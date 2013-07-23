@@ -25,17 +25,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_fb_thrift_serialize(CVarRef thing);
-Variant f_fb_thrift_unserialize(CVarRef thing, VRefParam success, VRefParam errcode = null_variant);
 Variant f_fb_serialize(CVarRef thing);
 Variant f_fb_unserialize(CVarRef thing, VRefParam success, VRefParam errcode = null_variant);
 Variant f_fb_compact_serialize(CVarRef thing);
 Variant f_fb_compact_unserialize(CVarRef thing, VRefParam success, VRefParam errcode = null_variant);
 bool f_fb_could_include(CStrRef file);
 bool f_fb_intercept(CStrRef name, CVarRef handler, CVarRef data = null_variant);
-Variant f_fb_stubout_intercept_handler(CStrRef name, CVarRef obj, CArrRef params, CVarRef data, VRefParam done);
-Variant f_fb_rpc_intercept_handler(CStrRef name, CVarRef obj, CArrRef params, CVarRef data, VRefParam done);
-void f_fb_renamed_functions(CArrRef names);
 bool f_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name);
 bool f_fb_autoload_map(CVarRef map, CStrRef root);
 bool f_fb_utf8ize(VRefParam input);
@@ -57,20 +52,13 @@ void f_xhprof_frame_end();
 Variant f_xhprof_run_trace(CStrRef packedTrace, int flags);
 void f_xhprof_sample_enable();
 Variant f_xhprof_sample_disable();
-void f_fb_load_local_databases(CArrRef servers);
 Array f_fb_parallel_query(CArrRef sql_map, int max_thread = 50, bool combine_result = true, bool retry_query_on_fail = true, int connect_timeout = -1, int read_timeout = -1, bool timeout_in_ms = false);
-Array f_fb_crossall_query(CStrRef sql, int max_thread = 50, bool retry_query_on_fail = true, int connect_timeout = -1, int read_timeout = -1, bool timeout_in_ms = false);
 Variant f_fb_const_fetch(CVarRef key);
 bool f_fb_output_compression(bool new_value);
 void f_fb_set_exit_callback(CVarRef function);
-Array f_fb_get_flush_stat();
 int64_t f_fb_get_last_flush_size();
-Variant f_fb_lazy_stat(CStrRef filename);
 Variant f_fb_lazy_lstat(CStrRef filename);
 String f_fb_lazy_realpath(CStrRef filename);
-void f_fb_setprofile(CVarRef callback);
-String f_fb_gc_collect_cycles();
-void f_fb_gc_detect_cycles(CStrRef filename);
 extern const int64_t k_FB_UNSERIALIZE_NONSTRING_VALUE;
 extern const int64_t k_FB_UNSERIALIZE_UNEXPECTED_END;
 extern const int64_t k_FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE;

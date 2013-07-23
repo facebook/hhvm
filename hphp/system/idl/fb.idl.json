@@ -48,57 +48,6 @@
     ],
     "funcs": [
         {
-            "name": "fb_thrift_serialize",
-            "desc": "Same as fb_serialize(). Please use fb_serialize() with better naming. This function has nothing to do with Facebook's open sourced Thrift package.",
-            "flags": [
-                "HasDocComment",
-                "HipHopSpecific"
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "Serialized data."
-            },
-            "args": [
-                {
-                    "name": "thing",
-                    "type": "Variant",
-                    "desc": "What to serialize. Note that objects are not supported."
-                }
-            ]
-        },
-        {
-            "name": "fb_thrift_unserialize",
-            "desc": "Same as fb_unserialize(). Please use fb_unserialize() with better naming. This function has nothing to do with Facebook's open sourced Thrift package.",
-            "flags": [
-                "HasDocComment",
-                "HipHopSpecific"
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "Unserialized data."
-            },
-            "args": [
-                {
-                    "name": "thing",
-                    "type": "Variant",
-                    "desc": "What to unserialize."
-                },
-                {
-                    "name": "success",
-                    "type": "Variant",
-                    "desc": "Whether it was successful or not.",
-                    "ref": true
-                },
-                {
-                    "name": "errcode",
-                    "type": "Variant",
-                    "value": "null_variant",
-                    "desc": "One of those FB_UNSERIALIZE_ constants to describe what the decoding error was, if it failed.",
-                    "ref": true
-                }
-            ]
-        },
-        {
             "name": "fb_serialize",
             "desc": "Seriailize data into a compact format that can be unserialized by fb_unserialize().",
             "flags": [
@@ -246,104 +195,6 @@
                     "type": "Variant",
                     "value": "null_variant",
                     "desc": "Extra data to pass to the handler when intercepting"
-                }
-            ]
-        },
-        {
-            "name": "fb_stubout_intercept_handler",
-            "desc": "As an interception handler, invokes a different function instead. Useful for stubbing out a function in unit testing. To use this handler, call fb_intercept('old_func', 'fb_stubout_intercept_handler', 'new_func') and this will call new_func() every time when old_func() is called and return new_func()'s return as old_func() call's return.",
-            "flags": [
-                "HasDocComment",
-                "HipHopSpecific"
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "What to return on behalf of original function."
-            },
-            "args": [
-                {
-                    "name": "name",
-                    "type": "String",
-                    "desc": "Which function function or class method that is being intercepted."
-                },
-                {
-                    "name": "obj",
-                    "type": "Variant",
-                    "desc": "Which class object this method was calling on."
-                },
-                {
-                    "name": "params",
-                    "type": "VariantVec",
-                    "desc": "The parameters original function took."
-                },
-                {
-                    "name": "data",
-                    "type": "Variant",
-                    "desc": "The callback to redirect to."
-                },
-                {
-                    "name": "done",
-                    "type": "Variant",
-                    "desc": "Will always set to TRUE.",
-                    "ref": true
-                }
-            ]
-        },
-        {
-            "name": "fb_rpc_intercept_handler",
-            "desc": "As an interception handler, invokes a function remotely on an RPC server instead of locally.",
-            "flags": [
-                "HasDocComment",
-                "HipHopSpecific"
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "What to return on behalf of original function."
-            },
-            "args": [
-                {
-                    "name": "name",
-                    "type": "String",
-                    "desc": "Which function function or class method that is being intercepted."
-                },
-                {
-                    "name": "obj",
-                    "type": "Variant",
-                    "desc": "Which class object this method was calling on."
-                },
-                {
-                    "name": "params",
-                    "type": "VariantVec",
-                    "desc": "The parameters original function took."
-                },
-                {
-                    "name": "data",
-                    "type": "Variant",
-                    "desc": "Information for RPC request in a format of array('host' => address, 'port' => port, 'auth' => password, 'timeout' => seconds)."
-                },
-                {
-                    "name": "done",
-                    "type": "Variant",
-                    "desc": "Will always set to TRUE.",
-                    "ref": true
-                }
-            ]
-        },
-        {
-            "name": "fb_renamed_functions",
-            "desc": "Specifies a list of functions that are allowed to rename by calling fb_rename_function().",
-            "flags": [
-                "HasDocComment",
-                "HipHopSpecific"
-            ],
-            "return": {
-                "type": null
-            },
-            "args": [
-                {
-                    "name": "names",
-                    "type": "StringVec",
-                    "desc": "The functions that can be renamed."
                 }
             ]
         },
@@ -756,24 +607,6 @@
             ]
         },
         {
-            "name": "fb_load_local_databases",
-            "desc": "Load a map from database IDs (32-bit integers) to database connection information for fb_crossall_query(), which only takes database IDs.",
-            "flags": [
-                "HasDocComment",
-                "HipHopSpecific"
-            ],
-            "return": {
-                "type": null
-            },
-            "args": [
-                {
-                    "name": "servers",
-                    "type": "VariantMap",
-                    "desc": "The map to load. The format is array($id1 => array('ip' => {ip address}, 'db' => {database name}, 'port' => {port number}, 'username' => {user name for login}, 'password' => {password for login}), $id2 => ...), where $id1 and $ids2 are arbitrary 32-bit integers that fb_crossall_query() can use to refer to the physical databases."
-                }
-            ]
-        },
-        {
             "name": "fb_parallel_query",
             "desc": "Runs MySQL queries in parallel. Internally it will spawn threads, each of which executes one or more queries sequentially.",
             "flags": [
@@ -801,55 +634,6 @@
                     "type": "Boolean",
                     "value": "true",
                     "desc": "Whether to merge dataset into just one, without maps of database IDs. If TRUE, result set would be array(..., 'result' => {dataset}, ...) directly."
-                },
-                {
-                    "name": "retry_query_on_fail",
-                    "type": "Boolean",
-                    "value": "true",
-                    "desc": "Whether or not retry query once when it fails. This may be useful if database connection is temporarily lost during queries and re-executing a SELECT or other idempotent queries are acceptable."
-                },
-                {
-                    "name": "connect_timeout",
-                    "type": "Int32",
-                    "value": "-1",
-                    "desc": "Connection timeout. If timeout_in_ms is TRUE, it is in seconds. Otherwise, it is in milli-seconds."
-                },
-                {
-                    "name": "read_timeout",
-                    "type": "Int32",
-                    "value": "-1",
-                    "desc": "Query timeout. If timeout_in_ms is TRUE, it is in seconds. Otherwise, it is in milli-seconds."
-                },
-                {
-                    "name": "timeout_in_ms",
-                    "type": "Boolean",
-                    "value": "false",
-                    "desc": "Whether connect_timeout or read_timeout are in seconds or milli-seconds."
-                }
-            ]
-        },
-        {
-            "name": "fb_crossall_query",
-            "desc": "Runs a MySQL query against all databases in the map loaded by fb_load_local_databases(). Internally it will spawn threads, each of which executes the same query against one or more databases sequentially.",
-            "flags": [
-                "HasDocComment",
-                "HipHopSpecific"
-            ],
-            "return": {
-                "type": "VariantMap",
-                "desc": "Query result in a format of array('affected' => {number of affected rows}, 'result' => array({dbId1} => {dataset}, {dbId2} => ...), 'error' => array({dbId1} => {error message}, {dbId2} => ....), 'errno' => array({dbId1} => {error code}, {dbId2} => ....))."
-            },
-            "args": [
-                {
-                    "name": "sql",
-                    "type": "String",
-                    "desc": "The SQL query to execute. For safety reasons, this has to be a SELECT statement with WHERE clause."
-                },
-                {
-                    "name": "max_thread",
-                    "type": "Int32",
-                    "value": "50",
-                    "desc": "Maximum number of threads to run."
                 },
                 {
                     "name": "retry_query_on_fail",
@@ -934,20 +718,6 @@
             ]
         },
         {
-            "name": "fb_get_flush_stat",
-            "desc": "Get stats on flushing the data from server.",
-            "flags": [
-                "HasDocComment",
-                "HipHopSpecific"
-            ],
-            "return": {
-                "type": "VariantMap",
-                "desc": "Query result in a format of array('total' => {number of total bytes to flush}, 'sent' => {number of bytes sent out}, 'time' => {time for flushing in us})."
-            },
-            "args": [
-            ]
-        },
-        {
             "name": "fb_get_last_flush_size",
             "desc": "Get stats on flushing the last data chunk from server.",
             "flags": [
@@ -959,42 +729,6 @@
                 "desc": "Total number of bytes flushed since last flush"
             },
             "args": [
-            ]
-        },
-        {
-            "name": "fb_lazy_stat",
-            "desc": "Gathers the statistics of the file named by filename, like stat(), except uses cached information from an internal inotify-based mechanism that may not be updated during the duration of a request.",
-            "flags": [
-                "HasDocComment"
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "Same format at the normal php stat() function."
-            },
-            "args": [
-                {
-                    "name": "filename",
-                    "type": "String",
-                    "desc": "Path to the file."
-                }
-            ]
-        },
-        {
-            "name": "fb_lazy_lstat",
-            "desc": "Gathers the statistics of the file named by filename, like lstat(), except uses cached information from an internal inotify-based mechanism that may not be updated during the duration of a request.",
-            "flags": [
-                "HasDocComment"
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "Same format as the normal php lstat() function."
-            },
-            "args": [
-                {
-                    "name": "filename",
-                    "type": "String",
-                    "desc": "Path to a file or a symbolic link."
-                }
             ]
         },
         {
@@ -1012,57 +746,6 @@
                     "name": "filename",
                     "type": "String",
                     "desc": "Fake path to the file."
-                }
-            ]
-        },
-        {
-            "name": "fb_setprofile",
-            "desc": "Set a callback function to be called whenever a function is entered or exited. Takes 3 args, the function name, the mode (enter or exit), and an array describing the frame.",
-            "flags": [
-                "HasDocComment",
-                "HipHopSpecific"
-            ],
-            "return": {
-                "type": null,
-                "desc": "No value is returned."
-            },
-            "args": [
-                {
-                    "name": "callback",
-                    "type": "Variant",
-                    "desc": "Profiler function to call or null to disable"
-                }
-            ]
-        },
-        {
-            "name": "fb_gc_collect_cycles",
-            "desc": "Invoke the backup cycle collector",
-            "flags": [
-                "HasDocComment",
-                "HipHopSpecific"
-            ],
-            "return": {
-                "type": "String",
-                "desc": "Some interesting statistics"
-            },
-            "args": [
-            ]
-        },
-        {
-            "name": "fb_gc_detect_cycles",
-            "desc": "Detect cyclic garbage in the heap and print information about it to a file",
-            "flags": [
-                "HasDocComment",
-                "HipHopSpecific"
-            ],
-            "return": {
-                "type": null
-            },
-            "args": [
-                {
-                    "name": "filename",
-                    "type": "String",
-                    "desc": "filename to write information about cyclic garbage to"
                 }
             ]
         }

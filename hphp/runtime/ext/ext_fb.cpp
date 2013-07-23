@@ -403,7 +403,7 @@ int fb_unserialize_from_buffer(Variant &res, const char *buff,
   return 0;
 }
 
-Variant f_fb_thrift_serialize(CVarRef thing) {
+Variant f_fb_serialize(CVarRef thing) {
   int len;
   if (fb_serialized_size(thing, 0, &len)) {
     return uninit_null();
@@ -415,8 +415,22 @@ Variant f_fb_thrift_serialize(CVarRef thing) {
   return s.setSize(len);
 }
 
-Variant fb_thrift_unserialize(const char* str, int len, VRefParam success,
-                              VRefParam errcode /* = null_variant */) {
+Variant f_fb_unserialize(CVarRef thing, VRefParam success,
+                         VRefParam errcode /* = null_variant */) {
+  if (thing.isString()) {
+    String sthing = thing.toString();
+
+    return fb_unserialize(sthing.data(), sthing.size(),
+                          ref(success), ref(errcode));
+  }
+
+  success = false;
+  errcode = FB_UNSERIALIZE_NONSTRING_VALUE;
+  return false;
+}
+
+Variant fb_unserialize(const char* str, int len, VRefParam success,
+                         VRefParam errcode /* = null_variant */) {
   int pos = 0;
   errcode = uninit_null();
   int errcd;
@@ -439,34 +453,6 @@ Variant fb_thrift_unserialize(const char* str, int len, VRefParam success,
 
   success = true;
   return ret;
-}
-
-Variant f_fb_thrift_unserialize(CVarRef thing, VRefParam success,
-                                VRefParam errcode /* = null_variant */) {
-  if (thing.isString()) {
-    String sthing = thing.toString();
-
-    return fb_thrift_unserialize(sthing.data(), sthing.size(),
-                                 ref(success), ref(errcode));
-  }
-
-  success = false;
-  errcode = FB_UNSERIALIZE_NONSTRING_VALUE;
-  return false;
-}
-
-Variant f_fb_serialize(CVarRef thing) {
-  return f_fb_thrift_serialize(thing);
-}
-
-Variant fb_unserialize(const char* str, int len, VRefParam success,
-                       VRefParam errcode /* = null_variant */) {
-  return fb_thrift_unserialize(str, len, ref(success), ref(errcode));
-}
-
-Variant f_fb_unserialize(CVarRef thing, VRefParam success,
-                         VRefParam errcode /* = null_variant */) {
-  return f_fb_thrift_unserialize(thing, ref(success), ref(errcode));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1059,31 +1045,6 @@ const StaticString
   s_auth("auth"),
   s_timeout("timeout");
 
-void f_fb_load_local_databases(CArrRef servers) {
-  DBConn::ClearLocalDatabases();
-  for (ArrayIter iter(servers); iter; ++iter) {
-    int dbId = iter.first().toInt32();
-    Array data = iter.second().toArray();
-    if (!data.empty()) {
-      std::vector< std::pair<string, string> > sessionVariables;
-      if (data.exists(s_session_variable)) {
-        Array sv = data[s_session_variable].toArray();
-        for (ArrayIter svIter(sv); svIter; ++svIter) {
-          sessionVariables.push_back(std::pair<string, string>(
-            svIter.first().toString().data(),
-            svIter.second().toString().data()));
-        }
-      }
-      DBConn::AddLocalDB(dbId, data[s_ip].toString().data(),
-                         data[s_db].toString().data(),
-                         data[s_port].toInt32(),
-                         data[s_username].toString().data(),
-                         data[s_password].toString().data(),
-                         sessionVariables);
-    }
-  }
-}
-
 Array f_fb_parallel_query(CArrRef sql_map, int max_thread /* = 50 */,
                           bool combine_result /* = true */,
                           bool retry_query_on_fail /* = true */,
@@ -1150,49 +1111,6 @@ Array f_fb_parallel_query(CArrRef sql_map, int max_thread /* = 50 */,
       ret.append(dsRet);
     }
   }
-  return ret;
-}
-
-Array f_fb_crossall_query(CStrRef sql, int max_thread /* = 50 */,
-                          bool retry_query_on_fail /* = true */,
-                          int connect_timeout /* = -1 */,
-                          int read_timeout /* = -1 */,
-                          bool timeout_in_ms /* = false */) {
-  if (!timeout_in_ms) {
-    if (connect_timeout > 0) connect_timeout *= 1000;
-    if (read_timeout > 0) read_timeout *= 1000;
-  }
-
-  Array ret;
-  // parameter checking
-  if (sql.empty()) {
-    static const StaticString s_errstr("empty SQL");
-    ret.set(s_error, s_errstr);
-    return ret;
-  }
-
-  // security checking
-  String ssql = StringUtil::ToLower(sql);
-  if (ssql.find("where") < 0) {
-    static const StaticString s_errstr("missing where clause");
-    ret.set(s_error, s_errstr);
-    return ret;
-  }
-  if (ssql.find("select") < 0) {
-    static const StaticString s_errstr("non-SELECT not supported");
-    ret.set(s_error, s_errstr);
-    return ret;
-  }
-
-  // do it
-  DBDataSet ds;
-  DBConn::ErrorInfoMap errors;
-  int affected = DBConn::parallelExecute(ssql.c_str(), ds, errors, max_thread,
-                     retry_query_on_fail,
-                     connect_timeout, read_timeout,
-                     RuntimeOption::MySQLMaxRetryOpenOnFail,
-                     RuntimeOption::MySQLMaxRetryQueryOnFail);
-  output_dataset(ret, affected, ds, errors);
   return ret;
 }
 
@@ -1282,7 +1200,7 @@ bool f_fb_utf8ize(VRefParam input) {
  *
  * deprecated=true: instead return byte count on invalid UTF-8 sequence.
  */
-static int f_fb_utf8_strlen_impl(CStrRef input, bool deprecated) {
+static int fb_utf8_strlen_impl(CStrRef input, bool deprecated) {
   // Count, don't modify.
   int32_t sourceLength = input.size();
   const char* const sourceBuffer = input.data();
@@ -1302,18 +1220,18 @@ static int f_fb_utf8_strlen_impl(CStrRef input, bool deprecated) {
 }
 
 int64_t f_fb_utf8_strlen(CStrRef input) {
-  return f_fb_utf8_strlen_impl(input, /* deprecated */ false);
+  return fb_utf8_strlen_impl(input, /* deprecated */ false);
 }
 
 int64_t f_fb_utf8_strlen_deprecated(CStrRef input) {
-  return f_fb_utf8_strlen_impl(input, /* deprecated */ true);
+  return fb_utf8_strlen_impl(input, /* deprecated */ true);
 }
 
 /**
  * Private helper; requires non-negative firstCodePoint and desiredCodePoints.
  */
-static Variant f_fb_utf8_substr_simple(CStrRef str, int32_t firstCodePoint,
-                                       int32_t numDesiredCodePoints) {
+static Variant fb_utf8_substr_simple(CStrRef str, int32_t firstCodePoint,
+                                     int32_t numDesiredCodePoints) {
   const char* const srcBuf = str.data();
   int32_t srcLenBytes = str.size(); // May truncate; checked before use below.
 
@@ -1399,7 +1317,7 @@ Variant f_fb_utf8_substr(CStrRef str, int start, int length /* = INT_MAX */) {
     return false; // Empty result
   }
 
-  return f_fb_utf8_substr_simple(str, start, length);
+  return fb_utf8_substr_simple(str, start, length);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1412,33 +1330,6 @@ bool f_fb_could_include(CStrRef file) {
 bool f_fb_intercept(CStrRef name, CVarRef handler,
                     CVarRef data /* = null_variant */) {
   return register_intercept(name, handler, data);
-}
-
-Variant f_fb_stubout_intercept_handler(CStrRef name, CVarRef obj,
-                                       CArrRef params, CVarRef data,
-                                       VRefParam done) {
-  if (obj.isObject()) {
-    return vm_call_user_func(CREATE_VECTOR2(obj, data), params);
-  }
-  return vm_call_user_func(data, params);
-}
-
-Variant f_fb_rpc_intercept_handler(CStrRef name, CVarRef obj, CArrRef params,
-                                   CVarRef data, VRefParam done) {
-  String host = data[s_host].toString();
-  int port = data[s_port].toInt32();
-  String auth = data[s_auth].toString();
-  int timeout = data[s_timeout].toInt32();
-
-  if (obj.isNull()) {
-    return f_call_user_func_array_rpc(host, port, auth, timeout, name, params);
-  }
-  return f_call_user_func_array_rpc(host, port, auth, timeout,
-                                    CREATE_VECTOR2(obj, name), params);
-}
-
-void f_fb_renamed_functions(CArrRef names) {
-  check_renamed_functions(names);
 }
 
 bool f_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name) {
@@ -1589,22 +1480,6 @@ const StaticString
   s_sent("sent"),
   s_time("time");
 
-Array f_fb_get_flush_stat() {
-  Transport *transport = g_context->getTransport();
-  if (transport) {
-    Array chunkStats(ArrayData::Create());
-    transport->getChunkSentSizes(chunkStats);
-
-    int total = transport->getResponseTotalSize();
-    int sent = transport->getResponseSentSize();
-    int64_t time = transport->getFlushTime();
-    return CREATE_MAP2(
-        s_flush_stats, CREATE_MAP3(s_total, total, s_sent, sent, s_time, time),
-        s_chunk_stats, chunkStats);
-  }
-  return NULL;
-}
-
 int64_t f_fb_get_last_flush_size() {
   Transport *transport = g_context->getTransport();
   return transport ? transport->getLastChunkSentSize() : 0;
@@ -1623,25 +1498,12 @@ static Variant do_lazy_stat(Function dostat, CStrRef filename) {
   return stat_impl(&sb);
 }
 
-Variant f_fb_lazy_stat(CStrRef filename) {
-  return do_lazy_stat(StatCache::stat, filename);
-}
-
 Variant f_fb_lazy_lstat(CStrRef filename) {
   return do_lazy_stat(StatCache::lstat, filename);
 }
 
 String f_fb_lazy_realpath(CStrRef filename) {
   return StatCache::realpath(filename.c_str());
-}
-
-String f_fb_gc_collect_cycles() {
-  std::string s = gc_collect_cycles();
-  return String(s);
-}
-
-void f_fb_gc_detect_cycles(CStrRef filename) {
-  gc_detect_cycles(std::string(filename.c_str()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

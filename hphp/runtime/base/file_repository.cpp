@@ -21,6 +21,8 @@
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/stat_cache.h"
+#include "hphp/runtime/base/stream_wrapper_registry.h"
+#include "hphp/runtime/base/file_stream_wrapper.h"
 #include "hphp/runtime/server/source_root_info.h"
 
 #include "hphp/runtime/vm/jit/target-cache.h"
@@ -158,11 +160,12 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
   FileInfo fileInfo;
   PhpFile *ret = nullptr;
   String name(rname);
-  if (rname->data()[0] != '/') {
-    name = String(SourceRootInfo::GetCurrentSourceRoot()) + name;
-  }
+  bool isPlainFile = File::IsPlainFilePath(name);
 
-  {
+  if (isPlainFile) {
+    if (rname->data()[0] != '/') {
+      name = String(SourceRootInfo::GetCurrentSourceRoot()) + name;
+    }
     // Get the common fast path out of the way with as little locking
     // as possible: it's in the map and has not changed on disk
     ParsedFilesMap::const_accessor acc;
@@ -171,6 +174,21 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
       ret = acc->second->getPhpFile();
       return ret;
     }
+  } else {
+    // Do the read before we get the repo lock, since it will call into the
+    // stream library and will needs its own locks.
+    if (isAuthoritativeRepo()) {
+      throw FatalErrorException(
+        "including urls doesn't work in RepoAuthoritative mode"
+      );
+    }
+    Stream::Wrapper* w = Stream::getWrapperFromURI(name);
+    File* f = w->open(name, "r", 0, null_variant);
+    if (!f) return nullptr;
+    StringBuffer sb;
+    sb.read(f);
+    fileInfo.m_inputString = sb.detach();
+    computeMd5(name.get(), fileInfo);
   }
 
   TRACE(1, "FR fast path miss: %s\n", rname->data());
@@ -199,7 +217,7 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
   bool isChanged = !isNew && old->isChanged(s);
 
   if (isNew || isChanged) {
-    if (!readFile(n, s, fileInfo)) {
+    if (isPlainFile && !readFile(n, s, fileInfo)) {
       TRACE(1, "File disappeared between stat and FR::readNewFile: %s\n",
             rname->data());
       return nullptr;
@@ -368,11 +386,15 @@ bool FileRepository::readActualFile(const StringData *name,
   fileInfo.m_inputString = str;
   if (nbytes != fileSize) return false;
 
+  computeMd5(name, fileInfo);
+  return true;
+}
+
+void FileRepository::computeMd5(const StringData *name, FileInfo& fileInfo) {
   if (md5Enabled()) {
     string md5 = StringUtil::MD5(fileInfo.m_inputString).c_str();
     setFileInfo(name, md5, fileInfo, false);
   }
-  return true;
 }
 
 bool FileRepository::readRepoMd5(const StringData *path,
@@ -461,6 +483,15 @@ struct ResolveIncludeContext {
 static bool findFileWrapper(CStrRef file, void* ctx) {
   ResolveIncludeContext* context = (ResolveIncludeContext*)ctx;
   assert(context->path.isNull());
+
+  Stream::Wrapper* w = Stream::getWrapperFromURI(file);
+  if (!dynamic_cast<FileStreamWrapper*>(w)) {
+    if (w->stat(file, context->s) == 0) {
+      context->path = file;
+      return true;
+    }
+  }
+
   // TranslatePath() will canonicalize the path and also check
   // whether the file is in an allowed directory.
   String translatedPath = File::TranslatePath(file, false, true);

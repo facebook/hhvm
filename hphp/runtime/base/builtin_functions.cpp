@@ -872,7 +872,13 @@ String resolve_include(CStrRef file, const char* currentDir,
                        bool (*tryFile)(CStrRef file, void*), void* ctx) {
   const char* c_file = file->data();
 
-  if (c_file[0] == '/') {
+  if (!File::IsPlainFilePath(file)) {
+    // URIs don't have an include path
+    if (tryFile(file, ctx)) {
+      return file;
+    }
+
+  } else if (c_file[0] == '/') {
     String can_path(Util::canonicalize(file.c_str(), file.size()),
                     AttachString);
 

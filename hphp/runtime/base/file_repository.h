@@ -166,6 +166,7 @@ public:
                           FileInfo &fileInfo, bool fromRepo = false);
   static bool readActualFile(const StringData *name, const struct stat &s,
                              FileInfo &fileInfo);
+  static void computeMd5(const StringData *name, FileInfo& fileInfo);
   static bool readRepoMd5(const StringData *path, FileInfo& fileInfo);
   static bool readFile(const StringData *name,
                        const struct stat &s, FileInfo &fileInfo);

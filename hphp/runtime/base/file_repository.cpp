@@ -494,7 +494,7 @@ static bool findFileWrapper(CStrRef file, void* ctx) {
 
   // TranslatePath() will canonicalize the path and also check
   // whether the file is in an allowed directory.
-  String translatedPath = File::TranslatePath(file, false, true);
+  String translatedPath = File::TranslatePathKeepRelative(file);
   if (file[0] != '/') {
     if (HPHP::Eval::FileRepository::findFile(translatedPath.get(),
                                              context->s)) {

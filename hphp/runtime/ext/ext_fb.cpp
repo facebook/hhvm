@@ -1615,7 +1615,7 @@ extern Array stat_impl(struct stat*); // ext_file.cpp
 template<class Function>
 static Variant do_lazy_stat(Function dostat, CStrRef filename) {
   struct stat sb;
-  if (dostat(File::TranslatePath(filename, true).c_str(), &sb)) {
+  if (dostat(File::TranslatePathWithFileCache(filename).c_str(), &sb)) {
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
                     Util::safe_strerror(errno).c_str());
     return false;

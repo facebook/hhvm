@@ -46,23 +46,9 @@ IMPLEMENT_REQUEST_LOCAL(FileData, s_file_data);
 
 const int File::USE_INCLUDE_PATH = 1;
 
-String File::TranslatePath(CStrRef filename, bool useFileCache /* = false */,
-                           bool keepRelative /*= false */) {
+String File::TranslatePathKeepRelative(CStrRef filename) {
   String canonicalized(Util::canonicalize(filename.data(),
                                           filename.size()), AttachString);
-
-  if (useFileCache) {
-    String translated = TranslatePath(canonicalized, false);
-    if (!translated.empty() && access(translated.data(), F_OK) < 0 &&
-        StaticContentCache::TheFileCache) {
-      if (StaticContentCache::TheFileCache->exists(canonicalized.data(),
-                                                   false)) {
-        // we use file cache's file name to make stat() work
-        translated = String(RuntimeOption::FileCache);
-      }
-    }
-    return translated;
-  }
 
   if (RuntimeOption::SafeFileAccess) {
     const vector<string> &allowedDirectories =
@@ -92,7 +78,13 @@ String File::TranslatePath(CStrRef filename, bool useFileCache /* = false */,
     }
   }
 
-  if (canonicalized.charAt(0) == '/' || keepRelative) {
+  return canonicalized;
+}
+
+String File::TranslatePath(CStrRef filename) {
+  String canonicalized = TranslatePathKeepRelative(filename);
+
+  if (canonicalized.charAt(0) == '/') {
     return canonicalized;
   }
 
@@ -101,6 +93,21 @@ String File::TranslatePath(CStrRef filename, bool useFileCache /* = false */,
     return cwd + canonicalized;
   }
   return cwd + "/" + canonicalized;
+}
+
+String File::TranslatePathWithFileCache(CStrRef filename) {
+  String canonicalized(Util::canonicalize(filename.data(),
+                                          filename.size()), AttachString);
+  String translated = TranslatePath(canonicalized);
+  if (!translated.empty() && access(translated.data(), F_OK) < 0 &&
+      StaticContentCache::TheFileCache) {
+    if (StaticContentCache::TheFileCache->exists(canonicalized.data(),
+                                                 false)) {
+      // we use file cache's file name to make stat() work
+      translated = String(RuntimeOption::FileCache);
+    }
+  }
+  return translated;
 }
 
 String File::TranslateCommand(CStrRef cmd) {

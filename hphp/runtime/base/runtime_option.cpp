@@ -398,6 +398,19 @@ static inline bool evalJitDefault() {
   return stat(path, &dummy) == 0;
 }
 
+static inline std::string regionSelectorDefault() {
+#ifdef HHVM_REGION_SELECTOR_TRACELET
+  return "tracelet";
+#else
+#ifdef HHVM_REGION_SELECTOR_LEGACY
+  return "legacy";
+#else
+  return "";
+#endif
+#endif
+}
+
+
 const uint64_t kEvalVMStackElmsDefault =
 #ifdef VALGRIND
  0x800

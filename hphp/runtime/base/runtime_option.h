@@ -444,7 +444,7 @@ public:
   F(bool, HHIRDeadCodeElim,            true)                            \
   F(bool, HHIRPredictionOpts,          true)                            \
   F(bool, HHIRStressCodegenBlocks,     false)                           \
-  F(string, JitRegionSelector,         "")                              \
+  F(string, JitRegionSelector,         regionSelectorDefault())         \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \
   F(bool, DumpTC,                      false)                           \

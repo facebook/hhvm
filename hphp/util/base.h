@@ -143,6 +143,14 @@ const bool packed_tv =
 #endif
   ;
 
+const bool memory_profiling =
+#ifdef MEMORY_PROFILING
+  true
+#else
+  false
+#endif
+  ;
+
 /**
  * Guard bug-for-bug hphpi compatibility code with this predicate.
  */

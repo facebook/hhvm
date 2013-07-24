@@ -332,6 +332,7 @@ class ObjectData {
   CArrRef getDynProps() const { return o_properties; }
   void initProperties(int nProp);
 
+  // heap profiling helpers
   void getChildren(std::vector<TypedValue*> &out) {
     // statically declared properties
     Slot nProps = m_cls->numDeclProperties();
@@ -442,6 +443,8 @@ class ObjectData {
   static void compileTimeAssertions() {
     static_assert(offsetof(ObjectData, m_count) == FAST_REFCOUNT_OFFSET, "");
   }
+
+  friend struct MemoryProfile;
 
   //============================================================================
   // ObjectData fields

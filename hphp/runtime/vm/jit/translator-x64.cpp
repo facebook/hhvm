@@ -1568,6 +1568,12 @@ TranslatorX64::funcPrologue(Func* func, int nPassed, ActRec* ar) {
     // Special __call prologue
     a.  mov_reg64_reg64(rStashedAR, argNumToRegName[0]);
     emitCall(a, TCA(TranslatorX64::shuffleArgsForMagicCall));
+    if (memory_profiling) {
+      m_fixupMap.recordFixup(
+        a.frontier(),
+        Fixup(skFuncBody.offset() - func->base(), func->numSlotsInFrame())
+      );
+    }
     // if shuffleArgs returns 0, that means this was not a magic call
     // and we should proceed to a prologue specialized for nPassed;
     // otherwise, proceed to a prologue specialized for nPassed==numParams (2).

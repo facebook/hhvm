@@ -168,6 +168,7 @@ public:
     TRACE(1, "dealloc %p\n", obj);
     assert(memset(obj, kSmartFreeFill, m_itemSize));
     m_free.push(obj);
+    if (memory_profiling) logDealloc(obj);
     MemoryManager::TheMemoryManager()->getStats().usage -= m_itemSize;
   }
   void clear() { m_free.clear(); }
@@ -182,6 +183,8 @@ public:
     assert(m_typeId);
     return *m_typeId;
   }
+
+  void logDealloc(void *ptr);
 
   // keep these frequently used fields together.
 private:

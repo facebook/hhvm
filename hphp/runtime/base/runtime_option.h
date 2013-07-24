@@ -403,6 +403,7 @@ public:
   F(uint32_t, JitTargetCacheSize,      64 << 20)                        \
   F(uint32_t, HHBCArenaChunkSize,      64 << 20)                        \
   F(bool, ProfileBC,                   false)                           \
+  F(bool, ProfileHeapAcrossRequests,   false)                           \
   F(bool, ProfileHWEnable,             true)                            \
   F(string, ProfileHWEvents,           string(""))                      \
   F(bool, JitAlwaysInterpOne,          false)                           \

@@ -1147,7 +1147,10 @@ void CodeGenerator::cgCallHelper(Asm& a,
 
   // do the call; may use a trampoline
   m_tx64->emitCall(a, call);
-  if (sync != SyncOptions::kNoSyncPoint) {
+  if (memory_profiling || sync != SyncOptions::kNoSyncPoint) {
+    // if we are profiling the heap, we always need to sync because
+    // regs need to be correct during smart allocations no matter
+    // what
     recordSyncPoint(a, sync);
   }
 
@@ -4321,7 +4324,9 @@ void CodeGenerator::recordSyncPoint(Asm& as,
   case SyncOptions::kSyncPoint:
     break;
   case SyncOptions::kNoSyncPoint:
-    assert(0);
+    // we can get here if we are memory profiling, since we override the
+    // normal sync settings and sync anyway
+    assert(memory_profiling);
   }
 
   Offset pcOff = m_curInst->marker().bcOff - m_curInst->marker().func->base();

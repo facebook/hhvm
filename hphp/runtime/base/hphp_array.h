@@ -27,6 +27,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class ArrayInit;
+struct MemoryProfile;
 
 class HphpArray : public ArrayData {
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
@@ -507,6 +508,7 @@ public:
       computeMaxElms(tableMask) * sizeof(HphpArray::Elm);
   }
 
+  friend struct MemoryProfile;
 };
 
 //=============================================================================

@@ -63,6 +63,7 @@
 #include "hphp/runtime/server/source_root_info.h"
 #include "hphp/runtime/base/extended_logger.h"
 #include "hphp/runtime/base/tracer.h"
+#include "hphp/runtime/base/memory_profile.h"
 
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/ext/ext_collections.h"
@@ -7194,6 +7195,8 @@ void VMExecutionContext::requestInit() {
 
   profileRequestStart();
 
+  MemoryProfile::startProfiling();
+
 #ifdef DEBUG
   Class* cls = Unit::GetNamedEntity(s_stdclass.get())->clsList();
   assert(cls);
@@ -7202,6 +7205,8 @@ void VMExecutionContext::requestInit() {
 }
 
 void VMExecutionContext::requestExit() {
+  MemoryProfile::finishProfiling();
+
   destructObjects();
   syncGdbState();
   tx()->requestExit();

@@ -473,7 +473,7 @@ SSATmp* Simplifier::simplifyExitOnVarEnv(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyLdCtx(IRInstruction* inst) {
-  const Func* func = inst->src(1)->getValFunc();
+  auto const func = inst->extra<LdCtx>()->func;
   if (func->isStatic()) {
     // ActRec->m_cls of a static function is always a valid class pointer with
     // the bottom bit set

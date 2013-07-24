@@ -1,8 +1,10 @@
 DOMNodeIterator
 object(DOMNodeIterator)#1 (0) {
 }
-string(27) "O:15:"DOMNodeIterator":0:{}"
-object(DOMNodeIterator)#2 (0) {
+string(100) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:15:"DOMNodeIterator";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(15) "DOMNodeIterator"
 }
 array(6) {
   [0]=>
@@ -24,10 +26,10 @@ object(A_DOMNodeIterator)#3 (1) {
   ["___x"]=>
   NULL
 }
-string(42) "O:17:"A_DOMNodeIterator":1:{s:4:"___x";N;}"
-object(A_DOMNodeIterator)#4 (1) {
-  ["___x"]=>
-  NULL
+string(102) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:17:"A_DOMNodeIterator";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(17) "A_DOMNodeIterator"
 }
 array(6) {
   [0]=>

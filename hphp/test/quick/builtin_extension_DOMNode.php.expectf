@@ -1,8 +1,10 @@
 DOMNode
 object(DOMNode)#1 (0) {
 }
-string(18) "O:7:"DOMNode":0:{}"
-object(DOMNode)#2 (0) {
+string(91) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:7:"DOMNode";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(7) "DOMNode"
 }
 array(21) {
   [0]=>
@@ -54,10 +56,10 @@ object(A_DOMNode)#3 (1) {
   ["___x"]=>
   NULL
 }
-string(33) "O:9:"A_DOMNode":1:{s:4:"___x";N;}"
-object(A_DOMNode)#4 (1) {
-  ["___x"]=>
-  NULL
+string(93) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:9:"A_DOMNode";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(9) "A_DOMNode"
 }
 array(21) {
   [0]=>

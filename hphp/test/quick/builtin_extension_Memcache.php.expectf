@@ -1,8 +1,10 @@
 Memcache
 object(Memcache)#1 (0) {
 }
-string(19) "O:8:"Memcache":0:{}"
-object(Memcache)#2 (0) {
+string(92) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:8:"Memcache";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(8) "Memcache"
 }
 array(21) {
   [0]=>
@@ -54,10 +56,10 @@ object(A_Memcache)#3 (1) {
   ["___x"]=>
   NULL
 }
-string(35) "O:10:"A_Memcache":1:{s:4:"___x";N;}"
-object(A_Memcache)#4 (1) {
-  ["___x"]=>
-  NULL
+string(95) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:10:"A_Memcache";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(10) "A_Memcache"
 }
 array(21) {
   [0]=>

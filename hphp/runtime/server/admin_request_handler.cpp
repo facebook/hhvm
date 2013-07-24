@@ -590,6 +590,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("tc-stubsize", tx->getStubSize());
     appendStat("targetcache", tx->getTargetCacheSize());
     appendStat("units", Eval::FileRepository::getLoadedFiles());
+    appendStat("Funcs", Func::nextFuncId());
     out << "}" << endl;
     transport->sendString(out.str());
     return true;

@@ -14,4 +14,4 @@ foreach ($x->cache_gen as $v) {
  }
 apc_store('key', $x);
 $y = apc_fetch('key');
-print_r($y->cache_gen);
+var_dump($y->cache_gen);

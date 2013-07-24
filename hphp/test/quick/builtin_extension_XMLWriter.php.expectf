@@ -1,8 +1,10 @@
 XMLWriter
 object(XMLWriter)#1 (0) {
 }
-string(20) "O:9:"XMLWriter":0:{}"
-object(XMLWriter)#2 (0) {
+string(93) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:9:"XMLWriter";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(9) "XMLWriter"
 }
 array(43) {
   [0]=>
@@ -98,10 +100,10 @@ object(A_XMLWriter)#3 (1) {
   ["___x"]=>
   NULL
 }
-string(36) "O:11:"A_XMLWriter":1:{s:4:"___x";N;}"
-object(A_XMLWriter)#4 (1) {
-  ["___x"]=>
-  NULL
+string(96) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:11:"A_XMLWriter";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(11) "A_XMLWriter"
 }
 array(43) {
   [0]=>

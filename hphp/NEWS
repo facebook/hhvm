@@ -1,0 +1,26 @@
+
+"Tamale" 7/22/2013
+  - Implement RecursiveArrayIterator
+  - Optimize vector-shaped Arrays (arrays with keys in range 0..size-1)
+  - Enable HHBC by default in debug builds
+  - Implement SplObjectStorage::getInfo()
+  - Initial rough draft of xhpast2, a replacement for xhpast
+  - fix compilation on Ubuntu 13.04
+  - OSX changes, next round
+  - Modify PHP's ext/standard/math/tests/(pow|abs).phpt to be HHVM friendly
+  - add XHP comment syntax based on http://www.w3.org/TR/REC-xml/#sec-comments
+
+"Wasabi Peas" 7/8/2013
+  - always_assert when we run out of TC space
+  - Initial changes to get HHVM compiling on OSX
+  - Consolodate ObjectData and Instance
+  - Prototype heap tracing framework & Heap profiler
+  - Better JIT code generation for Mod and Div
+  - Fixes to enable compilation with clang
+  - Support for yield k => v
+  - Make HHVM's command line parsing closer to PHP
+  - Implement Redis extension
+  - Implement LimitIterator from SPL
+  - add SessionHandler from PHP 5.4
+  - Numerous Debugger fixes and new developer docs for Debugger
+  - Ported many extension tests to PHP

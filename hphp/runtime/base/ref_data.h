@@ -15,13 +15,13 @@
    +----------------------------------------------------------------------+
 */
 
+#ifndef incl_HPHP_REF_DATA_H
+#define incl_HPHP_REF_DATA_H
+
 #ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 #error Directly including 'ref_data.h' is prohibited. \
        Include 'complex_types.h' instead.
 #endif
-
-#ifndef incl_HPHP_REF_DATA_H
-#define incl_HPHP_REF_DATA_H
 
 namespace HPHP {
 
@@ -46,7 +46,7 @@ public:
   ~RefData();
 
   // Don't extend Countable but use these methods to directly
-  // update _count, declared below.
+  // update m_count, declared below.
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
 
   // Memory allocator methods
@@ -80,7 +80,7 @@ public:
 private:
   // initialize this value by laundering uninitNull -> Null
   void init(DataType t, int64_t datum) {
-    _count = 1;
+    m_count = 1;
     if (!IS_NULL_TYPE(t)) {
       m_tv.m_type = t;
       m_tv.m_data.num = datum;
@@ -90,32 +90,29 @@ private:
   }
 
   static void compileTimeAsserts() {
-    static_assert(offsetof(RefData, _count) == FAST_REFCOUNT_OFFSET, "");
+    static_assert(offsetof(RefData, m_count) == FAST_REFCOUNT_OFFSET, "");
+    static_assert(sizeof(RefData::m_count) == TypedValueAux::auxSize, "");
   }
 
 #if defined(DEBUG) || defined(PACKED_TV)
-// don't overlap TypedValue with _count.  sizeof(*this) = 32.
-private: Magic m_magic;
-public:  mutable int32_t _count;
-private: TypedValue m_tv;
-  static void layoutAsserts() {
-    static_assert(offsetof(RefData, m_tv) >
-                  offsetof(RefData, _count) + sizeof(int32_t), "");
-  };
+private:
+  Magic m_magic;
+  int32_t m_padding;
+public:
+  mutable RefCount m_count;
+private:
+  TypedValue m_tv;
 #else
-// overlap TypedValue with count
+// count comes after actual TypedValue, overlapping TypedValue.m_aux
 public:
   union {
+    TypedValueAux m_tv;
     struct {
-      void* _ptr;
-      mutable int32_t _count;
+      void* shadow_data;
+      int32_t shadow_type;
+      mutable RefCount m_count; // refcount field
     };
-    TypedValue m_tv;
   };
-  static void layoutAsserts() {
-    static_assert(offsetof(RefData, _count) == TypedValueAux::auxOffset, "");
-    static_assert(sizeof(RefData::_count) == TypedValueAux::auxSize, "");
-  }
 #endif
 };
 

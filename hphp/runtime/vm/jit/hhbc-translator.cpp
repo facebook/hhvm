@@ -601,7 +601,7 @@ void HhbcTranslator::emitLateBoundCls() {
     emitInterpOne(Type::Cls, 0);
     return;
   }
-  auto const ctx = gen(LdCtx, m_tb->fp(), cns(curFunc()));
+  auto const ctx = gen(LdCtx, FuncData(curFunc()), m_tb->fp());
   push(gen(LdClsCtx, ctx));
 }
 
@@ -871,7 +871,7 @@ template<class Lambda>
 SSATmp* HhbcTranslator::emitIterInitCommon(int offset, Lambda genFunc) {
   SSATmp* src = popC();
   Type type = src->type();
-  if (!type.isArray() && !type.subtypeOf(Type::Obj)) {
+  if (!type.isArray() && type != Type::Obj) {
     PUNT(IterInit);
   }
   SSATmp* res = genFunc(src);
@@ -927,38 +927,13 @@ void HhbcTranslator::emitIterInitK(uint32_t iterId,
 
 void HhbcTranslator::emitIterNext(uint32_t iterId,
                                   int offset,
-                                  uint32_t valLocalId,
-                                  ArrayIter::IterKind iterKind) {
-  Opcode op;
-  switch (iterKind) {
-    case ArrayIter::IterKind::Array:
-      op = IterNextArray;
-    break;
-    case ArrayIter::IterKind::Vector:
-      op = IterNextVector;
-    break;
-    case ArrayIter::IterKind::Map:
-      op = IterNextMap;
-    break;
-    case ArrayIter::IterKind::StableMap:
-      op = IterNextStableMap;
-    break;
-    case ArrayIter::IterKind::Set:
-      op = IterNextSet;
-    break;
-    case ArrayIter::IterKind::Pair:
-      op = IterNextPair;
-    break;
-    default:
-      op = IterNext;
-    break;
-  }
+                                  uint32_t valLocalId) {
   SSATmp* res = gen(
-      op,
-      Type::Bool,
-      m_tb->fp(),
-      cns(iterId),
-      cns(valLocalId)
+    IterNext,
+    Type::Bool,
+    m_tb->fp(),
+    cns(iterId),
+    cns(valLocalId)
   );
   emitJmpCondHelper(offset, false, res);
 }
@@ -966,39 +941,14 @@ void HhbcTranslator::emitIterNext(uint32_t iterId,
 void HhbcTranslator::emitIterNextK(uint32_t iterId,
                                    int offset,
                                    uint32_t valLocalId,
-                                   uint32_t keyLocalId,
-                                   ArrayIter::IterKind iterKind) {
-  Opcode op;
-  switch (iterKind) {
-    case ArrayIter::IterKind::Array:
-      op = IterNextKArray;
-    break;
-    case ArrayIter::IterKind::Vector:
-      op = IterNextKVector;
-    break;
-    case ArrayIter::IterKind::Map:
-      op = IterNextKMap;
-    break;
-    case ArrayIter::IterKind::StableMap:
-      op = IterNextKStableMap;
-    break;
-    case ArrayIter::IterKind::Set:
-      op = IterNextKSet;
-    break;
-    case ArrayIter::IterKind::Pair:
-      op = IterNextKPair;
-    break;
-    default:
-      op = IterNextK;
-    break;
-  }
+                                   uint32_t keyLocalId) {
   SSATmp* res = gen(
-      op,
-      Type::Bool,
-      m_tb->fp(),
-      cns(iterId),
-      cns(valLocalId),
-      cns(keyLocalId)
+    IterNextK,
+    Type::Bool,
+    m_tb->fp(),
+    cns(iterId),
+    cns(valLocalId),
+    cns(keyLocalId)
   );
   emitJmpCondHelper(offset, false, res);
 }
@@ -1203,7 +1153,7 @@ void HhbcTranslator::emitCreateCont(Id funNameStrId) {
     ? gen(
         CreateContMeth,
         CreateContData { origFunc, genFunc },
-        gen(LdCtx, m_tb->fp(), cns(curFunc()))
+        gen(LdCtx, FuncData(curFunc()), m_tb->fp())
       )
     : gen(
         CreateContFunc,
@@ -1805,7 +1755,6 @@ void HhbcTranslator::emitFPushCufIter(int32_t numParams,
 
 void HhbcTranslator::emitFPushCufOp(Op op, Class* cls, StringData* invName,
                                     const Func* callee, int numArgs) {
-  const Func* curFunc = this->curFunc();
   const bool safe = op == OpFPushCufSafe;
   const bool forward = op == OpFPushCufF;
 
@@ -1825,7 +1774,7 @@ void HhbcTranslator::emitFPushCufOp(Op op, Class* cls, StringData* invName,
   SSATmp* func = cns(callee);
   if (cls) {
     if (forward) {
-      ctx = gen(LdCtx, m_tb->fp(), cns(curFunc));
+      ctx = gen(LdCtx, FuncData(curFunc()), m_tb->fp());
       ctx = gen(GetCtxFwdCall, ctx, cns(callee));
     } else {
       ctx = genClsMethodCtx(callee, cls);
@@ -1967,21 +1916,13 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
     }
   }
 
-  SSATmp* clss = nullptr;
-  if (persistentCls) {
-    clss = cns(cls);
-  } else {
-    clss = gen(LdClsCached, catchTrace1, cns(className));
-  }
-
-  SSATmp* obj = nullptr;
-  if (fastAlloc) {
-    obj = gen(IncRef, gen(AllocObjFast, clss));
-  } else {
-    obj = gen(IncRef, gen(AllocObj, clss));
-  }
-
-  emitFPushCtorCommon(clss, obj, func, numParams, catchTrace2);
+  auto const ssaCls =
+    persistentCls ? cns(cls)
+                  : gen(LdClsCached, catchTrace1, cns(className));
+  auto const obj =
+    fastAlloc ? gen(IncRef, gen(AllocObjFast, ClassData(cls)))
+              : gen(IncRef, gen(AllocObj, ssaCls));
+  emitFPushCtorCommon(ssaCls, obj, func, numParams, catchTrace2);
 }
 
 /*
@@ -2233,7 +2174,7 @@ void HhbcTranslator::emitFPushClsMethodF(int32_t           numParams,
   bool magicCall = false;
   const Func* func = lookupImmutableMethod(cls, methName, magicCall,
                                            true /* staticLookup */);
-  SSATmp* curCtxTmp = gen(LdCtx, m_tb->fp(), cns(curFunc()));
+  SSATmp* curCtxTmp = gen(LdCtx, FuncData(curFunc()), m_tb->fp());
   if (func) {
     SSATmp*   funcTmp = cns(func);
     SSATmp* newCtxTmp = gen(GetCtxFwdCall, curCtxTmp, funcTmp);
@@ -2644,10 +2585,6 @@ void HhbcTranslator::setThisAvailable() {
 
 void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type) {
   gen(GuardLoc, type, LocalId(locId), m_tb->fp());
-}
-
-void HhbcTranslator::guardTypeIter(uint32_t iterId, Type type) {
-  gen(GuardIter, type, IterId(iterId), m_tb->fp());
 }
 
 void HhbcTranslator::guardTypeLocation(const RegionDesc::Location& loc,

@@ -18,7 +18,7 @@
 
 #include "hphp/util/base.h"
 #include "hphp/runtime/vm/jit/ir.h"
-// for specialized object tests to get some real VM::Class and Iter types
+// for specialized object tests to get some real VM::Class
 #include "hphp/system/systemlib.h"
 
 namespace std { namespace tr1 {
@@ -168,25 +168,6 @@ TEST(Type, RuntimeType) {
   EXPECT_FALSE(t.subtypeOf(t1));
   EXPECT_FALSE(t.subtypeOf(Type::Str));
   EXPECT_FALSE(Type::Int.subtypeOf(t));
-  HPHP::Transl::RuntimeType rtItArr =
-    HPHP::Transl::RuntimeType(ArrayIter::IterKind::Array);
-  Type tItArr = Type::fromRuntimeType(rtItArr);
-  HPHP::Transl::RuntimeType rtItVec =
-    HPHP::Transl::RuntimeType(ArrayIter::IterKind::Vector);
-  Type tItVec = Type::fromRuntimeType(rtItVec);
-  EXPECT_TRUE(tItArr.subtypeOf(Type::Iter));
-  EXPECT_TRUE(tItVec.subtypeOf(Type::Iter));
-  EXPECT_TRUE(tItVec.strictSubtypeOf(Type::Iter));
-  EXPECT_FALSE(tItArr.subtypeOf(tItVec));
-  EXPECT_FALSE(tItVec.subtypeOf(tItArr));
-  EXPECT_FALSE(tItArr.subtypeOf(Type::Str));
-  EXPECT_FALSE(tItArr.subtypeOf(Type::Obj));
-  EXPECT_FALSE(tItVec.subtypeOf(Type::Int));
-  EXPECT_FALSE(tItVec.subtypeOf(Type::Obj));
-  EXPECT_FALSE(tItArr.subtypeOf(t));
-  EXPECT_FALSE(tItVec.subtypeOf(t1));
-  EXPECT_FALSE(t.subtypeOf(tItArr));
-  EXPECT_FALSE(t1.subtypeOf(tItVec));
 }
 
 TEST(Type, CanRunDtor) {

@@ -188,7 +188,6 @@ O(AssertType,                   DParam, S(Gen,Nullptr,Cls),    C|E|CRc|PRc|P) \
 O(CheckTypeMem,                     ND, S(PtrToGen),                       E) \
 O(GuardLoc,                         ND, S(FramePtr),                       E) \
 O(GuardStk,                  D(StkPtr), S(StkPtr),                         E) \
-O(GuardIter,                        ND, S(FramePtr),                       E) \
 O(CheckLoc,                         ND, S(FramePtr),                       E) \
 O(CheckStk,                  D(StkPtr), S(StkPtr),                         E) \
 O(CastStk,                   D(StkPtr), S(StkPtr),                  Mem|N|Er) \
@@ -333,7 +332,7 @@ O(LdThis,                       D(Obj), S(FramePtr),                       C) \
 O(LdRetAddr,                D(RetAddr), S(FramePtr),                      NF) \
 O(LdConst,                      DParam, NA,                                C) \
 O(DefConst,                     DParam, NA,                                C) \
-O(LdCtx,                        D(Ctx), S(FramePtr) S(Func),               C) \
+O(LdCtx,                        D(Ctx), S(FramePtr),                       C) \
 O(LdCctx,                      D(Cctx), S(FramePtr),                       C) \
 O(LdCls,                        D(Cls), S(Str) C(Cls),     C|E|N|Refs|Er|Mem) \
 O(LdClsCached,                  D(Cls), CStr,              C|E|N|Refs|Er|Mem) \
@@ -374,7 +373,7 @@ O(LdSwitchStrIndex,             D(Int), S(Str) S(Int) S(Int),          CRc|N) \
 O(LdSwitchObjIndex,             D(Int), S(Obj) S(Int) S(Int),       CRc|N|Er) \
 O(JmpSwitchDest,                    ND, S(Int),                          T|E) \
 O(AllocObj,                     D(Obj), S(Cls),                            N) \
-O(AllocObjFast,                 D(Obj), C(Cls),                            N) \
+O(AllocObjFast,                 D(Obj), NA,                                N) \
 O(LdClsCtor,                   D(Func), S(Cls),                       C|Er|N) \
 O(CreateCl,                     D(Obj), C(Cls)                                \
                                           C(Int)                              \
@@ -503,31 +502,7 @@ O(IterInitK,                   D(Bool), S(Arr,Obj)                            \
                                           C(Int),           E|N|Mem|Refs|CRc) \
 O(IterNext,                    D(Bool), S(FramePtr)                           \
                                           C(Int) C(Int),        E|N|Mem|Refs) \
-O(IterNextArray,               D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int),        E|N|Mem|Refs) \
-O(IterNextVector,              D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int),        E|N|Mem|Refs) \
-O(IterNextMap,                 D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int),        E|N|Mem|Refs) \
-O(IterNextStableMap,           D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int),        E|N|Mem|Refs) \
-O(IterNextSet,                 D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int),        E|N|Mem|Refs) \
-O(IterNextPair,                D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int),        E|N|Mem|Refs) \
 O(IterNextK,                   D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int) C(Int), E|N|Mem|Refs) \
-O(IterNextKArray,              D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int) C(Int), E|N|Mem|Refs) \
-O(IterNextKVector,             D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int) C(Int), E|N|Mem|Refs) \
-O(IterNextKMap,                D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int) C(Int), E|N|Mem|Refs) \
-O(IterNextKStableMap,          D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int) C(Int), E|N|Mem|Refs) \
-O(IterNextKSet,                D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int) C(Int), E|N|Mem|Refs) \
-O(IterNextKPair,               D(Bool), S(FramePtr)                           \
                                           C(Int) C(Int) C(Int), E|N|Mem|Refs) \
 O(WIterInit,                   D(Bool), S(Arr,Obj)                            \
                                           S(FramePtr)                         \

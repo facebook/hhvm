@@ -44,6 +44,7 @@ enum FuncFlags {
   IsConstructor                 = (1 << 12),
   IsNothing                     = (1 << 13),
   HasDocComment                 = (1 << 14),
+  IsCppSerializable             = (1 << 15),
   HipHopSpecific                = (1 << 16),
   VariableArguments             = (1 << 17),
   RefVariableArguments          = (1 << 18),

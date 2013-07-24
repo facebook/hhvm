@@ -57,10 +57,8 @@ std::string Type::toString() const {
 
   if (strictSubtypeOf(Type::Obj)) {
     return folly::format("Obj<{}>", m_class->name()->data()).str();
-  } else if (subtypeOf(Type::Iter)) {
-    return folly::format("Iter<{}>",
-                        ArrayIter::typeAsString(m_iterKind)).str();
   }
+
   // Concat all of the primitive types in the custom union type
   std::vector<std::string> types;
 # define IRT(name, ...) if (name.subtypeOf(*this)) types.push_back(#name);

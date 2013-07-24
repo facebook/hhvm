@@ -579,6 +579,110 @@ MethodCache::lookup(Handle handle, ActRec* ar, const void* extraKey) {
   }
 }
 
+//=============================================================================
+// GlobalCache
+//  | - BoxedGlobalCache
+
+template<bool isBoxed>
+inline TypedValue*
+GlobalCache::lookupImpl(StringData *name, bool allowCreate) {
+  bool hit ATTRIBUTE_UNUSED;
+
+  TypedValue* retval;
+  if (!m_tv) {
+    hit = false;
+
+    VarEnv* ve = g_vmContext->m_globalVarEnv;
+    assert(ve->isGlobalScope());
+    if (allowCreate) {
+      m_tv = ve->lookupAddRawPointer(name);
+    } else {
+      m_tv = ve->lookupRawPointer(name);
+      if (!m_tv) {
+        retval = 0;
+        goto miss;
+      }
+    }
+  } else {
+    hit = true;
+  }
+
+  retval = tvDerefIndirect(m_tv);
+  if (retval->m_type == KindOfUninit) {
+    if (!allowCreate) {
+      retval = 0;
+      goto miss;
+    } else {
+      tvWriteNull(retval);
+    }
+  }
+  if (isBoxed && retval->m_type != KindOfRef) {
+    tvBox(retval);
+  }
+  if (!isBoxed && retval->m_type == KindOfRef) {
+    retval = retval->m_data.pref->tv();
+  }
+  assert(!isBoxed || retval->m_type == KindOfRef);
+  assert(!allowCreate || retval);
+
+miss:
+  // decRef the name if we consumed it.  If we didn't get a global, we
+  // need to leave the name for the caller to use before decrefing (to
+  // emit warnings).
+  if (retval) decRefStr(name);
+  TRACE(5, "%sGlobalCache::lookup(\"%s\") tv@%p %p -> (%s) %p t%d\n",
+        isBoxed ? "Boxed" : "",
+        name->data(),
+        m_tv,
+        retval,
+        hit ? "hit" : "miss",
+        retval ? retval->m_data.pref : 0,
+        retval ? retval->m_type : 0);
+  return retval;
+}
+
+TypedValue*
+GlobalCache::lookup(Handle handle, StringData* name) {
+  GlobalCache* thiz = (GlobalCache*)GlobalCache::cacheAtHandle(handle);
+  TypedValue* retval = thiz->lookupImpl<false>(name, false /* allowCreate */);
+  assert(!retval || retval->m_type != KindOfRef);
+  return retval;
+}
+
+TypedValue*
+GlobalCache::lookupCreate(Handle handle, StringData* name) {
+  GlobalCache* thiz = (GlobalCache*)GlobalCache::cacheAtHandle(handle);
+  TypedValue* retval = thiz->lookupImpl<false>(name, true /* allowCreate */);
+  assert(retval->m_type != KindOfRef);
+  return retval;
+}
+
+TypedValue*
+GlobalCache::lookupCreateAddr(void* cacheAddr, StringData* name) {
+  GlobalCache* thiz = (GlobalCache*)cacheAddr;
+  TypedValue* retval = thiz->lookupImpl<false>(name, true /* allowCreate */);
+  assert(retval->m_type != KindOfRef);
+  return retval;
+}
+
+TypedValue*
+BoxedGlobalCache::lookup(Handle handle, StringData* name) {
+  BoxedGlobalCache* thiz = (BoxedGlobalCache*)
+    BoxedGlobalCache::cacheAtHandle(handle);
+  TypedValue* retval = thiz->lookupImpl<true>(name, false /* allowCreate */);
+  assert(!retval || retval->m_type == KindOfRef);
+  return retval;
+}
+
+TypedValue*
+BoxedGlobalCache::lookupCreate(Handle handle, StringData* name) {
+  BoxedGlobalCache* thiz = (BoxedGlobalCache*)
+    BoxedGlobalCache::cacheAtHandle(handle);
+  TypedValue* retval = thiz->lookupImpl<true>(name, true /* allowCreate */);
+  assert(retval->m_type == KindOfRef);
+  return retval;
+}
+
 static CacheHandle allocFuncOrClass(const unsigned* handlep, bool persistent) {
   if (UNLIKELY(!*handlep)) {
     Lock l(s_handleMutex);

@@ -168,8 +168,6 @@ above PHP-facing types.
   FramePtr        Pointer to a frame on the VM execution stack
   TCA             Machine code address
   Nullptr         Represents a null pointer
-  Iter            Represents an iterator type instantiated by IterInit*
-  Iter<IterType>  Specific iterator type
 
 There is also one special type which represents all the possible types that
 can be on the stack.
@@ -396,13 +394,6 @@ D:StkPtr = GuardStk<T,offset> S0:StkPtr
 
   Returns a new StkPtr that represents the same stack but with the
   knowledge that the slot at the index S1 has type T.
-
-GuardIter<Iter<IterType>,iterId> S0:FramePtr
-
-  Guard that the type of the given iterator in iterId on the frame S0 is
-  a subtype of the iterator type Iter<IterType>; if not, make a fallback
-  jump. (A jump to a service request that chains to a retranslation for
-  this tracelet.)
 
 D:StkPtr = CheckStk<T,offset> S0:StkPtr -> L
 
@@ -756,11 +747,12 @@ D:Obj = LdThis S0:FramePtr [ -> L ]
   in S0 is not, this instruction does not load it into D and transfers
   control to the exit label L.
 
-D:Ctx = LdCtx S0:FramePtr S1:Func
+D:Ctx = LdCtx<func> S0:FramePtr
 
   Loads into D the value of the m_this/m_cls field out of the frame
-  pointer S0 in the function given by S1. The result could be either
-  an object representing the this pointer or a class context.
+  pointer S0, which must be a frame of the function in the function
+  parameter. The result could be either an object representing the
+  this pointer or a class context.
 
 D:Cctx = LdCctx S0:FramePtr
 
@@ -962,11 +954,16 @@ D:Obj = AllocObj S1:Cls
 
   Allocates a new object of class S1.
 
-D:Obj = AllocObjFast S1:ConstCls
+D:Obj = AllocObjFast<class>
 
-  Allocate a new object of class S1 where S1 is persistent and able to
-  be instantiated (i.e., S1 is not an abstract class, interface, or
-  trait).
+  Allocate a new object of the specified class, which must be
+  persistent and able to be instantiated (i.e., S1 is not an abstract
+  class, interface, or trait).  The class' constructor is also assumed
+  to be accessible in the current context.
+
+  This instruction does not handle adding the object to the global
+  destructor list, so currently is not used when
+  RuntimeOption::EnableObjDestructCall is true.
 
 D:Arr = NewArray S0:ConstInt
 
@@ -1669,19 +1666,7 @@ D:Bool = MIterInitK S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt S4:ConstInt
   into the new iterator.
 
 D:Bool = IterNext S0:FramePtr S1:ConstInt S2:ConstInt
-D:Bool = IterNextArray S0:FramePtr S1:ConstInt S2:ConstInt
-D:Bool = IterNextPair S0:FramePtr S1:ConstInt S2:ConstInt
-D:Bool = IterNextVector S0:FramePtr S1:ConstInt S2:ConstInt
-D:Bool = IterNextMap S0:FramePtr S1:ConstInt S2:ConstInt
-D:Bool = IterNextStableMap S0:FramePtr S1:ConstInt S2:ConstInt
-D:Bool = IterNextSet S0:FramePtr S1:ConstInt S2:ConstInt
 D:Bool = IterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
-D:Bool = IterNextKArray S0:FramePtr S1:ConstInt S2:ConstInt
-D:Bool = IterNextKPair S0:FramePtr S1:ConstInt S2:ConstInt
-D:Bool = IterNextKVector S0:FramePtr S1:ConstInt S2:ConstInt
-D:Bool = IterNextKMap S0:FramePtr S1:ConstInt S2:ConstInt
-D:Bool = IterNextKStableMap S0:FramePtr S1:ConstInt S2:ConstInt
-D:Bool = IterNextKSet S0:FramePtr S1:ConstInt S2:ConstInt
 D:Bool = WIterNext S0:FramePtr S1:ConstInt S2:ConstInt
 D:Bool = WIterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
 D:Bool = MIterNext S0:FramePtr S1:ConstInt S2:ConstInt
@@ -1697,9 +1682,9 @@ D:Bool = MIterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
   the iterator's next value (and key) into the local variable S3 (and
   S4, respectively).
 
-  The IterNext* and IterNextK* instructions always copy the array
+  The IterInit and IterInitK instructions always copy the array
   element by value.
-  The WIterNext and WIterNextK instructions copy referenced array
+  The WIterInit and WIterInitK instructions copy referenced array
   elements by reference, and non-referenced array elements by value.
   The MIterNext and MIterNextK instructions always copy the array element
   by reference.

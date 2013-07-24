@@ -1,0 +1,15 @@
+int(2)
+int(1)
+string(3) "hi
+"
+bool(false)
+int(2)
+string(0) ""
+bool(true)
+int(2)
+int(1)
+string(0) ""
+bool(true)
+int(2)
+string(0) ""
+bool(true)

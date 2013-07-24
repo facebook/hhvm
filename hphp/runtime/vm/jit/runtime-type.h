@@ -200,10 +200,7 @@ class RuntimeType {
       DataType innerType;
       // Set when we want to transfer the type information to the
       // IR type system (Type object)
-      union {
-        const Class* knownClass;
-        ArrayIter::IterKind iterKind;
-      };
+      const Class* knownClass;
       union {
         // We may have even more precise data about this set of values.
         const StringData* string; // KindOfString: The exact value.
@@ -242,7 +239,6 @@ class RuntimeType {
       assert(m_value.innerType != KindOfStaticString &&
              m_value.outerType != KindOfStaticString);
       assert(m_value.knownClass == nullptr ||
-             m_kind == ITER ||
              m_value.outerType == KindOfObject ||
              (m_value.outerType == KindOfRef &&
                  m_value.innerType == KindOfObject));
@@ -260,7 +256,7 @@ class RuntimeType {
   RuntimeType(const RuntimeType& copy) = default;
   RuntimeType();
   explicit RuntimeType(const Iter* iter);
-  explicit RuntimeType(ArrayIter::IterKind kind);
+  explicit RuntimeType(ArrayIter::Type type);
 
   static const int UnknownBool = -1;
 
@@ -269,7 +265,6 @@ class RuntimeType {
   RuntimeType unbox() const;
   RuntimeType setValueType(DataType vt) const;
   RuntimeType setKnownClass(const Class* klass) const;
-  RuntimeType setIterKind(ArrayIter::IterKind iterKind) const;
 
   // Accessors
   DataType outerType() const;
@@ -283,7 +278,6 @@ class RuntimeType {
   int64_t valueInt() const;
   int64_t valueGeneric() const;
   const Class* knownClass() const;
-  ArrayIter::IterKind iterKind() const;
 
   // Helpers for typechecking
   DataType typeCheckValue() const;
@@ -305,7 +299,6 @@ class RuntimeType {
   bool isObject() const;
   bool isClass() const;
   bool hasKnownType() const;
-  bool hasIterKind() const;
   bool operator==(const RuntimeType& r) const;
   RuntimeType &operator=(const RuntimeType& r) = default;
   size_t operator()(const RuntimeType& r) const; // hash function

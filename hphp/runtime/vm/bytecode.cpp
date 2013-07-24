@@ -42,11 +42,8 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/debug.h"
 #include "hphp/runtime/base/stat_cache.h"
-#include "hphp/runtime/base/shared_variant.h"
 #include "hphp/runtime/vm/debug/debug.h"
-
 #include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/php_debug.h"
 #include "hphp/runtime/vm/debugger_hook.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -441,6 +438,16 @@ TypedValue* VarEnv::lookupAdd(const StringData* name) {
   return m_nvTable->lookupAdd(name);
 }
 
+TypedValue* VarEnv::lookupRawPointer(const StringData* name) {
+  ensureNvt();
+  return m_nvTable->lookupRawPointer(name);
+}
+
+TypedValue* VarEnv::lookupAddRawPointer(const StringData* name) {
+  ensureNvt();
+  return m_nvTable->lookupAddRawPointer(name);
+}
+
 bool VarEnv::unset(const StringData* name) {
   if (!m_nvTable) return true;
   m_nvTable->unset(name);
@@ -653,9 +660,9 @@ static std::string toStringElm(const TypedValue* tv) {
   }
 
   assert(tv->m_type >= MinDataType && tv->m_type < MaxNumDataTypes);
-  if (IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_data.pref->_count <= 0) {
+  if (IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_data.pref->m_count <= 0) {
     // OK in the invoking frame when running a destructor.
-    os << " ??? inner_count " << tv->m_data.pref->_count << " ";
+    os << " ??? inner_count " << tv->m_data.pref->m_count << " ";
     return os.str();
   }
 
@@ -740,23 +747,13 @@ static std::string toStringIter(const Iter* it, bool itRef) {
   // TODO(#2458166): it might be a CufIter, but we're just lucky that
   // the bit pattern for the CufIter is going to have a 0 in
   // getIterType for now.
-  switch (it->arr().getIterKind()) {
-    case ArrayIter::IterKind::Undefined:
-      return "I:Undefined";
-    case ArrayIter::IterKind::Array:
-      return "I:Array";
-    case ArrayIter::IterKind::Iterator:
-      return "I:Iterator";
-    case ArrayIter::IterKind::Pair:
-      return "I:Pair";
-    case ArrayIter::IterKind::Vector:
-      return "I:Vector";
-    case ArrayIter::IterKind::Map:
-      return "I:Map";
-    case ArrayIter::IterKind::StableMap:
-      return "I:StableMap";
-    case ArrayIter::IterKind::Set:
-      return "I:Set";
+  switch (it->arr().getIterType()) {
+  case ArrayIter::TypeUndefined:
+    return "I:Undefined";
+  case ArrayIter::TypeArray:
+    return "I:Array";
+  case ArrayIter::TypeIterator:
+    return "I:Iterator";
   }
   assert(false);
   return "I:?";
@@ -1769,7 +1766,7 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
         }
       } else if (!(flags & InvokeIgnoreByRefErrors) &&
                  (from->m_type != KindOfRef ||
-                  from->m_data.pref->_count == 2)) {
+                  from->m_data.pref->m_count == 2)) {
         raise_warning("Parameter %d to %s() expected to be "
                       "a reference, value given",
                       paramId + 1, f->fullName()->data());
@@ -2500,25 +2497,6 @@ VMExecutionContext::pushLocalsAndIterators(const Func* func,
   }
 }
 
-void VMExecutionContext::enqueueSharedVar(SharedVariant* svar) {
-  m_freedSvars.push_back(svar);
-}
-
-class FreedSVars : public Treadmill::WorkItem {
-  SVarVector m_svars;
-public:
-  explicit FreedSVars(SVarVector&& svars) : m_svars(std::move(svars)) {}
-  virtual void operator()() {
-    for (auto it = m_svars.begin(); it != m_svars.end(); it++) {
-      delete *it;
-    }
-  }
-};
-
-void VMExecutionContext::treadmillSharedVars() {
-  Treadmill::WorkItem::enqueue(new FreedSVars(std::move(m_freedSvars)));
-}
-
 void VMExecutionContext::destructObjects() {
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
     while (!m_liveBCObjs.empty()) {
@@ -2888,7 +2866,7 @@ static inline void lookupClsRef(TypedValue* input,
 static UNUSED int innerCount(const TypedValue* tv) {
   if (IS_REFCOUNTED_TYPE(tv->m_type)) {
     // We're using pref here arbitrarily; any refcounted union member works.
-    return tv->m_data.pref->_count;
+    return tv->m_data.pref->m_count;
   }
   return -1;
 }
@@ -5951,7 +5929,7 @@ bool VMExecutionContext::prepareArrayArgs(ActRec* ar,
     for (int i = 0; i < extra; ++i) {
       TypedValue* to = extraArgs->getExtraArg(i);
       tvDup(*args->getValueRef(pos).asTypedValue(), *to);
-      if (to->m_type == KindOfRef && to->m_data.pref->_count == 2) {
+      if (to->m_type == KindOfRef && to->m_data.pref->m_count == 2) {
         tvUnbox(to);
       }
       pos = args->iter_advance(pos);
@@ -7247,7 +7225,7 @@ void VMExecutionContext::requestInit() {
 }
 
 void VMExecutionContext::requestExit() {
-  treadmillSharedVars();
+  destructObjects();
   syncGdbState();
   tx()->requestExit();
   Transl::Translator::clearTranslator();

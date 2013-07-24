@@ -13,6 +13,7 @@
             "desc": "An ordered collection where values are keyed using integers 0 thru n-1 in order.",
             "flags": [
                 "IsFinal",
+                "IsCppSerializable",
                 "HasDocComment"
             ],
             "footer": "\n private:\n  TypedValue* m_data;\n  int size;\n  int capacity;",
@@ -749,6 +750,7 @@
             "desc": "An unordered dictionary-style collection.",
             "flags": [
                 "IsFinal",
+                "IsCppSerializable",
                 "HasDocComment"
             ],
             "funcs": [
@@ -1442,6 +1444,7 @@
             "desc": "An ordered dictionary-style collection.",
             "flags": [
                 "IsFinal",
+                "IsCppSerializable",
                 "HasDocComment"
             ],
             "funcs": [
@@ -2135,6 +2138,7 @@
             "desc": "An unordered set-style collection.",
             "flags": [
                 "IsFinal",
+                "IsCppSerializable",
                 "HasDocComment"
             ],
             "funcs": [
@@ -2645,6 +2649,7 @@
             "desc": "An ordered fixed-sized container.",
             "flags": [
                 "IsFinal",
+                "IsCppSerializable",
                 "HasDocComment"
             ],
             "footer": "\n private:\n  int size;\n  int capacity;",

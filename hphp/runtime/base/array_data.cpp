@@ -321,6 +321,11 @@ extern const ArrayFunctions g_array_funcs = {
     &SharedMap::Escalate,
     &ArrayData::Escalate,
     &PolicyArray::Escalate },
+  // getSharedVariant
+  { &ArrayData::GetSharedVariant, &ArrayData::GetSharedVariant,
+    &SharedMap::GetSharedVariant,
+    &ArrayData::GetSharedVariant,
+    &ArrayData::GetSharedVariant },
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -733,7 +738,7 @@ void ArrayData::dump(std::string &out) {
   VariableSerializer vs(VariableSerializer::Type::VarDump);
   String ret(vs.serialize(Array(this), true));
   out += "ArrayData(";
-  out += boost::lexical_cast<string>(_count);
+  out += boost::lexical_cast<string>(m_count);
   out += "): ";
   out += string(ret.data(), ret.size());
 }

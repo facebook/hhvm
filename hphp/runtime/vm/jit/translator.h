@@ -77,10 +77,6 @@ enum class VMRegState {
 };
 extern __thread VMRegState tl_regState;
 
-void sktrace(SrcKey sk, const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
-#define SKTRACE(level, sk, ...) \
-  ONTRACE(level, sktrace(sk, __VA_ARGS__))
-
 struct NormalizedInstruction;
 
 // A DynLocation is a Location-in-execution: a location, along with
@@ -142,9 +138,6 @@ struct DynLocation {
   }
   bool isArray() const {
     return rtt.isArray();
-  }
-  bool isIter() const {
-    return rtt.isIter();
   }
   DataType valueType() const {
     return rtt.valueType();
@@ -388,31 +381,27 @@ class GuardType {
                      DataType inner = KindOfInvalid);
   explicit GuardType(const RuntimeType& rtt);
            GuardType(const GuardType& other);
-  const DataType              getOuterType() const;
-  const DataType              getInnerType() const;
-  const Class*                getSpecializedClass() const;
-  const ArrayIter::IterKind   getSpecializedIterKind() const;
-  bool                        isSpecific() const;
-  bool                        isSpecialized() const;
-  bool                        isRelaxed() const;
-  bool                        isGeneric() const;
-  bool                        isCounted() const;
-  bool                        isMoreRefinedThan(const GuardType& other) const;
-  bool                        mayBeUninit() const;
-  GuardType                   getCountness() const;
-  GuardType                   getCountnessInit() const;
-  DataTypeCategory            getCategory() const;
-  GuardType                   dropSpecialization() const;
-  RuntimeType                 getRuntimeType() const;
-  bool                        isEqual(GuardType other) const;
+  const DataType   getOuterType() const;
+  const DataType   getInnerType() const;
+  const Class*     getSpecializedClass() const;
+  bool             isSpecific() const;
+  bool             isSpecialized() const;
+  bool             isRelaxed() const;
+  bool             isGeneric() const;
+  bool             isCounted() const;
+  bool             isMoreRefinedThan(const GuardType& other) const;
+  bool             mayBeUninit() const;
+  GuardType        getCountness() const;
+  GuardType        getCountnessInit() const;
+  DataTypeCategory getCategory() const;
+  GuardType        dropSpecialization() const;
+  RuntimeType      getRuntimeType() const;
+  bool             isEqual(GuardType other) const;
 
  private:
   DataType outerType;
   DataType innerType;
-  union {
-    const Class* klass;
-    ArrayIter::IterKind iterKind;
-  };
+  const Class* klass;
 };
 
 /*

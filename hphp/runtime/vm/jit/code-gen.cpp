@@ -954,7 +954,9 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args) {
       if (kind == ArgDesc::Kind::Imm) {
         a.emitImmReg(args[i].imm().q(), dst);
       } else if (kind == ArgDesc::Kind::TypeReg) {
-        a.    shlq   (kTypeShiftBits, dst);
+        if (kTypeShiftBits > 0) {
+          a.    shlq   (kTypeShiftBits, dst);
+        }
       } else if (kind == ArgDesc::Kind::Addr) {
         a.    addq   (args[i].imm(), dst);
       } else if (args[i].isZeroExtend()) {
@@ -987,14 +989,13 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args) {
         break;
 
       case ArgDesc::Kind::TypeReg:
-        static_assert(kTypeWordOffset == 4 || kTypeWordOffset == 1,
+        static_assert(kTypeWordOffset == 0 || kTypeWordOffset == 1,
                       "kTypeWordOffset value not supported");
         assert(srcReg.isGP());
         // x86 stacks grow down, so push higher offset items first
-        if (kTypeWordOffset == 4) {
+        if (kTypeWordOffset == 0) {
+          a.  pushl(eax); // 4 bytes of garbage overlapping m_aux
           a.  pushl(r32(srcReg));
-          // 4 bytes of garbage:
-          a.  pushl(eax);
         } else {
           // 4 bytes of garbage:
           a.  pushl(eax);
@@ -3581,8 +3582,21 @@ ObjectData* createClHelper(Class* cls, int numArgs, ActRec* ar,
 }
 
 void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
-  const Class* cls = inst->src(0)->getValClass();
-  auto dstReg = m_regs[inst->dst()].reg();
+  auto const cls    = inst->extra<AllocObjFast>()->cls;
+  auto const dstReg = m_regs[inst->dst()].reg();
+
+  // If it's an extension class with a custom instance initializer,
+  // that init function does all the work.
+  if (cls->instanceCtor()) {
+    cgCallHelper(m_as,
+                 (TCA)cls->instanceCtor(),
+                 dstReg,
+                 SyncOptions::kSyncPoint,
+                 ArgGroup(m_regs)
+                   .immPtr(cls)
+    );
+    return;
+  }
 
   // First, make sure our property init vectors are all set up
   bool props = cls->pinitVec().size() > 0;
@@ -3614,22 +3628,14 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
   }
 
   // Next, allocate the object
-  if (cls->instanceCtor()) {
-    cgCallHelper(m_as,
-                 (TCA)cls->instanceCtor(),
-                 dstReg,
-                 SyncOptions::kSyncPoint,
-                 ArgGroup(m_regs).imm((uint64_t)cls));
-  } else {
-    size_t size = ObjectData::sizeForNProps(cls->numDeclProperties());
-    int allocator = object_alloc_size_to_index(size);
-    assert(allocator != -1);
-    cgCallHelper(m_as,
-                 (TCA)getMethodPtr(&ObjectData::newInstanceRaw),
-                 dstReg,
-                 SyncOptions::kSyncPoint,
-                 ArgGroup(m_regs).imm((uint64_t)cls).imm(allocator));
-  }
+  size_t size = ObjectData::sizeForNProps(cls->numDeclProperties());
+  int allocator = object_alloc_size_to_index(size);
+  assert(allocator != -1);
+  cgCallHelper(m_as,
+               (TCA)getMethodPtr(&ObjectData::newInstanceRaw),
+               dstReg,
+               SyncOptions::kSyncPoint,
+               ArgGroup(m_regs).imm((uint64_t)cls).imm(allocator));
 
   // Set the attributes, if any
   int odAttrs = cls->getODAttrs();
@@ -4023,8 +4029,8 @@ void CodeGenerator::cgLdClsCctx(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdCtx(IRInstruction* inst) {
-  PhysReg dstReg = m_regs[inst->dst()].reg();
-  PhysReg srcReg = m_regs[inst->src(0)].reg();
+  auto const dstReg = m_regs[inst->dst()].reg();
+  auto const srcReg = m_regs[inst->src(0)].reg();
   if (dstReg != InvalidReg) {
     m_as.loadq(srcReg[AROFF(m_this)], dstReg);
   }
@@ -4357,18 +4363,6 @@ void CodeGenerator::cgCheckStk(IRInstruction* inst) {
   auto const baseOff = cellsToBytes(inst->extra<CheckStk>()->offset);
   emitTypeCheck(inst->typeParam(), rbase[baseOff + TVOFF(m_type)],
                 rbase[baseOff + TVOFF(m_data)], inst->taken());
-}
-
-void CodeGenerator::cgGuardIter(IRInstruction* inst) {
-  auto const rFP = m_regs[inst->src(0)].reg();
-  auto const baseOff = iterOffset(inst->extra<GuardIter>()->iterId);
-  auto const loc = rFP[baseOff + ArrayIter::getOffsetOfIterKind()];
-  auto const iterKind = inst->typeParam().getIterKind();
-  assert(sizeof(ArrayIter::IterKind) == 4);
-  m_as.cmpl(static_cast<int32_t>(iterKind), loc);
-  auto const destSK = SrcKey(curFunc(), m_curTrace->bcOff());
-  auto const destSR = m_tx64->getSrcRec(destSK);
-  m_tx64->emitFallbackCondJmp(m_as, *destSR, CC_NE);
 }
 
 void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
@@ -5575,82 +5569,20 @@ void CodeGenerator::cgIterInitCommon(IRInstruction* inst) {
       isInitK ? (TCA)new_iter_array_key<false> : (TCA)new_iter_array;
     cgCallHelper(m_as, helperAddr, inst->dst(), SyncOptions::kSyncPoint, args);
   } else {
-    Type srcType = src->type();
-    assert(srcType.subtypeOf(Type::Obj));
-
-    const Class* klass = srcType.getClass();
-    if (!isWInit && isCollectionClass(klass)) {
-      args.addr(fpReg, valLocalOffset);
-      if (isInitK) {
-        args.addr(fpReg, localOffset(inst->src(4)));
-      }
-      cgIterInitCommonCollection(inst, klass, args);
+    assert(src->type() == Type::Obj);
+    args.imm(uintptr_t(curClass())).addr(fpReg, valLocalOffset);
+    if (isInitK) {
+      args.addr(fpReg, localOffset(inst->src(4)));
     } else {
-      args.imm(uintptr_t(curClass())).addr(fpReg, valLocalOffset);
-      if (isInitK) {
-        args.addr(fpReg, localOffset(inst->src(4)));
-      } else {
-        args.imm(0);
-      }
-      // new_iter_object decrefs its src object if it propagates an
-      // exception out, so we use kSyncPointAdjustOne, which adjusts the
-      // stack pointer by 1 stack element on an unwind, skipping over
-      // the src object.
-      cgCallHelper(m_as, (TCA)new_iter_object, inst->dst(),
-                   SyncOptions::kSyncPointAdjustOne, args);
+      args.imm(0);
     }
+    // new_iter_object decrefs its src object if it propagates an
+    // exception out, so we use kSyncPointAdjustOne, which adjusts the
+    // stack pointer by 1 stack element on an unwind, skipping over
+    // the src object.
+    cgCallHelper(m_as, (TCA)new_iter_object, inst->dst(),
+                 SyncOptions::kSyncPointAdjustOne, args);
   }
-}
-
-void CodeGenerator::cgIterInitCommonCollection(IRInstruction* inst,
-                                               const Class* klass,
-                                               ArgGroup& args) {
-  assert(isCollectionClass(klass));
-  TCA helperAddr = nullptr;
-  if (klass == c_Pair::s_cls) {
-    helperAddr = inst->op() == IterInitK ?
-            (TCA)iterInitK<c_Pair,
-                           ArrayIter::Fixed,
-                           ArrayIter::IterKind::Pair> :
-            (TCA)iterInit<c_Pair,
-                          ArrayIter::Fixed,
-                          ArrayIter::IterKind::Pair>;
-  } else if (klass == c_Vector::s_cls) {
-    helperAddr = inst->op() == IterInitK ?
-        (TCA)iterInitK<c_Vector,
-                       ArrayIter::Versionable,
-                       ArrayIter::IterKind::Vector> :
-        (TCA)iterInit<c_Vector,
-                      ArrayIter::Versionable,
-                      ArrayIter::IterKind::Vector>;
-  } else if (klass == c_Map::s_cls) {
-    helperAddr = inst->op() == IterInitK ?
-        (TCA)iterInitK<c_Map,
-                       ArrayIter::VersionableSparse,
-                       ArrayIter::IterKind::Map> :
-        (TCA)iterInit<c_Map,
-                      ArrayIter::VersionableSparse,
-                      ArrayIter::IterKind::Map>;
-  } else if (klass == c_StableMap::s_cls) {
-    helperAddr = inst->op() == IterInitK ?
-        (TCA)iterInitK<c_StableMap,
-                       ArrayIter::VersionableSparse,
-                       ArrayIter::IterKind::StableMap> :
-        (TCA)iterInit<c_StableMap,
-                      ArrayIter::VersionableSparse,
-                      ArrayIter::IterKind::StableMap>;
-  } else if (klass == c_Set::s_cls) {
-    helperAddr = inst->op() == IterInitK ?
-        (TCA)iterInitK<c_Set,
-                       ArrayIter::VersionableSparse,
-                       ArrayIter::IterKind::Set> :
-        (TCA)iterInit<c_Set,
-                      ArrayIter::VersionableSparse,
-                      ArrayIter::IterKind::Set>;
-  }
-  assert(helperAddr != nullptr);
-  cgCallHelper(m_as, helperAddr, inst->dst(),
-               SyncOptions::kSyncPoint, args);
 }
 
 void CodeGenerator::cgMIterInit(IRInstruction* inst) {
@@ -5702,14 +5634,6 @@ void CodeGenerator::cgMIterInitCommon(IRInstruction* inst) {
   }
 }
 
-void CodeGenerator::cgIterNextArray(IRInstruction* inst) {
-  cgIterNextCommon(inst);
-}
-
-void CodeGenerator::cgIterNextKArray(IRInstruction* inst) {
-  cgIterNextCommon(inst);
-}
-
 void CodeGenerator::cgIterNext(IRInstruction* inst) {
   cgIterNextCommon(inst);
 }
@@ -5727,10 +5651,8 @@ void CodeGenerator::cgWIterNextK(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgIterNextCommon(IRInstruction* inst) {
-  bool isNextK = inst->op() == IterNextK || inst->op() == WIterNextK ||
-                 inst->op() == IterNextKArray;
+  bool isNextK = inst->op() == IterNextK || inst->op() == WIterNextK;
   bool isWNext = inst->op() == WIterNext || inst->op() == WIterNextK;
-  bool isArray = inst->op() == IterNextArray || inst->op() == IterNextKArray;
   PhysReg fpReg = m_regs[inst->src(0)].reg();
   ArgGroup args(m_regs);
   args.addr(fpReg, iterOffset(inst->src(1)))
@@ -5740,140 +5662,9 @@ void CodeGenerator::cgIterNextCommon(IRInstruction* inst) {
   } else if (isWNext) {
     args.imm(0);
   }
-  TCA helperAddr;
-  if (isWNext) {
-    helperAddr = (TCA)iter_next_key<true>;
-  } else {
-    if (isArray) {
-      helperAddr = isNextK ? (TCA)iter_next_key<false>
-                           : (TCA)iter_next;
-    } else {
-      args.imm(0);
-      helperAddr = (TCA)iter_next_any<false>;
-    }
-  }
+  TCA helperAddr = isWNext ? (TCA)iter_next_key<true> :
+    isNextK ? (TCA)iter_next_key<false> : (TCA)iter_next;
   cgCallHelper(m_as, helperAddr, inst->dst(), SyncOptions::kSyncPoint, args);
-}
-
-
-void CodeGenerator::cgIterNextVector(IRInstruction* inst) {
-  ArgGroup args(m_regs);
-  loadIterNextArg(args, inst, false);
-  cgCallHelper(m_as,
-               (TCA)iterNext<c_Vector, ArrayIter::Versionable>,
-               inst->dst(),
-               SyncOptions::kSyncPoint,
-               args);
-}
-
-void CodeGenerator::cgIterNextKVector(IRInstruction* inst) {
-  ArgGroup args(m_regs);
-  loadIterNextArg(args, inst, true);
-  cgCallHelper(m_as,
-               (TCA)iterNextK<c_Vector,
-                              ArrayIter::Versionable,
-                              ArrayIter::RefCountKey::DontRefcount>,
-               inst->dst(),
-               SyncOptions::kSyncPoint,
-               args);
-}
-
-void CodeGenerator::cgIterNextMap(IRInstruction* inst) {
-  ArgGroup args(m_regs);
-  loadIterNextArg(args, inst, false);
-                 cgCallHelper(m_as,
-                 (TCA)iterNext<c_Map, ArrayIter::VersionableSparse>,
-                 inst->dst(),
-                 SyncOptions::kSyncPoint,
-                 args);
-}
-
-void CodeGenerator::cgIterNextKMap(IRInstruction* inst) {
-  ArgGroup args(m_regs);
-  loadIterNextArg(args, inst, true);
-  cgCallHelper(m_as,
-               (TCA)iterNextK<c_Map,
-                              ArrayIter::VersionableSparse,
-                              ArrayIter::RefCountKey::Refcount>,
-               inst->dst(),
-               SyncOptions::kSyncPoint,
-               args);
-}
-
-void CodeGenerator::cgIterNextStableMap(IRInstruction* inst) {
-  ArgGroup args(m_regs);
-  loadIterNextArg(args, inst, false);
-  cgCallHelper(m_as,
-               (TCA)iterNext<c_StableMap, ArrayIter::VersionableSparse>,
-               inst->dst(),
-               SyncOptions::kSyncPoint,
-               args);
-}
-
-void CodeGenerator::cgIterNextKStableMap(IRInstruction* inst) {
-  ArgGroup args(m_regs);
-  loadIterNextArg(args, inst, true);
-  cgCallHelper(m_as,
-               (TCA)iterNextK<c_StableMap,
-                              ArrayIter::VersionableSparse,
-                              ArrayIter::RefCountKey::Refcount>,
-               inst->dst(),
-               SyncOptions::kSyncPoint,
-               args);
-}
-
-void CodeGenerator::cgIterNextSet(IRInstruction* inst) {
-  ArgGroup args(m_regs);
-  loadIterNextArg(args, inst, false);
-  cgCallHelper(m_as,
-               (TCA)iterNext<c_Set, ArrayIter::VersionableSparse>,
-               inst->dst(),
-               SyncOptions::kSyncPoint,
-               args);
-}
-
-void CodeGenerator::cgIterNextKSet(IRInstruction* inst) {
-  ArgGroup args(m_regs);
-  loadIterNextArg(args, inst, true);
-  cgCallHelper(m_as,
-               (TCA)iterNextK<c_Set,
-                              ArrayIter::VersionableSparse,
-                              ArrayIter::RefCountKey::DontRefcount>,
-               inst->dst(),
-               SyncOptions::kSyncPoint,
-               args);
-}
-
-void CodeGenerator::cgIterNextPair(IRInstruction* inst) {
-  ArgGroup args(m_regs);
-  loadIterNextArg(args, inst, false);
-  cgCallHelper(m_as,
-               (TCA)iterNext<c_Pair, ArrayIter::Fixed>,
-               inst->dst(),
-               SyncOptions::kSyncPoint,
-               args);
-}
-
-void CodeGenerator::cgIterNextKPair(IRInstruction* inst) {
-  ArgGroup args(m_regs);
-  loadIterNextArg(args, inst, true);
-  cgCallHelper(m_as,
-               (TCA)iterNextK<c_Pair,
-                              ArrayIter::Fixed,
-                              ArrayIter::RefCountKey::DontRefcount>,
-               inst->dst(),
-               SyncOptions::kSyncPoint,
-               args);
-}
-
-void CodeGenerator::loadIterNextArg(
-  ArgGroup& args, IRInstruction* inst, bool isNextK) {
-  PhysReg fpReg = m_regs[inst->src(0)].reg();
-  args.addr(fpReg, iterOffset(inst->src(1)))
-      .addr(fpReg, localOffset(inst->src(2)));
-  if (isNextK) {
-    args.addr(fpReg, localOffset(inst->src(3)));
-  }
 }
 
 void CodeGenerator::cgMIterNext(IRInstruction* inst) {

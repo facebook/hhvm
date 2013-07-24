@@ -1,0 +1,5 @@
+string(1) "x"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(42) "Closure$$%s$"
+}

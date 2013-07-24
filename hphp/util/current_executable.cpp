@@ -22,6 +22,10 @@
 #include <sys/sysctl.h>
 #endif
 
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#endif
+
 namespace HPHP {
 
 std::string current_executable_path() {

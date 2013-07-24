@@ -108,7 +108,6 @@ public:
     return arOffset;
   }
 
-protected: virtual bool php_sleep(Variant &ret);
 public:
   void call_next();
   void call_send(Cell& v);
@@ -158,26 +157,6 @@ public:
   ActRec* actRec() {
     return m_arPtr;
   }
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class DummyContinuation
-
-FORWARD_DECLARE_CLASS_BUILTIN(DummyContinuation);
-class c_DummyContinuation : public ExtObjectData {
- public:
-  DECLARE_CLASS(DummyContinuation, DummyContinuation, ObjectData)
-
-  // need to implement
-  public: c_DummyContinuation(Class* cls = c_DummyContinuation::s_cls);
-  public: ~c_DummyContinuation();
-  public: void t___construct();
-  public: Variant t_current();
-  public: Variant t_key();
-  public: void t_next();
-  public: void t_rewind();
-  public: bool t_valid();
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////

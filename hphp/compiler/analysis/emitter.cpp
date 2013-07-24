@@ -1626,6 +1626,9 @@ void EmitterVisitor::visitIfCondition(
   }
 }
 
+// Assigns ids to all of the local variables eagerly. This gives us the
+// nice property that all named local variables will be assigned ids
+// 0 through k-1, while any unnamed local variable will have an id >= k.
 void EmitterVisitor::assignLocalVariableIds(FunctionScopePtr fs) {
   VariableTablePtr variables = fs->getVariables();
   std::vector<std::string> localNames;
@@ -1644,9 +1647,6 @@ void EmitterVisitor::visit(FileScopePtr file) {
   if (!func) return;
 
   m_file = file;
-  // Assign ids to all of the local variables eagerly. This gives us the
-  // nice property that all named local variables will be assigned ids
-  // 0 through k-1, while any unnamed local variable will have an id >= k.
   assignLocalVariableIds(func);
 
   AnalysisResultPtr ar(file->getContainingProgram());
@@ -5291,6 +5291,69 @@ static Attr buildAttrs(ModifierExpressionPtr mod, bool isRef = false) {
   return Attr(attrs);
 }
 
+static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
+                             bool top, bool allowOverride) {
+  FunctionScopePtr funcScope = meth->getFunctionScope();
+  ModifierExpressionPtr mod(meth->getModifiers());
+  Attr attrs = buildAttrs(mod, meth->isRef());
+
+  if (allowOverride) {
+    attrs = attrs | AttrAllowOverride;
+  }
+
+  if (funcScope->mayUseVV() || meth->hasCallToGetArgs()) {
+    attrs = attrs | AttrMayUseVV;
+  }
+
+  auto fullName = meth->getOriginalFullName();
+  auto it = Option::FunctionSections.find(fullName);
+  if ((it != Option::FunctionSections.end() && it->second == "hot") ||
+      (RuntimeOption::EvalRandomHotFuncs &&
+       (hash_string_i(fullName.c_str()) & 8))) {
+    attrs = attrs | AttrHot;
+  }
+
+  if (Option::WholeProgram) {
+    if (!funcScope->isRedeclaring()) {
+      attrs = attrs | AttrUnique;
+      if (top &&
+          (!funcScope->isVolatile() ||
+           funcScope->isPersistent() ||
+           funcScope->isGenerator())) {
+        attrs = attrs | AttrPersistent;
+      }
+    }
+    if (ClassScopePtr cls = meth->getClassScope()) {
+      if (meth->getName() == cls->getName() &&
+          !cls->classNameCtor()) {
+        /*
+          In WholeProgram mode, we inline the traits into their
+          classes. If a trait method name matches the class name
+          it is NOT a constructor.
+          We mark the method with AttrTrait so that we can avoid
+          treating it as a constructor even though it looks like
+          one.
+        */
+        attrs = attrs | AttrTrait;
+      }
+      if (!funcScope->hasOverride()) {
+        attrs = attrs | AttrNoOverride;
+      }
+    }
+  } else if (!SystemLib::s_inited) {
+    // we're building systemlib. everything is unique
+    attrs = attrs | AttrUnique | AttrPersistent;
+  }
+
+  // For closures, the MethodStatement didn't have real attributes; enforce
+  // that the __invoke method is public here
+  if (fe->isClosureBody()) {
+    assert(!(attrs & (AttrProtected | AttrPrivate)));
+    attrs = attrs | AttrPublic;
+  }
+  return attrs;
+}
+
 static TypeConstraint
 determine_type_constraint(const ParameterExpressionPtr& par) {
   if (par->hasTypeHint()) {
@@ -5334,9 +5397,16 @@ void EmitterVisitor::emitPostponedMeths() {
     PostponedMeth& p = m_postponedMeths.front();
     FunctionScopePtr funcScope = p.m_meth->getFunctionScope();
     FuncEmitter* fe = p.m_fe;
-    bool allowOverride = false;
+
     if (!fe) {
       assert(p.m_top);
+      if (!m_topMethodEmitted.insert(p.m_meth->getOriginalName()).second) {
+        throw IncludeTimeFatalException(
+          p.m_meth,
+          "%s",
+          (string("Function already defined: ") +
+            p.m_meth->getOriginalName()).c_str());
+      }
       const StringData* methName =
         StringData::GetStaticString(p.m_meth->getOriginalName());
       fe = new FuncEmitter(m_ue, -1, -1, methName);
@@ -5346,275 +5416,234 @@ void EmitterVisitor::emitPostponedMeths() {
       p.m_fe = fe;
       top_fes.push_back(fe);
     }
-    const FunctionScope::UserAttributeMap& userAttrs =
-      funcScope->userAttributes();
-    for (FunctionScope::UserAttributeMap::const_iterator it = userAttrs.begin();
-         it != userAttrs.end(); ++it) {
-      if (it->first == "__Overridable") {
-        allowOverride = true;
-        continue;
-      }
-      const StringData* uaName = StringData::GetStaticString(it->first);
-      ExpressionPtr uaValue = it->second;
-      assert(uaValue);
-      assert(uaValue->isScalar());
-      TypedValue tv;
-      initScalar(tv, uaValue);
-      fe->addUserAttribute(uaName, tv);
-    }
-    Emitter e(p.m_meth, m_ue, *this);
-    if (p.m_top) {
-      if (!m_topMethodEmitted.insert(p.m_meth->getOriginalName()).second) {
-        throw IncludeTimeFatalException(
-          p.m_meth,
-          "%s",
-          (string("Function already defined: ") +
-           p.m_meth->getOriginalName()).c_str());
-      }
-    }
-    typedef std::pair<Id, ConstructPtr> DVInitializer;
-    std::vector<DVInitializer> dvInitializers;
-    ExpressionListPtr params = p.m_meth->getParams();
-    int numParam = params ? params->getCount() : 0;
-    for (int i = 0; i < numParam; i++) {
-      ParameterExpressionPtr par(
-        static_pointer_cast<ParameterExpression>((*params)[i]));
-      StringData* parName = StringData::GetStaticString(par->getName());
-      if (par->isOptional()) {
-        dvInitializers.push_back(DVInitializer(i, par->defaultValue()));
-      }
 
-      FuncEmitter::ParamInfo pi;
-      auto const typeConstraint = determine_type_constraint(par);
-      if (typeConstraint.hasConstraint()) {
-        pi.setTypeConstraint(typeConstraint);
-      }
+    emitMethodMetadata(p);
+    emitMethodBody(p);
 
-      if (par->hasUserType()) {
-        pi.setUserType(StringData::GetStaticString(par->getUserTypeHint()));
-      }
-
-      // Store info about the default value if there is one.
-      if (par->isOptional()) {
-        const StringData* phpCode;
-        ExpressionPtr vNode = par->defaultValue();
-        if (vNode->isScalar()) {
-          TypedValue dv;
-          initScalar(dv, vNode);
-          pi.setDefaultValue(dv);
-
-          std::string orig = vNode->getComment();
-          if (orig.empty()) {
-            // Simple case: it's a scalar value so we just serialize it
-            VariableSerializer vs(VariableSerializer::Type::PHPOutput);
-            String result = vs.serialize(tvAsCVarRef(&dv), true);
-            phpCode = StringData::GetStaticString(result.get());
-          } else {
-            // This was optimized from a Constant, or ClassConstant
-            // use the original string
-            phpCode = StringData::GetStaticString(orig);
-          }
-        } else {
-          // Non-scalar, so we have to output PHP from the AST node
-          std::ostringstream os;
-          CodeGenerator cg(&os, CodeGenerator::PickledPHP);
-          AnalysisResultPtr ar(new AnalysisResult());
-          vNode->outputPHP(cg, ar);
-          phpCode = StringData::GetStaticString(os.str());
-        }
-        pi.setPhpCode(phpCode);
-      }
-      ExpressionListPtr paramUserAttrs =
-        dynamic_pointer_cast<ExpressionList>(par->userAttributeList());
-      if (paramUserAttrs) {
-        for (int j = 0; j < paramUserAttrs->getCount(); ++j) {
-          UserAttributePtr a = dynamic_pointer_cast<UserAttribute>(
-            (*paramUserAttrs)[j]);
-          StringData* uaName = StringData::GetStaticString(a->getName());
-          ExpressionPtr uaValue = a->getExp();
-          assert(uaValue);
-          assert(uaValue->isScalar());
-          TypedValue tv;
-          initScalar(tv, uaValue);
-          pi.addUserAttribute(uaName, tv);
-        }
-      }
-
-      pi.setRef(par->isRef());
-      fe->appendParam(parName, pi);
-    }
-    // add return type hint
-    fe->setReturnTypeConstraint(
-        StringData::GetStaticString(p.m_meth->getReturnTypeConstraint()));
-
-    // add the original filename for flattened traits
-    auto const originalFilename = p.m_meth->getOriginalFilename();
-    if (!originalFilename.empty()) {
-      fe->setOriginalFilename(StringData::GetStaticString(originalFilename));
-    }
-
-    m_curFunc = fe;
-
-    if (fe->isClosureBody() || fe->isGeneratorFromClosure()) {
-      // We are going to keep the closure as the first local
-      fe->allocVarId(StringData::GetStaticString("0Closure"));
-
-      if (fe->isClosureBody()) {
-        ClosureUseVarVec* useVars = p.m_closureUseVars;
-        for (auto& useVar : *useVars) {
-          // These are all locals. I want them right after the params so I don't
-          // have to keep track of which one goes where at runtime.
-          fe->allocVarId(useVar.first);
-        }
-      }
-    }
-
-    if (p.m_meth->hasCallToGetArgs()) {
-      fe->allocVarId(s_continuationVarArgsLocal);
-    }
-
-    // Assign ids to all of the local variables eagerly. This gives us the
-    // nice property that all named local variables will be assigned ids
-    // 0 through k-1, while any unnamed local variable will have an id >= k.
-    // Note that the logic above already assigned ids to the parameters, so
-    // we will still uphold the invariant that the n parameters will have
-    // ids 0 through n-1 respectively.
-    assignLocalVariableIds(funcScope);
-
-    // set all the params and metadata etc on fe
-    StringData* methDoc =
-      StringData::GetStaticString(p.m_meth->getDocComment());
-    ModifierExpressionPtr mod(p.m_meth->getModifiers());
-    Attr attrs = buildAttrs(mod, p.m_meth->isRef());
-
-    if (allowOverride) attrs = attrs | AttrAllowOverride;
-
-    if (funcScope->mayUseVV() || p.m_meth->hasCallToGetArgs()) {
-      attrs = attrs | AttrMayUseVV;
-    }
-
-    auto fullName = p.m_meth->getOriginalFullName();
-    auto it = Option::FunctionSections.find(fullName);
-    if ((it != Option::FunctionSections.end() && it->second == "hot") ||
-        (RuntimeOption::EvalRandomHotFuncs &&
-         (hash_string_i(fullName.c_str()) & 8))) {
-      attrs = attrs | AttrHot;
-    }
-
-    if (Option::WholeProgram) {
-      if (!funcScope->isRedeclaring()) {
-        attrs = attrs | AttrUnique;
-        if (p.m_top &&
-            (!funcScope->isVolatile() ||
-             funcScope->isPersistent() ||
-             funcScope->isGenerator())) {
-          attrs = attrs | AttrPersistent;
-        }
-      }
-      if (ClassScopePtr cls = p.m_meth->getClassScope()) {
-        if (p.m_meth->getName() == cls->getName() &&
-            !cls->classNameCtor()) {
-          /*
-            In WholeProgram mode, we inline the traits into their
-            classes. If a trait method name matches the class name
-            it is NOT a constructor.
-            We mark the method with AttrTrait so that we can avoid
-            treating it as a constructor even though it looks like
-            one.
-          */
-          attrs = attrs | AttrTrait;
-        }
-        if (!funcScope->hasOverride()) {
-          attrs = attrs | AttrNoOverride;
-        }
-      }
-    } else if (!SystemLib::s_inited) {
-      // we're building systemlib. everything is unique
-      attrs = attrs | AttrUnique | AttrPersistent;
-    }
-
-    // For closures, the MethodStatement didn't have real attributes; enforce
-    // that the __invoke method is public here
-    if (fe->isClosureBody()) {
-      assert(!(attrs & (AttrProtected | AttrPrivate)));
-      attrs = attrs | AttrPublic;
-    }
-
-    Label topOfBody(e);
-    const Location* sLoc = p.m_meth->getLocation().get();
-    fe->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), attrs, p.m_top, methDoc);
-    // --Method emission begins--
-    {
-      if (funcScope->needsLocalThis() &&
-          !funcScope->isStatic() &&
-          !funcScope->isGenerator()) {
-        assert(!p.m_top);
-        static const StringData* thisStr = StringData::GetStaticString("this");
-        Id thisId = fe->lookupVarId(thisStr);
-        e.InitThisLoc(thisId);
-      }
-      for (uint i = 0; i < fe->params().size(); i++) {
-        const TypeConstraint& tc = fe->params()[i].typeConstraint();
-        if (!tc.hasConstraint()) continue;
-        e.VerifyParamType(i);
-      }
-
-      if (funcScope->isAbstract()) {
-        StringData* msg =
-          StringData::GetStaticString("Cannot call abstract method ");
-        const StringData* methName =
-          StringData::GetStaticString(p.m_meth->getOriginalFullName());
-        msg = NEW(StringData)(msg, methName->slice());
-        msg = NEW(StringData)(msg, "()");
-        e.String(msg);
-        e.Fatal(1);
-      }
-    }
-
-    // emit body
-    visit(p.m_meth->getStmts());
-
-    // If the current position in the bytecode is reachable, emit code to
-    // return null
-    if (currentPositionIsReachable()) {
-      e.Null();
-      if (p.m_meth->getFunctionScope()->isGenerator()) {
-        assert(m_evalStack.size() == 1);
-        e.ContRetC();
-      } else {
-        if ((p.m_meth->getStmts() && p.m_meth->getStmts()->isGuarded())) {
-          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::GuardedThis,
-                         false, 0, 0);
-        }
-        e.RetC();
-      }
-    } // -- Method emission ends --
-
-    FuncFinisher ff(this, e, p.m_fe);
-
-    // Default value initializers
-    for (uint i = 0; i < dvInitializers.size(); ++i) {
-      Label entryPoint(e);
-      Id paramId = dvInitializers[i].first;
-      ConstructPtr node = dvInitializers[i].second;
-      emitVirtualLocal(paramId, KindOfUninit);
-      visit(node);
-      emitCGet(e);
-      emitSet(e);
-      e.PopC();
-      p.m_fe->setParamFuncletOff(paramId, entryPoint.getAbsoluteOffset());
-    }
-    if (!dvInitializers.empty()) {
-      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NoSurprise,
-                     false, 0, 0);
-      e.Jmp(topOfBody);
-    }
     delete p.m_closureUseVars;
     m_postponedMeths.pop_front();
   }
 
   for (size_t i = 0; i < top_fes.size(); i++) {
     m_ue.appendTopEmitter(top_fes[i]);
+  }
+}
+
+void EmitterVisitor::emitMethodMetadata(PostponedMeth& p) {
+  FunctionScopePtr funcScope = p.m_meth->getFunctionScope();
+  FuncEmitter* fe = p.m_fe;
+
+  // user attributes
+  bool allowOverride = false;
+  const FunctionScope::UserAttributeMap& userAttrs =
+    funcScope->userAttributes();
+  for (FunctionScope::UserAttributeMap::const_iterator it = userAttrs.begin();
+       it != userAttrs.end(); ++it) {
+    if (it->first == "__Overridable") {
+      allowOverride = true;
+      continue;
+    }
+    const StringData* uaName = StringData::GetStaticString(it->first);
+    ExpressionPtr uaValue = it->second;
+    assert(uaValue);
+    assert(uaValue->isScalar());
+    TypedValue tv;
+    initScalar(tv, uaValue);
+    fe->addUserAttribute(uaName, tv);
+  }
+
+  // parameters
+  fillFuncEmitterParams(fe, p.m_meth->getParams());
+
+  // add return type hint
+  fe->setReturnTypeConstraint(
+      StringData::GetStaticString(p.m_meth->getReturnTypeConstraint()));
+
+  // add the original filename for flattened traits
+  auto const originalFilename = p.m_meth->getOriginalFilename();
+  if (!originalFilename.empty()) {
+    fe->setOriginalFilename(StringData::GetStaticString(originalFilename));
+  }
+
+  if (fe->isClosureBody() || fe->isGeneratorFromClosure()) {
+    // We are going to keep the closure as the first local
+    fe->allocVarId(StringData::GetStaticString("0Closure"));
+
+    if (fe->isClosureBody()) {
+      ClosureUseVarVec* useVars = p.m_closureUseVars;
+      for (auto& useVar : *useVars) {
+        // These are all locals. I want them right after the params so I don't
+        // have to keep track of which one goes where at runtime.
+        fe->allocVarId(useVar.first);
+      }
+    }
+  }
+
+  if (p.m_meth->hasCallToGetArgs()) {
+    fe->allocVarId(s_continuationVarArgsLocal);
+  }
+
+  const Location* sLoc = p.m_meth->getLocation().get();
+  fe->init(sLoc->line0,
+           sLoc->line1,
+           m_ue.bcPos(),
+           buildMethodAttrs(p.m_meth, p.m_fe, p.m_top, allowOverride),
+           p.m_top,
+           StringData::GetStaticString(p.m_meth->getDocComment()));
+}
+
+void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
+                                           ExpressionListPtr params){
+  int numParam = params ? params->getCount() : 0;
+  for (int i = 0; i < numParam; i++) {
+    ParameterExpressionPtr par(
+      static_pointer_cast<ParameterExpression>((*params)[i]));
+    StringData* parName = StringData::GetStaticString(par->getName());
+
+    FuncEmitter::ParamInfo pi;
+    auto const typeConstraint = determine_type_constraint(par);
+    if (typeConstraint.hasConstraint()) {
+      pi.setTypeConstraint(typeConstraint);
+    }
+
+    if (par->hasUserType()) {
+      pi.setUserType(StringData::GetStaticString(par->getUserTypeHint()));
+    }
+
+    // Store info about the default value if there is one.
+    if (par->isOptional()) {
+      const StringData* phpCode;
+      ExpressionPtr vNode = par->defaultValue();
+      if (vNode->isScalar()) {
+        TypedValue dv;
+        initScalar(dv, vNode);
+        pi.setDefaultValue(dv);
+
+        std::string orig = vNode->getComment();
+        if (orig.empty()) {
+          // Simple case: it's a scalar value so we just serialize it
+          VariableSerializer vs(VariableSerializer::Type::PHPOutput);
+          String result = vs.serialize(tvAsCVarRef(&dv), true);
+          phpCode = StringData::GetStaticString(result.get());
+        } else {
+          // This was optimized from a Constant, or ClassConstant
+          // use the original string
+          phpCode = StringData::GetStaticString(orig);
+        }
+      } else {
+        // Non-scalar, so we have to output PHP from the AST node
+        std::ostringstream os;
+        CodeGenerator cg(&os, CodeGenerator::PickledPHP);
+        AnalysisResultPtr ar(new AnalysisResult());
+        vNode->outputPHP(cg, ar);
+        phpCode = StringData::GetStaticString(os.str());
+      }
+      pi.setPhpCode(phpCode);
+    }
+
+    ExpressionListPtr paramUserAttrs =
+      dynamic_pointer_cast<ExpressionList>(par->userAttributeList());
+    if (paramUserAttrs) {
+      for (int j = 0; j < paramUserAttrs->getCount(); ++j) {
+        UserAttributePtr a = dynamic_pointer_cast<UserAttribute>(
+          (*paramUserAttrs)[j]);
+        StringData* uaName = StringData::GetStaticString(a->getName());
+        ExpressionPtr uaValue = a->getExp();
+        assert(uaValue);
+        assert(uaValue->isScalar());
+        TypedValue tv;
+        initScalar(tv, uaValue);
+        pi.addUserAttribute(uaName, tv);
+      }
+    }
+
+    pi.setRef(par->isRef());
+    fe->appendParam(parName, pi);
+  }
+}
+
+void EmitterVisitor::emitMethodBody(PostponedMeth& p) {
+  FunctionScopePtr funcScope = p.m_meth->getFunctionScope();
+  FuncEmitter* fe = p.m_fe;
+  m_curFunc = fe;
+
+  // Assign ids to all of the local variables eagerly. Note that parameters
+  // ids are already assigned, so we will still uphold the invariant that
+  // the n parameters will have ids 0 through n-1 respectively.
+  assignLocalVariableIds(funcScope);
+
+  Emitter e(p.m_meth, m_ue, *this);
+  Label topOfBody(e);
+
+  if (funcScope->needsLocalThis() &&
+      !funcScope->isStatic() &&
+      !funcScope->isGenerator()) {
+    assert(!p.m_top);
+    static const StringData* thisStr = StringData::GetStaticString("this");
+    Id thisId = fe->lookupVarId(thisStr);
+    e.InitThisLoc(thisId);
+  }
+  for (uint i = 0; i < fe->params().size(); i++) {
+    const TypeConstraint& tc = fe->params()[i].typeConstraint();
+    if (!tc.hasConstraint()) continue;
+    e.VerifyParamType(i);
+  }
+
+  if (funcScope->isAbstract()) {
+    StringData* msg = StringData::GetStaticString(
+      "Cannot call abstract method " + p.m_meth->getOriginalFullName() + "()");
+    e.String(msg);
+    e.Fatal(1);
+  }
+
+  // emit method body
+  visit(p.m_meth->getStmts());
+
+  // If the current position in the bytecode is reachable, emit code to
+  // return null
+  if (currentPositionIsReachable()) {
+    e.Null();
+    if (p.m_meth->getFunctionScope()->isGenerator()) {
+      assert(m_evalStack.size() == 1);
+      e.ContRetC();
+    } else {
+      if ((p.m_meth->getStmts() && p.m_meth->getStmts()->isGuarded())) {
+        m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::GuardedThis,
+                       false, 0, 0);
+      }
+      e.RetC();
+    }
+  }
+
+  FuncFinisher ff(this, e, p.m_fe);
+
+  emitMethodDVInitializers(e, p, topOfBody);
+}
+
+void EmitterVisitor::emitMethodDVInitializers(Emitter& e, PostponedMeth& p,
+                                              Label& topOfBody) {
+  // Default value initializers
+  bool hasOptional = false;
+  ExpressionListPtr params = p.m_meth->getParams();
+  int numParam = params ? params->getCount() : 0;
+  for (int i = 0; i < numParam; i++) {
+    ParameterExpressionPtr par(
+      static_pointer_cast<ParameterExpression>((*params)[i]));
+    if (par->isOptional()) {
+      hasOptional = true;
+      Label entryPoint(e);
+      emitVirtualLocal(i, KindOfUninit);
+      visit(par->defaultValue());
+      emitCGet(e);
+      emitSet(e);
+      e.PopC();
+      p.m_fe->setParamFuncletOff(i, entryPoint.getAbsoluteOffset());
+    }
+  }
+  if (hasOptional) {
+    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NoSurprise,
+                   false, 0, 0);
+    e.Jmp(topOfBody);
   }
 }
 

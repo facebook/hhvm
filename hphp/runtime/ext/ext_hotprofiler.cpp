@@ -1609,21 +1609,6 @@ Variant f_phprof_disable() {
 #endif
 }
 
-void f_fb_setprofile(CVarRef callback) {
-#ifdef HOTPROFILER
-  if (ThreadInfo::s_threadInfo->m_profiler != NULL) {
-    // phpprof is enabled, don't let PHP code override it
-    return;
-  }
-#endif
-  g_vmContext->m_setprofileCallback = callback;
-  if (callback.isNull()) {
-    HPHP::EventHook::Disable();
-  } else {
-    HPHP::EventHook::Enable();
-  }
-}
-
 void f_xhprof_frame_begin(CStrRef name) {
 #ifdef HOTPROFILER
   Profiler *prof = ThreadInfo::s_threadInfo->m_profiler;

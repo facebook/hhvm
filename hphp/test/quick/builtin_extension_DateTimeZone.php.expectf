@@ -1,5 +1,5 @@
 DateTimeZone
-HipHop Warning: DateTimeZone::__construct() expects exactly 1 parameter, 0 given in %s/hphp/test/quick/builtin_extensions.inc on line 5
+HipHop Warning: DateTimeZone::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
 object(DateTimeZone)#1 (0) {
 }
 string(24) "O:12:"DateTimeZone":0:{}"
@@ -23,7 +23,7 @@ array(7) {
 }
 ================
 A_DateTimeZone
-HipHop Warning: DateTimeZone::__construct() expects exactly 1 parameter, 0 given in %s/hphp/test/quick/builtin_extensions.inc on line 26
+HipHop Warning: DateTimeZone::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
 object(A_DateTimeZone)#3 (1) {
   ["___x"]=>
   NULL

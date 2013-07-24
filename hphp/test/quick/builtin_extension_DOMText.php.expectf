@@ -1,8 +1,10 @@
 DOMText
 object(DOMText)#1 (0) {
 }
-string(18) "O:7:"DOMText":0:{}"
-object(DOMText)#2 (0) {
+string(91) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:7:"DOMText";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(7) "DOMText"
 }
 array(28) {
   [0]=>
@@ -68,10 +70,10 @@ object(A_DOMText)#3 (1) {
   ["___x"]=>
   NULL
 }
-string(33) "O:9:"A_DOMText":1:{s:4:"___x";N;}"
-object(A_DOMText)#4 (1) {
-  ["___x"]=>
-  NULL
+string(93) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:9:"A_DOMText";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(9) "A_DOMText"
 }
 array(28) {
   [0]=>

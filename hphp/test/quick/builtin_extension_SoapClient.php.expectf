@@ -1,9 +1,11 @@
 SoapClient
-HipHop Warning: SoapClient::__construct() expects exactly 1 parameter, 0 given in %s/hphp/test/quick/builtin_extensions.inc on line 5
+HipHop Warning: SoapClient::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
 object(SoapClient)#1 (0) {
 }
-string(22) "O:10:"SoapClient":0:{}"
-object(SoapClient)#2 (0) {
+string(95) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:10:"SoapClient";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(10) "SoapClient"
 }
 array(13) {
   [0]=>
@@ -35,15 +37,15 @@ array(13) {
 }
 ================
 A_SoapClient
-HipHop Warning: SoapClient::__construct() expects exactly 1 parameter, 0 given in %s/hphp/test/quick/builtin_extensions.inc on line 26
+HipHop Warning: SoapClient::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
 object(A_SoapClient)#3 (1) {
   ["___x"]=>
   NULL
 }
-string(37) "O:12:"A_SoapClient":1:{s:4:"___x";N;}"
-object(A_SoapClient)#4 (1) {
-  ["___x"]=>
-  NULL
+string(97) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:12:"A_SoapClient";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(12) "A_SoapClient"
 }
 array(13) {
   [0]=>

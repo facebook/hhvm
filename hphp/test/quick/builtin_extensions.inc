@@ -4,15 +4,12 @@ function test($cls) {
   echo $cls . "\n";
   $a = new $cls;
   var_dump($a);
-  if ($a instanceof Closure || $a instanceof Continuation) {
-    continue;
-  }
   // serialize and unserialize
   $b = serialize($a);
   var_dump($b);
   $c = unserialize($b);
   var_dump($c);
-  if ($a != $c) {
+  if (($a != $c) && (get_class($c) != "__PHP_Unserializable_Class")) {
     echo "bad serialization/deserialization\n";
     exit(1);
   }
@@ -25,15 +22,12 @@ function test($cls) {
   echo $cls . "\n";
   $a = new $cls;
   var_dump($a);
-  if ($a instanceof Closure || $a instanceof Continuation) {
-    continue;
-  }
   // serialize and unserialize
   $b = serialize($a);
   var_dump($b);
   $c = unserialize($b);
   var_dump($c);
-  if ($a != $c) {
+  if (($a != $c) && (get_class($c) != "__PHP_Unserializable_Class")) {
     echo "bad serialization/deserialization\n";
     exit(1);
   }

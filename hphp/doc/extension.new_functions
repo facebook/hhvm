@@ -70,8 +70,6 @@ testing and some alternative PHP implementation.
 
 - fb_serialize
 - fb_unserialize
-- fb_thrift_serialize
-- fb_thrift_unserialize
 - fb_intercept
 - fb_stubout_intercept_handler
 - fb_rpc_intercept_handler

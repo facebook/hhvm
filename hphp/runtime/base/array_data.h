@@ -59,8 +59,8 @@ public:
     : m_kind(kind)
     , m_allocMode(AllocationMode::smart)
     , m_size(-1)
-    , _count(0)
     , m_pos(0)
+    , m_count(0)
     , m_strongIterators(nullptr)
   {}
 
@@ -68,8 +68,8 @@ public:
     : m_kind(kind)
     , m_allocMode(m)
     , m_size(-1)
-    , _count(0)
     , m_pos(0)
+    , m_count(0)
     , m_strongIterators(nullptr)
   {}
 
@@ -77,8 +77,8 @@ public:
     : m_kind(kind)
     , m_allocMode(m)
     , m_size(size)
-    , _count(0)
     , m_pos(size ? 0 : ArrayData::invalid_index)
+    , m_count(0)
     , m_strongIterators(nullptr)
   {}
 
@@ -86,8 +86,8 @@ public:
             AllocationMode m = AllocationMode::smart)
     : m_kind(src->m_kind)
     , m_allocMode(m)
-    , _count(0)
     , m_pos(src->m_pos)
+    , m_count(0)
     , m_strongIterators(nullptr)
   {}
 
@@ -198,6 +198,9 @@ public:
    * I.e. iteration order produces int keys 0 to m_size-1 in sequence.
    */
   bool isVectorData() const;
+
+  static SharedVariant *GetSharedVariant(const ArrayData* ad) { return nullptr; }
+  SharedVariant* getSharedVariant();
 
   /**
    * Whether or not this array has a referenced Variant or Object appearing
@@ -483,8 +486,7 @@ public:
  private:
   void serializeImpl(VariableSerializer *serializer) const;
   static void compileTimeAssertions() {
-    static_assert(offsetof(ArrayData, _count) == FAST_REFCOUNT_OFFSET,
-                  "Offset of _count in ArrayData must be FAST_REFCOUNT_OFFSET");
+    static_assert(offsetof(ArrayData, m_count) == FAST_REFCOUNT_OFFSET, "");
   }
 
  protected:
@@ -518,8 +520,8 @@ public:
   ArrayKind m_kind;
   const AllocationMode m_allocMode;
   uint32_t m_size;
-  mutable int32_t _count;
   int32_t m_pos;
+  mutable RefCount m_count;
  private:
   FullPos* m_strongIterators; // head of linked list
 
@@ -595,6 +597,7 @@ struct ArrayFunctions {
   void (*renumber[NK])(ArrayData*);
   void (*onSetEvalScalar[NK])(ArrayData*);
   ArrayData* (*escalate[NK])(const ArrayData*);
+  SharedVariant* (*getSharedVariant[NK])(const ArrayData*);
 };
 
 extern const ArrayFunctions g_array_funcs;

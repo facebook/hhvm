@@ -66,6 +66,8 @@ variable
 $x = "test_break3"
 break clear all
 All breakpoints are cleared.
+break break3->pubObj()
+Breakpoint was not set in right format.
 continue
 pubObj:test_break3
 
@@ -81,6 +83,8 @@ variable
 $x = "test_break4"
 break clear all
 All breakpoints are cleared.
+break cls::break4->pubCls()
+Breakpoint was not set in right format.
 continue
 pubCls:test_break4
 

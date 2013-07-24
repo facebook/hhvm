@@ -29,7 +29,6 @@
 #include <unistd.h>
 
 #ifdef __APPLE__
-#include <mach-o/dyld.h>
 #include <mach-o/getsect.h>
 #endif
 
@@ -78,7 +77,7 @@ bool get_embedded_data(const char *section, embedded_data* desc) {
 #else // __APPLE__
   const struct section_64 *sect = getsectbyname("__text", section);
   if (sect) {
-    string path = current_executable();
+    std::string path = current_executable_path();
     if (!path.empty()) {
       desc->m_filename = path;
     } else {

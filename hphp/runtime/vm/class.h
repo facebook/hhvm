@@ -578,6 +578,7 @@ public:
 
   int builtinPropSize() const { return m_builtinPropSize; }
   BuiltinCtorFunction instanceCtor() const { return m_InstanceCtor; }
+  bool isCppSerializable() const;
 
   // Interfaces this class declares in its "implements" clause.
   const std::vector<ClassPtr>& declInterfaces() const {

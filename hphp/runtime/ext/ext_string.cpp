@@ -359,14 +359,16 @@ Variant f_vprintf(CStrRef format, CArrRef args) {
   return len;
 }
 Variant f_sprintf(int _argc, CStrRef format, CArrRef _argv /* = null_array */) {
-  char *output = string_printf(format.data(), format.size(), _argv, NULL);
+  int len = 0;
+  char *output = string_printf(format.data(), format.size(), _argv, &len);
   if (output == NULL) return false;
-  return String(output, AttachString);
+  return String(output, len, AttachString);
 }
 Variant f_vsprintf(CStrRef format, CArrRef args) {
-  char *output = string_printf(format.data(), format.size(), args, NULL);
+  int len = 0;
+  char *output = string_printf(format.data(), format.size(), args, &len);
   if (output == NULL) return false;
-  return String(output, AttachString);
+  return String(output, len, AttachString);
 }
 
 Variant f_sscanf(int _argc, CStrRef str, CStrRef format, CArrRef _argv /* = null_array */) {

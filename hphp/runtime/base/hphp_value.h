@@ -98,8 +98,8 @@ struct TypedValue {
 #else
 struct TypedValue {
   Value m_data;
-  AuxUnion m_aux;
   DataType m_type;
+  AuxUnion m_aux;
 
   std::string pretty() const; // debug formatting. see trace.h
 };

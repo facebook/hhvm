@@ -96,6 +96,7 @@ namespace Trace {
       TM(statgroups)  \
       TM(minstr)      \
       TM(region)      \
+      TM(atomicvector)\
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)    \
       TM(stress_txInterpSeed)   \

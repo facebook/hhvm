@@ -213,11 +213,46 @@ void StringData::initLiteral(const char* data, int len) {
   // the literal, and the client can count on this->data() giving back
   // the literal ptr with the longer lifetime. Sketchy!
   m_hash = 0;
-  _count = 0;
+  m_count = 0;
   m_len = len;
   m_cdata = data;
   m_big.cap = len | IsLiteral;
   assert(checkSane());
+}
+
+void StringData::enlist() {
+  assert(isShared());
+  SweepNode& head = MemoryManager::TheMemoryManager()->m_strings;
+  // insert after head
+  SweepNode* next = head.next;
+  assert(uintptr_t(next) != kMallocFreeWord);
+  m_big.node.next = next;
+  m_big.node.prev = &head;
+  next->prev = head.next = &m_big.node;
+}
+
+void StringData::delist() {
+  assert(isShared());
+  SweepNode* next = m_big.node.next;
+  SweepNode* prev = m_big.node.prev;
+  assert(uintptr_t(next) != kMallocFreeWord);
+  assert(uintptr_t(prev) != kMallocFreeWord);
+  next->prev = prev;
+  prev->next = next;
+}
+
+void StringData::sweepAll() {
+  SweepNode& head = MemoryManager::TheMemoryManager()->m_strings;
+  for (SweepNode *next, *n = head.next; n != &head; n = next) {
+    next = n->next;
+    assert(next && uintptr_t(next) != kSmartFreeWord);
+    assert(next && uintptr_t(next) != kMallocFreeWord);
+    StringData* s = (StringData*)(uintptr_t(n) -
+                                  offsetof(StringData, m_big.node));
+    assert(s->isShared());
+    s->m_big.shared->decRef();
+  }
+  head.next = head.prev = &head;
 }
 
 HOT_FUNC
@@ -231,7 +266,7 @@ void StringData::initAttach(const char* data, int len) {
     throw InvalidArgumentException("len > 2^31-2", len);
   }
   m_hash = 0;
-  _count = 0;
+  m_count = 0;
   if (uint32_t(len) <= MaxSmallSize) {
     memcpy(m_small, data, len);
     m_len = len;
@@ -262,7 +297,7 @@ void StringData::initCopy(const char* data, int len) {
     throw InvalidArgumentException("len > 2^31-2", len);
   }
   m_hash = 0;
-  _count = 0;
+  m_count = 0;
   if (uint32_t(len) <= MaxSmallSize) {
     memcpy(m_small, data, len);
     m_len = len;
@@ -286,7 +321,7 @@ void StringData::initMalloc(const char* data, int len) {
     throw InvalidArgumentException("len > 2^31-2", len);
   }
   m_hash = 0;
-  _count = 0;
+  m_count = 0;
   if (uint32_t(len) <= MaxSmallSize) {
     memcpy(m_small, data, len);
     m_len = len;
@@ -306,12 +341,15 @@ void StringData::initMalloc(const char* data, int len) {
 
 HOT_FUNC
 StringData::StringData(SharedVariant *shared)
-  : _count(0) {
+  : m_count(0) {
   assert(shared && size_t(shared->stringLength()) <= size_t(MaxSize));
-  m_hash = shared->stringHash();
+  shared->incRef();
+  m_hash = 0;
   m_len = shared->stringLength();
   m_cdata = shared->stringData();
+  m_big.shared = shared;
   m_big.cap = m_len | IsShared;
+  enlist();
 }
 
 HOT_FUNC
@@ -323,6 +361,8 @@ void StringData::releaseData() {
     break;
   case IsShared:
     assert(checkSane());
+    m_big.shared->decRef();
+    delist();
     break;
   case IsSmart:
     assert(checkSane());
@@ -344,7 +384,7 @@ char* smart_concat(const char* s1, uint32_t len1, const char* s2, uint32_t len2)
 
 void StringData::initConcat(StringSlice r1, StringSlice r2) {
   m_hash = 0;
-  _count = 0;
+  m_count = 0;
   uint32_t len = r1.len + r2.len;
   if (len <= MaxSmallSize) {
     memcpy(m_small,          r1.ptr, r1.len);
@@ -367,7 +407,7 @@ void StringData::initConcat(StringSlice r1, StringSlice r2) {
 HOT_FUNC
 StringData::StringData(int cap) {
   m_hash = 0;
-  _count = 0;
+  m_count = 0;
   if (uint32_t(cap) <= MaxSmallSize) {
     m_len = 0;
     m_data = m_small;
@@ -402,6 +442,10 @@ void StringData::append(const char *s, int len) {
     // buffer is immutable, don't modify it.
     StringSlice r = slice();
     char* newdata = smart_concat(r.ptr, r.len, s, len);
+    if (isShared()) {
+      m_big.shared->decRef();
+      delist();
+    }
     m_len = newlen;
     m_data = newdata;
     m_big.cap = newlen | IsSmart;
@@ -475,7 +519,7 @@ void StringData::append(const char *s, int len) {
 }
 
 MutableSlice StringData::reserve(int cap) {
-  assert(!isImmutable() && _count <= 1 && cap >= 0);
+  assert(!isImmutable() && m_count <= 1 && cap >= 0);
   if (cap <= capacity()) return mutableSlice();
   switch (format()) {
     default: assert(false);
@@ -548,7 +592,7 @@ MutableSlice StringData::escalate(uint32_t cap) {
 
 StringData *StringData::Escalate(StringData *in) {
   if (!in) return NEW(StringData)();
-  if (in->_count != 1 || in->isImmutable()) {
+  if (in->m_count != 1 || in->isImmutable()) {
     StringData *ret = NEW(StringData)(in->data(), in->size(), CopyString);
     return ret;
   }
@@ -559,7 +603,7 @@ StringData *StringData::Escalate(StringData *in) {
 void StringData::dump() const {
   StringSlice s = slice();
 
-  printf("StringData(%d) (%s%s%s%d): [", _count,
+  printf("StringData(%d) (%s%s%s%d): [", m_count,
          isLiteral() ? "literal " : "",
          isShared() ? "shared " : "",
          isStatic() ? "static " : "",
@@ -739,7 +783,7 @@ void StringData::inc() {
 void StringData::negate() {
   if (empty()) return;
   // Assume we're a fresh mutable copy.
-  assert(!isImmutable() && _count <= 1 && m_hash == 0);
+  assert(!isImmutable() && m_count <= 1 && m_hash == 0);
   StringSlice s = slice();
   char *buf = (char*)s.ptr;
   for (int i = 0, len = s.len; i < len; i++) {
@@ -768,7 +812,7 @@ void StringData::preCompute() const {
 }
 
 void StringData::setStatic() const {
-  _count = RefCountStaticValue;
+  m_count = RefCountStaticValue;
   preCompute();
 }
 
@@ -923,8 +967,8 @@ int StringData::compare(const StringData *v2) const {
 
 HOT_FUNC
 strhash_t StringData::hashHelper() const {
-  assert(!isShared());
-  strhash_t h = hash_string_inline(m_data, m_len);
+  strhash_t h = isShared() ? m_big.shared->stringHash() :
+                             hash_string_inline(m_data, m_len);
   assert(h >= 0);
   m_hash |= h;
   return h;
@@ -941,8 +985,8 @@ std::string StringData::toCPPString() const {
 bool StringData::checkSane() const {
   static_assert(size_t(MaxSize) <= size_t(INT_MAX), "Beware int wraparound");
   static_assert(sizeof(Format) == 8, "enum Format is wrong size");
-  static_assert(offsetof(StringData, _count) == FAST_REFCOUNT_OFFSET,
-                "_count at wrong offset");
+  static_assert(offsetof(StringData, m_count) == FAST_REFCOUNT_OFFSET,
+                "m_count at wrong offset");
   static_assert(MaxSmallSize == sizeof(StringData) -
                         offsetof(StringData, m_small) - 1, "layout bustage");
   assert(uint32_t(size()) <= MaxSize);

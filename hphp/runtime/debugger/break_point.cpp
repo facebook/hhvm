@@ -665,6 +665,24 @@ int32_t BreakPointInfo::parseFileLocation(const std::string &str,
   return offset1;
 }
 
+//( letter | underscore ) #( letter | digit | underscore | extended_ascii ),
+//extended_ascii::=char_nbr(127)..char_nbr(255),
+static bool isValidIdentifier(const std::string &str) {
+  auto len = str.length();
+  for (int32_t index = 0; index < len; index++) {
+    char ch = str[index];
+    if (('A' <= ch && ch <= 'Z') || ('a' <= ch && ch <= 'z') || ch == '_') {
+      continue;
+    }
+    if (index == 0) return false;
+    if (('0' <= ch && ch <= '9') || ch >= 127) {
+      continue;
+    }
+    return false;
+  }
+  return true;
+}
+
 /* The parser accepts the following syntax, which harks back to pre VM days
    (all components are optional, as long as there is at least one component):
 
@@ -733,6 +751,7 @@ void BreakPointInfo::parseBreakPointReached(const std::string &exp,
     }
     while (offset1 < len && exp[offset1] == '\\') {
       if (!m_namespace.empty()) m_namespace += "\\";
+      if (!isValidIdentifier(name)) goto returnInvalid;
       m_namespace += name;
       offset1 += 1;
       auto offset2 = scanName(exp, offset1);
@@ -754,9 +773,10 @@ void BreakPointInfo::parseBreakPointReached(const std::string &exp,
     // The namespace only or the namespace and class might be empty.
     DFunctionInfoPtr pfunc(new DFunctionInfo());
     if (m_class.empty()) {
-      if (m_namespace.empty())
+      if (!isValidIdentifier(name)) goto returnInvalid;
+      if (m_namespace.empty()) {
         pfunc->m_function = name;
-      else {
+      } else {
         // Yes this does seem beyond strange, but that is what the PHP parser
         // does when it sees a function declared inside a namespace, so we
         // too have to pretend there is no namespace here. At some point
@@ -766,10 +786,12 @@ void BreakPointInfo::parseBreakPointReached(const std::string &exp,
       }
     } else {
       mangleXhpName(m_class, pfunc->m_class);
+      if (!isValidIdentifier(pfunc->m_class)) goto returnInvalid;
       if (!m_namespace.empty()) {
         // Emulate parser hack. See longer comment above.
         pfunc->m_class = m_namespace + "\\" + pfunc->m_class;
       }
+      if (!isValidIdentifier(name)) goto returnInvalid;
       pfunc->m_function = name;
     }
     m_funcs.insert(m_funcs.begin(), pfunc);

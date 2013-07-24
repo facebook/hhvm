@@ -1,8 +1,10 @@
 Normalizer
 object(Normalizer)#1 (0) {
 }
-string(22) "O:10:"Normalizer":0:{}"
-object(Normalizer)#2 (0) {
+string(95) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:10:"Normalizer";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(10) "Normalizer"
 }
 array(3) {
   [0]=>
@@ -18,10 +20,10 @@ object(A_Normalizer)#3 (1) {
   ["___x"]=>
   NULL
 }
-string(37) "O:12:"A_Normalizer":1:{s:4:"___x";N;}"
-object(A_Normalizer)#4 (1) {
-  ["___x"]=>
-  NULL
+string(97) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:12:"A_Normalizer";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(12) "A_Normalizer"
 }
 array(3) {
   [0]=>

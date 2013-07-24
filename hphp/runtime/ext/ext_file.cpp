@@ -29,6 +29,8 @@
 #include "hphp/runtime/server/static_content_cache.h"
 #include "hphp/runtime/base/zend_scanf.h"
 #include "hphp/runtime/base/pipe.h"
+#include "hphp/runtime/base/stream_wrapper_registry.h"
+#include "hphp/runtime/base/file_stream_wrapper.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/util.h"
@@ -93,6 +95,39 @@ static bool check_error(const char *function, int line, bool ret) {
                     Util::safe_strerror(errno).c_str());
   }
   return ret;
+}
+
+static int accessSyscall(
+    CStrRef path,
+    int mode,
+    bool useFileCache = false) {
+  Stream::Wrapper* w = Stream::getWrapperFromURI(path);
+  if (useFileCache && dynamic_cast<FileStreamWrapper*>(w)) {
+    return ::access(File::TranslatePathWithFileCache(path).data(), mode);
+  }
+  return w->access(path, mode);
+}
+
+static int statSyscall(
+    CStrRef path,
+    struct stat* buf,
+    bool useFileCache = false) {
+  Stream::Wrapper* w = Stream::getWrapperFromURI(path);
+  if (useFileCache && dynamic_cast<FileStreamWrapper*>(w)) {
+    return ::stat(File::TranslatePathWithFileCache(path).data(), buf);
+  }
+  return w->stat(path, buf);
+}
+
+static int lstatSyscall(
+    CStrRef path,
+    struct stat* buf,
+    bool useFileCache = false) {
+  Stream::Wrapper* w = Stream::getWrapperFromURI(path);
+  if (useFileCache && dynamic_cast<FileStreamWrapper*>(w)) {
+    return ::lstat(File::TranslatePathWithFileCache(path).data(), buf);
+  }
+  return w->lstat(path, buf);
 }
 
 const StaticString
@@ -580,13 +615,13 @@ Variant f_sha1_file(CStrRef filename, bool raw_output /* = false */) {
 
 Variant f_fileperms(CStrRef filename) {
   struct stat sb;
-  CHECK_SYSTEM(stat(File::TranslatePath(filename, true).data(), &sb));
+  CHECK_SYSTEM(statSyscall(filename, &sb, true));
   return (int64_t)sb.st_mode;
 }
 
 Variant f_fileinode(CStrRef filename) {
   struct stat sb;
-  CHECK_SYSTEM(stat(File::TranslatePath(filename).data(), &sb));
+  CHECK_SYSTEM(statSyscall(filename, &sb));
   return (int64_t)sb.st_ino;
 }
 
@@ -598,43 +633,43 @@ Variant f_filesize(CStrRef filename) {
     if (size >= 0) return size;
   }
   struct stat sb;
-  CHECK_SYSTEM(stat(File::TranslatePath(filename, true).data(), &sb));
+  CHECK_SYSTEM(statSyscall(filename, &sb, true));
   return (int64_t)sb.st_size;
 }
 
 Variant f_fileowner(CStrRef filename) {
   struct stat sb;
-  CHECK_SYSTEM(stat(File::TranslatePath(filename, true).data(), &sb));
+  CHECK_SYSTEM(statSyscall(filename, &sb, true));
   return (int64_t)sb.st_uid;
 }
 
 Variant f_filegroup(CStrRef filename) {
   struct stat sb;
-  CHECK_SYSTEM(stat(File::TranslatePath(filename, true).data(), &sb));
+  CHECK_SYSTEM(statSyscall(filename, &sb, true));
   return (int64_t)sb.st_gid;
 }
 
 Variant f_fileatime(CStrRef filename) {
   struct stat sb;
-  CHECK_SYSTEM(stat(File::TranslatePath(filename, true).data(), &sb));
+  CHECK_SYSTEM(statSyscall(filename, &sb, true));
   return (int64_t)sb.st_atime;
 }
 
 Variant f_filemtime(CStrRef filename) {
   struct stat sb;
-  CHECK_SYSTEM(stat(File::TranslatePath(filename, true).data(), &sb));
+  CHECK_SYSTEM(statSyscall(filename, &sb, true));
   return (int64_t)sb.st_mtime;
 }
 
 Variant f_filectime(CStrRef filename) {
   struct stat sb;
-  CHECK_SYSTEM(stat(File::TranslatePath(filename, true).data(), &sb));
+  CHECK_SYSTEM(statSyscall(filename, &sb, true));
   return (int64_t)sb.st_ctime;
 }
 
 Variant f_filetype(CStrRef filename) {
   struct stat sb;
-  CHECK_SYSTEM(lstat(File::TranslatePath(filename).data(), &sb));
+  CHECK_SYSTEM(lstatSyscall(filename, &sb));
 
   switch (sb.st_mode & S_IFMT) {
   case S_IFLNK:  return "link";
@@ -650,16 +685,16 @@ Variant f_filetype(CStrRef filename) {
 
 Variant f_linkinfo(CStrRef filename) {
   struct stat sb;
-  CHECK_SYSTEM(stat(File::TranslatePath(filename).data(), &sb));
+  CHECK_SYSTEM(statSyscall(filename, &sb));
   return (int64_t)sb.st_dev;
 }
 
 bool f_is_writable(CStrRef filename) {
   struct stat sb;
-  if (stat(File::TranslatePath(filename).data(), &sb)) {
+  if (statSyscall(filename, &sb)) {
     return false;
   }
-  CHECK_SYSTEM(access(File::TranslatePath(filename).data(), W_OK));
+  CHECK_SYSTEM(accessSyscall(filename, W_OK));
   return true;
   /*
   int mask = S_IWOTH;
@@ -691,8 +726,8 @@ bool f_is_writeable(CStrRef filename) {
 
 bool f_is_readable(CStrRef filename) {
   struct stat sb;
-  CHECK_SYSTEM(stat(File::TranslatePath(filename, true).data(), &sb));
-  CHECK_SYSTEM(access(File::TranslatePath(filename, true).data(), R_OK));
+  CHECK_SYSTEM(statSyscall(filename, &sb, true));
+  CHECK_SYSTEM(accessSyscall(filename, R_OK, true));
   return true;
   /*
   int mask = S_IROTH;
@@ -720,8 +755,8 @@ bool f_is_readable(CStrRef filename) {
 
 bool f_is_executable(CStrRef filename) {
   struct stat sb;
-  CHECK_SYSTEM(stat(File::TranslatePath(filename).data(), &sb));
-  CHECK_SYSTEM(access(File::TranslatePath(filename).data(), X_OK));
+  CHECK_SYSTEM(statSyscall(filename, &sb));
+  CHECK_SYSTEM(accessSyscall(filename, X_OK));
   return true;
   /*
   int mask = S_IXOTH;
@@ -749,7 +784,7 @@ bool f_is_executable(CStrRef filename) {
 
 bool f_is_file(CStrRef filename) {
   struct stat sb;
-  CHECK_SYSTEM(stat(File::TranslatePath(filename, true).data(), &sb));
+  CHECK_SYSTEM(statSyscall(filename, &sb, true));
   return (sb.st_mode & S_IFMT) == S_IFREG;
 }
 
@@ -767,13 +802,13 @@ bool f_is_dir(CStrRef filename) {
   }
 
   struct stat sb;
-  CHECK_SYSTEM(stat(File::TranslatePath(filename).data(), &sb));
+  CHECK_SYSTEM(statSyscall(filename, &sb));
   return (sb.st_mode & S_IFMT) == S_IFDIR;
 }
 
 bool f_is_link(CStrRef filename) {
   struct stat sb;
-  CHECK_SYSTEM(lstat(File::TranslatePath(filename).data(), &sb));
+  CHECK_SYSTEM(lstatSyscall(filename, &sb));
   return (sb.st_mode & S_IFMT) == S_IFLNK;
 }
 
@@ -787,7 +822,7 @@ bool f_is_uploaded_file(CStrRef filename) {
 
 bool f_file_exists(CStrRef filename) {
   if (filename.empty() ||
-      (access(File::TranslatePath(filename, true).data(), F_OK)) < 0) {
+      (accessSyscall(filename, F_OK, true)) < 0) {
     return false;
   }
   return true;
@@ -795,13 +830,13 @@ bool f_file_exists(CStrRef filename) {
 
 Variant f_stat(CStrRef filename) {
   struct stat sb;
-  CHECK_SYSTEM(stat(File::TranslatePath(filename, true).data(), &sb));
+  CHECK_SYSTEM(statSyscall(filename, &sb, true));
   return stat_impl(&sb);
 }
 
 Variant f_lstat(CStrRef filename) {
   struct stat sb;
-  CHECK_SYSTEM(lstat(File::TranslatePath(filename, true).data(), &sb));
+  CHECK_SYSTEM(lstatSyscall(filename, &sb, true));
   return stat_impl(&sb);
 }
 
@@ -837,7 +872,7 @@ Variant f_realpath(CStrRef path) {
       StaticContentCache::TheFileCache->exists(translated.data(), false)) {
     return translated;
   }
-  if (access(translated.c_str(), F_OK) == 0) {
+  if (accessSyscall(path, F_OK) == 0) {
     char resolved_path[PATH_MAX];
     if (!realpath(translated.c_str(), resolved_path)) {
       return false;
@@ -1005,7 +1040,7 @@ bool f_touch(CStrRef filename, int64_t mtime /* = 0 */, int64_t atime /* = 0 */)
   String translated = File::TranslatePath(filename);
 
   /* create the file if it doesn't exist already */
-  if (access(translated.data(), F_OK)) {
+  if (accessSyscall(translated, F_OK)) {
     FILE *f = fopen(translated.data(), "w");
     if (f == NULL) {
       Logger::Verbose("%s/%d: Unable to create file %s because %s",

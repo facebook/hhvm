@@ -557,6 +557,8 @@ void ObjectData::serialize(VariableSerializer* serializer) const {
 
 static StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
 static StaticString s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name");
+static StaticString s_PHP_Unserializable_Class_Name(
+                      "__PHP_Unserializable_Class_Name");
 
 void ObjectData::serializeImpl(VariableSerializer* serializer) const {
   bool handleSleep = false;
@@ -575,6 +577,15 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
         raise_error("%s::serialize() must return a string or NULL",
                     o_getClassName().data());
       }
+      return;
+    }
+    // Only serialize CPP extension type instances which can actually
+    // be deserialized.
+    if ((builtinPropSize() > 0) && !getVMClass()->isCppSerializable()) {
+      Object placeholder = ObjectData::newInstance(
+        SystemLib::s___PHP_Unserializable_ClassClass);
+      placeholder->o_set(s_PHP_Unserializable_Class_Name, o_getClassName());
+      placeholder->serialize(serializer);
       return;
     }
     handleSleep = const_cast<ObjectData*>(this)->php_sleep(ret);
@@ -602,12 +613,18 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       }
       return;
     }
+    // Don't try to serialize a CPP extension class which doesn't
+    // support serialization. Just send the class name instead.
+    if ((builtinPropSize() > 0) && !getVMClass()->isCppSerializable()) {
+      serializer->write(o_getClassName());
+      return;
+    }
     try {
       handleSleep = const_cast<ObjectData*>(this)->php_sleep(ret);
     } catch (...) {
       raise_warning("%s::sleep() throws exception", o_getClassName().data());
-      ret = uninit_null();
-      handleSleep = true;
+      serializer->writeNull();
+      return;
     }
   }
   if (UNLIKELY(handleSleep)) {
@@ -639,32 +656,10 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       serializer->setObjectInfo(o_getClassName(), o_getId(), 'O');
       wanted.serialize(serializer, true);
     } else {
-      if (instanceof(c_Closure::s_cls)) {
-        if (serializer->getType() == VariableSerializer::Type::APCSerialize) {
-          p_DummyClosure dummy(NEWOBJ(c_DummyClosure));
-          serializer->write(dummy);
-        } else if (serializer->getType() ==
-                   VariableSerializer::Type::DebuggerSerialize) {
-          serializer->write("Closure");
-        } else {
-          throw_fatal("Serialization of Closure is not allowed");
-        }
-      } else if (instanceof(c_Continuation::s_cls)) {
-        if (serializer->getType() == VariableSerializer::Type::APCSerialize) {
-          p_DummyContinuation dummy(NEWOBJ(c_DummyContinuation));
-          serializer->write(dummy);
-        } else if (serializer->getType() ==
-                   VariableSerializer::Type::DebuggerSerialize) {
-          serializer->write("Continuation");
-        } else {
-          throw_fatal("Serialization of Continuation is not allowed");
-        }
-      } else {
-        raise_warning("serialize(): __sleep should return an array only "
-                      "containing the names of instance-variables to "
-                      "serialize");
-        uninit_null().serialize(serializer);
-      }
+      raise_warning("serialize(): __sleep should return an array only "
+                    "containing the names of instance-variables to "
+                    "serialize");
+      uninit_null().serialize(serializer);
     }
   } else {
     if (isCollection()) {
@@ -809,7 +804,7 @@ ObjectData* ObjectData::callCustomInstanceInit() {
   const Func* init = m_cls->lookupMethod(sd_init);
   if (init != nullptr) {
     TypedValue tv;
-    // We need to incRef/decRef here because we're still a new (_count
+    // We need to incRef/decRef here because we're still a new (m_count
     // == 0) object and invokeFunc is going to expect us to have a
     // reasonable refcount.
     try {
@@ -1126,7 +1121,7 @@ TypedValue* ObjectData::setProp(Class* ctx, const StringData* key,
     }
     // when seting a dynamic property, do not write
     // directly to the TypedValue in the HphpArray, since
-    // its _count field is used to store the string hash of
+    // its m_aux field is used to store the string hash of
     // the property name. Instead, call the appropriate
     // setters (set() or setRef()).
     if (UNLIKELY(bindingAssignment)) {
@@ -1188,7 +1183,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
     }
     o_properties.get()->lval(*(const String*)&key,
                              *(Variant**)(&propVal), false);
-    // don't write propVal->_count because it holds data
+    // don't write propVal->m_aux because it holds data
     // owned by the HphpArray
     propVal->m_type = KindOfNull;
     SETOP_BODY(propVal, op, val);
@@ -1203,7 +1198,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
     }
     o_properties.get()->lval(*(const String*)&key,
                              *(Variant**)(&propVal), false);
-    // don't write propVal->_count because it holds data
+    // don't write propVal->m_aux because it holds data
     // owned by the HphpArray
     propVal->m_data.num = tvResult.m_data.num;
     propVal->m_type = tvResult.m_type;
@@ -1261,7 +1256,7 @@ void ObjectData::incDecPropImpl(TypedValue& tvRef, Class* ctx,
     }
     o_properties.get()->lval(*(const String*)&key,
                              *(Variant**)(&propVal), false);
-    // don't write propVal->_count because it holds data
+    // don't write propVal->m_aux because it holds data
     // owned by the HphpArray
     propVal->m_type = KindOfNull;
     IncDecBody<setResult>(op, propVal, &dest);
@@ -1276,7 +1271,7 @@ void ObjectData::incDecPropImpl(TypedValue& tvRef, Class* ctx,
     }
     o_properties.get()->lval(*(const String*)&key,
                              *(Variant**)(&propVal), false);
-    // don't write propVal->_count because it holds data
+    // don't write propVal->m_aux because it holds data
     // owned by the HphpArray
     propVal->m_data.num = tvResult.m_data.num;
     propVal->m_type = tvResult.m_type;

@@ -708,9 +708,13 @@ class Variant : private TypedValue {
    */
   Variant share(bool save) const;
 
-  /*
-   * Print information about a variant to stdout.  For debugging
-   * purposes.
+  /**
+   * Get the wrapped SharedVariant, if any.
+   */
+  SharedVariant *getSharedVariant() const;
+
+  /**
+   * Memory allocator methods.
    */
   void dump() const;
 

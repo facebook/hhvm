@@ -1,8 +1,10 @@
 DOMComment
 object(DOMComment)#1 (0) {
 }
-string(22) "O:10:"DOMComment":0:{}"
-object(DOMComment)#2 (0) {
+string(95) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:10:"DOMComment";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(10) "DOMComment"
 }
 array(26) {
   [0]=>
@@ -64,10 +66,10 @@ object(A_DOMComment)#3 (1) {
   ["___x"]=>
   NULL
 }
-string(37) "O:12:"A_DOMComment":1:{s:4:"___x";N;}"
-object(A_DOMComment)#4 (1) {
-  ["___x"]=>
-  NULL
+string(97) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:12:"A_DOMComment";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(12) "A_DOMComment"
 }
 array(26) {
   [0]=>

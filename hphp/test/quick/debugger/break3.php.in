@@ -9,6 +9,8 @@ break TestNs\cls::pubObj()
 @ $break8->pubObj('test_break2')
 variable
 break clear all
+break \TestNs\break8->pubObj()
+break TestNs\cls::break8->pubObj()
 continue
 break \TestNs\cls::pubCls()
 @ \TestNs\cls::pubCls('test_break3')

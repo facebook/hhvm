@@ -52,13 +52,36 @@ public:
                 bool unserializeObj = false);
   ~SharedVariant();
 
+  // Create will do the wrapped check before creating a SharedVariant
+  static SharedVariant* Create(CVarRef source, bool serialized,
+                               bool inner = false,
+                               bool unserializeObj = false);
+
   bool is(DataType d) const { return m_type == d; }
   DataType getType() const { return (DataType)m_type; }
   CVarRef asCVarRef() const {
     // Must be non-refcounted types
+    assert(m_shouldCache == false);
     assert(m_flags == 0);
     assert(!IS_REFCOUNTED_TYPE(m_tv.m_type));
     return tvAsCVarRef(&m_tv);
+  }
+
+  void incRef() {
+    assert(IS_REFCOUNTED_TYPE(m_type));
+    atomic_inc(m_count);
+  }
+
+  void decRef() {
+    assert(m_count);
+    if (IS_REFCOUNTED_TYPE(m_type)) {
+      if (atomic_dec(m_count) == 0) {
+        delete this;
+      }
+    } else {
+      assert(m_count == 1);
+      delete this;
+    }
   }
 
   Variant toLocal();
@@ -83,6 +106,28 @@ public:
     return m_data.str->hash();
   }
 
+  size_t arrSize() const {
+    assert(is(KindOfArray));
+    if (getIsVector()) return m_data.vec->m_size;
+    return m_data.map->size();
+  }
+
+  size_t arrCap() const {
+    assert(is(KindOfArray));
+    if (getIsVector()) return m_data.vec->m_size;
+    return m_data.map->capacity();
+  }
+
+  int getIndex(int64_t key);
+  int getIndex(const StringData* key);
+
+  ArrayData* loadElems(const SharedMap &sharedMap,
+                       bool mapInit = false);
+
+  Variant getKey(ssize_t pos) const;
+
+  SharedVariant* getValue(ssize_t pos) const;
+
   // implementing LeakDetectable
   void dump(std::string &out);
 
@@ -96,12 +141,40 @@ public:
 
   SharedVariant *convertObj(CVarRef var);
   bool isUnserializedObj() { return getIsObj(); }
+  bool shouldCache() const { return m_shouldCache; }
+
+  int countReachable() const;
 
 private:
+  class VectorData {
+  public:
+    union {
+      size_t m_size;
+      SharedVariant* m_align_dummy;
+    };
+
+    VectorData() : m_size(0) {}
+
+    ~VectorData() {
+      SharedVariant** v = vals();
+      for (size_t i = 0; i < m_size; i++) {
+        v[i]->decRef();
+      }
+    }
+    SharedVariant** vals() { return (SharedVariant**)(this + 1); }
+    void *operator new(size_t sz, int num) {
+      assert(sz == sizeof(VectorData));
+      return malloc(sizeof(VectorData) + num * sizeof(SharedVariant*));
+    }
+    void operator delete(void* ptr) { free(ptr); }
+    // just to keep the compiler happy; used if the constructor throws
+    void operator delete(void* ptr, int num) { free(ptr); }
+  };
+
   /*
    * Keep the object layout binary compatible with Variant for primitive types.
    * We want to have compile time assertion to guard it but still want to have
-   * anonymous struct. For non-refcounted types, m_flags is
+   * anonymous struct. For non-refcounted types, m_shouldCache and m_flags are
    * guaranteed to be 0, and other parts of runtime will not touch the count.
    */
 
@@ -120,20 +193,23 @@ private:
 #if PACKED_TV
       uint8_t _typePad;
       DataType m_type;
-      uint16_t m_flags;
+      bool m_shouldCache;
+      uint8_t m_flags;
       uint32_t m_count;
       SharedData m_data;
 #else
  #ifdef WORDS_BIGENDIAN
       SharedData m_data;
-      uint32_t m_count;
-      uint16_t m_flags;
+      bool m_shouldCache;
+      uint8_t m_flags;
       uint16_t m_type;
+      uint32_t m_count;
  #else
       SharedData m_data;
-      uint32_t m_count;
       uint16_t m_type;
-      uint16_t m_flags;
+      bool m_shouldCache;
+      uint8_t m_flags;
+      uint32_t m_count;
  #endif
 #endif
     };
@@ -159,6 +235,7 @@ private:
   void setSerializedArray() { m_flags |= SerializedArray;}
   void clearSerializedArray() { m_flags &= ~SerializedArray;}
 
+  bool getIsVector() const { return (bool)(m_flags & IsVector);}
   void setIsVector() { m_flags |= IsVector;}
   void clearIsVector() { m_flags &= ~IsVector;}
 
@@ -169,44 +246,6 @@ private:
   bool getObjAttempted() const { return (bool)(m_flags & ObjAttempted);}
   void setObjAttempted() { m_flags |= ObjAttempted;}
   void clearObjAttempted() { m_flags &= ~ObjAttempted;}
-
-public:
-  bool getIsVector() const { return (bool)(m_flags & IsVector);}
-  ImmutableMap* getMap() const { return m_data.map; }
-};
-
-/* VectorData is used when when all the keys are integers
- * in the sequential range 0 to n-1. */
-class VectorData {
-public:
-  union {
-    size_t m_size;
-    SharedVariant* m_align_dummy;
-  };
-
-  VectorData() : m_size(0) {}
-
-  ~VectorData() {
-    SharedVariant* v = vals();
-    for (size_t i = 0; i < m_size; i++) {
-      v[i].~SharedVariant();
-    }
-  }
-  SharedVariant* getValue(ssize_t pos) {
-    return &((SharedVariant *)(this + 1))[pos];
-  }
-  SharedVariant* vals() { return (SharedVariant*)(this + 1); }
-  void *operator new(size_t sz, int num) {
-    assert(sz == sizeof(VectorData));
-    return malloc(sizeof(VectorData) + num * sizeof(SharedVariant));
-  }
-  void add(CVarRef val, bool unserializeObj) {
-    /* placement new */
-    new (&vals()[m_size++]) SharedVariant(val, false, true, unserializeObj);
-  }
-  void operator delete(void* ptr) { free(ptr); }
-  // just to keep the compiler happy; used if the constructor throws
-  void operator delete(void* ptr, int num) { free(ptr); }
 };
 
 class SharedVariantStats {

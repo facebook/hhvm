@@ -49,8 +49,11 @@ DECLARE_EXTERN_REQUEST_LOCAL(FileData, s_file_data);
  */
 class File : public SweepableResourceData {
 public:
-  static String TranslatePath(CStrRef filename, bool useFileCache = false,
-                              bool keepRelative = false);
+  static String TranslatePath(CStrRef filename);
+  // Same as TranslatePath except doesn't make paths absolute
+  static String TranslatePathKeepRelative(CStrRef filename);
+  // Same as TranslatePath except checks the file cache on miss
+  static String TranslatePathWithFileCache(CStrRef filename);
   static String TranslateCommand(CStrRef cmd);
   static Variant Open(CStrRef filename, CStrRef mode,
                       int options = 0, CVarRef context = uninit_null());

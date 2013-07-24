@@ -19,7 +19,6 @@
 #define incl_HPHP_IMMUTABLE_MAP_H_
 
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/shared_variant.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/atomic.h"
@@ -27,6 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+class SharedVariant;
 /**
  * an immutable map is a php-style array that can take strings and
  * ints as keys. the map also stores the order in which the elements
@@ -38,19 +38,14 @@ public:
   int indexOf(const StringData* key);
   int indexOf(int64_t key);
 
-  Variant getKey(int index) {
+  SharedVariant* getKeyIndex(int index) {
     assert(index < size());
-    Bucket* b = &buckets()[index];
-    if (b->hasIntKey()) {
-      return b->ikey;
-    } else {
-      return b->skey;
-    }
+    return buckets()[index].key;
   }
 
-  SharedVariant* getValue(int index) {
+  SharedVariant* getValIndex(int index) {
     assert(index < size());
-    return (SharedVariant*)&buckets()[index].val;
+    return buckets()[index].val;
   }
 
   unsigned size() const {
@@ -69,45 +64,21 @@ public:
   }
 
   static ImmutableMap* Create(ArrayData* arr,
-                              bool unserializeObj);
+                              bool unserializeObj,
+                              bool& shouldCache);
   static void Destroy(ImmutableMap* im);
+private:
+  ImmutableMap() {}
+  ~ImmutableMap() {}
+  void add(int pos, SharedVariant *key, SharedVariant *val);
 
   struct Bucket {
     /** index of the next bucket, or -1 if the end of a chain */
     int next;
-    /* similar to HphpArray::Elm */
-    union {
-      int64_t     ikey;
-      StringData* skey;
-    };
-    // cannot declare SharedVariant here because of cyclic header
-    // includes
-    TypedValueAux val;
-    bool hasStrKey() const {
-      return val.hash() != 0;
-    }
-    bool hasIntKey() const {
-      return val.hash() == 0;
-    }
-    int32_t hash() const {
-      return val.hash();
-    }
-    void setStrKey(StringData* k, strhash_t h) {
-      skey = k;
-      val.hash() = int32_t(h) | 0x80000000;
-    }
-    void setIntKey(int64_t k) {
-      ikey = k;
-      val.hash() = 0;
-    }
+    /** the value of this bucket */
+    SharedVariant *key;
+    SharedVariant *val;
   };
-
-private:
-  ImmutableMap() {}
-  ~ImmutableMap() {}
-  void addVal(int pos, int hash_pos, CVarRef val, bool unserializeObj);
-  void add(int pos, CVarRef key, CVarRef val, bool unserializeObj);
-
   /** index of the beginning of each hash chain */
   int *hash() const { return (int*)(this + 1); }
   /** buckets, stored in index order */

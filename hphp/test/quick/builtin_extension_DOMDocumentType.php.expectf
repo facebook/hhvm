@@ -1,8 +1,10 @@
 DOMDocumentType
 object(DOMDocumentType)#1 (0) {
 }
-string(27) "O:15:"DOMDocumentType":0:{}"
-object(DOMDocumentType)#2 (0) {
+string(100) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:15:"DOMDocumentType";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(15) "DOMDocumentType"
 }
 array(21) {
   [0]=>
@@ -54,10 +56,10 @@ object(A_DOMDocumentType)#3 (1) {
   ["___x"]=>
   NULL
 }
-string(42) "O:17:"A_DOMDocumentType":1:{s:4:"___x";N;}"
-object(A_DOMDocumentType)#4 (1) {
-  ["___x"]=>
-  NULL
+string(102) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:17:"A_DOMDocumentType";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(17) "A_DOMDocumentType"
 }
 array(21) {
   [0]=>

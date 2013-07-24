@@ -2692,6 +2692,7 @@ inline void X64Assembler::call(Label& l) { l.call(*this); }
  */
 #if defined(__GNUC__) && !defined(__clang__)
 # pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wpragmas"
 # pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
 

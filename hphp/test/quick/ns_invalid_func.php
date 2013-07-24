@@ -1,4 +1,5 @@
 <?php
 
 namespace A;
-\b();
+function main() { \b(); }
+main();

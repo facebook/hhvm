@@ -32,10 +32,18 @@ public:
   TestCppExt();
 };
 
+inline void evalCodeForCppExt(CStrRef code_str) {
+  String prefixedCode = concat("<?php ", code_str);
+  Unit* unit = g_vmContext->compileEvalString(prefixedCode.get());
+  TypedValue retVal;
+  g_vmContext->invokeUnit(&retVal, unit);
+  tvRefcountedDecRef(&retVal);
+}
+
 #define DECLARE_TEST_FUNCTIONS(s)                                       \
   char *argv[] = { const_cast<char*>(which.c_str()), nullptr };         \
   execute_command_line_begin(1, argv, false);                           \
-  f_eval(s);                                                            \
+  evalCodeForCppExt(s);                                                 \
                                                                         \
   SCOPE_EXIT {                                                          \
     execute_command_line_end(0, false, which.c_str());                  \

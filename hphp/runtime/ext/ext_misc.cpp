@@ -193,14 +193,6 @@ Variant f_exit(CVarRef status /* = null_variant */) {
   throw ExitException(status.toInt32());
 }
 
-Variant f_eval(CStrRef code_str) {
-  String prefixedCode = concat("<?php ", code_str);
-  Unit* unit = g_vmContext->compileEvalString(prefixedCode.get());
-  TypedValue retVal;
-  g_vmContext->invokeUnit(&retVal, unit);
-  return tvAsVariant(&retVal);
-}
-
 Variant f_get_browser(CStrRef user_agent /* = null_string */,
                       bool return_array /* = false */) {
   throw NotSupportedException(__func__, "bad idea");

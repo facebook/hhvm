@@ -4,7 +4,7 @@
 HipHop Warning: %s
 bool(false)
 
--- Testing hash_file() function with a non-existant file --
+-- Testing hash_file() function with a non-existent file --
 HipHop Warning: %s
 bool(false)
 

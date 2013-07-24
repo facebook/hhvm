@@ -1,0 +1,30 @@
+----
+
+
+----
+POSTFIX
+
+----
+[0] => |-ArrayPOSTFIX
+[0] => | |-aPOSTFIX
+[1] => | \-1POSTFIX
+[a] => \-ArrayPOSTFIX
+[0] =>   |-2POSTFIX
+[1] =>   |-bPOSTFIX
+[3] =>   \-ArrayPOSTFIX
+[0] =>     |-4POSTFIX
+[1] =>     \-cPOSTFIX
+----
+
+
+----
+[0] => |-Array
+[0] => | |-a
+[1] => | \-1
+[a] => \-Array
+[0] =>   |-2
+[1] =>   |-b
+[3] =>   \-Array
+[0] =>     |-4
+[1] =>     \-c
+===DONE===

@@ -275,7 +275,7 @@ gen_xml(prefix=/Docs/)
 /Docs/ContactCommissionArticle=0,00
 gen_xml(prefix=/Docs/) end
 gen_xml(prefix=/Docs/)
-/Docs/QuantDependantPriceKey
+/Docs/QuantdependentPriceKey
 gen_xml(prefix=/Docs/) end
 gen_xml(prefix=/Docs/)
 /Docs/Quant=1

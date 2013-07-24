@@ -1,4 +1,4 @@
 <?php
-$result = exec('cd 1:\\non_existant; dir nonexistant');
+$result = exec('cd 1:\\non_existent; dir nonexistent');
 echo "$result";
 ?>

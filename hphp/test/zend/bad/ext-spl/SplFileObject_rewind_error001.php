@@ -7,4 +7,7 @@ $fo = new SplFileObject('SplFileObject_rewind_error001.csv');
 $fo->rewind( "invalid" );
 
 unlink('SplFileObject_rewind_error001.csv');
+?><?php
+unlink('SplFileObject_rewind_error001.csv');
+unlink('SplFileObject_rewind_error001.csv');
 ?>

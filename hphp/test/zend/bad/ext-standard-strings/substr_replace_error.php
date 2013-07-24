@@ -23,7 +23,7 @@ echo "\n-- Testing substr_replace() function with start and length different typ
 var_dump(substr_replace($s1, "evening", array(5))); 
 var_dump(substr_replace($s1, "evening", 5, array(8))); 
   
-echo "\n-- Testing substr_replace() function with start and length with a different number of elments --\n";
+echo "\n-- Testing substr_replace() function with start and length with a different number of elements --\n";
 var_dump(substr_replace($s1, "evening", array(5, 1), array(8))); 
 
 echo "\n-- Testing substr_replace() function with start and length as arrays but string not--\n";

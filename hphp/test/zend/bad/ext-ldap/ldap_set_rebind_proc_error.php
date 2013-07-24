@@ -17,6 +17,6 @@ function rebind_proc ($ds, $ldap_url) {
 $link = ldap_connect($host, $port);
 var_dump(ldap_set_rebind_proc($link));
 var_dump(ldap_set_rebind_proc($link, "rebind_proc", "Additional data"));
-var_dump(ldap_set_rebind_proc($link, "rebind_proc_inexistant"));
+var_dump(ldap_set_rebind_proc($link, "rebind_proc_inexistent"));
 ?>
 ===DONE===

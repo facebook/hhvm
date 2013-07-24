@@ -6,7 +6,7 @@
 
 /*
  * Check that array_values is re-assigning keys according to the internal order of the array,
- * and is not dependant on the \$input argument's keys
+ * and is not dependent on the \$input argument's keys
  */
 
 echo "*** Testing array_values() : usage variations ***\n";

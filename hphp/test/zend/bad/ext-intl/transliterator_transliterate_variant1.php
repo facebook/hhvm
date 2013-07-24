@@ -8,7 +8,7 @@ echo transliterator_transliterate("\x8F", $str), "\n";
 echo intl_get_error_message(), "\n";
 
 class A {
-function __toString() { return "inexistant id"; }
+function __toString() { return "inexistent id"; }
 }
 
 echo transliterator_transliterate(new A(), $str), "\n";

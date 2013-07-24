@@ -1328,12 +1328,25 @@ funcPrologSmashGuard(TCA prolog, const Func* func) {
 void
 TranslatorX64::smashPrologueGuards(TCA* prologues, int numPrologues,
                                    const Func* func) {
-#ifdef DEBUG
-  LeaseHolder writer(s_writeLease);
-#endif
+  DEBUG_ONLY std::unique_ptr<LeaseHolder> writer;
   for (int i = 0; i < numPrologues; i++) {
     if (prologues[i] != (TCA)fcallHelperThunk
         && funcPrologHasGuard(prologues[i], func)) {
+      if (debug) {
+        /*
+         * Unit's are sometimes created racily, in which case all
+         * but the first are destroyed immediately. In that case,
+         * the Funcs of the destroyed Units never need their
+         * prologs smashing, and it would be a lock rank violation
+         * to take the write lease here.
+         * In all other cases, Funcs are destroyed via a delayed path
+         * (treadmill) and the rank violation isn't an issue.
+         *
+         * Also note that we only need the write lease because we
+         * mprotect the translation cache in debug builds.
+         */
+        if (!writer) writer.reset(new LeaseHolder(s_writeLease));
+      }
       funcPrologSmashGuard(prologues[i], func);
     }
   }

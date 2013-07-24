@@ -45,12 +45,12 @@
 #endif
 
 #include <boost/bind.hpp>
-#include <boost/optional.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/scoped_ptr.hpp>
 
 #include "folly/Format.h"
+#include "folly/Optional.h"
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/bitops.h"
@@ -2727,9 +2727,9 @@ TranslatorX64::emitServiceReqWork(SRFlags flags, ServiceRequest req,
   /*
    * Remember previous state of the code cache.
    */
-  boost::optional<CodeCursor> maybeCc;
+  folly::Optional<CodeCursor> maybeCc = nullptr;
   if (start != as.frontier()) {
-    maybeCc = boost::in_place<CodeCursor>(boost::ref(as), start);
+    maybeCc.emplace(as, start);
   }
 
   /* max space for moving to align, saving VM regs plus emitting args */

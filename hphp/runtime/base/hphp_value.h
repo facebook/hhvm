@@ -210,6 +210,9 @@ typename std::enable_if<
   TypedValue
 >::type make_tv() {
   TypedValue ret;
+  // Null doesn't need a value, but we get uninitialized errors
+  // if we don't set it to *something*
+  ret.m_data.num = 0;
   ret.m_type = DType;
   return ret;
 }

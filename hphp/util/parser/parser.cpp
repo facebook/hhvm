@@ -205,6 +205,7 @@ void ParserBase::addLabel(const std::string &label,
   labelInfo.scopeId         = info.scopes.back();
   labelInfo.stmt            = extractStatement(stmt);
   labelInfo.loc             = loc;
+  labelInfo.inTryCatchBlock = false;
   info.labels[label]        = labelInfo;
 }
 

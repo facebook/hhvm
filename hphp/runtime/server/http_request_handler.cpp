@@ -136,7 +136,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   // don't serve the request if it's been sitting in queue for longer than our
   // allowed request timeout.
   int requestTimeoutSeconds =
-    vhost->getRequestTimeoutSeconds(RuntimeOption::RequestTimeoutSeconds);
+    vhost->getRequestTimeoutSeconds(getDefaultTimeout());
   if (requestTimeoutSeconds > 0) {
     timespec now;
     Timer::GetMonotonicTime(now);

@@ -243,6 +243,7 @@ public:
  public:
   int getTimeout() const { return m_timeoutSeconds; }
   void setTimeout(int seconds);
+  int getRemainingTime() const;
   void resetTimer(int seconds = -1);
   void setSurprisePage(void* page);
   void onTimeout();

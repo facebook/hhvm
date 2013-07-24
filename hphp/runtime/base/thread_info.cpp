@@ -207,12 +207,22 @@ void RequestInjectionData::setTimeout(int seconds) {
 #endif
 }
 
+int RequestInjectionData::getRemainingTime() const {
+  if (m_hasTimer) {
+    itimerspec ts;
+    if (!timer_gettime(m_timer_id, &ts)) {
+      int remaining = ts.it_value.tv_sec;
+      return remaining > 1 ? remaining : 1;
+    }
+  }
+  return m_timeoutSeconds;
+}
+
 void RequestInjectionData::resetTimer(int seconds /* = -1 */) {
   auto data = &ThreadInfo::s_threadInfo->m_reqInjectionData;
   if (seconds <= 0) seconds = data->getTimeout();
   data->setTimeout(seconds);
   data->clearTimedOutFlag();
-
 }
 
 void RequestInjectionData::reset() {

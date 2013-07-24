@@ -492,6 +492,11 @@ static bool findFileWrapper(CStrRef file, void* ctx) {
     }
   }
 
+  // handle file://
+  if (file.substr(0, 7) == "file://") {
+    return findFileWrapper(file.substr(7), ctx);
+  }
+
   // TranslatePath() will canonicalize the path and also check
   // whether the file is in an allowed directory.
   String translatedPath = File::TranslatePathKeepRelative(file);

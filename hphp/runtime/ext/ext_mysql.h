@@ -310,6 +310,7 @@ Variant f_mysql_affected_rows(CVarRef link_identifier = uninit_null());
 // query functions
 
 Variant mysql_makevalue(CStrRef data, MYSQL_FIELD *mysql_field);
+Variant mysql_makevalue(CStrRef data, enum_field_types field_type);
 
 bool f_mysql_set_timeout(int query_timeout_ms = -1,
                          CVarRef link_identifier = uninit_null());

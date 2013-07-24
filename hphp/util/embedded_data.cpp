@@ -68,7 +68,7 @@ bool get_embedded_data(const char *section, embedded_data* desc) {
     if (!strcmp(section, name)) {
       GElf_Shdr ghdr;
       if (gelf_getshdr(scn, &ghdr) != &ghdr) return false;
-      desc->m_filename = "/proc/self/exe";
+      desc->m_filename = current_executable_path().c_str();
       desc->m_start = ghdr.sh_offset;
       desc->m_len = ghdr.sh_size;
       return true;

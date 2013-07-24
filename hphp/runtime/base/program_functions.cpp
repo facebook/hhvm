@@ -1339,7 +1339,7 @@ void hphp_process_init() {
   }
   int64_t save = RuntimeOption::SerializationSizeLimit;
   RuntimeOption::SerializationSizeLimit = StringData::MaxSize;
-  apc_load(RuntimeOption::ApcLoadThread);
+  apc_load(apcExtension::LoadThread);
   RuntimeOption::SerializationSizeLimit = save;
 
   Transl::TargetCache::requestExit();

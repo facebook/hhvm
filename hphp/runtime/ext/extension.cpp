@@ -16,8 +16,8 @@
 */
 
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/runtime_option.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,7 +80,7 @@ void Extension::ShutdownModules() {
 
 bool Extension::IsLoaded(CStrRef name) {
   if (name == "apc") {
-    return RuntimeOption::EnableApc;
+    return apcExtension::Enable;
   }
   assert(s_registered_extensions);
   return s_registered_extensions->find(name.data()) !=

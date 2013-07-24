@@ -52,7 +52,7 @@ void Extension::LoadModules(Hdf hdf) {
   assert(s_registered_extensions);
   for (ExtensionMap::const_iterator iter = s_registered_extensions->begin();
        iter != s_registered_extensions->end(); ++iter) {
-    iter->second->moduleLoad(hdf["Extensions"][iter->second->m_name.c_str()]);
+    iter->second->moduleLoad(hdf);
   }
 }
 

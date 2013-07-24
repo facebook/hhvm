@@ -4339,6 +4339,8 @@ void EmitterVisitor::emitPushAndFreeUnnamedL(Emitter& e, Id tempLocal, Offset st
 }
 
 EmitterVisitor::PassByRefKind EmitterVisitor::getPassByRefKind(ExpressionPtr exp) {
+  auto permissiveKind = PassByRefKind::AllowCell;
+
   // The PassByRefKind of a list assignment expression is determined
   // by the PassByRefKind of the RHS. This loop will repeatedly recurse
   // on the RHS until it encounters an expression other than a list
@@ -4346,12 +4348,18 @@ EmitterVisitor::PassByRefKind EmitterVisitor::getPassByRefKind(ExpressionPtr exp
   while (exp->is(Expression::KindOfListAssignment)) {
     ListAssignmentPtr la(static_pointer_cast<ListAssignment>(exp));
     exp = la->getArray();
+    permissiveKind = PassByRefKind::WarnOnCell;
   }
+
   switch (exp->getKindOf()) {
     case Expression::KindOfNewObjectExpression:
     case Expression::KindOfIncludeExpression:
+    case Expression::KindOfSimpleVariable:
       // New and include/require
       return PassByRefKind::AllowCell;
+    case Expression::KindOfArrayElementExpression:
+      // Allow if bare; warn if inside list assignment
+      return permissiveKind;
     case Expression::KindOfAssignmentExpression:
       // Assignment (=) and binding assignment (=&)
       return PassByRefKind::WarnOnCell;

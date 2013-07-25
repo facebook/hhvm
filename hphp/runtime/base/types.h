@@ -229,7 +229,9 @@ public:
                        // protect for error conditions
 
  private:
+#ifndef __APPLE__
   timer_t m_timer_id;    // id of our timer
+#endif
   int m_timeoutSeconds;  // how many seconds to timeout
   bool m_hasTimer;       // Whether we've created our timer yet
   std::atomic<bool> m_timerActive;

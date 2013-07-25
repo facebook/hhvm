@@ -41,6 +41,10 @@ function dumpLogFilesToStdoutAndDie() {
   readfile("/tmp/hphpd_test_sandbox_access.log");
   echo "\n";
   error_log('-------------------------------------------');
+  error_log("Contents of '/tmp/hphpd_curl$test_run_id.log'");
+  readfile("/tmp/hphpd_curl$test_run_id.log");
+  echo "\n";
+  error_log('-------------------------------------------');
   throw new Exception("test failed");
 }
 
@@ -102,7 +106,10 @@ function startServer($serverPort, $adminPort, $debugPort) {
 }
 
 function waitForServerToGetGoing($serverPort) {
-  $url = "http://".php_uname('n').':'.$serverPort.'/hello.php';
+  global $test_run_id;
+
+  $host = php_uname('n');
+  $url = "http://$host:$serverPort/hello.php";
   $r = "";
   for ($i = 1; $i <= 20; $i++) {
     sleep(1);
@@ -112,6 +119,9 @@ function waitForServerToGetGoing($serverPort) {
 
   if ($r !== "Hello, World!") {
     tlog('Server is not responding.');
+    //repeat request with error trace to log file.
+    exec("curl --trace-ascii /tmp/hphpd_curl$test_run_id.log ".
+      "--header 'Host: hphpd.debugger.$host' --url $url");
     dumpLogFilesToStdoutAndDie();
   }
 }
@@ -227,8 +237,8 @@ function killChildren($pid) {
   $childIds = exec("pgrep -f -d , -P $pid");
   foreach (explode(",", $childIds) as $cid) {
     if (!$cid) continue;
+    tlog("killing ".exec("ps -f -p ".$cid));
     killChildren($cid);
-    error_log("killing $cid");
     posix_kill($cid, SIGKILL);
   }
 }
@@ -246,7 +256,9 @@ function getClientProcessId($pipe) {
   tlog("done reading client output for client process id");
 }
 
-function waitForClientToOutput($pipe, $string1, $retryCount = 20) {
+function waitForClientToOutput($pipe, $string1, $url = "", $retryCount = 20) {
+  global $test_run_id;
+
   tlog("reading client output");
   $rc = $retryCount;
   while (!feof($pipe)) {
@@ -255,6 +267,13 @@ function waitForClientToOutput($pipe, $string1, $retryCount = 20) {
     if (strpos($clientOutput,
         ".....Debugger client still waiting for server response.....") === 0) {
       if (--$rc > 0) continue;
+      tlog("refetching $url");
+      if ($url != "") {
+        //repeat request with error trace to log file.
+        $host = php_uname('n');
+        exec("curl --trace-ascii /tmp/hphpd_curl$test_run_id.log ".
+          "--header 'Host: hphpd.debugger.$host' --url $url");
+      }
       dumpLogFilesToStdoutAndDie();
     }
     echo $clientOutput;

@@ -10,4 +10,3 @@ Breakpoint 1 reached on line 3 of %s/error_bad_cmd_type_send.php
 
 internaltesting badcmdtypesend
 Executing internal test...
-DebuggerProxy::processInterrupt(): received bad cmd type: 20001

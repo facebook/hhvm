@@ -69,7 +69,7 @@ class Phar extends RecursiveDirectoryIterator
     $halt_token = "\n__HALT_COMPILER();";
     $pos = strpos($data, $halt_token);
     if ($pos === false) {
-      throw new PharException("$halt_token; must be declared in a phar");
+      throw new PharException("__HALT_COMPILER(); must be declared in a phar");
     }
     $this->stub = substr($data, 0, $pos);
 

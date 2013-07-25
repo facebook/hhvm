@@ -348,6 +348,8 @@ class NormalizedInstruction {
     return m_dynLocs.back().get();
   }
 
+  SrcKey nextSk() const;
+
  private:
   smart::vector<smart::unique_ptr<DynLocation>::type> m_dynLocs;
 };
@@ -923,7 +925,7 @@ protected:
   PCFilter m_dbgBLPC;
   hphp_hash_set<SrcKey,SrcKey::Hasher> m_dbgBLSrcKey;
   Mutex m_dbgBlacklistLock;
-  bool isSrcKeyInBL(const Unit* unit, const SrcKey& sk);
+  bool isSrcKeyInBL(const SrcKey& sk);
 
   TransKind m_mode;
   ProfData* m_profData;
@@ -1073,8 +1075,6 @@ static inline bool isSmartPtrRef(DataType t) {
   return t == KindOfString || t == KindOfStaticString ||
          t == KindOfArray || t == KindOfObject;
 }
-
-SrcKey nextSrcKey(const NormalizedInstruction& i);
 
 void populateImmediates(NormalizedInstruction&);
 void preInputApplyMetaData(Unit::MetaHandle, NormalizedInstruction*);

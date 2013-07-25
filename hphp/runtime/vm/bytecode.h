@@ -319,6 +319,11 @@ struct ActRec {
     return m_this;
   }
 
+  const Unit* unit() const {
+    m_func->validate();
+    return m_func->unit();
+  }
+
   /**
    * To conserve space, we use unions for pairs of mutually exclusive
    * fields (fields that are not used at the same time). We use unions

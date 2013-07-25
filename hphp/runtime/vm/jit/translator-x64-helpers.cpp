@@ -225,8 +225,8 @@ void TranslatorX64::fCallArrayHelper(const Offset pcOff, const Offset pcNext) {
   VMExecutionContext *ec = g_vmContext;
   ec->m_fp = fp;
   ec->m_stack.top() = sp;
-  ec->m_pc = curUnit()->at(pcOff);
-  PC pc = curUnit()->at(pcNext);
+  ec->m_pc = fp->unit()->at(pcOff);
+  PC pc = fp->unit()->at(pcNext);
 
   tl_regState = VMRegState::CLEAN;
   bool runFunc = ec->doFCallArray(pc);

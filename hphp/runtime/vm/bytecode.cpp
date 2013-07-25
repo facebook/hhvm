@@ -833,9 +833,11 @@ string Stack::toString(const ActRec* fp, int offset,
   // Use depth-first recursion to get the output order correct.
 
   std::ostringstream os;
-  os << prefix << "=== Stack at " << curUnit()->filepath()->data() << ":" <<
-    curUnit()->getLineNumber(curUnit()->offsetOf(vmpc())) << " func " <<
-    curFunc()->fullName()->data() << " ===\n";
+  auto unit = fp->unit();
+  os << prefix << "=== Stack at "
+     << unit->filepath()->data() << ":"
+     << unit->getLineNumber(unit->offsetOf(vmpc())) << " func "
+     << curFunc()->fullName()->data() << " ===\n";
 
   toStringFrame(os, fp, offset, m_top, prefix);
 
@@ -1520,7 +1522,7 @@ void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
   }
   Stats::inc(Stats::VMEnter);
   if (ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
-    (void) curUnit()->offsetOf(m_pc); /* assert */
+    (void) m_fp->unit()->offsetOf(m_pc); /* assert */
     if (enterFnAr) {
       assert(start);
       tx()->enterTCAfterProlog(start);
@@ -4354,7 +4356,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetM(PC& pc) {
   const ImmVector& immVec = ImmVector::createFromStream(oldPC + 1);
   StringData* name;
   MemberCode mc;
-  if (immVec.decodeLastMember(curUnit(), name, mc)) {
+  if (immVec.decodeLastMember(m_fp->unit(), name, mc)) {
     recordType(TypeProfileKey(mc, name), m_stack.top()->m_type);
   }
 }
@@ -5966,9 +5968,9 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
       reinterpret_cast<uintptr_t>(tx()->getRetFromInterpretedFrame());
     assert(isReturnHelper(ar->m_savedRip));
     TRACE(3, "FCallArray: pc %p func %p base %d\n", m_pc,
-          m_fp->m_func->unit()->entry(),
+          m_fp->unit()->entry(),
           int(m_fp->m_func->base()));
-    ar->m_soff = m_fp->m_func->unit()->offsetOf(pc)
+    ar->m_soff = m_fp->unit()->offsetOf(pc)
       - (uintptr_t)m_fp->m_func->base();
     assert(pcOff() > m_fp->m_func->base());
 

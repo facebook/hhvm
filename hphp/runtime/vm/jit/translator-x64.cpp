@@ -597,7 +597,7 @@ bool TranslatorX64::profileSrcKey(const SrcKey& sk) const {
 }
 
 TCA TranslatorX64::retranslate(const TranslArgs& args) {
-  if (isDebuggerAttachedProcess() && isSrcKeyInBL(curUnit(), args.m_sk)) {
+  if (isDebuggerAttachedProcess() && isSrcKeyInBL(args.m_sk)) {
     // We are about to translate something known to be blacklisted by
     // debugger, exit early
     SKTRACE(1, args.m_sk, "retranslate abort due to debugger\n");
@@ -616,7 +616,7 @@ TCA TranslatorX64::retranslate(const TranslArgs& args) {
 TCA TranslatorX64::retranslateAndPatchNoIR(SrcKey sk,
                                            bool   align,
                                            TCA    toSmash) {
-  if (isDebuggerAttachedProcess() && isSrcKeyInBL(curUnit(), sk)) {
+  if (isDebuggerAttachedProcess() && isSrcKeyInBL(sk)) {
     // We are about to translate something known to be blacklisted by
     // debugger, exit early
     SKTRACE(1, sk, "retranslateAndPatchNoIR abort due to debugger\n");
@@ -752,7 +752,7 @@ TranslatorX64::getTranslation(const TranslArgs& args) {
   curFunc()->validate();
   SKTRACE(2, sk,
           "getTranslation: curUnit %s funcId %x offset %d\n",
-          curUnit()->filepath()->data(),
+          sk.unit()->filepath()->data(),
           sk.getFuncId(),
           sk.offset());
   SKTRACE(2, sk, "   funcId: %x \n",
@@ -859,7 +859,7 @@ TranslatorX64::createTranslation(const TranslArgs& args) {
   TCA stubstart = astubs.frontier();
   TCA req = emitServiceReq(REQ_RETRANSLATE, sk.offset());
   SKTRACE(1, sk, "inserting anchor translation for (%p,%d) at %p\n",
-          curUnit(), sk.offset(), req);
+          sk.unit(), sk.offset(), req);
   SrcRec* sr = m_srcDB.insert(sk);
   sr->setFuncInfo(curFunc());
   sr->setAnchorTranslation(req);
@@ -868,7 +868,7 @@ TranslatorX64::createTranslation(const TranslArgs& args) {
   size_t stubsize = astubs.frontier() - stubstart;
   assert(asize == 0);
   if (stubsize && RuntimeOption::EvalDumpTCAnchors) {
-    addTranslation(TransRec(sk, curUnit()->md5(), TransAnchor,
+    addTranslation(TransRec(sk, sk.unit()->md5(), TransAnchor,
                             astart, asize, stubstart, stubsize));
     if (m_profData) {
       m_profData->addTransAnchor(sk);
@@ -1458,7 +1458,7 @@ static void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {
   tl_regState = VMRegState::CLEAN;
   vmfp() = (Cell*)ar;
   vmsp() = sp;
-  vmpc() = curUnit()->at(pcOff);
+  vmpc() = ar->unit()->at(pcOff);
 }
 
 TCA
@@ -2362,7 +2362,7 @@ TranslatorX64::enterTC(TCA start, void* data) {
     // recognizes, or we luck out and the leaseholder exits.
     while (!start) {
       TRACE(2, "enterTC forwarding BB to interpreter\n");
-      g_vmContext->m_pc = curUnit()->at(sk.offset());
+      g_vmContext->m_pc = sk.unit()->at(sk.offset());
       INC_TPC(interp_bb);
       g_vmContext->dispatchBB();
       PC newPc = g_vmContext->getPC();
@@ -2550,7 +2550,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
   case REQ_INTERPRET: {
     Offset off = args[0];
     int numInstrs = args[1];
-    g_vmContext->m_pc = curUnit()->at(off);
+    g_vmContext->m_pc = liveUnit()->at(off);
     /*
      * We know the compilation unit has not changed; basic blocks do
      * not span files. I claim even exceptions do not violate this
@@ -2610,8 +2610,8 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
      * need to use fpi regions to find the fcall.
      */
     const FPIEnt* fe = curFunc()->findPrecedingFPI(
-      curUnit()->offsetOf(vmpc()));
-    vmpc() = curUnit()->at(fe->m_fcallOff);
+      liveUnit()->offsetOf(vmpc()));
+    vmpc() = liveUnit()->at(fe->m_fcallOff);
     assert(isFCallStar(toOp(*vmpc())));
     raise_error("Stack overflow");
     NOT_REACHED();
@@ -3163,7 +3163,7 @@ TranslatorX64::reachedTranslationLimit(SrcKey sk,
     if (debug && Trace::moduleEnabled(Trace::tx64, 2)) {
       const vector<TCA>& tns = srcRec.translations();
       TRACE(1, "Too many (%zd) translations: %s, BC offset %d\n",
-            tns.size(), curUnit()->filepath()->data(),
+            tns.size(), sk.unit()->filepath()->data(),
             sk.offset());
       SKTRACE(2, sk, "{\n");
       TCA topTrans = srcRec.getTopTranslation();
@@ -3229,11 +3229,12 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
   if (!debug) return;
 
   SrcKey sk = t.m_sk;
+  DEBUG_ONLY auto unit = sk.unit();
 
   TRACE(3, "----------------------------------------------\n");
   TRACE(3, "  Translating from file %s:%d %s at %p:\n",
-        curUnit()->filepath()->data(),
-        curUnit()->getLineNumber(sk.offset()),
+        unit->filepath()->data(),
+        unit->getLineNumber(sk.offset()),
         curFunc()->name()->data(),
         postGuards);
   TRACE(3, "  preconds:\n");
@@ -3267,7 +3268,7 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
     // found it since this code is debug-only, and we don't want behavior
     // to vary across the optimized/debug builds.
     PC oldPC = vmpc();
-    vmpc() = curUnit()->at(sk.offset());
+    vmpc() = unit->at(sk.offset());
     TRACE(3, g_vmContext->prettyStack(string(" tx64 ")));
     vmpc() = oldPC;
     TRACE(3, "----------------------------------------------\n");
@@ -3396,7 +3397,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
   }
   m_pendingFixups.clear();
 
-  addTranslation(TransRec(sk, curUnit()->md5(), transKind, t, start,
+  addTranslation(TransRec(sk, sk.unit()->md5(), transKind, t, start,
                           a.frontier() - start, stubStart,
                           astubs.frontier() - stubStart,
                           counterStart, counterLen,
@@ -4148,7 +4149,7 @@ bool TranslatorX64::addDbgGuards(const Unit* unit) {
     SrcRec& sr = *it->second;
     if (sr.unitMd5() == unit->md5() &&
         !sr.hasDebuggerGuard() &&
-        isSrcKeyInBL(unit, sk)) {
+        isSrcKeyInBL(sk)) {
       addDbgGuardImpl(sk, sr);
     }
   }
@@ -4174,7 +4175,7 @@ bool TranslatorX64::addDbgGuard(const Func* func, Offset offset) {
     }
   }
   if (debug) {
-    if (!isSrcKeyInBL(func->unit(), sk)) {
+    if (!isSrcKeyInBL(sk)) {
       TRACE(5, "calling addDbgGuard on PC that is not in blacklist");
       return false;
     }

@@ -44,7 +44,7 @@ inline ActRec*& vmFirstAR() { return g_vmContext->m_firstAR; }
 
 inline ActRec* curFrame()    { return (ActRec*)vmfp(); }
 inline const Func* curFunc() { return curFrame()->m_func; }
-inline const Unit* curUnit() { return curFunc()->unit(); }
+inline const Unit* liveUnit() { return curFunc()->unit(); }
 inline Class* curClass() {
   const auto* func = curFunc();
   auto* cls = func->cls();

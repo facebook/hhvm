@@ -320,6 +320,7 @@ private:
   void emitContVarEnvHelperCall(SSATmp* fp, TCA helper);
   const Func* curFunc() const;
   Class*      curClass() const { return curFunc()->cls(); }
+  const Unit* curUnit() const { return curFunc()->unit(); }
   void recordSyncPoint(Asm& as, SyncOptions sync = SyncOptions::kSyncPoint);
   Address getDtorGeneric();
   Address getDtorTyped();

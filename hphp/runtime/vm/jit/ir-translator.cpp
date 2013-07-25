@@ -625,7 +625,7 @@ void IRTranslator::translateCreateCont(const NormalizedInstruction& i) {
 }
 
 void IRTranslator::translateContEnter(const NormalizedInstruction& i) {
-  auto after = nextSrcKey(i).offset();
+  auto after = i.nextSk().offset();
 
   // ContEnter can't exist in an inlined function right now.  (If it
   // ever can, this curFunc() needs to change.)
@@ -1327,7 +1327,7 @@ IRTranslator::translateFCall(const NormalizedInstruction& i) {
   auto const numArgs = i.imm[0].u_IVA;
 
   always_assert(!m_hhbcTrans.isInlining() && "curUnit and curFunc calls");
-  const PC after = curUnit()->at(nextSrcKey(i).offset());
+  const PC after = i.m_unit->at(i.nextSk().offset());
   const Func* srcFunc = curFunc();
   Offset returnBcOffset =
     srcFunc->unit()->offsetOf(after - srcFunc->base());
@@ -1370,7 +1370,7 @@ IRTranslator::translateFCall(const NormalizedInstruction& i) {
 void
 IRTranslator::translateFCallArray(const NormalizedInstruction& i) {
   const Offset pcOffset = i.offset();
-  SrcKey next = nextSrcKey(i);
+  SrcKey next = i.nextSk();
   const Offset after = next.offset();
 
   HHIR_EMIT(FCallArray, pcOffset, after);

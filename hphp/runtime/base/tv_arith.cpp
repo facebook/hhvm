@@ -32,7 +32,7 @@ namespace {
 // Helper for converting String, Array, Bool, Null or Obj to Dbl|Int.
 // Other types (i.e. Int and Double) must be handled outside of this.
 TypedNum numericConvHelper(Cell cell) {
-  assert(cellIsPlausible(&cell));
+  assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
   case KindOfString:
@@ -239,7 +239,6 @@ struct MulEq {
   }
 };
 
-
 template<class SzOp, class BitOp>
 StringData* stringBitOp(BitOp bop, SzOp sop, StringData* s1, StringData* s2) {
   auto const s1Size = s1->size();
@@ -262,8 +261,8 @@ StringData* stringBitOp(BitOp bop, SzOp sop, StringData* s1, StringData* s2) {
 
 template<template<class> class BitOp, class StrLenOp>
 Cell cellBitOp(StrLenOp strLenOp, Cell c1, Cell c2) {
-  assert(cellIsPlausible(&c1));
-  assert(cellIsPlausible(&c2));
+  assert(cellIsPlausible(c1));
+  assert(cellIsPlausible(c2));
 
   if (IS_STRING_TYPE(c1.m_type) && IS_STRING_TYPE(c2.m_type)) {
     return make_tv<KindOfString>(
@@ -286,6 +285,108 @@ void cellBitOpEq(Op op, Cell& c1, Cell c2) {
   auto const result = op(c1, c2);
   cellSet(result, c1);
 }
+
+// Op must implement the interface described for cellIncDecOp.
+template<class Op>
+void stringIncDecOp(Op op, Cell& cell) {
+  assert(IS_STRING_TYPE(cell.m_type));
+
+  auto const sd = cell.m_data.pstr;
+  if (sd->empty()) {
+    decRefStr(sd);
+    cellCopy(op.emptyString(), cell);
+    return;
+  }
+
+  int64_t ival;
+  double dval;
+  auto const dt = sd->isNumericWithVal(ival, dval, true /* allow_errors */);
+  switch (dt) {
+  case KindOfInt64:
+    decRefStr(sd);
+    op(ival);
+    cellCopy(num(ival), cell);
+    break;
+  case KindOfDouble:
+    decRefStr(sd);
+    op(dval);
+    cellCopy(dbl(dval), cell);
+    break;
+  default:
+    assert(dt == KindOfNull);
+    op.nonNumericString(cell);
+    break;
+  }
+}
+
+/*
+ * Inc or Dec for a string, depending on Op.  Op must implement
+ *
+ *   - a function call operator for numeric types
+ *   - a nullCase(Cell&) function that returns the result for null types
+ *   - an emptyString() function that performs the operation for empty strings
+ *   - and a nonNumericString(Cell&) function used for non-numeric strings
+ *
+ * PHP's Inc and Dec behave differently in all these cases, so this
+ * abstracts out the common parts from those differences.
+ */
+template<class Op>
+void cellIncDecOp(Op op, Cell& cell) {
+  assert(cellIsPlausible(cell));
+
+  switch (cell.m_type) {
+  case KindOfInt64:
+    op(cell.m_data.num);
+    break;
+  case KindOfDouble:
+    op(cell.m_data.dbl);
+    break;
+
+  case KindOfString:
+  case KindOfStaticString:
+    stringIncDecOp(op, cell);
+    break;
+
+  case KindOfUninit:
+  case KindOfNull:
+    op.nullCase(cell);
+    break;
+
+  case KindOfBoolean:
+  case KindOfObject:
+  case KindOfArray:
+    break;
+  default:
+    not_reached();
+  }
+}
+
+const StaticString s_1("1");
+
+struct Inc {
+  template<class T> void operator()(T& t) const { ++t; }
+  void nullCase(Cell& cell) const { cellCopy(num(1), cell); }
+
+  Cell emptyString() const {
+    return make_tv<KindOfStaticString>(s_1.get());
+  }
+
+  void nonNumericString(Cell& cell) const {
+    auto const sd = cell.m_data.pstr;
+    auto const newSd = NEW(StringData)(sd, CopyString);
+    newSd->inc();
+    newSd->incRefCount();
+    decRefStr(sd);
+    cellCopy(make_tv<KindOfString>(newSd), cell);
+  }
+};
+
+struct Dec {
+  template<class T> void operator()(T& t) const { --t; }
+  void nullCase(Cell&) const {}
+  Cell emptyString() const { return num(-1); }
+  void nonNumericString(Cell&) const {}
+};
 
 }
 
@@ -355,8 +456,8 @@ void cellMulEq(Cell& c1, Cell c2) {
 }
 
 void cellDivEq(Cell& c1, Cell c2) {
-  assert(cellIsPlausible(&c1));
-  assert(cellIsPlausible(&c2));
+  assert(cellIsPlausible(c1));
+  assert(cellIsPlausible(c2));
   if (!isTypedNum(c1)) {
     cellSet(numericConvHelper(c1), c1);
   }
@@ -377,6 +478,46 @@ void cellBitOrEq(Cell& c1, Cell c2) {
 
 void cellBitXorEq(Cell& c1, Cell c2) {
   cellBitOpEq(cellBitXor, c1, c2);
+}
+
+void cellInc(Cell& cell) {
+  cellIncDecOp(Inc(), cell);
+}
+
+void cellDec(Cell& cell) {
+  cellIncDecOp(Dec(), cell);
+}
+
+void cellBitNot(Cell& cell) {
+  assert(cellIsPlausible(cell));
+
+  switch (cell.m_type) {
+  case KindOfInt64:
+    cell.m_data.num = ~cell.m_data.num;
+    break;
+  case KindOfDouble:
+    cell.m_type     = KindOfInt64;
+    cell.m_data.num = ~toInt64(cell.m_data.dbl);
+    break;
+
+  case KindOfString:
+    if (cell.m_data.pstr->getCount() > 1) {
+    case KindOfStaticString:
+      auto const newSd = NEW(StringData)(
+        cell.m_data.pstr->slice(),
+        CopyString
+      );
+      newSd->incRefCount();
+      cell.m_data.pstr->decRefCount(); // can't go to zero
+      cell.m_data.pstr = newSd;
+      cell.m_type = KindOfString;
+    }
+    cell.m_data.pstr->negate();
+    break;
+
+  default:
+    raise_error("Unsupported operand type for ~");
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

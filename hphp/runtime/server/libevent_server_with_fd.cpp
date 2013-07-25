@@ -24,8 +24,8 @@
 namespace HPHP {
 
 LibEventServerWithFd::LibEventServerWithFd
-(const std::string &address, int port, int thread, int timeoutSeconds)
-  : LibEventServer(address, port, thread, timeoutSeconds)
+(const std::string &address, int port, int thread)
+  : LibEventServer(address, port, thread)
 {
 }
 

@@ -67,29 +67,36 @@ public:
     m_text += str;
     return *this;
   }
+
   Token &operator+(const Token &token) {
     m_num += token.m_num;
     m_text += token.m_text;
     return *this;
   }
+
   Token *operator->() {
     return this;
   }
+
   void operator=(int num) {
     m_num = num;
   }
-  void operator=(Token &other) {
+
+  Token& operator=(const Token& other) {
     ScannerToken::operator=(other);
     exp = other.exp;
     stmt = other.stmt;
     typeAnnotation = other.typeAnnotation;
+    return *this;
   }
+
   void reset() {
     exp.reset();
     stmt.reset();
     typeAnnotation.reset();
     ScannerToken::reset();
   }
+
   const std::string typeAnnotationName() {
     return (typeAnnotation) ? typeAnnotation->fullName() : "";
   }

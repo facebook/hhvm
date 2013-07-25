@@ -211,9 +211,7 @@ TCA funcBodyHelper(ActRec* fp) {
 
   TCA tca = tx64->getCallArrayProlog(func);
 
-  if (tca) {
-    func->setFuncBody(tca);
-  } else {
+  if (!tca) {
     tca = Translator::Get()->getResumeHelper();
   }
   tl_regState = VMRegState::DIRTY;

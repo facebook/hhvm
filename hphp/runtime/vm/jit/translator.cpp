@@ -554,6 +554,9 @@ predictOutputs(SrcKey startSk,
                const NormalizedInstruction* ni) {
   if (!RuntimeOption::EvalJitTypePrediction) return KindOfInvalid;
 
+  // In JitPGO mode, disable type prediction to avoid side exits
+  if (RuntimeOption::EvalJitPGO) return KindOfInvalid;
+
   if (RuntimeOption::EvalJitStressTypePredPercent &&
       RuntimeOption::EvalJitStressTypePredPercent > int(get_random() % 100)) {
     int dt;
@@ -756,7 +759,8 @@ getDynLocType(const SrcKey startSk,
         return RuntimeType(tv->m_type);
       }
       tv = Unit::lookupCns(sd);
-      if (tv) {
+      // In JitPGO mode, we disable type predictions to avoid side exits
+      if (tv && !RuntimeOption::EvalJitPGO) {
         ni->outputPredicted = true;
         TRACE(1, "CNS %s: guessing runtime type %d\n", sd->data(), tv->m_type);
         return RuntimeType(tv->m_type);
@@ -1508,6 +1512,9 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         ni->imm[0].u_IVA = info.m_data;
         break;
       case Unit::MetaInfo::Kind::DataTypePredicted: {
+        // In JitPGO, disable type predictions to avoid side exits
+        if (RuntimeOption::EvalJitPGO) break;
+
         // If the original type was invalid or predicted, then use the
         // prediction in the meta-data.
         assert((unsigned) arg < inputInfos.size());
@@ -2363,7 +2370,10 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii,
         m_resolvedDeps[l] = dl;
       }
     } else {
-      RuntimeType rtt = tx64->liveType(l, *curUnit(), true);
+      // TODO: Once the region translator supports guard relaxation
+      //       (task #2598894), we can enable specialization for all modes.
+      const bool specialize = tx64->mode() == TransLive;
+      RuntimeType rtt = tx64->liveType(l, *curUnit(), specialize);
       assert(rtt.isIter() || !rtt.isVagueValue());
       // Allocate a new DynLocation to represent this and store it in the
       // current map.
@@ -3183,6 +3193,12 @@ void Translator::analyzeCallee(TraceletContext& tas,
   fcall->calleeTrace = std::move(subTrace);
 }
 
+static bool instrBreaksProfileBB(const NormalizedInstruction* instr) {
+  return (instrIsNonCallControlFlow(instr->op()) ||
+          instr->outputPredicted ||
+          instr->op() == OpClsCnsD); // side exits if misses in the target cache
+}
+
 /*
  * analyze --
  *
@@ -3308,6 +3324,15 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
           if (!ni->ignoreInnerType && !ii.dontGuardInner) {
             if (rtt.isValue() && rtt.isRef() &&
                 rtt.innerType() == KindOfInvalid) {
+              throwUnknownInput();
+            }
+          }
+          if ((m_mode == TransProfile || m_mode == TransOptimize) &&
+              t.m_numOpcodes > 0) {
+            // We want to break blocks at every instrution that consumes a ref,
+            // so that we avoid side exits.  Therefore, instructions consume ref
+            // can only be the first in the tracelet/block.
+            if (rtt.isValue() && rtt.isRef()) {
               throwUnknownInput();
             }
           }
@@ -3439,6 +3464,12 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
       tas.recordDelete(l);
     }
 
+    if (m_mode == TransProfile && instrBreaksProfileBB(ni)) {
+      SKTRACE(1, sk, "BB broken\n");
+      sk.advance(unit);
+      goto breakBB;
+    }
+
     // Check if we need to break the tracelet.
     //
     // If we've gotten this far, it mostly boils down to control-flow
@@ -3483,7 +3514,10 @@ breakBB:
     }
   }
 
-  relaxDeps(t, tas);
+  // translateRegion doesn't support guard relaxation/specialization yet
+  if (m_mode != TransProfile && m_mode != TransOptimize) {
+    relaxDeps(t, tas);
+  }
 
   // Mark the last instruction appropriately
   assert(t.m_instrStream.last);
@@ -3504,12 +3538,19 @@ breakBB:
 Translator::Translator()
   : m_resumeHelper(nullptr)
   , m_createdTime(Timer::GetCurrentTimeMicros())
+  , m_mode(TransInvalid)
+  , m_profData(nullptr)
   , m_analysisDepth(0)
 {
   initInstrInfo();
+  if (RuntimeOption::EvalJitPGO) {
+    m_profData = new ProfData();
+  }
 }
 
 Translator::~Translator() {
+  delete m_profData;
+  m_profData = nullptr;
 }
 
 Translator*
@@ -3771,7 +3812,8 @@ Translator::translateRegion(const RegionDesc& region,
   const SrcKey startSk = region.blocks.front()->start();
   Unit::MetaHandle metaHand;
 
-  for (auto const& block : region.blocks) {
+  for (auto b = 0; b < region.blocks.size(); b++) {
+    auto const& block = region.blocks[b];
     SrcKey sk = block->start();
     const Func* topFunc = nullptr;
     auto typePreds  = makeMapWalker(block->typePreds());
@@ -3783,12 +3825,19 @@ Translator::translateRegion(const RegionDesc& region,
       // Emit prediction guards. If this is the first instruction in the
       // region the guards will go to a retranslate request. Otherwise, they'll
       // go to a side exit.
+      bool isFirstRegionInstr = block == region.blocks.front() && i == 0;
       while (typePreds.hasNext(sk)) {
         auto const& pred = typePreds.next();
-        if (block == region.blocks.front() && i == 0) {
-          ht.guardTypeLocation(pred.location, pred.type);
+        auto type = pred.type;
+        auto loc  = pred.location;
+        if (type.subtypeOf(Type::Cls)) {
+          // Do not generate guards for class; instead assert the type
+          assert(loc.tag() == JIT::RegionDesc::Location::Tag::Stack);
+          ht.assertTypeLocation(loc, type);
+        } else if (isFirstRegionInstr) {
+          ht.guardTypeLocation(loc, type);
         } else {
-          ht.checkTypeLocation(pred.location, pred.type, sk.offset());
+          ht.checkTypeLocation(loc, type, sk.offset());
         }
       }
 
@@ -3798,6 +3847,10 @@ Translator::translateRegion(const RegionDesc& region,
         assert(sk == startSk);
         auto const& pred = refPreds.next();
         ht.guardRefs(pred.arSpOffset, pred.mask, pred.vals);
+      }
+
+      if (RuntimeOption::EvalJitTransCounters && isFirstRegionInstr) {
+        ht.emitIncTransCounter();
       }
 
       // Update the current funcd, if we have a new one.
@@ -3813,6 +3866,12 @@ Translator::translateRegion(const RegionDesc& region,
         i == block->length() - 1 && block == region.blocks.back();
       inst.changesPC = opcodeChangesPC(inst.op());
       inst.funcd = topFunc;
+      inst.nextOffset = kInvalidOffset;
+      if (instrIsNonCallControlFlow(inst.op()) && !inst.breaksTracelet) {
+        assert(b < region.blocks.size());
+        inst.nextOffset = region.blocks[b+1]->start().offset();
+      }
+      inst.outputPredicted = false;
       populateImmediates(inst);
 
       // We can get a more precise output type for interpOne if we know all of
@@ -3868,11 +3927,6 @@ Translator::translateRegion(const RegionDesc& region,
         return Retry;
       }
 
-      if (isFCallStar(inst.op()) || inst.op() == OpFCallBuiltin) {
-        // This is much more conservative than it needs to be.
-        ht.emitSmashLocals();
-      }
-
       // Check the prediction. If the predicted type is less specific than what
       // is currently on the eval stack, checkTypeLocation won't emit any code.
       if (doPrediction) {
@@ -3918,7 +3972,7 @@ uint64_t* Translator::getTransCounterAddr() {
            [id % transCountersPerChunk]);
 }
 
-uint32_t Translator::addTranslation(const TransRec& transRec) {
+void Translator::addTranslation(const TransRec& transRec) {
   if (Trace::moduleEnabledRelease(Trace::trans, 1)) {
     // Log the translation's size, creation time, SrcKey, and size
     Trace::traceRelease("New translation: %" PRId64 " %s %u %u %d\n",
@@ -3932,7 +3986,7 @@ uint32_t Translator::addTranslation(const TransRec& transRec) {
                         transRec.kind);
   }
 
-  if (!isTransDBEnabled()) return -1u;
+  if (!isTransDBEnabled()) return;
   uint32_t id = getCurrentTransID();
   m_translations.push_back(transRec);
   m_translations[id].setID(id);
@@ -3943,8 +3997,6 @@ uint32_t Translator::addTranslation(const TransRec& transRec) {
   if (transRec.astubsLen > 0) {
     m_transDB[transRec.astubsStart] = id;
   }
-
-  return id;
 }
 
 uint64_t Translator::getTransCounter(TransID transId) const {
@@ -3999,14 +4051,13 @@ void Translator::invalidateFile(Eval::PhpFile* f) {
 }
 
 static const char *transKindStr[] = {
-  "Normal_Tx64",
-  "Normal_HHIR",
-  "Anchor",
-  "Prologue",
+#define DO(KIND) #KIND,
+  TRANS_KINDS
+#undef DO
 };
 
 const char *getTransKindName(TransKind kind) {
-  assert(kind >= 0 && kind <= TransProlog);
+  assert(kind >= 0 && kind < TransInvalid);
   return transKindStr[kind];
 }
 

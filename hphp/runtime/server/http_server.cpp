@@ -59,7 +59,6 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
 
   int startingThreadCount = RuntimeOption::ServerThreadCount;
   uint32_t additionalThreads = 0;
-  RequestHandlerFactory handlerFactory;
   if (RuntimeOption::ServerWarmupThrottleRequestCount > 0 &&
       RuntimeOption::ServerThreadCount > kNumProcessors) {
     startingThreadCount = kNumProcessors;
@@ -70,8 +69,7 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
       (RuntimeOption::ServerType);
   ServerOptions options
     (RuntimeOption::ServerIP, RuntimeOption::ServerPort,
-     startingThreadCount,
-     std::chrono::seconds(RuntimeOption::RequestTimeoutSeconds));
+     startingThreadCount);
   options.m_serverFD = RuntimeOption::ServerPortFd;
   options.m_sslFD = RuntimeOption::SSLPortFd;
   options.m_takeoverFilename = RuntimeOption::TakeoverFilename;
@@ -81,12 +79,14 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
   if (additionalThreads) {
     auto handlerFactory = boost::make_shared<WarmupRequestHandlerFactory>(
         m_pageServer, additionalThreads,
-        RuntimeOption::ServerWarmupThrottleRequestCount);
+        RuntimeOption::ServerWarmupThrottleRequestCount,
+        RuntimeOption::RequestTimeoutSeconds);
     m_pageServer->setRequestHandlerFactory([handlerFactory] {
       return handlerFactory->createHandler();
     });
   } else {
-    m_pageServer->setRequestHandlerFactory<HttpRequestHandler>();
+    m_pageServer->setRequestHandlerFactory<HttpRequestHandler>(
+      RuntimeOption::RequestTimeoutSeconds);
   }
 
   if (RuntimeOption::EnableSSL && m_sslCTX) {
@@ -97,9 +97,9 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
   m_adminServer = ServerFactoryRegistry::createServer
     (RuntimeOption::ServerType,
      RuntimeOption::ServerIP, RuntimeOption::AdminServerPort,
-     RuntimeOption::AdminThreadCount,
-     std::chrono::seconds(RuntimeOption::RequestTimeoutSeconds));
-  m_adminServer->setRequestHandlerFactory<AdminRequestHandler>();
+     RuntimeOption::AdminThreadCount);
+  m_adminServer->setRequestHandlerFactory<AdminRequestHandler>(
+    RuntimeOption::RequestTimeoutSeconds);
 
   for (unsigned int i = 0; i < RuntimeOption::SatelliteServerInfos.size();
        i++) {
@@ -139,7 +139,7 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
 
     ReplayTransport rt;
     rt.replayInput(hdf);
-    HttpRequestHandler handler;
+    HttpRequestHandler handler(0);
     handler.handleRequest(&rt);
     int code = rt.getResponseCode();
     if (code == 200) {

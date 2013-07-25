@@ -3,6 +3,7 @@
 include 'config.inc';
 
 $db = pg_connect($conn_str);
+@pg_query("SET bytea_output = 'escape'");
 
 @pg_query('DROP TABLE test_bug');
 

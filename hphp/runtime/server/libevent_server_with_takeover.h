@@ -28,8 +28,7 @@ namespace HPHP {
  */
 class LibEventServerWithTakeover : public LibEventServer {
 public:
-  LibEventServerWithTakeover(const std::string &address, int port, int thread,
-                             int timeoutSeconds);
+  LibEventServerWithTakeover(const std::string &address, int port, int thread);
 
   virtual void stop();
 

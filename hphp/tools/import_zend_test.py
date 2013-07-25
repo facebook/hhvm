@@ -208,6 +208,19 @@ bad_tests = (
     '/ext-openssl/openssl_x509_parse_basic.php',
     '/ext-standard-streams/bug61115-2.php',
     '/ext-standard-strings/moneyformat.php',
+
+    # works in interp but fails in JIT
+    '/ext-date/DateTime_add-february.php',
+    '/ext-date/gmdate_variation8.php',
+    '/ext-standard-array/array_next_error2.php',
+    '/ext-standard-array/prev_error3.php',
+    '/ext-standard-class_object/get_object_vars_variation_003.php',
+    '/ext-standard-file/pathinfo_variation1.php',
+    '/ext-standard-file/pathinfo_variaton.php',
+    '/tests-lang/038.php',
+    '/tests-lang/045.php',
+    '/zend/lsb_021.php',
+    '/zend/lsb_022.php',
 )
 
 # Random other files that zend wants
@@ -240,7 +253,6 @@ other_files = (
     '/ext-gd/src.gd2',
     '/ext-gd/src.wbmp',
     '/ext-gd/test8859.ttf',
-    '/ext-gd/test_gif.gif',
     '/ext-intl/ut_common.inc',
     '/ext-ldap/connect.inc',
     '/ext-mbstring/common.inc',
@@ -261,7 +273,6 @@ other_files = (
     '/ext-pdo/pdo_test.inc',
     '/ext-pdo_mysql/config.inc',
     '/ext-pdo_mysql/common.phpt',
-    '/ext-pdo_sqlite/config.inc',
     '/ext-pdo_sqlite/common.phpt',
     '/ext-session/save_handler.inc',
     '/ext-simplexml/bug24392.xml',
@@ -322,7 +333,6 @@ other_files = (
     '/zend/ns_027.inc',
     '/zend/ns_028.inc',
     '/zend/ns_065.inc',
-    '/zend/ns_066.inc',
     '/zend/ns_067.inc',
     '/zend/ns_069.inc',
     '/zend/unset.inc',
@@ -390,7 +400,7 @@ def walk(filename, source):
     if not '.phpt' in filename:
         return
 
-    print "Importing %s" % filename
+    print "Importing %s" % full_dest_filename
 
     def split(pattern, str):
         return re.split(r'\n\s*--'+pattern+'--\s*\n', str, 1)
@@ -655,13 +665,17 @@ if not os.path.isdir('test/zend/all'):
     else:
         print "Running all tests from test/zend/bad"
         shutil.copytree('test/zend/bad', 'test/zend/all')
+
+        for filename in other_files:
+            dest_dir = os.path.dirname('test/zend/all/'+filename)
+            if not os.path.exists(dest_dir):
+                os.makedirs(dest_dir)
+            shutil.copyfile(
+                'test/zend/good/'+filename, 
+                'test/zend/all/'+filename
+            )
 else:
     print "Running all tests from zend/all"
-
-file('test/zend/hphp_config.hdf', 'w').write('')
-file('test/zend/config.hdf', 'w').write(
-    'Eval {\n EnableObjDestructCall = true\n }'
-)
 
 stdout = subprocess.Popen(
     [
@@ -683,6 +697,8 @@ results = json.loads(last_line)['results']
 
 if args.verbose:
     print results
+else:
+    print "Test run done, moving files"
 
 for test in results:
     filename = test['name']

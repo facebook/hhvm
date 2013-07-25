@@ -181,6 +181,7 @@ void TestServer::StopServer() {
 
 class TestServerRequestHandler : public RequestHandler {
 public:
+  explicit TestServerRequestHandler(int timeout) : RequestHandler(timeout) {}
   // implementing RequestHandler
   virtual void handleRequest(Transport *transport) {
     // do nothing
@@ -191,8 +192,8 @@ static int find_server_port(int port_min, int port_max) {
   for (int port = port_min; ; port++) {
     try {
       ServerPtr server = boost::make_shared<LibEventServer>(
-          "127.0.0.1", port, 50, -1);
-      server->setRequestHandlerFactory<TestServerRequestHandler>();
+          "127.0.0.1", port, 50);
+      server->setRequestHandlerFactory<TestServerRequestHandler>(30);
       server->start();
       server->stop();
       server->waitForEnd();
@@ -420,7 +421,7 @@ public:
   }
 
   void process() {
-    HttpRequestHandler handler;
+    HttpRequestHandler handler(0);
     for (unsigned int i = 0; i < 100; i++) {
       handler.handleRequest(this);
     }
@@ -531,6 +532,7 @@ bool TestServer::TestInheritFdServer() {
 
 class EchoHandler : public RequestHandler {
 public:
+  explicit EchoHandler(int timeout) : RequestHandler(timeout) {}
   // implementing RequestHandler
   virtual void handleRequest(Transport *transport) {
     HeaderMap headers;
@@ -569,8 +571,8 @@ bool TestServer::TestHttpClient() {
   for (s_server_port = PORT_MIN; s_server_port <= PORT_MAX; s_server_port++) {
     try {
       server = boost::make_shared<LibEventServer>(
-          "127.0.0.1", s_server_port, 50, -1);
-      server->setRequestHandlerFactory<EchoHandler>();
+          "127.0.0.1", s_server_port, 50);
+      server->setRequestHandlerFactory<EchoHandler>(0);
       server->start();
       break;
     } catch (const FailedToListenException& e) {

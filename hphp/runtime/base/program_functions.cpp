@@ -60,6 +60,7 @@
 #include <boost/program_options/parsers.hpp>
 #include <libgen.h>
 #include <oniguruma.h>
+#include <signal.h>
 #include "libxml/parser.h"
 
 #include "hphp/runtime/base/file_repository.h"
@@ -501,7 +502,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   }
   String file = empty_string;
   if (argc > 0) {
-    file = NEW(StringData)(argv[0], AttachLiteral);
+    file = NEW(StringData)(argv[0], CopyString);
   }
   server.set(s_REQUEST_START_TIME, now);
   server.set(s_REQUEST_TIME, now);
@@ -532,7 +533,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
 
-  if (RuntimeOption::EvalJit && RuntimeOption::EvalDumpTC) {
+  if (RuntimeOption::EvalDumpTC) {
     HPHP::Transl::tc_dump();
   }
 
@@ -663,7 +664,7 @@ static int start_server(const std::string &username) {
   // If we have any warmup requests, replay them before listening for
   // real connections
   for (auto& file : RuntimeOption::ServerWarmupRequests) {
-    HttpRequestHandler handler;
+    HttpRequestHandler handler(0);
     ReplayTransport rt;
     timespec start;
     Timer::GetMonotonicTime(start);
@@ -1212,7 +1213,7 @@ static int execute_program_impl(int argc, char** argv) {
     RuntimeOption::RecordInput = false;
     set_execution_mode("server");
     HttpServer server; // so we initialize runtime properly
-    HttpRequestHandler handler;
+    HttpRequestHandler handler(0);
     for (int i = 0; i < po.count; i++) {
       for (unsigned int j = 0; j < po.args.size(); j++) {
         ReplayTransport rt;
@@ -1290,15 +1291,27 @@ extern "C" void hphp_fatal_error(const char *s) {
   throw_fatal(s);
 }
 
+static void on_timeout(int sig, siginfo_t* info, void* context) {
+  if (sig == SIGVTALRM && info && info->si_code == SI_TIMER) {
+    auto data = (RequestInjectionData*)info->si_value.sival_ptr;
+    data->onTimeout();
+  }
+}
+
 void hphp_process_init() {
   pthread_attr_t attr;
-#ifndef __APPLE__
+#ifdef _GNU_SOURCE
   pthread_getattr_np(pthread_self(), &attr);
 #else
   pthread_attr_init(&attr);
 #endif
   Util::init_stack_limits(&attr);
   pthread_attr_destroy(&attr);
+
+  struct sigaction action = {};
+  action.sa_sigaction = on_timeout;
+  action.sa_flags = SA_SIGINFO | SA_NODEFER;
+  sigaction(SIGVTALRM, &action, nullptr);
 
   init_thread_locals();
   ClassInfo::Load();

@@ -5,7 +5,7 @@
 *
 
 /*
- * This testcase tests uasort() functionality with differnt objects
+ * This testcase tests uasort() functionality with different objects
  * Objects of different classes: 
  *  simple class,
  *  child class,

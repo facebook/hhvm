@@ -25,7 +25,7 @@ namespace HPHP { namespace JIT {
  * A dummy (debugging) region selector that just uses a single HHBC
  * opcode as the region, and guards on everything.
  */
-RegionDescPtr regionOneBC(const RegionContext& ctx) {
+RegionDescPtr selectOneBC(const RegionContext& ctx) {
   auto ret = smart::make_unique<RegionDesc>();
   auto blk = smart::make_unique<RegionDesc::Block>(ctx.func, ctx.bcOffset, 1);
 

@@ -471,7 +471,8 @@
             "name": "str_split",
             "desc": "Converts a string to an array.",
             "flags": [
-                "HasDocComment"
+                "HasDocComment",
+                "ZendParamMode"
             ],
             "return": {
                 "type": "Variant",

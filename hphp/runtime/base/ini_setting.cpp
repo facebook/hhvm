@@ -25,7 +25,6 @@
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/hphp_system.h"
 #include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/timeout_thread.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/util/lock.h"
 
@@ -241,7 +240,9 @@ bool IniSetting::Get(CStrRef name, String &value) {
     return true;
   }
   if (name == s_max_execution_time || name == s_maximum_execution_time) {
-    value = String((int64_t)g_context->getRequestTimeLimit());
+    int64_t timeout = ThreadInfo::s_threadInfo.getNoCheck()->
+      m_reqInjectionData.getTimeout();
+    value = String(timeout);
     return true;
   }
   if (name == s_hphp_build_id) {
@@ -321,9 +322,8 @@ bool IniSetting::Set(CStrRef name, CStrRef value) {
     }
   } else if (name == "max_execution_time" || name == "maximum_execution_time"){
     int64_t limit = value.toInt64();
-    TimeoutThread::DeferTimeout(limit);
-    // Just for ini_get
-    g_context->setRequestTimeLimit(limit);
+    ThreadInfo::s_threadInfo.getNoCheck()->
+      m_reqInjectionData.setTimeout(limit);
     return true;
   } else if (name == "arg_separator.output") {
     g_context->setArgSeparatorOutput(value);

@@ -33,8 +33,7 @@ public:
 ServerPtr LibEventServerFactory::createServer(const ServerOptions& options) {
   if (options.m_serverFD != -1 || options.m_sslFD != -1) {
     auto const server = boost::make_shared<LibEventServerWithFd>
-      (options.m_address, options.m_port, options.m_numThreads,
-       options.m_timeout.count());
+      (options.m_address, options.m_port, options.m_numThreads);
     server->setServerSocketFd(options.m_serverFD);
     server->setSSLSocketFd(options.m_sslFD);
     return server;
@@ -42,15 +41,13 @@ ServerPtr LibEventServerFactory::createServer(const ServerOptions& options) {
 
   if (!options.m_takeoverFilename.empty()) {
     auto const server = boost::make_shared<LibEventServerWithTakeover>
-      (options.m_address, options.m_port, options.m_numThreads,
-       options.m_timeout.count());
+      (options.m_address, options.m_port, options.m_numThreads);
     server->setTransferFilename(options.m_takeoverFilename);
     return server;
   }
 
   return boost::make_shared<LibEventServer>(options.m_address, options.m_port,
-                                            options.m_numThreads,
-                                            options.m_timeout.count());
+                                            options.m_numThreads);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

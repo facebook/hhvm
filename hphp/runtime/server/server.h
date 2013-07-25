@@ -79,12 +79,16 @@ DECLARE_BOOST_TYPES(ServerFactory);
  */
 class RequestHandler {
 public:
+  explicit RequestHandler(int timeout) : m_timeout(timeout) {}
   virtual ~RequestHandler() {}
 
   /**
    * Sub-class handles a request by implementing this function.
    */
   virtual void handleRequest(Transport *transport) = 0;
+  int getDefaultTimeout() const { return m_timeout; }
+private:
+  int m_timeout;
 };
 
 /**
@@ -142,9 +146,9 @@ public:
    * GenericRequestHandlerFactory for the specified handler type.
    */
   template<class TRequestHandler>
-  void setRequestHandlerFactory() {
-    setRequestHandlerFactory([] {
-      return std::unique_ptr<RequestHandler>(new TRequestHandler());
+  void setRequestHandlerFactory(int timeout) {
+    setRequestHandlerFactory([timeout] {
+      return std::unique_ptr<RequestHandler>(new TRequestHandler(timeout));
     });
   }
 
@@ -256,12 +260,10 @@ class ServerOptions {
 public:
   ServerOptions(const std::string &address,
                 uint16_t port,
-                int numThreads,
-                std::chrono::seconds timeout)
+                int numThreads)
     : m_address(address),
       m_port(port),
       m_numThreads(numThreads),
-      m_timeout(timeout),
       m_serverFD(-1),
       m_sslFD(-1),
       m_takeoverFilename() {
@@ -270,7 +272,6 @@ public:
   std::string m_address;
   uint16_t m_port;
   int m_numThreads;
-  std::chrono::seconds m_timeout;
   int m_serverFD;
   int m_sslFD;
   std::string m_takeoverFilename;
@@ -287,8 +288,7 @@ public:
 
   ServerPtr createServer(const std::string &address,
                          uint16_t port,
-                         int numThreads,
-                         std::chrono::seconds timeout);
+                         int numThreads);
 };
 
 /**
@@ -306,8 +306,7 @@ public:
   static ServerPtr createServer(const std::string &type,
                                 const std::string &address,
                                 uint16_t port,
-                                int numThreads,
-                                std::chrono::seconds timeout);
+                                int numThreads);
 
   void registerFactory(const std::string &name,
                        const ServerFactoryPtr &factory);

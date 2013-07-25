@@ -247,6 +247,12 @@ Func::~Func() {
     DEBUG_ONLY auto oldVal = s_funcVec.exchange(m_funcId, nullptr);
     assert(oldVal == this);
   }
+  int maxNumPrologues = getMaxNumPrologues(numParams());
+  int numPrologues =
+    maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
+                                         : kNumFixedPrologues;
+  TranslatorX64::Get()->smashPrologueGuards((TCA *)m_prologueTable,
+                                            numPrologues, this);
 #ifdef DEBUG
   validate();
   m_magic = ~m_magic;
@@ -659,6 +665,19 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
     }
   }
 }
+
+DVFuncletsVec Func::getDVFunclets() const {
+ DVFuncletsVec dvs;
+  int nParams = numParams();
+  for (int i = 0; i < nParams; ++i) {
+    const ParamInfo& pi = params()[i];
+    if (pi.hasDefaultValue()) {
+      dvs.push_back(std::make_pair(i, pi.funcletOff()));
+    }
+  }
+  return dvs;
+}
+
 
 Func::SharedData::SharedData(PreClass* preClass, Id id,
                              Offset base, Offset past, int line1, int line2,

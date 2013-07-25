@@ -316,6 +316,7 @@ O(RaiseError,                       ND, S(Str),            E|N|Mem|Refs|T|Er) \
 O(RaiseWarning,                     ND, S(Str),              E|N|Mem|Refs|Er) \
 O(CheckInit,                        ND, S(Gen),                           NF) \
 O(CheckInitMem,                     ND, S(PtrToGen) C(Int),               NF) \
+O(CheckCold,                        ND, NA,                                E) \
 O(AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr),            NF) \
 O(Unbox,                     DUnbox(0), S(Gen),                           NF) \
 O(Box,                         DBox(0), S(Init),             E|N|Mem|CRc|PRc) \
@@ -423,6 +424,7 @@ O(ExceptionBarrier,          D(StkPtr), S(StkPtr),                         E) \
 O(ReqBindJmp,                       ND, NA,                              T|E) \
 O(ReqBindJmpNoIR,                   ND, NA,                              T|E) \
 O(ReqRetranslateNoIR,               ND, NA,                              T|E) \
+O(ReqRetranslateOpt,                ND, NA,                              T|E) \
 O(ReqRetranslate,                   ND, NA,                              T|E) \
 O(SyncABIRegs,                      ND, S(FramePtr) S(StkPtr),             E) \
 O(Mov,                         DofS(0), SUnk,                            C|P) \

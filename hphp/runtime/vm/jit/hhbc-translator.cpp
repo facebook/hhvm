@@ -868,14 +868,15 @@ void HhbcTranslator::emitReqDoc(const StringData* name) {
 }
 
 template<class Lambda>
-SSATmp* HhbcTranslator::emitIterInitCommon(int offset, Lambda genFunc) {
+SSATmp* HhbcTranslator::emitIterInitCommon(int offset, Lambda genFunc,
+                                           bool invertCond) {
   SSATmp* src = popC();
   Type type = src->type();
   if (!type.isArray() && type != Type::Obj) {
     PUNT(IterInit);
   }
   SSATmp* res = genFunc(src);
-  return emitJmpCondHelper(offset, true, res);
+  return emitJmpCondHelper(offset, !invertCond, res);
 }
 
 template<class Lambda>
@@ -895,39 +896,40 @@ SSATmp* HhbcTranslator::emitMIterInitCommon(int offset, Lambda genFunc) {
 
 void HhbcTranslator::emitIterInit(uint32_t iterId,
                                   int offset,
-                                  uint32_t valLocalId) {
+                                  uint32_t valLocalId,
+                                  bool invertCond) {
   emitIterInitCommon(offset, [&] (SSATmp* src) {
-    return gen(
-      IterInit,
-      Type::Bool,
-      src,
-      m_tb->fp(),
-      cns(iterId),
-      cns(valLocalId)
-    );
-  });
+      return gen(IterInit,
+                 Type::Bool,
+                 src,
+                 m_tb->fp(),
+                 cns(iterId),
+                 cns(valLocalId));
+    },
+    invertCond);
 }
 
 void HhbcTranslator::emitIterInitK(uint32_t iterId,
                                    int offset,
                                    uint32_t valLocalId,
-                                   uint32_t keyLocalId) {
+                                   uint32_t keyLocalId,
+                                   bool invertCond) {
   emitIterInitCommon(offset, [&] (SSATmp* src) {
-    return gen(
-      IterInitK,
-      Type::Bool,
-      src,
-      m_tb->fp(),
-      cns(iterId),
-      cns(valLocalId),
-      cns(keyLocalId)
-    );
-  });
+      return gen(IterInitK,
+                 Type::Bool,
+                 src,
+                 m_tb->fp(),
+                 cns(iterId),
+                 cns(valLocalId),
+                 cns(keyLocalId));
+    },
+    invertCond);
 }
 
 void HhbcTranslator::emitIterNext(uint32_t iterId,
                                   int offset,
-                                  uint32_t valLocalId) {
+                                  uint32_t valLocalId,
+                                  bool invertCond) {
   SSATmp* res = gen(
     IterNext,
     Type::Bool,
@@ -935,13 +937,14 @@ void HhbcTranslator::emitIterNext(uint32_t iterId,
     cns(iterId),
     cns(valLocalId)
   );
-  emitJmpCondHelper(offset, false, res);
+  emitJmpCondHelper(offset, invertCond, res);
 }
 
 void HhbcTranslator::emitIterNextK(uint32_t iterId,
                                    int offset,
                                    uint32_t valLocalId,
-                                   uint32_t keyLocalId) {
+                                   uint32_t keyLocalId,
+                                   bool invertCond) {
   SSATmp* res = gen(
     IterNextK,
     Type::Bool,
@@ -950,48 +953,47 @@ void HhbcTranslator::emitIterNextK(uint32_t iterId,
     cns(valLocalId),
     cns(keyLocalId)
   );
-  emitJmpCondHelper(offset, false, res);
+  emitJmpCondHelper(offset, invertCond, res);
 }
 
 void HhbcTranslator::emitWIterInit(uint32_t iterId,
                                    int offset,
-                                   uint32_t valLocalId) {
+                                   uint32_t valLocalId,
+                                   bool invertCond) {
   emitIterInitCommon(
     offset, [&] (SSATmp* src) {
-      return gen(
-        WIterInit,
-        Type::Bool,
-        src,
-        m_tb->fp(),
-        cns(iterId),
-        cns(valLocalId)
-      );
-    }
-  );
+      return gen(WIterInit,
+                 Type::Bool,
+                 src,
+                 m_tb->fp(),
+                 cns(iterId),
+                 cns(valLocalId));
+    },
+    invertCond);
 }
 
 void HhbcTranslator::emitWIterInitK(uint32_t iterId,
                                     int offset,
                                     uint32_t valLocalId,
-                                    uint32_t keyLocalId) {
+                                    uint32_t keyLocalId,
+                                    bool invertCond) {
   emitIterInitCommon(
     offset, [&] (SSATmp* src) {
-      return gen(
-        WIterInitK,
-        Type::Bool,
-        src,
-        m_tb->fp(),
-        cns(iterId),
-        cns(valLocalId),
-        cns(keyLocalId)
-      );
-    }
-  );
+      return gen(WIterInitK,
+                 Type::Bool,
+                 src,
+                 m_tb->fp(),
+                 cns(iterId),
+                 cns(valLocalId),
+                 cns(keyLocalId));
+    },
+    invertCond);
 }
 
 void HhbcTranslator::emitWIterNext(uint32_t iterId,
                                    int offset,
-                                   uint32_t valLocalId) {
+                                   uint32_t valLocalId,
+                                   bool invertCond) {
   SSATmp* res = gen(
     WIterNext,
     Type::Bool,
@@ -999,13 +1001,14 @@ void HhbcTranslator::emitWIterNext(uint32_t iterId,
     cns(iterId),
     cns(valLocalId)
   );
-  emitJmpCondHelper(offset, false, res);
+  emitJmpCondHelper(offset, invertCond, res);
 }
 
 void HhbcTranslator::emitWIterNextK(uint32_t iterId,
                                     int offset,
                                     uint32_t valLocalId,
-                                    uint32_t keyLocalId) {
+                                    uint32_t keyLocalId,
+                                    bool invertCond) {
   SSATmp* res = gen(
     WIterNextK,
     Type::Bool,
@@ -1014,7 +1017,7 @@ void HhbcTranslator::emitWIterNextK(uint32_t iterId,
     cns(valLocalId),
     cns(keyLocalId)
   );
-  emitJmpCondHelper(offset, false, res);
+  emitJmpCondHelper(offset, invertCond, res);
 }
 
 void HhbcTranslator::emitMIterInit(uint32_t iterId,
@@ -1432,6 +1435,10 @@ void HhbcTranslator::emitArrayIdx() {
 
 void HhbcTranslator::emitIncTransCounter() {
   m_tb->gen(IncTransCounter);
+}
+
+void HhbcTranslator::emitCheckCold(TransID transId) {
+  m_tb->gen(CheckCold, getExitOptTrace(transId), TransIDData(transId));
 }
 
 SSATmp* HhbcTranslator::getStrName(const StringData* knownName) {
@@ -2589,7 +2596,7 @@ void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type) {
 
 void HhbcTranslator::guardTypeLocation(const RegionDesc::Location& loc,
                                        Type type) {
-  assert(type.subtypeOf(Type::Gen | Type::Cls));
+  assert(type.subtypeOf(Type::Gen));
   typedef RegionDesc::Location::Tag T;
   switch (loc.tag()) {
     case T::Stack: guardTypeStack(loc.stackOffset(), type); break;
@@ -2631,12 +2638,7 @@ void HhbcTranslator::assertTypeLocation(const RegionDesc::Location& loc,
 }
 
 void HhbcTranslator::guardTypeStack(uint32_t stackIndex, Type type) {
-  // Should not generate guards for class; instead assert their type
-  if (type.subtypeOf(Type::Cls)) {
-    assertTypeStack(stackIndex, type);
-    return;
-  }
-
+  assert(type.subtypeOf(Type::Gen));
   assert(m_evalStack.size() == 0);
   assert(m_stackDeficit == 0); // This should only be called at the beginning
                                // of a trace, with a clean stack.
@@ -2644,6 +2646,7 @@ void HhbcTranslator::guardTypeStack(uint32_t stackIndex, Type type) {
 }
 
 void HhbcTranslator::checkTypeStack(uint32_t idx, Type type, Offset dest) {
+  assert(type.subtypeOf(Type::Gen));
   auto exitTrace = getExitTrace(dest);
   if (idx < m_evalStack.size()) {
     FTRACE(1, "checkTypeStack(){}: generating CheckType for {}\n",
@@ -3907,15 +3910,15 @@ IRTrace* HhbcTranslator::getExitTrace(Offset targetBcOff /* = -1 */) {
 IRTrace* HhbcTranslator::getExitTrace(Offset targetBcOff,
                                       std::vector<SSATmp*>& spillValues) {
   if (targetBcOff == -1) targetBcOff = bcOff();
-  return getExitTraceImpl(targetBcOff, ExitFlag::None, spillValues,
-    CustomExit{});
+  return getExitTraceImpl(targetBcOff, ExitFlag::JIT, spillValues,
+                          CustomExit{});
 }
 
 IRTrace* HhbcTranslator::getExitTraceWarn(Offset targetBcOff,
                                           std::vector<SSATmp*>& spillValues,
                                           const StringData* warning) {
   assert(targetBcOff != -1);
-  return getExitTraceImpl(targetBcOff, ExitFlag::None, spillValues,
+  return getExitTraceImpl(targetBcOff, ExitFlag::JIT, spillValues,
     [&]() -> SSATmp* {
       gen(RaiseWarning, cns(warning));
       return nullptr;
@@ -3934,8 +3937,36 @@ IRTrace* HhbcTranslator::makeSideExit(Offset targetBcOff, ExitLambda exit) {
 
 IRTrace* HhbcTranslator::getExitSlowTrace() {
   auto spillValues = peekSpillValues();
-  return getExitTraceImpl(bcOff(), ExitFlag::NoIR, spillValues,
-    CustomExit{});
+  return getExitTraceImpl(bcOff(), ExitFlag::Interp, spillValues,
+                          CustomExit{});
+}
+
+IRTrace* HhbcTranslator::getExitOptTrace(TransID transId) {
+  auto spillValues = peekSpillValues();
+  Offset targetBcOff = bcOff();
+  auto const exit = m_tb->makeExitTrace(targetBcOff);
+
+  BCMarker exitMarker;
+  exitMarker.bcOff = targetBcOff;
+  exitMarker.spOff = m_tb->spOffset() + spillValues.size() - m_stackDeficit;
+  exitMarker.func  = curFunc();
+
+  TracePusher tracePusher(*m_tb, exit, exitMarker);
+
+  SSATmp* stack = nullptr;
+  if (m_stackDeficit != 0 || !spillValues.empty()) {
+    spillValues.insert(spillValues.begin(),
+                       { m_tb->sp(), cns(int64_t(m_stackDeficit)) });
+    stack = gen(SpillStack,
+                std::make_pair(spillValues.size(), &spillValues[0]));
+  } else {
+    stack = m_tb->sp();
+  }
+
+  gen(SyncABIRegs, m_tb->fp(), stack);
+  gen(ReqRetranslateOpt, ReqRetransOptData(transId, targetBcOff));
+
+  return exit;
 }
 
 IRTrace* HhbcTranslator::getExitTraceImpl(Offset targetBcOff,
@@ -3985,7 +4016,7 @@ IRTrace* HhbcTranslator::getExitTraceImpl(Offset targetBcOff,
 
   gen(SyncABIRegs, m_tb->fp(), stack);
 
-  if (flag == ExitFlag::NoIR) {
+  if (flag == ExitFlag::Interp) {
     gen(targetBcOff == m_startBcOff ? ReqRetranslateNoIR : ReqBindJmpNoIR,
         BCOffset(targetBcOff));
     return exit;
@@ -3996,7 +4027,6 @@ IRTrace* HhbcTranslator::getExitTraceImpl(Offset targetBcOff,
   } else {
     gen(ReqBindJmp, BCOffset(targetBcOff));
   }
-
   return exit;
 }
 

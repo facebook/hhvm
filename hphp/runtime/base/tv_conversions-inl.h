@@ -22,7 +22,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 inline bool cellToBool(Cell cell) {
-  assert(cellIsPlausible(&cell));
+  assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
   case KindOfUninit:
@@ -40,7 +40,7 @@ inline bool cellToBool(Cell cell) {
 }
 
 inline int64_t cellToInt(Cell cell) {
-  assert(cellIsPlausible(&cell));
+  assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
   case KindOfInt64:        return cell.m_data.num;

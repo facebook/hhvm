@@ -20,6 +20,9 @@
 #include <sys/times.h>
 #include <sys/utsname.h>
 #include <sys/types.h>
+#ifdef __FreeBSD__
+#include <sys/param.h>
+#endif
 #include <sys/time.h>
 #include <pwd.h>
 #include <memory>
@@ -421,7 +424,7 @@ Variant f_posix_uname() {
   ret.set(s_release,    String(u.release,    CopyString));
   ret.set(s_version,    String(u.version,    CopyString));
   ret.set(s_machine,    String(u.machine,    CopyString));
-#if defined(_GNU_SOURCE) && !defined(__APPLE__) && !defined(__FreeBSD__)
+#if defined(_GNU_SOURCE)
   ret.set(s_domainname, String(u.domainname, CopyString));
 #endif
   return ret;

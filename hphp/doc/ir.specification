@@ -440,6 +440,12 @@ CheckDefinedClsEq<className,classPtr> -> L
   `classPtr'; if they aren't equal or if `className' is not defined,
   branch to L.
 
+CheckCold<TransID> -> L
+
+  Check if the counter associated with translation TransID is cold
+  (i.e. within a fixed threshold).  If it's not (i.e. such translation
+  has reached the "hotness threshold"), then branch to label L.
+
 GuardRefs S0:FuncPtr S1:Int S2:Int S3:Int S4:Int S5:Int
 
   Perform reffiness guard checks.  Operands:
@@ -1222,6 +1228,12 @@ ReqRetranslate
 
   This instruction is used in exit traces for a type prediction that
   occurs at the first bytecode offset of a tracelet.
+
+ReqRetranslateOpt<transID,bcOff>
+
+  Emit a service request to retranslate, with a higher optimization
+  gear, translation transID, which starts at bcOff.  This instruction
+  is used in exit traces that trigger profile-guided optimizations.
 
 ReqBindJmpGt
 ReqBindJmpGte

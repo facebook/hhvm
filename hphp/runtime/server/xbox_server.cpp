@@ -143,19 +143,22 @@ private:
   string m_reqInitDoc;
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
+static IMPLEMENT_THREAD_LOCAL(XboxServerInfoPtr, s_xbox_server_info);
+static IMPLEMENT_THREAD_LOCAL(string, s_xbox_prev_req_init_doc);
+
 class XboxRequestHandler: public RPCRequestHandler {
 public:
-  XboxRequestHandler() : RPCRequestHandler(Info) {}
+  XboxRequestHandler() : RPCRequestHandler(
+    (*s_xbox_server_info)->getTimeoutSeconds().count(), Info) {}
   static bool Info;
 };
 
 bool XboxRequestHandler::Info = false;
 
-///////////////////////////////////////////////////////////////////////////////
-
-static IMPLEMENT_THREAD_LOCAL(XboxServerInfoPtr, s_xbox_server_info);
 static IMPLEMENT_THREAD_LOCAL(XboxRequestHandler, s_xbox_request_handler);
-static IMPLEMENT_THREAD_LOCAL(string, s_xbox_prev_req_init_doc);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct XboxWorker

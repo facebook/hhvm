@@ -23,15 +23,17 @@
 #include "hphp/util/thread_local.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/case_insensitive.h"
-#include <vector>
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/memory_manager.h"
 
 #include <boost/static_assert.hpp>
 #include <boost/intrusive_ptr.hpp>
-#include <type_traits>
+
 #include <stdint.h>
+#include <atomic>
 #include <limits>
+#include <type_traits>
+#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -207,11 +209,14 @@ public:
   static const ssize_t LastFlag             = DebuggerSignalFlag;
 
   RequestInjectionData()
-    : cflagsPtr(nullptr), surprisePage(nullptr), started(0), timeoutSeconds(-1),
+    : cflagsPtr(nullptr), surprisePage(nullptr),
+      m_timeoutSeconds(-1), m_hasTimer(false), m_timerActive(false),
       m_debugger(false), m_dummySandbox(false),
       m_debuggerIntr(false), m_coverage(false),
       m_jit(false) {
   }
+
+  ~RequestInjectionData();
 
   inline volatile ssize_t* getConditionFlags() {
     assert(cflagsPtr);
@@ -222,17 +227,25 @@ public:
                        // somewhere in the thread's targetcache
   void *surprisePage;  // beginning address of page to
                        // protect for error conditions
-  Mutex surpriseLock;  // mutex controlling access to surprisePage
 
-  time_t started;      // when a request was started
-  int timeoutSeconds;  // how many seconds to timeout
  private:
+  timer_t m_timer_id;    // id of our timer
+  int m_timeoutSeconds;  // how many seconds to timeout
+  bool m_hasTimer;       // Whether we've created our timer yet
+  std::atomic<bool> m_timerActive;
+                         // Set true when we activate a timer,
+                         // cleared when the signal handler runs
   bool m_debugger;       // whether there is a DebuggerProxy attached to me
   bool m_dummySandbox;   // indicating it is from a dummy sandbox thread
   bool m_debuggerIntr;   // indicating we should force interrupt for debugger
   bool m_coverage;       // is coverage being collected
   bool m_jit;            // is the jit enabled
  public:
+  int getTimeout() const { return m_timeoutSeconds; }
+  void setTimeout(int seconds);
+  void resetTimer(int seconds = -1);
+  void setSurprisePage(void* page);
+  void onTimeout();
   bool getJit() const { return m_jit; }
   bool getDebugger() const { return m_debugger; }
   void setDebugger(bool d) {
@@ -262,6 +275,7 @@ public:
 
   void setMemExceededFlag();
   void setTimedOutFlag();
+  void clearTimedOutFlag();
   void setSignaledFlag();
   void setEventHookFlag();
   void clearEventHookFlag();
@@ -452,6 +466,7 @@ const Id kInvalidId = Id(-1);
 // offsets.
 typedef int32_t Offset;
 constexpr Offset kInvalidOffset = std::numeric_limits<Offset>::max();
+typedef hphp_hash_set<Offset> OffsetSet;
 
 /*
  * Various fields in the VM's runtime have indexes that are addressed

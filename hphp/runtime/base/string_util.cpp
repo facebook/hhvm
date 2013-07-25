@@ -263,7 +263,9 @@ String StringUtil::Implode(CArrRef items, CStrRef delim) {
 
 Variant StringUtil::Split(CStrRef str, int split_length /* = 1 */) {
   if (split_length <= 0) {
-    throw_invalid_argument("split_length: (non-positive)");
+    throw_invalid_argument(
+      "The length of each segment must be greater than zero"
+    );
     return false;
   }
 
@@ -305,7 +307,7 @@ Variant StringUtil::ChunkSplit(CStrRef body, int chunklen /* = 76 */,
 String StringUtil::CEncode(CStrRef input, CStrRef charlist) {
   String chars = charlist;
   if (chars.isNull()) {
-    chars = String("\\\x00\x01..\x1f\x7f..\xff", 10, AttachLiteral);
+    chars = String("\\\x00\x01..\x1f\x7f..\xff", 10, CopyString);
   }
   if (input.empty() || chars.empty()) return input;
   int len = input.size();

@@ -136,7 +136,7 @@ struct EagerVMRegAnchor {
   }
 };
 
-inline ActRec* regAnchorFP() {
+inline ActRec* regAnchorFP(Offset* pc = nullptr) {
   // In builtins, m_fp points to the caller's frame if called
   // through FCallBuiltin, else it points to the builtin's frame,
   // in which case, getPrevVMState() gets the caller's frame.
@@ -144,8 +144,9 @@ inline ActRec* regAnchorFP() {
   // in order to find the true context.
   VMExecutionContext* context = g_vmContext;
   ActRec* cur = context->getFP();
+  if (pc) *pc = cur->m_func->unit()->offsetOf(context->getPC());
   while (cur && cur->skipFrame()) {
-    cur = context->getPrevVMState(cur);
+    cur = context->getPrevVMState(cur, pc);
   }
   return cur;
 }
@@ -171,8 +172,9 @@ struct EagerCallerFrame : public EagerVMRegAnchor {
 // VM helper to retrieve the frame pointer from the TC. This is
 // a common need for extensions.
 struct CallerFrame : public VMRegAnchor {
-  ActRec* operator()() {
-    return regAnchorFP();
+  template<class... Args>
+  ActRec* operator()(Args&&... args) {
+    return regAnchorFP(std::forward<Args>(args)...);
   }
   ActRec* actRecForArgs() { return regAnchorFPForArgs(); }
 };

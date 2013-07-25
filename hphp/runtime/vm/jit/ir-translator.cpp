@@ -117,11 +117,16 @@ void IRTranslator::checkType(const Transl::Location& l,
 
   using Transl::Location;
   switch (l.space) {
-    case Location::Stack:
-      m_hhbcTrans.guardTypeStack(locPhysicalOffset(l),
-                                 Type::fromRuntimeType(rtt));
+    case Location::Stack: {
+      uint32_t stackOffset = locPhysicalOffset(l);
+      JIT::Type type = JIT::Type::fromRuntimeType(rtt);
+      if (type.subtypeOf(Type::Cls)) {
+        m_hhbcTrans.assertTypeStack(stackOffset, type);
+      } else {
+        m_hhbcTrans.guardTypeStack(stackOffset, type);
+      }
       break;
-
+    }
     case Location::Local:
       m_hhbcTrans.guardTypeLocal(l.offset, Type::fromRuntimeType(rtt));
       break;
@@ -266,12 +271,27 @@ void
 IRTranslator::translateBranchOp(const NormalizedInstruction& i) {
   auto const op = i.op();
   assert(op == OpJmpZ || op == OpJmpNZ);
-  assert(!i.next);
 
+  Offset takenOffset    = i.offset() + i.imm[0].u_BA;
+  Offset fallthruOffset = i.offset() + instrLen((Op*)(i.pc()));
+  assert(i.breaksTracelet ||
+         i.nextOffset == takenOffset ||
+         i.nextOffset == fallthruOffset);
+
+  if (i.breaksTracelet || i.nextOffset == fallthruOffset) {
+    if (op == OpJmpZ) {
+      HHIR_EMIT(JmpZ,  takenOffset);
+    } else {
+      HHIR_EMIT(JmpNZ, takenOffset);
+    }
+    return;
+  }
+  assert(i.nextOffset == takenOffset);
+  // invert the branch
   if (op == OpJmpZ) {
-    HHIR_EMIT(JmpZ,  i.offset() + i.imm[0].u_BA);
+    HHIR_EMIT(JmpNZ, fallthruOffset);
   } else {
-    HHIR_EMIT(JmpNZ, i.offset() + i.imm[0].u_BA);
+    HHIR_EMIT(JmpZ,  fallthruOffset);
   }
 }
 
@@ -1382,40 +1402,78 @@ IRTranslator::translateInstanceOfD(const NormalizedInstruction& i) {
   HHIR_EMIT(InstanceOfD, (i.imm[0].u_SA));
 }
 
+/*
+ * This function returns the offset of instruction i's branch target.
+ * This is normally the offset corresponding to the branch being
+ * taken.  However, if i does not break a trace and it's followed in
+ * the trace by the instruction in the taken branch, then this
+ * function returns the offset of the i's fall-through instruction.
+ * In that case, the invertCond output argument is set to true;
+ * otherwise it's set to false.
+ */
+static Offset getBranchTarget(const NormalizedInstruction& i,
+                              bool& invertCond) {
+  assert(instrJumpOffset((Op*)(i.pc())) != nullptr);
+  Offset targetOffset = i.offset() + i.imm[1].u_BA;
+  invertCond = false;
+
+  if (!i.breaksTracelet && i.nextOffset == targetOffset) {
+    invertCond = true;
+    Offset fallthruOffset = i.offset() + instrLen((Op*)i.pc());
+    targetOffset = fallthruOffset;
+  }
+
+  return targetOffset;
+}
+
 void
 IRTranslator::translateIterInit(const NormalizedInstruction& i) {
+  bool invertCond = false;
+  Offset targetOffset = getBranchTarget(i, invertCond);
+
   HHIR_EMIT(IterInit,
             i.imm[0].u_IVA,
-            i.offset() + i.imm[1].u_BA,
-            i.imm[2].u_IVA);
+            targetOffset,
+            i.imm[2].u_IVA,
+            invertCond);
 }
 
 void
 IRTranslator::translateIterInitK(const NormalizedInstruction& i) {
+  bool invertCond = false;
+  Offset targetOffset = getBranchTarget(i, invertCond);
+
   HHIR_EMIT(IterInitK,
             i.imm[0].u_IVA,
-            i.offset() + i.imm[1].u_BA,
+            targetOffset,
             i.imm[2].u_IVA,
-            i.imm[3].u_IVA);
+            i.imm[3].u_IVA,
+            invertCond);
 }
 
 void
 IRTranslator::translateIterNext(const NormalizedInstruction& i) {
+  bool invertCond = false;
+  Offset targetOffset = getBranchTarget(i, invertCond);
 
   HHIR_EMIT(IterNext,
             i.imm[0].u_IVA,
-            i.offset() + i.imm[1].u_BA,
-            i.imm[2].u_IVA);
+            targetOffset,
+            i.imm[2].u_IVA,
+            invertCond);
 }
 
 void
 IRTranslator::translateIterNextK(const NormalizedInstruction& i) {
+  bool invertCond = false;
+  Offset targetOffset = getBranchTarget(i, invertCond);
 
   HHIR_EMIT(IterNextK,
             i.imm[0].u_IVA,
-            i.offset() + i.imm[1].u_BA,
+            targetOffset,
             i.imm[2].u_IVA,
-            i.imm[3].u_IVA);
+            i.imm[3].u_IVA,
+            invertCond);
 }
 
 void
@@ -1456,38 +1514,52 @@ IRTranslator::translateMIterNextK(const NormalizedInstruction& i) {
 
 void
 IRTranslator::translateWIterInit(const NormalizedInstruction& i) {
+  bool invertCond = false;
+  Offset targetOffset = getBranchTarget(i, invertCond);
+
   HHIR_EMIT(WIterInit,
             i.imm[0].u_IVA,
-            i.offset() + i.imm[1].u_BA,
-            i.imm[2].u_IVA);
+            targetOffset,
+            i.imm[2].u_IVA,
+            invertCond);
 }
 
 void
 IRTranslator::translateWIterInitK(const NormalizedInstruction& i) {
+  bool invertCond = false;
+  Offset targetOffset = getBranchTarget(i, invertCond);
+
   HHIR_EMIT(WIterInitK,
             i.imm[0].u_IVA,
-            i.offset() + i.imm[1].u_BA,
+            targetOffset,
             i.imm[2].u_IVA,
-            i.imm[3].u_IVA);
+            i.imm[3].u_IVA,
+            invertCond);
 }
 
 void
 IRTranslator::translateWIterNext(const NormalizedInstruction& i) {
+  bool invertCond = false;
+  Offset targetOffset = getBranchTarget(i, invertCond);
 
   HHIR_EMIT(WIterNext,
             i.imm[0].u_IVA,
-            i.offset() + i.imm[1].u_BA,
-            i.imm[2].u_IVA);
+            targetOffset,
+            i.imm[2].u_IVA,
+            invertCond);
 }
 
 void
 IRTranslator::translateWIterNextK(const NormalizedInstruction& i) {
+  bool invertCond = false;
+  Offset targetOffset = getBranchTarget(i, invertCond);
 
   HHIR_EMIT(WIterNextK,
             i.imm[0].u_IVA,
-            i.offset() + i.imm[1].u_BA,
+            targetOffset,
             i.imm[2].u_IVA,
-            i.imm[3].u_IVA);
+            i.imm[3].u_IVA,
+            invertCond);
 }
 
 void
@@ -1613,6 +1685,8 @@ void IRTranslator::translateInstr(const NormalizedInstruction& i) {
   FTRACE(1, "\n{:-^60}\n", folly::format("translating {} with stack:\n{}",
                                          i.toString(),
                                          m_hhbcTrans.showStack()));
+  // When profiling, we disable type predictions to avoid side exits
+  assert(Transl::tx64->mode() != TransProfile || !i.outputPredicted);
 
   m_hhbcTrans.setBcOff(i.source.offset(),
                        i.breaksTracelet && !m_hhbcTrans.isInlining());

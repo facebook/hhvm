@@ -70,12 +70,12 @@ SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
 }
 
 bool SatelliteServerInfo::checkMainURL(const std::string& path) {
-  String url(path.c_str(), path.size(), AttachLiteral);
+  String url(path.c_str(), path.size(), CopyString);
   for (std::set<string>::const_iterator iter =
          SatelliteServerInfo::InternalURLs.begin();
        iter != SatelliteServerInfo::InternalURLs.end(); ++iter) {
     Variant ret = preg_match
-      (String(iter->c_str(), iter->size(), AttachLiteral), url);
+      (String(iter->c_str(), iter->size(), CopyString), url);
     if (ret.toInt64() > 0) {
       return false;
     }
@@ -92,8 +92,9 @@ public:
     : m_allowedURLs(info->getURLs()) {
     m_server = ServerFactoryRegistry::createServer
       (RuntimeOption::ServerType, RuntimeOption::ServerIP, info->getPort(),
-       info->getThreadCount(), info->getTimeoutSeconds());
-    m_server->setRequestHandlerFactory<HttpRequestHandler>();
+       info->getThreadCount());
+    m_server->setRequestHandlerFactory<HttpRequestHandler>(
+      info->getTimeoutSeconds().count());
     m_server->setUrlChecker(std::bind(&InternalPageServer::checkURL, this,
                                       std::placeholders::_1));
   }
@@ -108,10 +109,10 @@ public:
 
 private:
   bool checkURL(const std::string &path) const {
-    String url(path.c_str(), path.size(), AttachLiteral);
+    String url(path.c_str(), path.size(), CopyString);
     for (const auto &allowed : m_allowedURLs) {
       Variant ret = preg_match
-        (String(allowed.c_str(), allowed.size(), AttachLiteral), url);
+        (String(allowed.c_str(), allowed.size(), CopyString), url);
       if (ret.toInt64() > 0) {
         return true;
       }
@@ -131,8 +132,9 @@ public:
   explicit DanglingPageServer(SatelliteServerInfoPtr info) {
     m_server = ServerFactoryRegistry::createServer
       (RuntimeOption::ServerType, RuntimeOption::ServerIP, info->getPort(),
-       info->getThreadCount(), info->getTimeoutSeconds());
-    m_server->setRequestHandlerFactory<HttpRequestHandler>();
+       info->getThreadCount());
+    m_server->setRequestHandlerFactory<HttpRequestHandler>(
+      info->getTimeoutSeconds().count());
   }
 
   virtual void start() {
@@ -154,9 +156,10 @@ public:
   explicit RPCServer(SatelliteServerInfoPtr info) {
     m_server = ServerFactoryRegistry::createServer
       (RuntimeOption::ServerType, RuntimeOption::ServerIP, info->getPort(),
-       info->getThreadCount(), info->getTimeoutSeconds());
+       info->getThreadCount());
     m_server->setRequestHandlerFactory([info] {
-      auto handler = make_unique<RPCRequestHandler>();
+        auto handler = make_unique<RPCRequestHandler>(
+          info->getTimeoutSeconds().count(), true);
       handler->setServerInfo(info);
       return handler;
     });

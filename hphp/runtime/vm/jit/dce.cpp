@@ -493,7 +493,7 @@ void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
   if ((srcInst->op() == CheckType || srcInst->op() == AssertType) &&
       srcInst->typeParam().maybeCounted()) {
     // srcInst is a CheckType/AsserType that guards to a refcounted type. We
-    // need to trace through to its source. If the instruciton guards to a
+    // need to trace through to its source. If the instruction guards to a
     // non-refcounted type then the reference is consumed by CheckType itself.
     consumeIncRef(consumer, srcInst->src(0), state);
     return;

@@ -48,6 +48,11 @@ TCA SrcRec::getFallbackTranslation() const {
 }
 
 void SrcRec::chainFrom(IncomingBranch br) {
+  assert(br.type() == IncomingBranch::Tag::ADDR    ||
+         tx64->a.           contains(br.toSmash()) ||
+         tx64->ahot.        contains(br.toSmash()) ||
+         tx64->astubs.      contains(br.toSmash()) ||
+         tx64->atrampolines.contains(br.toSmash()));
   TCA destAddr = getTopTranslation();
   m_incomingBranches.push_back(br);
   TRACE(1, "SrcRec(%p)::chainFrom %p -> %p (type %d); %zd incoming branches\n",
@@ -175,14 +180,15 @@ void SrcRec::replaceOldTranslations() {
    * If we ever change that we'll have to change this to patch to
    * some sort of rebind requests.
    */
-  assert(!RuntimeOption::RepoAuthoritative);
+  assert(!RuntimeOption::RepoAuthoritative || RuntimeOption::EvalJitPGO);
   patchIncomingBranches(m_anchorTranslation);
 }
 
 void SrcRec::patch(IncomingBranch branch, TCA dest) {
   switch (branch.type()) {
   case IncomingBranch::Tag::JMP: {
-    auto& a = tx64->getAsmFor(branch.toSmash());
+    auto toSmash = branch.toSmash();
+    auto& a = tx64->getAsmFor(toSmash);
     CodeCursor cg(a, branch.toSmash());
     TranslatorX64::smashJmp(a, branch.toSmash(), dest);
     break;

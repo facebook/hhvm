@@ -153,7 +153,7 @@ Variant SharedVariant::toLocal() {
     {
       if (getSerializedArray()) {
         return apc_unserialize(String(m_data.str->data(), m_data.str->size(),
-                                      AttachLiteral));
+                                      CopyString));
       }
       return NEW(SharedMap)(this);
     }
@@ -169,7 +169,7 @@ Variant SharedVariant::toLocal() {
         return m_data.obj->getObject();
       }
       return apc_unserialize(String(m_data.str->data(), m_data.str->size(),
-                                    AttachLiteral));
+                                    CopyString));
     }
   }
 }

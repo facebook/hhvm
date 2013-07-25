@@ -18,12 +18,12 @@
 #include <unistd.h>
 #include <limits.h>
 
-#ifdef __FreeBSD__
-#include <sys/sysctl.h>
-#endif
-
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
+#endif
+
+#ifdef __FreeBSD__
+#include <sys/sysctl.h>
 #endif
 
 namespace HPHP {
@@ -48,12 +48,12 @@ std::string current_executable_path() {
   mib[2] = KERN_PROC_PATHNAME;
   mib[3] = -1;
 
-  if (sysctl(mib, 4, result, &size, NULL, 0) < 0) {
+  if (sysctl(mib, 4, result, &size, nullptr, 0) < 0) {
       return std::string();
   }
   return std::string(result, (size > 0) ? size : 0);
 #else
-  // Return empty string for all other platforms for now (e.g. FreeBSD)
+  // XXX: How do you do this on your platform?
   return std::string();
 #endif
 }

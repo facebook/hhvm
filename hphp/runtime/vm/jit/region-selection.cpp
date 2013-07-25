@@ -25,36 +25,57 @@
 #include "hphp/util/map_walker.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/trans-cfg.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP { namespace JIT {
 
 TRACE_SET_MOD(region);
 
+using Transl::TransID;
+using Transl::TranslatorX64;
+
 //////////////////////////////////////////////////////////////////////
 
-extern RegionDescPtr regionMethod(const RegionContext&);
-extern RegionDescPtr regionOneBC(const RegionContext&);
-extern RegionDescPtr regionTracelet(const RegionContext&);
+extern RegionDescPtr selectMethod(const RegionContext&);
+extern RegionDescPtr selectOneBC(const RegionContext&);
+extern RegionDescPtr selectTracelet(const RegionContext&);
+extern RegionDescPtr selectHotBlock(TransID transId,
+                                    const ProfData* profData,
+                                    const TransCFG& cfg);
+extern RegionDescPtr selectHotTrace(TransID triggerId,
+                                    const ProfData* profData,
+                                    TransCFG& cfg,
+                                    TransIDSet& selectedSet);
 
 //////////////////////////////////////////////////////////////////////
 
 namespace {
 
 enum class RegionMode {
-  None,
-  OneBC,
-  Method,
-  Tracelet,
-  Legacy,
+  None,      // empty region
+
+  // Modes that create a region by inspecting live VM state
+  OneBC,     // region with a single bytecode instruction
+  Method,    // region with a whole method
+  Tracelet,  // single-entry, multiple-exits region that ends on conditional
+             // branches or when an instruction consumes a value of unknown type
+  Legacy,    // same as Tracelet, but using the legacy analyze() code
+
+  // Modes that create a region by leveraging profiling data
+  HotBlock,  // single-entry, single-exit region
+  HotTrace,  // single-entry, multiple-exits region
 };
 
 RegionMode regionMode() {
   auto& s = RuntimeOption::EvalJitRegionSelector;
-  if (s == "")       return RegionMode::None;
-  if (s == "onebc")  return RegionMode::OneBC;
-  if (s == "method") return RegionMode::Method;
+  if (s == ""        ) return RegionMode::None;
+  if (s == "onebc"   ) return RegionMode::OneBC;
+  if (s == "method"  ) return RegionMode::Method;
   if (s == "tracelet") return RegionMode::Tracelet;
-  if (s == "legacy") return RegionMode::Legacy;
+  if (s == "legacy"  ) return RegionMode::Legacy;
+  if (s == "hotblock") return RegionMode::HotBlock;
+  if (s == "hottrace") return RegionMode::HotTrace;
   FTRACE(1, "unknown region mode {}: using none\n", s);
   if (debug) abort();
   return RegionMode::None;
@@ -163,7 +184,7 @@ void RegionDesc::Block::checkInvariants() const {
 //////////////////////////////////////////////////////////////////////
 
 namespace {
-RegionDescPtr createRegion(const Transl::Tracelet& tlet) {
+RegionDescPtr selectTraceletLegacy(const Transl::Tracelet& tlet) {
   typedef Transl::NormalizedInstruction NI;
   typedef RegionDesc::Block Block;
 
@@ -176,7 +197,7 @@ RegionDescPtr createRegion(const Transl::Tracelet& tlet) {
   Block* curBlock;
   auto newBlock = [&] {
     region->blocks.push_back(
-      smart::make_unique<Block>(tlet.m_func, sk.offset(), 0));
+      std::make_shared<Block>(tlet.m_func, sk.offset(), 0));
     curBlock = region->blocks.back().get();
   };
   newBlock();
@@ -253,6 +274,15 @@ RegionDescPtr createRegion(const Transl::Tracelet& tlet) {
 }
 }
 
+RegionDesc::BlockPtr createBlock(const Transl::Tracelet& tlet) {
+  RegionDescPtr region = selectTraceletLegacy(tlet);
+
+  if (region == nullptr) return nullptr;
+
+  always_assert(region->blocks.size() == 1);
+  return region->blocks.front();
+}
+
 RegionDescPtr selectRegion(const RegionContext& context,
                            const Transl::Tracelet* t) {
   auto const mode = regionMode();
@@ -281,11 +311,15 @@ RegionDescPtr selectRegion(const RegionContext& context,
   auto region = [&]{
     try {
       switch (mode) {
-      case RegionMode::None:   return RegionDescPtr{nullptr};
-      case RegionMode::OneBC:  return regionOneBC(context);
-      case RegionMode::Method: return regionMethod(context);
-      case RegionMode::Tracelet: return regionTracelet(context);
-      case RegionMode::Legacy: always_assert(t); return createRegion(*t);
+        case RegionMode::None:     return RegionDescPtr{nullptr};
+        case RegionMode::OneBC:    return selectOneBC(context);
+        case RegionMode::Method:   return selectMethod(context);
+        case RegionMode::Tracelet: return selectTracelet(context);
+        case RegionMode::Legacy:
+                 always_assert(t); return selectTraceletLegacy(*t);
+        case RegionMode::HotBlock:
+        case RegionMode::HotTrace: always_assert(0 &&
+                                                 "unsupported region mode");
       }
       not_reached();
     } catch (const std::exception& e) {
@@ -298,6 +332,48 @@ RegionDescPtr selectRegion(const RegionContext& context,
     FTRACE(3, "{}", show(*region));
   } else {
     FTRACE(1, "no region selectable; using tracelet compiler\n");
+  }
+
+  return region;
+}
+
+RegionDescPtr selectHotRegion(TransID transId,
+                              TranslatorX64* tx64) {
+
+  assert(RuntimeOption::EvalJitPGO);
+
+  const ProfData* profData = tx64->profData();
+  FuncId funcId = profData->transFuncId(transId);
+  TransCFG cfg(funcId, profData, tx64->getSrcDB(), tx64->getJmpToTransIDMap());
+  TransIDSet selectedTIDs;
+  RegionDescPtr region = nullptr;
+  RegionMode mode = regionMode();
+
+  switch (mode) {
+    case RegionMode::None:
+      region = RegionDescPtr{nullptr};
+      break;
+    case RegionMode::HotBlock:
+      region = selectHotBlock(transId, profData, cfg);
+      break;
+    case RegionMode::HotTrace:
+      region = selectHotTrace(transId, profData, cfg, selectedTIDs);
+      break;
+    case RegionMode::OneBC:
+    case RegionMode::Method:
+    case RegionMode::Tracelet:
+    case RegionMode::Legacy:
+      always_assert(0 && "unsupported region mode");
+  }
+
+  if (Trace::moduleEnabled(HPHP::Trace::pgo, 5)) {
+    std::string dotFileName = string("/tmp/trans-cfg-") +
+                              lexical_cast<std::string>(transId) + ".dot";
+
+    cfg.print(dotFileName, profData, &selectedTIDs);
+    FTRACE(5, "selectHotRegion: New Translation {} (file: {}) {}\n",
+           tx64->profData()->curTransID(), dotFileName,
+           region ? show(*region) : std::string("empty region"));
   }
 
   return region;

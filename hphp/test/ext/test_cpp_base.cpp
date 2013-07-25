@@ -192,7 +192,7 @@ bool TestCppBase::TestString() {
     VS(String("test").rvalAt(2).c_str(), "s");
     String s = "test";
     s.set(2, String(""));
-    VS(s, String("te\0t", 4, AttachLiteral));
+    VS(s, String("te\0t", 4, CopyString));
     s.set(2, String("zz"));
     VS(s, "tezt");
     s.set(5, String("q"));
@@ -343,12 +343,6 @@ bool TestCppBase::TestArray() {
     Variant name = "name";
     arr.lvalAt(name) = String("value");
     VS(arr, CREATE_MAP1("name", "value"));
-  }
-  {
-    Array arr;
-    arr.lvalAt(s_A) = 10;
-    arr.lvalAt(s_A)++;
-    VS(arr[s_A], 11);
   }
 
   {
@@ -740,21 +734,6 @@ bool TestCppBase::TestVariant() {
     v2.lvalAt() = ref(v1);
     v1 = 20;
     VS(v2[1], 20);
-  }
-  {
-    Variant v1 = 10;
-    Variant v2 = strongBind(v1);
-    v2++;
-    VS(v2, 11);
-    VS(v1, 11);
-  }
-  {
-    Variant arr = CREATE_VECTOR2(1, 2);
-    Variant v;
-    for (MutableArrayIter iter = arr.begin(nullptr, v); iter.advance();) {
-      v++;
-    }
-    VS(arr, CREATE_VECTOR2(2, 3));
   }
 
   // array escalation

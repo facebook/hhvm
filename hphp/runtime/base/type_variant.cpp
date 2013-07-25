@@ -523,104 +523,6 @@ inline DataType Variant::convertToNumeric(int64_t *lval, double *dval) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// bitwise
-
-Variant Variant::bitNot() const {
-  auto const cell = asCell();
-  switch (cell->m_type) {
-  case KindOfInt64:
-    return ~cell->m_data.num;
-  case KindOfDouble:
-    return ~toInt64(cell->m_data.dbl);
-  case KindOfStaticString:
-  case KindOfString:
-    return ~String(cell->m_data.pstr);
-  default:
-    break;
-  }
-  throw InvalidOperandException("only numerics and strings can be negated");
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// increment/decrement
-
-Variant &Variant::operator++() {
-  switch (getType()) {
-  case KindOfUninit:
-  case KindOfNull:   set(int64_t(1)); break;
-  case KindOfInt64:  set(toInt64() + 1);  break;
-  case KindOfDouble: set(toDouble() + 1); break;
-  case KindOfStaticString:
-  case KindOfString:
-    {
-      if (getStringData()->empty()) {
-        set(s_1);
-      } else {
-        int64_t lval; double dval;
-        DataType ret = convertToNumeric(&lval, &dval);
-        switch (ret) {
-        case KindOfInt64:  set(lval + 1); break;
-        case KindOfDouble: set(dval + 1); break;
-        case KindOfUninit:
-        case KindOfNull:
-          split();
-          getStringData()->inc(); break;
-        default:
-          assert(false);
-          break;
-        }
-      }
-    }
-    break;
-  default:
-    break;
-  }
-  return *this;
-}
-
-Variant Variant::operator++(int) {
-  Variant ret(*this);
-  operator++();
-  return ret;
-}
-
-Variant &Variant::operator--() {
-  switch (getType()) {
-  case KindOfInt64:  set(toInt64() - 1);  break;
-  case KindOfDouble: set(toDouble() - 1); break;
-  case KindOfStaticString:
-  case KindOfString:
-    {
-      if (getStringData()->empty()) {
-        set(int64_t(-1LL));
-      } else {
-        int64_t lval; double dval;
-        DataType ret = convertToNumeric(&lval, &dval);
-        switch (ret) {
-        case KindOfInt64:  set(lval - 1);   break;
-        case KindOfDouble: set(dval - 1);   break;
-        case KindOfUninit:
-        case KindOfNull:   /* do nothing */ break;
-        default:
-          assert(false);
-          break;
-        }
-      }
-    }
-    break;
-  default:
-    break;
-  }
-  return *this;
-}
-
-Variant Variant::operator--(int) {
-  Variant ret(*this);
-  operator--();
-  return ret;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // iterator functions
 
 HOT_FUNC
@@ -1939,12 +1841,12 @@ void Variant::unserialize(VariableUnserializer *uns,
                   throw Exception("Mangled private object property");
                 }
               }
-              String k(kdata + subLen, ksize - subLen, AttachLiteral);
+              String k(kdata + subLen, ksize - subLen, CopyString);
               if (kdata[1] == '*') {
                 unserializeProp(uns, obj.get(), k, clsName, key, i + 1);
               } else {
                 unserializeProp(uns, obj.get(), k,
-                                String(kdata + 1, subLen - 2, AttachLiteral),
+                                String(kdata + 1, subLen - 2, CopyString),
                                 key, i + 1);
               }
             } else {

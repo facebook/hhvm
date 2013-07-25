@@ -230,7 +230,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
         // For literal we disregard RuntimeOption::AlwaysPopulateRawPostData
         if (uint32_t(size) <= StringData::MaxSize) {
           g->getRef(s_HTTP_RAW_POST_DATA) =
-            String((char*)data, size, AttachLiteral);
+            String((char*)data, size, CopyString);
         }
       }
     }

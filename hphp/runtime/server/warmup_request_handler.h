@@ -32,8 +32,9 @@ DECLARE_BOOST_TYPES(WarmupRequestHandlerFactory);
  */
 class WarmupRequestHandler : public RequestHandler {
 public:
-  explicit WarmupRequestHandler(const WarmupRequestHandlerFactoryPtr& factory)
-    : m_factory(factory) {}
+  explicit WarmupRequestHandler(int timeout,
+                                const WarmupRequestHandlerFactoryPtr& factory)
+    : RequestHandler(timeout), m_factory(factory), m_reqHandler(timeout) {}
 
   virtual void handleRequest(Transport *transport);
 
@@ -47,10 +48,12 @@ class WarmupRequestHandlerFactory :
 public:
   WarmupRequestHandlerFactory(ServerPtr server,
                               uint32_t additionalThreads,
-                              uint32_t reqCount)
+                              uint32_t reqCount,
+                              int timeout)
     : m_additionalThreads(additionalThreads),
       m_reqNumber(0),
       m_warmupReqThreshold(reqCount),
+      m_timeout(timeout),
       m_server(server) {}
 
   std::unique_ptr<RequestHandler> createHandler();
@@ -61,6 +64,7 @@ private:
   std::atomic<uint32_t> m_additionalThreads;
   std::atomic<uint32_t> m_reqNumber;
   uint32_t const m_warmupReqThreshold;
+  int m_timeout;
   // The server has a shared pointer to us, so use a weak pointer to the
   // server to avoid a circular reference.
   ServerWeakPtr m_server;

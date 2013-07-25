@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/libevent_transport.h"
-#include "hphp/runtime/base/timeout_thread.h"
 #include "hphp/runtime/server/job_queue_vm_stack.h"
 #include "hphp/util/job_queue.h"
 #include "hphp/util/process.h"
@@ -127,8 +126,7 @@ public:
   /**
    * Constructor and destructor.
    */
-  LibEventServer(const std::string &address, int port, int thread,
-                 int timeoutSeconds);
+  LibEventServer(const std::string &address, int port, int thread);
   ~LibEventServer();
 
   // implementing Server
@@ -145,9 +143,6 @@ public:
     return m_dispatcher.getQueuedJobs();
   }
   int getLibEventConnectionCount();
-
-  void onThreadEnter();
-  void onThreadExit();
 
   /**
    * Request handler called by evhttp library.
@@ -187,9 +182,6 @@ protected:
   // signal to stop the thread
   event m_eventStop;
   CPipe m_pipeStop;
-
-  TimeoutThread m_timeoutThreadData;
-  AsyncFunc<TimeoutThread> m_timeoutThread;
 
 private:
   JobQueueDispatcher<LibEventJobPtr, LibEventWorker> m_dispatcher;

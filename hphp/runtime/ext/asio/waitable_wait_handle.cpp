@@ -90,7 +90,7 @@ c_BlockableWaitHandle* c_WaitableWaitHandle::addParent(c_BlockableWaitHandle* pa
 }
 
 void c_WaitableWaitHandle::setResult(const Cell& result) {
-  assert(cellIsPlausible(&result));
+  assert(cellIsPlausible(result));
 
   setState(STATE_SUCCEEDED);
   cellDup(result, m_resultOrException);

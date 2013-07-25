@@ -16,7 +16,7 @@ string(12) "Good morning"
 HipHop Warning: %s
 string(12) "Good morning"
 
--- Testing substr_replace() function with start and length with a different number of elments --
+-- Testing substr_replace() function with start and length with a different number of elements --
 HipHop Warning: %s
 string(12) "Good morning"
 

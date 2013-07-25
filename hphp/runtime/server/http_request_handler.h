@@ -38,7 +38,7 @@ public:
   static AccessLog &GetAccessLog() { return s_accessLog; }
 
 public:
-  HttpRequestHandler();
+  explicit HttpRequestHandler(int timeout);
 
   // implementing RequestHandler
   virtual void handleRequest(Transport *transport);

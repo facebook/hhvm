@@ -845,7 +845,7 @@ CacheHandle allocClassConstant(StringData* name) {
                                      sizeof(TypedValue), sizeof(TypedValue));
 }
 
-TypedValue*
+Cell*
 lookupClassConstant(TypedValue* cache,
                     const NamedEntity* ne,
                     const StringData* cls,
@@ -853,14 +853,14 @@ lookupClassConstant(TypedValue* cache,
   Stats::inc(Stats::TgtCache_ClsCnsHit, -1);
   Stats::inc(Stats::TgtCache_ClsCnsMiss, 1);
 
-  TypedValue* clsCns;
+  Cell* clsCns;
   clsCns = g_vmContext->lookupClsCns(ne, cls, cns);
   *cache = *clsCns;
 
   return cache;
 }
 
-TypedValue
+Cell
 lookupClassConstantTv(TypedValue* cache,
                       const NamedEntity* ne,
                       const StringData* cls,

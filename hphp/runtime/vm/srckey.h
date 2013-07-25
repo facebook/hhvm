@@ -131,6 +131,8 @@ struct SrcKey::Hasher {
   }
 };
 
+typedef hphp_hash_set<SrcKey,SrcKey::Hasher> SrcKeySet;
+
 //////////////////////////////////////////////////////////////////////
 
 inline std::string show(SrcKey sk) {

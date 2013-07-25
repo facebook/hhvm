@@ -29,6 +29,7 @@
 
 class TestCurlRequestHandler : public RequestHandler {
 public:
+  explicit TestCurlRequestHandler(int timeout) : RequestHandler(timeout) {}
   // implementing RequestHandler
   virtual void handleRequest(Transport *transport) {
     transport->addHeader("ECHOED", transport->getHeader("ECHO").c_str());
@@ -56,8 +57,8 @@ static ServerPtr runServer() {
   for (s_server_port = PORT_MIN; s_server_port <= PORT_MAX; s_server_port++) {
     try {
       ServerPtr server = boost::make_shared<LibEventServer>(
-          "127.0.0.1", s_server_port, 4, -1);
-      server->setRequestHandlerFactory<TestCurlRequestHandler>();
+          "127.0.0.1", s_server_port, 4);
+      server->setRequestHandlerFactory<TestCurlRequestHandler>(0);
       server->start();
       return server;
 

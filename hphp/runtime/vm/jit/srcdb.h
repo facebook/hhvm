@@ -125,6 +125,10 @@ struct SrcRec {
     return m_inProgressTailJumps;
   }
 
+  const vector<IncomingBranch>& incomingBranches() const {
+    return m_incomingBranches;
+  }
+
   void clearInProgressTailJumps() {
     m_inProgressTailJumps.clear();
   }

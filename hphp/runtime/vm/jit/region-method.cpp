@@ -54,12 +54,12 @@ int numInstrs(PC start, PC end) {
  * back to the tracelet compiler.  (This will happen for side-exits
  * from method regions, for example.)
  */
-RegionDescPtr regionMethod(const RegionContext& context) {
+RegionDescPtr selectMethod(const RegionContext& context) {
   using namespace HPHP::Verifier;
 
   if (!isFuncEntry(context.func, context.bcOffset)) return nullptr;
-  FTRACE(1, "function entry for {}: using regionMethod\n",
-            context.func->fullName()->data());
+  FTRACE(1, "function entry for {}: using selectMethod\n",
+         context.func->fullName()->data());
 
   auto ret = smart::make_unique<RegionDesc>();
 

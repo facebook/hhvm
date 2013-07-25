@@ -16,8 +16,8 @@ file_put_contents( $filename, 'The quick brown fox jumped over the lazy dog.' );
 echo "\n-- Testing hash_file() function with an unknown algorithm --\n";
 var_dump( hash_file( 'foobar', $filename ) );
 
-echo "\n-- Testing hash_file() function with a non-existant file --\n";
-var_dump( hash_file( 'md5', 'nonexistant.txt' ) );
+echo "\n-- Testing hash_file() function with a non-existent file --\n";
+var_dump( hash_file( 'md5', 'nonexistent.txt' ) );
 
 echo "\n-- Testing hash_file() function with less than expected no. of arguments --\n";
 var_dump( hash_file( 'md5' ) );

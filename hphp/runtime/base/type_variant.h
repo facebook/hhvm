@@ -585,14 +585,10 @@ class Variant : private TypedValue {
   Variant &operator <<=(int64_t n) = delete;
   Variant &operator >>=(int64_t n) = delete;
 
-  Variant &operator ++ ();
-  Variant  operator ++ (int);
-  Variant &operator -- ();
-  Variant  operator -- (int);
-
-  // Return the result of applying the php bitwise not operator to
-  // this value.
-  Variant bitNot() const;
+  Variant &operator ++ () = delete;
+  Variant  operator ++ (int) = delete;
+  Variant &operator -- () = delete;
+  Variant  operator -- (int) = delete;
 
   /**
    * Iterator functions. See array_iterator.h for end() and next().

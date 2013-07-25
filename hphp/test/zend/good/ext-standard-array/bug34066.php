@@ -120,7 +120,7 @@
                 "ProceedKeyArticle"	=>	"01",
                 "ActionKey"		=>	"00",
                 "ContactCommissionArticle"=>	"0,00",
-                "QuantDependantPriceKey"=>	"",
+                "QuantdependentPriceKey"=>	"",
                 "Quant"			=>	"1",
                 "QuantUnit"		=>	"",
                 "Meas" => array(

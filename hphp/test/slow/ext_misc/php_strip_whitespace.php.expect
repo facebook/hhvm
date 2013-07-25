@@ -1,0 +1,2 @@
+<?php
+ echo php_strip_whitespace(__FILE__); function do_nothing() { }; do_nothing(); ?>

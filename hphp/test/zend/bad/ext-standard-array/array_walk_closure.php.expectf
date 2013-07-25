@@ -1,0 +1,153 @@
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  string(3) "one"
+}
+array(2) {
+  [0]=>
+  int(2)
+  [1]=>
+  string(3) "two"
+}
+array(2) {
+  [0]=>
+  int(3)
+  [1]=>
+  string(5) "three"
+}
+bool(true)
+
+closure with array
+array(1) {
+  ["sum"]=>
+  int(42)
+}
+array(1) {
+  ["sum"]=>
+  int(43)
+}
+array(1) {
+  ["sum"]=>
+  int(45)
+}
+bool(true)
+End result:int(42)
+
+closure with use
+array(1) {
+  ["sum"]=>
+  int(42)
+}
+array(1) {
+  ["sum"]=>
+  int(43)
+}
+array(1) {
+  ["sum"]=>
+  int(45)
+}
+bool(true)
+End result:int(48)
+
+closure with object
+object(stdClass)#1 (1) {
+  ["sum"]=>
+  int(42)
+}
+object(stdClass)#1 (1) {
+  ["sum"]=>
+  int(43)
+}
+object(stdClass)#1 (1) {
+  ["sum"]=>
+  int(45)
+}
+bool(true)
+End result:int(48)
+
+function with object
+object(stdClass)#2 (1) {
+  ["sum"]=>
+  int(42)
+}
+object(stdClass)#2 (1) {
+  ["sum"]=>
+  int(43)
+}
+object(stdClass)#2 (1) {
+  ["sum"]=>
+  int(45)
+}
+bool(true)
+End result:int(48)
+
+function with array
+array(1) {
+  ["sum"]=>
+  int(42)
+}
+array(1) {
+  ["sum"]=>
+  int(42)
+}
+array(1) {
+  ["sum"]=>
+  int(42)
+}
+bool(true)
+End result:int(42)
+
+closure and exception
+array(2) {
+  [0]=>
+  array(2) {
+    ["function"]=>
+    string(9) "{closure}"
+    ["args"]=>
+    array(2) {
+      [0]=>
+      int(2)
+      [1]=>
+      string(3) "two"
+    }
+  }
+  [1]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(%d)
+    ["function"]=>
+    string(10) "array_walk"
+    ["args"]=>
+    array(2) {
+      [0]=>
+      &array(3) {
+        ["one"]=>
+        int(1)
+        ["two"]=>
+        int(2)
+        ["three"]=>
+        int(3)
+      }
+      [1]=>
+      object(Closure)#2 (1) {
+        ["parameter"]=>
+        array(2) {
+          ["$v"]=>
+          string(10) "<required>"
+          ["$k"]=>
+          string(10) "<required>"
+        }
+      }
+    }
+  }
+}
+Done

@@ -8,7 +8,7 @@
 * Testing uasort() with 'array_arg' containing different reference variables
 */
 
-// comparision function
+// comparison function
 /* Prototype : int cmp_function(mixed $value1, mixed $value2)
  * Parameters : $value1 and $value2 - values to be compared
  * Return value : 0 - if both values are same

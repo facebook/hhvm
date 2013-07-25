@@ -524,7 +524,9 @@ Object c_SimpleXMLElement::t_children(CStrRef ns /* = "" */,
   elem->m_is_text = m_is_text;
   elem->m_free_text = m_free_text;
   elem->m_is_children = true;
-  if (ns.empty()) {
+  if (m_is_text) {
+    // text nodes don't have children
+  } else if (ns.empty()) {
     elem->m_children.assignRef(m_children);
   } else {
     Array props = Array::Create();
@@ -873,7 +875,9 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
 }
 
 bool c_SimpleXMLElement::o_toBooleanImpl() const noexcept {
-  return (m_node || getDynProps().size());
+  return (m_node || getDynProps().size()) &&
+         (m_node->parent->type != XML_DOCUMENT_NODE ||
+          m_children.toArray().size());
 }
 
 int64_t c_SimpleXMLElement::o_toInt64Impl() const noexcept {
@@ -997,7 +1001,7 @@ void c_SimpleXMLElement::t_offsetunset(CVarRef index) {
 
   if (m_attributes.toArray().exists(name) && m_node) {
     for (xmlAttrPtr attr = m_node->properties; attr; attr = attr->next) {
-      if (String((char*)attr->name, xmlStrlen(attr->name), AttachLiteral) ==
+      if (String((char*)attr->name, xmlStrlen(attr->name), CopyString) ==
           name) {
         xmlUnlinkNode((xmlNodePtr)attr);
         break;

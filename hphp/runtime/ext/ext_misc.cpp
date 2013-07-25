@@ -227,10 +227,6 @@ bool f_php_check_syntax(CStrRef filename, VRefParam error_message /* = null */) 
   throw NotSupportedException(__func__, "PHP specific");
 }
 
-String f_php_strip_whitespace(CStrRef filename) {
-  throw NotSupportedException(__func__, "PHP specific");
-}
-
 int64_t f_sleep(int seconds) {
   IOStatusHelper io("sleep");
   sleep(seconds);

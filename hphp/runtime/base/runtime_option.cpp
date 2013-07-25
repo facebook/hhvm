@@ -398,6 +398,19 @@ static inline bool evalJitDefault() {
   return stat(path, &dummy) == 0;
 }
 
+static inline std::string regionSelectorDefault() {
+#ifdef HHVM_REGION_SELECTOR_TRACELET
+  return "tracelet";
+#else
+#ifdef HHVM_REGION_SELECTOR_LEGACY
+  return "legacy";
+#else
+  return "";
+#endif
+#endif
+}
+
+
 const uint64_t kEvalVMStackElmsDefault =
 #ifdef VALGRIND
  0x800
@@ -414,8 +427,8 @@ EVALFLAGS();
 std::set<string, stdltistr> RuntimeOption::DynamicInvokeFunctions;
 bool RuntimeOption::RecordCodeCoverage = false;
 std::string RuntimeOption::CodeCoverageOutputFile;
-size_t RuntimeOption::VMTranslAHotSize = 2 << 20;
-size_t RuntimeOption::VMTranslASize = 510 << 20;
+size_t RuntimeOption::VMTranslAHotSize = 4 << 20;
+size_t RuntimeOption::VMTranslASize = 508 << 20;
 size_t RuntimeOption::VMTranslAStubsSize = 512 << 20;
 size_t RuntimeOption::VMTranslGDataSize = RuntimeOption::VMTranslASize >> 2;
 
@@ -509,9 +522,9 @@ static bool matchHdfPattern(const std::string &value, Hdf hdfPattern) {
   string pattern = hdfPattern.getString();
   if (!pattern.empty()) {
     Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
-                                    AttachLiteral),
+                                    CopyString),
                              String(value.c_str(), value.size(),
-                                    AttachLiteral));
+                                    CopyString));
     if (ret.toInt64() <= 0) {
       return false;
     }
@@ -669,7 +682,11 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
   }
   {
     Hdf rlimit = config["ResourceLimit"];
-    setResourceLimit(RLIMIT_CORE,   rlimit, "CoreFileSize");
+    if (rlimit["CoreFileSizeOverride"].getInt64()) {
+      setResourceLimit(RLIMIT_CORE,   rlimit, "CoreFileSizeOverride");
+    } else {
+      setResourceLimit(RLIMIT_CORE,   rlimit, "CoreFileSize");
+    }
     setResourceLimit(RLIMIT_NOFILE, rlimit, "MaxSocket");
     setResourceLimit(RLIMIT_DATA,   rlimit, "RSS");
     MaxRSS = rlimit["MaxRSS"].getInt64(0);

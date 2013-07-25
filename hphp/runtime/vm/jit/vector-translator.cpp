@@ -1330,8 +1330,8 @@ static inline TypedValue setOpPropImpl(TypedValue* base, TypedValue keyVal,
   TypedValue* result = HPHP::SetOpProp<isObj>(
     mis->tvScratch, mis->tvRef, mis->ctx, op, base, &keyVal, &val);
 
-  TypedValue ret;
-  tvReadCell(result, &ret);
+  Cell ret;
+  cellDup(*tvToCell(result), ret);
   return ret;
 }
 
@@ -2249,8 +2249,8 @@ static inline TypedValue setOpElemImpl(TypedValue* base, TypedValue keyVal,
   TypedValue* result =
     HPHP::SetOpElem(mis->tvScratch, mis->tvRef, op, base, &keyVal, &val);
 
-  TypedValue ret;
-  tvReadCell(result, &ret);
+  Cell ret;
+  cellDup(*tvToCell(result), ret);
   return ret;
 }
 

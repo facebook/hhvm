@@ -145,7 +145,7 @@ static void url_encode_array(StringBuffer &ret, CVarRef varr,
       new_prefix += key_suffix;
       new_prefix += "%5B";
       url_encode_array(ret, data, seen_arrs, String(),
-                       new_prefix.detach(), String("%5D", AttachLiteral),
+                       new_prefix.detach(), String("%5D", CopyString),
                        arg_sep);
     } else {
       if (!ret.empty()) {

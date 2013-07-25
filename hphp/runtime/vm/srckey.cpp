@@ -18,22 +18,25 @@
 
 namespace HPHP {
 
-void sktrace(SrcKey sk, const char *fmt, ...) {
-  if (!Trace::enabled) {
-    return;
-  }
-  // We don't want to print string literals, so don't pass the unit
+std::string show(SrcKey sk) {
   auto func = sk.func();
   auto unit = sk.unit();
-  string s = instrToString((Op*)unit->at(sk.offset()));
   const char *filepath = "*anonFile*";
-  if (unit->filepath()->data() && strlen(unit->filepath()->data()) > 0) {
+  if (unit->filepath()->data() && unit->filepath()->size()) {
     filepath = unit->filepath()->data();
   }
-  Trace::trace("%s:%d in %s(id 0x%llx) %6d: %20s ",
-               filepath, unit->getLineNumber(sk.offset()),
-               func->isPseudoMain() ? "pseudoMain" : func->fullName()->data(),
-               (unsigned long long)sk.getFuncId(), sk.offset(), s.c_str());
+  return folly::format("{}:{} in {}(id 0x{:#x})@{: >6}",
+                       filepath, unit->getLineNumber(sk.offset()),
+                       func->isPseudoMain() ? "pseudoMain"
+                                            : func->fullName()->data(),
+                       (unsigned long long)sk.getFuncId(), sk.offset()).str();
+}
+
+void sktrace(SrcKey sk, const char *fmt, ...) {
+  if (!Trace::enabled) return;
+
+  auto inst = instrToString((Op*)sk.unit()->at(sk.offset()));
+  Trace::trace("%s: %20s ", show(sk).c_str(), inst.c_str());
   va_list a;
   va_start(a, fmt);
   Trace::vtrace(fmt, a);

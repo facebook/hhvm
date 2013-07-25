@@ -762,7 +762,7 @@ TranslatorX64::getTranslation(const TranslArgs& args) {
           sk.offset());
   SKTRACE(2, sk, "   funcId: %x \n", sk.func()->getFuncId());
 
-  if (liveFrame()->hasVarEnv() && liveFrame()->getVarEnv()->isGlobalScope()) {
+  if (Translator::liveFrameIsPseudoMain()) {
     SKTRACE(2, sk, "punting on pseudoMain\n");
     return nullptr;
   }
@@ -3202,19 +3202,9 @@ TranslatorX64::emitGuardChecks(X64Assembler& a,
     Stats::emitInc(a, Stats::TraceletGuard_enter);
   }
 
-  bool pseudoMain = Translator::liveFrameIsPseudoMain();
-
   emitRB(a, RBTypeTraceletGuards, sk);
-  for (DepMap::const_iterator dep = dependencies.begin();
-       dep != dependencies.end();
-       ++dep) {
-    if (!pseudoMain || !dep->second->isLocal() || !dep->second->isValue()) {
-      m_irTrans->checkType(dep->first, dep->second->rtt);
-    } else {
-      TRACE(3, "Skipping tracelet guard for %s %d\n",
-            dep->second->location.pretty().c_str(),
-            (int)dep->second->rtt.outerType());
-    }
+  for (auto const& dep : dependencies) {
+    m_irTrans->checkType(dep.first, dep.second->rtt);
   }
 
   checkRefs(a, sk, refDeps, fail);
@@ -3426,6 +3416,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
 TranslatorX64::TranslateResult
 TranslatorX64::translateTracelet(Tracelet& t) {
   FTRACE(2, "attempting to translate tracelet:\n{}\n", t.toString());
+  assert(!Translator::liveFrameIsPseudoMain());
   const SrcKey &sk = t.m_sk;
   SrcRec& srcRec = *getSrcRec(sk);
   HhbcTranslator& ht = m_irTrans->hhbcTrans();

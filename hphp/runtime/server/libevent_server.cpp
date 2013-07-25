@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/memory_manager.h"
+#include "hphp/runtime/base/crash_reporter.h"
 #include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/server/http_protocol.h"
 #include "hphp/runtime/debugger/debugger.h"
@@ -377,6 +378,25 @@ int LibEventServer::getAcceptSocketSSL() {
 // request/response handling
 
 void LibEventServer::onRequest(struct evhttp_request *request) {
+  // If we are in the process of crashing, we want to reject incoming work.
+  // This will prompt the load balancers to choose another server. Using
+  // shutdown rather than close has the advantage that it makes fewer changes
+  // to the process (eg, it doesn't close the FD so if the FD number were
+  // corrupted it would be mostly harmless).
+  //
+  // Setting accept sock to -1 will leak FDs. But we're crashing anyways.
+  if (IsCrashing) {
+    if (m_accept_sock != -1) {
+      shutdown(m_accept_sock, SHUT_FBLISTEN);
+      m_accept_sock = -1;
+    }
+    if (m_accept_sock_ssl != -1) {
+      shutdown(m_accept_sock_ssl, SHUT_FBLISTEN);
+      m_accept_sock_ssl = -1;
+    }
+    return;
+  }
+
   if (RuntimeOption::EnableKeepAlive &&
       RuntimeOption::ConnectionTimeoutSeconds > 0) {
     // before processing request, set the connection timeout

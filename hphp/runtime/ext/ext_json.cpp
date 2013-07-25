@@ -117,10 +117,10 @@ Variant f_json_decode(CStrRef json, bool assoc /* = false */,
 
   if (ch0 == '{' || ch0 == '[') { /* invalid JSON string */
     json_set_last_error_code(json_error_codes::JSON_ERROR_SYNTAX);
-    return uninit_null();
   }
 
-  return json;
+  assert(json_get_last_error_code() != json_error_codes::JSON_ERROR_NONE);
+  return uninit_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -630,7 +630,7 @@ void IRTranslator::translateContEnter(const NormalizedInstruction& i) {
   // ContEnter can't exist in an inlined function right now.  (If it
   // ever can, this curFunc() needs to change.)
   assert(!m_hhbcTrans.isInlining());
-  const Func* srcFunc = curFunc();
+  const Func* srcFunc = i.func();
   int32_t callOffsetInUnit = after - srcFunc->base();
 
   HHIR_EMIT(ContEnter, callOffsetInUnit);
@@ -1068,7 +1068,7 @@ findCuf(const NormalizedInstruction& ni,
     return nullptr;
   }
 
-  Class* ctx = curFunc()->cls();
+  Class* ctx = ni.func()->cls();
 
   if (sclass->isame(s_self.get())) {
     if (!ctx) return nullptr;
@@ -1328,7 +1328,7 @@ IRTranslator::translateFCall(const NormalizedInstruction& i) {
 
   always_assert(!m_hhbcTrans.isInlining() && "curUnit and curFunc calls");
   const PC after = i.m_unit->at(i.nextSk().offset());
-  const Func* srcFunc = curFunc();
+  const Func* srcFunc = i.func();
   Offset returnBcOffset =
     srcFunc->unit()->offsetOf(after - srcFunc->base());
 
@@ -1338,7 +1338,7 @@ IRTranslator::translateFCall(const NormalizedInstruction& i) {
    */
   if (i.calleeTrace) {
     if (!i.calleeTrace->m_inliningFailed && !m_hhbcTrans.isInlining()) {
-      assert(shouldIRInline(curFunc(), i.funcd, *i.calleeTrace));
+      assert(shouldIRInline(i.func(), i.funcd, *i.calleeTrace));
 
       m_hhbcTrans.beginInlining(numArgs, i.funcd, returnBcOffset);
       static const bool shapeStats = Stats::enabledAny() &&

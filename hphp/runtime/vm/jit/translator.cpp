@@ -185,6 +185,10 @@ SrcKey Tracelet::nextSk() const {
   return m_instrStream.last->nextSk();
 }
 
+const Func* Tracelet::func() const {
+  return m_sk.func();
+}
+
 /*
  * locPhysicalOffset --
  *
@@ -194,7 +198,7 @@ SrcKey Tracelet::nextSk() const {
  *   you're looking for, be sure to pass in a non-default f.
  */
 int locPhysicalOffset(Location l, const Func* f) {
-  f = f ? f : curFunc();
+  f = f ? f : liveFunc();
   assert_not_implemented(l.space == Location::Stack ||
                          l.space == Location::Local ||
                          l.space == Location::Iter);
@@ -294,7 +298,7 @@ RuntimeType Translator::outThisObjectType() {
    * correct object type because arGetContextClass() looks at
    * ar->m_func's class for methods.
    */
-  const Class *ctx = curFunc()->isMethod() ?
+  const Class *ctx = liveFunc()->isMethod() ?
     arGetContextClass(curFrame()) : nullptr;
   if (ctx) {
     assert(!curFrame()->hasThis() ||
@@ -518,7 +522,7 @@ PropInfo getFinalPropertyOffset(const NormalizedInstruction& ni,
 static std::pair<DataType,double>
 predictMVec(const NormalizedInstruction* ni) {
   auto info = getFinalPropertyOffset(*ni,
-                                     curFunc()->cls(),
+                                     ni->func()->cls(),
                                      getMInstrInfo(ni->mInstrOp()));
   if (info.offset != -1 && info.hphpcType != KindOfInvalid) {
     FTRACE(1, "prediction for CGetM prop: {}, hphpc\n",
@@ -1439,7 +1443,7 @@ void preInputApplyMetaData(Unit::MetaHandle metaHand,
   while (metaHand.nextArg(info)) {
     switch (info.m_kind) {
     case Unit::MetaInfo::Kind::NonRefCounted:
-      ni->nonRefCountedLocals.resize(curFunc()->numLocals());
+      ni->nonRefCountedLocals.resize(ni->func()->numLocals());
       ni->nonRefCountedLocals[info.m_data] = 1;
       break;
     case Unit::MetaInfo::Kind::GuardedThis:
@@ -1884,7 +1888,7 @@ void getInputsImpl(SrcKey startSk,
   }
 
   const bool wantInlineReturn = [&] {
-    const int localCount = curFunc()->numLocals();
+    const int localCount = ni->func()->numLocals();
     // Inline return causes us to guard this tracelet more precisely. If
     // we're already chaining to get here, just do a generic return in the
     // hopes of avoiding further specialization. The localCount constraint
@@ -1908,7 +1912,7 @@ void getInputsImpl(SrcKey startSk,
   if ((input & AllLocals) && wantInlineReturn) {
     ni->inlineReturn = true;
     ni->ignoreInnerType = true;
-    int n = curFunc()->numLocals();
+    int n = ni->func()->numLocals();
     for (int i = 0; i < n; ++i) {
       if (!ni->nonRefCountedLocals[i]) {
         inputs.emplace_back(Location(Location::Local, i));
@@ -2480,6 +2484,10 @@ const Unit* NormalizedInstruction::unit() const {
   return m_unit;
 }
 
+const Func* NormalizedInstruction::func() const {
+  return source.func();
+}
+
 Offset NormalizedInstruction::offset() const {
   return source.offset();
 }
@@ -3047,7 +3055,7 @@ static bool shouldAnalyzeCallee(const NormalizedInstruction* fcall,
 void Translator::analyzeCallee(TraceletContext& tas,
                                Tracelet& parent,
                                NormalizedInstruction* fcall) {
-  auto const callerFunc  = curFunc();
+  auto const callerFunc  = fcall->func();
   auto const fpi         = callerFunc->findFPI(fcall->source.offset());
   auto const pushOp      = fcall->m_unit->getOpcode(fpi->m_fpushOff);
 
@@ -3268,14 +3276,14 @@ static bool instrBreaksProfileBB(const NormalizedInstruction* instr) {
 std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
                                               const TypeMap& initialTypes) {
   std::unique_ptr<Tracelet> retval(new Tracelet());
+  auto func = sk.func();
   auto unit = sk.unit();
   auto& t = *retval;
   t.m_sk = sk;
-  t.m_func = curFunc();
 
   DEBUG_ONLY const char* file = unit->filepath()->data();
   DEBUG_ONLY const int lineNum = unit->getLineNumber(t.m_sk.offset());
-  DEBUG_ONLY const char* funcName = curFunc()->fullName()->data();
+  DEBUG_ONLY const char* funcName = func->fullName()->data();
 
   TRACE(1, "Translator::analyze %s:%d %s\n", file, lineNum, funcName);
   TraceletContext tas(&t, initialTypes);
@@ -3401,7 +3409,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     }
 
     if (isFCallStar(ni->op())) t.m_arState.pop();
-    if (doVarEnvTaint || callDestroysLocals(*ni, curFunc())) tas.varEnvTaint();
+    if (doVarEnvTaint || callDestroysLocals(*ni, func)) tas.varEnvTaint();
 
     DynLocation* outputs[] = { ni->outStack,
                                ni->outLocal, ni->outLocal2,
@@ -3418,7 +3426,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     if (ni->op() == OpCreateCont) {
       // CreateCont stores Uninit to all locals but NormalizedInstruction
       // doesn't have enough output fields, so we special case it here.
-      auto const numLocals = curFunc()->numLocals();
+      auto const numLocals = ni->func()->numLocals();
       for (unsigned i = 0; i < numLocals; ++i) {
         tas.recordWrite(t.newDynLocation(Location(Location::Local, i),
                                          KindOfUninit));
@@ -3490,7 +3498,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
       SKTRACE(1, sk, "greedily continuing through %dth jmp + %d\n",
               tas.m_numJmps, ni->imm[0].u_IA);
       tas.recordJmp();
-      sk = SrcKey(curFunc(), sk.offset() + ni->imm[0].u_IA);
+      sk = SrcKey(func, sk.offset() + ni->imm[0].u_IA);
       goto head; // don't advance sk
     } else if (opcodeBreaksBB(ni->op()) ||
                (dontGuardAnyInputs(ni->op()) && opcodeChangesPC(ni->op()))) {
@@ -3797,7 +3805,7 @@ void Translator::traceStart(Offset bcStartOffset) {
          color(ANSI_COLOR_END));
 
   m_irTrans.reset(new JIT::IRTranslator(
-    bcStartOffset, curSpOff(), curFunc()));
+    bcStartOffset, curSpOff(), liveFunc()));
 }
 
 void Translator::traceEnd() {
@@ -4219,7 +4227,7 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
   bool privateOnly = false;
   if (!RuntimeOption::RepoAuthoritative ||
       !(cls->preClass()->attrs() & AttrUnique)) {
-    Class* ctx = curFunc()->cls();
+    Class* ctx = liveFunc()->cls();
     if (!ctx || !ctx->classof(cls)) {
       return nullptr;
     }

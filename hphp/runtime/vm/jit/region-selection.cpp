@@ -197,7 +197,7 @@ RegionDescPtr selectTraceletLegacy(const Transl::Tracelet& tlet) {
   Block* curBlock;
   auto newBlock = [&] {
     region->blocks.push_back(
-      std::make_shared<Block>(tlet.m_func, sk.offset(), 0));
+      std::make_shared<Block>(tlet.func(), sk.offset(), 0));
     curBlock = region->blocks.back().get();
   };
   newBlock();

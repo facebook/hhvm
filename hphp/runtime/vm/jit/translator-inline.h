@@ -43,10 +43,10 @@ inline const uchar*& vmpc() { return g_vmContext->m_pc; }
 inline ActRec*& vmFirstAR() { return g_vmContext->m_firstAR; }
 
 inline ActRec* curFrame()    { return (ActRec*)vmfp(); }
-inline const Func* curFunc() { return curFrame()->m_func; }
-inline const Unit* liveUnit() { return curFunc()->unit(); }
+inline const Func* liveFunc() { return curFrame()->m_func; }
+inline const Unit* liveUnit() { return liveFunc()->unit(); }
 inline Class* curClass() {
-  const auto* func = curFunc();
+  const auto* func = liveFunc();
   auto* cls = func->cls();
   if (func->isPseudoMain() || func->isTraitMethod() || cls == nullptr) {
     return nullptr;
@@ -55,7 +55,7 @@ inline Class* curClass() {
 }
 inline Offset curSpOff() {
   Cell* fp = vmfp();
-  if (curFunc()->isGenerator()) {
+  if (liveFunc()->isGenerator()) {
     fp = (Cell*)Stack::generatorStackBase((ActRec*)fp);
   }
   return fp - vmsp();

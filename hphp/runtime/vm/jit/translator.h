@@ -293,7 +293,9 @@ class NormalizedInstruction {
   Op mInstrOp() const;
   PC pc() const;
   const Unit* unit() const;
+  const Func* func() const;
   Offset offset() const;
+  SrcKey nextSk() const;
 
   NormalizedInstruction()
     : next(nullptr)
@@ -347,8 +349,6 @@ class NormalizedInstruction {
       smart::make_unique<DynLocation>(std::forward<Args>(args)...));
     return m_dynLocs.back().get();
   }
-
-  SrcKey nextSk() const;
 
  private:
   smart::vector<smart::unique_ptr<DynLocation>::type> m_dynLocs;
@@ -545,9 +545,6 @@ struct Tracelet : private boost::noncopyable {
   ActRecState    m_arState;
   RefDeps        m_refDeps;
 
-  // The function this Tracelet was generated from.
-  const Func* m_func;
-
   /*
    * If we were unable to make sense of the instruction stream (e.g., it
    * used instructions that the translator does not understand), then this
@@ -587,6 +584,7 @@ struct Tracelet : private boost::noncopyable {
   std::string toString() const;
 
   SrcKey nextSk() const;
+  const Func* func() const;
 };
 
 const char* getTransKindName(TransKind kind);

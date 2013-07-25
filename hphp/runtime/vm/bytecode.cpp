@@ -834,10 +834,11 @@ string Stack::toString(const ActRec* fp, int offset,
 
   std::ostringstream os;
   auto unit = fp->unit();
+  auto func = fp->func();
   os << prefix << "=== Stack at "
      << unit->filepath()->data() << ":"
      << unit->getLineNumber(unit->offsetOf(vmpc())) << " func "
-     << curFunc()->fullName()->data() << " ===\n";
+     << func->fullName()->data() << " ===\n";
 
   toStringFrame(os, fp, offset, m_top, prefix);
 
@@ -1527,7 +1528,7 @@ void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
       assert(start);
       tx()->enterTCAfterProlog(start);
     } else {
-      SrcKey sk(curFunc(), m_pc);
+      SrcKey sk(m_fp->func(), m_pc);
       tx()->enterTCAtSrcKey(sk);
     }
   } else {
@@ -6984,7 +6985,7 @@ OPCODES
 
 static inline void
 profileReturnValue(const DataType dt) {
-  const Func* f = curFunc();
+  const Func* f = liveFunc();
   if (f->isPseudoMain() || f->isClosureBody() || f->isMagic() ||
       Func::isSpecial(f->name()))
     return;

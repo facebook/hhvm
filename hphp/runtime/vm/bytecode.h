@@ -320,8 +320,12 @@ struct ActRec {
   }
 
   const Unit* unit() const {
-    m_func->validate();
-    return m_func->unit();
+    func()->validate();
+    return func()->unit();
+  }
+
+  const Func* func() const {
+    return m_func;
   }
 
   /**

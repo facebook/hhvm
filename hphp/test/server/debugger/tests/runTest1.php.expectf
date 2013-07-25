@@ -67,7 +67,6 @@ Break at test_sleep() on line 17 of %s/test1.php
   18   return $a;
 
 @ $a = 0
-
 break test1.php:18
 Breakpoint 1 set on line 18 of test1.php
 continue

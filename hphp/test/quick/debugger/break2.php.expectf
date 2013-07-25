@@ -37,7 +37,6 @@ Breakpoint 1 reached at foo2() on line 7 of %s/break2.php
    8 }
 
 @ $break6=new cls2()
-
 @ $break6->pubObj('test_break6')
 Breakpoint 3 reached at cls2::pubObj() on line 12 of %s/break2.php
   11   public function pubObj($x) {
@@ -46,7 +45,6 @@ Breakpoint 3 reached at cls2::pubObj() on line 12 of %s/break2.php
 
 continue
 pubObj2:test_break6
-
 @ cls2::pubCls('test_break6')
 Breakpoint 4 reached at cls2::pubCls() on line 15 of %s/break2.php
   14   public static function pubCls($x) {
@@ -57,5 +55,4 @@ break clear all
 All breakpoints are cleared.
 continue
 pubCls2:test_break6
-
 quit

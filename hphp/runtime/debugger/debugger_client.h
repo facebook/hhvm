@@ -363,7 +363,6 @@ private:
   std::string m_configFileName;
   Hdf m_config;
   int m_tutorial;
-  std::string m_printFunction;
   std::set<std::string> m_tutorialVisited;
   bool m_scriptMode; // Is this client being scripted by a test?
 

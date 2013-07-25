@@ -67,6 +67,20 @@ void CmdVariable::help(DebuggerClient &client) {
   );
 }
 
+void CmdVariable::PrintVariable(DebuggerClient &client, CStrRef varName) {
+  CmdVariable cmd;
+  cmd.m_frame = client.getFrame();
+  CmdVariablePtr rcmd = client.xend<CmdVariable>(&cmd);
+  if (!rcmd->m_variables.empty()) {
+    for (ArrayIter iter(rcmd->m_variables); iter; ++iter) {
+      String name = iter.first().toString();
+      if (!name.equal(varName)) continue;
+      String value = DebuggerClient::FormatVariable(iter.second(), 200);
+      client.print("%s", value.data());
+    }
+  }
+}
+
 void CmdVariable::PrintVariables(DebuggerClient &client, CArrRef variables,
                                  bool global, CStrRef text) {
   bool system = true;

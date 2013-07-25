@@ -16,11 +16,9 @@ break clear all
 All breakpoints are cleared.
 continue
 test_break1_TestNs
-
 break TestNs\cls::pubObj()
 Breakpoint 1 set upon entering TestNs\cls::pubObj()
 @ $break8=new \TestNs\cls()
-
 @ $break8->pubObj('test_break2')
 Breakpoint 1 reached at TestNs\cls::pubObj() on line 13 of %s/break3.php
   12   public function pubObj($x) {
@@ -37,7 +35,6 @@ break TestNs\cls::break8->pubObj()
 Breakpoint was not set in right format.
 continue
 pubObj:test_break2
-
 break \TestNs\cls::pubCls()
 Breakpoint 1 set upon entering TestNs\cls::pubCls()
 @ \TestNs\cls::pubCls('test_break3')
@@ -52,7 +49,6 @@ break clear all
 All breakpoints are cleared.
 continue
 pubCls:test_break3
-
 break \TestNs\Nested\foo()
 Breakpoint 1 set upon entering TestNs\Nested\foo()
 @ \TestNs\Nested\foo('test_break4')
@@ -67,11 +63,9 @@ break clear all
 All breakpoints are cleared.
 continue
 test_break4_TestNs\Nested
-
 break TestNs\Nested\cls::pubObj()
 Breakpoint 1 set upon entering TestNs\Nested\cls::pubObj()
 @ $break8=new \TestNs\Nested\cls()
-
 @ $break8->pubObj('test_break5')
 Breakpoint 1 reached at TestNs\Nested\cls::pubObj() on line 29 of %s/break3.php
   28   public function pubObj($x) {
@@ -84,7 +78,6 @@ break clear all
 All breakpoints are cleared.
 continue
 pubObj:test_break5_TestNs\Nested
-
 break \TestNs\Nested\cls::pubCls()
 Breakpoint 1 set upon entering TestNs\Nested\cls::pubCls()
 @ \TestNs\Nested\cls::pubCls('test_break6')
@@ -99,5 +92,4 @@ break clear all
 All breakpoints are cleared.
 continue
 pubCls:test_break6_TestNs\Nested
-
 quit

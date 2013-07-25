@@ -47,7 +47,6 @@ break clear all
 All breakpoints are cleared.
 continue
 test done 1
-
 break flow.php:18
 Breakpoint 1 set on line 18 of flow.php
 @test(2)
@@ -107,7 +106,6 @@ continue
 out pri:2
 out pub:2
 test done 2
-
 break flow.php:6
 Breakpoint 1 set on line 6 of flow.php
 @test(3)
@@ -132,7 +130,6 @@ continue
 out pri:3
 out pub:3
 test done 3
-
 break flow.php:7
 Breakpoint 1 set on line 7 of flow.php
 @test(4)
@@ -181,7 +178,6 @@ Break at test() on line 62 of %s/flow.php
 
 continue
 test done 4
-
 break flow.php:46
 Breakpoint 1 set on line 46 of flow.php
 test(5)
@@ -222,7 +218,6 @@ continue
 out pri:5
 out pub:5
 test done 5
-
 break flow.php:46
 Breakpoint 1 set on line 46 of flow.php
 test(6)
@@ -263,7 +258,6 @@ continue
 out pri:6
 out pub:6
 test done 6
-
 break flow.php:7
 Breakpoint 1 set on line 7 of flow.php
 @test(7)
@@ -292,5 +286,4 @@ break clear all
 All breakpoints are cleared.
 continue
 test done 7
-
 quit

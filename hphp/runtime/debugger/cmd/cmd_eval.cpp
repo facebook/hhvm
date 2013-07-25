@@ -52,7 +52,7 @@ void CmdEval::onClientImpl(DebuggerClient &client) {
 }
 
 void CmdEval::handleReply(DebuggerClient &client) {
-  client.print(m_output);
+  if (!m_output.empty()) client.print(m_output);
 }
 
 const StaticString

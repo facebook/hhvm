@@ -4217,29 +4217,29 @@ void TranslatorX64::addDbgGuardImpl(SrcKey sk, SrcRec& srcRec) {
 }
 
 bool TranslatorX64::dumpTCCode(const char* filename) {
-  string aFilename = string(filename).append("_a");
-  string astubFilename = string(filename).append("_astub");
-  FILE* aFile = fopen(aFilename.c_str(),"wb");
-  if (aFile == nullptr)
-    return false;
-  FILE* astubFile = fopen(astubFilename.c_str(),"wb");
-  if (astubFile == nullptr) {
-    fclose(aFile);
-    return false;
-  }
-  string helperAddrFilename = string(filename).append("_helpers_addrs.txt");
-  FILE* helperAddrFile = fopen(helperAddrFilename.c_str(),"wb");
-  if (helperAddrFile == nullptr) {
-    fclose(aFile);
-    fclose(astubFile);
-    return false;
-  }
+#define OPEN_FILE(F, SUFFIX)                            \
+  string F ## name = string(filename).append(SUFFIX);   \
+  FILE* F = fopen(F ## name .c_str(),"wb");             \
+  if (F == nullptr) return false;                       \
+  SCOPE_EXIT{ fclose(F); };
+
+  OPEN_FILE(aFile,          "_a");
+  OPEN_FILE(aprofFile,      "_aprof");
+  OPEN_FILE(astubFile,      "_astub");
+  OPEN_FILE(helperAddrFile, "_helpers_addrs.txt");
+
+#undef OPEN_FILE
+
   // dump starting from the trampolines; this assumes processInit() places
   // trampolines before the translation cache
   // Task #2649357: teach tc-print about aprof, to avoid dumping the entire
   //                'a' code slab
-  size_t count = aprof.frontier() - atrampolines.base();
+  size_t count = a.frontier() - atrampolines.base();
   bool result = (fwrite(atrampolines.base(), 1, count, aFile) == count);
+  if (result) {
+    count = aprof.used();
+    result = (fwrite(aprof.base(), 1, count, aprofFile) == count);
+  }
   if (result) {
     count = astubs.used();
     result = (fwrite(astubs.base(), 1, count, astubFile) == count);
@@ -4257,9 +4257,6 @@ bool TranslatorX64::dumpTCCode(const char* filename) {
       free(functionName);
     }
   }
-  fclose(aFile);
-  fclose(astubFile);
-  fclose(helperAddrFile);
   return result;
 }
 
@@ -4288,10 +4285,13 @@ bool TranslatorX64::dumpTCData() {
                 "repo_schema     = %s\n"
                 "a.base          = %p\n"
                 "a.frontier      = %p\n"
+                "aprof.base      = %p\n"
+                "aprof.frontier  = %p\n"
                 "astubs.base     = %p\n"
                 "astubs.frontier = %p\n\n",
                 kRepoSchemaId,
                 atrampolines.base(), a.frontier(),
+                aprof.base(), aprof.frontier(),
                 astubs.base(), astubs.frontier())) {
     return false;
   }

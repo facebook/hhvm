@@ -36,6 +36,8 @@
 
 #include "hphp/runtime/vm/request_arena.h"
 
+#define ZEND_VERSION "2.4.99"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -858,7 +860,7 @@ String f_sys_get_temp_dir() {
 }
 
 String f_zend_logo_guid() {
-  throw NotSupportedException(__func__, "not zend anymore");
+  throw NotSupportedException(__func__, "deprecated and removed");
 }
 
 int64_t f_zend_thread_id() {
@@ -866,8 +868,9 @@ int64_t f_zend_thread_id() {
 }
 
 String f_zend_version() {
-  throw NotSupportedException(__func__, "not zend anymore");
+  return ZEND_VERSION;
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 

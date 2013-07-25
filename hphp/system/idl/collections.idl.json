@@ -611,23 +611,6 @@
                     ]
                 },
                 {
-                    "name": "fromVector",
-                    "flags": [
-                        "IsStatic",
-                        "HasDocComment"
-                    ],
-                    "desc": "Returns a copy of the specified Vector.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                        {
-                            "name": "vec",
-                            "type": "Variant"
-                        }
-                    ]
-                },
-                {
                     "name": "slice",
                     "flags": [
                         "IsStatic",
@@ -1329,23 +1312,6 @@
                             "type": "Variant"
                         }
                     ]
-                },
-                {
-                    "name": "fromIterable",
-                    "flags": [
-                        "IsStatic",
-                        "HasDocComment"
-                    ],
-                    "desc": "Returns a Map built from the keys and values produced by the specified KeyedIterable.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                        {
-                            "name": "mp",
-                            "type": "Variant"
-                        }
-                    ]
                 }
             ],
             "consts": [
@@ -2023,23 +1989,6 @@
                             "type": "Variant"
                         }
                     ]
-                },
-                {
-                    "name": "fromIterable",
-                    "flags": [
-                        "IsStatic",
-                        "HasDocComment"
-                    ],
-                    "desc": "Returns a StableMap built from the keys and values produced by the specified KeyedIterable.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                        {
-                            "name": "mp",
-                            "type": "Variant"
-                        }
-                    ]
                 }
             ],
             "consts": [
@@ -2387,36 +2336,6 @@
                     ]
                 },
                 {
-                    "name": "updateFromArrayValues",
-                    "flags": [
-                        "HasDocComment"
-                    ],
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                        {
-                            "name": "arr",
-                            "type": "Variant"
-                        }
-                    ]
-                },
-                {
-                    "name": "updateFromIterableValues",
-                    "flags": [
-                        "HasDocComment"
-                    ],
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                        {
-                            "name": "iterable",
-                            "type": "Variant"
-                        }
-                    ]
-                },
-                {
                     "name": "__toString",
                     "return": {
                         "type": "String"
@@ -2536,22 +2455,6 @@
                         "type": "Object"
                     },
                     "args": [
-                    ]
-                },
-                {
-                    "name": "fromIterableValues",
-                    "flags": [
-                        "IsStatic",
-                        "HasDocComment"
-                    ],
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                        {
-                            "name": "iterable",
-                            "type": "Variant"
-                        }
                     ]
                 }
             ],

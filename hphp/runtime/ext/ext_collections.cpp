@@ -663,31 +663,6 @@ Object c_Vector::ti_fromarray(CVarRef arr) {
   return ret;
 }
 
-Object c_Vector::ti_fromvector(CVarRef vec) {
-  if (!vec.isObject()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "vec must be an instance of Vector"));
-    throw e;
-  }
-  ObjectData* obj = vec.getObjectData();
-  if (!obj->instanceof(c_Vector::s_cls)) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "vec must be an instance of Vector"));
-    throw e;
-  }
-  auto v = static_cast<c_Vector*>(obj);
-  c_Vector* target;
-  Object ret = target = NEWOBJ(c_Vector)();
-  uint sz = v->m_size;
-  TypedValue* data;
-  target->m_capacity = target->m_size = sz;
-  target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
-  for (uint i = 0; i < sz; ++i) {
-    tvDup(v->m_data[i], data[i]);
-  }
-  return ret;
-}
-
 Variant c_Vector::ti_slice(CVarRef vec, CVarRef offset,
                            CVarRef len /* = null */) {
   if (!vec.isObject()) {
@@ -1605,34 +1580,6 @@ Object c_Map::ti_fromarray(CVarRef arr) {
     } else {
       assert(k.isString());
       mp->update(k.getStringData(), tv);
-    }
-  }
-  return ret;
-}
-
-Object c_Map::ti_fromiterable(CVarRef it) {
-  if (!it.isObject()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter it must be an instance of Iterable"));
-    throw e;
-  }
-  ObjectData* obj = it.getObjectData();
-  Object ret;
-  if (obj->getCollectionType() == Collection::MapType) {
-    ret = obj->clone();
-    return ret;
-  }
-  c_Map* target;
-  ret = target = NEWOBJ(c_Map)();
-  for (ArrayIter iter = obj->begin(); iter; ++iter) {
-    Variant k = iter.first();
-    Variant v = iter.second();
-    TypedValue* tv = cvarToCell(&v);
-    if (k.isInteger()) {
-      target->update(k.toInt64(), tv);
-    } else {
-      assert(k.isString());
-      target->update(k.getStringData(), tv);
     }
   }
   return ret;
@@ -2787,34 +2734,6 @@ Object c_StableMap::ti_fromarray(CVarRef arr) {
   return ret;
 }
 
-Object c_StableMap::ti_fromiterable(CVarRef it) {
-  if (!it.isObject()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter it must be an instance of Iterable"));
-    throw e;
-  }
-  ObjectData* obj = it.getObjectData();
-  Object ret;
-  if (obj->getCollectionType() == Collection::StableMapType) {
-    ret = obj->clone();
-    return ret;
-  }
-  c_StableMap* target;
-  ret = target = NEWOBJ(c_StableMap)();
-  for (ArrayIter iter = obj->begin(); iter; ++iter) {
-    Variant k = iter.first();
-    Variant v = iter.second();
-    TypedValue* tv = cvarToCell(&v);
-    if (k.isInteger()) {
-      target->update(k.toInt64(), tv);
-    } else {
-      assert(k.isString());
-      target->update(k.getStringData(), tv);
-    }
-  }
-  return ret;
-}
-
 void c_StableMap::throwOOB(int64_t key) {
   throwIntOOB(key);
 }
@@ -3752,34 +3671,6 @@ Object c_Set::t_difference(CVarRef iterable) {
   return this;
 }
 
-Object c_Set::t_updatefromarrayvalues(CVarRef arr) {
-  if (!arr.isArray()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter arr must be an array"));
-    throw e;
-  }
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(arr, sz);
-  for (; iter; ++iter) {
-    t_add(iter.second());
-  }
-  return this;
-}
-
-Object c_Set::t_updatefromiterablevalues(CVarRef iterable) {
-  if (!iterable.isObject()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter iterable must be an instance of Iterable"));
-    throw e;
-  }
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  for (; iter; ++iter) {
-    t_add(iter.second());
-  }
-  return this;
-}
-
 Object c_Set::ti_fromarrays(int _argc,
                             CArrRef _argv /* = null_array */) {
   c_Set* st;
@@ -3796,22 +3687,6 @@ Object c_Set::ti_fromarrays(int _argc,
          pos = ad->iter_advance(pos)) {
       st->t_add(ad->getValueRef(pos));
     }
-  }
-  return ret;
-}
-
-Object c_Set::ti_fromiterablevalues(CVarRef iterable) {
-  if (!iterable.isObject()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter iterable must be an instance of Iterable"));
-    throw e;
-  }
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  c_Set* st;
-  Object ret = st = NEWOBJ(c_Set)();
-  for (; iter; ++iter) {
-    st->t_add(iter.second());
   }
   return ret;
 }

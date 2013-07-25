@@ -240,7 +240,7 @@ void raise_error_sd(const StringData *msg) {
 
 void VerifyParamTypeFail(int paramNum) {
   VMRegAnchor _;
-  const ActRec* ar = curFrame();
+  const ActRec* ar = liveFrame();
   const Func* func = ar->m_func;
   const TypeConstraint& tc = func->params()[paramNum].typeConstraint();
   TypedValue* tv = frame_local(ar, paramNum);

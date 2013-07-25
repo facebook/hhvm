@@ -225,7 +225,7 @@ RuntimeType Translator::liveType(Location l,
       outer = &base[offset];
     } break;
     case Location::Iter: {
-      const Iter *it = frame_iter(curFrame(), l.offset);
+      const Iter *it = frame_iter(liveFrame(), l.offset);
       TRACE(1, "Iter input: fp %p, iter %p, offset %" PRId64 "\n", vmfp(),
             it, l.offset);
       return RuntimeType(it);
@@ -299,10 +299,10 @@ RuntimeType Translator::outThisObjectType() {
    * ar->m_func's class for methods.
    */
   const Class *ctx = liveFunc()->isMethod() ?
-    arGetContextClass(curFrame()) : nullptr;
+    arGetContextClass(liveFrame()) : nullptr;
   if (ctx) {
-    assert(!curFrame()->hasThis() ||
-           curFrame()->getThis()->getVMClass()->classof(ctx));
+    assert(!liveFrame()->hasThis() ||
+           liveFrame()->getThis()->getVMClass()->classof(ctx));
     TRACE(2, "OutThisObject: derived from Class \"%s\"\n",
           ctx->name()->data());
     return RuntimeType(KindOfObject, KindOfInvalid, ctx);
@@ -617,7 +617,7 @@ predictOutputs(SrcKey startSk,
 
   if (ni->op() == OpClsCnsD) {
     const NamedEntityPair& cne =
-      curFrame()->m_func->unit()->lookupNamedEntityPairId(ni->imm[1].u_SA);
+      ni->unit()->lookupNamedEntityPairId(ni->imm[1].u_SA);
     StringData* cnsName = ni->m_unit->lookupLitstrId(ni->imm[0].u_SA);
     Class* cls = cne.second->getCachedClass();
     if (cls) {
@@ -741,9 +741,9 @@ getDynLocType(const SrcKey startSk,
           return RuntimeType(klass);
         }
       } else if (op == OpSelf) {
-        return RuntimeType(curClass());
+        return RuntimeType(liveClass());
       } else if (op == OpParent) {
-        Class* clss = curClass();
+        Class* clss = liveClass();
         if (clss != nullptr)
           return RuntimeType(clss->parent());
       }
@@ -3118,7 +3118,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
    * analysis phase which pretty liberally inspects live VM state.
    */
   ActRec fakeAR;
-  fakeAR.m_savedRbp = reinterpret_cast<uintptr_t>(curFrame());
+  fakeAR.m_savedRbp = reinterpret_cast<uintptr_t>(liveFrame());
   fakeAR.m_savedRip = 0xbaabaa;  // should never be inspected
   fakeAR.m_func = fcall->funcd;
   fakeAR.m_soff = 0xb00b00;      // should never be inspected
@@ -3805,7 +3805,7 @@ void Translator::traceStart(Offset bcStartOffset) {
          color(ANSI_COLOR_END));
 
   m_irTrans.reset(new JIT::IRTranslator(
-    bcStartOffset, curSpOff(), liveFunc()));
+    bcStartOffset, liveSpOff(), liveFunc()));
 }
 
 void Translator::traceEnd() {

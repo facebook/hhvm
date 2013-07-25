@@ -2395,7 +2395,7 @@ bool VMExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
 
   ActRec* ar = m_stack.allocA();
   assert((uintptr_t)&ar->m_func < (uintptr_t)&ar->m_r);
-  Class* cls = curClass();
+  Class* cls = liveClass();
   if (m_fp->hasThis()) {
     ObjectData *this_ = m_fp->getThis();
     this_->incRefCount();

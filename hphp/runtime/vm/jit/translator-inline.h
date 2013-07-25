@@ -42,10 +42,10 @@ inline Cell*&  vmfp() { return (Cell*&)g_vmContext->m_fp; }
 inline const uchar*& vmpc() { return g_vmContext->m_pc; }
 inline ActRec*& vmFirstAR() { return g_vmContext->m_firstAR; }
 
-inline ActRec* curFrame()    { return (ActRec*)vmfp(); }
-inline const Func* liveFunc() { return curFrame()->m_func; }
+inline ActRec* liveFrame()    { return (ActRec*)vmfp(); }
+inline const Func* liveFunc() { return liveFrame()->m_func; }
 inline const Unit* liveUnit() { return liveFunc()->unit(); }
-inline Class* curClass() {
+inline Class* liveClass() {
   const auto* func = liveFunc();
   auto* cls = func->cls();
   if (func->isPseudoMain() || func->isTraitMethod() || cls == nullptr) {
@@ -53,7 +53,7 @@ inline Class* curClass() {
   }
   return cls;
 }
-inline Offset curSpOff() {
+inline Offset liveSpOff() {
   Cell* fp = vmfp();
   if (liveFunc()->isGenerator()) {
     fp = (Cell*)Stack::generatorStackBase((ActRec*)fp);

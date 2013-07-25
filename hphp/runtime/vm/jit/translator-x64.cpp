@@ -757,7 +757,7 @@ TranslatorX64::getTranslation(const TranslArgs& args) {
           sk.offset());
   SKTRACE(2, sk, "   funcId: %x \n", sk.func()->getFuncId());
 
-  if (curFrame()->hasVarEnv() && curFrame()->getVarEnv()->isGlobalScope()) {
+  if (liveFrame()->hasVarEnv() && liveFrame()->getVarEnv()->isGlobalScope()) {
     SKTRACE(2, sk, "punting on pseudoMain\n");
     return nullptr;
   }
@@ -3321,7 +3321,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
         // We always go through the tracelet translator in this case
       }
     } else {
-      JIT::RegionContext rContext { sk.func(), sk.offset(), curSpOff() };
+      JIT::RegionContext rContext { sk.func(), sk.offset(), liveSpOff() };
       FTRACE(2, "populating live context for region\n");
       populateLiveContext(rContext);
       region = JIT::selectRegion(rContext, &t);

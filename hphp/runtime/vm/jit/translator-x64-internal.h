@@ -367,11 +367,6 @@ emitCopyTo(X64Assembler& a,
   emitStoreTVType(a, s32, dest[destOff + TVOFF(m_type)]);
 }
 
-static inline const char* getContextName() {
-  Class* ctx = arGetContextClass(curFrame());
-  return ctx ? ctx->name()->data() : ":anonymous:";
-}
-
 }}
 
 #endif

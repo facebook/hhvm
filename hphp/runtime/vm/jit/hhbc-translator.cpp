@@ -1918,7 +1918,7 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
 
   const Func* func = uniqueCls ? cls->getCtor() : nullptr;
   if (func && !(func->attrs() & AttrPublic)) {
-    Class* ctx = arGetContextClass(curFrame());
+    Class* ctx = curClass();
     if (!ctx) {
       func = nullptr;
     } else if (ctx != cls) {

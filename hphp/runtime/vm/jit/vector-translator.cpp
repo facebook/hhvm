@@ -1188,7 +1188,9 @@ void HhbcTranslator::VectorTranslator::emitCGetProp() {
 
   typedef TypedValue (*OpFunc)(Class*, TypedValue*, TypedValue, MInstrState*);
   SSATmp* key = getKey();
-  BUILD_OPTAB_HOT(getKeyTypeS(key), m_base->isA(Type::Obj));
+  auto keyType = getKeyTypeS(key);
+  if (keyType == KeyType::Int) keyType = KeyType::Any;
+  BUILD_OPTAB_HOT(keyType, m_base->isA(Type::Obj));
   m_result = gen(CGetProp, getCatchTrace(),
                  cns((TCA)opFunc), CTX(), m_base, key, genMisPtr());
 }

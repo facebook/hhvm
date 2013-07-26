@@ -38,7 +38,7 @@ SOFTWARE.
 #define MAX_LENGTH_OF_LONG 20
 static const char long_min_digits[] = "9223372036854775808";
 
-using namespace HPHP;
+namespace HPHP {
 
 #ifdef true
 # undef true
@@ -864,4 +864,6 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
 
   s_json_parser->error_code = JSON_ERROR_SYNTAX;
   return false;
+}
+
 }

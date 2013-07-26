@@ -22,7 +22,6 @@
 #include "hphp/test/ext/test_util.h"
 #include "hphp/test/ext/test_ext.h"
 #include "hphp/test/ext/test_server.h"
-#include "hphp/test/ext/test_debugger.h"
 #include "hphp/compiler/option.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,16 +30,6 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
                         std::string &which, std::string &set) {
   // individual test suites
   s_suite = suite;
-  if (suite == "TestDebugger" || suite == "TestDebuggerJit") {
-    if (suite == "TestDebuggerJit") {
-      RuntimeOption::EvalJit = true;
-    } else {
-      RuntimeOption::EvalJit = false;
-    }
-    suite = "TestDebugger";
-    RUN_TESTSUITE(TestDebugger);
-    return;
-  }
   if (suite == "TestServer") {
     Option::EnableEval = Option::FullEval;
     RUN_TESTSUITE(TestServer);

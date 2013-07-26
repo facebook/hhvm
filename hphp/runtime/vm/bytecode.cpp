@@ -63,6 +63,7 @@
 #include "hphp/runtime/server/source_root_info.h"
 #include "hphp/runtime/base/extended_logger.h"
 #include "hphp/runtime/base/tracer.h"
+#include "hphp/runtime/base/memory_profile.h"
 
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/ext/ext_collections.h"
@@ -436,16 +437,6 @@ TypedValue* VarEnv::lookup(const StringData* name) {
 TypedValue* VarEnv::lookupAdd(const StringData* name) {
   ensureNvt();
   return m_nvTable->lookupAdd(name);
-}
-
-TypedValue* VarEnv::lookupRawPointer(const StringData* name) {
-  ensureNvt();
-  return m_nvTable->lookupRawPointer(name);
-}
-
-TypedValue* VarEnv::lookupAddRawPointer(const StringData* name) {
-  ensureNvt();
-  return m_nvTable->lookupAddRawPointer(name);
 }
 
 bool VarEnv::unset(const StringData* name) {
@@ -7204,6 +7195,8 @@ void VMExecutionContext::requestInit() {
 
   profileRequestStart();
 
+  MemoryProfile::startProfiling();
+
 #ifdef DEBUG
   Class* cls = Unit::GetNamedEntity(s_stdclass.get())->clsList();
   assert(cls);
@@ -7212,6 +7205,8 @@ void VMExecutionContext::requestInit() {
 }
 
 void VMExecutionContext::requestExit() {
+  MemoryProfile::finishProfiling();
+
   destructObjects();
   syncGdbState();
   tx()->requestExit();

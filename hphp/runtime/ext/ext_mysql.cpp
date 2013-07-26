@@ -201,23 +201,27 @@ void MySQL::SetDefaultConn(MySQL *conn) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // class MySQL
-static MYSQL *create_new_conn() {
-  MYSQL *ret = mysql_init(NULL);
-  mysql_options(ret, MYSQL_OPT_LOCAL_INFILE, 0);
+static MYSQL *configure_conn(MYSQL* conn) {
+  mysql_options(conn, MYSQL_OPT_LOCAL_INFILE, 0);
   if (RuntimeOption::MySQLConnectTimeout) {
-    MySQLUtil::set_mysql_timeout(ret, MySQLUtil::ConnectTimeout,
+    MySQLUtil::set_mysql_timeout(conn, MySQLUtil::ConnectTimeout,
                                  RuntimeOption::MySQLConnectTimeout);
   }
   int readTimeout = s_mysql_data->readTimeout;
   if (readTimeout) {
-    MySQLUtil::set_mysql_timeout(ret, MySQLUtil::ReadTimeout, readTimeout);
-    MySQLUtil::set_mysql_timeout(ret, MySQLUtil::WriteTimeout, readTimeout);
+    MySQLUtil::set_mysql_timeout(conn, MySQLUtil::ReadTimeout, readTimeout);
+    MySQLUtil::set_mysql_timeout(conn, MySQLUtil::WriteTimeout, readTimeout);
   }
-  return ret;
+  return conn;
+}
+
+static MYSQL *create_new_conn() {
+  return configure_conn(mysql_init(nullptr));
 }
 
 MySQL::MySQL(const char *host, int port, const char *username,
-             const char *password, const char *database)
+             const char *password, const char *database,
+             MYSQL* raw_connection)
     : m_port(port), m_last_error_set(false), m_last_errno(0),
       m_xaction_count(0), m_multi_query(false) {
   if (host) m_host = host;
@@ -225,7 +229,11 @@ MySQL::MySQL(const char *host, int port, const char *username,
   if (password) m_password = password;
   if (database) m_database = database;
 
-  m_conn = create_new_conn();
+  if (raw_connection) {
+    m_conn = configure_conn(raw_connection);
+  } else {
+    m_conn = create_new_conn();
+  }
 }
 
 MySQL::~MySQL() {

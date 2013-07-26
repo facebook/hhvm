@@ -389,41 +389,41 @@ bool TestParserExpr::TestClosure() {
 bool TestParserExpr::TestXHP() {
   // basics
   V("<?php $x = <thing />;",
-    "$x = new xhp_thing(array(), array());\n");
+    "$x = new xhp_thing(array(), array(), __FILE__, __LINE__);\n");
 
   // white spaces
   V("<?php $x = <x> a{ 'b' }c </x>;",
-    "$x = new xhp_x(array(), array(' a', 'b', 'c '));\n");
+    "$x = new xhp_x(array(), array(' a', 'b', 'c '), __FILE__, __LINE__);\n");
   V("<?php $x = <x> a { 'b' } c </x>;",
-    "$x = new xhp_x(array(), array(' a ', 'b', ' c '));\n");
+    "$x = new xhp_x(array(), array(' a ', 'b', ' c '), __FILE__, __LINE__);\n");
   V("<?php $x = <x>\n    foo\n   </x>;",
-    "$x = new xhp_x(array(), array(' foo '));\n");
+    "$x = new xhp_x(array(), array(' foo '), __FILE__, __LINE__);\n");
   V("<?php $x = <x>\n    foo\n   bar\n   </x>;",
-    "$x = new xhp_x(array(), array(' foo bar '));\n");
+    "$x = new xhp_x(array(), array(' foo bar '), __FILE__, __LINE__);\n");
 
   // attributes
   V("<?php $x = <x:y attr={:tag::CONSTANT} />;",
-    "$x = new xhp_x__y(array('attr' => xhp_tag::CONSTANT), array());\n");
+    "$x = new xhp_x__y(array('attr' => xhp_tag::CONSTANT), array(), __FILE__, __LINE__);\n");
   V("<?php $x = <a b=\"&nbsp;\">c</a>;",
-    "$x = new xhp_a(array('b' => '\xC2\xA0'), array('c'));\n");
+    "$x = new xhp_a(array('b' => '\xC2\xA0'), array('c'), __FILE__, __LINE__);\n");
   V("<?php $x = <a b=\"\" />;",
-    "$x = new xhp_a(array('b' => ''), array());\n");
+    "$x = new xhp_a(array('b' => ''), array(), __FILE__, __LINE__);\n");
 
   // children
   V("<?php $x = <x> <x /> {'a'} </x>;",
-    "$x = new xhp_x(array(), array(new xhp_x(array(), array()), 'a'));\n");
+    "$x = new xhp_x(array(), array(new xhp_x(array(), array(), __FILE__, __LINE__), 'a'), __FILE__, __LINE__);\n");
   V("<?php $x = <x> {'a'}<x /></x>;",
-    "$x = new xhp_x(array(), array('a', new xhp_x(array(), array())));");
+    "$x = new xhp_x(array(), array('a', new xhp_x(array(), array(), __FILE__, __LINE__)), __FILE__, __LINE__);");
   V("<?php $x = <x>\n<x>\n</x>.\n</x>;",
-    "$x = new xhp_x(array(), array(new xhp_x(array(), array()), '. '));\n");
+    "$x = new xhp_x(array(), array(new xhp_x(array(), array(), __FILE__, __LINE__), '. '), __FILE__, __LINE__);\n");
   V("<?php <div><a />=<a /></div>;",
-    "new xhp_div(array(), array(new xhp_a(array(), array()), '=', "
-    "new xhp_a(array(), array())));\n");
+    "new xhp_div(array(), array(new xhp_a(array(), array(), __FILE__, __LINE__), '=', "
+    "new xhp_a(array(), array(), __FILE__, __LINE__)), __FILE__, __LINE__);\n");
 
   // closing tag
   V("<?php $x = <a><a><a>hi</a></></a>;",
     "$x = new xhp_a(array(), array(new xhp_a(array(), "
-    "array(new xhp_a(array(), array('hi'))))));\n");
+    "array(new xhp_a(array(), array('hi'), __FILE__, __LINE__)), __FILE__, __LINE__)), __FILE__, __LINE__);\n");
 
   // class name with PHP keyword
   V("<?php class :a:b:switch-links { }",

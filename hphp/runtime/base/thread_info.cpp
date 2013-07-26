@@ -124,9 +124,11 @@ void ThreadInfo::onSessionExit() {
 }
 
 RequestInjectionData::~RequestInjectionData() {
+#ifndef __APPLE__
   if (m_hasTimer) {
     timer_delete(m_timer_id);
   }
+#endif
 }
 
 void RequestInjectionData::onSessionInit() {
@@ -156,6 +158,7 @@ void RequestInjectionData::setSurprisePage(void* page) {
 }
 
 void RequestInjectionData::setTimeout(int seconds) {
+#ifndef __APPLE__
   m_timeoutSeconds = seconds > 0 ? seconds : 0;
   if (!m_hasTimer) {
     if (!m_timeoutSeconds) {
@@ -201,6 +204,7 @@ void RequestInjectionData::setTimeout(int seconds) {
   } else {
     m_timerActive.store(false, std::memory_order_relaxed);
   }
+#endif
 }
 
 void RequestInjectionData::resetTimer(int seconds /* = -1 */) {

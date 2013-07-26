@@ -163,17 +163,34 @@ struct StackValueInfo {
     : value(value)
     , knownType(value ? value->type() : Type::None)
     , spansCall(false)
-  {}
+  {
+    TRACE(5, "%s created\n", show().c_str());
+  }
 
   explicit StackValueInfo(Type type)
     : value(nullptr)
     , knownType(type)
     , spansCall(false)
-  {}
+  {
+    TRACE(5, "%s created\n", show().c_str());
+  }
+
+  std::string show() const {
+    std::ostringstream out;
+    out << "StackValueInfo {";
+    out << (value ? value->inst()->toString() : knownType.toString());
+    if (spansCall) out << ", spans call";
+    out << "}";
+
+    return out.str();
+  }
 
   SSATmp* value;   // may be null
   Type knownType;  // currently Type::None if we don't know (TODO(#2135185)
   bool spansCall;  // whether the tmp's definition was above a call
+
+ private:
+  TRACE_SET_MOD(hhir);
 };
 
 /*

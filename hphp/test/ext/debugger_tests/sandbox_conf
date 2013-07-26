@@ -1,5 +1,0 @@
-default.path = .
-default.log = /tmp/hphpd_test_sandbox_error.log
-default.accesslog = /tmp/hphpd_test_sandbox_access.log
-default.ServerVars {
-}

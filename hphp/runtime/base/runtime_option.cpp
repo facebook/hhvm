@@ -323,32 +323,6 @@ int RuntimeOption::MaxArrayChain = INT_MAX;
 bool RuntimeOption::StrictCollections = true;
 bool RuntimeOption::WarnOnCollectionToArray = false;
 bool RuntimeOption::UseDirectCopy = false;
-bool RuntimeOption::EnableApc = true;
-bool RuntimeOption::EnableConstLoad = false;
-bool RuntimeOption::ForceConstLoadToAPC = true;
-std::string RuntimeOption::ApcPrimeLibrary;
-int RuntimeOption::ApcLoadThread = 1;
-std::set<std::string> RuntimeOption::ApcCompletionKeys;
-RuntimeOption::ApcTableTypes RuntimeOption::ApcTableType =
-  ApcTableTypes::ApcConcurrentTable;
-bool RuntimeOption::EnableApcSerialize = true;
-time_t RuntimeOption::ApcKeyMaturityThreshold = 20;
-size_t RuntimeOption::ApcMaximumCapacity = 0;
-int RuntimeOption::ApcKeyFrequencyUpdatePeriod = 1000;
-bool RuntimeOption::ApcExpireOnSets = false;
-int RuntimeOption::ApcPurgeFrequency = 4096;
-int RuntimeOption::ApcPurgeRate = -1;
-bool RuntimeOption::ApcAllowObj = false;
-int RuntimeOption::ApcTTLLimit = -1;
-bool RuntimeOption::ApcUseFileStorage = false;
-int64_t RuntimeOption::ApcFileStorageChunkSize = int64_t(1LL << 29);
-int64_t RuntimeOption::ApcFileStorageMaxSize = int64_t(1LL << 32);
-std::string RuntimeOption::ApcFileStoragePrefix;
-int RuntimeOption::ApcFileStorageAdviseOutPeriod = 1800;
-std::string RuntimeOption::ApcFileStorageFlagKey;
-bool RuntimeOption::ApcConcurrentTableLockFree = false;
-bool RuntimeOption::ApcFileStorageKeepFileLinked = false;
-std::vector<std::string> RuntimeOption::ApcNoTTLPrefix;
 
 bool RuntimeOption::EnableDnsCache = false;
 int RuntimeOption::DnsCacheTTL = 10 * 60; // 10 minutes
@@ -427,10 +401,11 @@ EVALFLAGS();
 std::set<string, stdltistr> RuntimeOption::DynamicInvokeFunctions;
 bool RuntimeOption::RecordCodeCoverage = false;
 std::string RuntimeOption::CodeCoverageOutputFile;
-size_t RuntimeOption::VMTranslAHotSize = 4 << 20;
-size_t RuntimeOption::VMTranslASize = 508 << 20;
+size_t RuntimeOption::VMTranslAHotSize   =   4 << 20;
+size_t RuntimeOption::VMTranslASize      = 508 << 20;
+size_t RuntimeOption::VMTranslAProfSize  = 512 << 20;
 size_t RuntimeOption::VMTranslAStubsSize = 512 << 20;
-size_t RuntimeOption::VMTranslGDataSize = RuntimeOption::VMTranslASize >> 2;
+size_t RuntimeOption::VMTranslGDataSize  = RuntimeOption::VMTranslASize >> 2;
 
 std::string RuntimeOption::RepoLocalMode;
 std::string RuntimeOption::RepoLocalPath;
@@ -861,46 +836,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     UseDirectCopy = server["UseDirectCopy"].getBool(false);
     AlwaysUseRelativePath = server["AlwaysUseRelativePath"].getBool(false);
 
-    Hdf apc = server["APC"];
-    EnableApc = apc["EnableApc"].getBool(true);
-    EnableConstLoad = apc["EnableConstLoad"].getBool(false);
-    ForceConstLoadToAPC = apc["ForceConstLoadToAPC"].getBool(true);
-    ApcPrimeLibrary = apc["PrimeLibrary"].getString();
-    ApcLoadThread = apc["LoadThread"].getInt16(2);
-    apc["CompletionKeys"].get(ApcCompletionKeys);
-
-    string apcTableType = apc["TableType"].getString("concurrent");
-    if (strcasecmp(apcTableType.c_str(), "concurrent") == 0) {
-      ApcTableType = ApcTableTypes::ApcConcurrentTable;
-    } else {
-      throw InvalidArgumentException("apc table type",
-                                     "Invalid table type");
-    }
-    EnableApcSerialize = apc["EnableApcSerialize"].getBool(true);
-    ApcExpireOnSets = apc["ExpireOnSets"].getBool();
-    ApcPurgeFrequency = apc["PurgeFrequency"].getInt32(4096);
-    ApcPurgeRate = apc["PurgeRate"].getInt32(-1);
-
-    ApcAllowObj = apc["AllowObject"].getBool();
-    ApcTTLLimit = apc["TTLLimit"].getInt32(-1);
-    Hdf fileStorage = apc["FileStorage"];
-    ApcUseFileStorage = fileStorage["Enable"].getBool();
-    ApcFileStorageChunkSize = fileStorage["ChunkSize"].getInt64(1LL << 29);
-    ApcFileStorageMaxSize = fileStorage["MaxSize"].getInt64(1LL << 32);
-    ApcFileStoragePrefix = fileStorage["Prefix"].getString("/tmp/apc_store");
-    ApcFileStorageFlagKey = fileStorage["FlagKey"].getString("_madvise_out");
-    ApcFileStorageAdviseOutPeriod =
-      fileStorage["AdviseOutPeriod"].getInt32(1800);
-    ApcFileStorageKeepFileLinked = fileStorage["KeepFileLinked"].getBool();
-
-    ApcConcurrentTableLockFree = apc["ConcurrentTableLockFree"].getBool(false);
-    ApcKeyMaturityThreshold = apc["KeyMaturityThreshold"].getInt32(20);
-    ApcMaximumCapacity = apc["MaximumCapacity"].getInt64(0);
-    ApcKeyFrequencyUpdatePeriod = apc["KeyFrequencyUpdatePeriod"].
-      getInt32(1000);
-
-    apc["NoTTLPrefix"].get(ApcNoTTLPrefix);
-
     Hdf dns = server["DnsCache"];
     EnableDnsCache = dns["Enable"].getBool();
     DnsCacheTTL = dns["TTL"].getInt32(600); // 10 minutes
@@ -1207,6 +1142,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     if (RecordCodeCoverage) CheckSymLink = true;
     CodeCoverageOutputFile = eval["CodeCoverageOutputFile"].getString();
     VMTranslAHotSize = eval["JitAHotSize"].getUInt64(VMTranslAHotSize);
+    VMTranslAProfSize = eval["JitAProfSize"].getUInt64(VMTranslAProfSize);
     VMTranslASize = eval["JitASize"].getUInt64(VMTranslASize);
     VMTranslAStubsSize = eval["JitAStubsSize"].getUInt64(VMTranslAStubsSize);
     VMTranslGDataSize = eval["JitGlobalDataSize"].getUInt64(VMTranslGDataSize);

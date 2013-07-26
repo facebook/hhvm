@@ -363,16 +363,20 @@ class TranslationFailedExc : public std::exception {
     m_file(file), m_line(line) { }
 };
 
-class UnknownInputExc : public std::exception {
+class UnknownInputExc : public std::runtime_error {
  public:
   const char* m_file; // must be static
   const int m_line;
   UnknownInputExc(const char* file, int line)
-    : m_file(file), m_line(line) { }
+    : std::runtime_error(folly::format("UnknownInputExc @ {}:{}",
+                                       file, line).str())
+    , m_file(file)
+    , m_line(line)
+  {}
 };
 
 #define punt() do { \
-  throw TranslationFailedExc(__FILE__, __LINE__); \
+  throw Transl::TranslationFailedExc(__FILE__, __LINE__); \
 } while(0)
 
 #define throwUnknownInput() do { \
@@ -507,12 +511,13 @@ struct ActRecState {
   std::vector<Record> m_arStack;
 
   ActRecState() {}
+  void pushFunc(const NormalizedInstruction& ni);
   void pushFuncD(const Func* func);
   void pushDynFunc();
   void pop();
-  bool getReffiness(int argNum, int stackOffset, RefDeps* outRefDeps);
-  const Func* getCurrentFunc();
-  State getCurrentState();
+  bool checkByRef(int argNum, int stackOffset, RefDeps* outRefDeps);
+  const Func* knownFunc();
+  State currentState();
 };
 
 struct Tracelet : private boost::noncopyable {
@@ -1073,7 +1078,12 @@ SrcKey nextSrcKey(const NormalizedInstruction& i);
 
 void populateImmediates(NormalizedInstruction&);
 void preInputApplyMetaData(Unit::MetaHandle, NormalizedInstruction*);
-void readMetaData(Unit::MetaHandle&, NormalizedInstruction&, HhbcTranslator&);
+enum class MetaMode {
+  Normal,
+  Legacy,
+};
+void readMetaData(Unit::MetaHandle&, NormalizedInstruction&, HhbcTranslator&,
+                  MetaMode m = MetaMode::Normal);
 bool instrMustInterp(const NormalizedInstruction&);
 
 typedef std::function<Type(int)> LocalTypeFn;
@@ -1083,6 +1093,8 @@ void getInputsImpl(SrcKey startSk, NormalizedInstruction* inst,
                    int& currentStackOffset, InputInfos& inputs,
                    const LocalTypeFn& localType);
 bool outputIsPredicted(SrcKey startSk, NormalizedInstruction& inst);
+bool callDestroysLocals(const NormalizedInstruction& inst,
+                        const Func* caller);
 int locPhysicalOffset(Location l, const Func* f = nullptr);
 
 namespace InstrFlags {
@@ -1122,6 +1134,8 @@ enum OutTypeConstraints {
   OutStrlen,            // OpStrLen
   OutClassRef,          // KindOfClass
   OutSetM,              // SetM is a very special snowflake
+  OutFPushCufSafe,      // FPushCufSafe pushes two values of different
+                        // types and an ActRec
   OutNone
 };
 
@@ -1156,7 +1170,6 @@ enum Operands {
                              // n = imm[0].u_IVA
   StackTop2 = Stack1 | Stack2,
   StackTop3 = Stack1 | Stack2 | Stack3,
-  StackCufSafe = StackIns1 | FStack
 };
 
 inline Operands operator|(const Operands& l, const Operands& r) {

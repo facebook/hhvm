@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/variable_serializer.h"
 #include "hphp/util/alloc.h"
+#include "hphp/util/hdf.h"
 #include "hphp/runtime/base/ini_setting.h"
 
 using HPHP::Util::ScopedMem;
@@ -35,32 +36,99 @@ namespace HPHP {
 
 extern void const_load();
 
+void apcExtension::moduleLoad(Hdf config) {
+  Hdf apc = config["Server"]["APC"];
 
-static class apcExtension : public Extension {
-public:
-  apcExtension() : Extension("apc") {}
-  virtual void moduleInit() {
-    IniSetting::SetGlobalDefault("apc.enabled","1");
-    IniSetting::SetGlobalDefault("apc.stat",
-                                 RuntimeOption::RepoAuthoritative
-                                 ? "0" : "1");
-    IniSetting::SetGlobalDefault("apc.enable_cli", "1");
-    if (RuntimeOption::ApcUseFileStorage) {
-      s_apc_file_storage.enable(RuntimeOption::ApcFileStoragePrefix,
-                                RuntimeOption::ApcFileStorageChunkSize,
-                                RuntimeOption::ApcFileStorageMaxSize);
-    }
+  Enable = apc["EnableApc"].getBool(true);
+  EnableConstLoad = apc["EnableConstLoad"].getBool(false);
+  ForceConstLoadToAPC = apc["ForceConstLoadToAPC"].getBool(true);
+  PrimeLibrary = apc["PrimeLibrary"].getString();
+  LoadThread = apc["LoadThread"].getInt16(2);
+  apc["CompletionKeys"].get(CompletionKeys);
+  string tblType = apc["TableType"].getString("concurrent");
+  if (strcasecmp(tblType.c_str(), "concurrent") == 0) {
+    TableType = TableTypes::ConcurrentTable;
+  } else {
+    throw InvalidArgumentException("apc table type", "Invalid table type");
   }
-  virtual void moduleShutdown() {
-    if (RuntimeOption::ApcUseFileStorage) {
-      s_apc_file_storage.cleanup();
-    }
-  }
-} s_apc_extension;
+  EnableApcSerialize = apc["EnableApcSerialize"].getBool(true);
+  ExpireOnSets = apc["ExpireOnSets"].getBool();
+  PurgeFrequency = apc["PurgeFrequency"].getInt32(4096);
+  PurgeRate = apc["PurgeRate"].getInt32(-1);
 
+  AllowObj = apc["AllowObject"].getBool();
+  TTLLimit = apc["TTLLimit"].getInt32(-1);
+
+  Hdf fileStorage = apc["FileStorage"];
+  UseFileStorage = fileStorage["Enable"].getBool();
+  FileStorageChunkSize = fileStorage["ChunkSize"].getInt64(1LL << 29);
+  FileStorageMaxSize = fileStorage["MaxSize"].getInt64(1LL << 32);
+  FileStoragePrefix = fileStorage["Prefix"].getString("/tmp/apc_store");
+  FileStorageFlagKey = fileStorage["FlagKey"].getString("_madvise_out");
+  FileStorageAdviseOutPeriod = fileStorage["AdviseOutPeriod"].getInt32(1800);
+  FileStorageKeepFileLinked = fileStorage["KeepFileLinked"].getBool();
+
+  ConcurrentTableLockFree = apc["ConcurrentTableLockFree"].getBool(false);
+  KeyMaturityThreshold = apc["KeyMaturityThreshold"].getInt32(20);
+  MaximumCapacity = apc["MaximumCapacity"].getInt64(0);
+  KeyFrequencyUpdatePeriod = apc["KeyFrequencyUpdatePeriod"].getInt32(1000);
+
+  apc["NoTTLPrefix"].get(NoTTLPrefix);
+}
+
+void apcExtension::moduleInit() {
+  IniSetting::SetGlobalDefault("apc.enabled","1");
+  IniSetting::SetGlobalDefault("apc.stat",
+                               RuntimeOption::RepoAuthoritative
+                               ? "0" : "1");
+  IniSetting::SetGlobalDefault("apc.enable_cli", "1");
+  if (UseFileStorage) {
+    s_apc_file_storage.enable(FileStoragePrefix,
+                              FileStorageChunkSize,
+                              FileStorageMaxSize);
+  }
+}
+
+void apcExtension::moduleShutdown() {
+  if (UseFileStorage) {
+    s_apc_file_storage.cleanup();
+  }
+}
+
+
+bool apcExtension::Enable = true;
+bool apcExtension::EnableConstLoad = false;
+bool apcExtension::ForceConstLoadToAPC = true;
+std::string apcExtension::PrimeLibrary;
+int apcExtension::LoadThread = 1;
+std::set<std::string> apcExtension::CompletionKeys;
+apcExtension::TableTypes apcExtension::TableType =
+  TableTypes::ConcurrentTable;
+bool apcExtension::EnableApcSerialize = true;
+time_t apcExtension::KeyMaturityThreshold = 20;
+size_t apcExtension::MaximumCapacity = 0;
+int apcExtension::KeyFrequencyUpdatePeriod = 1000;
+bool apcExtension::ExpireOnSets = false;
+int apcExtension::PurgeFrequency = 4096;
+int apcExtension::PurgeRate = -1;
+bool apcExtension::AllowObj = false;
+int apcExtension::TTLLimit = -1;
+bool apcExtension::UseFileStorage = false;
+int64_t apcExtension::FileStorageChunkSize = int64_t(1LL << 29);
+int64_t apcExtension::FileStorageMaxSize = int64_t(1LL << 32);
+std::string apcExtension::FileStoragePrefix;
+int apcExtension::FileStorageAdviseOutPeriod = 1800;
+std::string apcExtension::FileStorageFlagKey;
+bool apcExtension::ConcurrentTableLockFree = false;
+bool apcExtension::FileStorageKeepFileLinked = false;
+std::vector<std::string> apcExtension::NoTTLPrefix;
+
+static apcExtension s_apc_extension;
+
+///////////////////////////////////////////////////////////////////////////////
 bool f_apc_store(CStrRef key, CVarRef var, int64_t ttl /* = 0 */,
                  int64_t cache_id /* = 0 */) {
-  if (!RuntimeOption::EnableApc) return false;
+  if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
     throw_invalid_argument("cache_id: %" PRId64, cache_id);
@@ -72,7 +140,7 @@ bool f_apc_store(CStrRef key, CVarRef var, int64_t ttl /* = 0 */,
 
 bool f_apc_add(CStrRef key, CVarRef var, int64_t ttl /* = 0 */,
                int64_t cache_id /* = 0 */) {
-  if (!RuntimeOption::EnableApc) return false;
+  if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
     throw_invalid_argument("cache_id: %" PRId64, cache_id);
@@ -84,7 +152,7 @@ bool f_apc_add(CStrRef key, CVarRef var, int64_t ttl /* = 0 */,
 
 Variant f_apc_fetch(CVarRef key, VRefParam success /* = null */,
                     int64_t cache_id /* = 0 */) {
-  if (!RuntimeOption::EnableApc) return false;
+  if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
     throw_invalid_argument("cache_id: %" PRId64, cache_id);
@@ -123,7 +191,7 @@ Variant f_apc_fetch(CVarRef key, VRefParam success /* = null */,
 }
 
 Variant f_apc_delete(CVarRef key, int64_t cache_id /* = 0 */) {
-  if (!RuntimeOption::EnableApc) return false;
+  if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
     throw_invalid_argument("cache_id: %" PRId64, cache_id);
@@ -149,7 +217,7 @@ Variant f_apc_delete(CVarRef key, int64_t cache_id /* = 0 */) {
 }
 
 bool f_apc_clear_cache(int64_t cache_id /* = 0 */) {
-  if (!RuntimeOption::EnableApc) return false;
+  if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
     throw_invalid_argument("cache_id: %" PRId64, cache_id);
@@ -160,7 +228,7 @@ bool f_apc_clear_cache(int64_t cache_id /* = 0 */) {
 
 Variant f_apc_inc(CStrRef key, int64_t step /* = 1 */,
                   VRefParam success /* = null */, int64_t cache_id /* = 0 */) {
-  if (!RuntimeOption::EnableApc) return false;
+  if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
     throw_invalid_argument("cache_id: %" PRId64, cache_id);
@@ -174,7 +242,7 @@ Variant f_apc_inc(CStrRef key, int64_t step /* = 1 */,
 
 Variant f_apc_dec(CStrRef key, int64_t step /* = 1 */,
                   VRefParam success /* = null */, int64_t cache_id /* = 0 */) {
-  if (!RuntimeOption::EnableApc) return false;
+  if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
     throw_invalid_argument("cache_id: %" PRId64, cache_id);
@@ -188,7 +256,7 @@ Variant f_apc_dec(CStrRef key, int64_t step /* = 1 */,
 
 bool f_apc_cas(CStrRef key, int64_t old_cas, int64_t new_cas,
                int64_t cache_id /* = 0 */) {
-  if (!RuntimeOption::EnableApc) return false;
+  if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
     throw_invalid_argument("cache_id: %" PRId64, cache_id);
@@ -198,7 +266,7 @@ bool f_apc_cas(CStrRef key, int64_t old_cas, int64_t new_cas,
 }
 
 Variant f_apc_exists(CVarRef key, int64_t cache_id /* = 0 */) {
-  if (!RuntimeOption::EnableApc) return false;
+  if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
     throw_invalid_argument("cache_id: %" PRId64, cache_id);
@@ -290,7 +358,7 @@ static PFUNC_APC_LOAD apc_load_func(void *handle, const char *name) {
   const char *error = dlerror();
   if (error || p == NULL) {
     throw Exception("Unable to find %s in %s: %s", name,
-                    RuntimeOption::ApcPrimeLibrary.c_str(),
+                    apcExtension::PrimeLibrary.c_str(),
                     error ? error : "(unknown error)");
   }
   return p;
@@ -320,8 +388,8 @@ EXTERNALLY_VISIBLE
 void apc_load(int thread) {
   static void *handle = NULL;
   if (handle ||
-      RuntimeOption::ApcPrimeLibrary.empty() ||
-      !RuntimeOption::EnableApc) {
+      apcExtension::PrimeLibrary.empty() ||
+      !apcExtension::Enable) {
     static uint64_t keep_entry_points_around_under_lto;
     if (++keep_entry_points_around_under_lto == UINT64_MAX) {
       // this had better never happen...
@@ -350,10 +418,10 @@ void apc_load(int thread) {
   }
 
   Timer timer(Timer::WallTime, "loading APC data");
-  handle = dlopen(RuntimeOption::ApcPrimeLibrary.c_str(), RTLD_LAZY);
+  handle = dlopen(apcExtension::PrimeLibrary.c_str(), RTLD_LAZY);
   if (!handle) {
     throw Exception("Unable to open apc prime library %s: %s",
-                    RuntimeOption::ApcPrimeLibrary.c_str(), dlerror());
+                    apcExtension::PrimeLibrary.c_str(), dlerror());
   }
 
   if (thread <= 1) {
@@ -371,7 +439,7 @@ void apc_load(int thread) {
 
   s_apc_store[0].primeDone();
 
-  if (RuntimeOption::EnableConstLoad) {
+  if (apcExtension::EnableConstLoad) {
 #ifdef USE_JEMALLOC
     size_t allocated_before = 0;
     size_t allocated_after = 0;
@@ -428,7 +496,7 @@ void const_load_impl(struct cache_info *info,
                      const char **char_keys, char *char_values,
                      const char **strings, const char **objects,
                      const char **thrifts, const char **others) {
-  if (!RuntimeOption::EnableConstLoad || !info || !info->use_const) return;
+  if (!apcExtension::EnableConstLoad || !info || !info->use_const) return;
   {
     int count = count_items(int_keys, 2);
     if (count) {
@@ -524,8 +592,8 @@ void apc_load_impl(struct cache_info *info,
                    const char **char_keys, char *char_values,
                    const char **strings, const char **objects,
                    const char **thrifts, const char **others) {
-  if (!RuntimeOption::ForceConstLoadToAPC) {
-    if (RuntimeOption::EnableConstLoad && info && info->use_const) return;
+  if (!apcExtension::ForceConstLoadToAPC) {
+    if (apcExtension::EnableConstLoad && info && info->use_const) return;
   }
   SharedStore &s = s_apc_store[0];
   {
@@ -651,7 +719,7 @@ void const_load_impl_compressed
      int *object_lens, const char *objects,
      int *thrift_lens, const char *thrifts,
      int *other_lens, const char *others) {
-  if (!RuntimeOption::EnableConstLoad || !info || !info->use_const) return;
+  if (!apcExtension::EnableConstLoad || !info || !info->use_const) return;
   {
     int count = int_lens[0];
     int len = int_lens[1];
@@ -789,8 +857,8 @@ void apc_load_impl_compressed
      int *object_lens, const char *objects,
      int *thrift_lens, const char *thrifts,
      int *other_lens, const char *others) {
-  if (!RuntimeOption::ForceConstLoadToAPC) {
-    if (RuntimeOption::EnableConstLoad && info && info->use_const) return;
+  if (!apcExtension::ForceConstLoadToAPC) {
+    if (apcExtension::EnableConstLoad && info && info->use_const) return;
   }
   SharedStore &s = s_apc_store[0];
   {
@@ -1128,7 +1196,7 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
 
 String apc_serialize(CVarRef value) {
   VariableSerializer::Type sType =
-    RuntimeOption::EnableApcSerialize ?
+    apcExtension::EnableApcSerialize ?
       VariableSerializer::Type::APCSerialize :
       VariableSerializer::Type::Serialize;
   VariableSerializer vs(sType);
@@ -1137,7 +1205,7 @@ String apc_serialize(CVarRef value) {
 
 Variant apc_unserialize(CStrRef str) {
   VariableUnserializer::Type sType =
-    RuntimeOption::EnableApcSerialize ?
+    apcExtension::EnableApcSerialize ?
       VariableUnserializer::Type::APCSerialize :
       VariableUnserializer::Type::Serialize;
   return unserialize_ex(str, sType);
@@ -1286,7 +1354,7 @@ void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
 
 String apc_reserialize(CStrRef str) {
   if (str.empty() ||
-      !RuntimeOption::EnableApcSerialize) return str;
+      !apcExtension::EnableApcSerialize) return str;
 
   VariableUnserializer uns(str.data(), str.size(),
                            VariableUnserializer::Type::APCSerialize);

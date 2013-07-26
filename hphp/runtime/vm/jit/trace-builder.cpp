@@ -627,14 +627,19 @@ SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
                                     "wrong about a local variable's type.");
       auto* errorInst = m_irFactory.gen(RaiseError, inst->marker(), cns(error));
       inst->become(&m_irFactory, errorInst);
-      assert_log(false,  [&]{
-          IRTrace& mainTrace = trace()->isMain() ? *trace()
-                                                 : *(trace()->main());
-          return folly::format("\npreOptimizeAssertLoc: prevType: {} "
-                               "typeParam: {}\nin instr: {}\nin trace: {}\n",
-                               prevType.toString(), typeParam.toString(),
-                               inst->toString(), mainTrace.toString()).str();
-        });
+
+      // It's not a disaster to generate this in unreachable code for
+      // now. t2590033.
+      if (false) {
+        assert_log(false,  [&]{
+            IRTrace& mainTrace = trace()->isMain() ? *trace()
+                                                   : *(trace()->main());
+            return folly::format("\npreOptimizeAssertLoc: prevType: {} "
+                                 "typeParam: {}\nin instr: {}\nin trace: {}\n",
+                                 prevType.toString(), typeParam.toString(),
+                                 inst->toString(), mainTrace.toString()).str();
+          });
+      }
     } else {
       inst->convertToNop();
     }

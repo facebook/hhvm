@@ -57,10 +57,6 @@ struct RegionDesc {
   struct TypePred;
   struct ReffinessPred;
   typedef std::shared_ptr<Block> BlockPtr;
-  enum class ParamByRef : uint8_t {
-    Yes,
-    No,
-  };
 
   template<typename... Args>
   Block* addBlock(Args&&... args) {
@@ -149,7 +145,7 @@ struct RegionDesc::ReffinessPred {
  */
 class RegionDesc::Block {
   typedef flat_multimap<SrcKey, TypePred> TypePredMap;
-  typedef flat_map<SrcKey, ParamByRef> ParamByRefMap;
+  typedef flat_map<SrcKey, bool> ParamByRefMap;
   typedef flat_multimap<SrcKey, ReffinessPred> RefPredMap;
   typedef flat_map<SrcKey, const Func*> KnownFuncMap;
 
@@ -191,7 +187,7 @@ public:
   /*
    * Add information about parameter reffiness to this block.
    */
-  void setParamByRef(SrcKey sk, ParamByRef);
+  void setParamByRef(SrcKey sk, bool);
 
   /*
    * Add a reffiness prediction about a pre-live ActRec.
@@ -308,7 +304,6 @@ RegionDesc::BlockPtr createBlock(const Transl::Tracelet& tlet);
 std::string show(RegionDesc::Location);
 std::string show(RegionDesc::TypePred);
 std::string show(const RegionDesc::ReffinessPred&);
-std::string show(RegionDesc::ParamByRef);
 std::string show(RegionContext::LiveType);
 std::string show(RegionContext::PreLiveAR);
 std::string show(const RegionDesc::Block&);

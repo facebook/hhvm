@@ -222,6 +222,7 @@ void HhbcTranslator::replace(uint32_t index, SSATmp* tmp) {
 }
 
 Type HhbcTranslator::topType(uint32_t idx) const {
+  FTRACE(5, "Asking for type of stack elem {}\n", idx);
   if (idx < m_evalStack.size()) {
     return m_evalStack.top(idx)->type();
   } else {
@@ -230,6 +231,10 @@ Type HhbcTranslator::topType(uint32_t idx) const {
     if (stkVal.knownType.equals(Type::None)) return Type::Gen;
     return stkVal.knownType;
   }
+}
+
+size_t HhbcTranslator::spOffset() const {
+  return m_tb->spOffset() + m_evalStack.size() - m_stackDeficit;
 }
 
 /*
@@ -2657,7 +2662,7 @@ void HhbcTranslator::checkTypeStack(uint32_t idx, Type type, Offset dest) {
   } else {
     FTRACE(1, "checkTypeStack({}): no tmp: {}\n", idx, type.toString());
     gen(CheckStk, type, exitTrace,
-        StackOffset(idx - m_evalStack.size () + m_stackDeficit), m_tb->sp());
+        StackOffset(idx - m_evalStack.size() + m_stackDeficit), m_tb->sp());
   }
 }
 
@@ -3663,6 +3668,7 @@ Type HhbcTranslator::interpOutputType(const NormalizedInstruction& inst) const {
     case OutClassRef:   return Type::Cls;
     case OutSetM:       return Type::Cell; // Imprecise but we can translate
                                            // all cases that matter.
+    case OutFPushCufSafe: return Type::None;
 
     case OutNone:       return Type::None;
   }
@@ -3678,6 +3684,14 @@ void HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst) {
   };
 
   switch (inst.op()) {
+    case OpCreateCont: {
+      auto numLocals = curFunc()->numLocals();
+      for (unsigned i = 0; i < numLocals; ++i) {
+        gen(OverrideLoc, Type::Uninit, LocalId(i), m_tb->fp());
+      }
+      break;
+    }
+
     case OpSetN:
     case OpSetOpN:
     case OpIncDecN:
@@ -3833,10 +3847,10 @@ std::string HhbcTranslator::showStack() const {
     out << folly::format("+{:-^62}+\n", str);
   };
 
-  const int32_t frameCells = curFunc()->numSlotsInFrame();
+  const int32_t frameCells =
+    curFunc()->isGenerator() ? 0 : curFunc()->numSlotsInFrame();
   const int32_t stackDepth =
-    m_tb->spOffset() + m_evalStack.size() - m_stackDeficit -
-    (curFunc()->isGenerator() ? 0 : frameCells);
+    m_tb->spOffset() + m_evalStack.size() - m_stackDeficit - frameCells;
   auto spOffset = stackDepth;
   auto elem = [&](const std::string& str) {
     out << folly::format("| {:<60} |\n",
@@ -3845,12 +3859,23 @@ std::string HhbcTranslator::showStack() const {
     assert(spOffset > 0);
     --spOffset;
   };
-  auto fpiStack = m_fpiStack;
+
+  auto fpi = curFunc()->findFPI(bcOff());
   auto checkFpi = [&]() {
-    if (!fpiStack.empty() &&
-        spOffset - kNumActRecCells == fpiStack.top().second) {
-      for (unsigned i = 0; i < kNumActRecCells; ++i) elem("ActRec");
-      fpiStack.pop();
+    if (fpi && spOffset + frameCells == fpi->m_fpOff) {
+      auto fpushOff = fpi->m_fpushOff;
+      auto after = fpushOff + instrLen((Op*)curUnit()->at(fpushOff));
+      std::ostringstream msg;
+      msg << "ActRec from ";
+      curUnit()->prettyPrint(msg, Unit::PrintOpts().range(fpushOff, after)
+                                                   .noLineNumbers()
+                                                   .indent(0));
+      auto msgStr = msg.str();
+      assert(msgStr.back() == '\n');
+      msgStr.erase(msgStr.size() - 1);
+      for (unsigned i = 0; i < kNumActRecCells; ++i) elem(msgStr);
+      fpi = fpi->m_parentIndex != -1 ? &curFunc()->fpitab()[fpi->m_parentIndex]
+                                     : nullptr;
       return true;
     }
     return false;

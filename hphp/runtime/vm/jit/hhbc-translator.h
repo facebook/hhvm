@@ -764,7 +764,7 @@ private: // Exit trace creation routines.
                             std::vector<SSATmp*>& spillValues,
                             const CustomExit&);
 
-private:
+public:
   /*
    * Accessors for the current function being compiled and its
    * class and unit.
@@ -774,7 +774,9 @@ private:
   Unit*       curUnit()   const { return curFunc()->unit(); }
   Offset      bcOff()     const { return m_bcStateStack.back().bcOff; }
   SrcKey      curSrcKey() const { return SrcKey(curFunc(), bcOff()); }
+  size_t      spOffset()  const;
 
+private:
   /*
    * Predictates for testing information about the relationship of a
    * class to the current context class.

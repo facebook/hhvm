@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/smart_allocator.h"
 #include "hphp/runtime/base/leak_detectable.h"
 #include "hphp/runtime/base/sweepable.h"
+#include "hphp/runtime/base/memory_profile.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/server/http_server.h"
@@ -467,7 +468,12 @@ void* SmartAllocatorImpl::alloc(size_t nbytes) {
     ptr = MM().slabAlloc(nbytes);
   }
   TRACE(1, "alloc %zu -> %p\n", nbytes, ptr);
+  MemoryProfile::logAllocation(ptr, nbytes);
   return ptr;
+}
+
+void SmartAllocatorImpl::logDealloc(void *ptr) {
+  MemoryProfile::logDeallocation(ptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

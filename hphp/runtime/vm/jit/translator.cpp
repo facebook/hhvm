@@ -244,9 +244,7 @@ RuntimeType Translator::liveType(Location l,
 }
 
 RuntimeType
-Translator::liveType(const Cell* outer,
-                     const Location& l,
-                     bool specialize) {
+Translator::liveType(const Cell* outer, const Location& l, bool specialize) {
   always_assert(analysisDepth() == 0);
 
   if (!outer) {
@@ -265,9 +263,9 @@ Translator::liveType(const Cell* outer,
     assert(IS_REAL_TYPE(innerType));
     valueType = innerType;
     assert(innerType != KindOfRef);
-    TRACE(2, "liveType Var -> %d\n", innerType);
+    FTRACE(2, "liveType {}: Var -> {}\n", l.pretty(), tname(innerType));
   } else {
-    TRACE(2, "liveType %d\n", outerType);
+    FTRACE(2, "liveType {}: {}\n", l.pretty(), tname(outerType));
   }
   const Class *klass = nullptr;
   if (valueType == KindOfObject) {
@@ -1177,7 +1175,7 @@ static const struct {
   { OpFPushCufF,   {Stack1,           FStack,       OutFDesc,
                                                      kNumActRecCells - 1 }},
   { OpFPushCufSafe,{StackTop2|DontGuardAny,
-                                      StackCufSafe, OutFDesc,
+                                      StackTop2|FStack, OutFPushCufSafe,
                                                          kNumActRecCells }},
   { OpFPassC,      {FuncdRef,         None,         OutSameAsInput,    0 }},
   { OpFPassCW,     {FuncdRef,         None,         OutSameAsInput,    0 }},
@@ -1266,7 +1264,7 @@ static const struct {
 
   /*** 14. Continuation instructions ***/
 
-  { OpCreateCont,  {None,             Stack1,       OutObject,         1 }},
+  { OpCreateCont,  {None,             Stack1|Local, OutObject,         1 }},
   { OpContEnter,   {Stack1,           None,         OutNone,          -1 }},
   { OpUnpackCont,  {None,             StackTop2,    OutInt64,          2 }},
   { OpContSuspend, {Stack1,           None,         OutNone,          -1 }},
@@ -1360,12 +1358,6 @@ int64_t getStackPopped(const NormalizedInstruction& ni) {
 }
 
 int64_t getStackPushed(const NormalizedInstruction& ni) {
-  switch (ni.op()) {
-    case OpFPushCufSafe:   return kNumActRecCells + 2;
-
-    default:               break;
-  }
-
   return countOperands(getInstrInfo(ni.op()).out);
 }
 
@@ -1973,6 +1965,7 @@ bool outputDependsOnInput(const Op instr) {
     case OutStrlen:
     case OutNone:
       return false;
+
     case OutFDesc:
     case OutSameAsInput:
     case OutCInput:
@@ -1986,6 +1979,7 @@ bool outputDependsOnInput(const Op instr) {
     case OutSetOp:
     case OutIncDec:
     case OutSetM:
+    case OutFPushCufSafe:
       return true;
   }
   not_reached();
@@ -2079,20 +2073,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
       // Pseudo-outputs that affect translator state
       case FStack: {
         currentStackOffset += kNumActRecCells;
-        if (op == OpFPushFuncD || op == OpFPushFuncU) {
-          const Unit& cu = *ni->unit();
-          Id funcId = ni->imm[1].u_SA;
-          const NamedEntityPair &nep = cu.lookupNamedEntityPairId(funcId);
-          const Func* f = Unit::lookupFunc(nep.second);
-          if (f && f->isNameBindingImmutable(&cu)) {
-            t.m_arState.pushFuncD(f);
-          } else {
-            t.m_arState.pushDynFunc();
-          }
-        } else {
-          // Non-deterministic in some way
-          t.m_arState.pushDynFunc();
-        }
+        t.m_arState.pushFunc(*ni);
       } continue; // no instr-associated output
 
       case Local: {
@@ -2101,6 +2082,13 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           varEnvTaint = true;
           continue;
         }
+        if (op == OpCreateCont) {
+          // CreateCont stores Uninit to all locals but NormalizedInstruction
+          // doesn't have enough output fields, so we special case it in
+          // analyze().
+          continue;
+        }
+
         ASSERT_NOT_IMPLEMENTED(op == OpSetOpL ||
                                op == OpSetM || op == OpSetOpM ||
                                op == OpBindM ||
@@ -2283,9 +2271,22 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
       } continue; // already pushed an output for the local
 
       case Stack1:
-      case Stack2:
+      case Stack2: {
         loc = Location(Location::Stack, currentStackOffset++);
-        break;
+        if (ni->op() == OpFPushCufSafe) {
+          // FPushCufSafe pushes its first stack input, then a bool.
+          if (opnd == Stack2) {
+            assert(ni->outStack == nullptr);
+            auto* dl = t.newDynLocation(loc, ni->inputs[0]->rtt);
+            ni->outStack = dl;
+          } else {
+            assert(ni->outStack2 == nullptr);
+            auto* dl = t.newDynLocation(loc, KindOfBoolean);
+            ni->outStack2 = dl;
+          }
+          continue;
+        }
+      } break;
       case StackIns1: {
         // First stack output is where the inserted element will go.
         // The output code for the instruction will affect what we
@@ -2943,10 +2944,30 @@ void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
   }
 }
 
-static bool checkTaintFuncs(StringData* name) {
-  static const StringData* s_extract =
-    StringData::GetStaticString("extract");
-  return name->isame(s_extract);
+bool callDestroysLocals(const NormalizedInstruction& inst,
+                        const Func* caller) {
+  auto* unit = caller->unit();
+  auto checkTaintId = [&](Id id) {
+    static const StringData* s_extract = StringData::GetStaticString("extract");
+    return unit->lookupLitstrId(id)->isame(s_extract);
+  };
+
+  if (inst.op() == OpFCallBuiltin) return checkTaintId(inst.imm[2].u_SA);
+  if (!isFCallStar(inst.op()))     return false;
+
+  const FPIEnt *fpi = caller->findFPI(inst.source.offset());
+  assert(fpi);
+  Op* fpushPc = (Op*)unit->at(fpi->m_fpushOff);
+  auto const op = *fpushPc;
+
+  if (op == OpFPushFunc)  return true;
+  if (op == OpFPushFuncD) return checkTaintId(getImm(fpushPc, 1).u_SA);
+  if (op == OpFPushFuncU) {
+    return checkTaintId(getImm(fpushPc, 1).u_SA) ||
+           checkTaintId(getImm(fpushPc, 2).u_SA);
+  }
+
+  return false;
 }
 
 /*
@@ -3265,8 +3286,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     NormalizedInstruction* ni = t.newNormalizedInstruction();
     ni->source = sk;
     ni->stackOffset = stackFrameOffset;
-    ni->funcd = (t.m_arState.getCurrentState() == ActRecState::State::KNOWN) ?
-      t.m_arState.getCurrentFunc() : nullptr;
+    ni->funcd = t.m_arState.knownFunc();
     ni->m_unit = unit;
     ni->breaksTracelet = false;
     ni->changesPC = opcodeChangesPC(ni->op());
@@ -3299,11 +3319,11 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
         // exception, do so here.
         int argNum = ni->imm[0].u_IVA;
         // instrSpToArDelta() returns the delta relative to the sp at the
-        // beginning of the instruction, but getReffiness() wants the delta
+        // beginning of the instruction, but checkByRef() wants the delta
         // relative to the sp at the beginning of the tracelet, so we adjust
         // by subtracting ni->stackOff
         int entryArDelta = instrSpToArDelta((Op*)ni->pc()) - ni->stackOffset;
-        ni->preppedByRef = t.m_arState.getReffiness(argNum, entryArDelta,
+        ni->preppedByRef = t.m_arState.checkByRef(argNum, entryArDelta,
                                                     &t.m_refDeps);
         SKTRACE(1, sk, "passing arg%d by %s\n", argNum,
                 ni->preppedByRef ? "reference" : "value");
@@ -3361,7 +3381,6 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     SKTRACE(2, sk, "stack args: virtual sfo now %d\n", stackFrameOffset);
 
     bool doVarEnvTaint; // initialized by reference.
-
     try {
       getOutputs(t, ni, stackFrameOffset, doVarEnvTaint);
     } catch (TranslationFailedExc& tfe) {
@@ -3375,34 +3394,8 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
       goto breakBB;
     }
 
-    if (isFCallStar(ni->op())) {
-      if (!doVarEnvTaint) {
-        const FPIEnt *fpi = curFunc()->findFPI(ni->source.offset());
-        assert(fpi);
-        Offset fpushOff = fpi->m_fpushOff;
-        PC fpushPc = curUnit()->at(fpushOff);
-        auto const op = toOp(*fpushPc);
-        if (op == OpFPushFunc) {
-          doVarEnvTaint = true;
-        } else if (op == OpFPushFuncD) {
-          StringData *funcName =
-            curUnit()->lookupLitstrId(getImm((Op*)fpushPc, 1).u_SA);
-          doVarEnvTaint = checkTaintFuncs(funcName);
-        } else if (op == OpFPushFuncU) {
-          StringData *fallbackName =
-            curUnit()->lookupLitstrId(getImm((Op*)fpushPc, 2).u_SA);
-          doVarEnvTaint = checkTaintFuncs(fallbackName);
-        }
-      }
-      t.m_arState.pop();
-    }
-    if (ni->op() == OpFCallBuiltin && !doVarEnvTaint) {
-      StringData* funcName = curUnit()->lookupLitstrId(ni->imm[2].u_SA);
-      doVarEnvTaint = checkTaintFuncs(funcName);
-    }
-    if (doVarEnvTaint) {
-      tas.varEnvTaint();
-    }
+    if (isFCallStar(ni->op())) t.m_arState.pop();
+    if (doVarEnvTaint || callDestroysLocals(*ni, curFunc())) tas.varEnvTaint();
 
     DynLocation* outputs[] = { ni->outStack,
                                ni->outLocal, ni->outLocal2,
@@ -3414,6 +3407,15 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
                 o->rtt.outerType(), o->rtt.innerType(),
                 o->location.spaceName(), o->location.offset);
         tas.recordWrite(o);
+      }
+    }
+    if (ni->op() == OpCreateCont) {
+      // CreateCont stores Uninit to all locals but NormalizedInstruction
+      // doesn't have enough output fields, so we special case it here.
+      auto const numLocals = curFunc()->numLocals();
+      for (unsigned i = 0; i < numLocals; ++i) {
+        tas.recordWrite(t.newDynLocation(Location(Location::Local, i),
+                                         KindOfUninit));
       }
     }
 
@@ -3625,7 +3627,7 @@ const char* Translator::translateResultName(TranslateResult r) {
  * eventually replace applyInputMetaData.
  */
 void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
-                  HhbcTranslator& hhbcTrans) {
+                  HhbcTranslator& hhbcTrans, MetaMode metaMode /* = Normal */) {
   if (!handle.findMeta(inst.unit(), inst.offset())) return;
 
   Unit::MetaInfo info;
@@ -3660,6 +3662,13 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
                    !(iInfo.in & Stack2) ? 1 :
                    !(iInfo.in & Stack3) ? 2 : 3;
 
+  auto stackFilter = [metaMode, &inst](Location loc) {
+    if (metaMode == MetaMode::Legacy && loc.space == Location::Stack) {
+      loc.offset = -(loc.offset + 1) + inst.stackOffset;
+    }
+    return loc;
+  };
+
   do {
     SKTRACE(3, inst.source, "considering MetaInfo of kind %d\n", info.m_kind);
 
@@ -3667,7 +3676,7 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
       base + (info.m_arg & ~Unit::MetaInfo::VectorArg) : info.m_arg;
     auto updateType = [&]{
       auto& input = *inst.inputs[arg];
-      input.rtt = hhbcTrans.rttFromLocation(input.location);
+      input.rtt = hhbcTrans.rttFromLocation(stackFilter(input.location));
     };
 
     switch (info.m_kind) {
@@ -3681,7 +3690,8 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
         inst.imm[0].u_IVA = info.m_data;
         break;
       case Unit::MetaInfo::Kind::DataTypePredicted: {
-        auto const loc = inst.inputs[arg]->location.toLocation();
+        if (metaMode == MetaMode::Legacy) break;
+        auto const loc = stackFilter(inst.inputs[arg]->location).toLocation();
         auto const t = Type::fromDataType(DataType(info.m_data));
         auto const offset = inst.source.offset();
 
@@ -3695,14 +3705,15 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
       }
       case Unit::MetaInfo::Kind::DataTypeInferred: {
         hhbcTrans.assertTypeLocation(
-          inst.inputs[arg]->location.toLocation(),
+          stackFilter(inst.inputs[arg]->location).toLocation(),
           Type::fromDataType(DataType(info.m_data)));
         updateType();
         break;
       }
       case Unit::MetaInfo::Kind::String: {
-        hhbcTrans.assertString(inst.inputs[arg]->location.toLocation(),
-                               inst.unit()->lookupLitstrId(info.m_data));
+        hhbcTrans.assertString(
+          stackFilter(inst.inputs[arg]->location).toLocation(),
+          inst.unit()->lookupLitstrId(info.m_data));
         updateType();
         break;
       }
@@ -3822,6 +3833,10 @@ Translator::translateRegion(const RegionDesc& region,
     auto knownFuncs = makeMapWalker(block->knownFuncs());
 
     for (unsigned i = 0; i < block->length(); ++i, sk.advance(block->unit())) {
+      // Update bcOff here so any guards or assertions from metadata are
+      // attributed to this instruction.
+      ht.setBcOff(sk.offset(), false);
+
       // Emit prediction guards. If this is the first instruction in the
       // region the guards will go to a retranslate request. Otherwise, they'll
       // go to a side exit.
@@ -3908,8 +3923,7 @@ Translator::translateRegion(const RegionDesc& region,
       readMetaData(metaHand, inst, ht);
       if (!inst.noOp && inputInfos.needsRefCheck) {
         assert(byRefs.hasNext(sk));
-        auto byRef = byRefs.next();
-        inst.preppedByRef = byRef == RegionDesc::ParamByRef::Yes;
+        inst.preppedByRef = byRefs.next();
       }
 
       // Check for a type prediction. Put it in the NormalizedInstruction so
@@ -4099,8 +4113,26 @@ TransRec::print(uint64_t profCount) const {
 }
 
 void
+ActRecState::pushFunc(const NormalizedInstruction& inst) {
+  assert(isFPush(inst.op()));
+  if (inst.op() == OpFPushFuncD || inst.op() == OpFPushFuncU) {
+    const Unit& unit = *inst.unit();
+    Id funcId = inst.imm[1].u_SA;
+    auto const& nep = unit.lookupNamedEntityPairId(funcId);
+    auto const func = Unit::lookupFunc(nep.second);
+    if (func) func->validate();
+    if (func && func->isNameBindingImmutable(&unit)) {
+      pushFuncD(func);
+      return;
+    }
+  }
+  pushDynFunc();
+}
+
+void
 ActRecState::pushFuncD(const Func* func) {
   TRACE(2, "ActRecState: pushStatic func %p(%s)\n", func, func->name()->data());
+  func->validate();
   Record r;
   r.m_state = State::KNOWN;
   r.m_topFunc = func;
@@ -4126,7 +4158,7 @@ ActRecState::pop() {
 }
 
 /**
- * getReffiness() returns true if the parameter specified by argNum is pass
+ * checkByRef() returns true if the parameter specified by argNum is pass
  * by reference, otherwise it returns false. This function may also throw an
  * UnknownInputException if the reffiness cannot be determined.
  *
@@ -4134,9 +4166,9 @@ ActRecState::pop() {
  * the beginning of the tracelet and ar.
  */
 bool
-ActRecState::getReffiness(int argNum, int entryArDelta, RefDeps* outRefDeps) {
-  assert(outRefDeps);
-  TRACE(2, "ActRecState: getting reffiness for arg %d\n", argNum);
+ActRecState::checkByRef(int argNum, int entryArDelta, RefDeps* refDeps) {
+  FTRACE(2, "ActRecState: getting reffiness for arg {}, arDelta {}\n",
+         argNum, entryArDelta);
   if (m_arStack.empty()) {
     // The ActRec in question was pushed before the beginning of the
     // tracelet, so we can make a guess about parameter reffiness and
@@ -4146,6 +4178,7 @@ ActRecState::getReffiness(int argNum, int entryArDelta, RefDeps* outRefDeps) {
     Record r;
     r.m_state = State::GUESSABLE;
     r.m_entryArDelta = entryArDelta;
+    ar->m_func->validate();
     r.m_topFunc = ar->m_func;
     m_arStack.push_back(r);
   }
@@ -4160,19 +4193,20 @@ ActRecState::getReffiness(int argNum, int entryArDelta, RefDeps* outRefDeps) {
   if (r.m_state == State::GUESSABLE) {
     assert(r.m_entryArDelta != InvalidEntryArDelta);
     TRACE(2, "ActRecState: guessing arg%d -> %d\n", argNum, retval);
-    outRefDeps->addDep(r.m_entryArDelta, argNum, retval);
+    refDeps->addDep(r.m_entryArDelta, argNum, retval);
   }
   return retval;
 }
 
 const Func*
-ActRecState::getCurrentFunc() {
-  if (m_arStack.empty()) return nullptr;
+ActRecState::knownFunc() {
+  if (currentState() != State::KNOWN) return nullptr;
+  assert(!m_arStack.empty());
   return m_arStack.back().m_topFunc;
 }
 
 ActRecState::State
-ActRecState::getCurrentState() {
+ActRecState::currentState() {
   if (m_arStack.empty()) return State::GUESSABLE;
   return m_arStack.back().m_state;
 }

@@ -110,7 +110,6 @@ no_import = (
     '/ext/pdo_oci',
     '/ext/pdo_odbc',
     '/ext/pdo_pgsql',
-    '/ext/phar',
     '/ext/pspell',
     '/ext/readline',
     '/ext/recode',
@@ -143,9 +142,6 @@ bad_tests = (
     # SESSION is bused on husdon
     '/zend/unset_cv05.php',
     '/zend/unset_cv06.php',
-
-    # not implemented extensions
-    'phar', # this appears in filenames
 
     # works in interp but not others
     '/tests-lang/bug25922.php',

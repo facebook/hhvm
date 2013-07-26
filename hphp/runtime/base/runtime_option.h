@@ -316,34 +316,6 @@ public:
   static bool StrictCollections;
   static bool WarnOnCollectionToArray;
   static bool UseDirectCopy;
-  static bool EnableApc;
-  static bool EnableConstLoad;
-  static bool ForceConstLoadToAPC;
-  static std::string ApcPrimeLibrary;
-  static int ApcLoadThread;
-  static std::set<std::string> ApcCompletionKeys;
-  enum class ApcTableTypes {
-    ApcConcurrentTable
-  };
-  static ApcTableTypes ApcTableType;
-  static bool EnableApcSerialize;
-  static time_t ApcKeyMaturityThreshold;
-  static size_t ApcMaximumCapacity;
-  static int ApcKeyFrequencyUpdatePeriod;
-  static bool ApcExpireOnSets;
-  static int ApcPurgeFrequency;
-  static int ApcPurgeRate;
-  static bool ApcAllowObj;
-  static int ApcTTLLimit;
-  static bool ApcUseFileStorage;
-  static int64_t ApcFileStorageChunkSize;
-  static int64_t ApcFileStorageMaxSize;
-  static std::string ApcFileStoragePrefix;
-  static int ApcFileStorageAdviseOutPeriod;
-  static std::string ApcFileStorageFlagKey;
-  static bool ApcConcurrentTableLockFree;
-  static bool ApcFileStorageKeepFileLinked;
-  static std::vector<std::string> ApcNoTTLPrefix;
 
   static bool EnableDnsCache;
   static int DnsCacheTTL;
@@ -403,6 +375,7 @@ public:
   F(uint32_t, JitTargetCacheSize,      64 << 20)                        \
   F(uint32_t, HHBCArenaChunkSize,      64 << 20)                        \
   F(bool, ProfileBC,                   false)                           \
+  F(bool, ProfileHeapAcrossRequests,   false)                           \
   F(bool, ProfileHWEnable,             true)                            \
   F(string, ProfileHWEvents,           string(""))                      \
   F(bool, JitAlwaysInterpOne,          false)                           \
@@ -474,6 +447,7 @@ public:
   // TranslatorX64 allocation options
   static size_t VMTranslASize;
   static size_t VMTranslAHotSize;
+  static size_t VMTranslAProfSize;
   static size_t VMTranslAStubsSize;
   static size_t VMTranslGDataSize;
 

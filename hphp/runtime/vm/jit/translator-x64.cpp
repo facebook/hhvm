@@ -855,8 +855,6 @@ TranslatorX64::createTranslation(const TranslArgs& args) {
 
   // We put retranslate requests at the end of our slab to more frequently
   //   allow conditional jump fall-throughs
-  AHotSelector ahs(this, curFunc()->attrs() & AttrHot);
-
   TCA astart = a.frontier();
   TCA stubstart = astubs.frontier();
   TCA req = emitServiceReq(REQ_RETRANSLATE, sk.offset());
@@ -905,8 +903,9 @@ TranslatorX64::translate(const TranslArgs& args) {
     }
   }
 
-  Func* func = const_cast<Func*>(curFunc());
-  AHotSelector ahs(this, func->attrs() & AttrHot);
+  Func* func = const_cast<Func*>(args.m_sk.func());
+  AsmSelector asmSel(AsmSelector::Args(this).profile(m_mode == TransProfile)
+                                            .hot(func->attrs() & AttrHot));
 
   if (args.m_align) {
     moveToAlign(a, kNonFallthroughAlign);
@@ -1505,7 +1504,7 @@ TranslatorX64::funcPrologue(Func* func, int nPassed, ActRec* ar) {
   // in case another thread snuck in and set the prologue already.
   if (checkCachedPrologue(func, paramIndex, prologue)) return prologue;
 
-  AHotSelector ahs(this, func->attrs() & AttrHot);
+  AsmSelector asmSel(AsmSelector::Args(this).hot(func->attrs() & AttrHot));
 
   SpaceRecorder sr("_FuncPrologue", a);
   // If we're close to a cache line boundary, just burn some space to
@@ -1568,6 +1567,12 @@ TranslatorX64::funcPrologue(Func* func, int nPassed, ActRec* ar) {
     // Special __call prologue
     a.  mov_reg64_reg64(rStashedAR, argNumToRegName[0]);
     emitCall(a, TCA(TranslatorX64::shuffleArgsForMagicCall));
+    if (memory_profiling) {
+      m_fixupMap.recordFixup(
+        a.frontier(),
+        Fixup(skFuncBody.offset() - func->base(), func->numSlotsInFrame())
+      );
+    }
     // if shuffleArgs returns 0, that means this was not a magic call
     // and we should proceed to a prologue specialized for nPassed;
     // otherwise, proceed to a prologue specialized for nPassed==numParams (2).
@@ -3352,8 +3357,6 @@ TranslatorX64::translateWork(const TranslArgs& args) {
           m_mode = TransLive;
         }
         result = translateTracelet(t);
-        DEBUG_ONLY static const bool reqRegion = getenv("HHVM_REQUIRE_REGION");
-        assert(IMPLIES(region && reqRegion, result != Success));
       }
 
       if (result != Success) {
@@ -3468,9 +3471,12 @@ TranslatorX64::translateTracelet(Tracelet& t) {
       ht.profileSmallFunctionShape(traceletShape(t));
     }();
 
+    Unit::MetaHandle metaHand;
     // Translate each instruction in the tracelet
     for (auto* ni = t.m_instrStream.first; ni && !ht.hasExit();
          ni = ni->next) {
+      readMetaData(metaHand, *ni, m_irTrans->hhbcTrans(), MetaMode::Legacy);
+
       try {
         SKTRACE(1, ni->source, "HHIR: translateInstr\n");
         assert(!(m_mode == TransProfile && ni->outputPredicted && ni->next));
@@ -3657,11 +3663,13 @@ TranslatorX64::TranslatorX64()
   m_catchTraceMap(128)
 {
   static const size_t kRoundUp = 2 << 20;
-  const size_t kAHotSize = RuntimeOption::VMTranslAHotSize;
-  const size_t kASize = RuntimeOption::VMTranslASize;
+  const size_t kAHotSize   = RuntimeOption::VMTranslAHotSize;
+  const size_t kAProfSize  = RuntimeOption::EvalJitPGO ?
+                             RuntimeOption::VMTranslAProfSize : 0;
+  const size_t kASize      = RuntimeOption::VMTranslASize;
   const size_t kAStubsSize = RuntimeOption::VMTranslAStubsSize;
-  const size_t kGDataSize = RuntimeOption::VMTranslGDataSize;
-  m_totalSize = kAHotSize + kASize + kAStubsSize +
+  const size_t kGDataSize  = RuntimeOption::VMTranslGDataSize;
+  m_totalSize = kAHotSize + kASize + kAStubsSize + kAProfSize +
     kTrampolinesBlockSize + kGDataSize;
 
   TRACE(1, "TranslatorX64@%p startup\n", this);
@@ -3730,7 +3738,11 @@ TranslatorX64::TranslatorX64()
   base += kAHotSize;
   TRACE(1, "init a @%p\n", base);
   a.init(base, kASize);
+  aStart = base;
   base += kASize;
+  TRACE(1, "init aprof @%p\n", base);
+  aprof.init(base, kAProfSize);
+  base += kAProfSize;
   base += -(uint64_t)base & (kRoundUp - 1);
   TRACE(1, "init astubs @%p\n", base);
   astubs.init(base, kAStubsSize);
@@ -3740,7 +3752,7 @@ TranslatorX64::TranslatorX64()
   m_globalData.init(base, kGDataSize);
 
   // put the stubs into ahot, rather than a
-  AHotSelector ahs(this, true);
+  AsmSelector asmSel(AsmSelector::Args(this).hot(true));
 
   // Emit some special helpers that are shared across translations.
 
@@ -4091,23 +4103,26 @@ size_t TranslatorX64::getTargetCacheSize() {
 
 std::string TranslatorX64::getUsage() {
   std::string usage;
-  size_t aHotUsage = ahot.used();
-  size_t aUsage = a.used();
+  size_t aHotUsage  = ahot.used();
+  size_t aProfUsage = aprof.used();
+  size_t aUsage     = a.used();
   size_t stubsUsage = astubs.used();
-  size_t dataUsage = m_globalData.frontier - m_globalData.base;
-  size_t tcUsage = TargetCache::s_frontier;
+  size_t dataUsage  = m_globalData.frontier - m_globalData.base;
+  size_t tcUsage    = TargetCache::s_frontier;
   size_t persistentUsage =
     TargetCache::s_persistent_frontier - TargetCache::s_persistent_start;
   Util::string_printf(
     usage,
     "tx64: %9zd bytes (%zd%%) in ahot.code\n"
     "tx64: %9zd bytes (%zd%%) in a.code\n"
+    "tx64: %9zd bytes (%zd%%) in aprof.code\n"
     "tx64: %9zd bytes (%zd%%) in astubs.code\n"
     "tx64: %9zd bytes (%zd%%) in m_globalData\n"
     "tx64: %9zd bytes (%zd%%) in targetCache\n"
     "tx64: %9zd bytes (%zd%%) in persistentCache\n",
     aHotUsage,  100 * aHotUsage / ahot.capacity(),
     aUsage,     100 * aUsage / a.capacity(),
+    aProfUsage, 100 * aProfUsage / aprof.capacity(),
     stubsUsage, 100 * stubsUsage / astubs.capacity(),
     dataUsage,  100 * dataUsage / m_globalData.size,
     tcUsage,
@@ -4219,7 +4234,9 @@ bool TranslatorX64::dumpTCCode(const char* filename) {
   }
   // dump starting from the trampolines; this assumes processInit() places
   // trampolines before the translation cache
-  size_t count = a.frontier() - atrampolines.base();
+  // Task #2649357: teach tc-print about aprof, to avoid dumping the entire
+  //                'a' code slab
+  size_t count = aprof.frontier() - atrampolines.base();
   bool result = (fwrite(atrampolines.base(), 1, count, aFile) == count);
   if (result) {
     count = astubs.used();
@@ -4316,6 +4333,79 @@ void TranslatorX64::setJmpTransID(TCA jmp) {
   TransID transId = m_profData->curTransID();
   FTRACE(5, "setJmpTransID: adding {} => {}\n", jmp, transId);
   m_jmpToTransID[jmp] = transId;
+}
+
+TranslatorX64::AsmSelector::AsmSelector(const Args& args)
+    : m_tx(args.getTranslator())
+    , m_select(args.getSelection()) {
+
+  // If an assembler other an 'a' has already been selected, then just
+  // keep that selection.
+  if (m_tx->a.base() != m_tx->aStart) {
+    m_select = AsmSelection::Default;
+  }
+
+  swap();
+}
+
+/*
+ * Swap 'a' with 'ahot' or 'aprof'.
+ * Note that, although we don't write to either tx->ahot or tx->aprof directly,
+ * we still need to make  sure that all assembler code areas are available
+ * in a, astubs, aprof, and ahot, for example when we call asmChoose(addr, ...).
+ */
+void TranslatorX64::AsmSelector::swap() {
+  switch (m_select) {
+    case AsmSelection::Profile: std::swap(m_tx->a, m_tx->aprof); break;
+    case AsmSelection::Hot    : std::swap(m_tx->a, m_tx->ahot) ; break;
+    case AsmSelection::Default: break; // nothing to do
+  }
+}
+
+TranslatorX64::AsmSelector::~AsmSelector() {
+  swap();
+}
+
+TranslatorX64::AsmSelector::Args::Args(TranslatorX64* tx)
+    : m_tx(tx)
+    , m_select(AsmSelection::Default) {
+  assert(m_tx != nullptr);
+}
+
+static const int kMaxTranslationBytes = 8192;
+
+TranslatorX64::AsmSelector::Args&
+TranslatorX64::AsmSelector::Args::hot(bool isHot) {
+  // Profile has precedence over Hot.
+  if (m_select == AsmSelection::Profile) return *this;
+
+  // Make sure there's enough room left in ahot.
+  if (isHot && m_tx->ahot.available() > kMaxTranslationBytes) {
+    m_select = AsmSelection::Hot;
+  } else {
+    m_select = AsmSelection::Default;
+  }
+  return *this;
+}
+
+TranslatorX64::AsmSelector::Args&
+TranslatorX64::AsmSelector::Args::profile(bool isProf) {
+  if (isProf) {
+    m_select = AsmSelection::Profile;
+  } else if (m_select == AsmSelection::Profile) {
+    m_select = AsmSelection::Default;
+  }
+  return *this;
+}
+
+TranslatorX64::AsmSelection
+TranslatorX64::AsmSelector::Args::getSelection() const {
+  return m_select;
+}
+
+TranslatorX64*
+TranslatorX64::AsmSelector::Args::getTranslator() const {
+  return m_tx;
 }
 
 } // HPHP::Transl

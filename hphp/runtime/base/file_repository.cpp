@@ -58,7 +58,7 @@ PhpFile::PhpFile(const string &fileName, const string &srcRoot,
 
 PhpFile::~PhpFile() {
   always_assert(getRef() == 0);
-  if (m_unit != nullptr) {
+  if (!memory_profiling && m_unit != nullptr) {
     // Deleting a Unit can grab a low-ranked lock and we're probably
     // at a high rank right now
     PendQ::defer(new DeferredDeleter<Unit>(m_unit));
@@ -490,6 +490,11 @@ static bool findFileWrapper(CStrRef file, void* ctx) {
       context->path = file;
       return true;
     }
+  }
+
+  // handle file://
+  if (file.substr(0, 7) == "file://") {
+    return findFileWrapper(file.substr(7), ctx);
   }
 
   // TranslatePath() will canonicalize the path and also check

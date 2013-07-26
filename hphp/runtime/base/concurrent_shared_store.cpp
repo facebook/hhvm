@@ -66,7 +66,7 @@ static bool check_skip(const char *key) {
   return check_key_prefix(RuntimeOption::APCSizeSkipPrefix, key);
 }
 static bool check_noTTL(const char *key) {
-  return check_key_prefix(RuntimeOption::ApcNoTTLPrefix, key);
+  return check_key_prefix(apcExtension::NoTTLPrefix, key);
 }
 
 // stats_on_update should be called before updating sval with new value
@@ -100,7 +100,7 @@ static void stats_on_add(const StringData* key, const StoreValue* sval,
 }
 
 bool ConcurrentTableSharedStore::clear() {
-  if (RuntimeOption::ApcConcurrentTableLockFree) {
+  if (apcExtension::ConcurrentTableLockFree) {
     return false;
   }
   WriteLock l(m_lock);
@@ -124,7 +124,7 @@ bool ConcurrentTableSharedStore::clear() {
  */
 bool ConcurrentTableSharedStore::eraseImpl(CStrRef key, bool expired) {
   if (key.isNull()) return false;
-  ConditionalReadLock l(m_lock, !RuntimeOption::ApcConcurrentTableLockFree ||
+  ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
                                 m_lockingFlag);
   Map::accessor acc;
   if (m_vars.find(acc, key.data())) {
@@ -154,7 +154,7 @@ bool ConcurrentTableSharedStore::eraseImpl(CStrRef key, bool expired) {
 // Should be called outside m_lock
 void ConcurrentTableSharedStore::purgeExpired() {
   if (m_purgeCounter.fetch_add(1, std::memory_order_relaxed) %
-      RuntimeOption::ApcPurgeFrequency != 0) {
+      apcExtension::PurgeFrequency != 0) {
     return;
   }
   time_t now = time(nullptr);
@@ -162,7 +162,7 @@ void ConcurrentTableSharedStore::purgeExpired() {
   struct timespec tsBegin, tsEnd;
   Timer::GetMonotonicTime(tsBegin);
   int i = 0;
-  while (RuntimeOption::ApcPurgeRate < 0 || i < RuntimeOption::ApcPurgeRate) {
+  while (apcExtension::PurgeRate < 0 || i < apcExtension::PurgeRate) {
     if (!m_expQueue.try_pop(tmp)) {
       break;
     }
@@ -170,12 +170,12 @@ void ConcurrentTableSharedStore::purgeExpired() {
       m_expQueue.push(tmp);
       break;
     }
-    if (RuntimeOption::ApcUseFileStorage &&
-        strcmp(tmp.first, RuntimeOption::ApcFileStorageFlagKey.c_str()) == 0) {
+    if (apcExtension::UseFileStorage &&
+        strcmp(tmp.first, apcExtension::FileStorageFlagKey.c_str()) == 0) {
       s_apc_file_storage.adviseOut();
-      addToExpirationQueue(RuntimeOption::ApcFileStorageFlagKey.c_str(),
+      addToExpirationQueue(apcExtension::FileStorageFlagKey.c_str(),
                            time(nullptr) +
-                           RuntimeOption::ApcFileStorageAdviseOutPeriod);
+                           apcExtension::FileStorageAdviseOutPeriod);
       continue;
     }
     m_expMap.erase(tmp.first);
@@ -246,7 +246,7 @@ SharedVariant* ConcurrentTableSharedStore::unserialize(CStrRef key,
                                                        const StoreValue* sval) {
   try {
     VariableUnserializer::Type sType =
-      RuntimeOption::EnableApcSerialize ?
+      apcExtension::EnableApcSerialize ?
       VariableUnserializer::Type::APCSerialize :
       VariableUnserializer::Type::Serialize;
 
@@ -266,7 +266,7 @@ SharedVariant* ConcurrentTableSharedStore::unserialize(CStrRef key,
 bool ConcurrentTableSharedStore::get(CStrRef key, Variant &value) {
   const StoreValue *sval;
   SharedVariant *svar = nullptr;
-  ConditionalReadLock l(m_lock, !RuntimeOption::ApcConcurrentTableLockFree ||
+  ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
                                 m_lockingFlag);
   bool expired = false;
   bool promoteObj = false;
@@ -295,7 +295,7 @@ bool ConcurrentTableSharedStore::get(CStrRef key, Variant &value) {
           svar = sval->var;
         }
 
-        if (RuntimeOption::ApcAllowObj && svar->is(KindOfObject)) {
+        if (apcExtension::AllowObj && svar->is(KindOfObject)) {
           // Hold ref here for later promoting the object
           svar->incRef();
           promoteObj = true;
@@ -335,7 +335,7 @@ static int64_t get_int64_value(StoreValue* sval) {
 int64_t ConcurrentTableSharedStore::inc(CStrRef key, int64_t step, bool &found) {
   found = false;
   int64_t ret = 0;
-  ConditionalReadLock l(m_lock, !RuntimeOption::ApcConcurrentTableLockFree ||
+  ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
                                 m_lockingFlag);
   StoreValue *sval;
   {
@@ -357,7 +357,7 @@ int64_t ConcurrentTableSharedStore::inc(CStrRef key, int64_t step, bool &found) 
 
 bool ConcurrentTableSharedStore::cas(CStrRef key, int64_t old, int64_t val) {
   bool success = false;
-  ConditionalReadLock l(m_lock, !RuntimeOption::ApcConcurrentTableLockFree ||
+  ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
                                 m_lockingFlag);
   StoreValue *sval;
   {
@@ -378,7 +378,7 @@ bool ConcurrentTableSharedStore::cas(CStrRef key, int64_t old, int64_t val) {
 
 bool ConcurrentTableSharedStore::exists(CStrRef key) {
   const StoreValue *sval;
-  ConditionalReadLock l(m_lock, !RuntimeOption::ApcConcurrentTableLockFree ||
+  ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
                                 m_lockingFlag);
   bool expired = false;
   {
@@ -410,9 +410,9 @@ bool ConcurrentTableSharedStore::exists(CStrRef key) {
 }
 
 static int64_t adjust_ttl(int64_t ttl, bool overwritePrime) {
-  if (RuntimeOption::ApcTTLLimit > 0 && !overwritePrime) {
-    if (ttl == 0 || ttl > RuntimeOption::ApcTTLLimit) {
-      return RuntimeOption::ApcTTLLimit;
+  if (apcExtension::TTLLimit > 0 && !overwritePrime) {
+    if (ttl == 0 || ttl > apcExtension::TTLLimit) {
+      return apcExtension::TTLLimit;
     }
   }
   return ttl;
@@ -422,7 +422,7 @@ bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef value, int64_t ttl,
                                        bool overwrite /* = true */) {
   StoreValue *sval;
   SharedVariant* svar = construct(value);
-  ConditionalReadLock l(m_lock, !RuntimeOption::ApcConcurrentTableLockFree ||
+  ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
                                 m_lockingFlag);
   const char *kcp = strdup(key.data());
   bool present;
@@ -466,7 +466,7 @@ bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef value, int64_t ttl,
   if (expiry) {
     addToExpirationQueue(key.data(), expiry);
   }
-  if (RuntimeOption::ApcExpireOnSets) {
+  if (apcExtension::ExpireOnSets) {
     purgeExpired();
   }
   if (present) {
@@ -483,7 +483,7 @@ bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef value, int64_t ttl,
 
 void ConcurrentTableSharedStore::prime
 (const std::vector<SharedStore::KeyValuePair> &vars) {
-  ConditionalReadLock l(m_lock, !RuntimeOption::ApcConcurrentTableLockFree ||
+  ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
                                 m_lockingFlag);
   // we are priming, so we are not checking existence or expiration
   for (unsigned int i = 0; i < vars.size(); i++) {
@@ -555,14 +555,14 @@ void ConcurrentTableSharedStore::primeDone() {
     // initial accesses to the primed keys are not too bad. Still, for
     // the keys in file, a deserialization from memory is required on first
     // access.
-    addToExpirationQueue(RuntimeOption::ApcFileStorageFlagKey.c_str(),
+    addToExpirationQueue(apcExtension::FileStorageFlagKey.c_str(),
                          time(nullptr) +
-                         RuntimeOption::ApcFileStorageAdviseOutPeriod);
+                         apcExtension::FileStorageAdviseOutPeriod);
   }
 
   for (set<string>::const_iterator iter =
-         RuntimeOption::ApcCompletionKeys.begin();
-       iter != RuntimeOption::ApcCompletionKeys.end(); ++iter) {
+         apcExtension::CompletionKeys.begin();
+       iter != apcExtension::CompletionKeys.end(); ++iter) {
     Map::accessor acc;
     const char *copy = strdup(iter->c_str());
     if (m_vars.insert(acc, copy)) {
@@ -579,7 +579,7 @@ void ConcurrentTableSharedStore::dump(std::ostream & out, bool keyOnly,
   // Use write lock here to prevent concurrent ops running in parallel from
   // invalidatint the iterator.
   // This functionality is for debugging and should not be called regularly
-  if (RuntimeOption::ApcConcurrentTableLockFree) {
+  if (apcExtension::ConcurrentTableLockFree) {
     m_lockingFlag = true;
     int begin = time(nullptr);
     Logger::Info("waiting %d seconds before dump", waitSeconds);
@@ -619,7 +619,7 @@ void ConcurrentTableSharedStore::dump(std::ostream & out, bool keyOnly,
     out << std::endl;
   }
   Logger::Info("dumping apc done");
-  if (RuntimeOption::ApcConcurrentTableLockFree) {
+  if (apcExtension::ConcurrentTableLockFree) {
     m_lockingFlag = false;
   }
 }

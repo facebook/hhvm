@@ -36,3 +36,5 @@ var_dump(putenv("FOO=bar"));
 var_dump(!putenv("FOO"));
 
 var_dump(!version_compare("1.3.0.dev", "1.1.2", "<"));
+
+var_dump(version_compare(zend_version(), "2.4.99", ">="));

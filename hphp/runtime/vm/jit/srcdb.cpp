@@ -51,6 +51,7 @@ void SrcRec::chainFrom(IncomingBranch br) {
   assert(br.type() == IncomingBranch::Tag::ADDR    ||
          tx64->a.           contains(br.toSmash()) ||
          tx64->ahot.        contains(br.toSmash()) ||
+         tx64->aprof.       contains(br.toSmash()) ||
          tx64->astubs.      contains(br.toSmash()) ||
          tx64->atrampolines.contains(br.toSmash()));
   TCA destAddr = getTopTranslation();

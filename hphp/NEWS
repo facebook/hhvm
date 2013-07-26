@@ -1,4 +1,5 @@
 Future (next release):
+  - Implement read support for .phar
   - Implement assert with string arguments
   - Implement RecursiveArrayIterator
   - Implement php_strip_whitespace()

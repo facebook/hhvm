@@ -1,0 +1,7 @@
+%string|unicode%(%d) "%smytest"
+%string|unicode%(%d) "%smytest"
+HipHop Fatal error: %s
+Stack trace:
+#0 %sbug46032.php(%d): PharData->__construct('000000000000000...')
+#1 {main}
+  thrown in %sbug46032.php on line %d

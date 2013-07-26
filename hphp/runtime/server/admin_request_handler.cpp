@@ -927,7 +927,7 @@ bool AdminRequestHandler::handleAPCSizeRequest (const std::string &cmd,
 
 bool AdminRequestHandler::handleConstSizeRequest (const std::string &cmd,
                                                   Transport *transport) {
-  if (!RuntimeOption::EnableConstLoad && cmd == "const-ss") {
+  if (!apcExtension::EnableConstLoad && cmd == "const-ss") {
     transport->sendString("Not Enabled\n");
     return true;
   }
@@ -1002,9 +1002,9 @@ bool (*file_dump)(const char *filename) = nullptr;
 bool AdminRequestHandler::handleDumpCacheRequest(const std::string &cmd,
                                                  Transport *transport) {
   if (cmd == "dump-const") {
-    if (!RuntimeOption::EnableApc ||
-        !RuntimeOption::EnableConstLoad ||
-        RuntimeOption::ApcPrimeLibrary.empty()) {
+    if (!apcExtension::Enable ||
+        !apcExtension::EnableConstLoad ||
+        apcExtension::PrimeLibrary.empty()) {
       transport->sendString("No Constant Cache\n");
       return true;
     }
@@ -1013,7 +1013,7 @@ bool AdminRequestHandler::handleDumpCacheRequest(const std::string &cmd,
     return true;
   }
   if (cmd == "dump-apc") {
-    if (!RuntimeOption::EnableApc) {
+    if (!apcExtension::Enable) {
       transport->sendString("No APC\n");
       return true;
     }

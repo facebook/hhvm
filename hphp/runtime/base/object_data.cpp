@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/variable_serializer.h"
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/memory_profile.h"
 #include "hphp/util/lock.h"
 #include "hphp/runtime/base/class_info.h"
 #include "hphp/runtime/ext/ext_closure.h"

@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/leak_detectable.h"
 #include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/base/concurrent_shared_store.h"
+#include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/logger.h"
 #include <sys/mman.h>
@@ -90,8 +91,8 @@ SharedStores::SharedStores() {
 
 void SharedStores::create() {
   for (int i = 0; i < MAX_SHARED_STORE; i++) {
-    switch (RuntimeOption::ApcTableType) {
-      case RuntimeOption::ApcTableTypes::ApcConcurrentTable:
+    switch (apcExtension::TableType) {
+      case apcExtension::TableTypes::ConcurrentTable:
         m_stores[i] = new ConcurrentTableSharedStore(i);
         break;
       default:
@@ -273,7 +274,7 @@ bool SharedStoreFileStorage::addFile() {
     close(fd);
     return false;
   }
-  if (RuntimeOption::ApcFileStorageKeepFileLinked) {
+  if (apcExtension::FileStorageKeepFileLinked) {
     m_fileNames.push_back(std::string(name));
   } else {
     unlink(name);

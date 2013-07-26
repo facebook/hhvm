@@ -125,6 +125,16 @@ static void scalar_null(Parser *_p, Token &out) {
   _p->onConstantValue(out, tnull);
 }
 
+static void scalar_file(Parser *_p, Token &out) {
+  Token file; file.setText("__FILE__");
+  _p->onScalar(out, T_FILE, file);
+}
+
+static void scalar_line(Parser *_p, Token &out) {
+  Token line; line.setText("__LINE__");
+  _p->onScalar(out, T_LINE, line);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // converting constant declartion to "define(name, value);"
 
@@ -1791,15 +1801,23 @@ xhp_tag:
 xhp_tag_body:
     xhp_attributes '/'                 { Token t1; _p->onArray(t1,$1);
                                          Token t2; _p->onArray(t2,$2);
+                                         Token file; scalar_file(_p, file);
+                                         Token line; scalar_line(_p, line);
                                          _p->onCallParam($1,NULL,t1,0);
                                          _p->onCallParam($$, &$1,t2,0);
+                                         _p->onCallParam($1, &$1,file,0);
+                                         _p->onCallParam($1, &$1,line,0);
                                          $$.setText("");}
   | xhp_attributes T_XHP_TAG_GT
     xhp_children T_XHP_TAG_LT '/'
-    xhp_opt_end_label                  { _p->onArray($4,$1);
+    xhp_opt_end_label                  { Token file; scalar_file(_p, file);
+                                         Token line; scalar_line(_p, line);
+                                         _p->onArray($4,$1);
                                          _p->onArray($5,$3);
                                          _p->onCallParam($2,NULL,$4,0);
                                          _p->onCallParam($$, &$2,$5,0);
+                                         _p->onCallParam($2, &$2,file,0);
+                                         _p->onCallParam($2, &$2,line,0);
                                          $$.setText($6.text());}
 ;
 xhp_opt_end_label:

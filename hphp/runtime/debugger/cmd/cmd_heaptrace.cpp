@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_heaptrace.h"
 
+#include "hphp/runtime/base/memory_profile.h"
 #include "hphp/runtime/vm/unit.h"
 
 namespace HPHP { namespace Eval {
@@ -76,12 +77,14 @@ static std::map<std::string, GraphFormat> s_formatMap = {
 void CmdHeaptrace::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
   thrift.write(m_accum.typesMap);
+  thrift.write(m_accum.sizeMap);
   thrift.write(m_accum.adjacencyList);
 }
 
 void CmdHeaptrace::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
   thrift.read(m_accum.typesMap);
+  thrift.read(m_accum.sizeMap);
   thrift.read(m_accum.adjacencyList);
 }
 
@@ -138,10 +141,15 @@ static const char *typeName(int8_t type) {
 
 void CmdHeaptrace::printHeap(DebuggerClient &client) {
   for (const auto &pair : m_accum.typesMap) {
-    client.print(folly::stringPrintf("Found TV at %p with type %s (%u)",
-                                     (void *)pair.first,
-                                     typeName(pair.second),
-                                     pair.second));
+    size_t size = m_accum.sizeMap[pair.first];
+    std::string sizeStr = size
+      ? folly::stringPrintf(" which consumes %lu bytes", size)
+      : std::string();
+    client.print(
+      folly::stringPrintf("Found TV at %p with type %s%s",
+                          (void *)pair.first,
+                          typeName(pair.second),
+                          sizeStr.c_str()));
     std::vector<int64_t> &adjList = m_accum.adjacencyList[pair.first];
     if (!adjList.empty()) {
       std::string children = "  -> found children: ";
@@ -243,6 +251,7 @@ bool CmdHeaptrace::onServer(DebuggerProxy &proxy) {
     roots,
     [](TypedValue *node, Accum &accum) {
       accum.typesMap[(int64_t)node] = (int8_t)node->m_type;
+      accum.sizeMap[(int64_t)node] = (int64_t)MemoryProfile::getSizeOfTV(node);
     },
     [](TypedValue *parent, TypedValue *child, Accum &accum) {
       accum.adjacencyList[(int64_t)parent].push_back((int64_t)child);

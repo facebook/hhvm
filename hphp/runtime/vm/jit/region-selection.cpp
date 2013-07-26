@@ -24,6 +24,8 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/map_walker.h"
 #include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/vm/jit/normalized-instruction.h"
+#include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"

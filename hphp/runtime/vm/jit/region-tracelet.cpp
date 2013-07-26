@@ -18,7 +18,9 @@
 #include "hphp/runtime/vm/jit/annotation.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
 #include "hphp/runtime/vm/jit/ir-translator.h"
+#include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
+#include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
 namespace HPHP { namespace JIT {

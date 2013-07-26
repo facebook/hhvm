@@ -43,8 +43,10 @@
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
 #include "hphp/runtime/vm/jit/ir-factory.h"
 #include "hphp/runtime/vm/jit/ir-translator.h"
+#include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -131,62 +133,6 @@ void InstrStream::remove(NormalizedInstruction* ni) {
   }
   ni->prev = nullptr;
   ni->next = nullptr;
-}
-
-NormalizedInstruction* Tracelet::newNormalizedInstruction() {
-  NormalizedInstruction* ni = new NormalizedInstruction();
-  m_instrs.push_back(ni);
-  return ni;
-}
-
-DynLocation* Tracelet::newDynLocation(Location l, DataType t) {
-  DynLocation* dl = new DynLocation(l, t);
-  m_dynlocs.push_back(dl);
-  return dl;
-}
-
-DynLocation* Tracelet::newDynLocation(Location l, RuntimeType t) {
-  DynLocation* dl = new DynLocation(l, t);
-  m_dynlocs.push_back(dl);
-  return dl;
-}
-
-DynLocation* Tracelet::newDynLocation() {
-  DynLocation* dl = new DynLocation();
-  m_dynlocs.push_back(dl);
-  return dl;
-}
-
-void Tracelet::print() const {
-  print(std::cerr);
-}
-
-void Tracelet::print(std::ostream& out) const {
-  const NormalizedInstruction* i = m_instrStream.first;
-  if (i == nullptr) {
-    out << "<empty>\n";
-    return;
-  }
-
-  out << i->unit()->filepath()->data() << ':'
-            << i->unit()->getLineNumber(i->offset()) << std::endl;
-  for (; i; i = i->next) {
-    out << "  " << i->offset() << ": " << i->toString() << std::endl;
-  }
-}
-
-std::string Tracelet::toString() const {
-  std::ostringstream out;
-  print(out);
-  return out.str();
-}
-
-SrcKey Tracelet::nextSk() const {
-  return m_instrStream.last->nextSk();
-}
-
-const Func* Tracelet::func() const {
-  return m_sk.func();
 }
 
 /*
@@ -2454,52 +2400,6 @@ void TraceletContext::recordJmp() {
   m_numJmps++;
 }
 
-/*
- *   Helpers for recovering context of this instruction.
- */
-Op NormalizedInstruction::op() const {
-  auto op = toOp(*pc());
-  assert(isValidOpcode(op));
-  return (Op)op;
-}
-
-Op NormalizedInstruction::mInstrOp() const {
-  Op opcode = op();
-#define MII(instr, a, b, i, v, d) case Op##instr##M: return opcode;
-  switch (opcode) {
-    MINSTRS
-  case OpFPassM:
-    return preppedByRef ? OpVGetM : OpCGetM;
-  default:
-    not_reached();
-  }
-#undef MII
-}
-
-PC NormalizedInstruction::pc() const {
-  return unit()->at(source.offset());
-}
-
-const Unit* NormalizedInstruction::unit() const {
-  return m_unit;
-}
-
-const Func* NormalizedInstruction::func() const {
-  return source.func();
-}
-
-Offset NormalizedInstruction::offset() const {
-  return source.offset();
-}
-
-std::string NormalizedInstruction::toString() const {
-  return instrToString((Op*)pc(), unit());
-}
-
-SrcKey NormalizedInstruction::nextSk() const {
-  return source.advanced(m_unit);
-}
-
 void Translator::postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
                              Tracelet& t, TraceletContext& tas) {
   if (ni->op() == OpBareThis &&
@@ -2520,46 +2420,6 @@ static bool isPop(const NormalizedInstruction* instr) {
   return (opc == OpPopC ||
           opc == OpPopV ||
           opc == OpPopR);
-}
-
-NormalizedInstruction::OutputUse
-NormalizedInstruction::getOutputUsage(const DynLocation* output) const {
-  for (NormalizedInstruction* succ = next; succ; succ = succ->next) {
-    if (succ->noOp) continue;
-    for (size_t i = 0; i < succ->inputs.size(); ++i) {
-      if (succ->inputs[i] == output) {
-        if (succ->inputWasInferred(i)) {
-          return OutputUse::Inferred;
-        }
-        if (dontGuardAnyInputs(succ->op())) {
-          /* the consumer doesnt care about its inputs
-             but we may still have inferred something about
-             its outputs that a later instruction may depend on
-          */
-          if (!outputDependsOnInput(succ->op()) ||
-              !(succ->outStack && !succ->outStack->rtt.isVagueValue() &&
-                succ->getOutputUsage(succ->outStack) != OutputUse::Used) ||
-              !(succ->outLocal && !succ->outLocal->rtt.isVagueValue() &&
-                succ->getOutputUsage(succ->outLocal) != OutputUse::Used)) {
-            return OutputUse::DoesntCare;
-          }
-        }
-        return OutputUse::Used;
-      }
-    }
-  }
-  return OutputUse::Unused;
-}
-
-bool NormalizedInstruction::isOutputUsed(const DynLocation* output) const {
-  return (output && !output->rtt.isVagueValue() &&
-          getOutputUsage(output) == OutputUse::Used);
-}
-
-bool NormalizedInstruction::isAnyOutputUsed() const
-{
-  return (isOutputUsed(outStack) ||
-          isOutputUsed(outLocal));
 }
 
 GuardType::GuardType(DataType outer, DataType inner)
@@ -4082,6 +3942,29 @@ static const char *transKindStr[] = {
 const char *getTransKindName(TransKind kind) {
   assert(kind >= 0 && kind < TransInvalid);
   return transKindStr[kind];
+}
+
+TransRec::TransRec(SrcKey                   s,
+                   MD5                      _md5,
+                   TransKind                _kind,
+                   const Tracelet&          t,
+                   TCA                      _aStart,
+                   uint32_t                 _aLen,
+                   TCA                      _astubsStart,
+                   uint32_t                 _astubsLen,
+                   TCA                      _counterStart,
+                   uint8_t                  _counterLen,
+                   vector<TransBCMapping>   _bcMapping) :
+    id(0), kind(_kind), src(s), md5(_md5),
+    bcStopOffset(t.nextSk().offset()), aStart(_aStart), aLen(_aLen),
+    astubsStart(_astubsStart), astubsLen(_astubsLen),
+    counterStart(_counterStart), counterLen(_counterLen),
+    bcMapping(_bcMapping) {
+  for (DepMap::const_iterator dep = t.m_dependencies.begin();
+       dep != t.m_dependencies.end();
+       ++dep) {
+    dependencies.push_back(*dep->second);
+  }
 }
 
 string

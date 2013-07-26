@@ -28,6 +28,7 @@
 #include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/base/smart_containers.h"
 
 namespace HPHP { class ExecutionContext; }

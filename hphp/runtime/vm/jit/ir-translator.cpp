@@ -40,8 +40,10 @@
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/ir-translator.h"
 #include "hphp/runtime/vm/jit/linear-scan.h"
+#include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/tracelet.h"
 
 // Include last to localize effects to this file
 #include "hphp/util/assert_throw.h"

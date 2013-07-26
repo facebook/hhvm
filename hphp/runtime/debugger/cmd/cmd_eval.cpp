@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_eval.h"
 #include "hphp/runtime/vm/debugger-hook.h"
+#include "hphp/runtime/base/array_init.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

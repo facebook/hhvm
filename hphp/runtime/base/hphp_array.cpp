@@ -1473,6 +1473,7 @@ bool HphpArray::nvInsert(StringData *k, TypedValue *data) {
 }
 
 HphpArray* HphpArray::nextInsertVec(CVarRef v) {
+  assert(isVector());
   auto& tv = allocNextElm(m_size);
   return initVal(tv, v);
 }

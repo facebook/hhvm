@@ -121,8 +121,7 @@ public:
   int getIndex(int64_t key);
   int getIndex(const StringData* key);
 
-  ArrayData* loadElems(const SharedMap &sharedMap,
-                       bool mapInit = false);
+  ArrayData* loadElems(const SharedMap &sharedMap);
 
   Variant getKey(ssize_t pos) const;
 

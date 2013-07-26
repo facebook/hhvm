@@ -17,6 +17,7 @@
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
 #include "hphp/runtime/debugger/cmd/cmd_break.h"
 #include "hphp/runtime/debugger/cmd/cmd_print.h"
+#include "hphp/runtime/base/array_init.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

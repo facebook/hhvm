@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_config.h"
+#include "hphp/runtime/base/array_init.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

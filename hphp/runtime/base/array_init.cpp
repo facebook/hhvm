@@ -36,26 +36,9 @@ ArrayInit::ArrayInit(ssize_t n) {
 }
 
 HOT_FUNC
-ArrayData *ArrayInit::CreateVector(ssize_t n) {
-  return ArrayData::Make(n);
+ArrayInit::ArrayInit(ssize_t n, MapInit)
+  : m_data(ArrayData::Make(n)) {
 }
-
-HOT_FUNC
-ArrayData *ArrayInit::CreateMap(ssize_t n) {
-  return ArrayData::Make(n);
-}
-
-ArrayData *ArrayInit::CreateParams(int count, ...) {
-  va_list ap;
-  va_start(ap, count);
-  ArrayInit ai(count);
-  for (int i = 0; i < count; i++) {
-    ai.setRef(*va_arg(ap, const Variant *));
-  }
-  va_end(ap);
-  return ai.create();
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 }

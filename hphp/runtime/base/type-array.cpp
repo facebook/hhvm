@@ -638,29 +638,28 @@ Variant Array::key(CVarRef search_value, bool strict /* = false */) const {
 Array Array::keys(CVarRef search_value /* = null_variant */,
                   bool strict /* = false */) const {
   if (!search_value.isInitialized()) {
-    ArrayInit ai(size(), ArrayInit::vectorInit);
+    VectorInit ai(size());
     for (ArrayIter iter(*this); iter; ++iter) {
-      ai.set(iter.first());
+      ai.add(iter.first());
     }
-    return ai.create();
-  } else {
-    Array ret = Array::Create();
-    for (ArrayIter iter(*this); iter; ++iter) {
-      if ((strict && HPHP::same(iter.secondRef(), search_value)) ||
-          (!strict && HPHP::equal(iter.secondRef(), search_value))) {
-        ret.append(iter.first());
-      }
-    }
-    return ret;
+    return ai.toArray();
   }
+  VectorInit ai(0);
+  for (ArrayIter iter(*this); iter; ++iter) {
+    if ((strict && HPHP::same(iter.secondRef(), search_value)) ||
+        (!strict && HPHP::equal(iter.secondRef(), search_value))) {
+      ai.add(iter.first());
+    }
+  }
+  return ai.toArray();
 }
 
 Array Array::values() const {
-  ArrayInit ai(size(), ArrayInit::vectorInit);
+  VectorInit ai(size());
   for (ArrayIter iter(*this); iter; ++iter) {
-    ai.set(withRefBind(iter.secondRef()));
+    ai.add(withRefBind(iter.secondRef()));
   }
-  return ai.create();
+  return ai.toArray();
 }
 
 bool Array::exists(CStrRef key, bool isKey /* = false */) const {

@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/string_util.h"
 #include "hphp/runtime/vm/debugger-hook.h"
+#include "hphp/runtime/base/array_init.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

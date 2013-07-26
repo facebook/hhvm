@@ -19,26 +19,24 @@
 
 #include "hphp/runtime/base/array_data.h"
 #include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/hphp_array.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // macros for creating vectors or maps
 
 #define CREATE_VECTOR1(e)                                               \
-  Array(ArrayInit(1, ArrayInit::vectorInit).set(e).create())
+  VectorInit(1).add(e).toArray()
 #define CREATE_VECTOR2(e1, e2)                                          \
-  Array(ArrayInit(2, ArrayInit::vectorInit).set(e1).set(e2).create())
+  VectorInit(2).add(e1).add(e2).toArray()
 #define CREATE_VECTOR3(e1, e2, e3)                                      \
-  Array(ArrayInit(3, ArrayInit::vectorInit).set(e1).set(e2).set(e3).create())
+  VectorInit(3).add(e1).add(e2).add(e3).toArray()
 #define CREATE_VECTOR4(e1, e2, e3, e4)                                  \
-  Array(ArrayInit(4, ArrayInit::vectorInit).set(e1).set(e2).set(e3).    \
-                                            set(e4).create())
+  VectorInit(4).add(e1).add(e2).add(e3).add(e4).toArray()
 #define CREATE_VECTOR5(e1, e2, e3, e4, e5)                              \
-  Array(ArrayInit(5, ArrayInit::vectorInit).set(e1).set(e2).set(e3).    \
-                                            set(e4).set(e5).create())
+  VectorInit(5).add(e1).add(e2).add(e3).add(e4).add(e5).toArray()
 #define CREATE_VECTOR6(e1, e2, e3, e4, e5, e6)                          \
-  Array(ArrayInit(6, ArrayInit::vectorInit).set(e1).set(e2).set(e3).    \
-                                            set(e4).set(e5).set(e6).create())
+  VectorInit(6).add(e1).add(e2).add(e3).add(e4).add(e5).add(e6).toArray()
 
 inline String initkey(const char* s) { return String(s); }
 inline int64_t initkey(int k) { return k; }
@@ -86,18 +84,11 @@ inline CStrRef initkey(CStrRef k) { return k; }
  */
 class ArrayInit {
 public:
-  enum VectorInit { vectorInit };
   enum MapInit { mapInit };
 
   explicit ArrayInit(ssize_t n);
 
-  ArrayInit(ssize_t n, VectorInit) {
-    m_data = CreateVector(n);
-  }
-
-  ArrayInit(ssize_t n, MapInit) {
-    m_data = CreateMap(n);
-  }
+  ArrayInit(ssize_t n, MapInit);
 
   ArrayInit(ArrayInit&& other) : m_data(other.m_data) {
     other.m_data = nullptr;
@@ -105,9 +96,6 @@ public:
 
   ArrayInit(const ArrayInit&) = delete;
   ArrayInit& operator=(const ArrayInit&) = delete;
-
-  static ArrayData *CreateVector(ssize_t n);
-  static ArrayData *CreateMap(ssize_t n);
 
   ~ArrayInit() {
     // In case an exception interrupts the initialization.
@@ -309,10 +297,64 @@ public:
     return Variant(ptr, Variant::ArrayInitCtor::Tag);
   }
 
-  static ArrayData *CreateParams(int count, ...);
+private:
+  ArrayData* m_data;
+};
+
+/*
+ * Initializer for a vector-shaped array.
+ */
+class VectorInit {
+public:
+  explicit VectorInit(size_t n) : m_vec(ArrayData::Make(n)) {}
+
+  VectorInit(VectorInit&& other) : m_vec(other.m_vec) {
+    other.m_vec = nullptr;
+  }
+
+  VectorInit(const VectorInit&) = delete;
+  VectorInit& operator=(const VectorInit&) = delete;
+
+  ~VectorInit() {
+    // In case an exception interrupts the initialization.
+    if (m_vec) m_vec->release();
+  }
+
+  VectorInit& add(CVarRef v) {
+    m_vec->nvAppend(v.asTypedValue());
+    return *this;
+  }
+
+  VectorInit& add(CVarWithRefBind v) {
+    HphpArray::AppendWithRefVec(m_vec, variant(v), false);
+    return *this;
+  }
+
+  VectorInit& add(RefResult v) {
+    HphpArray::AppendRefVec(m_vec, variant(v), false);
+    return *this;
+  }
+
+  Variant toVariant() {
+    auto ptr = m_vec;
+    m_vec = nullptr;
+    return Variant(ptr, Variant::ArrayInitCtor::Tag);
+  }
+
+  Array toArray() {
+    ArrayData* ptr = m_vec;
+    m_vec = nullptr;
+    return Array(ptr, Array::ArrayInitCtor::Tag);
+  }
+
+  ArrayData *create() {
+    auto ptr = m_vec;
+    m_vec = nullptr;
+    return ptr;
+  }
 
 private:
-  ArrayData *m_data;
+  HphpArray* m_vec;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

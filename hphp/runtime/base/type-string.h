@@ -18,8 +18,8 @@
 #define incl_HPHP_STRING_H_
 
 #ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
-#error Directly including 'type_string.h' is prohibited. \
-       Include 'complex_types.h' instead.
+#error Directly including 'type-string.h' is prohibited. \
+       Include 'complex-types.h' instead.
 #endif
 
 #include "hphp/util/assertions.h"

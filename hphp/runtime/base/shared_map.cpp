@@ -245,7 +245,7 @@ void SharedMap::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
 
 ArrayData* SharedMap::EscalateForSort(ArrayData* ad) {
   auto a = asSharedMap(ad);
-  auto ret = a->m_arr->loadElems(*a, true /* mapInit */);
+  auto ret = a->m_arr->loadElems(*a);
   assert(!ret->isStatic());
   return ret;
 }

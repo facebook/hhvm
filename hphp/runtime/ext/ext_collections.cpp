@@ -175,12 +175,12 @@ void c_Vector::reserve(int64_t sz) {
 }
 
 Array c_Vector::toArrayImpl() const {
-  ArrayInit ai(m_size, ArrayInit::vectorInit);
+  VectorInit ai(m_size);
   uint sz = m_size;
   for (uint i = 0; i < sz; ++i) {
-    ai.set(tvAsCVarRef(&m_data[i]));
+    ai.add(tvAsCVarRef(&m_data[i]));
   }
-  return ai.create();
+  return ai.toArray();
 }
 
 Array c_Vector::o_toArray() const {
@@ -1281,17 +1281,17 @@ Array c_Map::t_copyasarray() {
 }
 
 Array c_Map::t_tokeysarray() {
-  ArrayInit ai(m_size, ArrayInit::vectorInit);
+  VectorInit ai(m_size);
   for (uint i = 0; i <= m_nLastSlot; ++i) {
     Bucket& p = m_data[i];
     if (!p.validValue()) continue;
     if (p.hasIntKey()) {
-      ai.set((int64_t)p.ikey);
+      ai.add((int64_t)p.ikey);
     } else {
-      ai.set(*(const String*)(&p.skey));
+      ai.add(*(const String*)(&p.skey));
     }
   }
-  return ai.create();
+  return ai.toArray();
 }
 
 Object c_Map::t_values() {
@@ -1319,13 +1319,13 @@ Object c_Map::t_values() {
 }
 
 Array c_Map::t_tovaluesarray() {
-  ArrayInit ai(m_size, ArrayInit::vectorInit);
+  VectorInit ai(m_size);
   for (uint i = 0; i <= m_nLastSlot; ++i) {
     Bucket& p = m_data[i];
     if (!p.validValue()) continue;
-    ai.set(tvAsCVarRef(&p.data));
+    ai.add(tvAsCVarRef(&p.data));
   }
-  return ai.create();
+  return ai.toArray();
 }
 
 Object c_Map::t_updatefromarray(CVarRef arr) {
@@ -2437,17 +2437,17 @@ Array c_StableMap::t_copyasarray() {
 }
 
 Array c_StableMap::t_tokeysarray() {
-  ArrayInit ai(m_size, ArrayInit::vectorInit);
+  VectorInit ai(m_size);
   Bucket* p = m_pListHead;
   while (p) {
     if (p->hasIntKey()) {
-      ai.set((int64_t)p->ikey);
+      ai.add((int64_t)p->ikey);
     } else {
-      ai.set(*(const String*)(&p->skey));
+      ai.add(*(const String*)(&p->skey));
     }
     p = p->pListNext;
   }
-  return ai.create();
+  return ai.toArray();
 }
 
 Object c_StableMap::t_values() {
@@ -2470,13 +2470,13 @@ Object c_StableMap::t_values() {
 }
 
 Array c_StableMap::t_tovaluesarray() {
-  ArrayInit ai(m_size, ArrayInit::vectorInit);
+  VectorInit ai(m_size);
   Bucket* p = m_pListHead;
   while (p) {
-    ai.set(tvAsCVarRef(&p->data));
+    ai.add(tvAsCVarRef(&p->data));
     p = p->pListNext;
   }
-  return ai.create();
+  return ai.toArray();
 }
 
 Object c_StableMap::t_updatefromarray(CVarRef arr) {
@@ -3409,14 +3409,14 @@ void c_Set::t___construct(CVarRef iterable /* = null_variant */) {
 }
 
 Array c_Set::toArrayImpl() const {
-  ArrayInit ai(m_size, ArrayInit::vectorInit);
+  VectorInit ai(m_size);
   for (uint i = 0; i <= m_nLastSlot; ++i) {
     Bucket& p = m_data[i];
     if (p.validValue()) {
-      ai.set(tvAsCVarRef(&p.data));
+      ai.add(tvAsCVarRef(&p.data));
     }
   }
-  return ai.create();
+  return ai.toArray();
 }
 
 Array c_Set::o_toArray() const {
@@ -4131,10 +4131,10 @@ void c_Pair::t___construct() {
 }
 
 Array c_Pair::toArrayImpl() const {
-  ArrayInit ai(2, ArrayInit::vectorInit);
-  ai.set(tvAsCVarRef(&elm0));
-  ai.set(tvAsCVarRef(&elm1));
-  return ai.create();
+  VectorInit ai(2);
+  ai.add(tvAsCVarRef(&elm0));
+  ai.add(tvAsCVarRef(&elm1));
+  return ai.toArray();
 }
 
 Array c_Pair::o_toArray() const {

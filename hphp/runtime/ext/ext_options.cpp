@@ -152,10 +152,10 @@ Variant f_assert(CVarRef assertion) {
   if (!s_option_data->assertCallback.isNull()) {
     auto const unit = fp->m_func->unit();
 
-    ArrayInit ai(3, ArrayInit::vectorInit);
-    ai.set(String(unit->filepath()));
-    ai.set(Variant(unit->getLineNumber(callerOffset)));
-    ai.set(assertion.isString() ? assertion.toString() : String(""));
+    VectorInit ai(3);
+    ai.add(String(unit->filepath()));
+    ai.add(Variant(unit->getLineNumber(callerOffset)));
+    ai.add(assertion.isString() ? assertion.toString() : String(""));
     f_call_user_func(1, s_option_data->assertCallback, ai.toArray());
   }
 

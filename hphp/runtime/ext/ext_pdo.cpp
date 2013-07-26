@@ -1005,6 +1005,7 @@ void c_PDO::t___construct(CStrRef dsn, CStrRef username /* = null_string */,
         if (m_dbh->support(PDOConnection::MethodCheckLiveness) &&
             !m_dbh->checkLiveness()) {
           /* nope... need to kill it */
+          s_pdo_request_data->m_persistent_connections.erase(m_dbh.get());
           m_dbh = NULL;
         } else {
           /* Yep, use it and mark it for saving at rshutdown */

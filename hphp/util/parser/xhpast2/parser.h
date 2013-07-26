@@ -419,7 +419,6 @@ struct Parser : ParserBase {
   void* extractStatement(ScannerToken*) { return nullptr; }
 
   bool enableFinallyStatement() { return true; }
-  bool enableXHP() { return true; }
 
   IMPLEMENT_XHP_ATTRIBUTES;
 

@@ -343,7 +343,7 @@ bool RuntimeOption::EnableHipHopSyntax = false;
 bool RuntimeOption::EnableHipHopExperimentalSyntax = false;
 bool RuntimeOption::EnableShortTags = true;
 bool RuntimeOption::EnableAspTags = false;
-bool RuntimeOption::EnableXHP = true;
+bool RuntimeOption::EnableXHP = false;
 bool RuntimeOption::EnableObjDestructCall = false;
 bool RuntimeOption::EnableEmitSwitch = true;
 bool RuntimeOption::EnableEmitterStats = true;
@@ -355,9 +355,10 @@ bool RuntimeOption::EnableArgsInBacktraces = true;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
-  if (EnableHipHopSyntax) type |= Scanner::AllowHipHopSyntax;
   if (EnableShortTags) type |= Scanner::AllowShortTags;
   if (EnableAspTags) type |= Scanner::AllowAspTags;
+  if (EnableXHP) type |= Scanner::AllowXHPSyntax;
+  if (EnableHipHopSyntax) type |= Scanner::AllowHipHopSyntax;
   return type;
 }
 
@@ -1100,7 +1101,14 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
       eval["EnableHipHopExperimentalSyntax"].getBool();
     EnableShortTags= eval["EnableShortTags"].getBool(true);
     EnableAspTags = eval["EnableAspTags"].getBool();
-    EnableXHP = eval["EnableXHP"].getBool(true);
+    EnableXHP = eval["EnableXHP"].getBool(false);
+  
+    if (EnableHipHopSyntax) {
+      // If EnableHipHopSyntax is true, it forces EnableXHP to true
+      // regardless of how it was set in the config
+      EnableXHP = true;
+    }
+
     EnableObjDestructCall = eval["EnableObjDestructCall"].getBool(false);
     MaxUserFunctionId = eval["MaxUserFunctionId"].getInt32(2 * 65536);
     CheckSymLink = eval["CheckSymLink"].getBool(false);

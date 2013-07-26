@@ -149,12 +149,6 @@ static void on_constant(Parser *_p, Token &out, Token &name, Token &value) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void user_attribute_check(Parser *_p) {
-  if (!_p->scanner().hipHopSyntaxEnabled()) {
-    HPHP_PARSER_ERROR("User attributes are not enabled", _p);
-  }
-}
-
 static void finally_statement(Parser *_p) {
   if (!_p->enableFinallyStatement()) {
     HPHP_PARSER_ERROR("Finally statement is not enabled", _p);
@@ -183,10 +177,6 @@ static void constant_ae(Parser *_p, Token &out, Token &value) {
  */
 
 static void xhp_tag(Parser *_p, Token &out, Token &label, Token &body) {
-  if (!_p->enableXHP()) {
-    HPHP_PARSER_ERROR("XHP: not enabled", _p);
-  }
-
   if (!body.text().empty() && body.text() != label.text()) {
     HPHP_PARSER_ERROR("XHP: mismatched tag: '%s' not the same as '%s'",
                       _p, body.text().c_str(), label.text().c_str());
@@ -315,10 +305,6 @@ static void xhp_attribute_list(Parser *_p, Token &out, Token *list,
 }
 
 static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
-  if (!_p->enableXHP()) {
-    HPHP_PARSER_ERROR("XHP: not enabled", _p);
-  }
-
   Token modifiers;
   Token fname; fname.setText("__xhpAttributeDeclaration");
   {
@@ -421,10 +407,6 @@ static void xhp_collect_attributes(Parser *_p, Token &out, Token &stmts) {
 }
 
 static void xhp_category_stmt(Parser *_p, Token &out, Token &categories) {
-  if (!_p->enableXHP()) {
-    HPHP_PARSER_ERROR("XHP: not enabled", _p);
-  }
-
   Token fname;     fname.setText("__xhpCategoryDeclaration");
   Token m1;        m1.setNum(T_PROTECTED);
   Token modifiers; _p->onMemberModifier(modifiers, 0, m1);
@@ -506,10 +488,6 @@ static void xhp_children_paren(Parser *_p, Token &out, Token exp, int op) {
 }
 
 static void xhp_children_stmt(Parser *_p, Token &out, Token &children) {
-  if (!_p->enableXHP()) {
-    HPHP_PARSER_ERROR("XHP: not enabled", _p);
-  }
-
   Token fname;     fname.setText("__xhpChildrenDeclaration");
   Token m1;        m1.setNum(T_PROTECTED);
   Token modifiers; _p->onMemberModifier(modifiers, 0, m1);
@@ -556,7 +534,7 @@ static void xhp_children_stmt(Parser *_p, Token &out, Token &children) {
 }
 
 static void only_in_hh_syntax(Parser *_p) {
-  if (!_p->scanner().hipHopSyntaxEnabled()) {
+  if (!_p->scanner().isHHSyntaxEnabled()) {
     HPHP_PARSER_ERROR(
       "Syntax only allowed with -v Eval.EnableHipHopSyntax=true", _p);
   }
@@ -702,7 +680,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_TRAIT_C
 
 %token T_VARARG
-%token T_HACK_ERROR
+%token T_HH_ERROR
 %token T_FINALLY
 
 %token T_XHP_TAG_LT
@@ -1142,11 +1120,11 @@ new_else_single:
 ;
 
 method_parameter_list:
-    non_empty_method_parameter_list ',' T_VARARG
-                                       { only_in_hh_syntax(_p); $$ = $1; }
+    non_empty_method_parameter_list
+    ',' T_VARARG                       { $$ = $1;}
   | non_empty_method_parameter_list
-    possible_comma_in_hphp_syntax      { $$ = $1;}
-  | T_VARARG                           { only_in_hh_syntax(_p); $$.reset(); }
+    hh_possible_comma                  { $$ = $1;}
+  | T_VARARG                           { $$.reset();}
   |                                    { $$.reset();}
 ;
 
@@ -1194,11 +1172,11 @@ non_empty_method_parameter_list:
 ;
 
 parameter_list:
-    non_empty_parameter_list ',' T_VARARG
-                                       { only_in_hh_syntax(_p); $$ = $1; }
+    non_empty_parameter_list ','
+    T_VARARG                           { $$ = $1;}
   | non_empty_parameter_list
-    possible_comma_in_hphp_syntax      { $$ = $1;}
-  | T_VARARG                           { only_in_hh_syntax(_p); $$.reset(); }
+    hh_possible_comma                  { $$ = $1;}
+  | T_VARARG                           { $$.reset();}
   |                                    { $$.reset();}
 ;
 
@@ -1239,7 +1217,7 @@ non_empty_parameter_list:
 
 function_call_parameter_list:
     non_empty_fcall_parameter_list
-    possible_comma_in_hphp_syntax      { $$ = $1;}
+    hh_possible_comma                  { $$ = $1;}
   |                                    { $$.reset();}
 ;
 non_empty_fcall_parameter_list:
@@ -1654,8 +1632,7 @@ static_shape_pair_list:
 ;
 
 shape_literal:
-    T_SHAPE '(' shape_pair_list ')'   { only_in_hh_syntax(_p);
-                                        _p->onArray($$, $3, T_ARRAY); }
+    T_SHAPE '(' shape_pair_list ')'   { _p->onArray($$, $3, T_ARRAY);}
 ;
 
 array_literal:
@@ -1691,10 +1668,8 @@ dim_expr_base:
 ;
 
 lexical_vars:
-    T_USE '('
-    lexical_var_list
-    possible_comma_in_hphp_syntax
-    ')'                                { $$ = $3;}
+    T_USE '(' lexical_var_list
+    hh_possible_comma ')'              { $$ = $3;}
   |                                    { $$.reset();}
 ;
 
@@ -1925,8 +1900,7 @@ static_scalar:
     static_array_pair_list ')'         { _p->onArray($$,$3,T_ARRAY); }
   | '[' static_array_pair_list ']'     { _p->onArray($$,$2,T_ARRAY); }
   | T_SHAPE '('
-    static_shape_pair_list ')'         { only_in_hh_syntax(_p);
-                                         _p->onArray($$,$3,T_ARRAY); }
+    static_shape_pair_list ')'         { _p->onArray($$,$3,T_ARRAY); }
   | static_class_constant              { $$ = $1;}
   | static_collection_literal          { $$ = $1;}
 ;
@@ -1961,7 +1935,7 @@ possible_comma:
     ','                                { $$.reset();}
   |                                    { $$.reset();}
 ;
-possible_comma_in_hphp_syntax:
+hh_possible_comma:
     ','                                { only_in_hh_syntax(_p); $$.reset();}
   |                                    { $$.reset();}
 ;
@@ -2002,8 +1976,7 @@ static_scalar_ae:
     static_array_pair_list_ae ')'      { _p->onArray($$,$3,T_ARRAY);}
   | '[' static_array_pair_list_ae ']'  { _p->onArray($$,$2,T_ARRAY);}
   | T_SHAPE '('
-    static_shape_pair_list_ae ')'      { only_in_hh_syntax(_p);
-                                         _p->onArray($$,$3,T_ARRAY); }
+    static_shape_pair_list_ae ')'      { _p->onArray($$,$3,T_ARRAY); }
 ;
 
 static_array_pair_list_ae:
@@ -2060,7 +2033,7 @@ non_empty_user_attribute_list:
     attribute_static_scalar_list       { _p->onUserAttribute($$,  0,$1,$2);}
 ;
 user_attribute_list:
-                                       { user_attribute_check(_p);}
+                                       { only_in_hh_syntax(_p);}
     non_empty_user_attribute_list
     possible_comma                     { $$ = $2;}
 ;
@@ -2338,13 +2311,10 @@ hh_opt_constraint:
 
 hh_type_alias_statement:
     T_TYPE hh_name_with_typevar
-      '=' hh_type ';'                  { only_in_hh_syntax(_p);
-                                         _p->onTypedef($$, $2, $4);
+      '=' hh_type ';'                  { _p->onTypedef($$, $2, $4);
                                          _p->popTypeScope(); }
   | T_NEWTYPE hh_name_with_typevar
-            hh_opt_constraint
-    '=' hh_type ';'                    { only_in_hh_syntax(_p);
-                                         _p->onTypedef($$, $2, $5);
+    hh_opt_constraint '=' hh_type ';'  { _p->onTypedef($$, $2, $5);
                                          _p->popTypeScope(); }
 ;
 
@@ -2360,14 +2330,13 @@ hh_name_with_typevar:  /* foo -> foo<X,Y>; this adds a typevar scope
   | ident
     T_TYPELIST_LT
     hh_typevar_list
-    T_TYPELIST_GT                      { _p->pushTypeScope(); $$ = $1;
-                                         only_in_hh_syntax(_p); }
+    T_TYPELIST_GT                      { _p->pushTypeScope(); $$ = $1; }
 ;
 
 hh_typeargs_opt:
     T_TYPELIST_LT
     hh_type_list
-    T_TYPELIST_GT                      { only_in_hh_syntax(_p); $$ = $2; }
+    T_TYPELIST_GT                      { $$ = $2; }
   |                                    { $$.reset(); }
 ;
 
@@ -2420,8 +2389,7 @@ hh_shape_member_list:
 
 hh_shape_type:
     T_SHAPE
-     '(' hh_shape_member_list ')'      { only_in_hh_syntax(_p);
-                                         $$.setText("array"); }
+     '(' hh_shape_member_list ')'      { $$.setText("array"); }
 ;
 
 /* extends non_empty_type_decl with some more types */
@@ -2440,12 +2408,10 @@ hh_type:
                                          _p->onTypeAnnotation($$, $1, t); }
   | hh_shape_type                      { $$ = $1; }
   | T_ARRAY T_TYPELIST_LT hh_type
-    T_TYPELIST_GT                      { only_in_hh_syntax(_p);
-                                         $1.setText("array");
+    T_TYPELIST_GT                      { $1.setText("array");
                                          _p->onTypeAnnotation($$, $1, $3); }
   | T_ARRAY T_TYPELIST_LT hh_type ','
-    hh_type T_TYPELIST_GT              { only_in_hh_syntax(_p);
-                                         _p->onTypeList($3, $5);
+    hh_type T_TYPELIST_GT              { _p->onTypeList($3, $5);
                                          $1.setText("array");
                                          _p->onTypeAnnotation($$, $1, $3); }
   | T_XHP_LABEL                        { $1.xhpLabel();

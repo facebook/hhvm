@@ -200,10 +200,6 @@ string Parser::errString() {
   return m_error.empty() ? getMessage() : m_error;
 }
 
-bool Parser::enableXHP() {
-  return Option::EnableXHP;
-}
-
 bool Parser::enableFinallyStatement() {
   return Option::EnableFinallyStatement;
 }
@@ -684,7 +680,7 @@ void Parser::onQOp(Token &out, Token &exprCond, Token *expYes, Token &expNo) {
 }
 
 void Parser::onArray(Token &out, Token &pairs, int op /* = T_ARRAY */) {
-  if (op != T_ARRAY && !m_scanner.hipHopSyntaxEnabled()) {
+  if (op != T_ARRAY && !m_scanner.isHHSyntaxEnabled()) {
     PARSE_ERROR("Typed collection is not enabled");
     return;
   }
@@ -877,7 +873,7 @@ void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
 
   TypeAnnotationPtr typeAnnotation = type.typeAnnotation;
   expList->addElement(NEW_EXP(ParameterExpression, typeAnnotation,
-                              m_scanner.hipHopSyntaxEnabled(), var->text(),
+                              m_scanner.isHHSyntaxEnabled(), var->text(),
                               ref, (modifier) ? modifier->num() : 0,
                               defValue ? defValue->exp : ExpressionPtr(),
                               attrList));
@@ -886,7 +882,7 @@ void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
 
 void Parser::onClassStart(int type, Token &name) {
   const Type::TypePtrMap& typeHintTypes =
-    Type::GetTypeHintTypes(m_scanner.hipHopSyntaxEnabled());
+    Type::GetTypeHintTypes(m_scanner.isHHSyntaxEnabled());
   if (name.text() == "self" || name.text() == "parent" ||
       typeHintTypes.find(name.text()) != typeHintTypes.end()) {
     PARSE_ERROR("Cannot use '%s' as class name as it is reserved",
@@ -1625,7 +1621,7 @@ void Parser::onClosureParam(Token &out, Token *params, Token &param,
     expList = NEW_EXP0(ExpressionList);
   }
   expList->addElement(NEW_EXP(ParameterExpression, TypeAnnotationPtr(),
-                              m_scanner.hipHopSyntaxEnabled(), param->text(),
+                              m_scanner.isHHSyntaxEnabled(), param->text(),
                               ref, 0, ExpressionPtr(), ExpressionPtr()));
   out->exp = expList;
 }
@@ -1824,7 +1820,7 @@ TStatementPtr Parser::extractStatement(ScannerToken *stmt) {
 
 bool Parser::hasType(Token &type) {
   if (!type.text().empty()) {
-    if (!m_scanner.hipHopSyntaxEnabled()) {
+    if (!m_scanner.isHHSyntaxEnabled()) {
       PARSE_ERROR("Type hint is not enabled");
       return false;
     }

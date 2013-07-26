@@ -86,7 +86,7 @@ inline void assert_fail(const char* e,
                         const char* file,
                         unsigned int line,
                         const char* func) {
-#if !defined(NDEBUG) && defined(_GNU_SOURCE)
+#if !defined(NDEBUG) && defined(_GNU_SOURCE) && defined(__linux__)
   __assert_fail(e, file, line, func);
 #else
   extern void impl_assert_fail(const char*,

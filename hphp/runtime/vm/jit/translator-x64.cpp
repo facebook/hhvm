@@ -4232,8 +4232,6 @@ bool TranslatorX64::dumpTCCode(const char* filename) {
 
   // dump starting from the trampolines; this assumes processInit() places
   // trampolines before the translation cache
-  // Task #2649357: teach tc-print about aprof, to avoid dumping the entire
-  //                'a' code slab
   size_t count = a.frontier() - atrampolines.base();
   bool result = (fwrite(atrampolines.base(), 1, count, aFile) == count);
   if (result) {

@@ -898,9 +898,8 @@ bool PDOMySqlStatement::support(SupportedMethod method) {
 }
 
 int PDOMySqlStatement::handleError(const char *file, int line) {
-  PDOMySqlConnection *conn = dynamic_cast<PDOMySqlConnection*>(dbh.get());
-  assert(conn);
-  return conn->handleError(file, line, this);
+  assert(m_conn);
+  return m_conn->handleError(file, line, this);
 }
 
 bool PDOMySqlStatement::executer() {
@@ -1100,7 +1099,7 @@ bool PDOMySqlStatement::paramHook(PDOBoundParam *param,
           if (!same(buf, false)) {
             param->parameter = buf;
           } else {
-            pdo_raise_impl_error(dbh, this, "HY105",
+            pdo_raise_impl_error(m_conn, this, "HY105",
                                  "Expected a stream resource");
             return false;
           }

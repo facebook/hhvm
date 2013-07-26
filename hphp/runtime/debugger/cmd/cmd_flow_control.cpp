@@ -140,7 +140,7 @@ void CmdFlowControl::setupStepOuts() {
   // Existing step outs should be cleaned up before making new ones.
   assert(!hasStepOuts());
   ActRec* fp = g_vmContext->getFP();
-  assert(fp);
+  if (!fp) return; // No place to step out to!
   Offset returnOffset;
   bool fromVMEntry;
   while (!hasStepOuts()) {

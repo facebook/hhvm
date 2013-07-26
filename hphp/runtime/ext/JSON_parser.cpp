@@ -333,8 +333,10 @@ const char *json_get_last_error_msg() {
 
 // For each request, make sure we start with the default error code.
 // Inline the function to do that reset.
-InitFiniNode init([]{ s_json_parser->error_code = JSON_ERROR_NONE; },
-                  InitFiniNode::When::ThreadInit);
+static InitFiniNode init(
+  []{ s_json_parser->error_code = JSON_ERROR_NONE; },
+  InitFiniNode::When::ThreadInit
+);
 
 class JsonParserCleaner {
 public:

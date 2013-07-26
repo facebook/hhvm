@@ -287,7 +287,7 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(SignalHandlers, s_signal_handlers);
 // it while processing a signal, which means calling malloc to insert
 // it into various vectors and sets, which is not ok from a signal
 // handler.
-const InitFiniNode initSignalHandler(
+static InitFiniNode initSignalHandler(
   [] { s_signal_handlers.get(); },
   InitFiniNode::When::ThreadInit
 );

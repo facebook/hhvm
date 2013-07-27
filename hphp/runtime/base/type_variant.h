@@ -429,9 +429,9 @@ class Variant : private TypedValue {
     return *reinterpret_cast<Object*>(&m_data.pobj);
   }
 
-  inline ALWAYS_INLINE const Object& asCResRef() const {
-    assert(m_type == KindOfObject && m_data.pobj);
-    return *reinterpret_cast<const Object*>(&m_data.pobj);
+  inline ALWAYS_INLINE const Resource& asCResRef() const {
+    assert(m_type == KindOfResource && m_data.pobj);
+    return *reinterpret_cast<const Resource*>(&m_data.pobj);
   }
 
   inline ALWAYS_INLINE Resource & asResRef() {

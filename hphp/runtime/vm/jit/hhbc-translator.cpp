@@ -474,7 +474,7 @@ void HhbcTranslator::emitNewArray(int capacity) {
 }
 
 void HhbcTranslator::emitNewTuple(int numArgs) {
-  // The new_tuple helper function needs array values passed to it
+  // The NewTuple opcode's helper needs array values passed to it
   // via the stack.  We use spillStack() to flush the eval stack and
   // obtain a pointer to the topmost item; if over-flushing becomes
   // a problem then we should refactor the NewTuple opcode to take

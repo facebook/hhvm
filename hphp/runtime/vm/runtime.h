@@ -27,9 +27,6 @@ namespace HPHP {
 struct HhbcExtFuncInfo;
 struct HhbcExtClassInfo;
 
-ArrayData* new_array(int capacity);
-ArrayData* new_tuple(int numArgs, const TypedValue* args);
-
 ObjectData* newVectorHelper(int nElms);
 ObjectData* newMapHelper(int nElms);
 ObjectData* newStableMapHelper(int nElms);

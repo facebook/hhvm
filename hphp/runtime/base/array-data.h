@@ -51,9 +51,9 @@ class ArrayData {
     kNumKinds // insert new values before kNumKinds.
   };
 
-public:
   static const ssize_t invalid_index = -1;
 
+ protected:
   explicit ArrayData(ArrayKind kind)
     : m_kind(kind)
     , m_allocMode(AllocationMode::smart)
@@ -89,9 +89,7 @@ public:
     , m_count(0)
     , m_strongIterators(nullptr)
   {}
-
-  static HphpArray* Make(uint capacity);
-  static HphpArray* Make(uint size, const TypedValue*);
+  void setRefCount(RefCount n) { m_count = n; }
 
   void destroy() {
     // If there are any strong iterators pointing to this array, they need
@@ -101,6 +99,7 @@ public:
 
   ~ArrayData() { destroy(); }
 
+public:
   IMPLEMENT_COUNTABLE_METHODS
 
   /**
@@ -111,6 +110,10 @@ public:
   static ArrayData *Create(CVarRef name, CVarRef value);
   static ArrayData *CreateRef(CVarRef value);
   static ArrayData *CreateRef(CVarRef name, CVarRef value);
+
+  static HphpArray* Make(uint capacity);
+  static HphpArray* MakeReserve(uint capacity);
+  static HphpArray* MakeTuple(uint size, const TypedValue*);
 
   /**
    * Type conversion functions. All other types are handled inside Array class.

@@ -61,21 +61,6 @@ void print_boolean(bool val) {
   }
 }
 
-HOT_FUNC_VM
-ArrayData* new_array(int capacity) {
-  ArrayData *a = ArrayData::Make(capacity);
-  a->incRefCount();
-  TRACE(2, "newArrayHelper: capacity %d\n", capacity);
-  return a;
-}
-
-ArrayData* new_tuple(int n, const TypedValue* values) {
-  auto a = ArrayData::Make(n, values);
-  a->incRefCount();
-  TRACE(2, "new_tuple: size %d\n", n);
-  return a;
-}
-
 #define NEW_COLLECTION_HELPER(name) \
   ObjectData* \
   new##name##Helper(int nElms) { \

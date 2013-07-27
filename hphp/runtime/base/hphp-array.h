@@ -520,15 +520,10 @@ public:
 };
 
 //=============================================================================
-
 // inline for performance reasons
 
 inline HphpArray* ArrayData::Make(uint capacity) {
   return NEW(HphpArray)(capacity);
-}
-
-inline HphpArray* ArrayData::Make(uint size, const TypedValue* data) {
-  return NEW(HphpArray)(size, data);
 }
 
 // HphpArray has more than one kind, so reuse ArrayData's virtual dispatch.

@@ -1775,5 +1775,23 @@ NEVER_INLINE HphpArray* HphpArray::copyGeneric() const {
          HphpArray(*this, AllocationMode::smart, CopyGeneric());
 }
 
+//=============================================================================
+
+HOT_FUNC_VM
+HphpArray* ArrayData::MakeTuple(uint size, const TypedValue* data) {
+  auto a = NEW(HphpArray)(size, data);
+  a->setRefCount(1);
+  TRACE(2, "MakeTuple: size %d\n", size);
+  return a;
+}
+
+HOT_FUNC_VM
+HphpArray* ArrayData::MakeReserve(uint capacity) {
+  auto a = NEW(HphpArray)(capacity);
+  a->setRefCount(1);
+  TRACE(2, "MakeReserve: capacity %d\n", capacity);
+  return a;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

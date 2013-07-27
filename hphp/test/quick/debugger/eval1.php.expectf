@@ -5,12 +5,10 @@ Program %s/eval1.php exited normally.
 print function_exists('test1')
 false
 @ function test1($x){error_log($x);return $x+1;}
-
 print function_exists('test1')
 true
 @ $eval1=test1(4)
 4
-
 print $eval1
 5
 print class_exists('test2')
@@ -31,15 +29,12 @@ class test2 {
   }
 }
 ?>
-
 print class_exists('test2')
 true
 set bac off
 BypassAccessCheck(bac) set to off
 @ $eval2 = new test2()
-
 @ $eval2->a = 3
-
 @ $eval2->b = 4
 Hit fatal : Cannot access protected property
     #0 at [:1]
@@ -51,7 +46,6 @@ set bac on
 BypassAccessCheck(bac) set to on.
 All code executed from debugger is bypassing access check!
 @ $eval2->b = 4
-
 print $eval2->ab()
 "3:4"
 break eval1.php:12
@@ -67,9 +61,7 @@ All breakpoints are cleared.
 set bac off
 BypassAccessCheck(bac) set to off
 @ $this->pub = 21
-
 @ $this->pri = 22
-
 next
 Break at cls::meth() on line 13 of %s/eval1.php
   12     $b = $this->pub.':'.$this->pri;
@@ -88,7 +80,6 @@ set bac on
 BypassAccessCheck(bac) set to on.
 All code executed from debugger is bypassing access check!
 @ $this->pub = $x->seven()
-
 continue
 "11:12-21:22-7:22"
 quit

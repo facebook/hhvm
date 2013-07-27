@@ -348,6 +348,8 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case ConvCellToBool:return simplifyConvCellToBool(inst);
   case ConvCellToInt: return simplifyConvCellToInt(inst);
   case ConvCellToDbl: return simplifyConvCellToDbl(inst);
+  case OpFloor:       return simplifyFloor(inst);
+  case OpCeil:        return simplifyCeil(inst);
   case Unbox:         return simplifyUnbox(inst);
   case UnboxPtr:      return simplifyUnboxPtr(inst);
   case IsType:
@@ -1425,6 +1427,7 @@ SSATmp* Simplifier::simplifyConvDblToBool(IRInstruction* inst) {
   if (src->isConst()) {
     return cns(bool(src->getValDbl()));
   }
+
   return nullptr;
 }
 
@@ -1606,6 +1609,30 @@ SSATmp* Simplifier::simplifyConvCellToDbl(IRInstruction* inst) {
   if (srcType.isObj())    return gen(ConvObjToDbl, inst->taken(), src);
 
   return nullptr;
+}
+
+template<class Oper>
+SSATmp* Simplifier::simplifyRoundCommon(IRInstruction* inst, Oper op) {
+  auto const src  = inst->src(0);
+
+  if (src->isConst()) {
+    return cns(op(src->getValDbl()));
+  }
+
+  auto srcInst = src->inst();
+  if (srcInst->op() == ConvIntToDbl || srcInst->op() == ConvBoolToDbl) {
+    return src;
+  }
+
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyFloor(IRInstruction* inst) {
+  return simplifyRoundCommon(inst, floor);
+}
+
+SSATmp* Simplifier::simplifyCeil(IRInstruction* inst) {
+  return simplifyRoundCommon(inst, ceil);
 }
 
 SSATmp* Simplifier::simplifyLdClsPropAddr(IRInstruction* inst) {

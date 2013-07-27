@@ -26,7 +26,6 @@
 #include <set>
 
 #include <boost/dynamic_bitset.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
 
 #include "hphp/util/hash.h"
 #include "hphp/util/timer.h"
@@ -34,12 +33,10 @@
 #include "hphp/runtime/base/smart_containers.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/fixup.h"
-#include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/trans-data.h"
 #include "hphp/runtime/vm/jit/translator-instrs.h"
-#include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/debugger_hook.h"
@@ -179,179 +176,6 @@ enum TXFlags {
 struct Tracelet;
 struct TraceletContext;
 
-// A NormalizedInstruction has been decorated with its typed inputs and
-// outputs.
-class NormalizedInstruction {
- public:
-  NormalizedInstruction* next;
-  NormalizedInstruction* prev;
-
-  SrcKey source;
-  const Func* funcd; // The Func in the topmost AR on the stack. Guaranteed to
-                     // be accurate. Don't guess about this. Note that this is
-                     // *not* the function whose body the NI belongs to.
-                     // Note that for an FPush* may be set to the (statically
-                     // known Func* that /this/ instruction is pushing)
-  const StringData* funcName;
-    // For FCall's, an opaque identifier that is either null, or uniquely
-    // identifies the (functionName, -arity) pair of this call site.
-  const Unit* m_unit;
-
-  std::vector<DynLocation*> inputs;
-  DynLocation* outStack;
-  DynLocation* outLocal;
-  DynLocation* outLocal2; // Used for IterInitK, MIterInitK, IterNextK,
-                          //   MIterNextK
-  DynLocation* outStack2; // Used for CGetL2
-  DynLocation* outStack3; // Used for CGetL3
-  Type         outPred;
-  vector<Location> deadLocs; // locations that die at the end of this
-                             // instruction
-  ArgUnion imm[4];
-  ImmVector immVec; // vector immediate; will have !isValid() if the
-                    // instruction has no vector immediate
-
-  // The member codes for the M-vector.
-  std::vector<MemberCode> immVecM;
-
-  /*
-   * For property dims, if we know the Class* for the base when we'll
-   * be executing a given dim, it is stored here (at the index for the
-   * relevant member code minus 1, because the known class for the
-   * first member code is given by the base in inputs[]).
-   *
-   * Other entries here store null.  See MetaInfo::MVecPropClass.
-   */
-  std::vector<Class*> immVecClasses;
-
-  /*
-   * On certain FCalls, we can inspect the callee and generate a
-   * tracelet with information about what happens over there.
-   *
-   * The HHIR translator uses this to possibly inline callees.
-   */
-  std::unique_ptr<Tracelet> calleeTrace;
-
-  unsigned checkedInputs;
-  // StackOff: logical delta at *start* of this instruction to
-  // stack at tracelet entry.
-  int stackOffset;
-  int sequenceNum;
-  Offset nextOffset; // for intra-trace* non-call control-flow instructions,
-                     // this is the offset of the next instruction in the trace*
-  bool breaksTracelet:1;
-  bool changesPC:1;
-  bool fuseBranch:1;
-  bool preppedByRef:1;
-  bool outputPredicted:1;
-  bool outputPredictionStatic:1;
-  bool ignoreInnerType:1;
-
-  /*
-   * guardedThis indicates that we know that ar->m_this is
-   * a valid $this. eg:
-   *
-   *   $this->foo = 1; # needs to check that $this is non-null
-   *   $this->bar = 2; # can skip the check
-   *   return 5;       # can decRef ar->m_this unconditionally
-   */
-  bool guardedThis:1;
-
-  /*
-   * guardedCls indicates that we know the class exists
-   */
-  bool guardedCls:1;
-
-  /*
-   * dont check the surprise flag
-   */
-  bool noSurprise:1;
-
-  /*
-   * instruction is statically known to have no effect, e.g. unboxing a Cell
-   */
-  bool noOp:1;
-
-  /*
-   * Used with HHIR. Instruction shoud be interpreted, because previous attempt
-   * to translate it has failed.
-   */
-  bool interp:1;
-
-  /*
-   * Indicates that a RetC/RetV should generate inlined return code
-   * rather than calling the shared stub.
-   */
-  bool inlineReturn:1;
-
-  // For returns, this tracks local ids that are statically known not
-  // to be reference counted at this point (i.e. won't require guards
-  // or decrefs).
-  boost::dynamic_bitset<> nonRefCountedLocals;
-
-  Op op() const;
-  Op mInstrOp() const;
-  PC pc() const;
-  const Unit* unit() const;
-  Offset offset() const;
-
-  NormalizedInstruction()
-    : next(nullptr)
-    , prev(nullptr)
-    , funcd(nullptr)
-    , outStack(nullptr)
-    , outLocal(nullptr)
-    , outLocal2(nullptr)
-    , outStack2(nullptr)
-    , outStack3(nullptr)
-    , outPred(Type::Gen)
-    , checkedInputs(0)
-    , outputPredicted(false)
-    , outputPredictionStatic(false)
-    , ignoreInnerType(false)
-    , guardedThis(false)
-    , guardedCls(false)
-    , noSurprise(false)
-    , noOp(false)
-    , interp(false)
-    , inlineReturn(false)
-  {
-    memset(imm, 0, sizeof(imm));
-  }
-
-  void markInputInferred(int i) {
-    if (i < 32) checkedInputs |= 1u << i;
-  }
-
-  bool inputWasInferred(int i) const {
-    return i < 32 && ((checkedInputs >> i) & 1);
-  }
-
-  enum class OutputUse {
-    Used,
-    Unused,
-    Inferred,
-    DoesntCare
-  };
-  OutputUse getOutputUsage(const DynLocation* output) const;
-  bool isOutputUsed(const DynLocation* output) const;
-  bool isAnyOutputUsed() const;
-
-  std::string toString() const;
-
-  // Returns a DynLocation that will be destroyed with this
-  // NormalizedInstruction.
-  template<typename... Args>
-  DynLocation* newDynLoc(Args&&... args) {
-    m_dynLocs.push_back(
-      smart::make_unique<DynLocation>(std::forward<Args>(args)...));
-    return m_dynLocs.back().get();
-  }
-
- private:
-  smart::vector<smart::unique_ptr<DynLocation>::type> m_dynLocs;
-};
-
 // Return a summary string of the bytecode in a tracelet.
 std::string traceletShape(const Tracelet&);
 
@@ -412,180 +236,10 @@ class GuardType {
   const Class* klass;
 };
 
-/*
- * A tracelet is a unit of input to the back-end. It is a partially typed,
- * non-maximal basic block, representing the next slice of the program to
- * be executed.
- * It is a consecutive set of instructions, only the last of which may be a
- * transfer of control, annotated types and locations for each opcode's input
- * and output.
- */
-typedef hphp_hash_map<Location, DynLocation*, Location> ChangeMap;
 typedef hphp_hash_map<Location,RuntimeType,Location> TypeMap;
-typedef ChangeMap DepMap;
 typedef hphp_hash_set<Location, Location> LocationSet;
 typedef hphp_hash_map<DynLocation*, GuardType>  DynLocTypeMap;
 
-struct InstrStream {
-  InstrStream() : first(nullptr), last(nullptr) {}
-  void append(NormalizedInstruction* ni);
-  void remove(NormalizedInstruction* ni);
-  NormalizedInstruction* first;
-  NormalizedInstruction* last;
-};
-
-struct RefDeps {
-  struct Record {
-    vector<bool> m_mask;
-    vector<bool> m_vals;
-
-    std::string pretty() const {
-      std::ostringstream out;
-      out << "mask=";
-      for (size_t i = 0; i < m_mask.size(); ++i) {
-        out << (m_mask[i] ? "1" : "0");
-      }
-      out << " vals=";
-      for (size_t i = 0; i < m_vals.size(); ++i) {
-        out << (m_vals[i] ? "1" : "0");
-      }
-      return out.str();
-    }
-  };
-  typedef hphp_hash_map<int64_t, Record, int64_hash> ArMap;
-  ArMap m_arMap;
-
-  RefDeps() {}
-
-  void addDep(int entryArDelta, unsigned argNum, bool isRef) {
-    if (m_arMap.find(entryArDelta) == m_arMap.end()) {
-      m_arMap[entryArDelta] = Record();
-    }
-    Record& r = m_arMap[entryArDelta];
-    if (argNum >= r.m_mask.size()) {
-      assert(argNum >= r.m_vals.size());
-      r.m_mask.resize(argNum + 1);
-      r.m_vals.resize(argNum + 1);
-    }
-    r.m_mask[argNum] = true;
-    r.m_vals[argNum] = isRef;
-  }
-
-  size_t size() const {
-    return m_arMap.size();
-  }
-};
-
-struct ActRecState {
-  // State for tracking function param reffiness. m_topFunc is the function
-  // for the activation record that is closest to the top of the stack, or
-  // NULL if it is currently unknown. A tracelet can be in one of three
-  // epistemological states: GUESSABLE, KNOWN, and UNKNOWABLE. We start out in
-  // GUESSABLE, with m_topFunc == NULL (not yet guessed); when it's time to
-  // guess, we will use the ActRec seen on the top of stack at compilation
-  // time as a hint for refs going forward.
-  //
-  // The KNOWN state is a very strong guarantee. It means that no matter when
-  // this tracelet is executed, no matter what else has happened, the ActRec
-  // closest to the top of the stack WILL contain m_topFunc. This means: if that
-  // function is defined conditionally, or defined in some other module, you
-  // cannot correctly make that assertion. KNOWN indicates absolute certainty
-  // about all possible futures.
-  //
-  // This strange "not-guessed-yet-but-could" state is required by our
-  // VM design; at present, the ActRec is not easily recoverable from an
-  // arbitrary instruction boundary. However, it can be recovered from the
-  // instructions that need to do so.
-  static const int InvalidEntryArDelta = INT_MAX;
-
-  enum class State {
-    GUESSABLE, KNOWN, UNKNOWABLE
-  };
-
-  struct Record {
-    State          m_state;
-    const Func*    m_topFunc;
-    int            m_entryArDelta; // delta at BB entry to guessed ActRec.
-  };
-
-  std::vector<Record> m_arStack;
-
-  ActRecState() {}
-  void pushFunc(const NormalizedInstruction& ni);
-  void pushFuncD(const Func* func);
-  void pushDynFunc();
-  void pop();
-  bool checkByRef(int argNum, int stackOffset, RefDeps* outRefDeps);
-  const Func* knownFunc();
-  State currentState();
-};
-
-struct Tracelet : private boost::noncopyable {
-  ChangeMap      m_changes;
-  DepMap         m_dependencies;
-  DepMap         m_resolvedDeps; // dependencies resolved by static analysis
-  InstrStream    m_instrStream;
-  int            m_stackChange;
-
-  // SrcKey for the start of the Tracelet. This will be the same as
-  // m_instrStream.first->source.
-  SrcKey         m_sk;
-
-  // numOpcodes is the number of raw opcode instructions, before optimization.
-  // The immediates optimization may both:
-  //
-  // 1. remove the first opcode, thus making
-  //        sk.instr != instrs.first->source.instr
-  // 2. remove no longer needed instructions
-  int            m_numOpcodes;
-
-  // Assumptions about entering actRec's reffiness.
-  ActRecState    m_arState;
-  RefDeps        m_refDeps;
-
-  // The function this Tracelet was generated from.
-  const Func* m_func;
-
-  /*
-   * If we were unable to make sense of the instruction stream (e.g., it
-   * used instructions that the translator does not understand), then this
-   * tracelet is useful only for defining the boundaries of a basic block.
-   * The low-level translator can handle this by backing off to the
-   * bytecode interpreter.
-   */
-  bool           m_analysisFailed;
-
-  /*
-   * If IR inlining failed we may still need access to the trace for profiling
-   * purposes if stats are enabled so maintain this to verify that we should use
-   * this Tracelet for inlining purposes.
-   */
-  bool           m_inliningFailed;
-
-  // Track which NormalizedInstructions and DynLocations are owned by this
-  // Tracelet; used for cleanup purposes
-  boost::ptr_vector<NormalizedInstruction> m_instrs;
-  boost::ptr_vector<DynLocation> m_dynlocs;
-
-  Tracelet() :
-    m_stackChange(0),
-    m_arState(),
-    m_analysisFailed(false),
-    m_inliningFailed(false){ }
-
-  NormalizedInstruction* newNormalizedInstruction();
-  DynLocation* newDynLocation(Location l, DataType t);
-  DynLocation* newDynLocation(Location l, RuntimeType t);
-  DynLocation* newDynLocation();
-
-  /* These aren't merged into a single method with a default argument
-   * to make gdb happy. */
-  void print() const;
-  void print(std::ostream& out) const;
-  std::string toString() const;
-
-  SrcKey nextSk() const;
-};
 
 const char* getTransKindName(TransKind kind);
 
@@ -635,23 +289,12 @@ struct TransRec {
            TransKind                _kind,
            const Tracelet&          t,
            TCA                      _aStart = 0,
-           uint32_t                   _aLen = 0,
+           uint32_t                 _aLen = 0,
            TCA                      _astubsStart = 0,
-           uint32_t                   _astubsLen = 0,
+           uint32_t                 _astubsLen = 0,
            TCA                      _counterStart = 0,
-           uint8_t                    _counterLen = 0,
-           vector<TransBCMapping>   _bcMapping = vector<TransBCMapping>()) :
-      id(0), kind(_kind), src(s), md5(_md5),
-      bcStopOffset(t.nextSk().offset()), aStart(_aStart), aLen(_aLen),
-      astubsStart(_astubsStart), astubsLen(_astubsLen),
-      counterStart(_counterStart), counterLen(_counterLen),
-      bcMapping(_bcMapping) {
-    for (DepMap::const_iterator dep = t.m_dependencies.begin();
-         dep != t.m_dependencies.end();
-         ++dep) {
-      dependencies.push_back(*dep->second);
-    }
-  }
+           uint8_t                  _counterLen = 0,
+           vector<TransBCMapping>  _bcMapping = vector<TransBCMapping>());
 
   void setID(TransID newID) { id = newID; }
   string print(uint64_t profCount) const;
@@ -923,7 +566,7 @@ protected:
   PCFilter m_dbgBLPC;
   hphp_hash_set<SrcKey,SrcKey::Hasher> m_dbgBLSrcKey;
   Mutex m_dbgBlacklistLock;
-  bool isSrcKeyInBL(const Unit* unit, const SrcKey& sk);
+  bool isSrcKeyInBL(const SrcKey& sk);
 
   TransKind m_mode;
   ProfData* m_profData;
@@ -1073,8 +716,6 @@ static inline bool isSmartPtrRef(DataType t) {
   return t == KindOfString || t == KindOfStaticString ||
          t == KindOfArray || t == KindOfObject;
 }
-
-SrcKey nextSrcKey(const NormalizedInstruction& i);
 
 void populateImmediates(NormalizedInstruction&);
 void preInputApplyMetaData(Unit::MetaHandle, NormalizedInstruction*);

@@ -36,69 +36,55 @@ normalizeDataType(DataType dt) {
   return dt == KindOfStaticString ? KindOfString : dt;
 }
 
-RuntimeType::RuntimeType(DataType outer, DataType inner /* = KindOfInvalid */,
-                         const Class* klass /* = NULL */)
-  : m_kind(VALUE) {
-  m_value.outerType = normalizeDataType(outer);
-  m_value.innerType = normalizeDataType(inner);
+void RuntimeType::init(DataType outer,
+                       DataType inner /* = KindOfInvalid */,
+                       const Class* klass /*= nullptr*/) {
+  m_value.outerType = outer;
+  m_value.innerType = inner;
   m_value.klass = klass;
   m_value.knownClass = nullptr;
   consistencyCheck();
+}
+
+RuntimeType::RuntimeType(DataType outer, DataType inner /* = KindOfInvalid */,
+                         const Class* klass /* = NULL */)
+  : m_kind(VALUE) {
+  init(normalizeDataType(outer), normalizeDataType(inner), klass);
 }
 
 RuntimeType::RuntimeType(const StringData* sd)
   : m_kind(VALUE) {
-  m_value.outerType = KindOfString;
-  m_value.innerType = KindOfInvalid;
+  init(KindOfString);
   m_value.string = sd;
-  m_value.knownClass = nullptr;
-  consistencyCheck();
 }
 
 RuntimeType::RuntimeType(const ArrayData* ad)
   : m_kind(VALUE) {
-  m_value.outerType = KindOfArray;
-  m_value.innerType = KindOfInvalid;
+  init(KindOfArray);
   m_value.array = ad;
-  m_value.knownClass = nullptr;
-  consistencyCheck();
 }
 
 RuntimeType::RuntimeType(bool value)
   : m_kind(VALUE) {
-  m_value.outerType = KindOfBoolean;
-  m_value.innerType = KindOfInvalid;
-  m_value.klass = nullptr;
+  init(KindOfBoolean);
   m_value.boolean = value;
   m_value.boolValid = true;
-  m_value.knownClass = nullptr;
-  consistencyCheck();
 }
 
 RuntimeType::RuntimeType(int64_t value)
   : m_kind(VALUE) {
-  m_value.outerType = KindOfInt64;
-  m_value.innerType = KindOfInvalid;
+  init(KindOfInt64);
   m_value.intval = value;
-  m_value.knownClass = nullptr;
-  consistencyCheck();
 }
 
 RuntimeType::RuntimeType(const Class* klass)
   : m_kind(VALUE) {
-  m_value.outerType = KindOfClass;
-  m_value.innerType = KindOfInvalid;
-  m_value.klass = klass;
-  m_value.knownClass = nullptr;
-  consistencyCheck();
+  init(KindOfClass, KindOfInvalid, klass);
 }
 
 RuntimeType::RuntimeType() :
   m_kind(VALUE) {
-  m_value.outerType = KindOfInvalid;
-  m_value.innerType = KindOfInvalid;
-  m_value.klass = nullptr;
-  m_value.knownClass = nullptr;
+  init(KindOfInvalid);
 }
 
 RuntimeType::RuntimeType(const Iter* it) :
@@ -115,10 +101,7 @@ RuntimeType RuntimeType::box() const {
     consistencyCheck();
     return *this;
   }
-  RuntimeType rtt;
-  rtt.m_value.outerType = KindOfRef;
-  rtt.m_value.innerType = m_value.outerType;
-  rtt.consistencyCheck();
+  RuntimeType rtt(KindOfRef, m_value.outerType);
   return rtt;
 }
 
@@ -128,10 +111,7 @@ RuntimeType RuntimeType::unbox() const {
     consistencyCheck();
     return *this;
   }
-  RuntimeType rtt;
-  rtt.m_value.outerType = m_value.innerType;
-  rtt.m_value.innerType = KindOfInvalid;
-  rtt.consistencyCheck();
+  RuntimeType rtt(m_value.innerType);
   return rtt;
 }
 
@@ -207,28 +187,21 @@ RuntimeType::knownClass() const {
 RuntimeType
 RuntimeType::setValueType(DataType newInner) const {
   assert(m_kind == VALUE);
-  RuntimeType rtt;
-  rtt.m_kind = VALUE;
-  rtt.m_value.outerType = outerType();
   if (outerType() == KindOfRef) {
-    rtt.m_value.innerType = newInner;
-  } else {
-    rtt.m_value.outerType = newInner;
+    RuntimeType rtt(KindOfRef, newInner);
+    assert(rtt.valueType() == newInner);
+    return rtt;
   }
+  RuntimeType rtt(newInner);
   assert(rtt.valueType() == newInner);
-  rtt.m_value.klass = nullptr;
-  rtt.consistencyCheck();
   return rtt;
 }
 
 RuntimeType
 RuntimeType::setKnownClass(const Class* klass) const {
   assert(isObject() || (isRef() && innerType() == KindOfObject));
-  RuntimeType rtt;
+  RuntimeType rtt(outerType(), innerType(), m_value.klass);
   rtt.m_kind = this->m_kind;
-  rtt.m_value.outerType = outerType();
-  rtt.m_value.innerType = innerType();
-  rtt.m_value.klass = m_value.klass;
   rtt.m_value.knownClass = klass;
   rtt.consistencyCheck();
   return rtt;

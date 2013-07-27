@@ -55,17 +55,64 @@ DebuggerProxy::DebuggerProxy(SmartPtr<Socket> socket, bool local)
   Debugger::UsageLog("server", m_dummyInfo.id(), "connect", clientDetails);
 }
 
-DebuggerProxy::~DebuggerProxy() {
-  TRACE_RB(2, "DebuggerProxy::~DebuggerProxy starting\n");
-  stop();
-  m_signalThread.waitForEnd();
-
+// Cleanup all resources owned by this proxy, including any threads it
+// owns. If a thread doesn't stop, return false so we can try again
+// later. This can be called multiple times, and this function leaves
+// the proxy usable by request threads which may still be handling an
+// interrupt.
+bool DebuggerProxy::cleanup(int timeout) {
+  TRACE_RB(2, "DebuggerProxy::cleanup starting\n");
+  // If we're not already marked as stopping then there may be other
+  // threads still attempting to use this object!
+  assert(m_stopped);
+  // No more client operation is possible, so drop the connection.
+  m_thrift.close();
+  TRACE(2, "Stopping signal thread...\n");
+  if (!m_signalThread.waitForEnd(timeout)) return false;
+  TRACE(2, "Stopping dummy sandbox...\n");
   if (m_dummySandbox) {
-    m_dummySandbox->stop();
+    if (!m_dummySandbox->stop(timeout)) return false;
+    delete m_dummySandbox;
+    m_dummySandbox = nullptr;
+  }
+  TRACE_RB(2, "DebuggerProxy::cleanup complete\n");
+  return true;
+}
+
+// Stop the proxy and ensure that no new uses of it can
+// occur. Schedule it for final cleanup on another thread. This may be
+// called from any thread wishing to stop the proxy, for any reason.
+void DebuggerProxy::stop() {
+  // Shared ref to keep us alive. Often the only reference to a proxy
+  // is in the debugger's proxy map, which we're about to alter below.
+  auto this_ = shared_from_this();
+  Debugger::UsageLog("server", getSandboxId(), "disconnect");
+
+  // After this we'll no longer be able to get this_ from
+  // Debugger::findProxy(), which means no new interrupts for this
+  // proxy. There may still be threads in existing interrupts, though.
+  Debugger::RemoveProxy(this_);
+
+  // Pop the signal polling thread, and any interrupting threads, out
+  // of their event loops and cause them to exit.
+  DSandboxInfo invalid;
+  {
+    Lock lock(this);
+    m_sandbox = invalid;
+    m_stopped = true;
   }
 
-  Debugger::UsageLog("server", getSandboxId(), "disconnect");
-  TRACE_RB(2, "DebuggerProxy::~DebuggerProxy complete\n");
+  // Retire the proxy, which will schedule it for cleanup and
+  // destruction on another thread. Threads for the dummy sandbox and
+  // signal polling can't destroy the proxy directly, since the proxy
+  // owns them and will want to destroy them.
+  Debugger::RetireProxy(this_);
+}
+
+// Stop the proxy, and stop execution of the current request.
+void DebuggerProxy::stopAndThrow() {
+  stop();
+  throw DebuggerClientExitException();
 }
 
 const char *DebuggerProxy::getThreadType() const {
@@ -73,15 +120,15 @@ const char *DebuggerProxy::getThreadType() const {
   return isLocal() ? "Command Line Script" : "Dummy Sandbox";
 }
 
-DSandboxInfo DebuggerProxy::getSandbox() const {
+DSandboxInfo DebuggerProxy::getSandbox() {
   TRACE(2, "DebuggerProxy::getSandbox\n");
-  Lock lock(m_mutex);
+  Lock lock(this);
   return m_sandbox;
 }
 
-std::string DebuggerProxy::getSandboxId() const {
+std::string DebuggerProxy::getSandboxId() {
   TRACE(2, "DebuggerProxy::getSandboxId\n");
-  Lock lock(m_mutex);
+  Lock lock(this);
   return m_sandbox.id();
 }
 
@@ -117,7 +164,7 @@ bool DebuggerProxy::switchSandbox(const std::string &newId, bool force) {
 // map.
 void DebuggerProxy::updateSandbox(DSandboxInfoPtr sandbox) {
   TRACE(2, "DebuggerProxy::updateSandbox\n");
-  Lock lock(m_mutex);
+  Lock lock(this);
   if (sandbox) {
     if (m_sandbox.id() != sandbox->id()) {
       m_sandbox = *sandbox;
@@ -167,7 +214,7 @@ void DebuggerProxy::startDummySandbox() {
 
 void DebuggerProxy::notifyDummySandbox() {
   TRACE(2, "DebuggerProxy::notifyDummySandbox\n");
-  m_dummySandbox->notifySignal(CmdSignal::SignalBreak);
+  if (m_dummySandbox) m_dummySandbox->notifySignal(CmdSignal::SignalBreak);
 }
 
 void DebuggerProxy::setBreakPoints(BreakPointInfoPtrVec &breakpoints) {
@@ -310,20 +357,19 @@ void DebuggerProxy::pollSignal() {
   while (!m_stopped) {
     sleep(1);
 
-    // After DebuggerSignalTimeout seconds that no active thread picks
-    // up the signal, we send it to dummy sandbox.
-    if ((m_signum != CmdSignal::SignalNone) && m_dummySandbox) {
-      Lock lock(m_signumMutex);
-      if ((m_signum != CmdSignal::SignalNone) && (--signalTimeout <= 0)) {
-        TRACE_RB(2, "DebuggerProxy::pollSignal: sending to dummy sandbox\n");
-        m_dummySandbox->notifySignal(m_signum);
-        m_signum = CmdSignal::SignalNone;
-      }
-    }
-
     // Block any threads that might be interrupting from communicating with the
     // client until we're done with this poll.
-    Lock lock(m_signalMutex);
+    Lock lock(m_signumMutex);
+
+    // After DebuggerSignalTimeout seconds that no active thread picks
+    // up the signal, we send it to dummy sandbox.
+    if ((m_signum != CmdSignal::SignalNone) && m_dummySandbox &&
+        (--signalTimeout <= 0)) {
+      TRACE_RB(2, "DebuggerProxy::pollSignal: sending to dummy sandbox\n");
+      m_dummySandbox->notifySignal(m_signum);
+      m_signum = CmdSignal::SignalNone;
+    }
+
     // Don't actually poll if another thread is already in a command
     // processing loop with the client.
     if (!m_okayToPoll) continue;
@@ -336,11 +382,13 @@ void DebuggerProxy::pollSignal() {
       break;
     }
 
-    // We will loop forever until DebuggerClient sends us something, modulo
-    // transport failure or a shutdown request.
+    // We've sent the client a command, and we expect an immediate
+    // response. Wait 10 times to give it a chance on especially
+    // overloaded computers.
     DebuggerCommandPtr res;
-    while (!DebuggerCommand::Receive(m_thrift, res,
-                                     "DebuggerProxy::pollSignal()")) {
+    for (int i = 0; i < 10; i++) {
+      if (DebuggerCommand::Receive(m_thrift, res,
+                                   "DebuggerProxy::pollSignal()")) break;
       if (m_stopped) {
         TRACE_RB(2, "DebuggerProxy::pollSignal: "
                  "signal thread asked to stop while waiting "
@@ -374,39 +422,12 @@ void DebuggerProxy::pollSignal() {
     }
   }
   if (!m_stopped) {
-    // We've noticed that the socket has closed. If there is a thread stopped at
-    // an interrrupt, stop() will help pop it out and cause the proxy to throw
-    // the proper exception to terminate the request.
+    // We've noticed that the socket has closed. Stop and destory this proxy.
     TRACE_RB(2, "DebuggerProxy::pollSignal: "
              "lost communication with the client, stopping proxy\n");
     stop();
   }
   TRACE_RB(2, "DebuggerProxy::pollSignal: ended\n");
-}
-
-// Ask this proxy to stop running and exit cleanly. Used during proxy
-// cleanup, sandbox switching, and from the signal polling
-// thread. This can be used from a thread which is not stopped at the
-// given proxy's interrupt.
-void DebuggerProxy::stop() {
-  TRACE_RB(2, "DebuggerProxy::stop\n");
-  DSandboxInfo invalid;
-  Lock l(this);
-  m_sandbox = invalid;
-  m_stopped = true;
-  // the flag will take care of the rest
-}
-
-// Used to quit this proxy, typcially in response to either a quit command from
-// the client or loss of communication with the client. The proxy is removed
-// from the proxy map, ensuring no other threads can use the proxy.
-// NB: It stops the proxy, and then tosses the client exit exception
-// to ensure the current request is terminated with a nice message.
-void DebuggerProxy::forceQuit() {
-  TRACE_RB(2, "DebuggerProxy::forceQuit\n");
-  Debugger::RemoveProxy(shared_from_this());
-  stop();
-  throw DebuggerClientExitException();
 }
 
 // Grab the ip address and port of the client that is connected to this proxy.
@@ -584,7 +605,7 @@ bool DebuggerProxy::checkFlowBreak(CmdInterrupt &cmd) {
 
 void DebuggerProxy::checkStop() {
   TRACE(5, "DebuggerProxy::checkStop\n");
-  if (m_stopped) forceQuit();
+  if (m_stopped) stopAndThrow();
 }
 
 void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
@@ -592,8 +613,7 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
   // Do the server-side work for this interrupt, which just notifies the client.
   if (!cmd.onServer(*this)) {
     TRACE_RB(1, "Failed to send CmdInterrupt to client\n");
-    Debugger::RemoveProxy(shared_from_this()); // on socket error
-    return;
+    stopAndThrow();
   }
 
   Debugger::UsageLogInterrupt("server", getSandboxId(), cmd);
@@ -633,7 +653,7 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
       if (res->is(DebuggerCommand::KindOfQuit)) {
         TRACE_RB(2, "Received quit command\n");
         res->onServer(*this); // acknowledge receipt so that client can quit.
-        forceQuit();
+        stopAndThrow();
       }
     }
     bool cmdFailure = false;
@@ -655,7 +675,7 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
                res->getType());
       cmdFailure = true;
     }
-    if (cmdFailure) forceQuit();
+    if (cmdFailure) stopAndThrow();
     if (res->shouldExitInterrupt()) return;
   }
 }

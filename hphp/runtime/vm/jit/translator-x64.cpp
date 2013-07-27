@@ -92,11 +92,13 @@
 #include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
 #include "hphp/runtime/vm/jit/ir-translator.h"
+#include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/jit/x64-util.h"
@@ -591,13 +593,13 @@ bool TranslatorX64::profileSrcKey(const SrcKey& sk) const {
   // tables.  So, to support retranslating them, we need to reset the
   // prologue tables and the prologue cache appropriately.
   // (test/quick/floatcmp.php exposes this problem)
-  if (curFunc()->isClosureBody()) return false;
+  if (sk.func()->isClosureBody()) return false;
 
   return true;
 }
 
 TCA TranslatorX64::retranslate(const TranslArgs& args) {
-  if (isDebuggerAttachedProcess() && isSrcKeyInBL(curUnit(), args.m_sk)) {
+  if (isDebuggerAttachedProcess() && isSrcKeyInBL(args.m_sk)) {
     // We are about to translate something known to be blacklisted by
     // debugger, exit early
     SKTRACE(1, args.m_sk, "retranslate abort due to debugger\n");
@@ -616,7 +618,7 @@ TCA TranslatorX64::retranslate(const TranslArgs& args) {
 TCA TranslatorX64::retranslateAndPatchNoIR(SrcKey sk,
                                            bool   align,
                                            TCA    toSmash) {
-  if (isDebuggerAttachedProcess() && isSrcKeyInBL(curUnit(), sk)) {
+  if (isDebuggerAttachedProcess() && isSrcKeyInBL(sk)) {
     // We are about to translate something known to be blacklisted by
     // debugger, exit early
     SKTRACE(1, sk, "retranslateAndPatchNoIR abort due to debugger\n");
@@ -654,7 +656,7 @@ TCA TranslatorX64::retranslateOpt(TransID transId, bool align) {
     // we don't have a Func* (since it's grabbed from the Block).
     // Anyway, in this case, the region translator resorts generates a
     // TransLive translation, corresponding to the current live VM context.
-    func = const_cast<Func*>(curFunc());
+    func = const_cast<Func*>(liveFunc());
   } else {
     func = m_profData->transFunc(transId);
   }
@@ -749,16 +751,15 @@ reqName(int req) {
 TCA
 TranslatorX64::getTranslation(const TranslArgs& args) {
   auto sk = args.m_sk;
-  curFunc()->validate();
+  sk.func()->validate();
   SKTRACE(2, sk,
           "getTranslation: curUnit %s funcId %x offset %d\n",
-          curUnit()->filepath()->data(),
+          sk.unit()->filepath()->data(),
           sk.getFuncId(),
           sk.offset());
-  SKTRACE(2, sk, "   funcId: %x \n",
-          curFunc()->getFuncId());
+  SKTRACE(2, sk, "   funcId: %x \n", sk.func()->getFuncId());
 
-  if (curFrame()->hasVarEnv() && curFrame()->getVarEnv()->isGlobalScope()) {
+  if (liveFrame()->hasVarEnv() && liveFrame()->getVarEnv()->isGlobalScope()) {
     SKTRACE(2, sk, "punting on pseudoMain\n");
     return nullptr;
   }
@@ -859,16 +860,16 @@ TranslatorX64::createTranslation(const TranslArgs& args) {
   TCA stubstart = astubs.frontier();
   TCA req = emitServiceReq(REQ_RETRANSLATE, sk.offset());
   SKTRACE(1, sk, "inserting anchor translation for (%p,%d) at %p\n",
-          curUnit(), sk.offset(), req);
+          sk.unit(), sk.offset(), req);
   SrcRec* sr = m_srcDB.insert(sk);
-  sr->setFuncInfo(curFunc());
+  sr->setFuncInfo(sk.func());
   sr->setAnchorTranslation(req);
 
   size_t asize = a.frontier() - astart;
   size_t stubsize = astubs.frontier() - stubstart;
   assert(asize == 0);
   if (stubsize && RuntimeOption::EvalDumpTCAnchors) {
-    addTranslation(TransRec(sk, curUnit()->md5(), TransAnchor,
+    addTranslation(TransRec(sk, sk.unit()->md5(), TransAnchor,
                             astart, asize, stubstart, stubsize));
     if (m_profData) {
       m_profData->addTransAnchor(sk);
@@ -1458,7 +1459,7 @@ static void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {
   tl_regState = VMRegState::CLEAN;
   vmfp() = (Cell*)ar;
   vmsp() = sp;
-  vmpc() = curUnit()->at(pcOff);
+  vmpc() = ar->unit()->at(pcOff);
 }
 
 TCA
@@ -2007,7 +2008,7 @@ TranslatorX64::bindJmpccFirst(TCA toSmash,
                               bool taken,
                               ConditionCode cc,
                               bool& smashed) {
-  const Func* f = curFunc();
+  const Func* f = liveFunc();
   LeaseHolder writer(s_writeLease);
   if (!writer) return nullptr;
   Offset offWillExplore = taken ? offTaken : offNotTaken;
@@ -2062,7 +2063,7 @@ TranslatorX64::bindJmpccFirst(TCA toSmash,
 TCA
 TranslatorX64::bindJmpccSecond(TCA toSmash, const Offset off,
                                ConditionCode cc, bool& smashed) {
-  const Func* f = curFunc();
+  const Func* f = liveFunc();
   SrcKey dest(f, off);
   TCA branch = getTranslation(TranslArgs(dest, true).src(toSmash));
   LeaseHolder writer(s_writeLease, LeaseAcquire::NO_ACQUIRE);
@@ -2362,12 +2363,12 @@ TranslatorX64::enterTC(TCA start, void* data) {
     // recognizes, or we luck out and the leaseholder exits.
     while (!start) {
       TRACE(2, "enterTC forwarding BB to interpreter\n");
-      g_vmContext->m_pc = curUnit()->at(sk.offset());
+      g_vmContext->m_pc = sk.unit()->at(sk.offset());
       INC_TPC(interp_bb);
       g_vmContext->dispatchBB();
       PC newPc = g_vmContext->getPC();
       if (!newPc) { g_vmContext->m_fp = 0; return; }
-      sk = SrcKey(curFunc(), newPc);
+      sk = SrcKey(liveFunc(), newPc);
       start = getTranslation(TranslArgs(sk, true));
     }
     assert(start == (TCA)HPHP::Transl::funcBodyHelperThunk ||
@@ -2495,7 +2496,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
   {
     TCA toSmash = (TCA)args[0];
     Offset off = args[1];
-    sk = SrcKey(curFunc(), off);
+    sk = SrcKey(liveFunc(), off);
     if (requestNum == REQ_BIND_SIDE_EXIT) {
       SKTRACE(3, sk, "side exit taken!\n");
     }
@@ -2511,7 +2512,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
     start = bindJmpccFirst(toSmash, offTaken, offNotTaken,
                            taken, cc, smashed);
     // SrcKey: we basically need to emulate the fail
-    sk = SrcKey(curFunc(), taken ? offTaken : offNotTaken);
+    sk = SrcKey(liveFunc(), taken ? offTaken : offNotTaken);
   } break;
 
   case REQ_BIND_JMPCC_SECOND: {
@@ -2519,12 +2520,12 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
     Offset off = (Offset)args[1];
     ConditionCode cc = ConditionCode(args[2]);
     start = bindJmpccSecond(toSmash, off, cc, smashed);
-    sk = SrcKey(curFunc(), off);
+    sk = SrcKey(liveFunc(), off);
   } break;
 
   case REQ_RETRANSLATE_NO_IR: {
     TCA toSmash = (TCA)args[0];
-    sk = SrcKey(curFunc(), (Offset)args[1]);
+    sk = SrcKey(liveFunc(), (Offset)args[1]);
     start = retranslateAndPatchNoIR(sk, true, toSmash);
     SKTRACE(1, sk, "retranslated (without IR) @%p\n", start);
   } break;
@@ -2542,7 +2543,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
 
   case REQ_RETRANSLATE: {
     INC_TPC(retranslate);
-    sk = SrcKey(curFunc(), (Offset)args[0]);
+    sk = SrcKey(liveFunc(), (Offset)args[0]);
     start = retranslate(TranslArgs(sk, true));
     SKTRACE(2, sk, "retranslated @%p\n", start);
   } break;
@@ -2550,14 +2551,14 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
   case REQ_INTERPRET: {
     Offset off = args[0];
     int numInstrs = args[1];
-    g_vmContext->m_pc = curUnit()->at(off);
+    g_vmContext->m_pc = liveUnit()->at(off);
     /*
      * We know the compilation unit has not changed; basic blocks do
      * not span files. I claim even exceptions do not violate this
      * axiom.
      */
     assert(numInstrs >= 0);
-    SKTRACE(5, SrcKey(curFunc(), off), "interp: enter\n");
+    SKTRACE(5, SrcKey(liveFunc(), off), "interp: enter\n");
     if (numInstrs) {
       s_perfCounters[tpc_interp_instr] += numInstrs;
       g_vmContext->dispatchN(numInstrs);
@@ -2568,7 +2569,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
     }
     PC newPc = g_vmContext->getPC();
     if (!newPc) { g_vmContext->m_fp = 0; return false; }
-    SrcKey newSk(curFunc(), newPc);
+    SrcKey newSk(liveFunc(), newPc);
     SKTRACE(5, newSk, "interp: exit\n");
     sk = newSk;
     start = getTranslation(TranslArgs(newSk, true));
@@ -2596,7 +2597,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
       g_vmContext->m_fp = 0;
       return false;
     }
-    SrcKey dest(curFunc(), vmpc());
+    SrcKey dest(liveFunc(), vmpc());
     sk = dest;
     start = getTranslation(TranslArgs(dest, true));
   } break;
@@ -2609,9 +2610,9 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
      * delete instructions from the instruction stream, we
      * need to use fpi regions to find the fcall.
      */
-    const FPIEnt* fe = curFunc()->findPrecedingFPI(
-      curUnit()->offsetOf(vmpc()));
-    vmpc() = curUnit()->at(fe->m_fcallOff);
+    const FPIEnt* fe = liveFunc()->findPrecedingFPI(
+      liveUnit()->offsetOf(vmpc()));
+    vmpc() = liveUnit()->at(fe->m_fcallOff);
     assert(isFCallStar(toOp(*vmpc())));
     raise_error("Stack overflow");
     NOT_REACHED();
@@ -2853,7 +2854,7 @@ TranslatorX64::getInputsIntoXMMRegs(const NormalizedInstruction& ni,
 VMExecutionContext*                                                     \
 interpOne##opcode(ActRec* ar, Cell* sp, Offset pcOff) {                 \
   interp_set_regs(ar, sp, pcOff);                                       \
-  SKTRACE(5, SrcKey(curFunc(), vmpc()), "%40s %p %p\n",                 \
+  SKTRACE(5, SrcKey(liveFunc(), vmpc()), "%40s %p %p\n",                \
           "interpOne" #opcode " before (fp,sp)",                        \
           vmfp(), vmsp());                                              \
   assert(toOp(*vmpc()) == Op::opcode);                                  \
@@ -3163,7 +3164,7 @@ TranslatorX64::reachedTranslationLimit(SrcKey sk,
     if (debug && Trace::moduleEnabled(Trace::tx64, 2)) {
       const vector<TCA>& tns = srcRec.translations();
       TRACE(1, "Too many (%zd) translations: %s, BC offset %d\n",
-            tns.size(), curUnit()->filepath()->data(),
+            tns.size(), sk.unit()->filepath()->data(),
             sk.offset());
       SKTRACE(2, sk, "{\n");
       TCA topTrans = srcRec.getTopTranslation();
@@ -3229,12 +3230,13 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
   if (!debug) return;
 
   SrcKey sk = t.m_sk;
+  DEBUG_ONLY auto unit = sk.unit();
 
   TRACE(3, "----------------------------------------------\n");
   TRACE(3, "  Translating from file %s:%d %s at %p:\n",
-        curUnit()->filepath()->data(),
-        curUnit()->getLineNumber(sk.offset()),
-        curFunc()->name()->data(),
+        unit->filepath()->data(),
+        unit->getLineNumber(sk.offset()),
+        sk.func()->name()->data(),
         postGuards);
   TRACE(3, "  preconds:\n");
   TRACE(3, "    types:\n");
@@ -3267,7 +3269,7 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
     // found it since this code is debug-only, and we don't want behavior
     // to vary across the optimized/debug builds.
     PC oldPC = vmpc();
-    vmpc() = curUnit()->at(sk.offset());
+    vmpc() = unit->at(sk.offset());
     TRACE(3, g_vmContext->prettyStack(string(" tx64 ")));
     vmpc() = oldPC;
     TRACE(3, "----------------------------------------------\n");
@@ -3321,7 +3323,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
         // We always go through the tracelet translator in this case
       }
     } else {
-      JIT::RegionContext rContext { curFunc(), sk.offset(), curSpOff() };
+      JIT::RegionContext rContext { sk.func(), sk.offset(), liveSpOff() };
       FTRACE(2, "populating live context for region\n");
       populateLiveContext(rContext);
       region = JIT::selectRegion(rContext, &t);
@@ -3396,16 +3398,16 @@ TranslatorX64::translateWork(const TranslArgs& args) {
   }
   m_pendingFixups.clear();
 
-  addTranslation(TransRec(sk, curUnit()->md5(), transKind, t, start,
+  addTranslation(TransRec(sk, sk.unit()->md5(), transKind, t, start,
                           a.frontier() - start, stubStart,
                           astubs.frontier() - stubStart,
                           counterStart, counterLen,
                           m_bcMap));
   m_bcMap.clear();
 
-  recordGdbTranslation(sk, curFunc(), a, start,
+  recordGdbTranslation(sk, sk.func(), a, start,
                        false, false);
-  recordGdbTranslation(sk, curFunc(), astubs, stubStart,
+  recordGdbTranslation(sk, sk.func(), astubs, stubStart,
                        false, false);
   if (RuntimeOption::EvalJitPGO) {
     m_profData->addTrans(t, transKind);
@@ -3449,7 +3451,7 @@ TranslatorX64::translateTracelet(Tracelet& t) {
     Stats::emitInc(a, Stats::Instr_TC, t.m_numOpcodes);
 
     // Profiling on function entry.
-    if (t.m_sk.offset() == curFunc()->base()) {
+    if (t.m_sk.offset() == t.func()->base()) {
       ht.profileFunctionEntry("Normal");
     }
 
@@ -3462,7 +3464,7 @@ TranslatorX64::translateTracelet(Tracelet& t) {
       static const bool enabled = Stats::enabledAny() &&
                                   getenv("HHVM_STATS_FUNCSHAPE");
       if (!enabled) return;
-      if (t.m_sk.offset() != curFunc()->base()) return;
+      if (t.m_sk.offset() != t.func()->base()) return;
       if (auto last = t.m_instrStream.last) {
         if (last->op() != OpRetC && last->op() != OpRetV) {
           return;
@@ -3486,7 +3488,7 @@ TranslatorX64::translateTracelet(Tracelet& t) {
         ni->interp = true;
         return Retry;
       }
-      assert(ni->source.offset() >= curFunc()->base());
+      assert(ni->source.offset() >= t.func()->base());
       // We sometimes leave the tail of a truncated tracelet in place to aid
       // analysis, but breaksTracelet is authoritative.
       if (ni->breaksTracelet) break;
@@ -4148,7 +4150,7 @@ bool TranslatorX64::addDbgGuards(const Unit* unit) {
     SrcRec& sr = *it->second;
     if (sr.unitMd5() == unit->md5() &&
         !sr.hasDebuggerGuard() &&
-        isSrcKeyInBL(unit, sk)) {
+        isSrcKeyInBL(sk)) {
       addDbgGuardImpl(sk, sr);
     }
   }
@@ -4174,7 +4176,7 @@ bool TranslatorX64::addDbgGuard(const Func* func, Offset offset) {
     }
   }
   if (debug) {
-    if (!isSrcKeyInBL(func->unit(), sk)) {
+    if (!isSrcKeyInBL(sk)) {
       TRACE(5, "calling addDbgGuard on PC that is not in blacklist");
       return false;
     }

@@ -272,6 +272,8 @@ O(OpEq,                        D(Bool), S(Gen) S(Gen),                   C|N) \
 O(OpNeq,                       D(Bool), S(Gen) S(Gen),                   C|N) \
 O(OpSame,                      D(Bool), S(Gen) S(Gen),                   C|N) \
 O(OpNSame,                     D(Bool), S(Gen) S(Gen),                   C|N) \
+O(OpFloor,                      D(Dbl), S(Dbl),                            C) \
+O(OpCeil,                       D(Dbl), S(Dbl),                            C) \
 O(InstanceOfBitmask,           D(Bool), S(Cls) CStr,                       C) \
 O(NInstanceOfBitmask,          D(Bool), S(Cls) CStr,                       C) \
 O(IsType,                      D(Bool), S(Cell),                           C) \

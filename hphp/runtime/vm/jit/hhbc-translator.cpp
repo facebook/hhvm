@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
 
+#include "folly/CpuId.h"
 #include "hphp/util/trace.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_continuation.h"
@@ -23,6 +24,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
@@ -1917,7 +1919,7 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
 
   const Func* func = uniqueCls ? cls->getCtor() : nullptr;
   if (func && !(func->attrs() & AttrPublic)) {
-    Class* ctx = arGetContextClass(curFrame());
+    Class* ctx = curClass();
     if (!ctx) {
       func = nullptr;
     } else if (ctx != cls) {
@@ -3317,6 +3319,30 @@ void HhbcTranslator::emitNot() {
   SSATmp* src = popC();
   push(gen(OpNot, gen(ConvCellToBool, src)));
   gen(DecRef, src);
+}
+
+void HhbcTranslator::emitFloor() {
+  // need SSE 4.1 support to use roundsd
+  if (!folly::CpuId().sse41()) {
+    PUNT(Floor);
+  }
+
+  auto val    = popC();
+  auto dblVal = gen(ConvCellToDbl, val);
+  gen(DecRef, val);
+  push(gen(OpFloor, dblVal));
+}
+
+void HhbcTranslator::emitCeil() {
+  // need SSE 4.1 support to use roundsd
+  if (!folly::CpuId().sse41()) {
+    PUNT(Ceil);
+  }
+
+  auto val = popC();
+  auto dblVal = gen(ConvCellToDbl, val);
+  gen(DecRef, val);
+  push(gen(OpCeil, dblVal));
 }
 
 #define BINOP(Opp) \

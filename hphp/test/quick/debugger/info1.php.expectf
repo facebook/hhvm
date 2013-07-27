@@ -1,6 +1,5 @@
 Program %s/info1.php loaded. Type '[r]un' or '[c]ontinue' to go.
 @
-
 info array_key_exists
 /**
  * ( excerpt from http://php.net/manual/en/function.array_key_exists.php )
@@ -21,7 +20,6 @@ class stdClass {
 run
 Program %s/info1.php exited normally.
 @
-
 info myfunc
 // defined on line 3 to 5 of %s/info1.php
 function myfunc($a, $b);

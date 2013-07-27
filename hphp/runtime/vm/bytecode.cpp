@@ -833,9 +833,12 @@ string Stack::toString(const ActRec* fp, int offset,
   // Use depth-first recursion to get the output order correct.
 
   std::ostringstream os;
-  os << prefix << "=== Stack at " << curUnit()->filepath()->data() << ":" <<
-    curUnit()->getLineNumber(curUnit()->offsetOf(vmpc())) << " func " <<
-    curFunc()->fullName()->data() << " ===\n";
+  auto unit = fp->unit();
+  auto func = fp->func();
+  os << prefix << "=== Stack at "
+     << unit->filepath()->data() << ":"
+     << unit->getLineNumber(unit->offsetOf(vmpc())) << " func "
+     << func->fullName()->data() << " ===\n";
 
   toStringFrame(os, fp, offset, m_top, prefix);
 
@@ -1520,12 +1523,12 @@ void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
   }
   Stats::inc(Stats::VMEnter);
   if (ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
-    (void) curUnit()->offsetOf(m_pc); /* assert */
+    (void) m_fp->unit()->offsetOf(m_pc); /* assert */
     if (enterFnAr) {
       assert(start);
       tx()->enterTCAfterProlog(start);
     } else {
-      SrcKey sk(curFunc(), m_pc);
+      SrcKey sk(m_fp->func(), m_pc);
       tx()->enterTCAtSrcKey(sk);
     }
   } else {
@@ -2392,7 +2395,7 @@ bool VMExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
 
   ActRec* ar = m_stack.allocA();
   assert((uintptr_t)&ar->m_func < (uintptr_t)&ar->m_r);
-  Class* cls = curClass();
+  Class* cls = liveClass();
   if (m_fp->hasThis()) {
     ObjectData *this_ = m_fp->getThis();
     this_->incRefCount();
@@ -4354,7 +4357,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetM(PC& pc) {
   const ImmVector& immVec = ImmVector::createFromStream(oldPC + 1);
   StringData* name;
   MemberCode mc;
-  if (immVec.decodeLastMember(curUnit(), name, mc)) {
+  if (immVec.decodeLastMember(m_fp->unit(), name, mc)) {
     recordType(TypeProfileKey(mc, name), m_stack.top()->m_type);
   }
 }
@@ -5966,9 +5969,9 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
       reinterpret_cast<uintptr_t>(tx()->getRetFromInterpretedFrame());
     assert(isReturnHelper(ar->m_savedRip));
     TRACE(3, "FCallArray: pc %p func %p base %d\n", m_pc,
-          m_fp->m_func->unit()->entry(),
+          m_fp->unit()->entry(),
           int(m_fp->m_func->base()));
-    ar->m_soff = m_fp->m_func->unit()->offsetOf(pc)
+    ar->m_soff = m_fp->unit()->offsetOf(pc)
       - (uintptr_t)m_fp->m_func->base();
     assert(pcOff() > m_fp->m_func->base());
 
@@ -6825,6 +6828,24 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContHandle(PC& pc) {
   throw exn.asObjRef();
 }
 
+template<class Op>
+inline void OPTBLD_INLINE VMExecutionContext::roundOpImpl(Op op) {
+  TypedValue* val = m_stack.topTV();
+
+  tvCastToDoubleInPlace(val);
+  val->m_data.dbl = op(val->m_data.dbl);
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopFloor(PC& pc) {
+  NEXT();
+  roundOpImpl(floor);
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopCeil(PC& pc) {
+  NEXT();
+  roundOpImpl(ceil);
+}
+
 inline void OPTBLD_INLINE VMExecutionContext::iopStrlen(PC& pc) {
   NEXT();
   TypedValue* subj = m_stack.topTV();
@@ -6964,7 +6985,7 @@ OPCODES
 
 static inline void
 profileReturnValue(const DataType dt) {
-  const Func* f = curFunc();
+  const Func* f = liveFunc();
   if (f->isPseudoMain() || f->isClosureBody() || f->isMagic() ||
       Func::isSpecial(f->name()))
     return;

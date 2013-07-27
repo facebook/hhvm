@@ -1300,7 +1300,7 @@ static void on_timeout(int sig, siginfo_t* info, void* context) {
 
 void hphp_process_init() {
   pthread_attr_t attr;
-#ifdef _GNU_SOURCE
+#if defined(_GNU_SOURCE) && defined(__linux__) // Linux+GNU extension
   pthread_getattr_np(pthread_self(), &attr);
 #else
   pthread_attr_init(&attr);

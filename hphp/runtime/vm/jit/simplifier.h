@@ -107,6 +107,8 @@ private:
   SSATmp* simplifyConvCellToBool(IRInstruction*);
   SSATmp* simplifyConvCellToInt(IRInstruction*);
   SSATmp* simplifyConvCellToDbl(IRInstruction*);
+  SSATmp* simplifyFloor(IRInstruction*);
+  SSATmp* simplifyCeil(IRInstruction*);
   SSATmp* simplifyUnbox(IRInstruction*);
   SSATmp* simplifyUnboxPtr(IRInstruction*);
   SSATmp* simplifyCheckInit(IRInstruction* inst);
@@ -141,6 +143,7 @@ private:
 
   template<class Oper>
   SSATmp* simplifyShift(SSATmp* src1, SSATmp* src2, Oper op);
+  template<class Oper> SSATmp* simplifyRoundCommon(IRInstruction*, Oper);
 
 private: // tracebuilder forwarders
   template<class... Args> SSATmp* cns(Args&&...);

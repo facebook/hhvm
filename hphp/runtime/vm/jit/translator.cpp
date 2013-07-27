@@ -43,8 +43,10 @@
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
 #include "hphp/runtime/vm/jit/ir-factory.h"
 #include "hphp/runtime/vm/jit/ir-translator.h"
+#include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -133,58 +135,6 @@ void InstrStream::remove(NormalizedInstruction* ni) {
   ni->next = nullptr;
 }
 
-NormalizedInstruction* Tracelet::newNormalizedInstruction() {
-  NormalizedInstruction* ni = new NormalizedInstruction();
-  m_instrs.push_back(ni);
-  return ni;
-}
-
-DynLocation* Tracelet::newDynLocation(Location l, DataType t) {
-  DynLocation* dl = new DynLocation(l, t);
-  m_dynlocs.push_back(dl);
-  return dl;
-}
-
-DynLocation* Tracelet::newDynLocation(Location l, RuntimeType t) {
-  DynLocation* dl = new DynLocation(l, t);
-  m_dynlocs.push_back(dl);
-  return dl;
-}
-
-DynLocation* Tracelet::newDynLocation() {
-  DynLocation* dl = new DynLocation();
-  m_dynlocs.push_back(dl);
-  return dl;
-}
-
-void Tracelet::print() const {
-  print(std::cerr);
-}
-
-void Tracelet::print(std::ostream& out) const {
-  const NormalizedInstruction* i = m_instrStream.first;
-  if (i == nullptr) {
-    out << "<empty>\n";
-    return;
-  }
-
-  out << i->unit()->filepath()->data() << ':'
-            << i->unit()->getLineNumber(i->offset()) << std::endl;
-  for (; i; i = i->next) {
-    out << "  " << i->offset() << ": " << i->toString() << std::endl;
-  }
-}
-
-std::string Tracelet::toString() const {
-  std::ostringstream out;
-  print(out);
-  return out.str();
-}
-
-SrcKey Tracelet::nextSk() const {
-  return m_instrStream.last->source.advanced(curUnit());
-}
-
 /*
  * locPhysicalOffset --
  *
@@ -194,7 +144,7 @@ SrcKey Tracelet::nextSk() const {
  *   you're looking for, be sure to pass in a non-default f.
  */
 int locPhysicalOffset(Location l, const Func* f) {
-  f = f ? f : curFunc();
+  f = f ? f : liveFunc();
   assert_not_implemented(l.space == Location::Stack ||
                          l.space == Location::Local ||
                          l.space == Location::Iter);
@@ -221,7 +171,7 @@ RuntimeType Translator::liveType(Location l,
       outer = &base[offset];
     } break;
     case Location::Iter: {
-      const Iter *it = frame_iter(curFrame(), l.offset);
+      const Iter *it = frame_iter(liveFrame(), l.offset);
       TRACE(1, "Iter input: fp %p, iter %p, offset %" PRId64 "\n", vmfp(),
             it, l.offset);
       return RuntimeType(it);
@@ -294,11 +244,11 @@ RuntimeType Translator::outThisObjectType() {
    * correct object type because arGetContextClass() looks at
    * ar->m_func's class for methods.
    */
-  const Class *ctx = curFunc()->isMethod() ?
-    arGetContextClass(curFrame()) : nullptr;
+  const Class *ctx = liveFunc()->isMethod() ?
+    arGetContextClass(liveFrame()) : nullptr;
   if (ctx) {
-    assert(!curFrame()->hasThis() ||
-           curFrame()->getThis()->getVMClass()->classof(ctx));
+    assert(!liveFrame()->hasThis() ||
+           liveFrame()->getThis()->getVMClass()->classof(ctx));
     TRACE(2, "OutThisObject: derived from Class \"%s\"\n",
           ctx->name()->data());
     return RuntimeType(KindOfObject, KindOfInvalid, ctx);
@@ -518,7 +468,7 @@ PropInfo getFinalPropertyOffset(const NormalizedInstruction& ni,
 static std::pair<DataType,double>
 predictMVec(const NormalizedInstruction* ni) {
   auto info = getFinalPropertyOffset(*ni,
-                                     curFunc()->cls(),
+                                     ni->func()->cls(),
                                      getMInstrInfo(ni->mInstrOp()));
   if (info.offset != -1 && info.hphpcType != KindOfInvalid) {
     FTRACE(1, "prediction for CGetM prop: {}, hphpc\n",
@@ -529,7 +479,7 @@ predictMVec(const NormalizedInstruction* ni) {
   auto& immVec = ni->immVec;
   StringData* name;
   MemberCode mc;
-  if (immVec.decodeLastMember(curUnit(), name, mc)) {
+  if (immVec.decodeLastMember(ni->m_unit, name, mc)) {
     auto pred = predictType(TypeProfileKey(mc, name));
     TRACE(1, "prediction for CGetM %s named %s: %d, %f\n",
           mc == MET ? "elt" : "prop",
@@ -613,8 +563,8 @@ predictOutputs(SrcKey startSk,
 
   if (ni->op() == OpClsCnsD) {
     const NamedEntityPair& cne =
-      curFrame()->m_func->unit()->lookupNamedEntityPairId(ni->imm[1].u_SA);
-    StringData* cnsName = curUnit()->lookupLitstrId(ni->imm[0].u_SA);
+      ni->unit()->lookupNamedEntityPairId(ni->imm[1].u_SA);
+    StringData* cnsName = ni->m_unit->lookupLitstrId(ni->imm[0].u_SA);
     Class* cls = cne.second->getCachedClass();
     if (cls) {
       DataType dt = cls->clsCnsType(cnsName);
@@ -737,9 +687,9 @@ getDynLocType(const SrcKey startSk,
           return RuntimeType(klass);
         }
       } else if (op == OpSelf) {
-        return RuntimeType(curClass());
+        return RuntimeType(liveClass());
       } else if (op == OpParent) {
-        Class* clss = curClass();
+        Class* clss = liveClass();
         if (clss != nullptr)
           return RuntimeType(clss->parent());
       }
@@ -750,7 +700,7 @@ getDynLocType(const SrcKey startSk,
       // If it's a system constant, burn in its type. Otherwise we have
       // to accept prediction; use the translation-time value, or fall back
       // to the targetcache if none exists.
-      StringData *sd = curUnit()->lookupLitstrId(ni->imm[0].u_SA);
+      StringData *sd = ni->m_unit->lookupLitstrId(ni->imm[0].u_SA);
       assert(sd);
       const TypedValue* tv = Unit::lookupPersistentCns(sd);
       if (tv) {
@@ -773,14 +723,14 @@ getDynLocType(const SrcKey startSk,
 
     case OutStringImm: {
       assert(ni->op() == OpString);
-      StringData *sd = curUnit()->lookupLitstrId(ni->imm[0].u_SA);
+      StringData *sd = ni->m_unit->lookupLitstrId(ni->imm[0].u_SA);
       assert(sd);
       return RuntimeType(sd);
     }
 
     case OutArrayImm: {
       assert(ni->op() == OpArray);
-      ArrayData *ad = curUnit()->lookupArrayId(ni->imm[0].u_AA);
+      ArrayData *ad = ni->m_unit->lookupArrayId(ni->imm[0].u_AA);
       assert(ad);
       return RuntimeType(ad);
     }
@@ -1261,6 +1211,8 @@ static const struct {
   { OpStrlen,      {Stack1,           Stack1,       OutStrlen,         0 }},
   { OpIncStat,     {None,             None,         OutNone,           0 }},
   { OpArrayIdx,    {StackTop3,        Stack1,       OutUnknown,       -2 }},
+  { OpFloor,       {Stack1,           Stack1,       OutDouble,         0 }},
+  { OpCeil,        {Stack1,           Stack1,       OutDouble,         0 }},
 
   /*** 14. Continuation instructions ***/
 
@@ -1437,7 +1389,7 @@ void preInputApplyMetaData(Unit::MetaHandle metaHand,
   while (metaHand.nextArg(info)) {
     switch (info.m_kind) {
     case Unit::MetaInfo::Kind::NonRefCounted:
-      ni->nonRefCountedLocals.resize(curFunc()->numLocals());
+      ni->nonRefCountedLocals.resize(ni->func()->numLocals());
       ni->nonRefCountedLocals[info.m_data] = 1;
       break;
     case Unit::MetaInfo::Kind::GuardedThis:
@@ -1882,7 +1834,7 @@ void getInputsImpl(SrcKey startSk,
   }
 
   const bool wantInlineReturn = [&] {
-    const int localCount = curFunc()->numLocals();
+    const int localCount = ni->func()->numLocals();
     // Inline return causes us to guard this tracelet more precisely. If
     // we're already chaining to get here, just do a generic return in the
     // hopes of avoiding further specialization. The localCount constraint
@@ -1906,7 +1858,7 @@ void getInputsImpl(SrcKey startSk,
   if ((input & AllLocals) && wantInlineReturn) {
     ni->inlineReturn = true;
     ni->ignoreInnerType = true;
-    int n = curFunc()->numLocals();
+    int n = ni->func()->numLocals();
     for (int i = 0; i < n; ++i) {
       if (!ni->nonRefCountedLocals[i]) {
         inputs.emplace_back(Location(Location::Local, i));
@@ -2348,7 +2300,7 @@ RuntimeType TraceletContext::currentType(const Location& l) const {
   if (!mapGet(m_currentMap, l, &dl)) {
     assert(!mapContains(m_deletedSet, l));
     assert(!mapContains(m_changeSet, l));
-    return tx64->liveType(l, *curUnit());
+    return tx64->liveType(l, *liveUnit());
   }
   return dl->rtt;
 }
@@ -2374,7 +2326,7 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii,
       // TODO: Once the region translator supports guard relaxation
       //       (task #2598894), we can enable specialization for all modes.
       const bool specialize = tx64->mode() == TransLive;
-      RuntimeType rtt = tx64->liveType(l, *curUnit(), specialize);
+      RuntimeType rtt = tx64->liveType(l, *liveUnit(), specialize);
       assert(rtt.isIter() || !rtt.isVagueValue());
       // Allocate a new DynLocation to represent this and store it in the
       // current map.
@@ -2448,44 +2400,6 @@ void TraceletContext::recordJmp() {
   m_numJmps++;
 }
 
-/*
- *   Helpers for recovering context of this instruction.
- */
-Op NormalizedInstruction::op() const {
-  auto op = toOp(*pc());
-  assert(isValidOpcode(op));
-  return (Op)op;
-}
-
-Op NormalizedInstruction::mInstrOp() const {
-  Op opcode = op();
-#define MII(instr, a, b, i, v, d) case Op##instr##M: return opcode;
-  switch (opcode) {
-    MINSTRS
-  case OpFPassM:
-    return preppedByRef ? OpVGetM : OpCGetM;
-  default:
-    not_reached();
-  }
-#undef MII
-}
-
-PC NormalizedInstruction::pc() const {
-  return unit()->at(source.offset());
-}
-
-const Unit* NormalizedInstruction::unit() const {
-  return m_unit;
-}
-
-Offset NormalizedInstruction::offset() const {
-  return source.offset();
-}
-
-std::string NormalizedInstruction::toString() const {
-  return instrToString((Op*)pc(), unit());
-}
-
 void Translator::postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
                              Tracelet& t, TraceletContext& tas) {
   if (ni->op() == OpBareThis &&
@@ -2506,46 +2420,6 @@ static bool isPop(const NormalizedInstruction* instr) {
   return (opc == OpPopC ||
           opc == OpPopV ||
           opc == OpPopR);
-}
-
-NormalizedInstruction::OutputUse
-NormalizedInstruction::getOutputUsage(const DynLocation* output) const {
-  for (NormalizedInstruction* succ = next; succ; succ = succ->next) {
-    if (succ->noOp) continue;
-    for (size_t i = 0; i < succ->inputs.size(); ++i) {
-      if (succ->inputs[i] == output) {
-        if (succ->inputWasInferred(i)) {
-          return OutputUse::Inferred;
-        }
-        if (dontGuardAnyInputs(succ->op())) {
-          /* the consumer doesnt care about its inputs
-             but we may still have inferred something about
-             its outputs that a later instruction may depend on
-          */
-          if (!outputDependsOnInput(succ->op()) ||
-              !(succ->outStack && !succ->outStack->rtt.isVagueValue() &&
-                succ->getOutputUsage(succ->outStack) != OutputUse::Used) ||
-              !(succ->outLocal && !succ->outLocal->rtt.isVagueValue() &&
-                succ->getOutputUsage(succ->outLocal) != OutputUse::Used)) {
-            return OutputUse::DoesntCare;
-          }
-        }
-        return OutputUse::Used;
-      }
-    }
-  }
-  return OutputUse::Unused;
-}
-
-bool NormalizedInstruction::isOutputUsed(const DynLocation* output) const {
-  return (output && !output->rtt.isVagueValue() &&
-          getOutputUsage(output) == OutputUse::Used);
-}
-
-bool NormalizedInstruction::isAnyOutputUsed() const
-{
-  return (isOutputUsed(outStack) ||
-          isOutputUsed(outLocal));
 }
 
 GuardType::GuardType(DataType outer, DataType inner)
@@ -3041,9 +2915,9 @@ static bool shouldAnalyzeCallee(const NormalizedInstruction* fcall,
 void Translator::analyzeCallee(TraceletContext& tas,
                                Tracelet& parent,
                                NormalizedInstruction* fcall) {
-  auto const callerFunc  = curFunc();
+  auto const callerFunc  = fcall->func();
   auto const fpi         = callerFunc->findFPI(fcall->source.offset());
-  auto const pushOp      = curUnit()->getOpcode(fpi->m_fpushOff);
+  auto const pushOp      = fcall->m_unit->getOpcode(fpi->m_fpushOff);
 
   if (!shouldAnalyzeCallee(fcall, fpi, pushOp)) return;
 
@@ -3104,7 +2978,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
    * analysis phase which pretty liberally inspects live VM state.
    */
   ActRec fakeAR;
-  fakeAR.m_savedRbp = reinterpret_cast<uintptr_t>(curFrame());
+  fakeAR.m_savedRbp = reinterpret_cast<uintptr_t>(liveFrame());
   fakeAR.m_savedRip = 0xbaabaa;  // should never be inspected
   fakeAR.m_func = fcall->funcd;
   fakeAR.m_soff = 0xb00b00;      // should never be inspected
@@ -3262,13 +3136,14 @@ static bool instrBreaksProfileBB(const NormalizedInstruction* instr) {
 std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
                                               const TypeMap& initialTypes) {
   std::unique_ptr<Tracelet> retval(new Tracelet());
+  auto func = sk.func();
+  auto unit = sk.unit();
   auto& t = *retval;
   t.m_sk = sk;
-  t.m_func = curFunc();
 
-  DEBUG_ONLY const char* file = curUnit()->filepath()->data();
-  DEBUG_ONLY const int lineNum = curUnit()->getLineNumber(t.m_sk.offset());
-  DEBUG_ONLY const char* funcName = curFunc()->fullName()->data();
+  DEBUG_ONLY const char* file = unit->filepath()->data();
+  DEBUG_ONLY const int lineNum = unit->getLineNumber(t.m_sk.offset());
+  DEBUG_ONLY const char* funcName = func->fullName()->data();
 
   TRACE(1, "Translator::analyze %s:%d %s\n", file, lineNum, funcName);
   TraceletContext tas(&t, initialTypes);
@@ -3280,7 +3155,6 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
   t.m_numOpcodes = 0;
   Unit::MetaHandle metaHand;
 
-  const Unit *unit = curUnit();
   for (;; sk.advance(unit)) {
   head:
     NormalizedInstruction* ni = t.newNormalizedInstruction();
@@ -3395,7 +3269,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     }
 
     if (isFCallStar(ni->op())) t.m_arState.pop();
-    if (doVarEnvTaint || callDestroysLocals(*ni, curFunc())) tas.varEnvTaint();
+    if (doVarEnvTaint || callDestroysLocals(*ni, func)) tas.varEnvTaint();
 
     DynLocation* outputs[] = { ni->outStack,
                                ni->outLocal, ni->outLocal2,
@@ -3412,7 +3286,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     if (ni->op() == OpCreateCont) {
       // CreateCont stores Uninit to all locals but NormalizedInstruction
       // doesn't have enough output fields, so we special case it here.
-      auto const numLocals = curFunc()->numLocals();
+      auto const numLocals = ni->func()->numLocals();
       for (unsigned i = 0; i < numLocals; ++i) {
         tas.recordWrite(t.newDynLocation(Location(Location::Local, i),
                                          KindOfUninit));
@@ -3484,7 +3358,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
       SKTRACE(1, sk, "greedily continuing through %dth jmp + %d\n",
               tas.m_numJmps, ni->imm[0].u_IA);
       tas.recordJmp();
-      sk = SrcKey(curFunc(), sk.offset() + ni->imm[0].u_IA);
+      sk = SrcKey(func, sk.offset() + ni->imm[0].u_IA);
       goto head; // don't advance sk
     } else if (opcodeBreaksBB(ni->op()) ||
                (dontGuardAnyInputs(ni->op()) && opcodeChangesPC(ni->op()))) {
@@ -3561,7 +3435,8 @@ Translator::Get() {
 }
 
 bool
-Translator::isSrcKeyInBL(const Unit* unit, const SrcKey& sk) {
+Translator::isSrcKeyInBL(const SrcKey& sk) {
+  auto unit = sk.unit();
   Lock l(m_dbgBlacklistLock);
   if (m_dbgBLSrcKey.find(sk) != m_dbgBLSrcKey.end()) {
     return true;
@@ -3592,12 +3467,6 @@ Translator::addDbgBLPC(PC pc) {
   }
   m_dbgBLPC.addPC(pc);
   return true;
-}
-
-// Return the SrcKey for the operation that should follow the supplied
-// NormalizedInstruction.
-SrcKey nextSrcKey(const NormalizedInstruction& i) {
-  return i.source.advanced(curUnit());
 }
 
 void populateImmediates(NormalizedInstruction& inst) {
@@ -3796,7 +3665,7 @@ void Translator::traceStart(Offset bcStartOffset) {
          color(ANSI_COLOR_END));
 
   m_irTrans.reset(new JIT::IRTranslator(
-    bcStartOffset, curSpOff(), curFunc()));
+    bcStartOffset, liveSpOff(), liveFunc()));
 }
 
 void Translator::traceEnd() {
@@ -3992,7 +3861,7 @@ void Translator::addTranslation(const TransRec& transRec) {
     Trace::traceRelease("New translation: %" PRId64 " %s %u %u %d\n",
                         Timer::GetCurrentTimeMicros() - m_createdTime,
                         folly::format("{}:{}:{}",
-                          curUnit()->filepath()->data(),
+                          transRec.src.unit()->filepath()->data(),
                           transRec.src.getFuncId(),
                           transRec.src.offset()).str().c_str(),
                         transRec.aLen,
@@ -4073,6 +3942,29 @@ static const char *transKindStr[] = {
 const char *getTransKindName(TransKind kind) {
   assert(kind >= 0 && kind < TransInvalid);
   return transKindStr[kind];
+}
+
+TransRec::TransRec(SrcKey                   s,
+                   MD5                      _md5,
+                   TransKind                _kind,
+                   const Tracelet&          t,
+                   TCA                      _aStart,
+                   uint32_t                 _aLen,
+                   TCA                      _astubsStart,
+                   uint32_t                 _astubsLen,
+                   TCA                      _counterStart,
+                   uint8_t                  _counterLen,
+                   vector<TransBCMapping>   _bcMapping) :
+    id(0), kind(_kind), src(s), md5(_md5),
+    bcStopOffset(t.nextSk().offset()), aStart(_aStart), aLen(_aLen),
+    astubsStart(_astubsStart), astubsLen(_astubsLen),
+    counterStart(_counterStart), counterLen(_counterLen),
+    bcMapping(_bcMapping) {
+  for (DepMap::const_iterator dep = t.m_dependencies.begin();
+       dep != t.m_dependencies.end();
+       ++dep) {
+    dependencies.push_back(*dep->second);
+  }
 }
 
 string
@@ -4218,7 +4110,7 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
   bool privateOnly = false;
   if (!RuntimeOption::RepoAuthoritative ||
       !(cls->preClass()->attrs() & AttrUnique)) {
-    Class* ctx = curFunc()->cls();
+    Class* ctx = liveFunc()->cls();
     if (!ctx || !ctx->classof(cls)) {
       return nullptr;
     }

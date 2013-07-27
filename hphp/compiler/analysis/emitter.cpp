@@ -3171,6 +3171,20 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             e.Strlen();
             return true;
           }
+        } else if (call->isCallToFunction("floor")) {
+          if (params && params->getCount() == 1) {
+            visit((*params)[0]);
+            emitConvertToCell(e);
+            e.Floor();
+            return true;
+          }
+        } else if (call->isCallToFunction("ceil")) {
+          if (params && params->getCount() == 1) {
+            visit((*params)[0]);
+            emitConvertToCell(e);
+            e.Ceil();
+            return true;
+          }
         } else if (call->isCallToFunction("define")) {
           if (params && params->getCount() == 2) {
             ExpressionPtr p0 = (*params)[0];
@@ -6330,7 +6344,7 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
                  dynamic_pointer_cast<ClassVariable>((*stmts)[i])) {
         ModifierExpressionPtr mod(cv->getModifiers());
         ExpressionListPtr el(cv->getVarList());
-        Attr attrs = buildAttrs(mod);
+        Attr declAttrs = buildAttrs(mod);
         StringData* typeConstraint = StringData::GetStaticString(
           cv->getTypeConstraint());
         int nVars = el->getCount();
@@ -6357,14 +6371,20 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
           StringData* propName = StringData::GetStaticString(var->getName());
           StringData* propDoc = empty_string.get();
           TypedValue tvVal;
+          // Some properties may need to be marked with the AttrDeepInit
+          // attribute, while other properties should not be marked with
+          // this attrbiute. We copy declAttrs into propAttrs for each loop
+          // iteration so that we can safely add AttrDeepInit to propAttrs
+          // without mutating the original declAttrs.
+          Attr propAttrs = declAttrs;
           if (vNode) {
             if (vNode->isScalar()) {
               initScalar(tvVal, vNode);
             } else {
               tvWriteUninit(&tvVal);
-              if (!(attrs & AttrStatic)) {
+              if (!(declAttrs & AttrStatic)) {
                 if (requiresDeepInit(vNode)) {
-                  attrs = (Attr)(attrs | AttrDeepInit);
+                  propAttrs = propAttrs | AttrDeepInit;
                 }
                 if (nonScalarPinitVec == nullptr) {
                   nonScalarPinitVec = new NonScalarVec();
@@ -6381,8 +6401,8 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
             tvWriteNull(&tvVal);
           }
           bool added UNUSED =
-            pce->addProperty(propName, attrs, typeConstraint, propDoc, &tvVal,
-                             hphpcType);
+            pce->addProperty(propName, propAttrs, typeConstraint,
+                             propDoc, &tvVal, hphpcType);
           assert(added);
         }
       } else if (ClassConstantPtr cc =

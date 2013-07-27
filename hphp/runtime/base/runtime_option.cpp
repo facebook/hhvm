@@ -110,6 +110,7 @@ int RuntimeOption::ServerWarmupThrottleRequestCount =
   kDefaultWarmupThrottleRequestCount;
 int RuntimeOption::ServerThreadDropCacheTimeoutSeconds = 0;
 int RuntimeOption::ServerThreadJobLIFOSwitchThreshold = INT_MAX;
+int RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds = -1;
 bool RuntimeOption::ServerThreadDropStack = false;
 bool RuntimeOption::ServerHttpSafeMode = false;
 bool RuntimeOption::ServerStatCache = true;
@@ -698,6 +699,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     ServerThreadJobLIFOSwitchThreshold =
       server["ThreadJobLIFOSwitchThreshold"].getInt32(
         ServerThreadJobLIFOSwitchThreshold);
+    ServerThreadJobMaxQueuingMilliSeconds =
+      server["ThreadJobMaxQueuingMilliSeconds"].getInt16(-1);
     ServerThreadDropStack = server["ThreadDropStack"].getBool();
     ServerHttpSafeMode = server["HttpSafeMode"].getBool();
     ServerStatCache = server["StatCache"].getBool(true);

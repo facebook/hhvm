@@ -35,7 +35,8 @@ public:
   static Resource TaskStart(CStrRef url, CArrRef headers,
                             CStrRef remote_host,
                             CStrRef post_data = null_string,
-                            CArrRef files = null_array);
+                            CArrRef files = null_array,
+                            int timeoutSeconds = -1);
 
   /**
    * Query if a task is finished. This is non-blocking and can be called as

@@ -329,6 +329,9 @@ struct HhbcTranslator {
   void emitRetC(bool freeInline);
   void emitRetV(bool freeInline);
 
+  void emitFloor();
+  void emitCeil();
+
   // binary arithmetic ops
   void emitAdd();
   void emitSub();

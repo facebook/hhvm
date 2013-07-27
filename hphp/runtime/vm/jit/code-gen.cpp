@@ -1385,6 +1385,26 @@ bool CodeGenerator::emitDec(SSATmp* dst, SSATmp* src1, SSATmp* src2) {
   return emitIncDecHelper(dst, src1, src2, &Asm::decq);
 }
 
+void CodeGenerator::cgRoundCommon(IRInstruction* inst, RoundDirection dir) {
+  auto dst = inst->dst();
+  auto src = inst->src(0);
+
+  auto dstReg = m_regs[dst].reg();
+  auto inReg  = prepXMMReg(src, m_as, m_regs, rCgXMM0);
+  auto outReg = dstReg.isXMM() ? dstReg : PhysReg(rCgXMM1);
+
+  m_as.   roundsd   (dir, inReg, outReg);
+  emitMovRegReg(m_as, outReg, dstReg);
+}
+
+void CodeGenerator::cgOpFloor(IRInstruction* inst) {
+  cgRoundCommon(inst, RoundDirection::floor);
+}
+
+void CodeGenerator::cgOpCeil(IRInstruction* inst) {
+  cgRoundCommon(inst, RoundDirection::ceil);
+}
+
 void CodeGenerator::cgOpAdd(IRInstruction* inst) {
   SSATmp* dst  = inst->dst();
   SSATmp* src1 = inst->src(0);

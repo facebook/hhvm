@@ -62,8 +62,8 @@ public:
   static void GetRegisteredSandboxes(DSandboxInfoPtrVec &sandboxes);
   static bool IsThreadDebugging(int64_t tid);
 
-  static void RetireDummySandboxThread(DummySandbox* toRetire);
-  static void CleanupDummySandboxThreads();
+  static void RetireProxy(DebuggerProxyPtr proxy);
+  static void CleanupRetiredProxies();
 
   // Request interrupt on threads that a proxy is attached to
   static void RequestInterrupt(DebuggerProxyPtr proxy);
@@ -149,8 +149,8 @@ private:
   typedef tbb::concurrent_hash_map<int64_t, ThreadInfo*> ThreadInfoMap;
   ThreadInfoMap m_threadInfos;
 
-  typedef tbb::concurrent_queue<DummySandbox*> DummySandboxQ;
-  DummySandboxQ m_cleanupDummySandboxQ;
+  typedef tbb::concurrent_queue<DebuggerProxyPtr> RetiredProxyQueue;
+  RetiredProxyQueue m_retiredProxyQueue;
 
   bool isThreadDebugging(int64_t id);
   void registerThread();
@@ -178,8 +178,8 @@ private:
                          bool force);
   bool switchSandbox(DebuggerProxyPtr proxy, const std::string &newId,
                      bool force);
-  void retireDummySandboxThread(DummySandbox* toRetire);
-  void cleanupDummySandboxThreads();
+  void retireProxy(DebuggerProxyPtr proxy);
+  void cleanupRetiredProxies();
 
   // A usage logger which is set by a provider to an implementation-specific
   // subclass if usage logging is enabled.

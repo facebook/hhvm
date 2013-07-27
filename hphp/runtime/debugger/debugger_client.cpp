@@ -400,7 +400,7 @@ String DebuggerClient::FormatTitle(const char *title) {
 ///////////////////////////////////////////////////////////////////////////////
 
 DebuggerClient::DebuggerClient(std::string name /* = "" */)
-    : m_tutorial(0), m_printFunction(""), m_scriptMode(false),
+    : m_tutorial(0), m_scriptMode(false),
       m_logFile(""), m_logFileHandler(nullptr),
       m_mainThread(this, &DebuggerClient::run), m_stopped(false),
       m_inputState(TakingCommand),
@@ -1919,6 +1919,8 @@ int DebuggerClient::checkEvalEnd() {
   return pos;
 }
 
+const StaticString s_UNDERSCORE("_");
+
 // Parses the current command line as a code execution command
 // and carries out the command.
 void DebuggerClient::processTakeCode() {
@@ -1937,8 +1939,9 @@ void DebuggerClient::processTakeCode() {
       // strip the trailing ;
       m_line = m_line.substr(0, m_line.size() - 1);
     }
-    m_code = string("<?php $_=(") + m_line.substr(1) + "); " + m_printFunction;
+    m_code = string("<?php $_=(") + m_line.substr(1) + "); ";
     processEval();
+    CmdVariable::PrintVariable(*this, s_UNDERSCORE);
     return;
   } else if (first != '<') {
     usageLogCommand("eval", m_line);
@@ -2360,7 +2363,6 @@ void DebuggerClient::loadConfig() {
 
   m_tutorial = m_config["Tutorial"].getInt32(0);
   m_scriptMode = m_config["ScriptMode"].getBool();
-  std::string pprint = m_config["PrettyPrint"].getString("hphpd_print_value");
   setDebuggerBypassCheck(m_config["BypassAccessCheck"].getBool());
   setDebuggerClientSmallStep(m_config["SmallStep"].getBool());
   int printLevel = m_config["PrintLevel"].getInt16(3);
@@ -2372,10 +2374,6 @@ void DebuggerClient::loadConfig() {
   int maxCodeLines = m_config["MaxCodeLines"].getInt16(-1);
   m_config["MaxCodeLines"] = maxCodeLines;
   setDebuggerClientMaxCodeLines(maxCodeLines);
-
-  m_printFunction = (boost::format(
-    "(function_exists(\"%s\") ? %s($_) : print_r(print_r($_, true)));")
-    % pprint % pprint).str();
 
   m_config["Tutorial"]["Visited"].get(m_tutorialVisited);
 

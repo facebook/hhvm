@@ -788,7 +788,8 @@
             "name": "sqrt",
             "desc": "Returns the square root of arg.",
             "flags": [
-                "HasDocComment"
+                "HasDocComment",
+                "ZendParamMode"
             ],
             "return": {
                 "type": "Double",

@@ -1,5 +1,5 @@
 break break1.php:7
-continue 
+continue
 variable
 break clear all
 break foo()
@@ -12,12 +12,6 @@ break cls::pubCls()
 continue
 break clear all
 continue
-continue
-@ $a = 0
-break test1.php:18
-continue
-p $a
-break clear all
 break end test1.php
 continue
 break psp test1.php

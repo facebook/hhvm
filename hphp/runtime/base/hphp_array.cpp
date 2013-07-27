@@ -1309,14 +1309,8 @@ HphpArray::AddLvalStr(ArrayData* ad, StringData* k, Variant*& ret, bool copy) {
 //=============================================================================
 // Delete.
 
-ArrayData* HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
-  ElmInd pos = *ei;
-  if (!validElmInd(pos)) {
-    return this;
-  }
-
-  Elm* elms = m_data;
-
+NEVER_INLINE
+void HphpArray::adjustFullPos(ElmInd pos) {
   ElmInd eIPrev = ElmIndTombstone;
   for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
     FullPos* fp = r.front();
@@ -1325,7 +1319,7 @@ ArrayData* HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
         // eIPrev will actually be used, so properly initialize it with the
         // previous element before pos, or ElmIndEmpty if pos is the first
         // element.
-        eIPrev = prevElm(elms, pos);
+        eIPrev = prevElm(m_data, pos);
       }
       if (eIPrev == ElmIndEmpty) {
         fp->setResetFlag(true);
@@ -1333,8 +1327,19 @@ ArrayData* HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
       fp->m_pos = ssize_t(eIPrev);
     }
   }
+}
+
+ArrayData* HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
+  ElmInd pos = *ei;
+  if (!validElmInd(pos)) {
+    return this;
+  }
+
+  // move strong iterators to the previous element
+  if (strongIterators()) adjustFullPos(pos);
 
   // If the internal pointer points to this element, advance it.
+  Elm* elms = m_data;
   if (m_pos == ssize_t(pos)) {
     ElmInd eINext = nextElm(elms, pos);
     m_pos = ssize_t(eINext);
@@ -1629,13 +1634,16 @@ ArrayData* HphpArray::PopVec(ArrayData* ad, Variant& value) {
   if (a->getCount() > 1) a = a->copyVec();
   if (a->m_size > 0) {
     auto i = a->m_size - 1;
-    value = tvAsCVarRef(&a->m_data[i].data);
+    auto& tv = a->m_data[i].data;
+    value = tvAsCVarRef(&tv);
+    if (a->strongIterators()) a->adjustFullPos(i);
+    tvRefcountedDecRef(&tv);
     a->m_size = a->m_used = i;
-    a->m_pos = i > 0 ? 0 : invalid_index; // reset internal iterator
-  } else {
-    value = uninit_null();
-    a->m_pos = invalid_index; // reset internal iterator
+    a->m_pos = a->m_size > 0 ? 0 : invalid_index; // reset internal iterator
+    return a;
   }
+  value = uninit_null();
+  a->m_pos = invalid_index; // reset internal iterator
   return a;
 }
 

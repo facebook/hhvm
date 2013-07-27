@@ -87,8 +87,10 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     TRACE_RB(1, "DebuggerCommand::Receive: error %d\n", errorNumber);
     return errorNumber != EINTR; // Treat signals as timeouts
   }
-  // Any error bits set indicate that we have nothing to read, so fail.
-  if (fds[0].revents != POLLIN) {
+  // If we don't have any data to read (POLLIN) then we're done. If we
+  // do have data we'll attempt to read and decode it below, even if
+  // there are other error bits set.
+  if (!(fds[0].revents & POLLIN)) {
     TRACE_RB(1, "DebuggerCommand::Receive: revents %d\n", fds[0].revents);
     return true;
   }
@@ -103,7 +105,7 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     // Note: this error case is difficult to test. But, it's exactly the same
     // as the error noted below. Make sure to keep handling of both of these
     // errors in sync.
-    Logger::Error("%s: socket error receiving command", caller);
+    TRACE_RB(1, "%s: socket error receiving command", caller);
     return true;
   }
 
@@ -147,7 +149,7 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     }
 
     default:
-      Logger::Error("%s: received bad cmd type: %d", caller, type);
+      TRACE_RB(1, "%s: received bad cmd type: %d", caller, type);
       cmd.reset();
       return true;
   }
@@ -155,7 +157,7 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     // Note: this error case is easily tested, and we have a test for it. But
     // the error case noted above is quite difficult to test. Keep these two
     // in sync.
-    Logger::Error("%s: socket error receiving command", caller);
+    TRACE_RB(1, "%s: socket error receiving command", caller);
     cmd.reset();
   }
   return true;

@@ -40,8 +40,10 @@
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/ir-translator.h"
 #include "hphp/runtime/vm/jit/linear-scan.h"
+#include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/tracelet.h"
 
 // Include last to localize effects to this file
 #include "hphp/util/assert_throw.h"
@@ -440,6 +442,16 @@ IRTranslator::translateAddElemC(const NormalizedInstruction& i) {
 }
 
 void
+IRTranslator::translateFloor(const NormalizedInstruction& i) {
+  HHIR_EMIT(Floor);
+}
+
+void
+IRTranslator::translateCeil(const NormalizedInstruction& i) {
+  HHIR_EMIT(Ceil);
+}
+
+void
 IRTranslator::translateAddNewElemC(const NormalizedInstruction& i) {
   assert(i.inputs.size() == 2);
   assert(i.inputs[0]->outerType() != KindOfRef);
@@ -615,12 +627,12 @@ void IRTranslator::translateCreateCont(const NormalizedInstruction& i) {
 }
 
 void IRTranslator::translateContEnter(const NormalizedInstruction& i) {
-  auto after = nextSrcKey(i).offset();
+  auto after = i.nextSk().offset();
 
   // ContEnter can't exist in an inlined function right now.  (If it
   // ever can, this curFunc() needs to change.)
   assert(!m_hhbcTrans.isInlining());
-  const Func* srcFunc = curFunc();
+  const Func* srcFunc = i.func();
   int32_t callOffsetInUnit = after - srcFunc->base();
 
   HHIR_EMIT(ContEnter, callOffsetInUnit);
@@ -1058,7 +1070,7 @@ findCuf(const NormalizedInstruction& ni,
     return nullptr;
   }
 
-  Class* ctx = curFunc()->cls();
+  Class* ctx = ni.func()->cls();
 
   if (sclass->isame(s_self.get())) {
     if (!ctx) return nullptr;
@@ -1317,8 +1329,8 @@ IRTranslator::translateFCall(const NormalizedInstruction& i) {
   auto const numArgs = i.imm[0].u_IVA;
 
   always_assert(!m_hhbcTrans.isInlining() && "curUnit and curFunc calls");
-  const PC after = curUnit()->at(nextSrcKey(i).offset());
-  const Func* srcFunc = curFunc();
+  const PC after = i.m_unit->at(i.nextSk().offset());
+  const Func* srcFunc = i.func();
   Offset returnBcOffset =
     srcFunc->unit()->offsetOf(after - srcFunc->base());
 
@@ -1328,7 +1340,7 @@ IRTranslator::translateFCall(const NormalizedInstruction& i) {
    */
   if (i.calleeTrace) {
     if (!i.calleeTrace->m_inliningFailed && !m_hhbcTrans.isInlining()) {
-      assert(shouldIRInline(curFunc(), i.funcd, *i.calleeTrace));
+      assert(shouldIRInline(i.func(), i.funcd, *i.calleeTrace));
 
       m_hhbcTrans.beginInlining(numArgs, i.funcd, returnBcOffset);
       static const bool shapeStats = Stats::enabledAny() &&
@@ -1360,7 +1372,7 @@ IRTranslator::translateFCall(const NormalizedInstruction& i) {
 void
 IRTranslator::translateFCallArray(const NormalizedInstruction& i) {
   const Offset pcOffset = i.offset();
-  SrcKey next = nextSrcKey(i);
+  SrcKey next = i.nextSk();
   const Offset after = next.offset();
 
   HHIR_EMIT(FCallArray, pcOffset, after);

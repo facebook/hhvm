@@ -1058,6 +1058,16 @@ Shr    [C C]  ->  [C:Int]
   Shift right (>>). Pushes ((int)$2 >> (int)$1) onto the stack. This
   instruction never throws a fatal error.
 
+Floor    [C]  ->  [C:Dbl]
+
+  Round $1 to nearest integer value not greater than $1.  Converts $1 to 
+  numeric as appropriate and then takes floor of resulting numeric value.
+
+Ceil    [C]  ->  [C:Dbl]
+
+  Round $1 to nearest integer value not less than $1.  Converts $1 to numeric
+  as appropriate and then takes ceil of resulting numeric value.
+
 CastBool    [C]  ->  [C:Bool]
 
   Cast to boolean ((bool),(boolean)). Pushes (bool)$1 onto the stack.

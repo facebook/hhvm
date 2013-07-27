@@ -21,6 +21,8 @@
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/string_buffer.h"
 
+namespace HPHP {
+
 void utf16_to_utf8(HPHP::StringBuffer &buf, unsigned short utf16);
 bool JSON_parser(HPHP::Variant &z, const char *p, int length,
                  bool assoc/*<fb>*/, bool loose/*</fb>*/);
@@ -37,5 +39,7 @@ enum json_error_codes {
 json_error_codes json_get_last_error_code();
 const char *json_get_last_error_msg();
 void json_set_last_error_code(json_error_codes ec);
+
+}
 
 #endif // incl_HPHP_JSON_PARSER_H_

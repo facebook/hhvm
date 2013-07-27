@@ -143,8 +143,9 @@ void DebuggerServer::accept() {
         }
       }
     } // else timed out, then we have a chance to check m_stopped bit
-    // cleanup the dummy sandbox threads it created
-    Debugger::CleanupDummySandboxThreads();
+
+    // A chance for some housekeeping...
+    Debugger::CleanupRetiredProxies();
   }
 
   m_sock.reset();

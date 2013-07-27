@@ -796,8 +796,15 @@ Variant f_mysql_affected_rows(CVarRef link_identifier /* = uninit_null() */) {
 ///////////////////////////////////////////////////////////////////////////////
 // query functions
 
+// Zend returns strings and NULL only, not integers or floats.  We
+// return ints (and, sometimes, actual doubles). TODO: make this
+// consistent or a runtime parameter or something.
 Variant mysql_makevalue(CStrRef data, MYSQL_FIELD *mysql_field) {
-  switch (mysql_field->type) {
+  return mysql_makevalue(data, mysql_field->type);
+}
+
+Variant mysql_makevalue(CStrRef data, enum_field_types field_type) {
+  switch (field_type) {
   case MYSQL_TYPE_DECIMAL:
   case MYSQL_TYPE_TINY:
   case MYSQL_TYPE_SHORT:

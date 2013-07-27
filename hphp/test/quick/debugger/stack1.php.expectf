@@ -95,7 +95,6 @@ StackArgs(sa) set to on.
 continue
 out pub:1 0
 test done 1 0
-
 break stack1.php:9
 Breakpoint 1 set on line 9 of stack1.php
 @ test(2, 2)
@@ -161,7 +160,6 @@ down
 #6  foo (2, 1)
     at %s/stack1.php:28
 @ $x=3
-
 continue
 out pri:2 0
 out pub:2 0

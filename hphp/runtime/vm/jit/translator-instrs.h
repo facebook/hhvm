@@ -167,7 +167,9 @@
   CASE(DecodeCufIter) \
   CASE(Shl) \
   CASE(Shr) \
-  CASE(Div)
+  CASE(Div) \
+  CASE(Floor) \
+  CASE(Ceil) \
 
   // These are instruction-like functions which cover more than one
   // opcode.

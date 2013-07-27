@@ -477,6 +477,8 @@ D:Int            = OpBitOr  S0:Int S1:Int
 D:Int            = OpBitXor S0:Int S1:Int
 D:Int            = OpShl    S0:Int S1:Int
 D:Int            = OpShr    S0:Int S1:Int
+D:Dbl            = OpFloor  S0:Dbl
+D:Dbl            = OpCeil   S0:Dbl
 
   Integer/boolean arithmetic.  Performs the operation described by the
   opcode name on S0 and S1, and puts the result in D.
@@ -490,6 +492,10 @@ D:Int            = OpShr    S0:Int S1:Int
   normal sign rules for division.
 
   Note that OpShr is an arithmetic right shift.
+
+  OpFloor and OpCeil will return an integral value not greater, or not less
+  than their input respectively.  Their use requires SSE 4.1, availability
+  should be checked before they are emitted.
 
 D:Bool = OpLogicXor S0:Bool S1:Bool
 

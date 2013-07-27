@@ -7,14 +7,7 @@ function test1Controller($hphpdOutput, $hphpdProcessId, $serverPort) {
   waitForClientToOutput($hphpdOutput, "Waiting for server response");
   $url = "http://".php_uname('n').':'.$serverPort.'/test1.php';
   echo "Requesting test1.php\n";
-  request($url, 1); // proceed without waiting for a response
-
-  // Send ctrl-c to client, which is waiting for a hung server
-  waitForClientToOutput($hphpdOutput, "Break at cls::pubHardBreak()");
-  waitForClientToOutput($hphpdOutput, "Waiting for server response");
-  sleep(2); // give server a chance to get itself in the enless loop
-  echo "sending SIGINT to the debugger client.\n";
-  posix_kill($hphpdProcessId, SIGINT);
+  request($url, 10); // proceed without waiting for a response
 
   // Let client run until script quits
   waitForClientToOutput($hphpdOutput, "quit");

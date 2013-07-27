@@ -119,15 +119,18 @@ Resource f_pagelet_server_task_start(CStrRef url,
                                      CArrRef files /* = null_array */) {
   String remote_host;
   Transport *transport = g_context->getTransport();
+  int timeout = ThreadInfo::s_threadInfo->m_reqInjectionData.getRemainingTime();
   if (transport) {
     remote_host = transport->getRemoteHost();
     if (!headers.exists(s_Host) && RuntimeOption::SandboxMode) {
       Array tmp = headers;
       tmp.set(s_Host, transport->getHeader("Host"));
-      return PageletServer::TaskStart(url, tmp, remote_host, post_data, files);
+      return PageletServer::TaskStart(url, tmp, remote_host,
+                                      post_data, files, timeout);
     }
   }
-  return PageletServer::TaskStart(url, headers, remote_host, post_data);
+  return PageletServer::TaskStart(url, headers, remote_host,
+                                  post_data, files, timeout);
 }
 
 int64_t f_pagelet_server_task_status(CResRef task) {
@@ -135,7 +138,8 @@ int64_t f_pagelet_server_task_status(CResRef task) {
 }
 
 String f_pagelet_server_task_result(CResRef task, VRefParam headers,
-                                    VRefParam code, int64_t timeout_ms /* = 0 */) {
+                                    VRefParam code,
+                                    int64_t timeout_ms /* = 0 */) {
   Array rheaders;
   int rcode;
   String response = PageletServer::TaskResult(task, rheaders, rcode,

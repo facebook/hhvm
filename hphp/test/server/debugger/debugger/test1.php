@@ -11,13 +11,5 @@ function test_break() {
   $obj->pubHardBreak($x);
 }
 
-function test_sleep() {
-  $a = 1;
-  // $a will be set to 0 by debugger after interrupt
-  while ($a == 1) { sleep(1); }
-  return $a;
-}
-
 test_break();
-test_sleep();
 echo "request done\n";

@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/memory_manager.h"
+#include "hphp/runtime/base/crash_reporter.h"
 #include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/server/http_protocol.h"
 #include "hphp/runtime/debugger/debugger.h"
@@ -84,6 +85,15 @@ LibEventWorker::~LibEventWorker() {
 }
 
 void LibEventWorker::doJob(LibEventJobPtr job) {
+  doJobImpl(job, false /*abort*/);
+}
+
+void LibEventWorker::abortJob(LibEventJobPtr job) {
+  doJobImpl(job, true /*abort*/);
+  m_requestsTimedOutOnQueue->addValue(1);
+}
+
+void LibEventWorker::doJobImpl(LibEventJobPtr job, bool abort) {
   job->stopTimer();
   evhttp_request *request = job->request;
   assert(m_opaque);
@@ -97,6 +107,12 @@ void LibEventWorker::doJob(LibEventJobPtr job) {
 #endif
   bool error = true;
   std::string errorMsg;
+
+  if (abort) {
+    transport.sendString("Service Unavailable", 503);
+    return;
+  }
+
   try {
     std::string cmd = transport.getCommand();
     cmd = std::string("/") + cmd;
@@ -136,6 +152,9 @@ void LibEventWorker::onThreadEnter() {
     Eval::Debugger::RegisterThread();
   }
   m_handler = server->createRequestHandler();
+  m_requestsTimedOutOnQueue =
+    ServiceData::createTimeseries("requests_timed_out_on_queue",
+                                  {ServiceData::StatsType::COUNT});
 }
 
 void LibEventWorker::onThreadExit() {
@@ -154,7 +173,8 @@ LibEventServer::LibEventServer(const std::string &address, int port,
     m_dispatcher(thread, RuntimeOption::ServerThreadRoundRobin,
                  RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
                  RuntimeOption::ServerThreadDropStack,
-                 this, RuntimeOption::ServerThreadJobLIFOSwitchThreshold),
+                 this, RuntimeOption::ServerThreadJobLIFOSwitchThreshold,
+                 RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds),
     m_dispatcherThread(this, &LibEventServer::dispatch) {
   m_eventBase = event_base_new();
   m_server = evhttp_new(m_eventBase);
@@ -358,6 +378,25 @@ int LibEventServer::getAcceptSocketSSL() {
 // request/response handling
 
 void LibEventServer::onRequest(struct evhttp_request *request) {
+  // If we are in the process of crashing, we want to reject incoming work.
+  // This will prompt the load balancers to choose another server. Using
+  // shutdown rather than close has the advantage that it makes fewer changes
+  // to the process (eg, it doesn't close the FD so if the FD number were
+  // corrupted it would be mostly harmless).
+  //
+  // Setting accept sock to -1 will leak FDs. But we're crashing anyways.
+  if (IsCrashing) {
+    if (m_accept_sock != -1) {
+      shutdown(m_accept_sock, SHUT_FBLISTEN);
+      m_accept_sock = -1;
+    }
+    if (m_accept_sock_ssl != -1) {
+      shutdown(m_accept_sock_ssl, SHUT_FBLISTEN);
+      m_accept_sock_ssl = -1;
+    }
+    return;
+  }
+
   if (RuntimeOption::EnableKeepAlive &&
       RuntimeOption::ConnectionTimeoutSeconds > 0) {
     // before processing request, set the connection timeout

@@ -28,16 +28,16 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-bool SegFaulting = false;
+bool IsCrashing = false;
 
 static void bt_handler(int sig) {
   // In case we crash again in the signal hander or something
   signal(sig, SIG_DFL);
 
+  IsCrashing = true;
   // Generating a stack dumps significant time, try to stop threads
   // from flushing bad data or generating more faults meanwhile
   if (sig==SIGQUIT || sig==SIGILL || sig==SIGSEGV || sig==SIGBUS) {
-    SegFaulting = true;
     LightProcess::Close();
     // leave running for SIGTERM SIGFPE SIGABRT
   }

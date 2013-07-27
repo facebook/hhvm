@@ -11,4 +11,3 @@ Breakpoint 1 reached on line 3 of %s/error_short_cmd_send.php
 internaltesting shortcmdsend
 Executing internal test...
 DebuggerCommand::recv(): a socket error has happened
-DebuggerProxy::processInterrupt(): socket error receiving command

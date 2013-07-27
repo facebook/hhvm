@@ -211,8 +211,7 @@ public:
   RequestInjectionData()
     : cflagsPtr(nullptr), surprisePage(nullptr),
       m_timeoutSeconds(-1), m_hasTimer(false), m_timerActive(false),
-      m_debugger(false), m_dummySandbox(false),
-      m_debuggerIntr(false), m_coverage(false),
+      m_debugger(false), m_debuggerIntr(false), m_coverage(false),
       m_jit(false) {
   }
 
@@ -238,13 +237,13 @@ public:
                          // Set true when we activate a timer,
                          // cleared when the signal handler runs
   bool m_debugger;       // whether there is a DebuggerProxy attached to me
-  bool m_dummySandbox;   // indicating it is from a dummy sandbox thread
   bool m_debuggerIntr;   // indicating we should force interrupt for debugger
   bool m_coverage;       // is coverage being collected
   bool m_jit;            // is the jit enabled
  public:
   int getTimeout() const { return m_timeoutSeconds; }
   void setTimeout(int seconds);
+  int getRemainingTime() const;
   void resetTimer(int seconds = -1);
   void setSurprisePage(void* page);
   void onTimeout();
@@ -267,8 +266,6 @@ public:
     m_coverage = flag;
     updateJit();
   }
-  bool getDummySandbox() const { return m_dummySandbox; }
-  void setDummySandbox(bool ds) { m_dummySandbox = ds; }
   void updateJit();
 
   std::stack<void *> interrupts;   // CmdInterrupts this thread's handling

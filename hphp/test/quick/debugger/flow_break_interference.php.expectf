@@ -31,7 +31,6 @@ Breakpoint 2 reached at main() on line 27 of %s/flow_break_interference.php
 p $a
 42
 $a = 7
-
 n
 Break at main() on line 28 of %s/flow_break_interference.php
   27   $z = $a;

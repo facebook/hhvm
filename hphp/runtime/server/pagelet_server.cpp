@@ -38,8 +38,11 @@ class PageletTransport : public Transport, public Synchronizable {
 public:
   PageletTransport(CStrRef url, CArrRef headers, CStrRef postData,
                    CStrRef remoteHost, const set<string> &rfc1867UploadedFiles,
-                   CArrRef files)
-    : m_refCount(0), m_done(false), m_code(0) {
+                   CArrRef files, int timeoutSeconds)
+      : m_refCount(0),
+        m_timeoutSeconds(timeoutSeconds),
+        m_done(false),
+        m_code(0) {
 
     Timer::GetMonotonicTime(m_queueTime);
     m_threadType = ThreadType::PageletThread;
@@ -211,9 +214,11 @@ public:
     }
   }
 
-  timespec getStartTimer() const { return m_queueTime; }
+  const timespec& getStartTimer() const { return m_queueTime; }
+  int getTimeoutSeconds() const { return m_timeoutSeconds; }
 private:
   int m_refCount;
+  int m_timeoutSeconds;
 
   string m_url;
   HeaderMap m_requestHeaders;
@@ -233,13 +238,31 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static int64_t to_ms(const timespec& ts) {
+  return ts.tv_sec * 1000 + (ts.tv_nsec / 1000000);
+}
+
 struct PageletWorker
   : JobQueueWorker<PageletTransport*,true,false,JobQueueDropVMStack>
 {
   virtual void doJob(PageletTransport *job) {
     try {
       job->onRequestStart(job->getStartTimer());
-      HttpRequestHandler(0).handleRequest(job);
+      int timeout = job->getTimeoutSeconds();
+      if (timeout > 0) {
+        timespec ts;
+        Timer::GetMonotonicTime(ts);
+        int64_t delta_ms =
+          to_ms(job->getStartTimer()) + timeout * 1000 - to_ms(ts);
+        if (delta_ms > 500) {
+          timeout = (delta_ms + 500) / 1000;
+        } else {
+          timeout = 1;
+        }
+      } else {
+        timeout = 0;
+      }
+      HttpRequestHandler(timeout).handleRequest(job);
       job->decRefCount();
     } catch (...) {
       Logger::Error("HttpRequestHandler leaked exceptions");
@@ -256,9 +279,9 @@ public:
   PageletTask(CStrRef url, CArrRef headers, CStrRef post_data,
               CStrRef remote_host,
               const std::set<std::string> &rfc1867UploadedFiles,
-              CArrRef files) {
+              CArrRef files, int timeoutSeconds) {
     m_job = new PageletTransport(url, headers, remote_host, post_data,
-                                 rfc1867UploadedFiles, files);
+                                 rfc1867UploadedFiles, files, timeoutSeconds);
     m_job->incRefCount();
   }
 
@@ -318,7 +341,8 @@ void PageletServer::Stop() {
 Resource PageletServer::TaskStart(CStrRef url, CArrRef headers,
                                   CStrRef remote_host,
                                   CStrRef post_data /* = null_string */,
-                                  CArrRef files /* = null_array */) {
+                                  CArrRef files /* = null_array */,
+                                  int timeoutSeconds /* = -1 */) {
   {
     Lock l(s_dispatchMutex);
     if (!s_dispatcher) {
@@ -331,7 +355,8 @@ Resource PageletServer::TaskStart(CStrRef url, CArrRef headers,
     }
   }
   PageletTask *task = NEWOBJ(PageletTask)(url, headers, remote_host, post_data,
-                                          get_uploaded_files(), files);
+                                          get_uploaded_files(), files,
+                                          timeoutSeconds);
   Resource ret(task);
   PageletTransport *job = task->getJob();
   Lock l(s_dispatchMutex);

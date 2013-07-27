@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/base/string_buffer.h"
 #include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/thread_init_fini.h"
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -280,6 +281,16 @@ public:
   sigset_t oldSet;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(SignalHandlers, s_signal_handlers);
+
+// We must register the s_signal_handlers RequestEventHandler
+// immediately: otherwise, pcntl_signal_handler might try to register
+// it while processing a signal, which means calling malloc to insert
+// it into various vectors and sets, which is not ok from a signal
+// handler.
+static InitFiniNode initSignalHandler(
+  [] { s_signal_handlers.get(); },
+  InitFiniNode::When::ThreadInit
+);
 
 static void pcntl_signal_handler(int signo) {
   if (signo > 0 && signo < _NSIG && !g_context.isNull()) {

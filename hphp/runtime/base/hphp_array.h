@@ -428,6 +428,7 @@ private:
   ArrayData* updateRef(int64_t ki, CVarRef data);
   ArrayData* updateRef(StringData* key, CVarRef data);
 
+  void adjustFullPos(ElmInd pos);
   ArrayData* erase(ElmInd* ei, bool updateNext = false);
 
   HphpArray* copyImpl(HphpArray* target) const;

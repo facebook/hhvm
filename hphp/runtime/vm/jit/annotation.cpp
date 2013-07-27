@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/annotation.h"
+#include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/base.h"
@@ -102,11 +103,11 @@ static void recordActRecPush(NormalizedInstruction& i,
 
   SrcKey next(sk);
   next.advance(unit);
-  const FPIEnt *fpi = curFunc()->findFPI(next.offset());
+  const FPIEnt *fpi = sk.func()->findFPI(next.offset());
   assert(fpi);
   assert(name->isStatic());
   assert(sk.offset() == fpi->m_fpushOff);
-  auto const fcall = SrcKey { curFunc(), fpi->m_fcallOff };
+  auto const fcall = SrcKey { sk.func(), fpi->m_fcallOff };
   assert(isFCallStar(toOp(*unit->at(fcall.offset()))));
   if (clsName) {
     const Class* cls = Unit::lookupUniqueClass(clsName);

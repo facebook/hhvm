@@ -117,26 +117,6 @@ int64_t convObjToBoolHelper(const ObjectData* o) {
   return o->o_toBoolean();
 }
 
-int64_t convCellToBoolHelper(TypedValue tv) {
-  // Cannot call tvCastToBooleanInPlace here because some of the
-  // call sites will not be increasing the ref count on tv before
-  // calling, the ref count must be left alone.
-
-  switch (tv.m_type) {
-    case KindOfUninit:
-    case KindOfNull:    return false;
-    case KindOfBoolean: return tv.m_data.num;
-    case KindOfInt64:   return tv.m_data.num != 0;
-    case KindOfDouble:  return tv.m_data.dbl != 0;
-    case KindOfStaticString:
-    case KindOfString:  return tv.m_data.pstr->toBoolean();
-    case KindOfArray:   return !tv.m_data.parr->empty();
-    case KindOfObject:  return tv.m_data.pobj->o_toBoolean();
-    case KindOfResource: return tv.m_data.pres->o_toBoolean();
-    default:            not_reached();
-  }
-}
-
 int64_t convArrToDblHelper(ArrayData* a) {
   return reinterpretDblAsInt(a->empty() ? 0 : 1);
 }

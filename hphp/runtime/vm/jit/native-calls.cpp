@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/tv_conversions.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/ir.h"
@@ -101,7 +102,7 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
     {ConvStrToBool,      (TCA)convStrToBoolHelper, DSSA, SNone,
                            {{SSA, 0}}},
-    {ConvCellToBool,      (TCA)convCellToBoolHelper, DSSA, SNone,
+    {ConvCellToBool,      (TCA)cellToBool, DSSA, SNone,
                            {{TV, 0}}},
 
     {ConvArrToDbl,       (TCA)convArrToDblHelper, DSSA, SNone,

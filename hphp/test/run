@@ -594,14 +594,21 @@ function run_test($options, $test) {
 }
 
 function num_cpus() {
-  $data = file('/proc/stat');
-  $cores = 0;
-  foreach($data as $line) {
-    if (preg_match('/^cpu[0-9]/', $line)) {
-      $cores++;
-    }
+  switch(PHP_OS) {
+    case 'Linux':
+      $data = file('/proc/stat');
+      $cores = 0;
+      foreach($data as $line) {
+        if (preg_match('/^cpu[0-9]/', $line)) {
+          $cores++;
+        }
+      }
+      return $cores;
+    case 'Darwin':
+    case 'FreeBSD':
+      return exec('sysctl -n hw.ncpu');
   }
-  return $cores;
+  return 2;
 }
 
 function main($argv) {

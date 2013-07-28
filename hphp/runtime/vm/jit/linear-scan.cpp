@@ -858,7 +858,6 @@ void LinearScan::computePreColoringHint() {
       normalHint(1, 0, 0);
       break;
     case LdGblAddr:
-    case LdGblAddrDef:
       normalHint(1, 0, 0);
       break;
     case LdClsPropAddr:

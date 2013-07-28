@@ -421,6 +421,7 @@ CALL_OPCODE(IncStatGrouped)
 CALL_OPCODE(StaticLocInit)
 CALL_OPCODE(StaticLocInitCached)
 CALL_OPCODE(ArrayIdx)
+CALL_OPCODE(LdGblAddrDef)
 
 // Vector instruction helpers
 CALL_OPCODE(BaseG)
@@ -5236,7 +5237,7 @@ HOT_FUNC_VM static TypedValue* ldGblAddrHelper(StringData* name) {
   return g_vmContext->m_globalVarEnv->lookup(name);
 }
 
-HOT_FUNC_VM static TypedValue* ldGblAddrDefHelper(StringData* name) {
+HOT_FUNC_VM TypedValue* ldGblAddrDefHelper(StringData* name) {
   TypedValue* r = g_vmContext->m_globalVarEnv->lookupAdd(name);
   decRefStr(name);
   return r;
@@ -5251,15 +5252,6 @@ void CodeGenerator::cgLdGblAddr(IRInstruction* inst) {
                ArgGroup(m_regs).ssa(inst->src(0)));
   m_as.testq(dstReg, dstReg);
   emitFwdJcc(CC_Z, inst->taken());
-}
-
-// TODO: convert this to native-calls.cpp
-void CodeGenerator::cgLdGblAddrDef(IRInstruction* inst) {
-  cgCallHelper(m_as,
-               CppCall(ldGblAddrDefHelper),
-               callDest(inst->dst()),
-               SyncOptions::kNoSyncPoint,
-               ArgGroup(m_regs).ssa(inst->src(0)));
 }
 
 void CodeGenerator::emitTestZero(SSATmp* src) {

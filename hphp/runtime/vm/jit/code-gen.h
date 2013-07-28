@@ -589,6 +589,7 @@ void genCodeForTrace(IRTrace*                trace,
 TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
 TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
+TypedValue* ldGblAddrDefHelper(StringData* name);
 
 }}
 

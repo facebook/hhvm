@@ -203,6 +203,8 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
     {ArrayIdx,           fssa(0), DTV, SSync,
                            {{SSA, 1}, {SSA, 2}, {TV, 3}}},
+    {LdGblAddrDef,       ldGblAddrDefHelper, DSSA, SNone,
+                           {{SSA, 0}}},
 
     /* Switch helpers */
     {LdSwitchDblIndex,   switchDoubleHelper, DSSA, SSync,

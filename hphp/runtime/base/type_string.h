@@ -232,10 +232,6 @@ public:
     return m_px ? m_px->isZero() : false;
   }
 
-  bool isValidVariableName() const {
-    return m_px ? m_px->isValidVariableName() : false;
-  }
-
   /**
    * Take a sub-string from start with specified length. Note, read
    * http://www.php.net/substr about meanings of negative start or length.

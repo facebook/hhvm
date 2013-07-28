@@ -148,10 +148,8 @@ bool TestCppBase::TestString() {
     VERIFY(String("test").length() == 4);
     VERIFY(!String("2test").isNumeric());
     VERIFY(!String("2test").isInteger());
-    VERIFY(!String("2test").isValidVariableName());
     VERIFY(!String("test").isNumeric());
     VERIFY(!String("test").isInteger());
-    VERIFY(String("test").isValidVariableName());
     VERIFY(String("23").isNumeric());
     VERIFY(String("23").isInteger());
     VERIFY(String("23.3").isNumeric());

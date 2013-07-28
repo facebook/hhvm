@@ -52,28 +52,6 @@ typedef folly::AtomicHashMap<const StringData *, uint32_t,
                              ahm_string_data_same> StringDataMap;
 static StringDataMap *s_stringDataMap;
 
-const StringData* StringData::convert_double_helper(double n) {
- char *buf;
- StringData* result;
-
- if (n == 0.0) n = 0.0; // so to avoid "-0" output
- vspprintf(&buf, 0, "%.*G", 14, n);
- result = StringData::GetStaticString(buf);
- free(buf);
- return result;
-}
-
-const StringData* StringData::convert_integer_helper(int64_t n) {
- char tmpbuf[21];
- char *p;
- int is_negative;
- int len;
-
- tmpbuf[20] = '\0';
- p = conv_10(n, &is_negative, &tmpbuf[20], &len);
- return StringData::GetStaticString(p);
-}
-
 // If a string is static it better be the one in the table.
 #ifndef NDEBUG
 static bool checkStaticStr(const StringData* s) {
@@ -825,11 +803,6 @@ bool StringData::isInteger() const {
     break;
   }
   return false;
-}
-
-bool StringData::isValidVariableName() const {
-  StringSlice s = slice();
-  return is_valid_var_name(s.ptr, s.len);
 }
 
 bool StringData::toBoolean() const {

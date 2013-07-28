@@ -214,8 +214,6 @@ public:
 
   void append(StringSlice r) { append(r.ptr, r.len); }
   void append(const char *s, int len);
-  static const StringData* convert_double_helper(double n);
-  static const StringData* convert_integer_helper(int64_t n);
   StringData *copy(bool sharedMemory = false) const;
   MutableSlice reserve(int capacity);
   MutableSlice mutableSlice() {
@@ -271,7 +269,6 @@ public:
     return is_strictly_integer(s.ptr, s.len, res);
   }
   bool isZero() const { return size() == 1 && rawdata()[0] == '0'; }
-  bool isValidVariableName() const;
 
   /**
    * Mutations.
@@ -300,11 +297,6 @@ public:
   int64_t  toInt64  (int base = 10) const;
   double toDouble () const;
   DataType toNumeric(int64_t &lval, double &dval) const;
-
-  strhash_t getPrecomputedHash() const {
-    assert(!isShared());
-    return m_hash & STRHASH_MASK;
-  }
 
   strhash_t hash() const {
     strhash_t h = m_hash & STRHASH_MASK;

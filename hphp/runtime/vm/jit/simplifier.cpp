@@ -1556,8 +1556,8 @@ SSATmp* Simplifier::simplifyConvBoolToStr(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyConvDblToStr(IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
-    return cns(
-      StringData::convert_double_helper(src->getValDbl()));
+    String dblStr(buildStringData(src->getValDbl()));
+    return cns(StringData::GetStaticString(dblStr));
   }
   return nullptr;
 }
@@ -1566,7 +1566,8 @@ SSATmp* Simplifier::simplifyConvIntToStr(IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
     return cns(
-      StringData::convert_integer_helper(src->getValInt()));
+      StringData::GetStaticString(folly::to<std::string>(src->getValInt()))
+    );
   }
   return nullptr;
 }

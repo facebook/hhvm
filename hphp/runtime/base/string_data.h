@@ -97,7 +97,7 @@ class StringData {
     IsMask    = 0xF000000000000000
   };
 
- public:
+public:
   const static uint32_t MaxSmallSize = 43;
 
   /* max length of a string, not counting the terminal 0.  This is
@@ -336,43 +336,8 @@ public:
   static uint32_t GetCnsHandle(const StringData* cnsName);
   static uint32_t DefCnsHandle(const StringData* cnsName, bool persistent);
   static Array GetConstants();
-  /**
-   * The order of the data members is significant. The m_count field must
-   * be exactly FAST_REFCOUNT_OFFSET bytes from the beginning of the object.
-   */
- private:
-  union {
-    const char* m_cdata;
-    char* m_data;
-  };
-  uint32_t m_len;
- protected:
-  mutable RefCount m_count;
- private:
-  // m_len and m_data are not overlapped with small strings because
-  // they are accessed so frequently that even the inline branch to
-  // measurably slows things down.  Its worse for m_len than m_data.
-  // If frequent callers are refacotred to use slice() then we could
-  // revisit this decision.
-  mutable strhash_t m_hash;   // precompute hash codes for static strings
-  union __attribute__((__packed__)) {
-    char m_small[MaxSmallSize + 1];
-    struct __attribute__((__packed__)) {
-      // Calculate padding so that node, shared, and cap are pointer aligned,
-      // and ensure cap overlaps the last byte of m_small.
-      static const size_t kPadding = sizeof(m_small) -
-        sizeof(SweepNode) - sizeof(SharedVariant*) - sizeof(uint64_t);
-      char junk[kPadding];
-      SweepNode node;
-      SharedVariant *shared;
-      uint64_t cap;
-    } m_big;
-  };
 
- private:
-  /**
-   * Helpers.
-   */
+private:
   void initAttach(const char* data);
   void initCopy(const char* data);
   void initAttach(const char* data, int len);
@@ -399,6 +364,37 @@ public:
   /* Only call preCompute() and setStatic() in a thread-neutral context! */
   void preCompute() const;
   void setStatic() const;
+
+private:
+  /*
+   * The order of the data members is significant. The m_count field must
+   * be exactly FAST_REFCOUNT_OFFSET bytes from the beginning of the object.
+   */
+  union {
+    const char* m_cdata;
+    char* m_data;
+  };
+  uint32_t m_len;
+  mutable RefCount m_count;
+  // m_len and m_data are not overlapped with small strings because
+  // they are accessed so frequently that even the inline branch to
+  // measurably slows things down.  Its worse for m_len than m_data.
+  // If frequent callers are refacotred to use slice() then we could
+  // revisit this decision.
+  mutable strhash_t m_hash;   // precompute hash codes for static strings
+  union __attribute__((__packed__)) {
+    char m_small[MaxSmallSize + 1];
+    struct __attribute__((__packed__)) {
+      // Calculate padding so that node, shared, and cap are pointer aligned,
+      // and ensure cap overlaps the last byte of m_small.
+      static const size_t kPadding = sizeof(m_small) -
+        sizeof(SweepNode) - sizeof(SharedVariant*) - sizeof(uint64_t);
+      char junk[kPadding];
+      SweepNode node;
+      SharedVariant *shared;
+      uint64_t cap;
+    } m_big;
+  };
 };
 
 /**

@@ -417,9 +417,6 @@ void StringData::append(const char *s, int len) {
                               size_t(len) + size_t(m_len));
   }
   uint32_t newlen = m_len + len;
-  // TODO: t1122987: in any of the cases below where we need a bigger buffer,
-  // we can probably assume we're in a concat-loop and pick a good buffer
-  // size to avoid O(N^2) copying cost.
   if (isShared()) {
     // buffer is immutable, don't modify it.
     StringSlice r = slice();

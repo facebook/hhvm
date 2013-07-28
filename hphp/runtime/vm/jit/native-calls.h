@@ -42,7 +42,7 @@ struct FuncPtr {
   template<class Ret, class... Args>
   /* implicit */ FuncPtr(Ret (*fp)(Args...))
     : type(FuncType::Call)
-    , call(reinterpret_cast<TCA>(fp))
+    , call(fp)
   {}
 
   FuncPtr(FuncType t, uint64_t i) : type(t), srcIdx(i) {

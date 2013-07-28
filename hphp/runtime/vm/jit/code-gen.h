@@ -30,13 +30,28 @@ namespace JIT {
 
 struct ArgGroup;
 
-// DestType describes the return type of native helper calls, particularly
-// register assignments
 enum class DestType : unsigned {
   None,  // return void (no valid registers)
   SSA,   // return a single-register value
   TV     // return a TypedValue packed in two registers
 };
+
+/*
+ * CallDest is the destination specification for a cgCallHelper
+ * invocation.
+ *
+ * The DestType describes the return type of native helper calls,
+ * particularly register assignments.
+ *
+ * These are created using the callDest() member functions.
+ */
+struct CallDest {
+  DestType type;
+  PhysReg reg0;
+  PhysReg reg1;
+};
+
+const CallDest kVoidDest { DestType::None };
 
 enum class SyncOptions {
   kNoSyncPoint,
@@ -139,48 +154,26 @@ private:
   IR_OPCODES
 #undef O
 
-  // helper functions for code generation
   void cgCallNative(Asm& a, IRInstruction* inst);
-  void doStackArgs(Asm&, ArgGroup&);
-  void cgCallHelper(Asm&,
-                    TCA addr,
-                    SSATmp* dst,
-                    SyncOptions sync,
-                    ArgGroup& args,
-                    DestType destType = DestType::SSA);
-  void cgCallHelper(Asm&,
-                    const Transl::CppCall&,
-                    SSATmp* dst,
-                    SyncOptions sync,
-                    ArgGroup& args,
-                    DestType destType = DestType::SSA);
-  void cgCallHelper(Asm& a,
-                    TCA addr,
-                    PhysReg dstReg,
-                    SyncOptions sync,
-                    ArgGroup& args,
-                    DestType destType = DestType::SSA);
+
+  // Utilities to package CallDest structs for cgCallHelper.
+  CallDest callDest(PhysReg reg0, PhysReg reg1 = InvalidReg) const;
+  CallDest callDest(SSATmp* dst) const;
+  CallDest callDestTV(SSATmp* dst) const;
+
+  // Main call helper:
   void cgCallHelper(Asm& a,
                     const Transl::CppCall& call,
-                    PhysReg dstReg,
+                    const CallDest& dstInfo,
                     SyncOptions sync,
                     ArgGroup& args,
-                    DestType destType = DestType::SSA);
+                    RegSet toSave);
+  // Overload to make the toSave RegSet optional:
   void cgCallHelper(Asm& a,
                     const Transl::CppCall& call,
-                    PhysReg dstReg0,
-                    PhysReg dstReg1,
+                    const CallDest& dstInfo,
                     SyncOptions sync,
-                    ArgGroup& args,
-                    DestType destType = DestType::SSA);
-  void cgCallHelper(Asm& a,
-                    const Transl::CppCall& call,
-                    PhysReg dstReg0,
-                    PhysReg dstReg1,
-                    SyncOptions sync,
-                    ArgGroup& args,
-                    RegSet toSave,
-                    DestType destType = DestType::SSA);
+                    ArgGroup& args);
   void cgInterpOneCommon(IRInstruction* inst);
 
   void cgStore(PhysReg base,
@@ -328,8 +321,6 @@ private:
   Class*      curClass() const { return curFunc()->cls(); }
   const Unit* curUnit() const { return curFunc()->unit(); }
   void recordSyncPoint(Asm& as, SyncOptions sync = SyncOptions::kSyncPoint);
-  Address getDtorGeneric();
-  Address getDtorTyped();
   int iterOffset(SSATmp* tmp);
   int iterOffset(uint32_t id);
   void emitReqBindAddr(const Func* func, TCA& dest, Offset offset);

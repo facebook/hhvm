@@ -68,8 +68,19 @@ struct FreeStubList {
 };
 
 struct CppCall {
-  explicit CppCall(void *p) : m_kind(Direct), m_fptr(p) {}
+  template<class Ret, class... Args>
+  explicit CppCall(Ret (*pfun)(Args...))
+    : m_kind(Direct)
+    , m_fptr(reinterpret_cast<void*>(pfun))
+  {}
+
+  explicit CppCall(void* p)
+    : m_kind(Direct)
+    , m_fptr(p)
+  {}
+
   explicit CppCall(int off) : m_kind(Virtual), m_offset(off) {}
+
   CppCall(CppCall const&) = default;
 
   bool isDirect()  const { return m_kind == Direct;  }

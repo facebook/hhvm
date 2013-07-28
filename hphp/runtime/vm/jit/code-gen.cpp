@@ -1071,78 +1071,52 @@ void CodeGenerator::cgCallNative(Asm& a, IRInstruction* inst) {
     not_reached();
   }();
 
-  cgCallHelper(a,
-               call,
-               info.dest != DestType::None ? inst->dst(0) : nullptr,
-               info.sync,
-               argGroup,
-               info.dest);
+  auto const dest = [&]() -> CallDest {
+    switch (info.dest) {
+    case DestType::None:  return kVoidDest;
+    case DestType::TV:    return callDestTV(inst->dst(0));
+    case DestType::SSA:   return callDest(inst->dst(0));
+    }
+    not_reached();
+  }();
+
+  cgCallHelper(a, call, dest, info.sync, argGroup);
 }
 
-void CodeGenerator::cgCallHelper(Asm& a,
-                                 TCA addr,
-                                 SSATmp* dst,
-                                 SyncOptions sync,
-                                 ArgGroup& args,
-                                 DestType destType) {
-  return cgCallHelper(a, CppCall(addr), dst, sync, args, destType);
+CallDest CodeGenerator::callDest(PhysReg reg0,
+                                 PhysReg reg1 /* = InvalidReg */) const {
+  return { DestType::SSA, reg0, reg1 };
 }
 
-void CodeGenerator::cgCallHelper(Asm& a,
-                                 const CppCall& call,
-                                 SSATmp* dst,
-                                 SyncOptions sync,
-                                 ArgGroup& args,
-                                 DestType destType) {
-  PhysReg dstReg0 = InvalidReg;
-  PhysReg dstReg1 = InvalidReg;
-  if (dst) {
-    auto &info = m_regs[dst];
-    dstReg0 = info.reg(0);
-    dstReg1 = info.reg(1);
-  }
-  return cgCallHelper(a, call, dstReg0, dstReg1, sync, args, destType);
+CallDest CodeGenerator::callDest(SSATmp* ssa) const {
+  if (!ssa) return kVoidDest;
+  return { DestType::SSA, m_regs[ssa].reg(0), m_regs[ssa].reg(1) };
 }
 
-void CodeGenerator::cgCallHelper(Asm& a,
-                                 TCA addr,
-                                 PhysReg dstReg,
-                                 SyncOptions sync,
-                                 ArgGroup& args,
-                                 DestType destType) {
-  cgCallHelper(a, CppCall(addr), dstReg, InvalidReg, sync, args,
-               destType);
+CallDest CodeGenerator::callDestTV(SSATmp* ssa) const {
+  if (!ssa) return kVoidDest;
+  return { DestType::TV, m_regs[ssa].reg(0), m_regs[ssa].reg(1) };
 }
 
 void CodeGenerator::cgCallHelper(Asm& a,
                                  const CppCall& call,
-                                 PhysReg dstReg,
+                                 const CallDest& dstInfo,
                                  SyncOptions sync,
-                                 ArgGroup& args,
-                                 DestType destType) {
-  cgCallHelper(a, call, dstReg, InvalidReg, sync, args, destType);
+                                 ArgGroup& args) {
+  cgCallHelper(a, call, dstInfo, sync, args, m_state.liveRegs[m_curInst]);
 }
 
 void CodeGenerator::cgCallHelper(Asm& a,
                                  const CppCall& call,
-                                 PhysReg dstReg0,
-                                 PhysReg dstReg1,
+                                 const CallDest& dstInfo,
                                  SyncOptions sync,
                                  ArgGroup& args,
-                                 DestType destType) {
-  cgCallHelper(a, call, dstReg0, dstReg1, sync, args,
-               m_state.liveRegs[m_curInst], destType);
-}
-
-void CodeGenerator::cgCallHelper(Asm& a,
-                                 const CppCall& call,
-                                 PhysReg dstReg0,
-                                 PhysReg dstReg1,
-                                 SyncOptions sync,
-                                 ArgGroup& args,
-                                 RegSet toSave,
-                                 DestType destType) {
+                                 RegSet toSave) {
   assert(m_curInst->isNative());
+
+  auto const destType = dstInfo.type;
+  auto const dstReg0  = dstInfo.reg0;
+  auto const dstReg1  = dstInfo.reg1;
 
   // Save the caller-saved registers that are live across this
   // instruction. The number of regs to save and the number of args
@@ -1176,21 +1150,28 @@ void CodeGenerator::cgCallHelper(Asm& a,
   }
 
   // copy the call result to the destination register(s)
-  if (destType == DestType::TV) {
-    // rax contains m_type and m_aux but we're expecting just the
-    // type in the lower bits, so shift the type result register.
-    auto rval = packed_tv ? reg::rdx : reg::rax;
-    auto rtyp = packed_tv ? reg::rax : reg::rdx;
-    if (kTypeShiftBits > 0) a.shrq(kTypeShiftBits, rtyp);
-    shuffle2(a, rval, rtyp, dstReg0, dstReg1);
-  } else if (destType == DestType::SSA) {
+  switch (destType) {
+  case DestType::TV:
+    {
+      // rax contains m_type and m_aux but we're expecting just the
+      // type in the lower bits, so shift the type result register.
+      auto rval = packed_tv ? reg::rdx : reg::rax;
+      auto rtyp = packed_tv ? reg::rax : reg::rdx;
+      if (kTypeShiftBits > 0) a.shrq(kTypeShiftBits, rtyp);
+      shuffle2(a, rval, rtyp, dstReg0, dstReg1);
+    }
+    return;
+  case DestType::SSA:
     // copy the single-register result to dstReg0
     assert(dstReg1 == InvalidReg);
     if (dstReg0 != InvalidReg) emitMovRegReg(a, reg::rax, dstReg0);
-  } else {
+    return;
+  case DestType::None:
     // void return type, no registers have values
     assert(dstReg0 == InvalidReg && dstReg1 == InvalidReg);
+    return;
   }
+  not_reached();
 }
 
 void CodeGenerator::cgMov(IRInstruction* inst) {
@@ -1812,7 +1793,8 @@ void CodeGenerator::cgCmpHelper(
   if (type1.isString() && type2.isString()) {
     ArgGroup args(m_regs);
     args.ssa(src1).ssa(src2);
-    cgCallHelper(m_as, (TCA)str_cmp_str,  dst, SyncOptions::kSyncPoint, args);
+    cgCallHelper(m_as, CppCall(str_cmp_str), callDest(dst),
+      SyncOptions::kSyncPoint, args);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1863,12 +1845,12 @@ void CodeGenerator::cgCmpHelper(
       if (type2 == Type::Int) {
         ArgGroup args(m_regs);
         args.ssa(src1).ssa(src2);
-        cgCallHelper(m_as, (TCA)str_cmp_int,  dst,
+        cgCallHelper(m_as, CppCall(str_cmp_int), callDest(dst),
                      SyncOptions::kSyncPoint, args);
       } else if (type2 == Type::Obj) {
         ArgGroup args(m_regs);
         args.ssa(src1).ssa(src2);
-        cgCallHelper(m_as, (TCA)str_cmp_obj, dst,
+        cgCallHelper(m_as, CppCall(str_cmp_obj), callDest(dst),
                      SyncOptions::kSyncPoint, args);
       } else {
         CG_PUNT(cgOpCmpHelper_sx);
@@ -1882,12 +1864,12 @@ void CodeGenerator::cgCmpHelper(
       if (type2 == Type::Obj) {
         ArgGroup args(m_regs);
         args.ssa(src1).ssa(src2);
-        cgCallHelper(m_as, (TCA)obj_cmp_obj,  dst,
+        cgCallHelper(m_as, CppCall(obj_cmp_obj), callDest(dst),
                      SyncOptions::kSyncPoint, args);
       } else if (type2 == Type::Int) {
         ArgGroup args(m_regs);
         args.ssa(src1).ssa(src2);
-        cgCallHelper(m_as, (TCA)obj_cmp_int,  dst,
+        cgCallHelper(m_as, CppCall(obj_cmp_int), callDest(dst),
                      SyncOptions::kSyncPoint, args);
       } else {
         CG_PUNT(cgOpCmpHelper_ox);
@@ -1902,7 +1884,8 @@ void CodeGenerator::cgCmpHelper(
   else if (type1.isArray() && type2.isArray()) {
     ArgGroup args(m_regs);
     args.ssa(src1).ssa(src2);
-    cgCallHelper(m_as, (TCA)arr_cmp_arr,  dst, SyncOptions::kSyncPoint, args);
+    cgCallHelper(m_as, CppCall(arr_cmp_arr),
+      callDest(dst), SyncOptions::kSyncPoint, args);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -2302,8 +2285,8 @@ void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
   unlikelyIfThenElse(CC_NZ, [&] (Asm& a) {
     cgCallHelper(
       a,
-      (TCA)convObjToBoolHelper,
-      dst,
+      CppCall(convObjToBoolHelper),
+      callDest(dst),
       SyncOptions::kSyncPoint,
       ArgGroup(m_regs)
         .ssa(src));
@@ -2522,7 +2505,9 @@ void CodeGenerator::cgLdFunc(IRInstruction* inst) {
 
   TargetCache::CacheHandle ch = TargetCache::FuncCache::alloc();
   // raises an error if function not found
-  cgCallHelper(m_as, (TCA)FuncCache::lookup, m_regs[dst].reg(),
+  cgCallHelper(m_as,
+               CppCall(FuncCache::lookup),
+               callDest(m_regs[dst].reg()),
                SyncOptions::kSyncPoint,
                ArgGroup(m_regs).imm(ch).ssa(methodName));
 }
@@ -2566,7 +2551,9 @@ void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
                m_as.storeq(m_rScratch, actRecReg[AROFF(m_func)]);
              },
              [&] { // else call slow path helper
-               cgCallHelper(m_as, (TCA)methodCacheSlowPath, InvalidReg,
+               cgCallHelper(m_as,
+                            CppCall(methodCacheSlowPath),
+                            kVoidDest,
                             SyncOptions::kSyncPoint,
                             ArgGroup(m_regs).addr(rVmTl, handle)
                                             .ssa(actRec)
@@ -2736,8 +2723,8 @@ void CodeGenerator::cgLdSSwitchDestFast(IRInstruction* inst) {
   emitReqBindAddr(data->func, *def, data->defaultOff);
 
   cgCallHelper(m_as,
-               TCA(sswitchHelperFast),
-               inst->dst(),
+               CppCall(sswitchHelperFast),
+               callDest(inst->dst()),
                SyncOptions::kNoSyncPoint,
                ArgGroup(m_regs)
                  .ssa(inst->src(0))
@@ -2769,8 +2756,8 @@ void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
   emitReqBindAddr(data->func, jmptab[data->numCases], data->defaultOff);
 
   cgCallHelper(m_as,
-               TCA(sswitchHelperSlow),
-               inst->dst(),
+               CppCall(sswitchHelperSlow),
+               callDest(inst->dst()),
                SyncOptions::kSyncPoint,
                ArgGroup(m_regs)
                  .typedValue(inst->src(0))
@@ -3159,6 +3146,7 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
   }
 }
 
+// TODO(#2031980): clear these out
 static void
 tv_release_generic(TypedValue* tv) {
   assert(Transl::tx64->stateIsDirty());
@@ -3175,14 +3163,6 @@ tv_release_typed(RefData* pv, DataType dt) {
          dt == KindOfObject || dt == KindOfResource ||
          dt == KindOfRef);
   g_destructors[typeToDestrIndex(dt)](pv);
-}
-
-Address CodeGenerator::getDtorGeneric() {
-  return (Address)tv_release_generic;
-}
-
-Address CodeGenerator::getDtorTyped() {
-  return (Address)tv_release_typed;
 }
 
 //
@@ -3356,9 +3336,12 @@ void CodeGenerator::cgDecRefStaticType(Type type,
     // Emit jump to m_astubs (to call release) if count got down to zero
     unlikelyIfBlock(CC_Z, [&] (Asm& a) {
       // Emit the call to release in m_astubs
-      cgCallHelper(a, m_tx64->getDtorCall(type.toDataType()),
-                   InvalidReg, InvalidReg, SyncOptions::kSyncPoint,
-                   ArgGroup(m_regs).reg(dataReg));
+      cgCallHelper(a,
+                   m_tx64->getDtorCall(type.toDataType()),
+                   kVoidDest,
+                   SyncOptions::kSyncPoint,
+                   ArgGroup(m_regs)
+                     .reg(dataReg));
     });
   }
   if (patchStaticCheck) {
@@ -3390,8 +3373,13 @@ void CodeGenerator::cgDecRefDynamicType(PhysReg typeReg,
     // Emit jump to m_astubs (to call release) if count got down to zero
     unlikelyIfBlock(CC_Z, [&] (Asm& a) {
       // Emit call to release in m_astubs
-      cgCallHelper(a, getDtorTyped(), InvalidReg, SyncOptions::kSyncPoint,
-                   ArgGroup(m_regs).reg(dataReg).reg(typeReg));
+      cgCallHelper(a,
+                   CppCall(tv_release_typed),
+                   kVoidDest,
+                   SyncOptions::kSyncPoint,
+                   ArgGroup(m_regs)
+                     .reg(dataReg)
+                     .reg(typeReg));
     });
   }
   // Patch checks to jump around the DecRef
@@ -3461,8 +3449,12 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
     unlikelyIfBlock(CC_Z, [&] (Asm& a) {
       // Emit call to release in m_astubs
       a.lea(baseReg[offset], scratchReg);
-      cgCallHelper(a, getDtorGeneric(), InvalidReg, SyncOptions::kSyncPoint,
-                   ArgGroup(m_regs).reg(scratchReg));
+      cgCallHelper(a,
+                   CppCall(tv_release_generic),
+                   kVoidDest,
+                   SyncOptions::kSyncPoint,
+                   ArgGroup(m_regs)
+                     .reg(scratchReg));
     });
   }
 
@@ -3717,8 +3709,8 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
   // that init function does all the work.
   if (cls->instanceCtor()) {
     cgCallHelper(m_as,
-                 (TCA)cls->instanceCtor(),
-                 dstReg,
+                 CppCall(cls->instanceCtor()),
+                 callDest(dstReg),
                  SyncOptions::kSyncPoint,
                  ArgGroup(m_regs)
                    .immPtr(cls)
@@ -3736,8 +3728,8 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
       m_as.testq(-1, rVmTl[cls->propHandle()]);
       unlikelyIfBlock(CC_Z, [&] (Asm& a) {
           cgCallHelper(a,
-                       (TCA)getMethodPtr(&Class::initProps),
-                       InvalidReg,
+                       CppCall(getMethodPtr(&Class::initProps)),
+                       kVoidDest,
                        SyncOptions::kSyncPoint,
                        ArgGroup(m_regs).imm((uint64_t)cls));
       });
@@ -3747,8 +3739,8 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
       m_as.testq(-1, rVmTl[cls->sPropHandle()]);
       unlikelyIfBlock(CC_Z, [&] (Asm& a) {
           cgCallHelper(a,
-                       (TCA)getMethodPtr(&Class::initSProps),
-                       InvalidReg,
+                       CppCall(getMethodPtr(&Class::initSProps)),
+                       kVoidDest,
                        SyncOptions::kSyncPoint,
                        ArgGroup(m_regs).imm((uint64_t)cls));
       });
@@ -3760,8 +3752,8 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
   int allocator = object_alloc_size_to_index(size);
   assert(allocator != -1);
   cgCallHelper(m_as,
-               (TCA)getMethodPtr(&ObjectData::newInstanceRaw),
-               dstReg,
+               CppCall(getMethodPtr(&ObjectData::newInstanceRaw)),
+               callDest(dstReg),
                SyncOptions::kSyncPoint,
                ArgGroup(m_regs).imm((uint64_t)cls).imm(allocator));
 
@@ -3785,8 +3777,8 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
         .imm(int64_t(&cls->declPropInit()[0]))
         .imm(cellsToBytes(nProps));
       cgCallHelper(m_as,
-                   (TCA)memcpy,
-                   InvalidReg,
+                   CppCall(memcpy),
+                   kVoidDest,
                    SyncOptions::kNoSyncPoint,
                    args);
     } else {
@@ -3802,8 +3794,8 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
           .reg(rPropData)
           .imm(cellsToBytes(nProps));
         cgCallHelper(m_as,
-                     (TCA)memcpy,
-                     InvalidReg,
+                     CppCall(memcpy),
+                     kVoidDest,
                      SyncOptions::kNoSyncPoint,
                      args);
       } else {
@@ -3812,8 +3804,8 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
           .reg(rPropData)
           .imm(nProps);
         cgCallHelper(m_as,
-                     (TCA)deepInitHelper,
-                     InvalidReg,
+                     CppCall(deepInitHelper),
+                     kVoidDest,
                      SyncOptions::kNoSyncPoint,
                      args);
       }
@@ -3824,8 +3816,8 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
   if (cls->callsCustomInstanceInit()) {
     // callCustomInstanceInit returns the instance in rax
     cgCallHelper(m_as,
-                 (TCA)getMethodPtr(&ObjectData::callCustomInstanceInit),
-                 dstReg,
+                 CppCall(getMethodPtr(&ObjectData::callCustomInstanceInit)),
+                 callDest(dstReg),
                  SyncOptions::kSyncPoint,
                  ArgGroup(m_regs).reg(dstReg));
   }
@@ -3839,8 +3831,13 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
   args.imm(pc).imm(after);
 
   // fCallArrayHelper makes the actual call by smashing its return address.
-  cgCallHelper(m_as, (TCA)TranslatorX64::fCallArrayHelper,
-               nullptr, SyncOptions::kSyncPoint, args);
+  cgCallHelper(
+    m_as,
+    CppCall(TranslatorX64::fCallArrayHelper),
+    kVoidDest,
+    SyncOptions::kSyncPoint,
+    args
+  );
 }
 
 void CodeGenerator::cgCall(IRInstruction* inst) {
@@ -3905,8 +3902,11 @@ void CodeGenerator::cgCastStk(IRInstruction *inst) {
   } else {
     not_reached();
   }
-  cgCallHelper(m_as, tvCastHelper, nullptr,
-               SyncOptions::kSyncPoint, args, DestType::None);
+  cgCallHelper(m_as,
+               CppCall(tvCastHelper),
+               kVoidDest,
+               SyncOptions::kSyncPoint,
+               args);
 }
 
 void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
@@ -3941,7 +3941,8 @@ void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
   }
 
   auto tmpReg = PhysReg(m_rScratch);
-  cgCallHelper(m_as, tvCoerceHelper, tmpReg, SyncOptions::kSyncPoint, args);
+  cgCallHelper(m_as, CppCall(tvCoerceHelper), callDest(tmpReg),
+    SyncOptions::kSyncPoint, args);
   m_as.testb(1, rbyte(tmpReg));
   emitFwdJcc(m_as, CC_E, exit);
 }
@@ -3999,7 +4000,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   // if the return value is returned by reference, we don't need the
   // return value from this call since we know where the value is.
   cgCallHelper(m_as, CppCall((TCA)func->nativeFuncPtr()),
-               isCppByRef(funcReturnType) ? InvalidReg : dstReg,
+               isCppByRef(funcReturnType) ? kVoidDest : callDest(dstReg),
                SyncOptions::kSyncPoint, callArgs);
 
   // load return value from builtin
@@ -4799,8 +4800,8 @@ void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
     }
     // can raise an error if class is undefined
     cgCallHelper(a,
-                 (TCA)StaticMethodCache::lookupIR,
-                 funcDestReg,
+                 CppCall(StaticMethodCache::lookupIR),
+                 callDest(funcDestReg),
                  SyncOptions::kSyncPoint,
                  ArgGroup(m_regs).imm(ch)         // Handle ch
                            .immPtr(ne)            // NamedEntity* np.second
@@ -4913,10 +4914,12 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
       const StringData*, TypedValue*) = StaticMethodFCache::lookupIR;
     // preserve destCtxReg across the call since it wouldn't be otherwise
     RegSet toSave = m_state.liveRegs[inst] | RegSet(destCtxReg);
-    cgCallHelper(a, CppCall((TCA)lookup),
-                 funcDestReg, InvalidReg,
+    cgCallHelper(a,
+                 CppCall((TCA)lookup),
+                 callDest(funcDestReg),
                  SyncOptions::kSyncPoint,
-                 ArgGroup(m_regs).imm(ch)
+                 ArgGroup(m_regs)
+                           .imm(ch)
                            .immPtr(cls)
                            .immPtr(methName)
                            .reg(m_regs[fp].reg()),
@@ -4980,12 +4983,14 @@ void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
   m_as.loadq(rVmTl[ch], tmpReg);
   m_as.testq(tmpReg, tmpReg);
   unlikelyIfBlock(CC_E, [&] (Asm& a) {
-    cgCallHelper(a,
-                 target ? (TCA)SPropCache::lookupIR<false>
-                        : (TCA)SPropCache::lookupIR<true>, // raise on error
-                 tmpReg,
-                 SyncOptions::kSyncPoint, // could re-enter to init properties
-                 ArgGroup(m_regs).imm(ch).ssa(cls).ssa(propName).ssa(cxt));
+    cgCallHelper(
+      a,
+      CppCall(target ? SPropCache::lookupIR<false>
+                     : SPropCache::lookupIR<true>), // raise on error
+      callDest(tmpReg),
+      SyncOptions::kSyncPoint, // could re-enter to init properties
+      ArgGroup(m_regs).imm(ch).ssa(cls).ssa(propName).ssa(cxt)
+    );
     if (target) {
       a.testq(tmpReg, tmpReg);
       emitFwdJcc(a, CC_Z, target);
@@ -5012,12 +5017,14 @@ void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
     // because its essential
     dstReg = m_rScratch;
   }
-  cgCallHelper(m_as,
-               target ? (TCA)SPropCache::lookupSProp<false>
-                      : (TCA)SPropCache::lookupSProp<true>, // raise on error
-               dstReg,
-               SyncOptions::kSyncPoint, // could re-enter to init properties
-               ArgGroup(m_regs).ssa(cls).ssa(prop).ssa(ctx));
+  cgCallHelper(
+    m_as,
+    CppCall(target ? SPropCache::lookupSProp<false>
+                   : SPropCache::lookupSProp<true>), // raise on error
+    callDest(dstReg),
+    SyncOptions::kSyncPoint, // could re-enter to init properties
+    ArgGroup(m_regs).ssa(cls).ssa(prop).ssa(ctx)
+  );
   if (target) {
     m_as.testq(dstReg, dstReg);
     emitFwdJcc(m_as, CC_Z, target);
@@ -5046,8 +5053,8 @@ void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
     // Passing only two arguments to lookupKnownClass, since the
     // third is ignored in the checkOnly==false case.
     cgCallHelper(a,
-                 (TCA)TargetCache::lookupKnownClass<false>,
-                 inst->dst(),
+                 CppCall(TargetCache::lookupKnownClass<false>),
+                 callDest(inst->dst()),
                  SyncOptions::kSyncPoint,
                  ArgGroup(m_regs).addr(rVmTl, intptr_t(ch)).ssas(inst, 0));
   });
@@ -5065,7 +5072,10 @@ void CodeGenerator::cgLdCls(IRInstruction* inst) {
   SSATmp* className = inst->src(0);
 
   CacheHandle ch = ClassCache::alloc();
-  cgCallHelper(m_as, (TCA)ClassCache::lookup, dst, SyncOptions::kSyncPoint,
+  cgCallHelper(m_as,
+               CppCall(ClassCache::lookup),
+               callDest(dst),
+               SyncOptions::kSyncPoint,
                ArgGroup(m_regs).imm(ch).ssa(className));
 }
 
@@ -5089,15 +5099,14 @@ void CodeGenerator::cgLookupClsCns(IRInstruction* inst) {
   auto const ch       = TargetCache::allocClassConstant(fullName);
   cgCallHelper(
     m_as,
-    TCA(TargetCache::lookupClassConstantTv),
-    inst->dst(),
+    CppCall(TargetCache::lookupClassConstantTv),
+    callDestTV(inst->dst()),
     SyncOptions::kSyncPoint,
     ArgGroup(m_regs)
       .addr(rVmTl, ch)
       .immPtr(Unit::GetNamedEntity(extra->clsName))
       .immPtr(extra->clsName)
-      .immPtr(extra->cnsName),
-    DestType::TV
+      .immPtr(extra->cnsName)
   );
 }
 
@@ -5150,8 +5159,9 @@ void CodeGenerator::cgLookupCns(IRInstruction* inst) {
   args.addr(rVmTl, ch)
       .immPtr(cnsName);
 
-  cgCallHelper(m_as, TCA(lookupCnsHelper),
-               inst->dst(), SyncOptions::kSyncPoint, args, DestType::TV);
+  cgCallHelper(m_as, CppCall(lookupCnsHelper),
+               callDestTV(inst->dst()),
+               SyncOptions::kSyncPoint, args);
 }
 
 HOT_FUNC_VM
@@ -5201,8 +5211,8 @@ void CodeGenerator::cgAKExists(IRInstruction* inst) {
   if (key->type().isNull()) {
     if (arr->isA(Type::Arr)) {
       cgCallHelper(m_as,
-                   (TCA)arr_str_helper,
-                   inst->dst(),
+                   CppCall(arr_str_helper),
+                   callDest(inst->dst()),
                    SyncOptions::kNoSyncPoint,
                    ArgGroup(m_regs).ssa(arr).immPtr(empty_string.get()));
     } else {
@@ -5216,8 +5226,8 @@ void CodeGenerator::cgAKExists(IRInstruction* inst) {
     : (key->isA(Type::Int) ? (TCA)arr_int_helper : (TCA)arr_str_helper);
 
   cgCallHelper(m_as,
-               helper_func,
-               inst->dst(),
+               CppCall(helper_func),
+               callDest(inst->dst()),
                SyncOptions::kNoSyncPoint,
                ArgGroup(m_regs).ssa(arr).ssa(key));
 }
@@ -5234,15 +5244,20 @@ HOT_FUNC_VM static TypedValue* ldGblAddrDefHelper(StringData* name) {
 
 void CodeGenerator::cgLdGblAddr(IRInstruction* inst) {
   auto dstReg = m_regs[inst->dst()].reg();
-  cgCallHelper(m_as, (TCA)ldGblAddrHelper, dstReg,
+  cgCallHelper(m_as,
+               CppCall(ldGblAddrHelper),
+               callDest(dstReg),
                SyncOptions::kNoSyncPoint,
                ArgGroup(m_regs).ssa(inst->src(0)));
   m_as.testq(dstReg, dstReg);
   emitFwdJcc(CC_Z, inst->taken());
 }
 
+// TODO: convert this to native-calls.cpp
 void CodeGenerator::cgLdGblAddrDef(IRInstruction* inst) {
-  cgCallHelper(m_as, (TCA)ldGblAddrDefHelper, inst->dst(),
+  cgCallHelper(m_as,
+               CppCall(ldGblAddrDefHelper),
+               callDest(inst->dst()),
                SyncOptions::kNoSyncPoint,
                ArgGroup(m_regs).ssa(inst->src(0)));
 }
@@ -5402,11 +5417,10 @@ void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
     emitFwdJcc(a, CC_Z, label);
     cgCallHelper(
       a,
-      TCA(static_cast<void (*)(ActRec*)>(ExtraArgs::deallocate)),
-      nullptr,
+      CppCall(static_cast<void (*)(ActRec*)>(ExtraArgs::deallocate)),
+      kVoidDest,
       SyncOptions::kSyncPoint,
-      ArgGroup(m_regs).reg(rFp),
-      DestType::None
+      ArgGroup(m_regs).reg(rFp)
     );
   });
 }
@@ -5421,7 +5435,10 @@ void CodeGenerator::cgBoxPtr(IRInstruction* inst) {
                base[TVOFF(m_data)],
     [&](ConditionCode cc) {
       ifThen(m_as, ccNegate(cc), [&] {
-        cgCallHelper(m_as, (TCA)tvBox, dstReg, SyncOptions::kNoSyncPoint,
+        cgCallHelper(m_as,
+                     CppCall(tvBox),
+                     callDest(dstReg),
+                     SyncOptions::kNoSyncPoint,
                      ArgGroup(m_regs).ssa(addr));
       });
     });
@@ -5450,7 +5467,7 @@ void CodeGenerator::cgConcat(IRInstruction* inst) {
     fptr = (void*)concat_is;
   }
   if (fptr) {
-    cgCallHelper(m_as, (TCA)fptr, dst, SyncOptions::kNoSyncPoint,
+    cgCallHelper(m_as, CppCall(fptr), callDest(dst), SyncOptions::kNoSyncPoint,
                  ArgGroup(m_regs).ssa(tl).ssa(tr));
   } else {
     if (lType.subtypeOf(Type::Obj) || lType.subtypeOf(Type::Res) ||
@@ -5458,7 +5475,8 @@ void CodeGenerator::cgConcat(IRInstruction* inst) {
         rType.subtypeOf(Type::Res) || rType.needsReg()) {
       CG_PUNT(cgConcat);
     }
-    cgCallHelper(m_as, (TCA)concat_value, dst, SyncOptions::kNoSyncPoint,
+    cgCallHelper(m_as, CppCall(concat_value), callDest(dst),
+                 SyncOptions::kNoSyncPoint,
                  ArgGroup(m_regs).typedValue(tl).typedValue(tr));
   }
 }
@@ -5472,7 +5490,9 @@ void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {
   void* interpOneHelper = interpOneEntryPoints[opc];
 
   auto dstReg = InvalidReg;
-  cgCallHelper(m_as, (TCA)interpOneHelper, dstReg, SyncOptions::kSyncPoint,
+  cgCallHelper(m_as, CppCall(interpOneHelper),
+               callDest(dstReg),
+               SyncOptions::kSyncPoint,
                ArgGroup(m_regs).ssa(fp).ssa(sp).imm(pcOff));
 }
 
@@ -5522,7 +5542,10 @@ void CodeGenerator::emitContVarEnvHelperCall(SSATmp* fp, TCA helper) {
   m_as.  loadq (m_regs[fp].reg()[AROFF(m_varEnv)], scratch);
   m_as.  testq (scratch, scratch);
   unlikelyIfBlock(CC_NZ, [&] (Asm& a) {
-    cgCallHelper(a, helper, InvalidReg, SyncOptions::kNoSyncPoint,
+    cgCallHelper(a,
+                 CppCall(helper),
+                 kVoidDest,
+                 SyncOptions::kNoSyncPoint,
                  ArgGroup(m_regs).ssa(fp));
   });
 }
@@ -5704,7 +5727,8 @@ void CodeGenerator::cgIterInitCommon(IRInstruction* inst) {
     }
     TCA helperAddr = isWInit ? (TCA)new_iter_array_key<true> :
       isInitK ? (TCA)new_iter_array_key<false> : (TCA)new_iter_array;
-    cgCallHelper(m_as, helperAddr, inst->dst(), SyncOptions::kSyncPoint, args);
+    cgCallHelper(m_as, CppCall(helperAddr), callDest(inst->dst()),
+      SyncOptions::kSyncPoint, args);
   } else {
     assert(src->type() == Type::Obj);
     args.imm(uintptr_t(curClass())).addr(fpReg, valLocalOffset);
@@ -5717,7 +5741,7 @@ void CodeGenerator::cgIterInitCommon(IRInstruction* inst) {
     // exception out, so we use kSyncPointAdjustOne, which adjusts the
     // stack pointer by 1 stack element on an unwind, skipping over
     // the src object.
-    cgCallHelper(m_as, (TCA)new_iter_object, inst->dst(),
+    cgCallHelper(m_as, CppCall(new_iter_object), callDest(inst->dst()),
                  SyncOptions::kSyncPointAdjustOne, args);
   }
 }
@@ -5750,7 +5774,7 @@ void CodeGenerator::cgMIterInitCommon(IRInstruction* inst) {
     } else {
       args.imm(0);
     }
-    cgCallHelper(m_as, (TCA)new_miter_array_key, inst->dst(),
+    cgCallHelper(m_as, CppCall(new_miter_array_key), callDest(inst->dst()),
                  SyncOptions::kSyncPoint, args);
   } else if (innerType.isObj()) {
     args.immPtr(curClass()).addr(fpReg, valLocalOffset);
@@ -5763,10 +5787,10 @@ void CodeGenerator::cgMIterInitCommon(IRInstruction* inst) {
     // exception out, so we use kSyncPointAdjustOne, which adjusts the
     // stack pointer by 1 stack element on an unwind, skipping over
     // the src object.
-    cgCallHelper(m_as, (TCA)new_miter_object, inst->dst(),
+    cgCallHelper(m_as, CppCall(new_miter_object), callDest(inst->dst()),
                  SyncOptions::kSyncPointAdjustOne, args);
   } else {
-    cgCallHelper(m_as, (TCA)new_miter_other, inst->dst(),
+    cgCallHelper(m_as, CppCall(new_miter_other), callDest(inst->dst()),
                  SyncOptions::kSyncPoint, args);
   }
 }
@@ -5801,7 +5825,8 @@ void CodeGenerator::cgIterNextCommon(IRInstruction* inst) {
   }
   TCA helperAddr = isWNext ? (TCA)iter_next_key<true> :
     isNextK ? (TCA)iter_next_key<false> : (TCA)iter_next;
-  cgCallHelper(m_as, helperAddr, inst->dst(), SyncOptions::kSyncPoint, args);
+  cgCallHelper(m_as, CppCall(helperAddr), callDest(inst->dst()),
+    SyncOptions::kSyncPoint, args);
 }
 
 void CodeGenerator::cgMIterNext(IRInstruction* inst) {
@@ -5822,7 +5847,7 @@ void CodeGenerator::cgMIterNextCommon(IRInstruction* inst) {
   } else {
     args.imm(0);
   }
-  cgCallHelper(m_as, (TCA)miter_next_key, inst->dst(),
+  cgCallHelper(m_as, CppCall(miter_next_key), callDest(inst->dst()),
                SyncOptions::kSyncPoint, args);
 }
 
@@ -5841,21 +5866,27 @@ void citerFreeHelper(Iter* iter) {
 void CodeGenerator::cgIterFree(IRInstruction* inst) {
   PhysReg fpReg = m_regs[inst->src(0)].reg();
   int64_t offset = iterOffset(inst->extra<IterFree>()->iterId);
-  cgCallHelper(m_as, (TCA)iterFreeHelper, InvalidReg, SyncOptions::kSyncPoint,
+  cgCallHelper(m_as,
+               CppCall(iterFreeHelper),
+               kVoidDest,
+               SyncOptions::kSyncPoint,
                ArgGroup(m_regs).addr(fpReg, offset));
 }
 
 void CodeGenerator::cgMIterFree(IRInstruction* inst) {
   PhysReg fpReg = m_regs[inst->src(0)].reg();
   int64_t offset = iterOffset(inst->extra<MIterFree>()->iterId);
-  cgCallHelper(m_as, (TCA)miterFreeHelper, InvalidReg, SyncOptions::kSyncPoint,
+  cgCallHelper(m_as,
+               CppCall(miterFreeHelper),
+               kVoidDest,
+               SyncOptions::kSyncPoint,
                ArgGroup(m_regs).addr(fpReg, offset));
 }
 
 void CodeGenerator::cgDecodeCufIter(IRInstruction* inst) {
   PhysReg fpReg = m_regs[inst->src(1)].reg();
   int64_t offset = iterOffset(inst->extra<DecodeCufIter>()->iterId);
-  cgCallHelper(m_as, (TCA)decodeCufIterHelper, inst->dst(),
+  cgCallHelper(m_as, CppCall(decodeCufIterHelper), callDest(inst->dst()),
                SyncOptions::kSyncPoint,
                ArgGroup(m_regs).addr(fpReg, offset).typedValue(inst->src(0)));
 }
@@ -5863,7 +5894,10 @@ void CodeGenerator::cgDecodeCufIter(IRInstruction* inst) {
 void CodeGenerator::cgCIterFree(IRInstruction* inst) {
   PhysReg fpReg = m_regs[inst->src(0)].reg();
   int64_t  offset = iterOffset(inst->extra<CIterFree>()->iterId);
-  cgCallHelper(m_as, (TCA)citerFreeHelper, InvalidReg, SyncOptions::kSyncPoint,
+  cgCallHelper(m_as,
+               CppCall(citerFreeHelper),
+               kVoidDest,
+               SyncOptions::kSyncPoint,
                ArgGroup(m_regs).addr(fpReg, offset));
 }
 

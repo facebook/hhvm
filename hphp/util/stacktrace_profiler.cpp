@@ -22,7 +22,6 @@
 namespace HPHP {
 
 const bool enabled = getenv("STACKTRACE_PROFILER") != nullptr;
-const int kMaxDepth = 10;
 
 StackTraceProfiler::StackTraceProfiler(std::string name, int skip) :
   m_name(name), finishing(false), m_root(nullptr), m_skip(skip) {
@@ -57,19 +56,31 @@ StackTraceProfiler::Node* StackTraceProfiler::findCaller(Node* n, void* addr) {
   return makeCaller(n, addr);
 }
 
-void StackTraceProfiler::count() {
+StackTraceSample::StackTraceSample() {
+  if (enabled) {
+    depth = backtrace(addrs, kMaxDepth);
+  } else {
+    depth = 0;
+  }
+}
+
+void StackTraceProfiler::count(const StackTraceSample& sample) {
   if (!enabled || finishing) return;
-  void* addrs[kMaxDepth];
-  auto count = backtrace(addrs, kMaxDepth);
-  if (count <= 0) return;
+  if (sample.depth <= 0) return;
   std::lock_guard<std::mutex> lock(m_mutex);
   m_root.hits++;
   Node* node = &m_root;
-  for (int i = m_skip; i < count; i++) {
-    Node* caller = findCaller(node, addrs[i]);
+  for (int i = m_skip; i < sample.depth; i++) {
+    Node* caller = findCaller(node, sample.addrs[i]);
     caller->hits++;
     node = caller;
   }
+}
+
+void StackTraceProfiler::count() {
+  if (!enabled || finishing) return;
+  StackTraceSample sample;
+  count(sample);
 }
 
 bool StackTraceProfiler::compareNodes(Node* a, Node* b) {

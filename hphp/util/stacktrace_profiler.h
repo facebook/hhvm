@@ -25,6 +25,17 @@
 namespace HPHP {
 
 /*
+ * One single stack trace sample.  These can be generated, stored,
+ * then passed to a StackTraceProfiler after the fact.
+ */
+struct StackTraceSample {
+  static const int kMaxDepth = 10;
+  StackTraceSample();
+  int depth;
+  void* addrs[kMaxDepth];
+};
+
+/*
  * A StackTraceProfiler incrementally constructs a prof-style caller tree from
  * the native backtrace each time its count() method is called, then dumps the
  * tree to stderr when destructed.
@@ -59,6 +70,7 @@ public:
 
   // count one call in this probe.
   void count();
+  void count(const StackTraceSample&);
   size_t hits() const { return m_root.hits; }
 
 private:

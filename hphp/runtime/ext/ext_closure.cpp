@@ -25,7 +25,7 @@ namespace HPHP {
 c_Closure::~c_Closure() {
   // same as ar->hasThis()
   if (m_thisOrClass && !(intptr_t(m_thisOrClass) & 1LL)) {
-    m_thisOrClass->decRefCount();
+    decRefObj(m_thisOrClass);
   }
 }
 

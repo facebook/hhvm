@@ -30,19 +30,28 @@ namespace HPHP {  namespace JIT { namespace NativeCalls {
 // CodeGenerator and LinearScan. See nativecalls.cpp for a full
 // description of the types and enums.
 
-enum FuncType : unsigned {
-  FPtr,
-  FSSA,
+enum class FuncType : unsigned {
+  Call,
+  SSA,
 };
 
 struct FuncPtr {
   FuncPtr() {}
-  /* implicit */ FuncPtr(TCA f) : type(FPtr), ptr(f) {}
-  FuncPtr(FuncType t, uint64_t i) : type(t), srcIdx(i) { assert(t == FSSA); }
+  explicit FuncPtr(TCA f) : type(FuncType::Call), call(f) {}
+
+  template<class Ret, class... Args>
+  /* implicit */ FuncPtr(Ret (*fp)(Args...))
+    : type(FuncType::Call)
+    , call(reinterpret_cast<TCA>(fp))
+  {}
+
+  FuncPtr(FuncType t, uint64_t i) : type(t), srcIdx(i) {
+    assert(t == FuncType::SSA);
+  }
 
   FuncType type;
   union {
-    TCA ptr;
+    Transl::CppCall call;
     uint64_t srcIdx;
   };
 };

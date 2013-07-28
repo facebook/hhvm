@@ -61,6 +61,7 @@ namespace {
 
 using namespace Util;
 using namespace Transl::reg;
+using Transl::CppCall;
 
 TRACE_SET_MOD(hhir);
 
@@ -1057,17 +1058,18 @@ void CodeGenerator::cgCallNative(Asm& a, IRInstruction* inst) {
     }
   }
 
-  TCA addr = nullptr;
-  switch (info.func.type) {
-    case FPtr:
-      addr = info.func.ptr;
-      break;
-    case FSSA:
-      addr = inst->src(info.func.srcIdx)->getValTCA();
-      break;
-  }
+  auto const call = [&]() -> CppCall {
+    switch (info.func.type) {
+    case FuncType::Call:
+      return CppCall(info.func.call);
+    case FuncType::SSA:
+      return CppCall(inst->src(info.func.srcIdx)->getValTCA());
+    }
+    not_reached();
+  }();
+
   cgCallHelper(a,
-               addr,
+               call,
                info.dest != DestType::None ? inst->dst(0) : nullptr,
                info.sync,
                argGroup,
@@ -1080,6 +1082,15 @@ void CodeGenerator::cgCallHelper(Asm& a,
                                  SyncOptions sync,
                                  ArgGroup& args,
                                  DestType destType) {
+  return cgCallHelper(a, CppCall(addr), dst, sync, args, destType);
+}
+
+void CodeGenerator::cgCallHelper(Asm& a,
+                                 const CppCall& call,
+                                 SSATmp* dst,
+                                 SyncOptions sync,
+                                 ArgGroup& args,
+                                 DestType destType) {
   PhysReg dstReg0 = InvalidReg;
   PhysReg dstReg1 = InvalidReg;
   if (dst) {
@@ -1087,8 +1098,7 @@ void CodeGenerator::cgCallHelper(Asm& a,
     dstReg0 = info.reg(0);
     dstReg1 = info.reg(1);
   }
-  return cgCallHelper(a, Transl::CppCall(addr), dstReg0, dstReg1, sync, args,
-                      destType);
+  return cgCallHelper(a, call, dstReg0, dstReg1, sync, args, destType);
 }
 
 void CodeGenerator::cgCallHelper(Asm& a,
@@ -1097,12 +1107,12 @@ void CodeGenerator::cgCallHelper(Asm& a,
                                  SyncOptions sync,
                                  ArgGroup& args,
                                  DestType destType) {
-  cgCallHelper(a, Transl::CppCall(addr), dstReg, InvalidReg, sync, args,
+  cgCallHelper(a, CppCall(addr), dstReg, InvalidReg, sync, args,
                destType);
 }
 
 void CodeGenerator::cgCallHelper(Asm& a,
-                                 const Transl::CppCall& call,
+                                 const CppCall& call,
                                  PhysReg dstReg,
                                  SyncOptions sync,
                                  ArgGroup& args,
@@ -1111,7 +1121,7 @@ void CodeGenerator::cgCallHelper(Asm& a,
 }
 
 void CodeGenerator::cgCallHelper(Asm& a,
-                                 const Transl::CppCall& call,
+                                 const CppCall& call,
                                  PhysReg dstReg0,
                                  PhysReg dstReg1,
                                  SyncOptions sync,
@@ -1122,7 +1132,7 @@ void CodeGenerator::cgCallHelper(Asm& a,
 }
 
 void CodeGenerator::cgCallHelper(Asm& a,
-                                 const Transl::CppCall& call,
+                                 const CppCall& call,
                                  PhysReg dstReg0,
                                  PhysReg dstReg1,
                                  SyncOptions sync,
@@ -3985,7 +3995,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 
   // if the return value is returned by reference, we don't need the
   // return value from this call since we know where the value is.
-  cgCallHelper(m_as, Transl::CppCall((TCA)func->nativeFuncPtr()),
+  cgCallHelper(m_as, CppCall((TCA)func->nativeFuncPtr()),
                isCppByRef(funcReturnType) ? InvalidReg : dstReg,
                SyncOptions::kSyncPoint, callArgs);
 
@@ -4900,7 +4910,7 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
       const StringData*, TypedValue*) = StaticMethodFCache::lookupIR;
     // preserve destCtxReg across the call since it wouldn't be otherwise
     RegSet toSave = m_state.liveRegs[inst] | RegSet(destCtxReg);
-    cgCallHelper(a, Transl::CppCall((TCA)lookup),
+    cgCallHelper(a, CppCall((TCA)lookup),
                  funcDestReg, InvalidReg,
                  SyncOptions::kSyncPoint,
                  ArgGroup(m_regs).imm(ch)

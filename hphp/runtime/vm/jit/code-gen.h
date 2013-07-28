@@ -148,6 +148,12 @@ private:
                     SyncOptions sync,
                     ArgGroup& args,
                     DestType destType = DestType::SSA);
+  void cgCallHelper(Asm&,
+                    const Transl::CppCall&,
+                    SSATmp* dst,
+                    SyncOptions sync,
+                    ArgGroup& args,
+                    DestType destType = DestType::SSA);
   void cgCallHelper(Asm& a,
                     TCA addr,
                     PhysReg dstReg,

@@ -391,9 +391,6 @@ public:
   String rvalAt(CObjRef key) const;
   String rvalAt(CVarRef key) const;
 
-  template <class K, class V>
-  inline const V &set(K key, const V &value);
-
   /**
    * Returns one character at specified position.
    */

@@ -107,31 +107,6 @@ public:
    */
   const static uint32_t MaxSize = 0x7ffffffe; // 2^31-2
 
-  /**
-   * StringData does not formally derive from Countable, however it has a
-   * m_count field and implements all of the methods from Countable.
-   */
-  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
-
-  void setRefCount(RefCount n) { m_count = n;}
-  bool isStatic() const { return m_count == RefCountStaticValue; }
-
-  /**
-   * Get the wrapped SharedVariant.
-   */
-  SharedVariant *getSharedVariant() const {
-    if (isShared()) return m_big.shared;
-    return nullptr;
-  }
-
-  static StringData *Escalate(StringData *in);
-
-  /**
-   * When we have static StringData in SharedStore, we should avoid directly
-   * deleting the StringData pointer, but rather call destruct().
-   */
-  void destruct() const { if (!isStatic()) delete this; }
-
   StringData() : m_data(m_small), m_len(0), m_count(0), m_hash(0) {
     m_big.shared = 0;
     m_big.cap = IsSmall;
@@ -192,9 +167,51 @@ public:
    */
   explicit StringData(int reserve);
 
+  /*
+   * Create a StringData that wraps an APC SharedVariant that contains
+   * a string.
+   */
   explicit StringData(SharedVariant *shared);
 
-public:
+  ~StringData() { checkStack(); releaseData(); }
+
+  /*
+   * When we have static StringData in SharedStore, we should avoid directly
+   * deleting the StringData pointer, but rather call destruct().
+   */
+  void destruct() const { if (!isStatic()) delete this; }
+
+  /*
+   * Reference counting related.
+   */
+  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
+  void setRefCount(RefCount n) { m_count = n;}
+  bool isStatic() const { return m_count == RefCountStaticValue; }
+
+  /*
+   * Returns a copy of in if its reference count is not 1 or if it is
+   * immutable.
+   *
+   * Resets the hash if not for unknown reasons, probably
+   * unnecessarily.
+   */
+  static StringData* Escalate(StringData* in) {
+    if (in->m_count != 1 || in->isImmutable()) {
+      return NEW(StringData)(in->data(), in->size(), CopyString);
+    }
+    in->m_hash = 0;
+    return in;
+  }
+
+  /*
+   * Get the wrapped SharedVariant, or return null if this string is
+   * not shared.
+   */
+  SharedVariant *getSharedVariant() const {
+    if (isShared()) return m_big.shared;
+    return nullptr;
+  }
+
   void append(StringSlice r) { append(r.ptr, r.len); }
   void append(const char *s, int len);
   static const StringData* convert_double_helper(double n);
@@ -215,7 +232,6 @@ public:
     return this;
   }
 
-  ~StringData() { checkStack(); releaseData(); }
   void checkStack() {
     /**
      * StringData should not generally be allocated on the

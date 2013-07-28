@@ -565,16 +565,6 @@ MutableSlice StringData::escalate(uint32_t cap) {
   return MutableSlice(buf, cap);
 }
 
-StringData *StringData::Escalate(StringData *in) {
-  if (!in) return NEW(StringData)();
-  if (in->m_count != 1 || in->isImmutable()) {
-    StringData *ret = NEW(StringData)(in->data(), in->size(), CopyString);
-    return ret;
-  }
-  in->m_hash = 0;
-  return in;
-}
-
 void StringData::dump() const {
   StringSlice s = slice();
 

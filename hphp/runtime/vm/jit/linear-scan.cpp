@@ -767,21 +767,23 @@ void LinearScan::computePreColoringHint() {
   }
 
   Opcode opc = inst->op();
-  using namespace NativeCalls;
+  using NativeCalls::CallMap;
+  using NativeCalls::ArgType;
   if (CallMap::hasInfo(opc)) {
     unsigned reg = 0;
     for (auto const& arg : CallMap::info(opc).args) {
       switch (arg.type) {
-        case SSA:
-          m_preColoringHint.add(inst->src(arg.srcIdx), 0, reg++);
+        case ArgType::SSA:
+          m_preColoringHint.add(inst->src(arg.ival), 0, reg++);
           break;
-        case TV:
-        case VecKeyS:
-        case VecKeyIS:
-          m_preColoringHint.add(inst->src(arg.srcIdx), 0, reg++);
-          m_preColoringHint.add(inst->src(arg.srcIdx), 1, reg++);
+        case ArgType::TV:
+        case ArgType::VecKeyS:
+        case ArgType::VecKeyIS:
+          m_preColoringHint.add(inst->src(arg.ival), 0, reg++);
+          m_preColoringHint.add(inst->src(arg.ival), 1, reg++);
           break;
-        case ExtraImm:
+        case ArgType::ExtraImm:
+        case ArgType::Imm:
           break;
       }
     }

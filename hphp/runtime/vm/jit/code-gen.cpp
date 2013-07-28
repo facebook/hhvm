@@ -1032,29 +1032,32 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args) {
 
 void CodeGenerator::cgCallNative(Asm& a, IRInstruction* inst) {
   using namespace NativeCalls;
+
   Opcode opc = inst->op();
   always_assert(CallMap::hasInfo(opc));
 
-  const CallInfo& info = CallMap::info(opc);
+  const auto& info = CallMap::info(opc);
   ArgGroup argGroup(m_regs);
   for (auto const& arg : info.args) {
-    SSATmp* src = inst->src(arg.srcIdx);
     switch (arg.type) {
-      case SSA:
-        argGroup.ssa(src);
-        break;
-      case TV:
-        argGroup.typedValue(src);
-        break;
-      case VecKeyS:
-        argGroup.vectorKeyS(src);
-        break;
-      case VecKeyIS:
-        argGroup.vectorKeyIS(src);
-        break;
-      case ExtraImm:
-        argGroup.imm(arg.extraFunc(inst));
-        break;
+    case ArgType::SSA:
+      argGroup.ssa(inst->src(arg.ival));
+      break;
+    case ArgType::TV:
+      argGroup.typedValue(inst->src(arg.ival));
+      break;
+    case ArgType::VecKeyS:
+      argGroup.vectorKeyS(inst->src(arg.ival));
+      break;
+    case ArgType::VecKeyIS:
+      argGroup.vectorKeyIS(inst->src(arg.ival));
+      break;
+    case ArgType::ExtraImm:
+      argGroup.imm(arg.extraFunc(inst));
+      break;
+    case ArgType::Imm:
+      argGroup.imm(arg.ival);
+      break;
     }
   }
 

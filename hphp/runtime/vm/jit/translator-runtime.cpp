@@ -109,10 +109,6 @@ int64_t convArrToBoolHelper(const ArrayData* a) {
   return a->size() != 0;
 }
 
-int64_t convStrToBoolHelper(const StringData* s) {
-  return s->toBoolean();
-}
-
 int64_t convObjToBoolHelper(const ObjectData* o) {
   return o->o_toBoolean();
 }
@@ -137,15 +133,6 @@ int64_t convDblToIntHelper(int64_t i) {
   double d = reinterpretIntAsDbl(i);
   return (d >= 0 ? d > std::numeric_limits<uint64_t>::max() ? 0u :
           (uint64_t)d : (int64_t)d);
-}
-
-int64_t convStrToIntHelper(const StringData* s) {
-  return s->toInt64(10);
-}
-
-int64_t convCellToIntHelper(TypedValue tv) {
-  // TODO call cellToInt directly from the TC.
-  return cellToInt(tv);
 }
 
 ObjectData* convCellToObjHelper(TypedValue tv) {

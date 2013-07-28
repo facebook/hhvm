@@ -47,6 +47,8 @@ Arg extra(MemberType EDType::*ptr) {
   return Arg(fun);
 }
 
+Arg immed(intptr_t imm) { return Arg(ArgType::Imm, imm); }
+
 FuncPtr fssa(uint64_t i) { return FuncPtr { FuncType::SSA, i }; }
 
 template<class Ret, class T, class... Args>
@@ -58,6 +60,11 @@ template<class Ret, class T, class... Args>
 FuncPtr method(Ret (T::*fp)(Args...)) {
   return FuncPtr(reinterpret_cast<TCA>(Util::getMethodPtr(fp)));
 }
+
+auto constexpr SSA      = ArgType::SSA;
+auto constexpr TV       = ArgType::TV;
+auto constexpr VecKeyS  = ArgType::VecKeyS;
+auto constexpr VecKeyIS = ArgType::VecKeyIS;
 
 }
 
@@ -89,13 +96,14 @@ FuncPtr method(Ret (T::*fp)(Args...)) {
  *
  * Args
  *   A list of tuples describing the arguments to pass to the helper
- *     {SSA, idx} - Pass the value in inst->src(idx)
- *     {TV, idx} - Pass the value in inst->src(idx) as a
- *                 TypedValue, in two registers
- *     {VecKeyS, idx} - Like TV, but Str values are passed as a raw
- *                      StringData*, in a single register
- *     {VecKeyIS, idx} - Like VecKeyS, including Int
- *     extra(&EDStruct::member) -- extract an immediate from extra data
+ *     {SSA, idx}               - Pass the value in inst->src(idx)
+ *     {TV, idx}                - Pass the value in inst->src(idx) as a
+ *                                TypedValue, in two registers
+ *     {VecKeyS, idx}           - Like TV, but Str values are passed as a raw
+ *                                StringData*, in a single register
+ *     {VecKeyIS, idx}          - Like VecKeyS, including Int
+ *     extra(&EDStruct::member) - extract an immediate from extra data
+ *     immed(int64_t)           - constant immediate
  */
 static CallMap s_callMap {
     /* Opcode, Func, Dest, SyncPoint, Args */
@@ -114,7 +122,7 @@ static CallMap s_callMap {
 
     {ConvArrToBool,      convArrToBoolHelper, DSSA, SNone,
                            {{SSA, 0}}},
-    {ConvStrToBool,      convStrToBoolHelper, DSSA, SNone,
+    {ConvStrToBool,      method(&StringData::toBoolean), DSSA, SNone,
                            {{SSA, 0}}},
     {ConvCellToBool,     cellToBool, DSSA, SNone,
                            {{TV, 0}}},
@@ -132,11 +140,11 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
     {ConvDblToInt,       convDblToIntHelper, DSSA, SNone,
                            {{SSA, 0}}},
-    {ConvObjToInt,       convCellToIntHelper, DSSA, SSync,
+    {ConvObjToInt,       cellToInt, DSSA, SSync,
                            {{TV, 0}}},
-    {ConvStrToInt,       convStrToIntHelper, DSSA, SNone,
-                           {{SSA, 0}}},
-    {ConvCellToInt,      convCellToIntHelper, DSSA, SSync,
+    {ConvStrToInt,       method(&StringData::toInt64), DSSA, SNone,
+                           {{SSA, 0}, immed(10)}},
+    {ConvCellToInt,      cellToInt, DSSA, SSync,
                            {{TV, 0}}},
 
     {ConvCellToObj,      convCellToObjHelper, DSSA, SSync,

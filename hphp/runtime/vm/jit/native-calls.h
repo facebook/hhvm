@@ -56,12 +56,13 @@ struct FuncPtr {
   };
 };
 
-enum ArgType : unsigned {
+enum class ArgType : unsigned {
   SSA,
   TV,
   VecKeyS,
   VecKeyIS,
   ExtraImm,
+  Imm,
 };
 
 // Function that extracts the bits for an immediate value from extra
@@ -69,16 +70,16 @@ enum ArgType : unsigned {
 typedef std::function<uintptr_t (IRInstruction*)> ExtraDataBits;
 
 struct Arg {
-  Arg(ArgType type, unsigned srcIdx) : type(type), srcIdx(srcIdx) {}
+  Arg(ArgType type, intptr_t ival) : type(type), ival(ival) {}
 
   explicit Arg(ExtraDataBits&& func)
-    : type(ExtraImm)
-    , srcIdx(-1u)
+    : type(ArgType::ExtraImm)
+    , ival(-1)
     , extraFunc(std::move(func))
   {}
 
   ArgType type;
-  unsigned srcIdx;
+  intptr_t ival;
   ExtraDataBits extraFunc;
 };
 

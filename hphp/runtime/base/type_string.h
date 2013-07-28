@@ -39,7 +39,6 @@ class VarNR;
 StringData* buildStringData(int     n);
 StringData* buildStringData(int64_t   n);
 StringData* buildStringData(double  n);
-StringData* buildStringData(litstr  s);
 
 /**
  * String type wrapping around StringData to implement copy-on-write and
@@ -117,7 +116,7 @@ public:
   /* implicit */ String(double  n);
   /* implicit */ String(litstr  s) {
     if (s) {
-      m_px = buildStringData(s);
+      m_px = NEW(StringData)(s, CopyString);
       m_px->setRefCount(1);
     }
   }

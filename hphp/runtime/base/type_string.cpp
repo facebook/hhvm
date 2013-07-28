@@ -136,10 +136,6 @@ String::String(double n) {
   m_px->setRefCount(1);
 }
 
-StringData* buildStringData(litstr s) {
-  return NEW(StringData)(s, CopyString);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // informational
 

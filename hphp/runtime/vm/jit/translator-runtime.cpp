@@ -230,19 +230,26 @@ StringData* convResToStrHelper(ResourceData* o) {
   }
 }
 
+const StaticString
+  s_empty(""),
+  s_1("1"),
+  s_Array("Array");
+
 StringData* convCellToStrHelper(TypedValue tv) {
   switch (tv.m_type) {
-    case KindOfUninit:
-    case KindOfNull:    return buildStringData("");
-    case KindOfBoolean: return buildStringData(tv.m_data.num ? "1" : "");
-    case KindOfInt64:   return convIntToStrHelper(tv.m_data.num);
-    case KindOfDouble:  return convDblToStrHelper(tv.m_data.num);
-    case KindOfStaticString:
-    case KindOfString:  return tv.m_data.pstr;
-    case KindOfArray:   tvDecRefArr(&tv); return buildStringData("Array");
-    case KindOfObject:  return convObjToStrHelper(tv.m_data.pobj);
-    case KindOfResource: return convResToStrHelper(tv.m_data.pres);
-    default:            not_reached();
+  case KindOfUninit:
+  case KindOfNull:     return s_empty.get();
+  case KindOfBoolean:  return tv.m_data.num ? s_1.get() : s_empty.get();
+  case KindOfInt64:    return convIntToStrHelper(tv.m_data.num);
+  case KindOfDouble:   return convDblToStrHelper(tv.m_data.num);
+  case KindOfStaticString:
+  case KindOfString:   // No incref, since there is also a logical decref of
+                       // our argument.
+                       return tv.m_data.pstr;
+  case KindOfArray:    tvDecRefArr(&tv); return s_Array.get();
+  case KindOfObject:   return convObjToStrHelper(tv.m_data.pobj);
+  case KindOfResource: return convResToStrHelper(tv.m_data.pres);
+  default:             not_reached();
   }
 }
 

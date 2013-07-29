@@ -1160,6 +1160,7 @@ foreach_optional_arg:
 foreach_variable:
     variable                           { $$ = $1;}
   | '&' variable                       { $$ = $2; $$ = 1;}
+  | T_LIST '(' assignment_list ')'     { _p->onListAssignment($$, $3, NULL);}
 ;
 
 for_statement:

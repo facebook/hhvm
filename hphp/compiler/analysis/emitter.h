@@ -662,6 +662,8 @@ public:
   PreClass::Hoistable emitClass(Emitter& e, ClassScopePtr cNode,
                                 bool topLevel);
   void emitTypedef(Emitter& e, TypedefStatementPtr);
+  void emitForeachListAssignment(Emitter& e, ListAssignmentPtr la,
+                                 int vLocalId);
   void emitForeach(Emitter& e, ForEachStatementPtr fe);
   void emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc);
   void emitMakeUnitFatal(Emitter& e, const std::string& message);

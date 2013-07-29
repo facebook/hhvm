@@ -123,9 +123,19 @@ void ForEachStatement::inferTypes(AnalysisResultPtr ar) {
 
   m_array->inferAndCheck(ar, m_ref ? Type::Variant : Type::Array, m_ref);
   if (m_name) {
-    m_name->inferAndCheck(ar, Type::Primitive, true);
+    if (m_name->is(Expression::KindOfListAssignment)) {
+      m_name->inferTypes(ar, TypePtr(), false);
+    } else {
+      m_name->inferAndCheck(ar, Type::Primitive, true);
+    }
   }
-  m_value->inferAndCheck(ar, Type::Variant, true);
+
+  if (m_value->is(Expression::KindOfListAssignment)) {
+    m_value->inferTypes(ar, TypePtr(), false);
+  } else {
+    m_value->inferAndCheck(ar, Type::Variant, true);
+  }
+
   if (m_ref) {
     TypePtr actualType = m_array->getActualType();
     if (!actualType ||

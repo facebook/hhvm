@@ -412,8 +412,7 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
         }
       }
     }
-    if (funcScope->isSepExtension() ||
-        Option::IsDynamicFunction(m_method, m_name) || Option::AllDynamic) {
+    if (Option::IsDynamicFunction(m_method, m_name) || Option::AllDynamic) {
       funcScope->setDynamic();
     }
     // TODO: this may have to expand to a concept of "virtual" functions...

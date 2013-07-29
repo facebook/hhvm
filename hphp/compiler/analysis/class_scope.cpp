@@ -62,7 +62,7 @@ ClassScope::ClassScope(KindOf kindOf, const std::string &name,
     m_kindOf(kindOf), m_derivesFromRedeclaring(FromNormal),
     m_traitStatus(NOT_FLATTENED), m_volatile(false),
     m_persistent(false), m_derivedByDynamic(false),
-    m_sep(false), m_needsCppCtor(false), m_needsInit(true), m_knownBases(0) {
+    m_needsCppCtor(false), m_needsInit(true), m_knownBases(0) {
 
   m_dynamic = Option::IsDynamicClass(m_name);
 
@@ -92,7 +92,7 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
     m_kindOf(KindOfObjectClass), m_derivesFromRedeclaring(FromNormal),
     m_traitStatus(NOT_FLATTENED), m_dynamic(false),
     m_volatile(false), m_persistent(false),
-    m_derivedByDynamic(false), m_sep(false), m_needsCppCtor(false),
+    m_derivedByDynamic(false), m_needsCppCtor(false),
     m_needsInit(true), m_knownBases(0) {
   BOOST_FOREACH(FunctionScopePtr f, methods) {
     if (f->getName() == "__construct") setAttribute(HasConstructor);

@@ -1231,7 +1231,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     Construct::recomputeEffects();
   }
 
-  m_builtinFunction = (!func->isUserFunction() || func->isSepExtension());
+  m_builtinFunction = !func->isUserFunction();
 
   beforeCheck(ar);
 

@@ -309,10 +309,6 @@ public:
   bool isInlined() const { return m_inlineable; }
   void disableInline() { m_inlineable = false; }
 
-  /* Whether this function is brought in by a separable extension */
-  void setSepExtension() { m_sep = true;}
-  bool isSepExtension() const { return m_sep;}
-
   /* Whether we need to worry about the named return value optimization
      for this function */
   void setNRVOFix(bool flag) { m_nrvoFix = flag; }
@@ -464,7 +460,6 @@ private:
   unsigned m_magicMethod : 1;
   unsigned m_system : 1;
   unsigned m_inlineable : 1;
-  unsigned m_sep : 1;
   unsigned m_containsThis : 1; // contains a usage of $this?
   unsigned m_containsBareThis : 2; // $this outside object-context,
                                    // 2 if in reference context

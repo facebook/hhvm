@@ -101,18 +101,6 @@ public:
   static std::map<std::string, int> DynamicFunctionCalls;
 
   /**
-   * Separable extensions that are loaded dynamically.
-   */
-  struct SepExtensionOptions {
-    std::string name;
-    std::string soname;
-    std::string include_path;
-    std::string lib_path;
-    bool shared;
-  };
-  static std::vector<SepExtensionOptions> SepExtensions;
-
-  /**
    * Optimization flags
    */
   static bool PreOptimization;

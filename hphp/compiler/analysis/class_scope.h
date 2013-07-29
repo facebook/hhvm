@@ -169,10 +169,6 @@ public:
     return m_derivedByDynamic;
   }
 
-  /* Whether this class is brought in by a separable extension */
-  void setSepExtension() { m_sep = true;}
-  bool isSepExtension() const { return m_sep;}
-
   /**
    * Get/set attributes.
    */
@@ -424,7 +420,6 @@ private:
   unsigned m_volatile:1; // for class_exists
   unsigned m_persistent:1;
   unsigned m_derivedByDynamic:1;
-  unsigned m_sep:1;
   unsigned m_needsCppCtor:1;
   unsigned m_needsInit:1;
   // m_knownBases has a bit for each base class saying whether

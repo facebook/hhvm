@@ -479,8 +479,8 @@ public:
   virtual bool isValidCodeAddress(TCA tca) const = 0;
   virtual Debug::DebugInfo* getDebugInfo() = 0;
   virtual void enterTCAtSrcKey(SrcKey& sk) = 0;
-  virtual void enterTCAtProlog(ActRec* ar, TCA start) = 0;
-  virtual void enterTCAfterProlog(TCA start) = 0;
+  virtual void enterTCAtPrologue(ActRec* ar, TCA start) = 0;
+  virtual void enterTCAfterPrologue(TCA start) = 0;
 
   const TransDB& getTransDB() const {
     return m_transDB;

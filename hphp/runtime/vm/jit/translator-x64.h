@@ -258,11 +258,11 @@ private:
 public:
   void emitCall(Asm& a, TCA dest);
   void emitCall(Asm& a, CppCall call);
-  TCA getCallArrayProlog(Func* func);
+  TCA getCallArrayPrologue(Func* func);
   void smashPrologueGuards(TCA* prologues, int numPrologues, const Func* func);
 private:
-  TCA emitCallArrayProlog(const Func* func,
-                          const DVFuncletsVec& dvs);
+  TCA emitCallArrayPrologue(const Func* func,
+                            const DVFuncletsVec& dvs);
   void translateClassExistsImpl(const Tracelet& t,
                                 const NormalizedInstruction& i,
                                 Attr typeAttr);
@@ -549,7 +549,7 @@ public:
    * as necessary for blocks that need to be interpreted).
    *
    * If start is not null, data will be used to initialize rStashedAr,
-   * to enable us to run a jitted prolog;
+   * to enable us to run a jitted prologue;
    * otherwise, data should be a pointer to the SrcKey to start
    * translating from.
    *
@@ -559,10 +559,10 @@ public:
   void enterTCAtSrcKey(SrcKey& sk) {
     enterTC(nullptr, &sk);
   }
-  void enterTCAtProlog(ActRec *ar, TCA start) {
+  void enterTCAtPrologue(ActRec *ar, TCA start) {
     enterTC(start, ar);
   }
-  void enterTCAfterProlog(TCA start) {
+  void enterTCAfterPrologue(TCA start) {
     enterTC(start, nullptr);
   }
 

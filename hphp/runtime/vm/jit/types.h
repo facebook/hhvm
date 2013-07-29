@@ -47,18 +47,18 @@ const TransID InvalidID = -1LL;
 /**
  * The different kinds of translations that the JIT generates:
  *
- *   - Anchor  : a service request for retranslating
- *   - Prolog  : function prologue
- *   - Interp  : a service to interpret at least one instruction
- *   - Live    : translate one tracelet by inspecting live VM state
- *   - Profile : translate one block by inspecting live VM state and
- *               inserting profiling counters
- *   - Optimize: translate one region performing optimizations that may
- *               leverage data collected by Profile translations
+ *   - Anchor   : a service request for retranslating
+ *   - Prologue : function prologue
+ *   - Interp   : a service to interpret at least one instruction
+ *   - Live     : translate one tracelet by inspecting live VM state
+ *   - Profile  : translate one block by inspecting live VM state and
+ *                inserting profiling counters
+ *   - Optimize : translate one region performing optimizations that may
+ *                leverage data collected by Profile translations
  */
 #define TRANS_KINDS \
     DO(Anchor)      \
-    DO(Prolog)      \
+    DO(Prologue)    \
     DO(Interp)      \
     DO(Live)        \
     DO(Profile)     \

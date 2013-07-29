@@ -1515,7 +1515,7 @@ void VMExecutionContext::enterVMPrologue(ActRec* enterFnAr) {
     int na = enterFnAr->numArgs();
     if (na > np) na = np + 1;
     Transl::TCA start = enterFnAr->m_func->getPrologue(na);
-    tx()->enterTCAtProlog(enterFnAr, start);
+    tx()->enterTCAtPrologue(enterFnAr, start);
   } else {
     if (prepareFuncEntry(enterFnAr, m_pc)) {
       enterVMWork(enterFnAr);
@@ -1535,7 +1535,7 @@ void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
     (void) m_fp->unit()->offsetOf(m_pc); /* assert */
     if (enterFnAr) {
       assert(start);
-      tx()->enterTCAfterProlog(start);
+      tx()->enterTCAfterPrologue(start);
     } else {
       SrcKey sk(m_fp->func(), m_pc);
       tx()->enterTCAtSrcKey(sk);

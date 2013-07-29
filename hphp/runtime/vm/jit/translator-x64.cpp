@@ -1174,7 +1174,7 @@ TranslatorX64::trimExtraArgs(ActRec* ar) {
 }
 
 TCA
-TranslatorX64::emitCallArrayProlog(const Func* func,
+TranslatorX64::emitCallArrayPrologue(const Func* func,
                                    const DVFuncletsVec& dvs) {
   TCA start = a.frontier();
   if (dvs.size() == 1) {
@@ -1194,7 +1194,7 @@ TranslatorX64::emitCallArrayProlog(const Func* func,
 }
 
 TCA
-TranslatorX64::getCallArrayProlog(Func* func) {
+TranslatorX64::getCallArrayPrologue(Func* func) {
   TCA tca = func->getFuncBody();
   if (tca != (TCA)funcBodyHelperThunk) return tca;
 
@@ -1205,7 +1205,7 @@ TranslatorX64::getCallArrayProlog(Func* func) {
     if (!writer) return nullptr;
     tca = func->getFuncBody();
     if (tca != (TCA)funcBodyHelperThunk) return tca;
-    tca = emitCallArrayProlog(func, dvs);
+    tca = emitCallArrayPrologue(func, dvs);
     func->setFuncBody(tca);
   } else {
     SrcKey sk(func, func->base());
@@ -1288,11 +1288,11 @@ static const int kFuncGuardShortLen = 14;
 
 template<typename T>
 static T*
-funcPrologToGuardImm(TCA prolog) {
+funcPrologueToGuardImm(TCA prologue) {
   assert(sizeof(T) == 4 || sizeof(T) == 8);
-  T* retval = (T*)(prolog - (sizeof(T) == 8 ?
-                             kFuncGuardLen - kFuncMovImm :
-                             kFuncGuardShortLen - kFuncCmpImm));
+  T* retval = (T*)(prologue - (sizeof(T) == 8 ?
+                               kFuncGuardLen - kFuncMovImm :
+                               kFuncGuardShortLen - kFuncCmpImm));
   // We padded these so the immediate would fit inside a cache line
   assert(((uintptr_t(retval) ^ (uintptr_t(retval + 1) - 1)) &
           ~(kX64CacheLineSize - 1)) == 0);
@@ -1301,31 +1301,31 @@ funcPrologToGuardImm(TCA prolog) {
 }
 
 static inline bool
-funcPrologHasGuard(TCA prolog, const Func* func) {
+funcPrologueHasGuard(TCA prologue, const Func* func) {
   intptr_t iptr = uintptr_t(func);
   if (deltaFits(iptr, sz::dword)) {
-    return *funcPrologToGuardImm<int32_t>(prolog) == iptr;
+    return *funcPrologueToGuardImm<int32_t>(prologue) == iptr;
   }
-  return *funcPrologToGuardImm<int64_t>(prolog) == iptr;
+  return *funcPrologueToGuardImm<int64_t>(prologue) == iptr;
 }
 
 static TCA
-funcPrologToGuard(TCA prolog, const Func* func) {
-  if (!prolog || prolog == (TCA)fcallHelperThunk) return prolog;
-  return prolog -
+funcPrologueToGuard(TCA prologue, const Func* func) {
+  if (!prologue || prologue == (TCA)fcallHelperThunk) return prologue;
+  return prologue -
     (deltaFits(uintptr_t(func), sz::dword) ?
      kFuncGuardShortLen :
      kFuncGuardLen);
 }
 
 static inline void
-funcPrologSmashGuard(TCA prolog, const Func* func) {
+funcPrologueSmashGuard(TCA prologue, const Func* func) {
   intptr_t iptr = uintptr_t(func);
   if (deltaFits(iptr, sz::dword)) {
-    *funcPrologToGuardImm<int32_t>(prolog) = 0;
+    *funcPrologueToGuardImm<int32_t>(prologue) = 0;
     return;
   }
-  *funcPrologToGuardImm<int64_t>(prolog) = 0;
+  *funcPrologueToGuardImm<int64_t>(prologue) = 0;
 }
 
 void
@@ -1334,13 +1334,13 @@ TranslatorX64::smashPrologueGuards(TCA* prologues, int numPrologues,
   DEBUG_ONLY std::unique_ptr<LeaseHolder> writer;
   for (int i = 0; i < numPrologues; i++) {
     if (prologues[i] != (TCA)fcallHelperThunk
-        && funcPrologHasGuard(prologues[i], func)) {
+        && funcPrologueHasGuard(prologues[i], func)) {
       if (debug) {
         /*
          * Unit's are sometimes created racily, in which case all
          * but the first are destroyed immediately. In that case,
          * the Funcs of the destroyed Units never need their
-         * prologs smashing, and it would be a lock rank violation
+         * prologues smashing, and it would be a lock rank violation
          * to take the write lease here.
          * In all other cases, Funcs are destroyed via a delayed path
          * (treadmill) and the rank violation isn't an issue.
@@ -1350,7 +1350,7 @@ TranslatorX64::smashPrologueGuards(TCA* prologues, int numPrologues,
          */
         if (!writer) writer.reset(new LeaseHolder(s_writeLease));
       }
-      funcPrologSmashGuard(prologues[i], func);
+      funcPrologueSmashGuard(prologues[i], func);
     }
   }
 }
@@ -1400,8 +1400,8 @@ TranslatorX64::emitFuncGuard(X64Assembler& a, const Func* func) {
   assert(m_funcPrologueRedispatch);
 
   a.    jnz(m_funcPrologueRedispatch);
-  assert(funcPrologToGuard(a.frontier(), func) == aStart);
-  assert(funcPrologHasGuard(a.frontier(), func));
+  assert(funcPrologueToGuard(a.frontier(), func) == aStart);
+  assert(funcPrologueHasGuard(a.frontier(), func));
   return a.frontier();
 }
 
@@ -1600,18 +1600,18 @@ TranslatorX64::funcPrologue(Func* func, int nPassed, ActRec* ar) {
     }
     start = magicStart;
   }
-  assert(funcPrologHasGuard(start, func));
+  assert(funcPrologueHasGuard(start, func));
   TRACE(2, "funcPrologue tx64 %p %s(%d) setting prologue %p\n",
         this, func->fullName()->data(), nPassed, start);
   assert(isValidCodeAddress(start));
   func->setPrologue(paramIndex, start);
 
   addTranslation(TransRec(skFuncBody, func->unit()->md5(),
-                          TransProlog, aStart, a.frontier() - aStart,
+                          TransPrologue, aStart, a.frontier() - aStart,
                           stubStart, astubs.frontier() - stubStart));
 
   if (m_profData) {
-    m_profData->addTransProlog(skFuncBody);
+    m_profData->addTransPrologue(skFuncBody);
   }
 
   recordGdbTranslation(skFuncBody, func,
@@ -2461,7 +2461,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
     if (!isImmutable) {
       // We dont know we're calling the right function, so adjust
       // dest to point to the dynamic check of ar->m_func.
-      dest = funcPrologToGuard(dest, func);
+      dest = funcPrologueToGuard(dest, func);
     } else {
       TRACE(2, "enterTC: bindCall immutably %s -> %p\n",
             func->fullName()->data(), dest);

@@ -119,7 +119,7 @@ public:
   int64_t*                transCounterAddr(TransID id);
 
   TransID                 addTrans(const Tracelet& tracelet, TransKind kind);
-  TransID                 addTransProlog(const SrcKey& sk);
+  TransID                 addTransPrologue(const SrcKey& sk);
   TransID                 addTransAnchor(const SrcKey& sk);
 
   bool                    optimized(const SrcKey& sk) const;

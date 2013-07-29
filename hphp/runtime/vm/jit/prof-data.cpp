@@ -30,7 +30,7 @@ static const Trace::Module TRACEMOD = Trace::pgo;
 
 using Transl::Tracelet;
 using Transl::TransAnchor;
-using Transl::TransProlog;
+using Transl::TransPrologue;
 using Transl::TransProfile;
 
 ///////////   Counters   //////////
@@ -79,7 +79,7 @@ ProfTransRec::ProfTransRec(TransID       id,
     , m_lastBcOff(-1)
     , m_block(nullptr)
     , m_sk(sk) {
-  assert(kind == TransAnchor || kind == TransProlog);
+  assert(kind == TransAnchor || kind == TransPrologue);
 }
 
 TransID ProfTransRec::transId() const {
@@ -220,9 +220,9 @@ TransID ProfData::addTrans(const Tracelet& tracelet, TransKind kind) {
   return transId;
 }
 
-TransID ProfData::addTransProlog(const SrcKey& sk) {
+TransID ProfData::addTransPrologue(const SrcKey& sk) {
   TransID transId = m_numTrans++;
-  m_transRecs.emplace_back(new ProfTransRec(transId, TransProlog, sk));
+  m_transRecs.emplace_back(new ProfTransRec(transId, TransPrologue, sk));
   return transId;
 }
 

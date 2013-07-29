@@ -84,7 +84,6 @@ flood error logs.
     CallUserHandlerOnFatals = true
     MaxLoopCount = 0
     NoInfiniteRecursionDetection = false
-    MaxStackDepth = 1000
     ThrowBadTypeExceptions = false
     ThrowTooManyArguments = false
     WarnTooManyArguments = false
@@ -107,7 +106,6 @@ flood error logs.
     MaxRSSPollingCycle = 0    # in seconds, how often to check max memory
     DropCacheCycle = 0        # in seconds, how often to drop disk cache
     MaxSQLRowCount = 0
-    MaxMemcacheKeyCount = 0
     SerializationSizeLimit = 0
     StringOffsetLimit = 10 * 1024 * 1024
   }
@@ -587,8 +585,6 @@ next requests.
     Malloc = false
     APC = false
     APCKey = false
-    Memcache = false
-    MemcacheKey = false
     SQL = false
     SQLTable = false
     NetworkIO = false
@@ -630,9 +626,6 @@ next requests.
     CoreDumpEmail = email address
     CoreDumpReport = true
     CoreDumpReportDirectory = /tmp
-
-    LocalMemcache = false
-    MemcacheReadOnly = false
   }
 
 - FullBacktrace, ServerStackTrace, ServerErrorMessage, TranslateSource

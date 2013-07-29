@@ -1,0 +1,16 @@
+array(7) {
+  ["."]=>
+  bool(true)
+  [".."]=>
+  bool(true)
+  ["dir"]=>
+  bool(true)
+  ["empty"]=>
+  bool(true)
+  ["file"]=>
+  bool(true)
+  ["fix_mtimes.inc"]=>
+  bool(true)
+  ["symlink"]=>
+  bool(true)
+}

@@ -220,5 +220,11 @@ class RecursiveIteratorIterator implements OuterIterator, Traversable {
   private function setInnerIteratorFlag($flag) {
     $this->iterators[count($this->iterators)-1][1] = $flag;
   }
-}
 
+  /**
+   * Undocumented behavior but Zend does it and frameworks rely on it, so..
+   */
+  public function __call($func, $params) {
+    return call_user_func_array(array($this->current(), $func), $params);
+  }
+}

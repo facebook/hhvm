@@ -29,6 +29,7 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/synchronizable_multi.h"
+#include "hphp/util/timer.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -125,7 +126,7 @@ public:
     assert(priority >= 0);
     assert(priority < m_jobQueues.size());
     timespec enqueueTime;
-    clock_gettime(CLOCK_MONOTONIC, &enqueueTime);
+    Timer::GetMonotonicTime(enqueueTime);
     Lock lock(this);
     m_jobQueues[priority].emplace_back(job, enqueueTime);
     ++m_jobCount;
@@ -143,7 +144,7 @@ public:
       return dequeueOnlyExpiredImpl(id, inc);
     }
     timespec now;
-    clock_gettime(CLOCK_MONOTONIC, &now);
+    Timer::GetMonotonicTime(now);
     return dequeueMaybeExpiredImpl(id, inc, now, expired);
   }
 
@@ -264,7 +265,7 @@ public:
       for (auto& jobs : boost::adaptors::reverse(m_jobQueues)) {
         if (!jobs.empty()) {
           timespec now;
-          clock_gettime(CLOCK_MONOTONIC, &now);
+          Timer::GetMonotonicTime(now);
           int64_t queuedTimeUs = gettime_diff_us(jobs.front().second, now);
           if (queuedTimeUs > m_maxJobQueuingMs * 1000) {
             if (inc) incActiveWorker();

@@ -191,7 +191,7 @@ void TransCFG::print(std::string fileName, const ProfData* profData,
     const char* shape = selected && setContains(*selected, tid) ? "oval"
                                                                 : "box";
     fprintf(file,
-            "t%u [shape=%s,label=\"T: %u\\np: %" PRIu64 "\\nbc: [0x%x-0x%x)\","
+            "t%u [shape=%s,label=\"T: %u\\np: %" PRId64 "\\nbc: [0x%x-0x%x)\","
             "style=filled,fillcolor=\"#ff%02x%02x\"];\n", tid, shape, tid, w,
             bcStart, bcStop, coldness, coldness);
   }
@@ -200,7 +200,7 @@ void TransCFG::print(std::string fileName, const ProfData* profData,
   for (auto srcId : nodes()) {
     for (auto arc : outArcs(srcId)) {
       int64_t w = arc->weight();
-      fprintf(file, "t%u -> t%u [color=\"%s\",label=\"%ld\"] ;\n",
+      fprintf(file, "t%u -> t%u [color=\"%s\",label=\"%" PRId64 "\"] ;\n",
               srcId,
               arc->dst(),
               arc->guessed() ? "red" : "green4",

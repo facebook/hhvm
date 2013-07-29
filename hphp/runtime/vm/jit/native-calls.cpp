@@ -142,8 +142,6 @@ static CallMap s_callMap {
 
     {ConvArrToInt,       convArrToIntHelper, DSSA, SNone,
                            {{SSA, 0}}},
-    {ConvDblToInt,       convDblToIntHelper, DSSA, SNone,
-                           {{SSA, 0}}},
     {ConvObjToInt,       cellToInt, DSSA, SSync,
                            {{TV, 0}}},
     {ConvStrToInt,       method(&StringData::toInt64), DSSA, SNone,

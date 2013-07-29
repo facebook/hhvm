@@ -383,7 +383,6 @@ CALL_OPCODE(ConvStrToDbl);
 CALL_OPCODE(ConvCellToDbl);
 
 CALL_OPCODE(ConvArrToInt);
-CALL_OPCODE(ConvDblToInt);
 CALL_OPCODE(ConvObjToInt);
 CALL_OPCODE(ConvStrToInt);
 CALL_OPCODE(ConvCellToInt);
@@ -2236,6 +2235,64 @@ asm_label(a, falseLabel);
   a.    xorl   (r32(rdst), r32(rdst));
 
 asm_label(a, out);
+}
+
+void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
+  auto dst = inst->dst();
+  auto src = inst->src(0);
+
+  auto srcReg = prepXMMReg(src, m_as, m_regs, rCgXMM0);
+  auto dstReg = m_regs[dst].reg();
+
+  if (dstReg == InvalidReg) {
+    return;
+  }
+
+  constexpr uint64_t indefiniteInteger = 0x8000000000000000LL;
+  constexpr uint64_t maxULongAsDouble  = 0x43F0000000000000LL;
+  constexpr uint64_t maxLongAsDouble   = 0x43E0000000000000LL;
+
+  m_as.    cvttsd2siq   (srcReg, dstReg);
+  m_as.    cmpq         (indefiniteInteger, dstReg);
+
+  unlikelyIfBlock(CC_E, [&] (Asm& a) {
+    // result > max signed int or unordered
+    a.    pxor_xmm_xmm       (rCgXMM1, rCgXMM1);
+    a.    ucomisd_xmm_xmm    (rCgXMM1, srcReg);
+
+    ifThen(a, CC_B, [&] {
+      // src0 > 0 (CF = 1 -> less than 0 or unordered)
+      Label isUnordered;
+      a.   jp8     (isUnordered);
+
+      emitLoadImm(a, maxULongAsDouble, rCgXMM1);
+
+      a.   ucomisd_xmm_xmm    (rCgXMM1, srcReg);
+
+      ifThenElse(a, CC_B, [&] {
+        // src0 > ULONG_MAX
+        a.    xorq    (dstReg, dstReg);
+
+      }, [&] {
+        // 0 < src0 <= ULONG_MAX
+        emitLoadImm(a, maxLongAsDouble, rCgXMM1);
+        emitMovRegReg(a, srcReg, rCgXMM0);
+
+        // we know that LONG_MAX < src0 <= UINT_MAX, therefore,
+        // 0 < src0 - ULONG_MAX <= LONG_MAX
+        a.    subsd_xmm_xmm    (rCgXMM1, rCgXMM0);
+        a.    cvttsd2siq       (rCgXMM0, dstReg);
+
+        // We want to simulate integer overflow so we take the resulting integer
+        // and flip its sign bit (NB: we don't use orq here because it's
+        // possible that src0 == LONG_MAX in which case cvttsd2siq will yeild
+        // an indefiniteInteger, which we would like to make zero)
+        a.    xorq             (indefiniteInteger, dstReg);
+      });
+
+      asm_label(a, isUnordered);
+    });
+  });
 }
 
 void CodeGenerator::cgConvDblToBool(IRInstruction* inst) {

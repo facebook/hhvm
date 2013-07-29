@@ -352,16 +352,22 @@ private:
     }
   }
 
+  // Generate an if-then-else block
+  template <class Then, class Else>
+  void ifThenElse(Asm& a, ConditionCode cc, Then thenBlock, Else elseBlock) {
+    Label elseLabel, done;
+    a.jcc8(ccNegate(cc), elseLabel);
+    thenBlock();
+    a.jmp8(done);
+    asm_label(a, elseLabel);
+    elseBlock();
+    asm_label(a, done);
+  }
+
   // Generate an if-then-else block into m_as.
   template <class Then, class Else>
   void ifThenElse(ConditionCode cc, Then thenBlock, Else elseBlock) {
-    Label elseLabel, done;
-    m_as.jcc8(ccNegate(cc), elseLabel);
-    thenBlock();
-    m_as.jmp8(done);
-    asm_label(m_as, elseLabel);
-    elseBlock();
-    asm_label(m_as, done);
+    ifThenElse(m_as, cc, thenBlock, elseBlock);
   }
 
   /*

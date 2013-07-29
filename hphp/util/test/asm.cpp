@@ -62,7 +62,7 @@ const bool testMax = getenv("ASM_TEST_MAX");
 bool match_opcode_line(const std::string& line,
                        std::string& opName,
                        std::string& opArgs) {
-  static boost::regex re { R"([^\t]*\t[^\t]*\t([a-zA-Z]+)\s+(.*))" };
+  static boost::regex re { R"([^\t]*\t[^\t]*\t([a-zA-Z0-9]+)\s+(.*))" };
   boost::smatch cm;
   if (!regex_match(line, cm, re)) return false;
   opName = cm[1];
@@ -803,6 +803,23 @@ sqrtsd %xmm1,%xmm2
 sqrtsd %xmm2,%xmm0
 sqrtsd %xmm15,%xmm0
 sqrtsd %xmm12,%xmm8
+)");
+}
+
+TEST(Asm, DoubleToIntConv) {
+  Asm a;
+  a.init(10 << 24);
+  a.    cvttsd2siq(xmm0, rax);
+  a.    cvttsd2siq(xmm1, rbx);
+  a.    cvttsd2siq(xmm2, rcx);
+  a.    cvttsd2siq(xmm15, rdx);
+  a.    cvttsd2siq(xmm12, r12);
+  expect_asm(a, R"(
+cvttsd2siq %xmm0,%rax
+cvttsd2siq %xmm1,%rbx
+cvttsd2siq %xmm2,%rcx
+cvttsd2siq %xmm15,%rdx
+cvttsd2siq %xmm12,%r12
 )");
 }
 

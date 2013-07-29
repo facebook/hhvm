@@ -129,12 +129,6 @@ int64_t convArrToIntHelper(ArrayData* a) {
   return a->empty() ? 0 : 1;
 }
 
-int64_t convDblToIntHelper(int64_t i) {
-  double d = reinterpretIntAsDbl(i);
-  return (d >= 0 ? d > std::numeric_limits<uint64_t>::max() ? 0u :
-          (uint64_t)d : (int64_t)d);
-}
-
 ObjectData* convCellToObjHelper(TypedValue tv) {
   // Note: the call sites of this function all assume that
   // no user code will run and no recoverable exceptions will

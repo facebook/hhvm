@@ -4941,7 +4941,8 @@
         },
         {
             "name": "PHP_BINDIR",
-            "value": ""
+            "type": "String",
+            "desc": "Dynamic constant - current_executable_directory()"
         },
         {
             "name": "PHP_CONFIG_FILE_PATH",

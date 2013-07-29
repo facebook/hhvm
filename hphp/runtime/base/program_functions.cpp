@@ -1424,6 +1424,7 @@ void hphp_session_init() {
   EnvConstants *g = get_env_constants();
   g->k_PHP_SAPI = StringData::GetStaticString(RuntimeOption::ExecutionMode);
   g->k_PHP_BINARY = current_executable_path();
+  g->k_PHP_BINDIR = current_executable_directory();
 }
 
 bool hphp_is_warmup_enabled() {

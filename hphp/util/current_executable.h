@@ -22,7 +22,7 @@
 namespace HPHP {
 
   std::string current_executable_path();
-
+  std::string current_executable_directory();
 }
 
 #endif // incl_HPHP_UTIL_CURRENT_EXECUTABLE_H_

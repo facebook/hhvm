@@ -157,7 +157,7 @@ Variant SharedVariant::toLocal() {
     }
   case KindOfString:
     {
-      return NEW(StringData)(this);
+      return StringData::Make(this);
     }
   case KindOfArray:
     {

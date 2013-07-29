@@ -88,7 +88,7 @@ void SimpleArrayStore::destroy(uint length, ArrayData::AllocationMode am) {
     if (hasStrKey(toPos(i))) {
       auto k = m_keys[i].s;
       assert(k);
-      if (!k->decRefCount()) DELETE(StringData)(k);
+      decRefStr(k);
     }
     lval(toPos(i)).~Variant();
   }
@@ -158,7 +158,7 @@ void SimpleArrayStore::erase(PosType pos, uint length) {
   if (hasStrKey(pos)) {
     auto const k = m_keys[ipos].s;
     assert(k);
-    if (!k->decRefCount()) DELETE(StringData)(k);
+    decRefStr(k);
   }
   lval(pos).~Variant();
   // Shift over memory
@@ -855,9 +855,7 @@ void PolicyArray::OnSetEvalScalar(ArrayData* ad) {
       auto k = a->key(pos).getStringData();
       if (!k->isStatic()) {
         auto sk = StringData::GetStaticString(k);
-        if (k->decRefCount() == 0) {
-          DELETE(StringData)(k);
-        }
+        decRefStr(k);
         // Andrei TODO: inefficient, does one incref and then decref
         a->setKey(pos, sk);
         sk->decRefCount();

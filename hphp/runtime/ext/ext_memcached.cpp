@@ -955,9 +955,9 @@ bool c_Memcached::toObject(Variant& value, const memcached_result_st &result) {
       raise_warning("could not uncompress value");
       return false;
     }
-    decompPayload = NEW(StringData)(buffer.data(), bufferSize, CopyString);
+    decompPayload = StringData::Make(buffer.data(), bufferSize, CopyString);
   } else {
-    decompPayload = NEW(StringData)(payload, payloadLength, CopyString);
+    decompPayload = StringData::Make(payload, payloadLength, CopyString);
   }
 
   switch (flags & MEMC_VAL_TYPE_MASK) {

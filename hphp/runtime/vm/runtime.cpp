@@ -132,7 +132,7 @@ tvPairToCString(DataType t, uint64_t v,
 StringData*
 concat_ss(StringData* v1, StringData* v2) {
   if (v1->getCount() > 1) {
-    StringData* ret = NEW(StringData)(v1, v2);
+    StringData* ret = StringData::Make(v1, v2);
     ret->setRefCount(1);
     decRefStr(v2);
     // Because v1->getCount() is greater than 1, we know we will never
@@ -162,7 +162,7 @@ concat_is(int64_t v1, StringData* v2) {
   }
   StringSlice s1(intstart, len1);
   StringSlice s2 = v2->slice();
-  StringData* ret = NEW(StringData)(s1, s2);
+  StringData* ret = StringData::Make(s1, s2);
   ret->incRefCount();
   decRefStr(v2);
   return ret;
@@ -184,7 +184,7 @@ concat_si(StringData* v1, int64_t v2) {
   }
   StringSlice s1 = v1->slice();
   StringSlice s2(intstart, len2);
-  StringData* ret = NEW(StringData)(s1, s2);
+  StringData* ret = StringData::Make(s1, s2);
   ret->incRefCount();
   decRefStr(v1);
   return ret;
@@ -203,7 +203,7 @@ concat_tv(DataType t1, uint64_t v1, DataType t2, uint64_t v2) {
   tvPairToCString(t2, v2, &s2, &s2len, &free2);
   StringSlice r1(s1, s1len);
   StringSlice r2(s2, s2len);
-  StringData* retval = NEW(StringData)(r1, r2);
+  StringData* retval = StringData::Make(r1, r2);
   retval->incRefCount();
   // If tvPairToCString allocated temporary buffers, free them now
   if (free1) free((void*)s1);

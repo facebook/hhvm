@@ -304,7 +304,7 @@ int fb_unserialize_from_buffer(Variant &res, const char *buff,
       int len = (uint8_t)buff[(*pos)++];
 
       CHECK_ENOUGH(len, *pos, buff_len);
-      StringData* ret = NEW(StringData)(buff + (*pos), len, CopyString);
+      StringData* ret = StringData::Make(buff + (*pos), len, CopyString);
       (*pos) += len;
       res = ret;
       break;
@@ -316,7 +316,7 @@ int fb_unserialize_from_buffer(Variant &res, const char *buff,
       (*pos) += 4;
 
       CHECK_ENOUGH(len, *pos, buff_len);
-      StringData* ret = NEW(StringData)(buff + (*pos), len, CopyString);
+      StringData* ret = StringData::Make(buff + (*pos), len, CopyString);
       (*pos) += len;
       res = ret;
       break;
@@ -361,7 +361,7 @@ int fb_unserialize_from_buffer(Variant &res, const char *buff,
             int len = (uint8_t)buff[(*pos)++];
 
             CHECK_ENOUGH(len, *pos, buff_len);
-            key = NEW(StringData)(buff + (*pos), len, CopyString);
+            key = StringData::Make(buff + (*pos), len, CopyString);
             (*pos) += len;
             break;
           }
@@ -372,7 +372,7 @@ int fb_unserialize_from_buffer(Variant &res, const char *buff,
             (*pos) += 4;
 
             CHECK_ENOUGH(len, *pos, buff_len);
-            key = NEW(StringData)(buff + (*pos), len, CopyString);
+            key = StringData::Make(buff + (*pos), len, CopyString);
             (*pos) += len;
             break;
           }
@@ -759,11 +759,11 @@ Variant f_fb_compact_serialize(CVarRef thing) {
     }
   }
 
-  StringData* sd = NEW(StringData);
+  StringData* sd = StringData::Make();
   // StringData will throw a FatalErrorException if we try to grow it too large,
   // so no need to check for length.
   if (fb_compact_serialize_variant(sd, thing, 0)) {
-    DELETE(StringData)(sd);
+    sd->release();
     return uninit_null();
   }
 
@@ -873,7 +873,7 @@ int fb_compact_unserialize_from_buffer(
 
     case FB_CS_STRING_0:
     {
-      StringData* sd = NEW(StringData);
+      StringData* sd = StringData::Make();
       out = sd;
       break;
     }
@@ -890,7 +890,7 @@ int fb_compact_unserialize_from_buffer(
       }
 
       CHECK_ENOUGH(len, p, n);
-      StringData* sd = NEW(StringData)(buf + p, len, CopyString);
+      StringData* sd = StringData::Make(buf + p, len, CopyString);
       p += len;
       out = sd;
       break;

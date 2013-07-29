@@ -96,7 +96,7 @@ StringData* buildStringData(int n) {
 
   tmpbuf[11] = '\0';
   p = conv_10(n, &is_negative, &tmpbuf[11], &len);
-  return NEW(StringData)(p, len, CopyString);
+  return StringData::Make(p, len, CopyString);
 }
 
 String::String(int n) {
@@ -118,7 +118,7 @@ StringData* buildStringData(int64_t n) {
 
   tmpbuf[20] = '\0';
   p = conv_10(n, &is_negative, &tmpbuf[20], &len);
-  return NEW(StringData)(p, len, CopyString);
+  return StringData::Make(p, len, CopyString);
 }
 
 HOT_FUNC
@@ -138,7 +138,7 @@ StringData* buildStringData(double n) {
 
   if (n == 0.0) n = 0.0; // so to avoid "-0" output
   vspprintf(&buf, 0, "%.*G", 14, n);
-  return NEW(StringData)(buf, AttachString);
+  return StringData::Make(buf, AttachString);
 }
 
 String::String(double n) {
@@ -278,7 +278,7 @@ char String::charAt(int pos) const {
 String &String::operator=(litstr s) {
   if (m_px) decRefStr(m_px);
   if (s) {
-    m_px = NEW(StringData)(s, CopyString);
+    m_px = StringData::Make(s, CopyString);
     m_px->setRefCount(1);
   } else {
     m_px = nullptr;
@@ -293,7 +293,7 @@ String &String::operator=(StringData *data) {
 
 String &String::operator=(const std::string & s) {
   if (m_px) decRefStr(m_px);
-  m_px = NEW(StringData)(s.c_str(), s.size(), CopyString);
+  m_px = StringData::Make(s.c_str(), s.size(), CopyString);
   m_px->setRefCount(1);
   return *this;
 }
@@ -314,12 +314,12 @@ String &String::operator=(CVarRef var) {
 String &String::operator+=(litstr s) {
   if (s && *s) {
     if (empty()) {
-      m_px = NEW(StringData)(s, CopyString);
+      m_px = StringData::Make(s, CopyString);
       m_px->setRefCount(1);
     } else if (m_px->getCount() == 1) {
       m_px->append(s, strlen(s));
     } else {
-      StringData* px = NEW(StringData)(m_px, s);
+      StringData* px = StringData::Make(m_px, s);
       px->setRefCount(1);
       decRefStr(m_px);
       m_px = px;
@@ -335,7 +335,7 @@ String &String::operator+=(CStrRef str) {
     } else if (m_px->getCount() == 1) {
       m_px->append(str.slice());
     } else {
-      StringData* px = NEW(StringData)(m_px, str.slice());
+      StringData* px = StringData::Make(m_px, str.slice());
       decRefStr(m_px);
       px->setRefCount(1);
       m_px = px;
@@ -354,11 +354,11 @@ String& String::operator+=(const StringSlice& slice) {
   }
   if (empty()) {
     if (m_px) decRefStr(m_px);
-    m_px = NEW(StringData)(slice.begin(), slice.size(), CopyString);
+    m_px = StringData::Make(slice.begin(), slice.size(), CopyString);
     m_px->setRefCount(1);
     return *this;
   }
-  StringData* px = NEW(StringData)(m_px, slice);
+  StringData* px = StringData::Make(m_px, slice);
   px->setRefCount(1);
   decRefStr(m_px);
   m_px = px;
@@ -377,7 +377,7 @@ String&& operator+(String&& lhs, litstr rhs) {
 String operator+(const String & lhs, litstr rhs) {
   if (lhs.empty()) return rhs;
   if (!rhs || !*rhs) return lhs;
-  return NEW(StringData)(lhs.slice(), rhs);
+  return StringData::Make(lhs.slice(), rhs);
 }
 
 HOT_FUNC
@@ -392,14 +392,14 @@ String operator+(String&& lhs, const String & rhs) {
 
 HOT_FUNC
 String operator+(const String & lhs, String&& rhs) {
-  return NEW(StringData)(lhs.slice(), rhs.slice());
+  return StringData::Make(lhs.slice(), rhs.slice());
 }
 
 HOT_FUNC
 String operator+(const String & lhs, const String & rhs) {
   if (lhs.empty()) return rhs;
   if (rhs.empty()) return lhs;
-  return NEW(StringData)(lhs.slice(), rhs.slice());
+  return StringData::Make(lhs.slice(), rhs.slice());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -597,7 +597,7 @@ void String::unserialize(VariableUnserializer *uns,
   if (ch != delimiter0) {
     throw Exception("Expected '%c' but got '%c'", delimiter0, ch);
   }
-  StringData *px = NEW(StringData)(int(size));
+  StringData *px = StringData::Make(int(size));
   MutableSlice buf = px->mutableSlice();
   assert(size <= buf.len);
   uns->read(buf.ptr, size);

@@ -245,7 +245,7 @@ StringData* stringBitOp(BitOp bop, SzOp sop, StringData* s1, StringData* s2) {
   auto const s1Size = s1->size();
   auto const s2Size = s2->size();
   auto const newLen = sop(s1Size, s2Size);
-  auto const newStr = NEW(StringData)(newLen);
+  auto const newStr = StringData::Make(newLen);
   auto const s1Data = s1->data();
   auto const s2Data = s2->data();
   auto const outData = newStr->mutableData();
@@ -375,7 +375,7 @@ struct Inc {
 
   void nonNumericString(Cell& cell) const {
     auto const sd = cell.m_data.pstr;
-    auto const newSd = NEW(StringData)(sd, CopyString);
+    auto const newSd = StringData::Make(sd, CopyString);
     newSd->inc();
     newSd->incRefCount();
     decRefStr(sd);
@@ -505,7 +505,7 @@ void cellBitNot(Cell& cell) {
   case KindOfString:
     if (cell.m_data.pstr->getCount() > 1) {
     case KindOfStaticString:
-      auto const newSd = NEW(StringData)(
+      auto const newSd = StringData::Make(
         cell.m_data.pstr->slice(),
         CopyString
       );

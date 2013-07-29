@@ -115,7 +115,7 @@ public:
   /* implicit */ String(double  n);
   /* implicit */ String(litstr  s) {
     if (s) {
-      m_px = NEW(StringData)(s, CopyString);
+      m_px = StringData::Make(s, CopyString);
       m_px->setRefCount(1);
     }
   }
@@ -135,47 +135,47 @@ public:
   String& operator=(Variant&& src);
 
   /* implicit */ String(const std::string &s) { // always make a copy
-    m_px = NEW(StringData)(s.data(), s.size(), CopyString);
+    m_px = StringData::Make(s.data(), s.size(), CopyString);
     m_px->setRefCount(1);
   }
   // attach to null terminated malloc'ed string, maybe free it now.
   String(const char *s, AttachStringMode mode) {
     if (s) {
-      m_px = NEW(StringData)(s, mode);
+      m_px = StringData::Make(s, mode);
       m_px->setRefCount(1);
     }
   }
   // copy a null terminated string
   String(const char *s, CopyStringMode mode) {
     if (s) {
-      m_px = NEW(StringData)(s, mode);
+      m_px = StringData::Make(s, mode);
       m_px->setRefCount(1);
     }
   }
   // attach to binary malloc'ed string
   String(const char *s, int length, AttachStringMode mode) {
     if (s) {
-      m_px = NEW(StringData)(s, length, mode);
+      m_px = StringData::Make(s, length, mode);
       m_px->setRefCount(1);
     }
   }
   // make copy of binary binary string
   String(const char *s, int length, CopyStringMode mode) {
     if (s) {
-      m_px = NEW(StringData)(s, length, mode);
+      m_px = StringData::Make(s, length, mode);
       m_px->setRefCount(1);
     }
   }
   // force a copy of a String
   String(const String& s, CopyStringMode mode) {
     if (s.m_px) {
-      m_px = NEW(StringData)(s.c_str(), s.size(), mode);
+      m_px = StringData::Make(s.c_str(), s.size(), mode);
       m_px->setRefCount(1);
     }
   }
   // make an empty string with cap reserve bytes, plus 1 for '\0'
   String(int cap, ReserveStringMode mode) {
-    m_px = NEW(StringData)(cap);
+    m_px = StringData::Make(cap);
     m_px->setRefCount(1);
   }
 

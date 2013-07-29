@@ -36,7 +36,7 @@ StringBuffer::StringBuffer(int initialSize /* = 63 */)
   : m_initialCap(initialSize), m_maxBytes(kDefaultOutputLimit),
     m_len(0) {
   assert(initialSize > 0);
-  m_str = NEW(StringData)(initialSize);
+  m_str = StringData::Make(initialSize);
   MutableSlice s = m_str->mutableSlice();
   m_buffer = s.ptr;
   m_cap = s.len;
@@ -45,7 +45,7 @@ StringBuffer::StringBuffer(int initialSize /* = 63 */)
 StringBuffer::~StringBuffer() {
   if (m_str) {
     assert((m_str->setSize(0), true)); // appease StringData::checkSane()
-    DELETE(StringData)(m_str);
+    m_str->release();
   }
 }
 
@@ -118,7 +118,7 @@ void StringBuffer::reset() {
 void StringBuffer::release() {
   if (m_str) {
     m_buffer[m_len] = 0; // appease StringData::checkSane()
-    DELETE(StringData)(m_str);
+    m_str->release();
   }
   m_str = 0;
   m_buffer = 0;
@@ -134,7 +134,7 @@ void StringBuffer::resize(int size) {
 
 char *StringBuffer::reserve(int size) {
   if (!m_buffer) {
-    m_str = NEW(StringData)(std::max(m_initialCap, m_len + size));
+    m_str = StringData::Make(std::max(m_initialCap, m_len + size));
     m_buffer = (char*)m_str->data();
     m_cap = m_str->capacity();
   } else if (m_cap - m_len < size) {

@@ -112,9 +112,17 @@ public:
     m_small[0] = 0;
   }
 
-  /**
+  /*
+   * Creating request local PHP strings should go through this factory
+   * function.
+   */
+  template<class... Args> static StringData* Make(Args&&...);
+
+  /*
    * Different ways of constructing StringData. Default constructor at above
    * is actually only for SmartAllocator to pre-allocate the objects.
+   *
+   * To actually allocate StringDatas, use StringData::Make().
    */
   explicit StringData(const char* data) {
     initCopy(data);
@@ -194,13 +202,7 @@ public:
    * Resets the hash if not for unknown reasons, probably
    * unnecessarily.
    */
-  static StringData* Escalate(StringData* in) {
-    if (in->m_count != 1 || in->isImmutable()) {
-      return NEW(StringData)(in->data(), in->size(), CopyString);
-    }
-    in->m_hash = 0;
-    return in;
-  }
+  static StringData* Escalate(StringData* in);
 
   /*
    * Get the wrapped SharedVariant, or return null if this string is
@@ -230,7 +232,7 @@ public:
   }
 
   void checkStack() {
-    /**
+    /*
      * StringData should not generally be allocated on the
      * stack - because references to it could escape. If
      * you know what you're doing, use StackStringData,
@@ -286,17 +288,21 @@ public:
   void set(CStrRef key, CStrRef v);
   void set(CVarRef key, CStrRef v);
 
-  /**
+  /*
    * Type conversion functions.
    */
-  bool   toBoolean() const;
-  char   toByte   (int base = 10) const { return toInt64(base);}
-  short  toInt16  (int base = 10) const { return toInt64(base);}
-  int    toInt32  (int base = 10) const { return toInt64(base);}
-  int64_t  toInt64  (int base = 10) const;
-  double toDouble () const;
-  DataType toNumeric(int64_t &lval, double &dval) const;
+  bool toBoolean() const;
+  char toByte(int base = 10) const { return toInt64(base);}
+  short toInt16(int base = 10) const { return toInt64(base);}
+  int toInt32(int base = 10) const { return toInt64(base);}
+  int64_t toInt64(int base = 10) const;
+  double toDouble() const;
+  DataType toNumeric(int64_t& lval, double& dval) const;
+  std::string toCPPString() const;
 
+  /*
+   * Returns: case insensitive hash value for this string.
+   */
   strhash_t hash() const {
     strhash_t h = m_hash & STRHASH_MASK;
     return h ? h : hashHelper();
@@ -321,13 +327,18 @@ public:
 
   int compare(const StringData *v2) const;
 
-  /**
-   * Memory allocator methods.
+  /*
+   * Memory allocator for smart-allocated StringDatas.
    */
-  DECLARE_SMART_ALLOCATION(StringData);
-  void dump() const;
-  std::string toCPPString() const;
+  typedef ThreadLocalSingleton<SmartAllocator<StringData>> Allocator;
+  void release();
+
   static void sweepAll();
+
+  /*
+   * Debug dumping of a StringData to stdout.
+   */
+  void dump() const;
 
   static StringData *GetStaticString(const StringData* str);
   static StringData *GetStaticString(const std::string& str);
@@ -450,6 +461,22 @@ struct string_data_isame {
     return s1->isame(s2);
   }
 };
+
+//////////////////////////////////////////////////////////////////////
+
+template<class... Args>
+inline StringData* StringData::Make(Args&&... args) {
+  return new (StringData::Allocator::getNoCheck())
+    StringData(std::forward<Args>(args)...);
+}
+
+inline StringData* StringData::Escalate(StringData* in) {
+  if (in->m_count != 1 || in->isImmutable()) {
+    return StringData::Make(in->data(), in->size(), CopyString);
+  }
+  in->m_hash = 0;
+  return in;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

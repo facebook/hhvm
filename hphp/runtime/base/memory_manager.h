@@ -400,7 +400,6 @@ void  smart_free(void* ptr);
  * if you let the allocator sweep it the destructors will not be
  * called.
  */
-
 template<class T> T* smart_new_array(size_t count) {
   T* ret = static_cast<T*>(smart_malloc(count * sizeof(T)));
   size_t i = 0;

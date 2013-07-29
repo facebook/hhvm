@@ -271,7 +271,7 @@ void MemoryManager::checkMemory() {
 //
 // These functions allocate all small blocks from a single slab,
 // and defer larger allocations directly to malloc.  When small blocks
-// are freed they're placed the appropriate size-segreated freelist.
+// are freed they're placed the appropriate size-segregated freelist.
 // (m_smartfree[i]).  Small blocks have an 8-byte SmallNode and
 // are swept en-masse when slabs are freed.
 //
@@ -290,12 +290,16 @@ inline void* MemoryManager::smartMalloc(size_t nbytes) {
     unsigned i = (padbytes - 1) >> kLgSizeQuantum;
     assert(i < kNumSizes);
     void* p = m_smartfree[i].maybePop();
-    if (LIKELY(p != 0)) return p;
+    if (LIKELY(p != 0)) {
+      TRACE(1, "smartMalloc small: %zu -> %p\n", padbytes, p);
+      return p;
+    }
     char* mem = m_front;
     if (LIKELY(mem + padbytes <= m_limit)) {
       m_front = mem + padbytes;
       SmallNode* n = (SmallNode*) mem;
       n->padbytes = padbytes;
+      TRACE(1, "smartMalloc small: %zu -> %p\n", padbytes, n + 1);
       return n + 1;
     }
     return smartMallocSlab(padbytes);
@@ -311,6 +315,7 @@ inline void MemoryManager::smartFree(void* ptr) {
     assert(memset(ptr, kSmartFreeFill, padbytes - sizeof(SmallNode)));
     unsigned i = (padbytes - 1) >> kLgSizeQuantum;
     assert(i < kNumSizes);
+    TRACE(1, "smartFree: %p\n", ptr);
     m_smartfree[i].push(ptr);
     m_stats.usage -= padbytes;
     return;

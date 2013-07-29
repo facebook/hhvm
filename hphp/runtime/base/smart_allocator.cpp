@@ -43,12 +43,13 @@ std::set<AllocatorThreadLocalInit>& GetAllocatorInitList() {
   return allocatorInitList;
 }
 
+extern void init_stringdata_allocator();
+
 void InitAllocatorThreadLocal() {
-  for (std::set<AllocatorThreadLocalInit>::iterator it =
-      GetAllocatorInitList().begin();
-      it != GetAllocatorInitList().end(); it++) {
-    (*it)();
+  for (auto& init : GetAllocatorInitList()) {
+    init();
   }
+  init_stringdata_allocator();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

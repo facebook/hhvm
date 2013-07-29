@@ -734,7 +734,7 @@ inline StringData* SetElem(TypedValue* base, TypedValue* key, Cell* value) {
         // reference.
         base->m_data.pstr->setChar(x, y[0]);
       } else {
-        StringData* sd = NEW(StringData)(slen);
+        StringData* sd = StringData::Make(slen);
         char* s = sd->mutableSlice().ptr;
         memcpy(s, base->m_data.pstr->data(), baseLen);
         if (x > baseLen) {
@@ -748,7 +748,7 @@ inline StringData* SetElem(TypedValue* base, TypedValue* key, Cell* value) {
         base->m_type = KindOfString;
       }
 
-      StringData* sd = NEW(StringData)(y, strlen(y), CopyString);
+      StringData* sd = StringData::Make(y, strlen(y), CopyString);
       sd->incRefCount();
       return sd;
     }

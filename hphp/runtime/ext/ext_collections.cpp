@@ -1004,8 +1004,8 @@ void c_Map::deleteBuckets() {
     Bucket& p = m_data[i];
     if (p.validValue()) {
       tvRefcountedDecRef(&p.data);
-      if (p.hasStrKey() && p.skey->decRefCount() == 0) {
-        DELETE(StringData)(p.skey);
+      if (p.hasStrKey()) {
+        decRefStr(p.skey);
       }
     }
   }
@@ -1788,8 +1788,8 @@ void c_Map::erase(Bucket* p) {
   if (p->validValue()) {
     m_size--;
     tvRefcountedDecRef(&p->data);
-    if (p->hasStrKey() && p->skey->decRefCount() == 0) {
-      DELETE(StringData)(p->skey);
+    if (p->hasStrKey()) {
+      decRefStr(p->skey);
     }
     p->data.m_type = (DataType)KindOfTombstone;
     if (m_size < computeMinElements() && m_size) {
@@ -3126,8 +3126,8 @@ void c_StableMap::throwBadKeyType() {
 }
 
 c_StableMap::Bucket::~Bucket() {
-  if (hasStrKey() && skey->decRefCount() == 0) {
-    DELETE(StringData)(skey);
+  if (hasStrKey()) {
+    decRefStr(skey);
   }
   tvRefcountedDecRef(&data);
 }

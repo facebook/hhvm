@@ -121,6 +121,10 @@ bool UNUSED is_smart_allocated(T* p) {
   return T::AllocatorType::getNoCheck()->isFromThisAllocator(p);
 }
 
+bool UNUSED is_smart_allocated(StringData* p) {
+  return StringData::Allocator::getNoCheck()->isFromThisAllocator(p);
+}
+
 bool is_static(void* obj) {
   return *count_addr(obj) == RefCountStaticValue;
 }

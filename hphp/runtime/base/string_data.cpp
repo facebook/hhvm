@@ -34,8 +34,15 @@
 
 namespace HPHP {
 
-IMPLEMENT_SMART_ALLOCATION_HOT(StringData);
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+void init_stringdata_allocator() { StringData::Allocator::getCheck(); }
+
+void StringData::release() {
+  Allocator::getNoCheck()->release(this);
+}
+
+//////////////////////////////////////////////////////////////////////
 
 // equality checker for AtomicHashMap
 struct ahm_string_data_same {
@@ -525,7 +532,7 @@ StringData *StringData::copy(bool sharedMemory /* = false */) const {
     // copied.
     return new StringData(data(), size(), CopyMalloc);
   }
-  return NEW(StringData)(data(), size(), CopyString);
+  return StringData::Make(data(), size(), CopyString);
 }
 
 MutableSlice StringData::escalate(uint32_t cap) {
@@ -936,5 +943,6 @@ bool StringData::checkSane() const {
   return true;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
 }

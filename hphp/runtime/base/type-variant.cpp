@@ -80,7 +80,7 @@ static VarNR ToKey(CVarRef v) { return v.toKey(); }
 
 Variant::Variant(litstr  v) {
   m_type = KindOfString;
-  m_data.pstr = NEW(StringData)(v);
+  m_data.pstr = StringData::Make(v);
   m_data.pstr->incRefCount();
 }
 
@@ -102,7 +102,7 @@ Variant::Variant(CStrRef v) {
 
 Variant::Variant(const std::string & v) {
   m_type = KindOfString;
-  StringData *s = NEW(StringData)(v.c_str(), v.size(), CopyString);
+  StringData *s = StringData::Make(v.c_str(), v.size(), CopyString);
   assert(s);
   m_data.pstr = s;
   s->incRefCount();

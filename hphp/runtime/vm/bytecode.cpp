@@ -2284,7 +2284,7 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupPhpFile(StringData* path,
   if (!alreadyResolved) {
     std::string rp = StatCache::realpath(spath.data());
     if (rp.size() != 0) {
-      rpath = NEW(StringData)(rp.data(), rp.size(), CopyString);
+      rpath = StringData::Make(rp.data(), rp.size(), CopyString);
       if (!rpath.same(spath)) {
         hasRealpath = true;
         it = m_evaledFiles.find(rpath.get());

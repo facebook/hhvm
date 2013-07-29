@@ -41,18 +41,6 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
- * If a class is using SmartAllocator, all "new" and "delete" should be done
- * through these two macros in a form like this,
- *
- *   MyClass *obj = NEW(MyClass)(...);
- *   DELETE(MyClass)(obj);
- *
- * Note that these various allocation functions should only be used
- * for ObjectData-derived classes.  (If you need other
- * request-lifetime memory you need to do something else.)
- */
-
 template<class T>
 inline void smart_allocator_check_type() {
   static_assert(

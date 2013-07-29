@@ -283,6 +283,7 @@ public:
     void setStrKey(StringData* k, strhash_t h) {
       key = k;
       data.hash() = int32_t(h) | 0x80000000;
+      k->incRefCount();
     }
     void setIntKey(int64_t k) {
       ikey = k;
@@ -416,8 +417,8 @@ private:
   HphpArray* nextInsertVec(CVarRef data);
   ArrayData* nextInsertRef(CVarRef data);
   ArrayData* nextInsertWithRef(CVarRef data);
-  ArrayData* addLvalImpl(int64_t ki, Variant** pDest);
-  ArrayData* addLvalImpl(StringData* key, strhash_t h, Variant** pDest);
+  ArrayData* addLvalImpl(int64_t ki, Variant*& ret);
+  ArrayData* addLvalImpl(StringData* key, strhash_t h, Variant*& ret);
   ArrayData* addVal(int64_t ki, CVarRef data);
   ArrayData* addVal(StringData* key, CVarRef data);
   ArrayData* addValWithRef(int64_t ki, CVarRef data);
@@ -439,13 +440,16 @@ private:
   Elm* allocElm(ElmInd* ei);
   Elm* allocElmFast(ElmInd* ei);
   TypedValue& allocNextElm(uint32_t i);
-  void initElmInt(Elm* e, int64_t ki, CVarRef data, bool byRef=false);
-  void initElmStr(Elm* e, strhash_t h, StringData* key, CVarRef data,
-                  bool byRef=false);
-  void newElmInt(ElmInd* ei, int64_t ki, CVarRef data,
-                      bool byRef=false);
-  void newElmStr(ElmInd* ei, strhash_t h, StringData* key, CVarRef data,
-                      bool byRef=false);
+
+  HphpArray* setVal(TypedValue& tv, CVarRef v);
+  HphpArray* setRef(TypedValue& tv, CVarRef v);
+  HphpArray* getLval(TypedValue& tv, Variant*& ret);
+  HphpArray* initVal(TypedValue& tv, CVarRef v);
+  HphpArray* initRef(TypedValue& tv, CVarRef v);
+  HphpArray* initLval(TypedValue& tv, Variant*& ret);
+  HphpArray* initWithRef(TypedValue& tv, CVarRef v);
+  HphpArray* moveVal(TypedValue& tv, TypedValue v);
+
   ElmInd* allocData(size_t maxElms, size_t tableSize);
   ElmInd* reallocData(size_t maxElms, size_t tableSize);
 

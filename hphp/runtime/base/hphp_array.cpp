@@ -677,37 +677,58 @@ HphpArray::Elm* HphpArray::newElmGrow(size_t h0) {
 }
 
 inline ALWAYS_INLINE
-void HphpArray::initElmInt(Elm* e, int64_t ki, CVarRef rhs, bool isRef) {
-  if (isRef) {
-    tvAsUninitializedVariant(&e->data).constructRefHelper(rhs);
-  } else {
-    tvAsUninitializedVariant(&e->data).constructValHelper(rhs);
-  }
-  e->setIntKey(ki);
+HphpArray* HphpArray::initVal(TypedValue& tv, CVarRef v) {
+  tvAsUninitializedVariant(&tv).constructValHelper(v);
+  return this;
 }
 
 inline ALWAYS_INLINE
-void HphpArray::initElmStr(Elm* e, strhash_t h, StringData* key, CVarRef rhs,
-                           bool isRef) {
-  if (isRef) {
-    tvAsUninitializedVariant(&e->data).constructRefHelper(rhs);
-  } else {
-    tvAsUninitializedVariant(&e->data).constructValHelper(rhs);
-  }
-  e->setStrKey(key, h);
-  key->incRefCount();
+HphpArray* HphpArray::initRef(TypedValue& tv, CVarRef v) {
+  tvAsUninitializedVariant(&tv).constructRefHelper(v);
+  return this;
 }
 
 inline ALWAYS_INLINE
-void HphpArray::newElmInt(ElmInd* ei, int64_t ki, CVarRef data,
-                               bool byRef) {
-  initElmInt(newElm(ei, ki), ki, data, byRef);
+HphpArray* HphpArray::getLval(TypedValue& tv, Variant*& ret) {
+  ret = &tvAsVariant(&tv);
+  return this;
 }
 
 inline ALWAYS_INLINE
-void HphpArray::newElmStr(ElmInd* ei, strhash_t h, StringData* key,
-                               CVarRef data, bool byRef) {
-  initElmStr(newElm(ei, h), h, key, data, byRef);
+HphpArray* HphpArray::initLval(TypedValue& tv, Variant*& ret) {
+  tvWriteNull(&tv);
+  ret = &tvAsVariant(&tv);
+  return this;
+}
+
+inline ALWAYS_INLINE
+HphpArray* HphpArray::initWithRef(TypedValue& tv, CVarRef v) {
+  tvWriteNull(&tv);
+  tvAsVariant(&tv).setWithRef(v);
+  return this;
+}
+
+inline ALWAYS_INLINE
+HphpArray* HphpArray::setVal(TypedValue& tv, CVarRef v) {
+  tvAsVariant(&tv).assignValHelper(v);
+  return this;
+}
+
+inline ALWAYS_INLINE
+HphpArray* HphpArray::setRef(TypedValue& tv, CVarRef v) {
+  tvAsVariant(&tv).assignRefHelper(v);
+  return this;
+}
+
+/*
+ * This is a streamlined copy of Variant.constructValHelper()
+ * with no incref+decref because we're moving v to this array.
+ */
+inline ALWAYS_INLINE
+HphpArray* HphpArray::moveVal(TypedValue& tv, TypedValue v) {
+  tv.m_type = typeInitNull(v.m_type);
+  tv.m_data.num = v.m_data.num;
+  return this;
 }
 
 HphpArray::ElmInd* HphpArray::allocData(size_t maxElms, size_t tableSize) {
@@ -873,10 +894,6 @@ void HphpArray::compact(bool renumber /* = false */) {
   }
 }
 
-static inline void elemConstruct(const TypedValue* fr, TypedValue* to) {
-  tvAsUninitializedVariant(to).constructValHelper(tvAsCVarRef(fr));
-}
-
 bool HphpArray::nextInsert(CVarRef data) {
   if (UNLIKELY(m_nextKI < 0)) {
     raise_warning("Cannot add element to the array as the next element is "
@@ -891,9 +908,10 @@ bool HphpArray::nextInsert(CVarRef data) {
   ElmInd* ei = findForNewInsert(ki);
   assert(!validElmInd(*ei));
   // Allocate and initialize a new element.
-  initElmInt(allocElm(ei), ki, data);
-  // Update next free element.
-  ++m_nextKI;
+  auto* e = allocElm(ei);
+  e->setIntKey(ki);
+  m_nextKI = ki + 1; // Update next free element.
+  initVal(e->data, data);
   return true;
 }
 
@@ -909,10 +927,10 @@ ArrayData* HphpArray::nextInsertRef(CVarRef data) {
   // know that m_nextKI is not present in the array, so it is safe
   // to use findForNewInsert()
   ElmInd* ei = findForNewInsert(ki);
-  initElmInt(allocElm(ei), ki, data, true /*byRef*/);
-  // Update next free element.
-  ++m_nextKI;
-  return this;
+  auto e = allocElm(ei);
+  e->setIntKey(ki);
+  m_nextKI = ki + 1; // Update next free element.
+  return initRef(e->data, data);
 }
 
 ArrayData* HphpArray::nextInsertWithRef(CVarRef data) {
@@ -923,52 +941,33 @@ ArrayData* HphpArray::nextInsertWithRef(CVarRef data) {
 
   // Allocate a new element.
   Elm* e = allocElm(ei);
-  tvWriteNull(&e->data);
-  tvAsVariant(&e->data).setWithRef(data);
-  // Set key.
   e->setIntKey(ki);
-  // Update next free element.
-  ++m_nextKI;
-  return this;
+  m_nextKI = ki + 1; // Update next free element.
+  return initWithRef(e->data, data);
 }
 
-ArrayData* HphpArray::addLvalImpl(int64_t ki, Variant** pDest) {
-  assert(pDest && !isVector());
+ArrayData* HphpArray::addLvalImpl(int64_t ki, Variant*& ret) {
+  assert(!isVector());
   ElmInd* ei = findForInsert(ki);
   if (validElmInd(*ei)) {
-    *pDest = &tvAsVariant(&m_data[*ei].data);
-    return this;
+    return getLval(m_data[*ei].data, ret);
   }
   Elm* e = newElm(ei, ki);
-  tvWriteNull(&e->data);
   e->setIntKey(ki);
-  *pDest = &(tvAsVariant(&e->data));
-  if (ki >= m_nextKI && m_nextKI >= 0) {
-    m_nextKI = ki + 1;
-  }
-  return this;
+  if (ki >= m_nextKI && m_nextKI >= 0) m_nextKI = ki + 1;
+  return initLval(e->data, ret);
 }
 
 ArrayData* HphpArray::addLvalImpl(StringData* key, strhash_t h,
-                                  Variant** pDest) {
-  assert(key && pDest && !isVector());
+                                  Variant*& ret) {
+  assert(key && !isVector());
   ElmInd* ei = findForInsert(key, h);
   if (validElmInd(*ei)) {
-    Elm* e = &m_data[*ei];
-    TypedValue* tv;
-    tv = &e->data;
-    *pDest = &tvAsVariant(tv);
-    return this;
+    return getLval(m_data[*ei].data, ret);
   }
   Elm* e = newElm(ei, h);
-  // Initialize element to null and store the address of the element into
-  // *pDest.
-  tvWriteNull(&e->data);
-  // Set key.
   e->setStrKey(key, h);
-  e->key->incRefCount();
-  *pDest = &(tvAsVariant(&e->data));
-  return this;
+  return initLval(e->data, ret);
 }
 
 inline ArrayData* HphpArray::addVal(int64_t ki, CVarRef data) {
@@ -978,9 +977,7 @@ inline ArrayData* HphpArray::addVal(int64_t ki, CVarRef data) {
   Elm* e = allocElm(ei);
   e->setIntKey(ki);
   if (ki >= m_nextKI && m_nextKI >= 0) m_nextKI = ki + 1;
-  // Set the element
-  elemConstruct((TypedValue*)&data, &e->data);
-  return this;
+  return initVal(e->data, data);
 }
 
 inline ArrayData* HphpArray::addVal(StringData* key, CVarRef data) {
@@ -990,12 +987,7 @@ inline ArrayData* HphpArray::addVal(StringData* key, CVarRef data) {
   ElmInd* ei = findForNewInsert(h);
   Elm *e = allocElm(ei);
   e->setStrKey(key, h);
-  key->incRefCount();
-  // Set the element
-  TypedValue* to = (TypedValue*)(&e->data);
-  TypedValue* fr = (TypedValue*)(&data);
-  elemConstruct(fr, to);
-  return this;
+  return initVal(e->data, data);
 }
 
 inline ArrayData* HphpArray::addValWithRef(int64_t ki, CVarRef data) {
@@ -1003,12 +995,9 @@ inline ArrayData* HphpArray::addValWithRef(int64_t ki, CVarRef data) {
   ElmInd* ei = findForInsert(ki);
   if (!validElmInd(*ei)) {
     Elm* e = allocElm(ei);
-    tvWriteNull(&e->data);
-    tvAsVariant(&e->data).setWithRef(data);
     e->setIntKey(ki);
-    if (ki >= m_nextKI) {
-      m_nextKI = ki + 1;
-    }
+    if (ki >= m_nextKI) m_nextKI = ki + 1;
+    initWithRef(e->data, data);
   }
   return this;
 }
@@ -1019,10 +1008,8 @@ inline ArrayData* HphpArray::addValWithRef(StringData* key, CVarRef data) {
   ElmInd* ei = findForInsert(key, h);
   if (!validElmInd(*ei)) {
     Elm* e = allocElm(ei);
-    tvWriteNull(&e->data);
-    tvAsVariant(&e->data).setWithRef(data);
     e->setStrKey(key, h);
-    e->key->incRefCount();
+    initWithRef(e->data, data);
   }
   return this;
 }
@@ -1031,15 +1018,12 @@ inline INLINE_SINGLE_CALLER
 ArrayData* HphpArray::update(int64_t ki, CVarRef data) {
   ElmInd* ei = findForInsert(ki);
   if (validElmInd(*ei)) {
-    Elm* e = &m_data[*ei];
-    tvAsVariant(&e->data).assignValHelper(data);
-    return this;
+    return setVal(m_data[*ei].data, data);
   }
-  newElmInt(ei, ki, data);
-  if (ki >= m_nextKI && m_nextKI >= 0) {
-    m_nextKI = ki + 1;
-  }
-  return this;
+  auto e = newElm(ei, ki);
+  e->setIntKey(ki);
+  if (ki >= m_nextKI && m_nextKI >= 0) m_nextKI = ki + 1;
+  return initVal(e->data, data);
 }
 
 inline INLINE_SINGLE_CALLER
@@ -1047,27 +1031,23 @@ ArrayData* HphpArray::update(StringData* key, CVarRef data) {
   strhash_t h = key->hash();
   ElmInd* ei = findForInsert(key, h);
   if (validElmInd(*ei)) {
-    Elm* e = &m_data[*ei];
-    tvAsVariant(&e->data).assignValHelper(data);
-    return this;
+    return setVal(m_data[*ei].data, data);
   }
-  newElmStr(ei, h, key, data);
-  return this;
+  auto e = newElm(ei, h);
+  e->setStrKey(key, h);
+  return initVal(e->data, data);
 }
 
 ArrayData* HphpArray::updateRef(int64_t ki, CVarRef data) {
   assert(!isVector());
   ElmInd* ei = findForInsert(ki);
   if (validElmInd(*ei)) {
-    Elm* e = &m_data[*ei];
-    tvAsVariant(&e->data).assignRefHelper(data);
-    return this;
+    return setRef(m_data[*ei].data, data);
   }
-  newElmInt(ei, ki, data, true /*byRef*/);
-  if (ki >= m_nextKI && m_nextKI >= 0) {
-    m_nextKI = ki + 1;
-  }
-  return this;
+  auto e = newElm(ei, ki);
+  e->setIntKey(ki);
+  if (ki >= m_nextKI && m_nextKI >= 0) m_nextKI = ki + 1;
+  return initRef(e->data, data);
 }
 
 ArrayData* HphpArray::updateRef(StringData* key, CVarRef data) {
@@ -1075,12 +1055,11 @@ ArrayData* HphpArray::updateRef(StringData* key, CVarRef data) {
   strhash_t h = key->hash();
   ElmInd* ei = findForInsert(key, h);
   if (validElmInd(*ei)) {
-    Elm* e = &m_data[*ei];
-    tvAsVariant(&e->data).assignRefHelper(data);
-    return this;
+    return setRef(m_data[*ei].data, data);
   }
-  newElmStr(ei, h, key, data, true /*byRef*/);
-  return this;
+  auto e = newElm(ei, h);
+  e->setStrKey(key, h);
+  return initRef(e->data, data);
 }
 
 // return true if Elm contains a Reference that won't be flattened
@@ -1095,38 +1074,35 @@ ArrayData* HphpArray::LvalIntVec(ArrayData* ad, int64_t k, Variant*& ret,
   auto a = asVector(ad);
   if (copy) a = a->copyVec();
   if (size_t(k) < a->m_size) {
-    ret = &tvAsVariant(&a->m_data[k].data);
-    return a;
+    return a->getLval(a->m_data[k].data, ret);
   }
   if (size_t(k) == a->m_size) {
     auto& tv = a->allocNextElm(k);
-    tvWriteNull(&tv);
-    ret = &(tvAsVariant(&tv));
-    return a;
+    return a->initLval(tv, ret);
   }
   // todo t2606310: we know key is new.  use add/findForNewInsert
-  return a->vectorToGeneric()->addLvalImpl(k, &ret);
+  return a->vectorToGeneric()->addLvalImpl(k, ret);
 }
 
 ArrayData* HphpArray::LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
                               bool copy) {
   auto a = asGeneric(ad);
   if (copy) a = a->copyGeneric();
-  return a->addLvalImpl(k, &ret);
+  return a->addLvalImpl(k, ret);
 }
 
 ArrayData* HphpArray::LvalStrVec(ArrayData* ad, StringData* key, Variant*& ret,
                                  bool copy) {
   auto a = asVector(ad);
   if (copy) a = a->copyVec();
-  return a->vectorToGeneric()->addLvalImpl(key, key->hash(), &ret);
+  return a->vectorToGeneric()->addLvalImpl(key, key->hash(), ret);
 }
 
 ArrayData* HphpArray::LvalStr(ArrayData* ad, StringData* key, Variant*& ret,
                               bool copy) {
   auto a = asGeneric(ad);
   if (copy) a = a->copyGeneric();
-  return a->addLvalImpl(key, key->hash(), &ret);
+  return a->addLvalImpl(key, key->hash(), ret);
 }
 
 ArrayData* HphpArray::LvalNewVec(ArrayData* ad, Variant*& ret, bool copy) {
@@ -1154,13 +1130,11 @@ HphpArray::SetIntVec(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
   auto a = asVector(ad);
   if (copy) a = a->copyVec();
   if (size_t(k) < a->m_size) {
-    tvAsVariant(&a->m_data[k].data).assignValHelper(v);
-    return a;
+    return a->setVal(a->m_data[k].data, v);
   }
   if (size_t(k) == a->m_size) {
     auto& tv = a->allocNextElm(k);
-    tvAsUninitializedVariant(&tv).constructValHelper(v);
-    return a;
+    return a->initVal(tv, v);
   }
   // must escalate, but call addVal() since key doesn't exist.
   return a->vectorToGeneric()->addVal(k, v);
@@ -1192,13 +1166,11 @@ HphpArray::SetRefIntVec(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
   auto a = asVector(ad);
   if (copy) a = a->copyVec();
   if (size_t(k) < a->m_size) {
-    tvAsVariant(&a->m_data[k].data).assignRefHelper(v);
-    return a;
+    return a->setRef(a->m_data[k].data, v);
   }
   if (size_t(k) == a->m_size) {
     auto& tv = a->allocNextElm(k);
-    tvAsUninitializedVariant(&tv).constructRefHelper(v);
-    return a;
+    return a->initRef(tv, v);
   }
   // todo t2606310: key can't exist.  use add/findForNewInsert
   return a->vectorToGeneric()->updateRef(k, v);
@@ -1233,8 +1205,7 @@ HphpArray::AddIntVec(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
   if (copy) a = a->copyVec();
   if (size_t(k) == a->m_size) {
     auto& tv = a->allocNextElm(k);
-    elemConstruct((TypedValue*)&v, &tv);
-    return a;
+    return a->initVal(tv, v);
   }
   return a->vectorToGeneric()->addVal(k, v);
 }
@@ -1274,11 +1245,9 @@ HphpArray::AddLvalIntVec(ArrayData* ad, int64_t k, Variant*& ret, bool copy) {
   }
   if (size_t(k) == a->m_size) {
     auto& tv = a->allocNextElm(k);
-    tvWriteNull(&tv);
-    ret = &(tvAsVariant(&tv));
-    return a;
+    return a->initLval(tv, ret);
   }
-  return a->vectorToGeneric()->addLvalImpl(k, &ret);
+  return a->vectorToGeneric()->addLvalImpl(k, ret);
 }
 
 ArrayData*
@@ -1286,7 +1255,7 @@ HphpArray::AddLvalInt(ArrayData* ad, int64_t k, Variant*& ret, bool copy) {
   assert(!ad->exists(k));
   auto a = asGeneric(ad);
   if (copy) a = a->copyGeneric();
-  return a->addLvalImpl(k, &ret);
+  return a->addLvalImpl(k, ret);
 }
 
 ArrayData*
@@ -1295,7 +1264,7 @@ HphpArray::AddLvalStrVec(ArrayData* ad, StringData* k, Variant*& ret,
   assert(!ad->exists(k));
   auto a = asVector(ad);
   if (copy) a = a->copyVec();
-  return a->vectorToGeneric()->addLvalImpl(k, k->hash(), &ret);
+  return a->vectorToGeneric()->addLvalImpl(k, k->hash(), ret);
 }
 
 ArrayData*
@@ -1303,7 +1272,7 @@ HphpArray::AddLvalStr(ArrayData* ad, StringData* k, Variant*& ret, bool copy) {
   assert(!ad->exists(k));
   auto a = asGeneric(ad);
   if (copy) a = a->copyGeneric();
-  return a->addLvalImpl(k, k->hash(), &ret);
+  return a->addLvalImpl(k, k->hash(), ret);
 }
 
 //=============================================================================
@@ -1497,14 +1466,15 @@ bool HphpArray::nvInsert(StringData *k, TypedValue *data) {
   if (validElmInd(*ei)) {
     return false;
   }
-  newElmStr(ei, h, k, tvAsVariant(data));
+  auto e = newElm(ei, h);
+  e->setStrKey(k, h);
+  initVal(e->data, tvAsVariant(data));
   return true;
 }
 
 HphpArray* HphpArray::nextInsertVec(CVarRef v) {
   auto& tv = allocNextElm(m_size);
-  tvAsUninitializedVariant(&tv).constructValHelper(v);
-  return this;
+  return initVal(tv, v);
 }
 
 ArrayData* HphpArray::AppendVec(ArrayData* ad, CVarRef v, bool copy) {
@@ -1540,31 +1510,26 @@ ArrayData* genericAddNewElemC(ArrayData* a, TypedValue value) {
  * than other array helpers, but tuned for the opcode.  See doc comment in
  * hphp_array.h.
  */
-ArrayData* HphpArray::AddNewElemC(ArrayData* a, TypedValue value) {
+ArrayData* HphpArray::AddNewElemC(ArrayData* ad, TypedValue value) {
   assert(value.m_type != KindOfRef);
-  HphpArray* h;
+  HphpArray* a;
   int64_t k;
-  if (LIKELY(a->isVector()) &&
-      ((h = (HphpArray*)a), LIKELY(h->m_pos >= 0)) &&
-      LIKELY(h->getCount() <= 1) &&
-      ((k = h->m_size), LIKELY(size_t(k) < h->m_cap))) {
-    // Fast path is a streamlined copy of Variant.constructValHelper()
-    // with no incref+decref because we're moving (data,type) to this array.
-    assert(h->checkInvariants());
-    auto& tv = h->allocNextElm(k);
-    tv.m_type = typeInitNull(value.m_type);
-    tv.m_data.num = value.m_data.num;
-    return a;
+  if (LIKELY(ad->isVector()) &&
+      ((a = asVector(ad)), LIKELY(a->m_pos >= 0)) &&
+      LIKELY(a->getCount() <= 1) &&
+      ((k = a->m_size), LIKELY(size_t(k) < a->m_cap))) {
+    assert(a->checkInvariants());
+    auto& tv = a->allocNextElm(k);
+    return a->moveVal(tv, value);
   }
-  return genericAddNewElemC(a, value);
+  return genericAddNewElemC(ad, value);
 }
 
 ArrayData* HphpArray::AppendRefVec(ArrayData* ad, CVarRef v, bool copy) {
   auto a = asVector(ad);
   if (copy) a = a->copyVec();
   auto &tv = a->allocNextElm(a->m_size);
-  tvAsUninitializedVariant(&tv).constructRefHelper(v);
-  return a;
+  return a->initRef(tv, v);
 }
 
 ArrayData* HphpArray::AppendRef(ArrayData* ad, CVarRef v, bool copy) {
@@ -1577,9 +1542,7 @@ ArrayData *HphpArray::AppendWithRefVec(ArrayData* ad, CVarRef v, bool copy) {
   auto a = asVector(ad);
   if (copy) a = a->copyVec();
   auto& tv = a->allocNextElm(a->m_size);
-  tvWriteNull(&tv);
-  tvAsVariant(&tv).setWithRef(v);
-  return a;
+  return a->initWithRef(tv, v);
 }
 
 ArrayData *HphpArray::AppendWithRef(ArrayData* ad, CVarRef v, bool copy) {
@@ -1622,7 +1585,7 @@ ArrayData* HphpArray::Merge(ArrayData* ad, const ArrayData* elems, bool copy) {
     } else {
       Variant *p;
       StringData *sd = key.getStringData();
-      a->addLvalImpl(sd, sd->hash(), &p);
+      a->addLvalImpl(sd, sd->hash(), p);
       p->setWithRef(value);
     }
   }
@@ -1637,9 +1600,11 @@ ArrayData* HphpArray::PopVec(ArrayData* ad, Variant& value) {
     auto& tv = a->m_data[i].data;
     value = tvAsCVarRef(&tv);
     if (a->strongIterators()) a->adjustFullPos(i);
-    tvRefcountedDecRef(&tv);
+    auto oldType = tv.m_type;
+    auto oldDatum = tv.m_data.num;
     a->m_size = a->m_used = i;
     a->m_pos = a->m_size > 0 ? 0 : invalid_index; // reset internal iterator
+    tvRefcountedDecRefHelper(oldType, oldDatum);
     return a;
   }
   value = uninit_null();
@@ -1726,14 +1691,10 @@ ArrayData* HphpArray::Prepend(ArrayData* ad, CVarRef v, bool copy) {
   }
 
   // Prepend.
-  Elm* e = &elms[0];
-
-  TypedValue* fr = (TypedValue*)(&v);
-  TypedValue* to = (TypedValue*)(&e->data);
-  elemConstruct(fr, to);
-
-  e->setIntKey(0);
   ++a->m_size;
+  Elm* e = &elms[0];
+  e->setIntKey(0);
+  a->initVal(e->data, v);
 
   // Renumber.
   a->compact(true);

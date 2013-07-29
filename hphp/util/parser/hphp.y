@@ -1,8 +1,6 @@
 %{
 #ifdef XHPAST2_PARSER
 #include "hphp/util/parser/xhpast2/parser.h"
-#elif TEST_PARSER
-#include "hphp/util/parser/test/parser.h"
 #else
 #include "hphp/compiler/parser/parser.h"
 #endif

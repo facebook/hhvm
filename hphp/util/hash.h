@@ -325,8 +325,8 @@ inline bool is_strictly_integer(const char* arKey, size_t nKeyLength,
       }
     }
     if (good) {
-      if (num <= 0x7FFFFFFFFFFFFFFEULL ||
-          (neg && num == 0x7FFFFFFFFFFFFFFFULL)) {
+      if (num <= 0x7FFFFFFFFFFFFFFFULL ||
+          (neg && num == 0x8000000000000000ULL)) {
         res = neg ? 0 - num : (long long)num;
         return true;
       }

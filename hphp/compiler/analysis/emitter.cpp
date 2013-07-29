@@ -7006,7 +7006,12 @@ static ConstructPtr doOptimize(ConstructPtr c, AnalysisResultConstPtr ar) {
       case Expression::KindOfIncludeExpression:
       case Expression::KindOfSimpleFunctionCall:
         return e->preOptimize(ar);
-
+      case Expression::KindOfClosureExpression: {
+        ClosureExpressionPtr cl = static_pointer_cast<ClosureExpression>(e);
+        auto UNUSED exp = doOptimize(cl->getClosureFunction(), ar);
+        assert(!exp);
+        break;
+      }
       default: break;
     }
   }

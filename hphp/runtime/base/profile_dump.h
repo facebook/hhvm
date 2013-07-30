@@ -57,6 +57,8 @@ struct ProfileDump {
     assert(current.m_count >= 0 && current.m_bytes >= 0);
   }
 
+  std::string toPProfFormat() const;
+
 private:
   std::map<ProfileStackTrace, SiteAllocations> m_currentlyAllocated;
   std::map<ProfileStackTrace, SiteAllocations> m_accumAllocated;

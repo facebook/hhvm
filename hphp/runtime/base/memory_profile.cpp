@@ -54,11 +54,14 @@ void MemoryProfile::startProfilingImpl() {
 }
 
 void MemoryProfile::finishProfilingImpl() {
-  TRACE(1, "request ended, dumping data\n");
+  TRACE(1, "request ended\n");
+  TRACE(2, "profile dump for this request in pprof format:\n");
+  std::string str = m_dump.toPProfFormat();
+  TRACE(2, "%s", str.c_str());
 }
 
 void MemoryProfile::logAllocationImpl(void *ptr, size_t size) {
-  TRACE(2, "logging allocation at %p of %lu bytes\n", ptr, size);
+  TRACE(3, "logging allocation at %p of %lu bytes\n", ptr, size);
   ProfileStackTrace trace = getStackTrace();
 
   Allocation alloc { size, trace };
@@ -68,7 +71,7 @@ void MemoryProfile::logAllocationImpl(void *ptr, size_t size) {
 }
 
 void MemoryProfile::logDeallocationImpl(void *ptr) {
-  TRACE(2, "logging deallocation at %p\n", ptr);
+  TRACE(3, "logging deallocation at %p\n", ptr);
   const auto &it = m_livePointers.find(ptr);
   if (it == m_livePointers.end()) return;
 

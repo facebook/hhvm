@@ -39,7 +39,8 @@ namespace HPHP {
 void init_stringdata_allocator() { StringData::Allocator::getCheck(); }
 
 void StringData::release() {
-  Allocator::getNoCheck()->release(this);
+  this->~StringData();
+  Allocator::getNoCheck()->dealloc(this);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -319,24 +320,26 @@ StringData::StringData(SharedVariant *shared)
 }
 
 HOT_FUNC
-void StringData::releaseData() {
-  switch (format()) {
-  case IsMalloc:
-    assert(checkSane());
-    free(m_data);
-    break;
-  case IsShared:
+void StringData::releaseDataSlowPath() {
+  assert(!isSmall());
+  assert(checkSane());
+
+  auto const fmt = format();
+  if (LIKELY(fmt == IsSmart)) {
+    smart_free(m_data);
+    return;
+  }
+
+  if (fmt == IsShared) {
     assert(checkSane());
     m_big.shared->decRef();
     delist();
-    break;
-  case IsSmart:
-    assert(checkSane());
-    smart_free(m_data);
-    break;
-  default:
-    break;
+    return;
   }
+
+  assert(fmt == IsMalloc);
+  assert(checkSane());
+  free(m_data);
 }
 
 char* smart_concat(const char* s1, uint32_t len1, const char* s2, uint32_t len2) {

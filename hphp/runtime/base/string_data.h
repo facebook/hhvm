@@ -28,10 +28,14 @@
 
 namespace HPHP {
 
+//////////////////////////////////////////////////////////////////////
+
 class SharedVariant;
 class Array;
 class String;
-///////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////
+
 
 /**
  * A Slice is a compact way to refer to an extent of array elements.
@@ -333,6 +337,11 @@ public:
   typedef ThreadLocalSingleton<SmartAllocator<StringData>> Allocator;
   void release();
 
+  /*
+   * Shared StringData's have a sweep list running through them for
+   * decrefing the SharedVariant they are fronting.  This function
+   * must be called at request cleanup time to handle this.
+   */
   static void sweepAll();
 
   /*
@@ -363,6 +372,7 @@ private:
   void initMalloc(const char* data, int len);
   void initConcat(StringSlice r1, StringSlice r2);
   void releaseData();
+  void releaseDataSlowPath();
   int numericCompare(const StringData *v2) const;
   MutableSlice escalate(uint32_t cap); // change to smart-malloced string
   void enlist();
@@ -397,7 +407,7 @@ private:
   // m_len and m_data are not overlapped with small strings because
   // they are accessed so frequently that even the inline branch to
   // measurably slows things down.  Its worse for m_len than m_data.
-  // If frequent callers are refacotred to use slice() then we could
+  // If frequent callers are refactored to use slice() then we could
   // revisit this decision.
   mutable strhash_t m_hash;   // precompute hash codes for static strings
   union __attribute__((__packed__)) {
@@ -464,21 +474,8 @@ struct string_data_isame {
 
 //////////////////////////////////////////////////////////////////////
 
-template<class... Args>
-inline StringData* StringData::Make(Args&&... args) {
-  return new (StringData::Allocator::getNoCheck())
-    StringData(std::forward<Args>(args)...);
 }
 
-inline StringData* StringData::Escalate(StringData* in) {
-  if (in->m_count != 1 || in->isImmutable()) {
-    return StringData::Make(in->data(), in->size(), CopyString);
-  }
-  in->m_hash = 0;
-  return in;
-}
+#include "hphp/runtime/base/string_data-inl.h"
 
-///////////////////////////////////////////////////////////////////////////////
-}
-
-#endif // incl_HPHP_STRING_DATA_H_
+#endif

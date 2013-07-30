@@ -325,17 +325,22 @@ O(CheckInit,                        ND, S(Gen),                           NF) \
 O(CheckInitMem,                     ND, S(PtrToGen) C(Int),               NF) \
 O(CheckCold,                        ND, NA,                                E) \
 O(CheckNullptr,                     ND, S(CountedStr,Nullptr),            NF) \
+O(CheckBounds,                      ND, S(Int) S(Int),                E|N|Er) \
+O(LdVectorSize,                 D(Int), S(Obj),                            E) \
 O(AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr),            NF) \
 O(Unbox,                     DUnbox(0), S(Gen),                           NF) \
 O(Box,                         DBox(0), S(Init),             E|N|Mem|CRc|PRc) \
 O(UnboxPtr,               D(PtrToCell), S(PtrToGen),                      NF) \
 O(BoxPtr,            D(PtrToBoxedCell), S(PtrToGen),                   N|Mem) \
+O(LdVectorBase,           D(PtrToCell), S(Obj),                            E) \
+O(LdPairBase,             D(PtrToCell), S(Obj),                            E) \
 O(LdStack,                      DParam, S(StkPtr),                        NF) \
 O(LdLoc,                        DParam, S(FramePtr),                      NF) \
 O(LdStackAddr,                  DParam, S(StkPtr),                         C) \
 O(LdLocAddr,                    DParam, S(FramePtr),                       C) \
 O(LdMem,                        DParam, S(PtrToGen) C(Int),               NF) \
 O(LdProp,                       DParam, S(Obj) C(Int),                    NF) \
+O(LdElem,                      D(Cell), S(PtrToCell) S(Int),      E|Mem|Refs) \
 O(LdRef,                        DParam, S(BoxedCell),                     NF) \
 O(LdThis,                       D(Obj), S(FramePtr),                       C) \
 O(LdRetAddr,                D(RetAddr), S(FramePtr),                      NF) \
@@ -415,6 +420,9 @@ O(StLocNT,                          ND, S(FramePtr) S(Gen),        E|Mem|CRc) \
 O(StRef,                       DBox(1), S(BoxedCell) S(Cell), E|Mem|CRc|Refs) \
 O(StRefNT,                     DBox(1), S(BoxedCell) S(Cell),      E|Mem|CRc) \
 O(StRaw,                            ND, SUnk,                          E|Mem) \
+O(StElem,                           ND, S(PtrToCell)                          \
+                                          S(Int)                              \
+                                          S(Cell),                 E|Mem|CRc) \
 O(LdStaticLocCached,      D(BoxedCell), C(CacheHandle),                   NF) \
 O(StaticLocInit,          D(BoxedCell), CStr                                  \
                                           S(FramePtr)                         \

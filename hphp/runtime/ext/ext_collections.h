@@ -165,6 +165,9 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
 
+  static uint sizeOffset() { return offsetof(c_Vector, m_size); }
+  static uint dataOffset() { return offsetof(c_Vector, m_data); }
+
  private:
   void grow();
   static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
@@ -1095,6 +1098,8 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
     return 2;
   }
 
+  static uint dataOffset() { return offsetof(c_Pair, elm0); }
+
  private:
   static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
@@ -1216,6 +1221,8 @@ inline bool isOptimizableCollectionClass(const Class* klass) {
 
 
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer);
+
+void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
 ///////////////////////////////////////////////////////////////////////////////
 

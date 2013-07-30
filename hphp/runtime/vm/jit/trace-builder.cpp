@@ -262,6 +262,7 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     break;
   }
 
+  case StElem:
   case StProp:
   case StPropNT:
     // fall through to StMem; stored value is the same arg number (2)
@@ -272,7 +273,13 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
 
   case LdMem:
   case LdProp:
+  case LdElem:
   case LdRef:
+  case ArrayGet:
+  case VectorGet:
+  case PairGet:
+  case MapGet:
+  case StableMapGet:
     m_refCountedMemValue = inst->dst();
     break;
 

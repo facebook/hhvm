@@ -363,6 +363,7 @@ bool IRInstruction::isLoad() const {
     case LdLoc:
     case LdMem:
     case LdProp:
+    case LdElem:
     case LdRef:
     case LdThis:
     case LdStaticLocCached:
@@ -398,7 +399,14 @@ bool IRInstruction::storesCell(uint32_t srcIdx) const {
     case StMemNT:
     case StProp:
     case StPropNT:
+    case StElem:
       return srcIdx == 2;
+
+    case ArraySet:
+    case VectorSet:
+    case MapSet:
+    case StableMapSet:
+      return srcIdx == 3;
 
     case SpillStack:
       return srcIdx >= 2 && srcIdx < numSrcs();

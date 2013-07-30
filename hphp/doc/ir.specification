@@ -759,6 +759,12 @@ D:T* = LdLocAddr<T,localId,valSrc> S0:FramePtr
   Loads the address of the local slot localId from the frame S0 into D. See
   LdLoc for a description of valSrc.
 
+D:PtrToCell = LdVectorBase S0:Obj<Vector>
+D:PtrToCell = LdPairBase S0:Obj<Pair>
+
+  Loads the base pointer to an array of Cells from the given collection
+  instance in S0. 
+
 D:T = LdMem<T> S0:PtrToGen S1:ConstInt [ -> L ]
 
   Loads from S0 + S1 (in bytes) and puts the value in D. If the
@@ -772,6 +778,11 @@ D:T = LdProp<T> S0:Obj S1:ConstInt [ -> L ]
   given by S1 and puts the value in D. If the optional label L is
   specified and the loaded value's type does not match T, this
   instruction does not load into D and transfers control to L.
+
+D:Cell = LdElem S0:PtrToCell S1:Int
+
+  Loads the element at index S1 from the base pointer in S0.
+  The index in S1 is the number of Cells from the base in S0.
 
 D:T = LdRef<T> S0:Cell& [ -> L ]
 
@@ -1198,6 +1209,11 @@ StPropNT S0:Obj S1:Int S2:Gen
 
   Store S2 into the location S0 + S1 (in bytes), without storing the
   type tag.
+
+StElem S0:PtrToCell S1:Int S2:Cell
+
+  Store S2 into the location given by the index S1 from base pointer
+  S0. The index in S1 is the number of Cells from the base in S0.
 
 StLoc<localId> S0:FramePtr S1:Gen
 
@@ -2080,6 +2096,15 @@ D:Bool = EmptyElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 
   Returns true iff the element at key S2 in S1 is set and not equal
   (as defined by the hhbc Eq instruction) to false.
+
+CheckBounds S0:Int S1:Int 
+
+  Check that the index in S0 is between 0 (included) and the values in S1
+  (excluded). Throws if out of bounds.
+
+D:Int = LdVectorSize S0:Obj<Vector>
+
+  Return the size of the given Vector in S0.
 
 20. Exception/unwinding support
 

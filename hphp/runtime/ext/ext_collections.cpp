@@ -42,6 +42,10 @@ void throwIntOOB(int64_t key, bool isVector /* = false */) {
   throw e;
 }
 
+void throwOOB(int64_t key) {
+  throwIntOOB(key, true);
+}
+
 static void throwStrOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
 void throwStrOOB(StringData* key) {

@@ -1642,29 +1642,37 @@ void HhbcTranslator::MInstrTranslator::emitArrayGet(SSATmp* key) {
 }
 #undef HELPER_TABLE
 
-namespace MInstrHelpers {
-TypedValue vectorGet(c_Vector* vec, int64_t key) {
-  TypedValue* ret = vec->at(key);
-  return *ret;
-}
-}
-
 void HhbcTranslator::MInstrTranslator::emitVectorGet(SSATmp* key) {
-  SSATmp* value = gen(VectorGet, getCatchTrace(),
-                      cns((TCA)MInstrHelpers::vectorGet), m_base, key);
+  assert(key->isA(Type::Int));
+  if (key->isConst()) {
+    auto idx = key->getValInt();
+    if (idx < 0) {
+      PUNT(emitVectorGet);
+    }
+  }
+  SSATmp* size = gen(LdVectorSize, m_base);
+  gen(CheckBounds, key, size);
+  SSATmp* base = gen(LdVectorBase, m_base);
+  SSATmp* value = gen(LdElem, base, key);
   m_result = gen(IncRef, value);
 }
 
-namespace MInstrHelpers {
-TypedValue pairGet(c_Pair* pair, int64_t key) {
-  TypedValue* ret = pair->at(key);
-  return *ret;
-}
-}
-
 void HhbcTranslator::MInstrTranslator::emitPairGet(SSATmp* key) {
-  SSATmp* value = gen(PairGet, getCatchTrace(),
-                      cns((TCA)MInstrHelpers::pairGet), m_base, key);
+  SSATmp* value;
+  assert(key->isA(Type::Int));
+  if (key->isConst()) {
+    auto idx = key->getValInt();
+    if (idx < 0 || idx > 1) {
+      PUNT(emitPairGet);
+    }
+    // no reason to check bounds
+    SSATmp* base = gen(LdPairBase, m_base);
+    value = gen(LdElem, base, key);
+  } else {
+    gen(CheckBounds, key, cns(1));
+    SSATmp* base = gen(LdPairBase, m_base);
+    value = gen(LdElem, base, key);
+  }
   m_result = gen(IncRef, value);
 }
 
@@ -2202,17 +2210,23 @@ void HhbcTranslator::MInstrTranslator::emitSetWithRefNewElem() {
   m_result = nullptr;
 }
 
-namespace MInstrHelpers {
-void vectorSet(c_Vector* vec, int64_t key, Cell value) {
-  vec->set(key, &value);
-}
-}
-
 void HhbcTranslator::MInstrTranslator::emitVectorSet(
     SSATmp* key, SSATmp* value) {
-  gen(VectorSet, getCatchTrace(),
-      cns((TCA)MInstrHelpers::vectorSet), m_base, key, value);
-  m_result = value;
+  assert(key->isA(Type::Int));
+  if (key->isConst()) {
+    auto idx = key->getValInt();
+    if (idx < 0) {
+      PUNT(emitVectorSet); // will throw
+    }
+  }
+  SSATmp* size = gen(LdVectorSize, m_base);
+  gen(CheckBounds, key, size);
+  SSATmp* increffed = gen(IncRef, value);
+  SSATmp* vecBase = gen(LdVectorBase, m_base);
+  SSATmp* oldVal = gen(LdElem, vecBase, key);
+  gen(StElem, vecBase, key, value);
+  gen(DecRef, oldVal);
+  m_result = increffed;
 }
 
 template<KeyType keyType>

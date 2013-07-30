@@ -181,13 +181,25 @@ private:
                     ArgGroup& args);
   void cgInterpOneCommon(IRInstruction* inst);
 
-  void cgStore(PhysReg base,
-               int64_t off,
+  template<class MemRef>
+  void cgStore(MemRef dst,
                SSATmp* src,
                bool genStoreType = true);
-  void cgStoreTypedValue(PhysReg base, int64_t off, SSATmp* src);
+  template<class MemRef>
+  void cgStoreTypedValue(MemRef dst, SSATmp* src);
 
-  void cgLoad(PhysReg base, int64_t off, IRInstruction* inst);
+  // helpers to load a value in dst. When label is not null a type check
+  // is performed against value to ensure it is of the type expected by dst
+  template<class MemRef>
+  void cgLoad(SSATmp* dst, MemRef value, Block* label = nullptr);
+  template<class MemRef>
+  void cgLoadTypedValue(SSATmp* dst, MemRef base, Block* label = nullptr);
+
+  // internal helper to manage register conflicts from (Indexed)MemoryRef
+  // source to PhysReg destination. They may fail in resolving conflicts
+  // in which case the returned *MemoryRef will have an InvalidReg base.
+  IndexedMemoryRef resolveRegCollision(PhysReg dst, IndexedMemoryRef value);
+  MemoryRef resolveRegCollision(PhysReg dst, MemoryRef value);
 
   template<class Loc1, class Loc2, class JmpFn>
   void emitTypeTest(Type type,
@@ -246,8 +258,6 @@ private:
   void emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,
                                     PhysReg      thisReg,
                                     Transl::TargetCache::CacheHandle& ch);
-
-  void cgLoadTypedValue(PhysReg base, int64_t off, IRInstruction* inst);
 
   void cgJcc(IRInstruction* inst);        // helper
   void cgReqBindJcc(IRInstruction* inst); // helper

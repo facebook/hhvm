@@ -120,6 +120,8 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
            std::make_tuple(r.offset(), r.getFuncId());
   }
 
+  std::string getSymbol() const;
+
 private:
   FuncId m_funcId;
   Offset m_offset;

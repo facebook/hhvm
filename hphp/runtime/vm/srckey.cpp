@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/srckey.h"
 
+#include "folly/Format.h"
+
 namespace HPHP {
 
 std::string show(SrcKey sk) {
@@ -41,6 +43,38 @@ void sktrace(SrcKey sk, const char *fmt, ...) {
   va_start(a, fmt);
   Trace::vtrace(fmt, a);
   va_end(a);
+}
+
+std::string SrcKey::getSymbol() const {
+  const Func* f = func();
+  const Unit* u = unit();
+
+  if (f->isBuiltin()) {
+    return f->name()->data();
+  }
+
+  if (f->isPseudoMain()) {
+    return folly::format(
+      "{{pseudo-main}}::{}::line-{}",
+      u->filepath()->data(),
+      u->getLineNumber(m_offset)
+    ).str();
+  }
+
+  if (f->isMethod()) {
+    return folly::format(
+      "{}::{}::line-{}",
+      f->cls()->name()->data(),
+      f->name()->data(),
+      u->getLineNumber(m_offset)
+    ).str();
+  }
+
+  return folly::format(
+    "{}::line-{}",
+    f->name()->data(),
+    u->getLineNumber(m_offset)
+  ).str();
 }
 
 }

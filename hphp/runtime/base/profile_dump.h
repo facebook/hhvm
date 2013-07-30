@@ -59,6 +59,15 @@ struct ProfileDump {
 
   std::string toPProfFormat() const;
 
+  template<typename F>
+  void forEachAddress(F fun) const {
+    for (const auto &data : m_accumAllocated) {
+      for (const SrcKey &sk : data.first) {
+        fun(sk);
+      }
+    }
+  }
+
 private:
   std::map<ProfileStackTrace, SiteAllocations> m_currentlyAllocated;
   std::map<ProfileStackTrace, SiteAllocations> m_accumAllocated;

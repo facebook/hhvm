@@ -71,7 +71,7 @@ Variant ArrayUtil::Chunk(CArrRef input, int size,
                          bool preserve_keys /* = false */) {
   if (size < 1) {
     throw_invalid_argument("size: %d", size);
-    return uninit_null();
+    return init_null();
   }
 
   Array ret = Array::Create();
@@ -568,7 +568,7 @@ Variant ArrayUtil::RandomKeys(CArrRef input, int num_req /* = 1 */) {
   if (num_req <= 0 || num_req > count) {
     raise_warning("Second argument has to be between 1 and the "
                   "number of elements in the array");
-    return uninit_null();
+    return init_null();
   }
 
   std::vector<ssize_t> indices;
@@ -594,7 +594,7 @@ Variant ArrayUtil::RandomKeys(CArrRef input, int num_req /* = 1 */) {
 Variant ArrayUtil::RandomValues(CArrRef input, int num_req /* = 1 */) {
   int count = input.size();
   if (num_req <= 0 || num_req > count) {
-    return uninit_null();
+    return init_null();
   }
 
   std::vector<ssize_t> indices;
@@ -778,7 +778,7 @@ Variant ArrayUtil::Map(CArrRef inputs, PFUNC_MAP map_function,
         if (k < arr.size()) {
           params.append(arr->getValueRef(positions[i][k]));
         } else {
-          params.append(uninit_null());
+          params.append(init_null_variant);
         }
       }
 

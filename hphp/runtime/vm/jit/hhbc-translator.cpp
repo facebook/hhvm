@@ -3400,7 +3400,6 @@ void HhbcTranslator::emitDiv() {
   // not going to bother with string division etc.
   if (!isNumeric(divisorType) || !isNumeric(dividendType)) {
     emitInterpOne(Type::Cell, 2);
-    checkTypeTopOfStack(Type::Dbl, nextBcOff());
     return;
   }
 
@@ -3448,9 +3447,6 @@ void HhbcTranslator::emitDiv() {
       /* fall through */
     }
     emitInterpOne(Type::Cell, 2);
-
-    // interpOne could return an int bool or double
-    checkTypeTopOfStack(Type::Dbl, nextBcOff());
     return;
   }
 

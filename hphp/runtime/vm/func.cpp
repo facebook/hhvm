@@ -955,7 +955,7 @@ void FuncEmitter::commit(RepoTxn& txn) const {
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool isGenerated = isdigit(m_name->data()[0]) ||
-    ParserBase::IsClosureOrContinuationName(m_name->toCPPString());
+    ParserBase::IsClosureName(m_name->toCPPString()) || m_isGenerator;
 
   Attr attrs = m_attrs;
   if (attrs & AttrPersistent &&

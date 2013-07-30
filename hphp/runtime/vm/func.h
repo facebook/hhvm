@@ -647,6 +647,10 @@ public:
   void setIsGenerator(bool isGenerator) { m_isGenerator = isGenerator; }
   bool isGenerator() const { return m_isGenerator; }
 
+  bool isMethod() const {
+    return !isPseudoMain() && (bool)pce();
+  }
+
   void setIsGeneratorFromClosure(bool b) { m_isGeneratorFromClosure = b; }
   bool isGeneratorFromClosure() const { return m_isGeneratorFromClosure; }
 

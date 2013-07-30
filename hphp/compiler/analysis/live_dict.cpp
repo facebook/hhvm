@@ -14,9 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/compiler/analysis/live_dict.h"
+
 #include "hphp/compiler/analysis/alias_manager.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/compiler/analysis/live_dict.h"
 #include "hphp/compiler/analysis/variable_table.h"
 
 #include "hphp/compiler/expression/expression.h"
@@ -465,7 +466,6 @@ bool LiveDict::color(TypePtr type) {
         if (sym &&
             !sym->isGlobal() &&
             !sym->isParameter() &&
-            !sym->isGeneratorParameter() &&
             !sym->isClosureVar() &&
             !sym->isStatic() &&
             !e->isThis()) {
@@ -610,7 +610,7 @@ public:
       SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(e));
       Symbol *sym = sv->getSymbol();
       if (!sym || sym->isGlobal() || sym->isStatic() || sym->isParameter() ||
-          sym->isGeneratorParameter() || sym->isClosureVar() || sv->isThis()) {
+          sym->isClosureVar() || sv->isThis()) {
         continue;
       }
 

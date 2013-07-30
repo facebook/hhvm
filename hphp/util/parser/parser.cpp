@@ -25,25 +25,6 @@ bool ParserBase::IsClosureName(const std::string &name) {
   return boost::istarts_with(name, "closure$");
 }
 
-bool ParserBase::IsContinuationName(const std::string &name) {
-  return boost::iends_with(name, "$continuation");
-}
-
-bool ParserBase::IsClosureOrContinuationName(const std::string &name) {
-  return IsClosureName(name) || IsContinuationName(name);
-}
-
-std::string ParserBase::newContinuationName(const std::string &name) {
-  assert(!name.empty());
-  size_t pos = 0;
-  std::string shorterName = name;
-  std::string suffix("$continuation");
-  while((pos = shorterName.find(suffix, pos)) != std::string::npos) {
-    shorterName.replace(pos, suffix.length(), "");
-  }
-  return shorterName + suffix;
-}
-
 std::string ParserBase::newClosureName(
     const std::string &className,
     const std::string &funcName) {

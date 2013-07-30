@@ -113,13 +113,6 @@
 
 using namespace HPHP::Compiler;
 
-extern void prepare_generator(Parser *_p, Token &stmt);
-extern void create_generator(Parser *_p, Token &out, Token &params,
-                             Token &name, const std::string &genName,
-                             const char *clsname, Token *modifiers,
-                             Token &origGenFunc, bool isHhvm,
-                             Token *attr);
-
 namespace HPHP {
 
 SimpleFunctionCallPtr NewSimpleFunctionCall(
@@ -841,72 +834,31 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
     funcName += "{lambda}";
   }
 
-  if (funcContext.isGenerator) {
-    string genName = newContinuationName(funcName);
-
-    prepare_generator(this, stmt);
-
-    func = NEW_STMT(FunctionStatement, exp, ref->num(), genName,
-                    ExpressionListPtr(), ret.typeAnnotationName(),
-                    dynamic_pointer_cast<StatementList>(stmt->stmt),
-                    attribute, comment, ExpressionListPtr());
-    out->stmt = func;
-    func->getLocation()->line0 = loc->line0;
-    func->getLocation()->char0 = loc->char0;
-    {
-      func->onParse(m_ar, m_file);
-    }
-    completeScope(func->getFunctionScope());
-    if (func->ignored()) {
-      out->stmt = NEW_STMT0(StatementList);
-    } else {
-      assert(!m_prependingStatements.empty());
-      vector<StatementPtr> &prepending = m_prependingStatements.back();
-      prepending.push_back(func);
-
-      if (name->text().empty()) m_closureGenerator = true;
-      // create_generator() expects us to push the docComment back
-      // onto the comment stack so that it can make sure that the
-      // the MethodStatement it's building will get the docComment
-      pushComment(comment);
-      Token origGenFunc;
-      create_generator(this, out, params, name, genName, nullptr, nullptr,
-                       origGenFunc,
-                       (!Option::WholeProgram || !Option::ParseTimeOpts),
-                       attr);
-      m_closureGenerator = false;
-      MethodStatementPtr origStmt =
-        boost::dynamic_pointer_cast<MethodStatement>(origGenFunc->stmt);
-      assert(origStmt);
-      func->setOrigGeneratorFunc(origStmt);
-      origStmt->setGeneratorFunc(func);
-      origStmt->setHasCallToGetArgs(hasCallToGetArgs);
-    }
-  } else {
-    ExpressionListPtr attrList;
-    if (attr && attr->exp) {
-      attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
-    }
-
-    func = NEW_STMT(FunctionStatement, exp, ref->num(), funcName, old_params,
-                    ret.typeAnnotationName(),
-                    dynamic_pointer_cast<StatementList>(stmt->stmt),
-                    attribute, comment, attrList);
-    out->stmt = func;
-
-    {
-      func->onParse(m_ar, m_file);
-    }
-    completeScope(func->getFunctionScope());
-    if (m_closureGenerator) {
-      func->getFunctionScope()->setClosureGenerator();
-    }
-    func->getLocation()->line0 = loc->line0;
-    func->getLocation()->char0 = loc->char0;
-    if (func->ignored()) {
-      out->stmt = NEW_STMT0(StatementList);
-    }
+  ExpressionListPtr attrList;
+  if (attr && attr->exp) {
+    attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
   }
+
+  func = NEW_STMT(FunctionStatement, exp, ref->num(), funcName, old_params,
+                  ret.typeAnnotationName(),
+                  dynamic_pointer_cast<StatementList>(stmt->stmt),
+                  attribute, comment, attrList);
+  out->stmt = func;
+
+  {
+    func->onParse(m_ar, m_file);
+  }
+  completeScope(func->getFunctionScope());
+
+  if (funcContext.isGenerator) {
+    func->getFunctionScope()->setGenerator(true);
+  }
+  func->getLocation()->line0 = loc->line0;
+  func->getLocation()->char0 = loc->char0;
+  if (func->ignored()) {
+    out->stmt = NEW_STMT0(StatementList);
+  }
+
   func->setHasCallToGetArgs(hasCallToGetArgs);
 }
 
@@ -1216,59 +1168,27 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
     funcName = newClosureName(m_clsName, m_containingFuncName);
   }
 
-  if (funcContext.isGenerator) {
-    string genName = newContinuationName(funcName);
-    if (m_inTrait) {
-      // see traits/2067.php
-      genName = newContinuationName(funcName + "@" + m_clsName);
-    }
-
-    prepare_generator(this, stmt);
-    ModifierExpressionPtr exp2 = Construct::Clone(exp);
-    mth = NEW_STMT(MethodStatement, exp2, ref->num(), genName,
-                   ExpressionListPtr(), ret.typeAnnotationName(),
-                   dynamic_pointer_cast<StatementList>(stmt->stmt),
-                   attribute, comment, ExpressionListPtr());
-    out->stmt = mth;
-    if (reloc) {
-      mth->getLocation()->line0 = loc->line0;
-      mth->getLocation()->char0 = loc->char0;
-    }
-    {
-      completeScope(mth->onInitialParse(m_ar, m_file));
-    }
-    // create_generator() expects us to push the docComment back
-    // onto the comment stack so that it can make sure that the
-    // the MethodStatement it's building will get the docComment
-    pushComment(comment);
-    Token origGenFunc;
-    create_generator(this, out, params, name, genName, m_clsName.c_str(),
-                     &modifiers, origGenFunc,
-                     (!Option::WholeProgram || !Option::ParseTimeOpts),
-                     attr);
-    MethodStatementPtr origStmt =
-      boost::dynamic_pointer_cast<MethodStatement>(origGenFunc->stmt);
-    assert(origStmt);
-    mth->setOrigGeneratorFunc(origStmt);
-    origStmt->setGeneratorFunc(mth);
-    origStmt->setHasCallToGetArgs(hasCallToGetArgs);
-  } else {
-    ExpressionListPtr attrList;
-    if (attr && attr->exp) {
-      attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
-    }
-    mth = NEW_STMT(MethodStatement, exp, ref->num(), funcName,
-                   old_params,
-                   ret.typeAnnotationName(),
-                   stmts, attribute, comment,
-                   attrList);
-    out->stmt = mth;
-    if (reloc) {
-      mth->getLocation()->line0 = loc->line0;
-      mth->getLocation()->char0 = loc->char0;
-    }
-    completeScope(mth->onInitialParse(m_ar, m_file));
+  ExpressionListPtr attrList;
+  if (attr && attr->exp) {
+    attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
   }
+  mth = NEW_STMT(MethodStatement, exp, ref->num(), funcName,
+                 old_params,
+                 ret.typeAnnotationName(),
+                 stmts, attribute, comment,
+                 attrList);
+  out->stmt = mth;
+
+  if (reloc) {
+    mth->getLocation()->line0 = loc->line0;
+    mth->getLocation()->char0 = loc->char0;
+  }
+  completeScope(mth->onInitialParse(m_ar, m_file));
+
+  if (funcContext.isGenerator) {
+    mth->getFunctionScope()->setGenerator(true);
+  }
+
   mth->setHasCallToGetArgs(hasCallToGetArgs);
 }
 

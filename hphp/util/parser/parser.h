@@ -54,9 +54,6 @@ public:
   };
 
   static bool IsClosureName                (const std::string &name);
-  static bool IsContinuationName           (const std::string &name);
-  static bool IsClosureOrContinuationName  (const std::string &name);
-  static std::string newContinuationName   (const std::string &name);
   std::string newClosureName(
       const std::string &className,
       const std::string &funcName);

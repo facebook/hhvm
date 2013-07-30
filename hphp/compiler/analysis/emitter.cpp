@@ -3238,36 +3238,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           e.False();
           e.ArrayIdx();
           return true;
-        } else if (call->isCompilerCallToFunction("hphp_unpack_continuation")) {
-          assert(!params || params->getCount() == 0);
-          int yieldLabelCount = call->getFunctionScope()->getYieldLabelCount();
-          emitContinuationSwitch(e, yieldLabelCount);
-          return false;
-        } else if (call->isCompilerCallToFunction("hphp_create_continuation")) {
-          assert(params && params->getCount() == 3);
-          ExpressionPtr name = (*params)[1];
-          Variant nameVar;
-          UNUSED bool isScalar = name->getScalarValue(nameVar);
-          assert(isScalar && nameVar.isString());
-
-          if (m_curFunc->hasVar(s_continuationVarArgsLocal)) {
-            static const StringData* s_func_get_args =
-              StringData::GetStaticString("func_get_args");
-
-            Id local = m_curFunc->lookupVarId(s_continuationVarArgsLocal);
-            emitVirtualLocal(local);
-            e.FCallBuiltin(0, 0, s_func_get_args);
-            m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut,
-                           false, 0, 0);
-            e.UnboxR();
-            emitSet(e);
-            e.PopC();
-          }
-
-          const StringData* nameStr =
-            StringData::GetStaticString(nameVar.getStringData());
-          e.CreateCont(nameStr);
-          return true;
         } else if (call->isCompilerCallToFunction("hphp_continuation_done")) {
           assert(params && params->getCount() == 1);
           visit((*params)[0]);
@@ -3940,7 +3910,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         pce->addMethod(invoke);
         MethodStatementPtr body(
           static_pointer_cast<MethodStatement>(ce->getClosureFunction()));
-        invoke->setHasGeneratorAsBody(!!body->getGeneratorFunc());
         postponeMeth(body, invoke, false, new ClosureUseVarVec(useVars));
 
         return true;
@@ -5331,7 +5300,8 @@ static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
     attrs = attrs | AttrAllowOverride;
   }
 
-  if (funcScope->mayUseVV() || meth->hasCallToGetArgs()) {
+  if (meth->hasCallToGetArgs() ||
+      (!fe->hasGeneratorAsBody() && funcScope->mayUseVV())) {
     attrs = attrs | AttrMayUseVV;
   }
 
@@ -5349,7 +5319,7 @@ static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
       if (top &&
           (!funcScope->isVolatile() ||
            funcScope->isPersistent() ||
-           funcScope->isGenerator())) {
+           fe->isGenerator())) {
         attrs = attrs | AttrPersistent;
       }
     }
@@ -5381,6 +5351,7 @@ static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
     assert(!(attrs & (AttrProtected | AttrPrivate)));
     attrs = attrs | AttrPublic;
   }
+
   return attrs;
 }
 
@@ -5425,30 +5396,31 @@ void EmitterVisitor::emitPostponedMeths() {
     assert(m_actualStackHighWater == 0);
     assert(m_fdescHighWater == 0);
     PostponedMeth& p = m_postponedMeths.front();
-    FunctionScopePtr funcScope = p.m_meth->getFunctionScope();
+    MethodStatementPtr meth = p.m_meth;
     FuncEmitter* fe = p.m_fe;
 
     if (!fe) {
       assert(p.m_top);
-      if (!m_topMethodEmitted.insert(p.m_meth->getOriginalName()).second) {
+      if (!m_topMethodEmitted.insert(meth->getOriginalName()).second) {
         throw IncludeTimeFatalException(
-          p.m_meth,
-          "%s",
-          (string("Function already defined: ") +
-            p.m_meth->getOriginalName()).c_str());
+          meth,
+          "Function already defined: %s",
+          meth->getOriginalName().c_str());
       }
+
       const StringData* methName =
-        StringData::GetStaticString(p.m_meth->getOriginalName());
-      fe = new FuncEmitter(m_ue, -1, -1, methName);
-      fe->setIsGenerator(funcScope->isGenerator());
-      fe->setIsGeneratorFromClosure(funcScope->isGeneratorFromClosure());
-      fe->setHasGeneratorAsBody(!!p.m_meth->getGeneratorFunc());
-      p.m_fe = fe;
+        StringData::GetStaticString(meth->getOriginalName());
+      p.m_fe = fe = new FuncEmitter(m_ue, -1, -1, methName);
       top_fes.push_back(fe);
     }
 
-    emitMethodMetadata(p);
-    emitMethodBody(p);
+    if (meth->getFunctionScope()->isGenerator()) {
+      emitMethodsForGenerator(p, top_fes);
+    } else {
+      m_curFunc = fe;
+      emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
+      emitMethod(meth);
+    }
 
     delete p.m_closureUseVars;
     m_postponedMeths.pop_front();
@@ -5459,14 +5431,15 @@ void EmitterVisitor::emitPostponedMeths() {
   }
 }
 
-void EmitterVisitor::emitMethodMetadata(PostponedMeth& p) {
-  FunctionScopePtr funcScope = p.m_meth->getFunctionScope();
-  FuncEmitter* fe = p.m_fe;
+void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
+                                        ClosureUseVarVec* useVars,
+                                        bool top) {
+  FuncEmitter* fe = m_curFunc;
 
   // user attributes
   bool allowOverride = false;
   const FunctionScope::UserAttributeMap& userAttrs =
-    funcScope->userAttributes();
+    meth->getFunctionScope()->userAttributes();
   for (FunctionScope::UserAttributeMap::const_iterator it = userAttrs.begin();
        it != userAttrs.end(); ++it) {
     if (it->first == "__Overridable") {
@@ -5482,44 +5455,56 @@ void EmitterVisitor::emitMethodMetadata(PostponedMeth& p) {
     fe->addUserAttribute(uaName, tv);
   }
 
-  // parameters
-  fillFuncEmitterParams(fe, p.m_meth->getParams());
+  // assign ids to parameters (all methods)
+  int numParam = meth->getParams() ? meth->getParams()->getCount() : 0;
+  for (int i = 0; i < numParam; i++) {
+    ParameterExpressionPtr par(
+      static_pointer_cast<ParameterExpression>((*meth->getParams())[i]));
+    fe->allocVarId(StringData::GetStaticString(par->getName()));
+  }
 
-  // add return type hint
-  fe->setReturnTypeConstraint(
-      StringData::GetStaticString(p.m_meth->getReturnTypeConstraint()));
+  // assign ids to 0Closure and use parameters (closures)
+  if (fe->isClosureBody() || fe->isGeneratorFromClosure()) {
+    fe->allocVarId(StringData::GetStaticString("0Closure"));
+
+    for (auto& useVar : *useVars) {
+      fe->allocVarId(useVar.first);
+    }
+  }
+
+  // assign id to continuationVarArgsLocal (generators - both methods)
+  if ((fe->isGenerator() || fe->hasGeneratorAsBody()) &&
+      meth->hasCallToGetArgs()) {
+    fe->allocVarId(s_continuationVarArgsLocal);
+  }
+
+  // assign ids to local variables (not in generator create)
+  if (!fe->hasGeneratorAsBody()) {
+    assignLocalVariableIds(meth->getFunctionScope());
+  }
+
+  if (!fe->isGenerator()) {
+    // add parameter info
+    fillFuncEmitterParams(fe, meth->getParams());
+
+    // copy declared return type (hack)
+    fe->setReturnTypeConstraint(
+      StringData::GetStaticString(meth->getReturnTypeConstraint()));
+  }
 
   // add the original filename for flattened traits
-  auto const originalFilename = p.m_meth->getOriginalFilename();
+  auto const originalFilename = meth->getOriginalFilename();
   if (!originalFilename.empty()) {
     fe->setOriginalFilename(StringData::GetStaticString(originalFilename));
   }
 
-  if (fe->isClosureBody() || fe->isGeneratorFromClosure()) {
-    // We are going to keep the closure as the first local
-    fe->allocVarId(StringData::GetStaticString("0Closure"));
-
-    if (fe->isClosureBody()) {
-      ClosureUseVarVec* useVars = p.m_closureUseVars;
-      for (auto& useVar : *useVars) {
-        // These are all locals. I want them right after the params so I don't
-        // have to keep track of which one goes where at runtime.
-        fe->allocVarId(useVar.first);
-      }
-    }
-  }
-
-  if (p.m_meth->hasCallToGetArgs()) {
-    fe->allocVarId(s_continuationVarArgsLocal);
-  }
-
-  const Location* sLoc = p.m_meth->getLocation().get();
+  const Location* sLoc = meth->getLocation().get();
   fe->init(sLoc->line0,
            sLoc->line1,
            m_ue.bcPos(),
-           buildMethodAttrs(p.m_meth, p.m_fe, p.m_top, allowOverride),
-           p.m_top,
-           StringData::GetStaticString(p.m_meth->getDocComment()));
+           buildMethodAttrs(meth, fe, top, allowOverride),
+           top,
+           StringData::GetStaticString(meth->getDocComment()));
 }
 
 void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
@@ -5592,69 +5577,147 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
   }
 }
 
-void EmitterVisitor::emitMethodBody(PostponedMeth& p) {
-  FunctionScopePtr funcScope = p.m_meth->getFunctionScope();
-  FuncEmitter* fe = p.m_fe;
-  m_curFunc = fe;
-
-  // Assign ids to all of the local variables eagerly. Note that parameters
-  // ids are already assigned, so we will still uphold the invariant that
-  // the n parameters will have ids 0 through n-1 respectively.
-  assignLocalVariableIds(funcScope);
-
-  Emitter e(p.m_meth, m_ue, *this);
-  Label topOfBody(e);
+void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
+  FunctionScopePtr funcScope = meth->getFunctionScope();
 
   if (funcScope->needsLocalThis() &&
       !funcScope->isStatic() &&
       !funcScope->isGenerator()) {
-    assert(!p.m_top);
+    assert(!m_curFunc->top());
     static const StringData* thisStr = StringData::GetStaticString("this");
-    Id thisId = fe->lookupVarId(thisStr);
+    Id thisId = m_curFunc->lookupVarId(thisStr);
     e.InitThisLoc(thisId);
   }
-  for (uint i = 0; i < fe->params().size(); i++) {
-    const TypeConstraint& tc = fe->params()[i].typeConstraint();
+  for (uint i = 0; i < m_curFunc->params().size(); i++) {
+    const TypeConstraint& tc = m_curFunc->params()[i].typeConstraint();
     if (!tc.hasConstraint()) continue;
     e.VerifyParamType(i);
   }
 
   if (funcScope->isAbstract()) {
     StringData* msg = StringData::GetStaticString(
-      "Cannot call abstract method " + p.m_meth->getOriginalFullName() + "()");
+      "Cannot call abstract method " + meth->getOriginalFullName() + "()");
     e.String(msg);
     e.Fatal(1);
   }
-
-  // emit method body
-  visit(p.m_meth->getStmts());
-
-  // If the current position in the bytecode is reachable, emit code to
-  // return null
-  if (currentPositionIsReachable()) {
-    e.Null();
-    if (p.m_meth->getFunctionScope()->isGenerator()) {
-      assert(m_evalStack.size() == 1);
-      e.ContRetC();
-    } else {
-      if ((p.m_meth->getStmts() && p.m_meth->getStmts()->isGuarded())) {
-        m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::GuardedThis,
-                       false, 0, 0);
-      }
-      e.RetC();
-    }
-  }
-
-  FuncFinisher ff(this, e, p.m_fe);
-
-  emitMethodDVInitializers(e, p, topOfBody);
 }
 
-void EmitterVisitor::emitMethodDVInitializers(Emitter& e, PostponedMeth& p,
+void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
+  Emitter e(meth, m_ue, *this);
+  Label topOfBody(e);
+  emitMethodPrologue(e, meth);
+
+  // emit method body
+  visit(meth->getStmts());
+  assert(m_evalStack.size() == 0);
+
+  // if the current position is reachable, emit code to return null
+  if (currentPositionIsReachable()) {
+    e.Null();
+    if ((meth->getStmts() && meth->getStmts()->isGuarded())) {
+      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::GuardedThis,
+                     false, 0, 0);
+    }
+    e.RetC();
+  }
+
+  FuncFinisher ff(this, e, m_curFunc);
+
+  emitMethodDVInitializers(e, meth, topOfBody);
+}
+
+void EmitterVisitor::emitMethodsForGenerator(PostponedMeth& p,
+                                   vector<FuncEmitter*>& top_fes) {
+  MethodStatementPtr meth = p.m_meth;
+  FuncEmitter* fe = p.m_fe;
+  fe->setHasGeneratorAsBody(true);
+  // emit the original ("create generator") function
+  m_curFunc = fe;
+  emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
+  emitGeneratorCreate(meth);
+
+  // emit generator body
+  // create new emitter
+  FuncEmitter* genFe;
+  string genName = meth->getGeneratorName();
+  if (fe->isMethod() && !fe->isClosureBody()) {
+    genFe = m_ue.newMethodEmitter(
+      StringData::GetStaticString(genName), fe->pce());
+    bool UNUSED added = fe->pce()->addMethod(genFe);
+    assert(added);
+  } else {
+    if (!m_generatorEmitted.insert(genName).second){
+      // generator body already emitted
+      return;
+    }
+    genFe = new FuncEmitter(m_ue, -1, -1, StringData::GetStaticString(genName));
+    top_fes.push_back(genFe);
+    genFe->setTop(true);
+  }
+  genFe->setIsGeneratorFromClosure(fe->isClosureBody());
+  genFe->setIsGenerator(true);
+
+  m_curFunc = genFe;
+  emitMethodMetadata(meth, p.m_closureUseVars, genFe->top());
+  emitGeneratorBody(meth);
+}
+
+void EmitterVisitor::emitGeneratorCreate(MethodStatementPtr meth) {
+  Emitter e(meth, m_ue, *this);
+  Label topOfBody(e);
+  emitMethodPrologue(e, meth);
+
+  if (m_curFunc->hasVar(s_continuationVarArgsLocal)) {
+    static const StringData* s_func_get_args =
+      StringData::GetStaticString("func_get_args");
+
+    Id local = m_curFunc->lookupVarId(s_continuationVarArgsLocal);
+    emitVirtualLocal(local);
+    e.FCallBuiltin(0, 0, s_func_get_args);
+    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut,
+                   false, 0, 0);
+    e.UnboxR();
+    emitSet(e);
+    e.PopC();
+  }
+
+  // emit code to create generator object
+  const StringData* nameStr = StringData::GetStaticString(
+      meth->getGeneratorName());
+  e.CreateCont(nameStr);
+  e.RetC();
+
+  FuncFinisher ff(this, e, m_curFunc);
+
+  emitMethodDVInitializers(e, meth, topOfBody);
+}
+
+void EmitterVisitor::emitGeneratorBody(MethodStatementPtr meth) {
+  Emitter e(meth, m_ue, *this);
+
+  // emit continuation unpack and the big switch
+  int yieldLabelCount = meth->getFunctionScope()->getYieldLabelCount();
+  emitContinuationSwitch(e, yieldLabelCount);
+
+  // emit method body
+  visit(meth->getStmts());
+  assert(m_evalStack.size() == 0);
+
+  // emit code to return null
+  if (currentPositionIsReachable()) {
+    e.Null();
+    e.ContRetC();
+  }
+
+  FuncFinisher ff(this, e, m_curFunc);
+}
+
+void EmitterVisitor::emitMethodDVInitializers(Emitter& e,
+                                              MethodStatementPtr& meth,
                                               Label& topOfBody) {
   // Default value initializers
   bool hasOptional = false;
-  ExpressionListPtr params = p.m_meth->getParams();
+  ExpressionListPtr params = meth->getParams();
   int numParam = params ? params->getCount() : 0;
   for (int i = 0; i < numParam; i++) {
     ParameterExpressionPtr par(
@@ -5667,7 +5730,7 @@ void EmitterVisitor::emitMethodDVInitializers(Emitter& e, PostponedMeth& p,
       emitCGet(e);
       emitSet(e);
       e.PopC();
-      p.m_fe->setParamFuncletOff(i, entryPoint.getAbsoluteOffset());
+      m_curFunc->setParamFuncletOff(i, entryPoint.getAbsoluteOffset());
     }
   }
   if (hasOptional) {
@@ -6341,10 +6404,6 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
         StringData* methName =
           StringData::GetStaticString(meth->getOriginalName());
         FuncEmitter* fe = m_ue.newMethodEmitter(methName, pce);
-        bool isGenerator = meth->getFunctionScope()->isGenerator();
-        fe->setIsGenerator(isGenerator);
-        fe->setIsGeneratorFromClosure(
-          meth->getFunctionScope()->isGeneratorFromClosure());
         bool added UNUSED = pce->addMethod(fe);
         assert(added);
         postponeMeth(meth, fe, false);
@@ -7003,6 +7062,14 @@ static ConstructPtr doOptimize(ConstructPtr c, AnalysisResultConstPtr ar) {
     if (ConstructPtr k = c->getNthKid(i)) {
       if (ConstructPtr rep = doOptimize(k, ar)) {
         c->setNthKid(i, rep);
+      }
+      ClosureExpressionPtr cl =
+        boost::dynamic_pointer_cast<ClosureExpression>(k);
+      if (cl) {
+        if (ConstructPtr repp = doOptimize(cl->getClosureFunction(), ar)) {
+          cl->setClosureFunction(
+            boost::static_pointer_cast<FunctionStatement>(repp));
+        }
       }
     }
   }

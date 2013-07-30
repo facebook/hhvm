@@ -178,8 +178,6 @@ bool VariableTable::isLocal(const Symbol *sym) const {
     */
     return (!sym->isStatic() &&
             !sym->isGlobal() &&
-            !sym->isGeneratorParameter() &&
-            !sym->isRefGeneratorParameter() &&
             !sym->isParameter());
   }
   return false;
@@ -292,8 +290,7 @@ void VariableTable::addStaticVariable(Symbol *sym,
   m_hasStatic = true;
 
   FunctionScopeRawPtr funcScope = getFunctionScope();
-  if (funcScope &&
-      (funcScope->isClosure() || funcScope->isGeneratorFromClosure())) {
+  if (funcScope && funcScope->isClosure()) {
     // static variables for closures/closure generators are local to the
     // function scope
     m_staticLocalsVec.push_back(sym);
@@ -567,10 +564,6 @@ void VariableTable::clearUsed() {
       sym.second.clearGlobal();
       sym.second.clearReseated();
     } else {
-      sym.second.setReferenced();
-    }
-
-    if (sym.second.isRefGeneratorParameter()) {
       sym.second.setReferenced();
     }
   }

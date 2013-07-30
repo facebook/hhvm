@@ -660,33 +660,18 @@ bool TestParserStmt::TestYieldStatement() {
   WithOpt w1(Option::EnableHipHopSyntax);
 
   V("<?php function foo() { yield break;}",
-    "function () {\n"
-    "hphp_unpack_continuation();\n"
-    "return;\n"
-    "}\n"
     "function foo() {\n"
-    "return hphp_create_continuation"
-    "('', 'foo$continuation', __FUNCTION__);\n"
+    "return;\n"
     "}\n");
 
   V("<?php function foo() { yield 123;}",
-    "function () {\n"
-    "hphp_unpack_continuation();\n"
-    "yield 123;\n"
-    "}\n"
     "function foo() {\n"
-    "return hphp_create_continuation"
-    "('', 'foo$continuation', __FUNCTION__);\n"
+    "yield 123;\n"
     "}\n");
 
   V("<?php class bar { function foo() { yield 123; yield 456;} }",
     "class bar {\n"
     "public function foo() {\n"
-    "return hphp_create_continuation"
-    "(__CLASS__, 'foo$continuation', __METHOD__);\n"
-    "}\n"
-    "public function () {\n"
-    "hphp_unpack_continuation();\n"
     "yield 123;\n"
     "yield 456;\n"
     "}\n"

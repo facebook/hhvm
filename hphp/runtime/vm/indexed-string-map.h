@@ -21,7 +21,7 @@
 #include <boost/utility/enable_if.hpp>
 
 #include "hphp/runtime/base/string_data.h"
-#include "hphp/runtime/vm/fixed_string_map.h"
+#include "hphp/runtime/vm/fixed-string-map.h"
 
 namespace HPHP {
 

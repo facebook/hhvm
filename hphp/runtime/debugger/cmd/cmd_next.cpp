@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_next.h"
-#include "hphp/runtime/vm/debugger_hook.h"
+#include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/ext/ext_continuation.h"
 

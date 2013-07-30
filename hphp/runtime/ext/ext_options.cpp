@@ -34,7 +34,7 @@
 #include <sys/utsname.h>
 #include <pwd.h>
 
-#include "hphp/runtime/vm/request_arena.h"
+#include "hphp/runtime/vm/request-arena.h"
 
 #define ZEND_VERSION "2.4.99"
 

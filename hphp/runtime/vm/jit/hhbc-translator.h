@@ -23,7 +23,7 @@
 
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/member_operations.h"
+#include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/trace-builder.h"
 #include "hphp/runtime/vm/jit/translator.h"

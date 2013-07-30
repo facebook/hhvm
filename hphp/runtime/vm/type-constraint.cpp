@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/type_constraint.h"
+#include "hphp/runtime/vm/type-constraint.h"
 
 #include "hphp/util/base.h"
 #include "hphp/util/trace.h"

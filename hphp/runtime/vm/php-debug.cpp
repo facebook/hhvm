@@ -35,7 +35,7 @@
 using std::string;
 using std::vector;
 
-#include "hphp/runtime/vm/php_debug.h"
+#include "hphp/runtime/vm/php-debug.h"
 
 namespace HPHP {
 

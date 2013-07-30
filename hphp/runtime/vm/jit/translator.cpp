@@ -52,7 +52,7 @@
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/pendq.h"
 #include "hphp/runtime/vm/treadmill.h"
-#include "hphp/runtime/vm/type_profile.h"
+#include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/vm/runtime.h"
 
 namespace HPHP {

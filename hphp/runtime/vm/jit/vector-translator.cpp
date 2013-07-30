@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/vm/member_operations.h"
+#include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"

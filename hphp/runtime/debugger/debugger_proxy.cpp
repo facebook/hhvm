@@ -21,7 +21,7 @@
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/ext/ext_socket.h"
-#include "hphp/runtime/vm/debugger_hook.h"
+#include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/util/process.h"
 #include "hphp/util/logger.h"
 

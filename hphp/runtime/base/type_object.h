@@ -152,9 +152,8 @@ public:
   int    toInt32  () const { return m_px ? m_px->o_toInt64() : 0;}
   int64_t  toInt64  () const { return m_px ? m_px->o_toInt64() : 0;}
   double toDouble () const { return m_px ? m_px->o_toDouble() : 0;}
-  String toString () const { return m_px ? m_px->t___tostring() : String();}
+  String toString () const { return m_px ? m_px->invokeToString() : String();}
   Array  toArray  () const;
-  Variant toKey   () const;
 
   int64_t toInt64ForCompare() const;
   double toDoubleForCompare() const;

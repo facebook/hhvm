@@ -200,17 +200,13 @@ Variant* ObjectData::o_realProp(CStrRef propName, int flags,
 
   auto thiz = const_cast<ObjectData*>(this);
   bool visible, accessible, unset;
-  TypedValue* ret = (flags & RealPropNoDynamic)
-                    ? thiz->getDeclProp(ctx, propName.get(), visible,
-                                        accessible, unset)
-                    : thiz->getProp(ctx, propName.get(), visible,
-                                    accessible, unset);
+  TypedValue* ret = thiz->getProp(ctx, propName.get(), visible,
+                                  accessible, unset);
   if (!ret) {
     // Property is not declared, and not dynamically created yet.
     if (!(flags & RealPropCreate)) {
       return nullptr;
     }
-    assert(!(flags & RealPropNoDynamic));
     if (!o_properties.get()) {
       thiz->initDynProps();
     }
@@ -262,15 +258,13 @@ Variant ObjectData::o_get(CStrRef propName, bool error /* = true */,
 
 template <class T>
 inline ALWAYS_INLINE Variant ObjectData::o_setImpl(CStrRef propName, T v,
-                                                   bool forInit,
                                                    CStrRef context) {
   if (UNLIKELY(!*propName.data())) {
     throw_invalid_property_name(propName);
   }
 
-  bool useSet = !forInit && getAttribute(UseSet);
+  bool useSet = getAttribute(UseSet);
   auto flags = useSet ? 0 : RealPropCreate;
-  if (forInit) flags |= RealPropUnchecked;
 
   if (Variant* t = o_realProp(propName, flags, context)) {
     if (!useSet || t->isInitialized()) {
@@ -290,7 +284,7 @@ inline ALWAYS_INLINE Variant ObjectData::o_setImpl(CStrRef propName, T v,
 }
 
 Variant ObjectData::o_set(CStrRef propName, CVarRef v) {
-  return o_setImpl<CVarRef>(propName, v, false, null_string);
+  return o_setImpl<CVarRef>(propName, v, null_string);
 }
 
 Variant ObjectData::o_set(CStrRef propName, RefResult v) {
@@ -298,11 +292,11 @@ Variant ObjectData::o_set(CStrRef propName, RefResult v) {
 }
 
 Variant ObjectData::o_setRef(CStrRef propName, CVarRef v) {
-  return o_setImpl<RefResult>(propName, ref(v), false, null_string);
+  return o_setImpl<RefResult>(propName, ref(v), null_string);
 }
 
 Variant ObjectData::o_set(CStrRef propName, CVarRef v, CStrRef context) {
-  return o_setImpl<CVarRef>(propName, v, false, context);
+  return o_setImpl<CVarRef>(propName, v, context);
 }
 
 Variant ObjectData::o_set(CStrRef propName, RefResult v, CStrRef context) {
@@ -310,7 +304,7 @@ Variant ObjectData::o_set(CStrRef propName, RefResult v, CStrRef context) {
 }
 
 Variant ObjectData::o_setRef(CStrRef propName, CVarRef v, CStrRef context) {
-  return o_setImpl<RefResult>(propName, ref(v), false, context);
+  return o_setImpl<RefResult>(propName, ref(v), context);
 }
 
 HOT_FUNC
@@ -878,10 +872,9 @@ Slot ObjectData::declPropInd(TypedValue* prop) const {
   }
 }
 
-template <bool declOnly>
-TypedValue* ObjectData::getPropImpl(Class* ctx, const StringData* key,
-                                    bool& visible, bool& accessible,
-                                    bool& unset) {
+TypedValue* ObjectData::getProp(Class* ctx, const StringData* key,
+                                bool& visible, bool& accessible,
+                                bool& unset) {
   TypedValue* prop = nullptr;
   unset = false;
   Slot propInd = m_cls->getDeclPropIndex(ctx, key, accessible);
@@ -895,9 +888,9 @@ TypedValue* ObjectData::getPropImpl(Class* ctx, const StringData* key,
     }
   } else {
     assert(!visible && !accessible);
-    // We could not find a visible property. We need to check for a
-    // dynamic property with this name if declOnly = false.
-    if (!declOnly && o_properties.get()) {
+    // We could not find a visible declared property. We need to check
+    // for a dynamic property with this name.
+    if (o_properties.get()) {
       prop = static_cast<HphpArray*>(o_properties.get())->nvGet(key);
       if (prop) {
         // o_properties.get()->nvGet() returned a non-declared property,
@@ -910,17 +903,6 @@ TypedValue* ObjectData::getPropImpl(Class* ctx, const StringData* key,
     }
   }
   return prop;
-}
-
-TypedValue* ObjectData::getProp(Class* ctx, const StringData* key,
-                                bool& visible, bool& accessible, bool& unset) {
-  return getPropImpl<false>(ctx, key, visible, accessible, unset);
-}
-
-TypedValue* ObjectData::getDeclProp(Class* ctx, const StringData* key,
-                                    bool& visible, bool& accessible,
-                                    bool& unset) {
-  return getPropImpl<true>(ctx, key, visible, accessible, unset);
 }
 
 void ObjectData::invokeSet(TypedValue* retval, const StringData* key,
@@ -1393,7 +1375,7 @@ Variant ObjectData::t___wakeup() {
   }
 }
 
-String ObjectData::t___tostring() {
+String ObjectData::invokeToString() {
   const Func* method = m_cls->getToString();
   if (method) {
     TypedValue tv;
@@ -1408,11 +1390,18 @@ String ObjectData::t___tostring() {
                   m_cls->m_preClass->name()->data());
     }
     return tv.m_data.pstr;
-  } else {
-    std::string msg = m_cls->m_preClass->name()->data();
-    msg += "::__toString() was not defined";
-    throw BadTypeConversionException(msg.c_str());
   }
+  raise_recoverable_error(
+    "Object of class %s could not be converted to string",
+    m_cls->m_preClass->name()->data()
+  );
+  // If the user error handler decides to allow execution to continue,
+  // we return the empty string.
+  return empty_string;
+}
+
+bool ObjectData::hasToString() {
+  return (m_cls->getToString() != nullptr);
 }
 
 void ObjectData::cloneSet(ObjectData* clone) {

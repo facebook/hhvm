@@ -139,14 +139,13 @@ bool cellRelOp(Op op, Cell cell, const StringData* val) {
 
   case KindOfObject:
     {
-      auto const od = cell.m_data.pobj;
+      auto od = cell.m_data.pobj;
       if (od->isCollection()) return op.collectionVsNonObj();
-      try {
-        String str(const_cast<ObjectData*>(od)->t___tostring());
+      if (od->hasToString()) {
+        String str(od->invokeToString());
         return op(str.get(), val);
-      } catch (BadTypeConversionException&) {
-        return op(true, false);
       }
+      return op(true, false);
     }
 
   case KindOfResource:
@@ -206,14 +205,15 @@ bool cellRelOp(Op op, Cell cell, const ObjectData* od) {
   case KindOfArray:
       return od->isCollection() ? op.collectionVsNonObj() : op(false, true);
   case KindOfString:
-  case KindOfStaticString:
-    if (od->isCollection()) return op.collectionVsNonObj();
-    try {
-      String str(const_cast<ObjectData*>(od)->t___tostring());
+  case KindOfStaticString: {
+    auto obj = const_cast<ObjectData*>(od);
+    if (obj->isCollection()) return op.collectionVsNonObj();
+    if (obj->hasToString()) {
+      String str(obj->invokeToString());
       return op(cell.m_data.pstr, str.get());
-    } catch (BadTypeConversionException&) {
-      return op(false, true);
     }
+    return op(false, true);
+  }
   case KindOfObject:
     return op(cell.m_data.pobj, od);
   case KindOfResource:

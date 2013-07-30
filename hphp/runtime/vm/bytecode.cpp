@@ -2663,7 +2663,7 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
   } catch (Object &e) {
     g_vmContext->write(s_phpException.data());
     g_vmContext->write(" : ");
-    g_vmContext->write(e->t___tostring().data());
+    g_vmContext->write(e->invokeToString().data());
   } catch (...) {
     g_vmContext->write(s_cppException.data());
   }

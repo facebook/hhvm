@@ -112,7 +112,7 @@ inline String toString(CStrRef v) { return toString(v.get());}
 inline String toString(const ArrayData *v) { return v ? "Array" : "";}
 inline String toString(CArrRef v) { return toString(v.get());}
 inline String toString(ObjectData *v) {
-  return v ? v->t___tostring() : String("");
+  return v ? v->invokeToString() : String("");
 }
 inline String toString(CObjRef v) { return toString(v.get());}
 inline String toString(CVarRef v) { return v.toString();}

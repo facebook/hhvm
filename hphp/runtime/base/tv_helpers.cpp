@@ -258,7 +258,7 @@ void tvCastToStringInPlace(TypedValue* tv) {
     goto static_string;
   case KindOfObject:
     // For objects, we fall back on the Variant machinery
-    tvAsVariant(tv) = tv->m_data.pobj->t___tostring();
+    tvAsVariant(tv) = tv->m_data.pobj->invokeToString();
     return;
   case KindOfResource:
     // For resources, we fall back on the Variant machinery
@@ -293,7 +293,7 @@ StringData* tvCastToString(TypedValue* tv) {
   case KindOfStaticString: return tv->m_data.pstr;
   case KindOfString:  s = tv->m_data.pstr; break;
   case KindOfArray:   return s_Array.get();
-  case KindOfObject:  return tv->m_data.pobj->t___tostring().detach();
+  case KindOfObject:  return tv->m_data.pobj->invokeToString().detach();
   case KindOfResource: return tv->m_data.pres->o_toString().detach();
   default:            not_reached();
   }
@@ -460,10 +460,9 @@ bool tvCoerceParamToStringInPlace(TypedValue* tv) {
   case KindOfArray:
     return false;
   case KindOfObject:
-    try {
-      tvAsVariant(tv) = tv->m_data.pobj->t___tostring();
+    if (tv->m_data.pobj->hasToString()) {
+      tvAsVariant(tv) = tv->m_data.pobj->invokeToString();
       return true;
-    } catch (BadTypeConversionException &e) {
     }
     return false;
   case KindOfResource:

@@ -723,9 +723,9 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
   } catch (Exception &e) {
     sb.append(Debugger::ColorStderr(String(e.what())));
   } catch (Object &e) {
-    try {
+    if (e->hasToString()) {
       sb.append(Debugger::ColorStderr(e.toString()));
-    } catch (BadTypeConversionException &e) {
+    } else {
       sb.append(Debugger::ColorStderr
                 (String("(object without __toString() is thrown)")));
     }

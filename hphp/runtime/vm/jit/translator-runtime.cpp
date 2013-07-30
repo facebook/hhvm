@@ -163,7 +163,7 @@ StringData* convIntToStrHelper(int64_t i) {
 
 StringData* convObjToStrHelper(ObjectData* o) {
   try {
-    auto s = o->t___tostring();
+    auto s = o->invokeToString();
     auto r = s.get();
     decRefObj(o);
     if (!r->isStatic()) r->incRefCount();

@@ -26,6 +26,34 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+extern const int64_t k_POSIX_S_IFMT;
+extern const int64_t k_POSIX_S_IFSOCK;
+extern const int64_t k_POSIX_S_IFLNK;
+extern const int64_t k_POSIX_S_IFREG;
+extern const int64_t k_POSIX_S_IFBLK;
+extern const int64_t k_POSIX_S_IFDIR;
+extern const int64_t k_POSIX_S_IFCHR;
+extern const int64_t k_POSIX_S_IFIFO;
+extern const int64_t k_POSIX_S_ISUID;
+extern const int64_t k_POSIX_S_ISGID;
+extern const int64_t k_POSIX_S_ISVTX;
+extern const int64_t k_POSIX_S_IRWXU;
+extern const int64_t k_POSIX_S_IRUSR;
+extern const int64_t k_POSIX_S_IWUSR;
+extern const int64_t k_POSIX_S_IXUSR;
+extern const int64_t k_POSIX_S_IRWXG;
+extern const int64_t k_POSIX_S_IRGRP;
+extern const int64_t k_POSIX_S_IWGRP;
+extern const int64_t k_POSIX_S_IXGRP;
+extern const int64_t k_POSIX_S_IRWXO;
+extern const int64_t k_POSIX_S_IROTH;
+extern const int64_t k_POSIX_S_IWOTH;
+extern const int64_t k_POSIX_S_IXOTH;
+extern const int64_t k_POSIX_F_OK;
+extern const int64_t k_POSIX_X_OK;
+extern const int64_t k_POSIX_W_OK;
+extern const int64_t k_POSIX_R_OK;
+
 bool f_posix_access(CStrRef file, int mode = 0);
 
 String f_posix_ctermid();

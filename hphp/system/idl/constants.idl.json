@@ -5158,42 +5158,6 @@
             "value": 0
         },
         {
-            "name": "POSIX_F_OK",
-            "value": 0
-        },
-        {
-            "name": "POSIX_R_OK",
-            "value": 4
-        },
-        {
-            "name": "POSIX_S_IFBLK",
-            "value": 24576
-        },
-        {
-            "name": "POSIX_S_IFCHR",
-            "value": 8192
-        },
-        {
-            "name": "POSIX_S_IFIFO",
-            "value": 4096
-        },
-        {
-            "name": "POSIX_S_IFREG",
-            "value": 32768
-        },
-        {
-            "name": "POSIX_S_IFSOCK",
-            "value": 49152
-        },
-        {
-            "name": "POSIX_W_OK",
-            "value": 2
-        },
-        {
-            "name": "POSIX_X_OK",
-            "value": 1
-        },
-        {
             "name": "PREG_BACKTRACK_LIMIT_ERROR",
             "value": 2
         },

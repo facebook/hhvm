@@ -1010,14 +1010,27 @@ class Phar extends RecursiveDirectoryIterator
   private static function stat($full_filename) {
     list($phar, $filename) = self::getPharAndFile($full_filename);
     if (!isset($phar->fileInfo[$filename])) {
-      return false;
+      $dir = self::opendir($full_filename);
+      if (!$dir) {
+        return false;
+      }
+
+      return array(
+        'size' => 0,
+        'atime' => 0,
+        'mtime' => 0,
+        'ctime' => 0,
+        'mode' => POSIX_S_IFDIR,
+      );
     }
+
     $info = $phar->fileInfo[$filename];
     return array(
       'size' => $info[0],
       'atime' => $info[1],
       'mtime' => $info[1],
       'ctime' => $info[1],
+      'mode' => POSIX_S_IFREG,
     );
   }
 

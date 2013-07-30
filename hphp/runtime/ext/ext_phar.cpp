@@ -32,6 +32,7 @@ static const StaticString
   s_mtime("mtime"),
   s_atime("atime"),
   s_ctime("ctime"),
+  s_mode("mode"),
   s_opendir("opendir");
 
 static class PharStreamWrapper : public Stream::Wrapper {
@@ -79,6 +80,7 @@ static class PharStreamWrapper : public Stream::Wrapper {
     buf->st_atime = stat[s_atime].asInt64Val();
     buf->st_mtime = stat[s_mtime].asInt64Val();
     buf->st_ctime = stat[s_ctime].asInt64Val();
+    buf->st_mode = stat[s_mode].asInt64Val();
     return 0;
   }
 

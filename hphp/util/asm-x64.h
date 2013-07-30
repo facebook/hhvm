@@ -2708,6 +2708,24 @@ inline void X64Assembler::call(Label& l) { l.call(*this); }
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * UndoMarker and CodeCursor don't seem to play nice with
+ * {folly,boost}::optional, complaining about potentially
+ * uninitialized values around code that, because of the
+ * optional wrapper, won't actually run.
+ *
+ * GCC picks up the possibility that it could be uninitialized
+ * when this code is run (specifically, the destructor in
+ * CodeCursor), but doesn't (and realistically, can't) know
+ * that if it's uninitialized this code won't be run anyway.
+ *
+ */
+#if defined(__GNUC__) && !defined(__clang__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wpragmas"
+# pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
+
 class UndoMarker {
   typedef X64Assembler Asm;
   Asm& m_a;
@@ -2739,6 +2757,10 @@ class CodeCursor : public UndoMarker {
     undo();
   }
 };
+
+#if defined(__GNUC__) && !defined(__clang__)
+# pragma GCC diagnostic pop
+#endif
 
 //////////////////////////////////////////////////////////////////////
 

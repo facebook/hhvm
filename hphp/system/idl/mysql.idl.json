@@ -865,8 +865,8 @@
                 "HipHopSpecific"
             ],
             "return": {
-                "type": "Boolean",
-                "desc": "True if the iterator has more results after this one. False if there was none."
+                "type": "Int32",
+                "desc": "0 - Query succeeded, more results coming.  -1 - Query succeeded, no more results coming.  >0 - query failed, value is error code."
             },
             "args": [
                 {

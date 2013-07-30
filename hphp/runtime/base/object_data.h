@@ -302,9 +302,6 @@ class ObjectData {
 
   static int GetMaxId() ATTRIBUTE_COLD;
 
- protected:
-  virtual bool php_sleep(Variant& ret);
-
  public:
   CArrRef getDynProps() const { return o_properties; }
   void initProperties(int nProp);

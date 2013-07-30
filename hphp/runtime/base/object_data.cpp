@@ -529,12 +529,6 @@ Variant ObjectData::o_invoke_few_args(CStrRef s, int count,
   return ret;
 }
 
-bool ObjectData::php_sleep(Variant& ret) {
-  setAttribute(HasSleep);
-  ret = t___sleep();
-  return getAttribute(HasSleep);
-}
-
 StaticString s_zero("\0", 1);
 
 void ObjectData::serialize(VariableSerializer* serializer) const {
@@ -579,7 +573,10 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       placeholder->serialize(serializer);
       return;
     }
-    handleSleep = const_cast<ObjectData*>(this)->php_sleep(ret);
+    if (getAttribute(HasSleep)) {
+      handleSleep = true;
+      ret = const_cast<ObjectData*>(this)->t___sleep();
+    }
   } else if (UNLIKELY(serializer->getType() ==
                       VariableSerializer::Type::DebuggerSerialize)) {
     if (instanceof(SystemLib::s_SerializableClass)) {
@@ -610,12 +607,15 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       serializer->write(o_getClassName());
       return;
     }
-    try {
-      handleSleep = const_cast<ObjectData*>(this)->php_sleep(ret);
-    } catch (...) {
-      raise_warning("%s::sleep() throws exception", o_getClassName().data());
-      serializer->writeNull();
-      return;
+    if (getAttribute(HasSleep)) {
+      try {
+        handleSleep = true;
+        ret = const_cast<ObjectData*>(this)->t___sleep();
+      } catch (...) {
+        raise_warning("%s::sleep() throws exception", o_getClassName().data());
+        serializer->writeNull();
+        return;
+      }
     }
   }
   if (UNLIKELY(handleSleep)) {
@@ -1378,7 +1378,6 @@ Variant ObjectData::t___sleep() {
     g_vmContext->invokeFuncFew(&tv, method, this);
     return tvAsVariant(&tv);
   } else {
-    clearAttribute(HasSleep);
     return uninit_null();
   }
 }

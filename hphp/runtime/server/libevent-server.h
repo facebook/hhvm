@@ -20,9 +20,10 @@
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/libevent-transport.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
-#include "hphp/util/job-queue.h"
+//#include "hphp/util/job-queue.h"
+//#include "hphp/util/service-data.h"
+#include "hphp/runtime/server/server-worker.h"
 #include "hphp/util/process.h"
-#include "hphp/util/service-data.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,47 +33,17 @@ namespace HPHP {
  * doJob().
  */
 DECLARE_BOOST_TYPES(LibEventJob);
-class LibEventJob {
+class LibEventJob : public ServerJob {
 public:
-  explicit LibEventJob(evhttp_request *req);
+  explicit LibEventJob(evhttp_request *req) : request(req) {}
 
-  const timespec &getStartTimer() const { return start;}
-  void stopTimer();
+  void getRequestStart(struct timespec *reqStart);
 
   evhttp_request *request;
-
-private:
-  timespec start;
 };
 
-/**
- * Required class for JobQueueDispatcher, who will call this class's doJob()
- * with one HTTP request after another. All this class does is to delegate
- * the request to an HttpRequestHandler.
- */
-struct LibEventWorker
-  : JobQueueWorker<LibEventJobPtr,true,false,JobQueueDropVMStack>
-{
-  LibEventWorker();
-  virtual ~LibEventWorker();
-
-  /**
-   * Request handler called by LibEventServer.
-   */
-  virtual void doJob(LibEventJobPtr job);
-  virtual void abortJob(LibEventJobPtr job);
-
-  /**
-   * Called when thread enters and exits.
-   */
-  virtual void onThreadEnter();
-  virtual void onThreadExit();
-
-private:
-  void doJobImpl(LibEventJobPtr job, bool abort);
-  std::unique_ptr<RequestHandler> m_handler;
-  ServiceData::ExportedTimeSeries* m_requestsTimedOutOnQueue;
-};
+class LibEventTransportTraits;
+typedef ServerWorker<LibEventJobPtr, LibEventTransportTraits> LibEventWorker;
 
 /**
  * Helper class for queuing up response sending back to event loop.
@@ -204,6 +175,25 @@ private:
   void dispatch();
 
   void dispatchWithTimeout(int timeoutSeconds);
+};
+
+class LibEventTransportTraits {
+ public:
+
+  LibEventTransportTraits(LibEventJobPtr job, void *opaque, int id);
+
+  Server *getServer() {
+    return server_;
+  }
+
+  Transport *getTransport() {
+    return &transport_;
+  }
+
+ private:
+  LibEventServer *server_;
+  evhttp_request *request_;
+  LibEventTransport transport_;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

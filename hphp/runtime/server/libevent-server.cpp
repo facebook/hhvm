@@ -51,112 +51,27 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // LibEventJob
 
-LibEventJob::LibEventJob(evhttp_request *req) : request(req) {
-  Timer::GetMonotonicTime(start);
-}
-
-void LibEventJob::stopTimer() {
-  if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
-    timespec end;
-    Timer::GetMonotonicTime(end);
-    time_t dsec = end.tv_sec - start.tv_sec;
-    long dnsec = end.tv_nsec - start.tv_nsec;
-    int64_t dusec = dsec * 1000000 + dnsec / 1000;
-    ServerStats::Log("page.wall.queuing", dusec);
-
+void LibEventJob::getRequestStart(struct timespec *reqStart) {
 #ifdef EVHTTP_CONNECTION_GET_START
-    struct timespec evstart;
-    evhttp_connection_get_start(request->evcon, &evstart);
-    dsec = start.tv_sec - evstart.tv_sec;
-    dnsec = start.tv_nsec - evstart.tv_nsec;
-    dusec = dsec * 1000000 + dnsec / 1000;
-    ServerStats::Log("page.wall.request_read_time", dusec);
+  evhttp_connection_get_start(request->evcon, reqStart);
 #endif
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// LibEventWorker
+// LibEventTransportTraits
 
-LibEventWorker::LibEventWorker() {
-}
+LibEventTransportTraits::LibEventTransportTraits(LibEventJobPtr job,
+                                                 void *opaque,
+                                                 int id) :
+    server_((LibEventServer*)opaque),
+    request_(job->request),
+    transport_(server_, request_, id) {
 
-LibEventWorker::~LibEventWorker() {
-}
-
-void LibEventWorker::doJob(LibEventJobPtr job) {
-  doJobImpl(job, false /*abort*/);
-}
-
-void LibEventWorker::abortJob(LibEventJobPtr job) {
-  doJobImpl(job, true /*abort*/);
-  m_requestsTimedOutOnQueue->addValue(1);
-}
-
-void LibEventWorker::doJobImpl(LibEventJobPtr job, bool abort) {
-  job->stopTimer();
-  evhttp_request *request = job->request;
-  assert(m_opaque);
-  LibEventServer *server = (LibEventServer*)m_opaque;
-
-  LibEventTransport transport(server, request, m_id);
 #ifdef _EVENT_USE_OPENSSL
-  if (evhttp_is_connection_ssl(job->request->evcon)) {
-    transport.setSSL();
+  if (evhttp_is_connection_ssl(request_->evcon)) {
+    transport_.setSSL();
   }
 #endif
-  bool error = true;
-  std::string errorMsg;
-
-  if (abort) {
-    transport.sendString("Service Unavailable", 503);
-    return;
-  }
-
-  try {
-    std::string cmd = transport.getCommand();
-    cmd = std::string("/") + cmd;
-    if (server->shouldHandle(cmd)) {
-      transport.onRequestStart(job->getStartTimer());
-      m_handler->handleRequest(&transport);
-      error = false;
-    } else {
-      transport.sendString("Not Found", 404);
-      return;
-    }
-  } catch (Exception &e) {
-    if (Server::StackTraceOnError) {
-      errorMsg = e.what();
-    } else {
-      errorMsg = e.getMessage();
-    }
-  } catch (std::exception &e) {
-    errorMsg = e.what();
-  } catch (...) {
-    errorMsg = "(unknown exception)";
-  }
-
-  if (error) {
-    if (RuntimeOption::ServerErrorMessage) {
-      transport.sendString(errorMsg, 500);
-    } else {
-      transport.sendString(RuntimeOption::FatalErrorMessage, 500);
-    }
-  }
-}
-
-void LibEventWorker::onThreadEnter() {
-  assert(m_opaque);
-  LibEventServer *server = (LibEventServer*)m_opaque;
-  m_handler = server->createRequestHandler();
-  m_requestsTimedOutOnQueue =
-    ServiceData::createTimeseries("requests_timed_out_on_queue",
-                                  {ServiceData::StatsType::COUNT});
-}
-
-void LibEventWorker::onThreadExit() {
-  assert(m_opaque);
-  m_handler.reset();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

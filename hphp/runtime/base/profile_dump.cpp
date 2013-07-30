@@ -18,6 +18,7 @@
 
 #include "folly/Format.h"
 #include "folly/Conv.h"
+#include "hphp/runtime/base/execution_context.h"
 
 namespace HPHP {
 
@@ -90,6 +91,144 @@ std::string ProfileDump::toPProfFormat() const {
   }
   fclose(f);
   return res;
+}
+
+// ProfileController state
+namespace {
+// type of current request
+// Next: profile the next request
+// NextURL: profile the next request to m_url
+// Global: profile all requests until stopped
+enum RequestType {
+  None,
+  Next,
+  NextURL,
+  Global
+} m_reqType;
+
+// url to profile for NextURL type requests
+std::string m_url;
+
+// currently-held dump, valid if we are complete
+ProfileDump m_dump;
+
+// state of the controller
+// Waiting: no request is active
+// Pending: a request is active, but has not yet
+//   been fulfilled
+// Complete: a request is active, and has been
+//   fulfilled
+enum State {
+  Waiting,
+  Pending,
+  Complete
+} m_state;
+
+// synchronization primitives
+std::condition_variable m_waitq;
+std::mutex m_mutex;
+
+};
+
+// static
+bool ProfileController::requestNext() {
+  std::unique_lock<std::mutex> lock(m_mutex);
+
+  // don't clobber another request!
+  if (m_state != State::Waiting) return false;
+  // we have the mutex and no other request is pending, we can
+  // place the request
+  m_reqType = RequestType::Next;
+  m_state = State::Pending;
+
+  return true;
+}
+
+// static
+bool ProfileController::requestNextURL(const std::string &url) {
+  std::unique_lock<std::mutex> lock(m_mutex);
+
+  if (m_state != State::Waiting) return false;
+  m_reqType = RequestType::NextURL;
+  m_url = url;
+  m_state = State::Pending;
+
+  return true;
+}
+
+// static
+bool ProfileController::requestGlobal() {
+  std::unique_lock<std::mutex> lock(m_mutex);
+
+  if (m_state != State::Waiting) return false;
+  m_reqType = RequestType::Global;
+  m_state = State::Pending;
+
+  // clean up the dump since we are going to copy in data
+  // from other dumps when they offer theirs
+  m_dump.clear();
+
+  return true;
+}
+
+// static
+void ProfileController::offerProfile(const ProfileDump &dump) {
+  std::unique_lock<std::mutex> lock(m_mutex);
+
+  // we have to be waiting for a profile, or it has to be
+  // a global profile (since we merge many profiles into
+  // a global request)
+  if (m_state != State::Pending &&
+      !(m_reqType == RequestType::Global &&
+        m_state == State::Complete)) {
+    return;
+  }
+
+  // check if we are fulfilling the pending request
+  // 1. if the type is Next, we always fill it
+  // 2. if the type is NextURL, we fill it if the
+  //    URL matches the one the VM thread is running
+  // 3. if the type is Global, we add our dump info
+  //    to the dump in the controller
+  switch (m_reqType) {
+    case RequestType::Next:
+      m_dump = dump;
+      break;
+    case RequestType::NextURL:
+      if (g_context->getTransport()->getCommand() != m_url) return;
+      m_dump = dump;
+      break;
+    case RequestType::Global:
+      m_dump += dump;
+      break;
+    default:
+      not_reached();
+  }
+  m_state = State::Complete;
+  m_waitq.notify_all();
+}
+
+// static
+ProfileDump ProfileController::waitForProfile() {
+  std::unique_lock<std::mutex> lock(m_mutex);
+
+  auto cond = [&] { return m_state != State::Pending; };
+  if (RuntimeOption::RequestTimeoutSeconds > 0) {
+    m_waitq.wait_for(
+      lock,
+      std::chrono::seconds(RuntimeOption::RequestTimeoutSeconds * 2),
+      cond
+    );
+  } else {
+    m_waitq.wait(lock, cond);
+  }
+
+  // check to see if someone else grabbed the profile
+  if (m_state == State::Waiting) return ProfileDump();
+  // otherwise, the profile is ours. reset the state and return it
+  m_state = State::Waiting;
+  m_reqType = RequestType::None;
+  return m_dump;
 }
 
 }

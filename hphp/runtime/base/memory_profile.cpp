@@ -64,6 +64,8 @@ void MemoryProfile::finishProfilingImpl() {
     std::string str = sk.getSymbol();
     TRACE(3, "%s\n", str.c_str());
   });
+
+  ProfileController::offerProfile(m_dump);
 }
 
 void MemoryProfile::logAllocationImpl(void *ptr, size_t size) {

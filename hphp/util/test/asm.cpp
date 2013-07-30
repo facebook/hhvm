@@ -760,4 +760,21 @@ divsd %xmm12,%xmm8
 )");
 }
 
+TEST(Asm, SSESqrt) {
+  Asm a;
+  a.init(10 << 24);
+  a.    sqrtsd(xmm0, xmm1);
+  a.    sqrtsd(xmm1, xmm2);
+  a.    sqrtsd(xmm2, xmm0);
+  a.    sqrtsd(xmm15, xmm0);
+  a.    sqrtsd(xmm12, xmm8);
+  expect_asm(a, R"(
+sqrtsd %xmm0,%xmm1
+sqrtsd %xmm1,%xmm2
+sqrtsd %xmm2,%xmm0
+sqrtsd %xmm15,%xmm0
+sqrtsd %xmm12,%xmm8
+)");
+}
+
 }}

@@ -984,6 +984,15 @@ Mod    [C C]  ->  [C:Bool|Int]
   Modulus (%). Pushes ((int)$2 % (int)$1) onto the stack. This instruction
   never throws a fatal error.
 
+Sqrt   [C]    ->  [C:Null|Dbl]
+
+  Square root. Computes the square root of $1 and pushes the result onto
+  the stack. If $1 is not null, a bool, an int, a double, or a numeric
+  string, it raises a warning and pushes null onto the stack.
+
+  If $1 is a negative number, this instruction pushes a floating-point
+  value representing NAN onto the stack.
+
 Xor    [C C]  ->  [C:Bool]
 
   Logical xor (xor). Pushes ((bool)$2 xor (bool)$1) onto the stack.

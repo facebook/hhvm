@@ -3542,6 +3542,23 @@ void HhbcTranslator::emitMod() {
   push(res);
 }
 
+void HhbcTranslator::emitSqrt() {
+  auto const srcType = topC()->type();
+  if (srcType.subtypeOf(Type::Int)) {
+    auto const src = gen(ConvIntToDbl, popC());
+    push(gen(OpSqrt, src));
+    return;
+  }
+
+  if (srcType.subtypeOf(Type::Dbl)) {
+    auto const src = popC();
+    push(gen(OpSqrt, src));
+    return;
+  }
+
+  emitInterpOne(Type::Cell, 1);
+}
+
 void HhbcTranslator::emitBitNot() {
   auto const srcType = topC()->type();
   if (srcType.subtypeOf(Type::Int)) {

@@ -1578,6 +1578,26 @@ void CodeGenerator::cgOpMod(IRInstruction* inst) {
   }
 }
 
+void CodeGenerator::cgOpSqrt(IRInstruction* inst) {
+  auto src = inst->src(0);
+  auto dst = inst->dst();
+
+  auto srcReg = m_regs[src].reg();
+  auto dstReg = m_regs[dst].reg();
+  if (dstReg == InvalidReg) return;
+
+  auto resReg = dstReg.isXMM() ? dstReg : PhysReg(rCgXMM0);
+
+  if (srcReg == InvalidReg) {
+    emitLoadImm  (m_as, src->getValRawInt(), m_rScratch);
+    emitMovRegReg(m_as, m_rScratch, resReg);
+  } else {
+    emitMovRegReg(m_as, srcReg, resReg);
+  }
+  m_as.  sqrtsd  (resReg, resReg);
+  emitMovRegReg  (m_as, resReg, dstReg);
+}
+
 template<class Oper>
 void CodeGenerator::cgOpShiftCommon(IRInstruction* inst,
                                     void (Asm::*instrIR)(Immed, Reg64),

@@ -495,6 +495,11 @@ IRTranslator::translateAdd(const NormalizedInstruction& i) {
 }
 
 void
+IRTranslator::translateSqrt(const NormalizedInstruction& i) {
+  HHIR_EMIT(Sqrt);
+}
+
+void
 IRTranslator::translateXor(const NormalizedInstruction& i) {
   HHIR_EMIT(Xor);
 }

@@ -213,6 +213,7 @@ O(OpSub,                        DArith, S(Int,Dbl) S(Int,Dbl),             C) \
 O(OpMul,                        DArith, S(Int,Dbl) S(Int,Dbl),             C) \
 O(OpDivDbl,                     D(Dbl), S(Dbl) S(Dbl),                     C) \
 O(OpMod,                        D(Int), S(Int) S(Int),                     C) \
+O(OpSqrt,                       D(Dbl), S(Dbl),                            C) \
 O(OpBitAnd,                     D(Int), S(Int) S(Int),                     C) \
 O(OpBitOr,                      D(Int), S(Int) S(Int),                     C) \
 O(OpBitXor,                     D(Int), S(Int) S(Int),                     C) \

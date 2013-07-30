@@ -377,6 +377,7 @@ enum SetOpOp {
   O(Mul,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Div,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Mod,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
+  O(Sqrt,            NA,               ONE(CV),         ONE(CV),    NF) \
   O(Xor,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Not,             NA,               ONE(CV),         ONE(CV),    NF) \
   O(Same,            NA,               TWO(CV,CV),      ONE(CV),    NF) \

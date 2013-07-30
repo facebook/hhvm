@@ -471,6 +471,7 @@ D:{Int|Dbl}      = OpAdd    S0:{Int|Dbl} S1:{Int|Dbl}
 D:{Int|Dbl}      = OpSub    S0:{Int|Dbl} S1:{Int|Dbl}
 D:{Int|Dbl}      = OpMul    S0:{Int|Dbl} S1:{Int|Dbl}
 D:Int            = OpMod    S0:Int       S1:Int
+D:Dbl            = OpSqrt   S0:Dbl
 D:Dbl            = OpDivDbl S0:Dbl S1:Dbl -> L
 D:Int            = OpBitAnd S0:Int S1:Int
 D:Int            = OpBitOr  S0:Int S1:Int

@@ -51,6 +51,7 @@
 #include "hphp/runtime/vm/type_constraint.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_error.h"
 #include "hphp/runtime/ext/ext_closure.h"
@@ -3760,6 +3761,34 @@ inline void OPTBLD_INLINE VMExecutionContext::iopShr(PC& pc) {
   implCellBinOp(pc, [&] (Cell c1, Cell c2) {
     return make_tv<KindOfInt64>(cellToInt(c1) >> cellToInt(c2));
   });
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopSqrt(PC& pc) {
+  NEXT();
+  Cell* c1 = m_stack.topC();
+
+  if (c1->m_type == KindOfNull || c1->m_type == KindOfBoolean ||
+      (IS_STRING_TYPE(c1->m_type) && c1->m_data.pstr->isNumeric())) {
+    tvCastToDoubleInPlace(c1);
+  }
+
+  if (c1->m_type == KindOfInt64) {
+    c1->m_type = KindOfDouble;
+    c1->m_data.dbl = f_sqrt(c1->m_data.num);
+  } else if (c1->m_type == KindOfDouble) {
+    c1->m_data.dbl = f_sqrt(c1->m_data.dbl);
+  }
+
+  if (c1->m_type != KindOfDouble) {
+    raise_param_type_warning(
+      "sqrt",
+      1,
+      KindOfDouble,
+      c1->m_type
+    );
+    tvRefcountedDecRefCell(c1);
+    c1->m_type = KindOfNull;
+  }
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopBitNot(PC& pc) {

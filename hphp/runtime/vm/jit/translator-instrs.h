@@ -49,6 +49,7 @@
   CASE(Xor) \
   CASE(Not) \
   CASE(Mod) \
+  CASE(Sqrt) \
   CASE(BitNot) \
   CASE(CastInt) \
   CASE(CastString) \

@@ -538,6 +538,11 @@ predictOutputs(SrcKey startSk,
     return KindOfInt64;
   }
 
+  if (ni->op() == OpSqrt) {
+    // sqrt returns a double, unless you pass something nasty to it.
+    return KindOfDouble;
+  }
+
   if (ni->op() == OpDiv) {
     // Integers can produce integers if there's no residue, but $i / $j in
     // general produces a double. $i / 0 produces boolean false, so we have
@@ -961,6 +966,7 @@ static const struct {
   /* Div and mod might return boolean false. Sigh. */
   { OpDiv,         {StackTop2,        Stack1,       OutPred,          -1 }},
   { OpMod,         {StackTop2,        Stack1,       OutPred,          -1 }},
+  { OpSqrt,        {Stack1,           Stack1,       OutPred,           0 }},
   /* Logical ops */
   { OpXor,         {StackTop2,        Stack1,       OutBoolean,       -1 }},
   { OpNot,         {Stack1,           Stack1,       OutBoolean,        0 }},

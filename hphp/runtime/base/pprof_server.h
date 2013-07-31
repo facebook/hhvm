@@ -42,7 +42,7 @@ struct HeapProfileServer {
       RuntimeOption::ServerType,
       RuntimeOption::ServerIP,
       (uint16_t)4327,          // port
-      1                        // thread count
+      2                        // thread count
     )
   ) {
     m_server->setRequestHandlerFactory<HeapProfileRequestHandler>(30);

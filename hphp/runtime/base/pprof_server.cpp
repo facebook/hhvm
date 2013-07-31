@@ -75,6 +75,10 @@ void HeapProfileRequestHandler::handleRequest(Transport *transport) {
       }
       transport->sendString(res, 200);
     }
+  } else if (!strcmp(url, "hhprof/stop")) {
+    // user has requested cancellation of the current profile dump
+    ProfileController::cancelRequest();
+    transport->sendString("OK\n", 200);
   } else {
     // the pprof server doesn't understand any other endpoints so just error
     // out

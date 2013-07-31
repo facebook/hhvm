@@ -173,6 +173,17 @@ bool ProfileController::requestGlobal() {
 }
 
 // static
+void ProfileController::cancelRequest() {
+  std::unique_lock<std::mutex> lock(m_mutex);
+
+  // changing the state is enough to cancel the currently
+  // active request; no VM thread will put their dump here
+  // if the state is waiting
+  m_state = State::Waiting;
+  m_waitq.notify_all();
+}
+
+// static
 void ProfileController::offerProfile(const ProfileDump &dump) {
   std::unique_lock<std::mutex> lock(m_mutex);
 

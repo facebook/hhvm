@@ -117,6 +117,7 @@ struct ProfileController {
   static bool requestNext();
   static bool requestNextURL(const std::string &url);
   static bool requestGlobal();
+  static void cancelRequest();
 
   // give API
   static void offerProfile(const ProfileDump &dump);

@@ -7063,14 +7063,6 @@ static ConstructPtr doOptimize(ConstructPtr c, AnalysisResultConstPtr ar) {
       if (ConstructPtr rep = doOptimize(k, ar)) {
         c->setNthKid(i, rep);
       }
-      ClosureExpressionPtr cl =
-        boost::dynamic_pointer_cast<ClosureExpression>(k);
-      if (cl) {
-        if (ConstructPtr repp = doOptimize(cl->getClosureFunction(), ar)) {
-          cl->setClosureFunction(
-            boost::static_pointer_cast<FunctionStatement>(repp));
-        }
-      }
     }
   }
   if (ExpressionPtr e = dynamic_pointer_cast<Expression>(c)) {

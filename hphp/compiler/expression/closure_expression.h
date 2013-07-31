@@ -38,7 +38,6 @@ public:
   virtual int getKidCount() const;
 
   FunctionStatementPtr getClosureFunction() { return m_func; }
-  void setClosureFunction(FunctionStatementPtr func) { m_func = func; }
   ExpressionListPtr getClosureVariables() { return m_vars; }
   ExpressionListPtr getClosureValues() { return m_values; }
   bool hasStaticLocals();

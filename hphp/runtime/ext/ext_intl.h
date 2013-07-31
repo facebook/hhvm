@@ -103,22 +103,6 @@ class c_Collator : public ExtObjectData, public Sweepable {
   UCollator *m_ucoll;
   intl_error m_errcode;
 };
-extern const int64_t q_Locale$$ACTUAL_LOCALE;
-extern const int64_t q_Locale$$VALID_LOCALE;
-
-///////////////////////////////////////////////////////////////////////////////
-// class Locale
-
-FORWARD_DECLARE_CLASS_BUILTIN(Locale);
-class c_Locale : public ExtObjectData {
- public:
-  DECLARE_CLASS(Locale, Locale, ObjectData)
-
-  // need to implement
-  public: c_Locale(Class* cls = c_Locale::s_cls);
-  public: ~c_Locale();
-  public: void t___construct();
-};
 extern const int64_t q_Normalizer$$NONE;
 extern const int64_t q_Normalizer$$FORM_D;
 extern const int64_t q_Normalizer$$NFD;

@@ -535,22 +535,6 @@ Variant f_collator_sort(CVarRef obj, VRefParam arr,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const int64_t q_Locale$$ACTUAL_LOCALE = 0;
-const int64_t q_Locale$$VALID_LOCALE = 1;
-
-///////////////////////////////////////////////////////////////////////////////
-
-c_Locale::c_Locale(Class* cb) : ExtObjectData(cb) {
-}
-
-c_Locale::~c_Locale() {
-}
-
-void c_Locale::t___construct() {
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 const int64_t q_Normalizer$$NONE     = UNORM_NONE;
 const int64_t q_Normalizer$$FORM_D   = UNORM_NFD;
 const int64_t q_Normalizer$$NFD      = UNORM_NFD;

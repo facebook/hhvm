@@ -377,8 +377,8 @@ private:
   bool m_stopped;
 
   InputState m_inputState;
-  int m_signum; // Set when ctrl-c is pressed, used by signal polling
-  int m_sigTime; // The last time ctrl-c was recognized
+  int m_sigNum; // Set when ctrl-c is pressed, used by signal polling
+  int m_sigCount; // Number of times ctrl-c pressed since last interrupt
 
   // auto-completion states
   int m_acLen;

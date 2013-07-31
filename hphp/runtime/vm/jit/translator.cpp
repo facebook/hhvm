@@ -1350,8 +1350,8 @@ bool outputIsPredicted(SrcKey startSk,
   auto const& iInfo = getInstrInfo(inst.op());
   auto doPrediction = iInfo.type == OutPred && !inst.breaksTracelet;
   if (doPrediction) {
-    // All OutPred ops have a single stack output for now.
-    assert(iInfo.out == Stack1);
+    // All OutPred ops except for SetM have a single stack output for now.
+    assert(iInfo.out == Stack1 || inst.op() == OpSetM);
     auto dt = predictOutputs(startSk, &inst);
     if (dt != KindOfInvalid) {
       inst.outPred = Type::fromDataType(dt);

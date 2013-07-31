@@ -358,6 +358,10 @@ GuardLoc<T,localId> S0:FramePtr
   the type T; if not, make a fallback jump.  (A jump to a service
   request that chains to a retranslation for this tracelet.)
 
+GuardCls<T<Cls>> S0:Obj
+
+  Guard that the object S0 has class Cls; else make a fallback jump.
+
 CheckLoc<T,localId> S0:FramePtr -> L
 
   Check that type of the given localId on the frame S0 is T; if not,
@@ -487,7 +491,7 @@ D:Dbl            = OpCeil   S0:Dbl
   Undefined behavior occurs if OpMod is given a divisor of zero, or if
   the divisor is -1 and the dividend is the minimum representable integer.
 
-  OpDivDbl Will branch to L when S1 is zero (signed or unsigned).  When the 
+  OpDivDbl Will branch to L when S1 is zero (signed or unsigned).  When the
   result of the division is a real valued number OpDivDbl conforms to IEEE 754.
   In particular should the result of a division be zero the sign will follow
   normal sign rules for division.

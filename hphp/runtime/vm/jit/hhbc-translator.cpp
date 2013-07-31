@@ -2626,6 +2626,12 @@ void HhbcTranslator::setThisAvailable() {
 }
 
 void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type) {
+  if (type.strictSubtypeOf(Type::Obj)) {
+    gen(GuardLoc, type.unspecialize(), LocalId(locId), m_tb->fp());
+    SSATmp* loc = gen(LdLoc, type, LocalId(locId), m_tb->fp());
+    gen(GuardCls, type, loc);
+    return;
+  }
   gen(GuardLoc, type, LocalId(locId), m_tb->fp());
 }
 

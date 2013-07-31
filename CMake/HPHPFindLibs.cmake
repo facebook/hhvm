@@ -90,6 +90,9 @@ set(CMAKE_REQUIRED_LIBRARIES)
 
 # GD checks
 find_package(GD REQUIRED)
+if (GDIMAGECONVOLUTION)
+	add_definitions("-DHAVE_GDIMAGECONVOLUTION")
+endif()
 
 find_package(LibXed)
 if (LibXed_INCLUDE_DIR AND LibXed_LIBRARY)

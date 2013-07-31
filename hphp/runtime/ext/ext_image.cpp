@@ -4200,6 +4200,7 @@ bool f_imagefilter(CResRef image, int filtertype,
   (src->trueColor?gdImageGetTrueColorPixel:gdImageGetPixel)
 #endif
 
+#ifndef HAVE_GDIMAGECONVOLUTION
 static int gdImageConvolution(gdImagePtr src, float filter[3][3],
                               float filter_div, float offset) {
   int x, y, i, j, new_a;
@@ -4258,6 +4259,7 @@ static int gdImageConvolution(gdImagePtr src, float filter[3][3],
   gdImageDestroy(srcback);
   return 1;
 }
+#endif
 
 bool f_imageconvolution(CResRef image, CArrRef matrix,
                         double div, double offset) {

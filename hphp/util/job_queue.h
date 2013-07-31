@@ -164,10 +164,10 @@ public:
    * Keeps track of how many active workers are working on the queue.
    */
   void incActiveWorker() {
-    atomic_inc(m_workerCount);
+    ++m_workerCount;
   }
   int decActiveWorker() {
-    return atomic_dec(m_workerCount);
+    return --m_workerCount;
   }
   int getActiveWorker() {
     return m_workerCount;
@@ -295,7 +295,7 @@ public:
   int m_jobCount;
   std::vector<std::deque<std::pair<TJob, timespec>>> m_jobQueues;
   bool m_stopped;
-  int m_workerCount;
+  std::atomic<int> m_workerCount;
   const int m_dropCacheTimeout;
   const bool m_dropStack;
   const int m_lifoSwitchThreshold;

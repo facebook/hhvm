@@ -126,10 +126,10 @@ class AtomicCountable {
  public:
   AtomicCountable() : m_count(0) {}
   RefCount getCount() const { return m_count; }
-  void incAtomicCount() const { atomic_inc(m_count); }
-  RefCount decAtomicCount() const { return atomic_dec(m_count); }
+  void incAtomicCount() const { ++m_count; }
+  RefCount decAtomicCount() const { return --m_count; }
  protected:
-  mutable RefCount m_count;
+  mutable std::atomic<RefCount> m_count;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

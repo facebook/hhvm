@@ -83,7 +83,7 @@ StringCase:
           setSerializedArray();
           m_shouldCache = true;
           String s = apc_serialize(source);
-          m_data.str = new StringData(s.data(), s.size(), CopyMalloc);
+          m_data.str = StringData::MakeMalloced(s.data(), s.size());
           break;
         }
       }
@@ -128,7 +128,7 @@ StringCase:
         setIsObj();
       } else {
         String s = apc_serialize(source);
-        m_data.str = new StringData(s.data(), s.size(), CopyMalloc);
+        m_data.str = StringData::MakeMalloced(s.data(), s.size());
       }
       break;
     }

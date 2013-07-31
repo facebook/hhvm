@@ -36,8 +36,7 @@ class String;
 
 //////////////////////////////////////////////////////////////////////
 
-
-/**
+/*
  * A Slice is a compact way to refer to an extent of array elements.
  * This type is designed to be passed around by value.  Methods on slice
  * are set up to match the Boost Range<T> concept.
@@ -89,6 +88,7 @@ enum CopyMallocMode { CopyMalloc };
  */
 class StringData {
   friend class StackStringData;
+
   StringData(const StringData&); // disable copying
   StringData& operator=(const StringData&);
 
@@ -101,97 +101,54 @@ class StringData {
   };
 
 public:
+  typedef ThreadLocalSingleton<SmartAllocator<StringData>> Allocator;
+
   const static uint32_t MaxSmallSize = 43;
 
-  /* max length of a string, not counting the terminal 0.  This is
-   * MAX_INT-1 to avoid this kind of hazard in client code:
+  /*
+   * Max length of a string, not counting the terminal 0.
+   *
+   * This is MAX_INT-1 to avoid this kind of hazard in client code:
+   *
    *   int size = string_data->size();
    *   ... = size + 1; // oops, wraparound.
    */
   const static uint32_t MaxSize = 0x7ffffffe; // 2^31-2
 
-  StringData() : m_data(m_small), m_len(0), m_count(0), m_hash(0) {
-    m_big.shared = 0;
-    m_big.cap = IsSmall;
-    m_small[0] = 0;
-  }
-
   /*
-   * Creating request local PHP strings should go through this factory
+   * Creating request-local PHP strings should go through this factory
    * function.
+   *
+   * Normally these strings should have their lifetime reference
+   * counted; call release() to return them to the allocator.
    */
   template<class... Args> static StringData* Make(Args&&...);
 
   /*
-   * Different ways of constructing StringData. Default constructor at above
-   * is actually only for SmartAllocator to pre-allocate the objects.
+   * Create a StringData that is allocated by malloc, instead of the
+   * smart allocator.
    *
-   * To actually allocate StringDatas, use StringData::Make().
+   * This is essentially only used for APC.
+   *
+   * StringDatas allocated with this function must be freed by calling
+   * destruct(), instead of release().
    */
-  explicit StringData(const char* data) {
-    initCopy(data);
-  }
-  StringData(const char *data, AttachStringMode) {
-    initAttach(data);
-  }
-  StringData(const char *data, CopyStringMode) {
-    initCopy(data);
-  }
-
-  StringData(const char* data, int len, AttachStringMode) {
-    initAttach(data, len);
-  }
-  StringData(const char* data, int len, CopyStringMode) {
-    initCopy(data, len);
-  }
-  StringData(const char* data, int len, CopyMallocMode) {
-    initMalloc(data, len);
-  }
-  StringData(const StringData* s, CopyStringMode) {
-    StringSlice r = s->slice();
-    initCopy(r.ptr, r.len);
-  }
-  StringData(StringSlice r1, CopyStringMode) {
-    initCopy(r1.ptr, r1.len);
-  }
-
-  // Create a new string by concatingating two existing strings.
-  StringData(const StringData* s1, const StringData* s2) {
-    initConcat(s1->slice(), s2->slice());
-  }
-  StringData(const StringData* s1, StringSlice s2) {
-    initConcat(s1->slice(), s2);
-  }
-  StringData(const StringData* s1, const char* lit2) {
-    initConcat(s1->slice(), StringSlice(lit2, strlen(lit2)));
-  }
-  StringData(StringSlice s1, StringSlice s2) {
-    initConcat(s1, s2);
-  }
-  StringData(StringSlice s1, const char* lit2) {
-    initConcat(s1, StringSlice(lit2, strlen(lit2)));
-  }
-
-  /**
-   * Create a new empty string big enough to hold the requested size,
-   * not counting the \0 terminator.
-   */
-  explicit StringData(int reserve);
+  static StringData* MakeMalloced(const char* data, int len);
 
   /*
-   * Create a StringData that wraps an APC SharedVariant that contains
-   * a string.
+   * Called to return a StringData to the smart allocator.  This is
+   * normally called when the reference count goes to zero (e.g. with
+   * a helper like decRefStr).
    */
-  explicit StringData(SharedVariant *shared);
-
-  ~StringData() { checkStack(); releaseData(); }
+  void release();
 
   /*
-   * When we have static StringData in SharedStore, we should avoid directly
-   * deleting the StringData pointer, but rather call destruct().
+   * StringData objects allocated with MakeMalloced should be freed
+   * using this function instead of release().
    */
   void destruct() const { if (!isStatic()) delete this; }
 
+public:
   /*
    * Reference counting related.
    */
@@ -332,12 +289,6 @@ public:
   int compare(const StringData *v2) const;
 
   /*
-   * Memory allocator for smart-allocated StringDatas.
-   */
-  typedef ThreadLocalSingleton<SmartAllocator<StringData>> Allocator;
-  void release();
-
-  /*
    * Shared StringData's have a sweep list running through them for
    * decrefing the SharedVariant they are fronting.  This function
    * must be called at request cleanup time to handle this.
@@ -365,6 +316,71 @@ public:
   static Array GetConstants();
 
 private:
+  StringData() : m_data(m_small), m_len(0), m_count(0), m_hash(0) {
+    m_big.shared = 0;
+    m_big.cap = IsSmall;
+    m_small[0] = 0;
+  }
+
+  explicit StringData(const char* data) {
+    initCopy(data);
+  }
+  StringData(const char *data, AttachStringMode) {
+    initAttach(data);
+  }
+  StringData(const char *data, CopyStringMode) {
+    initCopy(data);
+  }
+
+  StringData(const char* data, int len, AttachStringMode) {
+    initAttach(data, len);
+  }
+  StringData(const char* data, int len, CopyStringMode) {
+    initCopy(data, len);
+  }
+  StringData(const char* data, int len, CopyMallocMode) {
+    initMalloc(data, len);
+  }
+  StringData(const StringData* s, CopyStringMode) {
+    StringSlice r = s->slice();
+    initCopy(r.ptr, r.len);
+  }
+  StringData(StringSlice r1, CopyStringMode) {
+    initCopy(r1.ptr, r1.len);
+  }
+
+  // Create a new string by concatingating two existing strings.
+  StringData(const StringData* s1, const StringData* s2) {
+    initConcat(s1->slice(), s2->slice());
+  }
+  StringData(const StringData* s1, StringSlice s2) {
+    initConcat(s1->slice(), s2);
+  }
+  StringData(const StringData* s1, const char* lit2) {
+    initConcat(s1->slice(), StringSlice(lit2, strlen(lit2)));
+  }
+  StringData(StringSlice s1, StringSlice s2) {
+    initConcat(s1, s2);
+  }
+  StringData(StringSlice s1, const char* lit2) {
+    initConcat(s1, StringSlice(lit2, strlen(lit2)));
+  }
+
+  /*
+   * Create a new empty string big enough to hold the requested size,
+   * not counting the \0 terminator.
+   */
+  explicit StringData(int reserve);
+
+  /*
+   * Create a StringData that wraps an APC SharedVariant that contains
+   * a string.
+   */
+  explicit StringData(SharedVariant *shared);
+
+  ~StringData() { checkStack(); releaseData(); }
+
+private:
   void initAttach(const char* data);
   void initCopy(const char* data);
   void initAttach(const char* data, int len);
@@ -382,13 +398,16 @@ private:
 
   bool checkSane() const;
   const char* rawdata() const { return m_data; }
+
   Format format() const {
     return Format(m_big.cap & IsMask);
   }
+
   int bigCap() const {
     assert(!isSmall());
     return m_big.cap & ~IsMask;
   }
+
   /* Only call preCompute() and setStatic() in a thread-neutral context! */
   void preCompute() const;
   void setStatic() const;
@@ -431,7 +450,6 @@ private:
  */
 class StackStringData : public StringData {
  public:
-  StackStringData() { incRefCount(); }
   explicit StackStringData(const char* s) : StringData(s) { incRefCount(); }
   template <class T>
   StackStringData(const char* s, T p) : StringData(s, p) { incRefCount(); }

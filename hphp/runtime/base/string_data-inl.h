@@ -26,6 +26,10 @@ inline StringData* StringData::Make(Args&&... args) {
     StringData(std::forward<Args>(args)...);
 }
 
+inline StringData* StringData::MakeMalloced(const char* data, int len) {
+  return new StringData(data, len, CopyMallocMode{});
+}
+
 inline void StringData::releaseData() {
   //assert(checkSane()); // TODO(#2674472): violated by stack string stuff
   if (UNLIKELY(!isSmall())) return releaseDataSlowPath();

@@ -759,9 +759,10 @@ Variant f_fb_compact_serialize(CVarRef thing) {
     }
   }
 
-  StringData* sd = StringData::Make();
+  auto sd = StringData::Make();
   // StringData will throw a FatalErrorException if we try to grow it too large,
   // so no need to check for length.
+  // FIXME(#2683961): this exception case leaks the StringData.
   if (fb_compact_serialize_variant(sd, thing, 0)) {
     sd->release();
     return uninit_null();
@@ -829,6 +830,8 @@ int fb_compact_unserialize_int64_from_buffer(
   return 0;
 }
 
+const StaticString s_empty("");
+
 int fb_compact_unserialize_from_buffer(
   Variant& out, const char* buf, int n, int& p) {
 
@@ -873,8 +876,7 @@ int fb_compact_unserialize_from_buffer(
 
     case FB_CS_STRING_0:
     {
-      StringData* sd = StringData::Make();
-      out = sd;
+      out = s_empty;
       break;
     }
 

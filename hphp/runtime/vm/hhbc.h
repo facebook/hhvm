@@ -723,6 +723,28 @@ private:
 // Must be an opcode that actually has an ImmVector.
 ImmVector getImmVector(const Op* opcode);
 
+struct MInstrLocation {
+  LocationCode lcode;
+  int64_t imm;
+
+  bool hasImm() const {
+    auto count = numLocationCodeImms(lcode);
+    assert(count == 0 || count == 1);
+    return count;
+  }
+};
+MInstrLocation getMLocation(const Op* opcode);
+
+struct MVectorItem {
+  MemberCode mcode;
+  int64_t imm;
+
+  bool hasImm() const {
+    return memberCodeHasImm(mcode);
+  }
+};
+std::vector<MVectorItem> getMVector(const Op* opcode);
+
 /* Some decoding helper functions. */
 int numImmediates(Op opcode);
 ArgType immType(Op opcode, int idx);

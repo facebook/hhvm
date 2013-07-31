@@ -151,6 +151,7 @@ struct HhbcTranslator {
                      const Func* target,
                      Offset returnBcOffset);
   bool isInlining() const;
+  int inliningDepth() const;
   void profileFunctionEntry(const char* category);
   void profileInlineFunctionShape(const std::string& str);
   void profileSmallFunctionShape(const std::string& str);
@@ -786,6 +787,7 @@ public:
   Offset      bcOff()     const { return m_bcStateStack.back().bcOff; }
   SrcKey      curSrcKey() const { return SrcKey(curFunc(), bcOff()); }
   size_t      spOffset()  const;
+  Type        topType(uint32_t i, DataTypeCategory c = DataTypeSpecific) const;
 
 private:
   /*
@@ -844,7 +846,6 @@ private:
     return top(Type::Cell, i, cat);
   }
   SSATmp* topV(uint32_t i = 0) { return top(Type::BoxedCell, i); }
-  Type    topType(uint32_t i, DataTypeCategory c = DataTypeSpecific) const;
   std::vector<SSATmp*> peekSpillValues() const;
   SSATmp* emitSpillStack(SSATmp* sp,
                          const std::vector<SSATmp*>& spillVals);

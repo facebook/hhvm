@@ -18,7 +18,13 @@
 
 #include "folly/Format.h"
 
+#include "hphp/runtime/vm/hhbc.h"
+
 namespace HPHP {
+
+std::string SrcKey::showInst() const {
+  return instrToString(reinterpret_cast<const Op*>(unit()->at(offset())));
+}
 
 std::string show(SrcKey sk) {
   auto func = sk.func();
@@ -32,6 +38,12 @@ std::string show(SrcKey sk) {
                        func->isPseudoMain() ? "pseudoMain"
                                             : func->fullName()->data(),
                        (unsigned long long)sk.getFuncId(), sk.offset()).str();
+}
+
+std::string showShort(SrcKey sk) {
+  return folly::format("{}(id 0x{:#x})@{}",
+                       sk.func()->fullName()->data(), sk.getFuncId(),
+                       sk.offset()).str();
 }
 
 void sktrace(SrcKey sk, const char *fmt, ...) {

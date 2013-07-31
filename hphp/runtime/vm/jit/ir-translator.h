@@ -29,8 +29,23 @@ struct RuntimeType;
 namespace JIT {
 using Transl::NormalizedInstruction;
 
-bool shouldIRInline(const Func* curFunc, const Func* func,
-                    const Transl::Tracelet& callee);
+/*
+ * RegionIter is a temporary class used to traverse a region of hhbc
+ * instruction that may be more than just a straight-line series of
+ * instructions. It is used by shouldIRInline to traverse both Tracelets and
+ * RegionDescs.
+ */
+struct RegionIter {
+  virtual ~RegionIter() {}
+
+  virtual bool finished() const = 0;
+  virtual SrcKey sk() const = 0;
+  virtual void advance() = 0;
+};
+bool shouldIRInline(const Func* caller, const Func* callee,
+                    RegionIter& iter);
+bool shouldIRInline(const Func* caller, const Func* callee,
+                    const Transl::Tracelet& tlet);
 
 /*
  * IRTranslator is used to convert hhbc instructions to an IRTrace of hhir

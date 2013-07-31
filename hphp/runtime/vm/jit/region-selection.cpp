@@ -41,7 +41,7 @@ using Transl::TranslatorX64;
 
 extern RegionDescPtr selectMethod(const RegionContext&);
 extern RegionDescPtr selectOneBC(const RegionContext&);
-extern RegionDescPtr selectTracelet(const RegionContext&);
+extern RegionDescPtr selectTracelet(const RegionContext&, int inlineDepth);
 extern RegionDescPtr selectHotBlock(TransID transId,
                                     const ProfData* profData,
                                     const TransCFG& cfg);
@@ -83,31 +83,105 @@ RegionMode regionMode() {
   return RegionMode::None;
 }
 
+template<typename Container>
+void truncateMap(Container& c, SrcKey final) {
+  c.erase(c.upper_bound(final), c.end());
+}
 }
 
 //////////////////////////////////////////////////////////////////////
 
+RegionDesc::Block::Block(const Func* func, Offset start, int length)
+  : m_func(func)
+  , m_start(start)
+  , m_last(kInvalidOffset)
+  , m_length(length)
+  , m_inlinedCallee(nullptr)
+{
+  assert(length >= 0);
+  if (length > 0) {
+    SrcKey sk(func, start);
+    for (unsigned i = 1; i < length; ++i) sk.advance();
+    m_last = sk.offset();
+  }
+  checkInstructions();
+  checkMetadata();
+}
+
+bool RegionDesc::Block::contains(SrcKey sk) const {
+  return sk >= start() && sk <= last();
+}
+
+void RegionDesc::Block::addInstruction() {
+  if (m_length > 0) checkInstruction(last().op());
+  assert((m_last == kInvalidOffset) == (m_length == 0));
+
+  ++m_length;
+  if (m_length == 1) {
+    m_last = m_start;
+  } else {
+    m_last = last().advanced().offset();
+  }
+}
+
+void RegionDesc::Block::truncateAfter(SrcKey final) {
+  assert_not_implemented(!m_inlinedCallee);
+
+  auto skIter = start();
+  int newLen = -1;
+  for (int i = 0; i < m_length; ++i, skIter.advance(unit())) {
+    if (skIter == final) {
+      newLen = i + 1;
+      break;
+    }
+  }
+  assert(newLen != -1);
+  m_length = newLen;
+  m_last = final.offset();
+
+  truncateMap(m_typePreds, final);
+  truncateMap(m_byRefs, final);
+  truncateMap(m_refPreds, final);
+  truncateMap(m_knownFuncs, final);
+
+  checkInstructions();
+  checkMetadata();
+}
+
 void RegionDesc::Block::addPredicted(SrcKey sk, TypePred pred) {
+  FTRACE(2, "Block::addPredicted({}, {})\n", showShort(sk), show(pred));
   assert(pred.type.subtypeOf(Type::Gen | Type::Cls));
+  assert(contains(sk));
   m_typePreds.insert(std::make_pair(sk, pred));
-  checkInvariants();
 }
 
 void RegionDesc::Block::setParamByRef(SrcKey sk, bool byRef) {
+  FTRACE(2, "Block::setParamByRef({}, {})\n", showShort(sk),
+         byRef ? "by ref" : "by val");
   assert(m_byRefs.find(sk) == m_byRefs.end());
+  assert(contains(sk));
   m_byRefs.insert(std::make_pair(sk, byRef));
-  checkInvariants();
 }
 
 void RegionDesc::Block::addReffinessPred(SrcKey sk, const ReffinessPred& pred) {
+  FTRACE(2, "Block::addReffinessPred({}, {})\n", showShort(sk), show(pred));
+  assert(contains(sk));
   m_refPreds.insert(std::make_pair(sk, pred));
-  checkInvariants();
 }
 
 void RegionDesc::Block::setKnownFunc(SrcKey sk, const Func* func) {
+  FTRACE(2, "Block::setKnownFunc({}, {})\n", showShort(sk),
+         func ? func->fullName()->data() : "nullptr");
   assert(m_knownFuncs.find(sk) == m_knownFuncs.end());
+  assert(contains(sk));
+  auto it = m_knownFuncs.lower_bound(sk);
+  if (it != m_knownFuncs.begin() && (--it)->second == func) {
+    // Adding func at this sk won't add any new information.
+    FTRACE(2, "  func exists at {}, not adding\n", showShort(it->first));
+    return;
+  }
+
   m_knownFuncs.insert(std::make_pair(sk, func));
-  checkInvariants();
 }
 
 void RegionDesc::Block::setPostConditions(const PostConditions& conds) {
@@ -115,58 +189,60 @@ void RegionDesc::Block::setPostConditions(const PostConditions& conds) {
 }
 
 /*
- * Check invariants on a RegionDesc::Block.
+ * Check invariants about the bytecode instructions in this Block.
  *
  * 1. Single entry, single exit (aside from exceptions).  I.e. no
  *    non-fallthrough instructions mid-block and no control flow (not
  *    counting calls as control flow).
  *
- * 2. Each SrcKey in m_typePreds, m_byRefs, m_refPreds, and m_knownFuncs is
- *    within the bounds of the block.
- *
- * 3. Each local id referred to in the type prediction list is valid.
- *
- * 4. (Unchecked) each stack offset in the type prediction list is
- *    valid.
  */
-void RegionDesc::Block::checkInvariants() const {
+void RegionDesc::Block::checkInstructions() const {
   if (!debug || length() == 0) return;
 
-  smart::set<SrcKey> keysInRange;
-  auto firstKey = [&] { return *keysInRange.begin(); };
-  auto lastKey = [&] {
-    assert(!keysInRange.empty());
-    return *--keysInRange.end();
-  };
-  keysInRange.insert(start());
-  for (int i = 1; i < length(); ++i) {
-    if (i != length() - 1) {
-      auto const pc = unit()->at(lastKey().offset());
-      if (instrFlags(toOp(*pc)) & TF) {
-        FTRACE(1, "Bad block: {}\n", show(*this));
-        assert(!"Block may not contain non-fallthrough instruction unless "
-                "they are last");
-      }
-      if (instrIsNonCallControlFlow(toOp(*pc))) {
-        FTRACE(1, "Bad block: {}\n", show(*this));
-        assert(!"Block may not contain control flow instructions unless "
-                "they are last");
-      }
-    }
-    keysInRange.insert(lastKey().advanced(unit()));
-  }
-  assert(keysInRange.size() == length());
+  auto u = unit();
+  auto sk = start();
 
-  auto rangeCheck = [&](const char* type, SrcKey sk) {
-    if (!keysInRange.count(sk)) {
+  for (int i = 1; i < length(); ++i) {
+    if (i != length() - 1) checkInstruction(sk.op());
+    sk.advance(u);
+  }
+  assert(sk.offset() == m_last);
+}
+
+void RegionDesc::Block::checkInstruction(Op op) const {
+  if (instrFlags(op) & TF) {
+    FTRACE(1, "Bad block: {}\n", show(*this));
+    assert(!"Block may not contain non-fallthrough instruction unless "
+           "they are last");
+  }
+  if (instrIsNonCallControlFlow(op)) {
+    FTRACE(1, "Bad block: {}\n", show(*this));
+    assert(!"Block may not contain control flow instructions unless "
+           "they are last");
+  }
+}
+
+/*
+ * Check invariants about the metadata for this Block.
+ *
+ * 1. Each SrcKey in m_typePreds, m_byRefs, m_refPreds, and m_knownFuncs is
+ *    within the bounds of the block.
+ *
+ * 2. Each local id referred to in the type prediction list is valid.
+ *
+ * 3. (Unchecked) each stack offset in the type prediction list is
+ *    valid.
+*/
+void RegionDesc::Block::checkMetadata() const {
+  auto rangeCheck = [&](const char* type, Offset o) {
+    if (o < m_start || o > m_last) {
       std::cerr << folly::format("{} at {} outside range [{}, {}]\n",
-                                type, show(sk),
-                                 show(firstKey()), show(lastKey()));
+                                 type, o, m_start, m_last);
       assert(!"Region::Block contained out-of-range metadata");
     }
   };
   for (auto& tpred : m_typePreds) {
-    rangeCheck("type prediction", tpred.first);
+    rangeCheck("type prediction", tpred.first.offset());
     auto& loc = tpred.second.location;
     switch (loc.tag()) {
     case Location::Tag::Local: assert(loc.localId() < m_func->numLocals());
@@ -177,13 +253,13 @@ void RegionDesc::Block::checkInvariants() const {
   }
 
   for (auto& byRef : m_byRefs) {
-    rangeCheck("parameter reference flag", byRef.first);
+    rangeCheck("parameter reference flag", byRef.first.offset());
   }
   for (auto& refPred : m_refPreds) {
-    rangeCheck("reffiness prediction", refPred.first);
+    rangeCheck("reffiness prediction", refPred.first.offset());
   }
   for (auto& func : m_knownFuncs) {
-    rangeCheck("known Func*", func.first);
+    rangeCheck("known Func*", func.first.offset());
   }
 }
 
@@ -323,24 +399,8 @@ RegionDescPtr selectRegion(const RegionContext& context,
   auto const mode = regionMode();
 
   FTRACE(1,
-    "Select region: {}@{} mode={} context:\n{}{}",
-    context.func->fullName()->data(),
-    context.bcOffset,
-    static_cast<int>(mode),
-    [&]{
-      std::string ret;
-      for (auto& t : context.liveTypes) {
-        folly::toAppend(" ", show(t), "\n", &ret);
-      }
-      return ret;
-    }(),
-    [&]{
-      std::string ret;
-      for (auto& ar : context.preLiveARs) {
-        folly::toAppend(" ", show(ar), "\n", &ret);
-      }
-      return ret;
-    }()
+    "Select region: mode={} context:\n{}",
+    static_cast<int>(mode), show(context)
   );
 
   auto region = [&]{
@@ -349,7 +409,7 @@ RegionDescPtr selectRegion(const RegionContext& context,
         case RegionMode::None:     return RegionDescPtr{nullptr};
         case RegionMode::OneBC:    return selectOneBC(context);
         case RegionMode::Method:   return selectMethod(context);
-        case RegionMode::Tracelet: return selectTracelet(context);
+        case RegionMode::Tracelet: return selectTracelet(context, 0);
         case RegionMode::Legacy:
                  always_assert(t); return selectTraceletLegacy(*t);
         case RegionMode::HotBlock:
@@ -458,6 +518,15 @@ std::string show(RegionContext::PreLiveAR ar) {
     ar.func->fullName()->data(),
     ar.objOrCls.toString()
   ).str();
+}
+
+std::string show(const RegionContext& ctx) {
+  std::string ret;
+  folly::toAppend(ctx.func->fullName()->data(), "@", ctx.bcOffset, "\n", &ret);
+  for (auto& t : ctx.liveTypes) folly::toAppend(" ", show(t), "\n", &ret);
+  for (auto& ar : ctx.preLiveARs) folly::toAppend(" ", show(ar), "\n", &ret);
+
+  return ret;
 }
 
 std::string show(const RegionDesc::Block& b) {

@@ -1147,78 +1147,112 @@ IRTranslator::translateFCallBuiltin(const NormalizedInstruction& i) {
   HHIR_EMIT(FCallBuiltin, numArgs, numNonDefault, funcId);
 }
 
-bool shouldIRInline(const Func* curFunc,
-                    const Func* func,
-                    const Tracelet& callee) {
+bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
   if (!RuntimeOption::EvalHHIREnableGenTimeInlining) {
     return false;
   }
 
-  const NormalizedInstruction* cursor;
-  Op current;
-
   auto refuse = [&](const char* why) -> bool {
     FTRACE(1, "shouldIRInline: refusing {} <reason: {}> [NI = {}]\n",
-              func->fullName()->data(), why, cursor->toString());
+           callee->fullName()->data(), why,
+           iter.finished() ? "<end>" : iter.sk().showInst());
     return false;
   };
   auto accept = [&](const char* kind) -> bool {
     FTRACE(1, "shouldIRInline: inlining {} <kind: {}>\n",
-              func->fullName()->data(), kind);
+           callee->fullName()->data(), kind);
     return true;
   };
 
-  if (func->numIterators() != 0) {
+  if (callee->numIterators() != 0) {
     return refuse("iterators");
   }
-  if (func->isMagic() || Func::isSpecial(func->name())) {
+  if (callee->isMagic() || Func::isSpecial(callee->name())) {
     return refuse("special or magic function");
   }
-  if (func->attrs() & AttrMayUseVV) {
+  if (callee->attrs() & AttrMayUseVV) {
     return refuse("may use dynamic environment");
   }
-  if (!(func->attrs() & AttrHot) && (curFunc->attrs() & AttrHot)) {
+  if (!(callee->attrs() & AttrHot) && (caller->attrs() & AttrHot)) {
     return refuse("inlining cold func into hot func");
   }
 
-  auto resetCursor = [&] {
-    cursor = callee.m_instrStream.first;
-    current = cursor->op();
-  };
-  auto next = [&]() -> Op {
-    auto op = cursor->op();
-    cursor = cursor->next;
-    current = cursor->op();
-    return op;
-  };
-
-  auto atRet = [&] {
-    return current == OpRetC || current == OpRetV;
-  };
-
-  resetCursor();
+  ////////////
 
   uint64_t cost = 0;
-  for (; !atRet(); next()) {
-    if (current == OpFCallArray) return refuse("FCallArray");
+  int inlineDepth = 0;
+  Op op = OpLowInvalid;
+  const Func* func = nullptr;
 
-    cost += 1;
+  for (; !iter.finished(); iter.advance()) {
+    // If func has changed after an FCall, we've started an inlined call. This
+    // will have to change when we support inlining recursive calls.
+    if (func && func != iter.sk().func()) {
+      assert(isRet(op) || op == OpFCall);
+      if (op == OpFCall) {
+        ++inlineDepth;
+      }
+    }
+    op = iter.sk().op();
+    func = iter.sk().func();
 
-    // static cost + scale factor for vector ops
-    if (cursor->immVecM.size()) {
-      cost += cursor->immVecM.size();
+    // If we hit a RetC/V while inlining, leave that level and
+    // continue. Otherwise, accept the tracelet.
+    if (isRet(op)) {
+      if (inlineDepth > 0) {
+        --inlineDepth;
+        continue;
+      } else {
+        assert(inlineDepth == 0);
+        return accept("entire function fits in one region");
+      }
     }
 
-    if (cursor->breaksTracelet) {
-      return refuse("breaks tracelet");
+    if (op == OpFCallArray) return refuse("FCallArray");
+
+    cost += 1;
+    if (hasImmVector(op)) {
+      cost += getMVector(reinterpret_cast<const Op*>(iter.sk().pc())).size();
+      // static cost + scale factor for vector ops
     }
 
     if (cost > RuntimeOption::EvalHHIRInliningMaxCost) {
       return refuse("too expensive");
     }
+
+    if (Transl::opcodeBreaksBB(op)) {
+      return refuse("breaks tracelet");
+    }
   }
 
-  return accept("function is okay");
+  return refuse("region doesn't end in RetC/RetV");
+}
+
+struct TraceletIter : public RegionIter {
+  explicit TraceletIter(const Tracelet& tlet)
+    : m_current(tlet.m_instrStream.first)
+  {}
+
+  bool finished() const { return m_current == nullptr; }
+
+  SrcKey sk() const {
+    assert(!finished());
+    return m_current->source;
+  }
+
+  void advance() {
+    assert(!finished());
+    m_current = m_current->next;
+  }
+
+ private:
+  const NormalizedInstruction* m_current;
+};
+
+bool shouldIRInline(const Func* caller, const Func* callee,
+                    const Tracelet& tlet) {
+  TraceletIter iter(tlet);
+  return shouldIRInline(caller, callee, iter);
 }
 
 void

@@ -1646,8 +1646,9 @@ static void addMVectorInputs(NormalizedInstruction& ni,
    * ids (i.e. string ids), this analysis step is going to have to be
    * a bit wiser.
    */
-  const uint8_t* vec = ni.immVec.vec();
-  const LocationCode lcode = LocationCode(*vec++);
+  auto opPtr = (const Op*)ni.source.pc();
+  auto const location = getMLocation(opPtr);
+  auto const lcode = location.lcode;
 
   const bool trailingClassRef = lcode == LSL || lcode == LSC;
 
@@ -1657,9 +1658,8 @@ static void addMVectorInputs(NormalizedInstruction& ni,
       inputs.emplace_back(Location(Location::This));
     } else {
       assert(lcode == LL || lcode == LGL || lcode == LNL);
-      int numImms = numLocationCodeImms(lcode);
-      for (int i = 0; i < numImms; ++i) {
-        push_local(decodeVariableSizeImm(&vec));
+      if (location.hasImm()) {
+        push_local(location.imm);
       }
     }
   } break;
@@ -1667,7 +1667,8 @@ static void addMVectorInputs(NormalizedInstruction& ni,
     if (lcode == LSL) {
       // We'll get the trailing stack value after pushing all the
       // member vector elements.
-      push_local(decodeVariableSizeImm(&vec));
+      assert(location.hasImm());
+      push_local(location.imm);
     } else {
       push_stack();
     }
@@ -1683,14 +1684,14 @@ static void addMVectorInputs(NormalizedInstruction& ni,
   }
 
   // Now push all the members in the correct order.
-  while (vec - ni.immVec.vec() < ni.immVec.size()) {
-    const MemberCode mcode = MemberCode(*vec++);
+  for (auto const& member : getMVector(opPtr)) {
+    auto const mcode = member.mcode;
     ni.immVecM.push_back(mcode);
 
     if (mcode == MW) {
       // No stack and no locals.
-    } else if (memberCodeHasImm(mcode)) {
-      int64_t imm = decodeMemberCodeImm(&vec, mcode);
+    } else if (member.hasImm()) {
+      int64_t imm = member.imm;
       if (memberCodeImmIsLoc(mcode)) {
         push_local(imm);
       } else if (memberCodeImmIsString(mcode)) {
@@ -1711,7 +1712,6 @@ static void addMVectorInputs(NormalizedInstruction& ni,
 
   ni.immVecClasses.resize(ni.immVecM.size());
 
-  assert(vec - ni.immVec.vec() == ni.immVec.size());
   assert(stackCount == ni.immVec.numStackValues());
 
   SKTRACE(2, ni.source, "M-vector using %d hidden stack "
@@ -3058,7 +3058,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
 
   /*
    * If the IR can't inline this, give up now.  Below we're going to
-   * start making changes to the traclet that is making the call
+   * start making changes to the tracelet that is making the call
    * (potentially increasing the specificity of guards), and we don't
    * want to do that unnecessarily.
    */
@@ -3702,6 +3702,7 @@ void Translator::traceStart(Offset bcStartOffset) {
 }
 
 void Translator::traceEnd() {
+  assert(!m_irTrans->hhbcTrans().isInlining());
   m_irTrans->hhbcTrans().end();
   FTRACE(1, "{}{:-^40}{}\n",
          color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN),

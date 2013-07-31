@@ -964,7 +964,36 @@ ImmVector getImmVector(const Op* opcode) {
     }
   }
 
-  NOT_REACHED();
+  not_reached();
+}
+
+MInstrLocation getMLocation(const Op* opcode) {
+  auto immVec = getImmVector(opcode);
+  auto vec = immVec.vec();
+  auto const lcode = LocationCode(*vec++);
+  auto const imm = numLocationCodeImms(lcode) ? decodeVariableSizeImm(&vec)
+                                              : 0;
+  return {lcode, imm};
+}
+
+std::vector<MVectorItem> getMVector(const Op* opcode) {
+  auto immVec = getImmVector(opcode);
+  std::vector<MVectorItem> result;
+  auto it = immVec.vec();
+  auto end = it + immVec.size();
+
+  // Skip the LocationCode and its immediate
+  auto const lcode = LocationCode(*it++);
+  if (numLocationCodeImms(lcode)) decodeVariableSizeImm(&it);
+
+  while (it < end) {
+    auto const mcode = MemberCode(*it++);
+    auto const imm = memberCodeHasImm(mcode) ? decodeMemberCodeImm(&it, mcode)
+                                             : 0;
+    result.push_back({mcode, imm});
+  }
+
+  return result;
 }
 
 const uint8_t* ImmVector::findLastMember() const {

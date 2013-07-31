@@ -894,6 +894,7 @@ SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst,
   if (m_inlineSavedStates.size() && !m_needsFPAnchor) {
     if (inst->isNative() || inst->mayRaiseError()) {
       m_needsFPAnchor = true;
+      always_assert(m_fpValue != nullptr);
       gen(InlineFPAnchor, m_fpValue);
       FTRACE(2, "Anchor for: {}\n", inst->toString());
     }
@@ -985,7 +986,8 @@ void TraceBuilder::reoptimize() {
   FTRACE(5, "ReOptimize:vvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "ReOptimize:^^^^^^^^^^^^^^^^^^^^\n"); };
   assert(m_curTrace == m_mainTrace.get());
-  assert(m_savedTraces.size() == 0);
+  assert(m_savedTraces.empty());
+  assert(m_inlineSavedStates.empty());
 
   m_enableCse = RuntimeOption::EvalHHIRCse;
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;

@@ -272,11 +272,13 @@ bool checkTmpsSpanningCalls(IRTrace* trace, const IRFactory& irFactory) {
           if (src->isA(Type::FramePtr)) continue;
           if (src->isConst()) continue;
           if (!state[src]) {
-            FTRACE(1, "checkTmpsSpanningCalls failed\n"
-                      "  instruction: {}\n"
-                      "  src:         {}\n",
-                      inst.toString(),
-                      src->toString());
+            auto msg = folly::format("checkTmpsSpanningCalls failed\n"
+                                     "  instruction: {}\n"
+                                     "  src:         {}\n",
+                                     inst.toString(),
+                                     src->toString()).str();
+            std::cerr << msg;
+            FTRACE(1, "{}", msg);
             isValid = false;
           }
         }

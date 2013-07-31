@@ -364,6 +364,10 @@ bool HhbcTranslator::isInlining() const {
   return m_bcStateStack.size() > 1;
 }
 
+int HhbcTranslator::inliningDepth() const {
+  return m_bcStateStack.size() - 1;
+}
+
 BCMarker HhbcTranslator::makeMarker(Offset bcOff) {
   int32_t stackOff = m_tb->spOffset() +
     m_evalStack.numCells() - m_stackDeficit;
@@ -4025,14 +4029,22 @@ void HhbcTranslator::emitInterpOne(Type outType, int popped) {
 }
 
 void HhbcTranslator::emitInterpOne(Type outType, int popped, int pushed) {
+  auto unit = curFunc()->unit();
   auto sp = spillStack();
-  Unit *u = curFunc()->unit();
+  auto op = unit->getOpcode(bcOff());
+
+  auto& iInfo = getInstrInfo(op);
+  if (iInfo.type == Transl::InstrFlags::OutFDesc) {
+    m_fpiStack.emplace(sp, m_tb->spOffset());
+  } else if (isFCallStar(op) && !m_fpiStack.empty()) {
+    m_fpiStack.pop();
+  }
 
   InterpOneData idata;
   idata.bcOff = bcOff();
   idata.cellsPopped = popped;
   idata.cellsPushed = pushed;
-  idata.opcode = u->getOpcode(bcOff());
+  idata.opcode = op;
 
   auto const changesPC = opcodeChangesPC(idata.opcode);
   gen(changesPC ? InterpOneCF : InterpOne, outType, idata, m_tb->fp(), sp);
@@ -4077,7 +4089,8 @@ std::string HhbcTranslator::showStack() const {
       msg << "ActRec from ";
       curUnit()->prettyPrint(msg, Unit::PrintOpts().range(fpushOff, after)
                                                    .noLineNumbers()
-                                                   .indent(0));
+                                                   .indent(0)
+                                                   .noFuncs());
       auto msgStr = msg.str();
       assert(msgStr.back() == '\n');
       msgStr.erase(msgStr.size() - 1);

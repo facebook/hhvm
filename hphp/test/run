@@ -594,11 +594,18 @@ function run_test($options, $test) {
 }
 
 function num_cpus() {
-  $data = file('/proc/stat');
-  $cores = 0;
-  foreach($data as $line) {
-    if (preg_match('/^cpu[0-9]/', $line)) {
-      $cores++;
+  $os = php_uname('s');
+  if ($os == 'FreeBSD') {
+    $data = exec('sysctl kern.smp.cpus');
+    $array = explode(": ", $data);
+    $cores = $array[1];
+  } elseif ($os == 'Linux') {
+    $data = file('/proc/stat');
+    $cores = 0;
+    foreach($data as $line) {
+      if (preg_match('/^cpu[0-9]/', $line)) {
+        $cores++;
+      }
     }
   }
   return $cores;

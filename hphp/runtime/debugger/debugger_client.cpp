@@ -1674,7 +1674,6 @@ do {                                         \
 
     // these single lettter commands allow "x{cmd}" and "x {cmd}"
     case 'x': shiftCommand(); NEW_CMD_NAME("extended", CmdExtended);
-    case 'y': shiftCommand(); NEW_CMD_NAME("user", CmdUser);
     case '!': shiftCommand(); NEW_CMD_NAME("shell", CmdShell);
     case '&': shiftCommand(); NEW_CMD_NAME("macro", CmdMacro);
   }

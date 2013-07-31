@@ -133,7 +133,6 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     case KindOfUp       :  cmd = DebuggerCommandPtr(new CmdUp       ()); break;
     case KindOfVariable :  cmd = DebuggerCommandPtr(new CmdVariable ()); break;
     case KindOfWhere    :  cmd = DebuggerCommandPtr(new CmdWhere    ()); break;
-    case KindOfUser     :  cmd = DebuggerCommandPtr(new CmdUser     ()); break;
     case KindOfEval     :  cmd = DebuggerCommandPtr(new CmdEval     ()); break;
     case KindOfInterrupt:  cmd = DebuggerCommandPtr(new CmdInterrupt()); break;
     case KindOfSignal   :  cmd = DebuggerCommandPtr(new CmdSignal   ()); break;

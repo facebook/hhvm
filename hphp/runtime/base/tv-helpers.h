@@ -38,6 +38,14 @@ bool cellIsPlausible(Cell);
 bool refIsPlausible(Ref);
 
 /*
+ * In a debug build, write garbage into a memory slot for a TypedValue
+ * that should not be used anymore.
+ */
+inline void tvDebugTrash(TypedValue* tv) {
+  if (debug) memset(tv, kTVTrashFill, sizeof *tv);
+}
+
+/*
  * Returns: true if the supplied TypedValue is KindOfDouble or
  * KindOfInt64.  I.e. if it is a TypedNum.
  */

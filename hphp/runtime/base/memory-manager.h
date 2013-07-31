@@ -46,8 +46,10 @@ struct SweepNode {
 };
 
 // jemalloc uses 0x5a but we use 0x6a so we can tell the difference
-// when debugging.
+// when debugging.  There's also 0x7a for some cases of ex-TypedValue
+// memory.
 const char kSmartFreeFill = 0x6a;
+const char kTVTrashFill = 0x7a;
 const uintptr_t kSmartFreeWord = 0x6a6a6a6a6a6a6a6aLL;
 const uintptr_t kMallocFreeWord = 0x5a5a5a5a5a5a5a5aLL;
 

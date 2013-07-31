@@ -6743,9 +6743,9 @@ OPTBLD_INLINE void VMExecutionContext::iopContSuspendK(PC& pc) {
   c_Continuation* cont = frame_continuation(m_fp);
 
   TypedValue* val = m_stack.topTV();
-  m_stack.popTV();
-  cont->c_Continuation::t_update_key(label, tvAsCVarRef(m_stack.topTV()),
+  cont->c_Continuation::t_update_key(label, tvAsCVarRef(m_stack.indTV(1)),
                                      tvAsCVarRef(val));
+  m_stack.popTV();
   m_stack.popTV();
 
   EventHook::FunctionExit(m_fp);

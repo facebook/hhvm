@@ -1,6 +1,18 @@
 {
     "preamble": "",
     "consts": [
+        {
+            "name": "PHP_SESSION_DISABLED",
+            "type": "Int64"
+        },
+        {
+            "name": "PHP_SESSION_NONE",
+            "type": "Int64"
+        },
+        {
+            "name": "PHP_SESSION_ACTIVE",
+            "type": "Int64"
+        }
     ],
     "funcs": [
         {
@@ -248,6 +260,19 @@
             "return": {
                 "type": "Boolean",
                 "desc": "This function returns TRUE if a session was successfully started, otherwise FALSE."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "session_status",
+            "desc": "Returns the current session status",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "PHP_SESSION_DISABLED if sessions are disabled, PHP_SESSION_NONE if sessions are enabled, but none exists, or PHP_SESSION_ACTIVE if sessions are enabled, and one exists"
             },
             "args": [
             ]

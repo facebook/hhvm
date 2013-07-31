@@ -327,7 +327,15 @@ Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
 Unit* compile_string(const char* s, size_t sz, const char* fname) {
   MD5 md5;
   int out_len;
-  md5 = MD5(string_md5(s, sz, false, out_len));
+   /*
+      author:huzhiguang
+   	date:2013/7/31
+   	function:string_md5 function don't free and have memery leak
+   */
+  //md5 = MD5(string_md5(s, sz, false, out_len));
+   char * string_md5_char=string_md5(s, sz, false, out_len);
+   md5 = MD5(string_md5_char);
+   free(string_md5_char);
 
   Unit* u = Repo::get().loadUnit(fname ? fname : "", md5);
   if (u != nullptr) {

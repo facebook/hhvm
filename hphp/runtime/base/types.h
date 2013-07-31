@@ -51,7 +51,8 @@ class StaticString;
 class Array;
 class Object;
 template<typename T> class SmartObject;
-#define SmartResource SmartObject
+class Resource;
+template<typename T> class SmartResource;
 class Variant;
 class VarNR;
 class RefData;
@@ -74,7 +75,7 @@ extern const Array empty_array;
 
 /*
  * All Refcounted types have their m_count field at the same offset
- * in the object.  This offset is chosen to allow a RefData's count
+ * in the object. This offset is chosen to allow a RefData's count
  * field to pack after a TypedValue.
  *
  * Other refcounted types (ArrayData, StringData, and ObjectData)
@@ -152,7 +153,7 @@ typedef const char * litstr; /* literal string */
 typedef const String & CStrRef;
 typedef const Array & CArrRef;
 typedef const Object & CObjRef;
-typedef const Object & CResRef;
+typedef const Resource & CResRef;
 typedef const Variant & CVarRef;
 
 typedef const class VRefParamValue    &VRefParam;

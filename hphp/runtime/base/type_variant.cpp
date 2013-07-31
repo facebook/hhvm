@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/zend_string.h"
 #include "hphp/runtime/base/array_iterator.h"
+#include "hphp/runtime/base/dummy_resource.h"
 #include "hphp/util/parser/hphp.tab.hpp"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/system/systemlib.h"
@@ -52,18 +53,18 @@ static void unserializeProp(VariableUnserializer *uns,
 ///////////////////////////////////////////////////////////////////////////////
 // static strings
 
-static StaticString s_offsetGet("offsetGet");
-static StaticString s_offsetSet("offsetSet");
-static StaticString s_offsetUnset("offsetUnset");
-static StaticString s_s("s");
-static StaticString s_scalar("scalar");
-static StaticString s_array("Array");
-static StaticString s_1("1");
-static StaticString s_unserialize("unserialize");
-static StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
-static StaticString s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name");
-static StaticString s_PHP_Unserializable_Class_Name(
-  "__PHP_Unserializable_Class_Name");
+const StaticString
+  s_offsetGet("offsetGet"),
+  s_offsetSet("offsetSet"),
+  s_offsetUnset("offsetUnset"),
+  s_s("s"),
+  s_scalar("scalar"),
+  s_array("Array"),
+  s_1("1"),
+  s_unserialize("unserialize"),
+  s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
+  s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name"),
+  s_PHP_Unserializable_Class_Name("__PHP_Unserializable_Class_Name");
 
 ///////////////////////////////////////////////////////////////////////////////
 // local helpers
@@ -133,6 +134,18 @@ Variant::Variant(CObjRef v) {
 }
 
 HOT_FUNC
+Variant::Variant(CResRef v) {
+  m_type = KindOfResource;
+  ResourceData* o = v.get();
+  if (o) {
+    m_data.pres = o;
+    o->incRefCount();
+  } else {
+    m_type = KindOfNull;
+  }
+}
+
+HOT_FUNC
 Variant::Variant(StringData *v) {
   if (v) {
     m_data.pstr = v;
@@ -177,6 +190,16 @@ Variant::Variant(ObjectData *v) {
   }
 }
 
+Variant::Variant(ResourceData *v) {
+  m_type = KindOfResource;
+  if (v) {
+    m_data.pres = v;
+    v->incRefCount();
+  } else {
+    m_type = KindOfNull;
+  }
+}
+
 Variant::Variant(RefData *r) {
   m_type = KindOfRef;
   if (r) {
@@ -207,21 +230,25 @@ Variant::Variant(CVarWithRefBind v) {
  * This is safe because we have compile time assertions that guarantee that
  * the _count field will always be exactly FAST_REFCOUNT_OFFSET bytes from
  * the beginning of the object for the StringData, ArrayData, ObjectData,
- * and RefData classes.
+ * ResourceData, and RefData classes.
  */
 
-static_assert(TYPE_TO_DESTR_IDX(KindOfString) == 0, "String destruct index");
-static_assert(TYPE_TO_DESTR_IDX(KindOfArray)  == 1,  "Array destruct index");
-static_assert(TYPE_TO_DESTR_IDX(KindOfObject) == 2, "Object destruct index");
-static_assert(TYPE_TO_DESTR_IDX(KindOfRef)    == 3,    "Ref destruct index");
+static_assert(TYPE_TO_DESTR_IDX(KindOfString) == 1, "String destruct index");
+static_assert(TYPE_TO_DESTR_IDX(KindOfArray)  == 2,  "Array destruct index");
+static_assert(TYPE_TO_DESTR_IDX(KindOfObject) == 3, "Object destruct index");
+static_assert(TYPE_TO_DESTR_IDX(KindOfResource) == 4,
+              "Resource destruct index");
+static_assert(TYPE_TO_DESTR_IDX(KindOfRef)    == 5,    "Ref destruct index");
 
-static_assert(kDestrTableSize == 4,
+static_assert(kDestrTableSize == 6,
               "size of g_destructors[] must be kDestrTableSize");
 
 const RawDestructor g_destructors[] = {
+  nullptr,
   (RawDestructor)Util::getMethodPtr(&StringData::release),
   (RawDestructor)Util::getMethodPtr(&ArrayData::release),
   (RawDestructor)Util::getMethodPtr(&ObjectData::release),
+  (RawDestructor)Util::getMethodPtr(&ResourceData::release),
   (RawDestructor)Util::getMethodPtr(&RefData::release),
 };
 
@@ -229,7 +256,9 @@ inline ALWAYS_INLINE void Variant::destructDataImpl(RefData* data, DataType t) {
   assert(IS_REFCOUNTED_TYPE(t));
   assert(IS_REAL_TYPE(t));
   if (data->decRefCount() == 0) {
-    assert(t >= KindOfString && t <= KindOfRef);
+    assert(t == KindOfString || t == KindOfArray ||
+           t == KindOfObject || t == KindOfResource ||
+           t == KindOfRef);
     g_destructors[typeToDestrIndex(t)](data);
   }
 }
@@ -240,7 +269,9 @@ inline ALWAYS_INLINE void Variant::destructImpl() {
 
 HOT_FUNC_VM
 void tvDecRefHelper(DataType type, uint64_t datum) {
-  assert(type >= KindOfString && type <= KindOfRef);
+  assert(type == KindOfString || type == KindOfArray ||
+         type == KindOfObject || type == KindOfResource ||
+         type == KindOfRef);
   if (((RefData*)datum)->decRefCount() == 0) {
     g_destructors[typeToDestrIndex(type)]((void*)datum);
   }
@@ -334,6 +365,7 @@ HOT_FUNC IMPLEMENT_PTR_SET(StringData, pstr,
                            v->isStatic() ? KindOfStaticString : KindOfString);
 HOT_FUNC IMPLEMENT_PTR_SET(ArrayData, parr, KindOfArray)
 HOT_FUNC IMPLEMENT_PTR_SET(ObjectData, pobj, KindOfObject)
+HOT_FUNC IMPLEMENT_PTR_SET(ResourceData, pres, KindOfResource)
 
 #undef IMPLEMENT_PTR_SET
 
@@ -347,27 +379,12 @@ void Variant::init(ObjectData *v) {
   }
 }
 
-void Variant::split() {
-  switch (m_type) {
-  case KindOfRef: m_data.pref->var()->split();     break;
-  // copy-on-write
-  case KindOfStaticString:
-  case KindOfString:
-  {
-    set(NEW(StringData)(m_data.pstr, CopyString));
-    break;
-  }
-  case KindOfArray:   set(m_data.parr->copy()); break;
-  default:
-    break;
-  }
-}
-
 int Variant::getRefCount() const {
   switch (m_type) {
   case KindOfString:  return m_data.pstr->getCount();
   case KindOfArray:   return m_data.parr->getCount();
   case KindOfObject:  return m_data.pobj->getCount();
+  case KindOfResource: return m_data.pres->getCount();
   case KindOfRef: return m_data.pref->var()->getRefCount();
   default:
     break;
@@ -427,6 +444,7 @@ bool Variant::isScalar() const {
   case KindOfNull:
   case KindOfArray:
   case KindOfObject:
+  case KindOfResource:
     return false;
   default:
     break;
@@ -436,10 +454,7 @@ bool Variant::isScalar() const {
 
 bool Variant::isResource() const {
   auto const cell = asCell();
-  if (cell->m_type == KindOfObject) {
-    return cell->m_data.pobj->isResource();
-  }
-  return false;
+  return (cell->m_type == KindOfResource);
 }
 
 HOT_FUNC
@@ -566,6 +581,7 @@ bool Variant::toBooleanHelper() const {
   case KindOfString:  return m_data.pstr->toBoolean();
   case KindOfArray:   return !m_data.parr->empty();
   case KindOfObject:  return m_data.pobj->o_toBoolean();
+  case KindOfResource: return m_data.pres->o_toBoolean();
   case KindOfRef: return m_data.pref->var()->toBoolean();
   default:
     assert(false);
@@ -584,6 +600,7 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
   case KindOfString:  return m_data.pstr->toInt64(base);
   case KindOfArray:   return m_data.parr->empty() ? 0 : 1;
   case KindOfObject:  return m_data.pobj->o_toInt64();
+  case KindOfResource: return m_data.pres->o_toInt64();
   case KindOfRef: return m_data.pref->var()->toInt64(base);
   default:
     assert(false);
@@ -600,6 +617,7 @@ double Variant::toDoubleHelper() const {
   case KindOfStaticString:
   case KindOfString:  return m_data.pstr->toDouble();
   case KindOfObject:  return m_data.pobj->o_toDouble();
+  case KindOfResource: return m_data.pres->o_toDouble();
   case KindOfRef: return m_data.pref->var()->toDouble();
   default:
     break;
@@ -619,6 +637,7 @@ String Variant::toStringHelper() const {
     return m_data.pstr;
   case KindOfArray:   return s_array;
   case KindOfObject:  return m_data.pobj->t___tostring();
+  case KindOfResource: return m_data.pres->o_toString();
   case KindOfRef: return m_data.pref->var()->toString();
   default:
     break;
@@ -635,6 +654,7 @@ Array Variant::toArrayHelper() const {
   case KindOfString:  return Array::Create(m_data.pstr);
   case KindOfArray:   return m_data.parr;
   case KindOfObject:  return m_data.pobj->o_toArray();
+  case KindOfResource: return m_data.pres->o_toArray();
   case KindOfRef: return m_data.pref->var()->toArray();
   default:
     break;
@@ -654,6 +674,7 @@ Object Variant::toObjectHelper() const {
   case KindOfDouble:
   case KindOfStaticString:
   case KindOfString:
+  case KindOfResource:
     {
       ObjectData *obj = SystemLib::AllocStdClassObject();
       obj->o_set(s_scalar, *this, false);
@@ -666,6 +687,28 @@ Object Variant::toObjectHelper() const {
     break;
   }
   return Object(SystemLib::AllocStdClassObject());
+}
+
+Resource Variant::toResourceHelper() const {
+  if (m_type == KindOfRef) return m_data.pref->var()->toResource();
+
+  switch (m_type) {
+  case KindOfUninit:
+  case KindOfNull:
+  case KindOfBoolean:
+  case KindOfInt64:
+  case KindOfDouble:
+  case KindOfStaticString:
+  case KindOfString:
+  case KindOfArray:
+  case KindOfObject:
+    break;
+  case KindOfResource:  return m_data.pres;
+  default:
+    assert(false);
+    break;
+  }
+  return Resource(NEWOBJ(DummyResource));
 }
 
 HOT_FUNC
@@ -688,10 +731,9 @@ VarNR Variant::toKey() const {
   case KindOfDouble:
     return VarNR(ToKey(m_data.dbl));
   case KindOfObject:
-    if (isResource()) {
-      return VarNR(toInt64());
-    }
     break;
+  case KindOfResource:
+    return VarNR(toInt64());
   case KindOfRef:
     return m_data.pref->var()->toKey();
   default:
@@ -857,11 +899,10 @@ Variant Variant::rvalAt(CVarRef offset, ACCESSPARAMS_IMPL) const {
       throw_bad_type_exception("Invalid type used as key");
       break;
     case KindOfObject:
-      if (offset.isResource()) {
-        return m_data.parr->get(offset.toInt64(), flags & AccessFlags::Error);
-      }
       throw_bad_type_exception("Invalid type used as key");
       break;
+    case KindOfResource:
+      return m_data.parr->get(offset.toInt64(), flags & AccessFlags::Error);
     case KindOfRef:
       return rvalAt(*(offset.m_data.pref->var()), flags);
     default:
@@ -973,11 +1014,10 @@ CVarRef Variant::rvalRef(CVarRef offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
       throw_bad_type_exception("Invalid type used as key");
       break;
     case KindOfObject:
-      if (offset.isResource()) {
-        return m_data.parr->get(offset.toInt64(), flags & AccessFlags::Error);
-      }
       throw_bad_type_exception("Invalid type used as key");
       break;
+    case KindOfResource:
+      return m_data.parr->get(offset.toInt64(), flags & AccessFlags::Error);
     case KindOfRef:
       return rvalRef(*(offset.m_data.pref->var()), tmp, flags);
     default:
@@ -1561,6 +1601,7 @@ void Variant::setEvalScalar() {
     not_reached();
     break;
   case KindOfObject:
+  case KindOfResource:
     not_reached(); // object shouldn't be in a scalar array
     break;
   default:
@@ -1621,6 +1662,9 @@ void Variant::serialize(VariableSerializer *serializer,
   case KindOfObject:
     assert(!isArrayKey);
     m_data.pobj->serialize(serializer);     break;
+  case KindOfResource:
+    assert(!isArrayKey);
+    m_data.pres->serialize(serializer);     break;
   default:
     assert(false);
     break;
@@ -1909,47 +1953,6 @@ void Variant::unserialize(VariableUnserializer *uns,
   if (sep != ';') {
     throw Exception("Expected ';' but got '%c'", sep);
   }
-}
-
-Variant Variant::share(bool save) const {
-  if (m_type == KindOfRef) {
-    return m_data.pref->var()->share(save);
-  }
-
-  switch (m_type) {
-  case KindOfUninit:
-  case KindOfNull:    return false; // same as non-existent
-  case KindOfBoolean: return (m_data.num != 0);
-  case KindOfInt64:   return m_data.num;
-  case KindOfDouble:  return m_data.dbl;
-  case KindOfStaticString:
-  case KindOfString:
-    return String(m_data.pstr->data(), m_data.pstr->size(), CopyString);
-  case KindOfArray:
-    {
-      Array ret;
-      for (ArrayIter iter(m_data.parr); iter; ++iter) {
-        ret.set(iter.first().share(save), iter.second().share(save));
-      }
-      return ret;
-    }
-    break;
-  case KindOfObject:
-    if (save) {
-      // we have to return an object so to remember its type
-      ObjectData *obj = SystemLib::AllocStdClassObject();
-      obj->o_set(s_s, f_serialize(*this));
-      return obj;
-    } else {
-      return unserialize_from_string(m_data.pobj->o_get(s_s));
-    }
-    break;
-  default:
-    assert(false);
-    break;
-  }
-
-  return false; // same as non-existent
 }
 
 SharedVariant *Variant::getSharedVariant() const {

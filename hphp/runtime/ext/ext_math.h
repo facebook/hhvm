@@ -57,8 +57,8 @@ bool f_is_finite(double val);
 bool f_is_infinite(double val);
 bool f_is_nan(double val);
 
-Variant f_ceil(CVarRef value);
-Variant f_floor(CVarRef value);
+Variant f_ceil(CVarRef number);
+Variant f_floor(CVarRef number);
 Variant f_round(CVarRef val, int64_t precision = 0,
                 int64_t mode = PHP_ROUND_HALF_UP);
 

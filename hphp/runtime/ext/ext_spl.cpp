@@ -24,18 +24,18 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-static StaticString s_spl_autoload("spl_autoload");
-static StaticString s_spl_autoload_call("spl_autoload_call");
-static StaticString s_default_extensions(".inc,.php");
+const StaticString
+  s_spl_autoload("spl_autoload"),
+  s_spl_autoload_call("spl_autoload_call"),
+  s_default_extensions(".inc,.php"),
+  s_rewind("rewind"),
+  s_valid("valid"),
+  s_next("next"),
+  s_current("current"),
+  s_key("key"),
+  s_getIterator("getIterator");
 
-static StaticString s_rewind("rewind");
-static StaticString s_valid("valid");
-static StaticString s_next("next");
-static StaticString s_current("current");
-static StaticString s_key("key");
-static StaticString s_getIterator("getIterator");
-
-static const StaticString spl_classes[] = {
+const StaticString spl_classes[] = {
   StaticString("AppendIterator"),
   StaticString("ArrayIterator"),
   StaticString("ArrayObject"),

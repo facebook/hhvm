@@ -74,9 +74,7 @@ public:
   void setReplaced() { m_flags.m_replaced = true; }
   bool valueSet() const { return m_flags.m_value_set; }
   bool isSystem() const { return m_flags.m_system; }
-  bool isSep() const { return m_flags.m_sep; }
   void setSystem() { m_flags.m_system = true; }
-  void setSep() { m_flags.m_sep = true; }
   bool isConstant() const { return m_flags.m_constant; }
   void setConstant() { m_flags.m_constant = true; }
 
@@ -200,7 +198,6 @@ private:
 
       /* common */
       unsigned m_system : 1;
-      unsigned m_sep : 1;
 
       /* ConstantTable */
       unsigned m_dynamic : 1;
@@ -346,10 +343,6 @@ public:
   bool isExplicitlyDeclared(const std::string &name) const;
   ConstructPtr getDeclaration(const std::string &name) const;
   ConstructPtr getValue(const std::string &name) const;
-
-  /* Whether this constant is brought in by a separable extension */
-  void setSepExtension(const std::string &name);
-  bool isSepExtension(const std::string &name) const;
 
   /**
    * How big of a hash table for generate C++ switch statements.

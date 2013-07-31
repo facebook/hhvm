@@ -108,6 +108,16 @@ StringCase:
     {
       break;
     }
+  case KindOfResource:
+    {
+      // TODO Task #2661075: Here and elsewhere in the runtime, we convert
+      // Resources to the empty array during various serialization operations,
+      // which does not match Zend behavior. We should fix this.
+      m_type = KindOfArray;
+      setIsVector();
+      m_data.vec = new (0) VectorData();
+      break;
+    }
   default:
     {
       assert(source.isObject());
@@ -124,6 +134,7 @@ StringCase:
       break;
     }
   }
+  assert(m_type != KindOfResource);
 }
 
 HOT_FUNC

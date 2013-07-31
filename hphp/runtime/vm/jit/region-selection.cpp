@@ -192,32 +192,64 @@ RegionDescPtr selectTraceletLegacy(const Transl::Tracelet& tlet) {
 
   auto region = smart::make_unique<RegionDesc>();
   SrcKey sk(tlet.m_sk);
-  assert(sk == tlet.m_instrStream.first->source);
-  auto unit = tlet.m_instrStream.first->unit();
+  auto unit = tlet.func()->unit();
 
   const Func* topFunc = nullptr;
-  Block* curBlock;
-  auto newBlock = [&] {
+  Block* curBlock = nullptr;
+  auto newBlock = [&](const Func* func, SrcKey start) {
+    assert(curBlock == nullptr || curBlock->length() > 0);
     region->blocks.push_back(
-      std::make_shared<Block>(tlet.func(), sk.offset(), 0));
+      std::make_shared<Block>(func, start.offset(), 0));
     curBlock = region->blocks.back().get();
   };
-  newBlock();
+  newBlock(tlet.func(), sk);
 
   for (auto ni = tlet.m_instrStream.first; ni; ni = ni->next) {
     assert(sk == ni->source);
     assert(ni->unit() == unit);
 
     curBlock->addInstruction();
-
-    if (curBlock->length() == 1 || ni->funcd != topFunc) {
+    if ((curBlock->length() == 1 && ni->funcd != nullptr) ||
+        ni->funcd != topFunc) {
       topFunc = ni->funcd;
       curBlock->setKnownFunc(sk, topFunc);
     }
+
+    if (ni->calleeTrace && !ni->calleeTrace->m_inliningFailed) {
+      assert(ni->op() == OpFCall);
+      assert(ni->funcd == ni->calleeTrace->func());
+      // This should be translated as an inlined call. Insert the blocks of the
+      // callee in the region.
+      auto const& callee = *ni->calleeTrace;
+      curBlock->setInlinedCallee(ni->funcd);
+      SrcKey cSk = callee.m_sk;
+      Unit* cUnit = callee.func()->unit();
+
+      newBlock(callee.func(), cSk);
+
+      for (auto cni = callee.m_instrStream.first; cni; cni = cni->next) {
+        assert(cSk == cni->source);
+        assert(cni->op() == OpRetC ||
+               cni->op() == OpContRetC ||
+               cni->op() == OpNativeImpl ||
+               !instrIsControlFlow(cni->op()));
+
+        curBlock->addInstruction();
+        cSk.advance(cUnit);
+      }
+
+      if (ni->next) {
+        sk.advance(unit);
+        newBlock(tlet.func(), sk);
+      }
+      continue;
+    }
+
     if (!ni->noOp && isFPassStar(ni->op())) {
       curBlock->setParamByRef(sk, ni->preppedByRef);
     }
-    if (ni->op() == OpJmp && ni->next) {
+
+    if (ni->next && ni->op() == OpJmp) {
       // A Jmp that isn't the final instruction in a Tracelet means we traced
       // through a forward jump in analyze. Update sk to point to the next NI
       // in the stream.
@@ -226,7 +258,7 @@ RegionDescPtr selectTraceletLegacy(const Transl::Tracelet& tlet) {
       sk.setOffset(dest);
 
       // The Jmp terminates this block.
-      newBlock();
+      newBlock(tlet.func(), sk);
     } else {
       sk.advance(unit);
     }
@@ -439,7 +471,7 @@ std::string show(const RegionDesc::Block& b) {
   auto knownFuncs= makeMapWalker(b.knownFuncs());
   auto skIter    = b.start();
 
-  const Func* currentFunc = nullptr;
+  const Func* topFunc = nullptr;
 
   for (int i = 0; i < b.length(); ++i) {
     while (typePreds.hasNext(skIter)) {
@@ -452,11 +484,19 @@ std::string show(const RegionDesc::Block& b) {
 
     std::string knownFunc;
     if (knownFuncs.hasNext(skIter)) {
-      currentFunc = knownFuncs.next();
+      topFunc = knownFuncs.next();
     }
-    if (currentFunc) {
-      knownFunc = folly::format(" (top func: {})",
-                                currentFunc->fullName()->data()).str();
+    if (topFunc) {
+      const char* inlined = "";
+      if (i == b.length() - 1 && b.inlinedCallee()) {
+        assert(topFunc == b.inlinedCallee());
+        inlined = " (call is inlined)";
+      }
+      knownFunc = folly::format(" (top func: {}{})",
+                                topFunc->fullName()->data(), inlined).str();
+    } else {
+      assert((i < b.length() - 1 || !b.inlinedCallee()) &&
+             "inlined FCall without a known funcd");
     }
 
     std::string byRef;
@@ -465,13 +505,18 @@ std::string show(const RegionDesc::Block& b) {
                                                              : "value").str();
     }
 
+    std::string instrString;
+    folly::toAppend(instrToString((Op*)b.unit()->at(skIter.offset()), b.unit()),
+                    byRef,
+                    &instrString);
+
     folly::toAppend(
       "    ",
       skIter.offset(),
       "  ",
-      instrToString((Op*)b.unit()->at(skIter.offset()), b.unit()),
+      knownFunc.empty() ? instrString
+                        : folly::format("{:<40}", instrString).str(),
       knownFunc,
-      byRef,
       "\n",
       &ret
     );

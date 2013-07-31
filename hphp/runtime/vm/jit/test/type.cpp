@@ -179,10 +179,12 @@ TEST(Type, CanRunDtor) {
   expectTrue(Type::Arr);
   expectTrue(Type::CountedArr);
   expectTrue(Type::Obj);
+  expectTrue(Type::Res);
   expectTrue(Type::Counted);
   expectTrue(Type::BoxedArr);
   expectTrue(Type::BoxedCountedArr);
   expectTrue(Type::BoxedObj);
+  expectTrue(Type::BoxedRes);
   expectTrue(Type::BoxedCell);
   expectTrue(Type::Cell);
   expectTrue(Type::Gen);

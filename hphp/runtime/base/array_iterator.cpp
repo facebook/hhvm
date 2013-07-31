@@ -31,11 +31,12 @@ namespace HPHP {
 
 TRACE_SET_MOD(runtime);
 
-static StaticString s_rewind("rewind");
-static StaticString s_valid("valid");
-static StaticString s_next("next");
-static StaticString s_key("key");
-static StaticString s_current("current");
+const StaticString
+  s_rewind("rewind"),
+  s_valid("valid"),
+  s_next("next"),
+  s_key("key"),
+  s_current("current");
 
 ///////////////////////////////////////////////////////////////////////////////
 // ArrayIter

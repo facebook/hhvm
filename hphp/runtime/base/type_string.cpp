@@ -433,6 +433,10 @@ bool String::same(CObjRef v2) const {
   return HPHP::same(m_px, v2);
 }
 
+bool String::same(CResRef v2) const {
+  return HPHP::same(m_px, v2);
+}
+
 bool String::equal(litstr v2) const {
   return HPHP::equal(m_px, v2);
 }
@@ -450,6 +454,10 @@ bool String::equal(CArrRef v2) const {
 }
 
 bool String::equal(CObjRef v2) const {
+  return HPHP::equal(m_px, v2);
+}
+
+bool String::equal(CResRef v2) const {
   return HPHP::equal(m_px, v2);
 }
 
@@ -473,6 +481,10 @@ bool String::less(CObjRef v2) const {
   return HPHP::less(m_px, v2);
 }
 
+bool String::less(CResRef v2) const {
+  return HPHP::less(m_px, v2);
+}
+
 bool String::more(litstr v2) const {
   return HPHP::more(m_px, v2);
 }
@@ -490,6 +502,10 @@ bool String::more(CArrRef v2) const {
 }
 
 bool String::more(CObjRef v2) const {
+  return HPHP::more(m_px, v2);
+}
+
+bool String::more(CResRef v2) const {
   return HPHP::more(m_px, v2);
 }
 
@@ -638,6 +654,35 @@ String::String(Variant&& src) : StringBase(src.toString()) {
 
 String& String::operator=(Variant&& src) {
   return *this = src.toString();
+}
+
+const StaticString
+  s_NULL("NULL"),
+  s_boolean("boolean"),
+  s_integer("integer"),
+  s_double("double"),
+  s_string("string"),
+  s_array("array"),
+  s_object("object"),
+  s_resource("resource");
+
+String getDataTypeString(DataType t) {
+  switch (t) {
+    case KindOfUninit:
+    case KindOfNull:    return s_NULL;
+    case KindOfBoolean: return s_boolean;
+    case KindOfInt64:   return s_integer;
+    case KindOfDouble:  return s_double;
+    case KindOfStaticString:
+    case KindOfString:  return s_string;
+    case KindOfArray:   return s_array;
+    case KindOfObject:  return s_object;
+    case KindOfResource:return s_object;
+    default:
+      assert(false);
+      break;
+  }
+  return empty_string;
 }
 
 //////////////////////////////////////////////////////////////////////////////

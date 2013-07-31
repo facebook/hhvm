@@ -276,6 +276,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         return T_STRING;
 }
 
+<ST_LOOKING_FOR_PROPERTY>{WHITESPACE} {
+        RETSTEP(T_WHITESPACE);
+}
+
 <ST_LOOKING_FOR_PROPERTY>{ANY_CHAR} {
         yyless(0);
         yy_pop_state(yyscanner);

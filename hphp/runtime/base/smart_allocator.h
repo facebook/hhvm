@@ -56,8 +56,10 @@ namespace HPHP {
 
 template<class T>
 inline void smart_allocator_check_type() {
-  static_assert((boost::is_base_of<ObjectData,T>::value),
-                "Non-ObjectData allocated in smart heap");
+  static_assert(
+    (boost::is_base_of<ObjectData,T>::value) ||
+    (boost::is_base_of<ResourceData,T>::value),
+    "Cannot allocate types other than ObjectData and ResourceData");
 }
 
 #ifdef DEBUGGING_SMART_ALLOCATOR

@@ -104,8 +104,8 @@ static DataType zend_convert_scalar_to_number(CVarRef num,
     return dt;
   }
 
-  if (num.isBoolean() || num.isNull() ||
-      num.isObject() || num.isString()) {
+  if (num.isBoolean() || num.isNull() || num.isObject() || num.isResource() ||
+      num.isString()) {
     ival = num.toInt64();
     return KindOfInt64;
   }

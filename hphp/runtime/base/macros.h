@@ -141,7 +141,15 @@ namespace HPHP {
 #define CT_ASSERT_DESCENDENT_OF_OBJECTDATA(T)   \
   do {                                          \
     if (false) {                                \
-      ObjectData * dummy = nullptr;                \
+      ObjectData* dummy = nullptr;              \
+      if (static_cast<T*>(dummy)) {}            \
+    }                                           \
+  } while(0)                                    \
+
+#define CT_ASSERT_DESCENDENT_OF_RESOURCEDATA(T) \
+  do {                                          \
+    if (false) {                                \
+      ResourceData* dummy = nullptr;            \
       if (static_cast<T*>(dummy)) {}            \
     }                                           \
   } while(0)                                    \

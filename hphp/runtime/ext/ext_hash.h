@@ -33,7 +33,7 @@ String f_hash_final(CResRef context, bool raw_output = false);
 Variant f_hash_hmac_file(CStrRef algo, CStrRef filename, CStrRef key, bool raw_output = false);
 Variant f_hash_hmac(CStrRef algo, CStrRef data, CStrRef key, bool raw_output = false);
 bool f_hash_update_file(CResRef init_context, CStrRef filename, CObjRef stream_context = Object());
-int64_t f_hash_update_stream(CResRef context, CObjRef handle, int length = -1);
+int64_t f_hash_update_stream(CResRef context, CResRef handle, int length = -1);
 bool f_hash_update(CResRef context, CStrRef data);
 int64_t f_furchash_hphp_ext(CStrRef key, int len, int nPart);
 bool f_furchash_hphp_ext_supported();

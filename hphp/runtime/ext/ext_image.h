@@ -43,7 +43,7 @@ public:
   static StaticString s_class_name;
   // overriding ResourceData
   virtual CStrRef o_getClassNameHook() const { return s_class_name; }
-  virtual bool isResource() const { return m_gdImage != NULL;}
+  virtual bool isInvalid() const { return m_gdImage == nullptr; }
 
 private:
   gdImagePtr m_gdImage;
@@ -126,7 +126,7 @@ Array f_imagepsbbox(CStrRef text, int font, int size, int space = 0, int tightne
 bool f_imagepsencodefont(CResRef font_index, CStrRef encodingfile);
 bool f_imagepsextendfont(int font_index, double extend);
 bool f_imagepsfreefont(CResRef fontindex);
-Object f_imagepsloadfont(CStrRef filename);
+Resource f_imagepsloadfont(CStrRef filename);
 bool f_imagepsslantfont(CResRef font_index, double slant);
 Array f_imagepstext(CResRef image, CStrRef text, CResRef font, int size, int foreground, int background, int x, int y, int space = 0, int tightness = 0, double angle = 0.0, int antialias_steps = 0);
 bool f_imagerectangle(CResRef image, int x1, int y1, int x2, int y2, int color);

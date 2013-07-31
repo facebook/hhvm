@@ -208,6 +208,7 @@ void RequestInjectionData::setTimeout(int seconds) {
 }
 
 int RequestInjectionData::getRemainingTime() const {
+#ifndef __APPLE__
   if (m_hasTimer) {
     itimerspec ts;
     if (!timer_gettime(m_timer_id, &ts)) {
@@ -215,6 +216,7 @@ int RequestInjectionData::getRemainingTime() const {
       return remaining > 1 ? remaining : 1;
     }
   }
+#endif
   return m_timeoutSeconds;
 }
 

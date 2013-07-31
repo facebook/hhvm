@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/member_operations.h"
 
-namespace HPHP {  namespace JIT {
+namespace HPHP {  namespace JIT { namespace {
 
 #define CTX() cns(contextClass())
 
@@ -100,34 +100,29 @@ inline unsigned buildBitmask(T c, Args... args) {
   }                                                                     \
   unsigned idx = buildBitmask(__VA_ARGS__);                             \
   OpFunc opFunc = optab[idx];                                           \
-  assert(opFunc);
+  always_assert(opFunc);
 
-// The getKeyType family of functions determine the KeyType to be used as a
-// template argument to helper functions. S, IS, or I at the end of the
-// function names signals that the caller supports non-literal strings, int, or
-// both, respectively.
-static KeyType getKeyType(const SSATmp* key, bool nonLitStr,
-                          bool nonLitInt) {
+// getKeyType determines the KeyType to be used as a template argument
+// to helper functions.
+inline KeyType getKeyType(const SSATmp* key) {
   auto DEBUG_ONLY keyType = key->type();
   assert(keyType.notBoxed());
   assert(keyType.isKnownDataType() || keyType.equals(Type::Cell));
 
-  if ((key->isConst() || nonLitStr) && key->isString()) {
+  if (key->isString()) {
     return KeyType::Str;
-  } else if ((key->isConst() || nonLitInt) && key->isA(Type::Int)) {
+  } else if (key->isA(Type::Int)) {
     return KeyType::Int;
   } else {
     return KeyType::Any;
   }
 }
-inline static KeyType getKeyType(const SSATmp* key) {
-  return getKeyType(key, false, false);
-}
-inline static KeyType getKeyTypeS(const SSATmp* key) {
-  return getKeyType(key, true, false);
-}
-inline static KeyType getKeyTypeIS(const SSATmp* key) {
-  return getKeyType(key, true, true);
+
+// like getKeyType, but for cases where we don't have an Int
+// specialization for the helper.
+inline KeyType getKeyTypeNoInt(const SSATmp* key) {
+  auto kt = getKeyType(key);
+  return kt == KeyType::Int ? KeyType::Any : kt;
 }
 
 // keyPtr is used by helper function implementations to convert a
@@ -145,6 +140,6 @@ static inline TypedValue* keyPtr(TypedValue& key) {
   }
 }
 
-} }
+} } }
 
 #endif

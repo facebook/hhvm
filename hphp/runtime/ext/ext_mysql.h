@@ -101,7 +101,7 @@ public:
   static StaticString s_class_name;
   // overriding ResourceData
   virtual CStrRef o_getClassNameHook() const { return s_class_name; }
-  virtual bool isResource() const { return m_conn != NULL;}
+  virtual bool isInvalid() const { return m_conn == nullptr; }
 
   bool connect(CStrRef host, int port, CStrRef socket, CStrRef username,
                CStrRef password, CStrRef database, int client_flags,

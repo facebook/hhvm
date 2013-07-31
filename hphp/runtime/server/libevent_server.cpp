@@ -19,8 +19,9 @@
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/memory_manager.h"
 #include "hphp/runtime/base/crash_reporter.h"
-#include "hphp/runtime/server/server_stats.h"
+#include "hphp/runtime/base/url.h"
 #include "hphp/runtime/server/http_protocol.h"
+#include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/logger.h"
@@ -174,7 +175,8 @@ LibEventServer::LibEventServer(const std::string &address, int port,
                  RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
                  RuntimeOption::ServerThreadDropStack,
                  this, RuntimeOption::ServerThreadJobLIFOSwitchThreshold,
-                 RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds),
+                 RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds,
+                 kNumPriorities),
     m_dispatcherThread(this, &LibEventServer::dispatch) {
   m_eventBase = event_base_new();
   m_server = evhttp_new(m_eventBase);
@@ -405,7 +407,8 @@ void LibEventServer::onRequest(struct evhttp_request *request) {
                                   RuntimeOption::ConnectionTimeoutSeconds);
   }
   if (getStatus() == RunStatus::RUNNING) {
-    m_dispatcher.enqueue(LibEventJobPtr(new LibEventJob(request)));
+    RequestPriority priority = getRequestPriority(request);
+    m_dispatcher.enqueue(LibEventJobPtr(new LibEventJob(request)), priority);
   } else {
     Logger::Error("throwing away one new request while shutting down");
   }
@@ -453,6 +456,16 @@ void LibEventServer::onChunkedResponse(int worker, evhttp_request *request,
 void LibEventServer::onChunkedResponseEnd(int worker,
                                           evhttp_request *request) {
   m_responseQueue.enqueue(worker, request);
+}
+
+LibEventServer::RequestPriority LibEventServer::getRequestPriority(
+  struct evhttp_request* request) {
+  string command = URL::getCommand(URL::getServerObject(request->uri));
+  if (RuntimeOption::ServerHighPriorityEndPoints.find(command) ==
+      RuntimeOption::ServerHighPriorityEndPoints.end()) {
+    return PRIORITY_NORMAL;
+  }
+  return PRIORITY_HIGH;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

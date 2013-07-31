@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/dummy_resource.h"
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/zend_functions.h"
 
@@ -57,6 +58,10 @@ bool cellIsPlausible(const Cell cell) {
   case KindOfObject:
     assertPtr(cell.m_data.pobj);
     assert(!cell.m_data.pobj->isStatic());
+    break;
+  case KindOfResource:
+    assertPtr(cell.m_data.pres);
+    assert(!cell.m_data.pres->isStatic());
     break;
   case KindOfRef:
     assert(!"KindOfRef found in a Cell");
@@ -104,6 +109,9 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
   case KindOfObject:  b = tv->m_data.pobj->o_toBoolean();
                       tvDecRefObj(tv);
                       break;
+  case KindOfResource: b = tv->m_data.pres->o_toBoolean();
+                       tvDecRefRes(tv);
+                       break;
   default:            assert(false); b = false; break;
   }
   tv->m_data.num = b;
@@ -131,6 +139,11 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
   case KindOfObject:  {
     d = tv->m_data.pobj->o_toDouble();
     tvDecRefObj(tv);
+    break;
+  }
+  case KindOfResource:  {
+    d = tv->m_data.pres->o_toDouble();
+    tvDecRefRes(tv);
     break;
   }
   default:            assert(false); d = 0.0; break;
@@ -172,6 +185,10 @@ void cellCastToInt64InPlace(Cell* cell) {
     i = cell->m_data.pobj->o_toInt64();
     tvDecRefObj(cell);
     break;
+  case KindOfResource:
+    i = cell->m_data.pres->o_toInt64();
+    tvDecRefRes(cell);
+    break;
   default:
     not_reached();
   }
@@ -209,6 +226,8 @@ double tvCastToDouble(TypedValue* tv) {
     return tv->m_data.parr->empty() ? 0.0 : 1.0;
   case KindOfObject:
     return tv->m_data.pobj->o_toDouble();
+  case KindOfResource:
+    return tv->m_data.pres->o_toDouble();
   default:
     not_reached();
   }
@@ -216,7 +235,8 @@ double tvCastToDouble(TypedValue* tv) {
 
 const StaticString
   s_1("1"),
-  s_Array("Array");
+  s_Array("Array"),
+  s_scalar("scalar");
 
 void tvCastToStringInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
@@ -239,6 +259,10 @@ void tvCastToStringInPlace(TypedValue* tv) {
   case KindOfObject:
     // For objects, we fall back on the Variant machinery
     tvAsVariant(tv) = tv->m_data.pobj->t___tostring();
+    return;
+  case KindOfResource:
+    // For resources, we fall back on the Variant machinery
+    tvAsVariant(tv) = tv->m_data.pres->o_toString();
     return;
   default:
     not_reached();
@@ -270,6 +294,7 @@ StringData* tvCastToString(TypedValue* tv) {
   case KindOfString:  s = tv->m_data.pstr; break;
   case KindOfArray:   return s_Array.get();
   case KindOfObject:  return tv->m_data.pobj->t___tostring().detach();
+  case KindOfResource: return tv->m_data.pres->o_toString().detach();
   default:            not_reached();
   }
 
@@ -299,6 +324,11 @@ void tvCastToArrayInPlace(TypedValue* tv) {
     tvAsVariant(tv) = tv->m_data.pobj->o_toArray();
     return;
   }
+  case KindOfResource:  {
+    // For resources, we fall back on the Variant machinery
+    tvAsVariant(tv) = tv->m_data.pres->o_toArray();
+    return;
+  }
   default:            assert(false); a = ArrayData::Create(); break;
   }
   tv->m_data.parr = a;
@@ -318,12 +348,12 @@ void tvCastToObjectInPlace(TypedValue* tv) {
   case KindOfDouble:
   case KindOfStaticString: {
     o = SystemLib::AllocStdClassObject();
-    o->o_set("scalar", tvAsVariant(tv));
+    o->o_set(s_scalar, tvAsVariant(tv));
     break;
   }
   case KindOfString: {
     o = SystemLib::AllocStdClassObject();
-    o->o_set("scalar", tvAsVariant(tv));
+    o->o_set(s_scalar, tvAsVariant(tv));
     tvDecRefStr(tv);
     break;
   }
@@ -332,18 +362,49 @@ void tvCastToObjectInPlace(TypedValue* tv) {
     tvAsVariant(tv) = tv->m_data.parr->toObject();
     return;
   }
-  case KindOfObject:  return;
-  default:            assert(false); o = SystemLib::AllocStdClassObject(); break;
+  case KindOfObject: return;
+  case KindOfResource: return;
+  default: assert(false); o = SystemLib::AllocStdClassObject(); break;
   }
   tv->m_data.pobj = o;
   tv->m_type = KindOfObject;
   tv->m_data.pobj->incRefCount();
 }
 
+void tvCastToResourceInPlace(TypedValue* tv) {
+  assert(tvIsPlausible(*tv));
+  tvUnboxIfNeeded(tv);
+  switch (tv->m_type) {
+  case KindOfUninit:
+  case KindOfNull:
+  case KindOfBoolean:
+  case KindOfInt64:
+  case KindOfDouble:
+  case KindOfStaticString:
+    break;
+  case KindOfString:
+  case KindOfArray:
+  case KindOfObject:
+    tvDecRef(tv);
+    break;
+  case KindOfResource:
+    // no op, return
+    return;
+  default:
+    assert(false);
+    break;
+  }
+  tv->m_type = KindOfResource;
+  tv->m_data.pres = NEWOBJ(DummyResource);
+  tv->m_data.pres->incRefCount();
+  return;
+}
+
 bool tvCoerceParamToBooleanInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
-  if (tv->m_type == KindOfArray || tv->m_type == KindOfObject) {
+  if (tv->m_type == KindOfArray || tv->m_type == KindOfObject ||
+      tv->m_type == KindOfResource) {
     return false;
   }
   tvCastToBooleanInPlace(tv);
@@ -364,6 +425,7 @@ bool tvCanBeCoercedToNumber(TypedValue* tv) {
     break;
   case KindOfArray:
   case KindOfObject:
+  case KindOfResource:
     return false;
   default:
     break;
@@ -398,14 +460,13 @@ bool tvCoerceParamToStringInPlace(TypedValue* tv) {
   case KindOfArray:
     return false;
   case KindOfObject:
-    if (tv->m_data.pobj->isResource()) {
-      return false;
-    }
     try {
       tvAsVariant(tv) = tv->m_data.pobj->t___tostring();
       return true;
     } catch (BadTypeConversionException &e) {
     }
+    return false;
+  case KindOfResource:
     return false;
   default:
     break;
@@ -422,6 +483,9 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv) {
   } else if (tv->m_type == KindOfObject) {
     tvAsVariant(tv) = tv->m_data.pobj->o_toArray();
     return true;
+  } else if (tv->m_type == KindOfResource) {
+    tvAsVariant(tv) = tv->m_data.pres->o_toArray();
+    return true;
   }
   return false;
 }
@@ -430,6 +494,12 @@ bool tvCoerceParamToObjectInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
   return tv->m_type == KindOfObject;
+}
+
+bool tvCoerceParamToResourceInPlace(TypedValue* tv) {
+  assert(tvIsPlausible(*tv));
+  tvUnboxIfNeeded(tv);
+  return tv->m_type == KindOfResource;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

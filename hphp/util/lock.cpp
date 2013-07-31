@@ -16,6 +16,7 @@
 
 #include "hphp/util/lock.h"
 #include "hphp/util/stack_trace.h"
+#include "hphp/util/timer.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,33 +29,17 @@ LockProfiler::LockProfiler(bool profile) : m_profiling(false) {
   if (s_profile && s_pfunc_profile && profile &&
       s_profile_sampling && (rand() % s_profile_sampling) == 0) {
     m_profiling = true;
-#if defined(__APPLE__)
-    gettimeofday(&m_lockTime, nullptr);
-#else
-    clock_gettime(CLOCK_MONOTONIC, &m_lockTime);
-#endif
+    Timer::GetMonotonicTime(m_lockTime);
   }
 }
 
 LockProfiler::~LockProfiler() {
   if (m_profiling) {
-#if defined(__APPLE__)
-    timeval unlockTime;
-    unlockTime.tv_sec = 0;
-    unlockTime.tv_usec = 0;
-    gettimeofday(&unlockTime, nullptr);
-    time_t dsec = unlockTime.tv_sec - m_lockTime.tv_sec;
-    long dnsec = unlockTime.tv_usec - m_lockTime.tv_usec;
-    int64_t dusec = dsec * 1000000 + dnsec;
-#else
     timespec unlockTime;
-    unlockTime.tv_sec = 0;
-    unlockTime.tv_nsec = 0;
-    clock_gettime(CLOCK_MONOTONIC, &unlockTime);
+    Timer::GetMonotonicTime(unlockTime);
     time_t dsec = unlockTime.tv_sec - m_lockTime.tv_sec;
     long dnsec = unlockTime.tv_nsec - m_lockTime.tv_nsec;
     int64_t dusec = dsec * 1000000 + dnsec / 1000;
-#endif
 
     StackTrace st;
     s_pfunc_profile(st.hexEncode(3, 9), dusec);

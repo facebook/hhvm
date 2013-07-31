@@ -96,7 +96,7 @@ class LdapResultEntry : public SweepableResourceData {
 public:
   DECLARE_OBJECT_ALLOCATION(LdapResultEntry)
 
-  LdapResultEntry(LDAPMessage *entry, ObjectData *res)
+  LdapResultEntry(LDAPMessage *entry, ResourceData *res)
     : data(entry), ber(NULL), result(res) {}
   ~LdapResultEntry() { close();}
 

@@ -327,15 +327,15 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, Id id)
   setTaken(inst->taken());
 }
 
-const char* opcodeName(Opcode opcode) { return OpInfo[opcode].name; }
+const char* opcodeName(Opcode opcode) { return OpInfo[uint16_t(opcode)].name; }
 
 bool opcodeHasFlags(Opcode opcode, uint64_t flags) {
-  return OpInfo[opcode].flags & flags;
+  return OpInfo[uint16_t(opcode)].flags & flags;
 }
 
 Opcode getStackModifyingOpcode(Opcode opc) {
   assert(opcodeHasFlags(opc, HasStackVersion));
-  opc = Opcode(opc + 1);
+  opc = Opcode(uint64_t(opc) + 1);
   assert(opcodeHasFlags(opc, ModifiesStack));
   return opc;
 }
@@ -556,6 +556,7 @@ bool IRInstruction::killsSource(int idx) const {
     case ConvCellToInt:
     case ConvCellToObj:
     case ConvObjToStr:
+    case ConvResToStr:
     case ConvCellToStr:
       assert(idx == 0);
       return true;
@@ -630,14 +631,14 @@ const StringData* findClassName(SSATmp* cls) {
 
 bool isQueryOp(Opcode opc) {
   switch (opc) {
-  case OpGt:
-  case OpGte:
-  case OpLt:
-  case OpLte:
-  case OpEq:
-  case OpNeq:
-  case OpSame:
-  case OpNSame:
+  case Gt:
+  case Gte:
+  case Lt:
+  case Lte:
+  case Eq:
+  case Neq:
+  case Same:
+  case NSame:
   case InstanceOfBitmask:
   case NInstanceOfBitmask:
   case IsType:
@@ -650,14 +651,14 @@ bool isQueryOp(Opcode opc) {
 
 bool isCmpOp(Opcode opc) {
   switch (opc) {
-  case OpGt:
-  case OpGte:
-  case OpLt:
-  case OpLte:
-  case OpEq:
-  case OpNeq:
-  case OpSame:
-  case OpNSame:
+  case Gt:
+  case Gte:
+  case Lt:
+  case Lte:
+  case Eq:
+  case Neq:
+  case Same:
+  case NSame:
     return true;
   default:
     return false;
@@ -689,14 +690,14 @@ bool isQueryJmpOp(Opcode opc) {
 Opcode queryToJmpOp(Opcode opc) {
   assert(isQueryOp(opc));
   switch (opc) {
-  case OpGt:               return JmpGt;
-  case OpGte:              return JmpGte;
-  case OpLt:               return JmpLt;
-  case OpLte:              return JmpLte;
-  case OpEq:               return JmpEq;
-  case OpNeq:              return JmpNeq;
-  case OpSame:             return JmpSame;
-  case OpNSame:            return JmpNSame;
+  case Gt:                 return JmpGt;
+  case Gte:                return JmpGte;
+  case Lt:                 return JmpLt;
+  case Lte:                return JmpLte;
+  case Eq:                 return JmpEq;
+  case Neq:                return JmpNeq;
+  case Same:               return JmpSame;
+  case NSame:              return JmpNSame;
   case InstanceOfBitmask:  return JmpInstanceOfBitmask;
   case NInstanceOfBitmask: return JmpNInstanceOfBitmask;
   case IsType:             return JmpIsType;
@@ -708,14 +709,14 @@ Opcode queryToJmpOp(Opcode opc) {
 Opcode queryJmpToQueryOp(Opcode opc) {
   assert(isQueryJmpOp(opc));
   switch (opc) {
-  case JmpGt:                 return OpGt;
-  case JmpGte:                return OpGte;
-  case JmpLt:                 return OpLt;
-  case JmpLte:                return OpLte;
-  case JmpEq:                 return OpEq;
-  case JmpNeq:                return OpNeq;
-  case JmpSame:               return OpSame;
-  case JmpNSame:              return OpNSame;
+  case JmpGt:                 return Gt;
+  case JmpGte:                return Gte;
+  case JmpLt:                 return Lt;
+  case JmpLte:                return Lte;
+  case JmpEq:                 return Eq;
+  case JmpNeq:                return Neq;
+  case JmpSame:               return Same;
+  case JmpNSame:              return NSame;
   case JmpInstanceOfBitmask:  return InstanceOfBitmask;
   case JmpNInstanceOfBitmask: return NInstanceOfBitmask;
   case JmpIsType:             return IsType;
@@ -745,14 +746,14 @@ Opcode jmpToReqBindJmp(Opcode opc) {
 Opcode negateQueryOp(Opcode opc) {
   assert(isQueryOp(opc));
   switch (opc) {
-  case OpGt:                return OpLte;
-  case OpGte:               return OpLt;
-  case OpLt:                return OpGte;
-  case OpLte:               return OpGt;
-  case OpEq:                return OpNeq;
-  case OpNeq:               return OpEq;
-  case OpSame:              return OpNSame;
-  case OpNSame:             return OpSame;
+  case Gt:                  return Lte;
+  case Gte:                 return Lt;
+  case Lt:                  return Gte;
+  case Lte:                 return Gt;
+  case Eq:                  return Neq;
+  case Neq:                 return Eq;
+  case Same:                return NSame;
+  case NSame:               return Same;
   case InstanceOfBitmask:   return NInstanceOfBitmask;
   case NInstanceOfBitmask:  return InstanceOfBitmask;
   case IsType:              return IsNType;
@@ -764,14 +765,14 @@ Opcode negateQueryOp(Opcode opc) {
 Opcode commuteQueryOp(Opcode opc) {
   assert(isQueryOp(opc));
   switch (opc) {
-  case OpGt:    return OpLt;
-  case OpGte:   return OpLte;
-  case OpLt:    return OpGt;
-  case OpLte:   return OpGte;
-  case OpEq:    return OpEq;
-  case OpNeq:   return OpNeq;
-  case OpSame:  return OpSame;
-  case OpNSame: return OpNSame;
+  case Gt:    return Lt;
+  case Gte:   return Lte;
+  case Lt:    return Gt;
+  case Lte:   return Gte;
+  case Eq:    return Eq;
+  case Neq:   return Neq;
+  case Same:  return Same;
+  case NSame: return NSame;
   default:      always_assert(0);
   }
 }
@@ -779,7 +780,7 @@ Opcode commuteQueryOp(Opcode opc) {
 // Objects compared with strings may involve calling a user-defined
 // __toString function.
 bool cmpOpTypesMayReenter(Opcode op, Type t0, Type t1) {
-  if (op == OpNSame || op == OpSame) return false;
+  if (op == NSame || op == Same) return false;
   assert(!t0.equals(Type::Gen) && !t1.equals(Type::Gen));
   return (t0.maybe(Type::Obj) && t1.maybe(Type::Str)) ||
          (t0.maybe(Type::Str) && t1.maybe(Type::Obj));
@@ -1029,6 +1030,8 @@ Variant SSATmp::getValVariant() const {
       ->as<ArrayData*>()));
   case KindOfObject:
     return m_inst->extra<ConstData>()->as<const Object*>();
+  case KindOfResource:
+    return m_inst->extra<ConstData>()->as<const Resource*>();
   default:
     assert(false);
     return uninit_null();

@@ -496,7 +496,7 @@ MimePart *MimePart::getParent() {
   return m_parent.getTyped<MimePart>();
 }
 
-static const StaticString
+const StaticString
   s_headers("headers"),
   s_starting_pos("starting-pos"),
   s_starting_pos_body("starting-pos-body"),

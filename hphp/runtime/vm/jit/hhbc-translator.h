@@ -144,7 +144,6 @@ struct HhbcTranslator {
   void beginInlining(unsigned numArgs,
                      const Func* target,
                      Offset returnBcOffset);
-  void endInlining();
   bool isInlining() const;
   void profileFunctionEntry(const char* category);
   void profileInlineFunctionShape(const std::string& str);
@@ -242,14 +241,14 @@ struct HhbcTranslator {
   void emitJmpZ(Offset taken);
   void emitJmpNZ(Offset taken);
   void emitJmp(int32_t offset, bool breakTracelet, bool noSurprise);
-  void emitGt()    { emitCmp(OpGt);    }
-  void emitGte()   { emitCmp(OpGte);   }
-  void emitLt()    { emitCmp(OpLt);    }
-  void emitLte()   { emitCmp(OpLte);   }
-  void emitEq()    { emitCmp(OpEq);    }
-  void emitNeq()   { emitCmp(OpNeq);   }
-  void emitSame()  { emitCmp(OpSame);  }
-  void emitNSame() { emitCmp(OpNSame); }
+  void emitGt()    { emitCmp(Gt);    }
+  void emitGte()   { emitCmp(Gte);   }
+  void emitLt()    { emitCmp(Lt);    }
+  void emitLte()   { emitCmp(Lte);   }
+  void emitEq()    { emitCmp(Eq);    }
+  void emitNeq()   { emitCmp(Neq);   }
+  void emitSame()  { emitCmp(Same);  }
+  void emitNSame() { emitCmp(NSame); }
   void emitFPassCOp();
   void emitFPassR();
   void emitFPassV();
@@ -342,6 +341,7 @@ struct HhbcTranslator {
   void emitMul();
   void emitMod();
   void emitDiv();
+  void emitSqrt();
   void emitShl();
   void emitShr();
 

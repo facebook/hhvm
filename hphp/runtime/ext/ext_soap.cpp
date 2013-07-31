@@ -34,7 +34,7 @@
 
 namespace HPHP {
 
-static StaticString s___dorequest("__dorequest");
+const StaticString s___dorequest("__dorequest");
 IMPLEMENT_DEFAULT_EXTENSION(soap);
 ///////////////////////////////////////////////////////////////////////////////
 // helper classes for setting/resetting globals within a method call
@@ -1751,8 +1751,9 @@ static void model_to_string(sdlContentModelPtr model, StringBuffer &buf,
 ///////////////////////////////////////////////////////////////////////////////
 // soap fault functions
 
-static const StaticString s_HTTP_USER_AGENT("HTTP_USER_AGENT");
-static const StaticString s__SERVER("_SERVER");
+const StaticString
+  s_HTTP_USER_AGENT("HTTP_USER_AGENT"),
+  s__SERVER("_SERVER");
 
 static void send_soap_server_fault(sdlFunctionPtr function, Variant fault,
                                    soapHeader *hdr) {
@@ -1832,32 +1833,33 @@ c_SoapServer::c_SoapServer(Class* cb) :
 c_SoapServer::~c_SoapServer() {
 }
 
-static const StaticString s_soap_version("soap_version");
-static const StaticString s_uri("uri");
-static const StaticString s_actor("actor");
-static const StaticString s_encoding("encoding");
-static const StaticString s_classmap("classmap");
-static const StaticString s_typemap("typemap");
-static const StaticString s_features("features");
-static const StaticString s_cache_wsdl("cache_wsdl");
-static const StaticString s_send_errors("send_errors");
-static const StaticString s_location("location");
-static const StaticString s_style("style");
-static const StaticString s_use("use");
-static const StaticString s_stream_context("stream_context");
-static const StaticString s_login("login");
-static const StaticString s_password("password");
-static const StaticString s_authentication("authentication");
-static const StaticString s_proxy_host("proxy_host");
-static const StaticString s_proxy_port("proxy_port");
-static const StaticString s_proxy_login("proxy_login");
-static const StaticString s_proxy_password("proxy_password");
-static const StaticString s_trace("trace");
-static const StaticString s_exceptions("exceptions");
-static const StaticString s_compression("compression");
-static const StaticString s_connection_timeout("connection_timeout");
-static const StaticString s_user_agent("user_agent");
-static const StaticString s_soapaction("soapaction");
+const StaticString
+  s_soap_version("soap_version"),
+  s_uri("uri"),
+  s_actor("actor"),
+  s_encoding("encoding"),
+  s_classmap("classmap"),
+  s_typemap("typemap"),
+  s_features("features"),
+  s_cache_wsdl("cache_wsdl"),
+  s_send_errors("send_errors"),
+  s_location("location"),
+  s_style("style"),
+  s_use("use"),
+  s_stream_context("stream_context"),
+  s_login("login"),
+  s_password("password"),
+  s_authentication("authentication"),
+  s_proxy_host("proxy_host"),
+  s_proxy_port("proxy_port"),
+  s_proxy_login("proxy_login"),
+  s_proxy_password("proxy_password"),
+  s_trace("trace"),
+  s_exceptions("exceptions"),
+  s_compression("compression"),
+  s_connection_timeout("connection_timeout"),
+  s_user_agent("user_agent"),
+  s_soapaction("soapaction");
 
 void c_SoapServer::t___construct(CVarRef wsdl,
                                  CArrRef options /* = null_array */) {
@@ -2049,7 +2051,7 @@ static bool valid_function(c_SoapServer *server, Object &soap_obj,
   return (f && f->isPublic());
 }
 
-static const StaticString s_HTTP_CONTENT_ENCODING("HTTP_CONTENT_ENCODING");
+const StaticString s_HTTP_CONTENT_ENCODING("HTTP_CONTENT_ENCODING");
 
 void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
   USE_SOAP_GLOBAL;

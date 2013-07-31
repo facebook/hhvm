@@ -34,7 +34,6 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/externals.h"
-#include "hphp/runtime/base/resource_data.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/debugger/debugger.h"
@@ -574,8 +573,9 @@ private:
   ExecutionContext::ErrorState m_originalState;
 };
 
-static StaticString s_file("file");
-static StaticString s_line("line");
+const StaticString
+  s_file("file"),
+  s_line("line");
 
 void BaseExecutionContext::handleError(const std::string &msg,
                                        int errnum,

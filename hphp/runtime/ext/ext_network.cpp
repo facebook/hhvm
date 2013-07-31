@@ -366,48 +366,48 @@ typedef union {
   u_char qb2[65536];
 } querybuf;
 
-static const StaticString s_host("host");
-static const StaticString s_type("type");
-static const StaticString s_ip("ip");
-static const StaticString s_pri("pri");
-static const StaticString s_weight("weight");
-static const StaticString s_port("port");
-static const StaticString s_order("order");
-static const StaticString s_pref("pref");
-static const StaticString s_target("target");
-static const StaticString s_cpu("cpu");
-static const StaticString s_os("os");
-static const StaticString s_txt("txt");
-static const StaticString s_mname("mname");
-static const StaticString s_rname("rname");
-static const StaticString s_serial("serial");
-static const StaticString s_refresh("refresh");
-static const StaticString s_retry("retry");
-static const StaticString s_expire("expire");
-static const StaticString s_minimum_ttl("minimum-ttl");
-static const StaticString s_ipv6("ipv6");
-static const StaticString s_masklen("masklen");
-static const StaticString s_chain("chain");
-static const StaticString s_flags("flags");
-static const StaticString s_services("services");
-static const StaticString s_regex("regex");
-static const StaticString s_replacement("replacement");
-static const StaticString s_class("class");
-static const StaticString s_ttl("ttl");
-
-static const StaticString s_A("A");
-static const StaticString s_MX("MX");
-static const StaticString s_CNAME("CNAME");
-static const StaticString s_NS("NS");
-static const StaticString s_PTR("PTR");
-static const StaticString s_HINFO("HINFO");
-static const StaticString s_TXT("TXT");
-static const StaticString s_SOA("SOA");
-static const StaticString s_AAAA("AAAA");
-static const StaticString s_A6("A6");
-static const StaticString s_SRV("SRV");
-static const StaticString s_NAPTR("NAPTR");
-static const StaticString s_IN("IN");
+const StaticString
+  s_host("host"),
+  s_type("type"),
+  s_ip("ip"),
+  s_pri("pri"),
+  s_weight("weight"),
+  s_port("port"),
+  s_order("order"),
+  s_pref("pref"),
+  s_target("target"),
+  s_cpu("cpu"),
+  s_os("os"),
+  s_txt("txt"),
+  s_mname("mname"),
+  s_rname("rname"),
+  s_serial("serial"),
+  s_refresh("refresh"),
+  s_retry("retry"),
+  s_expire("expire"),
+  s_minimum_ttl("minimum-ttl"),
+  s_ipv6("ipv6"),
+  s_masklen("masklen"),
+  s_chain("chain"),
+  s_flags("flags"),
+  s_services("services"),
+  s_regex("regex"),
+  s_replacement("replacement"),
+  s_class("class"),
+  s_ttl("ttl"),
+  s_A("A"),
+  s_MX("MX"),
+  s_CNAME("CNAME"),
+  s_NS("NS"),
+  s_PTR("PTR"),
+  s_HINFO("HINFO"),
+  s_TXT("TXT"),
+  s_SOA("SOA"),
+  s_AAAA("AAAA"),
+  s_A6("A6"),
+  s_SRV("SRV"),
+  s_NAPTR("NAPTR"),
+  s_IN("IN");
 
 static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
                                   int type_to_fetch, bool store,
@@ -968,7 +968,7 @@ void f_header(CStrRef str, bool replace /* = true */,
   }
 }
 
-Variant f_http_response_code(int response_code /*= 0 */) {
+Variant f_http_response_code(int response_code /* = 0 */) {
   Transport *transport = g_context->getTransport();
   if (!transport) {
     raise_warning("Unable to access response code, no transport");

@@ -61,22 +61,6 @@ else()
 	message("Generating DEBUG build")
 endif()
 
-if(INFINITE_LOOP_DETECTION)
-	add_definitions(-DINFINITE_LOOP_DETECTION=1)
-endif()
-
-if(INFINITE_RECURSION_DETECTION)
-	add_definitions(-DINFINITE_RECURSION_DETECTION=1)
-endif()
-
-if(REQUEST_TIMEOUT_DETECTION)
-	add_definitions(-DREQUEST_TIMEOUT_DETECTION=1)
-endif()
-
-if(ENABLE_LATE_STATIC_BINDING)
-	add_definitions(-DENABLE_LATE_STATIC_BINDING=1)
-endif()
-
 if(DEBUG_MEMORY_LEAK)
 	add_definitions(-DDEBUG_MEMORY_LEAK=1)
 endif()
@@ -91,10 +75,6 @@ endif()
 
 if(HOTPROFILER)
 	add_definitions(-DHOTPROFILER=1)
-endif()
-
-if(HOTPROFILER_NO_BUILTIN)
-	add_definitions(-DHOTPROFILER_NO_BUILTIN=1)
 endif()
 
 if(EXECUTION_PROFILER)

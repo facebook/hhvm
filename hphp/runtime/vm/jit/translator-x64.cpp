@@ -176,7 +176,7 @@ void stubBlock(X64Assembler& hot, X64Assembler& cold, const L& body) {
 
 static bool
 typeCanBeStatic(DataType t) {
-  return t != KindOfObject && t != KindOfRef;
+  return t != KindOfObject && t != KindOfResource && t != KindOfRef;
 }
 
 // IfCountNotStatic --
@@ -485,6 +485,8 @@ CppCall TranslatorX64::getDtorCall(DataType type) {
     return CppCall(getMethodPtr(&ArrayData::release));
   case KindOfObject:
     return CppCall(getMethodPtr(&ObjectData::release));
+  case KindOfResource:
+    return CppCall(getMethodPtr(&ResourceData::release));
   case KindOfRef:
     return CppCall(getMethodPtr(&RefData::release));
   default:
@@ -515,10 +517,11 @@ static IndexedMemoryRef lookupDestructor(X64Assembler& a,
   assert(typeReg != r32(argNumToRegName[0]));
   assert(scratch != argNumToRegName[0]);
 
-  static_assert((BitwiseKindOfString >> kShiftDataTypeToDestrIndex == 0) &&
-                (KindOfArray         >> kShiftDataTypeToDestrIndex == 1) &&
-                (KindOfObject        >> kShiftDataTypeToDestrIndex == 2) &&
-                (KindOfRef           >> kShiftDataTypeToDestrIndex == 3),
+  static_assert((BitwiseKindOfString >> kShiftDataTypeToDestrIndex == 1) &&
+                (KindOfArray         >> kShiftDataTypeToDestrIndex == 2) &&
+                (KindOfObject        >> kShiftDataTypeToDestrIndex == 3) &&
+                (KindOfResource      >> kShiftDataTypeToDestrIndex == 4) &&
+                (KindOfRef           >> kShiftDataTypeToDestrIndex == 5),
                 "lookup of destructors depends on KindOf* values");
 
   a.    shrl   (kShiftDataTypeToDestrIndex, r32(typeReg));
@@ -759,7 +762,7 @@ TranslatorX64::getTranslation(const TranslArgs& args) {
           sk.offset());
   SKTRACE(2, sk, "   funcId: %x \n", sk.func()->getFuncId());
 
-  if (liveFrame()->hasVarEnv() && liveFrame()->getVarEnv()->isGlobalScope()) {
+  if (Translator::liveFrameIsPseudoMain()) {
     SKTRACE(2, sk, "punting on pseudoMain\n");
     return nullptr;
   }
@@ -1171,7 +1174,7 @@ TranslatorX64::trimExtraArgs(ActRec* ar) {
 }
 
 TCA
-TranslatorX64::emitCallArrayProlog(const Func* func,
+TranslatorX64::emitCallArrayPrologue(const Func* func,
                                    const DVFuncletsVec& dvs) {
   TCA start = a.frontier();
   if (dvs.size() == 1) {
@@ -1191,7 +1194,7 @@ TranslatorX64::emitCallArrayProlog(const Func* func,
 }
 
 TCA
-TranslatorX64::getCallArrayProlog(Func* func) {
+TranslatorX64::getCallArrayPrologue(Func* func) {
   TCA tca = func->getFuncBody();
   if (tca != (TCA)funcBodyHelperThunk) return tca;
 
@@ -1202,7 +1205,7 @@ TranslatorX64::getCallArrayProlog(Func* func) {
     if (!writer) return nullptr;
     tca = func->getFuncBody();
     if (tca != (TCA)funcBodyHelperThunk) return tca;
-    tca = emitCallArrayProlog(func, dvs);
+    tca = emitCallArrayPrologue(func, dvs);
     func->setFuncBody(tca);
   } else {
     SrcKey sk(func, func->base());
@@ -1285,11 +1288,11 @@ static const int kFuncGuardShortLen = 14;
 
 template<typename T>
 static T*
-funcPrologToGuardImm(TCA prolog) {
+funcPrologueToGuardImm(TCA prologue) {
   assert(sizeof(T) == 4 || sizeof(T) == 8);
-  T* retval = (T*)(prolog - (sizeof(T) == 8 ?
-                             kFuncGuardLen - kFuncMovImm :
-                             kFuncGuardShortLen - kFuncCmpImm));
+  T* retval = (T*)(prologue - (sizeof(T) == 8 ?
+                               kFuncGuardLen - kFuncMovImm :
+                               kFuncGuardShortLen - kFuncCmpImm));
   // We padded these so the immediate would fit inside a cache line
   assert(((uintptr_t(retval) ^ (uintptr_t(retval + 1) - 1)) &
           ~(kX64CacheLineSize - 1)) == 0);
@@ -1298,31 +1301,31 @@ funcPrologToGuardImm(TCA prolog) {
 }
 
 static inline bool
-funcPrologHasGuard(TCA prolog, const Func* func) {
+funcPrologueHasGuard(TCA prologue, const Func* func) {
   intptr_t iptr = uintptr_t(func);
   if (deltaFits(iptr, sz::dword)) {
-    return *funcPrologToGuardImm<int32_t>(prolog) == iptr;
+    return *funcPrologueToGuardImm<int32_t>(prologue) == iptr;
   }
-  return *funcPrologToGuardImm<int64_t>(prolog) == iptr;
+  return *funcPrologueToGuardImm<int64_t>(prologue) == iptr;
 }
 
 static TCA
-funcPrologToGuard(TCA prolog, const Func* func) {
-  if (!prolog || prolog == (TCA)fcallHelperThunk) return prolog;
-  return prolog -
+funcPrologueToGuard(TCA prologue, const Func* func) {
+  if (!prologue || prologue == (TCA)fcallHelperThunk) return prologue;
+  return prologue -
     (deltaFits(uintptr_t(func), sz::dword) ?
      kFuncGuardShortLen :
      kFuncGuardLen);
 }
 
 static inline void
-funcPrologSmashGuard(TCA prolog, const Func* func) {
+funcPrologueSmashGuard(TCA prologue, const Func* func) {
   intptr_t iptr = uintptr_t(func);
   if (deltaFits(iptr, sz::dword)) {
-    *funcPrologToGuardImm<int32_t>(prolog) = 0;
+    *funcPrologueToGuardImm<int32_t>(prologue) = 0;
     return;
   }
-  *funcPrologToGuardImm<int64_t>(prolog) = 0;
+  *funcPrologueToGuardImm<int64_t>(prologue) = 0;
 }
 
 void
@@ -1331,13 +1334,13 @@ TranslatorX64::smashPrologueGuards(TCA* prologues, int numPrologues,
   DEBUG_ONLY std::unique_ptr<LeaseHolder> writer;
   for (int i = 0; i < numPrologues; i++) {
     if (prologues[i] != (TCA)fcallHelperThunk
-        && funcPrologHasGuard(prologues[i], func)) {
+        && funcPrologueHasGuard(prologues[i], func)) {
       if (debug) {
         /*
          * Unit's are sometimes created racily, in which case all
          * but the first are destroyed immediately. In that case,
          * the Funcs of the destroyed Units never need their
-         * prologs smashing, and it would be a lock rank violation
+         * prologues smashing, and it would be a lock rank violation
          * to take the write lease here.
          * In all other cases, Funcs are destroyed via a delayed path
          * (treadmill) and the rank violation isn't an issue.
@@ -1347,7 +1350,7 @@ TranslatorX64::smashPrologueGuards(TCA* prologues, int numPrologues,
          */
         if (!writer) writer.reset(new LeaseHolder(s_writeLease));
       }
-      funcPrologSmashGuard(prologues[i], func);
+      funcPrologueSmashGuard(prologues[i], func);
     }
   }
 }
@@ -1397,8 +1400,8 @@ TranslatorX64::emitFuncGuard(X64Assembler& a, const Func* func) {
   assert(m_funcPrologueRedispatch);
 
   a.    jnz(m_funcPrologueRedispatch);
-  assert(funcPrologToGuard(a.frontier(), func) == aStart);
-  assert(funcPrologHasGuard(a.frontier(), func));
+  assert(funcPrologueToGuard(a.frontier(), func) == aStart);
+  assert(funcPrologueHasGuard(a.frontier(), func));
   return a.frontier();
 }
 
@@ -1597,18 +1600,18 @@ TranslatorX64::funcPrologue(Func* func, int nPassed, ActRec* ar) {
     }
     start = magicStart;
   }
-  assert(funcPrologHasGuard(start, func));
+  assert(funcPrologueHasGuard(start, func));
   TRACE(2, "funcPrologue tx64 %p %s(%d) setting prologue %p\n",
         this, func->fullName()->data(), nPassed, start);
   assert(isValidCodeAddress(start));
   func->setPrologue(paramIndex, start);
 
   addTranslation(TransRec(skFuncBody, func->unit()->md5(),
-                          TransProlog, aStart, a.frontier() - aStart,
+                          TransPrologue, aStart, a.frontier() - aStart,
                           stubStart, astubs.frontier() - stubStart));
 
   if (m_profData) {
-    m_profData->addTransProlog(skFuncBody);
+    m_profData->addTransPrologue(skFuncBody);
   }
 
   recordGdbTranslation(skFuncBody, func,
@@ -1681,15 +1684,11 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
     a.  loadq(rVmFp[AROFF(m_this)], rClosure);
 
     // Swap in the $this or late bound class
-    a.  loadq(rClosure[c_Closure::thisOffset()], rAsm);
+    a.  loadq(rClosure[c_Closure::ctxOffset()], rAsm);
     a.  storeq(rAsm, rVmFp[AROFF(m_this)]);
 
-    a.  shrq(1, rAsm);
-    if (func->attrs() & AttrStatic) {
-      UnlikelyIfBlock ifRealThis(CC_NBE, a, astubs);
-      astubs.shlq(1, rAsm);
-      emitIncRef(astubs, rAsm, KindOfObject);
-    } else {
+    if (!(func->attrs() & AttrStatic)) {
+      a.shrq(1, rAsm);
       JccBlock<CC_BE> ifRealThis(a);
       a.shlq(1, rAsm);
       emitIncRef(rAsm, KindOfObject);
@@ -2458,7 +2457,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
     if (!isImmutable) {
       // We dont know we're calling the right function, so adjust
       // dest to point to the dynamic check of ar->m_func.
-      dest = funcPrologToGuard(dest, func);
+      dest = funcPrologueToGuard(dest, func);
     } else {
       TRACE(2, "enterTC: bindCall immutably %s -> %p\n",
             func->fullName()->data(), dest);
@@ -3203,19 +3202,9 @@ TranslatorX64::emitGuardChecks(X64Assembler& a,
     Stats::emitInc(a, Stats::TraceletGuard_enter);
   }
 
-  bool pseudoMain = Translator::liveFrameIsPseudoMain();
-
   emitRB(a, RBTypeTraceletGuards, sk);
-  for (DepMap::const_iterator dep = dependencies.begin();
-       dep != dependencies.end();
-       ++dep) {
-    if (!pseudoMain || !dep->second->isLocal() || !dep->second->isValue()) {
-      m_irTrans->checkType(dep->first, dep->second->rtt);
-    } else {
-      TRACE(3, "Skipping tracelet guard for %s %d\n",
-            dep->second->location.pretty().c_str(),
-            (int)dep->second->rtt.outerType());
-    }
+  for (auto const& dep : dependencies) {
+    m_irTrans->checkType(dep.first, dep.second->rtt);
   }
 
   checkRefs(a, sk, refDeps, fail);
@@ -3427,6 +3416,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
 TranslatorX64::TranslateResult
 TranslatorX64::translateTracelet(Tracelet& t) {
   FTRACE(2, "attempting to translate tracelet:\n{}\n", t.toString());
+  assert(!Translator::liveFrameIsPseudoMain());
   const SrcKey &sk = t.m_sk;
   SrcRec& srcRec = *getSrcRec(sk);
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
@@ -3817,16 +3807,20 @@ TranslatorX64::TranslatorX64()
   // translations.
   typedef void* vp;
 
-  TCA strDtor, arrDtor, objDtor, refDtor;
+  TCA strDtor, arrDtor, objDtor, resDtor, refDtor;
   strDtor = emitUnaryStub(astubs, CppCall(getMethodPtr(&StringData::release)));
   arrDtor = emitUnaryStub(astubs,
                           CppCall(getVTableOffset(&HphpArray::release)));
   objDtor = emitUnaryStub(astubs, CppCall(getMethodPtr(&ObjectData::release)));
+  resDtor = emitUnaryStub(astubs,
+                          CppCall(getMethodPtr(&ResourceData::release)));
   refDtor = emitUnaryStub(astubs, CppCall(vp(getMethodPtr(&RefData::release))));
 
+  m_dtorStubs[0] = nullptr;
   m_dtorStubs[typeToDestrIndex(BitwiseKindOfString)] = strDtor;
   m_dtorStubs[typeToDestrIndex(KindOfArray)]         = arrDtor;
   m_dtorStubs[typeToDestrIndex(KindOfObject)]        = objDtor;
+  m_dtorStubs[typeToDestrIndex(KindOfResource)]      = resDtor;
   m_dtorStubs[typeToDestrIndex(KindOfRef)]           = refDtor;
 
   // Hot helper stubs in A:
@@ -4217,29 +4211,27 @@ void TranslatorX64::addDbgGuardImpl(SrcKey sk, SrcRec& srcRec) {
 }
 
 bool TranslatorX64::dumpTCCode(const char* filename) {
-  string aFilename = string(filename).append("_a");
-  string astubFilename = string(filename).append("_astub");
-  FILE* aFile = fopen(aFilename.c_str(),"wb");
-  if (aFile == nullptr)
-    return false;
-  FILE* astubFile = fopen(astubFilename.c_str(),"wb");
-  if (astubFile == nullptr) {
-    fclose(aFile);
-    return false;
-  }
-  string helperAddrFilename = string(filename).append("_helpers_addrs.txt");
-  FILE* helperAddrFile = fopen(helperAddrFilename.c_str(),"wb");
-  if (helperAddrFile == nullptr) {
-    fclose(aFile);
-    fclose(astubFile);
-    return false;
-  }
+#define OPEN_FILE(F, SUFFIX)                            \
+  string F ## name = string(filename).append(SUFFIX);   \
+  FILE* F = fopen(F ## name .c_str(),"wb");             \
+  if (F == nullptr) return false;                       \
+  SCOPE_EXIT{ fclose(F); };
+
+  OPEN_FILE(aFile,          "_a");
+  OPEN_FILE(aprofFile,      "_aprof");
+  OPEN_FILE(astubFile,      "_astub");
+  OPEN_FILE(helperAddrFile, "_helpers_addrs.txt");
+
+#undef OPEN_FILE
+
   // dump starting from the trampolines; this assumes processInit() places
   // trampolines before the translation cache
-  // Task #2649357: teach tc-print about aprof, to avoid dumping the entire
-  //                'a' code slab
-  size_t count = aprof.frontier() - atrampolines.base();
+  size_t count = a.frontier() - atrampolines.base();
   bool result = (fwrite(atrampolines.base(), 1, count, aFile) == count);
+  if (result) {
+    count = aprof.used();
+    result = (fwrite(aprof.base(), 1, count, aprofFile) == count);
+  }
   if (result) {
     count = astubs.used();
     result = (fwrite(astubs.base(), 1, count, astubFile) == count);
@@ -4257,9 +4249,6 @@ bool TranslatorX64::dumpTCCode(const char* filename) {
       free(functionName);
     }
   }
-  fclose(aFile);
-  fclose(astubFile);
-  fclose(helperAddrFile);
   return result;
 }
 
@@ -4288,10 +4277,13 @@ bool TranslatorX64::dumpTCData() {
                 "repo_schema     = %s\n"
                 "a.base          = %p\n"
                 "a.frontier      = %p\n"
+                "aprof.base      = %p\n"
+                "aprof.frontier  = %p\n"
                 "astubs.base     = %p\n"
                 "astubs.frontier = %p\n\n",
                 kRepoSchemaId,
                 atrampolines.base(), a.frontier(),
+                aprof.base(), aprof.frontier(),
                 astubs.base(), astubs.frontier())) {
     return false;
   }

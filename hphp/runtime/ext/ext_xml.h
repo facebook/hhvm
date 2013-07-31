@@ -25,11 +25,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Object f_xml_parser_create(CStrRef encoding = null_string);
+Resource f_xml_parser_create(CStrRef encoding = null_string);
 bool f_xml_parser_free(CResRef parser);
 int64_t f_xml_parse(CResRef parser, CStrRef data, bool is_final = true);
 int64_t f_xml_parse_into_struct(CResRef parser, CStrRef data, VRefParam values, VRefParam index = uninit_null());
-Object f_xml_parser_create_ns(CStrRef encoding = null_string, CStrRef separator = null_string);
+Resource f_xml_parser_create_ns(CStrRef encoding = null_string, CStrRef separator = null_string);
 Variant f_xml_parser_get_option(CResRef parser, int option);
 bool f_xml_parser_set_option(CResRef parser, int option, CVarRef value);
 bool f_xml_set_character_data_handler(CResRef parser, CVarRef handler);

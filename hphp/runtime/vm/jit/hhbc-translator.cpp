@@ -278,6 +278,9 @@ void HhbcTranslator::beginInlining(unsigned numParams,
   assert(!m_fpiStack.empty() &&
     "Inlining does not support calls with the FPush* in a different Tracelet");
   assert(!target->isGenerator() && "Generator stack handling not implemented");
+  assert(returnBcOffset >= 0 && "returnBcOffset before beginning of caller");
+  assert(curFunc()->base() + returnBcOffset < curFunc()->past() &&
+         "returnBcOffset past end of caller");
 
   FTRACE(1, "[[[ begin inlining: {}\n", target->fullName()->data());
 
@@ -761,7 +764,7 @@ void HhbcTranslator::emitIncDecL(bool pre, bool inc, uint32_t id) {
 SSATmp* HhbcTranslator::emitIncDec(bool pre, bool inc, SSATmp* src) {
   assert(src->isA(Type::Int) || src->isA(Type::Dbl));
   SSATmp* one = src->isA(Type::Int) ? cns(1) : cns(1.0);
-  SSATmp* res = inc ? gen(OpAdd, src, one) : gen(OpSub, src, one);
+  SSATmp* res = inc ? gen(Add, src, one) : gen(Sub, src, one);
   // no incref necessary on push since result is an int
   push(pre ? res : src);
   return res;
@@ -781,14 +784,14 @@ void HhbcTranslator::emitIncDecMem(bool pre,
 
 static bool areBinaryArithTypesSupported(Opcode opc, Type t1, Type t2) {
   switch (opc) {
-  case OpAdd:
-  case OpSub:
-  case OpMul: return t1.subtypeOfAny(Type::Int, Type::Bool, Type::Dbl) &&
+  case Add:
+  case Sub:
+  case Mul: return t1.subtypeOfAny(Type::Int, Type::Bool, Type::Dbl) &&
                      t2.subtypeOfAny(Type::Int, Type::Bool, Type::Dbl);
 
-  case OpBitAnd:
-  case OpBitOr:
-  case OpBitXor:
+  case BitAnd:
+  case BitOr:
+  case BitXor:
     return t1.subtypeOfAny(Type::Int, Type::Bool) &&
                      t2.subtypeOfAny(Type::Int, Type::Bool);
   default:
@@ -1259,7 +1262,7 @@ void HhbcTranslator::emitContSuspend(int64_t labelId) {
     // this needs optimization
     auto const idx = gen(LdContArRaw, Type::Int,
                          m_tb->fp(), cns(RawMemSlot::ContIndex));
-    auto const newIdx = gen(OpAdd, idx, cns(1));
+    auto const newIdx = gen(Add, idx, cns(1));
     gen(StContArRaw, m_tb->fp(), cns(RawMemSlot::ContIndex), newIdx);
 
     auto const oldKey = gen(LdContArKey, Type::Cell, m_tb->fp());
@@ -1320,7 +1323,7 @@ void HhbcTranslator::emitContRaise() {
   assert(curClass());
   SSATmp* cont = gen(LdThis, m_tb->fp());
   SSATmp* label = gen(LdRaw, Type::Int, cont, cns(RawMemSlot::ContLabel));
-  label = gen(OpSub, label, cns(1));
+  label = gen(Sub, label, cns(1));
   gen(StRaw, cont, cns(RawMemSlot::ContLabel), label);
 }
 
@@ -1566,7 +1569,7 @@ void HhbcTranslator::emitIssetS(const StringData* propName) {
 void HhbcTranslator::emitEmptyL(int32_t id) {
   auto const exitTrace = getExitTrace();
   auto const ld = ldLocInner(id, exitTrace);
-  push(gen(OpNot, gen(ConvCellToBool, ld)));
+  push(gen(Not, gen(ConvCellToBool, ld)));
 }
 
 void HhbcTranslator::emitEmptyG(const StringData* gblName) {
@@ -1939,6 +1942,8 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
   emitFPushCtorCommon(ssaCls, obj, func, numParams, catchTrace2);
 }
 
+const StaticString s_uuinvoke("__invoke");
+
 /*
  * The CreateCl opcode is specified as not being allowed before the
  * class it creates exists, and closure classes are always unique.
@@ -1948,19 +1953,45 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
  * so we can just burn it into the TC without using TargetCache.
  */
 void HhbcTranslator::emitCreateCl(int32_t numParams, int32_t funNameStrId) {
-  auto const sp = spillStack();
   auto const cls = Unit::lookupUniqueClass(lookupStringId(funNameStrId));
+  auto const invokeFunc = cls->lookupMethod(s_uuinvoke.get());
+  auto const clonedFunc = invokeFunc->cloneAndSetClass(curClass());
   assert(cls && (cls->attrs() & AttrUnique));
 
-  auto const closure = gen(
-    CreateCl,
-    cns(cls),
-    cns(numParams),
-    m_tb->fp(),
-    sp
-  );
+  // Although closures can't have destructors, destructing the
+  // captured values (or captured $this) can lead to user-visible
+  // side-effects, so we can't use AllocObjFast if
+  // EnableObjDestructCall is on.
+  auto const closure =
+    gen(IncRef,
+      RuntimeOption::EnableObjDestructCall ? gen(AllocObj, cns(cls))
+                                           : gen(AllocObjFast, ClassData(cls))
+    );
 
-  discard(numParams);
+  auto const ctx = [&]{
+    if (!curClass()) return cns(nullptr);
+    auto const ldctx = gen(LdCtx, FuncData(curFunc()), m_tb->fp());
+    if (invokeFunc->attrs() & AttrStatic) {
+      return gen(ConvClsToCctx, gen(LdClsCtx, ldctx));
+    }
+    return gen(IncRefCtx, ldctx);
+  }();
+  gen(StClosureCtx, closure, ctx);
+  gen(StClosureFunc, FuncData(clonedFunc), closure);
+
+  SSATmp* args[numParams];
+  for (int32_t i = 0; i < numParams; ++i) {
+    args[numParams - i - 1] = popF();
+  }
+  for (int32_t i = 0; i < numParams; ++i) {
+    gen(
+      StClosureArg,
+      PropByteOffset(cls->declPropOffset(i)),
+      closure,
+      args[i]
+    );
+  }
+
   push(closure);
 }
 
@@ -2262,6 +2293,7 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
       case KindOfInt64:
       case KindOfArray:
       case KindOfObject:
+      case KindOfResource:
       case KindOfString:
         if (zendParamMode) {
           gen(
@@ -3061,6 +3093,8 @@ void HhbcTranslator::emitCastString() {
     push(gen(ConvIntToStr, src));
   } else if (fromType.isObj()) {
     push(gen(ConvObjToStr, catchTrace, src));
+  } else if (fromType.isRes()) {
+    push(gen(ConvResToStr, catchTrace, src));
   } else {
     push(gen(ConvCellToStr, catchTrace, src));
   }
@@ -3175,7 +3209,7 @@ void HhbcTranslator::emitIsset(const StringData* name,
 
 void HhbcTranslator::emitEmptyMem(SSATmp* ptr) {
   SSATmp* ld = gen(LdMem, Type::Cell, gen(UnboxPtr, ptr), cns(0));
-  push(gen(OpNot, gen(ConvCellToBool, ld)));
+  push(gen(Not, gen(ConvCellToBool, ld)));
 }
 
 template<class CheckSupportedFun, class EmitLdAddrFun>
@@ -3195,7 +3229,7 @@ void HhbcTranslator::emitEmpty(const StringData* name,
                             gen(UnboxPtr, ptr),
                             cns(0)
                           );
-                          return gen(OpNot, gen(ConvCellToBool, ld));
+                          return gen(Not, gen(ConvCellToBool, ld));
                         },
                         [&] { // Taken
                           return cns(true);
@@ -3286,7 +3320,7 @@ void HhbcTranslator::emitCGetS(const StringData* propName,
 }
 
 void HhbcTranslator::emitBinaryArith(Opcode opc) {
-  bool isBitOp = (opc == OpBitAnd || opc == OpBitOr || opc == OpBitXor);
+  bool isBitOp = (opc == BitAnd || opc == BitOr || opc == BitXor);
   Type type1 = topC(0)->type();
   Type type2 = topC(1)->type();
   if (areBinaryArithTypesSupported(opc, type1, type2)) {
@@ -3317,7 +3351,7 @@ void HhbcTranslator::emitBinaryArith(Opcode opc) {
 
 void HhbcTranslator::emitNot() {
   SSATmp* src = popC();
-  push(gen(OpNot, gen(ConvCellToBool, src)));
+  push(gen(Not, gen(ConvCellToBool, src)));
   gen(DecRef, src);
 }
 
@@ -3330,7 +3364,7 @@ void HhbcTranslator::emitFloor() {
   auto val    = popC();
   auto dblVal = gen(ConvCellToDbl, val);
   gen(DecRef, val);
-  push(gen(OpFloor, dblVal));
+  push(gen(Floor, dblVal));
 }
 
 void HhbcTranslator::emitCeil() {
@@ -3342,13 +3376,13 @@ void HhbcTranslator::emitCeil() {
   auto val = popC();
   auto dblVal = gen(ConvCellToDbl, val);
   gen(DecRef, val);
-  push(gen(OpCeil, dblVal));
+  push(gen(Ceil, dblVal));
 }
 
-#define BINOP(Opp) \
-void HhbcTranslator::emit ## Opp() {  \
-  emitBinaryArith(Op ## Opp);         \
-}
+#define BINOP(Opp)                            \
+  void HhbcTranslator::emit ## Opp() {        \
+    emitBinaryArith(Opp);                     \
+  }
 
 BINOP(Add)
 BINOP(Sub)
@@ -3448,7 +3482,7 @@ void HhbcTranslator::emitDiv() {
   );
 
   assert(divisor->isA(Type::Dbl) && dividend->isA(Type::Dbl));
-  push(gen(OpDivDbl, exit, dividend, divisor));
+  push(gen(DivDbl, exit, dividend, divisor));
 }
 
 void HhbcTranslator::emitMod() {
@@ -3488,7 +3522,7 @@ void HhbcTranslator::emitMod() {
       // something on the stack
       push(cns(false));
     } else {
-      push(gen(OpMod, tl, tr));
+      push(gen(Mod, tl, tr));
     }
     return;
   }
@@ -3497,11 +3531,11 @@ void HhbcTranslator::emitMod() {
   SSATmp *res = m_tb->cond(
     curFunc(),
     [&] (Block* taken) {
-      SSATmp* negone = gen(OpEq, tr, cns(-1));
+      SSATmp* negone = gen(Eq, tr, cns(-1));
       gen(JmpNZero, taken, negone);
     },
     [&] {
-      return gen(OpMod, tl, tr);
+      return gen(Mod, tl, tr);
     },
     [&] {
       m_tb->hint(Block::Hint::Unlikely);
@@ -3511,17 +3545,34 @@ void HhbcTranslator::emitMod() {
   push(res);
 }
 
+void HhbcTranslator::emitSqrt() {
+  auto const srcType = topC()->type();
+  if (srcType.subtypeOf(Type::Int)) {
+    auto const src = gen(ConvIntToDbl, popC());
+    push(gen(Sqrt, src));
+    return;
+  }
+
+  if (srcType.subtypeOf(Type::Dbl)) {
+    auto const src = popC();
+    push(gen(Sqrt, src));
+    return;
+  }
+
+  emitInterpOne(Type::Cell, 1);
+}
+
 void HhbcTranslator::emitBitNot() {
   auto const srcType = topC()->type();
   if (srcType.subtypeOf(Type::Int)) {
     auto const src = popC();
-    push(gen(OpBitNot, src));
+    push(gen(BitNot, src));
     return;
   }
 
   if (srcType.subtypeOf(Type::Dbl)) {
     auto const src = gen(ConvDblToInt, popC());
-    push(gen(OpBitNot, src));
+    push(gen(BitNot, src));
     return;
   }
 
@@ -3537,7 +3588,7 @@ void HhbcTranslator::emitXor() {
   SSATmp* btl = popC();
   SSATmp* tr = gen(ConvCellToBool, btr);
   SSATmp* tl = gen(ConvCellToBool, btl);
-  push(gen(ConvCellToBool, gen(OpLogicXor, tl, tr)));
+  push(gen(ConvCellToBool, gen(LogicXor, tl, tr)));
   gen(DecRef, btl);
   gen(DecRef, btr);
 }
@@ -3549,7 +3600,7 @@ void HhbcTranslator::emitShl() {
   auto lhsInt         = gen(ConvCellToInt, lhs);
   auto shiftAmountInt = gen(ConvCellToInt, shiftAmount);
 
-  push(gen(OpShl, lhsInt, shiftAmountInt));
+  push(gen(Shl, lhsInt, shiftAmountInt));
   gen(DecRef, lhs);
   gen(DecRef, shiftAmount);
 }
@@ -3561,7 +3612,7 @@ void HhbcTranslator::emitShr() {
   auto lhsInt         = gen(ConvCellToInt, lhs);
   auto shiftAmountInt = gen(ConvCellToInt, shiftAmount);
 
-  push(gen(OpShr, lhsInt, shiftAmountInt));
+  push(gen(Shr, lhsInt, shiftAmountInt));
   gen(DecRef, lhs);
   gen(DecRef, shiftAmount);
 }
@@ -3666,6 +3717,7 @@ Type HhbcTranslator::interpOutputType(const NormalizedInstruction& inst) const {
     case OutArrayImm:    return Type::Arr; // Should be StaticArr: t2124292
     case OutObject:
     case OutThisObject:  return Type::Obj;
+    case OutResource:    return Type::Res;
 
     case OutFDesc:       return Type::None;
     case OutUnknown:     return Type::Gen;

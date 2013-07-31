@@ -43,7 +43,7 @@ public:
 Resource f_stream_context_create(CArrRef options = null_array,
                                  CArrRef params = null_array);
 
-Object f_stream_context_get_default(CArrRef options = null_array);
+Resource f_stream_context_get_default(CArrRef options = null_array);
 
 Variant f_stream_context_get_options(CResRef stream_or_context);
 
@@ -66,19 +66,19 @@ void f_stream_bucket_append(CResRef brigade, CResRef bucket);
 
 void f_stream_bucket_prepend(CResRef brigade, CResRef bucket);
 
-Object f_stream_bucket_make_writeable(CResRef brigade);
+Resource f_stream_bucket_make_writeable(CResRef brigade);
 
-Object f_stream_bucket_new(CResRef stream, CStrRef buffer);
+Resource f_stream_bucket_new(CResRef stream, CStrRef buffer);
 
 bool f_stream_filter_register(CStrRef filtername, CStrRef classname);
 
 bool f_stream_filter_remove(CResRef stream_filter);
 
-Object f_stream_filter_append(CResRef stream, CStrRef filtername,
+Resource f_stream_filter_append(CResRef stream, CStrRef filtername,
                               int read_write = 0,
                               CVarRef params = null_variant);
 
-Object f_stream_filter_prepend(CResRef stream, CStrRef filtername,
+Resource f_stream_filter_prepend(CResRef stream, CStrRef filtername,
                                int read_write = 0,
                                CVarRef params = null_variant);
 
@@ -95,6 +95,7 @@ Variant f_stream_get_meta_data(CResRef stream);
 Array f_stream_get_transports();
 
 Array f_stream_get_wrappers();
+bool f_stream_is_local(CVarRef stream_or_url);
 bool f_stream_register_wrapper(CStrRef protocol, CStrRef classname);
 bool f_stream_wrapper_register(CStrRef protocol, CStrRef classname);
 bool f_stream_wrapper_restore(CStrRef protocol);

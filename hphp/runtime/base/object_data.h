@@ -83,22 +83,6 @@ class ObjectData {
   static DECLARE_THREAD_LOCAL_NO_CHECK(int, os_max_id);
 
  public:
-  // This constructor is used for all cppext classes (including resources)
-  // and their descendents.
-  ObjectData(Class* cls, bool isResource)
-    : o_attribute(0)
-    , m_count(0)
-    , m_cls(cls) {
-    assert(uintptr_t(this) % sizeof(TypedValue) == 0);
-    if (!isResource) {
-      o_id = ++(*os_max_id);
-    }
-    instanceInit(cls);
-  }
-
- private:
-  // The two constructors below are used for all pure classes that are not
-  // descendents of cppext classes
   explicit ObjectData(Class* cls)
     : o_attribute(0)
     , m_count(0)
@@ -108,6 +92,7 @@ class ObjectData {
     instanceInit(cls);
   }
 
+ private:
   enum class NoInit { noinit };
   explicit ObjectData(Class* cls, NoInit)
     : o_attribute(0)
@@ -125,8 +110,7 @@ class ObjectData {
   bool isStatic() const { return false; }
   IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC
 
- public:
-  virtual ~ObjectData(); // all PHP classes need virtual tables
+  virtual ~ObjectData(); // all PHP objects need virtual tables
 
   // Call newInstance() to instantiate a PHP object
   static ObjectData* newInstance(Class* cls) {
@@ -198,8 +182,6 @@ class ObjectData {
     delete this;
   }
 
-  void setId(const ObjectData* r) { if (r) o_id = r->o_id; }
-
   Class* getVMClass() const {
     return m_cls;
   }
@@ -238,16 +220,11 @@ class ObjectData {
 
   /**
    * o_instanceof() can be used for both classes and interfaces.
-   * It is also worth noting that o_instanceof will always return
-   * false for classes that are descendents of ResourceData.
    */
   bool o_instanceof(CStrRef s) const;
 
   // class info
   CStrRef o_getClassName() const;
-  CStrRef o_getParentName() const;
-  virtual CStrRef o_getClassNameHook() const;
-  virtual bool isResource() const { return false; }
   int o_getId() const { return o_id;}
 
   bool o_toBoolean() const {
@@ -312,9 +289,9 @@ class ObjectData {
                             INVOKE_FEW_ARGS_DECL_ARGS);
 
   void serialize(VariableSerializer* serializer) const;
-  virtual void serializeImpl(VariableSerializer* serializer) const;
+  void serializeImpl(VariableSerializer* serializer) const;
   bool hasInternalReference(PointerSet& vars, bool ds = false) const;
-  virtual void dump() const;
+  void dump() const;
   virtual ObjectData* clone();
 
   Variant offsetGet(Variant key);
@@ -324,9 +301,6 @@ class ObjectData {
   virtual String t___tostring();
 
   static int GetMaxId() ATTRIBUTE_COLD;
-
- protected:
-  virtual bool php_sleep(Variant& ret);
 
  public:
   CArrRef getDynProps() const { return o_properties; }
@@ -449,7 +423,6 @@ class ObjectData {
   //============================================================================
   // ObjectData fields
 
-  // o_attribute and o_subclassData will be packed together with m_count.
  private:
   // Various per-instance flags
   mutable int16_t o_attribute;
@@ -459,6 +432,8 @@ class ObjectData {
     uint16_t u16;
     uint8_t u8[2];
   } o_subclassData;
+  // Counter to keep track of the number of references to this object
+  // (i.e. the object's "refcount")
   mutable RefCount m_count;
   // Pointer to this object's class
   Class* m_cls;
@@ -615,7 +590,7 @@ inline ObjectData* instanceFromTv(TypedValue* tv) {
 
 class ExtObjectData : public ObjectData {
  public:
-  explicit ExtObjectData(HPHP::Class* cls) : ObjectData(cls, false) {
+  explicit ExtObjectData(HPHP::Class* cls) : ObjectData(cls) {
     assert(!m_cls->callsCustomInstanceInit());
   }
 };

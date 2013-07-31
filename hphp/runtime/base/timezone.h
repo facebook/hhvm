@@ -20,8 +20,6 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/resource_data.h"
-#include "hphp/runtime/base/smart_object.h"
 
 extern "C" {
 #include <timelib.h>

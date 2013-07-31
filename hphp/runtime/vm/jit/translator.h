@@ -479,8 +479,8 @@ public:
   virtual bool isValidCodeAddress(TCA tca) const = 0;
   virtual Debug::DebugInfo* getDebugInfo() = 0;
   virtual void enterTCAtSrcKey(SrcKey& sk) = 0;
-  virtual void enterTCAtProlog(ActRec* ar, TCA start) = 0;
-  virtual void enterTCAfterProlog(TCA start) = 0;
+  virtual void enterTCAtPrologue(ActRec* ar, TCA start) = 0;
+  virtual void enterTCAfterPrologue(TCA start) = 0;
 
   const TransDB& getTransDB() const {
     return m_transDB;
@@ -714,7 +714,8 @@ static inline bool isCppByRef(DataType t) {
 // return true if type is passed in/out of C++ as String&/Array&/Object&
 static inline bool isSmartPtrRef(DataType t) {
   return t == KindOfString || t == KindOfStaticString ||
-         t == KindOfArray || t == KindOfObject;
+         t == KindOfArray || t == KindOfObject ||
+         t == KindOfResource;
 }
 
 void populateImmediates(NormalizedInstruction&);
@@ -729,14 +730,16 @@ bool instrMustInterp(const NormalizedInstruction&);
 
 typedef std::function<Type(int)> LocalTypeFn;
 void getInputs(SrcKey startSk, NormalizedInstruction& inst, InputInfos& infos,
-               const LocalTypeFn& localType);
+               const Func* func, const LocalTypeFn& localType);
 void getInputsImpl(SrcKey startSk, NormalizedInstruction* inst,
                    int& currentStackOffset, InputInfos& inputs,
-                   const LocalTypeFn& localType);
+                   const Func* func, const LocalTypeFn& localType);
 bool outputIsPredicted(SrcKey startSk, NormalizedInstruction& inst);
 bool callDestroysLocals(const NormalizedInstruction& inst,
                         const Func* caller);
 int locPhysicalOffset(Location l, const Func* f = nullptr);
+bool shouldAnalyzeCallee(const NormalizedInstruction*, const FPIEnt*,
+                         const Op, const int);
 
 namespace InstrFlags {
 enum OutTypeConstraints {
@@ -751,6 +754,7 @@ enum OutTypeConstraints {
   OutArray,
   OutArrayImm,
   OutObject,
+  OutResource,
   OutThisObject,        // Object from current environment
   OutFDesc,             // Blows away the current function desc
 

@@ -132,6 +132,7 @@ int64_t convCellToBoolHelper(TypedValue tv) {
     case KindOfString:  return tv.m_data.pstr->toBoolean();
     case KindOfArray:   return !tv.m_data.parr->empty();
     case KindOfObject:  return tv.m_data.pobj->o_toBoolean();
+    case KindOfResource: return tv.m_data.pres->o_toBoolean();
     default:            not_reached();
   }
 }
@@ -211,6 +212,24 @@ StringData* convObjToStrHelper(ObjectData* o) {
   }
 }
 
+StringData* convResToStrHelper(ResourceData* o) {
+  try {
+    auto s = o->o_toString();
+    auto r = s.get();
+    decRefRes(o);
+    if (!r->isStatic()) r->incRefCount();
+    return r;
+  } catch (...) {
+    // spill object back to stack. unwinder
+    // will take care of decreffing it.
+    VMRegAnchor _;
+    TypedValue* spillSlot = (TypedValue *)vmsp();
+    spillSlot->m_data.pres = o;
+    spillSlot->m_type = KindOfResource;
+    throw;
+  }
+}
+
 StringData* convCellToStrHelper(TypedValue tv) {
   switch (tv.m_type) {
     case KindOfUninit:
@@ -222,6 +241,7 @@ StringData* convCellToStrHelper(TypedValue tv) {
     case KindOfString:  return tv.m_data.pstr;
     case KindOfArray:   tvDecRefArr(&tv); return buildStringData("Array");
     case KindOfObject:  return convObjToStrHelper(tv.m_data.pobj);
+    case KindOfResource: return convResToStrHelper(tv.m_data.pres);
     default:            not_reached();
   }
 }

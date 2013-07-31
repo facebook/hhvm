@@ -1,8 +1,6 @@
 %{
 #ifdef XHPAST2_PARSER
 #include "hphp/util/parser/xhpast2/parser.h"
-#elif TEST_PARSER
-#include "hphp/util/parser/test/parser.h"
 #else
 #include "hphp/compiler/parser/parser.h"
 #endif
@@ -1160,6 +1158,7 @@ foreach_optional_arg:
 foreach_variable:
     variable                           { $$ = $1;}
   | '&' variable                       { $$ = $2; $$ = 1;}
+  | T_LIST '(' assignment_list ')'     { _p->onListAssignment($$, $3, NULL);}
 ;
 
 for_statement:

@@ -66,6 +66,7 @@ UserFile::UserFile(Class *cls, int options /*= 0 */,
   m_StreamLock  = lookupMethod(s_stream_lock.get());
 
   m_Call        = lookupMethod(s_call.get());
+  m_isLocal     = true;
 }
 
 UserFile::~UserFile() {

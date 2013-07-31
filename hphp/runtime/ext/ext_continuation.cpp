@@ -32,7 +32,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-p_Continuation f_hphp_create_continuation(CStrRef clsname,
+Object f_hphp_create_continuation(CStrRef clsname,
                                           CStrRef funcname,
                                           CStrRef origFuncName,
                                           CArrRef args /* = null_array */) {
@@ -108,7 +108,11 @@ void c_Continuation::t_next() {
   const_assert(false);
 }
 
-static StaticString s_next("next");
+const StaticString
+  s_next("next"),
+  s__closure_("{closure}"),
+  s_this("this");
+
 void c_Continuation::t_rewind() {
   this->o_invoke_few_args(s_next, 0);
 }
@@ -127,8 +131,7 @@ void c_Continuation::t_raise(CVarRef v) {
 }
 
 String c_Continuation::t_getorigfuncname() {
-  static auto const closureName = StringData::GetStaticString("{closure}");
-  auto const origName = m_origFunc->isClosureBody() ? closureName
+  auto const origName = m_origFunc->isClosureBody() ? s__closure_.get()
                                                     : m_origFunc->name();
   assert(origName->isStatic());
   return String(const_cast<StringData*>(origName));
@@ -163,8 +166,6 @@ void c_Continuation::dupContVar(const StringData* name, TypedValue* src) {
     fp->getVarEnv()->setWithRef(name, src);
   }
 }
-
-static const StaticString s_this("this");
 
 void c_Continuation::copyContinuationVars(ActRec* fp) {
   // For functions that contain only named locals, we can copy TVs

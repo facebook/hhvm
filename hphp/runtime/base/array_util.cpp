@@ -376,7 +376,8 @@ DataType ArrayUtil::Sum(CArrRef input, int64_t *isum, double *dsum) {
       }
     }
     case KindOfArray:
-    case KindOfObject: {
+    case KindOfObject:
+    case KindOfResource: {
       break;
     }
     default: {
@@ -392,7 +393,8 @@ DOUBLE:
   double d = i;
   for (; iter; ++iter) {
     CVarRef entry(iter.secondRef());
-    if (!entry.is(KindOfArray) && !entry.is(KindOfObject)) {
+    if (!entry.is(KindOfArray) && !entry.is(KindOfObject) &&
+        !entry.is(KindOfResource)) {
       d += entry.toDouble();
     }
   }
@@ -422,7 +424,8 @@ DataType ArrayUtil::Product(CArrRef input, int64_t *iprod, double *dprod) {
       }
     }
     case KindOfArray:
-    case KindOfObject: {
+    case KindOfObject:
+    case KindOfResource: {
       break;
     }
     default: {
@@ -438,7 +441,8 @@ DOUBLE:
   double d = i;
   for (; iter; ++iter) {
     CVarRef entry(iter.secondRef());
-    if (!entry.is(KindOfArray) && !entry.is(KindOfObject)) {
+    if (!entry.is(KindOfArray) && !entry.is(KindOfObject) &&
+        !entry.is(KindOfResource)) {
       d *= entry.toDouble();
     }
   }

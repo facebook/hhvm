@@ -39,8 +39,9 @@
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(curl);
 
-static StaticString s_exception("exception");
-static StaticString s_previous("previous");
+const StaticString
+  s_exception("exception"),
+  s_previous("previous");
 
 ///////////////////////////////////////////////////////////////////////////////
 // helper data structure

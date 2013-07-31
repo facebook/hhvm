@@ -73,6 +73,7 @@ Socket::Socket(int sockfd, int type, const char *address /* = NULL */,
   setsockopt(m_fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
   s_socket_data->m_lastErrno = errno;
   setTimeout(tv);
+  m_isLocal = (type == AF_UNIX);
 }
 
 Socket::~Socket() {

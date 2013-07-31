@@ -53,6 +53,7 @@ public:
   static const KindOf KindOfString     = 0x0080;
   static const KindOf KindOfArray      = 0x0100;
   static const KindOf KindOfObject     = 0x0200;   // with classname
+  static const KindOf KindOfResource   = 0x0400;
   static const KindOf KindOfVariant    = 0xFFFF;
 
   /* This bit tells coerce that if the other type
@@ -88,6 +89,7 @@ public:
   static TypePtr String;
   static TypePtr Array;
   static TypePtr Object;
+  static TypePtr Resource;
   static TypePtr Variant;
 
   static TypePtr Numeric;

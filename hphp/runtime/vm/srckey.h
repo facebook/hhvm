@@ -120,6 +120,8 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
            std::make_tuple(r.offset(), r.getFuncId());
   }
 
+  std::string getSymbol() const;
+
 private:
   FuncId m_funcId;
   Offset m_offset;
@@ -135,9 +137,7 @@ typedef hphp_hash_set<SrcKey,SrcKey::Hasher> SrcKeySet;
 
 //////////////////////////////////////////////////////////////////////
 
-inline std::string show(SrcKey sk) {
-  return folly::format("{}@{}", sk.getFuncId(), sk.offset()).str();
-}
+std::string show(SrcKey sk);
 
 void sktrace(SrcKey sk, const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
 #define SKTRACE(level, sk, ...) \

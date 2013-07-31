@@ -69,8 +69,9 @@ static void soap_ignorableWhitespace(void *ctx, const xmlChar *ch, int len) {
 static void soap_Comment(void *ctx, const xmlChar *value) {
 }
 
-static StaticString s_http("http");
-static StaticString s_timeout("timeout");
+const StaticString
+  s_http("http"),
+  s_timeout("timeout");
 
 xmlDocPtr soap_xmlParseFile(const char *filename) {
   String cache_key("HPHP.SOAP.WSDL.");

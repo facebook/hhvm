@@ -35,7 +35,7 @@ if [ x"$COMPILER_ID" = x"" ]; then
     # Building outside of a git repo, use system time instead.
     # This will make the sha appear to change constantly,
     # but without any insight into file state, it's the safest fallback
-    COMPILER_ID=$(date +%s.%N)
+    COMPILER_ID=$(date +%s_%N)
   fi
 fi
 
@@ -74,7 +74,7 @@ if [ x"$HHVM_REPO_SCHEMA" = x"" ] ; then
     # As with COMPILER_ID above, we're not in git so we have to
     # use a fallback state where we assume to repo is constantly
     # changing by using the system time
-    HHVM_REPO_SCHEMA=$(date +%N.%s)
+    HHVM_REPO_SCHEMA=$(date +%N_%s)
   fi
 fi
 

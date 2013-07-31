@@ -205,7 +205,8 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
     // making incorrect assumptions during WholeProgram mode.  See
     // AnalysisResult::collectFunctionsAndClasses.
     case FunType::ClassAlias:
-      if ((m_params->getCount() == 2 || m_params->getCount() == 3) &&
+      if (m_params &&
+          (m_params->getCount() == 2 || m_params->getCount() == 3) &&
           Option::WholeProgram) {
         if (!(*m_params)[0]->isLiteralString() ||
             !(*m_params)[1]->isLiteralString()) {
@@ -1230,7 +1231,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     Construct::recomputeEffects();
   }
 
-  m_builtinFunction = (!func->isUserFunction() || func->isSepExtension());
+  m_builtinFunction = !func->isUserFunction();
 
   beforeCheck(ar);
 

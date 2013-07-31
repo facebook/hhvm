@@ -312,6 +312,8 @@ public:
         return *(Array*)addr;
       case KindOfObject:
         return *(Object*)addr;
+      case KindOfResource:
+        return *(Resource*)addr;
       default:
         assert(false);
         return uninit_null();

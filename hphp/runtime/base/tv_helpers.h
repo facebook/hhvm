@@ -78,6 +78,11 @@ inline void tvDecRefObj(TypedValue* tv) {
   decRefObj(tv->m_data.pobj);
 }
 
+inline void tvDecRefRes(TypedValue* tv) {
+  assert(tv->m_type == KindOfResource);
+  decRefRes(tv->m_data.pres);
+}
+
 // Assumes 'r' is live and points to a RefData
 inline void tvDecRefRefInternal(RefData* r) {
   assert(tvIsPlausible(*r->tv()));
@@ -457,6 +462,7 @@ void tvCastToStringInPlace(TypedValue* tv);
 StringData* tvCastToString(TypedValue* tv);
 void tvCastToArrayInPlace(TypedValue* tv);
 void tvCastToObjectInPlace(TypedValue* tv);
+void tvCastToResourceInPlace(TypedValue* tv);
 
 bool tvCanBeCoercedToNumber(TypedValue* tv);
 bool tvCoerceParamToBooleanInPlace(TypedValue* tv);
@@ -465,6 +471,7 @@ bool tvCoerceParamToDoubleInPlace(TypedValue* tv);
 bool tvCoerceParamToStringInPlace(TypedValue* tv);
 bool tvCoerceParamToArrayInPlace(TypedValue* tv);
 bool tvCoerceParamToObjectInPlace(TypedValue* tv);
+bool tvCoerceParamToResourceInPlace(TypedValue* tv);
 
 typedef void(*RawDestructor)(void*);
 extern const RawDestructor g_destructors[kDestrTableSize];

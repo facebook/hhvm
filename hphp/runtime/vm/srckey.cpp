@@ -16,28 +16,65 @@
 
 #include "hphp/runtime/vm/srckey.h"
 
+#include "folly/Format.h"
+
 namespace HPHP {
 
-void sktrace(SrcKey sk, const char *fmt, ...) {
-  if (!Trace::enabled) {
-    return;
-  }
-  // We don't want to print string literals, so don't pass the unit
+std::string show(SrcKey sk) {
   auto func = sk.func();
   auto unit = sk.unit();
-  string s = instrToString((Op*)unit->at(sk.offset()));
   const char *filepath = "*anonFile*";
-  if (unit->filepath()->data() && strlen(unit->filepath()->data()) > 0) {
+  if (unit->filepath()->data() && unit->filepath()->size()) {
     filepath = unit->filepath()->data();
   }
-  Trace::trace("%s:%d in %s(id 0x%llx) %6d: %20s ",
-               filepath, unit->getLineNumber(sk.offset()),
-               func->isPseudoMain() ? "pseudoMain" : func->fullName()->data(),
-               (unsigned long long)sk.getFuncId(), sk.offset(), s.c_str());
+  return folly::format("{}:{} in {}(id 0x{:#x})@{: >6}",
+                       filepath, unit->getLineNumber(sk.offset()),
+                       func->isPseudoMain() ? "pseudoMain"
+                                            : func->fullName()->data(),
+                       (unsigned long long)sk.getFuncId(), sk.offset()).str();
+}
+
+void sktrace(SrcKey sk, const char *fmt, ...) {
+  if (!Trace::enabled) return;
+
+  auto inst = instrToString((Op*)sk.unit()->at(sk.offset()));
+  Trace::trace("%s: %20s ", show(sk).c_str(), inst.c_str());
   va_list a;
   va_start(a, fmt);
   Trace::vtrace(fmt, a);
   va_end(a);
+}
+
+std::string SrcKey::getSymbol() const {
+  const Func* f = func();
+  const Unit* u = unit();
+
+  if (f->isBuiltin()) {
+    return f->name()->data();
+  }
+
+  if (f->isPseudoMain()) {
+    return folly::format(
+      "{{pseudo-main}}::{}::line-{}",
+      u->filepath()->data(),
+      u->getLineNumber(m_offset)
+    ).str();
+  }
+
+  if (f->isMethod()) {
+    return folly::format(
+      "{}::{}::line-{}",
+      f->cls()->name()->data(),
+      f->name()->data(),
+      u->getLineNumber(m_offset)
+    ).str();
+  }
+
+  return folly::format(
+    "{}::line-{}",
+    f->name()->data(),
+    u->getLineNumber(m_offset)
+  ).str();
 }
 
 }

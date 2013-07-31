@@ -392,6 +392,7 @@ CALL_OPCODE(ConvCellToObj);
 CALL_OPCODE(ConvDblToStr);
 CALL_OPCODE(ConvIntToStr);
 CALL_OPCODE(ConvObjToStr);
+CALL_OPCODE(ConvResToStr);
 CALL_OPCODE(ConvCellToStr);
 
 CALL_OPCODE(CreateContFunc)
@@ -400,7 +401,6 @@ CALL_OPCODE(NewArray)
 CALL_OPCODE(NewTuple)
 CALL_OPCODE(AllocObj)
 CALL_OPCODE(LdClsCtor);
-CALL_OPCODE(CreateCl)
 CALL_OPCODE(PrintStr)
 CALL_OPCODE(PrintInt)
 CALL_OPCODE(PrintBool)
@@ -1397,15 +1397,15 @@ void CodeGenerator::cgRoundCommon(IRInstruction* inst, RoundDirection dir) {
   emitMovRegReg(m_as, outReg, dstReg);
 }
 
-void CodeGenerator::cgOpFloor(IRInstruction* inst) {
+void CodeGenerator::cgFloor(IRInstruction* inst) {
   cgRoundCommon(inst, RoundDirection::floor);
 }
 
-void CodeGenerator::cgOpCeil(IRInstruction* inst) {
+void CodeGenerator::cgCeil(IRInstruction* inst) {
   cgRoundCommon(inst, RoundDirection::ceil);
 }
 
-void CodeGenerator::cgOpAdd(IRInstruction* inst) {
+void CodeGenerator::cgAdd(IRInstruction* inst) {
   SSATmp* dst  = inst->dst();
   SSATmp* src1 = inst->src(0);
   SSATmp* src2 = inst->src(1);
@@ -1423,7 +1423,7 @@ void CodeGenerator::cgOpAdd(IRInstruction* inst) {
              Commutative);
 }
 
-void CodeGenerator::cgOpSub(IRInstruction* inst) {
+void CodeGenerator::cgSub(IRInstruction* inst) {
   SSATmp* dst   = inst->dst();
   SSATmp* src1  = inst->src(0);
   SSATmp* src2  = inst->src(1);
@@ -1446,7 +1446,7 @@ void CodeGenerator::cgOpSub(IRInstruction* inst) {
              NonCommutative);
 }
 
-void CodeGenerator::cgOpDivDbl(IRInstruction* inst) {
+void CodeGenerator::cgDivDbl(IRInstruction* inst) {
   const SSATmp* dst   = inst->dst();
   const SSATmp* src1  = inst->src(0);
   const SSATmp* src2  = inst->src(1);
@@ -1477,7 +1477,7 @@ void CodeGenerator::cgOpDivDbl(IRInstruction* inst) {
   emitMovRegReg(m_as, resReg, dstReg);
 }
 
-void CodeGenerator::cgOpBitAnd(IRInstruction* inst) {
+void CodeGenerator::cgBitAnd(IRInstruction* inst) {
   cgBinaryIntOp(inst,
                 &Asm::andq,
                 &Asm::andq,
@@ -1487,7 +1487,7 @@ void CodeGenerator::cgOpBitAnd(IRInstruction* inst) {
                 Commutative);
 }
 
-void CodeGenerator::cgOpBitOr(IRInstruction* inst) {
+void CodeGenerator::cgBitOr(IRInstruction* inst) {
   cgBinaryIntOp(inst,
                 &Asm::orq,
                 &Asm::orq,
@@ -1497,7 +1497,7 @@ void CodeGenerator::cgOpBitOr(IRInstruction* inst) {
                 Commutative);
 }
 
-void CodeGenerator::cgOpBitXor(IRInstruction* inst) {
+void CodeGenerator::cgBitXor(IRInstruction* inst) {
   cgBinaryIntOp(inst,
                 &Asm::xorq,
                 &Asm::xorq,
@@ -1507,14 +1507,14 @@ void CodeGenerator::cgOpBitXor(IRInstruction* inst) {
                 Commutative);
 }
 
-void CodeGenerator::cgOpBitNot(IRInstruction* inst) {
+void CodeGenerator::cgBitNot(IRInstruction* inst) {
   cgUnaryIntOp(inst->dst(),
                inst->src(0),
                &Asm::not,
                [](int64_t i) { return ~i; });
 }
 
-void CodeGenerator::cgOpLogicXor(IRInstruction* inst) {
+void CodeGenerator::cgLogicXor(IRInstruction* inst) {
   cgBinaryIntOp(inst,
                 &Asm::xorb,
                 &Asm::xorb,
@@ -1524,7 +1524,7 @@ void CodeGenerator::cgOpLogicXor(IRInstruction* inst) {
                 Commutative);
 }
 
-void CodeGenerator::cgOpMul(IRInstruction* inst) {
+void CodeGenerator::cgMul(IRInstruction* inst) {
   cgBinaryOp(inst,
              &Asm::imul,
              &Asm::imul,
@@ -1535,7 +1535,7 @@ void CodeGenerator::cgOpMul(IRInstruction* inst) {
              Commutative);
 }
 
-void CodeGenerator::cgOpMod(IRInstruction* inst) {
+void CodeGenerator::cgMod(IRInstruction* inst) {
   auto const src0 = inst->src(0);
   auto const src1 = inst->src(1);
   auto const dstReg = m_regs[inst->dst()].reg();
@@ -1578,8 +1578,28 @@ void CodeGenerator::cgOpMod(IRInstruction* inst) {
   }
 }
 
+void CodeGenerator::cgSqrt(IRInstruction* inst) {
+  auto src = inst->src(0);
+  auto dst = inst->dst();
+
+  auto srcReg = m_regs[src].reg();
+  auto dstReg = m_regs[dst].reg();
+  if (dstReg == InvalidReg) return;
+
+  auto resReg = dstReg.isXMM() ? dstReg : PhysReg(rCgXMM0);
+
+  if (srcReg == InvalidReg) {
+    emitLoadImm  (m_as, src->getValRawInt(), m_rScratch);
+    emitMovRegReg(m_as, m_rScratch, resReg);
+  } else {
+    emitMovRegReg(m_as, srcReg, resReg);
+  }
+  m_as.  sqrtsd  (resReg, resReg);
+  emitMovRegReg  (m_as, resReg, dstReg);
+}
+
 template<class Oper>
-void CodeGenerator::cgOpShiftCommon(IRInstruction* inst,
+void CodeGenerator::cgShiftCommon(IRInstruction* inst,
                                     void (Asm::*instrIR)(Immed, Reg64),
                                     void (Asm::*instrR)(Reg64),
                                     Oper oper) {
@@ -1656,21 +1676,21 @@ void CodeGenerator::cgOpShiftCommon(IRInstruction* inst,
   }
 }
 
-void CodeGenerator::cgOpShl(IRInstruction* inst) {
-  cgOpShiftCommon(inst,
-                  &Asm::shlq,
-                  &Asm::shlq,
-                  [] (int64_t a, int64_t b) { return a << b; });
+void CodeGenerator::cgShl(IRInstruction* inst) {
+  cgShiftCommon(inst,
+                &Asm::shlq,
+                &Asm::shlq,
+                [] (int64_t a, int64_t b) { return a << b; });
 }
 
-void CodeGenerator::cgOpShr(IRInstruction* inst) {
-  cgOpShiftCommon(inst,
-                  &Asm::sarq,
-                  &Asm::sarq,
-                  [] (int64_t a, int64_t b) { return a >> b; });
+void CodeGenerator::cgShr(IRInstruction* inst) {
+  cgShiftCommon(inst,
+                &Asm::sarq,
+                &Asm::sarq,
+                [] (int64_t a, int64_t b) { return a >> b; });
 }
 
-void CodeGenerator::cgOpNot(IRInstruction* inst) {
+void CodeGenerator::cgNot(IRInstruction* inst) {
   auto const src = inst->src(0);
   auto const dstReg = m_regs[inst->dst()].reg();
   auto& a = m_as;
@@ -1716,26 +1736,29 @@ inline int64_t ccmp_nsame(A a, B b) { return !ccmp_same(a, b); }
 template <typename A, typename B>
 inline int64_t ccmp_nequal(A a, B b) { return !ccmp_equal(a, b); }
 
+// TODO Task #2661083: We cannot assume that "(a <= b) === !(a > b)" for
+// all types. In particular, this assumption does not hold when comparing
+// two arrays or comparing two objects. We should fix this.
 template <typename A, typename B>
 inline int64_t ccmp_lte(A a, B b) { return !ccmp_more(a, b); }
 
 template <typename A, typename B>
 inline int64_t ccmp_gte(A a, B b) { return !ccmp_less(a, b); }
 
-#define CG_OP_CMP(inst, setter, name)                                         \
-  cgOpCmpHelper(inst, &Asm:: setter, ccmp_ ## name, ccmp_ ## name,            \
-                ccmp_ ## name, ccmp_ ## name, ccmp_ ## name, ccmp_ ## name)
+#define CG_OP_CMP(inst, setter, name)                                   \
+  cgCmpHelper(inst, &Asm:: setter, ccmp_ ## name, ccmp_ ## name,        \
+              ccmp_ ## name, ccmp_ ## name, ccmp_ ## name, ccmp_ ## name)
 
-// SRON - string, resource, object, or number
-static bool typeIsSRON(Type t) {
+// SON - string, object, or number
+static bool typeIsSON(Type t) {
   return t.isString()
-      || t == Type::Obj // encompases object and resource
+      || t == Type::Obj
       || t == Type::Int
       || t == Type::Dbl
       ;
 }
 
-void CodeGenerator::cgOpCmpHelper(
+void CodeGenerator::cgCmpHelper(
           IRInstruction* inst,
           void (Asm::*setter)(Reg8),
           int64_t (*str_cmp_str)(StringData*, StringData*),
@@ -1743,7 +1766,7 @@ void CodeGenerator::cgOpCmpHelper(
           int64_t (*str_cmp_obj)(StringData*, ObjectData*),
           int64_t (*obj_cmp_obj)(ObjectData*, ObjectData*),
           int64_t (*obj_cmp_int)(ObjectData*, int64_t),
-          int64_t (*arr_cmp_arr)( ArrayData*, ArrayData*)
+          int64_t (*arr_cmp_arr)(ArrayData*,  ArrayData*)
         ) {
   SSATmp* dst   = inst->dst();
   SSATmp* src1  = inst->src(0);
@@ -1796,7 +1819,7 @@ void CodeGenerator::cgOpCmpHelper(
   // These cases must be amalgamated because Type::Obj can refer to an object
   //  or to a resource.
   // strings are canonicalized to the left, ints to the right
-  else if (typeIsSRON(type1) && typeIsSRON(type2)) {
+  else if (typeIsSON(type1) && typeIsSON(type2)) {
     // the common case: int cmp int
     if (type1 == Type::Int && type2 == Type::Int) {
       if (src2->isConst()) {
@@ -1832,7 +1855,7 @@ void CodeGenerator::cgOpCmpHelper(
       } else if (type2 == Type::Obj) {
         ArgGroup args(m_regs);
         args.ssa(src1).ssa(src2);
-        cgCallHelper(m_as, (TCA)str_cmp_obj,  dst,
+        cgCallHelper(m_as, (TCA)str_cmp_obj, dst,
                      SyncOptions::kSyncPoint, args);
       } else {
         CG_PUNT(cgOpCmpHelper_sx);
@@ -1840,7 +1863,7 @@ void CodeGenerator::cgOpCmpHelper(
     }
 
     else if (type1 == Type::Obj) {
-      // string cmp object/resource is dealt with above
+      // string cmp object is dealt with above
       // object cmp double is punted above
 
       if (type2 == Type::Obj) {
@@ -1858,7 +1881,7 @@ void CodeGenerator::cgOpCmpHelper(
       }
     }
 
-   else NOT_REACHED();
+    else NOT_REACHED();
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1880,35 +1903,35 @@ void CodeGenerator::cgOpCmpHelper(
   }
 }
 
-void CodeGenerator::cgOpEq(IRInstruction* inst) {
+void CodeGenerator::cgEq(IRInstruction* inst) {
   CG_OP_CMP(inst, sete, equal);
 }
 
-void CodeGenerator::cgOpNeq(IRInstruction* inst) {
+void CodeGenerator::cgNeq(IRInstruction* inst) {
   CG_OP_CMP(inst, setne, nequal);
 }
 
-void CodeGenerator::cgOpSame(IRInstruction* inst) {
+void CodeGenerator::cgSame(IRInstruction* inst) {
   CG_OP_CMP(inst, sete, same);
 }
 
-void CodeGenerator::cgOpNSame(IRInstruction* inst) {
+void CodeGenerator::cgNSame(IRInstruction* inst) {
   CG_OP_CMP(inst, setne, nsame);
 }
 
-void CodeGenerator::cgOpLt(IRInstruction* inst) {
+void CodeGenerator::cgLt(IRInstruction* inst) {
   CG_OP_CMP(inst, setl, less);
 }
 
-void CodeGenerator::cgOpGt(IRInstruction* inst) {
+void CodeGenerator::cgGt(IRInstruction* inst) {
   CG_OP_CMP(inst, setg, more);
 }
 
-void CodeGenerator::cgOpLte(IRInstruction* inst) {
+void CodeGenerator::cgLte(IRInstruction* inst) {
   CG_OP_CMP(inst, setle, lte);
 }
 
-void CodeGenerator::cgOpGte(IRInstruction* inst) {
+void CodeGenerator::cgGte(IRInstruction* inst) {
   CG_OP_CMP(inst, setge, gte);
 }
 
@@ -1957,12 +1980,12 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
     assert(type.isKnownDataType());
     DataType dataType = type.toDataType();
     assert(dataType == KindOfRef ||
-           (dataType >= KindOfUninit && dataType <= KindOfObject));
+           (dataType >= KindOfUninit && dataType <= KindOfResource));
     emitCmpTVType(m_as, dataType, typeSrc);
     cc = CC_E;
   }
   doJcc(cc);
-  if (type.strictSubtypeOf(Type::Obj)) {
+  if (type.strictSubtypeOf(Type::Obj) || type.strictSubtypeOf(Type::Res)) {
     // emit the specific class test
     assert(type.getClass()->attrs() & AttrFinal);
     auto reg = getObjectDataEnregistered(m_as, dataSrc, m_rScratch);
@@ -1976,10 +1999,12 @@ void CodeGenerator::emitIsTypeTest(IRInstruction* inst, JmpFn doJcc) {
   auto const src = inst->src(0);
 
   // punt if specialized object for now
-  if (inst->typeParam().strictSubtypeOf(Type::Obj)) {
+  if (inst->typeParam().strictSubtypeOf(Type::Obj) ||
+      inst->typeParam().strictSubtypeOf(Type::Res)) {
     CG_PUNT(IsType-SpecializedUnsupported);
   }
-  if (inst->typeParam().equals(Type::Obj)) {
+  if (inst->typeParam().equals(Type::Obj) ||
+      inst->typeParam().equals(Type::Res)) {
     auto const srcReg = m_regs[src].reg();
     if (src->isA(Type::PtrToGen)) {
       emitTestTVType(m_as, KindOfObject, srcReg[TVOFF(m_type)]);
@@ -1994,7 +2019,7 @@ void CodeGenerator::emitIsTypeTest(IRInstruction* inst, JmpFn doJcc) {
       m_as.patchJcc8(toPatch, m_as.frontier());
     } else {
       // Cases where src isn't an Obj should have been simplified away
-      if (!src->isA(Type::Obj)) {
+      if (!src->isA(Type::Obj) && !src->isA(Type::Res)) {
         CG_PUNT(IsType-KnownWrongType);
       }
       m_as.   cmpq(SystemLib::s_resourceClass,
@@ -2344,6 +2369,22 @@ void CodeGenerator::cgConvBoolToStr(IRInstruction* inst) {
     m_as.mov_imm64_reg((uint64_t)StringData::GetStaticString("1"), m_rScratch);
     m_as.cmov_reg64_reg64(CC_NZ, m_rScratch, dstReg);
   }
+}
+
+void CodeGenerator::cgConvClsToCctx(IRInstruction* inst) {
+  auto const src  = inst->src(0);
+  auto const sreg = m_regs[src].reg();
+  auto const dreg = m_regs[inst->dst()].reg();
+  auto& a = m_as;
+
+  if (dreg == InvalidReg) return;
+
+  if (src->isConst()) {
+    a.  movq  (reinterpret_cast<uintptr_t>(src->getValClass()) | 1, dreg);
+    return;
+  }
+  emitMovRegReg(a, sreg, dreg);
+  a.    orq   (1, dreg);
 }
 
 void CodeGenerator::cgUnboxPtr(IRInstruction* inst) {
@@ -2999,13 +3040,27 @@ void CodeGenerator::cgIncRefWork(Type type, SSATmp* src) {
 }
 
 void CodeGenerator::cgIncRef(IRInstruction* inst) {
-  SSATmp* dst    = inst->dst();
-  SSATmp* src    = inst->src(0);
-  Type type = src->type();
+  SSATmp* dst = inst->dst();
+  SSATmp* src = inst->src(0);
+  Type type   = src->type();
 
   cgIncRefWork(type, src);
   shuffle2(m_as, m_regs[src].reg(0), m_regs[src].reg(1),
            m_regs[dst].reg(0), m_regs[dst].reg(1));
+}
+
+void CodeGenerator::cgIncRefCtx(IRInstruction* inst) {
+  if (inst->src(0)->isA(Type::Obj)) return cgIncRef(inst);
+
+  auto const src = m_regs[inst->src(0)].reg();
+  auto const dst = m_regs[inst->dst()].reg();
+  auto& a = m_as;
+
+  emitMovRegReg(a, src, dst);
+  a.    testb  (0x1, rbyte(dst));
+  ifThen(a, CC_Z, [&] {
+    emitIncRef(a, dst);
+  });
 }
 
 void CodeGenerator::cgDecRefStack(IRInstruction* inst) {
@@ -3094,14 +3149,18 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
 static void
 tv_release_generic(TypedValue* tv) {
   assert(Transl::tx64->stateIsDirty());
-  assert(tv->m_type >= KindOfString && tv->m_type <= KindOfRef);
+  assert(tv->m_type == KindOfString || tv->m_type == KindOfArray ||
+         tv->m_type == KindOfObject || tv->m_type == KindOfResource ||
+         tv->m_type == KindOfRef);
   g_destructors[typeToDestrIndex(tv->m_type)](tv->m_data.pref);
 }
 
 static void
 tv_release_typed(RefData* pv, DataType dt) {
   assert(Transl::tx64->stateIsDirty());
-  assert(dt >= KindOfString && dt <= KindOfRef);
+  assert(dt == KindOfString || dt == KindOfArray ||
+         dt == KindOfObject || dt == KindOfResource ||
+         dt == KindOfRef);
   g_destructors[typeToDestrIndex(dt)](pv);
 }
 
@@ -3611,11 +3670,30 @@ const Func* loadClassCtor(Class* cls) {
   return f;
 }
 
-ObjectData* createClHelper(Class* cls, int numArgs, ActRec* ar,
-                           TypedValue* sp) {
-  ObjectData* newObj = newInstance(cls);
-  newObj->incRefCount();
-  return static_cast<c_Closure*>(newObj)->init(numArgs, ar, sp);
+void CodeGenerator::cgStClosureFunc(IRInstruction* inst) {
+  auto const obj  = m_regs[inst->src(0)].reg();
+  auto const func = inst->extra<StClosureFunc>()->func;
+  auto& a = m_as;
+  a.    storeq  (func, obj[c_Closure::funcOffset()]);
+}
+
+void CodeGenerator::cgStClosureArg(IRInstruction* inst) {
+  cgStore(
+    m_regs[inst->src(0)].reg(),
+    inst->extra<StClosureArg>()->offsetBytes,
+    inst->src(1)
+  );
+}
+
+void CodeGenerator::cgStClosureCtx(IRInstruction* inst) {
+  auto const obj = m_regs[inst->src(0)].reg();
+  auto const ctx = m_regs[inst->src(1)].reg();
+  auto& a = m_as;
+  if (inst->src(1)->isA(Type::Nullptr)) {
+    a.  storeq  (0,   obj[c_Closure::ctxOffset()]);
+  } else {
+    a.  storeq  (ctx, obj[c_Closure::ctxOffset()]);
+  }
 }
 
 void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
@@ -3809,6 +3887,8 @@ void CodeGenerator::cgCastStk(IRInstruction *inst) {
     tvCastHelper = (TCA)tvCastToStringInPlace;
   } else if (type.subtypeOf(Type::Obj)) {
     tvCastHelper = (TCA)tvCastToObjectInPlace;
+  } else if (type.subtypeOf(Type::Res)) {
+    tvCastHelper = (TCA)tvCastToResourceInPlace;
   } else {
     not_reached();
   }
@@ -3841,6 +3921,8 @@ void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
     tvCoerceHelper = (TCA)tvCoerceParamToStringInPlace;
   } else if (type.subtypeOf(Type::Obj)) {
     tvCoerceHelper = (TCA)tvCoerceParamToObjectInPlace;
+  } else if (type.subtypeOf(Type::Res)) {
+    tvCoerceHelper = (TCA)tvCoerceParamToResourceInPlace;
   } else {
     not_reached();
   }
@@ -4019,7 +4101,6 @@ void CodeGenerator::cgLdThis(IRInstruction* inst) {
   SSATmp* dst   = inst->dst();
   SSATmp* src   = inst->src(0);
   Block* label  = inst->taken();
-  // mov dst, [fp + 0x20]
   auto dstReg = m_regs[dst].reg();
 
   // the destination of LdThis could be dead but the instruction
@@ -4032,12 +4113,10 @@ void CodeGenerator::cgLdThis(IRInstruction* inst) {
   }
   if (label == NULL) return;  // no need to perform its checks
   if (dstReg != InvalidReg) {
-    // test 0x01, dst
     m_as.testb(1, rbyte(dstReg));
   } else {
     m_as.testb(1, m_regs[src].reg()[AROFF(m_this)]);
   }
-  // jnz label
   emitFwdJcc(CC_NZ, label);
 }
 
@@ -5361,8 +5440,9 @@ void CodeGenerator::cgConcat(IRInstruction* inst) {
     cgCallHelper(m_as, (TCA)fptr, dst, SyncOptions::kNoSyncPoint,
                  ArgGroup(m_regs).ssa(tl).ssa(tr));
   } else {
-    if (lType.subtypeOf(Type::Obj) || lType.needsReg() ||
-        rType.subtypeOf(Type::Obj) || rType.needsReg()) {
+    if (lType.subtypeOf(Type::Obj) || lType.subtypeOf(Type::Res) ||
+        lType.needsReg() || rType.subtypeOf(Type::Obj) ||
+        rType.subtypeOf(Type::Res) || rType.needsReg()) {
       CG_PUNT(cgConcat);
     }
     cgCallHelper(m_as, (TCA)concat_value, dst, SyncOptions::kNoSyncPoint,

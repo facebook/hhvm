@@ -51,6 +51,7 @@
 #include "hphp/runtime/vm/type_constraint.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_error.h"
 #include "hphp/runtime/ext/ext_closure.h"
@@ -710,6 +711,15 @@ static std::string toStringElm(const TypedValue* tv) {
        << "c(" << tv->m_data.pobj->getCount() << ")"
        << ":Object("
        << tvAsCVarRef(tv).asCObjRef().get()->o_getClassName().get()->data()
+       << ")";
+    break;
+  case KindOfResource:
+    assert(tv->m_data.pres->getCount() > 0);
+    os << tv->m_data.pres
+       << "c(" << tv->m_data.pres->getCount() << ")"
+       << ":Resource("
+       << const_cast<ResourceData*>(tv->m_data.pres)
+            ->o_getClassName().get()->data()
        << ")";
     break;
   case KindOfRef:
@@ -1506,7 +1516,7 @@ void VMExecutionContext::enterVMPrologue(ActRec* enterFnAr) {
     int na = enterFnAr->numArgs();
     if (na > np) na = np + 1;
     Transl::TCA start = enterFnAr->m_func->getPrologue(na);
-    tx()->enterTCAtProlog(enterFnAr, start);
+    tx()->enterTCAtPrologue(enterFnAr, start);
   } else {
     if (prepareFuncEntry(enterFnAr, m_pc)) {
       enterVMWork(enterFnAr);
@@ -1526,7 +1536,7 @@ void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
     (void) m_fp->unit()->offsetOf(m_pc); /* assert */
     if (enterFnAr) {
       assert(start);
-      tx()->enterTCAfterProlog(start);
+      tx()->enterTCAfterPrologue(start);
     } else {
       SrcKey sk(m_fp->func(), m_pc);
       tx()->enterTCAtSrcKey(sk);
@@ -3753,6 +3763,34 @@ inline void OPTBLD_INLINE VMExecutionContext::iopShr(PC& pc) {
   });
 }
 
+inline void OPTBLD_INLINE VMExecutionContext::iopSqrt(PC& pc) {
+  NEXT();
+  Cell* c1 = m_stack.topC();
+
+  if (c1->m_type == KindOfNull || c1->m_type == KindOfBoolean ||
+      (IS_STRING_TYPE(c1->m_type) && c1->m_data.pstr->isNumeric())) {
+    tvCastToDoubleInPlace(c1);
+  }
+
+  if (c1->m_type == KindOfInt64) {
+    c1->m_type = KindOfDouble;
+    c1->m_data.dbl = f_sqrt(c1->m_data.num);
+  } else if (c1->m_type == KindOfDouble) {
+    c1->m_data.dbl = f_sqrt(c1->m_data.dbl);
+  }
+
+  if (c1->m_type != KindOfDouble) {
+    raise_param_type_warning(
+      "sqrt",
+      1,
+      KindOfDouble,
+      c1->m_type
+    );
+    tvRefcountedDecRefCell(c1);
+    c1->m_type = KindOfNull;
+  }
+}
+
 inline void OPTBLD_INLINE VMExecutionContext::iopBitNot(PC& pc) {
   NEXT();
   cellBitNot(*m_stack.topC());
@@ -4077,6 +4115,11 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSwitch(PC& pc) {
 
       case KindOfObject:
         intval = val->m_data.pobj->o_toInt64();
+        tvDecRef(val);
+        break;
+
+      case KindOfResource:
+        intval = val->m_data.pres->o_toInt64();
         tvDecRef(val);
         break;
 
@@ -5727,7 +5770,8 @@ template<class Ret, size_t NArgs, size_t CurArg> struct NativeFuncCaller {
       // pass TV.m_data.num by value
       return NextArgT::call(func, tvs - 1, args..., tvs->m_data.num);
     }
-    if (IS_STRING_TYPE(type) || type == KindOfArray || type == KindOfObject) {
+    if (IS_STRING_TYPE(type) || type == KindOfArray || type == KindOfObject ||
+        type == KindOfResource) {
       // pass ptr to TV.m_data for String&, Array&, or Object&
       return NextArgT::call(func, tvs - 1, args..., &tvs->m_data);
     }
@@ -5818,6 +5862,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
       CASE(String)
       CASE(Array)
       CASE(Object)
+      CASE(Resource)
       case KindOfUnknown:
         break;
       default:
@@ -5840,6 +5885,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
   case KindOfStaticString:
   case KindOfArray:
   case KindOfObject:
+  case KindOfResource:
     makeNativeRefCall(func, &ret.m_data, args, numArgs);
     if (ret.m_data.num == 0) {
       ret.m_type = KindOfNull;
@@ -6542,12 +6588,11 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCreateCl(PC& pc) {
   NEXT();
   DECODE_IVA(numArgs);
   DECODE_LITSTR(clsName);
-  Class* cls = Unit::loadClass(clsName);
-  c_Closure* cl = static_cast<c_Closure*>(newInstance(cls));
-  c_Closure* cl2 = cl->init(numArgs, m_fp, m_stack.top());
+  auto const cls = Unit::loadClass(clsName);
+  auto const cl = static_cast<c_Closure*>(newInstance(cls));
+  cl->init(numArgs, m_fp, m_stack.top());
   m_stack.ndiscard(numArgs);
-  assert(cl == cl2);
-  m_stack.pushObject(cl2);
+  m_stack.pushObject(cl);
 }
 
 static inline c_Continuation* createCont(const Func* origFunc,
@@ -6614,7 +6659,7 @@ static inline void setContVar(const Func* genFunc,
   }
 }
 
-static const StaticString s_this("this");
+const StaticString s_this("this");
 
 c_Continuation*
 VMExecutionContext::fillContinuationVars(ActRec* fp,

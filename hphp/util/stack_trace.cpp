@@ -30,6 +30,7 @@
 #include "hphp/util/light_process.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/hash.h"
+#include "folly/ScopeGuard.h"
 
 namespace HPHP {
 
@@ -332,7 +333,12 @@ void StackTrace::TranslateFromPerfMap(void* bt, Frame* f) {
            sizeof(perfMapName),
            "/tmp/perf-%d.map", getpid());
   FILE* perfMap = fopen(perfMapName, "r");
-
+  if (!perfMap) {
+    f->filename = "?";
+    f->funcname = "TC?";
+    return;
+  }
+  SCOPE_EXIT { fclose(perfMap); };
   uintptr_t begin;
   uint32_t size;
   char name[256];
@@ -342,8 +348,6 @@ void StackTrace::TranslateFromPerfMap(void* bt, Frame* f) {
       break;
     }
   }
-  fclose(perfMap);
-
   std::string filefunc = std::string(name);
   size_t endPhp = filefunc.find("::");
   if (endPhp == std::string::npos) {
@@ -352,7 +356,6 @@ void StackTrace::TranslateFromPerfMap(void* bt, Frame* f) {
   }
   endPhp += 2;   // Skip the ::
   size_t endFile = filefunc.find("::", endPhp);
-
   f->filename = std::string(filefunc, endPhp, endFile - endPhp);
   f->funcname = "PHP::" + std::string(filefunc, endFile + 2) + "()";
 }

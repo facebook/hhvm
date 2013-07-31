@@ -388,7 +388,7 @@
                 "HasDocComment"
             ],
             "return": {
-                "type": "Numeric",
+                "type": "Variant",
                 "desc": "base raised to the power of exp. If the result can be represented as integer it will be returned as type integer, else it will be returned as type float. If the power cannot be computed FALSE will be returned instead."
             },
             "args": [

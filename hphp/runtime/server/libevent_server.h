@@ -188,6 +188,13 @@ protected:
   CPipe m_pipeStop;
 
 private:
+  enum RequestPriority {
+    PRIORITY_NORMAL = 0,
+    PRIORITY_HIGH,
+    kNumPriorities
+  };
+  RequestPriority getRequestPriority(struct evhttp_request* request);
+
   JobQueueDispatcher<LibEventJobPtr, LibEventWorker> m_dispatcher;
   AsyncFunc<LibEventServer> m_dispatcherThread;
 

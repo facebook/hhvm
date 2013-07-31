@@ -86,9 +86,6 @@ public:
   bool isNull() const {
     return m_px == nullptr;
   }
-  bool isResource() const {
-    return m_px && m_px->isResource();
-  }
   bool instanceof(CStrRef s) const {
     return m_px && m_px->o_instanceof(s);
   }
@@ -106,11 +103,8 @@ public:
                          CStrRef context = null_string) const;
 
   /**
-   * getTyped() and is() are intended for use with classes only. Using
-   * these functions with an interface will cause a compile time error.
-   * It is also worth noting that these functions have not been tested
-   * with redeclared classes or classes that have a redeclared ancestor
-   * in the inheritance hierarchy.
+   * getTyped() and is() are intended for use with C++ classes that derive
+   * from ObjectData.
    */
   template<typename T>
   T *getTyped(bool nullOkay = false, bool badTypeOkay = false) const {
@@ -219,9 +213,6 @@ private:
     static_assert(offsetof(ObjNR, m_px) == kExpectedMPxOffset, "");
   }
 };
-
-typedef Object Resource;
-#define null_resource Object::s_nullObject
 
 ///////////////////////////////////////////////////////////////////////////////
 }

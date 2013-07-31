@@ -34,6 +34,7 @@ StaticString MemFile::s_class_name("MemFile");
 
 MemFile::MemFile()
   : File(false), m_data(nullptr), m_len(-1), m_cursor(0), m_malloced(false) {
+  m_isLocal = true;
 }
 
 MemFile::MemFile(const char *data, int64_t len)
@@ -43,6 +44,7 @@ MemFile::MemFile(const char *data, int64_t len)
     memcpy(m_data, data, len);
   }
   m_data[len] = '\0';
+  m_isLocal = true;
 }
 
 MemFile::~MemFile() {

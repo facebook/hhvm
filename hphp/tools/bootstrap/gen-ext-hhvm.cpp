@@ -369,6 +369,10 @@ void emitExtCall(const PhpFunc& func, std::ostream& out, const char* ind) {
     out << ind << "rv->m_type = KindOfObject;\n";
     call_suffix = (fbstring(";\n") + ind +
                    "if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;\n");
+  } else if (returnKindOf == KindOfResource) {
+    out << ind << "rv->m_type = KindOfResource;\n";
+    call_suffix = (fbstring(";\n") + ind +
+                   "if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;\n");
   } else {
     call_suffix = (fbstring(";\n") + ind +
                    "if (rv->m_type == KindOfUninit) "
@@ -393,6 +397,7 @@ void emitExtCall(const PhpFunc& func, std::ostream& out, const char* ind) {
         std::string nullToType =
           kindof == KindOfArray ? ".toArray()" :
           kindof == KindOfString ? ".toString()" :
+          kindof == KindOfResource ? ".toResource()" :
           kindof == KindOfObject ? ".toObject()" :
           kindof == KindOfRef ? "" :
           "icantconvertthisfromnull";

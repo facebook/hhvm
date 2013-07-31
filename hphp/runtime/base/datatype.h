@@ -43,37 +43,40 @@ enum DataType: DataTypeInt {
    * the number of bits needed to represent this.  (Known dependency
    * in unwind-x64.h.)
    */
-  KindOfUninit           = 0,
+  KindOfUninit           = 0x00,
   // Any code that static_asserts about the value of KindOfNull may
   // also depend on there not being any values between KindOfUninit
   // and KindOfNull.
-  KindOfNull             = 8,     //   0001000    0x08
-  KindOfBoolean          = 9,     //   0001001    0x09
-  KindOfInt64            = 10,    //   0001010    0x0a
-  KindOfDouble           = 11,    //   0001011    0x0b
+  KindOfNull             = 0x08,  //   0001000
+  KindOfBoolean          = 0x09,  //   0001001
+  KindOfInt64            = 0x0a,  //   0001010
+  KindOfDouble           = 0x0b,  //   0001011
 
-  KindOfStaticString     = 12,    //   0001100    0x0c
-  KindOfString           = 20,    //   0010100    0x14
-  KindOfArray            = 32,    //   0100000    0x20
-  KindOfObject           = 64,    //   1000000    0x40
-  KindOfRef              = 96,    //   1100000    0x60
-  KindOfIndirect         = 97,    //   1100001    0x61
+  KindOfStaticString     = 0x0c,  //   0001100
+  KindOfString           = 0x14,  //   0010100
+  KindOfArray            = 0x20,  //   0100000
+  KindOfObject           = 0x30,  //   0110000
+  KindOfResource         = 0x40,  //   1000000
+  KindOfRef              = 0x50,  //   1010000
+  KindOfIndirect         = 0x51,  //   1010001
 
   MaxNumDataTypes        = KindOfIndirect + 1, // marker, not a valid type
-  MaxNumDataTypesIndex   = 11 + 1,  // 1 + the number of valid DataTypes above
+  MaxNumDataTypesIndex   = 12 + 1,  // 1 + the number of valid DataTypes above
 
-  MaxDataType            = 0x7f, // Allow KindOf* > 11 in HphpArray.
   // Note: KindOfStringBit must be set in KindOfStaticString and KindOfString,
   //       and it must be 0 in any other real DataType.
-  KindOfStringBit        = 4,
+  KindOfStringBit        = 0x04,
 
   // Note: KindOfUncountedInitBit must be set for Null, Boolean, Int64, Double,
   //       and StaticString, and it must be 0 for any other real DataType.
-  KindOfUncountedInitBit = 8,
+  KindOfUncountedInitBit = 0x08,
 };
 
-const unsigned int kDataTypeMask = 0x7F;
-const unsigned int kNotConstantValueTypeMask = KindOfRef;
+const unsigned int kDataTypeMask = 0x7f;
+
+// For a given DataType dt >= 0, this mask can be used to test if dt is
+// KindOfArray, KindOfObject, KindOfResource, or KindOfRef
+const unsigned int kNotConstantValueTypeMask = 0x60;
 
 // All DataTypes greater than this value are refcounted.
 const DataType KindOfRefCountThreshold = KindOfStaticString;
@@ -98,6 +101,7 @@ static_assert(!(KindOfInt64      & KindOfStringBit), "");
 static_assert(!(KindOfDouble     & KindOfStringBit), "");
 static_assert(!(KindOfArray      & KindOfStringBit), "");
 static_assert(!(KindOfObject     & KindOfStringBit), "");
+static_assert(!(KindOfResource   & KindOfStringBit), "");
 static_assert(!(KindOfRef        & KindOfStringBit), "");
 static_assert(!(KindOfIndirect   & KindOfStringBit), "");
 static_assert(!(KindOfClass      & KindOfStringBit), "");
@@ -111,6 +115,7 @@ static_assert(!(KindOfUninit     & KindOfUncountedInitBit), "");
 static_assert(!(KindOfString     & KindOfUncountedInitBit), "");
 static_assert(!(KindOfArray      & KindOfUncountedInitBit), "");
 static_assert(!(KindOfObject     & KindOfUncountedInitBit), "");
+static_assert(!(KindOfResource   & KindOfUncountedInitBit), "");
 static_assert(!(KindOfRef        & KindOfUncountedInitBit), "");
 static_assert(!(KindOfIndirect   & KindOfUncountedInitBit), "");
 static_assert(!(KindOfClass      & KindOfUncountedInitBit), "");
@@ -123,6 +128,7 @@ static_assert(MaxNumDataTypes - 1 <= kDataTypeMask, "");
 
 static_assert((kNotConstantValueTypeMask & KindOfArray) != 0  &&
               (kNotConstantValueTypeMask & KindOfObject) != 0 &&
+              (kNotConstantValueTypeMask & KindOfResource) != 0 &&
               (kNotConstantValueTypeMask & KindOfRef) != 0,
               "DataType & kNotConstantValueTypeMask must be non-zero for "
               "Array, Object and Ref types");
@@ -148,6 +154,7 @@ inline std::string tname(DataType t) {
     CS(String)
     CS(Array)
     CS(Object)
+    CS(Resource)
     CS(Ref)
     CS(Class)
     CS(Any)
@@ -165,24 +172,6 @@ inline std::string tname(DataType t) {
   }
 }
 
-inline const char* getDataTypeString(DataType t) {
-  switch (t) {
-    case KindOfUninit:
-    case KindOfNull:    return "NULL";
-    case KindOfBoolean: return "boolean";
-    case KindOfInt64:   return "integer";
-    case KindOfDouble:  return "double";
-    case KindOfStaticString:
-    case KindOfString:  return "string";
-    case KindOfArray:   return "array";
-    case KindOfObject:  return "object";
-    default:
-      assert(false);
-      break;
-  }
-  return "";
-}
-
 inline int getDataTypeIndex(DataType type) {
   switch (type) {
     case KindOfUninit       : return 0;
@@ -194,8 +183,9 @@ inline int getDataTypeIndex(DataType type) {
     case KindOfString       : return 6;
     case KindOfArray        : return 7;
     case KindOfObject       : return 8;
-    case KindOfRef          : return 9;
-    case KindOfIndirect     : return 10;
+    case KindOfResource     : return 9;
+    case KindOfRef          : return 10;
+    case KindOfIndirect     : return 11;
     default                 : not_reached();
   }
 }
@@ -211,20 +201,22 @@ inline DataType getDataTypeValue(unsigned index) {
     case 6  : return KindOfString;
     case 7  : return KindOfArray;
     case 8  : return KindOfObject;
-    case 9  : return KindOfRef;
-    case 10 : return KindOfIndirect;
+    case 9  : return KindOfResource;
+    case 10 : return KindOfRef;
+    case 11 : return KindOfIndirect;
     default : not_reached();
   }
 }
 
 // These are used in type_variant.cpp and translator-x64.cpp
-const unsigned int kShiftDataTypeToDestrIndex = 5;
-const unsigned int kDestrTableSize = 4;
+const unsigned int kShiftDataTypeToDestrIndex = 4;
+const unsigned int kDestrTableSize = 6;
 
 #define TYPE_TO_DESTR_IDX(t) ((t) >> kShiftDataTypeToDestrIndex)
 
 inline ALWAYS_INLINE unsigned typeToDestrIndex(DataType t) {
-  assert(t >= KindOfString && t <= KindOfRef);
+  assert(t == KindOfString || t == KindOfArray || t == KindOfObject ||
+         t == KindOfResource || t == KindOfRef);
   return TYPE_TO_DESTR_IDX(t);
 }
 

@@ -27,7 +27,7 @@ namespace HPHP {
 
 FORWARD_DECLARE_CLASS_BUILTIN(Continuation);
 FORWARD_DECLARE_CLASS_BUILTIN(ContinuationWaitHandle);
-p_Continuation f_hphp_create_continuation(CStrRef clsname, CStrRef funcname, CStrRef origFuncName, CArrRef args = null_array);
+Object f_hphp_create_continuation(CStrRef clsname, CStrRef funcname, CStrRef origFuncName, CArrRef args = null_array);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Continuation

@@ -2,7 +2,7 @@
 
 class A extends RecursiveDirectoryIterator {
   public function current() {
-    return 'a';
+    return 'current() called';
   }
 }
 

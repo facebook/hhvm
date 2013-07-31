@@ -18,9 +18,10 @@
 #ifndef incl_HPHP_RUNTIME_OPTION_H_
 #define incl_HPHP_RUNTIME_OPTION_H_
 
-#include "hphp/runtime/server/virtual_host.h"
-#include "hphp/runtime/server/satellite_server.h"
+#include <boost/container/flat_set.hpp>
 #include "hphp/runtime/server/files_match.h"
+#include "hphp/runtime/server/satellite_server.h"
+#include "hphp/runtime/server/virtual_host.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -107,6 +108,7 @@ public:
   static bool ServerHttpSafeMode;
   static bool ServerStatCache;
   static std::vector<std::string> ServerWarmupRequests;
+  static boost::container::flat_set<std::string> ServerHighPriorityEndPoints;
   static int PageletServerThreadCount;
   static bool PageletServerThreadRoundRobin;
   static int PageletServerThreadDropCacheTimeoutSeconds;

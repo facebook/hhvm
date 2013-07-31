@@ -537,14 +537,15 @@ static inline bool php_openssl_config_check_syntax
   return true;
 }
 
-static const StaticString s_config("config");
-static const StaticString s_config_section_name("config_section_name");
-static const StaticString s_digest_alg("digest_alg");
-static const StaticString s_x509_extensions("x509_extensions");
-static const StaticString s_req_extensions("req_extensions");
-static const StaticString s_private_key_bits("private_key_bits");
-static const StaticString s_private_key_type("private_key_type");
-static const StaticString s_encrypt_key("encrypt_key");
+const StaticString
+  s_config("config"),
+  s_config_section_name("config_section_name"),
+  s_digest_alg("digest_alg"),
+  s_x509_extensions("x509_extensions"),
+  s_req_extensions("req_extensions"),
+  s_private_key_bits("private_key_bits"),
+  s_private_key_type("private_key_type"),
+  s_encrypt_key("encrypt_key");
 
 static bool php_openssl_parse_config(struct php_x509_request *req,
                                      CArrRef args, vector<String> &strings) {
@@ -1173,8 +1174,9 @@ static STACK_OF(X509) *php_array_to_X509_sk(CVarRef certs) {
   return pcerts;
 }
 
-static const StaticString s_friendly_name("friendly_name");
-static const StaticString s_extracerts("extracerts");
+const StaticString
+  s_friendly_name("friendly_name"),
+  s_extracerts("extracerts");
 
 static bool openssl_pkcs12_export_impl(CVarRef x509, BIO *bio_out,
                                        CVarRef priv_key, CStrRef pass,
@@ -1246,8 +1248,9 @@ bool f_openssl_pkcs12_export(CVarRef x509, VRefParam out, CVarRef priv_key,
   return ret;
 }
 
-static const StaticString s_cert("cert");
-static const StaticString s_pkey("pkey");
+const StaticString
+  s_cert("cert"),
+  s_pkey("pkey");
 
 bool f_openssl_pkcs12_read(CStrRef pkcs12, VRefParam certs, CStrRef pass) {
   Variant &vcerts = certs;
@@ -1646,36 +1649,35 @@ void f_openssl_pkey_free(CResRef key) {
   // do nothing
 }
 
-static const StaticString s_bits("bits");
-static const StaticString s_key("key");
-static const StaticString s_type("type");
-static const StaticString s_name("name");
-static const StaticString s_hash("hash");
-static const StaticString s_version("version");
-static const StaticString s_serialNumber("serialNumber");
-static const StaticString s_validFrom("validFrom");
-static const StaticString s_validTo("validTo");
-static const StaticString s_validFrom_time_t("validFrom_time_t");
-static const StaticString s_validTo_time_t("validTo_time_t");
-static const StaticString s_alias("alias");
-static const StaticString s_purposes("purposes");
-static const StaticString s_extensions("extensions");
-
-static const StaticString s_rsa("rsa");
-static const StaticString s_dsa("dsa");
-static const StaticString s_dh("dh");
-
-static const StaticString s_n("n");
-static const StaticString s_e("e");
-static const StaticString s_d("d");
-static const StaticString s_p("p");
-static const StaticString s_q("q");
-static const StaticString s_g("g");
-static const StaticString s_dmp1("dmp1");
-static const StaticString s_dmq1("dmq1");
-static const StaticString s_iqmp("iqmp");
-static const StaticString s_priv_key("priv_key");
-static const StaticString s_pub_key("pub_key");
+const StaticString
+  s_bits("bits"),
+  s_key("key"),
+  s_type("type"),
+  s_name("name"),
+  s_hash("hash"),
+  s_version("version"),
+  s_serialNumber("serialNumber"),
+  s_validFrom("validFrom"),
+  s_validTo("validTo"),
+  s_validFrom_time_t("validFrom_time_t"),
+  s_validTo_time_t("validTo_time_t"),
+  s_alias("alias"),
+  s_purposes("purposes"),
+  s_extensions("extensions"),
+  s_rsa("rsa"),
+  s_dsa("dsa"),
+  s_dh("dh"),
+  s_n("n"),
+  s_e("e"),
+  s_d("d"),
+  s_p("p"),
+  s_q("q"),
+  s_g("g"),
+  s_dmp1("dmp1"),
+  s_dmq1("dmq1"),
+  s_iqmp("iqmp"),
+  s_priv_key("priv_key"),
+  s_pub_key("pub_key");
 
 static void add_bignum_as_string(Array &arr,
                                  StaticString key,

@@ -55,7 +55,7 @@ Resource f_stream_context_create(CArrRef options /* = null_array */,
   return Resource(NEWOBJ(StreamContext)(options, params));
 }
 
-Object f_stream_context_get_default(CArrRef options /* = null_array */) {
+Resource f_stream_context_get_default(CArrRef options /* = null_array */) {
   throw NotImplementedException(__func__);
 }
 
@@ -125,11 +125,11 @@ void f_stream_bucket_prepend(CResRef brigade, CResRef bucket) {
   throw NotSupportedException(__func__, "stream bucket is not supported");
 }
 
-Object f_stream_bucket_make_writeable(CResRef brigade) {
+Resource f_stream_bucket_make_writeable(CResRef brigade) {
   throw NotSupportedException(__func__, "stream bucket is not supported");
 }
 
-Object f_stream_bucket_new(CResRef stream, CStrRef buffer) {
+Resource f_stream_bucket_new(CResRef stream, CStrRef buffer) {
   throw NotSupportedException(__func__, "stream bucket is not supported");
 }
 
@@ -141,13 +141,13 @@ bool f_stream_filter_remove(CResRef stream_filter) {
   throw NotSupportedException(__func__, "stream filter is not supported");
 }
 
-Object f_stream_filter_append(CResRef stream, CStrRef filtername,
+Resource f_stream_filter_append(CResRef stream, CStrRef filtername,
                               int read_write /* = 0 */,
                               CVarRef params /* = null_variant */) {
   throw NotSupportedException(__func__, "stream filter is not supported");
 }
 
-Object f_stream_filter_prepend(CResRef stream, CStrRef filtername,
+Resource f_stream_filter_prepend(CResRef stream, CStrRef filtername,
                                int read_write /* = 0 */,
                                CVarRef params /* = null_variant */) {
   throw NotSupportedException(__func__, "stream filter is not supported");
@@ -225,8 +225,9 @@ bool f_stream_set_blocking(CResRef stream, int mode) {
   return fcntl(file->fd(), F_SETFL, flags) != -1;
 }
 
-static const StaticString s_sec("sec");
-static const StaticString s_usec("usec");
+const StaticString
+  s_sec("sec"),
+  s_usec("usec");
 
 bool f_stream_set_timeout(CResRef stream, int seconds,
                           int microseconds /* = 0 */) {
@@ -265,6 +266,24 @@ int64_t f_set_file_buffer(CResRef stream, int buffer) {
 Array f_stream_get_wrappers() {
   return Stream::enumWrappers();
 }
+
+bool f_stream_is_local(CVarRef stream_or_url) {
+  if (stream_or_url.isString()) {
+    auto wrapper = Stream::getWrapperFromURI(stream_or_url.asCStrRef());
+    return wrapper->m_isLocal;
+
+  } else if (stream_or_url.isResource()) {
+    File* file = dynamic_cast<File*>(stream_or_url.asCResRef().get());
+    if (!file) {
+      raise_warning("supplied resource is not a valid stream resource");
+      return false;
+    }
+    return file->m_isLocal;
+  }
+  // Zend returns true for random data types...
+  return true;
+}
+
 
 bool f_stream_register_wrapper(CStrRef protocol, CStrRef classname) {
   return f_stream_wrapper_register(protocol, classname);

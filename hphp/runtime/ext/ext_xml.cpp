@@ -362,15 +362,16 @@ static void _xml_add_to_info(XmlParser *parser, char *name) {
   parser->curtag++;
 }
 
-static const StaticString s_type("type");
-static const StaticString s_complete("complete");
-static const StaticString s_tag("tag");
-static const StaticString s_close("close");
-static const StaticString s_level("level");
-static const StaticString s_value("value");
-static const StaticString s_cdata("cdata");
-static const StaticString s_open("open");
-static const StaticString s_attributes("attributes");
+const StaticString
+  s_type("type"),
+  s_complete("complete"),
+  s_tag("tag"),
+  s_close("close"),
+  s_level("level"),
+  s_value("value"),
+  s_cdata("cdata"),
+  s_open("open"),
+  s_attributes("attributes");
 
 void _xml_endElementHandler(void *userData, const XML_Char *name) {
   XmlParser *parser = (XmlParser *)userData;
@@ -680,13 +681,13 @@ static void xml_set_handler(Variant * handler, CVarRef data) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Object f_xml_parser_create(CStrRef encoding /* = null_string */) {
-  return php_xml_parser_create_impl(encoding, null_string, 0).toObject();
+Resource f_xml_parser_create(CStrRef encoding /* = null_string */) {
+  return php_xml_parser_create_impl(encoding, null_string, 0).toResource();
 }
 
-Object f_xml_parser_create_ns(CStrRef encoding /* = null_string */,
+Resource f_xml_parser_create_ns(CStrRef encoding /* = null_string */,
                               CStrRef separator /* = null_string */) {
-  return php_xml_parser_create_impl(encoding, separator, 1).toObject();
+  return php_xml_parser_create_impl(encoding, separator, 1).toResource();
 }
 
 bool f_xml_parser_free(CResRef parser) {

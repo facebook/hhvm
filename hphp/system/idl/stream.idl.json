@@ -468,6 +468,23 @@
             ]
         },
         {
+            "name": "stream_is_local",
+            "desc": "Checks if a stream is a local stream",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure." 
+            },
+            "args": [
+                {
+                    "type": "Variant",
+                    "name": "stream_or_url"
+                }
+            ]
+        },
+        {
             "name": "stream_register_wrapper",
             "flags": [
                 "HasDocComment"

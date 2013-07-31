@@ -28,6 +28,9 @@ namespace HPHP {
 
 class HttpStreamWrapper : public Stream::Wrapper {
  public:
+  HttpStreamWrapper() {
+    m_isLocal = false;
+  }
   virtual File* open(CStrRef filename, CStrRef mode,
                      int options, CVarRef context);
 };

@@ -878,14 +878,15 @@ int64_t f_proc_close(CResRef process) {
   return process.getTyped<ChildProcess>()->close();
 }
 
-static const StaticString s_command("command");
-static const StaticString s_pid("pid");
-static const StaticString s_running("running");
-static const StaticString s_signaled("signaled");
-static const StaticString s_stopped("stopped");
-static const StaticString s_exitcode("exitcode");
-static const StaticString s_termsig("termsig");
-static const StaticString s_stopsig("stopsig");
+const StaticString
+  s_command("command"),
+  s_pid("pid"),
+  s_running("running"),
+  s_signaled("signaled"),
+  s_stopped("stopped"),
+  s_exitcode("exitcode"),
+  s_termsig("termsig"),
+  s_stopsig("stopsig");
 
 Array f_proc_get_status(CResRef process) {
   ChildProcess *proc = process.getTyped<ChildProcess>();

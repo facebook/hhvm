@@ -352,21 +352,25 @@ public:
   bool same (CStrRef v2) const;
   bool same (CArrRef v2) const;
   bool same (CObjRef v2) const;
+  bool same (CResRef v2) const;
   bool equal(litstr  v2) const;
   bool equal(const StringData *v2) const;
   bool equal(CStrRef v2) const;
   bool equal(CArrRef v2) const;
   bool equal(CObjRef v2) const;
+  bool equal(CResRef v2) const;
   bool less (litstr  v2) const;
   bool less (const StringData *v2) const;
   bool less (CStrRef v2) const;
   bool less (CArrRef v2) const;
   bool less (CObjRef v2) const;
+  bool less (CResRef v2) const;
   bool more (litstr  v2) const;
   bool more (const StringData *v2) const;
   bool more (CStrRef v2) const;
   bool more (CArrRef v2) const;
   bool more (CObjRef v2) const;
+  bool more (CResRef v2) const;
 
   /**
    * Offset
@@ -557,6 +561,7 @@ private:
 };
 
 extern const StaticString empty_string;
+String getDataTypeString(DataType t);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

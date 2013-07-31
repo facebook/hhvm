@@ -35,17 +35,31 @@ class c_Closure : public ExtObjectData {
  public:
   DECLARE_CLASS(Closure, Closure, ObjectData)
 
-  // need to implement
-  public: c_Closure(Class* cls = c_Closure::s_cls);
-  public: ~c_Closure();
-  public: void t___construct();
+  c_Closure(Class* cls = c_Closure::s_cls)
+    : ExtObjectData(cls)
+  {
+    if (debug) {
+      // m_func and m_thisOrClass must be initialized by init(), or the TC.
+      m_thisOrClass = reinterpret_cast<ObjectData*>(-uintptr_t(1));
+      m_func = nullptr;
+    }
+  }
 
-  // implemented by HPHP
-  public: c_Closure *create();
+  ~c_Closure();
+
+  /*
+   * Initialization function used by the interpreter.  The JIT
+   * compiler inlines these operations in the TC.
+   *
+   * sp points to the last used variable on the evaluation stack.
+   */
+  void init(int numArgs, ActRec* ar, TypedValue* sp);
+
+public: // ObjectData overrides
+  void t___construct(); // must not be called for Closures
+  c_Closure* clone();
+
 public:
-  public: c_Closure* clone();
-
-  c_Closure* init(int numArgs, ActRec* ar, TypedValue* sp);
   ObjectData* getThisOrClass() { return m_thisOrClass; }
   const Func* getInvokeFunc() { return m_func; }
   HphpArray* getStaticLocals();
@@ -53,7 +67,7 @@ public:
   int getNumUseVars() { return m_cls->numDeclProperties(); }
 
   static size_t funcOffset() { return offsetof(c_Closure, m_func); }
-  static size_t thisOffset() { return offsetof(c_Closure, m_thisOrClass); }
+  static size_t ctxOffset() { return offsetof(c_Closure, m_thisOrClass); }
 
 private:
   SmartPtr<HphpArray> m_VMStatics;

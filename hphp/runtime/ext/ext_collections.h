@@ -80,7 +80,6 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   Variant t___unset(Variant name);
   static Object ti_fromitems(CVarRef iterable);
   static Object ti_fromarray(CVarRef arr); // deprecated
-  static Object ti_fromvector(CVarRef vec); // deprecated
   static Variant ti_slice(CVarRef vec, CVarRef offset,
                           CVarRef len = uninit_null());
   static Variant t_slice(CVarRef vec, CVarRef offset,
@@ -264,7 +263,6 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   Variant t___unset(Variant name);
   static Object ti_fromitems(CVarRef iterable);
   static Object ti_fromarray(CVarRef arr); // deprecated
-  static Object ti_fromiterable(CVarRef vec); // deprecated
 
   static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
   static void throwOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
@@ -569,7 +567,6 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   Variant t___unset(Variant name);
   static Object ti_fromitems(CVarRef iterable);
   static Object ti_fromarray(CVarRef arr); // deprecated
-  static Object ti_fromiterable(CVarRef vec); // deprecated
 
   static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
   static void throwOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
@@ -814,8 +811,6 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   Object t_filter(CVarRef callback);
   Object t_zip(CVarRef iterable);
   Object t_difference(CVarRef iterable);
-  Object t_updatefromarrayvalues(CVarRef arr);
-  Object t_updatefromiterablevalues(CVarRef iterable);
   String t___tostring();
   Variant t___get(Variant name);
   Variant t___set(Variant name, Variant value);
@@ -825,7 +820,6 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   static Object ti_fromarray(CVarRef arr);
   static Object ti_fromarrays(int _argc,
                               CArrRef _argv = null_array);
-  static Object ti_fromiterablevalues(CVarRef iterable);
 
   static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
   static void throwOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;

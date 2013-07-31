@@ -81,12 +81,22 @@ static char *getMethodName(char *demangledName) {
   return methodName;
 }
 
+static hphp_hash_map<xed_uint64_t,const char*> addressToSymbolMemo;
+
 // XED callback function to get a symbol from an address
 static int addressToSymbol(xed_uint64_t address,
                            char *symbol_buffer,
                            xed_uint32_t buffer_length,
                            xed_uint64_t *offset,
                            void *context) {
+  auto& memoVal = addressToSymbolMemo[address];
+  if (memoVal != nullptr) {
+    strncpy(symbol_buffer, memoVal, buffer_length - 1);
+    symbol_buffer[buffer_length - 1] = '\0';
+    *offset = 0;
+    return 1;
+  }
+
   char **symbolTable = backtrace_symbols((void **)&address, 1);
   if (!symbolTable) {
     return 0;
@@ -112,9 +122,9 @@ static int addressToSymbol(xed_uint64_t address,
   }
 
   if (methodName) {
-    strncpy(symbol_buffer, methodName, buffer_length);
-    symbol_buffer[buffer_length] = '\0';
-    free(methodName);
+    strncpy(symbol_buffer, methodName, buffer_length - 1);
+    symbol_buffer[buffer_length - 1] = '\0';
+    memoVal = methodName;
   } else {
     return 0;
   }

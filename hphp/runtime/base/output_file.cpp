@@ -34,6 +34,7 @@ OutputFile::OutputFile(CStrRef filename) {
   if (filename != "php://output") {
     throw FatalErrorException("not a php://output file ");
   }
+  m_isLocal = true;
 }
 
 OutputFile::~OutputFile() {

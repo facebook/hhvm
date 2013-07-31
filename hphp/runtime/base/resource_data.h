@@ -27,27 +27,89 @@ namespace HPHP {
 /**
  * Base class of all PHP resources.
  */
-class ResourceData : public ObjectData {
-public:
+class ResourceData {
+ public:
+  static const bool IsResourceClass = true;
+ private:
+  static DECLARE_THREAD_LOCAL_NO_CHECK(int, os_max_resource_id);
+
+ public:
   ResourceData();
-  virtual ~ResourceData();
+
+ private:
+  // Disallow copy construction
+  ResourceData(const ResourceData&) = delete;
+
+ public:
+  void setStatic() const { assert(false); }
+  bool isStatic() const { return false; }
+  IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC
+
+  virtual ~ResourceData(); // all PHP resources need vtables
+
   void operator delete(void* p) { ::operator delete(p); }
 
-  // implementing ObjectData
-  virtual bool isResource() const { return true;}
-  virtual String t___tostring();
-  virtual bool o_toBooleanImpl() const noexcept { return 1; }
-  virtual int64_t o_toInt64Impl() const noexcept { return o_getId(); }
-  virtual double o_toDoubleImpl() const noexcept { return o_getId(); }
-  void o_setId(int id); // only for BuiltinFiles
-  virtual void serializeImpl(VariableSerializer *serializer) const;
-  virtual CStrRef o_getResourceName() const;
-  virtual int o_getResourceId() const { return o_getId(); }
+  void release() {
+    assert(getCount() == 0);
+    delete this;
+  }
 
+  Class* getVMClass() const {
+    return m_cls;
+  }
+
+  static size_t getVMClassOffset() {
+    // For assembly linkage.
+    size_t res = offsetof(ResourceData, m_cls);
+    assert(res == ObjectData::getVMClassOffset());
+    return res;
+  }
+
+  int32_t o_getId() const { return o_id; }
+  void o_setId(int id); // only for BuiltinFiles
   static int GetMaxResourceId() ATTRIBUTE_COLD;
 
-  static const bool IsResourceClass = true;
-};
+  CStrRef o_getClassName() const;
+  virtual CStrRef o_getClassNameHook() const;
+  virtual CStrRef o_getResourceName() const;
+  virtual bool isInvalid() const { return false; }
+
+  bool o_toBoolean() const { return 1; }
+  int64_t o_toInt64() const { return o_id; }
+  double o_toDouble() const { return o_id; }
+  String o_toString() const {
+    return String("Resource id #") + String(o_id);
+  }
+  Array o_toArray() const;
+
+  void serialize(VariableSerializer* serializer) const;
+  void serializeImpl(VariableSerializer* serializer) const;
+  void dump() const;
+
+ private:
+  static void compileTimeAssertions() {
+    static_assert(offsetof(ResourceData, m_count) == FAST_REFCOUNT_OFFSET, "");
+  }
+
+  //============================================================================
+  // ResourceData fields
+
+ protected:
+  // Numeric identifier of resource object (used by var_dump() and other
+  // output functions)
+  int32_t o_id;
+  // Counter to keep track of the number of references to this resource
+  // (i.e. the resource's "refcount")
+  mutable RefCount m_count;
+  // Pointer to the __resource class; this field is needed (and must be at
+  // the same offset as ObjectData::m_cls) so that backup gc and other things
+  // that walk the SmartAllocator heaps can distinguish between objects and
+  // resources
+  Class* m_cls;
+  // Storage for dynamic properties
+  ArrNR o_properties;
+
+} __attribute__((aligned(16)));
 
 /**
  * Rules to avoid memory problems/leaks from ResourceData classes
@@ -131,6 +193,17 @@ class SweepableResourceData : public ResourceData, public Sweepable {};
 
 typedef std::map<std::string, ResourceData*> ResourceMap;
 typedef std::map<std::string, ResourceMap> ResourceMapMap;
+
+///////////////////////////////////////////////////////////////////////////////
+
+// Suppress the default implementation of the SmartPtr destructor so that
+// derived classes (ex. HPHP::Resource) can manually handle decReffing the
+// ResourceData.
+template<> inline SmartPtr<ResourceData>::~SmartPtr() {}
+
+ALWAYS_INLINE inline void decRefRes(ResourceData* res) {
+  if (res->decRefCount() == 0) res->release();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -53,7 +53,7 @@ register Cell* sp asm("rbx");
 Cell* sp;
 #endif
 
-static void setupAfterProlog(ActRec* fp) {
+static void setupAfterPrologue(ActRec* fp) {
   g_vmContext->m_fp = fp;
   g_vmContext->m_stack.top() = sp;
   int nargs = fp->numArgs();
@@ -90,7 +90,7 @@ asm(
   ".globl __fcallHelperThunk\n"
 "__fcallHelperThunk:\n"
 #if defined(__x86_64__)
-  // fcallHelper is used for prologs, and (in the case of
+  // fcallHelper is used for prologues, and (in the case of
   // closures) for dispatch to the function body. In the first
   // case, there's a call, in the second, there's a jmp.
   // We can differentiate by comparing r15 and rVmFp
@@ -106,7 +106,7 @@ asm(
   // fcallHelper, and then push it back from r15 + m_savedRip after
   // fcallHelper returns in case it has changed it.
   "1: pop 0x8(%r15)\n"
-  // There is a brief span from enterTCAtProlog until the function
+  // There is a brief span from enterTCAtPrologue until the function
   // is entered where rbp is *below* the new actrec, and is missing
   // a number of c++ frames. The new actrec is linked onto the c++
   // frames, however, so switch it into rbp in case fcallHelper throws.
@@ -134,9 +134,9 @@ TCA fcallHelper(ActRec* ar) {
     if (!ar->m_func->isClonedClosure()) {
       /*
        * If the func is a cloned closure, then the original
-       * closure has already run the prolog, and the prologs
+       * closure has already run the prologue, and the prologues
        * array is just being used as entry points for the
-       * dv funclets. Dont run the prolog again.
+       * dv funclets. Dont run the prologue again.
        */
       VMRegAnchor _(ar);
       uint64_t rip = ar->m_savedRip;
@@ -155,7 +155,7 @@ TCA fcallHelper(ActRec* ar) {
       sp = g_vmContext->m_stack.top();
       return nullptr;
     }
-    setupAfterProlog(ar);
+    setupAfterPrologue(ar);
     assert(ar == g_vmContext->m_fp);
     return Translator::Get()->getResumeHelper();
   } catch (...) {
@@ -205,11 +205,11 @@ asm (
  * to a function, after the prologue has run.
  */
 TCA funcBodyHelper(ActRec* fp) {
-  setupAfterProlog(fp);
+  setupAfterPrologue(fp);
   tl_regState = VMRegState::CLEAN;
   Func* func = const_cast<Func*>(fp->m_func);
 
-  TCA tca = tx64->getCallArrayProlog(func);
+  TCA tca = tx64->getCallArrayPrologue(func);
 
   if (!tca) {
     tca = Translator::Get()->getResumeHelper();

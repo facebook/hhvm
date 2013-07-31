@@ -211,14 +211,14 @@ void raise_param_type_warning(
     func_name += 4;
   }
   assert(param_num > 0);
-
+  String expected_type_str = getDataTypeString(expected_type);
+  String actual_type_str = getDataTypeString(actual_type);
   raise_warning(
     "%s() expects parameter %d to be %s, %s given",
     func_name,
     param_num,
-    getDataTypeString(expected_type),
-    getDataTypeString(actual_type)
-  );
+    expected_type_str.c_str(),
+    actual_type_str.c_str());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

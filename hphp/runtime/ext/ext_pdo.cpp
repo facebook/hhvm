@@ -31,7 +31,7 @@
 
 #define PDO_HANDLE_DBH_ERR(dbh)                         \
   if (strcmp(dbh->error_code, PDO_ERR_NONE)) {          \
-    pdo_handle_error(dbh, NULL);                        \
+    pdo_handle_error(dbh, nullptr);                     \
   }                                                     \
 
 #define PDO_HANDLE_STMT_ERR(stmt)                       \
@@ -453,10 +453,11 @@ public:
 };
 static PDOErrorHash s_err_hash;
 
-static const StaticString s_code("code");
-static const StaticString s_message("message");
-static const StaticString s_errorInfo("errorInfo");
-static const StaticString s_PDOException("PDOException");
+const StaticString
+  s_code("code"),
+  s_message("message"),
+  s_errorInfo("errorInfo"),
+  s_PDOException("PDOException");
 
 void throw_pdo_exception(CVarRef code, CVarRef info, const char *fmt, ...) {
   ObjectData *obj = SystemLib::AllocPDOExceptionObject();
@@ -566,7 +567,7 @@ static Object pdo_stmt_instantiate(sp_PDOConnection dbh, CStrRef clsname,
     name = "PDOStatement";
   }
   if (!ctor_args.isNull() && !ctor_args.isArray()) {
-    pdo_raise_impl_error(dbh, NULL, "HY000",
+    pdo_raise_impl_error(dbh, nullptr, "HY000",
                          "constructor arguments must be passed as an array");
     return Object();
   }
@@ -598,7 +599,7 @@ static bool valid_statement_class(sp_PDOConnection dbh, CVarRef opt,
   if (!opt.isArray() || !opt.toArray().exists(0) || !opt[0].isString() ||
       !f_class_exists(opt[0].toString())) {
     pdo_raise_impl_error
-      (dbh, NULL, "HY000",
+      (dbh, nullptr, "HY000",
        "PDO::ATTR_STATEMENT_CLASS requires format array(classname, "
        "array(ctor_args)); the classname must be a string specifying "
        "an existing class");
@@ -608,7 +609,7 @@ static bool valid_statement_class(sp_PDOConnection dbh, CVarRef opt,
   clsname = opt[0].toString();
   if (!f_is_subclass_of(clsname, "PDOStatement")) {
     pdo_raise_impl_error
-      (dbh, NULL, "HY000",
+      (dbh, nullptr, "HY000",
        "user-supplied statement class must be derived from PDOStatement");
     PDO_HANDLE_DBH_ERR(dbh);
     return false;
@@ -618,7 +619,7 @@ static bool valid_statement_class(sp_PDOConnection dbh, CVarRef opt,
     const HPHP::Func* method = cls->getDeclaredCtor();
     if (method && method->isPublic()) {
       pdo_raise_impl_error
-        (dbh, NULL, "HY000",
+        (dbh, nullptr, "HY000",
          "user-supplied statement class cannot have a public constructor");
       PDO_HANDLE_DBH_ERR(dbh);
       return false;
@@ -628,7 +629,7 @@ static bool valid_statement_class(sp_PDOConnection dbh, CVarRef opt,
     Variant item = opt[1];
     if (!item.isArray()) {
       pdo_raise_impl_error
-        (dbh, NULL, "HY000",
+        (dbh, nullptr, "HY000",
          "PDO::ATTR_STATEMENT_CLASS requires format array(classname, "
          "ctor_args); ctor_args must be an array");
       PDO_HANDLE_DBH_ERR(dbh);
@@ -1006,7 +1007,7 @@ void c_PDO::t___construct(CStrRef dsn, CStrRef username /* = null_string */,
             !m_dbh->checkLiveness()) {
           /* nope... need to kill it */
           s_pdo_request_data->m_persistent_connections.erase(m_dbh.get());
-          m_dbh = NULL;
+          m_dbh = nullptr;
         } else {
           /* Yep, use it and mark it for saving at rshutdown */
           s_pdo_request_data->m_persistent_connections.insert(m_dbh.get());
@@ -1018,7 +1019,7 @@ void c_PDO::t___construct(CStrRef dsn, CStrRef username /* = null_string */,
       } else {
         /* need a brand new pdbh */
         m_dbh = driver->createConnection(colon+1, username, password, options);
-        if (m_dbh.get() == NULL) {
+        if (m_dbh.get() == nullptr) {
           throw_pdo_exception(uninit_null(), uninit_null(), "unable to create a connection");
         }
         m_dbh->persistent_id = string(shashkey.data(), shashkey.size());
@@ -1027,7 +1028,7 @@ void c_PDO::t___construct(CStrRef dsn, CStrRef username /* = null_string */,
   }
   if (!m_dbh.get()) {
     m_dbh = driver->createConnection(colon+1, username, password, options);
-    if (m_dbh.get() == NULL) {
+    if (m_dbh.get() == nullptr) {
       throw_pdo_exception(uninit_null(), uninit_null(), "unable to create a connection");
     }
   }
@@ -1080,7 +1081,7 @@ Variant c_PDO::t_prepare(CStrRef statement,
   Object ret = pdo_stmt_instantiate(m_dbh, clsname, ctor_args);
   if (ret.isNull()) {
     pdo_raise_impl_error
-      (m_dbh, NULL, "HY000",
+      (m_dbh, nullptr, "HY000",
        "failed to instantiate user-supplied statement class");
     PDO_HANDLE_DBH_ERR(m_dbh);
     return false;
@@ -1113,7 +1114,7 @@ bool c_PDO::t_begintransaction() {
     return true;
   }
   if (strcmp(m_dbh->error_code, PDO_ERR_NONE)) {
-    pdo_handle_error(m_dbh, NULL);
+    pdo_handle_error(m_dbh, nullptr);
   }
   return false;
 }
@@ -1149,7 +1150,7 @@ bool c_PDO::t_setattribute(int64_t attribute, CVarRef value) {
 
 #define PDO_LONG_PARAM_CHECK                                           \
   if (!value.isInteger() && !value.isString() && !value.isBoolean()) { \
-    pdo_raise_impl_error(m_dbh, NULL, "HY000",                         \
+    pdo_raise_impl_error(m_dbh, nullptr, "HY000",                      \
                          "attribute value must be an integer");        \
     PDO_HANDLE_DBH_ERR(m_dbh);                                         \
     return false;                                                      \
@@ -1165,7 +1166,7 @@ bool c_PDO::t_setattribute(int64_t attribute, CVarRef value) {
       m_dbh->error_mode = (PDOErrorMode)value.toInt64();
       return true;
     default:
-      pdo_raise_impl_error(m_dbh, NULL, "HY000", "invalid error mode");
+      pdo_raise_impl_error(m_dbh, nullptr, "HY000", "invalid error mode");
       PDO_HANDLE_DBH_ERR(m_dbh);
       return false;
     }
@@ -1180,7 +1181,7 @@ bool c_PDO::t_setattribute(int64_t attribute, CVarRef value) {
       m_dbh->desired_case = (PDOCaseConversion)value.toInt64();
       return true;
     default:
-      pdo_raise_impl_error(m_dbh, NULL, "HY000",
+      pdo_raise_impl_error(m_dbh, nullptr, "HY000",
                            "invalid case folding mode");
       PDO_HANDLE_DBH_ERR(m_dbh);
       return false;
@@ -1198,7 +1199,7 @@ bool c_PDO::t_setattribute(int64_t attribute, CVarRef value) {
         Variant tmp = value[0];
         if (tmp.isInteger() && ((tmp.toInt64() == PDO_FETCH_INTO ||
                                  tmp.toInt64() == PDO_FETCH_CLASS))) {
-          pdo_raise_impl_error(m_dbh, NULL, "HY000",
+          pdo_raise_impl_error(m_dbh, nullptr, "HY000",
                                "FETCH_INTO and FETCH_CLASS are not yet "
                                "supported as default fetch modes");
           return false;
@@ -1208,7 +1209,7 @@ bool c_PDO::t_setattribute(int64_t attribute, CVarRef value) {
       PDO_LONG_PARAM_CHECK;
     }
     if (value.toInt64() == PDO_FETCH_USE_DEFAULT) {
-      pdo_raise_impl_error(m_dbh, NULL, "HY000", "invalid fetch mode type");
+      pdo_raise_impl_error(m_dbh, nullptr, "HY000", "invalid fetch mode type");
       return false;
     }
     m_dbh->default_fetch_type = (PDOFetchType)value.toInt64();
@@ -1222,7 +1223,7 @@ bool c_PDO::t_setattribute(int64_t attribute, CVarRef value) {
   case PDO_ATTR_STATEMENT_CLASS:
     {
       if (m_dbh->is_persistent) {
-        pdo_raise_impl_error(m_dbh, NULL, "HY000",
+        pdo_raise_impl_error(m_dbh, nullptr, "HY000",
                              "PDO::ATTR_STATEMENT_CLASS cannot be used "
                              "with persistent PDO instances");
         PDO_HANDLE_DBH_ERR(m_dbh);
@@ -1251,7 +1252,7 @@ bool c_PDO::t_setattribute(int64_t attribute, CVarRef value) {
                         "The auto-commit mode cannot be changed for this "
                         "driver");
   } else if (!m_dbh->support(PDOConnection::MethodSetAttribute)) {
-    pdo_raise_impl_error(m_dbh, NULL, "IM001",
+    pdo_raise_impl_error(m_dbh, nullptr, "IM001",
                          "driver does not support setting attributes");
   } else {
     PDO_HANDLE_DBH_ERR(m_dbh);
@@ -1294,7 +1295,7 @@ Variant c_PDO::t_getattribute(int64_t attribute) {
   }
 
   if (!m_dbh->support(PDOConnection::MethodGetAttribute)) {
-    pdo_raise_impl_error(m_dbh, NULL, "IM001",
+    pdo_raise_impl_error(m_dbh, nullptr, "IM001",
                          "driver does not support getting attributes");
     return false;
   }
@@ -1305,7 +1306,7 @@ Variant c_PDO::t_getattribute(int64_t attribute) {
     PDO_HANDLE_DBH_ERR(m_dbh);
     return false;
   case 0:
-    pdo_raise_impl_error(m_dbh, NULL, "IM001",
+    pdo_raise_impl_error(m_dbh, nullptr, "IM001",
                          "driver does not support that attribute");
     return false;
   }
@@ -1314,7 +1315,7 @@ Variant c_PDO::t_getattribute(int64_t attribute) {
 
 Variant c_PDO::t_exec(CStrRef query) {
   if (query.empty()) {
-    pdo_raise_impl_error(m_dbh, NULL, "HY000",
+    pdo_raise_impl_error(m_dbh, nullptr, "HY000",
                          "trying to execute an empty query");
     return false;
   }
@@ -1337,7 +1338,7 @@ Variant c_PDO::t_lastinsertid(CStrRef seqname /* = null_string */) {
   m_dbh->query_stmt = NULL;
 
   if (!m_dbh->support(PDOConnection::MethodLastId)) {
-    pdo_raise_impl_error(m_dbh, NULL, "IM001",
+    pdo_raise_impl_error(m_dbh, nullptr, "IM001",
                          "driver does not support lastInsertId()");
     return false;
   }
@@ -1406,7 +1407,7 @@ Variant c_PDO::t_query(CStrRef sql) {
                                     m_dbh->def_stmt_ctor_args);
   if (ret.isNull()) {
     pdo_raise_impl_error
-      (m_dbh, NULL, "HY000",
+      (m_dbh, nullptr, "HY000",
        "failed to instantiate user supplied statement class");
     return uninit_null();
   }
@@ -1461,7 +1462,7 @@ Variant c_PDO::t_quote(CStrRef str, int64_t paramtype /* = q_PDO$$PARAM_STR */) 
   m_dbh->query_stmt = NULL;
 
   if (!m_dbh->support(PDOConnection::MethodQuoter)) {
-    pdo_raise_impl_error(m_dbh, NULL, "IM001",
+    pdo_raise_impl_error(m_dbh, nullptr, "IM001",
                          "driver does not support quoting");
     return false;
   }
@@ -2985,10 +2986,11 @@ int64_t c_PDOStatement::t_columncount() {
   return m_stmt->column_count;
 }
 
-static const StaticString s_name("name");
-static const StaticString s_len("len");
-static const StaticString s_precision("precision");
-static const StaticString s_pdo_type("pdo_type");
+const StaticString
+  s_name("name"),
+  s_len("len"),
+  s_precision("precision"),
+  s_pdo_type("pdo_type");
 
 Variant c_PDOStatement::t_getcolumnmeta(int64_t column) {
   if (column < 0) {

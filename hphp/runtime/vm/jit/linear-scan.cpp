@@ -821,10 +821,10 @@ void LinearScan::computePreColoringHint() {
     case AKExists:
       normalHint(2, 0, 0);
       break;
-    case OpEq:
-    case OpNeq:
-    case OpSame:
-    case OpNSame:
+    case Eq:
+    case Neq:
+    case Same:
+    case NSame:
       {
         auto src1 = inst->src(0);
         auto src2 = inst->src(1);
@@ -835,7 +835,8 @@ void LinearScan::computePreColoringHint() {
         if ((type1.isArray() && type2.isArray())
             || (type1.isString() && type2.isString())
             || (type1.isString() && !src1->isConst())
-            || (type1 == Type::Obj && type2 == Type::Obj)) {
+            || ((type1 == Type::Obj || type1 == Type::Res) &&
+                (type2 == Type::Obj || type2 == Type::Res))) {
           m_preColoringHint.add(src1, 0, 0);
           m_preColoringHint.add(src2, 0, 1);
         }

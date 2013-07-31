@@ -69,8 +69,9 @@ UCNV_TYPE_CONST(UTF32);
 UCNV_TYPE_CONST(CESU8);
 UCNV_TYPE_CONST(IMAP_MAILBOX);
 
-static StaticString s_toUCallback("toUCallback");
-static StaticString s_fromUCallback("fromUCallback");
+const StaticString
+  s_toUCallback("toUCallback"),
+  s_fromUCallback("fromUCallback");
 
 #define THROW_UFAILURE(fname, uerr, ierr) throwFailure(uerr, #fname, ierr);
 

@@ -64,10 +64,17 @@ void Tracelet::print(std::ostream& out) const {
     return;
   }
 
-  out << i->unit()->filepath()->data() << ':'
-            << i->unit()->getLineNumber(i->offset()) << std::endl;
+  out << "Guards:\n";
+  for (auto const& dep : m_dependencies) {
+    out << "  " << dep.second->pretty() << '\n';
+  }
+  out << "Static types:\n";
+  for (auto const& dep : m_resolvedDeps) {
+    out << "  " << dep.second->pretty() << '\n';
+  }
+  out << show(i->source) << '\n';
   for (; i; i = i->next) {
-    out << "  " << i->offset() << ": " << i->toString() << std::endl;
+    out << folly::format("{: >6}: {}\n", i->offset(), i->toString());
   }
 }
 

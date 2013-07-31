@@ -572,7 +572,7 @@ String c_SimpleXMLElement::t_getname() {
   return String();
 }
 
-static const StaticString s_attributes("@attributes");
+const StaticString s_attributes("@attributes");
 
 Object c_SimpleXMLElement::t_attributes(CStrRef ns /* = "" */,
                                         bool is_prefix /* = false */) {
@@ -1222,12 +1222,13 @@ static void libxml_error_handler(void *userData, xmlErrorPtr error) {
   }
 }
 
-static const StaticString s_level("level");
-static const StaticString s_code("code");
-static const StaticString s_column("column");
-static const StaticString s_message("message");
-static const StaticString s_file("file");
-static const StaticString s_line("line");
+const StaticString
+  s_level("level"),
+  s_code("code"),
+  s_column("column"),
+  s_message("message"),
+  s_file("file"),
+  s_line("line");
 
 static Object create_libxmlerror(xmlError &error) {
   Object ret(NEWOBJ(c_LibXMLError)());

@@ -134,9 +134,11 @@ class Variant : private TypedValue {
   /* implicit */ Variant(CStrRef v);
   /* implicit */ Variant(CArrRef v);
   /* implicit */ Variant(CObjRef v);
+  /* implicit */ Variant(CResRef v);
   /* implicit */ Variant(StringData *v);
   /* implicit */ Variant(ArrayData *v);
   /* implicit */ Variant(ObjectData *v);
+  /* implicit */ Variant(ResourceData *v);
   /* implicit */ Variant(RefData *r);
 
   // for static strings only
@@ -180,11 +182,24 @@ class Variant : private TypedValue {
     }
   }
 
+  // Move ctor for resources
+  /* implicit */ Variant(Resource&& v) {
+    m_type = KindOfResource;
+    ResourceData *pres = v.get();
+    if (pres) {
+      m_data.pres = pres;
+      v.detach();
+    } else {
+      m_type = KindOfNull;
+    }
+  }
+
   // These are prohibited, but declared just to prevent accidentally
   // calling the bool constructor just because we had a pointer to
   // const.
   /* implicit */ Variant(const ArrayData *v) = delete;
   /* implicit */ Variant(const ObjectData *v) = delete;
+  /* implicit */ Variant(const ResourceData *v) = delete;
   /* implicit */ Variant(const RefData *v) = delete;
   /* implicit */ Variant(const TypedValue *v) = delete;
   /* implicit */ Variant(TypedValue *v) = delete;
@@ -414,9 +429,14 @@ class Variant : private TypedValue {
     return *reinterpret_cast<Object*>(&m_data.pobj);
   }
 
+  inline ALWAYS_INLINE const Resource& asCResRef() const {
+    assert(m_type == KindOfResource && m_data.pobj);
+    return *reinterpret_cast<const Resource*>(&m_data.pobj);
+  }
+
   inline ALWAYS_INLINE Resource & asResRef() {
-    assert(m_type == KindOfObject && m_data.pobj);
-    return *reinterpret_cast<Object*>(&m_data.pobj);
+    assert(m_type == KindOfResource && m_data.pres);
+    return *reinterpret_cast<Resource*>(&m_data.pres);
   }
 
   inline ALWAYS_INLINE Object& toObjRef() {
@@ -478,6 +498,7 @@ class Variant : private TypedValue {
       case KindOfBoolean:
       case KindOfInt64:
       case KindOfObject:
+      case KindOfResource:
         return true;
       case KindOfRef:
         return m_data.pref->var()->isIntVal();
@@ -661,8 +682,8 @@ class Variant : private TypedValue {
     return toObjectHelper();
   }
   Resource toResource () const {
-    if (m_type == KindOfObject) return m_data.pobj;
-    return toObjectHelper();
+    if (m_type == KindOfResource) return m_data.pres;
+    return toResourceHelper();
   }
   /**
    * Whether or not calling toKey() will throw a bad type exception
@@ -670,7 +691,7 @@ class Variant : private TypedValue {
   bool  canBeValidKey() const {
     switch (getType()) {
     case KindOfArray:  return false;
-    case KindOfObject: return isResource();
+    case KindOfObject: return false;
     default:           return true;
     }
   }
@@ -700,17 +721,13 @@ class Variant : private TypedValue {
                    Uns::Mode mode = Uns::Mode::Value);
 
   /**
-   * Used by SharedStore to save/restore a variant.
-   */
-  Variant share(bool save) const;
-
-  /**
    * Get the wrapped SharedVariant, if any.
    */
   SharedVariant *getSharedVariant() const;
 
-  /**
-   * Memory allocator methods.
+  /*
+   * Print information about a variant to stdout.  For debugging
+   * purposes.
    */
   void dump() const;
 
@@ -920,6 +937,10 @@ class Variant : private TypedValue {
         m_data.pref->var()->m_data.pobj) :
       (m_type <= KindOfNull ? nullptr : m_data.pobj);
   }
+  ResourceData* getResourceData() const {
+    assert(is(KindOfResource));
+    return m_type == KindOfRef ? m_data.pref->var()->m_data.pres : m_data.pres;
+  }
   Variant *getRefData() const {
     assert(m_type == KindOfRef);
     return m_data.pref->var();
@@ -970,17 +991,25 @@ class Variant : private TypedValue {
   CVarRef set(StringData  *v);
   CVarRef set(ArrayData   *v);
   CVarRef set(ObjectData  *v);
+  CVarRef set(ResourceData  *v);
   CVarRef set(const StringData  *v) = delete;
   CVarRef set(const ArrayData   *v) = delete;
   CVarRef set(const ObjectData  *v) = delete;
+  CVarRef set(const ResourceData  *v) = delete;
 
   CVarRef set(CStrRef v) { return set(v.get()); }
   CVarRef set(const StaticString & v);
   CVarRef set(CArrRef v) { return set(v.get()); }
   CVarRef set(CObjRef v) { return set(v.get()); }
+  CVarRef set(CResRef v) { return set(v.get()); }
 
   template<typename T>
   CVarRef set(const SmartObject<T> &v) {
+    return set(v.get());
+  }
+
+  template<typename T>
+  CVarRef set(const SmartResource<T> &v) {
     return set(v.get());
   }
 
@@ -1097,8 +1126,6 @@ public:
 private:
 #endif
 
-  void split();  // breaking weak binding by making a real copy
-
   template<typename T>
   static inline ALWAYS_INLINE Variant &LvalAtImpl0(
       Variant *self, T key, Variant *tmp, bool blackHole, ACCESSPARAMS_DECL);
@@ -1141,6 +1168,7 @@ private:
   String toStringHelper() const;
   Array  toArrayHelper() const;
   Object toObjectHelper() const;
+  Resource toResourceHelper() const;
 
   DataType convertToNumeric(int64_t *lval, double *dval) const;
 };
@@ -1182,6 +1210,7 @@ public:
   operator String () const { return m_var.toString();}
   operator Array  () const { return m_var.toArray();}
   operator Object () const { return m_var.toObject();}
+  explicit operator Resource () const { return m_var.toResource();}
 
   bool is(DataType type) const { return m_var.is(type); }
   bool isString() const { return m_var.isString(); }
@@ -1297,6 +1326,8 @@ private:
       return m_data.pstr->getCount() > 0;
     case KindOfObject:
       return m_data.pobj->getCount() > 0;
+    case KindOfResource:
+      return m_data.pres->getCount() > 0;
     default:
       break;
     }

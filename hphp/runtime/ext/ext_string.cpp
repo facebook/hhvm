@@ -677,6 +677,9 @@ Variant f_strlen(CVarRef vstr) {
   case KindOfArray:
     raise_warning("strlen() expects parameter 1 to be string, array given");
     return uninit_null();
+  case KindOfResource:
+    raise_warning("strlen() expects parameter 1 to be string, resource given");
+    return uninit_null();
   case KindOfObject:
     if (!f_method_exists(vstr, "__toString")) {
       raise_warning("strlen() expects parameter 1 to be string, object given");
@@ -1023,24 +1026,25 @@ Variant f_setlocale(int _argc, int category, CVarRef locale, CArrRef _argv /* = 
   return false;
 }
 
-static const StaticString s_decimal_point("decimal_point");
-static const StaticString s_thousands_sep("thousands_sep");
-static const StaticString s_int_curr_symbol("int_curr_symbol");
-static const StaticString s_currency_symbol("currency_symbol");
-static const StaticString s_mon_decimal_point("mon_decimal_point");
-static const StaticString s_mon_thousands_sep("mon_thousands_sep");
-static const StaticString s_positive_sign("positive_sign");
-static const StaticString s_negative_sign("negative_sign");
-static const StaticString s_int_frac_digits("int_frac_digits");
-static const StaticString s_frac_digits("frac_digits");
-static const StaticString s_p_cs_precedes("p_cs_precedes");
-static const StaticString s_p_sep_by_space("p_sep_by_space");
-static const StaticString s_n_cs_precedes("n_cs_precedes");
-static const StaticString s_n_sep_by_space("n_sep_by_space");
-static const StaticString s_p_sign_posn("p_sign_posn");
-static const StaticString s_n_sign_posn("n_sign_posn");
-static const StaticString s_grouping("grouping");
-static const StaticString s_mon_grouping("mon_grouping");
+const StaticString
+  s_decimal_point("decimal_point"),
+  s_thousands_sep("thousands_sep"),
+  s_int_curr_symbol("int_curr_symbol"),
+  s_currency_symbol("currency_symbol"),
+  s_mon_decimal_point("mon_decimal_point"),
+  s_mon_thousands_sep("mon_thousands_sep"),
+  s_positive_sign("positive_sign"),
+  s_negative_sign("negative_sign"),
+  s_int_frac_digits("int_frac_digits"),
+  s_frac_digits("frac_digits"),
+  s_p_cs_precedes("p_cs_precedes"),
+  s_p_sep_by_space("p_sep_by_space"),
+  s_n_cs_precedes("n_cs_precedes"),
+  s_n_sep_by_space("n_sep_by_space"),
+  s_p_sign_posn("p_sign_posn"),
+  s_n_sign_posn("n_sign_posn"),
+  s_grouping("grouping"),
+  s_mon_grouping("mon_grouping");
 
 Array f_localeconv() {
   struct lconv currlocdata;
@@ -1114,8 +1118,9 @@ static const HtmlBasicEntity basic_entities[] = {
   { 0, NULL, 0, 0 }
 };
 
-static const StaticString s_amp("&");
-static const StaticString s_ampsemi("&amp;");
+const StaticString
+  s_amp("&"),
+  s_ampsemi("&amp;");
 
 Array f_get_html_translation_table(int table /* = 0 */, int quote_style /* = k_ENT_COMPAT */) {
   static entity_charset charset = determine_charset(nullptr); // get default one

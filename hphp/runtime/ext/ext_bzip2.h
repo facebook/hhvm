@@ -26,15 +26,15 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_bzclose(CObjRef bz);
-Variant f_bzread(CObjRef bz, int length = 1024);
-Variant f_bzwrite(CObjRef bz, CStrRef data, int length = 0);
+Variant f_bzclose(CResRef bz);
+Variant f_bzread(CResRef bz, int length = 1024);
+Variant f_bzwrite(CResRef bz, CStrRef data, int length = 0);
 
 Variant f_bzopen(CVarRef filename, CStrRef mode);
-Variant f_bzflush(CObjRef bz);
-String f_bzerrstr(CObjRef bz);
-Variant f_bzerror(CObjRef bz);
-int64_t f_bzerrno(CObjRef bz);
+Variant f_bzflush(CResRef bz);
+String f_bzerrstr(CResRef bz);
+Variant f_bzerror(CResRef bz);
+int64_t f_bzerrno(CResRef bz);
 Variant f_bzcompress(CStrRef source, int blocksize = 4, int workfactor = 0);
 Variant f_bzdecompress(CStrRef source, int small = 0);
 

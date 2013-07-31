@@ -39,6 +39,7 @@ PlainFile::PlainFile(FILE *stream, bool nonblocking)
     if (m_buffer)
       setbuffer(stream, m_buffer, BUFSIZ);
   }
+  m_isLocal = true;
 }
 
 PlainFile::PlainFile(int fd, bool nonblocking)

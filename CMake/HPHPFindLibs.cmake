@@ -91,13 +91,6 @@ set(CMAKE_REQUIRED_LIBRARIES)
 # GD checks
 find_package(GD REQUIRED)
 
-if (WANT_FB_LIBMCC)
-	add_definitions(-DHPHP_WITH_LIBMCC)
-	message(FATAL_ERROR Need to add libmcc and libch for linking)
-else ()
-	# nothing for now
-endif()
-
 find_package(LibXed)
 if (LibXed_INCLUDE_DIR AND LibXed_LIBRARY)
 	include_directories(${LibXed_INCLUDE_DIR})

@@ -153,8 +153,8 @@ bool f_error_log(CStrRef message, int message_type /* = 0 */,
       Logger::Error("can't open error_log file!\n");
       return false;
     }
-    f_fwrite(outfile.toObject(), message);
-    f_fclose(outfile.toObject());
+    f_fwrite(outfile.toResource(), message);
+    f_fclose(outfile.toResource());
     return true;
   }
   case 2: // not used per PHP

@@ -53,7 +53,6 @@ map<string, string> Option::IncludeRoots;
 map<string, string> Option::AutoloadRoots;
 vector<string> Option::IncludeSearchPaths;
 string Option::DefaultIncludeRoot;
-vector<Option::SepExtensionOptions> Option::SepExtensions;
 map<string, int> Option::DynamicFunctionCalls;
 
 bool Option::GeneratePickledPHP = false;
@@ -224,23 +223,6 @@ void Option::Load(Hdf &config) {
     READ_CG_OPTION(IdPrefix);
     READ_CG_OPTION(LabelEscape);
     READ_CG_OPTION(LambdaPrefix);
-  }
-
-  int count = 0;
-  for (Hdf hdf = config["SepExtensions"].firstChild(); hdf.exists();
-       hdf = hdf.next()) {
-    ++count;
-  }
-  SepExtensions.resize(count);
-  count = 0;
-  for (Hdf hdf = config["SepExtensions"].firstChild(); hdf.exists();
-       hdf = hdf.next()) {
-    SepExtensionOptions &options = SepExtensions[count++];
-    options.name = hdf.getName();
-    options.soname = hdf["soname"].getString();
-    options.include_path = hdf["include"].getString();
-    options.lib_path = hdf["libpath"].getString();
-    options.shared = hdf["shared"].getBool();
   }
 
   config["DynamicFunctionPrefix"].get(DynamicFunctionPrefixes);

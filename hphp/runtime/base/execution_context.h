@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/class_info.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/server/transport.h"
-#include "hphp/runtime/base/resource_data.h"
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/server/virtual_host.h"
 #include "hphp/runtime/base/string_buffer.h"

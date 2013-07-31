@@ -20,6 +20,9 @@
 
 #include "hphp/runtime/vm/srckey.h"
 
+#include <mutex>
+#include <condition_variable>
+
 namespace HPHP {
 
 // A StackTrace is represented by SrcKeys, which uniquely identify logical
@@ -32,6 +35,29 @@ typedef std::vector<SrcKey> ProfileStackTrace;
 struct SiteAllocations {
   size_t m_count;
   size_t m_bytes;
+
+  // operators for merging shorthand
+  SiteAllocations &operator+=(size_t bytes) {
+    m_count++;
+    m_bytes += bytes;
+    return *this;
+  }
+  SiteAllocations &operator-=(size_t bytes) {
+    m_count--;
+    m_bytes -= bytes;
+    return *this;
+  }
+
+  SiteAllocations &operator+=(const SiteAllocations &allocs) {
+    m_count += allocs.m_count;
+    m_bytes += allocs.m_bytes;
+    return *this;
+  }
+  SiteAllocations &operator-=(const SiteAllocations &allocs) {
+    m_count -= allocs.m_count;
+    m_bytes -= allocs.m_bytes;
+    return *this;
+  }
 };
 
 // Allocation data for each stack trace. pprof wants both what is currently
@@ -43,23 +69,60 @@ struct ProfileDump {
   }
 
   void addAlloc(size_t size, const ProfileStackTrace &trace) {
-    auto &current = m_currentlyAllocated[trace];
-    current.m_count++;
-    current.m_bytes += size;
-    auto &accum = m_accumAllocated[trace];
-    accum.m_count++;
-    accum.m_bytes += size;
+    m_currentlyAllocated[trace] += size;
+    m_accumAllocated[trace] += size;
   }
   void removeAlloc(size_t size, const ProfileStackTrace &trace) {
     auto &current = m_currentlyAllocated[trace];
-    current.m_count--;
-    current.m_bytes -= size;
+    current -= size;
     assert(current.m_count >= 0 && current.m_bytes >= 0);
+  }
+
+  std::string toPProfFormat() const;
+
+  template<typename F>
+  void forEachAddress(F fun) const {
+    for (const auto &data : m_accumAllocated) {
+      for (const SrcKey &sk : data.first) {
+        fun(sk);
+      }
+    }
+  }
+
+  // merge operation: takes another dump and adds all of its data.
+  // used for global dumps that require logging from multiple VM
+  // threads
+  ProfileDump &operator+=(const ProfileDump &dump) {
+    for (const auto &pair : dump.m_currentlyAllocated) {
+      m_currentlyAllocated[pair.first] += pair.second;
+    }
+    for (const auto &pair : dump.m_accumAllocated) {
+      m_accumAllocated[pair.first] += pair.second;
+    }
+    return *this;
   }
 
 private:
   std::map<ProfileStackTrace, SiteAllocations> m_currentlyAllocated;
   std::map<ProfileStackTrace, SiteAllocations> m_accumAllocated;
+};
+
+// Static controller for requesting and fetching profile dumps. The pprof
+// server will place requests for dumps, and the VM threads will give
+// their dumps to the controller if they satisfy the currently-active
+// request. The pprof server will come and fetch the profile later, and if
+// it needs to wait for a request to finish, it will.
+struct ProfileController {
+  // request API
+  static bool requestNext();
+  static bool requestNextURL(const std::string &url);
+  static bool requestGlobal();
+
+  // give API
+  static void offerProfile(const ProfileDump &dump);
+
+  // get API
+  static ProfileDump waitForProfile();
 };
 
 }

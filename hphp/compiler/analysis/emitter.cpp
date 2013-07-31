@@ -3185,6 +3185,13 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             e.Ceil();
             return true;
           }
+        } else if (call->isCallToFunction("sqrt")) {
+          if (params && params->getCount() == 1) {
+            visit((*params)[0]);
+            emitConvertToCell(e);
+            e.Sqrt();
+            return true;
+          }
         } else if (call->isCallToFunction("define")) {
           if (params && params->getCount() == 2) {
             ExpressionPtr p0 = (*params)[0];
@@ -4445,6 +4452,7 @@ void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
         case KindOfString:
         case KindOfStaticString:
         case KindOfObject:
+        case KindOfResource:
         case KindOfArray:
           e.Int(0);
           break;
@@ -6511,6 +6519,37 @@ class ForeachIterGuard {
 
 }
 
+void EmitterVisitor::emitForeachListAssignment(Emitter& e,
+                                               ListAssignmentPtr la,
+                                               int vLocalId) {
+  std::vector<IndexChain*> indexChains;
+  IndexChain workingChain;
+  visitListAssignmentLHS(e, la, workingChain, indexChains);
+
+  if (indexChains.size() == 0) {
+    throw IncludeTimeFatalException(la, "Cannot use empty list");
+  }
+
+  for (int i = (int)indexChains.size() - 1; i >= 0; --i) {
+    IndexChain* currIndexChain = indexChains[i];
+    if (currIndexChain->empty()) {
+      continue;
+    }
+
+    emitVirtualLocal(vLocalId);
+    for (int j = 0; j < (int)currIndexChain->size(); ++j) {
+      m_evalStack.push(StackSym::I);
+      m_evalStack.setInt((*currIndexChain)[j]);
+      markElem(e);
+    }
+    emitCGet(e);
+    emitSet(e);
+    emitPop(e);
+
+    delete currIndexChain;
+  }
+}
+
 void EmitterVisitor::emitForeach(Emitter& e, ForEachStatementPtr fe) {
   ExpressionPtr ae(fe->getArrayExp());
   ExpressionPtr val(fe->getValueExp());
@@ -6527,6 +6566,8 @@ void EmitterVisitor::emitForeach(Emitter& e, ForEachStatementPtr fe) {
   ForeachIterGuard fig(*this, itId, strong ? KindOfMIter : KindOfIter);
   bool simpleCase = (!key || isNormalLocalVariable(key)) &&
                     isNormalLocalVariable(val);
+  bool listKey = key ? key->is(Expression::KindOfListAssignment) : false;
+  bool listVal = val->is(Expression::KindOfListAssignment);
 
   if (simpleCase) {
     SimpleVariablePtr svVal(static_pointer_cast<SimpleVariable>(val));
@@ -6600,29 +6641,45 @@ void EmitterVisitor::emitForeach(Emitter& e, ForEachStatementPtr fe) {
     // key and value for the iterator.
     start.set(e);
     bIterStart = m_ue.bcPos();
-    if (key) {
+    if (key && !listKey) {
       visit(key);
     }
-    visit(val);
-    emitVirtualLocal(valTempLocal);
-    if (strong) {
-      emitVGet(e);
-      emitBind(e);
+    if (listVal) {
+      emitForeachListAssignment(
+        e,
+        ListAssignmentPtr(static_pointer_cast<ListAssignment>(val)),
+        valTempLocal
+      );
     } else {
-      emitCGet(e);
-      emitSet(e);
+      visit(val);
+      emitVirtualLocal(valTempLocal);
+      if (strong) {
+        emitVGet(e);
+        emitBind(e);
+      } else {
+        emitCGet(e);
+        emitSet(e);
+      }
+      emitPop(e);
     }
-    emitPop(e);
     emitVirtualLocal(valTempLocal);
     emitUnset(e);
     newFaultRegion(bIterStart, m_ue.bcPos(),
                    new UnsetUnnamedLocalThunklet(valTempLocal));
     if (key) {
       assert(keyTempLocal != -1);
-      emitVirtualLocal(keyTempLocal);
-      emitCGet(e);
-      emitSet(e);
-      emitPop(e);
+      if (listKey) {
+        emitForeachListAssignment(
+          e,
+          ListAssignmentPtr(static_pointer_cast<ListAssignment>(key)),
+          keyTempLocal
+        );
+      } else {
+        emitVirtualLocal(keyTempLocal);
+        emitCGet(e);
+        emitSet(e);
+        emitPop(e);
+      }
       emitVirtualLocal(keyTempLocal);
       emitUnset(e);
       newFaultRegion(bIterStart, m_ue.bcPos(),
@@ -6956,7 +7013,12 @@ static ConstructPtr doOptimize(ConstructPtr c, AnalysisResultConstPtr ar) {
       case Expression::KindOfIncludeExpression:
       case Expression::KindOfSimpleFunctionCall:
         return e->preOptimize(ar);
-
+      case Expression::KindOfClosureExpression: {
+        ClosureExpressionPtr cl = static_pointer_cast<ClosureExpression>(e);
+        auto UNUSED exp = doOptimize(cl->getClosureFunction(), ar);
+        assert(!exp);
+        break;
+      }
       default: break;
     }
   }

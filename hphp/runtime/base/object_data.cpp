@@ -46,10 +46,11 @@ int ObjectData::GetMaxId() {
   return *(ObjectData::os_max_id.getCheck());
 }
 
-static StaticString s_offsetGet("offsetGet");
-static StaticString s___call("__call");
-static StaticString s___callStatic("__callStatic");
-static StaticString s_serialize("serialize");
+const StaticString
+  s_offsetGet("offsetGet"),
+  s___call("__call"),
+  s___callStatic("__callStatic"),
+  s_serialize("serialize");
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructor/destructor
@@ -104,18 +105,7 @@ void ObjectData::destruct() {
 // class info
 
 CStrRef ObjectData::o_getClassName() const {
-  if (isResource()) return o_getClassNameHook();
   return *(const String*)(&m_cls->m_preClass->nameRef());
-}
-
-CStrRef ObjectData::o_getParentName() const {
-  if (isResource()) return empty_string;
-  return *(const String*)(&m_cls->m_preClass->parentRef());
-}
-
-CStrRef ObjectData::o_getClassNameHook() const {
-  throw FatalErrorException("Class didnt provide a name");
-  return empty_string;
 }
 
 HOT_FUNC
@@ -138,7 +128,7 @@ double ObjectData::o_toDoubleImpl() const noexcept {
 ///////////////////////////////////////////////////////////////////////////////
 // instance methods and properties
 
-static StaticString s_getIterator("getIterator");
+const StaticString s_getIterator("getIterator");
 
 Object ObjectData::iterableObject(bool& isIterable,
                                   bool mayImplementIterator /* = true */) {
@@ -539,12 +529,6 @@ Variant ObjectData::o_invoke_few_args(CStrRef s, int count,
   return ret;
 }
 
-bool ObjectData::php_sleep(Variant& ret) {
-  setAttribute(HasSleep);
-  ret = t___sleep();
-  return getAttribute(HasSleep);
-}
-
 StaticString s_zero("\0", 1);
 
 void ObjectData::serialize(VariableSerializer* serializer) const {
@@ -556,10 +540,10 @@ void ObjectData::serialize(VariableSerializer* serializer) const {
   serializer->decNestedLevel((void*)this);
 }
 
-static StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
-static StaticString s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name");
-static StaticString s_PHP_Unserializable_Class_Name(
-                      "__PHP_Unserializable_Class_Name");
+const StaticString
+  s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
+  s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name"),
+  s_PHP_Unserializable_Class_Name("__PHP_Unserializable_Class_Name");
 
 void ObjectData::serializeImpl(VariableSerializer* serializer) const {
   bool handleSleep = false;
@@ -589,7 +573,10 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       placeholder->serialize(serializer);
       return;
     }
-    handleSleep = const_cast<ObjectData*>(this)->php_sleep(ret);
+    if (getAttribute(HasSleep)) {
+      handleSleep = true;
+      ret = const_cast<ObjectData*>(this)->t___sleep();
+    }
   } else if (UNLIKELY(serializer->getType() ==
                       VariableSerializer::Type::DebuggerSerialize)) {
     if (instanceof(SystemLib::s_SerializableClass)) {
@@ -620,12 +607,15 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       serializer->write(o_getClassName());
       return;
     }
-    try {
-      handleSleep = const_cast<ObjectData*>(this)->php_sleep(ret);
-    } catch (...) {
-      raise_warning("%s::sleep() throws exception", o_getClassName().data());
-      serializer->writeNull();
-      return;
+    if (getAttribute(HasSleep)) {
+      try {
+        handleSleep = true;
+        ret = const_cast<ObjectData*>(this)->t___sleep();
+      } catch (...) {
+        raise_warning("%s::sleep() throws exception", o_getClassName().data());
+        serializer->writeNull();
+        return;
+      }
     }
   }
   if (UNLIKELY(handleSleep)) {
@@ -766,10 +756,14 @@ size_t object_alloc_index_to_size(int idx) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static StaticString s___get(LITSTR_INIT("__get"));
-static StaticString s___set(LITSTR_INIT("__set"));
-static StaticString s___isset(LITSTR_INIT("__isset"));
-static StaticString s___unset(LITSTR_INIT("__unset"));
+const StaticString
+  s___get(LITSTR_INIT("__get")),
+  s___set(LITSTR_INIT("__set")),
+  s___isset(LITSTR_INIT("__isset")),
+  s___unset(LITSTR_INIT("__unset")),
+  s___init__(LITSTR_INIT("__init__")),
+  s___sleep(LITSTR_INIT("__sleep")),
+  s___wakeup(LITSTR_INIT("__wakeup"));
 
 TRACE_SET_MOD(runtime);
 
@@ -801,8 +795,7 @@ const TypedValue* ObjectData::propVec() const {
 }
 
 ObjectData* ObjectData::callCustomInstanceInit() {
-  static StringData* sd_init = StringData::GetStaticString("__init__");
-  const Func* init = m_cls->lookupMethod(sd_init);
+  const Func* init = m_cls->lookupMethod(s___init__.get());
   if (init != nullptr) {
     TypedValue tv;
     // We need to incRef/decRef here because we're still a new (m_count
@@ -1379,21 +1372,18 @@ void ObjectData::getProps(const Class* klass, bool pubOnly,
 }
 
 Variant ObjectData::t___sleep() {
-  static StringData* sd__sleep = StringData::GetStaticString("__sleep");
-  const Func* method = m_cls->lookupMethod(sd__sleep);
+  const Func* method = m_cls->lookupMethod(s___sleep.get());
   if (method) {
     TypedValue tv;
     g_vmContext->invokeFuncFew(&tv, method, this);
     return tvAsVariant(&tv);
   } else {
-    clearAttribute(HasSleep);
     return uninit_null();
   }
 }
 
 Variant ObjectData::t___wakeup() {
-  static StringData* sd__wakeup = StringData::GetStaticString("__wakeup");
-  const Func* method = m_cls->lookupMethod(sd__wakeup);
+  const Func* method = m_cls->lookupMethod(s___wakeup.get());
   if (method) {
     TypedValue tv;
     g_vmContext->invokeFuncFew(&tv, method, this);

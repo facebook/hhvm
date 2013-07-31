@@ -93,6 +93,57 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+class SmartResource : public Resource {
+public:
+  SmartResource()           { }
+  explicit SmartResource(CVarRef v) : Resource(v.toObject().get()) { }
+  /* implicit */ SmartResource(T *data) : Resource(data) { }
+  template<class Y>
+  explicit SmartResource(Y *data) : Resource(data) { }
+  explicit SmartResource(CResRef src) : Resource(src) { }
+
+  /**
+   * Assignment
+   */
+  SmartResource &operator=(CVarRef v) {
+    Resource::operator=(v.toObject().get());
+    return *this;
+  }
+  SmartResource &operator=(const SmartPtr<T> &src) {
+    Resource::operator=(src);
+    return *this;
+  }
+  SmartResource &operator=(CResRef src) {
+    Resource::operator=(src);
+    return *this;
+  }
+  SmartResource &operator=(T *src) {
+    Resource::operator=(src);
+    return *this;
+  }
+
+  T *operator->() const {
+    return static_cast<T*>(static_cast<void*>((Resource::operator->())));
+  }
+
+  T *get() const {
+    return static_cast<T*>(static_cast<void*>(Resource::get()));
+  }
+
+  template<class Y>
+  explicit operator SmartResource<Y>() {
+    /*
+      Note the cast to T* is intentional. We want to allow this
+      conversion only if T is derived from Y, so we are using an
+      implicit cast from T* to Y* to achieve that
+    */
+    return static_cast<T*>(this->m_px);
+  }
+};
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // __HPHP_SMART_OBJET_H__

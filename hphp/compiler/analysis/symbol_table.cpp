@@ -520,17 +520,6 @@ ConstructPtr SymbolTable::getValue(const std::string &name) const {
   return ConstructPtr();
 }
 
-void SymbolTable::setSepExtension(const std::string &name) {
-  genSymbol(name, m_const)->setSep();
-}
-
-bool SymbolTable::isSepExtension(const std::string &name) const {
-  if (const Symbol *sym = getSymbol(name)) {
-    return sym->isSep();
-  }
-  return false;
-}
-
 TypePtr SymbolTable::setType(AnalysisResultConstPtr ar, const std::string &name,
                              TypePtr type, bool coerced) {
   return setType(ar, genSymbol(name, m_const), type, coerced);

@@ -51,6 +51,7 @@ DataType Type::toDataType() const {
   if (subtypeOf(Str))           return KindOfString;
   if (subtypeOf(Arr))           return KindOfArray;
   if (subtypeOf(Obj))           return KindOfObject;
+  if (subtypeOf(Res))           return KindOfResource;
   if (subtypeOf(Cls))           return KindOfClass;
   if (subtypeOf(UncountedInit)) return KindOfUncountedInit;
   if (subtypeOf(Uncounted))     return KindOfUncounted;
@@ -88,6 +89,7 @@ Type Type::fromDataType(DataType outerType,
         return Obj;
       }
     }
+    case KindOfResource      : return Res;
     case KindOfClass         : return Cls;
     case KindOfUncountedInit : return UncountedInit;
     case KindOfUncounted     : return Uncounted;
@@ -180,10 +182,10 @@ Type stkReturn(const IRInstruction* inst, int dstId,
 }
 
 Type binArithResultType(Opcode op, Type t1, Type t2) {
-  if (op == OpMod) {
+  if (op == Mod) {
     return Type::Int;
   }
-  assert(op == OpAdd || op == OpSub || op == OpMul);
+  assert(op == Add || op == Sub || op == Mul);
   if (t1.subtypeOf(Type::Dbl) || t2.subtypeOf(Type::Dbl)) {
     return Type::Dbl;
   }

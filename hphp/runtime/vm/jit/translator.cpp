@@ -518,6 +518,7 @@ predictOutputs(SrcKey startSk,
         case KindOfString:
         case KindOfArray:
         case KindOfObject:
+        case KindOfResource:
           break;
         // KindOfRef and KindOfUninit can't happen for lots of predicted
         // types.
@@ -535,6 +536,11 @@ predictOutputs(SrcKey startSk,
     // x % 0 returns boolean false, so we don't know for certain, but it's
     // probably an int.
     return KindOfInt64;
+  }
+
+  if (ni->op() == OpSqrt) {
+    // sqrt returns a double, unless you pass something nasty to it.
+    return KindOfDouble;
   }
 
   if (ni->op() == OpDiv) {
@@ -669,6 +675,7 @@ getDynLocType(const SrcKey startSk,
     CS(OutFDesc,       KindOfInvalid); // Unclear if OutFDesc has a purpose.
     CS(OutArray,       KindOfArray);
     CS(OutObject,      KindOfObject);
+    CS(OutResource,    KindOfResource);
 #undef CS
     case OutPred: {
       auto dt = predictOutputs(startSk, ni);
@@ -959,6 +966,7 @@ static const struct {
   /* Div and mod might return boolean false. Sigh. */
   { OpDiv,         {StackTop2,        Stack1,       OutPred,          -1 }},
   { OpMod,         {StackTop2,        Stack1,       OutPred,          -1 }},
+  { OpSqrt,        {Stack1,           Stack1,       OutPred,           0 }},
   /* Logical ops */
   { OpXor,         {StackTop2,        Stack1,       OutBoolean,       -1 }},
   { OpNot,         {Stack1,           Stack1,       OutBoolean,        0 }},
@@ -1722,13 +1730,13 @@ static void addMVectorInputs(NormalizedInstruction& ni,
 }
 
 void getInputs(SrcKey startSk, NormalizedInstruction& inst, InputInfos& infos,
-               const LocalTypeFn& localType) {
+               const Func* func, const LocalTypeFn& localType) {
   // TranslatorX64 expected top of stack to be index -1, with indexes growing
   // down from there. hhir defines top of stack to be index 0, with indexes
   // growing up from there. To compensate we start with a stack offset of 1 and
   // negate the index of any stack input after the call to getInputs.
   int stackOff = 1;
-  getInputsImpl(startSk, &inst, stackOff, infos, localType);
+  getInputsImpl(startSk, &inst, stackOff, infos, func, localType);
   for (auto& info : infos) {
     if (info.loc.isStack()) info.loc.offset = -info.loc.offset;
   }
@@ -1752,6 +1760,7 @@ void getInputsImpl(SrcKey startSk,
                    NormalizedInstruction* ni,
                    int& currentStackOffset,
                    InputInfos& inputs,
+                   const Func* func,
                    const LocalTypeFn& localType) {
 #ifdef USE_TRACE
   const SrcKey& sk = ni->source;
@@ -1833,7 +1842,7 @@ void getInputsImpl(SrcKey startSk,
     if (input & DontBreakLocal) inputs.back().dontBreak = true;
   }
 
-  const bool wantInlineReturn = [&] {
+  auto wantInlineReturn = [&] {
     const int localCount = ni->func()->numLocals();
     // Inline return causes us to guard this tracelet more precisely. If
     // we're already chaining to get here, just do a generic return in the
@@ -1853,9 +1862,9 @@ void getInputsImpl(SrcKey startSk,
       numRefCounted += curType.maybeCounted();
     }
     return numRefCounted <= Translator::kMaxInlineReturnDecRefs;
-  }();
+  };
 
-  if ((input & AllLocals) && wantInlineReturn) {
+  if ((input & AllLocals) && wantInlineReturn()) {
     ni->inlineReturn = true;
     ni->ignoreInnerType = true;
     int n = ni->func()->numLocals();
@@ -1908,6 +1917,7 @@ bool outputDependsOnInput(const Op instr) {
     case OutArray:
     case OutArrayImm:
     case OutObject:
+    case OutResource:
     case OutThisObject:
     case OutUnknown:
     case OutVUnknown:
@@ -2480,6 +2490,7 @@ bool GuardType::isCounted() const {
     case KindOfString:
     case KindOfArray:
     case KindOfObject:
+    case KindOfResource:
     case KindOfRef:
       return true;
     default:
@@ -2848,9 +2859,10 @@ bool callDestroysLocals(const NormalizedInstruction& inst,
  * Check whether the a given FCall should be analyzed for possible
  * inlining or not.
  */
-static bool shouldAnalyzeCallee(const NormalizedInstruction* fcall,
-                                const FPIEnt* fpi,
-                                const Op pushOp) {
+bool shouldAnalyzeCallee(const NormalizedInstruction* fcall,
+                         const FPIEnt* fpi,
+                         const Op pushOp,
+                         const int depth) {
   auto const numArgs = fcall->imm[0].u_IVA;
   auto const target  = fcall->funcd;
 
@@ -2874,7 +2886,7 @@ static bool shouldAnalyzeCallee(const NormalizedInstruction* fcall,
   }
 
   constexpr int kMaxSubtraceAnalysisDepth = 2;
-  if (tx64->analysisDepth() + 1 >= kMaxSubtraceAnalysisDepth) {
+  if (depth + 1 >= kMaxSubtraceAnalysisDepth) {
     FTRACE(1, "analyzeCallee: max inlining depth reached\n");
     return false;
   }
@@ -2919,7 +2931,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
   auto const fpi         = callerFunc->findFPI(fcall->source.offset());
   auto const pushOp      = fcall->m_unit->getOpcode(fpi->m_fpushOff);
 
-  if (!shouldAnalyzeCallee(fcall, fpi, pushOp)) return;
+  if (!shouldAnalyzeCallee(fcall, fpi, pushOp, analysisDepth())) return;
 
   auto const numArgs     = fcall->imm[0].u_IVA;
   auto const target      = fcall->funcd;
@@ -3177,7 +3189,8 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     try {
       preInputApplyMetaData(metaHand, ni);
       InputInfos inputInfos;
-      getInputsImpl(t.m_sk, ni, stackFrameOffset, inputInfos, [&](int i) {
+      getInputsImpl(t.m_sk, ni, stackFrameOffset, inputInfos, sk.func(),
+      [&](int i) {
         return Type::fromRuntimeType(
           tas.currentType(Location(Location::Local, i)));
       });
@@ -3690,10 +3703,10 @@ Translator::translateRegion(const RegionDesc& region,
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
   assert(!region.blocks.empty());
   const SrcKey startSk = region.blocks.front()->start();
-  Unit::MetaHandle metaHand;
 
   for (auto b = 0; b < region.blocks.size(); b++) {
     auto const& block = region.blocks[b];
+    Unit::MetaHandle metaHand;
     SrcKey sk = block->start();
     const Func* topFunc = nullptr;
     auto typePreds  = makeMapWalker(block->typePreds());
@@ -3758,6 +3771,24 @@ Translator::translateRegion(const RegionDesc& region,
       inst.outputPredicted = false;
       populateImmediates(inst);
 
+      // If this block ends with an inlined FCall, we don't emit anything for
+      // the FCall and instead set up HhbcTranslator for inlining. Blocks from
+      // the callee will be next in the region.
+      if (i == block->length() - 1 &&
+          inst.op() == OpFCall && block->inlinedCallee()) {
+        auto const* callee = block->inlinedCallee();
+        FTRACE(1, "\nstarting inlined call from {} to {} with {} args "
+               "and stack:\n{}\n",
+               block->func()->fullName()->data(),
+               callee->fullName()->data(),
+               inst.imm[0].u_IVA,
+               ht.showStack());
+        auto returnSk = inst.nextSk();
+        auto returnFuncOff = returnSk.offset() - block->func()->base();
+        ht.beginInlining(inst.imm[0].u_IVA, callee, returnFuncOff);
+        continue;
+      }
+
       // We can get a more precise output type for interpOne if we know all of
       // its inputs, so we still populate the rest of the instruction even if
       // this is true.
@@ -3768,7 +3799,7 @@ Translator::translateRegion(const RegionDesc& region,
       preInputApplyMetaData(metaHand, &inst);
 
       InputInfos inputInfos;
-      getInputs(startSk, inst, inputInfos, [&](int i) {
+      getInputs(startSk, inst, inputInfos, block->func(), [&](int i) {
           return ht.traceBuilder()->getLocalType(i);
         });
 

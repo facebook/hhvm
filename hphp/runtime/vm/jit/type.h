@@ -42,10 +42,11 @@ using Transl::RuntimeType;
   c(CountedStr,   1ULL << 6)                                            \
   c(StaticArr,    1ULL << 7)                                            \
   c(CountedArr,   1ULL << 8)                                            \
-  c(Obj,          1ULL << 9)
-// Boxed*:       10-19
-// PtrTo*:       20-29
-// PtrToBoxed*:  30-39
+  c(Obj,          1ULL << 9)                                            \
+  c(Res,          1ULL << 10)
+// Boxed*:       11-21
+// PtrTo*:       22-32
+// PtrToBoxed*:  33-43
 
 // This list should be in non-decreasing order of specificity
 #define IRT_PHP_UNIONS(c)                                               \
@@ -54,25 +55,25 @@ using Transl::RuntimeType;
   c(Arr,           kStaticArr|kCountedArr)                              \
   c(UncountedInit, kInitNull|kBool|kInt|kDbl|kStaticStr|kStaticArr)     \
   c(Uncounted,     kUncountedInit|kUninit)                              \
-  c(Cell,          kUncounted|kStr|kArr|kObj)
+  c(Cell,          kUncounted|kStr|kArr|kObj|kRes)
 
 #define IRT_RUNTIME                                                     \
-  IRT(Cls,         1ULL << 40)                                          \
-  IRT(Func,        1ULL << 41)                                          \
-  IRT(VarEnv,      1ULL << 42)                                          \
-  IRT(NamedEntity, 1ULL << 43)                                          \
-  IRT(FuncCls,     1ULL << 44) /* {Func*, Cctx} */                      \
-  IRT(FuncObj,     1ULL << 45) /* {Func*, Obj} */                       \
-  IRT(Cctx,        1ULL << 46) /* Class* with the lowest bit set,  */   \
+  IRT(Cls,         1ULL << 44)                                          \
+  IRT(Func,        1ULL << 45)                                          \
+  IRT(VarEnv,      1ULL << 46)                                          \
+  IRT(NamedEntity, 1ULL << 47)                                          \
+  IRT(FuncCls,     1ULL << 48) /* {Func*, Cctx} */                      \
+  IRT(FuncObj,     1ULL << 49) /* {Func*, Obj} */                       \
+  IRT(Cctx,        1ULL << 50) /* Class* with the lowest bit set,  */   \
                                /* as stored in ActRec.m_cls field  */   \
-  IRT(RetAddr,     1ULL << 47) /* Return address */                     \
-  IRT(StkPtr,      1ULL << 48) /* stack pointer */                      \
-  IRT(FramePtr,    1ULL << 49) /* frame pointer */                      \
-  IRT(TCA,         1ULL << 50)                                          \
-  IRT(ActRec,      1ULL << 51)                                          \
-  IRT(None,        1ULL << 52)                                          \
-  IRT(CacheHandle, 1ULL << 53) /* TargetCache::CacheHandle */           \
-  IRT(Nullptr,     1ULL << 54)
+  IRT(RetAddr,     1ULL << 51) /* Return address */                     \
+  IRT(StkPtr,      1ULL << 52) /* stack pointer */                      \
+  IRT(FramePtr,    1ULL << 53) /* frame pointer */                      \
+  IRT(TCA,         1ULL << 54)                                          \
+  IRT(ActRec,      1ULL << 55)                                          \
+  IRT(None,        1ULL << 56)                                          \
+  IRT(CacheHandle, 1ULL << 57) /* TargetCache::CacheHandle */           \
+  IRT(Nullptr,     1ULL << 58)
 
 // The definitions for these are in ir.cpp
 #define IRT_UNIONS                                                      \
@@ -85,7 +86,7 @@ using Transl::RuntimeType;
 #define IRT_SPECIAL                                                 \
   IRT(Bottom,       0)                                              \
   IRT(Top,          0xffffffffffffffffULL)                          \
-  IRT(Counted,      kCountedStr|kCountedArr|kObj|kBoxedCell)        \
+  IRT(Counted,      kCountedStr|kCountedArr|kObj|kRes|kBoxedCell)   \
   IRT(PtrToCounted, kCounted << kPtrShift)                          \
   IRT(Gen,          kCell|kBoxedCell)                               \
   IRT(StackElem,    kGen|kCls)                                      \
@@ -107,7 +108,7 @@ using Transl::RuntimeType;
 class Type {
   typedef uint64_t bits_t;
 
-  static const size_t kBoxShift = 10;
+  static const size_t kBoxShift = 11;
   static const size_t kPtrShift = kBoxShift * 2;
   static const size_t kPtrBoxShift = kBoxShift + kPtrShift;
 
@@ -352,6 +353,10 @@ public:
     return subtypeOf(Obj);
   }
 
+  bool isRes() const {
+    return subtypeOf(Res);
+  }
+
   bool isString() const {
     return subtypeOf(Str);
   }
@@ -446,7 +451,8 @@ public:
 
   bool canRunDtor() const {
     return
-      (*this & (Obj | CountedArr | BoxedObj | BoxedCountedArr))
+      (*this & (CountedArr | BoxedCountedArr | Obj | BoxedObj |
+                Res | BoxedRes))
       != Type::Bottom;
   }
 
@@ -473,7 +479,8 @@ public:
   bool isReferenceType() const {
     return subtypeOf(Type::Str)
            || subtypeOf(Type::Arr)
-           || subtypeOf(Type::Obj);
+           || subtypeOf(Type::Obj)
+           || subtypeOf(Type::Res);
   }
 
   // In tx64, KindOfUnknown is used to represent Variants (Type::Cell).

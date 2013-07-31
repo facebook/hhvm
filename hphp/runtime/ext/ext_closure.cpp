@@ -22,12 +22,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Closure::c_Closure(Class* cb) : ExtObjectData(cb),
-  m_thisOrClass(nullptr), m_func(nullptr) {}
 c_Closure::~c_Closure() {
   // same as ar->hasThis()
   if (m_thisOrClass && !(intptr_t(m_thisOrClass) & 1LL)) {
-    m_thisOrClass->decRefCount();
+    decRefObj(m_thisOrClass);
   }
 }
 
@@ -35,13 +33,10 @@ void c_Closure::t___construct() {
   raise_error("Can't create a Closure directly");
 }
 
-/**
- * sp points to the last use variable on the stack.
- * returns the closure so that translator-x64 can just return "rax".
- */
-c_Closure* c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
-  static StringData* invokeName = StringData::GetStaticString("__invoke");
-  Func* invokeFunc = getVMClass()->lookupMethod(invokeName);
+const StaticString s_uuinvoke("__invoke");
+
+void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
+  auto const invokeFunc = getVMClass()->lookupMethod(s_uuinvoke.get());
 
   if (invokeFunc->attrs() & AttrStatic) {
     // Only set the class for static closures
@@ -65,9 +60,8 @@ c_Closure* c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   TypedValue* curProperty = propVec();
   for (int i = 0; i < numArgs; i++) {
     // teleport the references in here so we don't incref
-    *curProperty++ = *--beforeCurUseVar;
+    tvCopy(*--beforeCurUseVar, *curProperty++);
   }
-  return this;
 }
 
 c_Closure* c_Closure::clone() {

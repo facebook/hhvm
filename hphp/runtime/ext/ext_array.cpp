@@ -33,7 +33,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-static StaticString s_count("count");
+const StaticString s_count("count");
 
 const int64_t k_UCOL_DEFAULT = UCOL_DEFAULT;
 

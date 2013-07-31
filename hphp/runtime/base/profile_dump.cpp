@@ -27,6 +27,8 @@ std::string ProfileDump::toPProfFormat() const {
   size_t currentCountSum = 0, currentBytesSum = 0;
   size_t accumCountSum   = 0, accumBytesSum   = 0;
 
+  int numDumps = std::max(m_numDumps, 1);
+
   // aggregate for totals at top
   for (const auto &current : m_currentlyAllocated) {
     currentCountSum += current.second.m_count;
@@ -55,6 +57,12 @@ std::string ProfileDump::toPProfFormat() const {
     // skip this information if we have a zero-length stack trace, because
     // that means we allocated this outside of PHP userland.
     if (trace.size() == 0) continue;
+    // if the filters are set such that the number of bytes or allocations
+    // at this site is not enough, we are going to filter it out
+    if ((accum.second.m_count / numDumps <
+         RuntimeOption::HHProfServerFilterMinAllocPerReq) ||
+        (accum.second.m_bytes / numDumps <
+         RuntimeOption::HHProfServerFilterMinBytesPerReq)) continue;
     // get current allocation count/bytes for the current stack trace. we
     // know this is present in the current allocations map because we did
     // insert it at the same time we inserted something into the cumulative
@@ -225,15 +233,11 @@ ProfileDump ProfileController::waitForProfile() {
   std::unique_lock<std::mutex> lock(m_mutex);
 
   auto cond = [&] { return m_state != State::Pending; };
-  if (RuntimeOption::RequestTimeoutSeconds > 0) {
-    m_waitq.wait_for(
-      lock,
-      std::chrono::seconds(RuntimeOption::RequestTimeoutSeconds * 2),
-      cond
-    );
-  } else {
-    m_waitq.wait(lock, cond);
-  }
+  m_waitq.wait_for(
+    lock,
+    std::chrono::seconds(RuntimeOption::HHProfServerTimeoutSeconds),
+    cond
+  );
 
   // check to see if someone else grabbed the profile
   if (m_state == State::Waiting) return ProfileDump();

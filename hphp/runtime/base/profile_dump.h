@@ -66,6 +66,7 @@ struct ProfileDump {
   void clear() {
     m_currentlyAllocated.clear();
     m_accumAllocated.clear();
+    m_numDumps = 0;
   }
 
   void addAlloc(size_t size, const ProfileStackTrace &trace) {
@@ -99,12 +100,15 @@ struct ProfileDump {
     for (const auto &pair : dump.m_accumAllocated) {
       m_accumAllocated[pair.first] += pair.second;
     }
+    m_numDumps++;
     return *this;
   }
 
 private:
   std::map<ProfileStackTrace, SiteAllocations> m_currentlyAllocated;
   std::map<ProfileStackTrace, SiteAllocations> m_accumAllocated;
+
+  int m_numDumps;
 };
 
 // Static controller for requesting and fetching profile dumps. The pprof

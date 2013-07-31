@@ -452,6 +452,12 @@ long RuntimeOption::PregBacktraceLimit = 1000000;
 long RuntimeOption::PregRecursionLimit = 100000;
 bool RuntimeOption::EnablePregErrorLog = true;
 
+int RuntimeOption::HHProfServerPort = 4327;
+int RuntimeOption::HHProfServerThreads = 2;
+int RuntimeOption::HHProfServerTimeoutSeconds = 30;
+int RuntimeOption::HHProfServerFilterMinAllocPerReq = 2;
+int RuntimeOption::HHProfServerFilterMinBytesPerReq = 128;
+
 bool RuntimeOption::EnableHotProfiler = true;
 int RuntimeOption::ProfilerTraceBuffer = 2000000;
 double RuntimeOption::ProfilerTraceExpansion = 1.2;
@@ -1261,6 +1267,20 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     PregBacktraceLimit = preg["BacktraceLimit"].getInt64(1000000);
     PregRecursionLimit = preg["RecursionLimit"].getInt64(100000);
     EnablePregErrorLog = preg["ErrorLog"].getBool(true);
+  }
+  {
+    Hdf hhprofServer = config["HHProfServer"];
+    HHProfServerPort = hhprofServer["Port"].getInt16(4327);
+    HHProfServerThreads = hhprofServer["Threads"].getInt16(2);
+    HHProfServerTimeoutSeconds =
+      hhprofServer["TimeoutSeconds"].getInt64(30);
+
+    // HHProfServer.Filter.*
+    Hdf hhprofFilter = hhprofServer["Filter"];
+    HHProfServerFilterMinAllocPerReq =
+      hhprofFilter["MinAllocPerReq"].getInt64(2);
+    HHProfServerFilterMinBytesPerReq =
+      hhprofFilter["MinBytesPerReq"].getInt64(128);
   }
 #ifdef FACEBOOK
   {

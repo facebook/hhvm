@@ -41,11 +41,13 @@ struct HeapProfileServer {
     m_server(ServerFactoryRegistry::createServer(
       RuntimeOption::ServerType,
       RuntimeOption::ServerIP,
-      (uint16_t)4327,          // port
-      2                        // thread count
+      RuntimeOption::HHProfServerPort,
+      RuntimeOption::HHProfServerThreads
     )
   ) {
-    m_server->setRequestHandlerFactory<HeapProfileRequestHandler>(30);
+    m_server->setRequestHandlerFactory<HeapProfileRequestHandler>(
+      RuntimeOption::HHProfServerTimeoutSeconds
+    );
     m_server->start();
   }
 

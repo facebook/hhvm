@@ -69,6 +69,7 @@ public:
   bool        m_cookie_httponly;
 
   SessionModule *m_mod;
+  SessionModule *m_default_mod;
 
   Status m_session_status;
   int64_t  m_gc_probability;
@@ -97,13 +98,13 @@ public:
 
   Session()
     : m_entropy_length(0), m_cookie_lifetime(0), m_cookie_secure(false),
-      m_cookie_httponly(false), m_mod(NULL), m_session_status(None),
-      m_gc_probability(0), m_gc_divisor(0), m_gc_maxlifetime(0),
-      m_module_number(0), m_cache_expire(0), m_serializer(NULL),
-      m_auto_start(false), m_use_cookies(false), m_use_only_cookies(false),
-      m_use_trans_sid(false), m_apply_trans_sid(false),
-      m_hash_bits_per_character(0), m_send_cookie(0), m_define_sid(0),
-      m_invalid_session_id(false) {
+      m_cookie_httponly(false), m_mod(nullptr), m_default_mod(nullptr),
+      m_session_status(None), m_gc_probability(0), m_gc_divisor(0),
+      m_gc_maxlifetime(0), m_module_number(0), m_cache_expire(0),
+      m_serializer(nullptr), m_auto_start(false), m_use_cookies(false),
+      m_use_only_cookies(false), m_use_trans_sid(false),
+      m_apply_trans_sid(false), m_hash_bits_per_character(0), m_send_cookie(0),
+      m_define_sid(0), m_invalid_session_id(false) {
   }
 };
 
@@ -1332,9 +1333,13 @@ Variant f_session_module_name(CStrRef newname /* = null_string */) {
 bool f_hphp_session_set_save_handler(CObjRef sessionhandler,
     bool register_shutdown /* = true */) {
 
-  if (PS(session_status) != Session::None) {
+  if (PS(mod) &&
+      PS(session_status) != Session::None &&
+      PS(mod) != &s_user_session_module) {
     return false;
   }
+
+  PS(default_mod) = PS(mod);
 
   PS(ps_session_handler) = sessionhandler;
   if (register_shutdown) {
@@ -1608,22 +1613,21 @@ bool f_session_is_registered(CStrRef varname) {
 }
 
 void c_SessionHandler::t___construct() { }
-c_SessionHandler::c_SessionHandler(Class* cb) : ExtObjectData(cb) {
-  m_mod = PS(mod);
-}
+c_SessionHandler::c_SessionHandler(Class* cb) : ExtObjectData(cb) {}
 c_SessionHandler::~c_SessionHandler() { }
 
 bool c_SessionHandler::t_open(CStrRef save_path, CStrRef session_id) {
-  return m_mod->open(save_path->data(), session_id->data());
+  return PS(default_mod) &&
+    PS(default_mod)->open(save_path->data(), session_id->data());
 }
 
 bool c_SessionHandler::t_close() {
-  return m_mod->close();
+  return PS(default_mod) && PS(default_mod)->close();
 }
 
 String c_SessionHandler::t_read(CStrRef session_id) {
   String value;
-  if (m_mod->read(PS(id).data(), value)) {
+  if (PS(default_mod) && PS(default_mod)->read(PS(id).data(), value)) {
     php_session_decode(value);
     return value;
   }
@@ -1631,16 +1635,17 @@ String c_SessionHandler::t_read(CStrRef session_id) {
 }
 
 bool c_SessionHandler::t_write(CStrRef session_id, CStrRef session_data) {
-  return m_mod->write(session_id->data(), session_data->data());
+  return PS(default_mod) &&
+    PS(default_mod)->write(session_id->data(), session_data->data());
 }
 
 bool c_SessionHandler::t_destroy(CStrRef session_id) {
-  return m_mod->destroy(session_id->data());
+  return PS(default_mod) && PS(default_mod)->destroy(session_id->data());
 }
 
 bool c_SessionHandler::t_gc(int maxlifetime) {
   int nrdels = -1;
-  return m_mod->gc(maxlifetime, &nrdels);
+  return PS(default_mod) && PS(default_mod)->gc(maxlifetime, &nrdels);
 }
 
 

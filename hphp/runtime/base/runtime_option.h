@@ -369,12 +369,14 @@ public:
   F(uint32_t, VMInitialGlobalTableSize,                                 \
     kEvalVMInitialGlobalTableSizeDefault)                               \
   F(bool, Jit,                         evalJitDefault())                \
+  F(bool, RuntimeTypeProfile,          false)                           \
   F(bool, AllowHhas,                   false)                           \
   F(bool, CheckExtendedTypeHints,      false)                           \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
   F(bool, PerfPidMap,                  true)                            \
   F(bool, KeepPerfPidMap,              false)                           \
+  F(uint32_t, RuntimeTypeProfileFreq,  1000)                            \
   F(uint32_t, JitTargetCacheSize,      64 << 20)                        \
   F(uint32_t, HHBCArenaChunkSize,      64 << 20)                        \
   F(bool, ProfileBC,                   false)                           \

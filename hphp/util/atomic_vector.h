@@ -52,6 +52,7 @@ class AtomicVector {
 
   void ensureSize(size_t size);
   Value exchange(size_t i, const Value& val);
+  bool compare_exchange(size_t i, Value expect, const Value& val);
 
   Value get(size_t i) const;
 
@@ -131,6 +132,25 @@ Value AtomicVector<Value>::exchange(size_t i, const Value& val) {
 
   assert(m_next);
   return m_next.load(std::memory_order_acquire)->exchange(i - m_size, val);
+}
+
+template<typename Value>
+bool AtomicVector<Value>::compare_exchange(size_t i,
+                                           Value expect,
+                                           const Value& val) {
+  FTRACE(3, "{}::compare_exchange({}, {}), m_size = {}\n",
+         typeName(), i, val, m_size);
+  if (i < m_size) {
+    auto oldVal = m_vals[i].compare_exchange_strong(expect, val,
+        std::memory_order_release, std::memory_order_acquire);
+
+    FTRACE(3, "{}::compare_exchange returning {}\n", typeName(), oldVal);
+    return oldVal;
+  }
+
+  assert(m_next);
+  return m_next.load(std::memory_order_acquire)->
+                     compare_exchange(i - m_size, expect,  val);
 }
 
 template<typename Value>

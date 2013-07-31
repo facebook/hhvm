@@ -396,6 +396,7 @@ CALL_OPCODE(ConvObjToStr);
 CALL_OPCODE(ConvResToStr);
 CALL_OPCODE(ConvCellToStr);
 
+CALL_OPCODE(TypeProfileFunc)
 CALL_OPCODE(CreateContFunc)
 CALL_OPCODE(CreateContMeth)
 CALL_OPCODE(NewArray)

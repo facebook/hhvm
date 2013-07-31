@@ -2249,13 +2249,16 @@ void HhbcTranslator::emitFCall(uint32_t numParams,
   std::memset(params, 0, sizeof params);
   for (uint32_t i = 0; i < numParams; i++) {
     params[numParams + 3 - i - 1] = popF();
+    if (RuntimeOption::EvalRuntimeTypeProfile && callee != nullptr
+        && params[numParams + 3 - i - 1] != nullptr) {
+      gen(TypeProfileFunc, params[numParams + 3 - i - 1], cns(i), cns(callee));
+    }
   }
   params[0] = spillStack();
   params[1] = cns(returnBcOffset);
   params[2] = callee ? cns(callee) : m_tb->genDefNull();
   SSATmp** decayedPtr = params;
   gen(Call, std::make_pair(numParams + 3, decayedPtr));
-
   if (!m_fpiStack.empty()) {
     m_fpiStack.pop();
   }
@@ -2462,7 +2465,9 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     gen(ReleaseVVOrExit, getExitSlowTrace(), m_tb->fp());
   }
   SSATmp* retVal = pop(type);
-
+  if (RuntimeOption::EvalRuntimeTypeProfile) {
+    gen(TypeProfileFunc, retVal, cns(-1), cns(curFunc));
+  }
   SSATmp* sp;
   if (freeInline) {
     SSATmp* useRet = emitDecRefLocalsInline(retVal);

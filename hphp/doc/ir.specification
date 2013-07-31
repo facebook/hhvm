@@ -2034,3 +2034,9 @@ D:Cell = LdUnwinderValue
 DeleteUnwinderException
 
   Deletes the current unwinder exception.
+
+TypeProfileFunc S0:Gen S1:Int S2:Func
+
+  Profiles that function's parameter/return value. S1 is the parameter index 
+  (where -1 is the return value). Calls into native c++ function.
+

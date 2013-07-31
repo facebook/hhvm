@@ -21,7 +21,6 @@ foreach ($funcs as $func) {
   $arr = array(
     'name' => $func,
     'desc' => idx($info, 'desc'),
-    'flags' => 'HasDocComment',
     'return' => array(
       'type' => 'Variant',
       'desc' => idx($info, 'ret'),

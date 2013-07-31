@@ -27,7 +27,6 @@
             "name": "mysql_connect",
             "desc": "Opens or reuses a connection to a MySQL server.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -82,7 +81,6 @@
             "name": "mysql_async_connect_start",
             "desc": "Initiate an asynchronous (non-blocking) connection to the specified MySQL server.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -119,7 +117,6 @@
             "name": "mysql_async_connect_completed",
             "desc": "A nonblocking test whether a connection has completed, or errored out.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -137,7 +134,6 @@
             "name": "mysql_async_query_start",
             "desc": "Initiate a nonblocking query on a given connection.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -160,7 +156,6 @@
             "name": "mysql_async_query_result",
             "desc": "Fetch a result object, if available, containing some rows of the nonblocking query.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -178,7 +173,6 @@
             "name": "mysql_async_query_completed",
             "desc": "Perform a nonblocking test whether an asynchronous query has completed.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -196,7 +190,6 @@
             "name": "mysql_async_fetch_array",
             "desc": "Returns an array that corresponds to the fetched row, if available.  Nonblocking.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -220,7 +213,6 @@
             "name": "mysql_async_wait_actionable",
             "desc": "Block on one or more asynchronous operations, or until the specified timeout has occurred.  Returns values from the 'items' parameter when they become actionable.  Entries are returned as soon as they are actionable (i.e., it does not wait for the entire timeout before returning results).",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -243,7 +235,6 @@
             "name": "mysql_async_status",
             "desc": "Returns the async operation status for a given mysql connection.  For non-async connections, this returns ASYNC_OP_INVALID.  For an async connection, this can be either ASYNC_OP_UNSET (no pending async operation), ASYNC_OP_QUERY (async query pending), ASYNC_OP_FETCH_ROW (async row fetching pending), or ASYNC_OP_CONNECT (async connection pending).  Returns -1 if the supplied connection itself is invalid.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -261,7 +252,6 @@
             "name": "mysql_pconnect",
             "desc": "Establishes a persistent connection to a MySQL server.\n\nmysql_pconnect() acts very much like mysql_connect() with two major differences.\n\nFirst, when connecting, the function would first try to find a (persistent) link that's already open with the same host, username and password. If one is found, an identifier for it will be returned instead of opening a new connection.\n\nSecond, the connection to the SQL server will not be closed when the execution of the script ends. Instead, the link will remain open for future use (mysql_close() will not close links established by mysql_pconnect()).\n\nThis type of link is therefore called 'persistent'.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -309,7 +299,6 @@
         {
             "name": "mysql_connect_with_db",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -360,7 +349,6 @@
         {
             "name": "mysql_pconnect_with_db",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -407,7 +395,6 @@
             "name": "mysql_set_charset",
             "desc": "Sets the default character set for the current connection.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -431,7 +418,6 @@
             "name": "mysql_ping",
             "desc": "Checks whether or not the connection to the server is working. If it has gone down, an automatic reconnection is attempted. This function can be used by scripts that remain idle for a long while, to check whether or not the server has closed the connection and reconnect if necessary.\n\nSince MySQL 5.0.13, automatic reconnection feature is disabled.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -450,7 +436,6 @@
             "name": "mysql_escape_string",
             "desc": "This function will escape the unescaped_string, so that it is safe to place it in a mysql_query(). This function is deprecated.\n\nThis function is identical to mysql_real_escape_string() except that mysql_real_escape_string() takes a connection handler and escapes the string according to the current character set. mysql_escape_string() does not take a connection argument and does not respect the current charset setting. WarningThis function has been DEPRECATED as of PHP 5.3.0. Relying on this feature is highly discouraged.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -468,7 +453,6 @@
             "name": "mysql_real_escape_string",
             "desc": "Escapes special characters in the unescaped_string, taking into account the current character set of the connection so that it is safe to place it in a mysql_query(). If binary data is to be inserted, this function must be used.\n\nmysql_real_escape_string() calls MySQL's library function mysql_real_escape_string, which prepends backslashes to the following characters: \\x00, \\n, \\r, \\, ', \" and \\x1a.\n\nThis function must always (with few exceptions) be used to make data safe before sending a query to MySQL.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -492,7 +476,6 @@
             "name": "mysql_client_encoding",
             "desc": "Retrieves the character_set variable from MySQL.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -511,7 +494,6 @@
             "name": "mysql_close",
             "desc": "mysql_close() closes the non-persistent connection to the MySQL server that's associated with the specified link identifier. If link_identifier isn't specified, the last opened link is used.\n\nUsing mysql_close() isn't usually necessary, as non-persistent open links are automatically closed at the end of the script's execution. See also freeing resources.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -530,7 +512,6 @@
             "name": "mysql_errno",
             "desc": "Returns the error number from the last MySQL function.\n\nErrors coming back from the MySQL database backend no longer issue warnings. Instead, use mysql_errno() to retrieve the error code. Note that this function only returns the error code from the most recently executed MySQL function (not including mysql_error() and mysql_errno()), so if you want to use it, make sure you check the value before calling another MySQL function.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -549,7 +530,6 @@
             "name": "mysql_error",
             "desc": "Returns the error text from the last MySQL function. Errors coming back from the MySQL database backend no longer issue warnings. Instead, use mysql_error() to retrieve the error text. Note that this function only returns the error text from the most recently executed MySQL function (not including mysql_error() and mysql_errno()), so if you want to use it, make sure you check the value before calling another MySQL function.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -568,7 +548,6 @@
             "name": "mysql_warning_count",
             "desc": "Returns the number of errors generated during execution of the previous SQL statement. To retrieve warning messages you can use the SQL command SHOW WARNINGS [limit row_count].",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -587,7 +566,6 @@
             "name": "mysql_get_client_info",
             "desc": "mysql_get_client_info() returns a string that represents the client library version.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -600,7 +578,6 @@
             "name": "mysql_get_host_info",
             "desc": "Describes the type of connection in use for the connection, including the server host name.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -619,7 +596,6 @@
             "name": "mysql_get_proto_info",
             "desc": "Retrieves the MySQL protocol.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -638,7 +614,6 @@
             "name": "mysql_get_server_info",
             "desc": "Retrieves the MySQL server version.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -657,7 +632,6 @@
             "name": "mysql_info",
             "desc": "Returns detailed information about the last query.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -676,7 +650,6 @@
             "name": "mysql_insert_id",
             "desc": "Retrieves the ID generated for an AUTO_INCREMENT column by the previous query (usually INSERT).",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -695,7 +668,6 @@
             "name": "mysql_stat",
             "desc": "mysql_stat() returns the current server status.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -714,7 +686,6 @@
             "name": "mysql_thread_id",
             "desc": "Retrieves the current thread ID. If the connection is lost, and a reconnect with mysql_ping() is executed, the thread ID will change. This means only retrieve the thread ID when needed.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -733,7 +704,6 @@
             "name": "mysql_create_db",
             "desc": "mysql_create_db() attempts to create a new database on the server associated with the specified link identifier.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -757,7 +727,6 @@
             "name": "mysql_select_db",
             "desc": "Sets the current active database on the server that's associated with the specified link identifier. Every subsequent call to mysql_query() will be made on the active database.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -781,7 +750,6 @@
             "name": "mysql_drop_db",
             "desc": "mysql_drop_db() attempts to drop (remove) an entire database from the server associated with the specified link identifier. This function is deprecated, it is preferable to use mysql_query() to issue an sql DROP DATABASE statement instead.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -805,7 +773,6 @@
             "name": "mysql_affected_rows",
             "desc": "Get the number of affected rows by the last INSERT, UPDATE, REPLACE or DELETE query associated with link_identifier.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -824,7 +791,6 @@
             "name": "mysql_set_timeout",
             "desc": "Sets query timeout for a connection.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -849,7 +815,6 @@
             "name": "mysql_query",
             "desc": "mysql_query() sends a unique query (multiple queries are not supported) to the currently active database on the server that's associated with the specified link_identifier.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -873,7 +838,6 @@
             "name": "mysql_multi_query",
             "desc": "mysql_multi_query() executes one or more queries separated by a ; to the currently active database on the server that's associated with the specified link_identifier.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -898,7 +862,6 @@
             "name": "mysql_next_result",
             "desc": "Used with mysql_multi_query() to move the result set on one.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -918,7 +881,6 @@
             "name": "mysql_more_results",
             "desc": "Used with mysql_multi_query() to check if there are more result sets to be returned.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -938,7 +900,6 @@
             "name": "mysql_fetch_result",
             "desc": "Used with mysql_multi_query() to return a mysql result for the current iterated query.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -958,7 +919,6 @@
             "name": "mysql_unbuffered_query",
             "desc": "mysql_unbuffered_query() sends the SQL query query to MySQL without automatically fetching and buffering the result rows as mysql_query() does. This saves a considerable amount of memory with SQL queries that produce large result sets, and you can start working on the result set immediately after the first row has been retrieved as you don't have to wait until the complete SQL query has been performed. To use mysql_unbuffered_query() while multiple database connections are open, you must specify the optional parameter link_identifier to identify which connection you want to use.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -982,7 +942,6 @@
             "name": "mysql_db_query",
             "desc": "mysql_db_query() selects a database, and executes a query on it. WarningThis function has been DEPRECATED as of PHP 5.3.0. Relying on this feature is highly discouraged.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1011,7 +970,6 @@
             "name": "mysql_list_dbs",
             "desc": "Returns a result pointer containing the databases available from the current mysql daemon.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1030,7 +988,6 @@
             "name": "mysql_list_tables",
             "desc": "Retrieves a list of table names from a MySQL database.\n\nThis function is deprecated. It is preferable to use mysql_query() to issue an SQL SHOW TABLES [FROM db_name] [LIKE 'pattern'] statement instead.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1054,7 +1011,6 @@
             "name": "mysql_list_fields",
             "desc": "Retrieves information about the given table name.\n\nThis function is deprecated. It is preferable to use mysql_query() to issue an SQL SHOW COLUMNS FROM table [LIKE 'name'] statement instead.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1083,7 +1039,6 @@
             "name": "mysql_list_processes",
             "desc": "Retrieves the current MySQL server threads.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1102,7 +1057,6 @@
             "name": "mysql_db_name",
             "desc": "Retrieve the database name from a call to mysql_list_dbs().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1131,7 +1085,6 @@
             "name": "mysql_tablename",
             "desc": "Retrieves the table name from a result.\n\nThis function is deprecated. It is preferable to use mysql_query() to issue an SQL SHOW TABLES [FROM db_name] [LIKE 'pattern'] statement instead.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1154,7 +1107,6 @@
             "name": "mysql_num_fields",
             "desc": "Retrieves the number of fields from a query.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1172,7 +1124,6 @@
             "name": "mysql_num_rows",
             "desc": "Retrieves the number of rows from a result set. This command is only valid for statements like SELECT or SHOW that return an actual result set. To retrieve the number of rows affected by a INSERT, UPDATE, REPLACE or DELETE query, use mysql_affected_rows().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1190,7 +1141,6 @@
             "name": "mysql_free_result",
             "desc": "mysql_free_result() will free all memory associated with the result identifier result.\n\nmysql_free_result() only needs to be called if you are concerned about how much memory is being used for queries that return large result sets. All associated result memory is automatically freed at the end of the script's execution.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1208,7 +1158,6 @@
             "name": "mysql_data_seek",
             "desc": "mysql_data_seek() moves the internal row pointer of the MySQL result associated with the specified result identifier to point to the specified row number. The next call to a MySQL fetch function, such as mysql_fetch_assoc(), would return that row.\n\nrow_number starts at 0. The row_number should be a value in the range from 0 to mysql_num_rows() - 1. However if the result set is empty (mysql_num_rows() == 0), a seek to 0 will fail with a E_WARNING and mysql_data_seek() will return FALSE.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1231,7 +1180,6 @@
             "name": "mysql_fetch_row",
             "desc": "Returns a numerical array that corresponds to the fetched row and moves the internal data pointer ahead.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1249,7 +1197,6 @@
             "name": "mysql_fetch_assoc",
             "desc": "Returns an associative array that corresponds to the fetched row and moves the internal data pointer ahead. mysql_fetch_assoc() is equivalent to calling mysql_fetch_array() with MYSQL_ASSOC for the optional second parameter. It only returns an associative array.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1267,7 +1214,6 @@
             "name": "mysql_fetch_array",
             "desc": "Returns an array that corresponds to the fetched row and moves the internal data pointer ahead.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1291,7 +1237,6 @@
             "name": "mysql_fetch_lengths",
             "desc": "Returns an array that corresponds to the lengths of each field in the last row fetched by MySQL.\n\nmysql_fetch_lengths() stores the lengths of each result column in the last row returned by mysql_fetch_row(), mysql_fetch_assoc(), mysql_fetch_array(), and mysql_fetch_object() in an array, starting at offset 0.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1309,7 +1254,6 @@
             "name": "mysql_fetch_object",
             "desc": "Returns an object with properties that correspond to the fetched row and moves the internal data pointer ahead.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1339,7 +1283,6 @@
             "name": "mysql_result",
             "desc": "Retrieves the contents of one cell from a MySQL result set.\n\nWhen working on large result sets, you should consider using one of the functions that fetch an entire row (specified below). As these functions return the contents of multiple cells in one function call, they're MUCH quicker than mysql_result(). Also, note that specifying a numeric offset for the field argument is much quicker than specifying a fieldname or tablename.fieldname argument.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1368,7 +1311,6 @@
             "name": "mysql_fetch_field",
             "desc": "Returns an object containing field information. This function can be used to obtain information about fields in the provided query result.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1392,7 +1334,6 @@
             "name": "mysql_field_seek",
             "desc": "Seeks to the specified field offset. If the next call to mysql_fetch_field() doesn't include a field offset, the field offset specified in mysql_field_seek() will be returned.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1416,7 +1357,6 @@
             "name": "mysql_field_name",
             "desc": "mysql_field_name() returns the name of the specified field index.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1440,7 +1380,6 @@
             "name": "mysql_field_table",
             "desc": "Returns the name of the table that the specified field is in.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1464,7 +1403,6 @@
             "name": "mysql_field_len",
             "desc": "mysql_field_len() returns the length of the specified field.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1488,7 +1426,6 @@
             "name": "mysql_field_type",
             "desc": "mysql_field_type() is similar to the mysql_field_name() function. The arguments are identical, but the field type is returned instead.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1512,7 +1449,6 @@
             "name": "mysql_field_flags",
             "desc": "mysql_field_flags() returns the field flags of the specified field. The flags are reported as a single word per flag separated by a single space, so that you can split the returned value using explode().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",

@@ -75,7 +75,6 @@
                     "name": "getWaitHandle",
                     "desc": "Start asynchronous execution of this Continuation and return the wait handle",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Object"

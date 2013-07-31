@@ -130,7 +130,6 @@ define('IsCppAbstract',                  1 << 10);
 define('IsReference',                    1 << 11);
 define('IsConstructor',                  1 << 12);
 define('IsNothing',                      1 << 13);
-define('HasDocComment',                  1 << 14);
 define('IsCppSerializable',              1 << 15);
 define('HipHopSpecific',                 1 << 16);
 define('VariableArguments',              1 << 17);
@@ -170,7 +169,6 @@ function get_flag_names($arr, $name, $global_func) {
     if ($flag & IsPrivate           ) $ret .= ' | IsPrivate'             ;
   }
   if ($flag & IsStatic              ) $ret .= ' | IsStatic'              ;
-  if ($flag & HasDocComment         ) $ret .= ' | HasDocComment'         ;
   if ($flag & HipHopSpecific        ) $ret .= ' | HipHopSpecific'        ;
   if ($flag & VariableArguments     ) $ret .= ' | VariableArguments'     ;
   if ($flag & RefVariableArguments  ) $ret .= ' | RefVariableArguments'  ;
@@ -231,10 +229,8 @@ function BeginClass($class) {
   $class['flags'] = read_array_of_constant_names($class['flags']);
   $doc = get_class_doc_comments($class);
   if (!empty($doc)) {
-    $class['flags'] |= HasDocComment;
     $class['doc'] = $doc;
   } else {
-    $class['flags'] &= ~HasDocComment;
     $class['doc'] = null;
   }
 
@@ -353,10 +349,8 @@ function DefineFunction($func) {
 
   $doc = get_function_doc_comments($func, $current_class);
   if (!empty($doc)) {
-    $func['flags'] |= HasDocComment;
     $func['doc'] = $doc;
   } else {
-    $func['flags'] &= ~HasDocComment;
     $func['doc'] = null;
   }
 

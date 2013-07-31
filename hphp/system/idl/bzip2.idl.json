@@ -7,7 +7,6 @@
             "name": "bzclose",
             "desc": "Closes the given bzip2 file pointer.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -25,7 +24,6 @@
             "name": "bzopen",
             "desc": "bzopen() opens a bzip2 (.bz2) file for reading or writing.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -48,7 +46,6 @@
             "name": "bzread",
             "desc": "bzread() reads from the given bzip2 file pointer.\n\nReading stops when length (uncompressed) bytes have been read or EOF is reached, whichever comes first.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -72,7 +69,6 @@
             "name": "bzwrite",
             "desc": "bzwrite() writes a string into the given bzip2 file stream.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -101,7 +97,6 @@
             "name": "bzflush",
             "desc": "Forces a write of all buffered bzip2 data for the file pointer bz.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -119,7 +114,6 @@
             "name": "bzerrstr",
             "desc": "Gets the error string of any bzip2 error returned by the given file pointer.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -137,7 +131,6 @@
             "name": "bzerror",
             "desc": "Returns the error number and error string of any bzip2 error returned by the given file pointer.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -155,7 +148,6 @@
             "name": "bzerrno",
             "desc": "Returns the error number of any bzip2 error returned by the given file pointer.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -173,7 +165,6 @@
             "name": "bzcompress",
             "desc": "bzcompress() compresses the given string and returns it as bzip2 encoded data.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -203,7 +194,6 @@
             "name": "bzdecompress",
             "desc": "bzdecompress() decompresses the given string containing bzip2 encoded data.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",

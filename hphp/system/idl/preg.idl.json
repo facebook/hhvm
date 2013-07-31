@@ -7,7 +7,6 @@
             "name": "preg_grep",
             "desc": "Returns the array consisting of the elements of the input array that match the given pattern.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -36,7 +35,6 @@
             "name": "preg_match",
             "desc": "Searches subject for a match to the regular expression given in pattern.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -78,7 +76,6 @@
             "name": "preg_match_all",
             "desc": "Searches subject for all matches to the regular expression given in pattern and puts them in matches in the order specified by flags.\n\nAfter the first match is found, the subsequent searches are continued on from end of the last match.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -119,7 +116,6 @@
             "name": "preg_replace",
             "desc": "Searches subject for matches to pattern and replaces them with replacement.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -160,7 +156,6 @@
             "name": "preg_replace_callback",
             "desc": "The behavior of this function is almost identical to preg_replace(), except for the fact that instead of replacement parameter, one should specify a callback.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -201,7 +196,6 @@
             "name": "preg_split",
             "desc": "Split the given string by a regular expression.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -236,7 +230,6 @@
             "name": "preg_quote",
             "desc": "preg_quote() takes str and puts a backslash in front of every character that is part of the regular expression syntax. This is useful if you have a run-time string that you need to match in some text and the string may contain special regex characters.\n\nThe special regular expression characters are: . \\ + * ? [ ^ ] $ ( ) { } = ! < > | : -",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -260,7 +253,6 @@
             "name": "preg_last_error",
             "desc": "Returns the error code of the last PCRE regex execution.\n\nExample #1 preg_last_error() example\n\n\n\nBacktrack limit was exhausted!",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -272,7 +264,6 @@
         {
             "name": "ereg_replace",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -300,7 +291,6 @@
             "name": "eregi_replace",
             "desc": "This function is identical to ereg_replace() except that this ignores case distinction when matching alphabetic characters. WarningThis function has been DEPRECATED as of PHP 5.3.0. Relying on this feature is highly discouraged.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -327,7 +317,6 @@
         {
             "name": "ereg",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -357,7 +346,6 @@
             "name": "eregi",
             "desc": "This function is identical to ereg() except that it ignores case distinction when matching alphabetic characters. WarningThis function has been DEPRECATED as of PHP 5.3.0. Relying on this feature is highly discouraged.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -387,7 +375,6 @@
             "name": "split",
             "desc": "Splits a string into array by regular expression. WarningThis function has been DEPRECATED as of PHP 5.3.0. Relying on this feature is highly discouraged.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -416,7 +403,6 @@
             "name": "spliti",
             "desc": "Splits a string into array by regular expression.\n\nThis function is identical to split() except that this ignores case distinction when matching alphabetic characters. WarningThis function has been DEPRECATED as of PHP 5.3.0. Relying on this feature is highly discouraged.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -445,7 +431,6 @@
             "name": "sql_regcase",
             "desc": "Creates a regular expression for a case insensitive match. WarningThis function has been DEPRECATED as of PHP 5.3.0. Relying on this feature is highly discouraged.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",

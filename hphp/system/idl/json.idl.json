@@ -99,7 +99,6 @@
             "name": "json_encode",
             "desc": "Returns a string containing the JSON representation of value.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -123,7 +122,6 @@
             "name": "json_decode",
             "desc": "Takes a JSON encoded string and converts it into a PHP variable.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",

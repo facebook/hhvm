@@ -7,7 +7,6 @@
             "name": "mail",
             "desc": "Sends an email.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -46,7 +45,6 @@
         {
             "name": "ezmlm_hash",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -64,7 +62,6 @@
             "name": "mailparse_msg_create",
             "desc": "Create a MIME mail resource.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource",
@@ -77,7 +74,6 @@
             "name": "mailparse_msg_free",
             "desc": "Frees a MIME resource.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -95,7 +91,6 @@
             "name": "mailparse_msg_parse_file",
             "desc": "Parses a file. This is the optimal way of parsing a mail file that you have on disk.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -113,7 +108,6 @@
             "name": "mailparse_msg_parse",
             "desc": "Incrementally parse data into the supplied mime mail resource.\n\nThis function allow you to stream portions of a file at a time, rather than read and parse the whole thing.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -135,7 +129,6 @@
             "name": "mailparse_msg_extract_part_file",
             "desc": "Extracts\/decodes a message section from the supplied filename.\n\nThe contents of the section will be decoded according to their transfer encoding - base64, quoted-printable and uuencoded text are supported.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -163,7 +156,6 @@
         {
             "name": "mailparse_msg_extract_whole_part_file",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -188,7 +180,6 @@
         {
             "name": "mailparse_msg_extract_part",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -214,7 +205,6 @@
         {
             "name": "mailparse_msg_get_part_data",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap"
@@ -229,7 +219,6 @@
         {
             "name": "mailparse_msg_get_part",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -248,7 +237,6 @@
         {
             "name": "mailparse_msg_get_structure",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap"
@@ -264,7 +252,6 @@
             "name": "mailparse_rfc822_parse_addresses",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "StringVec",
@@ -282,7 +269,6 @@
             "name": "mailparse_stream_encode",
             "desc": "Streams data from the source file pointer, apply encoding and write to the destination file pointer.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -310,7 +296,6 @@
             "name": "mailparse_uudecode_all",
             "desc": "Scans the data from the given file pointer and extract each embedded uuencoded file into a temporary file.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -328,7 +313,6 @@
             "name": "mailparse_determine_best_xfer_encoding",
             "desc": "Figures out the best way of encoding the content read from the given file pointer.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",

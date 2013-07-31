@@ -26,7 +26,6 @@
         {
             "name": "pi",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -39,7 +38,6 @@
             "name": "min",
             "desc": "If the first and only parameter is an array, min() returns the lowest value in that array. If at least two parameters are provided, min() returns the smallest of these values.\n\nPHP will evaluate a non-numeric string as 0 if compared to integer, but still return the string if it's seen as the numerically lowest value. If multiple arguments evaluate to 0, min() will return the lowest alphanumerical string value if any strings are given, else a numeric 0 is returned.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments"
             ],
             "return": {
@@ -58,7 +56,6 @@
             "name": "max",
             "desc": "If the first and only parameter is an array, max() returns the highest value in that array. If at least two parameters are provided, max() returns the biggest of these values.\n\nPHP will evaluate a non-numeric string as 0 if compared to integer, but still return the string if it's seen as the numerically highest value. If multiple arguments evaluate to 0, max() will return a numeric 0 if given, else the alphabetical highest string value will be returned.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments"
             ],
             "return": {
@@ -77,7 +74,6 @@
             "name": "abs",
             "desc": "Returns the absolute value of number.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -95,7 +91,6 @@
             "name": "is_finite",
             "desc": "Checks whether val is a legal finite on this platform.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -113,7 +108,6 @@
             "name": "is_infinite",
             "desc": "Returns TRUE if val is infinite (positive or negative), like the result of log(0) or any value too big to fit into a float on this platform.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -131,7 +125,6 @@
             "name": "is_nan",
             "desc": "Checks whether val is 'not a number', like the result of acos(1.01).",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -148,7 +141,6 @@
         {
             "name": "ceil",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -165,7 +157,6 @@
         {
             "name": "floor",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -183,7 +174,6 @@
             "name": "round",
             "desc": "Returns the rounded value of val to specified precision (number of digits after the decimal point). precision can also be negative or zero (default).\n\nPHP doesn't handle strings like \"12,300.2\" correctly by default. See converting from strings.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -213,7 +203,6 @@
             "name": "deg2rad",
             "desc": "This function converts number from degrees to the radian equivalent.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -231,7 +220,6 @@
             "name": "rad2deg",
             "desc": "This function converts number from radian to degrees.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -249,7 +237,6 @@
             "name": "decbin",
             "desc": "Returns a string containing a binary representation of the given number argument.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -267,7 +254,6 @@
             "name": "dechex",
             "desc": "Returns a string containing a hexadecimal representation of the given number argument. The largest number that can be converted is 4294967295 in decimal resulting to \"ffffffff\".",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -285,7 +271,6 @@
             "name": "decoct",
             "desc": "Returns a string containing an octal representation of the given number argument. The largest number that can be converted is 4294967295 in decimal resulting to \"37777777777\".",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -303,7 +288,6 @@
             "name": "bindec",
             "desc": "Returns the decimal equivalent of the binary number represented by the binary_string argument.\n\nbindec() converts a binary number to an integer or, if needed for size reasons, float.\n\nbindec() interprets all binary_string values as unsigned integers. This is because bindec() sees the most significant bit as another order of magnitude rather than as the sign bit.\nWarning\n\nThe parameter must be a string. Using other data types will produce unexpected results.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -321,7 +305,6 @@
             "name": "hexdec",
             "desc": "Returns the decimal equivalent of the hexadecimal number represented by the hex_string argument. hexdec() converts a hexadecimal string to a decimal number.\n\nhexdec() will ignore any non-hexadecimal characters it encounters.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -339,7 +322,6 @@
             "name": "octdec",
             "desc": "Returns the decimal equivalent of the octal number represented by the octal_string argument.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -357,7 +339,6 @@
             "name": "base_convert",
             "desc": "Returns a string containing number represented in base tobase. The base in which number is given is specified in frombase. Both frombase and tobase have to be between 2 and 36, inclusive. Digits in numbers with a base higher than 10 will be represented with the letters a-z, with a meaning 10, b meaning 11 and z meaning 35. Warning base_convert() may lose precision on large numbers due to properties related to the internal \"double\" or \"float\" type used. Please see the Floating point numbers section in the manual for more specific information and limitations.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -385,7 +366,6 @@
             "name": "pow",
             "desc": "Returns base raised to the power of exp. Warning\n\nIn PHP 4.0.6 and earlier pow() always returned a float, and did not issue warnings.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -408,7 +388,6 @@
             "name": "exp",
             "desc": "Returns e raised to the power of arg.\n\n'e' is the base of the natural system of logarithms, or approximately 2.718282.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -426,7 +405,6 @@
             "name": "expm1",
             "desc": "expm1() returns the equivalent to 'exp(arg) - 1' computed in a way that is accurate even if the value of arg is near zero, a case where 'exp (arg) - 1' would be inaccurate due to subtraction of two numbers that are nearly equal.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -444,7 +422,6 @@
             "name": "log10",
             "desc": "Returns the base-10 logarithm of arg.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -462,7 +439,6 @@
             "name": "log1p",
             "desc": "log1p() returns log(1 + number) computed in a way that is accurate even when the value of number is close to zero. log() might only return log(1) in this case due to lack of precision.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -480,7 +456,6 @@
             "name": "log",
             "desc": "If the optional base parameter is specified, log() returns logbase arg, otherwise log() returns the natural logarithm of arg.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -504,7 +479,6 @@
             "name": "cos",
             "desc": "cos() returns the cosine of the arg parameter. The arg parameter is in radians.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -522,7 +496,6 @@
             "name": "cosh",
             "desc": "Returns the hyperbolic cosine of arg, defined as (exp(arg) + exp(-arg))\/2.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -540,7 +513,6 @@
             "name": "sin",
             "desc": "sin() returns the sine of the arg parameter. The arg parameter is in radians.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -558,7 +530,6 @@
             "name": "sinh",
             "desc": "Returns the hyperbolic sine of arg, defined as (exp(arg) - exp(-arg))\/2.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -576,7 +547,6 @@
             "name": "tan",
             "desc": "tan() returns the tangent of the arg parameter. The arg parameter is in radians.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -594,7 +564,6 @@
             "name": "tanh",
             "desc": "Returns the hyperbolic tangent of arg, defined as sinh(arg)\/cosh(arg).",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -612,7 +581,6 @@
             "name": "acos",
             "desc": "Returns the arc cosine of arg in radians. acos() is the complementary function of cos(), which means that a==cos(acos(a)) for every value of a that is within acos()' range.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -630,7 +598,6 @@
             "name": "acosh",
             "desc": "Returns the inverse hyperbolic cosine of arg, i.e. the value whose hyperbolic cosine is arg.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -648,7 +615,6 @@
             "name": "asin",
             "desc": "Returns the arc sine of arg in radians. asin() is the complementary function of sin(), which means that a==sin(asin(a)) for every value of a that is within asin()'s range.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -666,7 +632,6 @@
             "name": "asinh",
             "desc": "Returns the inverse hyperbolic sine of arg, i.e. the value whose hyperbolic sine is arg.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -684,7 +649,6 @@
             "name": "atan",
             "desc": "Returns the arc tangent of arg in radians. atan() is the complementary function of tan(), which means that a==tan(atan(a)) for every value of a that is within atan()'s range.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -702,7 +666,6 @@
             "name": "atanh",
             "desc": "Returns the inverse hyperbolic tangent of arg, i.e. the value whose hyperbolic tangent is arg.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -719,7 +682,6 @@
         {
             "name": "atan2",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -742,7 +704,6 @@
             "name": "hypot",
             "desc": "hypot() returns the length of the hypotenuse of a right-angle triangle with sides of length x and y, or the distance of the point (x, y) from the origin. This is equivalent to sqrt(x*x + y*y).",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -765,7 +726,6 @@
             "name": "fmod",
             "desc": "Returns the floating point remainder of dividing the dividend (x) by the divisor (y). The reminder (r) is defined as: x = i * y + r, for some integer i. If y is non-zero, r has the same sign as x and a magnitude less than the magnitude of y.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",
@@ -788,7 +748,6 @@
             "name": "sqrt",
             "desc": "Returns the square root of arg.",
             "flags": [
-                "HasDocComment",
                 "ZendParamMode"
             ],
             "return": {
@@ -806,7 +765,6 @@
         {
             "name": "getrandmax",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -819,7 +777,6 @@
             "name": "srand",
             "desc": "Seeds the random number generator with seed or with a random value if no seed is given. As of PHP 4.2.0, there is no need to seed the random number generator with srand() or mt_srand() as this is now done automatically.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null,
@@ -837,7 +794,6 @@
         {
             "name": "rand",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -861,7 +817,6 @@
         {
             "name": "mt_getrandmax",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -874,7 +829,6 @@
             "name": "mt_srand",
             "desc": "Seeds the random number generator with seed or with a random value if no seed is given. As of PHP 4.2.0, there is no need to seed the random number generator with srand() or mt_srand() as this is now done automatically.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null,
@@ -892,7 +846,6 @@
         {
             "name": "mt_rand",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -917,7 +870,6 @@
             "name": "lcg_value",
             "desc": "lcg_value() returns a pseudo random number in the range of (0, 1). The function combines two CGs with periods of 2^31 - 85 and 2^31 - 249. The period of this function is equal to the product of both primes.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double",

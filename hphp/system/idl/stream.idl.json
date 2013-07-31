@@ -7,7 +7,6 @@
             "name": "stream_context_create",
             "desc": "Creates and returns a stream context with any options supplied in options preset.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource",
@@ -31,7 +30,6 @@
         {
             "name": "stream_context_get_default",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource",
@@ -49,7 +47,6 @@
         {
             "name": "stream_context_get_options",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -66,7 +63,6 @@
         {
             "name": "stream_context_set_option",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -98,7 +94,6 @@
         {
             "name": "stream_context_set_param",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -118,7 +113,6 @@
             "name": "stream_copy_to_stream",
             "desc": "Makes a copy of up to maxlength bytes of data from the current position (or from the offset position, if specified) in source to dest. If maxlength is not specified, all remaining content in source will be copied.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -152,7 +146,6 @@
         {
             "name": "stream_encoding",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -172,7 +165,6 @@
         {
             "name": "stream_bucket_append",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -191,7 +183,6 @@
         {
             "name": "stream_bucket_prepend",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -210,7 +201,6 @@
         {
             "name": "stream_bucket_make_writeable",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -225,7 +215,6 @@
         {
             "name": "stream_bucket_new",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -245,7 +234,6 @@
             "name": "stream_filter_register",
             "desc": "stream_filter_register() allows you to implement your own filter on any registered stream used with all the other filesystem functions (such as fopen(), fread() etc.).",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -268,7 +256,6 @@
             "name": "stream_filter_remove",
             "desc": "Removes a stream filter previously added to a stream with stream_filter_prepend() or stream_filter_append(). Any data remaining in the filter's internal buffer will be flushed through to the next filter before removing it.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -286,7 +273,6 @@
             "name": "stream_filter_append",
             "desc": "Adds filtername to the list of filters attached to stream.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource",
@@ -321,7 +307,6 @@
             "name": "stream_filter_prepend",
             "desc": "Adds filtername to the list of filters attached to stream.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource",
@@ -356,7 +341,6 @@
             "name": "stream_get_contents",
             "desc": "Identical to file_get_contents(), except that stream_get_contents() operates on an already open stream resource and returns the remaining contents in a string, up to maxlength bytes and starting at the specified offset.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -385,7 +369,6 @@
         {
             "name": "stream_get_filters",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "StringVec",
@@ -398,7 +381,6 @@
             "name": "stream_get_line",
             "desc": "Gets a line from the given handle.\n\nReading ends when length bytes have been read, when the string specified by ending is found (which is not included in the return value), or on EOF (whichever comes first).\n\nThis function is nearly identical to fgets() except in that it allows end of line delimiters other than the standard \\n, \\r, and \\r\\n, and does not return the delimiter itself.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -428,7 +410,6 @@
             "name": "stream_get_meta_data",
             "desc": "Returns information about an existing stream.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -445,7 +426,6 @@
         {
             "name": "stream_get_transports",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "StringVec",
@@ -458,7 +438,6 @@
             "name": "stream_get_wrappers",
             "desc": "Retrieve list of registered streams available on the running system.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "StringVec",
@@ -471,7 +450,6 @@
             "name": "stream_is_local",
             "desc": "Checks if a stream is a local stream",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -487,7 +465,6 @@
         {
             "name": "stream_register_wrapper",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -507,7 +484,6 @@
             "name": "stream_wrapper_register",
             "desc": "Allows you to implement your own protocol handlers and streams for use with all the other filesystem functions (such as fopen(), fread() etc.).",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -530,7 +506,6 @@
             "name": "stream_wrapper_restore",
             "desc": "Restores a built-in wrapper previously unregistered with stream_wrapper_unregister().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -547,7 +522,6 @@
             "name": "stream_wrapper_unregister",
             "desc": "Allows you to disable an already defined stream wrapper. Once the wrapper has been disabled you may override it with a user-defined wrapper using stream_wrapper_register() or reenable it later on with stream_wrapper_restore().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -564,7 +538,6 @@
             "name": "stream_resolve_include_path",
             "desc": "Resolve filename against the include path according to the same rules as fopen()\/include() does.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -588,7 +561,6 @@
             "name": "stream_select",
             "desc": "The stream_select() function accepts arrays of streams and waits for them to change status. Its operation is equivalent to that of the socket_select() function except in that it acts on streams.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -630,7 +602,6 @@
             "name": "stream_set_blocking",
             "desc": "Sets blocking or non-blocking mode on a stream.\n\nThis function works for any stream that supports non-blocking mode (currently, regular files and socket streams).",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -653,7 +624,6 @@
             "name": "stream_set_timeout",
             "desc": "Sets the timeout value on stream, expressed in the sum of seconds and microseconds.\n\nWhen the stream times out, the 'timed_out' key of the array returned by stream_get_meta_data() is set to TRUE, although no error\/warning is generated.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -682,7 +652,6 @@
             "name": "stream_set_write_buffer",
             "desc": "Sets the buffering for write operations on the given stream to buffer bytes. Output using fwrite() is normally buffered at 8K. This means that if there are two processes wanting to write to the same output stream (a file), each is paused after 8K of data to allow the other to write.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -704,7 +673,6 @@
         {
             "name": "set_file_buffer",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -724,7 +692,6 @@
             "name": "stream_socket_accept",
             "desc": "Accept a connection on a socket previously created by stream_socket_server().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -755,7 +722,6 @@
             "name": "stream_socket_server",
             "desc": "Creates a stream or datagram socket on the specified local_socket.\n\nThis function only creates a socket, to begin accepting connections use stream_socket_accept().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -798,7 +764,6 @@
             "name": "stream_socket_client",
             "desc": "Initiates a stream or datagram connection to the destination specified by remote_socket. The type of socket created is determined by the transport specified using standard URL formatting: transport:\/\/target. For Internet Domain sockets (AF_INET) such as TCP and UDP, the target portion of the remote_socket parameter should consist of a hostname or IP address followed by a colon and a port number. For Unix domain sockets, the target portion should point to the socket file on the filesystem.\n\nThe stream will by default be opened in blocking mode. You can switch it to non-blocking mode by using stream_set_blocking().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -847,7 +812,6 @@
         {
             "name": "stream_socket_enable_crypto",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -882,7 +846,6 @@
             "name": "stream_socket_get_name",
             "desc": "Returns the local or remote name of a given socket connection.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -905,7 +868,6 @@
             "name": "stream_socket_pair",
             "desc": "stream_socket_pair() creates a pair of connected, indistinguishable socket streams. This function is commonly used in IPC (Inter-Process Communication).\nPlease consult the Streams constant list for further details on each constant.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -933,7 +895,6 @@
             "name": "stream_socket_recvfrom",
             "desc": "stream_socket_recvfrom() accepts data from a remote socket up to length bytes.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -968,7 +929,6 @@
             "name": "stream_socket_sendto",
             "desc": "Sends the specified data through the socket.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1003,7 +963,6 @@
             "name": "stream_socket_shutdown",
             "desc": "Shutdowns (partially or not) a full-duplex connection.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",

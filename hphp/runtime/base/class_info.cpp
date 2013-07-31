@@ -542,9 +542,7 @@ ClassInfo::MethodInfo::MethodInfo(const char **&p) {
       volatile_redec_offset = (int)(int64_t)(*p++);
     }
 
-    if (attribute & HasDocComment) {
-      docComment = *p++;
-    }
+    docComment = *p++;
 
     if (attribute & IsSystem) {
       returnType = (DataType)(int64_t)(*p++);
@@ -612,11 +610,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
     m_cdec_offset = (int)(int64_t)(*p++);
   }
 
-  if (m_attribute & HasDocComment) {
-    m_docComment = *p++;
-  } else {
-    m_docComment = "";
-  }
+  m_docComment = *p++;
 
   while (*p) {
     String iface_name = makeStaticString(*p++);

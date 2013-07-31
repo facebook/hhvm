@@ -19,7 +19,6 @@
             "name": "dangling_server_proxy_old_request",
             "desc": "When I'm running a newer version of the server software and I'm getting an HTTP request that's from old version of a web page, proxy it to a local instance that is still running or dangling just for handling old version of requests. Please read server documentation for more details.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -33,7 +32,6 @@
             "name": "dangling_server_proxy_new_request",
             "desc": "When I'm still running an old version of the server software and I'm getting an HTTP request that's newer, proxy it to a specified host that already has the new version of the software running. Please read server documentation for more details.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -52,7 +50,6 @@
             "name": "pagelet_server_is_enabled",
             "desc": "Whether pagelet server is enabled or not. Please read server documentation for what a pagelet server is.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -66,7 +63,6 @@
             "name": "pagelet_server_task_start",
             "desc": "Processes a pagelet server request.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -103,7 +99,6 @@
             "name": "pagelet_server_task_status",
             "desc": "Checks finish status of a pagelet task.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -122,7 +117,6 @@
             "name": "pagelet_server_task_result",
             "desc": "Block and wait until pagelet task finishes or times out.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -159,7 +153,6 @@
             "name": "pagelet_server_flush",
             "desc": "Flush all the currently buffered output, so that the main thread can read it with pagelet_server_task_result(). This is only meaningful in a pagelet thread.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -173,7 +166,6 @@
             "name": "xbox_send_message",
             "desc": "Sends an xbox message and waits for response. Please read server documentation for what an xbox is.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -209,7 +201,6 @@
             "name": "xbox_post_message",
             "desc": "Posts an xbox message without waiting. Please read server documentation for more details.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -234,7 +225,6 @@
             "name": "xbox_task_start",
             "desc": "Starts a local xbox task.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -253,7 +243,6 @@
             "name": "xbox_task_status",
             "desc": "Checks an xbox task's status.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -272,7 +261,6 @@
             "name": "xbox_task_result",
             "desc": "Block and wait for xbox task's result.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -302,7 +290,6 @@
             "name": "xbox_process_call_message",
             "desc": "This function is invoked by the xbox facility to start an xbox call task. This function is not intended to be called directly by user code.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -321,7 +308,6 @@
             "name": "xbox_get_thread_timeout",
             "desc": "Gets the timeout (maximum duration), in seconds, of the current xbox thread. Throws for non-xbox threads.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -335,7 +321,6 @@
             "name": "xbox_set_thread_timeout",
             "desc": "Sets the timeout (maximum duration), in seconds, of the current xbox thread. The xbox thread would reset when this amount of time has passed since the previous reset. Throws for non-xbox threads.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -353,7 +338,6 @@
             "name": "xbox_schedule_thread_reset",
             "desc": "Schedules a reset of the current xbox thread, when the next request comes in. Throws for non-xbox threads.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -366,7 +350,6 @@
             "name": "xbox_get_thread_time",
             "desc": "Returns the time that the current xbox thread has been running without a reset, in seconds, and throws for non-xbox threads.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {

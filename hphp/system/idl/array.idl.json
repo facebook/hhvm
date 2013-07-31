@@ -91,7 +91,6 @@
             "name": "array_change_key_case",
             "desc": "Returns an array with all keys from input lowercased or uppercased. Numbered indices are left as is.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -116,7 +115,6 @@
             "name": "array_chunk",
             "desc": "Chunks an array into size large chunks. The last chunk may contain less than size elements.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -174,7 +172,6 @@
             "name": "array_combine",
             "desc": "Creates an array by using the values from the keys array as keys and the values from the values array as the corresponding values.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -198,7 +195,6 @@
             "name": "array_count_values",
             "desc": "array_count_values() returns an array using the values of the input array as keys and their frequency in input as values.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -217,7 +213,6 @@
             "name": "array_fill_keys",
             "desc": "Fills an array with the value of the value parameter, using the values of the keys array as keys.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -241,7 +236,6 @@
             "name": "array_fill",
             "desc": "Fills an array with num entries of the value of the value parameter, keys starting at the start_index parameter.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -270,7 +264,6 @@
             "name": "array_filter",
             "desc": "Iterates over each value in the input array passing them to the callback function. If the callback function returns true, the current value from input is returned into the result array. Array keys are preserved.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -295,7 +288,6 @@
             "name": "array_flip",
             "desc": "array_flip() returns an array in flip order, i.e. keys from trans become values and values from trans become keys.\n\nNote that the values of trans need to be valid keys, i.e. they need to be either integer or string. A warning will be emitted if a value has the wrong type, and the key\/value pair in question will not be flipped.\n\nIf a value has several occurrences, the latest key will be used as its values, and all others will be lost.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -314,7 +306,6 @@
             "name": "array_key_exists",
             "desc": "array_key_exists() returns TRUE if the given key is set in the array. key can be any value possible for an array index.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -337,7 +328,6 @@
         {
             "name": "key_exists",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -358,7 +348,6 @@
             "name": "array_keys",
             "desc": "array_keys() returns the keys, numeric and string, from the input array.\n\nIf the optional search_value is specified, then only the keys for that value are returned. Otherwise, all the keys from the input are returned.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -389,7 +378,6 @@
             "name": "array_map",
             "desc": "array_map() returns an array containing all the elements of arr1 after applying the callback function to each one. The number of parameters that the callback function accepts should match the number of arrays passed to the array_map()",
             "flags": [
-                "HasDocComment",
                 "VariableArguments"
             ],
             "return": {
@@ -413,7 +401,6 @@
             "name": "array_merge_recursive",
             "desc": "array_merge_recursive() merges the elements of one or more arrays together so that the values of one are appended to the end of the previous one. It returns the resulting array.\n\nIf the input arrays have the same string keys, then the values for these keys are merged together into an array, and this is done recursively, so that if one of the values is an array itself, the function will merge it with a corresponding entry in another array too. If, however, the arrays have the same numeric key, the later value will not overwrite the original value, but will be appended.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments",
                 "FunctionIsFoldable"
             ],
@@ -433,7 +420,6 @@
             "name": "array_merge",
             "desc": "Merges the elements of one or more arrays together so that the values of one are appended to the end of the previous one. It returns the resulting array.\n\nIf the input arrays have the same string keys, then the later value for that key will overwrite the previous one. If, however, the arrays contain numeric keys, the later value will not overwrite the original value, but will be appended.\n\nIf all of the arrays contain only numeric keys, the resulting array is given incrementing keys starting from zero.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments",
                 "FunctionIsFoldable"
             ],
@@ -453,7 +439,6 @@
             "name": "array_replace_recursive",
             "desc": "array_replace_recursive() replaces the values of the first array with the same values from all the following arrays. If a key from the first array exists in the second array, its value will be replaced by the value from the second array. If the key exists in the second array, and not the first, it will be created in the first array. If a key only exists in the first array, it will be left as is. If several arrays are passed for replacement, they will be processed in order, the later array overwriting the previous values.\n\narray_replace_recursive() is recursive : it will recurse into arrays and apply the same process to the inner value.\n\nWhen the value in array is scalar, it will be replaced by the value in array1, may it be scalar or array. When the value in array and array1 are both arrays, array_replace_recursive() will replace their respective value recursively.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments",
                 "FunctionIsFoldable"
             ],
@@ -473,7 +458,6 @@
             "name": "array_replace",
             "desc": "array_replace() replaces the values of the first array with the same values from all the following arrays. If a key from the first array exists in the second array, its value will be replaced by the value from the second array. If the key exists in the second array, and not the first, it will be created in the first array. If a key only exists in the first array, it will be left as is. If several arrays are passed for replacement, they will be processed in order, the later arrays overwriting the previous values.\n\narray_replace() is not recursive : it will replace values in the first array by whatever type is in the second array.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments",
                 "FunctionIsFoldable"
             ],
@@ -493,7 +477,6 @@
             "name": "array_multisort",
             "desc": "array_multisort() can be used to sort several arrays at once, or a multi-dimensional array by one or more dimensions.\n\nAssociative (string) keys will be maintained, but numeric keys will be re-indexed.",
             "flags": [
-                "HasDocComment",
                 "MixedVariableArguments"
             ],
             "return": {
@@ -513,7 +496,6 @@
             "name": "array_pad",
             "desc": "array_pad() returns a copy of the input padded to size specified by pad_size with value pad_value. If pad_size is positive then the array is padded on the right, if it's negative then on the left. If the absolute value of pad_size is less than or equal to the length of the input then no padding takes place. It is possible to add most 1048576 elements at a time.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -542,7 +524,6 @@
             "name": "array_pop",
             "desc": "array_pop() pops and returns the last value of the array, shortening the array by one element. If array is empty (or is not an array), NULL will be returned. Will additionally produce a Warning when called on a non-array. This function will reset() the array pointer after use.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -561,7 +542,6 @@
             "name": "array_product",
             "desc": "array_product() returns the product of values in an array.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -580,7 +560,6 @@
             "name": "array_push",
             "desc": "array_push() treats array as a stack, and pushes the passed variables onto the end of array. The length of array increases by the number of variables pushed. Has the same effect as:\n\nrepeated for each var. If you use array_push() to add one element to the array it's better to use $array[] = because in that way there is no overhead of calling a function. array_push() will raise a warning if the first argument is not an array. This differs from the $var[] behaviour where a new array is created.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments"
             ],
             "return": {
@@ -605,7 +584,6 @@
             "name": "array_rand",
             "desc": "Picks one ore more random entries out of an array, and returns the key (or keys) of the random entries.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -629,7 +607,6 @@
             "name": "array_reduce",
             "desc": "array_reduce() applies iteratively the function function to the elements of the array input, so as to reduce the array to a single value.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -658,7 +635,6 @@
             "name": "array_reverse",
             "desc": "Takes an input array and returns a new array with the order of the elements reversed.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -683,7 +659,6 @@
             "name": "array_search",
             "desc": "Searches haystack for needle.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -713,7 +688,6 @@
             "name": "array_shift",
             "desc": "array_shift() shifts the first value of the array off and returns it, shortening the array by one element and moving everything down. All numerical array keys will be modified to start counting from zero while literal keys won't be touched. This function will reset() the array pointer after use.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -732,7 +706,6 @@
             "name": "array_slice",
             "desc": "array_slice() returns the sequence of elements from the array array as specified by the offset and length parameters. This function will reset() the array pointer after use.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -768,7 +741,6 @@
             "name": "array_splice",
             "desc": "Removes the elements designated by offset and length from the input array, and replaces them with the elements of the replacement array, if supplied.\n\nNote that numeric keys in input are not preserved. If replacement is not an array, it will be typecast to one (i.e. (array) $parameter). This may result in unexpected behavior when using an object or NULL replacement.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -804,7 +776,6 @@
             "name": "array_sum",
             "desc": "array_sum() returns the sum of values in an array.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -823,7 +794,6 @@
             "name": "array_unique",
             "desc": "Takes an input array and returns a new array without duplicate values.\n\nNote that keys are preserved. array_unique() sorts the values treated as string at first, then will keep the first key encountered for every value, and ignore all following keys. It does not mean that the key of the first related value from the unsorted array will be kept. Two elements are considered equal if and only if (string) $elem1 === (string) $elem2. In words: when the string representation is the same. The first element will be used.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -848,7 +818,6 @@
             "name": "array_unshift",
             "desc": "array_unshift() prepends passed elements to the front of the array. Note that the list of elements is prepended as a whole, so that the prepended elements stay in the same order. All numerical array keys will be modified to start counting from zero while literal keys won't be touched.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments"
             ],
             "return": {
@@ -873,7 +842,6 @@
             "name": "array_values",
             "desc": "array_values() returns all the values from the input array and indexes numerically the array.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -892,7 +860,6 @@
             "name": "array_walk_recursive",
             "desc": "Applies the user-defined function funcname to each element of the input array. This function will recur into deeper arrays.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -921,7 +888,6 @@
         {
             "name": "array_walk",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -951,7 +917,6 @@
             "name": "compact",
             "desc": "Creates an array containing variables and their values.\n\nFor each of these, compact() looks for a variable with that name in the current symbol table and adds it to the output array such that the variable name becomes the key and the contents of the variable become the value for that key. In short, it does the opposite of extract().\n\nAny strings that are not set will simply be skipped.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments"
             ],
             "return": {
@@ -970,7 +935,6 @@
             "name": "shuffle",
             "desc": "This function shuffles (randomizes the order of the elements in) an array.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -989,7 +953,6 @@
             "name": "count",
             "desc": "Counts all elements in an array, or properties in an object.\n\nFor objects, if you have SPL installed, you can hook into count() by implementing interface Countable. The interface has exactly one method, count(), which returns the return value for the count() function.\n\nPlease see the Array section of the manual for a detailed explanation of how arrays are implemented and used in PHP.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -1013,7 +976,6 @@
         {
             "name": "sizeof",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -1035,7 +997,6 @@
             "name": "each",
             "desc": "Return the current key and value pair from an array and advance the array cursor.\n\nAfter each() has executed, the array cursor will be left on the next element of the array, or past the last element if it hits the end of the array. You have to use reset() if you want to traverse the array again using each.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1054,7 +1015,6 @@
             "name": "current",
             "desc": "Every array has an internal pointer to its \"current\" element, which is initialized to the first element inserted into the array.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1073,7 +1033,6 @@
             "name": "next",
             "desc": "next() behaves like current(), with one difference. It advances the internal array pointer one place forward before returning the element value. That means it returns the next array value and advances the internal array pointer by one.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1091,7 +1050,6 @@
         {
             "name": "pos",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1108,7 +1066,6 @@
             "name": "prev",
             "desc": "Rewind the internal array pointer.\n\nprev() behaves just like next(), except it rewinds the internal array pointer one place instead of advancing it.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1127,7 +1084,6 @@
             "name": "reset",
             "desc": "reset() rewinds array's internal pointer to the first element and returns the value of the first array element.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1146,7 +1102,6 @@
             "name": "end",
             "desc": "end() advances array's internal pointer to the last element, and returns its value.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1165,7 +1120,6 @@
             "name": "key",
             "desc": "key() returns the index element of the current array position.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1184,7 +1138,6 @@
             "name": "in_array",
             "desc": "Searches haystack for needle.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -1214,7 +1167,6 @@
             "name": "range",
             "desc": "Create an array containing a range of elements.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable"
             ],
             "return": {
@@ -1244,7 +1196,6 @@
             "name": "array_diff",
             "desc": "Compares array1 against array2 and returns the difference.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments",
                 "FunctionIsFoldable"
             ],
@@ -1269,7 +1220,6 @@
             "name": "array_udiff",
             "desc": "Computes the difference of arrays by using a callback function for data comparison. This is unlike array_diff() which uses an internal function for comparing the data.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments"
             ],
             "return": {
@@ -1298,7 +1248,6 @@
             "name": "array_diff_assoc",
             "desc": "Compares array1 against array2 and returns the difference. Unlike array_diff() the array keys are used in the comparison.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments",
                 "FunctionIsFoldable"
             ],
@@ -1323,7 +1272,6 @@
             "name": "array_diff_uassoc",
             "desc": "Compares array1 against array2 and returns the difference. Unlike array_diff() the array keys are used in the comparison.\n\nUnlike array_diff_assoc() an user supplied callback function is used for the indices comparison, not internal function.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments"
             ],
             "return": {
@@ -1352,7 +1300,6 @@
             "name": "array_udiff_assoc",
             "desc": "Computes the difference of arrays with additional index check, compares data by a callback function. Please note that this function only checks one dimension of a n-dimensional array. Of course you can check deeper dimensions by using, for example, array_udiff_assoc($array1[0], $array2[0], \"some_comparison_func\");.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments"
             ],
             "return": {
@@ -1381,7 +1328,6 @@
             "name": "array_udiff_uassoc",
             "desc": "Computes the difference of arrays with additional index check, compares data and indexes by a callback function.\n\nNote that the keys are used in the comparison unlike array_diff() and array_udiff().",
             "flags": [
-                "HasDocComment",
                 "VariableArguments"
             ],
             "return": {
@@ -1415,7 +1361,6 @@
             "name": "array_diff_key",
             "desc": "Compares the keys from array1 against the keys from array2 and returns the difference. This function is like array_diff() except the comparison is done on the keys instead of the values.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments",
                 "FunctionIsFoldable"
             ],
@@ -1440,7 +1385,6 @@
             "name": "array_diff_ukey",
             "desc": "Compares the keys from array1 against the keys from array2 and returns the difference. This function is like array_diff() except the comparison is done on the keys instead of the values.\n\nUnlike array_diff_key() an user supplied callback function is used for the indices comparison, not internal function.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments"
             ],
             "return": {
@@ -1469,7 +1413,6 @@
             "name": "array_intersect",
             "desc": "array_intersect() returns an array containing all the values of array1 that are present in all the arguments. Note that keys are preserved.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments",
                 "FunctionIsFoldable"
             ],
@@ -1494,7 +1437,6 @@
             "name": "array_uintersect",
             "desc": "Computes the intersection of arrays, compares data by a callback function.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments"
             ],
             "return": {
@@ -1522,7 +1464,6 @@
         {
             "name": "array_intersect_assoc",
             "flags": [
-                "HasDocComment",
                 "VariableArguments",
                 "FunctionIsFoldable"
             ],
@@ -1547,7 +1488,6 @@
             "name": "array_intersect_uassoc",
             "desc": "array_intersect_uassoc() returns an array containing all the values of array1 that are present in all the arguments. Note that the keys are used in the comparison unlike in array_intersect().\n\nThe index comparison is done by a user supplied callback function. It must return an integer less than, equal to, or greater than zero if the first argument is considered to be respectively less than, equal to, or greater than the second.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments"
             ],
             "return": {
@@ -1576,7 +1516,6 @@
             "name": "array_uintersect_assoc",
             "desc": "Computes the intersection of arrays with additional index check, compares data by a callback function.\n\nNote that the keys are used in the comparison unlike in array_uintersect(). The data is compared by using a callback function.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments"
             ],
             "return": {
@@ -1605,7 +1544,6 @@
             "name": "array_uintersect_uassoc",
             "desc": "Computes the intersection of arrays with additional index check, compares data and indexes by a callback functions Note that the keys are used in the comparison unlike in array_uintersect(). Both the data and the indexes are compared by using separate callback functions.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments"
             ],
             "return": {
@@ -1639,7 +1577,6 @@
             "name": "array_intersect_key",
             "desc": "array_intersect_key() returns an array containing all the entries of array1 which have keys that are present in all the arguments.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments",
                 "FunctionIsFoldable"
             ],
@@ -1664,7 +1601,6 @@
             "name": "array_intersect_ukey",
             "desc": "array_intersect_ukey() returns an array containing all the values of array1 which have matching keys that are present in all the arguments.\n\nThis comparison is done by a user supplied callback function. It must return an integer less than, equal to, or greater than zero if the first key is considered to be respectively less than, equal to, or greater than the second.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments"
             ],
             "return": {
@@ -1693,7 +1629,6 @@
             "name": "sort",
             "desc": "This function sorts an array. Elements will be arranged from lowest to highest when this function has completed.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1723,7 +1658,6 @@
             "name": "rsort",
             "desc": "This function sorts an array in reverse order (highest to lowest).",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1753,7 +1687,6 @@
             "name": "asort",
             "desc": "This function sorts an array such that array indices maintain their correlation with the array elements they are associated with. This is used mainly when sorting associative arrays where the actual element order is significant.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1783,7 +1716,6 @@
             "name": "arsort",
             "desc": "This function sorts an array such that array indices maintain their correlation with the array elements they are associated with.\n\nThis is used mainly when sorting associative arrays where the actual element order is significant.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1813,7 +1745,6 @@
             "name": "ksort",
             "desc": "Sorts an array by key, maintaining key to data correlations. This is useful mainly for associative arrays.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1838,7 +1769,6 @@
             "name": "krsort",
             "desc": "Sorts an array by key in reverse order, maintaining key to data correlations. This is useful mainly for associative arrays.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1863,7 +1793,6 @@
             "name": "usort",
             "desc": "This function will sort an array by its values using a user-supplied comparison function. If the array you wish to sort needs to be sorted by some non-trivial criteria, you should use this function.\n\nIf two members compare as equal, their order in the sorted array is undefined. This function assigns new keys to the elements in array. It will remove any existing keys that may have been assigned, rather than just reordering the keys.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1887,7 +1816,6 @@
             "name": "uasort",
             "desc": "This function sorts an array such that array indices maintain their correlation with the array elements they are associated with, using a user-defined comparison function.\n\nThis is used mainly when sorting associative arrays where the actual element order is significant.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1911,7 +1839,6 @@
             "name": "uksort",
             "desc": "uksort() will sort the keys of an array using a user-supplied comparison function. If the array you wish to sort needs to be sorted by some non-trivial criteria, you should use this function.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1935,7 +1862,6 @@
             "name": "natsort",
             "desc": "This function implements a sort algorithm that orders alphanumeric strings in the way a human being would while maintaining key\/value associations. This is described as a \"natural ordering\". An example of the difference between this algorithm and the regular computer string sorting algorithms (used in sort()) can be seen in the example below.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1954,7 +1880,6 @@
             "name": "natcasesort",
             "desc": "natcasesort() is a case insensitive version of natsort().\n\nThis function implements a sort algorithm that orders alphanumeric strings in the way a human being would while maintaining key\/value associations. This is described as a \"natural ordering\".",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1972,7 +1897,6 @@
         {
             "name": "i18n_loc_get_default",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -1983,7 +1907,6 @@
         {
             "name": "i18n_loc_set_default",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -1998,7 +1921,6 @@
         {
             "name": "i18n_loc_set_attribute",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -2017,7 +1939,6 @@
         {
             "name": "i18n_loc_set_strength",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -2032,7 +1953,6 @@
         {
             "name": "i18n_loc_get_error_code",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -2044,7 +1964,6 @@
             "name": "hphp_array_idx",
             "desc": "hphp_array_idx() returns the value at the given key in the given array or the given default value if it is not found. An error will be raised if the search parameter is not an array.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "FunctionIsFoldable"
             ],

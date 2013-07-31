@@ -7,7 +7,6 @@
             "name": "iconv_mime_encode",
             "desc": "Composes and returns a string that represents a valid MIME header field, which looks like the following: Subject: =?ISO-8859-1?Q?Pr=FCfung_f=FCr?= Entwerfen von einer MIME kopfzeile In the above example, \"Subject\" is the field name and the portion that begins with \"=?ISO-8859-1?...\" is the field value.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -36,7 +35,6 @@
             "name": "iconv_mime_decode",
             "desc": "Decodes a MIME header field.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -66,7 +64,6 @@
             "name": "iconv_mime_decode_headers",
             "desc": "Decodes multiple MIME header fields at once.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -96,7 +93,6 @@
             "name": "iconv_get_encoding",
             "desc": "Retrieve internal configuration variables of iconv extension.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -115,7 +111,6 @@
             "name": "iconv_set_encoding",
             "desc": "Changes the value of the internal configuration variable specified by type to charset.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -138,7 +133,6 @@
             "name": "iconv",
             "desc": "Performs a character set conversion on the string str from in_charset to out_charset.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -166,7 +160,6 @@
             "name": "iconv_strlen",
             "desc": "In contrast to strlen(), iconv_strlen() counts the occurrences of characters in the given byte sequence str on the basis of the specified character set, the result of which is not necessarily identical to the length of the string in byte.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -190,7 +183,6 @@
             "name": "iconv_strpos",
             "desc": "Finds position of first occurrence of a needle within a haystack.\n\nIn contrast to strpos(), the return value of iconv_strpos() is the number of characters that appear before the needle, rather than the offset in bytes to the position where the needle has been found. The characters are counted on the basis of the specified character set charset.\nIf haystack or needle is not a string, it is converted to a string and applied as the ordinal value of a character.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -225,7 +217,6 @@
             "name": "iconv_strrpos",
             "desc": "In contrast to strpos(), the return value of iconv_strrpos() is the number of characters that appear before the needle, rather than the offset in bytes to the position where the needle has been found.\nIf haystack or needle is not a string, it is converted to a string and applied as the ordinal value of a character.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -254,7 +245,6 @@
             "name": "iconv_substr",
             "desc": "Cuts a portion of str specified by the offset and length parameters.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -289,7 +279,6 @@
             "name": "ob_iconv_handler",
             "desc": "Converts the string encoded in internal_encoding to output_encoding.\n\ninternal_encoding and output_encoding should be defined in the php.ini file or in iconv_set_encoding().\nSee ob_start() for information about this handler parameters.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",

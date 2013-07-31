@@ -6,7 +6,6 @@
         {
             "name": "hash",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -34,7 +33,6 @@
         {
             "name": "hash_algos",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "StringVec",
@@ -46,7 +44,6 @@
         {
             "name": "hash_init",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -75,7 +72,6 @@
         {
             "name": "hash_file",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -103,7 +99,6 @@
         {
             "name": "hash_final",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -126,7 +121,6 @@
         {
             "name": "hash_hmac_file",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -159,7 +153,6 @@
         {
             "name": "hash_hmac",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -192,7 +185,6 @@
         {
             "name": "hash_update_file",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -220,7 +212,6 @@
         {
             "name": "hash_update_stream",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -248,7 +239,6 @@
         {
             "name": "hash_update",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -270,7 +260,6 @@
         {
             "name": "furchash_hphp_ext",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -297,7 +286,6 @@
         {
             "name": "furchash_hphp_ext_supported",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -309,7 +297,6 @@
         {
             "name": "hphp_murmurhash",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",

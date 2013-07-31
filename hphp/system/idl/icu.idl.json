@@ -31,7 +31,6 @@
             "name": "icu_match",
             "desc": "Searches subject for a match to the regular expression given in pattern. See http:\/\/userguide.icu-project.org\/strings\/regexp",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -66,7 +65,6 @@
         {
             "name": "icu_transliterate",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"

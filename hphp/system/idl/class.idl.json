@@ -7,7 +7,6 @@
             "name": "get_declared_classes",
             "desc": "Gets the declared classes.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap",
@@ -20,7 +19,6 @@
             "name": "get_declared_interfaces",
             "desc": "Gets the declared interfaces.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap",
@@ -33,7 +31,6 @@
             "name": "get_declared_traits",
             "desc": "Gets the declared traits.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap",
@@ -46,7 +43,6 @@
             "name": "class_alias",
             "desc": "Creates an alias named alias based on the defined class original. The aliased class is exactly the same as the original class.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -75,7 +71,6 @@
             "name": "class_exists",
             "desc": "This function checks whether or not the given class has been defined.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -99,7 +94,6 @@
             "name": "interface_exists",
             "desc": "Checks if the given interface has been defined.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -123,7 +117,6 @@
             "name": "trait_exists",
             "desc": "Checks if the given trait has been defined.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -147,7 +140,6 @@
             "name": "get_class_methods",
             "desc": "Gets the class methods names.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap",
@@ -165,7 +157,6 @@
             "name": "get_class_vars",
             "desc": "Get the default properties of the given class.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap",
@@ -183,7 +174,6 @@
             "name": "get_class_constants",
             "desc": "Get the constants of the given class.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -202,7 +192,6 @@
             "name": "get_class",
             "desc": "Gets the name of the class of the given object.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -221,7 +210,6 @@
             "name": "get_parent_class",
             "desc": "Retrieves the parent class name for object or class.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -240,7 +228,6 @@
             "name": "is_a",
             "desc": "Checks if the given object is of this class or has this class as one of its parents.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -269,7 +256,6 @@
             "name": "is_subclass_of",
             "desc": "Checks if the given object has the class class_name as one of its parents.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -298,7 +284,6 @@
             "name": "method_exists",
             "desc": "Checks if the class method exists in the given object.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -321,7 +306,6 @@
             "name": "property_exists",
             "desc": "This function checks if the given property exists in the specified class.\n\nAs opposed with isset(), property_exists() returns TRUE even if the property has the value NULL.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -345,7 +329,6 @@
             "name": "get_object_vars",
             "desc": "Gets the accessible non-static properties of the given object according to scope.",
             "flags": [
-                "HasDocComment",
                 "ZendParamMode"
             ],
             "return": {
@@ -363,7 +346,6 @@
         {
             "name": "call_user_method_array",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -390,7 +372,6 @@
         {
             "name": "call_user_method",
             "flags": [
-                "HasDocComment",
                 "VariableArguments"
             ],
             "return": {

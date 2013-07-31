@@ -7,7 +7,6 @@
             "name": "use_soap_error_handler",
             "desc": "This function sets whether or not to use the SOAP error handler in the SOAP server. It will return the previous value. If set to TRUE, details of errors in a SoapServer application will be sent to the clients. If FALSE, no information will be sent.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -26,7 +25,6 @@
             "name": "is_soap_fault",
             "desc": "This function is useful to check if the SOAP call failed, but without using exceptions. To use it, create a SoapClient object with the exceptions option set to zero or FALSE. In this case, the SOAP method will return a special SoapFault object which encapsulates the fault details (faultcode, faultstring, faultactor and faultdetails).\n\nIf exceptions is not set then SOAP call will throw an exception on error. is_soap_fault() checks if the given parameter is a SoapFault object.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -44,7 +42,6 @@
             "name": "_soap_active_version",
             "desc": "This function returns the soap version that is currently active.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -59,14 +56,12 @@
             "name": "SoapServer",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "footer": "\n  public: int                        m_type;\n  public: soapFunctions              m_soap_functions;\n  public: soapClass                  m_soap_class;\n  public: Object                     m_soap_object;\n  public: String                     m_actor;\n  public: String                     m_uri;\n  public: int                        m_version;\n  public: sdl                       *m_sdl;\n  public: xmlCharEncodingHandlerPtr  m_encoding;\n  public: Array                      m_classmap;\n  public: encodeMap                 *m_typemap;\n  public: int                        m_features;\n  public: Array                      m_soap_headers;\n  public: int                        m_send_errors;",
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -87,7 +82,6 @@
                     "name": "setclass",
                     "desc": "Exports all methods from specified class.\n\nThe object can be made persistent across request for a given PHP session with the SoapServer::setPersistence() method.",
                     "flags": [
-                        "HasDocComment",
                         "VariableArguments"
                     ],
                     "return": {
@@ -106,7 +100,6 @@
                     "name": "setobject",
                     "desc": "This sets a specific object as the handler for SOAP requests, rather than just a class as in SoapServer::setClass().",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null,
@@ -124,7 +117,6 @@
                     "name": "addfunction",
                     "desc": "Exports one or more functions for remote clients",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null,
@@ -142,7 +134,6 @@
                     "name": "getfunctions",
                     "desc": "Returns a list of the defined functions in the SoapServer object. This method returns the list of all functions added by SoapServer::addFunction() or SoapServer::setClass().",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -155,7 +146,6 @@
                     "name": "handle",
                     "desc": "Processes a SOAP request, calls necessary functions, and sends a response back.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null,
@@ -174,7 +164,6 @@
                     "name": "setpersistence",
                     "desc": "This function allows saving data between requests in a PHP session. It works only with a server that exports functions from a class with SoapServer::setClass() or SoapServer::setObject().\n\nThe persistence SOAP_PERSISTENCE_SESSION makes only objects of the given class persistent, but not the class static data. In this case, use $this->bar instead of self::$bar.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null,
@@ -192,7 +181,6 @@
                     "name": "fault",
                     "desc": "Sends a response to the client of the current request indicating an error.\n\nThis can only be called when handling a request.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null,
@@ -233,7 +221,6 @@
                     "name": "addsoapheader",
                     "desc": "Adds a SOAP header to be returned with the response to the current request.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null,
@@ -255,14 +242,12 @@
             "name": "SoapClient",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "footer": "\n  public: int                         m_soap_version;\n  public: sdl                        *m_sdl;\n  public: xmlCharEncodingHandlerPtr   m_encoding;\n  public: encodeMap                  *m_typemap;\n  public: Array                       m_classmap;\n  public: int                         m_features;\n  public: String                      m_uri;\n  public: String                      m_location;\n  public: int                         m_style;\n  public: int                         m_use;\n  public: String                      m_login;\n  public: String                      m_password;\n  public: int                         m_authentication;\n  public: bool                        m_digest;\n  public: String                      m_proxy_host;\n  public: int                         m_proxy_port;\n  public: String                      m_proxy_login;\n  public: String                      m_proxy_password;\n  public: int                         m_connection_timeout;\n  public: int                         m_max_redirect;\n  public: bool                        m_use11;\n  public: String                      m_user_agent;\n  public: bool                        m_compression;\n  public: Variant                     m_default_headers;\n  public: Variant                     m_cookies;\n  public: bool                        m_exceptions;\n  public: Variant                     m_soap_fault;\n  public: bool                        m_trace;\n  public: Variant                     m_last_request;\n  public: Variant                     m_last_response;\n  public: Variant                     m_last_request_headers;\n  public: Variant                     m_last_response_headers;\n",
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -282,7 +267,6 @@
                 {
                     "name": "__call",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -301,7 +285,6 @@
                 {
                     "name": "__soapcall",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -336,7 +319,6 @@
                 {
                     "name": "__getlastrequest",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -347,7 +329,6 @@
                 {
                     "name": "__getlastresponse",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -358,7 +339,6 @@
                 {
                     "name": "__getlastrequestheaders",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -369,7 +349,6 @@
                 {
                     "name": "__getlastresponseheaders",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -380,7 +359,6 @@
                 {
                     "name": "__getfunctions",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -391,7 +369,6 @@
                 {
                     "name": "__gettypes",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -402,7 +379,6 @@
                 {
                     "name": "__dorequest",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -434,7 +410,6 @@
                 {
                     "name": "__setcookie",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -454,7 +429,6 @@
                 {
                     "name": "__setlocation",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -470,7 +444,6 @@
                 {
                     "name": "__setsoapheaders",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -491,14 +464,12 @@
             "name": "SoapVar",
             "desc": "A class representing a variable or object for use with SOAP services.",
             "flags": [
-                "HasDocComment"
             ],
             "footer": "\n  public: Variant m_value;\n  public: int64_t m_type;\n  public: String  m_stype;\n  public: String  m_ns;\n  public: String  m_name;\n  public: String  m_namens;",
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -542,14 +513,12 @@
             "name": "SoapParam",
             "desc": "Represents parameter to a SOAP call.",
             "flags": [
-                "HasDocComment"
             ],
             "footer": "\n  public: String  m_name;\n  public: String  m_data;",
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -573,14 +542,12 @@
             "name": "SoapHeader",
             "desc": "Represents a SOAP header.",
             "flags": [
-                "HasDocComment"
             ],
             "footer": "\n  public: String  m_namespace;\n  public: String  m_name;\n  public: Variant m_data;\n  public: bool    m_mustUnderstand;\n  public: Variant m_actor;",
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null

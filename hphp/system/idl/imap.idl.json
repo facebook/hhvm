@@ -7,7 +7,6 @@
             "name": "imap_8bit",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -25,7 +24,6 @@
             "name": "imap_alerts",
             "desc": "Returns all of the IMAP alert messages generated since the last imap_alerts() call, or the beginning of the page.\n\nWhen imap_alerts() is called, the alert stack is subsequently cleared. The IMAP specification requires that these messages be passed to the user.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -38,7 +36,6 @@
             "name": "imap_append",
             "desc": "Appends a string message to the specified mailbox.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -72,7 +69,6 @@
             "name": "imap_base64",
             "desc": "Decodes the given BASE-64 encoded text.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -90,7 +86,6 @@
             "name": "imap_binary",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -108,7 +103,6 @@
             "name": "imap_body",
             "desc": "imap_body() returns the body of the message, numbered msg_number in the current mailbox.\n\nimap_body() will only return a verbatim copy of the message body. To extract single parts of a multipart MIME-encoded message you have to use imap_fetchstructure() to analyze its structure and imap_fetchbody() to extract a copy of a single body component.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -137,7 +131,6 @@
             "name": "imap_bodystruct",
             "desc": "Read the structure of a specified body section of a specific message.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -165,7 +158,6 @@
             "name": "imap_check",
             "desc": "Checks information about the current mailbox.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -183,7 +175,6 @@
             "name": "imap_clearflag_full",
             "desc": "This function causes a store to delete the specified flag to the flags set for the messages in the specified sequence.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -217,7 +208,6 @@
             "name": "imap_close",
             "desc": "Closes the imap stream.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -241,7 +231,6 @@
             "name": "imap_createmailbox",
             "desc": "Creates a new mailbox specified by mailbox.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -264,7 +253,6 @@
             "name": "imap_delete",
             "desc": "Marks messages listed in msg_number for deletion. Messages marked for deletion will stay in the mailbox until either imap_expunge() is called or imap_close() is called with the optional parameter CL_EXPUNGE.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -293,7 +281,6 @@
             "name": "imap_deletemailbox",
             "desc": "Deletes the specified mailbox.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -316,7 +303,6 @@
             "name": "imap_errors",
             "desc": "Gets all of the IMAP errors (if any) that have occurred during this page request or since the error stack was reset.\n\nWhen imap_errors() is called, the error stack is subsequently cleared.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -329,7 +315,6 @@
             "name": "imap_expunge",
             "desc": "Deletes all the messages marked for deletion by imap_delete(), imap_mail_move(), or imap_setflag_full().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -347,7 +332,6 @@
             "name": "imap_fetch_overview",
             "desc": "This function fetches mail headers for the given sequence and returns an overview of their contents.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -376,7 +360,6 @@
             "name": "imap_fetchbody",
             "desc": "Fetch of a particular section of the body of the specified messages. Body parts are not decoded by this function.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -410,7 +393,6 @@
             "name": "imap_fetchheader",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -439,7 +421,6 @@
             "name": "imap_fetchstructure",
             "desc": "Fetches all the structured information for a given message.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -467,7 +448,6 @@
             "name": "imap_gc",
             "desc": "Purges the cache of entries of a specific type.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -490,7 +470,6 @@
             "name": "imap_get_quota",
             "desc": "Retrieve the quota level settings, and usage statics per mailbox.\n\nFor a non-admin user version of this function, please see the imap_get_quotaroot() function of PHP.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -513,7 +492,6 @@
             "name": "imap_get_quotaroot",
             "desc": "Retrieve the quota settings per user. The limit value represents the total amount of space allowed for this user's total mailbox usage. The usage value represents the user's current total mailbox capacity.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -536,7 +514,6 @@
             "name": "imap_getacl",
             "desc": "Gets the ACL for a given mailbox.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -559,7 +536,6 @@
             "name": "imap_getmailboxes",
             "desc": "Gets information on the mailboxes.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -587,7 +563,6 @@
             "name": "imap_getsubscribed",
             "desc": "Gets information about the subscribed mailboxes.\n\nIdentical to imap_getmailboxes(), except that it only returns mailboxes that the user is subscribed to.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -615,7 +590,6 @@
             "name": "imap_header",
             "desc": "Gets information about the given message number by reading its headers.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -654,7 +628,6 @@
             "name": "imap_headerinfo",
             "desc": "Gets information about the given message number by reading its headers.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -693,7 +666,6 @@
             "name": "imap_headers",
             "desc": "Returns headers for all messages in a mailbox.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -711,7 +683,6 @@
             "name": "imap_last_error",
             "desc": "Gets the full text of the last IMAP error message that occurred on the current page. The error stack is untouched; calling imap_last_error() subsequently, with no intervening errors, will return the same error.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -724,7 +695,6 @@
             "name": "imap_list",
             "desc": "Read the list of mailboxes.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -752,7 +722,6 @@
             "name": "imap_listmailbox",
             "desc": "Read the list of mailboxes.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -780,7 +749,6 @@
             "name": "imap_listscan",
             "desc": "Returns an array containing the names of the mailboxes that have content in the text of the mailbox.\n\nThis function is similar to imap_listmailbox(), but it will additionally check for the presence of the string content inside the mailbox data.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -813,7 +781,6 @@
             "name": "imap_listsubscribed",
             "desc": "Gets an array of all the mailboxes that you have subscribed.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -841,7 +808,6 @@
             "name": "imap_lsub",
             "desc": "Gets an array of all the mailboxes that you have subscribed.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -869,7 +835,6 @@
             "name": "imap_mail_compose",
             "desc": "Create a MIME message based on the given envelope and body sections.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -892,7 +857,6 @@
             "name": "imap_mail_copy",
             "desc": "Copies mail messages specified by msglist to specified mailbox.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -926,7 +890,6 @@
             "name": "imap_mail_move",
             "desc": "Moves mail messages specified by msglist to the specified mailbox.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -960,7 +923,6 @@
             "name": "imap_mail",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1011,7 +973,6 @@
             "name": "imap_mailboxmsginfo",
             "desc": "Checks the current mailbox status on the server. It is similar to imap_status(), but will additionally sum up the size of all messages in the mailbox, which will take some additional time to execute.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1029,7 +990,6 @@
             "name": "imap_mime_header_decode",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1047,7 +1007,6 @@
             "name": "imap_msgno",
             "desc": "Returns the message sequence number for the given uid.\n\nThis function is the inverse of imap_uid().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1070,7 +1029,6 @@
             "name": "imap_num_msg",
             "desc": "Gets the number of messages in the current mailbox.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1088,7 +1046,6 @@
             "name": "imap_num_recent",
             "desc": "Gets the number of recent messages in the current mailbox.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1106,7 +1063,6 @@
             "name": "imap_open",
             "desc": "Opens an IMAP stream to a mailbox.\n\nThis function can also be used to open streams to POP3 and NNTP servers, but some functions and features are only available on IMAP servers.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1146,7 +1102,6 @@
             "name": "imap_ping",
             "desc": "imap_ping() pings the stream to see if it's still active. It may discover new mail; this is the preferred method for a periodic \"new mail check\" as well as a \"keep alive\" for servers which have inactivity timeout.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1164,7 +1119,6 @@
             "name": "imap_qprint",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1182,7 +1136,6 @@
             "name": "imap_renamemailbox",
             "desc": "This function renames on old mailbox to new mailbox (see imap_open() for the format of mbox names).",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1210,7 +1163,6 @@
             "name": "imap_reopen",
             "desc": "Reopens the specified stream to a new mailbox on an IMAP or NNTP server.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1245,7 +1197,6 @@
             "name": "imap_rfc822_parse_adrlist",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1268,7 +1219,6 @@
             "name": "imap_rfc822_parse_headers",
             "desc": "Gets an object of various header elements, similar to imap_header().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1292,7 +1242,6 @@
             "name": "imap_rfc822_write_address",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1320,7 +1269,6 @@
             "name": "imap_savebody",
             "desc": "Saves a part or the whole body of the specified message.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1360,7 +1308,6 @@
             "name": "imap_scanmailbox",
             "desc": "Returns an array containing the names of the mailboxes that have content in the text of the mailbox.\n\nThis function is similar to imap_listmailbox(), but it will additionally check for the presence of the string content inside the mailbox data.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1393,7 +1340,6 @@
             "name": "imap_search",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1427,7 +1373,6 @@
             "name": "imap_set_quota",
             "desc": "Sets an upper limit quota on a per mailbox basis.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1455,7 +1400,6 @@
             "name": "imap_setacl",
             "desc": "Sets the ACL for a giving mailbox.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1488,7 +1432,6 @@
             "name": "imap_setflag_full",
             "desc": "Causes a store to add the specified flag to the flags set for the messages in the specified sequence.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1522,7 +1465,6 @@
             "name": "imap_sort",
             "desc": "Gets and sorts message numbers by the given parameters.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1566,7 +1508,6 @@
             "name": "imap_status",
             "desc": "Gets status information about the given mailbox.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1595,7 +1536,6 @@
             "name": "imap_subscribe",
             "desc": "Subscribe to a new mailbox.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1618,7 +1558,6 @@
             "name": "imap_thread",
             "desc": "Gets a tree of a threaded message.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1641,7 +1580,6 @@
             "name": "imap_timeout",
             "desc": "Sets or fetches the imap timeout.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1665,7 +1603,6 @@
             "name": "imap_uid",
             "desc": "This function returns the UID for the given message sequence number. An UID is a unique identifier that will not change over time while a message sequence number may change whenever the content of the mailbox changes.\n\nThis function is the inverse of imap_msgno().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1688,7 +1625,6 @@
             "name": "imap_undelete",
             "desc": "Removes the deletion flag for a specified message, which is set by imap_delete() or imap_mail_move().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1716,7 +1652,6 @@
             "name": "imap_unsubscribe",
             "desc": "Unsubscribe from the specified mailbox.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1739,7 +1674,6 @@
             "name": "imap_utf7_decode",
             "desc": "Decodes modified UTF-7 text into ISO-8859-1 string.\n\nThis function is needed to decode mailbox names that contain certain characters which are not in range of printable ASCII characters.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1757,7 +1691,6 @@
             "name": "imap_utf7_encode",
             "desc": "Converts data to modified UTF-7 text.\n\nThis is needed to encode mailbox names that contain certain characters which are not in range of printable ASCII characters.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1775,7 +1708,6 @@
             "name": "imap_utf8",
             "desc": "Converts the given mime_encoded_text to UTF-8.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",

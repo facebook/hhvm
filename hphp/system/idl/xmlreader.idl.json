@@ -12,14 +12,12 @@
             ],
             "desc": "",
             "flags": [
-                "HasDocComment"
             ],
             "footer": "\n  private: String read_string_func(xmlreader_read_char_t internal_function);\n  private: bool bool_func_no_arg(xmlreader_read_int_t internal_function);\n  private: Variant string_func_string_arg(String value, xmlreader_read_one_char_t internal_function);\n  private: bool set_relaxng_schema(String source, int type);\n\n public:\n  SmartObject<File>  m_uri;\n private:\n  xmlTextReaderPtr        m_ptr;\n  xmlParserInputBufferPtr m_input;\n  void*                   m_schema;\n  void close_impl();",
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -30,7 +28,6 @@
                 {
                     "name": "open",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -55,7 +52,6 @@
                 {
                     "name": "XML",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -80,7 +76,6 @@
                 {
                     "name": "close",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -91,7 +86,6 @@
                 {
                     "name": "read",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -102,7 +96,6 @@
                 {
                     "name": "next",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -118,7 +111,6 @@
                 {
                     "name": "readString",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "String"
@@ -129,7 +121,6 @@
                 {
                     "name": "readInnerXML",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "String"
@@ -140,7 +131,6 @@
                 {
                     "name": "readOuterXML",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "String"
@@ -151,7 +141,6 @@
                 {
                     "name": "moveToNextAttribute",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -162,7 +151,6 @@
                 {
                     "name": "getAttribute",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -177,7 +165,6 @@
                 {
                     "name": "getAttributeNo",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -192,7 +179,6 @@
                 {
                     "name": "getAttributeNs",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -211,7 +197,6 @@
                 {
                     "name": "moveToAttribute",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -226,7 +211,6 @@
                 {
                     "name": "moveToAttributeNo",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -241,7 +225,6 @@
                 {
                     "name": "moveToAttributeNs",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -260,7 +243,6 @@
                 {
                     "name": "moveToElement",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -271,7 +253,6 @@
                 {
                     "name": "moveToFirstAttribute",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -282,7 +263,6 @@
                 {
                     "name": "isValid",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -293,7 +273,6 @@
                 {
                     "name": "expand",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -304,7 +283,6 @@
                 {
                     "name": "__get",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -319,7 +297,6 @@
                 {
                     "name": "getParserProperty",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -334,7 +311,6 @@
                 {
                     "name": "lookupNamespace",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -349,7 +325,6 @@
                 {
                     "name": "setSchema",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -364,7 +339,6 @@
                 {
                     "name": "setParserProperty",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -383,7 +357,6 @@
                 {
                     "name": "setRelaxNGSchema",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -398,7 +371,6 @@
                 {
                     "name": "setRelaxNGSchemaSource",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"

@@ -7,7 +7,6 @@
             "name": "spl_classes",
             "desc": "This function returns an array with the current available SPL classes.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "StringMap",
@@ -20,7 +19,6 @@
             "name": "spl_object_hash",
             "desc": "This function returns a unique identifier for the object. This id can be used as a hash key for storing objects or for identifying an object.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -38,7 +36,6 @@
             "name": "hphp_object_pointer",
             "desc": "This function returns low level raw pointer the object. Used by closure and internal purposes.",
             "flags": [
-                "HasDocComment",
                 "NoInjection"
             ],
             "return": {
@@ -57,7 +54,6 @@
             "name": "hphp_get_this",
             "desc": "This function returns this object if present, or NULL.",
             "flags": [
-                "HasDocComment",
                 "NoInjection"
             ],
             "return": {
@@ -71,7 +67,6 @@
             "name": "class_implements",
             "desc": "This function returns an array with the names of the interfaces that the given class and its parents implement.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -95,7 +90,6 @@
             "name": "class_parents",
             "desc": "This function returns an array with the name of the parent classes of the given class.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -119,7 +113,6 @@
             "name": "class_uses",
             "desc": "This function returns an array with the names of the traits that the given class uses.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -143,7 +136,6 @@
             "name": "iterator_apply",
             "desc": "Calls a function for every element in an iterator.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -172,7 +164,6 @@
             "name": "iterator_count",
             "desc": "Count the elements in an iterator.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -190,7 +181,6 @@
             "name": "iterator_to_array",
             "desc": "Copy the elements of an iterator into an array.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -214,7 +204,6 @@
             "name": "spl_autoload_call",
             "desc": "This function can be used to manually search for a class or interface using the registered __autoload functions.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null,
@@ -232,7 +221,6 @@
             "name": "spl_autoload_extensions",
             "desc": "This function can modify and check the file extensions that the built in __autoload() fallback function spl_autoload() will be using.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -251,7 +239,6 @@
             "name": "spl_autoload_functions",
             "desc": "Get all registered __autoload() functions.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -264,7 +251,6 @@
             "name": "spl_autoload_register",
             "desc": "Register a function with the spl provided __autoload stack. If the stack is not yet activated it will be activated.\n\nIf your code has an existing __autoload function then this function must be explicitly registered on the __autoload stack. This is because spl_autoload_register() will effectively replace the engine cache for the __autoload function by either spl_autoload() or spl_autoload_call().\n\nIf there must be multiple autoload functions, spl_autoload_register() allows for this. It effectively creates a queue of autoload functions, and runs through each of them in the order they are defined. By contrast, __autoload() may only be defined once.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -295,7 +281,6 @@
             "name": "spl_autoload_unregister",
             "desc": "Unregister a function from the spl provided __autoload stack. If the stack is activated and empty after unregistering the given function then it will be deactivated.\n\nWhen this function results in the autoload stack being deactivated, any __autoload function that previously existed will not be reactivated.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -313,7 +298,6 @@
             "name": "spl_autoload",
             "desc": "This function is intended to be used as a default implementation for __autoload(). If nothing else is specified and spl_autoload_register() is called without any parameters then this functions will be used for any later call to __autoload().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null,

@@ -7,7 +7,6 @@
             "name": "readgzfile",
             "desc": "Reads a file, decompresses it and writes it to standard output.\n\nreadgzfile() can be used to read a file which is not in gzip format; in this case readgzfile() will directly read from the file without decompression.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -31,7 +30,6 @@
             "name": "gzfile",
             "desc": "This function is identical to readgzfile(), except that it returns the file in an array.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -55,7 +53,6 @@
             "name": "gzcompress",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -79,7 +76,6 @@
             "name": "gzuncompress",
             "desc": "This function uncompress a compressed string.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -103,7 +99,6 @@
             "name": "gzdeflate",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -127,7 +122,6 @@
             "name": "gzinflate",
             "desc": "This function inflate a deflated string.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -151,7 +145,6 @@
             "name": "gzencode",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -181,7 +174,6 @@
             "name": "gzdecode",
             "desc": "This function returns a decoded version of the input data.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -199,7 +191,6 @@
             "name": "zlib_get_coding_type",
             "desc": "Returns the coding type used for output compression.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -212,7 +203,6 @@
             "name": "gzopen",
             "desc": "Opens a gzip (.gz) file for reading or writing.\n\ngzopen() can be used to read a file which is not in gzip format; in this case gzread() will directly read from the file without decompression.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource",
@@ -241,7 +231,6 @@
             "name": "gzclose",
             "desc": "Closes the given gz-file pointer.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -259,7 +248,6 @@
             "name": "gzrewind",
             "desc": "Sets the file position indicator of the given gz-file pointer to the beginning of the file stream.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -277,7 +265,6 @@
             "name": "gzeof",
             "desc": "Tests the given GZ file pointer for EOF.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -295,7 +282,6 @@
             "name": "gzgetc",
             "desc": "Returns a string containing a single (uncompressed) character read from the given gz-file pointer.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -313,7 +299,6 @@
             "name": "gzgets",
             "desc": "Gets a (uncompressed) string of up to length - 1 bytes read from the given file pointer. Reading ends when length - 1 bytes have been read, on a newline, or on EOF (whichever comes first).",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -337,7 +322,6 @@
             "name": "gzgetss",
             "desc": "Identical to gzgets(), except that gzgetss() attempts to strip any HTML and PHP tags from the text it reads.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -367,7 +351,6 @@
             "name": "gzread",
             "desc": "gzread() reads up to length bytes from the given gz-file pointer. Reading stops when length (uncompressed) bytes have been read or EOF is reached, whichever comes first.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -391,7 +374,6 @@
             "name": "gzpassthru",
             "desc": "Reads to EOF on the given gz-file pointer from the current position and writes the (uncompressed) results to standard output.\n\nYou may need to call gzrewind() to reset the file pointer to the beginning of the file if you have already written data to it. Tip\n\nIf you just want to dump the contents of a file to the output buffer, without first modifying it or seeking to a particular offset, you may want to use the readgzfile() function, which saves you the gzopen() call.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -409,7 +391,6 @@
             "name": "gzseek",
             "desc": "Sets the file position indicator for the given file pointer to the given offset byte into the file stream. Equivalent to calling (in C) gzseek(zp, offset, SEEK_SET).\n\nIf the file is opened for reading, this function is emulated but can be extremely slow. If the file is opened for writing, only forward seeks are supported; gzseek() then compresses a sequence of zeroes up to the new starting position.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -438,7 +419,6 @@
             "name": "gztell",
             "desc": "Gets the position of the given file pointer; i.e., its offset into the uncompressed file stream.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -456,7 +436,6 @@
             "name": "gzwrite",
             "desc": "gzwrite() writes the contents of string to the given gz-file.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -484,7 +463,6 @@
         {
             "name": "gzputs",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -509,7 +487,6 @@
             "name": "qlzcompress",
             "desc": "This function compress the given string using the QuickLZ data format.\n\nFor details on the QuickLZ compression algorithm go to http:\/\/www.quicklz.com\/(RFC 1950).",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -533,7 +510,6 @@
             "name": "qlzuncompress",
             "desc": "This function uncompress a compressed string.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -557,7 +533,6 @@
             "name": "sncompress",
             "desc": "This function compress the given string using the Snappy data format.\n\nFor details on the Snappy compression algorithm go to http:\/\/code.google.com\/p\/snappy\/.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -575,7 +550,6 @@
             "name": "snuncompress",
             "desc": "This function uncompress a compressed string.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",

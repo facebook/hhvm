@@ -9,7 +9,6 @@
             "name": "SpoofChecker",
             "desc": "Unicode Security and Spoofing Detection (see http:\/\/icu-project.org\/apiref\/icu4c\/uspoof_8h.html for details)",
             "flags": [
-                "HasDocComment"
             ],
             "footer": "\n  private: USpoofChecker *m_spoof_checker;",
             "funcs": [
@@ -17,7 +16,6 @@
                     "name": "__construct",
                     "desc": "Creates a spoof checker that checks for visually confusing characters in a string.  By default, runs the following tests: SINGLE_SCRIPT_CONFUSABLE, MIXED_SCRIPT_CONFUSABLE, WHOLE_SCRIPT_CONFUSABLE, ANY_CASE, INVISIBLE.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -29,7 +27,6 @@
                     "name": "isSuspicious",
                     "desc": "Check the specified UTF-8 string for possible security or spoofing issues.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -54,7 +51,6 @@
                     "name": "areConfusable",
                     "desc": "Check the whether two specified UTF-8 strings are visually confusable. The types of confusability to be tested - single script, mixed script, or whole script - are determined by the check options set for this instance.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -84,7 +80,6 @@
                     "name": "setAllowedLocales",
                     "desc": "Limit characters that are acceptable in identifiers being checked to those normally used with the languages associated with the specified locales.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -101,7 +96,6 @@
                     "name": "setChecks",
                     "desc": "Specify the set of checks that will be performed by the check function",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null

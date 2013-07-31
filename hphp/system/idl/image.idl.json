@@ -7,7 +7,6 @@
             "name": "gd_info",
             "desc": "Gets information about the version and capabilities of the installed GD library.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap"
@@ -19,7 +18,6 @@
             "name": "getimagesize",
             "desc": "The getimagesize() function will determine the size of any given image file and return the dimensions along with the file type and a height\/width text string to be used inside a normal HTML IMG tag and the correspondant HTTP content type.\n\ngetimagesize() can also return some more information in imageinfo parameter. Note that JPC and JP2 are capable of having components with different bit depths. In this case, the value for \"bits\" is the highest bit depth encountered. Also, JP2 files may contain multiple JPEG 2000 codestreams. In this case, getimagesize() returns the values for the first codestream it encounters in the root of the file. The information about icons are retrieved from the icon with the highest bitrate.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -43,7 +41,6 @@
             "name": "image_type_to_extension",
             "desc": "Returns the extension for the given IMAGETYPE_XXX constant.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -67,7 +64,6 @@
             "name": "image_type_to_mime_type",
             "desc": "The image_type_to_mime_type() function will determine the Mime-Type for an IMAGETYPE constant.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -85,7 +81,6 @@
             "name": "image2wbmp",
             "desc": "image2wbmp() outputs or save a WBMP version of the given image.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -115,7 +110,6 @@
             "name": "imagealphablending",
             "desc": "imagealphablending() allows for two different modes of drawing on truecolor images. In blending mode, the alpha channel component of the color supplied to all drawing function, such as imagesetpixel() determines how much of the underlying color should be allowed to shine through. As a result, gd automatically blends the existing color at that point with the drawing color, and stores the result in the image. The resulting pixel is opaque. In non-blending mode, the drawing color is copied literally with its alpha channel information, replacing the destination pixel. Blending mode is not available when drawing on palette images.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -138,7 +132,6 @@
             "name": "imageantialias",
             "desc": "Activate the fast drawing antialiased methods for lines and wired polygons. It does not support alpha components. It works using a direct blend operation. It works only with truecolor images.\n\nThickness and styled are not supported.\n\nUsing antialiased primitives with transparent background color can end with some unexpected results. The blend method uses the background color as any other colors. The lack of alpha component support does not allow an alpha based antialiasing method.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -161,7 +154,6 @@
             "name": "imagearc",
             "desc": "imagearc() draws an arc of circle centered at the given coordinates.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -214,7 +206,6 @@
             "name": "imagechar",
             "desc": "imagechar() draws the first character of c in the image identified by image with its upper-left at x,y (top left is 0, 0) with the color color.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -257,7 +248,6 @@
             "name": "imagecharup",
             "desc": "Draws the character c vertically at the specified coordinate on the given image.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -300,7 +290,6 @@
             "name": "imagecolorallocate",
             "desc": "Returns a color identifier representing the color composed of the given RGB components.\n\nimagecolorallocate() must be called to create each color that is to be used in the image represented by image.\n\nThe first call to imagecolorallocate() fills the background color in palette-based images - images created using imagecreate().\nThese parameters are integers between 0 and 255 or hexadecimals between 0x00 and 0xFF.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -333,7 +322,6 @@
             "name": "imagecolorallocatealpha",
             "desc": "imagecolorallocatealpha() behaves identically to imagecolorallocate() with the addition of the transparency parameter alpha.\nThe colors parameters are integers between 0 and 255 or hexadecimals between 0x00 and 0xFF.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -371,7 +359,6 @@
             "name": "imagecolorat",
             "desc": "Returns the index of the color of the pixel at the specified location in the image specified by image.\n\nIf PHP is compiled against GD library 2.0 or higher and the image is a truecolor image, this function returns the RGB value of that pixel as integer. Use bitshifting and masking to access the distinct red, green and blue component values:",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -399,7 +386,6 @@
             "name": "imagecolorclosest",
             "desc": "Returns the index of the color in the palette of the image which is \"closest\" to the specified RGB value.\n\nThe \"distance\" between the desired color and each color in the palette is calculated as if the RGB values represented points in three-dimensional space.\n\nIf you created the image from a file, only colors used in the image are resolved. Colors present only in the palette are not resolved.\nThe colors parameters are integers between 0 and 255 or hexadecimals between 0x00 and 0xFF.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -432,7 +418,6 @@
             "name": "imagecolorclosestalpha",
             "desc": "Returns the index of the color in the palette of the image which is \"closest\" to the specified RGB value and alpha level.\nThe colors parameters are integers between 0 and 255 or hexadecimals between 0x00 and 0xFF.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -470,7 +455,6 @@
             "name": "imagecolorclosesthwb",
             "desc": "Get the index of the color which has the hue, white and blackness nearest the given color.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -503,7 +487,6 @@
             "name": "imagecolordeallocate",
             "desc": "De-allocates a color previously allocated with imagecolorallocate() or imagecolorallocatealpha().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -526,7 +509,6 @@
             "name": "imagecolorexact",
             "desc": "Returns the index of the specified color in the palette of the image.\n\nIf you created the image from a file, only colors used in the image are resolved. Colors present only in the palette are not resolved.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -559,7 +541,6 @@
             "name": "imagecolorexactalpha",
             "desc": "Returns the index of the specified color+alpha in the palette of the image.\nThe colors parameters are integers between 0 and 255 or hexadecimals between 0x00 and 0xFF.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -597,7 +578,6 @@
             "name": "imagecolormatch",
             "desc": "Makes the colors of the palette version of an image more closely match the true color version.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -620,7 +600,6 @@
             "name": "imagecolorresolve",
             "desc": "This function is guaranteed to return a color index for a requested color, either the exact color or the closest possible alternative.\n\nIf you created the image from a file, only colors used in the image are resolved. Colors present only in the palette are not resolved.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -653,7 +632,6 @@
             "name": "imagecolorresolvealpha",
             "desc": "This function is guaranteed to return a color index for a requested color, either the exact color or the closest possible alternative.\nThe colors parameters are integers between 0 and 255 or hexadecimals between 0x00 and 0xFF.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -691,7 +669,6 @@
             "name": "imagecolorset",
             "desc": "This sets the specified index in the palette to the specified color. This is useful for creating flood-fill-like effects in palleted images without the overhead of performing the actual flood-fill.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -729,7 +706,6 @@
             "name": "imagecolorsforindex",
             "desc": "Gets the color for a specified index.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -752,7 +728,6 @@
             "name": "imagecolorstotal",
             "desc": "Returns the number of colors in an image palette.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -770,7 +745,6 @@
             "name": "imagecolortransparent",
             "desc": "Sets the transparent color in the given image.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -794,7 +768,6 @@
             "name": "imageconvolution",
             "desc": "Applies a convolution matrix on the image, using the given coefficient and offset.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -827,7 +800,6 @@
             "name": "imagecopy",
             "desc": "Copy a part of src_im onto dst_im starting at the x,y coordinates src_x, src_y with a width of src_w and a height of src_h. The portion defined will be copied onto the x,y coordinates, dst_x and dst_y.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -880,7 +852,6 @@
             "name": "imagecopymerge",
             "desc": "Copy a part of src_im onto dst_im starting at the x,y coordinates src_x, src_y with a width of src_w and a height of src_h. The portion defined will be copied onto the x,y coordinates, dst_x and dst_y.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -938,7 +909,6 @@
             "name": "imagecopymergegray",
             "desc": "imagecopymergegray() copy a part of src_im onto dst_im starting at the x,y coordinates src_x, src_y with a width of src_w and a height of src_h. The portion defined will be copied onto the x,y coordinates, dst_x and dst_y.\n\nThis function is identical to imagecopymerge() except that when merging it preserves the hue of the source by converting the destination pixels to gray scale before the copy operation.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -996,7 +966,6 @@
             "name": "imagecopyresampled",
             "desc": "imagecopyresampled() copies a rectangular portion of one image to another image, smoothly interpolating pixel values so that, in particular, reducing the size of an image still retains a great deal of clarity.\n\nIn other words, imagecopyresampled() will take an rectangular area from src_image of width src_w and height src_h at position (src_x,src_y) and place it in a rectangular area of dst_image of width dst_w and height dst_h at position (dst_x,dst_y).\n\nIf the source and destination coordinates and width and heights differ, appropriate stretching or shrinking of the image fragment will be performed. The coordinates refer to the upper left corner. This function can be used to copy regions within the same image (if dst_image is the same as src_image) but if the regions overlap the results will be unpredictable.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1059,7 +1028,6 @@
             "name": "imagecopyresized",
             "desc": "imagecopyresized() copies a rectangular portion of one image to another image. dst_image is the destination image, src_image is the source image identifier.\n\nIn other words, imagecopyresized() will take an rectangular area from src_image of width src_w and height src_h at position (src_x,src_y) and place it in a rectangular area of dst_image of width dst_w and height dst_h at position (dst_x,dst_y).\n\nIf the source and destination coordinates and width and heights differ, appropriate stretching or shrinking of the image fragment will be performed. The coordinates refer to the upper left corner. This function can be used to copy regions within the same image (if dst_image is the same as src_image) but if the regions overlap the results will be unpredictable.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1122,7 +1090,6 @@
             "name": "imagecreate",
             "desc": "imagecreate() returns an image identifier representing a blank image of specified size.\n\nWe recommend the use of imagecreatetruecolor().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1145,7 +1112,6 @@
             "name": "imagecreatefromgd2part",
             "desc": "Create a new image from a given part of GD2 file or URL. TipA URL can be used as a filename with this function if the fopen wrappers have been enabled. See fopen() for more details on how to specify the filename. See the List of Supported Protocols\/Wrappers for links to information about what abilities the various wrappers have, notes on their usage, and information on any predefined variables they may provide.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1183,7 +1149,6 @@
             "name": "imagecreatefromgd",
             "desc": "Create a new image from GD file or URL. TipA URL can be used as a filename with this function if the fopen wrappers have been enabled. See fopen() for more details on how to specify the filename. See the List of Supported Protocols\/Wrappers for links to information about what abilities the various wrappers have, notes on their usage, and information on any predefined variables they may provide.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1201,7 +1166,6 @@
             "name": "imagecreatefromgd2",
             "desc": "Create a new image from GD2 file or URL. TipA URL can be used as a filename with this function if the fopen wrappers have been enabled. See fopen() for more details on how to specify the filename. See the List of Supported Protocols\/Wrappers for links to information about what abilities the various wrappers have, notes on their usage, and information on any predefined variables they may provide.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1219,7 +1183,6 @@
             "name": "imagecreatefromgif",
             "desc": "imagecreatefromgif() returns an image identifier representing the image obtained from the given filename. TipA URL can be used as a filename with this function if the fopen wrappers have been enabled. See fopen() for more details on how to specify the filename. See the List of Supported Protocols\/Wrappers for links to information about what abilities the various wrappers have, notes on their usage, and information on any predefined variables they may provide.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1237,7 +1200,6 @@
             "name": "imagecreatefromjpeg",
             "desc": "imagecreatefromjpeg() returns an image identifier representing the image obtained from the given filename. TipA URL can be used as a filename with this function if the fopen wrappers have been enabled. See fopen() for more details on how to specify the filename. See the List of Supported Protocols\/Wrappers for links to information about what abilities the various wrappers have, notes on their usage, and information on any predefined variables they may provide.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1255,7 +1217,6 @@
             "name": "imagecreatefrompng",
             "desc": "imagecreatefrompng() returns an image identifier representing the image obtained from the given filename. TipA URL can be used as a filename with this function if the fopen wrappers have been enabled. See fopen() for more details on how to specify the filename. See the List of Supported Protocols\/Wrappers for links to information about what abilities the various wrappers have, notes on their usage, and information on any predefined variables they may provide.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1273,7 +1234,6 @@
             "name": "imagecreatefromstring",
             "desc": "imagecreatefromstring() returns an image identifier representing the image obtained from the given data. These types will be automatically detected if your build of PHP supports them: JPEG, PNG, GIF, WBMP, and GD2.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1291,7 +1251,6 @@
             "name": "imagecreatefromwbmp",
             "desc": "imagecreatefromwbmp() returns an image identifier representing the image obtained from the given filename. TipA URL can be used as a filename with this function if the fopen wrappers have been enabled. See fopen() for more details on how to specify the filename. See the List of Supported Protocols\/Wrappers for links to information about what abilities the various wrappers have, notes on their usage, and information on any predefined variables they may provide.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1309,7 +1268,6 @@
             "name": "imagecreatefromxbm",
             "desc": "imagecreatefromxbm() returns an image identifier representing the image obtained from the given filename. TipA URL can be used as a filename with this function if the fopen wrappers have been enabled. See fopen() for more details on how to specify the filename. See the List of Supported Protocols\/Wrappers for links to information about what abilities the various wrappers have, notes on their usage, and information on any predefined variables they may provide.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1327,7 +1285,6 @@
             "name": "imagecreatefromxpm",
             "desc": "imagecreatefromxpm() returns an image identifier representing the image obtained from the given filename. TipA URL can be used as a filename with this function if the fopen wrappers have been enabled. See fopen() for more details on how to specify the filename. See the List of Supported Protocols\/Wrappers for links to information about what abilities the various wrappers have, notes on their usage, and information on any predefined variables they may provide.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1345,7 +1302,6 @@
             "name": "imagecreatetruecolor",
             "desc": "imagecreatetruecolor() returns an image identifier representing a black image of the specified size.\n\nDepending on your PHP and GD versions this function is defined or not. With PHP 4.0.6 through 4.1.x this function always exists if the GD module is loaded, but calling it without GD2 being installed PHP will issue a fatal error and exit. With PHP 4.2.x this behaviour is different in issuing a warning instead of an error. Other versions only define this function, if the correct GD version is installed.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1368,7 +1324,6 @@
             "name": "imagedashedline",
             "desc": "This function is deprecated. Use combination of imagesetstyle() and imageline() instead.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1411,7 +1366,6 @@
             "name": "imagedestroy",
             "desc": "imagedestroy() frees any memory associated with image image.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1429,7 +1383,6 @@
             "name": "imageellipse",
             "desc": "Draws an ellipse centered at the specified coordinates.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1472,7 +1425,6 @@
             "name": "imagefill",
             "desc": "Performs a flood fill starting at the given coordinate (top left is 0, 0) with the given color in the image.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1505,7 +1457,6 @@
             "name": "imagefilledarc",
             "desc": "Draws a partial arc centered at the specified coordinate in the given image.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1563,7 +1514,6 @@
             "name": "imagefilledellipse",
             "desc": "Draws an ellipse centered at the specified coordinate on the given image.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1606,7 +1556,6 @@
             "name": "imagefilledpolygon",
             "desc": "imagefilledpolygon() creates a filled polygon in the given image.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1639,7 +1588,6 @@
             "name": "imagefilledrectangle",
             "desc": "Creates a rectangle filled with color in the given image starting at point 1 and ending at point 2. 0, 0 is the top left corner of the image.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1682,7 +1630,6 @@
             "name": "imagefilltoborder",
             "desc": "imagefilltoborder() performs a flood fill whose border color is defined by border. The starting point for the fill is x, y (top left is 0, 0) and the region is filled with color color.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1720,7 +1667,6 @@
             "name": "imagefilter",
             "desc": "imagefilter() applies the given filter filtertype on the image.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1767,7 +1713,6 @@
             "name": "imagefontheight",
             "desc": "Returns the pixel height of a character in the specified font.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -1785,7 +1730,6 @@
             "name": "imagefontwidth",
             "desc": "Returns the pixel width of a character in font.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -1803,7 +1747,6 @@
             "name": "imageftbbox",
             "desc": "This function calculates and returns the bounding box in pixels for a FreeType text.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1841,7 +1784,6 @@
         {
             "name": "imagefttext",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1900,7 +1842,6 @@
             "name": "imagegammacorrect",
             "desc": "Applies gamma correction to the given gd image given an input and an output gamma.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1928,7 +1869,6 @@
             "name": "imagegd2",
             "desc": "Outputs a GD2 image to the given filename.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1964,7 +1904,6 @@
             "name": "imagegd",
             "desc": "Outputs a GD image to the given filename.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1988,7 +1927,6 @@
             "name": "imagegif",
             "desc": "imagegif() creates the GIF file in filename from the image image. The image argument is the return from the imagecreate() or imagecreatefrom* function.\n\nThe image format will be GIF87a unless the image has been made transparent with imagecolortransparent(), in which case the image format will be GIF89a.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -2012,7 +1950,6 @@
             "name": "imagegrabscreen",
             "desc": "Grabs a screenshot of the whole screen.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -2025,7 +1962,6 @@
             "name": "imagegrabwindow",
             "desc": "Grabs a window or its client area using a windows handle (HWND property in COM instance)",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -2049,7 +1985,6 @@
             "name": "imageinterlace",
             "desc": "imageinterlace() turns the interlace bit on or off.\n\nIf the interlace bit is set and the image is used as a JPEG image, the image is created as a progressive JPEG.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -2073,7 +2008,6 @@
             "name": "imageistruecolor",
             "desc": "imageistruecolor() finds whether the image image is a truecolor image.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -2091,7 +2025,6 @@
             "name": "imagejpeg",
             "desc": "imagejpeg() creates a JPEG file from the given image.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -2121,7 +2054,6 @@
             "name": "imagelayereffect",
             "desc": "Set the alpha blending flag to use the bundled libgd layering effects.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -2144,7 +2076,6 @@
             "name": "imageline",
             "desc": "Draws a line between the two given points.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -2187,7 +2118,6 @@
             "name": "imageloadfont",
             "desc": "imageloadfont() loads a user-defined bitmap and returns its identifier.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -2205,7 +2135,6 @@
             "name": "imagepalettecopy",
             "desc": "imagepalettecopy() copies the palette from the source image to the destination image.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null,
@@ -2228,7 +2157,6 @@
             "name": "imagepng",
             "desc": "Outputs or saves a PNG image from the given image.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -2264,7 +2192,6 @@
             "name": "imagepolygon",
             "desc": "imagepolygon() creates a polygon in the given image.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -2297,7 +2224,6 @@
             "name": "imagepsbbox",
             "desc": "Gives the bounding box of a text rectangle using PostScript Type1 fonts.\n\nThe bounding box is calculated using information available from character metrics, and unfortunately tends to differ slightly from the results achieved by actually rasterizing the text. If the angle is 0 degrees, you can expect the text to need 1 pixel more to every direction.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64Vec",
@@ -2343,7 +2269,6 @@
             "name": "imagepsencodefont",
             "desc": "Loads a character encoding vector from a file and changes the fonts encoding vector to it. As a PostScript fonts default vector lacks most of the character positions above 127, you'll definitely want to change this if you use an other language than English.\n\nIf you find yourself using this function all the time, a much better way to define the encoding is to set ps.default_encoding in the configuration file to point to the right encoding file and all fonts you load will automatically have the right encoding.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -2366,7 +2291,6 @@
             "name": "imagepsextendfont",
             "desc": "Extend or condense a font (font_index), if the value of the extend parameter is less than one you will be condensing the font.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -2389,7 +2313,6 @@
             "name": "imagepsfreefont",
             "desc": "imagepsfreefont() frees memory used by a PostScript Type 1 font.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -2407,7 +2330,6 @@
             "name": "imagepsloadfont",
             "desc": "Load a PostScript Type 1 font from the given filename.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource",
@@ -2425,7 +2347,6 @@
             "name": "imagepsslantfont",
             "desc": "Slant a given font given.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -2448,7 +2369,6 @@
             "name": "imagepstext",
             "desc": "Draws a text on an image using PostScript Type1 fonts.\n\nRefer to PostScript documentation about fonts and their measuring system if you have trouble understanding how this works.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "StringVec",
@@ -2525,7 +2445,6 @@
             "name": "imagerectangle",
             "desc": "imagerectangle() creates a rectangle starting at the specified coordinates.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -2568,7 +2487,6 @@
             "name": "imagerotate",
             "desc": "Rotates the image image using the given angle in degrees.\n\nThe center of rotation is the center of the image, and the rotated image may have different dimensions than the original image.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -2602,7 +2520,6 @@
             "name": "imagesavealpha",
             "desc": "imagesavealpha() sets the flag to attempt to save full alpha channel information (as opposed to single-color transparency) when saving PNG images.\n\nYou have to unset alphablending (imagealphablending($im, false)), to use it.\n\nAlpha channel is not supported by all browsers, if you have problem with your browser, try to load your script with an alpha channel compliant browser, e.g. latest Mozilla.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -2625,7 +2542,6 @@
             "name": "imagesetbrush",
             "desc": "imagesetbrush() sets the brush image to be used by all line drawing functions (such as imageline() and imagepolygon()) when drawing with the special colors IMG_COLOR_BRUSHED or IMG_COLOR_STYLEDBRUSHED.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -2648,7 +2564,6 @@
             "name": "imagesetpixel",
             "desc": "imagesetpixel() draws a pixel at the specified coordinate.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -2681,7 +2596,6 @@
             "name": "imagesetstyle",
             "desc": "imagesetstyle() sets the style to be used by all line drawing functions (such as imageline() and imagepolygon()) when drawing with the special color IMG_COLOR_STYLED or lines of images with color IMG_COLOR_STYLEDBRUSHED.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -2704,7 +2618,6 @@
             "name": "imagesetthickness",
             "desc": "imagesetthickness() sets the thickness of the lines drawn when drawing rectangles, polygons, ellipses etc. etc. to thickness pixels.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -2727,7 +2640,6 @@
             "name": "imagesettile",
             "desc": "imagesettile() sets the tile image to be used by all region filling functions (such as imagefill() and imagefilledpolygon()) when filling with the special color IMG_COLOR_TILED.\n\nA tile is an image used to fill an area with a repeated pattern. Any GD image can be used as a tile, and by setting the transparent color index of the tile image with imagecolortransparent(), a tile allows certain parts of the underlying area to shine through can be created.\n\nYou need not take special action when you are finished with a tile, but if you destroy the tile image, you must not use the IMG_COLOR_TILED color until you have set a new tile image!",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -2750,7 +2662,6 @@
             "name": "imagestring",
             "desc": "Draws a string at the given coordinates.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -2793,7 +2704,6 @@
             "name": "imagestringup",
             "desc": "Draws a string vertically at the given coordinates.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -2836,7 +2746,6 @@
             "name": "imagesx",
             "desc": "Returns the width of the given image resource.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -2854,7 +2763,6 @@
             "name": "imagesy",
             "desc": "Returns the height of the given image resource.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -2872,7 +2780,6 @@
             "name": "imagetruecolortopalette",
             "desc": "imagetruecolortopalette() converts a truecolor image to a palette image. The code for this function was originally drawn from the Independent JPEG Group library code, which is excellent. The code has been modified to preserve as much alpha channel information as possible in the resulting palette, in addition to preserving colors as well as possible. This does not work as well as might be hoped. It is usually best to simply produce a truecolor output image instead, which guarantees the highest output quality.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -2900,7 +2807,6 @@
             "name": "imagettfbbox",
             "desc": "This function calculates and returns the bounding box in pixels for a TrueType text.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -2933,7 +2839,6 @@
             "name": "imagettftext",
             "desc": "Writes the given text into the image using TrueType fonts.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -2986,7 +2891,6 @@
             "name": "imagetypes",
             "desc": "Returns the image types supported by the current PHP installation.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -2999,7 +2903,6 @@
             "name": "imagewbmp",
             "desc": "imagewbmp() outputs or save a WBMP version of the given image.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -3029,7 +2932,6 @@
             "name": "imagexbm",
             "desc": "Outputs or save an XBM version of the given image.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -3059,7 +2961,6 @@
             "name": "iptcembed",
             "desc": "Embeds binary IPTC data into a JPEG image.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -3088,7 +2989,6 @@
             "name": "iptcparse",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -3106,7 +3006,6 @@
             "name": "jpeg2wbmp",
             "desc": "Converts a JPEG file into a WBMP file.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -3144,7 +3043,6 @@
             "name": "png2wbmp",
             "desc": "Converts a PNG file into a WBMP file.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -3182,7 +3080,6 @@
             "name": "exif_imagetype",
             "desc": "exif_imagetype() reads the first bytes of an image and checks its signature.\n\nexif_imagetype() can be used to avoid calls to other exif functions with unsupported file types or in conjunction with $_SERVER['HTTP_ACCEPT'] to check whether or not the viewer is able to see a specific image in the browser.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -3200,7 +3097,6 @@
             "name": "exif_read_data",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -3235,7 +3131,6 @@
         {
             "name": "read_exif_data",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -3265,7 +3160,6 @@
         {
             "name": "exif_tagname",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -3283,7 +3177,6 @@
             "name": "exif_thumbnail",
             "desc": "exif_thumbnail() reads the embedded thumbnail of a TIFF or JPEG image.\n\nIf you want to deliver thumbnails through this function, you should send the mimetype information using the header() function.\n\nIt is possible that exif_thumbnail() cannot create an image but can determine its size. In this case, the return value is FALSE but width and height are set.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",

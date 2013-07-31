@@ -168,7 +168,7 @@ static void outputConstants(const char *outputfn,
 // Class Map
 
 #define FUNC_FLAG_MASK (IsProtected|IsPrivate|IsPublic|\
-                        IsAbstract|IsStatic|IsFinal|HasDocComment|\
+                        IsAbstract|IsStatic|IsFinal|\
                         AllowIntercept|NoProfile|ContextSensitive|\
                         HipHopSpecific|VariableArguments|\
                         RefVariableArguments|MixedVariableArguments|\
@@ -196,11 +196,9 @@ static void writeFunction(std::ostream& out, const PhpFunc& func) {
       << castLong(0) << ", "
       << castLong(0) << ",\n";
 
-  if (flags & HasDocComment) {
-    out << "  \""
-        << escapeCpp(genDocComment(func, func.className()))
-        << "\",\n";
-  }
+  out << "  \""
+      << escapeCpp(genDocComment(func, func.className()))
+      << "\",\n";
 
   DataType rko = func.returnKindOf();
   if (rko == KindOfAny) {
@@ -268,7 +266,7 @@ static void writeConstant(std::ostream& out, const PhpConst& cns) {
 }
 
 #define CLASS_FLAG_MASK (IsAbstract|IsFinal|NoDefaultSweep|\
-                         HipHopSpecific|HasDocComment|IsCppSerializable)
+                         HipHopSpecific|IsCppSerializable)
 #define PROP_FLAG_MASK  (IsProtected|IsPrivate|IsPublic|IsStatic)
 
 static void writeClass(std::ostream& out, const PhpClass& cls) {
@@ -281,9 +279,7 @@ static void writeClass(std::ostream& out, const PhpClass& cls) {
       << castLong(0) << ", "
       << castLong(0) << ",\n";
 
-  if (flags & HasDocComment) {
-    out << "  \"" << escapeCpp(genDocComment(cls)) << "\",\n";
-  }
+  out << "  \"" << escapeCpp(genDocComment(cls)) << "\",\n";
 
   out << "  ";
   for (auto &iface : cls.ifaces()) {
@@ -338,7 +334,7 @@ static void outputClassMap(const char *outputfn, const char *classmap_name,
   out << "  NULL,\n"; // End of extensions
 
   out << "  (const char *)ClassInfo::IsSystem, NULL, "
-      << "\"\", \"\", NULL, NULL, NULL,\n";
+      << "\"\", \"\", NULL, NULL, \"\", NULL,\n";
   for (auto &f : funcs) {
     writeFunction(out, f);
   }

@@ -156,9 +156,7 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
   }
 
   f->setClassInfoAttribute(attrs);
-  if (attrs & ClassInfo::HasDocComment) {
-    f->setDocComment(method->docComment);
-  }
+  f->setDocComment(method->docComment);
 
   if (!isMethod && (attrs & ClassInfo::HasOptFunction)) {
     // Legacy optimization functions
@@ -299,9 +297,7 @@ ClassScopePtr BuiltinSymbols::ImportClassScopePtr(AnalysisResultPtr ar,
   ImportExtConstants(ar, cl->getConstants(), cls);
   int attrs = cls->getAttribute();
   cl->setClassInfoAttribute(attrs);
-  if (attrs & ClassInfo::HasDocComment) {
-    cl->setDocComment(cls->getDocComment());
-  }
+  cl->setDocComment(cls->getDocComment());
   cl->setSystem();
   return cl;
 }

@@ -7,7 +7,6 @@
             "name": "ftok",
             "desc": "The function converts the pathname of an existing accessible file and a project identifier into an integer for use with for example shmop_open() and other System V IPC keys.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -30,7 +29,6 @@
             "name": "msg_get_queue",
             "desc": "msg_get_queue() returns an id that can be used to access the System V message queue with the given key. The first call creates the message queue with the optional perms. A second call to msg_get_queue() for the same key will return a different message queue identifier, but both identifiers access the same underlying message queue.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -54,7 +52,6 @@
             "name": "msg_queue_exists",
             "desc": "msg_queue_exists() checks whether a message queue exists",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -72,7 +69,6 @@
             "name": "msg_send",
             "desc": "msg_send() sends a message of type msgtype (which MUST be greater than 0) to the message queue specified by queue.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -115,7 +111,6 @@
             "name": "msg_receive",
             "desc": "msg_receive() will receive the first message from the specified queue of the type specified by desiredmsgtype.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -173,7 +168,6 @@
             "name": "msg_remove_queue",
             "desc": "msg_remove_queue() destroys the message queue specified by the queue. Only use this function when all processes have finished working with the message queue and you need to release the system resources held by it.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -191,7 +185,6 @@
             "name": "msg_set_queue",
             "desc": "msg_set_queue() allows you to change the values of the msg_perm.uid, msg_perm.gid, msg_perm.mode and msg_qbytes fields of the underlying message queue data structure.\n\nChanging the data structure will require that PHP be running as the same user that created the queue, owns the queue (as determined by the existing msg_perm.xxx fields), or be running with root privileges. root privileges are required to raise the msg_qbytes values above the system defined limit.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -214,7 +207,6 @@
             "name": "msg_stat_queue",
             "desc": "msg_stat_queue() returns the message queue meta data for the message queue specified by the queue. This is useful, for example, to determine which process sent the message that was just received.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64Map",
@@ -232,7 +224,6 @@
             "name": "sem_acquire",
             "desc": "sem_acquire() blocks (if necessary) until the semaphore can be acquired. A process attempting to acquire a semaphore which it has already acquired will block forever if acquiring the semaphore would cause its maximum number of semaphore to be exceeded.\n\nAfter processing a request, any semaphores acquired by the process but not explicitly released will be released automatically and a warning will be generated.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -250,7 +241,6 @@
             "name": "sem_get",
             "desc": "sem_get() returns an id that can be used to access the System V semaphore with the given key.\n\nA second call to sem_get() for the same key will return a different semaphore identifier, but both identifiers access the same underlying semaphore.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -285,7 +275,6 @@
             "name": "sem_release",
             "desc": "sem_release() releases the semaphore if it is currently acquired by the calling process, otherwise a warning is generated.\n\nAfter releasing the semaphore, sem_acquire() may be called to re-acquire it.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -303,7 +292,6 @@
             "name": "sem_remove",
             "desc": "sem_remove() removes the given semaphore.\n\nAfter removing the semaphore, it is no more accessible.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -321,7 +309,6 @@
             "name": "shm_attach",
             "desc": "shm_attach() returns an id that can be used to access the System V shared memory with the given key, the first call creates the shared memory segment with memsize and the optional perm-bits perm.\n\nA second call to shm_attach() for the same key will return a different shared memory identifier, but both identifiers access the same underlying shared memory. memsize and perm will be ignored.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -351,7 +338,6 @@
             "name": "shm_detach",
             "desc": "shm_detach() disconnects from the shared memory given by the shm_identifier created by shm_attach(). Remember, that shared memory still exist in the Unix system and the data is still present.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -369,7 +355,6 @@
             "name": "shm_remove",
             "desc": "shm_remove() removes the shared memory shm_identifier. All data will be destroyed.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -387,7 +372,6 @@
             "name": "shm_get_var",
             "desc": "shm_get_var() returns the variable with a given variable_key, in the given shared memory segment. The variable is still present in the shared memory.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -410,7 +394,6 @@
             "name": "shm_has_var",
             "desc": "shm_has_var() checks whether a specific key exists inside a shared memory segment.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -433,7 +416,6 @@
             "name": "shm_put_var",
             "desc": "shm_put_var() inserts or updates the variable with the given variable_key.\n\nWarnings (E_WARNING level) will be issued if shm_identifier is not a valid SysV shared memory index or if there was not enough shared memory remaining to complete your request.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -461,7 +443,6 @@
             "name": "shm_remove_var",
             "desc": "Removes a variable with a given variable_key and frees the occupied memory.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",

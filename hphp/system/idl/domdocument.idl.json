@@ -6,7 +6,6 @@
         {
             "name": "dom_document_create_element",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -30,7 +29,6 @@
         {
             "name": "dom_document_create_document_fragment",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -45,7 +43,6 @@
         {
             "name": "dom_document_create_text_node",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -64,7 +61,6 @@
         {
             "name": "dom_document_create_comment",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -83,7 +79,6 @@
         {
             "name": "dom_document_create_cdatasection",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -102,7 +97,6 @@
         {
             "name": "dom_document_create_processing_instruction",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -126,7 +120,6 @@
         {
             "name": "dom_document_create_attribute",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -145,7 +138,6 @@
         {
             "name": "dom_document_create_entity_reference",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -164,7 +156,6 @@
         {
             "name": "dom_document_get_elements_by_tag_name",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -183,7 +174,6 @@
         {
             "name": "dom_document_import_node",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -207,7 +197,6 @@
         {
             "name": "dom_document_create_element_ns",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -235,7 +224,6 @@
         {
             "name": "dom_document_create_attribute_ns",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -258,7 +246,6 @@
         {
             "name": "dom_document_get_elements_by_tag_name_ns",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -281,7 +268,6 @@
         {
             "name": "dom_document_get_element_by_id",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -300,7 +286,6 @@
         {
             "name": "dom_document_normalize_document",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -316,7 +301,6 @@
             "name": "dom_document_save",
             "desc": "Creates an XML document from the DOM representation. This function is usually called after building a new dom document from scratch as in the example below.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -344,7 +328,6 @@
             "name": "dom_document_savexml",
             "desc": "Creates an XML document from the DOM representation. This function is usually called after building a new dom document from scratch as in the example below.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -373,7 +356,6 @@
             "name": "dom_document_validate",
             "desc": "Validates the document based on its DTD.\n\nYou can also use the validateOnParse property of DOMDocument to make a DTD validation.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -390,7 +372,6 @@
             "name": "dom_document_xinclude",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -412,7 +393,6 @@
         {
             "name": "dom_document_save_html",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -427,7 +407,6 @@
         {
             "name": "dom_document_save_html_file",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -446,7 +425,6 @@
         {
             "name": "dom_document_schema_validate_file",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -465,7 +443,6 @@
         {
             "name": "dom_document_schema_validate_xml",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -484,7 +461,6 @@
         {
             "name": "dom_document_relaxng_validate_file",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -503,7 +479,6 @@
         {
             "name": "dom_document_relaxng_validate_xml",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -522,7 +497,6 @@
         {
             "name": "dom_node_insert_before",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -546,7 +520,6 @@
         {
             "name": "dom_node_replace_child",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -569,7 +542,6 @@
         {
             "name": "dom_node_remove_child",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -588,7 +560,6 @@
         {
             "name": "dom_node_append_child",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -607,7 +578,6 @@
         {
             "name": "dom_node_has_child_nodes",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -622,7 +592,6 @@
         {
             "name": "dom_node_clone_node",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -643,7 +612,6 @@
             "name": "dom_node_normalize",
             "desc": "Normalizes the node.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -659,7 +627,6 @@
         {
             "name": "dom_node_is_supported",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -682,7 +649,6 @@
         {
             "name": "dom_node_has_attributes",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -697,7 +663,6 @@
         {
             "name": "dom_node_is_same_node",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -716,7 +681,6 @@
         {
             "name": "dom_node_lookup_prefix",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -735,7 +699,6 @@
         {
             "name": "dom_node_is_default_namespace",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -754,7 +717,6 @@
         {
             "name": "dom_node_lookup_namespace_uri",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -774,7 +736,6 @@
             "name": "dom_nodelist_item",
             "desc": "Retrieves a node specified by index within the DOMNodeList object. Tip\n\nIf you need to know the number of nodes in the collection, use the length property of the DOMNodeList object.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -795,7 +756,6 @@
         {
             "name": "dom_namednodemap_get_named_item",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -815,7 +775,6 @@
             "name": "dom_namednodemap_item",
             "desc": "Retrieves a node specified by index within the DOMNamedNodeMap object.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -836,7 +795,6 @@
         {
             "name": "dom_namednodemap_get_named_item_ns",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -859,7 +817,6 @@
         {
             "name": "dom_characterdata_substring_data",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -882,7 +839,6 @@
         {
             "name": "dom_characterdata_append_data",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -901,7 +857,6 @@
         {
             "name": "dom_characterdata_insert_data",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -924,7 +879,6 @@
         {
             "name": "dom_characterdata_delete_data",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -947,7 +901,6 @@
         {
             "name": "dom_characterdata_replace_data",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -974,7 +927,6 @@
         {
             "name": "dom_attr_is_id",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -989,7 +941,6 @@
         {
             "name": "dom_element_get_attribute",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1008,7 +959,6 @@
         {
             "name": "dom_element_set_attribute",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1031,7 +981,6 @@
         {
             "name": "dom_element_remove_attribute",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1050,7 +999,6 @@
         {
             "name": "dom_element_get_attribute_node",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1069,7 +1017,6 @@
         {
             "name": "dom_element_set_attribute_node",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1088,7 +1035,6 @@
         {
             "name": "dom_element_remove_attribute_node",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1107,7 +1053,6 @@
         {
             "name": "dom_element_get_elements_by_tag_name",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1126,7 +1071,6 @@
         {
             "name": "dom_element_get_attribute_ns",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1149,7 +1093,6 @@
         {
             "name": "dom_element_set_attribute_ns",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1176,7 +1119,6 @@
         {
             "name": "dom_element_remove_attribute_ns",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1199,7 +1141,6 @@
         {
             "name": "dom_element_get_attribute_node_ns",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1222,7 +1163,6 @@
         {
             "name": "dom_element_set_attribute_node_ns",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1241,7 +1181,6 @@
         {
             "name": "dom_element_get_elements_by_tag_name_ns",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1264,7 +1203,6 @@
         {
             "name": "dom_element_has_attribute",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1283,7 +1221,6 @@
         {
             "name": "dom_element_has_attribute_ns",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1306,7 +1243,6 @@
         {
             "name": "dom_element_set_id_attribute",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1329,7 +1265,6 @@
         {
             "name": "dom_element_set_id_attribute_ns",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1356,7 +1291,6 @@
         {
             "name": "dom_element_set_id_attribute_node",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1379,7 +1313,6 @@
         {
             "name": "dom_text_split_text",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1398,7 +1331,6 @@
         {
             "name": "dom_text_is_whitespace_in_element_content",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1413,7 +1345,6 @@
         {
             "name": "dom_xpath_register_ns",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1437,7 +1368,6 @@
             "name": "dom_xpath_query",
             "desc": "Executes the given XPath expression.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1465,7 +1395,6 @@
             "name": "dom_xpath_evaluate",
             "desc": "Executes the given XPath expression and returns a typed result if possible.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1492,7 +1421,6 @@
         {
             "name": "dom_xpath_register_php_functions",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -1513,7 +1441,6 @@
             "name": "dom_import_simplexml",
             "desc": "This function takes the node node of class SimpleXML and makes it into a DOMElement node. This new object can then be used as a native DOMElement node.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1533,14 +1460,12 @@
             "name": "DOMNode",
             "desc": "",
             "flags": [
-                "HasDocComment"
             ],
             "footer": "\npublic:\n  virtual ObjectData *clone();\n  virtual p_DOMDocument doc() { return m_doc;}\n  p_DOMDocument m_doc;\n  xmlNodePtr m_node;",
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -1552,7 +1477,6 @@
                     "name": "appendChild",
                     "desc": "This functions appends a child to an existing list of children or creates a new list of children. The child can be created with e.g. DOMDocument::createElement(), DOMDocument::createTextNode() etc. or simply by using any other node.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1570,7 +1494,6 @@
                     "name": "cloneNode",
                     "desc": "Creates a copy of the node.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1589,7 +1512,6 @@
                     "name": "getLineNo",
                     "desc": "Gets line number for where the node is defined.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Int64",
@@ -1602,7 +1524,6 @@
                     "name": "hasAttributes",
                     "desc": "This method checks if the node has attributes. The tested node have to be an XML_ELEMENT_NODE.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -1615,7 +1536,6 @@
                     "name": "hasChildNodes",
                     "desc": "This function checks if the node has children.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -1628,7 +1548,6 @@
                     "name": "insertBefore",
                     "desc": "This function inserts a new node right before the reference node. If you plan to do further modifications on the appended child you must use the returned node.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1652,7 +1571,6 @@
                     "name": "isDefaultNamespace",
                     "desc": "Tells whether namespaceURI is the default namespace.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -1670,7 +1588,6 @@
                     "name": "isSameNode",
                     "desc": "This function indicates if two nodes are the same node. The comparison is not based on content",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -1688,7 +1605,6 @@
                     "name": "isSupported",
                     "desc": "Checks if the asked feature is supported for the specified version.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -1711,7 +1627,6 @@
                     "name": "lookupNamespaceUri",
                     "desc": "Gets the namespace URI of the node based on the prefix.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1729,7 +1644,6 @@
                     "name": "lookupPrefix",
                     "desc": "Gets the namespace prefix of the node based on the namespace URI.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1747,7 +1661,6 @@
                     "name": "normalize",
                     "desc": "Normalizes the node.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null,
@@ -1760,7 +1673,6 @@
                     "name": "removeChild",
                     "desc": "This functions removes a child from a list of children.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1778,7 +1690,6 @@
                     "name": "replaceChild",
                     "desc": "This function replaces the child oldnode with the passed new node. If the new node is already a child it will not be added a second time. If the replacement succeeds the old node is returned.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1800,7 +1711,6 @@
                 {
                     "name": "c14n",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -1831,7 +1741,6 @@
                 {
                     "name": "c14nfile",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -1866,7 +1775,6 @@
                 {
                     "name": "getNodePath",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -1877,7 +1785,6 @@
                 {
                     "name": "__get",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -1892,7 +1799,6 @@
                 {
                     "name": "__set",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -1911,7 +1817,6 @@
                 {
                     "name": "__isset",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1932,13 +1837,11 @@
             "parent": "DOMNode",
             "desc": "DOMAttr represents an attribute in the DOMElement object.",
             "flags": [
-                "HasDocComment"
             ],
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -1959,7 +1862,6 @@
                     "name": "isId",
                     "desc": "This function checks if the attribute is a defined ID.\n\nAccording to the DOM standard this requires a DTD which defines the attribute ID to be of type ID. You need to validate your document with DOMDocument::validate or DOMDocument::validateOnParse before using this function.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -1971,7 +1873,6 @@
                 {
                     "name": "__get",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -1986,7 +1887,6 @@
                 {
                     "name": "__set",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -2005,7 +1905,6 @@
                 {
                     "name": "__isset",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -2026,13 +1925,11 @@
             "parent": "DOMNode",
             "desc": "Represents nodes with character data. No nodes directly correspond to this class, but other nodes do inherit from it.",
             "flags": [
-                "HasDocComment"
             ],
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -2044,7 +1941,6 @@
                     "name": "appendData",
                     "desc": "Append the string data to the end of the character data of the node.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -2062,7 +1958,6 @@
                     "name": "deleteData",
                     "desc": "Deletes count characters starting from position offset.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -2085,7 +1980,6 @@
                     "name": "insertData",
                     "desc": "Inserts string data at position offset.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -2108,7 +2002,6 @@
                     "name": "replaceData",
                     "desc": "Replace count characters starting from position offset with data.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -2136,7 +2029,6 @@
                     "name": "substringData",
                     "desc": "Returns the specified substring.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "String",
@@ -2158,7 +2050,6 @@
                 {
                     "name": "__get",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -2173,7 +2064,6 @@
                 {
                     "name": "__set",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -2192,7 +2082,6 @@
                 {
                     "name": "__isset",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -2213,13 +2102,11 @@
             "parent": "DOMCharacterData",
             "desc": "Represents comment nodes, characters delimited by <!-- and -->.",
             "flags": [
-                "HasDocComment"
             ],
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -2241,13 +2128,11 @@
             "parent": "DOMCharacterData",
             "desc": "The DOMText class inherits from DOMCharacterData and represents the textual content of a DOMElement or DOMAttr.",
             "flags": [
-                "HasDocComment"
             ],
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -2264,7 +2149,6 @@
                     "name": "isWhitespaceInElementContent",
                     "desc": "Indicates whether this text node contains whitespace. The text node is determined to contain whitespace in element content during the load of the document.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -2277,7 +2161,6 @@
                     "name": "splitText",
                     "desc": "Breaks this node into two nodes at the specified offset, keeping both in the tree as siblings.\n\nAfter being split, this node will contain all the content up to the offset. If the original node had a parent node, the new node is inserted as the next sibling of the original node. When the offset is equal to the length of this node, the new node has no data.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2294,7 +2177,6 @@
                 {
                     "name": "__get",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -2309,7 +2191,6 @@
                 {
                     "name": "__set",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -2328,7 +2209,6 @@
                 {
                     "name": "__isset",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -2349,13 +2229,11 @@
             "parent": "DOMText",
             "desc": "",
             "flags": [
-                "HasDocComment"
             ],
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -2379,7 +2257,6 @@
             ],
             "desc": "Represents an entire HTML or XML document; serves as the root of the document tree.",
             "flags": [
-                "HasDocComment",
                 "NoDefaultSweep"
             ],
             "footer": "\npublic:\n  virtual p_DOMDocument doc() { return this;}\n  bool m_formatoutput;\n  bool m_validateonparse;\n  bool m_resolveexternals;\n  bool m_preservewhitespace;\n  bool m_substituteentities;\n  bool m_stricterror;\n  bool m_recover;\n  Array m_classmap;\n  std::auto_ptr<XmlNodeSet> m_orphans;\n  bool m_owner;",
@@ -2387,7 +2264,6 @@
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -2409,7 +2285,6 @@
                     "name": "createAttribute",
                     "desc": "This function creates a new instance of class DOMAttr. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2427,7 +2302,6 @@
                     "name": "createAttributens",
                     "desc": "This function creates a new instance of class DOMAttr. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2450,7 +2324,6 @@
                     "name": "createCDATASection",
                     "desc": "This function creates a new instance of class DOMCDATASection. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2468,7 +2341,6 @@
                     "name": "createComment",
                     "desc": "This function creates a new instance of class DOMComment. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2486,7 +2358,6 @@
                     "name": "createDocumentFragment",
                     "desc": "This function creates a new instance of class DOMDocumentFragment. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2499,7 +2370,6 @@
                     "name": "createElement",
                     "desc": "This function creates a new instance of class DOMElement. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2523,7 +2393,6 @@
                     "name": "createElementNS",
                     "desc": "This function creates a new element node with an associated namespace. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2552,7 +2421,6 @@
                     "name": "createEntityReference",
                     "desc": "This function creates a new instance of class DOMEntityReference. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2570,7 +2438,6 @@
                     "name": "createProcessingInstruction",
                     "desc": "This function creates a new instance of class DOMProcessingInstruction. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2594,7 +2461,6 @@
                     "name": "createTextNode",
                     "desc": "This function creates a new instance of class DOMText. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2612,7 +2478,6 @@
                     "name": "getElementById",
                     "desc": "This function is similar to DOMDocument::getElementsByTagName but searches for an element with a given id.\n\nFor this function to work, you will need either to set some ID attributes with DOMElement::setIdAttribute or a DTD which defines an attribute to be of type ID. In the later case, you will need to validate your document with DOMDocument::validate or DOMDocument->validateOnParse before using this function.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2630,7 +2495,6 @@
                     "name": "getElementsByTagName",
                     "desc": "This function returns a new instance of class DOMNodeList containing the elements with a given tag name.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2648,7 +2512,6 @@
                     "name": "getElementsByTagNameNS",
                     "desc": "Returns a DOMNodeList of all elements with a given local name and a namespace URI.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2671,7 +2534,6 @@
                     "name": "importNode",
                     "desc": "This function returns a copy of the node to import and associates it with the current document.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2695,7 +2557,6 @@
                     "name": "load",
                     "desc": "Loads an XML document from a file. Warning Unix style paths with forward slashes can cause significant performance degradation on Windows systems; be sure to call realpath() in such a case.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2719,7 +2580,6 @@
                     "name": "loadHTML",
                     "desc": "The function parses the HTML contained in the string source. Unlike loading XML, HTML does not have to be well-formed to load. This function may also be called statically to load and create a DOMDocument object. The static invocation may be used when no DOMDocument properties need to be set prior to loading.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2737,7 +2597,6 @@
                     "name": "loadHTMLFile",
                     "desc": "The function parses the HTML document in the file named filename. Unlike loading XML, HTML does not have to be well-formed to load.\n\nThough not recommended, this function may also be called statically to load and create a DOMDocument object. The static invocation may be used when no DOMDocument properties need to be set prior to loading. However, doing so will result an in E_STRICT error being generated.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2755,7 +2614,6 @@
                     "name": "loadXML",
                     "desc": "Loads an XML document from a string.\n\nThis method may also be called statically to load and create a DOMDocument object. The static invocation may be used when no DOMDocument properties need to be set prior to loading.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2779,7 +2637,6 @@
                     "name": "normalizeDocument",
                     "desc": "This method acts as if you saved and then loaded the document, putting the document in a \"normal\" form.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null,
@@ -2792,7 +2649,6 @@
                     "name": "registerNodeClass",
                     "desc": "This method allows you to register your own extended DOM class to be used afterward by the PHP DOM extension.\n\nThis method is not part of the DOM standard.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -2815,7 +2671,6 @@
                     "name": "relaxNGValidate",
                     "desc": null,
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -2833,7 +2688,6 @@
                     "name": "relaxNGValidateSource",
                     "desc": null,
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -2851,7 +2705,6 @@
                     "name": "save",
                     "desc": "Creates an XML document from the DOM representation. This function is usually called after building a new dom document from scratch as in the example below.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2875,7 +2728,6 @@
                     "name": "saveHTML",
                     "desc": "Creates an HTML document from the DOM representation. This function is usually called after building a new dom document from scratch as in the example below.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2888,7 +2740,6 @@
                     "name": "saveHTMLFile",
                     "desc": "Creates an HTML document from the DOM representation. This function is usually called after building a new dom document from scratch as in the example below.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2906,7 +2757,6 @@
                     "name": "saveXML",
                     "desc": "Creates an XML document from the DOM representation. This function is usually called after building a new dom document from scratch as in the example below.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2931,7 +2781,6 @@
                     "name": "schemaValidate",
                     "desc": "Validates a document based on the given schema file.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -2949,7 +2798,6 @@
                     "name": "schemaValidateSource",
                     "desc": "Validates a document based on a schema defined in the given string.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -2967,7 +2815,6 @@
                     "name": "validate",
                     "desc": "Validates the document based on its DTD.\n\nYou can also use the validateOnParse property of DOMDocument to make a DTD validation.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -2980,7 +2827,6 @@
                     "name": "xinclude",
                     "desc": null,
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2998,7 +2844,6 @@
                 {
                     "name": "__get",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -3013,7 +2858,6 @@
                 {
                     "name": "__set",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -3032,7 +2876,6 @@
                 {
                     "name": "__isset",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -3053,13 +2896,11 @@
             "parent": "DOMNode",
             "desc": "",
             "flags": [
-                "HasDocComment"
             ],
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -3071,7 +2912,6 @@
                     "name": "appendXML",
                     "desc": "Appends raw XML data to a DOMDocumentFragment.\n\nThis method is not part of the DOM standard. It was created as a simpler approach for appending an XML DocumentFragment in a DOMDocument.\n\nIf you want to stick to the standards, you will have to create a temporary DOMDocument with a dummy root and then loop through the child nodes of the root of your XML data to append them.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -3094,13 +2934,11 @@
             "parent": "DOMNode",
             "desc": "Each DOMDocument has a doctype attribute whose value is either NULL or a DOMDocumentType object.",
             "flags": [
-                "HasDocComment"
             ],
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -3111,7 +2949,6 @@
                 {
                     "name": "__get",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -3126,7 +2963,6 @@
                 {
                     "name": "__set",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -3145,7 +2981,6 @@
                 {
                     "name": "__isset",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -3166,13 +3001,11 @@
             "parent": "DOMNode",
             "desc": "",
             "flags": [
-                "HasDocComment"
             ],
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -3198,7 +3031,6 @@
                     "name": "getAttribute",
                     "desc": "Gets the value of the attribute with name name for the current node.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "String",
@@ -3216,7 +3048,6 @@
                     "name": "getAttributeNode",
                     "desc": "Returns the attribute node with name name for the current element.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3234,7 +3065,6 @@
                     "name": "getAttributeNodeNS",
                     "desc": "Returns the attribute node in namespace namespaceURI with local name localName for the current node.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Object",
@@ -3257,7 +3087,6 @@
                     "name": "getAttributeNS",
                     "desc": "Gets the value of the attribute in namespace namespaceURI with local name localName for the current node.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "String",
@@ -3280,7 +3109,6 @@
                     "name": "getElementsByTagName",
                     "desc": "This function returns a new instance of the class DOMNodeList of all descendant elements with a given tag name, in the order in which they are encountered in a preorder traversal of this element tree.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Object",
@@ -3298,7 +3126,6 @@
                     "name": "getElementsByTagNameNS",
                     "desc": "This function fetch all the descendant elements with a given localName and namespaceURI.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Object",
@@ -3321,7 +3148,6 @@
                     "name": "hasAttribute",
                     "desc": "Indicates whether attribute named name exists as a member of the element.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -3339,7 +3165,6 @@
                     "name": "hasAttributeNS",
                     "desc": "Indicates whether attribute in namespace namespaceURI named localName exists as a member of the element.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -3362,7 +3187,6 @@
                     "name": "removeAttribute",
                     "desc": "Removes attribute named name from the element.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -3380,7 +3204,6 @@
                     "name": "removeAttributeNode",
                     "desc": "Removes attribute oldnode from the element.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3398,7 +3221,6 @@
                     "name": "removeAttributeNS",
                     "desc": "Removes attribute is namespace namespaceURI named localName from the element.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3421,7 +3243,6 @@
                     "name": "setAttribute",
                     "desc": "Sets an attribute with name name to the given value. If the attribute does not exist, it will be created.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3444,7 +3265,6 @@
                     "name": "setAttributeNode",
                     "desc": "Adds new attribute node attr to element.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3462,7 +3282,6 @@
                     "name": "setAttributeNodeNS",
                     "desc": "Adds new attribute node attr to element.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3480,7 +3299,6 @@
                     "name": "setAttributeNS",
                     "desc": "Sets an attribute with namespace namespaceURI and name name to the given value. If the attribute does not exist, it will be created.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3508,7 +3326,6 @@
                     "name": "setIDAttribute",
                     "desc": "Declares the attribute name to be of type ID.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3531,7 +3348,6 @@
                     "name": "setIDAttributeNode",
                     "desc": "Declares the attribute specified by attr to be of type ID.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3554,7 +3370,6 @@
                     "name": "setIDAttributeNS",
                     "desc": "Declares the attribute specified by localName and namespaceURI to be of type ID.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3581,7 +3396,6 @@
                 {
                     "name": "__get",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -3596,7 +3410,6 @@
                 {
                     "name": "__set",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -3615,7 +3428,6 @@
                 {
                     "name": "__isset",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -3636,13 +3448,11 @@
             "parent": "DOMNode",
             "desc": "This interface represents a known entity, either parsed or unparsed, in an XML document.",
             "flags": [
-                "HasDocComment"
             ],
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -3653,7 +3463,6 @@
                 {
                     "name": "__get",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -3668,7 +3477,6 @@
                 {
                     "name": "__set",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -3687,7 +3495,6 @@
                 {
                     "name": "__isset",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -3708,13 +3515,11 @@
             "parent": "DOMNode",
             "desc": "",
             "flags": [
-                "HasDocComment"
             ],
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -3735,13 +3540,11 @@
             "parent": "DOMNode",
             "desc": "",
             "flags": [
-                "HasDocComment"
             ],
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -3752,7 +3555,6 @@
                 {
                     "name": "__get",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -3767,7 +3569,6 @@
                 {
                     "name": "__set",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -3786,7 +3587,6 @@
                 {
                     "name": "__isset",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -3807,13 +3607,11 @@
             "parent": "DOMNode",
             "desc": "",
             "flags": [
-                "HasDocComment"
             ],
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -3833,7 +3631,6 @@
                 {
                     "name": "__get",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -3848,7 +3645,6 @@
                 {
                     "name": "__set",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -3867,7 +3663,6 @@
                 {
                     "name": "__isset",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -3893,7 +3688,6 @@
             ],
             "desc": "",
             "flags": [
-                "HasDocComment",
                 "NoDefaultSweep"
             ],
             "footer": "\npublic:\n  void reset_iterator(dom_iterable *objmap);\n\n  dom_iterable *m_objmap;\n  ArrayIter *m_iter;\n  int m_index;\n  Object m_curobj;",
@@ -3901,7 +3695,6 @@
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -3912,7 +3705,6 @@
                 {
                     "name": "current",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -3923,7 +3715,6 @@
                 {
                     "name": "key",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -3934,7 +3725,6 @@
                 {
                     "name": "next",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -3945,7 +3735,6 @@
                 {
                     "name": "rewind",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -3956,7 +3745,6 @@
                 {
                     "name": "valid",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -3978,13 +3766,11 @@
             ],
             "desc": "",
             "flags": [
-                "HasDocComment"
             ],
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -3996,7 +3782,6 @@
                     "name": "getNamedItem",
                     "desc": "Retrieves a node specified by its nodeName.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -4014,7 +3799,6 @@
                     "name": "getNamedItemNS",
                     "desc": "Retrieves a node specified by localName and namespaceURI.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -4037,7 +3821,6 @@
                     "name": "item",
                     "desc": "Retrieves a node specified by index within the DOMNamedNodeMap object.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -4054,7 +3837,6 @@
                 {
                     "name": "__get",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -4069,7 +3851,6 @@
                 {
                     "name": "__set",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -4088,7 +3869,6 @@
                 {
                     "name": "__isset",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -4103,7 +3883,6 @@
                 {
                     "name": "getIterator",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -4125,13 +3904,11 @@
             ],
             "desc": "",
             "flags": [
-                "HasDocComment"
             ],
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -4143,7 +3920,6 @@
                     "name": "item",
                     "desc": "Retrieves a node specified by index within the DOMNodeList object. Tip\n\nIf you need to know the number of nodes in the collection, use the length property of the DOMNodeList object.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -4160,7 +3936,6 @@
                 {
                     "name": "__get",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -4175,7 +3950,6 @@
                 {
                     "name": "__set",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -4194,7 +3968,6 @@
                 {
                     "name": "__isset",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -4209,7 +3982,6 @@
                 {
                     "name": "getIterator",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -4225,13 +3997,11 @@
             "name": "DOMImplementation",
             "desc": "The DOMImplementation interface provides a number of methods for performing operations that are independent of any particular instance of the document object model.",
             "flags": [
-                "HasDocComment"
             ],
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -4243,7 +4013,6 @@
                     "name": "createDocument",
                     "desc": "Creates a DOMDocument object of the specified type with its document element.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -4274,7 +4043,6 @@
                     "name": "createDocumentType",
                     "desc": "Creates an empty DOMDocumentType object. Entity declarations and notations are not made available. Entity reference expansions and default attribute additions do not occur.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -4305,7 +4073,6 @@
                     "name": "hasFeature",
                     "desc": null,
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -4335,7 +4102,6 @@
             ],
             "desc": "Supports XPath 1.0",
             "flags": [
-                "HasDocComment",
                 "NoDefaultSweep"
             ],
             "footer": "\n public:\n  xmlNodePtr m_node;\n  p_DOMDocument m_doc;\n  Array m_node_list;\n  int m_registerPhpFunctions;\n  Array m_registered_phpfunctions;",
@@ -4343,7 +4109,6 @@
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -4359,7 +4124,6 @@
                     "name": "evaluate",
                     "desc": "Executes the given XPath expression and returns a typed result if possible.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -4383,7 +4147,6 @@
                     "name": "query",
                     "desc": "Executes the given XPath expression.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -4407,7 +4170,6 @@
                     "name": "registerNamespace",
                     "desc": "Registers the namespaceURI and prefix with the DOMXPath object.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -4430,7 +4192,6 @@
                     "name": "registerPHPFunctions",
                     "desc": "This method enables the ability to use PHP functions within XPath expressions.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -4448,7 +4209,6 @@
                 {
                     "name": "__get",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -4463,7 +4223,6 @@
                 {
                     "name": "__set",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -4482,7 +4241,6 @@
                 {
                     "name": "__isset",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"

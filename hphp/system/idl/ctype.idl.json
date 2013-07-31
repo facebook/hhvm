@@ -7,7 +7,6 @@
             "name": "ctype_alnum",
             "desc": "Checks if all of the characters in the provided string, text, are alphanumeric. In the standard C locale letters are just [A-Za-z].",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -25,7 +24,6 @@
             "name": "ctype_alpha",
             "desc": "Checks if all of the characters in the provided string, text, are alphabetic. In the standard C locale letters are just [A-Za-z] and ctype_alpha() is equivalent to (ctype_upper($text) || ctype_lower($text)) if $text is just a single character, but other languages have letters that are considered neither upper nor lower case.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -43,7 +41,6 @@
             "name": "ctype_cntrl",
             "desc": "Checks if all of the characters in the provided string, text, are control characters. Control characters are e.g. line feed, tab, escape.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -61,7 +58,6 @@
             "name": "ctype_digit",
             "desc": "Checks if all of the characters in the provided string, text, are numerical.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -79,7 +75,6 @@
             "name": "ctype_graph",
             "desc": "Checks if all of the characters in the provided string, text, creates visible output.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -97,7 +92,6 @@
             "name": "ctype_lower",
             "desc": "Checks if all of the characters in the provided string, text, are lowercase letters.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -115,7 +109,6 @@
             "name": "ctype_print",
             "desc": "Checks if all of the characters in the provided string, text, are printable.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -133,7 +126,6 @@
             "name": "ctype_punct",
             "desc": "Checks if all of the characters in the provided string, text, are punctuation character.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -151,7 +143,6 @@
             "name": "ctype_space",
             "desc": "Checks if all of the characters in the provided string, text, creates whitespace.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -169,7 +160,6 @@
             "name": "ctype_upper",
             "desc": "Checks if all of the characters in the provided string, text, are uppercase characters.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -187,7 +177,6 @@
             "name": "ctype_xdigit",
             "desc": "Checks if all of the characters in the provided string, text, are hexadecimal 'digits'.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",

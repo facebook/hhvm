@@ -15,7 +15,6 @@
             "name": "openssl_csr_export_to_file",
             "desc": "openssl_csr_export_to_file() takes the Certificate Signing Request represented by csr and saves it as ascii-armoured text into the file named by outfilename.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -43,7 +42,6 @@
             "name": "openssl_csr_export",
             "desc": "openssl_csr_export() takes the Certificate Signing Request represented by csr and stores it as ascii-armoured text into out, which is passed by reference.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -70,7 +68,6 @@
         {
             "name": "openssl_csr_get_public_key",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -85,7 +82,6 @@
         {
             "name": "openssl_csr_get_subject",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -106,7 +102,6 @@
             "name": "openssl_csr_new",
             "desc": "openssl_csr_new() generates a new CSR (Certificate Signing Request) based on the information provided by dn, which represents the Distinguished Name to be used in the certificate. You need to have a valid openssl.cnf installed for this function to operate correctly. See the notes under the installation section for more information.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -142,7 +137,6 @@
             "name": "openssl_csr_sign",
             "desc": "openssl_csr_sign() generates an x509 certificate resource from the given CSR. You need to have a valid openssl.cnf installed for this function to operate correctly. See the notes under the installation section for more information.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -187,7 +181,6 @@
             "name": "openssl_error_string",
             "desc": "openssl_error_string() returns the last error from the openSSL library. Error messages are stacked, so this function should be called multiple times to collect all of the information.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -200,7 +193,6 @@
             "name": "openssl_open",
             "desc": "openssl_open() opens (decrypts) sealed_data using the private key associated with the key identifier priv_key_id and the envelope key env_key, and fills open_data with the decrypted data. The envelope key is generated when the data are sealed and can only be used by one specific private key. See openssl_seal() for more information.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -231,7 +223,6 @@
             "name": "openssl_pkcs12_export_to_file",
             "desc": "openssl_pkcs12_export_to_file() stores x509 into a file named by filename in a PKCS#12 file format.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -269,7 +260,6 @@
             "name": "openssl_pkcs12_export",
             "desc": "openssl_pkcs12_export() stores x509 into a string named by out in a PKCS#12 file format.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -308,7 +298,6 @@
             "name": "openssl_pkcs12_read",
             "desc": "openssl_pkcs12_read() parses the PKCS#12 certificate store supplied by pkcs12 into a array named certs.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -336,7 +325,6 @@
             "name": "openssl_pkcs7_decrypt",
             "desc": "Decrypts the S\/MIME encrypted message contained in the file specified by infilename using the certificate and its associated private key specified by recipcert and recipkey.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -367,7 +355,6 @@
             "name": "openssl_pkcs7_encrypt",
             "desc": "openssl_pkcs7_encrypt() takes the contents of the file named infile and encrypts them using an RC2 40-bit cipher so that they can only be read by the intended recipients specified by recipcerts.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -410,7 +397,6 @@
             "name": "openssl_pkcs7_sign",
             "desc": "openssl_pkcs7_sign() takes the contents of the file named infilename and signs them using the certificate and its matching private key specified by signcert and privkey parameters.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -456,7 +442,6 @@
             "name": "openssl_pkcs7_verify",
             "desc": "openssl_pkcs7_verify() reads the S\/MIME message contained in the given file and examines the digital signature.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -503,7 +488,6 @@
             "name": "openssl_pkey_export_to_file",
             "desc": "openssl_pkey_export_to_file() saves an ascii-armoured (PEM encoded) rendition of key into the file named by outfilename. You need to have a valid openssl.cnf installed for this function to operate correctly. See the notes under the installation section for more information.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -537,7 +521,6 @@
             "name": "openssl_pkey_export",
             "desc": "openssl_pkey_export() exports key as a PEM encoded string and stores it into out (which is passed by reference). You need to have a valid openssl.cnf installed for this function to operate correctly. See the notes under the installation section for more information.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -571,7 +554,6 @@
             "name": "openssl_pkey_free",
             "desc": "This function frees a private key created by openssl_pkey_new().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null,
@@ -589,7 +571,6 @@
             "name": "openssl_free_key",
             "desc": "openssl_free_key() frees the key associated with the specified key_identifier from memory.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null,
@@ -606,7 +587,6 @@
             "name": "openssl_pkey_get_details",
             "desc": "This function returns the key details (bits, key, type).",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap",
@@ -624,7 +604,6 @@
             "name": "openssl_pkey_get_private",
             "desc": "openssl_get_privatekey() parses key and prepares it for use by other functions.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -647,7 +626,6 @@
         {
             "name": "openssl_get_privatekey",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -668,7 +646,6 @@
             "name": "openssl_pkey_get_public",
             "desc": "openssl_get_publickey() extracts the public key from certificate and prepares it for use by other functions.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -685,7 +662,6 @@
         {
             "name": "openssl_get_publickey",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -701,7 +677,6 @@
             "name": "openssl_pkey_new",
             "desc": "openssl_pkey_new() generates a new private and public key pair. The public component of the key can be obtained using openssl_pkey_get_public(). You need to have a valid openssl.cnf installed for this function to operate correctly. See the notes under the installation section for more information.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource",
@@ -720,7 +695,6 @@
             "name": "openssl_private_decrypt",
             "desc": "openssl_private_decrypt() decrypts data that was previous encrypted via openssl_public_encrypt() and stores the result into decrypted.\n\nYou can use this function e.g. to decrypt data which were supposed only to you.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -753,7 +727,6 @@
             "name": "openssl_private_encrypt",
             "desc": "openssl_private_encrypt() encrypts data with private key and stores the result into crypted. Encrypted data can be decrypted via openssl_public_decrypt().\n\nThis function can be used e.g. to sign data (or its hash) to prove that it is not written by someone else.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -785,7 +758,6 @@
             "name": "openssl_public_decrypt",
             "desc": "openssl_public_decrypt() decrypts data that was previous encrypted via openssl_private_encrypt() and stores the result into decrypted.\n\nYou can use this function e.g. to check if the message was written by the owner of the private key.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -818,7 +790,6 @@
             "name": "openssl_public_encrypt",
             "desc": "openssl_public_encrypt() encrypts data with public key and stores the result into crypted. Encrypted data can be decrypted via openssl_private_decrypt().\n\nThis function can be used e.g. to encrypt message which can be then read only by owner of the private key. It can be also used to store secure data in database.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -852,7 +823,6 @@
             "name": "openssl_seal",
             "desc": "openssl_seal() seals (encrypts) data by using RC4 with a randomly generated secret key. The key is encrypted with each of the public keys associated with the identifiers in pub_key_ids and each encrypted key is returned in env_keys. This means that one can send sealed data to multiple recipients (provided one has obtained their public keys). Each recipient must receive both the sealed data and the envelope key that was encrypted with the recipient's public key.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -883,7 +853,6 @@
             "name": "openssl_sign",
             "desc": "openssl_sign() computes a signature for the specified data by using SHA1 for hashing followed by encryption using the private key associated with priv_key_id. Note that the data itself is not encrypted.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -916,7 +885,6 @@
             "name": "openssl_verify",
             "desc": "openssl_verify() verifies that the signature is correct for the specified data using the public key associated with pub_key_id. This must be the public key corresponding to the private key used for signing.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -947,7 +915,6 @@
             "name": "openssl_x509_check_private_key",
             "desc": "Checks whether the given key is the private key that corresponds to cert.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -970,7 +937,6 @@
             "name": "openssl_x509_checkpurpose",
             "desc": "openssl_x509_checkpurpose() examines a certificate to see if it can be used for the specified purpose.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -1005,7 +971,6 @@
             "name": "openssl_x509_export_to_file",
             "desc": "openssl_x509_export_to_file() stores x509 into a file named by outfilename in a PEM encoded format.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1034,7 +999,6 @@
             "name": "openssl_x509_export",
             "desc": "openssl_x509_export() stores x509 into a string named by output in a PEM encoded format.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1064,7 +1028,6 @@
             "name": "openssl_x509_free",
             "desc": "openssl_x509_free() frees the certificate associated with the specified x509cert resource from memory.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null,
@@ -1081,7 +1044,6 @@
             "name": "openssl_x509_parse",
             "desc": "openssl_x509_parse() returns information about the supplied x509cert, including fields such as subject name, issuer name, purposes, valid from and valid to dates etc.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1104,7 +1066,6 @@
             "name": "openssl_x509_read",
             "desc": "openssl_x509_read() parses the certificate supplied by x509certdata and returns a resource identifier for it.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1121,7 +1082,6 @@
             "name": "openssl_random_pseudo_bytes",
             "desc": "Generates a string of pseudo-random bytes, with the number of bytes determined by the length parameter.\n\nIt also indicates if a cryptographically strong algorithm was used to produce the pseudo-random bytes, and does this via the optional crypto_strong parameter. It's rare for this to be FALSE, but some systems may be broken or old.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1146,7 +1106,6 @@
             "name": "openssl_cipher_iv_length",
             "desc": "Returns the required initialisation vector length for the cipher determined by the mode parameter.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1164,7 +1123,6 @@
             "name": "openssl_encrypt",
             "desc": "Encrypts given data with given method and key, returns a raw or base64 encoded string WarningThis function is currently not documented; only its argument list is available.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1204,7 +1162,6 @@
             "name": "openssl_decrypt",
             "desc": "Takes a raw or base64 encoded string and decrypts it using a given method and key.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1244,7 +1201,6 @@
             "name": "openssl_digest",
             "desc": "Computes digest hash value for given data using given method, returns raw or binhex encoded string.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1273,7 +1229,6 @@
             "name": "openssl_get_cipher_methods",
             "desc": "Gets a list of available cipher methods.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "StringVec",
@@ -1292,7 +1247,6 @@
             "name": "openssl_get_md_methods",
             "desc": "Gets a list of available digest methods.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "StringVec",

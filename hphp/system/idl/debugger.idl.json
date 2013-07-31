@@ -7,7 +7,6 @@
             "name": "hphpd_break",
             "desc": "Sets a hard breakpoint. When a debugger is running, this line of code will break into debugger, if condition is met. If there is no debugger that's attached, it will not do anything.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NeedsActRec"
             ],
@@ -27,7 +26,6 @@
             "name": "hphp_debugger_attached",
             "desc": "Quickly determine if a debugger is attached to this process and configured to debug this thread.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NeedsActRec"
             ],
@@ -42,7 +40,6 @@
             "name": "hphp_get_debugger_info",
             "desc": "Determine if a debugger is attached to this process and configured to debug this thread, and return information about the attached debugger.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NeedsActRec"
             ],

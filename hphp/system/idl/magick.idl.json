@@ -6,7 +6,6 @@
         {
             "name": "magickgetcopyright",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -17,7 +16,6 @@
         {
             "name": "magickgethomeurl",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -28,7 +26,6 @@
         {
             "name": "magickgetpackagename",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -39,7 +36,6 @@
         {
             "name": "magickgetquantumdepth",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -50,7 +46,6 @@
         {
             "name": "magickgetreleasedate",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -61,7 +56,6 @@
         {
             "name": "magickgetresourcelimit",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -76,7 +70,6 @@
         {
             "name": "magickgetversion",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -87,7 +80,6 @@
         {
             "name": "magickgetversionnumber",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -98,7 +90,6 @@
         {
             "name": "magickgetversionstring",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -109,7 +100,6 @@
         {
             "name": "magickqueryconfigureoption",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -124,7 +114,6 @@
         {
             "name": "magickqueryconfigureoptions",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "StringVec"
@@ -139,7 +128,6 @@
         {
             "name": "magickqueryfonts",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -154,7 +142,6 @@
         {
             "name": "magickqueryformats",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -169,7 +156,6 @@
         {
             "name": "magicksetresourcelimit",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -188,7 +174,6 @@
         {
             "name": "newdrawingwand",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -199,7 +184,6 @@
         {
             "name": "newmagickwand",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -210,7 +194,6 @@
         {
             "name": "newpixeliterator",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -225,7 +208,6 @@
         {
             "name": "newpixelregioniterator",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -256,7 +238,6 @@
         {
             "name": "newpixelwand",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -272,7 +253,6 @@
         {
             "name": "newpixelwandarray",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -287,7 +267,6 @@
         {
             "name": "newpixelwands",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -302,7 +281,6 @@
         {
             "name": "destroydrawingwand",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -317,7 +295,6 @@
         {
             "name": "destroymagickwand",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -332,7 +309,6 @@
         {
             "name": "destroypixeliterator",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -347,7 +323,6 @@
         {
             "name": "destroypixelwand",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -362,7 +337,6 @@
         {
             "name": "destroypixelwandarray",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -377,7 +351,6 @@
         {
             "name": "destroypixelwands",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -392,7 +365,6 @@
         {
             "name": "isdrawingwand",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -407,7 +379,6 @@
         {
             "name": "ismagickwand",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -422,7 +393,6 @@
         {
             "name": "ispixeliterator",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -437,7 +407,6 @@
         {
             "name": "ispixelwand",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -452,7 +421,6 @@
         {
             "name": "cleardrawingwand",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -467,7 +435,6 @@
         {
             "name": "clearmagickwand",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -482,7 +449,6 @@
         {
             "name": "clearpixeliterator",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -497,7 +463,6 @@
         {
             "name": "clearpixelwand",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -512,7 +477,6 @@
         {
             "name": "clonedrawingwand",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -527,7 +491,6 @@
         {
             "name": "clonemagickwand",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -542,7 +505,6 @@
         {
             "name": "wandgetexception",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -557,7 +519,6 @@
         {
             "name": "wandgetexceptionstring",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -572,7 +533,6 @@
         {
             "name": "wandgetexceptiontype",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -587,7 +547,6 @@
         {
             "name": "wandhasexception",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -602,7 +561,6 @@
         {
             "name": "drawaffine",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -641,7 +599,6 @@
         {
             "name": "drawannotation",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -668,7 +625,6 @@
         {
             "name": "drawarc",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -707,7 +663,6 @@
         {
             "name": "drawbezier",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -726,7 +681,6 @@
         {
             "name": "drawcircle",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -757,7 +711,6 @@
         {
             "name": "drawcolor",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -784,7 +737,6 @@
         {
             "name": "drawcomment",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -803,7 +755,6 @@
         {
             "name": "drawcomposite",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -842,7 +793,6 @@
         {
             "name": "drawellipse",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -881,7 +831,6 @@
         {
             "name": "drawgetclippath",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -896,7 +845,6 @@
         {
             "name": "drawgetcliprule",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -911,7 +859,6 @@
         {
             "name": "drawgetclipunits",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -926,7 +873,6 @@
         {
             "name": "drawgetexception",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -941,7 +887,6 @@
         {
             "name": "drawgetexceptionstring",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -956,7 +901,6 @@
         {
             "name": "drawgetexceptiontype",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -971,7 +915,6 @@
         {
             "name": "drawgetfillalpha",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -986,7 +929,6 @@
         {
             "name": "drawgetfillcolor",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -1001,7 +943,6 @@
         {
             "name": "drawgetfillopacity",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -1016,7 +957,6 @@
         {
             "name": "drawgetfillrule",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -1031,7 +971,6 @@
         {
             "name": "drawgetfont",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -1046,7 +985,6 @@
         {
             "name": "drawgetfontfamily",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -1061,7 +999,6 @@
         {
             "name": "drawgetfontsize",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -1076,7 +1013,6 @@
         {
             "name": "drawgetfontstretch",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -1091,7 +1027,6 @@
         {
             "name": "drawgetfontstyle",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -1106,7 +1041,6 @@
         {
             "name": "drawgetfontweight",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -1121,7 +1055,6 @@
         {
             "name": "drawgetgravity",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -1136,7 +1069,6 @@
         {
             "name": "drawgetstrokealpha",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -1151,7 +1083,6 @@
         {
             "name": "drawgetstrokeantialias",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -1166,7 +1097,6 @@
         {
             "name": "drawgetstrokecolor",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -1181,7 +1111,6 @@
         {
             "name": "drawgetstrokedasharray",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -1196,7 +1125,6 @@
         {
             "name": "drawgetstrokedashoffset",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -1211,7 +1139,6 @@
         {
             "name": "drawgetstrokelinecap",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -1226,7 +1153,6 @@
         {
             "name": "drawgetstrokelinejoin",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -1241,7 +1167,6 @@
         {
             "name": "drawgetstrokemiterlimit",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -1256,7 +1181,6 @@
         {
             "name": "drawgetstrokeopacity",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -1271,7 +1195,6 @@
         {
             "name": "drawgetstrokewidth",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -1286,7 +1209,6 @@
         {
             "name": "drawgettextalignment",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -1301,7 +1223,6 @@
         {
             "name": "drawgettextantialias",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -1316,7 +1237,6 @@
         {
             "name": "drawgettextdecoration",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -1331,7 +1251,6 @@
         {
             "name": "drawgettextencoding",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -1346,7 +1265,6 @@
         {
             "name": "drawgettextundercolor",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -1361,7 +1279,6 @@
         {
             "name": "drawgetvectorgraphics",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -1376,7 +1293,6 @@
         {
             "name": "drawline",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1407,7 +1323,6 @@
         {
             "name": "drawmatte",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1434,7 +1349,6 @@
         {
             "name": "drawpathclose",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1449,7 +1363,6 @@
         {
             "name": "drawpathcurvetoabsolute",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1488,7 +1401,6 @@
         {
             "name": "drawpathcurvetoquadraticbezierabsolute",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1519,7 +1431,6 @@
         {
             "name": "drawpathcurvetoquadraticbezierrelative",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1550,7 +1461,6 @@
         {
             "name": "drawpathcurvetoquadraticbeziersmoothabsolute",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1573,7 +1483,6 @@
         {
             "name": "drawpathcurvetoquadraticbeziersmoothrelative",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1596,7 +1505,6 @@
         {
             "name": "drawpathcurvetorelative",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1635,7 +1543,6 @@
         {
             "name": "drawpathcurvetosmoothabsolute",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1666,7 +1573,6 @@
         {
             "name": "drawpathcurvetosmoothrelative",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1697,7 +1603,6 @@
         {
             "name": "drawpathellipticarcabsolute",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1740,7 +1645,6 @@
         {
             "name": "drawpathellipticarcrelative",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1783,7 +1687,6 @@
         {
             "name": "drawpathfinish",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1798,7 +1701,6 @@
         {
             "name": "drawpathlinetoabsolute",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1821,7 +1723,6 @@
         {
             "name": "drawpathlinetohorizontalabsolute",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1840,7 +1741,6 @@
         {
             "name": "drawpathlinetohorizontalrelative",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1859,7 +1759,6 @@
         {
             "name": "drawpathlinetorelative",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1882,7 +1781,6 @@
         {
             "name": "drawpathlinetoverticalabsolute",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1901,7 +1799,6 @@
         {
             "name": "drawpathlinetoverticalrelative",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1920,7 +1817,6 @@
         {
             "name": "drawpathmovetoabsolute",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1943,7 +1839,6 @@
         {
             "name": "drawpathmovetorelative",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1966,7 +1861,6 @@
         {
             "name": "drawpathstart",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -1981,7 +1875,6 @@
         {
             "name": "drawpoint",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2004,7 +1897,6 @@
         {
             "name": "drawpolygon",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2023,7 +1915,6 @@
         {
             "name": "drawpolyline",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2042,7 +1933,6 @@
         {
             "name": "drawrectangle",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2073,7 +1963,6 @@
         {
             "name": "drawrender",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -2088,7 +1977,6 @@
         {
             "name": "drawrotate",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2107,7 +1995,6 @@
         {
             "name": "drawroundrectangle",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2146,7 +2033,6 @@
         {
             "name": "drawscale",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2169,7 +2055,6 @@
         {
             "name": "drawsetclippath",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -2188,7 +2073,6 @@
         {
             "name": "drawsetcliprule",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2207,7 +2091,6 @@
         {
             "name": "drawsetclipunits",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2226,7 +2109,6 @@
         {
             "name": "drawsetfillalpha",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2245,7 +2127,6 @@
         {
             "name": "drawsetfillcolor",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2264,7 +2145,6 @@
         {
             "name": "drawsetfillopacity",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2283,7 +2163,6 @@
         {
             "name": "drawsetfillpatternurl",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -2302,7 +2181,6 @@
         {
             "name": "drawsetfillrule",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2321,7 +2199,6 @@
         {
             "name": "drawsetfont",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -2340,7 +2217,6 @@
         {
             "name": "drawsetfontfamily",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -2359,7 +2235,6 @@
         {
             "name": "drawsetfontsize",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2378,7 +2253,6 @@
         {
             "name": "drawsetfontstretch",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2397,7 +2271,6 @@
         {
             "name": "drawsetfontstyle",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2416,7 +2289,6 @@
         {
             "name": "drawsetfontweight",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2435,7 +2307,6 @@
         {
             "name": "drawsetgravity",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2454,7 +2325,6 @@
         {
             "name": "drawsetstrokealpha",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2473,7 +2343,6 @@
         {
             "name": "drawsetstrokeantialias",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2493,7 +2362,6 @@
         {
             "name": "drawsetstrokecolor",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2512,7 +2380,6 @@
         {
             "name": "drawsetstrokedasharray",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2532,7 +2399,6 @@
         {
             "name": "drawsetstrokedashoffset",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2551,7 +2417,6 @@
         {
             "name": "drawsetstrokelinecap",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2570,7 +2435,6 @@
         {
             "name": "drawsetstrokelinejoin",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2589,7 +2453,6 @@
         {
             "name": "drawsetstrokemiterlimit",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2608,7 +2471,6 @@
         {
             "name": "drawsetstrokeopacity",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2627,7 +2489,6 @@
         {
             "name": "drawsetstrokepatternurl",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -2646,7 +2507,6 @@
         {
             "name": "drawsetstrokewidth",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2665,7 +2525,6 @@
         {
             "name": "drawsettextalignment",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2684,7 +2543,6 @@
         {
             "name": "drawsettextantialias",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2704,7 +2562,6 @@
         {
             "name": "drawsettextdecoration",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2723,7 +2580,6 @@
         {
             "name": "drawsettextencoding",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2742,7 +2598,6 @@
         {
             "name": "drawsettextundercolor",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2761,7 +2616,6 @@
         {
             "name": "drawsetvectorgraphics",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -2780,7 +2634,6 @@
         {
             "name": "drawsetviewbox",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2811,7 +2664,6 @@
         {
             "name": "drawskewx",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2830,7 +2682,6 @@
         {
             "name": "drawskewy",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2849,7 +2700,6 @@
         {
             "name": "drawtranslate",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2872,7 +2722,6 @@
         {
             "name": "pushdrawingwand",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2887,7 +2736,6 @@
         {
             "name": "drawpushclippath",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2906,7 +2754,6 @@
         {
             "name": "drawpushdefs",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2921,7 +2768,6 @@
         {
             "name": "drawpushpattern",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2956,7 +2802,6 @@
         {
             "name": "popdrawingwand",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2971,7 +2816,6 @@
         {
             "name": "drawpopclippath",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -2986,7 +2830,6 @@
         {
             "name": "drawpopdefs",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -3001,7 +2844,6 @@
         {
             "name": "drawpoppattern",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -3016,7 +2858,6 @@
         {
             "name": "magickadaptivethresholdimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3043,7 +2884,6 @@
         {
             "name": "magickaddimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3062,7 +2902,6 @@
         {
             "name": "magickaddnoiseimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3081,7 +2920,6 @@
         {
             "name": "magickaffinetransformimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3100,7 +2938,6 @@
         {
             "name": "magickannotateimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3135,7 +2972,6 @@
         {
             "name": "magickappendimages",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -3155,7 +2991,6 @@
         {
             "name": "magickaverageimages",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -3170,7 +3005,6 @@
         {
             "name": "magickblackthresholdimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3189,7 +3023,6 @@
         {
             "name": "magickblurimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3217,7 +3050,6 @@
         {
             "name": "magickborderimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3244,7 +3076,6 @@
         {
             "name": "magickcharcoalimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3267,7 +3098,6 @@
         {
             "name": "magickchopimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3298,7 +3128,6 @@
         {
             "name": "magickclipimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3313,7 +3142,6 @@
         {
             "name": "magickclippathimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3336,7 +3164,6 @@
         {
             "name": "magickcoalesceimages",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -3351,7 +3178,6 @@
         {
             "name": "magickcolorfloodfillimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3386,7 +3212,6 @@
         {
             "name": "magickcolorizeimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3409,7 +3234,6 @@
         {
             "name": "magickcombineimages",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -3428,7 +3252,6 @@
         {
             "name": "magickcommentimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3447,7 +3270,6 @@
         {
             "name": "magickcompareimages",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -3475,7 +3297,6 @@
         {
             "name": "magickcompositeimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3506,7 +3327,6 @@
         {
             "name": "magickconstituteimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3541,7 +3361,6 @@
         {
             "name": "magickcontrastimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3560,7 +3379,6 @@
         {
             "name": "magickconvolveimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3584,7 +3402,6 @@
         {
             "name": "magickcropimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3615,7 +3432,6 @@
         {
             "name": "magickcyclecolormapimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3634,7 +3450,6 @@
         {
             "name": "magickdeconstructimages",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -3649,7 +3464,6 @@
         {
             "name": "magickdescribeimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -3664,7 +3478,6 @@
         {
             "name": "magickdespeckleimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3679,7 +3492,6 @@
         {
             "name": "magickdrawimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3698,7 +3510,6 @@
         {
             "name": "magickechoimageblob",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3713,7 +3524,6 @@
         {
             "name": "magickechoimagesblob",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3728,7 +3538,6 @@
         {
             "name": "magickedgeimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3747,7 +3556,6 @@
         {
             "name": "magickembossimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3770,7 +3578,6 @@
         {
             "name": "magickenhanceimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3785,7 +3592,6 @@
         {
             "name": "magickequalizeimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3800,7 +3606,6 @@
         {
             "name": "magickevaluateimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3828,7 +3633,6 @@
         {
             "name": "magickflattenimages",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -3843,7 +3647,6 @@
         {
             "name": "magickflipimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3858,7 +3661,6 @@
         {
             "name": "magickflopimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3873,7 +3675,6 @@
         {
             "name": "magickframeimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3908,7 +3709,6 @@
         {
             "name": "magickfximage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -3932,7 +3732,6 @@
         {
             "name": "magickgammaimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3956,7 +3755,6 @@
         {
             "name": "magickgaussianblurimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -3984,7 +3782,6 @@
         {
             "name": "magickgetcharheight",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -4012,7 +3809,6 @@
         {
             "name": "magickgetcharwidth",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -4040,7 +3836,6 @@
         {
             "name": "magickgetexception",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -4055,7 +3850,6 @@
         {
             "name": "magickgetexceptionstring",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -4070,7 +3864,6 @@
         {
             "name": "magickgetexceptiontype",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -4085,7 +3878,6 @@
         {
             "name": "magickgetfilename",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -4100,7 +3892,6 @@
         {
             "name": "magickgetformat",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -4115,7 +3906,6 @@
         {
             "name": "magickgetimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -4130,7 +3920,6 @@
         {
             "name": "magickgetimagebackgroundcolor",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -4145,7 +3934,6 @@
         {
             "name": "magickgetimageblob",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -4160,7 +3948,6 @@
         {
             "name": "magickgetimageblueprimary",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -4175,7 +3962,6 @@
         {
             "name": "magickgetimagebordercolor",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -4190,7 +3976,6 @@
         {
             "name": "magickgetimagechannelmean",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -4209,7 +3994,6 @@
         {
             "name": "magickgetimagecolormapcolor",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -4228,7 +4012,6 @@
         {
             "name": "magickgetimagecolors",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -4243,7 +4026,6 @@
         {
             "name": "magickgetimagecolorspace",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -4258,7 +4040,6 @@
         {
             "name": "magickgetimagecompose",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -4273,7 +4054,6 @@
         {
             "name": "magickgetimagecompression",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -4288,7 +4068,6 @@
         {
             "name": "magickgetimagecompressionquality",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -4303,7 +4082,6 @@
         {
             "name": "magickgetimagedelay",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -4318,7 +4096,6 @@
         {
             "name": "magickgetimagedepth",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -4338,7 +4115,6 @@
         {
             "name": "magickgetimagedispose",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -4353,7 +4129,6 @@
         {
             "name": "magickgetimageextrema",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -4373,7 +4148,6 @@
         {
             "name": "magickgetimagefilename",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -4388,7 +4162,6 @@
         {
             "name": "magickgetimageformat",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -4403,7 +4176,6 @@
         {
             "name": "magickgetimagegamma",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -4418,7 +4190,6 @@
         {
             "name": "magickgetimagegreenprimary",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -4433,7 +4204,6 @@
         {
             "name": "magickgetimageheight",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -4448,7 +4218,6 @@
         {
             "name": "magickgetimagehistogram",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -4463,7 +4232,6 @@
         {
             "name": "magickgetimageindex",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -4478,7 +4246,6 @@
         {
             "name": "magickgetimageinterlacescheme",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -4493,7 +4260,6 @@
         {
             "name": "magickgetimageiterations",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -4508,7 +4274,6 @@
         {
             "name": "magickgetimagemattecolor",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -4523,7 +4288,6 @@
         {
             "name": "magickgetimagemimetype",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -4538,7 +4302,6 @@
         {
             "name": "magickgetimagepixels",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -4577,7 +4340,6 @@
         {
             "name": "magickgetimageprofile",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -4596,7 +4358,6 @@
         {
             "name": "magickgetimageredprimary",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -4611,7 +4372,6 @@
         {
             "name": "magickgetimagerenderingintent",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -4626,7 +4386,6 @@
         {
             "name": "magickgetimageresolution",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -4641,7 +4400,6 @@
         {
             "name": "magickgetimagescene",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -4656,7 +4414,6 @@
         {
             "name": "magickgetimagesignature",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -4671,7 +4428,6 @@
         {
             "name": "magickgetimagesize",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -4686,7 +4442,6 @@
         {
             "name": "magickgetimagetype",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -4701,7 +4456,6 @@
         {
             "name": "magickgetimageunits",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -4716,7 +4470,6 @@
         {
             "name": "magickgetimagevirtualpixelmethod",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -4731,7 +4484,6 @@
         {
             "name": "magickgetimagewhitepoint",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -4746,7 +4498,6 @@
         {
             "name": "magickgetimagewidth",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -4761,7 +4512,6 @@
         {
             "name": "magickgetimagesblob",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -4776,7 +4526,6 @@
         {
             "name": "magickgetinterlacescheme",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -4791,7 +4540,6 @@
         {
             "name": "magickgetmaxtextadvance",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -4819,7 +4567,6 @@
         {
             "name": "magickgetmimetype",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -4834,7 +4581,6 @@
         {
             "name": "magickgetnumberimages",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -4849,7 +4595,6 @@
         {
             "name": "magickgetsamplingfactors",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -4864,7 +4609,6 @@
         {
             "name": "magickgetsize",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -4879,7 +4623,6 @@
         {
             "name": "magickgetstringheight",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -4907,7 +4650,6 @@
         {
             "name": "magickgetstringwidth",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -4935,7 +4677,6 @@
         {
             "name": "magickgettextascent",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -4963,7 +4704,6 @@
         {
             "name": "magickgettextdescent",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -4991,7 +4731,6 @@
         {
             "name": "magickgetwandsize",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -5006,7 +4745,6 @@
         {
             "name": "magickhasnextimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5021,7 +4759,6 @@
         {
             "name": "magickhaspreviousimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5036,7 +4773,6 @@
         {
             "name": "magickimplodeimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5055,7 +4791,6 @@
         {
             "name": "magicklabelimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5074,7 +4809,6 @@
         {
             "name": "magicklevelimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5106,7 +4840,6 @@
         {
             "name": "magickmagnifyimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5121,7 +4854,6 @@
         {
             "name": "magickmapimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5144,7 +4876,6 @@
         {
             "name": "magickmattefloodfillimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5179,7 +4910,6 @@
         {
             "name": "magickmedianfilterimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5198,7 +4928,6 @@
         {
             "name": "magickminifyimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5213,7 +4942,6 @@
         {
             "name": "magickmodulateimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5240,7 +4968,6 @@
         {
             "name": "magickmontageimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -5275,7 +5002,6 @@
         {
             "name": "magickmorphimages",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -5294,7 +5020,6 @@
         {
             "name": "magickmosaicimages",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -5309,7 +5034,6 @@
         {
             "name": "magickmotionblurimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5336,7 +5060,6 @@
         {
             "name": "magicknegateimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5361,7 +5084,6 @@
         {
             "name": "magicknewimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5389,7 +5111,6 @@
         {
             "name": "magicknextimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5404,7 +5125,6 @@
         {
             "name": "magicknormalizeimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5419,7 +5139,6 @@
         {
             "name": "magickoilpaintimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5438,7 +5157,6 @@
         {
             "name": "magickpaintopaqueimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5466,7 +5184,6 @@
         {
             "name": "magickpainttransparentimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5495,7 +5212,6 @@
         {
             "name": "magickpingimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5514,7 +5230,6 @@
         {
             "name": "magickposterizeimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5537,7 +5252,6 @@
         {
             "name": "magickpreviewimages",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -5556,7 +5270,6 @@
         {
             "name": "magickpreviousimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5571,7 +5284,6 @@
         {
             "name": "magickprofileimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5595,7 +5307,6 @@
         {
             "name": "magickquantizeimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5630,7 +5341,6 @@
         {
             "name": "magickquantizeimages",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5665,7 +5375,6 @@
         {
             "name": "magickqueryfontmetrics",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -5693,7 +5402,6 @@
         {
             "name": "magickradialblurimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5712,7 +5420,6 @@
         {
             "name": "magickraiseimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5747,7 +5454,6 @@
         {
             "name": "magickreadimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5766,7 +5472,6 @@
         {
             "name": "magickreadimageblob",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5785,7 +5490,6 @@
         {
             "name": "magickreadimagefile",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5804,7 +5508,6 @@
         {
             "name": "magickreadimages",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5823,7 +5526,6 @@
         {
             "name": "magickreducenoiseimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5842,7 +5544,6 @@
         {
             "name": "magickremoveimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5857,7 +5558,6 @@
         {
             "name": "magickremoveimageprofile",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -5876,7 +5576,6 @@
         {
             "name": "magickremoveimageprofiles",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5891,7 +5590,6 @@
         {
             "name": "magickresampleimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5922,7 +5620,6 @@
         {
             "name": "magickresetiterator",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -5937,7 +5634,6 @@
         {
             "name": "magickresizeimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5968,7 +5664,6 @@
         {
             "name": "magickrollimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -5991,7 +5686,6 @@
         {
             "name": "magickrotateimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6014,7 +5708,6 @@
         {
             "name": "magicksampleimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6037,7 +5730,6 @@
         {
             "name": "magickscaleimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6060,7 +5752,6 @@
         {
             "name": "magickseparateimagechannel",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6079,7 +5770,6 @@
         {
             "name": "magicksetcompressionquality",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6098,7 +5788,6 @@
         {
             "name": "magicksetfilename",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6118,7 +5807,6 @@
         {
             "name": "magicksetfirstiterator",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -6133,7 +5821,6 @@
         {
             "name": "magicksetformat",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6152,7 +5839,6 @@
         {
             "name": "magicksetimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6171,7 +5857,6 @@
         {
             "name": "magicksetimagebackgroundcolor",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6190,7 +5875,6 @@
         {
             "name": "magicksetimagebias",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6209,7 +5893,6 @@
         {
             "name": "magicksetimageblueprimary",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6232,7 +5915,6 @@
         {
             "name": "magicksetimagebordercolor",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6251,7 +5933,6 @@
         {
             "name": "magicksetimagecolormapcolor",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6274,7 +5955,6 @@
         {
             "name": "magicksetimagecolorspace",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6293,7 +5973,6 @@
         {
             "name": "magicksetimagecompose",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6312,7 +5991,6 @@
         {
             "name": "magicksetimagecompression",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6331,7 +6009,6 @@
         {
             "name": "magicksetimagecompressionquality",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6350,7 +6027,6 @@
         {
             "name": "magicksetimagedelay",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6369,7 +6045,6 @@
         {
             "name": "magicksetimagedepth",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6393,7 +6068,6 @@
         {
             "name": "magicksetimagedispose",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6412,7 +6086,6 @@
         {
             "name": "magicksetimagefilename",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6432,7 +6105,6 @@
         {
             "name": "magicksetimageformat",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6451,7 +6123,6 @@
         {
             "name": "magicksetimagegamma",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6470,7 +6141,6 @@
         {
             "name": "magicksetimagegreenprimary",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6493,7 +6163,6 @@
         {
             "name": "magicksetimageindex",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6512,7 +6181,6 @@
         {
             "name": "magicksetimageinterlacescheme",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6531,7 +6199,6 @@
         {
             "name": "magicksetimageiterations",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6550,7 +6217,6 @@
         {
             "name": "magicksetimagemattecolor",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6569,7 +6235,6 @@
         {
             "name": "magicksetimageoption",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6596,7 +6261,6 @@
         {
             "name": "magicksetimagepixels",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6639,7 +6303,6 @@
         {
             "name": "magicksetimageprofile",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6662,7 +6325,6 @@
         {
             "name": "magicksetimageredprimary",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6685,7 +6347,6 @@
         {
             "name": "magicksetimagerenderingintent",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6704,7 +6365,6 @@
         {
             "name": "magicksetimageresolution",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6727,7 +6387,6 @@
         {
             "name": "magicksetimagescene",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6746,7 +6405,6 @@
         {
             "name": "magicksetimagetype",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6765,7 +6423,6 @@
         {
             "name": "magicksetimageunits",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6784,7 +6441,6 @@
         {
             "name": "magicksetimagevirtualpixelmethod",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6803,7 +6459,6 @@
         {
             "name": "magicksetimagewhitepoint",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6826,7 +6481,6 @@
         {
             "name": "magicksetinterlacescheme",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6845,7 +6499,6 @@
         {
             "name": "magicksetlastiterator",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -6860,7 +6513,6 @@
         {
             "name": "magicksetpassphrase",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6879,7 +6531,6 @@
         {
             "name": "magicksetresolution",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6902,7 +6553,6 @@
         {
             "name": "magicksetsamplingfactors",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6925,7 +6575,6 @@
         {
             "name": "magicksetsize",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6948,7 +6597,6 @@
         {
             "name": "magicksetwandsize",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6971,7 +6619,6 @@
         {
             "name": "magicksharpenimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -6999,7 +6646,6 @@
         {
             "name": "magickshaveimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -7022,7 +6668,6 @@
         {
             "name": "magickshearimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -7049,7 +6694,6 @@
         {
             "name": "magicksolarizeimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -7068,7 +6712,6 @@
         {
             "name": "magickspliceimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -7099,7 +6742,6 @@
         {
             "name": "magickspreadimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -7118,7 +6760,6 @@
         {
             "name": "magicksteganoimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -7141,7 +6782,6 @@
         {
             "name": "magickstereoimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -7160,7 +6800,6 @@
         {
             "name": "magickstripimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -7175,7 +6814,6 @@
         {
             "name": "magickswirlimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -7194,7 +6832,6 @@
         {
             "name": "magicktextureimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -7213,7 +6850,6 @@
         {
             "name": "magickthresholdimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -7237,7 +6873,6 @@
         {
             "name": "magicktintimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -7260,7 +6895,6 @@
         {
             "name": "magicktransformimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Resource"
@@ -7283,7 +6917,6 @@
         {
             "name": "magicktrimimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -7302,7 +6935,6 @@
         {
             "name": "magickunsharpmaskimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -7338,7 +6970,6 @@
         {
             "name": "magickwaveimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -7361,7 +6992,6 @@
         {
             "name": "magickwhitethresholdimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -7380,7 +7010,6 @@
         {
             "name": "magickwriteimage",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -7399,7 +7028,6 @@
         {
             "name": "magickwriteimagefile",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -7418,7 +7046,6 @@
         {
             "name": "magickwriteimages",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -7443,7 +7070,6 @@
         {
             "name": "magickwriteimagesfile",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -7462,7 +7088,6 @@
         {
             "name": "pixelgetalpha",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -7477,7 +7102,6 @@
         {
             "name": "pixelgetalphaquantum",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -7492,7 +7116,6 @@
         {
             "name": "pixelgetblack",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -7507,7 +7130,6 @@
         {
             "name": "pixelgetblackquantum",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -7522,7 +7144,6 @@
         {
             "name": "pixelgetblue",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -7537,7 +7158,6 @@
         {
             "name": "pixelgetbluequantum",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -7552,7 +7172,6 @@
         {
             "name": "pixelgetcolorasstring",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -7567,7 +7186,6 @@
         {
             "name": "pixelgetcolorcount",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -7582,7 +7200,6 @@
         {
             "name": "pixelgetcyan",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -7597,7 +7214,6 @@
         {
             "name": "pixelgetcyanquantum",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -7612,7 +7228,6 @@
         {
             "name": "pixelgetexception",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -7627,7 +7242,6 @@
         {
             "name": "pixelgetexceptionstring",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -7642,7 +7256,6 @@
         {
             "name": "pixelgetexceptiontype",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -7657,7 +7270,6 @@
         {
             "name": "pixelgetgreen",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -7672,7 +7284,6 @@
         {
             "name": "pixelgetgreenquantum",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -7687,7 +7298,6 @@
         {
             "name": "pixelgetindex",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -7702,7 +7312,6 @@
         {
             "name": "pixelgetmagenta",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -7717,7 +7326,6 @@
         {
             "name": "pixelgetmagentaquantum",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -7732,7 +7340,6 @@
         {
             "name": "pixelgetopacity",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -7747,7 +7354,6 @@
         {
             "name": "pixelgetopacityquantum",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -7762,7 +7368,6 @@
         {
             "name": "pixelgetquantumcolor",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap"
@@ -7777,7 +7382,6 @@
         {
             "name": "pixelgetred",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -7792,7 +7396,6 @@
         {
             "name": "pixelgetredquantum",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -7807,7 +7410,6 @@
         {
             "name": "pixelgetyellow",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -7822,7 +7424,6 @@
         {
             "name": "pixelgetyellowquantum",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Double"
@@ -7837,7 +7438,6 @@
         {
             "name": "pixelsetalpha",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -7856,7 +7456,6 @@
         {
             "name": "pixelsetalphaquantum",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -7875,7 +7474,6 @@
         {
             "name": "pixelsetblack",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -7894,7 +7492,6 @@
         {
             "name": "pixelsetblackquantum",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -7913,7 +7510,6 @@
         {
             "name": "pixelsetblue",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -7932,7 +7528,6 @@
         {
             "name": "pixelsetbluequantum",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -7951,7 +7546,6 @@
         {
             "name": "pixelsetcolor",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -7970,7 +7564,6 @@
         {
             "name": "pixelsetcolorcount",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -7989,7 +7582,6 @@
         {
             "name": "pixelsetcyan",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -8008,7 +7600,6 @@
         {
             "name": "pixelsetcyanquantum",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -8027,7 +7618,6 @@
         {
             "name": "pixelsetgreen",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -8046,7 +7636,6 @@
         {
             "name": "pixelsetgreenquantum",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -8065,7 +7654,6 @@
         {
             "name": "pixelsetindex",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -8084,7 +7672,6 @@
         {
             "name": "pixelsetmagenta",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -8103,7 +7690,6 @@
         {
             "name": "pixelsetmagentaquantum",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -8122,7 +7708,6 @@
         {
             "name": "pixelsetopacity",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -8141,7 +7726,6 @@
         {
             "name": "pixelsetopacityquantum",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -8160,7 +7744,6 @@
         {
             "name": "pixelsetquantumcolor",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -8192,7 +7775,6 @@
         {
             "name": "pixelsetred",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -8211,7 +7793,6 @@
         {
             "name": "pixelsetredquantum",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -8230,7 +7811,6 @@
         {
             "name": "pixelsetyellow",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -8249,7 +7829,6 @@
         {
             "name": "pixelsetyellowquantum",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -8268,7 +7847,6 @@
         {
             "name": "pixelgetiteratorexception",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -8283,7 +7861,6 @@
         {
             "name": "pixelgetiteratorexceptionstring",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -8298,7 +7875,6 @@
         {
             "name": "pixelgetiteratorexceptiontype",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -8313,7 +7889,6 @@
         {
             "name": "pixelgetnextiteratorrow",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -8328,7 +7903,6 @@
         {
             "name": "pixelresetiterator",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -8343,7 +7917,6 @@
         {
             "name": "pixelsetiteratorrow",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -8362,7 +7935,6 @@
         {
             "name": "pixelsynciterator",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"

@@ -2732,7 +2732,7 @@ TranslatorX64::emitServiceReqWork(SRFlags flags, ServiceRequest req,
   /*
    * Remember previous state of the code cache.
    */
-  boost::optional<CodeCursor> maybeCc;
+  boost::optional<CodeCursor> maybeCc = boost::none;
   if (start != as.frontier()) {
     maybeCc = boost::in_place<CodeCursor>(boost::ref(as), start);
   }

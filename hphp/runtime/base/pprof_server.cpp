@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/pprof_server.h"
 #include "hphp/util/current_executable.h"
+#include "hphp/util/logger.h"
 
 #include "folly/Format.h"
 #include "folly/Conv.h"
@@ -25,9 +26,8 @@ namespace HPHP {
 void HeapProfileRequestHandler::handleRequest(Transport *transport) {
   const char *url = transport->getCommand().c_str();
   if (!strcmp(url, "hhprof/start")) {
-    // this endpoint is used to start profiling. if there is no profile
-    // in progess, we start profiling, otherwise we error out
-    if (ProfileController::requestNext()) {
+    // if we can place the request, send a 200
+    if (handleStartRequest(transport)) {
       transport->sendString("OK\n", 200);
     } else {
       transport->sendString("Resource Unavailable\n", 503);
@@ -78,7 +78,36 @@ void HeapProfileRequestHandler::handleRequest(Transport *transport) {
   } else {
     // the pprof server doesn't understand any other endpoints so just error
     // out
+    Logger::Warning(folly::format(
+      "Unknown HHProf endpoint requested, command was: {}", url
+    ).str());
     transport->sendString("Not Found\n", 404);
+  }
+}
+
+bool HeapProfileRequestHandler::handleStartRequest(Transport *transport) {
+  // this endpoint is used to start profiling. if there is no profile
+  // in progess, we start profiling, otherwise we error out
+  std::string requestType = transport->getParam("type");
+  if (requestType == "" || requestType == "next") {
+    // profile the next request, which is also the default
+    // if a url was supplied, use that
+    std::string url = transport->getParam("url");
+    if (url == "") {
+      return ProfileController::requestNext();
+    } else {
+      return ProfileController::requestNextURL(url);
+    }
+  } else if (requestType == "global") {
+    // profile all requests until pprof attacks
+    return ProfileController::requestGlobal();
+  } else {
+    // what are they even trying to do???
+    Logger::Warning(folly::format(
+      "Bad request received at HHProf start endpoint, type was: {}",
+      requestType
+    ).str());
+    return false;
   }
 }
 

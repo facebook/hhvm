@@ -29,6 +29,9 @@ struct HeapProfileRequestHandler : public RequestHandler {
   virtual ~HeapProfileRequestHandler() {}
   virtual void handleRequest(Transport *transport);
 
+private:
+  bool handleStartRequest(Transport *transport);
+
 };
 
 DECLARE_BOOST_TYPES(HeapProfileServer);

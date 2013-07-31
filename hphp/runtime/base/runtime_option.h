@@ -423,7 +423,8 @@ public:
   F(bool, HHIRStressCodegenBlocks,     false)                           \
   F(string, JitRegionSelector,         regionSelectorDefault())         \
   F(bool,     JitPGO,                  false)                           \
-  F(uint64_t, JitPGOThreshold,         2)                               \
+  F(uint64_t, JitPGOThreshold,         kDefaultJitPGOThreshold)         \
+  F(bool,     JitPGOHotOnly,           ServerExecutionMode())           \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \
   F(bool, DumpTC,                      false)                           \

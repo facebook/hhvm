@@ -590,6 +590,10 @@ asm_label(a, release);
 bool TranslatorX64::profileSrcKey(const SrcKey& sk) const {
   if (!RuntimeOption::EvalJitPGO) return false;
 
+  if (RuntimeOption::EvalJitPGOHotOnly && !(sk.func()->attrs() & AttrHot)) {
+    return false;
+  }
+
   if (profData()->optimized(sk)) return false;
 
   // The TCA of closure bodies is stored in the func's prologue

@@ -262,8 +262,11 @@ struct ElmUCompare {
       }
     }
     if (!warned) {
-      raise_warning("Sort comparators should return an integer, double, "
-                    "or numeric string with value -1, 0, or 1");
+      raise_warning("Sort comparators should not return a boolean since it "
+                    "may result in a different sort order than expected. The "
+                    "comparator should return an integer or double (negative "
+                    "if left is less than right, positive if left is greater "
+                    "than right, zero otherwise).");
       warned = true;
     }
     if (ret.isBoolean()) {

@@ -466,11 +466,8 @@ void throw_collection_compare_exception() {
   static const string msg(
     "Cannot use relational comparison operators (<, <=, >, >=) to compare "
     "a collection with an integer, double, string, array, or object");
-  if (RuntimeOption::StrictCollections) {
-    Object e(SystemLib::AllocRuntimeExceptionObject(msg));
-    throw e;
-  }
-  raise_warning(msg);
+  Object e(SystemLib::AllocRuntimeExceptionObject(msg));
+  throw e;
 }
 
 // TODO

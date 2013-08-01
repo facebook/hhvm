@@ -322,7 +322,6 @@ bool RuntimeOption::LockCodeMemory = false;
 bool RuntimeOption::EnableMemoryManager = true;
 bool RuntimeOption::CheckMemory = false;
 int RuntimeOption::MaxArrayChain = INT_MAX;
-bool RuntimeOption::StrictCollections = true;
 bool RuntimeOption::WarnOnCollectionToArray = false;
 bool RuntimeOption::UseDirectCopy = false;
 
@@ -847,7 +846,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
       MaxArrayChain *= 2;
     }
 
-    StrictCollections = server["StrictCollections"].getBool(true);
     WarnOnCollectionToArray = server["WarnOnCollectionToArray"].getBool(false);
     UseDirectCopy = server["UseDirectCopy"].getBool(false);
     AlwaysUseRelativePath = server["AlwaysUseRelativePath"].getBool(false);

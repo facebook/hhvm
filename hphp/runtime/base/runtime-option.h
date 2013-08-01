@@ -316,7 +316,6 @@ public:
   static bool EnableMemoryManager;
   static bool CheckMemory;
   static int MaxArrayChain;
-  static bool StrictCollections;
   static bool WarnOnCollectionToArray;
   static bool UseDirectCopy;
 

@@ -31,10 +31,9 @@ public:
   virtual void list(DebuggerClient &client);
   virtual void help(DebuggerClient &client);
   virtual bool onServer(DebuggerProxy &proxy);
+  virtual void onClient(DebuggerClient &client);
 
 protected:
-  virtual void onClientImpl(DebuggerClient &client);
-
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 

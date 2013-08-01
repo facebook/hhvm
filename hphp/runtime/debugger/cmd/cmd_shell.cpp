@@ -48,7 +48,7 @@ void CmdShell::help(DebuggerClient &client) {
   );
 }
 
-void CmdShell::onClientImpl(DebuggerClient &client) {
+void CmdShell::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
   if (client.argCount() == 0) {
     help(client);

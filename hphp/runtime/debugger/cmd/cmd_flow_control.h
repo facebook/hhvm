@@ -63,6 +63,7 @@ public:
   virtual ~CmdFlowControl();
 
   virtual bool onServer(DebuggerProxy &proxy);
+  virtual void onClient(DebuggerClient &client);
 
   // Work done to setup a new flow command, after receiving it from the client.
   virtual void onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt) = 0;
@@ -78,7 +79,6 @@ public:
   bool needsVMInterrupt() { return m_needsVMInterrupt; }
 
 protected:
-  virtual void onClientImpl(DebuggerClient &client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 

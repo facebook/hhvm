@@ -28,9 +28,7 @@ public:
   CmdZend() : DebuggerCommand(KindOfZend) {}
 
   virtual void help(DebuggerClient &client);
-
-protected:
-  virtual void onClientImpl(DebuggerClient &client);
+  virtual void onClient(DebuggerClient &client);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -58,8 +58,8 @@ void CmdRun::help(DebuggerClient &client) {
   );
 }
 
-void CmdRun::onClientImpl(DebuggerClient &client) {
-  TRACE(2, "CmdRun::onClientImpl\n");
+void CmdRun::onClient(DebuggerClient &client) {
+  TRACE(2, "CmdRun::onClient\n");
   if (DebuggerCommand::displayedHelp(client)) return;
 
   m_args = StringVecPtr(client.args(), null_deleter());

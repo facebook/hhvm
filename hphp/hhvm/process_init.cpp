@@ -17,6 +17,7 @@
 #include "hphp/compiler/analysis/emitter.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/program_functions.h"
 #include "hphp/runtime/ext/ext.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/bytecode.h"

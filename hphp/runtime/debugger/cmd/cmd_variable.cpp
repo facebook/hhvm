@@ -110,8 +110,7 @@ void CmdVariable::PrintVariables(DebuggerClient &client, CArrRef variables,
       }
 
       ++i;
-      if (!client.isApiMode() &&
-          i % DebuggerClient::ScrollBlockSize == 0 &&
+      if (i % DebuggerClient::ScrollBlockSize == 0 &&
           client.ask("There are %zd more variables. Continue? [Y/n]",
                       variables.size() - i) == 'n') {
         break;
@@ -124,7 +123,7 @@ void CmdVariable::PrintVariables(DebuggerClient &client, CArrRef variables,
   }
 }
 
-void CmdVariable::onClientImpl(DebuggerClient &client) {
+void CmdVariable::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
   String text;
@@ -143,21 +142,6 @@ void CmdVariable::onClientImpl(DebuggerClient &client) {
     m_variables = cmd->m_variables;
     PrintVariables(client, cmd->m_variables, cmd->m_global, text);
   }
-}
-
-void CmdVariable::setClientOutput(DebuggerClient &client) {
-  client.setOutputType(DebuggerClient::OTValues);
-  Array values;
-  for (ArrayIter iter(m_variables); iter; ++iter) {
-    String name = iter.first().toString();
-    if (client.getDebuggerClientApiModeSerialize()) {
-      values.set(name,
-                 DebuggerClient::FormatVariable(iter.second(), 200));
-    } else {
-      values.set(name, iter.second());
-    }
-  }
-  client.setOTValues(values);
 }
 
 const StaticString s_GLOBALS("GLOBALS");

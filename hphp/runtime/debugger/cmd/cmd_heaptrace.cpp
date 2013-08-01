@@ -196,7 +196,7 @@ void CmdHeaptrace::printGraphToFile(DebuggerClient &client,
   client.print(folly::stringPrintf("Wrote heap graph to %s.", name));
 }
 
-void CmdHeaptrace::onClientImpl(DebuggerClient &client) {
+void CmdHeaptrace::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
   String format;

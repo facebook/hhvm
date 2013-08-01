@@ -48,7 +48,7 @@ void CmdConstant::help(DebuggerClient &client) {
   );
 }
 
-void CmdConstant::onClientImpl(DebuggerClient &client) {
+void CmdConstant::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
   String text;
@@ -86,8 +86,7 @@ void CmdConstant::onClientImpl(DebuggerClient &client) {
       } else {
         client.print("%s = %s", name.data(), value.data());
         ++i;
-        if (!client.isApiMode() &&
-            i % DebuggerClient::ScrollBlockSize == 0 &&
+        if (i % DebuggerClient::ScrollBlockSize == 0 &&
             client.ask("There are %zd more constants. Continue? [Y/n]",
                         m_constants.size() - i) == 'n') {
           break;
@@ -99,21 +98,6 @@ void CmdConstant::onClientImpl(DebuggerClient &client) {
       client.info("(unable to find specified text in any constants)");
     }
   }
-}
-
-void CmdConstant::setClientOutput(DebuggerClient &client) {
-  client.setOutputType(DebuggerClient::OTValues);
-  Array values;
-  for (ArrayIter iter(m_constants); iter; ++iter) {
-    String name = iter.first().toString();
-    if (client.getDebuggerClientApiModeSerialize()) {
-      values.set(name,
-                 DebuggerClient::FormatVariable(iter.second(), 200));
-    } else {
-      values.set(name, iter.second());
-    }
-  }
-  client.setOTValues(values);
 }
 
 bool CmdConstant::onServer(DebuggerProxy &proxy) {

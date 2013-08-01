@@ -209,7 +209,7 @@ bool CmdList::listFunctionOrClass(DebuggerClient &client) {
 // Checks the command arguments, report errors and returning as appropriate.
 // Then communicates with the server to retrieve source information. Also
 // retrieves and updates location information stored in the client.
-void CmdList::onClientImpl(DebuggerClient &client) {
+void CmdList::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
   if (client.argCount() > 1) {
     help(client);

@@ -112,7 +112,7 @@ public:
   static String FormatTitle(const char *title);
 
 public:
-  explicit DebuggerClient(std::string name = ""); // name only for api usage
+  explicit DebuggerClient();
   ~DebuggerClient();
 
   /**
@@ -170,7 +170,6 @@ public:
    * Test if argument matches specified. "index" is 1-based.
    */
   const std::string &getCommand() const { return m_command;}
-  void setCommand(const std::string &cmd) { m_command = cmd;}
   bool arg(int index, const char *s);
   int argCount() { return m_args.size();}
   std::string argValue(int index);
@@ -275,46 +274,10 @@ public:
   void addCompletion(const std::vector<std::string> &items);
   void setLiveLists(LiveListsPtr liveLists) { m_acLiveLists = liveLists; }
 
-  /**
-   * For DebuggerClient API
-   */
-  enum ClientState {
-    StateUninit,
-    StateInitializing,
-    StateReadyForCommand,
-    StateBusy
-  };
-  enum OutputType {
-    OTInvalid,
-    OTCodeLoc,
-    OTStacktrace,
-    OTValues,
-    OTText
-  };
-  bool isApiMode() const { return m_options.apiMode; }
-  void setConfigFileName(const std::string& fn) { m_configFileName = fn;}
-  ClientState getClientState() const { return m_clientState; }
-  void setClientState(ClientState state) { m_clientState = state; }
   void init(const DebuggerClientOptions &options);
-  DebuggerCommandPtr waitForNextInterrupt();
-  String getPrintString();
-  Array getOutputArray();
-  void setOutputType(OutputType type) { m_outputType = type; }
-  void setOTFileLine(const std::string& file, int line) {
-    m_otFile = file;
-    m_otLineNo = line;
-  }
-  void setOTValues(CArrRef values) { m_otValues = values; }
   void clearCachedLocal() {
-    m_otFile = "";
-    m_otLineNo = 0;
     m_stacktrace = null_array;
-    m_otValues = null_array;
   }
-  bool apiGrab();
-  void apiFree();
-  void resetSmartAllocatedMembers();
-  const std::string& getNameApi() const { return m_nameForApi; }
 
   /**
    * Macro functions
@@ -352,13 +315,6 @@ private:
     TakingCode,
     TakingInterrupt
   };
-
-  /*
-   * NOTE: be careful about the use of smart-allocated data members
-   * here.  They need to be kept in sync with
-   * resetSmartAllocatedMembers() or you'll break the php-api to the
-   * debugger and shutdown in the CLI client.
-   */
 
   std::string m_configFileName;
   Hdf m_config;
@@ -421,7 +377,7 @@ private:
   // list command's current location, which may be different from m_breakpoint
 
   // The file currently being listed. Set implicitly by breakpoints and
-  // explicitly by list commands issued to the client by a user or via the API.
+  // explicitly by list commands issued to the client by a user.
   std::string m_listFile;
 
   // The first line to list
@@ -433,9 +389,7 @@ private:
   Array m_stacktrace;
   int m_frame;
 
-  ClientState m_clientState;
   std::string m_sourceRoot;
-  std::string m_outputBuf;
 
   void start(const DebuggerClientOptions &options);
   void run();
@@ -480,20 +434,6 @@ private:
   DebuggerCommandPtr xend(DebuggerCommand *cmd, EventLoopKind loopKind);
   DebuggerCommandPtr eventLoop(EventLoopKind loopKind, int expectedCmd,
                                const char *caller);
-
-  // output
-  OutputType m_outputType;
-  std::string m_otFile;
-  int m_otLineNo;
-  Array m_otValues;
-  std::vector<int> m_pendingCommands;
-
-  Mutex m_inApiUseLck;
-  bool m_inApiUse;
-  std::string m_nameForApi;
-
-  // usage logging
-  const char *getUsageMode();
 
   // Zend executable for CmdZend, overridable via config.
   std::string m_zendExe;

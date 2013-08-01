@@ -44,8 +44,8 @@ public:
   std::string desc() const;
   std::string error() const { return m_errorMsg;}
 
-  virtual void setClientOutput(DebuggerClient &client);
   virtual bool onServer(DebuggerProxy &proxy);
+  virtual void onClient(DebuggerClient &client);
 
   bool shouldBreak(DebuggerProxy &proxy, const BreakPointInfoPtrVec &bps,
                    int stackDepth);
@@ -54,7 +54,6 @@ public:
   InterruptSite *getSite() { return m_site;}
 
 protected:
-  virtual void onClientImpl(DebuggerClient &client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 

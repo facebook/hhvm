@@ -66,7 +66,7 @@ void CmdException::help(DebuggerClient &client) {
   );
 }
 
-void CmdException::onClientImpl(DebuggerClient &client) {
+void CmdException::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
   if (client.argCount() == 0) {
     help(client);
@@ -100,11 +100,6 @@ void CmdException::onClientImpl(DebuggerClient &client) {
       "\n"
     );
   }
-}
-
-void CmdException::setClientOutput(DebuggerClient &client) {
-  // Also output an array of all breakpoints which include exceptions
-  CmdBreak().setClientOutput(client);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

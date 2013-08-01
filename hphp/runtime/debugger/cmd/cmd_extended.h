@@ -38,6 +38,7 @@ public:
   virtual void help(DebuggerClient &client);
 
   virtual bool onServer(DebuggerProxy &proxy);
+  virtual void onClient(DebuggerClient &client);
 
 private:
   const ExtendedCommandMap &getCommandMap();
@@ -45,7 +46,6 @@ private:
   bool invokeHelp(DebuggerClient &client, const std::string &cls);
   bool invokeClient(DebuggerClient &client, const std::string &cls);
 
-  void onClientImpl(DebuggerClient &client);
   void helpImpl(DebuggerClient &client, const char *name);
 
   ExtendedCommandMap match(DebuggerClient &client, int argIndex);

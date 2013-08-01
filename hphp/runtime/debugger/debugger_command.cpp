@@ -191,27 +191,6 @@ bool DebuggerCommand::displayedHelp(DebuggerClient &client) {
   return false;
 }
 
-// Carries out the command, possibly by sending it to the server.
-// If the client is controlled via the API, the setClientOuput method
-// is invoked to update the client with the command output for access
-// via the API.
-void DebuggerCommand::onClient(DebuggerClient &client) {
-  TRACE(2, "DebuggerCommand::onClient\n");
-  onClientImpl(client);
-  if (client.isApiMode() && !m_incomplete) {
-    setClientOutput(client);
-  }
-}
-
-// Updates the client with information about the execution of this command.
-// This information is not used by the command line client, but can
-// be accessed via the debugger client API exposed to PHP programs.
-void DebuggerCommand::setClientOutput(DebuggerClient &client) {
-  TRACE(2, "DebuggerCommand::setClientOutput\n");
-  // Just default to text
-  client.setOutputType(DebuggerClient::OTText);
-}
-
 // Server-side work for a command. Returning false indicates a failure to
 // communicate with the client (for commands that do so).
 bool DebuggerCommand::onServer(DebuggerProxy &proxy) {

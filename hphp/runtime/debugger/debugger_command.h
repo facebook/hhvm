@@ -101,8 +101,7 @@ public:
   bool recv(DebuggerThriftBuffer &thrift);
   virtual void list(DebuggerClient &client);
   virtual void help(DebuggerClient &client);
-  void onClient(DebuggerClient &client);
-  virtual void setClientOutput(DebuggerClient &client);
+  virtual void onClient(DebuggerClient &client) = 0;
   virtual bool onServer(DebuggerProxy &proxy);
 
   // This seems to be confined to eval and print commands.
@@ -119,9 +118,6 @@ public:
   String getWireError() const { return m_wireError; }
 
 protected:
-  // Carries out the command, possibly by sending it to the server.
-  virtual void onClientImpl(DebuggerClient &client) = 0;
-
   bool displayedHelp(DebuggerClient &client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);

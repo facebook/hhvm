@@ -29,9 +29,7 @@ public:
 
   virtual void list(DebuggerClient &client);
   virtual void help(DebuggerClient &client);
-
-protected:
-  virtual void onClientImpl(DebuggerClient &client);
+  virtual void onClient(DebuggerClient &client);
 
 private:
   void processList(DebuggerClient &client);

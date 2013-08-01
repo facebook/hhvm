@@ -36,35 +36,17 @@ void CmdEval::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_bypassAccessCheck);
 }
 
-void CmdEval::onClientImpl(DebuggerClient &client) {
+void CmdEval::onClient(DebuggerClient &client) {
   m_body = client.getCode();
   m_frame = client.getFrame();
   m_bypassAccessCheck = client.getDebuggerBypassCheck();
   DebuggerCommandPtr res =
     client.xendWithNestedExecution<DebuggerCommand>(this);
-  if (!res->is(m_type)) {
-    assert(client.isApiMode());
-    m_incomplete = true;
-    res->setClientOutput(client);
-  } else {
-    res->handleReply(client);
-  }
+  res->handleReply(client);
 }
 
 void CmdEval::handleReply(DebuggerClient &client) {
   if (!m_output.empty()) client.print(m_output);
-}
-
-const StaticString
-  s_body("body"),
-  s_value("value");
-
-void CmdEval::setClientOutput(DebuggerClient &client) {
-  client.setOutputType(DebuggerClient::OTValues);
-  ArrayInit values(2);
-  values.set(s_body, m_body);
-  values.set(s_value, m_output);
-  client.setOTValues(values.create());
 }
 
 // NB: unlike most other commands, the client expects that more interrupts

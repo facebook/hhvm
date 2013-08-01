@@ -72,7 +72,7 @@ void CmdExtension::help(DebuggerClient &client) {
   );
 }
 
-void CmdExtension::onClientImpl(DebuggerClient &client) {
+void CmdExtension::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
   m_args = *client.args();
   CmdExtensionPtr cmd = client.xend<CmdExtension>(this);

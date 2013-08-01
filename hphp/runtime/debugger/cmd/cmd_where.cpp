@@ -73,7 +73,7 @@ Array CmdWhere::fetchStackTrace(DebuggerClient &client) {
   return st;
 }
 
-void CmdWhere::onClientImpl(DebuggerClient &client) {
+void CmdWhere::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
   if (client.argCount() > 1) {
     help(client);
@@ -96,8 +96,7 @@ void CmdWhere::onClientImpl(DebuggerClient &client) {
     for (ArrayIter iter(st); iter; ++iter) {
       client.printFrame(i, iter.second().toArray());
       ++i;
-      if (!client.isApiMode() &&
-          i % DebuggerClient::ScrollBlockSize == 0 &&
+      if (i % DebuggerClient::ScrollBlockSize == 0 &&
           client.ask("There are %zd more frames. Continue? [Y/n]",
                       st.size() - i) == 'n') {
         break;
@@ -130,10 +129,6 @@ void CmdWhere::onClientImpl(DebuggerClient &client) {
       );
     }
   }
-}
-
-void CmdWhere::setClientOutput(DebuggerClient &client) {
-  client.setOutputType(DebuggerClient::OTStacktrace);
 }
 
 void CmdWhere::processStackTrace() {

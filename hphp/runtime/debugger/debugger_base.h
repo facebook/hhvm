@@ -33,11 +33,10 @@ struct DebuggerClientOptions {
   StringVec cmds;
   std::string sandbox;
   std::string user;
-  bool apiMode;
   std::string configFName;
   std::string fileName;
 
-  DebuggerClientOptions() : port(-1), apiMode(false) {}
+  DebuggerClientOptions() : port(-1) {}
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -39,7 +39,7 @@ void CmdFlowControl::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_smallStep);
 }
 
-void CmdFlowControl::onClientImpl(DebuggerClient &client) {
+void CmdFlowControl::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
   client.setFrame(0);

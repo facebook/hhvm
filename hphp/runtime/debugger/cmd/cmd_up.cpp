@@ -50,7 +50,7 @@ int CmdUp::ParseNumber(DebuggerClient &client) {
   return 1;
 }
 
-void CmdUp::onClientImpl(DebuggerClient &client) {
+void CmdUp::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
   if (client.argCount() > 1) {
     help(client);
@@ -58,10 +58,6 @@ void CmdUp::onClientImpl(DebuggerClient &client) {
     CmdWhere().fetchStackTrace(client);
     client.moveToFrame(client.getFrame() + ParseNumber(client));
   }
-}
-
-void CmdUp::setClientOutput(DebuggerClient &client) {
-  client.setOutputType(DebuggerClient::OTStacktrace);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

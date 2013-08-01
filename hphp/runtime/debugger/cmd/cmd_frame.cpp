@@ -36,7 +36,7 @@ void CmdFrame::help(DebuggerClient &client) {
   );
 }
 
-void CmdFrame::onClientImpl(DebuggerClient &client) {
+void CmdFrame::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
   if (client.argCount() != 1) {
     help(client);
@@ -44,10 +44,6 @@ void CmdFrame::onClientImpl(DebuggerClient &client) {
     CmdWhere().fetchStackTrace(client);
     client.moveToFrame(CmdUp::ParseNumber(client));
   }
-}
-
-void CmdFrame::setClientOutput(DebuggerClient &client) {
-  client.setOutputType(DebuggerClient::OTStacktrace);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -27,13 +27,12 @@ class CmdEval : public DebuggerCommand {
 public:
   CmdEval() : DebuggerCommand(KindOfEval), m_bypassAccessCheck(false) {}
 
-  virtual void setClientOutput(DebuggerClient &client);
+  virtual void onClient(DebuggerClient &client);
   virtual bool onServer(DebuggerProxy &proxy);
 
   virtual void handleReply(DebuggerClient &client);
 
 protected:
-  virtual void onClientImpl(DebuggerClient &client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 

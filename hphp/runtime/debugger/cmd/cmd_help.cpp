@@ -277,7 +277,7 @@ void CmdHelp::help(DebuggerClient &client) {
   );
 }
 
-void CmdHelp::onClientImpl(DebuggerClient &client) {
+void CmdHelp::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
   if (client.argCount() == 0) {
     HelpAll(client);

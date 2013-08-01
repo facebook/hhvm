@@ -100,7 +100,7 @@ void CmdThread::processList(DebuggerClient &client, bool output /* = true */) {
   }
 }
 
-void CmdThread::onClientImpl(DebuggerClient &client) {
+void CmdThread::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
   if (client.argCount() > 1) {
     help(client);

@@ -142,9 +142,6 @@ bool CmdMachine::AttachSandbox(DebuggerClient &client,
   if (user == nullptr) {
     user = client.getCurrentUser().c_str();
   }
-  if (client.isApiMode()) {
-    force = true;
-  }
 
   DSandboxInfoPtr sandbox(new DSandboxInfo());
   sandbox->m_user = user ? user : "";
@@ -207,7 +204,7 @@ void CmdMachine::UpdateIntercept(DebuggerClient &client,
   client.xend<CmdMachine>(&cmd);
 }
 
-void CmdMachine::onClientImpl(DebuggerClient &client) {
+void CmdMachine::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
   if (client.argCount() == 0) {
     help(client);

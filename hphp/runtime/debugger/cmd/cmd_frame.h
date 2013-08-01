@@ -28,10 +28,7 @@ public:
   CmdFrame() : DebuggerCommand(KindOfFrame) {}
 
   virtual void help(DebuggerClient &client);
-  virtual void setClientOutput(DebuggerClient &client);
-
-protected:
-  virtual void onClientImpl(DebuggerClient &client);
+  virtual void onClient(DebuggerClient &client);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

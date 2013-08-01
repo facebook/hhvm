@@ -388,8 +388,8 @@ class ObjectData {
   bool propIsset(Class* ctx, const StringData* key);
   bool propEmpty(Class* ctx, const StringData* key);
 
-  TypedValue* setProp(Class* ctx, const StringData* key, TypedValue* val,
-                      bool bindingAssignment = false);
+  void setProp(Class* ctx, const StringData* key, TypedValue* val,
+               bool bindingAssignment = false);
   TypedValue* setOpProp(TypedValue& tvRef, Class* ctx, unsigned char op,
                         const StringData* key, Cell* val);
  private:

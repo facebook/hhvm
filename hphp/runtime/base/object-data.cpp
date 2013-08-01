@@ -1060,9 +1060,10 @@ bool ObjectData::propEmpty(Class* ctx, const StringData* key) {
   return false;
 }
 
-TypedValue* ObjectData::setProp(Class* ctx, const StringData* key,
-                                TypedValue* val,
-                                bool bindingAssignment /* = false */) {
+void ObjectData::setProp(Class* ctx,
+                         const StringData* key,
+                         TypedValue* val,
+                         bool bindingAssignment /* = false */) {
   bool visible, accessible, unset;
   TypedValue* propVal = getProp(ctx, key, visible, accessible, unset);
   if (visible && accessible) {
@@ -1078,9 +1079,9 @@ TypedValue* ObjectData::setProp(Class* ctx, const StringData* key,
         tvSet(*val, *propVal);
       }
     }
-    // Return a pointer to the property if it's a declared property
-    return declPropInd(propVal) != kInvalidSlot ? propVal : nullptr;
+    return;
   }
+
   assert(!accessible);
   if (visible) {
     assert(propVal);
@@ -1106,14 +1107,14 @@ TypedValue* ObjectData::setProp(Class* ctx, const StringData* key,
       o_properties.get()->set(const_cast<StringData*>(key),
                               tvAsCVarRef(val), false);
     }
-    return nullptr;
+    return;
   }
+
   assert(!accessible);
   assert(getAttribute(UseSet));
   TypedValue ignored;
   invokeSet(&ignored, key, val);
   tvRefcountedDecRef(&ignored);
-  return nullptr;
 }
 
 TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,

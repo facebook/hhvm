@@ -35,7 +35,7 @@ no_import = (
     '/tests/run-test/test010.phpt',
 
     # segfaults
-    '/Zend/tests/bug35239.phpt',
+    '/Zend/tests/bug35239.phpt',      # fixed
     '/Zend/tests/bug54265.phpt',
     '/Zend/tests/bug55705.phpt',
     '/Zend/tests/callable_type_hint_001.phpt',

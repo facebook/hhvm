@@ -5,7 +5,7 @@ class X {
  }
 function test() {
   $x = new X;
-  var_dump($x->view());
+  var_dump($x->lazy());
 }
 test();
 

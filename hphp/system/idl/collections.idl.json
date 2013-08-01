@@ -78,6 +78,17 @@
                     ]
                 },
                 {
+                    "name": "lazy",
+                    "flags": [
+                    ],
+                    "desc": "Returns a lazy iterable view of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "view",
                     "flags": [
                     ],
@@ -751,6 +762,17 @@
                     ]
                 },
                 {
+                    "name": "lazy",
+                    "flags": [
+                    ],
+                    "desc": "Returns a lazy iterable view of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "view",
                     "flags": [
                     ],
@@ -1338,6 +1360,17 @@
                     ]
                 },
                 {
+                    "name": "lazy",
+                    "flags": [
+                    ],
+                    "desc": "Returns a lazy iterable view of this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "view",
                     "flags": [
                     ],
@@ -1914,6 +1947,17 @@
                     ]
                 },
                 {
+                    "name": "lazy",
+                    "flags": [
+                    ],
+                    "desc": "Returns a lazy iterable view of this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "view",
                     "flags": [
                     ],
@@ -2333,6 +2377,17 @@
                     "flags": [
                     ],
                     "desc": "Returns an Iterable that produces the keys from this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lazy",
+                    "flags": [
+                    ],
+                    "desc": "Returns a lazy iterable view of this Pair.",
                     "return": {
                         "type": "Object"
                     },

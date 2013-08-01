@@ -292,7 +292,7 @@ int64_t c_Vector::t_count() {
 }
 
 Object c_Vector::t_items() {
-  return SystemLib::AllocIterableViewObject(this);
+  return SystemLib::AllocLazyIterableViewObject(this);
 }
 
 Object c_Vector::t_keys() {
@@ -307,8 +307,12 @@ Object c_Vector::t_keys() {
   return obj;
 }
 
+Object c_Vector::t_lazy() {
+  return SystemLib::AllocLazyKeyedIterableViewObject(this);
+}
+
 Object c_Vector::t_view() {
-  return SystemLib::AllocKeyedIterableViewObject(this);
+  return SystemLib::AllocLazyKeyedIterableViewObject(this);
 }
 
 Object c_Vector::t_kvzip() {
@@ -1116,7 +1120,7 @@ int64_t c_Map::t_count() {
 }
 
 Object c_Map::t_items() {
-  return SystemLib::AllocKVZippedIterableObject(this);
+  return SystemLib::AllocLazyKVZipIterableObject(this);
 }
 
 Object c_Map::t_keys() {
@@ -1140,8 +1144,12 @@ Object c_Map::t_keys() {
   return obj;
 }
 
+Object c_Map::t_lazy() {
+  return SystemLib::AllocLazyKeyedIterableViewObject(this);
+}
+
 Object c_Map::t_view() {
-  return SystemLib::AllocKeyedIterableViewObject(this);
+  return SystemLib::AllocLazyKeyedIterableViewObject(this);
 }
 
 Object c_Map::t_kvzip() {
@@ -2216,7 +2224,7 @@ int64_t c_StableMap::t_count() {
 }
 
 Object c_StableMap::t_items() {
-  return SystemLib::AllocKVZippedIterableObject(this);
+  return SystemLib::AllocLazyKVZipIterableObject(this);
 }
 
 Object c_StableMap::t_keys() {
@@ -2239,8 +2247,12 @@ Object c_StableMap::t_keys() {
   return obj;
 }
 
+Object c_StableMap::t_lazy() {
+  return SystemLib::AllocLazyKeyedIterableViewObject(this);
+}
+
 Object c_StableMap::t_view() {
-  return SystemLib::AllocKeyedIterableViewObject(this);
+  return SystemLib::AllocLazyKeyedIterableViewObject(this);
 }
 
 Object c_StableMap::t_kvzip() {
@@ -3366,11 +3378,15 @@ int64_t c_Set::t_count() {
 }
 
 Object c_Set::t_items() {
-  return SystemLib::AllocIterableViewObject(this);
+  return SystemLib::AllocLazyIterableViewObject(this);
+}
+
+Object c_Set::t_lazy() {
+  return SystemLib::AllocLazyIterableViewObject(this);
 }
 
 Object c_Set::t_view() {
-  return SystemLib::AllocIterableViewObject(this);
+  return SystemLib::AllocLazyIterableViewObject(this);
 }
 
 bool c_Set::t_contains(CVarRef key) {
@@ -4037,7 +4053,7 @@ int64_t c_Pair::t_count() {
 }
 
 Object c_Pair::t_items() {
-  return SystemLib::AllocIterableViewObject(this);
+  return SystemLib::AllocLazyIterableViewObject(this);
 }
 
 Object c_Pair::t_keys() {
@@ -4052,8 +4068,12 @@ Object c_Pair::t_keys() {
   return obj;
 }
 
+Object c_Pair::t_lazy() {
+  return SystemLib::AllocLazyKeyedIterableViewObject(this);
+}
+
 Object c_Pair::t_view() {
-  return SystemLib::AllocKeyedIterableViewObject(this);
+  return SystemLib::AllocLazyKeyedIterableViewObject(this);
 }
 
 Object c_Pair::t_kvzip() {

@@ -52,7 +52,8 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   int64_t t_count();
   Object t_items();
   Object t_keys();
-  Object t_view();
+  Object t_lazy();
+  Object t_view(); // deprecated
   Object t_kvzip();
   Variant t_at(CVarRef key);
   Variant t_get(CVarRef key);
@@ -232,7 +233,8 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   int64_t t_count();
   Object t_items();
   Object t_keys();
-  Object t_view();
+  Object t_lazy();
+  Object t_view(); // deprecated
   Object t_kvzip();
   Variant t_at(CVarRef key);
   Variant t_get(CVarRef key);
@@ -533,7 +535,8 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   int64_t t_count();
   Object t_items();
   Object t_keys();
-  Object t_view();
+  Object t_lazy();
+  Object t_view(); // deprecated
   Object t_kvzip();
   Variant t_at(CVarRef key);
   Variant t_get(CVarRef key);
@@ -795,7 +798,8 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   bool t_isempty();
   int64_t t_count();
   Object t_items();
-  Object t_view();
+  Object t_lazy();
+  Object t_view(); // deprecated
   bool t_contains(CVarRef key);
   Object t_remove(CVarRef key);
   Array t_toarray();
@@ -1013,7 +1017,8 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   int64_t t_count();
   Object t_items();
   Object t_keys();
-  Object t_view();
+  Object t_lazy();
+  Object t_view(); // deprecated
   Object t_kvzip();
   Variant t_at(CVarRef key);
   Variant t_get(CVarRef key);

@@ -4806,10 +4806,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpL(PC& pc) {
   DECODE_HA(local);
   DECODE(unsigned char, op);
   Cell* fr = m_stack.topC();
-  TypedValue* to = frame_local(m_fp, local);
-  SETOP_BODY(to, op, fr);
+  Cell* to = tvToCell(frame_local(m_fp, local));
+  SETOP_BODY_CELL(to, op, fr);
   tvRefcountedDecRefCell(fr);
-  cellDup(*tvToCell(to), *fr);
+  cellDup(*to, *fr);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopSetOpN(PC& pc) {

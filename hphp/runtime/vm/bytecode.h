@@ -35,9 +35,9 @@
 namespace HPHP {
 
 inline ALWAYS_INLINE
-void SETOP_BODY(TypedValue* lhs, unsigned char op, Cell* rhs) {
+void SETOP_BODY_CELL(Cell* lhs, unsigned char op, Cell* rhs) {
+  assert(cellIsPlausible(*lhs));
   assert(cellIsPlausible(*rhs));
-  lhs = tvToCell(lhs);
 
   switch (op) {
   case SetOpPlusEqual:      cellAddEq(*lhs, *rhs); break;
@@ -63,6 +63,11 @@ void SETOP_BODY(TypedValue* lhs, unsigned char op, Cell* rhs) {
   default:
     not_reached();
   }
+}
+
+inline ALWAYS_INLINE
+void SETOP_BODY(TypedValue* lhs, unsigned char op, Cell* rhs) {
+  SETOP_BODY_CELL(tvToCell(lhs), op, rhs);
 }
 
 class Func;

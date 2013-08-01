@@ -1131,19 +1131,21 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
       SETOP_BODY(&tvResult, op, val);
       if (getAttribute(UseSet)) {
         assert(tvRef.m_type == KindOfUninit);
-        memcpy(&tvRef, &tvResult, sizeof(TypedValue));
+        tvDup(tvResult, tvRef);
         TypedValue ignored;
         invokeSet(&ignored, key, &tvRef);
         tvRefcountedDecRef(&ignored);
         propVal = &tvRef;
       } else {
-        memcpy(propVal, &tvResult, sizeof(TypedValue));
+        tvDup(tvResult, *propVal);
       }
     } else {
-      SETOP_BODY(propVal, op, val);
+      propVal = tvToCell(propVal);
+      SETOP_BODY_CELL(propVal, op, val);
     }
     return propVal;
   }
+
   assert(!accessible);
   if (visible) {
     assert(propVal);
@@ -1162,7 +1164,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
     // don't write propVal->m_aux because it holds data
     // owned by the HphpArray
     propVal->m_type = KindOfNull;
-    SETOP_BODY(propVal, op, val);
+    SETOP_BODY_CELL(propVal, op, val);
     return propVal;
   } else if (!getAttribute(UseSet)) {
     TypedValue tvResult;
@@ -1180,6 +1182,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
     propVal->m_type = tvResult.m_type;
     return propVal;
   }
+
   assert(!accessible);
   assert(getAttribute(UseGet) && getAttribute(UseSet));
   invokeGet(&tvRef, key);

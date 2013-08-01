@@ -160,6 +160,7 @@ inline void releaseKey(StringData* keySD) {
   }
 }
 
+// Post: base is a Cell*
 inline ALWAYS_INLINE void opPre(TypedValue*& base, DataType& type) {
   // Get inner variant if necessary.
   type = base->m_type;
@@ -167,6 +168,8 @@ inline ALWAYS_INLINE void opPre(TypedValue*& base, DataType& type) {
     base = base->m_data.pref->tv();
     type = base->m_type;
   }
+
+  assert(cellIsPlausible(*base));
 }
 
 inline TypedValue* ElemArrayRawKey(ArrayData* base, int64_t key) {
@@ -845,8 +848,10 @@ inline void SetNewElem(TypedValue* base, Cell* value) {
   }
 }
 
-inline TypedValue* SetOpElemEmptyish(unsigned char op, TypedValue* base,
+inline TypedValue* SetOpElemEmptyish(unsigned char op, Cell* base,
                                      TypedValue* key, Cell* rhs) {
+  assert(cellIsPlausible(*base));
+
   Array a = Array::Create();
   TypedValue* result = (TypedValue*)&a.lvalAt(tvAsCVarRef(key));
   tvAsVariant(base) = a;
@@ -854,7 +859,7 @@ inline TypedValue* SetOpElemEmptyish(unsigned char op, TypedValue* base,
     raise_notice(Strings::UNDEFINED_INDEX,
                  tvAsCVarRef(key).toString().data());
   }
-  SETOP_BODY(result, op, rhs);
+  SETOP_BODY_CELL(result, op, rhs);
   return result;
 }
 inline TypedValue* SetOpElemNumberish(TypedValue& tvScratch) {
@@ -869,8 +874,10 @@ inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
                              TypedValue* key, Cell* rhs) {
   TypedValue scratch;
   TypedValue* result;
+
   DataType type;
   opPre(base, type);
+
   switch (type) {
   case KindOfUninit:
   case KindOfNull: {
@@ -903,7 +910,8 @@ inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
   }
   case KindOfArray: {
     result = ElemDArray<MoreWarnings, keyType>(base, key);
-    SETOP_BODY(result, op, rhs);
+    result = tvToCell(result);
+    SETOP_BODY_CELL(result, op, rhs);
     break;
   }
   case KindOfObject: {

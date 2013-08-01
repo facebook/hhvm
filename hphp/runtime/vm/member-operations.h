@@ -1529,14 +1529,18 @@ inline void SetPropNull(Cell* val) {
     throw InvalidSetMException(make_tv<KindOfNull>());
   }
 }
+
 inline void SetPropStdclass(TypedValue* base, TypedValue* key,
                             Cell* val) {
+  // createDefaultObject could re-enter and clobber base.
+  auto const baseCopy = *base;
+
   ObjectData* obj = createDefaultObject();
   obj->incRefCount();
   StringData* keySD = prepareKey(key);
   obj->setProp(nullptr, keySD, (TypedValue*)val);
   decRefStr(keySD);
-  tvRefcountedDecRef(base);
+  tvRefcountedDecRef(baseCopy);
   base->m_type = KindOfObject;
   base->m_data.pobj = obj;
 }

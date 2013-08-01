@@ -200,11 +200,6 @@ public:
   void rollback();
 
   /**
-   * Write stats to ServerStats.
-   */
-  void logStats();
-
-  /**
    * Display any leaked or double-freed memory.
    */
   void checkMemory();

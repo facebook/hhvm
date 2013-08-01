@@ -128,7 +128,6 @@ public:
 
   SharedVariant* getValue(ssize_t pos) const;
 
-  // implementing LeakDetectable
   void dump(std::string &out);
 
   void getStats(SharedVariantStats *stats) const;

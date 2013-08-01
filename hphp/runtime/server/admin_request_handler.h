@@ -37,7 +37,6 @@ private:
   bool handleStatusRequest (const std::string &cmd, Transport *transport);
   bool handleStatsRequest  (const std::string &cmd, Transport *transport);
   bool handleProfileRequest(const std::string &cmd, Transport *transport);
-  bool handleLeakRequest   (const std::string &cmd, Transport *transport);
   bool handleAPCSizeRequest (const std::string &cmd, Transport *transport);
   bool handleDumpCacheRequest (const std::string &cmd, Transport *transport);
   bool handleConstSizeRequest (const std::string &cmd, Transport *transport);
@@ -47,9 +46,6 @@ private:
 
 #ifdef GOOGLE_CPU_PROFILER
   bool handleCPUProfilerRequest (const std::string &cmd, Transport *transport);
-#endif
-#ifdef GOOGLE_HEAP_PROFILER
-  bool handleHeapProfilerRequest(const std::string &cmd, Transport *transport);
 #endif
 
   static DECLARE_THREAD_LOCAL(AccessLog::ThreadData, s_accessLogThreadData);

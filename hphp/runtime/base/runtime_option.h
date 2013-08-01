@@ -278,7 +278,6 @@ public:
   static bool EnableStats;
   static bool EnableWebStats;
   static bool EnableMemoryStats;
-  static bool EnableMallocStats;
   static bool EnableAPCStats;
   static bool EnableAPCKeyStats;
   static bool EnableMemcacheStats;

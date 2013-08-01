@@ -30,7 +30,6 @@
 #include "hphp/runtime/base/memory_manager.h"
 #include "hphp/runtime/base/program_functions.h"
 #include "hphp/runtime/base/shared_store_base.h"
-#include "hphp/runtime/base/leak_detectable.h"
 #include "hphp/runtime/ext/mysql_stats.h"
 #include "hphp/runtime/base/shared_store_stats.h"
 #include "hphp/runtime/vm/repo.h"
@@ -46,9 +45,6 @@
 
 #ifdef GOOGLE_CPU_PROFILER
 #include "google/profiler.h"
-#endif
-#ifdef GOOGLE_HEAP_PROFILER
-#include "google/heap-profiler.h"
 #endif
 
 using std::endl;
@@ -195,16 +191,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/prof-cpu-on:     turn on CPU profiler\n"
         "/prof-cpu-off:    turn off CPU profiler\n"
 #endif
-#ifdef GOOGLE_HEAP_PROFILER
-        "/prof-heap-on:    turn on heap profiler\n"
-        "/prof-heap-dump:  take one snapshot of the heap\n"
-        "/prof-heap-off:   turn off heap profiler\n"
-        "/stats-malloc:    turn on/off malloc statistics\n"
-        "/leak-on:         start leak detection\n"
-        "    sampling      required, frequency\n"
-        "/leak-off:        end leak detection and report leaking\n"
-        "    cutoff        optional, default 20 seconds, ignore newer allocs\n"
-#endif
 #ifdef EXECUTION_PROFILER
         "/prof-exe:        returns sampled execution profile\n"
 #endif
@@ -306,10 +292,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
     if (strncmp(cmd.c_str(), "prof", 4) == 0 &&
         handleProfileRequest(cmd, transport)) {
-      break;
-    }
-    if (strncmp(cmd.c_str(), "leak", 4) == 0 &&
-        handleLeakRequest(cmd, transport)) {
       break;
     }
     if (strncmp(cmd.c_str(), "apc-ss", 6) == 0 &&
@@ -660,11 +642,6 @@ bool AdminRequestHandler::handleStatsRequest(const std::string &cmd,
     toggle_switch(transport, RuntimeOption::EnableMemoryStats);
     return true;
   }
-  if (cmd == "stats-malloc") {
-    toggle_switch(transport, RuntimeOption::EnableMallocStats);
-    LeakDetectable::EnableMallocStats(RuntimeOption::EnableMallocStats);
-    return true;
-  }
   if (cmd == "stats-apc") {
     return toggle_switch(transport, RuntimeOption::EnableAPCStats);
   }
@@ -753,11 +730,6 @@ bool AdminRequestHandler::handleProfileRequest(const std::string &cmd,
     return true;
   }
 #endif
-#ifdef GOOGLE_HEAP_PROFILER
-  if (handleHeapProfilerRequest(cmd, transport)) {
-    return true;
-  }
-#endif
   return false;
 }
 
@@ -785,99 +757,6 @@ bool AdminRequestHandler::handleCPUProfilerRequest(const std::string &cmd,
   return false;
 }
 #endif
-
-#ifdef GOOGLE_HEAP_PROFILER
-bool AdminRequestHandler::handleHeapProfilerRequest(const std::string &cmd,
-                                                    Transport *transport) {
-  string root = RuntimeOption::ProfilerOutputDir + "/" +
-    Process::HostName;
-  string file = root + "/hphp.prof";
-
-  if (cmd == "prof-heap-on") {
-    if (IsHeapProfilerRunning()) {
-      transport->sendString("HeapProfiler is already running.\n");
-    } else {
-      if (Util::mkdir(file)) {
-        // clean up leftovers
-        string cmd = "/bin/rm -f ";
-        cmd += file + ".*.heap";
-        Util::ssystem(cmd.c_str());
-
-        HeapProfilerStart(file.c_str());
-        HeapProfilerDump("start");
-        transport->sendString("OK\n");
-      } else {
-        transport->sendString("Unable to mkdir for profile data.\n");
-      }
-    }
-    return true;
-  }
-  if (cmd == "prof-heap-dump") {
-    if (!IsHeapProfilerRunning()) {
-      transport->sendString("HeapProfiler is not running.\n");
-    } else {
-      HeapProfilerDump("end");
-      transport->sendString("OK\n");
-    }
-    return true;
-  }
-  if (cmd == "prof-heap-off") {
-    if (!IsHeapProfilerRunning()) {
-      transport->sendString("HeapProfiler is not running.\n");
-    } else {
-      HeapProfilerDump("end");
-      HeapProfilerStop();
-      transport->sendString("OK\n");
-
-      const char *argv[] = {"", root.c_str(), "-name", "*.heap", nullptr};
-      string files;
-      Process::Exec("find", argv, nullptr, files);
-      vector<string> out;
-      Util::split('\n', files.c_str(), out, true);
-      if (out.size() > 1) {
-        string base = "--base=";
-        base += out[0];
-      } else {
-        Logger::Error("Unable to find heap profiler output");
-      }
-    }
-    return true;
-  }
-  return false;
-}
-#endif
-
-///////////////////////////////////////////////////////////////////////////////
-// leak detection
-
-bool AdminRequestHandler::handleLeakRequest(const std::string &cmd,
-                                            Transport *transport) {
-  if (cmd == "leak-on") {
-    LeakDetectable::BeginLeakChecking();   // class-based detection starts
-    LeakDetectable::MallocSampling = transport->getIntParam("sampling");
-    LeakDetectable::BeginMallocSampling(); // malloc-based detection starts
-    transport->sendString("OK\n");
-    return true;
-  }
-  if (cmd == "leak-off") {
-    std::string dumps;
-
-    // class-based detection ends
-    int count = LeakDetectable::EndLeakChecking(dumps, 1);
-    dumps += "\n";
-    dumps += boost::lexical_cast<string>(count) + " leaked LeakDetectables\n";
-
-    // malloc-based detection
-    int cutoff = transport->getIntParam("cutoff");
-    LeakDetectable::EndMallocSampling(dumps, cutoff ? cutoff : 20);
-    LeakDetectable::MallocSampling = 0;
-
-    transport->sendString(dumps);
-    return true;
-  }
-
-  return false;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // APC size profiling

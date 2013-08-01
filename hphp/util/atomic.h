@@ -77,12 +77,6 @@ inline void atomic_release_store(T* address, U val) {
                   // doing any non-temporal moves or whatnot).
 }
 
-template<typename T>
-inline T atomic_inc(T &count) {
-  assert_address_is_atomically_accessible(&count);
-  return __sync_fetch_and_add(&count, 1) + 1;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

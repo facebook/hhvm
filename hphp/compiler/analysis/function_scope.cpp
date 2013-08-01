@@ -823,7 +823,7 @@ bool FunctionScope::popReturnType() {
   m_prevReturn.reset();
   addUpdates(UseKindCallerReturn);
 #ifdef HPHP_INSTRUMENT_TYPE_INF
-  atomic_inc(RescheduleException::s_NumRetTypesChanged);
+  ++RescheduleException::s_NumRetTypesChanged;
 #endif /* HPHP_INSTRUMENT_TYPE_INF */
   return true;
 }

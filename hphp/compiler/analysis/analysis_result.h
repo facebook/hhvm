@@ -396,12 +396,12 @@ public:
                               s_changedScopesMapThreadLocal);
 
 #ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
-  static int                                  s_NumDoJobCalls;
+  static std::atomic<int>                     s_NumDoJobCalls;
   static ConcurrentBlockScopeRawPtrIntHashMap s_DoJobUniqueScopes;
-  static int                                  s_NumForceRerunGlobal;
-  static int                                  s_NumReactivateGlobal;
-  static int                                  s_NumForceRerunUseKinds;
-  static int                                  s_NumReactivateUseKinds;
+  static std::atomic<int>                     s_NumForceRerunGlobal;
+  static std::atomic<int>                     s_NumReactivateGlobal;
+  static std::atomic<int>                     s_NumForceRerunUseKinds;
+  static std::atomic<int>                     s_NumReactivateUseKinds;
 #endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
 
 private:
@@ -429,9 +429,9 @@ public:
     Exception(), m_scope(scope) {}
   BlockScopeRawPtr &getScope() { return m_scope; }
 #ifdef HPHP_INSTRUMENT_TYPE_INF
-  static int s_NumReschedules;
-  static int s_NumForceRerunSelfCaller;
-  static int s_NumRetTypesChanged;
+  static std::atomic<int> s_NumReschedules;
+  static std::atomic<int> s_NumForceRerunSelfCaller;
+  static std::atomic<int> s_NumRetTypesChanged;
 #endif /* HPHP_INSTRUMENT_TYPE_INF */
 private:
   BlockScopeRawPtr m_scope;

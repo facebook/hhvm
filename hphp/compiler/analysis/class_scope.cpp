@@ -41,7 +41,7 @@
 #include "hphp/compiler/statement/use_trait_statement.h"
 #include "hphp/compiler/statement/trait_prec_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
-#include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/zend-string.h"
 #include "hphp/util/util.h"
 
 #include <boost/foreach.hpp>

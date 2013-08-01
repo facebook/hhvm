@@ -21,8 +21,8 @@
 #include "hphp/runtime/ext/php_unicode.h"
 #include "hphp/runtime/ext/unicode_data.h"
 #include "hphp/runtime/ext/ext_process.h"
-#include "hphp/runtime/base/zend_url.h"
-#include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/zend-url.h"
+#include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/ini_setting.h"
 
 extern "C" {

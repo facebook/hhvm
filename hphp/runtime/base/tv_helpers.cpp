@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/dummy_resource.h"
 #include "hphp/runtime/base/type_conversions.h"
-#include "hphp/runtime/base/zend_functions.h"
+#include "hphp/runtime/base/zend-functions.h"
 
 #include "hphp/system/systemlib.h"
 

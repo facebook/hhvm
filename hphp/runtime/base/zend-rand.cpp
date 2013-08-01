@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/zend_math.h"
+#include "hphp/runtime/base/zend-math.h"
 #include "hphp/util/thread_local.h"
 #include "openssl/rand.h"
 

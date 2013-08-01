@@ -19,7 +19,7 @@
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/base/string_buffer.h"
-#include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/thread_init_fini.h"
 #include <unistd.h>
 #include <fcntl.h>

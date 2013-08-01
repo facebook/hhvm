@@ -89,7 +89,7 @@
  *  directly -- and assumed always to succeed.
  */
 
-#include "hphp/runtime/base/zend_strtod.h"
+#include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/util/thread_local.h"
 

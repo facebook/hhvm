@@ -29,7 +29,7 @@
 #include "hphp/util/lock.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// defined in zend/zend_ini.tab.cpp
+// defined in zend/zend-ini.tab.cpp
 
 extern bool zend_parse_ini_string
 (HPHP::CStrRef str, HPHP::CStrRef filename, int scanner_mode,

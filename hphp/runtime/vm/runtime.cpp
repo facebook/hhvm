@@ -16,7 +16,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/hphp_array.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/ext/ext_closure.h"
@@ -27,7 +27,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
-#include "hphp/runtime/base/zend_functions.h"
+#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/ext/ext_string.h"
 
 namespace HPHP {

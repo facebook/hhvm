@@ -20,7 +20,7 @@
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/base/request_local.h"
-#include "hphp/runtime/base/zend_collator.h"
+#include "hphp/runtime/base/zend-collator.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/sort_flags.h"
 #include "hphp/runtime/vm/jit/translator.h"

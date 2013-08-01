@@ -22,7 +22,7 @@
 #include <onigposix.h>
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/zend_functions.h"
+#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/array_iterator.h"
 #include "hphp/runtime/base/ini_setting.h"
 #include "hphp/runtime/base/thread_init_fini.h"

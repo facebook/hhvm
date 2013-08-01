@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/url.h"
-#include "hphp/runtime/base/zend_url.h"
+#include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/server/access_log.h"
 #include "hphp/runtime/ext/ext_openssl.h"
 #include "hphp/util/compression.h"

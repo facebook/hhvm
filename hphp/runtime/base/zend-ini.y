@@ -26,7 +26,7 @@
 using namespace HPHP;
 
 ///////////////////////////////////////////////////////////////////////////////
-// defined in zend_ini.x
+// defined in zend-ini.x
 
 extern int ini_parse();
 extern void ini_error(char *msg);

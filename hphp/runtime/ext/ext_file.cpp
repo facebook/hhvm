@@ -27,7 +27,7 @@
 #include "hphp/runtime/base/http_client.h"
 #include "hphp/runtime/base/request_local.h"
 #include "hphp/runtime/server/static_content_cache.h"
-#include "hphp/runtime/base/zend_scanf.h"
+#include "hphp/runtime/base/zend-scanf.h"
 #include "hphp/runtime/base/pipe.h"
 #include "hphp/runtime/base/stream_wrapper_registry.h"
 #include "hphp/runtime/base/file_stream_wrapper.h"

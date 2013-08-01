@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/zend_functions.h"
+#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/sort_flags.h"
 #include "hphp/util/safesort.h"
 

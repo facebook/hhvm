@@ -19,9 +19,9 @@
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/util/exception.h"
-#include "hphp/runtime/base/zend_printf.h"
-#include "hphp/runtime/base/zend_functions.h"
-#include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/zend-printf.h"
+#include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/base/zend-string.h"
 #include <math.h>
 #include <cmath>
 #include "hphp/runtime/base/runtime_option.h"

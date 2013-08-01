@@ -28,8 +28,8 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/util.h"
-#include "hphp/runtime/base/zend_string.h"
-#include "hphp/runtime/base/zend_printf.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/exceptions.h"
 #include <sys/file.h>
 #include "hphp/runtime/base/array_iterator.h"

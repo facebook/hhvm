@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/ext_url.h"
 #include "hphp/runtime/base/string_util.h"
-#include "hphp/runtime/base/zend_url.h"
+#include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/string_buffer.h"
 #include "hphp/runtime/ext/ext_curl.h"
 #include "hphp/runtime/ext/ext_string.h"

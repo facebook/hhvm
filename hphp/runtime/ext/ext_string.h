@@ -20,8 +20,8 @@
 
 #include "hphp/util/zend/zend_html.h"
 #include "hphp/runtime/base/base_includes.h"
-#include "hphp/runtime/base/zend_string.h"
-#include "hphp/runtime/base/zend_printf.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/bstring.h"
 #include <langinfo.h>
 #include "hphp/runtime/ext/ext_class.h"

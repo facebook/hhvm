@@ -700,8 +700,6 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
   }
   try {
     String code(php.c_str(), php.size(), CopyString);
-    // @TODO: enable this once task #2608250 is completed.
-#if 0
     // We're about to start executing more PHP. This is typically done
     // in response to commands from the client, and the client expects
     // those commands to send more interrupts since, of course, the
@@ -713,7 +711,6 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
     SCOPE_EXIT {
       if (flags & ExecutePHPFlagsAtInterrupt) disableSignalPolling();
     };
-#endif
     g_vmContext->evalPHPDebugger((TypedValue*)&ret, code.get(), frame);
   } catch (InvalidFunctionCallException &e) {
     sb.append(Debugger::ColorStderr(String(e.what())));

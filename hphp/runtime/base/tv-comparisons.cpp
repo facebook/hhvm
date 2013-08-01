@@ -25,7 +25,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-extern bool collectionEquals(ObjectData*, ObjectData*);
+extern bool collectionEquals(const ObjectData*, const ObjectData*);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -321,9 +321,7 @@ struct Eq {
     if (od1 == od2) return true;
     if (od1->getVMClass() != od2->getVMClass()) return false;
     if (od1->isCollection()) {
-      // TODO constness
-      return collectionEquals(const_cast<ObjectData*>(od1),
-                              const_cast<ObjectData*>(od2));
+      return collectionEquals(od1, od2);
     }
     Array ar1(od1->o_toArray());
     Array ar2(od2->o_toArray());

@@ -895,9 +895,9 @@ void c_Vector::OffsetUnset(ObjectData* obj, TypedValue* key) {
   throw e;
 }
 
-bool c_Vector::Equals(ObjectData* obj1, ObjectData* obj2) {
-  auto vec1 = static_cast<c_Vector*>(obj1);
-  auto vec2 = static_cast<c_Vector*>(obj2);
+bool c_Vector::Equals(const ObjectData* obj1, const ObjectData* obj2) {
+  auto vec1 = static_cast<const c_Vector*>(obj1);
+  auto vec2 = static_cast<const c_Vector*>(obj2);
   uint sz = vec1->m_size;
   if (sz != vec2->m_size) {
     return false;
@@ -1992,9 +1992,9 @@ void c_Map::OffsetUnset(ObjectData* obj, TypedValue* key) {
   throwBadKeyType();
 }
 
-bool c_Map::Equals(ObjectData* obj1, ObjectData* obj2) {
-  auto mp1 = static_cast<c_Map*>(obj1);
-  auto mp2 = static_cast<c_Map*>(obj2);
+bool c_Map::Equals(const ObjectData* obj1, const ObjectData* obj2) {
+  auto mp1 = static_cast<const c_Map*>(obj1);
+  auto mp2 = static_cast<const c_Map*>(obj2);
   if (mp1->m_size != mp2->m_size) return false;
   for (uint i = 0; i <= mp1->m_nLastSlot; ++i) {
     c_Map::Bucket& p = mp1->m_data[i];
@@ -3232,9 +3232,9 @@ void c_StableMap::OffsetUnset(ObjectData* obj, TypedValue* key) {
   throwBadKeyType();
 }
 
-bool c_StableMap::Equals(ObjectData* obj1, ObjectData* obj2) {
-  auto smp1 = static_cast<c_StableMap*>(obj1);
-  auto smp2 = static_cast<c_StableMap*>(obj2);
+bool c_StableMap::Equals(const ObjectData* obj1, const ObjectData* obj2) {
+  auto smp1 = static_cast<const c_StableMap*>(obj1);
+  auto smp2 = static_cast<const c_StableMap*>(obj2);
   if (smp1->m_size != smp2->m_size) return false;
   auto p1 = smp1->m_pListHead;
   auto p2 = smp2->m_pListHead;
@@ -4001,9 +4001,9 @@ void c_Set::OffsetUnset(ObjectData* obj, TypedValue* key) {
   c_Set::throwNoIndexAccess();
 }
 
-bool c_Set::Equals(ObjectData* obj1, ObjectData* obj2) {
-  auto st1 = static_cast<c_Set*>(obj1);
-  auto st2 = static_cast<c_Set*>(obj2);
+bool c_Set::Equals(const ObjectData* obj1, const ObjectData* obj2) {
+  auto st1 = static_cast<const c_Set*>(obj1);
+  auto st2 = static_cast<const c_Set*>(obj2);
   if (st1->m_size != st2->m_size) return false;
   for (uint i = 0; i <= st1->m_nLastSlot; ++i) {
     c_Set::Bucket& p = st1->m_data[i];
@@ -4376,9 +4376,9 @@ void c_Pair::OffsetUnset(ObjectData* obj, TypedValue* key) {
   throw e;
 }
 
-bool c_Pair::Equals(ObjectData* obj1, ObjectData* obj2) {
-  auto pair1 = static_cast<c_Pair*>(obj1);
-  auto pair2 = static_cast<c_Pair*>(obj2);
+bool c_Pair::Equals(const ObjectData* obj1, const ObjectData* obj2) {
+  auto pair1 = static_cast<const c_Pair*>(obj1);
+  auto pair2 = static_cast<const c_Pair*>(obj2);
   return equal(tvAsCVarRef(&pair1->elm0), tvAsCVarRef(&pair2->elm0)) &&
          equal(tvAsCVarRef(&pair1->elm1), tvAsCVarRef(&pair2->elm1));
 }
@@ -5035,7 +5035,7 @@ void collectionUnserialize(ObjectData* obj, VariableUnserializer* uns,
   }
 }
 
-bool collectionEquals(ObjectData* obj1, ObjectData* obj2) {
+bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2) {
   int ct = obj1->getCollectionType();
   assert(ct == obj2->getCollectionType());
   switch (ct) {

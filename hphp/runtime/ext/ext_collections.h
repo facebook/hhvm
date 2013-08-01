@@ -161,7 +161,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
   static void OffsetUnset(ObjectData* obj, TypedValue* key);
   static void OffsetAppend(ObjectData* obj, TypedValue* val);
-  static bool Equals(ObjectData* obj1, ObjectData* obj2);
+  static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
 
@@ -267,24 +267,24 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
   static void throwOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
-  TypedValue* at(int64_t key) {
+  TypedValue* at(int64_t key) const {
     Bucket* p = find(key);
     if (LIKELY(p != NULL)) return &p->data;
     throwOOB(key);
     return NULL;
   }
-  TypedValue* get(int64_t key) {
+  TypedValue* get(int64_t key) const {
     Bucket* p = find(key);
     if (p) return &p->data;
     return NULL;
   }
-  TypedValue* at(StringData* key) {
+  TypedValue* at(StringData* key) const {
     Bucket* p = find(key->data(), key->size(), key->hash());
     if (LIKELY(p != NULL)) return &p->data;
     throwOOB(key);
     return NULL;
   }
-  TypedValue* get(StringData* key) {
+  TypedValue* get(StringData* key) const {
     Bucket* p = find(key->data(), key->size(), key->hash());
     if (p) return &p->data;
     return NULL;
@@ -306,10 +306,10 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
     ++m_version;
     erase(find(key->data(), key->size(), key->hash()));
   }
-  bool contains(int64_t key) {
+  bool contains(int64_t key) const {
     return find(key);
   }
-  bool contains(StringData* key) {
+  bool contains(StringData* key) const {
     return find(key->data(), key->size(), key->hash());
   }
   void reserve(int64_t sz) {
@@ -335,7 +335,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
   static void OffsetUnset(ObjectData* obj, TypedValue* key);
   static void OffsetAppend(ObjectData* obj, TypedValue* val);
-  static bool Equals(ObjectData* obj1, ObjectData* obj2);
+  static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
 
@@ -637,7 +637,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
   static void OffsetUnset(ObjectData* obj, TypedValue* key);
   static void OffsetAppend(ObjectData* obj, TypedValue* val);
-  static bool Equals(ObjectData* obj1, ObjectData* obj2);
+  static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
 
@@ -863,7 +863,7 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
   static void OffsetUnset(ObjectData* obj, TypedValue* key);
   static void OffsetAppend(ObjectData* obj, TypedValue* val);
-  static bool Equals(ObjectData* obj1, ObjectData* obj2);
+  static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
 
@@ -1091,7 +1091,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
   static void OffsetUnset(ObjectData* obj, TypedValue* key);
   static void OffsetAppend(ObjectData* obj, TypedValue* val);
-  static bool Equals(ObjectData* obj1, ObjectData* obj2);
+  static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
   int64_t size() const {
@@ -1163,7 +1163,7 @@ int64_t collectionSize(ObjectData* obj);
 void collectionReserve(ObjectData* obj, int64_t sz);
 void collectionUnserialize(ObjectData* obj, VariableUnserializer* uns,
                            int64_t sz, char type);
-bool collectionEquals(ObjectData* obj1, ObjectData* obj2);
+bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2);
 void collectionDeepCopyTV(TypedValue* tv);
 ArrayData* collectionDeepCopyArray(ArrayData* arr);
 ObjectData* collectionDeepCopyVector(c_Vector* vec);

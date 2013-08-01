@@ -1508,10 +1508,15 @@ void VMExecutionContext::syncGdbState() {
   }
 }
 
+static bool jitIsEnabled(const Unit* unit) {
+  if (!ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) return false;
+  return unit == nullptr || !unit->isInterpretOnly();
+}
+
 void VMExecutionContext::enterVMPrologue(ActRec* enterFnAr) {
   assert(enterFnAr);
   Stats::inc(Stats::VMEnter);
-  if (ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
+  if (jitIsEnabled(enterFnAr->m_func->unit())) {
     int np = enterFnAr->m_func->numParams();
     int na = enterFnAr->numArgs();
     if (na > np) na = np + 1;
@@ -1532,7 +1537,7 @@ void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
     start = enterFnAr->m_func->getFuncBody();
   }
   Stats::inc(Stats::VMEnter);
-  if (ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
+  if (jitIsEnabled(m_fp->unit())) {
     (void) m_fp->unit()->offsetOf(m_pc); /* assert */
     if (enterFnAr) {
       assert(start);
@@ -2570,12 +2575,14 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
                                          int frame) {
   assert(retval);
   // The code has "<?php" prepended already
-  Unit* unit = compileEvalString(code);
+  Unit* unit = compile_string(code->data(), code->size());
   if (unit == nullptr) {
     raise_error("Syntax error");
     tvWriteNull(retval);
     return;
   }
+  // Do not JIT this unit, we are using it exactly once.
+  unit->setInterpretOnly();
 
   VarEnv *varEnv = nullptr;
   ActRec *fp = getFP();

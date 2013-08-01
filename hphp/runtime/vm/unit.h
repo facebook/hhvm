@@ -643,6 +643,8 @@ public:
     m_cacheOffset = id >> 3;
     m_cacheMask = 1 << (id & 7);
   }
+  bool isInterpretOnly() const { return m_interpretOnly; }
+  void setInterpretOnly() { m_interpretOnly = false; }
   bool isMergeOnly() const { return m_mergeOnly; }
   void clearMergeOnly() { m_mergeOnly = false; }
   bool isEmpty() const { return m_mergeState & UnitMergeStateEmpty; }
@@ -714,6 +716,7 @@ private:
   uint8_t m_mergeState;
   uint8_t m_cacheMask;
   bool m_mergeOnly;
+  bool m_interpretOnly;
   LineTable m_lineTable;
   FuncTable m_funcTable;
   mutable PseudoMainCacheMap *m_pseudoMainCache;

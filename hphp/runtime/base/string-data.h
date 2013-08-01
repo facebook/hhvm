@@ -92,12 +92,11 @@ class StringData {
   StringData(const StringData&); // disable copying
   StringData& operator=(const StringData&);
 
-  enum Format {
-    IsSmall   = 0, // short str overlaps m_big
-    IsShared  = 0x1000000000000000, // shared memory string
-    IsMalloc  = 0x2000000000000000, // m_big.data is malloc'd
-    IsSmart   = 0x3000000000000000, // m_big.data is smart_malloc'd
-    IsMask    = 0xF000000000000000
+  enum class Mode : uint8_t {
+    Small   = 0x0,  // short overlaps m_big; must be zero (null terminated)
+    Shared  = 0x1,  // shared memory string
+    Malloc  = 0x2,  // m_big.data is malloc'd
+    Smart   = 0x3,  // m_big.data is smart_malloc'd
   };
 
 public:
@@ -246,9 +245,6 @@ public:
   static uint sizeOffset() { return offsetof(StringData, m_len); }
   int capacity() const { return isSmall() ? MaxSmallSize : bigCap(); }
   bool empty() const { return size() == 0;}
-  bool isShared() const { return format() == IsShared; }
-  bool isSmall() const { return format() == IsSmall; }
-  bool isImmutable() const { return isStatic() || isShared(); }
   DataType isNumericWithVal(int64_t &lval, double &dval, int allow_errors) const;
   bool isNumeric() const;
   bool isInteger() const;
@@ -345,7 +341,7 @@ public:
 private:
   StringData() : m_data(m_small), m_len(0), m_count(0), m_hash(0) {
     m_big.shared = 0;
-    m_big.cap = IsSmall;
+    setSmall();
     m_small[0] = 0;
   }
 
@@ -426,13 +422,29 @@ private:
   bool checkSane() const;
   const char* rawdata() const { return m_data; }
 
-  Format format() const {
-    return Format(m_big.cap & IsMask);
+  bool isShared() const { return mode() == Mode::Shared; }
+  bool isImmutable() const { return isStatic() || isShared(); }
+  bool isSmall() const { return mode() == Mode::Small; }
+  bool isSmart() const { return mode() == Mode::Smart; }
+
+  Mode mode() const {
+    return static_cast<Mode>(m_small[MaxSmallSize]);
   }
 
-  int bigCap() const {
+  void setSmall() {
+    m_small[MaxSmallSize] = static_cast<uint8_t>(Mode::Small);
+  }
+
+  void setModeAndCap(Mode newMode, uint32_t cap) {
+    assert(newMode != Mode::Small);
+    m_big.modeAndCap = (static_cast<uint64_t>(newMode) << (7 * 8)) | cap;
+    assert(m_big.cap == cap);
+    assert(mode() == newMode);
+  }
+
+  uint32_t bigCap() const {
     assert(!isSmall());
-    return m_big.cap & ~IsMask;
+    return m_big.cap;
   }
 
   /* Only call preCompute() and setStatic() in a thread-neutral context! */
@@ -459,14 +471,19 @@ private:
   union __attribute__((__packed__)) {
     char m_small[MaxSmallSize + 1];
     struct __attribute__((__packed__)) {
-      // Calculate padding so that node, shared, and cap are pointer aligned,
-      // and ensure cap overlaps the last byte of m_small.
+      // Calculate padding so that node, shared, and cap are pointer aligned.
       static const size_t kPadding = sizeof(m_small) -
         sizeof(SweepNode) - sizeof(SharedVariant*) - sizeof(uint64_t);
       char junk[kPadding];
       SweepNode node;
       SharedVariant *shared;
-      uint64_t cap;
+      union {
+        struct {
+          uint32_t cap;
+          uint32_t paddingWithMode;
+        };
+        uint64_t modeAndCap; // overlaps with the last byte of m_small
+      };
     } m_big;
   };
 };
@@ -489,7 +506,7 @@ class StackStringData : public StringData {
     assert(!decRefCount());
     releaseData();
     m_data = 0;
-    m_big.cap = IsSmall;
+    setSmall(); // XXX(#2674472)
   }
 };
 

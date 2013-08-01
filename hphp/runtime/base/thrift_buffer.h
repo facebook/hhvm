@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/variable-serializer.h"
 
 #include "arpa/inet.h"
 #if defined(__FreeBSD__)

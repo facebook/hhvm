@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/request_local.h"
 #include "hphp/runtime/base/ini_setting.h"
 #include "hphp/runtime/base/datetime.h"
-#include "hphp/runtime/base/variable_unserializer.h"
+#include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/array_iterator.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"

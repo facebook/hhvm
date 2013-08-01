@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/thrift_buffer.h"
 #include "hphp/runtime/base/socket.h"
-#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/variable-serializer.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

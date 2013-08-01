@@ -37,7 +37,7 @@
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/util/parser/hphp.tab.hpp"
-#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/zend-string.h"
 
 using namespace HPHP;

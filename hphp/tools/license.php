@@ -25,8 +25,8 @@ $excluded = array(
 
   // non-PHP licenses
   'compiler/parser/hphp.tab.cpp',
-  'runtime/base/utf8_decode.c',
-  'runtime/base/utf8_to_utf16.c',
+  'runtime/base/utf8-decode.c',
+  'runtime/base/utf8-to-utf16.c',
   'runtime/base/zend-strtod.cpp',
   'runtime/ext/JSON_parser.cpp',
   'runtime/ext/php_unicode.h',

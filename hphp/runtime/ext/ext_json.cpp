@@ -17,8 +17,8 @@
 
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/runtime/ext/JSON_parser.h"
-#include "hphp/runtime/base/utf8_decode.h"
-#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/utf8-decode.h"
+#include "hphp/runtime/base/variable-serializer.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(json);

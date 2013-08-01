@@ -33,7 +33,7 @@
 #include "hphp/runtime/base/exceptions.h"
 #include <sys/file.h>
 #include "hphp/runtime/base/array_iterator.h"
-#include "hphp/runtime/base/stream_wrapper_registry.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/string_buffer.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/base/utf8_decode.h"
+#include "hphp/runtime/base/utf8-decode.h"
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/runtime/ext/JSON_parser.h"
 

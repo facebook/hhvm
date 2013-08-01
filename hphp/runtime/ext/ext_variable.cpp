@@ -16,8 +16,8 @@
 */
 
 #include "hphp/runtime/ext/ext_variable.h"
-#include "hphp/runtime/base/variable_serializer.h"
-#include "hphp/runtime/base/variable_unserializer.h"
+#include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/util/logger.h"
 

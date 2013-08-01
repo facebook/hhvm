@@ -16,8 +16,8 @@
 */
 
 #include "hphp/runtime/ext/ext_phar.h"
-#include "hphp/runtime/base/stream_wrapper.h"
-#include "hphp/runtime/base/stream_wrapper_registry.h"
+#include "hphp/runtime/base/stream-wrapper.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/mem_file.h"
 
 namespace HPHP {

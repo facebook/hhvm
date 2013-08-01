@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/runtime_error.h"
-#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/shared_map.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/lock.h"

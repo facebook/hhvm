@@ -23,9 +23,9 @@
 #include "hphp/runtime/base/string_buffer.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/server/server_stats.h"
-#include "hphp/runtime/base/stream_wrapper.h"
-#include "hphp/runtime/base/stream_wrapper_registry.h"
-#include "hphp/runtime/base/user_stream_wrapper.h"
+#include "hphp/runtime/base/stream-wrapper.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/user-stream-wrapper.h"
 #include <memory>
 #include <unistd.h>
 #include <fcntl.h>

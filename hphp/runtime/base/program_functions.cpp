@@ -53,7 +53,7 @@
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/base/simple_counter.h"
 #include "hphp/runtime/base/extended_logger.h"
-#include "hphp/runtime/base/stream_wrapper_registry.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>

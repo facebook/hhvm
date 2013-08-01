@@ -24,7 +24,7 @@
 #include <dlfcn.h>
 #include "hphp/runtime/base/program_functions.h"
 #include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/base/ini_setting.h"

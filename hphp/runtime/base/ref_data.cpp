@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/variable-serializer.h"
 
 namespace HPHP {
 

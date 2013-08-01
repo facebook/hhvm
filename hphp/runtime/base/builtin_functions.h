@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/runtime_error.h"
 #include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/variable_unserializer.h"
+#include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/request_local.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/util/case_insensitive.h"

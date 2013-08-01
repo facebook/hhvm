@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/base/concurrent_shared_store.h"
-#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/timer.h"

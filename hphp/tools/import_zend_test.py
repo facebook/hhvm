@@ -35,11 +35,6 @@ no_import = (
     '/tests/run-test/test010.phpt',
 
     # segfaults
-    '/Zend/tests/bug35239.phpt',      # fixed
-    '/Zend/tests/bug54265.phpt',      # fixed
-    '/Zend/tests/bug55705.phpt',
-    '/Zend/tests/callable_type_hint_001.phpt',
-    '/Zend/tests/callable_type_hint_003.phpt',
     '/Zend/tests/heredoc_005.phpt',
     '/Zend/tests/jump13.phpt',
     '/ext/bz2/tests/004.phpt',
@@ -52,11 +47,6 @@ no_import = (
     '/ext/session/tests/session_module_name_variation2.phpt',
     '/tests/func/010.phpt',
     '/tests/lang/bug21820.phpt',
-    '/tests/lang/func_get_arg.003.phpt',
-    '/tests/lang/func_get_args.003.phpt',
-    '/tests/lang/func_num_args.003.phpt',
-    '/tests/lang/operators/divide_basiclong_64bit.phpt',
-    '/tests/lang/operators/modulus_basiclong_64bit.phpt',
 
     # intermittent segfaults
     '/Zend/tests/001.phpt',

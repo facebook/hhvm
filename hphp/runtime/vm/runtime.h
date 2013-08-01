@@ -41,8 +41,6 @@ StringData* concat_si(StringData* v1, int64_t v2);
 StringData* concat_ss(StringData* v1, StringData* v2);
 StringData* concat_tv(DataType t1, uint64_t v1, DataType t2, uint64_t v2);
 
-int64_t tv_to_bool(TypedValue* tv);
-
 int64_t eq_null_str(StringData* v1);
 int64_t eq_bool_str(int64_t v1, StringData* v2);
 int64_t eq_int_str(int64_t v1, StringData* v2);

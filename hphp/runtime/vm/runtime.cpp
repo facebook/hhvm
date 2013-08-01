@@ -287,28 +287,6 @@ int64_t arr_to_bool(ArrayData* ad) {
   return retval;
 }
 
-/**
- * tv_to_bool will decrement tv's refcount if tv is a refcounted type
- */
-int64_t
-tv_to_bool(TypedValue* tv) {
-  using std::string;
-  bool retval;
-  if (IS_STRING_TYPE(tv->m_type)) {
-    StringData* sd = tv->m_data.pstr;
-    retval = bool(str0_to_bool(sd));
-  } else if (tv->m_type == KindOfArray) {
-    ArrayData* ad = tv->m_data.parr;
-    retval = bool(arr0_to_bool(ad));
-  } else {
-    retval = tvAsCVarRef(tv).toBoolean();
-  }
-  TRACE(2, Trace::prettyNode("TvToBool", *tv) + string(" -> ") +
-        string(retval ? "t" : "f") + string("\n"));
-  tvRefcountedDecRef(tv);
-  return int64_t(retval);
-}
-
 Unit* compile_file(const char* s, size_t sz, const MD5& md5,
                    const char* fname) {
   return g_hphp_compiler_parse(s, sz, md5, fname);

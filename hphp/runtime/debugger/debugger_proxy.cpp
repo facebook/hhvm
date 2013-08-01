@@ -359,7 +359,7 @@ void DebuggerProxy::pollSignal() {
 
     // Block any threads that might be interrupting from communicating with the
     // client until we're done with this poll.
-    Lock lock(m_signumMutex);
+    Lock lock(m_signalMutex);
 
     // After DebuggerSignalTimeout seconds that no active thread picks
     // up the signal, we send it to dummy sandbox.
@@ -554,7 +554,7 @@ bool DebuggerProxy::checkFlowBreak(CmdInterrupt &cmd) {
   // If there is an outstanding Ctrl-C from the client, go ahead and break now.
   // Note: this stops any flow control command we might have in-flight.
   if (m_signum == CmdSignal::SignalBreak) {
-    Lock lock(m_signumMutex);
+    Lock lock(m_signalMutex);
     if (m_signum == CmdSignal::SignalBreak) {
       m_signum = CmdSignal::SignalNone;
       m_flow.reset();

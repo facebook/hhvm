@@ -797,6 +797,10 @@ public:
     return nBytes < (capacity() - used());
   }
 
+  void skip(size_t nBytes) {
+    (void)code->alloc<uint8_t>(1, nBytes);
+  }
+
   /*
    * The following section defines the main interface for emitting
    * x64.

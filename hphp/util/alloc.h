@@ -78,7 +78,7 @@ namespace Util {
 
 #ifdef USE_JEMALLOC
 extern unsigned low_arena;
-extern bool low_huge;
+extern std::atomic<int> low_huge_pages;
 #endif
 
 inline void* low_malloc(size_t size) {
@@ -98,14 +98,13 @@ inline void low_free(void* ptr) {
 #endif
 }
 
-enum class low_malloc_opts {
-  huge = 1
-};
-inline void low_malloc_setopts(low_malloc_opts opts) {
+inline void low_malloc_huge_pages(int pages) {
 #ifdef USE_JEMALLOC
-  low_huge = int(opts) & int(low_malloc_opts::huge);
+  low_huge_pages = pages;
 #endif
 }
+
+void low_malloc_skip_huge(void* start, void* end);
 
 /**
  * Safe memory allocation.

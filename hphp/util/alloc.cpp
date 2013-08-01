@@ -93,7 +93,7 @@ void flush_thread_stack() {
 
 #ifdef USE_JEMALLOC
 unsigned low_arena = 0;
-bool low_huge = false;
+std::atomic<int> low_huge_pages(0);
 std::atomic<void*> highest_lowmall_addr;
 static const unsigned kLgHugeGranularity = 21;
 static const unsigned kHugePageSize = 1 << kLgHugeGranularity;
@@ -148,8 +148,9 @@ struct JEMallocInitializer {
     (void) sbrk(leftInPage);
     assert((uintptr_t(sbrk(0)) & kHugePageMask) == 0);
     highest_lowmall_addr = sbrk(0);
-    if (low_huge) {
-      hintHuge((void*)uintptr_t(highest_lowmall_addr.load()), kHugePageSize);
+    if (low_huge_pages.load()) {
+      --low_huge_pages;
+      hintHuge(highest_lowmall_addr.load(), kHugePageSize);
     }
   }
 };
@@ -168,9 +169,8 @@ struct JEMallocInitializer {
 #endif
 
 static JEMallocInitializer initJEMalloc MAX_CONSTRUCTOR_PRIORITY;
-void* low_malloc_impl(size_t size) {
-  void* ptr = nullptr;
-  allocm(&ptr, nullptr, size, ALLOCM_ARENA(low_arena));
+
+static void low_malloc_hugify(void* ptr) {
   // In practice, the things we low_malloc are both long-lived and likely
   // to be randomly accessed. This makes them good candidates for mapping
   // with huge pages. Track a high water mark, and incrementally map each
@@ -183,17 +183,43 @@ void* low_malloc_impl(size_t size) {
         // Whoever updates highest_ever is responsible for hinting all the
         // intervening regions. prevRegion is already huge, so bump the
         // region we're hugening by 1.
-        if (low_huge) {
-          hintHuge((void*)((prevRegion + 1) << kLgHugeGranularity),
-                 (newRegion - prevRegion) << kLgHugeGranularity);
+        int pages = newRegion - prevRegion;
+        int remaining = low_huge_pages.load();
+        while (remaining) {
+          if (pages > remaining) pages = remaining;
+
+          if (low_huge_pages.compare_exchange_weak(remaining,
+                                                   remaining - pages)) {
+            hintHuge((void*)((prevRegion + 1) << kLgHugeGranularity),
+                     pages << kLgHugeGranularity);
+            break;
+          }
         }
-        break;
       }
+      break;
     }
     // Try again.
   }
+}
+
+void* low_malloc_impl(size_t size) {
+  void* ptr = nullptr;
+  allocm(&ptr, nullptr, size, ALLOCM_ARENA(low_arena));
+  low_malloc_hugify((char*)ptr + size - 1);
   return ptr;
 }
+
+void low_malloc_skip_huge(void* start, void* end) {
+  low_malloc_hugify((char*)start - 1);
+  for (void* oldValue = highest_lowmall_addr.load(); end > oldValue; ) {
+    if (highest_lowmall_addr.compare_exchange_weak(oldValue, end)) break;
+  }
+}
+
+#else
+
+void low_malloc_skip_huge(void* start, void* end) {}
+
 #endif // USE_JEMALLOC
 
 ///////////////////////////////////////////////////////////////////////////////

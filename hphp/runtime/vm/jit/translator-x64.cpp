@@ -3380,20 +3380,21 @@ TranslatorX64::TranslatorX64()
   , m_catchTraceMap(128)
 {
   static const size_t kRoundUp = 2 << 20;
-  const size_t kAHotSize   = RuntimeOption::VMTranslAHotSize;
-  const size_t kAProfSize  = RuntimeOption::EvalJitPGO ?
-                             RuntimeOption::VMTranslAProfSize : 0;
-  const size_t kASize      = RuntimeOption::VMTranslASize;
-  const size_t kAStubsSize = RuntimeOption::VMTranslAStubsSize;
-  const size_t kGDataSize  = RuntimeOption::VMTranslGDataSize;
-  m_totalSize = kAHotSize + kASize + kAStubsSize + kAProfSize +
-    kTrampolinesBlockSize + kGDataSize;
+
+  auto ru = [=] (size_t sz) { return sz + (-sz & (kRoundUp - 1)); };
+
+  const size_t kAHotSize   = ru(RuntimeOption::VMTranslAHotSize);
+  const size_t kASize      = ru(RuntimeOption::VMTranslASize);
+  const size_t kAProfSize  = ru(RuntimeOption::EvalJitPGO ?
+                                RuntimeOption::VMTranslAProfSize : 0);
+  const size_t kAStubsSize = ru(RuntimeOption::VMTranslAStubsSize);
+  const size_t kGDataSize  = ru(RuntimeOption::VMTranslGDataSize);
+  m_totalSize = kAHotSize + kASize + kAStubsSize + kAProfSize + kGDataSize;
 
   TRACE(1, "TranslatorX64@%p startup\n", this);
   tx64 = this;
 
-  if ((kAHotSize < (2 << 20)) ||
-      (kASize < (10 << 20)) ||
+  if ((kASize < (10 << 20)) ||
       (kAStubsSize < (10 << 20)) ||
       (kGDataSize < (2 << 20))) {
     fprintf(stderr, "Allocation sizes ASize, AStubsSize, and GlobalDataSize "
@@ -3428,9 +3429,17 @@ TranslatorX64::TranslatorX64()
   // Using sbrk to ensure its in the bottom 2G, so we avoid
   // the need for trampolines, and get to use shorter
   // instructions for tc addresses.
-  const size_t allocationSize = m_totalSize + kRoundUp - 1;
-  uint8_t *base = (uint8_t*)sbrk(allocationSize);
+  size_t allocationSize = m_totalSize;
+  uint8_t* base = (uint8_t*)sbrk(0);
+  if (base != (uint8_t*)-1) {
+    assert(!(allocationSize & (kRoundUp - 1)));
+    // Make sure that we have space to round up to the start
+    // of a huge page
+    allocationSize += -(uint64_t)base & (kRoundUp - 1);
+    base = (uint8_t*)sbrk(allocationSize);
+  }
   if (base == (uint8_t*)-1) {
+    allocationSize = m_totalSize + kRoundUp - 1;
     base = (uint8_t*)low_malloc(allocationSize);
     if (!base) {
       base = (uint8_t*)malloc(allocationSize);
@@ -3440,38 +3449,59 @@ TranslatorX64::TranslatorX64()
               allocationSize);
       exit(1);
     }
+  } else {
+    low_malloc_skip_huge(base, base + allocationSize - 1);
   }
   assert(base);
   tcStart = base;
   base += -(uint64_t)base & (kRoundUp - 1);
-  enhugen(base, RuntimeOption::EvalTCNumHugeHotMB);
+
+  m_unwindRegistrar = register_unwind_region(base, m_totalSize - kGDataSize);
+
   TRACE(1, "init atrampolines @%p\n", base);
+
   trampolinesCode.init(base, kTrampolinesBlockSize);
   atrampolines.init(&trampolinesCode);
-  base += kTrampolinesBlockSize;
 
-  m_unwindRegistrar = register_unwind_region(base, m_totalSize);
-  TRACE(1, "init ahot @%p\n", base);
-  hotCode.init(base, kAHotSize);
-  ahot.init(&hotCode);
-  base += kAHotSize;
+  auto misalign = kTrampolinesBlockSize;
+
+  if (kAHotSize) {
+    TRACE(1, "init ahot @%p\n", base);
+    hotCode.init(base, kAHotSize);
+    ahot.init(&hotCode);
+    enhugen(base, kAHotSize >> 20);
+    base += kAHotSize;
+    ahot.skip(misalign);
+    misalign = 0;
+  }
+
   TRACE(1, "init a @%p\n", base);
+
   mainCode.init(base, kASize);
   a.init(&mainCode);
+  enhugen(base, RuntimeOption::EvalTCNumHugeHotMB);
   aStart = base;
   base += kASize;
+  a.skip(misalign);
+  misalign = 0;
+
   TRACE(1, "init aprof @%p\n", base);
   profCode.init(base, kAProfSize);
   aprof.init(&profCode);
   base += kAProfSize;
-  base += -(uint64_t)base & (kRoundUp - 1);
+
   TRACE(1, "init astubs @%p\n", base);
   stubsCode.init(base, kAStubsSize);
   astubs.init(&stubsCode);
   enhugen(base, RuntimeOption::EvalTCNumHugeColdMB);
   base += kAStubsSize;
+
   TRACE(1, "init gdata @%p\n", base);
   m_globalData.init(base, kGDataSize);
+  base += kGDataSize;
+
+  assert(base - tcStart <= allocationSize);
+  assert(base - tcStart + kRoundUp > allocationSize);
 
   // put the stubs into ahot, rather than a
   AsmSelector asmSel(AsmSelector::Args(this).hot(true));

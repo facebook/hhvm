@@ -1121,10 +1121,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
 #undef get_uint32
 #undef get_uint32_t
 #undef get_uint64
-    if (EvalMapLowMemHuge) {
-      assert(hugePagesSoundNice());
-      Util::low_malloc_setopts(Util::low_malloc_opts::huge);
-    }
+    Util::low_malloc_huge_pages(EvalMaxLowMemHugePages);
 
     EvalJitEnableRenameFunction = EvalJitEnableRenameFunction || !EvalJit;
 

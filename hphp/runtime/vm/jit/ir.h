@@ -605,6 +605,9 @@ O(ElemX,                   D(PtrToGen), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
                                           S(PtrToCell),      E|N|Mem|Refs|Er) \
+O(ElemArray,               D(PtrToGen), C(TCA)                                \
+                                          S(PtrToArr)                         \
+                                          S(Int,Str),        E|N|Mem|Refs|Er) \
 O_STK(ElemDX,              D(PtrToGen), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \

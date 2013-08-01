@@ -252,6 +252,8 @@ static CallMap s_callMap {
                  {{SSA, 1}, {SSA, 2}, {TV, 3}}},
     {ElemX,    fssa(0), DSSA, SSync,
                  {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
+    {ElemArray, fssa(0), DSSA, SSync,
+                 {{SSA, 1}, {SSA, 2}}},
     {ElemDX,   fssa(0), DSSA, SSync,
                  {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
     {ElemUX,   fssa(0), DSSA, SSync,

@@ -997,8 +997,17 @@ void HhbcTranslator::VectorTranslator::emitElem() {
   MInstrAttr mia = MInstrAttr(m_mii.getAttr(mCode) & MIA_intermediate);
   SSATmp* key = getKey();
 
+  // Fast path for the common/easy case
+  const bool warn = mia & Warn;
   const bool unset = mia & Unset;
   const bool define = mia & Define;
+  if (m_base->isA(Type::PtrToArr) &&
+      !unset && !define &&
+      (key->isA(Type::Int) || key->isA(Type::Str))) {
+    emitElemArray(key, warn);
+    return;
+  }
+
   assert(!(define && unset));
   if (unset) {
     SSATmp* uninit = m_tb.genPtrToUninit();
@@ -1027,6 +1036,72 @@ void HhbcTranslator::VectorTranslator::emitElem() {
     m_base = gen(ElemX, getCatchTrace(),
                  cns((TCA)opFunc), m_base, key, genMisPtr());
   }
+}
+#undef HELPER_TABLE
+
+template<bool warn>
+NEVER_INLINE
+static TypedValue* elemArrayNotFound(int64_t k) {
+  if (warn) {
+    raise_notice("Undefined index: %" PRId64, k);
+  }
+  return (TypedValue*)&null_variant;
+}
+
+template<bool warn>
+NEVER_INLINE
+static TypedValue* elemArrayNotFound(const StringData* k) {
+  if (warn) {
+    raise_notice("Undefined index: %s", k->data());
+  }
+  return (TypedValue*)&null_variant;
+}
+
+static inline TypedValue* checkedGet(ArrayData* a, StringData* key) {
+  int64_t i;
+  return UNLIKELY(key->isStrictlyInteger(i)) ? a->nvGet(i) : a->nvGet(key);
+}
+
+static inline TypedValue* checkedGet(ArrayData* a, int64_t key) {
+  not_reached();
+}
+
+template<KeyType keyType, bool checkForInt, bool warn>
+static inline TypedValue* elemArrayImpl(
+  TypedValue* a, typename KeyTypeTraits<keyType>::rawType key) {
+  ArrayData* ad = a->m_data.parr;
+  TypedValue* ret = checkForInt ? checkedGet(ad, key)
+                                : ad->nvGet(key);
+  return ret ? ret : elemArrayNotFound<warn>(key);
+}
+
+#define HELPER_TABLE(m)                                 \
+  /* name               keyType  checkForInt   warn */  \
+  m(elemArrayS,    KeyType::Str,       false, false)    \
+  m(elemArraySi,   KeyType::Str,        true, false)    \
+  m(elemArrayI,    KeyType::Int,       false, false)    \
+  m(elemArraySW,   KeyType::Str,       false,  true)    \
+  m(elemArraySiW,  KeyType::Str,        true,  true)    \
+  m(elemArrayIW,   KeyType::Int,       false,  true)
+
+#define ELEM(nm, keyType, checkForInt, warn)            \
+  TypedValue* nm(TypedValue* a, TypedValue* key) {      \
+    return elemArrayImpl<keyType, checkForInt, warn>(   \
+      a, keyAsRaw<keyType>(key));                       \
+  }
+namespace VectorHelpers {
+HELPER_TABLE(ELEM)
+}
+#undef ELEM
+
+void HhbcTranslator::VectorTranslator::emitElemArray(SSATmp* key, bool warn) {
+  KeyType keyType;
+  bool checkForInt;
+  m_ht.checkStrictlyInteger(key, keyType, checkForInt);
+
+  typedef TypedValue* (*OpFunc)(ArrayData*, TypedValue*);
+  BUILD_OPTAB(keyType, checkForInt, warn);
+  m_base = gen(ElemArray, cns((TCA)opFunc), m_base, key);
 }
 #undef HELPER_TABLE
 
@@ -1457,15 +1532,6 @@ static TypedValue arrayGetNotFound(const StringData* k) {
   TypedValue v;
   tvWriteNull(&v);
   return v;
-}
-
-static inline TypedValue* checkedGet(ArrayData* a, StringData* key) {
-  int64_t i;
-  return UNLIKELY(key->isStrictlyInteger(i)) ? a->nvGet(i) : a->nvGet(key);
-}
-
-static inline TypedValue* checkedGet(ArrayData* a, int64_t key) {
-  not_reached();
 }
 
 template<KeyType keyType, bool checkForInt>

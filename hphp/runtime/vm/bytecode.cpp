@@ -22,9 +22,9 @@
 
 #include "folly/String.h"
 
-#include "hphp/runtime/base/tv_comparisons.h"
-#include "hphp/runtime/base/tv_conversions.h"
-#include "hphp/runtime/base/tv_arith.h"
+#include "hphp/runtime/base/tv-comparisons.h"
+#include "hphp/runtime/base/tv-conversions.h"
+#include "hphp/runtime/base/tv-arith.h"
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/jit/translator.h"

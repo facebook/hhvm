@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/runtime_type_profiler.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/base/tv_conversions.h"
+#include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/ir.h"

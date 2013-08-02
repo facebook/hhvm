@@ -25,7 +25,7 @@
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
-#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/shared_store_base.h"
 #include "hphp/runtime/server/access_log.h"

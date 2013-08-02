@@ -34,7 +34,7 @@
 #include "hphp/util/atomic.h"
 #include "hphp/util/util.h"
 #include "hphp/runtime/base/class_info.h"
-#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/util/parser/hphp.tab.hpp"
 #include "hphp/runtime/base/variable-serializer.h"

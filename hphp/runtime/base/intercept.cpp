@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/request_local.h"
 #include "hphp/runtime/base/array_init.h"
 #include "hphp/runtime/base/array_iterator.h"
-#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/unit.h"

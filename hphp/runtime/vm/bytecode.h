@@ -22,8 +22,8 @@
 
 #include "hphp/util/util.h"
 #include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/tv_arith.h"
-#include "hphp/runtime/base/tv_conversions.h"
+#include "hphp/runtime/base/tv-arith.h"
+#include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/class_info.h"
 #include "hphp/runtime/base/array_iterator.h"
 #include "hphp/runtime/vm/class.h"

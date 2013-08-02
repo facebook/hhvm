@@ -35,7 +35,7 @@
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/ext/ext_string.h"

@@ -27,7 +27,7 @@
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/util/exception.h"
-#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/smart_object.h"

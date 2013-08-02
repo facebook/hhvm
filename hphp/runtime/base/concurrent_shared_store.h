@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/shared_variant.h"
 #include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/server/server_stats.h"
 #include "tbb/concurrent_hash_map.h"
@@ -39,7 +39,7 @@ namespace HPHP {
 
 class ConcurrentTableSharedStore : public SharedStore {
 public:
-  ConcurrentTableSharedStore(int id)
+  explicit ConcurrentTableSharedStore(int id)
     : SharedStore(id), m_lockingFlag(false), m_purgeCounter(0) {}
 
   virtual int size() {

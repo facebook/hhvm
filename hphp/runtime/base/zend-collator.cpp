@@ -17,7 +17,7 @@
 #include "hphp/runtime/base/zend-collator.h"
 #include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/base/intl_convert.h"
-#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/complex_types.h"

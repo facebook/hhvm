@@ -28,7 +28,7 @@
 #include "hphp/runtime/base/request_local.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/util/case_insensitive.h"
-#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/type-conversions.h"
 
 #if defined(__APPLE__) || defined(__USE_BSD)
 /**

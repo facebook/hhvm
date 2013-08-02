@@ -20,7 +20,7 @@
 #include "hphp/runtime/server/http_request_handler.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/debugger/debugger.h"
-#include "hphp/runtime/base/tv_arith.h"
+#include "hphp/runtime/base/tv-arith.h"
 
 using std::map;
 

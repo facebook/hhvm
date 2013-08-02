@@ -17,7 +17,7 @@
 #include "hphp/runtime/base/program_functions.h"
 
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/thread_init_fini.h"

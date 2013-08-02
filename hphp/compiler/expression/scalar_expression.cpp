@@ -27,7 +27,7 @@
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/util/hash.h"
 #include "hphp/runtime/base/string_data.h"
-#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/compiler/analysis/file_scope.h"

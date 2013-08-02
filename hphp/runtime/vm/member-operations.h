@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/base/tv_conversions.h"
+#include "hphp/runtime/base/tv-conversions.h"
 
 namespace HPHP {
 

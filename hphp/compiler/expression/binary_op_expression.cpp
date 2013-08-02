@@ -22,7 +22,7 @@
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -31,7 +31,7 @@
 #include "hphp/compiler/expression/simple_function_call.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/statement/loop_statement.h"
-#include "hphp/runtime/base/tv_arith.h"
+#include "hphp/runtime/base/tv-arith.h"
 
 using namespace HPHP;
 

@@ -21,13 +21,13 @@
 #define incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 
 #include "hphp/runtime/base/hphp_value.h"
-#include "hphp/runtime/base/type_string.h"
-#include "hphp/runtime/base/type_array.h"
-#include "hphp/runtime/base/type_object.h"
-#include "hphp/runtime/base/type_resource.h"
+#include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-object.h"
+#include "hphp/runtime/base/type-resource.h"
 #include "hphp/runtime/base/ref_data.h"
-#include "hphp/runtime/base/tv_helpers.h"
-#include "hphp/runtime/base/type_variant.h"
+#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/array_data-defs.h"
 #include "hphp/runtime/base/array_init.h"
 

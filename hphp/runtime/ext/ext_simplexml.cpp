@@ -173,7 +173,7 @@ static Array create_children(CResRef doc, xmlNodePtr root,
         continue;
       }
     } else {
-      if (node->type == XML_TEXT_NODE) {
+      if (node->type == XML_TEXT_NODE || node->type == XML_CDATA_SECTION_NODE) {
         if (node->content && *node->content) {
           add_property
             (properties, root,
@@ -187,7 +187,7 @@ static Array create_children(CResRef doc, xmlNodePtr root,
     if (node->type != XML_ELEMENT_NODE || match_ns(node, ns, is_prefix)) {
       xmlNodePtr child = node->children;
       Object sub;
-      if (child && child->type == XML_TEXT_NODE && !xmlIsBlankNode(child)) {
+      if (child && (child->type == XML_TEXT_NODE || child->type == XML_CDATA_SECTION_NODE) && !xmlIsBlankNode(child)) {
         sub = create_text(doc, child, node_list_to_string(root->doc, child),
                           ns, is_prefix, false);
       } else {
@@ -416,6 +416,7 @@ Variant c_SimpleXMLElement::t_xpath(CStrRef path) {
      */
     switch (nodeptr->type) {
     case XML_TEXT_NODE:
+    case XML_CDATA_SECTION_NODE:
       sub = create_element(m_doc, nodeptr->parent, String(), false);
       break;
     case XML_ELEMENT_NODE:

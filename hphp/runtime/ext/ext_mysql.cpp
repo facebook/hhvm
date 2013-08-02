@@ -1097,14 +1097,14 @@ Variant f_mysql_multi_query(CStrRef query, CVarRef link_identifier /* = null */)
   return true;
 }
 
-int f_mysql_next_result(CVarRef link_identifier /* = null */) {
+bool f_mysql_next_result(CVarRef link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!mysql_more_results(conn)) {
     raise_strict_warning("There is no next result set. "
       "Please, call mysql_more_results() to check "
       "whether to call this function/method");
   }
-  return mysql_next_result(conn);
+  return !mysql_next_result(conn);
 }
 
 bool f_mysql_more_results(CVarRef link_identifier /* = null */) {

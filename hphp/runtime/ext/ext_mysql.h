@@ -318,7 +318,7 @@ bool f_mysql_set_timeout(int query_timeout_ms = -1,
 Variant f_mysql_query(CStrRef query, CVarRef link_identifier = uninit_null());
 Variant f_mysql_multi_query(CStrRef query, CVarRef link_identifier = uninit_null());
 
-int f_mysql_next_result(CVarRef link_identifier = uninit_null());
+bool f_mysql_next_result(CVarRef link_identifier = uninit_null());
 
 bool f_mysql_more_results(CVarRef link_identifier = uninit_null());
 

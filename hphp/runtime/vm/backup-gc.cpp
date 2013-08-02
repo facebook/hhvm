@@ -26,7 +26,7 @@
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/execution_context.h"
-#include "hphp/runtime/base/smart_allocator.h"
+#include "hphp/runtime/base/smart-allocator.h"
 #include "hphp/runtime/base/memory_manager.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/hphp_array.h"

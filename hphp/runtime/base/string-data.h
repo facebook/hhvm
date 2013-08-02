@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/countable.h"
-#include "hphp/runtime/base/smart_allocator.h"
+#include "hphp/runtime/base/smart-allocator.h"
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/bstring.h"
 #include "hphp/util/hash.h"

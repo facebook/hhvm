@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/ssl_socket.h"
+#include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/runtime_error.h"
 #include "hphp/util/util.h"

@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/server/libevent_server_with_takeover.h"
 #include "hphp/util/logger.h"
-#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/string-util.h"
 #include <afdt.h>
 
 /*

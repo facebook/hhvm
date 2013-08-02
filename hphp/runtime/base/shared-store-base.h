@@ -18,7 +18,7 @@
 #define incl_HPHP_SHARED_STORE_BASE_H_
 
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/shared_variant.h"
+#include "hphp/runtime/base/shared-variant.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/smalllocks.h"
 #include "hphp/runtime/base/complex_types.h"

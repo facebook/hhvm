@@ -38,7 +38,7 @@
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/array_init.h"
-#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/ext/ext_variable.h"
 

@@ -27,7 +27,7 @@
 #include "folly/Traits.h"
 
 #include "hphp/util/trace.h"
-#include "hphp/runtime/base/string_data.h"
+#include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/cse.h"

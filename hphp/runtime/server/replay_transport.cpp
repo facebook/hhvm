@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/server/replay_transport.h"
-#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/util/process.h"

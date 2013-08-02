@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/array_init.h"
 #include "hphp/runtime/base/array_iterator.h"
 #include "hphp/runtime/base/hphp_array.h"
-#include "hphp/runtime/base/sort_helpers.h"
+#include "hphp/runtime/base/sort-helpers.h"
 #include "folly/Foreach.h"
 
 TRACE_SET_MOD(runtime);

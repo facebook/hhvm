@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/thread_init_fini.h"
-#include "hphp/runtime/base/smart_allocator.h"
+#include "hphp/runtime/base/thread-init-fini.h"
+#include "hphp/runtime/base/smart-allocator.h"
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/server/server_stats.h"

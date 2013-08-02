@@ -25,7 +25,7 @@
 
 #include "hphp/util/base.h"
 #include "hphp/util/lock.h"
-#include "hphp/runtime/base/smart_ptr.h"
+#include "hphp/runtime/base/smart-ptr.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

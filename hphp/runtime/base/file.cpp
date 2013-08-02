@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/string_buffer.h"
+#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/server/static_content_cache.h"

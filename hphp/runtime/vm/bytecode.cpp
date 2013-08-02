@@ -41,7 +41,7 @@
 #include "hphp/util/util.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/debug.h"
-#include "hphp/runtime/base/stat_cache.h"
+#include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/php-debug.h"

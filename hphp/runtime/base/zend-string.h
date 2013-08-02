@@ -21,7 +21,7 @@
 #include "hphp/util/base.h"
 #include "hphp/util/zend/zend_string.h"
 #include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/string_buffer.h"
+#include "hphp/runtime/base/string-buffer.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

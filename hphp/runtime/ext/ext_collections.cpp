@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/sort_helpers.h"
+#include "hphp/runtime/base/sort-helpers.h"
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_intl.h"

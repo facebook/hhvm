@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/md5.h"
 #include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/string-util.h"
 
 #ifdef __APPLE__
 #define st_mtim st_mtimespec

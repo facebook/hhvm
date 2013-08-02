@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/string_buffer.h"
+#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/utf8-decode.h"

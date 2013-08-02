@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_DEBUGGER_THRIFT_BUFFER_H_
 #define incl_HPHP_DEBUGGER_THRIFT_BUFFER_H_
 
-#include "hphp/runtime/base/thrift_buffer.h"
+#include "hphp/runtime/base/thrift-buffer.h"
 #include "hphp/runtime/base/socket.h"
 #include "hphp/runtime/base/variable-serializer.h"
 

@@ -19,16 +19,16 @@
 
 #define TBB_PREVIEW_CONCURRENT_PRIORITY_QUEUE 1
 
-#include "hphp/runtime/base/shared_store_base.h"
+#include "hphp/runtime/base/shared-store-base.h"
 #include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/shared_variant.h"
+#include "hphp/runtime/base/shared-variant.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/server/server_stats.h"
 #include "tbb/concurrent_hash_map.h"
 #include "tbb/concurrent_priority_queue.h"
-#include "hphp/runtime/base/shared_store_stats.h"
+#include "hphp/runtime/base/shared-store-stats.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

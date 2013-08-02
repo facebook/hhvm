@@ -33,7 +33,7 @@
 #include "asm/unistd.h"
 #include <sys/prctl.h>
 #include "linux/perf_event.h"
-#include "hphp/runtime/base/string_data.h"
+#include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"

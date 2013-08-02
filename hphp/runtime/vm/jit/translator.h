@@ -30,7 +30,7 @@
 #include "hphp/util/hash.h"
 #include "hphp/util/timer.h"
 #include "hphp/runtime/base/execution_context.h"
-#include "hphp/runtime/base/smart_containers.h"
+#include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"

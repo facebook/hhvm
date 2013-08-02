@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/stat_cache.h"
+#include "hphp/runtime/base/stat-cache.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>

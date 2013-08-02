@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/shared_map.h"
+#include "hphp/runtime/base/shared-map.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/array_iterator.h"
 #include "hphp/runtime/base/array_init.h"

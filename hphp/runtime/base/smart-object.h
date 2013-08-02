@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_SMART_OBJECT_H_
 #define incl_HPHP_SMART_OBJECT_H_
 
-#include "hphp/runtime/base/smart_ptr.h"
+#include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {

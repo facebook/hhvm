@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/file.h"
-#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/php-stream-wrapper.h"
 #include "hphp/runtime/base/http-stream-wrapper.h"

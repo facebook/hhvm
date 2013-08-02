@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/util/logger.h"
-#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/string-util.h"
 
 using std::set;
 

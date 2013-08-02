@@ -23,7 +23,7 @@
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/ext_mysql.h"
 #include "hphp/runtime/ext/ext_curl.h"
-#include "hphp/runtime/base/shared_store_base.h"
+#include "hphp/runtime/base/shared-store-base.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/server/ip_block_map.h"
 #include "hphp/test/ext/test_mysql_info.h"

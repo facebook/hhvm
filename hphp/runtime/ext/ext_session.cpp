@@ -21,7 +21,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/zend-math.h"
-#include "hphp/runtime/base/string_buffer.h"
+#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/request_local.h"
 #include "hphp/runtime/base/ini_setting.h"
 #include "hphp/runtime/base/datetime.h"

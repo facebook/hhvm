@@ -19,7 +19,7 @@
 #include "hphp/runtime/debugger/cmd/all.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/runtime/ext/ext_socket.h"

@@ -20,7 +20,7 @@
 #include <boost/mpl/if.hpp>
 #include <boost/utility/enable_if.hpp>
 
-#include "hphp/runtime/base/string_data.h"
+#include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/fixed-string-map.h"
 
 namespace HPHP {

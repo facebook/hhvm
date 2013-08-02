@@ -19,7 +19,7 @@
 #include "hphp/runtime/server/upload.h"
 #include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/base/file.h"
-#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/url.h"

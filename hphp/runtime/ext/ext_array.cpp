@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/request_local.h"
 #include "hphp/runtime/base/zend-collator.h"
 #include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/sort_flags.h"
+#include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/hphp_array.h"

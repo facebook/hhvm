@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/request_local.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/array_iterator.h"
 #include "hphp/runtime/base/ini_setting.h"
-#include "hphp/runtime/base/thread_init_fini.h"
+#include "hphp/runtime/base/thread-init-fini.h"
 #include "tbb/concurrent_hash_map.h"
 
 #define PREG_PATTERN_ORDER          1

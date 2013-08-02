@@ -18,7 +18,7 @@
 #define incl_HPHP_SHARED_MAP_H_
 
 #include "hphp/util/shared_memory_allocator.h"
-#include "hphp/runtime/base/shared_variant.h"
+#include "hphp/runtime/base/shared-variant.h"
 #include "hphp/runtime/base/array_data.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/builtin_functions.h"

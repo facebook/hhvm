@@ -26,10 +26,10 @@
 
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/shared_store_base.h"
+#include "hphp/runtime/base/shared-store-base.h"
 #include "hphp/runtime/server/access_log.h"
 #include "hphp/runtime/base/extended_logger.h"
-#include "hphp/runtime/base/simple_counter.h"
+#include "hphp/runtime/base/simple-counter.h"
 #include "hphp/util/util.h"
 #include "hphp/util/network.h"
 #include "hphp/util/logger.h"

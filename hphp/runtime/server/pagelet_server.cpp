@@ -19,7 +19,7 @@
 #include "hphp/runtime/server/http_request_handler.h"
 #include "hphp/runtime/server/upload.h"
 #include "hphp/runtime/server/job_queue_vm_stack.h"
-#include "hphp/runtime/base/string_buffer.h"
+#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/ext/ext_server.h"

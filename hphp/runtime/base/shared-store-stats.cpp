@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/shared_store_stats.h"
+#include "hphp/runtime/base/shared-store-stats.h"
 #include "hphp/runtime/base/runtime_option.h"
 
 #include "hphp/util/json.h"

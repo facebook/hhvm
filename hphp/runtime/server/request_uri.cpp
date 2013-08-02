@@ -19,7 +19,7 @@
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/server/static_content_cache.h"
-#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/string-util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

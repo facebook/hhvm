@@ -17,7 +17,7 @@
 #define incl_HPHP_DEBUGGABLE_H_
 
 #include "hphp/util/base.h"
-#include "hphp/runtime/base/string_buffer.h"
+#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/complex_types.h"
 
 namespace HPHP {

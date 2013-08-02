@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/base/immutable_obj.h"
-#include "hphp/runtime/base/shared_variant.h"
+#include "hphp/runtime/base/shared-variant.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/array_init.h"
 #include "hphp/runtime/base/array_iterator.h"

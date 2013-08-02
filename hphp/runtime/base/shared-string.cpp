@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/shared_string.h"
+#include "hphp/runtime/base/shared-string.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/base/base_includes.h"
 #include "hphp/runtime/ext/mailparse/rfc822.h"
-#include "hphp/runtime/base/string_buffer.h"
+#include "hphp/runtime/base/string-buffer.h"
 
 extern "C" {
 #include "mbfl/mbfl_convert.h"

@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/simple_counter.h"
+#include "hphp/runtime/base/simple-counter.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/util/stack_trace.h"
 #include "hphp/util/lock.h"

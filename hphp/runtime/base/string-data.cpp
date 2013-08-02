@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/string_data.h"
-#include "hphp/runtime/base/shared_variant.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/shared-variant.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/util/alloc.h"

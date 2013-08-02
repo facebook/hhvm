@@ -18,9 +18,9 @@
 #include "hphp/runtime/ext/ext_process.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/base/string_buffer.h"
+#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/thread_init_fini.h"
+#include "hphp/runtime/base/thread-init-fini.h"
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>

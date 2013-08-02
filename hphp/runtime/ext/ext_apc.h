@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_APC_H_
 
 #include "hphp/runtime/base/base_includes.h"
-#include "hphp/runtime/base/shared_store_base.h"
+#include "hphp/runtime/base/shared-store-base.h"
 #include "hphp/runtime/server/upload.h"
 
 namespace HPHP {

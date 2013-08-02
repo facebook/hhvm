@@ -23,7 +23,7 @@
 #endif
 #define __STDC_LIMIT_MACROS
 
-#include "hphp/runtime/base/smart_allocator.h"
+#include "hphp/runtime/base/smart-allocator.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/memory_profile.h"
 #include "hphp/runtime/base/builtin_functions.h"

@@ -18,7 +18,7 @@
 #define incl_HPHP_OBJECT_DATA_H_
 
 #include "hphp/runtime/base/countable.h"
-#include "hphp/runtime/base/smart_ptr.h"
+#include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/vm/class.h"

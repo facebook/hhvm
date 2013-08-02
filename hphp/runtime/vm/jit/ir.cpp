@@ -513,6 +513,20 @@ const StringData* findClassName(SSATmp* cls) {
   return nullptr;
 }
 
+bool isGuardOp(Opcode opc) {
+  switch (opc) {
+    case GuardLoc:
+    case CheckLoc:
+    case GuardStk:
+    case CheckStk:
+    case CheckType:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
 bool isQueryOp(Opcode opc) {
   switch (opc) {
   case Gt:

@@ -121,6 +121,23 @@ struct LocalId : IRExtraData {
   uint32_t locId;
 };
 
+struct LdLocData : LocalId {
+  explicit LdLocData(uint32_t id, SSATmp* src)
+    : LocalId(id)
+    , valSrc(src)
+  {}
+
+  bool cseEquals(const LdLocData& o) const {
+    return LocalId::cseEquals(o) && valSrc == o.valSrc;
+  }
+  size_t cseHash() const {
+    return hash_int64_pair(LocalId::cseHash(), int64_t(valSrc));
+  }
+  std::string show() const;
+
+  SSATmp* valSrc;
+};
+
 struct IterId : IRExtraData {
   explicit IterId(uint32_t id)
     : iterId(id)
@@ -422,9 +439,9 @@ X(GuardLoc,                     LocalId);
 X(CheckLoc,                     LocalId);
 X(AssertLoc,                    LocalId);
 X(OverrideLoc,                  LocalId);
-X(LdLocAddr,                    LocalId);
+X(LdLocAddr,                    LdLocData);
 X(DecRefLoc,                    LocalId);
-X(LdLoc,                        LocalId);
+X(LdLoc,                        LdLocData);
 X(StLoc,                        LocalId);
 X(StLocNT,                      LocalId);
 X(IterFree,                     IterId);

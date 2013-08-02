@@ -39,7 +39,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
 
   switch (inst->op()) {
   case DefSP:
-    return StackValueInfo();
+    return StackValueInfo { inst };
 
   case ReDefGeneratorSP:
   case StashGeneratorSP:
@@ -66,7 +66,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     // We don't have a value, but we may know the type due to guarding
     // on it.
     if (inst->extra<StackOffset>()->offset == index) {
-      return StackValueInfo { inst->typeParam() };
+      return StackValueInfo { inst, inst->typeParam() };
     }
     return getStackValue(inst->src(0), index);
 
@@ -79,7 +79,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   case CallArray: {
     if (index == 0) {
       // return value from call
-      return StackValueInfo { nullptr };
+      return StackValueInfo { inst };
     }
     auto info =
       getStackValue(inst->src(0),
@@ -93,7 +93,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   case Call: {
     if (index == 0) {
       // return value from call
-      return StackValueInfo { nullptr };
+      return StackValueInfo { inst };
     }
     auto info =
       getStackValue(inst->src(0),
@@ -139,32 +139,32 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     // some instructions are kinda funny and mess with the stack
     // in places other than the top
     case Op::CGetL2:
-      if (index == 1) return StackValueInfo { resultType };
+      if (index == 1) return StackValueInfo { inst, resultType };
       if (index == 0) return getStackValue(prevSp, index);
       break;
     case Op::CGetL3:
-      if (index == 2) return StackValueInfo { resultType };
+      if (index == 2) return StackValueInfo { inst, resultType };
       if (index < 2)  return getStackValue(prevSp, index);
       break;
     case Op::UnpackCont:
-      if (index == 0) return StackValueInfo { Type::Cell };
-      if (index == 1) return StackValueInfo { Type::Int };
+      if (index == 0) return StackValueInfo { inst, Type::Cell };
+      if (index == 1) return StackValueInfo { inst, Type::Int };
       break;
     case Op::FPushCufSafe:
-      if (index == kNumActRecCells) return StackValueInfo { Type::Bool };
+      if (index == kNumActRecCells) return StackValueInfo { inst, Type::Bool };
       if (index == kNumActRecCells + 1) return getStackValue(prevSp, 0);
       break;
 
     default:
       if (index == 0 && !resultType.equals(Type::None)) {
-        return StackValueInfo { resultType };
+        return StackValueInfo { inst, resultType };
       }
       break;
     }
 
     // If the index we're looking for is a cell pushed by the InterpOne (other
     // than top of stack), we know nothing about its type.
-    if (index < extra.cellsPushed) return StackValueInfo{ nullptr };
+    if (index < extra.cellsPushed) return StackValueInfo{ inst };
 
     return getStackValue(prevSp, index + spAdjustment);
   }
@@ -172,7 +172,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   case SpillFrame:
   case CufIterSpillFrame:
     // pushes an ActRec
-    if (index < kNumActRecCells) return StackValueInfo { nullptr };
+    if (index < kNumActRecCells) return StackValueInfo { inst };
     return getStackValue(inst->src(0), index - kNumActRecCells);
 
   default:
@@ -184,13 +184,12 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
       if (base->inst()->extra<LdStackAddr>()->offset == index) {
         VectorEffects ve(inst);
         assert(ve.baseTypeChanged || ve.baseValChanged);
-        return StackValueInfo { ve.baseType.derefIfPtr() };
+        return StackValueInfo { inst, ve.baseType.derefIfPtr() };
       }
       return getStackValue(base->inst()->src(0), index);
     }
   }
 
-  // Should not get here!
   not_reached();
 }
 
@@ -1898,9 +1897,9 @@ SSATmp* Simplifier::simplifyDecRefLoc(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyLdLoc(IRInstruction* inst) {
-  if (inst->typeParam().isNull()) {
-    return cns(inst->typeParam());
-  }
+  // Ideally we'd replace LdLoc<Null,...> with a constant value of that type,
+  // but that prevents the guard relaxation code from tracing the source of
+  // values.
   return nullptr;
 }
 

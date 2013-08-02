@@ -20,6 +20,11 @@
 
 namespace HPHP { namespace JIT {
 
+std::string LdLocData::show() const {
+  return folly::to<std::string>(LocalId::show(), ',',
+                                valSrc ? valSrc->toString() : "null");
+}
+
 //////////////////////////////////////////////////////////////////////
 
 namespace {

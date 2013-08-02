@@ -165,35 +165,44 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 struct StackValueInfo {
-  explicit StackValueInfo(SSATmp* value = nullptr)
+  explicit StackValueInfo(SSATmp* value)
     : value(value)
-    , knownType(value ? value->type() : Type::None)
+    , knownType(value->type())
     , spansCall(false)
+    , typeSrc(value->inst())
   {
     TRACE(5, "%s created\n", show().c_str());
   }
 
-  explicit StackValueInfo(Type type)
+  explicit StackValueInfo(IRInstruction* inst, Type type = Type::None)
     : value(nullptr)
     , knownType(type)
     , spansCall(false)
+    , typeSrc(inst)
   {
     TRACE(5, "%s created\n", show().c_str());
   }
 
   std::string show() const {
-    std::ostringstream out;
-    out << "StackValueInfo {";
-    out << (value ? value->inst()->toString() : knownType.toString());
-    if (spansCall) out << ", spans call";
-    out << "}";
+    std::string out = "StackValueInfo {";
 
-    return out.str();
+    if (value) {
+      out += value->inst()->toString();
+    } else {
+      folly::toAppend(knownType.toString(), " from ", typeSrc->toString(),
+                      &out);
+    }
+
+    if (spansCall) out += ", spans call";
+    out += "}";
+
+    return out;
   }
 
   SSATmp* value;   // may be null
   Type knownType;  // currently Type::None if we don't know (TODO(#2135185)
   bool spansCall;  // whether the tmp's definition was above a call
+  IRInstruction* typeSrc; // the instruction that gave us knownType
 
  private:
   TRACE_SET_MOD(hhir);

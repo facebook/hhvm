@@ -260,6 +260,8 @@ public:
    * value, which allows us to avoid several checks.
    */
   bool isKnownDataType() const {
+    if (subtypeOf(Type::None)) return false;
+
     // Calling this function with a type that can't be in a TypedValue isn't
     // meaningful
     assert(subtypeOf(Gen | Cls));
@@ -550,9 +552,13 @@ public:
     return Type(m_bits, klass);
   }
 
+  bool isSpecialized() const {
+    return (canSpecializeClass() && m_class) ||
+      (canSpecializeArrayKind() && m_arrayKindValid);
+  }
+
   Type unspecialize() const {
-    assert((canSpecializeClass() && m_class != nullptr) ||
-           (canSpecializeArrayKind() && m_arrayKindValid));
+    assert(isSpecialized());
     return Type(m_bits, nullptr);
   }
 

@@ -3146,7 +3146,8 @@ void TranslatorX64::traceCodeGen() {
   auto finishPass = [&](const char* msg, int level,
                         const RegAllocInfo* regs,
                         const LifetimeInfo* lifetime) {
-    dumpTrace(level, trace, msg, regs, lifetime);
+    dumpTrace(level, trace, msg, regs, lifetime, nullptr,
+              ht.traceBuilder()->guards());
     assert(checkCfg(trace, ht.irFactory()));
   };
 

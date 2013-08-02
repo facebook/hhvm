@@ -26,6 +26,7 @@
 namespace HPHP {  namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
+namespace {
 
 // Helper for pretty-printing punctuation.
 static std::string punc(const char* str) {
@@ -33,32 +34,36 @@ static std::string punc(const char* str) {
     color(ANSI_COLOR_DARK_GRAY), str, color(ANSI_COLOR_END)).str();
 }
 
-//////////////////////////////////////////////////////////////////////
-
-void printOpcode(std::ostream& os, const IRInstruction* inst) {
+void printOpcode(std::ostream& os, const IRInstruction* inst,
+                 const GuardConstraints* guards) {
   os << color(ANSI_COLOR_CYAN)
      << opcodeName(inst->op())
      << color(ANSI_COLOR_END)
      ;
 
-  auto type_param = inst->typeParam();
-  if (type_param == Type::None && !inst->hasExtra()) {
-    return;
-  }
+  auto const typeParam = inst->typeParam();
+  auto const hasTypeParam = !typeParam.equals(Type::None);
+  auto const hasExtra = inst->hasExtra();
+  auto const isGuard = guards && !inst->isTransient() && isGuardOp(inst->op());
+
+  if (!hasTypeParam && !hasExtra && !isGuard) return;
   os << color(ANSI_COLOR_LIGHT_BLUE) << '<' << color(ANSI_COLOR_END);
-  if (type_param != Type::None) {
+  if (hasTypeParam) {
     os << color(ANSI_COLOR_GREEN)
-       << type_param.toString()
+       << typeParam.toString()
        << color(ANSI_COLOR_END)
        ;
-    if (inst->hasExtra()) {
-      os << punc(",");
-    }
+    if (hasExtra || isGuard) os << punc(",");
   }
-  if (inst->hasExtra()) {
+  if (hasExtra) {
     os << color(ANSI_COLOR_GREEN)
        << showExtra(inst->op(), inst->rawExtra())
        << color(ANSI_COLOR_END);
+    if (isGuard) os << punc(",");
+  }
+  if (isGuard) {
+    auto it = guards->find(inst->id());
+    os << (it == guards->end() ? "unused" : typeCategoryName(it->second));
   }
   os << color(ANSI_COLOR_LIGHT_BLUE)
      << '>'
@@ -126,9 +131,13 @@ void printLabel(std::ostream& os, const Block* block) {
   }
   os << color(ANSI_COLOR_END);
 }
+} // namespace
+
+//////////////////////////////////////////////////////////////////////
 
 void print(std::ostream& ostream, const IRInstruction* inst,
-           const RegAllocInfo* regs, const LifetimeInfo* lifetime) {
+           const RegAllocInfo* regs, const LifetimeInfo* lifetime,
+           const GuardConstraints* guards) {
   if (!inst->isTransient()) {
     ostream << color(ANSI_COLOR_YELLOW);
     if (!lifetime || !lifetime->linear[inst]) {
@@ -140,7 +149,7 @@ void print(std::ostream& ostream, const IRInstruction* inst,
     ostream << color(ANSI_COLOR_END);
   }
   printDst(ostream, inst, regs, lifetime);
-  printOpcode(ostream, inst);
+  printOpcode(ostream, inst, guards);
   printSrcs(ostream, inst, regs, lifetime);
 
   if (Block* taken = inst->taken()) {
@@ -302,7 +311,8 @@ static smart::vector<Block*> blocks(const IRTrace* trace,
 }
 
 void print(std::ostream& os, const IRTrace* trace, const RegAllocInfo* regs,
-           const LifetimeInfo* lifetime, const AsmInfo* asmInfo) {
+           const LifetimeInfo* lifetime, const AsmInfo* asmInfo,
+           const GuardConstraints* guards) {
   static const int kIndent = 4;
   Disasm disasm(Disasm::Options().indent(kIndent + 4)
                                  .printEncoding(dumpIREnabled(kExtraLevel))
@@ -388,7 +398,7 @@ void print(std::ostream& os, const IRTrace* trace, const RegAllocInfo* regs,
       }
 
       os << std::string(kIndent, ' ');
-      JIT::print(os, &inst, regs, lifetime);
+      JIT::print(os, &inst, regs, lifetime, guards);
       os << '\n';
 
       if (asmInfo) {
@@ -436,15 +446,16 @@ void dumpTraceImpl(const IRTrace* trace,
                    std::ostream& out,
                    const RegAllocInfo* regs,
                    const LifetimeInfo* lifetime,
-                   const AsmInfo* asmInfo) {
-  print(out, trace, regs, lifetime, asmInfo);
+                   const AsmInfo* asmInfo,
+                   const GuardConstraints* guards) {
+  print(out, trace, regs, lifetime, asmInfo, guards);
 }
 
 // Suggested captions: "before jiffy removal", "after goat saturation",
 // etc.
 void dumpTrace(int level, const IRTrace* trace, const char* caption,
                const RegAllocInfo* regs, const LifetimeInfo* lifetime,
-               AsmInfo* ai) {
+               AsmInfo* ai, const GuardConstraints* guards) {
   if (dumpIREnabled(level)) {
     std::ostringstream str;
     auto bannerFmt = "{:-^80}\n";
@@ -452,7 +463,7 @@ void dumpTrace(int level, const IRTrace* trace, const char* caption,
         << folly::format(bannerFmt, caption)
         << color(ANSI_COLOR_END)
         ;
-    dumpTraceImpl(trace, str, regs, lifetime, ai);
+    dumpTraceImpl(trace, str, regs, lifetime, ai, guards);
     str << color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN)
         << folly::format(bannerFmt, "")
         << color(ANSI_COLOR_END)

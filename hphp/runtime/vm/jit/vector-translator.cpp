@@ -487,7 +487,7 @@ SSATmp* HhbcTranslator::VectorTranslator::getValAddr() {
   const Location& l = dl.location;
   if (l.space == Location::Local) {
     assert(!mapContains(m_stackInputs, 0));
-    return m_ht.ldLocAddr(l.offset);
+    return m_ht.ldLocAddr(l.offset, DataTypeGeneric);
   } else {
     assert(l.space == Location::Stack);
     assert(mapContains(m_stackInputs, 0));
@@ -506,7 +506,7 @@ SSATmp* HhbcTranslator::VectorTranslator::getInput(unsigned i) {
       return m_ht.top(Type::Gen | Type::Cls, m_stackInputs[i]);
 
     case Location::Local:
-      return m_ht.ldLoc(l.offset);
+      return m_ht.ldLoc(l.offset, DataTypeSpecific);
 
     case Location::Litstr:
       return cns(m_ht.lookupStringId(l.offset));
@@ -535,6 +535,7 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
             cns(m_ht.curFunc()->localVarName(base.location.offset)));
       }
       if (mia & MIA_define) {
+        m_tb.constrainLocal(base.location.offset, DataTypeSpecific);
         gen(
           StLoc,
           LocalId(base.location.offset),
@@ -575,7 +576,7 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
     }
 
     if (base.location.space == Location::Local) {
-      m_base = m_ht.ldLocAddr(base.location.offset);
+      m_base = m_ht.ldLocAddr(base.location.offset, DataTypeSpecific);
     } else {
       assert(base.location.space == Location::Stack);
       // Make sure the stack is clean before getting a pointer to one of its

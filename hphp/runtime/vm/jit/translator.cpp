@@ -3824,7 +3824,7 @@ Translator::translateRegion(const RegionDesc& region,
 
       InputInfos inputInfos;
       getInputs(startSk, inst, inputInfos, block->func(), [&](int i) {
-          return ht.traceBuilder()->getLocalType(i);
+          return ht.traceBuilder()->localType(i, DataTypeGeneric);
         });
 
       // Populate the NormalizedInstruction's input vector, using types from

@@ -355,11 +355,14 @@ CheckTypeMem<T> S0:PtrToGen -> L
 
   If the value pointed to by S0 is not type T, branch to the label L.
 
-GuardLoc<T,localId> S0:FramePtr
+D:FramePtr = GuardLoc<T,localId> S0:FramePtr
 
   Guard that type of the given localId on the frame S0 is a subtype of
   the type T; if not, make a fallback jump.  (A jump to a service
   request that chains to a retranslation for this tracelet.)
+
+  Returns a new frame pointer representing the same frame as S0 but with the
+  knowledge that the guarded local has type T.
 
 GuardCls<T<Cls>> S0:Obj
 
@@ -369,17 +372,23 @@ GuardArrayKind<T<AK>> S0:Obj
 
   Guard that the array S0 has kind AK; else make a fallback jump.
 
-CheckLoc<T,localId> S0:FramePtr -> L
+D:FramePtr = CheckLoc<T,localId> S0:FramePtr -> L
 
   Check that type of the given localId on the frame S0 is T; if not,
   branch to the label L.
 
-AssertLoc<T,localId> S0:FramePtr
+  Returns a new frame pointer representing the same frame as S0 but with the
+  knowledge that the checked local has type T.
+
+D:FramePtr = AssertLoc<T,localId> S0:FramePtr
 
   Asserts that type of the supplied local on the frame S0 is T.  This
   is used as a hint for local type information, and is similar to
   GuardLoc except it doesn't imply a runtime check and cannot cause
   control flow.
+
+  Returns a new frame pointer representing the same frame as S0 but with the
+  knowledge that the asserted local has type T.
 
 OverrideLoc<T,localId> S0:FramePtr
 
@@ -738,19 +747,25 @@ D:T = LdStack<T,offset> S0:StkPtr
   Loads from S0 at offset (in cells), and puts the value in D as type
   T.
 
-D:T = LdLoc<T,localId> S0:FramePtr
+D:T = LdLoc<T,localId,valSrc> S0:FramePtr
 
-  Loads local number localId from the frame S0 and puts the value in D
-  as type T.
+  Loads local number localId from the frame S0 and puts the value in D as type
+  T. valSrc is an SSATmp* used for guard relaxation; its value is never used at
+  runtime. If the local has a known value, valSrc will be that value, even if
+  there's been a Call since the value's definition. If the local has an unknown
+  value that was stored in the current trace, valSrc will be null. Otherwise,
+  val has an unknown value that existed upon entry to the current trace, and
+  valSrc will point to the FramePtr it's loading from.
 
 D:PtrToGen = LdStackAddr<offset> S0:StkPtr
 
   Loads the address of the stack slot given by the pointer in S0 at
   the offset (in cells).
 
-D:T* = LdLocAddr<T, localId> S0:FramePtr
+D:T* = LdLocAddr<T,localId,valSrc> S0:FramePtr
 
-  Loads the address of the local slot localId from the frame S0 into D.
+  Loads the address of the local slot localId from the frame S0 into D. See
+  LdLoc for a description of valSrc.
 
 D:T = LdMem<T> S0:PtrToGen S1:ConstInt [ -> L ]
 

@@ -104,6 +104,7 @@ struct TraceBuilder {
   int32_t spOffset() { return m_spOffset; }
   SSATmp* sp() const { return m_spValue; }
   SSATmp* fp() const { return m_fpValue; }
+  const GuardConstraints* guards() const { return &m_guardConstraints; }
 
   bool isThisAvailable() const {
     return m_thisIsAvailable;
@@ -112,8 +113,16 @@ struct TraceBuilder {
     m_thisIsAvailable = true;
   }
 
-  Type getLocalType(unsigned id) const;
-  SSATmp* getLocalValue(unsigned id) const;
+  void constrainGuard(IRInstruction* inst, DataTypeCategory cat);
+  SSATmp* constrainValue(SSATmp* const val, DataTypeCategory cat);
+  void constrainLocal(uint32_t id, DataTypeCategory cat);
+  void constrainLocal(uint32_t id, SSATmp* valSrc, DataTypeCategory cat);
+  void constrainStack(int32_t offset, DataTypeCategory cat);
+  void constrainStack(SSATmp* sp, int32_t offset, DataTypeCategory cat);
+
+  Type localType(unsigned id, DataTypeCategory cat);
+  SSATmp* localValue(unsigned id, DataTypeCategory cat);
+  SSATmp* localValueSource(unsigned id) const;
   void setLocalValue(unsigned id, SSATmp* value);
 
   /*
@@ -301,6 +310,21 @@ private:
     bool m_oldEnable;
   };
 
+  struct LocalState {
+    LocalState()
+      : value(nullptr)
+      , type(Type::None)
+      , unsafe(false)
+      , written(false)
+    {}
+
+    SSATmp* value; // The current value of the local. nullptr if unknown
+    Type type;     // The current type of the local, or Type::None if unknown
+    bool unsafe;   // true iff value is not safe to use at runtime. Currently
+                   // this only happens across a Call or CallArray instruction.
+    bool written;  // true iff the local has been written in this trace
+  };
+
   // Saved state information associated with the start of a block, or
   // for the caller of an inlined function.
   struct State {
@@ -309,8 +333,7 @@ private:
     SSATmp* curFunc;
     int32_t spOffset;
     bool thisAvailable;
-    std::vector<SSATmp*> localValues;
-    std::vector<Type> localTypes;
+    smart::vector<LocalState> locals;
     SSATmp* refCountedMemValue;
     std::vector<SSATmp*> callerAvailableValues; // unordered list
     BCMarker curMarker;
@@ -345,9 +368,10 @@ private:
   void      cseKill(SSATmp* src);
   CSEHash*  cseHashTable(IRInstruction* inst);
   void      killCse();
-  void      killLocals();
+  void      killLocalsForCall();
   void      killLocalValue(uint32_t id);
   void      setLocalType(uint32_t id, Type type);
+  void      refineLocalType(uint32_t id, Type type);
   bool      isValueAvailable(SSATmp*) const;
   bool      anyLocalHasValue(SSATmp*) const;
   bool      callerHasValueAvailable(SSATmp*) const;
@@ -400,6 +424,8 @@ private:
   // Snapshots of state at the beginning of blocks we haven't reached yet.
   StateVector<Block,State*> m_snapshots;
 
+  GuardConstraints m_guardConstraints;
+
   /*
    * While building a trace one instruction at a time, a TraceBuilder
    * tracks various state for generating code and for optimization:
@@ -418,9 +444,8 @@ private:
    *   (5) m_thisIsAvailable tracks whether the current ActRec has a
    *       non-null this pointer.
    *
-   *   (6) m_localValues & m_localTypes track the current values and
-   *       types held in locals. These vectors are indexed by the
-   *       local's id.
+   *   (6) m_locals tracks the current values and types held in
+   *       locals, indexed by the local's id.
    *
    * The function updateTrackedState(IRInstruction* inst) updates this
    * state (called after an instruction is appended to the trace), and
@@ -442,9 +467,7 @@ private:
   // state of values in memory
   SSATmp*    m_refCountedMemValue;
 
-  // vectors that track local values & types
-  std::vector<SSATmp*> m_localValues;
-  std::vector<Type>    m_localTypes;
+  smart::vector<LocalState> m_locals;
 
   // Values known to be "available" for the purposes of DecRef to
   // DecRefNZ transformations due to locals of the caller for an

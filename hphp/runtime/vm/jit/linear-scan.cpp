@@ -476,7 +476,6 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
         continue;
       }
       if (!abnormalFramePtr && dst.isA(Type::FramePtr)) {
-        assert(opc == DefFP || opc == FreeActRec || opc == DefInlineFP);
         assignRegToTmp(&m_regs[int(rVmFp)], &dst, 0);
         numAllocated++;
         continue;

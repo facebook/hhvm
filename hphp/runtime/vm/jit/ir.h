@@ -39,6 +39,7 @@
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/trace.h"
+#include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
@@ -184,13 +185,13 @@ class FailedCodeGen : public std::runtime_error {
 #define IR_OPCODES                                                            \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(CheckType,                    DParam, S(Gen),                  E|CRc|PRc|P) \
-O(AssertType,                   DParam, S(Gen,Nullptr,Cls),    C|E|CRc|PRc|P) \
+O(AssertType,                   DParam, S(Gen,Cls),            C|E|CRc|PRc|P) \
 O(CheckTypeMem,                     ND, S(PtrToGen),                       E) \
-O(GuardLoc,                         ND, S(FramePtr),                       E) \
+O(GuardLoc,                D(FramePtr), S(FramePtr),                       E) \
 O(GuardCls,                         ND, S(Obj),                            E) \
 O(GuardArrayKind,                   ND, S(Arr),                            E) \
 O(GuardStk,                  D(StkPtr), S(StkPtr),                         E) \
-O(CheckLoc,                         ND, S(FramePtr),                       E) \
+O(CheckLoc,                D(FramePtr), S(FramePtr),                       E) \
 O(CheckStk,                  D(StkPtr), S(StkPtr),                         E) \
 O(CastStk,                   D(StkPtr), S(StkPtr),                  Mem|N|Er) \
 O(CoerceStk,                 D(StkPtr), S(StkPtr),                  Mem|N|Er) \
@@ -202,7 +203,7 @@ O(GuardRefs,                        ND, S(Func)                               \
                                           S(Int)                              \
                                           S(Int)                              \
                                           S(Int),                          E) \
-O(AssertLoc,                        ND, S(FramePtr),                       E) \
+O(AssertLoc,               D(FramePtr), S(FramePtr),                       E) \
 O(OverrideLoc,                      ND, S(FramePtr),                       E) \
 O(OverrideLocVal,                   ND, S(FramePtr) S(Gen),                E) \
 O(SmashLocals,                      ND, S(FramePtr),                       E) \
@@ -749,6 +750,12 @@ enum class Opcode : uint16_t {
 #undef O
 
 /*
+ * Returns true for instructions that refine the types of values with
+ * a runtime check.
+ */
+bool isGuardOp(Opcode opc);
+
+/*
  * A "query op" is any instruction returning Type::Bool that is both
  * branch-fusable and negateable.
  */
@@ -1066,6 +1073,10 @@ struct CatchInfo {
 };
 
 typedef folly::Range<TCA> TcaRange;
+
+// Key is instruction id. Used instead of StateVector because it's
+// expected to be very sparse.
+typedef smart::flat_map<uint32_t, DataTypeCategory> GuardConstraints;
 
 /*
  * Counts the number of cells a SpillStack will logically push.  (Not

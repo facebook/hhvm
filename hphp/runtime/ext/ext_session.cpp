@@ -107,6 +107,10 @@ public:
   }
 };
 
+const int64_t k_PHP_SESSION_DISABLED = Session::Disabled;
+const int64_t k_PHP_SESSION_NONE     = Session::None;
+const int64_t k_PHP_SESSION_ACTIVE   = Session::Active;
+
 class SessionRequestData : public RequestEventHandler, public Session {
 public:
   SessionRequestData() : m_threadInited(false) {}
@@ -1250,6 +1254,10 @@ static int php_session_cache_limiter() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+int64_t f_session_status() {
+  return PS(session_status);
+}
 
 void f_session_set_cookie_params(int64_t lifetime,
                                  CStrRef path /* = null_string */,

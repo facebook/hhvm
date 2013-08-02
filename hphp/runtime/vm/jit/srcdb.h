@@ -23,7 +23,7 @@
 #include "hphp/util/mutex.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/srckey.h"
-#include "hphp/runtime/vm/tread_hash_map.h"
+#include "hphp/runtime/vm/tread-hash-map.h"
 
 namespace HPHP {
 namespace Transl {

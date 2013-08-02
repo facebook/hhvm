@@ -112,18 +112,10 @@ public:
   bool isZendParamMode() const;
   bool mayContainThis();
   bool isClosure() const;
-  bool isGenerator() const;
-  bool isGeneratorFromClosure() const;
+  bool isGenerator() const { return m_generator; }
+  void setGenerator(bool f) { m_generator = f; }
   int allocYieldLabel() { return ++m_yieldLabelCount; }
   int getYieldLabelCount() const { return m_yieldLabelCount; }
-  bool hasGeneratorAsBody() const;
-  MethodStatementRawPtr getOrigGenStmt() const;
-  FunctionScopeRawPtr getOrigGenFS() const;
-  void setClosureGenerator() { m_closureGenerator = true; }
-  bool isClosureGenerator() const {
-    assert(!m_closureGenerator || isClosure());
-    return m_closureGenerator;
-  }
   bool needsClassParam();
 
   void setInlineSameContext(bool f) { m_inlineSameContext = f; }
@@ -159,7 +151,6 @@ public:
   }
 
   virtual std::string getId() const;
-  std::string getInjectionId() const;
 
   int getRedeclaringId() const {
     return m_redeclaring;
@@ -468,7 +459,7 @@ private:
   unsigned m_inlineSameContext : 1;
   unsigned m_contextSensitive : 1;
   unsigned m_directInvoke : 1;
-  unsigned m_closureGenerator : 1;
+  unsigned m_generator : 1;
   unsigned m_noLSB : 1;
   unsigned m_nextLSB : 1;
   unsigned m_hasTry : 1;

@@ -2708,6 +2708,17 @@ inline void X64Assembler::call(Label& l) { l.call(*this); }
 
 //////////////////////////////////////////////////////////////////////
 
+/**
+ * gcc-4.7 warns about use of uninitialized memory around the use of
+ * a.code.frontier even though this is explicitly initialized at each point.
+ */
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuninitialized"
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
+
 class UndoMarker {
   typedef X64Assembler Asm;
   Asm& m_a;
@@ -2739,6 +2750,10 @@ class CodeCursor : public UndoMarker {
     undo();
   }
 };
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
 //////////////////////////////////////////////////////////////////////
 

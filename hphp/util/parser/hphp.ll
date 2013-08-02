@@ -34,8 +34,12 @@
 #define SETTOKEN(t) _scanner->setToken(yytext, yyleng, t)
 #define STEPPOS(t)  _scanner->stepPos(yytext, yyleng, t)
 
+#define XHP_ONLY_KEYWORD(tok) do {                           \
+  RETTOKEN(_scanner->isXHPSyntaxEnabled() ? (tok) : T_STRING); \
+} while (0)
+
 #define HH_ONLY_KEYWORD(tok) do {                               \
-  RETTOKEN(_scanner->hipHopSyntaxEnabled() ? tok : T_STRING); \
+  RETTOKEN(_scanner->isHHSyntaxEnabled() ? (tok) : T_STRING); \
 } while (0)
 
 #define IS_LABEL_START(c) \
@@ -47,14 +51,15 @@
  * token for the purpose of recognizing XHP tags, XHP class names, XHP
  * category names, and type lists.
  *   XhpTag:
- *     '<' should be recognized as the start of an XHP tag
+ *     '<' will be treated as the start of an XHP tag
  *   XhpTagMaybe:
- *     '<' should be recognized as possibly being the start of an XHP tag;
- *     this will be resolved by inspecting subsequent characters
+ *     '<' will be treated as possibly being the start of an XHP tag;
+ *     we will scan ahead looking at subsequent characters to figure
+ *     out if '<' is definitely the start of an XHP tag
  *   XhpClassName:
- *     ':' should be recognized as the start of an XHP class name
+ *     ':' will be treated as the start of an XHP class name
  *   XhpCategoryName:
- *     '%' should be recognized as the start of an XHP category name
+ *     '%' will be treated as the start of an XHP category name
  *   TypeListMaybe:
  *     '<' should be recognized as possibly being the start of a type list;
  *     this will be resolved by inspecting subsequent tokens
@@ -254,11 +259,11 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"insteadof"            { RETTOKEN(T_INSTEADOF);}
 <ST_IN_SCRIPTING>"extends"              { RETTOKEN(T_EXTENDS);}
 <ST_IN_SCRIPTING>"implements"           { RETTOKEN(T_IMPLEMENTS);}
-<ST_IN_SCRIPTING>"attribute"            { RETTOKEN(T_XHP_ATTRIBUTE);}
-<ST_IN_SCRIPTING>"category"             { RETTOKEN(T_XHP_CATEGORY);}
-<ST_IN_SCRIPTING>"children"             { RETTOKEN(T_XHP_CHILDREN);}
-<ST_IN_SCRIPTING>"required"             { RETTOKEN(T_XHP_REQUIRED);}
-<ST_IN_SCRIPTING>"enum"                 { RETTOKEN(T_XHP_ENUM);}
+<ST_IN_SCRIPTING>"attribute"            { XHP_ONLY_KEYWORD(T_XHP_ATTRIBUTE); }
+<ST_IN_SCRIPTING>"category"             { XHP_ONLY_KEYWORD(T_XHP_CATEGORY); }
+<ST_IN_SCRIPTING>"children"             { XHP_ONLY_KEYWORD(T_XHP_CHILDREN); }
+<ST_IN_SCRIPTING>"required"             { XHP_ONLY_KEYWORD(T_XHP_REQUIRED); }
+<ST_IN_SCRIPTING>"enum"                 { XHP_ONLY_KEYWORD(T_XHP_ENUM); }
 
 <ST_IN_SCRIPTING>"->" {
         STEPPOS(T_OBJECT_OPERATOR);
@@ -292,7 +297,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"var"               { RETTOKEN(T_VAR);}
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("int"|"integer"){TABS_AND_SPACES}")" {
-  if (_scanner->lastToken() != T_FUNCTION) {
+  if (_scanner->lastToken() != T_FUNCTION || !_scanner->isHHSyntaxEnabled()) {
     RETSTEP(T_INT_CAST);
   }
   yyless(1);
@@ -300,7 +305,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("real"|"double"|"float"){TABS_AND_SPACES}")" {
-  if (_scanner->lastToken() != T_FUNCTION) {
+  if (_scanner->lastToken() != T_FUNCTION || !_scanner->isHHSyntaxEnabled()) {
     RETSTEP(T_DOUBLE_CAST);
   }
   yyless(1);
@@ -308,7 +313,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("string"|"binary"){TABS_AND_SPACES}")" {
-  if (_scanner->lastToken() != T_FUNCTION) {
+  if (_scanner->lastToken() != T_FUNCTION || !_scanner->isHHSyntaxEnabled()) {
     RETSTEP(T_STRING_CAST);
   }
   yyless(1);
@@ -316,7 +321,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"array"{TABS_AND_SPACES}")" {
-  if (_scanner->lastToken() != T_FUNCTION) {
+  if (_scanner->lastToken() != T_FUNCTION || !_scanner->isHHSyntaxEnabled()) {
     RETSTEP(T_ARRAY_CAST);
   }
   yyless(1);
@@ -324,7 +329,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"object"{TABS_AND_SPACES}")" {
-  if (_scanner->lastToken() != T_FUNCTION) {
+  if (_scanner->lastToken() != T_FUNCTION || !_scanner->isHHSyntaxEnabled()) {
     RETSTEP(T_OBJECT_CAST);
   }
   yyless(1);
@@ -332,7 +337,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("bool"|"boolean"){TABS_AND_SPACES}")" {
-  if (_scanner->lastToken() != T_FUNCTION) {
+  if (_scanner->lastToken() != T_FUNCTION || !_scanner->isHHSyntaxEnabled()) {
     RETSTEP(T_BOOL_CAST);
   }
   yyless(1);
@@ -340,7 +345,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("unset"){TABS_AND_SPACES}")" {
-  if (_scanner->lastToken() != T_FUNCTION) {
+  if (_scanner->lastToken() != T_FUNCTION || !_scanner->isHHSyntaxEnabled()) {
     RETSTEP(T_UNSET_CAST);
   }
   yyless(1);
@@ -394,11 +399,18 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"AND"                { RETTOKEN(T_LOGICAL_AND);}
 <ST_IN_SCRIPTING>"XOR"                { RETTOKEN(T_LOGICAL_XOR);}
 <ST_IN_SCRIPTING>"<<"                 { RETSTEP(T_SL);}
-<ST_IN_SCRIPTING>"..."                { RETTOKEN(T_VARARG); }
 
 <ST_IN_SCRIPTING>"shape"              { HH_ONLY_KEYWORD(T_SHAPE); }
 <ST_IN_SCRIPTING>"type"               { HH_ONLY_KEYWORD(T_UNRESOLVED_TYPE); }
 <ST_IN_SCRIPTING>"newtype"            { HH_ONLY_KEYWORD(T_UNRESOLVED_NEWTYPE); }
+
+<ST_IN_SCRIPTING>"..." {
+  if (!_scanner->isHHSyntaxEnabled()) {
+    yyless(1);
+    RETSTEP('.');
+  }
+  RETTOKEN(T_VARARG);
+}
 
 <ST_IN_SCRIPTING>">>" {
   if (_scanner->getLookaheadLtDepth() < 2) {
@@ -409,6 +421,11 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING>"<"[a-zA-Z_\x7f-\xff] {
+  if (!_scanner->isXHPSyntaxEnabled()) {
+    assert(!_scanner->isHHSyntaxEnabled());
+    yyless(1);
+    RETSTEP('<');
+  }
   int ntt = getNextTokenType(_scanner->lastToken());
   if (ntt & NextTokenType::XhpTag) {
     yyless(1);
@@ -424,7 +441,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
     break;
   }
   yyless(1);
-  if (_scanner->hipHopSyntaxEnabled() && (ntt & NextTokenType::TypeListMaybe)) {
+  if (_scanner->isHHSyntaxEnabled() && (ntt & NextTokenType::TypeListMaybe)) {
     // Return T_UNRESOLVED_LT; the scanner will inspect subseqent tokens
     // to resolve this.
     RETSTEP(T_UNRESOLVED_LT);
@@ -433,7 +450,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING>"<" {
-  if (_scanner->hipHopSyntaxEnabled()) {
+  if (_scanner->isHHSyntaxEnabled()) {
     int ntt = getNextTokenType(_scanner->lastToken());
     if (ntt & NextTokenType::TypeListMaybe) {
       // Return T_UNRESOLVED_LT; the scanner will inspect subseqent tokens
@@ -458,20 +475,24 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING>":"{XHPLABEL}  {
-  int ntt = getNextTokenType(_scanner->lastToken());
-  if (ntt & NextTokenType::XhpClassName) {
-    yytext++; yyleng--; // skipping the first colon
-    RETTOKEN(T_XHP_LABEL);
+  if (_scanner->isXHPSyntaxEnabled()) {
+    int ntt = getNextTokenType(_scanner->lastToken());
+    if (ntt & NextTokenType::XhpClassName) {
+      yytext++; yyleng--; // skipping the first colon
+      RETTOKEN(T_XHP_LABEL);
+    }
   }
   yyless(1);
   RETSTEP(':');
 }
 
 <ST_IN_SCRIPTING>"%"{XHPLABEL}  {
-  int ntt = getNextTokenType(_scanner->lastToken());
-  if (ntt & NextTokenType::XhpCategoryName) {
-    yytext++; yyleng--; // skipping "%"
-    RETTOKEN(T_XHP_CATEGORY_LABEL);
+  if (_scanner->isXHPSyntaxEnabled()) {
+    int ntt = getNextTokenType(_scanner->lastToken());
+    if (ntt & NextTokenType::XhpCategoryName) {
+      yytext++; yyleng--; // skipping "%"
+      RETTOKEN(T_XHP_CATEGORY_LABEL);
+    }
   }
   yyless(1);
   RETSTEP('%');
@@ -520,8 +541,8 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         long ret = strtoll(yytext, NULL, 0);
         if (errno == ERANGE || ret < 0) {
                 _scanner->error("Dec number is too big: %s", yytext);
-                if (_scanner->isHackMode()) {
-                        RETTOKEN(T_HACK_ERROR);
+                if (_scanner->isHHFile()) {
+                        RETTOKEN(T_HH_ERROR);
                 }
         }
         RETTOKEN(T_LNUMBER);
@@ -532,8 +553,8 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         long ret = strtoull(yytext, NULL, 16);
         if (errno == ERANGE || ret < 0) {
                 _scanner->error("Hex number is too big: %s", yytext);
-                if (_scanner->isHackMode()) {
-                        RETTOKEN(T_HACK_ERROR);
+                if (_scanner->isHHFile()) {
+                        RETTOKEN(T_HH_ERROR);
                 }
         }
         RETTOKEN(T_LNUMBER);
@@ -544,8 +565,8 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         long ret = strtoll(yytext, NULL, 0);
         if (ret == LLONG_MAX && errno == ERANGE) {
                 _scanner->error("Offset number is too big: %s", yytext);
-                if (_scanner->isHackMode()) {
-                        RETTOKEN(T_HACK_ERROR);
+                if (_scanner->isHHFile()) {
+                        RETTOKEN(T_HH_ERROR);
                 }
         }
         RETTOKEN(T_NUM_STRING);
@@ -654,11 +675,11 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         } else if (YY_START == ST_AFTER_HASHBANG) {
           yy_pop_state(yyscanner);
         } else {
-          _scanner->error("Hack mode: content before <?hh");
-          return T_HACK_ERROR;
+          _scanner->error("HH mode: content before <?hh");
+          return T_HH_ERROR;
         }
         STEPPOS(T_OPEN_TAG);
-        _scanner->setHackMode();
+        _scanner->setHHFile();
         return T_OPEN_TAG;
 }
 
@@ -739,9 +760,9 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_ONE_LINE_COMMENT>"?>"|"%>" {
-        if (_scanner->isHackMode()) {
-          _scanner->error("Hack mode: ?> not allowed");
-          return T_HACK_ERROR;
+        if (_scanner->isHHFile()) {
+          _scanner->error("HH mode: ?> not allowed");
+          return T_HH_ERROR;
         }
         if (_scanner->aspTags() || yytext[yyleng-2] != '%') {
           _scanner->setToken(yytext, yyleng-2, yytext, yyleng-2, T_COMMENT);
@@ -798,9 +819,9 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING>"?>"{NEWLINE}? {
-        if (_scanner->isHackMode()) {
-          _scanner->error("Hack mode: ?> not allowed");
-          return T_HACK_ERROR;
+        if (_scanner->isHHFile()) {
+          _scanner->error("HH mode: ?> not allowed");
+          return T_HH_ERROR;
         }
         yy_push_state(ST_IN_HTML, yyscanner);
         if (_scanner->full()) {

@@ -17,7 +17,7 @@
 #include "hphp/runtime/debugger/cmd/cmd_print.h"
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/string_util.h"
-#include "hphp/runtime/vm/debugger_hook.h"
+#include "hphp/runtime/vm/debugger-hook.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

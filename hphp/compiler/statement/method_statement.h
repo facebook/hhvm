@@ -61,7 +61,6 @@ public:
   void setOriginalName(const std::string name) { m_originalName = name; }
   std::string getFullName() const;
   std::string getOriginalFullName() const;
-  std::string getOriginalFullNameForInjection() const;
   std::string getOriginalFilename() const { return m_originalFilename; }
   ExpressionListPtr getParams() { return m_params;}
   const std::string getReturnTypeConstraint() const {
@@ -95,20 +94,6 @@ public:
   // these pointers must be raw (weak) pointers to prevent cycles
   // in the reference graph
 
-  void setOrigGeneratorFunc(MethodStatementRawPtr stmt) {
-    m_origGeneratorFunc = stmt;
-  }
-  MethodStatementRawPtr getOrigGeneratorFunc() const {
-    return m_origGeneratorFunc;
-  }
-
-  void setGeneratorFunc(MethodStatementRawPtr stmt) {
-    m_generatorFunc = stmt;
-  }
-  MethodStatementRawPtr getGeneratorFunc() const {
-    return m_generatorFunc;
-  }
-
   void setContainingClosure(ClosureExpressionRawPtr exp) {
     m_containingClosure = exp;
   }
@@ -133,6 +118,8 @@ public:
   void setHasCallToGetArgs(bool f) { m_hasCallToGetArgs = f; }
   bool hasCallToGetArgs() const { return m_hasCallToGetArgs; }
 
+  std::string getGeneratorName() const;
+
 private:
   void checkParameters();
 
@@ -152,8 +139,6 @@ protected:
   std::string m_retTypeConstraint;
   StatementListPtr m_stmt;
   std::string m_docComment;
-  MethodStatementRawPtr m_origGeneratorFunc;
-  MethodStatementRawPtr m_generatorFunc;
   ClosureExpressionRawPtr m_containingClosure;
   ExpressionListPtr m_attrList;
 

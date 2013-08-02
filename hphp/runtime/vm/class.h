@@ -24,8 +24,8 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/util/fixed_vector.h"
 #include "hphp/util/range.h"
-#include "hphp/runtime/vm/fixed_string_map.h"
-#include "hphp/runtime/vm/indexed_string_map.h"
+#include "hphp/runtime/vm/fixed-string-map.h"
+#include "hphp/runtime/vm/indexed-string-map.h"
 
 namespace HPHP {
 

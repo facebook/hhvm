@@ -89,27 +89,26 @@ static void debugger_signal_handler(int sig) {
 void DebuggerClient::onSignal(int sig) {
   TRACE(2, "DebuggerClient::onSignal\n");
   if (m_inputState == TakingInterrupt) {
-    time_t now = time(0);
-
-    if (m_sigTime) {
-      int secWait = 10;
-      int secLeft = secWait - (now - m_sigTime);
-      if (secLeft <= 0) {
-        usageLogEvent("signal quit");
-        error("Program is not responding. Please restart debugger to get a "
-              "new connection.");
-        quit(); // NB: the machine is running, so can't send a real CmdQuit.
-        return;
-      }
-      usageLogEvent("signal wait");
-      info("Please wait. If not responding in %d second%s, "
-           "press Ctrl-C again to quit.", secLeft, secLeft > 1 ? "s" : "");
-    } else {
+    if (m_sigCount == 0) {
       usageLogEvent("signal start");
       info("Pausing program execution, please wait...");
-      m_sigTime = now;
+    } else if (m_sigCount == 1) {
+      usageLogEvent("signal wait");
+      help("Still attempting to pause program execution...");
+      help("  Sometimes this takes a few seconds, so give it a chance,");
+      help("  or press ctrl-c again to give up and terminate the debugger.");
+    } else {
+      usageLogEvent("signal quit");
+      error("Debugger is quitting.");
+      if (!getStaticDebuggerClient().isLocal()) {
+        error("  Note: the program may still be running on the server.");
+      }
+      quit(); // NB: the machine is running, so can't send a real CmdQuit.
+      return;
     }
-    m_signum = CmdSignal::SignalBreak;
+
+    m_sigCount++;
+    m_sigNum = CmdSignal::SignalBreak;
   } else {
     rl_replace_line("", 0);
     rl_redisplay();
@@ -121,8 +120,8 @@ int DebuggerClient::pollSignal() {
   if (m_scriptMode) {
     print(".....Debugger client still waiting for server response.....");
   }
-  int ret = m_signum;
-  m_signum = CmdSignal::SignalNone;
+  int ret = m_sigNum;
+  m_sigNum = CmdSignal::SignalNone;
   return ret;
 }
 
@@ -404,7 +403,7 @@ DebuggerClient::DebuggerClient(std::string name /* = "" */)
       m_logFile(""), m_logFileHandler(nullptr),
       m_mainThread(this, &DebuggerClient::run), m_stopped(false),
       m_inputState(TakingCommand),
-      m_signum(CmdSignal::SignalNone), m_sigTime(0),
+      m_sigNum(CmdSignal::SignalNone), m_sigCount(0),
       m_acLen(0), m_acIndex(0), m_acPos(0), m_acLiveListsDirty(true),
       m_threadId(0), m_listLine(0), m_listLineFocus(0), m_frame(0),
       m_clientState(StateUninit), m_inApiUse(false),
@@ -1038,7 +1037,7 @@ DebuggerCommandPtr DebuggerClient::waitForNextInterrupt() {
         Debugger::UsageLogInterrupt(getUsageMode(), getSandboxId(),
                                     *intr.get());
       }
-      m_sigTime = 0;
+      m_sigCount = 0;
       m_machine->m_interrupting = true;
       setClientState(StateReadyForCommand);
       m_inputState = TakingCommand;
@@ -1109,7 +1108,7 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
           throw DebuggerProtocolException();
         }
       }
-      m_sigTime = 0;
+      m_sigCount = 0;
       CmdInterruptPtr intr = dynamic_pointer_cast<CmdInterrupt>(cmd);
       Debugger::UsageLogInterrupt(getUsageMode(), getSandboxId(), *intr.get());
       cmd->onClient(*this);

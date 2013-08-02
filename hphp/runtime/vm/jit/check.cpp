@@ -37,23 +37,37 @@ enum Limits : unsigned {
 };
 
 struct RegState {
-  RegState() {
-    memset(regs, 0, sizeof(regs));
-    memset(slots, 0, sizeof(slots));
-  }
+  RegState();
+  SSATmp*& tmp(const RegisterInfo& info, int i);
+  void merge(const RegState& other);
   SSATmp* regs[kNumRegisters];  // which tmp is in each register
   SSATmp* slots[kNumSlots]; // which tmp is in each spill slot
-  SSATmp*& tmp(const RegisterInfo& info, int i) {
-    if (info.spilled()) {
-      auto slot = info.spillInfo(i).slot();
-      assert(unsigned(slot) < kNumSlots);
-      return slots[slot];
-    }
-    auto r = info.reg(i);
-    assert(r != Transl::InvalidReg && unsigned(int(r)) < kNumRegisters);
-    return regs[int(r)];
-  }
 };
+
+RegState::RegState() {
+  memset(regs, 0, sizeof(regs));
+  memset(slots, 0, sizeof(slots));
+}
+
+SSATmp*& RegState::tmp(const RegisterInfo& info, int i) {
+  if (info.spilled()) {
+    auto slot = info.spillInfo(i).slot();
+    assert(unsigned(slot) < kNumSlots);
+    return slots[slot];
+  }
+  auto r = info.reg(i);
+  assert(r != Transl::InvalidReg && unsigned(int(r)) < kNumRegisters);
+  return regs[int(r)];
+}
+
+void RegState::merge(const RegState& other) {
+  for (unsigned i = 0; i < kNumRegisters; i++) {
+    if (regs[i] != other.regs[i]) regs[i] = nullptr;
+  }
+  for (unsigned i = 0; i < kNumSlots; i++) {
+    if (slots[i] != other.slots[i]) slots[i] = nullptr;
+  }
+}
 
 // Return the number of parameters required for this block
 DEBUG_ONLY static int numBlockParams(Block* b) {
@@ -277,9 +291,10 @@ bool checkRegisters(IRTrace* trace, const IRFactory& factory,
   assert(checkCfg(trace, factory));
 
   auto blocks = rpoSortCfg(trace, factory);
-  auto children = findDomChildren(blocks);
-  forPreorderDoms(blocks.front(), children, RegState(),
-                  [&] (Block* block, RegState& state) {
+  StateVector<Block, RegState> states(&factory, RegState());
+  StateVector<Block, bool> reached(&factory, false);
+  for (auto* block : blocks) {
+    RegState state = states[block];
     for (IRInstruction& inst : *block) {
       for (SSATmp* src : inst.srcs()) {
         auto const &info = regs[src];
@@ -300,7 +315,17 @@ bool checkRegisters(IRTrace* trace, const IRFactory& factory,
         }
       }
     }
-  });
+    // State contains register/spill info at current block end.
+    auto updateEdge = [&](Block* succ) {
+      if (!reached[succ]) {
+        states[succ] = state;
+      } else {
+        states[succ].merge(state);
+      }
+    };
+    if (auto* next = block->next()) updateEdge(next);
+    if (auto* taken = block->taken()) updateEdge(taken);
+  }
 
   return true;
 }

@@ -628,11 +628,19 @@ public:
   void postponeSinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);
   void postponeCinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);
   void emitPostponedMeths();
-  void emitMethodMetadata(PostponedMeth& p);
+  void emitMethodMetadata(MethodStatementPtr meth,
+                          ClosureUseVarVec* useVars,
+                          bool top);
   void fillFuncEmitterParams(FuncEmitter* fe,
                              ExpressionListPtr params);
-  void emitMethodBody(PostponedMeth& p);
-  void emitMethodDVInitializers(Emitter& e, PostponedMeth& p,
+  void emitMethodPrologue(Emitter& e, MethodStatementPtr meth);
+  void emitMethod(MethodStatementPtr meth);
+  void emitMethodsForGenerator(PostponedMeth& p,
+                               vector<FuncEmitter*>& top_fes);
+  void emitGeneratorCreate(MethodStatementPtr meth);
+  void emitGeneratorBody(MethodStatementPtr meth);
+  void emitMethodDVInitializers(Emitter& e,
+                                MethodStatementPtr& meth,
                                 Label& topOfBody);
   void emitPostponedCtors();
   void emitPostponedPSinit(PostponedNonScalars& p, bool pinit);

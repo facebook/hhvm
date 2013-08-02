@@ -68,7 +68,7 @@
 #include "hphp/util/cycles.h"
 
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/php_debug.h"
+#include "hphp/runtime/vm/php-debug.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/execution_context.h"
@@ -85,8 +85,8 @@
 #include "hphp/runtime/vm/pendq.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/type_profile.h"
-#include "hphp/runtime/vm/member_operations.h"
+#include "hphp/runtime/vm/type-profile.h"
+#include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
@@ -2732,7 +2732,7 @@ TranslatorX64::emitServiceReqWork(SRFlags flags, ServiceRequest req,
   /*
    * Remember previous state of the code cache.
    */
-  boost::optional<CodeCursor> maybeCc;
+  boost::optional<CodeCursor> maybeCc = boost::none;
   if (start != as.frontier()) {
     maybeCc = boost::in_place<CodeCursor>(boost::ref(as), start);
   }
@@ -3476,12 +3476,15 @@ TranslatorX64::translateTracelet(Tracelet& t) {
       } catch (JIT::FailedIRGen& fcg) {
         always_assert(!ni->interp);
         ni->interp = true;
+        FTRACE(1, "HHIR: RETRY Translation {}: will interpOne BC instr {} "
+               "after failing to generate ir: {} \n\n",
+               getCurrentTransID(), ni->toString(), fcg.what());
         return Retry;
       }
       assert(ni->source.offset() >= t.func()->base());
       // We sometimes leave the tail of a truncated tracelet in place to aid
       // analysis, but breaksTracelet is authoritative.
-      if (ni->breaksTracelet) break;
+      if (ni->breaksTracelet || m_irTrans->hhbcTrans().hasExit()) break;
     }
     traceEnd();
 
@@ -3497,9 +3500,9 @@ TranslatorX64::translateTracelet(Tracelet& t) {
         if (ni->source.offset() == fcg.bcOff) {
           always_assert(!ni->interp);
           ni->interp = true;
-          TRACE(1, "HHIR: RETRY Translation %d: will interpOne BC instr %s "
-                "after failing to code-gen \n\n",
-                getCurrentTransID(), ni->toString().c_str());
+          FTRACE(1, "HHIR: RETRY Translation {}: will interpOne BC instr {} "
+                 "after failing to code-gen \n\n",
+                 getCurrentTransID(), ni->toString(), fcg.what());
           return Retry;
         }
       }

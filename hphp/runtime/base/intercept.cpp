@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/event_hook.h"
+#include "hphp/runtime/vm/event-hook.h"
 
 #include "hphp/util/parser/parser.h"
 #include "hphp/util/lock.h"

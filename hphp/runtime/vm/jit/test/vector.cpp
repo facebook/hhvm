@@ -28,52 +28,52 @@ namespace HPHP {  namespace JIT {
   << folly::format("Expected {}, got {}", (exp).toString(), (act).toString()) \
 
 TEST(VectorEffects, Basic) {
-  VectorEffects elem(SetElem, Type::PtrToArr, Type::Int, Type::Str);
+  VectorEffects elem(SetElem, Type::PtrToArr);
   EXPECT_TEQ(Type::PtrToArr, elem.baseType);
   EXPECT_FALSE(elem.baseTypeChanged);
   EXPECT_TRUE(elem.baseValChanged);
 
-  VectorEffects prop(SetProp, Type::Obj, Type::StaticStr, Type::Str);
+  VectorEffects prop(SetProp, Type::Obj);
   EXPECT_TEQ(Type::Obj, prop.baseType);
   EXPECT_FALSE(prop.baseTypeChanged);
   EXPECT_FALSE(prop.baseValChanged);
 }
 
 TEST(VectorEffects, BadArrayKey) {
-  VectorEffects ve(SetElem, Type::PtrToArr, Type::Arr, Type::Int);
+  VectorEffects ve(SetElem, Type::PtrToArr);
   EXPECT_TEQ(Type::PtrToArr, ve.baseType);
   EXPECT_FALSE(ve.baseTypeChanged);
   EXPECT_TRUE(ve.baseValChanged);
 }
 
 TEST(VectorEffects, NonObjProp) {
-  VectorEffects ve(SetProp, Type::PtrToInt, Type::Str, Type::Dbl);
+  VectorEffects ve(SetProp, Type::PtrToInt);
   EXPECT_TEQ(Type::PtrToInt, ve.baseType);
   EXPECT_FALSE(ve.baseTypeChanged);
   EXPECT_FALSE(ve.baseValChanged);
 }
 
 TEST(VectorEffects, NonArrElem) {
-  VectorEffects ve(SetElem, Type::PtrToDbl, Type::Int, Type::Obj);
+  VectorEffects ve(SetElem, Type::PtrToDbl);
   EXPECT_TEQ(Type::PtrToDbl, ve.baseType);
   EXPECT_FALSE(ve.baseTypeChanged);
   EXPECT_FALSE(ve.baseValChanged);
 }
 
 TEST(VectorEffects, PromoteNull) {
-  VectorEffects elem(SetElem, Type::PtrToNull, Type::Int, Type::Str);
+  VectorEffects elem(SetElem, Type::PtrToNull);
   EXPECT_TEQ(Type::PtrToArr, elem.baseType);
   EXPECT_TRUE(elem.baseTypeChanged);
   EXPECT_TRUE(elem.baseValChanged);
 
-  VectorEffects prop(SetProp, Type::PtrToUninit, Type::StaticStr, Type::Str);
+  VectorEffects prop(SetProp, Type::PtrToUninit);
   EXPECT_TEQ(Type::PtrToObj, prop.baseType);
   EXPECT_TRUE(prop.baseTypeChanged);
   EXPECT_TRUE(prop.baseValChanged);
 }
 
 TEST(VectorEffects, UnknownBase) {
-  VectorEffects ve(SetElem, Type::PtrToCell, Type::Int, Type::Obj);
+  VectorEffects ve(SetElem, Type::PtrToCell);
   EXPECT_TEQ(Type::PtrToCell - Type::PtrToNull, ve.baseType);
   EXPECT_TRUE(ve.baseTypeChanged);
   EXPECT_TRUE(ve.baseValChanged);

@@ -28,7 +28,7 @@
 #include "hphp/runtime/base/code_coverage.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/intercept.h"
-#include "hphp/runtime/vm/backup_gc.h"
+#include "hphp/runtime/vm/backup-gc.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "unicode/uchar.h"
 #include "unicode/utf8.h"

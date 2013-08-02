@@ -86,12 +86,6 @@ inline DEBUG_ONLY bool is_refcount_realistic(int32_t count) {
   }                                                                   \
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
 
-/**
- * Implements reference counting. We chose to roll our own SmartPtr type
- * instead of using boost::shared_ptr<T> so that we can achieve better
- * performance by directly embedding the reference count in the object.
- */
-
 #define IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC \
   RefCount getCount() const {                   \
     assert(is_refcount_realistic(m_count));     \
@@ -132,10 +126,10 @@ class AtomicCountable {
  public:
   AtomicCountable() : m_count(0) {}
   RefCount getCount() const { return m_count; }
-  void incAtomicCount() const { atomic_inc(m_count); }
-  RefCount decAtomicCount() const { return atomic_dec(m_count); }
+  void incAtomicCount() const { ++m_count; }
+  RefCount decAtomicCount() const { return --m_count; }
  protected:
-  mutable RefCount m_count;
+  mutable std::atomic<RefCount> m_count;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -29,8 +29,8 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/name_value_table.h"
-#include "hphp/runtime/vm/request_arena.h"
+#include "hphp/runtime/vm/name-value-table.h"
+#include "hphp/runtime/vm/request-arena.h"
 
 namespace HPHP {
 

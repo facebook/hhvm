@@ -181,7 +181,7 @@ void ServerStats::Filter(list<TimeSlot*> &slots, const std::string &keys,
     for (PageStatsMap::iterator piter = s->m_pages.begin();
          piter != s->m_pages.end();) {
       PageStats &ps = piter->second;
-      if ((code && ps.m_code == code) || (!urlEmpty && ps.m_url == url)) {
+      if ((code && ps.m_code != code) || (!urlEmpty && ps.m_url != url)) {
         PageStatsMap::iterator piterTemp = piter;
         ++piter;
         s->m_pages.erase(piterTemp);

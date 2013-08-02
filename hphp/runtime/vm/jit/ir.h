@@ -187,6 +187,7 @@ O(CheckType,                    DParam, S(Gen,Nullptr),          E|CRc|PRc|P) \
 O(AssertType,                   DParam, S(Gen,Nullptr,Cls),    C|E|CRc|PRc|P) \
 O(CheckTypeMem,                     ND, S(PtrToGen),                       E) \
 O(GuardLoc,                         ND, S(FramePtr),                       E) \
+O(GuardCls,                         ND, S(Obj),                            E) \
 O(GuardStk,                  D(StkPtr), S(StkPtr),                         E) \
 O(CheckLoc,                         ND, S(FramePtr),                       E) \
 O(CheckStk,                  D(StkPtr), S(StkPtr),                         E) \
@@ -257,7 +258,7 @@ O(ConvBoolToStr,          D(StaticStr), S(Bool),                           C) \
 O(ConvDblToStr,                 D(Str), S(Dbl),                            N) \
 O(ConvIntToStr,                 D(Str), S(Int),                            N) \
 O(ConvObjToStr,                 D(Str), S(Obj),                   N|Er|CRc|K) \
-O(ConvResToStr,                 D(Str), S(Obj),                   N|Er|CRc|K) \
+O(ConvResToStr,                 D(Str), S(Res),                   N|Er|CRc|K) \
 O(ConvCellToStr,                D(Str), S(Cell),                  N|Er|CRc|K) \
                                                                               \
 O(ExtendsClass,                D(Bool), S(Cls) C(Cls),                     C) \
@@ -478,8 +479,8 @@ O(ArrayAdd,                     D(Arr), S(Arr) S(Arr),         N|Mem|CRc|PRc) \
 O(AKExists,                    D(Bool), S(Cell) S(Cell),                 C|N) \
 O(InterpOne,                 D(StkPtr), S(FramePtr) S(StkPtr),                \
                                                              E|N|Mem|Refs|Er) \
-O(InterpOneCF,                      ND, S(FramePtr) S(StkPtr)                 \
-                                          C(Int),          T|E|N|Mem|Refs|Er) \
+O(InterpOneCF,               D(StkPtr), S(FramePtr) S(StkPtr),                \
+                                                           T|E|N|Mem|Refs|Er) \
 O(Spill,                       DofS(0), SUnk,                            Mem) \
 O(Reload,                      DofS(0), SUnk,                            Mem) \
 O(CreateContFunc,               D(Obj), NA,                          E|N|PRc) \
@@ -1029,8 +1030,8 @@ struct VectorEffects {
                   SetLocTypeFunc setLocType);
 
   explicit VectorEffects(const IRInstruction* inst);
-  VectorEffects(Opcode op, Type base, Type key, Type val);
-  VectorEffects(Opcode op, SSATmp* base, SSATmp* key, SSATmp* val);
+  VectorEffects(Opcode op, Type base);
+  VectorEffects(Opcode op, SSATmp* base);
   VectorEffects(Opcode opc, const std::vector<SSATmp*>& srcs);
 
   Type baseType;
@@ -1038,7 +1039,7 @@ struct VectorEffects {
   bool baseValChanged;
 
 private:
-  void init(const Opcode op, const Type base, const Type key, const Type val);
+  void init(const Opcode op, const Type base);
 };
 
 struct CatchInfo {

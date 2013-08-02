@@ -26,10 +26,10 @@
 #include "hphp/runtime/base/tv_conversions.h"
 #include "hphp/runtime/base/tv_arith.h"
 #include "hphp/compiler/builtin_symbols.h"
-#include "hphp/runtime/vm/event_hook.h"
+#include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/srckey.h"
-#include "hphp/runtime/vm/member_operations.h"
+#include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/base/class_info.h"
 #include "hphp/runtime/base/code_coverage.h"
 #include "hphp/runtime/base/file_repository.h"
@@ -44,11 +44,11 @@
 #include "hphp/runtime/base/stat_cache.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/vm/php_debug.h"
-#include "hphp/runtime/vm/debugger_hook.h"
+#include "hphp/runtime/vm/php-debug.h"
+#include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
-#include "hphp/runtime/vm/type_constraint.h"
+#include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/ext/ext_math.h"
@@ -60,7 +60,7 @@
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/vm/type_profile.h"
+#include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/server/source_root_info.h"
 #include "hphp/runtime/base/extended_logger.h"
 #include "hphp/runtime/base/tracer.h"
@@ -69,8 +69,8 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/ext/ext_collections.h"
 
-#include "hphp/runtime/vm/name_value_table_wrapper.h"
-#include "hphp/runtime/vm/request_arena.h"
+#include "hphp/runtime/vm/name-value-table-wrapper.h"
+#include "hphp/runtime/vm/request-arena.h"
 #include "hphp/util/arena.h"
 
 #include <iostream>
@@ -1508,10 +1508,15 @@ void VMExecutionContext::syncGdbState() {
   }
 }
 
+static bool jitIsEnabled(const Unit* unit) {
+  if (!ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) return false;
+  return unit == nullptr || !unit->isInterpretOnly();
+}
+
 void VMExecutionContext::enterVMPrologue(ActRec* enterFnAr) {
   assert(enterFnAr);
   Stats::inc(Stats::VMEnter);
-  if (ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
+  if (jitIsEnabled(enterFnAr->m_func->unit())) {
     int np = enterFnAr->m_func->numParams();
     int na = enterFnAr->numArgs();
     if (na > np) na = np + 1;
@@ -1532,7 +1537,7 @@ void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
     start = enterFnAr->m_func->getFuncBody();
   }
   Stats::inc(Stats::VMEnter);
-  if (ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
+  if (jitIsEnabled(m_fp->unit())) {
     (void) m_fp->unit()->offsetOf(m_pc); /* assert */
     if (enterFnAr) {
       assert(start);
@@ -2570,12 +2575,14 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
                                          int frame) {
   assert(retval);
   // The code has "<?php" prepended already
-  Unit* unit = compileEvalString(code);
+  Unit* unit = compile_string(code->data(), code->size());
   if (unit == nullptr) {
     raise_error("Syntax error");
     tvWriteNull(retval);
     return;
   }
+  // Do not JIT this unit, we are using it exactly once.
+  unit->setInterpretOnly();
 
   VarEnv *varEnv = nullptr;
   ActRec *fp = getFP();

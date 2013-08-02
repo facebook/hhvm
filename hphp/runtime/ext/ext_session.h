@@ -25,6 +25,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+extern const int64_t k_PHP_SESSION_DISABLED;
+extern const int64_t k_PHP_SESSION_NONE;
+extern const int64_t k_PHP_SESSION_ACTIVE;
+
+int64_t f_session_status();
 void f_session_set_cookie_params(int64_t lifetime, CStrRef path = null_string, CStrRef domain = null_string, CVarRef secure = uninit_null(), CVarRef httponly = uninit_null());
 Array f_session_get_cookie_params();
 String f_session_name(CStrRef newname = null_string);

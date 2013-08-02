@@ -148,98 +148,6 @@ static void on_constant(Parser *_p, Token &out, Token &name, Token &value) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// continuation transformations
-
-void prepare_generator(Parser *_p, Token &stmt) {
-  // 1. add prologue and epilogue to original body and store it back to "stmt"
-  {
-    // hphp_unpack_continuation()
-    Token empty;
-    Token cname;   cname.setText("hphp_unpack_continuation");
-    Token unpack;  _p->onCall(unpack, false, cname, empty, NULL, true);
-    Token sunpack; _p->onExpStatement(sunpack, unpack);
-
-    Token stmts0;  _p->onStatementListStart(stmts0);
-    Token stmts1;  _p->addStatement(stmts1, stmts0, sunpack);
-    Token stmts2;  _p->addStatement(stmts2, stmts1, stmt);
-
-    stmt.reset();
-    _p->finishStatement(stmt, stmts2); stmt = 1;
-  }
-}
-
-// create a generator function with original name and parameters
-void create_generator(Parser *_p, Token &out, Token &params,
-                      Token &name, const std::string &closureName,
-                      const char *clsname, Token *modifiers,
-                      Token &origGenFunc, bool isHhvm, Token *attr) {
-  _p->pushFuncLocation();
-  if (clsname) {
-    _p->onMethodStart(name, *modifiers, false);
-  } else {
-    _p->onFunctionStart(name, false);
-  }
-
-  Token scont;
-  {
-    Token cname;
-    if (isHhvm) {
-      Token cn;    cn.setText(clsname ? "__CLASS__" : "");
-                   _p->onScalar(
-                     cname,
-                     clsname ? T_CLASS_C : T_CONSTANT_ENCAPSED_STRING,
-                     cn);
-    } else {
-      Token cn;    cn.setText(clsname ? clsname : "");
-                   _p->onScalar(cname, T_CONSTANT_ENCAPSED_STRING, cn);
-    }
-
-    Token fn;      fn.setText(closureName);
-    Token fname;   _p->onScalar(fname, T_CONSTANT_ENCAPSED_STRING, fn);
-
-    Token ofn;     ofn.setText(clsname ? "__METHOD__" : "__FUNCTION__");
-    Token oname;   _p->onScalar(oname, clsname ? T_METHOD_C : T_FUNC_C, ofn);
-
-    Token param1;  _p->onCallParam(param1, NULL, cname, false);
-                   _p->onCallParam(param1, &param1, fname, false);
-                   _p->onCallParam(param1, &param1, oname, false);
-
-    Token stmts0;  _p->onStatementListStart(stmts0);
-
-    Token cname0;  cname0.setText("hphp_create_continuation");
-    Token call;    _p->onCall(call, false, cname0, param1, NULL, true);
-    Token ret;     _p->onReturn(ret, &call);
-
-    Token stmts1;  _p->addStatement(stmts1, stmts0, ret);
-    _p->finishStatement(scont, stmts1); scont = 1;
-  }
-
-  Token ret, ref;
-  ret.setText("Continuation");
-  ret.setCheck();
-  if (clsname) {
-    Token closure;
-    _p->onMethod(closure, *modifiers, ret, ref, name, params, scont, attr);
-    origGenFunc = closure;
-
-    Token stmts0;  _p->onStatementListStart(stmts0);
-    Token stmts1;  _p->addStatement(stmts1, stmts0, closure);
-    Token stmts2;  _p->addStatement(stmts2, stmts1, out);
-    _p->finishStatement(out, stmts2); out = 1;
-  } else {
-    out.reset();
-    _p->onFunction(out, modifiers, ret, ref, name, params, scont, attr);
-    origGenFunc = out;
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-static void user_attribute_check(Parser *_p) {
-  if (!_p->scanner().hipHopSyntaxEnabled()) {
-    HPHP_PARSER_ERROR("User attributes are not enabled", _p);
-  }
-}
 
 static void finally_statement(Parser *_p) {
   if (!_p->enableFinallyStatement()) {
@@ -269,10 +177,6 @@ static void constant_ae(Parser *_p, Token &out, Token &value) {
  */
 
 static void xhp_tag(Parser *_p, Token &out, Token &label, Token &body) {
-  if (!_p->enableXHP()) {
-    HPHP_PARSER_ERROR("XHP: not enabled", _p);
-  }
-
   if (!body.text().empty() && body.text() != label.text()) {
     HPHP_PARSER_ERROR("XHP: mismatched tag: '%s' not the same as '%s'",
                       _p, body.text().c_str(), label.text().c_str());
@@ -401,10 +305,6 @@ static void xhp_attribute_list(Parser *_p, Token &out, Token *list,
 }
 
 static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
-  if (!_p->enableXHP()) {
-    HPHP_PARSER_ERROR("XHP: not enabled", _p);
-  }
-
   Token modifiers;
   Token fname; fname.setText("__xhpAttributeDeclaration");
   {
@@ -507,10 +407,6 @@ static void xhp_collect_attributes(Parser *_p, Token &out, Token &stmts) {
 }
 
 static void xhp_category_stmt(Parser *_p, Token &out, Token &categories) {
-  if (!_p->enableXHP()) {
-    HPHP_PARSER_ERROR("XHP: not enabled", _p);
-  }
-
   Token fname;     fname.setText("__xhpCategoryDeclaration");
   Token m1;        m1.setNum(T_PROTECTED);
   Token modifiers; _p->onMemberModifier(modifiers, 0, m1);
@@ -592,10 +488,6 @@ static void xhp_children_paren(Parser *_p, Token &out, Token exp, int op) {
 }
 
 static void xhp_children_stmt(Parser *_p, Token &out, Token &children) {
-  if (!_p->enableXHP()) {
-    HPHP_PARSER_ERROR("XHP: not enabled", _p);
-  }
-
   Token fname;     fname.setText("__xhpChildrenDeclaration");
   Token m1;        m1.setNum(T_PROTECTED);
   Token modifiers; _p->onMemberModifier(modifiers, 0, m1);
@@ -642,7 +534,7 @@ static void xhp_children_stmt(Parser *_p, Token &out, Token &children) {
 }
 
 static void only_in_hh_syntax(Parser *_p) {
-  if (!_p->scanner().hipHopSyntaxEnabled()) {
+  if (!_p->scanner().isHHSyntaxEnabled()) {
     HPHP_PARSER_ERROR(
       "Syntax only allowed with -v Eval.EnableHipHopSyntax=true", _p);
   }
@@ -788,7 +680,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_TRAIT_C
 
 %token T_VARARG
-%token T_HACK_ERROR
+%token T_HH_ERROR
 %token T_FINALLY
 
 %token T_XHP_TAG_LT
@@ -1228,11 +1120,11 @@ new_else_single:
 ;
 
 method_parameter_list:
-    non_empty_method_parameter_list ',' T_VARARG
-                                       { only_in_hh_syntax(_p); $$ = $1; }
+    non_empty_method_parameter_list
+    ',' T_VARARG                       { $$ = $1;}
   | non_empty_method_parameter_list
-    possible_comma_in_hphp_syntax      { $$ = $1;}
-  | T_VARARG                           { only_in_hh_syntax(_p); $$.reset(); }
+    hh_possible_comma                  { $$ = $1;}
+  | T_VARARG                           { $$.reset();}
   |                                    { $$.reset();}
 ;
 
@@ -1280,11 +1172,11 @@ non_empty_method_parameter_list:
 ;
 
 parameter_list:
-    non_empty_parameter_list ',' T_VARARG
-                                       { only_in_hh_syntax(_p); $$ = $1; }
+    non_empty_parameter_list ','
+    T_VARARG                           { $$ = $1;}
   | non_empty_parameter_list
-    possible_comma_in_hphp_syntax      { $$ = $1;}
-  | T_VARARG                           { only_in_hh_syntax(_p); $$.reset(); }
+    hh_possible_comma                  { $$ = $1;}
+  | T_VARARG                           { $$.reset();}
   |                                    { $$.reset();}
 ;
 
@@ -1325,7 +1217,7 @@ non_empty_parameter_list:
 
 function_call_parameter_list:
     non_empty_fcall_parameter_list
-    possible_comma_in_hphp_syntax      { $$ = $1;}
+    hh_possible_comma                  { $$ = $1;}
   |                                    { $$.reset();}
 ;
 non_empty_fcall_parameter_list:
@@ -1740,8 +1632,7 @@ static_shape_pair_list:
 ;
 
 shape_literal:
-    T_SHAPE '(' shape_pair_list ')'   { only_in_hh_syntax(_p);
-                                        _p->onArray($$, $3, T_ARRAY); }
+    T_SHAPE '(' shape_pair_list ')'   { _p->onArray($$, $3, T_ARRAY);}
 ;
 
 array_literal:
@@ -1777,10 +1668,8 @@ dim_expr_base:
 ;
 
 lexical_vars:
-    T_USE '('
-    lexical_var_list
-    possible_comma_in_hphp_syntax
-    ')'                                { $$ = $3;}
+    T_USE '(' lexical_var_list
+    hh_possible_comma ')'              { $$ = $3;}
   |                                    { $$.reset();}
 ;
 
@@ -2011,8 +1900,7 @@ static_scalar:
     static_array_pair_list ')'         { _p->onArray($$,$3,T_ARRAY); }
   | '[' static_array_pair_list ']'     { _p->onArray($$,$2,T_ARRAY); }
   | T_SHAPE '('
-    static_shape_pair_list ')'         { only_in_hh_syntax(_p);
-                                         _p->onArray($$,$3,T_ARRAY); }
+    static_shape_pair_list ')'         { _p->onArray($$,$3,T_ARRAY); }
   | static_class_constant              { $$ = $1;}
   | static_collection_literal          { $$ = $1;}
 ;
@@ -2047,7 +1935,7 @@ possible_comma:
     ','                                { $$.reset();}
   |                                    { $$.reset();}
 ;
-possible_comma_in_hphp_syntax:
+hh_possible_comma:
     ','                                { only_in_hh_syntax(_p); $$.reset();}
   |                                    { $$.reset();}
 ;
@@ -2088,8 +1976,7 @@ static_scalar_ae:
     static_array_pair_list_ae ')'      { _p->onArray($$,$3,T_ARRAY);}
   | '[' static_array_pair_list_ae ']'  { _p->onArray($$,$2,T_ARRAY);}
   | T_SHAPE '('
-    static_shape_pair_list_ae ')'      { only_in_hh_syntax(_p);
-                                         _p->onArray($$,$3,T_ARRAY); }
+    static_shape_pair_list_ae ')'      { _p->onArray($$,$3,T_ARRAY); }
 ;
 
 static_array_pair_list_ae:
@@ -2146,7 +2033,7 @@ non_empty_user_attribute_list:
     attribute_static_scalar_list       { _p->onUserAttribute($$,  0,$1,$2);}
 ;
 user_attribute_list:
-                                       { user_attribute_check(_p);}
+                                       { only_in_hh_syntax(_p);}
     non_empty_user_attribute_list
     possible_comma                     { $$ = $2;}
 ;
@@ -2424,13 +2311,10 @@ hh_opt_constraint:
 
 hh_type_alias_statement:
     T_TYPE hh_name_with_typevar
-      '=' hh_type ';'                  { only_in_hh_syntax(_p);
-                                         _p->onTypedef($$, $2, $4);
+      '=' hh_type ';'                  { _p->onTypedef($$, $2, $4);
                                          _p->popTypeScope(); }
   | T_NEWTYPE hh_name_with_typevar
-            hh_opt_constraint
-    '=' hh_type ';'                    { only_in_hh_syntax(_p);
-                                         _p->onTypedef($$, $2, $5);
+    hh_opt_constraint '=' hh_type ';'  { _p->onTypedef($$, $2, $5);
                                          _p->popTypeScope(); }
 ;
 
@@ -2446,14 +2330,13 @@ hh_name_with_typevar:  /* foo -> foo<X,Y>; this adds a typevar scope
   | ident
     T_TYPELIST_LT
     hh_typevar_list
-    T_TYPELIST_GT                      { _p->pushTypeScope(); $$ = $1;
-                                         only_in_hh_syntax(_p); }
+    T_TYPELIST_GT                      { _p->pushTypeScope(); $$ = $1; }
 ;
 
 hh_typeargs_opt:
     T_TYPELIST_LT
     hh_type_list
-    T_TYPELIST_GT                      { only_in_hh_syntax(_p); $$ = $2; }
+    T_TYPELIST_GT                      { $$ = $2; }
   |                                    { $$.reset(); }
 ;
 
@@ -2506,8 +2389,7 @@ hh_shape_member_list:
 
 hh_shape_type:
     T_SHAPE
-     '(' hh_shape_member_list ')'      { only_in_hh_syntax(_p);
-                                         $$.setText("array"); }
+     '(' hh_shape_member_list ')'      { $$.setText("array"); }
 ;
 
 /* extends non_empty_type_decl with some more types */
@@ -2526,12 +2408,10 @@ hh_type:
                                          _p->onTypeAnnotation($$, $1, t); }
   | hh_shape_type                      { $$ = $1; }
   | T_ARRAY T_TYPELIST_LT hh_type
-    T_TYPELIST_GT                      { only_in_hh_syntax(_p);
-                                         $1.setText("array");
+    T_TYPELIST_GT                      { $1.setText("array");
                                          _p->onTypeAnnotation($$, $1, $3); }
   | T_ARRAY T_TYPELIST_LT hh_type ','
-    hh_type T_TYPELIST_GT              { only_in_hh_syntax(_p);
-                                         _p->onTypeList($3, $5);
+    hh_type T_TYPELIST_GT              { _p->onTypeList($3, $5);
                                          $1.setText("array");
                                          _p->onTypeAnnotation($$, $1, $3); }
   | T_XHP_LABEL                        { $1.xhpLabel();

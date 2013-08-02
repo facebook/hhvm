@@ -26,7 +26,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/tread_hash_map.h"
+#include "hphp/runtime/vm/tread-hash-map.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"

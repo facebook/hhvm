@@ -73,8 +73,16 @@ void Tracelet::print(std::ostream& out) const {
     out << "  " << dep.second->pretty() << '\n';
   }
   out << show(i->source) << '\n';
+
+  auto blockStart = i->source;
   for (; i; i = i->next) {
-    out << folly::format("{: >6}: {}\n", i->offset(), i->toString());
+    auto nextSk = i->source.advanced(i->unit());
+    if (!i->next || i->next->source != nextSk) {
+      auto opts = Unit::PrintOpts().range(blockStart.offset(), nextSk.offset())
+                                   .indent(2);
+      blockStart.unit()->prettyPrint(out, opts);
+      if (i->next) blockStart = i->next->source;
+    }
   }
 }
 

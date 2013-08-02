@@ -63,7 +63,7 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
       m_inlineAsExpr(false), m_inlineSameContext(false),
       m_contextSensitive(false),
       m_directInvoke(false),
-      m_closureGenerator(false), m_noLSB(false), m_nextLSB(false),
+      m_generator(false), m_noLSB(false), m_nextLSB(false),
       m_hasTry(false), m_hasGoto(false), m_localRedeclaring(false),
       m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0), m_nextID(0),
       m_yieldLabelCount(0) {
@@ -108,7 +108,7 @@ FunctionScope::FunctionScope(FunctionScopePtr orig,
       m_inlineSameContext(orig->m_inlineSameContext),
       m_contextSensitive(orig->m_contextSensitive),
       m_directInvoke(orig->m_directInvoke),
-      m_closureGenerator(orig->m_closureGenerator), m_noLSB(orig->m_noLSB),
+      m_generator(orig->m_generator), m_noLSB(orig->m_noLSB),
       m_nextLSB(orig->m_nextLSB), m_hasTry(orig->m_hasTry),
       m_hasGoto(orig->m_hasGoto), m_localRedeclaring(orig->m_localRedeclaring),
       m_redeclaring(orig->m_redeclaring),
@@ -207,7 +207,7 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
       m_inlineAsExpr(false), m_inlineSameContext(false),
       m_contextSensitive(false),
       m_directInvoke(false),
-      m_closureGenerator(false), m_noLSB(false), m_nextLSB(false),
+      m_generator(false), m_noLSB(false), m_nextLSB(false),
       m_hasTry(false), m_hasGoto(false), m_localRedeclaring(false),
       m_redeclaring(-1), m_inlineIndex(0),
       m_optFunction(0) {
@@ -345,34 +345,6 @@ bool FunctionScope::mayContainThis() {
 
 bool FunctionScope::isClosure() const {
   return ParserBase::IsClosureName(name());
-}
-
-bool FunctionScope::isGenerator() const {
-  assert(!getOrigGenStmt() || ParserBase::IsContinuationName(name()));
-  return !!getOrigGenStmt();
-}
-
-bool FunctionScope::hasGeneratorAsBody() const {
-  MethodStatementPtr stmt = dynamic_pointer_cast<MethodStatement>(getStmt());
-  return stmt ? !!stmt->getGeneratorFunc() : false;
-}
-
-bool FunctionScope::isGeneratorFromClosure() const {
-  bool res = isGenerator() && getOrigGenFS()->isClosure();
-  assert(!res || getOrigGenFS()->isClosureGenerator());
-  return res;
-}
-
-MethodStatementRawPtr FunctionScope::getOrigGenStmt() const {
-  if (!getStmt()) return MethodStatementRawPtr();
-  MethodStatementPtr m =
-    dynamic_pointer_cast<MethodStatement>(getStmt());
-  return m ? m->getOrigGeneratorFunc() : MethodStatementRawPtr();
-}
-
-FunctionScopeRawPtr FunctionScope::getOrigGenFS() const {
-  MethodStatementRawPtr origStmt = getOrigGenStmt();
-  return origStmt ? origStmt->getFunctionScope() : FunctionScopeRawPtr();
 }
 
 void FunctionScope::setVariableArgument(int reference) {
@@ -925,28 +897,6 @@ std::string FunctionScope::getDocFullName() const {
   return docName;
 }
 
-std::string FunctionScope::getInjectionId() const {
-  string injectionName = CodeGenerator::FormatLabel(getOriginalName());
-  MethodStatementPtr stmt =
-    dynamic_pointer_cast<MethodStatement>(getStmt());
-  assert(stmt);
-  if (stmt->getGeneratorFunc()) {
-    injectionName = isClosureGenerator() ?
-      injectionName :
-      injectionName + "{continuation}";
-  } else if (stmt->getOrigGeneratorFunc() &&
-             !getOrigGenFS()->isClosure()) {
-    injectionName = CodeGenerator::FormatLabel(
-      stmt->getOrigGeneratorFunc()->getOriginalName());
-  }
-  if (m_redeclaring < 0) {
-    return injectionName;
-  }
-  const string &redecSuffix = string(Option::IdPrefix) +
-    boost::lexical_cast<std::string>(m_redeclaring);
-  return injectionName + redecSuffix;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void FunctionScope::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
@@ -1072,7 +1022,7 @@ bool FunctionScope::needsAnonClosureClass(ParameterExpressionPtrVec &useVars) {
   useVars.clear();
   if (!isClosure()) return false;
   ParameterExpressionPtrIdxPairVec useVars0;
-  getClosureUseVars(useVars0, !m_closureGenerator);
+  getClosureUseVars(useVars0, !m_generator);
   useVars.resize(useVars0.size());
   // C++ seems to be unable to infer the type here on pair_first_elem
   transform(useVars0.begin(),
@@ -1086,7 +1036,7 @@ bool FunctionScope::needsAnonClosureClass(
     ParameterExpressionPtrIdxPairVec &useVars) {
   useVars.clear();
   if (!isClosure()) return false;
-  getClosureUseVars(useVars, !m_closureGenerator);
+  getClosureUseVars(useVars, !m_generator);
   return useVars.size() > 0 || getVariables()->hasStaticLocals();
 }
 

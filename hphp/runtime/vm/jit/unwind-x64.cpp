@@ -28,7 +28,7 @@
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/member_operations.h"
+#include "hphp/runtime/vm/member-operations.h"
 
 // libgcc exports this for registering eh information for
 // dynamically-loaded objects.  The pointer is to data in the format

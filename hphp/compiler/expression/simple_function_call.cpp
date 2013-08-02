@@ -39,6 +39,7 @@
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/array_init.h"
 #include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/zend_functions.h"
 #include "hphp/runtime/ext/ext_variable.h"
 
 using namespace HPHP;
@@ -738,10 +739,10 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
               name = voff.toString();
               if (mode == EXTR_PREFIX_ALL ||
                   (mode == EXTR_PREFIX_INVALID &&
-                   !name.isValidVariableName())) {
+                   !is_valid_var_name(name.c_str(), name.size()))) {
                 name = prefix + "_" + name;
               }
-              if (!name.isValidVariableName()) continue;
+              if (!is_valid_var_name(name.c_str(), name.size())) continue;
               SimpleVariablePtr var(
                 new SimpleVariable(getScope(), getLocation(), name.data()));
               var->updateSymbol(SimpleVariablePtr());

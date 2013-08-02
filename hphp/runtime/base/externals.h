@@ -27,7 +27,7 @@
  */
 
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/vm/name_value_table_wrapper.h"
+#include "hphp/runtime/vm/name-value-table-wrapper.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

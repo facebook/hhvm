@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_VM_FUNC_H_
 #define incl_HPHP_VM_FUNC_H_
 
-#include "hphp/runtime/vm/type_constraint.h"
-#include "hphp/runtime/vm/repo_helpers.h"
-#include "hphp/runtime/vm/indexed_string_map.h"
+#include "hphp/runtime/vm/type-constraint.h"
+#include "hphp/runtime/vm/repo-helpers.h"
+#include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/class_info.h"
 
@@ -646,6 +646,10 @@ public:
 
   void setIsGenerator(bool isGenerator) { m_isGenerator = isGenerator; }
   bool isGenerator() const { return m_isGenerator; }
+
+  bool isMethod() const {
+    return !isPseudoMain() && (bool)pce();
+  }
 
   void setIsGeneratorFromClosure(bool b) { m_isGeneratorFromClosure = b; }
   bool isGeneratorFromClosure() const { return m_isGeneratorFromClosure; }

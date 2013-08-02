@@ -1,0 +1,20 @@
+Program %s/eval2.php loaded. Type '[r]un' or '[c]ontinue' to go.
+b foo()
+Breakpoint 1 set upon entering foo()
+But wont break until function foo has been loaded.
+c
+Program %s/eval2.php exited normally.
+@ foo(1)
+Breakpoint 1 reached at foo() on line 3 of %s/eval2.php
+   2   function foo($x) {
+   3     return $x + 1;
+   4   }
+
+= $x
+1
+c
+= $x
+HipHop Notice: Undefined variable: x
+null
+
+quit

@@ -44,7 +44,7 @@ ImmutableMap* ImmutableMap::Create(ArrayData* arr,
                                                  unserializeObj);
       SharedVariant* val = SharedVariant::Create(it.secondRef(), false, true,
                                                  unserializeObj);
-      if (val->m_shouldCache) shouldCache = true;
+      if (val->shouldCache()) shouldCache = true;
       ret->add(ret->m.m_num, key, val);
       ++ret->m.m_num;
     }

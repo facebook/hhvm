@@ -39,7 +39,6 @@ class VarNR;
 StringData* buildStringData(int     n);
 StringData* buildStringData(int64_t   n);
 StringData* buildStringData(double  n);
-StringData* buildStringData(litstr  s);
 
 /**
  * String type wrapping around StringData to implement copy-on-write and
@@ -117,7 +116,7 @@ public:
   /* implicit */ String(double  n);
   /* implicit */ String(litstr  s) {
     if (s) {
-      m_px = buildStringData(s);
+      m_px = NEW(StringData)(s, CopyString);
       m_px->setRefCount(1);
     }
   }
@@ -231,10 +230,6 @@ public:
   }
   bool isZero() const {
     return m_px ? m_px->isZero() : false;
-  }
-
-  bool isValidVariableName() const {
-    return m_px ? m_px->isValidVariableName() : false;
   }
 
   /**
@@ -390,9 +385,6 @@ public:
   String rvalAt(CArrRef key) const;
   String rvalAt(CObjRef key) const;
   String rvalAt(CVarRef key) const;
-
-  template <class K, class V>
-  inline const V &set(K key, const V &value);
 
   /**
    * Returns one character at specified position.

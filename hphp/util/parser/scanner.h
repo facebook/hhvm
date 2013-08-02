@@ -187,8 +187,10 @@ public:
   enum Type {
     AllowShortTags       = 0x01, // allow <?
     AllowAspTags         = 0x02, // allow <% %>
-    ReturnAllTokens      = 0x08, // return comments and whitespaces
-    AllowHipHopSyntax = 0x10, // allow hip-hop specific reserved words
+    ReturnAllTokens      = 0x04, // return comments and whitespaces
+    AllowXHPSyntax       = 0x08, // allow XHP syntax
+    AllowHipHopSyntax    = 0x18, // allow HipHop-specific syntax (which
+                                 // includes XHP syntax)
   };
 
 public:
@@ -294,18 +296,22 @@ public:
   }
 
   /**
-   * Enables Hack for HipHop mode (types and other goodies).
+   * Enables HipHop syntax for this file.
    */
-  void setHackMode() {
-    m_isHackMode = 1;
+  void setHHFile() {
+    m_isHHFile = 1;
   }
 
-  bool isHackMode() const {
-    return m_isHackMode;
+  bool isHHFile() const {
+    return m_isHHFile;
   }
 
-  bool hipHopSyntaxEnabled() const {
-    return (m_type & AllowHipHopSyntax) || m_isHackMode;
+  bool isXHPSyntaxEnabled() const {
+    return (m_type & AllowXHPSyntax) || m_isHHFile;
+  }
+
+  bool isHHSyntaxEnabled() const {
+    return (m_type & AllowHipHopSyntax) || m_isHHFile;
   }
 
   int getLookaheadLtDepth() {
@@ -352,7 +358,7 @@ private:
   // fields for XHP parsing
   int m_lastToken;
   void incLoc(const char *rawText, int rawLeng, int type);
-  bool m_isHackMode;
+  bool m_isHHFile;
 
   TokenStore m_lookahead;
   int m_lookaheadLtDepth;

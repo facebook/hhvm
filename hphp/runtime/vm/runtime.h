@@ -17,7 +17,7 @@
 #define incl_HPHP_VM_RUNTIME_H_
 
 #include "hphp/runtime/ext/ext_continuation.h"
-#include "hphp/runtime/vm/event_hook.h"
+#include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/funcdict.h"
 #include "hphp/runtime/base/builtin_functions.h"

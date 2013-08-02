@@ -205,11 +205,11 @@ public:
 
   // ref counting
   void incRefCount() {
-    atomic_inc(m_refCount);
+    ++m_refCount;
   }
   void decRefCount() {
-    assert(m_refCount);
-    if (atomic_dec(m_refCount) == 0) {
+    assert(m_refCount.load() > 0);
+    if (--m_refCount == 0) {
       delete this;
     }
   }
@@ -217,7 +217,7 @@ public:
   const timespec& getStartTimer() const { return m_queueTime; }
   int getTimeoutSeconds() const { return m_timeoutSeconds; }
 private:
-  int m_refCount;
+  std::atomic<int> m_refCount;
   int m_timeoutSeconds;
 
   string m_url;

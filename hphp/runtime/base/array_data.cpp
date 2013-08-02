@@ -30,7 +30,7 @@
 #include "hphp/runtime/base/shared_map.h"
 #include "hphp/runtime/base/policy_array.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/vm/name_value_table_wrapper.h"
+#include "hphp/runtime/vm/name-value-table-wrapper.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

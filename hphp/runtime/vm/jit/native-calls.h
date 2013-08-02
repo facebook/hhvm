@@ -30,29 +30,39 @@ namespace HPHP {  namespace JIT { namespace NativeCalls {
 // CodeGenerator and LinearScan. See nativecalls.cpp for a full
 // description of the types and enums.
 
-enum FuncType : unsigned {
-  FPtr,
-  FSSA,
+enum class FuncType : unsigned {
+  Call,
+  SSA,
 };
 
 struct FuncPtr {
   FuncPtr() {}
-  /* implicit */ FuncPtr(TCA f) : type(FPtr), ptr(f) {}
-  FuncPtr(FuncType t, uint64_t i) : type(t), srcIdx(i) { assert(t == FSSA); }
+  explicit FuncPtr(TCA f) : type(FuncType::Call), call(f) {}
+
+  template<class Ret, class... Args>
+  /* implicit */ FuncPtr(Ret (*fp)(Args...))
+    : type(FuncType::Call)
+    , call(fp)
+  {}
+
+  FuncPtr(FuncType t, uint64_t i) : type(t), srcIdx(i) {
+    assert(t == FuncType::SSA);
+  }
 
   FuncType type;
   union {
-    TCA ptr;
+    Transl::CppCall call;
     uint64_t srcIdx;
   };
 };
 
-enum ArgType : unsigned {
+enum class ArgType : unsigned {
   SSA,
   TV,
   VecKeyS,
   VecKeyIS,
   ExtraImm,
+  Imm,
 };
 
 // Function that extracts the bits for an immediate value from extra
@@ -60,16 +70,16 @@ enum ArgType : unsigned {
 typedef std::function<uintptr_t (IRInstruction*)> ExtraDataBits;
 
 struct Arg {
-  Arg(ArgType type, unsigned srcIdx) : type(type), srcIdx(srcIdx) {}
+  Arg(ArgType type, intptr_t ival) : type(type), ival(ival) {}
 
   explicit Arg(ExtraDataBits&& func)
-    : type(ExtraImm)
-    , srcIdx(-1u)
+    : type(ArgType::ExtraImm)
+    , ival(-1)
     , extraFunc(std::move(func))
   {}
 
   ArgType type;
-  unsigned srcIdx;
+  intptr_t ival;
   ExtraDataBits extraFunc;
 };
 

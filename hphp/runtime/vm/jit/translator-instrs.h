@@ -145,7 +145,6 @@
   CASE(ContKey) \
   CASE(ContCurrent) \
   CASE(ContStopped) \
-  CASE(ContHandle) \
   CASE(Strlen) \
   CASE(IncStat) \
   CASE(ArrayIdx) \

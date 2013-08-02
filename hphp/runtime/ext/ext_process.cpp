@@ -25,7 +25,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include "hphp/util/lock.h"
-#include "hphp/runtime/base/plain_file.h"
+#include "hphp/runtime/base/plain-file.h"
 #include "hphp/util/light_process.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/request_local.h"

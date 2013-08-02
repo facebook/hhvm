@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_PIPE_H_
 #define incl_HPHP_PIPE_H_
 
-#include "hphp/runtime/base/plain_file.h"
+#include "hphp/runtime/base/plain-file.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

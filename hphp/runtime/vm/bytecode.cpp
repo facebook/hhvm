@@ -32,7 +32,7 @@
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/base/class_info.h"
 #include "hphp/runtime/base/code_coverage.h"
-#include "hphp/runtime/base/file_repository.h"
+#include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/base/base_includes.h"
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/runtime_option.h"

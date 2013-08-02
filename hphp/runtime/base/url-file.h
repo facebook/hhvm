@@ -14,48 +14,48 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ZIP_FILE_H_
-#define incl_HPHP_ZIP_FILE_H_
+#ifndef incl_HPHP_URL_FILE_H_
+#define incl_HPHP_URL_FILE_H_
 
-#include "hphp/runtime/base/plain-file.h"
-#include <zlib.h>
+#include "hphp/runtime/base/mem-file.h"
+#include "hphp/runtime/base/string_buffer.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * zlib based files.
+ * url based files.
  */
-class ZipFile : public File {
+class UrlFile : public MemFile {
 public:
-  DECLARE_OBJECT_ALLOCATION(ZipFile);
+  DECLARE_OBJECT_ALLOCATION(UrlFile);
 
-  ZipFile();
-  virtual ~ZipFile();
+  explicit UrlFile(const char *method = "GET", CArrRef headers = null_array,
+                   CStrRef postData = null_string, int maxRedirect = 20,
+                   int timeout = -1);
 
   static StaticString s_class_name;
   // overriding ResourceData
   CStrRef o_getClassNameHook() const { return s_class_name; }
 
   virtual bool open(CStrRef filename, CStrRef mode);
-  virtual bool close();
-  virtual int64_t readImpl(char *buffer, int64_t length);
   virtual int64_t writeImpl(const char *buffer, int64_t length);
-  virtual bool seekable() { return true;}
-  virtual bool seek(int64_t offset, int whence = SEEK_SET);
-  virtual int64_t tell();
-  virtual bool eof();
-  virtual bool rewind();
   virtual bool flush();
+  virtual Array getWrapperMetaData() { return m_responseHeaders; }
+  String getLastError();
 
 private:
-  gzFile m_gzFile;
-  PlainFile *m_innerFile;
-
-  bool closeImpl();
+  bool m_get;
+  Array m_headers;
+  String m_postData;
+  int m_maxRedirect;
+  int m_timeout;
+  std::string m_error;
+  StringBuffer m_response;
+  Array m_responseHeaders;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_ZIP_FILE_H_
+#endif // incl_HPHP_URL_FILE_H_

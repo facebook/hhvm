@@ -14,43 +14,36 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ZIP_FILE_H_
-#define incl_HPHP_ZIP_FILE_H_
+#ifndef incl_HPHP_TEMP_FILE_H_
+#define incl_HPHP_TEMP_FILE_H_
 
 #include "hphp/runtime/base/plain-file.h"
-#include <zlib.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * zlib based files.
+ * A temporary read/write file system file for php://temp, it will be deleted
+ * from the file system on close.
  */
-class ZipFile : public File {
+class TempFile : public PlainFile {
 public:
-  DECLARE_OBJECT_ALLOCATION(ZipFile);
+  DECLARE_OBJECT_ALLOCATION(TempFile);
 
-  ZipFile();
-  virtual ~ZipFile();
+  explicit TempFile(bool autoDelete = true);
+  virtual ~TempFile();
 
   static StaticString s_class_name;
   // overriding ResourceData
   CStrRef o_getClassNameHook() const { return s_class_name; }
 
+  // implementing File
   virtual bool open(CStrRef filename, CStrRef mode);
   virtual bool close();
-  virtual int64_t readImpl(char *buffer, int64_t length);
-  virtual int64_t writeImpl(const char *buffer, int64_t length);
-  virtual bool seekable() { return true;}
-  virtual bool seek(int64_t offset, int whence = SEEK_SET);
-  virtual int64_t tell();
-  virtual bool eof();
-  virtual bool rewind();
-  virtual bool flush();
 
 private:
-  gzFile m_gzFile;
-  PlainFile *m_innerFile;
+  bool m_autoDelete;
+  std::string m_rawName;
 
   bool closeImpl();
 };
@@ -58,4 +51,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_ZIP_FILE_H_
+#endif // incl_HPHP_TEMP_FILE_H_

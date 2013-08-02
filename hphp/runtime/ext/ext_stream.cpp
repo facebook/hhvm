@@ -19,7 +19,7 @@
 #include "hphp/runtime/ext/ext_socket.h"
 #include "hphp/runtime/ext/ext_network.h"
 #include "hphp/runtime/base/socket.h"
-#include "hphp/runtime/base/plain_file.h"
+#include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/string_buffer.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/server/server_stats.h"

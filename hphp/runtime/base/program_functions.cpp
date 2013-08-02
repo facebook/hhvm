@@ -65,7 +65,7 @@
 #include <signal.h>
 #include "libxml/parser.h"
 
-#include "hphp/runtime/base/file_repository.h"
+#include "hphp/runtime/base/file-repository.h"
 
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/repo.h"

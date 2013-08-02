@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/base/user-stream-wrapper.h"
-#include "hphp/runtime/base/user_file.h"
+#include "hphp/runtime/base/user-file.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

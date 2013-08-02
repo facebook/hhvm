@@ -32,7 +32,7 @@
 #include "hphp/runtime/vm/unwind.h"
 #include "unicode/uchar.h"
 #include "unicode/utf8.h"
-#include "hphp/runtime/base/file_repository.h"
+#include "hphp/runtime/base/file-repository.h"
 
 #include "hphp/util/parser/parser.h"
 

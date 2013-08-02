@@ -39,7 +39,7 @@
 #include "hphp/runtime/vm/verifier/check.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/vm/func-inline.h"
-#include "hphp/runtime/base/file_repository.h"
+#include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/treadmill.h"
 

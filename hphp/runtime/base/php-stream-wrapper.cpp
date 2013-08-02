@@ -16,10 +16,10 @@
 
 #include "hphp/runtime/base/php-stream-wrapper.h"
 #include "hphp/runtime/base/runtime_error.h"
-#include "hphp/runtime/base/plain_file.h"
-#include "hphp/runtime/base/temp_file.h"
-#include "hphp/runtime/base/mem_file.h"
-#include "hphp/runtime/base/output_file.h"
+#include "hphp/runtime/base/plain-file.h"
+#include "hphp/runtime/base/temp-file.h"
+#include "hphp/runtime/base/mem-file.h"
+#include "hphp/runtime/base/output-file.h"
 #include <memory>
 
 namespace HPHP {

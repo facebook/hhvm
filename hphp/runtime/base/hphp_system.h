@@ -35,7 +35,7 @@
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/string_util.h"
 #include "hphp/util/util.h"
-#include "hphp/runtime/base/plain_file.h"
+#include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/class_info.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/array_init.h"

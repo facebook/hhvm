@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/base/http-stream-wrapper.h"
 #include "hphp/runtime/base/string_util.h"
-#include "hphp/runtime/base/url_file.h"
+#include "hphp/runtime/base/url-file.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/ext/ext_stream.h"
 #include <memory>

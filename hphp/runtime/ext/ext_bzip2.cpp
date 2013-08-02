@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_bzip2.h"
-#include "hphp/runtime/base/bzip2_file.h"
+#include "hphp/runtime/base/bzip2-file.h"
 #include "hphp/util/alloc.h"
 
 namespace HPHP {

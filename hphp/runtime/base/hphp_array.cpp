@@ -874,7 +874,7 @@ void HphpArray::compact(bool renumber /* = false */) {
 }
 
 static inline void elemConstruct(const TypedValue* fr, TypedValue* to) {
-  cellDup(*tvToCell(fr), *to);
+  tvAsUninitializedVariant(to).constructValHelper(tvAsCVarRef(fr));
 }
 
 bool HphpArray::nextInsert(CVarRef data) {

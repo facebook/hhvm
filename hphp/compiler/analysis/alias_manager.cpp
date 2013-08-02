@@ -1527,8 +1527,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
             e->is(Expression::KindOfSimpleVariable) &&
             !e->isThis()) {
           Symbol *s = spc(SimpleVariable, e)->getSymbol();
-          if (s && !s->isParameter() && !s->isGeneratorParameter() &&
-              !s->isClosureVar()) {
+          if (s && !s->isParameter() && !s->isClosureVar()) {
             rep = e->makeConstant(m_arp, "null");
             Compiler::Error(Compiler::UseUndeclaredVariable, e);
             if (m_variables->getAttribute(VariableTable::ContainsCompact)) {
@@ -3332,19 +3331,12 @@ public:
     DataFlowWalker::walk(*this);
     ControlBlock *b = m_graph.getDfBlock(1);
     std::map<std::string,int>::iterator it = m_gidMap.find("v:this");
-    if (m->getOrigGeneratorFunc()) {
-      BitOps::set(m_gidMap.size(), b->getRow(DataFlow::PRefIn),
-                  BitOps::Bits(-1));
-      BitOps::set(m_gidMap.size(), b->getRow(DataFlow::PInitIn),
-                  BitOps::Bits(-1));
-    } else {
-      if (it != m_gidMap.end() && it->second) {
-        b->setBit(DataFlow::PRefIn, it->second);
-        b->setBit(DataFlow::PInitIn, it->second);
-      }
-      updateParamInfo(m->getParams(), Option::HardTypeHints);
-      updateParamInfo(m->getFunctionScope()->getClosureVars(), false);
+    if (it != m_gidMap.end() && it->second) {
+      b->setBit(DataFlow::PRefIn, it->second);
+      b->setBit(DataFlow::PInitIn, it->second);
     }
+    updateParamInfo(m->getParams(), Option::HardTypeHints);
+    updateParamInfo(m->getFunctionScope()->getClosureVars(), false);
   }
 
   void updateParamInfo(ExpressionListPtr el, bool useDefaults) {

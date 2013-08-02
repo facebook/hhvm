@@ -31,7 +31,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/util.h"
 #include "hphp/runtime/base/execution_context.h"
-#include "hphp/runtime/vm/member_operations.h"
+#include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/base/stats.h"
 
 // inline methods of HphpArray

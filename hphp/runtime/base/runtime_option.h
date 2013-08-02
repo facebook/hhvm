@@ -499,6 +499,13 @@ public:
   static long PregRecursionLimit;
   static bool EnablePregErrorLog;
 
+  // pprof/hhprof server options
+  static int HHProfServerPort;
+  static int HHProfServerThreads;
+  static int HHProfServerTimeoutSeconds;
+  static int HHProfServerFilterMinAllocPerReq;
+  static int HHProfServerFilterMinBytesPerReq;
+
 #ifdef FACEBOOK
   // fb303 server
   static bool EnableFb303Server;

@@ -148,10 +148,8 @@ bool TestCppBase::TestString() {
     VERIFY(String("test").length() == 4);
     VERIFY(!String("2test").isNumeric());
     VERIFY(!String("2test").isInteger());
-    VERIFY(!String("2test").isValidVariableName());
     VERIFY(!String("test").isNumeric());
     VERIFY(!String("test").isInteger());
-    VERIFY(String("test").isValidVariableName());
     VERIFY(String("23").isNumeric());
     VERIFY(String("23").isInteger());
     VERIFY(String("23.3").isNumeric());
@@ -185,23 +183,6 @@ bool TestCppBase::TestString() {
     VERIFY(String("1234567890").toInt32() == 1234567890);
     VERIFY(String("123456789012345678").toInt64() == 123456789012345678LL);
     VERIFY(String("123.45").toDouble() == 123.45);
-  }
-
-  // offset
-  {
-    VS(String("test").rvalAt(2).c_str(), "s");
-    String s = "test";
-    s.set(2, String(""));
-    VS(s, String("te\0t", 4, CopyString));
-    s.set(2, String("zz"));
-    VS(s, "tezt");
-    s.set(5, String("q"));
-    VS(s, "tezt q");
-
-    String s2 = s; // test copy-on-write
-    s.set(1, String("3"));
-    VS(s,  "t3zt q");
-    VS(s2, "tezt q");
   }
 
   return Count(true);

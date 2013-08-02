@@ -121,18 +121,18 @@ public:
 
   // ref counting
   void incRefCount() {
-    atomic_inc(m_refCount);
+    ++m_refCount;
   }
   void decRefCount() {
-    assert(m_refCount);
-    if (atomic_dec(m_refCount) == 0) {
+    assert(m_refCount.load());
+    if (--m_refCount == 0) {
       delete this;
     }
   }
 
   void setHost(const std::string &host) { m_host = host;}
 private:
-  int m_refCount;
+  std::atomic<int> m_refCount;
 
   string m_message;
 

@@ -403,22 +403,11 @@ MethodStatementPtr
 ClassScope::importTraitMethod(const TraitMethod&  traitMethod,
                               AnalysisResultPtr   ar,
                               string              methName,
-                              GeneratorRenameMap& genRenameMap,
                               const std::map<string, MethodStatementPtr>&
                               importedTraitMethods) {
   MethodStatementPtr meth = traitMethod.m_method;
   string origMethName = traitMethod.m_originalName;
   ModifierExpressionPtr modifiers = traitMethod.m_modifiers;
-
-  if (meth->getOrigGeneratorFunc()) {
-    const string &name = meth->getOrigGeneratorFunc()->getName();
-    if (!importedTraitMethods.count(name)) {
-      // Dont import the generator, if the origGenerator wasnt imported
-      // this happens when a generator in the trait is hidden by a non-generator
-      // method in the importing class.
-      return MethodStatementPtr();
-    }
-  }
 
   MethodStatementPtr cloneMeth = dynamic_pointer_cast<MethodStatement>(
     dynamic_pointer_cast<ClassStatement>(m_stmt)->addClone(meth));
@@ -434,14 +423,6 @@ ClassScope::importTraitMethod(const TraitMethod&  traitMethod,
   ClassScopePtr cScope = dynamic_pointer_cast<ClassScope>(shared_from_this());
   cloneMeth->fixupSelfAndParentTypehints( cScope );
 
-  // Generator methods need to be renamed, otherwise code gen produces multiple
-  // continuation classes with the same name
-  if (funcScope->isGenerator()) {
-    const string& newName = getNewGeneratorName(funcScope, genRenameMap);
-    methName = origMethName = newName;
-    cloneMeth->setName(newName);
-    cloneMeth->setOriginalName(newName);
-  }
   FunctionScopePtr cloneFuncScope
     (new HPHP::FunctionScope(funcScope, ar, methName, origMethName, cloneMeth,
                              cloneMeth->getModifiers()));
@@ -750,85 +731,6 @@ void ClassScope::removeSpareTraitAbstractMethods(AnalysisResultPtr ar) {
   }
 }
 
-const string& ClassScope::getNewGeneratorName(
-  FunctionScopePtr genFuncScope, GeneratorRenameMap &genRenameMap) {
-  assert(genFuncScope->isGenerator());
-  const string& oldName = genFuncScope->getName();
-  GeneratorRenameMap::iterator mapIt = genRenameMap.find(oldName);
-  if (mapIt != genRenameMap.end()) {
-    return mapIt->second;
-  }
-  string newName = ParserBase::newContinuationName(
-    oldName + "_" + lexical_cast<string>(genFuncScope->getNewID())
-  );
-  genRenameMap[oldName] = newName;
-  return genRenameMap[oldName];
-}
-
-void
-ClassScope::renameCreateContinuationCalls(AnalysisResultPtr ar,
-                                          ConstructPtr      c,
-                                          ImportedMethodMap &importedMethods) {
-  if (!c) return;
-  SimpleFunctionCallPtr funcCall = dynamic_pointer_cast<SimpleFunctionCall>(c);
-  if (funcCall && funcCall->getName() == "hphp_create_continuation") {
-
-    ExpressionListPtr params = funcCall->getParams();
-    assert(params->getCount() >= 2);
-    const string &oldClassName =
-      dynamic_pointer_cast<ScalarExpression>((*params)[0])->getString();
-    ClassScopePtr oldClassScope = ar->findClass(oldClassName);
-    if (!oldClassScope || !oldClassScope->isTrait()) return;
-
-    const string &oldGenName =
-      dynamic_pointer_cast<ScalarExpression>((*params)[1])->getString();
-
-    MethodStatementPtr origGenStmt = importedMethods[Util::toLower(oldGenName)];
-    assert(origGenStmt);
-
-    const string &newGenName = origGenStmt->getOriginalName();
-    ExpressionPtr newGenExpr = funcCall->makeScalarExpression(ar, newGenName);
-    ExpressionPtr newClsExpr = funcCall->makeScalarExpression(ar, getName());
-    (*params)[0] = newClsExpr;
-    (*params)[1] = newGenExpr;
-    funcCall->analyzeProgram(ar);
-    return;
-  }
-  for (int i=0; i < c->getKidCount(); i++) {
-    renameCreateContinuationCalls(ar, c->getNthKid(i), importedMethods);
-  }
-}
-
-void ClassScope::relinkGeneratorMethods(
-  AnalysisResultPtr ar,
-  ImportedMethodMap &importedMethods) {
-  for (ImportedMethodMap::const_iterator methIt =
-         importedMethods.begin(); methIt != importedMethods.end(); methIt++) {
-    MethodStatementPtr newMeth = methIt->second;
-
-    // Skip non-generator methods
-    if (!newMeth) continue;
-
-    if (newMeth->getOrigGeneratorFunc()) {
-      // Get corresponding original generator method in the current class
-      const string& origGenName = newMeth->getOrigGeneratorFunc()->getName();
-      MethodStatementPtr origGenStmt = importedMethods[origGenName];
-      assert(origGenStmt);
-      // It must be an orig gen func already, we're just updating to point
-      // to the corresponding method cloned from the trait
-      assert(origGenStmt->getGeneratorFunc());
-      newMeth->setOrigGeneratorFunc(origGenStmt);
-      origGenStmt->setGeneratorFunc(newMeth);
-    }
-
-    // OrigGenerator methods need to have their hphp_create_continuation calls
-    // patched to the new generator name.
-    if (newMeth->getGeneratorFunc()) {
-      renameCreateContinuationCalls(ar, newMeth, importedMethods);
-    }
-  }
-}
-
 void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
   if (m_traitStatus == FLATTENED) return;
   if (m_traitStatus == BEING_FLATTENED) {
@@ -882,8 +784,6 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
   std::map<string, MethodStatementPtr> importedTraitMethods;
   std::vector<std::pair<string,const TraitMethod*> > importedTraitsWithOrigName;
 
-  GeneratorRenameMap genRenameMap;
-
   // Actually import the methods
   for (MethodToTraitListMap::const_iterator
          iter = m_importMethToTraitMap.begin();
@@ -928,14 +828,11 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
     const TraitMethod *traitMethod = importedTraitsWithOrigName[i].second;
     MethodStatementPtr newMeth = importTraitMethod(
       *traitMethod, ar, Util::toLower(traitMethod->m_originalName),
-      genRenameMap, importedTraitMethods);
+      importedTraitMethods);
     if (newMeth) {
       importedTraitMethods[sourceName] = newMeth;
     }
   }
-
-  // Relink generator and origGenerator methods
-  relinkGeneratorMethods(ar, importedTraitMethods);
 
   // Import trait properties
   importTraitProperties(ar);

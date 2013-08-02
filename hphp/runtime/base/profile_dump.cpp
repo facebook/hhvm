@@ -3,16 +3,17 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
+   | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
-   | If you did not receive a copy of the PHP license and are unable to   |
+   | http://www.zend.com/license/2_00.txt.                                |
+   | If you did not receive a copy of the Zend license and are unable to  |
    | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   */
+*/
 
 #include "hphp/runtime/base/profile_dump.h"
 
@@ -25,6 +26,8 @@ namespace HPHP {
 std::string ProfileDump::toPProfFormat() const {
   size_t currentCountSum = 0, currentBytesSum = 0;
   size_t accumCountSum   = 0, accumBytesSum   = 0;
+
+  int numDumps = std::max(m_numDumps, 1);
 
   // aggregate for totals at top
   for (const auto &current : m_currentlyAllocated) {
@@ -54,6 +57,12 @@ std::string ProfileDump::toPProfFormat() const {
     // skip this information if we have a zero-length stack trace, because
     // that means we allocated this outside of PHP userland.
     if (trace.size() == 0) continue;
+    // if the filters are set such that the number of bytes or allocations
+    // at this site is not enough, we are going to filter it out
+    if ((accum.second.m_count / numDumps <
+         RuntimeOption::HHProfServerFilterMinAllocPerReq) ||
+        (accum.second.m_bytes / numDumps <
+         RuntimeOption::HHProfServerFilterMinBytesPerReq)) continue;
     // get current allocation count/bytes for the current stack trace. we
     // know this is present in the current allocations map because we did
     // insert it at the same time we inserted something into the cumulative
@@ -172,6 +181,17 @@ bool ProfileController::requestGlobal() {
 }
 
 // static
+void ProfileController::cancelRequest() {
+  std::unique_lock<std::mutex> lock(m_mutex);
+
+  // changing the state is enough to cancel the currently
+  // active request; no VM thread will put their dump here
+  // if the state is waiting
+  m_state = State::Waiting;
+  m_waitq.notify_all();
+}
+
+// static
 void ProfileController::offerProfile(const ProfileDump &dump) {
   std::unique_lock<std::mutex> lock(m_mutex);
 
@@ -213,15 +233,11 @@ ProfileDump ProfileController::waitForProfile() {
   std::unique_lock<std::mutex> lock(m_mutex);
 
   auto cond = [&] { return m_state != State::Pending; };
-  if (RuntimeOption::RequestTimeoutSeconds > 0) {
-    m_waitq.wait_for(
-      lock,
-      std::chrono::seconds(RuntimeOption::RequestTimeoutSeconds * 2),
-      cond
-    );
-  } else {
-    m_waitq.wait(lock, cond);
-  }
+  m_waitq.wait_for(
+    lock,
+    std::chrono::seconds(RuntimeOption::HHProfServerTimeoutSeconds),
+    cond
+  );
 
   // check to see if someone else grabbed the profile
   if (m_state == State::Waiting) return ProfileDump();

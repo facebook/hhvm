@@ -97,7 +97,7 @@ class StringData {
     IsMask    = 0xF000000000000000
   };
 
- public:
+public:
   const static uint32_t MaxSmallSize = 43;
 
   /* max length of a string, not counting the terminal 0.  This is
@@ -106,31 +106,6 @@ class StringData {
    *   ... = size + 1; // oops, wraparound.
    */
   const static uint32_t MaxSize = 0x7ffffffe; // 2^31-2
-
-  /**
-   * StringData does not formally derive from Countable, however it has a
-   * m_count field and implements all of the methods from Countable.
-   */
-  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
-
-  void setRefCount(RefCount n) { m_count = n;}
-  bool isStatic() const { return m_count == RefCountStaticValue; }
-
-  /**
-   * Get the wrapped SharedVariant.
-   */
-  SharedVariant *getSharedVariant() const {
-    if (isShared()) return m_big.shared;
-    return nullptr;
-  }
-
-  static StringData *Escalate(StringData *in);
-
-  /**
-   * When we have static StringData in SharedStore, we should avoid directly
-   * deleting the StringData pointer, but rather call destruct().
-   */
-  void destruct() const { if (!isStatic()) delete this; }
 
   StringData() : m_data(m_small), m_len(0), m_count(0), m_hash(0) {
     m_big.shared = 0;
@@ -192,13 +167,53 @@ class StringData {
    */
   explicit StringData(int reserve);
 
+  /*
+   * Create a StringData that wraps an APC SharedVariant that contains
+   * a string.
+   */
   explicit StringData(SharedVariant *shared);
 
-public:
+  ~StringData() { checkStack(); releaseData(); }
+
+  /*
+   * When we have static StringData in SharedStore, we should avoid directly
+   * deleting the StringData pointer, but rather call destruct().
+   */
+  void destruct() const { if (!isStatic()) delete this; }
+
+  /*
+   * Reference counting related.
+   */
+  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
+  void setRefCount(RefCount n) { m_count = n;}
+  bool isStatic() const { return m_count == RefCountStaticValue; }
+
+  /*
+   * Returns a copy of in if its reference count is not 1 or if it is
+   * immutable.
+   *
+   * Resets the hash if not for unknown reasons, probably
+   * unnecessarily.
+   */
+  static StringData* Escalate(StringData* in) {
+    if (in->m_count != 1 || in->isImmutable()) {
+      return NEW(StringData)(in->data(), in->size(), CopyString);
+    }
+    in->m_hash = 0;
+    return in;
+  }
+
+  /*
+   * Get the wrapped SharedVariant, or return null if this string is
+   * not shared.
+   */
+  SharedVariant *getSharedVariant() const {
+    if (isShared()) return m_big.shared;
+    return nullptr;
+  }
+
   void append(StringSlice r) { append(r.ptr, r.len); }
   void append(const char *s, int len);
-  static const StringData* convert_double_helper(double n);
-  static const StringData* convert_integer_helper(int64_t n);
   StringData *copy(bool sharedMemory = false) const;
   MutableSlice reserve(int capacity);
   MutableSlice mutableSlice() {
@@ -215,7 +230,6 @@ public:
     return this;
   }
 
-  ~StringData() { checkStack(); releaseData(); }
   void checkStack() {
     /**
      * StringData should not generally be allocated on the
@@ -255,7 +269,6 @@ public:
     return is_strictly_integer(s.ptr, s.len, res);
   }
   bool isZero() const { return size() == 1 && rawdata()[0] == '0'; }
-  bool isValidVariableName() const;
 
   /**
    * Mutations.
@@ -284,11 +297,6 @@ public:
   int64_t  toInt64  (int base = 10) const;
   double toDouble () const;
   DataType toNumeric(int64_t &lval, double &dval) const;
-
-  strhash_t getPrecomputedHash() const {
-    assert(!isShared());
-    return m_hash & STRHASH_MASK;
-  }
 
   strhash_t hash() const {
     strhash_t h = m_hash & STRHASH_MASK;
@@ -336,43 +344,8 @@ public:
   static uint32_t GetCnsHandle(const StringData* cnsName);
   static uint32_t DefCnsHandle(const StringData* cnsName, bool persistent);
   static Array GetConstants();
-  /**
-   * The order of the data members is significant. The m_count field must
-   * be exactly FAST_REFCOUNT_OFFSET bytes from the beginning of the object.
-   */
- private:
-  union {
-    const char* m_cdata;
-    char* m_data;
-  };
-  uint32_t m_len;
- protected:
-  mutable RefCount m_count;
- private:
-  // m_len and m_data are not overlapped with small strings because
-  // they are accessed so frequently that even the inline branch to
-  // measurably slows things down.  Its worse for m_len than m_data.
-  // If frequent callers are refacotred to use slice() then we could
-  // revisit this decision.
-  mutable strhash_t m_hash;   // precompute hash codes for static strings
-  union __attribute__((__packed__)) {
-    char m_small[MaxSmallSize + 1];
-    struct __attribute__((__packed__)) {
-      // Calculate padding so that node, shared, and cap are pointer aligned,
-      // and ensure cap overlaps the last byte of m_small.
-      static const size_t kPadding = sizeof(m_small) -
-        sizeof(SweepNode) - sizeof(SharedVariant*) - sizeof(uint64_t);
-      char junk[kPadding];
-      SweepNode node;
-      SharedVariant *shared;
-      uint64_t cap;
-    } m_big;
-  };
 
- private:
-  /**
-   * Helpers.
-   */
+private:
   void initAttach(const char* data);
   void initCopy(const char* data);
   void initAttach(const char* data, int len);
@@ -399,6 +372,37 @@ public:
   /* Only call preCompute() and setStatic() in a thread-neutral context! */
   void preCompute() const;
   void setStatic() const;
+
+private:
+  /*
+   * The order of the data members is significant. The m_count field must
+   * be exactly FAST_REFCOUNT_OFFSET bytes from the beginning of the object.
+   */
+  union {
+    const char* m_cdata;
+    char* m_data;
+  };
+  uint32_t m_len;
+  mutable RefCount m_count;
+  // m_len and m_data are not overlapped with small strings because
+  // they are accessed so frequently that even the inline branch to
+  // measurably slows things down.  Its worse for m_len than m_data.
+  // If frequent callers are refacotred to use slice() then we could
+  // revisit this decision.
+  mutable strhash_t m_hash;   // precompute hash codes for static strings
+  union __attribute__((__packed__)) {
+    char m_small[MaxSmallSize + 1];
+    struct __attribute__((__packed__)) {
+      // Calculate padding so that node, shared, and cap are pointer aligned,
+      // and ensure cap overlaps the last byte of m_small.
+      static const size_t kPadding = sizeof(m_small) -
+        sizeof(SweepNode) - sizeof(SharedVariant*) - sizeof(uint64_t);
+      char junk[kPadding];
+      SweepNode node;
+      SharedVariant *shared;
+      uint64_t cap;
+    } m_big;
+  };
 };
 
 /**

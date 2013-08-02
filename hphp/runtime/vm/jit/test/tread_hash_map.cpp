@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/vm/tread_hash_map.h"
+#include "hphp/runtime/vm/tread-hash-map.h"
 
 #include <vector>
 #include <algorithm>

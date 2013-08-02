@@ -17,8 +17,8 @@
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/vm/member_operations.h"
-#include "hphp/runtime/vm/type_constraint.h"
+#include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP { namespace Transl {
@@ -109,32 +109,8 @@ int64_t convArrToBoolHelper(const ArrayData* a) {
   return a->size() != 0;
 }
 
-int64_t convStrToBoolHelper(const StringData* s) {
-  return s->toBoolean();
-}
-
 int64_t convObjToBoolHelper(const ObjectData* o) {
   return o->o_toBoolean();
-}
-
-int64_t convCellToBoolHelper(TypedValue tv) {
-  // Cannot call tvCastToBooleanInPlace here because some of the
-  // call sites will not be increasing the ref count on tv before
-  // calling, the ref count must be left alone.
-
-  switch (tv.m_type) {
-    case KindOfUninit:
-    case KindOfNull:    return false;
-    case KindOfBoolean: return tv.m_data.num;
-    case KindOfInt64:   return tv.m_data.num != 0;
-    case KindOfDouble:  return tv.m_data.dbl != 0;
-    case KindOfStaticString:
-    case KindOfString:  return tv.m_data.pstr->toBoolean();
-    case KindOfArray:   return !tv.m_data.parr->empty();
-    case KindOfObject:  return tv.m_data.pobj->o_toBoolean();
-    case KindOfResource: return tv.m_data.pres->o_toBoolean();
-    default:            not_reached();
-  }
 }
 
 int64_t convArrToDblHelper(ArrayData* a) {
@@ -157,15 +133,6 @@ int64_t convDblToIntHelper(int64_t i) {
   double d = reinterpretIntAsDbl(i);
   return (d >= 0 ? d > std::numeric_limits<uint64_t>::max() ? 0u :
           (uint64_t)d : (int64_t)d);
-}
-
-int64_t convStrToIntHelper(const StringData* s) {
-  return s->toInt64(10);
-}
-
-int64_t convCellToIntHelper(TypedValue tv) {
-  // TODO call cellToInt directly from the TC.
-  return cellToInt(tv);
 }
 
 ObjectData* convCellToObjHelper(TypedValue tv) {
@@ -230,19 +197,26 @@ StringData* convResToStrHelper(ResourceData* o) {
   }
 }
 
+const StaticString
+  s_empty(""),
+  s_1("1"),
+  s_Array("Array");
+
 StringData* convCellToStrHelper(TypedValue tv) {
   switch (tv.m_type) {
-    case KindOfUninit:
-    case KindOfNull:    return buildStringData("");
-    case KindOfBoolean: return buildStringData(tv.m_data.num ? "1" : "");
-    case KindOfInt64:   return convIntToStrHelper(tv.m_data.num);
-    case KindOfDouble:  return convDblToStrHelper(tv.m_data.num);
-    case KindOfStaticString:
-    case KindOfString:  return tv.m_data.pstr;
-    case KindOfArray:   tvDecRefArr(&tv); return buildStringData("Array");
-    case KindOfObject:  return convObjToStrHelper(tv.m_data.pobj);
-    case KindOfResource: return convResToStrHelper(tv.m_data.pres);
-    default:            not_reached();
+  case KindOfUninit:
+  case KindOfNull:     return s_empty.get();
+  case KindOfBoolean:  return tv.m_data.num ? s_1.get() : s_empty.get();
+  case KindOfInt64:    return convIntToStrHelper(tv.m_data.num);
+  case KindOfDouble:   return convDblToStrHelper(tv.m_data.num);
+  case KindOfStaticString:
+  case KindOfString:   // No incref, since there is also a logical decref of
+                       // our argument.
+                       return tv.m_data.pstr;
+  case KindOfArray:    tvDecRefArr(&tv); return s_Array.get();
+  case KindOfObject:   return convObjToStrHelper(tv.m_data.pobj);
+  case KindOfResource: return convResToStrHelper(tv.m_data.pres);
+  default:             not_reached();
   }
 }
 

@@ -25,7 +25,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/debugger_hook.h"
+#include "hphp/runtime/vm/debugger-hook.h"
 
 namespace HPHP {
 

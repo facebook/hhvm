@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/member_operations.h"
+#include "hphp/runtime/vm/member-operations.h"
 
 namespace HPHP {  namespace JIT { namespace {
 

@@ -116,15 +116,16 @@ bool Option::JitEnableRenameFunction = false;
 bool Option::EnableHipHopExperimentalSyntax = false;
 bool Option::EnableShortTags = true;
 bool Option::EnableAspTags = false;
-bool Option::EnableXHP = true;
+bool Option::EnableXHP = false;
 bool Option::EnableFinallyStatement = false;
 int Option::ParserThreadCount = 0;
 
 int Option::GetScannerType() {
   int type = 0;
   if (EnableShortTags) type |= Scanner::AllowShortTags;
-  if (EnableHipHopSyntax) type |= Scanner::AllowHipHopSyntax;
   if (EnableAspTags) type |= Scanner::AllowAspTags;
+  if (EnableXHP) type |= Scanner::AllowXHPSyntax;
+  if (EnableHipHopSyntax) type |= Scanner::AllowHipHopSyntax;
   return type;
 }
 
@@ -267,7 +268,13 @@ void Option::Load(Hdf &config) {
 
   EnableAspTags = config["EnableAspTags"].getBool();
 
-  EnableXHP = config["EnableXHP"].getBool(true);
+  EnableXHP = config["EnableXHP"].getBool(false);
+
+  if (EnableHipHopSyntax) {
+    // If EnableHipHopSyntax is true, it forces EnableXHP to true
+    // regardless of how it was set in the config
+    EnableXHP = true;
+  }
 
   ParserThreadCount = config["ParserThreadCount"].getInt32(0);
   if (ParserThreadCount <= 0) {

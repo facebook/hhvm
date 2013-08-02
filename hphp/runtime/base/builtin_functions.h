@@ -98,14 +98,6 @@ inline String concat(CStrRef s1, CStrRef s2) {
 String concat3(CStrRef s1, CStrRef s2, CStrRef s3);
 String concat4(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4);
 
-template <class K, class V>
-const V &String::set(K key, const V &value) {
-  StringData *s = StringData::Escalate(m_px);
-  SmartPtr<StringData>::operator=(s);
-  m_px->setChar(HPHP::toInt32(key), toString(value));
-  return value;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // output functions
 

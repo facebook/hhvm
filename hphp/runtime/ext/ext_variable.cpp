@@ -228,7 +228,7 @@ int64_t f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
         name = prefix + "_" + name;
         break;
       case EXTR_PREFIX_INVALID:
-        if (!nameData->isValidVariableName()) {
+        if (!is_valid_var_name(nameData->data(), nameData->size())) {
           name = prefix + "_" + name;
         }
         break;
@@ -243,7 +243,7 @@ int64_t f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
     }
     nameData = name.get();
     // skip invalid variable names, as in PHP
-    if (!nameData->isValidVariableName()) {
+    if (!is_valid_var_name(nameData->data(), nameData->size())) {
       continue;
     }
     g_vmContext->setVar(nameData, iter.nvSecond(), reference);

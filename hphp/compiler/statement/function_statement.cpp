@@ -112,7 +112,7 @@ void FunctionStatement::outputPHPHeader(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
   cg_printf("function ");
   if (m_ref) cg_printf("&");
-  if (!ParserBase::IsClosureOrContinuationName(m_name)) {
+  if (!ParserBase::IsClosureName(m_name)) {
     cg_printf("%s", m_name.c_str());
   }
   cg_printf("(");

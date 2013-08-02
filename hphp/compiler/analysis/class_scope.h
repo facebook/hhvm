@@ -403,7 +403,6 @@ private:
 
   typedef std::list<TraitMethod> TraitMethodList;
   typedef std::map<std::string, TraitMethodList> MethodToTraitListMap;
-  typedef std::map<std::string, std::string> GeneratorRenameMap;
   MethodToTraitListMap m_importMethToTraitMap;
   typedef std::map<std::string, MethodStatementPtr> ImportedMethodMap;
 
@@ -441,14 +440,10 @@ private:
   MethodStatementPtr importTraitMethod(const TraitMethod&  traitMethod,
                                        AnalysisResultPtr   ar,
                                        std::string         methName,
-                                       GeneratorRenameMap& genRenameMap,
                                        const ImportedMethodMap &
                                        importedTraitMethods);
 
   void importTraitProperties(AnalysisResultPtr ar);
-
-  void relinkGeneratorMethods(AnalysisResultPtr ar,
-                              ImportedMethodMap& importedMethods);
 
   void findTraitMethodsToImport(AnalysisResultPtr ar, ClassScopePtr trait);
 
@@ -471,12 +466,6 @@ private:
   bool usesTrait(const std::string &traitName) const;
 
   bool hasMethod(const std::string &methodName) const;
-
-  const std::string& getNewGeneratorName(FunctionScopePtr    genFuncScope,
-                                         GeneratorRenameMap& genRenameMap);
-
-  void renameCreateContinuationCalls(AnalysisResultPtr ar, ConstructPtr c,
-                                     ImportedMethodMap &importedMethods);
 
 };
 

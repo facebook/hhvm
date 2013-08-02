@@ -30,8 +30,8 @@
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/base/file_repository.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
-#include "hphp/runtime/vm/blob_helper.h"
-#include "hphp/runtime/vm/func_inline.h"
+#include "hphp/runtime/vm/blob-helper.h"
+#include "hphp/runtime/vm/func-inline.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/util/parser/parser.h"
@@ -955,7 +955,7 @@ void FuncEmitter::commit(RepoTxn& txn) const {
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool isGenerated = isdigit(m_name->data()[0]) ||
-    ParserBase::IsClosureOrContinuationName(m_name->toCPPString());
+    ParserBase::IsClosureName(m_name->toCPPString()) || m_isGenerator;
 
   Attr attrs = m_attrs;
   if (attrs & AttrPersistent &&

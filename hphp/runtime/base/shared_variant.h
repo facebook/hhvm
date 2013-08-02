@@ -63,23 +63,23 @@ public:
     // Must be non-refcounted types
     assert(m_shouldCache == false);
     assert(m_flags == 0);
-    assert(!IS_REFCOUNTED_TYPE(m_tv.m_type));
-    return tvAsCVarRef(&m_tv);
+    assert(!IS_REFCOUNTED_TYPE(m_type));
+    return tvAsCVarRef(reinterpret_cast<const TypedValue*>(this));
   }
 
   void incRef() {
     assert(IS_REFCOUNTED_TYPE(m_type));
-    atomic_inc(m_count);
+    ++m_count;
   }
 
   void decRef() {
-    assert(m_count);
+    assert(m_count.load());
     if (IS_REFCOUNTED_TYPE(m_type)) {
-      if (atomic_dec(m_count) == 0) {
+      if (--m_count == 0) {
         delete this;
       }
     } else {
-      assert(m_count == 1);
+      assert(m_count.load() == 1);
       delete this;
     }
   }
@@ -173,9 +173,11 @@ private:
 
   /*
    * Keep the object layout binary compatible with Variant for primitive types.
-   * We want to have compile time assertion to guard it but still want to have
-   * anonymous struct. For non-refcounted types, m_shouldCache and m_flags are
-   * guaranteed to be 0, and other parts of runtime will not touch the count.
+   * For non-refcounted types, m_shouldCache and m_flags are guaranteed to be 0,
+   * and other parts of runtime will not touch the count.
+   *
+   * Note that this is assuming a little-endian system: m_shouldCache and
+   * m_flags have to overlay the higher-order bits of TypedValue::m_type.
    */
 
   union SharedData {
@@ -187,38 +189,20 @@ private:
     ImmutableObj* obj;
   };
 
-  union {
-    TypedValue m_tv;
-    struct {
 #if PACKED_TV
-      uint8_t _typePad;
-      DataType m_type;
-      bool m_shouldCache;
-      uint8_t m_flags;
-      uint32_t m_count;
-      SharedData m_data;
+  uint8_t _typePad;
+  DataType m_type;
+  bool m_shouldCache;
+  uint8_t m_flags;
+  std::atomic<uint32_t> m_count;
+  SharedData m_data;
 #else
- #ifdef WORDS_BIGENDIAN
-      SharedData m_data;
-      bool m_shouldCache;
-      uint8_t m_flags;
-      uint16_t m_type;
-      uint32_t m_count;
- #else
-      SharedData m_data;
-      uint16_t m_type;
-      bool m_shouldCache;
-      uint8_t m_flags;
-      uint32_t m_count;
- #endif
+  SharedData m_data;
+  uint16_t m_type;
+  bool m_shouldCache;
+  uint8_t m_flags;
+  std::atomic<uint32_t> m_count;
 #endif
-    };
-  };
-
-  const static uint8_t SerializedArray = (1<<0);
-  const static uint8_t IsVector = (1<<1);
-  const static uint8_t IsObj = (1<<2);
-  const static uint8_t ObjAttempted = (1<<3);
 
   static void compileTimeAssertions() {
     static_assert(offsetof(SharedVariant, m_data) == offsetof(TypedValue, m_data),
@@ -230,6 +214,11 @@ private:
     static_assert(sizeof(SharedVariant) == sizeof(TypedValue),
                   "Be careful with field layout");
   }
+
+  const static uint8_t SerializedArray = (1<<0);
+  const static uint8_t IsVector = (1<<1);
+  const static uint8_t IsObj = (1<<2);
+  const static uint8_t ObjAttempted = (1<<3);
 
   bool getSerializedArray() const { return (bool)(m_flags & SerializedArray);}
   void setSerializedArray() { m_flags |= SerializedArray;}

@@ -14,10 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/compiler/expression/expression.h"
 
 #include "hphp/compiler/analysis/block_scope.h"
+
 #include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/statement/statement_list.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/constant_table.h"
@@ -94,7 +95,7 @@ FunctionScopeRawPtr BlockScope::getContainingNonClosureFunction() {
   // walk out through all the closures
   while (bs && bs->is(BlockScope::FunctionScope)) {
     HPHP::FunctionScope *fs = static_cast<HPHP::FunctionScope*>(bs);
-    if (!fs->isClosure() && !fs->isGeneratorFromClosure()) {
+    if (!fs->isClosure()) {
       return FunctionScopeRawPtr(fs);
     }
     bs = bs->m_outerScope.get();

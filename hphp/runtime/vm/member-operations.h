@@ -1439,10 +1439,32 @@ inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
   switch (type) {
   case KindOfStaticString:
   case KindOfString: {
+    // TODO Task #XXXXXXX: Fix this so that the warnings raised match
+    // Zend PHP.
     TypedValue tv;
     initScratchKey<keyType>(scratch, key);
     tvDup(*key, tv);
+    bool badKey = false;
+    if (IS_STRING_TYPE(tv.m_type)) {
+      const char* str = tv.m_data.pstr->data();
+      size_t len = tv.m_data.pstr->size();
+      while (len > 0 &&
+             (*str == ' ' || *str == '\t' || *str == '\r' || *str == '\n')) {
+        ++str;
+        --len;
+      }
+      int64_t n;
+      badKey = !is_strictly_integer(str, len, n);
+    } else if (tv.m_type == KindOfArray || tv.m_type == KindOfObject ||
+               tv.m_type == KindOfResource) {
+      badKey = true;
+    }
+    // Even if badKey == true, we still perform the cast so that we
+    // raise the appropriate warnings.
     tvCastToInt64InPlace(&tv);
+    if (badKey) {
+      return useEmpty;
+    }
     int64_t x = tv.m_data.num;
     if (x < 0 || x >= base->m_data.pstr->size()) {
       return useEmpty;

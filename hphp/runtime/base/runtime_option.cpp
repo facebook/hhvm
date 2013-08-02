@@ -343,7 +343,7 @@ bool RuntimeOption::EnableHipHopSyntax = false;
 bool RuntimeOption::EnableHipHopExperimentalSyntax = false;
 bool RuntimeOption::EnableShortTags = true;
 bool RuntimeOption::EnableAspTags = false;
-bool RuntimeOption::EnableXHP = true;
+bool RuntimeOption::EnableXHP = false;
 bool RuntimeOption::EnableObjDestructCall = false;
 bool RuntimeOption::EnableEmitSwitch = true;
 bool RuntimeOption::EnableEmitterStats = true;
@@ -355,9 +355,10 @@ bool RuntimeOption::EnableArgsInBacktraces = true;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
-  if (EnableHipHopSyntax) type |= Scanner::AllowHipHopSyntax;
   if (EnableShortTags) type |= Scanner::AllowShortTags;
   if (EnableAspTags) type |= Scanner::AllowAspTags;
+  if (EnableXHP) type |= Scanner::AllowXHPSyntax;
+  if (EnableHipHopSyntax) type |= Scanner::AllowHipHopSyntax;
   return type;
 }
 
@@ -450,6 +451,12 @@ std::string RuntimeOption::MailForceExtraParameters;
 long RuntimeOption::PregBacktraceLimit = 1000000;
 long RuntimeOption::PregRecursionLimit = 100000;
 bool RuntimeOption::EnablePregErrorLog = true;
+
+int RuntimeOption::HHProfServerPort = 4327;
+int RuntimeOption::HHProfServerThreads = 2;
+int RuntimeOption::HHProfServerTimeoutSeconds = 30;
+int RuntimeOption::HHProfServerFilterMinAllocPerReq = 2;
+int RuntimeOption::HHProfServerFilterMinBytesPerReq = 128;
 
 bool RuntimeOption::EnableHotProfiler = true;
 int RuntimeOption::ProfilerTraceBuffer = 2000000;
@@ -1100,7 +1107,14 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
       eval["EnableHipHopExperimentalSyntax"].getBool();
     EnableShortTags= eval["EnableShortTags"].getBool(true);
     EnableAspTags = eval["EnableAspTags"].getBool();
-    EnableXHP = eval["EnableXHP"].getBool(true);
+    EnableXHP = eval["EnableXHP"].getBool(false);
+  
+    if (EnableHipHopSyntax) {
+      // If EnableHipHopSyntax is true, it forces EnableXHP to true
+      // regardless of how it was set in the config
+      EnableXHP = true;
+    }
+
     EnableObjDestructCall = eval["EnableObjDestructCall"].getBool(false);
     MaxUserFunctionId = eval["MaxUserFunctionId"].getInt32(2 * 65536);
     CheckSymLink = eval["CheckSymLink"].getBool(false);
@@ -1253,6 +1267,20 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     PregBacktraceLimit = preg["BacktraceLimit"].getInt64(1000000);
     PregRecursionLimit = preg["RecursionLimit"].getInt64(100000);
     EnablePregErrorLog = preg["ErrorLog"].getBool(true);
+  }
+  {
+    Hdf hhprofServer = config["HHProfServer"];
+    HHProfServerPort = hhprofServer["Port"].getInt16(4327);
+    HHProfServerThreads = hhprofServer["Threads"].getInt16(2);
+    HHProfServerTimeoutSeconds =
+      hhprofServer["TimeoutSeconds"].getInt64(30);
+
+    // HHProfServer.Filter.*
+    Hdf hhprofFilter = hhprofServer["Filter"];
+    HHProfServerFilterMinAllocPerReq =
+      hhprofFilter["MinAllocPerReq"].getInt64(2);
+    HHProfServerFilterMinBytesPerReq =
+      hhprofFilter["MinBytesPerReq"].getInt64(128);
   }
 #ifdef FACEBOOK
   {

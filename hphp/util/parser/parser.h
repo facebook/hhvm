@@ -27,7 +27,7 @@
     if (m_xhpAttributes.num()) {                \
       return &m_xhpAttributes;                  \
     }                                           \
-    return nullptr;                                \
+    return nullptr;                             \
   }                                             \
   void xhpSetAttributes(Token &t) {             \
     m_xhpAttributes = t;                        \
@@ -54,9 +54,6 @@ public:
   };
 
   static bool IsClosureName                (const std::string &name);
-  static bool IsContinuationName           (const std::string &name);
-  static bool IsClosureOrContinuationName  (const std::string &name);
-  static std::string newContinuationName   (const std::string &name);
   std::string newClosureName(
       const std::string &className,
       const std::string &funcName);
@@ -77,11 +74,6 @@ public:
    * Raise a parser error.
    */
   virtual void error(const char* fmt, ...) ATTRIBUTE_PRINTF(2,3) = 0;
-
-  /**
-   * How to decide whether to turn on XHP.
-   */
-  virtual bool enableXHP() = 0;
 
   /**
    * Public accessors.

@@ -52,28 +52,6 @@ typedef folly::AtomicHashMap<const StringData *, uint32_t,
                              ahm_string_data_same> StringDataMap;
 static StringDataMap *s_stringDataMap;
 
-const StringData* StringData::convert_double_helper(double n) {
- char *buf;
- StringData* result;
-
- if (n == 0.0) n = 0.0; // so to avoid "-0" output
- vspprintf(&buf, 0, "%.*G", 14, n);
- result = StringData::GetStaticString(buf);
- free(buf);
- return result;
-}
-
-const StringData* StringData::convert_integer_helper(int64_t n) {
- char tmpbuf[21];
- char *p;
- int is_negative;
- int len;
-
- tmpbuf[20] = '\0';
- p = conv_10(n, &is_negative, &tmpbuf[20], &len);
- return StringData::GetStaticString(p);
-}
-
 // If a string is static it better be the one in the table.
 #ifndef NDEBUG
 static bool checkStaticStr(const StringData* s) {
@@ -417,9 +395,6 @@ void StringData::append(const char *s, int len) {
                               size_t(len) + size_t(m_len));
   }
   uint32_t newlen = m_len + len;
-  // TODO: t1122987: in any of the cases below where we need a bigger buffer,
-  // we can probably assume we're in a concat-loop and pick a good buffer
-  // size to avoid O(N^2) copying cost.
   if (isShared()) {
     // buffer is immutable, don't modify it.
     StringSlice r = slice();
@@ -566,16 +541,6 @@ MutableSlice StringData::escalate(uint32_t cap) {
   m_hash = 0;
   assert(checkSane());
   return MutableSlice(buf, cap);
-}
-
-StringData *StringData::Escalate(StringData *in) {
-  if (!in) return NEW(StringData)();
-  if (in->m_count != 1 || in->isImmutable()) {
-    StringData *ret = NEW(StringData)(in->data(), in->size(), CopyString);
-    return ret;
-  }
-  in->m_hash = 0;
-  return in;
 }
 
 void StringData::dump() const {
@@ -838,11 +803,6 @@ bool StringData::isInteger() const {
     break;
   }
   return false;
-}
-
-bool StringData::isValidVariableName() const {
-  StringSlice s = slice();
-  return is_valid_var_name(s.ptr, s.len);
 }
 
 bool StringData::toBoolean() const {

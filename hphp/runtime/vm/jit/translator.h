@@ -39,7 +39,7 @@
 #include "hphp/runtime/vm/jit/translator-instrs.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
-#include "hphp/runtime/vm/debugger_hook.h"
+#include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/base/md5.h"
 
@@ -778,7 +778,6 @@ enum OutTypeConstraints {
   OutIncDec,            // For IncDecL
   OutStrlen,            // OpStrLen
   OutClassRef,          // KindOfClass
-  OutSetM,              // SetM is a very special snowflake
   OutFPushCufSafe,      // FPushCufSafe pushes two values of different
                         // types and an ActRec
   OutNone

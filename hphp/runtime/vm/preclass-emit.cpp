@@ -15,7 +15,7 @@
 */
 #include "hphp/runtime/vm/preclass-emit.h"
 #include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/blob_helper.h"
+#include "hphp/runtime/vm/blob-helper.h"
 
 namespace HPHP {
 

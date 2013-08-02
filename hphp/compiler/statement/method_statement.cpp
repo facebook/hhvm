@@ -106,26 +106,6 @@ string MethodStatement::getOriginalFullName() const {
   return m_originalClassName + "::" + m_originalName;
 }
 
-string MethodStatement::getOriginalFullNameForInjection() const {
-  FunctionScopeRawPtr funcScope = getFunctionScope();
-  string injectionName;
-  if (getGeneratorFunc()) {
-    injectionName = funcScope->isClosureGenerator() ?
-      m_originalName :
-      m_originalName + "{continuation}";
-  } else if (getOrigGeneratorFunc()) {
-    bool needsOrig = !funcScope->getOrigGenFS()->isClosure();
-    injectionName = needsOrig ?
-      getOrigGeneratorFunc()->getOriginalName() :
-      m_originalName;
-  } else {
-    injectionName = m_originalName;
-  }
-  return m_originalClassName.empty() ?
-    injectionName :
-    m_originalClassName + "::" + injectionName;
-}
-
 bool MethodStatement::isRef(int index /* = -1 */) const {
   if (index == -1) return m_ref;
   assert(index >= 0 && index < m_params->getCount());
@@ -376,42 +356,7 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
 
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     funcScope->setParamSpecs(ar);
-    if (funcScope->isGenerator()) {
-      MethodStatementRawPtr orig = getOrigGeneratorFunc();
-      VariableTablePtr variables = funcScope->getVariables();
 
-      orig->getFunctionScope()->addUse(funcScope, BlockScope::UseKindClosure);
-      orig->getFunctionScope()->setContainsBareThis(
-        funcScope->containsBareThis(), funcScope->containsRefThis());
-      orig->getFunctionScope()->setContainsThis(funcScope->containsThis());
-
-      if (ExpressionListPtr params = orig->getParams()) {
-        for (int i = 0; i < params->getCount(); ++i) {
-          auto param = dynamic_pointer_cast<ParameterExpression>((*params)[i]);
-          Symbol *gp = variables->addDeclaredSymbol(param->getName(), param);
-          gp->setGeneratorParameter();
-          if (param->isRef()) {
-            gp->setRefGeneratorParameter();
-            gp->setReferenced();
-          }
-        }
-      }
-
-      if (ClosureExpressionRawPtr closure = orig->getContainingClosure()) {
-        if (ExpressionListPtr cvars = closure->getClosureVariables()) {
-          for (int i = 0; i < cvars->getCount(); ++i) {
-            auto param = dynamic_pointer_cast<ParameterExpression>((*cvars)[i]);
-            Symbol *gp = variables->addDeclaredSymbol(
-              param->getName(), ConstructPtr());
-            gp->setGeneratorParameter();
-            if (param->isRef()) {
-              gp->setRefGeneratorParameter();
-              gp->setReferenced();
-            }
-          }
-        }
-      }
-    }
     if (Option::IsDynamicFunction(m_method, m_name) || Option::AllDynamic) {
       funcScope->setDynamic();
     }
@@ -480,11 +425,6 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
       FileScopePtr fs = getFileScope();
       if (fs) fs->addClassDependency(ar, ret->getName());
     }
-    if (!getFunctionScope()->usesLSB()) {
-      if (StatementPtr orig = getOrigGeneratorFunc()) {
-        orig->getFunctionScope()->clearUsesLSB();
-      }
-    }
   }
 }
 
@@ -533,7 +473,7 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
   FunctionScopeRawPtr funcScope = getFunctionScope();
   bool pseudoMain = funcScope->inPseudoMain();
 
-  if (m_stmt && funcScope->isFirstPass()) {
+  if (m_stmt && funcScope->isFirstPass() && !funcScope->isGenerator()) {
     if (pseudoMain ||
         funcScope->getReturnType() ||
         m_stmt->hasRetExp()) {
@@ -561,43 +501,13 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
     m_params->inferAndCheck(ar, Type::Any, false);
   }
 
-  // must also include params and use vars if this is a generator. note: we are
-  // OK reading the params from the AST nodes of the original generator
-  // function, since we have the dependency links set up
-  if (funcScope->isGenerator()) {
-    // orig function params
-    MethodStatementRawPtr m = getOrigGeneratorFunc();
-    assert(m);
-
-    VariableTablePtr variables = funcScope->getVariables();
-    ExpressionListPtr params = m->getParams();
-    if (params) {
-      for (int i = 0; i < params->getCount(); i++) {
-        ParameterExpressionPtr param =
-          dynamic_pointer_cast<ParameterExpression>((*params)[i]);
-        const string &name = param->getName();
-        assert(!param->isRef() || param->getType()->is(Type::KindOfVariant));
-        variables->addParamLike(name, param->getType(), ar, param,
-                                funcScope->isFirstPass());
-      }
-    }
-
-    // use vars
-    ExpressionListPtr useVars = m->getFunctionScope()->getClosureVars();
-    if (useVars) {
-      for (int i = 0; i < useVars->getCount(); i++) {
-        ParameterExpressionPtr param =
-          dynamic_pointer_cast<ParameterExpression>((*useVars)[i]);
-        const string &name = param->getName();
-        assert(!param->isRef() || param->getType()->is(Type::KindOfVariant));
-        variables->addParamLike(name, param->getType(), ar, param,
-                                funcScope->isFirstPass());
-      }
-    }
-  }
-
   if (m_stmt) {
     m_stmt->inferTypes(ar);
+  }
+
+  if (funcScope->isGenerator()) {
+    funcScope->setReturnType(ar,
+      Type::GetType(Type::KindOfObject, "Continuation"));
   }
 }
 
@@ -610,7 +520,7 @@ void MethodStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_modifiers->outputPHP(cg, ar);
   cg_printf(" function ");
   if (m_ref) cg_printf("&");
-  if (!ParserBase::IsClosureOrContinuationName(m_name)) {
+  if (!ParserBase::IsClosureName(m_name)) {
     cg_printf("%s", m_originalName.c_str());
   }
   cg_printf("(");
@@ -664,4 +574,13 @@ void MethodStatement::checkParameters() {
       }
     }
   }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// generator helper
+
+std::string MethodStatement::getGeneratorName() const {
+  // generators in traits must use full name, see test traits/2067.php
+  return ((getClassScope() && getClassScope()->isTrait()) ?
+          getFullName() : getOriginalName()) + "$continuation";
 }

@@ -129,9 +129,10 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
                          index - (numPushed - numPopped));
   }
 
-  case InterpOne: {
+  case InterpOne:
+  case InterpOneCF: {
     SSATmp* prevSp = inst->src(1);
-    auto const& extra = *inst->extra<InterpOne>();
+    auto const& extra = *inst->extra<InterpOneData>();
     int64_t spAdjustment = extra.cellsPopped - extra.cellsPushed;
     Type resultType = inst->typeParam();
     switch (extra.opcode) {
@@ -1555,8 +1556,8 @@ SSATmp* Simplifier::simplifyConvBoolToStr(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyConvDblToStr(IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
-    return cns(
-      StringData::convert_double_helper(src->getValDbl()));
+    String dblStr(buildStringData(src->getValDbl()));
+    return cns(StringData::GetStaticString(dblStr));
   }
   return nullptr;
 }
@@ -1565,7 +1566,8 @@ SSATmp* Simplifier::simplifyConvIntToStr(IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
     return cns(
-      StringData::convert_integer_helper(src->getValInt()));
+      StringData::GetStaticString(folly::to<std::string>(src->getValInt()))
+    );
   }
   return nullptr;
 }

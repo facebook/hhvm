@@ -59,9 +59,10 @@ namespace HPHP { namespace Util {
 #endif
 
 // TODO (#2632955): Remove once 4.7.x+ is the minimum GCC supported
-#if defined(__linux__) && \
+#if defined(__linux__) && !defined(__clang__) && \
     (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7))
-#pragma GCC diagnostic error "-Wmaybe-uninitialized"
+// broken until gcc 4.9 (gcc #384078)
+// #pragma GCC diagnostic error "-Wmaybe-uninitialized"
 #pragma GCC diagnostic error "-Wunused-variable"
 #endif
 

@@ -21,7 +21,7 @@
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/ext/ext_socket.h"
-#include "hphp/runtime/vm/debugger_hook.h"
+#include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/util/process.h"
 #include "hphp/util/logger.h"
 
@@ -670,9 +670,13 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
       }
     } catch (const DebuggerException &e) {
       throw;
+    } catch (const std::exception& e) {
+      Logger::Warning(DEBUGGER_LOG_TAG
+       "Cmd type %d onServer() threw exception %s", res->getType(), e.what());
+      cmdFailure = true;
     } catch (...) {
-      TRACE_RB(1, "Cmd type %d onServer() threw non DebuggerException",
-               res->getType());
+      Logger::Warning(DEBUGGER_LOG_TAG
+       "Cmd type %d onServer() threw non standard exception", res->getType());
       cmdFailure = true;
     }
     if (cmdFailure) stopAndThrow();

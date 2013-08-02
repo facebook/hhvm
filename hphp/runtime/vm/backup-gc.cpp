@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/vm/backup_gc.h"
+#include "hphp/runtime/vm/backup-gc.h"
 #include "hphp/runtime/base/runtime_error.h"
 
 #include <fstream>

@@ -683,10 +683,6 @@ void IRTranslator::translateContStopped(const NormalizedInstruction& i) {
   HHIR_EMIT(ContStopped);
 }
 
-void IRTranslator::translateContHandle(const NormalizedInstruction& i) {
-  HHIR_EMIT(ContHandle);
-}
-
 void IRTranslator::translateStrlen(const NormalizedInstruction& i) {
   HHIR_EMIT(Strlen);
 }
@@ -1677,27 +1673,9 @@ IRTranslator::passPredictedAndInferredTypes(const NormalizedInstruction& i) {
   }
 }
 
-/**
- * Returns the number of cells that instruction i pops from the stack.
- */
-static int getNumPopped(const NormalizedInstruction& i) {
-  return -getStackDelta(i)
-    // getStackDelta includes the output left on the stack, so discount it
-    + (i.outStack ? 1 : 0)
-    // getStackDelta includes ActRec cells pushed on the stack, so discount them
-    + (pushesActRec(i.op()) ? kNumActRecCells : 0);
-}
-
 void IRTranslator::interpretInstr(const NormalizedInstruction& i) {
-  int poppedCells      = getNumPopped(i);
-  FTRACE(5, "HHIR: BC Instr {}  Popped = {}\n",
-         i.toString(), poppedCells);
-
-  if (i.changesPC) {
-    m_hhbcTrans.emitInterpOneCF(poppedCells);
-  } else {
-    m_hhbcTrans.emitInterpOne(i);
-  }
+  FTRACE(5, "HHIR: BC Instr {}\n",  i.toString());
+  m_hhbcTrans.emitInterpOne(i);
 }
 
 void IRTranslator::translateInstr(const NormalizedInstruction& i) {

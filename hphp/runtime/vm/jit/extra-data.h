@@ -462,6 +462,7 @@ X(SideExitGuardLoc,             SideExitGuardData);
 X(SideExitGuardStk,             SideExitGuardData);
 X(CheckDefinedClsEq,            CheckDefinedClsData);
 X(InterpOne,                    InterpOneData);
+X(InterpOneCF,                  InterpOneData);
 X(CreateContFunc,               CreateContData);
 X(CreateContMeth,               CreateContData);
 X(StClosureFunc,                FuncData);

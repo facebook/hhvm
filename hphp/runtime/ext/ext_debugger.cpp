@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/debugger/cmd/cmd_user.h"
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
-#include "hphp/runtime/vm/debugger_hook.h"
+#include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "tbb/concurrent_hash_map.h"

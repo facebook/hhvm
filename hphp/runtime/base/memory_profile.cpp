@@ -55,21 +55,15 @@ void MemoryProfile::startProfilingImpl() {
 
 void MemoryProfile::finishProfilingImpl() {
   TRACE(1, "request ended\n");
-  TRACE(2, "profile dump for this request in pprof format:\n");
-  std::string str = m_dump.toPProfFormat();
-  TRACE(2, "%s", str.c_str());
 
-  TRACE(3, "symbols found:\n");
-  m_dump.forEachAddress([](const SrcKey &sk) {
-    std::string str = sk.getSymbol();
-    TRACE(3, "%s\n", str.c_str());
-  });
-
+  TRACE(2, "offerring dump to profile controller, "
+           "request was for URL %s\n",
+           g_context->getTransport()->getCommand().c_str());
   ProfileController::offerProfile(m_dump);
 }
 
 void MemoryProfile::logAllocationImpl(void *ptr, size_t size) {
-  TRACE(4, "logging allocation at %p of %lu bytes\n", ptr, size);
+  TRACE(3, "logging allocation at %p of %lu bytes\n", ptr, size);
   ProfileStackTrace trace = getStackTrace();
 
   Allocation alloc { size, trace };
@@ -79,7 +73,7 @@ void MemoryProfile::logAllocationImpl(void *ptr, size_t size) {
 }
 
 void MemoryProfile::logDeallocationImpl(void *ptr) {
-  TRACE(4, "logging deallocation at %p\n", ptr);
+  TRACE(3, "logging deallocation at %p\n", ptr);
   const auto &it = m_livePointers.find(ptr);
   if (it == m_livePointers.end()) return;
 

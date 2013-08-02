@@ -101,6 +101,16 @@ struct RegionDesc::Location {
     return m_stack.offset;
   }
 
+  bool operator==(const Location& other) const {
+    return (m_tag == other.m_tag) &&
+      ((m_tag == Tag::Local && localId() == other.localId()) ||
+       (m_tag == Tag::Stack && stackOffset() == other.stackOffset()));
+  }
+
+  bool operator!=(const Location &other) const {
+    return !(*this == other);
+  }
+
 private:
   Tag m_tag;
   union {
@@ -122,6 +132,8 @@ struct RegionDesc::TypePred {
   Location location;
   Type type;
 };
+
+typedef std::vector<RegionDesc::TypePred> PostConditions;
 
 /*
  * A prediction for the argument reffiness of the Func for a pre-live ActRec.
@@ -217,6 +229,11 @@ public:
   void setKnownFunc(SrcKey, const Func*);
 
   /*
+   * Set the postconditions for this Block.
+   */
+  void setPostConditions(const PostConditions&);
+
+  /*
    * The following getters return references to the metadata maps holding the
    * information added using the add* and set* methods above. The best way to
    * iterate over the information is using a MapWalker, since they're all
@@ -226,6 +243,7 @@ public:
   const ParamByRefMap& paramByRefs() const { return m_byRefs; }
   const RefPredMap& reffinessPreds() const { return m_refPreds; }
   const KnownFuncMap& knownFuncs()   const { return m_knownFuncs; }
+  const PostConditions& postConds()  const { return m_postConds; }
 
 private:
   void checkInvariants() const;
@@ -240,6 +258,7 @@ private:
   ParamByRefMap  m_byRefs;
   RefPredMap     m_refPreds;
   KnownFuncMap   m_knownFuncs;
+  PostConditions m_postConds;
 };
 
 //////////////////////////////////////////////////////////////////////

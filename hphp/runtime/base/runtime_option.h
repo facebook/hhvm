@@ -422,10 +422,12 @@ public:
   F(bool, HHIRDeadCodeElim,            true)                            \
   F(bool, HHIRPredictionOpts,          true)                            \
   F(bool, HHIRStressCodegenBlocks,     false)                           \
-  F(string, JitRegionSelector,         regionSelectorDefault())         \
+  /* Region compiler flags */                                           \
+  F(string,   JitRegionSelector,       regionSelectorDefault())         \
   F(bool,     JitPGO,                  false)                           \
   F(uint64_t, JitPGOThreshold,         kDefaultJitPGOThreshold)         \
   F(bool,     JitPGOHotOnly,           ServerExecutionMode())           \
+  F(bool,     JitPGOUsePostConditions, true)                            \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \
   F(bool, DumpTC,                      false)                           \

@@ -110,6 +110,10 @@ void RegionDesc::Block::setKnownFunc(SrcKey sk, const Func* func) {
   checkInvariants();
 }
 
+void RegionDesc::Block::setPostConditions(const PostConditions& conds) {
+  m_postConds = conds;
+}
+
 /*
  * Check invariants on a RegionDesc::Block.
  *
@@ -522,6 +526,11 @@ std::string show(const RegionDesc::Block& b) {
     );
     skIter.advance(b.unit());
   }
+
+  for (const auto& postCond : b.postConds()) {
+    folly::toAppend("  postcondition: ", show(postCond), "\n", &ret);
+  }
+
   return ret;
 }
 

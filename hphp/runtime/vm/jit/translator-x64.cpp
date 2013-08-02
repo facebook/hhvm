@@ -3303,6 +3303,8 @@ TranslatorX64::translateWork(const TranslArgs& args) {
     assert(srcRec.inProgressTailJumps().empty());
   };
 
+  JIT::PostConditions pconds;
+
   if (!args.m_interp && !reachedTranslationLimit(sk, srcRec)) {
     // Attempt to create a region at this SrcKey
     JIT::RegionDescPtr region;
@@ -3352,6 +3354,16 @@ TranslatorX64::translateWork(const TranslArgs& args) {
           m_mode = TransLive;
         }
         result = translateTracelet(t);
+
+        // If we're profiling, grab the postconditions so we can
+        // use them in region selection whenever we decide to
+        // retranslate.
+        if (RuntimeOption::EvalJitPGO &&
+            RuntimeOption::EvalJitPGOUsePostConditions &&
+            m_mode == TransProfile &&
+            result == Success) {
+          pconds = m_irTrans->hhbcTrans().traceBuilder()->getKnownTypes();
+        }
       }
 
       if (result != Success) {
@@ -3403,7 +3415,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
   recordGdbTranslation(sk, sk.func(), astubs, stubStart,
                        false, false);
   if (RuntimeOption::EvalJitPGO) {
-    m_profData->addTrans(t, transKind);
+    m_profData->addTrans(t, transKind, pconds);
   }
   // SrcRec::newTranslation() makes this code reachable. Do this last;
   // otherwise there's some chance of hitting in the reader threads whose

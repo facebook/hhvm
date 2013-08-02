@@ -210,11 +210,13 @@ static bool supportedTracelet(TransID transId, const Tracelet& tlet) {
   return true;
 }
 
-TransID ProfData::addTrans(const Tracelet& tracelet, TransKind kind) {
+TransID ProfData::addTrans(const Tracelet& tracelet, TransKind kind,
+                           const PostConditions& pconds) {
   TransID transId   = m_numTrans++;
   Offset  lastBcOff = tracelet.m_instrStream.last->source.offset();
   auto block = kind == TransProfile && supportedTracelet(transId, tracelet) ?
                createBlock(tracelet) : nullptr;
+  if (block) block->setPostConditions(pconds);
   m_transRecs.emplace_back(new ProfTransRec(transId, kind, lastBcOff,
                                             tracelet.m_sk, block));
   return transId;

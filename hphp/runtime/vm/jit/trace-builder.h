@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/cse.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
+#include "hphp/runtime/vm/jit/region-selection.h"
 
 namespace HPHP {  namespace JIT {
 
@@ -275,6 +276,11 @@ struct TraceBuilder {
     return m_mainTrace->addExitTrace(makeTrace(m_curFunc->getValFunc(),
                                                bcOff));
   }
+
+  /*
+   * Get all typed locations in current translation.
+   */
+  std::vector<RegionDesc::TypePred> getKnownTypes() const;
 
 private:
   // RAII disable of CSE; only restores if it used to be on.  Used for

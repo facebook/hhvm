@@ -571,6 +571,25 @@ SSATmp* TraceBuilder::cseLookup(IRInstruction* inst,
   return tmp;
 }
 
+std::vector<RegionDesc::TypePred> TraceBuilder::getKnownTypes() const {
+  std::vector<RegionDesc::TypePred> result;
+  const Func* curFunc = m_curFunc->getValFunc();
+
+  for (unsigned i = 0; i < curFunc->maxStackCells(); ++i) {
+    auto t = getStackValue(m_spValue, i).knownType;
+    if (!t.equals(Type::None) && !t.equals(Type::Gen)) {
+      result.push_back({ RegionDesc::Location::Stack{i}, t });
+    }
+  }
+  for (unsigned i = 0; i < curFunc->numLocals(); ++i) {
+    auto t = getLocalType(i);
+    if (!t.equals(Type::None) && !t.equals(Type::Gen)) {
+      result.push_back({ RegionDesc::Location::Local{i}, t });
+    }
+  }
+  return result;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* TraceBuilder::preOptimizeCheckLoc(IRInstruction* inst) {

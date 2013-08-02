@@ -118,7 +118,8 @@ public:
   int64_t                 transCounter(TransID id)    const;
   int64_t*                transCounterAddr(TransID id);
 
-  TransID                 addTrans(const Tracelet& tracelet, TransKind kind);
+  TransID                 addTrans(const Tracelet& tracelet, TransKind kind,
+                                   const PostConditions& pconds);
   TransID                 addTransPrologue(const SrcKey& sk);
   TransID                 addTransAnchor(const SrcKey& sk);
 

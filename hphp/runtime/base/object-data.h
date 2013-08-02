@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/macros.h"
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/system/systemlib.h"
 #include <boost/mpl/eval_if.hpp>

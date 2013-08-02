@@ -250,9 +250,8 @@ void MemoryManager::rollback() {
   }
   m_sweep.next = m_sweep.prev = &m_sweep;
   // zero out freelists
-  for (unsigned i = 0; i < kNumSizes; i++) {
-    m_smartfree[i].clear();
-  }
+  for (auto& i : m_sizeUntrackedFree) i.clear();
+  for (auto& i : m_sizeTrackedFree)   i.clear();
   m_front = m_limit = 0;
 }
 
@@ -268,57 +267,84 @@ void MemoryManager::checkMemory() {
   printf("Slabs: %lu KiB\n", m_slabs.size() * SLAB_SIZE / 1024);
 }
 
-//
-// smart_malloc implementation notes
-//
-// These functions allocate all small blocks from a single slab,
-// and defer larger allocations directly to malloc.  When small blocks
-// are freed they're placed the appropriate size-segregated freelist.
-// (m_smartfree[i]).  Small blocks have an 8-byte SmallNode and
-// are swept en-masse when slabs are freed.
-//
-// Medium blocks use a 16-byte SweepNode header to maintain a doubly-linked
-// list of blocks to free at request end.  smart_free can distinguish
-// SmallNode and SweepNode because valid next/prev pointers must be
-// larger than kMaxSmartSize.
-//
+/*
+ * smart_malloc & friends implementation notes
+ *
+ * There are three kinds of smart mallocation:
+ *
+ *  a) Large allocations.  (size >= kMaxSmartSize)
+ *
+ *     In this case we behave as a wrapper around the normal libc
+ *     malloc/free.  We insert a SweepNode header at the front of the
+ *     allocation in order to find these at sweep time (end of
+ *     request) so we can give them back to libc.
+ *
+ *  b) Size-tracked small allocations.
+ *
+ *     This is used for the generic case, for callers who can't tell
+ *     us the size of the allocation at free time.
+ *
+ *     In this situation, we put a SmallNode header at the front of
+ *     the block that tells us the size for when we need to free it
+ *     later.  We differentiate this from a SweepNode (for a big
+ *     allocation) by assuming that no SweepNode::prev will point to
+ *     an address in the first kMaxSmartSize bytes of virtual address
+ *     space.
+ *
+ *  c) Size-untracked small allocation
+ *
+ *     Many callers have an easy time telling you how big the object
+ *     was when they need to free it.  In this case we can avoid the
+ *     SmallNode, which saves us some memory and also let's us give
+ *     out 16-byte aligned pointers easily.
+ *
+ *     We know when we have one of these because it has to be freed
+ *     through a different entry point.  (E.g. MM().smartFreeSize or
+ *     MM().smartFreeSizeBig.)
+ *
+ * When small blocks are freed (case b and c), they're placed the
+ * appropriate size-segregated freelist.  Large blocks are immediately
+ * passed back to libc via free.
+ *
+ * There are currently two kinds of freelist entries: entries where
+ * there is already a valid SmallNode on the list (case b), and
+ * entries where there isn't (case c).  The reason for this is that
+ * that way, when allocating for case b, you don't need to store the
+ * SmallNode size again.  Much of the heap is going through case b at
+ * the time of this writing, so it is a measurable regression to try
+ * to just combine the free lists, but presumably we can move more to
+ * case c and combine the lists eventually.
+ */
 
 inline void* MemoryManager::smartMalloc(size_t nbytes) {
-  assert(nbytes > 0);
-  // add room for header before rounding up
-  size_t padbytes = (nbytes + sizeof(SmallNode) + kMask) & ~kMask;
-  if (LIKELY(padbytes <= kMaxSmartSize)) {
-    m_stats.usage += padbytes;
-    unsigned i = (padbytes - 1) >> kLgSizeQuantum;
-    assert(i < kNumSizes);
-    void* p = m_smartfree[i].maybePop();
-    if (LIKELY(p != 0)) {
-      TRACE(1, "smartMalloc small: %zu -> %p\n", padbytes, p);
-      return p;
-    }
-    char* mem = m_front;
-    if (LIKELY(mem + padbytes <= m_limit)) {
-      m_front = mem + padbytes;
-      SmallNode* n = (SmallNode*) mem;
-      n->padbytes = padbytes;
-      TRACE(1, "smartMalloc small: %zu -> %p\n", padbytes, n + 1);
-      return n + 1;
-    }
-    return smartMallocSlab(padbytes);
+  nbytes += sizeof(SmallNode);
+  if (UNLIKELY(nbytes > kMaxSmartSize)) {
+    return smartMallocBig(nbytes);
   }
-  return smartMallocBig(nbytes);
+
+  nbytes = smartSizeClass(nbytes);
+  m_stats.usage += nbytes;
+
+  auto const idx = (nbytes - 1) >> kLgSizeQuantum;
+  assert(idx < kNumSizes && idx >= 0);
+  void* vp = m_sizeTrackedFree[idx].maybePop();
+  if (UNLIKELY(vp == nullptr)) {
+    return smartMallocSlab(nbytes);
+  }
+  FTRACE(1, "smartMalloc: {} -> {}\n", nbytes, vp);
+
+  return vp;
 }
 
 inline void MemoryManager::smartFree(void* ptr) {
   assert(ptr != 0);
-  SweepNode* n = ((SweepNode*)ptr) - 1;
-  size_t padbytes = n->padbytes;
+  auto const n = static_cast<SweepNode*>(ptr) - 1;
+  auto const padbytes = n->padbytes;
   if (LIKELY(padbytes <= kMaxSmartSize)) {
-    assert(memset(ptr, kSmartFreeFill, padbytes - sizeof(SmallNode)));
-    unsigned i = (padbytes - 1) >> kLgSizeQuantum;
-    assert(i < kNumSizes);
-    TRACE(1, "smartFree: %p\n", ptr);
-    m_smartfree[i].push(ptr);
+    auto const idx = (padbytes - 1) >> kLgSizeQuantum;
+    assert(idx < kNumSizes && idx >= 0);
+    FTRACE(1, "smartFree: {}\n", ptr);
+    m_sizeTrackedFree[idx].push(ptr);
     m_stats.usage -= padbytes;
     return;
   }
@@ -328,6 +354,8 @@ inline void MemoryManager::smartFree(void* ptr) {
 // quick-and-dirty realloc implementation.  We could do better if the block
 // is malloc'd, by deferring to the underlying realloc.
 inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
+  FTRACE(1, "smartRealloc: {} to {}\n", ptr, nbytes);
+
   assert(ptr != 0 && nbytes > 0);
   SweepNode* n = ((SweepNode*)ptr) - 1;
   size_t old_padbytes = n->padbytes;
@@ -350,7 +378,7 @@ inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
   return n2 + 1;
 }
 
-/**
+/*
  * Get a new slab, then allocate nbytes from it and install it in our
  * slab list.  Return the newly allocated nbytes-sized block.
  */
@@ -359,6 +387,7 @@ NEVER_INLINE char* MemoryManager::newSlab(size_t nbytes) {
     refreshStatsHelper();
   }
   char* slab = (char*) Util::safe_malloc(SLAB_SIZE);
+  assert(uintptr_t(slab) % 16 == 0);
   JEMALLOC_STATS_ADJUST(&m_stats, SLAB_SIZE);
   m_stats.alloc += SLAB_SIZE;
   if (m_stats.alloc > m_stats.peakAlloc) {
@@ -367,13 +396,18 @@ NEVER_INLINE char* MemoryManager::newSlab(size_t nbytes) {
   m_slabs.push_back(slab);
   m_front = slab + nbytes;
   m_limit = slab + SLAB_SIZE;
+  FTRACE(1, "newSlab: adding slab at {} to limit {}\n",
+         static_cast<void*>(slab),
+         static_cast<void*>(m_limit));
   return slab;
 }
 
 NEVER_INLINE
 void* MemoryManager::smartMallocSlab(size_t padbytes) {
-  SmallNode* n = (SmallNode*) newSlab(padbytes);
+  SmallNode* n = (SmallNode*) slabAlloc(padbytes);
   n->padbytes = padbytes;
+  FTRACE(1, "smartMallocSlab: {} -> {}\n", padbytes,
+         static_cast<void*>(n + 1));
   return n + 1;
 }
 
@@ -393,15 +427,18 @@ inline void* MemoryManager::smartEnlist(SweepNode* n) {
 NEVER_INLINE
 void* MemoryManager::smartMallocBig(size_t nbytes) {
   assert(nbytes > 0);
-  SweepNode* n = (SweepNode*) Util::safe_malloc(nbytes + sizeof(SweepNode));
+  auto const n = static_cast<SweepNode*>(
+    Util::safe_malloc(nbytes + sizeof(SweepNode) - sizeof(SmallNode))
+  );
   return smartEnlist(n);
 }
 
 NEVER_INLINE
 void* MemoryManager::smartCallocBig(size_t totalbytes) {
   assert(totalbytes > 0);
-  SweepNode* n = (SweepNode*)Util::safe_calloc(totalbytes + sizeof(SweepNode),
-                                               1);
+  auto const n = static_cast<SweepNode*>(
+    Util::safe_calloc(totalbytes + sizeof(SweepNode), 1)
+  );
   return smartEnlist(n);
 }
 
@@ -414,22 +451,6 @@ void MemoryManager::smartFreeBig(SweepNode* n) {
   free(n);
 }
 
-// allocate nbytes from the current slab, aligned to 16-bytes
-inline void* MemoryManager::slabAlloc(size_t nbytes) {
-  const size_t kAlignMask = 15;
-  assert((nbytes & 7) == 0);
-  char* ptr = (char*)(uintptr_t(m_front + kAlignMask) & ~kAlignMask);
-  if (ptr + nbytes <= m_limit) {
-    m_front = ptr + nbytes;
-    return ptr;
-  }
-  return newSlab(nbytes);
-}
-
-static inline MemoryManager& MM() {
-  return *MemoryManager::TheMemoryManager();
-}
-
 // smart_malloc api entry points, with support for malloc/free corner cases.
 
 HOT_FUNC
@@ -439,11 +460,11 @@ void* smart_malloc(size_t nbytes) {
 
 HOT_FUNC
 void* smart_calloc(size_t count, size_t nbytes) {
-  size_t totalbytes = std::max(nbytes * count, size_t(1));
-  if (totalbytes <= MemoryManager::kMaxSmartSize) {
-    return memset(MM().smartMalloc(totalbytes), 0, totalbytes);
+  auto const totalBytes = std::max<size_t>(count * nbytes, 1);
+  if (totalBytes <= MemoryManager::kMaxSmartSize) {
+    return memset(MM().smartMalloc(totalBytes), 0, totalBytes);
   }
-  return MM().smartCallocBig(totalbytes);
+  return MM().smartCallocBig(totalBytes);
 }
 
 HOT_FUNC
@@ -478,4 +499,5 @@ void SmartAllocatorImpl::logDealloc(void *ptr) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
 }

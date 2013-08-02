@@ -503,6 +503,12 @@ private:
   };
 };
 
+static_assert(sizeof(StringData) ==
+                sizeof(char*) + 8 /* len and refcount */ +
+                sizeof(strhash_t) +
+                StringData::MaxSmallSize + 1,
+              "StringData size changed---update assertion if you mean it");
+
 ALWAYS_INLINE inline void decRefStr(StringData* s) {
   if (s->decRefCount() == 0) s->release();
 }

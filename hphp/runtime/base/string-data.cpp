@@ -955,12 +955,15 @@ bool StringData::checkSane() const {
                 "layout for the StaticString map");
   assert(uint32_t(size()) <= MaxSize);
   assert(uint32_t(capacity()) < MaxSize);
+  assert(size() >= 0);
   assert(size() < capacity());
+
   if (isSmall()) {
     assert(m_data == m_small && m_len <= MaxSmallSize);
   } else {
     assert(m_data && m_data != m_small);
   }
+
   return true;
 }
 

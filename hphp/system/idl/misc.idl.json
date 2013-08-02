@@ -199,29 +199,6 @@
             ]
         },
         {
-            "name": "highlight_file",
-            "desc": "Prints out or returns a syntax highlighted version of the code contained in filename using the colors defined in the built-in syntax highlighter for PHP.\n\nMany servers are configured to automatically highlight files with a phps extension. For example, example.phps when viewed will show the syntax highlighted source of the file. To enable this, add this line to the httpd.conf: AddType application\/x-httpd-php-source .phps",
-            "flags": [
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "If return is set to TRUE, returns the highlighted code as a string instead of printing it out. Otherwise, it will return TRUE on success, FALSE on failure."
-            },
-            "args": [
-                {
-                    "name": "filename",
-                    "type": "String",
-                    "desc": "Path to the PHP file to be highlighted."
-                },
-                {
-                    "name": "ret",
-                    "type": "Boolean",
-                    "value": "false",
-                    "desc": "Set this parameter to TRUE to make this function return the highlighted code."
-                }
-            ]
-        },
-        {
             "name": "show_source",
             "flags": [
             ],
@@ -237,28 +214,6 @@
                     "name": "ret",
                     "type": "Boolean",
                     "value": "false"
-                }
-            ]
-        },
-        {
-            "name": "highlight_string",
-            "flags": [
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "If return is set to TRUE, returns the highlighted code as a string instead of printing it out. Otherwise, it will return TRUE on success, FALSE on failure."
-            },
-            "args": [
-                {
-                    "name": "str",
-                    "type": "String",
-                    "desc": "The PHP code to be highlighted. This should include the opening tag."
-                },
-                {
-                    "name": "ret",
-                    "type": "Boolean",
-                    "value": "false",
-                    "desc": "Set this parameter to TRUE to make this function return the highlighted code."
                 }
             ]
         },

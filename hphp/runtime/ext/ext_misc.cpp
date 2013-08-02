@@ -203,15 +203,7 @@ void f___halt_compiler() {
   // do nothing
 }
 
-Variant f_highlight_file(CStrRef filename, bool ret /* = false */) {
-  throw NotSupportedException(__func__, "PHP specific");
-}
-
 Variant f_show_source(CStrRef filename, bool ret /* = false */) {
-  throw NotSupportedException(__func__, "PHP specific");
-}
-
-Variant f_highlight_string(CStrRef str, bool ret /* = false */) {
   throw NotSupportedException(__func__, "PHP specific");
 }
 

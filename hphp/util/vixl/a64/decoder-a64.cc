@@ -123,7 +123,7 @@ void Decoder::InsertVisitorBefore(DecoderVisitor* new_visitor,
   }
   // We reached the end of the list. The last element must be
   // registered_visitor.
-  ASSERT(*it == registered_visitor);
+  assert(*it == registered_visitor);
   visitors_.insert(it, new_visitor);
 }
 
@@ -141,7 +141,7 @@ void Decoder::InsertVisitorAfter(DecoderVisitor* new_visitor,
   }
   // We reached the end of the list. The last element must be
   // registered_visitor.
-  ASSERT(*it == registered_visitor);
+  assert(*it == registered_visitor);
   visitors_.push_back(new_visitor);
 }
 
@@ -152,7 +152,7 @@ void Decoder::RemoveVisitor(DecoderVisitor* visitor) {
 
 
 void Decoder::DecodeBranchSystemException(Instruction *instr) {
-  ASSERT((instr->Bits(27, 24) == 0x0) ||
+  assert((instr->Bits(27, 24) == 0x0) ||
          (instr->Bits(27, 24) == 0x4) ||
          (instr->Bits(27, 24) == 0x5) ||
          (instr->Bits(27, 24) == 0x6) ||
@@ -233,7 +233,7 @@ void Decoder::DecodeBranchSystemException(Instruction *instr) {
 
 
 void Decoder::DecodeLoadStore(Instruction *instr) {
-  ASSERT((instr->Bits(27, 24) == 0x8) ||
+  assert((instr->Bits(27, 24) == 0x8) ||
          (instr->Bits(27, 24) == 0x9) ||
          (instr->Bits(27, 24) == 0xC) ||
          (instr->Bits(27, 24) == 0xD) );
@@ -243,10 +243,10 @@ void Decoder::DecodeLoadStore(Instruction *instr) {
       if (instr->Bit(29) == 0) {
         if (instr->Bit(26) == 0) {
           // TODO: VisitLoadStoreExclusive.
-          UNIMPLEMENTED();
+          not_implemented();
         } else {
           // TODO: VisitLoadStoreAdvSIMD.
-          UNIMPLEMENTED();
+          not_implemented();
         }
       } else {
         UNALLOC(instr, Bits(31, 30) == 0x3);
@@ -310,7 +310,7 @@ void Decoder::DecodeLoadStore(Instruction *instr) {
 
 
 void Decoder::DecodeLogical(Instruction *instr) {
-  ASSERT(instr->Bits(27, 24) == 0x2);
+  assert(instr->Bits(27, 24) == 0x2);
 
   UNALLOC(instr, SpacedBits(2, 31, 22) == 0x1);
   if (instr->Bit(23) == 0) {
@@ -323,7 +323,7 @@ void Decoder::DecodeLogical(Instruction *instr) {
 
 
 void Decoder::DecodeBitfieldExtract(Instruction *instr) {
-  ASSERT(instr->Bits(27, 24) == 0x3);
+  assert(instr->Bits(27, 24) == 0x3);
 
   UNALLOC(instr, SpacedBits(2, 31, 22) == 0x2);
   UNALLOC(instr, SpacedBits(2, 31, 22) == 0x1);
@@ -341,7 +341,7 @@ void Decoder::DecodeBitfieldExtract(Instruction *instr) {
 
 
 void Decoder::DecodeDataProcessing(Instruction *instr) {
-  ASSERT((instr->Bits(27, 24) == 0x1) ||
+  assert((instr->Bits(27, 24) == 0x1) ||
          (instr->Bits(27, 24) == 0xA) ||
          (instr->Bits(27, 24) == 0xB) );
 
@@ -427,7 +427,7 @@ void Decoder::DecodeDataProcessing(Instruction *instr) {
 
 
 void Decoder::DecodeFP(Instruction *instr) {
-  ASSERT((instr->Bits(27, 24) == 0xE) ||
+  assert((instr->Bits(27, 24) == 0xE) ||
          (instr->Bits(27, 24) == 0xF) );
   UNALLOC(instr, Bit(29) == 0x1);
 
@@ -513,7 +513,7 @@ void Decoder::DecodeFP(Instruction *instr) {
 
 #define DEFINE_VISITOR_CALLERS(A)                                              \
   void Decoder::Visit##A(Instruction *instr) {                                 \
-    ASSERT(instr->Mask(A##FMask) == A##Fixed);                                 \
+    assert(instr->Mask(A##FMask) == A##Fixed);                                 \
     std::list<DecoderVisitor*>::iterator it;                                   \
     for (it = visitors_.begin(); it != visitors_.end(); it++) {                \
       (*it)->Visit##A(instr);                                                  \

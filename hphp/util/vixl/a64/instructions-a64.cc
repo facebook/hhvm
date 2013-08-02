@@ -46,7 +46,7 @@ uint32_t Instruction::SpacedBits(int num_bits, ...) const {
 static uint64_t RotateRight(uint64_t value,
                             unsigned int rotate,
                             unsigned int width) {
-  ASSERT(width <= 64);
+  assert(width <= 64);
   rotate &= 63;
   return ((value & ((1UL << rotate) - 1UL)) << (width - rotate)) |
          (value >> rotate);
@@ -56,9 +56,9 @@ static uint64_t RotateRight(uint64_t value,
 static uint64_t RepeatBitsAcrossReg(unsigned reg_size,
                                     uint64_t value,
                                     unsigned width) {
-  ASSERT((width == 2) || (width == 4) || (width == 8) || (width == 16) ||
+  assert((width == 2) || (width == 4) || (width == 8) || (width == 16) ||
          (width == 32));
-  ASSERT((reg_size == kWRegSize) || (reg_size == kXRegSize));
+  assert((reg_size == kWRegSize) || (reg_size == kXRegSize));
   uint64_t result = value & ((1UL << width) - 1UL);
   for (unsigned i = width; i < reg_size; i *= 2) {
     result |= (result << i);
@@ -91,15 +91,15 @@ uint64_t Instruction::ImmLogical() {
   //
 
   if (n == 1) {
-    ASSERT(imm_s != 0x3F);
+    assert(imm_s != 0x3F);
     uint64_t bits = (1UL << (imm_s + 1)) - 1;
     return RotateRight(bits, imm_r, 64);
   } else {
-    ASSERT((imm_s >> 1) != 0x1F);
+    assert((imm_s >> 1) != 0x1F);
     for (int width = 0x20; width >= 0x2; width >>= 1) {
       if ((imm_s & width) == 0) {
         int mask = width - 1;
-        ASSERT((imm_s & mask) != mask);
+        assert((imm_s & mask) != mask);
         uint64_t bits = (1UL << ((imm_s & mask) + 1)) - 1;
         return RepeatBitsAcrossReg(reg_size,
                                    RotateRight(bits, imm_r & mask, width),
@@ -107,7 +107,7 @@ uint64_t Instruction::ImmLogical() {
       }
     }
   }
-  UNREACHABLE();
+  not_reached();
   return 0;
 }
 
@@ -159,7 +159,7 @@ Instruction* Instruction::ImmPCOffsetTarget() {
     offset = ImmPCRel();
   } else {
     // All PC-relative branches.
-    ASSERT(BranchType() != UnknownBranchType);
+    assert(BranchType() != UnknownBranchType);
     // Relative branch offsets are instruction-size-aligned.
     offset = ImmBranch() << kInstructionSizeLog2;
   }
@@ -173,7 +173,7 @@ inline int Instruction::ImmBranch() const {
     case UncondBranchType: return ImmUncondBranch();
     case CompareBranchType: return ImmCmpBranch();
     case TestBranchType: return ImmTestBranch();
-    default: UNREACHABLE();
+    default: not_reached();
   }
   return 0;
 }
@@ -190,7 +190,7 @@ void Instruction::SetImmPCOffsetTarget(Instruction* target) {
 
 void Instruction::SetPCRelImmTarget(Instruction* target) {
   // ADRP is not supported, so 'this' must point to an ADR instruction.
-  ASSERT(Mask(PCRelAddressingMask) == ADR);
+  assert(Mask(PCRelAddressingMask) == ADR);
 
   Instr imm = Assembler::ImmPCRelAddress(target - this);
 
@@ -199,7 +199,7 @@ void Instruction::SetPCRelImmTarget(Instruction* target) {
 
 
 void Instruction::SetBranchImmTarget(Instruction* target) {
-  ASSERT(((target - this) & 3) == 0);
+  assert(((target - this) & 3) == 0);
   Instr branch_imm = 0;
   uint32_t imm_mask = 0;
   int offset = (target - this) >> kInstructionSizeLog2;
@@ -224,14 +224,14 @@ void Instruction::SetBranchImmTarget(Instruction* target) {
       imm_mask = ImmTestBranch_mask;
       break;
     }
-    default: UNREACHABLE();
+    default: not_reached();
   }
   SetInstructionBits(Mask(~imm_mask) | branch_imm);
 }
 
 
 void Instruction::SetImmLLiteral(Instruction* source) {
-  ASSERT(((source - this) & 3) == 0);
+  assert(((source - this) & 3) == 0);
   int offset = (source - this) >> kLiteralEntrySizeLog2;
   Instr imm = Assembler::ImmLLiteral(offset);
   Instr mask = ImmLLiteral_mask;

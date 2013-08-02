@@ -326,7 +326,7 @@ class Instruction {
   }
 
   inline Instruction* InstructionAtOffset(int64_t offset) {
-    ASSERT(IsWordAligned(this + offset));
+    assert(IsWordAligned(this + offset));
     return this + offset;
   }
 

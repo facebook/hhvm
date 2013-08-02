@@ -54,6 +54,7 @@
 #include <stddef.h>
 #include "platform.h"
 
+#include "hphp/util/assertions.h"
 
 typedef uint8_t byte;
 
@@ -61,21 +62,8 @@ const int KBytes = 1024;
 const int MBytes = 1024 * KBytes;
 const int GBytes = 1024 * MBytes;
 
-  #define ABORT() printf("in %s, line %i", __FILE__, __LINE__); abort()
-#ifdef DEBUG
-  #define ASSERT(condition) assert(condition)
-  #define CHECK(condition) ASSERT(condition)
-  #define UNIMPLEMENTED() printf("UNIMPLEMENTED\t"); ABORT()
-  #define UNREACHABLE() printf("UNREACHABLE\t"); ABORT()
-#else
-  #define ASSERT(condition) ((void) 0)
-  #define CHECK(condition) assert(condition)
-  #define UNIMPLEMENTED() ((void) 0)
-  #define UNREACHABLE() ((void) 0)
-#endif
-
 template <typename T> inline void USE(T) {}
 
-#define ALIGNMENT_EXCEPTION() printf("ALIGNMENT EXCEPTION\t"); ABORT()
+#define ALIGNMENT_EXCEPTION() printf("ALIGNMENT EXCEPTION\t"); abort()
 
 #endif  // VIXL_GLOBALS_H

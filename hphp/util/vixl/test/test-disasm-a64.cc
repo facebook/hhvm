@@ -1415,7 +1415,7 @@ TEST(Disasm, unreachable) {
   SETUP_CLASS(MacroAssembler);
 
 #ifdef USE_SIMULATOR
-  ASSERT(kUnreachableOpcode == 0xdeb0);
+  assert(kUnreachableOpcode == 0xdeb0);
   COMPARE(Unreachable(), "hlt #0xdeb0");
 #else
   COMPARE(Unreachable(), "blr xzr");
@@ -1429,7 +1429,7 @@ TEST(Disasm, unreachable) {
 TEST(Disasm, trace) {
   SETUP_CLASS(MacroAssembler);
 
-  ASSERT(kTraceOpcode == 0xdeb2);
+  assert(kTraceOpcode == 0xdeb2);
 
   // All Trace calls should produce the same instruction.
   COMPARE(Trace(LOG_ALL, TRACE_ENABLE), "hlt #0xdeb2");
@@ -1444,7 +1444,7 @@ TEST(Disasm, trace) {
 TEST(Disasm, log) {
   SETUP_CLASS(MacroAssembler);
 
-  ASSERT(kLogOpcode == 0xdeb3);
+  assert(kLogOpcode == 0xdeb3);
 
   // All Log calls should produce the same instruction.
   COMPARE(Log(LOG_ALL), "hlt #0xdeb3");

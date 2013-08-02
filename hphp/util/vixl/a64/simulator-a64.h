@@ -116,7 +116,7 @@ class Simulator : public DecoderVisitor {
 
   inline void ExecuteInstruction() {
     // The program counter should always be aligned.
-    ASSERT(IsWordAligned(pc_));
+    assert(IsWordAligned(pc_));
     decoder_->Decode(pc_);
     increment_pc();
   }
@@ -129,7 +129,7 @@ class Simulator : public DecoderVisitor {
   // Register accessors.
   inline int32_t wreg(unsigned code,
                       Reg31Mode r31mode = Reg31IsZeroRegister) const {
-    ASSERT(code < kNumberOfRegisters);
+    assert(code < kNumberOfRegisters);
     if ((code == 31) && (r31mode == Reg31IsZeroRegister)) {
       return 0;
     }
@@ -138,7 +138,7 @@ class Simulator : public DecoderVisitor {
 
   inline int64_t xreg(unsigned code,
                       Reg31Mode r31mode = Reg31IsZeroRegister) const {
-    ASSERT(code < kNumberOfRegisters);
+    assert(code < kNumberOfRegisters);
     if ((code == 31) && (r31mode == Reg31IsZeroRegister)) {
       return 0;
     }
@@ -152,14 +152,14 @@ class Simulator : public DecoderVisitor {
       case kWRegSize: return wreg(code, r31mode) & kWRegMask;
       case kXRegSize: return xreg(code, r31mode);
       default:
-        UNREACHABLE();
+        not_reached();
         return 0;
     }
   }
 
   inline void set_wreg(unsigned code, int32_t value,
                        Reg31Mode r31mode = Reg31IsZeroRegister) {
-    ASSERT(code < kNumberOfRegisters);
+    assert(code < kNumberOfRegisters);
     if ((code == kZeroRegCode) && (r31mode == Reg31IsZeroRegister)) {
       return;
     }
@@ -169,7 +169,7 @@ class Simulator : public DecoderVisitor {
 
   inline void set_xreg(unsigned code, int64_t value,
                        Reg31Mode r31mode = Reg31IsZeroRegister) {
-    ASSERT(code < kNumberOfRegisters);
+    assert(code < kNumberOfRegisters);
     if ((code == kZeroRegCode) && (r31mode == Reg31IsZeroRegister)) {
       return;
     }
@@ -185,7 +185,7 @@ class Simulator : public DecoderVisitor {
       case kXRegSize:
         return set_xreg(code, value, r31mode);
       default:
-        UNREACHABLE();
+        not_reached();
         break;
     }
   }
@@ -219,7 +219,7 @@ class Simulator : public DecoderVisitor {
 
   // FPRegister accessors.
   inline float sreg(unsigned code) const {
-    ASSERT(code < kNumberOfFPRegisters);
+    assert(code < kNumberOfFPRegisters);
     return fpregisters_[code].s;
   }
 
@@ -228,7 +228,7 @@ class Simulator : public DecoderVisitor {
   }
 
   inline double dreg(unsigned code) const {
-    ASSERT(code < kNumberOfFPRegisters);
+    assert(code < kNumberOfFPRegisters);
     return fpregisters_[code].d;
   }
 
@@ -241,14 +241,14 @@ class Simulator : public DecoderVisitor {
       case kSRegSize: return sreg(code);
       case kDRegSize: return dreg(code);
       default: {
-        UNREACHABLE();
+        not_reached();
         return 0.0;
       }
     }
   }
 
   inline void set_sreg(unsigned code, float val) {
-    ASSERT(code < kNumberOfFPRegisters);
+    assert(code < kNumberOfFPRegisters);
     // Ensure that the upper word is set to 0.
     set_dreg_bits(code, 0);
 
@@ -256,7 +256,7 @@ class Simulator : public DecoderVisitor {
   }
 
   inline void set_sreg_bits(unsigned code, uint32_t rawbits) {
-    ASSERT(code < kNumberOfFPRegisters);
+    assert(code < kNumberOfFPRegisters);
     // Ensure that the upper word is set to 0.
     set_dreg_bits(code, 0);
 
@@ -264,12 +264,12 @@ class Simulator : public DecoderVisitor {
   }
 
   inline void set_dreg(unsigned code, double val) {
-    ASSERT(code < kNumberOfFPRegisters);
+    assert(code < kNumberOfFPRegisters);
     fpregisters_[code].d = val;
   }
 
   inline void set_dreg_bits(unsigned code, uint64_t rawbits) {
-    ASSERT(code < kNumberOfFPRegisters);
+    assert(code < kNumberOfFPRegisters);
     set_dreg(code, rawbits_to_double(rawbits));
   }
 
@@ -280,7 +280,7 @@ class Simulator : public DecoderVisitor {
       case kDRegSize:
         return set_dreg(code, value);
       default:
-        UNREACHABLE();
+        not_reached();
         break;
     }
   }
@@ -363,7 +363,7 @@ class Simulator : public DecoderVisitor {
       case al:
         return true;
       default:
-        UNREACHABLE();
+        not_reached();
         return false;
     }
   }

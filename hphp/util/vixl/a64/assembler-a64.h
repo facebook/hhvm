@@ -73,62 +73,62 @@ class CPURegister {
   };
 
   CPURegister() : code_(0), size_(0), type_(kNoRegister) {
-    ASSERT(!IsValid());
-    ASSERT(IsNone());
+    assert(!IsValid());
+    assert(IsNone());
   }
 
   CPURegister(unsigned code, unsigned size, RegisterType type)
       : code_(code), size_(size), type_(type) {
-    ASSERT(IsValidOrNone());
+    assert(IsValidOrNone());
   }
 
   unsigned code() const {
-    ASSERT(IsValid());
+    assert(IsValid());
     return code_;
   }
 
   RegisterType type() const {
-    ASSERT(IsValidOrNone());
+    assert(IsValidOrNone());
     return type_;
   }
 
   RegList Bit() const {
-    ASSERT(code_ < (sizeof(RegList) * 8));
+    assert(code_ < (sizeof(RegList) * 8));
     return IsValid() ? (static_cast<RegList>(1) << code_) : 0;
   }
 
   unsigned size() const {
-    ASSERT(IsValid());
+    assert(IsValid());
     return size_;
   }
 
   int SizeInBytes() const {
-    ASSERT(IsValid());
-    ASSERT(size() % 8 == 0);
+    assert(IsValid());
+    assert(size() % 8 == 0);
     return size_ / 8;
   }
 
   int SizeInBits() const {
-    ASSERT(IsValid());
+    assert(IsValid());
     return size_;
   }
 
   bool Is32Bits() const {
-    ASSERT(IsValid());
+    assert(IsValid());
     return size_ == 32;
   }
 
   bool Is64Bits() const {
-    ASSERT(IsValid());
+    assert(IsValid());
     return size_ == 64;
   }
 
   bool IsValid() const {
     if (IsValidRegister() || IsValidFPRegister()) {
-      ASSERT(!IsNone());
+      assert(!IsNone());
       return true;
     } else {
-      ASSERT(IsNone());
+      assert(IsNone());
       return false;
     }
   }
@@ -147,25 +147,25 @@ class CPURegister {
 
   bool IsNone() const {
     // kNoRegister types should always have size 0 and code 0.
-    ASSERT((type_ != kNoRegister) || (code_ == 0));
-    ASSERT((type_ != kNoRegister) || (size_ == 0));
+    assert((type_ != kNoRegister) || (code_ == 0));
+    assert((type_ != kNoRegister) || (size_ == 0));
 
     return type_ == kNoRegister;
   }
 
   bool Is(const CPURegister& other) const {
-    ASSERT(IsValidOrNone() && other.IsValidOrNone());
+    assert(IsValidOrNone() && other.IsValidOrNone());
     return (code_ == other.code_) && (size_ == other.size_) &&
            (type_ == other.type_);
   }
 
   inline bool IsZero() const {
-    ASSERT(IsValid());
+    assert(IsValid());
     return IsRegister() && (code_ == kZeroRegCode);
   }
 
   inline bool IsSP() const {
-    ASSERT(IsValid());
+    assert(IsValid());
     return IsRegister() && (code_ == kSPRegInternalCode);
   }
 
@@ -203,13 +203,13 @@ class Register : public CPURegister {
   explicit Register() : CPURegister() {}
   inline explicit Register(const CPURegister& other)
       : CPURegister(other.code(), other.size(), other.type()) {
-    ASSERT(IsValidRegister());
+    assert(IsValidRegister());
   }
   explicit Register(unsigned code, unsigned size)
       : CPURegister(code, size, kRegister) {}
 
   bool IsValid() const {
-    ASSERT(IsRegister() || IsNone());
+    assert(IsRegister() || IsNone());
     return IsValidRegister();
   }
 
@@ -231,13 +231,13 @@ class FPRegister : public CPURegister {
   inline FPRegister() : CPURegister() {}
   inline explicit FPRegister(const CPURegister& other)
       : CPURegister(other.code(), other.size(), other.type()) {
-    ASSERT(IsValidFPRegister());
+    assert(IsValidFPRegister());
   }
   inline FPRegister(unsigned code, unsigned size)
       : CPURegister(code, size, kFPRegister) {}
 
   bool IsValid() const {
-    ASSERT(IsFPRegister() || IsNone());
+    assert(IsFPRegister() || IsNone());
     return IsValidFPRegister();
   }
 
@@ -321,30 +321,30 @@ class CPURegList {
                              CPURegister reg4 = NoCPUReg)
       : list_(reg1.Bit() | reg2.Bit() | reg3.Bit() | reg4.Bit()),
         size_(reg1.size()), type_(reg1.type()) {
-    ASSERT(AreSameSizeAndType(reg1, reg2, reg3, reg4));
-    ASSERT(IsValid());
+    assert(AreSameSizeAndType(reg1, reg2, reg3, reg4));
+    assert(IsValid());
   }
 
   inline CPURegList(CPURegister::RegisterType type, unsigned size, RegList list)
       : list_(list), size_(size), type_(type) {
-    ASSERT(IsValid());
+    assert(IsValid());
   }
 
   inline CPURegList(CPURegister::RegisterType type, unsigned size,
                     unsigned first_reg, unsigned last_reg)
       : size_(size), type_(type) {
-    ASSERT(((type == CPURegister::kRegister) &&
+    assert(((type == CPURegister::kRegister) &&
             (last_reg < kNumberOfRegisters)) ||
            ((type == CPURegister::kFPRegister) &&
             (last_reg < kNumberOfFPRegisters)));
-    ASSERT(last_reg >= first_reg);
+    assert(last_reg >= first_reg);
     list_ = (1UL << (last_reg + 1)) - 1;
     list_ &= ~((1UL << first_reg) - 1);
-    ASSERT(IsValid());
+    assert(IsValid());
   }
 
   inline CPURegister::RegisterType type() const {
-    ASSERT(IsValid());
+    assert(IsValid());
     return type_;
   }
 
@@ -352,9 +352,9 @@ class CPURegList {
   // this list are left unchanged. The type and size of the registers in the
   // 'other' list must match those in this list.
   void Combine(const CPURegList& other) {
-    ASSERT(IsValid());
-    ASSERT(other.type() == type_);
-    ASSERT(other.RegisterSizeInBits() == size_);
+    assert(IsValid());
+    assert(other.type() == type_);
+    assert(other.RegisterSizeInBits() == size_);
     list_ |= other.list();
   }
 
@@ -362,41 +362,41 @@ class CPURegList {
   // do not exist in this list are ignored. The type and size of the registers
   // in the 'other' list must match those in this list.
   void Remove(const CPURegList& other) {
-    ASSERT(IsValid());
-    ASSERT(other.type() == type_);
-    ASSERT(other.RegisterSizeInBits() == size_);
+    assert(IsValid());
+    assert(other.type() == type_);
+    assert(other.RegisterSizeInBits() == size_);
     list_ &= ~other.list();
   }
 
   // Variants of Combine and Remove which take a single register.
   inline void Combine(const CPURegister& other) {
-    ASSERT(other.type() == type_);
-    ASSERT(other.size() == size_);
+    assert(other.type() == type_);
+    assert(other.size() == size_);
     Combine(other.code());
   }
 
   inline void Remove(const CPURegister& other) {
-    ASSERT(other.type() == type_);
-    ASSERT(other.size() == size_);
+    assert(other.type() == type_);
+    assert(other.size() == size_);
     Remove(other.code());
   }
 
   // Variants of Combine and Remove which take a single register by its code;
   // the type and size of the register is inferred from this list.
   inline void Combine(int code) {
-    ASSERT(IsValid());
-    ASSERT(CPURegister(code, size_, type_).IsValid());
+    assert(IsValid());
+    assert(CPURegister(code, size_, type_).IsValid());
     list_ |= (1UL << code);
   }
 
   inline void Remove(int code) {
-    ASSERT(IsValid());
-    ASSERT(CPURegister(code, size_, type_).IsValid());
+    assert(IsValid());
+    assert(CPURegister(code, size_, type_).IsValid());
     list_ &= ~(1UL << code);
   }
 
   inline RegList list() const {
-    ASSERT(IsValid());
+    assert(IsValid());
     return list_;
   }
 
@@ -416,28 +416,28 @@ class CPURegList {
   static CPURegList GetCallerSavedFP(unsigned size = kDRegSize);
 
   inline bool IsEmpty() const {
-    ASSERT(IsValid());
+    assert(IsValid());
     return list_ == 0;
   }
 
   inline bool IncludesAliasOf(const CPURegister& other) const {
-    ASSERT(IsValid());
+    assert(IsValid());
     return (type_ == other.type()) && (other.Bit() & list_);
   }
 
   inline int Count() const {
-    ASSERT(IsValid());
+    assert(IsValid());
     return CountSetBits(list_, kRegListSizeInBits);
   }
 
   inline unsigned RegisterSizeInBits() const {
-    ASSERT(IsValid());
+    assert(IsValid());
     return size_;
   }
 
   inline unsigned RegisterSizeInBytes() const {
     int size_in_bits = RegisterSizeInBits();
-    ASSERT((size_in_bits % 8) == 0);
+    assert((size_in_bits % 8) == 0);
     return size_in_bits / 8;
   }
 
@@ -492,27 +492,27 @@ class Operand {
   Operand ToExtendedRegister() const;
 
   int64_t immediate() const {
-    ASSERT(IsImmediate());
+    assert(IsImmediate());
     return immediate_;
   }
 
   Register reg() const {
-    ASSERT(IsShiftedRegister() || IsExtendedRegister());
+    assert(IsShiftedRegister() || IsExtendedRegister());
     return reg_;
   }
 
   Shift shift() const {
-    ASSERT(IsShiftedRegister());
+    assert(IsShiftedRegister());
     return shift_;
   }
 
   Extend extend() const {
-    ASSERT(IsExtendedRegister());
+    assert(IsExtendedRegister());
     return extend_;
   }
 
   unsigned shift_amount() const {
-    ASSERT(IsShiftedRegister() || IsExtendedRegister());
+    assert(IsShiftedRegister() || IsExtendedRegister());
     return shift_amount_;
   }
 
@@ -571,7 +571,7 @@ class Label {
   Label() : is_bound_(false), link_(nullptr), target_(nullptr) {}
   ~Label() {
     // If the label has been linked to, it needs to be bound to a target.
-    ASSERT(!IsLinked() || IsBound());
+    assert(!IsLinked() || IsBound());
   }
 
   inline Instruction* link() const { return link_; }
@@ -658,7 +658,7 @@ class Assembler {
   void bind(Label* label);
   int UpdateAndGetByteOffsetTo(Label* label);
   inline int UpdateAndGetInstructionOffsetTo(Label* label) {
-    ASSERT(Label::kEndOfChain == 0);
+    assert(Label::kEndOfChain == 0);
     return UpdateAndGetByteOffsetTo(label) >> kInstructionSizeLog2;
   }
 
@@ -827,8 +827,8 @@ class Assembler {
                   const Register& rn,
                   unsigned lsb,
                   unsigned width) {
-    ASSERT(width >= 1);
-    ASSERT(lsb + width <= rn.size());
+    assert(width >= 1);
+    assert(lsb + width <= rn.size());
     bfm(rd, rn, (rd.size() - lsb) & (rd.size() - 1), width - 1);
   }
 
@@ -837,15 +837,15 @@ class Assembler {
                     const Register& rn,
                     unsigned lsb,
                     unsigned width) {
-    ASSERT(width >= 1);
-    ASSERT(lsb + width <= rn.size());
+    assert(width >= 1);
+    assert(lsb + width <= rn.size());
     bfm(rd, rn, lsb, lsb + width - 1);
   }
 
   // Sbfm aliases.
   // Arithmetic shift right.
   inline void asr(const Register& rd, const Register& rn, unsigned shift) {
-    ASSERT(shift < rd.size());
+    assert(shift < rd.size());
     sbfm(rd, rn, shift, rd.size() - 1);
   }
 
@@ -854,8 +854,8 @@ class Assembler {
                     const Register& rn,
                     unsigned lsb,
                     unsigned width) {
-    ASSERT(width >= 1);
-    ASSERT(lsb + width <= rn.size());
+    assert(width >= 1);
+    assert(lsb + width <= rn.size());
     sbfm(rd, rn, (rd.size() - lsb) & (rd.size() - 1), width - 1);
   }
 
@@ -864,8 +864,8 @@ class Assembler {
                    const Register& rn,
                    unsigned lsb,
                    unsigned width) {
-    ASSERT(width >= 1);
-    ASSERT(lsb + width <= rn.size());
+    assert(width >= 1);
+    assert(lsb + width <= rn.size());
     sbfm(rd, rn, lsb, lsb + width - 1);
   }
 
@@ -888,13 +888,13 @@ class Assembler {
   // Logical shift left.
   inline void lsl(const Register& rd, const Register& rn, unsigned shift) {
     unsigned reg_size = rd.size();
-    ASSERT(shift < reg_size);
+    assert(shift < reg_size);
     ubfm(rd, rn, (reg_size - shift) % reg_size, reg_size - shift - 1);
   }
 
   // Logical shift right.
   inline void lsr(const Register& rd, const Register& rn, unsigned shift) {
-    ASSERT(shift < rd.size());
+    assert(shift < rd.size());
     ubfm(rd, rn, shift, rd.size() - 1);
   }
 
@@ -903,8 +903,8 @@ class Assembler {
                     const Register& rn,
                     unsigned lsb,
                     unsigned width) {
-    ASSERT(width >= 1);
-    ASSERT(lsb + width <= rn.size());
+    assert(width >= 1);
+    assert(lsb + width <= rn.size());
     ubfm(rd, rn, (rd.size() - lsb) & (rd.size() - 1), width - 1);
   }
 
@@ -913,8 +913,8 @@ class Assembler {
                    const Register& rn,
                    unsigned lsb,
                    unsigned width) {
-    ASSERT(width >= 1);
-    ASSERT(lsb + width <= rn.size());
+    assert(width >= 1);
+    assert(lsb + width <= rn.size());
     ubfm(rd, rn, lsb, lsb + width - 1);
   }
 
@@ -1291,14 +1291,14 @@ class Assembler {
   // character. The instruction pointer (pc_) is then aligned correctly for
   // subsequent instructions.
   void EmitStringData(const char * string) {
-    ASSERT(string != nullptr);
+    assert(string != nullptr);
 
     size_t len = strlen(string) + 1;
     EmitData(string, len);
 
     // Pad with NUL characters until pc_ is aligned.
     const char pad[] = {'\0', '\0', '\0', '\0'};
-    ASSERT(sizeof(pad) == kInstructionSize);
+    assert(sizeof(pad) == kInstructionSize);
     Instruction* next_pc = AlignUp(pc_, kInstructionSize);
     EmitData(&pad, next_pc - pc_);
   }
@@ -1307,44 +1307,44 @@ class Assembler {
 
   // Register encoding.
   static Instr Rd(CPURegister rd) {
-    ASSERT(rd.code() != kSPRegInternalCode);
+    assert(rd.code() != kSPRegInternalCode);
     return rd.code() << Rd_offset;
   }
 
   static Instr Rn(CPURegister rn) {
-    ASSERT(rn.code() != kSPRegInternalCode);
+    assert(rn.code() != kSPRegInternalCode);
     return rn.code() << Rn_offset;
   }
 
   static Instr Rm(CPURegister rm) {
-    ASSERT(rm.code() != kSPRegInternalCode);
+    assert(rm.code() != kSPRegInternalCode);
     return rm.code() << Rm_offset;
   }
 
   static Instr Ra(CPURegister ra) {
-    ASSERT(ra.code() != kSPRegInternalCode);
+    assert(ra.code() != kSPRegInternalCode);
     return ra.code() << Ra_offset;
   }
 
   static Instr Rt(CPURegister rt) {
-    ASSERT(rt.code() != kSPRegInternalCode);
+    assert(rt.code() != kSPRegInternalCode);
     return rt.code() << Rt_offset;
   }
 
   static Instr Rt2(CPURegister rt2) {
-    ASSERT(rt2.code() != kSPRegInternalCode);
+    assert(rt2.code() != kSPRegInternalCode);
     return rt2.code() << Rt2_offset;
   }
 
   // These encoding functions allow the stack pointer to be encoded, and
   // disallow the zero register.
   static Instr RdSP(Register rd) {
-    ASSERT(!rd.IsZero());
+    assert(!rd.IsZero());
     return (rd.code() & kRegCodeMask) << Rd_offset;
   }
 
   static Instr RnSP(Register rn) {
-    ASSERT(!rn.IsZero());
+    assert(!rn.IsZero());
     return (rn.code() & kRegCodeMask) << Rn_offset;
   }
 
@@ -1355,7 +1355,7 @@ class Assembler {
     } else if (S == LeaveFlags) {
       return 0 << FlagsUpdate_offset;
     }
-    UNREACHABLE();
+    not_reached();
     return 0;
   }
 
@@ -1365,7 +1365,7 @@ class Assembler {
 
   // PC-relative address encoding.
   static Instr ImmPCRelAddress(int imm21) {
-    ASSERT(is_int21(imm21));
+    assert(is_int21(imm21));
     Instr imm = static_cast<Instr>(truncate_to_int21(imm21));
     Instr immhi = (imm >> ImmPCRelLo_width) << ImmPCRelHi_offset;
     Instr immlo = imm << ImmPCRelLo_offset;
@@ -1374,27 +1374,27 @@ class Assembler {
 
   // Branch encoding.
   static Instr ImmUncondBranch(int imm26) {
-    ASSERT(is_int26(imm26));
+    assert(is_int26(imm26));
     return truncate_to_int26(imm26) << ImmUncondBranch_offset;
   }
 
   static Instr ImmCondBranch(int imm19) {
-    ASSERT(is_int19(imm19));
+    assert(is_int19(imm19));
     return truncate_to_int19(imm19) << ImmCondBranch_offset;
   }
 
   static Instr ImmCmpBranch(int imm19) {
-    ASSERT(is_int19(imm19));
+    assert(is_int19(imm19));
     return truncate_to_int19(imm19) << ImmCmpBranch_offset;
   }
 
   static Instr ImmTestBranch(int imm14) {
-    ASSERT(is_int14(imm14));
+    assert(is_int14(imm14));
     return truncate_to_int14(imm14) << ImmTestBranch_offset;
   }
 
   static Instr ImmTestBranchBit(unsigned bit_pos) {
-    ASSERT(is_uint6(bit_pos));
+    assert(is_uint6(bit_pos));
     // Subtract five from the shift offset, as we need bit 5 from bit_pos.
     unsigned b5 = bit_pos << (ImmTestBranchBit5_offset - 5);
     unsigned b40 = bit_pos << ImmTestBranchBit40_offset;
@@ -1409,7 +1409,7 @@ class Assembler {
   }
 
   static Instr ImmAddSub(int64_t imm) {
-    ASSERT(IsImmAddSub(imm));
+    assert(IsImmAddSub(imm));
     if (is_uint12(imm)) {  // No shift required.
       return imm << ImmAddSub_offset;
     } else {
@@ -1418,55 +1418,55 @@ class Assembler {
   }
 
   static inline Instr ImmS(unsigned imms, unsigned reg_size) {
-    ASSERT(((reg_size == kXRegSize) && is_uint6(imms)) ||
+    assert(((reg_size == kXRegSize) && is_uint6(imms)) ||
            ((reg_size == kWRegSize) && is_uint5(imms)));
     USE(reg_size);
     return imms << ImmS_offset;
   }
 
   static inline Instr ImmR(unsigned immr, unsigned reg_size) {
-    ASSERT(((reg_size == kXRegSize) && is_uint6(immr)) ||
+    assert(((reg_size == kXRegSize) && is_uint6(immr)) ||
            ((reg_size == kWRegSize) && is_uint5(immr)));
     USE(reg_size);
-    ASSERT(is_uint6(immr));
+    assert(is_uint6(immr));
     return immr << ImmR_offset;
   }
 
   static inline Instr ImmSetBits(unsigned imms, unsigned reg_size) {
-    ASSERT((reg_size == kWRegSize) || (reg_size == kXRegSize));
-    ASSERT(is_uint6(imms));
-    ASSERT((reg_size == kXRegSize) || is_uint6(imms + 3));
+    assert((reg_size == kWRegSize) || (reg_size == kXRegSize));
+    assert(is_uint6(imms));
+    assert((reg_size == kXRegSize) || is_uint6(imms + 3));
     USE(reg_size);
     return imms << ImmSetBits_offset;
   }
 
   static inline Instr ImmRotate(unsigned immr, unsigned reg_size) {
-    ASSERT((reg_size == kWRegSize) || (reg_size == kXRegSize));
-    ASSERT(((reg_size == kXRegSize) && is_uint6(immr)) ||
+    assert((reg_size == kWRegSize) || (reg_size == kXRegSize));
+    assert(((reg_size == kXRegSize) && is_uint6(immr)) ||
            ((reg_size == kWRegSize) && is_uint5(immr)));
     USE(reg_size);
     return immr << ImmRotate_offset;
   }
 
   static inline Instr ImmLLiteral(int imm19) {
-    ASSERT(is_int19(imm19));
+    assert(is_int19(imm19));
     return truncate_to_int19(imm19) << ImmLLiteral_offset;
   }
 
   static inline Instr BitN(unsigned bitn, unsigned reg_size) {
-    ASSERT((reg_size == kWRegSize) || (reg_size == kXRegSize));
-    ASSERT((reg_size == kXRegSize) || (bitn == 0));
+    assert((reg_size == kWRegSize) || (reg_size == kXRegSize));
+    assert((reg_size == kXRegSize) || (bitn == 0));
     USE(reg_size);
     return bitn << BitN_offset;
   }
 
   static Instr ShiftDP(Shift shift) {
-    ASSERT(shift == LSL || shift == LSR || shift == ASR || shift == ROR);
+    assert(shift == LSL || shift == LSR || shift == ASR || shift == ROR);
     return shift << ShiftDP_offset;
   }
 
   static Instr ImmDPShift(unsigned amount) {
-    ASSERT(is_uint6(amount));
+    assert(is_uint6(amount));
     return amount << ImmDPShift_offset;
   }
 
@@ -1475,12 +1475,12 @@ class Assembler {
   }
 
   static Instr ImmExtendShift(unsigned left_shift) {
-    ASSERT(left_shift <= 4);
+    assert(left_shift <= 4);
     return left_shift << ImmExtendShift_offset;
   }
 
   static Instr ImmCondCmp(unsigned imm) {
-    ASSERT(is_uint5(imm));
+    assert(is_uint5(imm));
     return imm << ImmCondCmp_offset;
   }
 
@@ -1490,55 +1490,55 @@ class Assembler {
 
   // MemOperand offset encoding.
   static Instr ImmLSUnsigned(int imm12) {
-    ASSERT(is_uint12(imm12));
+    assert(is_uint12(imm12));
     return imm12 << ImmLSUnsigned_offset;
   }
 
   static Instr ImmLS(int imm9) {
-    ASSERT(is_int9(imm9));
+    assert(is_int9(imm9));
     return truncate_to_int9(imm9) << ImmLS_offset;
   }
 
   static Instr ImmLSPair(int imm7, LSDataSize size) {
-    ASSERT(((imm7 >> size) << size) == imm7);
+    assert(((imm7 >> size) << size) == imm7);
     int scaled_imm7 = imm7 >> size;
-    ASSERT(is_int7(scaled_imm7));
+    assert(is_int7(scaled_imm7));
     return truncate_to_int7(scaled_imm7) << ImmLSPair_offset;
   }
 
   static Instr ImmShiftLS(unsigned shift_amount) {
-    ASSERT(is_uint1(shift_amount));
+    assert(is_uint1(shift_amount));
     return shift_amount << ImmShiftLS_offset;
   }
 
   static Instr ImmException(int imm16) {
-    ASSERT(is_uint16(imm16));
+    assert(is_uint16(imm16));
     return imm16 << ImmException_offset;
   }
 
   static Instr ImmSystemRegister(int imm15) {
-    ASSERT(is_uint15(imm15));
+    assert(is_uint15(imm15));
     return imm15 << ImmSystemRegister_offset;
   }
 
   static Instr ImmHint(int imm7) {
-    ASSERT(is_uint7(imm7));
+    assert(is_uint7(imm7));
     return imm7 << ImmHint_offset;
   }
 
   static LSDataSize CalcLSDataSize(LoadStoreOp op) {
-    ASSERT((SizeLS_offset + SizeLS_width) == (kInstructionSize * 8));
+    assert((SizeLS_offset + SizeLS_width) == (kInstructionSize * 8));
     return static_cast<LSDataSize>(op >> SizeLS_offset);
   }
 
   // Move immediates encoding.
   static Instr ImmMoveWide(uint64_t imm) {
-    ASSERT(is_uint16(imm));
+    assert(is_uint16(imm));
     return imm << ImmMoveWide_offset;
   }
 
   static Instr ShiftMoveWide(int64_t shift) {
-    ASSERT(is_uint2(shift));
+    assert(is_uint2(shift));
     return shift << ShiftMoveWide_offset;
   }
 
@@ -1552,20 +1552,20 @@ class Assembler {
   }
 
   static Instr FPScale(unsigned scale) {
-    ASSERT(is_uint6(scale));
+    assert(is_uint6(scale));
     return scale << FPScale_offset;
   }
 
   // Size of the code generated in bytes
   uint64_t SizeOfCodeGenerated() const {
-    ASSERT((pc_ >= buffer_) && (pc_ < (buffer_ + buffer_size_)));
+    assert((pc_ >= buffer_) && (pc_ < (buffer_ + buffer_size_)));
     return pc_ - buffer_;
   }
 
   // Size of the code generated since label to the current position.
   uint64_t SizeOfCodeGeneratedSince(Label* label) const {
-    ASSERT(label->IsBound());
-    ASSERT((pc_ >= label->target()) && (pc_ < (buffer_ + buffer_size_)));
+    assert(label->IsBound());
+    assert((pc_ >= label->target()) && (pc_ < (buffer_ + buffer_size_)));
     return pc_ - label->target();
   }
 
@@ -1577,7 +1577,7 @@ class Assembler {
   inline void ReleaseLiteralPool() {
     if (--literal_pool_monitor_ == 0) {
       // Has the literal pool been blocked for too long?
-      ASSERT(literals_.empty() ||
+      assert(literals_.empty() ||
              (pc_ < (literals_.back()->pc_ + kMaxLoadLiteralRange)));
     }
   }
@@ -1723,9 +1723,9 @@ class Assembler {
 
   // Emit the instruction at pc_.
   void Emit(Instr instruction) {
-    ASSERT(sizeof(*pc_) == 1);
-    ASSERT(sizeof(instruction) == kInstructionSize);
-    ASSERT((pc_ + sizeof(instruction)) <= (buffer_ + buffer_size_));
+    assert(sizeof(*pc_) == 1);
+    assert(sizeof(instruction) == kInstructionSize);
+    assert((pc_ + sizeof(instruction)) <= (buffer_ + buffer_size_));
 
 #ifdef DEBUG
     finalized_ = false;
@@ -1738,8 +1738,8 @@ class Assembler {
 
   // Emit data inline in the instruction stream.
   void EmitData(void const * data, unsigned size) {
-    ASSERT(sizeof(*pc_) == 1);
-    ASSERT((pc_ + size) <= (buffer_ + buffer_size_));
+    assert(sizeof(*pc_) == 1);
+    assert((pc_ + size) <= (buffer_ + buffer_size_));
 
 #ifdef DEBUG
     finalized_ = false;
@@ -1753,7 +1753,7 @@ class Assembler {
   }
 
   inline void CheckBufferSpace() {
-    ASSERT(pc_ < (buffer_ + buffer_size_));
+    assert(pc_ < (buffer_ + buffer_size_));
     if (pc_ > next_literal_pool_check_) {
       CheckLiteralPool();
     }

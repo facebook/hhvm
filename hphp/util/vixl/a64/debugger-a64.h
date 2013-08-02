@@ -152,7 +152,7 @@ class Debugger : public Simulator {
   // back control.
   inline int steps() { return steps_; }
   inline void set_steps(int value) {
-    ASSERT(value > 1);
+    assert(value > 1);
     steps_ = value;
   }
 

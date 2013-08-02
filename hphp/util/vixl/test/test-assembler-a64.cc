@@ -2447,7 +2447,7 @@ TEST(Assembler, ldr_literal) {
 static void LdrLiteralRangeHelper(ptrdiff_t range_,
                                   LiteralPoolEmitOption option,
                                   bool expect_dump) {
-  ASSERT(range_ > 0);
+  assert(range_ > 0);
   SETUP_SIZE(range_ + 1024);
 
   Label label_1, label_2;
@@ -2478,7 +2478,7 @@ static void LdrLiteralRangeHelper(ptrdiff_t range_,
 
   // Check that the requested range (allowing space for a branch over the pool)
   // can be handled by this test.
-  ASSERT((code_size + pool_guard_size) <= range);
+  assert((code_size + pool_guard_size) <= range);
 
   // Emit NOPs up to 'range', leaving space for the pool guard.
   while ((code_size + pool_guard_size) < range) {
@@ -2492,7 +2492,7 @@ static void LdrLiteralRangeHelper(ptrdiff_t range_,
     code_size += sizeof(Instr);
   }
 
-  ASSERT(code_size == range);
+  assert(code_size == range);
   ASSERT_LITERAL_POOL_SIZE(24);
 
   // Possibly generate a literal pool.
@@ -6138,7 +6138,7 @@ TEST(Assembler, peek_poke_mixed) {
   __ Poke(x1, 8);
   __ Poke(x0, 0);
   {
-    ASSERT(__ StackPointer().Is(sp));
+    assert(__ StackPointer().Is(sp));
     __ Mov(x4, __ StackPointer());
     __ SetStackPointer(x4);
 
@@ -6234,7 +6234,7 @@ static void PushPopXRegSimpleHelper(int reg_count,
   uint64_t literal_base = 0x0100001000100101UL;
 
   {
-    ASSERT(__ StackPointer().Is(sp));
+    assert(__ StackPointer().Is(sp));
     __ Mov(stack_pointer, __ StackPointer());
     __ SetStackPointer(stack_pointer);
 
@@ -6261,7 +6261,7 @@ static void PushPopXRegSimpleHelper(int reg_count,
           case 3:  __ Push(r[2], r[1], r[0]); break;
           case 2:  __ Push(r[1], r[0]);       break;
           case 1:  __ Push(r[0]);             break;
-          default: ASSERT(i == 0);            break;
+          default: assert(i == 0);            break;
         }
         break;
       case PushPopRegList:
@@ -6283,7 +6283,7 @@ static void PushPopXRegSimpleHelper(int reg_count,
           case 3:  __ Pop(r[i], r[i+1], r[i+2]); break;
           case 2:  __ Pop(r[i], r[i+1]);         break;
           case 1:  __ Pop(r[i]);                 break;
-          default: ASSERT(i == reg_count);       break;
+          default: assert(i == reg_count);       break;
         }
         break;
       case PushPopRegList:
@@ -6415,7 +6415,7 @@ static void PushPopFPXRegSimpleHelper(int reg_count,
   uint64_t literal_base = 0x0100001000100101UL;
 
   {
-    ASSERT(__ StackPointer().Is(sp));
+    assert(__ StackPointer().Is(sp));
     __ Mov(stack_pointer, __ StackPointer());
     __ SetStackPointer(stack_pointer);
 
@@ -6446,7 +6446,7 @@ static void PushPopFPXRegSimpleHelper(int reg_count,
           case 3:  __ Push(v[2], v[1], v[0]); break;
           case 2:  __ Push(v[1], v[0]);       break;
           case 1:  __ Push(v[0]);             break;
-          default: ASSERT(i == 0);            break;
+          default: assert(i == 0);            break;
         }
         break;
       case PushPopRegList:
@@ -6468,7 +6468,7 @@ static void PushPopFPXRegSimpleHelper(int reg_count,
           case 3:  __ Pop(v[i], v[i+1], v[i+2]); break;
           case 2:  __ Pop(v[i], v[i+1]);         break;
           case 1:  __ Pop(v[i]);                 break;
-          default: ASSERT(i == reg_count);       break;
+          default: assert(i == reg_count);       break;
         }
         break;
       case PushPopRegList:
@@ -6588,7 +6588,7 @@ static void PushPopXRegMixedMethodsHelper(int claim, int reg_size) {
 
   START();
   {
-    ASSERT(__ StackPointer().Is(sp));
+    assert(__ StackPointer().Is(sp));
     __ Mov(stack_pointer, __ StackPointer());
     __ SetStackPointer(stack_pointer);
 
@@ -6691,7 +6691,7 @@ static void PushPopXRegWXOverlapHelper(int reg_count, int claim) {
 
   START();
   {
-    ASSERT(__ StackPointer().Is(sp));
+    assert(__ StackPointer().Is(sp));
     __ Mov(stack_pointer, __ StackPointer());
     __ SetStackPointer(stack_pointer);
 
@@ -6737,7 +6737,7 @@ static void PushPopXRegWXOverlapHelper(int reg_count, int claim) {
 
     int active_w_slots = 0;
     for (int i = 0; active_w_slots < requested_w_slots; i++) {
-      ASSERT(i < reg_count);
+      assert(i < reg_count);
       // In order to test various arguments to PushMultipleTimes, and to try to
       // exercise different alignment and overlap effects, we push each
       // register a different number of times.
@@ -6798,7 +6798,7 @@ static void PushPopXRegWXOverlapHelper(int reg_count, int claim) {
       }
       next_is_64 = !next_is_64;
     }
-    ASSERT(active_w_slots == 0);
+    assert(active_w_slots == 0);
 
     // Drop memory to restore stack_pointer.
     __ Drop(claim);
@@ -6834,7 +6834,7 @@ static void PushPopXRegWXOverlapHelper(int reg_count, int claim) {
       ASSERT_EQUAL_64(expected, x[i]);
     }
   }
-  ASSERT(slot == requested_w_slots);
+  assert(slot == requested_w_slots);
 
   TEARDOWN();
 }
@@ -6856,7 +6856,7 @@ TEST(Assembler, push_pop_sp) {
 
   START();
 
-  ASSERT(sp.Is(__ StackPointer()));
+  assert(sp.Is(__ StackPointer()));
 
   __ Mov(x3, 0x3333333333333333UL);
   __ Mov(x2, 0x2222222222222222UL);
@@ -6941,93 +6941,93 @@ TEST(Assembler, push_pop_sp) {
 TEST(Assembler, noreg) {
   // This test doesn't generate any code, but it verifies some invariants
   // related to NoReg.
-  CHECK(NoReg.Is(NoFPReg));
-  CHECK(NoFPReg.Is(NoReg));
-  CHECK(NoReg.Is(NoCPUReg));
-  CHECK(NoCPUReg.Is(NoReg));
-  CHECK(NoFPReg.Is(NoCPUReg));
-  CHECK(NoCPUReg.Is(NoFPReg));
+  assert(NoReg.Is(NoFPReg));
+  assert(NoFPReg.Is(NoReg));
+  assert(NoReg.Is(NoCPUReg));
+  assert(NoCPUReg.Is(NoReg));
+  assert(NoFPReg.Is(NoCPUReg));
+  assert(NoCPUReg.Is(NoFPReg));
 
-  CHECK(NoReg.IsNone());
-  CHECK(NoFPReg.IsNone());
-  CHECK(NoCPUReg.IsNone());
+  assert(NoReg.IsNone());
+  assert(NoFPReg.IsNone());
+  assert(NoCPUReg.IsNone());
 }
 
 
 TEST(Assembler, isvalid) {
   // This test doesn't generate any code, but it verifies some invariants
   // related to IsValid().
-  CHECK(!NoReg.IsValid());
-  CHECK(!NoFPReg.IsValid());
-  CHECK(!NoCPUReg.IsValid());
+  assert(!NoReg.IsValid());
+  assert(!NoFPReg.IsValid());
+  assert(!NoCPUReg.IsValid());
 
-  CHECK(x0.IsValid());
-  CHECK(w0.IsValid());
-  CHECK(x30.IsValid());
-  CHECK(w30.IsValid());
-  CHECK(xzr.IsValid());
-  CHECK(wzr.IsValid());
+  assert(x0.IsValid());
+  assert(w0.IsValid());
+  assert(x30.IsValid());
+  assert(w30.IsValid());
+  assert(xzr.IsValid());
+  assert(wzr.IsValid());
 
-  CHECK(sp.IsValid());
-  CHECK(wsp.IsValid());
+  assert(sp.IsValid());
+  assert(wsp.IsValid());
 
-  CHECK(d0.IsValid());
-  CHECK(s0.IsValid());
-  CHECK(d31.IsValid());
-  CHECK(s31.IsValid());
+  assert(d0.IsValid());
+  assert(s0.IsValid());
+  assert(d31.IsValid());
+  assert(s31.IsValid());
 
-  CHECK(x0.IsValidRegister());
-  CHECK(w0.IsValidRegister());
-  CHECK(xzr.IsValidRegister());
-  CHECK(wzr.IsValidRegister());
-  CHECK(sp.IsValidRegister());
-  CHECK(wsp.IsValidRegister());
-  CHECK(!x0.IsValidFPRegister());
-  CHECK(!w0.IsValidFPRegister());
-  CHECK(!xzr.IsValidFPRegister());
-  CHECK(!wzr.IsValidFPRegister());
-  CHECK(!sp.IsValidFPRegister());
-  CHECK(!wsp.IsValidFPRegister());
+  assert(x0.IsValidRegister());
+  assert(w0.IsValidRegister());
+  assert(xzr.IsValidRegister());
+  assert(wzr.IsValidRegister());
+  assert(sp.IsValidRegister());
+  assert(wsp.IsValidRegister());
+  assert(!x0.IsValidFPRegister());
+  assert(!w0.IsValidFPRegister());
+  assert(!xzr.IsValidFPRegister());
+  assert(!wzr.IsValidFPRegister());
+  assert(!sp.IsValidFPRegister());
+  assert(!wsp.IsValidFPRegister());
 
-  CHECK(d0.IsValidFPRegister());
-  CHECK(s0.IsValidFPRegister());
-  CHECK(!d0.IsValidRegister());
-  CHECK(!s0.IsValidRegister());
+  assert(d0.IsValidFPRegister());
+  assert(s0.IsValidFPRegister());
+  assert(!d0.IsValidRegister());
+  assert(!s0.IsValidRegister());
 
   // Test the same as before, but using CPURegister types. This shouldn't make
   // any difference.
-  CHECK(static_cast<CPURegister>(x0).IsValid());
-  CHECK(static_cast<CPURegister>(w0).IsValid());
-  CHECK(static_cast<CPURegister>(x30).IsValid());
-  CHECK(static_cast<CPURegister>(w30).IsValid());
-  CHECK(static_cast<CPURegister>(xzr).IsValid());
-  CHECK(static_cast<CPURegister>(wzr).IsValid());
+  assert(static_cast<CPURegister>(x0).IsValid());
+  assert(static_cast<CPURegister>(w0).IsValid());
+  assert(static_cast<CPURegister>(x30).IsValid());
+  assert(static_cast<CPURegister>(w30).IsValid());
+  assert(static_cast<CPURegister>(xzr).IsValid());
+  assert(static_cast<CPURegister>(wzr).IsValid());
 
-  CHECK(static_cast<CPURegister>(sp).IsValid());
-  CHECK(static_cast<CPURegister>(wsp).IsValid());
+  assert(static_cast<CPURegister>(sp).IsValid());
+  assert(static_cast<CPURegister>(wsp).IsValid());
 
-  CHECK(static_cast<CPURegister>(d0).IsValid());
-  CHECK(static_cast<CPURegister>(s0).IsValid());
-  CHECK(static_cast<CPURegister>(d31).IsValid());
-  CHECK(static_cast<CPURegister>(s31).IsValid());
+  assert(static_cast<CPURegister>(d0).IsValid());
+  assert(static_cast<CPURegister>(s0).IsValid());
+  assert(static_cast<CPURegister>(d31).IsValid());
+  assert(static_cast<CPURegister>(s31).IsValid());
 
-  CHECK(static_cast<CPURegister>(x0).IsValidRegister());
-  CHECK(static_cast<CPURegister>(w0).IsValidRegister());
-  CHECK(static_cast<CPURegister>(xzr).IsValidRegister());
-  CHECK(static_cast<CPURegister>(wzr).IsValidRegister());
-  CHECK(static_cast<CPURegister>(sp).IsValidRegister());
-  CHECK(static_cast<CPURegister>(wsp).IsValidRegister());
-  CHECK(!static_cast<CPURegister>(x0).IsValidFPRegister());
-  CHECK(!static_cast<CPURegister>(w0).IsValidFPRegister());
-  CHECK(!static_cast<CPURegister>(xzr).IsValidFPRegister());
-  CHECK(!static_cast<CPURegister>(wzr).IsValidFPRegister());
-  CHECK(!static_cast<CPURegister>(sp).IsValidFPRegister());
-  CHECK(!static_cast<CPURegister>(wsp).IsValidFPRegister());
+  assert(static_cast<CPURegister>(x0).IsValidRegister());
+  assert(static_cast<CPURegister>(w0).IsValidRegister());
+  assert(static_cast<CPURegister>(xzr).IsValidRegister());
+  assert(static_cast<CPURegister>(wzr).IsValidRegister());
+  assert(static_cast<CPURegister>(sp).IsValidRegister());
+  assert(static_cast<CPURegister>(wsp).IsValidRegister());
+  assert(!static_cast<CPURegister>(x0).IsValidFPRegister());
+  assert(!static_cast<CPURegister>(w0).IsValidFPRegister());
+  assert(!static_cast<CPURegister>(xzr).IsValidFPRegister());
+  assert(!static_cast<CPURegister>(wzr).IsValidFPRegister());
+  assert(!static_cast<CPURegister>(sp).IsValidFPRegister());
+  assert(!static_cast<CPURegister>(wsp).IsValidFPRegister());
 
-  CHECK(static_cast<CPURegister>(d0).IsValidFPRegister());
-  CHECK(static_cast<CPURegister>(s0).IsValidFPRegister());
-  CHECK(!static_cast<CPURegister>(d0).IsValidRegister());
-  CHECK(!static_cast<CPURegister>(s0).IsValidRegister());
+  assert(static_cast<CPURegister>(d0).IsValidFPRegister());
+  assert(static_cast<CPURegister>(s0).IsValidFPRegister());
+  assert(!static_cast<CPURegister>(d0).IsValidRegister());
+  assert(!static_cast<CPURegister>(s0).IsValidRegister());
 }
 
 
@@ -7232,7 +7232,7 @@ TEST(Assembler, trace) {
   __ Bind(&start);
   __ Trace(LOG_ALL, TRACE_ENABLE);
   __ Trace(LOG_ALL, TRACE_DISABLE);
-  CHECK(__ SizeOfCodeGeneratedSince(&start) == 0);
+  assert(__ SizeOfCodeGeneratedSince(&start) == 0);
 
   END();
   TEARDOWN();
@@ -7250,7 +7250,7 @@ TEST(Assembler, log) {
   Label start;
   __ Bind(&start);
   __ Log(LOG_ALL);
-  CHECK(__ SizeOfCodeGeneratedSince(&start) == 0);
+  assert(__ SizeOfCodeGeneratedSince(&start) == 0);
 
   END();
   TEARDOWN();
@@ -7263,17 +7263,17 @@ TEST(Assembler, instruction_accurate_scope) {
   START();
 
   // By default macro instructions are allowed.
-  ASSERT(masm.AllowMacroInstructions());
+  assert(masm.AllowMacroInstructions());
   {
     InstructionAccurateScope scope1(&masm);
-    ASSERT(!masm.AllowMacroInstructions());
+    assert(!masm.AllowMacroInstructions());
     {
       InstructionAccurateScope scope2(&masm);
-      ASSERT(!masm.AllowMacroInstructions());
+      assert(!masm.AllowMacroInstructions());
     }
-    ASSERT(!masm.AllowMacroInstructions());
+    assert(!masm.AllowMacroInstructions());
   }
-  ASSERT(masm.AllowMacroInstructions());
+  assert(masm.AllowMacroInstructions());
 
   {
     InstructionAccurateScope scope(&masm, 2);

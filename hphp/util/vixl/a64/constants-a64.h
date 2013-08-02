@@ -169,7 +169,7 @@ enum Condition {
 };
 
 inline Condition InvertCondition(Condition cond) {
-  ASSERT(cond != al);
+  assert(cond != al);
   return static_cast<Condition>(cond ^ 1);
 }
 
@@ -253,7 +253,7 @@ enum SystemRegister {
 //
 // The enumerations can be used like this:
 //
-// ASSERT(instr->Mask(PCRelAddressingFMask) == PCRelAddressingFixed);
+// assert(instr->Mask(PCRelAddressingFMask) == PCRelAddressingFixed);
 // switch(instr->Mask(PCRelAddressingMask)) {
 //   case ADR:  Format("adr 'Xd, 'AddrPCRelByte"); break;
 //   case ADRP: Format("adrp 'Xd, 'AddrPCRelPage"); break;

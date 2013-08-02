@@ -76,7 +76,7 @@ bool EqualFP64(double expected, const RegisterDump*, double result) {
 
 
 bool Equal32(uint32_t expected, const RegisterDump* core, const Register& reg) {
-  ASSERT(reg.Is32Bits());
+  assert(reg.Is32Bits());
   // Retrieve the corresponding X register so we can check that the upper part
   // was properly cleared.
   int64_t result_x = core->xreg(reg.code());
@@ -93,7 +93,7 @@ bool Equal32(uint32_t expected, const RegisterDump* core, const Register& reg) {
 bool Equal64(uint64_t expected,
              const RegisterDump* core,
              const Register& reg) {
-  ASSERT(reg.Is64Bits());
+  assert(reg.Is64Bits());
   uint64_t result = core->xreg(reg.code());
   return Equal64(expected, core, result);
 }
@@ -102,7 +102,7 @@ bool Equal64(uint64_t expected,
 bool EqualFP32(float expected,
                const RegisterDump* core,
                const FPRegister& fpreg) {
-  ASSERT(fpreg.Is32Bits());
+  assert(fpreg.Is32Bits());
   // Retrieve the corresponding D register so we can check that the upper part
   // was properly cleared.
   uint64_t result_64 = core->dreg_bits(fpreg.code());
@@ -126,7 +126,7 @@ bool EqualFP32(float expected,
 bool EqualFP64(double expected,
                const RegisterDump* core,
                const FPRegister& fpreg) {
-  ASSERT(fpreg.Is64Bits());
+  assert(fpreg.Is64Bits());
   if (expected == 0.0) {
     return Equal64(double_to_rawbits(expected), core,
                    core->dreg_bits(fpreg.code()));
@@ -142,7 +142,7 @@ bool EqualFP64(double expected,
 bool Equal64(const Register& reg0,
              const RegisterDump* core,
              const Register& reg1) {
-  ASSERT(reg0.Is64Bits() && reg1.Is64Bits());
+  assert(reg0.Is64Bits() && reg1.Is64Bits());
   int64_t expected = core->xreg(reg0.code());
   int64_t result = core->xreg(reg1.code());
   return Equal64(expected, core, result);
@@ -170,8 +170,8 @@ static char FlagV(uint32_t flags) {
 
 
 bool EqualNzcv(uint32_t expected, uint32_t result) {
-  ASSERT((expected & ~NZCVFlag) == 0);
-  ASSERT((result & ~NZCVFlag) == 0);
+  assert((expected & ~NZCVFlag) == 0);
+  assert((result & ~NZCVFlag) == 0);
   if (result != expected) {
     printf("Expected: %c%c%c%c\t Found: %c%c%c%c\n",
         FlagN(expected), FlagZ(expected), FlagC(expected), FlagV(expected),
@@ -226,7 +226,7 @@ RegList PopulateRegisterArray(Register* w, Register* x, Register* r,
     }
   }
   // Check that we got enough registers.
-  ASSERT(CountSetBits(list, kNumberOfRegisters) == reg_count);
+  assert(CountSetBits(list, kNumberOfRegisters) == reg_count);
 
   return list;
 }
@@ -253,7 +253,7 @@ RegList PopulateFPRegisterArray(FPRegister* s, FPRegister* d, FPRegister* v,
     }
   }
   // Check that we got enough registers.
-  ASSERT(CountSetBits(list, kNumberOfFPRegisters) == reg_count);
+  assert(CountSetBits(list, kNumberOfFPRegisters) == reg_count);
 
   return list;
 }
@@ -265,7 +265,7 @@ void Clobber(MacroAssembler* masm, RegList reg_list, uint64_t const value) {
     if (reg_list & (1UL << i)) {
       Register xn(i, kXRegSize);
       // We should never write into sp here.
-      ASSERT(!xn.Is(sp));
+      assert(!xn.Is(sp));
       if (!xn.IsZero()) {
         if (!first.IsValid()) {
           // This is the first register we've hit, so construct the literal.
@@ -309,13 +309,13 @@ void Clobber(MacroAssembler* masm, CPURegList reg_list) {
     // This will always clobber D registers.
     ClobberFP(masm, reg_list.list());
   } else {
-    UNREACHABLE();
+    not_reached();
   }
 }
 
 
 void RegisterDump::Dump(MacroAssembler* masm) {
-  ASSERT(__ StackPointer().Is(sp));
+  assert(__ StackPointer().Is(sp));
 
   // Ensure that we don't unintentionally clobber any registers.
   Register old_tmp0 = __ Tmp0();
@@ -392,7 +392,7 @@ void RegisterDump::Dump(MacroAssembler* masm) {
   // easily restore them.
   Register dump2_base = x10;
   Register dump2 = x11;
-  ASSERT(!AreAliased(dump_base, dump, tmp, dump2_base, dump2));
+  assert(!AreAliased(dump_base, dump, tmp, dump2_base, dump2));
 
   // Don't lose the dump_ address.
   __ Mov(dump2_base, dump_base);

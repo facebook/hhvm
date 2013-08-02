@@ -86,8 +86,8 @@ void CPU::EnsureIAndDCacheCoherency(void *address, size_t length) {
   uintptr_t dsize = static_cast<uintptr_t>(dcache_line_size_);
   uintptr_t isize = static_cast<uintptr_t>(icache_line_size_);
   // Cache line sizes are always a power of 2.
-  ASSERT(CountSetBits(dsize, 64) == 1);
-  ASSERT(CountSetBits(isize, 64) == 1);
+  assert(CountSetBits(dsize, 64) == 1);
+  assert(CountSetBits(isize, 64) == 1);
   uintptr_t dstart = start & ~(dsize - 1);
   uintptr_t istart = start & ~(isize - 1);
   uintptr_t end = start + length;

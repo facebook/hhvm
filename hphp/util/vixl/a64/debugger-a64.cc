@@ -86,7 +86,7 @@ class RegisterToken : public ValueToken<const Register> {
 
   static Token* Tokenize(const char* arg);
   static RegisterToken* Cast(Token* tok) {
-    ASSERT(tok->IsRegister());
+    assert(tok->IsRegister());
     return reinterpret_cast<RegisterToken*>(tok);
   }
 
@@ -108,7 +108,7 @@ class FPRegisterToken : public ValueToken<const FPRegister> {
 
   static Token* Tokenize(const char* arg);
   static FPRegisterToken* Cast(Token* tok) {
-    ASSERT(tok->IsFPRegister());
+    assert(tok->IsFPRegister());
     return reinterpret_cast<FPRegisterToken*>(tok);
   }
 };
@@ -132,7 +132,7 @@ class IdentifierToken : public ValueToken<char*> {
 
   static Token* Tokenize(const char* arg);
   static IdentifierToken* Cast(Token* tok) {
-    ASSERT(tok->IsIdentifier());
+    assert(tok->IsIdentifier());
     return reinterpret_cast<IdentifierToken*>(tok);
   }
 };
@@ -150,7 +150,7 @@ class AddressToken : public ValueToken<uint8_t*> {
 
   static Token* Tokenize(const char* arg);
   static AddressToken* Cast(Token* tok) {
-    ASSERT(tok->IsAddress());
+    assert(tok->IsAddress());
     return reinterpret_cast<AddressToken*>(tok);
   }
 };
@@ -167,7 +167,7 @@ class IntegerToken : public ValueToken<int64_t> {
 
   static Token* Tokenize(const char* arg);
   static IntegerToken* Cast(Token* tok) {
-    ASSERT(tok->IsInteger());
+    assert(tok->IsInteger());
     return reinterpret_cast<IntegerToken*>(tok);
   }
 };
@@ -198,7 +198,7 @@ class FormatToken : public Token {
 
   static Token* Tokenize(const char* arg);
   static FormatToken* Cast(Token* tok) {
-    ASSERT(tok->IsFormat());
+    assert(tok->IsFormat());
     return reinterpret_cast<FormatToken*>(tok);
   }
 };
@@ -669,8 +669,8 @@ char* Debugger::ReadCommandLine(const char* prompt, char* buffer, int length) {
   }
 
   // Remove the newline from the end of the command.
-  ASSERT(end[1] == '\0');
-  ASSERT((end - buffer) < (length - 1));
+  assert(end[1] == '\0');
+  assert((end - buffer) < (length - 1));
   end[0] = '\0';
 
   return buffer;
@@ -716,7 +716,7 @@ void Debugger::RunDebuggerShell() {
 
 
 void Debugger::DoBreakpoint(Instruction* instr) {
-  ASSERT(instr->Mask(ExceptionMask) == BRK);
+  assert(instr->Mask(ExceptionMask) == BRK);
 
   printf("Hit breakpoint at pc=%p.\n", reinterpret_cast<void*>(instr));
   set_debug_parameters(debug_parameters() | DBG_BREAK | DBG_ACTIVE);
@@ -726,24 +726,24 @@ void Debugger::DoBreakpoint(Instruction* instr) {
 
 
 void Debugger::DoUnreachable(Instruction* instr) {
-  ASSERT((instr->Mask(ExceptionMask) == HLT) &&
+  assert((instr->Mask(ExceptionMask) == HLT) &&
          (instr->ImmException() == kUnreachableOpcode));
 
-  fprintf(stream_, "Hit UNREACHABLE marker at pc=%p.\n",
+  fprintf(stream_, "Hit not_reached marker at pc=%p.\n",
           reinterpret_cast<void*>(instr));
   abort();
 }
 
 
 void Debugger::DoTrace(Instruction* instr) {
-  ASSERT((instr->Mask(ExceptionMask) == HLT) &&
+  assert((instr->Mask(ExceptionMask) == HLT) &&
          (instr->ImmException() == kTraceOpcode));
 
   // Read the arguments encoded inline in the instruction stream.
   uint32_t parameters;
   uint32_t command;
 
-  ASSERT(sizeof(*instr) == 1);
+  assert(sizeof(*instr) == 1);
   memcpy(&parameters, instr + kTraceParamsOffset, sizeof(parameters));
   memcpy(&command, instr + kTraceCommandOffset, sizeof(command));
 
@@ -755,7 +755,7 @@ void Debugger::DoTrace(Instruction* instr) {
       set_log_parameters(log_parameters() & ~parameters);
       break;
     default:
-      UNREACHABLE();
+      not_reached();
   }
 
   set_pc(instr->InstructionAtOffset(kTraceLength));
@@ -763,17 +763,17 @@ void Debugger::DoTrace(Instruction* instr) {
 
 
 void Debugger::DoLog(Instruction* instr) {
-  ASSERT((instr->Mask(ExceptionMask) == HLT) &&
+  assert((instr->Mask(ExceptionMask) == HLT) &&
          (instr->ImmException() == kLogOpcode));
 
   // Read the arguments encoded inline in the instruction stream.
   uint32_t parameters;
 
-  ASSERT(sizeof(*instr) == 1);
+  assert(sizeof(*instr) == 1);
   memcpy(&parameters, instr + kTraceParamsOffset, sizeof(parameters));
 
   // We don't support a one-shot LOG_DISASM.
-  ASSERT((parameters & LOG_DISASM) == 0);
+  assert((parameters & LOG_DISASM) == 0);
   // Print the requested information.
   if (parameters & LOG_FLAGS) PrintFlags(true);
   if (parameters & LOG_REGS) PrintRegisters(true);
@@ -835,7 +835,7 @@ static bool StringToInt64(int64_t* value, const char* line, int base = 10) {
 
 uint8_t* Token::ToAddress(Debugger* debugger) const {
   USE(debugger);
-  UNREACHABLE();
+  not_reached();
   return nullptr;
 }
 
@@ -883,7 +883,7 @@ Token* Token::Tokenize(const char* arg) {
 
 
 uint8_t* RegisterToken::ToAddress(Debugger* debugger) const {
-  ASSERT(CanAddressMemory());
+  assert(CanAddressMemory());
   uint64_t reg_value = debugger->xreg(value().code(), Reg31IsStackPointer);
   uint8_t* address = nullptr;
   memcpy(&address, &reg_value, sizeof(address));
@@ -892,7 +892,7 @@ uint8_t* RegisterToken::ToAddress(Debugger* debugger) const {
 
 
 void RegisterToken::Print(FILE* out) const {
-  ASSERT(value().IsValid());
+  assert(value().IsValid());
   fprintf(out, "[Register %s]", Name());
 }
 
@@ -928,7 +928,7 @@ Token* RegisterToken::Tokenize(const char* arg) {
 
 
 void FPRegisterToken::Print(FILE* out) const {
-  ASSERT(value().IsValid());
+  assert(value().IsValid());
   char prefix = value().Is32Bits() ? 's' : 'd';
   fprintf(out, "[FPRegister %c%" PRIu32 "]", prefix, value().code());
 }
@@ -956,7 +956,7 @@ Token* FPRegisterToken::Tokenize(const char* arg) {
       switch (*arg) {
         case 's': fpreg = FPRegister::SRegFromCode(code); break;
         case 'd': fpreg = FPRegister::DRegFromCode(code); break;
-        default: UNREACHABLE();
+        default: not_reached();
       }
 
       return new FPRegisterToken(fpreg);
@@ -967,7 +967,7 @@ Token* FPRegisterToken::Tokenize(const char* arg) {
 
 
 uint8_t* IdentifierToken::ToAddress(Debugger* debugger) const {
-  ASSERT(CanAddressMemory());
+  assert(CanAddressMemory());
   Instruction* pc_value = debugger->pc();
   uint8_t* address = nullptr;
   memcpy(&address, &pc_value, sizeof(address));
@@ -1062,7 +1062,7 @@ Token* FormatToken::Tokenize(const char* arg) {
     }
   }
 
-  ASSERT(length == 3);
+  assert(length == 3);
   switch (arg[1]) {
     case 's':
       switch (type) {
@@ -1150,8 +1150,8 @@ DebugCommand* DebugCommand::Parse(char* line) {
 void DebugCommand::PrintHelp(const char** aliases,
                              const char* args,
                              const char* help) {
-  ASSERT(aliases[0] != nullptr);
-  ASSERT(help != nullptr);
+  assert(aliases[0] != nullptr);
+  assert(help != nullptr);
 
   printf("\n----\n\n");
   for (const char** current = aliases; *current != nullptr; current++) {
@@ -1166,7 +1166,7 @@ void DebugCommand::PrintHelp(const char** aliases,
 
 
 bool HelpCommand::Run(Debugger* debugger) {
-  ASSERT(debugger->IsDebuggerRunning());
+  assert(debugger->IsDebuggerRunning());
   USE(debugger);
 
   #define PRINT_HELP(Command)                     \
@@ -1191,7 +1191,7 @@ DebugCommand* HelpCommand::Build(std::vector<Token*> args) {
 
 
 bool ContinueCommand::Run(Debugger* debugger) {
-  ASSERT(debugger->IsDebuggerRunning());
+  assert(debugger->IsDebuggerRunning());
 
   debugger->set_debug_parameters(debugger->debug_parameters() & ~DBG_ACTIVE);
   return true;
@@ -1208,7 +1208,7 @@ DebugCommand* ContinueCommand::Build(std::vector<Token*> args) {
 
 
 bool StepCommand::Run(Debugger* debugger) {
-  ASSERT(debugger->IsDebuggerRunning());
+  assert(debugger->IsDebuggerRunning());
 
   int64_t steps = count();
   if (steps < 0) {
@@ -1250,7 +1250,7 @@ DebugCommand* StepCommand::Build(std::vector<Token*> args) {
 
 
 bool DisasmCommand::Run(Debugger* debugger) {
-  ASSERT(debugger->IsDebuggerRunning());
+  assert(debugger->IsDebuggerRunning());
 
   uint8_t* from = target()->ToAddress(debugger);
   debugger->PrintInstructions(from, count());
@@ -1313,7 +1313,7 @@ void PrintCommand::Print(FILE* out) {
 
 
 bool PrintCommand::Run(Debugger* debugger) {
-  ASSERT(debugger->IsDebuggerRunning());
+  assert(debugger->IsDebuggerRunning());
 
   Token* tok = target();
   if (tok->IsIdentifier()) {
@@ -1360,7 +1360,7 @@ bool PrintCommand::Run(Debugger* debugger) {
     return false;
   }
 
-  UNREACHABLE();
+  not_reached();
   return false;
 }
 
@@ -1386,7 +1386,7 @@ DebugCommand* PrintCommand::Build(std::vector<Token*> args) {
 
 
 bool MemCommand::Run(Debugger* debugger) {
-  ASSERT(debugger->IsDebuggerRunning());
+  assert(debugger->IsDebuggerRunning());
 
   uint8_t* address = target()->ToAddress(debugger);
   debugger->PrintMemory(address, count(), format());
@@ -1463,7 +1463,7 @@ UnknownCommand::~UnknownCommand() {
 
 
 bool UnknownCommand::Run(Debugger* debugger) {
-  ASSERT(debugger->IsDebuggerRunning());
+  assert(debugger->IsDebuggerRunning());
   USE(debugger);
 
   printf(" ** Unknown Command:");
@@ -1487,7 +1487,7 @@ InvalidCommand::~InvalidCommand() {
 
 
 bool InvalidCommand::Run(Debugger* debugger) {
-  ASSERT(debugger->IsDebuggerRunning());
+  assert(debugger->IsDebuggerRunning());
   USE(debugger);
 
   printf(" ** Invalid Command:");

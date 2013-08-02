@@ -54,7 +54,7 @@
       printf("Instruction 0x%08" PRIx32 " uses an unallocated encoding.\n",   \
              I->InstructionBits());                                           \
     }                                                                         \
-    ASSERT(!(I->P));
+    assert(!(I->P));
 #else
   #define UNALLOC(I, P) ((void) 0)
 #endif

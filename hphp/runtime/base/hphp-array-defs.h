@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_HPHP_ARRAY_INL_H_
 #define incl_HPHP_HPHP_ARRAY_INL_H_
 
-#include "hphp/runtime/base/hphp_array.h"
+#include "hphp/runtime/base/hphp-array.h"
 #include "hphp/util/stacktrace_profiler.h"
 
 namespace HPHP {

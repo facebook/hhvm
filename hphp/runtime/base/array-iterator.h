@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/hphp_array.h"
+#include "hphp/runtime/base/hphp-array.h"
 #include "hphp/util/min_max_macros.h"
 
 namespace HPHP {

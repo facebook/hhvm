@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/base/array_iterator.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/lock.h"

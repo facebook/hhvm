@@ -30,7 +30,7 @@
 #include "hphp/util/parser/hphp.tab.hpp"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/array_iterator.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/util/logger.h"

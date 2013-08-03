@@ -14,16 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/hphp_array.h"
-#include "hphp/runtime/base/array_init.h"
-#include "hphp/runtime/base/array_iterator.h"
+#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/sort-helpers.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 // inline methods of HphpArray
-#include "hphp/runtime/base/hphp_array-defs.h"
+#include "hphp/runtime/base/hphp-array-defs.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

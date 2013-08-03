@@ -27,7 +27,7 @@
 #include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/tv-helpers.h"
 #include "hphp/runtime/base/type-variant.h"
-#include "hphp/runtime/base/array_data-defs.h"
+#include "hphp/runtime/base/array-data-defs.h"
 
 #undef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 

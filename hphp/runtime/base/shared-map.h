@@ -19,7 +19,7 @@
 
 #include "hphp/util/shared_memory_allocator.h"
 #include "hphp/runtime/base/shared-variant.h"
-#include "hphp/runtime/base/array_data.h"
+#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/builtin-functions.h"
 

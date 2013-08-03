@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/array_iterator.h"
-#include "hphp/runtime/base/array_data.h"
-#include "hphp/runtime/base/hphp_array.h"
+#include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/ext/ext_collections.h"
 
 // inline methods of HphpArray.
-#include "hphp/runtime/base/hphp_array-defs.h"
+#include "hphp/runtime/base/hphp-array-defs.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

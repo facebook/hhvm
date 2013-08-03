@@ -24,7 +24,7 @@
 #include <math.h>
 #include <cmath>
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/array_iterator.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/runtime/ext/ext_collections.h"

@@ -23,7 +23,7 @@
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/array_iterator.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/util/parser/hphp.tab.hpp"
 #include "hphp/runtime/vm/runtime.h"

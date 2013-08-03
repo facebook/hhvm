@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/array_init.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {

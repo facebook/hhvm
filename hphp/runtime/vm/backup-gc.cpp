@@ -29,7 +29,7 @@
 #include "hphp/runtime/base/smart-allocator.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/hphp_array.h"
+#include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/vm/class.h"
 
 namespace HPHP {

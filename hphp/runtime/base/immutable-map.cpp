@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/immutable_map.h"
+#include "hphp/runtime/base/immutable-map.h"
 #include "hphp/runtime/base/shared-variant.h"
-#include "hphp/runtime/base/array_iterator.h"
+#include "hphp/runtime/base/array-iterator.h"
 
 namespace HPHP {
 

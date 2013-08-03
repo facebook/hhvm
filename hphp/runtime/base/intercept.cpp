@@ -15,8 +15,8 @@
 */
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/request-local.h"
-#include "hphp/runtime/base/array_init.h"
-#include "hphp/runtime/base/array_iterator.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/vm/jit/target-cache.h"

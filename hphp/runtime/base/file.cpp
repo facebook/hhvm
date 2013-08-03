@@ -23,7 +23,7 @@
 #include "hphp/runtime/server/virtual_host.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/array_init.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/util.h"
@@ -31,7 +31,7 @@
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/exceptions.h"
 #include <sys/file.h>
-#include "hphp/runtime/base/array_iterator.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 
 namespace HPHP {

@@ -13,13 +13,13 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/array_data.h"
+#include "hphp/runtime/base/array-data.h"
 
 #include "tbb/concurrent_hash_map.h"
 
 #include "hphp/util/exception.h"
-#include "hphp/runtime/base/array_init.h"
-#include "hphp/runtime/base/array_iterator.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/complex-types.h"
@@ -27,7 +27,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/shared-map.h"
-#include "hphp/runtime/base/policy_array.h"
+#include "hphp/runtime/base/policy-array.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/vm/name-value-table-wrapper.h"
 

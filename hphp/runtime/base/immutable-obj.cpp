@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/immutable_obj.h"
+#include "hphp/runtime/base/immutable-obj.h"
 #include "hphp/runtime/base/shared-variant.h"
 #include "hphp/runtime/base/externals.h"
-#include "hphp/runtime/base/array_init.h"
-#include "hphp/runtime/base/array_iterator.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/builtin-functions.h"
 

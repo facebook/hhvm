@@ -15,7 +15,7 @@
 */
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/hphp_array.h"
+#include "hphp/runtime/base/hphp-array.h"
 #include "hphp/util/util.h"
 #include "hphp/util/debug.h"
 #include "hphp/runtime/vm/jit/target-cache.h"

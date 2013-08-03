@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/array_util.h"
+#include "hphp/runtime/base/array-util.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/server/static_content_cache.h"

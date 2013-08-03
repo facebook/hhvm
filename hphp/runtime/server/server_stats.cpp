@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/datetime.h"
-#include "hphp/runtime/base/array_init.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/util/json.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/process.h"

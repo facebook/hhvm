@@ -13,9 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/array_init.h"
-#include "hphp/runtime/base/policy_array.h"
-#include "hphp/runtime/base/hphp_array.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/policy-array.h"
+#include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP {

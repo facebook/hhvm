@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/server/virtual_host.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/hphp_array.h"
+#include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/vm/funcdict.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/bytecode.h"

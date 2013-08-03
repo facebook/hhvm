@@ -16,9 +16,9 @@
 
 #define INLINE_VARIANT_HELPER 1
 
-#include "hphp/runtime/base/hphp_array.h"
-#include "hphp/runtime/base/array_init.h"
-#include "hphp/runtime/base/array_iterator.h"
+#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -34,7 +34,7 @@
 #include "hphp/runtime/base/stats.h"
 
 // inline methods of HphpArray
-#include "hphp/runtime/base/hphp_array-defs.h"
+#include "hphp/runtime/base/hphp-array-defs.h"
 
 // If PEDANTIC is defined, extra checks are performed to ensure correct
 // function even as an array approaches 2^31 elements.  In practice this is

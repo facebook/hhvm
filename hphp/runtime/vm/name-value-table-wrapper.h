@@ -17,7 +17,7 @@
 #define incl_HPHP_RUNTIME_VM_NAME_VALUE_TABLE_WRAPPER_H
 
 #include "hphp/runtime/vm/name-value-table.h"
-#include "hphp/runtime/base/array_data.h"
+#include "hphp/runtime/base/array-data.h"
 
 namespace HPHP {
 

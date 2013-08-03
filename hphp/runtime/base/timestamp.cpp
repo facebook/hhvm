@@ -17,7 +17,7 @@
 #include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/datetime.h"
-#include "hphp/runtime/base/array_init.h"
+#include "hphp/runtime/base/array-init.h"
 #include <timelib.h>
 
 namespace HPHP {

@@ -65,9 +65,6 @@ public:
   virtual Array getTraits() const {
     return Unit::getTraitsInfo();
   }
-  virtual Array getConstants() const {
-    return g_vmContext->getConstantsInfo();
-  }
   virtual const ClassInfo::MethodInfo *findFunction(CStrRef name) const {
     return g_vmContext->findFunctionInfo(name);
   }

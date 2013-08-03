@@ -254,32 +254,13 @@ void ClassInfo::InitializeSystemConstants() {
   }
 }
 
-Array ClassInfo::GetSystemConstants() {
+Array ClassInfo::GetSystemConstants(bool get_dynamic_constants /* = false */) {
   assert(s_loaded);
   Array res;
   const ConstantMap &scm = s_systemFuncs->getConstants();
   for (ConstantMap::const_iterator it = scm.begin(); it != scm.end(); ++it) {
-    if (!it->second->isDynamic()) {
+    if (get_dynamic_constants || !it->second->isDynamic()) {
       res.set(it->second->name, it->second->getValue());
-    }
-  }
-  return res;
-}
-
-Array ClassInfo::GetConstants() {
-  assert(s_loaded);
-  Array res;
-  Array dyn;
-  {
-    const ConstantMap &scm = s_systemFuncs->getConstants();
-    for (ConstantMap::const_iterator it = scm.begin(); it != scm.end(); ++it) {
-      res.set(it->second->name, it->second->getValue());
-    }
-  }
-  if (s_hook) {
-    dyn = s_hook->getConstants();
-    if (!dyn.isNull()) {
-      res.merge(dyn);
     }
   }
   return res;
@@ -442,7 +423,7 @@ void ClassInfo::GetSymbolNames(std::vector<String> &classes,
   for (ArrayIter iter(funcs2); iter; ++iter) {
     functions.push_back(iter.second().toString());
   }
-  Array consts = GetConstants();
+  Array consts = StringData::GetConstants();
   constants.reserve(consts.size());
   for (ArrayIter iter(consts); iter; ++iter) {
     constants.push_back(iter.first().toString());

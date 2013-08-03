@@ -257,14 +257,10 @@ public:
   static const ClassInfo *FindSystemClassInterfaceOrTrait(CStrRef name);
 
   /**
-   * Get all statically known constants
+   * Get all statically known system constants, unless explicitly
+   * specified to get the dynamic ones.
    */
-  static Array GetConstants();
-
-  /**
-   * Get all statically known system constants
-   */
-  static Array GetSystemConstants();
+  static Array GetSystemConstants(bool get_dynamic_constants = false);
   static void InitializeSystemConstants();
 
   /**
@@ -455,7 +451,6 @@ public:
   virtual Array getClasses() const = 0;
   virtual Array getInterfaces() const = 0;
   virtual Array getTraits() const = 0;
-  virtual Array getConstants() const = 0;
   virtual const ClassInfo::MethodInfo *findFunction(CStrRef name) const = 0;
   virtual const ClassInfo *findClassLike(CStrRef name) const = 0;
   virtual const ClassInfo::ConstantInfo *findConstant(CStrRef name) const = 0;

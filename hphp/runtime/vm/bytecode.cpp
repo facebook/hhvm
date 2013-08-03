@@ -2161,12 +2161,6 @@ Array VMExecutionContext::getUserFunctionsInfo() {
   return Unit::getUserFunctions();
 }
 
-Array VMExecutionContext::getConstantsInfo() {
-  // Return an array of all defined constant:value pairs.  This method is used
-  // to support get_defined_constants().
-  return Array::Create();
-}
-
 const ClassInfo::MethodInfo* VMExecutionContext::findFunctionInfo(
   CStrRef name) {
   StringIMap<AtomicSmartPtr<MethodInfoVM> >::iterator it =

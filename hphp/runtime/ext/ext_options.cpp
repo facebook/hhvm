@@ -209,12 +209,23 @@ String f_get_current_user() {
   return ret;
 }
 
-Array f_get_defined_constants(CVarRef categorize /* = null_variant */) {
-  if (categorize.toBoolean()) {
-    throw NotSupportedException(__func__, "constant categorization not "
-                                "supported");
+StaticString s_user("user");
+StaticString s_core("Core");
+Array f_get_defined_constants(bool categorize /* = false */) {
+  if (categorize) {
+    Array categorized_consts;
+    // Get all defined constants - user and system
+    Array all_consts = StringData::GetConstants();
+    // Get all system constants, including dynamic ones
+    Array sys_consts = ClassInfo::GetSystemConstants(true);
+    Array user_consts = all_consts.diff(sys_consts, true, false);
+    categorized_consts.set(s_user, user_consts);
+    categorized_consts.set(s_core, sys_consts);
+    return categorized_consts;
   }
-  return StringData::GetConstants();
+  else {
+    return StringData::GetConstants();
+  }
 }
 
 String f_get_include_path() {

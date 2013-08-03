@@ -32,7 +32,7 @@ Array f_get_loaded_extensions(bool zend_extensions = false);
 Array f_get_extension_funcs(CStrRef module_name);
 Variant f_get_cfg_var(CStrRef option);
 String f_get_current_user();
-Array f_get_defined_constants(CVarRef categorize = null_variant);
+Array f_get_defined_constants(bool categorize = false);
 String f_get_include_path();
 void f_restore_include_path();
 String f_set_include_path(CStrRef new_include_path);

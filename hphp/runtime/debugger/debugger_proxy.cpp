@@ -775,12 +775,15 @@ int DebuggerProxy::getStackDepth() {
 // that execution has moved away from the previous interrupt site.)
 void DebuggerProxy::setBreakableForBreakpointsNotMatching(CmdInterrupt& cmd) {
   TRACE(2, "DebuggerProxy::setBreakableForBreakpointsNotMatching\n");
-  auto stackDepth = getRealStackDepth();
-  for (unsigned int i = 0; i < m_breakpoints.size(); ++i) {
-    BreakPointInfoPtr bp = m_breakpoints[i];
-    if (bp != nullptr && bp->m_state != BreakPointInfo::Disabled &&
-        !bp->match(*this, cmd.getInterruptType(), *cmd.getSite())) {
-      bp->setBreakable(stackDepth);
+  auto site = cmd.getSite();
+  if (site != nullptr) {
+    auto stackDepth = getRealStackDepth();
+    for (unsigned int i = 0; i < m_breakpoints.size(); ++i) {
+      BreakPointInfoPtr bp = m_breakpoints[i];
+      if (bp != nullptr && bp->m_state != BreakPointInfo::Disabled &&
+          !bp->match(*this, cmd.getInterruptType(), *site)) {
+        bp->setBreakable(stackDepth);
+      }
     }
   }
 }
@@ -789,12 +792,16 @@ void DebuggerProxy::setBreakableForBreakpointsNotMatching(CmdInterrupt& cmd) {
 // calls made from the current site.
 void DebuggerProxy::unsetBreakableForBreakpointsMatching(CmdInterrupt& cmd) {
   TRACE(2, "DebuggerProxy::unsetBreakableForBreakpointsMatching\n");
-  auto stackDepth = getRealStackDepth();
-  for (unsigned int i = 0; i < m_breakpoints.size(); ++i) {
-    BreakPointInfoPtr bp = m_breakpoints[i];
-    if (bp != nullptr && bp->m_state != BreakPointInfo::Disabled &&
-        bp->match(*this, cmd.getInterruptType(), *cmd.getSite())) {
-      bp->unsetBreakable(stackDepth);
+  auto site = cmd.getSite();
+  if (site != nullptr) {
+    auto offset = site->getCurOffset();
+    auto stackDepth = getRealStackDepth();
+    for (unsigned int i = 0; i < m_breakpoints.size(); ++i) {
+      BreakPointInfoPtr bp = m_breakpoints[i];
+      if (bp != nullptr && bp->m_state != BreakPointInfo::Disabled &&
+          bp->match(*this, cmd.getInterruptType(), *site)) {
+        bp->unsetBreakable(stackDepth, offset);
+      }
     }
   }
 }

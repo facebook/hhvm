@@ -178,8 +178,8 @@ public:
   static void RecvImpl(int version, BreakPointInfoPtrVec &bps,
                        DebuggerThriftBuffer &thrift);
 
-  bool breakable(int stackDepth) const;
-  void unsetBreakable(int stackDepth);
+  bool breakable(int stackDepth, Offset offset) const;
+  void unsetBreakable(int stackDepth, Offset offset);
   void setBreakable(int stackDepth);
 
   int16_t m_index; // client side index number
@@ -225,7 +225,9 @@ private:
   // exception class
   std::string m_namespace;
   std::string m_class;
-  std::list<int> breakDepthStack;
+  // Records the stack depth and offset of first operation for each break point
+  // that is currently disabled except at deeper stack levels.
+  std::list<std::pair<int, Offset>> m_stack;
 
   static bool Match(const char *haystack, int haystack_len,
                     const std::string &needle, bool regex, bool exact);

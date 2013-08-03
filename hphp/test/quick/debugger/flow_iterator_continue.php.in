@@ -1,0 +1,4 @@
+break A::current()
+continue
+continue
+quit

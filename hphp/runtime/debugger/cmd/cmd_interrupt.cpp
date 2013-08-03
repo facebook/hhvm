@@ -277,10 +277,11 @@ bool CmdInterrupt::shouldBreak(DebuggerProxy &proxy,
     case ExceptionThrown:
       m_matched.clear();
       if (m_site) {
+        auto offset = m_site->getCurOffset();
         for (unsigned int i = 0; i < bps.size(); i++) {
           if (bps[i]->m_state != BreakPointInfo::Disabled &&
-              bps[i]->breakable(stackDepth) &&
-              bps[i]->cmatch(proxy, getInterruptType(), *getSite())) {
+              bps[i]->breakable(stackDepth, offset) &&
+              bps[i]->cmatch(proxy, getInterruptType(), *m_site)) {
             BreakPointInfoPtr bp(new BreakPointInfo());
             *bp = *bps[i]; // make a copy
             m_matched.push_back(bp);

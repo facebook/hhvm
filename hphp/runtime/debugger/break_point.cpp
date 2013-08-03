@@ -280,10 +280,10 @@ void BreakPointInfo::setClause(const std::string &clause, bool check) {
 // Following this call, BreakPointInfo::breakable will return false until
 // a subsequent call to BreakPointInfo::setBreakable with a lower or equal
 // stack level.
-void BreakPointInfo::unsetBreakable(int stackDepth) {
+void BreakPointInfo::unsetBreakable(int stackDepth, Offset offset) {
   TRACE(2, "BreakPointInfo::unsetBreakable\n");
-  if (breakDepthStack.empty() || breakDepthStack.back() < stackDepth) {
-    breakDepthStack.push_back(stackDepth);
+  if (m_stack.empty() || m_stack.back().first < stackDepth) {
+    m_stack.push_back(std::make_pair(stackDepth, offset));
   }
 }
 
@@ -293,15 +293,22 @@ void BreakPointInfo::unsetBreakable(int stackDepth) {
 // higher stack level.
 void BreakPointInfo::setBreakable(int stackDepth) {
   TRACE(2, "BreakPointInfo::setBreakable\n");
-  while (!breakDepthStack.empty() && breakDepthStack.back() >= stackDepth) {
-    breakDepthStack.pop_back();
+  while (!m_stack.empty() && m_stack.back().first >= stackDepth) {
+    m_stack.pop_back();
   }
 }
 
 // Returns true if this breakpoint is enabled at the given stack level.
-bool BreakPointInfo::breakable(int stackDepth) const {
+bool BreakPointInfo::breakable(int stackDepth, Offset offset) const {
   TRACE(2, "BreakPointInfo::breakable\n");
-  if (!breakDepthStack.empty() && breakDepthStack.back() >= stackDepth) {
+  if (!m_stack.empty() && m_stack.back().first >= stackDepth) {
+    if (m_stack.back().first == stackDepth && m_stack.back().second >= offset) {
+      // We assume that the only way to ask this question for the same
+      // stack level and offset, is for the execution to have come back
+      // here after executing the operation at offset, but without
+      // executing any other operations in the interpreter.
+      return true;
+    }
     return false;
   } else {
     return true;

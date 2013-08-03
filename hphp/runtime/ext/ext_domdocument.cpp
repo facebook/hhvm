@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/ext_domdocument.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_class.h"
-#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"

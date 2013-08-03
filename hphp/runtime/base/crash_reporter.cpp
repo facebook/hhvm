@@ -18,7 +18,7 @@
 #include "hphp/util/light_process.h"
 #include "hphp/util/logger.h"
 
-#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/ext/ext_error.h"
 #include "hphp/runtime/debugger/debugger.h"

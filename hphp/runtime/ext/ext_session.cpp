@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/ini_setting.h"
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/variable-unserializer.h"

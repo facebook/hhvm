@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/profile_dump.h"
+#include "hphp/runtime/base/profile-dump.h"
 
 #include "folly/Format.h"
 #include "folly/Conv.h"

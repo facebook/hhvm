@@ -27,7 +27,7 @@
 #include "hphp/runtime/base/hphp_array.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/ext/ext_closure.h"

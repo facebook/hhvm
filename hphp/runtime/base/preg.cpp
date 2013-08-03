@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 #include <pcre.h>
 #include <onigposix.h>
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/array_iterator.h"

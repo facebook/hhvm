@@ -16,8 +16,8 @@
 */
 
 #include "hphp/runtime/ext/ext_mailparse.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/temp-file.h"
 #include "hphp/runtime/ext/ext_process.h"
 #include "hphp/runtime/ext/mailparse/mime.h"

@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/php-stream-wrapper.h"
 #include "hphp/runtime/base/http-stream-wrapper.h"
-#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/request-local.h"
 #include <set>
 #include <map>
 

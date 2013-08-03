@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/ext_network.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/server_stats.h"
 #include "hphp/util/lock.h"
 #include "hphp/runtime/base/file.h"

@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/cmd/cmd_signal.h"
-#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/server/source_root_info.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/hphp_system.h"

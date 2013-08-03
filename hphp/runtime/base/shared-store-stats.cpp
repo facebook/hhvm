@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/base/shared-store-stats.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/util/json.h"
 #include <pcre.h>

@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/array_iterator.h"
 #include "hphp/runtime/base/comparisons.h"
 

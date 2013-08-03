@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/server/xbox_server.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/rpc_request_handler.h"
 #include "hphp/runtime/server/satellite_server.h"
 #include "hphp/runtime/base/libevent_http_client.h"

@@ -18,7 +18,7 @@
 
 #include <boost/container/flat_map.hpp>
 
-#include "hphp/runtime/base/memory_manager.h"
+#include "hphp/runtime/base/memory-manager.h"
 
 namespace HPHP { namespace smart {
 

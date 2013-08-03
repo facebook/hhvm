@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/pprof_server.h"
+#include "hphp/runtime/base/pprof-server.h"
 #include "hphp/util/current_executable.h"
 #include "hphp/util/logger.h"
 

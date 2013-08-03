@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/preg.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/util/util.h"

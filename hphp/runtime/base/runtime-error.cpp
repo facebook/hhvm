@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/execution_context.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {

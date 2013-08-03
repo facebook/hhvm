@@ -15,10 +15,10 @@
 */
 
 #include "hphp/runtime/base/smart-allocator.h"
-#include "hphp/runtime/base/memory_manager.h"
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/server/server_stats.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
 

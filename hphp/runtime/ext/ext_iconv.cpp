@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/ext_iconv.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 

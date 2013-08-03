@@ -55,7 +55,7 @@ static DebuggerClient& getStaticDebuggerClient() {
    * global mutexes have been initialized before we enter the
    * constructor.
    *
-   * This initialization is thread-safe because program_functions.cpp
+   * This initialization is thread-safe because program-functions.cpp
    * must call Debugger::StartClient (which ends up here) before any
    * additional threads are created.
    */

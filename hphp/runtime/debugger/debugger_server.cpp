@@ -17,7 +17,7 @@
 #include "hphp/runtime/debugger/debugger_server.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/network.h"
 #include "hphp/util/logger.h"
 

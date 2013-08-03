@@ -20,7 +20,7 @@
 #include "hphp/runtime/server/pagelet_server.h"
 #include "hphp/runtime/server/xbox_server.h"
 #include "hphp/runtime/server/http_protocol.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/server/rpc_request_handler.h"
 

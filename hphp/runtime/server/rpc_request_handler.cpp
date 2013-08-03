@@ -17,8 +17,8 @@
 #include "hphp/runtime/server/rpc_request_handler.h"
 
 #include "hphp/runtime/server/http_request_handler.h"
-#include "hphp/runtime/base/program_functions.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/server/http_protocol.h"
 #include "hphp/runtime/server/access_log.h"

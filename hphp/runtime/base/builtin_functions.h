@@ -21,10 +21,10 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/intercept.h"
-#include "hphp/runtime/base/runtime_error.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/util/case_insensitive.h"
 #include "hphp/runtime/base/type-conversions.h"
@@ -267,7 +267,7 @@ void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
  * Handler for exceptions thrown from user functions that we don't
  * allow exception propagation from.  E.g., object destructors or
  * certain callback hooks (user profiler). Implemented in
- * program_functions.cpp.
+ * program-functions.cpp.
  */
 void handle_destructor_exception(const char* situation = "Destructor");
 

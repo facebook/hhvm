@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 // Get SIZE_MAX definition.  Do this before including any more files, to make
 // sure that this is the first place that stdint.h is included.

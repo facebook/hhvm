@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/hphp_system.h"
-#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/program-functions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

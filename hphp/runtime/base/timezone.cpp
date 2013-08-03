@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/array_init.h"
 #include "hphp/util/logger.h"
 

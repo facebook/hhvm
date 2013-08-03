@@ -18,8 +18,8 @@
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/request_local.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/min_max_macros.h"
 
 #include <gdfontt.h>  /* 1 Tiny font */

@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/zend-qsort.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/array_util.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/ext_iconv.h"
 #include "unicode/coll.h" // icu
 #include "hphp/util/parser/hphp.tab.hpp"

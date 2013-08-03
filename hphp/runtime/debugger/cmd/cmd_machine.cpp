@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_machine.h"
 #include "hphp/runtime/debugger/cmd/cmd_signal.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/array_init.h"
 #include "hphp/runtime/base/libevent_http_client.h"

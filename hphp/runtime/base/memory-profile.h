@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_MEMORY_PROFILE_H_
 #define incl_HPHP_MEMORY_PROFILE_H_
 
-#include "hphp/runtime/base/memory_profile.h"
-#include "hphp/runtime/base/profile_dump.h"
+#include "hphp/runtime/base/memory-profile.h"
+#include "hphp/runtime/base/profile-dump.h"
 #include "hphp/util/thread_local.h"
 
 namespace HPHP {

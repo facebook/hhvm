@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/server/service_thread.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/thread_local.h"
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/server/replay_transport.h"

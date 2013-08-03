@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/ext_thread.h"
 #include "hphp/runtime/server/service_thread.h"
 #include "hphp/runtime/server/http_server.h"
-#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/util/process.h"
 
 namespace HPHP {

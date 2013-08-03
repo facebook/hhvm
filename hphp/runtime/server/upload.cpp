@@ -16,10 +16,10 @@
 */
 
 #include "hphp/runtime/server/upload.h"
-#include "hphp/runtime/base/program_functions.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/hphp_system.h"
-#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/util/logger.h"

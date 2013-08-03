@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/ext/ext_variable.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/array_iterator.h"
 #include "hphp/runtime/base/dummy_resource.h"

@@ -18,7 +18,7 @@
 #include "hphp/runtime/server/http_request_handler.h"
 #include "hphp/runtime/server/rpc_request_handler.h"
 #include "hphp/runtime/server/virtual_host.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/util/util.h"
 #include "folly/Memory.h"

@@ -29,7 +29,7 @@
 #include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/util/parser/hphp.tab.hpp"
 #include "hphp/runtime/base/class_info.h"
-#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/array_iterator.h"
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/thread-init-fini.h"

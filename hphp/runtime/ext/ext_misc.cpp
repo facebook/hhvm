@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/zend-pack.h"
 #include "hphp/runtime/base/hphp_system.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_math.h"

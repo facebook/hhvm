@@ -24,7 +24,7 @@
 #include "hphp/util/arena.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/cse.h"
-#include "hphp/runtime/base/memory_manager.h"
+#include "hphp/runtime/base/memory-manager.h"
 
 namespace HPHP {  namespace JIT {
 

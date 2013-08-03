@@ -19,7 +19,7 @@
 #define incl_HPHP_ZEND_COLLATOR_H_
 
 #include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/request-local.h"
 #include "unicode/coll.h" // icu
 
 namespace HPHP {

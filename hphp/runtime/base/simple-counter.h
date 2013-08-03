@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_SIMPLE_COUNTER_H_
 #define incl_HPHP_SIMPLE_COUNTER_H_
 
-#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/util/stack_trace.h"
 #include <map>
 #include <string>

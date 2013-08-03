@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/class_info.h"
 #include "hphp/runtime/base/ini_setting.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/macros.h"
 
 #include "hphp/system/systemlib.h"

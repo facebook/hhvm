@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_memcache.h"
-#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/ini_setting.h"
 
 #include "hphp/system/systemlib.h"

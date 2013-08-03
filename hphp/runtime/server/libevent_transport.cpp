@@ -17,7 +17,7 @@
 #include "hphp/runtime/server/libevent_transport.h"
 #include "hphp/runtime/server/libevent_server.h"
 #include "hphp/runtime/server/server.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/util.h"
 #include "hphp/util/logger.h"
 

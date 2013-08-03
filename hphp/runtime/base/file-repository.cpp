@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/base/file-repository.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"

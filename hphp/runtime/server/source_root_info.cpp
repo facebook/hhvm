@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/server/source_root_info.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/server/http_request_handler.h"
 #include "hphp/runtime/server/transport.h"

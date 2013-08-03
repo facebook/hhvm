@@ -19,7 +19,7 @@
 #include "hphp/runtime/ext/ext_mb.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/ini_setting.h"
-#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/request-local.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(pcre);

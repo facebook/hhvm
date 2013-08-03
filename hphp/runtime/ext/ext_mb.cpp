@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/ext_mb.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/ext/php_unicode.h"
 #include "hphp/runtime/ext/unicode_data.h"
 #include "hphp/runtime/ext/ext_process.h"

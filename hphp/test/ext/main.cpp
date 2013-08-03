@@ -16,7 +16,7 @@
 
 #include "hphp/test/ext/test.h"
 #include "hphp/util/logger.h"
-#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/program-functions.h"
 #include <dlfcn.h>
 
 #include "hphp/hhvm/process_init.h"

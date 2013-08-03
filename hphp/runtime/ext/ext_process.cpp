@@ -28,7 +28,7 @@
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/util/light_process.h"
 #include "hphp/util/logger.h"
-#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/vm/repo.h"
 
 #if !defined(_NSIG) && defined(NSIG)

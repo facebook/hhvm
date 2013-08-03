@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/base/extended_logger.h"
 #include "hphp/runtime/base/execution_context.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/array_iterator.h"
 
 ///////////////////////////////////////////////////////////////////////////////

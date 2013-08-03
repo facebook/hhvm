@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/smart-object.h"
 #include "hphp/runtime/base/timezone.h"
 #include "hphp/runtime/base/dateinterval.h"
-#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/request-local.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

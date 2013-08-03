@@ -17,7 +17,7 @@
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/timestamp.h"
 #include <time.h>
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/server_note.h"
 #include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/server/request_uri.h"

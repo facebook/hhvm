@@ -26,7 +26,7 @@
 #include "hphp/util/lock.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/countable.h"
-#include "hphp/runtime/base/memory_usage_stats.h"
+#include "hphp/runtime/base/memory-usage-stats.h"
 #include "hphp/util/trace.h"
 #include <typeinfo>
 

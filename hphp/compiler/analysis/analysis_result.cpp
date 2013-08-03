@@ -47,7 +47,7 @@
 #include "hphp/compiler/expression/simple_function_call.h"
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/runtime/base/zend-printf.h"
-#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/util/atomic.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/util.h"

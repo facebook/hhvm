@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/file-repository.h"

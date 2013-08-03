@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/backup-gc.h"
-#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/runtime-error.h"
 
 #include <fstream>
 #include <algorithm>
@@ -27,7 +27,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/smart-allocator.h"
-#include "hphp/runtime/base/memory_manager.h"
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/hphp_array.h"
 #include "hphp/runtime/vm/class.h"

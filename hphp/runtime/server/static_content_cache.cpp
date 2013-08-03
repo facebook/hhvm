@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/server/static_content_cache.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"

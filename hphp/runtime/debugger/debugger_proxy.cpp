@@ -19,7 +19,7 @@
 #include "hphp/runtime/debugger/cmd/cmd_signal.h"
 #include "hphp/runtime/debugger/cmd/cmd_machine.h"
 #include "hphp/runtime/debugger/debugger.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/ext_socket.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/util/process.h"

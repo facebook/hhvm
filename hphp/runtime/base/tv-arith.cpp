@@ -19,7 +19,7 @@
 #include <limits>
 #include <algorithm>
 
-#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/tv-conversions.h"
 
 namespace HPHP {

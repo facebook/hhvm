@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/memory_profile.h"
+#include "hphp/runtime/base/memory-profile.h"
 #include "hphp/runtime/base/hphp_value.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 

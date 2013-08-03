@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/http_client.h"
 #include "hphp/runtime/server/static_content_cache.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/compression.h"
 #include "hphp/util/logger.h"
 

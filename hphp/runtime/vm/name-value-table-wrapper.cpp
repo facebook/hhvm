@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/vm/name-value-table-wrapper.h"
-#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/array_iterator.h"
 #include "hphp/runtime/base/array_init.h"
 

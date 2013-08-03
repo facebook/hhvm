@@ -18,11 +18,11 @@
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_fb.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/async_job.h"
 #include "hphp/util/timer.h"
 #include <dlfcn.h>
-#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/util/alloc.h"

@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/program-functions.h"
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/type-conversions.h"
@@ -21,8 +21,8 @@
 #include "hphp/runtime/base/execution_context.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/base/code_coverage.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/pprof_server.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/pprof-server.h"
 #include "hphp/util/shared_memory_allocator.h"
 #include "hphp/runtime/server/pagelet_server.h"
 #include "hphp/runtime/server/xbox_server.h"
@@ -31,8 +31,9 @@
 #include "hphp/runtime/server/http_request_handler.h"
 #include "hphp/runtime/server/admin_request_handler.h"
 #include "hphp/runtime/server/server_stats.h"
+#include "hphp/runtime/server/server_name_indication.h"
 #include "hphp/runtime/server/server_note.h"
-#include "hphp/runtime/base/memory_manager.h"
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/util/process.h"
 #include "hphp/util/capability.h"
 #include "hphp/util/embedded_data.h"

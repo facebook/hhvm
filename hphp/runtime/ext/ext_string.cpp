@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-scanf.h"
 #include "hphp/runtime/base/bstring.h"
-#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/util/lock.h"
 #include <locale.h>
 #include "hphp/runtime/server/http_request_handler.h"

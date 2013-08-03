@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_VM_UNIT_H_
 #define incl_HPHP_VM_UNIT_H_
 
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/vm/repo-helpers.h"

@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/request-local.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

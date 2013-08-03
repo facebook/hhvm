@@ -16,9 +16,9 @@
 
 #include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/server/http_server.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/program_functions.h"
-#include "hphp/runtime/base/memory_manager.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/datetime.h"

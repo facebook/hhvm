@@ -18,7 +18,7 @@
 #define incl_HPHP_PPROF_HEAP_SERVER_H_
 
 #include "hphp/runtime/server/server.h"
-#include "hphp/runtime/base/profile_dump.h"
+#include "hphp/runtime/base/profile-dump.h"
 
 namespace HPHP {
 

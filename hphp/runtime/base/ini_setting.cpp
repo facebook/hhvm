@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/hphp_system.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/util/lock.h"
 

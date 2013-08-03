@@ -1508,15 +1508,10 @@ void VMExecutionContext::syncGdbState() {
   }
 }
 
-static bool jitIsEnabled(const Unit* unit) {
-  if (!ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) return false;
-  return unit == nullptr || !unit->isInterpretOnly();
-}
-
 void VMExecutionContext::enterVMPrologue(ActRec* enterFnAr) {
   assert(enterFnAr);
   Stats::inc(Stats::VMEnter);
-  if (jitIsEnabled(enterFnAr->m_func->unit())) {
+  if (ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
     int np = enterFnAr->m_func->numParams();
     int na = enterFnAr->numArgs();
     if (na > np) na = np + 1;
@@ -1537,7 +1532,7 @@ void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
     start = enterFnAr->m_func->getFuncBody();
   }
   Stats::inc(Stats::VMEnter);
-  if (jitIsEnabled(m_fp->unit())) {
+  if (ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
     (void) m_fp->unit()->offsetOf(m_pc); /* assert */
     if (enterFnAr) {
       assert(start);

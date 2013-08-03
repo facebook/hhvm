@@ -644,7 +644,7 @@ public:
     m_cacheMask = 1 << (id & 7);
   }
   bool isInterpretOnly() const { return m_interpretOnly; }
-  void setInterpretOnly() { m_interpretOnly = false; }
+  void setInterpretOnly() { m_interpretOnly = true; }
   bool isMergeOnly() const { return m_mergeOnly; }
   void clearMergeOnly() { m_mergeOnly = false; }
   bool isEmpty() const { return m_mergeState & UnitMergeStateEmpty; }

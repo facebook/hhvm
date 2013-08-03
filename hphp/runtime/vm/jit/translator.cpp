@@ -3442,6 +3442,7 @@ Translator::Get() {
 bool
 Translator::isSrcKeyInBL(const SrcKey& sk) {
   auto unit = sk.unit();
+  if (unit->isInterpretOnly()) return true;
   Lock l(m_dbgBlacklistLock);
   if (m_dbgBLSrcKey.find(sk) != m_dbgBLSrcKey.end()) {
     return true;

@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 #include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/code_coverage.h"
+#include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/debugger/debugger.h"

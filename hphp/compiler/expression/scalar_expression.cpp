@@ -28,7 +28,7 @@
 #include "hphp/util/hash.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/compiler/analysis/file_scope.h"
 

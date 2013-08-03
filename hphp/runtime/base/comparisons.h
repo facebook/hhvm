@@ -18,8 +18,8 @@
 #define incl_HPHP_COMPARISONS_H_
 
 #include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 
 namespace HPHP {

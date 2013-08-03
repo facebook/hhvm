@@ -20,7 +20,7 @@
 
 #include <functional>
 #include <queue>
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/smart-containers.h"
 
 namespace HPHP {

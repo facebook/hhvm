@@ -23,7 +23,7 @@
 
 #include "hphp/util/util.h"
 #include "hphp/util/exp_arena.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {
 

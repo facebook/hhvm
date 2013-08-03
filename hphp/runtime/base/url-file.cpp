@@ -15,8 +15,8 @@
 */
 
 #include "hphp/runtime/base/url-file.h"
-#include "hphp/runtime/base/hphp_system.h"
-#include "hphp/runtime/base/http_client.h"
+#include "hphp/runtime/base/hphp-system.h"
+#include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/runtime-error.h"
 
 namespace HPHP {

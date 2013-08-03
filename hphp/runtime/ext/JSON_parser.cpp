@@ -28,9 +28,9 @@ SOFTWARE.
 
 
 #include "hphp/runtime/ext/JSON_parser.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/utf8-decode.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/thread-init-fini.h"

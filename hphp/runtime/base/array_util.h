@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_ARRAY_UTIL_H_
 #define incl_HPHP_ARRAY_UTIL_H_
 
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/util/hdf.h"
 
 namespace HPHP {

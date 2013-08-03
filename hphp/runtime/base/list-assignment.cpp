@@ -3,7 +3,6 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
-   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,31 +14,55 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_DUMMY_RESOURCE_H_
-#define incl_HPHP_DUMMY_RESOURCE_H_
-
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/list-assignment.h"
+#include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// ListAssignmentElement
 
-/**
- * DummyResource is used in a number of places where the runtime wants
- * to cast a value to the resource type. Ideally, casting a non-resource
- * value to a resource would throw or produce null, but there are a few
- * places in the runtime and the extensions that would need to be updated
- * first to make that work.
- */
-class DummyResource : public ResourceData {
-public:
-  DECLARE_OBJECT_ALLOCATION(DummyResource);
-  DummyResource();
-  static StaticString s_class_name;
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
-  virtual bool isInvalid() const { return true; }
-};
+ListAssignmentElement::ListAssignmentElement(Variant &var, int index, ...)
+  : m_var(var) {
+  va_list ap;
+  va_start(ap, index);
+  while (index != -1) {
+    m_indices.push_back(index);
+    index = va_arg(ap, int);
+  }
+  va_end(ap);
+}
+
+void ListAssignmentElement::assign(CArrRef data) {
+  assert(!m_indices.empty());
+  Variant tmp = data;
+  unsigned int size = m_indices.size();
+  for (unsigned int i = 0; i < size; i++) {
+    tmp = tmp.rvalAt(m_indices[i]);
+  }
+  m_var = tmp;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// global function
+
+Variant list_assign(CVarRef data, ListAssignmentElement *elem, ...) {
+  Array adata = data.toArray();
+  vector<ListAssignmentElement *> elems;
+
+  va_list ap;
+  va_start(ap, elem);
+  while (elem) {
+    elems.push_back(elem);
+    elem = va_arg(ap, ListAssignmentElement *);
+  }
+  va_end(ap);
+
+  for (int i = elems.size() - 1; i >= 0; i--) {
+    elems[i]->assign(adata);
+    delete elems[i];
+  }
+  return data;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-
-#endif // incl_HPHP_PHP_MAILPARSE_MIME_H_

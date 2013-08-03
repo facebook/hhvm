@@ -18,7 +18,7 @@
 #define incl_HPHP_TIMEZONE_H_
 
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 
 extern "C" {
 #include <timelib.h>

@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/vm/jit/translator.h"
 #include <boost/noncopyable.hpp>
-#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/execution-context.h"
 
 #define TVOFF(nm) offsetof(TypedValue, nm)
 #define AROFF(nm) offsetof(ActRec, nm)

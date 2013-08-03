@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/base/intercept.h"
-#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/class-info.h"
 
 namespace HPHP {
 

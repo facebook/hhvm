@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/hardware_counter.h"
+#include "hphp/runtime/base/hardware-counter.h"
 
 #ifndef NO_HARDWARE_COUNTERS
 

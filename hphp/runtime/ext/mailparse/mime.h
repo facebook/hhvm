@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_PHP_MAILPARSE_MIME_H_
 #define incl_HPHP_PHP_MAILPARSE_MIME_H_
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/ext/mailparse/rfc822.h"
 #include "hphp/runtime/base/string-buffer.h"
 

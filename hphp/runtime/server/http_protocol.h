@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_HTTP_PROTOCOL_H_
 #define incl_HPHP_HTTP_PROTOCOL_H_
 
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/server/transport.h"
 
 namespace HPHP {

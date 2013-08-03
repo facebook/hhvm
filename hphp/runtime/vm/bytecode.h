@@ -21,10 +21,10 @@
 #include <boost/optional.hpp>
 
 #include "hphp/util/util.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-conversions.h"
-#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/array_iterator.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/unit.h"

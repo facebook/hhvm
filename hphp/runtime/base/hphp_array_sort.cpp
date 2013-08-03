@@ -18,8 +18,8 @@
 #include "hphp/runtime/base/array_init.h"
 #include "hphp/runtime/base/array_iterator.h"
 #include "hphp/runtime/base/sort-helpers.h"
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 // inline methods of HphpArray

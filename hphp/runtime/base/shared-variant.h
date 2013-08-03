@@ -21,7 +21,7 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/atomic.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/immutable_map.h"
 #include "hphp/runtime/base/immutable_obj.h"
 

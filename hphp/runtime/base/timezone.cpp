@@ -15,11 +15,11 @@
 */
 
 #include "hphp/runtime/base/timezone.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/datetime.h"
-#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/array_init.h"
 #include "hphp/util/logger.h"

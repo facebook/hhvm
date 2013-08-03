@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/server/server_name_indication.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/extended_logger.h"
+#include "hphp/runtime/base/extended-logger.h"
 #include "hphp/util/util.h"
 #include "openssl/ssl.h"
 

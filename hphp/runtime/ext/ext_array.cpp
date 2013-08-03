@@ -21,7 +21,7 @@
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/zend-collator.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"

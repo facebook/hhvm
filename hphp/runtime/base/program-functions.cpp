@@ -17,10 +17,10 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/thread-init-fini.h"
-#include "hphp/runtime/base/code_coverage.h"
+#include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/pprof-server.h"
 #include "hphp/util/shared_memory_allocator.h"
@@ -52,7 +52,7 @@
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/base/simple-counter.h"
-#include "hphp/runtime/base/extended_logger.h"
+#include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 
 #include <boost/program_options/options_description.hpp>

@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_constant.h"
-#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/ext/ext_array.h"
 
 namespace HPHP { namespace Eval {

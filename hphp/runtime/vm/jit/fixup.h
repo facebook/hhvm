@@ -19,7 +19,7 @@
 
 #include "hphp/util/util.h"
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/tread-hash-map.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/util/atomic.h"

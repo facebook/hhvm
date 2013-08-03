@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/type-string.h"
-#include "hphp/runtime/base/hphp_value.h"
+#include "hphp/runtime/base/hphp-value.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

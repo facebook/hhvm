@@ -28,7 +28,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/array_data.h"
 #include "hphp/runtime/base/type-string.h"
-#include "hphp/runtime/base/hphp_value.h"
+#include "hphp/runtime/base/hphp-value.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

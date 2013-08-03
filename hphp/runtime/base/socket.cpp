@@ -17,7 +17,7 @@
 #include "hphp/runtime/base/socket.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/util/logger.h"

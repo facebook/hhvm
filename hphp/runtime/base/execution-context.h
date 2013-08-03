@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_EXECUTION_CONTEXT_H_
 #define incl_HPHP_EXECUTION_CONTEXT_H_
 
-#include "hphp/runtime/base/class_info.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/server/virtual_host.h"

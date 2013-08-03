@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/base/hphp_array.h"

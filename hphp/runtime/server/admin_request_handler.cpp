@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/server/http_server.h"
 #include "hphp/runtime/server/pagelet_server.h"
-#include "hphp/runtime/base/http_client.h"
+#include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/preg.h"

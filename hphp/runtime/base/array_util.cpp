@@ -17,7 +17,7 @@
 #include "hphp/runtime/base/array_util.h"
 #include "hphp/runtime/base/array_iterator.h"
 #include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_json.h"

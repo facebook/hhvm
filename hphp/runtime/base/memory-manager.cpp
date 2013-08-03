@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/smart-allocator.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/memory-profile.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/http_server.h"
 #include "hphp/util/alloc.h"

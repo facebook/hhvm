@@ -21,7 +21,7 @@
 #include <queue>
 #include <set>
 #include <vector>
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP {

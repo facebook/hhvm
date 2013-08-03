@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/base/temp-file.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/runtime-error.h"
 
 namespace HPHP {

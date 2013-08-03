@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/util/exception.h"

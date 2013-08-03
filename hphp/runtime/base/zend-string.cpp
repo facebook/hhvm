@@ -25,11 +25,11 @@
 
 #include "hphp/runtime/base/bstring.h"
 #include "hphp/runtime/base/exceptions.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 #ifdef __APPLE__
 #ifndef isnan

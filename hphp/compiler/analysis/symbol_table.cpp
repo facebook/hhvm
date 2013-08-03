@@ -27,8 +27,8 @@
 #include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/expression/simple_variable.h"
 
-#include "hphp/runtime/base/class_info.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/util/logger.h"

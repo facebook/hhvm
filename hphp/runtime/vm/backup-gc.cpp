@@ -25,10 +25,10 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
-#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/smart-allocator.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/hphp_array.h"
 #include "hphp/runtime/vm/class.h"
 

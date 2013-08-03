@@ -18,8 +18,8 @@
 
 #include <errno.h>
 #include <hphp/runtime/base/zend-ini.tab.hpp>
-#include <hphp/runtime/base/string_buffer.h>
-#include <hphp/runtime/base/ini_setting.h>
+#include <hphp/runtime/base/string-buffer.h>
+#include <hphp/runtime/base/ini-setting.h>
 #include <hphp/util/logger.h>
 
 using namespace HPHP;

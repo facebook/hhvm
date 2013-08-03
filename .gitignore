@@ -41,8 +41,8 @@ hphp.log
 /hphp/runtime/ext/*.ext_hhvm.h
 /hphp/runtime/ext/*/*.ext_hhvm.cpp
 /hphp/runtime/ext/*/*.ext_hhvm.h
-/hphp/runtime/base/builtin_functions.cpp.ext_hhvm.cpp
-/hphp/runtime/base/builtin_functions.cpp.ext_hhvm.h
+/hphp/runtime/base/builtin-functions.cpp.ext_hhvm.cpp
+/hphp/runtime/base/builtin-functions.cpp.ext_hhvm.h
 /hphp/runtime/ext_hhvm/ext_hhvm_infotabs.cpp
 /hphp/runtime/ext_hhvm/ext_hhvm_infotabs.h
 

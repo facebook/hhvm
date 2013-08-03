@@ -30,7 +30,7 @@
 #include "hphp/compiler/expression/binary_op_expression.h"
 #include "hphp/compiler/expression/encaps_list_expression.h"
 #include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/compiler/parser/parser.h"
 
 using namespace HPHP;

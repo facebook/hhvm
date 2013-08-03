@@ -16,7 +16,7 @@
 
 #define __STDC_LIMIT_MACROS
 
-#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/execution-context.h"
 
 #include <stdint.h>
 
@@ -29,9 +29,9 @@
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/base/request-local.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-conversions.h"

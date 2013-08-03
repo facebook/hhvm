@@ -20,7 +20,7 @@
 
 #include "folly/Optional.h"
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "mysql.h"
 #include "hphp/runtime/base/smart-containers.h"
 

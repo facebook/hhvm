@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/server/files_match.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/server/virtual_host.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/util/util.h"

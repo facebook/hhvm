@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_VM_EVENT_HOOK_H_
 #define incl_HPHP_VM_EVENT_HOOK_H_
 
-#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 

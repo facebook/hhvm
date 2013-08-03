@@ -16,11 +16,11 @@
 
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/dateinterval.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/array_init.h"
 
 namespace HPHP {

@@ -21,7 +21,7 @@
 // headers needed by extensions.
 
 #include "hphp/util/lock.h"
-#include "hphp/runtime/base/hphp_system.h"
+#include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/util/compatibility.h"
 #ifdef HHVM_FBMAKE

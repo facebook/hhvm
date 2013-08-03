@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/server/transport.h"
 #include "hphp/util/hdf.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

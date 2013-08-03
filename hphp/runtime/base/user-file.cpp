@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/base/user-file.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 

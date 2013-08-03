@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/code_coverage.h"
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/code-coverage.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {

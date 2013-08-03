@@ -13,24 +13,20 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/hphp_system.h"
-#include "hphp/runtime/base/program-functions.h"
+
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////
 
-#ifdef HPHP_VERSION
-#undef HPHP_VERSION
-#endif
-#define HPHP_VERSION(v) return #v;
-const char* getHphpCompilerVersion() {
-#include "../../version"
+std::string TypedValue::pretty() const {
+  char buf[20];
+  sprintf(buf, "0x%lx", long(m_data.num));
+  return Trace::prettyNode(tname(m_type).c_str(), std::string(buf));
 }
 
-const char* getHphpCompilerId() {
-  return kCompilerId;
-}
+//////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////////
 }

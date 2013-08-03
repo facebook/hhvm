@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/dummy_resource.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/zend-functions.h"
 

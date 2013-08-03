@@ -18,7 +18,7 @@
 #define incl_HPHP_UTIL_HARDWARE_COUNTER_H_
 
 #include "hphp/util/thread_local.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

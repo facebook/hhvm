@@ -15,8 +15,8 @@
 */
 
 #include "hphp/system/systemlib.h"
-#include "hphp/runtime/base/hphp_system.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/hphp-system.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/class.h"
 

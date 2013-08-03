@@ -17,7 +17,7 @@
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debug/gdb-jit.h"
 
-#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/execution-context.h"
 
 #include <sys/types.h>
 #include <stdio.h>

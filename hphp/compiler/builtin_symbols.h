@@ -19,7 +19,7 @@
 
 #include "hphp/compiler/hphp.h"
 #include "hphp/util/string_bag.h"
-#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/class-info.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

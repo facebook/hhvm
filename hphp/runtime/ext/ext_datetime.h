@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_DATETIME_H_
 #define incl_HPHP_EXT_DATETIME_H_
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/timezone.h"

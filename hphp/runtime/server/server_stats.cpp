@@ -27,7 +27,7 @@
 #include "hphp/util/compatibility.h"
 #include "hphp/util/process.h"
 #include "hphp/util/timer.h"
-#include "hphp/runtime/base/hardware_counter.h"
+#include "hphp/runtime/base/hardware-counter.h"
 
 using std::list;
 using std::set;

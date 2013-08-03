@@ -18,7 +18,7 @@
 #include "hphp/runtime/server/upload.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/hphp_system.h"
+#include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/ext/ext_apc.h"

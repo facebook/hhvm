@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/base/plain-file.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/request-local.h"
 #include <unistd.h>
 

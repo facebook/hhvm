@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_FUNCTION_H_
 #define incl_HPHP_EXT_FUNCTION_H_
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

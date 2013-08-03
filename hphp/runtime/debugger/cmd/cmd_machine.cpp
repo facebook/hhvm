@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/array_init.h"
-#include "hphp/runtime/base/libevent_http_client.h"
+#include "hphp/runtime/base/libevent-http-client.h"
 #include "hphp/util/process.h"
 
 namespace HPHP { namespace Eval {

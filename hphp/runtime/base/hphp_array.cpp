@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/hphp_array.h"
 #include "hphp/runtime/base/array_init.h"
 #include "hphp/runtime/base/array_iterator.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -29,7 +29,7 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/util.h"
-#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/base/stats.h"
 

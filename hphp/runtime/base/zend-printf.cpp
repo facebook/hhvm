@@ -18,9 +18,9 @@
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/array_iterator.h"
 #include <math.h>
 

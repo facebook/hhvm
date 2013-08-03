@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/array_data.h"
 #include "hphp/runtime/base/smart-allocator.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

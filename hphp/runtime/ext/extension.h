@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXTENSION_H_
 #define incl_HPHP_EXTENSION_H_
 
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/util/hdf.h"
 

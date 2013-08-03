@@ -3,6 +3,7 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,19 +15,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/util/trace.h"
+#include "hphp/runtime/base/dummy-resource.h"
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////
+StaticString DummyResource::s_class_name("Unknown");
 
-std::string TypedValue::pretty() const {
-  char buf[20];
-  sprintf(buf, "0x%lx", long(m_data.num));
-  return Trace::prettyNode(tname(m_type).c_str(), std::string(buf));
-}
+///////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////
+IMPLEMENT_OBJECT_ALLOCATION(DummyResource);
 
+DummyResource::DummyResource() {}
+
+///////////////////////////////////////////////////////////////////////////////
 }

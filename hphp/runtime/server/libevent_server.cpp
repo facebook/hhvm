@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/crash_reporter.h"
+#include "hphp/runtime/base/crash-reporter.h"
 #include "hphp/runtime/base/url.h"
 #include "hphp/runtime/server/http_protocol.h"
 #include "hphp/runtime/server/server_stats.h"

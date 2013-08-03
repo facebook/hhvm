@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_asio.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 #include "hphp/runtime/ext/ext_spl.h"
 #include "hphp/runtime/ext/ext_variable.h"

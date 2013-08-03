@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/base/ini-setting.h"
 
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/hphp_system.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/util/lock.h"

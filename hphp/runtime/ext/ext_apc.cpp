@@ -23,11 +23,11 @@
 #include "hphp/util/timer.h"
 #include <dlfcn.h>
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/hdf.h"
-#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/base/ini-setting.h"
 
 using HPHP::Util::ScopedMem;
 

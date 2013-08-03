@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_INTL_CONVERT_H_
 #define incl_HPHP_INTL_CONVERT_H_
 
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "unicode/ustring.h"
 
 namespace HPHP {

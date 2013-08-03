@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/jit/target-cache.h"
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/vm/unit.h"

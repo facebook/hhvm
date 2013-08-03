@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/base/request-local.h"
-#include "hphp/runtime/base/extended_logger.h"
+#include "hphp/runtime/base/extended-logger.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/db_mysql.h"
 #include "netinet/in.h"

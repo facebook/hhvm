@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_SERVER_NOTE_H_
 #define incl_HPHP_SERVER_NOTE_H_
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

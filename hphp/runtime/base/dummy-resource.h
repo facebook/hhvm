@@ -3,6 +3,7 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,30 +15,31 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/curl_tls_workarounds.h"
-#include "curl/curl.h"
-#include "curl/easy.h"
-#include "openssl/ssl.h"
-#include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/runtime-option.h"
+#ifndef incl_HPHP_DUMMY_RESOURCE_H_
+#define incl_HPHP_DUMMY_RESOURCE_H_
+
+#include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
-CURLcode curl_tls_workarounds_cb(CURL *curl, void *sslctx, void *parm) {
-  // Check to see if workarounds are enabled.
-  SSL_CTX* ctx = (SSL_CTX*)sslctx;
-  if (RuntimeOption::TLSDisableTLS1_2) {
-#ifdef SSL_OP_NO_TLSv1_2
-    SSL_CTX_set_options(ctx, SSL_CTX_get_options (ctx) | SSL_OP_NO_TLSv1_2);
-#else
-    raise_notice("TLSDisableTLS1_2 enabled, but this version of "
-                 "SSL does not support that option");
-#endif
-  }
-  if (!RuntimeOption::TLSClientCipherSpec.empty()) {
-    SSL_CTX_set_cipher_list(ctx, RuntimeOption::TLSClientCipherSpec.c_str());
-  }
-  return CURLE_OK;
+/**
+ * DummyResource is used in a number of places where the runtime wants
+ * to cast a value to the resource type. Ideally, casting a non-resource
+ * value to a resource would throw or produce null, but there are a few
+ * places in the runtime and the extensions that would need to be updated
+ * first to make that work.
+ */
+class DummyResource : public ResourceData {
+public:
+  DECLARE_OBJECT_ALLOCATION(DummyResource);
+  DummyResource();
+  static StaticString s_class_name;
+  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual bool isInvalid() const { return true; }
+};
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
-}
+#endif // incl_HPHP_PHP_MAILPARSE_MIME_H_

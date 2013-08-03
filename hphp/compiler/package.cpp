@@ -32,7 +32,7 @@
 #include "hphp/util/db_query.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/job_queue.h"
-#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/execution-context.h"
 
 using namespace HPHP;
 using std::set;

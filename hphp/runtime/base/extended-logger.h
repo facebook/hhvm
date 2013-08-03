@@ -19,7 +19,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/stack_trace.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

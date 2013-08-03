@@ -15,10 +15,10 @@
 */
 
 #include "hphp/test/ext/test_cpp_base.h"
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/ext_mysql.h"

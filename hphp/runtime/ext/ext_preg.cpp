@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/ext/ext_mb.h"
 #include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/request-local.h"
 
 namespace HPHP {

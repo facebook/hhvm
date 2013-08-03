@@ -23,7 +23,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-error.h"

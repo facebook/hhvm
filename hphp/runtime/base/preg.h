@@ -18,7 +18,7 @@
 #define incl_HPHP_PREG_H_
 
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

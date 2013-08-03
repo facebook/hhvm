@@ -297,7 +297,7 @@ typedef GlobalNameValueTableWrapper GlobalVariables;
 int object_alloc_size_to_index(size_t);
 size_t object_alloc_index_to_size(int);
 
-// implemented in runtime/base/thread_info
+// implemented in runtime/base/thread-info
 typedef boost::intrusive_ptr<ArrayData> ArrayHolder;
 void intrusive_ptr_add_ref(ArrayData* a);
 void intrusive_ptr_release(ArrayData* a);
@@ -388,7 +388,7 @@ inline void check_recursion(ThreadInfo *&info) {
   }
 }
 
-// implemented in runtime/base/builtin_functions.cpp
+// implemented in runtime/base/builtin-functions.cpp
 extern ssize_t check_request_surprise(ThreadInfo *info) ATTRIBUTE_COLD;
 
 // implemented in runtime/ext/ext_hotprofiler.cpp

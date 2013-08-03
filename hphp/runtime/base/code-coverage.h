@@ -14,55 +14,46 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/list_assignment.h"
-#include "hphp/runtime/base/complex_types.h"
+#ifndef incl_HPHP_EVAL_CODE_COVERAGE_H_
+#define incl_HPHP_EVAL_CODE_COVERAGE_H_
+
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/util/lock.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-// ListAssignmentElement
 
-ListAssignmentElement::ListAssignmentElement(Variant &var, int index, ...)
-  : m_var(var) {
-  va_list ap;
-  va_start(ap, index);
-  while (index != -1) {
-    m_indices.push_back(index);
-    index = va_arg(ap, int);
-  }
-  va_end(ap);
-}
+class CodeCoverage {
+public:
+  void Record(const char *filename, int line0, int line1);
 
-void ListAssignmentElement::assign(CArrRef data) {
-  assert(!m_indices.empty());
-  Variant tmp = data;
-  unsigned int size = m_indices.size();
-  for (unsigned int i = 0; i < size; i++) {
-    tmp = tmp.rvalAt(m_indices[i]);
-  }
-  m_var = tmp;
-}
+  /**
+   * Returns an array in this format,
+   *
+   *  array('filename' => array( line => count, ...))
+   */
+  Array Report();
 
-///////////////////////////////////////////////////////////////////////////////
-// global function
+  /**
+   * Write JSON format into the file.
+   *
+   *  { 'filename': [0, 0, 1, 0, 2, 0], ...}
+   *
+   * Note it's 0-indexed, so first count should always be 0.
+   */
+  void Report(const std::string &filename);
 
-Variant list_assign(CVarRef data, ListAssignmentElement *elem, ...) {
-  Array adata = data.toArray();
-  vector<ListAssignmentElement *> elems;
+  /**
+   * Clear all coverage data.
+   */
+  void Reset();
 
-  va_list ap;
-  va_start(ap, elem);
-  while (elem) {
-    elems.push_back(elem);
-    elem = va_arg(ap, ListAssignmentElement *);
-  }
-  va_end(ap);
-
-  for (int i = elems.size() - 1; i >= 0; i--) {
-    elems[i]->assign(adata);
-    delete elems[i];
-  }
-  return data;
-}
+private:
+  typedef hphp_const_char_map<std::vector<int> > CodeCoverageMap;
+  CodeCoverageMap m_hits;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#endif // incl_HPHP_EVAL_CODE_COVERAGE_H_

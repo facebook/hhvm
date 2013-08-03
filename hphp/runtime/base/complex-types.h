@@ -3,7 +3,6 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
-   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,18 +14,21 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/dummy_resource.h"
+#ifndef incl_HPHP_COMPLEX_TYPES_H_
+#define incl_HPHP_COMPLEX_TYPES_H_
 
-namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
+#define incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 
-StaticString DummyResource::s_class_name("Unknown");
+#include "hphp/runtime/base/hphp-value.h"
+#include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-object.h"
+#include "hphp/runtime/base/type-resource.h"
+#include "hphp/runtime/base/ref-data.h"
+#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/array_data-defs.h"
 
-///////////////////////////////////////////////////////////////////////////////
+#undef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 
-IMPLEMENT_OBJECT_ALLOCATION(DummyResource);
-
-DummyResource::DummyResource() {}
-
-///////////////////////////////////////////////////////////////////////////////
-}
+#endif // incl_HPHP_COMPLEX_TYPES_H_

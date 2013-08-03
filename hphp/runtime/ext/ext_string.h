@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_STRING_H_
 
 #include "hphp/util/zend/zend_html.h"
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/bstring.h"

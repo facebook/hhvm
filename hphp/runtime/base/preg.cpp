@@ -20,10 +20,10 @@
 #include <pcre.h>
 #include <onigposix.h>
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/array_iterator.h"
-#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "tbb/concurrent_hash_map.h"
 

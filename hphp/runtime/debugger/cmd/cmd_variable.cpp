@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_variable.h"
-#include "hphp/runtime/base/hphp_system.h"
+#include "hphp/runtime/base/hphp-system.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

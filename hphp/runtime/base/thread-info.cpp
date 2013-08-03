@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/hphp_system.h"
-#include "hphp/runtime/base/code_coverage.h"
+#include "hphp/runtime/base/hphp-system.h"
+#include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/smart-allocator.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/util/lock.h"

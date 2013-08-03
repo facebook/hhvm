@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/array_util.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/externals.h"
-#include "hphp/runtime/base/hphp_system.h"
+#include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/ext/extension.h"

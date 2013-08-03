@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/server/server_stats.h"
-#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/vdso.h"

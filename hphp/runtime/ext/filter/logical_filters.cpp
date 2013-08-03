@@ -19,7 +19,7 @@
 #include "hphp/runtime/ext/ext_filter.h"
 #include "hphp/runtime/base/zend-php-config.h"
 #include "hphp/runtime/base/zend-url.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_string.h"

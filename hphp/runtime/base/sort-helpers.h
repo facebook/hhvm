@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_SORT_HELPERS_H_
 #define incl_HPHP_SORT_HELPERS_H_
 
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/sort-flags.h"

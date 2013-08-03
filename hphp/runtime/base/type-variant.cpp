@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/array_iterator.h"
-#include "hphp/runtime/base/dummy_resource.h"
+#include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/util/parser/hphp.tab.hpp"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/system/systemlib.h"

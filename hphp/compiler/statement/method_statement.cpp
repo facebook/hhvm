@@ -45,7 +45,7 @@
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/analysis/alias_manager.h"
 
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 
 #include "hphp/util/parser/parser.h"
 #include "hphp/util/util.h"

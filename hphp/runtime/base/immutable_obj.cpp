@@ -19,8 +19,8 @@
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/array_init.h"
 #include "hphp/runtime/base/array_iterator.h"
-#include "hphp/runtime/base/class_info.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 #include "hphp/util/logger.h"
 

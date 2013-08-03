@@ -22,7 +22,7 @@
        Include 'complex_types.h' instead.
 #endif
 
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/sweepable.h"
 

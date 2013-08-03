@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/array_iterator.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

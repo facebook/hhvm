@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_CONTINUATION_H_
 
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {

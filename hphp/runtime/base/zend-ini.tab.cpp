@@ -132,8 +132,8 @@
 #define YYERROR_VERBOSE
 #define YYSTYPE String
 
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/ext/ext_misc.h"
 using namespace HPHP;
@@ -1863,7 +1863,7 @@ yyreturn:
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// exposed to runtime/base/ini_setting.cpp
+// exposed to runtime/base/ini-setting.cpp
 
 bool zend_parse_ini_string(CStrRef str, CStrRef filename, int scanner_mode,
                            IniSetting::PFN_PARSER_CALLBACK callback,

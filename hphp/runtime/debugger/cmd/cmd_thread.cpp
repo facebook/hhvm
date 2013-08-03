@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_thread.h"
-#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/util/process.h"
 

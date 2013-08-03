@@ -31,7 +31,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/timer.h"
-#include "hphp/runtime/base/hardware_counter.h"
+#include "hphp/runtime/base/hardware-counter.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

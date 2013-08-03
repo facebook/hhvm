@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/code_coverage.h"
+#include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/vm/backup-gc.h"

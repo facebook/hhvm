@@ -17,7 +17,7 @@
 #define incl_HPHP_ARRAY_INIT_H_
 
 #include "hphp/runtime/base/array_data.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/hphp_array.h"
 
 namespace HPHP {

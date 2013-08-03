@@ -44,9 +44,9 @@ $files_external_party = array(
 
 $files_zend = array(
   'util/zend/',
-  'runtime/base/intl_convert.cpp',
-  'runtime/base/intl_convert.h',
-  'runtime/base/utf8_decode.h',
+  'runtime/base/intl-convert.cpp',
+  'runtime/base/intl-convert.h',
+  'runtime/base/utf8-decode.h',
   'runtime/base/zend-collator.h',
   'runtime/base/zend-collator.cpp',
   'runtime/base/zend-functions.h',
@@ -73,8 +73,8 @@ $files_zend = array(
 );
 $files_php = array(
   'runtime/ext/',
-  'runtime/base/dummy_resource.h',
-  'runtime/base/dummy_resource.cpp',
+  'runtime/base/dummy-resource.h',
+  'runtime/base/dummy-resource.cpp',
   'runtime/server/upload.h',
   'runtime/server/upload.cpp',
   'util/compression.cpp',

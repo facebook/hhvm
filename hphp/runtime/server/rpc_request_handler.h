@@ -18,7 +18,7 @@
 #define incl_HPHP_RPC_REQUEST_HANDLER_H_
 
 #include "hphp/runtime/server/server.h"
-#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/execution-context.h"
 
 namespace HPHP {
 

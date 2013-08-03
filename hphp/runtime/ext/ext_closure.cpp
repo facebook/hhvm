@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {

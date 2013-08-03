@@ -15,8 +15,8 @@
 */
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/execution-context.h"
 
 namespace HPHP {
 

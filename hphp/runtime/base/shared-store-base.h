@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/shared-variant.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/smalllocks.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 
 #define SHARED_STORE_APPLICATION_CACHE 0
 #define SHARED_STORE_DNS_CACHE 1

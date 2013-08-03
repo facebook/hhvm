@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/server/http_protocol.h"
-#include "hphp/runtime/base/hphp_system.h"
+#include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -28,7 +28,7 @@
 #include "hphp/runtime/server/upload.h"
 #include "hphp/runtime/server/replay_transport.h"
 #include "hphp/runtime/server/virtual_host.h"
-#include "hphp/runtime/base/http_client.h"
+#include "hphp/runtime/base/http-client.h"
 
 #define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
 

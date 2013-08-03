@@ -13,13 +13,13 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/crash_reporter.h"
+#include "hphp/runtime/base/crash-reporter.h"
 #include "hphp/util/stack_trace.h"
 #include "hphp/util/light_process.h"
 #include "hphp/util/logger.h"
 
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/ext/ext_error.h"
 #include "hphp/runtime/debugger/debugger.h"
 

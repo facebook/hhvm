@@ -19,8 +19,8 @@
 #define YYERROR_VERBOSE
 #define YYSTYPE String
 
-#include <runtime/base/complex_types.h>
-#include <runtime/base/ini_setting.h>
+#include <runtime/base/complex-types.h>
+#include <runtime/base/ini-setting.h>
 #include <runtime/base/externals.h>
 #include <runtime/ext/ext_misc.h>
 using namespace HPHP;
@@ -186,7 +186,7 @@ constant_string:
 %%
 
 ///////////////////////////////////////////////////////////////////////////////
-// exposed to runtime/base/ini_setting.cpp
+// exposed to runtime/base/ini-setting.cpp
 
 bool zend_parse_ini_string(CStrRef str, CStrRef filename, int scanner_mode,
                            IniSetting::PFN_PARSER_CALLBACK callback,

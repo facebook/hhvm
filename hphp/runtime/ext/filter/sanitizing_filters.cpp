@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/filter/sanitizing_filters.h"
 #include "hphp/runtime/ext/ext_filter.h"
 #include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/zend-string.h"
 
 namespace HPHP {

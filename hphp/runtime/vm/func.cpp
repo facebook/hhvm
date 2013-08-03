@@ -18,13 +18,13 @@
 #include <iostream>
 #include <boost/scoped_ptr.hpp>
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/util/atomic_vector.h"
 #include "hphp/util/util.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/debug.h"
 #include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/jit/target-cache.h"

@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/base/zip-file.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/runtime-error.h"
 
 namespace HPHP {

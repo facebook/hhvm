@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/ext_ldap.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/util/thread_local.h"
 #include <lber.h>
 

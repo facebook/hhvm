@@ -26,7 +26,7 @@
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/hphp_value.h"
+#include "hphp/runtime/base/hphp-value.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-array.h"

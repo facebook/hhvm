@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/execution_context.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 #include "hphp/system/systemlib.h"
 

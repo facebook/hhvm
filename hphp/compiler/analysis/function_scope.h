@@ -246,6 +246,8 @@ public:
 
   /**
    * What is the inferred type of this function's return.
+   * Note that for generators and async functions, this is different
+   * from what caller actually gets when calling the function.
    */
   void pushReturnType();
   void setReturnType(AnalysisResultConstPtr ar, TypePtr type);

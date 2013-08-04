@@ -473,7 +473,7 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
   FunctionScopeRawPtr funcScope = getFunctionScope();
   bool pseudoMain = funcScope->inPseudoMain();
 
-  if (m_stmt && funcScope->isFirstPass() && !funcScope->isGenerator()) {
+  if (m_stmt && funcScope->isFirstPass()) {
     if (pseudoMain ||
         funcScope->getReturnType() ||
         m_stmt->hasRetExp()) {
@@ -503,11 +503,6 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
 
   if (m_stmt) {
     m_stmt->inferTypes(ar);
-  }
-
-  if (funcScope->isGenerator()) {
-    funcScope->setReturnType(ar,
-      Type::GetType(Type::KindOfObject, "Continuation"));
   }
 }
 

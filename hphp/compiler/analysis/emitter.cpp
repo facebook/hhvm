@@ -1872,7 +1872,7 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
     voidReturn = builtinFunc->info()->returnType == KindOfNull;
   } else if (fn->isValid() && fn->getFuncScope()) {
     ref = fn->getFuncScope()->isRefReturn();
-    if (!(fn->getFuncScope()->getReturnType())) {
+    if (!(fn->getActualType())) {
       voidReturn = true;
     }
   } else if (!fn->getName().empty()) {

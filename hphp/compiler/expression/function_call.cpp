@@ -545,6 +545,13 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
     assert(!func->inVisitScopes() || getScope() == func);
     frt = func->getReturnType();
   }
+
+  // fix return type for generators here, keep the infered return type
+  // in function scope
+  if (func->isGenerator()) {
+    frt = Type::GetType(Type::KindOfObject, "Continuation");
+  }
+
   if (!frt) {
     m_voidReturn = true;
     setActualType(TypePtr());

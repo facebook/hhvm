@@ -178,9 +178,6 @@ namespace Stats {
   /* astubs stats */ \
   STAT(Astubs_New) \
   STAT(Astubs_Reused) \
-  /* HphpArray */ \
-  STAT(HA_FindIntFast) \
-  STAT(HA_FindIntSlow) \
   /* Switches */ \
   STAT(Switch_Generic) \
   STAT(Switch_Integer) \

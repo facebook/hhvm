@@ -494,19 +494,6 @@ NEVER_INLINE
 ssize_t HphpArray::find(int64_t ki) const {
   // all vector methods should work w/out touching the hashtable
   assert(!isPacked());
-  if (size_t(ki) < m_used) {
-    // Try to get at it without dirtying a data cache line.
-    auto& e = m_data[ki];
-    if (!isTombstone(e.data.m_type) && hitIntKey(e, ki)) {
-      Stats::inc(Stats::HA_FindIntFast);
-      // Our results had better match the other path
-      assert(ki == findBody(ki, [ki] (const Elm& e) {
-        return hitIntKey(e, ki);
-      }));
-      return ki;
-    }
-  }
-  Stats::inc(Stats::HA_FindIntSlow);
   return findBody(ki, [ki] (const Elm& e) {
     return hitIntKey(e, ki);
   });

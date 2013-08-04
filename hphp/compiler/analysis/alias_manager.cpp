@@ -748,15 +748,6 @@ void AliasManager::killLocals() {
         goto kill_it;
 
       case Expression::KindOfBinaryOpExpression:
-        if (!(effects & emask) &&
-            getOpForAssignmentOp(spc(BinaryOpExpression, e)->getOp())) {
-          if (okToKill(spc(BinaryOpExpression, e)->getExp1(), false)) {
-            e->setContext(Expression::DeadStore);
-            m_replaced++;
-            ++it;
-            continue;
-          }
-        }
         cleanInterf(spc(BinaryOpExpression, e)->getExp1(), ++it, end, depth);
         continue;
 

@@ -337,6 +337,20 @@ void c_SimpleXMLElement::sweep() {
   }
 }
 
+c_SimpleXMLElement* c_SimpleXMLElement::clone() {
+  c_SimpleXMLElement *node = static_cast<c_SimpleXMLElement*>(ObjectData::clone());
+  node->m_doc = m_doc;
+  node->m_node = m_node;
+  node->m_is_text = m_is_text;
+  node->m_free_text = m_free_text;
+  node->m_is_attribute = m_is_attribute;
+  node->m_is_children = m_is_children;
+  node->m_is_property = m_is_property;
+  node->m_children = create_children(m_doc, m_node, String(), false);
+  node->m_attributes = collect_attributes(m_node, String(), false);
+  return node;
+}
+
 void c_SimpleXMLElement::t___construct(CStrRef data, int64_t options /* = 0 */,
                                        bool data_is_url /* = false */,
                                        CStrRef ns /* = "" */,

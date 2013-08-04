@@ -27,8 +27,8 @@
 #include "hphp/runtime/base/memory_manager.h"
 #include "hphp/runtime/base/request_local.h"
 #include "hphp/runtime/base/runtime_error.h"
-#include "hphp/runtime/base/zend_functions.h"
-#include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/process.h"
 #include <sys/utsname.h>

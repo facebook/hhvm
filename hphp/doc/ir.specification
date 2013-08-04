@@ -1865,6 +1865,10 @@ D:PtrToGen = ElemX S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
   Get intermediate element with key S2 from base S1. The base will not be
   modified. S3 should point to an MInstrState struct.
 
+D:PtrToGen = ElemArray S0:ConstTCA S1:PtrToArr S2:{Int|Str}
+
+  Similar to ElemX, but assumes the base S1 is an array and the key S2 is an int/str.
+
 D:PtrToGen = ElemDX S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 D:PtrToGen, D:StkPtr = ElemDXStk S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 
@@ -2034,3 +2038,9 @@ D:Cell = LdUnwinderValue
 DeleteUnwinderException
 
   Deletes the current unwinder exception.
+
+TypeProfileFunc S0:Gen S1:Int S2:Func
+
+  Profiles that function's parameter/return value. S1 is the parameter index 
+  (where -1 is the return value). Calls into native c++ function.
+

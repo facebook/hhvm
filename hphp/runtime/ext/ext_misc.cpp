@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/base/exceptions.h"
-#include "hphp/runtime/base/zend_pack.h"
+#include "hphp/runtime/base/zend-pack.h"
 #include "hphp/runtime/base/hphp_system.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/strings.h"

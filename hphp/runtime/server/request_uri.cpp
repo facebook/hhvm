@@ -66,6 +66,7 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
                          const string &pathTranslation, const char *url) {
   splitURL(url, m_originalURL, m_queryString);
   m_originalURL = StringUtil::UrlDecode(m_originalURL, false);
+  m_rewritten = false;
 
   // Fast path for files that exist
   String canon(Util::canonicalize(m_originalURL.c_str(), m_originalURL.size()),

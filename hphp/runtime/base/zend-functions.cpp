@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/zend_functions.h"
-#include "hphp/runtime/base/zend_strtod.h"
+#include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/base/zend-strtod.h"
 
 namespace HPHP {
 

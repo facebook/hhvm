@@ -278,7 +278,6 @@ public:
   static bool EnableStats;
   static bool EnableWebStats;
   static bool EnableMemoryStats;
-  static bool EnableMallocStats;
   static bool EnableAPCStats;
   static bool EnableAPCKeyStats;
   static bool EnableMemcacheStats;
@@ -369,12 +368,14 @@ public:
   F(uint32_t, VMInitialGlobalTableSize,                                 \
     kEvalVMInitialGlobalTableSizeDefault)                               \
   F(bool, Jit,                         evalJitDefault())                \
+  F(bool, RuntimeTypeProfile,          false)                           \
   F(bool, AllowHhas,                   false)                           \
   F(bool, CheckExtendedTypeHints,      false)                           \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
   F(bool, PerfPidMap,                  true)                            \
   F(bool, KeepPerfPidMap,              false)                           \
+  F(uint32_t, RuntimeTypeProfileFreq,  1000)                            \
   F(uint32_t, JitTargetCacheSize,      64 << 20)                        \
   F(uint32_t, HHBCArenaChunkSize,      64 << 20)                        \
   F(bool, ProfileBC,                   false)                           \
@@ -422,7 +423,8 @@ public:
   F(bool, HHIRStressCodegenBlocks,     false)                           \
   F(string, JitRegionSelector,         regionSelectorDefault())         \
   F(bool,     JitPGO,                  false)                           \
-  F(uint64_t, JitPGOThreshold,         2)                               \
+  F(uint64_t, JitPGOThreshold,         kDefaultJitPGOThreshold)         \
+  F(bool,     JitPGOHotOnly,           ServerExecutionMode())           \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \
   F(bool, DumpTC,                      false)                           \

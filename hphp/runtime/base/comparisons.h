@@ -428,12 +428,8 @@ inline bool equal(const StringData *v1, CObjRef v2) {
     return equal(toBoolean(v1), v2.toBoolean());
   }
   if (v2->isCollection()) return false;
-  try {
-    return equal(v1, v2.toString());
-  } catch (BadTypeConversionException &e) {
-    return false;
-  }
-  return false;
+  if (!v2->hasToString()) return false;
+  return equal(v1, v2.toString());
 }
 inline bool equal(const StringData *v1, CResRef v2) {
   if (v1 == nullptr || v2.get() == nullptr) {
@@ -470,11 +466,8 @@ inline bool less(const StringData *v1, CObjRef v2)  {
     return less(toBoolean(v1), v2.toBoolean());
   }
   check_collection_compare(v2.get());
-  try {
-    return less(v1, v2.toString());
-  } catch (BadTypeConversionException &e) {
-    return true;
-  }
+  if (!v2->hasToString()) return true;
+  return less(v1, v2.toString());
 }
 inline bool less(const StringData *v1, CResRef v2)  {
   if (v1 == nullptr || v2.get() == nullptr) {
@@ -511,11 +504,8 @@ inline bool more(const StringData *v1, CObjRef v2)  {
     return more(toBoolean(v1), v2.toBoolean());
   }
   check_collection_compare(v2.get());
-  try {
-    return more(v1, v2.toString());
-  } catch (BadTypeConversionException &e) {
-    return false;
-  }
+  if (!v2->hasToString()) return false;
+  return more(v1, v2.toString());
 }
 inline bool more(const StringData *v1, CResRef v2)  {
   if (v1 == nullptr || v2.get() == nullptr) {

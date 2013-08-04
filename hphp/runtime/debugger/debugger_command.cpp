@@ -29,7 +29,7 @@ TRACE_SET_MOD(debugger);
 // flushes the buffer.
 // Returns false if an exception occurs during these steps.
 bool DebuggerCommand::send(DebuggerThriftBuffer &thrift) {
-  TRACE(5, "DebuggerCommand::send\n");
+  TRACE(5, "DebuggerCommand::send cmd of type %d\n", m_type);
   try {
     thrift.reset(false);
     sendImpl(thrift);

@@ -19,8 +19,8 @@
 #include "hphp/runtime/ext/ext_array.h" // for throw_bad_array_exception
 #include "hphp/runtime/base/request_local.h"
 #include "hphp/runtime/base/intl_convert.h"
-#include "hphp/runtime/base/zend_collator.h"
-#include "hphp/runtime/base/zend_qsort.h"
+#include "hphp/runtime/base/zend-collator.h"
+#include "hphp/runtime/base/zend-qsort.h"
 #include "unicode/uidna.h"
 #include "unicode/ustring.h"
 #include "unicode/ucol.h" // icu

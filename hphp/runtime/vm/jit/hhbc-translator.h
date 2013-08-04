@@ -467,6 +467,7 @@ private:
     void emitPropGeneric();
     void emitPropSpecialized(const MInstrAttr mia, Transl::PropInfo propInfo);
     void emitElem();
+    void emitElemArray(SSATmp* key, bool warn);
     void emitNewElem();
     void emitRatchetRefs();
 

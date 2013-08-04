@@ -1358,6 +1358,10 @@ inline Variant uninit_null() {
   return Variant();
 }
 
+inline Variant init_null() {
+  return Variant(Variant::NullInit());
+}
+
 // TODO(#2298051) litstr must die
 inline Variant &concat_assign(Variant &v1, litstr s2) = delete;
 

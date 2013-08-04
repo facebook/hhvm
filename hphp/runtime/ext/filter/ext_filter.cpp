@@ -203,7 +203,10 @@ static filter_list_entry php_find_filter(uint64_t id) {
   return filter_list[0];
 }
 
-static Variant filter_var(CVarRef variable, int64_t filter, CVarRef options) {
+#define FAIL_IF(x) do { if (x) return false; } while (0)
+
+static bool filter_var(Variant& ret, CVarRef variable, int64_t filter,
+                       CVarRef options) {
   filter_list_entry filter_func = php_find_filter(filter);
 
   int64_t flags;
@@ -215,31 +218,35 @@ static Variant filter_var(CVarRef variable, int64_t filter, CVarRef options) {
     option_array = options[s_options];
   }
 
-  Variant ret(filter_func.function(variable.toString(), flags, option_array));
+  FAIL_IF(variable.isObject() && !variable.getObjectData()->hasToString());
+
+  ret = filter_func.function(variable.toString(), flags, option_array);
   if (option_array.isArray() && option_array.toArray().exists(s_default) &&
       ((flags & k_FILTER_NULL_ON_FAILURE && ret.isNull()) ||
        (!(flags & k_FILTER_NULL_ON_FAILURE) && ret.isBoolean() &&
         ret.asBooleanVal() == 0))) {
     ret = option_array[s_default];
   }
-  return ret;
+  return true;
 }
 
-static Variant filter_recursive(CVarRef variable, int64_t filter,
-                                CVarRef options) {
-  Array ret;
+static bool filter_recursive(Variant& ret, CVarRef variable, int64_t filter,
+                             CVarRef options) {
+  Array arr;
   for (ArrayIter iter(variable.toArray()); iter; ++iter) {
+    Variant v;
     if (iter.second().isArray()) {
-      ret.add(
-        iter.first(),
-        filter_recursive(iter.second().toArray(), filter, options)
-      );
+      FAIL_IF(!filter_recursive(v, iter.second().toArray(), filter, options));
     } else {
-      ret.add(iter.first(), filter_var(iter.second(), filter, options));
+      FAIL_IF(!filter_var(v, iter.second(), filter, options));
     }
+    arr.add(iter.first(), v);
   }
-  return ret;
+  ret = arr;
+  return true;
 }
+
+#undef FAIL_IF
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -262,6 +269,11 @@ Variant f_filter_id(CStrRef filtername) {
   return false;
 }
 
+#define FAIL_IF(x) \
+  do { \
+    if (x) return fail(filter_flags & k_FILTER_NULL_ON_FAILURE, options); \
+  } while(0)
+
 Variant f_filter_var(CVarRef variable, int64_t filter /* = 516 */,
                      CVarRef options /* = empty_array */) {
   int64_t filter_flags;
@@ -282,26 +294,22 @@ Variant f_filter_var(CVarRef variable, int64_t filter /* = 516 */,
   }
 
   if (variable.isArray()) {
-    if (filter_flags & k_FILTER_REQUIRE_SCALAR) {
-      return fail(filter_flags & k_FILTER_NULL_ON_FAILURE, options);
-    }
-    return filter_recursive(variable, filter, options);
-  }
-  if (filter_flags & k_FILTER_REQUIRE_ARRAY) {
-    return fail(filter_flags & k_FILTER_NULL_ON_FAILURE, options);
-  }
-
-  try {
-    Variant ret(filter_var(variable, filter, options));
-    if (filter_flags & k_FILTER_FORCE_ARRAY && !ret.isArray()) {
-      ret = CREATE_VECTOR1(ret);
-    }
+    FAIL_IF(filter_flags & k_FILTER_REQUIRE_SCALAR);
+    Variant ret;
+    FAIL_IF(!filter_recursive(ret, variable, filter, options));
     return ret;
-  } catch (BadTypeConversionException &e) {
-    return fail(filter_flags & k_FILTER_NULL_ON_FAILURE, options);
   }
+  FAIL_IF(filter_flags & k_FILTER_REQUIRE_ARRAY);
+
+  Variant ret;
+  FAIL_IF(!filter_var(ret, variable, filter, options));
+  if (filter_flags & k_FILTER_FORCE_ARRAY && !ret.isArray()) {
+    ret = CREATE_VECTOR1(ret);
+  }
+  return ret;
 }
 
+#undef FAIL_IF
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -68,7 +68,6 @@ class ObjectData {
 
   enum {
     RealPropCreate = 1,    // Property should be created if it doesn't exist
-    RealPropNoDynamic = 4, // Don't return dynamic properties
     RealPropUnchecked = 8, // Don't check property accessibility
     RealPropExist = 16,    // For property_exists
   };
@@ -295,10 +294,11 @@ class ObjectData {
   virtual ObjectData* clone();
 
   Variant offsetGet(Variant key);
+  String invokeToString();
+  bool hasToString();
 
   virtual Variant t___sleep();
   virtual Variant t___wakeup();
-  virtual String t___tostring();
 
   static int GetMaxId() ATTRIBUTE_COLD;
 
@@ -359,16 +359,10 @@ class ObjectData {
   inline Variant o_getImpl(CStrRef propName, int flags,
                            bool error = true, CStrRef context = null_string);
   template <typename T>
-  inline Variant o_setImpl(CStrRef propName, T v,
-                           bool forInit, CStrRef context);
-  template <bool declOnly>
-  TypedValue* getPropImpl(Class* ctx, const StringData* key, bool& visible,
-                          bool& accessible, bool& unset);
+  inline Variant o_setImpl(CStrRef propName, T v, CStrRef context);
  public:
   TypedValue* getProp(Class* ctx, const StringData* key, bool& visible,
                       bool& accessible, bool& unset);
-  TypedValue* getDeclProp(Class* ctx, const StringData* key, bool& visible,
-                          bool& accessible, bool& unset);
  private:
   template <bool warn, bool define>
   void propImpl(TypedValue*& retval, TypedValue& tvRef, Class* ctx,

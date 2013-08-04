@@ -16,14 +16,14 @@
 */
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/zend_functions.h"
+#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/variable_serializer.h"
 #include "hphp/runtime/base/variable_unserializer.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/array_iterator.h"
 #include "hphp/runtime/base/dummy_resource.h"
 #include "hphp/util/parser/hphp.tab.hpp"
@@ -636,7 +636,7 @@ String Variant::toStringHelper() const {
     assert(false); // Should be done in caller
     return m_data.pstr;
   case KindOfArray:   return s_array;
-  case KindOfObject:  return m_data.pobj->t___tostring();
+  case KindOfObject:  return m_data.pobj->invokeToString();
   case KindOfResource: return m_data.pres->o_toString();
   case KindOfRef: return m_data.pref->var()->toString();
   default:

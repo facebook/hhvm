@@ -14,8 +14,8 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/zend_collator.h"
-#include "hphp/runtime/base/zend_strtod.h"
+#include "hphp/runtime/base/zend-collator.h"
+#include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/base/intl_convert.h"
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"

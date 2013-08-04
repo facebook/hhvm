@@ -76,7 +76,7 @@
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/server/source_root_info.h"
-#include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_function.h"
@@ -589,6 +589,10 @@ asm_label(a, release);
 
 bool TranslatorX64::profileSrcKey(const SrcKey& sk) const {
   if (!RuntimeOption::EvalJitPGO) return false;
+
+  if (RuntimeOption::EvalJitPGOHotOnly && !(sk.func()->attrs() & AttrHot)) {
+    return false;
+  }
 
   if (profData()->optimized(sk)) return false;
 

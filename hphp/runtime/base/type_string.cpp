@@ -20,9 +20,9 @@
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/variable_serializer.h"
-#include "hphp/runtime/base/zend_functions.h"
-#include "hphp/runtime/base/zend_string.h"
-#include "hphp/runtime/base/zend_printf.h"
+#include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/zend-printf.h"
 
 namespace HPHP {
 
@@ -671,7 +671,9 @@ const StaticString
   s_string("string"),
   s_array("array"),
   s_object("object"),
-  s_resource("resource");
+  s_resource("resource"),
+  s_indirect("indirect"),
+  s_ref("reference");
 
 String getDataTypeString(DataType t) {
   switch (t) {
@@ -684,7 +686,10 @@ String getDataTypeString(DataType t) {
     case KindOfString:  return s_string;
     case KindOfArray:   return s_array;
     case KindOfObject:  return s_object;
+    case KindOfRef:     return s_ref;
+    case KindOfIndirect:return s_indirect;
     case KindOfResource:return s_object;
+
     default:
       assert(false);
       break;

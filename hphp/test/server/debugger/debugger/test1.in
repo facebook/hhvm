@@ -1,3 +1,6 @@
+break start
+continue
+next
 break break1.php:7
 continue
 variable
@@ -15,5 +18,5 @@ continue
 break end test1.php
 continue
 break psp test1.php
-continue
+next
 quit

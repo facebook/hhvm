@@ -25,7 +25,6 @@
 #define __STDC_LIMIT_MACROS
 
 #include "hphp/runtime/base/smart_allocator.h"
-#include "hphp/runtime/base/leak_detectable.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/memory_profile.h"
 #include "hphp/runtime/base/builtin_functions.h"
@@ -254,10 +253,6 @@ void MemoryManager::rollback() {
     m_smartfree[i].clear();
   }
   m_front = m_limit = 0;
-}
-
-void MemoryManager::logStats() {
-  LeakDetectable::LogMallocStats();
 }
 
 void MemoryManager::checkMemory() {

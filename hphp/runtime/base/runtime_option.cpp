@@ -29,7 +29,6 @@
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/shared_store_base.h"
 #include "hphp/runtime/server/access_log.h"
-#include "hphp/runtime/base/leak_detectable.h"
 #include "hphp/runtime/base/extended_logger.h"
 #include "hphp/runtime/base/simple_counter.h"
 #include "hphp/util/util.h"
@@ -289,7 +288,6 @@ bool RuntimeOption::MemcacheReadOnly = false;
 bool RuntimeOption::EnableStats = false;
 bool RuntimeOption::EnableWebStats = false;
 bool RuntimeOption::EnableMemoryStats = false;
-bool RuntimeOption::EnableMallocStats = false;
 bool RuntimeOption::EnableAPCStats = false;
 bool RuntimeOption::EnableAPCKeyStats = false;
 bool RuntimeOption::EnableMemcacheStats = false;
@@ -398,6 +396,7 @@ const uint64_t kEvalVMStackElmsDefault =
  ;
 const uint32_t kEvalVMInitialGlobalTableSizeDefault = 512;
 static const int kDefaultWarmupRequests = debug ? 1 : 11;
+static const int kDefaultJitPGOThreshold = debug ? 2 : 1000;
 #define F(type, name, def) \
   type RuntimeOption::Eval ## name = type(def);
 EVALFLAGS();
@@ -1048,7 +1047,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
 
     EnableWebStats = stats["Web"].getBool();
     EnableMemoryStats = stats["Memory"].getBool();
-    EnableMallocStats = stats["Malloc"].getBool();
     EnableAPCStats = stats["APC"].getBool();
     EnableAPCKeyStats = stats["APCKey"].getBool();
     EnableMemcacheStats = stats["Memcache"].getBool();
@@ -1056,10 +1054,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     EnableSQLStats = stats["SQL"].getBool();
     EnableSQLTableStats = stats["SQLTable"].getBool();
     EnableNetworkIOStatus = stats["NetworkIO"].getBool();
-
-    if (EnableStats && EnableMallocStats) {
-      LeakDetectable::EnableMallocStats(true);
-    }
 
     StatsXSL = stats["XSL"].getString();
     StatsXSLProxy = stats["XSLProxy"].getString();
@@ -1108,7 +1102,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     EnableShortTags= eval["EnableShortTags"].getBool(true);
     EnableAspTags = eval["EnableAspTags"].getBool();
     EnableXHP = eval["EnableXHP"].getBool(false);
-  
+
     if (EnableHipHopSyntax) {
       // If EnableHipHopSyntax is true, it forces EnableXHP to true
       // regardless of how it was set in the config

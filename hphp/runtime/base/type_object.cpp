@@ -58,10 +58,6 @@ Array Object::toArray() const {
   return m_px ? m_px->o_toArray() : Array();
 }
 
-Variant Object::toKey() const {
-  return m_px ? m_px->t___tostring() : String();
-}
-
 int64_t Object::toInt64ForCompare() const {
   check_collection_compare(m_px);
   return toInt64();

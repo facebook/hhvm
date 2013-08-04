@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/base/hphp_system.h"
 #include "hphp/runtime/base/request_local.h"
-#include "hphp/runtime/base/zend_printf.h"
+#include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/string_util.h"

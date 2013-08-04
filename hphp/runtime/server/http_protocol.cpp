@@ -16,8 +16,8 @@
 
 #include "hphp/runtime/server/http_protocol.h"
 #include "hphp/runtime/base/hphp_system.h"
-#include "hphp/runtime/base/zend_url.h"
-#include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/zend-url.h"
+#include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/program_functions.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/runtime/server/source_root_info.h"

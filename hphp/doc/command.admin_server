@@ -55,17 +55,6 @@ If program was compiled with GOOGLE_CPU_PROFILER, these commands will become ava
 /prof-cpu-on:     turn on CPU profiler
 /prof-cpu-off:    turn off CPU profiler
 
-If program was compiled with GOOGLE_HEAP_PROFILER, these commands will become available,
-
-/prof-heap-on:    turn on heap profiler
-/prof-heap-dump:  take one snapshot of the heap
-/prof-heap-off:   turn off heap profiler
-/stats-malloc:    turn on/off malloc statistics
-/leak-on:         start leak detection
-    sampling      required, frequency
-/leak-off:        end leak detection and report leaking
-    cutoff        optional, default 20 seconds, ignore newer allocs
-
 If program was compiled with GOOGLE_TCMALLOC, these commands will become available,
 
 /free-mem:        ask tcmalloc to release memory to system

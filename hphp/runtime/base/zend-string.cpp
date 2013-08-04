@@ -15,9 +15,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/zend_string.h"
-#include "hphp/runtime/base/zend_printf.h"
-#include "hphp/runtime/base/zend_math.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/zend-printf.h"
+#include "hphp/runtime/base/zend-math.h"
 
 #include "hphp/util/lock.h"
 #include <math.h>

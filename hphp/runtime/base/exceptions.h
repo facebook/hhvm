@@ -89,14 +89,6 @@ public:
   EXCEPTION_COMMON_IMPL(BadArrayOperandException);
 };
 
-class BadTypeConversionException : public ExtendedException {
-public:
-  explicit BadTypeConversionException(const char *msg)
-    : ExtendedException("Bad type conversion: %s.", msg) {}
-  virtual ~BadTypeConversionException() throw() {}
-  EXCEPTION_COMMON_IMPL(BadTypeConversionException);
-};
-
 class OffsetOutOfRangeException : public ExtendedException {
 public:
   OffsetOutOfRangeException()

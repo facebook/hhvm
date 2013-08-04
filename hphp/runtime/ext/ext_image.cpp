@@ -16,8 +16,8 @@
 */
 #include "hphp/runtime/ext/ext_image.h"
 #include "hphp/runtime/ext/ext_file.h"
-#include "hphp/runtime/base/zend_printf.h"
-#include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/zend-printf.h"
+#include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/request_local.h"
 #include "hphp/runtime/base/runtime_option.h"
 #include "hphp/util/min_max_macros.h"

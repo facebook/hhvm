@@ -605,6 +605,9 @@ O(ElemX,                   D(PtrToGen), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
                                           S(PtrToCell),      E|N|Mem|Refs|Er) \
+O(ElemArray,               D(PtrToGen), C(TCA)                                \
+                                          S(PtrToArr)                         \
+                                          S(Int,Str),        E|N|Mem|Refs|Er) \
 O_STK(ElemDX,              D(PtrToGen), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
@@ -716,6 +719,9 @@ O(EmptyElem,                   D(Bool), C(TCA)                                \
                                           S(Cell)                             \
                                           S(PtrToCell),      E|N|Mem|Refs|Er) \
 O(IncStat,                          ND, C(Int) C(Int) C(Bool),         E|Mem) \
+O(TypeProfileFunc,                  ND, S(Gen)                                \
+                                        S(Int)                                \
+                                        S(Func),               E|CallsNative) \
 O(IncStatGrouped,                   ND, CStr CStr C(Int),            E|N|Mem) \
 O(IncTransCounter,                  ND, NA,                                E) \
 O(ArrayIdx,                    D(Cell), C(TCA)                                \

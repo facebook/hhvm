@@ -1537,9 +1537,6 @@ void hphp_session_exit() {
   if (RuntimeOption::CheckMemory) {
     mm->checkMemory();
   }
-  if (RuntimeOption::EnableStats && RuntimeOption::EnableMemoryStats) {
-    mm->logStats();
-  }
   mm->resetStats();
 
   if (mm->isEnabled()) {

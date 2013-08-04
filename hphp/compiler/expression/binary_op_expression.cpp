@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/zend-string.h"
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/encaps_list_expression.h"
 #include "hphp/compiler/expression/simple_function_call.h"

@@ -15,9 +15,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/zend_printf.h"
-#include "hphp/runtime/base/zend_strtod.h"
-#include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/zend-printf.h"
+#include "hphp/runtime/base/zend-strtod.h"
+#include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/complex_types.h"
 #include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"

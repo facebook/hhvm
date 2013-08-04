@@ -142,11 +142,13 @@ private:
 
   CmdFlowControlPtr m_flow; // c, s, n, o commands that can skip breakpoints
 
-  Mutex m_signalMutex; // who can talk to client
   AsyncFunc<DebuggerProxy> m_signalThread; // polling signals from client
-  bool m_okayToPoll; // whether the polling thread can send polls to the client
 
-  Mutex m_signumMutex;
+  // This mutex gates who can talk to the client (signal polling
+  // thread vs. other threads who want to send an interrupt). Protects
+  // m_signum, m_okayToPoll.
+  Mutex m_signalMutex;
+  bool m_okayToPoll; // whether the polling thread can send polls to the client
   int m_signum;
 };
 

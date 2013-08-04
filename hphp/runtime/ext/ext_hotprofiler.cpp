@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/base/memory_manager.h"
 #include "hphp/runtime/base/request_local.h"
-#include "hphp/runtime/base/zend_math.h"
+#include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/base/ini_setting.h"
 #include "hphp/runtime/vm/event-hook.h"

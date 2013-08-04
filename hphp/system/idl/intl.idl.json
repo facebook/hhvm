@@ -1,5 +1,5 @@
 {
-    "preamble": "#include <runtime\/base\/zend\/zend_collator.h>\n#include <unicode\/ucol.h> \/\/ icu\nnamespace HPHP {\nextern const int64_t q_Collator$$SORT_REGULAR;\n}",
+    "preamble": "#include <runtime\/base\/zend\/zend-collator.h>\n#include <unicode\/ucol.h> \/\/ icu\nnamespace HPHP {\nextern const int64_t q_Collator$$SORT_REGULAR;\n}",
     "consts": [
     ],
     "funcs": [

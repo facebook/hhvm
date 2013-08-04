@@ -1,13 +1,25 @@
 
 Connecting to %s
 Attaching to debugger's default sandbox and pre-loading, please wait...
-break break1.php:7
-Breakpoint 1 set on line 7 of break1.php
-But wont break until file break1.php has been loaded.
+break start
+Breakpoint 1 set start of request
 continue
 Waiting for server response
 Requesting test1.php
-Breakpoint 1 reached at foo() on line 7 of %s/break1.php
+Web request /test1.php started.
+next
+Waiting for server response
+Break on line 2 of %s/test1.php
+   1 <?php
+   2 include 'break1.php';
+   3 
+
+break break1.php:7
+Breakpoint 2 set on line 7 of break1.php
+But wont break until file break1.php has been loaded.
+continue
+Waiting for server response
+Breakpoint 2 reached at foo() on line 7 of %s/break1.php
    6   $y = $x.'_suffix';
    7   error_log($y);
    8 }
@@ -64,7 +76,7 @@ Waiting for server response
 Web request /test1.php ended.
 break psp test1.php
 Breakpoint 2 set end of psp when request is test1.php
-continue
+next
 Waiting for server response
 Post-Send Processing for /test1.php was ended.
 quit

@@ -17,10 +17,10 @@
 
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/string_buffer.h"
-#include "hphp/runtime/base/zend_string.h"
-#include "hphp/runtime/base/zend_url.h"
-#include "hphp/runtime/base/zend_printf.h"
-#include "hphp/runtime/base/zend_scanf.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/zend-url.h"
+#include "hphp/runtime/base/zend-printf.h"
+#include "hphp/runtime/base/zend-scanf.h"
 #include "hphp/runtime/base/bstring.h"
 #include "hphp/runtime/base/request_local.h"
 #include "hphp/util/lock.h"
@@ -866,7 +866,7 @@ String f_html_entity_decode(CStrRef str, int quote_style /* = k_ENT_COMPAT */,
 String f_htmlentities(CStrRef str, int quote_style /* = k_ENT_COMPAT */,
                       CStrRef charset /* = "ISO-8859-1" */,
                       bool double_encode /* = true */) {
-  // dropping double_encode parameters and see runtime/base/zend_html.h
+  // dropping double_encode parameters and see runtime/base/zend-html.h
   const char *scharset = charset.data();
   if (!*scharset) scharset = "UTF-8";
   return StringUtil::HtmlEncode(str, (StringUtil::QuoteStyle)quote_style,
@@ -880,7 +880,7 @@ String f_htmlspecialchars_decode(CStrRef str,
 String f_htmlspecialchars(CStrRef str, int quote_style /* = k_ENT_COMPAT */,
                           CStrRef charset /* = "ISO-8859-1" */,
                           bool double_encode /* = true */) {
-  // dropping double_encode parameters and see runtime/base/zend_html.h
+  // dropping double_encode parameters and see runtime/base/zend-html.h
   const char *scharset = charset.data();
   if (!*scharset) scharset = "UTF-8";
   return StringUtil::HtmlEncode(str, (StringUtil::QuoteStyle)quote_style,

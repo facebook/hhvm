@@ -16,8 +16,8 @@
 */
 
 #include "hphp/runtime/ext/ext_math.h"
-#include "hphp/runtime/base/zend_math.h"
-#include "hphp/runtime/base/zend_multiply.h"
+#include "hphp/runtime/base/zend-math.h"
+#include "hphp/runtime/base/zend-multiply.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

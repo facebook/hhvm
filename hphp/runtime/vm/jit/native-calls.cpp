@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/native-calls.h"
 
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/runtime_type_profiler.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/tv_conversions.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
@@ -107,6 +108,8 @@ auto constexpr VecKeyIS = ArgType::VecKeyIS;
  */
 static CallMap s_callMap {
     /* Opcode, Func, Dest, SyncPoint, Args */
+    {TypeProfileFunc,    profileOneArgument, DNone, SNone,
+                           {{TV,0}, {SSA,1}, {SSA,2}}},
     {ConvBoolToArr,      convCellToArrHelper, DSSA, SNone,
                            {{TV, 0}}},
     {ConvDblToArr,       convCellToArrHelper, DSSA, SNone,
@@ -249,6 +252,8 @@ static CallMap s_callMap {
                  {{SSA, 1}, {SSA, 2}, {TV, 3}}},
     {ElemX,    fssa(0), DSSA, SSync,
                  {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
+    {ElemArray, fssa(0), DSSA, SSync,
+                 {{SSA, 1}, {SSA, 2}}},
     {ElemDX,   fssa(0), DSSA, SSync,
                  {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
     {ElemUX,   fssa(0), DSSA, SSync,

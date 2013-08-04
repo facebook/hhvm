@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/socket.h"
 #include "hphp/runtime/base/plain_file.h"
 #include "hphp/runtime/base/string_buffer.h"
-#include "hphp/runtime/base/zend_printf.h"
+#include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/server/server_stats.h"
 #include "hphp/runtime/base/stream_wrapper.h"
 #include "hphp/runtime/base/stream_wrapper_registry.h"

@@ -43,6 +43,9 @@ endif()
 # Not working with off-the-shelf libevent
 list(REMOVE_ITEM CXX_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/runtime/server/server_name_indication.cpp)
 
+# Waiting on OSS fix :(
+list(REMOVE_ITEM CXX_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/runtime/vm/runtime_type_profiler.cpp)
+
 # remove ext_hhvm, and anything in a test folder
 foreach (file ${CXX_SOURCES})
        	if (${file} MATCHES "ext_hhvm")

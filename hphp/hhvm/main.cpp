@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/hhvm/process_init.h"
+#include "hphp/hhvm/process-init.h"
 #include "hphp/compiler/compiler.h"
 
 #include "hphp/util/embedded_data.h"

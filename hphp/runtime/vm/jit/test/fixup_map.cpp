@@ -16,7 +16,7 @@
 #include "hphp/runtime/vm/jit/fixup.h"
 
 #include "gtest/gtest.h"
-#include "hphp/hhvm/process_init.h"
+#include "hphp/hhvm/process-init.h"
 
 namespace HPHP { namespace Transl {
 

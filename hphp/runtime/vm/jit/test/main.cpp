@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "gtest/gtest.h"
-#include "hphp/hhvm/process_init.h"
+#include "hphp/hhvm/process-init.h"
 #include "hphp/util/current_executable.h"
 
 #include <string>

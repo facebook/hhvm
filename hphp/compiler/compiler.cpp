@@ -43,7 +43,7 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/util/repo_schema.h"
 
-#include "hphp/hhvm/process_init.h"
+#include "hphp/hhvm/process-init.h"
 
 #include <sys/types.h>
 #include <sys/wait.h>

@@ -518,7 +518,7 @@ void MethodStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   FunctionScopeRawPtr funcScope = getFunctionScope();
 
   m_modifiers->outputPHP(cg, ar);
-  cg_printf(" function ");
+  cg_printf("function ");
   if (m_ref) cg_printf("&");
   if (!ParserBase::IsClosureName(m_name)) {
     cg_printf("%s", m_originalName.c_str());

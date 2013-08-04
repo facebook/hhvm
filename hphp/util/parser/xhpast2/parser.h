@@ -135,6 +135,11 @@ struct OnMethodEI : ExtraInfo {
   explicit OnMethodEI(bool r) : reloc(r) {}
 };
 
+struct OnFunctionEI : ExtraInfo {
+  bool isClosure;
+  explicit OnFunctionEI(bool c) : isClosure(c) {}
+};
+
 struct OnReturnEI : ExtraInfo {
   bool checkYield;
   explicit OnReturnEI(bool c) : checkYield(c) {}
@@ -628,10 +633,12 @@ struct Parser : ParserBase {
   }
 
   void onFunction(Token& out, Token *modifiers, Token& ret, Token& ref,
-                  Token& name, Token& params, Token& stmt, Token* attr) {
+                  Token& name, Token& params, Token& stmt, Token* attr,
+                  bool isClosure) {
     out.setNodeType(ONFUNCTION).appendChild(modifiers).appendChild(&ret)
       .appendChild(&ref).appendChild(&name).appendChild(&params)
-      .appendChild(&stmt).appendChild(attr);
+      .appendChild(&stmt).appendChild(attr)
+      .setExtra(new OnFunctionEI(isClosure));
   }
 
   void onParam(Token &out, Token *params, Token &type, Token &var,
@@ -848,11 +855,11 @@ struct Parser : ParserBase {
     out.setNodeType(ONTHROW).appendChild(&expr);
   }
 
-  void onClosure(Token &out, Token &ret, Token &ref, Token &params,
-                 Token &cparams, Token &stmts, bool is_static) {
-    out.setNodeType(ONCLOSURE).appendChild(&ret).appendChild(&ref)
-      .appendChild(&params).appendChild(&cparams).appendChild(&stmts)
-      .setExtra(new OnClosureEI(is_static));
+  void onClosure(Token &out, Token *modifiers, Token &ret, Token &ref,
+                 Token &params, Token &cparams, Token &stmts) {
+    out.setNodeType(ONCLOSURE).appendChild(modifiers).appendChild(&ret)
+      .appendChild(&ref).appendChild(&params).appendChild(&cparams)
+      .appendChild(&stmts);
   }
 
   void onClosureParam(Token &out, Token *params, Token &param, bool ref) {

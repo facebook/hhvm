@@ -114,7 +114,6 @@ void TraitAliasStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_methodName->outputPHP(cg, ar);
   cg_printf(" as ");
   m_modifiers->outputPHP(cg, ar);
-  cg_printf(" ");
   m_newMethodName->outputPHP(cg, ar);
   cg_printf(";\n");
 }

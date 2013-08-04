@@ -913,7 +913,7 @@ function_declaration_statement:
                                          _p->pushLabelInfo();}
     '(' parameter_list ')'
     hh_opt_return_type
-    '{' inner_statement_list '}'       { _p->onFunction($$,0,$8,$2,$3,$6,$10,0);
+    '{' inner_statement_list '}'       { _p->onFunction($$,0,$8,$2,$3,$6,$10,0,false);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();}
   | non_empty_user_attributes function_loc
@@ -922,7 +922,7 @@ function_declaration_statement:
                                          _p->pushLabelInfo();}
     '(' parameter_list ')'
     hh_opt_return_type
-    '{' inner_statement_list '}'       { _p->onFunction($$,0,$9,$3,$4,$7,$11,&$1);
+    '{' inner_statement_list '}'       { _p->onFunction($$,0,$9,$3,$4,$7,$11,&$1,false);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();}
 ;
@@ -1581,15 +1581,15 @@ expr_no_variable:
     parameter_list ')'
     hh_opt_return_type lexical_vars
     '{' inner_statement_list '}'       { Token u; u.reset();
-                                         _p->onClosure($$,u,$2,$5,$8,$10,0);
+                                         _p->onClosure($$,0,u,$2,$5,$8,$10);
                                          _p->popLabelInfo();}
-  | T_STATIC function_loc
+  | non_empty_member_modifiers function_loc
     is_reference '('                   { Token t; _p->onClosureStart(t);
                                          _p->pushLabelInfo();}
     parameter_list ')'
     hh_opt_return_type lexical_vars
     '{' inner_statement_list '}'       { Token u; u.reset();
-                                         _p->onClosure($$,u,$3,$6,$9,$11,1);
+                                         _p->onClosure($$,&$1,u,$3,$6,$9,$11);
                                          _p->popLabelInfo();}
   | dim_expr                           { $$ = $1;}
   | collection_literal                 { $$ = $1;}

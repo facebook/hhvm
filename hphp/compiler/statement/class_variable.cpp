@@ -273,7 +273,6 @@ void ClassVariable::inferTypes(AnalysisResultPtr ar) {
 
 void ClassVariable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_modifiers->outputPHP(cg, ar);
-  cg_printf(" ");
   m_declaration->outputPHP(cg, ar);
   cg_printf(";\n");
 }

@@ -186,7 +186,8 @@ public:
   void fixStaticVars();
   void onFunctionStart(Token &name, bool doPushComment = true);
   void onFunction(Token &out, Token *modifier, Token &ret, Token &ref,
-                  Token &name, Token &params, Token &stmt, Token *attr);
+                  Token &name, Token &params, Token &stmt, Token *attr,
+                  bool isClosure);
   void onParam(Token &out, Token *params, Token &type, Token &var,
                bool ref, Token *defValue, Token *attr, Token *modifiers);
   void onClassStart(int type, Token &name);
@@ -248,8 +249,8 @@ public:
   void onThrow(Token &out, Token &expr);
 
   void onClosureStart(Token &name);
-  void onClosure(Token &out, Token &ret, Token &ref, Token &params,
-                 Token &cparams, Token &stmts, bool is_static);
+  void onClosure(Token &out, Token *modifiers, Token &ret, Token &ref,
+                 Token &params, Token &cparams, Token &stmts);
   void onClosureParam(Token &out, Token *params, Token &param, bool ref);
   void onLabel(Token &out, Token &label);
   void onGoto(Token &out, Token &label, bool limited);

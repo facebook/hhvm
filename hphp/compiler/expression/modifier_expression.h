@@ -43,8 +43,13 @@ public:
 
   int getLocalEffects() const { return NoEffect; }
 
+  bool validForClosure() const;
+
+  void setHasPrivacy(bool f) { m_hasPrivacy = f; }
+
 private:
   std::vector<int> m_modifiers;
+  bool m_hasPrivacy;
 
   bool hasModifier(int modifier) const;
 };

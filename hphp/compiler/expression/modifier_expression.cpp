@@ -24,7 +24,8 @@ using namespace HPHP;
 
 ModifierExpression::ModifierExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ModifierExpression)) {
+  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ModifierExpression)),
+    m_hasPrivacy(true) {
 }
 
 ExpressionPtr ModifierExpression::clone() {
@@ -46,6 +47,9 @@ int ModifierExpression::operator[](int index) {
 }
 
 bool ModifierExpression::isPublic() const {
+  if (!m_hasPrivacy) {
+    return false;
+  }
   for (unsigned int i = 0; i < m_modifiers.size(); i++) {
     switch (m_modifiers[i]) {
     case T_PUBLIC:      return true;
@@ -87,6 +91,15 @@ bool ModifierExpression::isFinal() const {
   return hasModifier(T_FINAL);
 }
 
+bool ModifierExpression::validForClosure() const {
+  for (auto i = m_modifiers.begin(); i != m_modifiers.end(); ++i) {
+    if (*i != T_STATIC) {
+      return false;
+    }
+  }
+  return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
@@ -104,21 +117,23 @@ TypePtr ModifierExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 // code generation functions
 
 void ModifierExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (m_modifiers.empty()) {
-    cg_printf("public");
-    return;
-  }
-
-  bool printed = false;
-  for (unsigned int i = 0; i < m_modifiers.size(); i++) {
-    switch (m_modifiers[i]) {
-    case T_PUBLIC:    cg_printf("public");    printed = true; break;
-    case T_PROTECTED: cg_printf("protected"); printed = true; break;
-    case T_PRIVATE:   cg_printf("private");   printed = true; break;
+  if (m_hasPrivacy) {
+    if (m_modifiers.empty()) {
+      cg_printf("public ");
+      return;
     }
-  }
-  if (!printed) {
-    cg_printf("public");
+
+    bool printed = false;
+    for (unsigned int i = 0; i < m_modifiers.size(); i++) {
+      switch (m_modifiers[i]) {
+      case T_PUBLIC:    cg_printf("public ");    printed = true; break;
+      case T_PROTECTED: cg_printf("protected "); printed = true; break;
+      case T_PRIVATE:   cg_printf("private ");   printed = true; break;
+      }
+    }
+    if (!printed) {
+      cg_printf("public ");
+    }
   }
 
   for (unsigned int i = 0; i < m_modifiers.size(); i++) {
@@ -126,9 +141,9 @@ void ModifierExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     case T_PUBLIC:    break;
     case T_PROTECTED: break;
     case T_PRIVATE:   break;
-    case T_STATIC:    cg_printf(" static");    break;
-    case T_ABSTRACT:  cg_printf(" abstract");  break;
-    case T_FINAL:     cg_printf(" final");     break;
+    case T_STATIC:    cg_printf("static ");    break;
+    case T_ABSTRACT:  cg_printf("abstract ");  break;
+    case T_FINAL:     cg_printf("final ");     break;
     default:
       assert(false);
     }

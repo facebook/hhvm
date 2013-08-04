@@ -795,10 +795,15 @@ void Parser::fixStaticVars() {
 }
 
 void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
-                        Token &name, Token &params, Token &stmt, Token *attr) {
-  ModifierExpressionPtr exp = modifiers?
+                        Token &name, Token &params, Token &stmt, Token *attr,
+                        bool isClosure) {
+  ModifierExpressionPtr modifiersExp = modifiers && modifiers->exp ?
     dynamic_pointer_cast<ModifierExpression>(modifiers->exp)
     : NEW_EXP0(ModifierExpression);
+  modifiersExp->setHasPrivacy(false);
+  if (isClosure && !modifiersExp->validForClosure()) {
+    PARSE_ERROR("Invalid modifier on closure function.");
+  }
 
   if (!stmt->stmt) {
     stmt->stmt = NEW_STMT0(StatementList);
@@ -835,7 +840,8 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
     attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
   }
 
-  func = NEW_STMT(FunctionStatement, exp, ref->num(), funcName, old_params,
+  func = NEW_STMT(FunctionStatement, modifiersExp,
+                  ref->num(), funcName, old_params,
                   ret.typeAnnotationName(),
                   dynamic_pointer_cast<StatementList>(stmt->stmt),
                   attribute, comment, attrList);
@@ -1085,7 +1091,7 @@ void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl,
 void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
                       Token &name, Token &params, Token &stmt,
                       Token *attr, bool reloc /* = true */) {
-  ModifierExpressionPtr exp = modifiers->exp ?
+  ModifierExpressionPtr modifiersExp = modifiers->exp ?
     dynamic_pointer_cast<ModifierExpression>(modifiers->exp)
     : NEW_EXP0(ModifierExpression);
 
@@ -1102,7 +1108,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
   // look for argument promotion in ctor and add to function body
   string funcName = name->text();
   if (old_params && funcName == "__construct") {
-    bool isAbstract = (exp) ? exp->isAbstract() : false;
+    bool isAbstract = modifiersExp->isAbstract();
     for (int i = 0, count = old_params->getCount(); i < count; i++) {
       ParameterExpressionPtr param =
           dynamic_pointer_cast<ParameterExpression>((*old_params)[i]);
@@ -1168,7 +1174,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
   if (attr && attr->exp) {
     attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
   }
-  mth = NEW_STMT(MethodStatement, exp, ref->num(), funcName,
+  mth = NEW_STMT(MethodStatement, modifiersExp, ref->num(), funcName,
                  old_params,
                  ret.typeAnnotationName(),
                  stmts, attribute, comment,
@@ -1592,16 +1598,10 @@ void Parser::onClosureStart(Token &name) {
   onFunctionStart(name, true);
 }
 
-void Parser::onClosure(Token &out, Token &ret, Token &ref, Token &params,
-                       Token &cparams, Token &stmts, bool is_static) {
-  Token func, name, modifiers;
-
-  ModifierExpressionPtr modifier_exp = NEW_EXP0(ModifierExpression);
-  modifiers->exp = modifier_exp;
-  if (is_static) {
-    modifier_exp->add(T_STATIC);
-  }
-  onFunction(func, &modifiers, ret, ref, name, params, stmts, 0);
+void Parser::onClosure(Token &out, Token* modifiers, Token &ret, Token &ref,
+                       Token &params, Token &cparams, Token &stmts) {
+  Token func, name;
+  onFunction(func, modifiers, ret, ref, name, params, stmts, 0, true);
 
   ClosureExpressionPtr closure = NEW_EXP(
     ClosureExpression,

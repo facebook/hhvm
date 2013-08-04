@@ -161,7 +161,8 @@ extern const ArrayFunctions g_array_funcs = {
     &NameValueTableWrapper::SetInt, // reuse set
     &PolicyArray::AddInt },
   // addStr
-  { &HphpArray::AddStrVec, &HphpArray::AddStr,
+  { &HphpArray::SetStrVec, // reuse set
+    &HphpArray::AddStr,
     &SharedMap::SetStr, // reuse set
     &NameValueTableWrapper::SetStr, // reuse set
     &PolicyArray::AddStr },
@@ -171,7 +172,7 @@ extern const ArrayFunctions g_array_funcs = {
     &NameValueTableWrapper::AddLvalInt,
     &PolicyArray::AddLvalInt },
   // addLvalStr
-  { &HphpArray::AddLvalStrVec, &HphpArray::AddLvalStr,
+  { &HphpArray::LvalStrVec, &HphpArray::AddLvalStr,
     &SharedMap::AddLvalStr,
     &NameValueTableWrapper::AddLvalStr,
     &PolicyArray::AddLvalStr },

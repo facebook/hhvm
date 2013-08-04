@@ -148,15 +148,12 @@ public:
   static ArrayData* AddInt(ArrayData*, int64_t k, CVarRef v, bool copy);
   static ArrayData* AddStr(ArrayData*, StringData* k, CVarRef v, bool copy);
   static ArrayData* AddIntVec(ArrayData*, int64_t k, CVarRef v, bool copy);
-  static ArrayData* AddStrVec(ArrayData*, StringData* k, CVarRef v, bool copy);
 
   static ArrayData* AddLvalInt(ArrayData*, int64_t k, Variant*& ret,
                                bool copy);
   static ArrayData* AddLvalStr(ArrayData*, StringData* k, Variant*& ret,
                                bool copy);
   static ArrayData* AddLvalIntVec(ArrayData*, int64_t k, Variant*& ret,
-                                  bool copy);
-  static ArrayData* AddLvalStrVec(ArrayData*, StringData* k, Variant*& ret,
                                   bool copy);
 
   // implements ArrayData

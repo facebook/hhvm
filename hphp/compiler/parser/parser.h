@@ -231,6 +231,7 @@ public:
   void onYield(Token &out, Token &expr);
   void onYieldPair(Token &out, Token &key, Token &val);
   void onYieldBreak(Token &out);
+  void onAwait(Token &out, Token &expr);
   void onGlobal(Token &out, Token &expr);
   void onGlobalVar(Token &out, Token *exprs, Token &expr);
   void onStatic(Token &out, Token &expr);
@@ -278,28 +279,18 @@ public:
 private:
   struct FunctionContext {
     FunctionContext()
-      : isNotGenerator(false)
+      : hasReturn(false)
       , isGenerator(false)
+      , isAsync(false)
     {}
 
-    // mark this function as generator; returns true on success
-    bool setIsGenerator() {
-      if (!isNotGenerator) isGenerator = true;
-      return !isNotGenerator;
-    }
-
-    // mark this function as non-generator; returns true on success
-    bool setIsNotGenerator() {
-      if (!isGenerator) isNotGenerator = true;
-      return !isGenerator;
-    }
-
     void checkFinalAssertions() {
-      assert(!isGenerator || !isNotGenerator);
+      assert((isGenerator && !isAsync && !hasReturn) || !isGenerator);
     }
 
-    bool isNotGenerator;  // function determined to not be a generator
+    bool hasReturn;       // function contains a return statement
     bool isGenerator;     // function determined to be a generator
+    bool isAsync;         // function determined to be async
  };
 
   AnalysisResultPtr m_ar;
@@ -330,7 +321,17 @@ private:
   void newScope();
   void completeScope(BlockScopePtr inner);
 
+  void invalidYield();
   bool setIsGenerator();
+
+  void invalidAwait();
+  bool setIsAsync();
+
+  static bool canBeAsyncOrGenerator(string funcName, string clsName);
+  void checkFunctionContext(string funcName,
+                            FunctionContext& funcContext,
+                            ModifierExpressionPtr modifiers,
+                            int returnsRef);
 
   ExpressionPtr getDynamicVariable(ExpressionPtr exp, bool encap);
   ExpressionPtr createDynamicVariable(ExpressionPtr exp);

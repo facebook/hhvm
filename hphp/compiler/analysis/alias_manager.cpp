@@ -37,6 +37,7 @@
 #include "hphp/compiler/expression/include_expression.h"
 #include "hphp/compiler/expression/closure_expression.h"
 #include "hphp/compiler/expression/yield_expression.h"
+#include "hphp/compiler/expression/await_expression.h"
 #include "hphp/compiler/statement/statement.h"
 #include "hphp/compiler/statement/statement_list.h"
 #include "hphp/compiler/statement/catch_statement.h"
@@ -1587,6 +1588,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
               cur = next;
             }
             if (!m_inCall &&
+                !last->is(Expression::KindOfAwaitExpression) &&
                 !last->is(Expression::KindOfYieldExpression) &&
                 ae->isUnused() && m_accessList.isLast(ae) &&
                 !e->hasAnyContext(Expression::AccessContext |

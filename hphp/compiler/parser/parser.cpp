@@ -46,6 +46,7 @@
 #include "hphp/compiler/expression/encaps_list_expression.h"
 #include "hphp/compiler/expression/closure_expression.h"
 #include "hphp/compiler/expression/yield_expression.h"
+#include "hphp/compiler/expression/await_expression.h"
 #include "hphp/compiler/expression/user_attribute.h"
 
 #include "hphp/compiler/statement/function_statement.h"
@@ -794,6 +795,24 @@ void Parser::fixStaticVars() {
   m_staticVars.pop_back();
 }
 
+void Parser::checkFunctionContext(string funcName,
+                                  FunctionContext& funcContext,
+                                  ModifierExpressionPtr modifiers,
+                                  int returnsRef) {
+  funcContext.checkFinalAssertions();
+
+  // let async modifier be mandatory
+  if (funcContext.isAsync && !modifiers->isAsync()) {
+    PARSE_ERROR("Function '%s' contains 'await' but is not declared as async.",
+                funcName.c_str());
+  }
+
+  if (modifiers->isAsync() && returnsRef) {
+    PARSE_ERROR("Asynchronous function '%s' cannot return reference.",
+                funcName.c_str());
+  }
+}
+
 void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
                         Token &name, Token &params, Token &stmt, Token *attr,
                         bool isClosure) {
@@ -803,6 +822,9 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
   modifiersExp->setHasPrivacy(false);
   if (isClosure && !modifiersExp->validForClosure()) {
     PARSE_ERROR("Invalid modifier on closure function.");
+  }
+  if (!isClosure && !modifiersExp->validForFunction()) {
+    PARSE_ERROR("Invalid modifier on function %s.", name->text().c_str());
   }
 
   if (!stmt->stmt) {
@@ -816,10 +838,10 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
   LocationPtr loc = popFuncLocation();
 
   FunctionContext funcContext = m_funcContexts.back();
+  checkFunctionContext(name->text(), funcContext, modifiersExp, ref->num());
+
   m_funcContexts.pop_back();
   m_prependingStatements.pop_back();
-
-  funcContext.checkFinalAssertions();
 
   bool hasCallToGetArgs = m_hasCallToGetArgs.back();
   m_hasCallToGetArgs.pop_back();
@@ -852,9 +874,9 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
   }
   completeScope(func->getFunctionScope());
 
-  if (funcContext.isGenerator) {
-    func->getFunctionScope()->setGenerator(true);
-  }
+  func->getFunctionScope()->setGenerator(funcContext.isGenerator);
+  func->getFunctionScope()->setAsync(modifiersExp->isAsync());
+
   func->getLocation()->line0 = loc->line0;
   func->getLocation()->char0 = loc->char0;
   if (func->ignored()) {
@@ -1154,10 +1176,10 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
   LocationPtr loc = popFuncLocation();
 
   FunctionContext funcContext = m_funcContexts.back();
+  checkFunctionContext(funcName, funcContext, modifiersExp, ref->num());
+
   m_funcContexts.pop_back();
   m_prependingStatements.pop_back();
-
-  funcContext.checkFinalAssertions();
 
   bool hasCallToGetArgs = m_hasCallToGetArgs.back();
   m_hasCallToGetArgs.pop_back();
@@ -1187,9 +1209,8 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
   }
   completeScope(mth->onInitialParse(m_ar, m_file));
 
-  if (funcContext.isGenerator) {
-    mth->getFunctionScope()->setGenerator(true);
-  }
+  mth->getFunctionScope()->setGenerator(funcContext.isGenerator);
+  mth->getFunctionScope()->setAsync(modifiersExp->isAsync());
 
   mth->setHasCallToGetArgs(hasCallToGetArgs);
 }
@@ -1389,85 +1410,137 @@ void Parser::onBreakContinue(Token &out, bool isBreak, Token* expr) {
 void Parser::onReturn(Token &out, Token *expr) {
   out->stmt = NEW_STMT(ReturnStatement, expr ? expr->exp : ExpressionPtr());
   if (!m_funcContexts.empty()) {
-    if (!m_funcContexts.back().setIsNotGenerator()) {
+    FunctionContext& fc = m_funcContexts.back();
+    if (fc.isGenerator) {
       Compiler::Error(InvalidYield, out->stmt);
       PARSE_ERROR("Cannot mix 'return' and 'yield' in the same function");
+      return;
     }
+    fc.hasReturn = true;
   }
 }
 
-static void invalidYield(LocationPtr loc) {
-  ExpressionPtr exp(new SimpleFunctionCall(BlockScopePtr(), loc, "yield",
+void Parser::invalidYield() {
+  ExpressionPtr exp(new SimpleFunctionCall(BlockScopePtr(),
+                                           getLocation(),
+                                           "yield",
                                            false,
                                            ExpressionListPtr(),
                                            ExpressionPtr()));
   Compiler::Error(Compiler::InvalidYield, exp);
 }
 
+bool Parser::canBeAsyncOrGenerator(string funcName, string clsName) {
+  if (clsName.empty()) {
+    return true;
+  }
+  if (strcasecmp(funcName.c_str(), clsName.c_str()) == 0) {
+    return false;
+  }
+  if (strncmp(funcName.c_str(), "__", 2) == 0) {
+    const char *fname = funcName.c_str() + 2;
+    if (!strcasecmp(fname, "construct") ||
+        !strcasecmp(fname, "destruct") ||
+        !strcasecmp(fname, "get") ||
+        !strcasecmp(fname, "set") ||
+        !strcasecmp(fname, "isset") ||
+        !strcasecmp(fname, "unset") ||
+        !strcasecmp(fname, "call") ||
+        !strcasecmp(fname, "callstatic") ||
+        !strcasecmp(fname, "invoke")) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool Parser::setIsGenerator() {
   if (m_funcContexts.empty()) {
-    invalidYield(getLocation());
+    invalidYield();
     PARSE_ERROR("Yield can only be used inside a function");
     return false;
   }
 
-  if (!m_funcContexts.back().setIsGenerator()) {
-    invalidYield(getLocation());
+  FunctionContext& fc = m_funcContexts.back();
+  if (fc.hasReturn) {
+    invalidYield();
     PARSE_ERROR("Cannot mix 'return' and 'yield' in the same function");
     return false;
   }
+  if (fc.isAsync) {
+    invalidYield();
+    PARSE_ERROR("'yield' is not allowed in async functions.");
+    return false;
+  }
+  fc.isGenerator = true;
 
-  if (!m_clsName.empty()) {
-    if (strcasecmp(m_funcName.c_str(), m_clsName.c_str()) == 0) {
-      invalidYield(getLocation());
-      PARSE_ERROR("'yield' is not allowed in potential constructors");
-      return false;
-    }
-
-    if (m_funcName[0] == '_' && m_funcName[1] == '_') {
-      const char *fname = m_funcName.c_str() + 2;
-      if (!strcasecmp(fname, "construct") ||
-          !strcasecmp(fname, "destruct") ||
-          !strcasecmp(fname, "get") ||
-          !strcasecmp(fname, "set") ||
-          !strcasecmp(fname, "isset") ||
-          !strcasecmp(fname, "unset") ||
-          !strcasecmp(fname, "call") ||
-          !strcasecmp(fname, "callstatic") ||
-          !strcasecmp(fname, "invoke")) {
-        invalidYield(getLocation());
-        PARSE_ERROR("'yield' is not allowed in constructor, destructor, or "
-                    "magic methods");
-        return false;
-      }
-    }
+  if (!canBeAsyncOrGenerator(m_funcName, m_clsName)) {
+    invalidYield();
+    PARSE_ERROR("'yield' is not allowed in constructor, destructor, or "
+                "magic methods");
+    return false;
   }
 
   return true;
 }
 
 void Parser::onYield(Token &out, Token &expr) {
-  if (!setIsGenerator()) {
-    return;
+  if (setIsGenerator()) {
+    out->exp = NEW_EXP(YieldExpression, ExpressionPtr(), expr->exp);
   }
-
-  out->exp = NEW_EXP(YieldExpression, ExpressionPtr(), expr->exp);
 }
 
 void Parser::onYieldPair(Token &out, Token &key, Token &val) {
-  if (!setIsGenerator()) {
-    return;
+  if (setIsGenerator()) {
+    out->exp = NEW_EXP(YieldExpression, key->exp, val->exp);
   }
-
-  out->exp = NEW_EXP(YieldExpression, key->exp, val->exp);
 }
 
 void Parser::onYieldBreak(Token &out) {
-  if (!setIsGenerator()) {
-    return;
+  if (setIsGenerator()) {
+    out->stmt = NEW_STMT(ReturnStatement, ExpressionPtr());
+  }
+}
+
+void Parser::invalidAwait() {
+  ExpressionPtr exp(new SimpleFunctionCall(BlockScopePtr(),
+                                           getLocation(),
+                                           "async",
+                                           false,
+                                           ExpressionListPtr(),
+                                           ExpressionPtr()));
+  Compiler::Error(Compiler::InvalidAwait, exp);
+}
+
+bool Parser::setIsAsync() {
+  if (m_funcContexts.empty()) {
+    invalidAwait();
+    PARSE_ERROR("'await' can only be used inside a function");
+    return false;
   }
 
-  out->stmt = NEW_STMT(ReturnStatement, ExpressionPtr());
+  FunctionContext& fc = m_funcContexts.back();
+  if (fc.isGenerator) {
+    invalidAwait();
+    PARSE_ERROR("'await' is not allowed in generators.");
+    return false;
+  }
+  fc.isAsync = true;
+
+  if (!canBeAsyncOrGenerator(m_funcName, m_clsName)) {
+    invalidAwait();
+    PARSE_ERROR("'await' is not allowed in constructors, destructors, or "
+                    "magic methods.");
+  }
+
+  return true;
+}
+
+
+void Parser::onAwait(Token &out, Token &expr) {
+  if (setIsAsync()) {
+    out->exp = NEW_EXP(AwaitExpression, expr->exp);
+  }
 }
 
 void Parser::onGlobal(Token &out, Token &expr) {

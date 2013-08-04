@@ -116,6 +116,9 @@ public:
   void setGenerator(bool f) { m_generator = f; }
   int allocYieldLabel() { return ++m_yieldLabelCount; }
   int getYieldLabelCount() const { return m_yieldLabelCount; }
+  bool isAsync() const { return m_async; }
+  void setAsync(bool f) { m_async = f; }
+
   bool needsClassParam();
 
   void setInlineSameContext(bool f) { m_inlineSameContext = f; }
@@ -462,6 +465,7 @@ private:
   unsigned m_contextSensitive : 1;
   unsigned m_directInvoke : 1;
   unsigned m_generator : 1;
+  unsigned m_async : 1;
   unsigned m_noLSB : 1;
   unsigned m_nextLSB : 1;
   unsigned m_hasTry : 1;

@@ -108,6 +108,7 @@ static int getNextTokenType(int t) {
     case T_EXIT:
     case T_RETURN:
     case T_YIELD:
+    case T_AWAIT:
     case T_NEW:
     case T_INSTANCEOF:
     case T_DOUBLE_ARROW:
@@ -225,6 +226,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"const"                { RETTOKEN(T_CONST);}
 <ST_IN_SCRIPTING>"return"               { RETTOKEN(T_RETURN); }
 <ST_IN_SCRIPTING>"yield"                { RETTOKEN(T_YIELD);}
+<ST_IN_SCRIPTING>"await"                { RETTOKEN(T_AWAIT);}
 <ST_IN_SCRIPTING>"try"                  { RETTOKEN(T_TRY);}
 <ST_IN_SCRIPTING>"catch"                { RETTOKEN(T_CATCH);}
 <ST_IN_SCRIPTING>"finally"              { RETTOKEN(T_FINALLY);}
@@ -350,6 +352,12 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
   }
   yyless(1);
   RETSTEP('(');
+}
+
+<ST_IN_SCRIPTING>"async"/{WHITESPACE_AND_COMMENTS}"function" {
+  // 'async' is parsed to T_ASYNC only in front of 'function' to allow consts
+  // named 'async'. As soon as there are no such consts, this should be removed
+  RETTOKEN(T_ASYNC);
 }
 
 <ST_IN_SCRIPTING>"eval"               { RETTOKEN(T_EVAL);}

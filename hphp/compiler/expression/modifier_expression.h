@@ -40,9 +40,11 @@ public:
   bool isStatic() const;
   bool isAbstract() const;
   bool isFinal() const;
+  bool isAsync() const;
 
   int getLocalEffects() const { return NoEffect; }
 
+  bool validForFunction() const;
   bool validForClosure() const;
 
   void setHasPrivacy(bool f) { m_hasPrivacy = f; }

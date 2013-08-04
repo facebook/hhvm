@@ -261,6 +261,7 @@ enum NodeType {
   ONTYPELIST = 87,
   ONTYPESPECIALIZATION = 88,
   ONYIELDPAIR = 89,
+  ONAWAIT = 90,
 };
 
 struct Token : ScannerToken {
@@ -799,6 +800,10 @@ struct Parser : ParserBase {
 
   void onYieldBreak(Token &out) {
     out.setNodeType(ONYIELDBREAK);
+  }
+
+  void onAwait(Token &out, Token &expr) {
+    out.setNodeType(ONAWAIT).appendChild(&expr);
   }
 
   void onGlobal(Token &out, Token &expr) {
@@ -1580,6 +1585,13 @@ struct Parser : ParserBase {
         n->type = n_YIELD_EXPRESSION;
         xhpast::Node *yield_kw = new xhpast::Node(n_YIELD, node->ID());
         n->prependChild(yield_kw);
+        break;
+      }
+      case ONAWAIT: {
+        transform_children(node, n);
+        n->type = n_AWAIT_EXPRESSION;
+        xhpast::Node *await_kw = new xhpast::Node(n_AWAIT, node->ID());
+        n->prependChild(await_kw);
         break;
       }
       default: {

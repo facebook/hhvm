@@ -750,11 +750,24 @@ bool TestCodeError::TestInvalidYield() {
   WithOpt w0(Option::EnableHipHopSyntax);
 
   VE(InvalidYield, "<?php function f() { yield 1; return 2; }");
+  VE(InvalidYield, "<?php async function f() { await f(); yield 1; }");
   VE(InvalidYield, "<?php yield 1; }");
   VE(InvalidYield, "<?php class X { function __get() { yield 1; } }");
   VE(InvalidYield, "<?php class X { function X() { yield 1; } }");
   return true;
 }
+
+
+bool TestCodeError::TestInvalidAwait() {
+  WithOpt w0(Option::EnableHipHopSyntax);
+
+  VE(InvalidAwait, "<?php function f() { yield 1; await f(); }");
+  VE(InvalidAwait, "<?php await f(); }");
+  VE(InvalidAwait, "<?php class X { function __get() { await f(); } }");
+  VE(InvalidAwait, "<?php class X { function X() { await f(); } }");
+  return true;
+}
+
 
 bool TestCodeError::TestBadDefaultValueType() {
   WithOpt w0(Option::EnableHipHopSyntax);

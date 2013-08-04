@@ -63,7 +63,9 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
       m_inlineAsExpr(false), m_inlineSameContext(false),
       m_contextSensitive(false),
       m_directInvoke(false),
-      m_generator(false), m_noLSB(false), m_nextLSB(false),
+      m_generator(false),
+      m_async(false),
+      m_noLSB(false), m_nextLSB(false),
       m_hasTry(false), m_hasGoto(false), m_localRedeclaring(false),
       m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0), m_nextID(0),
       m_yieldLabelCount(0) {
@@ -108,7 +110,9 @@ FunctionScope::FunctionScope(FunctionScopePtr orig,
       m_inlineSameContext(orig->m_inlineSameContext),
       m_contextSensitive(orig->m_contextSensitive),
       m_directInvoke(orig->m_directInvoke),
-      m_generator(orig->m_generator), m_noLSB(orig->m_noLSB),
+      m_generator(orig->m_generator),
+      m_async(orig->m_async),
+      m_noLSB(orig->m_noLSB),
       m_nextLSB(orig->m_nextLSB), m_hasTry(orig->m_hasTry),
       m_hasGoto(orig->m_hasGoto), m_localRedeclaring(orig->m_localRedeclaring),
       m_redeclaring(orig->m_redeclaring),
@@ -207,7 +211,9 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
       m_inlineAsExpr(false), m_inlineSameContext(false),
       m_contextSensitive(false),
       m_directInvoke(false),
-      m_generator(false), m_noLSB(false), m_nextLSB(false),
+      m_generator(false),
+      m_async(false),
+      m_noLSB(false), m_nextLSB(false),
       m_hasTry(false), m_hasGoto(false), m_localRedeclaring(false),
       m_redeclaring(-1), m_inlineIndex(0),
       m_optFunction(0) {
@@ -503,6 +509,7 @@ bool FunctionScope::mayUseVV() const {
   return (inPseudoMain() ||
           isVariableArgument() ||
           isGenerator() ||
+          isAsync() ||
           variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
           variables->getAttribute(VariableTable::ContainsExtract) ||
           variables->getAttribute(VariableTable::ContainsCompact) ||
@@ -1022,7 +1029,7 @@ bool FunctionScope::needsAnonClosureClass(ParameterExpressionPtrVec &useVars) {
   useVars.clear();
   if (!isClosure()) return false;
   ParameterExpressionPtrIdxPairVec useVars0;
-  getClosureUseVars(useVars0, !m_generator);
+  getClosureUseVars(useVars0, !m_generator && !m_async);
   useVars.resize(useVars0.size());
   // C++ seems to be unable to infer the type here on pair_first_elem
   transform(useVars0.begin(),
@@ -1036,7 +1043,7 @@ bool FunctionScope::needsAnonClosureClass(
     ParameterExpressionPtrIdxPairVec &useVars) {
   useVars.clear();
   if (!isClosure()) return false;
-  getClosureUseVars(useVars, !m_generator);
+  getClosureUseVars(useVars, !m_generator && !m_async);
   return useVars.size() > 0 || getVariables()->hasStaticLocals();
 }
 

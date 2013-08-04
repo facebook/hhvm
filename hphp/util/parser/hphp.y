@@ -697,6 +697,8 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_UNRESOLVED_NEWTYPE
 
 %token T_COMPILER_HALT_OFFSET
+%right T_AWAIT
+%token T_ASYNC
 
 %%
 
@@ -870,6 +872,10 @@ statement:
   | yield_expr ';'                     { _p->onExpStatement($$, $1);}
   | yield_assign_expr ';'              { _p->onExpStatement($$, $1);}
   | yield_list_assign_expr ';'         { _p->onExpStatement($$, $1);}
+  | await_expr ';'                     { _p->onExpStatement($$, $1);}
+  | await_assign_expr ';'              { _p->onExpStatement($$, $1);}
+  | T_RETURN await_expr ';'            { _p->onReturn($$, &$2); }
+  | await_list_assign_expr ';'         { _p->onExpStatement($$, $1);}
   | ident ':'                          { _p->onLabel($$, $1);
                                          _p->addLabel($1.text(),
                                                       _p->getLocation(),
@@ -916,13 +922,24 @@ function_declaration_statement:
     '{' inner_statement_list '}'       { _p->onFunction($$,0,$8,$2,$3,$6,$10,0,false);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();}
-  | non_empty_user_attributes function_loc
+  | non_empty_member_modifiers
+    function_loc
     is_reference hh_name_with_typevar  { $4.setText(_p->nsDecl($4.text()));
                                          _p->onFunctionStart($4);
                                          _p->pushLabelInfo();}
     '(' parameter_list ')'
     hh_opt_return_type
-    '{' inner_statement_list '}'       { _p->onFunction($$,0,$9,$3,$4,$7,$11,&$1,false);
+    '{' inner_statement_list '}'       { _p->onFunction($$,&$1,$9,$3,$4,$7,$11,0,false);
+                                         _p->popLabelInfo();
+                                         _p->popTypeScope();}
+  | non_empty_user_attributes
+    method_modifiers function_loc
+    is_reference hh_name_with_typevar  { $5.setText(_p->nsDecl($5.text()));
+                                         _p->onFunctionStart($5);
+                                         _p->pushLabelInfo();}
+    '(' parameter_list ')'
+    hh_opt_return_type
+    '{' inner_statement_list '}'       { _p->onFunction($$,&$2,$10,$4,$5,$8,$12,&$1,false);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();}
 ;
@@ -1438,7 +1455,9 @@ member_modifier:
   | T_STATIC                           { $$ = T_STATIC;}
   | T_ABSTRACT                         { $$ = T_ABSTRACT;}
   | T_FINAL                            { $$ = T_FINAL;}
+  | T_ASYNC                            { $$ = T_ASYNC;}
 ;
+
 parameter_modifiers:
     parameter_modifier                 { $$ = $1;}
   |                                    { $$.reset();}
@@ -1495,6 +1514,19 @@ yield_assign_expr:
 yield_list_assign_expr:
     T_LIST '(' assignment_list ')'
     '=' yield_expr                     { _p->onListAssignment($$, $3, &$6, true);}
+;
+
+await_expr:
+    T_AWAIT expr                       { _p->onAwait($$, $2); }
+;
+
+await_assign_expr:
+    variable '=' await_expr            { _p->onAssign($$, $1, $3, 0, true);}
+;
+
+await_list_assign_expr:
+    T_LIST '(' assignment_list ')'
+    '=' await_expr                     { _p->onListAssignment($$, $3, &$6, true);}
 ;
 
 expr:
@@ -1758,6 +1790,7 @@ xhp_bareword:
   | T_CONST                            { $$ = $1;}
   | T_RETURN                           { $$ = $1;}
   | T_YIELD                            { $$ = $1;}
+  | T_AWAIT                            { $$ = $1;}
   | T_TRY                              { $$ = $1;}
   | T_CATCH                            { $$ = $1;}
   | T_FINALLY                          { $$ = $1;}
@@ -1810,6 +1843,7 @@ xhp_bareword:
   | T_PRIVATE                          { $$ = $1;}
   | T_PROTECTED                        { $$ = $1;}
   | T_PUBLIC                           { $$ = $1;}
+  | T_ASYNC                            { $$ = $1;}
   | T_UNSET                            { $$ = $1;}
   | T_LIST                             { $$ = $1;}
   | T_ARRAY                            { $$ = $1;}

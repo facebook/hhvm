@@ -44,6 +44,7 @@
 #include "hphp/compiler/expression/static_member_expression.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/compiler/expression/yield_expression.h"
+#include "hphp/compiler/expression/await_expression.h"
 #include "hphp/compiler/statement/break_statement.h"
 #include "hphp/compiler/statement/case_statement.h"
 #include "hphp/compiler/statement/catch_statement.h"
@@ -2526,7 +2527,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         MethodStatementPtr m(static_pointer_cast<MethodStatement>(node));
         // Only called for fn defs not on the top level
         StringData* nName = StringData::GetStaticString(m->getOriginalName());
-        if (m->getFunctionScope()->isGenerator()) {
+        if (m->getFunctionScope()->isGenerator() ||
+            m->getFunctionScope()->isAsync()) {
           if (m->getFileScope() != m_file) {
             // the generator's definition is in another file typically
             // because it was defined in a trait that got inlined into
@@ -3954,6 +3956,51 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
         // throw received exception on the stack
         assert(m_evalStack.size() == 1);
+        e.Throw();
+
+        // emit return label for next()/send()
+        e.Null();
+        m_yieldLabels[normalLabel].set(e);
+
+        // continue with the received result on the stack
+        assert(m_evalStack.size() == 1);
+        return true;
+      }
+      case Expression::KindOfAwaitExpression: {
+        AwaitExpressionPtr await(static_pointer_cast<AwaitExpression>(node));
+        assert(m_evalStack.size() == 0);
+
+        // evaluate expression passed to await
+        ExpressionPtr expr = await->getExpression();
+        visit(expr);
+        emitConvertToCell(e);
+
+        // if the type of expr is not WaitHandle (can be just Awaitable),
+        // call getWaitHandle() method.
+        AnalysisResultConstPtr ar = expr->getScope()->getContainingProgram();
+        TypePtr type = expr->getActualType();
+        if (!type || !Type::SubType(ar, type,
+                Type::GetType(Type::KindOfObject, "WaitHandle"))) {
+          StringData* nLiteral = StringData::GetStaticString("getWaitHandle");
+          {
+            FPIRegionRecorder fpi(this, m_ue, m_evalStack, m_ue.bcPos());
+            e.FPushObjMethodD(0, nLiteral);
+          }
+          e.FCall(0);
+          emitConvertToCell(e);
+        }
+
+        int64_t normalLabel = 2 * await->getLabel();
+        int64_t exceptLabel = normalLabel - 1;
+
+        e.ContSuspend(normalLabel);
+
+        // emit return label for raise()
+        assert(m_evalStack.size() == 0);
+        e.Null();
+        m_yieldLabels[exceptLabel].set(e);
+
+        // throw received exception on the stack
         e.Throw();
 
         // emit return label for next()/send()
@@ -5414,7 +5461,8 @@ void EmitterVisitor::emitPostponedMeths() {
       top_fes.push_back(fe);
     }
 
-    if (meth->getFunctionScope()->isGenerator()) {
+    if (meth->getFunctionScope()->isGenerator() ||
+        meth->getFunctionScope()->isAsync()) {
       emitMethodsForGenerator(p, top_fes);
     } else {
       m_curFunc = fe;
@@ -5582,7 +5630,8 @@ void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
 
   if (funcScope->needsLocalThis() &&
       !funcScope->isStatic() &&
-      !funcScope->isGenerator()) {
+      !funcScope->isGenerator() &&
+      !funcScope->isAsync()) {
     assert(!m_curFunc->top());
     static const StringData* thisStr = StringData::GetStaticString("this");
     Id thisId = m_curFunc->lookupVarId(thisStr);
@@ -5685,6 +5734,17 @@ void EmitterVisitor::emitGeneratorCreate(MethodStatementPtr meth) {
   const StringData* nameStr = StringData::GetStaticString(
       meth->getGeneratorName());
   e.CreateCont(nameStr);
+
+  if (meth->getFunctionScope()->isAsync()){
+    StringData* nLiteral = StringData::GetStaticString("getWaitHandle");
+    {
+      FPIRegionRecorder fpi(this, m_ue, m_evalStack, m_ue.bcPos());
+      e.FPushObjMethodD(0, nLiteral);
+    }
+    e.FCall(0);
+    emitConvertToCell(e);
+  }
+
   e.RetC();
 
   FuncFinisher ff(this, e, m_curFunc);

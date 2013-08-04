@@ -76,6 +76,7 @@ class Variant;
     x(EncapsListExpression, None),              \
     x(ClosureExpression, None),                 \
     x(YieldExpression, None),                   \
+    x(AwaitExpression, None),                   \
     x(UserAttribute, None)
 
 class Expression : public Construct {

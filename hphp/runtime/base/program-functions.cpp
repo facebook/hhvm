@@ -530,6 +530,11 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   if (xhprof) {
     f_xhprof_enable(xhprof, uninit_null().toArray());
   }
+
+  if (RuntimeOption::RequestTimeoutSeconds) {
+    ThreadInfo::s_threadInfo->m_reqInjectionData.setTimeout(
+      RuntimeOption::RequestTimeoutSeconds);
+  }
 }
 
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {

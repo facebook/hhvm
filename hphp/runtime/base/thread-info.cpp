@@ -219,9 +219,21 @@ int RequestInjectionData::getRemainingTime() const {
   return m_timeoutSeconds;
 }
 
-void RequestInjectionData::resetTimer(int seconds /* = -1 */) {
+/*
+ * If seconds == 0, reset the timeout to the last one set
+ * If seconds  < 0, set the timeout to -seconds if there's less than
+ *                  -seconds remaining.
+ * If seconds  > 0, set the timeout to seconds.
+ */
+void RequestInjectionData::resetTimer(int seconds /* = 0 */) {
   auto data = &ThreadInfo::s_threadInfo->m_reqInjectionData;
-  if (seconds <= 0) seconds = data->getTimeout();
+  if (seconds == 0) {
+    seconds = data->getTimeout();
+  } else if (seconds < 0) {
+    if (!data->getTimeout()) return;
+    seconds = -seconds;
+    if (seconds < data->getRemainingTime()) return;
+  }
   data->setTimeout(seconds);
   data->clearTimedOutFlag();
 }

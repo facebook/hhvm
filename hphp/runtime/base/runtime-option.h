@@ -116,6 +116,7 @@ public:
 
   static int FiberCount;
   static int RequestTimeoutSeconds;
+  static int PspTimeoutSeconds;
   static size_t ServerMemoryHeadRoom;
   static int64_t RequestMemoryMaxBytes;
   static int64_t ImageMemoryMaxBytes;

@@ -244,7 +244,7 @@ public:
   int getTimeout() const { return m_timeoutSeconds; }
   void setTimeout(int seconds);
   int getRemainingTime() const;
-  void resetTimer(int seconds = -1);
+  void resetTimer(int seconds = 0);
   void setSurprisePage(void* page);
   void onTimeout();
   bool getJit() const { return m_jit; }

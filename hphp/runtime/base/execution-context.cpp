@@ -491,7 +491,8 @@ void BaseExecutionContext::onRequestShutdown() {
 }
 
 void BaseExecutionContext::executeFunctions(CArrRef funcs) {
-  ThreadInfo::s_threadInfo->m_reqInjectionData.resetTimer();
+  ThreadInfo::s_threadInfo->m_reqInjectionData.resetTimer(
+    RuntimeOption::PspTimeoutSeconds);
 
   for (ArrayIter iter(funcs); iter; ++iter) {
     Array callback = iter.second().toArray();

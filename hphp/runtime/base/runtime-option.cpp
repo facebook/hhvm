@@ -122,6 +122,7 @@ int RuntimeOption::PageletServerQueueLimit = 0;
 bool RuntimeOption::PageletServerThreadDropStack = false;
 int RuntimeOption::FiberCount = 1;
 int RuntimeOption::RequestTimeoutSeconds = 0;
+int RuntimeOption::PspTimeoutSeconds = 0;
 size_t RuntimeOption::ServerMemoryHeadRoom = 0;
 int64_t RuntimeOption::RequestMemoryMaxBytes = INT64_MAX;
 int64_t RuntimeOption::ImageMemoryMaxBytes = 0;
@@ -716,6 +717,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     server["HighPriorityEndPoints"].get(ServerHighPriorityEndPoints);
 
     RequestTimeoutSeconds = server["RequestTimeoutSeconds"].getInt32(0);
+    PspTimeoutSeconds = server["PspTimeoutSeconds"].getInt32(0);
     ServerMemoryHeadRoom = server["MemoryHeadRoom"].getInt64(0);
     RequestMemoryMaxBytes = server["RequestMemoryMaxBytes"].getInt64(INT64_MAX);
     ResponseQueueCount = server["ResponseQueueCount"].getInt32(0);

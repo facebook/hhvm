@@ -1022,10 +1022,8 @@ class Variant : private TypedValue {
     if (UNLIKELY(self == other)) {
       return;
     }
-    Variant scopy((NoInit()));
-    scopy.m_data = self->m_data;
-    scopy.m_type = self->m_type;
-
+    const DataType stype = self->m_type;
+    const Value sdata = self->m_data;
     const DataType otype = other->m_type;
     if (UNLIKELY(otype == KindOfUninit)) {
       self->m_type = KindOfNull;
@@ -1037,6 +1035,7 @@ class Variant : private TypedValue {
       self->m_data = odata;
       self->m_type = otype;
     }
+    tvRefcountedDecRefHelper(stype, sdata.num);
   }
 
 #ifdef INLINE_VARIANT_HELPER

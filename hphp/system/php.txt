@@ -68,6 +68,7 @@ hphp/system/php/lang/ErrorException.php
 hphp/system/php/misc/php_strip_whitespace.php
 hphp/system/php/pdo/PDOException.php
 hphp/system/php/redis/Redis.php
+hphp/system/php/redis/RedisSessionModule.php
 hphp/system/php/reflection/reflection.php
 hphp/system/php/sessions/session_register_shutdown.php
 hphp/system/php/soap/SoapFault.php

@@ -532,6 +532,15 @@ bool SystemlibSessionModule::gc(int maxlifetime, int *nrdels) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// SystemlibSessionModule implementations
+
+static class RedisSessionModule : public SystemlibSessionModule {
+ public:
+  RedisSessionModule() :
+    SystemlibSessionModule("redis", "RedisSessionModule") { }
+} s_redis_session_module;
+
+//////////////////////////////////////////////////////////////////////////////
 // FileSessionModule
 
 class FileSessionData {

@@ -6,6 +6,7 @@
   - Implement php_strip_whitespace()
   - Support for timeouts in cli mode
   - Closure allocation optimizations (~2x faster to allocate a closure)
+  - Implement Redis session handler
 
 "Tamale" 22-Jul-2013
   - Optimize vector-shaped Arrays (arrays with keys in range 0..size-1)

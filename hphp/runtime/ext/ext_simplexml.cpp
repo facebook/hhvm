@@ -986,7 +986,7 @@ bool c_SimpleXMLElement::t_offsetexists(CVarRef index) {
 
 Variant c_SimpleXMLElement::t_offsetget(CVarRef index) {
   if (index.isInteger()) {
-    if (m_is_property) {
+    if (m_is_property || m_is_children) {
       int64_t n = 0; int64_t nIndex = index.toInt64(); Variant var(this);
       for (ArrayIter iter = var.begin(); !iter.end(); iter.next()) {
         if (n++ == nIndex) {

@@ -913,7 +913,7 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
 bool c_SimpleXMLElement::o_toBooleanImpl() const noexcept {
   if (m_node || getDynProps().size()) {
     if (m_is_children || (m_node->parent && m_node->parent->type == XML_DOCUMENT_NODE)) {
-      return m_children.toArray().size() > 0;
+      return m_children.toArray().size() > 0 || m_attributes.toArray().size() > 0;
     }
     return true;
   }

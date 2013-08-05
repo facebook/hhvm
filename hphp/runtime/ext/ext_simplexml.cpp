@@ -671,7 +671,28 @@ Variant c_SimpleXMLElement::t_addchild(CStrRef qname,
       m_children.set(newname, arr);
     }
   } else {
-    m_children.set(newname, child);
+    if (value.empty()) {
+      m_children.set(newname, child);
+    } else {
+      // If we specified a value to addChild, we mark all children to have
+      // invisible text. This is a strange SimpleXML quirk.
+      c_SimpleXMLElement *e = child.getTyped<c_SimpleXMLElement>();
+      Array children = e->m_children.toArray();
+      for (ArrayIter iter(children); iter; ++iter) {
+        if (iter.second().isObject()) {
+          c_SimpleXMLElement *elem = iter.second().toObject().
+            getTyped<c_SimpleXMLElement>();
+            elem->m_free_text = false;
+        }
+      }
+
+      // Since we abuse m_children to reprsent text nodes, we have to merge it
+      // with existing children.
+      m_children = m_children.toArray().merge(children);
+
+      // We return a clean element because the retval -can- be casted to string.
+      return create_element(m_doc, newnode, newns, false);
+    }
   }
   return child;
 }

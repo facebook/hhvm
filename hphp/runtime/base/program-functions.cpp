@@ -49,6 +49,7 @@
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_options.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/base/simple-counter.h"
@@ -1425,6 +1426,7 @@ void hphp_session_init() {
   g->k_PHP_SAPI = StringData::GetStaticString(RuntimeOption::ExecutionMode);
   g->k_PHP_BINARY = current_executable_path();
   g->k_PHP_BINDIR = current_executable_directory();
+  g->k_PHP_OS = f_php_uname("s");
 }
 
 bool hphp_is_warmup_enabled() {

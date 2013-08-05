@@ -5006,7 +5006,8 @@
         },
         {
             "name": "PHP_OS",
-            "value": "Linux"
+            "type": "String",
+            "desc": "Dynamic constant - php_uname()"
         },
         {
             "name": "PHP_OUTPUT_HANDLER_CONT",

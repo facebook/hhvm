@@ -27,6 +27,8 @@
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/array_iterator.h"
+#include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/compatibility.h"
@@ -306,6 +308,230 @@ String SessionModule::create_sid() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// SystemlibSessionModule
+
+static StaticString s_SessionHandlerInterface("SessionHandlerInterface");
+
+static StaticString s_open("open");
+static StaticString s_close("close");
+static StaticString s_read("read");
+static StaticString s_write("write");
+static StaticString s_gc("gc");
+static StaticString s_destroy("destroy");
+
+Class *SystemlibSessionModule::s_SHIClass = nullptr;
+
+/**
+ * Relies on the fact that only one SessionModule will be active
+ * in a given thread at any one moment.
+ */
+IMPLEMENT_REQUEST_LOCAL(SystemlibSessionInstance, SystemlibSessionModule::s_obj);
+
+Func* SystemlibSessionModule::lookupFunc(Class *cls, StringData *fname) {
+  Func *f = cls->lookupMethod(fname);
+  if (!f) {
+    throw InvalidArgumentException(0, "class %s must declare method %s()",
+                                   m_classname, fname->data());
+  }
+
+  if (f->attrs() & AttrStatic) {
+    throw InvalidArgumentException(0, "%s::%s() must not be declared static",
+                                   m_classname, fname->data());
+  }
+
+  if (f->attrs() & (AttrPrivate|AttrProtected|AttrAbstract)) {
+    throw InvalidArgumentException(0, "%s::%s() must be declared public",
+                                   m_classname, fname->data());
+  }
+
+  return f;
+}
+
+void SystemlibSessionModule::lookupClass() {
+  Class *cls;
+  if (!(cls = Unit::loadClass(String(m_classname, CopyString).get()))) {
+    throw InvalidArgumentException(0, "Unable to locate systemlib class '%s'",
+                                   m_classname);
+  }
+
+  if (cls->attrs() & (AttrTrait|AttrInterface)) {
+    throw InvalidArgumentException(0, "'%s' must be a real class, "
+                                      "not an interface or trait", m_classname);
+  }
+
+  if (!s_SHIClass) {
+    s_SHIClass = Unit::lookupClass(s_SessionHandlerInterface.get());
+    if (!s_SHIClass) {
+      throw InvalidArgumentException(0, "Unable to locate '%s' interface",
+                                        s_SessionHandlerInterface.data());
+    }
+  }
+
+  if (!cls->classof(s_SHIClass)) {
+    throw InvalidArgumentException(0, "SystemLib session module '%s' "
+                                      "must implement '%s'",
+                                      m_classname,
+                                      s_SessionHandlerInterface.data());
+  }
+
+  if (MethodLookup::LookupResult::MethodFoundWithThis !=
+      g_vmContext->lookupCtorMethod(m_ctor, cls)) {
+    throw InvalidArgumentException(0, "Unable to call %s's constructor",
+                                   m_classname);
+  }
+
+  m_open    = lookupFunc(cls, s_open.get());
+  m_close   = lookupFunc(cls, s_close.get());
+  m_read    = lookupFunc(cls, s_read.get());
+  m_write   = lookupFunc(cls, s_write.get());
+  m_gc      = lookupFunc(cls, s_gc.get());
+  m_destroy = lookupFunc(cls, s_destroy.get());
+  m_cls = cls;
+}
+
+ObjectData* SystemlibSessionModule::getObject() {
+  if (auto o = s_obj->getObject()) {
+    return o;
+  }
+
+  Transl::VMRegAnchor _;
+  Variant ret;
+
+  if (!m_cls) {
+    lookupClass();
+  }
+  s_obj->setObject(ObjectData::newInstance(m_cls));
+  ObjectData *obj = s_obj->getObject();
+  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_ctor, obj);
+
+  return obj;
+}
+
+bool SystemlibSessionModule::open(const char *save_path,
+                                  const char *session_name) {
+  ObjectData *obj = getObject();
+
+  Variant savePath = String(save_path, CopyString);
+  Variant sessionName = String(session_name, CopyString);
+  TypedValue args[2];
+  tvDup(*savePath.asTypedValue(), args[0]);
+  tvDup(*sessionName.asTypedValue(), args[1]);
+  Variant ret;
+
+  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_open, obj,
+                             nullptr, 2, args);
+
+  if (ret.isBoolean() && ret.toBoolean()) {
+    return true;
+  }
+
+  raise_warning("Failed calling %s::open()", m_classname);
+  return false;
+}
+
+bool SystemlibSessionModule::close() {
+  auto obj = s_obj->getObject();
+  if (!obj) {
+    // close() can be called twice in some circumstances
+    return true;
+  }
+
+  Variant ret;
+  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_close, obj,
+                             nullptr, 0, nullptr);
+  s_obj->destroy();
+
+  if (ret.isBoolean() && ret.toBoolean()) {
+    return true;
+  }
+
+  raise_warning("Failed calling %s::close()", m_classname);
+  return false;
+}
+
+bool SystemlibSessionModule::read(const char *key, String &value) {
+  ObjectData *obj = getObject();
+
+  Variant sessionKey = String(key, CopyString);
+  TypedValue args[1];
+  tvDup(*sessionKey.asTypedValue(), args[0]);
+  Variant ret;
+
+  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_read, obj,
+                             nullptr, 1, args);
+
+  if (ret.isString()) {
+    value = ret.toString();
+    return true;
+  }
+
+  raise_warning("Failed calling %s::read()", m_classname);
+  return false;
+}
+
+bool SystemlibSessionModule::write(const char *key, CStrRef value) {
+  ObjectData *obj = getObject();
+
+  Variant sessionKey = String(key, CopyString);
+  Variant sessionVal = value;
+  TypedValue args[2];
+  tvDup(*sessionKey.asTypedValue(), args[0]);
+  tvDup(*sessionVal.asTypedValue(), args[1]);
+  Variant ret;
+
+  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_write, obj,
+                             nullptr, 2, args);
+
+  if (ret.isBoolean() && ret.toBoolean()) {
+    return true;
+  }
+
+  raise_warning("Failed calling %s::write()", m_classname);
+  return false;
+}
+
+bool SystemlibSessionModule::destroy(const char *key) {
+  ObjectData *obj = getObject();
+
+  Variant sessionKey = String(key, CopyString);
+  TypedValue args[1];
+  tvDup(*sessionKey.asTypedValue(), args[0]);
+  Variant ret;
+
+  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_destroy, obj,
+                             nullptr, 1, args);
+
+  if (ret.isBoolean() && ret.toBoolean()) {
+    return true;
+  }
+
+  raise_warning("Failed calling %s::destroy()", m_classname);
+  return false;
+}
+
+bool SystemlibSessionModule::gc(int maxlifetime, int *nrdels) {
+  ObjectData *obj = getObject();
+
+  Variant maxLifeTime = maxlifetime;
+  TypedValue args[1];
+  tvDup(*maxLifeTime.asTypedValue(), args[0]);
+  Variant ret;
+
+  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_gc, obj,
+                             nullptr, 1, args);
+
+  if (ret.isInteger()) {
+    if (nrdels) {
+      *nrdels = ret.toInt64();
+    }
+    return true;
+  }
+
+  raise_warning("Failed calling %s::gc()", m_classname);
+  return false;
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // FileSessionModule
 
 class FileSessionData {

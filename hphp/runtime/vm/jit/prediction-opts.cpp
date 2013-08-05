@@ -43,13 +43,13 @@ bool instructionsAreSinkable(InputIterator first, InputIterator last) {
     case DecRefNZ:
     case IncRef:
     case LdMem:
-      return true;
+      continue;
     default:
       FTRACE(5, "unsinkable: {}\n", first->toString());
       return false;
     }
   }
-  not_reached();
+  return true;
 }
 
 }

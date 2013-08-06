@@ -815,9 +815,13 @@ CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
   // Override the maximum client TLS version if necessary.
   if (cp->m_opts.exists(int64_t(CURLOPT_FB_TLS_VER_MAX))) {
     // Get current options, unsetting the NO_TLSv1_* bits.
-    long cur_opts =
-      SSL_CTX_get_options(ctx) & ~(SSL_OP_NO_TLSv1_1 | SSL_OP_NO_TLSv1_1);
-
+    long cur_opts = SSL_CTX_get_options(ctx);
+#ifdef SSL_OP_NO_TLSv1_1
+    cur_opts &= ~SSL_OP_NO_TLSv1_1;
+#endif
+#ifdef SSL_OP_NO_TLSv1_2
+    cur_opts &= ~SSL_OP_NO_TLSv1_2;
+#endif
     int64_t value = cp->m_opts[int64_t(CURLOPT_FB_TLS_VER_MAX)].toInt64();
     if (value == CURLOPT_FB_TLS_VER_MAX_1_0) {
 #if defined (SSL_OP_NO_TLSv1_1) && defined (SSL_OP_NO_TLSv1_2)

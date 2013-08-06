@@ -939,12 +939,22 @@ double c_SimpleXMLElement::o_toDoubleImpl() const noexcept {
 }
 
 Array c_SimpleXMLElement::o_toArray() const {
-  if (m_attributes.toArray().empty()) {
-    return m_children.toArray();
+  Array ret = Array::Create();
+  if (!m_attributes.toArray().empty()) {
+    ret.set(s_attributes, m_attributes);
   }
-  Array ret;
-  ret.set(s_attributes, m_attributes);
   ret += m_children;
+
+  // String elements are implicitly converted.
+  for (ArrayIter iter(ret); iter; ++iter) {
+    if (iter.second().isObject()) {
+      c_SimpleXMLElement *elem = iter.second().toObject().
+        getTyped<c_SimpleXMLElement>();
+      if (elem->m_is_text) {
+        ret.set(iter.first(), elem->t___tostring());
+      }
+    }
+  }
   return ret;
 }
 

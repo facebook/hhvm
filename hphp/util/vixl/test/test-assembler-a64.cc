@@ -7220,6 +7220,60 @@ TEST(Assembler, printf_no_preserve) {
   TEARDOWN();
 }
 
+// Functions for testing the HostCall pseudo-opcode.
+extern "C" {
+
+int64_t minusOne() {
+  return -1;
+}
+
+char secondChar(const char* str) {
+  return str[1];
+}
+
+int addTogether(int a, int b) {
+  // Make sure the arguments are in the right order
+  return (3 * a) + b;
+}
+
+} // extern "C"
+
+TEST(Assembler, hostcall) {
+  SETUP();
+  START();
+
+  __ Push (x29, x30);  // save frame pointer and return address
+
+  // No arguments
+  __ Mov  (x16, reinterpret_cast<intptr_t>(&minusOne));
+  __ HostCall(0);
+  __ Mov  (x19, x0);
+
+  // One argument
+  __ Mov  (x16, reinterpret_cast<intptr_t>(&secondChar));
+  __ Mov  (x0, reinterpret_cast<intptr_t>("hi"));
+  __ HostCall(1);
+  __ Mov  (x20, x0);   // stash in a callee-saved reg, to check later
+
+  // Two arguments
+  __ Mov  (x16, reinterpret_cast<intptr_t>(&addTogether));
+  __ Mov  (x0, 1030);
+  __ Mov  (x1,  307);
+  __ HostCall(2);
+  __ Mov  (x21, x0);
+
+  __ Pop  (x30, x29);  // restore frame pointer and return address
+
+  END();
+  RUN();
+
+  ASSERT_EQUAL_64(minusOne(), x19);
+  ASSERT_EQUAL_64(secondChar("hi"), x20);
+  ASSERT_EQUAL_64(addTogether(1030, 307), x21);
+
+  TEARDOWN();
+}
+
 
 #ifndef USE_SIMULATOR
 TEST(Assembler, trace) {

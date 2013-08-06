@@ -1083,6 +1083,13 @@ class MacroAssembler : public Assembler {
   // Will output the flags.
   void Log(TraceParameters parameters);
 
+  // Pseudo-instruction that will call a function made of host machine code
+  // using host calling conventions. It will take the function address from x16
+  // (inter-procedural scratch reg). Arguments will be taken from simulated
+  // registers in the usual sequence, and the return value will be put in
+  // simulated x0. All caller-saved registers will be smashed.
+  void HostCall(uint8_t argc);
+
  private:
   // The actual Push and Pop implementations. These don't generate any code
   // other than that required for the push or pop. This allows

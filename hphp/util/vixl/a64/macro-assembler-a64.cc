@@ -1078,4 +1078,16 @@ void MacroAssembler::Log(TraceParameters parameters) {
 #endif
 }
 
+void MacroAssembler::HostCall(uint8_t argc) {
+#ifndef USE_SIMULATOR
+#error This is not going to work on real hardware
+#endif
+
+  assert(argc < 6);
+
+  hlt(kHostCallOpcode);
+  dc32(argc);
+}
+
+
 }  // namespace vixl

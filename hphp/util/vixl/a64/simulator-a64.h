@@ -75,6 +75,9 @@ const Instr kPrintfOpcode = 0xdeb1;
 const unsigned kPrintfTypeOffset = 1 * kInstructionSize;
 const unsigned kPrintfLength = 2 * kInstructionSize;
 
+const Instr kHostCallOpcode = 0xdeb4;
+const unsigned kHostCallCountOffset = 1 * kInstructionSize;
+
 class Simulator : public DecoderVisitor {
  public:
   explicit Simulator(Decoder* decoder, FILE* stream = stdout);
@@ -429,6 +432,8 @@ class Simulator : public DecoderVisitor {
 
   // Pseudo Printf instruction
   void DoPrintf(Instruction* instr);
+  // Pseudo HostCall instruction
+  void DoHostCall(Instruction* instr);
 
   // Processor state ---------------------------------------
 

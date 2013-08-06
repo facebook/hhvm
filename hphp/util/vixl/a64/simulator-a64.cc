@@ -1611,6 +1611,8 @@ void Simulator::VisitException(Instruction* instr) {
       // default simulator.
       if (instr->ImmException() == kPrintfOpcode) {
         DoPrintf(instr);
+      } else if (instr->ImmException() == kHostCallOpcode) {
+        DoHostCall(instr);
       } else {
         HostBreakpoint();
       }
@@ -1654,6 +1656,62 @@ void Simulator::DoPrintf(Instruction* instr) {
 
   // Set LR as if we'd just called a native printf function.
   set_lr(reinterpret_cast<uint64_t>(pc()));
+}
+
+void Simulator::DoHostCall(Instruction* instr) {
+  // Read the number of arguments out of the instruction stream
+  uint32_t argc;
+  assert(sizeof(*instr) == 1);
+  memcpy(&argc, instr + kHostCallCountOffset, sizeof(argc));
+  assert(argc < 6);
+
+  typedef intptr_t(*Native0Ptr)(void);
+  typedef intptr_t(*Native1Ptr)(intptr_t);
+  typedef intptr_t(*Native2Ptr)(intptr_t, intptr_t);
+  typedef intptr_t(*Native3Ptr)(intptr_t, intptr_t, intptr_t);
+  typedef intptr_t(*Native4Ptr)(intptr_t, intptr_t, intptr_t, intptr_t);
+  typedef intptr_t(*Native5Ptr)(intptr_t, intptr_t, intptr_t, intptr_t,
+                                intptr_t);
+
+  intptr_t result;
+
+  switch (argc) {
+    case 0:
+      result = reinterpret_cast<Native0Ptr>(xreg(16))();
+      break;
+    case 1:
+      result = reinterpret_cast<Native1Ptr>(xreg(16))(xreg(0));
+      break;
+    case 2:
+      result = reinterpret_cast<Native2Ptr>(xreg(16))(xreg(0), xreg(1));
+      break;
+    case 3:
+      result = reinterpret_cast<Native3Ptr>(xreg(16))(
+        xreg(0), xreg(1), xreg(2));
+      break;
+    case 4:
+      result = reinterpret_cast<Native4Ptr>(xreg(16))(
+        xreg(0), xreg(1), xreg(2), xreg(3));
+      break;
+    case 5:
+      result = reinterpret_cast<Native5Ptr>(xreg(16))(
+        xreg(0), xreg(1), xreg(2), xreg(3), xreg(4));
+      break;
+    default:
+      not_reached();
+  }
+
+  // Trash all caller-saved registers
+  auto callerSaved = CPURegList::GetCallerSaved();
+  while (!callerSaved.IsEmpty()) {
+    auto reg = callerSaved.PopLowestIndex();
+    set_xreg(reg.code(), 0xf00dbeef);
+  }
+
+  set_xreg(0, result);
+
+  // Skip over the embedded argc
+  set_pc(instr->InstructionAtOffset(kHostCallCountOffset + kInstructionSize));
 }
 
 }  // namespace vixl

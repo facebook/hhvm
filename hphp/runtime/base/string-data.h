@@ -494,6 +494,6 @@ struct string_data_isame {
 
 }
 
-#include "hphp/runtime/base/string_data-inl.h"
+#include "hphp/runtime/base/string-data-inl.h"
 
 #endif

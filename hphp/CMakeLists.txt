@@ -41,7 +41,7 @@ if(NOT LINUX)
 endif()
 
 # Not working with off-the-shelf libevent
-list(REMOVE_ITEM CXX_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/runtime/server/server_name_indication.cpp)
+list(REMOVE_ITEM CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/runtime/server/server-name-indication.cpp")
 
 # Waiting on OSS fix :(
 list(REMOVE_ITEM CXX_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/runtime/vm/runtime-type-profiler.cpp)

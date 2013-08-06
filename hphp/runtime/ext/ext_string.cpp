@@ -25,8 +25,8 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/util/lock.h"
 #include <locale.h>
-#include "hphp/runtime/server/http_request_handler.h"
-#include "hphp/runtime/server/http_protocol.h"
+#include "hphp/runtime/server/http-request-handler.h"
+#include "hphp/runtime/server/http-protocol.h"
 
 namespace HPHP {
 

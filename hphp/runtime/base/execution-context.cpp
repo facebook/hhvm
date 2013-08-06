@@ -27,7 +27,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/sweepable.h"
-#include "hphp/runtime/server/server_stats.h"
+#include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"

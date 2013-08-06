@@ -18,9 +18,9 @@
 #define incl_HPHP_RUNTIME_OPTION_H_
 
 #include <boost/container/flat_set.hpp>
-#include "hphp/runtime/server/files_match.h"
-#include "hphp/runtime/server/satellite_server.h"
-#include "hphp/runtime/server/virtual_host.h"
+#include "hphp/runtime/server/files-match.h"
+#include "hphp/runtime/server/satellite-server.h"
+#include "hphp/runtime/server/virtual-host.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

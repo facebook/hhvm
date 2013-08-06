@@ -61,7 +61,7 @@
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/type-profile.h"
-#include "hphp/runtime/server/source_root_info.h"
+#include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/tracer.h"
 #include "hphp/runtime/base/memory-profile.h"

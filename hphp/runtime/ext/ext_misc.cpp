@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/ext_misc.h"
 
-#include "hphp/runtime/server/server_stats.h"
+#include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/zend-pack.h"
 #include "hphp/runtime/base/hphp-system.h"

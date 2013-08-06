@@ -23,7 +23,7 @@
 #include "hphp/runtime/ext/mysql_stats.h"
 #include "hphp/runtime/base/socket.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/server/server_stats.h"
+#include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/util/timer.h"

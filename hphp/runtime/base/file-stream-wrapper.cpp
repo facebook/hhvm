@@ -17,7 +17,7 @@
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/plain-file.h"
-#include "hphp/runtime/server/static_content_cache.h"
+#include "hphp/runtime/server/static-content-cache.h"
 #include <memory>
 
 namespace HPHP {

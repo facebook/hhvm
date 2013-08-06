@@ -27,7 +27,7 @@
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/shared-store-base.h"
-#include "hphp/runtime/server/access_log.h"
+#include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/simple-counter.h"
 #include "hphp/util/util.h"
@@ -39,7 +39,7 @@
 #include "hphp/runtime/base/hardware-counter.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/util/parser/scanner.h"
-#include "hphp/runtime/server/access_log.h"
+#include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/base/crash-reporter.h"
 #include "folly/String.h"
 

@@ -17,7 +17,7 @@
 #include "hphp/runtime/base/smart-allocator.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/server/server_stats.h"
+#include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/trace.h"

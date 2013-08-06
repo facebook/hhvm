@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/server/server_stats.h"
+#include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/concurrent-shared-store.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/util/timer.h"

@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
-#include "hphp/runtime/server/source_root_info.h"
+#include "hphp/runtime/server/source-root-info.h"
 
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/translator.h"

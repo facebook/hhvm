@@ -25,10 +25,10 @@
 #include "hphp/util/async_func.h"
 #include "hphp/runtime/ext/ext_curl.h"
 #include "hphp/runtime/ext/ext_options.h"
-#include "hphp/runtime/server/http_request_handler.h"
+#include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/server/libevent_server.h"
+#include "hphp/runtime/server/libevent-server.h"
 
 #include <boost/make_shared.hpp>
 

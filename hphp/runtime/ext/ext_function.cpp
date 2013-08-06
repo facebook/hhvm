@@ -21,7 +21,7 @@
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/libevent-http-client.h"
-#include "hphp/runtime/server/http_protocol.h"
+#include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"

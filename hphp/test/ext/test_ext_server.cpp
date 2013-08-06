@@ -16,8 +16,8 @@
 
 #include "hphp/test/ext/test_ext_server.h"
 #include "hphp/runtime/ext/ext_server.h"
-#include "hphp/runtime/server/pagelet_server.h"
-#include "hphp/runtime/server/xbox_server.h"
+#include "hphp/runtime/server/pagelet-server.h"
+#include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/ext_file.h"
 

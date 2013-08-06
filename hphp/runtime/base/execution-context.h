@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/base/debuggable.h"
-#include "hphp/runtime/server/virtual_host.h"
+#include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/vm/funcdict.h"

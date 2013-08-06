@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/base/debuggable.h"
-#include "hphp/runtime/server/server_stats.h"
+#include "hphp/runtime/server/server-stats.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

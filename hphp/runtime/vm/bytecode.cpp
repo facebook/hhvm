@@ -6651,6 +6651,38 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCreateCont(PC& pc) {
   ret->m_data.pobj = cont;
 }
 
+inline void OPTBLD_INLINE VMExecutionContext::iopCreateAsync(PC& pc) {
+  NEXT();
+  DECODE_LITSTR(genName);
+  DECODE_IVA(label);
+  DECODE_IVA(iters);
+
+  const Func* origFunc = m_fp->m_func;
+  const Func* genFunc = origFunc->getGeneratorBody(genName);
+  assert(genFunc != nullptr);
+
+  c_Continuation* cont = origFunc->isMethod()
+    ? createContMeth(origFunc, genFunc, m_fp->getThisOrClass())
+    : createContFunc(origFunc, genFunc);
+
+  // TODO: we should check that the value on top of the stack is indeed
+  // a WaitHandle and fatal if not. Also, if it is a wait handle, assert
+  // that it is not finished.
+  cont->t_update(label, tvAsCVarRef(m_stack.topTV()));
+  m_stack.popTV();
+
+  fillContinuationVars(m_fp, origFunc, cont->actRec(), genFunc);
+
+  // copy the state of all the iterators at once
+  memcpy(frame_iter(cont->actRec(), iters-1),
+         frame_iter(m_fp, iters-1),
+         iters * sizeof(Iter));
+
+  TypedValue* ret = m_stack.allocTV();
+  ret->m_type = KindOfObject;
+  ret->m_data.pobj = cont;
+}
+
 static inline c_Continuation* this_continuation(const ActRec* fp) {
   ObjectData* obj = fp->getThis();
   assert(obj->instanceof(c_Continuation::s_cls));

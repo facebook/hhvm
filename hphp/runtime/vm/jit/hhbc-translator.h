@@ -425,6 +425,7 @@ struct HhbcTranslator {
 
   // continuations
   void emitCreateCont(Id funNameStrId);
+  void emitCreateAsync(Id funNameStrId, int64_t labelId, int iters);
   void emitContEnter(int32_t returnBcOffset);
   void emitUnpackCont();
   void emitContReturnControl();

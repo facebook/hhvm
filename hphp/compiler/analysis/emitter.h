@@ -599,6 +599,7 @@ public:
   void emitResolveClsBase(Emitter& e, int pos);
   void emitClsIfSPropBase(Emitter& e);
   Id emitVisitAndSetUnnamedL(Emitter& e, ExpressionPtr exp);
+  Id emitSetUnnamedL(Emitter& e);
   void emitPushAndFreeUnnamedL(Emitter& e, Id tempLocal, Offset start);
   void emitContinuationSwitch(Emitter& e, int ncase);
   DataType analyzeSwitch(SwitchStatementPtr s, SwitchState& state);
@@ -644,9 +645,12 @@ public:
                  MethodStatementPtr meth,
                  FuncEmitter* fe,
                  vector<FuncEmitter*>& top_fes);
+  void emitAsyncMethod(MethodStatementPtr meth);
   void emitGeneratorCreate(MethodStatementPtr meth);
   void emitGeneratorBody(MethodStatementPtr meth);
   void emitConstMethodCallNoParams(Emitter& e, string name);
+  void emitCreateStaticWaitHandle(Emitter& e, std::string cls,
+                                  std::function<void()> emitParam);
   void emitSetFuncGetArgs(Emitter& e);
   void emitMethodDVInitializers(Emitter& e,
                                 MethodStatementPtr& meth,

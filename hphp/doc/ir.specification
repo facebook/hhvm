@@ -1246,7 +1246,7 @@ StRaw S0:?? S1:ConstInt S2:??
   "Raw" store to memory---i.e. outside of our type-system.
 
   S0 is the base address, and is an untyped pointer.  S1 is a constant
-  from the RawMemSlow::Kind enum, which describes the offset from the
+  from the RawMemSlot::Kind enum, which describes the offset from the
   base, and the size.  The value in S2 depends on the value of S1.
 
 D:StkPtr = SpillStack S0:StkP S1:ConstInt, S2...
@@ -1829,6 +1829,11 @@ CIterFree<IterId> S0:FramePtr
 
   Free the iterator variable whose index is given by IterId in the stack
   frame pointed to by S0.
+
+IterCopy S0:FramePtr S1:ConstInt S2:PtrToGen S3:ConstInt
+
+  Copy iterator from stack frame S0 at offset S1 to the continuation
+  frame given by S2 at offset S3. Used for copying iterators in CreateAsync.
 
 
 19. Member instruction support

@@ -3741,6 +3741,13 @@ CreateCont <function name>    []  ->  [C]
   Continuation will store a reference to the function named by the string
   immediate to be used as its body.
 
+CreateAsync <function name> <label id> <number of iterators>   [C]  ->  [C]
+
+  Analogy of CreateCont for async functions. Creates a Continuation object, 
+  updates its label with <label id> immediate and stores a value from the stack 
+  to its m_value field. Unlike CreateCont, it also copies the first 
+  <number of iterators> iterators into the continuation frame.
+
 ContEnter [C]  ->  []
 
   This instruction may only appear in non-static methods of the Continuation
@@ -3815,7 +3822,6 @@ ContHandle    [C]  ->  []
   Handle exception from continuation body. $this must be a Continuation
   object. Marks the continuation as no longer running and finished and rethrows
   the exception on the top of the stack.
-
 
 Basic statement transformations
 -------------------------------

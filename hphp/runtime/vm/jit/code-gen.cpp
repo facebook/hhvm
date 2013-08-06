@@ -5880,6 +5880,17 @@ void CodeGenerator::cgMIterNextCommon(IRInstruction* inst) {
                SyncOptions::kSyncPoint, args);
 }
 
+void CodeGenerator::cgIterCopy(IRInstruction* inst) {
+  auto fromReg = m_regs[inst->src(0)].reg();
+  auto fromOffset = inst->src(1)->getValInt();
+  auto toReg = m_regs[inst->src(2)].reg();
+  auto toOffset = inst->src(3)->getValInt();
+  for (int i = 0; i < sizeof(Iter); i += 8) {
+    m_as.loadq(fromReg[-fromOffset+i], m_rScratch);
+    m_as.storeq(m_rScratch, toReg[-toOffset+i]);
+  }
+}
+
 void iterFreeHelper(Iter* iter) {
   iter->free();
 }

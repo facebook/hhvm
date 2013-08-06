@@ -2213,6 +2213,25 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
       case Statement::KindOfReturnStatement: {
         ReturnStatementPtr r(static_pointer_cast<ReturnStatement>(node));
+
+        // if returning from (outer) async function,
+        // wrap the result into StaticResultWaitHandle
+        if (node->getFunctionScope()->isAsync() &&
+            !m_curFunc->isGenerator()) {
+          if (visit(r->getRetExp())) {
+            emitConvertToCell(e);
+          } else {
+            e.Null();
+          }
+          Id tempLocal = emitSetUnnamedL(e);
+          Offset start = m_ue.bcPos();
+          emitFreePendingIters(e);
+          emitCreateStaticWaitHandle(e, "StaticResultWaitHandle",
+            [&]() { emitPushAndFreeUnnamedL(e, tempLocal, start); });
+          e.RetC();
+          return false;
+        }
+
         bool retV = false;
         if (visit(r->getRetExp())) {
           if (r->getRetExp()->getContext() & Expression::RefValue) {
@@ -3854,6 +3873,21 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           }
         }
 
+        // We're still at the closure definition site. Emit code to instantiate
+        // the new anonymous class, with the use variables as arguments.
+        ExpressionListPtr valuesList(ce->getClosureValues());
+        for (int i = 0; i < useCount; ++i) {
+          emitBuiltinCallArg(e, (*valuesList)[i], i, useVars[i].second);
+        }
+
+        if (node->getFunctionScope()->isAsync() && m_curFunc->isGenerator()) {
+          // Closure definition in the body of async function. The closure
+          // body was already emitted, so we just create the object here.
+          assert(ce->getClosureClassName());
+          e.CreateCl(useCount, ce->getClosureClassName());
+          return true;
+        }
+
         // The parser generated a unique name for the function,
         // use that for the class
         std::string clsName = ce->getClosureFunction()->getOriginalName();
@@ -3866,13 +3900,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         }
 
         StringData* className = StringData::GetStaticString(clsName);
-
-        // We're still at the closure definition site. Emit code to instantiate
-        // the new anonymous class, with the use variables as arguments.
-        ExpressionListPtr valuesList(ce->getClosureValues());
-        for (int i = 0; i < useCount; ++i) {
-          emitBuiltinCallArg(e, (*valuesList)[i], i, useVars[i].second);
-        }
 
         if (Option::WholeProgram) {
           int my_id;
@@ -3892,14 +3919,15 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           }
         }
 
-        e.CreateCl(useCount, className);
+        ce->setClosureClassName(StringData::GetStaticString(clsName));
+        e.CreateCl(useCount, ce->getClosureClassName());
 
         // From here on out, we're creating a new class to hold the closure.
         const static StringData* parentName =
           StringData::GetStaticString("Closure");
         const Location* sLoc = ce->getLocation().get();
         PreClassEmitter* pce = m_ue.newPreClassEmitter(
-          className, PreClass::AlwaysHoistable);
+          ce->getClosureClassName(), PreClass::AlwaysHoistable);
         pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(),
                   AttrUnique | AttrPersistent, parentName, nullptr);
 
@@ -3983,13 +4011,11 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         visit(expr);
         emitConvertToCell(e);
 
-        int64_t normalLabel = 2 * await->getLabel();
-        int64_t exceptLabel = normalLabel - 1;
-
         // if expr is null, just continue
+        Label awaitNull;
         e.Dup();
         e.IsNullC();
-        e.JmpNZ(m_yieldLabels[normalLabel]);
+        e.JmpNZ(awaitNull);
 
         // if the type of expr is not WaitHandle (can be just Awaitable),
         // call getWaitHandle() method.
@@ -4001,22 +4027,42 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         }
         assert(m_evalStack.size() == 1);
 
-        e.ContSuspend(normalLabel);
+        // suspend if it is not finished
+        Label finished;
+        e.Dup();        // keep wait handle on the stack
+        emitConstMethodCallNoParams(e, "isFinished");
+        e.JmpNZ(finished);
 
-        // emit return label for raise()
-        assert(m_evalStack.size() == 0);
-        e.Null();
-        m_yieldLabels[exceptLabel].set(e);
-
-        // throw received exception on the stack
-        e.Throw();
-
-        // emit return label for next()/send()
-        e.Null();
-        m_yieldLabels[normalLabel].set(e);
-
-        // continue with the received result on the stack
+        // the work is not yet finished, we had to suspend
+        int64_t normalLabel = 2 * await->getLabel();
+        int64_t exceptLabel = normalLabel - 1;
+        if (m_curFunc->isGenerator()) {
+          // suspend continuation
+          e.ContSuspend(normalLabel);
+          e.Null();
+          m_yieldLabels[exceptLabel].set(e);
+          e.Throw();
+          e.Null();
+        } else {
+          // create new continuation and return it's wait handle
+          auto meth = static_pointer_cast<MethodStatement>(
+                        node->getFunctionScope()->getStmt());
+          const StringData* nameStr =
+            StringData::GetStaticString(meth->getGeneratorName());
+          e.CreateAsync(nameStr, normalLabel, m_pendingIters.size());
+          emitConstMethodCallNoParams(e, "getWaitHandle");
+          e.RetC();
+        }
+        // emit code to continue without suspend
+        finished.set(e);
+        emitConstMethodCallNoParams(e, "join");
         assert(m_evalStack.size() == 1);
+
+        // resume here next time
+        if (m_curFunc->isGenerator()) {
+          m_yieldLabels[normalLabel].set(e);
+        }
+        awaitNull.set(e);
         return true;
       }
     }
@@ -4372,6 +4418,10 @@ Id EmitterVisitor::emitVisitAndSetUnnamedL(Emitter& e, ExpressionPtr exp) {
   visit(exp);
   emitConvertToCell(e);
 
+  return emitSetUnnamedL(e);
+}
+
+Id EmitterVisitor::emitSetUnnamedL(Emitter& e) {
   // HACK: emitVirtualLocal would pollute m_evalStack before visiting exp,
   //       YieldExpression won't be happy
   Id tempLocal = m_curFunc->allocUnnamedLocal();
@@ -5365,8 +5415,9 @@ static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
     attrs = attrs | AttrAllowOverride;
   }
 
-  if (meth->hasCallToGetArgs() ||
-      (!fe->hasGeneratorAsBody() && funcScope->mayUseVV())) {
+  // if hasCallToGetArgs() or if mayUseVV and is not 'create generator' function
+  if (meth->hasCallToGetArgs() || (funcScope->mayUseVV() &&
+        (!funcScope->isGenerator() || fe->isGenerator()))) {
     attrs = attrs | AttrMayUseVV;
   }
 
@@ -5479,13 +5530,26 @@ void EmitterVisitor::emitPostponedMeths() {
       top_fes.push_back(fe);
     }
 
-    FunctionScopePtr funcScope = meth->getFunctionScope();
-    if (funcScope->isGenerator() || funcScope->isAsync()) {
+    auto funcScope = meth->getFunctionScope();
+    if (funcScope->isGenerator()) {
       // emit the outer 'create generator' function
       m_curFunc = fe;
       fe->setHasGeneratorAsBody(true);
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
       emitGeneratorCreate(meth);
+
+      // emit the generator body
+      m_curFunc = createFuncEmitterForGeneratorBody(meth, fe, top_fes);
+      if (m_curFunc) {
+        emitMethodMetadata(meth, p.m_closureUseVars, m_curFunc->top());
+        emitGeneratorBody(meth);
+      }
+    } else if (funcScope->isAsync()) {
+      // emit the outer function (which creates continuation if blocked)
+      m_curFunc = fe;
+      fe->setHasGeneratorAsBody(true);
+      emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
+      emitAsyncMethod(meth);
 
       // emit the generator body
       m_curFunc = createFuncEmitterForGeneratorBody(meth, fe, top_fes);
@@ -5638,8 +5702,9 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
     fe->allocVarId(s_continuationVarArgsLocal);
   }
 
-  // assign ids to local variables (not in generator create)
-  if (!fe->hasGeneratorAsBody()) {
+  // assign ids to local variables (not in 'create generator' method)
+  if (!meth->getFunctionScope()->isGenerator() ||
+      fe->isGenerator()) {
     assignLocalVariableIds(meth->getFunctionScope());
   }
 
@@ -5748,8 +5813,7 @@ void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
 
   if (funcScope->needsLocalThis() &&
       !funcScope->isStatic() &&
-      !funcScope->isGenerator() &&
-      !funcScope->isAsync()) {
+      !funcScope->isGenerator()) {
     assert(!m_curFunc->top());
     static const StringData* thisStr = StringData::GetStaticString("this");
     Id thisId = m_curFunc->lookupVarId(thisStr);
@@ -5791,6 +5855,58 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
   FuncFinisher ff(this, e, m_curFunc);
 
   emitMethodDVInitializers(e, meth, topOfBody);
+}
+
+void EmitterVisitor::emitAsyncMethod(MethodStatementPtr meth) {
+  Emitter e(meth, m_ue, *this);
+  Label topOfBody(e);
+  emitMethodPrologue(e, meth);
+  emitSetFuncGetArgs(e);
+
+  // emit method body
+  Offset start = m_ue.bcPos();
+  visit(meth->getStmts());
+  assert(m_evalStack.size() == 0);
+
+  // if the current position is reachable, emit code to return null
+  if (currentPositionIsReachable()) {
+    emitCreateStaticWaitHandle(e, "StaticResultWaitHandle",
+                               [&](){ e.Null(); });
+    e.RetC();
+  }
+
+  // wrap the whole body into a try-catch block
+  Offset end = m_ue.bcPos();
+  ExnHandlerRegion* r = new ExnHandlerRegion(start, end);
+  m_exnHandlers.push_back(r);
+
+  Label* label = new Label(e);
+  StringData* excLit = StringData::GetStaticString("Exception");
+  r->m_names.insert(excLit);
+  r->m_catchLabels.push_back(std::pair<StringData*, Label*>(excLit, label));
+
+  // catch block
+  emitCreateStaticWaitHandle(e, "StaticExceptionWaitHandle",
+                             [&](){ e.Catch(); });
+  e.RetC();
+
+  FuncFinisher ff(this, e, m_curFunc);
+
+  emitMethodDVInitializers(e, meth, topOfBody);
+}
+
+void EmitterVisitor::emitCreateStaticWaitHandle(Emitter& e, std::string cls,
+                                          std::function<void()> emitParam) {
+  StringData* createLit = StringData::GetStaticString("create");
+  StringData* clsLit = StringData::GetStaticString(cls);
+  {
+    FPIRegionRecorder fpi(this, m_ue, m_evalStack, m_ue.bcPos());
+    e.FPushClsMethodD(1, createLit, clsLit);
+    emitParam();
+    e.FPassC(0);
+  }
+  e.FCall(1);
+  emitConvertToCell(e);
 }
 
 FuncEmitter* EmitterVisitor::createFuncEmitterForGeneratorBody(

@@ -424,6 +424,8 @@ O(StRaw,                            ND, SUnk,                          E|Mem) \
 O(StElem,                           ND, S(PtrToCell)                          \
                                           S(Int)                              \
                                           S(Cell),                 E|Mem|CRc) \
+O(IterCopy,                         ND, S(FramePtr) S(Int)                    \
+                                        S(PtrToGen) S(Int),            E|Mem) \
 O(LdStaticLocCached,      D(BoxedCell), C(CacheHandle),                   NF) \
 O(StaticLocInit,          D(BoxedCell), CStr                                  \
                                           S(FramePtr)                         \

@@ -40,12 +40,16 @@ public:
   FunctionStatementPtr getClosureFunction() { return m_func; }
   ExpressionListPtr getClosureVariables() { return m_vars; }
   ExpressionListPtr getClosureValues() { return m_values; }
+  StringData* getClosureClassName() { return m_closureClassName; }
+  void setClosureClassName(StringData* value) { m_closureClassName = value; }
   bool hasStaticLocals();
+
 
 private:
   FunctionStatementPtr m_func;
   ExpressionListPtr m_vars;
   ExpressionListPtr m_values;
+  StringData* m_closureClassName;
 
   static TypePtr s_ClosureType;
 

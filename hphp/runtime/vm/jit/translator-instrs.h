@@ -137,6 +137,7 @@
   CASE(Dup) \
   CASE(CreateCl) \
   CASE(CreateCont) \
+  CASE(CreateAsync) \
   CASE(ContEnter) \
   CASE(UnpackCont) \
   CASE(ContSuspend) \

@@ -1215,6 +1215,7 @@ static const struct {
   /*** 14. Continuation instructions ***/
 
   { OpCreateCont,  {None,             Stack1|Local, OutObject,         1 }},
+  { OpCreateAsync, {Stack1,           Stack1|Local, OutObject,         0 }},
   { OpContEnter,   {Stack1,           None,         OutNone,          -1 }},
   { OpUnpackCont,  {None,             StackTop2,    OutInt64,          2 }},
   { OpContSuspend, {Stack1,           None,         OutNone,          -1 }},
@@ -2029,7 +2030,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           varEnvTaint = true;
           continue;
         }
-        if (op == OpCreateCont) {
+        if (op == OpCreateCont || op == OpCreateAsync) {
           // CreateCont stores Uninit to all locals but NormalizedInstruction
           // doesn't have enough output fields, so we special case it in
           // analyze().
@@ -3315,7 +3316,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
         tas.recordWrite(o);
       }
     }
-    if (ni->op() == OpCreateCont) {
+    if (ni->op() == OpCreateCont || ni->op() == OpCreateAsync) {
       // CreateCont stores Uninit to all locals but NormalizedInstruction
       // doesn't have enough output fields, so we special case it here.
       auto const numLocals = ni->func()->numLocals();

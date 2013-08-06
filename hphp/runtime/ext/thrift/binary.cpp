@@ -154,6 +154,15 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       a.c = ntohll(a.c);
       return a.d;
     }
+    case T_FLOAT: {
+      union {
+        uint32_t c;
+        float d;
+      } a;
+      transport.readBytes(&(a.c), 4);
+      a.c = ntohl(a.c);
+      return a.d;
+    }
     //case T_UTF7: // aliases T_STRING
     case T_UTF8:
     case T_UTF16:
@@ -251,6 +260,7 @@ void skip_element(long thrift_typeID, PHPInputTransport& transport) {
       transport.skip(2);
       return;
     case T_I32:
+    case T_FLOAT:
       transport.skip(4);
       return;
     case T_U64:
@@ -385,6 +395,14 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
       } a;
       a.d = value.toDouble();
       transport.writeI64(a.c);
+    } return;
+    case T_FLOAT: {
+      union {
+        int32_t c;
+        float d;
+      } a;
+      a.d = (float)value.toDouble();
+      transport.writeI32(a.c);
     } return;
     //case T_UTF7:
     case T_UTF8:

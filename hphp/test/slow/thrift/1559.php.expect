@@ -1,4 +1,4 @@
-object(TestStruct)#4 (10) {
+object(TestStruct)#4 (12) {
   ["aBool"]=>
   bool(true)
   ["anInt"]=>
@@ -36,4 +36,8 @@ object(TestStruct)#4 (10) {
   int(123)
   ["anI16"]=>
   int(1234)
+  ["aFloat"]=>
+  float(1.25)
+  ["bFloat"]=>
+  float(3.1415927410126)
 }

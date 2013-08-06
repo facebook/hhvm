@@ -58,7 +58,8 @@ enum CType {
   C_LIST = 0x09,
   C_SET = 0x0A,
   C_MAP = 0x0B,
-  C_STRUCT = 0x0C
+  C_STRUCT = 0x0C,
+  C_FLOAT = 0x0D
 };
 
 enum CListType {
@@ -97,6 +98,8 @@ static CType ttype_to_ctype(TType x) {
       return C_SET;
     case T_MAP:
       return C_MAP;
+    case T_FLOAT:
+      return C_FLOAT;
     default:
       throw InvalidArgumentException("unknown TType", x);
   }
@@ -129,6 +132,8 @@ static TType ctype_to_ttype(CType x) {
         return T_SET;
     case C_MAP:
         return T_MAP;
+    case C_FLOAT:
+        return T_FLOAT;
     default:
         throw InvalidArgumentException("unknown CType", x);
   }
@@ -330,6 +335,18 @@ class CompactWriter {
             }
 
             transport->write((char*)&bits, 8);
+          }
+          break;
+
+        case T_FLOAT: {
+          union {
+            uint32_t i;
+            float d;
+          } u;
+
+          u.d = (float)value.toDouble();
+          uint32_t bits = htonl(u.i);
+          transport->write((char*)&bits, 4);
           }
           break;
 
@@ -672,6 +689,17 @@ class CompactReader {
             return u.d;
           }
 
+        case T_FLOAT: {
+             union {
+              uint32_t i;
+              float d;
+            } u;
+
+            transport.readBytes(&(u.i), 4);
+            u.i = ntohl(u.i);
+            return u.d;
+          }
+
         case T_UTF8:
         case T_UTF16:
         case T_STRING:
@@ -741,6 +769,10 @@ class CompactReader {
 
         case T_DOUBLE:
           transport.skip(8);
+          break;
+
+        case T_FLOAT:
+          transport.skip(4);
           break;
 
         case T_UTF8:

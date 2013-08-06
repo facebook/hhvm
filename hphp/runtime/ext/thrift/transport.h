@@ -84,7 +84,8 @@ enum TType {
   T_SET        = 14,
   T_LIST       = 15,
   T_UTF8       = 16,
-  T_UTF16      = 17
+  T_UTF16      = 17,
+  T_FLOAT      = 19,
 };
 
 

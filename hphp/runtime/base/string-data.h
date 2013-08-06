@@ -102,6 +102,10 @@ class StringData {
 public:
   typedef ThreadLocalSingleton<SmartAllocator<StringData>> Allocator;
 
+  /*
+   * Maximum length of a small string.  (The length does not include
+   * the null terminator.)
+   */
   const static uint32_t MaxSmallSize = 43;
 
   /*
@@ -196,7 +200,7 @@ public:
   MutableSlice mutableSlice() {
     assert(!isImmutable());
     return isSmall() ? MutableSlice(m_small, MaxSmallSize) :
-                       MutableSlice(m_data, bigCap());
+                       MutableSlice(m_data, bigCap() - 1);
   }
 
   /*
@@ -214,7 +218,7 @@ public:
   StringData* shrink(int len); // setSize and maybe realloc
 
   StringData* setSize(int len) {
-    assert(len >= 0 && len <= capacity() && !isImmutable());
+    assert(len >= 0 && len < capacity() && !isImmutable());
     m_data[len] = 0;
     m_len = len;
     m_hash = 0; // invalidate old hash
@@ -242,9 +246,17 @@ public:
   char* mutableData() const { return m_data; }
 
   int size() const { return m_len; }
+  bool empty() const { return size() == 0; }
   static uint sizeOffset() { return offsetof(StringData, m_len); }
-  int capacity() const { return isSmall() ? MaxSmallSize : bigCap(); }
-  bool empty() const { return size() == 0;}
+
+  /*
+   * Return the capacity of this string's buffer, including the space
+   * for the null terminator.
+   */
+  uint32_t capacity() const {
+    return isSmall() ? (MaxSmallSize + 1) : bigCap();
+  }
+
   DataType isNumericWithVal(int64_t &lval, double &dval, int allow_errors) const;
   bool isNumeric() const;
   bool isInteger() const;

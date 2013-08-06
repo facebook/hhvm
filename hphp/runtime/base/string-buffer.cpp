@@ -98,7 +98,7 @@ void StringBuffer::absorb(StringBuffer &buf) {
     if (str) {
       buf.m_buffer = (char*)str->data();
       buf.m_len = str->size();
-      buf.m_cap = str->capacity();
+      buf.m_cap = str->capacity() - 1;
     } else {
       buf.m_buffer = 0;
       buf.m_len = 0;
@@ -136,7 +136,7 @@ char *StringBuffer::reserve(int size) {
   if (!m_buffer) {
     m_str = StringData::Make(std::max(m_initialCap, m_len + size));
     m_buffer = (char*)m_str->data();
-    m_cap = m_str->capacity();
+    m_cap = m_str->capacity() - 1;
   } else if (m_cap - m_len < size) {
     m_buffer[m_len] = 0;
     m_str->setSize(m_len);

@@ -250,7 +250,7 @@ void StringData::initAttach(const char* data, int len) {
     buf[len] = 0;
     m_len = len;
     m_cdata = buf;
-    setModeAndCap(Mode::Smart, len);
+    setModeAndCap(Mode::Smart, len + 1);
     free(const_cast<char*>(data)); // XXX
   }
   assert(checkSane());
@@ -280,7 +280,7 @@ void StringData::initCopy(const char* data, int len) {
     buf[len] = 0;
     m_len = len;
     m_cdata = buf;
-    setModeAndCap(Mode::Smart, len);
+    setModeAndCap(Mode::Smart, len + 1);
   }
   assert(checkSane());
 }
@@ -304,7 +304,7 @@ void StringData::initMalloc(const char* data, int len) {
     buf[len] = 0;
     m_len = len;
     m_cdata = buf;
-    setModeAndCap(Mode::Malloc, len);
+    setModeAndCap(Mode::Malloc, len + 1);
   }
   assert(checkSane());
 }
@@ -318,7 +318,7 @@ StringData::StringData(SharedVariant *shared)
   m_len = shared->stringLength();
   m_cdata = shared->stringData();
   m_big.shared = shared;
-  setModeAndCap(Mode::Shared, m_len);
+  setModeAndCap(Mode::Shared, m_len + 1);
   enlist();
 }
 
@@ -372,7 +372,7 @@ void StringData::initConcat(StringSlice r1, StringSlice r2) {
     char* buf = smart_concat(r1.ptr, r1.len, r2.ptr, r2.len);
     m_len = len;
     m_data = buf;
-    setModeAndCap(Mode::Smart, len);
+    setModeAndCap(Mode::Smart, len + 1);
   }
 }
 
@@ -393,7 +393,7 @@ StringData::StringData(int cap) {
     m_len = 0;
     m_data = (char*) smart_malloc(cap + 1);
     m_data[0] = 0;
-    setModeAndCap(Mode::Smart, cap);
+    setModeAndCap(Mode::Smart, cap + 1);
   }
 }
 
@@ -418,7 +418,7 @@ void StringData::append(const char *s, int len) {
     }
     m_len = newlen;
     m_data = newdata;
-    setModeAndCap(Mode::Smart, newlen);
+    setModeAndCap(Mode::Smart, newlen + 1);
     m_hash = 0;
   } else if (rawdata() == s) {
     // appending ourself to ourself, be conservative.
@@ -427,7 +427,7 @@ void StringData::append(const char *s, int len) {
     releaseData();
     m_len = newlen;
     m_data = newdata;
-    setModeAndCap(Mode::Smart, newlen);
+    setModeAndCap(Mode::Smart, newlen + 1);
     m_hash = 0;
   } else if (isSmall()) {
     // we're currently small but might not be after append.
@@ -446,7 +446,7 @@ void StringData::append(const char *s, int len) {
       char *newdata = smart_concat(m_small, oldlen, s, len);
       m_len = newlen;
       m_data = newdata;
-      setModeAndCap(Mode::Smart, newlen);
+      setModeAndCap(Mode::Smart, newlen + 1);
       m_hash = 0;
     }
   } else if (isSmart()) {
@@ -457,12 +457,12 @@ void StringData::append(const char *s, int len) {
            (oldp < s && s - oldp > oldlen)); // no overlapping
     newlen = oldlen + len;
     char* newdata;
-    if ((int)newlen <= capacity()) {
+    if ((int)newlen < capacity()) {
       newdata = oldp;
     } else {
       uint32_t nlen = newlen + (newlen >> 2);
       newdata = (char*) smart_realloc(oldp, nlen + 1);
-      setModeAndCap(Mode::Smart, nlen);
+      setModeAndCap(Mode::Smart, nlen + 1);
     }
     memcpy(newdata + oldlen, s, len);
     newdata[newlen] = 0;
@@ -481,7 +481,7 @@ void StringData::append(const char *s, int len) {
     newdata[newlen] = 0;
     m_len = newlen;
     m_data = newdata;
-    setModeAndCap(Mode::Malloc, newlen);
+    setModeAndCap(Mode::Malloc, newlen + 1);
     m_hash = 0;
   }
   assert(newlen <= MaxSize);
@@ -490,21 +490,21 @@ void StringData::append(const char *s, int len) {
 
 MutableSlice StringData::reserve(int cap) {
   assert(!isImmutable() && m_count <= 1 && cap >= 0);
-  if (cap <= capacity()) return mutableSlice();
+  if (cap < capacity()) return mutableSlice();
   switch (mode()) {
     default: assert(false);
     case Mode::Small:
       m_data = (char*) smart_malloc(cap + 1);
       memcpy(m_data, m_small, m_len + 1); // includes \0
-      setModeAndCap(Mode::Smart, cap);
+      setModeAndCap(Mode::Smart, cap + 1);
       break;
     case Mode::Smart:
       m_data = (char*) smart_realloc(m_data, cap + 1);
-      setModeAndCap(Mode::Smart, cap);
+      setModeAndCap(Mode::Smart, cap + 1);
       break;
     case Mode::Malloc:
       m_data = (char*) realloc(m_data, cap + 1);
-      setModeAndCap(Mode::Malloc, cap);
+      setModeAndCap(Mode::Malloc, cap + 1);
       break;
   }
   return MutableSlice(m_data, cap);
@@ -515,11 +515,11 @@ StringData* StringData::shrink(int len) {
   switch (mode()) {
     case Mode::Smart:
       m_data = (char*) smart_realloc(m_data, len + 1);
-      setModeAndCap(Mode::Smart, len);
+      setModeAndCap(Mode::Smart, len + 1);
       break;
     case Mode::Malloc:
       m_data = (char*) realloc(m_data, len + 1);
-      setModeAndCap(Mode::Malloc, len);
+      setModeAndCap(Mode::Malloc, len + 1);
       break;
     default:
       // don't shrink
@@ -558,7 +558,7 @@ MutableSlice StringData::escalate(uint32_t cap) {
   delist();
 
   m_data = buf;
-  setModeAndCap(Mode::Smart, cap);
+  setModeAndCap(Mode::Smart, cap + 1);
   // clear precomputed hashcode
   m_hash = 0;
   assert(checkSane());
@@ -739,7 +739,7 @@ void StringData::inc() {
     releaseData();
     m_len = len;
     m_data = overflowed;
-    setModeAndCap(Mode::Smart, len);
+    setModeAndCap(Mode::Smart, len + 1);
   }
   m_hash = 0;
 }
@@ -948,8 +948,8 @@ bool StringData::checkSane() const {
   static_assert(MaxSmallSize == sizeof(StringData) -
                         offsetof(StringData, m_small) - 1, "layout bustage");
   assert(uint32_t(size()) <= MaxSize);
-  assert(uint32_t(capacity()) <= MaxSize);
-  assert(size() <= capacity());
+  assert(uint32_t(capacity()) < MaxSize);
+  assert(size() < capacity());
   if (isSmall()) {
     assert(m_data == m_small && m_len <= MaxSmallSize);
   } else {

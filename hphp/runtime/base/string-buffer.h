@@ -151,7 +151,7 @@ private:
   char *m_buffer;
   int m_initialCap;
   int m_maxBytes;
-  int m_cap;
+  int m_cap;                    // doesn't include null terminator
   int m_len;
 
   void growBy(int spaceRequired);

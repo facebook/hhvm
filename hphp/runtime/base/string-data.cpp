@@ -538,6 +538,10 @@ StringData *StringData::copy(bool sharedMemory /* = false */) const {
   return StringData::Make(data(), size(), CopyString);
 }
 
+/*
+ * Change to smart-malloced string.  Then returns a mutable slice of
+ * the usable string buffer (minus space for the null terminator).
+ */
 MutableSlice StringData::escalate(uint32_t cap) {
   assert(isImmutable() && !isStatic() && cap >= m_len);
   char *buf = (char*)smart_malloc(cap + 1);
@@ -545,7 +549,7 @@ MutableSlice StringData::escalate(uint32_t cap) {
   memcpy(buf, s.ptr, s.len);
   buf[s.len] = 0;
   m_data = buf;
-  m_big.cap = s.len | IsSmart;
+  m_big.cap = cap | IsSmart;
   // clear precomputed hashcode
   m_hash = 0;
   assert(checkSane());

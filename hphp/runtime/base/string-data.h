@@ -177,13 +177,43 @@ public:
   void append(StringSlice r) { append(r.ptr, r.len); }
   void append(const char *s, int len);
   StringData *copy(bool sharedMemory = false) const;
-  MutableSlice reserve(int capacity);
+
+  /*
+   * Reserve space for a string of length `maxLen' (not counting null
+   * terminator).
+   *
+   * Returns a slice with the same extents as mutableSlice.
+   */
+  MutableSlice reserve(int maxLen);
+
+  /*
+   * Returns a mutable slice with extents sized to the *buffer* this
+   * StringData wraps, not the string, minus space for an implicit
+   * null terminator.
+   *
+   * Note: please do not introduce new uses of this API that write
+   * nulls 1 byte past slice.len---we want to weed those out.
+   */
   MutableSlice mutableSlice() {
     assert(!isImmutable());
     return isSmall() ? MutableSlice(m_small, MaxSmallSize) :
                        MutableSlice(m_data, bigCap());
   }
+
+  /*
+   * Returns a slice with extends size to the *string* that this
+   * StringData wraps.  This range does not include a null terminator.
+   *
+   * Note: please do not add new code that assumes the range does
+   * include a null-terminator if possible.  (We would like to make
+   * this unnecessary eventually.)
+   */
+  StringSlice slice() const {
+    return StringSlice(m_data, m_len);
+  }
+
   StringData* shrink(int len); // setSize and maybe realloc
+
   StringData* setSize(int len) {
     assert(len >= 0 && len <= capacity() && !isImmutable());
     m_data[len] = 0;
@@ -215,9 +245,6 @@ public:
   int size() const { return m_len; }
   static uint sizeOffset() { return offsetof(StringData, m_len); }
   int capacity() const { return isSmall() ? MaxSmallSize : bigCap(); }
-  StringSlice slice() const {
-    return StringSlice(m_data, m_len);
-  }
   bool empty() const { return size() == 0;}
   bool isShared() const { return format() == IsShared; }
   bool isSmall() const { return format() == IsSmall; }
@@ -390,7 +417,7 @@ private:
   void releaseData();
   void releaseDataSlowPath();
   int numericCompare(const StringData *v2) const;
-  MutableSlice escalate(uint32_t cap); // change to smart-malloced string
+  MutableSlice escalate(uint32_t cap);
   void enlist();
   void delist();
 

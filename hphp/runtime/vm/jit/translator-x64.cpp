@@ -3687,23 +3687,28 @@ TranslatorX64::TranslatorX64()
   base += -(uint64_t)base & (kRoundUp - 1);
   enhugen(base, RuntimeOption::EvalTCNumHugeHotMB);
   TRACE(1, "init atrampolines @%p\n", base);
-  atrampolines.init(base, kTrampolinesBlockSize);
+  trampolinesCode.init(base, kTrampolinesBlockSize);
+  atrampolines.init(&trampolinesCode);
   base += kTrampolinesBlockSize;
 
   m_unwindRegistrar = register_unwind_region(base, m_totalSize);
   TRACE(1, "init ahot @%p\n", base);
-  ahot.init(base, kAHotSize);
+  hotCode.init(base, kAHotSize);
+  ahot.init(&hotCode);
   base += kAHotSize;
   TRACE(1, "init a @%p\n", base);
-  a.init(base, kASize);
+  mainCode.init(base, kASize);
+  a.init(&mainCode);
   aStart = base;
   base += kASize;
   TRACE(1, "init aprof @%p\n", base);
-  aprof.init(base, kAProfSize);
+  profCode.init(base, kAProfSize);
+  aprof.init(&profCode);
   base += kAProfSize;
   base += -(uint64_t)base & (kRoundUp - 1);
   TRACE(1, "init astubs @%p\n", base);
-  astubs.init(base, kAStubsSize);
+  stubsCode.init(base, kAStubsSize);
+  astubs.init(&stubsCode);
   enhugen(base, RuntimeOption::EvalTCNumHugeColdMB);
   base += kAStubsSize;
   TRACE(1, "init gdata @%p\n", base);
@@ -3985,7 +3990,10 @@ TranslatorX64::getPerfCounters(Array& ret) {
 }
 
 TranslatorX64::~TranslatorX64() {
-  freeSlab(atrampolines.base(), m_totalSize);
+  int result = munmap(trampolinesCode.getBase(), m_totalSize);
+  if (result != 0) {
+    perror("freeSlab: munmap");
+  }
 }
 
 static Debug::TCRange rangeFrom(const X64Assembler& a, const TCA addr,
@@ -4053,7 +4061,7 @@ std::string TranslatorX64::getUsage() {
   size_t aProfUsage = aprof.used();
   size_t aUsage     = a.used();
   size_t stubsUsage = astubs.used();
-  size_t dataUsage  = m_globalData.frontier - m_globalData.base;
+  size_t dataUsage  = m_globalData.getFrontier() - m_globalData.getBase();
   size_t tcUsage    = TargetCache::s_frontier;
   size_t persistentUsage =
     TargetCache::s_persistent_frontier - TargetCache::s_persistent_start;
@@ -4070,7 +4078,7 @@ std::string TranslatorX64::getUsage() {
     aUsage,     100 * aUsage / a.capacity(),
     aProfUsage, aprof.capacity() != 0 ? 100 * aProfUsage / aprof.capacity() : 0,
     stubsUsage, 100 * stubsUsage / astubs.capacity(),
-    dataUsage,  100 * dataUsage / m_globalData.size,
+    dataUsage,  100 * dataUsage / m_globalData.getSize(),
     tcUsage,
     400 * tcUsage / RuntimeOption::EvalJitTargetCacheSize / 3,
     persistentUsage,

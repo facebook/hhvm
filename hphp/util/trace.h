@@ -98,6 +98,7 @@ namespace Trace {
       TM(minstr)      \
       TM(region)      \
       TM(atomicvector)\
+      TM(datablock)   \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)    \
       TM(stress_txInterpSeed)   \

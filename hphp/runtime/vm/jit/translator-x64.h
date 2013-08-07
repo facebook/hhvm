@@ -190,11 +190,16 @@ class TranslatorX64 : public Translator
 
   TCA                    tcStart;
   TCA                    aStart;
-  Asm                    ahot;    // used for hot code of AttrHot functions
-  Asm                    a;       // used for hot code of non-AttrHot functions
-  Asm                    aprof;   // used for hot code of profiling translations
-  Asm                    astubs;  // used for cold code
-  Asm                    atrampolines;
+  CodeBlock              hotCode;
+  CodeBlock              mainCode;
+  CodeBlock              profCode;
+  CodeBlock              stubsCode;
+  CodeBlock              trampolinesCode;
+  X64Assembler           ahot;    // used for hot code of AttrHot functions
+  X64Assembler           a;       // used for hot code of non-AttrHot functions
+  X64Assembler           aprof;   // used for hot code of profiling translations
+  X64Assembler           astubs;  // used for cold code
+  X64Assembler           atrampolines;
   PointerMap             trampolineMap;
   int                    m_numNativeTrampolines;
 

@@ -20,6 +20,7 @@
 
 #include "hphp/util/util.h"
 #include "hphp/util/base.h"
+#include "hphp/util/data-block.h"
 #include "hphp/util/atomic.h"
 #include "hphp/util/trace.h"
 
@@ -472,181 +473,6 @@ namespace reg {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Note that CodeAddresses are not const; the whole point is that we intend
- * to mutate them. uint8_t is as good a type as any: instructions are
- * bytes, and pointer arithmetic works correctly for the architecture.
- */
-typedef uint8_t* CodeAddress;
-typedef uint8_t* Address;
-
-namespace sz {
-  static const int nosize = 0;
-  static const int byte  = 1;
-  static const int word  = 2;
-  static const int dword = 4;
-  static const int qword = 8;
-}
-
-Address allocSlab(size_t size);
-void freeSlab(Address addr, size_t size);
-
-/*
- * This needs to be a POD type (no user-declared constructors is the most
- * important characteristic) so that it can be made thread-local.
- */
-struct DataBlock {
-  logical_const Address base;
-  Address               frontier;
-  size_t                size;
-
-  /*
-   * mmap()s in the desired amount of memory. The size member must be set.
-   */
-  void init();
-
-  /*
-   * munmap()s the DataBlock's memory
-   */
-  void free();
-
-  /*
-   * Uses a preallocated slab of memory
-   */
-  void init(Address start, size_t size);
-
-  /*
-   * alloc --
-   *
-   *   Simple bump allocator.
-   *
-   * allocAt --
-   *
-   *   Some clients need to allocate with an externally maintained frontier.
-   *   allocAt supports this.
-   */
-  void* allocAt(size_t &frontierOff, size_t sz, size_t align = 16) {
-    align = Util::roundUpToPowerOfTwo(align);
-    uint8_t* frontier = base + frontierOff;
-    assert(base && frontier);
-    int slop = uintptr_t(frontier) & (align - 1);
-    if (slop) {
-      int leftInBlock = (align - slop);
-      frontier += leftInBlock;
-      frontierOff += leftInBlock;
-    }
-    assert((uintptr_t(frontier) & (align - 1)) == 0);
-    frontierOff += sz;
-    assert(frontierOff <= size);
-    return frontier;
-  }
-
-  template<typename T> T* alloc(size_t align = 16, int n = 1) {
-    size_t frontierOff = frontier - base;
-    T* retval = (T*)allocAt(frontierOff, sizeof(T) * n, align);
-    frontier = base + frontierOff;
-    return retval;
-  }
-
-  bool canEmit(size_t nBytes) {
-    assert(frontier >= base);
-    assert(frontier <= base + size);
-    return frontier + nBytes <= base + size;
-  }
-
-  bool isValidAddress(const CodeAddress tca) const {
-    return tca >= base && tca < (base + size);
-  }
-
-  void byte(const uint8_t byte) {
-    always_assert(canEmit(sz::byte));
-    TRACE(10, "%p b : %02x\n", frontier, byte);
-    *frontier = byte;
-    frontier += sz::byte;
-  }
-  void word(const uint16_t word) {
-    always_assert(canEmit(sz::word));
-    *(uint16_t*)frontier = word;
-    TRACE(10, "%p w : %04x\n", frontier, word);
-    frontier += sz::word;
-  }
-  void dword(const uint32_t dword) {
-    always_assert(canEmit(sz::dword));
-    TRACE(10, "%p d : %08x\n", frontier, dword);
-    *(uint32_t*)frontier = dword;
-    frontier += sz::dword;
-  }
-  void qword(const uint64_t qword) {
-    always_assert(canEmit(sz::qword));
-    TRACE(10, "%p q : %016" PRIx64 "\n", frontier, qword);
-    *(uint64_t*)frontier = qword;
-    frontier += sz::qword;
-  }
-
-  void bytes(size_t n, const uint8_t *bs) {
-    always_assert(canEmit(n));
-    TRACE(10, "%p [%ld b] : [%p]\n", frontier, n, bs);
-    if (n <= 8) {
-      // If it is a modest number of bytes, try executing in one machine
-      // store. This allows control-flow edges, including nop, to be
-      // appear idempotent on other CPUs.
-      union {
-        uint64_t qword;
-        uint8_t bytes[8];
-      } u;
-      u.qword = *(uint64_t*)frontier;
-      for (size_t i = 0; i < n; ++i) {
-        u.bytes[i] = bs[i];
-      }
-
-      // If this address doesn't span cache lines, on x64 this is an
-      // atomic store.  We're not using atomic_release_store() because
-      // this code path occurs even when it may span cache lines, and
-      // that function asserts about this.
-      *reinterpret_cast<uint64_t*>(frontier) = u.qword;
-    } else {
-      memcpy(frontier, bs, n);
-    }
-    frontier += n;
-  }
-
-protected:
-  void makeExecable();
-
-  void *rawBytes(size_t n) {
-    void* retval = (void*) frontier;
-    frontier += n;
-    return retval;
-  }
-};
-
-/*
- * This is sugar on top of DataBlock, providing a constructor (see
- * DataBlock's comment for why it can't provide constructors itself) and
- * making the allocated memory executable.
- *
- * We seqeuntially pour code into a codeblock from beginning to end.
- * Managing entry points, ensuring the block is big enough, keeping track
- * of cross-codeblock references in code and data, etc., is beyond the
- * scope of this module.
- */
-struct CodeBlock : public DataBlock {
-
-  CodeBlock() {};
-
-  /*
-   * Allocate executable memory of the specified size, anywhere in
-   * the address space.
-   */
-  void initCodeBlock(size_t sz);
-
-  /*
-   * User has pre-allocated the memory. This constructor might change
-   * virtual memory permissions to make this block "+rwx".
-   */
-  void initCodeBlock(CodeAddress start, size_t len);
-};
-
 enum instrFlags {
   IF_REVERSE    = 0x0001, // The operand encoding for some instructions are
                           // "backwards" in x64; these instructions are
@@ -919,30 +745,32 @@ struct Label;
 
 class X64Assembler {
   friend struct Label;
-  friend class CodeCursor;
-  friend class UndoMarker;
 
 public:
-  // must use init() later
-  X64Assembler() {}
+  X64Assembler() : code(nullptr) {}
 
-  void init(size_t sz);
-  void init(CodeAddress start, size_t sz);
+  void init(DataBlock* db) {
+    code = db;
+  }
 
   CodeAddress base() const {
-    return code.base;
+    return code->base;
   }
 
   CodeAddress frontier() const {
-    return code.frontier;
+    return code->frontier;
+  }
+
+  void setFrontier(CodeAddress newFrontier) {
+    code->frontier = newFrontier;
   }
 
   size_t capacity() const {
-    return code.size;
+    return code->size;
   }
 
   size_t used() const {
-    return frontier() - code.base;
+    return frontier() - code->base;
   }
 
   size_t available() const {
@@ -954,11 +782,11 @@ public:
   }
 
   bool empty() const {
-    return code.base == code.frontier;
+    return code->base == code->frontier;
   }
 
   void clear() {
-    code.frontier = code.base;
+    code->frontier = code->base;
   }
 
   bool canEmit(size_t nBytes) const {
@@ -1207,7 +1035,7 @@ public:
    */
 
   bool jmpDeltaFits(CodeAddress dest) {
-    int64_t delta = dest - (code.frontier + 5);
+    int64_t delta = dest - (code->frontier + 5);
     return deltaFits(delta, sz::dword);
   }
 
@@ -1249,7 +1077,7 @@ public:
   }
 
   void jmpAuto(CodeAddress dest) {
-    auto delta = dest - (code.frontier + 2);
+    auto delta = dest - (code->frontier + 2);
     if (deltaFits(delta, sz::byte)) {
       jmp8(dest);
     } else {
@@ -1258,7 +1086,7 @@ public:
   }
 
   void jccAuto(ConditionCode cc, CodeAddress dest) {
-    auto delta = dest - (code.frontier + 2);
+    auto delta = dest - (code->frontier + 2);
     if (deltaFits(delta, sz::byte)) {
       jcc8(cc, dest);
     } else {
@@ -1367,8 +1195,8 @@ public:
   }
 
   void emitInt3s(int n) {
-    memset(code.frontier, 0xcc, n);
-    code.frontier += n;
+    memset(code->frontier, 0xcc, n);
+    code->frontier += n;
   }
 
   void emitNop(int n) {
@@ -1401,19 +1229,19 @@ public:
    */
 
   void byte(uint8_t b) {
-    code.byte(b);
+    code->byte(b);
   }
   void word(uint16_t w) {
-    code.word(w);
+    code->word(w);
   }
   void dword(uint32_t dw) {
-    code.dword(dw);
+    code->dword(dw);
   }
   void qword(uint64_t qw) {
-    code.qword(qw);
+    code->qword(qw);
   }
   void bytes(size_t n, const uint8_t* bs) {
-    code.bytes(n, bs);
+    code->bytes(n, bs);
   }
 
   // op %r
@@ -1730,7 +1558,7 @@ public:
   void emitJ8(X64Instr op, ssize_t imm)
     ALWAYS_INLINE {
     assert((op.flags & IF_JCC) == 0);
-    ssize_t delta = imm - ((ssize_t)code.frontier + 2);
+    ssize_t delta = imm - ((ssize_t)code->frontier + 2);
     // Emit opcode and 8-bit immediate
     byte(0xEB);
     byte(safe_cast<int8_t>(delta));
@@ -1740,7 +1568,7 @@ public:
     ALWAYS_INLINE {
     // this is for jcc only
     assert(op.flags & IF_JCC);
-    ssize_t delta = imm - ((ssize_t)code.frontier + 2);
+    ssize_t delta = imm - ((ssize_t)code->frontier + 2);
     // Emit opcode
     byte(jcond | 0x70);
     // Emit 8-bit offset
@@ -1750,7 +1578,7 @@ public:
   void emitJ32(X64Instr op, ssize_t imm) ALWAYS_INLINE {
     // call and jmp are supported, jcc is not supported
     assert((op.flags & IF_JCC) == 0);
-    int32_t delta = safe_cast<int32_t>(imm - ((ssize_t)code.frontier + 5));
+    int32_t delta = safe_cast<int32_t>(imm - ((ssize_t)code->frontier + 5));
     uint8_t *bdelta = (uint8_t*)&delta;
     uint8_t instr[] = { op.table[2],
       bdelta[0], bdelta[1], bdelta[2], bdelta[3] };
@@ -1761,7 +1589,7 @@ public:
       ALWAYS_INLINE {
     // jcc is supported, call and jmp are not supported
     assert(op.flags & IF_JCC);
-    int32_t delta = safe_cast<int32_t>(imm - ((ssize_t)code.frontier + 6));
+    int32_t delta = safe_cast<int32_t>(imm - ((ssize_t)code->frontier + 6));
     uint8_t* bdelta = (uint8_t*)&delta;
     uint8_t instr[6] = { 0x0f, uint8_t(0x80 | jcond),
       bdelta[0], bdelta[1], bdelta[2], bdelta[3] };
@@ -2586,7 +2414,9 @@ private:
 #undef UIMR
 #undef URIP
 
-  CodeBlock code;
+  // This has to be a pointer because it's uninitialized when X64Assembler
+  // is constructed.
+  DataBlock* code;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -2614,32 +2444,32 @@ struct Label : private boost::noncopyable {
 
   void jmp(X64Assembler& a) {
     addJump(&a, Branch::Jmp);
-    a.jmp(m_address ? m_address : a.code.frontier);
+    a.jmp(m_address ? m_address : a.frontier());
   }
 
   void jmp8(X64Assembler& a) {
     addJump(&a, Branch::Jmp8);
-    a.jmp8(m_address ? m_address : a.code.frontier);
+    a.jmp8(m_address ? m_address : a.frontier());
   }
 
   void jcc(X64Assembler& a, ConditionCode cc) {
     addJump(&a, Branch::Jcc);
-    a.jcc(cc, m_address ? m_address : a.code.frontier);
+    a.jcc(cc, m_address ? m_address : a.frontier());
   }
 
   void jcc8(X64Assembler& a, ConditionCode cc) {
     addJump(&a, Branch::Jcc8);
-    a.jcc8(cc, m_address ? m_address : a.code.frontier);
+    a.jcc8(cc, m_address ? m_address : a.frontier());
   }
 
   void call(X64Assembler& a) {
     addJump(&a, Branch::Call);
-    a.call(m_address ? m_address : a.code.frontier);
+    a.call(m_address ? m_address : a.frontier());
   }
 
   void jmpAuto(X64Assembler& a) {
     assert(m_address);
-    auto delta = m_address - (a.code.frontier + 2);
+    auto delta = m_address - (a.frontier() + 2);
     if (deltaFits(delta, sz::byte)) {
       jmp8(a);
     } else {
@@ -2649,7 +2479,7 @@ struct Label : private boost::noncopyable {
 
   void jccAuto(X64Assembler& a, ConditionCode cc) {
     assert(m_address);
-    auto delta = m_address - (a.code.frontier + 2);
+    auto delta = m_address - (a.frontier() + 2);
     if (deltaFits(delta, sz::byte)) {
       jcc8(a, cc);
     } else {
@@ -2684,7 +2514,7 @@ private:
     JumpInfo info;
     info.type = type;
     info.a = a;
-    info.addr = a->code.frontier;
+    info.addr = a->code->getFrontier();
     m_toPatch.push_back(info);
   }
 
@@ -2732,7 +2562,7 @@ class UndoMarker {
   }
 
   void undo() {
-    m_a.code.frontier = m_oldFrontier;
+    m_a.setFrontier(m_oldFrontier);
     TRACE_MOD(Trace::trans, 1, "Restore: %p\n", m_a.frontier());
   }
 };
@@ -2744,7 +2574,7 @@ class CodeCursor : public UndoMarker {
   public:
   CodeCursor(X64Assembler& a, CodeAddress newFrontier) :
     UndoMarker(a) {
-    a.code.frontier = newFrontier;
+    a.setFrontier(newFrontier);
   }
   ~CodeCursor() {
     undo();

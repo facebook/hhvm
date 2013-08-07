@@ -272,10 +272,13 @@ void VerifyParamTypeSlow(const Class* cls,
     if (def) {
       // There's no need to handle nullable typedefs specially here:
       // we already know we're checking a non-null object with the
-      // class `cls'.
+      // class `cls'.  We do however need to check for typedefs to
+      // mixed.
       if (def->kind == KindOfObject) {
         constraint = def->klass;
         if (constraint && cls->classof(constraint)) return;
+      } else if (def->kind == KindOfAny) {
+        return;
       }
     }
   }

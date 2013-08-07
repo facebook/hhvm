@@ -157,7 +157,7 @@ bool TypeConstraint::checkTypedefObj(const TypedValue* tv) const {
   auto const td = getTypedefWithAutoload(m_namedEntity, m_typeName);
   if (!td) return false;
   if (td->nullable && IS_NULL_TYPE(tv->m_type)) return true;
-  if (td->kind != KindOfObject) return false;
+  if (td->kind != KindOfObject) return td->kind == KindOfAny;
   return td->klass && tv->m_data.pobj->instanceof(td->klass);
 }
 

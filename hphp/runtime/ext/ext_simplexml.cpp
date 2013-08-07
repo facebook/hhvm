@@ -173,7 +173,7 @@ static Array create_children(CResRef doc, xmlNodePtr root,
         continue;
       }
     } else {
-      if (node->type == XML_TEXT_NODE) {
+      if (node->type == XML_TEXT_NODE || node->type == XML_CDATA_SECTION_NODE) {
         if (node->content && *node->content) {
           add_property
             (properties, root,
@@ -187,7 +187,7 @@ static Array create_children(CResRef doc, xmlNodePtr root,
     if (node->type != XML_ELEMENT_NODE || match_ns(node, ns, is_prefix)) {
       xmlNodePtr child = node->children;
       Object sub;
-      if (child && child->type == XML_TEXT_NODE && !xmlIsBlankNode(child)) {
+      if (child && (child->type == XML_TEXT_NODE || child->type == XML_CDATA_SECTION_NODE) && !xmlIsBlankNode(child)) {
         sub = create_text(doc, child, node_list_to_string(root->doc, child),
                           ns, is_prefix, false);
       } else {
@@ -354,7 +354,7 @@ void c_SimpleXMLElement::t___construct(CStrRef data, int64_t options /* = 0 */,
   xmlDocPtr doc = xmlReadMemory(xml.data(), xml.size(), NULL, NULL, options);
   if (doc) {
     m_doc =
-      Resource(NEWOBJ(XmlDocWrapper)(doc, c_SimpleXMLElement::s_class_name));
+      Resource(NEWOBJ(XmlDocWrapper)(doc, o_getClassName()));
     m_node = xmlDocGetRootElement(doc);
     if (m_node) {
       m_children = create_children(m_doc, m_node, ns, is_prefix);
@@ -416,6 +416,7 @@ Variant c_SimpleXMLElement::t_xpath(CStrRef path) {
      */
     switch (nodeptr->type) {
     case XML_TEXT_NODE:
+    case XML_CDATA_SECTION_NODE:
       sub = create_element(m_doc, nodeptr->parent, String(), false);
       break;
     case XML_ELEMENT_NODE:
@@ -524,7 +525,9 @@ Object c_SimpleXMLElement::t_children(CStrRef ns /* = "" */,
   elem->m_is_text = m_is_text;
   elem->m_free_text = m_free_text;
   elem->m_is_children = true;
-  if (ns.empty()) {
+  if (m_is_text) {
+    return obj;
+  } else if (ns.empty()) {
     elem->m_children.assignRef(m_children);
   } else {
     Array props = Array::Create();
@@ -873,7 +876,13 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
 }
 
 bool c_SimpleXMLElement::o_toBooleanImpl() const noexcept {
-  return (m_node || getDynProps().size());
+  if (m_node || getDynProps().size()) {
+    if (m_is_children || m_node->parent->type == XML_DOCUMENT_NODE) {
+      return m_children.toArray().size() > 0;
+    }
+    return true;
+  }
+  return false;
 }
 
 int64_t c_SimpleXMLElement::o_toInt64Impl() const noexcept {

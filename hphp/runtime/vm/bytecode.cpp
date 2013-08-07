@@ -6017,7 +6017,7 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
       - (uintptr_t)m_fp->m_func->base();
     assert(pcOff() > m_fp->m_func->base());
 
-    if (UNLIKELY(!prepareArrayArgs(ar, args.get()))) return false;
+    if (UNLIKELY(!prepareArrayArgs(ar, args.values().get()))) return false;
   }
 
   if (UNLIKELY(!(prepareFuncEntry(ar, pc)))) {

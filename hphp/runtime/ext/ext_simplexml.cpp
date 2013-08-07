@@ -323,7 +323,7 @@ c_SimpleXMLElement::c_SimpleXMLElement(Class* cb) :
                        ObjectData::CallToImpl>(cb),
       m_node(NULL), m_is_text(false), m_free_text(false),
       m_is_attribute(false), m_is_children(false), m_is_property(false),
-      m_xpath(NULL) {
+      m_is_array(false), m_xpath(NULL) {
   m_children = Array::Create();
 }
 
@@ -346,6 +346,7 @@ c_SimpleXMLElement* c_SimpleXMLElement::clone() {
   node->m_is_attribute = m_is_attribute;
   node->m_is_children = m_is_children;
   node->m_is_property = m_is_property;
+  node->m_is_array = m_is_array;
   node->m_children = create_children(m_doc, m_node, String(), false);
   node->m_attributes = collect_attributes(m_node, String(), false);
   return node;
@@ -912,7 +913,8 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
 
 bool c_SimpleXMLElement::o_toBooleanImpl() const noexcept {
   if (m_node || getDynProps().size()) {
-    if (m_is_children || (m_node->parent && m_node->parent->type == XML_DOCUMENT_NODE)) {
+    if (m_is_array || m_is_children || 
+       (m_node->parent && m_node->parent->type == XML_DOCUMENT_NODE)) {
       return m_children.toArray().size() > 0 || m_attributes.toArray().size() > 0;
     }
     return true;
@@ -945,11 +947,12 @@ Array c_SimpleXMLElement::o_toArray() const {
   }
   ret += m_children;
 
-  // String elements are implicitly converted.
   for (ArrayIter iter(ret); iter; ++iter) {
     if (iter.second().isObject()) {
       c_SimpleXMLElement *elem = iter.second().toObject().
         getTyped<c_SimpleXMLElement>();
+      elem->m_is_array = true;
+      // String elements are implicitly converted.
       if (elem->m_is_text) {
         ret.set(iter.first(), elem->t___tostring());
       }

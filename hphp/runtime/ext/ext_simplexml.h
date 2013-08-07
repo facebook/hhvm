@@ -87,6 +87,7 @@ class c_SimpleXMLElement :
   bool m_is_attribute;
   bool m_is_children;
   bool m_is_property;
+  bool m_is_array;
   virtual bool o_toBooleanImpl() const noexcept;
   virtual int64_t o_toInt64Impl() const noexcept;
   virtual double o_toDoubleImpl() const noexcept;

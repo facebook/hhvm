@@ -456,8 +456,10 @@ void AnalysisResult::markRedeclaringClasses() {
    * as redeclaring for now.
    */
   for (auto& kv : m_classAliases) {
-    markRedeclaring(Util::toLower(kv.first));
-    markRedeclaring(Util::toLower(kv.second));
+    assert(kv.first == Util::toLower(kv.first));
+    assert(kv.second == Util::toLower(kv.second));
+    markRedeclaring(kv.first);
+    markRedeclaring(kv.second);
   }
 
   /*

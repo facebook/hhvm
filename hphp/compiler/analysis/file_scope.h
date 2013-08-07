@@ -138,7 +138,8 @@ public:
                              const std::string &decname);
 
   void addClassAlias(const std::string& target, const std::string& alias) {
-    m_classAliasMap.insert(std::make_pair(target, alias));
+    m_classAliasMap.insert(std::make_pair(Util::toLower(target),
+                                          Util::toLower(alias)));
   }
 
   std::multimap<std::string,std::string> const& getClassAliases() const {

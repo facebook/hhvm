@@ -238,6 +238,14 @@ public:
   ClassScopePtr findClass(const std::string &className,
                           FindClassBy by);
 
+  /*
+   * Returns: whether the given name is the name of any type aliases
+   * in the whole program.
+   */
+  bool isTypeAliasName(const std::string& name) const {
+    return m_typeAliasNames.count(name);
+  }
+
   /**
    * Find all the redeclared classes by the name, excluding system classes.
    * Note that system classes cannot be redeclared.

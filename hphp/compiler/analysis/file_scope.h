@@ -146,7 +146,7 @@ public:
   }
 
   void addTypeAliasName(const std::string& name) {
-    m_typeAliasNames.insert(name);
+    m_typeAliasNames.insert(Util::toLower(name));
   }
 
   std::set<std::string> const& getTypeAliasNames() const {

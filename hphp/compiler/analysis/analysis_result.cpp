@@ -467,7 +467,8 @@ void AnalysisResult::markRedeclaringClasses() {
    * that things like 'instanceof Foo' will not mean the same thing.
    */
   for (auto& name : m_typeAliasNames) {
-    markRedeclaring(Util::toLower(name));
+    assert(Util::toLower(name) == name);
+    markRedeclaring(name);
   }
 }
 

@@ -148,6 +148,11 @@ const StaticString
   s__SERVER("_SERVER"),
   s__ENV("_ENV");
 
+String k_PHP_BINARY;
+String k_PHP_BINDIR;
+String k_PHP_OS;
+String k_PHP_SAPI;
+
 static void process_cmd_arguments(int argc, char **argv) {
   GlobalVariables *g = get_global_variables();
   g->set(s_argc, Variant(argc), false);
@@ -1319,6 +1324,12 @@ void hphp_process_init() {
   action.sa_flags = SA_SIGINFO | SA_NODEFER;
   sigaction(SIGVTALRM, &action, nullptr);
 
+  // Initialize per-process dynamic PHP-visible consts before ClassInfo::Load()
+  k_PHP_BINARY = StringData::GetStaticString(current_executable_path());
+  k_PHP_BINDIR = StringData::GetStaticString(current_executable_directory());
+  k_PHP_OS = StringData::GetStaticString(f_php_uname("s"));
+  k_PHP_SAPI = StringData::GetStaticString(RuntimeOption::ExecutionMode);
+
   init_thread_locals();
   ClassInfo::Load();
   Process::InitProcessStatics();
@@ -1426,12 +1437,6 @@ void hphp_session_init() {
   StatCache::requestInit();
 
   g_vmContext->requestInit();
-
-  EnvConstants *g = get_env_constants();
-  g->k_PHP_SAPI = StringData::GetStaticString(RuntimeOption::ExecutionMode);
-  g->k_PHP_BINARY = current_executable_path();
-  g->k_PHP_BINDIR = current_executable_directory();
-  g->k_PHP_OS = f_php_uname("s");
 }
 
 bool hphp_is_warmup_enabled() {

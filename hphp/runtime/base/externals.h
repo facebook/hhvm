@@ -63,27 +63,24 @@ extern void free_global_variables_after_sweep();
 
 /**
  * These are things that look like constants to PHP, but their values aren't
- * known at compile time and are instead determined at startup time. lvalProxy
- * is not that (it's a "black hole" for certain types of assignments) but there
- * isn't really an obviously better place for it to live.
+ * known at compile time and are instead determined per request at startup time.
+ * lvalProxy is not that (it's a "black hole" for certain types of assignments)
+ * but there isn't really an obviously better place for it to live.
+ *
+ * The standalone k_ constants are similarly dynamic but invariant per process.
  */
 struct EnvConstants {
   static void requestInit(EnvConstants* gt);
   static void requestExit();
   Variant __lvalProxy;
-  Variant stgv_Variant[5];
+  Variant stgv_Variant[1];
 #define k_SID stgv_Variant[0]
-#define k_PHP_SAPI stgv_Variant[1]
-#define k_PHP_BINARY stgv_Variant[2]
-#define k_PHP_BINDIR stgv_Variant[3]
-#define k_PHP_OS stgv_Variant[4]
 };
 extern EnvConstants* get_env_constants();
-
-/**
- * Precomputed literal strings
- */
-extern StaticString literalStrings[];
+extern String k_PHP_BINARY;
+extern String k_PHP_BINDIR;
+extern String k_PHP_OS;
+extern String k_PHP_SAPI;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

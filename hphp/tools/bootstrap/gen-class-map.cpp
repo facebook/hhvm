@@ -248,9 +248,7 @@ static void writeConstant(std::ostream& out, const PhpConst& cns) {
 
   if (cns.isSystem()) {
     // Special "magic" constants
-    if ((name == "SID") || (name == "PHP_SAPI") ||
-       (name == "PHP_BINARY") || (name == "PHP_BINDIR") ||
-       (name == "PHP_OS")) {
+    if (name == "SID") {
       out << "(const char *)((offsetof(EnvConstants, k_" << name << ") - "
           << "offsetof(EnvConstants, stgv_Variant)) / sizeof(Variant)), "
           << castLong(1) << ",\n";

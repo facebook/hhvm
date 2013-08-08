@@ -38,14 +38,14 @@ const StaticString s_uuinvoke("__invoke");
 void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   auto const invokeFunc = getVMClass()->lookupMethod(s_uuinvoke.get());
 
-  if (invokeFunc->attrs() & AttrStatic) {
-    // Only set the class for static closures
-    m_thisOrClass = (ObjectData*)(intptr_t(ar->m_func->cls()) | 1LL);
-  } else {
-    // I don't care if it is a $this or a late bound class because we will just
-    // put it back in the same place on an ActRec.
-    m_thisOrClass = ar->m_this;
-    if (ar->hasThis()) {
+  m_thisOrClass = ar->m_this;
+  if (ar->hasThis()) {
+    if (invokeFunc->attrs() & AttrStatic) {
+      // Only set the class for static closures.
+      m_thisOrClass = reinterpret_cast<ObjectData*>(
+        reinterpret_cast<intptr_t>(ar->getThis()->getVMClass()) | 1LL
+      );
+    } else {
       ar->getThis()->incRefCount();
     }
   }

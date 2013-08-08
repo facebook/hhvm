@@ -1,5 +1,6 @@
 Next Release
   - Async stack traces in the debugger via the "wa" command
+  - Fix late static binding in static closures
 
 "Churrasco" 05-Aug-2013
   - Implement stream_is_local

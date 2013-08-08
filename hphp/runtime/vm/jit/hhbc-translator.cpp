@@ -1997,10 +1997,10 @@ void HhbcTranslator::emitCreateCl(int32_t numParams, int32_t funNameStrId) {
 
   auto const ctx = [&]{
     if (!curClass()) return cns(nullptr);
-    if (invokeFunc->attrs() & AttrStatic) {
-      return cns(reinterpret_cast<uintptr_t>(curClass()) | 1, Type::Cctx);
-    }
     auto const ldctx = gen(LdCtx, FuncData(curFunc()), m_tb->fp());
+    if (invokeFunc->attrs() & AttrStatic) {
+      return gen(ConvClsToCctx, gen(LdClsCtx, ldctx));
+    }
     return gen(IncRefCtx, ldctx);
   }();
   gen(StClosureCtx, closure, ctx);

@@ -404,7 +404,8 @@ DebuggerClient::DebuggerClient()
       m_inputState(TakingCommand),
       m_sigNum(CmdSignal::SignalNone), m_sigCount(0),
       m_acLen(0), m_acIndex(0), m_acPos(0), m_acLiveListsDirty(true),
-      m_threadId(0), m_listLine(0), m_listLineFocus(0), m_frame(0) {
+      m_threadId(0), m_listLine(0), m_listLineFocus(0),
+      m_stacktraceAsync(false), m_frame(0) {
   TRACE(2, "DebuggerClient::DebuggerClient\n");
   Debugger::InitUsageLogging();
 }
@@ -1501,6 +1502,12 @@ do {                                         \
     NEW_CMD_NAME("internaltesting", CmdInternalTesting);
   }
 
+  // Make 'wa' a quick shortcut for 'where async'
+  if (m_command == "wa") {
+    m_args.insert(m_args.begin(), "async");
+    NEW_CMD_NAME("where", CmdWhere);
+  }
+
   switch (tolower(m_command[0])) {
     case 'a': MATCH_CMD("abort"    , CmdAbort    );
     case 'b': MATCH_CMD("break"    , CmdBreak    );
@@ -1962,13 +1969,18 @@ void DebuggerClient::addWatch(const char *fmt, const std::string &php) {
   m_watches.push_back(watch);
 }
 
-void DebuggerClient::setStackTrace(CArrRef stacktrace) {
+void DebuggerClient::setStackTrace(CArrRef stacktrace, bool isAsync) {
   TRACE(2, "DebuggerClient::setStackTrace\n");
   m_stacktrace = stacktrace;
+  m_stacktraceAsync = isAsync;
 }
 
 void DebuggerClient::moveToFrame(int index, bool display /* = true */) {
   TRACE(2, "DebuggerClient::moveToFrame\n");
+  if (m_stacktraceAsync && display) {
+    error("Unable to move along the async stack at this time, sorry!");
+    return;
+  }
   m_frame = index;
   if (m_frame >= m_stacktrace.size()) {
     m_frame = m_stacktrace.size() - 1;
@@ -1999,7 +2011,9 @@ const StaticString
   s_args("args"),
   s_namespace("namespace"),
   s_class("class"),
-  s_function("function");
+  s_function("function"),
+  s_id("id"),
+  s_ancestors("ancestors");
 
 void DebuggerClient::printFrame(int index, CArrRef frame) {
   TRACE(2, "DebuggerClient::printFrame\n");
@@ -2022,13 +2036,42 @@ void DebuggerClient::printFrame(int index, CArrRef frame) {
   func.append(frame[s_function].toString());
 
   String sindex(index);
-  print("#%s  %s (%s)\n %s  at %s:%d",
-        sindex.data(),
-        func.data() ? func.data() : "",
-        args.data() ? args.data() : "",
-        String("           ").substr(0, sindex.size()).data(),
-        frame[s_file].toString().data(),
-        (int)frame[s_line].toInt32());
+
+  if (m_stacktraceAsync) {
+    if (frame.empty()) {
+      // NB: join boundaries are represented by an empty array.
+      print("#%s  <<join>>", sindex.data());
+    } else {
+      print("#%s  %s [%s]",
+            sindex.data(),
+            func.data() ? func.data() : "",
+            frame[s_id].toString().data());
+      auto ancestors = frame[s_ancestors].toArray();
+      if (ancestors.size() > 1) {
+        StringBuffer ancestorList;
+        for (ArrayIter iter(frame[s_ancestors].toArray()); iter; ++iter) {
+          if (!ancestorList.empty()) ancestorList.append(", ");
+          ancestorList.append(iter.second());
+        }
+        if (!ancestorList.empty()) {
+          print(" %s  ancestors: %s",
+                String("           ").substr(0, sindex.size()).data(),
+                ancestorList.data());
+        }
+      }
+    }
+  } else {
+    print("#%s  %s (%s)",
+          sindex.data(),
+          func.data() ? func.data() : "",
+          args.data() ? args.data() : "");
+  }
+  if (!frame[s_file].isNull()) {
+    print(" %s  at %s:%d",
+          String("           ").substr(0, sindex.size()).data(),
+          frame[s_file].toString().data(),
+          (int)frame[s_line].toInt32());
+  }
 }
 
 void DebuggerClient::startMacro(std::string name) {

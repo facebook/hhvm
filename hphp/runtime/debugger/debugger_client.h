@@ -256,12 +256,13 @@ public:
   /**
    * Stacktraces.
    */
-  Array getStackTrace() { return m_stacktrace;}
-  void setStackTrace(CArrRef stacktrace);
+  Array getStackTrace() { return m_stacktrace; }
+  void setStackTrace(CArrRef stacktrace, bool isAsync);
+  bool isStackTraceAsync() { return m_stacktraceAsync; }
   void moveToFrame(int index, bool display = true);
   void printFrame(int index, CArrRef frame);
   void setFrame(int frame) { m_frame = frame; }
-  int getFrame() const { return m_frame;}
+  int getFrame() const { return m_frame; }
 
   /**
    * Auto-completion.
@@ -387,6 +388,7 @@ private:
   WatchPtrVec m_watches;
 
   Array m_stacktrace;
+  bool m_stacktraceAsync;
   int m_frame;
 
   std::string m_sourceRoot;

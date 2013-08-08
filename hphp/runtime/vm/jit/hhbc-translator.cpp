@@ -2251,7 +2251,8 @@ void HhbcTranslator::emitFCall(uint32_t numParams,
     params[numParams + 3 - i - 1] = popF();
     if (RuntimeOption::EvalRuntimeTypeProfile && callee != nullptr
         && params[numParams + 3 - i - 1] != nullptr) {
-      gen(TypeProfileFunc, params[numParams + 3 - i - 1], cns(i), cns(callee));
+      gen(TypeProfileFunc, TypeProfileData(i, callee),
+          params[numParams + 3 - i - 1]);
     }
   }
   params[0] = spillStack();
@@ -2466,7 +2467,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
   }
   SSATmp* retVal = pop(type);
   if (RuntimeOption::EvalRuntimeTypeProfile) {
-    gen(TypeProfileFunc, retVal, cns(-1), cns(curFunc));
+      gen(TypeProfileFunc, TypeProfileData(-1, curFunc), retVal);
   }
   SSATmp* sp;
   if (freeInline) {

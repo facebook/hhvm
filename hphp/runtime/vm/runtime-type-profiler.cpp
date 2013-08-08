@@ -12,10 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-*/
+ */
 
 
-#include "hphp/runtime/vm/runtime_type_profiler.h"
+#include "hphp/runtime/vm/runtime-type-profiler.h"
 
 #include <iostream>
 #include <fstream>
@@ -32,23 +32,25 @@
 
 namespace HPHP {
 
-static FuncTypeCounter emptyFuncCounter(0);
-static RuntimeProfileInfo allProfileInfo(100000, &emptyFuncCounter);
+static FuncTypeCounter emptyFuncCounter(1,0);
+static RuntimeProfileInfo allProfileInfo
+      (RuntimeOption::EvalRuntimeTypeProfile
+       ? 1: 750000, &emptyFuncCounter);
 
 void profileOneArgument(const TypedValue value,
     const int param, const Func* function) {
   const char* typeString = giveTypeString(&value);
   if (function->fullName()->size() != 0) {
-    logType(function, typeString, param+1);
+    logType(function, typeString, param + 1);
   }
 }
 
 std::string dumpRawParamInfo(const Func* function){
   folly::dynamic info = {};
   auto funcParamMap = allProfileInfo.get(function->getFuncId());
-  for (int i = 0; i < funcParamMap->size(); i++) {
+  for (int i = 0; i <= function->numParams(); i++) {
     info.push_back(folly::dynamic::object);
-    auto typeCount = funcParamMap->at(i);
+    auto typeCount = funcParamMap->get(i);
     for (auto j = typeCount->begin(); j != typeCount->end(); j++) {
       folly::dynamic key = std::string(j->first);
       folly::dynamic value = j->second;
@@ -64,11 +66,11 @@ void writeProfileInformationToDisk() {
   for (auto i = 0; i  <= Func::nextFuncId(); i++) {
     folly::dynamic info = {};
     auto funcParamMap = allProfileInfo.get(i);
-    if (*funcParamMap == emptyFuncCounter) {
+    if (funcParamMap == &emptyFuncCounter) {
       continue;
     }
-    for (auto j = 0; j < funcParamMap->size(); j++) {
-      auto typeCount = funcParamMap->at(j);
+    for (auto j = 0; j < Func::fromFuncId(i)->numParams(); j++) {
+      auto typeCount = funcParamMap->get(j);
       if (typeCount == nullptr) {
         continue;
       }
@@ -88,39 +90,35 @@ void writeProfileInformationToDisk() {
   logfile.close();
 }
 
-
 void logType(const Func* func, const char* typeString, int64_t param) {
   if (param <= func->numParams()) {
     if (allProfileInfo.get(func->getFuncId()) == &emptyFuncCounter)
       initFuncTypeProfileData(func);
     auto it = allProfileInfo.get(func->getFuncId());
-    TypeCounter* hashmap = it->at(param);
-    auto success = hashmap->insert(std::make_pair(typeString, 1));
-    if (!success.second) {
-      base::subtle::NoBarrier_AtomicIncrement(&success.first->second, 1);
+    TypeCounter* hashmap = it->get(param);
+    try {
+      auto success = hashmap->insert(std::make_pair(typeString, 1));
+      if (!success.second) {
+        base::subtle::NoBarrier_AtomicIncrement(&success.first->second, 1);
+      }
+    } catch (folly::AtomicHashMapFullError& e) {
+      //fail silently if hashmap is full
     }
   }
 }
 
 void initFuncTypeProfileData(const Func* func) {
-  bool success = allProfileInfo.compare_exchange(
-      func->getFuncId(), &emptyFuncCounter,
-      new FuncTypeCounter(func->numParams()));
-  if (success) {
-    for (long i = 0; i < func->numParams() + 1; i++) {
-      auto myVector = allProfileInfo.get(func->getFuncId());
-      myVector->insert(myVector->begin()+ i, std::move(new TypeCounter(20)));
-    }
+  auto myVector = new FuncTypeCounter(func->numParams() + 1, 0);
+  for (long i = 0; i < func->numParams() + 1; i++) {
+    myVector->exchange(i, new TypeCounter(200));
   }
+  allProfileInfo.exchange(func->getFuncId(), myVector);
 }
 
 const char* giveTypeString(const TypedValue* value) {
-  const char* typeString;
-  if (value->m_type == KindOfObject){
-    typeString = value->m_data.pobj->o_getClassName()->data();
-  } else {
-    typeString = getDataTypeString(value->m_type).c_str();
+  if (value->m_type == KindOfObject || value->m_type == KindOfResource){
+    return value->m_data.pobj->o_getClassName()->data();
   }
-  return typeString;
+  return getDataTypeString(value->m_type).c_str();
 }
 }

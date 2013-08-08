@@ -1,5 +1,4 @@
-/*
-   +----------------------------------------------------------------------+
+/* +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
@@ -12,7 +11,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-*/
+ */
 
 
 #ifndef incl_HPHP_VM_PROFILER_H_
@@ -23,7 +22,6 @@
 
 #include "hphp/util/atomic_vector.h"
 namespace HPHP {
-
 #ifdef FACEBOOK
 void profileOneArgument(TypedValue value, int param, const Func* func);
 void logType(const Func* func, const char* typeString, int64_t param);
@@ -32,13 +30,12 @@ const char* giveTypeString(const TypedValue* value);
 std::string dumpRawParamInfo(const Func* function);
 void initFuncTypeProfileData(const Func* func);
 typedef folly::AtomicHashMap<const char*, int64_t> TypeCounter;
-typedef vector<TypeCounter*> FuncTypeCounter;
+typedef AtomicVector<TypeCounter*> FuncTypeCounter;
 typedef AtomicVector<FuncTypeCounter*> RuntimeProfileInfo;
 #else
-// Waiting on a fix for OSS
-static void profileOneArgument(TypedValue value, int param, const Func* func){}
+// Waiting for a fix for OSS
+void profileOneArgument(TypedValue value, int param, const Func* func){}
 #endif
-
 }
 
 #endif

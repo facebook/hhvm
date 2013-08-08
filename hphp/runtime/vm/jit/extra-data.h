@@ -234,6 +234,19 @@ struct ActRecInfo : IRExtraData {
 };
 
 /*
+ * Function pointer and parameter index for type profiling usage
+ */
+struct TypeProfileData : IRExtraData {
+  explicit TypeProfileData(int32_t param, const Func* func) : param(param),
+                                                              func(func) {}
+  int32_t param;
+  const Func* func;
+  std::string show() const {
+    return folly::to<std::string>(func->fullName()->data(), ":", param);
+  }
+};
+
+/*
  * Stack offsets.
  */
 struct StackOffset : IRExtraData {
@@ -462,6 +475,7 @@ X(SideExitGuardLoc,             SideExitGuardData);
 X(SideExitGuardStk,             SideExitGuardData);
 X(CheckDefinedClsEq,            CheckDefinedClsData);
 X(InterpOne,                    InterpOneData);
+X(TypeProfileFunc,              TypeProfileData);
 X(InterpOneCF,                  InterpOneData);
 X(CreateContFunc,               CreateContData);
 X(CreateContMeth,               CreateContData);

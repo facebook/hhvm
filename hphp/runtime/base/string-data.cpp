@@ -397,8 +397,9 @@ StringData::StringData(int cap) {
   }
 }
 
-void StringData::append(const char *s, int len) {
-  assert(!isStatic()); // never mess around with static strings!
+void StringData::append(const char* s, int len) {
+  assert(!isStatic() && getCount() <= 1);
+
   if (len == 0) return;
   if (UNLIKELY(uint32_t(len) > MaxSize)) {
     throw InvalidArgumentException("len > 2^31-2", len);
@@ -407,90 +408,41 @@ void StringData::append(const char *s, int len) {
     throw FatalErrorException(0, "String length exceeded 2^31-2: %zu",
                               size_t(len) + size_t(m_len));
   }
-  uint32_t newlen = m_len + len;
-  if (isShared()) {
-    // buffer is immutable, don't modify it.
-    StringSlice r = slice();
-    char* newdata = smart_concat(r.ptr, r.len, s, len);
-    if (isShared()) {
-      m_big.shared->decRef();
-      delist();
-    }
-    m_len = newlen;
-    m_data = newdata;
-    setModeAndCap(Mode::Smart, newlen + 1);
-    m_hash = 0;
-  } else if (rawdata() == s) {
-    // appending ourself to ourself, be conservative.
-    StringSlice r = slice();
-    char *newdata = smart_concat(r.ptr, r.len, s, len);
-    releaseData();
-    m_len = newlen;
-    m_data = newdata;
-    setModeAndCap(Mode::Smart, newlen + 1);
-    m_hash = 0;
-  } else if (isSmall()) {
-    // we're currently small but might not be after append.
-    uint32_t oldlen = m_len;
-    newlen = oldlen + len;
-    if (newlen <= MaxSmallSize) {
-      // win.
-      memcpy(&m_small[oldlen], s, len);
-      m_small[newlen] = 0;
-      setSmall();
-      m_len = newlen;
-      m_data = m_small;
-      m_hash = 0;
-    } else {
-      // small->big string transition.
-      char *newdata = smart_concat(m_small, oldlen, s, len);
-      m_len = newlen;
-      m_data = newdata;
-      setModeAndCap(Mode::Smart, newlen + 1);
-      m_hash = 0;
-    }
-  } else if (isSmart()) {
-    // generic "big string concat" path.  smart_realloc buffer.
-    uint32_t oldlen = m_len;
-    char* oldp = m_data;
-    assert((oldp > s && oldp - s > len) ||
-           (oldp < s && s - oldp > oldlen)); // no overlapping
-    newlen = oldlen + len;
-    char* newdata;
-    if ((int)newlen < capacity()) {
-      newdata = oldp;
-    } else {
-      uint32_t nlen = newlen + (newlen >> 2);
-      newdata = (char*) smart_realloc(oldp, nlen + 1);
-      setModeAndCap(Mode::Smart, nlen + 1);
-    }
-    memcpy(newdata + oldlen, s, len);
-    newdata[newlen] = 0;
-    m_len = newlen;
-    m_data = newdata;
-    m_hash = 0;
-  } else {
-    // generic "big string concat" path.  realloc buffer.
-    uint32_t oldlen = m_len;
-    char* oldp = m_data;
-    assert((oldp > s && oldp - s > len) ||
-           (oldp < s && s - oldp > oldlen)); // no overlapping
-    newlen = oldlen + len;
-    char* newdata = (char*) realloc(oldp, newlen + 1);
-    memcpy(newdata + oldlen, s, len);
-    newdata[newlen] = 0;
-    m_len = newlen;
-    m_data = newdata;
-    setModeAndCap(Mode::Malloc, newlen + 1);
-    m_hash = 0;
-  }
-  assert(newlen <= MaxSize);
+
+  const uint32_t newLen = m_len + len;
+
+  /*
+   * In case we're being to asked to append our own string, we need to
+   * load the old pointer value (it might change when we reserve
+   * below).
+   *
+   * We don't allow appending with an interior pointers here, although
+   * we may be asked to append less than the whole string.
+   */
+  auto const oldDataPtr = rawdata();
+  assert(uintptr_t(s) <= uintptr_t(rawdata()) ||
+         uintptr_t(s) >= uintptr_t(rawdata() + capacity()));
+  assert(s != rawdata() || len <= m_len);
+
+  auto const mslice = UNLIKELY(isShared()) ? escalate(newLen)
+                                           : reserve(newLen);
+  if (UNLIKELY(s == oldDataPtr)) s = mslice.ptr;
+
+  /*
+   * memcpy is safe even if it's a self append---the regions will be
+   * disjoint, since s can't point past our oldDataPtr, and len is
+   * smaller than the old length.
+   */
+  memcpy(mslice.ptr + m_len, s, len);
+
+  setSize(newLen);
   assert(checkSane());
 }
 
 MutableSlice StringData::reserve(int cap) {
   assert(!isImmutable() && m_count <= 1 && cap >= 0);
-  if (cap < capacity()) return mutableSlice();
+  if (cap + 1 <= capacity()) return mutableSlice();
+
   switch (mode()) {
     default: assert(false);
     case Mode::Small:
@@ -499,6 +451,11 @@ MutableSlice StringData::reserve(int cap) {
       setModeAndCap(Mode::Smart, cap + 1);
       break;
     case Mode::Smart:
+      // We only use geometric growth when we're heading to the smart
+      // allocator.  This is mostly because it was what was tested as
+      // a perf win, but it might make sense to do it for Mode::Malloc
+      // as well.  Will be revisited soon.
+      cap += cap >> 2;
       m_data = (char*) smart_realloc(m_data, cap + 1);
       setModeAndCap(Mode::Smart, cap + 1);
       break;

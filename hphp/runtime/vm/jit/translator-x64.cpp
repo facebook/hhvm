@@ -4137,7 +4137,7 @@ std::string TranslatorX64::getUsage() {
     "tx64: %9zd bytes (%zd%%) in persistentCache\n",
     aHotUsage,  100 * aHotUsage / ahot.capacity(),
     aUsage,     100 * aUsage / a.capacity(),
-    aProfUsage, 100 * aProfUsage / aprof.capacity(),
+    aProfUsage, aprof.capacity() != 0 ? 100 * aProfUsage / aprof.capacity() : 0,
     stubsUsage, 100 * stubsUsage / astubs.capacity(),
     dataUsage,  100 * dataUsage / m_globalData.size,
     tcUsage,

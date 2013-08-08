@@ -547,11 +547,16 @@ StringData *StringData::copy(bool sharedMemory /* = false */) const {
  * the usable string buffer (minus space for the null terminator).
  */
 MutableSlice StringData::escalate(uint32_t cap) {
-  assert(isImmutable() && !isStatic() && cap >= m_len);
+  assert(isShared() && !isStatic() && cap >= m_len);
+
   char *buf = (char*)smart_malloc(cap + 1);
   StringSlice s = slice();
   memcpy(buf, s.ptr, s.len);
   buf[s.len] = 0;
+
+  m_big.shared->decRef();
+  delist();
+
   m_data = buf;
   setModeAndCap(Mode::Smart, cap);
   // clear precomputed hashcode

@@ -73,7 +73,7 @@ public:
 
   FunctionScope(FunctionScopePtr orig, AnalysisResultConstPtr ar,
                 const std::string &name, const std::string &originalName,
-                StatementPtr stmt, ModifierExpressionPtr modifiers);
+                StatementPtr stmt, ModifierExpressionPtr modifiers, bool user);
 
   /**
    * System functions.

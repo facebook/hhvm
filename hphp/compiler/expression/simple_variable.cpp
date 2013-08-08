@@ -165,14 +165,18 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
       if (!m_sym->isSystem() &&
           !(getContext() &
             (LValue|RefValue|RefParameter|UnsetContext|ExistContext)) &&
-          m_sym->getDeclaration().get() == this &&
-          !variables->getAttribute(VariableTable::ContainsLDynamicVariable) &&
-          !getScope()->is(BlockScope::ClassScope)) {
-        if (getScope()->inPseudoMain()) {
-          Compiler::Error(Compiler::UseUndeclaredGlobalVariable,
-                          shared_from_this());
-        } else if (!m_sym->isClosureVar()) {
-          Compiler::Error(Compiler::UseUndeclaredVariable, shared_from_this());
+          m_sym->getDeclaration().get() == this) {
+        assert(!m_sym->isParameter());
+
+        if (!variables->getAttribute(VariableTable::ContainsLDynamicVariable) &&
+            !getScope()->is(BlockScope::ClassScope)) {
+          if (getScope()->inPseudoMain()) {
+            Compiler::Error(Compiler::UseUndeclaredGlobalVariable,
+                            shared_from_this());
+          } else if (!m_sym->isClosureVar()) {
+            Compiler::Error(Compiler::UseUndeclaredVariable,
+                            shared_from_this());
+          }
         }
       }
       // check function parameter that can occur in lval context

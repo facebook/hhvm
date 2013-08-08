@@ -425,7 +425,7 @@ ClassScope::importTraitMethod(const TraitMethod&  traitMethod,
 
   FunctionScopePtr cloneFuncScope
     (new HPHP::FunctionScope(funcScope, ar, methName, origMethName, cloneMeth,
-                             cloneMeth->getModifiers()));
+                             cloneMeth->getModifiers(), cScope->isUserClass()));
   cloneMeth->resetScope(cloneFuncScope, true);
   cloneFuncScope->setOuterScope(shared_from_this());
   informClosuresAboutScopeClone(cloneMeth, cloneFuncScope, ar);

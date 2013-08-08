@@ -54,7 +54,6 @@ hphp/system/php/phar/Phar.php
 hphp/system/php/phar/PharFileInfo.php
 
 # If you have no inheritance relationship, go here in alphabetical order
-hphp/system/php/DebuggerCommand.php
 hphp/system/php/XhprofFrame.php
 hphp/system/php/array_filter.hhas
 hphp/system/php/array_map.hhas

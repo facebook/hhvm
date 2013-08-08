@@ -52,7 +52,6 @@ public:
     KindOfGlobal              = 7,
     KindOfHelp                = 8,
     KindOfInfo                = 9,
-    KindOfJump_UNUSED         = 10,
     KindOfConstant            = 11,
     KindOfList                = 12,
     KindOfMachine             = 13,
@@ -67,7 +66,6 @@ public:
     KindOfVariable            = 22,
     KindOfWhere               = 23,
     KindOfExtended            = 24,
-    KindOfUser                = 25,
     KindOfZend                = 26,
     KindOfComplete            = 27,
 

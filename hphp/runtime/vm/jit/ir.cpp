@@ -1044,6 +1044,12 @@ TCA SSATmp::getValTCA() const {
   return m_inst->extra<ConstData>()->as<TCA>();
 }
 
+uintptr_t SSATmp::getValCctx() const {
+  assert(isConst());
+  assert(m_inst->typeParam().equals(Type::Cctx));
+  return m_inst->extra<ConstData>()->as<uintptr_t>();
+}
+
 std::string SSATmp::toString() const {
   std::ostringstream out;
   print(out, this);

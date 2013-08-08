@@ -186,6 +186,9 @@ static void printConst(std::ostream& os, IRInstruction* inst) {
   } else if (t.subtypeOf(Type::Cls)) {
     auto cls = c->as<const Class*>();
     os << "Cls(" << (cls ? cls->name()->data() : "0") << ")";
+  } else if (t.subtypeOf(Type::Cctx)) {
+    auto cls = reinterpret_cast<const Class*>(c->as<uintptr_t>() - 1);
+    os << "Cctx(" << (cls ? cls->name()->data() : "0") << ")";
   } else if (t.subtypeOf(Type::NamedEntity)) {
     auto ne = c->as<const NamedEntity*>();
     os << "NamedEntity(" << ne << ")";

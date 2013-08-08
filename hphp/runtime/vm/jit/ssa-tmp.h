@@ -60,6 +60,7 @@ public:
   uintptr_t          getValBits() const;
   Variant            getValVariant() const;
   TCA                getValTCA() const;
+  uintptr_t          getValCctx() const;
 
   /*
    * Returns: Type::subtypeOf(type(), tag).

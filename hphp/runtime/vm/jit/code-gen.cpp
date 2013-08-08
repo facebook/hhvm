@@ -3699,6 +3699,8 @@ void CodeGenerator::cgStClosureCtx(IRInstruction* inst) {
   auto& a = m_as;
   if (inst->src(1)->isA(Type::Nullptr)) {
     a.  storeq  (0,   obj[c_Closure::ctxOffset()]);
+  } else if (ctx == InvalidReg) {
+    a.  storeq  (inst->src(1)->getValCctx(), obj[c_Closure::ctxOffset()]);
   } else {
     a.  storeq  (ctx, obj[c_Closure::ctxOffset()]);
   }

@@ -387,6 +387,18 @@
                     },
                     "args": [
                     ]
+                },
+                {
+                    "name": "getDependencyStack",
+                    "desc": "Get the dependency stack for this wait handle",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "VariantVec",
+                        "desc": "A representation of the call stack of wait handles, starting with this wait handle. Each element in the array is a wait handle, or null which represents crossing a context boundary."
+                    },
+                    "args": [
+                    ]
                 }
             ],
             "consts": [

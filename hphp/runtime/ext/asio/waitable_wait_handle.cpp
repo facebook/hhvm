@@ -170,5 +170,44 @@ bool c_WaitableWaitHandle::hasCycle(c_WaitableWaitHandle* start) {
   return start == this;
 }
 
+Array c_WaitableWaitHandle::t_getdependencystack() {
+  Array result = Array::Create();
+  if (isFinished()) return result;
+  hphp_hash_set<int64_t> visited;
+  auto wait_handle = this;
+  while (wait_handle != nullptr) {
+    result.append(wait_handle);
+    visited.insert(wait_handle->t_getid());
+    auto context_idx = wait_handle->getContextIdx();
+
+    // 1. find parent in the same context
+    auto p = wait_handle->getFirstParent();
+    while (p) {
+      if ((p->getContextIdx() == context_idx) &&
+          visited.find(p->t_getid()) == visited.end()) {
+        wait_handle = p;
+        break;
+      }
+      p = p->getNextParent();
+    }
+    if (p) continue;
+
+    // 2. follow creator
+    if (m_creator && !m_creator->isFinished() &&
+        (m_creator->getContextIdx() == context_idx) &&
+        visited.find(m_creator->t_getid()) == visited.end()) {
+      wait_handle = m_creator;
+      continue;
+    }
+
+    // 3. cross the context boundary
+    result.append(null_object);
+    wait_handle = (context_idx > 1)
+      ? AsioSession::Get()->getContext(context_idx - 1)->getCurrent()
+      : nullptr;
+  }
+  return result;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

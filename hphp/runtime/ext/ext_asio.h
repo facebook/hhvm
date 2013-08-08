@@ -193,6 +193,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   public: int t_getcontextidx();
   public: Object t_getcreator();
   public: Array t_getparents();
+  public: Array t_getdependencystack();
 
 
  public:

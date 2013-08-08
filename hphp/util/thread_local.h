@@ -230,11 +230,12 @@ void ThreadLocalSingletonOnThreadExit(void *obj) {
 template <typename T>
 class ThreadLocalSingleton {
 public:
-  ThreadLocalSingleton() {}
+  ThreadLocalSingleton() { s_inited = true; }
 
   static T *getCheck() ATTRIBUTE_COLD NEVER_INLINE;
 
   static T* getNoCheck() {
+    assert(s_inited);
     assert(s_singleton == (T*)&s_storage);
     return (T*)&s_storage;
   }
@@ -263,10 +264,15 @@ private:
   typedef typename boost::aligned_storage<sizeof(T), sizeof(void*)>::type
           StorageType;
   static __thread StorageType s_storage;
+  static bool s_inited; // no-fast-TLS requires construction so be consistent
 };
 
 template<typename T>
+bool ThreadLocalSingleton<T>::s_inited = false;
+
+template<typename T>
 T *ThreadLocalSingleton<T>::getCheck() {
+  assert(s_inited);
   if (!s_singleton) {
     T* p = (T*) &s_storage;
     T::Create(p);
@@ -473,6 +479,7 @@ public:
 
   static T *getCheck() ATTRIBUTE_COLD NEVER_INLINE;
   static T* getNoCheck() {
+    assert(s_inited);
     T *obj = (T*)pthread_getspecific(s_key);
     assert(obj);
     return obj;
@@ -497,9 +504,11 @@ public:
 
 private:
   static pthread_key_t s_key;
+  static bool s_inited; // pthread_key_t has no portable valid sentinel
 
   static pthread_key_t getKey() {
-    if (s_key == 0) {
+    if (!s_inited) {
+      s_inited = true;
       ThreadLocalCreateKey(&s_key, ThreadLocalSingletonOnThreadExit<T>);
     }
     return s_key;
@@ -508,6 +517,7 @@ private:
 
 template<typename T>
 T *ThreadLocalSingleton<T>::getCheck() {
+  assert(s_inited);
   T *obj = (T*)pthread_getspecific(s_key);
   if (obj == nullptr) {
     obj = (T*)malloc(sizeof(T));
@@ -519,6 +529,8 @@ T *ThreadLocalSingleton<T>::getCheck() {
 
 template<typename T>
 pthread_key_t ThreadLocalSingleton<T>::s_key;
+template<typename T>
+bool ThreadLocalSingleton<T>::s_inited = false;
 
 ///////////////////////////////////////////////////////////////////////////////
 // some classes don't need new/delete at all

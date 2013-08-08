@@ -36,7 +36,10 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-void init_stringdata_allocator() { StringData::Allocator::getCheck(); }
+void init_stringdata_allocator() {
+  StringData::Allocator allocator;
+  StringData::Allocator::getCheck();
+}
 
 void StringData::release() {
   this->~StringData();

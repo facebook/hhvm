@@ -245,19 +245,6 @@ public:
   static std::vector<std::string> ProxyPatterns;
   static bool AlwaysUseRelativePath;
 
-  static bool MySQLReadOnly;
-#ifdef FACEBOOK
-  static bool MySQLLocalize;  // whether to localize MySQL query results
-#endif
-  static int  MySQLConnectTimeout;
-  static int  MySQLReadTimeout;
-  static int  MySQLWaitTimeout;
-  static int  MySQLSlowQueryThreshold;
-  static bool MySQLKillOnTimeout;
-  static int  MySQLMaxRetryOpenOnFail;
-  static int  MySQLMaxRetryQueryOnFail;
-  static std::string MySQLSocket;
-
   static int  HttpDefaultTimeout;
   static int  HttpSlowQueryThreshold;
 

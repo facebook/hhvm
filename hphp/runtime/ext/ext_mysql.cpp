@@ -39,6 +39,21 @@ namespace HPHP {
 StaticString MySQL::s_class_name("mysql link");
 StaticString MySQLResult::s_class_name("mysql result");
 
+bool mysqlExtension::ReadOnly = false;
+#ifdef FACEBOOK
+bool mysqlExtension::Localize = false;
+#endif
+int mysqlExtension::ConnectTimeout = 1000;
+int mysqlExtension::ReadTimeout = 1000;
+int mysqlExtension::WaitTimeout = -1;
+int mysqlExtension::SlowQueryThreshold = 1000; // ms
+bool mysqlExtension::KillOnTimeout = false;
+int mysqlExtension::MaxRetryOpenOnFail = 1;
+int mysqlExtension::MaxRetryQueryOnFail = 1;
+std::string mysqlExtension::Socket = "";
+
+mysqlExtension s_mysql_extension;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(MySQLResult);
@@ -92,7 +107,7 @@ class MySQLRequestData : public RequestEventHandler {
 public:
   virtual void requestInit() {
     defaultConn.reset();
-    readTimeout = RuntimeOption::MySQLReadTimeout;
+    readTimeout = mysqlExtension::ReadTimeout;
     totalRowCount = 0;
   }
 
@@ -162,8 +177,8 @@ int MySQL::GetDefaultPort() {
 }
 
 String MySQL::GetDefaultSocket() {
-  if (!RuntimeOption::MySQLSocket.empty()) {
-    return RuntimeOption::MySQLSocket;
+  if (!mysqlExtension::Socket.empty()) {
+    return mysqlExtension::Socket;
   }
   return MYSQL_UNIX_ADDR;
 }
@@ -203,9 +218,9 @@ void MySQL::SetDefaultConn(MySQL *conn) {
 // class MySQL
 static MYSQL *configure_conn(MYSQL* conn) {
   mysql_options(conn, MYSQL_OPT_LOCAL_INFILE, 0);
-  if (RuntimeOption::MySQLConnectTimeout) {
+  if (mysqlExtension::ConnectTimeout) {
     MySQLUtil::set_mysql_timeout(conn, MySQLUtil::ConnectTimeout,
-                                 RuntimeOption::MySQLConnectTimeout);
+                                 mysqlExtension::ConnectTimeout);
   }
   int readTimeout = s_mysql_data->readTimeout;
   if (readTimeout) {
@@ -281,9 +296,9 @@ bool MySQL::connect(CStrRef host, int port, CStrRef socket, CStrRef username,
                             port,
                             socket.empty() ? NULL : socket.data(),
                             client_flags);
-  if (ret && RuntimeOption::MySQLWaitTimeout > 0) {
+  if (ret && mysqlExtension::WaitTimeout > 0) {
     String query("set session wait_timeout=");
-    query += String((int64_t)(RuntimeOption::MySQLWaitTimeout / 1000));
+    query += String((int64_t)(mysqlExtension::WaitTimeout / 1000));
     if (mysql_real_query(m_conn, query.data(), query.size())) {
       raise_notice("MySQL::connect: failed setting session wait timeout: %s",
                    mysql_error(m_conn));
@@ -507,7 +522,7 @@ static Variant php_mysql_do_connect(String server, String username,
                                     int connect_timeout_ms,
                                     int query_timeout_ms) {
   if (connect_timeout_ms < 0) {
-    connect_timeout_ms = RuntimeOption::MySQLConnectTimeout;
+    connect_timeout_ms = mysqlExtension::ConnectTimeout;
   }
   if (query_timeout_ms < 0) {
     query_timeout_ms = s_mysql_data->readTimeout;
@@ -642,7 +657,7 @@ Variant f_mysql_pconnect_with_db(CStrRef server /* = null_string */,
 bool f_mysql_set_timeout(int query_timeout_ms /* = -1 */,
                          CVarRef link_identifier /* = null */) {
   if (query_timeout_ms < 0) {
-    query_timeout_ms = RuntimeOption::MySQLReadTimeout;
+    query_timeout_ms = mysqlExtension::ReadTimeout;
   }
   s_mysql_data->readTimeout = query_timeout_ms;
   return true;
@@ -904,7 +919,7 @@ static Variant php_mysql_localize_result(MYSQL *mysql) {
 
 static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
                                           bool use_store, bool async_mode) {
-  if (RuntimeOption::MySQLReadOnly &&
+  if (mysqlExtension::ReadOnly &&
       same(f_preg_match("/^((\\/\\*.*?\\*\\/)|\\(|\\s)*select/i", query), 0)) {
     raise_notice("runtime/ext_mysql: write query not executed [%s]",
                     query.data());
@@ -972,7 +987,7 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
     }
   }
 
-  SlowTimer timer(RuntimeOption::MySQLSlowQueryThreshold,
+  SlowTimer timer(mysqlExtension::SlowQueryThreshold,
                   "runtime/ext_mysql: slow query", query.data());
   IOStatusHelper io("mysql::query", rconn->m_host.c_str(), rconn->m_port);
   unsigned long tid = mysql_thread_id(conn);
@@ -1005,7 +1020,7 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
     // running a long query on the server without waiting for any results
     // back, wasting server resource. So we're sending a KILL command
     // to see if we can stop the query execution.
-    if (tid && RuntimeOption::MySQLKillOnTimeout) {
+    if (tid && mysqlExtension::KillOnTimeout) {
       unsigned int errcode = mysql_errno(conn);
       if (errcode == 2058 /* CR_NET_READ_INTERRUPTED */ ||
           errcode == 2059 /* CR_NET_WRITE_INTERRUPTED */) {
@@ -1043,7 +1058,7 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
     //
     // If php_mysql_localize_result ever gets rewritten
     // to use standard APIs, this can be opened up to everyone.
-    if (RuntimeOption::MySQLLocalize) {
+    if (mysqlExtension::Localize) {
       return php_mysql_localize_result(conn);
     }
 #endif
@@ -1928,29 +1943,6 @@ MySQLFieldInfo *MySQLResult::fetchFieldInfo() {
   if (m_current_field < getFieldCount()) m_current_field++;
   return getFieldInfo(m_current_field);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-
-static class mysqlExtension : public Extension {
-public:
-  mysqlExtension() : Extension("mysql") {}
-
-  // implementing IDebuggable
-  virtual int  debuggerSupport() {
-    return SupportInfo;
-  }
-  virtual void debuggerInfo(InfoVec &info) {
-    int count = g_persistentObjects->getMap("mysql::persistent_conns").size();
-    Add(info, "Persistent", FormatNumber("%" PRId64, count));
-
-    AddServerStats(info, "sql.conn"       );
-    AddServerStats(info, "sql.reconn_new" );
-    AddServerStats(info, "sql.reconn_ok"  );
-    AddServerStats(info, "sql.reconn_old" );
-    AddServerStats(info, "sql.query"      );
-  }
-
-} s_mysql_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -34,6 +34,59 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+class mysqlExtension : public Extension {
+public:
+  mysqlExtension() : Extension("mysql") {}
+
+  // implementing IDebuggable
+  virtual int  debuggerSupport() {
+    return SupportInfo;
+  }
+  virtual void debuggerInfo(InfoVec &info) {
+    int count = g_persistentObjects->getMap("mysql::persistent_conns").size();
+    Add(info, "Persistent", FormatNumber("%" PRId64, count));
+
+    AddServerStats(info, "sql.conn"       );
+    AddServerStats(info, "sql.reconn_new" );
+    AddServerStats(info, "sql.reconn_ok"  );
+    AddServerStats(info, "sql.reconn_old" );
+    AddServerStats(info, "sql.query"      );
+  }
+
+  static bool ReadOnly;
+#ifdef FACEBOOK
+  static bool Localize;
+#endif
+  static int ConnectTimeout;
+  static int ReadTimeout;
+  static int WaitTimeout;
+  static int SlowQueryThreshold;
+  static bool KillOnTimeout;
+  static int MaxRetryOpenOnFail;
+  static int MaxRetryQueryOnFail;
+  static std::string Socket;
+
+  virtual void moduleLoad(Hdf config) {
+    Hdf mysql = config["MySQL"];
+    ReadOnly = mysql["ReadOnly"].getBool();
+#ifdef FACEBOOK
+    Localize = mysql["Localize"].getBool();
+#endif
+    ConnectTimeout = mysql["ConnectTimeout"].getInt32(1000);
+    ReadTimeout = mysql["ReadTimeout"].getInt32(60000);
+    WaitTimeout = mysql["WaitTimeout"].getInt32(-1);
+    SlowQueryThreshold = mysql["SlowQueryThreshold"].getInt32(1000);
+    KillOnTimeout = mysql["KillOnTimeout"].getBool();
+    MaxRetryOpenOnFail = mysql["MaxRetryOpenOnFail"].getInt32(1);
+    MaxRetryQueryOnFail = mysql["MaxRetryQueryOnFail"].getInt32(1);
+    Socket = mysql["Socket"].getString();
+  }
+};
+
+extern mysqlExtension s_mysql_extension;
+
+///////////////////////////////////////////////////////////////////////////////
+
 class MySQL : public SweepableResourceData {
 public:
   /**

@@ -250,19 +250,6 @@ std::set<std::string> RuntimeOption::ProxyURLs;
 std::vector<std::string> RuntimeOption::ProxyPatterns;
 bool RuntimeOption::AlwaysUseRelativePath = false;
 
-bool RuntimeOption::MySQLReadOnly = false;
-#ifdef FACEBOOK
-bool RuntimeOption::MySQLLocalize = false;
-#endif
-int RuntimeOption::MySQLConnectTimeout = 1000;
-int RuntimeOption::MySQLReadTimeout = 1000;
-int RuntimeOption::MySQLWaitTimeout = -1;
-int RuntimeOption::MySQLSlowQueryThreshold = 1000; // ms
-bool RuntimeOption::MySQLKillOnTimeout = false;
-int RuntimeOption::MySQLMaxRetryOpenOnFail = 1;
-int RuntimeOption::MySQLMaxRetryQueryOnFail = 1;
-std::string RuntimeOption::MySQLSocket = "";
-
 int RuntimeOption::HttpDefaultTimeout = 30;
 int RuntimeOption::HttpSlowQueryThreshold = 5000; // ms
 
@@ -991,21 +978,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     ProxyPercentage = proxy["Percentage"].getByte(0);
     proxy["ProxyURLs"].get(ProxyURLs);
     proxy["ProxyPatterns"].get(ProxyPatterns);
-  }
-  {
-    Hdf mysql = config["MySQL"];
-    MySQLReadOnly = mysql["ReadOnly"].getBool();
-#ifdef FACEBOOK
-    MySQLLocalize = mysql["Localize"].getBool();
-#endif
-    MySQLConnectTimeout = mysql["ConnectTimeout"].getInt32(1000);
-    MySQLReadTimeout = mysql["ReadTimeout"].getInt32(60000);
-    MySQLWaitTimeout = mysql["WaitTimeout"].getInt32(-1);
-    MySQLSlowQueryThreshold = mysql["SlowQueryThreshold"].getInt32(1000);
-    MySQLKillOnTimeout = mysql["KillOnTimeout"].getBool();
-    MySQLMaxRetryOpenOnFail = mysql["MaxRetryOpenOnFail"].getInt32(1);
-    MySQLMaxRetryQueryOnFail = mysql["MaxRetryQueryOnFail"].getInt32(1);
-    MySQLSocket = mysql["Socket"].getString();
   }
   {
     Hdf http = config["Http"];

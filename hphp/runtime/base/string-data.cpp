@@ -642,14 +642,17 @@ void StringData::setChar(int offset, char ch) {
   m_hash = 0;
 }
 
-/**
- * Zend's way of incrementing a string. Definitely something we want to get rid
- * of in the future.  If the incremented string is longer, use smart_malloc
- * to allocate the new string, update len, and return the new string.
- * Otherwise return null.
- */
-char *increment_string(char *s, uint32_t &len) {
-  assert(s && *s);
+void StringData::inc() {
+  assert(!isStatic());
+  assert(!empty());
+
+  if (isImmutable()) {
+    escalate(m_len + 1);
+  } else {
+    reserve(m_len + 1);
+  }
+  m_hash = 0;
+
   enum class CharKind {
     UNKNOWN,
     LOWER_CASE,
@@ -657,9 +660,11 @@ char *increment_string(char *s, uint32_t &len) {
     NUMERIC
   };
 
+  auto const len = m_len;
+  auto const s = m_data;
   int carry = 0;
   int pos = len - 1;
-  CharKind last = CharKind::UNKNOWN; // Shut up the compiler warning
+  auto last = CharKind::UNKNOWN; // Shut up the compiler warning
   int ch;
 
   while (pos >= 0) {
@@ -702,46 +707,29 @@ char *increment_string(char *s, uint32_t &len) {
   }
 
   if (carry) {
-    char *t = (char *) smart_malloc(len+1+1);
-    memcpy(t+1, s, len);
-    t[++len] = '\0';
+    if (UNLIKELY(len + 1 > MaxSize)) {
+      throw InvalidArgumentException("len > 2^31-2", len);
+    }
+
+    assert(len + 2 <= capacity());
+    memmove(s + 1, s, len);
+    s[len + 1] = '\0';
+    m_len = len + 1;
+
     switch (last) {
     case CharKind::NUMERIC:
-      t[0] = '1';
+      s[0] = '1';
       break;
     case CharKind::UPPER_CASE:
-      t[0] = 'A';
+      s[0] = 'A';
       break;
     case CharKind::LOWER_CASE:
-      t[0] = 'a';
+      s[0] = 'a';
       break;
     default:
       break;
     }
-    return t;
   }
-  return nullptr;
-}
-
-void StringData::inc() {
-  assert(!isStatic());
-  assert(!empty());
-  StringSlice s = slice();
-  if (isImmutable()) escalate(s.len);
-  // if increment_string overflows, it returns a new ptr and updates len
-  assert(s.len <= MaxSize); // safe int/uint casting
-  auto len = s.len;
-  char *overflowed = increment_string((char *)s.ptr, len);
-  if (overflowed) {
-    if (len > MaxSize) {
-      throw InvalidArgumentException("len > 2^31-2", len);
-    }
-    releaseData();
-    m_len = len;
-    m_data = overflowed;
-    setModeAndCap(Mode::Smart, len + 1);
-  }
-  m_hash = 0;
 }
 
 void StringData::negate() {

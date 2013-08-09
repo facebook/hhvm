@@ -2826,29 +2826,6 @@ TranslatorX64::emitTransCounterInc(X64Assembler& a) {
   return start;
 }
 
-void
-TranslatorX64::getInputsIntoXMMRegs(const NormalizedInstruction& ni,
-                                    PhysReg lr, PhysReg rr,
-                                    RegXMM lxmm,
-                                    RegXMM rxmm) {
-  const DynLocation& l = *ni.inputs[0];
-  const DynLocation& r = *ni.inputs[1];
-  // Get the values into their appropriate xmm locations
-  auto intoXmm = [&](const DynLocation& l, PhysReg src, RegXMM xmm) {
-    if (l.isInt()) {
-      // cvtsi2sd doesn't modify the high bits of its target, which can
-      // cause false dependencies to prevent register renaming from kicking
-      // in. Break the dependency chain by zeroing out the destination reg.
-      a.  pxor_xmm_xmm(xmm, xmm);
-      a.  cvtsi2sd_reg64_xmm(src, xmm);
-    } else {
-      a.  mov_reg64_xmm(src, xmm);
-    }
-  };
-  intoXmm(l, lr, lxmm);
-  intoXmm(r, rr, rxmm);
-}
-
 #define O(opcode, imm, pusph, pop, flags) \
 /**
  * The interpOne methods saves m_pc, m_fp, and m_sp ExecutionContext,

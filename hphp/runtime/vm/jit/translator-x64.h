@@ -250,7 +250,6 @@ private:
   vector<PendingFixup> m_pendingFixups;
 
   void drawCFG(std::ofstream& out) const;
-  static vector<PhysReg> x64TranslRegs();
 
   Asm& getAsmFor(TCA addr) {
     assert(a.base()    != ahot.base()   &&
@@ -262,9 +261,6 @@ private:
   void emitIncRef(PhysReg base, DataType);
   void emitIncRefGenericRegSafe(PhysReg base, int disp, PhysReg tmp);
   static CppCall getDtorCall(DataType type);
-  void emitCopy(PhysReg srcCell, int disp, PhysReg destCell);
-
-  void emitThisCheck(const NormalizedInstruction& i, PhysReg reg);
 
 public:
   void emitCall(Asm& a, TCA dest);
@@ -274,43 +270,21 @@ public:
 private:
   TCA emitCallArrayPrologue(const Func* func,
                             const DVFuncletsVec& dvs);
-  void translateClassExistsImpl(const Tracelet& t,
-                                const NormalizedInstruction& i,
-                                Attr typeAttr);
   void recordSyncPoint(Asm& a, Offset pcOff, Offset spOff);
   void emitEagerSyncPoint(Asm& a, const Opcode* pc, const Offset spDiff);
   void recordIndirectFixup(CTCA addr, int dwordsPushed);
-  void emitStringToClass(const NormalizedInstruction& i);
-  void emitStringToKnownClass(const NormalizedInstruction& i,
-                              const StringData* clssName);
-  void emitObjToClass(const NormalizedInstruction& i);
-  void emitClsAndPals(const NormalizedInstruction& i);
 
   template<int Arity> TCA emitNAryStub(Asm& a, CppCall c);
   TCA emitUnaryStub(Asm& a, CppCall c);
-  TCA genericRefCountStub(Asm& a);
-  TCA genericRefCountStubRegs(Asm& a);
   void emitFreeLocalsHelpers();
   void emitGenericDecRefHelpers();
   TCA emitPrologueRedispatch(Asm &a);
   TCA emitFuncGuard(Asm& a, const Func *f);
-  template <bool reentrant>
-  void emitDerefStoreToLoc(PhysReg srcReg, const Location& destLoc);
 
-  void getInputsIntoXMMRegs(const NormalizedInstruction& ni,
-                            PhysReg lr, PhysReg rr,
-                            RegXMM lxmm, RegXMM rxmm);
-  void fpEq(const NormalizedInstruction& i, PhysReg lr, PhysReg rr);
   void emitRB(Asm& a, Trace::RingBufferType t, SrcKey sk,
               RegSet toSave = RegSet());
   void emitRB(Asm& a, Trace::RingBufferType t, const char* msgm,
               RegSet toSave = RegSet());
-  void newTuple(const NormalizedInstruction& i, unsigned n);
-
-  enum {
-    ArgDontAllocate = -1,
-    ArgAnyReg = -2
-  };
 
  private:
   template<typename L>
@@ -320,14 +294,6 @@ private:
   static uint64_t toStringHelper(ObjectData *obj);
   void invalidateSrcKey(SrcKey sk);
  public:
-  template<typename T>
-  void invalidateSrcKeys(const T& keys) {
-    BlockingLeaseHolder writer(s_writeLease);
-    assert(writer);
-    for (typename T::const_iterator i = keys.begin(); i != keys.end(); ++i) {
-      invalidateSrcKey(*i);
-    }
-  }
 
   void registerCatchTrace(CTCA ip, TCA trace);
   TCA getCatchTrace(CTCA ip) const;
@@ -411,8 +377,6 @@ public:
 
   void checkRefs(Asm&, SrcKey, const RefDeps&, SrcRec&);
 
-  void emitInlineReturn(Location retvalSrcLoc, int retvalSrcDisp);
-  void emitGenericReturn(bool noThis, int retvalSrcDisp);
   void dumpStack(const char* msg, int offset) const;
 
   void emitFallbackJmp(SrcRec& dest, ConditionCode cc = CC_NZ);

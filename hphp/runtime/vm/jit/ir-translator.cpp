@@ -593,13 +593,6 @@ IRTranslator::translateNativeImpl(const NormalizedInstruction& ni) {
   HHIR_EMIT(NativeImpl);
 }
 
-// emitClsLocalIndex --
-// emitStringToClass --
-// emitStringToKnownClass --
-// emitObjToClass --
-// emitClsAndPals --
-//   Helpers for AGetC/AGetL.
-
 const int kEmitClsLocalIdx = 0;
 
 void IRTranslator::translateAGetC(const NormalizedInstruction& ni) {

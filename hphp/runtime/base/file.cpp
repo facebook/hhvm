@@ -30,9 +30,11 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/exceptions.h"
-#include <sys/file.h>
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "folly/String.h"
+
+#include <sys/file.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -776,7 +778,7 @@ Array File::readCSV(int64_t length /* = 0 */, char delimiter_char /* = ',' */,
 }
 
 String File::getLastError() {
-  return Util::safe_strerror(errno);
+  return String(folly::errnoStr(errno).toStdString());
 }
 
 

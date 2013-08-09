@@ -17,6 +17,7 @@
 #include "hphp/runtime/server/libevent_server_with_takeover.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/string-util.h"
+#include "folly/String.h"
 #include <afdt.h>
 
 /*
@@ -63,7 +64,7 @@ static void fd_transfer_error_hander(
       afdt_phase_str(err->phase),
       afdt_operation_str(err->operation),
       err->message,
-      Util::safe_strerror(errno).c_str());
+      folly::errnoStr(errno).c_str());
 }
 
 static int fd_transfer_request_handler(
@@ -168,7 +169,7 @@ void LibEventServerWithTakeover::setupFdServer() {
   ret = unlink(m_transfer_fname.c_str());
   if (ret < 0 && errno != ENOENT) {
     Logger::Error("Unalbe to unlink '%s': %s",
-                  m_transfer_fname.c_str(), Util::safe_strerror(errno).c_str());
+                  m_transfer_fname.c_str(), folly::errnoStr(errno).c_str());
     return;
   }
 
@@ -248,7 +249,7 @@ int LibEventServerWithTakeover::getAcceptSocket() {
   ret = evhttp_accept_socket(m_server, m_accept_sock);
   if (ret < 0) {
     Logger::Error("evhttp_accept_socket: %s",
-        Util::safe_strerror(errno).c_str());
+        folly::errnoStr(errno).c_str());
     int errno_save = errno;
     close(m_accept_sock);
     m_accept_sock = -1;

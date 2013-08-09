@@ -22,6 +22,8 @@
 #include <boost/noncopyable.hpp>
 #include <map>
 
+#include "folly/String.h"
+
 #include "hphp/util/assertions.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
@@ -571,7 +573,7 @@ void gc_detect_cycles(const std::string& filename) {
   std::ofstream out(filename.c_str());
   if (!out.is_open()) {
     raise_error("couldn't open output file for gc_detect_cycles, %s",
-                strerror(errno));
+                folly::errnoStr(errno).c_str());
     return;
   }
 

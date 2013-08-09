@@ -18,6 +18,8 @@
 #include <cstdlib>
 #include <string.h>
 
+#include "folly/String.h"
+
 #include "hphp/util/parser/xhpast2/parser.h"
 
 namespace HPHP { namespace HPHP_PARSER_NS {
@@ -77,7 +79,7 @@ int main(int argc, char** argv) try {
   std::ifstream in(argv[1]);
   if (!in.is_open()) {
     std::cerr << argv[0] << ": couldn't open file: "
-              << strerror(errno) << '\n';
+              << folly::errnoStr(errno).toStdString() << '\n';
   }
 
   std::cout << "1..1\n";

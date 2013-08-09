@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/util/compression.h"
 #include "hphp/util/logger.h"
+#include "folly/String.h"
 #ifdef HAVE_SNAPPY
 #include <snappy.h>
 #endif
@@ -321,7 +322,7 @@ Resource f_gzopen(CStrRef filename, CStrRef mode,
   Resource handle(file);
   bool ret = file->open(File::TranslatePath(filename), mode);
   if (!ret) {
-    raise_warning("%s",Util::safe_strerror(errno).c_str());
+    raise_warning("%s",folly::errnoStr(errno).c_str());
     return NULL;
   }
   return handle;

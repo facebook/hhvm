@@ -32,6 +32,7 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/compatibility.h"
+#include "folly/String.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -630,7 +631,8 @@ public:
 
     if (n != (int)m_st_size) {
       if (n == -1) {
-        raise_warning("read failed: %s (%d)", strerror(errno), errno);
+        raise_warning("read failed: %s (%d)", folly::errnoStr(errno).c_str(),
+                      errno);
       } else {
         raise_warning("read returned less bytes than requested");
       }
@@ -659,7 +661,8 @@ public:
      */
     if (value.size() < (int)m_st_size) {
       if (ftruncate(m_fd, 0) < 0) {
-        raise_warning("truncate failed: %s (%d)", strerror(errno), errno);
+        raise_warning("truncate failed: %s (%d)",
+                      folly::errnoStr(errno).c_str(), errno);
         return false;
       }
     }
@@ -673,7 +676,8 @@ public:
 
     if (n != value.size()) {
       if (n == -1) {
-        raise_warning("write failed: %s (%d)", strerror(errno), errno);
+        raise_warning("write failed: %s (%d)",
+                      folly::errnoStr(errno).c_str(), errno);
       } else {
         raise_warning("write wrote less bytes than requested");
       }
@@ -816,12 +820,12 @@ private:
 # endif
         if (fcntl(m_fd, F_SETFD, FD_CLOEXEC)) {
           raise_warning("fcntl(%d, F_SETFD, FD_CLOEXEC) failed: %s (%d)",
-                        m_fd, strerror(errno), errno);
+                        m_fd, folly::errnoStr(errno).c_str(), errno);
         }
 #endif
       } else {
         raise_warning("open(%s, O_RDWR) failed: %s (%d)", buf,
-                      strerror(errno), errno);
+                      folly::errnoStr(errno).c_str(), errno);
       }
     }
   }
@@ -830,7 +834,7 @@ private:
     DIR *dir = opendir(dirname);
     if (!dir) {
       raise_notice("ps_files_cleanup_dir: opendir(%s) failed: %s (%d)",
-                   dirname, strerror(errno), errno);
+                   dirname, folly::errnoStr(errno).c_str(), errno);
       return 0;
     }
 

@@ -24,7 +24,7 @@
 #define SOCKET_ERROR(sock, msg, errn)                           \
   sock->setError(errn);                                         \
   raise_warning("%s [%d]: %s", msg, errn,                       \
-                  Util::safe_strerror(errn).c_str())            \
+                  folly::errnoStr(errn).c_str())                \
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

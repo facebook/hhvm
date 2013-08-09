@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/db_mysql.h"
+#include "folly/String.h"
 #include "netinet/in.h"
 #include <netdb.h>
 
@@ -1504,7 +1505,7 @@ Variant f_mysql_async_wait_actionable(CVarRef items, double timeout) {
   int res = poll(fds, nfds, timeout_millis);
   if (res == -1) {
     raise_warning("unable to poll [%d]: %s", errno,
-                  Util::safe_strerror(errno).c_str());
+                  folly::errnoStr(errno).c_str());
     return Array::Create();
   }
 

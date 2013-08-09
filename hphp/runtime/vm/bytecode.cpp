@@ -531,7 +531,8 @@ class StackElms {
       size_t algnSz = RuntimeOption::EvalVMStackElms * sizeof(TypedValue);
       if (posix_memalign((void**)&m_elms, algnSz, algnSz) != 0) {
         throw std::runtime_error(
-          std::string("VM stack initialization failed: ") + strerror(errno));
+          std::string("VM stack initialization failed: ") +
+                      folly::errnoStr(errno).c_str());
       }
     }
     return m_elms;

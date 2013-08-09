@@ -19,6 +19,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
+#include "folly/String.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/compiler/analysis/symbol_table.h"
@@ -67,7 +68,7 @@ void Package::addInputList(const char *listFileName) {
   FILE *f = fopen(listFileName, "r");
   if (f == nullptr) {
     throw Exception("Unable to open %s: %s", listFileName,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
   }
   char fileName[PATH_MAX];
   while (fgets(fileName, sizeof(fileName), f)) {

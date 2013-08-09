@@ -19,6 +19,8 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/util/trace.h"
 
+#include "folly/String.h"
+
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -106,7 +108,7 @@ profileInitMmap() {
   int fd = open(path.c_str(), O_RDWR | O_CREAT, 0600);
   if (fd < 0) {
     TRACE(0, "profileInit: open %s failed: %s\n", path.c_str(),
-          strerror(errno));
+          folly::errnoStr(errno).c_str());
     perror("open");
     return nullptr;
   }
@@ -116,7 +118,7 @@ profileInitMmap() {
   if (retval < 0) {
     perror("truncate");
     TRACE(0, "profileInit: truncate %s failed: %s\n", path.c_str(),
-          strerror(errno));
+          folly::errnoStr(errno).c_str());
     return nullptr;
   }
 
@@ -127,7 +129,7 @@ profileInitMmap() {
   if (mmapRet == MAP_FAILED) {
     perror("mmap");
     TRACE(0, "profileInit: mmap %s failed: %s\n", path.c_str(),
-          strerror(errno));
+          folly::errnoStr(errno).c_str());
     return nullptr;
   }
   return (ValueProfileLine*)mmapRet;

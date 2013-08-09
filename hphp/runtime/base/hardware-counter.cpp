@@ -37,6 +37,7 @@
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
+#include "folly/String.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -76,13 +77,13 @@ public:
     m_fd = syscall(__NR_perf_event_open, &pe, 0, -1, -1, 0);
     if (m_fd < 0) {
       Logger::Verbose("perf_event_open failed with: %s",
-                      Util::safe_strerror(errno).c_str());
+                      folly::errnoStr(errno).c_str());
       m_err = -1;
       return;
     }
     if (ioctl(m_fd, PERF_EVENT_IOC_ENABLE, 0) < 0) {
       Logger::Warning("perf_event failed to enable: %s",
-                      Util::safe_strerror(errno).c_str());
+                      folly::errnoStr(errno).c_str());
       close();
       m_err = -1;
       return;
@@ -128,7 +129,7 @@ public:
   void reset() {
     if (m_fd > 0 && ioctl (m_fd, PERF_EVENT_IOC_RESET, 0) < 0) {
       Logger::Warning("perf_event failed to reset with: %s",
-          Util::safe_strerror(errno).c_str());
+          folly::errnoStr(errno).c_str());
       m_err = -1;
     }
   }

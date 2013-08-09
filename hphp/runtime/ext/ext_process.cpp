@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/thread-init-fini.h"
+#include "folly/String.h"
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -142,7 +143,7 @@ void f_pcntl_exec(CStrRef path, CArrRef args /* = null_array */,
   char **envp = build_envp(envs, senvs);
   if (execve(path.c_str(), argv, envp) == -1) {
     raise_warning("Error has occured: (errno %d) %s",
-                    errno, Util::safe_strerror(errno).c_str());
+                    errno, folly::errnoStr(errno).c_str());
   }
 
   free(envp);
@@ -598,7 +599,7 @@ public:
     childend = dup(file->fd());
     if (childend < 0) {
       raise_warning("unable to dup File-Handle for descriptor %d - %s",
-                      index, Util::safe_strerror(errno).c_str());
+                      index, folly::errnoStr(errno).c_str());
       return false;
     }
     return true;
@@ -609,7 +610,7 @@ public:
     int newpipe[2];
     if (0 != pipe(newpipe)) {
       raise_warning("unable to create pipe %s",
-                      Util::safe_strerror(errno).c_str());
+                      folly::errnoStr(errno).c_str());
       return false;
     }
 
@@ -741,7 +742,7 @@ static Variant post_proc_open(CStrRef cmd, Variant &pipes,
     for (int i = 0; i < (int)items.size(); i++) {
       items[i].cleanup();
     }
-    raise_warning("fork failed - %s", Util::safe_strerror(errno).c_str());
+    raise_warning("fork failed - %s", folly::errnoStr(errno).c_str());
     return false;
   }
 

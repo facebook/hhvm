@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/socket.h"
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/server/server_stats.h"
+#include "folly/String.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -306,7 +307,7 @@ static bool create_new_socket(const char *&name, int port, Variant &errnum,
   if (!sock->valid()) {
     SOCKET_ERROR(sock, "unable to create socket", errno);
     errnum = sock->getError();
-    errstr = String(Util::safe_strerror(sock->getError()));
+    errstr = String(folly::errnoStr(sock->getError()).toStdString());
     return false;
   }
   return true;
@@ -645,7 +646,7 @@ Variant f_socket_select(VRefParam read, VRefParam write, VRefParam except,
   int retval = poll(fds, count, timeout_ms);
   if (retval == -1) {
     raise_warning("unable to select [%d]: %s", errno,
-                  Util::safe_strerror(errno).c_str());
+                  folly::errnoStr(errno).c_str());
     free(fds);
     return false;
   }
@@ -962,7 +963,7 @@ void f_socket_close(CResRef socket) {
 }
 
 String f_socket_strerror(int errnum) {
-  return String(Util::safe_strerror(errnum));
+  return String(folly::errnoStr(errnum).toStdString());
 }
 
 int64_t f_socket_last_error(CResRef socket /* = null_object */) {
@@ -1054,7 +1055,7 @@ static Variant sockopen_impl(CStrRef hostname, int port, Variant &errnum,
             msg += boost::lexical_cast<std::string>(port);
             SOCKET_ERROR(sock, msg.c_str(), valopt);
             errnum = sock->getError();
-            errstr = String(Util::safe_strerror(sock->getError()));
+            errstr = String(folly::errnoStr(sock->getError()).toStdString());
             return false;
           } else {
             retval = 0; // success
@@ -1068,7 +1069,7 @@ static Variant sockopen_impl(CStrRef hostname, int port, Variant &errnum,
           msg += boost::lexical_cast<std::string>(port);
           SOCKET_ERROR(sock, msg.c_str(), ETIMEDOUT);
           errnum = sock->getError();
-          errstr = String(Util::safe_strerror(sock->getError()));
+          errstr = String(folly::errnoStr(sock->getError()).toStdString());
           return false;
         }
       }
@@ -1081,7 +1082,7 @@ static Variant sockopen_impl(CStrRef hostname, int port, Variant &errnum,
 
   if (retval != 0) {
     errnum = sock->getError();
-    errstr = String(Util::safe_strerror(sock->getError()));
+    errstr = String(folly::errnoStr(sock->getError()).toStdString());
     return false;
   }
 

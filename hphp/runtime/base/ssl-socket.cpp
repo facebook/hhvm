@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/util/util.h"
+#include "folly/String.h"
 #include <poll.h>
 
 namespace HPHP {
@@ -265,8 +266,7 @@ bool SSLSocket::handleError(int64_t nr_bytes, bool is_init) {
         m_eof = true;
         retry = false;
       } else {
-        string estr = Util::safe_strerror(errno);
-        raise_warning("SSL: %s", estr.c_str());
+        raise_warning("SSL: %s", folly::errnoStr(errno).c_str());
         retry = false;
       }
       break;

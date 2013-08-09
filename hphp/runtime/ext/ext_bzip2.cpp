@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/ext_bzip2.h"
 #include "hphp/runtime/base/bzip2-file.h"
 #include "hphp/util/alloc.h"
+#include "folly/String.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,7 +54,7 @@ Variant f_bzopen(CVarRef filename, CStrRef mode) {
     bz = NEWOBJ(BZ2File)();
     bool ret = bz->open(File::TranslatePath(filename.toString()), mode);
     if (!ret) {
-      raise_warning("%s", Util::safe_strerror(errno).c_str());
+      raise_warning("%s", folly::errnoStr(errno).c_str());
       return false;
     }
   } else {

@@ -25,6 +25,8 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 
+#include "folly/String.h"
+
 #include "hphp/util/assertions.h"
 #include "hphp/util/maphuge.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -45,7 +47,7 @@ Address allocSlab(size_t size) {
     mmap(0, size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
   if (result == MAP_FAILED) {
     panic("%s:%d: (%s) map of %zu bytes failed (%s)\n",
-          __FILE__, __LINE__, __func__, size, strerror(errno));
+          __FILE__, __LINE__, __func__, size, folly::errnoStr(errno).c_str());
   }
   return result;
 }
@@ -77,7 +79,7 @@ void DataBlock::makeExecable() {
   if (mprotect(base, size, PROT_READ | PROT_WRITE | PROT_EXEC)) {
     panic("%s:%d (%s): mprotect @%p %zu bytes failed (%s)\n",
           __FILE__, __LINE__, __func__,
-          base, (long)size, strerror(errno));
+          base, (long)size, folly::errnoStr(errno).c_str());
   }
 }
 

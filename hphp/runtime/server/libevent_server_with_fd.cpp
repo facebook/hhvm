@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/server/libevent_server_with_fd.h"
 #include "hphp/util/logger.h"
+#include "folly/String.h"
 
 /*
  * LibEventServer that supports using existing/inherited accept sockets.
@@ -40,14 +41,14 @@ int LibEventServerWithFd::getAcceptSocket() {
   int ret = listen(m_accept_sock, RuntimeOption::ServerBacklog);
   if (ret != 0) {
     Logger::Error("inheritfd: listen() failed: %s",
-        Util::safe_strerror(errno).c_str());
+        folly::errnoStr(errno).c_str());
     return -1;
   }
 
   ret = evhttp_accept_socket(m_server, m_accept_sock);
   if (ret < 0) {
     Logger::Error("evhttp_accept_socket: %s",
-        Util::safe_strerror(errno).c_str());
+        folly::errnoStr(errno).c_str());
     int errno_save = errno;
     close(m_accept_sock);
     m_accept_sock = -1;
@@ -69,14 +70,14 @@ int LibEventServerWithFd::getAcceptSocketSSL() {
   int ret = listen(m_accept_sock_ssl, RuntimeOption::ServerBacklog);
   if (ret != 0) {
     Logger::Error("inheritfd: listen() failed for ssl: %s",
-        Util::safe_strerror(errno).c_str());
+        folly::errnoStr(errno).c_str());
     return -1;
   }
 
   ret = evhttp_accept_socket(m_server_ssl, m_accept_sock_ssl);
   if (ret < 0) {
     Logger::Error("evhttp_accept_socket: (ssl) %s",
-        Util::safe_strerror(errno).c_str());
+        folly::errnoStr(errno).c_str());
     int errno_save = errno;
     close(m_accept_sock_ssl);
     m_accept_sock_ssl = -1;

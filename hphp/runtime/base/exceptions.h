@@ -20,6 +20,7 @@
 #include "hphp/util/exception.h"
 #include "hphp/util/util.h"
 #include "hphp/runtime/base/types.h"
+#include "folly/String.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -173,7 +174,7 @@ class SystemCallFailure : public ExtendedException {
 public:
   explicit SystemCallFailure(const char *func)
     : ExtendedException("%s returned %d: %s.", func, errno,
-                        Util::safe_strerror(errno).c_str()) {}
+                        folly::errnoStr(errno).c_str()) {}
   virtual ~SystemCallFailure() throw() {}
   EXCEPTION_COMMON_IMPL(SystemCallFailure);
 };

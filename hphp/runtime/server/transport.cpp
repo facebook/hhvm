@@ -32,6 +32,7 @@
 #include "hphp/util/compatibility.h"
 #include "hphp/util/timer.h"
 #include "hphp/runtime/base/hardware-counter.h"
+#include "folly/String.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -837,7 +838,7 @@ bool Transport::moveUploadedFileHelper(CStrRef filename, CStrRef destination) {
   if (Util::rename(filename.c_str(), dest.c_str()) < 0) {
     Logger::Error("Unable to move uploaded file %s to %s: %s.",
                   filename.c_str(), dest.c_str(),
-                  Util::safe_strerror(errno).c_str());
+                  folly::errnoStr(errno).c_str());
     return false;
   }
   Logger::Verbose("Successfully moved uploaded file %s to %s.",

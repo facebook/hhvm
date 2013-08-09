@@ -19,6 +19,7 @@
 #include "hphp/util/compression.h"
 #include "util.h"
 #include "hphp/util/logger.h"
+#include "folly/String.h"
 #include <sys/mman.h>
 
 namespace HPHP {
@@ -125,7 +126,7 @@ void FileCache::write(const char *name, const char *fullpath) {
   struct stat sb;
   if (stat(fullpath, &sb) != 0) {
     throw Exception("Unable to stat %s: %s", fullpath,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
   }
   int len = sb.st_size;
   Buffer &buffer = m_files[name];
@@ -138,7 +139,7 @@ void FileCache::write(const char *name, const char *fullpath) {
     FILE *f = fopen(fullpath, "r");
     if (f == nullptr) {
       throw Exception("Unable to open %s: %s", fullpath,
-                      Util::safe_strerror(errno).c_str());
+                      folly::errnoStr(errno).c_str());
     }
 
     char *buf = buffer.data = (char *)malloc(len);
@@ -171,7 +172,7 @@ void FileCache::save(const char *filename) {
   FILE *f = fopen(filename, "w");
   if (f == nullptr) {
     throw Exception("Unable to open %s: %s", filename,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
   }
 
   // write an invalid length followed by a version number
@@ -215,7 +216,7 @@ short FileCache::getVersion(const char *filename) {
   FILE *f = fopen(filename, "r");
   if (f == nullptr) {
     throw Exception("Unable to open %s: %s", filename,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
   }
 
   short tag = -1;
@@ -233,7 +234,7 @@ void FileCache::load(const char *filename, bool onDemandUncompress,
   FILE *f = fopen(filename, "r");
   if (f == nullptr) {
     throw Exception("Unable to open %s: %s", filename,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
   }
 
   if (version > 0) {
@@ -313,7 +314,7 @@ void FileCache::load(const char *filename, bool onDemandUncompress,
 void FileCache::adviseOutMemory() {
   if (posix_madvise(m_addr, m_size, POSIX_MADV_DONTNEED)) {
     Logger::Error("posix_madvise failed: %s",
-                  Util::safe_strerror(errno).c_str());
+                  folly::errnoStr(errno).c_str());
   }
 }
 
@@ -324,19 +325,19 @@ void FileCache::loadMmap(const char *filename, short version) {
   struct stat sbuf;
   if (stat(filename, &sbuf) == -1) {
     throw Exception("Unable to stat %s: %s", filename,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
   }
   m_fd = open(filename, O_RDONLY);
   if (m_fd == -1) {
     throw Exception("Unable to open %s: %s", filename,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
   }
 
   m_addr = mmap(nullptr, sbuf.st_size, PROT_READ, MAP_PRIVATE, m_fd, 0);
   if (m_addr == (void *)-1) {
     close(m_fd);
     throw Exception("Unable to mmap %s: %s", filename,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
   }
   m_size = sbuf.st_size;
   char *p = (char *)m_addr;

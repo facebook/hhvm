@@ -18,6 +18,7 @@
 
 #include "hphp/util/capability.h"
 #include "hphp/util/logger.h"
+#include "folly/String.h"
 #include "linux/types.h"
 #include <sys/capability.h>
 #include <sys/prctl.h>
@@ -96,17 +97,20 @@ bool Capability::ChangeUnixUser(uid_t uid) {
     struct passwd *pw;
 
     if ((pw = getpwuid(uid)) == nullptr) {
-      Logger::Error("unable to getpwuid(%d): %s", uid, strerror(errno));
+      Logger::Error("unable to getpwuid(%d): %s", uid,
+                    folly::errnoStr(errno).c_str());
       return false;
     }
 
     if (pw->pw_gid == 0 || setgid(pw->pw_gid) < 0) {
-      Logger::Error("unable to drop gid privs: %s", strerror(errno));
+      Logger::Error("unable to drop gid privs: %s",
+                    folly::errnoStr(errno).c_str());
       return false;
     }
 
     if (uid == 0 || setuid(uid) < 0) {
-      Logger::Error("unable to drop uid privs: %s", strerror(errno));
+      Logger::Error("unable to drop uid privs: %s",
+                    folly::errnoStr(errno).c_str());
       return false;
     }
 
@@ -131,7 +135,8 @@ bool Capability::ChangeUnixUser(const std::string &username) {
 
 bool Capability::SetDumpable() {
   if (prctl(PR_SET_DUMPABLE, 1, 0, 0, 0)) {
-    Logger::Error("Unable to make process dumpable: %s", strerror(errno));
+    Logger::Error("Unable to make process dumpable: %s",
+                  folly::errnoStr(errno).c_str());
   }
 
   return true;

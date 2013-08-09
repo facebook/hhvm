@@ -18,6 +18,7 @@
 #include "hphp/util/process.h"
 #include "util.h"
 #include "hphp/util/logger.h"
+#include "folly/String.h"
 
 #include <afdt.h>
 #include <string>
@@ -124,7 +125,7 @@ static void do_popen(FILE *fin, FILE *fout, int afdt_fd) {
 
   if (f == nullptr) {
     Logger::Error("Light process failed popen: %d (%s).", errno,
-                  strerror(errno));
+                  folly::errnoStr(errno).c_str());
     fprintf(fout, "error\n");
     fflush(fout);
   } else {
@@ -367,7 +368,7 @@ bool LightProcess::initShadow(const std::string &prefix, int id,
   CPipe p1, p2;
   if (!p1.open() || !p2.open()) {
     Logger::Warning("Unable to create pipe: %d %s", errno,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     return false;
   }
 
@@ -402,7 +403,7 @@ bool LightProcess::initShadow(const std::string &prefix, int id,
   } else if (child < 0) {
     // failed
     Logger::Warning("Unable to fork lightly: %d %s", errno,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     return false;
   } else {
     // parent

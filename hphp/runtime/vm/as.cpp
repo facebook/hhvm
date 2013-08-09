@@ -89,6 +89,8 @@
 #include <boost/noncopyable.hpp>
 #include <boost/bind.hpp>
 
+#include "folly/String.h"
+
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/preclass-emit.h"
@@ -319,7 +321,7 @@ private:
   void io_error_if_bad() {
     if (m_in.bad()) {
       error("I/O error reading stream: " +
-        std::string(strerror(errno)));
+        folly::errnoStr(errno).toStdString());
     }
   }
 

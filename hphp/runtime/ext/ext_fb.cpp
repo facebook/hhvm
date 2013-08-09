@@ -21,6 +21,7 @@
 #include "hphp/util/db_conn.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/stat-cache.h"
+#include "folly/String.h"
 #include "netinet/in.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/string-util.h"
@@ -1494,7 +1495,7 @@ static Variant do_lazy_stat(Function dostat, CStrRef filename) {
   struct stat sb;
   if (dostat(File::TranslatePathWithFileCache(filename).c_str(), &sb)) {
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     return false;
   }
   return stat_impl(&sb);

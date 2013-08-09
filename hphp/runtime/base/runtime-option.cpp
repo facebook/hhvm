@@ -41,6 +41,7 @@
 #include "hphp/util/parser/scanner.h"
 #include "hphp/runtime/server/access_log.h"
 #include "hphp/runtime/base/crash-reporter.h"
+#include "folly/String.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -473,7 +474,7 @@ static void setResourceLimit(int resource, Hdf rlimit, const char *nodeName) {
     if (ret) {
       Logger::Error("Unable to set %s to %" PRId64 ": %s (%d)",
                     nodeName, (int64_t)rl.rlim_cur,
-                    Util::safe_strerror(errno).c_str(), errno);
+                    folly::errnoStr(errno).c_str(), errno);
     }
   }
 }

@@ -51,6 +51,7 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "folly/Format.h"
+#include "folly/String.h"
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/bitops.h"
@@ -3859,7 +3860,7 @@ TranslatorX64::TranslatorX64()
     if (sigaction(SIGSEGV, &sa, &old_sa) != 0) {
       throw std::runtime_error(
         std::string("Failed to install SIGSEGV handler: ") +
-          strerror(errno));
+          folly::errnoStr(errno).c_str());
     }
     m_segvChain = old_sa.sa_flags & SA_SIGINFO ?
       old_sa.sa_sigaction : (sigaction_t)old_sa.sa_handler;

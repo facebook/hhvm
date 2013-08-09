@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
+#include "folly/String.h"
 
 #include <sys/mman.h>
 
@@ -170,7 +171,7 @@ void RequestInjectionData::setTimeout(int seconds) {
     sev.sigev_signo = SIGVTALRM;
     sev.sigev_value.sival_ptr = this;
     if (timer_create(CLOCK_REALTIME, &sev, &m_timer_id)) {
-      raise_error("Failed to set timeout: %s", strerror(errno));
+      raise_error("Failed to set timeout: %s", folly::errnoStr(errno).c_str());
     }
     m_hasTimer = true;
   }

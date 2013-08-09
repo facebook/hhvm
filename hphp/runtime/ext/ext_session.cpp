@@ -1267,13 +1267,6 @@ static void php_session_save_current_state() {
 ///////////////////////////////////////////////////////////////////////////////
 // Cookie Management
 
-#define COOKIE_SET_COOKIE "Set-Cookie: "
-#define COOKIE_EXPIRES    "; expires="
-#define COOKIE_PATH       "; path="
-#define COOKIE_DOMAIN     "; domain="
-#define COOKIE_SECURE     "; secure"
-#define COOKIE_HTTPONLY   "; HttpOnly"
-
 static void php_session_send_cookie() {
   Transport *transport = g_context->getTransport();
   if (!transport) return;
@@ -1283,42 +1276,15 @@ static void php_session_send_cookie() {
     return;
   }
 
-  /* URL encode session_name and id because they might be user supplied */
-  String session_name =
-    StringUtil::UrlEncode(String(PS(session_name).c_str()));
-  String id = StringUtil::UrlEncode(PS(id));
-
-  StringBuffer ncookie;
-  ncookie.append(COOKIE_SET_COOKIE);
-  ncookie.append(session_name);
-  ncookie.append('=');
-  ncookie.append(id);
-
+  int64_t expire = 0;
   if (PS(cookie_lifetime) > 0) {
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    time_t t = tv.tv_sec + PS(cookie_lifetime);
-    if (t > 0) {
-      ncookie.append(COOKIE_EXPIRES);
-      ncookie.append(DateTime(t).toString(DateTime::DateFormat::Cookie));
-    }
+    expire = tv.tv_sec + PS(cookie_lifetime);
   }
-  if (!PS(cookie_path).empty()) {
-    ncookie.append(COOKIE_PATH);
-    ncookie.append(PS(cookie_path));
-  }
-  if (!PS(cookie_domain).empty()) {
-    ncookie.append(COOKIE_DOMAIN);
-    ncookie.append(PS(cookie_domain));
-  }
-  if (PS(cookie_secure)) {
-    ncookie.append(COOKIE_SECURE);
-  }
-  if (PS(cookie_httponly)) {
-    ncookie.append(COOKIE_HTTPONLY);
-  }
-
-  transport->addHeader(ncookie.detach());
+  transport->setCookie(PS(session_name), PS(id), expire, PS(cookie_path), 
+                       PS(cookie_domain), PS(cookie_secure), 
+                       PS(cookie_httponly), true);
 }
 
 static void php_session_reset_id() {

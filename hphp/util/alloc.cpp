@@ -93,6 +93,7 @@ void flush_thread_stack() {
 
 #ifdef USE_JEMALLOC
 unsigned low_arena = 0;
+bool low_huge = false;
 std::atomic<void*> highest_lowmall_addr;
 static const unsigned kLgHugeGranularity = 21;
 static const unsigned kHugePageSize = 1 << kLgHugeGranularity;
@@ -147,7 +148,9 @@ struct JEMallocInitializer {
     (void) sbrk(leftInPage);
     assert((uintptr_t(sbrk(0)) & kHugePageMask) == 0);
     highest_lowmall_addr = sbrk(0);
-    hintHuge((void*)uintptr_t(highest_lowmall_addr.load()), kHugePageSize);
+    if (low_huge) {
+      hintHuge((void*)uintptr_t(highest_lowmall_addr.load()), kHugePageSize);
+    }
   }
 };
 
@@ -180,8 +183,10 @@ void* low_malloc_impl(size_t size) {
         // Whoever updates highest_ever is responsible for hinting all the
         // intervening regions. prevRegion is already huge, so bump the
         // region we're hugening by 1.
-        hintHuge((void*)((prevRegion + 1) << kLgHugeGranularity),
+        if (low_huge) {
+          hintHuge((void*)((prevRegion + 1) << kLgHugeGranularity),
                  (newRegion - prevRegion) << kLgHugeGranularity);
+        }
         break;
       }
     }

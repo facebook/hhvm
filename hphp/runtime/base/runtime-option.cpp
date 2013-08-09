@@ -374,6 +374,9 @@ static inline std::string regionSelectorDefault() {
 #endif
 }
 
+static inline bool hugePagesSoundNice() {
+  return RuntimeOption::ServerExecutionMode();
+}
 
 const uint64_t kEvalVMStackElmsDefault =
 #ifdef VALGRIND
@@ -1117,6 +1120,10 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
 #undef get_uint32
 #undef get_uint32_t
 #undef get_uint64
+    if (EvalMapLowMemHuge) {
+      assert(hugePagesSoundNice());
+      Util::low_malloc_setopts(Util::low_malloc_opts::huge);
+    }
 
     EvalJitEnableRenameFunction = EvalJitEnableRenameFunction || !EvalJit;
 

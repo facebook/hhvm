@@ -333,7 +333,9 @@ void threadInit() {
   tl_targetCaches = mmap(nullptr, RuntimeOption::EvalJitTargetCacheSize,
                          PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
   always_assert(tl_targetCaches != MAP_FAILED);
-  hintHuge(tl_targetCaches, RuntimeOption::EvalJitTargetCacheSize);
+  if (RuntimeOption::EvalMapTgtCacheHuge) {
+    hintHuge(tl_targetCaches, RuntimeOption::EvalJitTargetCacheSize);
+  }
 
   void *shared_base = (char*)tl_targetCaches + s_persistent_start;
   /*

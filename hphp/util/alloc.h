@@ -78,6 +78,7 @@ namespace Util {
 
 #ifdef USE_JEMALLOC
 extern unsigned low_arena;
+extern bool low_huge;
 #endif
 
 inline void* low_malloc(size_t size) {
@@ -94,6 +95,15 @@ inline void low_free(void* ptr) {
   free(ptr);
 #else
   dallocm(ptr, ALLOCM_ARENA(low_arena));
+#endif
+}
+
+enum class low_malloc_opts {
+  huge = 1
+};
+inline void low_malloc_setopts(low_malloc_opts opts) {
+#ifdef USE_JEMALLOC
+  low_huge = int(opts) & int(low_malloc_opts::huge);
 #endif
 }
 

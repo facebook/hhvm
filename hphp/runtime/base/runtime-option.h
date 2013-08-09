@@ -419,7 +419,9 @@ public:
   F(bool, DumpTC,                      false)                           \
   F(bool, DumpTCAnchors,               false)                           \
   F(bool, DumpAst,                     false)                           \
-  F(bool, MapTCHuge,                   true)                            \
+  F(bool, MapTCHuge,                   hugePagesSoundNice())            \
+  F(bool, MapTgtCacheHuge,             false)                           \
+  F(bool, MapLowMemHuge,               hugePagesSoundNice())            \
   F(uint32_t, TCNumHugeHotMB,          16)                              \
   F(uint32_t, TCNumHugeColdMB,         4)                               \
   F(bool, RandomHotFuncs,              false)                           \

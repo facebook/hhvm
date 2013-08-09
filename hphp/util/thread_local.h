@@ -21,6 +21,7 @@
 #include "hphp/util/exception.h"
 #include <errno.h>
 #include "hphp/util/util.h"
+#include "folly/String.h"
 #include <boost/aligned_storage.hpp>
 
 namespace HPHP {
@@ -55,20 +56,24 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // helper
 
+inline void ThreadLocalCheckReturn(int ret, const char *funcName) {
+  if (ret != 0) {
+    // This is used from global constructors so the safest thing to do is just
+    // print to stderr and exit().
+    fprintf(stderr, "%s returned %d: %s", funcName, ret,
+            folly::errnoStr(ret).c_str());
+    exit(1);
+  }
+}
+
 inline void ThreadLocalCreateKey(pthread_key_t *key, void (*del)(void*)) {
   int ret = pthread_key_create(key, del);
-  if (ret != 0) {
-    const char *msg = "(unknown error)";
-    switch (ret) {
-    case EAGAIN:
-      msg = "PTHREAD_KEYS_MAX (1024) is exceeded";
-      break;
-    case ENOMEM:
-      msg = "Out-of-memory";
-      break;
-    }
-    throw Exception("pthread_key_create returned %d: %s", ret, msg);
-  }
+  ThreadLocalCheckReturn(ret, "pthread_key_create");
+}
+
+inline void ThreadLocalSetValue(pthread_key_t key, const void* value) {
+  int ret = pthread_setspecific(key, value);
+  ThreadLocalCheckReturn(ret, "pthread_setspecific");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -108,7 +113,7 @@ struct ThreadLocalManager {
     return pthread_getspecific(m_key);
   }
   void setTop(void * p) {
-    pthread_setspecific(m_key, p);
+    ThreadLocalSetValue(m_key, p);
   }
   static void OnThreadExit(void *p);
   pthread_key_t m_key;
@@ -381,7 +386,7 @@ public:
     T *obj = (T*)pthread_getspecific(m_key);
     if (obj == nullptr) {
       obj = new T();
-      pthread_setspecific(m_key, obj);
+      ThreadLocalSetValue(m_key, obj);
     }
     return obj;
   }
@@ -390,11 +395,11 @@ public:
 
   void destroy() {
     delete (T*)pthread_getspecific(m_key);
-    pthread_setspecific(m_key, nullptr);
+    ThreadLocalSetValue(m_key, nullptr);
   }
 
   void nullOut() {
-    pthread_setspecific(m_key, nullptr);
+    ThreadLocalSetValue(m_key, nullptr);
   }
 
   /**
@@ -434,7 +439,7 @@ public:
 
   void destroy() {
     delete (T*)pthread_getspecific(m_key);
-    pthread_setspecific(m_key, nullptr);
+    ThreadLocalSetValue(m_key, nullptr);
   }
 
   /**
@@ -457,7 +462,7 @@ T *ThreadLocalNoCheck<T>::getCheck() const {
   T *obj = (T*)pthread_getspecific(m_key);
   if (obj == nullptr) {
     obj = new T();
-    pthread_setspecific(m_key, obj);
+    ThreadLocalSetValue(m_key, obj);
   }
   return obj;
 }
@@ -491,7 +496,7 @@ public:
     void* p = pthread_getspecific(s_key);
     T::Delete((T*)p);
     free(p);
-    pthread_setspecific(s_key, nullptr);
+    ThreadLocalSetValue(s_key, nullptr);
   }
 
   T *operator->() const {
@@ -522,7 +527,7 @@ T *ThreadLocalSingleton<T>::getCheck() {
   if (obj == nullptr) {
     obj = (T*)malloc(sizeof(T));
     T::Create(obj);
-    pthread_setspecific(s_key, obj);
+    ThreadLocalSetValue(s_key, obj);
   }
   return obj;
 }
@@ -554,13 +559,13 @@ public:
   }
 
   void set(T* obj) {
-    pthread_setspecific(m_key, obj);
+    ThreadLocalSetValue(m_key, obj);
   }
 
   bool isNull() const { return pthread_getspecific(m_key) == nullptr; }
 
   void destroy() {
-    pthread_setspecific(m_key, nullptr);
+    ThreadLocalSetValue(m_key, nullptr);
   }
 
   /**

@@ -63,7 +63,7 @@ GlobalNameValueTableWrapper::GlobalNameValueTableWrapper(
   X(_FILES,               arr);
   X(_ENV,                 arr);
   X(_REQUEST,             arr);
-  X(_SESSION,             arr);
+  X(_SESSION,             init_null_variant);
   X(HTTP_RAW_POST_DATA,   init_null_variant);
   X(http_response_header, init_null_variant);
 #undef X

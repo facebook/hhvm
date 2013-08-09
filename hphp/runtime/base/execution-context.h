@@ -675,7 +675,7 @@ private:
   void pushClsMethodImpl(Class* cls, StringData* name,
                          ObjectData* obj, int numArgs);
   bool prepareFuncEntry(ActRec* ar, PC& pc);
-  bool prepareArrayArgs(ActRec* ar, ArrayData* args);
+  bool prepareArrayArgs(ActRec* ar, Array& arrayArgs);
   void recordCodeCoverage(PC pc);
   bool isReturnHelper(uintptr_t address);
   void switchModeForDebugger();

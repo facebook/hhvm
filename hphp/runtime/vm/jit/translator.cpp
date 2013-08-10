@@ -264,18 +264,6 @@ bool Translator::liveFrameIsPseudoMain() {
   return ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope();
 }
 
-Location
-Translator::tvToLocation(const TypedValue* tv, const TypedValue* frame) {
-  const Cell *arg0 = frame + locPhysicalOffset(Location(Location::Local, 0));
-  // Physical stack offsets grow downwards from the frame pointer. See
-  // locPhysicalOffset.
-  int offset = -(tv - arg0);
-  assert(offset >= 0);
-  assert(offset < ((ActRec*)frame)->m_func->numLocals());
-  TRACE(2, "tvToLocation: %p -> L:%d\n", tv, offset);
-  return Location(Location::Local, offset);
-}
-
 static int64_t typeToMask(DataType t) {
   return (t == KindOfInvalid) ? 1 : (1 << (1 + getDataTypeIndex(t)));
 }
@@ -3950,14 +3938,6 @@ uint64_t Translator::getTransCounter(TransID transId) const {
                               [transId % transCountersPerChunk];
   }
   return counter;
-}
-
-void Translator::setTransCounter(TransID transId, uint64_t value) {
-  assert(transId < m_translations.size());
-  assert(transId / transCountersPerChunk < m_transCounters.size());
-
-  m_transCounters[transId / transCountersPerChunk]
-                 [transId % transCountersPerChunk] = value;
 }
 
 namespace {

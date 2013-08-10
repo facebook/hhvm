@@ -35,7 +35,6 @@
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
-#include "hphp/runtime/vm/jit/trans-data.h"
 #include "hphp/runtime/vm/jit/translator-instrs.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -364,7 +363,6 @@ public:
 private:
   friend struct TraceletContext;
 
-  void analyzeSecondPass(Tracelet& t);
   void analyzeCallee(TraceletContext&,
                      Tracelet& parent,
                      NormalizedInstruction* fcall);
@@ -398,11 +396,6 @@ private:
   RuntimeType liveType(const Cell* outer,
                        const Location& l,
                        bool specialize = false);
-
-  void consumeStackEntry(Tracelet* tlet, NormalizedInstruction* ni);
-  void produceStackEntry(Tracelet* tlet, NormalizedInstruction* ni);
-  void produceDataRef(Tracelet* tlet, NormalizedInstruction* ni,
-                                      Location loc);
 
   virtual void syncWork() = 0;
   virtual void invalidateSrcKey(SrcKey sk) = 0;
@@ -514,17 +507,12 @@ public:
     return &m_translations[transId];
   }
 
-  TransID getNumTrans() const {
-    return m_translations.size();
-  }
-
   TransID getCurrentTransID() const {
     return m_translations.size();
   }
 
   uint64_t* getTransCounterAddr();
   uint64_t getTransCounter(TransID transId) const;
-  void setTransCounter(TransID transId, uint64_t value);
 
   void addTranslation(const TransRec& transRec);
 
@@ -551,10 +539,6 @@ public:
 
   void postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
                    Tracelet& t, TraceletContext& tas);
-  static Location tvToLocation(const TypedValue* tv, const TypedValue* frame);
-  static bool typeIsString(DataType type) {
-    return type == KindOfString || type == KindOfStaticString;
-  }
   static bool liveFrameIsPseudoMain();
 
   inline void sync() {

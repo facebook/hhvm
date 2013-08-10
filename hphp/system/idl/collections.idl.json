@@ -927,21 +927,6 @@
                     ]
                 },
                 {
-                    "name": "discard",
-                    "flags": [
-                    ],
-                    "desc": "Removes the specified key from this Map.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                        {
-                            "name": "key",
-                            "type": "Variant"
-                        }
-                    ]
-                },
-                {
                     "name": "add",
                     "flags": [
                     ],
@@ -1024,36 +1009,6 @@
                         "type": "VariantMap"
                     },
                     "args": [
-                    ]
-                },
-                {
-                    "name": "updateFromArray",
-                    "flags": [
-                    ],
-                    "desc": "Inserts the keys and values from the specified array into this Map.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                        {
-                            "name": "arr",
-                            "type": "Variant"
-                        }
-                    ]
-                },
-                {
-                    "name": "updateFromIterable",
-                    "flags": [
-                    ],
-                    "desc": "Inserts the keys and values produced by the specified KeyedIterable.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                        {
-                            "name": "it",
-                            "type": "Variant"
-                        }
                     ]
                 },
                 {
@@ -1559,21 +1514,6 @@
                     ]
                 },
                 {
-                    "name": "discard",
-                    "flags": [
-                    ],
-                    "desc": "Removes the specified key from this StableMap.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                        {
-                            "name": "key",
-                            "type": "Variant"
-                        }
-                    ]
-                },
-                {
                     "name": "add",
                     "flags": [
                     ],
@@ -1656,36 +1596,6 @@
                         "type": "VariantMap"
                     },
                     "args": [
-                    ]
-                },
-                {
-                    "name": "updateFromArray",
-                    "flags": [
-                    ],
-                    "desc": "Inserts the key\/value pairs from the specified array into this StableMap.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                        {
-                            "name": "arr",
-                            "type": "Variant"
-                        }
-                    ]
-                },
-                {
-                    "name": "updateFromIterable",
-                    "flags": [
-                    ],
-                    "desc": "Inserts the keys and values produced by the specified KeyedIterable.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                        {
-                            "name": "it",
-                            "type": "Variant"
-                        }
                     ]
                 },
                 {
@@ -2042,21 +1952,6 @@
                 },
                 {
                     "name": "remove",
-                    "flags": [
-                    ],
-                    "desc": "Removes the specified value from this Set.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                        {
-                            "name": "val",
-                            "type": "Variant"
-                        }
-                    ]
-                },
-                {
-                    "name": "discard",
                     "flags": [
                     ],
                     "desc": "Removes the specified value from this Set.",

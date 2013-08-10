@@ -15,7 +15,7 @@ try {
  catch (Exception $e) {
     echo 'B';
   }
-  $methods = Vector::fromArray(array('contains','remove','discard'));
+  $methods = Vector::fromArray(array('contains','remove'));
   foreach ($methods as $method) {
     $m = new Map();
     $m->$method(1);

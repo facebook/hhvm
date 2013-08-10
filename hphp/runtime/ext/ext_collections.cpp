@@ -1269,10 +1269,6 @@ Object c_Map::t_removekey(CVarRef key) {
   return t_remove(key);
 }
 
-Object c_Map::t_discard(CVarRef key) {
-  return t_remove(key);
-}
-
 Array c_Map::t_toarray() {
   return toArrayImpl();
 }
@@ -1327,61 +1323,6 @@ Array c_Map::t_tovaluesarray() {
     ai.add(tvAsCVarRef(&p.data));
   }
   return ai.toArray();
-}
-
-Object c_Map::t_updatefromarray(CVarRef arr) {
-  if (!arr.isArray()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Expected arr to be an array"));
-    throw e;
-  }
-  ArrayData* ad = arr.getArrayData();
-  for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
-       pos = ad->iter_advance(pos)) {
-    Variant k = ad->getKey(pos);
-    TypedValue* tv = cvarToCell(&ad->getValueRef(pos));
-    if (k.isInteger()) {
-      update(k.toInt64(), tv);
-    } else {
-      assert(k.isString());
-      update(k.getStringData(), tv);
-    }
-  }
-  return this;
-}
-
-Object c_Map::t_updatefromiterable(CVarRef it) {
-  if (!it.isObject()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter it must be an instance of Iterable"));
-    throw e;
-  }
-  ObjectData* obj = it.getObjectData();
-  if (obj->getCollectionType() == Collection::MapType) {
-    auto mp = static_cast<c_Map*>(obj);
-    for (uint i = 0; i <= mp->m_nLastSlot; ++i) {
-      c_Map::Bucket& p = mp->m_data[i];
-      if (!p.validValue()) continue;
-      if (p.hasIntKey()) {
-        update((int64_t)p.ikey, &p.data);
-      } else {
-        update(p.skey, &p.data);
-      }
-    }
-    return this;
-  }
-  for (ArrayIter iter = obj->begin(); iter; ++iter) {
-    Variant k = iter.first();
-    Variant v = iter.second();
-    TypedValue* tv = tvToCell(v.asTypedValue());
-    if (k.isInteger()) {
-      update(k.toInt64(), tv);
-    } else {
-      assert(k.isString());
-      update(k.getStringData(), tv);
-    }
-  }
-  return this;
 }
 
 Object c_Map::t_differencebykey(CVarRef it) {
@@ -2426,10 +2367,6 @@ Object c_StableMap::t_removekey(CVarRef key) {
   return t_remove(key);
 }
 
-Object c_StableMap::t_discard(CVarRef key) {
-  return t_remove(key);
-}
-
 Array c_StableMap::t_toarray() {
   return toArrayImpl();
 }
@@ -2479,61 +2416,6 @@ Array c_StableMap::t_tovaluesarray() {
     p = p->pListNext;
   }
   return ai.toArray();
-}
-
-Object c_StableMap::t_updatefromarray(CVarRef arr) {
-  if (!arr.isArray()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter arr must be an array"));
-    throw e;
-  }
-  ArrayData* ad = arr.getArrayData();
-  for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
-       pos = ad->iter_advance(pos)) {
-    Variant k = ad->getKey(pos);
-    TypedValue* tv = cvarToCell(&ad->getValueRef(pos));
-    if (k.isInteger()) {
-      update(k.toInt64(), tv);
-    } else {
-      assert(k.isString());
-      update(k.getStringData(), tv);
-    }
-  }
-  return this;
-}
-
-Object c_StableMap::t_updatefromiterable(CVarRef it) {
-  if (!it.isObject()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter it must be an instance of Iterable"));
-    throw e;
-  }
-  ObjectData* obj = it.getObjectData();
-  if (obj->getCollectionType() == Collection::StableMapType) {
-    auto smp = static_cast<c_StableMap*>(obj);
-    c_StableMap::Bucket* p = smp->m_pListHead;
-    while (p) {
-      if (p->hasIntKey()) {
-        update((int64_t)p->ikey, &p->data);
-      } else {
-        update(p->skey, &p->data);
-      }
-      p = p->pListNext;
-    }
-    return this;
-  }
-  for (ArrayIter iter = obj->begin(); iter; ++iter) {
-    Variant k = iter.first();
-    Variant v = iter.second();
-    TypedValue* tv = cvarToCell(&v);
-    if (k.isInteger()) {
-      update(k.toInt64(), tv);
-    } else {
-      assert(k.isString());
-      update(k.getStringData(), tv);
-    }
-  }
-  return this;
 }
 
 Object c_StableMap::t_differencebykey(CVarRef it) {
@@ -3654,10 +3536,6 @@ Object c_Set::ti_fromarray(CVarRef arr) {
     }
   }
   return ret;
-}
-
-Object c_Set::t_discard(CVarRef key) {
-  return t_remove(key);
 }
 
 Object c_Set::t_difference(CVarRef iterable) {

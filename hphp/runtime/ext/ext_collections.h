@@ -243,14 +243,11 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   bool t_containskey(CVarRef key);
   Object t_remove(CVarRef key);
   Object t_removekey(CVarRef key);
-  Object t_discard(CVarRef key); // deprecated
   Array t_toarray();
   Array t_copyasarray(); // deprecated
   Array t_tokeysarray(); // deprecated
   Object t_values(); // deprecated
   Array t_tovaluesarray(); // deprecated
-  Object t_updatefromarray(CVarRef arr);
-  Object t_updatefromiterable(CVarRef it);
   Object t_differencebykey(CVarRef it);
   Object t_getiterator();
   Object t_map(CVarRef callback);
@@ -547,14 +544,11 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   bool t_containskey(CVarRef key);
   Object t_remove(CVarRef key);
   Object t_removekey(CVarRef key);
-  Object t_discard(CVarRef key); // deprecated
   Array t_toarray();
   Array t_copyasarray(); // deprecated
   Array t_tokeysarray(); // deprecated
   Object t_values(); // deprecated
   Array t_tovaluesarray(); // deprecated
-  Object t_updatefromarray(CVarRef arr);
-  Object t_updatefromiterable(CVarRef it);
   Object t_differencebykey(CVarRef it);
   Object t_getiterator();
   Object t_map(CVarRef callback);
@@ -804,7 +798,6 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   Object t_view();
   bool t_contains(CVarRef key);
   Object t_remove(CVarRef key);
-  Object t_discard(CVarRef key);
   Array t_toarray();
   Object t_getiterator();
   Object t_map(CVarRef callback);

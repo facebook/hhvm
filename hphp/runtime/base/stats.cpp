@@ -40,11 +40,7 @@ __thread uint64_t tl_helper_counters[kMaxNumTrampolines];
 typedef hphp_const_char_map<hphp_const_char_map<uint64_t>> StatGroupMap;
 __thread StatGroupMap* tl_stat_groups = nullptr;
 
-// Only the thread holding the write lease will set the entries in the
-// helperNames array but other threads may concurrently read these
-// entries, so each entry is volatile (or an atomic type per the new
-// C++11 standard).
-const char* volatile helperNames[kMaxNumTrampolines];
+std::atomic<const char*> helperNames[kMaxNumTrampolines];
 
 void
 emitInc(X64Assembler& a, uint64_t* tl_table, uint index, int n,
@@ -86,6 +82,7 @@ void init() {
 static __thread int64_t epoch;
 void dump() {
   if (!enabledAny()) return;
+
   auto url = g_context->getRequestUrl(50);
   TRACE(0, "STATS %" PRId64 " %s\n", epoch, url.c_str());
 #include "hphp/runtime/vm/stats-opcodeDef.h"
@@ -95,11 +92,12 @@ void dump() {
   STATS
 #undef STAT
 #undef O
-  for (int i=0; helperNames[i]; i++) {
+
+  for (int i = 0;; i++) {
+    auto const name = helperNames[i].load(std::memory_order_acquire);
+    if (!name) break;
     if (tl_helper_counters[i]) {
-      TRACE(0, "STAT %-50s %15" PRIu64 "\n",
-            helperNames[i],
-            tl_helper_counters[i]);
+      TRACE(0, "STAT %-50s %15" PRIu64 "\n", name, tl_helper_counters[i]);
     }
   }
 

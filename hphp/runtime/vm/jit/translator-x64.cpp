@@ -2982,7 +2982,7 @@ TCA
 TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
   auto& a = atrampolines;
 
-  if (!a.canEmit(m_trampolineSize)) {
+  if (!a.canEmit(kExpectedPerTrampolineSize)) {
     // not enough space to emit a trampoline, so just return the
     // helper address and emitCall will the emit the right sequence
     // to call it indirectly
@@ -2999,7 +2999,7 @@ TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
     if (strlen(name) > limit) {
       name[limit] = '\0';
     }
-    Stats::helperNames[index] = name;
+    Stats::helperNames[index].store(name, std::memory_order_release);
   }
 
   /*
@@ -3017,10 +3017,6 @@ TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
   a.    ud2    ();
 
   trampolineMap[helperAddr] = trampAddr;
-  if (m_trampolineSize == 0) {
-    m_trampolineSize = a.frontier() - trampAddr;
-    assert(m_trampolineSize >= kMinPerTrampolineSize);
-  }
   recordBCInstr(OpNativeTrampoline, a, trampAddr);
   return trampAddr;
 }
@@ -3609,12 +3605,20 @@ asm_label(a, loopHead);
 }
 
 TranslatorX64::TranslatorX64()
-: m_numNativeTrampolines(0),
-  m_trampolineSize(0),
-  m_defClsHelper(0),
-  m_funcPrologueRedispatch(0),
-  m_numHHIRTrans(0),
-  m_catchTraceMap(128)
+  : m_numNativeTrampolines(0)
+  , m_callToExit(nullptr)
+  , m_retHelper(nullptr)
+  , m_retInlHelper(nullptr)
+  , m_genRetHelper(nullptr)
+  , m_stackOverflowHelper(nullptr)
+  , m_irPopRHelper(nullptr)
+  , m_dtorGenericStub(nullptr)
+  , m_dtorGenericStubRegs(nullptr)
+  , m_dtorStubs{}
+  , m_defClsHelper(nullptr)
+  , m_funcPrologueRedispatch(nullptr)
+  , m_numHHIRTrans(0)
+  , m_catchTraceMap(128)
 {
   static const size_t kRoundUp = 2 << 20;
   const size_t kAHotSize   = RuntimeOption::VMTranslAHotSize;

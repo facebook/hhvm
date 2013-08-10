@@ -13,8 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef STATS_H_
-#define STATS_H_
+#ifndef incl_HPHP_STATS_H_
+#define incl_HPHP_STATS_H_
+
+#include <atomic>
 
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/util/asm-x64.h"
@@ -22,7 +24,7 @@
 
 namespace HPHP {
 
- namespace Transl { class X64Assembler; }
+namespace Transl { class X64Assembler; }
 namespace Stats {
 
 #include "hphp/runtime/vm/stats-opcodeDef.h"
@@ -197,7 +199,7 @@ extern const char* g_counterNames[kNumStatCounters];
 extern __thread uint64_t tl_counters[kNumStatCounters];
 
 extern __thread uint64_t tl_helper_counters[];
-extern const char* volatile helperNames[];
+extern std::atomic<const char*> helperNames[];
 
 inline bool enabled() {
   return Trace::moduleEnabled(Trace::stats, 1);

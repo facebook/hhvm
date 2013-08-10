@@ -197,7 +197,6 @@ class TranslatorX64 : public Translator
   Asm                    atrampolines;
   PointerMap             trampolineMap;
   int                    m_numNativeTrampolines;
-  size_t                 m_trampolineSize; // size of each trampoline
 
   TCA                    m_callToExit;
   TCA                    m_retHelper;
@@ -589,14 +588,23 @@ private:
 
 const size_t kTrampolinesBlockSize = 8 << 12;
 
-// minimum length in bytes of each trampoline code sequence
-// Note that if stats is on, then this size is ~24 bytes due to the
-// instrumentation code that counts the number of calls through each
-// trampoline
-const size_t kMinPerTrampolineSize = 11;
+/*
+ * Roughly expected length in bytes of each trampoline code sequence.
+ *
+ * Note that if stats is on, then this size is ~24 bytes due to the
+ * instrumentation code that counts the number of calls through each
+ * trampoline.
+ *
+ * When a small jump fits, it is only 7 bytes.  When it's a large jump
+ * (followed by ud2) we have 11 bytes.
+ *
+ * We assume 11 bytes is the good size to expect, since stats are only
+ * used for debugging modes.
+ */
+const size_t kExpectedPerTrampolineSize = 11;
 
 const size_t kMaxNumTrampolines = kTrampolinesBlockSize /
-  kMinPerTrampolineSize;
+  kExpectedPerTrampolineSize;
 
 void fcallHelperThunk() asm ("__fcallHelperThunk");
 void funcBodyHelperThunk() asm ("__funcBodyHelperThunk");

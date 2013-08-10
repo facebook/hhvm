@@ -6555,6 +6555,9 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
           if (vNode->isArray()) {
             throw IncludeTimeFatalException(
               cc, "Arrays are not allowed in class constants");
+          } else if (vNode->isCollection()) {
+            throw IncludeTimeFatalException(
+              cc, "Collections are not allowed in class constants");
           } else if (vNode->isScalar()) {
             initScalar(tvVal, vNode);
           } else {

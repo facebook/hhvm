@@ -233,6 +233,7 @@ public:
   virtual bool isTemporary() const { return false; }
   virtual bool isScalar() const { return false; }
   bool isArray() const;
+  bool isCollection() const;
   virtual bool isRefable(bool checkError = false) const { return false; }
   virtual bool getScalarValue(Variant &value) { return false; }
   FileScopeRawPtr getUsedScalarScope(CodeGenerator& cg);

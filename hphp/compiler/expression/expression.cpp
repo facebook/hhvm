@@ -30,6 +30,7 @@
 #include "hphp/compiler/expression/array_element_expression.h"
 #include "hphp/compiler/expression/object_property_expression.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
+#include "hphp/compiler/expression/binary_op_expression.h"
 #include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/expression/function_call.h"
@@ -671,6 +672,14 @@ void Expression::computeLocalExprAltered() {
 bool Expression::isArray() const {
   if (is(KindOfUnaryOpExpression)) {
     return static_cast<const UnaryOpExpression*>(this)->getOp() == T_ARRAY;
+  }
+  return false;
+}
+
+bool Expression::isCollection() const {
+  if (is(KindOfBinaryOpExpression)) {
+    return
+      static_cast<const BinaryOpExpression*>(this)->getOp() == T_COLLECTION;
   }
   return false;
 }

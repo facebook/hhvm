@@ -289,6 +289,7 @@ function hhvm_cmd($options, $test, $test_run = null) {
     '-vEval.EnableArgsInBacktraces=true',
     read_file(find_test_ext($test, 'opts')),
     extra_args($options),
+    '-vResourceLimit.CoreFileSize=0',
     '--file',
     escapeshellarg($test_run)
   ));

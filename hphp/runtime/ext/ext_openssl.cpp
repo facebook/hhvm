@@ -1131,7 +1131,18 @@ void f_openssl_free_key(CResRef key) {
 }
 
 bool f_openssl_open(CStrRef sealed_data, VRefParam open_data, CStrRef env_key,
-                    CVarRef priv_key_id) {
+                    CVarRef priv_key_id, CStrRef method /* = null_string */) {
+  const EVP_CIPHER *cipher_type;
+  if (method.empty()) {
+    cipher_type = EVP_rc4();
+  } else {
+    cipher_type = EVP_get_cipherbyname(method.c_str());
+    if (!cipher_type) {
+      raise_warning("Unknown cipher algorithm");
+      return false;
+    }
+  }
+
   Resource okey = Key::Get(priv_key_id, false);
   if (okey.isNull()) {
     raise_warning("unable to coerce parameter 4 into a private key");
@@ -1144,8 +1155,10 @@ bool f_openssl_open(CStrRef sealed_data, VRefParam open_data, CStrRef env_key,
 
   EVP_CIPHER_CTX ctx;
   int len1, len2;
-  if (!EVP_OpenInit(&ctx, EVP_rc4(), (unsigned char *)env_key.data(),
+  if (!EVP_OpenInit(&ctx, cipher_type, (unsigned char *)env_key.data(),
                     env_key.size(), NULL, pkey) ||
+
+      EVP_CIPHER_CTX_iv_length(&ctx) > 0 ||
       !EVP_OpenUpdate(&ctx, buf, &len1, (unsigned char *)sealed_data.data(),
                       sealed_data.size()) ||
       !EVP_OpenFinal(&ctx, buf + len1, &len2) ||
@@ -1940,12 +1953,23 @@ bool f_openssl_public_encrypt(CStrRef data, VRefParam crypted, CVarRef key,
 }
 
 Variant f_openssl_seal(CStrRef data, VRefParam sealed_data, VRefParam env_keys,
-                       CArrRef pub_key_ids) {
+                       CArrRef pub_key_ids, CStrRef method /* = null_string */) {
   int nkeys = pub_key_ids.size();
   if (nkeys == 0) {
     raise_warning("Fourth argument to openssl_seal() must be "
                     "a non-empty array");
     return false;
+  }
+
+  const EVP_CIPHER *cipher_type;
+  if (method.empty()) {
+    cipher_type = EVP_rc4();
+  } else {
+    cipher_type = EVP_get_cipherbyname(method.c_str());
+    if (!cipher_type) {
+      raise_warning("Unknown cipher algorithm");
+      return false;
+    }
   }
 
   EVP_PKEY **pkeys = (EVP_PKEY**)malloc(nkeys * sizeof(*pkeys));
@@ -1972,7 +1996,13 @@ Variant f_openssl_seal(CStrRef data, VRefParam sealed_data, VRefParam env_keys,
   }
 
   EVP_CIPHER_CTX ctx;
-  if (!EVP_EncryptInit(&ctx, EVP_rc4(), NULL, NULL)) {
+  if (!EVP_EncryptInit(&ctx, cipher_type, nullptr, nullptr)) {
+    ret = false;
+    goto clean_exit;
+  }
+
+  if (EVP_CIPHER_CTX_iv_length(&ctx) > 0) {
+    raise_warning("Cipher algorithm requires an IV");
     ret = false;
     goto clean_exit;
   }
@@ -1981,7 +2011,7 @@ Variant f_openssl_seal(CStrRef data, VRefParam sealed_data, VRefParam env_keys,
 
   s = String(data.size() + EVP_CIPHER_CTX_block_size(&ctx), ReserveString);
   buf = (unsigned char *)s.mutableSlice().ptr;
-  if (!EVP_SealInit(&ctx, EVP_rc4(), eks, eksl, NULL, pkeys, nkeys) ||
+  if (!EVP_SealInit(&ctx, cipher_type, eks, eksl, nullptr, pkeys, nkeys) ||
       !EVP_SealUpdate(&ctx, buf, &len1, (unsigned char *)data.data(),
                       data.size())) {
     ret = false;

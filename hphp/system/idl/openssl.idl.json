@@ -216,6 +216,11 @@
                 {
                     "name": "priv_key_id",
                     "type": "Variant"
+                },
+                {
+                    "name": "method",
+                    "type": "String",
+                    "value": "null_string"
                 }
             ]
         },
@@ -846,6 +851,11 @@
                 {
                     "name": "pub_key_ids",
                     "type": "StringVec"
+                },
+                {
+                    "name": "method",
+                    "type": "String",
+                    "value": "null_string"
                 }
             ]
         },

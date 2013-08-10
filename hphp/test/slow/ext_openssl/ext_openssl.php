@@ -225,6 +225,17 @@ function test_openssl_seal() {
 
   VERIFY(openssl_open($sealed, $open_data, $ekeys[0], $privkey));
   VS($open_data, $data);
+
+  VERIFY(openssl_open($sealed, $open_data, $ekeys[0], $privkey, 'RC4'));
+  VS($open_data, $data);
+
+  VERIFY(openssl_seal($data, $sealed, $ekeys, array($pubkey), 'AES-256-ECB'));
+  VERIFY(strlen($sealed) > 0);
+  VS(count($ekeys), 1);
+  VERIFY(strlen($ekeys[0]) > 0);
+
+  VERIFY(openssl_open($sealed, $open_data, $ekeys[0], $privkey, 'AES-256-ECB'));
+  VS($open_data, $data);
 }
 
 function test_openssl_sign() {

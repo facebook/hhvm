@@ -118,9 +118,7 @@ void c_Vector::freeData() {
 }
 
 void c_Vector::t___construct(CVarRef iterable /* = null_variant */) {
-  if (!iterable.isInitialized()) {
-    return;
-  }
+  if (iterable.isNull()) return;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   if (sz) {
@@ -207,6 +205,7 @@ Object c_Vector::t_add(CVarRef val) {
 }
 
 Object c_Vector::t_addall(CVarRef iterable) {
+  if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   if (sz) {
@@ -607,6 +606,7 @@ Object c_Vector::t_set(CVarRef key, CVarRef value) {
 }
 
 Object c_Vector::t_setall(CVarRef iterable) {
+  if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   for (; iter; ++iter) {
@@ -627,6 +627,7 @@ Object c_Vector::t_put(CVarRef key, CVarRef value) {
 }
 
 Object c_Vector::ti_fromitems(CVarRef iterable) {
+  if (iterable.isNull()) return NEWOBJ(c_Vector)();
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   c_Vector* target;
@@ -1012,9 +1013,7 @@ void c_Map::deleteBuckets() {
 }
 
 void c_Map::t___construct(CVarRef iterable /* = null_variant */) {
-  if (!iterable.isInitialized()) {
-    return;
-  }
+  if (iterable.isNull()) return;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   if (sz) {
@@ -1086,6 +1085,7 @@ Object c_Map::t_add(CVarRef val) {
 }
 
 Object c_Map::t_addall(CVarRef iterable) {
+  if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   reserve(std::max(sz, size_t(m_size)));
@@ -1214,6 +1214,7 @@ Object c_Map::t_set(CVarRef key, CVarRef value) {
 }
 
 Object c_Map::t_setall(CVarRef iterable) {
+  if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   for (; iter; ++iter) {
@@ -1530,6 +1531,7 @@ Object c_Map::t_zip(CVarRef iterable) {
 }
 
 Object c_Map::ti_fromitems(CVarRef iterable) {
+  if (iterable.isNull()) return NEWOBJ(c_Map)();
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   c_Map* target;
@@ -2155,9 +2157,7 @@ void c_StableMap::deleteBuckets() {
 }
 
 void c_StableMap::t___construct(CVarRef iterable /* = null_variant */) {
-  if (!iterable.isInitialized()) {
-    return;
-  }
+  if (iterable.isNull()) return;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   if (sz) {
@@ -2242,6 +2242,7 @@ Object c_StableMap::t_add(CVarRef val) {
 }
 
 Object c_StableMap::t_addall(CVarRef iterable) {
+  if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   reserve(std::max(sz, size_t(m_size)));
@@ -2370,6 +2371,7 @@ Object c_StableMap::t_set(CVarRef key, CVarRef value) {
 }
 
 Object c_StableMap::t_setall(CVarRef iterable) {
+  if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   for (; iter; ++iter) {
@@ -2678,6 +2680,7 @@ Object c_StableMap::t_zip(CVarRef iterable) {
 }
 
 Object c_StableMap::ti_fromitems(CVarRef iterable) {
+  if (iterable.isNull()) return NEWOBJ(c_StableMap)();
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   c_StableMap* target;
@@ -3391,9 +3394,7 @@ void c_Set::deleteBuckets() {
 }
 
 void c_Set::t___construct(CVarRef iterable /* = null_variant */) {
-  if (!iterable.isInitialized()) {
-    return;
-  }
+  if (iterable.isNull()) return;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   for (; iter; ++iter) {
@@ -3453,6 +3454,7 @@ Object c_Set::t_add(CVarRef val) {
 }
 
 Object c_Set::t_addall(CVarRef iterable) {
+  if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   for (; iter; ++iter) {
@@ -3613,6 +3615,7 @@ Object c_Set::t_zip(CVarRef iterable) {
 }
 
 Object c_Set::ti_fromitems(CVarRef iterable) {
+  if (iterable.isNull()) return NEWOBJ(c_Set)();
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   c_Set* target;
@@ -3658,11 +3661,7 @@ Object c_Set::t_discard(CVarRef key) {
 }
 
 Object c_Set::t_difference(CVarRef iterable) {
-  if (!iterable.isObject()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter iterable must be an instance of Iterable"));
-    throw e;
-  }
+  if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   for (; iter; ++iter) {

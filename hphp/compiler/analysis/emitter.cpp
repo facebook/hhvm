@@ -3975,6 +3975,14 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         visit(expr);
         emitConvertToCell(e);
 
+        int64_t normalLabel = 2 * await->getLabel();
+        int64_t exceptLabel = normalLabel - 1;
+
+        // if expr is null, just continue
+        e.Dup();
+        e.IsNullC();
+        e.JmpNZ(m_yieldLabels[normalLabel]);
+
         // if the type of expr is not WaitHandle (can be just Awaitable),
         // call getWaitHandle() method.
         AnalysisResultConstPtr ar = expr->getScope()->getContainingProgram();
@@ -3989,9 +3997,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           e.FCall(0);
           emitConvertToCell(e);
         }
-
-        int64_t normalLabel = 2 * await->getLabel();
-        int64_t exceptLabel = normalLabel - 1;
 
         e.ContSuspend(normalLabel);
 

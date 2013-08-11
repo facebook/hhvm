@@ -57,7 +57,6 @@ using JIT::Type;
 using JIT::RegionDesc;
 using JIT::HhbcTranslator;
 using JIT::ProfData;
-static const bool trustSigSegv = false;
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
 

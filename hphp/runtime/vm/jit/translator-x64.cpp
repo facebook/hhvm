@@ -27,7 +27,6 @@
 #include <queue>
 #include <unwind.h>
 #include <unordered_set>
-#include <signal.h>
 #ifdef __FreeBSD__
 #include <sys/ucontext.h>
 #endif
@@ -205,40 +204,6 @@ struct IfCountNotStatic {
     delete m_cb;
   }
 };
-
-// Segfault handler: figure out if it's an intentional segfault
-// (timeout exception) and if so, act appropriately. Otherwise, pass
-// the signal on.
-void TranslatorX64::SEGVHandler(int signum, siginfo_t *info, void *ctx) {
-  TranslatorX64 *self = Get();
-  void *surprisePage =
-    ThreadInfo::s_threadInfo->m_reqInjectionData.surprisePage;
-  if (info->si_addr == surprisePage) {
-    ucontext_t *ucontext = (ucontext_t*)ctx;
-    TCA rip = (TCA)RIP_REGISTER(ucontext->uc_mcontext);
-    SignalStubMap::const_accessor a;
-    if (!self->m_segvStubs.find(a, rip)) {
-      NOT_REACHED();
-    }
-    TCA astubsCall = a->second;
-
-    // When this handler returns, "call" the astubs code for this
-    // surprise check.
-    RIP_REGISTER(ucontext->uc_mcontext) = (uintptr_t)astubsCall;
-
-    // We've processed this event; reset the page in case execution
-    // continues normally.
-    g_vmContext->m_stack.unprotect();
-  } else {
-    sig_t handler = (sig_t)self->m_segvChain;
-    if (handler == SIG_DFL || handler == SIG_IGN) {
-      signal(signum, handler);
-      raise(signum);
-    } else {
-      self->m_segvChain(signum, info, ctx);
-    }
-  }
-}
 
 // Logical register move: ensures the value in src will be in dest
 // after execution, but might do so in strange ways. Do not count on
@@ -3826,22 +3791,6 @@ TranslatorX64::TranslatorX64()
   m_funcPrologueRedispatch = emitPrologueRedispatch(a);
   TRACE(1, "HOTSTUB: all stubs finished: %lx\n",
         uintptr_t(a.frontier()));
-
-  if (trustSigSegv) {
-    // Install SIGSEGV handler for timeout exceptions
-    struct sigaction sa;
-    struct sigaction old_sa;
-    sa.sa_sigaction = &TranslatorX64::SEGVHandler;
-    sa.sa_flags = SA_SIGINFO;
-    sigemptyset(&sa.sa_mask);
-    if (sigaction(SIGSEGV, &sa, &old_sa) != 0) {
-      throw std::runtime_error(
-        std::string("Failed to install SIGSEGV handler: ") +
-          folly::errnoStr(errno).c_str());
-    }
-    m_segvChain = old_sa.sa_flags & SA_SIGINFO ?
-      old_sa.sa_sigaction : (sigaction_t)old_sa.sa_handler;
-  }
 
   moveToAlign(astubs);
   m_stackOverflowHelper = astubs.frontier();

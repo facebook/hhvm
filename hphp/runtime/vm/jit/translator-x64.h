@@ -16,7 +16,6 @@
 #ifndef incl_HPHP_RUNTIME_VM_TRANSLATOR_X64_H_
 #define incl_HPHP_RUNTIME_VM_TRANSLATOR_X64_H_
 
-#include <signal.h>
 #include <memory>
 #include <boost/noncopyable.hpp>
 
@@ -156,9 +155,6 @@ class TranslatorX64 : public Translator
   friend class Tx64Reaper;
   friend class HPHP::JIT::CodeGenerator;
 
-  typedef tbb::concurrent_hash_map<TCA, TCA> SignalStubMap;
-  typedef void (*sigaction_t)(int, siginfo_t*, void*);
-
   typedef X64Assembler Asm;
 
   enum class AsmSelection {
@@ -203,8 +199,6 @@ class TranslatorX64 : public Translator
   int                    m_numNativeTrampolines;
   size_t                 m_trampolineSize; // size of each trampoline
 
-  SignalStubMap          m_segvStubs;
-  sigaction_t            m_segvChain;
   TCA                    m_callToExit;
   TCA                    m_retHelper;
   TCA                    m_retInlHelper;

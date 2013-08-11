@@ -139,22 +139,7 @@ void RequestInjectionData::onSessionInit() {
 
 void RequestInjectionData::onTimeout() {
   setTimedOutFlag();
-  if (surprisePage) {
-    mprotect(surprisePage, sizeof(void*), PROT_NONE);
-  }
   m_timerActive.store(false, std::memory_order_relaxed);
-}
-
-void RequestInjectionData::setSurprisePage(void* page) {
-  if (page != surprisePage) {
-    if (!page) {
-      if (m_timerActive.load(std::memory_order_relaxed)) {
-        setTimeout(0);
-      }
-    }
-    assert(!m_timerActive.load(std::memory_order_relaxed));
-    surprisePage = page;
-  }
 }
 
 void RequestInjectionData::setTimeout(int seconds) {

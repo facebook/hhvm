@@ -209,7 +209,7 @@ public:
   static const ssize_t LastFlag             = DebuggerSignalFlag;
 
   RequestInjectionData()
-    : cflagsPtr(nullptr), surprisePage(nullptr),
+    : cflagsPtr(nullptr),
       m_timeoutSeconds(-1), m_hasTimer(false), m_timerActive(false),
       m_debugger(false), m_debuggerIntr(false), m_coverage(false),
       m_jit(false) {
@@ -224,8 +224,6 @@ public:
 
   ssize_t* cflagsPtr;  // this points to the real condition flags,
                        // somewhere in the thread's targetcache
-  void *surprisePage;  // beginning address of page to
-                       // protect for error conditions
 
  private:
 #ifndef __APPLE__
@@ -245,7 +243,6 @@ public:
   void setTimeout(int seconds);
   int getRemainingTime() const;
   void resetTimer(int seconds = 0);
-  void setSurprisePage(void* page);
   void onTimeout();
   bool getJit() const { return m_jit; }
   bool getDebugger() const { return m_debugger; }

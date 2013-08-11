@@ -520,8 +520,6 @@ public:
   bool isValidAddress(uintptr_t v) {
     return v >= uintptr_t(m_elms) && v < uintptr_t(m_base);
   }
-  void protect();
-  void unprotect();
   void requestInit();
   void requestExit();
 

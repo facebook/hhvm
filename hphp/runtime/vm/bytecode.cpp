@@ -576,25 +576,8 @@ Stack::~Stack() {
 }
 
 void
-Stack::protect() {
-  if (Transl::trustSigSegv) {
-    mprotect(m_elms, sizeof(void*), PROT_NONE);
-  }
-}
-
-void
-Stack::unprotect() {
-  if (Transl::trustSigSegv) {
-    mprotect(m_elms, sizeof(void*), PROT_READ | PROT_WRITE);
-  }
-}
-
-void
 Stack::requestInit() {
   m_elms = t_se->elms();
-  if (Transl::trustSigSegv) {
-    ThreadInfo::s_threadInfo->m_reqInjectionData.setSurprisePage(m_elms);
-  }
   // Burn one element of the stack, to satisfy the constraint that
   // valid m_top values always have the same high-order (>
   // log(RuntimeOption::EvalVMStackElms)) bits.
@@ -607,18 +590,11 @@ Stack::requestInit() {
     RuntimeOption::EvalVMStackElms - sSurprisePageSize / sizeof(TypedValue);
   assert(!wouldOverflow(maxelms - 1));
   assert(wouldOverflow(maxelms));
-
-  // Reset permissions on our stack's surprise page
-  unprotect();
 }
 
 void
 Stack::requestExit() {
   if (m_elms != nullptr) {
-    if (Transl::trustSigSegv) {
-      ThreadInfo::s_threadInfo->m_reqInjectionData.setSurprisePage(nullptr);
-      unprotect();
-    }
     m_elms = nullptr;
   }
 }

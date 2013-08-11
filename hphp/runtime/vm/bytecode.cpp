@@ -687,7 +687,7 @@ static std::string toStringElm(const TypedValue* tv) {
     os << tv->m_data.pobj
        << "c(" << tv->m_data.pobj->getCount() << ")"
        << ":Object("
-       << tvAsCVarRef(tv).asCObjRef().get()->o_getClassName().get()->data()
+       << tv->m_data.pobj->o_getClassName().get()->data()
        << ")";
     break;
   case KindOfResource:
@@ -4450,7 +4450,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetN(PC& pc) {
   if (tv == nullptr) {
     e = false;
   } else {
-    e = isset(tvAsCVarRef(tv));
+    e = !tvIsNull(tvToCell(tv));
   }
   tvRefcountedDecRefCell(tv1);
   tv1->m_data.num = e;
@@ -4468,7 +4468,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetG(PC& pc) {
   if (tv == nullptr) {
     e = false;
   } else {
-    e = isset(tvAsCVarRef(tv));
+    e = !tvIsNull(tvToCell(tv));
   }
   tvRefcountedDecRefCell(tv1);
   tv1->m_data.num = e;
@@ -4483,7 +4483,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetS(PC& pc) {
   if (!(visible && accessible)) {
     e = false;
   } else {
-    e = isset(tvAsCVarRef(val));
+    e = !tvIsNull(tvToCell(val));
   }
   m_stack.popA();
   output->m_data.num = e;
@@ -4555,7 +4555,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIs ## what ## C(PC& pc) { \
   IOP_TYPE_CHECK_INSTR_L(checkInit, what, predicate)              \
   IOP_TYPE_CHECK_INSTR_C(checkInit, what, predicate)              \
 
-IOP_TYPE_CHECK_INSTR_L(false,   set, isset)
+IOP_TYPE_CHECK_INSTR_L(false, set, is_not_null)
 IOP_TYPE_CHECK_INSTR(true,   Null, is_null)
 IOP_TYPE_CHECK_INSTR(true,  Array, is_array)
 IOP_TYPE_CHECK_INSTR(true, String, is_string)
@@ -4569,7 +4569,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyL(PC& pc) {
   NEXT();
   DECODE_HA(local);
   TypedValue* loc = frame_local(m_fp, local);
-  bool e = empty(tvAsCVarRef(loc));
+  bool e = !cellToBool(*tvToCell(loc));
   TypedValue* tv1 = m_stack.allocTV();
   tv1->m_data.num = e;
   tv1->m_type = KindOfBoolean;
@@ -4585,7 +4585,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyN(PC& pc) {
   if (tv == nullptr) {
     e = true;
   } else {
-    e = empty(tvAsCVarRef(tv));
+    e = !cellToBool(*tvToCell(tv));
   }
   tvRefcountedDecRefCell(tv1);
   tv1->m_data.num = e;
@@ -4603,7 +4603,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyG(PC& pc) {
   if (tv == nullptr) {
     e = true;
   } else {
-    e = empty(tvAsCVarRef(tv));
+    e = !cellToBool(*tvToCell(tv));
   }
   tvRefcountedDecRefCell(tv1);
   tv1->m_data.num = e;
@@ -4618,7 +4618,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyS(PC& pc) {
   if (!(visible && accessible)) {
     e = true;
   } else {
-    e = empty(tvAsCVarRef(val));
+    e = !cellToBool(*tvToCell(val));
   }
   m_stack.popA();
   output->m_data.num = e;
@@ -6028,7 +6028,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCufSafeArray(PC& pc) {
 
 inline void OPTBLD_INLINE VMExecutionContext::iopCufSafeReturn(PC& pc) {
   NEXT();
-  bool ok = tvAsVariant(m_stack.top() + 1).toBoolean();
+  bool ok = cellToBool(*tvToCell(m_stack.top() + 1));
   tvRefcountedDecRef(m_stack.top() + 1);
   tvRefcountedDecRef(m_stack.top() + (ok ? 2 : 0));
   if (ok) m_stack.top()[2] = m_stack.top()[0];

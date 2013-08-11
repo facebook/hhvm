@@ -1023,7 +1023,7 @@ bool ObjectData::propIsset(Class* ctx, const StringData* key) {
   bool visible, accessible, unset;
   TypedValue* propVal = getProp(ctx, key, visible, accessible, unset);
   if (visible && accessible && !unset) {
-    return isset(tvAsCVarRef(propVal));
+    return !tvIsNull(tvToCell(propVal));
   }
   if (!getAttribute(UseIsset)) {
     return false;
@@ -1039,7 +1039,7 @@ bool ObjectData::propEmpty(Class* ctx, const StringData* key) {
   bool visible, accessible, unset;
   TypedValue* propVal = getProp(ctx, key, visible, accessible, unset);
   if (visible && accessible && !unset) {
-    return empty(tvAsCVarRef(propVal));
+    return !cellToBool(*tvToCell(propVal));
   }
   if (!getAttribute(UseIsset)) {
     return true;
@@ -1053,7 +1053,7 @@ bool ObjectData::propEmpty(Class* ctx, const StringData* key) {
   }
   if (getAttribute(UseGet)) {
     invokeGet(&tv, key);
-    bool emptyResult = empty(tvAsCVarRef(&tv));
+    bool emptyResult = !cellToBool(*tvToCell(&tv));
     tvRefcountedDecRef(&tv);
     return emptyResult;
   }

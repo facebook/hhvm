@@ -315,7 +315,7 @@ static Variant php_xml_parser_create_impl(CStrRef encoding_param,
 
   parser->target_encoding = encoding;
   parser->case_folding = 1;
-  setNull(parser->object);
+  parser->object.reset();
   parser->isparsing = 0;
 
   XML_SetUserData(parser->parser, parser);

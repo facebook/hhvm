@@ -1501,9 +1501,9 @@ inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
   }
 
   if (useEmpty) {
-    return empty(tvAsCVarRef(result));
+    return !cellToBool(*tvToCell(result));
   } else {
-    return isset(tvAsCVarRef(result));
+    return !tvIsNull(tvToCell(result));
   }
 }
 

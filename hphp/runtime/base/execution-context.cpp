@@ -906,30 +906,4 @@ const ResourceMap &PersistentObjectStore::getMap(const char *type) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// silencer
-
-
-Silencer::Silencer(bool e) : m_active(false) {
-  if (e) enable();
-}
-
-void Silencer::enable() {
-  m_errorReportingValue = g_context->getErrorReportingLevel();
-  g_context->setErrorReportingLevel(0);
-  m_active = true;
-}
-
-void Silencer::disableHelper() {
-  if (m_active) {
-    if (g_context->getErrorReportingLevel() == 0)
-      g_context->setErrorReportingLevel(m_errorReportingValue);
-  }
-}
-
-Variant Silencer::disable(CVarRef v) {
-  disable();
-  return v;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 }

@@ -256,10 +256,10 @@ bool UnaryOpExpression::preCompute(CVarRef value, Variant &result) {
         result = toBoolean(value);
         break;
       case T_EMPTY:
-        result = empty(value);
+        result = !toBoolean(value);
         break;
       case T_ISSET:
-        result = isset(value);
+        result = is_not_null(value);
         break;
       case T_INC:
       case T_DEC:
@@ -335,7 +335,7 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
     for (; i < n; i++) {
       ExpressionPtr e((*el)[i]);
       if (!e || !e->isScalar() || !e->getScalarValue(value)) break;
-      if (!isset(value)) {
+      if (value.isNull()) {
         result = false;
       }
     }

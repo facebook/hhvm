@@ -805,23 +805,6 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class Silencer {
-public:
-  explicit Silencer(bool);
-
-  ~Silencer() { if (m_active) disableHelper(); }
-  void enable();
-  void disable() { disableHelper(); m_active = false; }
-  Variant disable(CVarRef v);
-
-private:
-  void disableHelper();
-  bool m_active;
-  int m_errorReportingValue;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
 extern DECLARE_THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
 extern DECLARE_THREAD_LOCAL_NO_CHECK(PersistentObjectStore,
                                      g_persistentObjects);

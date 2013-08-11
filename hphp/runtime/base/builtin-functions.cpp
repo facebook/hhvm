@@ -1057,7 +1057,7 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(CStrRef name,
       return Success;
     }
     CVarRef &func = m_map.get()->get(s_failure);
-    if (!isset(func)) return Failure;
+    if (func.isNull()) return Failure;
     // can throw, otherwise
     //  - true means the map was updated. try again
     //  - false means we should stop applying autoloaders (only affects classes)

@@ -442,6 +442,10 @@ inline void tvDupFlattenVars(const TypedValue* fr, TypedValue* to,
   }
 }
 
+inline bool tvIsNull(const TypedValue* tv) {
+  return IS_NULL_TYPE(tv->m_type);
+}
+
 inline bool tvIsString(const TypedValue* tv) {
   return (tv->m_type & KindOfStringBit) != 0;
 }

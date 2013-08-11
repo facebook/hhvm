@@ -266,8 +266,8 @@ bool TestCppBase::TestArray() {
   {
     Variant arr = CREATE_MAP2("n1", "v1", "n2", "v2");
     arr.escalate();
-    for (ArrayIterPtr iter = arr.begin(arr, true); !iter->end(); iter->next()){
-      unset(arr.lvalAt(iter->first()));
+    for (ArrayIter iter = arr.begin(arr, true); !iter->end(); iter->next()){
+      arr.lvalAt(iter->first()).reset();
     }
     VS(arr, Array::Create());
   }

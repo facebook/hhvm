@@ -1547,7 +1547,7 @@ public:
     const_iterator iter = find(name.data());
     if (iter == end()) return false;
     return !iter->second->test_isset ||
-      HPHP::isset(iter->second->getter(obj));
+      !iter->second->getter(obj).isNull();
   }
 };
 

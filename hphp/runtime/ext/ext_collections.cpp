@@ -857,7 +857,7 @@ bool c_Vector::OffsetIsset(ObjectData* obj, TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? isset(tvAsCVarRef(result)) : false;
+  return result ? !tvIsNull(tvToCell(result)) : false;
 }
 
 bool c_Vector::OffsetEmpty(ObjectData* obj, TypedValue* key) {
@@ -870,7 +870,7 @@ bool c_Vector::OffsetEmpty(ObjectData* obj, TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? empty(tvAsCVarRef(result)) : true;
+  return result ? !cellToBool(*result) : true;
 }
 
 bool c_Vector::OffsetContains(ObjectData* obj, TypedValue* key) {
@@ -1943,7 +1943,7 @@ bool c_Map::OffsetIsset(ObjectData* obj, TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? isset(tvAsCVarRef(result)) : false;
+  return result ? !tvIsNull(tvToCell(result)) : false;
 }
 
 bool c_Map::OffsetEmpty(ObjectData* obj, TypedValue* key) {
@@ -1958,7 +1958,7 @@ bool c_Map::OffsetEmpty(ObjectData* obj, TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? empty(tvAsCVarRef(result)) : true;
+  return result ? !cellToBool(*result) : true;
 }
 
 bool c_Map::OffsetContains(ObjectData* obj, TypedValue* key) {
@@ -3184,7 +3184,7 @@ bool c_StableMap::OffsetIsset(ObjectData* obj, TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? isset(tvAsCVarRef(result)) : false;
+  return result ? !tvIsNull(tvToCell(result)) : false;
 }
 
 bool c_StableMap::OffsetEmpty(ObjectData* obj, TypedValue* key) {
@@ -3199,7 +3199,7 @@ bool c_StableMap::OffsetEmpty(ObjectData* obj, TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? empty(tvAsCVarRef(result)) : true;
+  return result ? !cellToBool(*result) : true;
 }
 
 bool c_StableMap::OffsetContains(ObjectData* obj, TypedValue* key) {
@@ -4336,7 +4336,7 @@ bool c_Pair::OffsetIsset(ObjectData* obj, TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? isset(tvAsCVarRef(result)) : false;
+  return result ? !tvIsNull(tvToCell(result)) : false;
 }
 
 bool c_Pair::OffsetEmpty(ObjectData* obj, TypedValue* key) {
@@ -4349,7 +4349,7 @@ bool c_Pair::OffsetEmpty(ObjectData* obj, TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? empty(tvAsCVarRef(result)) : true;
+  return result ? !cellToBool(*result) : true;
 }
 
 bool c_Pair::OffsetContains(ObjectData* obj, TypedValue* key) {

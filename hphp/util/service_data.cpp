@@ -22,6 +22,7 @@
 
 #include "folly/Conv.h"
 #include "folly/MapUtil.h"
+#include "folly/stats/Histogram-defs.h"
 #include "hphp/util/base.h"
 
 namespace HPHP {

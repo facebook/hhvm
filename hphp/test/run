@@ -135,6 +135,7 @@ function get_options($argv) {
     'fbmake' => '',
     'threads:' => '',
     'args:' => 'a:',
+    'log' => 'l',
   );
   $options = array();
   $files = array();
@@ -493,6 +494,10 @@ function run_test($options, $test) {
      1 => array("pipe", "w"),
      2 => array("pipe", "w"),
   );
+  if (isset($options['log'])) {
+    $hhvm_env['TRACE'] = 'printir:1';
+    $hhvm_env['HPHP_TRACE_FILE'] = $test . '.log';
+  }
   $process = proc_open("$hhvm 2>&1", $descriptorspec, $pipes, null, $hhvm_env);
   if (!is_resource($process)) {
     file_put_contents("$test.diff", "Couldn't invoke $hhvm");

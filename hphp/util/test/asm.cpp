@@ -807,8 +807,9 @@ sqrtsd %xmm12,%xmm8
 }
 
 TEST(Asm, DoubleToIntConv) {
+  TestDataBlock db(10 << 24);
   Asm a;
-  a.init(10 << 24);
+  a.init(&db);
   a.    cvttsd2siq(xmm0, rax);
   a.    cvttsd2siq(xmm1, rbx);
   a.    cvttsd2siq(xmm2, rcx);

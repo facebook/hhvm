@@ -86,7 +86,7 @@ bool refIsPlausible(const Ref ref) {
   return tvIsPlausible(ref);
 }
 
-inline void tvUnboxIfNeeded(TypedValue *tv) {
+void tvUnboxIfNeeded(TypedValue *tv) {
   if (tv->m_type == KindOfRef) {
     tvUnbox(tv);
   }

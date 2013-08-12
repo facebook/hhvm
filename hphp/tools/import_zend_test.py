@@ -80,7 +80,6 @@ no_import = (
     '/ext/xmlwriter/examples/',
 
     # not implemented extensions
-    '/ext/calendar',
     '/ext/com_dotnet',
     '/ext/dba',
     '/ext/dom',
@@ -213,6 +212,7 @@ bad_tests = (
 
 # Random other files that zend wants
 other_files = (
+    '/ext-calendar/skipif.inc',
     '/ext-curl/curl_testdata1.txt',
     '/ext-curl/curl_testdata2.txt',
     '/ext-date/examine_diff.inc',
@@ -630,28 +630,26 @@ def walk(filename, source):
     file(full_dest_filename, 'w').write(test)
 
 if args.zend_path:
-    test_dirs = (('Zend/tests'), ('tests'), ('sapi'), ('ext'))
     def should_import(filename):
         for bad in no_import:
             if bad in filename:
                 return False
         return True
 
-    for source in test_dirs:
-        for root, dirs, files in os.walk(os.path.join(args.zend_path, source)):
-            for filename in files:
-                full_file = os.path.join(root, filename)
+    for root, dirs, files in os.walk(args.zend_path):
+        for filename in files:
+            full_file = os.path.join(root, filename)
 
-                def matches(patterns):
-                    if not patterns:
+            def matches(patterns):
+                if not patterns:
+                    return True
+                for pattern in patterns:
+                    if pattern in full_file:
                         return True
-                    for pattern in patterns:
-                        if pattern in full_file:
-                            return True
-                    return False
+                return False
 
-                if matches(args.only) and should_import(full_file):
-                    walk(full_file, root.replace(args.zend_path, ''))
+            if matches(args.only) and should_import(full_file):
+                walk(full_file, root.replace(args.zend_path, ''))
 
 if not os.path.isdir('test/zend/all'):
     if args.zend_path:

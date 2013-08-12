@@ -43,6 +43,7 @@ enum FuncFlags {
   IsReference                   = (1 << 11),
   IsConstructor                 = (1 << 12),
   IsNothing                     = (1 << 13),
+  ZendCompat                    = (1 << 14),
   IsCppSerializable             = (1 << 15),
   HipHopSpecific                = (1 << 16),
   VariableArguments             = (1 << 17),
@@ -221,6 +222,13 @@ class PhpFunc {
   PhpFunc(const folly::dynamic& d, const fbstring& className);
 
   fbstring name() const { return m_name; }
+  fbstring lowerName() const {
+    fbstring name = m_name;
+    for (char& c : name) {
+      c = tolower(c);
+    }
+    return name;
+  }
   fbstring className() const { return m_className; }
   fbstring getDesc() const { return m_desc; }
 

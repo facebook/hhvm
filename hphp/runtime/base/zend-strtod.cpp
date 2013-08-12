@@ -1928,7 +1928,7 @@ ret1:
   return s0;
 }
 
-double zend_strtod (CONST char *s00, char **se)
+double zend_strtod (CONST char *s00, const char **se)
 {
   int bb2, bb5, bbe, bd2, bd5, bbbits, bs2, c, dsign,
     e, e1, esign, i, j, k, nd, nd0, nf, nz, nz0, sign;
@@ -2474,7 +2474,7 @@ ret:
   return result;
 }
 
-double zend_hex_strtod(const char *str, char **endptr)
+double zend_hex_strtod(const char *str, const char **endptr)
 {
   const char *s = str;
   char c;
@@ -2507,7 +2507,7 @@ double zend_hex_strtod(const char *str, char **endptr)
   return value;
 }
 
-double zend_oct_strtod(const char *str, char **endptr)
+double zend_oct_strtod(const char *str, const char **endptr)
 {
   const char *s = str;
   char c;

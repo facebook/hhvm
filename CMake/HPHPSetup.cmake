@@ -128,3 +128,7 @@ ENDIF()
 include_directories(${HPHP_HOME}/hphp)
 include_directories(${HPHP_HOME}/hphp/lib/system/gen)
 include_directories(${HPHP_HOME})
+
+include_directories(${HPHP_HOME}/hphp/runtime/ext_zend_compat/php-src)
+include_directories(${HPHP_HOME}/hphp/runtime/ext_zend_compat/php-src/main)
+include_directories(${HPHP_HOME}/hphp/runtime/ext_zend_compat/php-src/Zend)

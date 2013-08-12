@@ -220,6 +220,30 @@ void raise_param_type_warning(
     actual_type_str.c_str());
 }
 
+void raise_message(ErrorConstants::ErrorModes mode,
+                   const char *fmt,
+                   va_list ap) {
+  std::string msg;
+  Util::string_vsnprintf(msg, fmt, ap);
+  raise_message(mode, msg);
+}
+
+void raise_message(ErrorConstants::ErrorModes mode, std::string &msg) {
+  switch (mode) {
+    case ErrorConstants::ErrorModes::ERROR:
+      raise_error(msg);
+      break;
+    case ErrorConstants::ErrorModes::WARNING:
+      raise_warning(msg);
+      break;
+    case ErrorConstants::ErrorModes::NOTICE:
+      raise_notice(msg);
+      break;
+    default:
+      always_assert("Unhandled type of error");
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

@@ -130,6 +130,7 @@ define('IsCppAbstract',                  1 << 10);
 define('IsReference',                    1 << 11);
 define('IsConstructor',                  1 << 12);
 define('IsNothing',                      1 << 13);
+define('ZendCompat',                     1 << 14);
 define('IsCppSerializable',              1 << 15);
 define('HipHopSpecific',                 1 << 16);
 define('VariableArguments',              1 << 17);
@@ -1165,7 +1166,7 @@ function phpnet_get_function_info($name, $clsname = 'function') {
   if (preg_match('#<div class="refsect1 parameters"[^>]*>(.*?)'.
                  '<div class="refsect1 #s', $doc, $m)) {
     $desc = $m[1];
-    if (preg_match_all('#<code class="parameter">(.*?)</code>#s', $desc, $m)) {
+    if (preg_match_all('#<span class="term"><em><code class="parameter">(.*?)</code>#s', $desc, $m)) {
       foreach ($m[1] as $param) {
         $ret['param_names'][] = phpnet_clean($param);
       }
@@ -1212,5 +1213,15 @@ function phpnet_get_extension_functions($name) {
 
   preg_match_all('#<li><a href="function\..*?\.php">(.*?)</a>.*?</li>#',
                  $doc, $m);
+  return $m[1];
+}
+
+function phpnet_get_extension_constants($name) {
+  $doc = @file_get_contents("http://www.php.net/manual/en/$name.constants.php");
+  if ($doc === false) {
+    return false;
+  }
+
+  preg_match_all('#<code>(.*?)</code>#', $doc, $m);
   return $m[1];
 }

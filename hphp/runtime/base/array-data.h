@@ -461,6 +461,7 @@ public:
   bool equal(const ArrayData *v2, bool strict) const;
 
   void setPosition(ssize_t p) { m_pos = p; }
+  ssize_t getPosition() const { return m_pos; }
 
   ArrayData *escalate() const;
 

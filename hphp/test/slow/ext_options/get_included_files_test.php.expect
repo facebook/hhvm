@@ -1,0 +1,10 @@
+bool(true)
+string(27) "get_included_files_test.php"
+bool(true)
+string(9) "test1.inc"
+bool(true)
+string(9) "test2.inc"
+bool(true)
+string(9) "test3.inc"
+bool(true)
+string(9) "test4.inc"

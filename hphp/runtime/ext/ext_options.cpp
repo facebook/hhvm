@@ -242,8 +242,14 @@ String f_set_include_path(CStrRef new_include_path) {
 }
 
 Array f_get_included_files() {
-  return Array::Create();
+  Array included_files = Array::Create();
+  int idx = 0;
+  for (auto& ent : g_vmContext->m_evaledFiles) {
+    included_files.set(idx++, ent.first);
+  }
+  return included_files;
 }
+
 
 Array f_inclued_get_data() {
   return Array::Create();

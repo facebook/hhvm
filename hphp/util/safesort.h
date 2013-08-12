@@ -262,7 +262,6 @@ void insertion_sort(IterT first, IterT last, CompT comp) {
 
 template <class CompT, class IterT>
 void sort(IterT first, IterT last, CompT comp) {
-  typedef typename std::iterator_traits<IterT>::value_type value_type;
   typedef typename std::iterator_traits<IterT>::difference_type
     difference_type;
   using std::swap;

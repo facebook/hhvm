@@ -191,7 +191,6 @@ void RegionDesc::Block::checkInvariants() const {
 
 namespace {
 RegionDescPtr selectTraceletLegacy(const Transl::Tracelet& tlet) {
-  typedef Transl::NormalizedInstruction NI;
   typedef RegionDesc::Block Block;
 
   auto region = smart::make_unique<RegionDesc>();

@@ -21,7 +21,16 @@
 #include "folly/Format.h"
 #include "folly/Conv.h"
 
+#include <mutex>
+#include <condition_variable>
+
 namespace HPHP {
+
+namespace {
+std::mutex s_clientMutex;
+std::condition_variable s_clientWaitq;
+bool s_cond = false;
+}
 
 void HeapProfileRequestHandler::handleRequest(Transport *transport) {
   const char *url = transport->getCommand().c_str();
@@ -74,6 +83,13 @@ void HeapProfileRequestHandler::handleRequest(Transport *transport) {
         folly::toAppend(addr, "\t", sk.getSymbol(), "\n", &res);
       }
       transport->sendString(res, 200);
+
+      if (RuntimeOption::ClientExecutionMode() &&
+          RuntimeOption::HHProfServerProfileClientMode) {
+        std::unique_lock<std::mutex> lock(s_clientMutex);
+        s_cond = true;
+        s_clientWaitq.notify_all();
+      }
     }
   } else if (!strcmp(url, "hhprof/stop")) {
     // user has requested cancellation of the current profile dump
@@ -87,6 +103,13 @@ void HeapProfileRequestHandler::handleRequest(Transport *transport) {
     ).str());
     transport->sendString("Not Found\n", 404);
   }
+}
+
+// static
+void HeapProfileServer::waitForPProf() {
+  std::unique_lock<std::mutex> lock(s_clientMutex);
+
+  s_clientWaitq.wait(lock, [&] { return s_cond; });
 }
 
 bool HeapProfileRequestHandler::handleStartRequest(Transport *transport) {

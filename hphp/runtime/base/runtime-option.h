@@ -496,6 +496,7 @@ public:
   static int HHProfServerPort;
   static int HHProfServerThreads;
   static int HHProfServerTimeoutSeconds;
+  static bool HHProfServerProfileClientMode;
   static int HHProfServerFilterMinAllocPerReq;
   static int HHProfServerFilterMinBytesPerReq;
 

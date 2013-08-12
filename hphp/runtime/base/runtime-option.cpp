@@ -445,6 +445,7 @@ bool RuntimeOption::EnablePregErrorLog = true;
 int RuntimeOption::HHProfServerPort = 4327;
 int RuntimeOption::HHProfServerThreads = 2;
 int RuntimeOption::HHProfServerTimeoutSeconds = 30;
+bool RuntimeOption::HHProfServerProfileClientMode = true;
 int RuntimeOption::HHProfServerFilterMinAllocPerReq = 2;
 int RuntimeOption::HHProfServerFilterMinBytesPerReq = 128;
 
@@ -1249,6 +1250,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     HHProfServerThreads = hhprofServer["Threads"].getInt16(2);
     HHProfServerTimeoutSeconds =
       hhprofServer["TimeoutSeconds"].getInt64(30);
+    HHProfServerProfileClientMode =
+      hhprofServer["ProfileClientMode"].getBool();
 
     // HHProfServer.Filter.*
     Hdf hhprofFilter = hhprofServer["Filter"];

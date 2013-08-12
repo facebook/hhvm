@@ -15,8 +15,11 @@
 */
 
 #include "hphp/runtime/base/memory-profile.h"
+#include "hphp/runtime/base/pprof-server.h"
 #include "hphp/runtime/base/hphp-value.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+
+#include <boost/make_shared.hpp>
 
 namespace HPHP {
 
@@ -48,6 +51,11 @@ static ProfileStackTrace getStackTrace() {
 
 void MemoryProfile::startProfilingImpl() {
   TRACE(1, "request started: initializing memory profile\n");
+  if (RuntimeOption::ClientExecutionMode() &&
+      RuntimeOption::HHProfServerProfileClientMode) {
+    HeapProfileServer::Server = boost::make_shared<HeapProfileServer>();
+    ProfileController::requestNext();
+  }
   m_livePointers.clear();
   m_dump.clear();
 }
@@ -58,7 +66,12 @@ void MemoryProfile::finishProfilingImpl() {
   TRACE(2, "offerring dump to profile controller, "
            "request was for URL %s\n",
            g_context->getTransport()->getCommand().c_str());
+
   ProfileController::offerProfile(m_dump);
+  if (RuntimeOption::ClientExecutionMode() &&
+      RuntimeOption::HHProfServerProfileClientMode) {
+    HeapProfileServer::waitForPProf();
+  }
 }
 
 void MemoryProfile::logAllocationImpl(void *ptr, size_t size) {

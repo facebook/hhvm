@@ -232,11 +232,16 @@ ProfileDump ProfileController::waitForProfile() {
   std::unique_lock<std::mutex> lock(m_mutex);
 
   auto cond = [&] { return m_state != State::Pending; };
-  m_waitq.wait_for(
-    lock,
-    std::chrono::seconds(RuntimeOption::HHProfServerTimeoutSeconds),
-    cond
-  );
+  if (RuntimeOption::ClientExecutionMode() &&
+      RuntimeOption::HHProfServerProfileClientMode) {
+    m_waitq.wait(lock, cond);
+  } else {
+    m_waitq.wait_for(
+      lock,
+      std::chrono::seconds(RuntimeOption::HHProfServerTimeoutSeconds),
+      cond
+    );
+  }
 
   // check to see if someone else grabbed the profile
   if (m_state == State::Waiting) return ProfileDump();

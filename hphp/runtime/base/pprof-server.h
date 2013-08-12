@@ -20,6 +20,9 @@
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/base/profile-dump.h"
 
+#include <condition_variable>
+#include <mutex>
+
 namespace HPHP {
 
 struct HeapProfileRequestHandler : public RequestHandler {
@@ -31,7 +34,6 @@ struct HeapProfileRequestHandler : public RequestHandler {
 
 private:
   bool handleStartRequest(Transport *transport);
-
 };
 
 DECLARE_BOOST_TYPES(HeapProfileServer);
@@ -45,9 +47,14 @@ struct HeapProfileServer {
       RuntimeOption::HHProfServerThreads
     )
   ) {
-    m_server->setRequestHandlerFactory<HeapProfileRequestHandler>(
-      RuntimeOption::HHProfServerTimeoutSeconds
-    );
+    if (RuntimeOption::ClientExecutionMode() &&
+        RuntimeOption::HHProfServerProfileClientMode) {
+      m_server->setRequestHandlerFactory<HeapProfileRequestHandler>(0);
+    } else {
+      m_server->setRequestHandlerFactory<HeapProfileRequestHandler>(
+        RuntimeOption::HHProfServerTimeoutSeconds
+      );
+    }
     m_server->start();
   }
 
@@ -55,6 +62,8 @@ struct HeapProfileServer {
     m_server->stop();
     m_server->waitForEnd();
   }
+
+  static void waitForPProf();
 
   static HeapProfileServerPtr Server;
 

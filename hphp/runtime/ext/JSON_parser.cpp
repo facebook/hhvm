@@ -363,10 +363,10 @@ private:
  * Push a mode onto the stack. Return false if there is overflow.
  */
 static int push(json_parser *json, int mode) {
-  json->the_top += 1;
-  if (json->the_top >= JSON_PARSER_MAX_DEPTH) {
+  if (json->the_top + 1 >= JSON_PARSER_MAX_DEPTH) {
     return false;
   }
+  json->the_top += 1;
   json->the_stack[json->the_top] = mode;
   if (json->the_top > json->the_mark) {
     json->the_mark = json->the_top;

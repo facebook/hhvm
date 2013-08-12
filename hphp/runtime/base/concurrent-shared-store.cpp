@@ -325,8 +325,7 @@ static int64_t get_int64_value(StoreValue* sval) {
     v = sval->var->toLocal();
   } else {
     assert(sval->inFile());
-    String s(sval->sAddr, sval->getSerializedSize(), CopyString);
-    v = apc_unserialize(s);
+    v = apc_unserialize(sval->sAddr, sval->getSerializedSize());
   }
   return v.toInt64();
 }
@@ -604,8 +603,7 @@ void ConcurrentTableSharedStore::dump(std::ostream & out, bool keyOnly,
           assert(sval->inFile());
           // we need unserialize and serialize again because the format was
           // APCSerialize
-          String s(sval->sAddr, sval->getSerializedSize(), CopyString);
-          value = apc_unserialize(s);
+          value = apc_unserialize(sval->sAddr, sval->getSerializedSize());
         }
         try {
           String valS(vs.serialize(value, true));

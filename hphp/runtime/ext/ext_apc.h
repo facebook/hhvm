@@ -158,7 +158,7 @@ static_assert(sizeof(int64_t) == sizeof(long long),
 // apc serialization
 
 String apc_serialize(CVarRef value);
-Variant apc_unserialize(CStrRef str);
+Variant apc_unserialize(const char* data, int len);
 String apc_reserialize(CStrRef str);
 
 ///////////////////////////////////////////////////////////////////////////////

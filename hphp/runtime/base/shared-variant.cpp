@@ -162,8 +162,7 @@ Variant SharedVariant::toLocal() {
   case KindOfArray:
     {
       if (getSerializedArray()) {
-        return apc_unserialize(String(m_data.str->data(), m_data.str->size(),
-                                      CopyString));
+        return apc_unserialize(m_data.str->data(), m_data.str->size());
       }
       return NEW(SharedMap)(this);
     }
@@ -178,8 +177,7 @@ Variant SharedVariant::toLocal() {
       if (getIsObj()) {
         return m_data.obj->getObject();
       }
-      return apc_unserialize(String(m_data.str->data(), m_data.str->size(),
-                                    CopyString));
+      return apc_unserialize(m_data.str->data(), m_data.str->size());
     }
   }
 }

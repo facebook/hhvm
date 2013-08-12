@@ -1203,12 +1203,12 @@ String apc_serialize(CVarRef value) {
   return vs.serialize(value, true);
 }
 
-Variant apc_unserialize(CStrRef str) {
+Variant apc_unserialize(const char* data, int len) {
   VariableUnserializer::Type sType =
     apcExtension::EnableApcSerialize ?
       VariableUnserializer::Type::APCSerialize :
       VariableUnserializer::Type::Serialize;
-  return unserialize_ex(str, sType);
+  return unserialize_ex(data, len, sType);
 }
 
 void reserialize(VariableUnserializer *uns, StringBuffer &buf) {

@@ -17,8 +17,8 @@
 #include "hphp/util/parser/scanner.h"
 #include "hphp/util/util.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/zend/zend_string.h"
-#include "hphp/util/zend/zend_html.h"
+#include "hphp/zend/zend-string.h"
+#include "hphp/zend/zend-html.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

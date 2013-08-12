@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/util/zend/zend_html.h"
+#include "hphp/zend/zend-html.h"
 #include "hphp/util/lock.h"
 #include "unicode/uchar.h"
 #include "unicode/utf8.h"

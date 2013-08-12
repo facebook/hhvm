@@ -43,7 +43,7 @@ $files_external_party = array(
 );
 
 $files_zend = array(
-  'util/zend/',
+  'zend/',
   'runtime/base/intl-convert.cpp',
   'runtime/base/intl-convert.h',
   'runtime/base/utf8-decode.h',

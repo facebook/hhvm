@@ -19,7 +19,7 @@
 #define incl_HPHP_ZEND_STRING_H_
 
 #include "hphp/util/base.h"
-#include "hphp/util/zend/zend_string.h"
+#include "hphp/zend/zend-string.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/string-buffer.h"
 

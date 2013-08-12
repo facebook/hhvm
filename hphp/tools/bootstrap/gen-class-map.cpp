@@ -81,7 +81,13 @@ static fbstring genDocCommentPreamble(const fbstring& name,
     } else {
       ret += "function.";
     }
-    ret += name + ".php )";
+    auto mangled_name = name;
+    for (auto it = mangled_name.begin(); it != mangled_name.end(); ++it) {
+      if (*it == '_') {
+        *it = '-';
+      }
+    }
+    ret += mangled_name + ".php )";
   }
 
   if (desc.size()) {

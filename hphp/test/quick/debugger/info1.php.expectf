@@ -2,7 +2,7 @@ Program %s/info1.php loaded. Type '[r]un' or '[c]ontinue' to go.
 @
 info array_key_exists
 /**
- * ( excerpt from http://php.net/manual/en/function.array_key_exists.php )
+ * ( excerpt from http://php.net/manual/en/function.array-key-exists.php )
  * array_key_exists() returns TRUE if the given key is set in the array. key can be any value possible for an array index.
  *
  * @key mixed Value to check.

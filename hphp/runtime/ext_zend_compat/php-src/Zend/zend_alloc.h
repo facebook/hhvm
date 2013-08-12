@@ -43,6 +43,9 @@ ZEND_API inline void *_safe_malloc(size_t nmemb, size_t size, size_t offset) {
 ZEND_API inline void _efree(const void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
   HPHP::smart_free(const_cast<void*>(ptr));
 }
+ZEND_API inline void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
+  return HPHP::smart_calloc(nmemb, size);
+}
 ZEND_API inline void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
   return HPHP::smart_realloc(ptr, size);
 }

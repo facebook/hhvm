@@ -26,8 +26,19 @@
 #include <sys/stat.h>
 
 #include "php.h"
-
 #include "hphp/runtime/base/php-stream-wrapper.h"
+
+BEGIN_EXTERN_C()
+PHPAPI inline int php_file_le_stream(void) {
+  return -2;
+}
+PHPAPI inline int php_file_le_pstream(void) {
+  return -3;
+}
+PHPAPI inline int php_file_le_stream_filter(void) {
+  return -4;
+}
+END_EXTERN_C()
 
 #define STREAMS_CC
 #define STREAMS_DC
@@ -47,6 +58,20 @@
 typedef struct HPHP::File php_stream;
 typedef void* php_stream_context;
 
+PHPAPI inline php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC) {
+  FILE *f = tmpfile();
+  if (f) {
+    php_stream* stream = NEWOBJ(HPHP::PlainFile)(f);
+    stream->incRefCount();
+    return stream;
+  }
+  return nullptr;
+}
+#define php_stream_fopen_tmpfile()      _php_stream_fopen_tmpfile(0 STREAMS_CC TSRMLS_CC)
+#define php_stream_fopen_tmpfile_rel()	_php_stream_fopen_tmpfile(0 STREAMS_REL_CC TSRMLS_CC)
+
+#define php_stream_from_zval(xstr, ppzval)	ZEND_FETCH_RESOURCE2((xstr), php_stream *, (ppzval), -1, "stream", php_file_le_stream(), php_file_le_pstream())
+
 #define PHP_STREAM_FREE_CALL_DTOR      1 /* call ops->close */
 #define PHP_STREAM_FREE_RELEASE_STREAM    2 /* pefree(stream) */
 #define PHP_STREAM_FREE_PRESERVE_HANDLE    4 /* tell ops->close to not close it's underlying handle */
@@ -65,6 +90,44 @@ PHPAPI inline int _php_stream_free(php_stream *stream, int close_options TSRMLS_
 #define php_stream_free(stream, close_options)  _php_stream_free((stream), (close_options) TSRMLS_CC)
 #define php_stream_close(stream)  _php_stream_free((stream), PHP_STREAM_FREE_CLOSE TSRMLS_CC)
 #define php_stream_pclose(stream)  _php_stream_free((stream), PHP_STREAM_FREE_CLOSE_PERSISTENT TSRMLS_CC)
+
+PHPAPI inline int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC) {
+  return stream->seek(offset, whence);
+}
+#define php_stream_rewind(stream)	_php_stream_seek((stream), 0L, SEEK_SET TSRMLS_CC)
+#define php_stream_seek(stream, offset, whence)	_php_stream_seek((stream), (offset), (whence) TSRMLS_CC)
+
+PHPAPI inline off_t _php_stream_tell(php_stream *stream TSRMLS_DC) {
+  return stream->tell();
+}
+#define php_stream_tell(stream)	_php_stream_tell((stream) TSRMLS_CC)
+
+PHPAPI inline size_t _php_stream_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) {
+  return stream->readImpl(buf, count);
+}
+#define php_stream_read(stream, buf, count)		_php_stream_read((stream), (buf), (count) TSRMLS_CC)
+
+PHPAPI inline size_t _php_stream_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC) {
+  return stream->writeImpl(buf, count);
+}
+#define php_stream_write_string(stream, str)	_php_stream_write(stream, str, strlen(str) TSRMLS_CC)
+#define php_stream_write(stream, buf, count)	_php_stream_write(stream, (buf), (count) TSRMLS_CC)
+
+PHPAPI inline int _php_stream_eof(php_stream *stream TSRMLS_DC) {
+  return stream->eof();
+}
+#define php_stream_eof(stream)	_php_stream_eof((stream) TSRMLS_CC)
+
+PHPAPI inline int _php_stream_getc(php_stream *stream TSRMLS_DC) {
+  return stream->getc();
+}
+#define php_stream_getc(stream)	_php_stream_getc((stream) TSRMLS_CC)
+
+PHPAPI inline int _php_stream_putc(php_stream *stream, int c TSRMLS_DC) {
+  return stream->putc(c);
+}
+#define php_stream_putc(stream, c)	_php_stream_putc((stream), (c) TSRMLS_CC)
+
 
 /* copy up to maxlen bytes from src to dest.  If maxlen is PHP_STREAM_COPY_ALL,
  * copy until eof(src). */
@@ -147,7 +210,7 @@ END_EXTERN_C()
 #define STREAM_ASSUME_REALPATH          0x00004000
 
 BEGIN_EXTERN_C()
-PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
+PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 
 #define php_stream_open_wrapper(path, mode, options, opened)  _php_stream_open_wrapper_ex((path), (mode), (options), (opened), NULL STREAMS_CC TSRMLS_CC)
 #define php_stream_open_wrapper_ex(path, mode, options, opened, context)  _php_stream_open_wrapper_ex((path), (mode), (options), (opened), (context) STREAMS_CC TSRMLS_CC)

@@ -389,6 +389,8 @@ zend_always_inline zend_bool zval_set_isref_to_p(zval* pz, zend_bool isref) {
 #define IS_CONSTANT_ARRAY  9
 #define IS_CALLABLE        10
 
+ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_copy);
+
 #define STR_FREE(ptr) if (ptr && !IS_INTERNED(ptr)) { efree(ptr); }
 #define STR_FREE_REL(ptr) if (ptr && !IS_INTERNED(ptr)) { efree_rel(ptr); }
 

@@ -1,5 +1,6 @@
 auto_sources(IDL_SRCS "*.idl.json" "RECURSE" "${HPHP_HOME}/hphp/system/idl")
 list(REMOVE_ITEM IDL_SRCS "${HPHP_HOME}/hphp/system/idl/calendar.idl.json")
+list(REMOVE_ITEM IDL_SRCS "${HPHP_HOME}/hphp/system/idl/ftp.idl.json")
 list(REMOVE_ITEM IDL_SRCS "${HPHP_HOME}/hphp/system/idl/gettext.idl.json")
 list(REMOVE_ITEM IDL_SRCS "${HPHP_HOME}/hphp/system/idl/yaml.idl.json")
 

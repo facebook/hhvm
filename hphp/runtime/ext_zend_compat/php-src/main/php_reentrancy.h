@@ -24,5 +24,6 @@
 #include <time.h>
 
 #define php_localtime_r localtime_r
+#define php_gmtime_r gmtime_r
 
 #endif

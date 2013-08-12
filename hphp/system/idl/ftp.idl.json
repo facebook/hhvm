@@ -1,0 +1,991 @@
+{
+    "preamble": "",
+    "consts": [
+        {
+            "name": "FTP_ASCII",
+            "value": 1
+        },
+        {
+            "name": "FTP_TEXT",
+            "value": 1
+        },
+        {
+            "name": "FTP_BINARY",
+            "value": 2
+        },
+        {
+            "name": "FTP_IMAGE",
+            "value": 2
+        },
+        {
+            "name": "FTP_TIMEOUT_SEC",
+            "value": 90
+        },
+        {
+            "name": "FTP_AUTOSEEK",
+            "value": 1
+        },
+        {
+            "name": "FTP_FAILED",
+            "value": 0
+        },
+        {
+            "name": "FTP_FINISHED",
+            "value": 1
+        },
+        {
+            "name": "FTP_MOREDATA",
+            "value": 2
+        },
+        {
+            "name": "FTP_AUTORESUME",
+            "value": -1
+        }
+    ],
+    "funcs": [
+        {
+            "name": "ftp_alloc",
+            "desc": "Sends an ALLO command to the remote FTP server to allocate space for a file to be uploaded.\n\nMany FTP servers do not support this command. These servers may return a failure code (FALSE) indicating the command is not supported or a success code (TRUE) to indicate that pre-allocation is not necessary and the client should continue as though the operation were successful. Because of this, it may be best to reserve this function for servers which explicitly require preallocation.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "filesize",
+                    "type": "Variant",
+                    "desc": "The number of bytes to allocate."
+                },
+                {
+                    "name": "result",
+                    "type": "Variant",
+                    "desc": "A textual representation of the servers response will be returned by reference in result if a variable is provided.",
+                    "ref": true
+                }
+            ]
+        },
+        {
+            "name": "ftp_cdup",
+            "desc": "Changes to the parent directory.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                }
+            ]
+        },
+        {
+            "name": "ftp_chdir",
+            "desc": "Changes the current directory to the specified one.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure. If changing directory fails, PHP will also throw a warning."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "directory",
+                    "type": "Variant",
+                    "desc": "The target directory."
+                }
+            ]
+        },
+        {
+            "name": "ftp_chmod",
+            "desc": "Sets the permissions on the specified remote file to mode.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the new file permissions on success or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "mode",
+                    "type": "Variant",
+                    "desc": "The new permissions, given as an octal value."
+                },
+                {
+                    "name": "filename",
+                    "type": "Variant",
+                    "desc": "The remote file."
+                }
+            ]
+        },
+        {
+            "name": "ftp_close",
+            "desc": "ftp_close() closes the given link identifier and releases the resource.\n\nAfter calling this function, you can no longer use the FTP connection and must create a new one with ftp_connect().",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                }
+            ]
+        },
+        {
+            "name": "ftp_connect",
+            "desc": "ftp_connect() opens an FTP connection to the specified host.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a FTP stream on success or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "host",
+                    "type": "Variant",
+                    "desc": "The FTP server address. This parameter shouldn't have any trailing slashes and shouldn't be prefixed with ftp:\/\/."
+                },
+                {
+                    "name": "port",
+                    "type": "Variant",
+                    "desc": "This parameter specifies an alternate port to connect to. If it is omitted or set to zero, then the default FTP port, 21, will be used."
+                },
+                {
+                    "name": "timeout",
+                    "type": "Variant",
+                    "desc": "This parameter specifies the timeout for all subsequent network operations. If omitted, the default value is 90 seconds. The timeout can be changed and queried at any time with ftp_set_option() and ftp_get_option()."
+                }
+            ]
+        },
+        {
+            "name": "ftp_delete",
+            "desc": "ftp_delete() deletes the file specified by path from the FTP server.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "path",
+                    "type": "Variant",
+                    "desc": "The file to delete."
+                }
+            ]
+        },
+        {
+            "name": "ftp_exec",
+            "desc": "Sends a SITE EXEC command request to the FTP server.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE if the command was successful (server sent response code: 200); otherwise returns FALSE."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "command",
+                    "type": "Variant",
+                    "desc": "The command to execute."
+                }
+            ]
+        },
+        {
+            "name": "ftp_fget",
+            "desc": "ftp_fget() retrieves remote_file from the FTP server, and writes it to the given file pointer.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "handle",
+                    "type": "Variant",
+                    "desc": "An open file pointer in which we store the data."
+                },
+                {
+                    "name": "remote_file",
+                    "type": "Variant",
+                    "desc": "The remote file path."
+                },
+                {
+                    "name": "mode",
+                    "type": "Variant",
+                    "desc": "The transfer mode. Must be either FTP_ASCII or FTP_BINARY."
+                },
+                {
+                    "name": "resumepos",
+                    "type": "Variant",
+                    "desc": "The position in the remote file to start downloading from."
+                }
+            ]
+        },
+        {
+            "name": "ftp_fput",
+            "desc": "ftp_fput() uploads the data from a file pointer to a remote file on the FTP server.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "remote_file",
+                    "type": "Variant",
+                    "desc": "The remote file path."
+                },
+                {
+                    "name": "handle",
+                    "type": "Variant",
+                    "desc": "An open file pointer on the local file. Reading stops at end of file."
+                },
+                {
+                    "name": "mode",
+                    "type": "Variant",
+                    "desc": "The transfer mode. Must be either FTP_ASCII or FTP_BINARY."
+                },
+                {
+                    "name": "startpos",
+                    "type": "Variant",
+                    "desc": ""
+                }
+            ]
+        },
+        {
+            "name": "ftp_get_option",
+            "desc": "This function returns the value for the requested option from the specified FTP connection.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the value on success or FALSE if the given option is not supported. In the latter case, a warning message is also thrown."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "option",
+                    "type": "Variant",
+                    "desc": "Currently, the following options are supported: Supported runtime FTP options FTP_TIMEOUT_SEC Returns the current timeout used for network related operations. FTP_AUTOSEEK Returns TRUE if this option is on, FALSE otherwise."
+                }
+            ]
+        },
+        {
+            "name": "ftp_get",
+            "desc": "ftp_get() retrieves a remote file from the FTP server, and saves it into a local file.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "local_file",
+                    "type": "Variant",
+                    "desc": "The local file path (will be overwritten if the file already exists)."
+                },
+                {
+                    "name": "remote_file",
+                    "type": "Variant",
+                    "desc": "The remote file path."
+                },
+                {
+                    "name": "mode",
+                    "type": "Variant",
+                    "desc": "The transfer mode. Must be either FTP_ASCII or FTP_BINARY."
+                },
+                {
+                    "name": "resumepos",
+                    "type": "Variant",
+                    "desc": "The position in the remote file to start downloading from."
+                }
+            ]
+        },
+        {
+            "name": "ftp_login",
+            "desc": "Logs in to the given FTP stream.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure. If login fails, PHP will also throw a warning."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "username",
+                    "type": "Variant",
+                    "desc": "The username (USER)."
+                },
+                {
+                    "name": "password",
+                    "type": "Variant",
+                    "desc": "The password (PASS)."
+                }
+            ]
+        },
+        {
+            "name": "ftp_mdtm",
+            "desc": "ftp_mdtm() gets the last modified time for a remote file.\n\nNot all servers support this feature!\n\nftp_mdtm() does not work with directories.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the last modified time as a Unix timestamp on success, or -1 on error."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "remote_file",
+                    "type": "Variant",
+                    "desc": "The file from which to extract the last modification time."
+                }
+            ]
+        },
+        {
+            "name": "ftp_mkdir",
+            "desc": "Creates the specified directory on the FTP server.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the newly created directory name on success or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "directory",
+                    "type": "Variant",
+                    "desc": "The name of the directory that will be created."
+                }
+            ]
+        },
+        {
+            "name": "ftp_nb_continue",
+            "desc": "Continues retrieving\/sending a file non-blocking.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns FTP_FAILED or FTP_FINISHED or FTP_MOREDATA."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                }
+            ]
+        },
+        {
+            "name": "ftp_nb_fget",
+            "desc": "ftp_nb_fget() retrieves a remote file from the FTP server.\n\nThe difference between this function and ftp_fget() is that this function retrieves the file asynchronously, so your program can perform other operations while the file is being downloaded.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns FTP_FAILED or FTP_FINISHED or FTP_MOREDATA."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "handle",
+                    "type": "Variant",
+                    "desc": "An open file pointer in which we store the data."
+                },
+                {
+                    "name": "remote_file",
+                    "type": "Variant",
+                    "desc": "The remote file path."
+                },
+                {
+                    "name": "mode",
+                    "type": "Variant",
+                    "desc": "The transfer mode. Must be either FTP_ASCII or FTP_BINARY."
+                },
+                {
+                    "name": "resumepos",
+                    "type": "Variant",
+                    "desc": ""
+                }
+            ]
+        },
+        {
+            "name": "ftp_nb_fput",
+            "desc": "ftp_nb_fput() uploads the data from a file pointer to a remote file on the FTP server.\n\nThe difference between this function and the ftp_fput() is that this function uploads the file asynchronously, so your program can perform other operations while the file is being uploaded.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns FTP_FAILED or FTP_FINISHED or FTP_MOREDATA."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "remote_file",
+                    "type": "Variant",
+                    "desc": "The remote file path."
+                },
+                {
+                    "name": "handle",
+                    "type": "Variant",
+                    "desc": "An open file pointer on the local file. Reading stops at end of file."
+                },
+                {
+                    "name": "mode",
+                    "type": "Variant",
+                    "desc": "The transfer mode. Must be either FTP_ASCII or FTP_BINARY."
+                },
+                {
+                    "name": "startpos",
+                    "type": "Variant",
+                    "desc": ""
+                }
+            ]
+        },
+        {
+            "name": "ftp_nb_get",
+            "desc": "ftp_nb_get() retrieves a remote file from the FTP server, and saves it into a local file.\n\nThe difference between this function and ftp_get() is that this function retrieves the file asynchronously, so your program can perform other operations while the file is being downloaded.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns FTP_FAILED or FTP_FINISHED or FTP_MOREDATA."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "local_file",
+                    "type": "Variant",
+                    "desc": "The local file path (will be overwritten if the file already exists)."
+                },
+                {
+                    "name": "remote_file",
+                    "type": "Variant",
+                    "desc": "The remote file path."
+                },
+                {
+                    "name": "mode",
+                    "type": "Variant",
+                    "desc": "The transfer mode. Must be either FTP_ASCII or FTP_BINARY."
+                },
+                {
+                    "name": "resumepos",
+                    "type": "Variant",
+                    "desc": ""
+                }
+            ]
+        },
+        {
+            "name": "ftp_nb_put",
+            "desc": "ftp_nb_put() stores a local file on the FTP server.\n\nThe difference between this function and the ftp_put() is that this function uploads the file asynchronously, so your program can perform other operations while the file is being uploaded.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns FTP_FAILED or FTP_FINISHED or FTP_MOREDATA."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "remote_file",
+                    "type": "Variant",
+                    "desc": "The remote file path."
+                },
+                {
+                    "name": "local_file",
+                    "type": "Variant",
+                    "desc": "The local file path."
+                },
+                {
+                    "name": "mode",
+                    "type": "Variant",
+                    "desc": "The transfer mode. Must be either FTP_ASCII or FTP_BINARY."
+                },
+                {
+                    "name": "startpos",
+                    "type": "Variant",
+                    "desc": ""
+                }
+            ]
+        },
+        {
+            "name": "ftp_nlist",
+            "desc": null,
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an array of filenames from the specified directory on success or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "directory",
+                    "type": "Variant",
+                    "desc": "The directory to be listed. This parameter can also include arguments, eg. ftp_nlist($conn_id, \"-la \/your\/dir\"); Note that this parameter isn't escaped so there may be some issues with filenames containing spaces and other characters."
+                }
+            ]
+        },
+        {
+            "name": "ftp_pasv",
+            "desc": "ftp_pasv() turns on or off passive mode. In passive mode, data connections are initiated by the client, rather than by the server. It may be needed if the client is behind firewall.\n\nPlease note that ftp_pasv() can only be called after a successfull login or otherwise it will fail.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "pasv",
+                    "type": "Variant",
+                    "desc": "If TRUE, the passive mode is turned on, else it's turned off."
+                }
+            ]
+        },
+        {
+            "name": "ftp_put",
+            "desc": "ftp_put() stores a local file on the FTP server.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "remote_file",
+                    "type": "Variant",
+                    "desc": "The remote file path."
+                },
+                {
+                    "name": "local_file",
+                    "type": "Variant",
+                    "desc": "The local file path."
+                },
+                {
+                    "name": "mode",
+                    "type": "Variant",
+                    "desc": "The transfer mode. Must be either FTP_ASCII or FTP_BINARY."
+                },
+                {
+                    "name": "startpos",
+                    "type": "Variant",
+                    "desc": ""
+                }
+            ]
+        },
+        {
+            "name": "ftp_pwd",
+            "desc": "",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the current directory name or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                }
+            ]
+        },
+        {
+            "name": "ftp_quit",
+            "desc": null,
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": null
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "ftp_raw",
+            "desc": "Sends an arbitrary command to the FTP server.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the server's response as an array of strings. No parsing is performed on the response string, nor does ftp_raw() determine if the command succeeded."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "command",
+                    "type": "Variant",
+                    "desc": "The command to execute."
+                }
+            ]
+        },
+        {
+            "name": "ftp_rawlist",
+            "desc": "ftp_rawlist() executes the FTP LIST command, and returns the result as an array.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an array where each element corresponds to one line of text.\n\nThe output is not parsed in any way. The system type identifier returned by ftp_systype() can be used to determine how the results should be interpreted."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "directory",
+                    "type": "Variant",
+                    "desc": "The directory path. May include arguments for the LIST command."
+                },
+                {
+                    "name": "recursive",
+                    "type": "Variant",
+                    "desc": "If set to TRUE, the issued command will be LIST -R."
+                }
+            ]
+        },
+        {
+            "name": "ftp_rename",
+            "desc": "ftp_rename() renames a file or a directory on the FTP server.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "oldname",
+                    "type": "Variant",
+                    "desc": "The old file\/directory name."
+                },
+                {
+                    "name": "newname",
+                    "type": "Variant",
+                    "desc": "The new name."
+                }
+            ]
+        },
+        {
+            "name": "ftp_rmdir",
+            "desc": "Removes the specified directory on the FTP server.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "directory",
+                    "type": "Variant",
+                    "desc": "The directory to delete. This must be either an absolute or relative path to an empty directory."
+                }
+            ]
+        },
+        {
+            "name": "ftp_set_option",
+            "desc": "This function controls various runtime options for the specified FTP stream.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE if the option could be set; FALSE if not. A warning message will be thrown if the option is not supported or the passed value doesn't match the expected value for the given option."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "option",
+                    "type": "Variant",
+                    "desc": "Currently, the following options are supported: Supported runtime FTP options FTP_TIMEOUT_SEC Changes the timeout in seconds used for all network related functions. value must be an integer that is greater than 0. The default timeout is 90 seconds. FTP_AUTOSEEK When enabled, GET or PUT requests with a resumepos or startpos parameter will first seek to the requested position within the file. This is enabled by default."
+                },
+                {
+                    "name": "value",
+                    "type": "Variant",
+                    "desc": "This parameter depends on which option is chosen to be altered."
+                }
+            ]
+        },
+        {
+            "name": "ftp_site",
+            "desc": "ftp_site() sends the given SITE command to the FTP server.\n\nSITE commands are not standardized, and vary from server to server. They are useful for handling such things as file permissions and group membership.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "command",
+                    "type": "Variant",
+                    "desc": "The SITE command. Note that this parameter isn't escaped so there may be some issues with filenames containing spaces and other characters."
+                }
+            ]
+        },
+        {
+            "name": "ftp_size",
+            "desc": "ftp_size() returns the size of the given file in bytes.\n\nNot all servers support this feature.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the file size on success, or -1 on error."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                },
+                {
+                    "name": "remote_file",
+                    "type": "Variant",
+                    "desc": "The remote file."
+                }
+            ]
+        },
+        {
+            "name": "ftp_ssl_connect",
+            "desc": "ftp_ssl_connect() opens an explicit SSL-FTP connection to the specified host. Why this function may not exist\n\nftp_ssl_connect() is only available if both the ftp module and the OpenSSL support is built statically into php, this means that on Windows this function will be undefined in the official PHP builds. To make this function available on Windows you must compile your own PHP binaries.\n\nftp_ssl_connect() is not intended for use with sFTP. To use sFTP with PHP, please see ssh2_sftp().",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a SSL-FTP stream on success or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "host",
+                    "type": "Variant",
+                    "desc": "The FTP server address. This parameter shouldn't have any trailing slashes and shouldn't be prefixed with ftp:\/\/."
+                },
+                {
+                    "name": "port",
+                    "type": "Variant",
+                    "desc": "This parameter specifies an alternate port to connect to. If it is omitted or set to zero, then the default FTP port, 21, will be used."
+                },
+                {
+                    "name": "timeout",
+                    "type": "Variant",
+                    "desc": "This parameter specifies the timeout for all subsequent network operations. If omitted, the default value is 90 seconds. The timeout can be changed and queried at any time with ftp_set_option() and ftp_get_option()."
+                }
+            ]
+        },
+        {
+            "name": "ftp_systype",
+            "desc": "Returns the system type identifier of the remote FTP server.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the remote system type, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "ftp_stream",
+                    "type": "Variant",
+                    "desc": "The link identifier of the FTP connection."
+                }
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

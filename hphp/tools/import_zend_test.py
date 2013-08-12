@@ -86,7 +86,6 @@ no_import = (
     '/ext/enchant',
     '/ext/ereg',
     '/ext/fileinfo',
-    '/ext/ftp',
     '/ext/gmp',
     '/ext/interbase',
     '/ext/mssql',
@@ -228,6 +227,8 @@ other_files = (
     '/ext-date/DateTime_data-fall-type3-type3.inc',
     '/ext-date/DateTime_data-fall-type2-type2.inc',
     '/ext-exif/bug48378.jpeg',
+    '/ext-ftp/cert.pem',
+    '/ext-ftp/server.inc',
     '/ext-gd/Tuffy.ttf',
     '/ext-gd/bug37346.gif',
     '/ext-gd/bug38112.gif',
@@ -408,6 +409,12 @@ def walk(filename, source):
     full_dest_filename = full_dest_filename.replace('.phpt', '.php')
 
     if not '.phpt' in filename:
+        def replace(find, replace):
+            data = file(full_dest_filename).read().replace(find, replace)
+            file(full_dest_filename, 'w').write(data)
+
+        if '/ext-ftp/server.inc' in full_dest_filename:
+            replace('stream_socket_server', '@stream_socket_server')
         return
 
     print "Importing %s" % full_dest_filename
@@ -647,6 +654,18 @@ def walk(filename, source):
     if '/ext-standard-file/fread_socket_variation1.php' in full_dest_filename:
         test = test.replace("<?php", "<?php\n$port = rand(50000, 65535);")
         test = test.replace("31337'", "'.$port")
+    if '/ext-ftp/ftp_fget_basic1.php' in full_dest_filename:
+        test = test.replace("localfile.txt", "ftp_fget_basic1.txt")
+    if '/ext-ftp/ftp_fget_basic2.php' in full_dest_filename:
+        test = test.replace("localfile.txt", "ftp_fget_basic2.txt")
+    if '/ext-ftp/ftp_fget_basic3.php' in full_dest_filename:
+        test = test.replace("localfile.txt", "ftp_fget_basic3.txt")
+    if '/ext-ftp/ftp_nb_fget_basic1.php' in full_dest_filename:
+        test = test.replace("localfile.txt", "ftp_nb_fget_basic1.txt")
+    if '/ext-ftp/ftp_nb_fget_basic2.php' in full_dest_filename:
+        test = test.replace("localfile.txt", "ftp_nb_fget_basic2.txt")
+    if '/ext-ftp/ftp_nb_fget_basic3.php' in full_dest_filename:
+        test = test.replace("localfile.txt", "ftp_nb_fget_basic3.txt")
 
     file(full_dest_filename, 'w').write(test)
 

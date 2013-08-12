@@ -265,7 +265,7 @@ END_EXTERN_C()
 
 #define ZVAL_RESOURCE(z, l) do {  \
     zval *__z = (z);      \
-    __z->m_data.pres = zend_list_id_to_entry(l); \
+    zval_follow_ref(*__z).m_data.pres = zend_list_id_to_resource_data(l); \
     Z_TYPE_P(__z) = IS_RESOURCE;\
   } while (0)
 
@@ -294,7 +294,7 @@ END_EXTERN_C()
 #define ZVAL_STRINGL(z, s, l, duplicate) do {                       \
     const char *__s=(s); int __l=(l);                               \
     zval *__z = (z);                                                \
-    auto &__dest = __z->m_data.pstr;                                \
+    auto &__dest = zval_follow_ref(*__z).m_data.pstr;               \
     __dest = HPHP::String(__s, __l, HPHP::CopyString).detach();     \
     if (duplicate == 0) {                                           \
       efree(__s);                                                   \

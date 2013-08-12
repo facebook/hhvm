@@ -39,6 +39,15 @@ namespace HPHP {
       int type;
       int id;
   };
+  class ZendNormalResourceDataHolder : public ZendResourceData {
+    public:
+      ZendNormalResourceDataHolder(ResourceData* rd) :
+          ZendResourceData(nullptr, -1), m_rd(rd) {}
+      ~ZendNormalResourceDataHolder() {}
+      ResourceData* getResourceData() { return m_rd; }
+    private:
+      ResourceData* m_rd;
+  };
 };
 typedef HPHP::ZendResourceData zend_rsrc_list_entry;
 typedef void (rsrc_dtor_func_t)(zend_rsrc_list_entry*);
@@ -52,7 +61,9 @@ ZEND_API int zend_list_insert(void *ptr, int type TSRMLS_DC);
 ZEND_API int _zend_list_addref(int id TSRMLS_DC);
 ZEND_API int _zend_list_delete(int id TSRMLS_DC);
 ZEND_API void *_zend_list_find(int id, int *type TSRMLS_DC);
-ZEND_API zend_rsrc_list_entry *zend_list_id_to_entry(int id TSRMLS_DC);
+
+// For ZVAL_RESOURCE()
+HPHP::ResourceData *zend_list_id_to_resource_data(int id TSRMLS_DC);
 
 #define zend_list_addref(id)    _zend_list_addref(id TSRMLS_CC)
 #define zend_list_delete(id)    _zend_list_delete(id TSRMLS_CC)
@@ -62,6 +73,9 @@ ZEND_API int zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int r
 ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, const char *resource_type_name, int *found_resource_type, int num_resource_types, ...);
 
 extern ZEND_API int le_index_ptr;  /* list entry type for index pointers */
+
+// for zval_get_resource_id()
+int zval_get_resource_id(const zval &z);
 
 #define ZEND_VERIFY_RESOURCE(rsrc)    \
   if (!rsrc) {            \

@@ -30,9 +30,6 @@ ZEND_API inline void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC) {
 
 zend_always_inline void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 {
-  if (zvalue->m_type <= IS_BOOL) {
-    return;
-  }
   _zval_dtor_func(zvalue ZEND_FILE_LINE_RELAY_CC);
 }
 
@@ -42,9 +39,6 @@ ZEND_API inline void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC) {
 
 zend_always_inline void _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 {
-  if (zvalue->m_type <= IS_BOOL) {
-    return;
-  }
   _zval_copy_ctor_func(zvalue ZEND_FILE_LINE_RELAY_CC);
 }
 

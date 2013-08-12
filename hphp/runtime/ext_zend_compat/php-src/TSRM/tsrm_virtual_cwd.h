@@ -32,5 +32,6 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC);
 
 #define VCWD_GETCWD(buff, size) getcwd(buff, size)
 #define VCWD_REALPATH(path, real_path) tsrm_realpath(path, real_path TSRMLS_CC)
+#define VCWD_UNLINK(path) unlink(path)
 
 #endif /* VIRTUAL_CWD_H */

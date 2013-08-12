@@ -2,13 +2,15 @@ future
   - Optimize closure invocation and __invoke (~3x faster to invoke)
   - Import gettext extension
   - string and object allocation optimizations (reduced memory usage for both)
-  - Import YAML Extension
+  - Import YAML extension
+  - Import ftp extension
 
 "Kimchi" 2-Sep-2013
   - Fix order of custom attributes and visibility in  ctor arg promotion
   - Implement CachingIterator
   - Implement RecursiveCachingIterator
   - Generalized heuristic for choosing when to inline in the jit
+  - Introduced a Zend compatibility layer to compile extensions
   - Imported calendar extension
   - Use gcc-4.8.1 by default
   - Improve hhvm commandline parsing logic

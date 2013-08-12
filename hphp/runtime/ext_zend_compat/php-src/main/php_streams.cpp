@@ -1,4 +1,4 @@
-#include "hphp/runtime/ext_zend_compat/php-src/main/php_streams.h"
+#include "hphp/runtime/ext_zend_compat/php-src/main/php.h"
 
 PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen, int persistent STREAMS_DC TSRMLS_DC) {
     HPHP::String s;
@@ -23,7 +23,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
   return false;
 }
 
-PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) {
+PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) {
   HPHP::Variant v = HPHP::File::Open(path, mode, options, context);
   php_stream *stream = dynamic_cast<php_stream*>(v.getResourceData());
   stream->incRefCount();

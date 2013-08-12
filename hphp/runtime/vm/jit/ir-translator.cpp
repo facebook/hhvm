@@ -468,6 +468,16 @@ IRTranslator::translateCns(const NormalizedInstruction& i) {
 }
 
 void
+IRTranslator::translateCnsE(const NormalizedInstruction& i) {
+  HHIR_EMIT(CnsE, i.imm[0].u_SA);
+}
+
+void
+IRTranslator::translateCnsU(const NormalizedInstruction& i) {
+  HHIR_EMIT(CnsU, i.imm[0].u_SA, i.imm[1].u_SA);
+}
+
+void
 IRTranslator::translateDefCns(const NormalizedInstruction& i) {
   HHIR_EMIT(DefCns, (i.imm[0].u_SA));
 }

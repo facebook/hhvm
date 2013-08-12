@@ -351,6 +351,8 @@ O(LdClsCns,                     DParam, NA,                               NF) \
 O(LookupClsCns,                 DParam, NA,                  E|Refs|Er|N|Mem) \
 O(LdCns,                        DParam, CStr,                             NF) \
 O(LookupCns,                    DParam, CStr,                E|Refs|Er|N|Mem) \
+O(LookupCnsE,                   DParam, CStr,                E|Refs|Er|N|Mem) \
+O(LookupCnsU,                   DParam, CStr CStr,           E|Refs|Er|N|Mem) \
 O(LdClsMethodCache,         D(FuncCls), C(Str)                                \
                                           C(Str)                              \
                                           C(NamedEntity)                      \

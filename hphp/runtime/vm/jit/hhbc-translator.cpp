@@ -548,19 +548,34 @@ void HhbcTranslator::emitColAddNewElemC() {
   emitInterpOne(Type::Obj, 2);
 }
 
-void HhbcTranslator::emitCns(uint32_t id) {
+void HhbcTranslator::emitCnsCommon(uint32_t id,
+                                   uint32_t fallback,
+                                   bool error) {
+  assert(fallback == kInvalidId || !error);
   StringData* name = curUnit()->lookupLitstrId(id);
   SSATmp* cnsNameTmp = cns(name);
   const TypedValue* tv = Unit::lookupPersistentCns(name);
   SSATmp* result = nullptr;
   Type cnsType = Type::Cell;
+
+  SSATmp* fallbackNameTmp = nullptr;
+  if (fallback != kInvalidId) {
+    StringData* fallbackName = curUnit()->lookupLitstrId(fallback);
+    fallbackNameTmp = cns(fallbackName);
+  }
   if (tv) {
-    result =
+    if (tv->m_type == KindOfUninit) {
       // KindOfUninit is a dynamic system constant. always a slow
       // lookup.
-      tv->m_type == KindOfUninit
-        ? gen(LookupCns, cnsType, cnsNameTmp)
-        : staticTVCns(tv);
+      assert(!fallbackNameTmp);
+      if (error) {
+        result = gen(LookupCnsE, cnsType, cnsNameTmp);
+      } else {
+        result = gen(LookupCns, cnsType, cnsNameTmp);
+      }
+    } else {
+      result = staticTVCns(tv);
+    }
   } else {
     SSATmp* c1 = gen(LdCns, cnsType, cnsNameTmp);
     result = m_tb->cond(
@@ -573,19 +588,32 @@ void HhbcTranslator::emitCns(uint32_t id) {
       },
       [&] { // Taken: miss in TC, do lookup & init
         m_tb->hint(Block::Hint::Unlikely);
-        return gen(LookupCns, getCatchTrace(), cnsType, cnsNameTmp);
+        if (fallbackNameTmp) {
+          return gen(LookupCnsU, getCatchTrace(),
+                     cnsType, cnsNameTmp, fallbackNameTmp);
+        } else if (error) {
+          return gen(LookupCnsE, getCatchTrace(),
+                     cnsType, cnsNameTmp);
+        } else {
+          return gen(LookupCns, getCatchTrace(),
+                     cnsType, cnsNameTmp);
+        }
       }
     );
   }
   push(result);
 }
 
-void HhbcTranslator::emitCnsE(uint32_t id) {
-  PUNT(CnsE);
+void HhbcTranslator::emitCns(uint32_t id) {
+  emitCnsCommon(id, kInvalidId, false);
 }
 
-void HhbcTranslator::emitCnsU(uint32_t id) {
-  PUNT(CnsU);
+void HhbcTranslator::emitCnsE(uint32_t id) {
+  emitCnsCommon(id, kInvalidId, true);
+}
+
+void HhbcTranslator::emitCnsU(uint32_t id, uint32_t fallbackId) {
+  emitCnsCommon(id, fallbackId, false);
 }
 
 void HhbcTranslator::emitDefCns(uint32_t id) {

@@ -5206,7 +5206,9 @@ void CodeGenerator::cgLdCns(IRInstruction* inst) {
   cgLoad(rVmTl, ch, inst);
 }
 
-static Cell lookupCnsHelper(const TypedValue* tv, StringData* nm) {
+static Cell lookupCnsHelper(const TypedValue* tv,
+                            StringData* nm,
+                            bool error) {
   assert(tv->m_type == KindOfUninit);
   Cell *cns = nullptr;
   Cell c1;
@@ -5223,9 +5225,13 @@ static Cell lookupCnsHelper(const TypedValue* tv, StringData* nm) {
       cns = Unit::loadCns(const_cast<StringData*>(nm));
     }
     if (UNLIKELY(!cns)) {
-      raise_notice(Strings::UNDEFINED_CONSTANT, nm->data(), nm->data());
-      c1.m_data.pstr = const_cast<StringData*>(nm);
-      c1.m_type = KindOfStaticString;
+      if (error) {
+        raise_error("Undefined constant '%s'", nm->data());
+      } else {
+        raise_notice(Strings::UNDEFINED_CONSTANT, nm->data(), nm->data());
+        c1.m_data.pstr = const_cast<StringData*>(nm);
+        c1.m_type = KindOfStaticString;
+      }
     } else {
       c1.m_type = cns->m_type;
       c1.m_data = cns->m_data;
@@ -5234,7 +5240,7 @@ static Cell lookupCnsHelper(const TypedValue* tv, StringData* nm) {
   return c1;
 }
 
-void CodeGenerator::cgLookupCns(IRInstruction* inst) {
+void CodeGenerator::cgLookupCnsCommon(IRInstruction* inst) {
   SSATmp* cnsNameTmp = inst->src(0);
 
   assert(inst->typeParam() == Type::Cell);
@@ -5245,9 +5251,84 @@ void CodeGenerator::cgLookupCns(IRInstruction* inst) {
 
   ArgGroup args(m_regs);
   args.addr(rVmTl, ch)
-      .immPtr(cnsName);
+      .immPtr(cnsName)
+      .imm(inst->op() == LookupCnsE);
 
   cgCallHelper(m_as, CppCall(lookupCnsHelper),
+               callDestTV(inst->dst()),
+               SyncOptions::kSyncPoint, args);
+}
+
+void CodeGenerator::cgLookupCns(IRInstruction* inst) {
+  cgLookupCnsCommon(inst);
+}
+
+void CodeGenerator::cgLookupCnsE(IRInstruction* inst) {
+  cgLookupCnsCommon(inst);
+}
+
+static Cell lookupCnsUHelper(const TypedValue* tv,
+                             StringData* nm,
+                             StringData* fallback) {
+  Cell *cns = nullptr;
+  Cell c1;
+
+  // lookup qualified name in thread-local constants
+  bool cacheConsts = TargetCache::s_constants != nullptr;
+  if (UNLIKELY(cacheConsts)) {
+    cns = TargetCache::s_constants->HphpArray::nvGet(nm);
+  }
+  if (!cns) {
+    cns = Unit::loadCns(const_cast<StringData*>(nm));
+  }
+
+  // try cache handle for unqualified name
+  if (UNLIKELY(!cns && tv->m_type != KindOfUninit)) {
+    cns = const_cast<Cell*>(tv);
+  }
+
+  // lookup unqualified name in thread-local constants
+  if (UNLIKELY(!cns)) {
+    if (UNLIKELY(cacheConsts)) {
+      cns = TargetCache::s_constants->HphpArray::nvGet(fallback);
+    }
+    if (!cns) {
+      cns = Unit::loadCns(const_cast<StringData*>(fallback));
+    }
+    if (UNLIKELY(!cns)) {
+      raise_notice(Strings::UNDEFINED_CONSTANT,
+                   fallback->data(), fallback->data());
+      c1.m_data.pstr = const_cast<StringData*>(fallback);
+      c1.m_type = KindOfStaticString;
+    }
+  } else {
+    c1.m_type = cns->m_type;
+    c1.m_data = cns->m_data;
+  }
+  return c1;
+}
+
+void CodeGenerator::cgLookupCnsU(IRInstruction* inst) {
+  SSATmp* cnsNameTmp = inst->src(0);
+  SSATmp* fallbackNameTmp = inst->src(1);
+
+  assert(inst->typeParam() == Type::Cell);
+  assert(cnsNameTmp->isConst() && cnsNameTmp->type() == Type::StaticStr);
+  assert(fallbackNameTmp->isConst() &&
+         fallbackNameTmp->type() == Type::StaticStr);
+
+  const StringData* cnsName = cnsNameTmp->getValStr();
+
+  const StringData* fallbackName = fallbackNameTmp->getValStr();
+  TargetCache::CacheHandle fallbackCh =
+    StringData::DefCnsHandle(fallbackName, false);
+
+  ArgGroup args(m_regs);
+  args.addr(rVmTl, fallbackCh)
+      .immPtr(cnsName)
+      .immPtr(fallbackName);
+
+  cgCallHelper(m_as, CppCall(lookupCnsUHelper),
                callDestTV(inst->dst()),
                SyncOptions::kSyncPoint, args);
 }

@@ -42,6 +42,8 @@
   CASE(ColAddElemC) \
   CASE(ColAddNewElemC) \
   CASE(Cns) \
+  CASE(CnsE) \
+  CASE(CnsU) \
   CASE(DefCns) \
   CASE(ClsCnsD) \
   CASE(Concat) \

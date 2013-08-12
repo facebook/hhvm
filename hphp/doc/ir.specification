@@ -850,6 +850,19 @@ D:T = LdClsCns<T,className,constName> [ -> L ]
   that no decref of the result is necessary because class constants
   will always be static.
 
+D:T = LookupCns<T,constName>
+D:T = LookupCnsE<T,constName>
+
+  Load a constant via the target cache. Raises an undefined constant
+  notice if the constant cannot be defined. The E variant will instead
+  throw a fatal error if it cannot define the constant.
+
+D:T = LookupCnsU<T,constName,fallbackName>
+
+  Load an unqualified constant via the target cache, first by trying
+  constName, then by trying fallbackName. Raises a notice if neither
+  can be found.
+
 D:T = LookupClsCns<T,className,constName>
 
   Load a class constant for a class via the target cache, invoking

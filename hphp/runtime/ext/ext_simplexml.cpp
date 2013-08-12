@@ -174,7 +174,7 @@ static Array create_children(CResRef doc, xmlNodePtr root,
       }
     } else {
       if (node->type == XML_TEXT_NODE || node->type == XML_CDATA_SECTION_NODE) {
-        if (node->content && *node->content) {
+        if (node->content && *node->content && !xmlIsBlankNode(node)) {
           add_property
             (properties, root,
              create_text(doc, node, node_list_to_string(root->doc, node),

@@ -767,9 +767,14 @@ String c_SimpleXMLElement::t___tostring() {
 }
 
 Variant c_SimpleXMLElement::t___get(Variant name) {
-  Variant ret = m_children[name];
-  if (ret.isArray()) {
-    ret = ret[0];
+  Variant ret;
+  if (m_is_attribute) {
+    ret = m_attributes[name];
+  } else {
+    ret = m_children[name];
+    if (ret.isArray()) {
+      ret = ret[0];
+    }
   }
   if (ret.isObject()) {
     c_SimpleXMLElement *elem = ret.toObject().getTyped<c_SimpleXMLElement>();

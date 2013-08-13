@@ -1324,13 +1324,14 @@ void hphp_process_init() {
   action.sa_flags = SA_SIGINFO | SA_NODEFER;
   sigaction(SIGVTALRM, &action, nullptr);
 
+  init_thread_locals();
+
   // Initialize per-process dynamic PHP-visible consts before ClassInfo::Load()
   k_PHP_BINARY = StringData::GetStaticString(current_executable_path());
   k_PHP_BINDIR = StringData::GetStaticString(current_executable_directory());
   k_PHP_OS = StringData::GetStaticString(f_php_uname("s"));
   k_PHP_SAPI = StringData::GetStaticString(RuntimeOption::ExecutionMode);
 
-  init_thread_locals();
   ClassInfo::Load();
   Process::InitProcessStatics();
 

@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/user-stream-wrapper.h"
+#include "hphp/util/network.h"
 #include <memory>
 #include <unistd.h>
 #include <fcntl.h>
@@ -316,30 +317,30 @@ bool f_stream_wrapper_unregister(CStrRef protocol) {
 ///////////////////////////////////////////////////////////////////////////////
 // stream socket functions
 
+// Extract host:port pair.
+// 192.168.1.1:80 -> 192.168.1.0 80
+// [2a03:2880::1]:80 -> [2a03:2880::1] 80
 static void parse_host(CStrRef address, String &host, int &port) {
-  int pos = address.find(':');
-  if (pos >= 0) {
-    host = address.substr(0, pos);
-    port = address.substr(pos + 1).toInt16();
-  } else {
-    host = address;
-    port = 0;
-  }
-}
 
-static void parse_socket(CStrRef socket, String &protocol, String &host,
-                         int &port) {
-  String address;
-  int pos = socket.find("://");
-  if (pos >= 0) {
-    protocol = socket.substr(0, pos);
-    address = socket.substr(pos + 3);
+  if (address.find('[') != std::string::npos) {
+    auto epos = address.rfind(']');
+    if (epos != std::string::npos) {
+      auto cpos = address.rfind(':', epos);
+      if (cpos != std::string::npos) {
+        port = address.substr(cpos + 1).toInt16();
+      }
+    }
+    host = address.substr(0, epos + 1);
   } else {
-    protocol = "tcp";
-    address = socket;
+    auto cpos = address.rfind(':');
+    if (cpos != std::string::npos) {
+      host = address.substr(0, cpos);
+      port = address.substr(cpos + 1).toInt16();
+    } else {
+      host = address;
+      port = 0;
+    }
   }
-
-  parse_host(address, host, port);
 }
 
 static Socket *socket_accept_impl(CResRef socket, struct sockaddr *addr,
@@ -439,9 +440,8 @@ Variant f_stream_socket_server(CStrRef local_socket,
                                VRefParam errstr /* = null */,
                                int flags /* = 0 */,
                                CResRef context /* = null_object */) {
-  String protocol, host; int port;
-  parse_socket(local_socket, protocol, host, port);
-  return f_socket_server(protocol + "://" + host, port, errnum, errstr);
+  Util::HostURL hosturl(static_cast<const std::string>(local_socket));
+  return socket_server_impl(hosturl, errnum, errstr);
 }
 
 Variant f_stream_socket_client(CStrRef remote_socket,
@@ -450,9 +450,8 @@ Variant f_stream_socket_client(CStrRef remote_socket,
                                double timeout /* = 0.0 */,
                                int flags /* = 0 */,
                                CResRef context /* = null_object */) {
-  String protocol, host; int port;
-  parse_socket(remote_socket, protocol, host, port);
-  return f_fsockopen(protocol + "://" + host, port, errnum, errstr, timeout);
+  Util::HostURL hosturl(static_cast<const std::string>(remote_socket));
+  return sockopen_impl(hosturl, errnum, errstr, timeout, false);
 }
 
 Variant f_stream_socket_enable_crypto(CResRef stream, bool enable,

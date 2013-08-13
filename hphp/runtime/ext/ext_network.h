@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/util/network.h"
 #include <syslog.h>
 
 namespace HPHP {
@@ -53,10 +54,15 @@ bool f_getmxrr(CStrRef hostname, VRefParam mxhosts,
 ///////////////////////////////////////////////////////////////////////////////
 // socket
 
-Variant f_fsockopen(CStrRef hostname, int port = -1, VRefParam errnum = uninit_null(),
+Variant sockopen_impl(const Util::HostURL &hosturl,
+                      VRefParam errnum, VRefParam errstr,
+                      double timeout = 0.0, bool persistent = false);
+Variant f_fsockopen(CStrRef hostname, int port = -1,
+                    VRefParam errnum = uninit_null(),
                     VRefParam errstr = uninit_null(), double timeout = 0.0);
 
-Variant f_pfsockopen(CStrRef hostname, int port = -1, VRefParam errnum = uninit_null(),
+Variant f_pfsockopen(CStrRef hostname, int port = -1,
+                     VRefParam errnum = uninit_null(),
                      VRefParam errstr = uninit_null(), double timeout = 0.0);
 
 Variant f_socket_get_status(CResRef stream);

@@ -308,27 +308,27 @@ bool SSLSocket::handleError(int64_t nr_bytes, bool is_init) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SSLSocket *SSLSocket::Create(const char *&name, int port, double timeout) {
+SSLSocket *SSLSocket::Create(const Util::HostURL &hosturl, double timeout) {
   CryptoMethod method;
-  if (strncmp(name, "ssl://", 6) == 0) {
-    name += 6;
+  const std::string scheme = hosturl.getScheme();
+
+  if (scheme == "ssl") {
     method = CryptoMethod::ClientSSLv23;
-  } else if (strncmp(name, "sslv2://", 8) == 0) {
-    name += 8;
+  } else if (scheme == "sslv2") {
     method = CryptoMethod::ClientSSLv2;
-  } else if (strncmp(name, "sslv3://", 8) == 0) {
-    name += 8;
+  } else if (scheme == "sslv3") {
     method = CryptoMethod::ClientSSLv3;
-  } else if (strncmp(name, "tls://", 6) == 0) {
-    name += 6;
+  } else if (scheme == "tls") {
     method = CryptoMethod::ClientTLS;
   } else {
     return nullptr;
   }
 
-  int domain = AF_INET;
+  int domain = hosturl.isIPv6() ? AF_INET6 : AF_INET;
   int type = SOCK_STREAM;
-  SSLSocket *sock = new SSLSocket(socket(domain, type, 0), domain, name, port);
+  SSLSocket *sock = new SSLSocket(socket(domain, type, 0), domain,
+                                  hosturl.getHost().c_str(),
+                                  hosturl.getPort());
   sock->m_method = method;
   sock->m_connect_timeout = timeout;
   sock->m_enable_on_connect = true;

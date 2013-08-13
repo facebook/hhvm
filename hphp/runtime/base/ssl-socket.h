@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/socket.h"
 #include "hphp/util/lock.h"
+#include "hphp/util/network.h"
 #include "openssl/ssl.h"
 #include "openssl/x509.h"
 #include "openssl/err.h"
@@ -44,7 +45,7 @@ public:
   };
 
   static int GetSSLExDataIndex();
-  static SSLSocket *Create(const char *&name, int port, double timeout);
+  static SSLSocket *Create(const Util::HostURL &hosturl, double timeout);
 
 public:
   SSLSocket();

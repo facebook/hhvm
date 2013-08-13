@@ -11,6 +11,29 @@ function tryopen($u, $p) {
   return $r;
 }
 
+function tryopen_noport($u) {
+  for ($i = 0; $i < 10; $i++) {
+    $r = fsockopen($u);
+    if ($r) return $r;
+    sleep(1);
+  }
+  return $r;
+}
+
+function get_addresses($host) {
+  $r = array();
+  if (($records = dns_get_record($host))) {
+    foreach ($records as $record) {
+      if (isset($record['ipv6'])) {
+        $r []= '['.$record['ipv6'].']';
+      } else if (isset($record['ip'])) {
+        $r []= $record['ip'];
+      }
+    }
+  }
+  return $r;
+}
+
 var_dump(gethostname() != false);
 
 var_dump(strpos(gethostbyaddr("127.0.0.1"), 'localhost'));
@@ -67,6 +90,52 @@ while ($f && !feof($f)) {
 }
 var_dump(!empty($response));
 
+$addresses = get_addresses('www.facebook.com');
+$schemes = array('ssl://' => 443, 'tcp://' => 80);
+foreach ($addresses as $address) {
+  foreach ($schemes as $scheme => $port) {
+    $f = tryopen($scheme.$address, $port);
+    fwrite($f,
+      "GET / HTTP/1.1\r\n".
+      "Host: www.facebook.com\r\n".
+      "Connection: Close\r\n".
+      "\r\n");
+    $response = '';
+    while ($f && !feof($f)) {
+      $line = fgets($f, 128);
+      $response .= $line;
+    }
+    var_dump(!empty($response));
+
+    # Try appending a port
+    $f = tryopen_noport($scheme.$address.':'.$port);
+    fwrite($f,
+      "GET / HTTP/1.1\r\n".
+      "Host: www.facebook.com\r\n".
+      "Connection: Close\r\n".
+      "\r\n");
+    $response = '';
+    while ($f && !feof($f)) {
+      $line = fgets($f, 128);
+      $response .= $line;
+    }
+    var_dump(!empty($response));
+
+    # php expects anything following the ':' to over-ride the port passed in
+    $f = tryopen($scheme.$address.':'.$port, 12345);
+    fwrite($f,
+      "GET / HTTP/1.1\r\n".
+      "Host: www.facebook.com\r\n".
+      "Connection: Close\r\n".
+      "\r\n");
+    $response = '';
+    while ($f && !feof($f)) {
+      $line = fgets($f, 128);
+      $response .= $line;
+    }
+    var_dump(!empty($response));
+  }
+}
 var_dump(socket_get_status(new stdclass));
 
 $f = tryopen("facebook.com", 80);

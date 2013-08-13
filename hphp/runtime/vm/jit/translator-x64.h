@@ -477,9 +477,9 @@ public:
 
   TCA lookupTranslation(SrcKey sk) const;
   TCA retranslateOpt(TransID transId, bool align);
-  TCA retranslateAndPatchNoIR(SrcKey sk,
-                              bool   align,
-                              TCA    toSmash);
+  TCA retranslateAndPatchInterpret(SrcKey sk,
+                                   bool   align,
+                                   TCA    toSmash);
   TCA bindJmp(TCA toSmash, SrcKey dest, ServiceRequest req, bool& smashed);
   TCA bindJmpccFirst(TCA toSmash,
                      Offset offTrue, Offset offFalse,
@@ -582,8 +582,8 @@ private:
   virtual bool addDbgGuard(const Func* func, Offset offset);
   void addDbgGuardImpl(SrcKey sk, SrcRec& sr);
 
-public: // Only for HackIR
-  void emitReqRetransNoIR(Asm& as, const SrcKey& sk);
+public: // accessed from CodeGenerator
+  void emitReqRetransInterpret(Asm& as, const SrcKey& sk);
   void emitReqRetransOpt(Asm& as, const SrcKey& sk, TransID transId);
 
 private:

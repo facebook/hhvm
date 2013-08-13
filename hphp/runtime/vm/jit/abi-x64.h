@@ -216,10 +216,9 @@ const int kNumServiceReqArgRegs =
   \
   /*
    * BIND_JMP_NO_IR is similar to BIND_JMP except that, if a new translation
-   * needs to be generated, it'll force that HHIR is not used.
-   * This is only used when HHIR is turned on.
+   * needs to be generated, it'll interpret instead.
    */ \
-  REQ(BIND_JMP_NO_IR)  \
+  REQ(BIND_JMP_INTERPRET)  \
   \
   /*
    * When all translations don't support the incoming types, a
@@ -259,7 +258,7 @@ const int kNumServiceReqArgRegs =
    * This requests a retranslation that does not use HHIR, meaning it
    * will be an INTERPRET service request.
    */ \
-  REQ(RETRANSLATE_NO_IR) \
+  REQ(RETRANSLATE_INTERPRET) \
   \
   /*
    * Resume restarts execution at the current PC.  This is used after

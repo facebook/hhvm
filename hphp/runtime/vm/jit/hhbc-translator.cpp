@@ -4174,7 +4174,8 @@ IRTrace* HhbcTranslator::getExitTraceImpl(Offset targetBcOff,
   gen(SyncABIRegs, m_tb->fp(), stack);
 
   if (flag == ExitFlag::Interp) {
-    gen(targetBcOff == m_startBcOff ? ReqRetranslateNoIR : ReqBindJmpNoIR,
+    gen(targetBcOff == m_startBcOff
+        ? ReqRetranslateInterpret : ReqBindJmpInterpret,
         BCOffset(targetBcOff));
     return exit;
   }

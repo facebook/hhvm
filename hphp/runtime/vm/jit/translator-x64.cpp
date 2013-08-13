@@ -588,18 +588,18 @@ TCA TranslatorX64::retranslate(const TranslArgs& args) {
 }
 
 // Only use comes from HHIR's cgExitTrace() case TraceExitType::SlowNoProgress
-TCA TranslatorX64::retranslateAndPatchNoIR(SrcKey sk,
-                                           bool   align,
-                                           TCA    toSmash) {
+TCA TranslatorX64::retranslateAndPatchInterpret(SrcKey sk,
+                                                bool   align,
+                                                TCA    toSmash) {
   if (isDebuggerAttachedProcess() && isSrcKeyInBL(sk)) {
     // We are about to translate something known to be blacklisted by
     // debugger, exit early
-    SKTRACE(1, sk, "retranslateAndPatchNoIR abort due to debugger\n");
+    SKTRACE(1, sk, "retranslateAndPatchInterpret abort due to debugger\n");
     return nullptr;
   }
   LeaseHolder writer(s_writeLease);
   if (!writer) return nullptr;
-  SKTRACE(1, sk, "retranslateAndPatchNoIR\n");
+  SKTRACE(1, sk, "retranslateAndPatchInterpret\n");
   SrcRec* srcRec = getSrcRec(sk);
   if (srcRec->translations().size() ==
         RuntimeOption::EvalJitMaxTranslations + 1) {
@@ -1931,7 +1931,7 @@ TCA
 TranslatorX64::bindJmp(TCA toSmash, SrcKey destSk,
                        ServiceRequest req, bool& smashed) {
   TCA tDest = getTranslation(
-    TranslArgs(destSk, false).interp(req == REQ_BIND_JMP_NO_IR)
+    TranslArgs(destSk, false).interp(req == REQ_BIND_JMP_INTERPRET)
                              .src(toSmash));
   if (!tDest) return nullptr;
   LeaseHolder writer(s_writeLease);
@@ -2130,14 +2130,14 @@ TranslatorX64::emitFallbackCondJmp(Asm& as, SrcRec& dest, ConditionCode cc) {
   dest.emitFallbackJump(as.frontier(), cc);
 }
 
-void TranslatorX64::emitReqRetransNoIR(Asm& as, const SrcKey& sk) {
+void TranslatorX64::emitReqRetransInterpret(Asm& as, const SrcKey& sk) {
   prepareForSmash(as, kJmpLen);
   TCA toSmash = as.frontier();
   if (&as == &astubs) {
     as.jmp(toSmash);
   }
 
-  TCA sr = emitServiceReq(REQ_RETRANSLATE_NO_IR,
+  TCA sr = emitServiceReq(REQ_RETRANSLATE_INTERPRET,
                           toSmash, sk.offset());
 
   if (&as == &astubs) {
@@ -2460,7 +2460,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
   case REQ_BIND_SIDE_EXIT:
   case REQ_BIND_JMP:
   case REQ_BIND_JCC:
-  case REQ_BIND_JMP_NO_IR:
+  case REQ_BIND_JMP_INTERPRET:
   case REQ_BIND_ADDR:
   {
     TCA toSmash = (TCA)args[0];
@@ -2492,11 +2492,11 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
     sk = SrcKey(liveFunc(), off);
   } break;
 
-  case REQ_RETRANSLATE_NO_IR: {
+  case REQ_RETRANSLATE_INTERPRET: {
     TCA toSmash = (TCA)args[0];
     sk = SrcKey(liveFunc(), (Offset)args[1]);
-    start = retranslateAndPatchNoIR(sk, true, toSmash);
-    SKTRACE(1, sk, "retranslated (without IR) @%p\n", start);
+    start = retranslateAndPatchInterpret(sk, true, toSmash);
+    SKTRACE(1, sk, "retranslated as interp request @%p\n", start);
   } break;
 
   case REQ_RETRANSLATE_OPT: {

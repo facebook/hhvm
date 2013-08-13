@@ -3083,18 +3083,18 @@ static void emitExitNoIRStats(Asm& a,
   }
 }
 
-void CodeGenerator::cgReqBindJmpNoIR(IRInstruction* inst) {
+void CodeGenerator::cgReqBindJmpInterpret(IRInstruction* inst) {
   auto const dest = SrcKey(curFunc(),
-                           inst->extra<ReqBindJmpNoIR>()->offset);
+                           inst->extra<ReqBindJmpInterpret>()->offset);
   emitExitNoIRStats(m_as, m_tx64, curFunc(), dest);
-  m_tx64->emitBindJmp(m_as, dest, REQ_BIND_JMP_NO_IR);
+  m_tx64->emitBindJmp(m_as, dest, REQ_BIND_JMP_INTERPRET);
 }
 
-void CodeGenerator::cgReqRetranslateNoIR(IRInstruction* inst) {
+void CodeGenerator::cgReqRetranslateInterpret(IRInstruction* inst) {
   auto const dest = SrcKey(curFunc(),
-                           inst->extra<ReqRetranslateNoIR>()->offset);
+                           inst->extra<ReqRetranslateInterpret>()->offset);
   emitExitNoIRStats(m_as, m_tx64, curFunc(), dest);
-  m_tx64->emitReqRetransNoIR(m_as, dest);
+  m_tx64->emitReqRetransInterpret(m_as, dest);
 }
 
 void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {

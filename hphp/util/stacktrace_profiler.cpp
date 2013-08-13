@@ -21,7 +21,8 @@
 
 namespace HPHP {
 
-const bool enabled = getenv("STACKTRACE_PROFILER") != nullptr;
+extern const bool enable_stacktrace_profiler =
+  getenv("STACKTRACE_PROFILER") != nullptr;
 
 StackTraceProfiler::StackTraceProfiler(std::string name, int skip) :
   m_name(name), finishing(false), m_root(nullptr), m_skip(skip) {
@@ -57,7 +58,7 @@ StackTraceProfiler::Node* StackTraceProfiler::findCaller(Node* n, void* addr) {
 }
 
 StackTraceSample::StackTraceSample() {
-  if (enabled) {
+  if (enable_stacktrace_profiler) {
     depth = backtrace(addrs, kMaxDepth);
   } else {
     depth = 0;
@@ -65,7 +66,7 @@ StackTraceSample::StackTraceSample() {
 }
 
 void StackTraceProfiler::count(const StackTraceSample& sample) {
-  if (!enabled || finishing) return;
+  if (!enable_stacktrace_profiler || finishing) return;
   if (sample.depth <= 0) return;
   std::lock_guard<std::mutex> lock(m_mutex);
   m_root.hits++;
@@ -78,7 +79,7 @@ void StackTraceProfiler::count(const StackTraceSample& sample) {
 }
 
 void StackTraceProfiler::count() {
-  if (!enabled || finishing) return;
+  if (!enable_stacktrace_profiler || finishing) return;
   StackTraceSample sample;
   count(sample);
 }
@@ -115,7 +116,7 @@ void StackTraceProfiler::print(Node* n, std::string indent) {
 }
 
 StackTraceProfiler::~StackTraceProfiler() {
-  if (!enabled) return;
+  if (!enable_stacktrace_profiler) return;
   finishing = true;
   print(&m_root, "");
 }
@@ -127,7 +128,7 @@ BoolProfiler::BoolProfiler(std::string name)
 {}
 
 BoolProfiler::~BoolProfiler() {
-  if (!enabled) return;
+  if (!enable_stacktrace_profiler) return;
   auto total = p0.hits() + p1.hits();
   if (total) {
     fprintf(stderr, "%s: total=%lu false=%.1f%% true=%.1f%%\n", name.c_str(),
@@ -156,7 +157,7 @@ IntProfiler::IntProfiler(std::string name)
 {}
 
 IntProfiler::~IntProfiler() {
-  if (!enabled) return;
+  if (!enable_stacktrace_profiler) return;
   auto total = p0.hits() + p1.hits() + p2.hits() + p4.hits() + p8.hits() +
                p16.hits() + p32.hits() + p64.hits() + pN.hits();
   if (total) {

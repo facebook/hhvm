@@ -114,6 +114,8 @@ private:
   StackTraceProfiler pN, p64, p32, p16, p8, p4, p2, p1, p0;
 };
 
+extern const bool enable_stacktrace_profiler;
+
 }
 
 #endif

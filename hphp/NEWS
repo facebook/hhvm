@@ -1,3 +1,6 @@
+Next Release
+  - Async stack traces in the debugger via the "wa" command
+
 "Churrasco" 05-Aug-2013
   - Implement stream_is_local
   - Implement read support for .phar
@@ -7,6 +10,7 @@
   - Support for timeouts in cli mode
   - Closure allocation optimizations (~2x faster to allocate a closure)
   - Implement Redis session handler
+  - New memory profiler, hhprof, with pprof compatible output
 
 "Tamale" 22-Jul-2013
   - Optimize vector-shaped Arrays (arrays with keys in range 0..size-1)

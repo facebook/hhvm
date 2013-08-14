@@ -36,12 +36,6 @@
 // inline methods of HphpArray
 #include "hphp/runtime/base/hphp-array-defs.h"
 
-// If PEDANTIC is defined, extra checks are performed to ensure correct
-// function even as an array approaches 2^31 elements.  In practice this is
-// just wasted effort though, since such an array would require on the order of
-// 128 GiB of memory.
-//#define PEDANTIC
-
 namespace HPHP {
 
 static_assert(
@@ -106,11 +100,6 @@ static inline uint32_t computeMaskFromNumElms(const uint32_t n) {
 HphpArray::HphpArray(uint capacity)
     : ArrayData(kVectorKind, AllocationMode::smart, 0)
     , m_used(0) {
-#ifdef PEDANTIC
-  if (size > 0x7fffffffU) {
-    raise_error("Cannot create an array with more than 2^31 - 1 elements");
-  }
-#endif
   assert(m_size == 0);
   const auto mask = computeMaskFromNumElms(capacity);
   m_tableMask = mask;
@@ -121,11 +110,6 @@ HphpArray::HphpArray(uint capacity)
 HphpArray::HphpArray(uint size, const TypedValue* values)
     : ArrayData(kVectorKind, AllocationMode::smart, size)
     , m_used(size) {
-#ifdef PEDANTIC
-  if (size > 0x7fffffffU) {
-    raise_error("Cannot create an array with more than 2^31 - 1 elements");
-  }
-#endif
   const auto mask = computeMaskFromNumElms(size);
   m_tableMask = mask;
   allocData(computeMaxElms(mask), computeTableSize(mask));
@@ -203,7 +187,7 @@ HphpArray::HphpArray(const HphpArray& other, AllocationMode mode, CopyGeneric)
   // If the element density dropped below 50% due to indirect elements
   // being converted into tombstones, we should do a compaction
   if (m_size < m_used / 2) {
-    compact();
+    compact(false);
   }
   assert(checkInvariants());
 }
@@ -644,12 +628,6 @@ inline ALWAYS_INLINE bool HphpArray::isFull() const {
 inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElmFast(ElmInd* ei) {
   assert(!validElmInd(*ei) && !isFull());
   assert(m_size != 0 || m_used == 0);
-#ifdef PEDANTIC
-  if (m_size >= 0x7fffffffU) {
-    raise_error("Cannot insert into array with 2^31 - 1 elements");
-    return nullptr;
-  }
-#endif
   ++m_size;
   m_hLoad += (*ei == ElmIndEmpty);
   ElmInd i = m_used++;
@@ -783,23 +761,10 @@ NEVER_INLINE void HphpArray::resize() {
   // At a minimum, compaction is required.  If the load factor would be >0.5
   // even after compaction, grow instead, in order to avoid the possibility
   // of repeated compaction if the load factor were to hover at nearly 0.75.
-  bool doGrow = (m_size > (maxElms >> 1));
-#ifdef PEDANTIC
-  if (m_tableMask > 0x7fffffffU && doGrow) {
-    // If the hashtable is at its maximum size, we cannot grow
-    doGrow = false;
-    // Check if compaction would actually make room for at least one new
-    // element. If not, raise an error.
-    if (m_size >= 0x7fffffffU) {
-      raise_error("Cannot grow an array with 2^31 - 1 elements");
-      return;
-    }
-  }
-#endif
-  if (doGrow) {
+  if (m_size > maxElms / 2) {
     grow();
   } else {
-    compact();
+    compact(false);
   }
 }
 
@@ -1289,7 +1254,7 @@ void HphpArray::adjustFullPos(ElmInd pos) {
   }
 }
 
-ArrayData* HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
+ArrayData* HphpArray::erase(ElmInd* ei, bool updateNext) {
   ElmInd pos = *ei;
   if (!validElmInd(pos)) {
     return this;
@@ -1345,7 +1310,7 @@ ArrayData* HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
 
   if (m_size < m_used / 2) {
     // Compact in order to keep elms from being overly sparse.
-    compact();
+    compact(false);
   }
   return this;
 }
@@ -1356,7 +1321,7 @@ ArrayData* HphpArray::RemoveIntVec(ArrayData* ad, int64_t k, bool copy) {
   // todo t2606310: what is probability of (k == size-1)
   if (size_t(k) < a->m_size) {
     a->vectorToGeneric();
-    return a->erase(a->findForInsert(k));
+    return a->erase(a->findForInsert(k), false);
   }
   return a; // key didn't exist, so we're still vector
 }
@@ -1364,7 +1329,7 @@ ArrayData* HphpArray::RemoveIntVec(ArrayData* ad, int64_t k, bool copy) {
 ArrayData* HphpArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
   auto a = asGeneric(ad);
   if (copy) a = a->copyGeneric();
-  return a->erase(a->findForInsert(k));
+  return a->erase(a->findForInsert(k), false);
 }
 
 ArrayData*
@@ -1378,7 +1343,7 @@ ArrayData*
 HphpArray::RemoveStr(ArrayData* ad, const StringData* key, bool copy) {
   auto a = asGeneric(ad);
   if (copy) a = a->copyGeneric();
-  return a->erase(a->findForInsert(key, key->hash()));
+  return a->erase(a->findForInsert(key, key->hash()), false);
 }
 
 ArrayData* HphpArray::CopyVec(const ArrayData* ad) {
@@ -1647,9 +1612,9 @@ ArrayData* HphpArray::Dequeue(ArrayData* ad, Variant& value) {
       }
       a->vectorToGeneric();
     }
-    a->erase(e->hasStrKey() ?
-             a->findForInsert(e->key, e->hash()) :
-             a->findForInsert(e->ikey));
+    ElmInd* ei = e->hasStrKey() ?  a->findForInsert(e->key, e->hash()) :
+                 a->findForInsert(e->ikey);
+    a->erase(ei, false);
     a->compact(true);
   } else {
     value = uninit_null();

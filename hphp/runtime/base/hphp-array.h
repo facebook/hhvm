@@ -439,7 +439,8 @@ private:
   ArrayData* updateRef(StringData* key, CVarRef data);
 
   void adjustFullPos(ElmInd pos);
-  ArrayData* erase(ElmInd* ei, bool updateNext = false);
+
+  ArrayData* erase(ElmInd* ei, bool updateNext);
 
   HphpArray* copyImpl(HphpArray* target) const;
 
@@ -475,7 +476,7 @@ private:
    * for elements. compact() rebuilds the hash table and compacts the
    * elements into the slots with lower addresses.
    */
-  void compact(bool renumber=false) ATTRIBUTE_COLD;
+  void compact(bool renumber) ATTRIBUTE_COLD;
 
   /**
    * resize() and resizeIfNeeded() will grow or compact the array as

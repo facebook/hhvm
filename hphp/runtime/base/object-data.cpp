@@ -977,11 +977,11 @@ void ObjectData::propImpl(TypedValue*& retval, TypedValue& tvRef,
                     key->data());
       }
     }
-  } else if (UNLIKELY(!*key->data())) {
-    throw_invalid_property_name(StrNR(key));
   } else {
     if (getAttribute(UseGet)) {
       invokeGetProp(retval, tvRef, key);
+    } else if (UNLIKELY(!*key->data())) {
+      throw_invalid_property_name(StrNR(key));
     } else {
       if (warn) {
         raiseUndefProp(key);

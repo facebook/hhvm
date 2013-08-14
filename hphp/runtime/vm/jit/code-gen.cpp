@@ -3210,7 +3210,7 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
   );
 }
 
-static void emitExitNoIRStats(Asm& a,
+static void emitExitSlowStats(Asm& a,
                               TranslatorX64* tx64,
                               const Func* func,
                               SrcKey dest) {
@@ -3225,18 +3225,12 @@ static void emitExitNoIRStats(Asm& a,
   }
 }
 
-void CodeGenerator::cgReqBindJmpInterpret(IRInstruction* inst) {
-  auto const dest = SrcKey(curFunc(),
-                           inst->extra<ReqBindJmpInterpret>()->offset);
-  emitExitNoIRStats(m_as, m_tx64, curFunc(), dest);
-  m_tx64->emitBindJmp(m_as, dest, REQ_BIND_JMP_INTERPRET);
-}
-
-void CodeGenerator::cgReqRetranslateInterpret(IRInstruction* inst) {
-  auto const dest = SrcKey(curFunc(),
-                           inst->extra<ReqRetranslateInterpret>()->offset);
-  emitExitNoIRStats(m_as, m_tx64, curFunc(), dest);
-  m_tx64->emitReqRetransInterpret(m_as, dest);
+void CodeGenerator::cgReqInterpret(IRInstruction* inst) {
+  auto offset = inst->extra<ReqInterpret>()->offset;
+  auto destSk = SrcKey { curFunc(), offset };
+  auto const numInstrs = 1;
+  emitExitSlowStats(m_as, m_tx64, curFunc(), destSk);
+  m_tx64->emitServiceReq(REQ_INTERPRET, offset, numInstrs);
 }
 
 void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {

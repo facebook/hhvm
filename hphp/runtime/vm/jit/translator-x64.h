@@ -463,9 +463,6 @@ public:
 
   TCA lookupTranslation(SrcKey sk) const;
   TCA retranslateOpt(TransID transId, bool align);
-  TCA retranslateAndPatchInterpret(SrcKey sk,
-                                   bool   align,
-                                   TCA    toSmash);
   TCA bindJmp(TCA toSmash, SrcKey dest, ServiceRequest req, bool& smashed);
   TCA bindJmpccFirst(TCA toSmash,
                      Offset offTrue, Offset offFalse,
@@ -569,7 +566,6 @@ private:
   void addDbgGuardImpl(SrcKey sk, SrcRec& sr);
 
 public: // accessed from CodeGenerator
-  void emitReqRetransInterpret(Asm& as, const SrcKey& sk);
   void emitReqRetransOpt(Asm& as, const SrcKey& sk, TransID transId);
 
 private:

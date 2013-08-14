@@ -215,12 +215,6 @@ const int kNumServiceReqArgRegs =
   REQ(BIND_JMPCC_SECOND) \
   \
   /*
-   * BIND_JMP_NO_IR is similar to BIND_JMP except that, if a new translation
-   * needs to be generated, it'll interpret instead.
-   */ \
-  REQ(BIND_JMP_INTERPRET)  \
-  \
-  /*
    * When all translations don't support the incoming types, a
    * retranslate request is made.
    */ \
@@ -253,12 +247,6 @@ const int kNumServiceReqArgRegs =
    * Raised when the execution stack overflowed.
    */ \
   REQ(STACK_OVERFLOW) \
-  \
-  /*
-   * This requests a retranslation that does not use HHIR, meaning it
-   * will be an INTERPRET service request.
-   */ \
-  REQ(RETRANSLATE_INTERPRET) \
   \
   /*
    * Resume restarts execution at the current PC.  This is used after

@@ -424,35 +424,6 @@ TCA TranslatorX64::retranslate(const TranslArgs& args) {
   return translate(args);
 }
 
-// Only use comes from HHIR's cgExitTrace() case TraceExitType::SlowNoProgress
-TCA TranslatorX64::retranslateAndPatchInterpret(SrcKey sk,
-                                                bool   align,
-                                                TCA    toSmash) {
-  if (isDebuggerAttachedProcess() && isSrcKeyInBL(sk)) {
-    // We are about to translate something known to be blacklisted by
-    // debugger, exit early
-    SKTRACE(1, sk, "retranslateAndPatchInterpret abort due to debugger\n");
-    return nullptr;
-  }
-  LeaseHolder writer(s_writeLease);
-  if (!writer) return nullptr;
-  SKTRACE(1, sk, "retranslateAndPatchInterpret\n");
-  SrcRec* srcRec = getSrcRec(sk);
-  if (srcRec->translations().size() ==
-        RuntimeOption::EvalJitMaxTranslations + 1) {
-    // we've gone over the translation limit and already have an anchor
-    // translation that will interpret, so just return NULL and force
-    // interpretation of this BB.
-    return nullptr;
-  }
-  m_mode = TransLive;
-  TCA start = translate(TranslArgs(sk, align).interp(true));
-  if (start != nullptr) {
-    smashJmp(getAsmFor(toSmash), toSmash, start);
-  }
-  return start;
-}
-
 TCA TranslatorX64::retranslateOpt(TransID transId, bool align) {
   LeaseHolder writer(s_writeLease);
   if (!writer) return nullptr;
@@ -1773,9 +1744,7 @@ int32_t TranslatorX64::emitNativeImpl(const Func* func,
 TCA
 TranslatorX64::bindJmp(TCA toSmash, SrcKey destSk,
                        ServiceRequest req, bool& smashed) {
-  TCA tDest = getTranslation(
-    TranslArgs(destSk, false).interp(req == REQ_BIND_JMP_INTERPRET)
-                             .src(toSmash));
+  TCA tDest = getTranslation(TranslArgs(destSk, false).src(toSmash));
   if (!tDest) return nullptr;
   LeaseHolder writer(s_writeLease);
   if (!writer) return tDest;
@@ -1971,24 +1940,6 @@ void
 TranslatorX64::emitFallbackCondJmp(Asm& as, SrcRec& dest, ConditionCode cc) {
   prepareForSmash(as, kJmpccLen);
   dest.emitFallbackJump(as.frontier(), cc);
-}
-
-void TranslatorX64::emitReqRetransInterpret(Asm& as, const SrcKey& sk) {
-  prepareForSmash(as, kJmpLen);
-  TCA toSmash = as.frontier();
-  if (&as == &astubs) {
-    as.jmp(toSmash);
-  }
-
-  TCA sr = emitServiceReq(REQ_RETRANSLATE_INTERPRET,
-                          toSmash, sk.offset());
-
-  if (&as == &astubs) {
-    CodeCursor cc(as, toSmash);
-    as.jmp(sr);
-  } else {
-    as.jmp(sr);
-  }
 }
 
 void TranslatorX64::emitReqRetransOpt(Asm& as, const SrcKey& sk,
@@ -2303,7 +2254,6 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
   case REQ_BIND_SIDE_EXIT:
   case REQ_BIND_JMP:
   case REQ_BIND_JCC:
-  case REQ_BIND_JMP_INTERPRET:
   case REQ_BIND_ADDR:
   {
     TCA toSmash = (TCA)args[0];
@@ -2333,13 +2283,6 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
     ConditionCode cc = ConditionCode(args[2]);
     start = bindJmpccSecond(toSmash, off, cc, smashed);
     sk = SrcKey(liveFunc(), off);
-  } break;
-
-  case REQ_RETRANSLATE_INTERPRET: {
-    TCA toSmash = (TCA)args[0];
-    sk = SrcKey(liveFunc(), (Offset)args[1]);
-    start = retranslateAndPatchInterpret(sk, true, toSmash);
-    SKTRACE(1, sk, "retranslated as interp request @%p\n", start);
   } break;
 
   case REQ_RETRANSLATE_OPT: {

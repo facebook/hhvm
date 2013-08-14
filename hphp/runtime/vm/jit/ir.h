@@ -432,8 +432,7 @@ O(CufIterSpillFrame,         D(StkPtr), S(StkPtr)                             \
                                           S(FramePtr),                    NF) \
 O(ExceptionBarrier,          D(StkPtr), S(StkPtr),                         E) \
 O(ReqBindJmp,                       ND, NA,                              T|E) \
-O(ReqBindJmpInterpret,              ND, NA,                              T|E) \
-O(ReqRetranslateInterpret,          ND, NA,                              T|E) \
+O(ReqInterpret,                     ND, NA,                              T|E) \
 O(ReqRetranslateOpt,                ND, NA,                              T|E) \
 O(ReqRetranslate,                   ND, NA,                              T|E) \
 O(SyncABIRegs,                      ND, S(FramePtr) S(StkPtr),             E) \

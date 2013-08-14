@@ -36,7 +36,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/timer.h"
-#include "hphp/util/repo_schema.h"
+#include "hphp/util/repo-schema.h"
 #include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/ext/ext_apc.h"
 

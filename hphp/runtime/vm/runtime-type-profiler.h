@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/datatype.h"
 
-#include "hphp/util/atomic_vector.h"
+#include "hphp/util/atomic-vector.h"
 namespace HPHP {
 #ifdef FACEBOOK
 void profileOneArgument(TypedValue value, int param, const Func* func);

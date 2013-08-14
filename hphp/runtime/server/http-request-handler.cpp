@@ -32,7 +32,7 @@
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/util/alloc.h"
-#include "hphp/util/service_data.h"
+#include "hphp/util/service-data.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

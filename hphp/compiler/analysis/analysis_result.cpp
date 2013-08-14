@@ -53,7 +53,7 @@
 #include "hphp/util/util.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/process.h"
-#include "hphp/util/job_queue.h"
+#include "hphp/util/job-queue.h"
 #include "hphp/util/timer.h"
 
 using namespace HPHP;

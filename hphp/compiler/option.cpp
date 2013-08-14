@@ -21,7 +21,7 @@
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/util/parser/scanner.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/db_query.h"
+#include "hphp/util/db-query.h"
 #include "hphp/util/util.h"
 #include "hphp/util/process.h"
 #include <boost/algorithm/string/trim.hpp>

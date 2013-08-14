@@ -18,7 +18,7 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 
-#include "hphp/util/kernel_version.h"
+#include "hphp/util/kernel-version.h"
 
 namespace HPHP {
 

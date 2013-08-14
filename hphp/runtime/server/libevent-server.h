@@ -20,9 +20,9 @@
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/libevent-transport.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
-#include "hphp/util/job_queue.h"
+#include "hphp/util/job-queue.h"
 #include "hphp/util/process.h"
-#include "hphp/util/service_data.h"
+#include "hphp/util/service-data.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

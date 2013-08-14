@@ -26,7 +26,7 @@
 #include "hphp/util/range.h"
 #include "hphp/util/parser/location.h"
 #include "hphp/runtime/base/md5.h"
-#include "hphp/util/tiny_vector.h"
+#include "hphp/util/tiny-vector.h"
 
 namespace HPHP {
 // Forward declarations.

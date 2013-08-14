@@ -18,8 +18,8 @@
 #include "hphp/util/base.h"
 #include "util.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/async_func.h"
-#include "hphp/util/text_color.h"
+#include "hphp/util/async-func.h"
+#include "hphp/util/text-color.h"
 #include "folly/String.h"
 
 #include <pwd.h>

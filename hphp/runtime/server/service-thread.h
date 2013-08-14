@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_SERVICE_THREAD_H_
 #define incl_HPHP_SERVICE_THREAD_H_
 
-#include "hphp/util/async_func.h"
+#include "hphp/util/async-func.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

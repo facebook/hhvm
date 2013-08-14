@@ -19,9 +19,9 @@
 
 #include "hphp/util/base.h"
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/util/thread_local.h"
+#include "hphp/util/thread-local.h"
 #include "hphp/util/mutex.h"
-#include "hphp/util/case_insensitive.h"
+#include "hphp/util/case-insensitive.h"
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/memory-manager.h"
 

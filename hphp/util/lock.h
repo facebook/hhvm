@@ -19,7 +19,7 @@
 
 #include "hphp/util/mutex.h"
 #include "hphp/util/synchronizable.h"
-#include "hphp/util/synchronizable_multi.h"
+#include "hphp/util/synchronizable-multi.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

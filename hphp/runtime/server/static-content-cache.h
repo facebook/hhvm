@@ -18,7 +18,7 @@
 #define incl_HPHP_STATIC_CONTENT_CACHE_H_
 
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/util/file_cache.h"
+#include "hphp/util/file-cache.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

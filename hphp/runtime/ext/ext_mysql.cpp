@@ -27,7 +27,7 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/util/timer.h"
-#include "hphp/util/db_mysql.h"
+#include "hphp/util/db-mysql.h"
 #include "folly/String.h"
 #include "netinet/in.h"
 #include <netdb.h>

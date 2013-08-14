@@ -91,7 +91,7 @@
 
 #include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/base/exceptions.h"
-#include "hphp/util/thread_local.h"
+#include "hphp/util/thread-local.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

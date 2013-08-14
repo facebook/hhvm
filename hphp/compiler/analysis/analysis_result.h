@@ -25,8 +25,8 @@
 #include "hphp/compiler/analysis/function_container.h"
 #include "hphp/compiler/package.h"
 
-#include "hphp/util/string_bag.h"
-#include "hphp/util/thread_local.h"
+#include "hphp/util/string-bag.h"
+#include "hphp/util/thread-local.h"
 
 #include <boost/graph/adjacency_list.hpp>
 #include "tbb/concurrent_hash_map.h"

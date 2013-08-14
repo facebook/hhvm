@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_UTIL_HARDWARE_COUNTER_H_
 #define incl_HPHP_UTIL_HARDWARE_COUNTER_H_
 
-#include "hphp/util/thread_local.h"
+#include "hphp/util/thread-local.h"
 #include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {

@@ -18,7 +18,7 @@
 #define incl_HPHP_LIBEVENT_HTTP_CLIENT_H_
 
 #include "hphp/util/base.h"
-#include "hphp/util/async_func.h"
+#include "hphp/util/async-func.h"
 #include "hphp/util/lock.h"
 #include <evhttp.h>
 

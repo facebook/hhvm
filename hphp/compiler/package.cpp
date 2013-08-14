@@ -29,10 +29,10 @@
 #include "hphp/util/util.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/json.h"
-#include "hphp/util/db_conn.h"
-#include "hphp/util/db_query.h"
+#include "hphp/util/db-conn.h"
+#include "hphp/util/db-query.h"
 #include "hphp/util/exception.h"
-#include "hphp/util/job_queue.h"
+#include "hphp/util/job-queue.h"
 #include "hphp/runtime/base/execution-context.h"
 
 using namespace HPHP;

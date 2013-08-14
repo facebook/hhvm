@@ -25,7 +25,7 @@
 #include "hphp/runtime/vm/jit/translator-x64.h"
 
 // These files do ugly things with macros so include them last
-#include "hphp/util/assert_throw.h"
+#include "hphp/util/assert-throw.h"
 #include "hphp/runtime/vm/jit/minstr-translator-internal.h"
 
 namespace HPHP { namespace JIT {

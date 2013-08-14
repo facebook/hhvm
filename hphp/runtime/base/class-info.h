@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/util/mutex.h"
-#include "hphp/util/case_insensitive.h"
+#include "hphp/util/case-insensitive.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

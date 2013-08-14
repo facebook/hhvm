@@ -18,8 +18,8 @@
 #include "hphp/hhvm/process-init.h"
 #include "hphp/compiler/compiler.h"
 
-#include "hphp/util/embedded_data.h"
-#include "hphp/util/embedded_vfs.h"
+#include "hphp/util/embedded-data.h"
+#include "hphp/util/embedded-vfs.h"
 #include "hphp/util/util.h"
 
 int main(int argc, char** argv) {

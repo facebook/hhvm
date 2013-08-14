@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/crash-reporter.h"
-#include "hphp/util/stack_trace.h"
-#include "hphp/util/light_process.h"
+#include "hphp/util/stack-trace.h"
+#include "hphp/util/light-process.h"
 #include "hphp/util/logger.h"
 
 #include "hphp/runtime/base/program-functions.h"

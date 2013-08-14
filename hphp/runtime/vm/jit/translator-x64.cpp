@@ -64,7 +64,7 @@
 #include "hphp/util/meta.h"
 #include "hphp/util/process.h"
 #include "hphp/util/util.h"
-#include "hphp/util/repo_schema.h"
+#include "hphp/util/repo-schema.h"
 #include "hphp/util/cycles.h"
 
 #include "hphp/runtime/vm/bytecode.h"

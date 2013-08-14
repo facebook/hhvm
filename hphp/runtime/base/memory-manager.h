@@ -21,7 +21,7 @@
 
 #include "folly/Memory.h"
 
-#include "hphp/util/thread_local.h"
+#include "hphp/util/thread-local.h"
 #include "hphp/runtime/base/memory-usage-stats.h"
 
 #include <vector>

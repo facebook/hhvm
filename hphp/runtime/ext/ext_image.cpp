@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/util/min_max_macros.h"
+#include "hphp/util/min-max-macros.h"
 
 #include <gdfontt.h>  /* 1 Tiny font */
 #include <gdfonts.h>  /* 2 Small font */

@@ -17,7 +17,7 @@
 #define incl_HPHP_ACCESS_LOG_H_
 
 #include "hphp/runtime/base/base-includes.h"
-#include "hphp/util/thread_local.h"
+#include "hphp/util/thread-local.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/cronolog.h"

@@ -21,8 +21,8 @@
 #include <boost/type_traits/is_base_of.hpp>
 
 #include "hphp/util/base.h"
-#include "hphp/util/thread_local.h"
-#include "hphp/util/stack_trace.h"
+#include "hphp/util/thread-local.h"
+#include "hphp/util/stack-trace.h"
 #include "hphp/util/lock.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/countable.h"

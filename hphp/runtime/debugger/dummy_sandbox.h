@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_EVAL_DUMMY_SANDBOX_H_
 #define incl_HPHP_EVAL_DUMMY_SANDBOX_H_
 
-#include "hphp/util/async_func.h"
+#include "hphp/util/async-func.h"
 #include "hphp/util/synchronizable.h"
 #include "hphp/runtime/debugger/debugger_base.h"
 

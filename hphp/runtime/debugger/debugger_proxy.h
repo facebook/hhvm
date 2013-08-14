@@ -19,7 +19,7 @@
 
 #include "hphp/util/base.h"
 #include "hphp/util/synchronizable.h"
-#include "hphp/util/async_func.h"
+#include "hphp/util/async-func.h"
 #include "hphp/runtime/base/socket.h"
 #include "hphp/runtime/debugger/dummy_sandbox.h"
 

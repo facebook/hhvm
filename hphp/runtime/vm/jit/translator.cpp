@@ -29,8 +29,8 @@
 #include "folly/Conv.h"
 
 #include "hphp/util/trace.h"
-#include "hphp/util/biased_coin.h"
-#include "hphp/util/map_walker.h"
+#include "hphp/util/biased-coin.h"
+#include "hphp/util/map-walker.h"
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"

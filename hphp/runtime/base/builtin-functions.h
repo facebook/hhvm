@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/strings.h"
-#include "hphp/util/case_insensitive.h"
+#include "hphp/util/case-insensitive.h"
 #include "hphp/runtime/base/type-conversions.h"
 
 #if defined(__APPLE__) || defined(__USE_BSD)

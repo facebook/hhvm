@@ -22,7 +22,7 @@
 #include <stdarg.h>
 
 #include "folly/Format.h"
-#include "hphp/util/text_color.h"
+#include "hphp/util/text-color.h"
 
 /*
  * Runtime-selectable trace facility. A trace statement has both a module and a

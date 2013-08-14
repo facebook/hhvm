@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/satellite-server.h"
-#include "hphp/util/async_func.h"
+#include "hphp/util/async-func.h"
 #include "hphp/runtime/server/service-thread.h"
 
 namespace HPHP {

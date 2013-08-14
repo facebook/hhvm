@@ -41,7 +41,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/simple-counter.h"
-#include "hphp/util/shm_counter.h"
+#include "hphp/util/shm-counter.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

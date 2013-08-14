@@ -22,7 +22,7 @@
 #include "curl/curl.h"
 #include "curl/easy.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/ssl_init.h"
+#include "hphp/util/ssl-init.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

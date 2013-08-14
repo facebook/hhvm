@@ -23,7 +23,7 @@
 #include <time.h>
 #include "tbb/concurrent_hash_map.h"
 #ifdef __APPLE__
-#include "pthread_spin_lock_shim.h"
+#include "pthread-spin-lock-shim.h"
 #endif
 
 #include "hphp/util/rank.h"

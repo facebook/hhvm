@@ -18,8 +18,8 @@
 #define incl_HPHP_PACKAGE_H_
 
 #include "hphp/compiler/hphp.h"
-#include "hphp/util/string_bag.h"
-#include "hphp/util/file_cache.h"
+#include "hphp/util/string-bag.h"
+#include "hphp/util/file-cache.h"
 #include "hphp/util/mutex.h"
 
 namespace HPHP {

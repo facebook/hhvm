@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/hphp-array.h"
-#include "hphp/util/min_max_macros.h"
+#include "hphp/util/min-max-macros.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

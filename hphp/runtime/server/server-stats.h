@@ -18,7 +18,7 @@
 #define incl_HPHP_SERVERSTATS_H_
 
 #include "hphp/util/lock.h"
-#include "hphp/util/thread_local.h"
+#include "hphp/util/thread-local.h"
 #include "curl/curl.h"
 #include <time.h>
 #include "hphp/runtime/base/shared-string.h"

@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/memory-profile.h"
 #include "hphp/runtime/base/profile-dump.h"
-#include "hphp/util/thread_local.h"
+#include "hphp/util/thread-local.h"
 
 namespace HPHP {
 

@@ -18,7 +18,7 @@
 #define incl_HPHP_OPTION_H_
 
 #include "hphp/util/hdf.h"
-#include "hphp/util/string_bag.h"
+#include "hphp/util/string-bag.h"
 #include "hphp/util/base.h"
 
 namespace HPHP {

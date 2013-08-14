@@ -19,7 +19,7 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "hphp/runtime/base/base-includes.h"
-#include "hphp/util/atomic_vector.h"
+#include "hphp/util/atomic-vector.h"
 #include "hphp/util/util.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/debug.h"

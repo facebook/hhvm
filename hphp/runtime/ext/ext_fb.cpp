@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_mysql.h"
-#include "hphp/util/db_conn.h"
+#include "hphp/util/db-conn.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "folly/String.h"

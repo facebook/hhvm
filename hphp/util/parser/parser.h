@@ -19,7 +19,7 @@
 
 #include "hphp/util/parser/scanner.h"
 #include "hphp/util/lock.h"
-#include "hphp/util/case_insensitive.h"
+#include "hphp/util/case-insensitive.h"
 
 #define IMPLEMENT_XHP_ATTRIBUTES                \
   Token m_xhpAttributes;                        \

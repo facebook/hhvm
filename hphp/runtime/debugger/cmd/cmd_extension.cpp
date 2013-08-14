@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_extension.h"
 #include "hphp/runtime/ext/ext_array.h"
-#include "hphp/util/text_art.h"
+#include "hphp/util/text-art.h"
 
 using namespace HPHP::Util::TextArt;
 

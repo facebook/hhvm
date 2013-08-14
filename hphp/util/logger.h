@@ -20,7 +20,7 @@
 #include <atomic>
 #include <string>
 #include <stdarg.h>
-#include "hphp/util/thread_local.h"
+#include "hphp/util/thread-local.h"
 #include "hphp/util/util.h"
 #include "hphp/util/cronolog.h"
 

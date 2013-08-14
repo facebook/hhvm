@@ -22,7 +22,7 @@
 #include "folly/Conv.h"
 
 #include "hphp/util/assertions.h"
-#include "hphp/util/map_walker.h"
+#include "hphp/util/map-walker.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/tracelet.h"

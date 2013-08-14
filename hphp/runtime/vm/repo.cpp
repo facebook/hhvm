@@ -17,7 +17,7 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
-#include "hphp/util/repo_schema.h"
+#include "hphp/util/repo-schema.h"
 
 namespace HPHP {
 

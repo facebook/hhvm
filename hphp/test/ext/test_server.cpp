@@ -22,7 +22,7 @@
 #include "hphp/util/util.h"
 #include "hphp/util/process.h"
 #include "hphp/compiler/option.h"
-#include "hphp/util/async_func.h"
+#include "hphp/util/async-func.h"
 #include "hphp/runtime/ext/ext_curl.h"
 #include "hphp/runtime/ext/ext_options.h"
 #include "hphp/runtime/server/http-request-handler.h"

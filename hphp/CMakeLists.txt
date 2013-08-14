@@ -78,15 +78,15 @@ foreach (CXX_FILE ${CXX_SOURCES})
 endforeach()
 
 add_custom_command(
-  OUTPUT hphp_repo_schema.h hphp_build_info.cpp
-  COMMAND hphp/util/generate_buildinfo.sh
+  OUTPUT "hphp-repo-schema.h" "hphp-build-info.cpp"
+  COMMAND "hphp/util/generate-buildinfo.sh"
   DEPENDS ${CXX_SOURCES} ${C_SOURCES}
   WORKING_DIRECTORY ${HPHP_HOME}
   COMMENT "Generating Repo Schema ID and Compiler ID"
   VERBATIM)
 
 ADD_LIBRARY(hphp_runtime_static STATIC
-            hphp_repo_schema.h hphp_build_info.cpp
+            "hphp-repo-schema.h" "hphp-build-info.cpp"
             ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES})
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES OUTPUT_NAME "hphp_runtime")
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES PREFIX "lib")

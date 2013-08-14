@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/util/text_color.h"
+#include "hphp/util/text-color.h"
 #include "hphp/util/util.h"
 #include "hphp/util/logger.h"
 

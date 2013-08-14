@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/util/disasm.h"
-#include "hphp/util/text_color.h"
+#include "hphp/util/text-color.h"
 
 namespace HPHP {  namespace JIT {
 

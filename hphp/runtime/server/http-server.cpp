@@ -32,10 +32,10 @@
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/server/warmup-request-handler.h"
 #include "hphp/runtime/server/xbox-server.h"
-#include "hphp/util/db_conn.h"
+#include "hphp/util/db-conn.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
-#include "hphp/util/ssl_init.h"
+#include "hphp/util/ssl-init.h"
 
 #include <boost/make_shared.hpp>
 #include <sys/types.h>

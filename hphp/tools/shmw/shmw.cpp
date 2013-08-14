@@ -16,7 +16,7 @@
 
 #include <stdio.h>
 #include <unistd.h>
-#include "hphp/util/shm_counter.h"
+#include "hphp/util/shm-counter.h"
 
 using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////

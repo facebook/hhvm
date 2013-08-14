@@ -18,7 +18,7 @@
 #define incl_HPHP_DATATYPE_PROFILER_H_
 
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/util/stacktrace_profiler.h"
+#include "hphp/util/stacktrace-profiler.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

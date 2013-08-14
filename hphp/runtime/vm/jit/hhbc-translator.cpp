@@ -30,7 +30,7 @@
 #include "hphp/runtime/vm/jit/translator-x64.h"
 
 // Include last to localize effects to this file
-#include "hphp/util/assert_throw.h"
+#include "hphp/util/assert-throw.h"
 
 namespace HPHP {
 namespace JIT {

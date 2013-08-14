@@ -24,8 +24,8 @@
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/runtime/ext/ext_socket.h"
 #include "hphp/runtime/ext/ext_network.h"
-#include "hphp/util/text_color.h"
-#include "hphp/util/text_art.h"
+#include "hphp/util/text-color.h"
+#include "hphp/util/text-art.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include <boost/format.hpp>

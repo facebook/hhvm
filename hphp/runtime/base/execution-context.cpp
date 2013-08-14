@@ -22,7 +22,7 @@
 
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
-#include "hphp/util/text_color.h"
+#include "hphp/util/text-color.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/memory-manager.h"

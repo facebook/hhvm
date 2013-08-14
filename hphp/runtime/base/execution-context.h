@@ -29,7 +29,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/util/base.h"
 #include "hphp/util/lock.h"
-#include "hphp/util/thread_local.h"
+#include "hphp/util/thread-local.h"
 #include <setjmp.h>
 
 #define PHP_OUTPUT_HANDLER_START  (1<<0)

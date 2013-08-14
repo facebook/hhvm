@@ -22,7 +22,7 @@
 #include "folly/Format.h"
 #include "folly/Conv.h"
 #include "hphp/util/trace.h"
-#include "hphp/util/stack_trace.h"
+#include "hphp/util/stack-trace.h"
 #include "hphp/util/util.h"
 
 #include "hphp/runtime/vm/bytecode.h"
@@ -46,7 +46,7 @@
 #include "hphp/runtime/vm/jit/tracelet.h"
 
 // Include last to localize effects to this file
-#include "hphp/util/assert_throw.h"
+#include "hphp/util/assert-throw.h"
 
 namespace HPHP {
 namespace JIT {

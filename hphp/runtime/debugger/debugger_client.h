@@ -22,7 +22,7 @@
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_client_settings.h"
 #include "hphp/runtime/base/debuggable.h"
-#include "hphp/util/text_color.h"
+#include "hphp/util/text-color.h"
 #include "hphp/util/hdf.h"
 #include "hphp/util/mutex.h"
 

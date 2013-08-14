@@ -27,6 +27,7 @@
 #include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/base/smart-containers.h"
 
@@ -238,14 +239,6 @@ class TranslatorX64 : public Translator
 private:
   int64_t m_createdTime;
 
-  struct PendingFixup {
-    TCA m_tca;
-    Fixup m_fixup;
-    PendingFixup() { }
-    PendingFixup(TCA tca, Fixup fixup) :
-      m_tca(tca), m_fixup(fixup) { }
-  };
-  vector<PendingFixup> m_pendingFixups;
 
   void drawCFG(std::ofstream& out) const;
 
@@ -265,12 +258,10 @@ public:
   void emitCall(Asm& a, CppCall call);
   TCA getCallArrayPrologue(Func* func);
   void smashPrologueGuards(TCA* prologues, int numPrologues, const Func* func);
+  FixupMap& fixupMap() { return m_fixupMap; }
 private:
   TCA emitCallArrayPrologue(const Func* func,
                             const DVFuncletsVec& dvs);
-  void recordSyncPoint(Asm& a, Offset pcOff, Offset spOff);
-  void emitEagerSyncPoint(Asm& a, const Opcode* pc, const Offset spDiff);
-  void recordIndirectFixup(CTCA addr, int dwordsPushed);
 
   template<int Arity> TCA emitNAryStub(Asm& a, CppCall c);
   TCA emitUnaryStub(Asm& a, CppCall c);
@@ -296,10 +287,6 @@ private:
   void registerCatchTrace(CTCA ip, TCA trace);
   TCA getCatchTrace(CTCA ip) const;
 
-  static void SEGVHandler(int signum, siginfo_t *info, void *ctx);
-
-  void fixupWork(VMExecutionContext* ec, ActRec* startRbp) const;
-  void fixup(VMExecutionContext* ec) const;
   TCA getTranslatedCaller() const;
 
   const TcaTransIDMap& getJmpToTransIDMap() const {
@@ -444,7 +431,6 @@ public:
   TCA funcPrologue(Func* func, int nArgs, ActRec* ar = nullptr);
   bool checkCachedPrologue(const Func* func, int param, TCA& plgOut) const;
   SrcKey emitPrologue(Func* func, int nArgs);
-  static bool eagerRecord(const Func* func);
   int32_t emitNativeImpl(const Func*, bool emitSavedRIPReturn);
   void emitBindJ(Asm& a, ConditionCode cc, SrcKey dest,
                  ServiceRequest req);
@@ -661,26 +647,6 @@ bool isSupportedCGetM(const NormalizedInstruction& i);
 TXFlags planInstrAdd_Int(const NormalizedInstruction& i);
 TXFlags planInstrAdd_Array(const NormalizedInstruction& i);
 void dumpTranslationInfo(const Tracelet& t, TCA postGuards);
-
-// SpaceRecorder is used in translator-x64.cpp and in hopt/irtranslator.cpp
-// RAII logger for TC space consumption.
-struct SpaceRecorder {
-  const char *m_name;
-  const X64Assembler m_a;
-  // const X64Assembler& m_a;
-  size_t m_start;
-  SpaceRecorder(const char* name, const X64Assembler& a) :
-      m_name(name), m_a(a), m_start(a.used())
-    { }
-  ~SpaceRecorder() {
-    if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
-      auto diff = m_a.used() - m_start;
-      if (diff) {
-        Trace::traceRelease("TCSpace %10s %3td\n", m_name, diff);
-      }
-    }
-  }
-};
 
 typedef const int COff; // Const offsets
 

@@ -153,7 +153,30 @@ struct DataBlock : private boost::noncopyable {
 
   Address getBase() const { return base; }
   Address getFrontier() const { return frontier; }
-  size_t getSize() const { return size; }
+
+  size_t capacity() const {
+    return size;
+  }
+
+  size_t used() const {
+    return frontier - base;
+  }
+
+  size_t available() const {
+    return size - (frontier - base);
+  }
+
+  bool contains(CodeAddress addr) const {
+    return addr >= base && addr < (base + size);
+  }
+
+  bool empty() const {
+    return base == frontier;
+  }
+
+  void clear() {
+    frontier = base;
+  }
 
  protected:
   Address base;

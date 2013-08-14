@@ -26,6 +26,11 @@
 #include "hphp/runtime/vm/jit/state-vector.h"
 
 namespace HPHP {
+
+namespace Transl {
+class CppCall;
+}
+
 namespace JIT {
 
 struct ArgGroup;
@@ -58,6 +63,26 @@ enum class SyncOptions {
   kSyncPoint,
   kSyncPointAdjustOne,
 };
+
+/*
+ * SaveFP uses rVmFp, as usual. SavePC requires the caller to have
+ * placed the PC offset of the instruction about to be executed in
+ * rdi.
+ */
+enum class RegSaveFlags {
+  None = 0,
+  SaveFP = 1,
+  SavePC = 2
+};
+inline RegSaveFlags operator|(const RegSaveFlags& l, const RegSaveFlags& r) {
+  return RegSaveFlags(int(r) | int(l));
+}
+inline RegSaveFlags operator&(const RegSaveFlags& l, const RegSaveFlags& r) {
+  return RegSaveFlags(int(r) & int(l));
+}
+inline RegSaveFlags operator~(const RegSaveFlags& f) {
+  return RegSaveFlags(~int(f));
+}
 
 // Information about where code was generated, for pretty-printing.
 struct AsmInfo {
@@ -267,22 +292,32 @@ private:
   bool emitInc(SSATmp* dst, SSATmp* src1, SSATmp* src2);
   bool emitDec(SSATmp* dst, SSATmp* src1, SSATmp* src2);
 
+public:
+
+  static void emitEagerSyncPoint(Asm& a, const HPHP::Opcode* pc,
+                                 const Offset spDiff);
+  static void emitEagerVMRegSave(Asm& a, RegSaveFlags flags);
+  static void emitGetGContext(Asm& a, PhysReg dest);
+  static void emitIncRef(Asm& a, PhysReg base, DataType dtype);
+  static void emitIncRefGenericRegSafe(Asm& a, PhysReg base,
+                                       int disp, PhysReg tmpReg);
+
 private:
   PhysReg selectScratchReg(IRInstruction* inst);
-  void emitLoadImm(CodeGenerator::Asm& as, int64_t val, PhysReg dstReg);
+  void emitLoadImm(Asm& as, int64_t val, PhysReg dstReg);
   PhysReg prepXMMReg(const SSATmp* tmp,
-                     X64Assembler& as,
+                     Asm& as,
                      const RegAllocInfo& allocInfo,
                      RegXMM rXMMScratch);
   void emitSetCc(IRInstruction*, ConditionCode);
   template<class JmpFn>
   void emitIsTypeTest(IRInstruction* inst, JmpFn doJcc);
-  void doubleCmp(X64Assembler& a, RegXMM xmmReg0, RegXMM xmmReg1);
+  void doubleCmp(Asm& a, RegXMM xmmReg0, RegXMM xmmReg1);
   void cgIsTypeCommon(IRInstruction* inst, bool negate);
   void cgJmpIsTypeCommon(IRInstruction* inst, bool negate);
   void cgIsTypeMemCommon(IRInstruction*, bool negate);
   void emitInstanceBitmaskCheck(IRInstruction*);
-  void emitTraceRet(CodeGenerator::Asm& as);
+  void emitTraceRet(Asm& as);
   Address cgCheckStaticBit(Type type,
                            PhysReg reg,
                            bool regIsCount);

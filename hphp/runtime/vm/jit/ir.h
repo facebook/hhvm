@@ -60,10 +60,10 @@ using HPHP::Transl::RegSet;
 using HPHP::Transl::PhysReg;
 using HPHP::Transl::ConditionCode;
 
+class IRFactory;
 struct IRInstruction;
-struct SSATmp;
-struct Block;
 struct IRTrace;
+class SSATmp;
 
 class FailedIRGen : public std::runtime_error {
  public:
@@ -975,15 +975,6 @@ class RawMemSlot {
   bool m_allowExtra; // Used as a flag to ensure that extra offets are
                      // only used with RawMemSlots that support it
 };
-
-class SSATmp;
-class IRTrace;
-class CodeGenerator;
-struct AsmInfo;
-class IRFactory;
-class Simplifier;
-struct LifetimeInfo;
-struct RegAllocInfo;
 
 bool isRefCounted(SSATmp* opnd);
 

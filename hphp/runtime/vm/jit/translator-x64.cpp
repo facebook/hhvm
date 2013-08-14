@@ -174,43 +174,11 @@ void stubBlock(X64Assembler& hot, X64Assembler& cold, const L& body) {
   cold. jmp(hot.frontier());
 }
 
-static bool
-typeCanBeStatic(DataType t) {
-  return t != KindOfObject && t != KindOfResource && t != KindOfRef;
-}
-
-// IfCountNotStatic --
-//   Emits if (%reg->_count != RefCountStaticValue) { ... }.
-//   May short-circuit this check if the type is known to be
-//   static already.
-struct IfCountNotStatic {
-  typedef CondBlock<FAST_REFCOUNT_OFFSET,
-                    RefCountStaticValue,
-                    CC_Z,
-                    field_type(RefData, m_count)> NonStaticCondBlock;
-  NonStaticCondBlock *m_cb; // might be null
-  IfCountNotStatic(X64Assembler& a,
-                   PhysReg reg,
-                   DataType t = KindOfInvalid) {
-    // Objects and variants cannot be static
-    if (typeCanBeStatic(t)) {
-      m_cb = new NonStaticCondBlock(a, reg);
-    } else {
-      m_cb = nullptr;
-    }
-  }
-
-  ~IfCountNotStatic() {
-    delete m_cb;
-  }
-};
-
 // Logical register move: ensures the value in src will be in dest
 // after execution, but might do so in strange ways. Do not count on
 // being able to smash dest to a different register in the future, e.g.
 void
 emitMovRegReg(X64Assembler& a, PhysReg src, PhysReg dest) {
-  SpaceRecorder("_RegMove", a);
   if (src != dest) {
     a.  movq (src, dest);
   }
@@ -312,137 +280,6 @@ TranslatorX64::emitCall(X64Assembler& a, CppCall call) {
   a.call(rax[call.getOffset()]);
 }
 
-static void emitGetGContext(X64Assembler& a, PhysReg dest) {
-  emitTLSLoad<ExecutionContext>(a, g_context, dest);
-}
-
-void
-TranslatorX64::emitEagerSyncPoint(X64Assembler& a, const Opcode* pc,
-                                  const Offset spDiff) {
-  static COff spOff = offsetof(VMExecutionContext, m_stack) +
-    Stack::topOfStackOffset();
-  static COff fpOff = offsetof(VMExecutionContext, m_fp);
-  static COff pcOff = offsetof(VMExecutionContext, m_pc);
-
-  /* we can't use rAsm because the pc store uses it as a
-     temporary */
-  Reg64 rEC = reg::rdi;
-
-  a.   push(rEC);
-  emitGetGContext(a, rEC);
-  a.   storeq(rVmFp, rEC[fpOff]);
-  if (spDiff) {
-    a.   lea(rVmSp[spDiff], rAsm);
-    a.   storeq(rAsm, rEC[spOff]);
-  } else {
-    a.   storeq(rVmSp, rEC[spOff]);
-  }
-  a.   storeq(pc, rEC[pcOff]);
-  a.   pop(rEC);
-}
-
-void
-TranslatorX64::recordSyncPoint(X64Assembler& a, Offset pcOff, Offset spOff) {
-  m_pendingFixups.push_back(PendingFixup(a.frontier(), Fixup(pcOff, spOff)));
-}
-
-void
-TranslatorX64::recordIndirectFixup(CTCA addr, int dwordsPushed) {
-  m_fixupMap.recordIndirectFixup(
-    a.frontier(), IndirectFixup((2 + dwordsPushed) * 8));
-}
-
-void
-TranslatorX64::emitIncRef(PhysReg base, DataType dtype) {
-  emitIncRef(a, base, dtype);
-}
-
-void
-TranslatorX64::emitIncRef(X64Assembler &a, PhysReg base, DataType dtype) {
-  if (!IS_REFCOUNTED_TYPE(dtype) && dtype != KindOfInvalid) {
-    return;
-  }
-  SpaceRecorder sr("_IncRef", a);
-  static_assert(sizeof(RefCount) == sizeof(int32_t), "");
-  { // if !static then
-    IfCountNotStatic ins(a, base, dtype);
-    /*
-     * The optimization guide cautions against using inc; while it is
-     * compact, it only writes the low-order 8 bits of eflags, causing a
-     * partial dependency for any downstream flags-dependent code.
-     */
-    a.    incl(base[FAST_REFCOUNT_OFFSET]);
-  } // endif
-}
-
-void
-TranslatorX64::emitIncRefGenericRegSafe(PhysReg base,
-                                        int disp,
-                                        PhysReg tmpReg) {
-  { // if RC
-    IfRefCounted irc(a, base, disp);
-    a.    load_reg64_disp_reg64(base, disp + TVOFF(m_data),
-                                tmpReg);
-    { // if !static
-      IfCountNotStatic ins(a, tmpReg);
-      a.  incl(tmpReg[FAST_REFCOUNT_OFFSET]);
-    } // endif
-  } // endif
-}
-
-// emitEagerVMRegSave --
-//   Inline. Saves regs in-place in the TC. This is an unusual need;
-//   you probably want to lazily save these regs via recordCall and
-//   its ilk.
-//
-//   SaveFP uses rVmFp, as usual. SavePC requires the caller to have
-//   placed the PC offset of the instruction about to be executed in
-//   rdi.
-enum RegSaveFlags {
-  SaveFP = 1,
-  SavePC = 2
-};
-
-static TCA
-emitEagerVMRegSave(X64Assembler& a,
-                   int flags /* :: RegSaveFlags */) {
-  TCA start = a.frontier();
-  bool saveFP = bool(flags & SaveFP);
-  bool savePC = bool(flags & SavePC);
-  assert((flags & ~(SavePC | SaveFP)) == 0);
-
-  Reg64 pcReg = rdi;
-  PhysReg rEC = rAsm;
-  assert(!kSpecialCrossTraceRegs.contains(rdi));
-
-  emitGetGContext(a, rEC);
-
-  static COff spOff = offsetof(VMExecutionContext, m_stack) +
-    Stack::topOfStackOffset();
-  static COff fpOff = offsetof(VMExecutionContext, m_fp) - spOff;
-  static COff pcOff = offsetof(VMExecutionContext, m_pc) - spOff;
-
-  assert(spOff != 0);
-  a.    addq   (spOff, r64(rEC));
-  a.    storeq (rVmSp, *rEC);
-  if (savePC) {
-    // We're going to temporarily abuse rVmSp to hold the current unit.
-    Reg64 rBC = rVmSp;
-    a.  push   (rBC);
-    // m_fp -> m_func -> m_unit -> m_bc + pcReg
-    a.  loadq  (rVmFp[AROFF(m_func)], rBC);
-    a.  loadq  (rBC[Func::unitOff()], rBC);
-    a.  loadq  (rBC[Unit::bcOff()], rBC);
-    a.  addq   (rBC, pcReg);
-    a.  storeq (pcReg, rEC[pcOff]);
-    a.  pop    (rBC);
-  }
-  if (saveFP) {
-    a.  storeq (rVmFp, rEC[fpOff]);
-  }
-  return start;
-}
-
 CppCall TranslatorX64::getDtorCall(DataType type) {
   switch (type) {
   case BitwiseKindOfString:
@@ -540,7 +377,7 @@ asm_label(a, release);
   {
     PhysRegSaver prs(a, kGPCallerSaved - RegSet(rdi));
     callDestructor(a, rAsm, rax);
-    recordIndirectFixup(a.frontier(), prs.rspTotalAdjustmentRegs());
+    m_fixupMap.recordIndirectFixup(a.frontier(), prs.rspTotalAdjustmentRegs());
   }
   a.    ret    ();
 
@@ -673,7 +510,6 @@ TranslatorX64::moveToAlign(X64Assembler &aa,
                            const size_t align /* =kJmpTargetAlign */,
                            bool unreachable /* =true */) {
   using namespace HPHP::Util;
-  SpaceRecorder sr("_Align", aa);
   assert(isPowerOfTwo(align));
   size_t leftInBlock = align - ((align - 1) & uintptr_t(aa.frontier()));
   if (leftInBlock == align) return;
@@ -1025,11 +861,12 @@ TranslatorX64::emitCheckSurpriseFlagsEnter(bool inTracelet, Fixup fixup) {
     astubs.mov_reg64_reg64(rVmFp, argNumToRegName[0]);
     emitCall(astubs, (TCA)&functionEnterHelper);
     if (inTracelet) {
-      recordSyncPoint(astubs, fixup.m_pcOffset, fixup.m_spOffset);
+      m_fixupMap.recordSyncPoint(astubs.frontier(),
+                                 fixup.m_pcOffset, fixup.m_spOffset);
     } else {
       // If we're being called while generating a func prologue, we
       // have to record the fixup directly in the fixup map instead of
-      // going through m_pendingFixups like normal.
+      // going through the pending fixup path like normal.
       m_fixupMap.recordFixup(astubs.frontier(), fixup);
     }
   }
@@ -1480,7 +1317,6 @@ TranslatorX64::funcPrologue(Func* func, int nPassed, ActRec* ar) {
 
   AsmSelector asmSel(AsmSelector::Args(this).hot(func->attrs() & AttrHot));
 
-  SpaceRecorder sr("_FuncPrologue", a);
   // If we're close to a cache line boundary, just burn some space to
   // try to keep the func and its body on fewer total lines.
   if (((uintptr_t)a.frontier() & kX64CacheLineMask) >= 32) {
@@ -1600,6 +1436,14 @@ static void raiseMissingArgument(const char* name, int expected, int got) {
   }
 }
 
+static void emitIncRefHelper(X64Assembler& a, PhysReg base, DataType dtype) {
+  if (!IS_REFCOUNTED_TYPE(dtype) && dtype != KindOfInvalid) {
+    return;
+  }
+  static_assert(sizeof(RefCount) == sizeof(int32_t), "");
+  JIT::CodeGenerator::emitIncRef(a, base, dtype);
+}
+
 SrcKey
 TranslatorX64::emitPrologue(Func* func, int nPassed) {
   int numParams = func->numParams();
@@ -1661,7 +1505,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
       a.shrq(1, rAsm);
       JccBlock<CC_BE> ifRealThis(a);
       a.shlq(1, rAsm);
-      emitIncRef(rAsm, KindOfObject);
+      emitIncRefHelper(a, rAsm, KindOfObject);
     }
 
     // Put in the correct context
@@ -1684,7 +1528,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
       int uvOffset = baseUVOffset + cellsToBytes(i-1);
 
       emitCopyTo(a, rClosure, uvOffset, rVmSp, spOffset, rAsm);
-      emitIncRefGenericRegSafe(rVmSp, spOffset, rAsm);
+      JIT::CodeGenerator::emitIncRefGenericRegSafe(a, rVmSp, spOffset, rAsm);
     }
 
     numLocals += numUseVars + 1;
@@ -1698,7 +1542,6 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
   int numUninitLocals = func->numLocals() - numLocals;
   assert(numUninitLocals >= 0);
   if (numUninitLocals > 0 && !func->isGenerator()) {
-    SpaceRecorder sr("_InitializeLocals", a);
 
     // If there are too many locals, then emitting a loop to initialize locals
     // is more compact, rather than emitting a slew of movs inline.
@@ -1867,8 +1710,8 @@ int32_t TranslatorX64::emitNativeImpl(const Func* func,
    * will handle it for us.
    */
   a.   mov_reg64_reg64(rVmFp, argNumToRegName[0]);
-  if (eagerRecord(func)) {
-    emitEagerSyncPoint(a, func->getEntry(), 0);
+  if (m_fixupMap.eagerRecord(func)) {
+    JIT::CodeGenerator::emitEagerSyncPoint(a, func->getEntry(), 0);
   }
   emitCall(a, (TCA)builtinFuncPtr);
 
@@ -1888,7 +1731,7 @@ int32_t TranslatorX64::emitNativeImpl(const Func* func,
   Offset pcOffset = 0;  // NativeImpl is the only instruction in the func
   Offset stackOff = func->numLocals(); // Builtin stubs have no
                                        // non-arg locals
-  recordSyncPoint(a, pcOffset, stackOff);
+  m_fixupMap.recordSyncPoint(a.frontier(), pcOffset, stackOff);
 
   if (emitSavedRIPReturn) {
     // push the return address to get ready to ret.
@@ -2742,7 +2585,7 @@ TranslatorX64::emitServiceReqWork(SRFlags flags, ServiceRequest req,
       default: not_reached();
     }
   }
-  emitEagerVMRegSave(as, SaveFP);
+  JIT::CodeGenerator::emitEagerVMRegSave(as, JIT::RegSaveFlags::SaveFP);
   if (persist) {
     as.  emitImmReg(0, rAsm);
   } else {
@@ -2835,61 +2678,6 @@ OPCODES
 #undef O
 };
 
-void TranslatorX64::fixupWork(VMExecutionContext* ec,
-                              ActRec* rbp) const {
-  assert(RuntimeOption::EvalJit);
-
-  TRACE_SET_MOD(fixup);
-  TRACE(1, "fixup(begin):\n");
-
-  auto isVMFrame = [] (ActRec* ar) {
-    assert(ar);
-    bool ret = uintptr_t(ar) - Util::s_stackLimit >= Util::s_stackSize;
-    assert(!ret ||
-           (ar >= g_vmContext->m_stack.getStackLowAddress() &&
-            ar < g_vmContext->m_stack.getStackHighAddress()) ||
-           ar->m_func->isGenerator());
-    return ret;
-  };
-
-  auto* nextRbp = rbp;
-  rbp = 0;
-  do {
-    auto* prevRbp = rbp;
-    rbp = nextRbp;
-    assert(rbp && "Missing fixup for native call");
-    nextRbp = reinterpret_cast<ActRec*>(rbp->m_savedRbp);
-    TRACE(2, "considering frame %p, %p\n", rbp, (void*)rbp->m_savedRip);
-
-    if (isVMFrame(nextRbp)) {
-      TRACE(2, "fixup checking vm frame %s\n",
-               nextRbp->m_func->name()->data());
-      FixupMap::VMRegs regs;
-      if (m_fixupMap.getFrameRegs(rbp, prevRbp, &regs)) {
-        TRACE(2, "fixup(end): func %s fp %p sp %p pc %p\n",
-              regs.m_fp->m_func->name()->data(),
-              regs.m_fp, regs.m_sp, regs.m_pc);
-        ec->m_fp = const_cast<ActRec*>(regs.m_fp);
-        ec->m_pc = regs.m_pc;
-        vmsp() = regs.m_sp;
-        return;
-      }
-    }
-  } while (rbp && rbp != nextRbp);
-
-  // OK, we've exhausted the entire actRec chain.  We are only
-  // invoking ::fixup() from contexts that were known to be called out
-  // of the TC, so this cannot happen.
-  NOT_REACHED();
-}
-
-void TranslatorX64::fixup(VMExecutionContext* ec) const {
-  // Start looking for fixup entries at the current (C++) frame.  This
-  // will walk the frames upward until we find a TC frame.
-  DECLARE_FRAME_POINTER(framePtr);
-  fixupWork(ec, framePtr);
-}
-
 TCA TranslatorX64::getTranslatedCaller() const {
   DECLARE_FRAME_POINTER(fp);
   ActRec* framePtr = fp;  // can't directly mutate the register-mapped one
@@ -2905,7 +2693,7 @@ TCA TranslatorX64::getTranslatedCaller() const {
 void
 TranslatorX64::syncWork() {
   assert(tl_regState == VMRegState::DIRTY);
-  fixup(g_vmContext);
+  m_fixupMap.fixup(g_vmContext);
   tl_regState = VMRegState::CLEAN;
   Stats::inc(Stats::TC_Sync);
 }
@@ -2924,30 +2712,6 @@ mathEquivTypes(RuntimeType lt, RuntimeType rt) {
   return (lt.isDouble() && rt.isDouble()) ||
    (lt.isInt() && rt.isDouble()) ||
    (lt.isDouble() && rt.isInt());
-}
-
-/* This is somewhat hacky. It decides which helpers/builtins should
- * use eager vmreganchor based on profile information. Using eager
- * vmreganchor for all helper calls is a perf regression. */
-bool TranslatorX64::eagerRecord(const Func* func) {
-  const char* list[] = {
-    "func_get_args",
-    "get_called_class",
-    "func_num_args",
-    "array_filter",
-    "array_map",
-  };
-
-  for (int i = 0; i < sizeof(list)/sizeof(list[0]); i++) {
-    if (!strcmp(func->name()->data(), list[i])) {
-      return true;
-    }
-  }
-  if (func->cls() && !strcmp(func->cls()->name()->data(), "WaitHandle")
-      && !strcmp(func->name()->data(), "join")) {
-    return true;
-  }
-  return false;
 }
 
 ObjectData*
@@ -3229,7 +2993,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
   auto resetState = [&] {
     undoA.undo();
     undoAstubs.undo();
-    m_pendingFixups.clear();
+    m_fixupMap.clearPendingFixups();
     m_bcMap.clear();
     srcRec.clearInProgressTailJumps();
   };
@@ -3237,7 +3001,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
   auto assertCleanState = [&] {
     assert(a.frontier() == start);
     assert(astubs.frontier() == stubStart);
-    assert(m_pendingFixups.empty());
+    assert(m_fixupMap.pendingFixupsEmpty());
     assert(m_bcMap.empty());
     assert(srcRec.inProgressTailJumps().empty());
   };
@@ -3335,12 +3099,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
     // Fall through.
   }
 
-  for (uint i = 0; i < m_pendingFixups.size(); i++) {
-    TCA tca = m_pendingFixups[i].m_tca;
-    assert(isValidCodeAddress(tca));
-    m_fixupMap.recordFixup(tca, m_pendingFixups[i].m_fixup);
-  }
-  m_pendingFixups.clear();
+  m_fixupMap.processPendingFixups();
 
   addTranslation(TransRec(sk, sk.unit()->md5(), transKind, t, start,
                           a.frontier() - start, stubStart,
@@ -3575,7 +3334,7 @@ asm_label(a, doRelease);
     emitCmpTVType(a, KindOfRefCountThreshold, rType);
     a.  jle8   (skipDecRef);
     a.  call   (release);
-    recordIndirectFixup(a.frontier(), 0);
+    m_fixupMap.recordIndirectFixup(a.frontier(), 0);
   asm_label(a, skipDecRef);
   };
 
@@ -3748,7 +3507,7 @@ TranslatorX64::TranslatorX64()
   m_resumeHelperRet = astubs.frontier();
   emitPopRetIntoActRec(astubs);
   m_resumeHelper = astubs.frontier();
-  emitGetGContext(astubs, rax);
+  JIT::CodeGenerator::emitGetGContext(astubs, rax);
   astubs.   load_reg64_disp_reg64(rax, offsetof(VMExecutionContext, m_fp),
                                        rVmFp);
   astubs.   load_reg64_disp_reg64(rax, offsetof(VMExecutionContext, m_stack) +
@@ -3764,7 +3523,7 @@ TranslatorX64::TranslatorX64()
     }
     m_defClsHelper = TCA(a.frontier());
     PhysReg rEC = argNumToRegName[2];
-    emitGetGContext(a, rEC);
+    JIT::CodeGenerator::emitGetGContext(a, rEC);
     a.   storeq (rVmFp, rEC[offsetof(VMExecutionContext, m_fp)]);
     a.   storeq (argNumToRegName[1],
                     rEC[offsetof(VMExecutionContext, m_pc)]);
@@ -3810,7 +3569,8 @@ TranslatorX64::TranslatorX64()
   astubs.    load_reg64_disp_reg64(rax, Func::sharedOffset(), rax);
   astubs.    load_reg64_disp_reg32(rax, Func::sharedBaseOffset(), rax);
   astubs.    add_reg32_reg32(rax, rdi);
-  emitEagerVMRegSave(astubs, SaveFP | SavePC);
+  JIT::CodeGenerator::emitEagerVMRegSave(astubs, JIT::RegSaveFlags::SaveFP |
+                                                 JIT::RegSaveFlags::SavePC);
   emitServiceReq(REQ_STACK_OVERFLOW);
 }
 
@@ -4061,7 +3821,7 @@ std::string TranslatorX64::getUsage() {
   size_t aProfUsage = aprof.used();
   size_t aUsage     = a.used();
   size_t stubsUsage = astubs.used();
-  size_t dataUsage  = m_globalData.getFrontier() - m_globalData.getBase();
+  size_t dataUsage  = m_globalData.used();
   size_t tcUsage    = TargetCache::s_frontier;
   size_t persistentUsage =
     TargetCache::s_persistent_frontier - TargetCache::s_persistent_start;
@@ -4078,7 +3838,7 @@ std::string TranslatorX64::getUsage() {
     aUsage,     100 * aUsage / a.capacity(),
     aProfUsage, aprof.capacity() != 0 ? 100 * aProfUsage / aprof.capacity() : 0,
     stubsUsage, 100 * stubsUsage / astubs.capacity(),
-    dataUsage,  100 * dataUsage / m_globalData.getSize(),
+    dataUsage,  100 * dataUsage / m_globalData.capacity(),
     tcUsage,
     400 * tcUsage / RuntimeOption::EvalJitTargetCacheSize / 3,
     persistentUsage,

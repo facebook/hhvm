@@ -750,46 +750,46 @@ class X64Assembler {
   friend struct Label;
 
 public:
-  X64Assembler() : code(nullptr) {}
+  X64Assembler() : codeBlock(nullptr) {}
 
   void init(DataBlock* db) {
-    code = db;
+    codeBlock = db;
   }
 
   CodeAddress base() const {
-    return code->base;
+    return codeBlock->base;
   }
 
   CodeAddress frontier() const {
-    return code->frontier;
+    return codeBlock->frontier;
   }
 
   void setFrontier(CodeAddress newFrontier) {
-    code->frontier = newFrontier;
+    codeBlock->frontier = newFrontier;
   }
 
   size_t capacity() const {
-    return code->size;
+    return codeBlock->capacity();
   }
 
   size_t used() const {
-    return frontier() - code->base;
+    return codeBlock->used();
   }
 
   size_t available() const {
-    return capacity() - used();
+    return codeBlock->available();
   }
 
   bool contains(CodeAddress addr) const {
-    return addr >= base() && addr < (base() + capacity());
+    return codeBlock->contains(addr);
   }
 
   bool empty() const {
-    return code->base == code->frontier;
+    return codeBlock->empty();
   }
 
   void clear() {
-    code->frontier = code->base;
+    codeBlock->clear();
   }
 
   bool canEmit(size_t nBytes) const {
@@ -1038,7 +1038,7 @@ public:
    */
 
   bool jmpDeltaFits(CodeAddress dest) {
-    int64_t delta = dest - (code->frontier + 5);
+    int64_t delta = dest - (codeBlock->frontier + 5);
     return deltaFits(delta, sz::dword);
   }
 
@@ -1080,7 +1080,7 @@ public:
   }
 
   void jmpAuto(CodeAddress dest) {
-    auto delta = dest - (code->frontier + 2);
+    auto delta = dest - (codeBlock->frontier + 2);
     if (deltaFits(delta, sz::byte)) {
       jmp8(dest);
     } else {
@@ -1089,7 +1089,7 @@ public:
   }
 
   void jccAuto(ConditionCode cc, CodeAddress dest) {
-    auto delta = dest - (code->frontier + 2);
+    auto delta = dest - (codeBlock->frontier + 2);
     if (deltaFits(delta, sz::byte)) {
       jcc8(cc, dest);
     } else {
@@ -1198,8 +1198,8 @@ public:
   }
 
   void emitInt3s(int n) {
-    memset(code->frontier, 0xcc, n);
-    code->frontier += n;
+    memset(codeBlock->frontier, 0xcc, n);
+    codeBlock->frontier += n;
   }
 
   void emitNop(int n) {
@@ -1232,19 +1232,19 @@ public:
    */
 
   void byte(uint8_t b) {
-    code->byte(b);
+    codeBlock->byte(b);
   }
   void word(uint16_t w) {
-    code->word(w);
+    codeBlock->word(w);
   }
   void dword(uint32_t dw) {
-    code->dword(dw);
+    codeBlock->dword(dw);
   }
   void qword(uint64_t qw) {
-    code->qword(qw);
+    codeBlock->qword(qw);
   }
   void bytes(size_t n, const uint8_t* bs) {
-    code->bytes(n, bs);
+    codeBlock->bytes(n, bs);
   }
 
   // op %r
@@ -1563,7 +1563,7 @@ public:
   void emitJ8(X64Instr op, ssize_t imm)
     ALWAYS_INLINE {
     assert((op.flags & IF_JCC) == 0);
-    ssize_t delta = imm - ((ssize_t)code->frontier + 2);
+    ssize_t delta = imm - ((ssize_t)codeBlock->frontier + 2);
     // Emit opcode and 8-bit immediate
     byte(0xEB);
     byte(safe_cast<int8_t>(delta));
@@ -1573,7 +1573,7 @@ public:
     ALWAYS_INLINE {
     // this is for jcc only
     assert(op.flags & IF_JCC);
-    ssize_t delta = imm - ((ssize_t)code->frontier + 2);
+    ssize_t delta = imm - ((ssize_t)codeBlock->frontier + 2);
     // Emit opcode
     byte(jcond | 0x70);
     // Emit 8-bit offset
@@ -1583,7 +1583,8 @@ public:
   void emitJ32(X64Instr op, ssize_t imm) ALWAYS_INLINE {
     // call and jmp are supported, jcc is not supported
     assert((op.flags & IF_JCC) == 0);
-    int32_t delta = safe_cast<int32_t>(imm - ((ssize_t)code->frontier + 5));
+    int32_t delta =
+      safe_cast<int32_t>(imm - ((ssize_t)codeBlock->frontier + 5));
     uint8_t *bdelta = (uint8_t*)&delta;
     uint8_t instr[] = { op.table[2],
       bdelta[0], bdelta[1], bdelta[2], bdelta[3] };
@@ -1594,7 +1595,8 @@ public:
       ALWAYS_INLINE {
     // jcc is supported, call and jmp are not supported
     assert(op.flags & IF_JCC);
-    int32_t delta = safe_cast<int32_t>(imm - ((ssize_t)code->frontier + 6));
+    int32_t delta =
+      safe_cast<int32_t>(imm - ((ssize_t)codeBlock->frontier + 6));
     uint8_t* bdelta = (uint8_t*)&delta;
     uint8_t instr[6] = { 0x0f, uint8_t(0x80 | jcond),
       bdelta[0], bdelta[1], bdelta[2], bdelta[3] };
@@ -2427,7 +2429,7 @@ private:
 
   // This has to be a pointer because it's uninitialized when X64Assembler
   // is constructed.
-  DataBlock* code;
+  CodeBlock* codeBlock;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -2525,7 +2527,7 @@ private:
     JumpInfo info;
     info.type = type;
     info.a = a;
-    info.addr = a->code->getFrontier();
+    info.addr = a->codeBlock->getFrontier();
     m_toPatch.push_back(info);
   }
 

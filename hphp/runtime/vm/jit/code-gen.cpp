@@ -541,7 +541,7 @@ emitMovRegReg(CodeGenerator::Asm& as, PhysReg srcReg, PhysReg dstReg) {
   }
 }
 
-void CodeGenerator::emitLoadImm(CodeGenerator::Asm& as, int64_t val,
+void CodeGenerator::emitLoadImm(Asm& as, int64_t val,
                                 PhysReg dstReg) {
   assert(dstReg != InvalidReg);
   if (dstReg.isGP()) {
@@ -604,7 +604,7 @@ static void shuffle2(CodeGenerator::Asm& a,
   }
 }
 
-static void zeroExtendBool(X64Assembler& as, const RegisterInfo& info) {
+static void zeroExtendBool(CodeGenerator::Asm& as, const RegisterInfo& info) {
   auto reg = info.reg();
   if (reg != InvalidReg) {
     // zero-extend the bool from a byte to a quad
@@ -613,7 +613,7 @@ static void zeroExtendBool(X64Assembler& as, const RegisterInfo& info) {
   }
 }
 
-static void zeroExtendIfBool(X64Assembler& as, const SSATmp* src,
+static void zeroExtendIfBool(CodeGenerator::Asm& as, const SSATmp* src,
                             const RegisterInfo& info) {
   if (src->isA(Type::Bool)) {
     zeroExtendBool(as, info);
@@ -638,7 +638,7 @@ static int64_t convIntToDouble(int64_t i) {
  * they're emitted in 'as'.
  */
 PhysReg CodeGenerator::prepXMMReg(const SSATmp* tmp,
-                                  X64Assembler& as,
+                                  Asm& as,
                                   const RegAllocInfo& allocInfo,
                                   RegXMM rCgXMM) {
   assert(tmp->isA(Type::Bool) || tmp->isA(Type::Int) || tmp->isA(Type::Dbl));
@@ -676,7 +676,8 @@ PhysReg CodeGenerator::prepXMMReg(const SSATmp* tmp,
   return rCgXMM;
 }
 
-void CodeGenerator::doubleCmp(X64Assembler& a, RegXMM xmmReg0, RegXMM xmmReg1) {
+void CodeGenerator::doubleCmp(Asm& a,
+                              RegXMM xmmReg0, RegXMM xmmReg1) {
   a.    ucomisd_xmm_xmm(xmmReg0, xmmReg1);
   Label notPF;
   a.    jnp8(notPF);
@@ -791,6 +792,31 @@ void CodeGenerator::emitReqBindJcc(ConditionCode cc,
 
   tx64->setJmpTransID(a.frontier());
   a.    jmp    (jccStub);
+}
+
+void CodeGenerator::emitEagerSyncPoint(Asm& a,
+                                       const HPHP::Opcode* pc,
+                                       const Offset spDiff) {
+  static COff spOff = offsetof(VMExecutionContext, m_stack) +
+    Stack::topOfStackOffset();
+  static COff fpOff = offsetof(VMExecutionContext, m_fp);
+  static COff pcOff = offsetof(VMExecutionContext, m_pc);
+
+  /* we can't use rAsm because the pc store uses it as a
+     temporary */
+  Reg64 rEC = reg::rdi;
+
+  a.   push(rEC);
+  emitGetGContext(a, rEC);
+  a.   storeq(rVmFp, rEC[fpOff]);
+  if (spDiff) {
+    a.   lea(rVmSp[spDiff], rAsm);
+    a.   storeq(rAsm, rEC[spOff]);
+  } else {
+    a.   storeq(rVmSp, rEC[spOff]);
+  }
+  a.   storeq(pc, rEC[pcOff]);
+  a.   pop(rEC);
 }
 
 void CodeGenerator::cgAssertNonNull(IRInstruction* inst) {
@@ -1426,6 +1452,122 @@ bool CodeGenerator::emitInc(SSATmp* dst, SSATmp* src1, SSATmp* src2) {
  */
 bool CodeGenerator::emitDec(SSATmp* dst, SSATmp* src1, SSATmp* src2) {
   return emitIncDecHelper(dst, src1, src2, &Asm::decq);
+}
+
+// emitEagerVMRegSave --
+//   Inline. Saves regs in-place in the TC. This is an unusual need;
+//   you probably want to lazily save these regs via recordCall and
+//   its ilk.
+void CodeGenerator::emitEagerVMRegSave(Asm& a, RegSaveFlags flags) {
+  bool saveFP = bool(flags & RegSaveFlags::SaveFP);
+  bool savePC = bool(flags & RegSaveFlags::SavePC);
+  assert((flags & ~(RegSaveFlags::SavePC | RegSaveFlags::SaveFP)) ==
+         RegSaveFlags::None);
+
+  Reg64 pcReg = rdi;
+  PhysReg rEC = rAsm;
+  assert(!kSpecialCrossTraceRegs.contains(rdi));
+
+  emitGetGContext(a, rEC);
+
+  static COff spOff = offsetof(VMExecutionContext, m_stack) +
+    Stack::topOfStackOffset();
+  static COff fpOff = offsetof(VMExecutionContext, m_fp) - spOff;
+  static COff pcOff = offsetof(VMExecutionContext, m_pc) - spOff;
+
+  assert(spOff != 0);
+  a.    addq   (spOff, r64(rEC));
+  a.    storeq (rVmSp, *rEC);
+  if (savePC) {
+    // We're going to temporarily abuse rVmSp to hold the current unit.
+    Reg64 rBC = rVmSp;
+    a.  push   (rBC);
+    // m_fp -> m_func -> m_unit -> m_bc + pcReg
+    a.  loadq  (rVmFp[AROFF(m_func)], rBC);
+    a.  loadq  (rBC[Func::unitOff()], rBC);
+    a.  loadq  (rBC[Unit::bcOff()], rBC);
+    a.  addq   (rBC, pcReg);
+    a.  storeq (pcReg, rEC[pcOff]);
+    a.  pop    (rBC);
+  }
+  if (saveFP) {
+    a.  storeq (rVmFp, rEC[fpOff]);
+  }
+}
+
+void CodeGenerator::emitGetGContext(Asm& a, PhysReg dest) {
+  emitTLSLoad<ExecutionContext>(a, g_context, dest);
+}
+
+// IfCountNotStatic --
+//   Emits if (%reg->_count != RefCountStaticValue) { ... }.
+//   May short-circuit this check if the type is known to be
+//   static already.
+struct IfCountNotStatic {
+  typedef CondBlock<FAST_REFCOUNT_OFFSET,
+                    RefCountStaticValue,
+                    CC_Z,
+                    field_type(RefData, m_count)> NonStaticCondBlock;
+  NonStaticCondBlock *m_cb; // might be null
+  IfCountNotStatic(CodeGenerator::Asm& a,
+                   PhysReg reg,
+                   DataType t = KindOfInvalid) {
+
+    // Objects and variants cannot be static
+    if (t != KindOfObject && t != KindOfResource && t != KindOfRef) {
+      m_cb = new NonStaticCondBlock(a, reg);
+    } else {
+      m_cb = nullptr;
+    }
+  }
+
+  ~IfCountNotStatic() {
+    delete m_cb;
+  }
+};
+
+static void emitAssertFlagsNonNegative(CodeGenerator::Asm& as) {
+  ifThen(as, CC_NGE, [&] { as.ud2(); });
+}
+
+static void emitAssertRefCount(CodeGenerator::Asm& as, PhysReg base) {
+  as.cmpl(HPHP::RefCountStaticValue, base[FAST_REFCOUNT_OFFSET]);
+  ifThen(as, CC_NBE, [&] { as.ud2(); });
+}
+
+static void emitIncRefImpl(CodeGenerator::Asm& as, PhysReg base) {
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    emitAssertRefCount(as, base);
+  }
+  // emit incref
+  as.incl(base[FAST_REFCOUNT_OFFSET]);
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    // Assert that the ref count is greater than zero
+    emitAssertFlagsNonNegative(as);
+  }
+}
+
+void CodeGenerator::emitIncRef(Asm& a, PhysReg base,
+                               DataType dtype) {
+  { // if !static then
+    IfCountNotStatic ins(a, base, dtype);
+    emitIncRefImpl(a, base);
+  } // endif
+}
+
+void CodeGenerator::emitIncRefGenericRegSafe(Asm& a,
+                                             PhysReg base,
+                                             int disp,
+                                             PhysReg tmpReg) {
+  { // if RC
+    IfRefCounted irc(a, base, disp);
+    a.    load_reg64_disp_reg64(base, disp + TVOFF(m_data),
+                                tmpReg);
+    { // if !static
+      IfCountNotStatic ins(a, tmpReg);
+      a.  incl(tmpReg[FAST_REFCOUNT_OFFSET]);
+    } // endif
+  } // endif
 }
 
 void CodeGenerator::cgRoundCommon(IRInstruction* inst, RoundDirection dir) {
@@ -2730,7 +2872,7 @@ void traceRet(ActRec* fp, Cell* sp, void* rip) {
   if (sp < (Cell*)fp) assertTv(sp);
 }
 
-void CodeGenerator::emitTraceRet(CodeGenerator::Asm& a) {
+void CodeGenerator::emitTraceRet(Asm& a) {
   // call to a trace function
   a.    movq  (rVmFp, rdi);
   a.    movq  (rVmSp, rsi);
@@ -3109,36 +3251,15 @@ void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
   m_tx64->emitFallbackUncondJmp(m_as, *destSR);
 }
 
-static void emitAssertFlagsNonNegative(CodeGenerator::Asm& as) {
-  ifThen(as, CC_NGE, [&] { as.ud2(); });
-}
-
-static void emitAssertRefCount(CodeGenerator::Asm& as, PhysReg base) {
-  as.cmpl(HPHP::RefCountStaticValue, base[FAST_REFCOUNT_OFFSET]);
-  ifThen(as, CC_NBE, [&] { as.ud2(); });
-}
-
-static void emitIncRef(CodeGenerator::Asm& as, PhysReg base) {
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitAssertRefCount(as, base);
-  }
-  // emit incref
-  as.incl(base[FAST_REFCOUNT_OFFSET]);
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    // Assert that the ref count is greater than zero
-    emitAssertFlagsNonNegative(as);
-  }
-}
-
 void CodeGenerator::cgIncRefWork(Type type, SSATmp* src) {
   assert(type.maybeCounted());
   auto increfMaybeStatic = [&] {
     auto base = m_regs[src].reg(0);
     if (!type.needsStaticBitCheck()) {
-      emitIncRef(m_as, base);
+      emitIncRefImpl(m_as, base);
     } else {
       m_as.cmpl(RefCountStaticValue, base[FAST_REFCOUNT_OFFSET]);
-      ifThen(m_as, CC_NE, [&] { emitIncRef(m_as, base); });
+      ifThen(m_as, CC_NE, [&] { emitIncRefImpl(m_as, base); });
     }
   };
 
@@ -3171,7 +3292,7 @@ void CodeGenerator::cgIncRefCtx(IRInstruction* inst) {
   emitMovRegReg(a, src, dst);
   a.    testb  (0x1, rbyte(dst));
   ifThen(a, CC_Z, [&] {
-    emitIncRef(a, dst);
+    emitIncRefImpl(a, dst);
   });
 }
 
@@ -3658,13 +3779,13 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
   m_as.shrq    (1, m_rScratch);
   ifThen(m_as, CC_NBE, [this] {
       m_as.shlq(1, m_rScratch);
-      emitIncRef(m_as, m_rScratch);
+      emitIncRefImpl(m_as, m_rScratch);
     });
   m_as.loadq   (fpReg[itOff + CufIter::nameOff()], m_rScratch);
   m_as.testq    (m_rScratch, m_rScratch);
   ifThen(m_as, CC_NZ, [this] {
       m_as.cmpl(RefCountStaticValue, m_rScratch[FAST_REFCOUNT_OFFSET]);
-      ifThen(m_as, CC_NE, [&] { emitIncRef(m_as, m_rScratch); });
+      ifThen(m_as, CC_NE, [&] { emitIncRefImpl(m_as, m_rScratch); });
       m_as.orq (ActRec::kInvNameBit, m_rScratch);
     });
   m_as.storeq  (m_rScratch, spReg[spOffset + int(AROFF(m_invName))]);
@@ -4074,10 +4195,10 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   DataType funcReturnType = func->returnType();
   int returnOffset = HHIR_MISOFF(tvBuiltinReturn);
 
-  if (TranslatorX64::eagerRecord(func)) {
+  if (FixupMap::eagerRecord(func)) {
     const uchar* pc = curUnit()->entry() + m_curInst->marker().bcOff;
     // we have spilled all args to stack, so spDiff is 0
-    m_tx64->emitEagerSyncPoint(m_as, pc, 0);
+    emitEagerSyncPoint(m_as, pc, 0);
   }
   // RSP points to the MInstrState we need to use.
   // workaround the fact that rsp moves when we spill registers around call
@@ -4218,8 +4339,8 @@ void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
 
   BuiltinFunction builtinFuncPtr = func->getValFunc()->builtinFuncPtr();
   emitMovRegReg(m_as, m_regs[fp].reg(), argNumToRegName[0]);
-  if (TranslatorX64::eagerRecord(fn)) {
-    m_tx64->emitEagerSyncPoint(m_as, fn->getEntry(), 0);
+  if (FixupMap::eagerRecord(fn)) {
+    emitEagerSyncPoint(m_as, fn->getEntry(), 0);
   }
   m_as.call((TCA)builtinFuncPtr);
   recordSyncPoint(m_as);
@@ -4560,7 +4681,7 @@ void CodeGenerator::recordSyncPoint(Asm& as,
 
   FTRACE(5, "IR recordSyncPoint: {} {} {}\n", as.frontier(), pcOff,
          stackOff);
-  m_tx64->recordSyncPoint(as, pcOff, stackOff);
+  m_tx64->fixupMap().recordSyncPoint(as.frontier(), pcOff, stackOff);
 }
 
 void CodeGenerator::cgLdAddr(IRInstruction* inst) {
@@ -4966,7 +5087,7 @@ void CodeGenerator::emitGetCtxFwdCallWithThis(PhysReg ctxReg,
     m_as.orq(1, ctxReg);
   } else {
     // Just incref $this.
-    emitIncRef(m_as, ctxReg);
+    emitIncRefImpl(m_as, ctxReg);
   }
 }
 
@@ -4995,7 +5116,7 @@ void CodeGenerator::emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,
   {
     asm_label(m_as, NonStaticCall);
     emitMovRegReg(m_as, thisReg, destCtxReg);
-    emitIncRef(m_as, destCtxReg);
+    emitIncRefImpl(m_as, destCtxReg);
   }
   asm_label(m_as, End);
 }

@@ -798,7 +798,7 @@ public:
   }
 
   void skip(size_t nBytes) {
-    (void)code->alloc<uint8_t>(1, nBytes);
+    (void)codeBlock->alloc<uint8_t>(1, nBytes);
   }
 
   /*

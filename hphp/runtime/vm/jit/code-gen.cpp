@@ -3097,8 +3097,9 @@ void CodeGenerator::cgReqInterpret(IRInstruction* inst) {
 
 void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
   auto extra = inst->extra<ReqRetranslateOpt>();
-  auto sk    = SrcKey(curFunc(), extra->offset);
-  m_tx64->emitReqRetransOpt(m_as, sk, extra->transId);
+
+  m_tx64->emitServiceReq(REQ_RETRANSLATE_OPT, curFunc()->getFuncId(),
+                         extra->offset, extra->transId);
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {

@@ -195,41 +195,6 @@ emitLea(X64Assembler& a, PhysReg base, int disp, PhysReg dest) {
   a.   lea  (base[disp], dest);
 }
 
-static void UNUSED tc_debug_print(const char* message,
-                           uintptr_t r1,
-                           uintptr_t r2,
-                           uintptr_t r3,
-                           ActRec* fp) {
-  TRACE(1, "*********************** %s: %p %p %p  (for : %s)\n",
-           message, (void*)r1, (void*)r2, (void*)r3,
-           fp->m_func ? fp->m_func->fullName()->data() : "[?]");
-}
-
-// Utility for debugging translations that will print a message,
-// followed by the value of up to three registers.
-void TranslatorX64::emitDebugPrint(Asm& a,
-                                   const char* message,
-                                   PhysReg r1,
-                                   PhysReg r2,
-                                   PhysReg r3) {
-  boost::optional<PhysRegSaver> aSaver;
-  boost::optional<PhysRegSaverStub> astubsSaver;
-
-  if (&a == &this->a) {
-    aSaver = boost::in_place<PhysRegSaver>(boost::ref(a), kAllX64Regs);
-  } else {
-    astubsSaver = boost::in_place<PhysRegSaverStub>(boost::ref(a),
-      kAllX64Regs);
-  }
-
-  a.  mov_imm64_reg  (uintptr_t(message), argNumToRegName[0]);
-  a.  mov_reg64_reg64(r1, argNumToRegName[1]);
-  a.  mov_reg64_reg64(r2, argNumToRegName[2]);
-  a.  mov_reg64_reg64(r3, argNumToRegName[3]);
-  a.  mov_reg64_reg64(rVmFp, argNumToRegName[4]);
-  a.  call((TCA)tc_debug_print);
-}
-
 void
 TranslatorX64::emitRB(X64Assembler& a,
                       Trace::RingBufferType t,
@@ -1921,18 +1886,6 @@ void TranslatorX64::emitResolvedDeps(const ChangeMap& resolvedDeps) {
 }
 
 void
-TranslatorX64::emitFallbackJmp(SrcRec& dest, ConditionCode cc /* = CC_NZ */) {
-  emitFallbackJmp(a, dest, cc);
-}
-
-void
-TranslatorX64::emitFallbackJmp(Asm& as, SrcRec& dest,
-                               ConditionCode cc /* = CC_NZ */) {
-  prepareForSmash(as, kJmpccLen);
-  dest.emitFallbackJump(as.frontier(), cc);
-}
-
-void
 TranslatorX64::emitFallbackUncondJmp(Asm& as, SrcRec& dest) {
   prepareForSmash(as, kJmpLen);
   dest.emitFallbackJump(as.frontier());
@@ -1942,12 +1895,6 @@ void
 TranslatorX64::emitFallbackCondJmp(Asm& as, SrcRec& dest, ConditionCode cc) {
   prepareForSmash(as, kJmpccLen);
   dest.emitFallbackJump(as.frontier(), cc);
-}
-
-void TranslatorX64::emitReqRetransOpt(Asm& as, const SrcKey& sk,
-                                      TransID transId) {
-  emitServiceReq(REQ_RETRANSLATE_OPT,
-                 sk.getFuncId(), sk.offset(), transId);
 }
 
 void

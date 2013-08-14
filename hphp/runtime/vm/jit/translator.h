@@ -793,15 +793,12 @@ enum Operands {
   MVector         = 1 << 8,  // Member-vector input
   Iter            = 1 << 9,  // Iterator in imm[0]
   AllLocals       = 1 << 10, // All locals (used by RetC)
-  DontGuardLocal  = 1 << 11, // Dont force a guard on behalf of the local input
-  DontGuardStack1 = 1 << 12, // Dont force a guard on behalf of stack1 input
-  DontBreakLocal  = 1 << 13, // Dont break a tracelet on behalf of the local
-  DontBreakStack1 = 1 << 14, // Dont break a tracelet on behalf of stack1 input
-  IgnoreInnerType = 1 << 15, // Instruction doesnt care about the inner types
-  DontGuardAny    = 1 << 16, // Dont force a guard for any input
-  This            = 1 << 17, // Input to CheckThis
-  StackN          = 1 << 18, // pop N cells from stack; n = imm[0].u_IVA
-  BStackN         = 1 << 19, // consume N cells from stack for builtin call;
+  DontGuardStack1 = 1 << 11, // Dont force a guard on behalf of stack1 input
+  IgnoreInnerType = 1 << 12, // Instruction doesnt care about the inner types
+  DontGuardAny    = 1 << 13, // Dont force a guard for any input
+  This            = 1 << 14, // Input to CheckThis
+  StackN          = 1 << 15, // pop N cells from stack; n = imm[0].u_IVA
+  BStackN         = 1 << 16, // consume N cells from stack for builtin call;
                              // n = imm[0].u_IVA
   StackTop2 = Stack1 | Stack2,
   StackTop3 = Stack1 | Stack2 | Stack3,

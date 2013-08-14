@@ -865,8 +865,26 @@ inline bool isThisSelfOrParent(Op op) {
   }
 }
 
+inline bool isRet(Op op) {
+  switch (op) {
+    case OpRetC:
+    case OpRetV:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
 inline bool isSwitch(Op op) {
-  return op == Op::Switch || op == Op::SSwitch;
+  switch (op) {
+    case OpSwitch:
+    case OpSSwitch:
+      return true;
+
+    default:
+      return false;
+  }
 }
 
 inline bool isSwitch(Opcode op) {

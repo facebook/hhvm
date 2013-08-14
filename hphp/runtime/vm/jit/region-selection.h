@@ -107,8 +107,13 @@ struct RegionDesc::Location {
        (m_tag == Tag::Stack && stackOffset() == other.stackOffset()));
   }
 
-  bool operator!=(const Location &other) const {
+  bool operator!=(const Location& other) const {
     return !(*this == other);
+  }
+
+  bool operator<(const Location& other) const {
+    return m_tag < other.m_tag ||
+      (m_tag == other.m_tag && m_local.locId < other.m_local.locId);
   }
 
 private:

@@ -665,6 +665,15 @@ void CodeGenerator::emitReqBindJcc(ConditionCode cc,
   a.    jmp    (jccStub);
 }
 
+void CodeGenerator::cgCheckNullptr(IRInstruction* inst) {
+  if (!inst->taken()) return;
+
+  auto src = inst->src(0);
+  auto reg = m_regs[src].reg(0);
+  m_as.testq (reg, reg);
+  emitFwdJcc(CC_NZ, inst->taken());
+}
+
 void CodeGenerator::cgAssertNonNull(IRInstruction* inst) {
   auto srcReg = m_regs[inst->src(0)].reg();
   auto dstReg = m_regs[inst->dst()].reg();
@@ -4529,7 +4538,6 @@ void CodeGenerator::cgDefMIStateBase(IRInstruction* inst) {
 
 void CodeGenerator::cgCheckType(IRInstruction* inst) {
   auto const src   = inst->src(0);
-  auto const t     = inst->typeParam();
   auto const rData = m_regs[src].reg(0);
   auto const rType = m_regs[src].reg(1);
 
@@ -4537,23 +4545,15 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
     emitFwdJcc(ccNegate(cc), inst->taken());
   };
 
-  if (t.equals(Type::Nullptr)) {
-    if (!src->type().equals(Type::Nullptr | Type::CountedStr)) {
-      CG_PUNT(CheckType-Nullptr-UnsupportedType);
-    }
-    m_as.testq (rData, rData);
-    doJcc(CC_E);
+  Type typeParam = inst->typeParam();
+  if (rType != InvalidReg) {
+    emitTypeTest(typeParam, rType, rData, doJcc);
   } else {
-    Type typeParam = inst->typeParam();
-    if (rType != InvalidReg) {
-      emitTypeTest(typeParam, rType, rData, doJcc);
+    Type srcType = src->type();
+    if (srcType.isBoxed() && typeParam.isBoxed()) {
+      // Nothing to do here, since we check the inner type at the uses
     } else {
-      Type srcType = src->type();
-      if (srcType.isBoxed() && typeParam.isBoxed()) {
-        // Nothing to do here, since we check the inner type at the uses
-      } else {
-        CG_PUNT(CheckType-known-srcType);
-      }
+      CG_PUNT(CheckType-known-srcType);
     }
   }
 

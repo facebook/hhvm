@@ -295,11 +295,18 @@ void assertOperandTypes(const IRInstruction* inst) {
 
   auto bail = [&] (const std::string& msg) {
     FTRACE(1, "{}", msg);
-    if (!::HPHP::Trace::moduleEnabled(::HPHP::Trace::hhir, 1)) {
-      fprintf(stderr, "%s\n", msg.c_str());
-    }
+    fprintf(stderr, "%s\n", msg.c_str());
     always_assert(false && "instruction operand type check failure");
   };
+
+  if (opHasExtraData(inst->op()) != (bool)inst->rawExtra()) {
+    bail(folly::format("opcode {} should{} have an ExtraData struct "
+                       "but instruction {} does{}",
+                       inst->op(),
+                       opHasExtraData(inst->op()) ? "" : "n't",
+                       *inst,
+                       inst->rawExtra() ? "" : "n't").str());
+  }
 
   auto src = [&]() -> SSATmp* {
     if (curSrc < inst->numSrcs()) {

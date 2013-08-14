@@ -17,6 +17,12 @@
 #ifndef incl_HPHP_JIT_TYPE_H_
 #define incl_HPHP_JIT_TYPE_H_
 
+#include <cstdint>
+#include <cstring>
+
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/vm/class.h"
+
 namespace HPHP {
 namespace Transl {
 struct DynLocation;

@@ -183,7 +183,7 @@ class FailedCodeGen : public std::runtime_error {
 
 #define IR_OPCODES                                                            \
 /*    name                      dstinfo srcinfo                      flags */ \
-O(CheckType,                    DParam, S(Gen,Nullptr),          E|CRc|PRc|P) \
+O(CheckType,                    DParam, S(Gen),                  E|CRc|PRc|P) \
 O(AssertType,                   DParam, S(Gen,Nullptr,Cls),    C|E|CRc|PRc|P) \
 O(CheckTypeMem,                     ND, S(PtrToGen),                       E) \
 O(GuardLoc,                         ND, S(FramePtr),                       E) \
@@ -325,6 +325,7 @@ O(RaiseWarning,                     ND, S(Str),              E|N|Mem|Refs|Er) \
 O(CheckInit,                        ND, S(Gen),                           NF) \
 O(CheckInitMem,                     ND, S(PtrToGen) C(Int),               NF) \
 O(CheckCold,                        ND, NA,                                E) \
+O(CheckNullptr,                     ND, S(CountedStr,Nullptr),            NF) \
 O(AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr),            NF) \
 O(Unbox,                     DUnbox(0), S(Gen),                           NF) \
 O(Box,                         DBox(0), S(Init),             E|N|Mem|CRc|PRc) \
@@ -393,7 +394,7 @@ O(StClosureCtx,                     ND, S(Obj) S(Ctx,Nullptr),         CRc|E) \
 O(NewArray,                     D(Arr), C(Int),                        N|PRc) \
 O(NewTuple,                     D(Arr), C(Int) S(StkPtr),    E|Mem|N|PRc|CRc) \
 O(LdRaw,                        DParam, SUnk,                             NF) \
-O(FreeActRec,                D(FramePtr), S(FramePtr),                   Mem) \
+O(FreeActRec,              D(FramePtr), S(FramePtr),                     Mem) \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(Call,                      D(StkPtr), SUnk,                 E|Mem|CRc|Refs) \
 O(CallArray,                 D(StkPtr), S(StkPtr),          E|Mem|N|CRc|Refs) \
@@ -801,6 +802,8 @@ Opcode commuteQueryOp(Opcode opc);
 
 const char* opcodeName(Opcode opcode);
 
+bool opHasExtraData(Opcode op);
+
 enum OpcodeFlag : uint64_t {
   NoFlags          = 0,
   HasDest          = 1ULL <<  0,
@@ -1073,7 +1076,10 @@ int32_t spillValueCells(IRInstruction* spillStack);
 
 bool isConvIntOrPtrToBool(IRInstruction* instr);
 
-}}
+FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_toString, toString);
+
+} // namespace JIT
+} // namespace HPHP
 
 namespace std {
   template<> struct hash<HPHP::JIT::Opcode> {
@@ -1082,6 +1088,35 @@ namespace std {
   template<> struct hash<HPHP::JIT::Type> {
     size_t operator()(HPHP::JIT::Type t) const { return t.hash(); }
   };
+}
+
+namespace folly {
+template<> struct FormatValue<HPHP::JIT::Opcode> {
+  explicit FormatValue(HPHP::JIT::Opcode op) : m_op(op) {}
+
+  template<typename Callback> void format(FormatArg& arg, Callback& cb) const {
+    format_value::formatString(opcodeName(m_op), arg, cb);
+  }
+
+ private:
+  HPHP::JIT::Opcode m_op;
+};
+
+template<typename Val>
+struct FormatValue<Val,
+                   typename std::enable_if<
+                     HPHP::JIT::has_toString<Val, std::string() const>::value,
+                     void
+                   >::type> {
+  explicit FormatValue(const Val& val) : m_val(val) {}
+
+  template<typename Callback> void format(FormatArg& arg, Callback& cb) const {
+    format_value::formatString(m_val.toString(), arg, cb);
+  }
+
+ private:
+  const Val& m_val;
+};
 }
 
 #endif

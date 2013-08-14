@@ -3156,7 +3156,7 @@ void TranslatorX64::traceCodeGen() {
 
   auto* factory = &ht.irFactory();
   recordBCInstr(OpTraceletGuard, a, a.frontier());
-  if (dumpIREnabled() || RuntimeOption::EvalJitCompareHHIR) {
+  if (dumpIREnabled()) {
     LifetimeInfo lifetime(factory);
     RegAllocInfo regs = allocRegsForTrace(trace, factory, &lifetime);
     finishPass(" after reg alloc ", kRegAllocLevel, &regs, &lifetime);
@@ -3164,13 +3164,8 @@ void TranslatorX64::traceCodeGen() {
     AsmInfo ai(factory);
     genCodeForTrace(trace, a, astubs, factory, &m_bcMap, this, regs,
                     &lifetime, &ai);
-    if (RuntimeOption::EvalJitCompareHHIR) {
-      std::ostringstream out;
-      dumpTraceImpl(trace, out, &regs, &lifetime, &ai);
-    } else {
-      dumpTrace(kCodeGenLevel, trace, " after code gen ", &regs,
-                &lifetime, &ai);
-    }
+    dumpTrace(kCodeGenLevel, trace, " after code gen ", &regs,
+              &lifetime, &ai);
   } else {
     RegAllocInfo regs = allocRegsForTrace(trace, factory);
     finishPass(" after reg alloc ", kRegAllocLevel, nullptr, nullptr);

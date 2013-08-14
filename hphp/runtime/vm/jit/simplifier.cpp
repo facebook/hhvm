@@ -113,7 +113,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
         if (tmp->inst()->op() == IncRef) {
           tmp = tmp->inst()->src(0);
         }
-        if (!tmp->type().equals(Type::None)) {
+        if (!tmp->isA(Type::None)) {
           return StackValueInfo { tmp };
         }
       }

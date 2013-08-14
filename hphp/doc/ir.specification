@@ -337,12 +337,15 @@ approach is that boxed values may alias.  Therefore, in lack of memory
 alias analysis, the inner types generally need to be rechecked before
 each use.
 
-D:T = CheckType<T> S0:{Gen|Nullptr} -> L
+D:T = CheckType<T> S0:Gen -> L
 
   Check that the type of the src S0 is T, and if so copy it to D.  If
-  S0 is not type T, branch to the label L. If T is Nullptr, the
-  instruction is being used to check for a C++ nullptr, usually from a
-  type like {Str|Nullptr}.
+  S0 is not type T, branch to the label L.
+
+CheckNullptr S0:{CountedStr|NullPtr} -> L
+
+  If S0 is a null pointer, branch to L. This is used to check the return value
+  of a native helper that returns a potentially null StringData*.
 
 D:T = AssertType<T> S0:{Gen|Nullptr}
 

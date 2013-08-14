@@ -18,7 +18,7 @@
 
 #ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 #error Directly including 'hphp_value.h' is prohibited. \
-       Include 'complex_types.h' instead.
+       Include 'complex-types.h' instead.
 #endif
 
 #include <type_traits>

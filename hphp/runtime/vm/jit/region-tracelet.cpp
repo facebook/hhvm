@@ -206,7 +206,7 @@ bool RegionFormer::prepareInstruction() {
       (m_ht.spOffset() - m_ctx.spOffset);
     try {
       m_inst.preppedByRef = m_arState.checkByRef(argNum, entryArDelta,
-                                               &m_refDeps);
+                                                 &m_refDeps);
     } catch (const Transl::UnknownInputExc& exn) {
       // We don't have a guess for the current ActRec.
       return false;

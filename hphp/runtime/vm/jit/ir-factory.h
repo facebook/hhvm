@@ -88,7 +88,10 @@ private:
   template<class... SSAs>
   Ret go2(IRInstruction* inst, SSATmp* t1, SSAs... ts) {
     SSATmp* ssas[] = { t1, ts... };
-    inst->initializeSrcs(1 + sizeof...(ts), ssas);
+    auto const nSrcs = 1 + sizeof...(ts);
+    for (unsigned i = 0; debug && i < nSrcs; ++i) assert(ssas[i]);
+
+    inst->initializeSrcs(nSrcs, ssas);
     return stop(inst);
   }
 
@@ -111,7 +114,9 @@ private:
     inst->setTypeParam(t);
   }
 
-  void setter(IRInstruction* inst, const IRExtraData& extra) {
+  template<typename T>
+  typename std::enable_if<std::is_base_of<IRExtraData,T>::value, void>::type
+  setter(IRInstruction* inst, const T& extra) {
     /*
      * Taking the address of this temporary seems scary, but actually
      * it is safe: `extra' was forwarded in all the way from the
@@ -125,7 +130,9 @@ private:
      * We null out the extra data in go() before ~IRInstruction runs,
      * though.
      */
-    inst->setExtra(const_cast<IRExtraData*>(&extra));
+    assert_opcode_extra_same<T>(inst->op());
+    const IRExtraData* dataPtr = &extra;
+    inst->setExtra(const_cast<IRExtraData*>(dataPtr));
   }
 
   // Finally we end up here.

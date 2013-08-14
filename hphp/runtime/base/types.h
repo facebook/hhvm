@@ -191,7 +191,7 @@ inline RefResult ref(Variant& v) {
   return *(RefResultValue*)&v;
 }
 
-  class Class;
+class Class;
 
 ///////////////////////////////////////////////////////////////////////////////
 // code injection classes

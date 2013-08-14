@@ -532,7 +532,7 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
     if (baseType.subtypeOf(Type::Uninit)) {
       if (mia & MIA_warn) {
         gen(RaiseUninitLoc, getEmptyCatchTrace(),
-            LocalId(base.location.offset));
+            cns(m_ht.curFunc()->localVarName(base.location.offset)));
       }
       if (mia & MIA_define) {
         gen(
@@ -2602,7 +2602,7 @@ void HhbcTranslator::VectorTranslator::emitSideExits(SSATmp* catchSp,
       gen(DecRef, m_result);
       m_tb.add(str->inst());
     }
-    gen(CheckType, Type::Nullptr, exitTrace, m_strTestResult);
+    gen(CheckNullptr, exitTrace, m_strTestResult);
     gen(IncStat, cns(Stats::TC_SetMStrGuess_Hit), cns(1), cns(false));
   }
 }

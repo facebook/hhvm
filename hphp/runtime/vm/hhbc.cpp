@@ -1030,19 +1030,24 @@ const MInstrInfo& getMInstrInfo(Op op) {
   static const MInstrInfo mInstrInfo[] = {
 #define MII(instr, attrs, bS, iS, vC, fN)                               \
     {MI_##instr##M,                                                     \
-     {MIA_none, MIA_none, MInstrAttr((attrs) & MIA_base),               \
-      MInstrAttr((attrs) & MIA_base), MInstrAttr((attrs) & MIA_base),   \
-      MInstrAttr((attrs) & MIA_base), MInstrAttr((attrs) & MIA_base),   \
-        MIA_none,                                                       \
-      MIA_none},                                                        \
-     {MInstrAttr((attrs) & MIA_intermediate),                           \
-      MInstrAttr((attrs) & MIA_intermediate),                           \
-      MInstrAttr((attrs) & MIA_intermediate),                           \
-      MInstrAttr((attrs) & MIA_intermediate),                           \
-      MInstrAttr((attrs) & MIA_intermediate),                           \
-      MInstrAttr((attrs) & MIA_intermediate),                           \
-      MInstrAttr((attrs) & MIA_intermediate),                           \
-      MInstrAttr((attrs) & MIA_final)},                                 \
+     {MInstrAttr((attrs) & MIA_base), /* LL */                          \
+      MIA_none,                       /* LC */                          \
+      MIA_none,                       /* LH */                          \
+      MInstrAttr((attrs) & MIA_base), /* LGL */                         \
+      MInstrAttr((attrs) & MIA_base), /* LGC */                         \
+      MInstrAttr((attrs) & MIA_base), /* LNL */                         \
+      MInstrAttr((attrs) & MIA_base), /* LNC */                         \
+      MIA_none,                       /* LSL */                         \
+      MIA_none,                       /* LSC */                         \
+      MIA_none},                      /* LR */                          \
+     {MInstrAttr((attrs) & MIA_intermediate), /* MEC */                 \
+      MInstrAttr((attrs) & MIA_intermediate), /* MPC */                 \
+      MInstrAttr((attrs) & MIA_intermediate), /* MEL */                 \
+      MInstrAttr((attrs) & MIA_intermediate), /* MPL */                 \
+      MInstrAttr((attrs) & MIA_intermediate), /* MET */                 \
+      MInstrAttr((attrs) & MIA_intermediate), /* MPT */                 \
+      MInstrAttr((attrs) & MIA_intermediate), /* MEI */                 \
+      MInstrAttr((attrs) & MIA_final)},       /* MW */                  \
      unsigned(vC), bool((attrs) & MIA_new), bool((attrs) & MIA_final_get), \
      #instr},
     MINSTRS

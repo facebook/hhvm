@@ -1255,8 +1255,7 @@ static int numHiddenStackInputs(const NormalizedInstruction& ni) {
 namespace {
 int64_t countOperands(uint64_t mask) {
   const uint64_t ignore = FuncdRef | Local | Iter | AllLocals |
-    DontGuardLocal | DontGuardStack1 | DontBreakLocal | DontBreakStack1 |
-    IgnoreInnerType | DontGuardAny | This;
+    DontGuardStack1 | IgnoreInnerType | DontGuardAny | This;
   mask &= ~ignore;
 
   static const uint64_t counts[][2] = {
@@ -1778,7 +1777,6 @@ void getInputsImpl(SrcKey startSk,
     SKTRACE(1, sk, "getInputs: stack1 %d\n", currentStackOffset - 1);
     inputs.emplace_back(Location(Location::Stack, --currentStackOffset));
     if (input & DontGuardStack1) inputs.back().dontGuard = true;
-    if (input & DontBreakStack1) inputs.back().dontBreak = true;
     if (input & Stack2) {
       SKTRACE(1, sk, "getInputs: stack2 %d\n", currentStackOffset - 1);
       inputs.emplace_back(Location(Location::Stack, --currentStackOffset));
@@ -1828,8 +1826,6 @@ void getInputsImpl(SrcKey startSk,
     }
     SKTRACE(1, sk, "getInputs: local %d\n", loc);
     inputs.emplace(insertAt, Location(Location::Local, loc));
-    if (input & DontGuardLocal) inputs.back().dontGuard = true;
-    if (input & DontBreakLocal) inputs.back().dontBreak = true;
   }
 
   auto wantInlineReturn = [&] {

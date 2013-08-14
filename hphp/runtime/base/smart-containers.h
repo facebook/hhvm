@@ -215,6 +215,11 @@ struct flat_map
   : boost::container::flat_map<K,V,Pred,Allocator<std::pair<K,V>>>
 {};
 
+template<class K, class Pred = std::less<K>>
+struct flat_set
+  : boost::container::flat_set<K, Pred, Allocator<K>>
+{};
+
 template<class K,
          class V,
          class Pred = std::less<K>>

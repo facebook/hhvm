@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_DATATYPE_H_
 #define incl_HPHP_DATATYPE_H_
 
+#include "folly/Format.h"
+
 #include "hphp/util/base.h"
 
 namespace HPHP {
@@ -80,13 +82,21 @@ const unsigned int kNotConstantValueTypeMask = 0x60;
 // All DataTypes greater than this value are refcounted.
 const DataType KindOfRefCountThreshold = KindOfStaticString;
 
-enum DataTypeCategory {
-  DataTypeGeneric,
-  DataTypeCountness,
-  DataTypeCountnessInit,
-  DataTypeSpecific,
-  DataTypeSpecialized
+#define DT_CATEGORIES(func)                     \
+  func(Generic)                                 \
+  func(Countness)                               \
+  func(CountnessInit)                           \
+  func(Specific)                                \
+  func(Specialized)
+
+enum class DataTypeCategory {
+#define DT(name) name,
+  DT_CATEGORIES(DT)
+#undef DT
 };
+#define DT(name) auto constexpr DataType##name = DataTypeCategory::name;
+DT_CATEGORIES(DT)
+#undef DT
 
 ///////////////////////////////////////////////////////////////////////////////
 // nannies
@@ -169,6 +179,15 @@ inline std::string tname(DataType t) {
       return std::string(buf);
     }
   }
+}
+
+inline std::string typeCategoryName(DataTypeCategory c) {
+  switch (c) {
+# define CASE(name) case DataType##name: return "DataType" #name;
+  DT_CATEGORIES(CASE)
+#undef CASE
+  }
+  not_reached();
 }
 
 inline int getDataTypeIndex(DataType type) {
@@ -257,5 +276,19 @@ inline DataType typeInitNull(DataType t) {
 
 ///////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
+
+namespace folly {
+template<> struct FormatValue<HPHP::DataTypeCategory> {
+  explicit FormatValue(HPHP::DataTypeCategory val) : m_val(val) {}
+
+  template<typename Callback>
+  void format(FormatArg& arg, Callback& cb) const {
+    format_value::formatString(typeCategoryName(m_val), arg, cb);
+  }
+
+ private:
+  HPHP::DataTypeCategory m_val;
+};
+}
 
 #endif // incl_HPHP_DATATYPE_H_

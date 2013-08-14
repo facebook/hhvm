@@ -388,7 +388,6 @@ public:
   F(bool, ThreadingJit,                false)                           \
   F(bool, JitTransCounters,            false)                           \
   F(bool, JitMGeneric,                 true)                            \
-  F(double, JitCompareHHIR,            0)                               \
   F(bool, HHIRGenericDtorHelper,       true)                            \
   F(bool, HHIRCse,                     true)                            \
   F(bool, HHIRSimplification,          true)                            \

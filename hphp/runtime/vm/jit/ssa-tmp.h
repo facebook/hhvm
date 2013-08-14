@@ -17,9 +17,15 @@
 #ifndef incl_HPHP_VM_SSATMP_H_
 #define incl_HPHP_VM_SSATMP_H_
 
-#include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP { namespace JIT {
+
+using Transl::TCA;
+class IRInstruction;
+class IRFactory;
+class TraceBuilder;
 
 class SSATmp {
 public:
@@ -35,10 +41,7 @@ public:
 
   // XXX: false for Null, etc.  Would rather it returns whether we
   // have a compile-time constant value.
-  bool isConst() const {
-    return m_inst->op() == DefConst ||
-      m_inst->op() == LdConst;
-  }
+  bool isConst() const;
 
   /*
    * For SSATmps with a compile-time constant value, the following
@@ -85,13 +88,9 @@ private:
 
   // May only be created via IRFactory.  Note that this class is never
   // destructed, so don't add complex members.
-  SSATmp(uint32_t opndId, IRInstruction* i, int dstId = 0)
-    : m_inst(i)
-    , m_type(outputType(i, dstId))
-    , m_id(opndId)
-  {}
-  SSATmp(const SSATmp&);
-  SSATmp& operator=(const SSATmp&);
+  SSATmp(uint32_t opndId, IRInstruction* i, int dstId = 0);
+  SSATmp(const SSATmp&) = delete;
+  SSATmp& operator=(const SSATmp&) = delete;
 
   IRInstruction*  m_inst;
   Type            m_type; // type when defined

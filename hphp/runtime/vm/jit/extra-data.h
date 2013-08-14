@@ -418,7 +418,6 @@ struct CreateContData : IRExtraData {
 X(JmpSwitchDest,                JmpSwitchData);
 X(LdSSwitchDestFast,            LdSSwitchData);
 X(LdSSwitchDestSlow,            LdSSwitchData);
-X(RaiseUninitLoc,               LocalId);
 X(GuardLoc,                     LocalId);
 X(CheckLoc,                     LocalId);
 X(AssertLoc,                    LocalId);
@@ -489,19 +488,30 @@ template<bool hasExtra, Opcode opc, class T> struct AssertExtraTypes {
   static void doassert() {
     assert(!"called extra on an opcode without extra data");
   }
+  static void doassert_same() {
+    assert(!"called extra on an opcode without extra data");
+  }
 };
 
 template<Opcode opc, class T> struct AssertExtraTypes<true,opc,T> {
+  typedef typename IRExtraDataType<opc>::type ExtraType;
+
   static void doassert() {
-    typedef typename IRExtraDataType<opc>::type ExtraType;
-    if (!std::is_same<ExtraType,T>::value) {
+    if (!std::is_base_of<T,ExtraType>::value) {
       assert(!"extra<T> was called with an extra data "
               "type that doesn't match the opcode type");
     }
   }
+  static void doassert_same() {
+    if (!std::is_same<T,ExtraType>::value) {
+      assert(!"extra<T> was called with an extra data type that "
+             "doesn't exactly match the opcode type");
+    }
+  }
 };
 
-// Asserts that Opcode opc has extradata and it is of type T.
+// Asserts that Opcode opc has extradata and it is of type T, or a
+// type derived from T.
 template<class T> void assert_opcode_extra(Opcode opc) {
 #define O(opcode, dstinfo, srcinfo, flags)      \
   case opcode:                                  \
@@ -513,6 +523,20 @@ template<class T> void assert_opcode_extra(Opcode opc) {
 #undef O
 }
 
+template<class T> void assert_opcode_extra_same(Opcode opc) {
+#define O(opcode, dstinfo, srcinfo, flags)      \
+  case opcode:                                  \
+    AssertExtraTypes<                           \
+      OpHasExtraData<opcode>::value,opcode,T    \
+    >::doassert_same();                         \
+    break;
+  switch (opc) { IR_OPCODES default: not_reached(); }
+#undef O
+}
+
+size_t cseHashExtra(Opcode opc, IRExtraData* data);
+bool cseEqualsExtra(Opcode opc, IRExtraData* a, IRExtraData* b);
+IRExtraData* cloneExtra(Opcode opc, IRExtraData* data, Arena& a);
 std::string showExtra(Opcode opc, const IRExtraData* data);
 
 //////////////////////////////////////////////////////////////////////

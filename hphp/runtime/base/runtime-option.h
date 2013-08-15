@@ -355,6 +355,7 @@ public:
   F(uint32_t, VMInitialGlobalTableSize,                                 \
     kEvalVMInitialGlobalTableSizeDefault)                               \
   F(bool, Jit,                         evalJitDefault())                \
+  F(bool, JitRequireWriteLease,        false)                           \
   F(bool, RuntimeTypeProfile,          false)                           \
   F(bool, AllowHhas,                   false)                           \
   F(bool, CheckExtendedTypeHints,      false)                           \

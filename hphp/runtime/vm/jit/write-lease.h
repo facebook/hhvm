@@ -17,6 +17,7 @@
 #define incl_HPHP_WRITELEASE_H_
 
 #include "hphp/util/base.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 #include <pthread.h>
 
@@ -74,11 +75,12 @@ private:
 enum class LeaseAcquire {
   ACQUIRE,
   NO_ACQUIRE,
+  BLOCKING
 };
 
 struct LeaseHolderBase {
   protected:
-    LeaseHolderBase(Lease& l, LeaseAcquire acquire, bool blocking);
+    LeaseHolderBase(Lease& l, LeaseAcquire acquire);
 
   public:
     ~LeaseHolderBase();
@@ -91,12 +93,17 @@ struct LeaseHolderBase {
     bool m_acquired;
 };
 struct LeaseHolder : public LeaseHolderBase {
-  explicit LeaseHolder(Lease& l, LeaseAcquire acquire = LeaseAcquire::ACQUIRE)
-    : LeaseHolderBase(l, acquire, false) {}
+  explicit LeaseHolder(Lease& l, LeaseAcquire acquire)
+    : LeaseHolderBase(l, acquire) {}
+  explicit LeaseHolder(Lease& l)
+    : LeaseHolderBase(l,
+                      RuntimeOption::EvalJitRequireWriteLease ?
+                      LeaseAcquire::BLOCKING : LeaseAcquire::ACQUIRE)
+    {}
 };
 struct BlockingLeaseHolder : public LeaseHolderBase {
   explicit BlockingLeaseHolder(Lease& l)
-    : LeaseHolderBase(l, LeaseAcquire::ACQUIRE, true) {}
+    : LeaseHolderBase(l, LeaseAcquire::BLOCKING) {}
 };
 
 }} // HPHP::Transl

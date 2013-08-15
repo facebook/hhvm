@@ -102,6 +102,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/jit/x64-util.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 
 #include "hphp/runtime/vm/jit/translator-x64-internal.h"
 
@@ -111,6 +112,7 @@ namespace Transl {
 using namespace reg;
 using namespace Util;
 using namespace Trace;
+using namespace JIT::CodeGenHelpersX64;
 using std::max;
 
 #define TRANS_PERF_COUNTERS \
@@ -1412,7 +1414,7 @@ static void emitIncRefHelper(X64Assembler& a, PhysReg base, DataType dtype) {
     return;
   }
   static_assert(sizeof(RefCount) == sizeof(int32_t), "");
-  JIT::CodeGenerator::emitIncRef(a, base, dtype);
+  emitIncRefCheckNonStatic(a, base, dtype);
 }
 
 SrcKey
@@ -1499,7 +1501,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
       int uvOffset = baseUVOffset + cellsToBytes(i-1);
 
       emitCopyTo(a, rClosure, uvOffset, rVmSp, spOffset, rAsm);
-      JIT::CodeGenerator::emitIncRefGenericRegSafe(a, rVmSp, spOffset, rAsm);
+      emitIncRefGenericRegSafe(a, rVmSp, spOffset, rAsm);
     }
 
     numLocals += numUseVars + 1;
@@ -1682,7 +1684,7 @@ int32_t TranslatorX64::emitNativeImpl(const Func* func,
    */
   a.   mov_reg64_reg64(rVmFp, argNumToRegName[0]);
   if (m_fixupMap.eagerRecord(func)) {
-    JIT::CodeGenerator::emitEagerSyncPoint(a, func->getEntry(), 0);
+    emitEagerSyncPoint(a, func->getEntry(), 0);
   }
   emitCall(a, (TCA)builtinFuncPtr);
 
@@ -2528,7 +2530,7 @@ TranslatorX64::emitServiceReqWork(SRFlags flags, ServiceRequest req,
       default: not_reached();
     }
   }
-  JIT::CodeGenerator::emitEagerVMRegSave(as, JIT::RegSaveFlags::SaveFP);
+  emitEagerVMRegSave(as, JIT::RegSaveFlags::SaveFP);
   if (persist) {
     as.  emitImmReg(0, rAsm);
   } else {
@@ -3480,7 +3482,7 @@ TranslatorX64::TranslatorX64()
   m_resumeHelperRet = astubs.frontier();
   emitPopRetIntoActRec(astubs);
   m_resumeHelper = astubs.frontier();
-  JIT::CodeGenerator::emitGetGContext(astubs, rax);
+  emitGetGContext(astubs, rax);
   astubs.   load_reg64_disp_reg64(rax, offsetof(VMExecutionContext, m_fp),
                                        rVmFp);
   astubs.   load_reg64_disp_reg64(rax, offsetof(VMExecutionContext, m_stack) +
@@ -3496,7 +3498,7 @@ TranslatorX64::TranslatorX64()
     }
     m_defClsHelper = TCA(a.frontier());
     PhysReg rEC = argNumToRegName[2];
-    JIT::CodeGenerator::emitGetGContext(a, rEC);
+    emitGetGContext(a, rEC);
     a.   storeq (rVmFp, rEC[offsetof(VMExecutionContext, m_fp)]);
     a.   storeq (argNumToRegName[1],
                     rEC[offsetof(VMExecutionContext, m_pc)]);
@@ -3542,7 +3544,7 @@ TranslatorX64::TranslatorX64()
   astubs.    load_reg64_disp_reg64(rax, Func::sharedOffset(), rax);
   astubs.    load_reg64_disp_reg32(rax, Func::sharedBaseOffset(), rax);
   astubs.    add_reg32_reg32(rax, rdi);
-  JIT::CodeGenerator::emitEagerVMRegSave(astubs, JIT::RegSaveFlags::SaveFP |
+  emitEagerVMRegSave(astubs, JIT::RegSaveFlags::SaveFP |
                                                  JIT::RegSaveFlags::SavePC);
   emitServiceReq(REQ_STACK_OVERFLOW);
 }

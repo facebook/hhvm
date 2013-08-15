@@ -248,9 +248,6 @@ private:
            ahot.base() != astubs.base());
     return asmChoose(addr, a, ahot, aprof, astubs, atrampolines);
   }
-  void emitIncRef(X64Assembler &a, PhysReg base, DataType dtype);
-  void emitIncRef(PhysReg base, DataType);
-  void emitIncRefGenericRegSafe(PhysReg base, int disp, PhysReg tmp);
   static CppCall getDtorCall(DataType type);
 
 public:
@@ -643,8 +640,6 @@ bool isSupportedCGetM(const NormalizedInstruction& i);
 TXFlags planInstrAdd_Int(const NormalizedInstruction& i);
 TXFlags planInstrAdd_Array(const NormalizedInstruction& i);
 void dumpTranslationInfo(const Tracelet& t, TCA postGuards);
-
-typedef const int COff; // Const offsets
 
 }}
 

@@ -64,26 +64,6 @@ enum class SyncOptions {
   kSyncPointAdjustOne,
 };
 
-/*
- * SaveFP uses rVmFp, as usual. SavePC requires the caller to have
- * placed the PC offset of the instruction about to be executed in
- * rdi.
- */
-enum class RegSaveFlags {
-  None = 0,
-  SaveFP = 1,
-  SavePC = 2
-};
-inline RegSaveFlags operator|(const RegSaveFlags& l, const RegSaveFlags& r) {
-  return RegSaveFlags(int(r) | int(l));
-}
-inline RegSaveFlags operator&(const RegSaveFlags& l, const RegSaveFlags& r) {
-  return RegSaveFlags(int(r) & int(l));
-}
-inline RegSaveFlags operator~(const RegSaveFlags& f) {
-  return RegSaveFlags(~int(f));
-}
-
 // Information about where code was generated, for pretty-printing.
 struct AsmInfo {
   explicit AsmInfo(const IRFactory* factory)
@@ -291,16 +271,6 @@ private:
                         void(Asm::*emitFunc)(Reg64));
   bool emitInc(SSATmp* dst, SSATmp* src1, SSATmp* src2);
   bool emitDec(SSATmp* dst, SSATmp* src1, SSATmp* src2);
-
-public:
-
-  static void emitEagerSyncPoint(Asm& a, const HPHP::Opcode* pc,
-                                 const Offset spDiff);
-  static void emitEagerVMRegSave(Asm& a, RegSaveFlags flags);
-  static void emitGetGContext(Asm& a, PhysReg dest);
-  static void emitIncRef(Asm& a, PhysReg base, DataType dtype);
-  static void emitIncRefGenericRegSafe(Asm& a, PhysReg base,
-                                       int disp, PhysReg tmpReg);
 
 private:
   PhysReg selectScratchReg(IRInstruction* inst);

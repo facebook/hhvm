@@ -48,6 +48,7 @@
 #include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/layout.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 
 using HPHP::Transl::TCA;
 using namespace HPHP::Transl::TargetCache;
@@ -61,6 +62,7 @@ namespace {
 
 using namespace Util;
 using namespace Transl::reg;
+using namespace CodeGenHelpersX64;
 using Transl::CppCall;
 
 TRACE_SET_MOD(hhir);
@@ -794,31 +796,6 @@ void CodeGenerator::emitReqBindJcc(ConditionCode cc,
   a.    jmp    (jccStub);
 }
 
-void CodeGenerator::emitEagerSyncPoint(Asm& a,
-                                       const HPHP::Opcode* pc,
-                                       const Offset spDiff) {
-  static COff spOff = offsetof(VMExecutionContext, m_stack) +
-    Stack::topOfStackOffset();
-  static COff fpOff = offsetof(VMExecutionContext, m_fp);
-  static COff pcOff = offsetof(VMExecutionContext, m_pc);
-
-  /* we can't use rAsm because the pc store uses it as a
-     temporary */
-  Reg64 rEC = reg::rdi;
-
-  a.   push(rEC);
-  emitGetGContext(a, rEC);
-  a.   storeq(rVmFp, rEC[fpOff]);
-  if (spDiff) {
-    a.   lea(rVmSp[spDiff], rAsm);
-    a.   storeq(rAsm, rEC[spOff]);
-  } else {
-    a.   storeq(rVmSp, rEC[spOff]);
-  }
-  a.   storeq(pc, rEC[pcOff]);
-  a.   pop(rEC);
-}
-
 void CodeGenerator::cgAssertNonNull(IRInstruction* inst) {
   auto srcReg = m_regs[inst->src(0)].reg();
   auto dstReg = m_regs[inst->dst()].reg();
@@ -1452,122 +1429,6 @@ bool CodeGenerator::emitInc(SSATmp* dst, SSATmp* src1, SSATmp* src2) {
  */
 bool CodeGenerator::emitDec(SSATmp* dst, SSATmp* src1, SSATmp* src2) {
   return emitIncDecHelper(dst, src1, src2, &Asm::decq);
-}
-
-// emitEagerVMRegSave --
-//   Inline. Saves regs in-place in the TC. This is an unusual need;
-//   you probably want to lazily save these regs via recordCall and
-//   its ilk.
-void CodeGenerator::emitEagerVMRegSave(Asm& a, RegSaveFlags flags) {
-  bool saveFP = bool(flags & RegSaveFlags::SaveFP);
-  bool savePC = bool(flags & RegSaveFlags::SavePC);
-  assert((flags & ~(RegSaveFlags::SavePC | RegSaveFlags::SaveFP)) ==
-         RegSaveFlags::None);
-
-  Reg64 pcReg = rdi;
-  PhysReg rEC = rAsm;
-  assert(!kSpecialCrossTraceRegs.contains(rdi));
-
-  emitGetGContext(a, rEC);
-
-  static COff spOff = offsetof(VMExecutionContext, m_stack) +
-    Stack::topOfStackOffset();
-  static COff fpOff = offsetof(VMExecutionContext, m_fp) - spOff;
-  static COff pcOff = offsetof(VMExecutionContext, m_pc) - spOff;
-
-  assert(spOff != 0);
-  a.    addq   (spOff, r64(rEC));
-  a.    storeq (rVmSp, *rEC);
-  if (savePC) {
-    // We're going to temporarily abuse rVmSp to hold the current unit.
-    Reg64 rBC = rVmSp;
-    a.  push   (rBC);
-    // m_fp -> m_func -> m_unit -> m_bc + pcReg
-    a.  loadq  (rVmFp[AROFF(m_func)], rBC);
-    a.  loadq  (rBC[Func::unitOff()], rBC);
-    a.  loadq  (rBC[Unit::bcOff()], rBC);
-    a.  addq   (rBC, pcReg);
-    a.  storeq (pcReg, rEC[pcOff]);
-    a.  pop    (rBC);
-  }
-  if (saveFP) {
-    a.  storeq (rVmFp, rEC[fpOff]);
-  }
-}
-
-void CodeGenerator::emitGetGContext(Asm& a, PhysReg dest) {
-  emitTLSLoad<ExecutionContext>(a, g_context, dest);
-}
-
-// IfCountNotStatic --
-//   Emits if (%reg->_count != RefCountStaticValue) { ... }.
-//   May short-circuit this check if the type is known to be
-//   static already.
-struct IfCountNotStatic {
-  typedef CondBlock<FAST_REFCOUNT_OFFSET,
-                    RefCountStaticValue,
-                    CC_Z,
-                    field_type(RefData, m_count)> NonStaticCondBlock;
-  NonStaticCondBlock *m_cb; // might be null
-  IfCountNotStatic(CodeGenerator::Asm& a,
-                   PhysReg reg,
-                   DataType t = KindOfInvalid) {
-
-    // Objects and variants cannot be static
-    if (t != KindOfObject && t != KindOfResource && t != KindOfRef) {
-      m_cb = new NonStaticCondBlock(a, reg);
-    } else {
-      m_cb = nullptr;
-    }
-  }
-
-  ~IfCountNotStatic() {
-    delete m_cb;
-  }
-};
-
-static void emitAssertFlagsNonNegative(CodeGenerator::Asm& as) {
-  ifThen(as, CC_NGE, [&] { as.ud2(); });
-}
-
-static void emitAssertRefCount(CodeGenerator::Asm& as, PhysReg base) {
-  as.cmpl(HPHP::RefCountStaticValue, base[FAST_REFCOUNT_OFFSET]);
-  ifThen(as, CC_NBE, [&] { as.ud2(); });
-}
-
-static void emitIncRefImpl(CodeGenerator::Asm& as, PhysReg base) {
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitAssertRefCount(as, base);
-  }
-  // emit incref
-  as.incl(base[FAST_REFCOUNT_OFFSET]);
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    // Assert that the ref count is greater than zero
-    emitAssertFlagsNonNegative(as);
-  }
-}
-
-void CodeGenerator::emitIncRef(Asm& a, PhysReg base,
-                               DataType dtype) {
-  { // if !static then
-    IfCountNotStatic ins(a, base, dtype);
-    emitIncRefImpl(a, base);
-  } // endif
-}
-
-void CodeGenerator::emitIncRefGenericRegSafe(Asm& a,
-                                             PhysReg base,
-                                             int disp,
-                                             PhysReg tmpReg) {
-  { // if RC
-    IfRefCounted irc(a, base, disp);
-    a.    load_reg64_disp_reg64(base, disp + TVOFF(m_data),
-                                tmpReg);
-    { // if !static
-      IfCountNotStatic ins(a, tmpReg);
-      a.  incl(tmpReg[FAST_REFCOUNT_OFFSET]);
-    } // endif
-  } // endif
 }
 
 void CodeGenerator::cgRoundCommon(IRInstruction* inst, RoundDirection dir) {
@@ -3250,10 +3111,10 @@ void CodeGenerator::cgIncRefWork(Type type, SSATmp* src) {
   auto increfMaybeStatic = [&] {
     auto base = m_regs[src].reg(0);
     if (!type.needsStaticBitCheck()) {
-      emitIncRefImpl(m_as, base);
+      emitIncRef(m_as, base);
     } else {
       m_as.cmpl(RefCountStaticValue, base[FAST_REFCOUNT_OFFSET]);
-      ifThen(m_as, CC_NE, [&] { emitIncRefImpl(m_as, base); });
+      ifThen(m_as, CC_NE, [&] { emitIncRef(m_as, base); });
     }
   };
 
@@ -3286,7 +3147,7 @@ void CodeGenerator::cgIncRefCtx(IRInstruction* inst) {
   emitMovRegReg(a, src, dst);
   a.    testb  (0x1, rbyte(dst));
   ifThen(a, CC_Z, [&] {
-    emitIncRefImpl(a, dst);
+    emitIncRef(a, dst);
   });
 }
 
@@ -3773,13 +3634,13 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
   m_as.shrq    (1, m_rScratch);
   ifThen(m_as, CC_NBE, [this] {
       m_as.shlq(1, m_rScratch);
-      emitIncRefImpl(m_as, m_rScratch);
+      emitIncRef(m_as, m_rScratch);
     });
   m_as.loadq   (fpReg[itOff + CufIter::nameOff()], m_rScratch);
   m_as.testq    (m_rScratch, m_rScratch);
   ifThen(m_as, CC_NZ, [this] {
       m_as.cmpl(RefCountStaticValue, m_rScratch[FAST_REFCOUNT_OFFSET]);
-      ifThen(m_as, CC_NE, [&] { emitIncRefImpl(m_as, m_rScratch); });
+      ifThen(m_as, CC_NE, [&] { emitIncRef(m_as, m_rScratch); });
       m_as.orq (ActRec::kInvNameBit, m_rScratch);
     });
   m_as.storeq  (m_rScratch, spReg[spOffset + int(AROFF(m_invName))]);
@@ -5081,7 +4942,7 @@ void CodeGenerator::emitGetCtxFwdCallWithThis(PhysReg ctxReg,
     m_as.orq(1, ctxReg);
   } else {
     // Just incref $this.
-    emitIncRefImpl(m_as, ctxReg);
+    emitIncRef(m_as, ctxReg);
   }
 }
 
@@ -5110,7 +4971,7 @@ void CodeGenerator::emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,
   {
     asm_label(m_as, NonStaticCall);
     emitMovRegReg(m_as, thisReg, destCtxReg);
-    emitIncRefImpl(m_as, destCtxReg);
+    emitIncRef(m_as, destCtxReg);
   }
   asm_label(m_as, End);
 }

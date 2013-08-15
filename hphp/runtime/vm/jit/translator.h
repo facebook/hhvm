@@ -821,6 +821,8 @@ struct InstrInfo {
 
 const InstrInfo& getInstrInfo(Op op);
 
+typedef const int COff; // Const offsets
+
 } } // HPHP::Transl
 
 #endif

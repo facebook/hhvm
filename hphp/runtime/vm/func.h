@@ -143,17 +143,13 @@ struct Func {
   typedef FixedVector<EHEnt> EHEntVec;
   typedef FixedVector<FPIEnt> FPIEntVec;
 
-  Func(Unit& unit, Id id, int line1, int line2, Offset base,
+  Func(Unit& unit, Id id, PreClass* preClass, int line1, int line2, Offset base,
        Offset past, const StringData* name, Attr attrs, bool top,
-       const StringData* docComment, int numParams, bool isGenerator);
-  Func(Unit& unit, PreClass* preClass, int line1,
-       int line2, Offset base, Offset past,
-       const StringData* name, Attr attrs, bool top,
        const StringData* docComment, int numParams, bool isGenerator);
   ~Func();
   static void destroy(Func* func);
 
-  Func* clone() const;
+  Func* clone(Class* cls) const;
   const Func* cloneAndSetClass(Class* cls) const;
 
   void validate() const {
@@ -258,12 +254,7 @@ struct Func {
   Unit* unit() const { return m_unit; }
   PreClass* preClass() const { return shared()->m_preClass; }
   Class* cls() const { return m_cls; }
-  void setCls(Class* cls) {
-    m_cls = cls;
-    setFullName();
-  }
-  void setClsAndName(Class* cls, const StringData* name) {
-    m_cls = cls;
+  void setName(const StringData* name) {
     m_name = name;
     setFullName();
   }
@@ -392,7 +383,9 @@ struct Func {
   }
 
   static void* allocFuncMem(
-    const StringData* name, int numParams, bool needsNextClonedClosure);
+    const StringData* name, int numParams,
+    bool needsNextClonedClosure,
+    bool lowMem);
 
   void setPrologue(int index, unsigned char* tca) {
     m_prologueTable[index] = tca;

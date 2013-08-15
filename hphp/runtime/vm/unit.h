@@ -807,12 +807,7 @@ class UnitEmitter {
   void emitDouble(double n, int64_t pos = -1) { emitImpl(n, pos); }
   bool insert(UnitOrigin unitOrigin, RepoTxn& txn);
   void commit(UnitOrigin unitOrigin);
-  Func* newFunc(const FuncEmitter* fe, Unit& unit, Id id, int line1, int line2,
-                Offset base, Offset past,
-                const StringData* name, Attr attrs, bool top,
-                const StringData* docComment, int numParams,
-                bool isClosureBody, bool isGenerator);
-  Func* newFunc(const FuncEmitter* fe, Unit& unit, PreClass* preClass,
+  Func* newFunc(const FuncEmitter* fe, Unit& unit, Id id, PreClass* preClass,
                 int line1, int line2, Offset base, Offset past,
                 const StringData* name, Attr attrs, bool top,
                 const StringData* docComment, int numParams,

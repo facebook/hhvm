@@ -1023,9 +1023,8 @@ void Class::setParent() {
 static Func* findSpecialMethod(Class* cls, const StringData* name) {
   if (!cls->preClass()->hasMethod(name)) return nullptr;
   Func* f = cls->preClass()->lookupMethod(name);
-  f = f->clone();
+  f = f->clone(cls);
   f->setNewFuncId();
-  f->setCls(cls);
   f->setBaseCls(cls);
   f->setHasPrivateAncestor(false);
   return f;
@@ -1241,9 +1240,9 @@ void Class::importTraitMethod(const TraitMethod&  traitMethod,
     }
     parentMethod = existingMethod;
   }
-  Func* f = method->clone();
+  Func* f = method->clone(this);
   f->setNewFuncId();
-  f->setClsAndName(this, methName);
+  f->setName(methName);
   f->setAttrs(modifiers);
   if (!parentMethod) {
     // New method
@@ -1451,9 +1450,8 @@ void Class::setMethods() {
       assert(parentMethod);
       methodOverrideCheck(parentMethod, method);
       // Overlay.
-      Func* f = method->clone();
+      Func* f = method->clone(this);
       f->setNewFuncId();
-      f->setCls(this);
       Class* baseClass;
       assert(!(f->attrs() & AttrPrivate) ||
              (parentMethod->attrs() & AttrPrivate));
@@ -1471,9 +1469,8 @@ void Class::setMethods() {
       // This is the first class that declares the method
       Class* baseClass = this;
       // Append.
-      Func* f = method->clone();
+      Func* f = method->clone(this);
       f->setNewFuncId();
-      f->setCls(this);
       f->setBaseCls(baseClass);
       f->setHasPrivateAncestor(false);
       builder.add(method->name(), f);
@@ -1497,10 +1494,7 @@ void Class::setMethods() {
       // we're cloning it so that we get a distinct set of static
       // locals and a separate translation, not a different context
       // class.
-      f = f->clone();
-      if (f->attrs() & AttrClone) {
-        f->setCls(this);
-      }
+      f = f->clone(f->attrs() & AttrClone ? this : f->cls());
       f->setNewFuncId();
     }
   }

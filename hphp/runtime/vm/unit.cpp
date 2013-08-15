@@ -1461,9 +1461,8 @@ Func* Unit::getMain(Class* cls /*= NULL*/) const {
   if (it != m_pseudoMainCache->end()) {
     return it->second;
   }
-  Func* f = (*m_mergeInfo->funcBegin())->clone();
+  Func* f = (*m_mergeInfo->funcBegin())->clone(cls);
   f->setNewFuncId();
-  f->setCls(cls);
   f->setBaseCls(cls);
   (*m_pseudoMainCache)[cls] = f;
   return f;
@@ -2409,26 +2408,16 @@ void UnitEmitter::recordFunction(FuncEmitter* fe) {
   m_feTab.push_back(std::make_pair(fe->past(), fe));
 }
 
-Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit, Id id, int line1,
-                           int line2, Offset base, Offset past,
-                           const StringData* name, Attr attrs, bool top,
-                           const StringData* docComment, int numParams,
-                           bool needsNextClonedClosure, bool isGenerator) {
-  Func* f = new (Func::allocFuncMem(name, numParams, needsNextClonedClosure))
-    Func(unit, id, line1, line2, base, past, name, attrs,
-         top, docComment, numParams, isGenerator);
-  m_fMap[fe] = f;
-  return f;
-}
-
 Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
-                           PreClass* preClass, int line1, int line2,
+                           Id id, PreClass* preClass, int line1, int line2,
                            Offset base, Offset past,
                            const StringData* name, Attr attrs, bool top,
                            const StringData* docComment, int numParams,
                            bool needsNextClonedClosure, bool isGenerator) {
-  Func* f = new (Func::allocFuncMem(name, numParams, needsNextClonedClosure))
-    Func(unit, preClass, line1, line2, base, past, name,
+  Func* f = new (Func::allocFuncMem(name, numParams,
+                                    needsNextClonedClosure,
+                                    !preClass))
+    Func(unit, id, preClass, line1, line2, base, past, name,
          attrs, top, docComment, numParams, isGenerator);
   m_fMap[fe] = f;
   return f;

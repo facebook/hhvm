@@ -80,6 +80,10 @@ HOT_FUNC_VM void setNewElem(TypedValue* base, Cell val) {
   SetNewElem<false>(base, &val);
 }
 
+HOT_FUNC_VM void setNewElemArray(TypedValue* base, Cell val) {
+  SetNewElemArray(base, &val);
+}
+
 void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis) {
   base = NewElem(mis->tvScratch, mis->tvRef, base);
   if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {

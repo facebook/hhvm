@@ -1997,6 +1997,11 @@ D:StkPtr = SetNewElemStk S0:PtrToGen S1:Cell
 
   Append the value in S1 to S0.
 
+SetNewElemArray S0:PtrToArr S1:Cell
+D:StkPtr = SetNewElemStk S0:PtrToArr S1:Cell
+
+  Append the value in S1 to S0, where S0 must be a pointer to an array.
+
 SetWithRefNewElem S0:ConstTCA S1:PtrToGen S2:PtrToGen S3:PtrToCell
 D:StkPtr = SetWithRefNewElemStk S0:ConstTCA S1:PtrToGen S2:PtrToGen
                                           S3:PtrToCell

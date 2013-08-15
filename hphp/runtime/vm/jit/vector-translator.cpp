@@ -184,6 +184,7 @@ void VectorEffects::init(const Opcode rawOp, const Type origBase) {
 // vectorBaseIdx returns the src index for inst's base operand.
 int vectorBaseIdx(Opcode opc) {
   return opc == SetNewElem || opc == SetNewElemStk ? 0
+         : opc == SetNewElemArray || opc == SetNewElemArrayStk ? 0
          : opc == BindNewElem || opc == BindNewElemStk ? 0
          : opc == ArraySet ? 1
          : opc == SetOpProp || opc == SetOpPropStk ? 1
@@ -198,6 +199,7 @@ int vectorBaseIdx(const IRInstruction* inst) {
 // vectorKeyIdx returns the src index for inst's key operand.
 int vectorKeyIdx(Opcode opc) {
   return opc == SetNewElem || opc == SetNewElemStk ? -1
+         : opc == SetNewElemArray || opc == SetNewElemArrayStk ? -1
          : opc == SetWithRefNewElem || opc == SetWithRefNewElemStk ? -1
          : opc == BindNewElem || opc == BindNewElem ? -1
          : opc == ArraySet ? 2
@@ -225,6 +227,7 @@ int vectorValIdx(Opcode opc) {
 
     case ArraySet: return 3;
     case SetNewElem: case SetNewElemStk: return 1;
+    case SetNewElemArray: case SetNewElemArrayStk: return 1;
     case SetWithRefNewElem: case SetWithRefNewElemStk: return 2;
     case BindNewElem: case BindNewElemStk: return 1;
     case SetOpProp: case SetOpPropStk: return 3;
@@ -2452,7 +2455,11 @@ void HhbcTranslator::VectorTranslator::emitVGetNewElem() {
 
 void HhbcTranslator::VectorTranslator::emitSetNewElem() {
   SSATmp* value = getValue();
-  gen(SetNewElem, getCatchSetTrace(), m_base, value);
+  if (m_base->type().subtypeOf(Type::PtrToArr)) {
+    gen(SetNewElemArray, getCatchSetTrace(), m_base, value);
+  } else {
+    gen(SetNewElem, getCatchSetTrace(), m_base, value);
+  }
   m_result = value;
 }
 

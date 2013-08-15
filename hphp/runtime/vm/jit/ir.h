@@ -692,6 +692,8 @@ O_STK(IncDecElem,              D(Cell), C(TCA)                                \
                                           S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
 O_STK(SetNewElem,                   ND, S(PtrToGen)                           \
                                           S(Cell),     VElem|E|N|Mem|Refs|Er) \
+O_STK(SetNewElemArray,              ND, S(PtrToArr)                           \
+                                          S(Cell),     VElem|E|N|Mem|Refs|Er) \
 O_STK(SetWithRefNewElem,            ND, C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(PtrToGen)                         \

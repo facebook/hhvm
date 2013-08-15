@@ -781,6 +781,7 @@ inline void SetNewElemEmptyish(TypedValue* base, Cell* value) {
   a.append(cellAsCVarRef(*value));
   tvAsVariant(base) = a;
 }
+
 template <bool setResult>
 inline void SetNewElemNumberish(Cell* value) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
@@ -791,59 +792,65 @@ inline void SetNewElemNumberish(Cell* value) {
     throw InvalidSetMException(make_tv<KindOfNull>());
   }
 }
+
+template <bool setResult>
+inline void SetNewElemBoolean(TypedValue* base, Cell* value) {
+  if (base->m_data.num) {
+    SetNewElemNumberish<setResult>(value);
+  } else {
+    SetNewElemEmptyish(base, value);
+  }
+}
+
+inline void SetNewElemString(TypedValue* base, Cell* value) {
+  int baseLen = base->m_data.pstr->size();
+  if (baseLen == 0) {
+    SetNewElemEmptyish(base, value);
+  } else {
+    raise_error("[] operator not supported for strings");
+  }
+}
+
+inline void SetNewElemArray(TypedValue* base, Cell* value) {
+  ArrayData* a = base->m_data.parr;
+  bool copy = (a->getCount() > 1)
+    || (value->m_type == KindOfArray && value->m_data.parr == a);
+  ArrayData* a2 = a->append(cellAsCVarRef(*value), copy);
+  if (a2 != a) {
+    a2->incRefCount();
+    base->m_data.parr->decRefCount();
+    base->m_data.parr = a2;
+  }
+}
+
+inline void SetNewElemObject(TypedValue* base, Cell* value) {
+  if (LIKELY(base->m_data.pobj->isCollection())) {
+    collectionAppend(base->m_data.pobj, (TypedValue*)value);
+  } else {
+    objOffsetAppend(instanceFromTv(base), (TypedValue*)value);
+  }
+}
+
 template <bool setResult>
 inline void SetNewElem(TypedValue* base, Cell* value) {
   DataType type;
   opPre(base, type);
   switch (type) {
   case KindOfUninit:
-  case KindOfNull: {
-    SetNewElemEmptyish(base, value);
-    break;
-  }
-  case KindOfBoolean: {
-    if (base->m_data.num) {
-      SetNewElemNumberish<setResult>(value);
-    } else {
-      SetNewElemEmptyish(base, value);
-    }
-    break;
-  }
+  case KindOfNull:
+    return SetNewElemEmptyish(base, value);
+  case KindOfBoolean:
+    return SetNewElemBoolean<setResult>(base,  value);
   case KindOfInt64:
-  case KindOfDouble: {
-    SetNewElemNumberish<setResult>(value);
-    break;
-  }
+  case KindOfDouble:
+    return SetNewElemNumberish<setResult>(value);
   case KindOfStaticString:
-  case KindOfString: {
-    int baseLen = base->m_data.pstr->size();
-    if (baseLen == 0) {
-      SetNewElemEmptyish(base, value);
-    } else {
-      raise_error("[] operator not supported for strings");
-    }
-    break;
-  }
-  case KindOfArray: {
-    ArrayData* a = base->m_data.parr;
-    bool copy = (a->getCount() > 1)
-                || (value->m_type == KindOfArray && value->m_data.parr == a);
-    ArrayData* a2 = a->append(cellAsCVarRef(*value), copy);
-    if (a2 != a) {
-      a2->incRefCount();
-      base->m_data.parr->decRefCount();
-      base->m_data.parr = a2;
-    }
-    break;
-  }
-  case KindOfObject: {
-    if (LIKELY(base->m_data.pobj->isCollection())) {
-      collectionAppend(base->m_data.pobj, (TypedValue*)value);
-    } else {
-      objOffsetAppend(instanceFromTv(base), (TypedValue*)value);
-    }
-    break;
-  }
+  case KindOfString:
+    return SetNewElemString(base, value);
+  case KindOfArray:
+    return SetNewElemArray(base, value);
+  case KindOfObject:
+    return SetNewElemObject(base, value);
   default: assert(false);
   }
 }

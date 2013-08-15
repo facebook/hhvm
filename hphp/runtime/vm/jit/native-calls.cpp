@@ -294,6 +294,7 @@ static CallMap s_callMap {
     {IncDecElem, fssa(0), DTV, SSync,
                  {{SSA, 1}, {TV, 2}, {SSA, 3}}},
     {SetNewElem, setNewElem, DNone, SSync, {{SSA, 0}, {TV, 1}}},
+    {SetNewElemArray, setNewElemArray, DNone, SSync, {{SSA, 0}, {TV, 1}}},
     {SetWithRefNewElem, fssa(0), DNone, SSync,
                  {{SSA, 1}, {SSA, 2}, {SSA, 3}}},
     {BindNewElem, bindNewElemIR, DNone, SSync,

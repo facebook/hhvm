@@ -55,6 +55,7 @@ ArrayData* addElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
 ArrayData* addElemStringKeyHelper(ArrayData* ad, StringData* key,
                                   TypedValue val);
 void setNewElem(TypedValue* base, Cell val);
+void setNewElemArray(TypedValue* base, Cell val);
 void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis);
 RefData* box_value(TypedValue tv);
 ArrayData* convCellToArrHelper(TypedValue tv);

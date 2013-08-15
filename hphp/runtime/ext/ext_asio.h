@@ -299,6 +299,9 @@ class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
   String getName();
   void enterContext(context_idx_t ctx_idx);
   void exitContext(context_idx_t ctx_idx);
+  bool isRunning() { return getState() == STATE_RUNNING; }
+  String getFileName();
+  int getLineNumber();
 
  protected:
   void onUnblocked();

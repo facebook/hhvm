@@ -133,6 +133,8 @@ public:
     }
   }
 
+  Offset getNextExecutionOffset() const;
+
 private:
   size_t getObjectSize() {
     return (char*)(m_arPtr + 1) - (char*)this;

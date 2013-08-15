@@ -2067,10 +2067,17 @@ void DebuggerClient::printFrame(int index, CArrRef frame) {
           args.data() ? args.data() : "");
   }
   if (!frame[s_file].isNull()) {
-    print(" %s  at %s:%d",
-          String("           ").substr(0, sindex.size()).data(),
-          frame[s_file].toString().data(),
-          (int)frame[s_line].toInt32());
+    int line = (int)frame[s_line].toInt32();
+    auto fileLineInfo =
+      folly::stringPrintf(" %s  at %s",
+                          String("           ").substr(0, sindex.size()).data(),
+                          frame[s_file].toString().data());
+    if (line > 0) {
+      fileLineInfo += folly::stringPrintf(":%d", line);
+    } else {
+      fileLineInfo += ":unknown line";
+    }
+    print(fileLineInfo);
   }
 }
 

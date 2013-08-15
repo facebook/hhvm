@@ -187,6 +187,17 @@ const StaticString
   s_line("line"),
   s_ancestors("ancestors");
 
+// Add location information for the given continuation to the given frame.
+void addContinuationLocation(Array& frameData,
+                             c_ContinuationWaitHandle& contWh) {
+  // A running continuation is active on the normal stack, and we
+  // cannot compute the location just by inspecting the continuation
+  // alone.
+  if (contWh.isRunning()) return;
+  frameData.set(s_file, contWh.getFileName(), true);
+  frameData.set(s_line, contWh.getLineNumber(), true);
+}
+
 // Form a trace of the async stack starting with the currently running
 // generator, if any. For now we just toss in the function name and
 // id, as well as the pseudo-frames for context breaks at explicit
@@ -210,13 +221,14 @@ Array createAsyncStacktrace() {
         auto parent = objToWaitableWaitHandle(piter.secondRef().toObject());
         ancestors.append(parent->t_getname());
       }
-      trace.append(
-        ArrayInit(3)
-          .set(s_function, wh->t_getname(), true)
-          .set(s_id, wh->t_getid(), true)
-          .set(s_ancestors, ancestors, true)
-          .toVariant()
-      );
+      Array frameData;
+      frameData.set(s_function, wh->t_getname(), true);
+      frameData.set(s_id, wh->t_getid(), true);
+      frameData.set(s_ancestors, ancestors, true);
+      // Continuation wait handles may have a source location to add.
+      auto contWh = dynamic_cast<c_ContinuationWaitHandle*>(wh);
+      if (contWh != nullptr) addContinuationLocation(frameData, *contWh);
+      trace.append(frameData);
     }
   }
   return trace;

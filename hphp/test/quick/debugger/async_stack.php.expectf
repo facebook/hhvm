@@ -52,6 +52,7 @@ Fetching async stacktrace...
 #0  genBar [%d]
 #1  <gen-array> [%d]
 #2  genFoo [%d]
+    at %s/async_stack.php:35
 #3  <<join>>
 c
 In genBar
@@ -76,6 +77,7 @@ Fetching async stacktrace...
 #0  genBar [%d]
 #1  <gen-array> [%d]
 #2  genFoo [%d]
+    at %s/async_stack.php:35
 #3  <<join>>
 c
 In genBar
@@ -101,6 +103,7 @@ Fetching async stacktrace...
 #0  gen2 [%d]
 #1  <gen-array> [%d]
 #2  genFoo [%d]
+    at %s/async_stack.php:35
 #3  <<join>>
 c
 In gen1
@@ -129,6 +132,7 @@ Fetching async stacktrace...
 #2  gen2 [%d]
 #3  <gen-array> [%d]
 #4  genFoo [%d]
+    at %s/async_stack.php:35
 #5  <<join>>
 c
 Finished in gen1

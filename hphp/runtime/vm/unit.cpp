@@ -53,6 +53,7 @@ TRACE_SET_MOD(hhbc);
 static const StaticString s_stdin("STDIN");
 static const StaticString s_stdout("STDOUT");
 static const StaticString s_stderr("STDERR");
+static const StaticString s___autoload("__autoload");
 
 ReadOnlyArena& get_readonly_arena() {
   static ReadOnlyArena arena(RuntimeOption::EvalHHBCArenaChunkSize);
@@ -794,10 +795,10 @@ Class* Unit::getClass(const NamedEntity* ne,
 }
 
 bool Unit::classExists(const StringData* name, bool autoload, Attr typeAttrs) {
+if(!function_exists(s___autoload)){autoload=false;}
   Class* cls = Unit::getClass(name, autoload);
   return cls && (cls->attrs() & (AttrInterface | AttrTrait)) == typeAttrs;
 }
-
 void Unit::loadFunc(const Func *func) {
   assert(!func->isMethod());
   const NamedEntity *ne = func->getNamedEntity();

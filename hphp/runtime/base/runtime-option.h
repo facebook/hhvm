@@ -422,7 +422,7 @@ public:
   F(bool, DumpAst,                     false)                           \
   F(bool, MapTCHuge,                   hugePagesSoundNice())            \
   F(bool, MapTgtCacheHuge,             false)                           \
-  F(bool, MaxLowMemHugePages,          hugePagesSoundNice() ? 200 : 0)  \
+  F(int32_t, MaxLowMemHugePages,       hugePagesSoundNice() ? 8 : 0)   \
   F(uint32_t, TCNumHugeHotMB,          16)                              \
   F(uint32_t, TCNumHugeColdMB,         4)                               \
   F(bool, RandomHotFuncs,              false)                           \

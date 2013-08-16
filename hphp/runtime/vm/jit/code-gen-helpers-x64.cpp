@@ -56,6 +56,30 @@ namespace CodeGenHelpersX64 {
 using Transl::rVmFp;
 using Transl::rVmSp;
 
+/*
+ * Satisfy an alignment constraint. If we're in a reachable section
+ * of code, bridge the gap with nops. Otherwise, int3's.
+ */
+void moveToAlign(Asm& aa,
+                 const size_t align /* =kJmpTargetAlign */,
+                 const bool unreachable /* =true */) {
+  using namespace HPHP::Util;
+  assert(isPowerOfTwo(align));
+  size_t leftInBlock = align - ((align - 1) & uintptr_t(aa.frontier()));
+  if (leftInBlock == align) return;
+  if (unreachable) {
+    if (leftInBlock > 2) {
+      aa.ud2();
+      leftInBlock -= 2;
+    }
+    if (leftInBlock > 0) {
+      aa.emitInt3s(leftInBlock);
+    }
+    return;
+  }
+  aa.emitNop(leftInBlock);
+}
+
 void emitEagerSyncPoint(Asm& as, const HPHP::Opcode* pc, const Offset spDiff) {
   static COff spOff = offsetof(VMExecutionContext, m_stack) +
     Stack::topOfStackOffset();
@@ -314,6 +338,109 @@ ConditionCode opToConditionCode(Opcode opc) {
   default:
     always_assert(0);
   }
+}
+
+/*
+ * emitServiceReqWork --
+ *
+ *   Call a translator service co-routine. The code emitted here
+ *   reenters the enterTC loop, invoking the requested service. Control
+ *   will be returned non-locally to the next logical instruction in
+ *   the TC.
+ *
+ *   Return value is a destination; we emit the bulky service
+ *   request code into astubs.
+ *
+ *   Returns a continuation that will run after the arguments have been
+ *   emitted. This is gross, but is a partial workaround for the inability
+ *   to capture argument packs in the version of gcc we're using.
+ */
+TCA
+emitServiceReqWork(Asm& as, TCA start, bool persist, SRFlags flags,
+                   ServiceRequest req, const ServiceReqArgVec& argv) {
+  assert(start);
+  const bool align = flags & SRFlags::Align;
+
+  /*
+   * Remember previous state of the code cache.
+   */
+  boost::optional<CodeCursor> maybeCc = boost::none;
+  if (start != as.frontier()) {
+    maybeCc = boost::in_place<CodeCursor>(boost::ref(as), start);
+  }
+
+  /* max space for moving to align, saving VM regs plus emitting args */
+  static const int
+    kVMRegSpace = 0x14,
+    kMovSize = 0xa,
+    kNumServiceRegs = sizeof(serviceReqArgRegs) / sizeof(PhysReg),
+    kMaxStubSpace = kJmpTargetAlign - 1 + kVMRegSpace +
+      kNumServiceRegs * kMovSize;
+  if (align) {
+    moveToAlign(as);
+  }
+  TCA retval = as.frontier();
+  TRACE(3, "Emit Service Req @%p %s(", start, serviceReqName(req));
+  /*
+   * Move args into appropriate regs. Eager VMReg save may bash flags,
+   * so set the CondCode arguments first.
+   */
+  for (int i = 0; i < argv.size(); ++i) {
+    assert(i < kNumServiceReqArgRegs);
+    auto reg = serviceReqArgRegs[i];
+    const auto& argInfo = argv[i];
+    switch(argv[i].m_kind) {
+      case ServiceReqArgInfo::Immediate: {
+        TRACE(3, "%" PRIx64 ", ", argInfo.m_imm);
+        as.    emitImmReg(argInfo.m_imm, reg);
+      } break;
+      case ServiceReqArgInfo::CondCode: {
+        // Already set before VM reg save.
+        DEBUG_ONLY TCA start = as.frontier();
+        as.    setcc(argInfo.m_cc, rbyte(reg));
+        assert(start - as.frontier() <= kMovSize);
+        TRACE(3, "cc(%x), ", argInfo.m_cc);
+      } break;
+      default: not_reached();
+    }
+  }
+  emitEagerVMRegSave(as, JIT::RegSaveFlags::SaveFP);
+  if (persist) {
+    as.  emitImmReg(0, rAsm);
+  } else {
+    as.  emitImmReg((uint64_t)start, rAsm);
+  }
+  TRACE(3, ")\n");
+  as.    emitImmReg(req, rdi);
+
+  /*
+   * Weird hand-shaking with enterTC: reverse-call a service routine.
+   *
+   * In the case of some special stubs (m_callToExit, m_retHelper), we
+   * have already unbalanced the return stack by doing a ret to
+   * something other than enterTCHelper.  In that case
+   * SRJmpInsteadOfRet indicates to fake the return.
+   */
+  if (flags & SRFlags::JmpInsteadOfRet) {
+    as.  pop(rax);
+    as.  jmp(rax);
+  } else {
+    as.  ret();
+  }
+
+  // TODO(2796856): we should record an OpServiceRequest pseudo-bytecode here.
+
+  translator_not_reached(as);
+  if (!persist) {
+    /*
+     * Recycled stubs need to be uniformly sized. Make space for the
+     * maximal possible service requests.
+     */
+    assert(as.frontier() - start <= kMaxStubSpace);
+    as.emitNop(start + kMaxStubSpace - as.frontier());
+    assert(as.frontier() - start == kMaxStubSpace);
+  }
+  return retval;
 }
 
 }}}

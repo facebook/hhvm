@@ -185,117 +185,12 @@ const int kNumRegisterArgs = sizeof(argNumToRegName) / sizeof(PhysReg);
  * JIT'd code "reverse calls" the enterTC routine by returning to it,
  * with a service request number and arguments.
  */
-
 const PhysReg serviceReqArgRegs[] = {
   // rdi: contains request number
   reg::rsi, reg::rdx, reg::rcx, reg::r8, reg::r9
 };
 const int kNumServiceReqArgRegs =
   sizeof(serviceReqArgRegs) / sizeof(PhysReg);
-
-#define SERVICE_REQUESTS \
-  /*
-   * Return from this nested VM invocation to the previous invocation.
-   * (Ending the program if there is no previous invocation.)
-   */ \
-  REQ(EXIT) \
-  \
-  /*
-   * BIND_* all are requests for the first time a call, jump, or
-   * whatever is needed.  This generally involves translating new code
-   * and then patching an address supplied as a service request
-   * argument.
-   */ \
-  REQ(BIND_CALL)         \
-  REQ(BIND_JMP)          \
-  REQ(BIND_JCC)          \
-  REQ(BIND_ADDR)         \
-  REQ(BIND_SIDE_EXIT)    \
-  REQ(BIND_JMPCC_FIRST)  \
-  REQ(BIND_JMPCC_SECOND) \
-  \
-  /*
-   * When all translations don't support the incoming types, a
-   * retranslate request is made.
-   */ \
-  REQ(RETRANSLATE) \
-  \
-  /*
-   * When PGO is enabled, this retranslates previous translations leveraging
-   * profiling data.
-   */ \
-  REQ(RETRANSLATE_OPT) \
-  \
-  /*
-   * If the max translations is reached for a SrcKey, the last
-   * translation in the chain will jump to an interpret request stub.
-   * This instructs enterTC to punt to the interpreter.
-   */ \
-  REQ(INTERPRET) \
-  \
-  /*
-   * When the interpreter pushes an ActRec, the return address for
-   * this ActRec will be set to a stub that raises POST_INTERP_RET,
-   * since it doesn't have a TCA to return to.
-   *
-   * This request is raised in the case that translated machine code
-   * executes the RetC for a frame that was pushed by the interpreter.
-   */ \
-  REQ(POST_INTERP_RET) \
-  \
-  /*
-   * Raised when the execution stack overflowed.
-   */ \
-  REQ(STACK_OVERFLOW) \
-  \
-  /*
-   * Resume restarts execution at the current PC.  This is used after
-   * an interpOne of an instruction that changes the PC, and in some
-   * cases with FCall.
-   */ \
-  REQ(RESUME)
-
-enum ServiceRequest {
-#define REQ(nm) REQ_##nm,
-  SERVICE_REQUESTS
-#undef REQ
-};
-
-/*
- * Various flags that are passed to emitServiceReq.  May be or'd
- * together.
- */
-enum class SRFlags {
-  None = 0,
-
-  /*
-   * Indicates the service request should be aligned.
-   */
-  Align = 1 << 0,
-
-  /*
-   * For some service requests (returning from interpreted frames),
-   * using a ret instruction to get back to enterTCHelper will
-   * unbalance the return stack buffer---in these cases use a jmp.
-   */
-  JmpInsteadOfRet = 1 << 1,
-
-  /*
-   * The service request should be emitted on a instead of astubs.
-   *
-   * Overrides whatever the bits for Align and Persistent are and
-   * implies !Align and !Persistent.
-   */
-  EmitInA = 1 << 2,
-};
-
-inline bool operator&(SRFlags a, SRFlags b) {
-  return int(a) & int(b);
-}
-
-inline SRFlags operator|(SRFlags a, SRFlags b) {
-  return SRFlags(int(a) | int(b));
-}
 
 //////////////////////////////////////////////////////////////////////
 // Set of all the x64 registers.
@@ -329,15 +224,5 @@ const size_t kReservedRSPSpillSpace   = 0x200;
 //////////////////////////////////////////////////////////////////////
 
 }}
-
-namespace std {
-
-template<> struct hash<HPHP::Transl::ServiceRequest> {
-  size_t operator()(const HPHP::Transl::ServiceRequest& sr) const {
-    return sr;
-  }
-};
-
-}
 
 #endif

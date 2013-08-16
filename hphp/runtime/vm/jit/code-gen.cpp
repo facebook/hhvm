@@ -529,12 +529,14 @@ void CodeGenerator::emitReqBindJcc(ConditionCode cc,
   prepareForTestAndSmash(a, 0, TestAndSmashFlags::kAlignJccAndJmp);
   auto const patchAddr = a.frontier();
   auto const jccStub =
-    m_tx64->emitServiceReq(REQ_BIND_JMPCC_FIRST,
-                           patchAddr,
-                           extra->taken,
-                           extra->notTaken,
-                           cc,
-                           m_tx64->ccArgInfo(cc));
+    emitEphemeralServiceReq(m_astubs,
+                            tx64->getFreeStub(),
+                            REQ_BIND_JMPCC_FIRST,
+                            patchAddr,
+                            extra->taken,
+                            extra->notTaken,
+                            cc,
+                            ccServiceReqArgInfo(cc));
 
   tx64->setJmpTransID(a.frontier());
   a.    jcc    (cc, jccStub);
@@ -2531,9 +2533,9 @@ void CodeGenerator::emitReqBindAddr(const Func* func,
                                     Offset offset) {
   tx64->setJmpTransID((TCA)&dest);
 
-  dest = m_tx64->emitServiceReq(REQ_BIND_ADDR,
-                                &dest,
-                                offset);
+  dest = emitServiceReq(m_astubs, REQ_BIND_ADDR,
+                        &dest,
+                        offset);
 }
 
 void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
@@ -2548,9 +2550,13 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
       }
       m_as.    cmpq(data->cases - 2, indexReg);
       prepareForSmash(m_as, kJmpccLen);
-      TCA def = m_tx64->emitServiceReq(REQ_BIND_JMPCC_SECOND,
-                                       m_as.frontier(), data->defaultOff,
-                                       CC_AE);
+      TCA def = emitEphemeralServiceReq(
+        m_astubs,
+        tx64->getFreeStub(),
+        REQ_BIND_JMPCC_SECOND,
+        m_as.frontier(),
+        data->defaultOff,
+        CC_AE);
       tx64->setJmpTransID(m_as.frontier());
 
       m_as.    jae(def);
@@ -2861,14 +2867,14 @@ void CodeGenerator::cgReqInterpret(IRInstruction* inst) {
   auto destSk = SrcKey { curFunc(), offset };
   auto const numInstrs = 1;
   emitExitSlowStats(m_as, curFunc(), destSk);
-  m_tx64->emitServiceReq(REQ_INTERPRET, offset, numInstrs);
+  emitServiceReq(m_astubs, REQ_INTERPRET, offset, numInstrs);
 }
 
 void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
   auto extra = inst->extra<ReqRetranslateOpt>();
 
-  m_tx64->emitServiceReq(REQ_RETRANSLATE_OPT, curFunc()->getFuncId(),
-                         extra->offset, extra->transId);
+  emitServiceReq(m_astubs, REQ_RETRANSLATE_OPT, curFunc()->getFuncId(),
+                 extra->offset, extra->transId);
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
@@ -5550,7 +5556,7 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   m_as.loadq(rax[offsetof(VMExecutionContext, m_stack) +
                  Stack::topOfStackOffset()], rVmSp);
 
-  m_tx64->emitServiceReq(SRFlags::EmitInA, REQ_RESUME);
+  emitServiceReq(m_as, REQ_RESUME);
 }
 
 void CodeGenerator::cgContEnter(IRInstruction* inst) {

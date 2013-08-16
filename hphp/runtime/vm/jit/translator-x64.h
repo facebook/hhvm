@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/base/smart-containers.h"
 
@@ -113,7 +114,6 @@ typedef X64Assembler Asm;
 
 typedef hphp_hash_map<TCA, TransID> TcaTransIDMap;
 
-constexpr size_t kJmpTargetAlign = 16;
 constexpr size_t kNonFallthroughAlign = 64;
 constexpr int kJmpLen = 5;
 constexpr int kCallLen = 5;
@@ -137,17 +137,6 @@ void prepareForTestAndSmash(Asm&, int testBytes, TestAndSmashFlags flags);
 void prepareForSmash(Asm&, int nBytes, int offset = 0);
 bool isSmashable(Address frontier, int nBytes, int offset = 0);
 
-// Service request arg packing.
-struct ServiceReqArgInfo {
-  enum {
-    Immediate,
-    CondCode,
-  } m_kind;
-  union {
-    uint64_t m_imm;
-    ConditionCode m_cc;
-  };
-};
 
 class TranslatorX64 : public Translator
                     , private boost::noncopyable {
@@ -282,69 +271,22 @@ private:
   //
   ////////////////////////////////////////
 public:
-  template<typename... Arg>
-  TCA emitServiceReq(SRFlags flags, ServiceRequest sr, Arg... a) {
-    ServiceReqArgVec argv;
-    packServiceReqArgs(argv, a...);
-    return emitServiceReqWork(flags, sr, argv);
-  }
-
-  template<typename... Arg>
-  TCA emitServiceReq(ServiceRequest sr, Arg... a) {
-    return emitServiceReq(SRFlags::None, sr, a...);
-  }
 
   bool freeRequestStub(TCA stub);
   TCA getFreeStub();
 
 private:
-  ServiceReqArgInfo ccArgInfo(ConditionCode cc) {
-    return ServiceReqArgInfo{ServiceReqArgInfo::CondCode, { uint64_t(cc) }};
-  }
-
-  typedef smart::vector<ServiceReqArgInfo> ServiceReqArgVec;
-
-  template<typename T>
-  typename std::enable_if<
-    // Only allow for things with a sensible cast to uint64_t.
-    std::is_integral<T>::value || std::is_pointer<T>::value ||
-    std::is_enum<T>::value
-  >::type packServiceReqArg(ServiceReqArgVec& args, T arg) {
-    // By default, assume we meant to pass an immediate arg.
-    args.push_back({ ServiceReqArgInfo::Immediate, { uint64_t(arg) } });
-  }
-
-  void packServiceReqArg(ServiceReqArgVec& args,
-                         const ServiceReqArgInfo& argInfo) {
-    args.push_back(argInfo);
-  }
-
-  template<typename T, typename... Arg>
-  void packServiceReqArgs(ServiceReqArgVec& argv, T arg, Arg... args) {
-    packServiceReqArg(argv, arg);
-    packServiceReqArgs(argv, args...);
-  }
-
-  void packServiceReqArgs(ServiceReqArgVec& argv) {
-    // Recursive base case.
-  }
-
-  TCA emitServiceReqWork(SRFlags flags, ServiceRequest req,
-                         const ServiceReqArgVec& argInfo);
-
   void emitBindJ(Asm& a, ConditionCode cc, SrcKey dest,
-                 ServiceRequest req);
+                 JIT::ServiceRequest req);
   void emitBindJmp(Asm& a, SrcKey dest,
-                   ServiceRequest req = REQ_BIND_JMP);
+                   JIT::ServiceRequest req = JIT::REQ_BIND_JMP);
   void emitBindJcc(Asm& a, ConditionCode cc, SrcKey dest,
-                   ServiceRequest req = REQ_BIND_JCC);
-  void emitBindJmp(SrcKey dest);
+                   JIT::ServiceRequest req = JIT::REQ_BIND_JCC);
   int32_t emitBindCall(SrcKey srcKey, const Func* funcd, int numArgs);
   void emitBindCallHelper(SrcKey srcKey,
                           const Func* funcd,
                           int numArgs);
   int32_t emitNativeImpl(const Func*, bool emitSavedRIPReturn);
-
 
   ////////////////////////////////////////
   //
@@ -352,7 +294,7 @@ private:
   //
   ////////////////////////////////////////
 private:
-  TCA bindJmp(TCA toSmash, SrcKey dest, ServiceRequest req, bool& smashed);
+  TCA bindJmp(TCA toSmash, SrcKey dest, JIT::ServiceRequest req, bool& smashed);
   TCA bindJmpccFirst(TCA toSmash,
                      Offset offTrue, Offset offFalse,
                      bool toTake,
@@ -390,9 +332,6 @@ private:
 
   void emitFallbackUncondJmp(Asm& as, SrcRec& dest);
   void emitFallbackCondJmp(Asm& as, SrcRec& dest, ConditionCode cc);
-
-  void moveToAlign(Asm &aa, const size_t alignment = kJmpTargetAlign,
-                   const bool unreachable = true);
 
   static void smash(Asm &a, TCA src, TCA dest, bool isCall);
   static void smashJmp(Asm &a, TCA src, TCA dest) {

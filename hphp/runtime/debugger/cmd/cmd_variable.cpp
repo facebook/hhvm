@@ -76,7 +76,7 @@ void CmdVariable::PrintVariable(DebuggerClient &client, CStrRef varName) {
       String name = iter.first().toString();
       if (!name.equal(varName)) continue;
       String value = DebuggerClient::FormatVariable(iter.second(), 200);
-      client.print("%s", value.data());
+      client.output("%s", value.data());
     }
   }
 }

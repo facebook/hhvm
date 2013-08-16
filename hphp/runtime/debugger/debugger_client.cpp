@@ -323,14 +323,15 @@ bool DebuggerClient::IsValidNumber(const std::string &arg) {
 }
 
 String DebuggerClient::FormatVariable(CVarRef v, int maxlen /* = 80 */,
-                                      bool vardump /* = false */) {
+                                      char format /* = 'd' */) {
   TRACE(2, "DebuggerClient::FormatVariable\n");
   String value;
   if (maxlen <= 0) {
     try {
-      VariableSerializer::Type t = vardump ?
-                                   VariableSerializer::Type::VarDump :
-                                   VariableSerializer::Type::DebuggerDump;
+      VariableSerializer::Type t =
+        format == 'r' ? VariableSerializer::Type::PrintR :
+        format == 'v' ? VariableSerializer::Type::VarDump :
+                        VariableSerializer::Type::DebuggerDump;
       VariableSerializer vs(t, 0, 2);
       value = vs.serialize(v, true);
     } catch (StringBufferLimitException &e) {
@@ -341,10 +342,10 @@ String DebuggerClient::FormatVariable(CVarRef v, int maxlen /* = 80 */,
     }
   } else {
     VariableSerializer vs(VariableSerializer::Type::DebuggerDump, 0, 2);
-    value = vs.serializeWithLimit(v, maxlen);
+    value = vs.serializeWithLimit(v, maxlen+1);
   }
 
-  if (maxlen <= 0 || value.length() - maxlen < 30) {
+  if (maxlen <= 0 || value.length() <= maxlen) {
     return value;
   }
 

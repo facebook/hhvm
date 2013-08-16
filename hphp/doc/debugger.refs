@@ -342,6 +342,8 @@ step out more than one level of function calls.
     --------------------------- Print Command ---------------------------
 
     [p]rint {php}        prints result of PHP code
+    [p]rint r {php}      prints result of PHP code, (print_r)
+    [p]rint v {php}      prints result of PHP code, (var_dump)
     [p]rint x {php}      prints hex encoded string or number
     [p]rint [h]ex        prints hex encoded string or number
       {php}

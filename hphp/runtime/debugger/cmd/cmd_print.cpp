@@ -26,7 +26,7 @@ namespace HPHP { namespace Eval {
 TRACE_SET_MOD(debugger);
 
 const char *CmdPrint::Formats[] = {
-  "x", "v", "hex", "oct", "dec", "unsigned", "time", nullptr
+  "r", "v", "x", "hex", "oct", "dec", "unsigned", "time", nullptr
 };
 
 std::string CmdPrint::FormatResult(const char *format, CVarRef ret) {
@@ -35,8 +35,13 @@ std::string CmdPrint::FormatResult(const char *format, CVarRef ret) {
     return string(sret.data(), sret.size());
   }
 
+  if (strcmp(format, "r") == 0) {
+    String sret = DebuggerClient::FormatVariable(ret, -1, 'r');
+    return string(sret.data(), sret.size());
+  }
+
   if (strcmp(format, "v") == 0) {
-    String sret = DebuggerClient::FormatVariable(ret, -1, true);
+    String sret = DebuggerClient::FormatVariable(ret, -1, 'v');
     return string(sret.data(), sret.size());
   }
 
@@ -185,7 +190,8 @@ void CmdPrint::list(DebuggerClient &client) {
 void CmdPrint::help(DebuggerClient &client) {
   client.helpTitle("Print Command");
   client.helpCmds(
-    "[p]rint {php}",              "prints result of PHP code, (print_r)",
+    "[p]rint {php}",              "prints result of PHP code",
+    "[p]rint r {php}",            "prints result of PHP code, (print_r)",
     "[p]rint v {php}",            "prints result of PHP code, (var_dump)",
     "[p]rint x {php}",            "prints hex encoded string or number",
     "[p]rint [h]ex {php}",        "prints hex encoded string or number",

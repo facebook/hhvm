@@ -106,7 +106,7 @@ public:
   static bool Match(const char *input, const char *cmd);
   static bool IsValidNumber(const std::string &arg);
   static String FormatVariable(CVarRef v, int maxlen = 80,
-                               bool vardump = false);
+                               char format = 'd');
   static String FormatInfoVec(const IDebuggable::InfoVec &info,
                               int *nameLen = nullptr);
   static String FormatTitle(const char *title);

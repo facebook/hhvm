@@ -65,7 +65,7 @@ public:
   const InterruptSite *getCallingSite() const;
   const char *getFile() const { return m_file.data(); }
   const char *getClass() const { return m_class ? m_class : ""; }
-  const char *getFunction() const { return m_function ? m_function : ""; }
+  const char *getFunction() const { return m_function.data(); }
   // Placeholder for future namespace support.
   const char *getNamespace() const { return nullptr; }
   int getFileLen() const;
@@ -99,7 +99,7 @@ private:
   // cached
   mutable std::unique_ptr<const InterruptSite> m_callingSite;
   mutable const char *m_class;
-  mutable const char *m_function;
+  mutable std::string m_function;
   mutable String m_file;
   mutable std::string m_url;
 

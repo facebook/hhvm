@@ -111,7 +111,7 @@ break flow2.php:12
 Breakpoint 2 set on line 12 of flow2.php
 @test(2)
 Constructor
-Breakpoint 1 reached at genFoo$continuation() on line 10 of %s/flow2.php
+Breakpoint 1 reached at genFoo() on line 10 of %s/flow2.php
    9 function genFoo($a) {
   10   $a = bar($a);
   11   $z = yield $a+5;
@@ -123,7 +123,7 @@ Break at foo() on line 40 of %s/flow2.php
   41     var_dump($x);
 
 continue
-Breakpoint 2 reached at genFoo$continuation() on line 12 of %s/flow2.php
+Breakpoint 2 reached at genFoo() on line 12 of %s/flow2.php
   11   $z = yield $a+5;
   12   yield $z+1;
   13   error_log('Finished in genFoo');

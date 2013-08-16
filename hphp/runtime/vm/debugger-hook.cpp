@@ -38,7 +38,7 @@ static inline Transl::Translator* transl() {
 // here and execute any number of commands from the client. Return from here
 // lets the opcode execute.
 void phpDebuggerOpcodeHook(const uchar* pc) {
-  TRACE(5, "in phpDebuggerOpcodeHook()\n");
+  TRACE(5, "in phpDebuggerOpcodeHook() with pc %p\n", pc);
   // Short-circuit when we're doing things like evaling PHP for print command,
   // or conditional breakpoints.
   if (UNLIKELY(g_vmContext->m_dbgNoBreak)) {
@@ -172,8 +172,8 @@ static void addBreakPointsInFile(Eval::DebuggerProxy* proxy,
 
 static void addBreakPointFuncEntry(const Func* f) {
   PC pc = f->unit()->at(f->base());
-  TRACE(5, "func() break %s : unit %p offset %d)\n",
-        f->fullName()->data(), f->unit(), f->base());
+  TRACE(5, "func() break %s : unit %p offset %d ==> pc %p)\n",
+        f->fullName()->data(), f->unit(), f->base(), pc);
   getBreakPointFilter()->addPC(pc);
   if (RuntimeOption::EvalJit) {
     if (transl()->addDbgBLPC(pc)) {
@@ -182,6 +182,23 @@ static void addBreakPointFuncEntry(const Func* f) {
         Logger::Warning("Failed to set breakpoints in Jitted code");
       }
     }
+  }
+}
+
+// See if the given name matches the function's name. For generators,
+// it will only return true if the given function is the generator,
+// not the stub which makes the generator. I.e., given name="genFoo"
+// this will return true when f's name is "genFoo$continuation", and
+// false for "genFoo".
+static bool matchFunctionName(string name, const Func* f) {
+  if (f->hasGeneratorAsBody()) return false; // Original function.
+  auto funcName = f->name()->data();
+  if (!f->isGenerator()) {
+    return name == funcName;
+  } else {
+    DEBUG_ONLY string s(funcName);
+    assert(s.compare(s.length() - 13, string::npos, "$continuation") == 0);
+    return name.compare(0, string::npos, funcName, strlen(funcName) - 13) == 0;
   }
 }
 
@@ -194,7 +211,7 @@ static void addBreakPointFuncEntry(Eval::DebuggerProxy* proxy, const Func* f) {
   for (unsigned int i = 0; i < bps.size(); i++) {
     Eval::BreakPointInfoPtr bp = bps[i];
     if (bp->m_state == Eval::BreakPointInfo::Disabled) continue;
-    if (bp->getFuncName() != f->fullName()->data()) continue;
+    if (!matchFunctionName(bp->getFuncName(), f)) continue;
     bp->m_bindState = Eval::BreakPointInfo::KnownToBeValid;
     addBreakPointFuncEntry(f);
     return;
@@ -221,7 +238,7 @@ static void addBreakPointsClass(Eval::DebuggerProxy* proxy, const Class* cls) {
     bp->m_bindState = Eval::BreakPointInfo::KnownToBeInvalid;
     for (size_t i = 0; i < numFuncs; ++i) {
       auto f = funcs[i];
-      if (bp->getFunction() != f->name()->data()) continue;
+      if (!matchFunctionName(bp->getFunction(), f)) continue;
       bp->m_bindState = Eval::BreakPointInfo::KnownToBeValid;
       addBreakPointFuncEntry(f);
     }
@@ -308,7 +325,7 @@ void phpSetBreakPoints(Eval::DebuggerProxy* proxy) {
       Func* const* funcs = cls->methods();
       for (size_t i = 0; i < numFuncs; ++i) {
         auto f = funcs[i];
-        if (methodName != f->name()->data()) continue;
+        if (!matchFunctionName(methodName, f)) continue;
         bp->m_bindState = Eval::BreakPointInfo::KnownToBeValid;
         addBreakPointFuncEntry(f);
         break;
@@ -322,6 +339,15 @@ void phpSetBreakPoints(Eval::DebuggerProxy* proxy) {
       auto fName = StringData::GetStaticString(funcName);
       Func* f = Unit::lookupFunc(fName);
       if (f == nullptr) continue;
+      if (f->hasGeneratorAsBody()) {
+        // This function is a generator, and it's the original
+        // function which has been turned into a stub which creates a
+        // continuation. We want to set the breakpoint on the
+        // continuation function instead.
+        fName = StringData::GetStaticString(funcName + "$continuation");
+        f = Unit::lookupFunc(fName);
+        if (f == nullptr) continue;
+      }
       bp->m_bindState = Eval::BreakPointInfo::KnownToBeValid;
       addBreakPointFuncEntry(f);
       continue;

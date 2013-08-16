@@ -79,7 +79,7 @@ std::string InterruptSite::desc() const {
 InterruptSite::InterruptSite(bool hardBreakPoint, CVarRef error)
     : m_error(error), m_activationRecord(nullptr),
       m_callingSite(nullptr), m_class(nullptr),
-      m_function(nullptr), m_file((StringData*)nullptr),
+      m_file((StringData*)nullptr),
       m_line0(0), m_char0(0), m_line1(0), m_char1(0),
       m_offset(InvalidAbsoluteOffset), m_unit(nullptr), m_valid(false),
       m_funcEntry(false) {
@@ -111,7 +111,7 @@ InterruptSite::InterruptSite(bool hardBreakPoint, CVarRef error)
 InterruptSite::InterruptSite(ActRec *fp, Offset offset, CVarRef error)
   : m_error(error), m_activationRecord(nullptr),
     m_callingSite(nullptr), m_class(nullptr),
-    m_function(nullptr), m_file((StringData*)nullptr),
+    m_file((StringData*)nullptr),
     m_line0(0), m_char0(0), m_line1(0), m_char1(0),
     m_offset(offset), m_unit(nullptr), m_valid(false),
     m_funcEntry(false) {
@@ -136,6 +136,12 @@ void InterruptSite::Initialize(ActRec *fp) {
     m_char1 = m_sourceLoc.char1;
   }
   m_function = fp->m_func->name()->data();
+  if (fp->m_func->isGenerator()) {
+    // Strip off "$continuation" to get the original function name
+    assert(m_function.compare(m_function.length() - 13,
+                              string::npos, "$continuation") == 0);
+    m_function.resize(m_function.length() - 13);
+  }
   if (fp->m_func->preClass()) {
     m_class = fp->m_func->preClass()->name()->data();
   } else {
@@ -1031,7 +1037,6 @@ bool BreakPointInfo::checkStack(InterruptSite &site) {
   TRACE(2, "BreakPointInfo::checkStack\n");
   const InterruptSite* s = &site;
   for (int i = 0; i < m_funcs.size(); ) {
-    if (s == nullptr) return false;
     if (!Match(s->getNamespace(), 0, m_funcs[i]->m_namespace, m_regex, true) ||
         !Match(s->getFunction(),  0, m_funcs[i]->m_function,  m_regex, true) ||
         !MatchClass(s->getClass(), m_funcs[i]->m_class, m_regex,
@@ -1043,6 +1048,7 @@ bool BreakPointInfo::checkStack(InterruptSite &site) {
       i++; // matched m_funcs[i], proceed to match m_funcs[i+1]
     }
     s = s->getCallingSite();
+    if (s == nullptr) return false;
   }
   return true;
 }

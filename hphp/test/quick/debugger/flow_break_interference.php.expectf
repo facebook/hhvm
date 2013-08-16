@@ -7,7 +7,7 @@ Breakpoint 2 set on line 27 of flow_break_interference.php
 But wont break until file flow_break_interference.php has been loaded.
 c
 int(8)
-Breakpoint 1 reached at genFoo$continuation() on line 15 of %s/flow_break_interference.php
+Breakpoint 1 reached at genFoo() on line 15 of %s/flow_break_interference.php
   14   // then we'll execute that opcode (load $a) before stopping.
   15   yield $z+1;
   16   error_log('Finished in genFoo');

@@ -13,19 +13,21 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/file.h"
-#include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/ext/ext_json.h"
 
-#include "hphp/util/alloc.h"
+#include <algorithm>
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include <algorithm>
+#include "folly/Conv.h"
+
+#include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/ext/ext_json.h"
+
+#include "hphp/util/alloc.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -298,6 +300,8 @@ void StringBuffer::growBy(int spaceRequired) {
   m_cap = s.len;
 }
 
+//////////////////////////////////////////////////////////////////////
+
 CstrBuffer::CstrBuffer(int cap)
   : m_buffer((char*)Util::safe_malloc(cap + 1)), m_len(0), m_cap(cap) {
   assert(unsigned(cap) <= kMaxCap);
@@ -308,10 +312,10 @@ CstrBuffer::CstrBuffer(const char *filename)
   struct stat sb;
   if (stat(filename, &sb) == 0) {
     if (sb.st_size > kMaxCap - 1) {
-      std::ostringstream out;
-      out << "file " << filename << " is too large";
-      throw StringBufferLimitException(kMaxCap,
-                                       String(out.str().c_str()));
+      auto const str = folly::to<std::string>(
+        "file ", filename, " is too large"
+      );
+      throw StringBufferLimitException(kMaxCap, String(str.c_str()));
     }
     m_cap = sb.st_size;
     m_buffer = (char *)Util::safe_malloc(m_cap + 1);
@@ -339,8 +343,12 @@ CstrBuffer::~CstrBuffer() {
   free(m_buffer);
 }
 
-void CstrBuffer::append(const char* data, int len) {
+void CstrBuffer::append(StringSlice slice) {
+  auto const data = slice.ptr;
+  auto const len = slice.len;
+
   assert(m_buffer && len >= 0);
+
   unsigned newlen = m_len + len;
   if (newlen + 1 > m_cap) {
     if (newlen + 1 > kMaxCap) {
@@ -363,7 +371,6 @@ String CstrBuffer::detach() {
   m_len = m_cap = 0;
   return s;
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 }

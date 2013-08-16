@@ -84,9 +84,9 @@ void StaticContentCache::load() {
 
     int total = 0;
     for (unsigned int i = 0; i < out.size(); i++) {
-      ResourceFilePtr f(new ResourceFile());
+      auto const f = std::make_shared<ResourceFile>();
 
-      CstrBufferPtr sb(new CstrBuffer(out[i].c_str()));
+      auto const sb = std::make_shared<CstrBuffer>(out[i].c_str());
       if (sb->valid() && sb->size() > 0) {
         string url = out[i].substr(rootSize + 1);
         f->file = sb;
@@ -98,7 +98,7 @@ void StaticContentCache::load() {
           char *data = gzencode(sb->data(), len, 9, CODING_GZIP);
           if (data) {
             if (unsigned(len) < sb->size()) {
-              f->compressed = CstrBufferPtr(new CstrBuffer(data, len));
+              f->compressed = std::make_shared<CstrBuffer>(data, len);
             } else {
               free(data);
             }
@@ -120,7 +120,7 @@ bool StaticContentCache::find(const std::string &name, const char *&data,
     return (data = TheFileCache->read(name.c_str(), len, compressed));
   }
 
-  StringToResourceFilePtrMap::const_iterator iter = m_files.find(name);
+  auto const iter = m_files.find(name);
   if (iter != m_files.end()) {
     if (compressed && iter->second->compressed) {
       data = iter->second->compressed->data();

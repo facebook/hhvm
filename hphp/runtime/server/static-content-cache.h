@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_STATIC_CONTENT_CACHE_H_
 #define incl_HPHP_STATIC_CONTENT_CACHE_H_
 
+#include <memory>
+
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/util/file-cache.h"
 
@@ -43,15 +45,14 @@ public:
             bool &compressed) const;
 
 private:
-  int m_totalSize;
-
-  DECLARE_BOOST_TYPES(ResourceFile);
   struct ResourceFile {
-    CstrBufferPtr file;
-    CstrBufferPtr compressed;
+    std::shared_ptr<CstrBuffer> file;
+    std::shared_ptr<CstrBuffer> compressed;
   };
 
-  StringToResourceFilePtrMap m_files;
+  int m_totalSize;
+  hphp_hash_map<std::string,std::shared_ptr<ResourceFile>,string_hash>
+    m_files;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

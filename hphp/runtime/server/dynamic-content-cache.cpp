@@ -31,9 +31,9 @@ bool DynamicContentCache::find(const std::string &name, const char *&data,
   assert(!name.empty());
 
   ReadLock lock(m_mutex);
-  StringToResourceFilePtrMap::const_iterator iter = m_files.find(name);
+  auto const iter = m_files.find(name);
   if (iter != m_files.end()) {
-    ResourceFile &f = *iter->second;
+    auto& f = *iter->second;
     if (compressed && f.compressed) {
       data = f.compressed->data();
       len = f.compressed->size();
@@ -52,15 +52,15 @@ void DynamicContentCache::store(const std::string &name, const char *data,
   assert(!name.empty());
   assert(size > 0);
 
-  ResourceFilePtr f(new ResourceFile());
-  CstrBufferPtr sb(new CstrBuffer(size));
-  sb->append(data, size); // makes a copy
+  auto const f = std::make_shared<ResourceFile>();
+  auto const sb = std::make_shared<CstrBuffer>(size);
+  sb->append(StringSlice{data, static_cast<uint32_t>(size)}); // makes a copy
   f->file = sb;
   int len = sb->size();
   char *compressed = gzencode(sb->data(), len, 9, CODING_GZIP);
   if (compressed) {
     if (unsigned(len) < sb->size()) {
-      f->compressed = CstrBufferPtr(new CstrBuffer(compressed, len));
+      f->compressed = std::make_shared<CstrBuffer>(compressed, len);
     } else {
       free(compressed);
     }

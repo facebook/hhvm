@@ -35,7 +35,7 @@ public:
   String m_result;
 };
 
-/**
+/*
  * Efficient string concatenation.
  */
 struct StringBuffer {
@@ -205,27 +205,79 @@ private:
   int m_len;
 };
 
-/**
- * StringBuffer-like wrapper for a malloc'd null-terminated C-String
+/*
+ * StringBuffer-like wrapper for a malloc'd, null-terminated C-style
+ * string.
  */
-DECLARE_BOOST_TYPES(CstrBuffer);
-class CstrBuffer {
- public:
+struct CstrBuffer {
   static const unsigned kMaxCap = INT_MAX;
-  explicit CstrBuffer(int len); // reserve space
-  CstrBuffer(char* data, int len); // attach a malloc'd buffer
-  explicit CstrBuffer(const char *filename); // read in a file
+
+  /*
+   * Create a buffer with enough space for a string of length `len'.
+   * (I.e. an allocation of size len + 1.)
+   *
+   * Pre: len <= kMaxCap
+   */
+  explicit CstrBuffer(int len);
+
+  /*
+   * Take ownership of an existing malloc'd buffer containing a
+   * null-terminated string of length `len'.  It is assumed the
+   * capacity is also len.
+   *
+   * Pre: len < kMaxCap
+   */
+  CstrBuffer(char* data, int len);
+
+  /*
+   * Create a CstrBuffer, attempting to read the contents of a given
+   * file.
+   *
+   * I/O errors are not reported.  size() will just be zero in that
+   * case.
+   *
+   * Post: valid()
+   */
+  explicit CstrBuffer(const char* filename);
+
+  CstrBuffer(const CstrBuffer&) = delete;
+  CstrBuffer& operator=(const CstrBuffer&) = delete;
   ~CstrBuffer();
+
+  /*
+   * Read-only access to the data this buffer contains.  Guaranteed to
+   * be null-terminated.
+   *
+   * Pre: valid()
+   */
   const char* data() const;
   unsigned size() const { return m_len; }
+
+  /*
+   * Returns whether this CstrBuffer contains a buffer.  This can only
+   * return false if detach() has been called.
+   */
   bool valid() const { return m_buffer != nullptr; }
-  void append(const char* s, int len);
+
+  /*
+   * Append the supplied data to this string.
+   *
+   * Pre: valid()
+   */
+  void append(StringSlice slice);
+
+  /*
+   * Create a request-local string from this buffer.
+   *
+   * Pre: valid()
+   * Post: !valid()
+   */
   String detach();
 
- private:
+private:
   char* m_buffer;
   unsigned m_len;
-  unsigned m_cap;
+  unsigned m_cap; // doesn't include the space for the \0
 };
 
 inline const char* CstrBuffer::data() const {

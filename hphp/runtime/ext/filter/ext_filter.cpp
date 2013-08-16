@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/filter/sanitizing_filters.h"
 
 namespace HPHP {
+IMPLEMENT_DEFAULT_EXTENSION(filter);
 ///////////////////////////////////////////////////////////////////////////////
 
 const int64_t k_INPUT_POST = 0;

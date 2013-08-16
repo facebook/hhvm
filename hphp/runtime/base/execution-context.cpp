@@ -268,7 +268,7 @@ int BaseExecutionContext::obGetContentLength() {
 
 void BaseExecutionContext::obClean() {
   if (!m_buffers.empty()) {
-    m_buffers.back()->oss.reset();
+    m_buffers.back()->oss.clear();
   }
 }
 
@@ -288,7 +288,7 @@ bool BaseExecutionContext::obFlush() {
             vm_call_user_func(last->handler,
                                    CREATE_VECTOR2(last->oss.detach(), flag));
           prev->oss.append(tout.toString());
-          last->oss.reset();
+          last->oss.clear();
         } catch (...) {
           prev->oss.absorb(last->oss);
         }
@@ -303,13 +303,13 @@ bool BaseExecutionContext::obFlush() {
                                  CREATE_VECTOR2(last->oss.detach(), flag));
         String sout = tout.toString();
         writeStdout(sout.data(), sout.size());
-        last->oss.reset();
+        last->oss.clear();
         return true;
       } catch (...) {}
     }
 
     writeStdout(last->oss.data(), last->oss.size());
-    last->oss.reset();
+    last->oss.clear();
     return true;
   }
   return false;
@@ -401,7 +401,7 @@ void BaseExecutionContext::flush() {
         writeStdout(oss.data(), oss.size());
         fflush(stdout);
       }
-      oss.reset();
+      oss.clear();
     }
   }
 }

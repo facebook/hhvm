@@ -38,52 +38,113 @@ public:
 /**
  * Efficient string concatenation.
  */
-DECLARE_BOOST_TYPES(StringBuffer);
-class StringBuffer {
-public:
-  /**
-   * Constructing a string buffer with some initial size, subsequent allocation
-   * will double existing size every round.
+struct StringBuffer {
+  static const int kDefaultOutputLimit = StringData::MaxSize;
+
+  /*
+   * Construct a string buffer with some initial size, subsequent allocation
+   * will geometrically grow the size when needed.
    */
   explicit StringBuffer(int initialSize = StringData::MaxSmallSize);
+
   ~StringBuffer();
 
-  static const int kDefaultOutputLimit = StringData::MaxSize;
+  StringBuffer(const StringBuffer& sb) = delete;
+  StringBuffer& operator=(const StringBuffer& sb) = delete;
+
+  /*
+   * Set an "output limit" for this string buffer.  If any append goes
+   * over this size, the StringBuffer will throw an exception.
+   *
+   * Pre: size() < maxBytes
+   */
   void setOutputLimit(int maxBytes) {
     m_maxBytes = maxBytes > 0 ? maxBytes : kDefaultOutputLimit;
   }
 
-  bool valid() const { return m_buffer != nullptr;}
-  bool empty() const { return m_len == 0;}
-  int size() const { return m_len;}
-  int length() const { return m_len;}
-  const char *data() const;
-public:
-  char charAt(int pos) const;
-
-  /**
-   * Detach buffer and yield a String. After this, do not use this StringBuffer
-   * object any more.
+  /*
+   * Access the current state of the string.
+   *
+   * data() has the following semantics:
+   *
+   *   if size() > 0:
+   *
+   *     the pointer returned by to data() is a string of length
+   *     size(), and is guaranteed to be null terminated.
+   *
+   *   if size() == 0:
+   *
+   *     the return value of data() may *either* be nullptr or a
+   *     pointer to a zero-length string.  Calling code may assume it
+   *     will not be null if it can guarantee detach() or release()
+   *     have never been called.
+   *
+   * The pointer and size should be considered invalidated after any
+   * call to a non-const member function on this class.
    */
-  String detach() { return detachImpl(); }
-  String detachImpl();
-  String copy();
-  void reset();
-  void clear() { reset();}
+  int size() const { return m_len; }
+  const char* data() const;
+
+  /*
+   * Returns whether this string has length zero.
+   */
+  bool empty() const { return m_len == 0; }
+
+  /*
+   * Detach buffer and yield a String.
+   *
+   * Post: empty()
+   */
+  String detach();
+
+  /*
+   * Copy this buffer into a String.  The contents of this buffer
+   * object are unchanged.
+   */
+  String copy() const;
+
+  /*
+   * Set the length of this string to zero.
+   *
+   * Post: empty()
+   */
+  void clear();
+
+  /*
+   * Set the size of this string to `size'.
+   *
+   * This function may only be used to reduce the size of the string,
+   * or increase the size of the string to a value in range after a
+   * call to appendCursor().
+   *
+   * Post: size() == size
+   */
   void resize(int size);
+
+  /*
+   * Release all memory associated with this string buffer.
+   *
+   * Post: empty()
+   */
   void release();
 
-  /**
-   * Increase internal buffer to at least "size" longer, and return the write
-   * position to append more chars.
+  /*
+   * Return a pointer for writing up to `additionalBytes' more bytes.
+   * The caller may write fewer bytes than this, and should call
+   * resize() as appropriate or the new bytes will not be considered
+   * part of the string.
+   *
+   * The caller *may* write one more byte than `additionalBytes', but
+   * only if it is a null terminator.
+   *
+   * The returned pointer is invalidated after any call to a non-const
+   * member function.
    */
-  char *reserve(int size);
+  char* appendCursor(int additionalBytes);
 
-  /**
-   * Append strings.
+  /*
+   * Append various types of things to this string.
    */
-  void append(int n);
-  void append(int64_t n);
   void append(char c) {
     if (m_buffer && m_len < m_cap) {
       m_buffer[m_len++] = c;
@@ -91,13 +152,12 @@ public:
     }
     appendHelper(c);
   }
-  void appendHelper(char c);
   void append(unsigned char c) { append((char)c);}
-  void append(litstr  s) { assert(s); append(s, strlen(s));}
-  void append(CStrRef s);
-  void append(CVarRef s);
-  void append(const StringData *s) { append(s->data(), s->size()); }
-  void append(const char *s, int len) {
+  void append(const char* s) { assert(s); append(s, strlen(s)); }
+  void append(CStrRef s) { append(s.data(), s.size()); }
+  void append(const std::string& s) { append(s.data(), s.size()); }
+  void append(const StringData* s) { append(s->data(), s->size()); }
+  void append(const char* s, int len) {
     assert(len >= 0);
     if (m_buffer && len <= m_cap - m_len) {
       memcpy(m_buffer + m_len, s, len);
@@ -106,33 +166,23 @@ public:
     }
     appendHelper(s, len);
   }
-  void appendHelper(const char *s, int len);
-  void append(const std::string &s) { append(s.data(), s.size());}
-  /**
-   * Json-escape the string and then append it.
+  void append(CVarRef s);
+  void append(int n);
+  void append(int64_t n);
+
+  /*
+   * Take ownership of the string being built by buf.
+   *
+   * Post: buf.size() == 0
    */
-  void appendJsonEscape(const char *s, int len, int options);
+  void absorb(StringBuffer& buf);
 
-  StringBuffer &operator+=(int n)     { append(n); return *this;}
-  StringBuffer &operator+=(char c)    { append(c); return *this;}
-  StringBuffer &operator+=(litstr  s) { append(s); return *this;}
-  StringBuffer &operator+=(CStrRef s) { append(s); return *this;}
-
-  StringBuffer &add(CStrRef s) { append(s); return *this; }
-  StringBuffer &add(const char *s, int len) { append(s, len); return *this; }
-
-  /**
-   * Append what buf has, and reset buf. Internally, if this StringBuffer
-   * is empty, it will swap with buf, so to avoid one string copying.
+  /*
+   * Append to this string using a printf-style format specification.
    */
-  void absorb(StringBuffer &buf);
+  void printf(const char* format, ...) ATTRIBUTE_PRINTF(2,3);
 
-  /**
-   * Write data.
-   */
-  void printf(const char *format, ...) ATTRIBUTE_PRINTF(2,3);
-
-  /**
+  /*
    * Read a file into this buffer. Use a larger page size to read more bytes
    * a time for large files.
    */
@@ -140,21 +190,19 @@ public:
   void read(File *in, int page_size = 1024);
 
 private:
-  // disabling copy constructor and assignment
-  StringBuffer(const StringBuffer &sb) { assert(false); }
-  StringBuffer &operator=(const StringBuffer &sb) {
-    assert(false);
-    return *this;
-  }
+  void appendHelper(const char* s, int len);
+  void appendHelper(char c);
+  void growBy(int spaceRequired);
+  void makeValid(int minCap);
+  bool valid() const { return m_buffer != nullptr; }
 
+private:
   StringData* m_str;
   char *m_buffer;
   int m_initialCap;
   int m_maxBytes;
   int m_cap;                    // doesn't include null terminator
   int m_len;
-
-  void growBy(int spaceRequired);
 };
 
 /**

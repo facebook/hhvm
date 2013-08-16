@@ -17,9 +17,7 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/base/utf8-decode.h"
 #include "hphp/runtime/ext/ext_json.h"
-#include "hphp/runtime/ext/JSON_parser.h"
 
 #include "hphp/util/alloc.h"
 
@@ -32,9 +30,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StringBuffer::StringBuffer(int initialSize /* = 63 */)
-  : m_initialCap(initialSize), m_maxBytes(kDefaultOutputLimit),
-    m_len(0) {
+StringBuffer::StringBuffer(int initialSize /* = StringData::MaxSmallSize */)
+  : m_initialCap(initialSize)
+  , m_maxBytes(kDefaultOutputLimit)
+  , m_len(0)
+{
   assert(initialSize > 0);
   m_str = StringData::Make(initialSize);
   MutableSlice s = m_str->mutableSlice();
@@ -57,15 +57,7 @@ const char *StringBuffer::data() const {
   return nullptr;
 }
 
-char StringBuffer::charAt(int pos) const {
-  assert(pos >= 0 && pos < m_len);
-  if (m_buffer && pos >= 0 && pos < m_len) {
-    return m_buffer[pos];
-  }
-  return '\0';
-}
-
-String StringBuffer::detachImpl() {
+String StringBuffer::detach() {
   if (m_buffer && m_len) {
     assert(m_str && m_str->getCount() == 0);
     m_buffer[m_len] = '\0'; // fixup
@@ -80,12 +72,11 @@ String StringBuffer::detachImpl() {
   return empty_string;
 }
 
-String StringBuffer::copy() {
-  // REGISTER_ACCESSED() is called by data()
+String StringBuffer::copy() const {
   return String(data(), size(), CopyString);
 }
 
-void StringBuffer::absorb(StringBuffer &buf) {
+void StringBuffer::absorb(StringBuffer& buf) {
   if (empty()) {
     StringData* str = m_str;
 
@@ -104,14 +95,14 @@ void StringBuffer::absorb(StringBuffer &buf) {
       buf.m_len = 0;
       buf.m_cap = 0;
     }
-    buf.reset();
-  } else {
-    // REGISTER_ACCESSED()/REGISTER_MUTATED() are called by append()/detach()
-    append(buf.detach());
+    buf.clear();
+    return;
   }
+
+  append(buf.detach());
 }
 
-void StringBuffer::reset() {
+void StringBuffer::clear() {
   m_len = 0;
 }
 
@@ -132,11 +123,9 @@ void StringBuffer::resize(int size) {
   }
 }
 
-char *StringBuffer::reserve(int size) {
+char* StringBuffer::appendCursor(int size) {
   if (!m_buffer) {
-    m_str = StringData::Make(std::max(m_initialCap, m_len + size));
-    m_buffer = (char*)m_str->data();
-    m_cap = m_str->capacity() - 1;
+    makeValid(size);
   } else if (m_cap - m_len < size) {
     m_buffer[m_len] = 0;
     m_str->setSize(m_len);
@@ -193,21 +182,23 @@ void StringBuffer::append(CVarRef v) {
 }
 
 void StringBuffer::appendHelper(char ch) {
-  if (!m_buffer) reserve(1);
+  if (!valid()) makeValid(1);
   if (m_len == m_cap) {
     growBy(1);
   }
   m_buffer[m_len++] = ch;
 }
 
-
-void StringBuffer::append(CStrRef s) {
-  // REGISTER_MUTATED() is called by data()
-  append(s.data(), s.size());
+void StringBuffer::makeValid(int minCap) {
+  assert(!valid());
+  assert(!m_len);
+  m_str = StringData::Make(std::max(m_initialCap, minCap));
+  m_buffer = (char*)m_str->data();
+  m_cap = m_str->capacity() - 1;
 }
 
 void StringBuffer::appendHelper(const char *s, int len) {
-  if (!m_buffer) reserve(len);
+  if (!valid()) makeValid(len);
 
   assert(s);
   assert(len >= 0);
@@ -218,116 +209,6 @@ void StringBuffer::appendHelper(const char *s, int len) {
   }
   memcpy(m_buffer + m_len, s, len);
   m_len += len;
-}
-
-#define REVERSE16(us)                                     \
-  (((us & 0xf) << 12)      | (((us >> 4) & 0xf) << 8) |   \
-  (((us >> 8) & 0xf) << 4) | ((us >> 12) & 0xf))          \
-
-void StringBuffer::appendJsonEscape(const char *s, int len, int options) {
-  if (len == 0) {
-    append("\"\"", 2);
-  } else {
-    static const char digits[] = "0123456789abcdef";
-
-    int start = size();
-    append('"');
-
-    UTF8To16Decoder decoder(s, len, options & k_JSON_FB_LOOSE);
-    for (;;) {
-      int c = decoder.decode();
-      if (c == UTF8_END) {
-        append('"');
-        break;
-      }
-      if (c == UTF8_ERROR) {
-        // discard the part that has been already decoded.
-        resize(start);
-        append("null", 4);
-        break;
-      }
-      assert(c >= 0);
-      unsigned short us = (unsigned short)c;
-      switch (us) {
-      case '"':
-        if (options & k_JSON_HEX_QUOT) {
-          append("\\u0022", 6);
-        } else {
-          append("\\\"", 2);
-        }
-        break;
-      case '\\': append("\\\\", 2); break;
-      case '/':
-        if (options & k_JSON_UNESCAPED_SLASHES) {
-          append('/');
-        } else {
-          append("\\/", 2);
-        }
-        break;
-      case '\b': append("\\b", 2);  break;
-      case '\f': append("\\f", 2);  break;
-      case '\n': append("\\n", 2);  break;
-      case '\r': append("\\r", 2);  break;
-      case '\t': append("\\t", 2);  break;
-      case '<':
-        if (options & k_JSON_HEX_TAG || options & k_JSON_FB_EXTRA_ESCAPES) {
-          append("\\u003C", 6);
-        } else {
-          append('<');
-        }
-        break;
-      case '>':
-        if (options & k_JSON_HEX_TAG) {
-          append("\\u003E", 6);
-        } else {
-          append('>');
-        }
-        break;
-      case '&':
-        if (options & k_JSON_HEX_AMP) {
-          append("\\u0026", 6);
-        } else {
-          append('&');
-        }
-        break;
-      case '\'':
-        if (options & k_JSON_HEX_APOS) {
-          append("\\u0027", 6);
-        } else {
-          append('\'');
-        }
-        break;
-      case '@':
-        if (options & k_JSON_FB_EXTRA_ESCAPES) {
-          append("\\u0040", 6);
-        } else {
-          append('@');
-        }
-        break;
-      case '%':
-        if (options & k_JSON_FB_EXTRA_ESCAPES) {
-          append("\\u0025", 6);
-        } else {
-          append('%');
-        }
-        break;
-      default:
-        if (us >= ' ' && options & k_JSON_UNESCAPED_UNICODE) {
-          utf16_to_utf8(*this, us);
-        } else if (us >= ' ' && (us & 127) == us) {
-          append((char)us);
-        } else {
-          append("\\u", 2);
-          us = REVERSE16(us);
-          append(digits[us & ((1 << 4) - 1)]); us >>= 4;
-          append(digits[us & ((1 << 4) - 1)]); us >>= 4;
-          append(digits[us & ((1 << 4) - 1)]); us >>= 4;
-          append(digits[us & ((1 << 4) - 1)]);
-        }
-        break;
-      }
-    }
-  }
 }
 
 void StringBuffer::printf(const char *format, ...) {
@@ -356,7 +237,7 @@ void StringBuffer::read(FILE* in, int page_size /* = 1024 */) {
   assert(in);
   assert(page_size > 0);
 
-  if (!m_buffer) reserve(page_size);
+  if (!valid()) makeValid(page_size);
   while (true) {
     int buffer_size = m_cap - m_len;
     if (buffer_size < page_size) {
@@ -373,7 +254,7 @@ void StringBuffer::read(File* in, int page_size /* = 1024 */) {
   assert(in);
   assert(page_size > 0);
 
-  if (!m_buffer) reserve(page_size);
+  if (!valid()) makeValid(page_size);
   while (true) {
     int buffer_size = m_cap - m_len;
     if (buffer_size < page_size) {

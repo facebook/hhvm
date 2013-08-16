@@ -167,7 +167,7 @@ MimePart::MimeHeader::MimeHeader(php_rfc822_tokenized_t *toks)
             rfc2231_to_mime(value_buf, NULL, 0, prevcharset_p);
 
             m_attributes.set(name_buf, value_buf.detach());
-            value_buf.reset();
+            value_buf.clear();
 
             prevcharset_p = 0;
             is_rfc2231_name = false;
@@ -281,20 +281,20 @@ void MimePart::MimeHeader::rfc2231_to_mime(StringBuffer &value_buf,
 
   /* If first encoded token*/
   if (charset_p && !prevcharset_p && startofvalue) {
-    value_buf += "=?";
-    value_buf += value;
-    value_buf += "?Q?";
-    value_buf += startofvalue;
+    value_buf.append("=?");
+    value_buf.append(value);
+    value_buf.append("?Q?");
+    value_buf.append(startofvalue);
   }
 
   /* If last encoded token*/
   if (prevcharset_p && !charset_p) {
-    value_buf += "?=";
+    value_buf.append("?=");
   }
 
   /* Append value*/
   if ((!charset_p || (prevcharset_p && charset_p)) && value) {
-    value_buf += value;
+    value_buf.append(value);
   }
 }
 

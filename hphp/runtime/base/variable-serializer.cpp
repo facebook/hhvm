@@ -26,6 +26,8 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/utf8-decode.h"
+#include "hphp/runtime/ext/JSON_parser.h"
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/runtime/ext/ext_collections.h"
 
@@ -262,6 +264,122 @@ void VariableSerializer::write(double v) {
   }
 }
 
+uint16_t reverse16(uint16_t us) {
+  return
+    ((us & 0xf) << 12)       | (((us >> 4) & 0xf) << 8) |
+    (((us >> 8) & 0xf) << 4) | ((us >> 12) & 0xf);
+}
+
+static void appendJsonEscape(StringBuffer& sb,
+                             const char *s,
+                             int len,
+                             int options) {
+  if (len == 0) {
+    sb.append("\"\"", 2);
+    return;
+  }
+
+  static const char digits[] = "0123456789abcdef";
+
+  auto const start = sb.size();
+  sb.append('"');
+
+  UTF8To16Decoder decoder(s, len, options & k_JSON_FB_LOOSE);
+  for (;;) {
+    int c = decoder.decode();
+    if (c == UTF8_END) {
+      sb.append('"');
+      break;
+    }
+    if (c == UTF8_ERROR) {
+      // discard the part that has been already decoded.
+      sb.resize(start);
+      sb.append("null", 4);
+      break;
+    }
+    assert(c >= 0);
+    unsigned short us = (unsigned short)c;
+    switch (us) {
+    case '"':
+      if (options & k_JSON_HEX_QUOT) {
+        sb.append("\\u0022", 6);
+      } else {
+        sb.append("\\\"", 2);
+      }
+      break;
+    case '\\': sb.append("\\\\", 2); break;
+    case '/':
+      if (options & k_JSON_UNESCAPED_SLASHES) {
+        sb.append('/');
+      } else {
+        sb.append("\\/", 2);
+      }
+      break;
+    case '\b': sb.append("\\b", 2);  break;
+    case '\f': sb.append("\\f", 2);  break;
+    case '\n': sb.append("\\n", 2);  break;
+    case '\r': sb.append("\\r", 2);  break;
+    case '\t': sb.append("\\t", 2);  break;
+    case '<':
+      if (options & k_JSON_HEX_TAG || options & k_JSON_FB_EXTRA_ESCAPES) {
+        sb.append("\\u003C", 6);
+      } else {
+        sb.append('<');
+      }
+      break;
+    case '>':
+      if (options & k_JSON_HEX_TAG) {
+        sb.append("\\u003E", 6);
+      } else {
+        sb.append('>');
+      }
+      break;
+    case '&':
+      if (options & k_JSON_HEX_AMP) {
+        sb.append("\\u0026", 6);
+      } else {
+        sb.append('&');
+      }
+      break;
+    case '\'':
+      if (options & k_JSON_HEX_APOS) {
+        sb.append("\\u0027", 6);
+      } else {
+        sb.append('\'');
+      }
+      break;
+    case '@':
+      if (options & k_JSON_FB_EXTRA_ESCAPES) {
+        sb.append("\\u0040", 6);
+      } else {
+        sb.append('@');
+      }
+      break;
+    case '%':
+      if (options & k_JSON_FB_EXTRA_ESCAPES) {
+        sb.append("\\u0025", 6);
+      } else {
+        sb.append('%');
+      }
+      break;
+    default:
+      if (us >= ' ' && options & k_JSON_UNESCAPED_UNICODE) {
+        utf16_to_utf8(sb, us);
+      } else if (us >= ' ' && (us & 127) == us) {
+        sb.append((char)us);
+      } else {
+        sb.append("\\u", 2);
+        us = reverse16(us);
+        sb.append(digits[us & ((1 << 4) - 1)]); us >>= 4;
+        sb.append(digits[us & ((1 << 4) - 1)]); us >>= 4;
+        sb.append(digits[us & ((1 << 4) - 1)]); us >>= 4;
+        sb.append(digits[us & ((1 << 4) - 1)]);
+      }
+      break;
+    }
+  }
+}
+
 void VariableSerializer::write(const char *v, int len /* = -1 */,
                                bool isArrayKey /* = false */) {
   if (v == nullptr) v = "";
@@ -325,7 +443,7 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
       }
     }
 
-    m_buf->appendJsonEscape(v, len, m_option);
+    appendJsonEscape(*m_buf, v, len, m_option);
     break;
   }
   case Type::DebuggerDump:

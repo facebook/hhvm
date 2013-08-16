@@ -974,7 +974,7 @@ Variant f_strtr(CStrRef str, CVarRef from, CVarRef to /* = null_variant */) {
       if (arr.exists(key)) {
         String replace = arr[key].toString();
         if (!replace.empty()) {
-          result += replace;
+          result.append(replace);
         }
         pos += len;
         found = true;
@@ -982,7 +982,7 @@ Variant f_strtr(CStrRef str, CVarRef from, CVarRef to /* = null_variant */) {
       }
     }
     if (!found) {
-      result += s[pos++];
+      result.append(s[pos++]);
     }
   }
   return result.detach();

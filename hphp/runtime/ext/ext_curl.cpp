@@ -240,7 +240,7 @@ public:
       // the reader function will be called
       curl_easy_setopt(m_cp, CURLOPT_POSTFIELDSIZE, 0);
     }
-    m_write.buf.reset();
+    m_write.buf.clear();
     m_write.content.clear();
     m_header.clear();
     memset(m_error_str, 0, sizeof(m_error_str));
@@ -255,7 +255,7 @@ public:
 
     /* CURLE_PARTIAL_FILE is returned by HEAD requests */
     if (m_error_no != CURLE_OK && m_error_no != CURLE_PARTIAL_FILE) {
-      m_write.buf.reset();
+      m_write.buf.clear();
       m_write.content.clear();
       return false;
     }

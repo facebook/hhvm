@@ -294,33 +294,33 @@ Variant php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) {
 
   StringBuffer p(len);
   if (str < end && (*str == '+' || *str == '-')) {
-    p += *str++;
+    p.append(*str++);
   }
   int first = 1;
   while (1) {
     int n = 0;
     while (str < end && *str >= '0' && *str <= '9') {
       ++n;
-      p += *str++;
+      p.append(*str++);
     }
     if (str == end || *str == dec_sep || *str == 'e' || *str == 'E') {
       if (!first && n != 3) {
         goto error;
       }
       if (*str == dec_sep) {
-        p += '.';
+        p.append('.');
         str++;
         while (str < end && *str >= '0' && *str <= '9') {
-          p += *str++;
+          p.append(*str++);
         }
       }
       if (*str == 'e' || *str == 'E') {
-        p += *str++;
+        p.append(*str++);
         if (str < end && (*str == '+' || *str == '-')) {
-          p += *str++;
+          p.append(*str++);
         }
         while (str < end && *str >= '0' && *str <= '9') {
-          p += *str++;
+          p.append(*str++);
         }
       }
       break;
@@ -342,12 +342,12 @@ Variant php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) {
 
   int64_t lval;
   double dval;
-  switch (is_numeric_string(p.data(), p.length(), &lval, &dval, 0)) {
+  switch (is_numeric_string(p.data(), p.size(), &lval, &dval, 0)) {
     case KindOfInt64:
       return (double) lval;
       break;
     case KindOfDouble:
-      if ((!dval && p.length() > 1 && strpbrk(p.data(), "123456789")) ||
+      if ((!dval && p.size() > 1 && strpbrk(p.data(), "123456789")) ||
            !zend_finite(dval)) {
         goto error;
       }

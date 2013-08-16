@@ -51,7 +51,7 @@ bool UrlFile::open(CStrRef url, CStrRef mode) {
     return false;
   }
   HttpClient http(m_timeout, m_maxRedirect);
-  m_response.reset();
+  m_response.clear();
 
   HeaderMap *pHeaders = nullptr;
   HeaderMap requestHeaders;

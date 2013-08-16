@@ -51,9 +51,9 @@ static char **build_envp(CArrRef envs, std::vector<String> &senvs) {
     int i = 0;
     for (ArrayIter iter(envs); iter; ++iter, ++i) {
       StringBuffer nvpair;
-      nvpair += iter.first().toString();
-      nvpair += '=';
-      nvpair += iter.second().toString();
+      nvpair.append(iter.first().toString());
+      nvpair.append('=');
+      nvpair.append(iter.second().toString());
 
       String env = nvpair.detach();
       senvs.push_back(env);
@@ -827,9 +827,9 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
     std::vector<std::string> envs;
     for (ArrayIter iter(enva); iter; ++iter) {
       StringBuffer nvpair;
-      nvpair += iter.first().toString();
-      nvpair += '=';
-      nvpair += iter.second().toString();
+      nvpair.append(iter.first().toString());
+      nvpair.append('=');
+      nvpair.append(iter.second().toString());
       string tmp = nvpair.detach().c_str();
       if (tmp.find('\n') == string::npos) {
         envs.push_back(tmp);

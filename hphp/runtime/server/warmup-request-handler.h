@@ -44,7 +44,7 @@ private:
 };
 
 class WarmupRequestHandlerFactory :
-  public boost::enable_shared_from_this<WarmupRequestHandlerFactory> {
+  public std::enable_shared_from_this<WarmupRequestHandlerFactory> {
 public:
   WarmupRequestHandlerFactory(ServerPtr server,
                               uint32_t additionalThreads,

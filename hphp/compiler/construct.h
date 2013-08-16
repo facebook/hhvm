@@ -67,7 +67,7 @@ public:
 /**
  * Base class of Expression and Statement.
  */
-class Construct : public boost::enable_shared_from_this<Construct>,
+class Construct : public std::enable_shared_from_this<Construct>,
                   public JSON::CodeError::ISerializable {
 protected:
   Construct(BlockScopePtr scope, LocationPtr loc);
@@ -191,15 +191,15 @@ public:
   virtual bool kidUnused(int i) const { return false; }
 
   template<typename T>
-  static boost::shared_ptr<T> Clone(boost::shared_ptr<T> constr) {
+  static std::shared_ptr<T> Clone(std::shared_ptr<T> constr) {
     if (constr) {
       return dynamic_pointer_cast<T>(constr->clone());
     }
-    return boost::shared_ptr<T>();
+    return std::shared_ptr<T>();
   }
 
   template<typename T>
-  boost::shared_ptr<T> Clone(boost::shared_ptr<T> constr, BlockScopePtr scope) {
+  std::shared_ptr<T> Clone(std::shared_ptr<T> constr, BlockScopePtr scope) {
     if (constr) {
       constr = constr->clone();
       constr->resetScope(scope);

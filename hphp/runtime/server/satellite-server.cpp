@@ -23,8 +23,6 @@
 #include "hphp/util/util.h"
 #include "folly/Memory.h"
 
-#include <boost/make_shared.hpp>
-
 using folly::make_unique;
 using std::set;
 

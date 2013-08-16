@@ -272,7 +272,7 @@ private:
 /**
  * Base class of VariableTable and ConstantTable.
  */
-class SymbolTable : public boost::enable_shared_from_this<SymbolTable>,
+class SymbolTable : public std::enable_shared_from_this<SymbolTable>,
                     public JSON::CodeError::ISerializable {
 public:
   static Mutex AllSymbolTablesMutex;

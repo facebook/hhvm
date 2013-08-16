@@ -26,7 +26,7 @@ extern "C" {
 
 namespace HPHP {
 
-typedef boost::shared_ptr<timelib_tzinfo> TimeZoneInfo;
+typedef std::shared_ptr<timelib_tzinfo> TimeZoneInfo;
 typedef std::map<std::string, TimeZoneInfo> MapStringToTimeZoneInfo;
 ///////////////////////////////////////////////////////////////////////////////
 

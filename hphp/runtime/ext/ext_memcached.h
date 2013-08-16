@@ -142,7 +142,7 @@ class c_Memcached : public ExtObjectData, public Sweepable {
     int serializer;
     int rescode;
   };
-  typedef boost::shared_ptr<Impl> ImplPtr;
+  typedef std::shared_ptr<Impl> ImplPtr;
   ImplPtr m_impl;
 
   bool handleError(memcached_return status);

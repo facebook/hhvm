@@ -21,7 +21,7 @@
 #include <sstream>
 #include <string>
 #include <unwind.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/base/types.h"
@@ -57,7 +57,7 @@ inline std::exception* exceptionFromUnwindException(
  * Called whenever we create a new translation cache for the whole
  * region of code.
  */
-typedef boost::shared_ptr<void> UnwindInfoHandle;
+typedef std::shared_ptr<void> UnwindInfoHandle;
 UnwindInfoHandle register_unwind_region(unsigned char* address, size_t size);
 
 //////////////////////////////////////////////////////////////////////

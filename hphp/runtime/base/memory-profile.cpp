@@ -20,8 +20,6 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/hphp-array-defs.h"
 
-#include <boost/make_shared.hpp>
-
 namespace HPHP {
 
 TRACE_SET_MOD(heap);
@@ -54,7 +52,7 @@ void MemoryProfile::startProfilingImpl() {
   TRACE(1, "request started: initializing memory profile\n");
   if (RuntimeOption::ClientExecutionMode() &&
       RuntimeOption::HHProfServerProfileClientMode) {
-    HeapProfileServer::Server = boost::make_shared<HeapProfileServer>();
+    HeapProfileServer::Server = std::make_shared<HeapProfileServer>();
     ProfileController::requestNext();
   }
   m_livePointers.clear();

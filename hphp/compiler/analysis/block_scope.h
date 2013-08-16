@@ -66,7 +66,7 @@ typedef SimpleMutex InferTypesMutex;
  * Base class of ClassScope and FunctionScope.
  */
 class BlockScope : private boost::noncopyable,
-                   public boost::enable_shared_from_this<BlockScope> {
+                   public std::enable_shared_from_this<BlockScope> {
 public:
   enum KindOf {
     ClassScope,

@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_COMPILER_TYPEDEF_STATEMENT_H_
 #define incl_HPHP_COMPILER_TYPEDEF_STATEMENT_H_
 
-#include <boost/shared_ptr.hpp>
 #include <string>
 
 #include "hphp/compiler/statement/statement.h"
@@ -42,7 +41,7 @@ public:
   const TypeAnnotationPtr annot;
 };
 
-typedef boost::shared_ptr<TypedefStatement> TypedefStatementPtr;
+typedef std::shared_ptr<TypedefStatement> TypedefStatementPtr;
 
 //////////////////////////////////////////////////////////////////////
 }

@@ -56,7 +56,7 @@ inline void timelib_rel_time_dtor(timelib_rel_time *t) {
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
-typedef boost::shared_ptr<timelib_rel_time> DateIntervalPtr;
+typedef std::shared_ptr<timelib_rel_time> DateIntervalPtr;
 
 /**
  * Handles all date interal related functions.

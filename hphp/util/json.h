@@ -113,7 +113,7 @@ public:
   }
 
   template<typename T>
-  _OutputStream &operator<< (const boost::shared_ptr<T> &v) {
+  _OutputStream &operator<< (const std::shared_ptr<T> &v) {
     if (v) {
       *this << *v;
     } else {

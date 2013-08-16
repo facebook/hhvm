@@ -37,7 +37,6 @@
 #include "hphp/util/process.h"
 #include "hphp/util/ssl-init.h"
 
-#include <boost/make_shared.hpp>
 #include <sys/types.h>
 #include <signal.h>
 
@@ -81,7 +80,7 @@ HttpServer::HttpServer()
   m_pageServer->addTakeoverListener(this);
 
   if (additionalThreads) {
-    auto handlerFactory = boost::make_shared<WarmupRequestHandlerFactory>(
+    auto handlerFactory = std::make_shared<WarmupRequestHandlerFactory>(
         m_pageServer, additionalThreads,
         RuntimeOption::ServerWarmupThrottleRequestCount,
         RuntimeOption::RequestTimeoutSeconds);

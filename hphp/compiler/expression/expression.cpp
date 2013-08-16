@@ -370,7 +370,7 @@ void Expression::setTypes(AnalysisResultConstPtr ar, TypePtr actualType,
   }
 
   if (m_actualType->isSpecificObject()) {
-    boost::const_pointer_cast<AnalysisResult>(ar)->
+    std::const_pointer_cast<AnalysisResult>(ar)->
       addClassDependency(getFileScope(), m_actualType->getName());
   }
 }

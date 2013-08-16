@@ -60,7 +60,6 @@
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/parsers.hpp>
-#include <boost/make_shared.hpp>
 #include <libgen.h>
 #include <oniguruma.h>
 #include <signal.h>
@@ -671,7 +670,7 @@ static int start_server(const std::string &username) {
 
   if (memory_profiling) {
     Logger::Info("Starting up profiling server");
-    HeapProfileServer::Server = boost::make_shared<HeapProfileServer>();
+    HeapProfileServer::Server = std::make_shared<HeapProfileServer>();
   }
 
   // If we have any warmup requests, replay them before listening for

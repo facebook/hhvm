@@ -343,7 +343,7 @@ private:
       timelib_time_dtor(t);
     }
   };
-  typedef boost::shared_ptr<timelib_time> TimePtr;
+  typedef std::shared_ptr<timelib_time> TimePtr;
 
   TimePtr m_time;
   SmartResource<TimeZone> m_tz;

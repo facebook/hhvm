@@ -56,7 +56,7 @@ public:
   void doJob() {
     m_worker.onThreadEnter();
     while (true) {
-      boost::shared_ptr<TJob> job = m_dispatcher.getNextJob();
+      std::shared_ptr<TJob> job = m_dispatcher.getNextJob();
       if (!job) break;
       m_worker.doJob(job);
     }
@@ -98,7 +98,7 @@ private:
 template<class TJob, class TWorker>
 class JobDispatcher {
  public:
-  JobDispatcher(std::vector<boost::shared_ptr<TJob> > &jobs,
+  JobDispatcher(std::vector<std::shared_ptr<TJob> > &jobs,
                 unsigned int workerCount, bool showStatus = false)
     : m_index(0), m_jobs(jobs), m_showStatus(showStatus), m_lastPercent(0) {
     std::random_shuffle(m_jobs.begin(), m_jobs.end());
@@ -107,7 +107,7 @@ class JobDispatcher {
     }
     m_workers.resize(workerCount);
     for (unsigned int i = 0; i < m_workers.size(); i++) {
-      m_workers[i] = boost::shared_ptr<WorkerWrapper<TJob, TWorker> >
+      m_workers[i] = std::shared_ptr<WorkerWrapper<TJob, TWorker> >
         (new WorkerWrapper<TJob, TWorker>(*this));
     }
   }
@@ -165,10 +165,10 @@ class JobDispatcher {
     }
   }
 
-  boost::shared_ptr<TJob> getNextJob() {
+  std::shared_ptr<TJob> getNextJob() {
     Lock lock(m_mutex);
     if (m_index >= m_jobs.size()) {
-      return boost::shared_ptr<TJob>();
+      return std::shared_ptr<TJob>();
     }
     if (m_showStatus && m_index > m_workers.size()) {
       setStatus((m_index - m_workers.size()) * 100 / m_jobs.size());
@@ -179,8 +179,8 @@ class JobDispatcher {
  private:
   Mutex m_mutex;
   unsigned int m_index;
-  std::vector<boost::shared_ptr<TJob> > &m_jobs;
-  std::vector<boost::shared_ptr<WorkerWrapper<TJob, TWorker> > > m_workers;
+  std::vector<std::shared_ptr<TJob> > &m_jobs;
+  std::vector<std::shared_ptr<WorkerWrapper<TJob, TWorker> > > m_workers;
   bool m_showStatus;
   int m_lastPercent;
   struct timeval m_start;

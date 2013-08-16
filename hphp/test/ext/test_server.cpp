@@ -30,7 +30,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/libevent-server.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace HPHP;
 
@@ -191,7 +191,7 @@ public:
 static int find_server_port(int port_min, int port_max) {
   for (int port = port_min; ; port++) {
     try {
-      ServerPtr server = boost::make_shared<LibEventServer>(
+      ServerPtr server = std::make_shared<LibEventServer>(
           "127.0.0.1", port, 50);
       server->setRequestHandlerFactory<TestServerRequestHandler>(30);
       server->start();
@@ -428,10 +428,10 @@ public:
   }
 };
 
-typedef boost::shared_ptr<TestTransport> TestTransportPtr;
+typedef std::shared_ptr<TestTransport> TestTransportPtr;
 typedef std::vector<TestTransportPtr> TestTransportPtrVec;
 typedef AsyncFunc<TestTransport> TestTransportAsyncFunc;
-typedef boost::shared_ptr<TestTransportAsyncFunc> TestTransportAsyncFuncPtr;
+typedef std::shared_ptr<TestTransportAsyncFunc> TestTransportAsyncFuncPtr;
 typedef std::vector<TestTransportAsyncFuncPtr> TestTransportAsyncFuncPtrVec;
 
 #define TEST_SIZE 100
@@ -570,7 +570,7 @@ bool TestServer::TestHttpClient() {
   ServerPtr server;
   for (s_server_port = PORT_MIN; s_server_port <= PORT_MAX; s_server_port++) {
     try {
-      server = boost::make_shared<LibEventServer>(
+      server = std::make_shared<LibEventServer>(
           "127.0.0.1", s_server_port, 50);
       server->setRequestHandlerFactory<EchoHandler>(0);
       server->start();

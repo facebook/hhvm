@@ -201,7 +201,7 @@ typedef encodeType* encodeTypePtr;
 
 DECLARE_BOOST_TYPES(encode);
 typedef StringToencodePtrMap encodeMap;
-typedef boost::shared_ptr<encodeMap> encodeMapPtr;
+typedef std::shared_ptr<encodeMap> encodeMapPtr;
 struct encode {
   encodeType details;
   Variant (*to_zval)(encodeTypePtr type, xmlNodePtr data);

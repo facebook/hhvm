@@ -35,7 +35,7 @@ ZEND_API zend_class_entry *zend_get_class_entry(const zval *zobject TSRMLS_DC) {
 }
 
 static int parse_arg_object_to_string(zval **arg, const char **p, int *pl, int type TSRMLS_DC) {
-  HPHP::StringData *sd = tvCastToString(*arg);
+  HPHP::StringData *sd = tvCastToString((*arg)->tv());
   *p = sd->data();
   *pl = sd->size();
   zval_ptr_dtor(arg);
@@ -559,7 +559,9 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
       if (num_varargs > 0) {
         int iv = 0;
         HPHP::TypedValue *top = HPHP::vmfp() - (i + 1);
-        zval **p = &top;
+        // zPrepArgs should take care of this for us
+        assert(top->m_type == HPHP::KindOfRef);
+        zval **p = &top->m_data.pref;
 
         *n_varargs = num_varargs;
 
@@ -580,7 +582,8 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
     }
 
     HPHP::TypedValue *top = HPHP::vmfp() - (i + 1);
-    arg = &top;
+    assert(top->m_type == HPHP::KindOfRef);
+    arg = &top->m_data.pref;
 
     if (zend_parse_arg(i+1, arg, va, &type_spec, quiet TSRMLS_CC) == FAILURE) {
       /* clean up varargs array if it was used */
@@ -589,10 +592,6 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
         *varargs = NULL;
       }
       return FAILURE;
-    }
-
-    if (HPHP::liveFunc()->byRef(i) && (*arg)->m_type != HPHP::KindOfRef) {
-      tvBox(*arg);
     }
 
     i++;
@@ -978,7 +977,7 @@ ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value) /* {{{ */
 
 ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, char **callable_name TSRMLS_DC) {
   HPHP::Variant name;
-  bool b = f_is_callable(tvAsVariant(callable), check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY, HPHP::ref(name));
+  bool b = f_is_callable(tvAsVariant(callable->tv()), check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY, HPHP::ref(name));
   if (callable_name) {
     HPHP::StringData *sd = name.getStringData();
     *callable_name = (char*) emalloc(sd->size() + 1);
@@ -990,15 +989,15 @@ ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, char **cal
 ZEND_API int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, zend_uint param_count, zval **params[], int no_separation, HashTable *symbol_table TSRMLS_DC) {
   HPHP::PackedArrayInit ad_params(param_count);
   for (int i = 0; i < param_count; i++) {
-    ad_params.add(tvAsVariant(*params[i]));
+    ad_params.add(tvAsVariant((*params[i])->tv()));
   }
-  HPHP::Variant retval = vm_call_user_func(tvAsCVarRef(function_name), ad_params.toArray());
+  HPHP::Variant retval = vm_call_user_func(tvAsCVarRef(function_name->tv()), ad_params.toArray());
   if (!retval.isInitialized()) {
     return FAILURE;
   }
 
   MAKE_STD_ZVAL(*retval_ptr_ptr);
-  tvDup(*retval.asTypedValue(), **retval_ptr_ptr);
+  HPHP::cellDup(*retval.asCell(), *(*retval_ptr_ptr)->tv());
   return SUCCESS;
 }
 

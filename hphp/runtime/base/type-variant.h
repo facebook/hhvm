@@ -520,7 +520,7 @@ class Variant : private TypedValue {
    * Whether or not there are at least two variables that are strongly bound.
    */
   bool isReferenced() const {
-    return m_type == KindOfRef && m_data.pref->getCount() > 1;
+    return m_type == KindOfRef && m_data.pref->isReferenced();
   }
 
   /**
@@ -1064,7 +1064,6 @@ public:
     PromoteToRef(v);
     RefData* r = v.m_data.pref;
     r->incRefCount(); // in case destruct() triggers deletion of v
-
     RefData* d = m_data.pref;
     DataType t = m_type;
     m_type = KindOfRef;
@@ -1106,7 +1105,7 @@ public:
   void setWithRefHelper(CVarRef v, bool destroy) {
     assert(this != &v);
 
-    CVarRef rhs = v.m_type == KindOfRef && v.m_data.pref->getCount() <= 1
+    CVarRef rhs = v.m_type == KindOfRef && !v.m_data.pref->isReferenced()
       ? *v.m_data.pref->var() : v;
     if (IS_REFCOUNTED_TYPE(rhs.m_type)) {
       assert(rhs.m_data.pstr);

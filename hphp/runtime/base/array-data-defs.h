@@ -178,6 +178,18 @@ inline ArrayData* ArrayData::set(StringData* k, CVarRef v, bool copy) {
   return g_array_funcs.setStr[m_kind](this, k, v, copy);
 }
 
+inline void ArrayData::zSet(int64_t k, RefData* v) {
+  g_array_funcs.zSetInt[m_kind](this, k, v);
+}
+
+inline void ArrayData::zSet(StringData* k, RefData* v) {
+  g_array_funcs.zSetStr[m_kind](this, k, v);
+}
+
+inline void ArrayData::zAppend(RefData* v) {
+  g_array_funcs.zAppend[m_kind](this, v);
+}
+
 inline size_t ArrayData::vsize() const {
   return g_array_funcs.vsize[m_kind](this);
 }

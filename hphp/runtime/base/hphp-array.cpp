@@ -921,6 +921,12 @@ HphpArray* HphpArray::initVal(TypedValue& tv, CVarRef v) {
 }
 
 ALWAYS_INLINE
+void HphpArray::zInitVal(TypedValue& tv, RefData* v) {
+  tv.m_type = KindOfRef;
+  tv.m_data.pref = v;
+}
+
+ALWAYS_INLINE
 HphpArray* HphpArray::initRef(TypedValue& tv, CVarRef v) {
   tvAsUninitializedVariant(&tv).constructRefHelper(v);
   return this;
@@ -950,6 +956,15 @@ ALWAYS_INLINE
 HphpArray* HphpArray::setVal(TypedValue& tv, CVarRef v) {
   tvAsVariant(&tv).assignValHelper(v);
   return this;
+}
+
+ALWAYS_INLINE
+void HphpArray::zSetVal(TypedValue& tv, RefData* v) {
+  // Dec ref the old value
+  tvRefcountedDecRef(tv);
+  // Store the RefData but do not increment the refcount
+  tv.m_type = KindOfRef;
+  tv.m_data.pref = v;
 }
 
 ALWAYS_INLINE
@@ -1269,6 +1284,49 @@ ArrayData* HphpArray::update(StringData* key, CVarRef data) {
   return initVal(e.data, data);
 }
 
+INLINE_SINGLE_CALLER
+void HphpArray::zSetImpl(int64_t ki, RefData* data) {
+  auto ei = findForInsert(ki);
+  if (validPos(*ei)) {
+    zSetVal(m_data[*ei].data, data);
+    return;
+  }
+  auto& e = newElm(ei, ki);
+  e.setIntKey(ki);
+  if (ki >= m_nextKI && m_nextKI >= 0) m_nextKI = ki + 1;
+  zInitVal(e.data, data);
+}
+
+INLINE_SINGLE_CALLER
+void HphpArray::zSetImpl(StringData* key, RefData* data) {
+  strhash_t h = key->hash();
+  auto ei = findForInsert(key, h);
+  if (validPos(*ei)) {
+    zSetVal(m_data[*ei].data, data);
+    return;
+  }
+  auto& e = newElm(ei, h);
+  e.setStrKey(key, h);
+  zInitVal(e.data, data);
+}
+
+INLINE_SINGLE_CALLER
+void HphpArray::zAppendImpl(RefData* data) {
+  if (UNLIKELY(m_nextKI < 0)) {
+    raise_warning("Cannot add element to the array as the next element is "
+                  "already occupied");
+    return;
+  }
+  resizeIfNeeded();
+  int64_t ki = m_nextKI;
+  auto ei = findForNewInsert(ki);
+  assert(!validPos(*ei));
+  auto& e = allocElm(ei);
+  e.setIntKey(ki);
+  m_nextKI = ki + 1;
+  zInitVal(e.data, data);
+}
+
 ArrayData* HphpArray::updateRef(int64_t ki, CVarRef data) {
   assert(!isPacked());
   auto ei = findForInsert(ki);
@@ -1456,6 +1514,30 @@ HphpArray::AddStr(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
   auto a = asMixed(ad);
   if (copy) a = a->copyMixed();
   return a->addVal(k, v);
+}
+
+void HphpArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {
+  auto a = asHphpArray(ad);
+  if (a->isPacked()) {
+    a->packedToMixed();
+  }
+  a->zSetImpl(k, v);
+}
+
+void HphpArray::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
+  auto a = asHphpArray(ad);
+  if (a->isPacked()) {
+    a->packedToMixed();
+  }
+  a->zSetImpl(k, v);
+}
+
+void HphpArray::ZAppend(ArrayData* ad, RefData* v) {
+  auto a = asHphpArray(ad);
+  if (a->isPacked()) {
+    a->packedToMixed();
+  }
+  a->zAppendImpl(v);
 }
 
 //=============================================================================

@@ -255,7 +255,7 @@ void emitDtorStubs(UniqueStubs& uniqueStubs) {
     a, CppCall(getMethodPtr(&ResourceData::release))
   ));
   auto const refDtor = add("dtorRef", emitUnaryStub(
-    a, CppCall(implicit_cast<void*>(getMethodPtr(&RefData::release)))
+    a, CppCall((void*)(&refdata_after_decref_helper))
   ));
 
   uniqueStubs.dtorStubs[0] = nullptr;

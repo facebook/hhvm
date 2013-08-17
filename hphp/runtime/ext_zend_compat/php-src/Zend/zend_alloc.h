@@ -28,6 +28,19 @@
 #include "zend.h"
 
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/complex-types.h"
+
+/**
+ * Some times a zval is passed to efree() and friends, but unfortunately
+ * zvals (i.e. RefDatas) are not allocated using smart_malloc but rather
+ * they are allocated using their own allocator, so we have a different
+ * overload of _efree() to handle freeing these correctly.
+ */
+inline void _efree(const HPHP::RefData* ptr) {
+  auto p = const_cast<HPHP::RefData*>(ptr);
+  p->tv()->m_type = HPHP::KindOfNull;
+  p->release();
+}
 
 BEGIN_EXTERN_C()
 
@@ -136,16 +149,22 @@ END_EXTERN_C()
 
 /* fast cache for zval's */
 #define ALLOC_ZVAL(z)  \
-  (z) = (zval *) emalloc(sizeof(zval))
+  (z) = HPHP::RefData::Make(HPHP::KindOfNull, 0)
 
 #define FREE_ZVAL(z)  \
-  efree_rel(z)
+  do { \
+    (z)->tv()->m_type = KindOfNull; \
+    (z)->release(); \
+  } while (0)
 
 #define ALLOC_ZVAL_REL(z)  \
-  (z) = (zval *) emalloc_rel(sizeof(zval))
+  (z) = HPHP::RefData::Make(HPHP::KindOfNull, 0)
 
 #define FREE_ZVAL_REL(z)  \
-  efree_rel(z)
+  do { \
+    (z)->tv()->m_type = KindOfNull; \
+    (z)->release(); \
+  } while (0)
 
 /* fast cache for HashTables */
 #define ALLOC_HASHTABLE(ht)                               \
@@ -153,12 +172,15 @@ END_EXTERN_C()
               ret->setRefCount(0);                        \
               return ret; }()
 
+// TODO Should we try to free the hashtable here? At present it
+// gets freed by zend_hash_destroy()
 #define FREE_HASHTABLE(ht)
 
 #define ALLOC_HASHTABLE_REL(ht)  \
-  (ht) = (HashTable *) emalloc_rel(sizeof(HPHP::HphpArray))
+  (ht) = HashTable::Make(0);
 
-#define FREE_HASHTABLE_REL(ht)  \
-  efree_rel(ht)
+// TODO Should we try to free the hashtable here? At present it
+// gets freed by zend_hash_destroy()
+#define FREE_HASHTABLE_REL(ht)
 
 #endif

@@ -316,6 +316,21 @@ extern const ArrayFunctions g_array_funcs = {
     &SharedMap::GetSharedVariant,
     &ArrayData::GetSharedVariant,
     &ArrayData::GetSharedVariant },
+  // zSetInt
+  { &HphpArray::ZSetInt, &HphpArray::ZSetInt,
+    &ArrayData::ZSetInt,
+    &ArrayData::ZSetInt,
+    &ArrayData::ZSetInt },
+  // zSetStr
+  { &HphpArray::ZSetStr, &HphpArray::ZSetStr,
+    &ArrayData::ZSetStr,
+    &ArrayData::ZSetStr,
+    &ArrayData::ZSetStr },
+  // zAppend
+  { &HphpArray::ZAppend, &HphpArray::ZAppend,
+    &ArrayData::ZAppend,
+    &ArrayData::ZAppend,
+    &ArrayData::ZAppend },
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -541,6 +556,18 @@ void ArrayData::Uasort(ArrayData*, CVarRef cmp_function) {
 
 ArrayData* ArrayData::CopyWithStrongIterators(const ArrayData* ad) {
   throw FatalErrorException("Unimplemented ArrayData::copyWithStrongIterators");
+}
+
+void ArrayData::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {
+  throw FatalErrorException("Unimplemented ArrayData::ZSetInt");
+}
+
+void ArrayData::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
+  throw FatalErrorException("Unimplemented ArrayData::ZSetStr");
+}
+
+void ArrayData::ZAppend(ArrayData* ad, RefData* v) {
+  throw FatalErrorException("Unimplemented ArrayData::ZAppend");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

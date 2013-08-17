@@ -13,24 +13,25 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/variable-serializer.h"
+
+#include "hphp/runtime/ext_hhvm/ext_zend_compat.h"
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
-void RefData::dump() const {
-  VariableSerializer vs(VariableSerializer::Type::VarDump);
-  String ret(vs.serialize(tvAsCVarRef(&m_tv), true));
-  printf("RefData: %s", ret.c_str());
-}
-
-void refdata_after_decref_helper(RefData* ref) {
-  if (LIKELY(!ref->m_cow)) {
-    ref->release();
-    return;
+// TODO zPrepArgs needs to be updated so take care of
+// boxing varargs
+void zPrepArgs(ActRec* ar) {
+  int32_t numArgs = ar->numArgs();
+  TypedValue* args = (TypedValue*)ar - 1;
+  for (int32_t i = 0; i < numArgs; ++i) {
+    TypedValue* arg = args-i;
+    if (arg->m_type != KindOfRef) {
+      tvBox(arg);
+    }
   }
-  ref->m_count = 1;
-  ref->m_cowAndZ = 0;
 }
 
+///////////////////////////////////////////////////////////////////////////////
 }
+

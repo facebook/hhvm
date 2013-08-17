@@ -75,7 +75,7 @@ bool tvIsPlausible(TypedValue tv) {
   if (tv.m_type == KindOfRef) {
     assert(tv.m_data.pref);
     assert(uintptr_t(tv.m_data.pref) % sizeof(void*) == 0);
-    assert(is_refcount_realistic(tv.m_data.pref->getCount()));
+    assert(is_refcount_realistic(tv.m_data.pref->getRealCount()));
     tv = *tv.m_data.pref->tv();
   }
   return cellIsPlausible(tv);
@@ -84,6 +84,16 @@ bool tvIsPlausible(TypedValue tv) {
 bool refIsPlausible(const Ref ref) {
   assert(ref.m_type == KindOfRef);
   return tvIsPlausible(ref);
+}
+
+bool tvDecRefWillRelease(TypedValue* tv) {
+  if (!IS_REFCOUNTED_TYPE(tv->m_type)) {
+    return false;
+  }
+  if (tv->m_type == KindOfRef) {
+    return tv->m_data.pref->getRealCount() <= 1;
+  }
+  return tv->m_data.pstr->getCount() <= 1;
 }
 
 void tvUnboxIfNeeded(TypedValue *tv) {

@@ -203,7 +203,9 @@ public:
    */
   bool isVectorData() const;
 
-  static SharedVariant *GetSharedVariant(const ArrayData* ad) { return nullptr; }
+  static SharedVariant *GetSharedVariant(const ArrayData* ad) {
+    return nullptr;
+  }
   SharedVariant* getSharedVariant();
 
   /**
@@ -277,6 +279,10 @@ public:
 
   ArrayData *setRef(int64_t k, CVarRef v, bool copy);
   ArrayData *setRef(StringData* k, CVarRef v, bool copy);
+
+  void zSet(int64_t k, RefData* r);
+  void zSet(StringData* k, RefData* r);
+  void zAppend(RefData* r);
 
   /**
    * The same as set(), but with the precondition that the key does
@@ -384,6 +390,10 @@ public:
   static void Uksort(ArrayData*, CVarRef cmp_function);
   static void Usort(ArrayData*, CVarRef cmp_function);
   static void Uasort(ArrayData*, CVarRef cmp_function);
+
+  static void ZSetInt(ArrayData* ad, int64_t k, RefData* v);
+  static void ZSetStr(ArrayData* ad, StringData* k, RefData* v);
+  static void ZAppend(ArrayData* ad, RefData* v);
 
   /**
    * Make a copy of myself.
@@ -604,6 +614,9 @@ struct ArrayFunctions {
   void (*onSetEvalScalar[NK])(ArrayData*);
   ArrayData* (*escalate[NK])(const ArrayData*);
   SharedVariant* (*getSharedVariant[NK])(const ArrayData*);
+  void (*zSetInt[NK])(ArrayData*, int64_t k, RefData* v);
+  void (*zSetStr[NK])(ArrayData*, StringData* k, RefData* v);
+  void (*zAppend[NK])(ArrayData*, RefData* v);
 };
 
 extern const ArrayFunctions g_array_funcs;

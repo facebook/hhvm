@@ -439,7 +439,6 @@ private:
   bool isFlat() const;
   bool isImmutable() const;
 
-  void releaseData();
   void releaseDataSlowPath();
   int numericCompare(const StringData *v2) const;
   StringData* escalate(uint32_t cap);

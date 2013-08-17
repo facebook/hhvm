@@ -22,6 +22,8 @@
 #ifndef ZEND_TYPES_H
 #define ZEND_TYPES_H
 
+#include "hphp/runtime/base/complex-types.h"
+
 typedef unsigned char zend_bool;
 typedef unsigned char zend_uchar;
 typedef unsigned int zend_uint;
@@ -44,7 +46,7 @@ typedef unsigned long zend_uintptr_t;
 
 typedef unsigned int zend_object_handle;
 typedef struct _zend_object_handlers zend_object_handlers;
-typedef struct HPHP::TypedValue zval;
+typedef struct HPHP::RefData zval;
 
 typedef struct _zend_object_value {
   zend_object_handle handle;

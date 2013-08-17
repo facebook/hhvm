@@ -57,7 +57,18 @@ inline bool isTypedNum(const TypedValue& tv) {
 // Assumes 'IS_REFCOUNTED_TYPE(type)'
 void tvDecRefHelper(DataType type, uint64_t datum);
 
-inline bool tvWillBeReleased(TypedValue* tv) {
+/*
+ * Returns true if decreffing the specified TypedValue will free heap-allocated
+ * data. Note that this function always returns false for non-refcounted types.
+ */
+bool tvDecRefWillRelease(TypedValue* tv);
+
+/*
+ * Returns true iff decreffing the specified TypedValue will cause any kind of
+ * helper to be called. Note that there are cases where this function returns
+ * true but tvDecRefWillRelease() will return false.
+ */
+inline bool tvDecRefWillCallHelper(TypedValue* tv) {
   return IS_REFCOUNTED_TYPE(tv->m_type) &&
          tv->m_data.pstr->getCount() <= 1;
 }
@@ -94,7 +105,7 @@ inline void tvDecRefRes(TypedValue* tv) {
 inline void tvDecRefRefInternal(RefData* r) {
   assert(tvIsPlausible(*r->tv()));
   assert(r->tv()->m_type != KindOfRef);
-  assert(r->m_count > 0);
+  assert(r->getRealCount() > 0);
   decRefRef(r);
 }
 
@@ -130,7 +141,7 @@ ALWAYS_INLINE void tvRefcountedDecRef(TypedValue* tv) {
 
 // decref when the count is known not to reach zero
 ALWAYS_INLINE void tvDecRefOnly(TypedValue* tv) {
-  assert(!tvWillBeReleased(tv));
+  assert(!tvDecRefWillCallHelper(tv));
   if (IS_REFCOUNTED_TYPE(tv->m_type)) {
     tv->m_data.pstr->decRefCount();
   }
@@ -151,7 +162,6 @@ inline TypedValue* tvBox(TypedValue* tv) {
 }
 
 // Assumes 'tv' is live
-//
 // Assumes 'IS_REFCOUNTED_TYPE(tv->m_type)'
 inline void tvIncRef(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
@@ -215,8 +225,8 @@ inline void refCopy(const Ref& fr, Ref& to) {
 }
 
 /*
- * Duplicate a TypedValue to a new location.  Copies the m_data and
- * m_type fields, and increments reference count.  Does not perform a
+ * Duplicate a TypedValue to a new location. Copies the m_data and
+ * m_type fields, and increments reference count. Does not perform a
  * decRef on to.
  */
 inline void tvDup(const TypedValue& fr, TypedValue& to) {
@@ -225,19 +235,20 @@ inline void tvDup(const TypedValue& fr, TypedValue& to) {
 }
 
 /*
- * Duplicate a Cell from one location to another.  Is equivalent to
- * tvDup, with some added assertions.
+ * Duplicate a Cell from one location to another. Copies the m_data and
+ * m_type fields, and increments the reference count. Does not perform
+ * a decRef on the value that was overwritten.
  */
 inline void cellDup(const Cell& fr, Cell& to) {
   assert(cellIsPlausible(fr));
-  tvDup(fr, to);
+  tvCopy(fr, to);
+  tvRefcountedIncRef(&to);
 }
 
 /*
- * Duplicate a Ref from one location to another.
- *
- * This has the same effects as tvDup(fr, to), but is slightly more
- * efficient because we don't need to check the type tag.
+ * Duplicate a Ref from one location to another. Copies the m_data and
+ * m_type fields and increments the reference count. Does not perform
+ * as decRef on the value that was overwritten.
  */
 inline void refDup(const Ref& fr, Ref& to) {
   assert(refIsPlausible(fr));
@@ -345,8 +356,8 @@ inline void tvBind(TypedValue* fr, TypedValue* to) {
 inline void tvBindRef(RefData* fr, TypedValue* to) {
   auto const oldType  = to->m_type;
   auto const oldDatum = to->m_data.num;
-  tvCopy(make_tv<KindOfRef>(fr), *to);
   fr->incRefCount();
+  tvCopy(make_tv<KindOfRef>(fr), *to);
   tvRefcountedDecRefHelper(oldType, oldDatum);
 }
 
@@ -433,7 +444,7 @@ inline const Variant& refAsCVarRef(const Ref& ref) {
 }
 
 inline bool tvIsStronglyBound(const TypedValue* tv) {
-  return (tv->m_type == KindOfRef && tv->m_data.pref->m_count > 1);
+  return (tv->m_type == KindOfRef && tv->m_data.pref->isReferenced());
 }
 
 // Assumes 'fr' is live and 'to' is dead, and does not mutate to->m_aux
@@ -441,7 +452,7 @@ inline void tvDupFlattenVars(const TypedValue* fr, TypedValue* to,
                              const ArrayData* container) {
   if (LIKELY(fr->m_type != KindOfRef)) {
     cellDup(*fr, *to);
-  } else if (fr->m_data.pref->m_count <= 1 &&
+  } else if (!fr->m_data.pref->isReferenced() &&
              (!container || fr->m_data.pref->tv()->m_data.parr != container)) {
     fr = fr->m_data.pref->tv();
     cellDup(*fr, *to);

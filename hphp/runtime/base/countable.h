@@ -52,56 +52,52 @@ inline DEBUG_ONLY bool is_refcount_realistic(int32_t count) {
  * Ref-counted types have a m_count field at FAST_REFCOUNT_OFFSET
  * and define counting methods with these macros.
  */
-#define IMPLEMENT_COUNTABLE_METHODS_NO_STATIC   \
-  RefCount getCount() const {                   \
-    assert(is_refcount_realistic(m_count));     \
-    return m_count;                             \
-  }                                             \
-                                                \
-  bool isRefCounted() const {                   \
-    assert(is_refcount_realistic(m_count));     \
-    return m_count != RefCountStaticValue;      \
-  }                                             \
-                                                \
-  void incRefCount() const {                    \
-    assert(is_refcount_realistic(m_count));     \
-    if (isRefCounted()) { ++m_count; }          \
-  }                                             \
-                                                \
-  RefCount decRefCount() const {                \
-    assert(m_count > 0);                        \
-    assert(is_refcount_realistic(m_count));     \
-    return isRefCounted() ? --m_count : m_count;\
+#define IMPLEMENT_COUNTABLE_METHODS_NO_STATIC    \
+  RefCount getCount() const {                    \
+    assert(is_refcount_realistic(m_count));      \
+    return m_count;                              \
+  }                                              \
+  bool isRefCounted() const {                    \
+    assert(is_refcount_realistic(m_count));      \
+    return m_count != RefCountStaticValue;       \
+  }                                              \
+  void incRefCount() const {                     \
+    assert(is_refcount_realistic(m_count));      \
+    if (isRefCounted()) { ++m_count; }           \
+  }                                              \
+  RefCount decRefCount() const {                 \
+    assert(m_count > 0);                         \
+    assert(is_refcount_realistic(m_count));      \
+    return isRefCounted() ? --m_count : m_count; \
   }
 
-#define IMPLEMENT_COUNTABLE_METHODS                                   \
-  void setStatic() const {                                            \
-    assert(is_refcount_realistic(m_count));                           \
-    m_count = RefCountStaticValue;                                    \
-  }                                                                   \
-  bool isStatic() const {                                             \
-    assert(is_refcount_realistic(m_count));                           \
-    return m_count == RefCountStaticValue;                            \
-  }                                                                   \
+#define IMPLEMENT_COUNTABLE_METHODS              \
+  void setStatic() const {                       \
+    assert(is_refcount_realistic(m_count));      \
+    m_count = RefCountStaticValue;               \
+  }                                              \
+  bool isStatic() const {                        \
+    assert(is_refcount_realistic(m_count));      \
+    return m_count == RefCountStaticValue;       \
+  }                                              \
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
 
-#define IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC \
-  RefCount getCount() const {                   \
-    assert(is_refcount_realistic(m_count));     \
-    return m_count;                             \
-  }                                             \
-                                                \
-  bool isRefCounted() const { return true; }    \
-                                                \
-  void incRefCount() const {                    \
-    assert(is_refcount_realistic(m_count));     \
-    ++m_count;                                  \
-  }                                             \
-                                                \
-  RefCount decRefCount() const {                \
-    assert(m_count > 0);                        \
-    assert(is_refcount_realistic(m_count));     \
-    return --m_count;                           \
+#define IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC  \
+  RefCount getCount() const {                    \
+    assert(is_refcount_realistic(m_count));      \
+    return m_count;                              \
+  }                                              \
+  bool isRefCounted() const {                    \
+    return true;                                 \
+  }                                              \
+  void incRefCount() const {                     \
+    assert(is_refcount_realistic(m_count));      \
+    ++m_count;                                   \
+  }                                              \
+  RefCount decRefCount() const {                 \
+    assert(m_count > 0);                         \
+    assert(is_refcount_realistic(m_count));      \
+    return --m_count;                            \
   }
 
 class ObjectData;

@@ -2864,8 +2864,11 @@ static inline void lookupClsRef(TypedValue* input,
 
 static UNUSED int innerCount(const TypedValue* tv) {
   if (IS_REFCOUNTED_TYPE(tv->m_type)) {
-    // We're using pref here arbitrarily; any refcounted union member works.
-    return tv->m_data.pref->m_count;
+    if (tv->m_type == KindOfRef) {
+      return tv->m_data.pref->getRealCount();
+    } else {
+      return tv->m_data.pref->m_count;
+    }
   }
   return -1;
 }
@@ -5868,9 +5871,11 @@ bool VMExecutionContext::prepareArrayArgs(ActRec* ar, Array& arrayArgs) {
     ExtraArgs* extraArgs = ExtraArgs::allocateUninit(extra);
     for (int i = 0; i < extra; ++i) {
       TypedValue* to = extraArgs->getExtraArg(i);
-      tvDup(*args->getValueRef(pos).asTypedValue(), *to);
-      if (to->m_type == KindOfRef && to->m_data.pref->m_count == 2) {
-        tvUnbox(to);
+      const TypedValue* from = args->getValueRef(pos).asTypedValue();
+      if (from->m_type == KindOfRef && from->m_data.pref->isReferenced()) {
+        refDup(*from, *to);
+      } else {
+        cellDup(*tvToCell(from), *to);
       }
       pos = args->iter_advance(pos);
     }
@@ -6396,6 +6401,7 @@ OPTBLD_INLINE void VMExecutionContext::iopStaticLocInit(PC& pc) {
   bool inited;
   lookupStatic(var, m_fp, fr, inited);
   assert(fr != nullptr);
+  assert(!inited || fr->m_type == KindOfRef);
   if (!inited) {
     Cell* initVal = m_stack.topC();
     cellDup(*initVal, *fr);

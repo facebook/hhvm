@@ -240,7 +240,7 @@ typedef enum {
 
 #include "zend_hash.h"
 
-#define INTERNAL_FUNCTION_PARAMETERS HPHP::ActRec* ar, HPHP::TypedValue* return_value
+#define INTERNAL_FUNCTION_PARAMETERS HPHP::ActRec* ar, HPHP::RefData* return_value
 #define INTERNAL_FUNCTION_PARAM_PASSTHRU ar, return_value
 
 #if defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)
@@ -316,45 +316,35 @@ typedef union HPHP::Value zvalue_value;
 
 using HPHP::KindOfRefCountThreshold;
 zend_always_inline zend_bool zval_isref_p(zval* pz) {
-  return pz->m_type == HPHP::KindOfRef;
+  return pz->zIsRef();
 }
 
 zend_always_inline zend_uint zval_refcount_p(zval* pz) {
-  if (zval_isref_p(pz)) {
-    return pz->m_data.pstr->getCount();
-  }
-  return 0;
+  return pz->zRefcount();
 }
 
 zend_always_inline zend_uint zval_set_refcount_p(zval* pz, zend_uint rc) {
-  if (zval_isref_p(pz)) {
-    pz->m_data.pstr->setRefCount(rc);
-  }
+  pz->zSetRefcount(rc);
   return rc;
 }
 
 zend_always_inline zend_uint zval_addref_p(zval* pz) {
-  if (pz->m_type != HPHP::KindOfRef) {
-    tvBox(pz);
-  }
-  tvRefcountedIncRef(pz);
-  return zval_refcount_p(pz);
+  pz->zAddRef();
+  return pz->zRefcount();
 }
 
 zend_always_inline zend_uint zval_delref_p(zval* pz) {
-  tvRefcountedDecRef(pz);
-  return zval_refcount_p(pz);
+  pz->zDelRef();
+  return pz->zRefcount();
 }
 
 zend_always_inline zend_bool zval_set_isref_p(zval* pz) {
-  if (pz->m_type != HPHP::KindOfRef) {
-    tvBox(pz);
-  }
+  pz->zSetIsRef();
   return true;
 }
 
 zend_always_inline zend_bool zval_unset_isref_p(zval* pz) {
-  tvUnboxIfNeeded(pz);
+  pz->zUnsetIsRef();
   return false;
 }
 
@@ -409,49 +399,48 @@ ZEND_API inline void zend_error(int type, const char *format, ...) {
 }
 
 extern ZEND_API zend_class_entry *zend_standard_class_def;
-extern ZEND_API zval zval_used_for_init;
 
 END_EXTERN_C()
 
-#define INIT_PZVAL(z)     \
-  tvWriteUninit(z);       \
-  Z_SET_REFCOUNT_P(z, 1); \
-  Z_UNSET_ISREF_P(z);
+#define INIT_PZVAL(z) \
+  Z_SET_REFCOUNT_P((z), 1); \
+  Z_UNSET_ISREF_P((z));
 
-#define INIT_ZVAL(z) z = zval_used_for_init;
+#define INIT_ZVAL(z) ((z).zInit());
 
-#define ALLOC_INIT_ZVAL(zp)            \
-  ALLOC_ZVAL(zp);    \
+#define ALLOC_INIT_ZVAL(zp) \
+  ALLOC_ZVAL(zp); \
   INIT_ZVAL(*zp);
 
-#define MAKE_STD_ZVAL(zv)         \
+#define MAKE_STD_ZVAL(zv) \
   ALLOC_ZVAL(zv); \
   INIT_PZVAL(zv);
 
-#define PZVAL_IS_REF(z)    Z_ISREF_P(z)
+#define PZVAL_IS_REF(z) Z_ISREF_P(z)
 
-#define ZVAL_COPY_VALUE(z, v)    \
-  do {                           \
-    tvDup(*v, *z);              \
+#define ZVAL_COPY_VALUE(z, v) \
+  do { \
+    (z)->tv()->m_data.num = (v)->tv()->m_data.num; \
+    (z)->tv()->m_type = (v)->tv()->m_type; \
   } while (0)
 
-#define INIT_PZVAL_COPY(z, v)          \
-  do {                    \
-    ZVAL_COPY_VALUE(z, v);          \
-    Z_SET_REFCOUNT_P(z, 1);          \
-    Z_UNSET_ISREF_P(z);            \
+#define INIT_PZVAL_COPY(z, v) \
+  do { \
+    ZVAL_COPY_VALUE(z, v); \
+    Z_SET_REFCOUNT_P(z, 1); \
+    Z_UNSET_ISREF_P(z); \
   } while (0)
 
-#define SEPARATE_ZVAL(ppzv)            \
-  do {                    \
-    if (Z_REFCOUNT_PP((ppzv)) > 1) {    \
-      zval *new_zv;            \
-      Z_DELREF_PP(ppzv);          \
-      ALLOC_ZVAL(new_zv);          \
-      INIT_PZVAL_COPY(new_zv, *(ppzv));  \
-      *(ppzv) = new_zv;          \
-      zval_copy_ctor(new_zv);        \
-    }                    \
+#define SEPARATE_ZVAL(ppzv) \
+  do { \
+    if (Z_REFCOUNT_PP((ppzv)) > 1) { \
+      zval *new_zv; \
+      Z_DELREF_PP(ppzv); \
+      ALLOC_ZVAL(new_zv); \
+      INIT_PZVAL_COPY(new_zv, *(ppzv)); \
+      *(ppzv) = new_zv; \
+      zval_copy_ctor(new_zv); \
+    } \
   } while (0)
 
 #define SEPARATE_ZVAL_IF_NOT_REF(ppzv)    \

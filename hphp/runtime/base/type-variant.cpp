@@ -249,7 +249,7 @@ const RawDestructor g_destructors[] = {
   (RawDestructor)getMethodPtr(&ArrayData::release),
   (RawDestructor)getMethodPtr(&ObjectData::release),
   (RawDestructor)getMethodPtr(&ResourceData::release),
-  (RawDestructor)getMethodPtr(&RefData::release),
+  (RawDestructor)(&refdata_after_decref_helper),
 };
 
 ALWAYS_INLINE

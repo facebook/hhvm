@@ -625,20 +625,16 @@ inline ALWAYS_INLINE bool HphpArray::isFull() const {
   return m_used == m_cap || m_hLoad == m_cap;
 }
 
-inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElmFast(ElmInd* ei) {
+inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElm(ElmInd* ei) {
   assert(!validElmInd(*ei) && !isFull());
   assert(m_size != 0 || m_used == 0);
   ++m_size;
   m_hLoad += (*ei == ElmIndEmpty);
-  ElmInd i = m_used++;
+  size_t i = m_used;
   (*ei) = i;
+  m_used = i + 1;
+  if (m_pos == invalid_index) m_pos = i;
   return &m_data[i];
-}
-
-inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElm(ElmInd* ei) {
-  Elm* e = allocElmFast(ei);
-  if (m_pos == ArrayData::invalid_index) m_pos = ssize_t(*ei);
-  return e;
 }
 
 inline ALWAYS_INLINE TypedValue& HphpArray::allocNextElm(uint32_t i) {

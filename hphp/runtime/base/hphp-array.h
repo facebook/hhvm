@@ -448,7 +448,6 @@ private:
   Elm* newElm(ElmInd* e, size_t h0);
   Elm* newElmGrow(size_t h0);
   Elm* allocElm(ElmInd* ei);
-  Elm* allocElmFast(ElmInd* ei);
   TypedValue& allocNextElm(uint32_t i);
 
   HphpArray* setVal(TypedValue& tv, CVarRef v);

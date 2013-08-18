@@ -1019,9 +1019,9 @@ class Variant : private TypedValue {
   void AssignValHelper(Variant *self, const Variant *other) {
     if (UNLIKELY(self->m_type == KindOfRef)) self = self->m_data.pref->var();
     if (UNLIKELY(other->m_type == KindOfRef)) other = other->m_data.pref->var();
-    if (UNLIKELY(self == other)) {
-      return;
-    }
+    // An early check for self == other here would be faster in that case, but
+    // slows down the frequent case of self != other.
+    // The following code is correct even if self == other.
     const DataType stype = self->m_type;
     const Value sdata = self->m_data;
     const DataType otype = other->m_type;

@@ -311,8 +311,22 @@ public:
 
   bool same(const StringData *s) const {
     assert(s);
-    if (m_len != s->m_len) return false;
-    return !memcmp(rawdata(), s->rawdata(), m_len);
+    size_t len = m_len;
+    if (len != s->m_len) return false;
+    // The underlying buffer and its length are 32-bit aligned, ensured by
+    // StringData layout, smart_malloc, or malloc.  So compare words.
+    auto p1 = (uint32_t*) rawdata();
+    auto p2 = (uint32_t*) s->rawdata();
+    auto constexpr W = sizeof(*p1);
+    for (auto end = p1 + len / W; p1 < end; p1++, p2++) {
+      if (*p1 != *p2) return false;
+    }
+    // let W = sizeof(*p1); now p1 and p2 point to the last 0..W-1 bytes plus
+    // the 0 terminator, ie the last 1..W bytes.  Load W bytes, shift off the
+    // bytes after the 0, then compare.
+    auto shift = 8 * (W - 1) - 8 * (len % W);
+    return (*p1 << shift) == (*p2 << shift);
+    static_assert(offsetof(StringData,m_small)%8 == 4, "");
   }
 
   bool isame(const StringData *s) const {

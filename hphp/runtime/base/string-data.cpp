@@ -310,16 +310,26 @@ void StringData::initMalloc(const char* data, int len) {
 }
 
 HOT_FUNC
-StringData::StringData(SharedVariant *shared)
+StringData::StringData(SharedVariant* shared)
   : m_count(0) {
   assert(shared && size_t(shared->stringLength()) <= size_t(MaxSize));
-  shared->incRef();
   m_hash = 0;
-  m_len = shared->stringLength();
-  m_cdata = shared->stringData();
-  m_big.shared = shared;
-  setModeAndCap(Mode::Shared, m_len + 1);
-  enlist();
+  auto len = shared->stringLength();
+  auto data = shared->stringData();
+  if (len <= MaxSmallSize) {
+    memcpy(m_small, data, len + 1); // include \0
+    m_len = len;
+    m_data = m_small;
+    setSmall();
+    assert(m_small[len] == 0);
+  } else {
+    shared->incRef();
+    m_len = len;
+    m_cdata = data;
+    m_big.shared = shared;
+    setModeAndCap(Mode::Shared, len + 1);
+    enlist();
+  }
 }
 
 HOT_FUNC

@@ -432,15 +432,7 @@ static bool hitStringKey(const HphpArray::Elm& e, const StringData* s,
   // it removes an element it always removes the corresponding hash entry.
   // Therefore the assertion below must hold.
   assert(!HphpArray::isTombstone(e.data.m_type));
-
-  if (hash != e.hash()) return false;
-  auto* s2 = e.key;
-  if (s2 == s) return true;
-  const char* data = s->data();
-  const char* data2 = s2->data();
-  if (data2 == data) return true;
-  int len = s->size();
-  return len == s2->size() && !memcmp(data, data2, len);
+  return hash == e.hash() && (s == e.key || s->same(e.key));
 }
 
 static bool hitIntKey(const HphpArray::Elm& e, int64_t ki) {

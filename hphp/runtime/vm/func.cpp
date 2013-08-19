@@ -130,7 +130,7 @@ void Func::setFullName() {
   }
 }
 
-void Func::initPrologues(int numParams, bool isGenerator) {
+void Func::initPrologues(int numParams) {
   m_funcBody = (TCA)HPHP::Transl::funcBodyHelperThunk;
 
   int maxNumPrologues = Func::getMaxNumPrologues(numParams);
@@ -144,7 +144,7 @@ void Func::initPrologues(int numParams, bool isGenerator) {
   }
 }
 
-void Func::init(int numParams, bool isGenerator) {
+void Func::init(int numParams) {
   // For methods, we defer setting the full name until m_cls is initialized
   m_maybeIntercepted = -1;
   if (!preClass()) {
@@ -169,7 +169,7 @@ void Func::init(int numParams, bool isGenerator) {
   m_magic = kMagic;
 #endif
   assert(m_name);
-  initPrologues(numParams, isGenerator);
+  initPrologues(numParams);
 }
 
 void* Func::allocFuncMem(
@@ -196,8 +196,7 @@ void* Func::allocFuncMem(
 
 Func::Func(Unit& unit, Id id, PreClass* preClass, int line1, int line2,
            Offset base, Offset past, const StringData* name, Attr attrs,
-           bool top, const StringData* docComment, int numParams,
-           bool isGenerator)
+           bool top, const StringData* docComment, int numParams)
   : m_unit(&unit)
   , m_cls(nullptr)
   , m_baseCls(nullptr)
@@ -214,7 +213,7 @@ Func::Func(Unit& unit, Id id, PreClass* preClass, int line1, int line2,
   m_shared = new SharedData(preClass, preClass ? -1 : id,
                             base, past, line1, line2,
                             top, docComment);
-  init(numParams, isGenerator);
+  init(numParams);
 }
 
 Func::~Func() {
@@ -266,7 +265,7 @@ Func* Func::clone(Class* cls) const {
                    isClosureBody() || isGeneratorFromClosure(),
                    cls || !preClass())) Func(*this);
 
-  f->initPrologues(m_numParams, isGenerator());
+  f->initPrologues(m_numParams);
   f->m_funcId = InvalidFuncId;
   if (cls != f->m_cls) {
     f->m_cls = cls;
@@ -669,7 +668,6 @@ DVFuncletsVec Func::getDVFunclets() const {
   return dvs;
 }
 
-
 Func::SharedData::SharedData(PreClass* preClass, Id id,
                              Offset base, Offset past, int line1, int line2,
                              bool top, const StringData* docComment)
@@ -970,8 +968,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   Func* f = m_ue.newFunc(this, unit, m_id, preClass, m_line1, m_line2, m_base,
                          m_past, m_name, attrs, m_top, m_docComment,
                          m_params.size(),
-                         m_isClosureBody | m_isGeneratorFromClosure,
-                         m_isGenerator);
+                         m_isClosureBody | m_isGeneratorFromClosure);
 
   f->shared()->m_info = m_info;
   f->shared()->m_returnType = m_returnType;

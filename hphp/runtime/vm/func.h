@@ -145,7 +145,7 @@ struct Func {
 
   Func(Unit& unit, Id id, PreClass* preClass, int line1, int line2, Offset base,
        Offset past, const StringData* name, Attr attrs, bool top,
-       const StringData* docComment, int numParams, bool isGenerator);
+       const StringData* docComment, int numParams);
   ~Func();
   static void destroy(Func* func);
 
@@ -412,7 +412,7 @@ struct Func {
   void resetPrologues() {
     // Useful when killing code; forget what we've learned about the contents
     // of the translation cache.
-    initPrologues(m_numParams, isGenerator());
+    initPrologues(m_numParams);
   }
 
   const NamedEntity* getNamedEntity() const {
@@ -498,8 +498,8 @@ private:
 
 private:
   void setFullName();
-  void init(int numParams, bool isGenerator);
-  void initPrologues(int numParams, bool isGenerator);
+  void init(int numParams);
+  void initPrologues(int numParams);
   void appendParam(bool ref, const ParamInfo& info,
                    std::vector<ParamInfo>& pBuilder);
   void allocVarId(const StringData* name);

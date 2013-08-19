@@ -2413,12 +2413,12 @@ Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
                            Offset base, Offset past,
                            const StringData* name, Attr attrs, bool top,
                            const StringData* docComment, int numParams,
-                           bool needsNextClonedClosure, bool isGenerator) {
+                           bool needsNextClonedClosure) {
   Func* f = new (Func::allocFuncMem(name, numParams,
                                     needsNextClonedClosure,
                                     !preClass))
     Func(unit, id, preClass, line1, line2, base, past, name,
-         attrs, top, docComment, numParams, isGenerator);
+         attrs, top, docComment, numParams);
   m_fMap[fe] = f;
   return f;
 }

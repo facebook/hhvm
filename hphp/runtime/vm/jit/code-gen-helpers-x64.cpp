@@ -18,24 +18,15 @@
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/trace.h"
-#include "hphp/util/util.h"
 
-#include "hphp/runtime/base/hphp-array.h"
-#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/jit/translator-x64-internal.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/x64-util.h"
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/native-calls.h"
 
 namespace HPHP {
 namespace JIT {

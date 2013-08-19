@@ -6624,32 +6624,30 @@ VMExecutionContext::createContMeth(const Func* origFunc,
 static inline void setContVar(const Func* genFunc,
                               const StringData* name,
                               TypedValue* src,
-                              c_Continuation* cont) {
+                              ActRec* genFp) {
   Id destId = genFunc->lookupVarId(name);
   if (destId != kInvalidId) {
     // Copy the value of the local to the cont object and set the
     // local to uninit so that we don't need to change refcounts.
-    tvCopy(*src, *frame_local(cont->actRec(), destId));
+    tvCopy(*src, *frame_local(genFp, destId));
     tvWriteUninit(src);
   } else {
-    ActRec *contFP = cont->actRec();
-    if (!contFP->hasVarEnv()) {
+    if (!genFp->hasVarEnv()) {
       // We pass skipInsert to this VarEnv because it's going to exist
       // independent of the chain; i.e. we can't stack-allocate it. We link it
       // into the chain in UnpackCont, and take it out in ContSuspend.
-      contFP->setVarEnv(VarEnv::createLocalOnHeap(contFP));
+      genFp->setVarEnv(VarEnv::createLocalOnHeap(genFp));
     }
-    contFP->getVarEnv()->setWithRef(name, src);
+    genFp->getVarEnv()->setWithRef(name, src);
   }
 }
 
 const StaticString s_this("this");
 
-c_Continuation*
-VMExecutionContext::fillContinuationVars(ActRec* fp,
-                                         const Func* origFunc,
-                                         const Func* genFunc,
-                                         c_Continuation* cont) {
+void VMExecutionContext::fillContinuationVars(ActRec* origFp,
+                                              const Func* origFunc,
+                                              ActRec* genFp,
+                                              const Func* genFunc) {
   // For functions that contain only named locals, the variable
   // environment is saved and restored by teleporting the values (and
   // their references) between the evaluation stack and the local
@@ -6657,33 +6655,37 @@ VMExecutionContext::fillContinuationVars(ActRec* fp,
   // VarEnv are saved and restored from m_vars as usual.
   static const StringData* thisStr = s_this.get();
   bool skipThis;
-  if (fp->hasVarEnv()) {
+  if (origFp->hasVarEnv()) {
+    // This is currently never executed but it will be needed for eager
+    // execution of async functions - should be revisited later.
+    assert(false);
     Stats::inc(Stats::Cont_CreateVerySlow);
-    Array definedVariables = fp->getVarEnv()->getDefinedVariables();
+    Array definedVariables = origFp->getVarEnv()->getDefinedVariables();
     skipThis = definedVariables.exists(s_this, true);
 
     for (ArrayIter iter(definedVariables); !iter.end(); iter.next()) {
       setContVar(genFunc, iter.first().getStringData(),
-                 const_cast<TypedValue*>(iter.secondRef().asTypedValue()), cont);
+        const_cast<TypedValue*>(iter.secondRef().asTypedValue()), genFp);
     }
   } else {
     skipThis = origFunc->lookupVarId(thisStr) != kInvalidId;
     for (Id i = 0; i < origFunc->numNamedLocals(); ++i) {
-      setContVar(genFunc, origFunc->localVarName(i),
-                 frame_local(fp, i), cont);
+      assert(i == genFunc->lookupVarId(origFunc->localVarName(i)));
+      TypedValue* src = frame_local(origFp, i);
+      tvCopy(*src, *frame_local(genFp, i));
+      tvWriteUninit(src);
     }
   }
 
   // If $this is used as a local inside the body and is not provided
   // by our containing environment, just prefill it here instead of
   // using InitThisLoc inside the body
-  if (!skipThis && fp->hasThis()) {
+  if (!skipThis && origFp->hasThis()) {
     Id id = genFunc->lookupVarId(thisStr);
     if (id != kInvalidId) {
-      tvAsVariant(frame_local(cont->actRec(), id)) = fp->getThis();
+      tvAsVariant(frame_local(genFp, id)) = origFp->getThis();
     }
   }
-  return cont;
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopCreateCont(PC& pc) {
@@ -6698,7 +6700,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCreateCont(PC& pc) {
     ? createContMeth(origFunc, genFunc, m_fp->getThisOrClass())
     : createContFunc(origFunc, genFunc);
 
-  fillContinuationVars(m_fp, origFunc, genFunc, cont);
+  fillContinuationVars(m_fp, origFunc, cont->actRec(), genFunc);
 
   TypedValue* ret = m_stack.allocTV();
   ret->m_type = KindOfObject;

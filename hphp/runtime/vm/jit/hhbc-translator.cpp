@@ -1171,27 +1171,12 @@ void HhbcTranslator::emitIterBreak(const ImmVector& iv,
   gen(Jmp_, getExitTrace(offset));
 }
 
-typedef std::map<int, int> ContParamMap;
-/*
- * mapContParams builds a mapping between named locals in origFunc and
- * corresponding named locals in genFunc.
- */
-static
-void mapContParams(ContParamMap& map,
-                   const Func* origFunc, const Func* genFunc) {
-  const StringData* const* varNames = origFunc->localNames();
-  for (Id i = 0; i < origFunc->numNamedLocals(); ++i) {
-    map[i] = genFunc->lookupVarId(varNames[i]);
-  }
-}
-
 void HhbcTranslator::emitCreateCont(Id funNameStrId) {
   gen(ExitOnVarEnv, getExitSlowTrace()->front(), m_tb->fp());
 
   auto const genName = lookupStringId(funNameStrId);
   auto const origFunc = curFunc();
   auto const genFunc = origFunc->getGeneratorBody(genName);
-  auto const origLocals = origFunc->numLocals();
 
   auto const cont = origFunc->isMethod()
     ? gen(
@@ -1204,9 +1189,6 @@ void HhbcTranslator::emitCreateCont(Id funNameStrId) {
         CreateContData { origFunc, genFunc }
       );
 
-  ContParamMap params;
-  mapContParams(params, origFunc, genFunc);
-
   static auto const thisStr = StringData::GetStaticString("this");
   Id thisId = kInvalidId;
   const bool fillThis = origFunc->isMethod() &&
@@ -1216,16 +1198,15 @@ void HhbcTranslator::emitCreateCont(Id funNameStrId) {
 
   SSATmp* contAR = gen(
     LdRaw, Type::PtrToGen, cont, cns(RawMemSlot::ContARPtr));
-  for (int i = 0; i < origLocals; ++i) {
-    if (params[i] != kInvalidId) {
-      // We must generate an AssertLoc because we don't have tracelet
-      // guards on the object type in these outer generator functions.
-      gen(AssertLoc, Type::Gen, LocalId(i), m_tb->fp());
-      // Copy the value of the local to the cont object and set the
-      // local to uninit so that we don't need to change refcounts.
-      gen(StMem, contAR, cns(-cellsToBytes(params[i] + 1)), ldLoc(i));
-      gen(StLoc, LocalId(i), m_tb->fp(), m_tb->genDefUninit());
-    }
+  for (int i = 0; i < origFunc->numNamedLocals(); ++i) {
+    assert(i == genFunc->lookupVarId(origFunc->localVarName(i)));
+    // We must generate an AssertLoc because we don't have tracelet
+    // guards on the object type in these outer generator functions.
+    gen(AssertLoc, Type::Gen, LocalId(i), m_tb->fp());
+    // Copy the value of the local to the cont object and set the
+    // local to uninit so that we don't need to change refcounts.
+    gen(StMem, contAR, cns(-cellsToBytes(i + 1)), ldLoc(i));
+    gen(StLoc, LocalId(i), m_tb->fp(), m_tb->genDefUninit());
   }
   if (fillThis) {
     assert(thisId != kInvalidId);

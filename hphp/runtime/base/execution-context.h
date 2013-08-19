@@ -428,9 +428,8 @@ public:
   static c_Continuation* createContMeth(const Func* origFunc,
                                         const Func* genFunc,
                                         void* objOrCls);
-  static c_Continuation* fillContinuationVars(
-    ActRec* fp, const Func* origFunc, const Func* genFunc,
-    c_Continuation* cont);
+  static void fillContinuationVars(
+    ActRec* origFp, const Func* origFunc, ActRec* genFp, const Func* genFunc);
   void pushLocalsAndIterators(const HPHP::Func* f, int nparams = 0);
 
 private:

@@ -247,6 +247,13 @@ void Func::destroy(Func* func) {
     Func** startOfFunc = (Func**) mem;
     mem = startOfFunc - 1; // move back by a pointer
     if (Func* f = startOfFunc[-1]) {
+      /*
+       * cloned closures use the prolog array to hold
+       * the per-clone post-prolog entry points.
+       * They're not real prologs, and they shouldn't be
+       * smashed, so clear them out here.
+       */
+      f->initPrologues(f->m_numParams);
       Func::destroy(f);
     }
   }

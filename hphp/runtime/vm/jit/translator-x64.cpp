@@ -1093,7 +1093,9 @@ TranslatorX64::smashPrologueGuards(TCA* prologues, int numPrologues,
          * Also note that we only need the write lease because we
          * mprotect the translation cache in debug builds.
          */
-        if (!writer) writer.reset(new LeaseHolder(s_writeLease));
+        if (!writer) {
+          writer.reset(new LeaseHolder(s_writeLease, LeaseAcquire::BLOCKING));
+        }
       }
       funcPrologueSmashGuard(prologues[i], func);
     }

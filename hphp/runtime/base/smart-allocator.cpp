@@ -43,13 +43,10 @@ std::set<AllocatorThreadLocalInit>& GetAllocatorInitList() {
   return allocatorInitList;
 }
 
-extern void init_stringdata_allocator();
-
 void InitAllocatorThreadLocal() {
   for (auto& init : GetAllocatorInitList()) {
     init();
   }
-  init_stringdata_allocator();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -57,7 +54,9 @@ void InitAllocatorThreadLocal() {
 
 SmartAllocatorImpl::SmartAllocatorImpl(const std::type_info* typeId,
                                        uint itemSize)
-  : m_itemSize(itemSizeRoundup(itemSize)) , m_typeId(typeId) {
+  : m_itemSize(itemSizeRoundup(itemSize))
+  , m_typeId(typeId)
+{
   assert(itemSize > 0);
   MemoryManager::TheMemoryManager()->add(this);
 }

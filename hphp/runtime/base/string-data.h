@@ -17,9 +17,12 @@
 #ifndef incl_HPHP_STRING_DATA_H_
 #define incl_HPHP_STRING_DATA_H_
 
+#include <cmath>
+
 #include "hphp/util/hash.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/word-same.h"
+
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/smart-allocator.h"
@@ -65,48 +68,65 @@ enum CopyStringMode { CopyString };
 // reserve space for buffer that will be filled in by client.
 enum ReserveStringMode { ReserveString };
 
-// const char* points to client-owned memory, StringData will copy it
-// at construct-time using malloc.  This works for any String but is
-// meant for StringData instances which are not smart-allocated (e.g.
-// live across multiple requests).
-enum CopyMallocMode { CopyMalloc };
-
-/**
- * Inner data class for String type. As a coding guideline, String
- * should delegate real string work to this class, although String is
- * more than welcome to test nullability to avoid calling this class.
+/*
+ * Runtime representation of PHP strings.
  *
- * A StringData can be in two formats, small or big.  Small format
- * stores the string inline by overlapping with some fields, as follows:
+ * StringData's have several different modes, not all of which we want
+ * to keep forever.  The main mode is Flat, which means StringData
+ * is a header in a contiguous allocation with the character array for
+ * the string.
  *
- * small: m_data:8, m_len:4, m_count:4, m_hash:4,
- *        m_small[44]
- * big:   m_data:8, m_len:4, m_count:4, m_hash:4,
- *        junk[12], node:16, shared:8, cap:8
+ * StringDatas can also be allocated in multiple ways.  Normally, they
+ * are created through one of the Make overloads, which drops them in
+ * the request-local heap.  They can also be low-malloced (for static
+ * strings), or malloc'd (MakeMalloc) for APC strings.
  *
- * If the format is IsShared, we always use the "big" layout.
- * resemblences to fbstring are not accidental.
+ * Here's a breakdown of string modes, and which configurations are
+ * allowed in which allocation mode:
+ *
+ *          | MakeLowMalloced |  MakeMalloced  | Normal Make (request local)
+ *          +-----------------+----------------+----------------------------
+ *   Flat   |       X         |                |      X
+ *   Smart  |                 |                |      X
+ *   Malloc |                 |       X        |
+ *   Shared |                 |                |      X
+ *
+ * The mode discrimination logic is the following:
+ *
+ *  mode := m_data == this + 1 ? Flat   :
+ *          m_cap > 0          ? Smart  :
+ *          m_cap == 0         ? Shared : Malloc;
+ *
+ * (For this, in Malloc mode, the buffer capacity is actually -m_cap.)
  */
 class StringData {
   StringData(const StringData&); // disable copying
   StringData& operator=(const StringData&);
 
   enum class Mode : uint8_t {
-    Small   = 0x0,  // short overlaps m_big; must be zero (null terminated)
+    Flat  = 0x0,  // string immediately follows StringData in memory
     Shared  = 0x1,  // shared memory string
     Malloc  = 0x2,  // m_big.data is malloc'd
     Smart   = 0x3,  // m_big.data is smart_malloc'd
   };
 
+  // When a string transitions from either Flat or Shared to Smart,
+  // we need to keep the old capacity around in the previous Flat
+  // slot so we know what to tell the allocator the size was when we
+  // free this.
+  //
+  // TODO(#1802148): make append() always allocate a new string so
+  // Mode::Smart can go away.
+  struct PromotedPayload {
+    uint32_t oldFlatCap;
+  };
+
+  struct SharedPayload {
+    SweepNode node;
+    SharedVariant* shared;
+  };
+
 public:
-  typedef ThreadLocalSingleton<SmartAllocator<StringData>> Allocator;
-
-  /*
-   * Maximum length of a small string.  (The length does not include
-   * the null terminator.)
-   */
-  const static uint32_t MaxSmallSize = 43;
-
   /*
    * Max length of a string, not counting the terminal 0.
    *
@@ -118,19 +138,60 @@ public:
   const static uint32_t MaxSize = 0x7ffffffe; // 2^31-2
 
   /*
-   * Creating request-local PHP strings should go through this factory
-   * function.
-   *
-   * Normally these strings should have their lifetime reference
-   * counted; call release() to return them to the allocator.
+   * Creates an empty request-local string with an unspecified amount
+   * of reserved space.
    */
-  template<class... Args> static StringData* Make(Args&&...);
+  static StringData* Make();
+
+  /*
+   * Constructors that copy the string memory into this StringData,
+   * for request-local strings.
+   *
+   * Most strings are created this way.
+   */
+  static StringData* Make(const char* data);
+  static StringData* Make(const char* data, CopyStringMode);
+  static StringData* Make(const char* data, int len, CopyStringMode);
+  static StringData* Make(const StringData* s, CopyStringMode);
+  static StringData* Make(StringSlice r1, CopyStringMode);
+
+  /*
+   * Attach constructors for request-local strings.
+   *
+   * These do the same thing as the above CopyStringMode constructors,
+   * except that it will also free `data'.
+   */
+  static StringData* Make(const char* data, AttachStringMode);
+  static StringData* Make(const char* data, int len, AttachStringMode);
+
+  /*
+   * Create a new request-local string by concatenating two existing
+   * strings.
+   */
+  static StringData* Make(const StringData* s1, const StringData* s2);
+  static StringData* Make(const StringData* s1, StringSlice s2);
+  static StringData* Make(const StringData* s1, const char* lit2);
+  static StringData* Make(StringSlice s1, StringSlice s2);
+  static StringData* Make(StringSlice s1, const char* lit2);
+
+  /*
+   * Create a new request-local empty string big enough to hold
+   * strings of length `reserve' (not counting the \0 terminator).
+   */
+  static StringData* Make(int reserve);
+
+  /*
+   * Create a request-local StringData that wraps an APC SharedVariant
+   * that contains a string.
+   */
+  static StringData* Make(SharedVariant* shared);
 
   /*
    * Create a StringData that is allocated by malloc, instead of the
    * smart allocator.
    *
-   * This is essentially only used for APC.
+   * This is essentially only used for APC, for non-request local
+   * StringDatas.
    *
    * StringDatas allocated with this function must be freed by calling
    * destruct(), instead of release().
@@ -148,9 +209,8 @@ public:
    * StringData objects allocated with MakeMalloced should be freed
    * using this function instead of release().
    */
-  void destruct() const { if (!isStatic()) delete this; }
+  void destruct();
 
-public:
   /*
    * Reference counting related.
    */
@@ -171,14 +231,14 @@ public:
    * Get the wrapped SharedVariant, or return null if this string is
    * not shared.
    */
-  SharedVariant *getSharedVariant() const {
-    if (isShared()) return m_big.shared;
+  SharedVariant* getSharedVariant() const {
+    if (isShared()) return sharedPayload()->shared;
     return nullptr;
   }
 
   void append(StringSlice r) { append(r.ptr, r.len); }
   void append(const char *s, int len);
-  StringData *copy(bool sharedMemory = false) const;
+  StringData* copy(bool sharedMemory = false) const;
 
   /*
    * Reserve space for a string of length `maxLen' (not counting null
@@ -198,12 +258,11 @@ public:
    */
   MutableSlice mutableSlice() {
     assert(!isImmutable());
-    return isSmall() ? MutableSlice(m_small, MaxSmallSize) :
-                       MutableSlice(m_data, bigCap() - 1);
+    return MutableSlice(m_data, capacity() - 1);
   }
 
   /*
-   * Returns a slice with extends size to the *string* that this
+   * Returns a slice with extents sized to the *string* that this
    * StringData wraps.  This range does not include a null terminator.
    *
    * Note: please do not add new code that assumes the range does
@@ -232,7 +291,7 @@ public:
     assert(uintptr_t(this) - Util::s_stackLimit >= Util::s_stackSize);
   }
 
-  const char *data() const {
+  const char* data() const {
     // TODO: t1800106: re-enable this assert
     //assert(rawdata()[size()] == 0); // all strings must be null-terminated
     return rawdata();
@@ -246,9 +305,11 @@ public:
   /*
    * Return the capacity of this string's buffer, including the space
    * for the null terminator.
+   *
+   * For shared strings, returns zero.
    */
   uint32_t capacity() const {
-    return isSmall() ? (MaxSmallSize + 1) : bigCap();
+    return std::abs(m_cap);
   }
 
   DataType isNumericWithVal(int64_t &lval, double &dval, int allow_errors) const;
@@ -298,21 +359,20 @@ public:
     return h ? h : hashHelper();
   }
 
-  /**
+  /*
    * Comparisons.
    */
-  bool equal(const StringData *s) const;
+  bool equal(const StringData* s) const;
 
-  bool same(const StringData *s) const {
+  bool same(const StringData* s) const {
     assert(s);
     size_t len = m_len;
     if (len != s->m_len) return false;
     // The underlying buffer and its length are 32-bit aligned, ensured by
     // StringData layout, smart_malloc, or malloc. So compare words.
+    assert(uintptr_t(rawdata()) % 4 == 0);
+    assert(uintptr_t(s->rawdata()) % 4 == 0);
     return wordsame(rawdata(), s->rawdata(), len);
-    // if the offset of m_small becomes 8-byte aligned, then we should
-    // take advantage by changing the p1&p2 from uint32_t to uint64_t.
-    static_assert(offsetof(StringData,m_small) % 8 == 4, "");
   }
 
   bool isame(const StringData *s) const {
@@ -352,79 +412,28 @@ public:
   static Array GetConstants();
 
 private:
-  StringData() : m_data(m_small), m_len(0), m_count(0), m_hash(0) {
-    m_big.shared = 0;
-    setSmall();
-    m_small[0] = 0;
-  }
-
-  explicit StringData(const char* data) {
-    initCopy(data);
-  }
-  StringData(const char *data, AttachStringMode) {
-    initAttach(data);
-  }
-  StringData(const char *data, CopyStringMode) {
-    initCopy(data);
-  }
-
-  StringData(const char* data, int len, AttachStringMode) {
-    initAttach(data, len);
-  }
-  StringData(const char* data, int len, CopyStringMode) {
-    initCopy(data, len);
-  }
-  StringData(const char* data, int len, CopyMallocMode) {
-    initMalloc(data, len);
-  }
-  StringData(const StringData* s, CopyStringMode) {
-    StringSlice r = s->slice();
-    initCopy(r.ptr, r.len);
-  }
-  StringData(StringSlice r1, CopyStringMode) {
-    initCopy(r1.ptr, r1.len);
-  }
-
-  // Create a new string by concatingating two existing strings.
-  StringData(const StringData* s1, const StringData* s2) {
-    initConcat(s1->slice(), s2->slice());
-  }
-  StringData(const StringData* s1, StringSlice s2) {
-    initConcat(s1->slice(), s2);
-  }
-  StringData(const StringData* s1, const char* lit2) {
-    initConcat(s1->slice(), StringSlice(lit2, strlen(lit2)));
-  }
-  StringData(StringSlice s1, StringSlice s2) {
-    initConcat(s1, s2);
-  }
-  StringData(StringSlice s1, const char* lit2) {
-    initConcat(s1, StringSlice(lit2, strlen(lit2)));
-  }
-
-  /*
-   * Create a new empty string big enough to hold the requested size,
-   * not counting the \0 terminator.
-   */
-  explicit StringData(int reserve);
-
-  /*
-   * Create a StringData that wraps an APC SharedVariant that contains
-   * a string.
-   */
-  explicit StringData(SharedVariant *shared);
-
-  ~StringData() { checkStack(); releaseData(); }
-
-private:
+  static StringData* MakeLowMalloced(StringSlice);
   static StringData* InsertStaticString(StringSlice);
 
-  void initAttach(const char* data);
-  void initAttach(const char* data, int len);
-  void initCopy(const char* data);
-  void initCopy(const char* data, int len);
+  ~StringData() = delete;
+
+private:
+  const void* voidPayload() const { return this + 1; }
+  void* voidPayload() { return this + 1; }
+  const SharedPayload* sharedPayload() const {
+    return static_cast<const SharedPayload*>(voidPayload());
+  }
+  SharedPayload* sharedPayload() {
+    return static_cast<SharedPayload*>(voidPayload());
+  }
+  const PromotedPayload* promotedPayload() const {
+    return static_cast<const PromotedPayload*>(voidPayload());
+  }
+  PromotedPayload* promotedPayload() {
+    return static_cast<PromotedPayload*>(voidPayload());
+  }
+
   void initMalloc(const char* data, int len);
-  void initConcat(StringSlice r1, StringSlice r2);
   void releaseData();
   void releaseDataSlowPath();
   int numericCompare(const StringData *v2) const;
@@ -432,82 +441,68 @@ private:
   void enlist();
   void delist();
 
+  void destructLowMalloc() ATTRIBUTE_COLD;
+
   strhash_t hashHelper() const NEVER_INLINE;
 
   bool checkSane() const;
   const char* rawdata() const { return m_data; }
 
-  bool isShared() const { return mode() == Mode::Shared; }
+  bool isShared() const { return !m_cap; }
   bool isImmutable() const { return isStatic() || isShared(); }
-  bool isSmall() const { return mode() == Mode::Small; }
-  bool isSmart() const { return mode() == Mode::Smart; }
+  bool isFlat() const { return m_data == voidPayload(); }
+  bool isSmart() const { return !isFlat() && m_cap > 0; }
 
-  Mode mode() const {
-    return static_cast<Mode>(m_small[MaxSmallSize]);
+  Mode modeNonFlat() const {
+    assert(!isFlat());
+    return m_cap > 0 ? Mode::Smart :
+           m_cap == 0 ? Mode::Shared : Mode::Malloc;
   }
 
-  void setSmall() {
-    m_small[MaxSmallSize] = static_cast<uint8_t>(Mode::Small);
+  Mode mode() const {
+    if (isFlat()) return Mode::Flat;
+    return modeNonFlat();
   }
 
   void setModeAndCap(Mode newMode, uint32_t cap) {
-    assert(newMode != Mode::Small);
-    m_big.modeAndCap = (static_cast<uint64_t>(newMode) << (7 * 8)) | cap;
-    assert(m_big.cap == cap);
+    assert(newMode != Mode::Flat);
+    assert(cap < std::numeric_limits<int32_t>::max());
+    m_cap = newMode == Mode::Smart ? cap :
+            newMode == Mode::Shared ? 0 : -cap;
     assert(mode() == newMode);
   }
 
-  uint32_t bigCap() const {
-    assert(!isSmall());
-    return m_big.cap;
-  }
-
-  /* Only call preCompute() and setStatic() in a thread-neutral context! */
+  // Only call preCompute() and setStatic() in a thread-neutral context!
   void preCompute() const;
   void setStatic() const;
 
 private:
-  /*
-   * The order of the data members is significant. The m_count field must
-   * be exactly FAST_REFCOUNT_OFFSET bytes from the beginning of the object.
-   */
+  char* m_data;
+
+  // We have the next fields blocked into qword-size unions so
+  // StringData initialization can do fewer stores to initialize the
+  // fields.  (gcc does not combine the stores itself.)
   union {
-    const char* m_cdata;
-    char* m_data;
+    struct {
+      uint32_t m_len;
+      mutable RefCount m_count;
+    };
+    uint64_t m_lenAndCount;
   };
-  uint32_t m_len;
-  mutable RefCount m_count;
-  // m_len and m_data are not overlapped with small strings because
-  // they are accessed so frequently that even the inline branch to
-  // measurably slows things down.  Its worse for m_len than m_data.
-  // If frequent callers are refactored to use slice() then we could
-  // revisit this decision.
-  mutable strhash_t m_hash;   // precompute hash codes for static strings
-  union __attribute__((__packed__)) {
-    char m_small[MaxSmallSize + 1];
-    struct __attribute__((__packed__)) {
-      // Calculate padding so that node, shared, and cap are pointer aligned.
-      static const size_t kPadding = sizeof(m_small) -
-        sizeof(SweepNode) - sizeof(SharedVariant*) - sizeof(uint64_t);
-      char junk[kPadding];
-      SweepNode node;
-      SharedVariant *shared;
-      union {
-        struct {
-          uint32_t cap;
-          uint32_t paddingWithMode;
-        };
-        uint64_t modeAndCap; // overlaps with the last byte of m_small
-      };
-    } m_big;
+  union {
+    struct {
+      int32_t m_cap;
+      mutable strhash_t m_hash;   // precompute hash codes for static strings
+    };
+    uint64_t m_capAndHash;
   };
 };
 
-static_assert(sizeof(StringData) ==
-                sizeof(char*) + 8 /* len and refcount */ +
-                sizeof(strhash_t) +
-                StringData::MaxSmallSize + 1,
-              "StringData size changed---update assertion if you mean it");
+/*
+ * A reasonable length to reserve for small strings.  This is the
+ * default reserve size for StringData::Make(), also.
+ */
+const uint32_t SmallStringReserve = 64 - sizeof(StringData) - 1;
 
 ALWAYS_INLINE inline void decRefStr(StringData* s) {
   if (s->decRefCount() == 0) s->release();

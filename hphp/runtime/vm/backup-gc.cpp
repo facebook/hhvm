@@ -124,7 +124,8 @@ bool UNUSED is_smart_allocated(T* p) {
 }
 
 bool UNUSED is_smart_allocated(StringData* p) {
-  return StringData::Allocator::getNoCheck()->isFromThisAllocator(p);
+  // XXX
+  return true;
 }
 
 bool is_static(void* obj) {

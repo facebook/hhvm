@@ -32,7 +32,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StringBuffer::StringBuffer(int initialSize /* = StringData::MaxSmallSize */)
+StringBuffer::StringBuffer(int initialSize /* = SmallStringReserve */)
   : m_initialCap(initialSize)
   , m_maxBytes(kDefaultOutputLimit)
   , m_len(0)

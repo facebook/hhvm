@@ -45,8 +45,7 @@ struct StringBuffer {
    * Construct a string buffer with some initial size, subsequent allocation
    * will geometrically grow the size when needed.
    */
-  explicit StringBuffer(int initialSize = StringData::MaxSmallSize);
-
+  explicit StringBuffer(int initialSize = SmallStringReserve);
   ~StringBuffer();
 
   StringBuffer(const StringBuffer& sb) = delete;

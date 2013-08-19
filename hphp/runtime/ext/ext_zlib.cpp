@@ -122,7 +122,7 @@ static Variant gzuncompress(const char *data, int len, int limit /* = 0 */) {
   unsigned long plength = limit;
   unsigned long length;
   unsigned int factor = 4, maxfactor = 16;
-  String str(std::max(plength, (unsigned long)StringData::MaxSmallSize),
+  String str(std::max(plength, (unsigned long)SmallStringReserve),
              ReserveString);
   int status;
   do {
@@ -211,7 +211,7 @@ static Variant gzinflate(const char *data, int len, int limit /* = 0 */) {
   unsigned int factor = len < 128 * 1024 * 1024 ? 4 : 2;
   unsigned int maxfactor = 16;
 
-  String str(std::max(plength, (unsigned long)StringData::MaxSmallSize),
+  String str(std::max(plength, (unsigned long)SmallStringReserve),
              ReserveString);
   do {
     if (length >= StringData::MaxSize) {

@@ -20,20 +20,93 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-template<class... Args>
-inline StringData* StringData::Make(Args&&... args) {
-  return new (StringData::Allocator::getNoCheck())
-    StringData(std::forward<Args>(args)...);
+inline StringData* StringData::Make() {
+  return Make(SmallStringReserve);
 }
+
+//////////////////////////////////////////////////////////////////////
+
+// CopyString
+
+inline StringData* StringData::Make(const char* data) {
+  return Make(data, CopyString);
+}
+
+inline StringData* StringData::Make(const char* data,
+                                    int len,
+                                    CopyStringMode) {
+  return Make(StringSlice(data, len), CopyString);
+}
+
+inline StringData* StringData::Make(const StringData* s, CopyStringMode) {
+  return Make(s->slice(), CopyString);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+// AttachString
+
+inline StringData* StringData::Make(const char* data, AttachStringMode) {
+  auto const sd = Make(data, CopyString);
+  free(const_cast<char*>(data)); // XXX
+  assert(sd->checkSane());
+  return sd;
+}
+
+inline StringData* StringData::Make(const char* data,
+                                    int len,
+                                    AttachStringMode) {
+  auto const sd = Make(StringSlice(data, len), CopyString);
+  free(const_cast<char*>(data)); // XXX
+  assert(sd->checkSane());
+  return sd;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+// Concat creation
+
+inline StringData* StringData::Make(const StringData* s1,
+                                    const StringData* s2) {
+  return Make(s1->slice(), s2->slice());
+}
+
+inline StringData* StringData::Make(const StringData* s1, StringSlice s2) {
+  return Make(s1->slice(), s2);
+}
+
+inline StringData* StringData::Make(const StringData* s1, const char* lit2) {
+  return Make(s1->slice(), lit2);
+}
+
+//////////////////////////////////////////////////////////////////////
 
 inline StringData* StringData::MakeMalloced(const char* data, int len) {
-  return new StringData(data, len, CopyMallocMode{});
+  auto const sd = static_cast<StringData*>(malloc(sizeof(StringData)));
+  try {
+    sd->initMalloc(data, len);
+  } catch (...) {
+    free(sd);
+    throw;
+  }
+  assert(sd->checkSane());
+  return sd;
 }
 
-inline void StringData::releaseData() {
+//////////////////////////////////////////////////////////////////////
+
+inline void StringData::destruct() {
   assert(checkSane());
-  if (UNLIKELY(!isSmall())) return releaseDataSlowPath();
+
+  // N.B. APC code assumes it is legal to call destruct() on a static
+  // string.  Probably it shouldn't do that....
+  if (!isStatic()) {
+    releaseDataSlowPath();
+    free(this);
+  }
 }
+
+//////////////////////////////////////////////////////////////////////
 
 inline StringData* StringData::Escalate(StringData* in) {
   if (in->m_count != 1 || in->isImmutable()) {
@@ -41,16 +114,6 @@ inline StringData* StringData::Escalate(StringData* in) {
   }
   in->m_hash = 0;
   return in;
-}
-
-inline void StringData::initAttach(const char* data, int len) {
-  initCopy(data, len);
-  free(const_cast<char*>(data)); // XXX
-}
-
-inline void StringData::initAttach(const char* data) {
-  initCopy(data);
-  free(const_cast<char*>(data)); // XXX
 }
 
 //////////////////////////////////////////////////////////////////////

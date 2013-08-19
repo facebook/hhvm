@@ -77,8 +77,7 @@ VMExecutionContext::VMExecutionContext() :
     m_preg_recursion_limit(RuntimeOption::PregRecursionLimit),
     m_lambdaCounter(0), m_nesting(0),
     m_breakPointFilter(nullptr), m_lastLocFilter(nullptr),
-    m_dbgNoBreak(false), m_coverPrevLine(-1), m_coverPrevUnit(nullptr),
-    m_executingSetprofileCallback(false) {
+    m_dbgNoBreak(false), m_coverPrevLine(-1), m_coverPrevUnit(nullptr) {
 
   // Make sure any fields accessed from the TC are within a byte of
   // ExecutionContext's beginning.

@@ -115,8 +115,10 @@ struct TraceBuilder {
 
   void constrainGuard(IRInstruction* inst, DataTypeCategory cat);
   SSATmp* constrainValue(SSATmp* const val, DataTypeCategory cat);
-  void constrainLocal(uint32_t id, DataTypeCategory cat);
-  void constrainLocal(uint32_t id, SSATmp* valSrc, DataTypeCategory cat);
+  void constrainLocal(uint32_t id, DataTypeCategory cat,
+                      const std::string& why);
+  void constrainLocal(uint32_t id, SSATmp* valSrc, DataTypeCategory cat,
+                      const std::string& why);
   void constrainStack(int32_t offset, DataTypeCategory cat);
   void constrainStack(SSATmp* sp, int32_t offset, DataTypeCategory cat);
 

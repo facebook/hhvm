@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/trace-builder.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -553,9 +554,11 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
 
   if (srcType.subtypeOf(type)) {
     /*
-     * The type of the src is the same or more refined than type, so the
-     * guard is unnecessary.
+     * The type of the src is the same or more refined than type, so the guard
+     * is unnecessary. Constrain the guard so the resulting type isn't less
+     * specific that the CheckType would've produced.
      */
+    m_tb->constrainValue(src, categoryForType(type));
     return src;
   }
   if (type.strictSubtypeOf(srcType)) {
@@ -576,9 +579,9 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
   }
 
   /*
-   * We got a predicted type that is wrong -- it's incompatible with
-   * the tracked type.  So throw the prediction away, since it would
-   * always fail.
+   * XXX(t2774391): This code doesn't belong here. We got a predicted type that
+   * is wrong -- it's incompatible with the tracked type. So throw the
+   * prediction away, since it would always fail.
    */
   FTRACE(1, "WARNING: CheckType: removed incorrect prediction that {} is {}\n",
          srcType.toString(), type.toString());
@@ -594,6 +597,7 @@ SSATmp* Simplifier::simplifyCheckStk(IRInstruction* inst) {
   if (stkVal.knownType.equals(Type::None)) return nullptr;
 
   if (stkVal.knownType.subtypeOf(type)) {
+    m_tb->constrainStack(sp, offset, categoryForType(type));
     return sp;
   }
   return nullptr;

@@ -82,6 +82,7 @@ const unsigned int kNotConstantValueTypeMask = 0x60;
 // All DataTypes greater than this value are refcounted.
 const DataType KindOfRefCountThreshold = KindOfStaticString;
 
+// These must be kept in order from least to most specific.
 #define DT_CATEGORIES(func)                     \
   func(Generic)                                 \
   func(Countness)                               \

@@ -107,10 +107,21 @@ bool typeFitsConstraint(Type t, DataTypeCategory cat) {
       return t.isKnownDataType();
 
     case DataTypeSpecialized:
-      return t.strictSubtypeOf(Type::Obj) || t.hasArrayKind();
+      return t.isSpecialized();
   }
 
   not_reached();
+}
+
+/*
+ * Returns the most general category 'cat' that satisfies this expression:
+ * relaxType(t, categoryForType(t)) == t
+ */
+DataTypeCategory categoryForType(Type t) {
+  if (Type::Gen.subtypeOf(t)) return DataTypeGeneric;
+  if (Type::Uncounted.subtypeOf(t) || t.isCounted()) return DataTypeCountness;
+  if (Type::UncountedInit.subtypeOf(t)) return DataTypeCountnessInit;
+  return t.isSpecialized() ? DataTypeSpecialized : DataTypeSpecific;
 }
 
 /*
@@ -125,8 +136,7 @@ Type relaxType(Type t, DataTypeCategory cat) {
       return Type::Gen;
 
     case DataTypeCountness:
-      if (t.notCounted()) return Type::Uncounted;
-      return t;
+      return t.notCounted() ? Type::Uncounted : t;
 
     case DataTypeCountnessInit:
       if (t.subtypeOf(Type::Uninit)) return Type::Uninit;

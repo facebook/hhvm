@@ -35,6 +35,7 @@ typedef std::function<void(const RegionDesc::Location&, Type)> VisitGuardFn;
 void visitGuards(IRTrace* trace, const VisitGuardFn& func);
 
 bool typeFitsConstraint(Type t, DataTypeCategory cat);
+DataTypeCategory categoryForType(Type t);
 Type relaxType(Type t, DataTypeCategory cat);
 
 } }

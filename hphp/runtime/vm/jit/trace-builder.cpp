@@ -840,7 +840,8 @@ SSATmp* TraceBuilder::preOptimizeStLoc(IRInstruction* inst) {
     // TODO(t2598894) once relaxGuards supports proper type reflowing, we
     // should be able to relax the constraint here and degrade StLocNT to
     // StLoc if we relax its input.
-    if (sameUnboxed) constrainLocal(locId, DataTypeSpecific);
+    if (sameUnboxed) constrainLocal(locId, DataTypeSpecific,
+                                    "StLoc -> StLocNT");
     inst->setOpcode(StLocNT);
   }
 
@@ -1070,7 +1071,7 @@ void TraceBuilder::clearLocals() {
 
 SSATmp* TraceBuilder::localValue(unsigned id, DataTypeCategory cat) {
   always_assert(id < m_locals.size());
-  constrainLocal(id, cat);
+  constrainLocal(id, cat, "localValue");
   return m_locals[id].unsafe ? nullptr : m_locals[id].value;
 }
 
@@ -1085,7 +1086,7 @@ SSATmp* TraceBuilder::localValueSource(unsigned id) const {
 
 Type TraceBuilder::localType(unsigned id, DataTypeCategory cat) {
   always_assert(id < m_locals.size());
-  constrainLocal(id, cat);
+  constrainLocal(id, cat, "localType");
   return m_locals[id].type;
 }
 
@@ -1124,13 +1125,10 @@ void TraceBuilder::constrainGuard(IRInstruction* inst, DataTypeCategory cat) {
                 "DataTypeGeneric must be the default DataTypeCategory");
   auto& guard = m_guardConstraints[inst->id()];
 
-  // TODO(t2598894) Guard relaxation on the IR is only used to distinguish
-  // between guard/no guard for now. It will be loosened up to completely
-  // replace relaxDeps soon.
-  cat = DataTypeSpecific;
-
-  FTRACE(1, "constraining {}: {} -> {}\n", *inst, guard, cat);
-  if (cat > guard) guard = cat;
+  if (cat > guard) {
+    FTRACE(1, "constraining {}: {} -> {}\n", *inst, guard, cat);
+    guard = cat;
+  }
 }
 
 /**
@@ -1166,7 +1164,8 @@ SSATmp* TraceBuilder::constrainValue(SSATmp* const val, DataTypeCategory cat) {
     // If valSrc is a FramePtr, it represents the frame the value was
     // originally loaded from. Look for the guard for this local.
     if (source->isA(Type::FramePtr)) {
-      constrainLocal(inst->extra<LocalId>()->locId, source, cat);
+      constrainLocal(inst->extra<LocalId>()->locId, source, cat,
+                     "constrainValue");
       return val;
     }
 
@@ -1179,6 +1178,10 @@ SSATmp* TraceBuilder::constrainValue(SSATmp* const val, DataTypeCategory cat) {
     // there are more guards to constrain.
     constrainGuard(inst, cat);
     constrainValue(inst->src(0), cat);
+  } else if (inst->op() == StRef || inst->op() == StRefNT) {
+    // TODO(t2598894): This can be tightened up. As a conservative
+    // approximation, pass the constraint through to the source of the value.
+    constrainValue(inst->src(1), cat);
   } else if (inst->isPassthrough()) {
     constrainValue(inst->getPassthroughValue(), cat);
   } else {
@@ -1190,14 +1193,16 @@ SSATmp* TraceBuilder::constrainValue(SSATmp* const val, DataTypeCategory cat) {
   return val;
 }
 
-void TraceBuilder::constrainLocal(uint32_t locId, DataTypeCategory cat) {
-  constrainLocal(locId, localValueSource(locId), cat);
+void TraceBuilder::constrainLocal(uint32_t locId, DataTypeCategory cat,
+                                  const std::string& why) {
+  constrainLocal(locId, localValueSource(locId), cat, why);
 }
 
 void TraceBuilder::constrainLocal(uint32_t locId, SSATmp* valSrc,
-                                  DataTypeCategory cat) {
-  FTRACE(1, "constrainLocal({}, {}, {})\n",
-         locId, valSrc ? valSrc->inst()->toString() : "null", cat);
+                                  DataTypeCategory cat,
+                                  const std::string& why) {
+  FTRACE(1, "constrainLocal({}, {}, {}, {})\n",
+         locId, valSrc ? valSrc->inst()->toString() : "null", cat, why);
 
   if (!valSrc) return;
   if (!valSrc->isA(Type::FramePtr)) {

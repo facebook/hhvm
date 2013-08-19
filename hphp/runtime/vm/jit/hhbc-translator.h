@@ -540,7 +540,7 @@ private:
     void numberStackInputs();
     void setNoMIState() { m_needMIS = false; }
     SSATmp* genMisPtr();
-    SSATmp* getInput(unsigned i);
+    SSATmp* getInput(unsigned i, DataTypeCategory cat = DataTypeSpecific);
     SSATmp* getBase();
     SSATmp* getKey();
     SSATmp* getValue();
@@ -579,7 +579,8 @@ private:
       // simple opcode on Map* (c_Pair*)
       Pair
     };
-    SimpleOp isSimpleCollectionOp();
+    SimpleOp simpleCollectionOp();
+    void constrainSimpleOpBase();
 
     bool generateMVal() const;
     bool needFirstRatchet() const;
@@ -825,17 +826,23 @@ private:
    */
   SSATmp* push(SSATmp* tmp);
   SSATmp* pushIncRef(SSATmp* tmp) { return push(gen(IncRef, tmp)); }
-  SSATmp* pop(Type type, DataTypeCategory constraint = DataTypeSpecific);
-  void    popDecRef(Type type);
+  SSATmp* pop(Type type, DataTypeCategory cat = DataTypeSpecific);
+  void    popDecRef(Type type, DataTypeCategory cat = DataTypeCountness);
   void    discard(unsigned n);
-  SSATmp* popC() { return pop(Type::Cell);      }
+  SSATmp* popC(DataTypeCategory cat = DataTypeSpecific) {
+    return pop(Type::Cell, cat);
+  }
   SSATmp* popV() { return pop(Type::BoxedCell); }
   SSATmp* popR() { return pop(Type::Gen);       }
   SSATmp* popA() { return pop(Type::Cls);       }
-  SSATmp* popF() { return pop(Type::Gen);       }
+  SSATmp* popF(DataTypeCategory cat = DataTypeSpecific) {
+    return pop(Type::Gen, cat);
+  }
   SSATmp* top(Type type, uint32_t index = 0,
               DataTypeCategory c = DataTypeSpecific);
-  SSATmp* topC(uint32_t i = 0) { return top(Type::Cell, i); }
+  SSATmp* topC(uint32_t i = 0, DataTypeCategory cat = DataTypeSpecific) {
+    return top(Type::Cell, i, cat);
+  }
   SSATmp* topV(uint32_t i = 0) { return top(Type::BoxedCell, i); }
   Type    topType(uint32_t i, DataTypeCategory c = DataTypeSpecific) const;
   std::vector<SSATmp*> peekSpillValues() const;
@@ -843,7 +850,7 @@ private:
                          const std::vector<SSATmp*>& spillVals);
   SSATmp* spillStack();
   void    exceptionBarrier();
-  SSATmp* ldStackAddr(int32_t offset);
+  SSATmp* ldStackAddr(int32_t offset, DataTypeCategory cat);
   void    extendStack(uint32_t index, Type type);
   void    replace(uint32_t index, SSATmp* tmp);
   void    refineType(SSATmp* tmp, Type type);

@@ -322,8 +322,12 @@ void assertOperandTypes(const IRInstruction* inst) {
     not_reached();
   };
 
-  auto check = [&] (bool cond, const std::string& expected) {
+  // If expected is not nullptr, it will be used. Otherwise, t.toString() will
+  // be used as the expected string.
+  auto check = [&] (bool cond, const Type t, const char* expected) {
     if (cond) return;
+
+    std::string expectStr = expected ? expected : t.toString();
 
     bail(folly::format(
       "Error: failed type check on operand {}\n"
@@ -332,7 +336,7 @@ void assertOperandTypes(const IRInstruction* inst) {
       "   received: {}\n",
         curSrc,
         inst->toString(),
-        expected,
+        expectStr,
         inst->src(curSrc)->type().toString()
       ).str()
     );
@@ -376,7 +380,7 @@ void assertOperandTypes(const IRInstruction* inst) {
       // simplifier removed some.
       auto const valid = inst->src(curSrc)->type()
         .subtypeOfAny(Type::StackElem, Type::None);
-      check(valid, "Gen|Cls|None");
+      check(valid, Type(), "Gen|Cls|None");
     }
   };
 
@@ -387,11 +391,12 @@ void assertOperandTypes(const IRInstruction* inst) {
 #define NA       return checkNoArgs();
 #define S(...)   {                                        \
                    Type t = buildUnion(__VA_ARGS__);      \
-                   check(src()->isA(t), t.toString());    \
+                   check(src()->isA(t), t, nullptr);      \
                    ++curSrc;                              \
                  }
 #define C(type)  check(src()->isConst() &&          \
                        src()->isA(type),            \
+                       Type(),                      \
                        "constant " #type);          \
                   ++curSrc;
 #define CStr     C(StaticStr)

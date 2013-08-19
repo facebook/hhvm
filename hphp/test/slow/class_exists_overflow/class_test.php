@@ -4,4 +4,5 @@ class testCore {
         echo "myClass";
     }
 }
+
 ?>

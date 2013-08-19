@@ -379,8 +379,7 @@ void RepoQuery::getStaticString(int iCol, StringData*& s) {
     const char* text;
     size_t size;
     getText(iCol, text, size);
-    StackStringData sd(text, size, CopyString);
-    s = StringData::GetStaticString(&sd);
+    s = StringData::GetStaticString(text, size);
   }
 }
 

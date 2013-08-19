@@ -31,7 +31,7 @@ inline StringData* StringData::MakeMalloced(const char* data, int len) {
 }
 
 inline void StringData::releaseData() {
-  //assert(checkSane()); // TODO(#2674472): violated by stack string stuff
+  assert(checkSane());
   if (UNLIKELY(!isSmall())) return releaseDataSlowPath();
 }
 

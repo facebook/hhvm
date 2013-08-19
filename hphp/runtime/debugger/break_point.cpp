@@ -956,14 +956,14 @@ bool BreakPointInfo::MatchClass(const char *fcls, const std::string &bcls,
     return Match(fcls, 0, bcls, true, true);
   }
 
-  StackStringData sdBClsName(bcls.c_str());
-  Class* clsB = Unit::lookupClass(&sdBClsName);
+  String sdBClsName(bcls);
+  Class* clsB = Unit::lookupClass(sdBClsName.get());
   if (!clsB) return false;
-  StackStringData sdFClsName(fcls);
-  Class* clsF = Unit::lookupClass(&sdFClsName);
+  String sdFClsName(fcls, CopyString);
+  Class* clsF = Unit::lookupClass(sdFClsName.get());
   if (clsB == clsF) return true;
-  StackStringData sdFuncName(func);
-  Func* f = clsB->lookupMethod(&sdFuncName);
+  String sdFuncName(func, CopyString);
+  Func* f = clsB->lookupMethod(sdFuncName.get());
   return f && f->baseCls() == clsF;
 }
 

@@ -88,8 +88,6 @@ enum CopyMallocMode { CopyMalloc };
  * resemblences to fbstring are not accidental.
  */
 class StringData {
-  friend class StackStringData;
-
   StringData(const StringData&); // disable copying
   StringData& operator=(const StringData&);
 
@@ -226,17 +224,12 @@ public:
     return this;
   }
 
+  /*
+   * StringData should not generally be allocated on the stack,
+   * because references to it could escape.
+   */
   void checkStack() {
-    /*
-     * StringData should not generally be allocated on the
-     * stack - because references to it could escape. If
-     * you know what you're doing, use StackStringData,
-     * which maintains refCounts appropriately, and checks
-     * that the StringData didnt escape
-     */
-    assert(!m_data ||
-           (uintptr_t(this) - Util::s_stackLimit >=
-            Util::s_stackSize));
+    assert(uintptr_t(this) - Util::s_stackLimit >= Util::s_stackSize);
   }
 
   const char *data() const {
@@ -508,28 +501,6 @@ private:
       };
     } m_big;
   };
-};
-
-/**
- * Use this class to declare a StringData on the stack
- * It will verify that the StringData does not escape.
- */
-class StackStringData : public StringData {
- public:
-  explicit StackStringData(const char* s) : StringData(s) { incRefCount(); }
-  template <class T>
-  StackStringData(const char* s, T p) : StringData(s, p) { incRefCount(); }
-  template <class T>
-  StackStringData(const char* s, int len, T p) :
-      StringData(s, len, p) { incRefCount(); }
-
-  ~StackStringData() {
-    // verify that no references escaped
-    assert(!decRefCount());
-    releaseData();
-    m_data = 0;
-    setSmall(); // XXX(#2674472)
-  }
 };
 
 ALWAYS_INLINE inline void decRefStr(StringData* s) {

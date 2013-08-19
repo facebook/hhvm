@@ -595,18 +595,15 @@ void String::dump() const {
 // StaticString
 
 StaticString::StaticString(litstr s) {
-  StackStringData sd(s);
-  m_px = StringData::GetStaticString(&sd);
+  m_px = StringData::GetStaticString(s);
 }
 
 StaticString::StaticString(litstr s, int length) {
-  StackStringData sd(s, length, CopyString);
-  m_px = StringData::GetStaticString(&sd);
+  m_px = StringData::GetStaticString(s, length);
 }
 
 StaticString::StaticString(std::string s) {
-  StackStringData sd(s.c_str(), s.size(), CopyString);
-  m_px = StringData::GetStaticString(&sd);
+  m_px = StringData::GetStaticString(s.c_str(), s.size());
 }
 
 StaticString::StaticString(const StaticString &str) {

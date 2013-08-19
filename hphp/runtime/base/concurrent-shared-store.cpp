@@ -526,8 +526,8 @@ void ConcurrentTableSharedStore::prime(const std::vector<KeyValuePair> &vars) {
       continue;
     }
     if (RuntimeOption::APCSizeCountPrime) {
-      StackStringData sd(copy);
-      stats_on_add(&sd, &acc->second, 0, true, false);
+      String str(copy, CopyString);
+      stats_on_add(str.get(), &acc->second, 0, true, false);
     }
   }
 }

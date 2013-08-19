@@ -18,6 +18,8 @@
 
 #ifndef NO_HARDWARE_COUNTERS
 
+#include "folly/ScopeGuard.h"
+
 #include "hphp/util/logger.h"
 
 #define _GNU_SOURCE 1
@@ -360,10 +362,15 @@ bool HardwareCounter::eventExists(char *event) {
 }
 
 bool HardwareCounter::setPerfEvents(CStrRef events) {
-  StringData* sd = events.get();
-  StackStringData sevents(sd->data(), sd->size(), CopyString);
-  char *strtok_buf = nullptr;
-  char *s = strtok_r(const_cast<char *>(sevents.data()), ",", &strtok_buf);
+  // Make a copy of the string for use with strtok.
+  auto const sevents = events.get()->slice();
+  auto const sevents_buf = static_cast<char*>(smart_malloc(sevents.len + 1));
+  SCOPE_EXIT { smart_free(sevents_buf); };
+  memcpy(sevents_buf, sevents.ptr, sevents.len);
+  sevents_buf[sevents.len] = '\0';
+
+  char* strtok_buf = nullptr;
+  char* s = strtok_r(sevents_buf, ",", &strtok_buf);
   m_pseudoEvents = false;
   while (s) {
     int len = strlen(s);

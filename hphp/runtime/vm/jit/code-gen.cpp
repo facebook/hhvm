@@ -4968,8 +4968,8 @@ void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
 
   string sds(Util::toLower(clsNameString->data()) + ":" +
              string(propNameString->data(), propNameString->size()));
-  StackStringData sd(sds.c_str(), sds.size(), CopyString);
-  CacheHandle ch = SPropCache::alloc(&sd);
+  String sd(sds);
+  CacheHandle ch = SPropCache::alloc(sd.get());
 
   auto dstReg = m_regs[dst].reg();
   // Cls is live in the slow path call to lookupIR, so we have to be

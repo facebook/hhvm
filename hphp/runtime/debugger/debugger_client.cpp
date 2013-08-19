@@ -24,6 +24,7 @@
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/runtime/ext/ext_socket.h"
 #include "hphp/runtime/ext/ext_network.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/util/text-color.h"
 #include "hphp/util/text-art.h"
 #include "hphp/util/logger.h"
@@ -384,7 +385,7 @@ String DebuggerClient::FormatInfoVec(const IDebuggable::InfoVec &info,
 
 String DebuggerClient::FormatTitle(const char *title) {
   TRACE(2, "DebuggerClient::FormatTitle\n");
-  String dash = StringUtil::Repeat(BOX_H, (LineWidth - strlen(title)) / 2 - 4);
+  String dash = f_str_repeat(BOX_H, (LineWidth - strlen(title)) / 2 - 4);
 
   StringBuffer sb;
   sb.append("\n");
@@ -1309,7 +1310,7 @@ IMPLEMENT_COLOR_OUTPUT(error,    stderr,  ErrorColor);
 
 string DebuggerClient::wrap(const std::string &s) {
   TRACE(2, "DebuggerClient::wrap\n");
-  String ret = StringUtil::WordWrap(String(s.c_str(), s.size(), CopyString),
+  String ret = f_wordwrap(String(s.c_str(), s.size(), CopyString),
                                     LineWidth - 4, "\n", true);
   return string(ret.data(), ret.size());
 }
@@ -1368,8 +1369,8 @@ void DebuggerClient::helpCmds(const std::vector<const char *> &cmds) {
       continue;
     }
 
-    cmd = StringUtil::WordWrap(cmd, left, "\n", true);
-    desc = StringUtil::WordWrap(desc, right, "\n", true);
+    cmd = f_wordwrap(cmd, left, "\n", true);
+    desc = f_wordwrap(desc, right, "\n", true);
     Array lines1 = StringUtil::Explode(cmd, "\n").toArray();
     Array lines2 = StringUtil::Explode(desc, "\n").toArray();
     for (int n = 0; n < lines1.size() || n < lines2.size(); n++) {
@@ -1381,7 +1382,7 @@ void DebuggerClient::helpCmds(const std::vector<const char *> &cmds) {
       line.append("  ");
       line.append(lines2[n].toString());
 
-      sb.append(StringUtil::Trim(line.detach(), StringUtil::TrimType::Right));
+      sb.append(f_rtrim(line.detach()));
       sb.append("\n");
     }
   }
@@ -1406,20 +1407,20 @@ void DebuggerClient::tutorial(const char *text) {
   if (m_tutorial < 0) return;
 
   String ret = String(text).replace("\t", "    ");
-  ret = StringUtil::WordWrap(ret, LineWidth - 4, "\n", true);
+  ret = f_wordwrap(ret, LineWidth - 4, "\n", true);
   Array lines = StringUtil::Explode(ret, "\n").toArray();
 
   StringBuffer sb;
   String header = "  Tutorial - '[h]elp [t]utorial off|auto' to turn off  ";
-  String hr = StringUtil::Repeat(BOX_H, LineWidth - 2);
+  String hr = f_str_repeat(BOX_H, LineWidth - 2);
 
   sb.append(BOX_UL); sb.append(hr); sb.append(BOX_UR); sb.append("\n");
 
   int wh = (LineWidth - 2 - header.size()) / 2;
   sb.append(BOX_V);
-  sb.append(StringUtil::Repeat(" ", wh));
+  sb.append(f_str_repeat(" ", wh));
   sb.append(header);
-  sb.append(StringUtil::Repeat(" ", wh));
+  sb.append(f_str_repeat(" ", wh));
   sb.append(BOX_V);
   sb.append("\n");
 

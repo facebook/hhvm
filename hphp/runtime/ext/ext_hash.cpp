@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/ext_hash.h"
 #include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/hash/hash_md.h"
 #include "hphp/runtime/ext/hash/hash_sha.h"
 #include "hphp/runtime/ext/hash/hash_ripemd.h"
@@ -170,7 +171,7 @@ Array HHVM_FUNCTION(hash_algos) {
 
 static HashEnginePtr php_hash_fetch_ops(CStrRef algo) {
   HashEngineMap::const_iterator iter =
-    HashEngines.find(StringUtil::ToLower(algo).data());
+    HashEngines.find(f_strtolower(algo).data());
   if (iter == HashEngines.end()) {
     return HashEnginePtr();
   }
@@ -215,7 +216,7 @@ static Variant php_hash_do_hash(CStrRef algo, CStrRef data, bool isfilename,
   if (raw_output) {
     return raw;
   }
-  return StringUtil::HexEncode(raw);
+  return f_bin2hex(raw);
 }
 
 Variant HHVM_FUNCTION(hash, CStrRef algo, CStrRef data,
@@ -316,7 +317,7 @@ String HHVM_FUNCTION(hash_final, CResRef context,
   if (raw_output) {
     return raw;
   }
-  return StringUtil::HexEncode(raw);
+  return f_bin2hex(raw);
 }
 
 int64_t HHVM_FUNCTION(furchash_hphp_ext, CStrRef key,

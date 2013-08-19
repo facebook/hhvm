@@ -16,11 +16,11 @@
 
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/file.h"
-#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/php-stream-wrapper.h"
 #include "hphp/runtime/base/http-stream-wrapper.h"
 #include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include <set>
 #include <map>
 
@@ -60,7 +60,7 @@ const StaticString
   s_compress_zlib("compress.zlib");
 
 bool disableWrapper(CStrRef scheme) {
-  String lscheme = StringUtil::ToLower(scheme);
+  String lscheme = f_strtolower(scheme);
 
   if (lscheme.same(s_file)) {
     // Zend quietly succeeds, but does nothing
@@ -94,7 +94,7 @@ bool disableWrapper(CStrRef scheme) {
 }
 
 bool restoreWrapper(CStrRef scheme) {
-  String lscheme = StringUtil::ToLower(scheme);
+  String lscheme = f_strtolower(scheme);
   bool ret = false;
 
   // Unregister request-specific wrapper
@@ -117,7 +117,7 @@ bool restoreWrapper(CStrRef scheme) {
 }
 
 bool registerRequestWrapper(CStrRef scheme, std::unique_ptr<Wrapper> wrapper) {
-  String lscheme = StringUtil::ToLower(scheme);
+  String lscheme = f_strtolower(scheme);
 
   // Global, non-disabled wrapper
   if ((s_wrappers.find(lscheme.data()) != s_wrappers.end()) &&
@@ -156,7 +156,7 @@ Array enumWrappers() {
 }
 
 Wrapper* getWrapper(CStrRef scheme) {
-  String lscheme = StringUtil::ToLower(scheme);
+  String lscheme = f_strtolower(scheme);
 
   // Request local wrapper?
   {

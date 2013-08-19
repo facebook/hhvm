@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/ext_spl.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/ext_string.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -341,7 +342,7 @@ void f_spl_autoload(CStrRef class_name,
   Array ext = file_extensions.isNull()
               ? s_extension_list->extensions
               : StringUtil::Explode(file_extensions, ",").toArray();
-  String lClass = StringUtil::ToLower(class_name);
+  String lClass = f_strtolower(class_name);
   bool found = false;
   for (ArrayIter iter(ext); iter; ++iter) {
     String fileName = lClass + iter.second().toString();

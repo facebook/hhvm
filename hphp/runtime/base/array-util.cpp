@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/ext_string.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -479,9 +480,9 @@ Variant ArrayUtil::ChangeKeyCase(CArrRef input, bool lower) {
     Variant key(iter.first());
     if (key.isString()) {
       if (lower) {
-        ret.set(StringUtil::ToLower(key.toString()), iter.secondRef());
+        ret.set(f_strtolower(key.toString()), iter.secondRef());
       } else {
-        ret.set(StringUtil::ToUpper(key.toString()), iter.secondRef());
+        ret.set(f_strtoupper(key.toString()), iter.secondRef());
       }
     } else {
       ret.set(key, iter.secondRef());

@@ -26,65 +26,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // manipulations
 
-String StringUtil::ToLower(CStrRef input,
-                           ToLowerType type /*= ToLowerType::All */) {
-  if (input.empty()) return input;
-
-  int len = input.size();
-  char *ret = nullptr;
-  switch (type) {
-  case ToLowerType::All:
-    ret = string_to_lower(input.data(), len);
-    break;
-  case ToLowerType::First:
-    ret = string_to_lower_first(input.data(), len);
-    break;
-  case ToLowerType::Words:
-    ret = string_to_lower_words(input.data(), len);
-    break;
-  default:
-    assert(false);
-    break;
-  }
-  return String(ret, len, AttachString);
-}
-
-String StringUtil::ToUpper(CStrRef input,
-                           ToUpperType type /*= ToUpperType::All */) {
-  if (input.empty()) return input;
-
-  int len = input.size();
-  char *ret = nullptr;
-  switch (type) {
-  case ToUpperType::All:
-    ret = string_to_upper(input.data(), len);
-    break;
-  case ToUpperType::First:
-    ret = string_to_upper_first(input.data(), len);
-    break;
-  case ToUpperType::Words:
-    ret = string_to_upper_words(input.data(), len);
-    break;
-  default:
-    assert(false);
-    break;
-  }
-  return String(ret, len, AttachString);
-}
-
-String StringUtil::Trim(CStrRef input, TrimType type  /* = TrimType::Both */,
-                        CStrRef charlist /* = k_HPHP_TRIM_CHARLIST */) {
-  if (input.empty()) return input;
-  int len = input.size();
-  char *ret = string_trim(input.data(), len,
-                          charlist.data(), charlist.length(),
-                          static_cast<int>(type));
-  if (!ret) {
-      return input;
-  }
-  return String(ret, len, AttachString);
-}
-
 String StringUtil::Pad(CStrRef input, int final_length,
                        CStrRef pad_string /* = " " */,
                        PadType type /* = PadType::Right */) {
@@ -95,41 +36,6 @@ String StringUtil::Pad(CStrRef input, int final_length,
   return String();
 }
 
-String StringUtil::Reverse(CStrRef input) {
-  if (input.empty()) return input;
-  int len = input.size();
-  return String(string_reverse(input.data(), len), len, AttachString);
-}
-
-String StringUtil::Repeat(CStrRef input, int count) {
-  if (count < 0) {
-    raise_warning("Second argument has to be greater than or equal to 0");
-    return String();
-  }
-  if (count == 0) {
-    return "";
-  }
-  if (!input.empty()) {
-    int len = input.size();
-    char *ret = string_repeat(input.data(), len, count);
-    if (ret) {
-      return String(ret, len, AttachString);
-    }
-  }
-  return input;
-}
-
-String StringUtil::Shuffle(CStrRef input) {
-  if (!input.empty()) {
-    int len = input.size();
-    char *ret = string_shuffle(input.data(), len);
-    if (ret) {
-      return String(ret, len, AttachString);
-    }
-  }
-  return input;
-}
-
 String StringUtil::StripHTMLTags(CStrRef input,
                                  CStrRef allowable_tags /* = "" */) {
   if (input.empty()) return input;
@@ -137,21 +43,6 @@ String StringUtil::StripHTMLTags(CStrRef input,
   char *ret = string_strip_tags(input.data(), len, allowable_tags.data(),
                                 allowable_tags.size(), false);
   return String(ret, len, AttachString);
-}
-
-String StringUtil::WordWrap(CStrRef input, int width,
-                            CStrRef wordbreak /* = "\n" */,
-                            bool cut /* = false */) {
-  if (!input.empty()) {
-    int len = input.size();
-    char *ret = string_wordwrap(input.data(), len, width, wordbreak.data(),
-                                wordbreak.size(), cut);
-    if (ret) {
-      return String(ret, len, AttachString);
-    }
-    return String();
-  }
-  return input;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -303,46 +194,6 @@ Variant StringUtil::ChunkSplit(CStrRef body, int chunklen /* = 76 */,
 ///////////////////////////////////////////////////////////////////////////////
 // encoding/decoding
 
-String StringUtil::CEncode(CStrRef input, CStrRef charlist) {
-  String chars = charlist;
-  if (chars.isNull()) {
-    chars = String("\\\x00\x01..\x1f\x7f..\xff", 10, CopyString);
-  }
-  if (input.empty() || chars.empty()) return input;
-  int len = input.size();
-  char *ret = string_addcslashes(input.c_str(), len, chars.data(),
-                                 chars.size());
-  return String(ret, len, AttachString);
-}
-
-String StringUtil::CDecode(CStrRef input) {
-  if (input.empty()) return input;
-  int len = input.size();
-  char *ret = string_stripcslashes(input.c_str(), len);
-  return String(ret, len, AttachString);
-}
-
-String StringUtil::SqlEncode(CStrRef input) {
-  if (input.empty()) return input;
-  int len = input.size();
-  char *ret = string_addslashes(input.c_str(), len);
-  return String(ret, len, AttachString);
-}
-
-String StringUtil::SqlDecode(CStrRef input) {
-  if (input.empty()) return input;
-  int len = input.size();
-  char *ret = string_stripslashes(input.c_str(), len);
-  return String(ret, len, AttachString);
-}
-
-String StringUtil::RegExEncode(CStrRef input) {
-  if (input.empty()) return input;
-  int len = input.size();
-  char *ret = string_quotemeta(input.c_str(), len);
-  return String(ret, len, AttachString);
-}
-
 String StringUtil::HtmlEncode(CStrRef input, QuoteStyle quoteStyle,
                               const char *charset, bool nbsp) {
   if (input.empty()) return input;
@@ -482,20 +333,6 @@ String StringUtil::QuotedPrintableDecode(CStrRef input) {
   if (input.empty()) return input;
   int len = input.size();
   char *ret = string_quoted_printable_decode(input.data(), len, false);
-  return String(ret, len, AttachString);
-}
-
-String StringUtil::HexEncode(CStrRef input) {
-  if (input.empty()) return input;
-  int len = input.size();
-  char *ret = string_bin2hex(input.data(), len);
-  return String(ret, len, AttachString);
-}
-
-String StringUtil::HexDecode(CStrRef input) {
-  if (input.empty()) return input;
-  int len = input.size();
-  char *ret = string_hex2bin(input.data(), len);
   return String(ret, len, AttachString);
 }
 

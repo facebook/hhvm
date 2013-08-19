@@ -31,6 +31,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/util.h"
 #include "hphp/util/process.h"
@@ -1057,7 +1058,7 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(CStrRef name,
     CVarRef &type_map = m_map.get()->get(kind);
     auto const typeMapCell = type_map.asCell();
     if (typeMapCell->m_type != KindOfArray) return Failure;
-    String canonicalName = toLower ? StringUtil::ToLower(name) : name;
+    String canonicalName = toLower ? f_strtolower(name) : name;
     CVarRef &file = typeMapCell->m_data.parr->get(canonicalName);
     bool ok = false;
     if (file.isString()) {
@@ -1222,7 +1223,7 @@ String AutoloadHandler::getSignature(CVarRef handler) {
   if (!f_is_callable(handler, false, ref(name))) {
     return null_string;
   }
-  String lName = StringUtil::ToLower(name.toString());
+  String lName = f_strtolower(name.toString());
   if (handler.isArray()) {
     Variant first = handler.getArrayData()->get(int64_t(0));
     if (first.isObject()) {

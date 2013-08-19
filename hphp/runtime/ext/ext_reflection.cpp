@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/ext_reflection.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_misc.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -692,7 +693,7 @@ static Array get_class_info(const ClassInfo *cls) {
       ClassInfo::MethodInfo *m = *iter;
       Array info = Array::Create();
       set_method_info(info, m, cls);
-      arr.set(StringUtil::ToLower(m->name), info);
+      arr.set(f_strtolower(m->name), info);
     }
     ret.set(s_methods, VarNR(arr));
   }
@@ -829,7 +830,7 @@ Array f_hphp_get_class_info(CVarRef name) {
       if (m->isGenerated()) continue;
       Array info = Array::Create();
       set_method_info(info, m);
-      arr.set(StringUtil::ToLower(m->nameRef()), VarNR(info));
+      arr.set(f_strtolower(m->nameRef()), VarNR(info));
     }
 
     Func* const* clsMethods = cls->methods();
@@ -840,7 +841,7 @@ Array f_hphp_get_class_info(CVarRef name) {
       if (m->isGenerated()) continue;
       Array info = Array::Create();
       set_method_info(info, m);
-      arr.set(StringUtil::ToLower(m->nameRef()), VarNR(info));
+      arr.set(f_strtolower(m->nameRef()), VarNR(info));
     }
     ret.set(s_methods, VarNR(arr));
   }

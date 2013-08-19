@@ -28,6 +28,7 @@
 #include "hphp/runtime/server/ip-block-map.h"
 #include "hphp/test/ext/test_mysql_info.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/ext/ext_string.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -170,7 +171,7 @@ bool TestCppBase::TestString() {
 
   // manipulations
   {
-    String s = StringUtil::ToLower("Test");
+    String s = f_strtolower("Test");
     VS(s.c_str(), "test");
   }
 

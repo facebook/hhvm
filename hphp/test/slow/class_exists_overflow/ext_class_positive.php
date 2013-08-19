@@ -7,6 +7,7 @@ function autoload($className) {
         require $path;
 	var_dump(class_exists('test')); 
     }
+    
 
 }
 spl_autoload_register('autoload');

@@ -27,6 +27,7 @@
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_modules.h"
+#include "zend_list.h"
 #include "zend_operators.h"
 #include "zend_variables.h"
 
@@ -264,7 +265,7 @@ END_EXTERN_C()
 
 #define ZVAL_RESOURCE(z, l) do {  \
     zval *__z = (z);      \
-    Z_LVAL_P(__z) = l;      \
+    __z->m_data.pres = zend_list_id_to_entry(l); \
     Z_TYPE_P(__z) = IS_RESOURCE;\
   } while (0)
 

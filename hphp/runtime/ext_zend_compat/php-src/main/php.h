@@ -380,6 +380,7 @@ END_EXTERN_C()
 
 /* Virtual current working directory support */
 #include "tsrm_virtual_cwd.h"
+#include "fopen_wrappers.h"
 
 #include "zend_constants.h"
 

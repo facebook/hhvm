@@ -37,8 +37,8 @@ foreach ($funcs as $func) {
     )
   );
 
+  $args = array();
   if (isset($info['params'])) {
-    $args = array();
     for ($i = 0; $i < count($info['params']); $i++) {
       $args[] = array(
         'name' => $info['param_names'][$i],
@@ -46,8 +46,8 @@ foreach ($funcs as $func) {
         'desc' => $info['params'][$i],
       );
     }
-    $arr['args'] = $args;
   }
+  $arr['args'] = $args;
 
   $ret['funcs'][] = $arr;
 }

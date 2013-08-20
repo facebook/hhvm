@@ -28,6 +28,17 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, zval
   return SUCCESS;
 }
 
+ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, int flag) {
+  if (nKeyLength == 0) {
+    ht->remove(h, false);
+  } else {
+    assert(arKey[nKeyLength - 1] == '\0');
+    auto key = HPHP::StringData::GetStaticString(arKey, nKeyLength - 1);
+    ht->remove(key, false);
+  }
+  return SUCCESS;
+}
+
 /**
  * Something to try and keep these TypedValue**s alive.
  */
@@ -52,6 +63,15 @@ ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLen
   *pData = tvHolder.getNext();
   **pData = ht->nvGet(key);
   return **pData == nullptr ? FAILURE : SUCCESS;
+}
+
+ZEND_API int zend_hash_index_find(const HashTable *ht, ulong h, void **pData) {
+  *pData = ht->nvGet(h);
+  return *pData == nullptr ? FAILURE : SUCCESS;
+}
+
+ZEND_API ulong zend_hash_next_free_element(const HashTable *ht) {
+  return ht->iter_end() + 1;
 }
 
 ZEND_API int zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos) {

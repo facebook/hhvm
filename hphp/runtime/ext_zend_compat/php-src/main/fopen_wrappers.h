@@ -12,21 +12,22 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Author: Jim Winstead <jimw@php.net>                                  |
    +----------------------------------------------------------------------+
-*/
+ */
 
 /* $Id$ */
 
-#ifndef INFO_H
-#define INFO_H
+#ifndef FOPEN_WRAPPERS_H
+#define FOPEN_WRAPPERS_H
 
 BEGIN_EXTERN_C()
-PHPAPI inline void php_info_print_table_header(int num_cols, ...) {}
-PHPAPI inline void php_info_print_table_row(int num_cols, ...) {}
-PHPAPI inline void php_info_print_table_start(void) {}
-PHPAPI inline void php_info_print_table_end(void) {}
+
+PHPAPI inline int php_check_open_basedir(const char *path TSRMLS_DC) {
+  // we don't support openbasedir so you can access anything
+  return SUCCESS;
+}
+
 END_EXTERN_C()
 
-#endif /* INFO_H */
+#endif

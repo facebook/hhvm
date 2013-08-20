@@ -44,9 +44,9 @@ inline void smart_allocator_check_type() {
 
 #define NEW(T) new (T::AllocatorType::getNoCheck()) T
 
-#define NEWOBJ(T) new (MM().smartMallocSize(sizeof(T))) T
+#define NEWOBJ(T) new (HPHP::MM().smartMallocSize(sizeof(T))) T
 
-#define NEWOBJSZ(T,SZ) new (MM().objMalloc(SZ)) T
+#define NEWOBJSZ(T,SZ) new (HPHP::MM().objMalloc(SZ)) T
 
 #define DELETE(T) T::AllocatorType::getNoCheck()->release
 

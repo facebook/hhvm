@@ -2300,7 +2300,7 @@ c_StableMap* c_StableMap::Clone(ObjectData* obj) {
 
   Bucket *last = nullptr;
   for (Bucket* p = thiz->m_pListHead; p; p = p->pListNext) {
-    Bucket *np = NEW(Bucket)();
+    Bucket *np = NEW(c_StableMap::Bucket)();
     cellDup(p->data, np->data);
     uint nIndex;
     if (p->hasIntKey()) {
@@ -2637,7 +2637,7 @@ Object c_StableMap::t_map(CVarRef callback) {
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
-    Bucket *np = NEW(Bucket)(ret.asCell());
+    Bucket *np = NEW(c_StableMap::Bucket)(ret.asCell());
     uint nIndex;
     if (p->hasIntKey()) {
       np->setIntKey(p->ikey);
@@ -2688,7 +2688,7 @@ Object c_StableMap::t_mapwithkey(CVarRef callback) {
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
-    Bucket *np = NEW(Bucket)(ret.asTypedValue());
+    Bucket *np = NEW(c_StableMap::Bucket)(ret.asTypedValue());
     uint nIndex;
     if (p->hasIntKey()) {
       np->setIntKey(p->ikey);
@@ -2952,7 +2952,7 @@ bool c_StableMap::update(int64_t h, TypedValue* data) {
   if (++m_size > m_nTableSize) {
     adjustCapacity();
   }
-  p = NEW(Bucket)(data);
+  p = NEW(c_StableMap::Bucket)(data);
   p->setIntKey(h);
   uint nIndex = (h & m_nTableMask);
   p->pNext = m_arBuckets[nIndex];
@@ -2976,7 +2976,7 @@ bool c_StableMap::update(StringData *key, TypedValue* data) {
   if (++m_size > m_nTableSize) {
     adjustCapacity();
   }
-  p = NEW(Bucket)(data);
+  p = NEW(c_StableMap::Bucket)(data);
   p->setStrKey(key, h);
   uint nIndex = (h & m_nTableMask);
   p->pNext = m_arBuckets[nIndex];
@@ -3403,7 +3403,7 @@ void c_StableMap::Unserialize(ObjectData* obj,
       auto h = k.toInt64();
       p = smp->find(h);
       if (UNLIKELY(p != nullptr)) goto do_unserialize;
-      p = NEW(Bucket)();
+      p = NEW(c_StableMap::Bucket)();
       p->setIntKey(h);
       nIndex = (h & smp->m_nTableMask);
     } else if (k.isString()) {
@@ -3411,7 +3411,7 @@ void c_StableMap::Unserialize(ObjectData* obj,
       auto h = key->hash();
       p = smp->find(key->data(), key->size(), h);
       if (UNLIKELY(p != nullptr)) goto do_unserialize;
-      p = NEW(Bucket)();
+      p = NEW(c_StableMap::Bucket)();
       p->setStrKey(key, h);
       nIndex = (h & smp->m_nTableMask);
     } else {

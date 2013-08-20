@@ -163,7 +163,7 @@ inline const zval& zval_follow_ref(const zval &z) {
 #define Z_OBJCE(zval)      zend_get_class_entry(&(zval) TSRMLS_CC)
 #define Z_OBJPROP(zval)      Z_OBJ_HT((zval))->get_properties(&(zval) TSRMLS_CC)
 #define Z_OBJ_HANDLER(zval, hf) Z_OBJ_HT((zval))->hf
-#define Z_RESVAL(zval)      (zval).value.lval
+#define Z_RESVAL(zval)      dynamic_cast<zend_rsrc_list_entry*>((zval).m_data.pres)->id
 #define Z_OBJDEBUG(zval,is_tmp)  (Z_OBJ_HANDLER((zval),get_debug_info)?Z_OBJ_HANDLER((zval),get_debug_info)(&(zval),&is_tmp TSRMLS_CC):(is_tmp=0,Z_OBJ_HANDLER((zval),get_properties)?Z_OBJPROP(zval):NULL))
 
 #define Z_LVAL_P(zval_p)    Z_LVAL(*zval_p)

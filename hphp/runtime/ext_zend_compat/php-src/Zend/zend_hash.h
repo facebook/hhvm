@@ -125,6 +125,10 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint n
 
 /* Data retreival */
 ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, zval ***pData);
+ZEND_API int zend_hash_index_find(const HashTable *ht, ulong h, void **pData);
+
+/* Misc */
+ZEND_API ulong zend_hash_next_free_element(const HashTable *ht);
 
 /* traversing */
 #define zend_hash_has_more_elements_ex(ht, pos) \

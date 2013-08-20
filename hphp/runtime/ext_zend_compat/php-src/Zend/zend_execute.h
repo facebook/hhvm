@@ -35,6 +35,7 @@ ZEND_API int zend_lookup_class(const char *name, int name_length, zend_class_ent
 /* services */
 ZEND_API const char *get_active_class_name(const char **space TSRMLS_DC);
 ZEND_API inline const char *get_active_function_name(TSRMLS_D) {
+  HPHP::Transl::VMRegAnchor _;
   return HPHP::liveFunc()->name()->data();
 }
 

@@ -69,9 +69,10 @@ int main(int argc, const char* argv[]) {
       cpp << "} // End namespace\n";
       cpp << "void zif_" << name << "(HPHP::ActRec* ar, HPHP::TypedValue* return_value);\n";
       cpp << "HPHP::TypedValue* fg_" << name << "(HPHP::ActRec* ar){\n";
-      cpp << "  tvWriteNull(&ar->m_r);\n";
-      cpp << "  zif_" << name << "(ar, &ar->m_r);\n";
-      cpp << "  tvRefcountedIncRef(&ar->m_r);\n";
+      cpp << "  HPHP::TypedValue return_value;\n";
+      cpp << "  HPHP::tvWriteNull(&return_value);\n";
+      cpp << "  zif_" << name << "(ar, &return_value);\n";
+      cpp << "  HPHP::tvDup(return_value, ar->m_r);\n";
       cpp << "  return nullptr;\n";
       cpp << "}\n";
       cpp << "namespace HPHP {\n";

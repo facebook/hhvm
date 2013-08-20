@@ -152,7 +152,7 @@ Variant f_assert(CVarRef assertion) {
   if (!s_option_data->assertCallback.isNull()) {
     auto const unit = fp->m_func->unit();
 
-    VectorInit ai(3);
+    PackedArrayInit ai(3);
     ai.add(String(unit->filepath()));
     ai.add(Variant(unit->getLineNumber(callerOffset)));
     ai.add(assertion.isString() ? assertion.toString() : String(""));

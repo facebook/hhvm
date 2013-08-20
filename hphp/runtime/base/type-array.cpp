@@ -621,13 +621,13 @@ Variant Array::key(CVarRef search_value, bool strict /* = false */) const {
 Array Array::keys(CVarRef search_value /* = null_variant */,
                   bool strict /* = false */) const {
   if (!search_value.isInitialized()) {
-    VectorInit ai(size());
+    PackedArrayInit ai(size());
     for (ArrayIter iter(*this); iter; ++iter) {
       ai.add(iter.first());
     }
     return ai.toArray();
   }
-  VectorInit ai(0);
+  PackedArrayInit ai(0);
   for (ArrayIter iter(*this); iter; ++iter) {
     if ((strict && HPHP::same(iter.secondRef(), search_value)) ||
         (!strict && HPHP::equal(iter.secondRef(), search_value))) {
@@ -638,7 +638,7 @@ Array Array::keys(CVarRef search_value /* = null_variant */,
 }
 
 Array Array::values() const {
-  VectorInit ai(size());
+  PackedArrayInit ai(size());
   for (ArrayIter iter(*this); iter; ++iter) {
     ai.add(withRefBind(iter.secondRef()));
   }

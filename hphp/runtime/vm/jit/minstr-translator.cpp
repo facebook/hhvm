@@ -1545,9 +1545,9 @@ static TypedValue arrayGetNotFound(const StringData* k) {
   return v;
 }
 
-static TypedValue arrayVectorGetI(ArrayData* a, TypedValue* key) {
+static TypedValue packedArrayGetI(ArrayData* a, TypedValue* key) {
   int64_t ki = keyAsRaw<KeyType::Int>(key);
-  return HphpArray::GetCellIntVec(a, ki);
+  return HphpArray::GetCellIntPacked(a, ki);
 }
 
 template<KeyType keyType, bool checkForInt>
@@ -1590,9 +1590,9 @@ void HhbcTranslator::MInstrTranslator::emitArrayGet(SSATmp* key) {
 
   auto baseType = m_base->type();
   if (baseType.hasArrayKind() &&
-      baseType.getArrayKind() == ArrayData::ArrayKind::kVectorKind &&
+      baseType.getArrayKind() == ArrayData::kPackedKind &&
       key->isA(Type::Int)) {
-    opFunc = arrayVectorGetI;
+    opFunc = packedArrayGetI;
   }
   m_result = gen(ArrayGet, cns((TCA)opFunc), m_base, key);
 }
@@ -1831,9 +1831,9 @@ void HhbcTranslator::MInstrTranslator::emitIssetEmptyElem(bool isEmpty) {
 }
 #undef HELPER_TABLE
 
-static uint64_t arrayVectorIssetI(ArrayData* a, TypedValue* key) {
+static uint64_t packedArrayIssetI(ArrayData* a, TypedValue* key) {
   int64_t ki = keyAsRaw<KeyType::Int>(key);
-  return HphpArray::IssetIntVec(a, ki);
+  return HphpArray::IssetIntPacked(a, ki);
 }
 
 template<KeyType keyType, bool checkForInt>
@@ -1871,9 +1871,9 @@ void HhbcTranslator::MInstrTranslator::emitArrayIsset() {
   assert(m_base->isA(Type::Arr));
   auto baseType = m_base->type();
   if (baseType.hasArrayKind() &&
-      baseType.getArrayKind() == ArrayData::ArrayKind::kVectorKind &&
+      baseType.getArrayKind() == ArrayData::kPackedKind &&
       key->isA(Type::Int)) {
-    opFunc = arrayVectorIssetI;
+    opFunc = packedArrayIssetI;
   }
   m_result = gen(ArrayIsset, getCatchTrace(),
                  cns((TCA)opFunc), m_base, key);

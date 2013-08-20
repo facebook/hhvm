@@ -168,7 +168,7 @@ void c_Vector::reserve(int64_t sz) {
 }
 
 Array c_Vector::toArrayImpl() const {
-  VectorInit ai(m_size);
+  PackedArrayInit ai(m_size);
   uint sz = m_size;
   for (uint i = 0; i < sz; ++i) {
     ai.add(tvAsCVarRef(&m_data[i]));
@@ -1281,7 +1281,7 @@ Array c_Map::t_copyasarray() {
 }
 
 Array c_Map::t_tokeysarray() {
-  VectorInit ai(m_size);
+  PackedArrayInit ai(m_size);
   for (uint i = 0; i <= m_nLastSlot; ++i) {
     Bucket& p = m_data[i];
     if (!p.validValue()) continue;
@@ -1319,7 +1319,7 @@ Object c_Map::t_values() {
 }
 
 Array c_Map::t_tovaluesarray() {
-  VectorInit ai(m_size);
+  PackedArrayInit ai(m_size);
   for (uint i = 0; i <= m_nLastSlot; ++i) {
     Bucket& p = m_data[i];
     if (!p.validValue()) continue;
@@ -2383,7 +2383,7 @@ Array c_StableMap::t_copyasarray() {
 }
 
 Array c_StableMap::t_tokeysarray() {
-  VectorInit ai(m_size);
+  PackedArrayInit ai(m_size);
   Bucket* p = m_pListHead;
   while (p) {
     if (p->hasIntKey()) {
@@ -2416,7 +2416,7 @@ Object c_StableMap::t_values() {
 }
 
 Array c_StableMap::t_tovaluesarray() {
-  VectorInit ai(m_size);
+  PackedArrayInit ai(m_size);
   Bucket* p = m_pListHead;
   while (p) {
     ai.add(tvAsCVarRef(&p->data));
@@ -3299,7 +3299,7 @@ void c_Set::t___construct(CVarRef iterable /* = null_variant */) {
 }
 
 Array c_Set::toArrayImpl() const {
-  VectorInit ai(m_size);
+  PackedArrayInit ai(m_size);
   for (uint i = 0; i <= m_nLastSlot; ++i) {
     Bucket& p = m_data[i];
     if (p.validValue()) {
@@ -4019,7 +4019,7 @@ void c_Pair::t___construct() {
 }
 
 Array c_Pair::toArrayImpl() const {
-  VectorInit ai(2);
+  PackedArrayInit ai(2);
   ai.add(tvAsCVarRef(&elm0));
   ai.add(tvAsCVarRef(&elm1));
   return ai.toArray();

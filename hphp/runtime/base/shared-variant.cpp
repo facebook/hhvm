@@ -298,7 +298,7 @@ ArrayData* SharedVariant::loadElems(const SharedMap &sharedMap) {
   auto count = arrSize();
   ArrayData* elems;
   if (getIsVector()) {
-    VectorInit ai(count);
+    PackedArrayInit ai(count);
     for (uint i = 0; i < count; i++) {
       ai.add(sharedMap.getValueRef(i));
     }

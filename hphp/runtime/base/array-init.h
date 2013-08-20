@@ -25,17 +25,17 @@ namespace HPHP {
 // macros for creating vectors or maps
 
 #define CREATE_VECTOR1(e)                                               \
-  VectorInit(1).add(e).toArray()
+  PackedArrayInit(1).add(e).toArray()
 #define CREATE_VECTOR2(e1, e2)                                          \
-  VectorInit(2).add(e1).add(e2).toArray()
+  PackedArrayInit(2).add(e1).add(e2).toArray()
 #define CREATE_VECTOR3(e1, e2, e3)                                      \
-  VectorInit(3).add(e1).add(e2).add(e3).toArray()
+  PackedArrayInit(3).add(e1).add(e2).add(e3).toArray()
 #define CREATE_VECTOR4(e1, e2, e3, e4)                                  \
-  VectorInit(4).add(e1).add(e2).add(e3).add(e4).toArray()
+  PackedArrayInit(4).add(e1).add(e2).add(e3).add(e4).toArray()
 #define CREATE_VECTOR5(e1, e2, e3, e4, e5)                              \
-  VectorInit(5).add(e1).add(e2).add(e3).add(e4).add(e5).toArray()
+  PackedArrayInit(5).add(e1).add(e2).add(e3).add(e4).add(e5).toArray()
 #define CREATE_VECTOR6(e1, e2, e3, e4, e5, e6)                          \
-  VectorInit(6).add(e1).add(e2).add(e3).add(e4).add(e5).add(e6).toArray()
+  PackedArrayInit(6).add(e1).add(e2).add(e3).add(e4).add(e5).add(e6).toArray()
 
 inline String initkey(const char* s) { return String(s); }
 inline int64_t initkey(int k) { return k; }
@@ -303,34 +303,34 @@ private:
 /*
  * Initializer for a vector-shaped array.
  */
-class VectorInit {
+class PackedArrayInit {
 public:
-  explicit VectorInit(size_t n) : m_vec(ArrayData::Make(n)) {}
+  explicit PackedArrayInit(size_t n) : m_vec(ArrayData::Make(n)) {}
 
-  VectorInit(VectorInit&& other) : m_vec(other.m_vec) {
+  PackedArrayInit(PackedArrayInit&& other) : m_vec(other.m_vec) {
     other.m_vec = nullptr;
   }
 
-  VectorInit(const VectorInit&) = delete;
-  VectorInit& operator=(const VectorInit&) = delete;
+  PackedArrayInit(const PackedArrayInit&) = delete;
+  PackedArrayInit& operator=(const PackedArrayInit&) = delete;
 
-  ~VectorInit() {
+  ~PackedArrayInit() {
     // In case an exception interrupts the initialization.
     if (m_vec) m_vec->release();
   }
 
-  VectorInit& add(CVarRef v) {
+  PackedArrayInit& add(CVarRef v) {
     m_vec->nvAppend(v.asTypedValue());
     return *this;
   }
 
-  VectorInit& add(CVarWithRefBind v) {
-    HphpArray::AppendWithRefVec(m_vec, variant(v), false);
+  PackedArrayInit& add(CVarWithRefBind v) {
+    HphpArray::AppendWithRefPacked(m_vec, variant(v), false);
     return *this;
   }
 
-  VectorInit& add(RefResult v) {
-    HphpArray::AppendRefVec(m_vec, variant(v), false);
+  PackedArrayInit& add(RefResult v) {
+    HphpArray::AppendRefPacked(m_vec, variant(v), false);
     return *this;
   }
 

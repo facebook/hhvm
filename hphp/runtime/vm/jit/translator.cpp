@@ -2674,7 +2674,7 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
       if (specType.getOuterType() == KindOfArray) {
         if (instr->inputs.size() == 2 && opndIdx == 0) {
           if (specType.hasArrayKind() &&
-              specType.getArrayKind() == ArrayData::ArrayKind::kVectorKind) {
+              specType.getArrayKind() == ArrayData::ArrayKind::kPackedKind) {
             return DataTypeSpecialized;
           }
         }

@@ -46,7 +46,7 @@ inline void HphpArray::initHash(size_t tableSize) {
 
 inline ALWAYS_INLINE
 HphpArray::ElmInd* HphpArray::findForNewInsert(size_t h0) const {
-  assert(!isVector());
+  assert(!isPacked());
   size_t tableMask = m_tableMask;
   size_t probeIndex = h0 & tableMask;
   ElmInd* ei = &m_hash[probeIndex];
@@ -81,7 +81,7 @@ void HphpArray::getArrayElm(ssize_t pos, TypedValue* valOut,
     if (LIKELY(keyOut != nullptr)) {
       DataType t = keyOut->m_type;
       uint64_t d = keyOut->m_data.num;
-      if (isVector()) {
+      if (isPacked()) {
         keyOut->m_data.num = pos;
         keyOut->m_type = KindOfInt64;
       } else {
@@ -93,7 +93,7 @@ void HphpArray::getArrayElm(ssize_t pos, TypedValue* valOut,
     TypedValue* cur = tvToCell(&elm.data);
     cellDup(*cur, *valOut);
     if (keyOut) {
-      if (isVector()) {
+      if (isPacked()) {
         keyOut->m_data.num = pos;
         keyOut->m_type = KindOfInt64;
       } else {
@@ -117,28 +117,28 @@ inline const HphpArray* HphpArray::asHphpArray(const ArrayData* ad) {
   return a;
 }
 
-inline HphpArray* HphpArray::asVector(ArrayData* ad) {
-  assert(ad->kind() == kVectorKind);
+inline HphpArray* HphpArray::asPacked(ArrayData* ad) {
+  assert(ad->kind() == kPackedKind);
   auto a = static_cast<HphpArray*>(ad);
   assert(a->checkInvariants());
   return a;
 }
 
-inline const HphpArray* HphpArray::asVector(const ArrayData* ad) {
-  assert(ad->kind() == kVectorKind);
+inline const HphpArray* HphpArray::asPacked(const ArrayData* ad) {
+  assert(ad->kind() == kPackedKind);
   auto a = static_cast<const HphpArray*>(ad);
   assert(a->checkInvariants());
   return a;
 }
 
-inline HphpArray* HphpArray::asGeneric(ArrayData* ad) {
+inline HphpArray* HphpArray::asMixed(ArrayData* ad) {
   assert(ad->kind() == kMixedKind);
   auto a = static_cast<HphpArray*>(ad);
   assert(a->checkInvariants());
   return a;
 }
 
-inline const HphpArray* HphpArray::asGeneric(const ArrayData* ad) {
+inline const HphpArray* HphpArray::asMixed(const ArrayData* ad) {
   assert(ad->kind() == kMixedKind);
   auto a = static_cast<const HphpArray*>(ad);
   assert(a->checkInvariants());
@@ -146,11 +146,12 @@ inline const HphpArray* HphpArray::asGeneric(const ArrayData* ad) {
 }
 
 inline HphpArray* HphpArray::copyImpl() const {
-  return isVector() ? copyVec() : copyGeneric();
+  return isPacked() ? copyPacked() : copyMixed();
 }
 
-inline TypedValue HphpArray::GetCellIntVec(const ArrayData* ad, int64_t ki) {
-  auto a = asVector(ad);
+inline TypedValue
+HphpArray::GetCellIntPacked(const ArrayData* ad, int64_t ki) {
+  auto a = asPacked(ad);
   if (LIKELY(size_t(ki) < a->m_size)) {
     TypedValue* ret = &a->m_data[ki].data;
     ret = tvToCell(ret);
@@ -161,8 +162,9 @@ inline TypedValue HphpArray::GetCellIntVec(const ArrayData* ad, int64_t ki) {
   return *v.asTypedValue();
 }
 
-inline uint64_t HphpArray::IssetIntVec(const ArrayData* ad, int64_t ki) {
-  auto a = asVector(ad);
+inline uint64_t
+HphpArray::IssetIntPacked(const ArrayData* ad, int64_t ki) {
+  auto a = asPacked(ad);
   return (size_t(ki) < a->m_size) &&
          (a->m_data[ki].data.m_type != KindOfNull);
 }

@@ -43,8 +43,8 @@ class ArrayData {
   //  - using kind as an index
   //  - maybe doing bitops in the future
   enum ArrayKind : uint8_t {
-    kVectorKind,  // HphpArray vector-shape
-    kMixedKind,   // HphpArray generic shape
+    kPackedKind,  // HphpArray with keys in range [0..size)
+    kMixedKind,   // HphpArray arbitrary int or string keys, maybe holes
     kSharedKind,  // SharedMap
     kNvtwKind,    // NameValueTableWrapper
     kPolicyKind,  // PolicyArray
@@ -185,10 +185,10 @@ public:
    * Specific derived class type querying operators.
    */
   bool isPolicyArray() const { return m_kind == kPolicyKind; }
-  bool isVector() const { return m_kind == kVectorKind; }
+  bool isPacked() const { return m_kind == kPackedKind; }
   bool isHphpArray() const {
     return m_kind <= kMixedKind;
-    static_assert(kVectorKind < kMixedKind, "");
+    static_assert(kPackedKind < kMixedKind, "");
   }
   bool isSharedMap() const { return m_kind == kSharedKind; }
   bool isNameValueTableWrapper() const {

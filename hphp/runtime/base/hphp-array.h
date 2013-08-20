@@ -45,20 +45,20 @@ public:
   }
 
 private:
-  enum class CopyVector {};
-  HphpArray(const HphpArray& other, AllocationMode, CopyVector);
+  enum class ClonePacked {};
+  HphpArray(const HphpArray& other, AllocationMode, ClonePacked);
 
-  enum class CopyGeneric {};
-  HphpArray(const HphpArray& other, AllocationMode, CopyGeneric);
+  enum class CloneMixed {};
+  HphpArray(const HphpArray& other, AllocationMode, CloneMixed);
 
-  // convert in-place from kVector to kHphpArray: fill in keys & hashtable
-  HphpArray* vectorToGeneric();
+  // convert in-place from kPackedKind to kMixedKind: fill in keys & hashtable
+  HphpArray* packedToMixed();
 
   // Safe downcast helpers
-  static HphpArray* asVector(ArrayData* ad);
-  static const HphpArray* asVector(const ArrayData* ad);
-  static HphpArray* asGeneric(ArrayData* ad);
-  static const HphpArray* asGeneric(const ArrayData* ad);
+  static HphpArray* asPacked(ArrayData* ad);
+  static const HphpArray* asPacked(const ArrayData* ad);
+  static HphpArray* asMixed(ArrayData* ad);
+  static const HphpArray* asMixed(const ArrayData* ad);
   static HphpArray* asHphpArray(ArrayData* ad);
   static const HphpArray* asHphpArray(const ArrayData* ad);
 
@@ -71,7 +71,7 @@ public:
   HphpArray(uint size, const TypedValue* vals); // make tuple
 
   ~HphpArray();
-  void destroyVec();
+  void destroyPacked();
   void destroy();
 
   // This behaves the same as iter_begin except that it assumes
@@ -103,7 +103,7 @@ public:
 
   // overrides ArrayData
   static bool IsVectorData(const ArrayData*);
-  static bool IsVectorDataVec(const ArrayData*);
+  static bool IsVectorDataPacked(const ArrayData*);
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterEnd(const ArrayData*);
   static ssize_t IterAdvance(const ArrayData*, ssize_t pos);
@@ -112,24 +112,25 @@ public:
   // implements ArrayData
   static bool ExistsInt(const ArrayData*, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData* k);
-  static bool ExistsIntVec(const ArrayData*, int64_t k);
-  static bool ExistsStrVec(const ArrayData*, const StringData* k);
+  static bool ExistsIntPacked(const ArrayData*, int64_t k);
+  static bool ExistsStrPacked(const ArrayData*, const StringData* k);
 
   // implements ArrayData
   static ArrayData* LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
                             bool copy);
   static ArrayData* LvalStr(ArrayData* ad, StringData* k, Variant*& ret,
                             bool copy);
-  static ArrayData* LvalIntVec(ArrayData* ad, int64_t k, Variant*& ret,
-                               bool copy);
-  static ArrayData* LvalStrVec(ArrayData* ad, StringData* k, Variant*& ret,
-                               bool copy);
+  static ArrayData* LvalIntPacked(ArrayData* ad, int64_t k, Variant*& ret,
+                                  bool copy);
+  static ArrayData* LvalStrPacked(ArrayData* ad, StringData* k, Variant*& ret,
+                                  bool copy);
   static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
-  static ArrayData* LvalNewVec(ArrayData*, Variant*& ret, bool copy);
+  static ArrayData* LvalNewPacked(ArrayData*, Variant*& ret, bool copy);
 
   // implements ArrayData
-  static ArrayData* SetIntVec(ArrayData*, int64_t k, CVarRef v, bool copy);
-  static ArrayData* SetStrVec(ArrayData*, StringData* k, CVarRef v, bool copy);
+  static ArrayData* SetIntPacked(ArrayData*, int64_t k, CVarRef v, bool copy);
+  static ArrayData* SetStrPacked(ArrayData*, StringData* k, CVarRef v,
+                                 bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, CVarRef v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, CVarRef v, bool copy);
 
@@ -138,48 +139,48 @@ public:
                               bool copy);
   static ArrayData* SetRefStr(ArrayData* ad, StringData* k, CVarRef v,
                               bool copy);
-  static ArrayData* SetRefIntVec(ArrayData* ad, int64_t k, CVarRef v,
-                                 bool copy);
-  static ArrayData* SetRefStrVec(ArrayData* ad, StringData* k, CVarRef v,
-                                 bool copy);
+  static ArrayData* SetRefIntPacked(ArrayData* ad, int64_t k, CVarRef v,
+                                    bool copy);
+  static ArrayData* SetRefStrPacked(ArrayData* ad, StringData* k, CVarRef v,
+                                    bool copy);
 
   // overrides ArrayData
   static ArrayData* AddInt(ArrayData*, int64_t k, CVarRef v, bool copy);
   static ArrayData* AddStr(ArrayData*, StringData* k, CVarRef v, bool copy);
-  static ArrayData* AddIntVec(ArrayData*, int64_t k, CVarRef v, bool copy);
+  static ArrayData* AddIntPacked(ArrayData*, int64_t k, CVarRef v, bool copy);
 
   // implements ArrayData
   static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k, bool copy);
-  static ArrayData* RemoveIntVec(ArrayData*, int64_t k, bool copy);
-  static ArrayData* RemoveStrVec(ArrayData*, const StringData* k, bool copy);
+  static ArrayData* RemoveIntPacked(ArrayData*, int64_t k, bool copy);
+  static ArrayData* RemoveStrPacked(ArrayData*, const StringData* k, bool copy);
 
   // overrides ArrayData
   static ArrayData* Copy(const ArrayData*);
-  static ArrayData* CopyVec(const ArrayData*);
+  static ArrayData* CopyPacked(const ArrayData*);
   static ArrayData* CopyWithStrongIterators(const ArrayData*);
   static ArrayData* NonSmartCopy(const ArrayData*);
 
   HphpArray* copyImpl() const;
-  HphpArray* copyVec() const;
-  HphpArray* copyGeneric() const;
+  HphpArray* copyPacked() const;
+  HphpArray* copyMixed() const;
 
-  static ArrayData* AppendVec(ArrayData*, CVarRef v, bool copy);
+  static ArrayData* AppendPacked(ArrayData*, CVarRef v, bool copy);
   static ArrayData* Append(ArrayData*, CVarRef v, bool copy);
   static ArrayData* AppendRef(ArrayData*, CVarRef v, bool copy);
-  static ArrayData* AppendRefVec(ArrayData*, CVarRef v, bool copy);
+  static ArrayData* AppendRefPacked(ArrayData*, CVarRef v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, CVarRef v, bool copy);
-  static ArrayData* AppendWithRefVec(ArrayData*, CVarRef v, bool copy);
+  static ArrayData* AppendWithRefPacked(ArrayData*, CVarRef v, bool copy);
   static ArrayData* Plus(ArrayData*, const ArrayData* elems, bool copy);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems, bool copy);
   static ArrayData* Pop(ArrayData*, Variant& value);
-  static ArrayData* PopVec(ArrayData*, Variant& value);
+  static ArrayData* PopPacked(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, CVarRef v, bool copy);
   static void Renumber(ArrayData*);
-  static void RenumberVec(ArrayData*);
+  static void RenumberPacked(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
-  static void OnSetEvalScalarVec(ArrayData*);
+  static void OnSetEvalScalarPacked(ArrayData*);
 
   // overrides ArrayData
   static bool ValidFullPos(const ArrayData*, const FullPos &fp);
@@ -194,9 +195,9 @@ public:
 
   // nvGet returns a pointer to the value if the specified key is in the
   // array, NULL otherwise.
-  static TypedValue* NvGetIntVec(const ArrayData*, int64_t ki);
+  static TypedValue* NvGetIntPacked(const ArrayData*, int64_t ki);
+  static TypedValue* NvGetStrPacked(const ArrayData*, const StringData* k);
   static TypedValue* NvGetInt(const ArrayData*, int64_t ki);
-  static TypedValue* NvGetStrVec(const ArrayData*, const StringData* k);
   static TypedValue* NvGetStr(const ArrayData*, const StringData* k);
 
   void nvBind(int64_t k, const TypedValue* v) {
@@ -206,9 +207,9 @@ public:
     ArrayData::setRef(k, tvAsCVarRef(v), false);
   }
   void nvAppend(const TypedValue* v) {
-    nextInsertVec(tvAsCVarRef(v));
+    nextInsertPacked(tvAsCVarRef(v));
   }
-  static void NvGetKeyVec(const ArrayData*, TypedValue* out, ssize_t pos);
+  static void NvGetKeyPacked(const ArrayData*, TypedValue* out, ssize_t pos);
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
   bool nvInsert(StringData* k, TypedValue *v);
 
@@ -224,8 +225,8 @@ public:
   /**
    * Inline helpers to be called directly from the TC
    */
-  static TypedValue GetCellIntVec(const ArrayData* ad, int64_t ki);
-  static uint64_t IssetIntVec(const ArrayData* ad, int64_t ki);
+  static TypedValue GetCellIntPacked(const ArrayData* ad, int64_t ki);
+  static uint64_t IssetIntPacked(const ArrayData* ad, int64_t ki);
 
 private:
   template <typename AccessorT>
@@ -415,7 +416,7 @@ private:
   ElmInd* findForNewInsertLoop(size_t tableMask, size_t h0) const;
 
   bool nextInsert(CVarRef data);
-  HphpArray* nextInsertVec(CVarRef data);
+  HphpArray* nextInsertPacked(CVarRef data);
   ArrayData* nextInsertRef(CVarRef data);
   ArrayData* nextInsertWithRef(CVarRef data);
   ArrayData* addLvalImpl(int64_t ki, Variant*& ret);
@@ -460,7 +461,7 @@ private:
    * does not compact the elements.
    */
   void grow() ATTRIBUTE_COLD;
-  void growVec() ATTRIBUTE_COLD;
+  void growPacked() ATTRIBUTE_COLD;
 
   /**
    * compact() does not change the hash table size or the number of slots
@@ -483,7 +484,7 @@ private:
 
   // Memory allocator methods.
   DECLARE_SMART_ALLOCATION(HphpArray);
-  static void ReleaseVec(ArrayData*);
+  static void ReleasePacked(ArrayData*);
   static void Release(ArrayData*);
 
 private:

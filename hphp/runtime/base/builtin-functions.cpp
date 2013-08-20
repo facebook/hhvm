@@ -1107,7 +1107,7 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
       if (res != Failure) return res == Success;
     }
   }
-  Array params = VectorInit(1).add(className).toArray();
+  Array params = PackedArrayInit(1).add(className).toArray();
   bool l_running = m_running;
   m_running = true;
   if (m_handlers.isNull() && !forceSplStack) {

@@ -63,9 +63,9 @@ template <typename AccessorT>
 HphpArray::SortFlavor
 HphpArray::preSort(const AccessorT& acc, bool checkTypes) {
   assert(m_size > 0);
-  if (isVector()) {
+  if (isPacked()) {
     // todo t2607563: this is pessimistic.
-    vectorToGeneric();
+    packedToMixed();
   }
   if (!checkTypes && m_size == m_used) {
     // No need to loop over the elements, we're done

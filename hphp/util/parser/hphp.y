@@ -893,9 +893,9 @@ additional_catches:
 ;
 
 finally:
-                                       { finally_statement(_p);}
     T_FINALLY '{'
     inner_statement_list '}'           { _p->onFinally($$, $4);}
+                                       { finally_statement(_p);}
 ;
 
 optional_finally:

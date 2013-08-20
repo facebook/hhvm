@@ -1,4 +1,5 @@
-/* +----------------------------------------------------------------------+
+/*
+   +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
@@ -11,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
- */
+*/
 
 
 #ifndef incl_HPHP_VM_PROFILER_H_

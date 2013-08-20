@@ -166,16 +166,6 @@ extern const ArrayFunctions g_array_funcs = {
     &SharedMap::SetStr, // reuse set
     &NameValueTableWrapper::SetStr, // reuse set
     &PolicyArray::AddStr },
-  // addLvalInt
-  { &HphpArray::AddLvalIntVec, &HphpArray::AddLvalInt,
-    &SharedMap::AddLvalInt,
-    &NameValueTableWrapper::AddLvalInt,
-    &PolicyArray::AddLvalInt },
-  // addLvalStr
-  { &HphpArray::LvalStrVec, &HphpArray::AddLvalStr,
-    &SharedMap::AddLvalStr,
-    &NameValueTableWrapper::AddLvalStr,
-    &PolicyArray::AddLvalStr },
   // removeInt
   { &HphpArray::RemoveIntVec, &HphpArray::RemoveInt,
     &SharedMap::RemoveInt,

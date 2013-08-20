@@ -351,28 +351,6 @@ class Array : protected SmartPtr<ArrayData> {
   void add(CStrRef key, CVarRef v, bool isKey = false);
   void add(CVarRef key, CVarRef v, bool isKey = false);
 
-  // defined in type_variant.h
-  template<typename T>
-  Variant &addLvalImpl(const T &key) {
-    if (!m_px) ArrayBase::operator=(ArrayData::Create());
-    Variant *ret = nullptr;
-    ArrayData *escalated = m_px->addLval(key, ret, m_px->getCount() > 1);
-    if (escalated != m_px) ArrayBase::operator=(escalated);
-    assert(ret);
-    return *ret;
-  }
-
-  Variant &addLval(int     key) {
-    return addLvalImpl((int64_t)key);
-  }
-  Variant &addLval(int64_t   key) {
-    return addLvalImpl(key);
-  }
-  Variant &addLval(double  key) = delete;
-
-  Variant &addLval(CStrRef key, bool isKey = false);
-  Variant &addLval(CVarRef key, bool isKey = false);
-
   /**
    * Membership functions.
    */
@@ -423,6 +401,8 @@ class Array : protected SmartPtr<ArrayData> {
   void removeAll();
   void clear() { removeAll();}
 
+  void setWithRef(CVarRef k, CVarRef v);
+
   CVarRef append(CVarRef v);
   CVarRef append(RefResult v) { return appendRef(variant(v)); }
   CVarRef appendRef(CVarRef v);
@@ -464,8 +444,7 @@ class Array : protected SmartPtr<ArrayData> {
     assert(!(flags & AccessFlags::CheckExist));
     if (!m_px) ArrayBase::operator=(ArrayData::Create());
     Variant *ret = nullptr;
-    ArrayData *escalated =
-      m_px->lval(key, ret, m_px->getCount() > 1);
+    ArrayData *escalated = m_px->lval(key, ret, m_px->getCount() > 1);
     if (escalated != m_px) ArrayBase::operator=(escalated);
     assert(ret);
     return *ret;

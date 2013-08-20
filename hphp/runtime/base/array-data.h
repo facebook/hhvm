@@ -284,13 +284,6 @@ public:
   ArrayData *add(int64_t k, CVarRef v, bool copy);
   ArrayData *add(StringData* k, CVarRef v, bool copy);
 
-  /*
-   * Same semantics as lval(), except with the precondition that the
-   * key doesn't already exist in the array.
-   */
-  ArrayData *addLval(int64_t k, Variant *&ret, bool copy);
-  ArrayData *addLval(StringData* k, Variant *&ret, bool copy);
-
   /**
    * Remove a value at specified key. If "copy" is true, make a copy first
    * then remove the value. Return this if escalation is not needed, or an
@@ -320,8 +313,6 @@ public:
   ArrayData *setRef(const StringData*, CVarRef, bool) = delete;
   ArrayData *add(CStrRef k, CVarRef v, bool copy);
   ArrayData *add(CVarRef k, CVarRef v, bool copy);
-  ArrayData *addLval(CStrRef k, Variant *&ret, bool copy);
-  ArrayData *addLval(CVarRef k, Variant *&ret, bool copy);
   ArrayData *remove(CStrRef k, bool copy);
   ArrayData *remove(CVarRef k, bool copy);
 
@@ -573,10 +564,6 @@ struct ArrayFunctions {
   ArrayData* (*setRefStr[NK])(ArrayData*, StringData* k, CVarRef v, bool copy);
   ArrayData* (*addInt[NK])(ArrayData*, int64_t k, CVarRef v, bool copy);
   ArrayData* (*addStr[NK])(ArrayData*, StringData* k, CVarRef v, bool copy);
-  ArrayData* (*addLvalInt[NK])(ArrayData*, int64_t k, Variant *&ret,
-                               bool copy);
-  ArrayData* (*addLvalStr[NK])(ArrayData*, StringData* k, Variant *&ret,
-                               bool copy);
   ArrayData* (*removeInt[NK])(ArrayData*, int64_t k, bool copy);
   ArrayData* (*removeStr[NK])(ArrayData*, const StringData* k, bool copy);
   ssize_t (*iterBegin[NK])(const ArrayData*);

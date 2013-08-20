@@ -419,20 +419,6 @@ public:
   static ArrayData* AddInt(ArrayData*, int64_t k, CVarRef v, bool copy);
   static ArrayData* AddStr(ArrayData*, StringData* k, CVarRef v, bool copy);
 
-  /*
-   * Same semantics as lval(), except with the precondition that the
-   * key doesn't already exist in the array.
-   */
-private:
-  template <class K>
-  ArrayData* addLvalImpl(K k, Variant*& ret, bool copy);
-
-public:
-  static ArrayData* AddLvalInt(ArrayData*, int64_t k, Variant *&ret,
-                               bool copy);
-  static ArrayData* AddLvalStr(ArrayData*, StringData* k, Variant *&ret,
-                               bool copy);
-
   /**
    * Remove a value at specified key. If "copy" is true, make a copy first
    * then remove the value. Return NULL if escalation is not needed, or an

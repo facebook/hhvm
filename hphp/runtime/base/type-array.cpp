@@ -168,7 +168,7 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
         }
       }
       if (found == match) {
-        ret.addLval(key, true).setWithRef(value);
+        ret.setWithRef(key, value);
       }
     }
     return ret;
@@ -256,7 +256,7 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
     }
 
     if (found == match) {
-      ret.addLval(iter.first(), true).setWithRef(iter.secondRef());
+      ret.setWithRef(iter.first(), iter.secondRef());
     }
   }
   return ret;
@@ -594,23 +594,6 @@ void Array::add(CVarRef key, CVarRef v, bool isKey /* = false */) {
   if (!k.isNull()) addImpl(k, v);
 }
 
-Variant &Array::addLval(CStrRef key, bool isKey /* = false */) {
-  if (isKey) return addLvalImpl(key);
-  return addLvalImpl(key.toKey());
-}
-
-Variant &Array::addLval(CVarRef key, bool isKey /* = false */) {
-  if (key.getRawType() == KindOfInt64) {
-    return addLvalImpl(key.getNumData());
-  }
-  if (isKey) return addLvalImpl(key);
-  VarNR k(key.toKey());
-  if (!k.isNull()) {
-    return addLvalImpl(k);
-  }
-  return Variant::lvalBlackHole();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // membership functions
 
@@ -793,14 +776,15 @@ void Array::unserialize(VariableUnserializer *uns) {
     // Pre-allocate an ArrayData of the given size, to avoid escalation in
     // the middle, which breaks references.
     operator=(ArrayInit(size).create());
-    bool isAPC = (uns->getType() == VariableUnserializer::Type::APCSerialize);
     for (int64_t i = 0; i < size; i++) {
       Variant key(uns->unserializeKey());
       if (!key.isString() && !key.isInteger()) {
         throw Exception("Invalid key");
       }
-      Variant &value = isAPC ? addLval(key, true) :
-        lvalAt(key, AccessFlags::Key);
+      // for apc, we know the key can't exist, but ignore that optimization
+      assert(uns->getType() != VariableUnserializer::Type::APCSerialize ||
+             !exists(key, true));
+      Variant &value = lvalAt(key, AccessFlags::Key);
       value.unserialize(uns);
     }
   }
@@ -900,8 +884,7 @@ void Array::sort(PFUNC_CMP cmp_func, bool by_key, bool renumber,
     if (renumber) {
       sorted.appendWithRef(m_px->getValueRef(pos));
     } else {
-      sorted.addLval(m_px->getKey(pos), true).
-        setWithRef(m_px->getValueRef(pos));
+      sorted.setWithRef(m_px->getKey(pos), m_px->getValueRef(pos));
     }
   }
   operator=(sorted);

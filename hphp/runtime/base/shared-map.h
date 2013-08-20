@@ -52,7 +52,6 @@ public:
   using ArrayData::set;
   using ArrayData::setRef;
   using ArrayData::add;
-  using ArrayData::addLval;
   using ArrayData::remove;
 
   Variant getKey(ssize_t pos) const {
@@ -75,11 +74,6 @@ public:
   static ArrayData* SetStr(ArrayData*, StringData* k, CVarRef v, bool copy);
   static ArrayData* SetRefInt(ArrayData*, int64_t k, CVarRef v, bool copy);
   static ArrayData* SetRefStr(ArrayData*, StringData* k, CVarRef v, bool copy);
-
-  static ArrayData* AddLvalInt(ArrayData*, int64_t k, Variant *&ret,
-                               bool copy);
-  static ArrayData* AddLvalStr(ArrayData*, StringData* k, Variant *&ret,
-                               bool copy);
 
   static ArrayData *RemoveInt(ArrayData* ad, int64_t k, bool copy);
   static ArrayData *RemoveStr(ArrayData* ad, const StringData* k, bool copy);

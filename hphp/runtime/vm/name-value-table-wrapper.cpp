@@ -108,18 +108,6 @@ NameValueTableWrapper::LvalStr(ArrayData* ad, StringData* k, Variant*& ret,
 }
 
 ArrayData*
-NameValueTableWrapper::AddLvalInt(ArrayData* ad, int64_t k, Variant*& ret,
-                                  bool copy) {
-  return LvalStr(ad, String(k).get(), ret, copy);
-}
-
-ArrayData*
-NameValueTableWrapper::AddLvalStr(ArrayData* ad, StringData* k, Variant*& ret,
-                                  bool copy) {
-  return LvalStr(ad, k, ret, copy);
-}
-
-ArrayData*
 NameValueTableWrapper::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
   ret = &Variant::lvalBlackHole();
   return ad;

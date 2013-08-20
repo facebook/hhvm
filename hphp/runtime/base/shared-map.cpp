@@ -155,18 +155,6 @@ SharedMap::SetRefStr(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
   return releaseIfCopied(escalated, escalated->setRef(k, v, false));
 }
 
-ArrayData *SharedMap::AddLvalInt(ArrayData* ad, int64_t k, Variant *&ret,
-                                 bool copy) {
-  ArrayData *escalated = Escalate(ad);
-  return releaseIfCopied(escalated, escalated->addLval(k, ret, false));
-}
-
-ArrayData *SharedMap::AddLvalStr(ArrayData* ad, StringData* k, Variant *&ret,
-                                 bool copy) {
-  ArrayData *escalated = Escalate(ad);
-  return releaseIfCopied(escalated, escalated->addLval(k, ret, false));
-}
-
 ArrayData *SharedMap::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
   ArrayData *escalated = Escalate(ad);
   return releaseIfCopied(escalated, escalated->remove(k, false));

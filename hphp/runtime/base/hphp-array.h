@@ -95,7 +95,6 @@ public:
   using ArrayData::set;
   using ArrayData::setRef;
   using ArrayData::add;
-  using ArrayData::addLval;
   using ArrayData::remove;
   using ArrayData::nvGet;
 
@@ -148,13 +147,6 @@ public:
   static ArrayData* AddInt(ArrayData*, int64_t k, CVarRef v, bool copy);
   static ArrayData* AddStr(ArrayData*, StringData* k, CVarRef v, bool copy);
   static ArrayData* AddIntVec(ArrayData*, int64_t k, CVarRef v, bool copy);
-
-  static ArrayData* AddLvalInt(ArrayData*, int64_t k, Variant*& ret,
-                               bool copy);
-  static ArrayData* AddLvalStr(ArrayData*, StringData* k, Variant*& ret,
-                               bool copy);
-  static ArrayData* AddLvalIntVec(ArrayData*, int64_t k, Variant*& ret,
-                                  bool copy);
 
   // implements ArrayData
   static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);

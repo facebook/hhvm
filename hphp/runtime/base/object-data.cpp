@@ -357,9 +357,7 @@ void ObjectData::o_getArray(Array& props, bool pubOnly /* = false */) const {
   // Iterate over dynamic properties and insert {name --> prop} pairs.
   if (o_properties.get() && !o_properties.get()->empty()) {
     for (ArrayIter it(o_properties.get()); !it.end(); it.next()) {
-      Variant key = it.first();
-      CVarRef value = it.secondRef();
-      props.addLval(key, true).setWithRef(value);
+      props.setWithRef(it.first(), it.secondRef());
     }
   }
 }

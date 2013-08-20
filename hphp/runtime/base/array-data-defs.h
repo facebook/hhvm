@@ -114,18 +114,6 @@ inline ArrayData* ArrayData::add(CVarRef k, CVarRef v, bool copy) {
                         : add(getStringKey(cell), v, copy);
 }
 
-inline ArrayData* ArrayData::addLval(CStrRef k, Variant *&ret, bool copy) {
-  assert(IsValidKey(k));
-  return addLval(k.get(), ret, copy);
-}
-
-inline ArrayData* ArrayData::addLval(CVarRef k, Variant *&ret, bool copy) {
-  assert(IsValidKey(k));
-  auto const cell = k.asCell();
-  return isIntKey(cell) ? addLval(getIntKey(cell), ret, copy)
-                        : addLval(getStringKey(cell), ret, copy);
-}
-
 inline ArrayData* ArrayData::remove(CStrRef k, bool copy) {
   assert(IsValidKey(k));
   return remove(k.get(), copy);
@@ -240,14 +228,6 @@ inline ArrayData* ArrayData::add(int64_t k, CVarRef v, bool copy) {
 
 inline ArrayData* ArrayData::add(StringData* k, CVarRef v, bool copy) {
   return g_array_funcs.addStr[m_kind](this, k, v, copy);
-}
-
-inline ArrayData* ArrayData::addLval(int64_t k, Variant *&ret, bool copy) {
-  return g_array_funcs.addLvalInt[m_kind](this, k, ret, copy);
-}
-
-inline ArrayData* ArrayData::addLval(StringData* k, Variant *&ret, bool copy) {
-  return g_array_funcs.addLvalStr[m_kind](this, k, ret, copy);
 }
 
 inline ArrayData* ArrayData::remove(int64_t k, bool copy) {

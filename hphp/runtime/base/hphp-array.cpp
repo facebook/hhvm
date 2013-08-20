@@ -1187,38 +1187,6 @@ HphpArray::AddStr(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
   return a->addVal(k, v);
 }
 
-ArrayData*
-HphpArray::AddLvalIntVec(ArrayData* ad, int64_t k, Variant*& ret, bool copy) {
-  assert(!ad->exists(k));
-  auto a = asVector(ad);
-  if (copy) a = a->copyVec();
-  if (size_t(k) < a->m_size) {
-    ret = &tvAsVariant(&a->m_data[k].data);
-    return a;
-  }
-  if (size_t(k) == a->m_size) {
-    auto& tv = a->allocNextElm(k);
-    return a->initLval(tv, ret);
-  }
-  return a->vectorToGeneric()->addLvalImpl(k, ret);
-}
-
-ArrayData*
-HphpArray::AddLvalInt(ArrayData* ad, int64_t k, Variant*& ret, bool copy) {
-  assert(!ad->exists(k));
-  auto a = asGeneric(ad);
-  if (copy) a = a->copyGeneric();
-  return a->addLvalImpl(k, ret);
-}
-
-ArrayData*
-HphpArray::AddLvalStr(ArrayData* ad, StringData* k, Variant*& ret, bool copy) {
-  assert(!ad->exists(k));
-  auto a = asGeneric(ad);
-  if (copy) a = a->copyGeneric();
-  return a->addLvalImpl(k, k->hash(), ret);
-}
-
 //=============================================================================
 // Delete.
 

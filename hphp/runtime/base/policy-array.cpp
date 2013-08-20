@@ -419,31 +419,6 @@ PolicyArray::AddStr(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
 }
 
 template <class K>
-ArrayData* PolicyArray::addLvalImpl(K k, Variant*& ret, bool copy) {
-  APILOG(this) << "(" << k << ", " << ret << ", " << copy << ")";
-  if (copy) {
-    return asPolicyArray(Copy(this))->addLval(k, ret, false);
-  }
-  assert(!exists(k) && m_size <= capacity());
-  if (m_size == capacity()) {
-    grow(m_size, m_size + 1, m_size * 2 + 1, m_allocMode);
-  }
-  ret = appendNoGrow(k, Variant::NullInit());
-  MYLOG << (void*)this << "->lval:" << "added";
-  return this;
-}
-
-ArrayData* PolicyArray::AddLvalInt(ArrayData* ad, int64_t k,
-                                   Variant *&ret, bool copy) {
-  return asPolicyArray(ad)->addLvalImpl(k, ret, copy);
-}
-
-ArrayData* PolicyArray::AddLvalStr(ArrayData* ad, StringData* k,
-                                   Variant *&ret, bool copy) {
-  return asPolicyArray(ad)->addLvalImpl(k, ret, copy);
-}
-
-template <class K>
 ArrayData *PolicyArray::removeImpl(K k, bool copy) {
   APILOG(this) << "(" << keystr(k) << ", " << copy << ")";
 

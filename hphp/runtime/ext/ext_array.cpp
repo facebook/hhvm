@@ -303,7 +303,7 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
       v.unset(); // avoid contamination of the value that was strongly bound
       v = subarr1;
     } else {
-      arr1.addLval(key, true).setWithRef(value);
+      arr1.lvalAt(key, AccessFlags::Key).setWithRef(value);
     }
   }
 

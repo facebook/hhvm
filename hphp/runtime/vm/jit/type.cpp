@@ -123,13 +123,11 @@ Type Type::fromDynLocation(const Transl::DynLocation* dynLoc) {
 Type liveTVType(const TypedValue* tv) {
   if (tv->m_type == KindOfObject) {
     Type t = Type::fromDataType(KindOfObject, KindOfInvalid);
-    t.specialize(tv->m_data.pobj->getVMClass());
-    return t;
+    return t.specialize(tv->m_data.pobj->getVMClass());
   }
   if (tv->m_type == KindOfArray) {
     Type t = Type::fromDataType(KindOfArray, KindOfInvalid);
-    t.specialize(tv->m_data.parr->kind());
-    return t;
+    return t.specialize(tv->m_data.parr->kind());
   }
 
   auto outer = tv->m_type;

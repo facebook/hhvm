@@ -558,7 +558,6 @@ public:
   }
 
   Type unspecialize() const {
-    assert(isSpecialized());
     return Type(m_bits, nullptr);
   }
 

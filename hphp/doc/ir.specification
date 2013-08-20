@@ -364,14 +364,6 @@ D:FramePtr = GuardLoc<T,localId> S0:FramePtr
   Returns a new frame pointer representing the same frame as S0 but with the
   knowledge that the guarded local has type T.
 
-GuardCls<T<Cls>> S0:Obj
-
-  Guard that the object S0 has class Cls; else make a fallback jump.
-
-GuardArrayKind<T<AK>> S0:Obj
-
-  Guard that the array S0 has kind AK; else make a fallback jump.
-
 D:FramePtr = CheckLoc<T,localId> S0:FramePtr -> L
 
   Check that type of the given localId on the frame S0 is T; if not,

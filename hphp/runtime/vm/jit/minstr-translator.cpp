@@ -577,9 +577,9 @@ void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
   if ((baseType.subtypeOfAny(Type::Obj, Type::BoxedObj) &&
        mcodeMaybePropName(m_ni.immVecM[0])) ||
       simpleCollectionOp() != SimpleOp::None) {
-    constrainSimpleOpBase();
     // In these cases we can pass the base by value, after unboxing if needed.
     m_base = gen(Unbox, failedRef, getBase());
+    constrainSimpleOpBase();
     // With array kind specialization it's possible that the base
     // could become a less-specialized kind due to an earlier SetM.
     // That's ok, we just have to generate generic code for later
@@ -1585,9 +1585,11 @@ static TypedValue arrayGetNotFound(const StringData* k) {
   return v;
 }
 
-static TypedValue packedArrayGetI(ArrayData* a, TypedValue* key) {
+namespace VectorHelpers {
+TypedValue packedArrayGetI(ArrayData* a, TypedValue* key) {
   int64_t ki = keyAsRaw<KeyType::Int>(key);
   return HphpArray::GetCellIntPacked(a, ki);
+}
 }
 
 template<KeyType keyType, bool checkForInt>
@@ -1634,7 +1636,7 @@ void HhbcTranslator::MInstrTranslator::emitArrayGet(SSATmp* key) {
       key->isA(Type::Int)) {
     // DataTypeSpecialized because we care about the array kind
     m_tb.constrainValue(m_base, DataTypeSpecialized);
-    opFunc = packedArrayGetI;
+    opFunc = VectorHelpers::packedArrayGetI;
   }
   m_result = gen(ArrayGet, cns((TCA)opFunc), m_base, key);
 }

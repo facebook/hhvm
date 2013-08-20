@@ -4350,27 +4350,6 @@ void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
                 rFP[baseOff + TVOFF(m_data)]);
 }
 
-void CodeGenerator::cgGuardCls(IRInstruction* inst) {
-  auto const srcReg = m_regs[inst->src(0)].reg();
-  auto const type = inst->typeParam();
-  assert(type.strictSubtypeOf(Type::Obj));
-  m_as.cmpq(type.getClass(), srcReg[ObjectData::getVMClassOffset()]);
-  auto const destSK = SrcKey(curFunc(), m_curTrace->bcOff());
-  auto const destSR = m_tx64->getSrcRec(destSK);
-  m_tx64->emitFallbackCondJmp(m_as, *destSR, ccNegate(CC_E));
-}
-
-void CodeGenerator::cgGuardArrayKind(IRInstruction* inst) {
-  auto const srcReg = m_regs[inst->src(0)].reg();
-  auto const type = inst->typeParam();
-  assert(type.canSpecializeArrayKind() && type.hasArrayKind());
-  static_assert(sizeof(ArrayData::ArrayKind) == 1, "");
-  m_as.cmpb(type.getArrayKind(), srcReg[ArrayData::offsetofKind()]);
-  auto const destSK = SrcKey(curFunc(), m_curTrace->bcOff());
-  auto const destSR = m_tx64->getSrcRec(destSK);
-  m_tx64->emitFallbackCondJmp(m_as, *destSR, ccNegate(CC_E));
-}
-
 void CodeGenerator::cgCheckLoc(IRInstruction* inst) {
   auto const rbase = m_regs[inst->src(0)].reg();
   auto const baseOff = localOffset(inst->extra<CheckLoc>()->locId);

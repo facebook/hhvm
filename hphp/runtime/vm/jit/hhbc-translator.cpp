@@ -2741,18 +2741,6 @@ void HhbcTranslator::setThisAvailable() {
 }
 
 void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type) {
-  if (type.strictSubtypeOf(Type::Obj)) {
-    gen(GuardLoc, type.unspecialize(), LocalId(locId), m_tb->fp());
-    SSATmp* loc = gen(LdLoc, type, LdLocData(locId, m_tb->fp()), m_tb->fp());
-    gen(GuardCls, type, loc);
-    return;
-  }
-  if (type.canSpecializeArrayKind() && type.hasArrayKind()) {
-    gen(GuardLoc, type.unspecialize(), LocalId(locId), m_tb->fp());
-    SSATmp* loc = gen(LdLoc, type, LdLocData(locId, m_tb->fp()), m_tb->fp());
-    gen(GuardArrayKind, type, loc);
-    return;
-  }
   gen(GuardLoc, type, LocalId(locId), m_tb->fp());
 }
 

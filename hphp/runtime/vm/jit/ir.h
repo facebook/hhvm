@@ -188,8 +188,6 @@ O(CheckType,                    DParam, S(Gen),                  E|CRc|PRc|P) \
 O(AssertType,                   DParam, S(Gen,Cls),            C|E|CRc|PRc|P) \
 O(CheckTypeMem,                     ND, S(PtrToGen),                       E) \
 O(GuardLoc,                D(FramePtr), S(FramePtr),                       E) \
-O(GuardCls,                         ND, S(Obj),                            E) \
-O(GuardArrayKind,                   ND, S(Arr),                            E) \
 O(GuardStk,                  D(StkPtr), S(StkPtr),                         E) \
 O(CheckLoc,                D(FramePtr), S(FramePtr),                       E) \
 O(CheckStk,                  D(StkPtr), S(StkPtr),                         E) \

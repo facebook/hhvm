@@ -136,7 +136,7 @@ Type relaxType(Type t, DataTypeCategory cat) {
       return Type::Gen;
 
     case DataTypeCountness:
-      return t.notCounted() ? Type::Uncounted : t;
+      return t.notCounted() ? Type::Uncounted : t.unspecialize();
 
     case DataTypeCountnessInit:
       if (t.subtypeOf(Type::Uninit)) return Type::Uninit;
@@ -144,11 +144,11 @@ Type relaxType(Type t, DataTypeCategory cat) {
 
     case DataTypeSpecific:
       assert(t.isKnownDataType());
-      return t.isSpecialized() ? t.unspecialize() : t;
+      return t.unspecialize();
 
     case DataTypeSpecialized:
-      not_implemented();
-      break;
+      assert(t.isSpecialized());
+      return t;
   }
 
   not_reached();

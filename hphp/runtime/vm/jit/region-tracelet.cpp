@@ -85,8 +85,6 @@ RegionDescPtr RegionFormer::go() {
   uint32_t numJmps = 0;
   for (auto const& lt : m_ctx.liveTypes) {
     auto t = lt.type;
-    if (t.strictSubtypeOf(Type::Obj)) t = t.unspecialize();
-
     if (t.subtypeOf(Type::Cls)) {
       m_ht.assertTypeStack(lt.location.stackOffset(), t);
       m_curBlock->addPredicted(m_sk, RegionDesc::TypePred{lt.location, t});

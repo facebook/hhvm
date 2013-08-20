@@ -81,6 +81,8 @@ void CmdVariable::PrintVariable(DebuggerClient &client, CStrRef varName) {
   }
 }
 
+const StaticString s_http_response_header("http_response_header");
+
 void CmdVariable::PrintVariables(DebuggerClient &client, CArrRef variables,
                                  bool global, CStrRef text) {
   bool system = true;
@@ -104,7 +106,7 @@ void CmdVariable::PrintVariables(DebuggerClient &client, CArrRef variables,
       }
 
       // we knew this is the last system global
-      if (global && name == "http_response_header") {
+      if (global && name == s_http_response_header) {
         client.output("%s", "");
         system = false;
       }

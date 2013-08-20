@@ -809,19 +809,25 @@ String f_php_sapi_name() {
   return RuntimeOption::ExecutionMode;
 }
 
+const StaticString s_s("s");
+const StaticString s_r("r");
+const StaticString s_n("n");
+const StaticString s_v("v");
+const StaticString s_m("m");
+
 String f_php_uname(CStrRef mode /* = null_string */) {
   String ret;
   struct utsname buf;
   if (uname((struct utsname *)&buf) != -1) {
-    if (mode == "s") {
+    if (mode == s_s) {
       ret = String(buf.sysname, CopyString);
-    } else if (mode == "r") {
+    } else if (mode == s_r) {
       ret = String(buf.release, CopyString);
-    } else if (mode == "n") {
+    } else if (mode == s_n) {
       ret = String(buf.nodename, CopyString);
-    } else if (mode == "v") {
+    } else if (mode == s_v) {
       ret = String(buf.version, CopyString);
-    } else if (mode == "m") {
+    } else if (mode == s_m) {
       ret = String(buf.machine, CopyString);
     } else { /* assume mode == "a" */
       char tmp_uname[512];

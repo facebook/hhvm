@@ -802,7 +802,7 @@ bool f_is_dir(CStrRef filename) {
   }
   bool isRelative = (filename.charAt(0) != '/');
   if (isRelative) cwd = g_context->getCwd();
-  if (!isRelative || cwd == RuntimeOption::SourceRoot.c_str()) {
+  if (!isRelative || cwd == String(RuntimeOption::SourceRoot)) {
     if (File::IsVirtualDirectory(filename)) {
       return true;
     }

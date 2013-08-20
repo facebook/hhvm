@@ -305,7 +305,7 @@ bool IniSetting::Set(CStrRef name, CStrRef value) {
   if (iter != s_callbacks->end()) {
     return (*iter->second.callback)(value, iter->second.p);
   }
-  if (name == "memory_limit") {
+  if (name == s_memory_limit) {
     if (!value.empty()) {
       int64_t newInt = value.toInt64();
       char lastChar = value.charAt(value.size() - 1);
@@ -319,29 +319,29 @@ bool IniSetting::Set(CStrRef name, CStrRef value) {
       g_context->setRequestMemoryMaxBytes(newInt);
       return true;
     }
-  } else if (name == "max_execution_time" || name == "maximum_execution_time"){
+  } else if (name == s_max_execution_time || name == s_maximum_execution_time){
     int64_t limit = value.toInt64();
     ThreadInfo::s_threadInfo.getNoCheck()->
       m_reqInjectionData.setTimeout(limit);
     return true;
-  } else if (name == "arg_separator.output") {
+  } else if (name == s_arg_separator_output) {
     g_context->setArgSeparatorOutput(value);
     return true;
-  } else if (name == "log_errors") {
+  } else if (name == s_log_errors) {
     bool log;
     ini_on_update_bool(value, &log);
     g_context->setLogErrors(log);
     return true;
-  } else if (name == "error_log") {
+  } else if (name == s_error_log) {
     g_context->setErrorLog(value);
     return true;
-  } else if (name == "notice_frequency") {
+  } else if (name == s_notice_frequency) {
     RuntimeOption::NoticeFrequency = value.toInt64();
     return true;
-  } else if (name == "warning_frequency") {
+  } else if (name == s_warning_frequency) {
     RuntimeOption::WarningFrequency = value.toInt64();
     return true;
-  } else if (name == "include_path") {
+  } else if (name == s_include_path) {
     g_context->setIncludePath(value);
     return true;
   }

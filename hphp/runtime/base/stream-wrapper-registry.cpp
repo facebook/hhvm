@@ -55,10 +55,14 @@ bool registerWrapper(const std::string &scheme, Wrapper *wrapper) {
   return true;
 }
 
+const StaticString
+  s_file("file"),
+  s_compress_zlib("compress.zlib");
+
 bool disableWrapper(CStrRef scheme) {
   String lscheme = StringUtil::ToLower(scheme);
 
-  if (lscheme.same("file")) {
+  if (lscheme.same(s_file)) {
     // Zend quietly succeeds, but does nothing
     return true;
   }
@@ -174,10 +178,6 @@ Wrapper* getWrapper(CStrRef scheme) {
 
   return nullptr;
 }
-
-StaticString
-  s_compress_zlib("compress.zlib"),
-  s_file("file");
 
 Wrapper* getWrapperFromURI(CStrRef uri) {
   const char *uri_string = uri.data();

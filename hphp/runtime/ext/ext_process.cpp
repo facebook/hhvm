@@ -571,6 +571,8 @@ StaticString ChildProcess::s_class_name("Process");
 #define DESC_FILE       2
 #define DESC_PARENT_MODE_WRITE  8
 
+const StaticString s_w("w");
+
 class DescriptorItem {
 public:
   DescriptorItem() :
@@ -614,7 +616,7 @@ public:
       return false;
     }
 
-    if (zmode != "w") {
+    if (zmode != s_w) {
       parentend = newpipe[1];
       childend = newpipe[0];
       mode |= DESC_PARENT_MODE_WRITE;
@@ -673,6 +675,9 @@ public:
  */
 Mutex DescriptorItem::s_mutex(false);
 
+const StaticString s_pipe("pipe");
+const StaticString s_file("file");
+
 static bool pre_proc_open(CArrRef descriptorspec,
                           vector<DescriptorItem> &items) {
   /* walk the descriptor spec and set up files/pipes */
@@ -702,13 +707,13 @@ static bool pre_proc_open(CArrRef descriptorspec,
         break;
       }
       String ztype = descarr[int64_t(0)].toString();
-      if (ztype == "pipe") {
+      if (ztype == s_pipe) {
         if (!descarr.exists(int64_t(1))) {
           raise_warning("Missing mode parameter for 'pipe'");
           break;
         }
         if (!item.readPipe(descarr[int64_t(1)].toString())) break;
-      } else if (ztype == "file") {
+      } else if (ztype == s_file) {
         if (!descarr.exists(int64_t(1))) {
           raise_warning("Missing file name parameter for 'file'");
           break;

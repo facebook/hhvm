@@ -96,7 +96,7 @@ void SourceRootInfo::createFromCommonRoot(const String &sandboxName) {
   }
 }
 
-
+const StaticString s_default("default");
 
 void SourceRootInfo::createFromUserConfig() {
   String homePath = String(RuntimeOption::SandboxHome) + "/" + m_user + "/";
@@ -139,7 +139,7 @@ void SourceRootInfo::createFromUserConfig() {
   if (!userOverride.empty()) {
     m_user = std::move(userOverride);
   }
-  if (m_sandbox == "default") {
+  if (m_sandbox == s_default) {
     if (sp.isNull()) {
       sp = "www/";
     }

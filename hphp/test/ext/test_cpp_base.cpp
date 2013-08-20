@@ -273,6 +273,8 @@ bool TestCppBase::TestArray() {
   }
   */
 
+  static const StaticString s_Array("Array");
+
   // conversions
   {
     Array arr0;
@@ -282,7 +284,7 @@ bool TestCppBase::TestArray() {
     VERIFY(arr0.toInt32() == 0);
     VERIFY(arr0.toInt64() == 0);
     VERIFY(arr0.toDouble() == 0.0);
-    VERIFY(arr0.toString() == "");
+    VERIFY(arr0.toString()->empty());
 
     Array arr1 = Array::Create("test");
     VERIFY(arr1.toBoolean() == true);
@@ -291,7 +293,7 @@ bool TestCppBase::TestArray() {
     VERIFY(arr1.toInt32() == 1);
     VERIFY(arr1.toInt64() == 1);
     VERIFY(arr1.toDouble() == 1.0);
-    VERIFY(arr1.toString() == "Array");
+    VERIFY(arr1.toString() == s_Array);
   }
 
   // offset

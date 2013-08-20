@@ -35,8 +35,10 @@ Variant f_bzwrite(CResRef bz, CStrRef data, int length /* = 0 */) {
   return f_fwrite(bz, data, length);
 }
 
+const StaticString s_r("r"), s_w("w");
+
 Variant f_bzopen(CVarRef filename, CStrRef mode) {
-  if (mode != "r" && mode != "w") {
+  if (mode != s_r && mode != s_w) {
     raise_warning(
       "'%s' is not a valid mode for bzopen(). "
       "Only 'w' and 'r' are supported.",
@@ -82,10 +84,11 @@ Variant f_bzopen(CVarRef filename, CStrRef mode) {
     }
 
     const char rw_mode = stream_mode[0];
-    if (mode == "r" && rw_mode != 'r') {
+    if (mode == s_r && rw_mode != 'r') {
       raise_warning("cannot write to a stream opened in read only mode");
       return false;
-    } else if (mode == "w" && rw_mode != 'w' && rw_mode != 'a' && rw_mode != 'x') {
+    } else if (mode == s_w && rw_mode != 'w' && rw_mode != 'a' &&
+               rw_mode != 'x') {
       raise_warning("cannot read from a stream opened in write only mode");
       return false;
     }

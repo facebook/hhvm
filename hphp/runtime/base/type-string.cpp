@@ -419,10 +419,6 @@ VarNR String::toKey() const {
 ///////////////////////////////////////////////////////////////////////////////
 // comparisons
 
-bool String::same(litstr v2) const {
-  return HPHP::same(m_px, v2);
-}
-
 bool String::same(const StringData *v2) const {
   return HPHP::same(m_px, v2);
 }
@@ -441,10 +437,6 @@ bool String::same(CObjRef v2) const {
 
 bool String::same(CResRef v2) const {
   return HPHP::same(m_px, v2);
-}
-
-bool String::equal(litstr v2) const {
-  return HPHP::equal(m_px, v2);
 }
 
 bool String::equal(const StringData *v2) const {
@@ -467,10 +459,6 @@ bool String::equal(CResRef v2) const {
   return HPHP::equal(m_px, v2);
 }
 
-bool String::less(litstr v2) const {
-  return HPHP::less(m_px, v2);
-}
-
 bool String::less(const StringData *v2) const {
   return HPHP::less(m_px, v2);
 }
@@ -489,10 +477,6 @@ bool String::less(CObjRef v2) const {
 
 bool String::less(CResRef v2) const {
   return HPHP::less(m_px, v2);
-}
-
-bool String::more(litstr v2) const {
-  return HPHP::more(m_px, v2);
 }
 
 bool String::more(const StringData *v2) const {
@@ -517,22 +501,6 @@ bool String::more(CResRef v2) const {
 
 ///////////////////////////////////////////////////////////////////////////////
 // comparison operators
-
-bool String::operator==(litstr v) const {
-  return HPHP::equal(m_px, v);
-}
-
-bool String::operator!=(litstr v) const {
-  return !HPHP::equal(m_px, v);
-}
-
-bool String::operator>(litstr v) const {
-  return HPHP::more(m_px, v);
-}
-
-bool String::operator<(litstr v) const {
-  return HPHP::less(m_px, v);
-}
 
 bool String::operator==(CStrRef v) const {
   return HPHP::equal(m_px, v);

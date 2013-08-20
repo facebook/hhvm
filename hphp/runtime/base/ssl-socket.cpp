@@ -686,10 +686,12 @@ bool SSLSocket::checkLiveness() {
 ///////////////////////////////////////////////////////////////////////////////
 // Certificate
 
+const StaticString s_file("file://");
+
 BIO *Certificate::ReadData(CVarRef var, bool *file /* = NULL */) {
   if (var.isString() || var.isObject()) {
     String svar = var.toString();
-    if (svar.substr(0, 7) == "file://") {
+    if (svar.substr(0, 7) == s_file) {
       if (file) *file = true;
       BIO *ret = BIO_new_file((char*)svar.substr(7).data(), "r");
       if (ret == nullptr) {

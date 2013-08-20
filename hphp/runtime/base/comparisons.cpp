@@ -52,12 +52,6 @@ bool same(CVarRef v1, const StringData* v2) {
   return sdata == v2 || v2->same(sdata);
 }
 
-// TODO(#2298051) litstr must die
-bool same(CVarRef v1, litstr v2) {
-  StackStringData sd2(v2);
-  return same(v1, &sd2);
-}
-
 bool same(CVarRef v1, CStrRef v2) {
   const StringData* sd = v2.get();
   return same(v1, sd);

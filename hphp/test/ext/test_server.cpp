@@ -586,6 +586,8 @@ bool TestServer::TestHttpClient() {
   string url = "http://127.0.0.1:" + lexical_cast<string>(s_server_port) +
     "/echo?name=value";
 
+  static const StaticString s_Custom_colon_blah("Custom: blah");
+
   for (int i = 0; i < 10; i++) {
     HttpClient http;
     StringBuffer response;
@@ -604,7 +606,7 @@ bool TestServer::TestHttpClient() {
 
     bool found = false;
     for (unsigned int i = 0; i < responseHeaders.size(); i++) {
-      if (responseHeaders[i] == "Custom: blah") {
+      if (responseHeaders[i] == s_Custom_colon_blah) {
         found = true;
       }
     }
@@ -634,7 +636,7 @@ bool TestServer::TestHttpClient() {
 
     bool found = false;
     for (unsigned int i = 0; i < responseHeaders.size(); i++) {
-      if (responseHeaders[i] == "Custom: blah") {
+      if (responseHeaders[i] == s_Custom_colon_blah) {
         found = true;
       }
     }

@@ -29,8 +29,10 @@ StaticString OutputFile::s_class_name("OutputFile");
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
+const StaticString s_php_output("php://output");
+
 OutputFile::OutputFile(CStrRef filename) {
-  if (filename != "php://output") {
+  if (filename != s_php_output) {
     throw FatalErrorException("not a php://output file ");
   }
   m_isLocal = true;

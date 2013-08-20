@@ -506,6 +506,12 @@ static void verify_soap_headers_array(Array &headers) {
 ///////////////////////////////////////////////////////////////////////////////
 // shared helpers
 
+const StaticString
+  s_type_name("type_name"),
+  s_type_ns("type_ns"),
+  s_to_xml("to_xml"),
+  s_from_xml("from_xml");
+
 static encodeMapPtr soap_create_typemap_impl(sdl *sdl, Array &ht) {
   encodeMapPtr typemap(new encodeMap());
   for (ArrayIter iter(ht); iter; ++iter) {
@@ -522,13 +528,13 @@ static encodeMapPtr soap_create_typemap_impl(sdl *sdl, Array &ht) {
       tmp = it.second();
       if (it.first().isString()) {
         String name = it.first().toString();
-        if (name == "type_name") {
+        if (name == s_type_name) {
           if (tmp.isString()) type_name = tmp.toString();
-        } else if (name == "type_ns") {
+        } else if (name == s_type_ns) {
           if (tmp.isString()) type_ns = tmp.toString();
-        } else if (name == "to_xml") {
+        } else if (name == s_to_xml) {
           to_xml = tmp;
-        } else if (name == "from_xml") {
+        } else if (name == s_from_xml) {
           to_zval = tmp;
         }
       }
@@ -1753,14 +1759,15 @@ static void model_to_string(sdlContentModelPtr model, StringBuffer &buf,
 
 const StaticString
   s_HTTP_USER_AGENT("HTTP_USER_AGENT"),
-  s__SERVER("_SERVER");
+  s__SERVER("_SERVER"),
+  s_Shockwave_Flash("Shockwave Flash");
 
 static void send_soap_server_fault(sdlFunctionPtr function, Variant fault,
                                    soapHeader *hdr) {
   USE_SOAP_GLOBAL;
   bool use_http_error_status = true;
   GlobalVariables *g = get_global_variables();
-  if (g->get(s__SERVER)[s_HTTP_USER_AGENT].toString() == "Shockwave Flash") {
+  if (g->get(s__SERVER)[s_HTTP_USER_AGENT].toString() == s_Shockwave_Flash) {
     use_http_error_status = false;
   }
   if (use_http_error_status) {
@@ -2051,7 +2058,11 @@ static bool valid_function(c_SoapServer *server, Object &soap_obj,
   return (f && f->isPublic());
 }
 
-const StaticString s_HTTP_CONTENT_ENCODING("HTTP_CONTENT_ENCODING");
+const StaticString
+  s_HTTP_CONTENT_ENCODING("HTTP_CONTENT_ENCODING"),
+  s_gzip("gzip"),
+  s_xgzip("x-gzip"),
+  s_deflate("deflate");
 
 void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
   USE_SOAP_GLOBAL;
@@ -2098,9 +2109,9 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
     if (g->get(s__SERVER).toArray().exists(s_HTTP_CONTENT_ENCODING)) {
       String encoding = g->get(s__SERVER)[s_HTTP_CONTENT_ENCODING].toString();
       Variant ret;
-      if (encoding == "gzip" || encoding == "x-gzip") {
+      if (encoding == s_gzip || encoding == s_xgzip) {
         ret = f_gzinflate(String(data, size, CopyString));
-      } else if (encoding == "deflate") {
+      } else if (encoding == s_deflate) {
         ret = f_gzuncompress(String(data, size, CopyString));
       } else {
         raise_warning("Request is encoded with unknown compression '%s'",

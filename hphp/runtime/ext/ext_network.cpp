@@ -275,6 +275,8 @@ Variant f_inet_pton(CStrRef address) {
   return String(buffer, af == AF_INET ? 4 : 16, CopyString);
 }
 
+const StaticString s_255_255_255_255("255.255.255.255");
+
 Variant f_ip2long(CStrRef ip_address) {
   unsigned long int ip;
   if (ip_address.empty() ||
@@ -283,7 +285,7 @@ Variant f_ip2long(CStrRef ip_address) {
      * because inet_addr() considers it wrong. We return 0xFFFFFFFF and
      * not -1 or ~0 because of 32/64bit issues.
      */
-    if (ip_address == "255.255.255.255") {
+    if (ip_address == s_255_255_255_255) {
       return (int64_t)0xFFFFFFFF;
     }
     return false;

@@ -241,14 +241,16 @@ void XboxServer::Stop() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static bool isLocalHost(CStrRef host) {
-  return host.empty() || host == "localhost" || host == "127.0.0.1";
-}
-
 const StaticString
   s_code("code"),
   s_response("response"),
-  s_error("error");
+  s_error("error"),
+  s_localhost("localhost"),
+  s_127_0_0_1("127.0.0.1");
+
+static bool isLocalHost(CStrRef host) {
+  return host.empty() || host == s_localhost || host == s_127_0_0_1;
+}
 
 bool XboxServer::SendMessage(CStrRef message, Variant &ret, int timeout_ms,
                              CStrRef host /* = "localhost" */) {

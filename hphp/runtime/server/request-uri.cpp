@@ -35,7 +35,7 @@ RequestURI::RequestURI(const VirtualHost *vhost, Transport *transport,
     m_forbidden = false; // put down forbidden flag since we are redirecting
     if (!RuntimeOption::ErrorDocument404.empty()) {
       String redirectURL(RuntimeOption::ErrorDocument404);
-      if (m_queryString != "") {
+      if (!m_queryString->empty()) {
         if (redirectURL.find('?') == -1) {
           redirectURL += "?";
         } else {
@@ -113,6 +113,9 @@ void RequestURI::splitURL(String surl, String &base, String &querys) {
   }
 }
 
+const StaticString s_http("http://");
+const StaticString s_https("https://");
+
 /**
  * Precondition: m_originalURL and m_queryString are set
  * Postcondition: Output is false and we are redirecting OR
@@ -132,8 +135,8 @@ bool RequestURI::rewriteURL(const VirtualHost *vhost, Transport *transport,
       m_rewrittenURL += m_queryString;
     }
     if (redirect) {
-      if (m_rewrittenURL.substr(0, 7) != "http://" &&
-          m_rewrittenURL.substr(0, 8) != "https://") {
+      if (m_rewrittenURL.substr(0, 7) != s_http &&
+          m_rewrittenURL.substr(0, 8) != s_https) {
         PrependSlash(m_rewrittenURL);
       }
       transport->redirect(m_rewrittenURL.c_str(), redirect, "rewriteURL");
@@ -164,8 +167,8 @@ bool RequestURI::rewriteURL(const VirtualHost *vhost, Transport *transport,
         m_rewrittenURL += "?";
         m_rewrittenURL += m_queryString;
       }
-      if (m_rewrittenURL.substr(0, 7) != "http://" &&
-          m_rewrittenURL.substr(0, 8) != "https://") {
+      if (m_rewrittenURL.substr(0, 7) != s_http &&
+          m_rewrittenURL.substr(0, 8) != s_https) {
         PrependSlash(m_rewrittenURL);
       }
       transport->redirect(m_rewrittenURL.c_str(), 301, "rewriteURL");

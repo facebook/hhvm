@@ -308,12 +308,12 @@ public:
    * generation always uses explicit functions like same(), less() etc. that
    * are type specialized and unambiguous.
    */
-  bool operator == (litstr  v) const;
-  bool operator != (litstr  v) const;
+  bool operator == (litstr  v) const = delete;
+  bool operator != (litstr  v) const = delete;
   bool operator >= (litstr  v) const = delete;
   bool operator <= (litstr  v) const = delete;
-  bool operator >  (litstr  v) const;
-  bool operator <  (litstr  v) const;
+  bool operator >  (litstr  v) const = delete;
+  bool operator <  (litstr  v) const = delete;
   bool operator == (CStrRef v) const;
   bool operator != (CStrRef v) const;
   bool operator >= (CStrRef v) const = delete;
@@ -341,25 +341,25 @@ public:
   /**
    * Comparisons
    */
-  bool same (litstr  v2) const;
+  bool same (litstr  v2) const = delete;
   bool same (const StringData *v2) const;
   bool same (CStrRef v2) const;
   bool same (CArrRef v2) const;
   bool same (CObjRef v2) const;
   bool same (CResRef v2) const;
-  bool equal(litstr  v2) const;
+  bool equal(litstr  v2) const = delete;
   bool equal(const StringData *v2) const;
   bool equal(CStrRef v2) const;
   bool equal(CArrRef v2) const;
   bool equal(CObjRef v2) const;
   bool equal(CResRef v2) const;
-  bool less (litstr  v2) const;
+  bool less (litstr  v2) const = delete;
   bool less (const StringData *v2) const;
   bool less (CStrRef v2) const;
   bool less (CArrRef v2) const;
   bool less (CObjRef v2) const;
   bool less (CResRef v2) const;
-  bool more (litstr  v2) const;
+  bool more (litstr  v2) const = delete;
   bool more (const StringData *v2) const;
   bool more (CStrRef v2) const;
   bool more (CArrRef v2) const;

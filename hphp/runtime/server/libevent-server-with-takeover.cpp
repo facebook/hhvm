@@ -92,9 +92,14 @@ LibEventServerWithTakeover::LibEventServerWithTakeover
 {
 }
 
+const StaticString
+  s_ver_C_FD_REQ(P_VERSION C_FD_REQ),
+  s_ver_C_TERM_REQ(P_VERSION C_TERM_REQ),
+  s_ver_C_TERM_OK(P_VERSION C_TERM_OK);
+
 int LibEventServerWithTakeover::afdtRequest(String request, String* response) {
   Logger::Info("takeover: received request");
-  if (request == P_VERSION C_FD_REQ) {
+  if (request == s_ver_C_FD_REQ) {
     Logger::Info("takeover: request is a listen socket request");
     int ret;
     *response = P_VERSION C_FD_RESP;
@@ -111,7 +116,7 @@ int LibEventServerWithTakeover::afdtRequest(String request, String* response) {
     }
     m_takeover_state = TakeoverState::Started;
     return m_accept_sock;
-  } else if (request == P_VERSION C_TERM_REQ) {
+  } else if (request == s_ver_C_TERM_REQ) {
     Logger::Info("takeover: request is a terminate request");
     // It is a little bit of a hack to use an AFDT request/response
     // to shut down our accept socket, but it has to be done from
@@ -300,7 +305,7 @@ void LibEventServerWithTakeover::start() {
       // The higher-level start logic will try *very* hard to recover from this.
     }
     String resp((const char*)shutdown_response, response_len, CopyString);
-    if (resp != P_VERSION C_TERM_OK) {
+    if (resp != s_ver_C_TERM_OK) {
       Logger::Error(
           "Old server could not shut down: "
           "response = '%s'",

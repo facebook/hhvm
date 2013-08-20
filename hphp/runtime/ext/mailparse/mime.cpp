@@ -488,8 +488,10 @@ void MimePart::decoderFeed(CStrRef str) {
   }
 }
 
+const StaticString s_1_pt_0("1.0");
+
 bool MimePart::isVersion1() {
-  return m_mime_version == "1.0" || !m_parent.isNull();
+  return m_mime_version == s_1_pt_0 || !m_parent.isNull();
 }
 
 MimePart *MimePart::getParent() {
@@ -518,7 +520,11 @@ const StaticString
   s_content_description("content-description"),
   s_content_language("content-language"),
   s_content_md5("content-md5"),
-  s_boundary("boundary");
+  s_boundary("boundary"),
+  s_to("to"),
+  s_cc("cc"),
+  s_mime_version("mime-version"),
+  s_content_transfer_encoding("content-transfer-encoding");
 
 Variant MimePart::getPartData() {
   Array ret = Array::Create();
@@ -672,7 +678,7 @@ bool MimePart::processHeader() {
 
     /* add the header to the hash.
      * join multiple To: or Cc: lines together */
-    if ((header_key == "to" || header_key == "cc") &&
+    if ((header_key == s_to || header_key == s_cc) &&
         m_headers.exists(header_key)) {
       String newstr = m_headers[header_key].toString();
       newstr += ", ";
@@ -696,21 +702,21 @@ bool MimePart::processHeader() {
     }
 
     /* if it is useful, keep a pointer to it in the mime part */
-    if (header_key == "mime-version") {
+    if (header_key == s_mime_version) {
       m_mime_version = header_val_stripped;
-    } else if (header_key == "content-location") {
+    } else if (header_key == s_content_location) {
       m_content_location =
         String(php_rfc822_recombine_tokens
                (toks, 2, toks->ntokens-2,
                 PHP_RFC822_RECOMBINE_IGNORE_COMMENTS), AttachString);
-    } else if (header_key == "content-base") {
+    } else if (header_key == s_content_base) {
       m_content_base =
         String(php_rfc822_recombine_tokens
                (toks, 2, toks->ntokens-2,
                 PHP_RFC822_RECOMBINE_IGNORE_COMMENTS), AttachString);
-    } else if (header_key == "content-transfer-encoding") {
+    } else if (header_key == s_content_transfer_encoding) {
       m_content_transfer_encoding = header_val_stripped;
-    } else if (header_key == "content-type") {
+    } else if (header_key == s_content_type) {
       m_content_type = MimeHeader(toks);
       Variant boundary = m_content_type.get(s_boundary);
       if (!boundary.isNull()) {
@@ -720,7 +726,7 @@ bool MimePart::processHeader() {
       if (!charset.isNull()) {
         m_charset = charset.toString();
       }
-    } else if (header_key == "content-disposition") {
+    } else if (header_key == s_content_disposition) {
       m_content_disposition = MimeHeader(toks);
     }
   }

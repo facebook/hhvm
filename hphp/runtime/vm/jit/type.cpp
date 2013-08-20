@@ -149,7 +149,7 @@ namespace {
 
 Type setElemReturn(const IRInstruction* inst) {
   assert(inst->op() == SetElem || inst->op() == SetElemStk);
-  auto baseType = inst->src(vectorBaseIdx(inst))->type().strip();
+  auto baseType = inst->src(minstrBaseIdx(inst))->type().strip();
 
   // If the base is a Str, the result will always be a CountedStr (or
   // an exception). If the baes might be a str, the result wil be

@@ -27,56 +27,56 @@ namespace HPHP {  namespace JIT {
   EXPECT_EQ(exp, act)                                                   \
   << folly::format("Expected {}, got {}", (exp).toString(), (act).toString()) \
 
-TEST(VectorEffects, Basic) {
-  VectorEffects elem(SetElem, Type::PtrToArr);
+TEST(MInstrEffects, Basic) {
+  MInstrEffects elem(SetElem, Type::PtrToArr);
   EXPECT_TEQ(Type::PtrToArr, elem.baseType);
   EXPECT_FALSE(elem.baseTypeChanged);
   EXPECT_TRUE(elem.baseValChanged);
 
-  VectorEffects prop(SetProp, Type::Obj);
+  MInstrEffects prop(SetProp, Type::Obj);
   EXPECT_TEQ(Type::Obj, prop.baseType);
   EXPECT_FALSE(prop.baseTypeChanged);
   EXPECT_FALSE(prop.baseValChanged);
 }
 
-TEST(VectorEffects, BadArrayKey) {
-  VectorEffects ve(SetElem, Type::PtrToArr);
-  EXPECT_TEQ(Type::PtrToArr, ve.baseType);
-  EXPECT_FALSE(ve.baseTypeChanged);
-  EXPECT_TRUE(ve.baseValChanged);
+TEST(MInstrEffects, BadArrayKey) {
+  MInstrEffects effects(SetElem, Type::PtrToArr);
+  EXPECT_TEQ(Type::PtrToArr, effects.baseType);
+  EXPECT_FALSE(effects.baseTypeChanged);
+  EXPECT_TRUE(effects.baseValChanged);
 }
 
-TEST(VectorEffects, NonObjProp) {
-  VectorEffects ve(SetProp, Type::PtrToInt);
-  EXPECT_TEQ(Type::PtrToInt, ve.baseType);
-  EXPECT_FALSE(ve.baseTypeChanged);
-  EXPECT_FALSE(ve.baseValChanged);
+TEST(MInstrEffects, NonObjProp) {
+  MInstrEffects effects(SetProp, Type::PtrToInt);
+  EXPECT_TEQ(Type::PtrToInt, effects.baseType);
+  EXPECT_FALSE(effects.baseTypeChanged);
+  EXPECT_FALSE(effects.baseValChanged);
 }
 
-TEST(VectorEffects, NonArrElem) {
-  VectorEffects ve(SetElem, Type::PtrToDbl);
-  EXPECT_TEQ(Type::PtrToDbl, ve.baseType);
-  EXPECT_FALSE(ve.baseTypeChanged);
-  EXPECT_FALSE(ve.baseValChanged);
+TEST(MInstrEffects, NonArrElem) {
+  MInstrEffects effects(SetElem, Type::PtrToDbl);
+  EXPECT_TEQ(Type::PtrToDbl, effects.baseType);
+  EXPECT_FALSE(effects.baseTypeChanged);
+  EXPECT_FALSE(effects.baseValChanged);
 }
 
-TEST(VectorEffects, PromoteNull) {
-  VectorEffects elem(SetElem, Type::PtrToNull);
+TEST(MInstrEffects, PromoteNull) {
+  MInstrEffects elem(SetElem, Type::PtrToNull);
   EXPECT_TEQ(Type::PtrToArr, elem.baseType);
   EXPECT_TRUE(elem.baseTypeChanged);
   EXPECT_TRUE(elem.baseValChanged);
 
-  VectorEffects prop(SetProp, Type::PtrToUninit);
+  MInstrEffects prop(SetProp, Type::PtrToUninit);
   EXPECT_TEQ(Type::PtrToObj, prop.baseType);
   EXPECT_TRUE(prop.baseTypeChanged);
   EXPECT_TRUE(prop.baseValChanged);
 }
 
-TEST(VectorEffects, UnknownBase) {
-  VectorEffects ve(SetElem, Type::PtrToCell);
-  EXPECT_TEQ(Type::PtrToCell - Type::PtrToNull, ve.baseType);
-  EXPECT_TRUE(ve.baseTypeChanged);
-  EXPECT_TRUE(ve.baseValChanged);
+TEST(MInstrEffects, UnknownBase) {
+  MInstrEffects effects(SetElem, Type::PtrToCell);
+  EXPECT_TEQ(Type::PtrToCell - Type::PtrToNull, effects.baseType);
+  EXPECT_TRUE(effects.baseTypeChanged);
+  EXPECT_TRUE(effects.baseValChanged);
 }
 
 } }

@@ -1587,7 +1587,7 @@ void HhbcTranslator::emitIncDecS(bool pre, bool inc) {
 }
 
 void HhbcTranslator::emitMInstr(const NormalizedInstruction& ni) {
-  VectorTranslator(ni, *this).emit();
+  MInstrTranslator(ni, *this).emit();
 }
 
 /*
@@ -3903,7 +3903,7 @@ void HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst) {
           auto const& base = inst.inputs[mii.valCount()]->location;
           assert(base.space == Location::Local);
 
-          // VectorEffects expects to be used in the context of a normally
+          // MInstrEffects expects to be used in the context of a normally
           // translated instruction, not an interpOne. The two important
           // differences are that the base is normally a PtrTo* and we need to
           // supply an IR opcode representing the operation. SetWithRefElem is
@@ -3916,9 +3916,9 @@ void HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst) {
 
           if (isUnset && isProp) break;
           auto op = isProp ? SetProp : isUnset ? UnsetElem : SetWithRefElem;
-          VectorEffects ve(op, baseType);
-          if (ve.baseValChanged) {
-            gen(OverrideLoc, ve.baseType.deref(),
+          MInstrEffects effects(op, baseType);
+          if (effects.baseValChanged) {
+            gen(OverrideLoc, effects.baseType.deref(),
                 LocalId(base.offset), m_tb->fp());
           }
           break;

@@ -470,7 +470,7 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
                opc == CastStk ||
                opc == CoerceStk ||
                opc == SideExitGuardStk  ||
-               VectorEffects::supported(opc));
+               MInstrEffects::supported(opc));
         assignRegToTmp(&m_regs[int(rVmSp)], &dst, 0);
         numAllocated++;
         continue;
@@ -776,8 +776,8 @@ void LinearScan::computePreColoringHint() {
           m_preColoringHint.add(inst->src(arg.ival), 0, reg++);
           break;
         case ArgType::TV:
-        case ArgType::VecKeyS:
-        case ArgType::VecKeyIS:
+        case ArgType::MemberKeyS:
+        case ArgType::MemberKeyIS:
           m_preColoringHint.add(inst->src(arg.ival), 0, reg++);
           m_preColoringHint.add(inst->src(arg.ival), 1, reg++);
           break;

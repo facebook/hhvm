@@ -313,12 +313,12 @@ HasStackVersion
   primary destination. The behavior of the stack-modifying version is otherwise
   identical.
 
-VectorProp
+MInstrProp
 
   The instruction may affect the type and/or value of its base operand,
   operating on object properties.
 
-VectorElem
+MInstrElem
 
   The instruction may affect the type and/or value of its base operand,
   operating on array elements.
@@ -1793,7 +1793,7 @@ CIterFree<IterId> S0:FramePtr
   frame pointed to by S0.
 
 
-19. Vector instruction support
+19. Member instruction support
 
 
 D:PtrToCell = DefMIStateBase

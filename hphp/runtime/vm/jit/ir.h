@@ -174,8 +174,8 @@ class FailedCodeGen : public std::runtime_error {
  *      T     isTerminal
  *      P     passthrough
  *      K     killsSource
- *      VProp VectorProp
- *      VElem VectorElem
+ *      MProp MInstrProp
+ *      MElem MInstrElem
  */
 
 #define O_STK(name, dst, src, flags)            \
@@ -562,7 +562,7 @@ O_STK(PropDX,              D(PtrToGen), C(TCA)                                \
                                           C(Cls)                              \
                                           S(Obj,PtrToGen)                     \
                                           S(Cell)                             \
-                                          S(PtrToCell),VProp|E|N|Mem|Refs|Er) \
+                                          S(PtrToCell),MProp|E|N|Mem|Refs|Er) \
 O(CGetProp,                    D(Cell), C(TCA)                                \
                                           C(Cls)                              \
                                           S(Obj,PtrToGen)                     \
@@ -572,18 +572,18 @@ O_STK(VGetProp,           D(BoxedCell), C(TCA)                                \
                                           C(Cls)                              \
                                           S(Obj,PtrToGen)                     \
                                           S(Cell)                             \
-                                          S(PtrToCell),VProp|E|N|Mem|Refs|Er) \
+                                          S(PtrToCell),MProp|E|N|Mem|Refs|Er) \
 O_STK(BindProp,                     ND, C(TCA)                                \
                                           C(Cls)                              \
                                           S(Obj,PtrToGen)                     \
                                           S(Cell)                             \
                                           S(BoxedCell)                        \
-                                          S(PtrToCell),VProp|E|N|Mem|Refs|Er) \
+                                          S(PtrToCell),MProp|E|N|Mem|Refs|Er) \
 O_STK(SetProp,                      ND, C(TCA)                                \
                                           C(Cls)                              \
                                           S(Obj,PtrToGen)                     \
                                           S(Cell)                             \
-                                          S(Cell),     VProp|E|N|Mem|Refs|Er) \
+                                          S(Cell),     MProp|E|N|Mem|Refs|Er) \
 O(UnsetProp,                        ND, C(TCA)                                \
                                           C(Cls)                              \
                                           S(Obj,PtrToGen)                     \
@@ -593,12 +593,12 @@ O_STK(SetOpProp,               D(Cell), C(TCA)                                \
                                           S(Cell)                             \
                                           S(Cell)                             \
                                           S(PtrToCell)                        \
-                                          C(Int),      VProp|E|N|Mem|Refs|Er) \
+                                          C(Int),      MProp|E|N|Mem|Refs|Er) \
 O_STK(IncDecProp,              D(Cell), C(TCA)                                \
                                           S(Obj,PtrToGen)                     \
                                           S(Cell)                             \
                                           S(PtrToCell)                        \
-                                          C(Int),      VProp|E|N|Mem|Refs|Er) \
+                                          C(Int),      MProp|E|N|Mem|Refs|Er) \
 O(EmptyProp,                   D(Bool), C(TCA)                                \
                                           C(Cls)                              \
                                           S(Obj,PtrToGen)                     \
@@ -617,11 +617,11 @@ O(ElemArray,               D(PtrToGen), C(TCA)                                \
 O_STK(ElemDX,              D(PtrToGen), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
-                                          S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
+                                          S(PtrToCell),MElem|E|N|Mem|Refs|Er) \
 O_STK(ElemUX,              D(PtrToGen), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
-                                          S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
+                                          S(PtrToCell),MElem|E|N|Mem|Refs|Er) \
 O(ArrayGet,                    D(Cell), C(TCA)                                \
                                           S(Arr)                              \
                                           S(Int,Str),     C|N|PRc|Refs|Mem|Er)\
@@ -644,12 +644,12 @@ O(CGetElem,                    D(Cell), C(TCA)                                \
 O_STK(VGetElem,           D(BoxedCell), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
-                                          S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
+                                          S(PtrToCell),MElem|E|N|Mem|Refs|Er) \
 O_STK(BindElem,                     ND, C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
                                           S(BoxedCell)                        \
-                                          S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
+                                          S(PtrToCell),MElem|E|N|Mem|Refs|Er) \
 O(ArraySet,                     D(Arr), C(TCA)                                \
                                           S(Arr)                              \
                                           S(Int,Str)                          \
@@ -674,35 +674,35 @@ O(ArraySetRef,                      ND, C(TCA)                                \
 O_STK(SetElem,                DSetElem, C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
-                                          S(Cell),     VElem|E|N|Mem|Refs|Er) \
+                                          S(Cell),     MElem|E|N|Mem|Refs|Er) \
 O_STK(SetWithRefElem,               ND, C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
                                           S(PtrToGen)                         \
-                                          S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
+                                          S(PtrToCell),MElem|E|N|Mem|Refs|Er) \
 O_STK(UnsetElem,                    ND, C(TCA)                                \
                                           S(PtrToGen)                         \
-                                          S(Cell),     VElem|E|N|Mem|Refs|Er) \
+                                          S(Cell),     MElem|E|N|Mem|Refs|Er) \
 O_STK(SetOpElem,               D(Cell), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
                                           S(Cell)                             \
-                                          S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
+                                          S(PtrToCell),MElem|E|N|Mem|Refs|Er) \
 O_STK(IncDecElem,              D(Cell), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
-                                          S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
+                                          S(PtrToCell),MElem|E|N|Mem|Refs|Er) \
 O_STK(SetNewElem,                   ND, S(PtrToGen)                           \
-                                          S(Cell),     VElem|E|N|Mem|Refs|Er) \
+                                          S(Cell),     MElem|E|N|Mem|Refs|Er) \
 O_STK(SetNewElemArray,              ND, S(PtrToArr)                           \
-                                          S(Cell),     VElem|E|N|Mem|Refs|Er) \
+                                          S(Cell),     MElem|E|N|Mem|Refs|Er) \
 O_STK(SetWithRefNewElem,            ND, C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(PtrToGen)                         \
-                                          S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
+                                          S(PtrToCell),MElem|E|N|Mem|Refs|Er) \
 O_STK(BindNewElem,                  ND, S(PtrToGen)                           \
                                           S(BoxedCell)                        \
-                                          S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
+                                          S(PtrToCell),MElem|E|N|Mem|Refs|Er) \
 O(ArrayIsset,                  D(Bool), C(TCA)                                \
                                           S(Arr)                              \
                                           S(Int,Str),        E|N|Mem|Refs|Er) \
@@ -830,8 +830,8 @@ enum OpcodeFlag : uint64_t {
   KillsSources     = 1ULL << 14,
   ModifiesStack    = 1ULL << 15,
   HasStackVersion  = 1ULL << 16,
-  VectorProp       = 1ULL << 17,
-  VectorElem       = 1ULL << 18,
+  MInstrProp       = 1ULL << 17,
+  MInstrElem       = 1ULL << 18,
 };
 
 bool opcodeHasFlags(Opcode opc, uint64_t flags);
@@ -1013,19 +1013,19 @@ Type outputType(const IRInstruction*, int dstId = 0);
 void assertOperandTypes(const IRInstruction*);
 
 
-int vectorBaseIdx(Opcode opc);
-int vectorKeyIdx(Opcode opc);
-int vectorValIdx(Opcode opc);
-int vectorBaseIdx(const IRInstruction* inst);
-int vectorKeyIdx(const IRInstruction* inst);
-int vectorValIdx(const IRInstruction* inst);
+int minstrBaseIdx(Opcode opc);
+int minstrKeyIdx(Opcode opc);
+int minstrValueIdx(Opcode opc);
+int minstrBaseIdx(const IRInstruction* inst);
+int minstrKeyIdx(const IRInstruction* inst);
+int minstrValueIdx(const IRInstruction* inst);
 
-struct VectorEffects {
+struct MInstrEffects {
   static bool supported(Opcode op);
   static bool supported(const IRInstruction* inst);
 
   /*
-   * VectorEffects::get is used to allow multiple different consumers to deal
+   * MInstrEffects::get is used to allow multiple different consumers to deal
    * with the side effects of vector instructions. It takes an instruction and
    * a series of callbacks, each of which will be called when the instruction
    * has a certain effect:
@@ -1040,10 +1040,10 @@ struct VectorEffects {
                   StoreLocFunc storeLocValue,
                   SetLocTypeFunc setLocType);
 
-  explicit VectorEffects(const IRInstruction* inst);
-  VectorEffects(Opcode op, Type base);
-  VectorEffects(Opcode op, SSATmp* base);
-  VectorEffects(Opcode opc, const std::vector<SSATmp*>& srcs);
+  explicit MInstrEffects(const IRInstruction* inst);
+  MInstrEffects(Opcode op, Type base);
+  MInstrEffects(Opcode op, SSATmp* base);
+  MInstrEffects(Opcode opc, const std::vector<SSATmp*>& srcs);
 
   Type baseType;
   bool baseTypeChanged;

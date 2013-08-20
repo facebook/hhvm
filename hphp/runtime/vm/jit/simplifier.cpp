@@ -178,13 +178,13 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   default:
     {
       // Assume it's a vector instruction.  This will assert in
-      // vectorBaseIdx if not.
-      auto const base = inst->src(vectorBaseIdx(inst));
+      // minstrBaseIdx if not.
+      auto const base = inst->src(minstrBaseIdx(inst));
       assert(base->inst()->op() == LdStackAddr);
       if (base->inst()->extra<LdStackAddr>()->offset == index) {
-        VectorEffects ve(inst);
-        assert(ve.baseTypeChanged || ve.baseValChanged);
-        return StackValueInfo { inst, ve.baseType.derefIfPtr() };
+        MInstrEffects effects(inst);
+        assert(effects.baseTypeChanged || effects.baseValChanged);
+        return StackValueInfo { inst, effects.baseType.derefIfPtr() };
       }
       return getStackValue(base->inst()->src(0), index);
     }

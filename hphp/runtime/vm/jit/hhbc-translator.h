@@ -444,12 +444,12 @@ struct HhbcTranslator {
 
 private:
   /*
-   * VectorTranslator is responsible for translating one of the vector
+   * MInstrTranslator is responsible for translating one of the vector
    * instructions (CGetM, SetM, IssetM, etc..) into hhir.
    */
-  class VectorTranslator {
+  class MInstrTranslator {
    public:
-    VectorTranslator(const NormalizedInstruction& ni,
+    MInstrTranslator(const NormalizedInstruction& ni,
                      HhbcTranslator& ht);
     void emit();
 

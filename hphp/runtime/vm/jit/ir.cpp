@@ -111,8 +111,8 @@ namespace {
 #define P      Passthrough
 #define K      KillsSources
 #define StkFlags(f) HasStackVersion|(f)
-#define VProp  VectorProp
-#define VElem  VectorElem
+#define MProp  MInstrProp
+#define MElem  MInstrElem
 
 #define ND        0
 #define D(n)      HasDest
@@ -154,8 +154,8 @@ struct {
 #undef P
 #undef K
 #undef StkFlags
-#undef VProp
-#undef VElem
+#undef MProp
+#undef MElem
 
 #undef ND
 #undef D
@@ -459,7 +459,7 @@ bool IRInstruction::modifiesStack() const {
 
 SSATmp* IRInstruction::modifiedStkPtr() const {
   assert(modifiesStack());
-  assert(VectorEffects::supported(this));
+  assert(MInstrEffects::supported(this));
   SSATmp* sp = dst(hasMainDst() ? 1 : 0);
   assert(sp->isA(Type::StkPtr));
   return sp;

@@ -928,10 +928,10 @@ void CodeGenerator::cgCallNative(Asm& a, IRInstruction* inst) {
     case ArgType::TV:
       argGroup.typedValue(inst->src(arg.ival));
       break;
-    case ArgType::VecKeyS:
+    case ArgType::MemberKeyS:
       argGroup.vectorKeyS(inst->src(arg.ival));
       break;
-    case ArgType::VecKeyIS:
+    case ArgType::MemberKeyIS:
       argGroup.vectorKeyIS(inst->src(arg.ival));
       break;
     case ArgType::ExtraImm:

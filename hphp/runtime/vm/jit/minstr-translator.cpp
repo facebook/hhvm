@@ -26,7 +26,7 @@
 
 // These files do ugly things with macros so include them last
 #include "hphp/util/assert_throw.h"
-#include "hphp/runtime/vm/jit/vector-translator-internal.h"
+#include "hphp/runtime/vm/jit/minstr-translator-internal.h"
 
 namespace HPHP { namespace JIT {
 
@@ -39,19 +39,19 @@ static bool wantPropSpecializedWarnings() {
     !RuntimeOption::EvalDisableSomeRepoAuthNotices;
 }
 
-bool VectorEffects::supported(Opcode op) {
-  return opcodeHasFlags(op, VectorProp | VectorElem);
+bool MInstrEffects::supported(Opcode op) {
+  return opcodeHasFlags(op, MInstrProp | MInstrElem);
 }
-bool VectorEffects::supported(const IRInstruction* inst) {
+bool MInstrEffects::supported(const IRInstruction* inst) {
   return supported(inst->op());
 }
 
-void VectorEffects::get(const IRInstruction* inst,
+void MInstrEffects::get(const IRInstruction* inst,
                         StoreLocFunc storeLocalValue,
                         SetLocTypeFunc setLocalType) {
   // If the base for this instruction is a local address, the
   // helper call might have side effects on the local's value
-  SSATmp* base = inst->src(vectorBaseIdx(inst));
+  SSATmp* base = inst->src(minstrBaseIdx(inst));
   IRInstruction* locInstr = base->inst();
   if (locInstr->op() == LdLocAddr) {
     UNUSED Type baseType = locInstr->dst()->type();
@@ -59,10 +59,10 @@ void VectorEffects::get(const IRInstruction* inst,
     assert(baseType.isPtr() || baseType.isKnownDataType());
     int loc = locInstr->extra<LdLocAddr>()->locId;
 
-    VectorEffects ve(inst);
-    if (ve.baseTypeChanged || ve.baseValChanged) {
+    MInstrEffects effects(inst);
+    if (effects.baseTypeChanged || effects.baseValChanged) {
       storeLocalValue(loc, nullptr);
-      setLocalType(loc, ve.baseType.derefIfPtr());
+      setLocalType(loc, effects.baseType.derefIfPtr());
     }
   }
 }
@@ -93,31 +93,31 @@ Opcode canonicalOp(Opcode op) {
       op == SetWithRefNewElemStk) {
     return SetWithRefElem;
   }
-  return opcodeHasFlags(op, VectorProp) ? SetProp
-       : opcodeHasFlags(op, VectorElem) || op == ArraySet ? SetElem
+  return opcodeHasFlags(op, MInstrProp) ? SetProp
+       : opcodeHasFlags(op, MInstrElem) || op == ArraySet ? SetElem
        : bad_value<Opcode>();
 }
 }
 
-VectorEffects::VectorEffects(const IRInstruction* inst) {
-  init(inst->op(), inst->src(vectorBaseIdx(inst))->type());
+MInstrEffects::MInstrEffects(const IRInstruction* inst) {
+  init(inst->op(), inst->src(minstrBaseIdx(inst))->type());
 }
 
-VectorEffects::VectorEffects(Opcode op, Type base) {
+MInstrEffects::MInstrEffects(Opcode op, Type base) {
   init(op, base);
 }
 
-VectorEffects::VectorEffects(Opcode op, SSATmp* base) {
+MInstrEffects::MInstrEffects(Opcode op, SSATmp* base) {
   auto typeOrNone =
     [](SSATmp* val){ return val ? val->type() : Type::None; };
   init(op, typeOrNone(base));
 }
 
-VectorEffects::VectorEffects(Opcode opc, const std::vector<SSATmp*>& srcs) {
-  init(opc, srcs[vectorBaseIdx(opc)]->type());
+MInstrEffects::MInstrEffects(Opcode opc, const std::vector<SSATmp*>& srcs) {
+  init(opc, srcs[minstrBaseIdx(opc)]->type());
 }
 
-void VectorEffects::init(const Opcode rawOp, const Type origBase) {
+void MInstrEffects::init(const Opcode rawOp, const Type origBase) {
   baseType = origBase;
   bool basePtr, baseBoxed;
   stripBase(baseType, basePtr, baseBoxed);
@@ -181,39 +181,39 @@ void VectorEffects::init(const Opcode rawOp, const Type origBase) {
   baseValChanged = !baseBoxed && (baseValChanged || baseTypeChanged);
 }
 
-// vectorBaseIdx returns the src index for inst's base operand.
-int vectorBaseIdx(Opcode opc) {
+// minstrBaseIdx returns the src index for inst's base operand.
+int minstrBaseIdx(Opcode opc) {
   return opc == SetNewElem || opc == SetNewElemStk ? 0
          : opc == SetNewElemArray || opc == SetNewElemArrayStk ? 0
          : opc == BindNewElem || opc == BindNewElemStk ? 0
          : opc == ArraySet ? 1
          : opc == SetOpProp || opc == SetOpPropStk ? 1
-         : opcodeHasFlags(opc, VectorProp) ? 2
-         : opcodeHasFlags(opc, VectorElem) ? 1
+         : opcodeHasFlags(opc, MInstrProp) ? 2
+         : opcodeHasFlags(opc, MInstrElem) ? 1
          : bad_value<int>();
 }
-int vectorBaseIdx(const IRInstruction* inst) {
-  return vectorBaseIdx(inst->op());
+int minstrBaseIdx(const IRInstruction* inst) {
+  return minstrBaseIdx(inst->op());
 }
 
-// vectorKeyIdx returns the src index for inst's key operand.
-int vectorKeyIdx(Opcode opc) {
+// minstrKeyIdx returns the src index for inst's key operand.
+int minstrKeyIdx(Opcode opc) {
   return opc == SetNewElem || opc == SetNewElemStk ? -1
          : opc == SetNewElemArray || opc == SetNewElemArrayStk ? -1
          : opc == SetWithRefNewElem || opc == SetWithRefNewElemStk ? -1
          : opc == BindNewElem || opc == BindNewElem ? -1
          : opc == ArraySet ? 2
          : opc == SetOpProp || opc == SetOpPropStk ? 2
-         : opcodeHasFlags(opc, VectorProp) ? 3
-         : opcodeHasFlags(opc, VectorElem) ? 2
+         : opcodeHasFlags(opc, MInstrProp) ? 3
+         : opcodeHasFlags(opc, MInstrElem) ? 2
          : bad_value<int>();
 }
-int vectorKeyIdx(const IRInstruction* inst) {
-  return vectorKeyIdx(inst->op());
+int minstrKeyIdx(const IRInstruction* inst) {
+  return minstrKeyIdx(inst->op());
 }
 
-// vectorValIdx returns the src index for inst's value operand.
-int vectorValIdx(Opcode opc) {
+// minstrValueIdx returns the src index for inst's value operand.
+int minstrValueIdx(Opcode opc) {
   switch (opc) {
     case VGetProp: case VGetPropStk:
     case IncDecProp: case IncDecPropStk:
@@ -233,16 +233,16 @@ int vectorValIdx(Opcode opc) {
     case SetOpProp: case SetOpPropStk: return 3;
 
     default:
-      return opcodeHasFlags(opc, VectorProp) ? 4
-           : opcodeHasFlags(opc, VectorElem) ? 3
+      return opcodeHasFlags(opc, MInstrProp) ? 4
+           : opcodeHasFlags(opc, MInstrElem) ? 3
            : bad_value<int>();
   }
 }
-int vectorValIdx(const IRInstruction* inst) {
-  return vectorValIdx(inst->op());
+int minstrValueIdx(const IRInstruction* inst) {
+  return minstrValueIdx(inst->op());
 }
 
-HhbcTranslator::VectorTranslator::VectorTranslator(
+HhbcTranslator::MInstrTranslator::MInstrTranslator(
   const NormalizedInstruction& ni,
   HhbcTranslator& ht)
     : m_ni(ni)
@@ -261,19 +261,19 @@ HhbcTranslator::VectorTranslator::VectorTranslator(
 }
 
 template<typename... Srcs>
-SSATmp* HhbcTranslator::VectorTranslator::genStk(Opcode opc, IRTrace* taken,
+SSATmp* HhbcTranslator::MInstrTranslator::genStk(Opcode opc, IRTrace* taken,
                                                  Srcs... srcs) {
   assert(opcodeHasFlags(opc, HasStackVersion));
   assert(!opcodeHasFlags(opc, ModifiesStack));
   std::vector<SSATmp*> srcVec({srcs...});
-  SSATmp* base = srcVec[vectorBaseIdx(opc)];
+  SSATmp* base = srcVec[minstrBaseIdx(opc)];
 
   /* If the base is a pointer to a stack cell and the operation might change
    * its type and/or value, use the version of the opcode that returns a new
    * StkPtr. */
   if (base->inst()->op() == LdStackAddr) {
-    VectorEffects ve(opc, srcVec);
-    if (ve.baseTypeChanged || ve.baseValChanged) {
+    MInstrEffects effects(opc, srcVec);
+    if (effects.baseTypeChanged || effects.baseValChanged) {
       opc = getStackModifyingOpcode(opc);
     }
   }
@@ -281,7 +281,7 @@ SSATmp* HhbcTranslator::VectorTranslator::genStk(Opcode opc, IRTrace* taken,
   return gen(opc, taken, srcs...);
 }
 
-void HhbcTranslator::VectorTranslator::emit() {
+void HhbcTranslator::MInstrTranslator::emit() {
   // Assign stack slots to our stack inputs
   numberStackInputs();
   // Emit the base and every intermediate op
@@ -294,7 +294,7 @@ void HhbcTranslator::VectorTranslator::emit() {
 
 // Returns a pointer to the base of the current MInstrState struct, or
 // a null pointer if it's not needed.
-SSATmp* HhbcTranslator::VectorTranslator::genMisPtr() {
+SSATmp* HhbcTranslator::MInstrTranslator::genMisPtr() {
   if (m_needMIS) {
     return gen(LdAddr, m_misBase, cns(kReservedRSPSpillSpace));
   } else {
@@ -304,7 +304,7 @@ SSATmp* HhbcTranslator::VectorTranslator::genMisPtr() {
 
 // Inspect the instruction we're about to translate and determine if
 // it can be executed without using an MInstrState struct.
-void HhbcTranslator::VectorTranslator::checkMIState() {
+void HhbcTranslator::MInstrTranslator::checkMIState() {
   Type baseType = getInput(m_mii.valCount())->type();
   const bool isCGetM = m_ni.mInstrOp() == OpCGetM;
   const bool isSetM = m_ni.mInstrOp() == OpSetM;
@@ -359,7 +359,7 @@ void HhbcTranslator::VectorTranslator::checkMIState() {
   }
 }
 
-void HhbcTranslator::VectorTranslator::emitMPre() {
+void HhbcTranslator::MInstrTranslator::emitMPre() {
   checkMIState();
 
   if (HPHP::Trace::moduleEnabled(HPHP::Trace::minstr, 1)) {
@@ -392,7 +392,7 @@ void HhbcTranslator::VectorTranslator::emitMPre() {
   }
 }
 
-void HhbcTranslator::VectorTranslator::emitMTrace() {
+void HhbcTranslator::MInstrTranslator::emitMTrace() {
   auto rttStr = [this](int i) {
     return Type::fromRuntimeType(m_ni.inputs[i]->rtt).unbox().toString();
   };
@@ -428,7 +428,7 @@ void HhbcTranslator::VectorTranslator::emitMTrace() {
 }
 
 // Build a map from (stack) input index to stack index.
-void HhbcTranslator::VectorTranslator::numberStackInputs() {
+void HhbcTranslator::MInstrTranslator::numberStackInputs() {
   // Stack inputs are pushed in the order they appear in the vector
   // from left to right, so earlier elements in the vector are at
   // higher offsets in the stack. m_mii.valCount() tells us how many
@@ -459,12 +459,12 @@ void HhbcTranslator::VectorTranslator::numberStackInputs() {
   }
 }
 
-SSATmp* HhbcTranslator::VectorTranslator::getBase() {
+SSATmp* HhbcTranslator::MInstrTranslator::getBase() {
   assert(m_iInd == m_mii.valCount());
   return getInput(m_iInd);
 }
 
-SSATmp* HhbcTranslator::VectorTranslator::getKey() {
+SSATmp* HhbcTranslator::MInstrTranslator::getKey() {
   SSATmp* key = getInput(m_iInd);
   auto keyType = key->type();
   assert(keyType.isBoxed() || keyType.notBoxed());
@@ -474,14 +474,14 @@ SSATmp* HhbcTranslator::VectorTranslator::getKey() {
   return key;
 }
 
-SSATmp* HhbcTranslator::VectorTranslator::getValue() {
+SSATmp* HhbcTranslator::MInstrTranslator::getValue() {
   // If an instruction takes an rhs, it's always input 0.
   assert(m_mii.valCount() == 1);
   const int kValIdx = 0;
   return getInput(kValIdx);
 }
 
-SSATmp* HhbcTranslator::VectorTranslator::getValAddr() {
+SSATmp* HhbcTranslator::MInstrTranslator::getValAddr() {
   assert(m_mii.valCount() == 1);
   const DynLocation& dl = *m_ni.inputs[0];
   const Location& l = dl.location;
@@ -496,7 +496,7 @@ SSATmp* HhbcTranslator::VectorTranslator::getValAddr() {
   }
 }
 
-SSATmp* HhbcTranslator::VectorTranslator::getInput(unsigned i) {
+SSATmp* HhbcTranslator::MInstrTranslator::getInput(unsigned i) {
   const DynLocation& dl = *m_ni.inputs[i];
   const Location& l = dl.location;
 
@@ -521,7 +521,7 @@ SSATmp* HhbcTranslator::VectorTranslator::getInput(unsigned i) {
   }
 }
 
-void HhbcTranslator::VectorTranslator::emitBaseLCR() {
+void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
   const MInstrAttr& mia = m_mii.getAttr(m_ni.immVec.locationCode());
   const DynLocation& base = *m_ni.inputs[m_iInd];
   auto baseType = getInput(m_iInd)->type();
@@ -591,8 +591,8 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
 
 // Is the current instruction a 1-element simple collection (includes Array),
 // operation?
-HhbcTranslator::VectorTranslator::SimpleOp
-HhbcTranslator::VectorTranslator::isSimpleCollectionOp() {
+HhbcTranslator::MInstrTranslator::SimpleOp
+HhbcTranslator::MInstrTranslator::isSimpleCollectionOp() {
   SSATmp* base = getInput(m_mii.valCount());
   auto baseType = base->type().unbox();
   HPHP::Op op = m_ni.mInstrOp();
@@ -634,20 +634,20 @@ HhbcTranslator::VectorTranslator::isSimpleCollectionOp() {
 }
 
 // "Simple" bases are stack cells and locals.
-bool HhbcTranslator::VectorTranslator::isSimpleBase() {
+bool HhbcTranslator::MInstrTranslator::isSimpleBase() {
   LocationCode loc = m_ni.immVec.locationCode();
   return loc == LL || loc == LC || loc == LR;
 }
 
-bool HhbcTranslator::VectorTranslator::isSingleMember() {
+bool HhbcTranslator::MInstrTranslator::isSingleMember() {
   return m_ni.immVecM.size() == 1;
 }
 
-void HhbcTranslator::VectorTranslator::emitBaseH() {
+void HhbcTranslator::MInstrTranslator::emitBaseH() {
   m_base = gen(LdThis, m_tb.fp());
 }
 
-void HhbcTranslator::VectorTranslator::emitBaseN() {
+void HhbcTranslator::MInstrTranslator::emitBaseN() {
   PUNT(emitBaseN);
 }
 
@@ -679,7 +679,7 @@ static inline TypedValue* baseGImpl(TypedValue *key,
   return base;
 }
 
-namespace VectorHelpers {
+namespace MInstrHelpers {
 TypedValue* baseG(TypedValue key, MInstrState* mis) {
   return baseGImpl<false, false>(&key, mis);
 }
@@ -697,10 +697,10 @@ TypedValue* baseGWD(TypedValue key, MInstrState* mis) {
 }
 }
 
-void HhbcTranslator::VectorTranslator::emitBaseG() {
+void HhbcTranslator::MInstrTranslator::emitBaseG() {
   const MInstrAttr& mia = m_mii.getAttr(m_ni.immVec.locationCode());
   typedef TypedValue* (*OpFunc)(TypedValue, MInstrState*);
-  using namespace VectorHelpers;
+  using namespace MInstrHelpers;
   static const OpFunc opFuncs[] = {baseG, baseGW, baseGD, baseGWD};
   OpFunc opFunc = opFuncs[mia & MIA_base];
   SSATmp* gblName = getBase();
@@ -711,7 +711,7 @@ void HhbcTranslator::VectorTranslator::emitBaseG() {
                genMisPtr());
 }
 
-void HhbcTranslator::VectorTranslator::emitBaseS() {
+void HhbcTranslator::MInstrTranslator::emitBaseS() {
   const int kClassIdx = m_ni.inputs.size() - 1;
   SSATmp* key = getKey();
   SSATmp* clsRef = getInput(kClassIdx);
@@ -721,7 +721,7 @@ void HhbcTranslator::VectorTranslator::emitBaseS() {
                     CTX());
 }
 
-void HhbcTranslator::VectorTranslator::emitBaseOp() {
+void HhbcTranslator::MInstrTranslator::emitBaseOp() {
   LocationCode lCode = m_ni.immVec.locationCode();
   switch (lCode) {
   case LL: case LC: case LR: emitBaseLCR(); break;
@@ -733,7 +733,7 @@ void HhbcTranslator::VectorTranslator::emitBaseOp() {
   }
 }
 
-void HhbcTranslator::VectorTranslator::emitIntermediateOp() {
+void HhbcTranslator::MInstrTranslator::emitIntermediateOp() {
   switch (m_ni.immVecM[m_mInd]) {
     case MEC: case MEL: case MET: case MEI: {
       emitElem();
@@ -753,7 +753,7 @@ void HhbcTranslator::VectorTranslator::emitIntermediateOp() {
 }
 
 
-void HhbcTranslator::VectorTranslator::emitProp() {
+void HhbcTranslator::MInstrTranslator::emitProp() {
   const Class* knownCls = nullptr;
   const auto propInfo   = getPropertyOffset(m_ni, contextClass(),
                                             knownCls, m_mii,
@@ -791,12 +791,12 @@ TypedValue* nm(Class* ctx, TypedValue* base, TypedValue key,            \
                MInstrState* mis) {                                      \
   return propImpl<__VA_ARGS__>(ctx, base, key, mis);                    \
 }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(PROP)
 }
 #undef PROP
 
-void HhbcTranslator::VectorTranslator::emitPropGeneric() {
+void HhbcTranslator::MInstrTranslator::emitPropGeneric() {
   MemberCode mCode = m_ni.immVecM[m_mInd];
   MInstrAttr mia = MInstrAttr(m_mii.getAttr(mCode) & MIA_intermediate_prop);
 
@@ -826,7 +826,7 @@ void HhbcTranslator::VectorTranslator::emitPropGeneric() {
  * We can omit the uninit check for properties that we know may not be
  * uninit due to the frontend's type inference.
  */
-SSATmp* HhbcTranslator::VectorTranslator::checkInitProp(
+SSATmp* HhbcTranslator::MInstrTranslator::checkInitProp(
     SSATmp* baseAsObj,
     SSATmp* propAddr,
     PropInfo propInfo,
@@ -873,11 +873,11 @@ SSATmp* HhbcTranslator::VectorTranslator::checkInitProp(
   );
 }
 
-Class* HhbcTranslator::VectorTranslator::contextClass() const {
+Class* HhbcTranslator::MInstrTranslator::contextClass() const {
   return m_ht.curFunc()->cls();
 }
 
-void HhbcTranslator::VectorTranslator::emitPropSpecialized(const MInstrAttr mia,
+void HhbcTranslator::MInstrTranslator::emitPropSpecialized(const MInstrAttr mia,
                                                            PropInfo propInfo) {
   assert(!(mia & MIA_warn) || !(mia & MIA_unset));
   const bool doWarn   = mia & MIA_warn;
@@ -998,12 +998,12 @@ hot                                                                     \
 TypedValue* nm(TypedValue* base, TypedValue key, MInstrState* mis) {    \
   return elemImpl<keyType, WDRU(attrs)>(base, key, mis);                \
 }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(ELEM)
 }
 #undef ELEM
 
-void HhbcTranslator::VectorTranslator::emitElem() {
+void HhbcTranslator::MInstrTranslator::emitElem() {
   MemberCode mCode = m_ni.immVecM[m_mInd];
   MInstrAttr mia = MInstrAttr(m_mii.getAttr(mCode) & MIA_intermediate);
   SSATmp* key = getKey();
@@ -1100,12 +1100,12 @@ static inline TypedValue* elemArrayImpl(
     return elemArrayImpl<keyType, checkForInt, warn>(   \
       a, keyAsRaw<keyType>(key));                       \
   }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(ELEM)
 }
 #undef ELEM
 
-void HhbcTranslator::VectorTranslator::emitElemArray(SSATmp* key, bool warn) {
+void HhbcTranslator::MInstrTranslator::emitElemArray(SSATmp* key, bool warn) {
   KeyType keyType;
   bool checkForInt;
   m_ht.checkStrictlyInteger(key, keyType, checkForInt);
@@ -1116,11 +1116,11 @@ void HhbcTranslator::VectorTranslator::emitElemArray(SSATmp* key, bool warn) {
 }
 #undef HELPER_TABLE
 
-void HhbcTranslator::VectorTranslator::emitNewElem() {
+void HhbcTranslator::MInstrTranslator::emitNewElem() {
   PUNT(emitNewElem);
 }
 
-void HhbcTranslator::VectorTranslator::emitRatchetRefs() {
+void HhbcTranslator::MInstrTranslator::emitRatchetRefs() {
   if (ratchetInd() < 0 || ratchetInd() >= int(nLogicalRatchets())) {
     return;
   }
@@ -1153,13 +1153,13 @@ void HhbcTranslator::VectorTranslator::emitRatchetRefs() {
   );
 }
 
-void HhbcTranslator::VectorTranslator::emitFinalMOp() {
-  typedef void (HhbcTranslator::VectorTranslator::*MemFun)();
+void HhbcTranslator::MInstrTranslator::emitFinalMOp() {
+  typedef void (HhbcTranslator::MInstrTranslator::*MemFun)();
 
   switch (m_ni.immVecM[m_mInd]) {
   case MEC: case MEL: case MET: case MEI:
     static MemFun elemOps[] = {
-#   define MII(instr, ...) &HhbcTranslator::VectorTranslator::emit##instr##Elem,
+#   define MII(instr, ...) &HhbcTranslator::MInstrTranslator::emit##instr##Elem,
     MINSTRS
 #   undef MII
     };
@@ -1168,7 +1168,7 @@ void HhbcTranslator::VectorTranslator::emitFinalMOp() {
 
   case MPC: case MPL: case MPT:
     static MemFun propOps[] = {
-#   define MII(instr, ...) &HhbcTranslator::VectorTranslator::emit##instr##Prop,
+#   define MII(instr, ...) &HhbcTranslator::MInstrTranslator::emit##instr##Prop,
     MINSTRS
 #   undef MII
     };
@@ -1179,7 +1179,7 @@ void HhbcTranslator::VectorTranslator::emitFinalMOp() {
     assert(m_mii.getAttr(MW) & MIA_final);
     static MemFun newOps[] = {
 #   define MII(instr, attrs, bS, iS, vC, fN) \
-      &HhbcTranslator::VectorTranslator::emit##fN,
+      &HhbcTranslator::MInstrTranslator::emit##fN,
     MINSTRS
 #   undef MII
     };
@@ -1218,12 +1218,12 @@ TypedValue nm(Class* ctx, TypedValue* base, TypedValue key,             \
                      MInstrState* mis) {                                \
   return cGetPropImpl<__VA_ARGS__>(ctx, base, key, mis);                \
 }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(PROP)
 }
 #undef PROP
 
-void HhbcTranslator::VectorTranslator::emitCGetProp() {
+void HhbcTranslator::MInstrTranslator::emitCGetProp() {
   assert(!m_ni.outLocal);
 
   const Class* knownCls = nullptr;
@@ -1274,12 +1274,12 @@ RefData* nm(Class* ctx, TypedValue* base, TypedValue key,               \
                      MInstrState* mis) {                                \
   return vGetPropImpl<__VA_ARGS__>(ctx, base, key, mis);                \
 }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(PROP)
 }
 #undef PROP
 
-void HhbcTranslator::VectorTranslator::emitVGetProp() {
+void HhbcTranslator::MInstrTranslator::emitVGetProp() {
   SSATmp* key = getKey();
   typedef RefData* (*OpFunc)(Class*, TypedValue*, TypedValue, MInstrState*);
   BUILD_OPTAB_HOT(getKeyTypeNoInt(key), m_base->isA(Type::Obj));
@@ -1306,12 +1306,12 @@ static inline bool issetEmptyPropImpl(Class* ctx, TypedValue* base,
 uint64_t nm(Class* ctx, TypedValue* base, TypedValue key) {             \
   return issetEmptyPropImpl<__VA_ARGS__>(ctx, base, key);               \
 }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(ISSET)
 }
 #undef ISSET
 
-void HhbcTranslator::VectorTranslator::emitIssetEmptyProp(bool isEmpty) {
+void HhbcTranslator::MInstrTranslator::emitIssetEmptyProp(bool isEmpty) {
   SSATmp* key = getKey();
   typedef uint64_t (*OpFunc)(Class*, TypedValue*, TypedValue);
   BUILD_OPTAB(isEmpty, m_base->isA(Type::Obj));
@@ -1320,11 +1320,11 @@ void HhbcTranslator::VectorTranslator::emitIssetEmptyProp(bool isEmpty) {
 }
 #undef HELPER_TABLE
 
-void HhbcTranslator::VectorTranslator::emitIssetProp() {
+void HhbcTranslator::MInstrTranslator::emitIssetProp() {
   emitIssetEmptyProp(false);
 }
 
-void HhbcTranslator::VectorTranslator::emitEmptyProp() {
+void HhbcTranslator::MInstrTranslator::emitEmptyProp() {
   emitIssetEmptyProp(true);
 }
 
@@ -1343,12 +1343,12 @@ static inline void setPropImpl(Class* ctx, TypedValue* base,
 void nm(Class* ctx, TypedValue* base, TypedValue key, Cell val) {       \
   setPropImpl<__VA_ARGS__>(ctx, base, key, val);                        \
 }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(PROP)
 }
 #undef PROP
 
-void HhbcTranslator::VectorTranslator::emitSetProp() {
+void HhbcTranslator::MInstrTranslator::emitSetProp() {
   SSATmp* value = getValue();
 
   /* If we know the class for the current base, emit a direct property set. */
@@ -1398,12 +1398,12 @@ TypedValue nm(TypedValue* base, TypedValue key,                        \
               Cell val, MInstrState* mis, SetOpOp op) {                \
   return setOpPropImpl<__VA_ARGS__>(base, key, val, mis, op);          \
 }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(SETOP)
 }
 #undef SETOP
 
-void HhbcTranslator::VectorTranslator::emitSetOpProp() {
+void HhbcTranslator::MInstrTranslator::emitSetOpProp() {
   SetOpOp op = SetOpOp(m_ni.imm[0].u_OA);
   SSATmp* key = getKey();
   SSATmp* value = getValue();
@@ -1439,12 +1439,12 @@ TypedValue nm(TypedValue* base, TypedValue key,                         \
               MInstrState* mis, IncDecOp op) {                          \
   return incDecPropImpl<__VA_ARGS__>(base, key, mis, op);               \
 }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(INCDEC)
 }
 #undef INCDEC
 
-void HhbcTranslator::VectorTranslator::emitIncDecProp() {
+void HhbcTranslator::MInstrTranslator::emitIncDecProp() {
   IncDecOp op = IncDecOp(m_ni.imm[0].u_OA);
   SSATmp* key = getKey();
   typedef TypedValue (*OpFunc)(TypedValue*, TypedValue,
@@ -1477,12 +1477,12 @@ void nm(Class* ctx, TypedValue* base, TypedValue key,                   \
                       RefData* val, MInstrState* mis) {                 \
   bindPropImpl<__VA_ARGS__>(ctx, base, key, val, mis);                  \
 }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(PROP)
 }
 #undef PROP
 
-void HhbcTranslator::VectorTranslator::emitBindProp() {
+void HhbcTranslator::MInstrTranslator::emitBindProp() {
   SSATmp* key = getKey();
   SSATmp* box = getValue();
   typedef void (*OpFunc)(Class*, TypedValue*, TypedValue, RefData*,
@@ -1509,12 +1509,12 @@ static inline void unsetPropImpl(Class* ctx, TypedValue* base,
   static void nm(Class* ctx, TypedValue* base, TypedValue key) {        \
     unsetPropImpl<__VA_ARGS__>(ctx, base, key);                         \
   }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(PROP)
 }
 #undef PROP
 
-void HhbcTranslator::VectorTranslator::emitUnsetProp() {
+void HhbcTranslator::MInstrTranslator::emitUnsetProp() {
   SSATmp* key = getKey();
 
   if (m_base->type().strip().not(Type::Obj)) {
@@ -1574,12 +1574,12 @@ hot                                                                     \
 TypedValue nm(ArrayData* a, TypedValue* key) {                          \
   return arrayGetImpl<keyType, checkForInt>(a, keyAsRaw<keyType>(key)); \
 }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(ELEM)
 }
 #undef ELEM
 
-void HhbcTranslator::VectorTranslator::emitArrayGet(SSATmp* key) {
+void HhbcTranslator::MInstrTranslator::emitArrayGet(SSATmp* key) {
   KeyType keyType;
   bool checkForInt;
   m_ht.checkStrictlyInteger(key, keyType, checkForInt);
@@ -1598,29 +1598,29 @@ void HhbcTranslator::VectorTranslator::emitArrayGet(SSATmp* key) {
 }
 #undef HELPER_TABLE
 
-namespace VectorHelpers {
+namespace MInstrHelpers {
 TypedValue vectorGet(c_Vector* vec, int64_t key) {
   TypedValue* ret = vec->at(key);
   return *ret;
 }
 }
 
-void HhbcTranslator::VectorTranslator::emitVectorGet(SSATmp* key) {
+void HhbcTranslator::MInstrTranslator::emitVectorGet(SSATmp* key) {
   SSATmp* value = gen(VectorGet, getCatchTrace(),
-                      cns((TCA)VectorHelpers::vectorGet), m_base, key);
+                      cns((TCA)MInstrHelpers::vectorGet), m_base, key);
   m_result = gen(IncRef, value);
 }
 
-namespace VectorHelpers {
+namespace MInstrHelpers {
 TypedValue pairGet(c_Pair* pair, int64_t key) {
   TypedValue* ret = pair->at(key);
   return *ret;
 }
 }
 
-void HhbcTranslator::VectorTranslator::emitPairGet(SSATmp* key) {
+void HhbcTranslator::MInstrTranslator::emitPairGet(SSATmp* key) {
   SSATmp* value = gen(PairGet, getCatchTrace(),
-                      cns((TCA)VectorHelpers::pairGet), m_base, key);
+                      cns((TCA)MInstrHelpers::pairGet), m_base, key);
   m_result = gen(IncRef, value);
 }
 
@@ -1641,12 +1641,12 @@ hot                                                         \
 TypedValue nm(c_Map* map, TypedValue* key) {          \
   return mapGetImpl<keyType>(map, keyAsRaw<keyType>(key)); \
 }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(ELEM)
 }
 #undef ELEM
 
-void HhbcTranslator::VectorTranslator::emitMapGet(SSATmp* key) {
+void HhbcTranslator::MInstrTranslator::emitMapGet(SSATmp* key) {
   assert(key->isA(Type::Int) || key->isA(Type::Str));
   KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
 
@@ -1675,12 +1675,12 @@ hot                                                              \
 TypedValue nm(c_StableMap* map, TypedValue* key) {               \
   return stableMapGetImpl<keyType>(map, keyAsRaw<keyType>(key)); \
 }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(ELEM)
 }
 #undef ELEM
 
-void HhbcTranslator::VectorTranslator::emitStableMapGet(SSATmp* key) {
+void HhbcTranslator::MInstrTranslator::emitStableMapGet(SSATmp* key) {
   assert(key->isA(Type::Int) || key->isA(Type::Str));
   KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
 
@@ -1717,12 +1717,12 @@ hot                                                                     \
 TypedValue nm(TypedValue* base, TypedValue key, MInstrState* mis) {     \
   return cGetElemImpl<__VA_ARGS__>(base, key, mis);                     \
 }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(ELEM)
 }
 #undef ELEM
 
-void HhbcTranslator::VectorTranslator::emitCGetElem() {
+void HhbcTranslator::MInstrTranslator::emitCGetElem() {
   SSATmp* key = getKey();
 
   SimpleOp simpleOpType = isSimpleCollectionOp();
@@ -1777,12 +1777,12 @@ static inline RefData* vGetElemImpl(TypedValue* base, TypedValue keyVal,
 RefData* nm(TypedValue* base, TypedValue key, MInstrState* mis) {       \
   return vGetElemImpl<__VA_ARGS__>(base, key,  mis);                    \
 }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(ELEM)
 }
 #undef ELEM
 
-void HhbcTranslator::VectorTranslator::emitVGetElem() {
+void HhbcTranslator::MInstrTranslator::emitVGetElem() {
   SSATmp* key = getKey();
   typedef RefData* (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
   BUILD_OPTAB(getKeyType(key));
@@ -1816,12 +1816,12 @@ hot                                                                     \
 uint64_t nm(TypedValue* base, TypedValue key, MInstrState* mis) {       \
   return issetEmptyElemImpl<__VA_ARGS__>(base, key, mis);               \
 }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(ISSET)
 }
 #undef ISSET
 
-void HhbcTranslator::VectorTranslator::emitIssetEmptyElem(bool isEmpty) {
+void HhbcTranslator::MInstrTranslator::emitIssetEmptyElem(bool isEmpty) {
   SSATmp* key = getKey();
 
   typedef uint64_t (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
@@ -1855,12 +1855,12 @@ static inline uint64_t arrayIssetImpl(
   uint64_t nm(ArrayData* a, TypedValue* key) {                          \
     return arrayIssetImpl<keyType, checkForInt>(a, keyAsRaw<keyType>(key)); \
   }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(ISSET)
 }
 #undef ISSET
 
-void HhbcTranslator::VectorTranslator::emitArrayIsset() {
+void HhbcTranslator::MInstrTranslator::emitArrayIsset() {
   SSATmp* key = getKey();
   KeyType keyType;
   bool checkForInt;
@@ -1880,32 +1880,32 @@ void HhbcTranslator::VectorTranslator::emitArrayIsset() {
 }
 #undef HELPER_TABLE
 
-namespace VectorHelpers {
+namespace MInstrHelpers {
 uint64_t vectorIsset(c_Vector* vec, int64_t index) {
   return vec->get(index) != nullptr;
 }
 }
 
-void HhbcTranslator::VectorTranslator::emitVectorIsset() {
+void HhbcTranslator::MInstrTranslator::emitVectorIsset() {
   SSATmp* key = getKey();
   assert(key->isA(Type::Int));
   m_result = gen(VectorIsset,
-                 cns((TCA)VectorHelpers::vectorIsset),
+                 cns((TCA)MInstrHelpers::vectorIsset),
                  m_base,
                  key);
 }
 
-namespace VectorHelpers {
+namespace MInstrHelpers {
 uint64_t pairIsset(c_Pair* pair, int64_t index) {
   return pair->get(index) != nullptr;
 }
 }
 
-void HhbcTranslator::VectorTranslator::emitPairIsset() {
+void HhbcTranslator::MInstrTranslator::emitPairIsset() {
   SSATmp* key = getKey();
   assert(key->isA(Type::Int));
   m_result = gen(PairIsset,
-                 cns((TCA)VectorHelpers::pairIsset),
+                 cns((TCA)MInstrHelpers::pairIsset),
                  m_base,
                  key);
 }
@@ -1926,12 +1926,12 @@ hot                                                          \
 uint64_t nm(c_Map* map, TypedValue* key) {                   \
   return mapIssetImpl<keyType>(map, keyAsRaw<keyType>(key)); \
 }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(ELEM)
 }
 #undef ELEM
 
-void HhbcTranslator::VectorTranslator::emitMapIsset() {
+void HhbcTranslator::MInstrTranslator::emitMapIsset() {
   SSATmp* key = getKey();
   assert(key->isA(Type::Int) || key->isA(Type::Str));
   KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
@@ -1958,12 +1958,12 @@ hot                                                                \
 uint64_t nm(c_StableMap* map, TypedValue* key) {                   \
   return stableMapIssetImpl<keyType>(map, keyAsRaw<keyType>(key)); \
 }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(ELEM)
 }
 #undef ELEM
 
-void HhbcTranslator::VectorTranslator::emitStableMapIsset() {
+void HhbcTranslator::MInstrTranslator::emitStableMapIsset() {
   SSATmp* key = getKey();
   assert(key->isA(Type::Int) || key->isA(Type::Str));
   KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
@@ -1974,7 +1974,7 @@ void HhbcTranslator::VectorTranslator::emitStableMapIsset() {
 }
 #undef HELPER_TABLE
 
-void HhbcTranslator::VectorTranslator::emitIssetElem() {
+void HhbcTranslator::MInstrTranslator::emitIssetElem() {
   SimpleOp simpleOpType = isSimpleCollectionOp();
   switch (simpleOpType) {
   case SimpleOp::Array:
@@ -1998,7 +1998,7 @@ void HhbcTranslator::VectorTranslator::emitIssetElem() {
   }
 }
 
-void HhbcTranslator::VectorTranslator::emitEmptyElem() {
+void HhbcTranslator::MInstrTranslator::emitEmptyElem() {
   emitIssetEmptyElem(true);
 }
 
@@ -2043,12 +2043,12 @@ nm(ArrayData* a, TypedValue* key, TypedValue value, RefData* ref) {     \
   return arraySetImpl<keyType, checkForInt, setRef>(                    \
     a, keyAsRaw<keyType>(key), tvAsCVarRef(&value), ref);               \
 }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(ELEM)
 }
 #undef ELEM
 
-void HhbcTranslator::VectorTranslator::emitArraySet(SSATmp* key,
+void HhbcTranslator::MInstrTranslator::emitArraySet(SSATmp* key,
                                                     SSATmp* value) {
   assert(m_iInd == m_mii.valCount() + 1);
   const int baseStkIdx = m_mii.valCount();
@@ -2081,9 +2081,9 @@ void HhbcTranslator::VectorTranslator::emitArraySet(SSATmp* key,
       // newArr has already been incref'd in the helper.
       gen(StLoc, LocalId(base.location.offset), m_tb.fp(), newArr);
     } else if (base.location.space == Location::Stack) {
-      VectorEffects ve(newArr->inst());
-      assert(ve.baseValChanged);
-      assert(ve.baseType.subtypeOf(Type::Arr));
+      MInstrEffects effects(newArr->inst());
+      assert(effects.baseValChanged);
+      assert(effects.baseType.subtypeOf(Type::Arr));
       m_ht.extendStack(baseStkIdx, Type::Gen);
       m_ht.replace(baseStkIdx, newArr);
     } else {
@@ -2095,7 +2095,7 @@ void HhbcTranslator::VectorTranslator::emitArraySet(SSATmp* key,
 }
 #undef HELPER_TABLE
 
-namespace VectorHelpers {
+namespace MInstrHelpers {
 void setWithRefElemC(TypedValue* base, TypedValue keyVal, TypedValue* val,
                      MInstrState* mis) {
   base = HPHP::ElemD<false, false>(mis->tvScratch, mis->tvRef, base, &keyVal);
@@ -2117,7 +2117,7 @@ void setWithRefNewElem(TypedValue* base, TypedValue* val,
 }
 }
 
-void HhbcTranslator::VectorTranslator::emitSetWithRefLElem() {
+void HhbcTranslator::MInstrTranslator::emitSetWithRefLElem() {
   SSATmp* key = getKey();
   SSATmp* locAddr = getValAddr();
   if (m_base->type().strip().subtypeOf(Type::Arr) &&
@@ -2126,46 +2126,46 @@ void HhbcTranslator::VectorTranslator::emitSetWithRefLElem() {
     assert(m_strTestResult == nullptr);
   } else {
     genStk(SetWithRefElem, getCatchTrace(),
-           cns((TCA)VectorHelpers::setWithRefElemC),
+           cns((TCA)MInstrHelpers::setWithRefElemC),
            m_base, key, locAddr, genMisPtr());
   }
   m_result = nullptr;
 }
 
-void HhbcTranslator::VectorTranslator::emitSetWithRefLProp() {
+void HhbcTranslator::MInstrTranslator::emitSetWithRefLProp() {
   SPUNT(__func__);
 }
 
-void HhbcTranslator::VectorTranslator::emitSetWithRefRElem() {
+void HhbcTranslator::MInstrTranslator::emitSetWithRefRElem() {
   emitSetWithRefLElem();
 }
 
-void HhbcTranslator::VectorTranslator::emitSetWithRefRProp() {
+void HhbcTranslator::MInstrTranslator::emitSetWithRefRProp() {
   emitSetWithRefLProp();
 }
 
-void HhbcTranslator::VectorTranslator::emitSetWithRefNewElem() {
+void HhbcTranslator::MInstrTranslator::emitSetWithRefNewElem() {
   if (m_base->type().strip().subtypeOf(Type::Arr) &&
       getValue()->type().notBoxed()) {
     emitSetNewElem();
   } else {
     genStk(SetWithRefNewElem, getCatchTrace(),
-           cns((TCA)VectorHelpers::setWithRefNewElem),
+           cns((TCA)MInstrHelpers::setWithRefNewElem),
            m_base, getValAddr(), genMisPtr());
   }
   m_result = nullptr;
 }
 
-namespace VectorHelpers {
+namespace MInstrHelpers {
 void vectorSet(c_Vector* vec, int64_t key, Cell value) {
   vec->set(key, &value);
 }
 }
 
-void HhbcTranslator::VectorTranslator::emitVectorSet(
+void HhbcTranslator::MInstrTranslator::emitVectorSet(
     SSATmp* key, SSATmp* value) {
   gen(VectorSet, getCatchTrace(),
-      cns((TCA)VectorHelpers::vectorSet), m_base, key, value);
+      cns((TCA)MInstrHelpers::vectorSet), m_base, key, value);
   m_result = value;
 }
 
@@ -2187,12 +2187,12 @@ hot                                                             \
 void nm(c_Map* map, TypedValue* key, Cell value) {              \
   mapSetImpl<keyType>(map, keyAsRaw<keyType>(key), value);      \
 }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(ELEM)
 }
 #undef ELEM
 
-void HhbcTranslator::VectorTranslator::emitMapSet(
+void HhbcTranslator::MInstrTranslator::emitMapSet(
     SSATmp* key, SSATmp* value) {
   assert(key->isA(Type::Int) || key->isA(Type::Str));
   KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
@@ -2223,12 +2223,12 @@ hot                                                                 \
 void nm(c_StableMap* map, TypedValue* key, Cell value) {            \
   stableMapSetImpl<keyType>(map, keyAsRaw<keyType>(key), value);    \
 }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(ELEM)
 }
 #undef ELEM
 
-void HhbcTranslator::VectorTranslator::emitStableMapSet(
+void HhbcTranslator::MInstrTranslator::emitStableMapSet(
     SSATmp* key, SSATmp* value) {
   assert(key->isA(Type::Int) || key->isA(Type::Str));
   KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
@@ -2259,12 +2259,12 @@ hot                                                                     \
 StringData* nm(TypedValue* base, TypedValue key, Cell val) {            \
   return setElemImpl<__VA_ARGS__>(base, key, val);                      \
 }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(ELEM)
 }
 #undef ELEM
 
-void HhbcTranslator::VectorTranslator::emitSetElem() {
+void HhbcTranslator::MInstrTranslator::emitSetElem() {
   SSATmp* value = getValue();
   SSATmp* key = getKey();
 
@@ -2332,13 +2332,13 @@ TypedValue nm(TypedValue* base, TypedValue key, Cell val,               \
   return setOpElemImpl<__VA_ARGS__>(base, key, val, mis);               \
 }
 #define SETOP_OP(op, bcOp) HELPER_TABLE(SETOP, op)
-namespace VectorHelpers {
+namespace MInstrHelpers {
 SETOP_OPS
 }
 #undef SETOP_OP
 #undef SETOP
 
-void HhbcTranslator::VectorTranslator::emitSetOpElem() {
+void HhbcTranslator::MInstrTranslator::emitSetOpElem() {
   SetOpOp op = SetOpOp(m_ni.imm[0].u_OA);
   SSATmp* key = getKey();
   typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, Cell, MInstrState*);
@@ -2367,13 +2367,13 @@ TypedValue nm(TypedValue* base, TypedValue key, MInstrState* mis) {     \
   return incDecElemImpl<__VA_ARGS__>(base, key, mis);                   \
 }
 #define INCDEC_OP(op) HELPER_TABLE(INCDEC, op)
-namespace VectorHelpers {
+namespace MInstrHelpers {
 INCDEC_OPS
 }
 #undef INCDEC_OP
 #undef INCDEC
 
-void HhbcTranslator::VectorTranslator::emitIncDecElem() {
+void HhbcTranslator::MInstrTranslator::emitIncDecElem() {
   IncDecOp op = IncDecOp(m_ni.imm[0].u_OA);
   SSATmp* key = getKey();
   typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
@@ -2385,7 +2385,7 @@ void HhbcTranslator::VectorTranslator::emitIncDecElem() {
 }
 #undef HELPER_TABLE
 
-namespace VectorHelpers {
+namespace MInstrHelpers {
 void bindElemC(TypedValue* base, TypedValue keyVal, RefData* val,
                MInstrState* mis) {
   base = HPHP::ElemD<false, true>(mis->tvScratch, mis->tvRef, base, &keyVal);
@@ -2395,10 +2395,10 @@ void bindElemC(TypedValue* base, TypedValue keyVal, RefData* val,
 }
 }
 
-void HhbcTranslator::VectorTranslator::emitBindElem() {
+void HhbcTranslator::MInstrTranslator::emitBindElem() {
   SSATmp* key = getKey();
   SSATmp* box = getValue();
-  genStk(BindElem, getCatchTrace(), cns((TCA)VectorHelpers::bindElemC),
+  genStk(BindElem, getCatchTrace(), cns((TCA)MInstrHelpers::bindElemC),
          m_base, key, box, genMisPtr());
   m_result = box;
 }
@@ -2420,12 +2420,12 @@ hot                                                             \
 void nm(TypedValue* base, TypedValue key) {                     \
   unsetElemImpl<__VA_ARGS__>(base, key);                        \
 }
-namespace VectorHelpers {
+namespace MInstrHelpers {
 HELPER_TABLE(ELEM)
 }
 #undef ELEM
 
-void HhbcTranslator::VectorTranslator::emitUnsetElem() {
+void HhbcTranslator::MInstrTranslator::emitUnsetElem() {
   SSATmp* key = getKey();
 
   Type baseType = m_base->type().strip();
@@ -2446,15 +2446,15 @@ void HhbcTranslator::VectorTranslator::emitUnsetElem() {
 }
 #undef HELPER_TABLE
 
-void HhbcTranslator::VectorTranslator::emitNotSuppNewElem() {
+void HhbcTranslator::MInstrTranslator::emitNotSuppNewElem() {
   not_reached();
 }
 
-void HhbcTranslator::VectorTranslator::emitVGetNewElem() {
+void HhbcTranslator::MInstrTranslator::emitVGetNewElem() {
   SPUNT(__func__);
 }
 
-void HhbcTranslator::VectorTranslator::emitSetNewElem() {
+void HhbcTranslator::MInstrTranslator::emitSetNewElem() {
   SSATmp* value = getValue();
   if (m_base->type().subtypeOf(Type::PtrToArr)) {
     gen(SetNewElemArray, getCatchSetTrace(), m_base, value);
@@ -2464,21 +2464,21 @@ void HhbcTranslator::VectorTranslator::emitSetNewElem() {
   m_result = value;
 }
 
-void HhbcTranslator::VectorTranslator::emitSetOpNewElem() {
+void HhbcTranslator::MInstrTranslator::emitSetOpNewElem() {
   SPUNT(__func__);
 }
 
-void HhbcTranslator::VectorTranslator::emitIncDecNewElem() {
+void HhbcTranslator::MInstrTranslator::emitIncDecNewElem() {
   SPUNT(__func__);
 }
 
-void HhbcTranslator::VectorTranslator::emitBindNewElem() {
+void HhbcTranslator::MInstrTranslator::emitBindNewElem() {
   SSATmp* box = getValue();
   genStk(BindNewElem, getCatchTrace(), m_base, box, genMisPtr());
   m_result = box;
 }
 
-void HhbcTranslator::VectorTranslator::emitMPost() {
+void HhbcTranslator::MInstrTranslator::emitMPost() {
   SSATmp* catchSp = nullptr;
   if (m_failedSetTrace) {
     catchSp = m_failedSetTrace->back()->back()->src(0);
@@ -2550,7 +2550,7 @@ void HhbcTranslator::VectorTranslator::emitMPost() {
   emitSideExits(catchSp, nStack);
 }
 
-void HhbcTranslator::VectorTranslator::emitSideExits(SSATmp* catchSp,
+void HhbcTranslator::MInstrTranslator::emitSideExits(SSATmp* catchSp,
                                                      int nStack) {
   auto const nextOff = m_ht.nextBcOff();
   auto const op = m_ni.mInstrOp();
@@ -2608,7 +2608,7 @@ void HhbcTranslator::VectorTranslator::emitSideExits(SSATmp* catchSp,
   }
 }
 
-bool HhbcTranslator::VectorTranslator::needFirstRatchet() const {
+bool HhbcTranslator::MInstrTranslator::needFirstRatchet() const {
   if (m_ni.inputs[m_mii.valCount()]->valueType() == KindOfArray) {
     switch (m_ni.immVecM[0]) {
     case MEC: case MEL: case MET: case MEI: return false;
@@ -2619,7 +2619,7 @@ bool HhbcTranslator::VectorTranslator::needFirstRatchet() const {
   return true;
 }
 
-bool HhbcTranslator::VectorTranslator::needFinalRatchet() const {
+bool HhbcTranslator::MInstrTranslator::needFinalRatchet() const {
   return m_mii.finalGet();
 }
 
@@ -2659,7 +2659,7 @@ bool HhbcTranslator::VectorTranslator::needFinalRatchet() const {
 //     logical ratchet
 //   SetElemL
 //     no ratchet
-unsigned HhbcTranslator::VectorTranslator::nLogicalRatchets() const {
+unsigned HhbcTranslator::MInstrTranslator::nLogicalRatchets() const {
   // If we've proven elsewhere that we don't need an MInstrState struct, we
   // know this translation won't need any ratchets
   if (!m_needMIS) return 0;
@@ -2670,7 +2670,7 @@ unsigned HhbcTranslator::VectorTranslator::nLogicalRatchets() const {
   return ratchets;
 }
 
-int HhbcTranslator::VectorTranslator::ratchetInd() const {
+int HhbcTranslator::MInstrTranslator::ratchetInd() const {
   return needFirstRatchet() ? int(m_mInd) : int(m_mInd) - 1;
 }
 

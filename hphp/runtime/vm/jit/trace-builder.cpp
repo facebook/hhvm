@@ -334,8 +334,8 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     break;
   }
 
-  if (VectorEffects::supported(inst)) {
-    VectorEffects::get(inst,
+  if (MInstrEffects::supported(inst)) {
+    MInstrEffects::get(inst,
                        [&](uint32_t id, SSATmp* val) { // storeLocalValue
                          setLocalValue(id, val);
                        },

@@ -595,7 +595,7 @@ predictOutputs(SrcKey startSk,
      * if the base was a string, or (most commonly) its first stack input. We
      * mark the output as predicted here and do a very rough approximation of
      * what really happens; most of the time the prediction will be a noop
-     * since VectorTranslator side exits in all uncommon cases.
+     * since MInstrTranslator side exits in all uncommon cases.
      */
 
     // If the base is a string, the output is probably a string.

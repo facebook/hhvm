@@ -452,7 +452,7 @@ class Redis {
                                     $key, $start, $end, $opts);
   }
 
-  public function zRevRange($key, $start, $end, $withscore = false) {
+  public function zRevRange($key, $start, $end, $withscores = false) {
     $args = [
       $this->prefix($key),
       (int)$start,

@@ -48,75 +48,153 @@ void StringData::release() {
 
 //////////////////////////////////////////////////////////////////////
 
-// equality checker for AtomicHashMap
-struct ahm_string_data_same {
-  bool operator()(const StringData *s1, const StringData *s2) const {
-    // ahm uses -1, -2, -3 as magic values
-    return int64_t(s1) > 0 && s1->same(s2);
+namespace {
+
+// Pointer to StringData, or pointer to StringSlice.
+typedef intptr_t StrInternKey;
+
+constexpr intptr_t kAhmMagicThreshold = -3;
+
+StrInternKey make_intern_key(const StringData* sd) {
+  auto const ret = reinterpret_cast<StrInternKey>(sd);
+  assert(ret > 0);
+  return ret;
+}
+
+StrInternKey make_intern_key(const StringSlice* sl) {
+  auto const ret = -reinterpret_cast<StrInternKey>(sl);
+  assert(ret < 0 && ret < kAhmMagicThreshold);
+  return ret;
+}
+
+const StringData* to_sdata(StrInternKey key) {
+  assert(key > 0);
+  return reinterpret_cast<const StringData*>(key);
+}
+
+const StringSlice* to_sslice(StrInternKey key) {
+  assert(key < 0 && key < kAhmMagicThreshold);
+  return reinterpret_cast<const StringSlice*>(-key);
+}
+
+// To avoid extra instructions in strintern_eq, we currently are
+// making use of the fact that StringSlice and StringData have the
+// same initial layout.  See the static_asserts in checkSane.
+const StringSlice* to_sslice_punned(StrInternKey key) {
+  if (UNLIKELY(key < 0)) {
+    return reinterpret_cast<const StringSlice*>(-key);
+  }
+  // Actually a StringData*, but same layout.
+  return reinterpret_cast<const StringSlice*>(key);
+}
+
+struct strintern_eq {
+  bool operator()(StrInternKey k1, StrInternKey k2) const {
+    if (k1 < 0) {
+      // AHM only gives lookup keys on the rhs of the equal operator
+      assert(k1 >= kAhmMagicThreshold);
+      return false;
+    }
+    assert(k2 >= 0 || k2 < kAhmMagicThreshold);
+    auto const sd1 = to_sdata(k1);
+    auto const s2 = to_sslice_punned(k2);
+    return sd1->size() == s2->len &&
+           wordsame(sd1->data(), s2->ptr, s2->len);
+  }
+};
+
+struct strintern_hash {
+  size_t operator()(StrInternKey k) const {
+    assert(k > 0 || k < kAhmMagicThreshold);
+    if (LIKELY(k > 0)) {
+      return to_sdata(k)->hash();
+    }
+    auto const slice = *to_sslice(k);
+    return hash_string_inline(slice.ptr, slice.len);
   }
 };
 
 // The uint32_t is used to hold TargetCache offsets for constants
-typedef folly::AtomicHashMap<const StringData *, uint32_t,
-                             string_data_hash,
-                             ahm_string_data_same> StringDataMap;
-static StringDataMap *s_stringDataMap;
+typedef folly::AtomicHashMap<StrInternKey,uint32_t,strintern_hash,strintern_eq>
+        StringDataMap;
+StringDataMap* s_stringDataMap;
 
 // If a string is static it better be the one in the table.
-#ifndef NDEBUG
-static bool checkStaticStr(const StringData* s) {
+DEBUG_ONLY bool checkStaticStr(const StringData* s) {
   assert(s->isStatic());
-  StringDataMap::const_iterator it = s_stringDataMap->find(s);
+  auto DEBUG_ONLY const it = s_stringDataMap->find(make_intern_key(s));
   assert(it != s_stringDataMap->end());
-  assert(it->first == s);
+  assert(to_sdata(it->first) == s);
   return true;
 }
-#endif
+
+void create_string_data_map() {
+  StringDataMap::Config config;
+  config.growthFactor = 1;
+  s_stringDataMap =
+    new StringDataMap(RuntimeOption::EvalInitialStaticStringTableSize,
+                      config);
+}
+
+}
+
+//////////////////////////////////////////////////////////////////////
 
 size_t StringData::GetStaticStringCount() {
   if (!s_stringDataMap) return 0;
   return s_stringDataMap->size();
 }
 
-StringData *StringData::GetStaticString(const StringData *str) {
+StringData* StringData::InsertStaticString(StringSlice slice) {
+  auto const sd = static_cast<StringData*>(
+    Util::low_malloc(sizeof(StringData))
+  );
+  new (sd) StringData(slice.ptr, slice.len, CopyMalloc);
+  sd->setStatic();
+  auto pair = s_stringDataMap->insert(make_intern_key(sd), 0);
+  if (!pair.second) {
+    sd->~StringData();
+    Util::low_free(sd);
+  }
+  assert(to_sdata(pair.first->first) != nullptr);
+  return const_cast<StringData*>(to_sdata(pair.first->first));
+}
+
+StringData* StringData::GetStaticString(const StringData* str) {
   if (UNLIKELY(!s_stringDataMap)) {
-    StringDataMap::Config config;
-    config.growthFactor = 1;
-    s_stringDataMap =
-      new StringDataMap(RuntimeOption::EvalInitialStaticStringTableSize,
-                        config);
+    create_string_data_map();
   }
   if (str->isStatic()) {
     assert(checkStaticStr(str));
     return const_cast<StringData*>(str);
   }
-  StringDataMap::const_iterator it = s_stringDataMap->find(str);
+  auto const it = s_stringDataMap->find(make_intern_key(str));
   if (it != s_stringDataMap->end()) {
-    return const_cast<StringData*>(it->first);
+    return const_cast<StringData*>(to_sdata(it->first));
   }
-  // Lookup failed, so do the hard work of creating a StringData with its own
-  // copy of the key string, so that the atomic insert() has a permanent key.
-  StringData *sd = (StringData*)Util::low_malloc(sizeof(StringData));
-  new (sd) StringData(str->data(), str->size(), CopyMalloc);
-  sd->setStatic();
-  auto pair = s_stringDataMap->insert(sd, 0);
-  if (!pair.second) {
-    sd->~StringData();
-    Util::low_free(sd);
-  }
-  assert(pair.first->first != nullptr);
-  return const_cast<StringData*>(pair.first->first);
+  return InsertStaticString(str->slice());
 }
 
-StringData *StringData::LookupStaticString(const StringData *str) {
+StringData* StringData::GetStaticString(StringSlice slice) {
+  if (UNLIKELY(!s_stringDataMap)) {
+    create_string_data_map();
+  }
+  auto const it = s_stringDataMap->find(make_intern_key(&slice));
+  if (it != s_stringDataMap->end()) {
+    return const_cast<StringData*>(to_sdata(it->first));
+  }
+  return InsertStaticString(slice);
+}
+
+StringData* StringData::LookupStaticString(const StringData *str) {
   if (UNLIKELY(!s_stringDataMap)) return nullptr;
   if (str->isStatic()) {
     assert(checkStaticStr(str));
     return const_cast<StringData*>(str);
   }
-  StringDataMap::const_iterator it = s_stringDataMap->find(str);
+  auto const it = s_stringDataMap->find(make_intern_key(str));
   if (it != s_stringDataMap->end()) {
-    return const_cast<StringData*>(it->first);
+    return const_cast<StringData*>(to_sdata(it->first));
   }
   return nullptr;
 }
@@ -126,22 +204,25 @@ StringData* StringData::GetStaticString(const String& str) {
   return GetStaticString(str.get());
 }
 
-StringData *StringData::GetStaticString(const char *str, size_t len) {
-  StackStringData sd(str, len, CopyString);
-  return GetStaticString(&sd);
+StringData* StringData::GetStaticString(const char* str, size_t len) {
+  assert(len <= MaxSize);
+  return GetStaticString(StringSlice{str, static_cast<uint32_t>(len)});
 }
 
-StringData *StringData::GetStaticString(const std::string &str) {
-  return GetStaticString(str.c_str(), str.size());
+StringData* StringData::GetStaticString(const std::string& str) {
+  assert(str.size() <= MaxSize);
+  return GetStaticString(
+    StringSlice{str.c_str(), static_cast<uint32_t>(str.size())}
+  );
 }
 
-StringData *StringData::GetStaticString(const char *str) {
+StringData* StringData::GetStaticString(const char* str) {
   return GetStaticString(str, strlen(str));
 }
 
 uint32_t StringData::GetCnsHandle(const StringData* cnsName) {
   assert(s_stringDataMap);
-  StringDataMap::const_iterator it = s_stringDataMap->find(cnsName);
+  auto const it = s_stringDataMap->find(make_intern_key(cnsName));
   if (it != s_stringDataMap->end()) {
     return it->second;
   }
@@ -152,12 +233,12 @@ uint32_t StringData::DefCnsHandle(const StringData* cnsName, bool persistent) {
   uint32_t val = GetCnsHandle(cnsName);
   if (val) return val;
   if (!cnsName->isStatic()) {
-    // Its a dynamic constant, that doesnt correspond to
+    // Its a dynamic constant, that doesn't correspond to
     // an already allocated handle. We'll allocate it in
     // the request local TargetCache::s_constants instead.
     return 0;
   }
-  StringDataMap::iterator it = s_stringDataMap->find(cnsName);
+  auto const it = s_stringDataMap->find(make_intern_key(cnsName));
   assert(it != s_stringDataMap->end());
   if (!it->second) {
     Transl::TargetCache::allocConstant(&it->second, persistent);
@@ -173,13 +254,13 @@ Array StringData::GetConstants() {
   for (StringDataMap::const_iterator it = s_stringDataMap->begin();
        it != s_stringDataMap->end(); ++it) {
     if (it->second) {
-      TypedValue& tv =
+      auto& tv =
         Transl::TargetCache::handleToRef<TypedValue>(it->second);
       if (tv.m_type != KindOfUninit) {
-        StrNR key(const_cast<StringData*>(it->first));
+        StrNR key(const_cast<StringData*>(to_sdata(it->first)));
         a.set(key, tvAsVariant(&tv), true);
       } else if (tv.m_data.pref) {
-        StrNR key(const_cast<StringData*>(it->first));
+        StrNR key(const_cast<StringData*>(to_sdata(it->first)));
         ClassInfo::ConstantInfo* ci =
           (ClassInfo::ConstantInfo*)(void*)tv.m_data.pref;
         a.set(key, ci->getDeferredValue(), true);
@@ -524,8 +605,7 @@ static StringData** precompute_chars() {
   StringData** raw = new StringData*[256];
   for (int i = 0; i < 256; i++) {
     char s[2] = { (char)i, 0 };
-    StackStringData str(s, 1, CopyString);
-    raw[i] = StringData::GetStaticString(&str);
+    raw[i] = StringData::GetStaticString(&s[0], 1);
   }
   return raw;
 }
@@ -869,6 +949,10 @@ bool StringData::checkSane() const {
                 "m_count at wrong offset");
   static_assert(MaxSmallSize == sizeof(StringData) -
                         offsetof(StringData, m_small) - 1, "layout bustage");
+  static_assert(offsetof(StringSlice, ptr) == offsetof(StringData, m_data) &&
+                offsetof(StringSlice, len) == offsetof(StringData, m_len),
+                "StringSlice and StringData must have same pointer and size "
+                "layout for the StaticString map");
   assert(uint32_t(size()) <= MaxSize);
   assert(uint32_t(capacity()) < MaxSize);
   assert(size() < capacity());

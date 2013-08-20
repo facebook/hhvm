@@ -342,12 +342,13 @@ public:
    */
   void dump() const;
 
-  static StringData *GetStaticString(const StringData* str);
-  static StringData *GetStaticString(const std::string& str);
-  static StringData *GetStaticString(const String& str);
-  static StringData *GetStaticString(const char* str, size_t len);
-  static StringData *GetStaticString(const char* str);
-  static StringData *GetStaticString(char c);
+  static StringData* GetStaticString(const StringData* str);
+  static StringData* GetStaticString(StringSlice);
+  static StringData* GetStaticString(const std::string& str);
+  static StringData* GetStaticString(const String& str);
+  static StringData* GetStaticString(const char* str, size_t len);
+  static StringData* GetStaticString(const char* str);
+  static StringData* GetStaticString(char c);
 
   /* check if a static string exists that is the same as str
    * and if so, return it. Else, return nullptr. */
@@ -423,6 +424,8 @@ private:
   ~StringData() { checkStack(); releaseData(); }
 
 private:
+  static StringData* InsertStaticString(StringSlice);
+
   void initAttach(const char* data);
   void initAttach(const char* data, int len);
   void initCopy(const char* data);

@@ -1655,7 +1655,8 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
   }
   Cell* savedSP = m_stack.top();
 
-  if (f->numParams() > kStackCheckReenterPadding - kNumActRecCells) {
+  if (f->attrs() & AttrPhpLeafFn ||
+      f->numParams() > kStackCheckReenterPadding - kNumActRecCells) {
     checkStack(m_stack, f);
   }
 
@@ -1797,7 +1798,8 @@ void VMExecutionContext::invokeFuncFew(TypedValue* retval,
     thiz->incRefCount();
   }
   Cell* savedSP = m_stack.top();
-  if (argc > kStackCheckReenterPadding - kNumActRecCells) {
+  if (f->attrs() & AttrPhpLeafFn ||
+      argc > kStackCheckReenterPadding - kNumActRecCells) {
     checkStack(m_stack, f);
   }
   ActRec* ar = m_stack.allocA();

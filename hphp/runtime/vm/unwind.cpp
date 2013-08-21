@@ -395,6 +395,11 @@ UnwindAction exception_handler() noexcept {
     return UnwindAction::ResumeVM;
   }
 
+  catch (VMReenterStackOverflow&) {
+    pushFault(new FatalErrorException("Stack overflow"));
+    return UnwindAction::Propagate;
+  }
+
   catch (Exception& e) {
     pushFault(e.clone());;
     return enterUnwinder();

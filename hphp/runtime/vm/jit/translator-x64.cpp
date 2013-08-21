@@ -103,6 +103,7 @@
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/jit/x64-util.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
+#include "hphp/runtime/vm/unwind.h"
 
 #include "hphp/runtime/vm/jit/translator-x64-internal.h"
 
@@ -2308,21 +2309,31 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
     start = getTranslation(TranslArgs(dest, true));
   } break;
 
-  case REQ_STACK_OVERFLOW: {
-    /*
-     * we need to construct the pc of the fcall from the return
-     * address (which will be after the fcall). Because fcall is
-     * a variable length instruction, and because we sometimes
-     * delete instructions from the instruction stream, we
-     * need to use fpi regions to find the fcall.
-     */
-    const FPIEnt* fe = liveFunc()->findPrecedingFPI(
-      liveUnit()->offsetOf(vmpc()));
-    vmpc() = liveUnit()->at(fe->m_fcallOff);
-    assert(isFCallStar(toOp(*vmpc())));
-    raise_error("Stack overflow");
-    NOT_REACHED();
-  }
+  case REQ_STACK_OVERFLOW:
+    if (((ActRec*)info.saved_rStashedAr)->m_savedRbp == (uintptr_t)vmfp()) {
+      /*
+       * The normal case - we were called via FCall, or FCallArray.
+       * We need to construct the pc of the fcall from the return
+       * address (which will be after the fcall). Because fcall is
+       * a variable length instruction, and because we sometimes
+       * delete instructions from the instruction stream, we
+       * need to use fpi regions to find the fcall.
+       */
+      const FPIEnt* fe = liveFunc()->findPrecedingFPI(
+        liveUnit()->offsetOf(vmpc()));
+      vmpc() = liveUnit()->at(fe->m_fcallOff);
+      assert(isFCallStar(toOp(*vmpc())));
+      raise_error("Stack overflow");
+      NOT_REACHED();
+    } else {
+      /*
+       * We were called via re-entry
+       * Leak the params and the actrec, and tell the unwinder
+       * that there's nothing left to do in this "entry".
+       */
+      vmsp() = (Cell*)((ActRec*)info.saved_rStashedAr + 1);
+      throw VMReenterStackOverflow();
+    }
   }
 
   if (smashed && info.stubAddr) {

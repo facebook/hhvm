@@ -72,6 +72,14 @@ struct VMSwitchMode : std::exception {
 };
 
 /*
+ * Thrown for stack overflow thrown from a prolog while
+ * re-entering
+ */
+struct VMReenterStackOverflow : std::exception {
+  const char* what() const throw() { return "VMReenterStackOverflow"; }
+};
+
+/*
  * Same as VMSwitchMode, except for use from a builtin---the frame for
  * the builtin function should be unwound before resuming the VM.
  */

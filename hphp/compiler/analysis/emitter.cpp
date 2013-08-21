@@ -3996,14 +3996,9 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         TypePtr type = expr->getActualType();
         if (!type || !Type::SubType(ar, type,
                 Type::GetType(Type::KindOfObject, "WaitHandle"))) {
-          StringData* nLiteral = StringData::GetStaticString("getWaitHandle");
-          {
-            FPIRegionRecorder fpi(this, m_ue, m_evalStack, m_ue.bcPos());
-            e.FPushObjMethodD(0, nLiteral);
-          }
-          e.FCall(0);
-          emitConvertToCell(e);
+          emitConstMethodCallNoParams(e, "getWaitHandle");
         }
+        assert(m_evalStack.size() == 1);
 
         e.ContSuspend(normalLabel);
 
@@ -4027,6 +4022,16 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
   }
 
   not_reached();
+}
+
+void EmitterVisitor::emitConstMethodCallNoParams(Emitter& e, string name) {
+  StringData* nameLit = StringData::GetStaticString(name);
+  {
+    FPIRegionRecorder fpi(this, m_ue, m_evalStack, m_ue.bcPos());
+    e.FPushObjMethodD(0, nameLit);
+  }
+  e.FCall(0);
+  emitConvertToCell(e);
 }
 
 int EmitterVisitor::scanStackForLocation(int iLast) {
@@ -5475,7 +5480,18 @@ void EmitterVisitor::emitPostponedMeths() {
 
     if (meth->getFunctionScope()->isGenerator() ||
         meth->getFunctionScope()->isAsync()) {
-      emitMethodsForGenerator(p, top_fes);
+      // emit the outer 'create generator' function
+      m_curFunc = fe;
+      fe->setHasGeneratorAsBody(true);
+      emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
+      emitGeneratorCreate(meth);
+
+      // emit the generator body
+      m_curFunc = createFuncEmitterForGeneratorBody(meth, fe, top_fes);
+      if (m_curFunc) {
+        emitMethodMetadata(meth, p.m_closureUseVars, m_curFunc->top());
+        emitGeneratorBody(meth);
+      }
     } else {
       m_curFunc = fe;
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
@@ -5532,9 +5548,10 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
     }
   }
 
-  // assign id to continuationVarArgsLocal (generators - both methods)
-  if ((fe->isGenerator() || fe->hasGeneratorAsBody()) &&
-      meth->hasCallToGetArgs()) {
+  // assign id to continuationVarArgsLocal (generators/async - both methods)
+  if (meth->hasCallToGetArgs() &&
+      (meth->getFunctionScope()->isGenerator() ||
+       meth->getFunctionScope()->isAsync())) {
     fe->allocVarId(s_continuationVarArgsLocal);
   }
 
@@ -5687,18 +5704,10 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
   emitMethodDVInitializers(e, meth, topOfBody);
 }
 
-void EmitterVisitor::emitMethodsForGenerator(PostponedMeth& p,
-                                   vector<FuncEmitter*>& top_fes) {
-  MethodStatementPtr meth = p.m_meth;
-  FuncEmitter* fe = p.m_fe;
-  fe->setHasGeneratorAsBody(true);
-  // emit the original ("create generator") function
-  m_curFunc = fe;
-  emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
-  emitGeneratorCreate(meth);
-
-  // emit generator body
-  // create new emitter
+FuncEmitter* EmitterVisitor::createFuncEmitterForGeneratorBody(
+                               MethodStatementPtr meth,
+                               FuncEmitter* fe,
+                               vector<FuncEmitter*>& top_fes) {
   FuncEmitter* genFe;
   string genName = meth->getGeneratorName();
   if (fe->isMethod() && !fe->isClosureBody()) {
@@ -5709,7 +5718,7 @@ void EmitterVisitor::emitMethodsForGenerator(PostponedMeth& p,
   } else {
     if (!m_generatorEmitted.insert(genName).second){
       // generator body already emitted
-      return;
+      return nullptr;
     }
     genFe = new FuncEmitter(m_ue, -1, -1, StringData::GetStaticString(genName));
     top_fes.push_back(genFe);
@@ -5717,30 +5726,14 @@ void EmitterVisitor::emitMethodsForGenerator(PostponedMeth& p,
   }
   genFe->setIsGeneratorFromClosure(fe->isClosureBody());
   genFe->setIsGenerator(true);
-
-  m_curFunc = genFe;
-  emitMethodMetadata(meth, p.m_closureUseVars, genFe->top());
-  emitGeneratorBody(meth);
+  return genFe;
 }
 
 void EmitterVisitor::emitGeneratorCreate(MethodStatementPtr meth) {
   Emitter e(meth, m_ue, *this);
   Label topOfBody(e);
   emitMethodPrologue(e, meth);
-
-  if (m_curFunc->hasVar(s_continuationVarArgsLocal)) {
-    static const StringData* s_func_get_args =
-      StringData::GetStaticString("func_get_args");
-
-    Id local = m_curFunc->lookupVarId(s_continuationVarArgsLocal);
-    emitVirtualLocal(local);
-    e.FCallBuiltin(0, 0, s_func_get_args);
-    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut,
-                   false, 0, 0);
-    e.UnboxR();
-    emitSet(e);
-    e.PopC();
-  }
+  emitSetFuncGetArgs(e);
 
   // emit code to create generator object
   const StringData* nameStr = StringData::GetStaticString(
@@ -5748,13 +5741,7 @@ void EmitterVisitor::emitGeneratorCreate(MethodStatementPtr meth) {
   e.CreateCont(nameStr);
 
   if (meth->getFunctionScope()->isAsync()){
-    StringData* nLiteral = StringData::GetStaticString("getWaitHandle");
-    {
-      FPIRegionRecorder fpi(this, m_ue, m_evalStack, m_ue.bcPos());
-      e.FPushObjMethodD(0, nLiteral);
-    }
-    e.FCall(0);
-    emitConvertToCell(e);
+    emitConstMethodCallNoParams(e, "getWaitHandle");
   }
 
   e.RetC();
@@ -5782,6 +5769,22 @@ void EmitterVisitor::emitGeneratorBody(MethodStatementPtr meth) {
   }
 
   FuncFinisher ff(this, e, m_curFunc);
+}
+
+void EmitterVisitor::emitSetFuncGetArgs(Emitter& e) {
+  if (m_curFunc->hasVar(s_continuationVarArgsLocal)) {
+    static const StringData* s_func_get_args =
+      StringData::GetStaticString("func_get_args");
+
+    Id local = m_curFunc->lookupVarId(s_continuationVarArgsLocal);
+    emitVirtualLocal(local);
+    e.FCallBuiltin(0, 0, s_func_get_args);
+    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut,
+                   false, 0, 0);
+    e.UnboxR();
+    emitSet(e);
+    e.PopC();
+  }
 }
 
 void EmitterVisitor::emitMethodDVInitializers(Emitter& e,

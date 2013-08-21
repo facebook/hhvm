@@ -635,10 +635,14 @@ public:
                              ExpressionListPtr params);
   void emitMethodPrologue(Emitter& e, MethodStatementPtr meth);
   void emitMethod(MethodStatementPtr meth);
-  void emitMethodsForGenerator(PostponedMeth& p,
-                               vector<FuncEmitter*>& top_fes);
+  FuncEmitter* createFuncEmitterForGeneratorBody(
+                 MethodStatementPtr meth,
+                 FuncEmitter* fe,
+                 vector<FuncEmitter*>& top_fes);
   void emitGeneratorCreate(MethodStatementPtr meth);
   void emitGeneratorBody(MethodStatementPtr meth);
+  void emitConstMethodCallNoParams(Emitter& e, string name);
+  void emitSetFuncGetArgs(Emitter& e);
   void emitMethodDVInitializers(Emitter& e,
                                 MethodStatementPtr& meth,
                                 Label& topOfBody);

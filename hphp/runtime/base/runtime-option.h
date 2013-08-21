@@ -47,6 +47,7 @@ public:
 
   static const char *ExecutionMode;
   static std::string BuildId;
+  static std::string InstanceId;
   static std::string PidFile;
 
   static std::string LogFile;

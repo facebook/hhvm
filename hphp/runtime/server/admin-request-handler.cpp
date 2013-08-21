@@ -117,12 +117,14 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     if (cmd == "" || cmd == "help") {
       string usage =
         "/stop:            stop the web server\n"
+        "    instance-id   optional, if specified, instance ID has to match\n"
         "/translate:       translate hex encoded stacktrace in 'stack' param\n"
         "    stack         required, stack trace to translate\n"
         "    build-id      optional, if specified, build ID has to match\n"
         "    bare          optional, whether to display frame ordinates\n"
         "/build-id:        returns build id that's passed in from command line"
         "\n"
+        "/instance-id:     instance id that's passed in from command line\n"
         "/compiler-id:     returns the compiler id that built this app\n"
         "/repo-schema:     return the repo schema id used by this app\n"
         "/check-load:      how many threads are actively handling requests\n"
@@ -248,6 +250,12 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
 
     if (cmd == "stop") {
+      string instanceId = transport->getParam("instance-id");
+      if (!instanceId.empty() && instanceId != RuntimeOption::InstanceId) {
+        transport->sendString("Instance ID doesn't match.", 500);
+        break;
+      }
+
       transport->sendString("OK\n");
       Logger::Info("Got admin port stop request from %s",
                    transport->getRemoteHost());
@@ -256,6 +264,10 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
     if (cmd == "build-id") {
       transport->sendString(RuntimeOption::BuildId, 200);
+      break;
+    }
+    if (cmd == "instance-id") {
+      transport->sendString(RuntimeOption::InstanceId, 200);
       break;
     }
     if (cmd == "compiler-id") {

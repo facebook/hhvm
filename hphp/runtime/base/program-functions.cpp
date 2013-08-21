@@ -111,6 +111,7 @@ struct ProgramOptions {
   bool       noSafeAccessCheck;
   StringVec  args;
   string     buildId;
+  string     instanceId;
   int        xhprofFlags;
   string     show;
   string     parse;
@@ -876,6 +877,8 @@ static int execute_program_impl(int argc, char** argv) {
      "extra-header to add to log lines")
     ("build-id", value<string>(&po.buildId),
      "unique identifier of compiled server code")
+    ("instance-id", value<string>(&po.instanceId),
+     "unique identifier of server instance")
     ("xhprof-flags", value<int>(&po.xhprofFlags)->default_value(0),
      "Set XHProf flags")
     ;
@@ -1027,6 +1030,7 @@ static int execute_program_impl(int argc, char** argv) {
 
   vector<int> inherited_fds;
   RuntimeOption::BuildId = po.buildId;
+  RuntimeOption::InstanceId = po.instanceId;
   if (po.port != -1) {
     RuntimeOption::ServerPort = po.port;
   }

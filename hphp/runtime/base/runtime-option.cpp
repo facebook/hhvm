@@ -50,6 +50,7 @@ bool RuntimeOption::Loaded = false;
 
 const char *RuntimeOption::ExecutionMode = "";
 std::string RuntimeOption::BuildId;
+std::string RuntimeOption::InstanceId;
 std::string RuntimeOption::PidFile = "www.pid";
 
 std::string RuntimeOption::LogFile;

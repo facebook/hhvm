@@ -10,15 +10,15 @@ array(28) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(28) "isWhitespaceInElementContent"
-  [2]=>
-  string(9) "splitText"
-  [3]=>
   string(5) "__get"
-  [4]=>
+  [2]=>
   string(5) "__set"
-  [5]=>
+  [3]=>
   string(7) "__isset"
+  [4]=>
+  string(28) "isWhitespaceInElementContent"
+  [5]=>
+  string(9) "splitText"
   [6]=>
   string(10) "appendData"
   [7]=>
@@ -79,15 +79,15 @@ array(28) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(28) "isWhitespaceInElementContent"
-  [2]=>
-  string(9) "splitText"
-  [3]=>
   string(5) "__get"
-  [4]=>
+  [2]=>
   string(5) "__set"
-  [5]=>
+  [3]=>
   string(7) "__isset"
+  [4]=>
+  string(28) "isWhitespaceInElementContent"
+  [5]=>
+  string(9) "splitText"
   [6]=>
   string(10) "appendData"
   [7]=>

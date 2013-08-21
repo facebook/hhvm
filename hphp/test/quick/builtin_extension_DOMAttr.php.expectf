@@ -11,13 +11,13 @@ array(22) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(4) "isId"
-  [2]=>
   string(5) "__get"
-  [3]=>
+  [2]=>
   string(5) "__set"
-  [4]=>
+  [3]=>
   string(7) "__isset"
+  [4]=>
+  string(4) "isId"
   [5]=>
   string(11) "appendChild"
   [6]=>
@@ -69,13 +69,13 @@ array(22) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(4) "isId"
-  [2]=>
   string(5) "__get"
-  [3]=>
+  [2]=>
   string(5) "__set"
-  [4]=>
+  [3]=>
   string(7) "__isset"
+  [4]=>
+  string(4) "isId"
   [5]=>
   string(11) "appendChild"
   [6]=>

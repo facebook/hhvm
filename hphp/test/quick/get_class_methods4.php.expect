@@ -1,0 +1,7 @@
+B::priv
+array(2) {
+  [0]=>
+  string(4) "priv"
+  [1]=>
+  string(4) "func"
+}

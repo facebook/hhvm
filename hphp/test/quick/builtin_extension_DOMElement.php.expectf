@@ -11,47 +11,47 @@ array(39) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(12) "getAttribute"
-  [2]=>
-  string(16) "getAttributeNode"
-  [3]=>
-  string(18) "getAttributeNodeNS"
-  [4]=>
-  string(14) "getAttributeNS"
-  [5]=>
-  string(20) "getElementsByTagName"
-  [6]=>
-  string(22) "getElementsByTagNameNS"
-  [7]=>
-  string(12) "hasAttribute"
-  [8]=>
-  string(14) "hasAttributeNS"
-  [9]=>
-  string(15) "removeAttribute"
-  [10]=>
-  string(19) "removeAttributeNode"
-  [11]=>
-  string(17) "removeAttributeNS"
-  [12]=>
-  string(12) "setAttribute"
-  [13]=>
-  string(16) "setAttributeNode"
-  [14]=>
-  string(18) "setAttributeNodeNS"
-  [15]=>
-  string(14) "setAttributeNS"
-  [16]=>
-  string(14) "setIDAttribute"
-  [17]=>
-  string(18) "setIDAttributeNode"
-  [18]=>
-  string(16) "setIDAttributeNS"
-  [19]=>
   string(5) "__get"
-  [20]=>
+  [2]=>
   string(5) "__set"
-  [21]=>
+  [3]=>
   string(7) "__isset"
+  [4]=>
+  string(12) "getAttribute"
+  [5]=>
+  string(16) "getAttributeNode"
+  [6]=>
+  string(18) "getAttributeNodeNS"
+  [7]=>
+  string(14) "getAttributeNS"
+  [8]=>
+  string(20) "getElementsByTagName"
+  [9]=>
+  string(22) "getElementsByTagNameNS"
+  [10]=>
+  string(12) "hasAttribute"
+  [11]=>
+  string(14) "hasAttributeNS"
+  [12]=>
+  string(15) "removeAttribute"
+  [13]=>
+  string(19) "removeAttributeNode"
+  [14]=>
+  string(17) "removeAttributeNS"
+  [15]=>
+  string(12) "setAttribute"
+  [16]=>
+  string(16) "setAttributeNode"
+  [17]=>
+  string(18) "setAttributeNodeNS"
+  [18]=>
+  string(14) "setAttributeNS"
+  [19]=>
+  string(14) "setIDAttribute"
+  [20]=>
+  string(18) "setIDAttributeNode"
+  [21]=>
+  string(16) "setIDAttributeNS"
   [22]=>
   string(11) "appendChild"
   [23]=>
@@ -103,47 +103,47 @@ array(39) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(12) "getAttribute"
-  [2]=>
-  string(16) "getAttributeNode"
-  [3]=>
-  string(18) "getAttributeNodeNS"
-  [4]=>
-  string(14) "getAttributeNS"
-  [5]=>
-  string(20) "getElementsByTagName"
-  [6]=>
-  string(22) "getElementsByTagNameNS"
-  [7]=>
-  string(12) "hasAttribute"
-  [8]=>
-  string(14) "hasAttributeNS"
-  [9]=>
-  string(15) "removeAttribute"
-  [10]=>
-  string(19) "removeAttributeNode"
-  [11]=>
-  string(17) "removeAttributeNS"
-  [12]=>
-  string(12) "setAttribute"
-  [13]=>
-  string(16) "setAttributeNode"
-  [14]=>
-  string(18) "setAttributeNodeNS"
-  [15]=>
-  string(14) "setAttributeNS"
-  [16]=>
-  string(14) "setIDAttribute"
-  [17]=>
-  string(18) "setIDAttributeNode"
-  [18]=>
-  string(16) "setIDAttributeNS"
-  [19]=>
   string(5) "__get"
-  [20]=>
+  [2]=>
   string(5) "__set"
-  [21]=>
+  [3]=>
   string(7) "__isset"
+  [4]=>
+  string(12) "getAttribute"
+  [5]=>
+  string(16) "getAttributeNode"
+  [6]=>
+  string(18) "getAttributeNodeNS"
+  [7]=>
+  string(14) "getAttributeNS"
+  [8]=>
+  string(20) "getElementsByTagName"
+  [9]=>
+  string(22) "getElementsByTagNameNS"
+  [10]=>
+  string(12) "hasAttribute"
+  [11]=>
+  string(14) "hasAttributeNS"
+  [12]=>
+  string(15) "removeAttribute"
+  [13]=>
+  string(19) "removeAttributeNode"
+  [14]=>
+  string(17) "removeAttributeNS"
+  [15]=>
+  string(12) "setAttribute"
+  [16]=>
+  string(16) "setAttributeNode"
+  [17]=>
+  string(18) "setAttributeNodeNS"
+  [18]=>
+  string(14) "setAttributeNS"
+  [19]=>
+  string(14) "setIDAttribute"
+  [20]=>
+  string(18) "setIDAttributeNode"
+  [21]=>
+  string(16) "setIDAttributeNS"
   [22]=>
   string(11) "appendChild"
   [23]=>

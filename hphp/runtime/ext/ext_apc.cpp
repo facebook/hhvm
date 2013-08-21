@@ -36,6 +36,8 @@ namespace HPHP {
 
 extern void const_load();
 
+typedef ConcurrentTableSharedStore::KeyValuePair KeyValuePair;
+
 void apcExtension::moduleLoad(Hdf config) {
   Hdf apc = config["Server"]["APC"];
 
@@ -555,7 +557,7 @@ void const_load_impl(struct cache_info *info,
   {
     int count = count_items(thrifts, 4);
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       const char **p = thrifts;
       for (int i = 0; i < count; i++, p += 4) {
         String key(*p, (int)(int64_t)*(p+1), CopyString);
@@ -595,15 +597,15 @@ void apc_load_impl(struct cache_info *info,
   if (!apcExtension::ForceConstLoadToAPC) {
     if (apcExtension::EnableConstLoad && info && info->use_const) return;
   }
-  SharedStore &s = s_apc_store[0];
+  auto& s = s_apc_store[0];
   {
     int count = count_items(int_keys, 2);
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       const char **k = int_keys;
       long long*v = int_values;
       for (int i = 0; i < count; i++, k += 2) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = *k;
         item.len = (int)(int64_t)*(k+1);
         s.constructPrime(*v++, item);
@@ -614,11 +616,11 @@ void apc_load_impl(struct cache_info *info,
   {
     int count = count_items(char_keys, 2);
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       const char **k = char_keys;
       char *v = char_values;
       for (int i = 0; i < count; i++, k += 2) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = *k;
         item.len = (int)(int64_t)*(k+1);
         switch (*v++) {
@@ -635,10 +637,10 @@ void apc_load_impl(struct cache_info *info,
   {
     int count = count_items(strings, 4);
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       const char **p = strings;
       for (int i = 0; i < count; i++, p += 4) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = *p;
         item.len = (int)(int64_t)*(p+1);
         // Strings would be copied into APC anyway.
@@ -651,10 +653,10 @@ void apc_load_impl(struct cache_info *info,
   {
     int count = count_items(objects, 4);
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       const char **p = objects;
       for (int i = 0; i < count; i++, p += 4) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = *p;
         item.len = (int)(int64_t)*(p+1);
         String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
@@ -666,10 +668,10 @@ void apc_load_impl(struct cache_info *info,
   {
     int count = count_items(thrifts, 4);
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       const char **p = thrifts;
       for (int i = 0; i < count; i++, p += 4) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = *p;
         item.len = (int)(int64_t)*(p+1);
         String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
@@ -686,10 +688,10 @@ void apc_load_impl(struct cache_info *info,
   {
     int count = count_items(others, 4);
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       const char **p = others;
       for (int i = 0; i < count; i++, p += 4) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = *p;
         item.len = (int)(int64_t)*(p+1);
 
@@ -860,19 +862,19 @@ void apc_load_impl_compressed
   if (!apcExtension::ForceConstLoadToAPC) {
     if (apcExtension::EnableConstLoad && info && info->use_const) return;
   }
-  SharedStore &s = s_apc_store[0];
+  auto& s = s_apc_store[0];
   {
     int count = int_lens[0];
     int len = int_lens[1];
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       char *keys = gzdecode(int_keys, len);
       if (keys == NULL) throw Exception("bad compressed apc archive.");
       ScopedMem holder(keys);
       const char *k = keys;
       long long* v = int_values;
       for (int i = 0; i < count; i++) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = k;
         item.len = int_lens[i + 2];
         s.constructPrime(*v++, item);
@@ -886,14 +888,14 @@ void apc_load_impl_compressed
     int count = char_lens[0];
     int len = char_lens[1];
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       char *keys = gzdecode(char_keys, len);
       if (keys == NULL) throw Exception("bad compressed apc archive.");
       ScopedMem holder(keys);
       const char *k = keys;
       char *v = char_values;
       for (int i = 0; i < count; i++) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = k;
         item.len = char_lens[i + 2];
         switch (*v++) {
@@ -913,13 +915,13 @@ void apc_load_impl_compressed
     int count = string_lens[0] / 2;
     int len = string_lens[1];
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       char *decoded = gzdecode(strings, len);
       if (decoded == NULL) throw Exception("bad compressed apc archive.");
       ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = p;
         item.len = string_lens[i + i + 2];
         p += string_lens[i + i + 2] + 1; // skip \0
@@ -937,13 +939,13 @@ void apc_load_impl_compressed
     int count = object_lens[0] / 2;
     int len = object_lens[1];
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       char *decoded = gzdecode(objects, len);
       if (decoded == NULL) throw Exception("bad compressed APC archive.");
       ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = p;
         item.len = object_lens[i + i + 2];
         p += object_lens[i + i + 2] + 1; // skip \0
@@ -959,13 +961,13 @@ void apc_load_impl_compressed
     int count = thrift_lens[0] / 2;
     int len = thrift_lens[1];
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       char *decoded = gzdecode(thrifts, len);
       if (decoded == NULL) throw Exception("bad compressed apc archive.");
       ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = p;
         item.len = thrift_lens[i + i + 2];
         p += thrift_lens[i + i + 2] + 1; // skip \0
@@ -986,13 +988,13 @@ void apc_load_impl_compressed
     int count = other_lens[0] / 2;
     int len = other_lens[1];
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       char *decoded = gzdecode(others, len);
       if (decoded == NULL) throw Exception("bad compressed apc archive.");
       ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = p;
         item.len = other_lens[i + i + 2];
         p += other_lens[i + i + 2] + 1; // skip \0

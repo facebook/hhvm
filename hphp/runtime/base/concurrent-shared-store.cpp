@@ -98,6 +98,26 @@ static void stats_on_add(const StringData* key, const StoreValue* sval,
   }
 }
 
+std::string ConcurrentTableSharedStore::GetSkeleton(CStrRef key) {
+  std::string ret;
+  const char *p = key.data();
+  ret.reserve(key.size());
+  bool added = false; // whether consecutive numbers are replaced by # yet
+  for (int i = 0; i < key.size(); i++) {
+    char ch = *p++;
+    if (ch >= '0' && ch <= '9') {
+      if (!added) {
+        ret += '#';
+        added = true;
+      }
+    } else {
+      added = false;
+      ret += ch;
+    }
+  }
+  return ret;
+}
+
 bool ConcurrentTableSharedStore::clear() {
   if (apcExtension::ConcurrentTableLockFree) {
     return false;
@@ -112,6 +132,16 @@ bool ConcurrentTableSharedStore::clear() {
   }
   m_vars.clear();
   return true;
+}
+
+bool ConcurrentTableSharedStore::erase(CStrRef key,
+                                       bool expired /* = false */) {
+  bool success = eraseImpl(key, expired);
+
+  if (RuntimeOption::EnableStats && RuntimeOption::EnableAPCStats) {
+    ServerStats::Log(success ? "apc.erased" : "apc.erase", 1);
+  }
+  return success;
 }
 
 /**
@@ -479,13 +509,12 @@ bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef value, int64_t ttl,
   return true;
 }
 
-void ConcurrentTableSharedStore::prime
-(const std::vector<SharedStore::KeyValuePair> &vars) {
+void ConcurrentTableSharedStore::prime(const std::vector<KeyValuePair> &vars) {
   ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
                                 m_lockingFlag);
   // we are priming, so we are not checking existence or expiration
   for (unsigned int i = 0; i < vars.size(); i++) {
-    const SharedStore::KeyValuePair &item = vars[i];
+    const KeyValuePair &item = vars[i];
     Map::accessor acc;
     const char *copy = strdup(item.key);
     m_vars.insert(acc, copy);

@@ -64,11 +64,12 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   }
 }
 
-c_Closure* c_Closure::clone() {
-  auto closure = static_cast<c_Closure*>(ObjectData::clone());
-  closure->m_VMStatics = m_VMStatics;
-  closure->m_thisOrClass = m_thisOrClass;
-  closure->m_func = m_func;
+c_Closure* c_Closure::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_Closure*>(obj);
+  auto closure = static_cast<c_Closure*>(obj->cloneImpl());
+  closure->m_VMStatics = thiz->m_VMStatics;
+  closure->m_thisOrClass = thiz->m_thisOrClass;
+  closure->m_func = thiz->m_func;
   return closure;
 }
 

@@ -55,6 +55,7 @@ class ObjectData {
     HasCall       = 0x0080, // defines __call
     HasCallStatic = 0x0100, // defines __callStatic
     CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl
+    HasClone      = 0x0400, // has custom clone logic
     // The top 3 bits of o_attributes are reserved to indicate the
     // type of collection
     CollectionTypeAttrMask = (7 << 13),
@@ -108,7 +109,7 @@ class ObjectData {
   bool isStatic() const { return false; }
   IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC
 
-  virtual ~ObjectData(); // all PHP objects need virtual tables
+  virtual ~ObjectData();
 
   // Call newInstance() to instantiate a PHP object
   static ObjectData* newInstance(Class* cls) {
@@ -226,14 +227,14 @@ class ObjectData {
   int o_getId() const { return o_id;}
 
   bool o_toBoolean() const {
-    if (getAttribute(CallToImpl)) {
+    if (UNLIKELY(getAttribute(CallToImpl))) {
       return o_toBooleanImpl();
     }
     return true;
   }
 
   int64_t o_toInt64() const {
-    if (getAttribute(CallToImpl)) {
+    if (UNLIKELY(getAttribute(CallToImpl))) {
       return o_toInt64Impl();
     }
     raiseObjToIntNotice(o_getClassName().data());
@@ -241,17 +242,17 @@ class ObjectData {
   }
 
   double o_toDouble() const {
-    if (getAttribute(CallToImpl)) {
+    if (UNLIKELY(getAttribute(CallToImpl))) {
       return o_toDoubleImpl();
     }
     return o_toInt64();
   }
 
   // overridable casting
-  virtual bool o_toBooleanImpl() const noexcept;
-  virtual int64_t o_toInt64Impl() const noexcept;
-  virtual double o_toDoubleImpl() const noexcept;
-  virtual Array o_toArray() const;
+  bool o_toBooleanImpl() const noexcept;
+  int64_t o_toInt64Impl() const noexcept;
+  double o_toDoubleImpl() const noexcept;
+  Array o_toArray() const;
 
   void destruct();
 
@@ -290,14 +291,14 @@ class ObjectData {
   void serializeImpl(VariableSerializer* serializer) const;
   bool hasInternalReference(PointerSet& vars, bool ds = false) const;
   void dump() const;
-  virtual ObjectData* clone();
+  ObjectData* clone();
 
   Variant offsetGet(Variant key);
   String invokeToString();
   bool hasToString();
 
-  virtual Variant t___sleep();
-  virtual Variant t___wakeup();
+  Variant invokeSleep();
+  Variant invokeWakeup();
 
   static int GetMaxId() ATTRIBUTE_COLD;
 

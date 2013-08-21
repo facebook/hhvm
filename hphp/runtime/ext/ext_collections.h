@@ -32,7 +32,8 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
                                            ObjectData::UseGet|
                                            ObjectData::UseSet|
                                            ObjectData::UseIsset|
-                                           ObjectData::UseUnset> {
+                                           ObjectData::UseUnset|
+                                           ObjectData::HasClone> {
  public:
   DECLARE_CLASS(Vector, Vector, ObjectData)
 
@@ -139,11 +140,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
     return m_size;
   }
 
-
   Array toArrayImpl() const;
-
-  Array o_toArray() const;
-  c_Vector* clone();
 
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
 
@@ -155,6 +152,8 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   void sort(int sort_flags, bool ascending);
   void usort(CVarRef cmp_function);
 
+  static c_Vector* Clone(ObjectData* obj);
+  static Array ToArray(const ObjectData* obj);
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
@@ -217,7 +216,8 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
                                         ObjectData::UseGet|
                                         ObjectData::UseSet|
                                         ObjectData::UseIsset|
-                                        ObjectData::UseUnset> {
+                                        ObjectData::UseUnset|
+                                        ObjectData::HasClone> {
  public:
   DECLARE_CLASS(Map, Map, ObjectData)
 
@@ -324,9 +324,8 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   }
   Array toArrayImpl() const;
 
-  Array o_toArray() const;
-  c_Map* clone();
-
+  static c_Map* Clone(ObjectData* obj);
+  static Array ToArray(const ObjectData* obj);
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
@@ -519,7 +518,8 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
                                               ObjectData::UseGet|
                                               ObjectData::UseSet|
                                               ObjectData::UseIsset|
-                                              ObjectData::UseUnset> {
+                                              ObjectData::UseUnset|
+                                              ObjectData::HasClone> {
  public:
   DECLARE_CLASS(StableMap, StableMap, ObjectData)
 
@@ -624,9 +624,8 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   }
   Array toArrayImpl() const;
 
-  Array o_toArray() const;
-  c_StableMap* clone();
-
+  static c_StableMap* Clone(ObjectData* obj);
+  static Array ToArray(const ObjectData* obj);
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
@@ -781,7 +780,8 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
                                         ObjectData::UseGet|
                                         ObjectData::UseSet|
                                         ObjectData::UseIsset|
-                                        ObjectData::UseUnset> {
+                                        ObjectData::UseUnset|
+                                        ObjectData::HasClone> {
  public:
   DECLARE_CLASS(Set, Set, ObjectData)
 
@@ -850,9 +850,8 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   }
   Array toArrayImpl() const;
 
-  Array o_toArray() const;
-  c_Set* clone();
-
+  static c_Set* Clone(ObjectData* obj);
+  static Array ToArray(const ObjectData* obj);
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
@@ -1002,10 +1001,11 @@ class c_SetIterator : public ExtObjectData {
 
 FORWARD_DECLARE_CLASS_BUILTIN(Pair);
 class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
-                                          ObjectData::UseGet|
-                                          ObjectData::UseSet|
-                                          ObjectData::UseIsset|
-                                          ObjectData::UseUnset> {
+                                         ObjectData::UseGet|
+                                         ObjectData::UseSet|
+                                         ObjectData::UseIsset|
+                                         ObjectData::UseUnset|
+                                         ObjectData::HasClone> {
  public:
   DECLARE_CLASS(Pair, Pair, ObjectData)
 
@@ -1079,9 +1079,8 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
 
   Array toArrayImpl() const;
 
-  Array o_toArray() const;
-  c_Pair* clone();
-
+  static c_Pair* Clone(ObjectData* obj);
+  static Array ToArray(const ObjectData* obj);
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);

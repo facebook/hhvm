@@ -97,7 +97,7 @@ public:
    */
   template<typename T>
   T *getTyped(bool nullOkay = false, bool badTypeOkay = false) const {
-    CT_ASSERT_DESCENDENT_OF_RESOURCEDATA(T);
+    static_assert(std::is_base_of<ResourceData, T>::value, "");
 
     ResourceData *cur = m_px;
     if (!cur) {

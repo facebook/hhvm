@@ -107,7 +107,7 @@ public:
    */
   template<typename T>
   T *getTyped(bool nullOkay = false, bool badTypeOkay = false) const {
-    CT_ASSERT_DESCENDENT_OF_OBJECTDATA(T);
+    static_assert(std::is_base_of<ObjectData, T>::value, "");
 
     ObjectData *cur = m_px;
     if (!cur) {
@@ -116,14 +116,14 @@ public:
       }
       return nullptr;
     }
-    T *px = dynamic_cast<T*>(cur);
-    if (!px) {
+    if (!cur->instanceof(T::s_cls)) {
       if (!badTypeOkay) {
         throw InvalidObjectTypeException(m_px->o_getClassName().c_str());
       }
       return nullptr;
     }
 
+    T *px = static_cast<T*>(cur);
     // Assert that casting does not adjust the 'this' pointer
     assert((void*)px == (void*)cur);
     return px;

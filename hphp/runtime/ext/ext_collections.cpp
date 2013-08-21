@@ -93,7 +93,8 @@ c_Vector::c_Vector(Class* cb) :
                        ObjectData::UseGet|
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
-                       ObjectData::UseUnset>(cb),
+                       ObjectData::UseUnset|
+                       ObjectData::HasClone>(cb),
     m_data(nullptr), m_size(0), m_capacity(0), m_version(0) {
 }
 
@@ -176,19 +177,15 @@ Array c_Vector::toArrayImpl() const {
   return ai.toArray();
 }
 
-Array c_Vector::o_toArray() const {
-  check_collection_cast_to_array();
-  return toArrayImpl();
-}
-
-c_Vector* c_Vector::clone() {
-  auto target = static_cast<c_Vector*>(ObjectData::clone());
-  uint sz = m_size;
+c_Vector* c_Vector::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_Vector*>(obj);
+  auto target = static_cast<c_Vector*>(obj->cloneImpl());
+  uint sz = thiz->m_size;
   TypedValue* data;
   target->m_capacity = target->m_size = sz;
   target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
   for (int i = 0; i < sz; ++i) {
-    tvDup(m_data[i], data[i]);
+    tvDup(thiz->m_data[i], data[i]);
   }
   return target;
 }
@@ -825,6 +822,11 @@ void c_Vector::throwBadKeyType() {
   throw e;
 }
 
+Array c_Vector::ToArray(const ObjectData* obj) {
+  check_collection_cast_to_array();
+  return static_cast<const c_Vector*>(obj)->toArrayImpl();
+}
+
 TypedValue* c_Vector::OffsetGet(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
   auto vec = static_cast<c_Vector*>(obj);
@@ -981,7 +983,8 @@ c_Map::c_Map(Class* cb) :
                        ObjectData::UseGet|
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
-                       ObjectData::UseUnset>(cb),
+                       ObjectData::UseUnset|
+                       ObjectData::HasClone>(cb),
     m_size(0), m_load(0), m_nLastSlot(0), m_version(0) {
   m_data = (Bucket*)emptyMapSlot;
 }
@@ -1047,25 +1050,21 @@ Array c_Map::toArrayImpl() const {
   return ai.create();
 }
 
-Array c_Map::o_toArray() const {
-  check_collection_cast_to_array();
-  return toArrayImpl();
-}
+c_Map* c_Map::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_Map*>(obj);
+  auto target = static_cast<c_Map*>(obj->cloneImpl());
 
-c_Map* c_Map::clone() {
-  auto target = static_cast<c_Map*>(ObjectData::clone());
+  if (!thiz->m_size) return target;
 
-  if (!m_size) return target;
+  assert(thiz->m_nLastSlot != 0);
+  target->m_size = thiz->m_size;
+  target->m_load = thiz->m_load;
+  target->m_nLastSlot = thiz->m_nLastSlot;
+  target->m_data = (Bucket*)smart_malloc(thiz->numSlots() * sizeof(Bucket));
+  memcpy(target->m_data, thiz->m_data, thiz->numSlots() * sizeof(Bucket));
 
-  assert(m_nLastSlot != 0);
-  target->m_size = m_size;
-  target->m_load = m_load;
-  target->m_nLastSlot = m_nLastSlot;
-  target->m_data = (Bucket*)smart_malloc(numSlots() * sizeof(Bucket));
-  memcpy(target->m_data, m_data, numSlots() * sizeof(Bucket));
-
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
+  for (uint i = 0; i <= thiz->m_nLastSlot; ++i) {
+    Bucket& p = thiz->m_data[i];
     if (p.validValue()) {
       tvRefcountedIncRef(&p.data);
       if (p.hasStrKey()) {
@@ -1335,8 +1334,8 @@ Object c_Map::t_differencebykey(CVarRef it) {
     throw e;
   }
   ObjectData* obj = it.getObjectData();
-  c_Map* target;
-  Object ret = target = clone();
+  c_Map* target = c_Map::Clone(this);;
+  Object ret = target;
   if (obj->getCollectionType() == Collection::MapType) {
     auto mp = static_cast<c_Map*>(obj);
     for (uint i = 0; i <= mp->m_nLastSlot; ++i) {
@@ -1847,6 +1846,11 @@ void c_Map::Bucket::dump() {
   tvAsCVarRef(&data).dump();
 }
 
+Array c_Map::ToArray(const ObjectData* obj) {
+  check_collection_cast_to_array();
+  return static_cast<const c_Map*>(obj)->toArrayImpl();
+}
+
 TypedValue* c_Map::OffsetGet(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
   auto mp = static_cast<c_Map*>(obj);
@@ -2071,7 +2075,8 @@ c_StableMap::c_StableMap(Class* cb) :
                        ObjectData::UseGet|
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
-                       ObjectData::UseUnset>(cb),
+                       ObjectData::UseUnset|
+                       ObjectData::HasClone>(cb),
     m_version(0), m_pListHead(nullptr), m_pListTail(nullptr) {
   m_size = 0;
   m_nTableSize = 0;
@@ -2135,23 +2140,20 @@ Array c_StableMap::toArrayImpl() const {
   return ai.create();
 }
 
-Array c_StableMap::o_toArray() const {
-  check_collection_cast_to_array();
-  return toArrayImpl();
-}
+c_StableMap* c_StableMap::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_StableMap*>(obj);
+  auto target = static_cast<c_StableMap*>(obj->cloneImpl());
 
-c_StableMap* c_StableMap::clone() {
-  auto target = static_cast<c_StableMap*>(ObjectData::clone());
+  if (!thiz->m_size) return target;
 
-  if (!m_size) return target;
-
-  target->m_size = m_size;
-  target->m_nTableSize = m_nTableSize;
-  target->m_nTableMask = m_nTableMask;
-  target->m_arBuckets = (Bucket**)smart_calloc(m_nTableSize, sizeof(Bucket*));
+  target->m_size = thiz->m_size;
+  target->m_nTableSize = thiz->m_nTableSize;
+  target->m_nTableMask = thiz->m_nTableMask;
+  target->m_arBuckets =
+    (Bucket**)smart_calloc(thiz->m_nTableSize, sizeof(Bucket*));
 
   Bucket *last = nullptr;
-  for (Bucket* p = m_pListHead; p; p = p->pListNext) {
+  for (Bucket* p = thiz->m_pListHead; p; p = p->pListNext) {
     Bucket *np = NEW(Bucket)();
     tvDup(p->data, np->data);
     uint nIndex;
@@ -2432,8 +2434,8 @@ Object c_StableMap::t_differencebykey(CVarRef it) {
     throw e;
   }
   ObjectData* obj = it.getObjectData();
-  c_StableMap* target;
-  Object ret = target = clone();
+  c_StableMap* target = c_StableMap::Clone(this);
+  Object ret = target;
   if (obj->getCollectionType() == Collection::StableMapType) {
     auto smp = static_cast<c_StableMap*>(obj);
     c_StableMap::Bucket* p = smp->m_pListHead;
@@ -3033,6 +3035,11 @@ void c_StableMap::Bucket::dump() {
   tvAsCVarRef(&data).dump();
 }
 
+Array c_StableMap::ToArray(const ObjectData* obj) {
+  check_collection_cast_to_array();
+  return static_cast<const c_StableMap*>(obj)->toArrayImpl();
+}
+
 TypedValue* c_StableMap::OffsetGet(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
   auto smp = static_cast<c_StableMap*>(obj);
@@ -3255,7 +3262,8 @@ c_Set::c_Set(Class* cb) :
                        ObjectData::UseGet|
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
-                       ObjectData::UseUnset>(cb),
+                       ObjectData::UseUnset|
+                       ObjectData::HasClone>(cb),
     m_size(0), m_load(0), m_nLastSlot(0), m_version(0) {
   m_data = (Bucket*)emptySetSlot;
 }
@@ -3309,25 +3317,21 @@ Array c_Set::toArrayImpl() const {
   return ai.toArray();
 }
 
-Array c_Set::o_toArray() const {
-  check_collection_cast_to_array();
-  return toArrayImpl();
-}
+c_Set* c_Set::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_Set*>(obj);
+  auto target = static_cast<c_Set*>(obj->cloneImpl());
 
-c_Set* c_Set::clone() {
-  auto target = static_cast<c_Set*>(ObjectData::clone());
+  if (!thiz->m_size) return target;
 
-  if (!m_size) return target;
+  assert(thiz->m_nLastSlot != 0);
+  target->m_size = thiz->m_size;
+  target->m_load = thiz->m_load;
+  target->m_nLastSlot = thiz->m_nLastSlot;
+  target->m_data = (Bucket*)smart_malloc(thiz->numSlots() * sizeof(Bucket));
+  memcpy(target->m_data, thiz->m_data, thiz->numSlots() * sizeof(Bucket));
 
-  assert(m_nLastSlot != 0);
-  target->m_size = m_size;
-  target->m_load = m_load;
-  target->m_nLastSlot = m_nLastSlot;
-  target->m_data = (Bucket*)smart_malloc(numSlots() * sizeof(Bucket));
-  memcpy(target->m_data, m_data, numSlots() * sizeof(Bucket));
-
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
+  for (uint i = 0; i <= thiz->m_nLastSlot; ++i) {
+    Bucket& p = thiz->m_data[i];
     if (p.validValue()) {
       tvRefcountedIncRef(&p.data);
     }
@@ -3859,6 +3863,11 @@ void c_Set::Bucket::dump() {
   tvAsCVarRef(&data).dump();
 }
 
+Array c_Set::ToArray(const ObjectData* obj) {
+  check_collection_cast_to_array();
+  return static_cast<const c_Set*>(obj)->toArrayImpl();
+}
+
 TypedValue* c_Set::OffsetGet(ObjectData* obj, TypedValue* key) {
   c_Set::throwNoIndexAccess();
 }
@@ -3997,7 +4006,8 @@ c_Pair::c_Pair(Class* cb) :
                        ObjectData::UseGet|
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
-                       ObjectData::UseUnset>(cb),
+                       ObjectData::UseUnset|
+                       ObjectData::HasClone>(cb),
     m_size(0) {
 }
 
@@ -4025,17 +4035,13 @@ Array c_Pair::toArrayImpl() const {
   return ai.toArray();
 }
 
-Array c_Pair::o_toArray() const {
-  check_collection_cast_to_array();
-  return toArrayImpl();
-}
-
-c_Pair* c_Pair::clone() {
+c_Pair* c_Pair::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_Pair*>(obj);
   auto pair = NEWOBJ(c_Pair)();
   pair->incRefCount();
   pair->m_size = 2;
-  tvDup(elm0, pair->elm0);
-  tvDup(elm1, pair->elm1);
+  tvDup(thiz->elm0, pair->elm0);
+  tvDup(thiz->elm1, pair->elm1);
   return pair;
 }
 
@@ -4201,6 +4207,11 @@ void c_Pair::throwBadKeyType() {
   Object e(SystemLib::AllocInvalidArgumentExceptionObject(
     "Only integer keys may be used with Pairs"));
   throw e;
+}
+
+Array c_Pair::ToArray(const ObjectData* obj) {
+  check_collection_cast_to_array();
+  return static_cast<const c_Pair*>(obj)->toArrayImpl();
 }
 
 TypedValue* c_Pair::OffsetGet(ObjectData* obj, TypedValue* key) {
@@ -4460,7 +4471,7 @@ ArrayData* collectionDeepCopyArray(ArrayData* arr) {
 }
 
 ObjectData* collectionDeepCopyVector(c_Vector* vec) {
-  Object o = vec = vec->clone();
+  Object o = vec = c_Vector::Clone(vec);
   size_t sz = vec->m_size;
   for (size_t i = 0; i < sz; ++i) {
     collectionDeepCopyTV(&vec->m_data[i]);
@@ -4469,7 +4480,7 @@ ObjectData* collectionDeepCopyVector(c_Vector* vec) {
 }
 
 ObjectData* collectionDeepCopyMap(c_Map* mp) {
-  Object o = mp = mp->clone();
+  Object o = mp = c_Map::Clone(mp);
   uint lastSlot = mp->m_nLastSlot;
   for (uint i = 0; i <= lastSlot; ++i) {
     c_Map::Bucket* p = mp->fetchBucket(i);
@@ -4481,7 +4492,7 @@ ObjectData* collectionDeepCopyMap(c_Map* mp) {
 }
 
 ObjectData* collectionDeepCopyStableMap(c_StableMap* smp) {
-  Object o = smp = smp->clone();
+  Object o = smp = c_StableMap::Clone(smp);
   for (c_StableMap::Bucket* p = smp->m_pListHead; p; p = p->pListNext) {
     collectionDeepCopyTV(&p->data);
   }
@@ -4489,12 +4500,12 @@ ObjectData* collectionDeepCopyStableMap(c_StableMap* smp) {
 }
 
 ObjectData* collectionDeepCopySet(c_Set* st) {
-  Object o = st = st->clone();
+  Object o = st = c_Set::Clone(st);
   return o.detach();
 }
 
 ObjectData* collectionDeepCopyPair(c_Pair* pair) {
-  Object o = pair = pair->clone();
+  Object o = pair = c_Pair::Clone(pair);
   collectionDeepCopyTV(&pair->elm0);
   collectionDeepCopyTV(&pair->elm1);
   return o.detach();

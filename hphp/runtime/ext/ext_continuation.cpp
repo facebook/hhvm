@@ -43,7 +43,7 @@ Object f_hphp_create_continuation(CStrRef clsname,
 ///////////////////////////////////////////////////////////////////////////////
 
 c_Continuation::c_Continuation(Class* cb)
-    : ExtObjectData(cb)
+    : ExtObjectDataFlags<ObjectData::HasClone>(cb)
     , m_label(0)
     , m_index(-1LL)
     , m_key(-1LL)
@@ -203,22 +203,23 @@ void c_Continuation::copyContinuationVars(ActRec* fp) {
   }
 }
 
-c_Continuation *c_Continuation::clone() {
-  const Func *origFunc = m_origFunc;
-  const Func *genFunc = actRec()->m_func;
+c_Continuation *c_Continuation::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_Continuation*>(obj);
+  const Func *origFunc = thiz->m_origFunc;
+  const Func *genFunc = thiz->actRec()->m_func;
 
   ActRec *fp = g_vmContext->getFP();
   c_Continuation* cont = origFunc->isMethod()
     ? g_vmContext->createContMeth(origFunc, genFunc, fp->getThisOrClass())
     : g_vmContext->createContFunc(origFunc, genFunc);
 
-  cont->copyContinuationVars(actRec());
+  cont->copyContinuationVars(thiz->actRec());
 
-  cont->o_subclassData.u16 = o_subclassData.u16;
-  cont->m_label = m_label;
-  cont->m_index = m_index;
-  cont->m_key   = m_key;
-  cont->m_value = m_value;
+  cont->o_subclassData.u16 = thiz->o_subclassData.u16;
+  cont->m_label = thiz->m_label;
+  cont->m_index = thiz->m_index;
+  cont->m_key   = thiz->m_key;
+  cont->m_value = thiz->m_value;
 
   return cont;
 }

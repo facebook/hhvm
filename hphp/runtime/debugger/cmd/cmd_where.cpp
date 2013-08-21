@@ -176,7 +176,7 @@ void CmdWhere::removeArgs() {
 }
 
 c_WaitableWaitHandle *objToWaitableWaitHandle(Object o) {
-  assert(dynamic_cast<c_WaitableWaitHandle*>(o.get()));
+  assert(o->instanceof(c_WaitableWaitHandle::s_cls));
   return static_cast<c_WaitableWaitHandle*>(o.get());
 }
 

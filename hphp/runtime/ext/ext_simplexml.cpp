@@ -322,7 +322,8 @@ c_SimpleXMLElement::c_SimpleXMLElement(Class* cb) :
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
                        ObjectData::UseUnset|
-                       ObjectData::CallToImpl>(cb),
+                       ObjectData::CallToImpl|
+                       ObjectData::HasClone>(cb),
       m_node(NULL), m_is_text(false), m_free_text(false),
       m_is_attribute(false), m_is_children(false), m_is_property(false),
       m_is_array(false), m_xpath(nullptr) {
@@ -339,19 +340,21 @@ void c_SimpleXMLElement::sweep() {
   }
 }
 
-c_SimpleXMLElement* c_SimpleXMLElement::clone() {
+c_SimpleXMLElement* c_SimpleXMLElement::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_SimpleXMLElement*>(obj);
   c_SimpleXMLElement *node =
-    static_cast<c_SimpleXMLElement*>(ObjectData::clone());
-  node->m_doc = m_doc;
-  node->m_node = m_node;
-  node->m_is_text = m_is_text;
-  node->m_free_text = m_free_text;
-  node->m_is_attribute = m_is_attribute;
-  node->m_is_children = m_is_children;
-  node->m_is_property = m_is_property;
-  node->m_is_array = m_is_array;
-  node->m_children = create_children(m_doc, m_node, String(), false);
-  node->m_attributes = collect_attributes(m_node, String(), false);
+    static_cast<c_SimpleXMLElement*>(obj->cloneImpl());
+  node->m_doc = thiz->m_doc;
+  node->m_node = thiz->m_node;
+  node->m_is_text = thiz->m_is_text;
+  node->m_free_text = thiz->m_free_text;
+  node->m_is_attribute = thiz->m_is_attribute;
+  node->m_is_children = thiz->m_is_children;
+  node->m_is_property = thiz->m_is_property;
+  node->m_is_array = thiz->m_is_array;
+  node->m_children =
+    create_children(thiz->m_doc, thiz->m_node, String(), false);
+  node->m_attributes = collect_attributes(thiz->m_node, String(), false);
   return node;
 }
 
@@ -919,42 +922,47 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
   return uninit_null();
 }
 
-bool c_SimpleXMLElement::o_toBooleanImpl() const noexcept {
-  if (m_node || getDynProps().size()) {
-    if (m_is_array || m_is_children ||
-       (m_node->parent && m_node->parent->type == XML_DOCUMENT_NODE)) {
-      return m_children.toArray().size() > 0 ||
-             m_attributes.toArray().size() > 0;
+bool c_SimpleXMLElement::ToBoolean(const ObjectData* obj) noexcept {
+  auto thiz = static_cast<const c_SimpleXMLElement*>(obj);
+  if (thiz->m_node || thiz->getDynProps().size()) {
+    if (thiz->m_is_array || thiz->m_is_children ||
+       (thiz->m_node->parent &&
+        thiz->m_node->parent->type == XML_DOCUMENT_NODE)) {
+      return thiz->m_children.toArray().size() > 0 ||
+             thiz->m_attributes.toArray().size() > 0;
     }
     return true;
   }
   return false;
 }
 
-int64_t c_SimpleXMLElement::o_toInt64Impl() const noexcept {
+int64_t c_SimpleXMLElement::ToInt64(const ObjectData* obj) noexcept {
   Variant prop;
-  ArrayIter iter(m_children.toArray());
+  ArrayIter iter(static_cast<const c_SimpleXMLElement*>(obj)
+                 ->m_children.toArray());
   if (iter) {
     prop = iter.second();
   }
   return prop.toString().toInt64();
 }
 
-double c_SimpleXMLElement::o_toDoubleImpl() const noexcept {
+double c_SimpleXMLElement::ToDouble(const ObjectData* obj) noexcept {
   Variant prop;
-  ArrayIter iter(m_children.toArray());
+  ArrayIter iter(static_cast<const c_SimpleXMLElement*>(obj)
+                 ->m_children.toArray());
   if (iter) {
     prop = iter.second();
   }
   return prop.toString().toDouble();
 }
 
-Array c_SimpleXMLElement::o_toArray() const {
+Array c_SimpleXMLElement::ToArray(const ObjectData* obj) {
+  auto thiz = static_cast<const c_SimpleXMLElement*>(obj);
   Array ret = Array::Create();
-  if (!m_attributes.toArray().empty()) {
-    ret.set(s_attributes, m_attributes);
+  if (!thiz->m_attributes.toArray().empty()) {
+    ret.set(s_attributes, thiz->m_attributes);
   }
-  ret += m_children;
+  ret += thiz->m_children;
 
   for (ArrayIter iter(ret); iter; ++iter) {
     if (iter.second().isObject()) {

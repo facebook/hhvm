@@ -434,10 +434,8 @@ struct GarbageCollector {
   }
 
   void dealloc(SmartAllocatorImpl* sa, ObjectData* obj) const {
-    if (Sweepable* s = dynamic_cast<Sweepable*>(obj)) {
-      s->sweep();
-      s->unregister();
-    }
+    // Treat Sweepable specially?
+
     if (RuntimeOption::EnableObjDestructCall) {
       g_vmContext->m_liveBCObjs.erase(obj);
     }

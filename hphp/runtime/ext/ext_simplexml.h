@@ -45,7 +45,8 @@ class c_SimpleXMLElement :
                                 ObjectData::UseSet|
                                 ObjectData::UseIsset|
                                 ObjectData::UseUnset|
-                                ObjectData::CallToImpl>,
+                                ObjectData::CallToImpl|
+                                ObjectData::HasClone>,
       public Sweepable {
  public:
   DECLARE_CLASS(SimpleXMLElement, SimpleXMLElement, ObjectData)
@@ -78,6 +79,12 @@ class c_SimpleXMLElement :
 
 
  public:
+  static c_SimpleXMLElement* Clone(ObjectData* obj);
+  static bool    ToBoolean(const ObjectData* obj) noexcept;
+  static int64_t ToInt64(const ObjectData* obj) noexcept;
+  static double  ToDouble(const ObjectData* obj) noexcept;
+  static Array   ToArray(const ObjectData* obj);
+
   Resource m_doc;
   xmlNodePtr m_node;
   Variant m_children;
@@ -88,11 +95,6 @@ class c_SimpleXMLElement :
   bool m_is_children;
   bool m_is_property;
   bool m_is_array;
-  virtual bool o_toBooleanImpl() const noexcept;
-  virtual int64_t o_toInt64Impl() const noexcept;
-  virtual double o_toDoubleImpl() const noexcept;
-  virtual Array o_toArray() const;
-  virtual c_SimpleXMLElement* clone();
  private:
   xmlXPathContextPtr m_xpath;
 };

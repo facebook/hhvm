@@ -6712,7 +6712,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCreateCont(PC& pc) {
 
 static inline c_Continuation* this_continuation(const ActRec* fp) {
   ObjectData* obj = fp->getThis();
-  assert(dynamic_cast<c_Continuation*>(obj));
+  assert(obj->instanceof(c_Continuation::s_cls));
   return static_cast<c_Continuation*>(obj);
 }
 

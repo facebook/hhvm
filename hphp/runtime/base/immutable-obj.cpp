@@ -74,7 +74,7 @@ Object ImmutableObj::getObject() {
   }
   Array v = ai.create();
   obj->o_setArray(v);
-  obj->t___wakeup();
+  obj->invokeWakeup();
   return obj;
 }
 

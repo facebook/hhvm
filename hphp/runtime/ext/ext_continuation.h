@@ -32,7 +32,7 @@ Object f_hphp_create_continuation(CStrRef clsname, CStrRef funcname, CStrRef ori
 ///////////////////////////////////////////////////////////////////////////////
 // class Continuation
 
-class c_Continuation : public ExtObjectData {
+class c_Continuation : public ExtObjectDataFlags<ObjectData::HasClone> {
  public:
   DECLARE_CLASS_NO_ALLOCATION(Continuation, Continuation, ObjectData)
   virtual void sweep();
@@ -80,7 +80,7 @@ public:
   String t_getorigfuncname();
   String t_getcalledclass();
 
-  c_Continuation* clone();
+  static c_Continuation* Clone(ObjectData* obj);
 
   static c_Continuation* alloc(const Func* origFunc, const Func* genFunc) {
     assert(origFunc);

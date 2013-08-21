@@ -27,6 +27,8 @@
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/ext_datetime.h"
+#include "hphp/runtime/ext/ext_domdocument.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/member-operations.h"
@@ -115,13 +117,22 @@ bool ObjectData::o_instanceof(CStrRef s) const {
 }
 
 bool ObjectData::o_toBooleanImpl() const noexcept {
-  not_reached();
+  // SimpleXMLElement is the only class that has custom bool casting. If others
+  // are added in future, just turn this assert into an if and add cases.
+  assert(instanceof(c_SimpleXMLElement::s_cls));
+  return c_SimpleXMLElement::ToBoolean(this);
 }
 int64_t ObjectData::o_toInt64Impl() const noexcept {
-  not_reached();
+  // SimpleXMLElement is the only class that has custom int casting. If others
+  // are added in future, just turn this assert into an if and add cases.
+  assert(instanceof(c_SimpleXMLElement::s_cls));
+  return c_SimpleXMLElement::ToInt64(this);
 }
 double ObjectData::o_toDoubleImpl() const noexcept {
-  not_reached();
+  // SimpleXMLElement is the only class that has custom double casting. If
+  // others are added in future, just turn this assert into an if and add cases.
+  assert(instanceof(c_SimpleXMLElement::s_cls));
+  return c_SimpleXMLElement::ToDouble(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -363,9 +374,33 @@ void ObjectData::o_getArray(Array& props, bool pubOnly /* = false */) const {
 }
 
 Array ObjectData::o_toArray() const {
-  Array ret(ArrayData::Create());
-  o_getArray(ret, false);
-  return ret;
+  // We can quickly tell if this object is a collection, which lets us avoid
+  // checking for each class in turn if it's not one.
+  if (isCollection()) {
+    // The collection classes are final and have no parent, so direct comparison
+    // of their m_cls is okay
+    if (m_cls == c_Vector::s_cls) {
+      return c_Vector::ToArray(this);
+    } else if (m_cls == c_Map::s_cls) {
+      return c_Map::ToArray(this);
+    } else if (m_cls == c_StableMap::s_cls) {
+      return c_StableMap::ToArray(this);
+    } else if (m_cls == c_Set::s_cls) {
+      return c_Set::ToArray(this);
+    } else if (m_cls == c_Pair::s_cls) {
+      return c_Pair::ToArray(this);
+    }
+    not_reached();
+  } else if (UNLIKELY(getAttribute(CallToImpl))) {
+    // If we end up with other classes that need special behavior, turn the
+    // assert into an if and add cases.
+    assert(instanceof(c_SimpleXMLElement::s_cls));
+    return c_SimpleXMLElement::ToArray(this);
+  } else {
+    Array ret(ArrayData::Create());
+    o_getArray(ret, false);
+    return ret;
+  }
 }
 
 Array ObjectData::o_toIterArray(CStrRef context,
@@ -539,6 +574,7 @@ const StaticString
 void ObjectData::serializeImpl(VariableSerializer* serializer) const {
   bool handleSleep = false;
   Variant ret;
+
   if (LIKELY(serializer->getType() == VariableSerializer::Type::Serialize ||
              serializer->getType() == VariableSerializer::Type::APCSerialize)) {
     if (instanceof(SystemLib::s_SerializableClass)) {
@@ -566,7 +602,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
     }
     if (getAttribute(HasSleep)) {
       handleSleep = true;
-      ret = const_cast<ObjectData*>(this)->t___sleep();
+      ret = const_cast<ObjectData*>(this)->invokeSleep();
     }
   } else if (UNLIKELY(serializer->getType() ==
                       VariableSerializer::Type::DebuggerSerialize)) {
@@ -601,7 +637,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
     if (getAttribute(HasSleep)) {
       try {
         handleSleep = true;
-        ret = const_cast<ObjectData*>(this)->t___sleep();
+        ret = const_cast<ObjectData*>(this)->invokeSleep();
       } catch (...) {
         raise_warning("%s::sleep() throws exception", o_getClassName().data());
         serializer->writeNull();
@@ -609,6 +645,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       }
     }
   }
+
   if (UNLIKELY(handleSleep)) {
     assert(!isCollection());
     if (ret.isArray()) {
@@ -678,6 +715,39 @@ void ObjectData::dump() const {
 }
 
 ObjectData* ObjectData::clone() {
+  if (getAttribute(HasClone)) {
+    if (isCollection()) {
+      // The collection classes are final and have no parent, so direct
+      // comparison of their m_cls is okay.
+      if (m_cls == c_Vector::s_cls) {
+        return c_Vector::Clone(this);
+      } else if (m_cls == c_Map::s_cls) {
+        return c_Map::Clone(this);
+      } else if (m_cls == c_StableMap::s_cls) {
+        return c_StableMap::Clone(this);
+      } else if (m_cls == c_Set::s_cls) {
+        return c_Set::Clone(this);
+      } else if (m_cls == c_Pair::s_cls) {
+        return c_Pair::Clone(this);
+      }
+    } else if (instanceof(c_Closure::s_cls)) {
+      return c_Closure::Clone(this);
+    } else if (instanceof(c_Continuation::s_cls)) {
+      return c_Continuation::Clone(this);
+    } else if (instanceof(c_DateTime::s_cls)) {
+      return c_DateTime::Clone(this);
+    } else if (instanceof(c_DateTimeZone::s_cls)) {
+      return c_DateTimeZone::Clone(this);
+    } else if (instanceof(c_DateInterval::s_cls)) {
+      return c_DateInterval::Clone(this);
+    } else if (instanceof(c_DOMNode::s_cls)) {
+      return c_DOMNode::Clone(this);
+    } else if (instanceof(c_SimpleXMLElement::s_cls)) {
+      return c_SimpleXMLElement::Clone(this);
+    }
+    not_reached();
+  }
+
   return cloneImpl();
 }
 
@@ -1354,7 +1424,7 @@ void ObjectData::getProps(const Class* klass, bool pubOnly,
   }
 }
 
-Variant ObjectData::t___sleep() {
+Variant ObjectData::invokeSleep() {
   const Func* method = m_cls->lookupMethod(s___sleep.get());
   if (method) {
     TypedValue tv;
@@ -1365,7 +1435,7 @@ Variant ObjectData::t___sleep() {
   }
 }
 
-Variant ObjectData::t___wakeup() {
+Variant ObjectData::invokeWakeup() {
   const Func* method = m_cls->lookupMethod(s___wakeup.get());
   if (method) {
     TypedValue tv;

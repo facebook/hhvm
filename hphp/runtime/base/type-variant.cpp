@@ -1909,7 +1909,7 @@ void Variant::unserialize(VariableUnserializer *uns,
         throw Exception("Expected '}' but got '%c'", sep);
       }
 
-      obj->t___wakeup();
+      obj->invokeWakeup();
       return; // object has '}' terminating
     }
     break;

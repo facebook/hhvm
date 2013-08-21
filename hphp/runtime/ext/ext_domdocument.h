@@ -103,7 +103,10 @@ Variant f_dom_import_simplexml(CObjRef node);
 // class DOMNode
 
 FORWARD_DECLARE_CLASS_BUILTIN(DOMNode);
-class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet|ObjectData::UseIsset> {
+class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|
+                                            ObjectData::UseSet|
+                                            ObjectData::UseIsset|
+                                            ObjectData::HasClone> {
  public:
   DECLARE_CLASS(DOMNode, DOMNode, ObjectData)
 
@@ -135,7 +138,7 @@ class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSe
 
 
 public:
-  virtual c_DOMNode* clone();
+  static c_DOMNode* Clone(ObjectData* obj);
   virtual p_DOMDocument doc() { return m_doc;}
   p_DOMDocument m_doc;
   xmlNodePtr m_node;

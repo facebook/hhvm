@@ -80,7 +80,7 @@ inline c_Continuation*
 frame_continuation(const ActRec* fp) {
   size_t arOffset = c_Continuation::getArOffset(fp->m_func);
   ObjectData* obj = (ObjectData*)((char*)fp - arOffset);
-  assert(dynamic_cast<c_Continuation*>(obj));
+  assert(obj->getVMClass() == c_Continuation::s_cls);
   return static_cast<c_Continuation*>(obj);
 }
 

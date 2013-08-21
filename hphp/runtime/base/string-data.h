@@ -45,7 +45,7 @@ template <class T>
 struct Slice {
   T* ptr;        // pointer to bytes, not necessarily \0 teriminated
   uint32_t len;  // number of bytes, not counting possible \0
-  Slice(T* ptr, int len) : ptr(ptr), len(len) {}
+  Slice(T* ptr, uint32_t len) : ptr(ptr), len(len) {}
   T* begin() const { return ptr; }
   T* end() const { return ptr + len; }
   uint32_t size() const { return len; }

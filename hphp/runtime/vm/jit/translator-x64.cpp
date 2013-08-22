@@ -1527,6 +1527,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
         a.  emitImmReg(i, argNumToRegName[2]);
         emitCall(a, (TCA)raiseMissingArgument);
         m_fixupMap.recordFixup(a.frontier(), fixup);
+        break;
       }
     }
   }

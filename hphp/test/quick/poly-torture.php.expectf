@@ -12,10 +12,6 @@ T2::dubiousArgs 1
     randObj: B
 T1::dubiousArgs 2, 2
 --HipHop Warning: noSuchMethodBoyeee() expects exactly 5 parameters, 0 given in %s on line 41
-HipHop Warning: noSuchMethodBoyeee() expects exactly 5 parameters, 1 given in %s on line 41
-HipHop Warning: noSuchMethodBoyeee() expects exactly 5 parameters, 2 given in %s on line 41
-HipHop Warning: noSuchMethodBoyeee() expects exactly 5 parameters, 3 given in %s on line 41
-HipHop Warning: noSuchMethodBoyeee() expects exactly 5 parameters, 4 given in %s on line 41
 C also has this method with params: HipHop Notice: Undefined variable: d in %s on line 41
  HipHop Notice: Undefined variable: e in %s on line 41
 

@@ -1473,6 +1473,7 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
         } else {
           raise_warning(Strings::MISSING_ARGUMENTS, name, nparams, i);
         }
+        break;
       }
     }
   }

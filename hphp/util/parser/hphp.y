@@ -1487,6 +1487,7 @@ expr_with_parens:
     ctor_arguments                     { _p->onNewObject($$, $2, $3);}
   | T_CLONE expr                       { UEXP($$,$2,T_CLONE,1);}
   | xhp_tag                            { $$ = $1;}
+  | collection_literal                 { $$ = $1;}
 
 parenthesis_expr:
   '(' expr ')'                         { $$ = $2;}
@@ -1624,7 +1625,6 @@ expr_no_variable:
                                          _p->onClosure($$,&$1,u,$3,$6,$9,$11);
                                          _p->popLabelInfo();}
   | dim_expr                           { $$ = $1;}
-  | collection_literal                 { $$ = $1;}
 ;
 
 shape_keyname:

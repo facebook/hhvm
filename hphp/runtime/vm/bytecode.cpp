@@ -6023,6 +6023,19 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
   return true;
 }
 
+bool VMExecutionContext::doFCallArrayTC(PC pc) {
+  if (debug) {
+    DEBUG_ONLY DECLARE_STACK_POINTER(sp);
+    // native stack pointer should be 16-byte aligned.
+    assert(uintptr_t(sp) % 16 == 0);
+  }
+  assert(tl_regState == VMRegState::DIRTY);
+  tl_regState = VMRegState::CLEAN;
+  auto const ret = doFCallArray(pc);
+  tl_regState = VMRegState::DIRTY;
+  return ret;
+}
+
 inline void OPTBLD_INLINE VMExecutionContext::iopFCallArray(PC& pc) {
   NEXT();
   (void)doFCallArray(pc);

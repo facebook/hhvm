@@ -3686,17 +3686,14 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
 void CodeGenerator::cgCallArray(IRInstruction* inst) {
   Offset pc             = inst->extra<CallArray>()->pc;
   Offset after          = inst->extra<CallArray>()->after;
-
-  ArgGroup args(m_regs);
-  args.imm(pc).imm(after);
-
-  // fCallArrayHelper makes the actual call by smashing its return address.
   cgCallHelper(
     m_as,
-    CppCall(TranslatorX64::fCallArrayHelper),
+    CppCall(m_tx64->m_fcallArrayHelper),
     kVoidDest,
     SyncOptions::kSyncPoint,
-    args
+    ArgGroup(m_regs)
+      .imm(pc)
+      .imm(after)
   );
 }
 

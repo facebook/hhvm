@@ -91,8 +91,8 @@ struct VMRegAnchor : private boost::noncopyable {
   VMRegAnchor() {
     if (debug) {
       DEBUG_ONLY DECLARE_STACK_POINTER(sp);
-      // native stack pointer should be octoword-aligned.
-      assert((uintptr_t(sp) & 0xf) == 0);
+      // native stack pointer should be 16-byte aligned.
+      assert(uintptr_t(sp) % 16 == 0);
     }
     m_old = tl_regState;
     Translator::Get()->sync();

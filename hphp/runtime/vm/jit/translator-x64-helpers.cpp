@@ -184,10 +184,8 @@ asm (
 "__funcBodyHelperThunk:\n"
 #if defined(__x86_64__)
   /*
-   * when this helper is called, its as if by a jmp
-   * direct from the tc (its actually called by smashing
-   * the return address of fCallArrayHelper). So we dont
-   * need to worry about stack parity
+   * when this helper is called, a jmp direct from the tc (from the
+   * fcallArrayHelper). So we don't need to worry about stack parity.
    */
   "mov %rbp, %rdi\n"
   "call " ASM_HELPER_FUNC_NAME(funcBodyHelper) "\n"
@@ -216,28 +214,6 @@ TCA funcBodyHelper(ActRec* fp) {
   }
   tl_regState = VMRegState::DIRTY;
   return tca;
-}
-
-void TranslatorX64::fCallArrayHelper(const Offset pcOff, const Offset pcNext) {
-  DECLARE_FRAME_POINTER(framePtr);
-  ActRec* fp = (ActRec*)framePtr->m_savedRbp;
-
-  VMExecutionContext *ec = g_vmContext;
-  ec->m_fp = fp;
-  ec->m_stack.top() = sp;
-  ec->m_pc = fp->unit()->at(pcOff);
-  PC pc = fp->unit()->at(pcNext);
-
-  tl_regState = VMRegState::CLEAN;
-  bool runFunc = ec->doFCallArray(pc);
-  sp = ec->m_stack.top();
-  tl_regState = VMRegState::DIRTY;
-  if (!runFunc) return;
-
-  ec->m_fp->m_savedRip = framePtr->m_savedRip;
-  // smash our return and frame pointer chain
-  framePtr->m_savedRip = (uint64_t)ec->m_fp->m_func->getFuncBody();
-  framePtr->m_savedRbp = (uint64_t)ec->m_fp;
 }
 
 void functionEnterHelper(const ActRec* ar) {

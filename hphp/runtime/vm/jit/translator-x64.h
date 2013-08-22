@@ -215,6 +215,7 @@ class TranslatorX64 : public Translator
   TCA                    m_dtorStubs[kDestrTableSize];
   TCA                    m_defClsHelper;
   TCA                    m_funcPrologueRedispatch;
+  TCA                    m_fcallArrayHelper;
 
   TCA                    m_freeManyLocalsHelper;
   TCA                    m_freeLocalsHelpers[kNumFreeLocalsHelpers];
@@ -273,7 +274,6 @@ private:
   static int  shuffleArgsForMagicCall(ActRec* ar);
   static void setArgInActRec(ActRec* ar, int argNum, uint64_t datum,
                              DataType t);
-  static void fCallArrayHelper(const Offset pcOff, const Offset pcNext);
 
 
   ////////////////////////////////////////
@@ -413,10 +413,10 @@ private:
   TCA emitUnaryStub(Asm& a, CppCall c);
   void emitFreeLocalsHelpers();
   void emitGenericDecRefHelpers();
+  void emitFCallArrayHelper();
   TCA emitRetFromInterpretedFrame();
   TCA emitRetFromInterpretedGeneratorFrame();
   void emitPopRetIntoActRec(Asm& a);
-
 
 private:
   void drawCFG(std::ofstream& out) const;

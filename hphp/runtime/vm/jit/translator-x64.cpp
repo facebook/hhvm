@@ -339,6 +339,65 @@ asm_label(a, release);
         size_t(a.frontier() - m_dtorGenericStub));
 }
 
+void TranslatorX64::emitFCallArrayHelper() {
+  moveToAlign(a, kNonFallthroughAlign);
+  m_fcallArrayHelper = a.frontier();
+
+  // NOTE: we're assuming we don't need to save registers, because we
+  // don't ever have live registers across php-level calls.
+
+  Label noCallee;
+
+  auto const rPCOff  = argNumToRegName[0];
+  auto const rPCNext = argNumToRegName[1];
+  auto const rBC     = r13;
+  auto const rEC     = r15;
+
+  auto const spOff = offsetof(VMExecutionContext, m_stack) +
+                       Stack::topOfStackOffset();
+  auto const fpOff = offsetof(VMExecutionContext, m_fp);
+  auto const pcOff = offsetof(VMExecutionContext, m_pc);
+
+  emitGetGContext(a, rEC);
+  a.    storeq (rVmFp, rEC[fpOff]);
+  a.    storeq (rVmSp, rEC[spOff]);
+
+  // rBC := fp -> m_func -> m_unit -> m_bc
+  a.    loadq  (rVmFp[AROFF(m_func)], rBC);
+  a.    loadq  (rBC[Func::unitOff()], rBC);
+  a.    loadq  (rBC[Unit::bcOff()],   rBC);
+  // Convert offsets into PC's and sync the PC
+  a.    addq   (rBC,    rPCOff);
+  a.    storeq (rPCOff, rEC[pcOff]);
+  a.    addq   (rBC,    rPCNext);
+
+  a.    subq   (8, rsp);  // stack parity
+
+  a.    movq   (rEC, argNumToRegName[0]);
+  assert(rPCNext == argNumToRegName[1]);
+  a.    call   (TCA(getMethodPtr(&VMExecutionContext::doFCallArrayTC)));
+
+  a.    loadq  (rEC[spOff], rVmSp);
+
+  a.    testq  (rax, rax);
+  a.    jz8    (noCallee);
+
+  a.    addq   (8, rsp);
+  a.    loadq  (rEC[fpOff], rVmFp);
+  a.    pop    (rVmFp[AROFF(m_savedRip)]);
+  a.    loadq  (rVmFp[AROFF(m_func)], rax);
+  a.    loadq  (rax[Func::funcBodyOff()], rax);
+  a.    jmp    (rax);
+
+asm_label(a, noCallee);
+  a.    addq   (8, rsp);
+  a.    ret    ();
+
+  FTRACE(1, "HOTSTUB: fcallArrayHelper: {} - {} bytes\n",
+         static_cast<void*>(m_fcallArrayHelper),
+         static_cast<size_t>(a.frontier() - m_fcallArrayHelper));
+}
+
 bool TranslatorX64::profileSrcKey(const SrcKey& sk) const {
   if (!RuntimeOption::EvalJitPGO) return false;
 
@@ -3259,6 +3318,7 @@ TranslatorX64::TranslatorX64()
   , m_dtorStubs{}
   , m_defClsHelper(nullptr)
   , m_funcPrologueRedispatch(nullptr)
+  , m_fcallArrayHelper(nullptr)
   , m_numHHIRTrans(0)
   , m_catchTraceMap(128)
 {
@@ -3470,6 +3530,7 @@ TranslatorX64::TranslatorX64()
   emitGenericDecRefHelpers();
   emitFreeLocalsHelpers();
   m_funcPrologueRedispatch = emitPrologueRedispatch(a);
+  emitFCallArrayHelper();
   TRACE(1, "HOTSTUB: all stubs finished: %lx\n",
         uintptr_t(a.frontier()));
 

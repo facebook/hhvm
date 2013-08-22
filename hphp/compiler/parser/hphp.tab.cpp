@@ -470,7 +470,7 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
   }
   {
     Token params, ret, ref; ref = 1;
-    _p->onMethod(out, modifiers, ret, ref, fname, params, stmt, 0, false);
+    _p->onMethod(out, modifiers, ret, ref, fname, params, stmt, nullptr, false);
   }
 }
 
@@ -520,7 +520,7 @@ static void xhp_category_stmt(Parser *_p, Token &out, Token &categories) {
   }
   {
     Token params, ret, ref; ref = 1;
-    _p->onMethod(out, modifiers, ret, ref, fname, params, stmt, 0, false);
+    _p->onMethod(out, modifiers, ret, ref, fname, params, stmt, nullptr, false);
   }
 }
 
@@ -608,7 +608,7 @@ static void xhp_children_stmt(Parser *_p, Token &out, Token &children) {
   }
   {
     Token params, ret, ref; ref = 1;
-    _p->onMethod(out, modifiers, ret, ref, fname, params, stmt, 0, false);
+    _p->onMethod(out, modifiers, ret, ref, fname, params, stmt, nullptr, false);
   }
 }
 
@@ -6168,7 +6168,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 922 "hphp.y"
-    { _p->onFunction((yyval),0,(yyvsp[(8) - (11)]),(yyvsp[(2) - (11)]),(yyvsp[(3) - (11)]),(yyvsp[(6) - (11)]),(yyvsp[(10) - (11)]),0,false);
+    { _p->onFunction((yyval),nullptr,(yyvsp[(8) - (11)]),(yyvsp[(2) - (11)]),(yyvsp[(3) - (11)]),(yyvsp[(6) - (11)]),(yyvsp[(10) - (11)]),nullptr);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();;}
     break;
@@ -6186,7 +6186,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 932 "hphp.y"
-    { _p->onFunction((yyval),&(yyvsp[(1) - (12)]),(yyvsp[(9) - (12)]),(yyvsp[(3) - (12)]),(yyvsp[(4) - (12)]),(yyvsp[(7) - (12)]),(yyvsp[(11) - (12)]),0,false);
+    { _p->onFunction((yyval),&(yyvsp[(1) - (12)]),(yyvsp[(9) - (12)]),(yyvsp[(3) - (12)]),(yyvsp[(4) - (12)]),(yyvsp[(7) - (12)]),(yyvsp[(11) - (12)]),nullptr);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();;}
     break;
@@ -6204,7 +6204,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 942 "hphp.y"
-    { _p->onFunction((yyval),&(yyvsp[(2) - (13)]),(yyvsp[(10) - (13)]),(yyvsp[(4) - (13)]),(yyvsp[(5) - (13)]),(yyvsp[(8) - (13)]),(yyvsp[(12) - (13)]),&(yyvsp[(1) - (13)]),false);
+    { _p->onFunction((yyval),&(yyvsp[(2) - (13)]),(yyvsp[(10) - (13)]),(yyvsp[(4) - (13)]),(yyvsp[(5) - (13)]),(yyvsp[(8) - (13)]),(yyvsp[(12) - (13)]),&(yyvsp[(1) - (13)]));
                                          _p->popLabelInfo();
                                          _p->popTypeScope();;}
     break;
@@ -7020,7 +7020,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 1289 "hphp.y"
-    { _p->onMethod((yyval),(yyvsp[(1) - (10)]),(yyvsp[(9) - (10)]),(yyvsp[(3) - (10)]),(yyvsp[(4) - (10)]),(yyvsp[(7) - (10)]),(yyvsp[(10) - (10)]),0);
+    { _p->onMethod((yyval),(yyvsp[(1) - (10)]),(yyvsp[(9) - (10)]),(yyvsp[(3) - (10)]),(yyvsp[(4) - (10)]),(yyvsp[(7) - (10)]),(yyvsp[(10) - (10)]),nullptr);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();;}
     break;

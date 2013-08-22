@@ -135,11 +135,6 @@ struct OnMethodEI : ExtraInfo {
   explicit OnMethodEI(bool r) : reloc(r) {}
 };
 
-struct OnFunctionEI : ExtraInfo {
-  bool isClosure;
-  explicit OnFunctionEI(bool c) : isClosure(c) {}
-};
-
 struct OnReturnEI : ExtraInfo {
   bool checkYield;
   explicit OnReturnEI(bool c) : checkYield(c) {}
@@ -634,12 +629,10 @@ struct Parser : ParserBase {
   }
 
   void onFunction(Token& out, Token *modifiers, Token& ret, Token& ref,
-                  Token& name, Token& params, Token& stmt, Token* attr,
-                  bool isClosure) {
+                  Token& name, Token& params, Token& stmt, Token* attr) {
     out.setNodeType(ONFUNCTION).appendChild(modifiers).appendChild(&ret)
       .appendChild(&ref).appendChild(&name).appendChild(&params)
-      .appendChild(&stmt).appendChild(attr)
-      .setExtra(new OnFunctionEI(isClosure));
+      .appendChild(&stmt).appendChild(attr);
   }
 
   void onParam(Token &out, Token *params, Token &type, Token &var,

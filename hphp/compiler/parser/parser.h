@@ -22,7 +22,10 @@
 #include "hphp/compiler/construct.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/type_annotation.h"
+#include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/statement/statement_list.h"
 
 #ifdef HPHP_PARSER_NS
 #undef HPHP_PARSER_NS
@@ -186,8 +189,7 @@ public:
   void fixStaticVars();
   void onFunctionStart(Token &name, bool doPushComment = true);
   void onFunction(Token &out, Token *modifier, Token &ret, Token &ref,
-                  Token &name, Token &params, Token &stmt, Token *attr,
-                  bool isClosure);
+                  Token &name, Token &params, Token &stmt, Token *attr);
   void onParam(Token &out, Token *params, Token &type, Token &var,
                bool ref, Token *defValue, Token *attr, Token *modifiers);
   void onClassStart(int type, Token &name);
@@ -291,7 +293,13 @@ private:
     bool hasReturn;       // function contains a return statement
     bool isGenerator;     // function determined to be a generator
     bool isAsync;         // function determined to be async
- };
+  };
+
+  enum class FunctionType {
+    Function,
+    Method,
+    Closure,
+  };
 
   AnalysisResultPtr m_ar;
   FileScopePtr m_file;
@@ -332,6 +340,15 @@ private:
                             FunctionContext& funcContext,
                             ModifierExpressionPtr modifiers,
                             int returnsRef);
+
+  string getFunctionName(FunctionType type, Token* name);
+  void prepareConstructorParameters(StatementListPtr stmts,
+                                    ExpressionListPtr params,
+                                    bool isAbstract);
+  StatementPtr onFunctionHelper(FunctionType type,
+                        Token *modifiers, Token &ret,
+                        Token &ref, Token *name, Token &params,
+                        Token &stmt, Token *attr, bool reloc);
 
   ExpressionPtr getDynamicVariable(ExpressionPtr exp, bool encap);
   ExpressionPtr createDynamicVariable(ExpressionPtr exp);

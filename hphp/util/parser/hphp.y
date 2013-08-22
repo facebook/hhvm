@@ -391,7 +391,7 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
   }
   {
     Token params, ret, ref; ref = 1;
-    _p->onMethod(out, modifiers, ret, ref, fname, params, stmt, 0, false);
+    _p->onMethod(out, modifiers, ret, ref, fname, params, stmt, nullptr, false);
   }
 }
 
@@ -441,7 +441,7 @@ static void xhp_category_stmt(Parser *_p, Token &out, Token &categories) {
   }
   {
     Token params, ret, ref; ref = 1;
-    _p->onMethod(out, modifiers, ret, ref, fname, params, stmt, 0, false);
+    _p->onMethod(out, modifiers, ret, ref, fname, params, stmt, nullptr, false);
   }
 }
 
@@ -529,7 +529,7 @@ static void xhp_children_stmt(Parser *_p, Token &out, Token &children) {
   }
   {
     Token params, ret, ref; ref = 1;
-    _p->onMethod(out, modifiers, ret, ref, fname, params, stmt, 0, false);
+    _p->onMethod(out, modifiers, ret, ref, fname, params, stmt, nullptr, false);
   }
 }
 
@@ -919,7 +919,7 @@ function_declaration_statement:
                                          _p->pushLabelInfo();}
     '(' parameter_list ')'
     hh_opt_return_type
-    '{' inner_statement_list '}'       { _p->onFunction($$,0,$8,$2,$3,$6,$10,0,false);
+    '{' inner_statement_list '}'       { _p->onFunction($$,nullptr,$8,$2,$3,$6,$10,nullptr);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();}
   | non_empty_member_modifiers
@@ -929,7 +929,7 @@ function_declaration_statement:
                                          _p->pushLabelInfo();}
     '(' parameter_list ')'
     hh_opt_return_type
-    '{' inner_statement_list '}'       { _p->onFunction($$,&$1,$9,$3,$4,$7,$11,0,false);
+    '{' inner_statement_list '}'       { _p->onFunction($$,&$1,$9,$3,$4,$7,$11,nullptr);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();}
   | non_empty_user_attributes
@@ -939,7 +939,7 @@ function_declaration_statement:
                                          _p->pushLabelInfo();}
     '(' parameter_list ')'
     hh_opt_return_type
-    '{' inner_statement_list '}'       { _p->onFunction($$,&$2,$10,$4,$5,$8,$12,&$1,false);
+    '{' inner_statement_list '}'       { _p->onFunction($$,&$2,$10,$4,$5,$8,$12,&$1);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();}
 ;
@@ -1286,7 +1286,7 @@ class_statement:
     method_parameter_list ')'
     hh_opt_return_type
     method_body
-                                       { _p->onMethod($$,$1,$9,$3,$4,$7,$10,0);
+                                       { _p->onMethod($$,$1,$9,$3,$4,$7,$10,nullptr);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();}
   | non_empty_user_attributes

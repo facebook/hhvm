@@ -43,6 +43,16 @@ inline StringData* StringData::Escalate(StringData* in) {
   return in;
 }
 
+inline void StringData::initAttach(const char* data, int len) {
+  initCopy(data, len);
+  free(const_cast<char*>(data)); // XXX
+}
+
+inline void StringData::initAttach(const char* data) {
+  initCopy(data);
+  free(const_cast<char*>(data)); // XXX
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }

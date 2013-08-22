@@ -433,8 +433,8 @@ private:
 
 private:
   void initAttach(const char* data);
-  void initCopy(const char* data);
   void initAttach(const char* data, int len);
+  void initCopy(const char* data);
   void initCopy(const char* data, int len);
   void initMalloc(const char* data, int len);
   void initConcat(StringSlice r1, StringSlice r2);

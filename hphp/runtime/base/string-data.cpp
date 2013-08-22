@@ -226,37 +226,6 @@ void StringData::sweepAll() {
 }
 
 HOT_FUNC
-void StringData::initAttach(const char* data) {
-  return initAttach(data, strlen(data));
-}
-
-HOT_FUNC
-void StringData::initAttach(const char* data, int len) {
-  if (uint32_t(len) > MaxSize) {
-    throw InvalidArgumentException("len > 2^31-2", len);
-  }
-  m_hash = 0;
-  m_count = 0;
-  if (uint32_t(len) <= MaxSmallSize) {
-    memcpy(m_small, data, len);
-    m_len = len;
-    m_data = m_small;
-    m_small[len] = 0;
-    setSmall();
-    free(const_cast<char*>(data)); // XXX
-  } else {
-    char* buf = (char*)smart_malloc(len + 1);
-    memcpy(buf, data, len);
-    buf[len] = 0;
-    m_len = len;
-    m_cdata = buf;
-    setModeAndCap(Mode::Smart, len + 1);
-    free(const_cast<char*>(data)); // XXX
-  }
-  assert(checkSane());
-}
-
-HOT_FUNC
 void StringData::initCopy(const char* data) {
   return initCopy(data, strlen(data));
 }

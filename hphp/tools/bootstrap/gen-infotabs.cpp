@@ -67,9 +67,10 @@ int main(int argc, const char* argv[]) {
     fbstring name = func.lowerName();
     if (func.flags() & ZendCompat) {
       cpp << "} // End namespace\n";
-      cpp << "void fh_" << name << "(HPHP::ActRec* ar, HPHP::TypedValue* return_value);\n";
+      cpp << "void zif_" << name << "(HPHP::ActRec* ar, HPHP::TypedValue* return_value);\n";
       cpp << "HPHP::TypedValue* fg_" << name << "(HPHP::ActRec* ar){\n";
-      cpp << "  fh_" << name << "(ar, &ar->m_r);\n";
+      cpp << "  tvWriteNull(&ar->m_r);\n";
+      cpp << "  zif_" << name << "(ar, &ar->m_r);\n";
       cpp << "  tvRefcountedIncRef(&ar->m_r);\n";
       cpp << "  return nullptr;\n";
       cpp << "}\n";
@@ -110,14 +111,16 @@ int main(int argc, const char* argv[]) {
     }
     first = false;
 
-    auto prefix = "";
+    auto ns = "";
+    auto prefix = "fh_";
     if (func.flags() & ZendCompat) {
-      prefix = "::";
+      ns = "::";
+      prefix = "zif_";
     }
 
     fbstring name = func.lowerName();
-    cpp << "{ \"" << name << "\", " << prefix << "fg_" << name
-        << ", (void *)&" << prefix << "fh_" << name << " }";
+    cpp << "{ \"" << name << "\", " << ns << "fg_" << name
+        << ", (void *)&" << ns << prefix << name << " }";
   }
   cpp << "\n};\n\n";
 

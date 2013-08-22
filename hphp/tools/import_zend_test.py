@@ -87,7 +87,6 @@ no_import = (
     '/ext/ereg',
     '/ext/fileinfo',
     '/ext/ftp',
-    '/ext/gettext',
     '/ext/gmp',
     '/ext/interbase',
     '/ext/mssql',
@@ -241,6 +240,23 @@ other_files = (
     '/ext-gd/src.gd2',
     '/ext-gd/src.wbmp',
     '/ext-gd/test8859.ttf',
+    '/ext-gettext/locale/en/LC_CTYPE/dgettextTest.mo',
+    '/ext-gettext/locale/en/LC_CTYPE/dgettextTest.po',
+    '/ext-gettext/locale/en/LC_CTYPE/dgettextTest_switched.po',
+    '/ext-gettext/locale/en/LC_CTYPE/dgettextTest_switch.mo',
+    '/ext-gettext/locale/en/LC_CTYPE/dgettextTest_switch.po',
+    '/ext-gettext/locale/en/LC_CTYPE/dngettextTest.mo',
+    '/ext-gettext/locale/en/LC_CTYPE/dngettextTest.po',
+    '/ext-gettext/locale/en/LC_MESSAGES/dgettextTest.mo',
+    '/ext-gettext/locale/en/LC_MESSAGES/dgettextTest.po',
+    '/ext-gettext/locale/en/LC_MESSAGES/dgettextTest_switch.mo',
+    '/ext-gettext/locale/en/LC_MESSAGES/dgettextTest_switch.po',
+    '/ext-gettext/locale/en/LC_MESSAGES/dngettextTest.mo',
+    '/ext-gettext/locale/en/LC_MESSAGES/dngettextTest.po',
+    '/ext-gettext/locale/en/LC_MESSAGES/messages.mo',
+    '/ext-gettext/locale/en/LC_MESSAGES/messages.po',
+    '/ext-gettext/locale/fi/LC_MESSAGES/messages.mo',
+    '/ext-gettext/locale/fi/LC_MESSAGES/messages.po',
     '/ext-intl/ut_common.inc',
     '/ext-ldap/connect.inc',
     '/ext-mbstring/common.inc',
@@ -372,8 +388,13 @@ def mkdir_p(path):
         pass
 
 def walk(filename, source):
+    if not '/tests' in source:
+        return
+
     dest_filename = os.path.basename(filename)
-    source_dir = source.lower().replace('/tests', '').replace('/', '-')
+    suite, path = source.split('/tests', 2)
+    suite = suite.lower().replace('/', '-')
+    source_dir = suite + path
 
     cur_dir = os.path.dirname(__file__)
     dest_subdir = os.path.join(cur_dir, '../test/zend/all', source_dir)

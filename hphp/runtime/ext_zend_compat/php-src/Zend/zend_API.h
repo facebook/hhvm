@@ -67,7 +67,7 @@ typedef struct _zend_fcall_info_cache {
 
 #define ZEND_NS_NAME(ns, name)      ns "\\" name
 
-#define ZEND_FN(name) fh_##name
+#define ZEND_FN(name) zif_##name
 #define ZEND_MN(name) zim_##name
 #define ZEND_NAMED_FUNCTION(name)    void name(INTERNAL_FUNCTION_PARAMETERS)
 #define ZEND_FUNCTION(name)        ZEND_NAMED_FUNCTION(ZEND_FN(name))

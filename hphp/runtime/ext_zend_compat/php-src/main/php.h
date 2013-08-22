@@ -377,6 +377,10 @@ END_EXTERN_C()
 
 /* Output support */
 #include "php_streams.h"
+
+/* Virtual current working directory support */
+#include "tsrm_virtual_cwd.h"
+
 #include "zend_constants.h"
 
 /* connection status states */

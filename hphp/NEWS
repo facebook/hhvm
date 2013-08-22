@@ -1,5 +1,6 @@
 future
   - Optimize closure invocation and __invoke (~3x faster to invoke)
+  - Import gettext extension
 
 "Kimchi" 2-Sep-2013
   - Fix order of custom attributes and visibility in  ctor arg promotion

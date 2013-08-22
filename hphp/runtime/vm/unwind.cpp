@@ -196,6 +196,13 @@ void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc, Offset& faultOffset) {
     }
     stack.ndiscard(func->numSlotsInFrame());
     stack.discardAR();
+  } else {
+    // The generator's locals will be cleaned up when the Continuation
+    // object is destroyed. But we are leaving the generator function
+    // now, so signal that to anyone who cares.
+    try {
+      EventHook::FunctionExit(fp);
+    } catch (...) {} // As above, don't let new exceptions out of unwind.
   }
 
   assert(stack.isValidAddress(reinterpret_cast<uintptr_t>(prevFp)) ||

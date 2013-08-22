@@ -1,0 +1,7 @@
+<?php 
+class auto {
+    public function __construct() {
+        echo "__autoload";
+    }
+}
+?>

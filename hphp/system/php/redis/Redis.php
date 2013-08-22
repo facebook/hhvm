@@ -1373,7 +1373,7 @@ class Redis {
   public function __call($fname, $args) {
     $fname = strtolower($fname);
     if (!isset(self::$map[$fname])) {
-      error_log("Call to undefined function Redis::$fname", E_USER_ERROR);
+      trigger_error("Call to undefined function Redis::$fname", E_USER_ERROR);
       return null;
     }
     $func = self::$map[$fname];
@@ -1423,8 +1423,9 @@ class Redis {
             array_key_exists($func['defaults'], $i)) {
           $args[$i] = $func['defualts'][$i];
         } else {
-          error_log("Redis::$fname requires at least $flen parameters ".
-                    "$argc given", E_USER_ERROR);
+          trigger_error(
+            "Redis::$fname requires at least $flen parameters $argc given",
+            E_USER_ERROR);
           return null;
         }
       }
@@ -1437,8 +1438,9 @@ class Redis {
         case 'b': $args[$i] = (bool)$arts[$i]; break;
         case 'p':
           if (($args[$i] !== self::BEFORE) AND ($args[$i] !== self::AFTER)) {
-            error_log("Argument $i to Redis::$fname must be ".
-                      "'before' or 'after'", E_USER_ERROR);
+            trigger_error(
+              "Argument $i to Redis::$fname must be 'before' or 'after'",
+              E_USER_ERROR);
             return null;
           } break;
       }
@@ -1484,8 +1486,9 @@ class Redis {
     $this->mode = self::ATOMIC;
 
     if (!$conn) {
-      error_log("Failed connecting to redis server at {$host}: {$errstr}",
-                E_USER_WARNING);
+      trigger_error(
+        "Failed connecting to redis server at {$host}: {$errstr}",
+        E_USER_WARNING);
       return false;
     }
     stream_set_blocking($conn, true);

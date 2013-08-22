@@ -476,28 +476,33 @@ Id Func::lookupVarId(const StringData* name) const {
   return shared()->m_localNames.findIndex(name);
 }
 
+static void print_attrs(std::ostream& out, Attr attrs) {
+  if (attrs & AttrStatic)    { out << " static"; }
+  if (attrs & AttrPublic)    { out << " public"; }
+  if (attrs & AttrProtected) { out << " protected"; }
+  if (attrs & AttrPrivate)   { out << " private"; }
+  if (attrs & AttrAbstract)  { out << " abstract"; }
+  if (attrs & AttrFinal)     { out << " final"; }
+  if (attrs & AttrPhpLeafFn) { out << " (leaf)"; }
+  if (attrs & AttrHot)       { out << " (hot)"; }
+}
+
 void Func::prettyPrint(std::ostream& out) const {
   if (isPseudoMain()) {
     out << "Pseudo-main";
   } else if (preClass() != nullptr) {
-    out << "Method ";
-    if (m_attrs & AttrStatic) { out << "static "; }
-    if (m_attrs & AttrPublic) { out << "public "; }
-    if (m_attrs & AttrProtected) { out << "protected "; }
-    if (m_attrs & AttrPrivate) { out << "private "; }
-    if (m_attrs & AttrAbstract) { out << "abstract "; }
-    if (m_attrs & AttrFinal) { out << "final "; }
-    if (m_attrs & AttrPhpLeafFn) { out << "(leaf) "; }
+    out << "Method";
+    print_attrs(out, m_attrs);
     if (cls() != nullptr) {
-      out << fullName()->data();
+      out << ' ' << fullName()->data();
     } else {
-      out << preClass()->name()->data() << "::" << m_name->data();
+      out << ' ' << preClass()->name()->data() << "::" << m_name->data();
     }
   } else {
-    out << "Function " << m_name->data();
+    out << "Function";
+    print_attrs(out, m_attrs);
+    out << ' ' << m_name->data();
   }
-
-  if (m_attrs & AttrHot) out << " (hot)";
 
   out << " at " << base();
   if (shared()->m_id != -1) {

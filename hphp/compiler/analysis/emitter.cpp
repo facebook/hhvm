@@ -265,22 +265,22 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
   return count;
 }
 
-#define O(name, imm, pop, push, flags) \
-  void Emitter::name(imm) { \
-    auto const opcode = Op::name; \
-    Offset curPos UNUSED = getUnitEmitter().bcPos(); \
-    getEmitterVisitor().prepareEvalStack(); \
-    POP_##pop; \
-    const int nIn UNUSED = COUNT_##pop; \
-    POP_HA_##imm; \
-    PUSH_##push; \
-    getUnitEmitter().emitOp(Op##name); \
-    IMPL_##imm; \
+#define O(name, imm, pop, push, flags)                                  \
+  void Emitter::name(imm) {                                             \
+    auto const opcode = Op::name;                                       \
+    Offset curPos UNUSED = getUnitEmitter().bcPos();                    \
+    getEmitterVisitor().prepareEvalStack();                             \
+    POP_##pop;                                                          \
+    const int nIn UNUSED = COUNT_##pop;                                 \
+    POP_HA_##imm;                                                       \
+    PUSH_##push;                                                        \
+    getUnitEmitter().emitOp(Op##name);                                  \
+    IMPL_##imm;                                                         \
     getUnitEmitter().recordSourceLocation(m_tempLoc ? m_tempLoc.get() : \
                                           m_node->getLocation().get(), curPos); \
-    if (flags & TF) getEmitterVisitor().restoreJumpTargetEvalStack(); \
-    if (isFCallStar(opcode)) getEmitterVisitor().recordCall(); \
-    getEmitterVisitor().setPrevOpcode(opcode); \
+    if (flags & TF) getEmitterVisitor().restoreJumpTargetEvalStack();   \
+    if (opcode == Op::FCall) getEmitterVisitor().recordCall();          \
+    getEmitterVisitor().setPrevOpcode(opcode);                          \
   }
 
 #define COUNT_NOV 0

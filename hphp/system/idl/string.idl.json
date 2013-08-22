@@ -1426,13 +1426,13 @@
                 },
                 {
                     "name": "dec_point",
-                    "type": "String",
+                    "type": "Variant",
                     "value": "\".\"",
                     "desc": "Sets the separator for the decimal point."
                 },
                 {
                     "name": "thousands_sep",
-                    "type": "String",
+                    "type": "Variant",
                     "value": "\",\"",
                     "desc": "Sets the thousands separator.\n\nOnly the first character of thousands_sep is used. For example, if you use bar as thousands_sep on the number 1000, number_format() will return 1b000."
                 }

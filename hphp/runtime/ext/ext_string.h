@@ -129,8 +129,8 @@ Variant f_sscanf(int _argc, CStrRef str, CStrRef format, CArrRef _argv = null_ar
 String f_chr(int64_t ascii);
 int64_t f_ord(CStrRef str);
 Variant f_money_format(CStrRef format, double number);
-String f_number_format(double number, int decimals = 0, CStrRef dec_point = ".",
-                       CStrRef thousands_sep = ",");
+String f_number_format(double number, int decimals = 0, CVarRef dec_point = ".",
+                       CVarRef thousands_sep = ",");
 
 ///////////////////////////////////////////////////////////////////////////////
 // analysis

@@ -33,7 +33,7 @@ class ArrayIter;
 class MutableArrayIter;
 
 class HphpArray;
-class TypedValue;
+struct TypedValue;
 class PreClass;
 class Class;
 

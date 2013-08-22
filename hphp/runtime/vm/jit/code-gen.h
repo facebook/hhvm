@@ -598,11 +598,6 @@ void genCodeForTrace(IRTrace*                trace,
                      const LifetimeInfo*     lifetime = nullptr,
                      AsmInfo*                asmInfo = nullptr);
 
-TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
-TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
-TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
-TypedValue* ldGblAddrDefHelper(StringData* name);
-
 }}
 
 #endif

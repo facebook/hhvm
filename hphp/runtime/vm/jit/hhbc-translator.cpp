@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/jit/code-gen.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/ir-factory.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"

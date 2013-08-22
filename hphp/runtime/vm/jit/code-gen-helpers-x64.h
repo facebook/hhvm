@@ -24,8 +24,10 @@
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 
 namespace HPHP {
-
+struct Func;
 namespace JIT {
+
+class SSATmp;
 
 using HPHP::Transl::PhysReg;
 
@@ -35,20 +37,55 @@ using HPHP::Transl::PhysReg;
  */
 namespace CodeGenHelpersX64 {
 
-  typedef Transl::X64Assembler Asm;
+typedef Transl::X64Assembler Asm;
 
-  void emitEagerSyncPoint(Asm& a, const HPHP::Opcode* pc,
+void emitEagerSyncPoint(Asm& as, const HPHP::Opcode* pc,
                                  const Offset spDiff);
-  void emitEagerVMRegSave(Asm& a, RegSaveFlags flags);
-  void emitGetGContext(Asm& a, PhysReg dest);
+void emitEagerVMRegSave(Asm& as, RegSaveFlags flags);
+void emitGetGContext(Asm& as, PhysReg dest);
 
-  void emitIncRef(Asm& a, PhysReg base);
-  void emitIncRefCheckNonStatic(Asm& a, PhysReg base, DataType dtype);
-  void emitIncRefGenericRegSafe(Asm& a, PhysReg base,
-                                       int disp, PhysReg tmpReg);
+void emitIncRef(Asm& as, PhysReg base);
+void emitIncRefCheckNonStatic(Asm& as, PhysReg base, DataType dtype);
+void emitIncRefGenericRegSafe(Asm& as, PhysReg base, int disp, PhysReg tmpReg);
 
-  void emitAssertFlagsNonNegative(Asm& as);
-  void emitAssertRefCount(Asm& as, PhysReg base);
+void emitAssertFlagsNonNegative(Asm& as);
+void emitAssertRefCount(Asm& as, PhysReg base);
+
+void emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg);
+void emitLea(Asm& as, PhysReg base, int disp, PhysReg dest);
+void emitLea(Asm& as, Transl::MemoryRef mr, PhysReg dst);
+
+void emitLdObjClass(Asm& as, PhysReg objReg, PhysReg dstReg);
+void emitLdClsCctx(Asm& as, PhysReg srcReg, PhysReg dstReg);
+
+void emitExitSlowStats(Asm& as, const Func* func, SrcKey dest);
+
+template<class Mem>
+void emitLoadReg(Asm& as, Mem mem, PhysReg reg) {
+  assert(reg != Transl::InvalidReg);
+  if (reg.isGP()) {
+    as. loadq(mem, reg);
+  } else {
+    as. movsd(mem, reg);
+  }
+}
+
+template<class Mem>
+void emitStoreReg(Asm& as, PhysReg reg, Mem mem) {
+  assert(reg != Transl::InvalidReg);
+  if (reg.isGP()) {
+    as. storeq(reg, mem);
+  } else {
+    as. movsd(reg, mem);
+  }
+}
+
+void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1);
+
+void zeroExtendIfBool(Asm& as, const SSATmp* src, PhysReg reg);
+
+Transl::ConditionCode opToConditionCode(Opcode opc);
+
 };
 
 }}

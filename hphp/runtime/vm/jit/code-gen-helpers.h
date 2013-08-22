@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_VM_CODEGENHELPERS_H_
 #define incl_HPHP_VM_CODEGENHELPERS_H_
 
-namespace HPHP {
+#include "hphp/runtime/vm/jit/type.h"
 
-namespace JIT {
+namespace HPHP { namespace JIT {
 
 /*
  * SaveFP uses rVmFp, as usual. SavePC requires the caller to have
@@ -40,6 +40,18 @@ inline RegSaveFlags operator&(const RegSaveFlags& l, const RegSaveFlags& r) {
 inline RegSaveFlags operator~(const RegSaveFlags& f) {
   return RegSaveFlags(~int(f));
 }
+
+int64_t ak_exist_string(ArrayData* arr, StringData* key);
+int64_t ak_exist_int(ArrayData* arr, int64_t key);
+int64_t ak_exist_string_obj(ObjectData* obj, StringData* key);
+int64_t ak_exist_int_obj(ObjectData* obj, int64_t key);
+
+TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
+TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
+TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
+
+TypedValue* ldGblAddrHelper(StringData* name);
+TypedValue* ldGblAddrDefHelper(StringData* name);
 
 }}
 

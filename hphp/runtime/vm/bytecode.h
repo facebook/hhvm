@@ -71,7 +71,7 @@ void SETOP_BODY(TypedValue* lhs, unsigned char op, Cell* rhs) {
 }
 
 class Func;
-class ActRec;
+struct ActRec;
 
 // max number of arguments for direct call to builtin
 const int kMaxBuiltinArgs = 5;

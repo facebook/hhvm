@@ -386,32 +386,6 @@ void CodeGenerator::emitFwdJcc(ConditionCode cc, Block* target) {
   emitFwdJcc(m_as, cc, target);
 }
 
-static void
-emitMovRegReg(CodeGenerator::Asm& as, PhysReg srcReg, PhysReg dstReg) {
-  assert(srcReg != InvalidReg);
-  assert(dstReg != InvalidReg);
-
-  if (srcReg == dstReg) return;
-
-  if (srcReg.isGP()) {
-    if (dstReg.isGP()) {                 // GP => GP
-      as.movq(srcReg, dstReg);
-    } else {                             // GP => XMM
-      // This generates a movq x86 instruction, which zero extends
-      // the 64-bit value in srcReg into a 128-bit XMM register
-      as.mov_reg64_xmm(srcReg, dstReg);
-    }
-  } else {
-    if (dstReg.isGP()) {                 // XMM => GP
-      as.mov_xmm_reg64(srcReg, dstReg);
-    } else {                             // XMM => XMM
-      // This copies all 128 bits in XMM,
-      // thus avoiding partial register stalls
-      as.movdqa(srcReg, dstReg);
-    }
-  }
-}
-
 void CodeGenerator::emitLoadImm(Asm& as, int64_t val,
                                 PhysReg dstReg) {
   assert(dstReg != InvalidReg);
@@ -426,68 +400,6 @@ void CodeGenerator::emitLoadImm(Asm& as, int64_t val,
       as.emitImmReg(val, m_rScratch);
       emitMovRegReg(as, m_rScratch, dstReg);
     }
-  }
-}
-
-static void emitLea(CodeGenerator::Asm& as, MemoryRef mr, PhysReg dst) {
-  if (dst == InvalidReg) return;
-  if (mr.r.disp == 0) {
-    emitMovRegReg(as, mr.r.base, dst);
-  } else {
-    as.lea(mr, dst);
-  }
-}
-
-template<class Mem>
-static void emitLoadReg(CodeGenerator::Asm& as, Mem mem, PhysReg reg) {
-  assert(reg != InvalidReg);
-  if (reg.isGP()) {
-    as.loadq(mem, reg);
-  } else {
-    as.movsd(mem, reg);
-  }
-}
-
-template<class Mem>
-static void emitStoreReg(CodeGenerator::Asm& as, PhysReg reg, Mem mem) {
-  assert(reg != InvalidReg);
-  if (reg.isGP()) {
-    as.storeq(reg, mem);
-  } else {
-    as.movsd(reg, mem);
-  }
-}
-
-static void shuffle2(CodeGenerator::Asm& a,
-                     PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
-  assert(s0 != s1);
-  if (d0 == s1 && d1 != InvalidReg) {
-    assert(d0 != d1);
-    if (d1 == s0) {
-      a.    xchgq (s1, s0);
-    } else {
-      a.    movq (s1, d1); // save s1 first; d1 != s0
-      a.    movq (s0, d0);
-    }
-  } else {
-    if (d0 != InvalidReg) emitMovRegReg(a, s0, d0); // d0 != s1
-    if (d1 != InvalidReg) emitMovRegReg(a, s1, d1);
-  }
-}
-
-static void zeroExtendBool(CodeGenerator::Asm& as, const RegisterInfo& info) {
-  auto reg = info.reg();
-  if (reg != InvalidReg) {
-    // zero-extend the bool from a byte to a quad
-    // note: movzbl actually extends the value to 64 bits.
-    as.movzbl(rbyte(reg), r32(reg));
-  }
-}
-
-static void zeroExtendIfBool(CodeGenerator::Asm& as, const SSATmp* src,
-                            const RegisterInfo& info) {
-  if (src->isA(Type::Bool)) {
-    zeroExtendBool(as, info);
   }
 }
 
@@ -528,7 +440,7 @@ PhysReg CodeGenerator::prepXMMReg(const SSATmp* tmp,
     }
     // Case 2.b: Bool or Int stored in GP reg
     assert(tmp->isA(Type::Bool) || tmp->isA(Type::Int));
-    zeroExtendIfBool(as, tmp, allocInfo[tmp]);
+    zeroExtendIfBool(as, tmp, allocInfo[tmp].reg());
     as.pxor_xmm_xmm(rCgXMM, rCgXMM);
     as.cvtsi2sd_reg64_xmm(reg, rCgXMM);
     return rCgXMM;
@@ -556,41 +468,6 @@ void CodeGenerator::doubleCmp(Asm& a,
   // clear ZF.
   a.    or_imm32_reg64(1, m_rScratch);
   asm_label(a, notPF);
-}
-
-static ConditionCode opToConditionCode(Opcode opc) {
-  using namespace HPHP::Transl;
-
-  switch (opc) {
-  case JmpGt:                 return CC_G;
-  case JmpGte:                return CC_GE;
-  case JmpLt:                 return CC_L;
-  case JmpLte:                return CC_LE;
-  case JmpEq:                 return CC_E;
-  case JmpNeq:                return CC_NE;
-  case JmpSame:               return CC_E;
-  case JmpNSame:              return CC_NE;
-  case JmpInstanceOfBitmask:  return CC_NZ;
-  case JmpNInstanceOfBitmask: return CC_Z;
-  case JmpIsType:             return CC_NZ;
-  case JmpIsNType:            return CC_Z;
-  case JmpZero:               return CC_Z;
-  case JmpNZero:              return CC_NZ;
-  case ReqBindJmpGt:                 return CC_G;
-  case ReqBindJmpGte:                return CC_GE;
-  case ReqBindJmpLt:                 return CC_L;
-  case ReqBindJmpLte:                return CC_LE;
-  case ReqBindJmpEq:                 return CC_E;
-  case ReqBindJmpNeq:                return CC_NE;
-  case ReqBindJmpSame:               return CC_E;
-  case ReqBindJmpNSame:              return CC_NE;
-  case ReqBindJmpInstanceOfBitmask:  return CC_NZ;
-  case ReqBindJmpNInstanceOfBitmask: return CC_Z;
-  case ReqBindJmpZero:               return CC_Z;
-  case ReqBindJmpNZero:              return CC_NZ;
-  default:
-    always_assert(0);
-  }
 }
 
 void CodeGenerator::emitCompare(SSATmp* src1, SSATmp* src2) {
@@ -1088,7 +965,7 @@ void CodeGenerator::cgUnaryIntOp(SSATmp* dst,
   auto& a = m_as;
 
   // Integer operations require 64-bit representations
-  zeroExtendIfBool(a, src, m_regs[src]);
+  zeroExtendIfBool(a, src, m_regs[src].reg());
 
   if (srcReg != InvalidReg) {
     emitMovRegReg(a, srcReg, dstReg);
@@ -2305,7 +2182,7 @@ void CodeGenerator::emitConvBoolOrIntToDbl(IRInstruction* inst) {
     PhysReg xmmReg = dstReg.isXMM() ? dstReg : PhysReg(rCgXMM0);
     m_as.pxor_xmm_xmm(xmmReg, xmmReg);
     m_as.cvtsi2sd_reg64_xmm(srcReg, xmmReg);
-    zeroExtendIfBool(m_as, src, m_regs[src]);
+    zeroExtendIfBool(m_as, src, m_regs[src].reg());
     emitMovRegReg(m_as, xmmReg, dstReg);
   }
 }
@@ -2502,12 +2379,6 @@ void CodeGenerator::cgLdFunc(IRInstruction* inst) {
                callDest(m_regs[dst].reg()),
                SyncOptions::kSyncPoint,
                ArgGroup(m_regs).imm(ch).ssa(methodName));
-}
-
-static void emitLdObjClass(CodeGenerator::Asm& a,
-                           PhysReg objReg,
-                           PhysReg dstReg) {
-  a.loadq  (objReg[ObjectData::getVMClassOffset()], dstReg);
 }
 
 void CodeGenerator::cgLdObjClass(IRInstruction* inst) {
@@ -2948,26 +2819,11 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
   );
 }
 
-static void emitExitSlowStats(Asm& a,
-                              TranslatorX64* tx64,
-                              const Func* func,
-                              SrcKey dest) {
-  if (RuntimeOption::EnableInstructionCounts ||
-      HPHP::Trace::moduleEnabled(HPHP::Trace::stats, 3)) {
-    Stats::emitInc(a,
-                   Stats::opcodeToIRPreStatCounter(
-                     Op(*func->unit()->at(dest.offset()))),
-                   -1,
-                   Transl::CC_None,
-                   true);
-  }
-}
-
 void CodeGenerator::cgReqInterpret(IRInstruction* inst) {
   auto offset = inst->extra<ReqInterpret>()->offset;
   auto destSk = SrcKey { curFunc(), offset };
   auto const numInstrs = 1;
-  emitExitSlowStats(m_as, m_tx64, curFunc(), destSk);
+  emitExitSlowStats(m_as, curFunc(), destSk);
   m_tx64->emitServiceReq(REQ_INTERPRET, offset, numInstrs);
 }
 
@@ -4102,13 +3958,6 @@ void CodeGenerator::cgLdThis(IRInstruction* inst) {
   emitFwdJcc(CC_NZ, label);
 }
 
-static void emitLdClsCctx(CodeGenerator::Asm& a,
-                          PhysReg srcReg,
-                          PhysReg dstReg) {
-  emitMovRegReg(a, srcReg, dstReg);
-  a.    decq(dstReg);
-}
-
 void CodeGenerator::cgLdClsCtx(IRInstruction* inst) {
   PhysReg srcReg = m_regs[inst->src(0)].reg();
   PhysReg dstReg = m_regs[inst->dst()].reg();
@@ -4350,7 +4199,7 @@ void CodeGenerator::cgStore(PhysReg base,
     }
     m_as.storeq(val, base[off + TVOFF(m_data)]);
   } else {
-    zeroExtendIfBool(m_as, src, m_regs[src]);
+    zeroExtendIfBool(m_as, src, m_regs[src].reg());
     emitStoreReg(m_as, m_regs[src].reg(), base[off + TVOFF(m_data)]);
   }
 }
@@ -5225,41 +5074,6 @@ void CodeGenerator::cgLookupCnsU(IRInstruction* inst) {
                SyncOptions::kSyncPoint, args);
 }
 
-HOT_FUNC_VM
-static inline int64_t ak_exist_string(ArrayData* arr, StringData* key) {
-  int64_t n;
-  if (key->isStrictlyInteger(n)) {
-    return arr->exists(n);
-  }
-  return arr->exists(key);
-}
-
-HOT_FUNC_VM
-static int64_t ak_exist_int(ArrayData* arr, int64_t key) {
-  bool res = arr->exists(key);
-  return res;
-}
-
-HOT_FUNC_VM
-static int64_t ak_exist_string_obj(ObjectData* obj, StringData* key) {
-  if (obj->isCollection()) {
-    return collectionOffsetContains(obj, key);
-  }
-  CArrRef arr = obj->o_toArray();
-  int64_t res = ak_exist_string(arr.get(), key);
-  return res;
-}
-
-HOT_FUNC_VM
-static int64_t ak_exist_int_obj(ObjectData* obj, int64_t key) {
-  if (obj->isCollection()) {
-    return collectionOffsetContains(obj, key);
-  }
-  CArrRef arr = obj->o_toArray();
-  bool res = arr.get()->exists(key);
-  return res;
-}
-
 void CodeGenerator::cgAKExists(IRInstruction* inst) {
   SSATmp* arr = inst->src(0);
   SSATmp* key = inst->src(1);
@@ -5291,16 +5105,6 @@ void CodeGenerator::cgAKExists(IRInstruction* inst) {
                callDest(inst->dst()),
                SyncOptions::kNoSyncPoint,
                ArgGroup(m_regs).ssa(arr).ssa(key));
-}
-
-HOT_FUNC_VM static TypedValue* ldGblAddrHelper(StringData* name) {
-  return g_vmContext->m_globalVarEnv->lookup(name);
-}
-
-HOT_FUNC_VM TypedValue* ldGblAddrDefHelper(StringData* name) {
-  TypedValue* r = g_vmContext->m_globalVarEnv->lookupAdd(name);
-  decRefStr(name);
-  return r;
 }
 
 void CodeGenerator::cgLdGblAddr(IRInstruction* inst) {
@@ -6175,36 +5979,6 @@ void genCodeForTrace(IRTrace* trace,
       assert(isEmitted(block));
     }
   }
-}
-
-inline ALWAYS_INLINE
-TypedValue& getDefaultIfNullCell(TypedValue* tv, TypedValue& def) {
-  if (UNLIKELY(nullptr == tv)) {
-    // refcount is already correct since def was never decrefed
-    return def;
-  }
-  tvRefcountedDecRef(&def);
-  TypedValue* ret = tvToCell(tv);
-  tvRefcountedIncRef(ret);
-  return *ret;
-}
-
-HOT_FUNC_VM
-TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
-  return getDefaultIfNullCell(a->nvGet(key), def);
-}
-
-HOT_FUNC_VM
-TypedValue arrayIdxSi(ArrayData* a, StringData* key, TypedValue def) {
-  int64_t i;
-  return UNLIKELY(key->isStrictlyInteger(i)) ?
-         getDefaultIfNullCell(a->nvGet(i), def) :
-         getDefaultIfNullCell(a->nvGet(key), def);
-}
-
-HOT_FUNC_VM
-TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
-  return getDefaultIfNullCell(a->nvGet(key), def);
 }
 
 }}

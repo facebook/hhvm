@@ -177,25 +177,6 @@ void stubBlock(X64Assembler& hot, X64Assembler& cold, const L& body) {
   cold. jmp(hot.frontier());
 }
 
-// Logical register move: ensures the value in src will be in dest
-// after execution, but might do so in strange ways. Do not count on
-// being able to smash dest to a different register in the future, e.g.
-void
-emitMovRegReg(X64Assembler& a, PhysReg src, PhysReg dest) {
-  if (src != dest) {
-    a.  movq (src, dest);
-  }
-}
-
-void
-emitLea(X64Assembler& a, PhysReg base, int disp, PhysReg dest) {
-  if (!disp) {
-    emitMovRegReg(a, base, dest);
-    return;
-  }
-  a.   lea  (base[disp], dest);
-}
-
 void
 TranslatorX64::emitRB(X64Assembler& a,
                       Trace::RingBufferType t,

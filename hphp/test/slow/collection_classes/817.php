@@ -6,64 +6,55 @@ foreach ($ctypes as $ctype) {
   $c = new $ctype();
   try {
     $c[0];
-  }
- catch (Exception $e) {
-    var_dump($e->getMessage());
+  } catch (Exception $e) {
+    echo $e->getMessage() . "\n";
   }
   try {
     $c[PHP_INT_MAX];
-  }
- catch (Exception $e) {
-    var_dump($e->getMessage());
+  } catch (Exception $e) {
+    echo $e->getMessage() . "\n";
   }
   try {
     $c[~PHP_INT_MAX];
-  }
- catch (Exception $e) {
-    var_dump($e->getMessage());
+  } catch (Exception $e) {
+    echo $e->getMessage() . "\n";
   }
   if ($ctype === 'Vector') {
     continue;
   }
   try {
     $c['abc'];
+  } catch (Exception $e) {
+    echo $e->getMessage() . "\n";
   }
- catch (Exception $e) {
-    var_dump($e->getMessage());
+  $hundred_chars = 'abcdefghijklmnopqrst' .
+                   'abcdefghijklmnopqrst' .
+                   'abcdefghijklmnopqrst' .
+                   'abcdefghijklmnopqrst' .
+                   'abcdefghijklmnopqrst';
+  try {
+    $c[$hundred_chars];
+  } catch (Exception $e) {
+    echo $e->getMessage() . "\n";
   }
   try {
-    $c['abcdefghijklmnopqrst'];
-  }
- catch (Exception $e) {
-    var_dump($e->getMessage());
-  }
-  try {
-    $c['abcdefghijklmnopqrstu'];
-  }
- catch (Exception $e) {
-    var_dump($e->getMessage());
+    $c['ABCDEFGHIJKLMNOPQRST' . $hundred_chars];
+  } catch (Exception $e) {
+    echo $e->getMessage() . "\n";
   }
   try {
-    $c["abcdefghij\000klmnopqrst"];
-  }
- catch (Exception $e) {
+    $c["ABCDEFGHIJ\000KLMNOPQRST" . $hundred_chars];
+  } catch (Exception $e) {
     $str = $e->getMessage();
-    $i = 0;
-    for (;
-;
-) {
-      echo(ord($str[$i]));
-      ++$i;
-      if ($i >= strlen($str)) {
-        break;
-      }
-      if (($i % 8) === 0) {
-        echo "\n";
-      }
- else {
-        echo ' ';
+    $len = strlen($str);
+    for ($i = 0; $i < $len; ++$i) {
+      if (ord($str[$i]) == 0) {
+        echo '<NUL>';
+      } else {
+        echo($str[$i]);
       }
     }
     echo "\n";
   }
 }
+

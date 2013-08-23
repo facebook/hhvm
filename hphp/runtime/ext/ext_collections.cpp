@@ -45,24 +45,19 @@ void throwIntOOB(int64_t key, bool isVector /* = false */) {
 static void throwStrOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
 void throwStrOOB(StringData* key) {
-  const size_t maxDisplaySize = 20;
-  const char* dots = "...";
-  size_t dotsSize = strlen(dots);
+  const size_t maxDisplaySize = 100;
   int keySize = key->size();
   bool keyIsLarge = (keySize > maxDisplaySize);
-  size_t displaySize = keyIsLarge ? (maxDisplaySize - dotsSize) : keySize;
   const char* part1 = "String key \"";
-  size_t part1Size = strlen(part1);
-  size_t part2Size = keyIsLarge ? maxDisplaySize : keySize;
-  const char* part3 = "\" is not defined";
-  size_t part3Size = strlen(part3);
-  // Do some math ahead of time so we know exactly how large
-  // the String needs to be
-  String msg(part1Size + part2Size + part3Size, ReserveString);
-  msg += StringSlice(part1, part1Size);
-  msg += StringSlice(key->data(), displaySize);
-  if (keyIsLarge) msg += StringSlice(dots, dotsSize);
-  msg += StringSlice(part3, part3Size);
+  const char* part3 = keyIsLarge ? "\" (truncated) is not defined" :
+                                   "\" is not defined";
+  StringSlice ss1(part1, strlen(part1));
+  StringSlice ss2(key->data(), keyIsLarge ? maxDisplaySize : keySize);
+  StringSlice ss3(part3, strlen(part3));
+  String msg(ss1.len + ss2.len + ss3.len, ReserveString);
+  msg += ss1;
+  msg += ss2;
+  msg += ss3;
   Object e(SystemLib::AllocOutOfBoundsExceptionObject(msg));
   throw e;
 }

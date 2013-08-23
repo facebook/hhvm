@@ -732,6 +732,24 @@
                     "desc": "Fake path to the file."
                 }
             ]
+        },
+        {
+            "name": "fb_setprofile",
+            "desc": "Set a callback function to be called whenever a function is entered or exited. Takes 3 args, the function name, the mode (enter or exit), and an array describing the frame.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null,
+                "desc": "No value is returned."
+            },
+            "args": [
+                {
+                    "name": "callback",
+                    "type": "Variant",
+                    "desc": "Profiler function to call or null to disable"
+                }
+            ]
         }
     ],
     "classes": [

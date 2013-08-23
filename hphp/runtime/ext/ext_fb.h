@@ -52,6 +52,7 @@ void f_xhprof_frame_end();
 Variant f_xhprof_run_trace(CStrRef packedTrace, int flags);
 void f_xhprof_sample_enable();
 Variant f_xhprof_sample_disable();
+void f_fb_setprofile(CVarRef callback);
 Array f_fb_parallel_query(CArrRef sql_map, int max_thread = 50, bool combine_result = true, bool retry_query_on_fail = true, int connect_timeout = -1, int read_timeout = -1, bool timeout_in_ms = false);
 Variant f_fb_const_fetch(CVarRef key);
 bool f_fb_output_compression(bool new_value);

@@ -767,6 +767,8 @@ private:
 
 public:
   static int64_t s_threadIdxCounter;
+  Variant m_setprofileCallback;
+  bool m_executingSetprofileCallback;
 };
 
 class ExecutionContext : public VMExecutionContext {};

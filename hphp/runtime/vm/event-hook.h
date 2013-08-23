@@ -64,6 +64,12 @@ class EventHook {
   }
 
 private:
+  enum {
+    ProfileEnter,
+    ProfileExit,
+  };
+
+  static void RunUserProfiler(const ActRec* ar, int mode);
   static bool RunInterceptHandler(ActRec* ar);
 };
 

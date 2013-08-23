@@ -103,8 +103,12 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
 
     case Expression::KindOfBinaryOpExpression: {
       BinaryOpExpressionPtr b(static_pointer_cast<BinaryOpExpression>(rhs));
-      return b->isAssignmentOp() || b->getOp() == '+' ?
-        ListAssignment::Regular : ListAssignment::Null;
+      if (b->isAssignmentOp() ||
+          b->getOp() == '+' ||
+          b->getOp() == T_COLLECTION) {
+        return ListAssignment::Regular;
+      }
+      return ListAssignment::Null;
     }
     case Expression::KindOfQOpExpression:
       return ListAssignment::Checked;

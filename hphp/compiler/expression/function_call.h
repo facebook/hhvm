@@ -65,6 +65,9 @@ public:
   bool isValid() const { return m_valid; }
   bool hadBackslash() const { return m_hadBackslash; }
 
+private:
+  void checkParamTypeCodeErrors(AnalysisResultPtr);
+
 protected:
   ExpressionPtr m_nameExp;
   std::string m_name;

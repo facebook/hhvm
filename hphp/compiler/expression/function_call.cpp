@@ -171,39 +171,43 @@ void FunctionCall::markRefParams(FunctionScopePtr func,
   }
 }
 
+void FunctionCall::checkParamTypeCodeErrors(AnalysisResultPtr ar) {
+  if (!m_funcScope || m_arrayParams) return;
+  for (int i = 0, n = m_funcScope->getMaxParamCount(); i < n; ++i) {
+    TypePtr specType = m_funcScope->getParamTypeSpec(i);
+    if (!specType) continue;
+
+    const char *fmt = 0;
+    string ptype;
+    if (!m_params || m_params->getCount() <= i) {
+      if (i >= m_funcScope->getMinParamCount()) break;
+      fmt = "parameter %d of %s() requires %s, none given";
+    } else {
+      ExpressionPtr param = (*m_params)[i];
+      if (!Type::Inferred(ar, param->getType(), specType)) {
+        fmt = "parameter %d of %s() requires %s, called with %s";
+      }
+      ptype = param->getType()->toString();
+    }
+    if (fmt) {
+      string msg;
+      Util::string_printf
+        (msg, fmt,
+         i + 1,
+         Util::escapeStringForCPP(m_funcScope->getOriginalName()).c_str(),
+         specType->toString().c_str(), ptype.c_str());
+      Compiler::Error(Compiler::BadArgumentType,
+                      shared_from_this(), msg);
+    }
+  }
+}
+
 void FunctionCall::analyzeProgram(AnalysisResultPtr ar) {
   if (m_class) m_class->analyzeProgram(ar);
   if (m_nameExp) m_nameExp->analyzeProgram(ar);
   if (m_params) m_params->analyzeProgram(ar);
   if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    if (m_funcScope && !m_arrayParams) {
-      for (int i = 0, n = m_funcScope->getMaxParamCount(); i < n; ++i) {
-        if (TypePtr specType = m_funcScope->getParamTypeSpec(i)) {
-          const char *fmt = 0;
-          string ptype;
-          if (!m_params || m_params->getCount() <= i) {
-            if (i >= m_funcScope->getMinParamCount()) break;
-            fmt = "parameter %d of %s() requires %s, none given";
-          } else {
-            ExpressionPtr param = (*m_params)[i];
-            if (!Type::Inferred(ar, param->getType(), specType)) {
-              fmt = "parameter %d of %s() requires %s, called with %s";
-            }
-            ptype = param->getType()->toString();
-          }
-          if (fmt) {
-            string msg;
-            Util::string_printf
-              (msg, fmt,
-               i + 1,
-               Util::escapeStringForCPP(m_funcScope->getOriginalName()).c_str(),
-               specType->toString().c_str(), ptype.c_str());
-            Compiler::Error(Compiler::BadArgumentType,
-                            shared_from_this(), msg);
-          }
-        }
-      }
-    }
+    checkParamTypeCodeErrors(ar);
   }
 }
 

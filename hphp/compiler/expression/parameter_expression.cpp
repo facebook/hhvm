@@ -157,7 +157,9 @@ TypePtr ParameterExpression::getTypeSpecForClass(AnalysisResultPtr ar,
     }
   }
   if (!ret) {
-    ret = Type::CreateObjectType(m_type);
+    ret = ar->isTypeAliasName(m_type)
+      ? Type::Variant
+      : Type::CreateObjectType(m_type);
   }
   always_assert(ret);
   return ret;

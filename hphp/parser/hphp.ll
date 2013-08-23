@@ -227,7 +227,6 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"const"                { RETTOKEN(T_CONST);}
 <ST_IN_SCRIPTING>"return"               { RETTOKEN(T_RETURN); }
 <ST_IN_SCRIPTING>"yield"                { RETTOKEN(T_YIELD);}
-<ST_IN_SCRIPTING>"await"                { RETTOKEN(T_AWAIT);}
 <ST_IN_SCRIPTING>"try"                  { RETTOKEN(T_TRY);}
 <ST_IN_SCRIPTING>"catch"                { RETTOKEN(T_CATCH);}
 <ST_IN_SCRIPTING>"finally"              { RETTOKEN(T_FINALLY);}
@@ -355,12 +354,6 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
   RETSTEP('(');
 }
 
-<ST_IN_SCRIPTING>"async"/{WHITESPACE_AND_COMMENTS}"function" {
-  // 'async' is parsed to T_ASYNC only in front of 'function' to allow consts
-  // named 'async'. As soon as there are no such consts, this should be removed
-  RETTOKEN(T_ASYNC);
-}
-
 <ST_IN_SCRIPTING>"eval"               { RETTOKEN(T_EVAL);}
 <ST_IN_SCRIPTING>"include"            { RETTOKEN(T_INCLUDE);}
 <ST_IN_SCRIPTING>"include_once"       { RETTOKEN(T_INCLUDE_ONCE);}
@@ -412,6 +405,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"shape"              { HH_ONLY_KEYWORD(T_SHAPE); }
 <ST_IN_SCRIPTING>"type"               { HH_ONLY_KEYWORD(T_UNRESOLVED_TYPE); }
 <ST_IN_SCRIPTING>"newtype"            { HH_ONLY_KEYWORD(T_UNRESOLVED_NEWTYPE); }
+<ST_IN_SCRIPTING>"await"              { HH_ONLY_KEYWORD(T_AWAIT);}
+<ST_IN_SCRIPTING>"async"/{WHITESPACE_AND_COMMENTS}[a-zA-Z0-9_\x7f-\xff] {
+  HH_ONLY_KEYWORD(T_ASYNC);
+}
 
 <ST_IN_SCRIPTING>"tuple"/("("|{WHITESPACE_AND_COMMENTS}"(") {
   HH_ONLY_KEYWORD(T_TUPLE);

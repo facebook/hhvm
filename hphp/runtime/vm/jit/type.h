@@ -19,6 +19,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <boost/optional/optional.hpp>
 
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/class.h"
@@ -606,6 +607,11 @@ public:
   }
 };
 
+inline bool operator<(Type a, Type b) { return a.strictSubtypeOf(b); }
+inline bool operator>(Type a, Type b) { return b.strictSubtypeOf(a); }
+inline bool operator<=(Type a, Type b) { return a.subtypeOf(b); }
+inline bool operator>=(Type a, Type b) { return b.subtypeOf(a); }
+
 /*
  * JIT::Type must be small enough for efficient pass-by-value.
  */
@@ -623,6 +629,41 @@ Type liveTVType(const TypedValue* tv);
  * semantics and subtle implementation details.
  */
 Type boxType(Type);
+
+struct TypeConstraint {
+  /* implicit */ TypeConstraint(DataTypeCategory cat = DataTypeGeneric,
+                                Type type = Type::Gen)
+    : category(cat)
+    , knownType(type)
+  {}
+
+  std::string toString() const {
+    std::string catStr;
+    if (innerCat) {
+      catStr = folly::to<std::string>("inner:",
+                                      typeCategoryName(innerCat.get()));
+    } else {
+      catStr = typeCategoryName(category);
+    }
+
+    return folly::format("<{},{}>", catStr, knownType).str();
+  }
+
+  // category starts as DataTypeGeneric and is refined to more specific values
+  // by consumers of the type.
+  DataTypeCategory category;
+
+  // if innerCat is set, this object represents a constraint on the inner type
+  // of the current value. It is set and cleared when the constraint code
+  // traces through an operation that unboxes or boxes an operand,
+  // respectively.
+  boost::optional<DataTypeCategory> innerCat;
+
+  // knownType represents an upper bound for the type of the guard, which is
+  // known from static analysis or other guards that have been appropriately
+  // constrained. It can be used to convert some guards into asserts.
+  Type knownType;
+};
 
 }}
 

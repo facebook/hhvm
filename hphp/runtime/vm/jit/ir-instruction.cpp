@@ -346,8 +346,10 @@ void IRInstruction::convertToMov() {
   assert(!isControlFlow());
   m_op = Mov;
   m_typeParam = Type::None;
+  m_extra = nullptr;
   assert(m_numSrcs == 1);
-  assert(m_numDsts == 1);
+  // Instructions in the simplifier don't have dests yet
+  assert((m_numDsts == 1) != isTransient());
 }
 
 void IRInstruction::become(IRFactory& factory, IRInstruction* other) {

@@ -4566,8 +4566,26 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   auto doJcc = [&](ConditionCode cc) {
     emitFwdJcc(ccNegate(cc), inst->taken());
   };
+  auto doMov = [&]() {
+    auto const valDst = m_regs[inst->dst()].reg(0);
+    auto const typeDst = m_regs[inst->dst()].reg(1);
+    if (valDst != InvalidReg) emitMovRegReg(m_as, rData, valDst);
+    if (typeDst != InvalidReg) emitMovRegReg(m_as, rType, typeDst);
+  };
 
   Type typeParam = inst->typeParam();
+  // CheckTypes that are known to succeed or fail may be kept around
+  // by the simplifier in case the guard can be relaxed.
+  if (src->isA(typeParam)) {
+    // src is the target type or better. do nothing.
+    doMov();
+    return;
+  } else if (src->type().not(typeParam)) {
+    // src is definitely not the target type. always jump.
+    emitFwdJmp(m_as, inst->taken(), m_state);
+    return;
+  }
+
   if (rType != InvalidReg) {
     emitTypeTest(typeParam, rType, rData, doJcc);
   } else {
@@ -4578,11 +4596,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
       CG_PUNT(CheckType-known-srcType);
     }
   }
-
-  auto const dstReg = m_regs[inst->dst()].reg();
-  if (dstReg != InvalidReg) {
-    emitMovRegReg(m_as, rData, dstReg);
-  }
+  doMov();
 }
 
 void CodeGenerator::cgCheckTypeMem(IRInstruction* inst) {

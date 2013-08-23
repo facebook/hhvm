@@ -12,7 +12,7 @@
 #
 #   Checkout and build your new hhvm, then:
 #   ./test/run -l -m jit ./test/quick
-#   ./compare-logs.sh
+#   ./test/compare-logs.sh
 #
 # Produces an ir-diffs.diff file that you can inspect for meaningful
 # differences in JIT output.

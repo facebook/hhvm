@@ -13,12 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/jit/opt.h"
-#include "hphp/runtime/vm/jit/trace-builder.h"
+
 #include "hphp/util/trace.h"
+#include "hphp/runtime/vm/jit/check.h"
+#include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/ir-factory.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/check.h"
+#include "hphp/runtime/vm/jit/trace-builder.h"
 
 namespace HPHP {
 namespace JIT {
@@ -124,7 +127,14 @@ void optimizeTrace(IRTrace* trace, TraceBuilder& traceBuilder) {
     eliminateDeadCode(trace, irFactory);
     finishPass(folly::format("{} DCE", which).str().c_str());
   };
+
+  if (RuntimeOption::EvalHHIRRelaxGuards) {
+    auto changed = relaxGuards(trace, irFactory, *traceBuilder.guards());
+    if (changed) finishPass("guard relaxation");
+  }
+
   dce("initial");
+
   if (RuntimeOption::EvalHHIRPredictionOpts) {
     doPass(optimizePredictions, "prediction opts");
   }

@@ -28,6 +28,7 @@ struct SSATmp;
 struct IRTrace;
 struct IRFactory;
 
+IRInstruction* guardForLocal(uint32_t locId, SSATmp* fp);
 bool relaxGuards(IRTrace* trace, const IRFactory& factory,
                  const GuardConstraints& guards);
 

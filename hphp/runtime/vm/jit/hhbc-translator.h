@@ -52,7 +52,7 @@ struct EvalStack {
     m_vector.push_back(tmp);
   }
 
-  SSATmp* pop(DataTypeCategory cat) {
+  SSATmp* pop(TypeConstraint cat) {
     if (m_vector.size() == 0) {
       return nullptr;
     }
@@ -83,6 +83,7 @@ struct EvalStack {
     return ret;
   }
 
+  bool empty() const { return m_vector.empty(); }
   int  size()  const { return m_vector.size(); }
   void clear()       { m_vector.clear(); }
 
@@ -832,11 +833,11 @@ private:
    */
   SSATmp* push(SSATmp* tmp);
   SSATmp* pushIncRef(SSATmp* tmp) { return push(gen(IncRef, tmp)); }
-  SSATmp* pop(Type type, DataTypeCategory cat = DataTypeSpecific);
-  void    popDecRef(Type type, DataTypeCategory cat = DataTypeCountness);
+  SSATmp* pop(Type type, TypeConstraint tc = DataTypeSpecific);
+  void    popDecRef(Type type, TypeConstraint tc = DataTypeCountness);
   void    discard(unsigned n);
-  SSATmp* popC(DataTypeCategory cat = DataTypeSpecific) {
-    return pop(Type::Cell, cat);
+  SSATmp* popC(TypeConstraint tc = DataTypeSpecific) {
+    return pop(Type::Cell, {tc.category, std::min(Type::Cell, tc.knownType)});
   }
   SSATmp* popV() { return pop(Type::BoxedCell); }
   SSATmp* popR() { return pop(Type::Gen);       }

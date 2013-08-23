@@ -29,10 +29,44 @@ namespace HPHP { namespace JIT {
 TRACE_SET_MOD(hhir);
 
 /*
+ * Trace back through the source of fp, looking for a guard with the
+ * given locId. If one can't be found, return nullptr.
+ */
+IRInstruction* guardForLocal(uint32_t locId, SSATmp* fp) {
+  FTRACE(2, "guardForLdLoc({}, {})\n", locId, *fp);
+
+  for (auto fpInst = fp->inst(); !fpInst->is(DefFP, DefInlineFP);
+       fpInst = fpInst->src(0)->inst()) {
+    FTRACE(2, "    - fp = {}\n", *fpInst);
+    assert(fpInst->dst()->isA(Type::FramePtr));
+    auto instLoc = [fpInst]{ return fpInst->extra<LocalId>()->locId; };
+
+    switch (fpInst->op()) {
+      case GuardLoc:
+      case CheckLoc:
+        if (instLoc() == locId) return fpInst;
+        break;
+
+      case AssertLoc:
+        if (instLoc() == locId) return fpInst;
+        break;
+
+      case FreeActRec:
+        always_assert(0 && "Attempt to read a local after freeing its frame");
+
+      default:
+        not_reached();
+    }
+  }
+
+  return nullptr;
+}
+
+/*
  * For all guard instructions in trace, check to see if we can relax the
  * destination type to something less specific. The GuardConstraints map
  * contains information about what properties of the guarded type matter for
- * each instruction.
+ * each instruction. Returns true iff any changes were made to the trace.
  */
 bool relaxGuards(IRTrace* trace, const IRFactory& factory,
                  const GuardConstraints& guards) {
@@ -44,23 +78,34 @@ bool relaxGuards(IRTrace* trace, const IRFactory& factory,
     for (auto& inst : *block) {
       if (!isGuardOp(inst.op())) continue;
 
-      auto it = guards.find(inst.id());
-      auto category = it == guards.end() ? DataTypeGeneric : it->second;
+      auto it = guards.find(&inst);
+      auto constraint = it == guards.end() ? TypeConstraint() : it->second;
 
+      // TODO(t2598894): Support relaxing inner types
       auto const oldType = inst.typeParam();
-      auto newType = relaxType(oldType, category);
+      auto newType = relaxType(oldType, constraint.category);
 
-      if (!oldType.equals(newType)) {
+      if (constraint.knownType <= newType) {
+        // If the known type is at least as good as the relaxed type, we can
+        // replace the guard with an assert.
+        auto newOp = guardToAssert(inst.op());
+        FTRACE(1, "relaxGuards changing {}'s type to {}, op to {}\n",
+               inst, constraint.knownType, newOp);
+        inst.setTypeParam(constraint.knownType);
+        inst.setOpcode(newOp);
+        inst.setTaken(nullptr);
+
+        if (!reflowBlock) reflowBlock = block;
+      } else if (!oldType.equals(newType)) {
         FTRACE(1, "relaxGuards changing {}'s type to {}\n", inst, newType);
         inst.setTypeParam(newType);
+
         if (!reflowBlock) reflowBlock = block;
       }
     }
   }
 
-  // TODO(t2598894): For now we require regenerating the IR after guard
-  // relaxation, so it's only useful in the tracelet region selector.
-  if (false && reflowBlock) reflowTypes(reflowBlock, blocks);
+  if (reflowBlock) reflowTypes(reflowBlock, blocks);
 
   return (bool)reflowBlock;
 }
@@ -140,7 +185,7 @@ Type relaxType(Type t, DataTypeCategory cat) {
 
     case DataTypeCountnessInit:
       if (t.subtypeOf(Type::Uninit)) return Type::Uninit;
-      return relaxType(t, DataTypeCountness);
+      return t.notCounted() ? Type::UncountedInit : t.unspecialize();
 
     case DataTypeSpecific:
       assert(t.isKnownDataType());

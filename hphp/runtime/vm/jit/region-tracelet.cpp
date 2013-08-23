@@ -212,10 +212,14 @@ RegionDescPtr RegionFormer::go() {
 
     if (isFCallStar(m_inst.op())) m_arStates.back().pop();
 
-    // Advance sk and check the prediction, if any.
-    m_sk.advance(curUnit());
-
-    if (doPrediction) m_ht.checkTypeStack(0, m_inst.outPred, m_sk.offset());
+    // Advance sk and check the prediction, if any. Since the current
+    // instruction is over, advance HhbcTranslator's sk before
+    // emitting the prediction.
+    m_sk.advance(m_curBlock->unit());
+    if (doPrediction) {
+      m_ht.setBcOff(m_sk.offset(), false);
+      m_ht.checkTypeStack(0, m_inst.outPred, m_sk.offset());
+    }
   }
 
   dumpTrace(2, m_ht.traceBuilder().trace(), " after tracelet formation ",
@@ -471,13 +475,24 @@ bool RegionFormer::consumeInput(int i, const Transl::InputInfo& ii) {
  * to relaxGuards.
  */
 void RegionFormer::recordDependencies() {
+  // Record the incrementally constructed reffiness predictions.
+  assert(!m_region->blocks.empty());
+  auto& frontBlock = *m_region->blocks.front();
+  for (auto const& dep : m_refDeps.m_arMap) {
+    frontBlock.addReffinessPred(m_startSk, {dep.second.m_mask,
+                                            dep.second.m_vals,
+                                            dep.first});
+  }
+
   // Relax guards and record the ones that survived.
   auto trace = m_ht.traceBuilder().trace();
   auto& firstBlock = *m_region->blocks.front();
   auto blockStart = firstBlock.start();
+  auto const doRelax = RuntimeOption::EvalHHIRRelaxGuards;
 
-  auto changed = relaxGuards(trace, m_ht.irFactory(),
-                             *m_ht.traceBuilder().guards());
+  auto changed =  doRelax ? relaxGuards(trace, m_ht.irFactory(),
+                                        *m_ht.traceBuilder().guards())
+                          : false;
   visitGuards(trace, [&](const RegionDesc::Location& loc, Type type) {
     RegionDesc::TypePred pred{loc, type};
     FTRACE(1, "selectTracelet adding guard {}\n", show(pred));
@@ -488,14 +503,6 @@ void RegionFormer::recordDependencies() {
               nullptr, nullptr, nullptr, m_ht.traceBuilder().guards());
   }
 
-  // Record the incrementally constructed reffiness predictions.
-  assert(!m_region->blocks.empty());
-  auto& frontBlock = *m_region->blocks.front();
-  for (auto const& dep : m_refDeps.m_arMap) {
-    frontBlock.addReffinessPred(m_startSk, {dep.second.m_mask,
-                                            dep.second.m_vals,
-                                            dep.first});
-  }
 }
 }
 

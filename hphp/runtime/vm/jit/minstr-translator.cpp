@@ -520,7 +520,7 @@ SSATmp* HhbcTranslator::MInstrTranslator::getInput(unsigned i,
   assert(mapContains(m_stackInputs, i) == (l.space == Location::Stack));
   switch (l.space) {
     case Location::Stack:
-      return m_ht.top(Type::Gen | Type::Cls, m_stackInputs[i], cat);
+      return m_ht.top(Type::StackElem, m_stackInputs[i], cat);
 
     case Location::Local:
       return m_ht.ldLoc(l.offset, cat);
@@ -744,6 +744,8 @@ void HhbcTranslator::MInstrTranslator::emitBaseG() {
   static const OpFunc opFuncs[] = {baseG, baseGW, baseGD, baseGWD};
   OpFunc opFunc = opFuncs[mia & MIA_base];
   SSATmp* gblName = getBase();
+  if (!gblName->isA(Type::Str)) PUNT(BaseG-non-string-name);
+
   m_base = gen(BaseG,
                getEmptyCatchTrace(),
                cns(reinterpret_cast<TCA>(opFunc)),

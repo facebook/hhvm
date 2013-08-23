@@ -515,7 +515,7 @@ O(ContArUpdateIdx,                  ND, S(FramePtr) S(Int),            E|Mem) \
 O(LdContArRaw,                  DParam, S(FramePtr) C(Int),               NF) \
 O(StContArRaw,                      ND, S(FramePtr) C(Int) S(Gen),     E|Mem) \
 O(LdContArValue,                DParam, S(FramePtr),                      NF) \
-O(StContArValue,                    ND, S(FramePtr) S(Gen),   E|Mem|CRc|Refs) \
+O(StContArValue,                    ND, S(FramePtr) S(Cell),  E|Mem|CRc|Refs) \
 O(LdContArKey,                  DParam, S(FramePtr),                      NF) \
 O(StContArKey,                      ND, S(FramePtr) S(Gen),   E|Mem|CRc|Refs) \
 O(IterInit,                    D(Bool), S(Arr,Obj)                            \
@@ -767,6 +767,11 @@ enum class Opcode : uint16_t {
  * a runtime check.
  */
 bool isGuardOp(Opcode opc);
+
+/*
+ * Returns the corresponding Assert* opcode for a guard instruction.
+ */
+Opcode guardToAssert(Opcode opc);
 
 /*
  * A "query op" is any instruction returning Type::Bool that is both
@@ -1087,9 +1092,8 @@ struct CatchInfo {
 
 typedef folly::Range<TCA> TcaRange;
 
-// Key is instruction id. Used instead of StateVector because it's
-// expected to be very sparse.
-typedef smart::flat_map<uint32_t, DataTypeCategory> GuardConstraints;
+// Used instead of StateVector because it's expected to be very sparse.
+typedef smart::flat_map<const IRInstruction*, TypeConstraint> GuardConstraints;
 
 /*
  * Counts the number of cells a SpillStack will logically push.  (Not
@@ -1099,8 +1103,6 @@ typedef smart::flat_map<uint32_t, DataTypeCategory> GuardConstraints;
 int32_t spillValueCells(IRInstruction* spillStack);
 
 bool isConvIntOrPtrToBool(IRInstruction* instr);
-
-FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_toString, toString);
 
 } // namespace JIT
 } // namespace HPHP
@@ -1124,22 +1126,6 @@ template<> struct FormatValue<HPHP::JIT::Opcode> {
 
  private:
   HPHP::JIT::Opcode m_op;
-};
-
-template<typename Val>
-struct FormatValue<Val,
-                   typename std::enable_if<
-                     HPHP::JIT::has_toString<Val, std::string() const>::value,
-                     void
-                   >::type> {
-  explicit FormatValue(const Val& val) : m_val(val) {}
-
-  template<typename Callback> void format(FormatArg& arg, Callback& cb) const {
-    format_value::formatString(m_val.toString(), arg, cb);
-  }
-
- private:
-  const Val& m_val;
 };
 }
 

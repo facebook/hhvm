@@ -113,14 +113,14 @@ struct TraceBuilder {
     m_thisIsAvailable = true;
   }
 
-  void constrainGuard(IRInstruction* inst, DataTypeCategory cat);
-  SSATmp* constrainValue(SSATmp* const val, DataTypeCategory cat);
-  void constrainLocal(uint32_t id, DataTypeCategory cat,
+  void constrainGuard(IRInstruction* inst, TypeConstraint cat);
+  SSATmp* constrainValue(SSATmp* const val, TypeConstraint cat);
+  void constrainLocal(uint32_t id, TypeConstraint cat,
                       const std::string& why);
-  void constrainLocal(uint32_t id, SSATmp* valSrc, DataTypeCategory cat,
+  void constrainLocal(uint32_t id, SSATmp* valSrc, TypeConstraint cat,
                       const std::string& why);
-  void constrainStack(int32_t offset, DataTypeCategory cat);
-  void constrainStack(SSATmp* sp, int32_t offset, DataTypeCategory cat);
+  void constrainStack(int32_t offset, TypeConstraint cat);
+  void constrainStack(SSATmp* sp, int32_t offset, TypeConstraint cat);
 
   Type localType(unsigned id, DataTypeCategory cat);
   SSATmp* localValue(unsigned id, DataTypeCategory cat);

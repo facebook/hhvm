@@ -166,13 +166,13 @@ void HhbcTranslator::refineType(SSATmp* tmp, Type type) {
   }
 }
 
-SSATmp* HhbcTranslator::pop(Type type, DataTypeCategory cat) {
-  SSATmp* opnd = m_evalStack.pop(cat);
+SSATmp* HhbcTranslator::pop(Type type, TypeConstraint tc) {
+  SSATmp* opnd = m_evalStack.pop(tc);
 
   if (opnd == nullptr) {
     uint32_t stackOff = m_stackDeficit;
     m_stackDeficit++;
-    m_tb->constrainStack(stackOff, cat);
+    m_tb->constrainStack(stackOff, tc);
     return gen(LdStack, type, StackOffset(stackOff), m_tb->sp());
   }
 
@@ -185,18 +185,18 @@ SSATmp* HhbcTranslator::pop(Type type, DataTypeCategory cat) {
 
 void HhbcTranslator::discard(unsigned n) {
   for (unsigned i = 0; i < n; ++i) {
-    pop(Type::Gen | Type::Cls);
+    pop(Type::StackElem, DataTypeGeneric); // don't care about the values
   }
 }
 
 // type is the type expected on the stack.
-void HhbcTranslator::popDecRef(Type type, DataTypeCategory cat) {
-  if (SSATmp* src = m_evalStack.pop(cat)) {
+void HhbcTranslator::popDecRef(Type type, TypeConstraint tc) {
+  if (SSATmp* src = m_evalStack.pop(tc)) {
     gen(DecRef, src);
     return;
   }
 
-  m_tb->constrainStack(m_stackDeficit, cat);
+  m_tb->constrainStack(m_stackDeficit, tc);
   gen(DecRefStack, StackOffset(m_stackDeficit), type, m_tb->sp());
   m_stackDeficit++;
 }
@@ -207,12 +207,15 @@ void HhbcTranslator::popDecRef(Type type, DataTypeCategory cat) {
 // refineType during a later pop() or top() will fix up the type to
 // the known type.
 void HhbcTranslator::extendStack(uint32_t index, Type type) {
+  // DataTypeGeneric is used in here because nobody's actually looking at the
+  // values, we're just inserting LdStacks into m_evalStack to be consumed
+  // elsewhere.
   if (index == 0) {
-    push(pop(type));
+    push(pop(type, DataTypeGeneric));
     return;
   }
 
-  SSATmp* tmp = pop(Type::Gen | Type::Cls);
+  SSATmp* tmp = pop(Type::StackElem, DataTypeGeneric);
   extendStack(index - 1, type);
   push(tmp);
 }
@@ -750,7 +753,9 @@ void HhbcTranslator::emitInitThisLoc(int32_t id) {
 
 void HhbcTranslator::emitCGetL(int32_t id) {
   IRTrace* exitTrace = getExitTrace();
-  pushIncRef(ldLocInnerWarn(id, exitTrace, DataTypeCountnessInit));
+  auto cat = curSrcKey().op() == OpFPassL ? DataTypeSpecific // XXX t2802368
+                                          : DataTypeCountnessInit;
+  pushIncRef(ldLocInnerWarn(id, exitTrace, cat));
 }
 
 void HhbcTranslator::emitCGetL2(int32_t id) {
@@ -795,7 +800,7 @@ void HhbcTranslator::emitBindL(int32_t id) {
   // pseudo-main: the destructor could decref the value again after
   // we've stored it into the local.
   pushIncRef(newValue);
-  auto const oldValue = ldLoc(id, DataTypeCountness);
+  auto const oldValue = ldLoc(id, DataTypeSpecific); // XXX t2802368
   gen(StLoc, LocalId(id), m_tb->fp(), newValue);
   gen(DecRef, oldValue);
 }
@@ -803,8 +808,9 @@ void HhbcTranslator::emitBindL(int32_t id) {
 void HhbcTranslator::emitSetL(int32_t id) {
   auto const exitTrace = getExitTrace();
 
-  // We're just going to store src into a local. stLoc will IncRef it, but if
-  // nobody else cares about the type a generic IncRef is better than a guard.
+  // since we're just storing the value in a local, this function doesn't care
+  // about the type of the value. stLoc needs to IncRef the value so it may
+  // constrain it further.
   auto const src = popC(DataTypeGeneric);
   push(stLoc(id, exitTrace, src));
 }
@@ -1785,19 +1791,18 @@ void HhbcTranslator::emitIsBoolC()   { emitIsTypeC(Type::Bool);}
 void HhbcTranslator::emitIsDoubleC() { emitIsTypeC(Type::Dbl); }
 
 void HhbcTranslator::emitPopC() {
-  // A generic decref in one tracelet is better than multiple different
-  // tracelets with specialized decrefs.
-  popDecRef(Type::Cell, DataTypeGeneric);
+  // PopC and friends decref their source. We should be able to use a generic
+  // decref if nobody else cares about the type but don't currently have the
+  // ability to get this correct. t2598894.
+  popDecRef(Type::Cell, {DataTypeCountness, Type::Cell});
 }
 
 void HhbcTranslator::emitPopV() {
-  // see emitPopC
-  popDecRef(Type::BoxedCell, DataTypeGeneric);
+  popDecRef(Type::BoxedCell, {DataTypeCountness, Type::BoxedCell});
 }
 
 void HhbcTranslator::emitPopR() {
-  // see emitPopC
-  popDecRef(Type::Gen, DataTypeGeneric);
+  popDecRef(Type::Gen, DataTypeCountness);
 }
 
 void HhbcTranslator::emitDup() {
@@ -2655,7 +2660,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     //       bytecode boundaries until the end of RetC
     gen(ReleaseVVOrExit, getExitSlowTrace(), m_tb->fp());
   }
-  SSATmp* retVal = pop(type);
+  SSATmp* retVal = pop(type, DataTypeCountness);
   if (RuntimeOption::EvalRuntimeTypeProfile) {
       gen(TypeProfileFunc, TypeProfileData(-1, curFunc), retVal);
   }
@@ -2863,7 +2868,7 @@ void HhbcTranslator::checkTypeLocation(const RegionDesc::Location& loc,
 
 void HhbcTranslator::assertTypeLocation(const RegionDesc::Location& loc,
                                         Type type) {
-  assert(type.subtypeOf(Type::Gen | Type::Cls));
+  assert(type.subtypeOf(Type::StackElem));
   typedef RegionDesc::Location::Tag T;
   switch (loc.tag()) {
     case T::Stack: assertTypeStack(loc.stackOffset(), type); break;
@@ -3045,7 +3050,7 @@ void HhbcTranslator::guardRefs(int64_t entryArDelta,
 
 void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   const Func* func = curFunc();
-  const TypeConstraint& tc = func->params()[paramId].typeConstraint();
+  auto const& tc = func->params()[paramId].typeConstraint();
   auto locVal = ldLoc(paramId, DataTypeSpecific);
   Type locType = locVal->type().unbox();
   assert(locType.isKnownDataType());
@@ -3355,8 +3360,15 @@ template<class CheckSupportedFun, class EmitLdAddrFun>
 void HhbcTranslator::emitSet(const StringData* name,
                              CheckSupportedFun checkSupported,
                              EmitLdAddrFun emitLdAddr) {
-  if (!(this->*checkSupported)(name, topC(0)->type(), 1)) return;
-  SSATmp* src = popC();
+  if (!(this->*checkSupported)(name, topC(0, DataTypeGeneric)->type(), 1)) {
+    // TODO(t2598894): reflowTypes doesn't have support for changing
+    // InterpOne's typeParam yet, so in the cases where we are emitting an
+    // interpOne we can't relax the type.
+    m_tb->constrainStack(0, DataTypeSpecific);
+    return;
+  }
+
+  SSATmp* src = popC(DataTypeCountness);
   emitSetMem((this->*emitLdAddr)(name), src);
 }
 
@@ -4473,7 +4485,10 @@ SSATmp* HhbcTranslator::stLocImpl(uint32_t id,
                                   bool doRefCount) {
   assert(!newVal->type().maybeBoxed());
 
-  auto const oldLoc = ldLoc(id, DataTypeCountness);
+  // We might be refcounting both the old and new values.
+  if (doRefCount) m_tb->constrainValue(newVal, DataTypeCountness);
+  auto const oldLoc = ldLoc(id, doRefCount ? DataTypeCountness
+                                           : DataTypeGeneric);
   if (!(oldLoc->type().isBoxed() || oldLoc->type().notBoxed())) {
     PUNT(stLocImpl-maybeBoxedValue);
   }

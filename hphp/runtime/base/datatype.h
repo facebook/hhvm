@@ -91,7 +91,7 @@ const DataType KindOfRefCountThreshold = KindOfStaticString;
   func(Specific)                                \
   func(Specialized)
 
-enum class DataTypeCategory {
+enum class DataTypeCategory : uint8_t {
 #define DT(name) name,
   DT_CATEGORIES(DT)
 #undef DT

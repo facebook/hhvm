@@ -55,6 +55,10 @@ std::string Type::toString() const {
   IR_TYPES
 # undef IRT
 
+  if (isBoxed()) {
+    return folly::to<std::string>("Boxed", innerType().toString());
+  }
+
   if (strictSubtypeOf(Type::Obj)) {
     return folly::format("Obj<{}>", m_class->name()->data()).str();
   }
@@ -223,6 +227,18 @@ bool isGuardOp(Opcode opc) {
 
     default:
       return false;
+  }
+}
+
+Opcode guardToAssert(Opcode opc) {
+  switch (opc) {
+    case GuardLoc:
+    case CheckLoc:  return AssertLoc;
+    case GuardStk:
+    case CheckStk:  return AssertStk;
+    case CheckType: return AssertType;
+
+    default:        not_reached();
   }
 }
 

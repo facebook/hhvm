@@ -118,6 +118,8 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
 }
 
 Type liveTVType(const TypedValue* tv) {
+  assert(tv->m_type == KindOfClass || tvIsPlausible(*tv));
+
   if (tv->m_type == KindOfObject) {
     return Type::Obj.specialize(tv->m_data.pobj->getVMClass());
   }
@@ -145,7 +147,7 @@ Type setElemReturn(const IRInstruction* inst) {
   auto baseType = inst->src(minstrBaseIdx(inst))->type().strip();
 
   // If the base is a Str, the result will always be a CountedStr (or
-  // an exception). If the baes might be a str, the result wil be
+  // an exception). If the base might be a str, the result wil be
   // CountedStr or Nullptr. Otherwise, the result is always Nullptr.
   if (baseType.subtypeOf(Type::Str)) {
     return Type::CountedStr;

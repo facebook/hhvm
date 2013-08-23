@@ -376,6 +376,14 @@ static inline std::string regionSelectorDefault() {
 #endif
 }
 
+static inline bool hhirRelaxGuardsDefault() {
+  return RuntimeOption::EvalJitRegionSelector == "tracelet";
+}
+
+static inline bool hhbcRelaxGuardsDefault() {
+  return true;
+}
+
 static inline bool hugePagesSoundNice() {
   return RuntimeOption::ServerExecutionMode();
 }

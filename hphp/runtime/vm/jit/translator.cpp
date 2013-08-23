@@ -2687,7 +2687,8 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
       if (specType.getOuterType() == KindOfArray) {
         if (instr->inputs.size() == 2 && opndIdx == 0) {
           if (specType.hasArrayKind() &&
-              specType.getArrayKind() == ArrayData::ArrayKind::kPackedKind) {
+              specType.getArrayKind() == ArrayData::ArrayKind::kPackedKind &&
+              instr->inputs[1]->isInt()) {
             return DataTypeSpecialized;
           }
         }
@@ -3434,7 +3435,8 @@ breakBB:
   }
 
   // translateRegion doesn't support guard relaxation/specialization yet
-  if (m_mode != TransProfile && m_mode != TransOptimize) {
+  if (RuntimeOption::EvalHHBCRelaxGuards &&
+      m_mode != TransProfile && m_mode != TransOptimize) {
     relaxDeps(t, tas);
   }
 

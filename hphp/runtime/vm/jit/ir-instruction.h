@@ -206,6 +206,12 @@ struct IRInstruction {
    */
   void become(IRFactory&, IRInstruction* other);
 
+  bool       is() const { return false; }
+  template<typename... Args>
+  bool       is(Opcode op, Args&&... args) {
+    return m_op == op || is(std::forward<Args>(args)...);
+  }
+
   Opcode     op()   const       { return m_op; }
   void       setOpcode(Opcode newOpc)  { m_op = newOpc; }
   Type       typeParam() const         { return m_typeParam; }

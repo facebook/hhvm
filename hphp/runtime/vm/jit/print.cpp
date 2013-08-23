@@ -63,8 +63,8 @@ void printOpcode(std::ostream& os, const IRInstruction* inst,
     if (isGuard) os << punc(",");
   }
   if (isGuard) {
-    auto it = guards->find(inst->id());
-    os << (it == guards->end() ? "unused" : typeCategoryName(it->second));
+    auto it = guards->find(inst);
+    os << (it == guards->end() ? "unused" : it->second.toString());
   }
   os << color(ANSI_COLOR_LIGHT_BLUE)
      << '>'

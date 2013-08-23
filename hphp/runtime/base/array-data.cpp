@@ -722,7 +722,7 @@ ArrayData* ArrayData::Escalate(const ArrayData* ad) {
 
 const char* ArrayData::kindToString(ArrayKind kind) {
   const char* names[] = {
-    "VectorKind",
+    "PackedKind",
     "MixedKind",
     "SharedKind",
     "NvtwKind",

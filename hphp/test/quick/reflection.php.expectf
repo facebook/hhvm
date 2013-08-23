@@ -293,7 +293,7 @@ bool(false)
 bool(true)
 
 --- newInstance() ---
-object(B)#34 (4) {
+object(B)#51 (4) {
   ["p0":"B":private]=>
   int(1)
   ["p1":protected]=>
@@ -305,7 +305,7 @@ object(B)#34 (4) {
 }
 
 --- newInstanceArgs() ---
-object(B)#34 (4) {
+object(B)#51 (4) {
   ["p0":"B":private]=>
   int(1)
   ["p1":protected]=>

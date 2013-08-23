@@ -1179,7 +1179,8 @@ class ReflectionClass implements Reflector {
       throw new ReflectionException("Property $class::$name does not exist");
     }
 
-    $ret = new ReflectionProperty(null, null);
+    $cls = new ReflectionClass("ReflectionProperty");
+    $ret = $cls->newInstanceWithoutConstructor();
     $ret->info  = $properties[$name];
     $ret->name  = $name;
     $ret->class = $this->info['name'];
@@ -1837,6 +1838,8 @@ class ReflectionProperty implements Reflector {
         $this->name  = $prop->name;
         $this->class = $prop->class;
       }
+    } else {
+      throw new ReflectionException("Parameters must not be null");
     }
   }
 

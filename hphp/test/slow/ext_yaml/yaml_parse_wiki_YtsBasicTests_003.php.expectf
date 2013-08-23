@@ -1,0 +1,17 @@
+array(4) {
+  [0]=>
+  string(5) "apple"
+  [1]=>
+  array(3) {
+    [0]=>
+    string(3) "foo"
+    [1]=>
+    string(3) "bar"
+    [2]=>
+    string(4) "x123"
+  }
+  [2]=>
+  string(6) "banana"
+  [3]=>
+  string(6) "carrot"
+}

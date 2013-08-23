@@ -1,0 +1,11 @@
+<?php
+$recursive = array(
+  "a" => "a",
+  "b" => "b",
+  "c" => &$recursive,
+);
+var_dump(yaml_emit($recursive));
+
+// clean up a little or we may see false memory leak reports
+unset($recursive['c']);
+?>

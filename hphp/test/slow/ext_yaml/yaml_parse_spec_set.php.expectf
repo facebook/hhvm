@@ -1,0 +1,11 @@
+array(1) {
+  ["baseball players"]=>
+  array(3) {
+    ["Mark McGwire"]=>
+    NULL
+    ["Sammy Sosa"]=>
+    NULL
+    ["Ken Griffey"]=>
+    NULL
+  }
+}

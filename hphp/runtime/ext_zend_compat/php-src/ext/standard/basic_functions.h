@@ -24,10 +24,10 @@
 
 #include "hphp/runtime/ext/ext_misc.h"
 
-PHPAPI double php_get_nan(void) {
+PHPAPI inline double php_get_nan(void) {
   return HPHP::k_NAN;
 }
-PHPAPI double php_get_inf(void) {
+PHPAPI inline double php_get_inf(void) {
   return HPHP::k_INF;
 }
 

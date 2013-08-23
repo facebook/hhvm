@@ -1009,9 +1009,11 @@ ZEND_API int _array_init(zval *arg, uint size ZEND_FILE_LINE_DC) {
   return SUCCESS;
 }
 
+/* returns 1 if you need to copy result, 0 if it's already a copy */
 ZEND_API int zend_get_object_classname(const zval *object, const char **class_name, zend_uint *class_name_len TSRMLS_DC) {
   zend_class_entry* clazz = zend_get_class_entry(object);
-  *class_name_len = clazz->name()->size();
-  *class_name = strndup(clazz->name()->data(), *class_name_len);
-  return SUCCESS;
+  auto* name = clazz->name();
+  *class_name_len = name->size();
+  *class_name = estrndup(name->data(), *class_name_len);
+  return 0;
 }

@@ -1,0 +1,5 @@
+<?php
+// TODO: This should properly be extension_loaded("yaml")
+// but yaml doesn't currently have an Extension struct
+// Blame @ptarjan
+if (!function_exists("yaml_emit")) echo "skip";

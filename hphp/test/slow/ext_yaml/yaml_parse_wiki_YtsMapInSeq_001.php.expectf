@@ -1,0 +1,12 @@
+array(2) {
+  [0]=>
+  array(1) {
+    ["foo"]=>
+    string(3) "bar"
+  }
+  [1]=>
+  array(1) {
+    ["baz"]=>
+    string(3) "bug"
+  }
+}

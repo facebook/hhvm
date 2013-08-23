@@ -55,8 +55,8 @@ ZEND_API inline void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC) {
 #define zval_dtor(zvalue) _zval_dtor((zvalue) ZEND_FILE_LINE_CC)
 #define zval_ptr_dtor(zval_ptr) _zval_ptr_dtor((zval_ptr) ZEND_FILE_LINE_CC)
 
-ZEND_API inline void zval_add_ref(zval **p) {
-  HPHP::tvRefcountedIncRef(*p);
+ZEND_API inline void zval_add_ref(zval *p) {
+  HPHP::tvRefcountedIncRef(p);
 }
 
 END_EXTERN_C()

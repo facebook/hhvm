@@ -44,12 +44,12 @@ ZEND_API inline void _efree(const void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORI
   HPHP::smart_free(const_cast<void*>(ptr));
 }
 ZEND_API inline void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
-  HPHP::smart_realloc(ptr, size);
-  return ptr;
+  return HPHP::smart_realloc(ptr, size);
 }
 ZEND_API inline char *_estrndup(const char *s, unsigned int length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
-  char* ret = (char*) _emalloc(length);
+  char* ret = (char*) _emalloc(length + 1);
   memcpy(ret, s, length);
+  ret[length] = '\0';
   return ret;
 }
 ZEND_API inline char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {

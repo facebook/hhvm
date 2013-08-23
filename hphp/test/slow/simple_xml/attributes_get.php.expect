@@ -1,0 +1,8 @@
+object(SimpleXMLElement)#5 (1) {
+  ["@attributes"]=>
+  array(1) {
+    ["hello"]=>
+    string(5) "world"
+  }
+}
+string(5) "world"

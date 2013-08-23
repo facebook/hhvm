@@ -173,8 +173,8 @@ static Array create_children(CResRef doc, xmlNodePtr root,
         continue;
       }
     } else {
-      if (node->type == XML_TEXT_NODE) {
-        if (node->content && *node->content) {
+      if (node->type == XML_TEXT_NODE || node->type == XML_CDATA_SECTION_NODE) {
+        if (node->content && *node->content && !xmlIsBlankNode(node)) {
           add_property
             (properties, root,
              create_text(doc, node, node_list_to_string(root->doc, node),
@@ -187,7 +187,7 @@ static Array create_children(CResRef doc, xmlNodePtr root,
     if (node->type != XML_ELEMENT_NODE || match_ns(node, ns, is_prefix)) {
       xmlNodePtr child = node->children;
       Object sub;
-      if (child && child->type == XML_TEXT_NODE && !xmlIsBlankNode(child)) {
+      if (child && (child->type == XML_TEXT_NODE || child->type == XML_CDATA_SECTION_NODE) && !xmlIsBlankNode(child)) {
         sub = create_text(doc, child, node_list_to_string(root->doc, child),
                           ns, is_prefix, false);
       } else {
@@ -323,7 +323,7 @@ c_SimpleXMLElement::c_SimpleXMLElement(Class* cb) :
                        ObjectData::CallToImpl>(cb),
       m_node(NULL), m_is_text(false), m_free_text(false),
       m_is_attribute(false), m_is_children(false), m_is_property(false),
-      m_xpath(NULL) {
+      m_is_array(false), m_xpath(NULL) {
   m_children = Array::Create();
 }
 
@@ -335,6 +335,21 @@ void c_SimpleXMLElement::sweep() {
   if (m_xpath) {
     xmlXPathFreeContext(m_xpath);
   }
+}
+
+c_SimpleXMLElement* c_SimpleXMLElement::clone() {
+  c_SimpleXMLElement *node = static_cast<c_SimpleXMLElement*>(ObjectData::clone());
+  node->m_doc = m_doc;
+  node->m_node = m_node;
+  node->m_is_text = m_is_text;
+  node->m_free_text = m_free_text;
+  node->m_is_attribute = m_is_attribute;
+  node->m_is_children = m_is_children;
+  node->m_is_property = m_is_property;
+  node->m_is_array = m_is_array;
+  node->m_children = create_children(m_doc, m_node, String(), false);
+  node->m_attributes = collect_attributes(m_node, String(), false);
+  return node;
 }
 
 void c_SimpleXMLElement::t___construct(CStrRef data, int64_t options /* = 0 */,
@@ -354,7 +369,7 @@ void c_SimpleXMLElement::t___construct(CStrRef data, int64_t options /* = 0 */,
   xmlDocPtr doc = xmlReadMemory(xml.data(), xml.size(), NULL, NULL, options);
   if (doc) {
     m_doc =
-      Resource(NEWOBJ(XmlDocWrapper)(doc, c_SimpleXMLElement::s_class_name));
+      Resource(NEWOBJ(XmlDocWrapper)(doc, o_getClassName()));
     m_node = xmlDocGetRootElement(doc);
     if (m_node) {
       m_children = create_children(m_doc, m_node, ns, is_prefix);
@@ -416,6 +431,7 @@ Variant c_SimpleXMLElement::t_xpath(CStrRef path) {
      */
     switch (nodeptr->type) {
     case XML_TEXT_NODE:
+    case XML_CDATA_SECTION_NODE:
       sub = create_element(m_doc, nodeptr->parent, String(), false);
       break;
     case XML_ELEMENT_NODE:
@@ -524,7 +540,9 @@ Object c_SimpleXMLElement::t_children(CStrRef ns /* = "" */,
   elem->m_is_text = m_is_text;
   elem->m_free_text = m_free_text;
   elem->m_is_children = true;
-  if (ns.empty()) {
+  if (m_is_text) {
+    return obj;
+  } else if (ns.empty()) {
     elem->m_children.assignRef(m_children);
   } else {
     Array props = Array::Create();
@@ -654,7 +672,28 @@ Variant c_SimpleXMLElement::t_addchild(CStrRef qname,
       m_children.set(newname, arr);
     }
   } else {
-    m_children.set(newname, child);
+    if (value.empty()) {
+      m_children.set(newname, child);
+    } else {
+      // If we specified a value to addChild, we mark all children to have
+      // invisible text. This is a strange SimpleXML quirk.
+      c_SimpleXMLElement *e = child.getTyped<c_SimpleXMLElement>();
+      Array children = e->m_children.toArray();
+      for (ArrayIter iter(children); iter; ++iter) {
+        if (iter.second().isObject()) {
+          c_SimpleXMLElement *elem = iter.second().toObject().
+            getTyped<c_SimpleXMLElement>();
+            elem->m_free_text = false;
+        }
+      }
+
+      // Since we abuse m_children to reprsent text nodes, we have to merge it
+      // with existing children.
+      m_children = m_children.toArray().merge(children);
+
+      // We return a clean element because the retval -can- be casted to string.
+      return create_element(m_doc, newnode, newns, false);
+    }
   }
   return child;
 }
@@ -728,9 +767,14 @@ String c_SimpleXMLElement::t___tostring() {
 }
 
 Variant c_SimpleXMLElement::t___get(Variant name) {
-  Variant ret = m_children[name];
-  if (ret.isArray()) {
-    ret = ret[0];
+  Variant ret;
+  if (m_is_attribute) {
+    ret = m_attributes[name];
+  } else {
+    ret = m_children[name];
+    if (ret.isArray()) {
+      ret = ret[0];
+    }
   }
   if (ret.isObject()) {
     c_SimpleXMLElement *elem = ret.toObject().getTyped<c_SimpleXMLElement>();
@@ -873,7 +917,14 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
 }
 
 bool c_SimpleXMLElement::o_toBooleanImpl() const noexcept {
-  return (m_node || getDynProps().size());
+  if (m_node || getDynProps().size()) {
+    if (m_is_array || m_is_children || 
+       (m_node->parent && m_node->parent->type == XML_DOCUMENT_NODE)) {
+      return m_children.toArray().size() > 0 || m_attributes.toArray().size() > 0;
+    }
+    return true;
+  }
+  return false;
 }
 
 int64_t c_SimpleXMLElement::o_toInt64Impl() const noexcept {
@@ -895,12 +946,23 @@ double c_SimpleXMLElement::o_toDoubleImpl() const noexcept {
 }
 
 Array c_SimpleXMLElement::o_toArray() const {
-  if (m_attributes.toArray().empty()) {
-    return m_children.toArray();
+  Array ret = Array::Create();
+  if (!m_attributes.toArray().empty()) {
+    ret.set(s_attributes, m_attributes);
   }
-  Array ret;
-  ret.set(s_attributes, m_attributes);
   ret += m_children;
+
+  for (ArrayIter iter(ret); iter; ++iter) {
+    if (iter.second().isObject()) {
+      c_SimpleXMLElement *elem = iter.second().toObject().
+        getTyped<c_SimpleXMLElement>();
+      elem->m_is_array = true;
+      // String elements are implicitly converted.
+      if (elem->m_is_text) {
+        ret.set(iter.first(), elem->t___tostring());
+      }
+    }
+  }
   return ret;
 }
 
@@ -942,7 +1004,7 @@ bool c_SimpleXMLElement::t_offsetexists(CVarRef index) {
 
 Variant c_SimpleXMLElement::t_offsetget(CVarRef index) {
   if (index.isInteger()) {
-    if (m_is_property) {
+    if (m_is_property || m_is_children) {
       int64_t n = 0; int64_t nIndex = index.toInt64(); Variant var(this);
       for (ArrayIter iter = var.begin(); !iter.end(); iter.next()) {
         if (n++ == nIndex) {

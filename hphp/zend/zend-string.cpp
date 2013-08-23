@@ -181,19 +181,26 @@ char *string_crypt(const char *key, const char *salt) {
   }
 
 #ifdef HAVE_CRYPT_R
+# if defined(CRYPT_R_STRUCT_CRYPT_DATA)
   struct crypt_data buffer;
   memset(&buffer, 0, sizeof(buffer));
-
-  // in some cases buffer is of type CRYPTD
-  // CRYPTD buffer;
-
-  return strdup(crypt_r(key, salt, &buffer));
+# elif defined(CRYPT_R_CRYPTD)
+  CRYPTD buffer;
+# else
+#  error "Data struct used by crypt_r() is unknown. Please report."
+# endif
+  char *crypt_res = crypt_r(key, salt, &buffer);
 #else
   static Mutex mutex;
   Lock lock(mutex);
-
-  return strdup(crypt(key, salt));
+  char *crypt_res = crypt(key, salt);
 #endif
+
+  if (crypt_res) {
+    return strdup(crypt_res);
+  }
+  return ((salt[0] == '*') && (salt[1] == '0'))
+                  ? strdup("*1") : strdup("*0");
 }
 
 //////////////////////////////////////////////////////////////////////

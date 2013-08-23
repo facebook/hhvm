@@ -699,6 +699,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_COMPILER_HALT_OFFSET
 %right T_AWAIT
 %token T_ASYNC
+%token T_TUPLE
 
 %%
 
@@ -739,6 +740,7 @@ ident:
   | T_XHP_CHILDREN                     { $$ = $1;}
   | T_XHP_REQUIRED                     { $$ = $1;}
   | T_XHP_ENUM                         { $$ = $1;}
+  | T_TUPLE                            { $$ = $1;}
 ;
 
 use_declarations:
@@ -1932,6 +1934,8 @@ static_scalar:
   | '-' static_scalar                  { UEXP($$,$2,'-',1);}
   | T_ARRAY '('
     static_array_pair_list ')'         { _p->onArray($$,$3,T_ARRAY); }
+  | T_TUPLE '('
+    static_array_pair_list ')'         { _p->onArray($$,$3,T_ARRAY); }
   | '[' static_array_pair_list ']'     { _p->onArray($$,$2,T_ARRAY); }
   | T_SHAPE '('
     static_shape_pair_list ')'         { _p->onArray($$,$3,T_ARRAY); }
@@ -2007,6 +2011,8 @@ static_scalar_ae:
   | '+' static_numeric_scalar_ae       { UEXP($$,$2,'+',1);}
   | '-' static_numeric_scalar_ae       { UEXP($$,$2,'-',1);}
   | T_ARRAY '('
+    static_array_pair_list_ae ')'      { _p->onArray($$,$3,T_ARRAY);}
+  | T_TUPLE '('
     static_array_pair_list_ae ')'      { _p->onArray($$,$3,T_ARRAY);}
   | '[' static_array_pair_list_ae ']'  { _p->onArray($$,$2,T_ARRAY);}
   | T_SHAPE '('

@@ -194,7 +194,8 @@
      YYTOKEN(406, T_UNRESOLVED_NEWTYPE),
      YYTOKEN(407, T_COMPILER_HALT_OFFSET),
      YYTOKEN(408, T_AWAIT),
-     YYTOKEN(409, T_ASYNC)
+     YYTOKEN(409, T_ASYNC),
+     YYTOKEN(410, T_TUPLE)
    };
 #endif
 
@@ -228,5 +229,5 @@ typedef struct YYLTYPE
 #define YYTOKEN_MIN 258
 #endif
 #ifndef YYTOKEN_MAX
-#define YYTOKEN_MAX 409
+#define YYTOKEN_MAX 410
 #endif

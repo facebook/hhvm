@@ -412,6 +412,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"type"               { HH_ONLY_KEYWORD(T_UNRESOLVED_TYPE); }
 <ST_IN_SCRIPTING>"newtype"            { HH_ONLY_KEYWORD(T_UNRESOLVED_NEWTYPE); }
 
+<ST_IN_SCRIPTING>"tuple"/("("|{WHITESPACE_AND_COMMENTS}"(") {
+  HH_ONLY_KEYWORD(T_TUPLE);
+}
+
 <ST_IN_SCRIPTING>"..." {
   if (!_scanner->isHHSyntaxEnabled()) {
     yyless(1);

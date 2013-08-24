@@ -172,14 +172,16 @@ void emitResumeHelpers(UniqueStubs& uniqueStubs) {
   auto& a = tx64->astubs;
   moveToAlign(a);
 
+  auto const fpOff = offsetof(VMExecutionContext, m_fp);
+  auto const spOff = offsetof(VMExecutionContext, m_stack) +
+                       Stack::topOfStackOffset();
+
   uniqueStubs.resumeHelperRet = a.frontier();
   a.    pop   (rStashedAR[AROFF(m_savedRip)]);
   uniqueStubs.resumeHelper = a.frontier();
   emitGetGContext(a, rax);
-  a.   load_reg64_disp_reg64(rax, offsetof(VMExecutionContext, m_fp),
-                             rVmFp);
-  a.   load_reg64_disp_reg64(rax, offsetof(VMExecutionContext, m_stack) +
-                             Stack::topOfStackOffset(), rVmSp);
+  a.   loadq  (rax[fpOff], rVmFp);
+  a.   loadq  (rax[spOff], rVmSp);
   emitServiceReq(a, REQ_RESUME);
 
   log("resumeHelpers", uniqueStubs.resumeHelper);
@@ -210,11 +212,11 @@ void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
 
   // We are called from emitStackCheck, with the new stack frame in
   // rStashedAR. Get the caller's PC into rdi and save it off.
-  a.    load_reg64_disp_reg64(rVmFp, AROFF(m_func), rax);
-  a.    load_reg64_disp_reg32(rStashedAR, AROFF(m_soff), rdi);
-  a.    load_reg64_disp_reg64(rax, Func::sharedOffset(), rax);
-  a.    load_reg64_disp_reg32(rax, Func::sharedBaseOffset(), rax);
-  a.    add_reg32_reg32(rax, rdi);
+  a.    loadq  (rVmFp[AROFF(m_func)], rax);
+  a.    loadl  (rStashedAR[AROFF(m_soff)], edi);
+  a.    loadq  (rax[Func::sharedOffset()], rax);
+  a.    loadl  (rax[Func::sharedBaseOffset()], eax);
+  a.    addl   (eax, edi);
   emitEagerVMRegSave(a, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
   emitServiceReq(a, REQ_STACK_OVERFLOW);
 
@@ -366,60 +368,42 @@ void emitFuncPrologueRedispatch(UniqueStubs& uniqueStubs) {
   moveToAlign(a);
   uniqueStubs.funcPrologueRedispatch = a.frontier();
 
-  // We're in the wrong func prologue.
-
   assert(kScratchCrossTraceRegs.contains(rax));
   assert(kScratchCrossTraceRegs.contains(rdx));
   assert(kScratchCrossTraceRegs.contains(rcx));
 
-  //    Get the called func in rax
-  a.    load_reg64_disp_reg64(rStashedAR, AROFF(m_func), rax);
-  //    Get the number of passed parameters in rdx
-  a.    load_reg64_disp_reg32(rStashedAR, AROFF(m_numArgsAndCtorFlag), rdx);
-  a.    and_imm32_reg32(0x7fffffff, rdx);
-  //    Get the number of declared parameters in rcx
-  a.    load_reg64_disp_reg32(rax, Func::numParamsOff(), rcx);
+  Label actualDispatch;
+  Label numParamsCheck;
 
-  // If we didn't pass too many args, directly dereference
-  // func->m_prologues.
-  a.    cmp_reg32_reg32(rdx, rcx);
-  TCA bToFixedProloguesCheck = a.frontier();
-  a.    jcc8(CC_L, bToFixedProloguesCheck);
+  // rax := called func
+  // edx := num passed parameters
+  // ecx := num declared parameters
+  a.    loadq  (rStashedAR[AROFF(m_func)], rax);
+  a.    loadl  (rStashedAR[AROFF(m_numArgsAndCtorFlag)], edx);
+  a.    andl   (0x7fffffff, edx);
+  a.    loadl  (rax[Func::numParamsOff()], ecx);
 
-  //   cmp $kNumFixedPrologues, %rdx
-  //   jl numParamsCheck
-  TCA actualDispatch = a.frontier();
+  // If we passed more args than declared, jump to the numParamsCheck.
+  a.    cmpl   (edx, ecx);
+  a.    jl8    (numParamsCheck);
 
-  // rcx: prologueIdx
-  // rax = func->prologues[numParams]
-  // jmp rax
+asm_label(a, actualDispatch);
   a.    loadq  (rax[rdx*8 + Func::prologueTableOff()], rax);
   a.    jmp    (rax);
   a.    ud2    ();
 
-  // Hmm, more parameters passed than the function expected. Did we pass
-  // kNumFixedPrologues or more? If not, %rdx is still a perfectly
-  // legitimate index into the func prologue table.
-  // numParamsCheck:
-  //    cmp $kNumFixedPrologues, %rcx
-  //    jl  dispatch
-  a.patchJcc8(bToFixedProloguesCheck, a.frontier()); // numParamsCheck:
-  a.    cmp_imm32_reg32(kNumFixedPrologues, rdx);
-  a.    jcc8(CC_L, actualDispatch);
+  // Hmm, more parameters passed than the function expected. Did we
+  // pass kNumFixedPrologues or more? If not, %rdx is still a
+  // perfectly legitimate index into the func prologue table.
+asm_label(a, numParamsCheck);
+  a.    cmpl   (kNumFixedPrologues, edx);
+  a.    jl8    (actualDispatch);
 
   // Too many gosh-darned parameters passed. Go to numExpected + 1, which
   // is always a "too many params" entry point.
-  //
-  //    mov %rdx, %rcx
-  //    add $1, %rcx
-  //    jmp dispatch
-  a.    load_reg64_disp_index_reg64(rax,
-                                    // %rcx + 1
-                                    Func::prologueTableOff() + sizeof(TCA),
-                                    rcx,
-                                    rax);
-  a.    jmp(rax);
-  a.    ud2();
+  a.    loadq  (rax[rcx*8 + Func::prologueTableOff() + sizeof(TCA)], rax);
+  a.    jmp    (rax);
+  a.    ud2    ();
 
   log("funcPrologueRedispatch", uniqueStubs.funcPrologueRedispatch);
 }

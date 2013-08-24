@@ -414,8 +414,25 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
   moveToAlign(a, kNonFallthroughAlign);
   uniqueStubs.fcallArrayHelper = a.frontier();
 
-  // NOTE: we're assuming we don't need to save registers, because we
-  // don't ever have live registers across php-level calls.
+  /*
+   * When translating FCallArray, we have a pre-live ActRec on the
+   * stack and an Array of the parameters.  This stub uses the
+   * interpreter functions to enter the ActRec, but those functions
+   * may also tell us not to run it.  We reach this stub using a call
+   * instruction from the TC.
+   *
+   * In the case we're told to run it, we pop the return IP from the
+   * call and put it in the pre-live ActRec, link it as the frame
+   * pointer, and then jump directly to the prologue for the function
+   * being called.  This is done to keep the return stack buffer
+   * balanced with the call to this stub.  If we're told not to
+   * (e.g. the call_user_func_array was intercepted), we just return
+   * to our caller in the TC after re-loading the VM regs (the
+   * interpreter will have popped the pre-live ActRec for us).
+   *
+   * NOTE: we're assuming we don't need to save registers, because we
+   * don't ever have live registers across php-level calls.
+   */
 
   Label noCallee;
 

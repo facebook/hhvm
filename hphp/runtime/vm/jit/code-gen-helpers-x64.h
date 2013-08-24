@@ -23,24 +23,19 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
+#include "hphp/runtime/vm/jit/abi-x64.h"
 
 namespace HPHP {
 struct Func;
 namespace JIT {
+struct SSATmp;
+namespace X64 {
 
-class SSATmp;
+using namespace Transl; // XXX: this namespace should go away
 
-using HPHP::Transl::ConditionCode;
-using HPHP::Transl::PhysReg;
-using HPHP::Transl::TCA;
+//////////////////////////////////////////////////////////////////////
 
-/*
- * This namespace is intended to house stateless code emission helpers (as a
- * complement to code-gen which maintains state.)
- */
-namespace CodeGenHelpersX64 {
-
-typedef Transl::X64Assembler Asm;
+typedef X64Assembler Asm;
 
 constexpr size_t kJmpTargetAlign = 16;
 
@@ -61,7 +56,7 @@ void emitAssertRefCount(Asm& as, PhysReg base);
 
 void emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg);
 void emitLea(Asm& as, PhysReg base, int disp, PhysReg dest);
-void emitLea(Asm& as, Transl::MemoryRef mr, PhysReg dst);
+void emitLea(Asm& as, MemoryRef mr, PhysReg dst);
 
 void emitLdObjClass(Asm& as, PhysReg objReg, PhysReg dstReg);
 void emitLdClsCctx(Asm& as, PhysReg srcReg, PhysReg dstReg);
@@ -70,7 +65,7 @@ void emitExitSlowStats(Asm& as, const Func* func, SrcKey dest);
 
 template<class Mem>
 void emitLoadReg(Asm& as, Mem mem, PhysReg reg) {
-  assert(reg != Transl::InvalidReg);
+  assert(reg != InvalidReg);
   if (reg.isGP()) {
     as. loadq(mem, reg);
   } else {
@@ -80,7 +75,7 @@ void emitLoadReg(Asm& as, Mem mem, PhysReg reg) {
 
 template<class Mem>
 void emitStoreReg(Asm& as, PhysReg reg, Mem mem) {
-  assert(reg != Transl::InvalidReg);
+  assert(reg != InvalidReg);
   if (reg.isGP()) {
     as. storeq(reg, mem);
   } else {
@@ -92,7 +87,57 @@ void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1);
 
 void zeroExtendIfBool(Asm& as, const SSATmp* src, PhysReg reg);
 
-Transl::ConditionCode opToConditionCode(Opcode opc);
+ConditionCode opToConditionCode(Opcode opc);
+
+template<ConditionCode Jcc, class Lambda>
+void jccBlock(Asm& a, Lambda body) {
+  Label exit;
+  exit.jcc8(a, Jcc);
+  body();
+  asm_label(a, exit);
+}
+
+/*
+ * callDestructor/jumpDestructor --
+ *
+ * Emit a call or jump to the appropriate destructor for a dynamically
+ * typed value.
+ *
+ * No registers are saved; most translated code should be using
+ * emitDecRefGeneric{Reg,} instead of this.
+ *
+ *   Inputs:
+ *
+ *     - typeReg is destroyed and may not be argNumToRegName[0].
+ *     - argNumToRegName[0] should contain the m_data for this value.
+ *     - scratch is destoyed.
+ */
+
+inline IndexedMemoryRef lookupDestructor(X64Assembler& a,
+                                         PhysReg typeReg,
+                                         PhysReg scratch) {
+  assert(typeReg != r32(argNumToRegName[0]));
+  assert(scratch != argNumToRegName[0]);
+
+  static_assert((KindOfString        >> kShiftDataTypeToDestrIndex == 1) &&
+                (KindOfArray         >> kShiftDataTypeToDestrIndex == 2) &&
+                (KindOfObject        >> kShiftDataTypeToDestrIndex == 3) &&
+                (KindOfResource      >> kShiftDataTypeToDestrIndex == 4) &&
+                (KindOfRef           >> kShiftDataTypeToDestrIndex == 5),
+                "lookup of destructors depends on KindOf* values");
+
+  a.    shrl   (kShiftDataTypeToDestrIndex, r32(typeReg));
+  a.    movq   (&g_destructors, scratch);
+  return scratch[typeReg*8];
+}
+
+inline void callDestructor(Asm& a, PhysReg typeReg, PhysReg scratch) {
+  a.    call   (lookupDestructor(a, typeReg, scratch));
+}
+
+inline void jumpDestructor(Asm& a, PhysReg typeReg, PhysReg scratch) {
+  a.    jmp    (lookupDestructor(a, typeReg, scratch));
+}
 
 void emitIncRef(Asm& a, PhysReg base);
 void emitIncRefCheckNonStatic(Asm& a, PhysReg base, DataType dtype);
@@ -138,7 +183,8 @@ TCA emitEphemeralServiceReq(Asm& as, TCA start, ServiceRequest sr,
   return emitServiceReqWork(as, start, false, SRFlags::None, sr, argv);
 }
 
-}
-}}
+//////////////////////////////////////////////////////////////////////
+
+}}}
 
 #endif

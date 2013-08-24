@@ -38,6 +38,7 @@
 #include "hphp/runtime/vm/jit/translator-instrs.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/base/md5.h"
@@ -352,9 +353,14 @@ struct TranslArgs {
 /*
  * Translator annotates a tracelet with input/output locations/types.
  */
-class Translator {
-public:
+struct Translator {
+  // kMaxInlineReturnDecRefs is the maximum ref-counted locals to
+  // generate an inline return for.
+  static const int kMaxInlineReturnDecRefs = 1;
+
   static const int MaxJmpsTracedThrough = 5;
+
+  JIT::UniqueStubs uniqueStubs;
 
 private:
   friend struct TraceletContext;
@@ -418,9 +424,6 @@ protected:
   TranslateResult translateRegion(const RegionDesc& region,
                                   RegionBlacklist& interp);
 
-  TCA m_resumeHelper;
-  TCA m_resumeHelperRet;
-
   typedef std::map<TCA, TransID> TransDB;
   TransDB            m_transDB;
   vector<TransRec>   m_translations;
@@ -460,9 +463,6 @@ public:
   virtual void requestInit() = 0;
   virtual void requestExit() = 0;
   virtual TCA funcPrologue(Func* f, int nArgs, ActRec* ar = nullptr) = 0;
-  virtual TCA getCallToExit() = 0;
-  virtual TCA getRetFromInterpretedFrame() = 0;
-  virtual TCA getRetFromInterpretedGeneratorFrame() = 0;
   virtual TCA getTranslatedCaller() const = 0;
   virtual std::string getUsage() = 0;
   virtual size_t getCodeSize() = 0;
@@ -567,14 +567,6 @@ public:
   bool addDbgBLPC(PC pc);
   virtual bool addDbgGuards(const Unit* unit) = 0;
   virtual bool addDbgGuard(const Func* func, Offset offset) = 0;
-
-  TCA getResumeHelper() {
-    return m_resumeHelper;
-  }
-
-  TCA getResumeHelperRet() {
-    return m_resumeHelperRet;
-  }
 
   ProfData* profData() const {
     return m_profData;

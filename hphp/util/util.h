@@ -321,40 +321,6 @@ inline void compiler_membar( ) {
 #endif
 
 /**
- * Given the address of a C++ function, returns that function's name
- * or a hex string representation of the address if it can't find
- * the function's name. Attempts to demangle C++ function names. It's
- * the caller's responsibility to free the returned C string.
- */
-char* getNativeFunctionName(void* codeAddr);
-
-/**
- * Get the vtable offset corresponding to a method pointer. NB: only works
- * for single inheritance. For no inheritance at all, use
- * getMethodPtr. ABI-specific, don't play on or around.
- */
-template <typename MethodPtr>
-int64_t getVTableOffset(MethodPtr meth) {
-  union {
-    MethodPtr meth;
-    int64_t offset;
-  } u;
-  u.meth = meth;
-  return u.offset - 1;
-}
-
-template <typename MethodPtr>
-union MethodPtrU {
-  MethodPtr meth;
-  void* ptr;
-};
-
-template <typename MethodPtr>
-constexpr void* getMethodPtr(MethodPtr meth) {
-  return ((MethodPtrU<MethodPtr>*)(&meth))->ptr;
-}
-
-/**
  * 64-bit equivalents of 32-bit htonl() and ntohq().
  */
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__

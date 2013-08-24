@@ -1,0 +1,133 @@
+/*
+   +----------------------------------------------------------------------+
+   | HipHop for PHP                                                       |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+*/
+#ifndef incl_HPHP_JIT_UNIQUE_STUBS_H_
+#define incl_HPHP_JIT_UNIQUE_STUBS_H_
+
+#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/base/datatype.h"
+
+namespace HPHP { namespace JIT {
+
+//////////////////////////////////////////////////////////////////////
+
+using Transl::TCA;
+
+constexpr int kNumFreeLocalsHelpers = 9;
+
+/*
+ * Addresses of various unique, long-lived JIT helper routines are
+ * emitted when we first start up our code cache.
+ */
+struct UniqueStubs {
+  /*
+   * Stub that returns from this level VM-nesting to the previous one,
+   * with whatever value is on the top of the stack.
+   */
+  TCA callToExit;
+
+  /*
+   * Returning from a function when the ActRec was pushed by the
+   * interpreter.  The return IP on the ActRec will be set to one of
+   * these stubs, so if someone tries to execute a return instruction,
+   * we get a chance to set up state for a POST_INTERP_RET service
+   * request.
+   *
+   * Generators need a different stub because the ActRec for a
+   * generator is in the heap.
+   */
+  TCA retHelper;
+  TCA genRetHelper;  // version for generators
+
+  /*
+   * Returning from a function where the ActRec was pushed by an
+   * inlined call.  This is the same as retHelper but separated just
+   * for debugability.
+   */
+  TCA retInlHelper;
+
+  /*
+   * Helpers used for restarting execution based on the value of PC,
+   * after things like InterpOne of an instruction that changes PC.
+   */
+  TCA resumeHelperRet;
+  TCA resumeHelper;
+
+  /*
+   * A helper routine for implementing the DefCls opcode.
+   */
+  TCA defClsHelper;
+
+  /*
+   * Functions for releasing various php objects when their reference
+   * count goes to zero.  Indexed using typeToDestrIndex.
+   *
+   * FIXME: this is dead code after the tx64->hhir switch.  Leaving in
+   * for now to review whether we want to use it.
+   */
+  TCA dtorStubs[kDestrTableSize];
+
+  /*
+   * Generic destructor stub for PtrToGen types.
+   *
+   * The irPopRHelper takes the pointer to the value to decref in
+   * rVmSp, and is intended for generic PopR instructions.  The normal
+   * dtorGenericStub takes the pointer to the value to dec ref in the
+   * first argument register.
+   */
+  TCA irPopRHelper;
+  TCA dtorGenericStub;
+
+  /*
+   * Generic destructor stub for in-registered Gen or Cell types.
+   *
+   * FIXME: currently dead code after tx64->hhir.  We need to look at
+   * whether we want to use this again.
+   */
+  TCA dtorGenericStubRegs;
+
+  /*
+   * Helper stubs for doing generic decrefs on a function return.  The
+   * stub is a partially-unrolled loop with kNumFreeLocalsHelpers
+   * points to call to.  The freeManyLocalsHelper entry point should
+   * be used when there's more locals than that.
+   */
+  TCA freeManyLocalsHelper;
+  TCA freeLocalsHelpers[kNumFreeLocalsHelpers];
+
+  /*
+   * When we enter a func prologue based on a prediction of which
+   * Func* we'll be calling, if the prediction was wrong we bail to
+   * this stub to redispatch.
+   */
+  TCA funcPrologueRedispatch;
+
+  /*
+   * Utility routine that helps implement a fast path to avoid full VM
+   * re-entry during translations of Op::FCallArray.
+   */
+  TCA fcallArrayHelper;
+
+  /*
+   * The stub we jump to when a stack overflow check fails.
+   */
+  TCA stackOverflowHelper;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+}}
+
+#endif

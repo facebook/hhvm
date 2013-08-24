@@ -224,5 +224,7 @@ void assertTv(const TypedValue* tv);
 // returns the number of things it put on sp
 int init_closure(ActRec* ar, TypedValue* sp);
 
+void defClsHelper(PreClass*);
+
 }
 #endif

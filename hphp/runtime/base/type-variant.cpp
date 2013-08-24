@@ -31,6 +31,7 @@
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/util/util.h"
+#include "hphp/util/abi-cxx.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
@@ -244,11 +245,11 @@ static_assert(kDestrTableSize == 6,
 
 const RawDestructor g_destructors[] = {
   nullptr,
-  (RawDestructor)Util::getMethodPtr(&StringData::release),
-  (RawDestructor)Util::getMethodPtr(&ArrayData::release),
-  (RawDestructor)Util::getMethodPtr(&ObjectData::release),
-  (RawDestructor)Util::getMethodPtr(&ResourceData::release),
-  (RawDestructor)Util::getMethodPtr(&RefData::release),
+  (RawDestructor)getMethodPtr(&StringData::release),
+  (RawDestructor)getMethodPtr(&ArrayData::release),
+  (RawDestructor)getMethodPtr(&ObjectData::release),
+  (RawDestructor)getMethodPtr(&ResourceData::release),
+  (RawDestructor)getMethodPtr(&RefData::release),
 };
 
 inline ALWAYS_INLINE void Variant::destructDataImpl(RefData* data, DataType t) {

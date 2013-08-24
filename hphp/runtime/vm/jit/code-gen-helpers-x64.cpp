@@ -29,10 +29,7 @@
 #include "hphp/runtime/vm/jit/x64-util.h"
 #include "hphp/runtime/vm/jit/ir.h"
 
-namespace HPHP {
-namespace JIT {
-
-namespace {
+namespace HPHP { namespace JIT { namespace X64 {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -42,9 +39,7 @@ using namespace Transl::reg;
 
 TRACE_SET_MOD(hhir);
 
-} // unnamed namespace
-
-namespace CodeGenHelpersX64 {
+//////////////////////////////////////////////////////////////////////
 
 /*
  * It's not normally ok to directly use tracelet abi registers in

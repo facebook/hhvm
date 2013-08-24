@@ -3444,7 +3444,7 @@ breakBB:
 }
 
 Translator::Translator()
-  : m_resumeHelper(nullptr)
+  : uniqueStubs{}
   , m_createdTime(Timer::GetCurrentTimeMicros())
   , m_mode(TransInvalid)
   , m_profData(nullptr)

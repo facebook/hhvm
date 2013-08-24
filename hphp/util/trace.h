@@ -64,6 +64,7 @@ namespace Trace {
       TM(trans)       \
       TM(tx64)        \
       TM(tx64stats)   \
+      TM(ustubs)      \
       TM(unwind)      \
       TM(txlease)     \
       TM(fixup)       \

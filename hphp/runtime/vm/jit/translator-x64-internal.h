@@ -21,6 +21,7 @@
 #include <boost/utility/typed_in_place_factory.hpp>
 
 #include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
 namespace Transl {
@@ -138,14 +139,6 @@ private:
   JccBlock(const JccBlock&);
   JccBlock& operator=(const JccBlock&);
 };
-
-template<ConditionCode Jcc, class Lambda>
-void jccBlock(X64Assembler& a, Lambda body) {
-  Label exit;
-  exit.jcc8(a, Jcc);
-  body();
- asm_label(a, exit);
-}
 
 // A CondBlock is an RAII structure for emitting conditional code. It
 // compares the source register at fieldOffset with fieldValue, and
@@ -365,6 +358,12 @@ emitCopyTo(X64Assembler& a,
   a.    storeq (s64, dest[destOff + TVOFF(m_data)]);
   emitLoadTVType(a, src[srcOff + TVOFF(m_type)], s32);
   emitStoreTVType(a, s32, dest[destOff + TVOFF(m_type)]);
+}
+
+// Pops the return address pushed by fcall and stores it into the
+// actrec in rStashedAR.
+inline void emitPopRetIntoActRec(X64Assembler& a) {
+  a.    pop  (rStashedAR[AROFF(m_savedRip)]);
 }
 
 }}

@@ -23,6 +23,7 @@
 #include "folly/Format.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/util.h"
+#include "hphp/util/abi-cxx.h"
 
 #include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -63,7 +64,7 @@ namespace {
 
 using namespace Util;
 using namespace Transl::reg;
-using namespace CodeGenHelpersX64;
+using namespace X64; // XXX: we need to split the x64-specific parts out
 using Transl::CppCall;
 
 TRACE_SET_MOD(hhir);
@@ -2492,7 +2493,7 @@ void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
 }
 
 void traceRet(ActRec* fp, Cell* sp, void* rip) {
-  if (rip == TranslatorX64::Get()->getCallToExit()) {
+  if (rip == TranslatorX64::Get()->uniqueStubs.callToExit) {
     return;
   }
   checkFrame(fp, sp, /*checkLocals*/ false);
@@ -2665,7 +2666,7 @@ void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
  */
 void CodeGenerator::cgDefInlineFP(IRInstruction* inst) {
   auto const fp       = m_regs[inst->src(0)].reg();
-  auto const fakeRet  = m_tx64->getRetFromInlinedFrame();
+  auto const fakeRet  = m_tx64->uniqueStubs.retInlHelper;
   auto const retBCOff = inst->extra<DefInlineFP>()->retBCOff;
 
   m_as.    storeq (fakeRet, fp[AROFF(m_savedRip)]);
@@ -2997,8 +2998,8 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
   }
 
   auto const target = numLocals > kNumFreeLocalsHelpers
-    ? m_tx64->m_freeManyLocalsHelper
-    : m_tx64->m_freeLocalsHelpers[numLocals - 1];
+    ? m_tx64->uniqueStubs.freeManyLocalsHelper
+    : m_tx64->uniqueStubs.freeLocalsHelpers[numLocals - 1];
 
   a.subq(stackAdjust, rsp);  // For parity; callee does retq $0x8.
   a.lea(rFp[-numLocals * sizeof(TypedValue)], rDest);
@@ -3278,13 +3279,13 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
 
       /*
        * rVmSp is ok here because this is part of the special
-       * ABI to m_irPopRHelper.  We're not using a secret dependency
+       * ABI to irPopRHelper.  We're not using a secret dependency
        * on the frame or stack---we're only going to use that ABI if
        * we happen to have that register allocated for baseReg.
        */
       if (offset == 0 && baseReg == rVmSp) {
         // Decref'ing top of vm stack, very likely a popR
-        m_tx64->emitCall(m_as, m_tx64->m_irPopRHelper);
+        m_tx64->emitCall(m_as, m_tx64->uniqueStubs.irPopRHelper);
       } else {
         if (baseReg == rsp) {
           // Because we just pushed %rdi, %rsp is 8 bytes below where
@@ -3292,7 +3293,7 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
           offset += sizeof(int64_t);
         }
         m_as.lea(baseReg[offset], rdi);
-        m_tx64->emitCall(m_as, m_tx64->m_dtorGenericStub);
+        m_tx64->emitCall(m_as, m_tx64->uniqueStubs.dtorGenericStub);
       }
       recordSyncPoint(m_as);
     }
@@ -3694,7 +3695,7 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
   Offset after          = inst->extra<CallArray>()->after;
   cgCallHelper(
     m_as,
-    CppCall(m_tx64->m_fcallArrayHelper),
+    CppCall(m_tx64->uniqueStubs.fcallArrayHelper),
     kVoidDest,
     SyncOptions::kSyncPoint,
     ArgGroup(m_regs)

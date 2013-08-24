@@ -108,8 +108,6 @@ extern "C" TCA funcBodyHelper(ActRec* fp);
 struct TReqInfo;
 struct Label;
 
-static const int kNumFreeLocalsHelpers = 9;
-
 typedef X64Assembler Asm;
 
 typedef hphp_hash_map<TCA, TransID> TcaTransIDMap;
@@ -185,29 +183,15 @@ class TranslatorX64 : public Translator
   CodeBlock              profCode;
   CodeBlock              stubsCode;
   CodeBlock              trampolinesCode;
+public: // TODO: move these to some kind of CodeCache module
   X64Assembler           ahot;    // used for hot code of AttrHot functions
   X64Assembler           a;       // used for hot code of non-AttrHot functions
   X64Assembler           aprof;   // used for hot code of profiling translations
   X64Assembler           astubs;  // used for cold code
   X64Assembler           atrampolines;
+private:
   PointerMap             trampolineMap;
   int                    m_numNativeTrampolines;
-
-  TCA                    m_callToExit;
-  TCA                    m_retHelper;
-  TCA                    m_retInlHelper;
-  TCA                    m_genRetHelper;
-  TCA                    m_stackOverflowHelper;
-  TCA                    m_irPopRHelper;
-  TCA                    m_dtorGenericStub;
-  TCA                    m_dtorGenericStubRegs;
-  TCA                    m_dtorStubs[kDestrTableSize];
-  TCA                    m_defClsHelper;
-  TCA                    m_funcPrologueRedispatch;
-  TCA                    m_fcallArrayHelper;
-
-  TCA                    m_freeManyLocalsHelper;
-  TCA                    m_freeLocalsHelpers[kNumFreeLocalsHelpers];
 
   DataBlock              m_globalData;
 
@@ -245,7 +229,6 @@ public:
 
 private:
   TCA emitCallArrayPrologue(const Func* func, const DVFuncletsVec& dvs);
-  TCA emitPrologueRedispatch(Asm &a);
   TCA emitFuncGuard(Asm& a, const Func *f);
   void emitStackCheck(int funcDepth, Offset pc);
   void emitStackCheckDynamic(int numArgs, Offset pc);
@@ -341,22 +324,6 @@ private:
     smash(a, src, dest, true);
   }
 
-
-  ////////////////////////////////////////
-  //
-  // Unique long-lived stubs
-  //
-  ////////////////////////////////////////
-private:
-  template<int Arity> TCA emitNAryStub(Asm& a, CppCall c);
-  TCA emitUnaryStub(Asm& a, CppCall c);
-  void emitFreeLocalsHelpers();
-  void emitGenericDecRefHelpers();
-  void emitFCallArrayHelper();
-  TCA emitRetFromInterpretedFrame();
-  TCA emitRetFromInterpretedGeneratorFrame();
-  void emitPopRetIntoActRec(Asm& a);
-
 private:
   void drawCFG(std::ofstream& out) const;
 
@@ -390,22 +357,6 @@ public:
 
   TCA getTopTranslation(SrcKey sk) {
     return getSrcRec(sk)->getTopTranslation();
-  }
-
-  TCA getCallToExit() {
-    return m_callToExit;
-  }
-
-  TCA getRetFromInterpretedFrame() {
-    return m_retHelper;
-  }
-
-  TCA getRetFromInlinedFrame() {
-    return m_retInlHelper;
-  }
-
-  TCA getRetFromInterpretedGeneratorFrame() {
-    return m_genRetHelper;
   }
 
   inline bool isValidCodeAddress(TCA tca) const {

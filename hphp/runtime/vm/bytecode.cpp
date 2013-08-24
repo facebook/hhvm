@@ -1528,7 +1528,7 @@ void VMExecutionContext::enterVM(TypedValue* retval, ActRec* ar) {
   SCOPE_EXIT { assert(m_faults.size() == faultDepth); };
 
   m_firstAR = ar;
-  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx()->getCallToExit());
+  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx()->uniqueStubs.callToExit);
   assert(isReturnHelper(ar->m_savedRip));
 
   /*
@@ -2398,8 +2398,7 @@ bool VMExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   arSetSfp(ar, m_fp);
   ar->m_soff = uintptr_t(m_fp->m_func->unit()->offsetOf(pc) -
                          m_fp->m_func->base());
-  ar->m_savedRip =
-    reinterpret_cast<uintptr_t>(tx()->getRetFromInterpretedFrame());
+  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx()->uniqueStubs.retHelper);
   assert(isReturnHelper(ar->m_savedRip));
   pushLocalsAndIterators(func);
   if (!m_fp->hasVarEnv()) {
@@ -2656,7 +2655,7 @@ void VMExecutionContext::enterDebuggerDummyEnv() {
   ar->setThis(nullptr);
   ar->m_soff = 0;
   ar->m_savedRbp = 0;
-  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx()->getCallToExit());
+  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx()->uniqueStubs.callToExit);
   assert(isReturnHelper(ar->m_savedRip));
   m_fp = ar;
   m_pc = s_debuggerDummy->entry();
@@ -2692,9 +2691,11 @@ void VMExecutionContext::exitDebuggerDummyEnv() {
 // ActRec.
 bool VMExecutionContext::isReturnHelper(uintptr_t address) {
   auto tcAddr = reinterpret_cast<Transl::TCA>(address);
-  return ((tcAddr == tx()->getRetFromInterpretedFrame()) ||
-          (tcAddr == tx()->getRetFromInterpretedGeneratorFrame()) ||
-          (tcAddr == tx()->getCallToExit()));
+  auto& u = tx()->uniqueStubs;
+  return tcAddr == u.retHelper ||
+         tcAddr == u.genRetHelper ||
+         tcAddr == u.retInlHelper ||
+         tcAddr == u.callToExit;
 }
 
 // Walk the stack and find any return address to jitted code and bash it to
@@ -2713,11 +2714,10 @@ void VMExecutionContext::preventReturnsToTC() {
                  ar->m_func->fullName()->data());
         if (ar->m_func->isGenerator()) {
           ar->m_savedRip =
-            reinterpret_cast<uintptr_t>(
-              tx()->getRetFromInterpretedGeneratorFrame());
+            reinterpret_cast<uintptr_t>(tx()->uniqueStubs.genRetHelper);
         } else {
           ar->m_savedRip =
-            reinterpret_cast<uintptr_t>(tx()->getRetFromInterpretedFrame());
+            reinterpret_cast<uintptr_t>(tx()->uniqueStubs.retHelper);
         }
         assert(isReturnHelper(ar->m_savedRip));
       }
@@ -5708,7 +5708,7 @@ void VMExecutionContext::iopFPassM(PC& pc) {
 bool VMExecutionContext::doFCall(ActRec* ar, PC& pc) {
   assert(getOuterVMFrame(ar) == m_fp);
   ar->m_savedRip =
-    reinterpret_cast<uintptr_t>(tx()->getRetFromInterpretedFrame());
+    reinterpret_cast<uintptr_t>(tx()->uniqueStubs.retHelper);
   assert(isReturnHelper(ar->m_savedRip));
   TRACE(3, "FCall: pc %p func %p base %d\n", m_pc,
         m_fp->m_func->unit()->entry(),
@@ -5999,7 +5999,7 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
     assert(ar->m_savedRbp == (uint64_t)m_fp);
     assert(!ar->m_func->isGenerator());
     ar->m_savedRip =
-      reinterpret_cast<uintptr_t>(tx()->getRetFromInterpretedFrame());
+      reinterpret_cast<uintptr_t>(tx()->uniqueStubs.retHelper);
     assert(isReturnHelper(ar->m_savedRip));
     TRACE(3, "FCallArray: pc %p func %p base %d\n", m_pc,
           m_fp->unit()->entry(),
@@ -6745,7 +6745,7 @@ void VMExecutionContext::iopContEnter(PC& pc) {
   contAR->m_soff = m_fp->m_func->unit()->offsetOf(pc)
     - (uintptr_t)m_fp->m_func->base();
   contAR->m_savedRip =
-    reinterpret_cast<uintptr_t>(tx()->getRetFromInterpretedGeneratorFrame());
+    reinterpret_cast<uintptr_t>(tx()->uniqueStubs.genRetHelper);
   assert(isReturnHelper(contAR->m_savedRip));
 
   m_fp = contAR;

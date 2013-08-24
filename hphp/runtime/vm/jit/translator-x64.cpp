@@ -52,6 +52,7 @@
 #include "folly/Format.h"
 #include "folly/String.h"
 
+#include "hphp/util/abi-cxx.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/bitops.h"
 #include "hphp/util/debug.h"
@@ -67,6 +68,7 @@
 #include "hphp/util/repo-schema.h"
 #include "hphp/util/cycles.h"
 
+#include "hphp/runtime/vm/jit/unique-stubs-x64.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/php-debug.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -113,7 +115,7 @@ namespace Transl {
 using namespace reg;
 using namespace Util;
 using namespace Trace;
-using namespace JIT::CodeGenHelpersX64;
+using namespace JIT::X64;
 using std::max;
 
 #define TRANS_PERF_COUNTERS \
@@ -245,157 +247,6 @@ CppCall TranslatorX64::getDtorCall(DataType type) {
     assert(false);
     NOT_REACHED();
   }
-}
-
-/*
- * callDestructor/jumpDestructor --
- *
- * Emit a call or jump to the appropriate destructor for a dynamically
- * typed value.
- *
- * No registers are saved; most translated code should be using
- * emitDecRefGeneric{Reg,} instead of this.
- *
- *   Inputs:
- *
- *     - typeReg is destroyed and may not be argNumToRegName[0].
- *     - argNumToRegName[0] should contain the m_data for this value.
- *     - scratch is destoyed.
- */
-
-static IndexedMemoryRef lookupDestructor(X64Assembler& a,
-                                         PhysReg typeReg,
-                                         PhysReg scratch) {
-  assert(typeReg != r32(argNumToRegName[0]));
-  assert(scratch != argNumToRegName[0]);
-
-  static_assert((BitwiseKindOfString >> kShiftDataTypeToDestrIndex == 1) &&
-                (KindOfArray         >> kShiftDataTypeToDestrIndex == 2) &&
-                (KindOfObject        >> kShiftDataTypeToDestrIndex == 3) &&
-                (KindOfResource      >> kShiftDataTypeToDestrIndex == 4) &&
-                (KindOfRef           >> kShiftDataTypeToDestrIndex == 5),
-                "lookup of destructors depends on KindOf* values");
-
-  a.    shrl   (kShiftDataTypeToDestrIndex, r32(typeReg));
-  a.    movq   (&g_destructors, scratch);
-  return scratch[typeReg*8];
-}
-
-static void callDestructor(X64Assembler& a,
-                           PhysReg typeReg,
-                           PhysReg scratch) {
-  a.    call   (lookupDestructor(a, typeReg, scratch));
-}
-
-static void jumpDestructor(X64Assembler& a,
-                           PhysReg typeReg,
-                           PhysReg scratch) {
-  a.    jmp    (lookupDestructor(a, typeReg, scratch));
-}
-
-void TranslatorX64::emitGenericDecRefHelpers() {
-  Label release;
-
-  // m_dtorGenericStub just takes a pointer to the TypedValue in rdi.
-  moveToAlign(a, kNonFallthroughAlign);
-  m_irPopRHelper = a.frontier();
-  // popR: Move top-of-stack pointer to rdi
-  emitMovRegReg(a, rVmSp, rdi);
-  // fall through
-  m_dtorGenericStub = a.frontier();
-  emitLoadTVType(a, rdi[TVOFF(m_type)], r32(rAsm));
-  a.    loadq  (rdi[TVOFF(m_data)], rdi);
-  // Fall through to the regs stub.
-
-  /*
-   * Custom calling convention: m_type goes in rAsm, m_data in
-   * rdi.  We don't ever store program locations in rAsm, so the
-   * caller didn't need to spill anything.  The assembler sometimes
-   * uses rAsm, but we know the stub won't need to and it makes it
-   * possible to share the code for both decref helpers.
-   */
-  m_dtorGenericStubRegs = a.frontier();
-  a.    cmpl   (RefCountStaticValue, rdi[FAST_REFCOUNT_OFFSET]);
-  jccBlock<CC_Z>(a, [&] {
-    a.  decl   (rdi[FAST_REFCOUNT_OFFSET]);
-    release.jcc8(a, CC_Z);
-  });
-  a.    ret    ();
-
-asm_label(a, release);
-  {
-    PhysRegSaver prs(a, kGPCallerSaved - RegSet(rdi));
-    callDestructor(a, rAsm, rax);
-    m_fixupMap.recordIndirectFixup(a.frontier(), prs.rspTotalAdjustmentRegs());
-  }
-  a.    ret    ();
-
-  TRACE(1, "HOTSTUB: generic dtor start: %lx\n",
-        uintptr_t(m_irPopRHelper));
-  TRACE(1, "HOTSTUB: genericDtorStub: %lx\n", uintptr_t(m_dtorGenericStub));
-  TRACE(1, "HOTSTUB: genericDtorStubRegs: %lx\n",
-        uintptr_t(m_dtorGenericStubRegs));
-  TRACE(1, "HOTSTUB: total dtor generic stubs %zu bytes\n",
-        size_t(a.frontier() - m_dtorGenericStub));
-}
-
-void TranslatorX64::emitFCallArrayHelper() {
-  moveToAlign(a, kNonFallthroughAlign);
-  m_fcallArrayHelper = a.frontier();
-
-  // NOTE: we're assuming we don't need to save registers, because we
-  // don't ever have live registers across php-level calls.
-
-  Label noCallee;
-
-  auto const rPCOff  = argNumToRegName[0];
-  auto const rPCNext = argNumToRegName[1];
-  auto const rBC     = r13;
-  auto const rEC     = r15;
-
-  auto const spOff = offsetof(VMExecutionContext, m_stack) +
-                       Stack::topOfStackOffset();
-  auto const fpOff = offsetof(VMExecutionContext, m_fp);
-  auto const pcOff = offsetof(VMExecutionContext, m_pc);
-
-  emitGetGContext(a, rEC);
-  a.    storeq (rVmFp, rEC[fpOff]);
-  a.    storeq (rVmSp, rEC[spOff]);
-
-  // rBC := fp -> m_func -> m_unit -> m_bc
-  a.    loadq  (rVmFp[AROFF(m_func)], rBC);
-  a.    loadq  (rBC[Func::unitOff()], rBC);
-  a.    loadq  (rBC[Unit::bcOff()],   rBC);
-  // Convert offsets into PC's and sync the PC
-  a.    addq   (rBC,    rPCOff);
-  a.    storeq (rPCOff, rEC[pcOff]);
-  a.    addq   (rBC,    rPCNext);
-
-  a.    subq   (8, rsp);  // stack parity
-
-  a.    movq   (rEC, argNumToRegName[0]);
-  assert(rPCNext == argNumToRegName[1]);
-  a.    call   (TCA(getMethodPtr(&VMExecutionContext::doFCallArrayTC)));
-
-  a.    loadq  (rEC[spOff], rVmSp);
-
-  a.    testq  (rax, rax);
-  a.    jz8    (noCallee);
-
-  a.    addq   (8, rsp);
-  a.    loadq  (rEC[fpOff], rVmFp);
-  a.    pop    (rVmFp[AROFF(m_savedRip)]);
-  a.    loadq  (rVmFp[AROFF(m_func)], rax);
-  a.    loadq  (rax[Func::funcBodyOff()], rax);
-  a.    jmp    (rax);
-
-asm_label(a, noCallee);
-  a.    addq   (8, rsp);
-  a.    ret    ();
-
-  FTRACE(1, "HOTSTUB: fcallArrayHelper: {} - {} bytes\n",
-         static_cast<void*>(m_fcallArrayHelper),
-         static_cast<size_t>(a.frontier() - m_fcallArrayHelper));
 }
 
 bool TranslatorX64::profileSrcKey(const SrcKey& sk) const {
@@ -764,8 +615,7 @@ TranslatorX64::emitStackCheck(int funcDepth, Offset pc) {
   a.    mov_reg64_reg64(rVmSp, rAsm); // copy to destroy
   a.    and_imm64_reg64(stackMask, rAsm);
   a.    sub_imm64_reg64(funcDepth + Stack::sSurprisePageSize, rAsm);
-  assert(m_stackOverflowHelper);
-  a.    jl(m_stackOverflowHelper); // Unlikely branch to failure.
+  a.    jl(uniqueStubs.stackOverflowHelper); // Unlikely branch to failure.
   // Success.
 }
 
@@ -951,70 +801,6 @@ TranslatorX64::getCallArrayPrologue(Func* func) {
   return tca;
 }
 
-TCA
-TranslatorX64::emitPrologueRedispatch(X64Assembler& a) {
-  TCA retval;
-  moveToAlign(a);
-  retval = a.frontier();
-  TRACE(1, "HOTSTUB: emitPrologueRedispatch: %lx\n", uintptr_t(a.frontier()));
-
-  // We're in the wrong func prologue.
-
-  assert(kScratchCrossTraceRegs.contains(rax));
-  assert(kScratchCrossTraceRegs.contains(rdx));
-  assert(kScratchCrossTraceRegs.contains(rcx));
-
-  //    Get the called func in rax
-  a.    load_reg64_disp_reg64(rStashedAR, AROFF(m_func), rax);
-  //    Get the number of passed parameters in rdx
-  a.    load_reg64_disp_reg32(rStashedAR, AROFF(m_numArgsAndCtorFlag), rdx);
-  a.    and_imm32_reg32(0x7fffffff, rdx);
-  //    Get the number of declared parameters in rcx
-  a.    load_reg64_disp_reg32(rax, Func::numParamsOff(), rcx);
-
-  // If we didn't pass too many args, directly dereference
-  // func->m_prologues.
-  a.    cmp_reg32_reg32(rdx, rcx);
-  TCA bToFixedProloguesCheck = a.frontier();
-  a.    jcc8(CC_L, bToFixedProloguesCheck);
-
-  //   cmp $kNumFixedPrologues, %rdx
-  //   jl numParamsCheck
-  TCA actualDispatch = a.frontier();
-
-  // rcx: prologueIdx
-  // rax = func->prologues[numParams]
-  // jmp rax
-  a.    loadq  (rax[rdx*8 + Func::prologueTableOff()], rax);
-  a.    jmp    (rax);
-  a.    ud2    ();
-
-  // Hmm, more parameters passed than the function expected. Did we pass
-  // kNumFixedPrologues or more? If not, %rdx is still a perfectly
-  // legitimate index into the func prologue table.
-  // numParamsCheck:
-  //    cmp $kNumFixedPrologues, %rcx
-  //    jl  dispatch
-  a.patchJcc8(bToFixedProloguesCheck, a.frontier()); // numParamsCheck:
-  a.    cmp_imm32_reg32(kNumFixedPrologues, rdx);
-  a.    jcc8(CC_L, actualDispatch);
-
-  // Too many gosh-darned parameters passed. Go to numExpected + 1, which
-  // is always a "too many params" entry point.
-  //
-  //    mov %rdx, %rcx
-  //    add $1, %rcx
-  //    jmp dispatch
-  a.    load_reg64_disp_index_reg64(rax,
-                                    // %rcx + 1
-                                    Func::prologueTableOff() + sizeof(TCA),
-                                    rcx,
-                                    rax);
-  a.    jmp(rax);
-  a.    ud2();
-  return retval;
-}
-
 // The funcGuard gets skipped and patched by other code, so we have some
 // magic offsets.
 static const int kFuncMovImm = 6; // Offset to the immediate for 8 byte Func*
@@ -1135,9 +921,10 @@ TranslatorX64::emitFuncGuard(X64Assembler& a, const Func* func) {
     a.    cmp_imm32_disp_reg32(uint64_t(func), AROFF(m_func), rStashedAR);
   }
 
-  assert(m_funcPrologueRedispatch);
+  assert(uniqueStubs.funcPrologueRedispatch);
 
-  a.    jnz(m_funcPrologueRedispatch);
+  a.    jnz(uniqueStubs.funcPrologueRedispatch);
+
   assert(funcPrologueToGuard(a.frontier(), func) == aStart);
   assert(funcPrologueHasGuard(a.frontier(), func));
   return a.frontier();
@@ -1187,12 +974,6 @@ TranslatorX64::checkCachedPrologue(const Func* func, int paramIdx,
     return true;
   }
   return false;
-}
-
-// pops the return address pushed by fcall and stores it into the actrec
-void
-TranslatorX64::emitPopRetIntoActRec(Asm& a) {
-  a.    pop  (rStashedAR[AROFF(m_savedRip)]);
 }
 
 static void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {
@@ -1914,46 +1695,6 @@ TranslatorX64::checkRefs(X64Assembler& a,
   }
 }
 
-/*
- * emitRetFromInterpretedFrame --
- *
- *   When the interpreter pushes a call frame, there is necessarily no
- *   machine RIP available to return to. This helper fishes out the
- *   destination from the frame and redirects execution to it via enterTC.
- */
-TCA
-TranslatorX64::emitRetFromInterpretedFrame() {
-  int32_t arBase = sizeof(ActRec) - sizeof(Cell);
-  moveToAlign(astubs);
-  TCA stub = astubs.frontier();
-  // Marshall our own args by hand here.
-  astubs.   lea  (rVmSp[-arBase], serviceReqArgRegs[0]);
-  astubs.   movq (rVmFp, serviceReqArgRegs[1]);
-  emitServiceReq(astubs, JIT::SRFlags::JmpInsteadOfRet,
-                 JIT::REQ_POST_INTERP_RET);
-  return stub;
-}
-
-/*
- * Same as above, except has different logic for fetching the AR we are trying
- * to return from, because generators have ARs in different places.
- */
-TCA
-TranslatorX64::emitRetFromInterpretedGeneratorFrame() {
-  // We have to get the Continuation object from the current AR's $this, then
-  // find where its embedded AR is.
-  moveToAlign(astubs);
-  TCA stub = astubs.frontier();
-
-  PhysReg rContAR = serviceReqArgRegs[0];
-  astubs.    loadq (rVmFp[AROFF(m_this)], rContAR);
-  astubs.    loadq (rContAR[CONTOFF(m_arPtr)], rContAR);
-  astubs.    movq  (rVmFp, serviceReqArgRegs[1]);
-  emitServiceReq(astubs, JIT::SRFlags::JmpInsteadOfRet,
-                 JIT::REQ_POST_INTERP_RET);
-  return stub;
-}
-
 class FreeRequestStubTrigger : public Treadmill::WorkItem {
   TCA m_stub;
  public:
@@ -2325,9 +2066,9 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
       vmsp() = (Cell*)((ActRec*)info.saved_rStashedAr + 1);
       throw VMReenterStackOverflow();
     }
-  case JIT::REQ_EXIT: {
+
+  case JIT::REQ_EXIT:
     not_reached();
-  }
   }
 
   if (smashed && info.stubAddr) {
@@ -2531,7 +2272,7 @@ TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
   TCA trampAddr = a.frontier();
   if (Stats::enabled()) {
     Stats::emitInc(a, &Stats::tl_helper_counters[0], index);
-    char* name = Util::getNativeFunctionName(helperAddr);
+    char* name = getNativeFunctionName(helperAddr);
     const size_t limit = 50;
     if (strlen(name) > limit) {
       name[limit] = '\0';
@@ -2546,7 +2287,7 @@ TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
    * jumping.)
    */
   auto DEBUG_ONLY stubUsingRScratch = [&](TCA tca) {
-    return tca == m_dtorGenericStubRegs;
+    return tca == uniqueStubs.dtorGenericStubRegs;
   };
 
   assert(IMPLIES(stubUsingRScratch(helperAddr), a.jmpDeltaFits(helperAddr)));
@@ -2568,20 +2309,6 @@ TranslatorX64::getNativeTrampoline(TCA helperAddr) {
     return trampAddr;
   }
   return emitNativeTrampoline(helperAddr);
-}
-
-static void defClsHelper(PreClass *preClass) {
-  assert(tl_regState == VMRegState::DIRTY);
-  tl_regState = VMRegState::CLEAN;
-  Unit::defClass(preClass);
-
-  /*
-   * m_defClsHelper sync'd the registers for us already.  This means
-   * if an exception propagates we want to leave things as
-   * VMRegState::CLEAN, since we're still in sync.  Only set it to dirty
-   * if we are actually returning to run in the TC again.
-   */
-  tl_regState = VMRegState::DIRTY;
 }
 
 template <typename T>
@@ -3058,94 +2785,8 @@ void TranslatorX64::traceCodeGen() {
   m_numHHIRTrans++;
 }
 
-/*
- * Defines functions called by emitGenericReturn, and
- * cgGenericRetDecRefs.
- */
-void TranslatorX64::emitFreeLocalsHelpers() {
-  Label doRelease;
-  Label release;
-  Label loopHead;
-
-  /*
-   * Note: the IR currently requires that we preserve r13/r14 across
-   * calls to these free locals helpers.
-   */
-  static_assert(rVmSp == rbx, "");
-  auto const rIter     = rbx;
-  auto const rFinished = r15;
-  auto const rType     = esi;
-  auto const rData     = rdi;
-
-  moveToAlign(a, kNonFallthroughAlign);
-
-  TRACE(1, "HOTSTUB: freeLocalsHelpers starts %lx\n", uintptr_t(a.frontier()));
-
-asm_label(a, release);
-  a.    loadq  (rIter[TVOFF(m_data)], rData);
-  a.    cmpl   (RefCountStaticValue, rData[FAST_REFCOUNT_OFFSET]);
-  jccBlock<CC_Z>(a, [&] {
-    a.  decl   (rData[FAST_REFCOUNT_OFFSET]);
-    a.  jz8    (doRelease);
-  });
-  a.    ret    ();
-asm_label(a, doRelease);
-  jumpDestructor(a, PhysReg(rType), rax);
-
-  moveToAlign(a);
-  m_freeManyLocalsHelper = a.frontier();
-  a.    lea    (rVmFp[-cellsToBytes(kNumFreeLocalsHelpers)], rFinished);
-
-  auto emitDecLocal = [&] {
-    Label skipDecRef;
-
-    emitLoadTVType(a, rIter[TVOFF(m_type)], rType);
-    emitCmpTVType(a, KindOfRefCountThreshold, rType);
-    a.  jle8   (skipDecRef);
-    a.  call   (release);
-    m_fixupMap.recordIndirectFixup(a.frontier(), 0);
-  asm_label(a, skipDecRef);
-  };
-
-  // Loop for the first few locals, but unroll the final
-  // kNumFreeLocalsHelpers.
-asm_label(a, loopHead);
-  emitDecLocal();
-  a.    addq   (sizeof(TypedValue), rIter);
-  a.    cmpq   (rIter, rFinished);
-  a.    jnz8   (loopHead);
-
-  for (int i = 0; i < kNumFreeLocalsHelpers; ++i) {
-    m_freeLocalsHelpers[kNumFreeLocalsHelpers - i - 1] = a.frontier();
-    TRACE(1, "HOTSTUB: m_freeLocalsHelpers[%d] = %p\n",
-          kNumFreeLocalsHelpers - i - 1, a.frontier());
-    emitDecLocal();
-    if (i != kNumFreeLocalsHelpers - 1) {
-      a.addq (sizeof(TypedValue), rIter);
-    }
-  }
-
-  a.    addq   (AROFF(m_r) + sizeof(TypedValue), rVmSp);
-  a.    ret    (8);
-
-  TRACE(1, "STUB freeLocals helpers: %zu bytes\n",
-           size_t(a.frontier() - m_freeManyLocalsHelper));
-}
-
 TranslatorX64::TranslatorX64()
   : m_numNativeTrampolines(0)
-  , m_callToExit(nullptr)
-  , m_retHelper(nullptr)
-  , m_retInlHelper(nullptr)
-  , m_genRetHelper(nullptr)
-  , m_stackOverflowHelper(nullptr)
-  , m_irPopRHelper(nullptr)
-  , m_dtorGenericStub(nullptr)
-  , m_dtorGenericStubRegs(nullptr)
-  , m_dtorStubs{}
-  , m_defClsHelper(nullptr)
-  , m_funcPrologueRedispatch(nullptr)
-  , m_fcallArrayHelper(nullptr)
   , m_numHHIRTrans(0)
   , m_catchTraceMap(128)
 {
@@ -3273,7 +2914,7 @@ TranslatorX64::TranslatorX64()
   assert(base - tcStart <= allocationSize);
   assert(base - tcStart + kRoundUp > allocationSize);
 
-  // put the stubs into ahot, rather than a
+  // Put the following stubs into ahot, rather than a.
   AsmSelector asmSel(AsmSelector::Args(this).hot(true));
 
   // Emit some special helpers that are shared across translations.
@@ -3283,98 +2924,7 @@ TranslatorX64::TranslatorX64()
   // it with m_callToExit - 1 as the start address.
   astubs.emitNop(1);
 
-  // Call to exit with whatever value the program leaves on
-  // the return stack.
-  m_callToExit =
-    emitServiceReq(astubs,
-                   JIT::SRFlags::Align | JIT::SRFlags::JmpInsteadOfRet,
-                   JIT::REQ_EXIT);
-
-  /*
-   * Helpers for returning from a function where the ActRec was pushed
-   * by the interpreter.
-   */
-  m_retHelper = emitRetFromInterpretedFrame();
-  m_genRetHelper = emitRetFromInterpretedGeneratorFrame();
-
-  /*
-   * Returning from a function where the ActRec was pushed by an
-   * inlined call.  This is separate from m_retHelper just for
-   * debugability---it does the same thing.
-   */
-  m_retInlHelper = emitRetFromInterpretedFrame();
-  FTRACE(1, "retInlHelper: {}\n", (void*)m_retInlHelper);
-
-  moveToAlign(astubs);
-  m_resumeHelperRet = astubs.frontier();
-  emitPopRetIntoActRec(astubs);
-  m_resumeHelper = astubs.frontier();
-  emitGetGContext(astubs, rax);
-  astubs.   load_reg64_disp_reg64(rax, offsetof(VMExecutionContext, m_fp),
-                                       rVmFp);
-  astubs.   load_reg64_disp_reg64(rax, offsetof(VMExecutionContext, m_stack) +
-                                       Stack::topOfStackOffset(), rVmSp);
-  emitServiceReq(astubs, JIT::REQ_RESUME);
-
-  // Helper for DefCls, in astubs.
-  {
-    auto& a = astubs;
-    if (false) {
-      PreClass *preClass = 0;
-      defClsHelper(preClass);
-    }
-    m_defClsHelper = TCA(a.frontier());
-    PhysReg rEC = argNumToRegName[2];
-    emitGetGContext(a, rEC);
-    a.   storeq (rVmFp, rEC[offsetof(VMExecutionContext, m_fp)]);
-    a.   storeq (argNumToRegName[1],
-                    rEC[offsetof(VMExecutionContext, m_pc)]);
-    a.   storeq (rax, rEC[offsetof(VMExecutionContext, m_stack) +
-                      Stack::topOfStackOffset()]);
-    a.   jmp    (TCA(defClsHelper));
-  }
-
-  // The decRef helper for when we bring the count down to zero. Callee needs to
-  // bring the value into rdi. These can be burned in for all time, and for all
-  // translations.
-  typedef void* vp;
-
-  TCA strDtor, arrDtor, objDtor, resDtor, refDtor;
-  strDtor = emitUnaryStub(astubs, CppCall(getMethodPtr(&StringData::release)));
-  arrDtor = emitUnaryStub(astubs,
-                          CppCall(getVTableOffset(&HphpArray::release)));
-  objDtor = emitUnaryStub(astubs, CppCall(getMethodPtr(&ObjectData::release)));
-  resDtor = emitUnaryStub(astubs,
-                          CppCall(getMethodPtr(&ResourceData::release)));
-  refDtor = emitUnaryStub(astubs, CppCall(vp(getMethodPtr(&RefData::release))));
-
-  m_dtorStubs[0] = nullptr;
-  m_dtorStubs[typeToDestrIndex(BitwiseKindOfString)] = strDtor;
-  m_dtorStubs[typeToDestrIndex(KindOfArray)]         = arrDtor;
-  m_dtorStubs[typeToDestrIndex(KindOfObject)]        = objDtor;
-  m_dtorStubs[typeToDestrIndex(KindOfResource)]      = resDtor;
-  m_dtorStubs[typeToDestrIndex(KindOfRef)]           = refDtor;
-
-  // Hot helper stubs in A:
-  emitGenericDecRefHelpers();
-  emitFreeLocalsHelpers();
-  m_funcPrologueRedispatch = emitPrologueRedispatch(a);
-  emitFCallArrayHelper();
-  TRACE(1, "HOTSTUB: all stubs finished: %lx\n",
-        uintptr_t(a.frontier()));
-
-  moveToAlign(astubs);
-  m_stackOverflowHelper = astubs.frontier();
-  // We are called from emitStackCheck, with the new stack frame in
-  // rStashedAR. Get the caller's PC into rdi and save it off.
-  astubs.    load_reg64_disp_reg64(rVmFp, AROFF(m_func), rax);
-  astubs.    load_reg64_disp_reg32(rStashedAR, AROFF(m_soff), rdi);
-  astubs.    load_reg64_disp_reg64(rax, Func::sharedOffset(), rax);
-  astubs.    load_reg64_disp_reg32(rax, Func::sharedBaseOffset(), rax);
-  astubs.    add_reg32_reg32(rax, rdi);
-  emitEagerVMRegSave(astubs,
-                     JIT::RegSaveFlags::SaveFP | JIT::RegSaveFlags::SavePC);
-  emitServiceReq(astubs, JIT::REQ_STACK_OVERFLOW);
+  uniqueStubs = JIT::X64::emitUniqueStubs();
 }
 
 // do gdb specific initialization. This has to happen after
@@ -3386,16 +2936,19 @@ void TranslatorX64::initGdb() {
   // returnRIP-1, since the AR was set up manually. For this frame,
   // record the tracelet address as starting from callToExit-1, so gdb
   // does not barf
-  recordGdbStub(astubs, m_callToExit - 1, "HHVM::callToExit");
+  recordGdbStub(astubs, uniqueStubs.callToExit - 1, "HHVM::callToExit");
 
-  recordBCInstr(OpRetFromInterp, astubs, m_retHelper);
-  recordGdbStub(astubs, m_retHelper - 1, "HHVM::retHelper");
-  recordBCInstr(OpResumeHelper, astubs, m_resumeHelper);
-  recordBCInstr(OpDefClsHelper, astubs, m_defClsHelper);
+  // TODO: move all this to unique-stubs and make it make sense.
+
+  recordBCInstr(OpRetFromInterp, astubs, uniqueStubs.retHelper);
+  recordGdbStub(astubs, uniqueStubs.retHelper - 1, "HHVM::retHelper");
+  recordBCInstr(OpResumeHelper, astubs, uniqueStubs.resumeHelper);
+  recordBCInstr(OpDefClsHelper, astubs, uniqueStubs.defClsHelper);
   recordBCInstr(OpDtorStub, astubs,
-                m_dtorStubs[typeToDestrIndex(BitwiseKindOfString)]);
-  recordGdbStub(astubs, m_dtorStubs[typeToDestrIndex(BitwiseKindOfString)],
-                        "HHVM::destructorStub");
+                uniqueStubs.dtorStubs[typeToDestrIndex(BitwiseKindOfString)]);
+  recordGdbStub(astubs,
+                uniqueStubs.dtorStubs[typeToDestrIndex(BitwiseKindOfString)],
+                "HHVM::destructorStub");
 }
 
 TranslatorX64*
@@ -3413,59 +2966,6 @@ TranslatorX64::Get() {
   }
   assert(tx64);
   return tx64;
-}
-
-template<int Arity>
-TCA TranslatorX64::emitNAryStub(X64Assembler& a, CppCall c) {
-  static_assert(Arity < kNumRegisterArgs, "");
-
-  // The callNAryStub has already saved these regs on a.
-  RegSet alreadySaved;
-  for (size_t i = 0; i < Arity; ++i) {
-    alreadySaved |= RegSet(argNumToRegName[i]);
-  }
-
-  /*
-   * We've made a call instruction, and pushed Arity args on the
-   * stack.  So the stack address will be odd coming into the stub if
-   * Arity + 1 (for the call) is odd.  We need to correct for this
-   * when saving other registers below to keep SSE-friendly alignment
-   * of the stack.
-   */
-  const int Parity = (Arity + 1) % 2;
-
-  // These dtor stubs are meant to be called with the call
-  // instruction, unlike most translator code.
-  moveToAlign(a);
-  TCA start = a.frontier();
-  /*
-   * Preserve most caller-saved regs. The calling code has already
-   * preserved regs in `alreadySaved'; we push the rest of the caller
-   * saved regs and rbp.  It should take 9 qwords in total, and the
-   * incoming call instruction made it 10.  This is an even number of
-   * pushes, so we preserve the SSE-friendliness of our execution
-   * environment (without real intervention from PhysRegSaverParity).
-   *
-   * Note that we don't need to clean all registers because the only
-   * reason we could need those locations written back is if stack
-   * unwinding were to happen.  These stubs can re-enter due to user
-   * destructors, but exceptions are not allowed to propagate out of
-   * those, so it's not a problem.
-   */
-  a.    push (rbp); // {
-  a.    movq (rsp, rbp);
-  {
-    RegSet s = kGPCallerSaved - alreadySaved;
-    PhysRegSaverParity rs(Parity, a, s);
-    emitCall(a, c);
-  }
-  a.    pop  (rbp);  // }
-  a.    ret  ();
-  return start;
-}
-
-TCA TranslatorX64::emitUnaryStub(X64Assembler& a, CppCall c) {
-  return emitNAryStub<1>(a, c);
 }
 
 void TranslatorX64::registerCatchTrace(CTCA ip, TCA trace) {
@@ -3763,7 +3263,7 @@ bool TranslatorX64::dumpTCCode(const char* filename) {
         iter++) {
       void* helperAddr = iter->first;
       void* trampAddr = iter->second;
-      char* functionName = Util::getNativeFunctionName(helperAddr);
+      char* functionName = getNativeFunctionName(helperAddr);
       fprintf(helperAddrFile,"%10p %10p %s\n",
               trampAddr, helperAddr,
               functionName);

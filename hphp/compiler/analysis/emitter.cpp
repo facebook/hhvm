@@ -6354,6 +6354,7 @@ void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   auto const nullable = td->annot->isNullable();
   auto const valueStr = td->annot->stripNullable().vanillaName();
   auto const kind =
+    td->annot->stripNullable().isFunction()  ? KindOfAny :
     td->annot->stripNullable().isMixed()     ? KindOfAny :
     !strcasecmp(valueStr.c_str(), "array")   ? KindOfArray :
     !strcasecmp(valueStr.c_str(), "int")     ? KindOfInt64 :

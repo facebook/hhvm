@@ -113,18 +113,10 @@ PosType SimpleArrayStore::find(int64_t key, uint length) const {
 PosType SimpleArrayStore::find(const StringData* key, uint length) const {
   // glorious linear find
   assert(key && m_keys && length <= m_capacity);
-  auto const d0 = key->data();
-  auto const sz = key->size();
   for (uint i = 0; i < length; ++i) {
     if (!hasStrKey(toPos(i))) continue;
     auto const k = m_keys[i].s;
-    if (key == k) return toPos(i);
-    assert(k);
-    if (sz != k->size()) continue;
-    auto const data = k->data();
-    if (d0 == data) return toPos(i);
-    assert(d0 && data);
-    if (memcmp(d0, data, sz) == 0) return toPos(i);
+    if (key == k || key->same(k)) return toPos(i);
   }
   return PosType::invalid;
 }

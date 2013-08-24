@@ -315,8 +315,8 @@ public:
     if (len != s->m_len) return false;
     // The underlying buffer and its length are 32-bit aligned, ensured by
     // StringData layout, smart_malloc, or malloc.  So compare words.
-    auto p1 = (uint32_t*) rawdata();
-    auto p2 = (uint32_t*) s->rawdata();
+    auto p1 = reinterpret_cast<const uint32_t*>(rawdata());
+    auto p2 = reinterpret_cast<const uint32_t*>(s->rawdata());
     auto constexpr W = sizeof(*p1);
     for (auto end = p1 + len / W; p1 < end; p1++, p2++) {
       if (*p1 != *p2) return false;
@@ -326,7 +326,9 @@ public:
     // bytes after the 0, then compare.
     auto shift = 8 * (W - 1) - 8 * (len % W);
     return (*p1 << shift) == (*p2 << shift);
-    static_assert(offsetof(StringData,m_small)%8 == 4, "");
+    // if the offset of m_small becomes 8-byte aligned, then we should
+    // take advantage by changing the p1&p2 from uint32_t to uint64_t.
+    static_assert(offsetof(StringData,m_small) % 8 == 4, "");
   }
 
   bool isame(const StringData *s) const {

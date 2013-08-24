@@ -818,9 +818,7 @@ bool StringData::equal(const StringData *s) const {
       return ret == 0;
     }
   }
-  if (m_len != s->m_len) return false;
-  ret = memcmp(rawdata(), s->rawdata(), m_len);
-  return ret == 0;
+  return same(s);
 }
 
 HOT_FUNC

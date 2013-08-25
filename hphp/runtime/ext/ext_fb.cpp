@@ -35,7 +35,7 @@
 #include "unicode/utf8.h"
 #include "hphp/runtime/base/file-repository.h"
 
-#include "hphp/util/parser/parser.h"
+#include "hphp/parser/parser.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(fb);

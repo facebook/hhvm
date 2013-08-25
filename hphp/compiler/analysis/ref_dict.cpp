@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/compiler/analysis/ref_dict.h"
 #include "hphp/compiler/analysis/alias_manager.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/compiler/analysis/ref_dict.h"
 
 #include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/expression/assignment_expression.h"
@@ -29,7 +29,7 @@
 #include "hphp/compiler/statement/method_statement.h"
 #include "hphp/compiler/statement/statement_list.h"
 
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 
 using namespace HPHP;
 using std::vector;
@@ -74,10 +74,10 @@ void RefDict::visit(ExpressionPtr e) {
   SimpleVariablePtr ptr(static_pointer_cast<SimpleVariable>(e));
 
   if (ptr->isSuperGlobal() || ptr->isThis()) {
-    // don't both recording for super globals or this 
+    // don't both recording for super globals or this
     return;
   }
-  
+
   // Good to go
   if (m_am.insertForDict(e)) {
     record(e);
@@ -129,7 +129,7 @@ void RefDict::updateParams() {
         bool isRef;
         if (sym->isParameter()) {
           ExpressionListPtr methodParams = m_method_stmt->getParams();
-          ExpressionPtr paramExprPtr = 
+          ExpressionPtr paramExprPtr =
               (*methodParams)[sym->getParameterIndex()];
           paramType = paramExprPtr->getType();
           isRef = m_method_stmt->isRef(sym->getParameterIndex());
@@ -160,7 +160,7 @@ void RefDict::updateParams() {
 
 void RefDict::updateAccess(ExpressionPtr e) {
   always_assert(!e->getScope()->inPseudoMain());
-  
+
   int eid     = e->getCanonID();
   int context = e->getContext();
 
@@ -204,7 +204,7 @@ void RefDict::updateAccess(ExpressionPtr e) {
              context & Expression::UnsetContext) {
     BitOps::set_bit(eid, m_referenced, false);
     BitOps::set_bit(eid, m_killed, true);
-  } 
+  }
 
   if (first_pass) return;
 
@@ -215,7 +215,7 @@ void RefDict::updateAccess(ExpressionPtr e) {
     // we dealt with this node as a store expression
     return;
   }
-  
+
   int cls = e->getExprClass();
 
   bool isRhsNeeded = false;
@@ -227,7 +227,7 @@ void RefDict::updateAccess(ExpressionPtr e) {
   if (cls & Expression::Store) {
     // we care about two cases here
     switch (e->getKindOf()) {
-      case Expression::KindOfAssignmentExpression: 
+      case Expression::KindOfAssignmentExpression:
         // $x = ...
         {
           AssignmentExpressionPtr assign(
@@ -254,7 +254,7 @@ void RefDict::updateAccess(ExpressionPtr e) {
         break;
     }
   }
-  
+
   bool isLhsSimpleVar = false;
   bool isLhsDynamic   = false;
   bool isRefd         = false;
@@ -343,20 +343,20 @@ void RefDict::updateAccess(ExpressionPtr e) {
       // unset($x);
       BitOps::set_bit(eid, m_obj, false);
       BitOps::set_bit(eid, m_noobj, true);
-    } else if (isRefd || 
+    } else if (isRefd ||
         ((context & Expression::Declaration) == Expression::Declaration)) {
       // if a simple variable has isRefd, then we need to mark it
       // as potentially containing an object.
-      // also, if the simple variable is in global context 
+      // also, if the simple variable is in global context
       // then we also mark it as potentially containing an object
       BitOps::set_bit(eid, m_obj, true);
       BitOps::set_bit(eid, m_noobj, false);
-    }  
+    }
   }
 
   if (isRefd) {
-    // do a scan for every simple variable referenced value 
-    // in the dictionary and mark it as potentially 
+    // do a scan for every simple variable referenced value
+    // in the dictionary and mark it as potentially
     // containing an object (in the bit vector)
     for (int i = size(); i--; ) {
       if (ExpressionPtr e = get(i)) {
@@ -372,7 +372,7 @@ void RefDict::updateAccess(ExpressionPtr e) {
 }
 
 int RefDictWalker::after(ConstructRawPtr cp) {
-  if (SimpleVariableRawPtr s = 
+  if (SimpleVariableRawPtr s =
       boost::dynamic_pointer_cast<SimpleVariable>(cp)) {
     if (int id = s->getCanonID()) {
       if (first_pass) {

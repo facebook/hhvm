@@ -22,7 +22,7 @@ SET(USE_HHVM TRUE)
 SET(ENV{HHVM} 1)
 ADD_DEFINITIONS("-DHHVM -DHHVM_BINARY=1 -DHHVM_PATH=\\\"${HPHP_HOME}/hphp/hhvm/hhvm\\\"")
 
-set(RECURSIVE_SOURCE_SUBDIRS runtime/base runtime/debugger runtime/eval runtime/ext runtime/server runtime/vm util zend neo)
+set(RECURSIVE_SOURCE_SUBDIRS runtime/base runtime/debugger runtime/eval runtime/ext runtime/server runtime/vm util zend neo parser)
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
 
 	auto_sources(files "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/${dir}")

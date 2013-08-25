@@ -78,7 +78,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/util.h"
 #include "hphp/util/job-queue.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/as.h"

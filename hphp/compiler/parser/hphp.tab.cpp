@@ -79,7 +79,7 @@
 #line 1 "hphp.y"
 
 #ifdef XHPAST2_PARSER
-#include "hphp/util/parser/xhpast2/parser.h"
+#include "hphp/parser/xhpast2/parser.h"
 #else
 #include "hphp/compiler/parser/parser.h"
 #endif

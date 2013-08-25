@@ -34,7 +34,7 @@
 #include "hphp/runtime/vm/func-inline.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/util/parser/parser.h"
+#include "hphp/parser/parser.h"
 
 namespace HPHP {
 

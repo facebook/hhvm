@@ -47,7 +47,7 @@
 
 #include "hphp/runtime/base/complex-types.h"
 
-#include "hphp/util/parser/parser.h"
+#include "hphp/parser/parser.h"
 #include "hphp/util/util.h"
 
 using namespace HPHP;

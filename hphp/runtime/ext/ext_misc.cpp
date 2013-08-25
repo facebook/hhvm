@@ -26,7 +26,7 @@
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/util/parser/scanner.h"
+#include "hphp/parser/scanner.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -346,7 +346,7 @@ String f_token_name(int64_t token) {
 #endif
 #define YYTOKEN(num, name) #name
 #define YYTOKEN_MAP static const char *names[] =
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 #undef YYTOKEN_MAP
 #undef YYTOKEN
 

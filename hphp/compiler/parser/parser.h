@@ -18,7 +18,7 @@
 #define incl_HPHP_COMPILER_PARSER_H_
 
 #include "hphp/runtime/base/exceptions.h"
-#include "hphp/util/parser/parser.h"
+#include "hphp/parser/parser.h"
 #include "hphp/compiler/construct.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/type_annotation.h"

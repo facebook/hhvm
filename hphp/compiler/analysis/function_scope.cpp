@@ -36,7 +36,7 @@
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/zend-string.h"
 

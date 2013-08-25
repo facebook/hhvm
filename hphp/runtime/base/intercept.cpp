@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/event-hook.h"
 
-#include "hphp/util/parser/parser.h"
+#include "hphp/parser/parser.h"
 #include "hphp/util/lock.h"
 
 #include "hphp/runtime/base/file-repository.h"

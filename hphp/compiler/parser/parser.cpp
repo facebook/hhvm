@@ -18,7 +18,7 @@
 #include <boost/make_shared.hpp>
 
 #include "hphp/compiler/type_annotation.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 #include "hphp/compiler/analysis/file_scope.h"
 
 #include "hphp/compiler/expression/expression_list.h"

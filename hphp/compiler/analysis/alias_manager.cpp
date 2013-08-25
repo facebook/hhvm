@@ -68,8 +68,8 @@
 
 #include "hphp/runtime/base/builtin-functions.h"
 
-#include "hphp/util/parser/hphp.tab.hpp"
-#include "hphp/util/parser/location.h"
+#include "hphp/parser/hphp.tab.hpp"
+#include "hphp/parser/location.h"
 #include "hphp/util/util.h"
 
 #define spc(T,p) boost::static_pointer_cast<T>(p)

@@ -19,7 +19,7 @@
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/variable_table.h"
-#include "hphp/util/parser/scanner.h"
+#include "hphp/parser/scanner.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/db-query.h"
 #include "hphp/util/util.h"

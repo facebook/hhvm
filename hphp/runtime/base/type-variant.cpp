@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/dummy-resource.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/ext/ext_collections.h"

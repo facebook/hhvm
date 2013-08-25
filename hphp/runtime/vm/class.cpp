@@ -24,7 +24,7 @@
 #include "hphp/runtime/vm/request-arena.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/parser/parser.h"
+#include "hphp/parser/parser.h"
 
 #include <iostream>
 #include <algorithm>

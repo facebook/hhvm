@@ -22,7 +22,7 @@
 #include "hphp/compiler/option.h"
 
 #include "hphp/util/json.h"
-#include "hphp/util/parser/parser.h"
+#include "hphp/parser/parser.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

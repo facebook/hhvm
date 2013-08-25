@@ -27,7 +27,7 @@
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/constant_table.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/array-iterator.h"

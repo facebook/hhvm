@@ -27,7 +27,7 @@
 #include "hphp/util/util.h"
 #include "hphp/util/atomic.h"
 #include "hphp/util/read-only-arena.h"
-#include "hphp/util/parser/parser.h"
+#include "hphp/parser/parser.h"
 
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/vm/bytecode.h"

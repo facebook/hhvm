@@ -25,7 +25,7 @@
 #include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"

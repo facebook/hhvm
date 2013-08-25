@@ -522,7 +522,7 @@ function run_test($options, $test) {
   proc_close($process);
 
   // Needed for testing non-hhvm binaries that don't actually run the code
-  // e.g. util/parser/test/parse_tester.cpp
+  // e.g. parser/test/parse_tester.cpp
   if ($output == "FORCE PASS") {
     return true;
   }

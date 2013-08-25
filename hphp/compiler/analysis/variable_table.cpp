@@ -31,8 +31,8 @@
 #include "hphp/compiler/expression/static_member_expression.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/util/util.h"
-#include "hphp/util/parser/location.h"
-#include "hphp/util/parser/parser.h"
+#include "hphp/parser/location.h"
+#include "hphp/parser/parser.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

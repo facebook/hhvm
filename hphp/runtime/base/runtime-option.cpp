@@ -38,7 +38,7 @@
 #include "hphp/util/file-cache.h"
 #include "hphp/runtime/base/hardware-counter.h"
 #include "hphp/runtime/base/preg.h"
-#include "hphp/util/parser/scanner.h"
+#include "hphp/parser/scanner.h"
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/base/crash-reporter.h"
 #include "folly/String.h"

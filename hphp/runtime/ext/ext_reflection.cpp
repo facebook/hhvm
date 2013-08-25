@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/util/parser/parser.h"
+#include "hphp/parser/parser.h"
 
 #include "hphp/system/systemlib.h"
 

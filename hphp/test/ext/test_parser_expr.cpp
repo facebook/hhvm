@@ -16,7 +16,7 @@
 
 #include "hphp/test/ext/test_parser_expr.h"
 #include "hphp/compiler/option.h"
-#include "hphp/util/parser/scanner.h"
+#include "hphp/parser/scanner.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

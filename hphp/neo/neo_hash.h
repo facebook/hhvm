@@ -15,7 +15,7 @@
 __BEGIN_DECLS
 
 #include <stdlib.h>
-#include "hphp/util/neo/neo_misc.h"
+#include "hphp/neo/neo_misc.h"
 
 typedef UINT32 (*NE_HASH_FUNC)(const void *);
 typedef int (*NE_COMP_FUNC)(const void *, const void *);

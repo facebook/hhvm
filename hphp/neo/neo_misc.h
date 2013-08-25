@@ -18,7 +18,7 @@
 
 /* In case they didn't start from ClearSilver.h. */
 #ifndef incl_HPHP_CS_CONFIG_H_
-#include "hphp/util/neo/cs_config.h"
+#include "hphp/neo/cs_config.h"
 #endif
 
 /* Fix Up for systems that don't define these standard things */

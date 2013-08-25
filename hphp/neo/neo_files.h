@@ -16,7 +16,7 @@ __BEGIN_DECLS
 
 #include <stdarg.h>
 #include <sys/types.h>
-#include "hphp/util/neo/ulist.h"
+#include "hphp/neo/ulist.h"
 
 
 

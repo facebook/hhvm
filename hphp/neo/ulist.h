@@ -1,7 +1,7 @@
 /*
  * Neotonic ClearSilver Templating System
  *
- * This code is made available under the terms of the 
+ * This code is made available under the terms of the
  * Neotonic ClearSilver License.
  * http://www.neotonic.com/clearsilver/license.hdf
  *
@@ -11,7 +11,7 @@
 #ifndef incl_HPHP_ULIST_H_
 #define incl_HPHP_ULIST_H_ 1
 
-#include "hphp/util/neo/neo_err.h"
+#include "hphp/neo/neo_err.h"
 
 typedef struct _ulist
 {

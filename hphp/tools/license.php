@@ -15,7 +15,7 @@ $inputs = 'find . -name "*.cpp" -o -name "*.c" -o -name "*.h"';
 $excluded = array(
   'runtime/base/compiler_id.h',
   'runtime/ext/bcmath/',
-  'util/neo/',
+  'neo/',
   'util/cronoutils.h',
   'util/cronoutils.cpp',
   'util/vixl/',

@@ -15,8 +15,8 @@
 __BEGIN_DECLS
 
 #include <stdio.h>
-#include "hphp/util/neo/neo_err.h"
-#include "hphp/util/neo/neo_hash.h"
+#include "hphp/neo/neo_err.h"
+#include "hphp/neo/neo_hash.h"
 
 #define FORCE_HASH_AT 10
 

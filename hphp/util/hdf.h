@@ -22,7 +22,7 @@
 #include <string>
 #include "hphp/util/exception.h"
 #include "hphp/util/case-insensitive.h"
-#include "neo/neo_hdf.h"
+#include "hphp/neo/neo_hdf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

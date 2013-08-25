@@ -3,4 +3,4 @@ HipHop Fatal error: %s
 Stack trace:
 #0 %s(%d): foo(1, 5)
 #1 {main}
-  thrown in hphp/test/zend/bad/zend-generators-finally/throw_yield.phpt on line %d
+  thrown in %s on line %d

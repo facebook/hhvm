@@ -1,12 +1,13 @@
 <?php
+$port = rand(50000, 65535);
 	/* Setup socket server */
-	$server = stream_socket_server('tcp://127.0.0.1:31337');
+	$server = stream_socket_server('tcp://127.0.0.1:'.$port);
 	if (!$server) {
 		die('Unable to create AF_INET socket [server]');
 	}
 
 	/* Connect and send request 1 */
-	$client1 = stream_socket_client('tcp://127.0.0.1:31337');
+	$client1 = stream_socket_client('tcp://127.0.0.1:'.$port);
 	if (!$client1) {
 		die('Unable to create AF_INET socket [client]');
 	}
@@ -15,7 +16,7 @@
 	@fwrite($client1, "Error 1\n");
 
 	/* Connect and send request 2 */
-	$client2 = stream_socket_client('tcp://127.0.0.1:31337');
+	$client2 = stream_socket_client('tcp://127.0.0.1:'.$port);
 	if (!$client2) {
 		die('Unable to create AF_INET socket [client]');
 	}

@@ -1,6 +1,6 @@
 ---> 1. Trying to assign by reference the return value of a function that returns by value:
 
-Strict Standards: Only variables should be assigned by reference in hphp/test/zend/bad/tests-lang/returnByReference.004.phpt on line 19
+Strict Standards: Only variables should be assigned by reference in %s on line 19
 int(5)
 int(100)
 

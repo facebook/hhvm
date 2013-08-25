@@ -1,7 +1,7 @@
-Deprecated: Function mcrypt_cbc() is deprecated in hphp/test/zend/bad/ext-mcrypt/mcrypt_cbc.phpt on line %d
+Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 
-Deprecated: Function mcrypt_cbc() is deprecated in hphp/test/zend/bad/ext-mcrypt/mcrypt_cbc.phpt on line %d
+Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 PHP Testfest 2008
 
-Deprecated: Function mcrypt_cbc() is deprecated in hphp/test/zend/bad/ext-mcrypt/mcrypt_cbc.phpt on line %d
+Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 HipHop Warning: %s

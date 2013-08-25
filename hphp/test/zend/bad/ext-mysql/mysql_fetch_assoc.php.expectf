@@ -1,4 +1,4 @@
-Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in hphp/test/zend/bad/ext-mysql/mysql_fetch_assoc.phpt on line %d
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 [005]
 array(2) {
   [%u|b%"id"]=>
@@ -23,7 +23,7 @@ array(5) {
 }
 HipHop Warning: %s
 
-Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in hphp/test/zend/bad/ext-mysql/mysql_fetch_assoc.phpt on line %d
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 [010]
 array(5) {
   [%u|b%"id"]=>

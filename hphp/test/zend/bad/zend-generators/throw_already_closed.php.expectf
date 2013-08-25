@@ -2,4 +2,4 @@ bool(false)
 HipHop Fatal error: %s
 Stack trace:
 #0 {main}
-  thrown in hphp/test/zend/bad/zend-generators/throw_already_closed.phpt on line %d
+  thrown in %s on line %d

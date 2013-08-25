@@ -11,6 +11,6 @@ bool(false)
 HipHop Warning: %s
 bool(true)
 
-Deprecated: error in hphp/test/zend/bad/zend/015.phpt on line %d
+Deprecated: error in %s on line %d
 bool(true)
 Done

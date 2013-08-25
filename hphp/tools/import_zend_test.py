@@ -47,6 +47,7 @@ no_import = (
     '/ext/session/tests/session_module_name_variation2.phpt',
     '/tests/func/010.phpt',
     '/tests/lang/bug21820.phpt',
+    '/Zend/tests/bug64660.phpt',
 
     # intermittent segfaults
     '/Zend/tests/001.phpt',
@@ -196,8 +197,6 @@ bad_tests = (
     '/ext-standard-strings/moneyformat.php',
 
     # works in interp but fails in JIT
-    '/ext-date/DateTime_add-february.php',
-    '/ext-date/gmdate_variation8.php',
     '/ext-standard-array/array_next_error2.php',
     '/ext-standard-array/prev_error3.php',
     '/ext-standard-class_object/get_object_vars_variation_003.php',
@@ -312,6 +311,7 @@ other_files = (
     '/tests-lang/inc.inc',
     '/tests-lang/inc_throw.inc',
     '/tests/quicktester.inc',
+    '/zend/014.inc',
     '/zend/bug46665_autoload.inc',
     '/zend/bug54804.inc',
     '/zend/nowdoc.inc',
@@ -423,9 +423,6 @@ def walk(filename, source):
 
             # tests are really inconsistent about whitespace
             exp = re.sub(r'(\r\n|\r|\n)', '\n', exp.strip())
-
-            exp = exp.replace('in %s on', 'in %s/%s/%s on' %
-                    ('hphp/test/zend/all', source_dir, dest_filename))
 
             # PHP puts a newline in that we don't
             exp = exp.replace('\n\nFatal error:', '\nFatal error:')
@@ -617,6 +614,15 @@ def walk(filename, source):
         test = test.replace("plainfile.txt.gz", "gzfile_basic.txt.gz")
     if '/ext-zlib/gzfile_basic2.php' in full_dest_filename:
         test = test.replace("plainfile.txt", "gzfile_basic2.txt")
+    if '/ext-standard-network/fsockopen_variation1.php' in full_dest_filename:
+        test = test.replace("<?php", "<?php\n$port = rand(50000, 65535);")
+        test = test.replace("31337'", "'.$port")
+    if '/ext-standard-network/shutdown.php' in full_dest_filename:
+        test = test.replace("<?php", "<?php\n$port = rand(50000, 65535);")
+        test = test.replace("31337'", "'.$port")
+    if '/ext-standard-file/fread_socket_variation1.php' in full_dest_filename:
+        test = test.replace("<?php", "<?php\n$port = rand(50000, 65535);")
+        test = test.replace("31337'", "'.$port")
 
     file(full_dest_filename, 'w').write(test)
 
@@ -728,10 +734,11 @@ for root, dirs, files in os.walk('test/zend/all'):
 
         for name in other_files:
             if name in filename:
-                dest = filename.replace('all', 'good', 1)
-                dir = os.path.dirname(dest)
-                mkdir_p(dir)
-                shutil.copyfile(filename, dest)
+                for subdir in ('good', 'bad'):
+                    dest = filename.replace('all', subdir, 1)
+                    dir = os.path.dirname(dest)
+                    mkdir_p(dir)
+                    shutil.copyfile(filename, dest)
 
 if not args.dirty:
     shutil.rmtree('test/zend/all')

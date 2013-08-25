@@ -25,7 +25,7 @@ object(ArrayObject)#3 (3) {
     string(4) "zero"
     [1]=>
     string(3) "one"
-    [""]=>
+    [2]=>
     string(4) "last"
   }
   ["flags":"ArrayObject":private]=>

@@ -39,6 +39,9 @@ hphp/system/php/spl/iterators/RecursiveFilterIterator.php
 hphp/system/php/spl/iterators/ArrayIterator.php
 hphp/system/php/spl/iterators/RecursiveArrayIterator.php
 
+hphp/system/php/spl/iterators/CachingIterator.php
+hphp/system/php/spl/iterators/RecursiveCachingIterator.php
+
 hphp/system/php/filter/filter_has_var.php
 hphp/system/php/filter/filter_input.php
 hphp/system/php/filter/filter_var_array.php

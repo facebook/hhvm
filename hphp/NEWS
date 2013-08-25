@@ -1,4 +1,6 @@
 Next? 2-Sep-2013
+  - Implement CachingIterator
+  - Implement RecursiveCachingIterator
 
 "Achiote" 19-Aug-2013
   - Async stack traces in the debugger via the "wa" command

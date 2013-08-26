@@ -61,13 +61,14 @@ struct RegionDesc {
   template<typename... Args>
   Block* addBlock(Args&&... args) {
     blocks.push_back(
-      smart::make_unique<Block>(std::forward<Args>(args)...));
+      std::make_shared<Block>(std::forward<Args>(args)...));
     return blocks.back().get();
   }
 
-  smart::vector<BlockPtr> blocks;
+  std::vector<BlockPtr> blocks;
 };
-typedef smart::unique_ptr<RegionDesc>::type RegionDescPtr;
+
+typedef std::shared_ptr<RegionDesc> RegionDescPtr;
 
 /*
  * Specification of an HHBC-visible location that can have a type
@@ -334,10 +335,10 @@ RegionDescPtr selectHotRegion(Transl::TransID transId,
                               Transl::TranslatorX64* tx64);
 
 /*
- * Creates a Block corresponding to tracelet tlet. This function
- * assumes that tlet contains a single block.
+ * Create a compilation region corresponding to a tracelet, using
+ * the old analyze() framework.
  */
-RegionDesc::BlockPtr createBlock(const Transl::Tracelet& tlet);
+RegionDescPtr selectTraceletLegacy(const Transl::Tracelet& tlet);
 
 /*
  * Debug stringification for various things.

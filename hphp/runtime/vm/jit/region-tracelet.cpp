@@ -64,8 +64,8 @@ struct RegionDescIter : public RegionIter {
   }
 
  private:
-  const smart::vector<RegionDesc::BlockPtr>& m_blocks;
-  smart::vector<RegionDesc::BlockPtr>::const_iterator m_blockIter;
+  const std::vector<RegionDesc::BlockPtr>& m_blocks;
+  std::vector<RegionDesc::BlockPtr>::const_iterator m_blockIter;
   SrcKey m_sk;
 };
 
@@ -108,7 +108,7 @@ RegionFormer::RegionFormer(const RegionContext& ctx, InterpSet& interp,
   , m_interp(interp)
   , m_sk(ctx.func, ctx.bcOffset)
   , m_startSk(m_sk)
-  , m_region(smart::make_unique<RegionDesc>())
+  , m_region(std::make_shared<RegionDesc>())
   , m_curBlock(m_region->addBlock(ctx.func, m_sk.offset(), 0))
   , m_blockFinished(false)
   , m_irTrans(ctx.bcOffset, ctx.spOffset, ctx.func)

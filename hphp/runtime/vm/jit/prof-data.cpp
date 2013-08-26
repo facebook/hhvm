@@ -58,17 +58,18 @@ T* ProfCounters<T>::getAddr(uint32_t id) {
 
 ///////////   ProfTransRec   //////////
 
-ProfTransRec::ProfTransRec(TransID              id,
-                           TransKind            kind,
-                           Offset               lastBcOff,
-                           const SrcKey&        sk,
-                           RegionDesc::BlockPtr block)
+ProfTransRec::ProfTransRec(TransID       id,
+                           TransKind     kind,
+                           Offset        lastBcOff,
+                           const SrcKey& sk,
+                           RegionDescPtr region)
     : m_id(id)
     , m_kind(kind)
     , m_lastBcOff(lastBcOff)
-    , m_block(block)
+    , m_region(region)
     , m_sk(sk) {
-  assert(block == nullptr || block->start() == sk);
+  assert(region == nullptr ||
+         (region->blocks.size() > 0 && region->blocks[0]->start() == sk));
 }
 
 ProfTransRec::ProfTransRec(TransID       id,
@@ -77,7 +78,7 @@ ProfTransRec::ProfTransRec(TransID       id,
     : m_id(id)
     , m_kind(kind)
     , m_lastBcOff(-1)
-    , m_block(nullptr)
+    , m_region(nullptr)
     , m_sk(sk) {
   assert(kind == TransAnchor || kind == TransPrologue);
 }
@@ -95,7 +96,7 @@ SrcKey ProfTransRec::srcKey() const {
 }
 
 Offset ProfTransRec::startBcOff() const {
-  return m_block->start().offset();;
+  return m_region->blocks[0]->start().offset();;
 }
 
 Offset ProfTransRec::lastBcOff() const {
@@ -103,15 +104,15 @@ Offset ProfTransRec::lastBcOff() const {
 }
 
 Func* ProfTransRec::func() const {
-  return const_cast<Func*>(m_block->func());
+  return const_cast<Func*>(m_region->blocks[0]->func());
 }
 
 FuncId ProfTransRec::funcId() const {
   return m_sk.getFuncId();
 }
 
-RegionDesc::BlockPtr ProfTransRec::block() const {
-  return m_block;
+RegionDescPtr ProfTransRec::region() const {
+  return m_region;
 }
 
 ///////////   ProfData   //////////
@@ -188,37 +189,24 @@ void ProfData::setOptimized(const SrcKey& sk) {
   m_optimized.insert(sk);
 }
 
-RegionDesc::BlockPtr ProfData::transBlock(TransID id) const {
+RegionDescPtr ProfData::transRegion(TransID id) const {
   assert(id < m_transRecs.size());
   const ProfTransRec& pTransRec = *m_transRecs[id];
-  return pTransRec.block();
-}
-
-/*
- * Temporary work-around.
- *
- * TODO: get rid of this once translateRegion supports inlining
- */
-static bool supportedTracelet(TransID transId, const Tracelet& tlet) {
-  for (auto instr = tlet.m_instrStream.first; instr; instr = instr->next) {
-    if (instr->calleeTrace) {
-      FTRACE(5, "supportedTracelet: unsupported {}: has inlining\n", transId);
-      return false;
-    }
-  }
-
-  return true;
+  return pTransRec.region();
 }
 
 TransID ProfData::addTrans(const Tracelet& tracelet, TransKind kind,
                            const PostConditions& pconds) {
   TransID transId   = m_numTrans++;
   Offset  lastBcOff = tracelet.m_instrStream.last->source.offset();
-  auto block = kind == TransProfile && supportedTracelet(transId, tracelet) ?
-               createBlock(tracelet) : nullptr;
-  if (block) block->setPostConditions(pconds);
+  auto region = kind == TransProfile ? selectTraceletLegacy(tracelet) : nullptr;
+  if (region) {
+    size_t nBlocks = region->blocks.size();
+    assert(nBlocks == 1 || (nBlocks > 1 && region->blocks[0]->inlinedCallee()));
+    region->blocks.back()->setPostConditions(pconds);
+  }
   m_transRecs.emplace_back(new ProfTransRec(transId, kind, lastBcOff,
-                                            tracelet.m_sk, block));
+                                            tracelet.m_sk, region));
   return transId;
 }
 

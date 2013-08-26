@@ -265,11 +265,10 @@ void RegionDesc::Block::checkMetadata() const {
 
 //////////////////////////////////////////////////////////////////////
 
-namespace {
 RegionDescPtr selectTraceletLegacy(const Transl::Tracelet& tlet) {
   typedef RegionDesc::Block Block;
 
-  auto region = smart::make_unique<RegionDesc>();
+  auto region = std::make_shared<RegionDesc>();
   SrcKey sk(tlet.m_sk);
   auto unit = tlet.func()->unit();
 
@@ -382,16 +381,6 @@ RegionDescPtr selectTraceletLegacy(const Transl::Tracelet& tlet) {
   FTRACE(2, "Converted Tracelet:\n{}\nInto RegionDesc:\n{}\n",
          tlet.toString(), show(*region));
   return region;
-}
-}
-
-RegionDesc::BlockPtr createBlock(const Transl::Tracelet& tlet) {
-  RegionDescPtr region = selectTraceletLegacy(tlet);
-
-  if (region == nullptr) return nullptr;
-
-  always_assert(region->blocks.size() == 1);
-  return region->blocks.front();
 }
 
 RegionDescPtr selectRegion(const RegionContext& context,

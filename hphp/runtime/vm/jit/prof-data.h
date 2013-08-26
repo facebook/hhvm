@@ -71,7 +71,7 @@ class ProfCounters {
 class ProfTransRec {
  public:
   ProfTransRec(TransID id, TransKind kind, Offset lastBcOff, const SrcKey& sk,
-               RegionDesc::BlockPtr block);
+               RegionDescPtr region);
   ProfTransRec(TransID id, TransKind kind, const SrcKey& sk);
 
   TransID              transId()    const;
@@ -81,13 +81,13 @@ class ProfTransRec {
   Offset               lastBcOff()  const;
   Func*                func()       const;
   FuncId               funcId()     const;
-  RegionDesc::BlockPtr block()      const;
+  RegionDescPtr        region()     const;
 
  private:
   TransID              m_id;  // sequential ID of the assiciated translation
   TransKind            m_kind;
   Offset               m_lastBcOff;  // offset of the last bytecode instr
-  RegionDesc::BlockPtr m_block;
+  RegionDescPtr        m_region;
   SrcKey               m_sk;
 };
 
@@ -113,7 +113,7 @@ public:
   Offset                  transStopBcOff(TransID id)  const;
   FuncId                  transFuncId(TransID id)     const;
   Func*                   transFunc(TransID id)       const;
-  RegionDesc::BlockPtr    transBlock(TransID id)      const;
+  RegionDescPtr           transRegion(TransID id)     const;
   TransKind               transKind(TransID id)       const;
   int64_t                 transCounter(TransID id)    const;
   int64_t*                transCounterAddr(TransID id);

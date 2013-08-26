@@ -128,7 +128,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
                              const ProfData* profData,
                              TransCFG& cfg,
                              TransIDSet& selectedSet) {
-  JIT::RegionDescPtr region = smart::make_unique<JIT::RegionDesc>();
+  JIT::RegionDescPtr region = std::make_shared<JIT::RegionDesc>();
   TransID tid    = triggerId;
   TransID prevId = InvalidID;
   selectedSet.clear();
@@ -137,8 +137,8 @@ RegionDescPtr selectHotTrace(TransID triggerId,
 
   while (!setContains(selectedSet, tid)) {
 
-    RegionDesc::BlockPtr block = profData->transBlock(tid);
-    if (block == nullptr) break;
+    RegionDescPtr blockRegion = profData->transRegion(tid);
+    if (blockRegion == nullptr) break;
 
     // If the debugger is attached, only allow single-block regions.
     if (prevId != InvalidID && isDebuggerAttachedProcess()) {
@@ -150,7 +150,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
     // Break if block is not the first and requires reffiness checks.
     // Task #2589970: fix translateRegion to support mid-region reffiness checks
     if (prevId != InvalidID) {
-      auto nRefDeps = block->reffinessPreds().size();
+      auto nRefDeps = blockRegion->blocks[0]->reffinessPreds().size();
       if (nRefDeps > 0) {
         FTRACE(5, "selectHotRegion: breaking region because of refDeps ({}) at "
                "Translation {}\n", nRefDeps, tid);
@@ -171,7 +171,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
           FTRACE(5, "selectHotTrace: WARNING: Breaking region @: {}\n",
                  JIT::show(*region));
           FTRACE(5, "selectHotTrace: next translation selected: tid = {}\n{}\n",
-                 tid, JIT::show(*block));
+                 tid, JIT::show(*blockRegion));
           std::string succStr("succOffs = ");
           for (auto succ : succOffs) {
             succStr += lexical_cast<std::string>(succ);
@@ -181,7 +181,8 @@ RegionDescPtr selectHotTrace(TransID triggerId,
         break;
       }
     }
-    region->blocks.emplace_back(block);
+    region->blocks.insert(region->blocks.end(), blockRegion->blocks.begin(),
+                          blockRegion->blocks.end());
     selectedSet.insert(tid);
 
     Op lastOp = *(profData->transLastInstr(tid));
@@ -198,11 +199,13 @@ RegionDescPtr selectHotTrace(TransID triggerId,
       break;
     }
 
-    mergePostConds(accumPostConds, block->postConds());
+    auto lastNewBlock = blockRegion->blocks.back();
+    mergePostConds(accumPostConds, lastNewBlock->postConds());
 
     TransCFG::ArcPtrVec possibleOutArcs;
     for (auto arc : outArcs) {
-      RegionDesc::BlockPtr possibleNext = profData->transBlock(arc->dst());
+      RegionDesc::BlockPtr possibleNext =
+        profData->transRegion(arc->dst())->blocks[0];
       if (preCondsAreSatisfied(possibleNext, accumPostConds)) {
         possibleOutArcs.emplace_back(arc);
       }

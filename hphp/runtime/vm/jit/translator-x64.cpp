@@ -289,17 +289,9 @@ TCA TranslatorX64::retranslateOpt(TransID transId, bool align) {
 
   TRACE(1, "retranslateOpt: transId = %u\n", transId);
 
-  Func* func = nullptr;
-  if (m_profData->transBlock(transId) == nullptr) {
-    // This can happen for profiling translations that have some
-    // feature not supported by translateRegion yet.  For such translations,
-    // we don't have a Func* (since it's grabbed from the Block).
-    // Anyway, in this case, the region translator resorts generates a
-    // TransLive translation, corresponding to the current live VM context.
-    func = const_cast<Func*>(liveFunc());
-  } else {
-    func = m_profData->transFunc(transId);
-  }
+  always_assert(m_profData->transRegion(transId) != nullptr);
+
+  Func* func = m_profData->transFunc(transId);
 
   // We may get here multiple times because different translations of
   // the same SrcKey hit the optimization threshold.  Only the first

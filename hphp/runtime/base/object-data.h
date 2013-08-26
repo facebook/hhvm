@@ -329,9 +329,6 @@ class ObjectData {
   void cloneSet(ObjectData* clone);
   ObjectData* cloneImpl();
 
-  void invokeUserMethod(TypedValue* retval, const Func* method,
-                        CArrRef params);
-
   const Func* methodNamed(const StringData* sd) const {
     return getVMClass()->lookupMethod(sd);
   }

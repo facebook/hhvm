@@ -33,17 +33,6 @@ namespace HPHP {
  */
 const std::size_t kExpectedMPxOffset = 0;
 
-/**
- * Work with Countable to implement reference counting. For example,
- *
- *   class MyClassData : public Countable {
- *     // now MyClassData has a counter to keep track of references
- *   };
- *
- *   class MyClass : public SmartPtr<MyClassData> {
- *     // now MyClassData becomes an inner pointer that's managed by SmartPtr
- *   };
- */
 template<typename T>
 class SmartPtr {
 public:

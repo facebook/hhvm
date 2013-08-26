@@ -646,7 +646,8 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
     }
     explicit Bucket(TypedValue* tv) : ikey(0), pListNext(nullptr),
         pListLast(nullptr), pNext(nullptr) {
-      tvDup(*tv, data);
+      assert(tv->m_type != KindOfRef);
+      cellDup(*tv, data);
       data.hash() = 0;
     }
     ~Bucket();
@@ -1177,7 +1178,7 @@ ObjectData* collectionDeepCopyPair(c_Pair* pair);
 ///////////////////////////////////////////////////////////////////////////////
 
 inline TypedValue* cvarToCell(const Variant* v) {
-  return const_cast<TypedValue*>(tvToCell(v->asTypedValue()));
+  return const_cast<TypedValue*>(v->asCell());
 }
 
 inline Variant& collectionOffsetGet(ObjectData* obj, bool offset) {

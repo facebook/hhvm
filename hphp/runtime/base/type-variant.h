@@ -953,7 +953,7 @@ class Variant : private TypedValue {
   void setToDefaultObject();
 
   /*
-   * Access this Variant as a TypedValue.  Does not unbox refs, etc.
+   * Access this Variant as a TypedValue. Does not unbox refs, etc.
    */
   const TypedValue* asTypedValue() const { return this; }
         TypedValue* asTypedValue()       { return this; }
@@ -964,6 +964,13 @@ class Variant : private TypedValue {
    */
   const Cell* asCell() const { return tvToCell(asTypedValue()); }
         Cell* asCell()       { return tvToCell(asTypedValue()); }
+
+  /*
+   * Access this Variant as a Ref. Promotes this Variant to a ref
+   * if it is not already a ref.
+   */
+  const Ref* asRef() const { PromoteToRef(*this); return this; }
+        Ref* asRef()       { PromoteToRef(*this); return this; }
 
  private:
   bool isPrimitive() const { return !IS_REFCOUNTED_TYPE(m_type); }

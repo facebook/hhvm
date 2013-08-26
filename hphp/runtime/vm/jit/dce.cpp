@@ -228,8 +228,8 @@ initInstructions(const BlockList& blocks, DceState& state) {
         Opcode srcOpc = srcInst->op();
         if (srcOpc != DefConst) {
           assert(srcInst->op() == IncRef);
-          assert(state[srcInst].isDead()); // IncRef isn't essential so it should
-                                           // be dead here
+          assert(state[srcInst].isDead()); // IncRef isn't essential so it
+                                           // should be dead here
           state[srcInst].setDecRefNZed();
         }
       }

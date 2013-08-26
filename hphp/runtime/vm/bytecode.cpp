@@ -1737,32 +1737,30 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
         // (i.e. the last extra arg has the lowest address)
         to = extraArgs->getExtraArg(paramId - numParams);
       }
-      tvDup(*from, *to);
       if (LIKELY(!f->byRef(paramId))) {
-        if (to->m_type == KindOfRef) {
-          tvUnbox(to);
-        }
-      } else if (!(flags & InvokeIgnoreByRefErrors) &&
-                 (from->m_type != KindOfRef ||
-                  from->m_data.pref->m_count == 2)) {
-        raise_warning("Parameter %d to %s() expected to be "
-                      "a reference, value given",
-                      paramId + 1, f->fullName()->data());
-        if (skipCufOnInvalidParams) {
-          if (extraArgs) {
-            int n = paramId >= numParams ? paramId - numParams + 1 : 0;
-            ExtraArgs::deallocate(extraArgs, n);
-            ar->m_varEnv = nullptr;
-            paramId -= n;
+        cellDup(*tvToCell(from), *to);
+      } else if (from->m_type == KindOfRef && from->m_data.pref->m_count >= 2) {
+        refDup(*from, *to);
+      } else {
+        if (flags & InvokeCuf) {
+          try {
+            raise_warning("Parameter %d to %s() expected to be "
+                          "a reference, value given",
+                          paramId + 1, f->fullName()->data());
+          } catch (...) {
+            // If an exception is thrown by the user error handler,
+            // we need to clean up the stack
+            m_stack.discard();
+            invokeFuncCleanupHelper(retval, ar, paramId);
+            throw;
           }
-          while (paramId >= 0) {
-            m_stack.popTV();
-            paramId--;
+          if (skipCufOnInvalidParams) {
+            m_stack.discard();
+            invokeFuncCleanupHelper(retval, ar, paramId);
+            return;
           }
-          m_stack.popAR();
-          tvWriteNull(retval);
-          return;
         }
+        cellDup(*tvToCell(from), *to);
       }
     }
   }
@@ -1775,11 +1773,34 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
   }
 }
 
+void VMExecutionContext::invokeFuncCleanupHelper(TypedValue* retval,
+                                                 ActRec* ar,
+                                                 int numArgsPushed) {
+  assert(retval && ar);
+  const int numFormalParams = ar->m_func->numParams();
+  ExtraArgs* extraArgs = ar->hasExtraArgs() ? ar->getExtraArgs() : nullptr;
+
+  if (extraArgs) {
+    int n =
+      numArgsPushed > numFormalParams ? numArgsPushed - numFormalParams : 0;
+    ExtraArgs::deallocate(extraArgs, n);
+    ar->m_varEnv = nullptr;
+    numArgsPushed -= n;
+  }
+  while (numArgsPushed > 0) {
+    m_stack.popTV();
+    numArgsPushed--;
+  }
+  m_stack.popAR();
+  tvWriteNull(retval);
+}
+
 void VMExecutionContext::invokeFuncFew(TypedValue* retval,
                                        const Func* f,
                                        void* thisOrCls,
                                        StringData* invName,
-                                       int argc, TypedValue* argv) {
+                                       int argc,
+                                       const TypedValue* argv) {
   assert(retval);
   assert(f);
   // If this is a regular function, this_ and cls must be NULL
@@ -1827,8 +1848,14 @@ void VMExecutionContext::invokeFuncFew(TypedValue* retval,
   }
 #endif
 
-  for (int i = 0; i < argc; i++) {
-    *m_stack.allocTV() = *argv++;
+  for (ssize_t i = 0; i < argc; ++i) {
+    const TypedValue *from = &argv[i];
+    TypedValue *to = m_stack.allocTV();
+    if (LIKELY(from->m_type != KindOfRef || !f->byRef(i))) {
+      cellDup(*tvToCell(from), *to);
+    } else {
+      refDup(*from, *to);
+    }
   }
 
   if (m_fp) {
@@ -2952,7 +2979,7 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPost(
   if (saveResult) {
     // If tvRef wasn't just allocated, we've already decref'd it in
     // the loop above.
-    memcpy(tvRet, &tvScratch, sizeof(TypedValue));
+    tvCopy(tvScratch, *tvRet);
   }
 }
 
@@ -2972,18 +2999,6 @@ VMExecutionContext::getHelper(PC& pc,
                               TypedValue*& curMember) {
   getHelperPre<true, true, VectorLeaveCode::ConsumeAll>(MEMBERHELPERPRE_ARGS);
   getHelperPost<true>(GETHELPERPOST_ARGS);
-}
-
-void
-VMExecutionContext::getElem(TypedValue* base, TypedValue* key,
-                            TypedValue* dest) {
-  assert(base->m_type != KindOfArray);
-  VMRegAnchor _;
-  tvWriteUninit(dest);
-  TypedValue* result = Elem<true>(*dest, *dest, base, key);
-  if (result != dest) {
-    tvDup(*result, *dest);
-  }
 }
 
 template <bool setMember,
@@ -4281,10 +4296,7 @@ static void raise_undefined_local(ActRec* fp, Id pind) {
 
 static inline void cgetl_inner_body(TypedValue* fr, TypedValue* to) {
   assert(fr->m_type != KindOfUninit);
-  tvDup(*fr, *to);
-  if (to->m_type == KindOfRef) {
-    tvUnbox(to);
-  }
+  cellDup(*tvToCell(fr), *to);
 }
 
 static inline void cgetl_body(ActRec* fp,
@@ -4434,7 +4446,7 @@ static inline void vgetl_body(TypedValue* fr, TypedValue* to) {
   if (fr->m_type != KindOfRef) {
     tvBox(fr);
   }
-  tvDup(*fr, *to);
+  refDup(*fr, *to);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopVGetL(PC& pc) {
@@ -5827,24 +5839,30 @@ bool VMExecutionContext::prepareArrayArgs(ActRec* ar, Array& arrayArgs) {
     TypedValue* from = const_cast<TypedValue*>(
       args->getValueRef(pos).asTypedValue());
     TypedValue* to = m_stack.allocTV();
-    if (UNLIKELY(f->byRef(i))) {
-      if (UNLIKELY(!tvAsVariant(from).isReferenced())) {
+    if (LIKELY(!f->byRef(i))) {
+      cellDup(*tvToCell(from), *to);
+    } else if (LIKELY(from->m_type == KindOfRef &&
+                      from->m_data.pref->m_count >= 2)) {
+      refDup(*from, *to);
+    } else {
+      try {
         raise_warning("Parameter %d to %s() expected to be a reference, "
                       "value given", i + 1, f->fullName()->data());
-        if (skipCufOnInvalidParams) {
-          m_stack.discard();
-          while (i--) m_stack.popTV();
-          m_stack.popAR();
-          m_stack.pushNull();
-          return false;
-        }
+      } catch (...) {
+        // If the user error handler throws an exception, discard the
+        // uninitialized TypedValue at the top of the eval stack so
+        // that the unwinder doesn't choke
+        m_stack.discard();
+        throw;
       }
-      tvDup(*from, *to);
-    } else {
-      tvDup(*from, *to);
-      if (UNLIKELY(to->m_type == KindOfRef)) {
-        tvUnbox(to);
+      if (skipCufOnInvalidParams) {
+        m_stack.discard();
+        while (i--) m_stack.popTV();
+        m_stack.popAR();
+        m_stack.pushNull();
+        return false;
       }
+      cellDup(*tvToCell(from), *to);
     }
     pos = args->iter_advance(pos);
   }
@@ -6386,7 +6404,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopStaticLocInit(PC& pc) {
   assert(fr != nullptr);
   if (!inited) {
     Cell* initVal = m_stack.topC();
-    tvDup(*initVal, *fr);
+    cellDup(*initVal, *fr);
   }
   if (fr->m_type != KindOfRef) {
     assert(!inited);

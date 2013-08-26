@@ -157,7 +157,7 @@ void c_Vector::resize(int64_t sz, TypedValue* val) {
     } while (m_size > requestedSize);
   } else {
     for (; m_size < requestedSize; ++m_size) {
-      tvDup(*val, m_data[m_size]);
+      cellDup(*val, m_data[m_size]);
     }
   }
 }
@@ -189,7 +189,7 @@ c_Vector* c_Vector::Clone(ObjectData* obj) {
   target->m_capacity = target->m_size = sz;
   target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
   for (int i = 0; i < sz; ++i) {
-    tvDup(thiz->m_data[i], data[i]);
+    cellDup(thiz->m_data[i], data[i]);
   }
   return target;
 }
@@ -535,9 +535,7 @@ Object c_Vector::t_map(CVarRef callback) {
   for (uint i = 0; i < m_size; ++i) {
     TypedValue* tv = &vec->m_data[i];
     int32_t version = m_version;
-    TypedValue args[1];
-    tvDup(m_data[i], args[0]);
-    g_vmContext->invokeFuncFew(tv, ctx, 1, args);
+    g_vmContext->invokeFuncFew(tv, ctx, 1, &m_data[i]);
     if (UNLIKELY(version != m_version)) {
       tvRefcountedDecRef(tv);
       throw_collection_modified();
@@ -560,9 +558,7 @@ Object c_Vector::t_filter(CVarRef callback) {
   for (uint i = 0; i < m_size; ++i) {
     Variant ret;
     int32_t version = m_version;
-    TypedValue args[1];
-    tvDup(m_data[i], args[0]);
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, args);
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &m_data[i]);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
@@ -634,7 +630,7 @@ Object c_Vector::ti_fromitems(CVarRef iterable) {
   Object ret = target = NEWOBJ(c_Vector)();
   for (uint i = 0; iter; ++i, ++iter) {
     Variant v = iter.second();
-    TypedValue* tv = tvToCell(v.asTypedValue());
+    TypedValue* tv = v.asCell();
     target->add(tv);
   }
   return ret;
@@ -728,7 +724,7 @@ Variant c_Vector::ti_slice(CVarRef vec, CVarRef offset,
   target->m_data = data =
     (TypedValue*)smart_malloc(targetSize * sizeof(TypedValue));
   for (uint i = 0; i < targetSize; ++i, ++startPos) {
-    tvDup(v->m_data[startPos], data[i]);
+    cellDup(v->m_data[startPos], data[i]);
   }
   return ret;
 }
@@ -1028,7 +1024,7 @@ void c_Map::t___construct(CVarRef iterable /* = null_variant */) {
   for (; iter; ++iter) {
     Variant k = iter.first();
     Variant v = iter.second();
-    TypedValue* tv = tvToCell(v.asTypedValue());
+    TypedValue* tv = v.asCell();
     if (k.isInteger()) {
       update(k.toInt64(), tv);
     } else if (k.isString()) {
@@ -1402,9 +1398,7 @@ Object c_Map::t_map(CVarRef callback) {
     }
     TypedValue* tv = &np.data;
     int32_t version = m_version;
-    TypedValue args[1];
-    tvDup(p.data, args[0]);
-    g_vmContext->invokeFuncFew(tv, ctx, 1, args);
+    g_vmContext->invokeFuncFew(tv, ctx, 1, &p.data);
     if (UNLIKELY(version != m_version)) {
       tvRefcountedDecRef(tv);
       throw_collection_modified();
@@ -1434,9 +1428,7 @@ Object c_Map::t_filter(CVarRef callback) {
     if (!p.validValue()) continue;
     Variant ret;
     int32_t version = m_version;
-    TypedValue args[1];
-    tvDup(p.data, args[0]);
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, args);
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
@@ -1488,7 +1480,7 @@ Object c_Map::ti_fromitems(CVarRef iterable) {
   }
   for (; iter; ++iter) {
     Variant v = iter.second();
-    TypedValue* tv = tvToCell(v.asTypedValue());
+    TypedValue* tv = v.asCell();
     if (UNLIKELY(tv->m_type != KindOfObject ||
                  !tv->m_data.pobj->instanceof(c_Pair::s_cls))) {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -1704,6 +1696,7 @@ bool c_Map::update(int64_t h, TypedValue* data) {
 }
 
 bool c_Map::update(StringData *key, TypedValue* data) {
+  assert(data->m_type != KindOfRef);
   strhash_t h = key->hash();
   Bucket* p = findForInsert(key->data(), key->size(), h);
   assert(p);
@@ -2159,7 +2152,7 @@ c_StableMap* c_StableMap::Clone(ObjectData* obj) {
   Bucket *last = nullptr;
   for (Bucket* p = thiz->m_pListHead; p; p = p->pListNext) {
     Bucket *np = NEW(Bucket)();
-    tvDup(p->data, np->data);
+    cellDup(p->data, np->data);
     uint nIndex;
     if (p->hasIntKey()) {
       np->setIntKey(p->ikey);
@@ -2415,7 +2408,7 @@ Object c_StableMap::t_values() {
   Bucket* p = m_pListHead;
   for (int64_t i = 0; i < sz; ++i) {
     assert(p);
-    tvDup(p->data, data[i]);
+    cellDup(p->data, data[i]);
     p = p->pListNext;
   }
   return ret;
@@ -2491,13 +2484,11 @@ Object c_StableMap::t_map(CVarRef callback) {
   for (Bucket* p = m_pListHead; p; p = p->pListNext) {
     Variant ret;
     int32_t version = m_version;
-    TypedValue args[1];
-    tvDup(p->data, args[0]);
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, args);
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p->data);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
-    Bucket *np = NEW(Bucket)(ret.asTypedValue());
+    Bucket *np = NEW(Bucket)(ret.asCell());
     uint nIndex;
     if (p->hasIntKey()) {
       np->setIntKey(p->ikey);
@@ -2534,9 +2525,7 @@ Object c_StableMap::t_filter(CVarRef callback) {
   for (Bucket* p = m_pListHead; p; p = p->pListNext) {
     Variant ret;
     int32_t version = m_version;
-    TypedValue args[1];
-    tvDup(p->data, args[0]);
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, args);
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p->data);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
@@ -2717,6 +2706,7 @@ c_StableMap::Bucket** c_StableMap::findForErase(const char* k, int len,
 }
 
 bool c_StableMap::update(int64_t h, TypedValue* data) {
+  assert(data->m_type != KindOfRef);
   Bucket* p = find(h);
   if (p) {
     tvRefcountedIncRef(data);
@@ -2739,6 +2729,7 @@ bool c_StableMap::update(int64_t h, TypedValue* data) {
 }
 
 bool c_StableMap::update(StringData *key, TypedValue* data) {
+  assert(data->m_type != KindOfRef);
   strhash_t h = key->hash();
   Bucket* p = find(key->data(), key->size(), h);
   if (p) {
@@ -3457,9 +3448,7 @@ Object c_Set::t_map(CVarRef callback) {
     }
     TypedValue* tv = &np.data;
     int32_t version = m_version;
-    TypedValue args[1];
-    tvDup(p.data, args[0]);
-    g_vmContext->invokeFuncFew(tv, ctx, 1, args);
+    g_vmContext->invokeFuncFew(tv, ctx, 1, &p.data);
     if (UNLIKELY(version != m_version)) {
       tvRefcountedDecRef(tv);
       throw_collection_modified();
@@ -3485,9 +3474,7 @@ Object c_Set::t_filter(CVarRef callback) {
     if (!p.validValue()) continue;
     Variant ret;
     int32_t version = m_version;
-    TypedValue args[1];
-    tvDup(p.data, args[0]);
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, args);
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
@@ -4044,8 +4031,8 @@ c_Pair* c_Pair::Clone(ObjectData* obj) {
   auto pair = NEWOBJ(c_Pair)();
   pair->incRefCount();
   pair->m_size = 2;
-  tvDup(thiz->elm0, pair->elm0);
-  tvDup(thiz->elm1, pair->elm1);
+  cellDup(thiz->elm0, pair->elm0);
+  cellDup(thiz->elm1, pair->elm1);
   return pair;
 }
 
@@ -4151,9 +4138,7 @@ Object c_Pair::t_map(CVarRef callback) {
   Object obj = vec = NEWOBJ(c_Vector)();
   vec->reserve(2);
   for (uint64_t i = 0; i < 2; ++i) {
-    TypedValue args[1];
-    tvDup(getElms()[i], args[0]);
-    g_vmContext->invokeFuncFew(&vec->m_data[i], ctx, 1, args);
+    g_vmContext->invokeFuncFew(&vec->m_data[i], ctx, 1, &getElms()[i]);
     ++vec->m_size;
   }
   return obj;
@@ -4171,9 +4156,7 @@ Object c_Pair::t_filter(CVarRef callback) {
   Object obj = vec = NEWOBJ(c_Vector)();
   for (uint64_t i = 0; i < 2; ++i) {
     Variant ret;
-    TypedValue args[1];
-    tvDup(getElms()[i], args[0]);
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, args);
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &getElms()[i]);
     if (ret.toBoolean()) {
       vec->add(&getElms()[i]);
     }

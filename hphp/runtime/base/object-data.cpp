@@ -534,19 +534,19 @@ Variant ObjectData::o_invoke_few_args(CStrRef s, int count,
   switch(count) {
     default: not_implemented();
 #if INVOKE_FEW_ARGS_COUNT > 6
-    case 10: tvDup(*a9.asTypedValue(), args[9]);
-    case  9: tvDup(*a8.asTypedValue(), args[8]);
-    case  8: tvDup(*a7.asTypedValue(), args[7]);
-    case  7: tvDup(*a6.asTypedValue(), args[6]);
+    case 10: tvCopy(*a9.asTypedValue(), args[9]);
+    case  9: tvCopy(*a8.asTypedValue(), args[8]);
+    case  8: tvCopy(*a7.asTypedValue(), args[7]);
+    case  7: tvCopy(*a6.asTypedValue(), args[6]);
 #endif
 #if INVOKE_FEW_ARGS_COUNT > 3
-    case  6: tvDup(*a5.asTypedValue(), args[5]);
-    case  5: tvDup(*a4.asTypedValue(), args[4]);
-    case  4: tvDup(*a3.asTypedValue(), args[3]);
+    case  6: tvCopy(*a5.asTypedValue(), args[5]);
+    case  5: tvCopy(*a4.asTypedValue(), args[4]);
+    case  4: tvCopy(*a3.asTypedValue(), args[3]);
 #endif
-    case  3: tvDup(*a2.asTypedValue(), args[2]);
-    case  2: tvDup(*a1.asTypedValue(), args[1]);
-    case  1: tvDup(*a0.asTypedValue(), args[0]);
+    case  3: tvCopy(*a2.asTypedValue(), args[2]);
+    case  2: tvCopy(*a1.asTypedValue(), args[1]);
+    case  1: tvCopy(*a0.asTypedValue(), args[0]);
     case  0: break;
   }
 
@@ -759,10 +759,8 @@ Variant ObjectData::offsetGet(Variant key) {
     return uninit_null();
   }
   Variant v;
-  TypedValue args[1];
-  tvDup(*key.asTypedValue(), args[0]);
   g_vmContext->invokeFuncFew(v.asTypedValue(), method,
-                             this, nullptr, 1, args);
+                             this, nullptr, 1, key.asCell());
   return v;
 }
 
@@ -897,11 +895,6 @@ void ObjectData::operator delete(void* p) {
   DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
 }
 
-void ObjectData::invokeUserMethod(TypedValue* retval, const Func* method,
-                                  CArrRef params) {
-  g_vmContext->invokeFunc(retval, method, params, this);
-}
-
 Object ObjectData::FromArray(ArrayData* properties) {
   ObjectData* retval = ObjectData::newInstance(SystemLib::s_stdclassClass);
   retval->initDynProps();
@@ -977,15 +970,21 @@ void ObjectData::invokeSet(TypedValue* retval, const StringData* key,
   AttributeClearer a(UseSet, this);
   const Func* meth = m_cls->lookupMethod(s___set.get());
   assert(meth);
-  invokeUserMethod(retval, meth,
-                   CREATE_VECTOR2(CStrRef(key), tvAsVariant(val)));
+  TypedValue args[2] = {
+    make_tv<KindOfString>(const_cast<StringData*>(key)),
+    *tvToCell(val)
+  };
+  g_vmContext->invokeFuncFew(retval, meth, this, nullptr, 2, args);
 }
 
 #define MAGIC_PROP_BODY(name, attr) \
   AttributeClearer a((attr), this); \
   const Func* meth = m_cls->lookupMethod(name); \
   assert(meth); \
-  invokeUserMethod(retval, meth, CREATE_VECTOR1(CStrRef(key))); \
+  TypedValue args[1] = { \
+    make_tv<KindOfString>(const_cast<StringData*>(key)) \
+  }; \
+  g_vmContext->invokeFuncFew(retval, meth, this, nullptr, 1, args);
 
 void ObjectData::invokeGet(TypedValue* retval, const StringData* key) {
   MAGIC_PROP_BODY(s___get.get(), UseGet);
@@ -1199,13 +1198,13 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
       SETOP_BODY(&tvResult, op, val);
       if (getAttribute(UseSet)) {
         assert(tvRef.m_type == KindOfUninit);
-        tvDup(tvResult, tvRef);
+        cellDup(*tvToCell(&tvResult), tvRef);
         TypedValue ignored;
         invokeSet(&ignored, key, &tvRef);
         tvRefcountedDecRef(&ignored);
         propVal = &tvRef;
       } else {
-        tvDup(tvResult, *propVal);
+        cellDup(*tvToCell(&tvResult), *propVal);
       }
     } else {
       propVal = tvToCell(propVal);

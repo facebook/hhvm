@@ -414,11 +414,8 @@ bool SystemlibSessionModule::open(const char *save_path,
 
   Variant savePath = String(save_path, CopyString);
   Variant sessionName = String(session_name, CopyString);
-  TypedValue args[2];
-  tvDup(*savePath.asTypedValue(), args[0]);
-  tvDup(*sessionName.asTypedValue(), args[1]);
   Variant ret;
-
+  TypedValue args[2] = { *savePath.asCell(), *sessionName.asCell() };
   g_vmContext->invokeFuncFew(ret.asTypedValue(), m_open, obj,
                              nullptr, 2, args);
 
@@ -438,8 +435,7 @@ bool SystemlibSessionModule::close() {
   }
 
   Variant ret;
-  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_close, obj,
-                             nullptr, 0, nullptr);
+  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_close, obj);
   s_obj->destroy();
 
   if (ret.isBoolean() && ret.toBoolean()) {
@@ -454,12 +450,9 @@ bool SystemlibSessionModule::read(const char *key, String &value) {
   ObjectData *obj = getObject();
 
   Variant sessionKey = String(key, CopyString);
-  TypedValue args[1];
-  tvDup(*sessionKey.asTypedValue(), args[0]);
   Variant ret;
-
   g_vmContext->invokeFuncFew(ret.asTypedValue(), m_read, obj,
-                             nullptr, 1, args);
+                             nullptr, 1, sessionKey.asCell());
 
   if (ret.isString()) {
     value = ret.toString();
@@ -475,11 +468,8 @@ bool SystemlibSessionModule::write(const char *key, CStrRef value) {
 
   Variant sessionKey = String(key, CopyString);
   Variant sessionVal = value;
-  TypedValue args[2];
-  tvDup(*sessionKey.asTypedValue(), args[0]);
-  tvDup(*sessionVal.asTypedValue(), args[1]);
   Variant ret;
-
+  TypedValue args[2] = { *sessionKey.asCell(), *sessionVal.asCell() };
   g_vmContext->invokeFuncFew(ret.asTypedValue(), m_write, obj,
                              nullptr, 2, args);
 
@@ -495,12 +485,9 @@ bool SystemlibSessionModule::destroy(const char *key) {
   ObjectData *obj = getObject();
 
   Variant sessionKey = String(key, CopyString);
-  TypedValue args[1];
-  tvDup(*sessionKey.asTypedValue(), args[0]);
   Variant ret;
-
   g_vmContext->invokeFuncFew(ret.asTypedValue(), m_destroy, obj,
-                             nullptr, 1, args);
+                             nullptr, 1, sessionKey.asCell());
 
   if (ret.isBoolean() && ret.toBoolean()) {
     return true;
@@ -514,12 +501,9 @@ bool SystemlibSessionModule::gc(int maxlifetime, int *nrdels) {
   ObjectData *obj = getObject();
 
   Variant maxLifeTime = maxlifetime;
-  TypedValue args[1];
-  tvDup(*maxLifeTime.asTypedValue(), args[0]);
   Variant ret;
-
   g_vmContext->invokeFuncFew(ret.asTypedValue(), m_gc, obj,
-                             nullptr, 1, args);
+                             nullptr, 1, maxLifeTime.asCell());
 
   if (ret.isInteger()) {
     if (nrdels) {

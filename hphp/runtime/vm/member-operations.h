@@ -1497,7 +1497,7 @@ inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
     // Zend PHP.
     TypedValue tv;
     initScratchKey<keyType>(scratch, key);
-    tvDup(*key, tv);
+    cellDup(*key, tv);
     bool badKey = false;
     if (IS_STRING_TYPE(tv.m_type)) {
       const char* str = tv.m_data.pstr->data();

@@ -162,9 +162,7 @@ Variant f_array_fill(int start_index, int num, CVarRef value) {
 static bool filter_func(CVarRef value, const void *data) {
   CallCtx* ctx = (CallCtx*)data;
   Variant ret;
-  TypedValue args[1];
-  tvDup(*value.asTypedValue(), args[0]);
-  g_vmContext->invokeFuncFew((TypedValue*)&ret, *ctx, 1, args);
+  g_vmContext->invokeFuncFew((TypedValue*)&ret, *ctx, 1, value.asCell() );
   return ret.toBoolean();
 }
 Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
@@ -248,7 +246,8 @@ static Variant map_func(CArrRef params, const void *data) {
     return params;
   }
   Variant ret;
-  g_vmContext->invokeFunc((TypedValue*)&ret, *ctx, params);
+  g_vmContext->invokeFunc((TypedValue*)&ret, ctx->func, params, ctx->this_,
+                          ctx->cls, nullptr, ctx->invName);
   return ret;
 }
 
@@ -474,9 +473,7 @@ Variant f_array_rand(CVarRef input, int num_req /* = 1 */) {
 static Variant reduce_func(CVarRef result, CVarRef operand, const void *data) {
   CallCtx* ctx = (CallCtx*)data;
   Variant ret;
-  TypedValue args[2];
-  tvDup(*result.asTypedValue(), args[0]);
-  tvDup(*operand.asTypedValue(), args[1]);
+  TypedValue args[2] = { *result.asCell(), *operand.asCell() };
   g_vmContext->invokeFuncFew(ret.asTypedValue(), *ctx, 2, args);
   return ret;
 }
@@ -582,10 +579,7 @@ static void walk_func(VRefParam value, CVarRef key, CVarRef userdata,
                       const void *data) {
   CallCtx* ctx = (CallCtx*)data;
   Variant sink;
-  TypedValue args[3];
-  tvDup(*value->asTypedValue(), args[0]);
-  tvDup(*key.asTypedValue(), args[1]);
-  tvDup(*userdata.asTypedValue(), args[2]);
+  TypedValue args[3] = { *value->asRef(), *key.asCell(), *userdata.asCell() };
   g_vmContext->invokeFuncFew(sink.asTypedValue(), *ctx, 3, args);
 }
 

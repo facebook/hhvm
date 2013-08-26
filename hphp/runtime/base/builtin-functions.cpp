@@ -346,7 +346,7 @@ Variant vm_call_user_func(CVarRef function, CArrRef params,
   }
   Variant ret;
   g_vmContext->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
-                          nullptr, invName);
+                          nullptr, invName, ExecutionContext::InvokeCuf);
   return ret;
 }
 

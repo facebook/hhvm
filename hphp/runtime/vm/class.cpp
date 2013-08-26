@@ -639,7 +639,7 @@ Class::PropInitVec* Class::initPropsImpl() const {
 
         auto const* value = propArr->nvGet(k);
         assert(value);
-        tvDup(*value, prop);
+        cellDup(*value, prop);
       }
     }
   }
@@ -823,7 +823,7 @@ TypedValue* Class::initSPropsImpl() const {
     if (sProp.m_class == this) {
       auto const* value = getValueFromArr(propName);
       if (value) {
-        tvDup(*value, spropTable[slot]);
+        cellDup(*value, spropTable[slot]);
       } else {
         assert(tvIsStatic(&sProp.m_val));
         spropTable[slot] = sProp.m_val;
@@ -834,7 +834,7 @@ TypedValue* Class::initSPropsImpl() const {
                                               visible, accessible);
       auto const* value = getValueFromArr(propName);
       if (value) {
-        tvDup(*value, *storage);
+        cellDup(*value, *storage);
       }
 
       tvBindIndirect(&spropTable[slot], storage);
@@ -969,12 +969,11 @@ Cell* Class::clsCnsGet(const StringData* clsCnsName) const {
     static StringData* sd86cinit = StringData::GetStaticString("86cinit");
     const Func* meth86cinit =
       m_constants[clsCnsInd].m_class->lookupMethod(sd86cinit);
-    TypedValue tv[1];
-    tv->m_data.pstr = (StringData*)clsCnsName;
-    tv->m_type = KindOfString;
-    clsCnsName->incRefCount();
+    TypedValue args[1] = {
+      make_tv<KindOfString>(const_cast<StringData*>(clsCnsName))
+    };
     g_vmContext->invokeFuncFew(clsCns, meth86cinit, ActRec::encodeClass(this),
-                               nullptr, 1, tv);
+                               nullptr, 1, args);
   }
   assert(cellIsPlausible(*clsCns));
   return clsCns;
@@ -2386,7 +2385,7 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
     m_data = (TypedValueAux*)realloc(m_data, size * sizeof(*m_data));
     assert(m_data);
   }
-  tvDup(v, m_data[m_size++]);
+  cellDup(v, m_data[m_size++]);
 }
 
 using Transl::TargetCache::handleToRef;

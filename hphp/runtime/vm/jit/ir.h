@@ -243,9 +243,9 @@ O(ConvCellToBool,              D(Bool), S(Cell),                           N) \
 O(ConvArrToDbl,                 D(Dbl), S(Arr),                          C|N) \
 O(ConvBoolToDbl,                D(Dbl), S(Bool),                           C) \
 O(ConvIntToDbl,                 D(Dbl), S(Int),                            C) \
-O(ConvObjToDbl,                 D(Dbl), S(Obj),                       N|Er|K) \
-O(ConvStrToDbl,                 D(Dbl), S(Str),                          N|K) \
-O(ConvCellToDbl,                D(Dbl), S(Cell),                      N|Er|K) \
+O(ConvObjToDbl,                 D(Dbl), S(Obj),                         N|Er) \
+O(ConvStrToDbl,                 D(Dbl), S(Str),                            N) \
+O(ConvCellToDbl,                D(Dbl), S(Cell),                        N|Er) \
                                                                               \
 O(ConvArrToInt,                 D(Int), S(Arr),                          C|N) \
 O(ConvBoolToInt,                D(Int), S(Bool),                           C) \

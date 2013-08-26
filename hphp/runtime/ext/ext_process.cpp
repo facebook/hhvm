@@ -523,7 +523,7 @@ String f_system(CStrRef command, VRefParam return_var /* = null */) {
 
 class ChildProcess : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(ChildProcess)
+  DECLARE_RESOURCE_ALLOCATION(ChildProcess)
 
   pid_t child;
   Array pipes;

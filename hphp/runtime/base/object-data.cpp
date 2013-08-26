@@ -887,14 +887,14 @@ void ObjectData::operator delete(void* p) {
   ObjectData* this_ = (ObjectData*)p;
   Class* cls = this_->getVMClass();
   size_t nProps = cls->numDeclProperties();
-  // cppext classes have their own implementation of delete
-  assert(this_->builtinPropSize() == 0);
-  TypedValue* propVec = (TypedValue*)((uintptr_t)this_ + sizeof(ObjectData));
+  size_t builtinPropSize = cls->builtinPropSize();
+  TypedValue* propVec = (TypedValue*)((uintptr_t)this_ + sizeof(ObjectData) +
+                                      builtinPropSize);
   for (unsigned i = 0; i < nProps; ++i) {
     TypedValue* prop = &propVec[i];
     tvRefcountedDecRef(prop);
   }
-  DELETEOBJSZ(sizeForNProps(nProps))(this_);
+  DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
 }
 
 void ObjectData::invokeUserMethod(TypedValue* retval, const Func* method,

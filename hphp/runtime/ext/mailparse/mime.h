@@ -42,7 +42,7 @@ public:
   static bool ProcessLine(MimePart *workpart, CStrRef line);
 
 public:
-  DECLARE_OBJECT_ALLOCATION(MimePart);
+  DECLARE_RESOURCE_ALLOCATION(MimePart);
 
   MimePart();
 

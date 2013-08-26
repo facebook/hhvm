@@ -44,7 +44,7 @@ static IMPLEMENT_THREAD_LOCAL(LdapRequestData, s_ldap_data);
 
 class LdapLink : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(LdapLink)
+  DECLARE_RESOURCE_ALLOCATION(LdapLink)
 
   LdapLink() : link(NULL) {}
   ~LdapLink() { close();}
@@ -71,7 +71,7 @@ StaticString LdapLink::s_class_name("ldap link");
 
 class LdapResult : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(LdapResult)
+  DECLARE_RESOURCE_ALLOCATION(LdapResult)
 
   LdapResult(LDAPMessage *res) : data(res) {}
   ~LdapResult() { close();}
@@ -95,7 +95,7 @@ StaticString LdapResult::s_class_name("ldap result");
 
 class LdapResultEntry : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(LdapResultEntry)
+  DECLARE_RESOURCE_ALLOCATION(LdapResultEntry)
 
   LdapResultEntry(LDAPMessage *entry, ResourceData *res)
     : data(entry), ber(NULL), result(res) {}

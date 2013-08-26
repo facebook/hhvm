@@ -27,8 +27,6 @@ namespace HPHP {
  * Base class of all PHP resources.
  */
 class ResourceData {
- public:
-  static const bool IsResourceClass = true;
  private:
   static DECLARE_THREAD_LOCAL_NO_CHECK(int, os_max_resource_id);
 

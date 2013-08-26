@@ -28,7 +28,7 @@ namespace HPHP {
  */
 class ZipFile : public File {
 public:
-  DECLARE_OBJECT_ALLOCATION(ZipFile);
+  DECLARE_RESOURCE_ALLOCATION(ZipFile);
 
   ZipFile();
   virtual ~ZipFile();

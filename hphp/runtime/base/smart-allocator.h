@@ -242,31 +242,21 @@ void *SmartAllocatorInitSetup() {
 ///////////////////////////////////////////////////////////////////////////////
 // This allocator is for unknown but fixed sized classes, like ObjectData.
 
-#define DECLARE_OBJECT_ALLOCATION_NO_SWEEP(T)                           \
+#define DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                         \
   public:                                                               \
-  /* static void *ObjAllocatorInitSetup; */                             \
-  inline ALWAYS_INLINE void operator delete(void *p) {                  \
-    if (T::IsResourceClass) {                                           \
-      RELEASEOBJ(NS, T, p);                                             \
-      return;                                                           \
-    }                                                                   \
-    ObjectData* this_ = (ObjectData*)p;                                 \
-    Class* cls = this_->getVMClass();                                   \
-    size_t nProps = cls->numDeclProperties();                           \
-    size_t builtinPropSize = cls->builtinPropSize();                    \
-    TypedValue* propVec =                                               \
-      (TypedValue *)((uintptr_t)this_ + sizeof(ObjectData) +            \
-                     builtinPropSize);                                  \
-    for (unsigned i = 0; i < nProps; ++i) {                             \
-      TypedValue* prop = &propVec[i];                                   \
-      tvRefcountedDecRef(prop);                                         \
-    }                                                                   \
-    DELETEOBJSZ(ObjectData::sizeForNProps(nProps) +                     \
-                builtinPropSize)(this_);                                \
+  inline ALWAYS_INLINE void operator delete(void* p) {                  \
+    static_assert(std::is_base_of<ResourceData,T>::value, "");          \
+    RELEASEOBJ(NS, T, p);                                               \
   }
 
+#define DECLARE_RESOURCE_ALLOCATION(T)                                  \
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                               \
+  virtual void sweep();
+
 #define DECLARE_OBJECT_ALLOCATION(T)                                    \
-  DECLARE_OBJECT_ALLOCATION_NO_SWEEP(T)                                 \
+  static void typeCheck() {                                             \
+    static_assert(std::is_base_of<ObjectData,T>::value, "");            \
+  }                                                                     \
   virtual void sweep();
 
 #define IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP_CLS(NS,T)          \

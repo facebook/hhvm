@@ -27,7 +27,7 @@ namespace HPHP {
 
 class StreamContext : public ResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(StreamContext);
+  DECLARE_RESOURCE_ALLOCATION(StreamContext);
 
   static StaticString s_class_name;
   // overriding ResourceData

@@ -27,7 +27,7 @@ namespace HPHP {
  */
 class OutputFile : public File {
 public:
-  DECLARE_OBJECT_ALLOCATION(OutputFile);
+  DECLARE_RESOURCE_ALLOCATION(OutputFile);
 
   explicit OutputFile(CStrRef filename);
   virtual ~OutputFile();

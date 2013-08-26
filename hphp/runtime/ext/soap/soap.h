@@ -157,7 +157,7 @@ struct soapClass {
 
 class soapHeader : public ResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(soapHeader);
+  DECLARE_RESOURCE_ALLOCATION(soapHeader);
 
   static StaticString s_class_name;
   // overriding ResourceData

@@ -28,7 +28,7 @@ namespace HPHP {
  */
 class UrlFile : public MemFile {
 public:
-  DECLARE_OBJECT_ALLOCATION(UrlFile);
+  DECLARE_RESOURCE_ALLOCATION(UrlFile);
 
   explicit UrlFile(const char *method = "GET", CArrRef headers = null_array,
                    CStrRef postData = null_string, int maxRedirect = 20,

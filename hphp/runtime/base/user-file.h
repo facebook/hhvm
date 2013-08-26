@@ -24,7 +24,7 @@ namespace HPHP {
 
 class UserFile : public File {
 public:
-  DECLARE_OBJECT_ALLOCATION(UserFile);
+  DECLARE_RESOURCE_ALLOCATION(UserFile);
 
   explicit UserFile(Class *cls, int options = 0,
                     CVarRef context = uninit_null());

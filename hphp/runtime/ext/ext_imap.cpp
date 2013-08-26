@@ -38,7 +38,7 @@ namespace HPHP {
 
 class ImapStream : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(ImapStream);
+  DECLARE_RESOURCE_ALLOCATION(ImapStream);
 
   ImapStream(MAILSTREAM *stream, int64_t flag)
       : m_stream(stream), m_flag(flag) {

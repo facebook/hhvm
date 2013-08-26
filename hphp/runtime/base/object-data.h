@@ -72,11 +72,6 @@ class ObjectData {
     RealPropExist = 16,    // For property_exists
   };
 
-  // ResourceData overrides this setting IsResourceClass to true;
-  // various macros check whether type T is a resource type by
-  // inspecting "T::IsResourceClass".
-  static const bool IsResourceClass = false;
-
   static int ObjAllocatorSizeClassCount;
  private:
   static DECLARE_THREAD_LOCAL_NO_CHECK(int, os_max_id);

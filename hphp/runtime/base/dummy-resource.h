@@ -32,7 +32,7 @@ namespace HPHP {
  */
 class DummyResource : public ResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(DummyResource);
+  DECLARE_RESOURCE_ALLOCATION(DummyResource);
   DummyResource();
   static StaticString s_class_name;
   virtual CStrRef o_getClassNameHook() const { return s_class_name; }

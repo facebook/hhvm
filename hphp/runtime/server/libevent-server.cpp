@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/url.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/debugger/debugger.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/timer.h"
@@ -149,9 +148,6 @@ void LibEventWorker::doJobImpl(LibEventJobPtr job, bool abort) {
 void LibEventWorker::onThreadEnter() {
   assert(m_opaque);
   LibEventServer *server = (LibEventServer*)m_opaque;
-  if (RuntimeOption::EnableDebugger) {
-    Eval::Debugger::RegisterThread();
-  }
   m_handler = server->createRequestHandler();
   m_requestsTimedOutOnQueue =
     ServiceData::createTimeseries("requests_timed_out_on_queue",

@@ -432,7 +432,7 @@ std::string BreakPointInfo::state(bool padding) const {
 }
 
 std::string BreakPointInfo::regex(const std::string &name) const {
-  TRACE(2, "BreakPointInfo::regex\n");
+  TRACE(7, "BreakPointInfo::regex\n");
   if (m_regex) {
     return "regex{" + name + "}";
   }
@@ -440,7 +440,7 @@ std::string BreakPointInfo::regex(const std::string &name) const {
 }
 
 std::string BreakPointInfo::getNamespace() const {
-  TRACE(2, "BreakPointInfo::getNamespace\n");
+  TRACE(7, "BreakPointInfo::getNamespace\n");
   if (!m_funcs.empty()) {
     return m_funcs[0]->m_namespace;
   }
@@ -448,7 +448,7 @@ std::string BreakPointInfo::getNamespace() const {
 }
 
 std::string BreakPointInfo::getClass() const {
-  TRACE(2, "BreakPointInfo::getClass\n");
+  TRACE(7, "BreakPointInfo::getClass\n");
   if (!m_funcs.empty()) {
     return m_funcs[0]->m_class;
   }
@@ -456,7 +456,7 @@ std::string BreakPointInfo::getClass() const {
 }
 
 std::string BreakPointInfo::getFunction() const {
-  TRACE(2, "BreakPointInfo::getFunction\n");
+  TRACE(7, "BreakPointInfo::getFunction\n");
   if (!m_funcs.empty()) {
     return m_funcs[0]->m_function;
   }
@@ -464,7 +464,7 @@ std::string BreakPointInfo::getFunction() const {
 }
 
 std::string BreakPointInfo::getFuncName() const {
-  TRACE(2, "BreakPointInfo::getFuncName\n");
+  TRACE(7, "BreakPointInfo::getFuncName\n");
   if (!m_funcs.empty()) {
     return m_funcs[0]->getName();
   }
@@ -472,7 +472,7 @@ std::string BreakPointInfo::getFuncName() const {
 }
 
 std::string BreakPointInfo::site() const {
-  TRACE(2, "BreakPointInfo::site\n");
+  TRACE(7, "BreakPointInfo::site\n");
   string ret;
 
   string preposition = "at ";
@@ -924,7 +924,7 @@ bool BreakPointInfo::MatchFile(const char *haystack, int haystack_len,
 // Returns true if file is a suffix path of fullPath
 bool BreakPointInfo::MatchFile(const std::string& file,
                                const std::string& fullPath) {
-  TRACE(2, "BreakPointInfo::MatchFile(const std::string&\n");
+  TRACE(7, "BreakPointInfo::MatchFile(const std::string&\n");
   if (file == fullPath) {
     return true;
   }

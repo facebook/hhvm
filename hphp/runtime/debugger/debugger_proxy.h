@@ -136,9 +136,9 @@ private:
   DSandboxInfo m_dummyInfo;
 
   ThreadMode m_threadMode;
-  int64_t m_thread;
-  DThreadInfoPtr m_newThread;
-  std::map<int64_t, DThreadInfoPtr> m_threads;
+  int64_t m_thread; // Thread allowed to process interrupts
+  DThreadInfoPtr m_newThread; // Used by CmdThread to switch threads
+  std::map<int64_t, DThreadInfoPtr> m_threads; // Threads in blockUntilOwn
 
   CmdFlowControlPtr m_flow; // c, s, n, o commands that can skip breakpoints
 

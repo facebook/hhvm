@@ -71,11 +71,6 @@ void Debugger::UnregisterSandbox(CStrRef id) {
   s_debugger.unregisterSandbox(id.get());
 }
 
-void Debugger::RegisterThread() {
-  TRACE(2, "Debugger::RegisterThread\n");
-  s_debugger.registerThread();
-}
-
 DebuggerProxyPtr Debugger::CreateProxy(SmartPtr<Socket> socket, bool local) {
   TRACE(2, "Debugger::CreateProxy\n");
   return s_debugger.createProxy(socket, local);
@@ -92,7 +87,7 @@ int Debugger::CountConnectedProxy() {
 }
 
 DebuggerProxyPtr Debugger::GetProxy() {
-  TRACE(2, "Debugger::GetProxy\n");
+  TRACE(7, "Debugger::GetProxy\n");
   CStrRef sandboxId = g_context->getSandboxId();
   return s_debugger.findProxy(sandboxId.get());
 }
@@ -315,16 +310,26 @@ String Debugger::ColorStderr(CStrRef s) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+// The flag for this is in the VM's normal ThreadInfo, but we don't
+// have a way to get that given just a tid. Use our own map to find it
+// and answer the question.
 bool Debugger::isThreadDebugging(int64_t tid) {
-  TRACE(2, "Debugger::isThreadDebugging\n");
+  TRACE(2, "Debugger::isThreadDebugging tid=%" PRIx64 "\n", tid);
   ThreadInfoMap::const_accessor acc;
   if (m_threadInfos.find(acc, tid)) {
     ThreadInfo* ti = acc->second;
-    return (ti->m_reqInjectionData.getDebugger());
+    auto isDebugging = ti->m_reqInjectionData.getDebugger();
+    TRACE(2, "Is thread debugging? %d\n", isDebugging);
+    return isDebugging;
   }
+  TRACE(2, "Thread was never registered, assuming it is not debugging\n");
   return false;
 }
 
+// Remeber this thread's VM ThreadInfo so we can find it later via
+// isThreadDebugging(). This is called when a thread interrupts for
+// either session- or request-started, as these each signal the start
+// of debugging for request and other threads.
 void Debugger::registerThread() {
   TRACE(2, "Debugger::registerThread\n");
   ThreadInfo* ti = ThreadInfo::s_threadInfo.getNoCheck();
@@ -515,7 +520,7 @@ void Debugger::removeProxy(DebuggerProxyPtr proxy) {
 }
 
 DebuggerProxyPtr Debugger::findProxy(const StringData* sandboxId) {
-  TRACE(2, "Debugger::findProxy\n");
+  TRACE(7, "Debugger::findProxy\n");
   if (sandboxId) {
     ProxyMap::const_accessor acc;
     if (m_proxyMap.find(acc, sandboxId)) {

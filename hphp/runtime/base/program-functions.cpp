@@ -1172,7 +1172,6 @@ static int execute_program_impl(int argc, char** argv) {
         return 1;
       }
       Eval::Debugger::RegisterSandbox(localProxy->getDummyInfo());
-      Eval::Debugger::RegisterThread();
       StringVecPtr client_args;
       bool restart = false;
       ret = 0;

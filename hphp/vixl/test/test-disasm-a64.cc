@@ -28,8 +28,8 @@
 #include <cstring>
 #include <gtest/gtest.h>
 
-#include "hphp/util/vixl/a64/macro-assembler-a64.h"
-#include "hphp/util/vixl/a64/disasm-a64.h"
+#include "hphp/vixl/a64/macro-assembler-a64.h"
+#include "hphp/vixl/a64/disasm-a64.h"
 
 #define EXP_SIZE   (256)
 #define INSTR_SIZE (1024)

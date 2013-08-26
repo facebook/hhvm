@@ -27,8 +27,8 @@
 #ifndef VIXL_A64_DISASM_A64_H
 #define VIXL_A64_DISASM_A64_H
 
-#include "hphp/util/vixl/globals.h"
-#include "hphp/util/vixl/utils.h"
+#include "hphp/vixl/globals.h"
+#include "hphp/vixl/utils.h"
 #include "instructions-a64.h"
 #include "decoder-a64.h"
 

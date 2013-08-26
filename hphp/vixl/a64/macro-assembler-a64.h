@@ -27,9 +27,9 @@
 #ifndef VIXL_A64_MACRO_ASSEMBLER_A64_H_
 #define VIXL_A64_MACRO_ASSEMBLER_A64_H_
 
-#include "hphp/util/vixl/globals.h"
-#include "hphp/util/vixl/a64/assembler-a64.h"
-#include "hphp/util/vixl/a64/debugger-a64.h"
+#include "hphp/vixl/globals.h"
+#include "hphp/vixl/a64/assembler-a64.h"
+#include "hphp/vixl/a64/debugger-a64.h"
 
 
 #define LS_MACRO_LIST(V)                                      \

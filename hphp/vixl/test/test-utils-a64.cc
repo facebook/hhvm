@@ -28,10 +28,10 @@
 
 #include <math.h>   // Needed for isnan().
 
-#include "hphp/util/vixl/a64/macro-assembler-a64.h"
-#include "hphp/util/vixl/a64/simulator-a64.h"
-#include "hphp/util/vixl/a64/disasm-a64.h"
-#include "hphp/util/vixl/a64/cpu-a64.h"
+#include "hphp/vixl/a64/macro-assembler-a64.h"
+#include "hphp/vixl/a64/simulator-a64.h"
+#include "hphp/vixl/a64/disasm-a64.h"
+#include "hphp/vixl/a64/cpu-a64.h"
 
 #define __ masm->
 

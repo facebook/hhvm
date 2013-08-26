@@ -25,7 +25,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#include "hphp/util/vixl/a64/assembler-a64.h"
+#include "hphp/vixl/a64/assembler-a64.h"
 
 #include <cmath>
 

@@ -27,7 +27,7 @@
 #ifndef VIXL_CPU_A64_H
 #define VIXL_CPU_A64_H
 
-#include "hphp/util/vixl/globals.h"
+#include "hphp/vixl/globals.h"
 
 namespace vixl {
 

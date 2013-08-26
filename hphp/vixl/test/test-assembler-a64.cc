@@ -29,12 +29,12 @@
 #include <cmath>
 #include <gtest/gtest.h>
 
-#include "hphp/util/vixl/test/test-utils-a64.h"
-#include "hphp/util/vixl/a64/macro-assembler-a64.h"
-#include "hphp/util/vixl/a64/simulator-a64.h"
-#include "hphp/util/vixl/a64/debugger-a64.h"
-#include "hphp/util/vixl/a64/disasm-a64.h"
-#include "hphp/util/vixl/a64/cpu-a64.h"
+#include "hphp/vixl/test/test-utils-a64.h"
+#include "hphp/vixl/a64/macro-assembler-a64.h"
+#include "hphp/vixl/a64/simulator-a64.h"
+#include "hphp/vixl/a64/debugger-a64.h"
+#include "hphp/vixl/a64/disasm-a64.h"
+#include "hphp/vixl/a64/cpu-a64.h"
 
 namespace vixl {
 

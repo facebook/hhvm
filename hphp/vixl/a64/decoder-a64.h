@@ -29,8 +29,8 @@
 
 #include <list>
 
-#include "hphp/util/vixl/globals.h"
-#include "hphp/util/vixl/a64/instructions-a64.h"
+#include "hphp/vixl/globals.h"
+#include "hphp/vixl/a64/instructions-a64.h"
 
 
 #ifdef DEBUG

@@ -29,7 +29,7 @@
 
 
 #include <string.h>
-#include "hphp/util/vixl/globals.h"
+#include "hphp/vixl/globals.h"
 
 namespace vixl {
 

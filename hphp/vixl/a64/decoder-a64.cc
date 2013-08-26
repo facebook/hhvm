@@ -24,9 +24,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "hphp/util/vixl/a64/decoder-a64.h"
-#include "hphp/util/vixl/globals.h"
-#include "hphp/util/vixl/utils.h"
+#include "hphp/vixl/a64/decoder-a64.h"
+#include "hphp/vixl/globals.h"
+#include "hphp/vixl/utils.h"
 
 namespace vixl {
 // Top-level instruction decode function.

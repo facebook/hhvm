@@ -27,9 +27,9 @@
 #ifndef VIXL_A64_INSTRUCTIONS_A64_H_
 #define VIXL_A64_INSTRUCTIONS_A64_H_
 
-#include "hphp/util/vixl/globals.h"
-#include "hphp/util/vixl/utils.h"
-#include "hphp/util/vixl/a64/constants-a64.h"
+#include "hphp/vixl/globals.h"
+#include "hphp/vixl/utils.h"
+#include "hphp/vixl/a64/constants-a64.h"
 
 namespace vixl {
 // ISA constants. --------------------------------------------------------------

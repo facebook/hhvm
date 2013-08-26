@@ -18,7 +18,7 @@ $excluded = array(
   'neo/',
   'util/cronoutils.h',
   'util/cronoutils.cpp',
-  'util/vixl/',
+  'vixl/',
   'runtime/ext/quicklz.h',
   'runtime/ext/quicklz.inc',
   'facebook',

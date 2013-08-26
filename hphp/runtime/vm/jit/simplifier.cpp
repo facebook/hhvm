@@ -361,6 +361,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case ConvDblToStr:  return simplifyConvDblToStr(inst);
   case ConvIntToStr:  return simplifyConvIntToStr(inst);
   case ConvCellToBool:return simplifyConvCellToBool(inst);
+  case ConvCellToStr: return simplifyConvCellToStr(inst);
   case ConvCellToInt: return simplifyConvCellToInt(inst);
   case ConvCellToDbl: return simplifyConvCellToDbl(inst);
   case Floor:         return simplifyFloor(inst);
@@ -1621,6 +1622,23 @@ SSATmp* Simplifier::simplifyConvCellToBool(IRInstruction* inst) {
   if (srcType.isInt())    return gen(ConvIntToBool, src);
   if (srcType.isString()) return gen(ConvStrToBool, src);
   if (srcType.isObj())    return gen(ConvObjToBool, src);
+  if (srcType.isRes())    return nullptr; // No specialization yet
+
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyConvCellToStr(IRInstruction* inst) {
+  auto const src     = inst->src(0);
+  auto const srcType = src->type();
+
+  if (srcType.isBool())   return gen(ConvBoolToStr, src);
+  if (srcType.isNull())   return cns(StringData::GetStaticString(""));
+  if (srcType.isArray())  return cns(StringData::GetStaticString("Array"));
+  if (srcType.isDbl())    return gen(ConvDblToStr, src);
+  if (srcType.isInt())    return gen(ConvIntToStr, src);
+  if (srcType.isString()) return gen(IncRef, src);
+  if (srcType.isObj())    return gen(ConvObjToStr, src);
+  if (srcType.isRes())    return gen(ConvResToStr, src);
 
   return nullptr;
 }
@@ -1636,6 +1654,7 @@ SSATmp* Simplifier::simplifyConvCellToInt(IRInstruction* inst) {
   if (srcType.isDbl())    return gen(ConvDblToInt, src);
   if (srcType.isString()) return gen(ConvStrToInt, src);
   if (srcType.isObj())    return gen(ConvObjToInt, inst->taken(), src);
+  if (srcType.isRes())    return nullptr; // No specialization yet
 
   return nullptr;
 }
@@ -1651,6 +1670,7 @@ SSATmp* Simplifier::simplifyConvCellToDbl(IRInstruction* inst) {
   if (srcType.isInt())    return gen(ConvIntToDbl, src);
   if (srcType.isString()) return gen(ConvStrToDbl, src);
   if (srcType.isObj())    return gen(ConvObjToDbl, inst->taken(), src);
+  if (srcType.isRes())    return nullptr; // No specialization yet
 
   return nullptr;
 }

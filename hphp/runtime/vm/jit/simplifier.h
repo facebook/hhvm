@@ -107,6 +107,7 @@ private:
   SSATmp* simplifyConvDblToStr(IRInstruction*);
   SSATmp* simplifyConvIntToStr(IRInstruction*);
   SSATmp* simplifyConvCellToBool(IRInstruction*);
+  SSATmp* simplifyConvCellToStr(IRInstruction*);
   SSATmp* simplifyConvCellToInt(IRInstruction*);
   SSATmp* simplifyConvCellToDbl(IRInstruction*);
   SSATmp* simplifyFloor(IRInstruction*);

@@ -3178,15 +3178,15 @@ void HhbcTranslator::emitCastBool() {
 }
 
 void HhbcTranslator::emitCastDouble() {
-  IRTrace* catchTrace = getCatchTrace();
-  SSATmp* src = popC();
+  auto const catchTrace = getCatchTrace();
+  auto const src = popC();
   push(gen(ConvCellToDbl, catchTrace, src));
   gen(DecRef, src);
 }
 
 void HhbcTranslator::emitCastInt() {
-  IRTrace* catchTrace = getCatchTrace();
-  SSATmp* src = popC();
+  auto const catchTrace = getCatchTrace();
+  auto const src = popC();
   push(gen(ConvCellToInt, catchTrace, src));
   gen(DecRef, src);
 }
@@ -3202,29 +3202,10 @@ void HhbcTranslator::emitCastObject() {
 }
 
 void HhbcTranslator::emitCastString() {
-  IRTrace* catchTrace = getCatchTrace();
-  SSATmp* src = popC();
-  Type fromType = src->type();
-  if (fromType.isString()) {
-    push(src);
-  } else if (fromType.isNull()) {
-    push(cns(StringData::GetStaticString("")));
-  } else if (fromType.isArray()) {
-    push(cns(StringData::GetStaticString("Array")));
-    gen(DecRef, src);
-  } else if (fromType.isBool()) {
-    push(gen(ConvBoolToStr, src));
-  } else if (fromType.isDbl()) {
-    push(gen(ConvDblToStr, src));
-  } else if (fromType.isInt()) {
-    push(gen(ConvIntToStr, src));
-  } else if (fromType.isObj()) {
-    push(gen(ConvObjToStr, catchTrace, src));
-  } else if (fromType.isRes()) {
-    push(gen(ConvResToStr, catchTrace, src));
-  } else {
-    push(gen(ConvCellToStr, catchTrace, src));
-  }
+  auto const catchTrace = getCatchTrace();
+  auto const src = popC();
+  push(gen(ConvCellToStr, catchTrace, src));
+  gen(DecRef, src);
 }
 
 static

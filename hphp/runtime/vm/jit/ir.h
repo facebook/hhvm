@@ -259,9 +259,9 @@ O(ConvCellToObj,                D(Obj), S(Cell),                     N|CRc|K) \
 O(ConvBoolToStr,          D(StaticStr), S(Bool),                           C) \
 O(ConvDblToStr,                 D(Str), S(Dbl),                            N) \
 O(ConvIntToStr,                 D(Str), S(Int),                            N) \
-O(ConvObjToStr,                 D(Str), S(Obj),                   N|Er|CRc|K) \
-O(ConvResToStr,                 D(Str), S(Res),                   N|Er|CRc|K) \
-O(ConvCellToStr,                D(Str), S(Cell),                  N|Er|CRc|K) \
+O(ConvObjToStr,                 D(Str), S(Obj),                         N|Er) \
+O(ConvResToStr,                 D(Str), S(Res),                         N|Er) \
+O(ConvCellToStr,                D(Str), S(Cell),                        N|Er) \
                                                                               \
 O(ExtendsClass,                D(Bool), S(Cls) C(Cls),                     C) \
 O(InstanceOf,                  D(Bool), S(Cls) S(Cls),                   C|N) \

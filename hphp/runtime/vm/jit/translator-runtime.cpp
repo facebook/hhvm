@@ -160,39 +160,19 @@ StringData* convIntToStrHelper(int64_t i) {
 }
 
 StringData* convObjToStrHelper(ObjectData* o) {
-  try {
-    auto s = o->invokeToString();
-    auto r = s.get();
-    decRefObj(o);
-    if (!r->isStatic()) r->incRefCount();
-    return r;
-  } catch (...) {
-    // spill object back to stack. unwinder
-    // will take care of decreffing it.
-    VMRegAnchor _;
-    TypedValue* spillSlot = (TypedValue *)vmsp();
-    spillSlot->m_data.pobj = o;
-    spillSlot->m_type = KindOfObject;
-    throw;
-  }
+  auto s = o->invokeToString();
+  auto r = s.get();
+  decRefObj(o);
+  if (!r->isStatic()) r->incRefCount();
+  return r;
 }
 
 StringData* convResToStrHelper(ResourceData* o) {
-  try {
-    auto s = o->o_toString();
-    auto r = s.get();
-    decRefRes(o);
-    if (!r->isStatic()) r->incRefCount();
-    return r;
-  } catch (...) {
-    // spill object back to stack. unwinder
-    // will take care of decreffing it.
-    VMRegAnchor _;
-    TypedValue* spillSlot = (TypedValue *)vmsp();
-    spillSlot->m_data.pres = o;
-    spillSlot->m_type = KindOfResource;
-    throw;
-  }
+  auto s = o->o_toString();
+  auto r = s.get();
+  decRefRes(o);
+  if (!r->isStatic()) r->incRefCount();
+  return r;
 }
 
 const StaticString

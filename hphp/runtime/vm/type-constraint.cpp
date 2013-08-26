@@ -73,6 +73,9 @@ void TypeConstraint::init() {
       { StringData::GetStaticString("array"),    { KindOfArray,
                                                    MetaType::Precise }},
 
+      { StringData::GetStaticString("resource"), { KindOfResource,
+                                                   MetaType::Precise }},
+
       { StringData::GetStaticString("self"),     { KindOfObject,
                                                    MetaType::Self }},
       { StringData::GetStaticString("parent"),   { KindOfObject,

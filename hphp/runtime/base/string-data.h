@@ -17,13 +17,14 @@
 #ifndef incl_HPHP_STRING_DATA_H_
 #define incl_HPHP_STRING_DATA_H_
 
+#include "hphp/util/hash.h"
+#include "hphp/util/alloc.h"
+#include "hphp/util/word-same.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/smart-allocator.h"
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/bstring.h"
-#include "hphp/util/hash.h"
-#include "hphp/util/alloc.h"
 #include "hphp/runtime/base/exceptions.h"
 
 namespace HPHP {
@@ -314,18 +315,8 @@ public:
     size_t len = m_len;
     if (len != s->m_len) return false;
     // The underlying buffer and its length are 32-bit aligned, ensured by
-    // StringData layout, smart_malloc, or malloc.  So compare words.
-    auto p1 = reinterpret_cast<const uint32_t*>(rawdata());
-    auto p2 = reinterpret_cast<const uint32_t*>(s->rawdata());
-    auto constexpr W = sizeof(*p1);
-    for (auto end = p1 + len / W; p1 < end; p1++, p2++) {
-      if (*p1 != *p2) return false;
-    }
-    // let W = sizeof(*p1); now p1 and p2 point to the last 0..W-1 bytes plus
-    // the 0 terminator, ie the last 1..W bytes.  Load W bytes, shift off the
-    // bytes after the 0, then compare.
-    auto shift = 8 * (W - 1) - 8 * (len % W);
-    return (*p1 << shift) == (*p2 << shift);
+    // StringData layout, smart_malloc, or malloc. So compare words.
+    return wordsame(rawdata(), s->rawdata(), len);
     // if the offset of m_small becomes 8-byte aligned, then we should
     // take advantage by changing the p1&p2 from uint32_t to uint64_t.
     static_assert(offsetof(StringData,m_small) % 8 == 4, "");

@@ -18,6 +18,7 @@
 #define incl_HPHP_HASH_H_
 
 #include <stdint.h>
+#include <cstring>
 
 #include "hphp/util/util.h"
 

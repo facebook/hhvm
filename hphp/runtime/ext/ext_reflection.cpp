@@ -85,7 +85,8 @@ const StaticString
   s_closure_in_braces("{closure}"),
   s_closureobj("closureobj"),
   s_return_type("return_type"),
-  s_type_hint("type_hint");
+  s_type_hint("type_hint"),
+  s_accessible("accessible");
 
 static const Class* get_cls(CVarRef class_or_object) {
   Class* cls = nullptr;
@@ -139,10 +140,13 @@ int get_modifiers(Attr attrs, bool cls) {
 static void set_attrs(Array& ret, int modifiers) {
   if (modifiers & 0x100) {
     ret.set(s_access, VarNR(s_public));
+    ret.set(s_accessible, true_varNR);
   } else if (modifiers & 0x200) {
     ret.set(s_access, VarNR(s_protected));
+    ret.set(s_accessible, false_varNR);
   } else if (modifiers & 0x400) {
     ret.set(s_access, VarNR(s_private));
+    ret.set(s_accessible, false_varNR);
   } else {
     assert(false);
   }
@@ -595,6 +599,7 @@ Array f_hphp_get_closure_info(CVarRef closure) {
   mi.set(s_closureobj, closure);
   mi.set(s_closure, empty_string);
   mi.remove(s_access);
+  mi.remove(s_accessible);
   mi.remove(s_modifiers);
   mi.remove(s_class);
 

@@ -1,6 +1,6 @@
 MyArrayIterator Object
 (
-    [arr:protected] => Array
+    [storage:ArrayIterator:private] => Array
         (
             [lemons] => 1
             [oranges] => 4
@@ -8,5 +8,5 @@ MyArrayIterator Object
             [apples] => 10
         )
 
-    [flags:protected] => 0
+    [flags:ArrayIterator:private] => 0
 )

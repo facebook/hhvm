@@ -132,7 +132,7 @@ struct IfCountNotStatic {
   typedef CondBlock<FAST_REFCOUNT_OFFSET,
                     RefCountStaticValue,
                     CC_Z,
-                    field_type(RefData, m_count)> NonStaticCondBlock;
+                    hphp_field_type(RefData, m_count)> NonStaticCondBlock;
   NonStaticCondBlock *m_cb; // might be null
   IfCountNotStatic(Asm& as,
                    PhysReg reg,

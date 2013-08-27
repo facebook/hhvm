@@ -195,6 +195,16 @@ public:
    */
   virtual void waitForEnd() = 0;
 
+  /*
+   * Stop accepting new connections and finish ongoing requests.
+   */
+  virtual void waitForJobs() = 0;
+
+  /*
+   * Close the port this server is listening on.
+   */
+  virtual void closePort() = 0;
+
   /**
    * Gracefully stop this web server. We will stop accepting new connections
    * and finish ongoing requests without being interrupted in the middle of

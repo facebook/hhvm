@@ -110,6 +110,8 @@ public:
   // implementing Server
   virtual void start();
   virtual void waitForEnd();
+  virtual void waitForJobs();
+  virtual void closePort();
   virtual void stop();
   virtual int getActiveWorker() {
     return m_dispatcher.getActiveWorker();

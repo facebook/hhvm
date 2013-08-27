@@ -136,8 +136,10 @@ int LibEventServer::getLibEventConnectionCount() {
 void LibEventServer::start() {
   if (getStatus() == RunStatus::RUNNING) return;
 
-  if (getAcceptSocket() != 0) {
-    throw FailedToListenException(m_address, m_port);
+  if (m_server != nullptr) {
+    if (getAcceptSocket() != 0) {
+      throw FailedToListenException(m_address, m_port);
+    }
   }
 
   if (m_server_ssl != nullptr && m_accept_sock_ssl != -2) {
@@ -200,7 +202,7 @@ void LibEventServer::dispatch() {
   }
 }
 
-void LibEventServer::stop() {
+void LibEventServer::waitForJobs() {
   Lock lock(m_mutex);
   if (getStatus() != RunStatus::RUNNING || m_server == nullptr) return;
 
@@ -249,9 +251,16 @@ void LibEventServer::stop() {
     // an error occured but we're in shutdown already, so ignore
   }
   m_dispatcherThread.waitForEnd();
+}
 
+void LibEventServer::closePort() {
   evhttp_free(m_server);
   m_server = nullptr;
+}
+
+void LibEventServer::stop() {
+  waitForJobs();
+  closePort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -72,11 +72,27 @@ StaticString XmlDocWrapper::s_class_name("xmlDoc");
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
+static Object find_node(CVarRef children, xmlNodePtr node) {
+  for (ArrayIter iter(children.toArray()); iter; ++iter) {
+    if (iter.second().isObject()) {
+      c_SimpleXMLElement *elem =
+        iter.second().toObject().getTyped<c_SimpleXMLElement>();
+      Object ret = elem->m_node == node ? elem
+                                        : find_node(elem->m_children, node);
+      if (!ret.isNull()) return ret;
+    } else if(iter.second().isArray()) {
+      Object ret = find_node(iter.second(), node);
+      if (!ret.isNull()) return ret;
+    }
+  }
+  return nullptr;
+}
+
 static inline bool match_ns(xmlNodePtr node, CStrRef ns, bool is_prefix) {
   if (ns.empty()) {
     return true;
   }
-  if (node->ns == NULL || node->ns->prefix == NULL) {
+  if (node->ns == nullptr || node->ns->prefix == nullptr) {
     return false;
   }
   if (node->ns && !xmlStrcmp(is_prefix ? node->ns->prefix : node->ns->href,
@@ -129,12 +145,14 @@ static void add_property(Array &properties, xmlNodePtr node, Object value) {
   }
 }
 
-static Object create_text(CResRef doc, xmlNodePtr node,
+static Object create_text(c_SimpleXMLElement *root,
+                          CResRef doc, xmlNodePtr node,
                           CStrRef value, CStrRef ns,
                           bool is_prefix, bool free_text) {
   Object obj = create_object(doc.getTyped<XmlDocWrapper>()->
                              getClass(), Array(), false);
   c_SimpleXMLElement *elem = obj.getTyped<c_SimpleXMLElement>();
+  elem->m_root = root;
   elem->m_doc = doc;
   elem->m_node = node->parent; // assign to parent, not node
   elem->m_children.set(0, value);
@@ -144,24 +162,28 @@ static Object create_text(CResRef doc, xmlNodePtr node,
   return obj;
 }
 
-static Array create_children(CResRef doc, xmlNodePtr root,
+static Array create_children(c_SimpleXMLElement *m_root,
+                             CResRef doc, xmlNodePtr root,
                              CStrRef ns, bool is_prefix);
 
-static Object create_element(CResRef doc, xmlNodePtr node,
+static Object create_element(c_SimpleXMLElement *root,
+                             CResRef doc, xmlNodePtr node,
                              CStrRef ns, bool is_prefix) {
   Object obj = create_object(doc.getTyped<XmlDocWrapper>()->
                              getClass(), Array(), false);
   c_SimpleXMLElement *elem = obj.getTyped<c_SimpleXMLElement>();
+  elem->m_root = root ? root : elem;
   elem->m_doc = doc;
   elem->m_node = node;
   if (node) {
-    elem->m_children = create_children(doc, node, ns, is_prefix);
+    elem->m_children = create_children(elem->m_root, doc, node, ns, is_prefix);
     elem->m_attributes = collect_attributes(node, ns, is_prefix);
   }
   return obj;
 }
 
-static Array create_children(CResRef doc, xmlNodePtr root,
+static Array create_children(c_SimpleXMLElement *m_root,
+                             CResRef doc, xmlNodePtr root,
                              CStrRef ns, bool is_prefix) {
   Array properties = Array::Create();
   for (xmlNodePtr node = root->children; node; node = node->next) {
@@ -177,7 +199,8 @@ static Array create_children(CResRef doc, xmlNodePtr root,
         if (node->content && *node->content && !xmlIsBlankNode(node)) {
           add_property
             (properties, root,
-             create_text(doc, node, node_list_to_string(root->doc, node),
+             create_text(m_root, doc, node,
+                         node_list_to_string(root->doc, node),
                          ns, is_prefix, true));
         }
         continue;
@@ -190,10 +213,11 @@ static Array create_children(CResRef doc, xmlNodePtr root,
       if (child && (child->type == XML_TEXT_NODE ||
                     child->type == XML_CDATA_SECTION_NODE)
                 && !xmlIsBlankNode(child)) {
-        sub = create_text(doc, child, node_list_to_string(root->doc, child),
+        sub = create_text(m_root, doc, child,
+                          node_list_to_string(root->doc, child),
                           ns, is_prefix, false);
       } else {
-        sub = create_element(doc, node, ns, is_prefix);
+        sub = create_element(m_root, doc, node, ns, is_prefix);
       }
       add_property(properties, node, sub);
     }
@@ -266,7 +290,7 @@ Variant f_simplexml_import_dom(CObjRef node,
   if (nodep && nodep->type == XML_ELEMENT_NODE) {
     Resource obj =
       Resource(NEWOBJ(XmlDocWrapper)(nodep->doc, class_name, node));
-    return create_element(obj, nodep, String(), false);
+    return create_element(nullptr, obj, nodep, String(), false);
   } else {
     raise_warning("Invalid Nodetype to import");
     return uninit_null();
@@ -296,14 +320,16 @@ Variant f_simplexml_load_string(CStrRef data,
     cls = c_SimpleXMLElement::s_cls;
   }
 
-  xmlDocPtr doc = xmlReadMemory(data.data(), data.size(), NULL, NULL, options);
+  xmlDocPtr doc = xmlReadMemory(data.data(), data.size(),
+                                nullptr, nullptr, options);
   xmlNodePtr root = xmlDocGetRootElement(doc);
   if (!doc) {
     return false;
   }
 
-  return create_element(Resource(NEWOBJ(XmlDocWrapper)(doc, cls->nameRef())),
-                                           root, ns, is_prefix);
+  return create_element(nullptr,
+                        Resource(NEWOBJ(XmlDocWrapper)(doc, cls->nameRef())),
+                        root, ns, is_prefix);
 }
 
 Variant f_simplexml_load_file(CStrRef filename,
@@ -324,7 +350,7 @@ c_SimpleXMLElement::c_SimpleXMLElement(Class* cb) :
                        ObjectData::UseUnset|
                        ObjectData::CallToImpl|
                        ObjectData::HasClone>(cb),
-      m_node(NULL), m_is_text(false), m_free_text(false),
+      m_root(nullptr), m_node(nullptr), m_is_text(false), m_free_text(false),
       m_is_attribute(false), m_is_children(false), m_is_property(false),
       m_is_array(false), m_xpath(nullptr) {
   m_children = Array::Create();
@@ -353,7 +379,7 @@ c_SimpleXMLElement* c_SimpleXMLElement::Clone(ObjectData* obj) {
   node->m_is_property = thiz->m_is_property;
   node->m_is_array = thiz->m_is_array;
   node->m_children =
-    create_children(thiz->m_doc, thiz->m_node, String(), false);
+    create_children(nullptr, thiz->m_doc, thiz->m_node, String(), false);
   node->m_attributes = collect_attributes(thiz->m_node, String(), false);
   return node;
 }
@@ -372,13 +398,14 @@ void c_SimpleXMLElement::t___construct(CStrRef data, int64_t options /* = 0 */,
     xml = ret.toString();
   }
 
-  xmlDocPtr doc = xmlReadMemory(xml.data(), xml.size(), NULL, NULL, options);
+  xmlDocPtr doc = xmlReadMemory(xml.data(), xml.size(),
+                                nullptr, nullptr, options);
   if (doc) {
     m_doc =
       Resource(NEWOBJ(XmlDocWrapper)(doc, o_getClassName()));
     m_node = xmlDocGetRootElement(doc);
     if (m_node) {
-      m_children = create_children(m_doc, m_node, ns, is_prefix);
+      m_children = create_children(nullptr, m_doc, m_node, ns, is_prefix);
       m_attributes = collect_attributes(m_node, ns, is_prefix);
     }
   } else {
@@ -396,13 +423,13 @@ Variant c_SimpleXMLElement::t_xpath(CStrRef path) {
 
   int nsnbr = 0;
   xmlNsPtr *ns = xmlGetNsList(doc, m_node);
-  if (ns != NULL) {
-    while (ns[nsnbr] != NULL) {
+  if (ns != nullptr) {
+    while (ns[nsnbr] != nullptr) {
       nsnbr++;
     }
   }
 
-  if (m_xpath == NULL) {
+  if (m_xpath == nullptr) {
     m_xpath = xmlXPathNewContext(doc);
   }
   m_xpath->node = m_node;
@@ -410,9 +437,9 @@ Variant c_SimpleXMLElement::t_xpath(CStrRef path) {
   m_xpath->nsNr = nsnbr;
 
   xmlXPathObjectPtr retval = xmlXPathEval((xmlChar *)path.data(), m_xpath);
-  if (ns != NULL) {
+  if (ns != nullptr) {
     xmlFree(ns);
-    m_xpath->namespaces = NULL;
+    m_xpath->namespaces = nullptr;
     m_xpath->nsNr = 0;
   }
 
@@ -430,24 +457,20 @@ Variant c_SimpleXMLElement::t_xpath(CStrRef path) {
   for (int i = 0; i < result->nodeNr; ++i) {
     xmlNodePtr nodeptr = result->nodeTab[i];
     Object sub;
-    /**
-     * Detect the case where the last selector is text(), simplexml
-     * always accesses the text() child by default, therefore we assign
-     * to the parent node.
-     */
-    switch (nodeptr->type) {
-    case XML_TEXT_NODE:
-    case XML_CDATA_SECTION_NODE:
-      sub = create_element(m_doc, nodeptr->parent, String(), false);
-      break;
-    case XML_ELEMENT_NODE:
-      sub = create_element(m_doc, nodeptr, String(), false);
-      break;
-    case XML_ATTRIBUTE_NODE:
-      sub = create_element(m_doc, nodeptr->parent, String(), false);
-      break;
-    default:
-      break;
+    if (m_node == nodeptr) {
+      sub = this;
+    } else {
+      switch (nodeptr->type) {
+        case XML_TEXT_NODE:
+        case XML_CDATA_SECTION_NODE:
+        case XML_ATTRIBUTE_NODE:
+          sub = find_node(m_root->m_children, nodeptr->parent);
+          break;
+        case XML_ELEMENT_NODE:
+          sub = find_node(m_root->m_children, nodeptr);
+        default:
+          break;
+      }
     }
     ret.append(sub);
   }
@@ -479,8 +502,8 @@ Variant c_SimpleXMLElement::t_asxml(CStrRef filename /* = "" */) {
     }
 
     xmlOutputBufferPtr outbuf =
-      xmlOutputBufferCreateFilename(translated.c_str(), NULL, 0);
-    if (outbuf == NULL) {
+      xmlOutputBufferCreateFilename(translated.c_str(), nullptr, 0);
+    if (outbuf == nullptr) {
       return false;
     }
     xmlNodeDumpOutput(outbuf, m_node->doc, m_node, 0, 0,
@@ -498,8 +521,8 @@ Variant c_SimpleXMLElement::t_asxml(CStrRef filename /* = "" */) {
     return ret;
   }
 
-  xmlOutputBufferPtr outbuf = xmlAllocOutputBuffer(NULL);
-  if (outbuf == NULL) {
+  xmlOutputBufferPtr outbuf = xmlAllocOutputBuffer(nullptr);
+  if (outbuf == nullptr) {
     return false;
   }
   xmlNodeDumpOutput(outbuf, m_node->doc, m_node, 0, 0,
@@ -541,6 +564,7 @@ Object c_SimpleXMLElement::t_children(CStrRef ns /* = "" */,
   Object obj = create_object(m_doc.getTyped<XmlDocWrapper>()->
                              getClass(), Array(), false);
   c_SimpleXMLElement *elem = obj.getTyped<c_SimpleXMLElement>();
+  elem->m_root = m_root;
   elem->m_doc = m_doc;
   elem->m_node = m_node;
   elem->m_is_text = m_is_text;
@@ -607,6 +631,7 @@ Object c_SimpleXMLElement::t_attributes(CStrRef ns /* = "" */,
   Object obj = create_object(m_doc.getTyped<XmlDocWrapper>()->
                              getClass(), Array(), false);
   c_SimpleXMLElement *elem = obj.getTyped<c_SimpleXMLElement>();
+  elem->m_root = m_root;
   elem->m_doc = m_doc;
   elem->m_node = m_node;
   elem->m_is_attribute = true;
@@ -637,22 +662,22 @@ Variant c_SimpleXMLElement::t_addchild(CStrRef qname,
     return uninit_null();
   }
 
-  xmlChar *prefix = NULL;
+  xmlChar *prefix = nullptr;
   xmlChar *localname = xmlSplitQName2((xmlChar *)qname.data(), &prefix);
-  if (localname == NULL) {
+  if (localname == nullptr) {
     localname = xmlStrdup((xmlChar *)qname.data());
   }
 
-  xmlNsPtr nsptr = NULL;
-  xmlNodePtr newnode = xmlNewChild(m_node, NULL, localname,
+  xmlNsPtr nsptr = nullptr;
+  xmlNodePtr newnode = xmlNewChild(m_node, nullptr, localname,
                                    (xmlChar *)value.data());
   if (!ns.isNull()) {
     if (ns.empty()) {
-      newnode->ns = NULL;
+      newnode->ns = nullptr;
       nsptr = xmlNewNs(newnode, (xmlChar *)ns.data(), prefix);
     } else {
       nsptr = xmlSearchNsByHref(m_node->doc, m_node, (xmlChar *)ns.data());
-      if (nsptr == NULL) {
+      if (nsptr == nullptr) {
         nsptr = xmlNewNs(newnode, (xmlChar *)ns.data(), prefix);
       }
       newnode->ns = nsptr;
@@ -666,7 +691,7 @@ Variant c_SimpleXMLElement::t_addchild(CStrRef qname,
     xmlFree(prefix);
   }
 
-  Object child = create_element(m_doc, newnode, newns, false);
+  Object child = create_element(m_root, m_doc, newnode, newns, false);
   if (m_children.toArray().exists(newname)) {
     Variant &tmp = m_children.lvalAt(newname);
     if (tmp.isArray()) {
@@ -698,7 +723,7 @@ Variant c_SimpleXMLElement::t_addchild(CStrRef qname,
       m_children = m_children.toArray().merge(children);
 
       // We return a clean element because the retval -can- be casted to string.
-      return create_element(m_doc, newnode, newns, false);
+      return create_element(m_root, m_doc, newnode, newns, false);
     }
   }
   return child;
@@ -720,26 +745,26 @@ void c_SimpleXMLElement::t_addattribute(CStrRef qname,
     return;
   }
 
-  xmlChar *prefix = NULL;
+  xmlChar *prefix = nullptr;
   xmlChar *localname = xmlSplitQName2((xmlChar *)qname.data(), &prefix);
-  if (localname == NULL) {
+  if (localname == nullptr) {
     localname = xmlStrdup((xmlChar *)qname.data());
   }
 
   xmlAttrPtr attrp = xmlHasNsProp(m_node, localname, (xmlChar *)ns.data());
   if (attrp && attrp->type != XML_ATTRIBUTE_DECL) {
     xmlFree(localname);
-    if (prefix != NULL) {
+    if (prefix != nullptr) {
       xmlFree(prefix);
     }
     raise_warning("Attribute already exists");
     return;
   }
 
-  xmlNsPtr nsptr = NULL;
+  xmlNsPtr nsptr = nullptr;
   if (!ns.isNull()) {
     nsptr = xmlSearchNsByHref(m_node->doc, m_node, (xmlChar *)ns.data());
-    if (nsptr == NULL) {
+    if (nsptr == nullptr) {
       nsptr = xmlNewNs(m_node, (xmlChar *)ns.data(), prefix);
     }
   }
@@ -748,7 +773,7 @@ void c_SimpleXMLElement::t_addattribute(CStrRef qname,
   m_attributes.set(String((char*)localname, CopyString), value);
 
   xmlFree(localname);
-  if (prefix != NULL) {
+  if (prefix != nullptr) {
     xmlFree(prefix);
   }
 }
@@ -787,6 +812,7 @@ Variant c_SimpleXMLElement::t___get(Variant name) {
     Object obj = create_object(m_doc.getTyped<XmlDocWrapper>()->
                                getClass(), Array(), false);
     c_SimpleXMLElement *e = obj.getTyped<c_SimpleXMLElement>();
+    e->m_root = elem->m_root;
     e->m_doc = elem->m_doc;
     e->m_node = elem->m_node;
     e->m_children.assignRef(elem->m_children);
@@ -802,7 +828,7 @@ Variant c_SimpleXMLElement::t___get(Variant name) {
 }
 
 Variant c_SimpleXMLElement::t___unset(Variant name) {
-  if (m_node == NULL) return uninit_null();
+  if (m_node == nullptr) return uninit_null();
 
   Variant node;
   if (m_is_attribute) {
@@ -861,10 +887,10 @@ static void change_node_zval(xmlNodePtr node, CStrRef value) {
 }
 
 Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
-  if (m_node == NULL) return uninit_null();
+  if (m_node == nullptr) return uninit_null();
 
   String svalue = value.toString();
-  xmlChar *sv = svalue.empty() ? NULL : (xmlChar *)svalue.data();
+  xmlChar *sv = svalue.empty() ? nullptr : (xmlChar *)svalue.data();
   String sname = name.toString();
 
   Variant node;
@@ -874,7 +900,7 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
     node = m_children[name];
   }
 
-  xmlNodePtr newnode = NULL;
+  xmlNodePtr newnode = nullptr;
   if (node.isObject()) {
     c_SimpleXMLElement *elem =
       node.toObject().getTyped<c_SimpleXMLElement>();
@@ -910,7 +936,7 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
 
   if (newnode) {
     String ns((char*)m_node->ns, CopyString);
-    Object child = create_element(m_doc, newnode, ns, false);
+    Object child = create_element(m_root, m_doc, newnode, ns, false);
     if (m_is_attribute) {
       m_attributes.set(name, child);
       m_children.set(s_attributes, m_attributes);
@@ -1046,7 +1072,7 @@ void c_SimpleXMLElement::t_offsetset(CVarRef index, CVarRef newvalue) {
     t_offsetunset(index);
   }
 
-  if (m_node == NULL || m_is_text) {
+  if (m_node == nullptr || m_is_text) {
     raise_error("cannot create attribute on this node");
     return;
   }
@@ -1085,7 +1111,7 @@ void c_SimpleXMLElement::t_offsetunset(CVarRef index) {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_SimpleXMLElementIterator::c_SimpleXMLElementIterator(Class* cb) :
-    ExtObjectData(cb), m_parent(), m_iter1(NULL), m_iter2(NULL) {
+    ExtObjectData(cb), m_parent(), m_iter1(nullptr), m_iter2(nullptr) {
 }
 
 c_SimpleXMLElementIterator::~c_SimpleXMLElementIterator() {
@@ -1103,9 +1129,9 @@ void c_SimpleXMLElementIterator::set_parent(c_SimpleXMLElement* parent) {
 }
 
 void c_SimpleXMLElementIterator::reset_iterator() {
-  assert(m_parent.get() != NULL);
-  delete m_iter1; m_iter1 = NULL;
-  delete m_iter2; m_iter2 = NULL;
+  assert(m_parent.get() != nullptr);
+  delete m_iter1; m_iter1 = nullptr;
+  delete m_iter2; m_iter2 = nullptr;
 
   if (m_parent->m_is_attribute) {
     m_iter1 = new ArrayIter(m_parent->m_attributes.toArray());
@@ -1116,7 +1142,8 @@ void c_SimpleXMLElementIterator::reset_iterator() {
   // same name of mine.
   if (m_parent->m_is_property) {
     String name = m_parent->t_getname();
-    Object obj = create_element(m_parent->m_doc, m_parent->m_node->parent,
+    Object obj = create_element(m_parent->m_root, m_parent->m_doc,
+                                m_parent->m_node->parent,
                                 "", false);
     m_parent = obj.getTyped<c_SimpleXMLElement>();
     Variant children = m_parent->m_children[name];
@@ -1149,13 +1176,13 @@ void c_SimpleXMLElementIterator::t___construct() {
 }
 
 Variant c_SimpleXMLElementIterator::t_current() {
-  if (m_iter1 == NULL) return uninit_null();
+  if (m_iter1 == nullptr) return uninit_null();
   if (m_parent->m_is_attribute) {
     return m_iter1->second();
   }
 
   ArrayIter *iter = m_iter2;
-  if (iter == NULL && m_iter1->second().isObject()) {
+  if (iter == nullptr && m_iter1->second().isObject()) {
     iter = m_iter1;
   }
 
@@ -1175,7 +1202,7 @@ Variant c_SimpleXMLElementIterator::t_key() {
 }
 
 Variant c_SimpleXMLElementIterator::t_next() {
-  if (m_iter1 == NULL) return uninit_null();
+  if (m_iter1 == nullptr) return uninit_null();
   if (m_parent->m_is_attribute) {
     m_iter1->next();
     return uninit_null();
@@ -1186,7 +1213,7 @@ Variant c_SimpleXMLElementIterator::t_next() {
     if (!m_iter2->end()) {
       return uninit_null();
     }
-    delete m_iter2; m_iter2 = NULL;
+    delete m_iter2; m_iter2 = nullptr;
   }
   m_iter1->next();
   while (!m_iter1->end()) {
@@ -1244,7 +1271,7 @@ public:
   virtual void requestInit() {
     m_use_error = false;
     m_errors.reset();
-    xmlParserInputBufferCreateFilenameDefault(NULL);
+    xmlParserInputBufferCreateFilenameDefault(nullptr);
   }
   virtual void requestShutdown() {
     m_use_error = false;
@@ -1270,15 +1297,15 @@ extern void libxml_add_error(const std::string &msg) {
   error_copy.code = XML_ERR_INTERNAL_ERROR;
   error_copy.level = XML_ERR_ERROR;
   error_copy.line = 0;
-  error_copy.node = NULL;
+  error_copy.node = nullptr;
   error_copy.int1 = 0;
   error_copy.int2 = 0;
-  error_copy.ctxt = NULL;
+  error_copy.ctxt = nullptr;
   error_copy.message = (char*)xmlStrdup((const xmlChar*)msg.c_str());
-  error_copy.file = NULL;
-  error_copy.str1 = NULL;
-  error_copy.str2 = NULL;
-  error_copy.str3 = NULL;
+  error_copy.file = nullptr;
+  error_copy.str1 = nullptr;
+  error_copy.str2 = nullptr;
+  error_copy.str3 = nullptr;
 }
 
 static void libxml_error_handler(void *userData, xmlErrorPtr error) {
@@ -1341,11 +1368,11 @@ bool f_libxml_use_internal_errors(CVarRef use_errors /* = null_variant */) {
   bool ret = (xmlStructuredError == libxml_error_handler);
   if (!use_errors.isNull()) {
     if (!use_errors.toBoolean()) {
-      xmlSetStructuredErrorFunc(NULL, NULL);
+      xmlSetStructuredErrorFunc(nullptr, nullptr);
       s_libxml_errors->m_use_error = false;
       s_libxml_errors->m_errors.reset();
     } else {
-      xmlSetStructuredErrorFunc(NULL, libxml_error_handler);
+      xmlSetStructuredErrorFunc(nullptr, libxml_error_handler);
       s_libxml_errors->m_use_error = true;
     }
   }
@@ -1358,7 +1385,7 @@ void f_libxml_set_streams_context(CResRef streams_context) {
 
 static xmlParserInputBufferPtr
 hphp_libxml_input_buffer_noload(const char *URI, xmlCharEncoding enc) {
-  return NULL;
+  return nullptr;
 }
 
 bool f_libxml_disable_entity_loader(bool disable /* = true */) {
@@ -1367,7 +1394,7 @@ bool f_libxml_disable_entity_loader(bool disable /* = true */) {
   if (disable) {
     old = xmlParserInputBufferCreateFilenameDefault(hphp_libxml_input_buffer_noload);
   } else {
-    old = xmlParserInputBufferCreateFilenameDefault(NULL);
+    old = xmlParserInputBufferCreateFilenameDefault(nullptr);
   }
   return (old == hphp_libxml_input_buffer_noload);
 }

@@ -1062,7 +1062,8 @@ void LinearScan::findFullXMMCandidates() {
   for (auto* block : m_blocks) {
     for (auto& inst : *block) {
       for (SSATmp& tmp : inst.dsts()) {
-        if (tmp.numNeededRegs() == 2 && inst.isLoad()) {
+        if (tmp.numNeededRegs() == 2 && inst.isLoad() &&
+            !inst.isControlFlow()) {
           m_fullXMMCandidates[tmp.id()] = true;
         }
       }

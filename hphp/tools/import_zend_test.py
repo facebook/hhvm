@@ -182,6 +182,7 @@ bad_tests = (
     '/ext-sockets/socket_getpeername_ipv4loop.php',
     '/ext-standard-file/fread_socket_variation1.php',
     '/ext-standard-network/fsockopen_variation1.php',
+    '/ext-standard-network/shutdown.php',
 
     # time tests are hard to write, these are poorly written
     '/ext-date/bug48187.php',

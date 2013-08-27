@@ -45,18 +45,6 @@ var_dump(count($fds));
 
 var_dump(socket_get_option($s, SOL_SOCKET, SO_TYPE), SOCK_STREAM);
 
-$s = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-var_dump(socket_connect($s, "facebook.com", 80));
-var_dump(socket_getpeername($s, $address));
-var_dump(!empty($address));
-var_dump(socket_getsockname($s, $address));
-var_dump(!empty($address));
-
-var_dump(socket_set_block($s));
-var_dump(socket_set_nonblock($s));
-var_dump(socket_set_option($s, SOL_SOCKET, SO_RCVTIMEO,
-                         array("sec" => 1, "usec" => 0)));
-
 list($client, $s) = get_client_server();
 var_dump(socket_write($client, "hello world"));
 // this could fail with shorter returns, but it never does...

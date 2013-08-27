@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/parser/parser.h"
+#include "hphp/runtime/ext/util.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -987,14 +988,9 @@ void f_hphp_set_property(CObjRef obj, CStrRef cls, CStrRef prop,
 
 Variant f_hphp_get_static_property(CStrRef cls, CStrRef prop, bool force) {
   StringData* sd = cls.get();
-  Class* class_ = Unit::lookupClass(sd);
-  if (class_ == nullptr) {
-    String normName = normalizeNS(sd);
-    if (normName) {
-      return f_hphp_get_static_property(normName, prop, force);
-    } else {
-      raise_error("Non-existent class %s", sd->data());
-    }
+  Class* class_ = lookup_class(sd);
+  if (!class_) {
+    raise_error("Non-existent class %s", sd->data());
   }
   VMRegAnchor _;
   bool visible, accessible;
@@ -1016,14 +1012,9 @@ Variant f_hphp_get_static_property(CStrRef cls, CStrRef prop, bool force) {
 void f_hphp_set_static_property(CStrRef cls, CStrRef prop, CVarRef value,
                                 bool force) {
   StringData* sd = cls.get();
-  Class* class_ = Unit::lookupClass(sd);
-  if (class_ == nullptr) {
-    String normName = normalizeNS(sd);
-    if (normName) {
-      return f_hphp_set_static_property(normName, prop, value, force);
-    } else {
-      raise_error("Non-existent class %s", sd->data());
-    }
+  Class* class_ = lookup_class(sd);
+  if (!class_) {
+    raise_error("Non-existent class %s", sd->data());
   }
   VMRegAnchor _;
   bool visible, accessible;

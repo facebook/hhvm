@@ -516,9 +516,9 @@ bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
 
       // if for whatever reason, m_thread isn't debugging anymore (for example,
       // it runs in Sticky mode, but it finishes running), kick it out.
-      if (!Debugger::IsThreadDebugging(m_thread)) {
+      if (m_thread && !Debugger::IsThreadDebugging(m_thread)) {
         m_threadMode = Normal;
-        m_thread = self;
+        m_thread = 0;
         m_newThread.reset();
         m_flow.reset();
       }
@@ -707,9 +707,18 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
     // already processing an interrupt, enable signal polling around
     // the execution of the new PHP to ensure that we can handle
     // signals while doing so.
+    //
+    // Note: we must switch the thread mode to Sticky so we block
+    // other threads which may hit interrupts while we're running,
+    // since nested processInterrupt() calls would normally release
+    // other threads on the way out.
+    assert(m_thread == (int64_t)Process::GetThreadId());
+    ThreadMode origThreadMode = m_threadMode;
+    m_threadMode = Sticky;
     if (flags & ExecutePHPFlagsAtInterrupt) enableSignalPolling();
     SCOPE_EXIT {
       if (flags & ExecutePHPFlagsAtInterrupt) disableSignalPolling();
+      m_threadMode = origThreadMode;
     };
     g_vmContext->evalPHPDebugger((TypedValue*)&ret, code.get(), frame);
   } catch (InvalidFunctionCallException &e) {

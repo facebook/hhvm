@@ -179,6 +179,7 @@ void Debugger::InterruptSessionStarted(const char *file,
                                        const char *error /* = NULL */) {
   TRACE(2, "Debugger::InterruptSessionStarted\n");
   ThreadInfo::s_threadInfo->m_reqInjectionData.setDebugger(true);
+  s_debugger.registerThread(); // Register this thread as being debugged
   Interrupt(SessionStarted, file, nullptr, error);
 }
 
@@ -198,6 +199,7 @@ void Debugger::InterruptWithUrl(int type, const char *url) {
 void Debugger::InterruptRequestStarted(const char *url) {
   TRACE(2, "Debugger::InterruptRequestStarted\n");
   if (ThreadInfo::s_threadInfo->m_reqInjectionData.getDebugger()) {
+    s_debugger.registerThread(); // Register this thread as being debugged
     InterruptWithUrl(RequestStarted, url);
   }
 }

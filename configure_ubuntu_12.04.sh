@@ -14,8 +14,14 @@ fi
 export CMAKE_PREFIX_PATH=`/bin/pwd`/..
 export HPHP_HOME=`/bin/pwd`
 
+# install apt-fast to speedup later dependency installation
+sudo add-apt-repository -y ppa:apt-fast/stable
 sudo apt-get update
-sudo apt-get install git-core cmake g++ libboost1.48-dev libmysqlclient-dev \
+sudo apt-get install apt-fast
+
+# install the actual dependencies
+sudo apt-fast -y update
+sudo apt-fast -y install git-core cmake g++ libboost1.48-dev libmysqlclient-dev \
   libxml2-dev libmcrypt-dev libicu-dev openssl build-essential binutils-dev \
   libcap-dev libgd2-xpm-dev zlib1g-dev libtbb-dev libonig-dev libpcre3-dev \
   autoconf libtool libcurl4-openssl-dev libboost-regex1.48-dev libboost-system1.48-dev \

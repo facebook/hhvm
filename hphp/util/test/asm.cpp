@@ -108,8 +108,14 @@ void dump_disasm(Asm& a, std::ifstream& dump) {
   std::fwrite(a.base(), a.used(), 1, fp);
   std::fclose(fp);
 
+  const char* objdump = getenv("HHVM_OBJDUMP_PATH");
+  if (!objdump) {
+    objdump = "objdump";
+  }
+
   system(str(boost::format(
-    "objdump -D -b binary -mi386 -M x86-64 %s > %s")
+    "'%s' -D -b binary -mi386 -M x86-64 %s > %s")
+      % objdump
       % filename
       % outfile
     ).c_str());
@@ -255,7 +261,11 @@ const char* expected_str(Reg8 r)  { return regname(r); }
 #undef X
 
 void expected_disp_str(intptr_t disp, std::ostream& out) {
-  out << "0x" << std::hex << (uintptr_t)disp;
+  if (disp < 0) {
+    out << "-0x" << std::hex << -disp;
+  } else {
+    out << "0x" << std::hex << disp;
+  }
 }
 
 std::string expected_str(MemoryRef mr) {
@@ -816,11 +826,11 @@ TEST(Asm, DoubleToIntConv) {
   a.    cvttsd2siq(xmm15, rdx);
   a.    cvttsd2siq(xmm12, r12);
   expect_asm(a, R"(
-cvttsd2siq %xmm0,%rax
-cvttsd2siq %xmm1,%rbx
-cvttsd2siq %xmm2,%rcx
-cvttsd2siq %xmm15,%rdx
-cvttsd2siq %xmm12,%r12
+cvttsd2si %xmm0,%rax
+cvttsd2si %xmm1,%rbx
+cvttsd2si %xmm2,%rcx
+cvttsd2si %xmm15,%rdx
+cvttsd2si %xmm12,%r12
 )");
 }
 

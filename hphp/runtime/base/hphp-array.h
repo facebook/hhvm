@@ -177,6 +177,8 @@ public:
   static ArrayData* PopPacked(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, CVarRef v, bool copy);
+  static ArrayData* DequeuePacked(ArrayData*, Variant& value);
+  static ArrayData* PrependPacked(ArrayData*, CVarRef v, bool copy);
   static void Renumber(ArrayData*);
   static void RenumberPacked(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);

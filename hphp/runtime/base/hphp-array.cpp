@@ -1550,9 +1550,30 @@ ArrayData* HphpArray::Pop(ArrayData* ad, Variant& value) {
   return a;
 }
 
+ArrayData* HphpArray::DequeuePacked(ArrayData* ad, Variant& value) {
+  auto a = asPacked(ad);
+  if (a->getCount() > 1) a = a->copyPacked();
+  // To conform to PHP behavior, we invalidate all strong iterators when an
+  // element is removed from the beginning of the array.
+  a->freeStrongIterators();
+  auto elms = a->m_data;
+  if (a->m_size > 0) {
+    auto n = a->m_size - 1;
+    auto& tv = elms[0].data;
+    value = std::move(tvAsVariant(&tv)); // no incref+decref
+    memmove(&elms[0], &elms[1], n * sizeof(elms[0]));
+    a->m_size = a->m_used = n;
+    a->m_pos = n > 0 ? 0 : invalid_index;
+  } else {
+    value = uninit_null();
+    a->m_pos = invalid_index;
+  }
+  return a;
+}
+
 ArrayData* HphpArray::Dequeue(ArrayData* ad, Variant& value) {
-  auto a = asHphpArray(ad);
-  if (a->getCount() > 1) a = a->copyImpl();
+  auto a = asMixed(ad);
+  if (a->getCount() > 1) a = a->copyMixed();
   // To conform to PHP behavior, we invalidate all strong iterators when an
   // element is removed from the beginning of the array.
   a->freeStrongIterators();
@@ -1561,16 +1582,6 @@ ArrayData* HphpArray::Dequeue(ArrayData* ad, Variant& value) {
   if (validElmInd(pos)) {
     Elm* e = &elms[pos];
     value = tvAsCVarRef(&e->data);
-    if (a->isPacked()) {
-      if (a->m_size == 1) {
-        assert(pos == 0);
-        a->m_size = a->m_used = 0;
-        a->m_pos = invalid_index;
-        tvRefcountedDecRef(&e->data);
-        return a;
-      }
-      a->packedToMixed();
-    }
     ElmInd* ei = e->hasStrKey() ?  a->findForInsert(e->key, e->hash()) :
                  a->findForInsert(e->ikey);
     a->erase(ei, false);
@@ -1580,17 +1591,31 @@ ArrayData* HphpArray::Dequeue(ArrayData* ad, Variant& value) {
   }
   // To conform to PHP behavior, the dequeue operation resets the array's
   // internal iterator
-  a->m_pos = ssize_t(a->nextElm(elms, ElmIndEmpty));
+  a->m_pos = a->nextElm(elms, ElmIndEmpty);
+  return a;
+}
+
+ArrayData* HphpArray::PrependPacked(ArrayData* ad, CVarRef v, bool copy) {
+  auto a = asPacked(ad);
+  if (a->getCount() > 1) a = a->copyPacked();
+  // To conform to PHP behavior, we invalidate all strong iterators when an
+  // element is added to the beginning of the array.
+  a->freeStrongIterators();
+  size_t n = a->m_size;
+  if (n > 0) {
+    if (n == a->m_cap) a->growPacked();
+    auto elms = a->m_data;
+    memmove(&elms[1], &elms[0], n * sizeof(elms[0]));
+  }
+  a->m_size = a->m_used = n + 1;
+  a->m_pos = 0;
+  a->initVal(a->m_data[0].data, v);
   return a;
 }
 
 ArrayData* HphpArray::Prepend(ArrayData* ad, CVarRef v, bool copy) {
-  auto a = asHphpArray(ad);
-  if (a->getCount() > 1) a = a->copyImpl();
-  if (a->isPacked()) {
-    // todo t2606310: fast path - same as add for empty vectors
-    a->packedToMixed();
-  }
+  auto a = asMixed(ad);
+  if (a->getCount() > 1) a = a->copyMixed();
   // To conform to PHP behavior, we invalidate all strong iterators when an
   // element is added to the beginning of the array.
   a->freeStrongIterators();
@@ -1616,7 +1641,7 @@ ArrayData* HphpArray::Prepend(ArrayData* ad, CVarRef v, bool copy) {
   a->compact(true);
   // To conform to PHP behavior, the prepend operation resets the array's
   // internal iterator
-  a->m_pos = ssize_t(a->nextElm(elms, ElmIndEmpty));
+  a->m_pos = a->nextElm(elms, ElmIndEmpty);
   return a;
 }
 

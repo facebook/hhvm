@@ -287,12 +287,12 @@ extern const ArrayFunctions g_array_funcs = {
     &NameValueTableWrapper::Pop,
     &PolicyArray::Pop },
   // dequeue
-  { &HphpArray::Dequeue, &HphpArray::Dequeue,
+  { &HphpArray::DequeuePacked, &HphpArray::Dequeue,
     &SharedMap::Dequeue,
     &NameValueTableWrapper::Dequeue,
     &PolicyArray::Dequeue },
   // prepend
-  { &HphpArray::Prepend, &HphpArray::Prepend,
+  { &HphpArray::PrependPacked, &HphpArray::Prepend,
     &SharedMap::Prepend,
     &NameValueTableWrapper::Prepend,
     &PolicyArray::Prepend },

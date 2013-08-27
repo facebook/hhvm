@@ -1409,40 +1409,42 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
         if (UNLIKELY(m_mergeState & UnitMergeStateNeedsCompact)) {
           SimpleLock lock(unitInitLock);
           if (!(m_mergeState & UnitMergeStateNeedsCompact)) return;
-          /*
-           * All the classes are known to be unique, and we just got
-           * here, so all were successfully defined. We can now go
-           * back and convert all UnitMergeKindClass entries to
-           * UnitMergeKindUniqueDefinedClass, and all hoistable
-           * classes to their Class*'s instead of PreClass*'s.
-           *
-           * We can also remove any Persistent Class/Func*'s,
-           * and any requires of modules that are (now) empty
-           */
-          size_t delta = compactUnitMergeInfo(mi, nullptr);
-          UnitMergeInfo* newMi = mi;
-          if (delta) {
-            newMi = UnitMergeInfo::alloc(mi->m_mergeablesSize - delta);
-          }
-          /*
-           * In the case where mi == newMi, there's an apparent
-           * race here. Although we have a lock, so we're the only
-           * ones modifying this, there could be any number of
-           * readers. But thats ok, because it doesnt matter
-           * whether they see the old contents or the new.
-           */
-          compactUnitMergeInfo(mi, newMi);
-          if (newMi != mi) {
-            this->m_mergeInfo = newMi;
-            Treadmill::deferredFree(mi);
-            if (isMergeOnly() &&
-                newMi->m_firstHoistableFunc == newMi->m_mergeablesSize) {
-              m_mergeState |= UnitMergeStateEmpty;
+          if (!redoHoistable) {
+            /*
+             * All the classes are known to be unique, and we just got
+             * here, so all were successfully defined. We can now go
+             * back and convert all UnitMergeKindClass entries to
+             * UnitMergeKindUniqueDefinedClass, and all hoistable
+             * classes to their Class*'s instead of PreClass*'s.
+             *
+             * We can also remove any Persistent Class/Func*'s,
+             * and any requires of modules that are (now) empty
+             */
+            size_t delta = compactUnitMergeInfo(mi, nullptr);
+            UnitMergeInfo* newMi = mi;
+            if (delta) {
+              newMi = UnitMergeInfo::alloc(mi->m_mergeablesSize - delta);
             }
+            /*
+             * In the case where mi == newMi, there's an apparent
+             * race here. Although we have a lock, so we're the only
+             * ones modifying this, there could be any number of
+             * readers. But thats ok, because it doesnt matter
+             * whether they see the old contents or the new.
+             */
+            compactUnitMergeInfo(mi, newMi);
+            if (newMi != mi) {
+              this->m_mergeInfo = newMi;
+              Treadmill::deferredFree(mi);
+              if (isMergeOnly() &&
+                  newMi->m_firstHoistableFunc == newMi->m_mergeablesSize) {
+                m_mergeState |= UnitMergeStateEmpty;
+              }
+            }
+            assert(newMi->m_firstMergeablePreClass == newMi->m_mergeablesSize ||
+                   isMergeOnly());
           }
           m_mergeState &= ~UnitMergeStateNeedsCompact;
-          assert(newMi->m_firstMergeablePreClass == newMi->m_mergeablesSize ||
-                 isMergeOnly());
         }
         return;
     }

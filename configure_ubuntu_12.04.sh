@@ -28,10 +28,31 @@ sudo apt-fast -y install git-core cmake g++ libboost1.48-dev libmysqlclient-dev 
   libboost-program-options1.48-dev libboost-filesystem1.48-dev wget memcached \
   libreadline-dev libncurses-dev libmemcached-dev libbz2-dev \
   libc-client2007e-dev php5-mcrypt php5-imagick libgoogle-perftools-dev \
-  libcloog-ppl0 libelf-dev libdwarf-dev libunwind7-dev subversion
+  libcloog-ppl0 libelf-dev libdwarf-dev libunwind7-dev subversion &
+
+git clone git://github.com/libevent/libevent.git --quiet &
+git clone git://github.com/bagder/curl.git --quiet &
+svn checkout http://google-glog.googlecode.com/svn/trunk/ google-glog --quiet &
+wget http://www.canonware.com/download/jemalloc/jemalloc-3.0.0.tar.bz2 --quiet &
+
+# wait until all background processes finished
+FAIL=0
+
+for job in `jobs -p`
+do
+    echo "waiting for background job $job"
+    wait $job || let "FAIL+=1"
+done
+
+if [ "$FAIL" == "0" ];
+then
+    echo "all downloads finished";
+else
+    echo "$FAIL errors while downloading!";
+    exit 100
+fi 
 
 # libevent
-git clone git://github.com/libevent/libevent.git
 cd libevent
 git checkout release-1.4.14b-stable
 cat ../hphp/third_party/libevent-1.4.14.fb-changes.diff | patch -p1
@@ -42,7 +63,6 @@ make install
 cd ..
 
 # curl
-git clone git://github.com/bagder/curl.git
 cd curl
 ./buildconf
 ./configure --prefix=$CMAKE_PREFIX_PATH
@@ -51,7 +71,6 @@ make install
 cd ..
 
 # glog
-svn checkout http://google-glog.googlecode.com/svn/trunk/ google-glog
 cd google-glog
 ./configure --prefix=$CMAKE_PREFIX_PATH
 make
@@ -59,7 +78,6 @@ make install
 cd ..
 
 # jemaloc
-wget http://www.canonware.com/download/jemalloc/jemalloc-3.0.0.tar.bz2
 tar xjvf jemalloc-3.0.0.tar.bz2
 cd jemalloc-3.0.0
 ./configure --prefix=$CMAKE_PREFIX_PATH

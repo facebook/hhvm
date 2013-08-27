@@ -25,6 +25,10 @@ VirtualHost {
   }
 }
 
+Http {
+  SlowQueryThreshold = 0
+}
+
 Repo {
   Local.Mode = r-
   Central.Path = /var/facebook/hhvm/cli.hhbc

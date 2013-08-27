@@ -1,3 +1,7 @@
 Eval {
  EnableObjDestructCall = true
- }
+}
+
+Http {
+  SlowQueryThreshold = 0
+}

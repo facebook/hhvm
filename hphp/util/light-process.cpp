@@ -415,7 +415,9 @@ bool LightProcess::initShadow(const std::string &prefix, int id,
     socklen_t addrlen;
     m_afdt_fd = accept(m_afdt_lfd, &addr, &addrlen);
     if (m_afdt_fd < 0) {
-      Logger::Warning("Unable to establish afdt connection");
+      char buf[1024];
+      Logger::Warning("Unable to establish afdt connection: %s",
+                      strerror_r(errno, buf, sizeof(buf)));
       closeShadow();
       return false;
     }

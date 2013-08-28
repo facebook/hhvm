@@ -49,9 +49,10 @@ template <class T> class Range;
  * as Boyer-Moore. On the upside, it does not do any upfront
  * preprocessing and does not allocate memory.
  */
-template <class T>
+template <class T, class Comp = std::equal_to<typename Range<T>::value_type>>
 inline size_t qfind(const Range<T> & haystack,
-                    const Range<T> & needle);
+                    const Range<T> & needle,
+                    Comp eq = Comp());
 
 /**
  * Finds the first occurrence of needle in haystack. The result is the
@@ -675,12 +676,6 @@ extern const AsciiCaseInsensitive asciiCaseInsensitive;
 
 template <class T>
 size_t qfind(const Range<T>& haystack,
-             const Range<T>& needle) {
-  return qfind(haystack, needle, asciiCaseSensitive);
-}
-
-template <class T>
-size_t qfind(const Range<T>& haystack,
              const typename Range<T>::value_type& needle) {
   auto pos = std::find(haystack.begin(), haystack.end(), needle);
   return pos == haystack.end() ? std::string::npos : pos - haystack.data();
@@ -705,7 +700,7 @@ inline size_t qfind(const Range<const char*>& haystack, const char& needle) {
   return pos == nullptr ? std::string::npos : pos - haystack.data();
 }
 
-#ifdef _GNU_SOURCE // memrchr is a GNU extension
+#if FOLLY_HAVE_MEMRCHR
 template <>
 inline size_t rfind(const Range<const char*>& haystack, const char& needle) {
   auto pos = static_cast<const char*>(
@@ -723,7 +718,7 @@ inline size_t qfind(const Range<const unsigned char*>& haystack,
   return pos == nullptr ? std::string::npos : pos - haystack.data();
 }
 
-#ifdef _GNU_SOURCE // memrchr is a GNU extension
+#if FOLLY_HAVE_MEMRCHR
 template <>
 inline size_t rfind(const Range<const unsigned char*>& haystack,
                     const unsigned char& needle) {

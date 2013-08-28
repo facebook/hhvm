@@ -159,11 +159,11 @@ class GenImpl : public FBounded<Self> {
   typedef typename std::decay<Value>::type StorageType;
 
   /**
-   * apply() - Send all values produced by this generator to given
-   * handler until the handler returns false. Returns false if and only if the
-   * handler returns false. Note: It should return true even if it completes
-   * (without the handler returning false), as 'Chain' uses the return value of
-   * apply to determine if it should process the second object in its chain.
+   * apply() - Send all values produced by this generator to given handler until
+   * the handler returns false. Returns false if and only if the handler passed
+   * in returns false. Note: It should return true even if it completes (without
+   * the handler returning false), as 'Chain' uses the return value of apply to
+   * determine if it should process the second object in its chain.
    */
   template<class Handler>
   bool apply(Handler&& handler) const;
@@ -695,10 +695,8 @@ class Until : public Operator<Until<Predicate>> {
   {}
 
   template<class Value,
-           class Source,
-           class Result = typename std::result_of<Predicate(Value)>::type>
-  class Generator :
-      public GenImpl<Result, Generator<Value, Source, Result>> {
+           class Source>
+  class Generator : public GenImpl<Value, Generator<Value, Source>> {
     Source source_;
     Predicate pred_;
    public:
@@ -707,10 +705,18 @@ class Until : public Operator<Until<Predicate>> {
 
     template<class Handler>
     bool apply(Handler&& handler) const {
-      return source_.apply([&](Value value) -> bool {
-        return !pred_(std::forward<Value>(value))
-            && handler(std::forward<Value>(value));
+      bool cancelled = false;
+      source_.apply([&](Value value) -> bool {
+        if (pred_(value)) { // un-forwarded to disable move
+          return false;
+        }
+        if (!handler(std::forward<Value>(value))) {
+          cancelled = true;
+          return false;
+        }
+        return true;
       });
+      return !cancelled;
     }
   };
 
@@ -761,12 +767,15 @@ class Take : public Operator<Take> {
     bool apply(Handler&& handler) const {
       if (count_ == 0) { return false; }
       size_t n = count_;
-      return source_.apply([&](Value value) -> bool {
-          if (!handler(std::forward<Value>(value))) {
-            return false;
-          }
-          return --n;
-        });
+      bool cancelled = false;
+      source_.apply([&](Value value) -> bool {
+        if (!handler(std::forward<Value>(value))) {
+          cancelled = true;
+          return false;
+        }
+        return --n;
+      });
+      return !cancelled;
     }
   };
 
@@ -907,7 +916,7 @@ class Skip : public Operator<Skip> {
     template<class Handler>
     bool apply(Handler&& handler) const {
       if (count_ == 0) {
-        return source_.apply(handler);
+        return source_.apply(std::forward<Handler>(handler));
       }
       size_t n = 0;
       return source_.apply([&](Value value) -> bool {
@@ -1150,6 +1159,83 @@ class Distinct : public Operator<Distinct<Selector>> {
            class Gen = Generator<Value, Source>>
   Gen compose(const GenImpl<Value, Source>& source) const {
     return Gen(source.self(), selector_);
+  }
+};
+
+/**
+ * Batch - For producing fixed-size batches of each value from a source.
+ *
+ * This type is usually used through the 'batch' helper function:
+ *
+ *   auto batchSums
+ *     = seq(1, 10)
+ *     | batch(3)
+ *     | map([](const std::vector<int>& batch) {
+ *         return from(batch) | sum;
+ *       })
+ *     | as<vector>();
+ */
+class Batch : public Operator<Batch> {
+  size_t batchSize_;
+ public:
+  explicit Batch(size_t batchSize)
+    : batchSize_(batchSize) {
+    if (batchSize_ == 0) {
+      throw std::invalid_argument("Batch size must be non-zero!");
+    }
+  }
+
+  template<class Value,
+           class Source,
+           class StorageType = typename std::decay<Value>::type,
+           class VectorType = std::vector<StorageType>>
+  class Generator :
+      public GenImpl<VectorType&,
+                     Generator<Value, Source, StorageType, VectorType>> {
+    Source source_;
+    size_t batchSize_;
+  public:
+    explicit Generator(Source source, size_t batchSize)
+      : source_(std::move(source))
+      , batchSize_(batchSize) {}
+
+    template<class Handler>
+    bool apply(Handler&& handler) const {
+      VectorType batch_;
+      batch_.reserve(batchSize_);
+      bool shouldContinue = source_.apply([&](Value value) -> bool {
+          batch_.push_back(std::forward<Value>(value));
+          if (batch_.size() == batchSize_) {
+            bool needMore = handler(batch_);
+            batch_.clear();
+            return needMore;
+          }
+          // Always need more if the handler is not called.
+          return true;
+        });
+      // Flush everything, if and only if `handler` hasn't returned false.
+      if (shouldContinue && !batch_.empty()) {
+        shouldContinue = handler(batch_);
+        batch_.clear();
+      }
+      return shouldContinue;
+    }
+
+    static constexpr bool infinite = Source::infinite;
+  };
+
+  template<class Source,
+           class Value,
+           class Gen = Generator<Value, Source>>
+  Gen compose(GenImpl<Value, Source>&& source) const {
+    return Gen(std::move(source.self()), batchSize_);
+  }
+
+  template<class Source,
+           class Value,
+           class Gen = Generator<Value, Source>>
+  Gen compose(const GenImpl<Value, Source>& source) const {
+    return Gen(source.self(), batchSize_);
   }
 };
 
@@ -1794,6 +1880,140 @@ class GuardImpl : public Operator<GuardImpl<Exception, ErrorHandler>> {
     return Gen(source.self(), handler_);
   }
 };
+
+/**
+ * Cycle - For repeating a sequence forever.
+ *
+ * This type is usually used through the 'cycle' static value, like:
+ *
+ *   auto tests
+ *     = from(samples)
+ *     | cycle
+ *     | take(100);
+ */
+class Cycle : public Operator<Cycle> {
+  off_t limit_; // -1 for infinite
+ public:
+  Cycle()
+    : limit_(-1) { }
+
+  explicit Cycle(off_t limit)
+    : limit_(limit) { }
+
+  template<class Value,
+           class Source>
+  class Generator : public GenImpl<Value, Generator<Value, Source>> {
+    Source source_;
+    off_t limit_; // -1 for infinite
+  public:
+    explicit Generator(Source source, off_t limit)
+      : source_(std::move(source))
+      , limit_(limit) {}
+
+    template<class Handler>
+    bool apply(Handler&& handler) const {
+      bool cont;
+      auto handler2 = [&](Value value) {
+        cont = handler(std::forward<Value>(value));
+        return cont;
+      };
+      for (off_t count = 0; count != limit_; ++count) {
+        cont = false;
+        source_.apply(handler2);
+        if (!cont) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // not actually infinite, since an empty generator will end the cycles.
+    static constexpr bool infinite = Source::infinite;
+  };
+
+  template<class Source,
+           class Value,
+           class Gen = Generator<Value, Source>>
+  Gen compose(GenImpl<Value, Source>&& source) const {
+    return Gen(std::move(source.self()), limit_);
+  }
+
+  template<class Source,
+           class Value,
+           class Gen = Generator<Value, Source>>
+  Gen compose(const GenImpl<Value, Source>& source) const {
+    return Gen(source.self(), limit_);
+  }
+
+  /**
+   * Convenience function for use like:
+   *
+   *  auto tripled = gen | cycle(3);
+   */
+  Cycle operator()(off_t limit) const {
+    return Cycle(limit);
+  }
+};
+
+/**
+ * Dereference - For dereferencing a sequence of pointers while filtering out
+ * null pointers.
+ *
+ * This type is usually used through the 'dereference' static value, like:
+ *
+ *   auto refs = from(ptrs) | dereference;
+ */
+class Dereference : public Operator<Dereference> {
+ public:
+  Dereference() {}
+
+  template<class Value,
+           class Source,
+           class Result = decltype(*std::declval<Value>())>
+  class Generator : public GenImpl<Result, Generator<Value, Source, Result>> {
+    Source source_;
+  public:
+    explicit Generator(Source source)
+      : source_(std::move(source)) {}
+
+    template<class Body>
+    void foreach(Body&& body) const {
+      source_.foreach([&](Value value) {
+        if (value) {
+          return body(*value);
+        }
+      });
+    }
+
+    template<class Handler>
+    bool apply(Handler&& handler) const {
+      return source_.apply([&](Value value) -> bool {
+        if (value) {
+          return handler(*value);
+        }
+        return true;
+      });
+    }
+
+    // not actually infinite, since an empty generator will end the cycles.
+    static constexpr bool infinite = Source::infinite;
+  };
+
+  template<class Source,
+           class Value,
+           class Gen = Generator<Value, Source>>
+  Gen compose(GenImpl<Value, Source>&& source) const {
+    return Gen(std::move(source.self()));
+  }
+
+  template<class Source,
+           class Value,
+           class Gen = Generator<Value, Source>>
+  Gen compose(const GenImpl<Value, Source>& source) const {
+    return Gen(source.self());
+  }
+};
+
 } //::detail
 
 /**
@@ -1875,6 +2095,13 @@ static const detail::Count count;
 
 static const detail::First first;
 
+/**
+ * Use directly for detecting any values, or as a function to detect values
+ * which pass a predicate:
+ *
+ *  auto nonempty = g | any;
+ *  auto evens = g | any(even);
+ */
 static const detail::Any any;
 
 static const detail::Min<Identity, Less> min;
@@ -1891,6 +2118,16 @@ static const detail::Concat concat;
 
 static const detail::RangeConcat rconcat;
 
+/**
+ * Use directly for infinite sequences, or as a function to limit cycle count.
+ *
+ *  auto forever = g | cycle;
+ *  auto thrice = g | cycle(3);
+ */
+static const detail::Cycle cycle;
+
+static const detail::Dereference dereference;
+
 inline detail::Take take(size_t count) {
   return detail::Take(count);
 }
@@ -1902,6 +2139,10 @@ inline detail::Sample<Random> sample(size_t count, Random rng = Random()) {
 
 inline detail::Skip skip(size_t count) {
   return detail::Skip(count);
+}
+
+inline detail::Batch batch(size_t batchSize) {
+  return detail::Batch(batchSize);
 }
 
 }} //folly::gen

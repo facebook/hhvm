@@ -17,29 +17,34 @@
 #ifndef incl_HPHP_FILE_CACHE_H_
 #define incl_HPHP_FILE_CACHE_H_
 
+#include <string>
+
 #include "hphp/util/base.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
 /**
  * Stores file contents in memory. Used by web server for faster static
  * content serving.
  */
 DECLARE_BOOST_TYPES(FileCache);
+
 class FileCache {
-public:
+ public:
   static std::string SourceRoot;
 
-public:
-  FileCache() : m_fd(-1), m_size(0), m_addr(nullptr) {}
+ public:
+  FileCache();
   ~FileCache();
 
   /**
    * Archiving data.
    */
+
   void write(const char *name, bool addDirectories = true);
   void write(const char *name, const char *fullpath); // name + data
+
+
   void save(const char *filename);
 
   /**
@@ -54,10 +59,11 @@ public:
   bool exists(const char *name, bool isRelative = true) const;
   char *read(const char *name, int &len, bool &compressed) const;
   int64_t fileSize(const char *name, bool isRelative) const;
-  void dump();
+  void dump() const;
 
   static std::string GetRelativePath(const char *path);
-private:
+
+ private:
   struct Buffer {
     int len;     // uncompressed len     -1: PHP file, -2: directories
     char *data;  // uncompressed data
@@ -72,10 +78,8 @@ private:
   void *m_addr;
 
   void writeDirectories(const char *name);
-
 };
 
-///////////////////////////////////////////////////////////////////////////////
-}
+}   // namespace HPHP
 
 #endif  // incl_HPHP_FILE_CACHE_H_

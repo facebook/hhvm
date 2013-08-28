@@ -93,6 +93,8 @@ TEST_F(TestFileCache, WriteAndReadBack) {
   // ... and here it means "this thing does not exist".
   EXPECT_EQ(fc2.fileSize("unit_test_three_", false), -1);
 
+  fc2.dump();
+
   // Clean up the mess.
 
   ASSERT_EQ(unlink(cache_fn), 0);

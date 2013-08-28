@@ -2616,10 +2616,6 @@ bool VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
     os << ExitException::ExitCode;
     g_vmContext->write(os.str());
   } catch (Eval::DebuggerException &e) {
-    if (varEnv) {
-      varEnv->setCfp(cfpSave);
-    }
-    throw;
   } catch (Exception &e) {
     g_vmContext->write(s_cppException.data());
     g_vmContext->write(" : ");

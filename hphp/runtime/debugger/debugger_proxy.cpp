@@ -698,47 +698,28 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
   if (flags & ExecutePHPFlagsLog) {
     Logger::SetThreadHook(append_stderr, &sb);
   }
-  failed = true;
-  try {
-    String code(php.c_str(), php.size(), CopyString);
-    // We're about to start executing more PHP. This is typically done
-    // in response to commands from the client, and the client expects
-    // those commands to send more interrupts since, of course, the
-    // user might want to debug the code we're about to run. If we're
-    // already processing an interrupt, enable signal polling around
-    // the execution of the new PHP to ensure that we can handle
-    // signals while doing so.
-    //
-    // Note: we must switch the thread mode to Sticky so we block
-    // other threads which may hit interrupts while we're running,
-    // since nested processInterrupt() calls would normally release
-    // other threads on the way out.
-    assert(m_thread == (int64_t)Process::GetThreadId());
-    ThreadMode origThreadMode = m_threadMode;
-    m_threadMode = Sticky;
-    if (flags & ExecutePHPFlagsAtInterrupt) enableSignalPolling();
-    SCOPE_EXIT {
-      if (flags & ExecutePHPFlagsAtInterrupt) disableSignalPolling();
-      m_threadMode = origThreadMode;
-    };
-    failed = g_vmContext->evalPHPDebugger((TypedValue*)&ret, code.get(), frame);
-  } catch (InvalidFunctionCallException &e) {
-    sb.append(Debugger::ColorStderr(String(e.what())));
-    sb.append(Debugger::ColorStderr(
-              "You may also need to connect to a host "
-              "(e.g., machine connect localhost)."));
-  } catch (Exception &e) {
-    sb.append(Debugger::ColorStderr(String(e.what())));
-  } catch (Object &e) {
-    if (e->hasToString()) {
-      sb.append(Debugger::ColorStderr(e.toString()));
-    } else {
-      sb.append(Debugger::ColorStderr
-                (String("(object without __toString() is thrown)")));
-    }
-  } catch (...) {
-    sb.append(Debugger::ColorStderr(String("(unknown exception was thrown)")));
-  }
+  String code(php.c_str(), php.size(), CopyString);
+  // We're about to start executing more PHP. This is typically done
+  // in response to commands from the client, and the client expects
+  // those commands to send more interrupts since, of course, the
+  // user might want to debug the code we're about to run. If we're
+  // already processing an interrupt, enable signal polling around
+  // the execution of the new PHP to ensure that we can handle
+  // signals while doing so.
+  //
+  // Note: we must switch the thread mode to Sticky so we block
+  // other threads which may hit interrupts while we're running,
+  // since nested processInterrupt() calls would normally release
+  // other threads on the way out.
+  assert(m_thread == (int64_t)Process::GetThreadId());
+  ThreadMode origThreadMode = m_threadMode;
+  m_threadMode = Sticky;
+  if (flags & ExecutePHPFlagsAtInterrupt) enableSignalPolling();
+  SCOPE_EXIT {
+    if (flags & ExecutePHPFlagsAtInterrupt) disableSignalPolling();
+    m_threadMode = origThreadMode;
+  };
+  failed = g_vmContext->evalPHPDebugger((TypedValue*)&ret, code.get(), frame);
   g_context->setStdout(nullptr, nullptr);
   g_context->swapOutputBuffer(save);
   if (flags & ExecutePHPFlagsLog) {

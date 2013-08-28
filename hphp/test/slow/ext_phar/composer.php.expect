@@ -4,7 +4,7 @@
 / /___/ /_/ / / / / / / /_/ / /_/ (__  )  __/ /
 \____/\____/_/ /_/ /_/ .___/\____/____/\___/_/
                     /_/
-Composer version d740f502772929d127f6d58e4f5a71463b1147e6
+Composer version ef072ff8c008f35d90fe3460608bdb1365a8d7a7
 
 Usage:
   [options] command [arguments]
@@ -29,9 +29,11 @@ Available commands:
   diagnose         Diagnoses the system to identify common errors.
   dump-autoload    Dumps the autoloader
   dumpautoload     Dumps the autoloader
+  global           Allows running commands in the global composer dir ($COMPOSER_HOME).
   help             Displays help for a command
   init             Creates a basic composer.json file in current directory.
   install          Installs the project dependencies from the composer.lock file if present, or falls back on the composer.json.
+  licenses         Show information about licenses of dependencies
   list             Lists commands
   require          Adds required packages to your composer.json and installs them
   run-script       Run the scripts defined in composer.json.

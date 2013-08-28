@@ -377,6 +377,8 @@ private:
     assert(!elm->m_tv);
     elm->m_tv = static_cast<TypedValue*>(
       m_storage.alloc(sizeof(TypedValue)));
+    // Require 16-byte alignment so we can access globals with movdqa.
+    assert(reinterpret_cast<uintptr_t>(elm->m_tv) % 16 == 0);
   }
 
 private:

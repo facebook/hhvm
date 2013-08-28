@@ -92,8 +92,10 @@ struct ExpArenaImpl : boost::noncopyable {
 private:
   struct Slab {
     Slab* prev;
+    uintptr_t empty;  // For 16-byte alignment
     unsigned char buf[];
   };
+  static_assert(sizeof(Slab) == 16, "");
 
   void createSlab(size_t desiredSz) {
     desiredSz += offsetof(Slab, buf);

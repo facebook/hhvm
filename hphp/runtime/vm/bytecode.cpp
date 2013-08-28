@@ -2539,7 +2539,7 @@ CStrRef VMExecutionContext::createFunction(CStrRef args, CStrRef code) {
   return lambda->nameRef();
 }
 
-void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
+bool VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
                                          int frame) {
   assert(retval);
   // The code has "<?php" prepended already
@@ -2547,11 +2547,12 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
   if (unit == nullptr) {
     raise_error("Syntax error");
     tvWriteNull(retval);
-    return;
+    return true;
   }
   // Do not JIT this unit, we are using it exactly once.
   unit->setInterpretOnly();
 
+  bool failed = true;
   VarEnv *varEnv = nullptr;
   ActRec *fp = getFP();
   ActRec *cfpSave = nullptr;
@@ -2601,6 +2602,7 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
     // class used to execute the current function.
     invokeFunc(retval, unit->getMain(functionClass), null_array,
                this_, frameClass, varEnv, nullptr, InvokePseudoMain);
+    failed = false;
   } catch (FatalErrorException &e) {
     g_vmContext->write(s_fatal);
     g_vmContext->write(" : ");
@@ -2642,6 +2644,7 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
     // cfp back to what it was before
     varEnv->setCfp(cfpSave);
   }
+  return failed;
 }
 
 void VMExecutionContext::enterDebuggerDummyEnv() {

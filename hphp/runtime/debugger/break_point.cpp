@@ -1068,7 +1068,8 @@ bool BreakPointInfo::checkClause(DebuggerProxy &proxy) {
       // Don't hit more breakpoints while attempting to decide if we should stop
       // at this breakpoint.
       EvalBreakControl eval(true);
-      Variant ret = proxy.ExecutePHP(m_php, output, 0,
+      bool failed;
+      Variant ret = proxy.ExecutePHP(m_php, output, 0, failed,
                                      DebuggerProxy::ExecutePHPFlagsNone);
       if (m_check) {
         return ret.toBoolean();

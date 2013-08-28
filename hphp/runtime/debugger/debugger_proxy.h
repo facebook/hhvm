@@ -106,7 +106,7 @@ public:
   };
 
   Variant ExecutePHP(const std::string &php, String &output, int frame,
-                     int flags);
+                     bool &failed, int flags);
 
 private:
   bool blockUntilOwn(CmdInterrupt &cmd, bool check);

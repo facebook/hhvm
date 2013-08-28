@@ -1790,8 +1790,7 @@ void DebuggerClient::processTakeCode() {
       m_line = m_line.substr(0, m_line.size() - 1);
     }
     m_code = string("<?php $_=(") + m_line.substr(1) + "); ";
-    processEval();
-    CmdVariable::PrintVariable(*this, s_UNDERSCORE);
+    if (processEval()) CmdVariable::PrintVariable(*this, s_UNDERSCORE);
     return;
   } else if (first != '<') {
     usageLogCommand("eval", m_line);
@@ -1814,11 +1813,13 @@ void DebuggerClient::processTakeCode() {
   }
 }
 
-void DebuggerClient::processEval() {
+bool DebuggerClient::processEval() {
   TRACE(2, "DebuggerClient::processEval\n");
   m_inputState = TakingCommand;
   m_acLiveListsDirty = true;
-  CmdEval().onClient(*this);
+  CmdEval eval;
+  eval.onClient(*this);
+  return !eval.failed();
 }
 
 void DebuggerClient::swapHelp() {

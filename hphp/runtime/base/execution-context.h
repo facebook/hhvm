@@ -625,7 +625,7 @@ public:
   void invokeUnit(TypedValue* retval, HPHP::Unit* unit);
   HPHP::Unit* compileEvalString(StringData* code);
   CStrRef createFunction(CStrRef args, CStrRef code);
-  void evalPHPDebugger(TypedValue* retval, StringData *code, int frame);
+  bool evalPHPDebugger(TypedValue* retval, StringData *code, int frame);
   void enterDebuggerDummyEnv();
   void exitDebuggerDummyEnv();
   void preventReturnsToTC();

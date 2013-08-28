@@ -405,7 +405,7 @@ private:
   bool match(const char *cmd);
   int  checkEvalEnd();
   void processTakeCode();
-  void processEval();
+  bool processEval();
   DebuggerCommand *createCommand();
 
   void updateLiveLists();

@@ -687,7 +687,7 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
-                                  int frame, int flags) {
+                                  int frame, bool &failed, int flags) {
   TRACE(2, "DebuggerProxy::ExecutePHP\n");
   Variant ret;
   // Wire up stdout and stderr to our own string buffer so we can pass
@@ -698,6 +698,7 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
   if (flags & ExecutePHPFlagsLog) {
     Logger::SetThreadHook(append_stderr, &sb);
   }
+  failed = true;
   try {
     String code(php.c_str(), php.size(), CopyString);
     // We're about to start executing more PHP. This is typically done
@@ -720,7 +721,7 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
       if (flags & ExecutePHPFlagsAtInterrupt) disableSignalPolling();
       m_threadMode = origThreadMode;
     };
-    g_vmContext->evalPHPDebugger((TypedValue*)&ret, code.get(), frame);
+    failed = g_vmContext->evalPHPDebugger((TypedValue*)&ret, code.get(), frame);
   } catch (InvalidFunctionCallException &e) {
     sb.append(Debugger::ColorStderr(String(e.what())));
     sb.append(Debugger::ColorStderr(

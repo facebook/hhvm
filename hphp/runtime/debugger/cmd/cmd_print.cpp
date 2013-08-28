@@ -350,9 +350,10 @@ bool CmdPrint::onServer(DebuggerProxy &proxy) {
   g_vmContext->setDebuggerBypassCheck(m_bypassAccessCheck);
   {
     EvalBreakControl eval(m_noBreak);
+    bool failed;
     m_ret =
       proxy.ExecutePHP(DebuggerProxy::MakePHPReturn(m_body),
-                       m_output, m_frame,
+                       m_output, m_frame, failed,
                        DebuggerProxy::ExecutePHPFlagsAtInterrupt |
                        (!proxy.isLocal() ? DebuggerProxy::ExecutePHPFlagsLog :
                         DebuggerProxy::ExecutePHPFlagsNone));

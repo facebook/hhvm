@@ -4,4 +4,10 @@ c
 = $x
 c
 = $x
+$_ = "don't want to see this"
+= throwSomething()
+p $_
+= bad syntax
+= printSomething()
+
 

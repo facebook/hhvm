@@ -1,0 +1,19 @@
+-- only two parameters --
+GET&http%3A%2F%2F127.0.0.1%3A12342%2F&
+-- using empty array --
+GET&http%3A%2F%2F127.0.0.1%3A12342%2F&
+-- using string instead of array --
+HipHop Warning: %s
+
+-- using numeric keys masked as a string --
+GET&http%3A%2F%2F127.0.0.1%3A12342%2F&1%3Dhello
+-- using string keys --
+GET&http%3A%2F%2F127.0.0.1%3A12342%2F&test%3Dhello
+-- using same var in url and params --
+GET&http%3A%2F%2F127.0.0.1%3A12342%2F&test%3Dhi
+-- using null inside params --
+GET&http%3A%2F%2F127.0.0.1%3A12342%2F&test%3D
+-- putting oauth_signature inside by mistake --
+GET&http%3A%2F%2F127.0.0.1%3A12342%2F&
+-- merging url query and extra params --
+GET&http%3A%2F%2F127.0.0.1%3A12342%2Fscript&arg1%3D1%26arg2%3D2

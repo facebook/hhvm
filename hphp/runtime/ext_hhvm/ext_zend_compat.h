@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/ZendObjectData.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,7 +32,7 @@ void zPrepArgs(ActRec* ar);
 
 inline TypedValue* zend_wrap_func(
     ActRec* ar,
-    void (*builtin_func)(ActRec*, RefData*),
+    void (*builtin_func)(ActRec*, RefData*, RefData*),
     int numParams,
     bool isReturnRef) {
 
@@ -42,10 +43,21 @@ inline TypedValue* zend_wrap_func(
   return_value.asTypedValue()->m_type = KindOfRef;
   return_value.asTypedValue()->m_data.pref = RefData::Make(KindOfNull, 0);
 
+  Variant this_ptr;
+  this_ptr.asTypedValue()->m_type = HPHP::KindOfRef;
+  this_ptr.asTypedValue()->m_data.pref = RefData::Make(HPHP::KindOfNull, 0);
+  if (ar->hasThis()) {
+    tvWriteObject(
+      ar->getThis(),
+      this_ptr.asTypedValue()->m_data.pref->tv()
+    );
+  }
+
   // Invoke the PHP extension function/method
   builtin_func(
     ar,
-    return_value.asTypedValue()->m_data.pref
+    return_value.asTypedValue()->m_data.pref,
+    this_ptr.asTypedValue()->m_data.pref
   );
 
   // Take care of freeing the args, tearing down the ActRec,

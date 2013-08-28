@@ -1,0 +1,34 @@
+-- empty params --
+HipHop Warning: %s
+NULL
+-- one param --
+HipHop Warning: %s
+NULL
+-- empty consumer key and secret --
+EXCEPTION -1: The consumer key cannot be empty
+NULL
+-- empty consumer secret --
+OAuth[debug=0,sslChecks=3,debugInfo=]
+-- normal constructor --
+OAuth[debug=0,sslChecks=3,debugInfo=]
+-- enable debug --
+OAuth[debug=1,sslChecks=3,debugInfo=]
+-- disable debug --
+OAuth[debug=0,sslChecks=3,debugInfo=]
+-- set version without parameters --
+HipHop Warning: %s
+NULL
+-- set version with boolean --
+bool(true)
+-- set version with empty string --
+EXCEPTION 503: Invalid version
+-- set version to 1 --
+bool(true)
+-- set auth type to invalid type 99 --
+EXCEPTION 503: Invalid auth type
+-- generate a signature --
+bool(true)
+-- set a timeout (100 ms) --
+bool(true)
+-- set an invalid timeout --
+EXCEPTION 503: Invalid timeout

@@ -21,38 +21,20 @@
 
 /* resource lists */
 
-#include "zend_list.h"
-
 #include "zend.h"
+#include "zend_list.h"
 #include "zend_API.h"
 #include "php_streams.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/ZendRequestLocal.h"
 
 ZEND_API int le_index_ptr;
 
-typedef std::vector<zend_rsrc_list_entry*> zend_rsrc_list;
 namespace HPHP {
-  class ZendResourceList : public RequestEventHandler {
-    public:
-      void clear() {
-        m_list.clear();
-        m_list.push_back(nullptr); // don't give out id 0
-      }
-      virtual void requestInit() {
-        clear();
-      }
-      virtual void requestShutdown() {
-        clear();
-      }
-      zend_rsrc_list& get() {
-        return m_list;
-      }
-    private:
-      zend_rsrc_list m_list;
-  };
   IMPLEMENT_OBJECT_ALLOCATION(ZendResourceData);
 }
 
-static __thread HPHP::RequestLocal<HPHP::ZendResourceList> s_regular_list;
+ZEND_REQUEST_LOCAL_LIST(zend_rsrc_list_entry*, s_regular_list);
+typedef ZendRequestLocalList<zend_rsrc_list_entry*>::list zend_rsrc_list;
 
 zend_rsrc_list& RL() {
   return s_regular_list.get()->get();

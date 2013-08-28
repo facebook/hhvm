@@ -62,9 +62,7 @@ END_EXTERN_C()
 #define STD_ZEND_INI_BOOLEAN(name, default_value, modifiable, on_modify, property_name, struct_type, struct_ptr) \
   ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr, NULL, zend_ini_boolean_displayer_cb)
 
-#define REGISTER_INI_ENTRIES()                                          \
-  static HPHP::InitFiniNode init(init_ini_entries,                      \
-    HPHP::InitFiniNode::When::ThreadInit);
+#define REGISTER_INI_ENTRIES() init_ini_entries();
 #define UNREGISTER_INI_ENTRIES()
 #define DISPLAY_INI_ENTRIES() display_ini_entries(zend_module)
 

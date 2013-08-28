@@ -1,5 +1,7 @@
 <?php
 
+require __DIR__."/random_port.inc";
+
 function http_server_skipif($socket_string) {
 
 	if (!function_exists('pcntl_fork')) die('skip pcntl_fork() not available');

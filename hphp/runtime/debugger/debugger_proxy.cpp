@@ -425,6 +425,7 @@ void DebuggerProxy::pollSignal() {
     // We've noticed that the socket has closed. Stop and destory this proxy.
     TRACE_RB(2, "DebuggerProxy::pollSignal: "
              "lost communication with the client, stopping proxy\n");
+    Debugger::UsageLog("server", getSandboxId(), "ProxyError", "Signal poll");
     stop();
   }
   TRACE_RB(2, "DebuggerProxy::pollSignal: ended\n");
@@ -613,6 +614,8 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
   // Do the server-side work for this interrupt, which just notifies the client.
   if (!cmd.onServer(*this)) {
     TRACE_RB(1, "Failed to send CmdInterrupt to client\n");
+    Debugger::UsageLog("server", getSandboxId(), "ProxyError",
+                       "Send interrupt");
     stopAndThrow();
   }
 
@@ -662,10 +665,14 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
       if (res) {
         if (!res->onServer(*this)) {
           TRACE_RB(1, "Failed to execute cmd %d from client\n", res->getType());
+          Debugger::UsageLog("server", getSandboxId(), "ProxyError",
+                             "Command failed");
           cmdFailure = true;
         }
       } else {
         TRACE_RB(1, "Failed to receive cmd from client\n");
+        Debugger::UsageLog("server", getSandboxId(), "ProxyError",
+                           "Command receive failed");
         cmdFailure = true;
       }
     } catch (const DebuggerException &e) {
@@ -673,10 +680,14 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
     } catch (const std::exception& e) {
       Logger::Warning(DEBUGGER_LOG_TAG
        "Cmd type %d onServer() threw exception %s", res->getType(), e.what());
+      Debugger::UsageLog("server", getSandboxId(), "ProxyError",
+                         "Command exception");
       cmdFailure = true;
     } catch (...) {
       Logger::Warning(DEBUGGER_LOG_TAG
        "Cmd type %d onServer() threw non standard exception", res->getType());
+      Debugger::UsageLog("server", getSandboxId(), "ProxyError",
+                         "Command exception");
       cmdFailure = true;
     }
     if (cmdFailure) stopAndThrow();

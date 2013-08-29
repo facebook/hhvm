@@ -171,6 +171,7 @@ static int getNextTokenType(int t) {
 %x ST_END_HEREDOC
 %x ST_LOOKING_FOR_PROPERTY
 %x ST_LOOKING_FOR_VARNAME
+%x ST_LOOKING_FOR_COLON
 %x ST_VAR_OFFSET
 %x ST_LT_CHECK
 %x ST_COMMENT
@@ -196,7 +197,7 @@ TOKENS [;:,.\[\]()|^&+\-*/=%!~$<>?@]
 ANY_CHAR (.|[\n])
 NEWLINE ("\r"|"\n"|"\r\n")
 XHPLABEL {LABEL}([:-]{LABEL})*
-COMMENT_REGEX ([\/][\*]([^\*]|(\*[^/]))*[\*][\/]|"//"[^\r\n]*{NEWLINE})
+COMMENT_REGEX ("/*"([^\*]|("*"[^/]))*"*/"|("//"|"#")[^\r\n]*{NEWLINE})
 WHITESPACE_AND_COMMENTS ([ \n\r\t]|({COMMENT_REGEX}))+
 
 /*
@@ -416,6 +417,25 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
   HH_ONLY_KEYWORD(T_TUPLE);
 }
 
+<ST_IN_SCRIPTING>"?"/":"[a-zA-Z_\x7f-\xff] {
+  int ntt = getNextTokenType(_scanner->lastToken());
+  if (!_scanner->isXHPSyntaxEnabled() ||
+      ((ntt & NextTokenType::XhpClassName) && _scanner->lastToken() != '}')) {
+    RETSTEP('?');
+  }
+  /* If XHP is enabled and "?:" occurs in a place where an XHP class name is
+     not expected or it occurs after "}", drop into the ST_LOOKING_FOR_COLON
+     state to avoid potentially treating ":" as the beginning of an XHP class
+     name */
+  BEGIN(ST_LOOKING_FOR_COLON);
+  RETSTEP('?');
+}
+
+<ST_LOOKING_FOR_COLON>":" {
+  BEGIN(ST_IN_SCRIPTING);
+  RETSTEP(':');
+}
+
 <ST_IN_SCRIPTING>"..." {
   if (!_scanner->isHHSyntaxEnabled()) {
     yyless(1);
@@ -522,6 +542,24 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         STEPPOS(T_DOLLAR_OPEN_CURLY_BRACES);
         yy_push_state(ST_LOOKING_FOR_VARNAME, yyscanner);
         return T_DOLLAR_OPEN_CURLY_BRACES;
+}
+
+<ST_IN_SCRIPTING>"}"/":"[a-zA-Z_\x7f-\xff] {
+        STEPPOS('}');
+        // We need to be robust against a '}' in PHP code with
+        // no corresponding '{'
+        struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+        if (yyg->yy_start_stack_ptr) {
+          yy_pop_state(yyscanner);
+          if (YY_START == ST_IN_SCRIPTING) {
+            /* If XHP is enabled and "}:" occurs (and "}" does not cause us
+               to transition to some state other than ST_IN_SCRIPTING), drop
+               into the ST_LOOKING_FOR_COLON state to avoid potentially
+               treating ":" as the beginning of an XHP class name */
+            BEGIN(ST_LOOKING_FOR_COLON);
+          }
+        }
+        return '}';
 }
 
 <ST_IN_SCRIPTING>"}" {

@@ -38,7 +38,11 @@ class ArrayObject implements IteratorAggregate, Traversable, ArrayAccess,
     if (!$input) {
       $input = array();
     }
-    $this->storage = $input;
+    if (($input instanceof ArrayObject) || ($input instanceof ArrayIterator)) {
+      $this->storage = $input->getArrayCopy();
+    } else {
+      $this->storage = $input;
+    }
     $this->flags = $flags;
     $this->iteratorClass = $iterator_class;
   }

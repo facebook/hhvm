@@ -30,9 +30,6 @@
 #define LMCD_SERVER_HOSTNAME(server)      memcached_server_name(server)
 #define LMCD_SERVER_PORT(server)          memcached_server_port(server)
 
-#elif defined(LIBMEMCACHED_VERSION_HEX) && \
-      LIBMEMCACHED_VERSION_HEX == 0x01000008
-#error libmemcached 1.0.8 is unsupported, either upgrade or downgrade
 #else
 
 #define LMCD_SERVER_BY_KEY_INSTANCE_TYPE   const memcached_server_instance_st

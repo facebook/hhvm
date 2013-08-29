@@ -42,6 +42,7 @@
 #include "hphp/util/light-process.h"
 #include "hphp/util/repo-schema.h"
 #include "hphp/util/current-executable.h"
+#include "hphp/util/service-data.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/ext_fb.h"
@@ -302,6 +303,22 @@ static void handle_exception_append_bt(std::string& errorMsg,
   }
 }
 
+static void bump_counter_and_rethrow() {
+  try {
+    throw;
+  } catch (const RequestTimeoutException& e) {
+    static auto requestTimeoutCounter = ServiceData::createTimeseries(
+      "requests_timed_out", {ServiceData::StatsType::COUNT});
+    requestTimeoutCounter->addValue(1);
+    throw;
+  } catch (const RequestMemoryExceededException& e) {
+    static auto requestMemoryExceededCounter = ServiceData::createTimeseries(
+      "requests_memory_exceeded", {ServiceData::StatsType::COUNT});
+    requestMemoryExceededCounter->addValue(1);
+    throw;
+  }
+}
+
 static void handle_exception_helper(bool& ret,
                                     ExecutionContext* context,
                                     std::string& errorMsg,
@@ -309,7 +326,7 @@ static void handle_exception_helper(bool& ret,
                                     bool& error,
                                     bool richErrorMsg) {
   try {
-    throw;
+    bump_counter_and_rethrow();
   } catch (const Eval::DebuggerException &e) {
     throw;
   } catch (const ExitException &e) {

@@ -624,6 +624,7 @@ void throw_infinite_recursion_exception() {
     throw UncatchableException("infinite recursion detected");
   }
 }
+
 Exception* generate_request_timeout_exception() {
   Exception* ret = nullptr;
   ThreadInfo *info = ThreadInfo::s_threadInfo.getNoCheck();
@@ -639,7 +640,7 @@ Exception* generate_request_timeout_exception() {
   if (RuntimeOption::InjectedStackTrace) {
     exceptionStack = g_vmContext->debugBacktrace(false, true, true).get();
   }
-  ret = new FatalErrorException(exceptionMsg, exceptionStack.get());
+  ret = new RequestTimeoutException(exceptionMsg, exceptionStack.get());
 
   return ret;
 }
@@ -649,7 +650,7 @@ Exception* generate_memory_exceeded_exception() {
   if (RuntimeOption::InjectedStackTrace) {
     exceptionStack = g_vmContext->debugBacktrace(false, true, true).get();
   }
-  return new FatalErrorException(
+  return new RequestMemoryExceededException(
     "request has exceeded memory limit", exceptionStack.get());
 }
 

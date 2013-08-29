@@ -609,7 +609,6 @@ Class* Unit::defClass(const PreClass* preClass,
     newClass->m_cachedOffset = nameList->m_cachedClassOffset;
 
     newClass.get()->incAtomicCount();
-    newClass.get()->setCached();
     if (Class::s_instanceBitsInit.load(std::memory_order_acquire)) {
       // If the instance bitmap has already been set up, we can just
       // initialize our new class's bits and add ourselves to the class
@@ -627,6 +626,12 @@ Class* Unit::defClass(const PreClass* preClass,
       }
       nameList->pushClass(newClass.get());
     }
+    /*
+     * call setCached after adding to the class list, otherwise the
+     * target-cache short circuit at the top could return a class
+     * which is not yet on the clsList().
+     */
+    newClass.get()->setCached();
     DEBUGGER_ATTACHED_ONLY(phpDebuggerDefClassHook(newClass.get()));
     return newClass.get();
   }

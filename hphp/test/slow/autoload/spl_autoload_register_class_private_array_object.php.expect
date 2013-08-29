@@ -1,1 +1,1 @@
-array(1) { [0]=> array(2) { [0]=> object(ClassAutoloader)#1 (0) { } [1]=> string(6) "loader" } } Trying to load testCore via ClassAutoloader::loader() myClass
+Trying to load testCore via ClassAutoloader::loader() myClass

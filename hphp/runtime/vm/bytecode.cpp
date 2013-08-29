@@ -1009,6 +1009,10 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
     // The anonymous context cannot access protected or private methods,
     // so we can fail fast here.
     if (ctx == nullptr) {
+       //spl autoload override private and protected
+	    String a_f=StrNR(method->name()->data()).asString();
+	    String a_c=StrNR(baseClass->preClass()->name()->data()).asString();	
+	    if(SPL::s_instance->bool_spl_register_class(a_c+"::"+a_f)) return method;
       if (raise) {
         raise_error("Call to %s method %s::%s from anonymous context",
                     (method->attrs() & AttrPrivate) ? "private" : "protected",

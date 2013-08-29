@@ -447,8 +447,9 @@ struct Unit {
 
   MD5 md5() const { return m_md5; }
 
-  static NamedEntity* GetNamedEntity(const StringData *)
-    __attribute__((__flatten__));
+  static NamedEntity* GetNamedEntity(const StringData *str,
+                                     bool allowCreate = true) FLATTEN;
+
   static size_t GetNamedEntityTableSize();
   static Array getUserFunctions();
   static Array getClassesInfo();
@@ -471,6 +472,8 @@ struct Unit {
     assert(id < Id(m_namedInfo.size()));
     const NamedEntityPair &ne = m_namedInfo[id];
     assert(ne.first);
+    assert(ne.first->data()[ne.first->size()] == 0);
+    assert(ne.first->data()[0] != '\\');
     if (UNLIKELY(!ne.second)) {
       const_cast<const NamedEntity*&>(ne.second) = GetNamedEntity(ne.first);
     }
@@ -1087,7 +1090,7 @@ public:
  * If name starts with '\\', returns a new String with the leading
  * slash stripped. Otherwise returns a null string.
  */
-inline const String normalizeNS(const StringData* name) {
+inline String normalizeNS(const StringData* name) {
   assert(name->data()[name->size()] == 0);
   if (name->data()[0] == '\\') {
     return String(name->data() + 1);

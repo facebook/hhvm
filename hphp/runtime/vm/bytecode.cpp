@@ -3830,16 +3830,16 @@ inline bool OPTBLD_INLINE VMExecutionContext::cellInstanceOf(
 
 inline ALWAYS_INLINE
 bool VMExecutionContext::iopInstanceOfHelper(const StringData* str1, Cell* c2) {
-  const NamedEntity* rhs = Unit::GetNamedEntity(str1);
+  const NamedEntity* rhs = Unit::GetNamedEntity(str1, false);
   // Because of other codepaths, an un-normalized name might enter the
   // table without a Class* so we need to check if it's there.
-  if (LIKELY(rhs->getCachedClass() != nullptr)) {
+  if (LIKELY(rhs && rhs->getCachedClass() != nullptr)) {
     return cellInstanceOf(c2, rhs);
   }
   auto normName = normalizeNS(str1);
   if (normName) {
-    rhs = Unit::GetNamedEntity(normName.get());
-    if (LIKELY(rhs->getCachedClass() != nullptr)) {
+    rhs = Unit::GetNamedEntity(normName.get(), false);
+    if (LIKELY(rhs && rhs->getCachedClass() != nullptr)) {
       return cellInstanceOf(c2, rhs);
     }
   }

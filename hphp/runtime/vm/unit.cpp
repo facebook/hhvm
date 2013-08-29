@@ -112,13 +112,15 @@ static void initializeNamedDataMap() {
                        config);
 }
 
-NamedEntity* Unit::GetNamedEntity(const StringData* str) {
+NamedEntity* Unit::GetNamedEntity(const StringData* str,
+                                  bool allowCreate /*=true*/) {
   if (UNLIKELY(!s_namedDataMap)) {
     initializeNamedDataMap();
   }
   NamedEntityMap::iterator it = s_namedDataMap->find(str);
   if (LIKELY(it != s_namedDataMap->end())) return &it->second;
-  return getNamedEntityHelper(str);
+  if (LIKELY(allowCreate)) { return getNamedEntityHelper(str); }
+  return nullptr;
 }
 
 void NamedEntity::setCachedFunc(Func* f) {

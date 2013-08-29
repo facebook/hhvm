@@ -3053,7 +3053,7 @@ TranslatorX64::getPerfCounters(Array& ret) {
 }
 
 TranslatorX64::~TranslatorX64() {
-  int result = munmap(trampolinesCode.getBase(), m_totalSize);
+  int result = munmap(trampolinesCode.base(), m_totalSize);
   if (result != 0) {
     perror("freeSlab: munmap");
   }

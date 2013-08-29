@@ -757,15 +757,15 @@ public:
   }
 
   CodeAddress base() const {
-    return codeBlock->base;
+    return codeBlock->base();
   }
 
   CodeAddress frontier() const {
-    return codeBlock->frontier;
+    return codeBlock->frontier();
   }
 
   void setFrontier(CodeAddress newFrontier) {
-    codeBlock->frontier = newFrontier;
+    codeBlock->setFrontier(newFrontier);
   }
 
   size_t capacity() const {
@@ -1042,7 +1042,7 @@ public:
    */
 
   bool jmpDeltaFits(CodeAddress dest) {
-    int64_t delta = dest - (codeBlock->frontier + 5);
+    int64_t delta = dest - (codeBlock->frontier() + 5);
     return deltaFits(delta, sz::dword);
   }
 
@@ -1084,7 +1084,7 @@ public:
   }
 
   void jmpAuto(CodeAddress dest) {
-    auto delta = dest - (codeBlock->frontier + 2);
+    auto delta = dest - (codeBlock->frontier() + 2);
     if (deltaFits(delta, sz::byte)) {
       jmp8(dest);
     } else {
@@ -1093,7 +1093,7 @@ public:
   }
 
   void jccAuto(ConditionCode cc, CodeAddress dest) {
-    auto delta = dest - (codeBlock->frontier + 2);
+    auto delta = dest - (codeBlock->frontier() + 2);
     if (deltaFits(delta, sz::byte)) {
       jcc8(cc, dest);
     } else {
@@ -1202,8 +1202,9 @@ public:
   }
 
   void emitInt3s(int n) {
-    memset(codeBlock->frontier, 0xcc, n);
-    codeBlock->frontier += n;
+    for (auto i = 0; i < n; ++i) {
+      byte(0xcc);
+    }
   }
 
   void emitNop(int n) {
@@ -1567,7 +1568,7 @@ public:
   void emitJ8(X64Instr op, ssize_t imm)
     ALWAYS_INLINE {
     assert((op.flags & IF_JCC) == 0);
-    ssize_t delta = imm - ((ssize_t)codeBlock->frontier + 2);
+    ssize_t delta = imm - ((ssize_t)codeBlock->frontier() + 2);
     // Emit opcode and 8-bit immediate
     byte(0xEB);
     byte(safe_cast<int8_t>(delta));
@@ -1577,7 +1578,7 @@ public:
     ALWAYS_INLINE {
     // this is for jcc only
     assert(op.flags & IF_JCC);
-    ssize_t delta = imm - ((ssize_t)codeBlock->frontier + 2);
+    ssize_t delta = imm - ((ssize_t)codeBlock->frontier() + 2);
     // Emit opcode
     byte(jcond | 0x70);
     // Emit 8-bit offset
@@ -1588,7 +1589,7 @@ public:
     // call and jmp are supported, jcc is not supported
     assert((op.flags & IF_JCC) == 0);
     int32_t delta =
-      safe_cast<int32_t>(imm - ((ssize_t)codeBlock->frontier + 5));
+      safe_cast<int32_t>(imm - ((ssize_t)codeBlock->frontier() + 5));
     uint8_t *bdelta = (uint8_t*)&delta;
     uint8_t instr[] = { op.table[2],
       bdelta[0], bdelta[1], bdelta[2], bdelta[3] };
@@ -1600,7 +1601,7 @@ public:
     // jcc is supported, call and jmp are not supported
     assert(op.flags & IF_JCC);
     int32_t delta =
-      safe_cast<int32_t>(imm - ((ssize_t)codeBlock->frontier + 6));
+      safe_cast<int32_t>(imm - ((ssize_t)codeBlock->frontier() + 6));
     uint8_t* bdelta = (uint8_t*)&delta;
     uint8_t instr[6] = { 0x0f, uint8_t(0x80 | jcond),
       bdelta[0], bdelta[1], bdelta[2], bdelta[3] };
@@ -2531,7 +2532,7 @@ private:
     JumpInfo info;
     info.type = type;
     info.a = a;
-    info.addr = a->codeBlock->getFrontier();
+    info.addr = a->codeBlock->frontier();
     m_toPatch.push_back(info);
   }
 

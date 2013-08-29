@@ -32,23 +32,23 @@ namespace HPHP { namespace Transl {
 typedef X64Assembler Asm;
 using namespace reg;
 
+namespace {
+
 struct TestDataBlock : public DataBlock {
   explicit TestDataBlock(size_t sz) {
     Address result = (Address)mmap(0, sz, PROT_READ | PROT_WRITE | PROT_EXEC,
                                    MAP_ANON | MAP_PRIVATE, -1, 0);
     always_assert(result != MAP_FAILED);
-    base = frontier = result;
-    size = sz;
+    m_base = m_frontier = result;
+    m_size = sz;
   }
 
   ~TestDataBlock() {
-    munmap(base, size);
-    base = frontier = nullptr;
-    size = 0;
+    munmap(m_base, m_size);
+    m_base = m_frontier = nullptr;
+    m_size = 0;
   }
 };
-
-namespace {
 
 //////////////////////////////////////////////////////////////////////
 

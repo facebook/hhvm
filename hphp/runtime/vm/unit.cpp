@@ -53,7 +53,6 @@ TRACE_SET_MOD(hhbc);
 static const StaticString s_stdin("STDIN");
 static const StaticString s_stdout("STDOUT");
 static const StaticString s_stderr("STDERR");
-static const StaticString s___autoload("__autoload");
 
 ReadOnlyArena& get_readonly_arena() {
   static ReadOnlyArena arena(RuntimeOption::EvalHHBCArenaChunkSize);

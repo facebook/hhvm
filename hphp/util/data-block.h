@@ -47,6 +47,21 @@ struct DataBlock : private boost::noncopyable {
 
   DataBlock() : m_base(nullptr), m_frontier(nullptr), m_size(0) {}
 
+  DataBlock(DataBlock&& other)
+    : m_base(other.m_base), m_frontier(other.m_frontier), m_size(other.m_size) {
+    other.m_base = other.m_frontier = nullptr;
+    other.m_size = 0;
+  }
+
+  DataBlock& operator=(DataBlock&& other) {
+    m_base = other.m_base;
+    m_frontier = other.m_frontier;
+    m_size = other.m_size;
+    other.m_base = other.m_frontier = nullptr;
+    other.m_size = 0;
+    return *this;
+  }
+
   /**
    * Uses an existing chunk of memory.
    */
@@ -148,6 +163,10 @@ struct DataBlock : private boost::noncopyable {
       memcpy(m_frontier, bs, n);
     }
     m_frontier += n;
+  }
+
+  void skip(size_t nbytes) {
+    alloc<uint8_t>(1, nbytes);
   }
 
   Address base() const { return m_base; }

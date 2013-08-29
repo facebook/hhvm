@@ -127,7 +127,8 @@ bool Translator::replace() {
   TranslatorX64* n00b = new TranslatorX64();
   n00b->initGdb();
   TRACE(0, "Tx64: replace %p a.code %p -> %p a.code %p complete\n",
-        current, current->getAsm().base(), n00b, n00b->getAsm().base());
+        current, current->mainCode.base(),
+        n00b, n00b->mainCode.base());
   // Here is the changing of the guard.
   nextTx64 = n00b;
   // TxReaper: runs after a translation space becomes unreachable.

@@ -145,58 +145,59 @@ class TranslatorX64 : public Translator
 
   typedef X64Assembler Asm;
 
-  enum class AsmSelection {
+  enum class CodeBlockSelection {
     Default,   // 'a'
     Hot,       // 'ahot'
     Profile,   // 'aprof' -- highest precedence
   };
 
-  class AsmSelector {
+  class CodeBlockSelector {
    public:
     class Args {
      public:
       explicit Args(TranslatorX64* tx);
-      Args&          hot(bool isHot);
-      Args&          profile(bool isProf);
-      AsmSelection   getSelection() const;
-      TranslatorX64* getTranslator() const;
+      Args&              hot(bool isHot);
+      Args&              profile(bool isProf);
+      CodeBlockSelection getSelection() const;
+      TranslatorX64*     getTranslator() const;
 
      private:
       TranslatorX64* m_tx;
-      AsmSelection   m_select;
+      CodeBlockSelection   m_select;
     };
 
-    explicit AsmSelector(const Args& args);
-    ~AsmSelector();
+    explicit CodeBlockSelector(const Args& args);
+    ~CodeBlockSelector();
 
    private:
     void           swap();
 
     TranslatorX64* m_tx;
-    AsmSelection   m_select;
+    CodeBlockSelection   m_select;
   };
 
   TCA                    tcStart;
   TCA                    aStart;
-  CodeBlock              hotCode;
-  CodeBlock              mainCode;
-  CodeBlock              profCode;
-  CodeBlock              stubsCode;
-  CodeBlock              trampolinesCode;
+
 public: // TODO: move these to some kind of CodeCache module
-  X64Assembler           ahot;    // used for hot code of AttrHot functions
-  X64Assembler           a;       // used for hot code of non-AttrHot functions
-  X64Assembler           aprof;   // used for hot code of profiling translations
-  X64Assembler           astubs;  // used for cold code
-  X64Assembler           atrampolines;
+
+  // Note that mainCode gets swapped with hotCode and profCode sometimes. It
+  // should be very uncommon to specifically refer to hotCode and profCode.
+  CodeBlock            mainCode; // used for hot code of non-AttrHot functions
+  CodeBlock            hotCode;  // used for hot code of AttrHot functions
+  CodeBlock            profCode; // used for hot code of profiling translations
+
+  CodeBlock            stubsCode; // used for cold code
+  CodeBlock            trampolinesCode;
+
 private:
-  PointerMap             trampolineMap;
-  int                    m_numNativeTrampolines;
+  PointerMap           trampolineMap;
+  int                  m_numNativeTrampolines;
 
-  DataBlock              m_globalData;
+  DataBlock            m_globalData;
 
-  TcaTransIDMap          m_jmpToTransID; // maps jump addresses to the ID
-                                         // of translation containing them
+  TcaTransIDMap        m_jmpToTransID; // maps jump addresses to the ID
+                                       // of translation containing them
 
   // Data structures for HHIR-based translation
   uint64_t               m_numHHIRTrans;
@@ -316,22 +317,23 @@ private:
   void emitFallbackUncondJmp(Asm& as, SrcRec& dest);
   void emitFallbackCondJmp(Asm& as, SrcRec& dest, ConditionCode cc);
 
-  static void smash(Asm &a, TCA src, TCA dest, bool isCall);
-  static void smashJmp(Asm &a, TCA src, TCA dest) {
-    smash(a, src, dest, false);
+  static void smash(CodeBlock &cb, TCA src, TCA dest, bool isCall);
+  static void smashJmp(CodeBlock& cb, TCA src, TCA dest) {
+    smash(cb, src, dest, false);
   }
-  static void smashCall(Asm &a, TCA src, TCA dest) {
-    smash(a, src, dest, true);
+  static void smashCall(CodeBlock& cb, TCA src, TCA dest) {
+    smash(cb, src, dest, true);
   }
 
 private:
   void drawCFG(std::ofstream& out) const;
 
-  Asm& getAsmFor(TCA addr) {
-    assert(a.base()    != ahot.base()   &&
-           a.base()    != astubs.base() &&
-           ahot.base() != astubs.base());
-    return asmChoose(addr, a, ahot, aprof, astubs, atrampolines);
+  CodeBlock& codeBlockFor(TCA addr) {
+    assert(mainCode.base() != hotCode.base()   &&
+           mainCode.base() != stubsCode.base() &&
+           hotCode.base()  != stubsCode.base());
+    return codeBlockChoose(addr, mainCode, hotCode, profCode, stubsCode,
+                           trampolinesCode);
   }
 
   static CppCall getDtorCall(DataType type);
@@ -360,15 +362,8 @@ public:
   }
 
   inline bool isValidCodeAddress(TCA tca) const {
-    return tca >= tcStart && tca < astubs.base() + astubs.capacity();
+    return tca >= tcStart && tca < stubsCode.base() + stubsCode.capacity();
   }
-
-  // If we were to shove every little helper function into this class
-  // header, we'd spend the rest of our lives compiling. So, these public
-  // functions are for static helpers private to translator-x64.cpp. Be
-  // professional.
-
-  Asm& getAsm()   { return a; }
 
   static bool isPseudoEvent(const char* event);
   void getPerfCounters(Array& ret);
@@ -399,11 +394,11 @@ private:
   TCA retranslateOpt(TransID transId, bool align);
 
   void recordGdbTranslation(SrcKey sk, const Func* f,
-                            const Asm& a,
+                            const CodeBlock& cb,
                             const TCA start,
                             bool exit, bool inPrologue);
-  void recordGdbStub(const Asm& a, TCA start, const char* name);
-  void recordBCInstr(uint32_t op, const Asm& a, const TCA addr);
+  void recordGdbStub(const CodeBlock& cb, TCA start, const char* name);
+  void recordBCInstr(uint32_t op, const CodeBlock& cb, const TCA addr);
 
 
 public:

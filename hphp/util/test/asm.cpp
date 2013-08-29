@@ -388,8 +388,7 @@ typedef void (Asm::*OpISM16)(Immed, IndexedMemoryRef);
 
 TEST(Asm, General) {
   TestDataBlock db(10 << 24);
-  Asm a;
-  a.init(&db);
+  Asm a { db };
 
   /*
    * Test is a little different, so we have this BASIC_OP stuff.
@@ -489,8 +488,7 @@ TEST(Asm, General) {
 
 TEST(Asm, WordSizeInstructions) {
   TestDataBlock db(10 << 24);
-  Asm a;
-  a.init(&db);
+  Asm a { db };
 
   // single register operations
   a.    incw   (ax);
@@ -532,8 +530,7 @@ movw $0x1,0x100(%rax)
 
 TEST(Asm, RetImmediate) {
   TestDataBlock db(10 << 24);
-  Asm a;
-  a.init(&db);
+  Asm a { db };
 
   a.ret(8);
   ASSERT_FALSE(a.base()[0] == kOpsizePrefix);
@@ -541,8 +538,7 @@ TEST(Asm, RetImmediate) {
 
 TEST(Asm, IncDecRegs) {
   TestDataBlock db(10 << 24);
-  Asm a;
-  a.init(&db);
+  Asm a { db };
 
   // incq, incl, incw
   a.    incq(rax);
@@ -577,8 +573,7 @@ dec %r15w
 
 TEST(Asm, HighByteReg) {
   TestDataBlock db(10 << 24);
-  Asm a;
-  a.init(&db);
+  Asm a { db };
 
   // Test movzbl with high byte regs, avoiding destination registers
   // that need a rex prefix
@@ -599,8 +594,7 @@ cmp %ch,%dh
 
 TEST(Asm, RandomJunk) {
   TestDataBlock db(10 << 24);
-  Asm a;
-  a.init(&db);
+  Asm a { db };
 
   a.    push   (rbp);
   a.    movq   (rsp, rbp);
@@ -628,8 +622,7 @@ retq )" "\n"); // string concat to avoid space at end of line after retq
 
 TEST(Asm, AluBytes) {
   TestDataBlock db(10 << 24);
-  Asm a;
-  a.init(&db);
+  Asm a { db };
 
 #define INSTRS \
  FROB(cmp)     \
@@ -681,8 +674,7 @@ test %sil,(%rcx,%rsi,8)
 
 TEST(Asm, CMov) {
   TestDataBlock db(10 << 24);
-  Asm a;
-  a.init(&db);
+  Asm a { db };
   a.   test_reg64_reg64(rax, rax);
   a.   cload_reg64_disp_reg64(CC_Z, rax, 0, rax);
   a.   cload_reg64_disp_reg32(CC_Z, rax, 0, rax);
@@ -695,8 +687,7 @@ cmove (%rax),%eax
 
 TEST(Asm, SimpleLabelTest) {
   TestDataBlock db(10 << 24);
-  Asm a;
-  a.init(&db);
+  Asm a { db };
 
   Label loop;
 
@@ -741,8 +732,7 @@ asm_label(a, loop);
 
 TEST(Asm, ShiftingWithCl) {
   TestDataBlock db(10 << 24);
-  Asm a;
-  a.init(&db);
+  Asm a { db };
 
   a.    shlq(rax);
   a.    shlq(rdx);
@@ -763,8 +753,7 @@ sar %cl,%r8
 TEST(Asm, FloatRounding) {
   if (folly::CpuId().sse41()) {
     TestDataBlock db(10 << 24);
-    Asm a;
-    a.init(&db);
+    Asm a { db };
 
     a.    roundsd(RoundDirection::nearest,  xmm1, xmm2);
     a.    roundsd(RoundDirection::floor,    xmm2, xmm4);
@@ -782,8 +771,7 @@ roundsd $0x3,%xmm12,%xmm9
 
 TEST(Asm, SSEDivision) {
   TestDataBlock db(10 << 24);
-  Asm a;
-  a.init(&db);
+  Asm a { db };
   a.    divsd(xmm0, xmm1);
   a.    divsd(xmm1, xmm2);
   a.    divsd(xmm2, xmm0);
@@ -800,8 +788,7 @@ divsd %xmm12,%xmm8
 
 TEST(Asm, SSESqrt) {
   TestDataBlock db(10 << 24);
-  Asm a;
-  a.init(&db);
+  Asm a { db };
   a.    sqrtsd(xmm0, xmm1);
   a.    sqrtsd(xmm1, xmm2);
   a.    sqrtsd(xmm2, xmm0);
@@ -818,8 +805,7 @@ sqrtsd %xmm12,%xmm8
 
 TEST(Asm, DoubleToIntConv) {
   TestDataBlock db(10 << 24);
-  Asm a;
-  a.init(&db);
+  Asm a { db };
   a.    cvttsd2siq(xmm0, rax);
   a.    cvttsd2siq(xmm1, rbx);
   a.    cvttsd2siq(xmm2, rcx);

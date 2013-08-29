@@ -3732,7 +3732,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   SrcKey srcKey = SrcKey(m_curInst->marker().func, m_curInst->marker().bcOff);
   bool isImmutable = (func->isConst() && !func->type().isNull());
   const Func* funcd = isImmutable ? func->getValFunc() : nullptr;
-  assert(&m_as == &m_tx64->getAsm());
+  assert(m_as.base() == m_tx64->mainCode.base());
   int32_t adjust = m_tx64->emitBindCall(srcKey, funcd, numArgs);
   if (adjust) {
     m_as.addq (adjust, rVmSp);
@@ -6059,8 +6059,8 @@ LiveRegs computeLiveRegs(const IRFactory* factory, const RegAllocInfo& regs,
 }
 
 void genCodeForTrace(IRTrace* trace,
-                     CodeGenerator::Asm& as,
-                     CodeGenerator::Asm& astubs,
+                     CodeBlock& mainCode,
+                     CodeBlock& stubsCode,
                      IRFactory* irFactory,
                      vector<TransBCMapping>* bcMap,
                      Transl::TranslatorX64* tx64,
@@ -6070,6 +6070,9 @@ void genCodeForTrace(IRTrace* trace,
   assert(trace->isMain());
   LiveRegs live_regs = computeLiveRegs(irFactory, regs, trace->front());
   CodegenState state(irFactory, regs, live_regs, lifetime, asmInfo);
+
+  Asm as { mainCode };
+  Asm astubs { stubsCode };
 
   // Returns: whether a block has already been emitted.
   DEBUG_ONLY auto isEmitted = [&](Block* block) {
@@ -6086,7 +6089,7 @@ void genCodeForTrace(IRTrace* trace,
     assert(!isEmitted(block));
 
     FTRACE(6, "cgBlock {} on {}\n", block->id(),
-           &a == &astubs ? "astubs" : "a");
+           a.base() == astubs.base() ? "astubs" : "a");
 
     auto const aStart      = a.frontier();
     auto const astubsStart = astubs.frontier();
@@ -6114,7 +6117,7 @@ void genCodeForTrace(IRTrace* trace,
 
     if (state.asmInfo) {
       state.asmInfo->asmRanges[block] = TcaRange(aStart, a.frontier());
-      if (&a != &astubs) {
+      if (a.base() != astubs.base()) {
         state.asmInfo->astubRanges[block] = TcaRange(astubsStart,
                                                      astubs.frontier());
       }

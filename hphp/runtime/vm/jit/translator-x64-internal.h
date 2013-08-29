@@ -38,64 +38,6 @@ void ifThen(Transl::X64Assembler& a, ConditionCode cc, Then thenBlock) {
   asm_label(a, done);
 }
 
-// RAII aids to machine code.
-
-// UnlikelyIfBlock:
-//
-//  Branch to distant code (that we presumably don't expect to
-//  take). This helps keep hot paths compact.
-//
-//  A common pattern using this involves patching the jump in astubs
-//  to jump past the normal control flow in a (as in the following
-//  example).  Do this using DiamondReturn so the register allocator
-//  state will be properly maintained.  (Spills/fills to keep the
-//  states in sync will be emitted on the unlikely path.)
-//
-// Example:
-//
-//  {
-//    PhysReg inputParam = i.getReg(i.inputs[0]->location);
-//    a.   test_reg_reg(inputParam, inputParam);
-//    DiamondReturn retFromStubs;
-//    {
-//      UnlikelyIfBlock ifNotRax(CC_Z, a, astubs, &retFromStubs);
-//      EMIT_CALL(a, TCA(launch_nuclear_missiles));
-//    }
-//    // The inputParam was non-zero, here is the likely branch:
-//    m_regMap.allocOutputRegs(i);
-//    emitMovRegReg(inputParam, m_regMap.getReg(i.outLocal->location));
-//    // ~DiamondReturn patches the jump, and reconciles the branch
-//    // with the main line.  (In this case it will fill the outLocal
-//    // register since the main line thinks it is dirty.)
-//  }
-//  // The two cases are joined here.  We can do logic that was
-//  // independent of whether the branch was taken, if necessary.
-//  emitMovRegReg(i.outLocal, m_regMap.getReg(i.outStack->location));
-//
-// Note: it is ok to nest UnlikelyIfBlocks, as long as their
-// corresponding DiamondReturns are correctly destroyed in reverse
-// order.  But also note that this can lead to more jumps on the
-// unlikely branch (see ~DiamondReturn).
-struct UnlikelyIfBlock {
-  X64Assembler& m_likely;
-  X64Assembler& m_unlikely;
-  TCA m_likelyPostBranch;
-
-  explicit UnlikelyIfBlock(ConditionCode cc,
-                           X64Assembler& likely,
-                           X64Assembler& unlikely)
-    : m_likely(likely)
-    , m_unlikely(unlikely)
-  {
-    m_likely.jcc(cc, m_unlikely.frontier());
-    m_likelyPostBranch = m_likely.frontier();
-  }
-
-  ~UnlikelyIfBlock() {
-    m_unlikely.jmp(m_likelyPostBranch);
-  }
-};
-
 // Helper structs for jcc vs. jcc8.
 struct Jcc8 {
   static void branch(X64Assembler& a, ConditionCode cc, TCA dest) {

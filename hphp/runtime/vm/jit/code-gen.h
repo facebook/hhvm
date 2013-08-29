@@ -414,8 +414,8 @@ private:
   void print() const;
 
 private:
-  Asm&                m_as;       // current "main" assembler
-  Asm&                m_astubs;   // assembler for stubs and other cold code.
+  Asm&                m_as;  // current "main" assembler
+  Asm&                m_astubs; // for stubs and other cold code
   TranslatorX64*      m_tx64;
   CodegenState&       m_state;
   const RegAllocInfo& m_regs;
@@ -599,8 +599,8 @@ const Func* loadClassCtor(Class* cls);
 ObjectData* createClHelper(Class*, int, ActRec*, TypedValue*);
 
 void genCodeForTrace(IRTrace*                trace,
-                     CodeGenerator::Asm&     a,
-                     CodeGenerator::Asm&     astubs,
+                     CodeBlock&              mainCode,
+                     CodeBlock&              stubsCode,
                      IRFactory*              irFactory,
                      vector<TransBCMapping>* bcMap,
                      TranslatorX64*          tx64,

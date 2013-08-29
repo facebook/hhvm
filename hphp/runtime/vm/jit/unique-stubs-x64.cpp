@@ -45,9 +45,9 @@ namespace {
 // Utility for logging stubs addresses during startup.  It's often
 // useful to know where they were when debugging.
 TCA log(const char* name, TCA start) {
-  auto const inAStubs = start > tx64->astubs.base();
-  UNUSED auto const stop = inAStubs ? tx64->astubs.frontier()
-                                    : tx64->a.frontier();
+  auto const inAStubs = start > tx64->stubsCode.base();
+  UNUSED auto const stop = inAStubs ? tx64->stubsCode.frontier()
+                                    : tx64->mainCode.frontier();
 
   FTRACE(1, "unique stub: {} {} -- {:4} bytes: {}\n",
          inAStubs ? "astubs @ "
@@ -69,7 +69,7 @@ TCA log(const char* name, TCA start) {
 }
 
 TCA emitRetFromInterpretedFrame() {
-  auto& a = tx64->astubs;
+  Asm a { tx64->stubsCode };
   moveToAlign(a);
   auto const ret = a.frontier();
 
@@ -81,7 +81,7 @@ TCA emitRetFromInterpretedFrame() {
 }
 
 TCA emitRetFromInterpretedGeneratorFrame() {
-  auto& a = tx64->astubs;
+  Asm a { tx64->stubsCode };
   moveToAlign(a);
   auto const ret = a.frontier();
 
@@ -151,7 +151,7 @@ TCA emitUnaryStub(Asm& a, CppCall c) {
 //////////////////////////////////////////////////////////////////////
 
 void emitCallToExit(UniqueStubs& uniqueStubs) {
-  auto& a = tx64->astubs;
+  Asm a { tx64->stubsCode };
   auto const stub = emitServiceReq(
     a,
     SRFlags::Align | SRFlags::JmpInsteadOfRet,
@@ -169,7 +169,7 @@ void emitReturnHelpers(UniqueStubs& us) {
 }
 
 void emitResumeHelpers(UniqueStubs& uniqueStubs) {
-  auto& a = tx64->astubs;
+  Asm a { tx64->stubsCode };
   moveToAlign(a);
 
   auto const fpOff = offsetof(VMExecutionContext, m_fp);
@@ -188,7 +188,7 @@ void emitResumeHelpers(UniqueStubs& uniqueStubs) {
 }
 
 void emitDefClsHelper(UniqueStubs& uniqueStubs) {
-  auto& a = tx64->astubs;
+  Asm a { tx64->stubsCode };
   uniqueStubs.defClsHelper = a.frontier();
 
   void (*helper)(PreClass*) = defClsHelper;
@@ -205,7 +205,7 @@ void emitDefClsHelper(UniqueStubs& uniqueStubs) {
 }
 
 void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
-  auto& a = tx64->astubs;
+  Asm a { tx64->stubsCode };
 
   moveToAlign(a);
   uniqueStubs.stackOverflowHelper = a.frontier();
@@ -224,7 +224,7 @@ void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
 }
 
 void emitDtorStubs(UniqueStubs& uniqueStubs) {
-  auto& a = tx64->astubs;
+  Asm a { tx64->stubsCode };
 
   auto const strDtor = log("dtorStr", emitUnaryStub(
     a, CppCall(getMethodPtr(&StringData::release))
@@ -253,7 +253,7 @@ void emitDtorStubs(UniqueStubs& uniqueStubs) {
 void emitGenericDecRefHelpers(UniqueStubs& uniqueStubs) {
   Label release;
 
-  auto& a = tx64->a;
+  Asm a { tx64->mainCode };
   moveToAlign(a, kNonFallthroughAlign);
 
   // dtorGenericStub just takes a pointer to the TypedValue in rdi.
@@ -310,7 +310,7 @@ void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
   auto const rType     = esi;
   auto const rData     = rdi;
 
-  auto& a = tx64->a;
+  Asm a { tx64->mainCode };
   moveToAlign(a, kNonFallthroughAlign);
 
 asm_label(a, release);
@@ -363,7 +363,7 @@ asm_label(a, loopHead);
 }
 
 void emitFuncPrologueRedispatch(UniqueStubs& uniqueStubs) {
-  auto& a = tx64->a;
+  Asm a { tx64->mainCode };
 
   moveToAlign(a);
   uniqueStubs.funcPrologueRedispatch = a.frontier();
@@ -409,7 +409,7 @@ asm_label(a, numParamsCheck);
 }
 
 void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
-  auto& a = tx64->a;
+  Asm a { tx64->mainCode };
 
   moveToAlign(a, kNonFallthroughAlign);
   uniqueStubs.fcallArrayHelper = a.frontier();

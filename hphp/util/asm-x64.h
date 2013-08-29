@@ -746,59 +746,52 @@ struct Label;
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-class X64Assembler {
+class X64Assembler : private boost::noncopyable {
   friend struct Label;
+  friend class CodeCursor;
 
 public:
-  X64Assembler() : codeBlock(nullptr) {}
-
-  void init(DataBlock* db) {
-    codeBlock = db;
-  }
+  explicit X64Assembler(CodeBlock& cb) : codeBlock(cb) {}
 
   CodeAddress base() const {
-    return codeBlock->base();
+    return codeBlock.base();
   }
 
   CodeAddress frontier() const {
-    return codeBlock->frontier();
+    return codeBlock.frontier();
   }
 
   void setFrontier(CodeAddress newFrontier) {
-    codeBlock->setFrontier(newFrontier);
+    codeBlock.setFrontier(newFrontier);
   }
 
   size_t capacity() const {
-    return codeBlock->capacity();
+    return codeBlock.capacity();
   }
 
   size_t used() const {
-    return codeBlock->used();
+    return codeBlock.used();
   }
 
   size_t available() const {
-    return codeBlock->available();
+    return codeBlock.available();
   }
 
   bool contains(CodeAddress addr) const {
-    return codeBlock->contains(addr);
+    return codeBlock.contains(addr);
   }
 
   bool empty() const {
-    return codeBlock->empty();
+    return codeBlock.empty();
   }
 
   void clear() {
-    codeBlock->clear();
+    codeBlock.clear();
   }
 
   bool canEmit(size_t nBytes) const {
     assert(capacity() >= used());
     return nBytes < (capacity() - used());
-  }
-
-  void skip(size_t nBytes) {
-    (void)codeBlock->alloc<uint8_t>(1, nBytes);
   }
 
   /*
@@ -1042,7 +1035,7 @@ public:
    */
 
   bool jmpDeltaFits(CodeAddress dest) {
-    int64_t delta = dest - (codeBlock->frontier() + 5);
+    int64_t delta = dest - (codeBlock.frontier() + 5);
     return deltaFits(delta, sz::dword);
   }
 
@@ -1084,7 +1077,7 @@ public:
   }
 
   void jmpAuto(CodeAddress dest) {
-    auto delta = dest - (codeBlock->frontier() + 2);
+    auto delta = dest - (codeBlock.frontier() + 2);
     if (deltaFits(delta, sz::byte)) {
       jmp8(dest);
     } else {
@@ -1093,7 +1086,7 @@ public:
   }
 
   void jccAuto(ConditionCode cc, CodeAddress dest) {
-    auto delta = dest - (codeBlock->frontier() + 2);
+    auto delta = dest - (codeBlock.frontier() + 2);
     if (deltaFits(delta, sz::byte)) {
       jcc8(cc, dest);
     } else {
@@ -1237,19 +1230,19 @@ public:
    */
 
   void byte(uint8_t b) {
-    codeBlock->byte(b);
+    codeBlock.byte(b);
   }
   void word(uint16_t w) {
-    codeBlock->word(w);
+    codeBlock.word(w);
   }
   void dword(uint32_t dw) {
-    codeBlock->dword(dw);
+    codeBlock.dword(dw);
   }
   void qword(uint64_t qw) {
-    codeBlock->qword(qw);
+    codeBlock.qword(qw);
   }
   void bytes(size_t n, const uint8_t* bs) {
-    codeBlock->bytes(n, bs);
+    codeBlock.bytes(n, bs);
   }
 
   // op %r
@@ -1568,7 +1561,7 @@ public:
   void emitJ8(X64Instr op, ssize_t imm)
     ALWAYS_INLINE {
     assert((op.flags & IF_JCC) == 0);
-    ssize_t delta = imm - ((ssize_t)codeBlock->frontier() + 2);
+    ssize_t delta = imm - ((ssize_t)codeBlock.frontier() + 2);
     // Emit opcode and 8-bit immediate
     byte(0xEB);
     byte(safe_cast<int8_t>(delta));
@@ -1578,7 +1571,7 @@ public:
     ALWAYS_INLINE {
     // this is for jcc only
     assert(op.flags & IF_JCC);
-    ssize_t delta = imm - ((ssize_t)codeBlock->frontier() + 2);
+    ssize_t delta = imm - ((ssize_t)codeBlock.frontier() + 2);
     // Emit opcode
     byte(jcond | 0x70);
     // Emit 8-bit offset
@@ -1589,7 +1582,7 @@ public:
     // call and jmp are supported, jcc is not supported
     assert((op.flags & IF_JCC) == 0);
     int32_t delta =
-      safe_cast<int32_t>(imm - ((ssize_t)codeBlock->frontier() + 5));
+      safe_cast<int32_t>(imm - ((ssize_t)codeBlock.frontier() + 5));
     uint8_t *bdelta = (uint8_t*)&delta;
     uint8_t instr[] = { op.table[2],
       bdelta[0], bdelta[1], bdelta[2], bdelta[3] };
@@ -1601,7 +1594,7 @@ public:
     // jcc is supported, call and jmp are not supported
     assert(op.flags & IF_JCC);
     int32_t delta =
-      safe_cast<int32_t>(imm - ((ssize_t)codeBlock->frontier() + 6));
+      safe_cast<int32_t>(imm - ((ssize_t)codeBlock.frontier() + 6));
     uint8_t* bdelta = (uint8_t*)&delta;
     uint8_t instr[6] = { 0x0f, uint8_t(0x80 | jcond),
       bdelta[0], bdelta[1], bdelta[2], bdelta[3] };
@@ -2432,9 +2425,7 @@ private:
 #undef UIMR
 #undef URIP
 
-  // This has to be a pointer because it's uninitialized when X64Assembler
-  // is constructed.
-  CodeBlock* codeBlock;
+  CodeBlock& codeBlock;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -2532,7 +2523,7 @@ private:
     JumpInfo info;
     info.type = type;
     info.a = a;
-    info.addr = a->codeBlock->frontier();
+    info.addr = a->codeBlock.frontier();
     m_toPatch.push_back(info);
   }
 
@@ -2568,20 +2559,19 @@ inline void X64Assembler::call(Label& l) { l.call(*this); }
 #endif
 
 class UndoMarker {
-  typedef X64Assembler Asm;
-  Asm& m_a;
+  CodeBlock& m_cb;
   CodeAddress m_oldFrontier;
   public:
-  explicit UndoMarker(Asm& a)
-    : m_a(a)
-    , m_oldFrontier(a.frontier()) {
+  explicit UndoMarker(CodeBlock& cb)
+    : m_cb(cb)
+    , m_oldFrontier(cb.frontier()) {
     TRACE_MOD(Trace::trans, 1, "RewindTo: %p\n",
               m_oldFrontier);
   }
 
   void undo() {
-    m_a.setFrontier(m_oldFrontier);
-    TRACE_MOD(Trace::trans, 1, "Restore: %p\n", m_a.frontier());
+    m_cb.setFrontier(m_oldFrontier);
+    TRACE_MOD(Trace::trans, 1, "Restore: %p\n", m_cb.frontier());
   }
 };
 
@@ -2590,10 +2580,16 @@ class UndoMarker {
  */
 class CodeCursor : public UndoMarker {
   public:
-  CodeCursor(X64Assembler& a, CodeAddress newFrontier) :
-    UndoMarker(a) {
-    a.setFrontier(newFrontier);
+  CodeCursor(CodeBlock& cb, CodeAddress newFrontier) :
+    UndoMarker(cb) {
+    cb.setFrontier(newFrontier);
   }
+
+  explicit CodeCursor(X64Assembler& as, CodeAddress newFrontier)
+      : UndoMarker(as.codeBlock) {
+    as.codeBlock.setFrontier(newFrontier);
+  }
+
   ~CodeCursor() {
     undo();
   }
@@ -2607,7 +2603,7 @@ class CodeCursor : public UndoMarker {
 
 class StoreImmPatcher {
  public:
-  StoreImmPatcher(X64Assembler& as, uint64_t initial, RegNumber reg,
+  StoreImmPatcher(CodeBlock& cb, uint64_t initial, RegNumber reg,
                   int32_t offset, RegNumber base);
   void patch(uint64_t actual);
  private:
@@ -2620,18 +2616,18 @@ class StoreImmPatcher {
  *
  * E.g.:
  *
- *   Asm& a = asmChoose(toPatch, a, astubs);
+ *   Asm& a = codeBlockChoose(toPatch, a, astubs);
  *   a.patchJmp(...);
  */
-inline X64Assembler& asmChoose(CodeAddress addr) {
-  assert(false && "addr was not part of any known assembler");
-  NOT_REACHED();
-  return *static_cast<X64Assembler*>(nullptr);
+inline CodeBlock& codeBlockChoose(CodeAddress addr) {
+  assert(false && "addr was not part of any known code block");
+  not_reached();
+  return *static_cast<CodeBlock*>(nullptr);
 }
-template<class... Asm>
-X64Assembler& asmChoose(CodeAddress addr, X64Assembler& a, Asm&... as) {
+template<class... Blocks>
+CodeBlock& codeBlockChoose(CodeAddress addr, CodeBlock& a, Blocks&... as) {
   if (a.contains(addr)) return a;
-  return asmChoose(addr, as...);
+  return codeBlockChoose(addr, as...);
 }
 
 //////////////////////////////////////////////////////////////////////

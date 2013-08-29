@@ -17,8 +17,10 @@
 #include "hphp/runtime/vm/jit/native-calls.h"
 
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/base/tv_conversions.h"
+#include "hphp/runtime/base/tv-conversions.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/ir.h"
@@ -63,8 +65,8 @@ FuncPtr method(Ret (T::*fp)(Args...)) {
 
 auto constexpr SSA      = ArgType::SSA;
 auto constexpr TV       = ArgType::TV;
-auto constexpr VecKeyS  = ArgType::VecKeyS;
-auto constexpr VecKeyIS = ArgType::VecKeyIS;
+auto constexpr MemberKeyS  = ArgType::MemberKeyS;
+auto constexpr MemberKeyIS = ArgType::MemberKeyIS;
 
 }
 
@@ -99,14 +101,17 @@ auto constexpr VecKeyIS = ArgType::VecKeyIS;
  *     {SSA, idx}               - Pass the value in inst->src(idx)
  *     {TV, idx}                - Pass the value in inst->src(idx) as a
  *                                TypedValue, in two registers
- *     {VecKeyS, idx}           - Like TV, but Str values are passed as a raw
+ *     {MemberKeyS, idx}           - Like TV, but Str values are passed as a raw
  *                                StringData*, in a single register
- *     {VecKeyIS, idx}          - Like VecKeyS, including Int
+ *     {MemberKeyIS, idx}          - Like MemberKeyS, including Int
  *     extra(&EDStruct::member) - extract an immediate from extra data
  *     immed(int64_t)           - constant immediate
  */
 static CallMap s_callMap {
     /* Opcode, Func, Dest, SyncPoint, Args */
+    {TypeProfileFunc,    profileOneArgument, DNone, SNone,
+                           {{TV,0}, extra(&TypeProfileData::param),
+                                    extra(&TypeProfileData::func)}},
     {ConvBoolToArr,      convCellToArrHelper, DSSA, SNone,
                            {{TV, 0}}},
     {ConvDblToArr,       convCellToArrHelper, DSSA, SNone,
@@ -138,8 +143,6 @@ static CallMap s_callMap {
 
     {ConvArrToInt,       convArrToIntHelper, DSSA, SNone,
                            {{SSA, 0}}},
-    {ConvDblToInt,       convDblToIntHelper, DSSA, SNone,
-                           {{SSA, 0}}},
     {ConvObjToInt,       cellToInt, DSSA, SSync,
                            {{TV, 0}}},
     {ConvStrToInt,       method(&StringData::toInt64), DSSA, SNone,
@@ -169,8 +172,8 @@ static CallMap s_callMap {
                            {{SSA, 0}, {TV, 1}}},
     {ArrayAdd,           array_add, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
     {Box,                box_value, DSSA, SNone, {{TV, 0}}},
-    {NewArray,           new_array, DSSA, SNone, {{SSA, 0}}},
-    {NewTuple,           new_tuple, DSSA, SNone,
+    {NewArray,           ArrayData::MakeReserve, DSSA, SNone, {{SSA, 0}}},
+    {NewTuple,           ArrayData::MakeTuple, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}}},
     {AllocObj,           newInstance, DSSA, SSync,
                            {{SSA, 0}}},
@@ -223,16 +226,16 @@ static CallMap s_callMap {
                             extra(&CreateContData::genFunc),
                             {SSA, 0} }},
 
-    /* VectorTranslator helpers */
+    /* MInstrTranslator helpers */
     {BaseG,    fssa(0), DSSA, SSync, {{TV, 1}, {SSA, 2}}},
     {PropX,    fssa(0), DSSA, SSync,
                  {{SSA, 1}, {SSA, 2}, {TV, 3}, {SSA, 4}}},
     {PropDX,   fssa(0), DSSA, SSync,
                  {{SSA, 1}, {SSA, 2}, {TV, 3}, {SSA, 4}}},
     {CGetProp, fssa(0), DTV, SSync,
-                 {{SSA, 1}, {SSA, 2}, {VecKeyS, 3}, {SSA, 4}}},
+                 {{SSA, 1}, {SSA, 2}, {MemberKeyS, 3}, {SSA, 4}}},
     {VGetProp, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {SSA, 2}, {VecKeyS, 3}, {SSA, 4}}},
+                 {{SSA, 1}, {SSA, 2}, {MemberKeyS, 3}, {SSA, 4}}},
     {BindProp, fssa(0), DNone, SSync,
                  {{SSA, 1}, {SSA, 2}, {TV, 3}, {SSA, 4}, {SSA, 5}}},
     {SetProp,  fssa(0), DNone, SSync,
@@ -248,11 +251,13 @@ static CallMap s_callMap {
     {IssetProp, fssa(0), DSSA, SSync,
                  {{SSA, 1}, {SSA, 2}, {TV, 3}}},
     {ElemX,    fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
+                 {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
+    {ElemArray, fssa(0), DSSA, SSync,
+                 {{SSA, 1}, {SSA, 2}}},
     {ElemDX,   fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
+                 {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
     {ElemUX,   fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
+                 {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
     {ArrayGet, fssa(0), DTV, SSync,
                  {{SSA, 1}, {SSA, 2}}},
     {VectorGet, fssa(0), DTV, SSync,
@@ -264,9 +269,9 @@ static CallMap s_callMap {
     {StableMapGet, fssa(0), DTV, SSync,
                  {{SSA, 1}, {SSA, 2}}},
     {CGetElem, fssa(0), DTV, SSync,
-                 {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
+                 {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
     {VGetElem, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
+                 {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
     {BindElem, fssa(0), DNone, SSync,
                  {{SSA, 1}, {TV, 2}, {SSA, 3}, {SSA, 4}}},
     {SetWithRefElem, fssa(0), DNone, SSync,
@@ -282,14 +287,15 @@ static CallMap s_callMap {
     {ArraySetRef, fssa(0), DSSA, SSync,
                  {{SSA, 1}, {SSA, 2}, {TV, 3}, {SSA, 4}}},
     {SetElem,  fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {VecKeyIS, 2}, {TV, 3}}},
+                 {{SSA, 1}, {MemberKeyIS, 2}, {TV, 3}}},
     {UnsetElem, fssa(0), DNone, SSync,
-                 {{SSA, 1}, {VecKeyIS, 2}}},
+                 {{SSA, 1}, {MemberKeyIS, 2}}},
     {SetOpElem, fssa(0), DTV, SSync,
                  {{SSA, 1}, {TV, 2}, {TV, 3}, {SSA, 4}}},
     {IncDecElem, fssa(0), DTV, SSync,
                  {{SSA, 1}, {TV, 2}, {SSA, 3}}},
     {SetNewElem, setNewElem, DNone, SSync, {{SSA, 0}, {TV, 1}}},
+    {SetNewElemArray, setNewElemArray, DNone, SSync, {{SSA, 0}, {TV, 1}}},
     {SetWithRefNewElem, fssa(0), DNone, SSync,
                  {{SSA, 1}, {SSA, 2}, {SSA, 3}}},
     {BindNewElem, bindNewElemIR, DNone, SSync,
@@ -300,9 +306,9 @@ static CallMap s_callMap {
     {MapIsset,  fssa(0), DSSA, SSync, {{SSA, 1}, {SSA, 2}}},
     {StableMapIsset, fssa(0), DSSA, SSync, {{SSA, 1}, {SSA, 2}}},
     {IssetElem, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
+                 {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
     {EmptyElem, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
+                 {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
 
     /* instanceof checks */
     {InstanceOf, instanceOfHelper, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},

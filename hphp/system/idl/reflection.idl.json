@@ -7,7 +7,6 @@
             "name": "hphp_get_extension_info",
             "desc": "Internally used for getting extension's information.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NoInjection"
             ],
@@ -25,7 +24,6 @@
             "name": "hphp_get_method_info",
             "desc": "Internally used by ReflectionClass for getting a method's information.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NoInjection"
             ],
@@ -47,7 +45,6 @@
             "name": "hphp_get_closure_info",
             "desc": "Internally used by ReflectionFunction for getting a closure's information.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NoInjection"
             ],
@@ -65,7 +62,6 @@
             "name": "hphp_get_class_constant",
             "desc": "Internally used by ReflectionClass for getting a default parameters value.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NoInjection"
             ],
@@ -87,7 +83,6 @@
             "name": "hphp_get_class_info",
             "desc": "Internally used by ReflectionClass for getting a class's information.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NoInjection"
             ],
@@ -105,7 +100,6 @@
             "name": "hphp_get_function_info",
             "desc": "Internally used by ReflectionFuncion for getting a function's information.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NoInjection"
             ],
@@ -123,7 +117,6 @@
             "name": "hphp_invoke",
             "desc": "Used by FFI interface for other languages to call into PHP.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NoInjection"
             ],
@@ -145,7 +138,6 @@
             "name": "hphp_invoke_method",
             "desc": "Used by FFI interface for other languages to call into PHP.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NoInjection"
             ],
@@ -175,7 +167,6 @@
             "name": "hphp_instanceof",
             "desc": "Used by FFI interface for other languages to call into PHP.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NoInjection"
             ],
@@ -197,7 +188,6 @@
             "name": "hphp_create_object",
             "desc": "Used by FFI interface for other languages to call into PHP.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NoInjection"
             ],
@@ -219,7 +209,6 @@
             "name": "hphp_create_object_without_constructor",
             "desc": "Used by FFI interface for other languages to call into PHP.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NoInjection"
             ],
@@ -237,7 +226,6 @@
             "name": "hphp_get_property",
             "desc": "Used by FFI interface for other languages to call into PHP.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NoInjection"
             ],
@@ -263,7 +251,6 @@
             "name": "hphp_set_property",
             "desc": "Used by FFI interface for other languages to call into PHP.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NoInjection"
             ],
@@ -293,7 +280,6 @@
             "name": "hphp_get_static_property",
             "desc": "Used by FFI interface for other languages to call into PHP.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NoInjection"
             ],
@@ -319,7 +305,6 @@
             "name": "hphp_set_static_property",
             "desc": "Used by FFI interface for other languages to call into PHP.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NoInjection"
             ],
@@ -349,7 +334,6 @@
             "name": "hphp_get_original_class_name",
             "desc": "Internally used by ReflectionClass for getting a class's declared name.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NoInjection"
             ],
@@ -367,7 +351,6 @@
             "name": "hphp_scalar_typehints_enabled",
             "desc": "Internally used by ReflectionClass for checking whether scalar typehints are enabled.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NoInjection"
             ],

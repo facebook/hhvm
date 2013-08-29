@@ -110,6 +110,7 @@ void FunctionStatement::inferTypes(AnalysisResultPtr ar) {
 
 void FunctionStatement::outputPHPHeader(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
+  m_modifiers->outputPHP(cg, ar);
   cg_printf("function ");
   if (m_ref) cg_printf("&");
   if (!ParserBase::IsClosureName(m_name)) {

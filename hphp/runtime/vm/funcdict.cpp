@@ -16,11 +16,11 @@
 
 #include "hphp/runtime/vm/funcdict.h"
 
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/base.h"
 
-#include "hphp/runtime/base/execution_context.h"
-#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/target-cache.h"

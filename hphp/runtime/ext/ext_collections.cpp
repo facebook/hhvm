@@ -16,8 +16,8 @@
 */
 
 #include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/base/variable_serializer.h"
-#include "hphp/runtime/base/sort_helpers.h"
+#include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/sort-helpers.h"
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_intl.h"
@@ -45,24 +45,19 @@ void throwIntOOB(int64_t key, bool isVector /* = false */) {
 static void throwStrOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
 void throwStrOOB(StringData* key) {
-  const size_t maxDisplaySize = 20;
-  const char* dots = "...";
-  size_t dotsSize = strlen(dots);
+  const size_t maxDisplaySize = 100;
   int keySize = key->size();
   bool keyIsLarge = (keySize > maxDisplaySize);
-  size_t displaySize = keyIsLarge ? (maxDisplaySize - dotsSize) : keySize;
   const char* part1 = "String key \"";
-  size_t part1Size = strlen(part1);
-  size_t part2Size = keyIsLarge ? maxDisplaySize : keySize;
-  const char* part3 = "\" is not defined";
-  size_t part3Size = strlen(part3);
-  // Do some math ahead of time so we know exactly how large
-  // the String needs to be
-  String msg(part1Size + part2Size + part3Size, ReserveString);
-  msg += StringSlice(part1, part1Size);
-  msg += StringSlice(key->data(), displaySize);
-  if (keyIsLarge) msg += StringSlice(dots, dotsSize);
-  msg += StringSlice(part3, part3Size);
+  const char* part3 = keyIsLarge ? "\" (truncated) is not defined" :
+                                   "\" is not defined";
+  StringSlice ss1(part1, strlen(part1));
+  StringSlice ss2(key->data(), keyIsLarge ? maxDisplaySize : keySize);
+  StringSlice ss3(part3, strlen(part3));
+  String msg(ss1.len + ss2.len + ss3.len, ReserveString);
+  msg += ss1;
+  msg += ss2;
+  msg += ss3;
   Object e(SystemLib::AllocOutOfBoundsExceptionObject(msg));
   throw e;
 }
@@ -98,7 +93,8 @@ c_Vector::c_Vector(Class* cb) :
                        ObjectData::UseGet|
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
-                       ObjectData::UseUnset>(cb),
+                       ObjectData::UseUnset|
+                       ObjectData::HasClone>(cb),
     m_data(nullptr), m_size(0), m_capacity(0), m_version(0) {
 }
 
@@ -118,9 +114,7 @@ void c_Vector::freeData() {
 }
 
 void c_Vector::t___construct(CVarRef iterable /* = null_variant */) {
-  if (!iterable.isInitialized()) {
-    return;
-  }
+  if (iterable.isNull()) return;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   if (sz) {
@@ -175,27 +169,23 @@ void c_Vector::reserve(int64_t sz) {
 }
 
 Array c_Vector::toArrayImpl() const {
-  ArrayInit ai(m_size, ArrayInit::vectorInit);
+  PackedArrayInit ai(m_size);
   uint sz = m_size;
   for (uint i = 0; i < sz; ++i) {
-    ai.set(tvAsCVarRef(&m_data[i]));
+    ai.add(tvAsCVarRef(&m_data[i]));
   }
-  return ai.create();
+  return ai.toArray();
 }
 
-Array c_Vector::o_toArray() const {
-  check_collection_cast_to_array();
-  return toArrayImpl();
-}
-
-c_Vector* c_Vector::clone() {
-  auto target = static_cast<c_Vector*>(ObjectData::clone());
-  uint sz = m_size;
+c_Vector* c_Vector::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_Vector*>(obj);
+  auto target = static_cast<c_Vector*>(obj->cloneImpl());
+  uint sz = thiz->m_size;
   TypedValue* data;
   target->m_capacity = target->m_size = sz;
   target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
   for (int i = 0; i < sz; ++i) {
-    tvDup(m_data[i], data[i]);
+    tvDup(thiz->m_data[i], data[i]);
   }
   return target;
 }
@@ -207,6 +197,7 @@ Object c_Vector::t_add(CVarRef val) {
 }
 
 Object c_Vector::t_addall(CVarRef iterable) {
+  if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   if (sz) {
@@ -293,7 +284,7 @@ int64_t c_Vector::t_count() {
 }
 
 Object c_Vector::t_items() {
-  return SystemLib::AllocIterableViewObject(this);
+  return SystemLib::AllocLazyIterableViewObject(this);
 }
 
 Object c_Vector::t_keys() {
@@ -308,8 +299,12 @@ Object c_Vector::t_keys() {
   return obj;
 }
 
+Object c_Vector::t_lazy() {
+  return SystemLib::AllocLazyKeyedIterableViewObject(this);
+}
+
 Object c_Vector::t_view() {
-  return SystemLib::AllocKeyedIterableViewObject(this);
+  return SystemLib::AllocLazyKeyedIterableViewObject(this);
 }
 
 Object c_Vector::t_kvzip() {
@@ -607,6 +602,7 @@ Object c_Vector::t_set(CVarRef key, CVarRef value) {
 }
 
 Object c_Vector::t_setall(CVarRef iterable) {
+  if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   for (; iter; ++iter) {
@@ -627,6 +623,7 @@ Object c_Vector::t_put(CVarRef key, CVarRef value) {
 }
 
 Object c_Vector::ti_fromitems(CVarRef iterable) {
+  if (iterable.isNull()) return NEWOBJ(c_Vector)();
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   c_Vector* target;
@@ -825,6 +822,11 @@ void c_Vector::throwBadKeyType() {
   throw e;
 }
 
+Array c_Vector::ToArray(const ObjectData* obj) {
+  check_collection_cast_to_array();
+  return static_cast<const c_Vector*>(obj)->toArrayImpl();
+}
+
 TypedValue* c_Vector::OffsetGet(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
   auto vec = static_cast<c_Vector*>(obj);
@@ -856,7 +858,7 @@ bool c_Vector::OffsetIsset(ObjectData* obj, TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? isset(tvAsCVarRef(result)) : false;
+  return result ? !tvIsNull(tvToCell(result)) : false;
 }
 
 bool c_Vector::OffsetEmpty(ObjectData* obj, TypedValue* key) {
@@ -869,7 +871,7 @@ bool c_Vector::OffsetEmpty(ObjectData* obj, TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? empty(tvAsCVarRef(result)) : true;
+  return result ? !cellToBool(*result) : true;
 }
 
 bool c_Vector::OffsetContains(ObjectData* obj, TypedValue* key) {
@@ -895,9 +897,9 @@ void c_Vector::OffsetUnset(ObjectData* obj, TypedValue* key) {
   throw e;
 }
 
-bool c_Vector::Equals(ObjectData* obj1, ObjectData* obj2) {
-  auto vec1 = static_cast<c_Vector*>(obj1);
-  auto vec2 = static_cast<c_Vector*>(obj2);
+bool c_Vector::Equals(const ObjectData* obj1, const ObjectData* obj2) {
+  auto vec1 = static_cast<const c_Vector*>(obj1);
+  auto vec2 = static_cast<const c_Vector*>(obj2);
   uint sz = vec1->m_size;
   if (sz != vec2->m_size) {
     return false;
@@ -981,7 +983,8 @@ c_Map::c_Map(Class* cb) :
                        ObjectData::UseGet|
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
-                       ObjectData::UseUnset>(cb),
+                       ObjectData::UseUnset|
+                       ObjectData::HasClone>(cb),
     m_size(0), m_load(0), m_nLastSlot(0), m_version(0) {
   m_data = (Bucket*)emptyMapSlot;
 }
@@ -1004,17 +1007,15 @@ void c_Map::deleteBuckets() {
     Bucket& p = m_data[i];
     if (p.validValue()) {
       tvRefcountedDecRef(&p.data);
-      if (p.hasStrKey() && p.skey->decRefCount() == 0) {
-        DELETE(StringData)(p.skey);
+      if (p.hasStrKey()) {
+        decRefStr(p.skey);
       }
     }
   }
 }
 
 void c_Map::t___construct(CVarRef iterable /* = null_variant */) {
-  if (!iterable.isInitialized()) {
-    return;
-  }
+  if (iterable.isNull()) return;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   if (sz) {
@@ -1049,25 +1050,21 @@ Array c_Map::toArrayImpl() const {
   return ai.create();
 }
 
-Array c_Map::o_toArray() const {
-  check_collection_cast_to_array();
-  return toArrayImpl();
-}
+c_Map* c_Map::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_Map*>(obj);
+  auto target = static_cast<c_Map*>(obj->cloneImpl());
 
-c_Map* c_Map::clone() {
-  auto target = static_cast<c_Map*>(ObjectData::clone());
+  if (!thiz->m_size) return target;
 
-  if (!m_size) return target;
+  assert(thiz->m_nLastSlot != 0);
+  target->m_size = thiz->m_size;
+  target->m_load = thiz->m_load;
+  target->m_nLastSlot = thiz->m_nLastSlot;
+  target->m_data = (Bucket*)smart_malloc(thiz->numSlots() * sizeof(Bucket));
+  memcpy(target->m_data, thiz->m_data, thiz->numSlots() * sizeof(Bucket));
 
-  assert(m_nLastSlot != 0);
-  target->m_size = m_size;
-  target->m_load = m_load;
-  target->m_nLastSlot = m_nLastSlot;
-  target->m_data = (Bucket*)smart_malloc(numSlots() * sizeof(Bucket));
-  memcpy(target->m_data, m_data, numSlots() * sizeof(Bucket));
-
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
+  for (uint i = 0; i <= thiz->m_nLastSlot; ++i) {
+    Bucket& p = thiz->m_data[i];
     if (p.validValue()) {
       tvRefcountedIncRef(&p.data);
       if (p.hasStrKey()) {
@@ -1086,6 +1083,7 @@ Object c_Map::t_add(CVarRef val) {
 }
 
 Object c_Map::t_addall(CVarRef iterable) {
+  if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   reserve(std::max(sz, size_t(m_size)));
@@ -1116,7 +1114,7 @@ int64_t c_Map::t_count() {
 }
 
 Object c_Map::t_items() {
-  return SystemLib::AllocKVZippedIterableObject(this);
+  return SystemLib::AllocLazyKVZipIterableObject(this);
 }
 
 Object c_Map::t_keys() {
@@ -1140,8 +1138,12 @@ Object c_Map::t_keys() {
   return obj;
 }
 
+Object c_Map::t_lazy() {
+  return SystemLib::AllocLazyKeyedIterableViewObject(this);
+}
+
 Object c_Map::t_view() {
-  return SystemLib::AllocKeyedIterableViewObject(this);
+  return SystemLib::AllocLazyKeyedIterableViewObject(this);
 }
 
 Object c_Map::t_kvzip() {
@@ -1214,6 +1216,7 @@ Object c_Map::t_set(CVarRef key, CVarRef value) {
 }
 
 Object c_Map::t_setall(CVarRef iterable) {
+  if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   for (; iter; ++iter) {
@@ -1268,10 +1271,6 @@ Object c_Map::t_removekey(CVarRef key) {
   return t_remove(key);
 }
 
-Object c_Map::t_discard(CVarRef key) {
-  return t_remove(key);
-}
-
 Array c_Map::t_toarray() {
   return toArrayImpl();
 }
@@ -1281,17 +1280,17 @@ Array c_Map::t_copyasarray() {
 }
 
 Array c_Map::t_tokeysarray() {
-  ArrayInit ai(m_size, ArrayInit::vectorInit);
+  PackedArrayInit ai(m_size);
   for (uint i = 0; i <= m_nLastSlot; ++i) {
     Bucket& p = m_data[i];
     if (!p.validValue()) continue;
     if (p.hasIntKey()) {
-      ai.set((int64_t)p.ikey);
+      ai.add((int64_t)p.ikey);
     } else {
-      ai.set(*(const String*)(&p.skey));
+      ai.add(*(const String*)(&p.skey));
     }
   }
-  return ai.create();
+  return ai.toArray();
 }
 
 Object c_Map::t_values() {
@@ -1319,68 +1318,13 @@ Object c_Map::t_values() {
 }
 
 Array c_Map::t_tovaluesarray() {
-  ArrayInit ai(m_size, ArrayInit::vectorInit);
+  PackedArrayInit ai(m_size);
   for (uint i = 0; i <= m_nLastSlot; ++i) {
     Bucket& p = m_data[i];
     if (!p.validValue()) continue;
-    ai.set(tvAsCVarRef(&p.data));
+    ai.add(tvAsCVarRef(&p.data));
   }
-  return ai.create();
-}
-
-Object c_Map::t_updatefromarray(CVarRef arr) {
-  if (!arr.isArray()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Expected arr to be an array"));
-    throw e;
-  }
-  ArrayData* ad = arr.getArrayData();
-  for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
-       pos = ad->iter_advance(pos)) {
-    Variant k = ad->getKey(pos);
-    TypedValue* tv = cvarToCell(&ad->getValueRef(pos));
-    if (k.isInteger()) {
-      update(k.toInt64(), tv);
-    } else {
-      assert(k.isString());
-      update(k.getStringData(), tv);
-    }
-  }
-  return this;
-}
-
-Object c_Map::t_updatefromiterable(CVarRef it) {
-  if (!it.isObject()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter it must be an instance of Iterable"));
-    throw e;
-  }
-  ObjectData* obj = it.getObjectData();
-  if (obj->getCollectionType() == Collection::MapType) {
-    auto mp = static_cast<c_Map*>(obj);
-    for (uint i = 0; i <= mp->m_nLastSlot; ++i) {
-      c_Map::Bucket& p = mp->m_data[i];
-      if (!p.validValue()) continue;
-      if (p.hasIntKey()) {
-        update((int64_t)p.ikey, &p.data);
-      } else {
-        update(p.skey, &p.data);
-      }
-    }
-    return this;
-  }
-  for (ArrayIter iter = obj->begin(); iter; ++iter) {
-    Variant k = iter.first();
-    Variant v = iter.second();
-    TypedValue* tv = tvToCell(v.asTypedValue());
-    if (k.isInteger()) {
-      update(k.toInt64(), tv);
-    } else {
-      assert(k.isString());
-      update(k.getStringData(), tv);
-    }
-  }
-  return this;
+  return ai.toArray();
 }
 
 Object c_Map::t_differencebykey(CVarRef it) {
@@ -1390,8 +1334,8 @@ Object c_Map::t_differencebykey(CVarRef it) {
     throw e;
   }
   ObjectData* obj = it.getObjectData();
-  c_Map* target;
-  Object ret = target = clone();
+  c_Map* target = c_Map::Clone(this);;
+  Object ret = target;
   if (obj->getCollectionType() == Collection::MapType) {
     auto mp = static_cast<c_Map*>(obj);
     for (uint i = 0; i <= mp->m_nLastSlot; ++i) {
@@ -1530,6 +1474,7 @@ Object c_Map::t_zip(CVarRef iterable) {
 }
 
 Object c_Map::ti_fromitems(CVarRef iterable) {
+  if (iterable.isNull()) return NEWOBJ(c_Map)();
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   c_Map* target;
@@ -1788,8 +1733,8 @@ void c_Map::erase(Bucket* p) {
   if (p->validValue()) {
     m_size--;
     tvRefcountedDecRef(&p->data);
-    if (p->hasStrKey() && p->skey->decRefCount() == 0) {
-      DELETE(StringData)(p->skey);
+    if (p->hasStrKey()) {
+      decRefStr(p->skey);
     }
     p->data.m_type = (DataType)KindOfTombstone;
     if (m_size < computeMinElements() && m_size) {
@@ -1901,6 +1846,11 @@ void c_Map::Bucket::dump() {
   tvAsCVarRef(&data).dump();
 }
 
+Array c_Map::ToArray(const ObjectData* obj) {
+  check_collection_cast_to_array();
+  return static_cast<const c_Map*>(obj)->toArrayImpl();
+}
+
 TypedValue* c_Map::OffsetGet(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
   auto mp = static_cast<c_Map*>(obj);
@@ -1941,7 +1891,7 @@ bool c_Map::OffsetIsset(ObjectData* obj, TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? isset(tvAsCVarRef(result)) : false;
+  return result ? !tvIsNull(tvToCell(result)) : false;
 }
 
 bool c_Map::OffsetEmpty(ObjectData* obj, TypedValue* key) {
@@ -1956,7 +1906,7 @@ bool c_Map::OffsetEmpty(ObjectData* obj, TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? empty(tvAsCVarRef(result)) : true;
+  return result ? !cellToBool(*result) : true;
 }
 
 bool c_Map::OffsetContains(ObjectData* obj, TypedValue* key) {
@@ -1992,9 +1942,9 @@ void c_Map::OffsetUnset(ObjectData* obj, TypedValue* key) {
   throwBadKeyType();
 }
 
-bool c_Map::Equals(ObjectData* obj1, ObjectData* obj2) {
-  auto mp1 = static_cast<c_Map*>(obj1);
-  auto mp2 = static_cast<c_Map*>(obj2);
+bool c_Map::Equals(const ObjectData* obj1, const ObjectData* obj2) {
+  auto mp1 = static_cast<const c_Map*>(obj1);
+  auto mp2 = static_cast<const c_Map*>(obj2);
   if (mp1->m_size != mp2->m_size) return false;
   for (uint i = 0; i <= mp1->m_nLastSlot; ++i) {
     c_Map::Bucket& p = mp1->m_data[i];
@@ -2125,7 +2075,8 @@ c_StableMap::c_StableMap(Class* cb) :
                        ObjectData::UseGet|
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
-                       ObjectData::UseUnset>(cb),
+                       ObjectData::UseUnset|
+                       ObjectData::HasClone>(cb),
     m_version(0), m_pListHead(nullptr), m_pListTail(nullptr) {
   m_size = 0;
   m_nTableSize = 0;
@@ -2155,9 +2106,7 @@ void c_StableMap::deleteBuckets() {
 }
 
 void c_StableMap::t___construct(CVarRef iterable /* = null_variant */) {
-  if (!iterable.isInitialized()) {
-    return;
-  }
+  if (iterable.isNull()) return;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   if (sz) {
@@ -2191,23 +2140,20 @@ Array c_StableMap::toArrayImpl() const {
   return ai.create();
 }
 
-Array c_StableMap::o_toArray() const {
-  check_collection_cast_to_array();
-  return toArrayImpl();
-}
+c_StableMap* c_StableMap::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_StableMap*>(obj);
+  auto target = static_cast<c_StableMap*>(obj->cloneImpl());
 
-c_StableMap* c_StableMap::clone() {
-  auto target = static_cast<c_StableMap*>(ObjectData::clone());
+  if (!thiz->m_size) return target;
 
-  if (!m_size) return target;
-
-  target->m_size = m_size;
-  target->m_nTableSize = m_nTableSize;
-  target->m_nTableMask = m_nTableMask;
-  target->m_arBuckets = (Bucket**)smart_calloc(m_nTableSize, sizeof(Bucket*));
+  target->m_size = thiz->m_size;
+  target->m_nTableSize = thiz->m_nTableSize;
+  target->m_nTableMask = thiz->m_nTableMask;
+  target->m_arBuckets =
+    (Bucket**)smart_calloc(thiz->m_nTableSize, sizeof(Bucket*));
 
   Bucket *last = nullptr;
-  for (Bucket* p = m_pListHead; p; p = p->pListNext) {
+  for (Bucket* p = thiz->m_pListHead; p; p = p->pListNext) {
     Bucket *np = NEW(Bucket)();
     tvDup(p->data, np->data);
     uint nIndex;
@@ -2242,6 +2188,7 @@ Object c_StableMap::t_add(CVarRef val) {
 }
 
 Object c_StableMap::t_addall(CVarRef iterable) {
+  if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   reserve(std::max(sz, size_t(m_size)));
@@ -2274,7 +2221,7 @@ int64_t c_StableMap::t_count() {
 }
 
 Object c_StableMap::t_items() {
-  return SystemLib::AllocKVZippedIterableObject(this);
+  return SystemLib::AllocLazyKVZipIterableObject(this);
 }
 
 Object c_StableMap::t_keys() {
@@ -2297,8 +2244,12 @@ Object c_StableMap::t_keys() {
   return obj;
 }
 
+Object c_StableMap::t_lazy() {
+  return SystemLib::AllocLazyKeyedIterableViewObject(this);
+}
+
 Object c_StableMap::t_view() {
-  return SystemLib::AllocKeyedIterableViewObject(this);
+  return SystemLib::AllocLazyKeyedIterableViewObject(this);
 }
 
 Object c_StableMap::t_kvzip() {
@@ -2370,6 +2321,7 @@ Object c_StableMap::t_set(CVarRef key, CVarRef value) {
 }
 
 Object c_StableMap::t_setall(CVarRef iterable) {
+  if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   for (; iter; ++iter) {
@@ -2424,10 +2376,6 @@ Object c_StableMap::t_removekey(CVarRef key) {
   return t_remove(key);
 }
 
-Object c_StableMap::t_discard(CVarRef key) {
-  return t_remove(key);
-}
-
 Array c_StableMap::t_toarray() {
   return toArrayImpl();
 }
@@ -2437,17 +2385,17 @@ Array c_StableMap::t_copyasarray() {
 }
 
 Array c_StableMap::t_tokeysarray() {
-  ArrayInit ai(m_size, ArrayInit::vectorInit);
+  PackedArrayInit ai(m_size);
   Bucket* p = m_pListHead;
   while (p) {
     if (p->hasIntKey()) {
-      ai.set((int64_t)p->ikey);
+      ai.add((int64_t)p->ikey);
     } else {
-      ai.set(*(const String*)(&p->skey));
+      ai.add(*(const String*)(&p->skey));
     }
     p = p->pListNext;
   }
-  return ai.create();
+  return ai.toArray();
 }
 
 Object c_StableMap::t_values() {
@@ -2470,68 +2418,13 @@ Object c_StableMap::t_values() {
 }
 
 Array c_StableMap::t_tovaluesarray() {
-  ArrayInit ai(m_size, ArrayInit::vectorInit);
+  PackedArrayInit ai(m_size);
   Bucket* p = m_pListHead;
   while (p) {
-    ai.set(tvAsCVarRef(&p->data));
+    ai.add(tvAsCVarRef(&p->data));
     p = p->pListNext;
   }
-  return ai.create();
-}
-
-Object c_StableMap::t_updatefromarray(CVarRef arr) {
-  if (!arr.isArray()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter arr must be an array"));
-    throw e;
-  }
-  ArrayData* ad = arr.getArrayData();
-  for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
-       pos = ad->iter_advance(pos)) {
-    Variant k = ad->getKey(pos);
-    TypedValue* tv = cvarToCell(&ad->getValueRef(pos));
-    if (k.isInteger()) {
-      update(k.toInt64(), tv);
-    } else {
-      assert(k.isString());
-      update(k.getStringData(), tv);
-    }
-  }
-  return this;
-}
-
-Object c_StableMap::t_updatefromiterable(CVarRef it) {
-  if (!it.isObject()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter it must be an instance of Iterable"));
-    throw e;
-  }
-  ObjectData* obj = it.getObjectData();
-  if (obj->getCollectionType() == Collection::StableMapType) {
-    auto smp = static_cast<c_StableMap*>(obj);
-    c_StableMap::Bucket* p = smp->m_pListHead;
-    while (p) {
-      if (p->hasIntKey()) {
-        update((int64_t)p->ikey, &p->data);
-      } else {
-        update(p->skey, &p->data);
-      }
-      p = p->pListNext;
-    }
-    return this;
-  }
-  for (ArrayIter iter = obj->begin(); iter; ++iter) {
-    Variant k = iter.first();
-    Variant v = iter.second();
-    TypedValue* tv = cvarToCell(&v);
-    if (k.isInteger()) {
-      update(k.toInt64(), tv);
-    } else {
-      assert(k.isString());
-      update(k.getStringData(), tv);
-    }
-  }
-  return this;
+  return ai.toArray();
 }
 
 Object c_StableMap::t_differencebykey(CVarRef it) {
@@ -2541,8 +2434,8 @@ Object c_StableMap::t_differencebykey(CVarRef it) {
     throw e;
   }
   ObjectData* obj = it.getObjectData();
-  c_StableMap* target;
-  Object ret = target = clone();
+  c_StableMap* target = c_StableMap::Clone(this);
+  Object ret = target;
   if (obj->getCollectionType() == Collection::StableMapType) {
     auto smp = static_cast<c_StableMap*>(obj);
     c_StableMap::Bucket* p = smp->m_pListHead;
@@ -2678,6 +2571,7 @@ Object c_StableMap::t_zip(CVarRef iterable) {
 }
 
 Object c_StableMap::ti_fromitems(CVarRef iterable) {
+  if (iterable.isNull()) return NEWOBJ(c_StableMap)();
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   c_StableMap* target;
@@ -3126,8 +3020,8 @@ void c_StableMap::throwBadKeyType() {
 }
 
 c_StableMap::Bucket::~Bucket() {
-  if (hasStrKey() && skey->decRefCount() == 0) {
-    DELETE(StringData)(skey);
+  if (hasStrKey()) {
+    decRefStr(skey);
   }
   tvRefcountedDecRef(&data);
 }
@@ -3139,6 +3033,11 @@ void c_StableMap::Bucket::dump() {
     skey->dump();
   }
   tvAsCVarRef(&data).dump();
+}
+
+Array c_StableMap::ToArray(const ObjectData* obj) {
+  check_collection_cast_to_array();
+  return static_cast<const c_StableMap*>(obj)->toArrayImpl();
 }
 
 TypedValue* c_StableMap::OffsetGet(ObjectData* obj, TypedValue* key) {
@@ -3181,7 +3080,7 @@ bool c_StableMap::OffsetIsset(ObjectData* obj, TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? isset(tvAsCVarRef(result)) : false;
+  return result ? !tvIsNull(tvToCell(result)) : false;
 }
 
 bool c_StableMap::OffsetEmpty(ObjectData* obj, TypedValue* key) {
@@ -3196,7 +3095,7 @@ bool c_StableMap::OffsetEmpty(ObjectData* obj, TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? empty(tvAsCVarRef(result)) : true;
+  return result ? !cellToBool(*result) : true;
 }
 
 bool c_StableMap::OffsetContains(ObjectData* obj, TypedValue* key) {
@@ -3232,9 +3131,9 @@ void c_StableMap::OffsetUnset(ObjectData* obj, TypedValue* key) {
   throwBadKeyType();
 }
 
-bool c_StableMap::Equals(ObjectData* obj1, ObjectData* obj2) {
-  auto smp1 = static_cast<c_StableMap*>(obj1);
-  auto smp2 = static_cast<c_StableMap*>(obj2);
+bool c_StableMap::Equals(const ObjectData* obj1, const ObjectData* obj2) {
+  auto smp1 = static_cast<const c_StableMap*>(obj1);
+  auto smp2 = static_cast<const c_StableMap*>(obj2);
   if (smp1->m_size != smp2->m_size) return false;
   auto p1 = smp1->m_pListHead;
   auto p2 = smp2->m_pListHead;
@@ -3363,7 +3262,8 @@ c_Set::c_Set(Class* cb) :
                        ObjectData::UseGet|
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
-                       ObjectData::UseUnset>(cb),
+                       ObjectData::UseUnset|
+                       ObjectData::HasClone>(cb),
     m_size(0), m_load(0), m_nLastSlot(0), m_version(0) {
   m_data = (Bucket*)emptySetSlot;
 }
@@ -3391,9 +3291,7 @@ void c_Set::deleteBuckets() {
 }
 
 void c_Set::t___construct(CVarRef iterable /* = null_variant */) {
-  if (!iterable.isInitialized()) {
-    return;
-  }
+  if (iterable.isNull()) return;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   for (; iter; ++iter) {
@@ -3409,35 +3307,31 @@ void c_Set::t___construct(CVarRef iterable /* = null_variant */) {
 }
 
 Array c_Set::toArrayImpl() const {
-  ArrayInit ai(m_size, ArrayInit::vectorInit);
+  PackedArrayInit ai(m_size);
   for (uint i = 0; i <= m_nLastSlot; ++i) {
     Bucket& p = m_data[i];
     if (p.validValue()) {
-      ai.set(tvAsCVarRef(&p.data));
+      ai.add(tvAsCVarRef(&p.data));
     }
   }
-  return ai.create();
+  return ai.toArray();
 }
 
-Array c_Set::o_toArray() const {
-  check_collection_cast_to_array();
-  return toArrayImpl();
-}
+c_Set* c_Set::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_Set*>(obj);
+  auto target = static_cast<c_Set*>(obj->cloneImpl());
 
-c_Set* c_Set::clone() {
-  auto target = static_cast<c_Set*>(ObjectData::clone());
+  if (!thiz->m_size) return target;
 
-  if (!m_size) return target;
+  assert(thiz->m_nLastSlot != 0);
+  target->m_size = thiz->m_size;
+  target->m_load = thiz->m_load;
+  target->m_nLastSlot = thiz->m_nLastSlot;
+  target->m_data = (Bucket*)smart_malloc(thiz->numSlots() * sizeof(Bucket));
+  memcpy(target->m_data, thiz->m_data, thiz->numSlots() * sizeof(Bucket));
 
-  assert(m_nLastSlot != 0);
-  target->m_size = m_size;
-  target->m_load = m_load;
-  target->m_nLastSlot = m_nLastSlot;
-  target->m_data = (Bucket*)smart_malloc(numSlots() * sizeof(Bucket));
-  memcpy(target->m_data, m_data, numSlots() * sizeof(Bucket));
-
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
+  for (uint i = 0; i <= thiz->m_nLastSlot; ++i) {
+    Bucket& p = thiz->m_data[i];
     if (p.validValue()) {
       tvRefcountedIncRef(&p.data);
     }
@@ -3453,6 +3347,7 @@ Object c_Set::t_add(CVarRef val) {
 }
 
 Object c_Set::t_addall(CVarRef iterable) {
+  if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   for (; iter; ++iter) {
@@ -3482,11 +3377,15 @@ int64_t c_Set::t_count() {
 }
 
 Object c_Set::t_items() {
-  return SystemLib::AllocIterableViewObject(this);
+  return SystemLib::AllocLazyIterableViewObject(this);
+}
+
+Object c_Set::t_lazy() {
+  return SystemLib::AllocLazyIterableViewObject(this);
 }
 
 Object c_Set::t_view() {
-  return SystemLib::AllocIterableViewObject(this);
+  return SystemLib::AllocLazyIterableViewObject(this);
 }
 
 bool c_Set::t_contains(CVarRef key) {
@@ -3613,6 +3512,7 @@ Object c_Set::t_zip(CVarRef iterable) {
 }
 
 Object c_Set::ti_fromitems(CVarRef iterable) {
+  if (iterable.isNull()) return NEWOBJ(c_Set)();
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   c_Set* target;
@@ -3653,16 +3553,8 @@ Object c_Set::ti_fromarray(CVarRef arr) {
   return ret;
 }
 
-Object c_Set::t_discard(CVarRef key) {
-  return t_remove(key);
-}
-
 Object c_Set::t_difference(CVarRef iterable) {
-  if (!iterable.isObject()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter iterable must be an instance of Iterable"));
-    throw e;
-  }
+  if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   for (; iter; ++iter) {
@@ -3971,6 +3863,11 @@ void c_Set::Bucket::dump() {
   tvAsCVarRef(&data).dump();
 }
 
+Array c_Set::ToArray(const ObjectData* obj) {
+  check_collection_cast_to_array();
+  return static_cast<const c_Set*>(obj)->toArrayImpl();
+}
+
 TypedValue* c_Set::OffsetGet(ObjectData* obj, TypedValue* key) {
   c_Set::throwNoIndexAccess();
 }
@@ -4001,9 +3898,9 @@ void c_Set::OffsetUnset(ObjectData* obj, TypedValue* key) {
   c_Set::throwNoIndexAccess();
 }
 
-bool c_Set::Equals(ObjectData* obj1, ObjectData* obj2) {
-  auto st1 = static_cast<c_Set*>(obj1);
-  auto st2 = static_cast<c_Set*>(obj2);
+bool c_Set::Equals(const ObjectData* obj1, const ObjectData* obj2) {
+  auto st1 = static_cast<const c_Set*>(obj1);
+  auto st2 = static_cast<const c_Set*>(obj2);
   if (st1->m_size != st2->m_size) return false;
   for (uint i = 0; i <= st1->m_nLastSlot; ++i) {
     c_Set::Bucket& p = st1->m_data[i];
@@ -4109,7 +4006,8 @@ c_Pair::c_Pair(Class* cb) :
                        ObjectData::UseGet|
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
-                       ObjectData::UseUnset>(cb),
+                       ObjectData::UseUnset|
+                       ObjectData::HasClone>(cb),
     m_size(0) {
 }
 
@@ -4131,23 +4029,19 @@ void c_Pair::t___construct() {
 }
 
 Array c_Pair::toArrayImpl() const {
-  ArrayInit ai(2, ArrayInit::vectorInit);
-  ai.set(tvAsCVarRef(&elm0));
-  ai.set(tvAsCVarRef(&elm1));
-  return ai.create();
+  PackedArrayInit ai(2);
+  ai.add(tvAsCVarRef(&elm0));
+  ai.add(tvAsCVarRef(&elm1));
+  return ai.toArray();
 }
 
-Array c_Pair::o_toArray() const {
-  check_collection_cast_to_array();
-  return toArrayImpl();
-}
-
-c_Pair* c_Pair::clone() {
+c_Pair* c_Pair::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_Pair*>(obj);
   auto pair = NEWOBJ(c_Pair)();
   pair->incRefCount();
   pair->m_size = 2;
-  tvDup(elm0, pair->elm0);
-  tvDup(elm1, pair->elm1);
+  tvDup(thiz->elm0, pair->elm0);
+  tvDup(thiz->elm1, pair->elm1);
   return pair;
 }
 
@@ -4160,7 +4054,7 @@ int64_t c_Pair::t_count() {
 }
 
 Object c_Pair::t_items() {
-  return SystemLib::AllocIterableViewObject(this);
+  return SystemLib::AllocLazyIterableViewObject(this);
 }
 
 Object c_Pair::t_keys() {
@@ -4175,8 +4069,12 @@ Object c_Pair::t_keys() {
   return obj;
 }
 
+Object c_Pair::t_lazy() {
+  return SystemLib::AllocLazyKeyedIterableViewObject(this);
+}
+
 Object c_Pair::t_view() {
-  return SystemLib::AllocKeyedIterableViewObject(this);
+  return SystemLib::AllocLazyKeyedIterableViewObject(this);
 }
 
 Object c_Pair::t_kvzip() {
@@ -4311,6 +4209,11 @@ void c_Pair::throwBadKeyType() {
   throw e;
 }
 
+Array c_Pair::ToArray(const ObjectData* obj) {
+  check_collection_cast_to_array();
+  return static_cast<const c_Pair*>(obj)->toArrayImpl();
+}
+
 TypedValue* c_Pair::OffsetGet(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
   auto pair = static_cast<c_Pair*>(obj);
@@ -4337,7 +4240,7 @@ bool c_Pair::OffsetIsset(ObjectData* obj, TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? isset(tvAsCVarRef(result)) : false;
+  return result ? !tvIsNull(tvToCell(result)) : false;
 }
 
 bool c_Pair::OffsetEmpty(ObjectData* obj, TypedValue* key) {
@@ -4350,7 +4253,7 @@ bool c_Pair::OffsetEmpty(ObjectData* obj, TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? empty(tvAsCVarRef(result)) : true;
+  return result ? !cellToBool(*result) : true;
 }
 
 bool c_Pair::OffsetContains(ObjectData* obj, TypedValue* key) {
@@ -4376,9 +4279,9 @@ void c_Pair::OffsetUnset(ObjectData* obj, TypedValue* key) {
   throw e;
 }
 
-bool c_Pair::Equals(ObjectData* obj1, ObjectData* obj2) {
-  auto pair1 = static_cast<c_Pair*>(obj1);
-  auto pair2 = static_cast<c_Pair*>(obj2);
+bool c_Pair::Equals(const ObjectData* obj1, const ObjectData* obj2) {
+  auto pair1 = static_cast<const c_Pair*>(obj1);
+  auto pair2 = static_cast<const c_Pair*>(obj2);
   return equal(tvAsCVarRef(&pair1->elm0), tvAsCVarRef(&pair2->elm0)) &&
          equal(tvAsCVarRef(&pair1->elm1), tvAsCVarRef(&pair2->elm1));
 }
@@ -4568,7 +4471,7 @@ ArrayData* collectionDeepCopyArray(ArrayData* arr) {
 }
 
 ObjectData* collectionDeepCopyVector(c_Vector* vec) {
-  Object o = vec = vec->clone();
+  Object o = vec = c_Vector::Clone(vec);
   size_t sz = vec->m_size;
   for (size_t i = 0; i < sz; ++i) {
     collectionDeepCopyTV(&vec->m_data[i]);
@@ -4577,7 +4480,7 @@ ObjectData* collectionDeepCopyVector(c_Vector* vec) {
 }
 
 ObjectData* collectionDeepCopyMap(c_Map* mp) {
-  Object o = mp = mp->clone();
+  Object o = mp = c_Map::Clone(mp);
   uint lastSlot = mp->m_nLastSlot;
   for (uint i = 0; i <= lastSlot; ++i) {
     c_Map::Bucket* p = mp->fetchBucket(i);
@@ -4589,7 +4492,7 @@ ObjectData* collectionDeepCopyMap(c_Map* mp) {
 }
 
 ObjectData* collectionDeepCopyStableMap(c_StableMap* smp) {
-  Object o = smp = smp->clone();
+  Object o = smp = c_StableMap::Clone(smp);
   for (c_StableMap::Bucket* p = smp->m_pListHead; p; p = p->pListNext) {
     collectionDeepCopyTV(&p->data);
   }
@@ -4597,12 +4500,12 @@ ObjectData* collectionDeepCopyStableMap(c_StableMap* smp) {
 }
 
 ObjectData* collectionDeepCopySet(c_Set* st) {
-  Object o = st = st->clone();
+  Object o = st = c_Set::Clone(st);
   return o.detach();
 }
 
 ObjectData* collectionDeepCopyPair(c_Pair* pair) {
-  Object o = pair = pair->clone();
+  Object o = pair = c_Pair::Clone(pair);
   collectionDeepCopyTV(&pair->elm0);
   collectionDeepCopyTV(&pair->elm1);
   return o.detach();
@@ -5035,7 +4938,7 @@ void collectionUnserialize(ObjectData* obj, VariableUnserializer* uns,
   }
 }
 
-bool collectionEquals(ObjectData* obj1, ObjectData* obj2) {
+bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2) {
   int ct = obj1->getCollectionType();
   assert(ct == obj2->getCollectionType());
   switch (ct) {

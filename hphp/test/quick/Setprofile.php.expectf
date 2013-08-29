@@ -808,14 +808,6 @@ array(3) {
 }
 array(3) {
   [0]=>
-  string(4) "exit"
-  [1]=>
-  string(16) "gen$continuation"
-  [2]=>
-  NULL
-}
-array(3) {
-  [0]=>
   string(5) "enter"
   [1]=>
   string(13) "fb_setprofile"

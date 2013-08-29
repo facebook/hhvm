@@ -28,10 +28,8 @@ public:
   CmdQuit() : DebuggerCommand(KindOfQuit) {}
 
   virtual void help(DebuggerClient &client);
-
-protected:
-  virtual void onClientImpl(DebuggerClient &client);
   virtual bool onServer(DebuggerProxy &proxy);
+  virtual void onClient(DebuggerClient &client);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

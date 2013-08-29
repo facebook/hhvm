@@ -10,71 +10,71 @@ array(51) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(15) "createAttribute"
-  [2]=>
-  string(17) "createAttributens"
-  [3]=>
-  string(18) "createCDATASection"
-  [4]=>
-  string(13) "createComment"
-  [5]=>
-  string(22) "createDocumentFragment"
-  [6]=>
-  string(13) "createElement"
-  [7]=>
-  string(15) "createElementNS"
-  [8]=>
-  string(21) "createEntityReference"
-  [9]=>
-  string(27) "createProcessingInstruction"
-  [10]=>
-  string(14) "createTextNode"
-  [11]=>
-  string(14) "getElementById"
-  [12]=>
-  string(20) "getElementsByTagName"
-  [13]=>
-  string(22) "getElementsByTagNameNS"
-  [14]=>
-  string(10) "importNode"
-  [15]=>
-  string(4) "load"
-  [16]=>
-  string(8) "loadHTML"
-  [17]=>
-  string(12) "loadHTMLFile"
-  [18]=>
-  string(7) "loadXML"
-  [19]=>
-  string(17) "normalizeDocument"
-  [20]=>
-  string(17) "registerNodeClass"
-  [21]=>
-  string(15) "relaxNGValidate"
-  [22]=>
-  string(21) "relaxNGValidateSource"
-  [23]=>
-  string(4) "save"
-  [24]=>
-  string(8) "saveHTML"
-  [25]=>
-  string(12) "saveHTMLFile"
-  [26]=>
-  string(7) "saveXML"
-  [27]=>
-  string(14) "schemaValidate"
-  [28]=>
-  string(20) "schemaValidateSource"
-  [29]=>
-  string(8) "validate"
-  [30]=>
-  string(8) "xinclude"
-  [31]=>
   string(5) "__get"
-  [32]=>
+  [2]=>
   string(5) "__set"
-  [33]=>
+  [3]=>
   string(7) "__isset"
+  [4]=>
+  string(15) "createAttribute"
+  [5]=>
+  string(17) "createAttributens"
+  [6]=>
+  string(18) "createCDATASection"
+  [7]=>
+  string(13) "createComment"
+  [8]=>
+  string(22) "createDocumentFragment"
+  [9]=>
+  string(13) "createElement"
+  [10]=>
+  string(15) "createElementNS"
+  [11]=>
+  string(21) "createEntityReference"
+  [12]=>
+  string(27) "createProcessingInstruction"
+  [13]=>
+  string(14) "createTextNode"
+  [14]=>
+  string(14) "getElementById"
+  [15]=>
+  string(20) "getElementsByTagName"
+  [16]=>
+  string(22) "getElementsByTagNameNS"
+  [17]=>
+  string(10) "importNode"
+  [18]=>
+  string(4) "load"
+  [19]=>
+  string(8) "loadHTML"
+  [20]=>
+  string(12) "loadHTMLFile"
+  [21]=>
+  string(7) "loadXML"
+  [22]=>
+  string(17) "normalizeDocument"
+  [23]=>
+  string(17) "registerNodeClass"
+  [24]=>
+  string(15) "relaxNGValidate"
+  [25]=>
+  string(21) "relaxNGValidateSource"
+  [26]=>
+  string(4) "save"
+  [27]=>
+  string(8) "saveHTML"
+  [28]=>
+  string(12) "saveHTMLFile"
+  [29]=>
+  string(7) "saveXML"
+  [30]=>
+  string(14) "schemaValidate"
+  [31]=>
+  string(20) "schemaValidateSource"
+  [32]=>
+  string(8) "validate"
+  [33]=>
+  string(8) "xinclude"
   [34]=>
   string(11) "appendChild"
   [35]=>
@@ -125,71 +125,71 @@ array(51) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(15) "createAttribute"
-  [2]=>
-  string(17) "createAttributens"
-  [3]=>
-  string(18) "createCDATASection"
-  [4]=>
-  string(13) "createComment"
-  [5]=>
-  string(22) "createDocumentFragment"
-  [6]=>
-  string(13) "createElement"
-  [7]=>
-  string(15) "createElementNS"
-  [8]=>
-  string(21) "createEntityReference"
-  [9]=>
-  string(27) "createProcessingInstruction"
-  [10]=>
-  string(14) "createTextNode"
-  [11]=>
-  string(14) "getElementById"
-  [12]=>
-  string(20) "getElementsByTagName"
-  [13]=>
-  string(22) "getElementsByTagNameNS"
-  [14]=>
-  string(10) "importNode"
-  [15]=>
-  string(4) "load"
-  [16]=>
-  string(8) "loadHTML"
-  [17]=>
-  string(12) "loadHTMLFile"
-  [18]=>
-  string(7) "loadXML"
-  [19]=>
-  string(17) "normalizeDocument"
-  [20]=>
-  string(17) "registerNodeClass"
-  [21]=>
-  string(15) "relaxNGValidate"
-  [22]=>
-  string(21) "relaxNGValidateSource"
-  [23]=>
-  string(4) "save"
-  [24]=>
-  string(8) "saveHTML"
-  [25]=>
-  string(12) "saveHTMLFile"
-  [26]=>
-  string(7) "saveXML"
-  [27]=>
-  string(14) "schemaValidate"
-  [28]=>
-  string(20) "schemaValidateSource"
-  [29]=>
-  string(8) "validate"
-  [30]=>
-  string(8) "xinclude"
-  [31]=>
   string(5) "__get"
-  [32]=>
+  [2]=>
   string(5) "__set"
-  [33]=>
+  [3]=>
   string(7) "__isset"
+  [4]=>
+  string(15) "createAttribute"
+  [5]=>
+  string(17) "createAttributens"
+  [6]=>
+  string(18) "createCDATASection"
+  [7]=>
+  string(13) "createComment"
+  [8]=>
+  string(22) "createDocumentFragment"
+  [9]=>
+  string(13) "createElement"
+  [10]=>
+  string(15) "createElementNS"
+  [11]=>
+  string(21) "createEntityReference"
+  [12]=>
+  string(27) "createProcessingInstruction"
+  [13]=>
+  string(14) "createTextNode"
+  [14]=>
+  string(14) "getElementById"
+  [15]=>
+  string(20) "getElementsByTagName"
+  [16]=>
+  string(22) "getElementsByTagNameNS"
+  [17]=>
+  string(10) "importNode"
+  [18]=>
+  string(4) "load"
+  [19]=>
+  string(8) "loadHTML"
+  [20]=>
+  string(12) "loadHTMLFile"
+  [21]=>
+  string(7) "loadXML"
+  [22]=>
+  string(17) "normalizeDocument"
+  [23]=>
+  string(17) "registerNodeClass"
+  [24]=>
+  string(15) "relaxNGValidate"
+  [25]=>
+  string(21) "relaxNGValidateSource"
+  [26]=>
+  string(4) "save"
+  [27]=>
+  string(8) "saveHTML"
+  [28]=>
+  string(12) "saveHTMLFile"
+  [29]=>
+  string(7) "saveXML"
+  [30]=>
+  string(14) "schemaValidate"
+  [31]=>
+  string(20) "schemaValidateSource"
+  [32]=>
+  string(8) "validate"
+  [33]=>
+  string(8) "xinclude"
   [34]=>
   string(11) "appendChild"
   [35]=>

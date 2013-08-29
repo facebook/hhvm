@@ -17,6 +17,12 @@
 #ifndef incl_HPHP_JIT_TYPE_H_
 #define incl_HPHP_JIT_TYPE_H_
 
+#include <cstdint>
+#include <cstring>
+
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/vm/class.h"
+
 namespace HPHP {
 namespace Transl {
 struct DynLocation;
@@ -122,11 +128,24 @@ class Type {
     bits_t m_bits;
     TypeBits m_typedBits;
   };
-  const Class* m_class;
 
-  // private ctor to build a specialized type
+  union {
+    const Class* m_class;
+    struct {
+      bool m_arrayKindValid;
+      ArrayData::ArrayKind m_arrayKind;
+    };
+  };
+
+  // private ctors to build a specialized type
   explicit Type(bits_t bits, const Class* klass)
     : m_bits(bits), m_class(klass)
+  {}
+
+  explicit Type(bits_t bits, ArrayData::ArrayKind arrayKind)
+    : m_bits(bits),
+      m_arrayKindValid(true),
+      m_arrayKind(arrayKind)
   {}
 
 public:
@@ -151,26 +170,41 @@ public:
   }
 
   Type operator|(Type other) const {
-    assert(m_class == nullptr && other.m_class == nullptr);
-    return Type(m_bits | other.m_bits);
+    assert(!canSpecializeClass() ||
+           (m_class == nullptr && other.m_class == nullptr));
+    Type t = Type(m_bits | other.m_bits);
+    if (t.canSpecializeArrayKind() &&
+        hasArrayKind() && other.hasArrayKind() &&
+        getArrayKind() == other.getArrayKind()) {
+      return t.specialize(m_arrayKind);
+    }
+    return t;
   }
+
   Type& operator|=(Type other) {
     return *this = *this | other;
   }
 
   Type operator&(Type other) const {
-    if (m_class != nullptr && other.m_class != nullptr) {
+    Type t = Type(m_bits & other.m_bits);
+    if (canSpecializeClass() &&
+        m_class != nullptr && other.m_class != nullptr) {
       if (m_class->classof(other.m_class)) {
-        return Type(m_bits & other.m_bits).specialize(other.m_class);
+        return t.specialize(other.m_class);
       } else if (other.m_class->classof(m_class)) {
-        return Type(m_bits & other.m_bits).specialize(m_class);
+        return t.specialize(m_class);
       }
+    } else if (canSpecializeArrayKind() &&
+               hasArrayKind() && other.hasArrayKind() &&
+               getArrayKind() == other.getArrayKind()) {
+      return t.specialize(m_arrayKind);
     }
-    return Type(m_bits & other.m_bits);
+    return t;
   }
 
   Type operator-(Type other) const {
     assert(m_class == nullptr && other.m_class == nullptr);
+    assert(!m_arrayKindValid && !other.m_arrayKindValid);
     return Type(m_bits & ~other.m_bits);
   }
 
@@ -226,6 +260,8 @@ public:
    * value, which allows us to avoid several checks.
    */
   bool isKnownDataType() const {
+    if (subtypeOf(Type::None)) return false;
+
     // Calling this function with a type that can't be in a TypedValue isn't
     // meaningful
     assert(subtypeOf(Gen | Cls));
@@ -276,13 +312,41 @@ public:
   }
 
   /*
+   * True if type can have a specialized class.
+   */
+  bool canSpecializeClass() const {
+    bits_t objectBits = Obj.m_bits | BoxedObj.m_bits | PtrToObj.m_bits |
+      PtrToBoxedObj.m_bits;
+    return (m_bits & objectBits) == m_bits;
+  }
+
+  /*
+   * True if type can have a specialized array kind.
+   */
+  bool canSpecializeArrayKind() const {
+    bits_t arrayBits = Arr.m_bits | BoxedArr.m_bits | PtrToArr.m_bits |
+      PtrToBoxedArr.m_bits;
+    return (m_bits & arrayBits) == m_bits;
+  }
+
+  /*
    * Returns true if this is same type or a subtype of any of the arguments.
    */
   bool subtypeOf(Type t2) const {
-    return (m_bits & t2.m_bits) == m_bits
-           && (t2.m_class == nullptr
-               || (m_class != nullptr
-                   && m_class->classof(t2.m_class)));
+    if ((m_bits & t2.m_bits) != m_bits) {
+      return false;
+    }
+    if (canSpecializeClass()) {
+      return t2.m_class == nullptr ||
+        (m_class != nullptr
+         && m_class->classof(t2.m_class));
+    }
+    if (canSpecializeArrayKind()) {
+      return !t2.m_arrayKindValid ||
+        (m_arrayKindValid
+         && m_arrayKind == t2.m_arrayKind);
+    }
+    return true;
   }
 
   /*
@@ -316,7 +380,26 @@ public:
    * probably mean subtypeOf.
    */
   bool equals(Type t2) const {
-    return m_bits == t2.m_bits && m_class == t2.m_class;
+    if (m_bits != t2.m_bits) {
+      return false;
+    }
+    if (canSpecializeClass()) {
+      return m_class == t2.m_class;
+    }
+    if (canSpecializeArrayKind()) {
+      // Use m_class to represent the arrayKind bits.
+      return m_arrayKindValid == t2.m_arrayKindValid &&
+             m_arrayKind == t2.m_arrayKind;
+    }
+    return true;
+  }
+
+  /*
+   * True if t1 and t2 have the same KindOf, even if they're not
+   * precisely equal (due to specialization, for example).
+   */
+  bool isSameKindOf(Type t2) const {
+    return isKnownDataType() && m_bits == t2.m_bits;
   }
 
   /*
@@ -370,6 +453,15 @@ public:
     return m_class;
   }
 
+  bool hasArrayKind() const {
+    return m_arrayKindValid;
+  }
+
+  ArrayData::ArrayKind getArrayKind() const {
+    assert(isArray() && hasArrayKind());
+    return m_arrayKind;
+  }
+
   Type innerType() const {
     assert(isBoxed());
     return Type(m_bits >> kBoxShift, m_class);
@@ -405,21 +497,32 @@ public:
     // Boxing Uninit returns InitNull but that logic doesn't belong
     // here.
     assert(not(Uninit) || equals(Cell));
-    return Type(m_bits << kBoxShift, m_class);
+    auto t = Type(m_bits << kBoxShift);
+    return
+      canSpecializeClass() ? t.specialize(m_class) :
+      canSpecializeArrayKind() && hasArrayKind() ? t.specialize(m_arrayKind) :
+      t;
   }
 
   // This computes the type effects of the Unbox opcode.
   Type unbox() const {
     assert(subtypeOf(Gen));
     const Class* klass = m_class;
+    ArrayData::ArrayKind kind = m_arrayKind;
     Type t = (*this & Cell) | (*this & BoxedCell).innerType();
-    t.m_class = klass; // keep the Class* if one was set
-    return t;
+    return
+      canSpecializeClass() ? t.specialize(klass) :
+      canSpecializeArrayKind() && hasArrayKind() ? t.specialize(kind) :
+      t;
   }
 
   Type deref() const {
     assert(isPtr());
-    return Type(m_bits >> kPtrShift, m_class);
+    auto t = Type(m_bits >> kPtrShift);
+    return
+      canSpecializeClass() ? t.specialize(m_class) :
+      canSpecializeArrayKind() && hasArrayKind() ? t.specialize(m_arrayKind) :
+      t;
   }
 
   Type derefIfPtr() const {
@@ -436,17 +539,31 @@ public:
   Type ptr() const {
     assert(!isPtr());
     assert(subtypeOf(Gen));
-    return Type(m_bits << kPtrShift, m_class);
+    auto t = Type(m_bits << kPtrShift);
+    return
+      canSpecializeClass() ? t.specialize(m_class) :
+      canSpecializeArrayKind() && hasArrayKind() ? t.specialize(m_arrayKind) :
+      t;
+
   }
 
   Type specialize(const Class* klass) const {
-    assert(isObj() && m_class == nullptr);
+    assert(canSpecializeClass() && m_class == nullptr);
     return Type(m_bits, klass);
   }
 
+  bool isSpecialized() const {
+    return (canSpecializeClass() && m_class) ||
+      (canSpecializeArrayKind() && m_arrayKindValid);
+  }
+
   Type unspecialize() const {
-    assert(isObj() && m_class != nullptr);
     return Type(m_bits, nullptr);
+  }
+
+  Type specialize(ArrayData::ArrayKind arrayKind) const {
+    assert(canSpecializeArrayKind());
+    return Type(m_bits, arrayKind);
   }
 
   bool canRunDtor() const {
@@ -459,9 +576,9 @@ public:
   DataType toDataType() const;
   RuntimeType toRuntimeType() const;
 
-  static Type fromDataType(DataType outerType,
-                           DataType innerType = KindOfInvalid,
-                           const Class* klass = nullptr);
+  static Type fromDataType(
+    DataType outerType,
+    DataType innerType = KindOfInvalid);
   static Type fromRuntimeType(const Transl::RuntimeType& rtt);
   static Type fromDynLocation(const Transl::DynLocation* dynLoc);
 
@@ -499,6 +616,9 @@ public:
 
 };
 
+/*
+ * JIT::Type must be small enough for efficient pass-by-value.
+ */
 static_assert(sizeof(Type) <= 2 * sizeof(uint64_t),
               "JIT::Type should fit in (2 * sizeof(uint64_t))");
 

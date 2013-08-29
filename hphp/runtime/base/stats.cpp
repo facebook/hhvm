@@ -3,15 +3,14 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
+   | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
 
@@ -41,11 +40,7 @@ __thread uint64_t tl_helper_counters[kMaxNumTrampolines];
 typedef hphp_const_char_map<hphp_const_char_map<uint64_t>> StatGroupMap;
 __thread StatGroupMap* tl_stat_groups = nullptr;
 
-// Only the thread holding the write lease will set the entries in the
-// helperNames array but other threads may concurrently read these
-// entries, so each entry is volatile (or an atomic type per the new
-// C++11 standard).
-const char* volatile helperNames[kMaxNumTrampolines];
+std::atomic<const char*> helperNames[kMaxNumTrampolines];
 
 void
 emitInc(X64Assembler& a, uint64_t* tl_table, uint index, int n,
@@ -87,6 +82,7 @@ void init() {
 static __thread int64_t epoch;
 void dump() {
   if (!enabledAny()) return;
+
   auto url = g_context->getRequestUrl(50);
   TRACE(0, "STATS %" PRId64 " %s\n", epoch, url.c_str());
 #include "hphp/runtime/vm/stats-opcodeDef.h"
@@ -96,11 +92,12 @@ void dump() {
   STATS
 #undef STAT
 #undef O
-  for (int i=0; helperNames[i]; i++) {
+
+  for (int i = 0;; i++) {
+    auto const name = helperNames[i].load(std::memory_order_acquire);
+    if (!name) break;
     if (tl_helper_counters[i]) {
-      TRACE(0, "STAT %-50s %15" PRIu64 "\n",
-            helperNames[i],
-            tl_helper_counters[i]);
+      TRACE(0, "STAT %-50s %15" PRIu64 "\n", name, tl_helper_counters[i]);
     }
   }
 

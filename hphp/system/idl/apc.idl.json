@@ -7,7 +7,6 @@
             "name": "apc_add",
             "desc": "Caches a variable in the data store, only if it's not already stored. Unlike many other mechanisms in PHP, variables stored using apc_add() will persist between requests (until the value is removed from the cache).",
             "flags": [
-                "HasDocComment",
                 "AllowIntercept"
             ],
             "return": {
@@ -42,7 +41,6 @@
             "name": "apc_store",
             "desc": "Cache a variable in the data store. Unlike many other mechanisms in PHP, variables stored using apc_store() will persist between requests (until the value is removed from the cache).",
             "flags": [
-                "HasDocComment",
                 "AllowIntercept"
             ],
             "return": {
@@ -77,7 +75,6 @@
             "name": "apc_fetch",
             "desc": "Fetchs a stored variable from the cache.",
             "flags": [
-                "HasDocComment",
                 "AllowIntercept"
             ],
             "return": {
@@ -108,7 +105,6 @@
             "name": "apc_delete",
             "desc": "Removes a stored variable from the cache.",
             "flags": [
-                "HasDocComment",
                 "AllowIntercept"
             ],
             "return": {
@@ -132,7 +128,6 @@
             "name": "apc_compile_file",
             "desc": "Stores a file in the bytecode cache, bypassing all filters.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -160,7 +155,6 @@
             "name": "apc_cache_info",
             "desc": "Retrieves cached information and meta-data from APC's data store.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -185,7 +179,6 @@
             "name": "apc_clear_cache",
             "desc": "Clears the user\/system cache.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -204,7 +197,6 @@
             "name": "apc_define_constants",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -238,7 +230,6 @@
             "name": "apc_load_constants",
             "desc": "Loads a set of constants from the cache.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -267,7 +258,6 @@
             "name": "apc_sma_info",
             "desc": "Retrieves APC's Shared Memory Allocation information.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap",
@@ -285,7 +275,6 @@
         {
             "name": "apc_filehits",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "StringVec"
@@ -297,7 +286,6 @@
             "name": "apc_delete_file",
             "desc": "Deletes the given files from the opcode cache.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -320,7 +308,6 @@
             "name": "apc_inc",
             "desc": "Increases a stored number.",
             "flags": [
-                "HasDocComment",
                 "AllowIntercept"
             ],
             "return": {
@@ -357,7 +344,6 @@
             "name": "apc_dec",
             "desc": "Decreases a stored integer value.",
             "flags": [
-                "HasDocComment",
                 "AllowIntercept"
             ],
             "return": {
@@ -394,7 +380,6 @@
             "name": "apc_cas",
             "desc": "apc_cas WarningThis function is currently not documented; only its argument list is available.",
             "flags": [
-                "HasDocComment",
                 "AllowIntercept"
             ],
             "return": {
@@ -425,7 +410,6 @@
             "name": "apc_exists",
             "desc": "Checks if one ore more APC keys exist.",
             "flags": [
-                "HasDocComment",
                 "AllowIntercept"
             ],
             "return": {
@@ -449,7 +433,6 @@
             "name": "apc_bin_dump",
             "desc": "Returns a binary dump of the given files and user variables from the APC cache. A NULL for files or user_vars signals a dump of every entry, whereas array() will dump nothing.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -474,7 +457,6 @@
             "name": "apc_bin_load",
             "desc": "Loads the given binary dump into the APC file\/user cache.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -503,7 +485,6 @@
             "name": "apc_bin_dumpfile",
             "desc": "Outputs a binary dump of the given files and user variables from the APC cache to the named file.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -543,7 +524,6 @@
             "name": "apc_bin_loadfile",
             "desc": "Loads a binary dump from a file into the APC file\/user cache.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",

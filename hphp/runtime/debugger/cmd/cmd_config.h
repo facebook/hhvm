@@ -28,10 +28,8 @@ public:
   CmdConfig() : DebuggerCommand(KindOfConfig) {}
 
   virtual void help(DebuggerClient &client);
-  virtual void setClientOutput(DebuggerClient &client);
+  virtual void onClient(DebuggerClient &client);
 
-protected:
-  virtual void onClientImpl(DebuggerClient &client);
 private:
   void listVars(DebuggerClient &client);
 };

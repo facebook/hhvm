@@ -18,23 +18,24 @@
 #include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_mysql.h"
-#include "hphp/util/db_conn.h"
+#include "hphp/util/db-conn.h"
 #include "hphp/util/logger.h"
-#include "hphp/runtime/base/stat_cache.h"
+#include "hphp/runtime/base/stat-cache.h"
+#include "folly/String.h"
 #include "netinet/in.h"
 #include "hphp/runtime/base/externals.h"
-#include "hphp/runtime/base/string_util.h"
-#include "hphp/runtime/base/string_buffer.h"
-#include "hphp/runtime/base/code_coverage.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/code-coverage.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/vm/backup-gc.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "unicode/uchar.h"
 #include "unicode/utf8.h"
-#include "hphp/runtime/base/file_repository.h"
+#include "hphp/runtime/base/file-repository.h"
 
-#include "hphp/util/parser/parser.h"
+#include "hphp/parser/parser.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(fb);
@@ -304,7 +305,7 @@ int fb_unserialize_from_buffer(Variant &res, const char *buff,
       int len = (uint8_t)buff[(*pos)++];
 
       CHECK_ENOUGH(len, *pos, buff_len);
-      StringData* ret = NEW(StringData)(buff + (*pos), len, CopyString);
+      StringData* ret = StringData::Make(buff + (*pos), len, CopyString);
       (*pos) += len;
       res = ret;
       break;
@@ -316,7 +317,7 @@ int fb_unserialize_from_buffer(Variant &res, const char *buff,
       (*pos) += 4;
 
       CHECK_ENOUGH(len, *pos, buff_len);
-      StringData* ret = NEW(StringData)(buff + (*pos), len, CopyString);
+      StringData* ret = StringData::Make(buff + (*pos), len, CopyString);
       (*pos) += len;
       res = ret;
       break;
@@ -361,7 +362,7 @@ int fb_unserialize_from_buffer(Variant &res, const char *buff,
             int len = (uint8_t)buff[(*pos)++];
 
             CHECK_ENOUGH(len, *pos, buff_len);
-            key = NEW(StringData)(buff + (*pos), len, CopyString);
+            key = StringData::Make(buff + (*pos), len, CopyString);
             (*pos) += len;
             break;
           }
@@ -372,7 +373,7 @@ int fb_unserialize_from_buffer(Variant &res, const char *buff,
             (*pos) += 4;
 
             CHECK_ENOUGH(len, *pos, buff_len);
-            key = NEW(StringData)(buff + (*pos), len, CopyString);
+            key = StringData::Make(buff + (*pos), len, CopyString);
             (*pos) += len;
             break;
           }
@@ -759,11 +760,12 @@ Variant f_fb_compact_serialize(CVarRef thing) {
     }
   }
 
-  StringData* sd = NEW(StringData);
+  auto sd = StringData::Make();
   // StringData will throw a FatalErrorException if we try to grow it too large,
   // so no need to check for length.
+  // FIXME(#2683961): this exception case leaks the StringData.
   if (fb_compact_serialize_variant(sd, thing, 0)) {
-    DELETE(StringData)(sd);
+    sd->release();
     return uninit_null();
   }
 
@@ -829,6 +831,8 @@ int fb_compact_unserialize_int64_from_buffer(
   return 0;
 }
 
+const StaticString s_empty("");
+
 int fb_compact_unserialize_from_buffer(
   Variant& out, const char* buf, int n, int& p) {
 
@@ -873,8 +877,7 @@ int fb_compact_unserialize_from_buffer(
 
     case FB_CS_STRING_0:
     {
-      StringData* sd = NEW(StringData);
-      out = sd;
+      out = s_empty;
       break;
     }
 
@@ -890,7 +893,7 @@ int fb_compact_unserialize_from_buffer(
       }
 
       CHECK_ENOUGH(len, p, n);
-      StringData* sd = NEW(StringData)(buf + p, len, CopyString);
+      StringData* sd = StringData::Make(buf + p, len, CopyString);
       p += len;
       out = sd;
       break;
@@ -1090,8 +1093,8 @@ Array f_fb_parallel_query(CArrRef sql_map, int max_thread /* = 50 */,
     int affected = DBConn::parallelExecute(queries, ds, errors, max_thread,
                      retry_query_on_fail,
                      connect_timeout, read_timeout,
-                     RuntimeOption::MySQLMaxRetryOpenOnFail,
-                     RuntimeOption::MySQLMaxRetryQueryOnFail);
+                     mysqlExtension::MaxRetryOpenOnFail,
+                     mysqlExtension::MaxRetryQueryOnFail);
     output_dataset(ret, affected, ds, errors);
   } else {
     DBDataSetPtrVec dss(queries.size());
@@ -1103,8 +1106,8 @@ Array f_fb_parallel_query(CArrRef sql_map, int max_thread /* = 50 */,
     int affected = DBConn::parallelExecute(queries, dss, errors, max_thread,
                      retry_query_on_fail,
                      connect_timeout, read_timeout,
-                     RuntimeOption::MySQLMaxRetryOpenOnFail,
-                     RuntimeOption::MySQLMaxRetryQueryOnFail);
+                     mysqlExtension::MaxRetryOpenOnFail,
+                     mysqlExtension::MaxRetryQueryOnFail);
     for (unsigned int i = 0; i < dss.size(); i++) {
       Array dsRet;
       output_dataset(dsRet, affected, *dss[i], errors);
@@ -1492,7 +1495,7 @@ static Variant do_lazy_stat(Function dostat, CStrRef filename) {
   struct stat sb;
   if (dostat(File::TranslatePathWithFileCache(filename).c_str(), &sb)) {
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     return false;
   }
   return stat_impl(&sb);

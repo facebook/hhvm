@@ -29,13 +29,12 @@
 
 #include "hphp/util/hash.h"
 #include "hphp/util/timer.h"
-#include "hphp/runtime/base/execution_context.h"
-#include "hphp/runtime/base/smart_containers.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
-#include "hphp/runtime/vm/jit/trans-data.h"
 #include "hphp/runtime/vm/jit/translator-instrs.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -58,7 +57,6 @@ using JIT::Type;
 using JIT::RegionDesc;
 using JIT::HhbcTranslator;
 using JIT::ProfData;
-static const bool trustSigSegv = false;
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
 
@@ -229,11 +227,19 @@ class GuardType {
   GuardType        dropSpecialization() const;
   RuntimeType      getRuntimeType() const;
   bool             isEqual(GuardType other) const;
+  bool             hasArrayKind() const;
+  ArrayData::ArrayKind getArrayKind() const;
 
  private:
   DataType outerType;
   DataType innerType;
-  const Class* klass;
+  union {
+    const Class* klass;
+    struct {
+      bool arrayKindValid;
+      ArrayData::ArrayKind arrayKind;
+    };
+  };
 };
 
 typedef hphp_hash_map<Location,RuntimeType,Location> TypeMap;
@@ -348,15 +354,11 @@ struct TranslArgs {
  */
 class Translator {
 public:
-  // kMaxInlineReturnDecRefs is the maximum ref-counted locals to
-  // generate an inline return for.
-  static const int kMaxInlineReturnDecRefs = 1;
   static const int MaxJmpsTracedThrough = 5;
 
 private:
   friend struct TraceletContext;
 
-  void analyzeSecondPass(Tracelet& t);
   void analyzeCallee(TraceletContext&,
                      Tracelet& parent,
                      NormalizedInstruction* fcall);
@@ -390,11 +392,6 @@ private:
   RuntimeType liveType(const Cell* outer,
                        const Location& l,
                        bool specialize = false);
-
-  void consumeStackEntry(Tracelet* tlet, NormalizedInstruction* ni);
-  void produceStackEntry(Tracelet* tlet, NormalizedInstruction* ni);
-  void produceDataRef(Tracelet* tlet, NormalizedInstruction* ni,
-                                      Location loc);
 
   virtual void syncWork() = 0;
   virtual void invalidateSrcKey(SrcKey sk) = 0;
@@ -506,17 +503,12 @@ public:
     return &m_translations[transId];
   }
 
-  TransID getNumTrans() const {
-    return m_translations.size();
-  }
-
   TransID getCurrentTransID() const {
     return m_translations.size();
   }
 
   uint64_t* getTransCounterAddr();
   uint64_t getTransCounter(TransID transId) const;
-  void setTransCounter(TransID transId, uint64_t value);
 
   void addTranslation(const TransRec& transRec);
 
@@ -543,10 +535,6 @@ public:
 
   void postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
                    Tracelet& t, TraceletContext& tas);
-  static Location tvToLocation(const TypedValue* tv, const TypedValue* frame);
-  static bool typeIsString(DataType type) {
-    return type == KindOfString || type == KindOfStaticString;
-  }
   static bool liveFrameIsPseudoMain();
 
   inline void sync() {
@@ -701,7 +689,8 @@ bool outputDependsOnInput(const Op instr);
 
 extern bool tc_dump();
 const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
-                                  bool& magicCall, bool staticLookup);
+                                  bool& magicCall, bool staticLookup,
+                                  Class* ctx);
 
 // This is used to check that return types of builtins are not simple
 // types. This is different from IS_REFCOUNTED_TYPE because builtins
@@ -802,15 +791,12 @@ enum Operands {
   MVector         = 1 << 8,  // Member-vector input
   Iter            = 1 << 9,  // Iterator in imm[0]
   AllLocals       = 1 << 10, // All locals (used by RetC)
-  DontGuardLocal  = 1 << 11, // Dont force a guard on behalf of the local input
-  DontGuardStack1 = 1 << 12, // Dont force a guard on behalf of stack1 input
-  DontBreakLocal  = 1 << 13, // Dont break a tracelet on behalf of the local
-  DontBreakStack1 = 1 << 14, // Dont break a tracelet on behalf of stack1 input
-  IgnoreInnerType = 1 << 15, // Instruction doesnt care about the inner types
-  DontGuardAny    = 1 << 16, // Dont force a guard for any input
-  This            = 1 << 17, // Input to CheckThis
-  StackN          = 1 << 18, // pop N cells from stack; n = imm[0].u_IVA
-  BStackN         = 1 << 19, // consume N cells from stack for builtin call;
+  DontGuardStack1 = 1 << 11, // Dont force a guard on behalf of stack1 input
+  IgnoreInnerType = 1 << 12, // Instruction doesnt care about the inner types
+  DontGuardAny    = 1 << 13, // Dont force a guard for any input
+  This            = 1 << 14, // Input to CheckThis
+  StackN          = 1 << 15, // pop N cells from stack; n = imm[0].u_IVA
+  BStackN         = 1 << 16, // consume N cells from stack for builtin call;
                              // n = imm[0].u_IVA
   StackTop2 = Stack1 | Stack2,
   StackTop3 = Stack1 | Stack2 | Stack3,
@@ -829,6 +815,8 @@ struct InstrInfo {
 };
 
 const InstrInfo& getInstrInfo(Op op);
+
+typedef const int COff; // Const offsets
 
 } } // HPHP::Transl
 

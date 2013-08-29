@@ -26,17 +26,17 @@ DECLARE_BOOST_TYPES(CmdWhere);
 class CmdWhere : public DebuggerCommand {
 public:
   CmdWhere() : DebuggerCommand(KindOfWhere), m_stackArgs(true) {}
+  explicit CmdWhere(Type type) : DebuggerCommand(type), m_stackArgs(true) {}
 
   virtual void help(DebuggerClient &client);
 
-  virtual void setClientOutput(DebuggerClient &client);
   virtual bool onServer(DebuggerProxy &proxy);
+  virtual void onClient(DebuggerClient &client);
 
   Array fetchStackTrace(DebuggerClient &client); // client side
-  void processStackTrace(); // server side
+  void removeArgs(); // server side
 
 protected:
-  virtual void onClientImpl(DebuggerClient &client);
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 

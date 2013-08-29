@@ -18,17 +18,18 @@
 #include "hphp/runtime/ext/ext_process.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/base/string_buffer.h"
-#include "hphp/runtime/base/zend_string.h"
-#include "hphp/runtime/base/thread_init_fini.h"
+#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/thread-init-fini.h"
+#include "folly/String.h"
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>
 #include "hphp/util/lock.h"
-#include "hphp/runtime/base/plain_file.h"
-#include "hphp/util/light_process.h"
+#include "hphp/runtime/base/plain-file.h"
+#include "hphp/util/light-process.h"
 #include "hphp/util/logger.h"
-#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/vm/repo.h"
 
 #if !defined(_NSIG) && defined(NSIG)
@@ -50,9 +51,9 @@ static char **build_envp(CArrRef envs, std::vector<String> &senvs) {
     int i = 0;
     for (ArrayIter iter(envs); iter; ++iter, ++i) {
       StringBuffer nvpair;
-      nvpair += iter.first().toString();
-      nvpair += '=';
-      nvpair += iter.second().toString();
+      nvpair.append(iter.first().toString());
+      nvpair.append('=');
+      nvpair.append(iter.second().toString());
 
       String env = nvpair.detach();
       senvs.push_back(env);
@@ -142,7 +143,7 @@ void f_pcntl_exec(CStrRef path, CArrRef args /* = null_array */,
   char **envp = build_envp(envs, senvs);
   if (execve(path.c_str(), argv, envp) == -1) {
     raise_warning("Error has occured: (errno %d) %s",
-                    errno, Util::safe_strerror(errno).c_str());
+                    errno, folly::errnoStr(errno).c_str());
   }
 
   free(envp);
@@ -570,6 +571,8 @@ StaticString ChildProcess::s_class_name("Process");
 #define DESC_FILE       2
 #define DESC_PARENT_MODE_WRITE  8
 
+const StaticString s_w("w");
+
 class DescriptorItem {
 public:
   DescriptorItem() :
@@ -598,7 +601,7 @@ public:
     childend = dup(file->fd());
     if (childend < 0) {
       raise_warning("unable to dup File-Handle for descriptor %d - %s",
-                      index, Util::safe_strerror(errno).c_str());
+                      index, folly::errnoStr(errno).c_str());
       return false;
     }
     return true;
@@ -609,11 +612,11 @@ public:
     int newpipe[2];
     if (0 != pipe(newpipe)) {
       raise_warning("unable to create pipe %s",
-                      Util::safe_strerror(errno).c_str());
+                      folly::errnoStr(errno).c_str());
       return false;
     }
 
-    if (zmode != "w") {
+    if (zmode != s_w) {
       parentend = newpipe[1];
       childend = newpipe[0];
       mode |= DESC_PARENT_MODE_WRITE;
@@ -672,6 +675,9 @@ public:
  */
 Mutex DescriptorItem::s_mutex(false);
 
+const StaticString s_pipe("pipe");
+const StaticString s_file("file");
+
 static bool pre_proc_open(CArrRef descriptorspec,
                           vector<DescriptorItem> &items) {
   /* walk the descriptor spec and set up files/pipes */
@@ -701,13 +707,13 @@ static bool pre_proc_open(CArrRef descriptorspec,
         break;
       }
       String ztype = descarr[int64_t(0)].toString();
-      if (ztype == "pipe") {
+      if (ztype == s_pipe) {
         if (!descarr.exists(int64_t(1))) {
           raise_warning("Missing mode parameter for 'pipe'");
           break;
         }
         if (!item.readPipe(descarr[int64_t(1)].toString())) break;
-      } else if (ztype == "file") {
+      } else if (ztype == s_file) {
         if (!descarr.exists(int64_t(1))) {
           raise_warning("Missing file name parameter for 'file'");
           break;
@@ -741,7 +747,7 @@ static Variant post_proc_open(CStrRef cmd, Variant &pipes,
     for (int i = 0; i < (int)items.size(); i++) {
       items[i].cleanup();
     }
-    raise_warning("fork failed - %s", Util::safe_strerror(errno).c_str());
+    raise_warning("fork failed - %s", folly::errnoStr(errno).c_str());
     return false;
   }
 
@@ -826,9 +832,9 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
     std::vector<std::string> envs;
     for (ArrayIter iter(enva); iter; ++iter) {
       StringBuffer nvpair;
-      nvpair += iter.first().toString();
-      nvpair += '=';
-      nvpair += iter.second().toString();
+      nvpair.append(iter.first().toString());
+      nvpair.append('=');
+      nvpair.append(iter.second().toString());
       string tmp = nvpair.detach().c_str();
       if (tmp.find('\n') == string::npos) {
         envs.push_back(tmp);

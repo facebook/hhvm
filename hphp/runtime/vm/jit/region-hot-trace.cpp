@@ -86,6 +86,44 @@ static OffsetSet findSuccOffsets(Op* opc, const Unit* unit) {
   return succBcOffs;
 }
 
+static void mergePostConds(PostConditions& dst,
+                           const PostConditions& src) {
+  for (const auto &post : src) {
+    bool replace = false;
+    for (auto it = dst.begin(); it != dst.end(); ++it) {
+      if (post.location == it->location) {
+        *it = post;
+        replace = true;
+      }
+    }
+    if (!replace) {
+      dst.emplace_back(post);
+    }
+  }
+}
+
+static bool postCondMismatch(const RegionDesc::TypePred& postCond,
+                             const RegionDesc::TypePred& preCond) {
+  return postCond.location == preCond.location &&
+         !preCond.type.maybe(postCond.type);
+}
+
+static bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
+                                 const PostConditions& prevPostConds) {
+  const auto& preConds = block->typePreds();
+  for (const auto& it : preConds) {
+    for (const auto& post : prevPostConds) {
+      if (postCondMismatch(post, it.second)) {
+        FTRACE(6, "preCondsAreSatisfied: postcondition check failed!\n"
+               "  postcondition was {}, precondition was {}\n",
+               show(post), show(it.second));
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 RegionDescPtr selectHotTrace(TransID triggerId,
                              const ProfData* profData,
                              TransCFG& cfg,
@@ -94,6 +132,8 @@ RegionDescPtr selectHotTrace(TransID triggerId,
   TransID tid    = triggerId;
   TransID prevId = InvalidID;
   selectedSet.clear();
+
+  PostConditions accumPostConds;
 
   while (!setContains(selectedSet, tid)) {
 
@@ -158,9 +198,25 @@ RegionDescPtr selectHotTrace(TransID triggerId,
       break;
     }
 
+    mergePostConds(accumPostConds, block->postConds());
+
+    TransCFG::ArcPtrVec possibleOutArcs;
+    for (auto arc : outArcs) {
+      RegionDesc::BlockPtr possibleNext = profData->transBlock(arc->dst());
+      if (preCondsAreSatisfied(possibleNext, accumPostConds)) {
+        possibleOutArcs.emplace_back(arc);
+      }
+    }
+
+    if (possibleOutArcs.size() == 0) {
+      FTRACE(5, "selectHotTrace: breaking region because postcondition check "
+             "pruned all successors of Translation {}\n", tid);
+      break;
+    }
+
     auto maxWeight = std::numeric_limits<int64_t>::min();
     TransCFG::Arc* maxArc = nullptr;
-    for (auto arc : outArcs) {
+    for (auto arc : possibleOutArcs) {
       if (arc->weight() >= maxWeight) {
         maxWeight = arc->weight();
         maxArc = arc;

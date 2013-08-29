@@ -16,7 +16,6 @@
 #ifndef incl_HPHP_RUNTIME_VM_TRANSLATOR_X64_H_
 #define incl_HPHP_RUNTIME_VM_TRANSLATOR_X64_H_
 
-#include <signal.h>
 #include <memory>
 #include <boost/noncopyable.hpp>
 
@@ -28,8 +27,9 @@
 #include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
-#include "hphp/runtime/base/smart_containers.h"
+#include "hphp/runtime/base/smart-containers.h"
 
 namespace HPHP { class ExecutionContext; }
 
@@ -150,14 +150,11 @@ struct ServiceReqArgInfo {
 };
 
 class TranslatorX64 : public Translator
-                    , boost::noncopyable {
+                    , private boost::noncopyable {
   friend class SrcRec; // so it can smash code.
   friend class SrcDB;  // For write lock and code invalidation.
   friend class Tx64Reaper;
   friend class HPHP::JIT::CodeGenerator;
-
-  typedef tbb::concurrent_hash_map<TCA, TCA> SignalStubMap;
-  typedef void (*sigaction_t)(int, siginfo_t*, void*);
 
   typedef X64Assembler Asm;
 
@@ -194,17 +191,19 @@ class TranslatorX64 : public Translator
 
   TCA                    tcStart;
   TCA                    aStart;
-  Asm                    ahot;    // used for hot code of AttrHot functions
-  Asm                    a;       // used for hot code of non-AttrHot functions
-  Asm                    aprof;   // used for hot code of profiling translations
-  Asm                    astubs;  // used for cold code
-  Asm                    atrampolines;
+  CodeBlock              hotCode;
+  CodeBlock              mainCode;
+  CodeBlock              profCode;
+  CodeBlock              stubsCode;
+  CodeBlock              trampolinesCode;
+  X64Assembler           ahot;    // used for hot code of AttrHot functions
+  X64Assembler           a;       // used for hot code of non-AttrHot functions
+  X64Assembler           aprof;   // used for hot code of profiling translations
+  X64Assembler           astubs;  // used for cold code
+  X64Assembler           atrampolines;
   PointerMap             trampolineMap;
   int                    m_numNativeTrampolines;
-  size_t                 m_trampolineSize; // size of each trampoline
 
-  SignalStubMap          m_segvStubs;
-  sigaction_t            m_segvChain;
   TCA                    m_callToExit;
   TCA                    m_retHelper;
   TCA                    m_retInlHelper;
@@ -237,20 +236,190 @@ class TranslatorX64 : public Translator
 
   Debug::DebugInfo m_debugInfo;
 
+  FreeStubList m_freeStubs;
+
+  // asize + astubssize + gdatasize + trampolinesblocksize
+  size_t m_totalSize;
+
+  ////////////////////////////////////////
+  //
+  // Function prologue emission / smashing
+  //
+  ////////////////////////////////////////
+public:
+  TCA getCallArrayPrologue(Func* func);
+  void smashPrologueGuards(TCA* prologues, int numPrologues, const Func* func);
+  TCA funcPrologue(Func* func, int nArgs, ActRec* ar = nullptr);
+  bool checkCachedPrologue(const Func* func, int param, TCA& plgOut) const;
+  SrcKey emitPrologue(Func* func, int nArgs);
+
 private:
-  int64_t m_createdTime;
+  TCA emitCallArrayPrologue(const Func* func, const DVFuncletsVec& dvs);
+  TCA emitPrologueRedispatch(Asm &a);
+  TCA emitFuncGuard(Asm& a, const Func *f);
+  void emitStackCheck(int funcDepth, Offset pc);
+  void emitStackCheckDynamic(int numArgs, Offset pc);
+  void emitTestSurpriseFlags(Asm& a);
+  void emitCheckSurpriseFlagsEnter(bool inTracelet, Fixup fixup);
+  TCA  emitTransCounterInc(Asm& a);
 
-  struct PendingFixup {
-    TCA m_tca;
-    Fixup m_fixup;
-    PendingFixup() { }
-    PendingFixup(TCA tca, Fixup fixup) :
-      m_tca(tca), m_fixup(fixup) { }
-  };
-  vector<PendingFixup> m_pendingFixups;
+  void emitRB(Asm& a, Trace::RingBufferType t, SrcKey sk,
+              RegSet toSave = RegSet());
+  void emitRB(Asm& a, Trace::RingBufferType t, const char* msgm,
+              RegSet toSave = RegSet());
 
+  // Called at runtime, from prologues.
+  static void trimExtraArgs(ActRec* ar);
+  static int  shuffleArgsForMagicCall(ActRec* ar);
+  static void setArgInActRec(ActRec* ar, int argNum, uint64_t datum,
+                             DataType t);
+  static void fCallArrayHelper(const Offset pcOff, const Offset pcNext);
+
+
+  ////////////////////////////////////////
+  //
+  // Service request emission
+  //
+  ////////////////////////////////////////
+public:
+  template<typename... Arg>
+  TCA emitServiceReq(SRFlags flags, ServiceRequest sr, Arg... a) {
+    ServiceReqArgVec argv;
+    packServiceReqArgs(argv, a...);
+    return emitServiceReqWork(flags, sr, argv);
+  }
+
+  template<typename... Arg>
+  TCA emitServiceReq(ServiceRequest sr, Arg... a) {
+    return emitServiceReq(SRFlags::None, sr, a...);
+  }
+
+  bool freeRequestStub(TCA stub);
+  TCA getFreeStub();
+
+private:
+  ServiceReqArgInfo ccArgInfo(ConditionCode cc) {
+    return ServiceReqArgInfo{ServiceReqArgInfo::CondCode, { uint64_t(cc) }};
+  }
+
+  typedef smart::vector<ServiceReqArgInfo> ServiceReqArgVec;
+
+  template<typename T>
+  typename std::enable_if<
+    // Only allow for things with a sensible cast to uint64_t.
+    std::is_integral<T>::value || std::is_pointer<T>::value ||
+    std::is_enum<T>::value
+  >::type packServiceReqArg(ServiceReqArgVec& args, T arg) {
+    // By default, assume we meant to pass an immediate arg.
+    args.push_back({ ServiceReqArgInfo::Immediate, { uint64_t(arg) } });
+  }
+
+  void packServiceReqArg(ServiceReqArgVec& args,
+                         const ServiceReqArgInfo& argInfo) {
+    args.push_back(argInfo);
+  }
+
+  template<typename T, typename... Arg>
+  void packServiceReqArgs(ServiceReqArgVec& argv, T arg, Arg... args) {
+    packServiceReqArg(argv, arg);
+    packServiceReqArgs(argv, args...);
+  }
+
+  void packServiceReqArgs(ServiceReqArgVec& argv) {
+    // Recursive base case.
+  }
+
+  TCA emitServiceReqWork(SRFlags flags, ServiceRequest req,
+                         const ServiceReqArgVec& argInfo);
+
+  void emitBindJ(Asm& a, ConditionCode cc, SrcKey dest,
+                 ServiceRequest req);
+  void emitBindJmp(Asm& a, SrcKey dest,
+                   ServiceRequest req = REQ_BIND_JMP);
+  void emitBindJcc(Asm& a, ConditionCode cc, SrcKey dest,
+                   ServiceRequest req = REQ_BIND_JCC);
+  void emitBindJmp(SrcKey dest);
+  int32_t emitBindCall(SrcKey srcKey, const Func* funcd, int numArgs);
+  void emitBindCallHelper(SrcKey srcKey,
+                          const Func* funcd,
+                          int numArgs);
+  int32_t emitNativeImpl(const Func*, bool emitSavedRIPReturn);
+
+
+  ////////////////////////////////////////
+  //
+  // Service request handling
+  //
+  ////////////////////////////////////////
+private:
+  TCA bindJmp(TCA toSmash, SrcKey dest, ServiceRequest req, bool& smashed);
+  TCA bindJmpccFirst(TCA toSmash,
+                     Offset offTrue, Offset offFalse,
+                     bool toTake,
+                     ConditionCode cc,
+                     bool& smashed);
+  TCA bindJmpccSecond(TCA toSmash, const Offset off,
+                      ConditionCode cc,
+                      bool& smashed);
+  bool handleServiceRequest(TReqInfo&, TCA& start, SrcKey& sk);
+
+
+  ////////////////////////////////////////
+  //
+  // Calling into C++
+  //
+  ////////////////////////////////////////
+public:
+  void emitCall(Asm& a, TCA dest);
+  void emitCall(Asm& a, CppCall call);
+
+private:
+  TCA getNativeTrampoline(TCA helperAddress);
+  TCA emitNativeTrampoline(TCA helperAddress);
+
+  ////////////////////////////////////////
+  //
+  // Tracelet entry
+  //
+  ////////////////////////////////////////
+private:
+  void emitGuardChecks(Asm& a, SrcKey, const ChangeMap&,
+    const RefDeps&, SrcRec&);
+  void emitResolvedDeps(const ChangeMap& resolvedDeps);
+  void checkRefs(Asm&, SrcKey, const RefDeps&, SrcRec&);
+
+  void emitFallbackUncondJmp(Asm& as, SrcRec& dest);
+  void emitFallbackCondJmp(Asm& as, SrcRec& dest, ConditionCode cc);
+
+  void moveToAlign(Asm &aa, const size_t alignment = kJmpTargetAlign,
+                   const bool unreachable = true);
+
+  static void smash(Asm &a, TCA src, TCA dest, bool isCall);
+  static void smashJmp(Asm &a, TCA src, TCA dest) {
+    smash(a, src, dest, false);
+  }
+  static void smashCall(Asm &a, TCA src, TCA dest) {
+    smash(a, src, dest, true);
+  }
+
+
+  ////////////////////////////////////////
+  //
+  // Unique long-lived stubs
+  //
+  ////////////////////////////////////////
+private:
+  template<int Arity> TCA emitNAryStub(Asm& a, CppCall c);
+  TCA emitUnaryStub(Asm& a, CppCall c);
+  void emitFreeLocalsHelpers();
+  void emitGenericDecRefHelpers();
+  TCA emitRetFromInterpretedFrame();
+  TCA emitRetFromInterpretedGeneratorFrame();
+  void emitPopRetIntoActRec(Asm& a);
+
+
+private:
   void drawCFG(std::ofstream& out) const;
-  static vector<PhysReg> x64TranslRegs();
 
   Asm& getAsmFor(TCA addr) {
     assert(a.base()    != ahot.base()   &&
@@ -258,84 +427,18 @@ private:
            ahot.base() != astubs.base());
     return asmChoose(addr, a, ahot, aprof, astubs, atrampolines);
   }
-  void emitIncRef(X64Assembler &a, PhysReg base, DataType dtype);
-  void emitIncRef(PhysReg base, DataType);
-  void emitIncRefGenericRegSafe(PhysReg base, int disp, PhysReg tmp);
-  static CppCall getDtorCall(DataType type);
-  void emitCopy(PhysReg srcCell, int disp, PhysReg destCell);
 
-  void emitThisCheck(const NormalizedInstruction& i, PhysReg reg);
+  static CppCall getDtorCall(DataType type);
+
+private:
+  void invalidateSrcKey(SrcKey sk);
 
 public:
-  void emitCall(Asm& a, TCA dest);
-  void emitCall(Asm& a, CppCall call);
-  TCA getCallArrayPrologue(Func* func);
-  void smashPrologueGuards(TCA* prologues, int numPrologues, const Func* func);
-private:
-  TCA emitCallArrayPrologue(const Func* func,
-                            const DVFuncletsVec& dvs);
-  void translateClassExistsImpl(const Tracelet& t,
-                                const NormalizedInstruction& i,
-                                Attr typeAttr);
-  void recordSyncPoint(Asm& a, Offset pcOff, Offset spOff);
-  void emitEagerSyncPoint(Asm& a, const Opcode* pc, const Offset spDiff);
-  void recordIndirectFixup(CTCA addr, int dwordsPushed);
-  void emitStringToClass(const NormalizedInstruction& i);
-  void emitStringToKnownClass(const NormalizedInstruction& i,
-                              const StringData* clssName);
-  void emitObjToClass(const NormalizedInstruction& i);
-  void emitClsAndPals(const NormalizedInstruction& i);
-
-  template<int Arity> TCA emitNAryStub(Asm& a, CppCall c);
-  TCA emitUnaryStub(Asm& a, CppCall c);
-  TCA genericRefCountStub(Asm& a);
-  TCA genericRefCountStubRegs(Asm& a);
-  void emitFreeLocalsHelpers();
-  void emitGenericDecRefHelpers();
-  TCA emitPrologueRedispatch(Asm &a);
-  TCA emitFuncGuard(Asm& a, const Func *f);
-  template <bool reentrant>
-  void emitDerefStoreToLoc(PhysReg srcReg, const Location& destLoc);
-
-  void getInputsIntoXMMRegs(const NormalizedInstruction& ni,
-                            PhysReg lr, PhysReg rr,
-                            RegXMM lxmm, RegXMM rxmm);
-  void fpEq(const NormalizedInstruction& i, PhysReg lr, PhysReg rr);
-  void emitRB(Asm& a, Trace::RingBufferType t, SrcKey sk,
-              RegSet toSave = RegSet());
-  void emitRB(Asm& a, Trace::RingBufferType t, const char* msgm,
-              RegSet toSave = RegSet());
-  void newTuple(const NormalizedInstruction& i, unsigned n);
-
-  enum {
-    ArgDontAllocate = -1,
-    ArgAnyReg = -2
-  };
-
- private:
-  template<typename L>
-  void translatorAssert(X64Assembler& a, ConditionCode cc,
-                        const char* msg, L setup);
-
-  static uint64_t toStringHelper(ObjectData *obj);
-  void invalidateSrcKey(SrcKey sk);
- public:
-  template<typename T>
-  void invalidateSrcKeys(const T& keys) {
-    BlockingLeaseHolder writer(s_writeLease);
-    assert(writer);
-    for (typename T::const_iterator i = keys.begin(); i != keys.end(); ++i) {
-      invalidateSrcKey(*i);
-    }
-  }
+  FixupMap& fixupMap() { return m_fixupMap; }
 
   void registerCatchTrace(CTCA ip, TCA trace);
   TCA getCatchTrace(CTCA ip) const;
 
-  static void SEGVHandler(int signum, siginfo_t *info, void *ctx);
-
-  void fixupWork(VMExecutionContext* ec, ActRec* startRbp) const;
-  void fixup(VMExecutionContext* ec) const;
   TCA getTranslatedCaller() const;
 
   const TcaTransIDMap& getJmpToTransIDMap() const {
@@ -376,7 +479,6 @@ private:
   // professional.
 
   Asm& getAsm()   { return a; }
-  void emitChainTo(SrcKey dest, bool isCall = false);
 
   static bool isPseudoEvent(const char* event);
   void getPerfCounters(Array& ret);
@@ -385,16 +487,6 @@ private:
   virtual void syncWork();
 
 public:
-  bool acquireWriteLease(bool blocking) {
-    return s_writeLease.acquire(blocking);
-  }
-  void dropWriteLease() {
-    s_writeLease.drop();
-  }
-
-  void emitGuardChecks(Asm& a, SrcKey, const ChangeMap&,
-    const RefDeps&, SrcRec&);
-  void emitResolvedDeps(const ChangeMap& resolvedDeps);
 
   Debug::DebugInfo* getDebugInfo() { return &m_debugInfo; }
 
@@ -403,110 +495,10 @@ public:
     return m_globalData.alloc<T>(std::forward<Args>(args)...);
   }
 
-  FreeStubList m_freeStubs;
-  bool freeRequestStub(TCA stub);
-  TCA getFreeStub();
   bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
   TranslateResult translateTracelet(Tracelet& t);
 
-  void checkRefs(Asm&, SrcKey, const RefDeps&, SrcRec&);
-
-  void emitInlineReturn(Location retvalSrcLoc, int retvalSrcDisp);
-  void emitGenericReturn(bool noThis, int retvalSrcDisp);
-  void dumpStack(const char* msg, int offset) const;
-
-  void emitFallbackJmp(SrcRec& dest, ConditionCode cc = CC_NZ);
-  void emitFallbackJmp(Asm& as, SrcRec& dest, ConditionCode cc = CC_NZ);
-  void emitFallbackUncondJmp(Asm& as, SrcRec& dest);
-  void emitFallbackCondJmp(Asm& as, SrcRec& dest, ConditionCode cc);
-  void emitDebugPrint(Asm&, const char*,
-                      PhysReg = reg::r13,
-                      PhysReg = reg::r14,
-                      PhysReg = reg::rax);
-
-  ServiceReqArgInfo ccArgInfo(ConditionCode cc) {
-    return ServiceReqArgInfo{ServiceReqArgInfo::CondCode, { uint64_t(cc) }};
-  }
-
-  typedef smart::vector<ServiceReqArgInfo> ServiceReqArgVec;
-  void packServiceReqArg(ServiceReqArgVec& args) {
-    // all done.
-  }
-
-  template<typename T>
-  typename std::enable_if<
-    // Only allow for things with a sensible cast to uint64_t.
-    std::is_integral<T>::value || std::is_pointer<T>::value ||
-    std::is_enum<T>::value
-  >::type packServiceReqArg(ServiceReqArgVec& args, T arg) {
-    // By default, assume we meant to pass an immediate arg.
-    args.push_back({ ServiceReqArgInfo::Immediate, { uint64_t(arg) } });
-  }
-
-  void packServiceReqArg(ServiceReqArgVec& args,
-                         const ServiceReqArgInfo& argInfo) {
-    args.push_back(argInfo);
-  }
-
-  template<typename T, typename... Arg>
-  void packServiceReqArgs(ServiceReqArgVec& argv, T arg, Arg... args) {
-    packServiceReqArg(argv, arg);
-    packServiceReqArgs(argv, args...);
-  }
-
-  void packServiceReqArgs(ServiceReqArgVec& argv) {
-    // all done.
-  }
-
-
-  TCA emitServiceReqWork(SRFlags flags, ServiceRequest req,
-                         const ServiceReqArgVec& argInfo);
-public:
-  template<typename... Arg>
-  TCA emitServiceReq(SRFlags flags, ServiceRequest sr, Arg... a) {
-    ServiceReqArgVec argv;
-    packServiceReqArgs(argv, a...);
-    return emitServiceReqWork(flags, sr, argv);
-  }
-
-  template<typename... Arg>
-  TCA emitServiceReq(ServiceRequest sr, Arg... a) {
-    return emitServiceReq(SRFlags::None, sr, a...);
-  }
-
-  TCA emitRetFromInterpretedFrame();
-  TCA emitRetFromInterpretedGeneratorFrame();
-  void emitPopRetIntoActRec(Asm& a);
-  int32_t emitBindCall(SrcKey srcKey, const Func* funcd, int numArgs);
-
-  TCA funcPrologue(Func* func, int nArgs, ActRec* ar = nullptr);
-  bool checkCachedPrologue(const Func* func, int param, TCA& plgOut) const;
-  SrcKey emitPrologue(Func* func, int nArgs);
-  static bool eagerRecord(const Func* func);
-  int32_t emitNativeImpl(const Func*, bool emitSavedRIPReturn);
-  void emitBindJ(Asm& a, ConditionCode cc, SrcKey dest,
-                 ServiceRequest req);
-  void emitBindJmp(Asm& a, SrcKey dest,
-                   ServiceRequest req = REQ_BIND_JMP);
-  void emitBindJcc(Asm& a, ConditionCode cc, SrcKey dest,
-                   ServiceRequest req = REQ_BIND_JCC);
-  void emitBindJmp(SrcKey dest);
-  void emitBindCallHelper(SrcKey srcKey,
-                          const Func* funcd,
-                          int numArgs);
-  void emitIncCounter(TCA start, int cntOfs);
-
- private:
-  void moveToAlign(Asm &aa, const size_t alignment = kJmpTargetAlign,
-                   const bool unreachable = true);
-  static void smash(Asm &a, TCA src, TCA dest, bool isCall);
-  static void smashJmp(Asm &a, TCA src, TCA dest) {
-    smash(a, src, dest, false);
-  }
-  static void smashCall(Asm &a, TCA src, TCA dest) {
-    smash(a, src, dest, true);
-  }
-
+private:
   TCA getTranslation(const TranslArgs& args);
   TCA createTranslation(const TranslArgs& args);
   TCA retranslate(const TranslArgs& args);
@@ -515,19 +507,6 @@ public:
 
   TCA lookupTranslation(SrcKey sk) const;
   TCA retranslateOpt(TransID transId, bool align);
-  TCA retranslateAndPatchNoIR(SrcKey sk,
-                              bool   align,
-                              TCA    toSmash);
-  TCA bindJmp(TCA toSmash, SrcKey dest, ServiceRequest req, bool& smashed);
-  TCA bindJmpccFirst(TCA toSmash,
-                     Offset offTrue, Offset offFalse,
-                     bool toTake,
-                     ConditionCode cc,
-                     bool& smashed);
-  TCA bindJmpccSecond(TCA toSmash, const Offset off,
-                      ConditionCode cc,
-                      bool& smashed);
-  bool handleServiceRequest(TReqInfo&, TCA& start, SrcKey& sk);
 
   void recordGdbTranslation(SrcKey sk, const Func* f,
                             const Asm& a,
@@ -536,21 +515,6 @@ public:
   void recordGdbStub(const Asm& a, TCA start, const char* name);
   void recordBCInstr(uint32_t op, const Asm& a, const TCA addr);
 
-  void emitStackCheck(int funcDepth, Offset pc);
-  void emitStackCheckDynamic(int numArgs, Offset pc);
-  void emitTestSurpriseFlags(Asm& a);
-  void emitCheckSurpriseFlagsEnter(bool inTracelet, Fixup fixup);
-  TCA  emitTransCounterInc(Asm& a);
-
-  static void trimExtraArgs(ActRec* ar);
-  static int  shuffleArgsForMagicCall(ActRec* ar);
-  static void setArgInActRec(ActRec* ar, int argNum, uint64_t datum,
-                             DataType t);
-
-  static void fCallArrayHelper(const Offset pcOff, const Offset pcNext);
-
-  TCA getNativeTrampoline(TCA helperAddress);
-  TCA emitNativeTrampoline(TCA helperAddress);
 
 public:
   /*
@@ -620,25 +584,27 @@ private:
   virtual bool addDbgGuard(const Func* func, Offset offset);
   void addDbgGuardImpl(SrcKey sk, SrcRec& sr);
 
-public: // Only for HackIR
-  void emitReqRetransNoIR(Asm& as, const SrcKey& sk);
-  void emitReqRetransOpt(Asm& as, const SrcKey& sk, TransID transId);
-
-private:
-  // asize + astubssize + gdatasize + trampolinesblocksize
-  size_t m_totalSize;
 };
 
 const size_t kTrampolinesBlockSize = 8 << 12;
 
-// minimum length in bytes of each trampoline code sequence
-// Note that if stats is on, then this size is ~24 bytes due to the
-// instrumentation code that counts the number of calls through each
-// trampoline
-const size_t kMinPerTrampolineSize = 11;
+/*
+ * Roughly expected length in bytes of each trampoline code sequence.
+ *
+ * Note that if stats is on, then this size is ~24 bytes due to the
+ * instrumentation code that counts the number of calls through each
+ * trampoline.
+ *
+ * When a small jump fits, it is only 7 bytes.  When it's a large jump
+ * (followed by ud2) we have 11 bytes.
+ *
+ * We assume 11 bytes is the good size to expect, since stats are only
+ * used for debugging modes.
+ */
+const size_t kExpectedPerTrampolineSize = 11;
 
 const size_t kMaxNumTrampolines = kTrampolinesBlockSize /
-  kMinPerTrampolineSize;
+  kExpectedPerTrampolineSize;
 
 void fcallHelperThunk() asm ("__fcallHelperThunk");
 void funcBodyHelperThunk() asm ("__funcBodyHelperThunk");
@@ -690,28 +656,6 @@ bool isSupportedCGetM(const NormalizedInstruction& i);
 TXFlags planInstrAdd_Int(const NormalizedInstruction& i);
 TXFlags planInstrAdd_Array(const NormalizedInstruction& i);
 void dumpTranslationInfo(const Tracelet& t, TCA postGuards);
-
-// SpaceRecorder is used in translator-x64.cpp and in hopt/irtranslator.cpp
-// RAII logger for TC space consumption.
-struct SpaceRecorder {
-  const char *m_name;
-  const X64Assembler m_a;
-  // const X64Assembler& m_a;
-  size_t m_start;
-  SpaceRecorder(const char* name, const X64Assembler& a) :
-      m_name(name), m_a(a), m_start(a.used())
-    { }
-  ~SpaceRecorder() {
-    if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
-      auto diff = m_a.used() - m_start;
-      if (diff) {
-        Trace::traceRelease("TCSpace %10s %3td\n", m_name, diff);
-      }
-    }
-  }
-};
-
-typedef const int COff; // Const offsets
 
 }}
 

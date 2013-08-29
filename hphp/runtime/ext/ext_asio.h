@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_ASIO_H_
 #define incl_HPHP_EXT_ASIO_H_
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
 
 namespace HPHP {
@@ -193,6 +193,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   public: int t_getcontextidx();
   public: Object t_getcreator();
   public: Array t_getparents();
+  public: Array t_getdependencystack();
 
 
  public:
@@ -298,6 +299,9 @@ class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
   String getName();
   void enterContext(context_idx_t ctx_idx);
   void exitContext(context_idx_t ctx_idx);
+  bool isRunning() { return getState() == STATE_RUNNING; }
+  String getFileName();
+  int getLineNumber();
 
  protected:
   void onUnblocked();

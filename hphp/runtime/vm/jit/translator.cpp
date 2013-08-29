@@ -29,10 +29,10 @@
 #include "folly/Conv.h"
 
 #include "hphp/util/trace.h"
-#include "hphp/util/biased_coin.h"
-#include "hphp/util/map_walker.h"
-#include "hphp/runtime/base/file_repository.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/util/biased-coin.h"
+#include "hphp/util/map-walker.h"
+#include "hphp/runtime/base/file-repository.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/ext/ext_continuation.h"
@@ -217,16 +217,19 @@ Translator::liveType(const Cell* outer, const Location& l, bool specialize) {
   } else {
     FTRACE(2, "liveType {}: {}\n", l.pretty(), tname(outerType));
   }
-  const Class *klass = nullptr;
-  if (valueType == KindOfObject) {
-    // Only infer the class if specialization requested
-    if (specialize) {
-      klass = valCell->m_data.pobj->getVMClass();
-    }
-  }
   RuntimeType retval = RuntimeType(outerType, innerType);
-  if (klass != nullptr) {
-    retval = retval.setKnownClass(klass);
+  const Class *klass = nullptr;
+  if (specialize) {
+    // Only infer the class/array kind if specialization requested
+    if (valueType == KindOfObject) {
+      klass = valCell->m_data.pobj->getVMClass();
+      if (klass != nullptr) {
+        retval = retval.setKnownClass(klass);
+      }
+    } else if (valueType == KindOfArray) {
+      ArrayData::ArrayKind arrayKind = valCell->m_data.parr->kind();
+      retval = retval.setArrayKind(arrayKind);
+    }
   }
   return retval;
 }
@@ -259,18 +262,6 @@ RuntimeType Translator::outThisObjectType() {
 bool Translator::liveFrameIsPseudoMain() {
   ActRec* ar = (ActRec*)vmfp();
   return ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope();
-}
-
-Location
-Translator::tvToLocation(const TypedValue* tv, const TypedValue* frame) {
-  const Cell *arg0 = frame + locPhysicalOffset(Location(Location::Local, 0));
-  // Physical stack offsets grow downwards from the frame pointer. See
-  // locPhysicalOffset.
-  int offset = -(tv - arg0);
-  assert(offset >= 0);
-  assert(offset < ((ActRec*)frame)->m_func->numLocals());
-  TRACE(2, "tvToLocation: %p -> L:%d\n", tv, offset);
-  return Location(Location::Local, offset);
 }
 
 static int64_t typeToMask(DataType t) {
@@ -567,6 +558,22 @@ predictOutputs(SrcKey startSk,
     return KindOfDouble;
   }
 
+  if (ni->op() == OpAbs) {
+    if (ni->inputs[0]->valueType() == KindOfDouble) {
+      return KindOfDouble;
+    }
+
+    // some types can't be converted to integers and will return false here
+    if (ni->inputs[0]->valueType() == KindOfArray) {
+      return KindOfBoolean;
+    }
+
+    // If the type is not numeric we need to convert it to a numeric type,
+    // a string can be converted to an Int64 or a Double but most other types
+    // will end up being integral.
+    return KindOfInt64;
+  }
+
   if (ni->op() == OpClsCnsD) {
     const NamedEntityPair& cne =
       ni->unit()->lookupNamedEntityPairId(ni->imm[1].u_SA);
@@ -588,7 +595,7 @@ predictOutputs(SrcKey startSk,
      * if the base was a string, or (most commonly) its first stack input. We
      * mark the output as predicted here and do a very rough approximation of
      * what really happens; most of the time the prediction will be a noop
-     * since VectorTranslator side exits in all uncommon cases.
+     * since MInstrTranslator side exits in all uncommon cases.
      */
 
     // If the base is a string, the output is probably a string.
@@ -942,6 +949,7 @@ static const struct {
   /* Binary string */
   { OpConcat,      {StackTop2,        Stack1,       OutString,        -1 }},
   /* Arithmetic ops */
+  { OpAbs,         {Stack1,           Stack1,       OutPred,           0 }},
   { OpAdd,         {StackTop2,        Stack1,       OutArith,         -1 }},
   { OpSub,         {StackTop2,        Stack1,       OutArith,         -1 }},
   { OpMul,         {StackTop2,        Stack1,       OutArith,         -1 }},
@@ -1247,8 +1255,7 @@ static int numHiddenStackInputs(const NormalizedInstruction& ni) {
 namespace {
 int64_t countOperands(uint64_t mask) {
   const uint64_t ignore = FuncdRef | Local | Iter | AllLocals |
-    DontGuardLocal | DontGuardStack1 | DontBreakLocal | DontBreakStack1 |
-    IgnoreInnerType | DontGuardAny | This;
+    DontGuardStack1 | IgnoreInnerType | DontGuardAny | This;
   mask &= ~ignore;
 
   static const uint64_t counts[][2] = {
@@ -1770,7 +1777,6 @@ void getInputsImpl(SrcKey startSk,
     SKTRACE(1, sk, "getInputs: stack1 %d\n", currentStackOffset - 1);
     inputs.emplace_back(Location(Location::Stack, --currentStackOffset));
     if (input & DontGuardStack1) inputs.back().dontGuard = true;
-    if (input & DontBreakStack1) inputs.back().dontBreak = true;
     if (input & Stack2) {
       SKTRACE(1, sk, "getInputs: stack2 %d\n", currentStackOffset - 1);
       inputs.emplace_back(Location(Location::Stack, --currentStackOffset));
@@ -1820,8 +1826,6 @@ void getInputsImpl(SrcKey startSk,
     }
     SKTRACE(1, sk, "getInputs: local %d\n", loc);
     inputs.emplace(insertAt, Location(Location::Local, loc));
-    if (input & DontGuardLocal) inputs.back().dontGuard = true;
-    if (input & DontBreakLocal) inputs.back().dontBreak = true;
   }
 
   auto wantInlineReturn = [&] {
@@ -1843,7 +1847,7 @@ void getInputsImpl(SrcKey startSk,
       }
       numRefCounted += curType.maybeCounted();
     }
-    return numRefCounted <= Translator::kMaxInlineReturnDecRefs;
+    return numRefCounted <= RuntimeOption::EvalHHIRInliningMaxReturnDecRefs;
   };
 
   if ((input & AllLocals) && wantInlineReturn()) {
@@ -2432,13 +2436,19 @@ GuardType::GuardType(const RuntimeType& rtt) {
   assert(rtt.isValue());
   outerType = rtt.outerType();
   innerType = rtt.innerType();
-  klass = rtt.hasKnownType() ? rtt.knownClass() : nullptr;
+  if (rtt.hasKnownClass()) {
+    klass = rtt.knownClass();
+  } else if (rtt.hasArrayKind()) {
+    arrayKindValid = true;
+    arrayKind = rtt.arrayKind();
+  } else {
+    klass = nullptr;
+  }
 }
 
 GuardType::GuardType(const GuardType& other) {
   *this = other;
 }
-
 
 const DataType GuardType::getOuterType() const {
   return outerType;
@@ -2457,7 +2467,8 @@ bool GuardType::isSpecific() const {
 }
 
 bool GuardType::isSpecialized() const {
-  return outerType == KindOfObject && klass != nullptr;
+  return (outerType == KindOfObject && klass != nullptr) ||
+    (outerType == KindOfArray && arrayKindValid);
 }
 
 bool GuardType::isRelaxed() const {
@@ -2499,7 +2510,7 @@ DataTypeCategory GuardType::getCategory() const {
     case KindOfAny:           return DataTypeGeneric;
     case KindOfUncounted:     return DataTypeCountness;
     case KindOfUncountedInit: return DataTypeCountnessInit;
-    default:                  return klass != nullptr ?
+    default:                  return (klass != nullptr || arrayKindValid) ?
                                                 DataTypeSpecialized :
                                                 DataTypeSpecific;
   }
@@ -2536,8 +2547,11 @@ GuardType GuardType::dropSpecialization() const {
 }
 
 RuntimeType GuardType::getRuntimeType() const {
-  if (klass != nullptr) {
+  if (outerType == KindOfObject && klass != nullptr) {
     return RuntimeType(outerType, innerType).setKnownClass(klass);
+  }
+  if (outerType == KindOfArray && arrayKindValid) {
+    return RuntimeType(outerType, innerType).setArrayKind(arrayKind);
   }
   return RuntimeType(outerType, innerType);
 }
@@ -2559,6 +2573,13 @@ GuardType GuardType::getCountnessInit() const {
   }
 }
 
+bool GuardType::hasArrayKind() const {
+  return arrayKindValid;
+}
+
+ArrayData::ArrayKind GuardType::getArrayKind() const {
+  return arrayKind;
+}
 
 /**
  * Returns true iff loc is consumed by a Pop* instruction in the sequence
@@ -2650,18 +2671,29 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
     case OpCGetM:
     case OpIssetM:
     case OpFPassM:
-      if (instr->inputs.size() == 2 && opndIdx == 0) {
-        const Class* klass = specType.getSpecializedClass();
-        if (klass != nullptr && isOptimizableCollectionClass(klass)) {
-          return DataTypeSpecialized;
+      if (specType.getOuterType() == KindOfArray) {
+        if (instr->inputs.size() == 2 && opndIdx == 0) {
+          if (specType.hasArrayKind() &&
+              specType.getArrayKind() == ArrayData::ArrayKind::kPackedKind) {
+            return DataTypeSpecialized;
+          }
+        }
+      } else if (specType.getOuterType() == KindOfObject) {
+        if (instr->inputs.size() == 2 && opndIdx == 0) {
+          const Class* klass = specType.getSpecializedClass();
+          if (klass != nullptr && isOptimizableCollectionClass(klass)) {
+            return DataTypeSpecialized;
+          }
         }
       }
       return DataTypeSpecific;
     case OpSetM:
-      if (instr->inputs.size() == 3 && opndIdx == 1) {
-        const Class* klass = specType.getSpecializedClass();
-        if (klass != nullptr && isOptimizableCollectionClass(klass)) {
-          return DataTypeSpecialized;
+      if (specType.getOuterType() == KindOfObject) {
+        if (instr->inputs.size() == 3 && opndIdx == 1) {
+          const Class* klass = specType.getSpecializedClass();
+          if (klass != nullptr && isOptimizableCollectionClass(klass)) {
+            return DataTypeSpecialized;
+          }
         }
       }
       return DataTypeSpecific;
@@ -2877,20 +2909,15 @@ bool shouldAnalyzeCallee(const NormalizedInstruction* fcall,
     return false;
   }
 
-  constexpr int kMaxSubtraceAnalysisDepth = 2;
-  if (depth + 1 >= kMaxSubtraceAnalysisDepth) {
+  if (depth + 1 > RuntimeOption::EvalHHIRInliningMaxDepth) {
     FTRACE(1, "analyzeCallee: max inlining depth reached\n");
     return false;
   }
 
+  // TODO(2716400): support __call and friends
   if (numArgs != target->numParams()) {
     FTRACE(1, "analyzeCallee: param count mismatch {} != {}\n",
            numArgs, target->numParams());
-    return false;
-  }
-  if (target->numLocals() != target->numParams()) {
-    FTRACE(1, "analyzeCallee: not inlining functions with more locals "
-              "than params\n");
     return false;
   }
 
@@ -3442,6 +3469,7 @@ Translator::Get() {
 bool
 Translator::isSrcKeyInBL(const SrcKey& sk) {
   auto unit = sk.unit();
+  if (unit->isInterpretOnly()) return true;
   Lock l(m_dbgBlacklistLock);
   if (m_dbgBLSrcKey.find(sk) != m_dbgBLSrcKey.end()) {
     return true;
@@ -3690,7 +3718,6 @@ void Translator::traceFree() {
 Translator::TranslateResult
 Translator::translateRegion(const RegionDesc& region,
                             RegionBlacklist& toInterp) {
-  typedef JIT::RegionDesc::Block Block;
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
   assert(!region.blocks.empty());
@@ -3792,7 +3819,7 @@ Translator::translateRegion(const RegionDesc& region,
 
       InputInfos inputInfos;
       getInputs(startSk, inst, inputInfos, block->func(), [&](int i) {
-          return ht.traceBuilder()->getLocalType(i);
+          return ht.traceBuilder()->localType(i, DataTypeGeneric);
         });
 
       // Populate the NormalizedInstruction's input vector, using types from
@@ -3918,14 +3945,6 @@ uint64_t Translator::getTransCounter(TransID transId) const {
                               [transId % transCountersPerChunk];
   }
   return counter;
-}
-
-void Translator::setTransCounter(TransID transId, uint64_t value) {
-  assert(transId < m_translations.size());
-  assert(transId / transCountersPerChunk < m_transCounters.size());
-
-  m_transCounters[transId / transCountersPerChunk]
-                 [transId % transCountersPerChunk] = value;
 }
 
 namespace {
@@ -4127,13 +4146,13 @@ ActRecState::currentState() {
 }
 
 const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
-                                  bool& magicCall, bool staticLookup) {
+                                  bool& magicCall, bool staticLookup,
+                                  Class* ctx) {
   if (!cls || RuntimeOption::EvalJitEnableRenameFunction) return nullptr;
   if (cls->attrs() & AttrInterface) return nullptr;
   bool privateOnly = false;
   if (!RuntimeOption::RepoAuthoritative ||
       !(cls->preClass()->attrs() & AttrUnique)) {
-    Class* ctx = liveFunc()->cls();
     if (!ctx || !ctx->classof(cls)) {
       return nullptr;
     }
@@ -4142,9 +4161,8 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
 
   const Func* func;
   MethodLookup::LookupResult res = staticLookup ?
-    g_vmContext->lookupClsMethod(func, cls, name, 0,
-                                 g_vmContext->getFP(), false) :
-    g_vmContext->lookupObjMethod(func, cls, name, false);
+    g_vmContext->lookupClsMethod(func, cls, name, nullptr, ctx, false) :
+    g_vmContext->lookupObjMethod(func, cls, name, ctx, false);
 
   if (res == MethodLookup::LookupResult::MethodNotFound) return nullptr;
 

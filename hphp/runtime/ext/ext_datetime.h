@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_DATETIME_H_
 #define incl_HPHP_EXT_DATETIME_H_
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/timezone.h"
@@ -41,7 +41,7 @@ extern const StaticString q_DateTime$$RSS;
 extern const StaticString q_DateTime$$W3C;
 
 FORWARD_DECLARE_CLASS_BUILTIN(DateTime);
-class c_DateTime : public ExtObjectData {
+class c_DateTime : public ExtObjectDataFlags<ObjectData::HasClone> {
  public:
   DECLARE_CLASS(DateTime, DateTime, ObjectData)
 
@@ -85,7 +85,7 @@ class c_DateTime : public ExtObjectData {
  private:
   SmartResource<DateTime> m_dt;
  public:
-  virtual c_DateTime* clone();
+  static c_DateTime* Clone(ObjectData* obj);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -107,7 +107,7 @@ extern const int64_t q_DateTimeZone$$ALL_WITH_BC;
 extern const int64_t q_DateTimeZone$$PER_COUNTRY;
 
 FORWARD_DECLARE_CLASS_BUILTIN(DateTimeZone);
-class c_DateTimeZone : public ExtObjectData {
+class c_DateTimeZone : public ExtObjectDataFlags<ObjectData::HasClone> {
  public:
   DECLARE_CLASS(DateTimeZone, DateTimeZone, ObjectData)
 
@@ -141,14 +141,16 @@ class c_DateTimeZone : public ExtObjectData {
  private:
   SmartResource<TimeZone> m_tz;
  public:
-  virtual c_DateTimeZone* clone();
+  static c_DateTimeZone* Clone(ObjectData* obj);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 // class DateInterval
 
 FORWARD_DECLARE_CLASS_BUILTIN(DateInterval);
-class c_DateInterval : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet> {
+class c_DateInterval : public ExtObjectDataFlags<ObjectData::UseGet|
+                                                 ObjectData::UseSet|
+                                                 ObjectData::HasClone> {
  public:
   DECLARE_CLASS(DateInterval, DateInterval, ObjectData)
 
@@ -180,7 +182,7 @@ class c_DateInterval : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::
  private:
   SmartResource<DateInterval> m_di;
  public:
-  virtual c_DateInterval* clone();
+  static c_DateInterval* Clone(ObjectData* obj);
 
 };
 

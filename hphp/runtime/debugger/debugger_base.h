@@ -18,7 +18,7 @@
 #define incl_HPHP_EVAL_DEBUGGER_BASE_H_
 
 #include "hphp/runtime/debugger/break_point.h"
-#include "hphp/runtime/base/string_buffer.h"
+#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/util/hdf.h"
 
@@ -33,11 +33,10 @@ struct DebuggerClientOptions {
   StringVec cmds;
   std::string sandbox;
   std::string user;
-  bool apiMode;
   std::string configFName;
   std::string fileName;
 
-  DebuggerClientOptions() : port(-1), apiMode(false) {}
+  DebuggerClientOptions() : port(-1) {}
 };
 
 ///////////////////////////////////////////////////////////////////////////////

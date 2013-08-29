@@ -15,17 +15,17 @@
 */
 
 #include "hphp/test/ext/test_cpp_base.h"
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/util/logger.h"
-#include "hphp/runtime/base/memory_manager.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/ext_mysql.h"
 #include "hphp/runtime/ext/ext_curl.h"
-#include "hphp/runtime/base/shared_store_base.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/server/ip_block_map.h"
+#include "hphp/runtime/base/shared-store-base.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/server/ip-block-map.h"
 #include "hphp/test/ext/test_mysql_info.h"
 #include "hphp/system/systemlib.h"
 
@@ -266,12 +266,14 @@ bool TestCppBase::TestArray() {
   {
     Variant arr = CREATE_MAP2("n1", "v1", "n2", "v2");
     arr.escalate();
-    for (ArrayIterPtr iter = arr.begin(arr, true); !iter->end(); iter->next()){
-      unset(arr.lvalAt(iter->first()));
+    for (ArrayIter iter = arr.begin(arr, true); !iter->end(); iter->next()){
+      arr.lvalAt(iter->first()).reset();
     }
     VS(arr, Array::Create());
   }
   */
+
+  static const StaticString s_Array("Array");
 
   // conversions
   {
@@ -282,7 +284,7 @@ bool TestCppBase::TestArray() {
     VERIFY(arr0.toInt32() == 0);
     VERIFY(arr0.toInt64() == 0);
     VERIFY(arr0.toDouble() == 0.0);
-    VERIFY(arr0.toString() == "");
+    VERIFY(arr0.toString()->empty());
 
     Array arr1 = Array::Create("test");
     VERIFY(arr1.toBoolean() == true);
@@ -291,7 +293,7 @@ bool TestCppBase::TestArray() {
     VERIFY(arr1.toInt32() == 1);
     VERIFY(arr1.toInt64() == 1);
     VERIFY(arr1.toDouble() == 1.0);
-    VERIFY(arr1.toString() == "Array");
+    VERIFY(arr1.toString() == s_Array);
   }
 
   // offset

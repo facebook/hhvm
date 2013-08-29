@@ -50,6 +50,7 @@ class TestParserExpr : public TestParser {
   bool TestConstant();
   bool TestEncapsListExpression();
   bool TestClosure();
+  bool TestAwaitExpression();
 
   bool TestXHP();
 };

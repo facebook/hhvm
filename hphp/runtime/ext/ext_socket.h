@@ -18,7 +18,8 @@
 #ifndef incl_HPHP_EXT_SOCKET_H_
 #define incl_HPHP_EXT_SOCKET_H_
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
+#include "hphp/util/network.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,8 +41,12 @@ bool f_socket_bind(CResRef socket, CStrRef address, int port = 0);
 bool f_socket_listen(CResRef socket, int backlog = 0);
 Variant f_socket_select(VRefParam read, VRefParam write, VRefParam except,
                         CVarRef vtv_sec, int tv_usec = 0);
-Variant f_socket_server(CStrRef hostname, int port = -1, VRefParam errnum = uninit_null(),
+Variant f_socket_server(CStrRef hostname, int port = -1,
+                        VRefParam errnum = uninit_null(),
                         VRefParam errstr = uninit_null());
+Variant socket_server_impl(const Util::HostURL &hosturl,
+                           VRefParam errnum = uninit_null(),
+                           VRefParam errstr = uninit_null());
 Variant f_socket_accept(CResRef socket);
 Variant f_socket_read(CResRef socket, int length, int type = 0);
 Variant f_socket_write(CResRef socket, CStrRef buffer, int length = 0);

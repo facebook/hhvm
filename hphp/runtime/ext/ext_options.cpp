@@ -22,13 +22,13 @@
 #include "hphp/runtime/ext/ext_error.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/ini_setting.h"
-#include "hphp/runtime/base/memory_manager.h"
-#include "hphp/runtime/base/request_local.h"
-#include "hphp/runtime/base/runtime_error.h"
-#include "hphp/runtime/base/zend_functions.h"
-#include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/process.h"
 #include <sys/utsname.h>
@@ -152,10 +152,10 @@ Variant f_assert(CVarRef assertion) {
   if (!s_option_data->assertCallback.isNull()) {
     auto const unit = fp->m_func->unit();
 
-    ArrayInit ai(3, ArrayInit::vectorInit);
-    ai.set(String(unit->filepath()));
-    ai.set(Variant(unit->getLineNumber(callerOffset)));
-    ai.set(assertion.isString() ? assertion.toString() : String(""));
+    PackedArrayInit ai(3);
+    ai.add(String(unit->filepath()));
+    ai.add(Variant(unit->getLineNumber(callerOffset)));
+    ai.add(assertion.isString() ? assertion.toString() : String(""));
     f_call_user_func(1, s_option_data->assertCallback, ai.toArray());
   }
 
@@ -209,12 +209,23 @@ String f_get_current_user() {
   return ret;
 }
 
-Array f_get_defined_constants(CVarRef categorize /* = null_variant */) {
-  if (categorize.toBoolean()) {
-    throw NotSupportedException(__func__, "constant categorization not "
-                                "supported");
+StaticString s_user("user");
+StaticString s_core("Core");
+Array f_get_defined_constants(bool categorize /* = false */) {
+  if (categorize) {
+    Array categorized_consts;
+    // Get all defined constants - user and system
+    Array all_consts = StringData::GetConstants();
+    // Get all system constants, including dynamic ones
+    Array sys_consts = ClassInfo::GetSystemConstants(true);
+    Array user_consts = all_consts.diff(sys_consts, true, false);
+    categorized_consts.set(s_user, user_consts);
+    categorized_consts.set(s_core, sys_consts);
+    return categorized_consts;
   }
-  return StringData::GetConstants();
+  else {
+    return StringData::GetConstants();
+  }
 }
 
 String f_get_include_path() {
@@ -231,8 +242,14 @@ String f_set_include_path(CStrRef new_include_path) {
 }
 
 Array f_get_included_files() {
-  return Array::Create();
+  Array included_files = Array::Create();
+  int idx = 0;
+  for (auto& ent : g_vmContext->m_evaledFiles) {
+    included_files.set(idx++, ent.first);
+  }
+  return included_files;
 }
+
 
 Array f_inclued_get_data() {
   return Array::Create();
@@ -792,19 +809,25 @@ String f_php_sapi_name() {
   return RuntimeOption::ExecutionMode;
 }
 
+const StaticString s_s("s");
+const StaticString s_r("r");
+const StaticString s_n("n");
+const StaticString s_v("v");
+const StaticString s_m("m");
+
 String f_php_uname(CStrRef mode /* = null_string */) {
   String ret;
   struct utsname buf;
   if (uname((struct utsname *)&buf) != -1) {
-    if (mode == "s") {
+    if (mode == s_s) {
       ret = String(buf.sysname, CopyString);
-    } else if (mode == "r") {
+    } else if (mode == s_r) {
       ret = String(buf.release, CopyString);
-    } else if (mode == "n") {
+    } else if (mode == s_n) {
       ret = String(buf.nodename, CopyString);
-    } else if (mode == "v") {
+    } else if (mode == s_v) {
       ret = String(buf.version, CopyString);
-    } else if (mode == "m") {
+    } else if (mode == s_m) {
       ret = String(buf.machine, CopyString);
     } else { /* assume mode == "a" */
       char tmp_uname[512];

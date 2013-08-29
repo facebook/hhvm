@@ -22,7 +22,7 @@
 #include <stdarg.h>
 
 #include "folly/Format.h"
-#include "hphp/util/text_color.h"
+#include "hphp/util/text-color.h"
 
 /*
  * Runtime-selectable trace facility. A trace statement has both a module and a
@@ -98,6 +98,7 @@ namespace Trace {
       TM(minstr)      \
       TM(region)      \
       TM(atomicvector)\
+      TM(datablock)   \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)    \
       TM(stress_txInterpSeed)   \

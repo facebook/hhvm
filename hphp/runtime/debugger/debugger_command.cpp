@@ -29,7 +29,7 @@ TRACE_SET_MOD(debugger);
 // flushes the buffer.
 // Returns false if an exception occurs during these steps.
 bool DebuggerCommand::send(DebuggerThriftBuffer &thrift) {
-  TRACE(5, "DebuggerCommand::send\n");
+  TRACE(5, "DebuggerCommand::send cmd of type %d\n", m_type);
   try {
     thrift.reset(false);
     sendImpl(thrift);
@@ -133,7 +133,8 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     case KindOfUp       :  cmd = DebuggerCommandPtr(new CmdUp       ()); break;
     case KindOfVariable :  cmd = DebuggerCommandPtr(new CmdVariable ()); break;
     case KindOfWhere    :  cmd = DebuggerCommandPtr(new CmdWhere    ()); break;
-    case KindOfUser     :  cmd = DebuggerCommandPtr(new CmdUser     ()); break;
+    case KindOfWhereAsync:
+      cmd = DebuggerCommandPtr(new CmdWhere(KindOfWhereAsync)); break;
     case KindOfEval     :  cmd = DebuggerCommandPtr(new CmdEval     ()); break;
     case KindOfInterrupt:  cmd = DebuggerCommandPtr(new CmdInterrupt()); break;
     case KindOfSignal   :  cmd = DebuggerCommandPtr(new CmdSignal   ()); break;
@@ -190,27 +191,6 @@ bool DebuggerCommand::displayedHelp(DebuggerClient &client) {
     return true;
   }
   return false;
-}
-
-// Carries out the command, possibly by sending it to the server.
-// If the client is controlled via the API, the setClientOuput method
-// is invoked to update the client with the command output for access
-// via the API.
-void DebuggerCommand::onClient(DebuggerClient &client) {
-  TRACE(2, "DebuggerCommand::onClient\n");
-  onClientImpl(client);
-  if (client.isApiMode() && !m_incomplete) {
-    setClientOutput(client);
-  }
-}
-
-// Updates the client with information about the execution of this command.
-// This information is not used by the command line client, but can
-// be accessed via the debugger client API exposed to PHP programs.
-void DebuggerCommand::setClientOutput(DebuggerClient &client) {
-  TRACE(2, "DebuggerCommand::setClientOutput\n");
-  // Just default to text
-  client.setOutputType(DebuggerClient::OTText);
 }
 
 // Server-side work for a command. Returning false indicates a failure to

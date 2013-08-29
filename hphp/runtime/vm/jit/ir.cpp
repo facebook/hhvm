@@ -27,7 +27,7 @@
 #include "folly/Traits.h"
 
 #include "hphp/util/trace.h"
-#include "hphp/runtime/base/string_data.h"
+#include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/cse.h"
@@ -39,7 +39,7 @@
 #include "hphp/runtime/vm/jit/trace.h"
 
 // Include last to localize effects to this file
-#include "hphp/util/assert_throw.h"
+#include "hphp/util/assert-throw.h"
 
 namespace HPHP {  namespace JIT {
 
@@ -57,6 +57,17 @@ std::string Type::toString() const {
 
   if (strictSubtypeOf(Type::Obj)) {
     return folly::format("Obj<{}>", m_class->name()->data()).str();
+  }
+
+  if (canSpecializeArrayKind() && hasArrayKind()) {
+    std::string typeName = [&] {
+#     define IRT(name, ...) if (subtypeOf(name)) return #name;
+      IR_TYPES
+#     undef IRT
+      not_reached();
+    }();
+    return folly::format("{}<{}>", typeName,
+                         ArrayData::kindToString(m_arrayKind)).str();
   }
 
   // Concat all of the primitive types in the custom union type
@@ -100,8 +111,8 @@ namespace {
 #define P      Passthrough
 #define K      KillsSources
 #define StkFlags(f) HasStackVersion|(f)
-#define VProp  VectorProp
-#define VElem  VectorElem
+#define MProp  MInstrProp
+#define MElem  MInstrElem
 
 #define ND        0
 #define D(n)      HasDest
@@ -143,8 +154,8 @@ struct {
 #undef P
 #undef K
 #undef StkFlags
-#undef VProp
-#undef VElem
+#undef MProp
+#undef MElem
 
 #undef ND
 #undef D
@@ -160,138 +171,7 @@ struct {
 #undef DBuiltin
 #undef DSubtract
 
-//////////////////////////////////////////////////////////////////////
-
-/*
- * dispatchExtra translates from runtime values for the Opcode enum
- * into compile time types.  The goal is to call a `targetFunction'
- * that is overloaded on the extra data type structs.
- *
- * The purpose of the MAKE_DISPATCHER layer is to weed out Opcode
- * values that have no associated extra data.
- *
- * Basically this is doing dynamic dispatch without a vtable in
- * IRExtraData, instead using the Opcode tag from the associated
- * instruction to discriminate the runtime type.
- *
- * Note: functions made with this currently only make sense to call if
- * it's already known that the opcode has extra data.  If you call it
- * for one that doesn't, you'll get an abort.  Generally hasExtra()
- * should be checked first.
- */
-
-#define MAKE_DISPATCHER(name, rettype, targetFunction)                \
-  template<bool HasExtra, Opcode opc> struct name {                   \
-    template<class... Args>                                           \
-    static rettype go(IRExtraData* vp, Args&&...) { not_reached(); }  \
-  };                                                                  \
-  template<Opcode opc> struct name<true,opc> {                        \
-    template<class... Args>                                           \
-    static rettype go(IRExtraData* vp, Args&&... args) {              \
-      return targetFunction(                                          \
-        static_cast<typename IRExtraDataType<opc>::type*>(vp),        \
-        std::forward<Args>(args)...                                   \
-      );                                                              \
-    }                                                                 \
-  };
-
-template<
-  class RetType,
-  template<bool, Opcode> class Dispatcher,
-  class... Args
->
-RetType dispatchExtra(Opcode opc, IRExtraData* data, Args&&... args) {
-#define O(opcode, dstinfo, srcinfo, flags)      \
-  case opcode:                                  \
-    return Dispatcher<                          \
-      OpHasExtraData<opcode>::value,            \
-      opcode                                    \
-    >::go(data, std::forward<Args>(args)...);
-  switch (opc) { IR_OPCODES default: not_reached(); }
-#undef O
-  not_reached();
-}
-
-FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_cseHash,   cseHash);
-FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_cseEquals, cseEquals);
-FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_clone,     clone);
-FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_show,      show);
-
-template<class T>
-typename std::enable_if<
-  has_cseHash<T,size_t () const>::value,
-  size_t
->::type cseHashExtraImpl(T* t) { return t->cseHash(); }
-size_t cseHashExtraImpl(IRExtraData*) {
-  // This probably means an instruction was marked CanCSE but its
-  // extra data had no hash function.
-  always_assert(!"attempted to hash extra data that didn't "
-    "provide a hash function");
-}
-
-template<class T>
-typename std::enable_if<
-  has_cseEquals<T,bool (T const&) const>::value ||
-  has_cseEquals<T,bool (T)        const>::value,
-  bool
->::type cseEqualsExtraImpl(T* t, IRExtraData* o) {
-  return t->cseEquals(*static_cast<T*>(o));
-}
-bool cseEqualsExtraImpl(IRExtraData*, IRExtraData*) {
-  // This probably means an instruction was marked CanCSE but its
-  // extra data had no equals function.
-  always_assert(!"attempted to compare extra data that didn't "
-                 "provide an equals function");
-}
-
-// Clone using a data-specific clone function.
-template<class T>
-typename std::enable_if<
-  has_clone<T,T* (Arena&) const>::value,
-  T*
->::type cloneExtraImpl(T* t, Arena& arena) {
-  return t->clone(arena);
-}
-
-// Use the copy constructor if no clone() function was supplied.
-template<class T>
-typename std::enable_if<
-  !has_clone<T,T* (Arena&) const>::value,
-  T*
->::type cloneExtraImpl(T* t, Arena& arena) {
-  return new (arena) T(*t);
-}
-
-template<class T>
-typename std::enable_if<
-  has_show<T,std::string () const>::value,
-  std::string
->::type showExtraImpl(T* t) { return t->show(); }
-std::string showExtraImpl(const IRExtraData*) { return "..."; }
-
-MAKE_DISPATCHER(HashDispatcher, size_t, cseHashExtraImpl);
-size_t cseHashExtra(Opcode opc, IRExtraData* data) {
-  return dispatchExtra<size_t,HashDispatcher>(opc, data);
-}
-
-MAKE_DISPATCHER(EqualsDispatcher, bool, cseEqualsExtraImpl);
-bool cseEqualsExtra(Opcode opc, IRExtraData* data, IRExtraData* other) {
-  return dispatchExtra<bool,EqualsDispatcher>(opc, data, other);
-}
-
-MAKE_DISPATCHER(CloneDispatcher, IRExtraData*, cloneExtraImpl);
-IRExtraData* cloneExtra(Opcode opc, IRExtraData* data, Arena& a) {
-  return dispatchExtra<IRExtraData*,CloneDispatcher>(opc, data, a);
-}
-
-MAKE_DISPATCHER(ShowDispatcher, std::string, showExtraImpl);
-
 } // namespace
-
-std::string showExtra(Opcode opc, const IRExtraData* data) {
-  return dispatchExtra<std::string,ShowDispatcher>(opc,
-      const_cast<IRExtraData*>(data));
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -333,6 +213,10 @@ bool opcodeHasFlags(Opcode opcode, uint64_t flags) {
   return OpInfo[uint16_t(opcode)].flags & flags;
 }
 
+bool opHasExtraData(Opcode op) {
+  return opcodeHasFlags(op, HasExtra);
+}
+
 Opcode getStackModifyingOpcode(Opcode opc) {
   assert(opcodeHasFlags(opc, HasStackVersion));
   opc = Opcode(uint64_t(opc) + 1);
@@ -345,7 +229,7 @@ IRTrace* IRInstruction::trace() const {
 }
 
 bool IRInstruction::hasExtra() const {
-  return opcodeHasFlags(op(), HasExtra) && m_extra;
+  return m_extra;
 }
 
 // Instructions with ModifiesStack are always naryDst regardless of
@@ -532,7 +416,7 @@ bool IRInstruction::storesCell(uint32_t srcIdx) const {
 
 SSATmp* IRInstruction::getPassthroughValue() const {
   assert(isPassthrough());
-  assert(m_op == IncRef ||
+  assert(m_op == IncRef || m_op == PassFP || m_op == PassSP ||
          m_op == CheckType || m_op == AssertType ||
          m_op == Mov);
   return src(0);
@@ -575,7 +459,7 @@ bool IRInstruction::modifiesStack() const {
 
 SSATmp* IRInstruction::modifiedStkPtr() const {
   assert(modifiesStack());
-  assert(VectorEffects::supported(this));
+  assert(MInstrEffects::supported(this));
   SSATmp* sp = dst(hasMainDst() ? 1 : 0);
   assert(sp->isA(Type::StkPtr));
   return sp;
@@ -627,6 +511,20 @@ const StringData* findClassName(SSATmp* cls) {
     }
   }
   return nullptr;
+}
+
+bool isGuardOp(Opcode opc) {
+  switch (opc) {
+    case GuardLoc:
+    case CheckLoc:
+    case GuardStk:
+    case CheckStk:
+    case CheckType:
+      return true;
+
+    default:
+      return false;
+  }
 }
 
 bool isQueryOp(Opcode opc) {
@@ -1042,6 +940,12 @@ TCA SSATmp::getValTCA() const {
   assert(isConst());
   assert(m_inst->typeParam().equals(Type::TCA));
   return m_inst->extra<ConstData>()->as<TCA>();
+}
+
+uintptr_t SSATmp::getValCctx() const {
+  assert(isConst());
+  assert(m_inst->typeParam().equals(Type::Cctx));
+  return m_inst->extra<ConstData>()->as<uintptr_t>();
 }
 
 std::string SSATmp::toString() const {

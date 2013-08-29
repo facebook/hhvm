@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/ext_curl.h"
 #include "hphp/runtime/ext/ext_output.h"
 #include "hphp/runtime/ext/ext_zlib.h"
-#include "hphp/runtime/server/libevent_server.h"
+#include "hphp/runtime/server/libevent-server.h"
 
 #include <boost/make_shared.hpp>
 
@@ -122,6 +122,8 @@ bool TestExtCurl::test_curl_init() {
   return Count(true);
 }
 
+const StaticString s_OK("OK");
+
 bool TestExtCurl::test_curl_copy_handle() {
   Variant c = f_curl_init();
   f_curl_setopt(c.toResource(), k_CURLOPT_URL, String(get_request_uri()));
@@ -129,7 +131,7 @@ bool TestExtCurl::test_curl_copy_handle() {
   Variant cpy = f_curl_copy_handle(c.toResource());
   f_curl_close(c.toResource()); // to test cpy is still working fine
   Variant res = f_curl_exec(cpy.toResource());
-  if (res.toString() != "OK") {
+  if (res.toString() != s_OK) {
     // XXX: t1782098
     return CountSkip();
   }

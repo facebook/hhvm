@@ -27,12 +27,12 @@
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/constant_table.h"
-#include "hphp/util/parser/hphp.tab.hpp"
-#include "hphp/runtime/base/class_info.h"
-#include "hphp/runtime/base/program_functions.h"
-#include "hphp/runtime/base/array_iterator.h"
-#include "hphp/runtime/base/execution_context.h"
-#include "hphp/runtime/base/thread_init_fini.h"
+#include "hphp/parser/hphp.tab.hpp"
+#include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/util.h"
 #include <dlfcn.h>
@@ -116,6 +116,13 @@ static TypePtr typePtrFromDataType(DataType dt, TypePtr unknown) {
   }
 }
 
+const StaticString
+  s_fb_call_user_func_safe("fb_call_user_func_safe"),
+  s_fb_call_user_func_safe_return("fb_call_user_func_safe_return"),
+  s_fb_call_user_func_array_safe("fb_call_user_func_array_safe"),
+  s_is_callable("is_callable"),
+  s_call_user_func_array("call_user_func_array");
+
 FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
                  ClassInfo *cls, ClassInfo::MethodInfo *method) {
   int attrs = method->attribute;
@@ -156,19 +163,17 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
   }
 
   f->setClassInfoAttribute(attrs);
-  if (attrs & ClassInfo::HasDocComment) {
-    f->setDocComment(method->docComment);
-  }
+  f->setDocComment(method->docComment);
 
   if (!isMethod && (attrs & ClassInfo::HasOptFunction)) {
     // Legacy optimization functions
-    if (method->name.same("fb_call_user_func_safe") ||
-        method->name.same("fb_call_user_func_safe_return") ||
-        method->name.same("fb_call_user_func_array_safe")) {
+    if (method->name.same(s_fb_call_user_func_safe) ||
+        method->name.same(s_fb_call_user_func_safe_return) ||
+        method->name.same(s_fb_call_user_func_array_safe)) {
       f->setOptFunction(hphp_opt_fb_call_user_func);
-    } else if (method->name.same("is_callable")) {
+    } else if (method->name.same(s_is_callable)) {
       f->setOptFunction(hphp_opt_is_callable);
-    } else if (method->name.same("call_user_func_array")) {
+    } else if (method->name.same(s_call_user_func_array)) {
       f->setOptFunction(hphp_opt_call_user_func);
     }
   }
@@ -264,7 +269,7 @@ void BuiltinSymbols::ImportExtConstants(AnalysisResultPtr ar,
   for (auto it = src.begin(); it != src.end(); ++it) {
     // We make an assumption that if the constant is a callback type
     // (e.g. STDIN, STDOUT, STDERR) then it will return an Object.
-    // And that if it's deferred (SID, PHP_SAPI) it'll be a String.
+    // And that if it's deferred (SID, PHP_SAPI, etc.) it'll be a String.
     ClassInfo::ConstantInfo *cinfo = *it;
     dest->add(cinfo->name.data(),
               cinfo->isDeferred() ?
@@ -299,9 +304,7 @@ ClassScopePtr BuiltinSymbols::ImportClassScopePtr(AnalysisResultPtr ar,
   ImportExtConstants(ar, cl->getConstants(), cls);
   int attrs = cls->getAttribute();
   cl->setClassInfoAttribute(attrs);
-  if (attrs & ClassInfo::HasDocComment) {
-    cl->setDocComment(cls->getDocComment());
-  }
+  cl->setDocComment(cls->getDocComment());
   cl->setSystem();
   return cl;
 }
@@ -358,8 +361,11 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
                      ConstructPtr(), ModifierExpressionPtr());
   }
 
-  s_constants->setDynamic(ar, "SID", true);
+  s_constants->setDynamic(ar, "PHP_BINARY", true);
+  s_constants->setDynamic(ar, "PHP_BINDIR", true);
+  s_constants->setDynamic(ar, "PHP_OS", true);
   s_constants->setDynamic(ar, "PHP_SAPI", true);
+  s_constants->setDynamic(ar, "SID", true);
 
   // parse all PHP files under system/php
   s_systemAr = ar = AnalysisResultPtr(new AnalysisResult());

@@ -16,7 +16,6 @@
 
 #include "hphp/test/ext/test_ext_mysql.h"
 #include "hphp/runtime/ext/ext_mysql.h"
-#include "hphp/runtime/base/runtime_option.h"
 #include "hphp/test/ext/test_mysql_info.h"
 #include "errmsg.h"
 
@@ -27,7 +26,7 @@ bool TestExtMysql::RunTests(const std::string &which) {
   return true;
 
   bool ret = true;
-  RuntimeOption::MySQLReadOnly = false;
+  mysqlExtension::ReadOnly = false;
 
   DECLARE_TEST_FUNCTIONS("");
 

@@ -24,6 +24,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/trace-builder.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -41,25 +42,29 @@ using Transl::RuntimeType;
 //////////////////////////////////////////////////////////////////////
 
 struct EvalStack {
+  explicit EvalStack(TraceBuilder& tb)
+    : m_tb(tb)
+  {}
+
   void push(SSATmp* tmp) {
     m_vector.push_back(tmp);
   }
 
-  SSATmp* pop() {
+  SSATmp* pop(DataTypeCategory cat) {
     if (m_vector.size() == 0) {
       return nullptr;
     }
     SSATmp* tmp = m_vector.back();
     m_vector.pop_back();
-    return tmp;
+    return m_tb.constrainValue(tmp, cat);
   }
 
-  SSATmp* top(uint32_t offset=0) const {
+  SSATmp* top(DataTypeCategory cat, uint32_t offset = 0) const {
     if (offset >= m_vector.size()) {
       return nullptr;
     }
     uint32_t index = m_vector.size() - 1 - offset;
-    return m_vector[index];
+    return m_tb.constrainValue(m_vector[index], cat);
   }
 
   void replace(uint32_t offset, SSATmp* tmp) {
@@ -81,6 +86,7 @@ struct EvalStack {
 
 private:
   std::vector<SSATmp*> m_vector;
+  TraceBuilder& m_tb;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -181,9 +187,10 @@ struct HhbcTranslator {
   void emitColAddElemC();
   void emitColAddNewElemC();
   void emitDefCns(uint32_t id);
+  void emitCnsCommon(uint32_t id, uint32_t fallbackId, bool error);
   void emitCns(uint32_t id);
   void emitCnsE(uint32_t id);
-  void emitCnsU(uint32_t id);
+  void emitCnsU(uint32_t id, uint32_t fallbackId);
   void emitConcat();
   void emitDefCls(int id, Offset after);
   void emitDefFunc(int id);
@@ -337,6 +344,7 @@ struct HhbcTranslator {
   void emitBitOr();
   void emitBitXor();
   void emitBitNot();
+  void emitAbs();
   void emitMul();
   void emitMod();
   void emitDiv();
@@ -436,12 +444,12 @@ struct HhbcTranslator {
 
 private:
   /*
-   * VectorTranslator is responsible for translating one of the vector
+   * MInstrTranslator is responsible for translating one of the vector
    * instructions (CGetM, SetM, IssetM, etc..) into hhir.
    */
-  class VectorTranslator {
+  class MInstrTranslator {
    public:
-    VectorTranslator(const NormalizedInstruction& ni,
+    MInstrTranslator(const NormalizedInstruction& ni,
                      HhbcTranslator& ht);
     void emit();
 
@@ -467,6 +475,7 @@ private:
     void emitPropGeneric();
     void emitPropSpecialized(const MInstrAttr mia, Transl::PropInfo propInfo);
     void emitElem();
+    void emitElemArray(SSATmp* key, bool warn);
     void emitNewElem();
     void emitRatchetRefs();
 
@@ -531,7 +540,7 @@ private:
     void numberStackInputs();
     void setNoMIState() { m_needMIS = false; }
     SSATmp* genMisPtr();
-    SSATmp* getInput(unsigned i);
+    SSATmp* getInput(unsigned i, DataTypeCategory cat = DataTypeSpecific);
     SSATmp* getBase();
     SSATmp* getKey();
     SSATmp* getValue();
@@ -570,7 +579,8 @@ private:
       // simple opcode on Map* (c_Pair*)
       Pair
     };
-    SimpleOp isSimpleCollectionOp();
+    SimpleOp simpleCollectionOp();
+    void constrainSimpleOpBase();
 
     bool generateMVal() const;
     bool needFirstRatchet() const;
@@ -816,24 +826,31 @@ private:
    */
   SSATmp* push(SSATmp* tmp);
   SSATmp* pushIncRef(SSATmp* tmp) { return push(gen(IncRef, tmp)); }
-  SSATmp* pop(Type type);
-  void    popDecRef(Type type);
+  SSATmp* pop(Type type, DataTypeCategory cat = DataTypeSpecific);
+  void    popDecRef(Type type, DataTypeCategory cat = DataTypeCountness);
   void    discard(unsigned n);
-  SSATmp* popC() { return pop(Type::Cell);      }
+  SSATmp* popC(DataTypeCategory cat = DataTypeSpecific) {
+    return pop(Type::Cell, cat);
+  }
   SSATmp* popV() { return pop(Type::BoxedCell); }
   SSATmp* popR() { return pop(Type::Gen);       }
   SSATmp* popA() { return pop(Type::Cls);       }
-  SSATmp* popF() { return pop(Type::Gen);       }
-  SSATmp* topC(uint32_t i = 0) { return top(Type::Cell, i); }
+  SSATmp* popF(DataTypeCategory cat = DataTypeSpecific) {
+    return pop(Type::Gen, cat);
+  }
+  SSATmp* top(Type type, uint32_t index = 0,
+              DataTypeCategory c = DataTypeSpecific);
+  SSATmp* topC(uint32_t i = 0, DataTypeCategory cat = DataTypeSpecific) {
+    return top(Type::Cell, i, cat);
+  }
   SSATmp* topV(uint32_t i = 0) { return top(Type::BoxedCell, i); }
-  Type    topType(uint32_t i) const;
+  Type    topType(uint32_t i, DataTypeCategory c = DataTypeSpecific) const;
   std::vector<SSATmp*> peekSpillValues() const;
   SSATmp* emitSpillStack(SSATmp* sp,
                          const std::vector<SSATmp*>& spillVals);
   SSATmp* spillStack();
   void    exceptionBarrier();
-  SSATmp* ldStackAddr(int32_t offset);
-  SSATmp* top(Type type, uint32_t index = 0);
+  SSATmp* ldStackAddr(int32_t offset, DataTypeCategory cat);
   void    extendStack(uint32_t index, Type type);
   void    replace(uint32_t index, SSATmp* tmp);
   void    refineType(SSATmp* tmp, Type type);
@@ -841,11 +858,15 @@ private:
   /*
    * Local instruction helpers.
    */
-  SSATmp* ldLoc(uint32_t id);
-  SSATmp* ldLocAddr(uint32_t id);
-  SSATmp* ldLocInner(uint32_t id, IRTrace* exitTrace);
+  SSATmp* ldLoc(uint32_t id, DataTypeCategory constraint);
+  SSATmp* ldLocAddr(uint32_t id, DataTypeCategory constraint);
+private:
+  SSATmp* ldLocInner(uint32_t id, IRTrace* exitTrace,
+                     DataTypeCategory constraint);
   SSATmp* ldLocInnerWarn(uint32_t id, IRTrace* target,
+                         DataTypeCategory constraint,
                          IRTrace* catchTrace = nullptr);
+public:
   SSATmp* stLoc(uint32_t id, IRTrace* exitTrace, SSATmp* newVal);
   SSATmp* stLocNRC(uint32_t id, IRTrace* exitTrace, SSATmp* newVal);
   SSATmp* stLocImpl(uint32_t id, IRTrace*, SSATmp* newVal, bool doRefCount);
@@ -904,6 +925,18 @@ private:
    * that can be used after the inlined callee "returns".
    */
   std::stack<std::pair<SSATmp*,int32_t>> m_fpiStack;
+
+  /*
+   * When we know that a call site is being inlined we add its StkPtr
+   * offset pair to this stack to prevent it from being erroneously
+   * popped during an FCall.
+   *
+   * XXX: There should be a better way to do this.  We don't allow
+   * the tracelet to break during inlining so if we're careful it
+   * should be possible to make sure FPush* and FCall[Array|Builtin]
+   * is always matched with corresponding push()/pop().
+   */
+  std::stack<std::pair<SSATmp*,int32_t>> m_fpiActiveStack;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -18,10 +18,10 @@
 #ifndef incl_HPHP_EXT_STRING_H_
 #define incl_HPHP_EXT_STRING_H_
 
-#include "hphp/util/zend/zend_html.h"
-#include "hphp/runtime/base/base_includes.h"
-#include "hphp/runtime/base/zend_string.h"
-#include "hphp/runtime/base/zend_printf.h"
+#include "hphp/zend/zend-html.h"
+#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/bstring.h"
 #include <langinfo.h>
 #include "hphp/runtime/ext/ext_class.h"
@@ -129,8 +129,8 @@ Variant f_sscanf(int _argc, CStrRef str, CStrRef format, CArrRef _argv = null_ar
 String f_chr(int64_t ascii);
 int64_t f_ord(CStrRef str);
 Variant f_money_format(CStrRef format, double number);
-String f_number_format(double number, int decimals = 0, CStrRef dec_point = ".",
-                       CStrRef thousands_sep = ",");
+String f_number_format(double number, int decimals = 0, CVarRef dec_point = ".",
+                       CVarRef thousands_sep = ",");
 
 ///////////////////////////////////////////////////////////////////////////////
 // analysis

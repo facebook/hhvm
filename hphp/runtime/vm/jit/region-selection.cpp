@@ -22,8 +22,8 @@
 #include "folly/Conv.h"
 
 #include "hphp/util/assertions.h"
-#include "hphp/util/map_walker.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/util/map-walker.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -110,6 +110,10 @@ void RegionDesc::Block::setKnownFunc(SrcKey sk, const Func* func) {
   checkInvariants();
 }
 
+void RegionDesc::Block::setPostConditions(const PostConditions& conds) {
+  m_postConds = conds;
+}
+
 /*
  * Check invariants on a RegionDesc::Block.
  *
@@ -187,7 +191,6 @@ void RegionDesc::Block::checkInvariants() const {
 
 namespace {
 RegionDescPtr selectTraceletLegacy(const Transl::Tracelet& tlet) {
-  typedef Transl::NormalizedInstruction NI;
   typedef RegionDesc::Block Block;
 
   auto region = smart::make_unique<RegionDesc>();
@@ -232,7 +235,7 @@ RegionDescPtr selectTraceletLegacy(const Transl::Tracelet& tlet) {
         assert(cni->op() == OpRetC ||
                cni->op() == OpContRetC ||
                cni->op() == OpNativeImpl ||
-               !instrIsControlFlow(cni->op()));
+               !instrIsNonCallControlFlow(cni->op()));
 
         curBlock->addInstruction();
         cSk.advance(cUnit);
@@ -522,6 +525,11 @@ std::string show(const RegionDesc::Block& b) {
     );
     skIter.advance(b.unit());
   }
+
+  for (const auto& postCond : b.postConds()) {
+    folly::toAppend("  postcondition: ", show(postCond), "\n", &ret);
+  }
+
   return ret;
 }
 

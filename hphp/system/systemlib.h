@@ -56,13 +56,9 @@ namespace Eval {
   x(JsonSerializable)                           \
   x(Traversable)                                \
   x(Countable)                                  \
-  x(KeysIterable)                               \
-  x(KVZippedIterable)                           \
-  x(MappedKeyedIterable)                        \
-  x(FilteredKeyedIterable)                      \
-  x(ZippedKeyedIterable)                        \
-  x(IterableView)                               \
-  x(KeyedIterableView)                          \
+  x(LazyKVZipIterable)                          \
+  x(LazyIterableView)                           \
+  x(LazyKeyedIterableView)                      \
   x(Phar)                                       \
   x(__PHP_Incomplete_Class)                     \
   x(__PHP_Unserializable_Class)                 \
@@ -104,17 +100,10 @@ class SystemLib {
                                           CVarRef detail = null_variant,
                                           CVarRef name = null_variant,
                                           CVarRef header = null_variant);
-  static ObjectData* AllocKeysIterableObject(CVarRef mp);
-  static ObjectData* AllocKVZippedIterableObject(CVarRef mp);
-  static ObjectData* AllocMappedKeyedIterableObject(CVarRef iterable,
-                                                    CVarRef callback);
-  static ObjectData* AllocFilteredKeyedIterableObject(CVarRef iterable,
-                                                      CVarRef callback);
-  static ObjectData* AllocZippedKeyedIterableObject(CVarRef iterable1,
-                                                    CVarRef iterable2);
+  static ObjectData* AllocLazyKVZipIterableObject(CVarRef mp);
 
-  static ObjectData* AllocIterableViewObject(CVarRef iterable);
-  static ObjectData* AllocKeyedIterableViewObject(CVarRef iterable);
+  static ObjectData* AllocLazyIterableViewObject(CVarRef iterable);
+  static ObjectData* AllocLazyKeyedIterableViewObject(CVarRef iterable);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

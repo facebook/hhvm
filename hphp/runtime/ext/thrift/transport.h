@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_THRIFT_TRANSPORT_H_
 #define incl_HPHP_THRIFT_TRANSPORT_H_
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/util/logger.h"
 
 #include <sys/types.h>
@@ -84,7 +84,8 @@ enum TType {
   T_SET        = 14,
   T_LIST       = 15,
   T_UTF8       = 16,
-  T_UTF16      = 17
+  T_UTF16      = 17,
+  T_FLOAT      = 19,
 };
 
 

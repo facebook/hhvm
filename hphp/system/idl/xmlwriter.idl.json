@@ -7,7 +7,6 @@
             "name": "xmlwriter_open_memory",
             "desc": "Creates a new XMLWriter using memory for string output.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -20,7 +19,6 @@
             "name": "xmlwriter_open_uri",
             "desc": "Creates a new XMLWriter using uri for the output.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Object",
@@ -38,7 +36,6 @@
             "name": "xmlwriter_set_indent_string",
             "desc": "Sets the string which will be used to indent each element\/attribute of the resulting xml.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -61,7 +58,6 @@
             "name": "xmlwriter_set_indent",
             "desc": "Toggles indentation on or off.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -84,7 +80,6 @@
             "name": "xmlwriter_start_document",
             "desc": "Starts a document.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -120,7 +115,6 @@
             "name": "xmlwriter_start_element",
             "desc": "Starts an element.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -143,7 +137,6 @@
             "name": "xmlwriter_start_element_ns",
             "desc": "Starts a namespaced element.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -176,7 +169,6 @@
             "name": "xmlwriter_write_element_ns",
             "desc": "Writes a full namespaced element tag.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -215,7 +207,6 @@
             "name": "xmlwriter_write_element",
             "desc": "Writes a full element tag.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -244,7 +235,6 @@
             "name": "xmlwriter_end_element",
             "desc": "Ends the current element.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -262,7 +252,6 @@
             "name": "xmlwriter_full_end_element",
             "desc": "End the current xml element. Writes an end tag even if the element is empty.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -280,7 +269,6 @@
             "name": "xmlwriter_start_attribute_ns",
             "desc": "Starts a namespaced attribute.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -313,7 +301,6 @@
             "name": "xmlwriter_start_attribute",
             "desc": "Starts an attribute.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -336,7 +323,6 @@
             "name": "xmlwriter_write_attribute_ns",
             "desc": "Writes a full namespaced attribute.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -374,7 +360,6 @@
             "name": "xmlwriter_write_attribute",
             "desc": "Writes a full attribute.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -402,7 +387,6 @@
             "name": "xmlwriter_end_attribute",
             "desc": "Ends the current attribute.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -420,7 +404,6 @@
             "name": "xmlwriter_start_cdata",
             "desc": "Starts a CDATA.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -438,7 +421,6 @@
             "name": "xmlwriter_write_cdata",
             "desc": "Writes a full CDATA.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -461,7 +443,6 @@
             "name": "xmlwriter_end_cdata",
             "desc": "Ends the current CDATA section.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -479,7 +460,6 @@
             "name": "xmlwriter_start_comment",
             "desc": "Starts a comment.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -497,7 +477,6 @@
             "name": "xmlwriter_write_comment",
             "desc": "Writes a full comment.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -520,7 +499,6 @@
             "name": "xmlwriter_end_comment",
             "desc": "Ends the current comment.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -538,7 +516,6 @@
             "name": "xmlwriter_end_document",
             "desc": "Ends the current document.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -556,7 +533,6 @@
             "name": "xmlwriter_start_pi",
             "desc": "Starts a processing instruction tag.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -579,7 +555,6 @@
             "name": "xmlwriter_write_pi",
             "desc": "Writes a processing instruction.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -607,7 +582,6 @@
             "name": "xmlwriter_end_pi",
             "desc": "Ends the current processing instruction.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -625,7 +599,6 @@
             "name": "xmlwriter_text",
             "desc": "Writes a text.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -648,7 +621,6 @@
             "name": "xmlwriter_write_raw",
             "desc": "Writes a raw xml text.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -671,7 +643,6 @@
             "name": "xmlwriter_start_dtd",
             "desc": "Starts a DTD.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -706,7 +677,6 @@
             "name": "xmlwriter_write_dtd",
             "desc": "Writes a full DTD.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -747,7 +717,6 @@
             "name": "xmlwriter_start_dtd_element",
             "desc": "Starts a DTD element.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -770,7 +739,6 @@
             "name": "xmlwriter_write_dtd_element",
             "desc": "Writes a full DTD element.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -798,7 +766,6 @@
             "name": "xmlwriter_end_dtd_element",
             "desc": "Ends the current DTD element.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -816,7 +783,6 @@
             "name": "xmlwriter_start_dtd_attlist",
             "desc": "Starts a DTD attribute list.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -839,7 +805,6 @@
             "name": "xmlwriter_write_dtd_attlist",
             "desc": "Writes a DTD attribute list.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -867,7 +832,6 @@
             "name": "xmlwriter_end_dtd_attlist",
             "desc": "Ends the current DTD attribute list.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -885,7 +849,6 @@
             "name": "xmlwriter_start_dtd_entity",
             "desc": "Starts a DTD entity.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -912,7 +875,6 @@
             "name": "xmlwriter_write_dtd_entity",
             "desc": "Writes a full DTD entity.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -960,7 +922,6 @@
             "name": "xmlwriter_end_dtd_entity",
             "desc": "Ends the current DTD entity.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -978,7 +939,6 @@
             "name": "xmlwriter_end_dtd",
             "desc": "Ends the DTD of the document.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -996,7 +956,6 @@
             "name": "xmlwriter_flush",
             "desc": "Flushes the current buffer.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1020,7 +979,6 @@
             "name": "xmlwriter_output_memory",
             "desc": "Returns the current buffer.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -1049,14 +1007,12 @@
             ],
             "desc": "",
             "flags": [
-                "HasDocComment"
             ],
             "footer": "\n public:\n  SmartObject<File>  m_uri;\n private:\n  xmlTextWriterPtr   m_ptr;\n  xmlBufferPtr       m_output;\n  xmlOutputBufferPtr m_uri_output;",
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -1067,7 +1023,6 @@
                 {
                     "name": "openMemory",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1078,7 +1033,6 @@
                 {
                     "name": "openURI",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1093,7 +1047,6 @@
                 {
                     "name": "setIndentString",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1108,7 +1061,6 @@
                 {
                     "name": "setIndent",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1123,7 +1075,6 @@
                 {
                     "name": "startDocument",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1149,7 +1100,6 @@
                 {
                     "name": "startElement",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1164,7 +1114,6 @@
                 {
                     "name": "startElementNS",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1187,7 +1136,6 @@
                 {
                     "name": "writeElementNS",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1215,7 +1163,6 @@
                 {
                     "name": "writeElement",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1235,7 +1182,6 @@
                 {
                     "name": "endElement",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1246,7 +1192,6 @@
                 {
                     "name": "fullEndElement",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1257,7 +1202,6 @@
                 {
                     "name": "startAttributens",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1280,7 +1224,6 @@
                 {
                     "name": "startAttribute",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1295,7 +1238,6 @@
                 {
                     "name": "writeAttributeNS",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1322,7 +1264,6 @@
                 {
                     "name": "writeAttribute",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1341,7 +1282,6 @@
                 {
                     "name": "endAttribute",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1352,7 +1292,6 @@
                 {
                     "name": "startCData",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1363,7 +1302,6 @@
                 {
                     "name": "writeCData",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1378,7 +1316,6 @@
                 {
                     "name": "endCData",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1389,7 +1326,6 @@
                 {
                     "name": "startComment",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1400,7 +1336,6 @@
                 {
                     "name": "writeComment",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1415,7 +1350,6 @@
                 {
                     "name": "endComment",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1426,7 +1360,6 @@
                 {
                     "name": "endDocument",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1437,7 +1370,6 @@
                 {
                     "name": "startPI",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1452,7 +1384,6 @@
                 {
                     "name": "writePI",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1471,7 +1402,6 @@
                 {
                     "name": "endPI",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1482,7 +1412,6 @@
                 {
                     "name": "text",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1497,7 +1426,6 @@
                 {
                     "name": "writeRaw",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1512,7 +1440,6 @@
                 {
                     "name": "startDTD",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1537,7 +1464,6 @@
                 {
                     "name": "writeDTD",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1567,7 +1493,6 @@
                 {
                     "name": "startDTDElement",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1582,7 +1507,6 @@
                 {
                     "name": "writeDTDElement",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1601,7 +1525,6 @@
                 {
                     "name": "endDTDElement",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1612,7 +1535,6 @@
                 {
                     "name": "startDTDAttlist",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1627,7 +1549,6 @@
                 {
                     "name": "writeDTDAttlist",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1646,7 +1567,6 @@
                 {
                     "name": "endDTDAttlist",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1657,7 +1577,6 @@
                 {
                     "name": "startDTDEntity",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1676,7 +1595,6 @@
                 {
                     "name": "writeDTDEntity",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1715,7 +1633,6 @@
                 {
                     "name": "endDTDEntity",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1726,7 +1643,6 @@
                 {
                     "name": "endDTD",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -1737,7 +1653,6 @@
                 {
                     "name": "flush",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -1753,7 +1668,6 @@
                 {
                     "name": "outputMemory",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "String"

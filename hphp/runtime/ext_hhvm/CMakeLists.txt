@@ -38,7 +38,7 @@ foreach (f ${files})
 		EXT_HHVM_FILE(CXX_SOURCES CXX_HEADERS ${f_REL} ${EXT_HHVM_OS} ${EXT_HHVM_ARCH})
 	endif()
 endforeach()
-EXT_HHVM_FILE(CXX_SOURCES CXX_HEADERS "runtime/base/builtin_functions.cpp" ${EXT_HHVM_OS} ${EXT_HHVM_ARCH})
+EXT_HHVM_FILE(CXX_SOURCES CXX_HEADERS "runtime/base/builtin-functions.cpp" ${EXT_HHVM_OS} ${EXT_HHVM_ARCH})
 
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
         auto_sources(files "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}")

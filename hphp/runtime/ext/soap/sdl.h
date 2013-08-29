@@ -19,7 +19,7 @@
 #define PHP_SDL_H
 
 #include "hphp/runtime/ext/soap/encoding.h"
-#include "hphp/runtime/base/http_client.h"
+#include "hphp/runtime/base/http-client.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // defines

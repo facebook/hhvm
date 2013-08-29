@@ -42,9 +42,12 @@
   CASE(ColAddElemC) \
   CASE(ColAddNewElemC) \
   CASE(Cns) \
+  CASE(CnsE) \
+  CASE(CnsU) \
   CASE(DefCns) \
   CASE(ClsCnsD) \
   CASE(Concat) \
+  CASE(Abs) \
   CASE(Add) \
   CASE(Xor) \
   CASE(Not) \

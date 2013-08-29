@@ -51,7 +51,6 @@
             "name": "fb_serialize",
             "desc": "Seriailize data into a compact format that can be unserialized by fb_unserialize().",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -70,7 +69,6 @@
             "name": "fb_unserialize",
             "desc": "Unserialize a previously fb_thrift_serialize()-ed data.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -102,7 +100,6 @@
             "name": "fb_compact_serialize",
             "desc": "Serialize data into a compact format that can be unserialized by fb_compact_unserialize(). In general produces smaller output compared to fb_serialize(). Largest savings are on arrays with sequential (or almost sequential) indexes, i.e. simple arrays like array($a, $b, $c). NOTE: unlike serialize(), does not preserve internal references, i.e. array(&$a, &$a) will become array($a, $a).",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -121,7 +118,6 @@
             "name": "fb_compact_unserialize",
             "desc": "Unserialize a previously fb_compact_serialize()-ed data.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -153,7 +149,6 @@
             "name": "fb_could_include",
             "desc": "Returns whether the (php) file could be included (eg if its been compiled into the binary)",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -172,7 +167,6 @@
             "name": "fb_intercept",
             "desc": "Invokes a user handler upon calling a function or a class method. If this handler returns FALSE, code will continue with original function. Otherwise, it will return what handler tells. The handler function looks like \"intercept_handler($name, $obj, $params, $data, &$done)\", where $name is orginal function's name, $obj is $this for an instance method call or null for static method call or function calls, and $params are original call's parameters. $data is what's passed to fb_intercept() and set $done to false to indicate function should continue its execution with old function as if interception did not happen. By default $done is true so it will return handler's return immediately without executing old function's code. Note that built-in functions are not interceptable.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -202,7 +196,6 @@
             "name": "fb_rename_function",
             "desc": "Rename a function, so that a function can be called with the new name.\n\nWhen writing unit tests, one may want to stub out a function. To do so, call fb_rename_function('func_to_stub_out', 'somename') then fb_rename_function('new_func_to_replace_with', 'func_to_stub_out'). This way, when calling func_to_stub_out(), it will actually execute new_func_to_replace_with().",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -226,7 +219,6 @@
             "name": "fb_autoload_map",
             "desc": "Specify a map containing an array with four optional elements. 'class', 'function', 'constant', and 'failure'. The first three entries are maps from names to the file where that entity is defined. An attempt to access an undefined class\/function\/constant will look it up in the appropriate map, and if found, include that file. If the entity is still not defined, it will call the 'failure' entry.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -250,7 +242,6 @@
             "name": "fb_utf8ize",
             "desc": "Sanitize a string to make sure it's legal UTF-8 by stripping off any characters that are not properly encoded.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -270,7 +261,6 @@
             "name": "fb_utf8_strlen_deprecated",
             "desc": "Count the number of UTF-8 code points in string or byte count if it's not valid UTF-8.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -289,7 +279,6 @@
             "name": "fb_utf8_strlen",
             "desc": "Count the number of UTF-8 code points in string, substituting U+FFFD for invalid sequences.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -308,7 +297,6 @@
             "name": "fb_utf8_substr",
             "desc": "Cuts a portion of str specified by the start and length parameters.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -338,7 +326,6 @@
             "name": "fb_call_user_func_safe",
             "desc": "This function invokes $function with the arguments specified in its parameter list. It returns an array of two elements, the first being a boolean specifying whether or not the function was invoked, the latter being the return value, or null if it was not invoked. The function may be any PHP callable, either a string function name, an array of object instance and method, or array of classname and static class method.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "VariableArguments",
                 "HasOptFunction",
@@ -361,7 +348,6 @@
             "name": "fb_call_user_func_safe_return",
             "desc": "This function invokes $function with the arguments specified in its parameter\nlist. If the function is not defined, $default_rval is returned. Note that\nthe default return value comes BEFORE the arguments to the function.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "VariableArguments",
                 "HasOptFunction",
@@ -389,7 +375,6 @@
             "name": "fb_call_user_func_array_safe",
             "desc": "This function invokes $function with the arguments specified in its parameter list. It returns an array of two elements, the first being a boolean specifying whether or not the function was invoked, the latter being the return value, or null if it was not invoked. The function may be any PHP callable, either a string function name, an array of object instance and method, or array of classname and static class method.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "HasOptFunction",
                 "NoProfile",
@@ -416,7 +401,6 @@
             "name": "fb_get_code_coverage",
             "desc": "Returns code coverage data collected so far. Turn on code coverage by Eval.RecordCodeCoverage or by using fb_enable_code_coverage and call this function periodically to get results. Eval.CodeCoverageOutputFile allows you to specify an output file to store results at end of a script run from command line. Use this function in server mode to collect results instead.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -434,7 +418,6 @@
             "name": "fb_enable_code_coverage",
             "desc": "Enables code coverage. The coverage information is cleared.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NeedsActRec"
             ],
@@ -448,7 +431,6 @@
             "name": "fb_disable_code_coverage",
             "desc": "Disables and returns code coverage. The coverage information is cleared.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -461,7 +443,6 @@
             "name": "xhprof_enable",
             "desc": "Starts xhprof profiling. For details on how to use this function, please refer to http:\/\/mirror.facebook.net\/facebook\/xhprof\/doc.html.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -486,7 +467,6 @@
             "name": "xhprof_disable",
             "desc": "Ends and reports xhprof profiling result. For details on how to use this function, please refer to http:\/\/mirror.facebook.net\/facebook\/xhprof\/doc.html.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -500,7 +480,6 @@
             "name": "xhprof_network_enable",
             "desc": "Starts xhprof network I\/O profiling.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -513,7 +492,6 @@
             "name": "xhprof_network_disable",
             "desc": "Ends and reports xhprof network I\/O profiling result.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -527,7 +505,6 @@
             "name": "xhprof_frame_begin",
             "desc": "Starts an artificial frame. Together with xhprof_frame_end(), this times one block of code execution as if it were a function call, allowing people to define arbitrary function boundaries. Prefer to use XhprofFrame classobjects instead of calling this function directly.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NoInjection"
             ],
@@ -546,7 +523,6 @@
             "name": "xhprof_frame_end",
             "desc": "Ends an artificial frame that xhprof_frame_begin() started. One has to make sure there are no exceptions in between these two calls, as otherwise, it may report incorrect timings. Also, xhprof_frame_begin() and xhprof_frame_end() have to be paired up really well, so not to interfere with regular function's profiling, unless that's the intention. Prefer to use XhprofFrame classobjects instead of calling this function directly.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NoInjection"
             ],
@@ -560,7 +536,6 @@
             "name": "xhprof_run_trace",
             "desc": "Re-runs a prior trace and generates xhprof output.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -584,7 +559,6 @@
             "name": "xhprof_sample_enable",
             "desc": "Starts sampling based xhprof profiling. For details on how to use this function, please refer to http:\/\/mirror.facebook.net\/facebook\/xhprof\/doc.html.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -597,7 +571,6 @@
             "name": "xhprof_sample_disable",
             "desc": "Ends sampling based xhprof profiling. For details on how to use this function, please refer to http:\/\/mirror.facebook.net\/facebook\/xhprof\/doc.html.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -610,7 +583,6 @@
             "name": "fb_parallel_query",
             "desc": "Runs MySQL queries in parallel. Internally it will spawn threads, each of which executes one or more queries sequentially.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -665,7 +637,6 @@
             "name": "fb_const_fetch",
             "desc": "Fetches a constant string from a special store that's compiled into the executable. This is faster than apc_fetch(), which needs locking between different threads. This store is immutable and loaded once with strings that are never changed. Therefore, no locking is needed when accessed by different threads.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -684,7 +655,6 @@
             "name": "fb_output_compression",
             "desc": "Toggles the compression status of HipHop output, if headers have already been sent this may be ignored.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -703,7 +673,6 @@
             "name": "fb_set_exit_callback",
             "desc": "Set a callback function that is called when php tries to exit.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -721,7 +690,6 @@
             "name": "fb_get_last_flush_size",
             "desc": "Get stats on flushing the last data chunk from server.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -735,7 +703,6 @@
             "name": "fb_lazy_lstat",
             "desc": "Gathers the statistics of the file named by filename, like lstat(), except uses cached information from an internal inotify-based mechanism that may not be updated during the duration of a request.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -753,7 +720,6 @@
             "name": "fb_lazy_realpath",
             "desc": "Returns a canonicalized version of the input path that contains no symbolic links, like realpath(), except uses cached information from an internal inotify-based mechanism that may not be updated during the duration of a request.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -764,6 +730,24 @@
                     "name": "filename",
                     "type": "String",
                     "desc": "Fake path to the file."
+                }
+            ]
+        },
+        {
+            "name": "fb_setprofile",
+            "desc": "Set a callback function to be called whenever a function is entered or exited. Takes 3 args, the function name, the mode (enter or exit), and an array describing the frame.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null,
+                "desc": "No value is returned."
+            },
+            "args": [
+                {
+                    "name": "callback",
+                    "type": "Variant",
+                    "desc": "Profiler function to call or null to disable"
                 }
             ]
         }

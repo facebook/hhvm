@@ -7,7 +7,6 @@
             "name": "checkdate",
             "desc": "Checks the validity of the date formed by the arguments. A date is considered valid if each parameter is properly defined.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -34,7 +33,6 @@
         {
             "name": "date_add",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Object"
@@ -53,7 +51,6 @@
         {
             "name": "date_create_from_format",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Object"
@@ -77,7 +74,6 @@
         {
             "name": "date_create",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Object"
@@ -98,7 +94,6 @@
         {
             "name": "date_date_set",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -126,7 +121,6 @@
             "name": "date_default_timezone_get",
             "desc": "In order of preference, this function returns the default timezone by:\n\nReading the timezone set using the date_default_timezone_set() function (if any)\n\nReading the TZ environment variable (if non empty) (Prior to PHP 5.3.0)\n\nReading the value of the date.timezone ini option (if set)\n\nQuerying the host operating system (if supported and allowed by the OS)\n\nIf none of the above succeed, date_default_timezone_get() will return a default timezone of UTC.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -139,7 +133,6 @@
             "name": "date_default_timezone_set",
             "desc": "date_default_timezone_set() sets the default timezone used by all date\/time functions.\n\nSince PHP 5.1.0 (when the date\/time functions were rewritten), every call to a date\/time function will generate a E_NOTICE if the timezone isn't valid, and\/or a E_WARNING message if using the system settings or the TZ environment variable.\n\nInstead of using this function to set the default timezone in your script, you can also use the INI setting date.timezone to set the default timezone.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -156,7 +149,6 @@
         {
             "name": "date_diff",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Object"
@@ -180,7 +172,6 @@
         {
             "name": "date_format",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -199,7 +190,6 @@
         {
             "name": "date_get_last_errors",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -210,7 +200,6 @@
         {
             "name": "date_interval_create_from_date_string",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Object"
@@ -225,7 +214,6 @@
         {
             "name": "date_interval_format",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -244,7 +232,6 @@
         {
             "name": "date_isodate_set",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -272,7 +259,6 @@
         {
             "name": "date_modify",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -291,7 +277,6 @@
         {
             "name": "date_offset_get",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -306,7 +291,6 @@
         {
             "name": "date_parse",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -323,7 +307,6 @@
         {
             "name": "date_sub",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Object"
@@ -342,7 +325,6 @@
         {
             "name": "date_sun_info",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap",
@@ -370,7 +352,6 @@
             "name": "date_sunrise",
             "desc": "date_sunrise() returns the sunrise time for a given day (specified as a timestamp) and location.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -418,7 +399,6 @@
             "name": "date_sunset",
             "desc": "date_sunset() returns the sunset time for a given day (specified as a timestamp) and location.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -465,7 +445,6 @@
         {
             "name": "date_time_set",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -493,7 +472,6 @@
         {
             "name": "date_timestamp_get",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -508,7 +486,6 @@
         {
             "name": "date_timestamp_set",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Object"
@@ -527,7 +504,6 @@
         {
             "name": "date_timezone_get",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -542,7 +518,6 @@
         {
             "name": "date_timezone_set",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -562,7 +537,6 @@
             "name": "date",
             "desc": "Returns a string formatted according to the given format string using the given integer timestamp or the current time if no timestamp is given. In other words, timestamp is optional and defaults to the value of time().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -584,7 +558,6 @@
             "name": "getdate",
             "desc": "Returns an associative array containing the date information of the timestamp, or the current local time if no timestamp is given.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap"
@@ -602,7 +575,6 @@
             "name": "gettimeofday",
             "desc": "This is an interface to gettimeofday(2). It returns an associative array containing the data returned from the system call.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -621,7 +593,6 @@
             "name": "gmdate",
             "desc": "Identical to the date() function except that the time returned is Greenwich Mean Time (GMT).",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -645,7 +616,6 @@
             "name": "gmmktime",
             "desc": "Identical to mktime() except the passed parameters represents a GMT date. gmmktime() internally uses mktime() so only times valid in derived local time can be used.\n\nLike mktime(), arguments may be left out in order from right to left, with any omitted arguments being set to the current corresponding GMT value.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -694,7 +664,6 @@
             "name": "gmstrftime",
             "desc": "Behaves the same as strftime() except that the time returned is Greenwich Mean Time (GMT). For example, when run in Eastern Standard Time (GMT -0500), the first line below prints \"Dec 31 1998 20:00:00\", while the second prints \"Jan 01 1999 01:00:00\".",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -718,7 +687,6 @@
             "name": "idate",
             "desc": "Returns a number formatted according to the given format string using the given integer timestamp or the current local time if no timestamp is given. In other words, timestamp is optional and defaults to the value of time().\n\nUnlike the function date(), idate() accepts just one char in the format parameter.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -742,7 +710,6 @@
             "name": "localtime",
             "desc": "The localtime() function returns an array identical to that of the structure returned by the C function call.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap"
@@ -766,7 +733,6 @@
             "name": "microtime",
             "desc": "microtime() returns the current Unix timestamp with microseconds. This function is only available on operating systems that support the gettimeofday() system call.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -784,7 +750,6 @@
             "name": "mktime",
             "desc": "Returns the Unix timestamp corresponding to the arguments given. This timestamp is a long integer containing the number of seconds between the Unix Epoch (January 1 1970 00:00:00 GMT) and the time specified.\n\nArguments may be left out in order from right to left; any arguments thus omitted will be set to the current value according to the local date and time.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -833,7 +798,6 @@
             "name": "strftime",
             "desc": "Format the time and\/or date according to locale settings. Month and weekday names and other language-dependent strings respect the current locale set with setlocale().\n\nNot all conversion specifiers may be supported by your C library, in which case they will not be supported by PHP's strftime(). Additionally, not all platforms support negative timestamps, so your date range may be limited to no earlier than the Unix epoch. This means that %e, %T, %R and, %D (and possibly others) - as well as dates prior to Jan 1, 1970 - will not work on Windows, some Linux distributions, and a few other operating systems. For Windows systems, a complete overview of supported conversion specifiers can be found at MSDN.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -855,7 +819,6 @@
             "name": "strptime",
             "desc": "strptime() returns an array with the date parsed, or FALSE on error.\n\nMonth and weekday names and other language dependent strings respect the current locale set with setlocale() (LC_TIME).",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -877,7 +840,6 @@
         {
             "name": "strtotime",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -901,7 +863,6 @@
             "name": "time",
             "desc": "Returns the current time measured in the number of seconds since the Unix Epoch (January 1 1970 00:00:00 GMT).",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -912,7 +873,6 @@
         {
             "name": "timezone_abbreviations_list",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "StringVec"
@@ -923,7 +883,6 @@
         {
             "name": "timezone_identifiers_list",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "StringVec"
@@ -934,7 +893,6 @@
         {
             "name": "timezone_location_get",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -949,7 +907,6 @@
         {
             "name": "timezone_name_from_abbr",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -978,7 +935,6 @@
         {
             "name": "timezone_name_get",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -993,7 +949,6 @@
         {
             "name": "timezone_offset_get",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -1012,7 +967,6 @@
         {
             "name": "timezone_open",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Object"
@@ -1027,7 +981,6 @@
         {
             "name": "timezone_transitions_get",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec"
@@ -1042,7 +995,6 @@
         {
             "name": "timezone_version_get",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -1056,7 +1008,6 @@
             "name": "DateTime",
             "desc": "Representation of date and time.",
             "flags": [
-                "HasDocComment"
             ],
             "footer": "\n private:\n  SmartObject<DateTime> m_dt;\n public:\n  virtual ObjectData *clone();",
             "funcs": [
@@ -1064,7 +1015,6 @@
                     "name": "add",
                     "desc": "Add an interval to a datetime object",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Object",
@@ -1081,7 +1031,6 @@
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -1103,8 +1052,7 @@
                     "name": "createFromFormat",
                     "desc": "Parse a date according to a format and create a DateTime object",
                     "flags": [
-                        "IsStatic",
-                        "HasDocComment"
+                        "IsStatic"
                     ],
                     "return": {
                         "type": "Object",
@@ -1133,7 +1081,6 @@
                     "name": "diff",
                     "desc": "Find the interval between two DateTime objects",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Object",
@@ -1157,7 +1104,6 @@
                     "name": "format",
                     "desc": "Procedural style string date_format ( DateTime $object , string $format ) Returns date formatted according to given format.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "String",
@@ -1175,8 +1121,7 @@
                     "name": "getLastErrors",
                     "desc": "Returns the last errors encountered by the datetime extension",
                     "flags": [
-                        "IsStatic",
-                        "HasDocComment"
+                        "IsStatic"
                     ],
                     "return": {
                         "type": "VariantVec",
@@ -1189,7 +1134,6 @@
                     "name": "getOffset",
                     "desc": "Procedural style int date_offset_get ( DateTime $object ) Returns the timezone offset.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Int64",
@@ -1202,7 +1146,6 @@
                     "name": "getTimestamp",
                     "desc": "Returns the unix timestamp representing the date.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Int64",
@@ -1215,7 +1158,6 @@
                     "name": "getTimezone",
                     "desc": "Procedural style DateTimeZone date_timezone_get ( DateTime $object ) Return time zone relative to given DateTime.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1228,7 +1170,6 @@
                     "name": "modify",
                     "desc": "Procedural style DateTime date_modify ( DateTime $object , string $modify ) Alter the timestamp of a DateTime object by incrementing or decrementing in a format accepted by strtotime().",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Object",
@@ -1246,7 +1187,6 @@
                     "name": "setDate",
                     "desc": "Procedural style DateTime date_date_set ( DateTime $object , int $year , int $month , int $day ) Resets the current date of the DateTime object to a different date.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Object",
@@ -1274,7 +1214,6 @@
                     "name": "setISODate",
                     "desc": "Procedural style DateTime date_isodate_set ( DateTime $object , int $year , int $week [, int $day = 1 ] ) Set a date according to the ISO 8601 standard - using weeks and day offsets rather than specific dates.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Object",
@@ -1303,7 +1242,6 @@
                     "name": "setTime",
                     "desc": "Procedural style DateTime date_time_set ( DateTime $object , int $hour , int $minute [, int $second = 0 ] ) Resets the current time of the DateTime object to a different time.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Object",
@@ -1332,7 +1270,6 @@
                     "name": "setTimestamp",
                     "desc": "Set the DateTime object according to the timestamp provided",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Object",
@@ -1350,7 +1287,6 @@
                     "name": "setTimezone",
                     "desc": "Procedural style DateTime date_timezone_set ( DateTime $object , DateTimeZone $timezone )",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Object",
@@ -1368,7 +1304,6 @@
                     "name": "sub",
                     "desc": "Subtract an interval from a datetime object",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Object",
@@ -1434,14 +1369,12 @@
             "name": "DateTimeZone",
             "desc": "Representation of time zone.",
             "flags": [
-                "HasDocComment"
             ],
             "footer": "\n  \/\/ Helper for TimeZone -> c_DateTimeZone conversion\n  public: static Object wrap(SmartObject<TimeZone> tz) {\n    c_DateTimeZone *ctz = NEWOBJ(c_DateTimeZone)();\n    Object ret(ctz);\n    ctz->m_tz = tz;\n    return ret;\n  }\n\n  \/\/ Helper for c_DateTimeZone -> TimeZone conversion\n  public: static SmartObject<TimeZone> unwrap(CObjRef timezone) {\n    SmartObject<c_DateTimeZone> ctz = timezone.getTyped<c_DateTimeZone>(true);\n    if (ctz.get() == NULL)\n      return SmartObject<TimeZone>();\n    return ctz->m_tz;\n  }\n\n private:\n  SmartObject<TimeZone> m_tz;\n public:\n  virtual ObjectData *clone();",
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -1457,7 +1390,6 @@
                     "name": "getLocation",
                     "desc": "Returns location information for a timezone",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "VariantVec",
@@ -1470,7 +1402,6 @@
                     "name": "getName",
                     "desc": "Procedural style string timezone_name_get ( void ) Returns the name of the timezone.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "String",
@@ -1483,7 +1414,6 @@
                     "name": "getOffset",
                     "desc": "Procedural style int timezone_offset_get ( DateTimeZone $object , DateTime $datetime ) This function returns the offset to GMT for the date\/time specified in the datetime parameter. The GMT offset is calculated with the timezone information contained in the DateTimeZone object being used.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Int64",
@@ -1501,7 +1431,6 @@
                     "name": "getTransitions",
                     "desc": "Procedural style array timezone_transitions_get ( DateTimeZone $object [, int $timestamp_begin [, int $timestamp_end ]] )",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "VariantMap",
@@ -1514,8 +1443,7 @@
                     "name": "listAbbreviations",
                     "desc": "Procedural style array timezone_abbreviations_list ( void )",
                     "flags": [
-                        "IsStatic",
-                        "HasDocComment"
+                        "IsStatic"
                     ],
                     "return": {
                         "type": "VariantMap",
@@ -1528,8 +1456,7 @@
                     "name": "listIdentifiers",
                     "desc": "Procedural style array timezone_identifiers_list ([ int $what = DateTimeZone::ALL [, string $country = NULL ]] )",
                     "flags": [
-                        "IsStatic",
-                        "HasDocComment"
+                        "IsStatic"
                     ],
                     "return": {
                         "type": "VariantMap",
@@ -1602,7 +1529,6 @@
             "name": "DateInterval",
             "desc": "Represents a date interval.",
             "flags": [
-                "HasDocComment"
             ],
             "footer": "\n  public: static Object wrap(SmartObject<DateInterval> di) {\n    c_DateInterval *cdi = NEWOBJ(c_DateInterval)();\n    Object ret(cdi);\n    cdi->m_di = di;\n    return ret;\n  }\n\n  public: static SmartObject<DateInterval> unwrap(CObjRef dateinterval) {\n    SmartObject<c_DateInterval> cdi = dateinterval.getTyped<c_DateInterval>(true);\n    if (cdi.get() == NULL)\n      return SmartObject<DateInterval>();\n    return cdi->m_di;\n  }\n\n private:\n  SmartObject<DateInterval> m_di;\n public:\n  virtual ObjectData *clone();",
             "funcs": [
@@ -1610,7 +1536,6 @@
                     "name": "__construct",
                     "desc": "Creates a new DateInterval object",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -1626,7 +1551,6 @@
                     "name": "__get",
                     "desc": "Retreives interval partials (y, m, d, etc...)",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1644,7 +1568,6 @@
                     "name": "__set",
                     "desc": "Sets interval partials (y, m, d, etc...)",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1667,8 +1590,7 @@
                     "name": "createFromDateString",
                     "desc": "Sets up a DateInterval from the relative parts of the string",
                     "flags": [
-                        "IsStatic",
-                        "HasDocComment"
+                        "IsStatic"
                     ],
                     "return": {
                         "type": "Object",
@@ -1686,7 +1608,6 @@
                     "name": "format",
                     "desc": "Formats the interval",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "String",

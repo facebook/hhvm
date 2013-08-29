@@ -11,6 +11,29 @@ function tryopen($u, $p) {
   return $r;
 }
 
+function tryopen_noport($u) {
+  for ($i = 0; $i < 10; $i++) {
+    $r = fsockopen($u);
+    if ($r) return $r;
+    sleep(1);
+  }
+  return $r;
+}
+
+function get_addresses($host) {
+  $r = array();
+  if (($records = dns_get_record($host))) {
+    foreach ($records as $record) {
+      if (isset($record['ipv6'])) {
+        $r []= '['.$record['ipv6'].']';
+      } else if (isset($record['ip'])) {
+        $r []= $record['ip'];
+      }
+    }
+  }
+  return $r;
+}
+
 var_dump(gethostname() != false);
 
 var_dump(strpos(gethostbyaddr("127.0.0.1"), 'localhost'));
@@ -36,46 +59,7 @@ var_dump(inet_pton("::1"));
 var_dump(ip2long("127.0.0.1"));
 var_dump(long2ip(2130706433));
 
-var_dump(dns_check_record("facebook.com"));
-var_dump(checkdnsrr("facebook.com"));
-
-$x = dns_get_record("facebook.com", DNS_A);
-var_dump(!empty($x));
-
-var_dump(dns_get_mx("facebook.com", $hosts));
-var_dump(!empty($hosts));
-
-var_dump(getmxrr("facebook.com", $hosts));
-var_dump(!empty($hosts));
-
-$f = tryopen("facebook.com", 80);
-var_dump($f);
-fputs($f, "GET / HTTP/1.0\n\n");
-$r = fread($f, 15);
-var_dump(!empty($r));
-
-$f = tryopen("ssl://www.facebook.com", 443);
-fwrite($f,
-         "GET / HTTP/1.1\r\n".
-         "Host: www.facebook.com\r\n".
-         "Connection: Close\r\n".
-         "\r\n");
-$response = '';
-while ($f && !feof($f)) {
-  $line = fgets($f, 128);
-  $response .= $line;
-}
-var_dump(!empty($response));
-
 var_dump(socket_get_status(new stdclass));
-
-$f = tryopen("facebook.com", 80);
-var_dump($f);
-socket_set_blocking($f, 0);
-
-$f = tryopen("facebook.com", 80);
-var_dump($f);
-socket_set_timeout($f, 0);
 
 header("Location: http://www.facebook.com");
 header("Location: http://www.facebook.com");

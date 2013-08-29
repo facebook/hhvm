@@ -10,21 +10,21 @@ array(26) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(10) "appendData"
-  [2]=>
-  string(10) "deleteData"
-  [3]=>
-  string(10) "insertData"
-  [4]=>
-  string(11) "replaceData"
-  [5]=>
-  string(13) "substringData"
-  [6]=>
   string(5) "__get"
-  [7]=>
+  [2]=>
   string(5) "__set"
-  [8]=>
+  [3]=>
   string(7) "__isset"
+  [4]=>
+  string(10) "appendData"
+  [5]=>
+  string(10) "deleteData"
+  [6]=>
+  string(10) "insertData"
+  [7]=>
+  string(11) "replaceData"
+  [8]=>
+  string(13) "substringData"
   [9]=>
   string(11) "appendChild"
   [10]=>
@@ -75,21 +75,21 @@ array(26) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(10) "appendData"
-  [2]=>
-  string(10) "deleteData"
-  [3]=>
-  string(10) "insertData"
-  [4]=>
-  string(11) "replaceData"
-  [5]=>
-  string(13) "substringData"
-  [6]=>
   string(5) "__get"
-  [7]=>
+  [2]=>
   string(5) "__set"
-  [8]=>
+  [3]=>
   string(7) "__isset"
+  [4]=>
+  string(10) "appendData"
+  [5]=>
+  string(10) "deleteData"
+  [6]=>
+  string(10) "insertData"
+  [7]=>
+  string(11) "replaceData"
+  [8]=>
+  string(13) "substringData"
   [9]=>
   string(11) "appendChild"
   [10]=>

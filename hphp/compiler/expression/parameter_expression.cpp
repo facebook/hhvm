@@ -144,15 +144,22 @@ TypePtr ParameterExpression::getTypeSpecForClass(AnalysisResultPtr ar,
   if (forInference) {
     ClassScopePtr cls = ar->findClass(m_type);
     if (!cls || cls->isRedeclaring() || cls->derivedByDynamic()) {
-      if (!cls && getScope()->isFirstPass()) {
+      if (!cls && getScope()->isFirstPass() && !ar->isTypeAliasName(m_type)) {
         ConstructPtr self = shared_from_this();
         Compiler::Error(Compiler::UnknownClass, self);
       }
       ret = Type::Variant;
     }
+    if (cls) {
+      // Classes must be redeclaring if there are also type aliases
+      // with the same name.
+      assert(!ar->isTypeAliasName(m_type) || cls->isRedeclaring());
+    }
   }
   if (!ret) {
-    ret = Type::CreateObjectType(m_type);
+    ret = ar->isTypeAliasName(m_type)
+      ? Type::Variant
+      : Type::CreateObjectType(m_type);
   }
   always_assert(ret);
   return ret;

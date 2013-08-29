@@ -68,8 +68,7 @@ RuntimeType Type::toRuntimeType() const {
 }
 
 Type Type::fromDataType(DataType outerType,
-                        DataType innerType /* = KindOfInvalid */,
-                        const Class* klass /* = nullptr */) {
+                        DataType innerType /* = KindOfInvalid */) {
   assert(innerType != KindOfRef);
 
   switch (outerType) {
@@ -82,14 +81,8 @@ Type Type::fromDataType(DataType outerType,
     case KindOfStaticString  : return StaticStr;
     case KindOfString        : return Str;
     case KindOfArray         : return Arr;
-    case KindOfObject        : {
-      if (klass != nullptr) {
-        return Obj.specialize(klass);
-      } else {
-        return Obj;
-      }
-    }
     case KindOfResource      : return Res;
+    case KindOfObject        : return Obj;
     case KindOfClass         : return Cls;
     case KindOfUncountedInit : return UncountedInit;
     case KindOfUncounted     : return Uncounted;
@@ -106,7 +99,14 @@ Type Type::fromDataType(DataType outerType,
 }
 
 Type Type::fromRuntimeType(const RuntimeType& rtt) {
-  return fromDataType(rtt.outerType(), rtt.innerType(), rtt.knownClass());
+  Type t = fromDataType(rtt.outerType(), rtt.innerType());
+  if (rtt.outerType() == KindOfObject && rtt.hasKnownClass()) {
+    return t.specialize(rtt.knownClass());
+  }
+  if (rtt.outerType() == KindOfArray && rtt.hasArrayKind()) {
+    return t.specialize(rtt.arrayKind());
+  }
+  return t;
 }
 
 Type Type::fromDynLocation(const Transl::DynLocation* dynLoc) {
@@ -122,8 +122,12 @@ Type Type::fromDynLocation(const Transl::DynLocation* dynLoc) {
 
 Type liveTVType(const TypedValue* tv) {
   if (tv->m_type == KindOfObject) {
-    return Type::fromDataType(KindOfObject, KindOfInvalid,
-      tv->m_data.pobj->getVMClass());
+    Type t = Type::fromDataType(KindOfObject, KindOfInvalid);
+    return t.specialize(tv->m_data.pobj->getVMClass());
+  }
+  if (tv->m_type == KindOfArray) {
+    Type t = Type::fromDataType(KindOfArray, KindOfInvalid);
+    return t.specialize(tv->m_data.parr->kind());
   }
 
   auto outer = tv->m_type;
@@ -143,7 +147,7 @@ namespace {
 
 Type setElemReturn(const IRInstruction* inst) {
   assert(inst->op() == SetElem || inst->op() == SetElemStk);
-  auto baseType = inst->src(vectorBaseIdx(inst))->type().strip();
+  auto baseType = inst->src(minstrBaseIdx(inst))->type().strip();
 
   // If the base is a Str, the result will always be a CountedStr (or
   // an exception). If the baes might be a str, the result wil be
@@ -289,11 +293,18 @@ void assertOperandTypes(const IRInstruction* inst) {
 
   auto bail = [&] (const std::string& msg) {
     FTRACE(1, "{}", msg);
-    if (!::HPHP::Trace::moduleEnabled(::HPHP::Trace::hhir, 1)) {
-      fprintf(stderr, "%s\n", msg.c_str());
-    }
+    fprintf(stderr, "%s\n", msg.c_str());
     always_assert(false && "instruction operand type check failure");
   };
+
+  if (opHasExtraData(inst->op()) != (bool)inst->rawExtra()) {
+    bail(folly::format("opcode {} should{} have an ExtraData struct "
+                       "but instruction {} does{}",
+                       inst->op(),
+                       opHasExtraData(inst->op()) ? "" : "n't",
+                       *inst,
+                       inst->rawExtra() ? "" : "n't").str());
+  }
 
   auto src = [&]() -> SSATmp* {
     if (curSrc < inst->numSrcs()) {
@@ -309,8 +320,12 @@ void assertOperandTypes(const IRInstruction* inst) {
     not_reached();
   };
 
-  auto check = [&] (bool cond, const std::string& expected) {
+  // If expected is not nullptr, it will be used. Otherwise, t.toString() will
+  // be used as the expected string.
+  auto check = [&] (bool cond, const Type t, const char* expected) {
     if (cond) return;
+
+    std::string expectStr = expected ? expected : t.toString();
 
     bail(folly::format(
       "Error: failed type check on operand {}\n"
@@ -319,7 +334,7 @@ void assertOperandTypes(const IRInstruction* inst) {
       "   received: {}\n",
         curSrc,
         inst->toString(),
-        expected,
+        expectStr,
         inst->src(curSrc)->type().toString()
       ).str()
     );
@@ -363,7 +378,7 @@ void assertOperandTypes(const IRInstruction* inst) {
       // simplifier removed some.
       auto const valid = inst->src(curSrc)->type()
         .subtypeOfAny(Type::StackElem, Type::None);
-      check(valid, "Gen|Cls|None");
+      check(valid, Type(), "Gen|Cls|None");
     }
   };
 
@@ -374,11 +389,12 @@ void assertOperandTypes(const IRInstruction* inst) {
 #define NA       return checkNoArgs();
 #define S(...)   {                                        \
                    Type t = buildUnion(__VA_ARGS__);      \
-                   check(src()->isA(t), t.toString());    \
+                   check(src()->isA(t), t, nullptr);      \
                    ++curSrc;                              \
                  }
 #define C(type)  check(src()->isConst() &&          \
                        src()->isA(type),            \
+                       Type(),                      \
                        "constant " #type);          \
                   ++curSrc;
 #define CStr     C(StaticStr)

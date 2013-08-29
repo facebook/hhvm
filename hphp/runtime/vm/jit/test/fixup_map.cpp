@@ -16,7 +16,7 @@
 #include "hphp/runtime/vm/jit/fixup.h"
 
 #include "gtest/gtest.h"
-#include "hphp/hhvm/process_init.h"
+#include "hphp/hhvm/process-init.h"
 
 namespace HPHP { namespace Transl {
 
@@ -45,7 +45,7 @@ void* reader(void* that) {
   const StringData* sd = StringData::GetStaticString("test");
   // ar2: a mock actrec, requires a Func, which can't be builtin.
   Unit u;
-  Func f(u, 1, 1, 1, 0, 0, sd, AttrNone, true, nullptr, 0, false);
+  Func f(u, 1, nullptr, 1, 1, 0, 0, sd, AttrNone, true, nullptr, 0);
   ActRec ar2;
   ar2.m_savedRip = 0xdeadbeef;
   ar2.m_savedRbp = 0;

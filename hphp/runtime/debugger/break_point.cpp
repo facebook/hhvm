@@ -20,9 +20,9 @@
 #include "hphp/runtime/debugger/debugger_proxy.h"
 #include "hphp/runtime/debugger/debugger_thrift_buffer.h"
 #include "hphp/runtime/base/preg.h"
-#include "hphp/runtime/base/execution_context.h"
-#include "hphp/runtime/base/class_info.h"
-#include "hphp/runtime/base/stat_cache.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/comparisons.h"
 
@@ -79,7 +79,7 @@ std::string InterruptSite::desc() const {
 InterruptSite::InterruptSite(bool hardBreakPoint, CVarRef error)
     : m_error(error), m_activationRecord(nullptr),
       m_callingSite(nullptr), m_class(nullptr),
-      m_function(nullptr), m_file((StringData*)nullptr),
+      m_file((StringData*)nullptr),
       m_line0(0), m_char0(0), m_line1(0), m_char1(0),
       m_offset(InvalidAbsoluteOffset), m_unit(nullptr), m_valid(false),
       m_funcEntry(false) {
@@ -111,7 +111,7 @@ InterruptSite::InterruptSite(bool hardBreakPoint, CVarRef error)
 InterruptSite::InterruptSite(ActRec *fp, Offset offset, CVarRef error)
   : m_error(error), m_activationRecord(nullptr),
     m_callingSite(nullptr), m_class(nullptr),
-    m_function(nullptr), m_file((StringData*)nullptr),
+    m_file((StringData*)nullptr),
     m_line0(0), m_char0(0), m_line1(0), m_char1(0),
     m_offset(offset), m_unit(nullptr), m_valid(false),
     m_funcEntry(false) {
@@ -136,6 +136,12 @@ void InterruptSite::Initialize(ActRec *fp) {
     m_char1 = m_sourceLoc.char1;
   }
   m_function = fp->m_func->name()->data();
+  if (fp->m_func->isGenerator()) {
+    // Strip off "$continuation" to get the original function name
+    assert(m_function.compare(m_function.length() - 13,
+                              string::npos, "$continuation") == 0);
+    m_function.resize(m_function.length() - 13);
+  }
   if (fp->m_func->preClass()) {
     m_class = fp->m_func->preClass()->name()->data();
   } else {
@@ -280,10 +286,10 @@ void BreakPointInfo::setClause(const std::string &clause, bool check) {
 // Following this call, BreakPointInfo::breakable will return false until
 // a subsequent call to BreakPointInfo::setBreakable with a lower or equal
 // stack level.
-void BreakPointInfo::unsetBreakable(int stackDepth) {
+void BreakPointInfo::unsetBreakable(int stackDepth, Offset offset) {
   TRACE(2, "BreakPointInfo::unsetBreakable\n");
-  if (breakDepthStack.empty() || breakDepthStack.back() < stackDepth) {
-    breakDepthStack.push_back(stackDepth);
+  if (m_stack.empty() || m_stack.back().first < stackDepth) {
+    m_stack.push_back(std::make_pair(stackDepth, offset));
   }
 }
 
@@ -293,15 +299,22 @@ void BreakPointInfo::unsetBreakable(int stackDepth) {
 // higher stack level.
 void BreakPointInfo::setBreakable(int stackDepth) {
   TRACE(2, "BreakPointInfo::setBreakable\n");
-  while (!breakDepthStack.empty() && breakDepthStack.back() >= stackDepth) {
-    breakDepthStack.pop_back();
+  while (!m_stack.empty() && m_stack.back().first >= stackDepth) {
+    m_stack.pop_back();
   }
 }
 
 // Returns true if this breakpoint is enabled at the given stack level.
-bool BreakPointInfo::breakable(int stackDepth) const {
+bool BreakPointInfo::breakable(int stackDepth, Offset offset) const {
   TRACE(2, "BreakPointInfo::breakable\n");
-  if (!breakDepthStack.empty() && breakDepthStack.back() >= stackDepth) {
+  if (!m_stack.empty() && m_stack.back().first >= stackDepth) {
+    if (m_stack.back().first == stackDepth && m_stack.back().second >= offset) {
+      // We assume that the only way to ask this question for the same
+      // stack level and offset, is for the execution to have come back
+      // here after executing the operation at offset, but without
+      // executing any other operations in the interpreter.
+      return true;
+    }
     return false;
   } else {
     return true;
@@ -1024,7 +1037,6 @@ bool BreakPointInfo::checkStack(InterruptSite &site) {
   TRACE(2, "BreakPointInfo::checkStack\n");
   const InterruptSite* s = &site;
   for (int i = 0; i < m_funcs.size(); ) {
-    if (s == nullptr) return false;
     if (!Match(s->getNamespace(), 0, m_funcs[i]->m_namespace, m_regex, true) ||
         !Match(s->getFunction(),  0, m_funcs[i]->m_function,  m_regex, true) ||
         !MatchClass(s->getClass(), m_funcs[i]->m_class, m_regex,
@@ -1036,6 +1048,7 @@ bool BreakPointInfo::checkStack(InterruptSite &site) {
       i++; // matched m_funcs[i], proceed to match m_funcs[i+1]
     }
     s = s->getCallingSite();
+    if (s == nullptr) return false;
   }
   return true;
 }

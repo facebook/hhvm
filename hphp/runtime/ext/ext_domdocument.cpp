@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/ext_domdocument.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_class.h"
-#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -1547,7 +1547,7 @@ public:
     const_iterator iter = find(name.data());
     if (iter == end()) return false;
     return !iter->second->test_isset ||
-      HPHP::isset(iter->second->getter(obj));
+      !iter->second->getter(obj).isNull();
   }
 };
 
@@ -1919,7 +1919,10 @@ static PropertyAccessorMap domnode_properties_map
 ///////////////////////////////////////////////////////////////////////////////
 
 c_DOMNode::c_DOMNode(Class* cb) :
-    ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet|ObjectData::UseIsset>(cb),m_node(NULL) {
+    ExtObjectDataFlags<ObjectData::UseGet|
+                       ObjectData::UseSet|
+                       ObjectData::UseIsset|
+                       ObjectData::HasClone>(cb), m_node(nullptr) {
 }
 
 c_DOMNode::~c_DOMNode() {
@@ -2015,10 +2018,11 @@ Variant c_DOMNode::t_appendchild(CObjRef newnode) {
   return create_node_object(new_child, doc(), false);
 }
 
-c_DOMNode* c_DOMNode::clone() {
-  c_DOMNode* node = static_cast<c_DOMNode*>(ObjectData::clone());
-  node->m_node = m_node;
-  node->m_doc = doc();
+c_DOMNode* c_DOMNode::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_DOMNode*>(obj);
+  c_DOMNode* node = static_cast<c_DOMNode*>(obj->cloneImpl());
+  node->m_node = thiz->m_node;
+  node->m_doc = thiz->doc();
   return node;
 }
 

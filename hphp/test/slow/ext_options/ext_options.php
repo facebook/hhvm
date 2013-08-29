@@ -11,7 +11,7 @@ var_dump(extension_loaded("mysql"));
 $x = get_loaded_extensions();
 var_dump(empty($x));
 
-var_dump(get_included_files());
+var_dump(get_included_files()[0] === __FILE__);
 var_dump(inclued_get_data());
 
 var_dump(get_magic_quotes_gpc());
@@ -38,3 +38,9 @@ var_dump(!putenv("FOO"));
 var_dump(!version_compare("1.3.0.dev", "1.1.2", "<"));
 
 var_dump(version_compare(zend_version(), "2.4.99", ">="));
+
+define("MY_CONSTANT", 1);
+define("YOUR_CONSTANT", 2);
+$arr = get_defined_constants(true);
+var_dump(count($arr["user"]) === 2);
+var_dump(in_array('PHP_BINARY', $arr["Core"]));

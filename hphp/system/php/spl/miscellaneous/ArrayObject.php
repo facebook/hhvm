@@ -261,7 +261,11 @@ class ArrayObject implements IteratorAggregate, Traversable, ArrayAccess,
    */
   public function offsetSet($index, $newval) {
     if ($this->isArray()) {
-      $this->storage[$index] = $newval;
+      if ($index === null) {
+        $this->storage[] = $newval;
+      } else {
+        $this->storage[$index] = $newval;
+      }
     } else {
       $obj = $this->storage;
       $obj->$index = $newval;

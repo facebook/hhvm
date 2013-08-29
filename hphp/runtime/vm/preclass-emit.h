@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_VM_CLASS_EMIT_H_
 #define incl_HPHP_VM_CLASS_EMIT_H_
 
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/repo-helpers.h"
 
 namespace HPHP {

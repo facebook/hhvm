@@ -7,7 +7,6 @@
             "name": "mb_list_encodings",
             "desc": "Returns an array containing all supported encodings.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "StringVec",
@@ -19,7 +18,6 @@
         {
             "name": "mb_list_encodings_alias_names",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -35,7 +33,6 @@
         {
             "name": "mb_list_mime_names",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -52,7 +49,6 @@
             "name": "mb_check_encoding",
             "desc": "Checks if the specified byte stream is valid for the specified encoding. It is useful to prevent so-called \"Invalid Encoding Attack\".",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -77,7 +73,6 @@
             "name": "mb_convert_case",
             "desc": "Performs case folding on a string, converted in the way specified by mode.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -106,7 +101,6 @@
             "name": "mb_convert_encoding",
             "desc": "Converts the character encoding of string str to to_encoding from optionally from_encoding.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -135,7 +129,6 @@
             "name": "mb_convert_kana",
             "desc": "Performs a \"han-kaku\" - \"zen-kaku\" conversion for string str. This function is only useful for Japanese.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -165,7 +158,6 @@
             "name": "mb_convert_variables",
             "desc": "Converts character encoding of variables vars in encoding from_encoding to encoding to_encoding.\n\nmb_convert_variables() join strings in Array or Object to detect encoding, since encoding detection tends to fail for short strings. Therefore, it is impossible to mix encoding in single array or object.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments"
             ],
             "return": {
@@ -195,7 +187,6 @@
             "name": "mb_decode_mimeheader",
             "desc": "Decodes encoded-word string str in MIME header.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -213,7 +204,6 @@
             "name": "mb_decode_numericentity",
             "desc": "Convert numeric string reference of string str in a specified block to character.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -242,7 +232,6 @@
             "name": "mb_detect_encoding",
             "desc": "Detects character encoding in string str.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -272,7 +261,6 @@
             "name": "mb_detect_order",
             "desc": "Sets the automatic character encoding detection order to encoding_list.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -291,7 +279,6 @@
             "name": "mb_encode_mimeheader",
             "desc": "Encodes a given string str by the MIME header encoding scheme.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -333,7 +320,6 @@
             "name": "mb_encode_numericentity",
             "desc": "Converts specified character codes in string str from HTML numeric character reference to character code.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -362,7 +348,6 @@
             "name": "mb_ereg_match",
             "desc": "A regular expression match for a multibyte string",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -389,7 +374,6 @@
         {
             "name": "mb_ereg_replace",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -422,7 +406,6 @@
         {
             "name": "mb_ereg_search_getpos",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -434,7 +417,6 @@
         {
             "name": "mb_ereg_search_getregs",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -447,7 +429,6 @@
             "name": "mb_ereg_search_init",
             "desc": "mb_ereg_search_init() sets string and pattern for a multibyte regular expression. These values are used for mb_ereg_search(), mb_ereg_search_pos(), and mb_ereg_search_regs().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -477,7 +458,6 @@
             "name": "mb_ereg_search_pos",
             "desc": "Returns position and length of a matched part of the multibyte regular expression for a predefined multibyte string\n\nThe string for match is specified by mb_ereg_search_init(). If it is not specified, the previous one will be used.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -502,7 +482,6 @@
             "name": "mb_ereg_search_regs",
             "desc": "Returns the matched part of a multibyte regular expression.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -526,7 +505,6 @@
         {
             "name": "mb_ereg_search_setpos",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -544,7 +522,6 @@
             "name": "mb_ereg_search",
             "desc": "Performs a multibyte regular expression match for a predefined multibyte string.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -568,7 +545,6 @@
         {
             "name": "mb_ereg",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -597,7 +573,6 @@
         {
             "name": "mb_eregi_replace",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -630,7 +605,6 @@
         {
             "name": "mb_eregi",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -659,7 +633,6 @@
         {
             "name": "mb_get_info",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -677,7 +650,6 @@
         {
             "name": "mb_http_input",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -696,7 +668,6 @@
             "name": "mb_http_output",
             "desc": "Set\/Get the HTTP output character encoding. Output after this function is converted to encoding.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -715,7 +686,6 @@
             "name": "mb_internal_encoding",
             "desc": "Set\/Get the internal character encoding",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -734,7 +704,6 @@
             "name": "mb_language",
             "desc": "Set\/Get the current language.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -753,7 +722,6 @@
             "name": "mb_output_handler",
             "desc": "mb_output_handler() is ob_start() callback function. mb_output_handler() converts characters in the output buffer from internal character encoding to HTTP output character encoding.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -776,7 +744,6 @@
             "name": "mb_parse_str",
             "desc": "Parses GET\/POST\/COOKIE data and sets global variables. Since PHP does not provide raw POST\/COOKIE data, it can only be used for GET data for now. It parses URL encoded data, detects encoding, converts coding to internal encoding and set values to the result array or global variables.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -801,7 +768,6 @@
             "name": "mb_preferred_mime_name",
             "desc": "Get a MIME charset string for a specific encoding.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -819,7 +785,6 @@
             "name": "mb_regex_encoding",
             "desc": "Returns the current encoding for a multibyte regex as a string.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -837,7 +802,6 @@
         {
             "name": "mb_regex_set_options",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -856,7 +820,6 @@
             "name": "mb_send_mail",
             "desc": "Sends email. Headers and messages are converted and encoded according to the mb_language() setting. It's a wrapper function for mail(), so see also mail() for details.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -895,7 +858,6 @@
         {
             "name": "mb_split",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -924,7 +886,6 @@
             "name": "mb_strcut",
             "desc": "mb_strcut() performs equivalent operation as mb_substr() with different method. If start position is multi-byte character's second byte or larger, it starts from first byte of multi-byte character.\n\nIt subtracts string from str that is shorter than length AND character that is not part of multi-byte string or not being middle of shift sequence.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -959,7 +920,6 @@
             "name": "mb_strimwidth",
             "desc": "Truncates string str to specified width.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -999,7 +959,6 @@
             "name": "mb_stripos",
             "desc": "mb_stripos() returns the numeric position of the first occurrence of needle in the haystack string. Unlike mb_strpos(), mb_stripos() is case-insensitive. If needle is not found, it returns FALSE.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1034,7 +993,6 @@
             "name": "mb_stristr",
             "desc": "mb_stristr() finds the first occurrence of needle in haystack and returns the portion of haystack. Unlike mb_strstr(), mb_stristr() is case-insensitive. If needle is not found, it returns FALSE.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1069,7 +1027,6 @@
             "name": "mb_strlen",
             "desc": "Gets the length of a string.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1093,7 +1050,6 @@
             "name": "mb_strpos",
             "desc": "Finds position of the first occurrence of a string in a string.\n\nPerforms a multi-byte safe strpos() operation based on number of characters. The first character's position is 0, the second character position is 1, and so on.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1128,7 +1084,6 @@
             "name": "mb_strrchr",
             "desc": "mb_strrchr() finds the last occurrence of needle in haystack and returns the portion of haystack. If needle is not found, it returns FALSE.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1163,7 +1118,6 @@
             "name": "mb_strrichr",
             "desc": "mb_strrichr() finds the last occurrence of needle in haystack and returns the portion of haystack. Unlike mb_strrchr(), mb_strrichr() is case-insensitive. If needle is not found, it returns FALSE.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1198,7 +1152,6 @@
             "name": "mb_strripos",
             "desc": "mb_strripos() performs multi-byte safe strripos() operation based on number of characters. needle position is counted from the beginning of haystack. First character's position is 0. Second character position is 1. Unlike mb_strrpos(), mb_strripos() is case-insensitive.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1233,7 +1186,6 @@
             "name": "mb_strrpos",
             "desc": "Performs a multibyte safe strrpos() operation based on the number of characters. needle position is counted from the beginning of haystack. First character's position is 0. Second character position is 1.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1268,7 +1220,6 @@
             "name": "mb_strstr",
             "desc": "mb_strstr() finds the first occurrence of needle in haystack and returns the portion of haystack. If needle is not found, it returns FALSE.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1303,7 +1254,6 @@
             "name": "mb_strtolower",
             "desc": "Returns str with all alphabetic characters converted to lowercase.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1327,7 +1277,6 @@
             "name": "mb_strtoupper",
             "desc": "Returns str with all alphabetic characters converted to uppercase.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1351,7 +1300,6 @@
             "name": "mb_strwidth",
             "desc": "Returns the width of string str.\n\nMulti-byte characters are usually twice the width of single byte characters.\n\nCharacters width Chars Width U+0000 - U+0019 0 U+0020 - U+1FFF 1 U+2000 - U+FF60 2 U+FF61 - U+FF9F 1 U+FFA0 - 2",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1375,7 +1323,6 @@
             "name": "mb_substitute_character",
             "desc": "Specifies a substitution character when input character encoding is invalid or character code does not exist in output character encoding. Invalid characters may be substituted NULL (no output), string or integer value (Unicode character code value).\n\nThis setting affects mb_convert_encoding(), mb_convert_variables(), mb_output_handler(), and mb_send_mail().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1394,7 +1341,6 @@
             "name": "mb_substr_count",
             "desc": "Counts the number of times the needle substring occurs in the haystack string.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1423,7 +1369,6 @@
             "name": "mb_substr",
             "desc": "Performs a multi-byte safe substr() operation based on number of characters. Position is counted from the beginning of str. First character's position is 0. Second character position is 1, and so on.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",

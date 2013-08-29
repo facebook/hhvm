@@ -17,7 +17,7 @@
 #include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 
 using namespace HPHP;
 

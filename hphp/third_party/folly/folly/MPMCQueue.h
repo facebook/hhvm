@@ -37,6 +37,8 @@ namespace detail {
 template<typename T, template<typename> class Atom>
 class SingleElementQueue;
 
+template <typename T> class MPMCPipelineStageImpl;
+
 } // namespace detail
 
 /// MPMCQueue<T> is a high-performance bounded concurrent queue that
@@ -83,6 +85,7 @@ template<typename T,
              std::is_nothrow_constructible<T,T&&>::value ||
              folly::IsRelocatable<T>::value>::type>
 class MPMCQueue : boost::noncopyable {
+  friend class detail::MPMCPipelineStageImpl<T>;
  public:
   typedef T value_type;
 
@@ -196,7 +199,7 @@ class MPMCQueue : boost::noncopyable {
 
   /// Returns is a guess at size() for contexts that don't need a precise
   /// value, such as stats.
-  uint64_t sizeGuess() const noexcept {
+  ssize_t sizeGuess() const noexcept {
     return writeCount() - readCount();
   }
 
@@ -332,7 +335,13 @@ class MPMCQueue : boost::noncopyable {
         (kFalseSharingRange - 1) / sizeof(detail::SingleElementQueue<T,Atom>)
   };
 
-#define FOLLY_ON_NEXT_CACHE_LINE __attribute__((aligned(kFalseSharingRange)))
+  static_assert(kFalseSharingRange == 64,
+                "FOLLY_ON_NEXT_CACHE_LINE must track kFalseSharingRange");
+
+// This literal "64' should be kFalseSharingRange,
+// but gcc-4.8.0 and 4.8.1 reject it.
+// FIXME: s/64/kFalseSharingRange/ if that ever changes.
+#define FOLLY_ON_NEXT_CACHE_LINE __attribute__((aligned(64)))
 
   /// The maximum number of items in the queue at once
   size_t capacity_ FOLLY_ON_NEXT_CACHE_LINE;

@@ -27,11 +27,12 @@
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/simple_function_call.h"
 #include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/expression/static_member_expression.h"
-#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/class-info.h"
 #include "hphp/util/util.h"
-#include "hphp/util/parser/location.h"
-#include "hphp/util/parser/parser.h"
+#include "hphp/parser/location.h"
+#include "hphp/parser/parser.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -414,7 +415,12 @@ TypePtr VariableTable::add(Symbol *sym, TypePtr type,
   }
 
   type = setType(ar, sym, type, true);
-  sym->setDeclaration(construct);
+  if (sym->isParameter()) {
+    auto p = dynamic_pointer_cast<ParameterExpression>(construct);
+    if (p) sym->setDeclaration(construct);
+  } else {
+    sym->setDeclaration(construct);
+  }
 
   if (!implicit && m_blockScope.isFirstPass()) {
     if (!sym->getValue()) {

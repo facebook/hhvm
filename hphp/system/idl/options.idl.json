@@ -7,7 +7,6 @@
             "name": "assert_options",
             "desc": "Set the various assert() control options or just query their current settings.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -31,7 +30,6 @@
             "name": "assert",
             "desc": "assert() will check the given assertion and take appropriate action if its result is FALSE.\n\nIf the assertion is given as a string it will be evaluated as PHP code by assert(). The advantages of a string assertion are less overhead when assertion checking is off and messages containing the assertion expression when an assertion fails. This means that if you pass a boolean condition as assertion this condition will not show up as parameter to the assertion function which you may have defined with the assert_options() function, the condition is converted to a string before calling that handler function, and the boolean FALSE is converted as the empty string.\n\nAssertions should be used as a debugging feature only. You may use them for sanity-checks that test for conditions that should always be TRUE and that indicate some programming errors if not or to check for the presence of certain features like extension functions or certain system limits and features.\n\nAssertions should not be used for normal runtime operations like input parameter checks. As a rule of thumb your code should always be able to work correctly if assertion checking is not activated.\n\nThe behavior of assert() may be configured by assert_options() or by .ini-settings described in that functions manual page.\n\nThe assert_options() function and\/or ASSERT_CALLBACK configuration directive allow a callback function to be set to handle failed assertions.\n\nassert() callbacks are particularly useful for building automated test suites because they allow you to easily capture the code passed to the assertion, along with information on where the assertion was made. While this information can be captured via other methods, using assertions makes it much faster and easier!\n\nThe callback function should accept three arguments. The first argument will contain the file the assertion failed in. The second argument will contain the line the assertion failed on and the third argument will contain the expression that failed (if any - literal values such as 1 or \"two\" will not be passed via this argument)",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -49,7 +47,6 @@
             "name": "dl",
             "desc": "Loads the PHP extension given by the parameter library.\n\nUse extension_loaded() to test whether a given extension is already available or not. This works on both built-in extensions and dynamically loaded ones (either through php.ini or dl()). Warning This function has been removed from some SAPI's in PHP 5.3.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -67,7 +64,6 @@
             "name": "extension_loaded",
             "desc": "Finds out whether the extension is loaded.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -85,7 +81,6 @@
             "name": "get_loaded_extensions",
             "desc": "This function returns the names of all the modules compiled and loaded in the PHP interpreter.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "StringVec",
@@ -104,7 +99,6 @@
             "name": "get_extension_funcs",
             "desc": "This function returns the names of all the functions defined in the module indicated by module_name.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap",
@@ -122,7 +116,6 @@
             "name": "get_cfg_var",
             "desc": "Gets the value of a PHP configuration option.\n\nThis function will not return configuration information set when the PHP was compiled, or read from an Apache configuration file.\n\nTo check whether the system is using a configuration file, try retrieving the value of the cfg_file_path configuration setting. If this is available, a configuration file is being used.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -139,7 +132,6 @@
         {
             "name": "get_current_user",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -152,7 +144,6 @@
             "name": "get_defined_constants",
             "desc": "Returns the names and values of all the constants currently defined. This includes those created by extensions as well as those created with the define() function.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap"
@@ -160,8 +151,8 @@
             "args": [
                 {
                     "name": "categorize",
-                    "type": "Variant",
-                    "value": "null_variant",
+                    "type": "Boolean",
+                    "value": "false",
                     "desc": "Causing this function to return a multi-dimensional array with categories in the keys of the first dimension and constants and their values in the second dimension.\n\n\n\nThe above example will output something similar to: Array ( [Core] => Array ( [E_ERROR] => 1 [E_WARNING] => 2 [E_PARSE] => 4 [E_NOTICE] => 8 [E_CORE_ERROR] => 16 [E_CORE_WARNING] => 32 [E_COMPILE_ERROR] => 64 [E_COMPILE_WARNING] => 128 [E_USER_ERROR] => 256 [E_USER_WARNING] => 512 [E_USER_NOTICE] => 1024 [E_ALL] => 2047 [TRUE] => 1 ) [pcre] => Array ( [PREG_PATTERN_ORDER] => 1 [PREG_SET_ORDER] => 2 [PREG_OFFSET_CAPTURE] => 256 [PREG_SPLIT_NO_EMPTY] => 1 [PREG_SPLIT_DELIM_CAPTURE] => 2 [PREG_SPLIT_OFFSET_CAPTURE] => 4 [PREG_GREP_INVERT] => 1 ) [user] => Array ( [MY_CONSTANT] => 1 ) )"
                 }
             ]
@@ -169,7 +160,6 @@
         {
             "name": "get_include_path",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -181,7 +171,6 @@
         {
             "name": "restore_include_path",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null,
@@ -194,7 +183,6 @@
             "name": "set_include_path",
             "desc": "Sets the include_path configuration option for the duration of the script.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -212,7 +200,6 @@
             "name": "get_included_files",
             "desc": "Gets the names of all files that have been included using include(), include_once(), require() or require_once().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "StringVec",
@@ -225,7 +212,6 @@
             "name": "inclued_get_data",
             "desc": "Get the inclued data.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantVec",
@@ -238,7 +224,6 @@
             "name": "get_magic_quotes_gpc",
             "desc": "Returns the current configuration setting of magic_quotes_gpc\n\nKeep in mind that attempting to set magic_quotes_gpc at runtime will not work.\n\nFor more information about magic_quotes, see this security section.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -250,7 +235,6 @@
         {
             "name": "get_magic_quotes_runtime",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -262,7 +246,6 @@
         {
             "name": "get_required_files",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "StringVec"
@@ -274,7 +257,6 @@
             "name": "getenv",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -292,7 +274,6 @@
             "name": "getlastmod",
             "desc": "Gets the time of the last modification of the current page.\n\nIf you're interested in getting the last modification time of a different file, consider using filemtime().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -304,7 +285,6 @@
         {
             "name": "getmygid",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -317,7 +297,6 @@
             "name": "getmyinode",
             "desc": "Gets the inode of the current script.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -330,7 +309,6 @@
             "name": "getmypid",
             "desc": "Gets the current PHP process ID.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -342,7 +320,6 @@
         {
             "name": "getmyuid",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -355,7 +332,6 @@
             "name": "getopt",
             "desc": "Parses options passed to the script.\nThe options parameter may contain the following elements: Individual characters (do not accept values) Characters followed by a colon (parameter requires value) Characters followed by two colons (optional value) Option values are the first argument after the string. It does not matter if a value has leading white space or not. Optional values do not accept \" \" (space) as a separator.\n\nThe format for the options and longopts is almost the same, the only difference is that longopts takes an array of options (where each element is the option) where as options takes a string (where each character is the option).",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap",
@@ -379,7 +355,6 @@
             "name": "getrusage",
             "desc": "This is an interface to getrusage(2). It gets data returned from the system call.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap",
@@ -398,7 +373,6 @@
             "name": "clock_getres",
             "desc": "Gets resolution of system clock. \"man 3 clock_getres\" for more details.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -429,7 +403,6 @@
             "name": "clock_gettime",
             "desc": "Gets time of a system clock. \"man 3 clock_gettime\" for more details.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -460,7 +433,6 @@
             "name": "clock_settime",
             "desc": "Sets time of a system clock. \"man 3 clock_settime\" for more details.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific"
             ],
             "return": {
@@ -489,7 +461,6 @@
             "name": "cpu_get_count",
             "desc": "Gets number of processors.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NoInjection"
             ],
@@ -504,7 +475,6 @@
             "name": "cpu_get_model",
             "desc": "Gets processor model.",
             "flags": [
-                "HasDocComment",
                 "HipHopSpecific",
                 "NoInjection"
             ],
@@ -518,7 +488,6 @@
         {
             "name": "ini_alter",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String"
@@ -538,7 +507,6 @@
             "name": "ini_get_all",
             "desc": "Returns all the registered configuration options.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap",
@@ -557,7 +525,6 @@
             "name": "ini_get",
             "desc": "Returns the value of the configuration option on success.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -575,7 +542,6 @@
             "name": "ini_restore",
             "desc": "Restores a given configuration option to its original value.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null,
@@ -593,7 +559,6 @@
             "name": "ini_set",
             "desc": "Sets the value of the given configuration option. The configuration option will keep this new value during the script's execution, and will be restored at the script's ending.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -616,7 +581,6 @@
             "name": "memory_get_allocation",
             "desc": "Returns the total memory, in bytes, that your PHP script has allocated.",
             "flags": [
-                "HasDocComment",
                 "NoProfile"
             ],
             "return": {
@@ -630,7 +594,6 @@
             "name": "memory_get_peak_usage",
             "desc": "Returns the peak of memory, in bytes, that's been allocated to your PHP script.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -649,7 +612,6 @@
             "name": "memory_get_usage",
             "desc": "Returns the amount of memory, in bytes, that's currently being allocated to your PHP script.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -668,7 +630,6 @@
             "name": "php_ini_loaded_file",
             "desc": "Retrieve a path to the loaded php.ini file.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -681,7 +642,6 @@
             "name": "php_ini_scanned_files",
             "desc": "php_ini_scanned_files() returns a comma-separated list of configuration files parsed after php.ini. These files are found in a directory defined by the --with-config-file-scan-dir option which is set during compilation.\n\nThe returned configuration files also include the path as declared in the --with-config-file-scan-dir option.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -694,7 +654,6 @@
             "name": "php_logo_guid",
             "desc": "This function returns the ID which can be used to display the PHP logo using the built-in image. Logo is displayed only if expose_php is On.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -706,7 +665,6 @@
         {
             "name": "php_sapi_name",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -719,7 +677,6 @@
             "name": "php_uname",
             "desc": "php_uname() returns a description of the operating system PHP is running on. This is the same string you see at the very top of the phpinfo() output. For the name of just the operating system, consider using the PHP_OS constant, but keep in mind this constant will contain the operating system PHP was built on.\n\nOn some older UNIX platforms, it may not be able to determine the current OS information in which case it will revert to displaying the OS PHP was built on. This will only happen if your uname() library call either doesn't exist or doesn't work.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -738,7 +695,6 @@
             "name": "phpcredits",
             "desc": "This function prints out the credits listing the PHP developers, modules, etc. It generates the appropriate HTML codes to insert the information in a page.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -757,7 +713,6 @@
             "name": "phpinfo",
             "desc": "Outputs a large amount of information about the current state of PHP. This includes information about PHP compilation options and extensions, the PHP version, server information and environment (if compiled as a module), the PHP environment, OS version information, paths, master and local values of configuration options, HTTP headers, and the PHP License.\n\nBecause every system is setup differently, phpinfo() is commonly used to check configuration settings and for available predefined variables on a given system.\n\nphpinfo() is also a valuable debugging tool as it contains all EGPCS (Environment, GET, POST, Cookie, Server) data.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -776,7 +731,6 @@
             "name": "phpversion",
             "desc": "Returns a string containing the version of the currently running PHP parser or extension.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -795,7 +749,6 @@
             "name": "putenv",
             "desc": "Adds setting to the server environment. The environment variable will only exist for the duration of the current request. At the end of the request the environment is restored to its original state.\n\nSetting certain environment variables may be a potential security breach. The safe_mode_allowed_env_vars directive contains a comma-delimited list of prefixes. In Safe Mode, the user may only alter environment variables whose names begin with the prefixes supplied by this directive. By default, users will only be able to set environment variables that begin with PHP_ (e.g. PHP_FOO=BAR). Note: if this directive is empty, PHP will let the user modify ANY environment variable!\n\nThe safe_mode_protected_env_vars directive contains a comma-delimited list of environment variables, that the end user won't be able to change using putenv(). These variables will be protected even if safe_mode_allowed_env_vars is set to allow to change them.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -813,7 +766,6 @@
             "name": "set_magic_quotes_runtime",
             "desc": "Set the current active configuration setting of magic_quotes_runtime. WarningThis function has been DEPRECATED as of PHP 5.3.0. Relying on this feature is highly discouraged.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -831,7 +783,6 @@
             "name": "set_time_limit",
             "desc": "Set the number of seconds a script is allowed to run. If this is reached, the script returns a fatal error. The default limit is 30 seconds or, if it exists, the max_execution_time value defined in the php.ini.\n\nWhen called, set_time_limit() restarts the timeout counter from zero. In other words, if the timeout is the default 30 seconds, and 25 seconds into script execution a call such as set_time_limit(20) is made, the script will run for a total of 45 seconds before timing out.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null,
@@ -849,7 +800,6 @@
             "name": "sys_get_temp_dir",
             "desc": "Returns the path of the directory PHP stores temporary files in by default.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -862,7 +812,6 @@
             "name": "version_compare",
             "desc": "version_compare() compares two \"PHP-standardized\" version number strings. This is useful if you would like to write programs working only on some versions of PHP.\n\nThe function first replaces _, - and + with a dot . in the version strings and also inserts dots . before and after any non number so that for example '4.3.2RC1' becomes '4.3.2.RC.1'. Then it splits the results like if you were using explode('.', $ver). Then it compares the parts starting from left to right. If a part contains special version strings these are handled in the following order: any string not found in this list < dev < alpha = a < beta = b < RC = rc < # < pl = p. This way not only versions with different levels like '4.1' and '4.1.2' can be compared but also any PHP specific version containing development state.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -891,7 +840,6 @@
             "name": "gc_enabled",
             "desc": "Returns status of the circular reference collector.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -904,7 +852,6 @@
             "name": "gc_enable",
             "desc": "Activates the circular reference collector.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -916,7 +863,6 @@
             "name": "gc_disable",
             "desc": "Deactivates the circular reference collector.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -928,7 +874,6 @@
             "name": "gc_collect_cycles",
             "desc": "Forces collection of any existing garbage cycles.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -941,7 +886,6 @@
             "name": "zend_logo_guid",
             "desc": "This function returns the ID which can be used to display the Zend logo using the built-in image.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -954,7 +898,6 @@
             "name": "zend_thread_id",
             "desc": "This function returns a unique identifier for the current thread.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -967,7 +910,6 @@
             "name": "zend_version",
             "desc": "Returns a string containing the version of the currently running Zend Engine.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",

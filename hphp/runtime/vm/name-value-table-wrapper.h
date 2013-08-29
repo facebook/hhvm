@@ -17,7 +17,7 @@
 #define incl_HPHP_RUNTIME_VM_NAME_VALUE_TABLE_WRAPPER_H
 
 #include "hphp/runtime/vm/name-value-table.h"
-#include "hphp/runtime/base/array_data.h"
+#include "hphp/runtime/base/array-data.h"
 
 namespace HPHP {
 
@@ -69,7 +69,6 @@ public: // ArrayData implementation
   using ArrayData::set;
   using ArrayData::setRef;
   using ArrayData::add;
-  using ArrayData::addLval;
   using ArrayData::remove;
   using ArrayData::nvGet;
 
@@ -96,10 +95,6 @@ public: // ArrayData implementation
   static ArrayData* SetStr(ArrayData*, StringData* k, CVarRef v, bool copy);
   static ArrayData* SetRefInt(ArrayData*, int64_t k, CVarRef v, bool copy);
   static ArrayData* SetRefStr(ArrayData*, StringData* k, CVarRef v, bool copy);
-  static ArrayData* AddLvalInt(ArrayData*, int64_t k, Variant*& ret,
-                               bool copy);
-  static ArrayData* AddLvalStr(ArrayData*, StringData* k, Variant*& ret,
-                               bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k, bool copy);
 

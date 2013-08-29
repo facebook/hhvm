@@ -7,7 +7,6 @@
             "name": "base64_decode",
             "desc": "Decodes a base64 encoded data.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -31,7 +30,6 @@
             "name": "base64_encode",
             "desc": "Encodes the given data with base64.\n\nThis encoding is designed to make binary data survive transport through transport layers that are not 8-bit clean, such as mail bodies.\n\nBase64-encoded data takes about 33% more space than the original data.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -49,7 +47,6 @@
             "name": "get_headers",
             "desc": "get_headers() returns an array with the headers sent by the server in response to a HTTP request.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -73,7 +70,6 @@
             "name": "get_meta_tags",
             "desc": "Opens filename and parses it line by line for <meta> tags in the file. The parsing stops at <\/head>.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "StringVec",
@@ -97,7 +93,6 @@
             "name": "http_build_query",
             "desc": "Generates a URL-encoded query string from the associative (or indexed) array provided.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -127,7 +122,6 @@
             "name": "parse_url",
             "desc": "This function parses a URL and returns an associative array containing any of the various components of the URL that are present.\n\nThis function is not meant to validate the given URL, it only breaks it up into the above listed parts. Partial URLs are also accepted, parse_url() tries its best to parse them correctly.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -151,7 +145,6 @@
             "name": "rawurldecode",
             "desc": "Returns a string in which the sequences with percent (%) signs followed by two hex digits have been replaced with literal characters.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -169,7 +162,6 @@
             "name": "rawurlencode",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -187,7 +179,6 @@
             "name": "urldecode",
             "desc": "Decodes any %## encoding in the given string. Plus symbols ('+') are decoded to a space character.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -205,7 +196,6 @@
             "name": "urlencode",
             "desc": "This function is convenient when encoding a string to be used in a query part of a URL, as a convenient way to pass variables to the next page.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",

@@ -25,8 +25,8 @@
 #include "hphp/compiler/analysis/function_container.h"
 #include "hphp/compiler/package.h"
 
-#include "hphp/util/string_bag.h"
-#include "hphp/util/thread_local.h"
+#include "hphp/util/string-bag.h"
+#include "hphp/util/thread-local.h"
 
 #include <boost/graph/adjacency_list.hpp>
 #include "tbb/concurrent_hash_map.h"
@@ -238,6 +238,14 @@ public:
   ClassScopePtr findClass(const std::string &className,
                           FindClassBy by);
 
+  /*
+   * Returns: whether the given name is the name of any type aliases
+   * in the whole program.
+   */
+  bool isTypeAliasName(const std::string& name) const {
+    return m_typeAliasNames.count(name);
+  }
+
   /**
    * Find all the redeclared classes by the name, excluding system classes.
    * Note that system classes cannot be redeclared.
@@ -396,12 +404,12 @@ public:
                               s_changedScopesMapThreadLocal);
 
 #ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
-  static int                                  s_NumDoJobCalls;
+  static std::atomic<int>                     s_NumDoJobCalls;
   static ConcurrentBlockScopeRawPtrIntHashMap s_DoJobUniqueScopes;
-  static int                                  s_NumForceRerunGlobal;
-  static int                                  s_NumReactivateGlobal;
-  static int                                  s_NumForceRerunUseKinds;
-  static int                                  s_NumReactivateUseKinds;
+  static std::atomic<int>                     s_NumForceRerunGlobal;
+  static std::atomic<int>                     s_NumReactivateGlobal;
+  static std::atomic<int>                     s_NumForceRerunUseKinds;
+  static std::atomic<int>                     s_NumReactivateUseKinds;
 #endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
 
 private:
@@ -429,9 +437,9 @@ public:
     Exception(), m_scope(scope) {}
   BlockScopeRawPtr &getScope() { return m_scope; }
 #ifdef HPHP_INSTRUMENT_TYPE_INF
-  static int s_NumReschedules;
-  static int s_NumForceRerunSelfCaller;
-  static int s_NumRetTypesChanged;
+  static std::atomic<int> s_NumReschedules;
+  static std::atomic<int> s_NumForceRerunSelfCaller;
+  static std::atomic<int> s_NumRetTypesChanged;
 #endif /* HPHP_INSTRUMENT_TYPE_INF */
 private:
   BlockScopeRawPtr m_scope;

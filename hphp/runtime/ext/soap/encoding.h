@@ -19,7 +19,7 @@
 #define PHP_ENCODING_H
 
 #include "hphp/runtime/ext/soap/xml.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // defines

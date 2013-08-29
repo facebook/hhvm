@@ -38,7 +38,7 @@ void CmdZend::help(DebuggerClient &client) {
   );
 }
 
-void CmdZend::onClientImpl(DebuggerClient &client) {
+void CmdZend::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
   if (client.argCount() == 0) {

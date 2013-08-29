@@ -20,15 +20,12 @@
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/funcdict.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 namespace HPHP {
 
 struct HhbcExtFuncInfo;
 struct HhbcExtClassInfo;
-
-ArrayData* new_array(int capacity);
-ArrayData* new_tuple(int numArgs, const TypedValue* args);
 
 ObjectData* newVectorHelper(int nElms);
 ObjectData* newMapHelper(int nElms);
@@ -40,8 +37,6 @@ StringData* concat_is(int64_t v1, StringData* v2);
 StringData* concat_si(StringData* v1, int64_t v2);
 StringData* concat_ss(StringData* v1, StringData* v2);
 StringData* concat_tv(DataType t1, uint64_t v1, DataType t2, uint64_t v2);
-
-int64_t tv_to_bool(TypedValue* tv);
 
 int64_t eq_null_str(StringData* v1);
 int64_t eq_bool_str(int64_t v1, StringData* v2);
@@ -85,7 +80,7 @@ inline c_Continuation*
 frame_continuation(const ActRec* fp) {
   size_t arOffset = c_Continuation::getArOffset(fp->m_func);
   ObjectData* obj = (ObjectData*)((char*)fp - arOffset);
-  assert(dynamic_cast<c_Continuation*>(obj));
+  assert(obj->getVMClass() == c_Continuation::s_cls);
   return static_cast<c_Continuation*>(obj);
 }
 

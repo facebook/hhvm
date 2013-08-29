@@ -25,15 +25,15 @@
 #include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/simple_function_call.h"
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 using namespace HPHP;
 

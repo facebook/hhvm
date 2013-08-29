@@ -17,7 +17,7 @@
 #include "hphp/runtime/debugger/debugger_base.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/break_point.h"
-#include "hphp/util/parser/scanner.h"
+#include "hphp/parser/scanner.h"
 #include "hphp/util/util.h"
 
 namespace HPHP { namespace Eval {
@@ -301,7 +301,7 @@ static void get_color(int tokid, int prev, int next,
 #endif
 #define YYTOKEN(num, name) (char)(CodeColorKeyword * 2)
 #define YYTOKEN_MAP static char code[] =
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 #undef YYTOKEN_MAP
 #undef YYTOKEN
 

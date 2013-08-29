@@ -55,8 +55,8 @@ void CmdInternalTesting::help(DebuggerClient &client) {
   );
 }
 
-void CmdInternalTesting::onClientImpl(DebuggerClient &client) {
-  TRACE(2, "CmdInternalTesting::onClientImpl\n");
+void CmdInternalTesting::onClient(DebuggerClient &client) {
+  TRACE(2, "CmdInternalTesting::onClient\n");
   if (DebuggerCommand::displayedHelp(client)) return;
   if (client.argCount() == 0) {
     help(client);

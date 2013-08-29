@@ -17,10 +17,10 @@
 
 #include "hphp/runtime/ext/ext_intl.h"
 #include "hphp/runtime/ext/ext_array.h" // for throw_bad_array_exception
-#include "hphp/runtime/base/request_local.h"
-#include "hphp/runtime/base/intl_convert.h"
-#include "hphp/runtime/base/zend_collator.h"
-#include "hphp/runtime/base/zend_qsort.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/intl-convert.h"
+#include "hphp/runtime/base/zend-collator.h"
+#include "hphp/runtime/base/zend-qsort.h"
 #include "unicode/uidna.h"
 #include "unicode/ustring.h"
 #include "unicode/ucol.h" // icu
@@ -531,22 +531,6 @@ Variant f_collator_sort(CVarRef obj, VRefParam arr,
                         int64_t sort_flag /* = q_Collator$$SORT_REGULAR */) {
   CHECK_COLL(obj);
   return coll->t_sort(ref(arr), sort_flag);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-const int64_t q_Locale$$ACTUAL_LOCALE = 0;
-const int64_t q_Locale$$VALID_LOCALE = 1;
-
-///////////////////////////////////////////////////////////////////////////////
-
-c_Locale::c_Locale(Class* cb) : ExtObjectData(cb) {
-}
-
-c_Locale::~c_Locale() {
-}
-
-void c_Locale::t___construct() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////

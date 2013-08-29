@@ -26,6 +26,11 @@
 #include "hphp/runtime/vm/jit/state-vector.h"
 
 namespace HPHP {
+
+namespace Transl {
+class CppCall;
+}
+
 namespace JIT {
 
 struct ArgGroup;
@@ -269,20 +274,20 @@ private:
 
 private:
   PhysReg selectScratchReg(IRInstruction* inst);
-  void emitLoadImm(CodeGenerator::Asm& as, int64_t val, PhysReg dstReg);
+  void emitLoadImm(Asm& as, int64_t val, PhysReg dstReg);
   PhysReg prepXMMReg(const SSATmp* tmp,
-                     X64Assembler& as,
+                     Asm& as,
                      const RegAllocInfo& allocInfo,
                      RegXMM rXMMScratch);
   void emitSetCc(IRInstruction*, ConditionCode);
   template<class JmpFn>
   void emitIsTypeTest(IRInstruction* inst, JmpFn doJcc);
-  void doubleCmp(X64Assembler& a, RegXMM xmmReg0, RegXMM xmmReg1);
+  void doubleCmp(Asm& a, RegXMM xmmReg0, RegXMM xmmReg1);
   void cgIsTypeCommon(IRInstruction* inst, bool negate);
   void cgJmpIsTypeCommon(IRInstruction* inst, bool negate);
   void cgIsTypeMemCommon(IRInstruction*, bool negate);
   void emitInstanceBitmaskCheck(IRInstruction*);
-  void emitTraceRet(CodeGenerator::Asm& as);
+  void emitTraceRet(Asm& as);
   Address cgCheckStaticBit(Type type,
                            PhysReg reg,
                            bool regIsCount);
@@ -313,6 +318,7 @@ private:
   void cgMIterNextCommon(IRInstruction* inst);
   void cgMIterInitCommon(IRInstruction* inst);
   void cgLdFuncCachedCommon(IRInstruction* inst);
+  void cgLookupCnsCommon(IRInstruction* inst);
   TargetCache::CacheHandle cgLdClsCachedCommon(IRInstruction* inst);
   void emitFwdJcc(ConditionCode cc, Block* target);
   void emitFwdJcc(Asm& a, ConditionCode cc, Block* target);
@@ -352,16 +358,22 @@ private:
     }
   }
 
+  // Generate an if-then-else block
+  template <class Then, class Else>
+  void ifThenElse(Asm& a, ConditionCode cc, Then thenBlock, Else elseBlock) {
+    Label elseLabel, done;
+    a.jcc8(ccNegate(cc), elseLabel);
+    thenBlock();
+    a.jmp8(done);
+    asm_label(a, elseLabel);
+    elseBlock();
+    asm_label(a, done);
+  }
+
   // Generate an if-then-else block into m_as.
   template <class Then, class Else>
   void ifThenElse(ConditionCode cc, Then thenBlock, Else elseBlock) {
-    Label elseLabel, done;
-    m_as.jcc8(ccNegate(cc), elseLabel);
-    thenBlock();
-    m_as.jmp8(done);
-    asm_label(m_as, elseLabel);
-    elseBlock();
-    asm_label(m_as, done);
+    ifThenElse(m_as, cc, thenBlock, elseBlock);
   }
 
   /*
@@ -585,11 +597,6 @@ void genCodeForTrace(IRTrace*                trace,
                      const RegAllocInfo&     regs,
                      const LifetimeInfo*     lifetime = nullptr,
                      AsmInfo*                asmInfo = nullptr);
-
-TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
-TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
-TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
-TypedValue* ldGblAddrDefHelper(StringData* name);
 
 }}
 

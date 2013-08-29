@@ -39,6 +39,9 @@ hphp/system/php/spl/iterators/RecursiveFilterIterator.php
 hphp/system/php/spl/iterators/ArrayIterator.php
 hphp/system/php/spl/iterators/RecursiveArrayIterator.php
 
+hphp/system/php/spl/iterators/CachingIterator.php
+hphp/system/php/spl/iterators/RecursiveCachingIterator.php
+
 hphp/system/php/filter/filter_has_var.php
 hphp/system/php/filter/filter_input.php
 hphp/system/php/filter/filter_var_array.php
@@ -54,7 +57,6 @@ hphp/system/php/phar/Phar.php
 hphp/system/php/phar/PharFileInfo.php
 
 # If you have no inheritance relationship, go here in alphabetical order
-hphp/system/php/DebuggerCommand.php
 hphp/system/php/XhprofFrame.php
 hphp/system/php/array_filter.hhas
 hphp/system/php/array_map.hhas
@@ -65,15 +67,19 @@ hphp/system/php/dom/DOMException.php
 hphp/system/php/file_system/Directory.php
 hphp/system/php/json/JsonSerializable.php
 hphp/system/php/lang/ErrorException.php
+hphp/system/php/misc/highlight.php
 hphp/system/php/misc/php_strip_whitespace.php
 hphp/system/php/pdo/PDOException.php
 hphp/system/php/redis/Redis.php
+hphp/system/php/redis/RedisSessionModule.php
 hphp/system/php/reflection/reflection.php
 hphp/system/php/sessions/session_register_shutdown.php
 hphp/system/php/soap/SoapFault.php
 hphp/system/php/spl/datastructures/SplFixedArray.php
 hphp/system/php/spl/datastructures/SplObjectStorage.php
 hphp/system/php/spl/datastructures/SplPriorityQueue.php
+hphp/system/php/spl/interfaces/SplObserver.php
+hphp/system/php/spl/interfaces/SplSubject.php
 hphp/system/php/spl/iterators/AppendIterator.php
 hphp/system/php/spl/iterators/EmptyIterator.php
 hphp/system/php/spl/iterators/InfiniteIterator.php

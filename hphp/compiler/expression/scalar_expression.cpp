@@ -15,7 +15,7 @@
 */
 
 #include "hphp/compiler/expression/scalar_expression.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 #include "hphp/util/util.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/block_scope.h"
@@ -26,9 +26,9 @@
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/util/hash.h"
-#include "hphp/runtime/base/string_data.h"
-#include "hphp/runtime/base/type_conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/compiler/analysis/file_scope.h"
 

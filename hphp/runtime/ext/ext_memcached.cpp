@@ -17,7 +17,8 @@
 */
 
 #include "hphp/runtime/ext/ext_memcached.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/ext/libmemcached_portability.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/ext_json.h"
 #include <zlib.h>
 
@@ -601,17 +602,24 @@ bool c_Memcached::t_addservers(CArrRef servers) {
 
 namespace {
 
-const StaticString
-  s_host("host"),
-  s_port("port"),
-  s_weight("weight");
+const StaticString s_host("host"), s_port("port");
+#ifdef LMCD_SERVER_QUERY_INCLUDES_WEIGHT
+const StaticString s_weight("weight");
+#endif
 
 memcached_return_t doServerListCallback(const memcached_st *ptr,
-    memcached_server_instance_st server, void *context) {
+    LMCD_SERVER_CALLBACK_INSTANCE_TYPE server, void *context) {
   Array *returnValue = (Array*) context;
-  returnValue->append(CREATE_MAP3(s_host, String(server->hostname, CopyString),
-                                  s_port, (int32_t)server->port,
+  const char* hostname = LMCD_SERVER_HOSTNAME(server);
+  in_port_t port = LMCD_SERVER_PORT(server);
+#ifdef LMCD_SERVER_QUERY_INCLUDES_WEIGHT
+  returnValue->append(CREATE_MAP3(s_host, String(hostname, CopyString),
+                                  s_port, (int32_t)port,
                                   s_weight, (int32_t)server->weight));
+#else
+  returnValue->append(CREATE_MAP2(s_host, String(hostname, CopyString),
+                                  s_port, (int32_t)port));
+#endif
   return MEMCACHED_SUCCESS;
 }
 }
@@ -631,16 +639,23 @@ Variant c_Memcached::t_getserverbykey(CStrRef server_key) {
   }
 
   memcached_return_t error;
-  const memcached_server_st *server = memcached_server_by_key(
-      &m_impl->memcached, server_key.c_str(), server_key.size(), &error);
+  LMCD_SERVER_BY_KEY_INSTANCE_TYPE server = memcached_server_by_key(
+    &m_impl->memcached, server_key.c_str(), server_key.size(), &error);
   if (!server) {
     handleError(error);
     return false;
   }
 
-  Array returnValue = CREATE_MAP3(s_host, String(server->hostname, CopyString),
-                                  s_port, (int32_t)server->port,
+  const char* hostname = LMCD_SERVER_HOSTNAME(server);
+  in_port_t port = LMCD_SERVER_PORT(server);
+#ifdef LMCD_SERVER_QUERY_INCLUDES_WEIGHT
+  Array returnValue = CREATE_MAP3(s_host, String(hostname, CopyString),
+                                  s_port, (int32_t)port,
                                   s_weight, (int32_t)server->weight);
+#else
+  Array returnValue = CREATE_MAP2(s_host, String(hostname, CopyString),
+                                  s_port, (int32_t)port);
+#endif
   return returnValue;
 }
 
@@ -677,10 +692,12 @@ const StaticString
   s_version("version");
 
 memcached_return_t doStatsCallback(const memcached_st *ptr,
-    memcached_server_instance_st server, void *inContext) {
+    LMCD_SERVER_CALLBACK_INSTANCE_TYPE server, void *inContext) {
   StatsContext *context = (StatsContext*) inContext;
   char key[NI_MAXHOST + 6];
-  snprintf(key, sizeof(key), "%s:%d", server->hostname, server->port);
+  const char* hostname = LMCD_SERVER_HOSTNAME(server);
+  in_port_t port = LMCD_SERVER_PORT(server);
+  snprintf(key, sizeof(key), "%s:%d", hostname, port);
   memcached_stat_st *stats = context->stats;
   ssize_t i = context->returnValue.size();
 
@@ -735,12 +752,19 @@ Variant c_Memcached::t_getstats() {
 
 namespace {
 memcached_return_t doVersionCallback(const memcached_st *ptr,
-    memcached_server_instance_st server, void *context) {
+    LMCD_SERVER_CALLBACK_INSTANCE_TYPE server, void *context) {
   Array *returnValue = (Array*) context;
   char key[NI_MAXHOST + 6], version[16];
-  snprintf(key, sizeof(key), "%s:%d", server->hostname, server->port);
-  snprintf(version, sizeof(version), "%d.%d.%d", server->major_version,
-           server->minor_version, server->micro_version);
+
+  const char* hostname = LMCD_SERVER_HOSTNAME(server);
+  in_port_t port = LMCD_SERVER_PORT(server);
+  uint8_t majorVersion = LMCD_SERVER_MAJOR_VERSION(server);
+  uint8_t minorVersion = LMCD_SERVER_MINOR_VERSION(server);
+  uint8_t microVersion = LMCD_SERVER_MICRO_VERSION(server);
+
+  snprintf(key, sizeof(key), "%s:%d", hostname, port);
+  snprintf(version, sizeof(version), "%" PRIu8 ".%" PRIu8 ".%" PRIu8,
+           majorVersion, minorVersion, microVersion);
   returnValue->set(String(key, CopyString), String(version, CopyString));
   return MEMCACHED_SUCCESS;
 }
@@ -955,9 +979,9 @@ bool c_Memcached::toObject(Variant& value, const memcached_result_st &result) {
       raise_warning("could not uncompress value");
       return false;
     }
-    decompPayload = NEW(StringData)(buffer.data(), bufferSize, CopyString);
+    decompPayload = StringData::Make(buffer.data(), bufferSize, CopyString);
   } else {
-    decompPayload = NEW(StringData)(payload, payloadLength, CopyString);
+    decompPayload = StringData::Make(payload, payloadLength, CopyString);
   }
 
   switch (flags & MEMC_VAL_TYPE_MASK) {

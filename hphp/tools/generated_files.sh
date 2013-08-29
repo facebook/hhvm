@@ -34,7 +34,7 @@ if [ "$1" = "help" ]; then
 fi
 
 if [ "$1" = "lexer" -o "$1" = "all" ]; then
-  cd $HPHP_HOME/hphp/util/parser
+  cd $HPHP_HOME/hphp/parser
   [ $VERBOSE -eq 1 ] && echo "Generating lexer"
   FLEX=`which flex`
   if [ -x "$FLEX" ]; then
@@ -46,7 +46,7 @@ if [ "$1" = "lexer" -o "$1" = "all" ]; then
 fi
 
 if [ "$1" = "parser" -o "$1" = "all" ]; then
-  cd $HPHP_HOME/hphp/util/parser
+  cd $HPHP_HOME/hphp/parser
   BISON=`which bison`
   SED=`which sed`
   if [ -x "$BISON" -a -x "$SED" ]; then
@@ -81,8 +81,8 @@ if [ "$1" = "parser" -o "$1" = "all" ]; then
            -e "s/YYSTACK_FREE \(yyss\)/YYSTACK_FREE (yyss);\n  YYSTACK_CLEANUP/" \
       > new_hphp.tab.cpp.tmp
     mv new_hphp.tab.cpp.tmp new_hphp.tab.cpp
-    (diff -q new_hphp.tab.cpp ../../compiler/parser/hphp.tab.cpp >/dev/null ||
-      mv -f new_hphp.tab.cpp ../../compiler/parser/hphp.tab.cpp) &&
+    (diff -q new_hphp.tab.cpp ../compiler/parser/hphp.tab.cpp >/dev/null ||
+      mv -f new_hphp.tab.cpp ../compiler/parser/hphp.tab.cpp) &&
       rm -f new_hphp.tab.cpp
   else
     [ $VERBOSE -eq 1 ] && echo "No bison/sed with which to generate parser"

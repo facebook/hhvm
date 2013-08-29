@@ -3,15 +3,14 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
+   | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
 
@@ -64,26 +63,24 @@ extern void free_global_variables_after_sweep();
 
 /**
  * These are things that look like constants to PHP, but their values aren't
- * known at compile time and are instead determined at startup time. lvalProxy
- * is not that (it's a "black hole" for certain types of assignments) but there
- * isn't really an obviously better place for it to live.
+ * known at compile time and are instead determined per request at startup time.
+ * lvalProxy is not that (it's a "black hole" for certain types of assignments)
+ * but there isn't really an obviously better place for it to live.
+ *
+ * The standalone k_ constants are similarly dynamic but invariant per process.
  */
 struct EnvConstants {
   static void requestInit(EnvConstants* gt);
   static void requestExit();
   Variant __lvalProxy;
-  Variant stgv_Variant[4];
+  Variant stgv_Variant[1];
 #define k_SID stgv_Variant[0]
-#define k_PHP_SAPI stgv_Variant[1]
-#define k_PHP_BINARY stgv_Variant[2]
-#define k_PHP_BINDIR stgv_Variant[3]
 };
 extern EnvConstants* get_env_constants();
-
-/**
- * Precomputed literal strings
- */
-extern StaticString literalStrings[];
+extern String k_PHP_BINARY;
+extern String k_PHP_BINDIR;
+extern String k_PHP_OS;
+extern String k_PHP_SAPI;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

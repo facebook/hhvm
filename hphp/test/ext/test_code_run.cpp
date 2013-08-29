@@ -23,7 +23,7 @@
 #include "hphp/util/util.h"
 #include "hphp/util/process.h"
 #include "hphp/compiler/option.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include <pcre.h>
 #include "hphp/test/ext/test_mysql_info.h"
 #include "hphp/runtime/ext/ext_file.h"

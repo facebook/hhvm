@@ -17,7 +17,7 @@
 #include "hphp/compiler/statement/loop_statement.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/util/parser/parser.h"
+#include "hphp/parser/parser.h"
 
 using namespace HPHP;
 

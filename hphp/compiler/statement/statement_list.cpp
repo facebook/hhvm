@@ -26,7 +26,7 @@
 #include "hphp/compiler/statement/function_statement.h"
 #include "hphp/compiler/statement/return_statement.h"
 #include "hphp/compiler/statement/block_statement.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 #include "hphp/compiler/expression/binary_op_expression.h"
 #include "hphp/compiler/expression/assignment_expression.h"
 #include "hphp/compiler/expression/simple_variable.h"

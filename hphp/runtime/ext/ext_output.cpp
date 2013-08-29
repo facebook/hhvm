@@ -17,8 +17,8 @@
 
 #include "hphp/runtime/ext/ext_output.h"
 #include "hphp/runtime/ext/ext_json.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/hardware_counter.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/hardware-counter.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 

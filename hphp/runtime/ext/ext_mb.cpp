@@ -16,14 +16,14 @@
 */
 
 #include "hphp/runtime/ext/ext_mb.h"
-#include "hphp/runtime/base/string_buffer.h"
-#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/ext/php_unicode.h"
 #include "hphp/runtime/ext/unicode_data.h"
 #include "hphp/runtime/ext/ext_process.h"
-#include "hphp/runtime/base/zend_url.h"
-#include "hphp/runtime/base/zend_string.h"
-#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/base/zend-url.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/ini-setting.h"
 
 extern "C" {
 #include "mbfl/mbfl_convert.h"

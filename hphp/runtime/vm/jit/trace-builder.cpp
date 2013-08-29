@@ -19,8 +19,9 @@
 #include "folly/ScopeGuard.h"
 
 #include "hphp/util/trace.h"
-#include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/runtime/vm/jit/guard-relaxation.h"
+#include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/util/assertions.h"
 
 namespace HPHP { namespace JIT {
@@ -43,9 +44,10 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   , m_fpValue(nullptr)
   , m_spOffset(initialSpOffsetFromFp)
   , m_thisIsAvailable(false)
+  , m_frameSpansCall(false)
+  , m_needsFPAnchor(false)
   , m_refCountedMemValue(nullptr)
-  , m_localValues(func->numLocals(), nullptr)
-  , m_localTypes(func->numLocals(), Type::None)
+  , m_locals(func->numLocals())
 {
   m_curFunc = m_irFactory.cns(func);
   if (RuntimeOption::EvalHHIRGenOpts) {
@@ -71,7 +73,8 @@ bool TraceBuilder::isValueAvailable(SSATmp* tmp) const {
     IRInstruction* srcInstr = tmp->inst();
     Opcode srcOpcode = srcInstr->op();
 
-    if (srcOpcode == LdThis) return true;
+    // ensure that the LdThis is in the same frame
+    if (srcOpcode == LdThis && srcInstr->src(0) == m_fpValue) return true;
 
     if (srcInstr->isPassthrough()) {
       tmp = srcInstr->getPassthroughValue();
@@ -137,22 +140,22 @@ void TraceBuilder::trackDefInlineFP(IRInstruction* inst) {
   m_spValue         = calleeSP;
   m_thisIsAvailable = target->cls() != nullptr && !target->isStatic();
   m_curFunc         = cns(target);
+  m_frameSpansCall  = false;
+  m_needsFPAnchor   = false;
 
   /*
    * Keep the outer locals somewhere for isValueAvailable() to know
    * about their liveness, to help with incref/decref elimination.
    */
-  m_callerAvailableValues.insert(m_callerAvailableValues.end(),
-                                 m_localValues.begin(),
-                                 m_localValues.end());
+  for (auto const& state : m_locals) {
+    m_callerAvailableValues.push_back(state.value);
+  }
   m_callerAvailableValues.insert(m_callerAvailableValues.end(),
                                  stackValues.begin(),
                                  stackValues.end());
 
-  m_localValues.clear();
-  m_localTypes.clear();
-  m_localValues.resize(target->numLocals(), nullptr);
-  m_localTypes.resize(target->numLocals(), Type::None);
+  m_locals.clear();
+  m_locals.resize(target->numLocals());
 }
 
 void TraceBuilder::trackInlineReturn(IRInstruction* inst) {
@@ -176,28 +179,32 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
   case DefInlineFP:    trackDefInlineFP(inst);  break;
   case InlineReturn:   trackInlineReturn(inst); break;
 
+  case InlineFPAnchor: m_needsFPAnchor = true;  break;
+
   case Call:
     m_spValue = inst->dst();
+    m_frameSpansCall = true;
     // A call pops the ActRec and pushes a return value.
     m_spOffset -= kNumActRecCells;
     m_spOffset += 1;
     assert(m_spOffset >= 0);
     killCse();
-    killLocals();
+    killLocalsForCall();
     break;
 
   case CallArray:
     m_spValue = inst->dst();
+    m_frameSpansCall = true;
     // A CallArray pops the ActRec an array arg and pushes a return value.
     m_spOffset -= kNumActRecCells;
     assert(m_spOffset >= 0);
     killCse();
-    killLocals();
+    killLocalsForCall();
     break;
 
   case ContEnter:
     killCse();
-    killLocals();
+    killLocalsForCall();
     break;
 
   case DefFP:
@@ -206,8 +213,16 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     break;
 
   case ReDefGeneratorSP:
-  case DefSP:
+    m_spValue = inst->dst();
+    break;
+
   case ReDefSP:
+    m_spValue = inst->dst();
+    m_spOffset = inst->extra<ReDefSP>()->offset;
+    break;
+
+  case DefInlineSP:
+  case DefSP:
     m_spValue = inst->dst();
     m_spOffset = inst->extra<StackOffset>()->offset;
     break;
@@ -283,15 +298,15 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
   case OverrideLoc:
     // If changing the inner type of a boxed local, also drop the
     // information about inner types for any other boxed locals.
-    if (inst->typeParam().isBoxed()) {
-      dropLocalRefsInnerTypes();
-    }
-    // fallthrough
+    if (inst->typeParam().isBoxed()) dropLocalRefsInnerTypes();
+    setLocalType(inst->extra<LocalId>()->locId, inst->typeParam());
+    break;
+
   case AssertLoc:
   case GuardLoc:
   case CheckLoc:
-    setLocalType(inst->extra<LocalId>()->locId,
-                 inst->typeParam());
+    m_fpValue = inst->dst();
+    refineLocalType(inst->extra<LocalId>()->locId, inst->typeParam());
     break;
 
   case OverrideLocVal:
@@ -336,8 +351,8 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     break;
   }
 
-  if (VectorEffects::supported(inst)) {
-    VectorEffects::get(inst,
+  if (MInstrEffects::supported(inst)) {
+    MInstrEffects::get(inst,
                        [&](uint32_t id, SSATmp* val) { // storeLocalValue
                          setLocalValue(id, val);
                        },
@@ -376,11 +391,12 @@ std::unique_ptr<TraceBuilder::State> TraceBuilder::createState() const {
   state->curFunc = m_curFunc;
   state->spOffset = m_spOffset;
   state->thisAvailable = m_thisIsAvailable;
-  state->localValues = m_localValues;
-  state->localTypes = m_localTypes;
+  state->locals = m_locals;
   state->callerAvailableValues = m_callerAvailableValues;
   state->refCountedMemValue = m_refCountedMemValue;
   state->curMarker = m_curMarker;
+  state->frameSpansCall = m_frameSpansCall;
+  state->needsFPAnchor = m_needsFPAnchor;
   assert(state->curMarker.valid());
   return state;
 }
@@ -393,6 +409,11 @@ std::unique_ptr<TraceBuilder::State> TraceBuilder::createState() const {
 void TraceBuilder::saveState(Block* block) {
   if (State* state = m_snapshots[block]) {
     mergeState(state);
+
+    // reset caller's available values for all inlined frames
+    for (auto& state : m_inlineSavedStates) {
+      state->callerAvailableValues.clear();
+    }
   } else {
     m_snapshots[block] = createState().release();
   }
@@ -419,20 +440,25 @@ void TraceBuilder::mergeState(State* state) {
   }
   // this is available iff it's available in both states
   state->thisAvailable &= m_thisIsAvailable;
-  for (unsigned i = 0, n = state->localValues.size(); i < n; ++i) {
+
+  assert(m_locals.size() == state->locals.size());
+  for (unsigned i = 0; i < m_locals.size(); ++i) {
+    auto& local = state->locals[i];
+
     // preserve local values if they're the same in both states,
     // This would be the place to insert phi nodes (jmps+deflabels) if we want
     // to avoid clearing state, which triggers a downstream reload.
-    if (state->localValues[i] != m_localValues[i]) {
-      state->localValues[i] = nullptr;
-    }
-  }
-  for (unsigned i = 0, n = state->localTypes.size(); i < n; ++i) {
-    // combine types using Type::unionOf(), but handle Type::None here (t2135185)
-    Type t1 = state->localTypes[i];
-    Type t2 = m_localTypes[i];
-    state->localTypes[i] = (t1 == Type::None || t2 == Type::None) ? Type::None :
-                           Type::unionOf(t1, t2);
+    if (local.value != m_locals[i].value) local.value = nullptr;
+
+    // combine types using Type::unionOf(), but handle Type::None here: t2135185
+    Type t1 = local.type;
+    Type t2 = m_locals[i].type;
+    local.type =
+      (t1 == Type::None || t2 == Type::None) ? Type::None
+                                             : Type::unionOf(t1, t2);
+
+    local.unsafe = local.unsafe || m_locals[i].unsafe;
+    local.written = local.written || m_locals[i].written;
   }
   // Reference counted memory value is available only if it is available on both
   // paths
@@ -455,10 +481,11 @@ void TraceBuilder::useState(std::unique_ptr<State> state) {
   m_curFunc = state->curFunc;
   m_thisIsAvailable = state->thisAvailable;
   m_refCountedMemValue = state->refCountedMemValue;
-  m_localValues = std::move(state->localValues);
-  m_localTypes = std::move(state->localTypes);
+  m_locals = std::move(state->locals);
   m_callerAvailableValues = std::move(state->callerAvailableValues);
   m_curMarker = state->curMarker;
+  m_needsFPAnchor = state->needsFPAnchor;
+  m_frameSpansCall = m_frameSpansCall || state->frameSpansCall;
   // If spValue is null, we merged two different but equivalent values.
   // Define a new sp using the known-good spOffset.
   if (!m_spValue) {
@@ -473,19 +500,12 @@ void TraceBuilder::useState(Block* block) {
   useState(std::move(state));
 }
 
-void TraceBuilder::clearLocals() {
-  for (uint32_t i = 0; i < m_localValues.size(); i++) {
-    m_localValues[i] = nullptr;
-  }
-  for (uint32_t i = 0; i < m_localTypes.size(); i++) {
-    m_localTypes[i] = Type::None;
-  }
-}
-
 void TraceBuilder::clearTrackedState() {
   killCse(); // clears m_cseHash
   clearLocals();
   m_callerAvailableValues.clear();
+  m_frameSpansCall = false;
+  m_needsFPAnchor = false;
   m_spValue = m_fpValue = nullptr;
   m_spOffset = 0;
   m_thisIsAvailable = false;
@@ -571,19 +591,41 @@ SSATmp* TraceBuilder::cseLookup(IRInstruction* inst,
   return tmp;
 }
 
+std::vector<RegionDesc::TypePred> TraceBuilder::getKnownTypes() const {
+  std::vector<RegionDesc::TypePred> result;
+  const Func* curFunc = m_curFunc->getValFunc();
+
+  for (unsigned i = 0; i < curFunc->maxStackCells(); ++i) {
+    auto t = getStackValue(m_spValue, i).knownType;
+    if (!t.equals(Type::None) && !t.equals(Type::Gen)) {
+      result.push_back({ RegionDesc::Location::Stack{i}, t });
+    }
+  }
+
+  // XXX(t2598894) This is only safe right now because it's not called on a
+  // trace with relaxed guards.
+  for (unsigned i = 0; i < curFunc->numLocals(); ++i) {
+    auto t = m_locals[i].type;
+    if (!t.equals(Type::None) && !t.equals(Type::Gen)) {
+      result.push_back({ RegionDesc::Location::Local{i}, t });
+    }
+  }
+  return result;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* TraceBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
   auto const locId = inst->extra<CheckLoc>()->locId;
   Type typeParam = inst->typeParam();
 
-  if (auto const prevValue = getLocalValue(locId)) {
+  if (auto const prevValue = localValue(locId, DataTypeGeneric)) {
     return gen(CheckType, typeParam, inst->taken(), prevValue);
   }
 
-  auto const prevType = getLocalType(locId);
+  auto const prevType = localType(locId, DataTypeSpecific);
 
-  if (prevType == Type::None) {
+  if (prevType.equals(Type::None)) {
     return nullptr;
   }
 
@@ -615,7 +657,7 @@ SSATmp* TraceBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
 
 SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
   auto const locId = inst->extra<AssertLoc>()->locId;
-  auto const prevType = getLocalType(locId);
+  auto const prevType = localType(locId, DataTypeGeneric);
   auto const typeParam = inst->typeParam();
 
   if (!prevType.equals(Type::None) && !typeParam.strictSubtypeOf(prevType)) {
@@ -649,7 +691,18 @@ SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
 }
 
 SSATmp* TraceBuilder::preOptimizeLdThis(IRInstruction* inst) {
-  if (isThisAvailable()) inst->setTaken(nullptr);
+  if (isThisAvailable()) {
+    auto fpInst = inst->src(0)->inst();
+    if (fpInst->op() == DefInlineFP) {
+      if (!m_frameSpansCall) { // check that we haven't nuked the SSATmp
+        auto spInst = fpInst->src(0)->inst();
+        if (spInst->op() == SpillFrame && spInst->src(3)->isA(Type::Obj)) {
+          return spInst->src(3);
+        }
+      }
+    }
+    inst->setTaken(nullptr);
+  }
   return nullptr;
 }
 
@@ -725,7 +778,7 @@ SSATmp* TraceBuilder::preOptimizeDecRefLoc(IRInstruction* inst) {
    * aliasing stores may change them, and we only guard during LdRef.
    * So we have to change any boxed type to BoxedCell.
    */
-  auto knownType = getLocalType(locId);
+  auto knownType = localType(locId, DataTypeCountness);
   if (knownType.isBoxed()) {
     knownType = Type::BoxedCell;
   }
@@ -739,7 +792,7 @@ SSATmp* TraceBuilder::preOptimizeDecRefLoc(IRInstruction* inst) {
    * If we have the local value in flight, use a DecRef on it instead
    * of doing it in memory.
    */
-  if (auto tmp = getLocalValue(locId)) {
+  if (auto tmp = localValue(locId, DataTypeCountness)) {
     gen(DecRef, tmp);
     inst->convertToNop();
   }
@@ -749,41 +802,46 @@ SSATmp* TraceBuilder::preOptimizeDecRefLoc(IRInstruction* inst) {
 
 SSATmp* TraceBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   auto const locId = inst->extra<LdLoc>()->locId;
-  if (auto tmp = getLocalValue(locId)) {
+  if (auto tmp = localValue(locId, DataTypeGeneric)) {
     return tmp;
   }
-  if (getLocalType(locId) != Type::None) { // TODO(#2135185)
-    inst->setTypeParam(
-      Type::mostRefined(getLocalType(locId), inst->typeParam())
-    );
+
+  auto const type = localType(locId, DataTypeGeneric);
+  if (!type.equals(Type::None)) { // TODO(#2135185)
+    inst->setTypeParam(Type::mostRefined(type, inst->typeParam()));
   }
   return nullptr;
 }
 
 SSATmp* TraceBuilder::preOptimizeLdLocAddr(IRInstruction* inst) {
   auto const locId = inst->extra<LdLocAddr>()->locId;
-  if (getLocalType(locId) != Type::None) { // TODO(#2135185)
-    inst->setTypeParam(
-      Type::mostRefined(getLocalType(locId).ptr(), inst->typeParam())
-    );
+  auto const type = localType(locId, DataTypeGeneric);
+  if (!type.equals(Type::None)) { // TODO(#2135185)
+    inst->setTypeParam(Type::mostRefined(type.ptr(), inst->typeParam()));
   }
   return nullptr;
 }
 
 SSATmp* TraceBuilder::preOptimizeStLoc(IRInstruction* inst) {
-  auto const curType = getLocalType(inst->extra<StLoc>()->locId);
+  auto locId = inst->extra<StLoc>()->locId;
+  auto const curType = localType(locId, DataTypeGeneric);
   auto const newType = inst->src(1)->type();
 
   assert(inst->typeParam().equals(Type::None));
 
   // There's no need to store the type if it's going to be the same
-  // KindOfFoo.  We still have to store string types because we don't
+  // KindOfFoo. We still have to store string types because we don't
   // guard on KindOfStaticString vs. KindOfString.
   auto const bothBoxed = curType.isBoxed() && newType.isBoxed();
   auto const sameUnboxed = curType != Type::None && // TODO(#2135185)
-    curType.isKnownDataType() &&
-    curType.equals(newType) && !curType.isString();
+    curType.isSameKindOf(newType) &&
+    !curType.isString();
   if (bothBoxed || sameUnboxed) {
+    // TODO(t2598894) once relaxGuards supports proper type reflowing, we
+    // should be able to relax the constraint here and degrade StLocNT to
+    // StLoc if we relax its input.
+    if (sameUnboxed) constrainLocal(locId, DataTypeSpecific,
+                                    "StLoc -> StLocNT");
     inst->setOpcode(StLocNT);
   }
 
@@ -824,6 +882,15 @@ SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst,
   DEBUG_ONLY auto indent = [&] { return std::string(instNest * 2, ' '); };
 
   FTRACE(1, "{}{}\n", indent(), inst->toString());
+
+  // turn off ActRec optimization for instructions that will require a frame
+  if (m_inlineSavedStates.size() && !m_needsFPAnchor) {
+    if (inst->isNative() || inst->mayRaiseError()) {
+      m_needsFPAnchor = true;
+      gen(InlineFPAnchor, m_fpValue);
+      FTRACE(2, "Anchor for: {}\n", inst->toString());
+    }
+  }
 
   // First pass of tracebuilder optimizations try to replace an
   // instruction based on tracked state before we do anything else.
@@ -946,6 +1013,13 @@ void TraceBuilder::reoptimize() {
       auto *inst = &instructions.front();
       instructions.pop_front();
 
+      // last attempt to elide ActRecs, if we still need the InlineFPAnchor
+      // it will be added back to the trace when we re-add instructions that
+      // rely on it
+      if (inst->op() == InlineFPAnchor) {
+        continue;
+      }
+
       // merging state looks at the current marker, and optimizeWork
       // below may create new instructions. Use the marker from this
       // instruction.
@@ -989,40 +1063,218 @@ void TraceBuilder::killCse() {
   m_cseHash.clear();
 }
 
-SSATmp* TraceBuilder::getLocalValue(unsigned id) const {
-  assert(id < m_localValues.size());
-  return m_localValues[id];
+void TraceBuilder::clearLocals() {
+  for (unsigned i = 0; i < m_locals.size(); ++i) {
+    setLocalValue(i, nullptr);
+  }
 }
 
-Type TraceBuilder::getLocalType(unsigned id) const {
-  assert(id < m_localTypes.size());
-  return m_localTypes[id];
+SSATmp* TraceBuilder::localValue(unsigned id, DataTypeCategory cat) {
+  always_assert(id < m_locals.size());
+  constrainLocal(id, cat, "localValue");
+  return m_locals[id].unsafe ? nullptr : m_locals[id].value;
+}
+
+SSATmp* TraceBuilder::localValueSource(unsigned id) const {
+  always_assert(id < m_locals.size());
+  auto const& local = m_locals[id];
+
+  if (local.value) return local.value;
+  if (local.written) return nullptr;
+  return fp();
+}
+
+Type TraceBuilder::localType(unsigned id, DataTypeCategory cat) {
+  always_assert(id < m_locals.size());
+  constrainLocal(id, cat, "localType");
+  return m_locals[id].type;
 }
 
 void TraceBuilder::setLocalValue(unsigned id, SSATmp* value) {
-  assert(id < m_localValues.size() && id < m_localTypes.size());
-  m_localValues[id] = value;
-  m_localTypes[id] = value ? value->type() : Type::None;
+  always_assert(id < m_locals.size());
+  m_locals[id].value = value;
+  m_locals[id].type = value ? value->type() : Type::None;
+  m_locals[id].written = true;
+  m_locals[id].unsafe = false;
 }
 
 void TraceBuilder::setLocalType(uint32_t id, Type type) {
-  assert(id < m_localValues.size() && id < m_localTypes.size());
-  m_localValues[id] = nullptr;
-  m_localTypes[id] = type;
+  always_assert(id < m_locals.size());
+  m_locals[id].value = nullptr;
+  m_locals[id].type = type;
+  m_locals[id].written = true;
+  m_locals[id].unsafe = false;
+}
+
+void TraceBuilder::refineLocalType(uint32_t id, Type type) {
+  always_assert(id < m_locals.size());
+  auto UNUSED oldType = m_locals[id].type;
+  oldType = oldType.equals(Type::None) ? Type::Gen : oldType;
+  assert(type.subtypeOf(oldType));
+  m_locals[id].type = type;
 }
 
 // Needs to be called if a local escapes as a by-ref or
 // otherwise set to an unknown value (e.g., by Iter[Init,Next][K])
 void TraceBuilder::killLocalValue(uint32_t id) {
-  assert(id < m_localValues.size() && id < m_localTypes.size());
-  m_localValues[id] = nullptr;
-  m_localTypes[id] = Type::None;
+  setLocalValue(id, nullptr);
+}
+
+void TraceBuilder::constrainGuard(IRInstruction* inst, DataTypeCategory cat) {
+  static_assert(DataTypeCategory() == DataTypeGeneric,
+                "DataTypeGeneric must be the default DataTypeCategory");
+  auto& guard = m_guardConstraints[inst->id()];
+
+  if (cat > guard) {
+    FTRACE(1, "constraining {}: {} -> {}\n", *inst, guard, cat);
+    guard = cat;
+  }
+}
+
+/**
+ * Trace back to the guard that provided the type of val, if
+ * any. Constrain it so its type will not be relaxed beyond the given
+ * DataTypeCategory. Always returns val, for convenience.
+ */
+SSATmp* TraceBuilder::constrainValue(SSATmp* const val, DataTypeCategory cat) {
+  if (!val) {
+    FTRACE(1, "constrainValue(nullptr, {}), bailing\n", cat);
+    return nullptr;
+  }
+
+  FTRACE(1, "constrainValue({}, {})\n", *val->inst(), cat);
+
+  // If cat is DataTypeGeneric, there's nothing to do.
+  if (cat == DataTypeGeneric) return val;
+
+  auto inst = val->inst();
+
+  if (inst->op() == LdLoc || inst->op() == LdLocAddr) {
+    // We've hit a LdLoc(Addr). If the source of the value is non-null and not
+    // a FramePtr, it's a real value that was killed by a Call. The value won't
+    // be live but it's ok to use it to track down the guard.
+
+    auto source = inst->extra<LdLocData>()->valSrc;
+    if (!source) {
+      // val was newly created in this trace. Nothing to constrain.
+      FTRACE(2, "  - valSrc is null, bailing\n");
+      return val;
+    }
+
+    // If valSrc is a FramePtr, it represents the frame the value was
+    // originally loaded from. Look for the guard for this local.
+    if (source->isA(Type::FramePtr)) {
+      constrainLocal(inst->extra<LocalId>()->locId, source, cat,
+                     "constrainValue");
+      return val;
+    }
+
+    // Otherwise, keep chasing down the source of val.
+    constrainValue(source, cat);
+  } else if (inst->op() == LdStack) {
+    constrainStack(inst->src(0), inst->extra<StackOffset>()->offset, cat);
+  } else if (inst->op() == CheckType) {
+    // Constrain this CheckType and keep going on its source value, in case
+    // there are more guards to constrain.
+    constrainGuard(inst, cat);
+    constrainValue(inst->src(0), cat);
+  } else if (inst->op() == StRef || inst->op() == StRefNT) {
+    // TODO(t2598894): This can be tightened up. As a conservative
+    // approximation, pass the constraint through to the source of the value.
+    constrainValue(inst->src(1), cat);
+  } else if (inst->isPassthrough()) {
+    constrainValue(inst->getPassthroughValue(), cat);
+  } else {
+    // Any instructions not special cased above produce a new value, so
+    // there's no guard for us to constrain.
+    FTRACE(2, "  - value is new in this trace, bailing\n");
+  }
+
+  return val;
+}
+
+void TraceBuilder::constrainLocal(uint32_t locId, DataTypeCategory cat,
+                                  const std::string& why) {
+  constrainLocal(locId, localValueSource(locId), cat, why);
+}
+
+void TraceBuilder::constrainLocal(uint32_t locId, SSATmp* valSrc,
+                                  DataTypeCategory cat,
+                                  const std::string& why) {
+  FTRACE(1, "constrainLocal({}, {}, {}, {})\n",
+         locId, valSrc ? valSrc->inst()->toString() : "null", cat, why);
+
+  if (!valSrc) return;
+  if (!valSrc->isA(Type::FramePtr)) {
+    constrainValue(valSrc, cat);
+    return;
+  }
+
+  // When valSrc is a FramePtr, that means we loaded the value the local had
+  // coming into the trace. Trace through the FramePtr chain, looking for a
+  // guard for this local id. If we find it, constrain the guard. If we don't
+  // find it, there wasn't a guard for this local so there's nothing to
+  // constrain.
+  for (auto fpInst = valSrc->inst();
+       fpInst->op() != DefFP && fpInst->op() != DefInlineFP;
+       fpInst = fpInst->src(0)->inst()) {
+    FTRACE(2, "    - fp = {}\n", *fpInst);
+    assert(fpInst->dst()->isA(Type::FramePtr));
+
+    auto instLoc = [fpInst]{ return fpInst->extra<LocalId>()->locId; };
+    switch (fpInst->op()) {
+      case GuardLoc:
+      case CheckLoc:
+        if (instLoc() != locId) break;
+        FTRACE(2, "    - found guard to constrain\n");
+        constrainGuard(fpInst, cat);
+        return;
+
+      case AssertLoc:
+        if (instLoc() != locId) break;
+        // If the refined the type of the local satisfies the constraint we're
+        // trying to apply, we can stop here. This can happen if we assert a
+        // more general type than what we already know. Otherwise we need to
+        // keep tracing back to the guard.
+        if (typeFitsConstraint(fpInst->typeParam(), cat)) return;
+        break;
+
+      case FreeActRec:
+        always_assert(0 && "Attempt to read a local after freeing its frame");
+
+      default:
+        not_reached();
+    }
+  }
+
+  FTRACE(2, "    - no guard to constrain\n");
+}
+
+void TraceBuilder::constrainStack(int32_t idx, DataTypeCategory cat) {
+  constrainStack(sp(), idx, cat);
+}
+
+void TraceBuilder::constrainStack(SSATmp* sp, int32_t idx,
+                                  DataTypeCategory cat) {
+  FTRACE(1, "constrainStack({}, {}, {})\n", *sp->inst(), idx, cat);
+  assert(sp->isA(Type::StkPtr));
+
+  // We've hit a LdStack. Use getStackValue to find the instruction that gave
+  // us the type of the stack element. If it's a GuardStk or CheckStk, it's our
+  // target. If it's anything else, the value is new so there's no guard to
+  // relax.
+  auto typeSrc = getStackValue(sp, idx).typeSrc;
+  FTRACE(1, "  - typeSrc = {}\n", *typeSrc);
+  if (typeSrc->op() == GuardStk || typeSrc->op() == CheckStk) {
+    constrainGuard(typeSrc, cat);
+  }
 }
 
 bool TraceBuilder::anyLocalHasValue(SSATmp* tmp) const {
-  return std::find(m_localValues.begin(),
-                   m_localValues.end(),
-                   tmp) != m_localValues.end();
+  return std::any_of(m_locals.begin(), m_locals.end(),
+                     [tmp](const LocalState& s) {
+                       return !s.unsafe && s.value == tmp;
+                     });
 }
 
 bool TraceBuilder::callerHasValueAvailable(SSATmp* tmp) const {
@@ -1040,13 +1292,31 @@ void TraceBuilder::updateLocalRefValues(SSATmp* oldRef, SSATmp* newRef) {
   assert(oldRef->type().isBoxed());
   assert(newRef->type().isBoxed());
 
-  Type newRefType = newRef->type();
-  size_t nTrackedLocs = m_localValues.size();
-  for (size_t id = 0; id < nTrackedLocs; id++) {
-    if (m_localValues[id] == oldRef) {
-      m_localValues[id] = newRef;
-      m_localTypes[id]  = newRefType;
+  auto findAndReplaceLocal = [&] (smart::vector<LocalState>& locals) {
+    Type newRefType = newRef->type();
+    for (auto& loc : locals) {
+      if (loc.value == oldRef) {
+        assert(!loc.unsafe);
+        loc.value = newRef;
+        loc.type  = newRefType;
+      }
     }
+  };
+
+  auto findAndReplaceCallerAvailable = [&] (std::vector<SSATmp*>& vec) {
+    size_t nTrackedLocs = vec.size();
+    for (size_t id = 0; id < nTrackedLocs; id++) {
+      if (vec[id] == oldRef) {
+        vec[id] = newRef;
+      }
+    }
+  };
+
+  findAndReplaceLocal(m_locals);
+  findAndReplaceCallerAvailable(m_callerAvailableValues);
+  for (auto& state : m_inlineSavedStates) {
+    findAndReplaceLocal(state->locals);
+    findAndReplaceCallerAvailable(state->callerAvailableValues);
   }
 }
 
@@ -1054,10 +1324,14 @@ void TraceBuilder::updateLocalRefValues(SSATmp* oldRef, SSATmp* newRef) {
  * This method changes any boxed local into a BoxedCell type.
  */
 void TraceBuilder::dropLocalRefsInnerTypes() {
-  for (size_t id = 0; id < m_localTypes.size(); id++) {
-    if (m_localTypes[id].isBoxed()) {
-      m_localTypes[id] = Type::BoxedCell;
+  auto dropTypes = [] (smart::vector<LocalState>& locals) {
+    for (auto& loc : locals) {
+      if (loc.type.isBoxed()) loc.type = Type::BoxedCell;
     }
+  };
+  dropTypes(m_locals);
+  for (auto& state : m_inlineSavedStates) {
+    dropTypes(state->locals);
   }
 }
 
@@ -1067,22 +1341,31 @@ void TraceBuilder::dropLocalRefsInnerTypes() {
  * registers across calls. We do continue tracking the types in
  * locals, however.
  */
-void TraceBuilder::killLocals() {
-  for (uint32_t i = 0; i < m_localValues.size(); i++) {
-    SSATmp* t = m_localValues[i];
-    // should not kill DefConst, and LdConst should be replaced by DefConst
-    if (!t || t->inst()->op() == DefConst) {
-      continue;
+void TraceBuilder::killLocalsForCall() {
+  auto doKill = [&](smart::vector<LocalState>& locals) {
+    for (auto& loc : locals) {
+      SSATmp* t = loc.value;
+      // should not kill DefConst, and LdConst should be replaced by DefConst
+      if (!t || t->inst()->op() == DefConst) continue;
+
+      if (t->inst()->op() == LdConst) {
+        // make the new DefConst instruction
+        IRInstruction* clone = t->inst()->clone(&m_irFactory);
+        clone->setOpcode(DefConst);
+        loc.value = clone->dst();
+        continue;
+      }
+      assert(!t->isConst());
+      loc.unsafe = true;
     }
-    if (t->inst()->op() == LdConst) {
-      // make the new DefConst instruction
-      IRInstruction* clone = t->inst()->clone(&m_irFactory);
-      clone->setOpcode(DefConst);
-      m_localValues[i] = clone->dst();
-      continue;
-    }
-    assert(!t->isConst());
-    m_localValues[i] = nullptr;
+  };
+
+  doKill(m_locals);
+  m_callerAvailableValues.clear();
+
+  for (auto& state : m_inlineSavedStates) {
+    doKill(state->locals);
+    state->callerAvailableValues.clear();
   }
 }
 

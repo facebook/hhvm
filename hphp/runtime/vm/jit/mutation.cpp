@@ -121,7 +121,7 @@ void reflowTypes(Block* const changed, const BlockList& blocks) {
       auto const ssa = inst->dst(i);
       auto const oldType = ssa->type();
       retypeDst(inst, i);
-      if (ssa->type() != oldType) {
+      if (!ssa->type().equals(oldType)) {
         FTRACE(5, "reflowTypes: retyped {} in {}\n", oldType.toString(),
                inst->toString());
       }

@@ -3,20 +3,21 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
+   | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
 
 #ifndef incl_HPHP_DATATYPE_H_
 #define incl_HPHP_DATATYPE_H_
+
+#include "folly/Format.h"
 
 #include "hphp/util/base.h"
 
@@ -81,13 +82,22 @@ const unsigned int kNotConstantValueTypeMask = 0x60;
 // All DataTypes greater than this value are refcounted.
 const DataType KindOfRefCountThreshold = KindOfStaticString;
 
-enum DataTypeCategory {
-  DataTypeGeneric,
-  DataTypeCountness,
-  DataTypeCountnessInit,
-  DataTypeSpecific,
-  DataTypeSpecialized
+// These must be kept in order from least to most specific.
+#define DT_CATEGORIES(func)                     \
+  func(Generic)                                 \
+  func(Countness)                               \
+  func(CountnessInit)                           \
+  func(Specific)                                \
+  func(Specialized)
+
+enum class DataTypeCategory {
+#define DT(name) name,
+  DT_CATEGORIES(DT)
+#undef DT
 };
+#define DT(name) auto constexpr DataType##name = DataTypeCategory::name;
+DT_CATEGORIES(DT)
+#undef DT
 
 ///////////////////////////////////////////////////////////////////////////////
 // nannies
@@ -170,6 +180,15 @@ inline std::string tname(DataType t) {
       return std::string(buf);
     }
   }
+}
+
+inline std::string typeCategoryName(DataTypeCategory c) {
+  switch (c) {
+# define CASE(name) case DataType##name: return "DataType" #name;
+  DT_CATEGORIES(CASE)
+#undef CASE
+  }
+  not_reached();
 }
 
 inline int getDataTypeIndex(DataType type) {
@@ -258,5 +277,19 @@ inline DataType typeInitNull(DataType t) {
 
 ///////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
+
+namespace folly {
+template<> struct FormatValue<HPHP::DataTypeCategory> {
+  explicit FormatValue(HPHP::DataTypeCategory val) : m_val(val) {}
+
+  template<typename Callback>
+  void format(FormatArg& arg, Callback& cb) const {
+    format_value::formatString(typeCategoryName(m_val), arg, cb);
+  }
+
+ private:
+  HPHP::DataTypeCategory m_val;
+};
+}
 
 #endif // incl_HPHP_DATATYPE_H_

@@ -43,7 +43,11 @@ void CmdNext::onSetup(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
   m_vmDepth = g_vmContext->m_nesting;
   m_loc = interrupt.getFileLine();
   ActRec *fp = g_vmContext->getFP();
-  assert(fp); // All interrupts which reach a flow cmd have an AR.
+  if (!fp) {
+    // If we have no frame just wait for the next instruction to be interpreted.
+    m_needsVMInterrupt = true;
+    return;
+  }
   PC pc = g_vmContext->getPC();
   stepCurrentLine(interrupt, fp, pc);
 }
@@ -53,7 +57,11 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
   assert(!m_complete); // Complete cmds should not be asked to do work.
 
   ActRec *fp = g_vmContext->getFP();
-  assert(fp); // All interrupts which reach a flow cmd have an AR.
+  if (!fp) {
+    // If we have no frame just wait for the next instruction to be interpreted.
+    m_needsVMInterrupt = true;
+    return;
+  }
   PC pc = g_vmContext->getPC();
   Unit* unit = fp->m_func->unit();
   Offset offset = unit->offsetOf(pc);

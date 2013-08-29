@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_config.h"
+#include "hphp/runtime/base/array-init.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,7 +33,7 @@ void CmdConfig::help(DebuggerClient &client) {
   );
 }
 
-void CmdConfig::onClientImpl(DebuggerClient &client) {
+void CmdConfig::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
   if (client.argCount() == 0) {
     listVars(client);
@@ -120,15 +121,6 @@ void CmdConfig::onClientImpl(DebuggerClient &client) {
     }
     return;
   }
-  if (var == "ApiModeSerialize") {
-    assert(client.isApiMode());
-    if (value == "on") {
-      client.setDebuggerClientApiModeSerialize(true);
-    } else if (value == "off") {
-      client.setDebuggerClientApiModeSerialize(false);
-    }
-    return;
-  }
   if (var == "MaxCodeLines" || var == "mcl") {
     // MaxCodeLines: a useful configuration variable for emacs/hphpd-integration
     // to prevent or limit code spew after each breakpoint is hit (since emacs
@@ -147,26 +139,6 @@ void CmdConfig::onClientImpl(DebuggerClient &client) {
   listVars(client);
 }
 
-const StaticString
-  s_BypassAccessCheck("BypassAccessCheck"),
-  s_LogFile("LogFile"),
-  s_PrintLevel("PrintLevel"),
-  s_SmallStep("SmallStep"),
-  s_StackArgs("StackArgs"),
-  s_ApiModeSerialize("ApiModeSerialize");
-
-void CmdConfig::setClientOutput(DebuggerClient &client) {
-  client.setOutputType(DebuggerClient::OTValues);
-  ArrayInit values(6);
-  values.set(s_BypassAccessCheck, client.getDebuggerBypassCheck());
-  values.set(s_LogFile, client.getLogFile());
-  values.set(s_PrintLevel, client.getDebuggerPrintLevel());
-  values.set(s_SmallStep, client.getDebuggerClientSmallStep());
-  values.set(s_StackArgs, client.getDebuggerStackArgs());
-  values.set(s_ApiModeSerialize, client.getDebuggerClientApiModeSerialize());
-  client.setOTValues(values.create());
-}
-
 void CmdConfig::listVars(DebuggerClient &client) {
   std::string LogFile = client.getLogFile();
   client.print("LogFile(lf) %s", LogFile == "" ?
@@ -178,8 +150,6 @@ void CmdConfig::listVars(DebuggerClient &client) {
                 client.getDebuggerClientSmallStep() ? "on" : "off");
   client.print("StackArgs(sa) %s",
                 client.getDebuggerStackArgs() ? "on" : "off");
-  client.print("ApiModeSerialize %s",
-                client.getDebuggerClientApiModeSerialize() ? "on" : "off");
   client.print("MaxCodeLines(mcl) %d",
                 client.getDebuggerClientMaxCodeLines());
 }

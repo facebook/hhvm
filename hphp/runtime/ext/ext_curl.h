@@ -23,7 +23,7 @@
 #include "curl/easy.h"
 #include "curl/multi.h"
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

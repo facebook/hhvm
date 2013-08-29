@@ -16,8 +16,9 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_print.h"
 #include "hphp/runtime/base/datetime.h"
-#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/vm/debugger-hook.h"
+#include "hphp/runtime/base/array-init.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -25,7 +26,7 @@ namespace HPHP { namespace Eval {
 TRACE_SET_MOD(debugger);
 
 const char *CmdPrint::Formats[] = {
-  "x", "v", "hex", "oct", "dec", "unsigned", "time", nullptr
+  "r", "v", "x", "hex", "oct", "dec", "unsigned", "time", nullptr
 };
 
 std::string CmdPrint::FormatResult(const char *format, CVarRef ret) {
@@ -34,8 +35,13 @@ std::string CmdPrint::FormatResult(const char *format, CVarRef ret) {
     return string(sret.data(), sret.size());
   }
 
+  if (strcmp(format, "r") == 0) {
+    String sret = DebuggerClient::FormatVariable(ret, -1, 'r');
+    return string(sret.data(), sret.size());
+  }
+
   if (strcmp(format, "v") == 0) {
-    String sret = DebuggerClient::FormatVariable(ret, -1, true);
+    String sret = DebuggerClient::FormatVariable(ret, -1, 'v');
     return string(sret.data(), sret.size());
   }
 
@@ -184,7 +190,8 @@ void CmdPrint::list(DebuggerClient &client) {
 void CmdPrint::help(DebuggerClient &client) {
   client.helpTitle("Print Command");
   client.helpCmds(
-    "[p]rint {php}",              "prints result of PHP code, (print_r)",
+    "[p]rint {php}",              "prints result of PHP code",
+    "[p]rint r {php}",            "prints result of PHP code, (print_r)",
     "[p]rint v {php}",            "prints result of PHP code, (var_dump)",
     "[p]rint x {php}",            "prints hex encoded string or number",
     "[p]rint [h]ex {php}",        "prints hex encoded string or number",
@@ -284,7 +291,7 @@ void CmdPrint::handleReply(DebuggerClient &client) {
   client.output(m_ret.toString());
 }
 
-void CmdPrint::onClientImpl(DebuggerClient &client) {
+void CmdPrint::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
   if (client.argCount() == 0) {
     help(client);
@@ -327,50 +334,12 @@ void CmdPrint::onClientImpl(DebuggerClient &client) {
   assert(m_printLevel <= 0 || m_printLevel >= DebuggerClient::MinPrintLevel);
   m_frame = client.getFrame();
   CmdPrintPtr res = client.xendWithNestedExecution<CmdPrint>(this);
-  if (!res->is(m_type)) {
-    assert(client.isApiMode());
-    m_incomplete = true;
-    res->setClientOutput(client);
-  } else {
-    m_output = res->m_output;
-    m_ret = res->m_ret;
-    if (!m_output.empty()) {
-      client.output(m_output);
-    }
-    client.output(FormatResult(format, m_ret));
+  m_output = res->m_output;
+  m_ret = res->m_ret;
+  if (!m_output.empty()) {
+    client.output(m_output);
   }
-}
-
-const StaticString
-  s_format("format"),
-  s_php("php"),
-  s_body("body"),
-  s_value_serialize("value_serialize"),
-  s_value("value");
-
-void CmdPrint::setClientOutput(DebuggerClient &client) {
-  client.setOutputType(DebuggerClient::OTValues);
-  Array values;
-  if (m_isForWatch) {
-    // Manipulating the watch list, output the current list
-    DebuggerClient::WatchPtrVec &watches = client.getWatches();
-    for (int i = 0; i < (int)watches.size(); i++) {
-      ArrayInit watch(2);
-      watch.set(s_format, watches[i]->first);
-      watch.set(s_php, watches[i]->second);
-      values.append(watch.create());
-    }
-  } else {
-    // Just print an expression, do similar output as eval
-    values.set(s_body, m_body);
-    if (client.getDebuggerClientApiModeSerialize()) {
-      values.set(s_value_serialize,
-                 DebuggerClient::FormatVariable(m_ret, 200));
-    } else {
-      values.set(s_value, m_ret);
-    }
-  }
-  client.setOTValues(values);
+  client.output(FormatResult(format, m_ret));
 }
 
 // NB: unlike most other commands, the client expects that more interrupts

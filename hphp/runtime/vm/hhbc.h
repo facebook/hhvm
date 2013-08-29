@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_VM_HHBC_H_
 #define incl_HPHP_VM_HHBC_H_
 
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {
 
@@ -570,6 +570,7 @@ enum SetOpOp {
   O(ContHandle,      NA,               ONE(CV),         NOV,        CF_TF) \
   O(Strlen,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IncStat,         TWO(IVA,IVA),     NOV,             NOV,        NF) \
+  O(Abs,             NA,               ONE(CV),         ONE(CV),    NF) \
   O(ArrayIdx,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(Floor,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(Ceil,            NA,               ONE(CV),         ONE(CV),    NF) \
@@ -864,8 +865,26 @@ inline bool isThisSelfOrParent(Op op) {
   }
 }
 
+inline bool isRet(Op op) {
+  switch (op) {
+    case OpRetC:
+    case OpRetV:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
 inline bool isSwitch(Op op) {
-  return op == Op::Switch || op == Op::SSwitch;
+  switch (op) {
+    case OpSwitch:
+    case OpSSwitch:
+      return true;
+
+    default:
+      return false;
+  }
 }
 
 inline bool isSwitch(Opcode op) {

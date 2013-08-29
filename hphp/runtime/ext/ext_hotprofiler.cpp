@@ -16,11 +16,11 @@
 */
 
 #include "hphp/runtime/ext/ext_fb.h"
-#include "hphp/runtime/base/memory_manager.h"
-#include "hphp/runtime/base/request_local.h"
-#include "hphp/runtime/base/zend_math.h"
-#include "hphp/runtime/server/server_stats.h"
-#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/zend-math.h"
+#include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/vdso.h"
@@ -1608,6 +1608,21 @@ Variant f_phprof_disable() {
 #else
   return uninit_null();
 #endif
+}
+
+void f_fb_setprofile(CVarRef callback) {
+#ifdef HOTPROFILER
+  if (ThreadInfo::s_threadInfo->m_profiler != NULL) {
+    // phpprof is enabled, don't let PHP code override it
+    return;
+  }
+#endif
+  g_vmContext->m_setprofileCallback = callback;
+  if (callback.isNull()) {
+    HPHP::EventHook::Disable();
+  } else {
+    HPHP::EventHook::Enable();
+  }
 }
 
 void f_xhprof_frame_begin(CStrRef name) {

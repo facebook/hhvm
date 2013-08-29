@@ -121,11 +121,11 @@ void Lease::drop(int64_t hintExpireDelay) {
   pthread_mutex_unlock(&m_lock);
 }
 
-LeaseHolderBase::LeaseHolderBase(Lease& l, LeaseAcquire acquire,
-                                                bool blocking)
-  : m_lease(l), m_haveLock(false), m_acquired(false) {
-  assert(IMPLIES(blocking, acquire == LeaseAcquire::ACQUIRE));
-  if (!m_lease.amOwner() && acquire == LeaseAcquire::ACQUIRE) {
+LeaseHolderBase::LeaseHolderBase(Lease& l, LeaseAcquire acquire)
+    : m_lease(l), m_haveLock(false), m_acquired(false) {
+  if (!m_lease.amOwner() && (acquire == LeaseAcquire::ACQUIRE ||
+                             acquire == LeaseAcquire::BLOCKING)) {
+    bool blocking = (acquire == LeaseAcquire::BLOCKING);
     m_acquired = m_lease.acquire(blocking);
   }
   m_haveLock = m_lease.amOwner();

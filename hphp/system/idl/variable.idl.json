@@ -7,7 +7,6 @@
             "name": "is_bool",
             "desc": "Finds whether the given variable is a boolean.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable",
                 "NoEffect",
                 "NoInjection"
@@ -28,7 +27,6 @@
             "name": "is_int",
             "desc": "Finds whether the type of the given variable is integer.\n\nTo test if a variable is a number or a numeric string (such as form input, which is always a string), you must use is_numeric().",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable",
                 "NoEffect",
                 "NoInjection"
@@ -48,7 +46,6 @@
         {
             "name": "is_integer",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable",
                 "NoEffect",
                 "NoInjection"
@@ -66,7 +63,6 @@
         {
             "name": "is_long",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable",
                 "NoEffect",
                 "NoInjection"
@@ -84,7 +80,6 @@
         {
             "name": "is_double",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable",
                 "NoEffect",
                 "NoInjection"
@@ -103,7 +98,6 @@
             "name": "is_float",
             "desc": "Finds whether the type of the given variable is float.\n\nTo test if a variable is a number or a numeric string (such as form input, which is always a string), you must use is_numeric().",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable",
                 "NoEffect",
                 "NoInjection"
@@ -124,7 +118,6 @@
             "name": "is_numeric",
             "desc": "Finds whether the given variable is numeric. Numeric strings consist of optional sign, any number of digits, optional decimal part and optional exponential part. Thus +0123.45e6 is a valid numeric value. Hexadecimal notation (0xFF) is allowed too but only without sign, decimal and exponential part.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable",
                 "NoEffect",
                 "NoInjection"
@@ -144,7 +137,6 @@
         {
             "name": "is_real",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable",
                 "NoEffect",
                 "NoInjection"
@@ -163,7 +155,6 @@
             "name": "is_string",
             "desc": "Finds whether the type given variable is string.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable",
                 "NoEffect",
                 "NoInjection"
@@ -184,7 +175,6 @@
             "name": "is_scalar",
             "desc": "Finds whether the given variable is a scalar.\n\nScalar variables are those containing an integer, float, string or boolean. Types array, object and resource are not scalar.\n\nis_scalar() does not consider resource type values to be scalar as resources are abstract datatypes which are currently based on integers. This implementation detail should not be relied upon, as it may change.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable",
                 "NoEffect",
                 "NoInjection"
@@ -205,7 +195,6 @@
             "name": "is_array",
             "desc": "Finds whether the given variable is an array.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable",
                 "NoEffect",
                 "NoInjection"
@@ -226,7 +215,6 @@
             "name": "is_object",
             "desc": "Finds whether the given variable is an object.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable",
                 "NoEffect",
                 "NoInjection"
@@ -247,7 +235,6 @@
             "name": "is_resource",
             "desc": "Finds whether the given variable is a resource.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable",
                 "NoEffect",
                 "NoInjection"
@@ -268,7 +255,6 @@
             "name": "is_null",
             "desc": "Finds whether the given variable is NULL.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable",
                 "NoEffect",
                 "NoInjection"
@@ -289,7 +275,6 @@
             "name": "gettype",
             "desc": "Returns the type of the PHP variable var. Warning Never use gettype() to test for a certain type, since the returned string may be subject to change in a future version. In addition, it is slow too, as it involves string comparison. Instead, use the is_* functions.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -307,7 +292,6 @@
             "name": "get_resource_type",
             "desc": "This function gets the type of the given resource.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -325,7 +309,6 @@
             "name": "intval",
             "desc": "Returns the integer value of var, using the specified base for the conversion (the default is base 10). intval() should not be used on objects, as doing so will emit an E_NOTICE level error and return 1.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable",
                 "NoInjection"
             ],
@@ -350,7 +333,6 @@
         {
             "name": "doubleval",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable",
                 "NoInjection"
             ],
@@ -368,7 +350,6 @@
             "name": "floatval",
             "desc": "Gets the float value of var.",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable",
                 "NoInjection"
             ],
@@ -387,7 +368,6 @@
         {
             "name": "strval",
             "flags": [
-                "HasDocComment",
                 "FunctionIsFoldable",
                 "NoInjection"
             ],
@@ -407,7 +387,6 @@
             "name": "settype",
             "desc": "Set the type of variable var to type.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -431,7 +410,6 @@
             "name": "print_r",
             "desc": "print_r() displays information about a variable in a way that's readable by humans.\n\nprint_r(), var_dump() and var_export() will also show protected and private properties of objects with PHP 5. Static class members will not be shown.\n\nRemember that print_r() will move the array pointer to the end. Use reset() to bring it back to beginning.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -454,7 +432,6 @@
         {
             "name": "var_export",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -477,7 +454,6 @@
         {
             "name": "var_dump",
             "flags": [
-                "HasDocComment",
                 "VariableArguments"
             ],
             "return": {
@@ -496,7 +472,6 @@
             "name": "debug_zval_dump",
             "desc": "Dumps a string representation of an internal zend value to output.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null,
@@ -514,7 +489,6 @@
             "name": "serialize",
             "desc": "Generates a storable representation of a value\n\nThis is useful for storing or passing PHP values around without losing their type and structure.\n\nTo make the serialized string into a PHP value again, use unserialize().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -531,7 +505,6 @@
         {
             "name": "unserialize",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -555,7 +528,6 @@
             "name": "get_defined_vars",
             "desc": "This function returns a multidimensional array containing a list of all defined variables, be them environment, server or user-defined variables, within the scope that get_defined_vars() is called.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap",
@@ -568,7 +540,6 @@
             "name": "import_request_variables",
             "desc": "Imports GET\/POST\/Cookie variables into the global scope. It is useful if you disabled register_globals, but would like to see some variables in the global scope.\n\nIf you're interested in importing other variables into the global scope, such as $_SERVER, consider using extract().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -592,7 +563,6 @@
             "name": "extract",
             "desc": "Import variables from an array into the current symbol table.\n\nChecks each key to see whether it has a valid variable name. It also checks for collisions with existing variables in the symbol table.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",

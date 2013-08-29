@@ -3,15 +3,14 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
+   | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
 
@@ -20,11 +19,11 @@
 
 #include "hphp/util/base.h"
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/util/thread_local.h"
+#include "hphp/util/thread-local.h"
 #include "hphp/util/mutex.h"
-#include "hphp/util/case_insensitive.h"
+#include "hphp/util/case-insensitive.h"
 #include "hphp/runtime/base/macros.h"
-#include "hphp/runtime/base/memory_manager.h"
+#include "hphp/runtime/base/memory-manager.h"
 
 #include <boost/static_assert.hpp>
 #include <boost/intrusive_ptr.hpp>
@@ -192,7 +191,7 @@ inline RefResult ref(Variant& v) {
   return *(RefResultValue*)&v;
 }
 
-  class Class;
+class Class;
 
 ///////////////////////////////////////////////////////////////////////////////
 // code injection classes
@@ -210,7 +209,7 @@ public:
   static const ssize_t LastFlag             = DebuggerSignalFlag;
 
   RequestInjectionData()
-    : cflagsPtr(nullptr), surprisePage(nullptr),
+    : cflagsPtr(nullptr),
       m_timeoutSeconds(-1), m_hasTimer(false), m_timerActive(false),
       m_debugger(false), m_debuggerIntr(false), m_coverage(false),
       m_jit(false) {
@@ -225,8 +224,6 @@ public:
 
   ssize_t* cflagsPtr;  // this points to the real condition flags,
                        // somewhere in the thread's targetcache
-  void *surprisePage;  // beginning address of page to
-                       // protect for error conditions
 
  private:
 #ifndef __APPLE__
@@ -245,8 +242,7 @@ public:
   int getTimeout() const { return m_timeoutSeconds; }
   void setTimeout(int seconds);
   int getRemainingTime() const;
-  void resetTimer(int seconds = -1);
-  void setSurprisePage(void* page);
+  void resetTimer(int seconds = 0);
   void onTimeout();
   bool getJit() const { return m_jit; }
   bool getDebugger() const { return m_debugger; }
@@ -298,7 +294,7 @@ typedef GlobalNameValueTableWrapper GlobalVariables;
 int object_alloc_size_to_index(size_t);
 size_t object_alloc_index_to_size(int);
 
-// implemented in runtime/base/thread_info
+// implemented in runtime/base/thread-info
 typedef boost::intrusive_ptr<ArrayData> ArrayHolder;
 void intrusive_ptr_add_ref(ArrayData* a);
 void intrusive_ptr_release(ArrayData* a);
@@ -389,7 +385,7 @@ inline void check_recursion(ThreadInfo *&info) {
   }
 }
 
-// implemented in runtime/base/builtin_functions.cpp
+// implemented in runtime/base/builtin-functions.cpp
 extern ssize_t check_request_surprise(ThreadInfo *info) ATTRIBUTE_COLD;
 
 // implemented in runtime/ext/ext_hotprofiler.cpp

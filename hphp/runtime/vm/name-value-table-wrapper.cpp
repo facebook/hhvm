@@ -15,9 +15,9 @@
 */
 
 #include "hphp/runtime/vm/name-value-table-wrapper.h"
-#include "hphp/runtime/base/runtime_error.h"
-#include "hphp/runtime/base/array_iterator.h"
-#include "hphp/runtime/base/array_init.h"
+#include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/array-init.h"
 
 namespace HPHP {
 
@@ -105,18 +105,6 @@ NameValueTableWrapper::LvalStr(ArrayData* ad, StringData* k, Variant*& ret,
   }
   ret = &tvAsVariant(tv);
   return a;
-}
-
-ArrayData*
-NameValueTableWrapper::AddLvalInt(ArrayData* ad, int64_t k, Variant*& ret,
-                                  bool copy) {
-  return LvalStr(ad, String(k).get(), ret, copy);
-}
-
-ArrayData*
-NameValueTableWrapper::AddLvalStr(ArrayData* ad, StringData* k, Variant*& ret,
-                                  bool copy) {
-  return LvalStr(ad, k, ret, copy);
 }
 
 ArrayData*

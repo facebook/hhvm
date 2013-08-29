@@ -16,9 +16,9 @@
 */
 
 #include "hphp/runtime/ext/ext_url.h"
-#include "hphp/runtime/base/string_util.h"
-#include "hphp/runtime/base/zend_url.h"
-#include "hphp/runtime/base/string_buffer.h"
+#include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/zend-url.h"
+#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/ext/ext_curl.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_file.h"
@@ -139,33 +139,33 @@ static void url_encode_array(StringBuffer &ret, CVarRef varr,
       }
       StringBuffer new_prefix(key_prefix.size() + num_prefix.size() +
                               encoded.size() + key_suffix.size() + 4);
-      new_prefix += key_prefix;
-      if (numeric) new_prefix += num_prefix;
-      new_prefix += encoded;
-      new_prefix += key_suffix;
-      new_prefix += "%5B";
+      new_prefix.append(key_prefix);
+      if (numeric) new_prefix.append(num_prefix);
+      new_prefix.append(encoded);
+      new_prefix.append(key_suffix);
+      new_prefix.append("%5B");
       url_encode_array(ret, data, seen_arrs, String(),
                        new_prefix.detach(), String("%5D", CopyString),
                        arg_sep);
     } else {
       if (!ret.empty()) {
-        ret += arg_sep;
+        ret.append(arg_sep);
       }
-      ret += key_prefix;
+      ret.append(key_prefix);
       if (numeric) {
-        ret += num_prefix;
-        ret += key;
+        ret.append(num_prefix);
+        ret.append(key);
       } else {
-        ret += StringUtil::UrlEncode(key);
+        ret.append(StringUtil::UrlEncode(key));
       }
-      ret += key_suffix;
-      ret += "=";
+      ret.append(key_suffix);
+      ret.append("=");
       if (data.isInteger() || data.is(KindOfBoolean)) {
-        ret += String(data.toInt64());
+        ret.append(String(data.toInt64()));
       } else if (data.is(KindOfDouble)) {
-        ret += String(data.toDouble());
+        ret.append(String(data.toDouble()));
       } else {
-        ret += StringUtil::UrlEncode(data.toString());
+        ret.append(StringUtil::UrlEncode(data.toString()));
       }
     }
   }

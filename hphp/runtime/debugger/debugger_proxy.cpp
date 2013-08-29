@@ -19,7 +19,7 @@
 #include "hphp/runtime/debugger/cmd/cmd_signal.h"
 #include "hphp/runtime/debugger/cmd/cmd_machine.h"
 #include "hphp/runtime/debugger/debugger.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/ext_socket.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/util/process.h"
@@ -359,7 +359,7 @@ void DebuggerProxy::pollSignal() {
 
     // Block any threads that might be interrupting from communicating with the
     // client until we're done with this poll.
-    Lock lock(m_signumMutex);
+    Lock lock(m_signalMutex);
 
     // After DebuggerSignalTimeout seconds that no active thread picks
     // up the signal, we send it to dummy sandbox.
@@ -554,7 +554,7 @@ bool DebuggerProxy::checkFlowBreak(CmdInterrupt &cmd) {
   // If there is an outstanding Ctrl-C from the client, go ahead and break now.
   // Note: this stops any flow control command we might have in-flight.
   if (m_signum == CmdSignal::SignalBreak) {
-    Lock lock(m_signumMutex);
+    Lock lock(m_signalMutex);
     if (m_signum == CmdSignal::SignalBreak) {
       m_signum = CmdSignal::SignalNone;
       m_flow.reset();
@@ -700,8 +700,6 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
   }
   try {
     String code(php.c_str(), php.size(), CopyString);
-    // @TODO: enable this once task #2608250 is completed.
-#if 0
     // We're about to start executing more PHP. This is typically done
     // in response to commands from the client, and the client expects
     // those commands to send more interrupts since, of course, the
@@ -713,7 +711,6 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
     SCOPE_EXIT {
       if (flags & ExecutePHPFlagsAtInterrupt) disableSignalPolling();
     };
-#endif
     g_vmContext->evalPHPDebugger((TypedValue*)&ret, code.get(), frame);
   } catch (InvalidFunctionCallException &e) {
     sb.append(Debugger::ColorStderr(String(e.what())));
@@ -723,9 +720,9 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
   } catch (Exception &e) {
     sb.append(Debugger::ColorStderr(String(e.what())));
   } catch (Object &e) {
-    try {
+    if (e->hasToString()) {
       sb.append(Debugger::ColorStderr(e.toString()));
-    } catch (BadTypeConversionException &e) {
+    } else {
       sb.append(Debugger::ColorStderr
                 (String("(object without __toString() is thrown)")));
     }
@@ -775,12 +772,15 @@ int DebuggerProxy::getStackDepth() {
 // that execution has moved away from the previous interrupt site.)
 void DebuggerProxy::setBreakableForBreakpointsNotMatching(CmdInterrupt& cmd) {
   TRACE(2, "DebuggerProxy::setBreakableForBreakpointsNotMatching\n");
-  auto stackDepth = getRealStackDepth();
-  for (unsigned int i = 0; i < m_breakpoints.size(); ++i) {
-    BreakPointInfoPtr bp = m_breakpoints[i];
-    if (bp != nullptr && bp->m_state != BreakPointInfo::Disabled &&
-        !bp->match(*this, cmd.getInterruptType(), *cmd.getSite())) {
-      bp->setBreakable(stackDepth);
+  auto site = cmd.getSite();
+  if (site != nullptr) {
+    auto stackDepth = getRealStackDepth();
+    for (unsigned int i = 0; i < m_breakpoints.size(); ++i) {
+      BreakPointInfoPtr bp = m_breakpoints[i];
+      if (bp != nullptr && bp->m_state != BreakPointInfo::Disabled &&
+          !bp->match(*this, cmd.getInterruptType(), *site)) {
+        bp->setBreakable(stackDepth);
+      }
     }
   }
 }
@@ -789,12 +789,16 @@ void DebuggerProxy::setBreakableForBreakpointsNotMatching(CmdInterrupt& cmd) {
 // calls made from the current site.
 void DebuggerProxy::unsetBreakableForBreakpointsMatching(CmdInterrupt& cmd) {
   TRACE(2, "DebuggerProxy::unsetBreakableForBreakpointsMatching\n");
-  auto stackDepth = getRealStackDepth();
-  for (unsigned int i = 0; i < m_breakpoints.size(); ++i) {
-    BreakPointInfoPtr bp = m_breakpoints[i];
-    if (bp != nullptr && bp->m_state != BreakPointInfo::Disabled &&
-        bp->match(*this, cmd.getInterruptType(), *cmd.getSite())) {
-      bp->unsetBreakable(stackDepth);
+  auto site = cmd.getSite();
+  if (site != nullptr) {
+    auto offset = site->getCurOffset();
+    auto stackDepth = getRealStackDepth();
+    for (unsigned int i = 0; i < m_breakpoints.size(); ++i) {
+      BreakPointInfoPtr bp = m_breakpoints[i];
+      if (bp != nullptr && bp->m_state != BreakPointInfo::Disabled &&
+          bp->match(*this, cmd.getInterruptType(), *site)) {
+        bp->unsetBreakable(stackDepth, offset);
+      }
     }
   }
 }

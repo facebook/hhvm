@@ -1108,6 +1108,26 @@
             "value": 10029
         },
         {
+            "name": "CURLOPT_FB_TLS_VER_MAX",
+            "value": 2147482624
+        },
+        {
+            "name": "CURLOPT_FB_TLS_VER_MAX_NONE",
+            "value": 2147482625
+        },
+        {
+            "name": "CURLOPT_FB_TLS_VER_MAX_1_1",
+            "value": 2147482626
+        },
+        {
+            "name": "CURLOPT_FB_TLS_VER_MAX_1_0",
+            "value": 2147482627
+        },
+        {
+            "name": "CURLOPT_FB_TLS_CIPHER_SPEC",
+            "value": 2147482628
+        },
+        {
             "name": "CURLPROXY_HTTP",
             "value": 0
         },
@@ -4986,7 +5006,8 @@
         },
         {
             "name": "PHP_OS",
-            "value": "Linux"
+            "type": "String",
+            "desc": "Dynamic constant - php_uname()"
         },
         {
             "name": "PHP_OUTPUT_HANDLER_CONT",

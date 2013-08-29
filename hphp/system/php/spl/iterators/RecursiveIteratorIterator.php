@@ -117,6 +117,7 @@ class RecursiveIteratorIterator implements OuterIterator, Traversable {
       if ($it->hasChildren() && !$this->getInnerIteratorFlag()) {
         $this->setInnerIteratorFlag(1);
         $newit = $it->getChildren();
+        $newit->rewind();
         $this->iterators[] = array($newit, 0);
       } else {
         $it->next();
@@ -130,14 +131,15 @@ class RecursiveIteratorIterator implements OuterIterator, Traversable {
       return $this->next();
     } else if ($this->mode == self::CHILD_FIRST ||
                $this->mode == self::LEAVES_ONLY) {
-
       if (!$it->valid()) {
         array_pop($this->iterators);
         return $this->next();
       } else if ($it->hasChildren()) {
         if (!$this->getInnerIteratorFlag()) {
           $this->setInnerIteratorFlag(1);
-          $this->iterators[] = array($it->getChildren(), 0);
+          $newit = $it->getChildren();
+          $newit->rewind();
+          $this->iterators[] = array($newit, 0);
           if ($this->valid()) {
             return;
           }

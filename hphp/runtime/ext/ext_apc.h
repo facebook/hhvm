@@ -18,8 +18,8 @@
 #ifndef incl_HPHP_EXT_APC_H_
 #define incl_HPHP_EXT_APC_H_
 
-#include "hphp/runtime/base/base_includes.h"
-#include "hphp/runtime/base/shared_store_base.h"
+#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/shared-store-base.h"
 #include "hphp/runtime/server/upload.h"
 
 namespace HPHP {
@@ -158,7 +158,7 @@ static_assert(sizeof(int64_t) == sizeof(long long),
 // apc serialization
 
 String apc_serialize(CVarRef value);
-Variant apc_unserialize(CStrRef str);
+Variant apc_unserialize(const char* data, int len);
 String apc_reserialize(CStrRef str);
 
 ///////////////////////////////////////////////////////////////////////////////

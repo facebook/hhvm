@@ -193,7 +193,7 @@ function ut_main3()
             continue;
         }
         // Get the requested, valid and actual locales.
-        $vloc = ut_coll_get_locale( $coll, Locale::VALID_LOCALE );
+        $vloc = ut_coll_get_locale( $coll, 1 ); // was Locale::VALID_LOCALE
         // Show them.
         $res_str .= "Locale: '$locale'\n" .
             "  ULOC_VALID_LOCALE     = '$vloc'\n";

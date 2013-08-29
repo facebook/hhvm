@@ -59,8 +59,8 @@ struct FuncPtr {
 enum class ArgType : unsigned {
   SSA,
   TV,
-  VecKeyS,
-  VecKeyIS,
+  MemberKeyS,
+  MemberKeyIS,
   ExtraImm,
   Imm,
 };

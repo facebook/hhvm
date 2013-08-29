@@ -17,9 +17,10 @@
 
 #include "hphp/runtime/ext/ext_ipc.h"
 #include "hphp/runtime/ext/ext_variable.h"
-#include "hphp/runtime/base/variable_unserializer.h"
+#include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
+#include "folly/String.h"
 
 #include <memory>
 
@@ -87,7 +88,7 @@ Variant f_msg_get_queue(int64_t key, int64_t perms /* = 0666 */) {
     id = msgget(key, IPC_CREAT | IPC_EXCL | perms);
     if (id < 0) {
       raise_warning("Failed to create message queue for key 0x%" PRIx64 ": %s",
-                      key, Util::safe_strerror(errno).c_str());
+                      key, folly::errnoStr(errno).c_str());
       return false;
     }
   }
@@ -200,7 +201,7 @@ bool f_msg_send(CResRef queue, int64_t msgtype, CVarRef message,
   if (result < 0) {
     int err = errno;
     raise_warning("Unable to send message: %s",
-                    Util::safe_strerror(err).c_str());
+                    folly::errnoStr(err).c_str());
     if (!errorcode.isNull()) {
       errorcode = err;
     }
@@ -241,7 +242,7 @@ bool f_msg_receive(CResRef queue, int64_t desiredmsgtype, VRefParam msgtype,
   if (result < 0) {
     int err = errno;
     raise_warning("Unable to receive message: %s",
-                    Util::safe_strerror(err).c_str());
+                    folly::errnoStr(err).c_str());
     if (!errorcode.isNull()) {
       errorcode = err;
     }
@@ -324,7 +325,7 @@ public:
       if (errno != EINTR) {
         raise_warning("failed to %s key 0x%x: %s",
                         acquire ? "acquire" : "release",
-                        key, Util::safe_strerror(errno).c_str());
+                        key, folly::errnoStr(errno).c_str());
         return false;
       }
     }
@@ -386,7 +387,7 @@ Variant f_sem_get(int64_t key, int64_t max_acquire /* = 1 */,
   int semid = semget(key, 3, perm|IPC_CREAT);
   if (semid == -1) {
     raise_warning("failed for key 0x%" PRIx64 ": %s", key,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     return false;
   }
 
@@ -418,7 +419,7 @@ Variant f_sem_get(int64_t key, int64_t max_acquire /* = 1 */,
   while (semop(semid, sop, 3) == -1) {
     if (errno != EINTR) {
       raise_warning("failed acquiring SYSVSEM_SETVAL for key 0x%" PRIx64 ": %s",
-                      key, Util::safe_strerror(errno).c_str());
+                      key, folly::errnoStr(errno).c_str());
       break;
     }
   }
@@ -427,7 +428,7 @@ Variant f_sem_get(int64_t key, int64_t max_acquire /* = 1 */,
   int count = semctl(semid, SYSVSEM_USAGE, GETVAL, NULL);
   if (count == -1) {
     raise_warning("failed for key 0x%" PRIx64 ": %s", key,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
   }
 
   /* If we are the only user, then take this opportunity to set the max. */
@@ -436,7 +437,7 @@ Variant f_sem_get(int64_t key, int64_t max_acquire /* = 1 */,
     semarg.val = max_acquire;
     if (semctl(semid, SYSVSEM_SEM, SETVAL, semarg) == -1) {
       raise_warning("failed for key 0x%" PRIx64 ": %s", key,
-                      Util::safe_strerror(errno).c_str());
+                      folly::errnoStr(errno).c_str());
     }
   }
 
@@ -447,7 +448,7 @@ Variant f_sem_get(int64_t key, int64_t max_acquire /* = 1 */,
   while (semop(semid, sop, 1) == -1) {
     if (errno != EINTR) {
       raise_warning("failed releasing SYSVSEM_SETVAL for key 0x%" PRIx64 ": %s",
-                      key, Util::safe_strerror(errno).c_str());
+                      key, folly::errnoStr(errno).c_str());
       break;
     }
   }
@@ -479,7 +480,7 @@ bool f_sem_remove(CResRef sem_identifier) {
   if (semctl(sem_ptr->semid, 0, IPC_RMID, un) < 0) {
     raise_warning("failed for SysV sempphore %d: %s",
                     sem_identifier->o_getId(),
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     return false;
   }
 
@@ -620,14 +621,14 @@ Variant f_shm_attach(int64_t shm_key, int64_t shm_size /* = 10000 */,
     if ((shm_id = shmget(shm_key, shm_size, shm_flag | IPC_CREAT | IPC_EXCL))
         < 0) {
       raise_warning("failed for key 0x%" PRIx64 ": %s", shm_key,
-                      Util::safe_strerror(errno).c_str());
+                      folly::errnoStr(errno).c_str());
       return false;
     }
   }
 
   if ((shm_ptr = (char*)shmat(shm_id, NULL, 0)) == (char *)-1) {
     raise_warning("failed for key 0x%" PRIx64 ": %s", shm_key,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     return false;
   }
 
@@ -676,7 +677,7 @@ bool f_shm_remove(int64_t shm_identifier) {
 
   if (shmctl(shm_list_ptr->id, IPC_RMID,NULL) < 0) {
     raise_warning("failed for key 0x%x, id %" PRId64 ": %s", shm_list_ptr->key,
-                    shm_identifier, Util::safe_strerror(errno).c_str());
+                    shm_identifier, folly::errnoStr(errno).c_str());
     return false;
   }
   return true;

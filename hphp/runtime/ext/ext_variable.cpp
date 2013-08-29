@@ -16,15 +16,25 @@
 */
 
 #include "hphp/runtime/ext/ext_variable.h"
-#include "hphp/runtime/base/variable_serializer.h"
-#include "hphp/runtime/base/variable_unserializer.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/variable-unserializer.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString s_unknown_type("unknown type");
+const StaticString
+  s_unknown_type("unknown type"),
+  s_boolean("boolean"),
+  s_bool("bool"),
+  s_integer("integer"),
+  s_int("int"),
+  s_float("float"),
+  s_string("string"),
+  s_object("object"),
+  s_array("array"),
+  s_null("null");
 
 String f_gettype(CVarRef v) {
   if (v.getType() == KindOfResource && v.getResourceData()->isInvalid()) {
@@ -43,15 +53,15 @@ double f_floatval(CVarRef v) { return v.toDouble();}
 String f_strval(CVarRef v) { return v.toString();}
 
 bool f_settype(VRefParam var, CStrRef type) {
-  if      (type == "boolean") var = var.toBoolean();
-  else if (type == "bool"   ) var = var.toBoolean();
-  else if (type == "integer") var = var.toInt64();
-  else if (type == "int"    ) var = var.toInt64();
-  else if (type == "float"  ) var = var.toDouble();
-  else if (type == "string" ) var = var.toString();
-  else if (type == "array"  ) var = var.toArray();
-  else if (type == "object" ) var = var.toObject();
-  else if (type == "null"   ) var = uninit_null();
+  if      (type == s_boolean) var = var.toBoolean();
+  else if (type == s_bool   ) var = var.toBoolean();
+  else if (type == s_integer) var = var.toInt64();
+  else if (type == s_int    ) var = var.toInt64();
+  else if (type == s_float  ) var = var.toDouble();
+  else if (type == s_string ) var = var.toString();
+  else if (type == s_array  ) var = var.toArray();
+  else if (type == s_object ) var = var.toObject();
+  else if (type == s_null   ) var = uninit_null();
   else return false;
   return true;
 }

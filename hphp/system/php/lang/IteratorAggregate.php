@@ -22,4 +22,10 @@ interface IteratorAggregate extends Traversable {
 }
 
 interface Iterable extends IteratorAggregate {
+  public function toArray();
+  public function lazy();
+  public function map($callback);
+  public function filter($callback);
+  public function zip($iterable);
 }
+

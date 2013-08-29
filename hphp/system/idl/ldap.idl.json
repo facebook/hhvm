@@ -7,7 +7,6 @@
             "name": "ldap_connect",
             "desc": "Establishes a connection to a LDAP server on a specified hostname and port.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -32,7 +31,6 @@
             "name": "ldap_explode_dn",
             "desc": "Splits the DN returned by ldap_get_dn() and breaks it up into its component parts. Each part is known as Relative Distinguished Name, or RDN.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -55,7 +53,6 @@
             "name": "ldap_dn2ufn",
             "desc": "Turns the specified dn, into a more user-friendly form, stripping off type names.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -73,7 +70,6 @@
             "name": "ldap_err2str",
             "desc": "Returns the string error message explaining the error number errno. While LDAP errno numbers are standardized, different libraries return different or even localized textual error messages. Never check for a specific error message text, but always use an error number to check.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -91,7 +87,6 @@
             "name": "ldap_add",
             "desc": "Add entries in the LDAP directory.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -119,7 +114,6 @@
             "name": "ldap_mod_add",
             "desc": "Adds one or more attributes to the specified dn. It performs the modification at the attribute level as opposed to the object level. Object-level additions are done by the ldap_add() function.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -146,7 +140,6 @@
             "name": "ldap_mod_del",
             "desc": "Removes one or more attributes from the specified dn. It performs the modification at the attribute level as opposed to the object level. Object-level deletions are done by the ldap_delete() function.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -173,7 +166,6 @@
             "name": "ldap_mod_replace",
             "desc": "Replaces one or more attributes from the specified dn. It performs the modification at the attribute level as opposed to the object level. Object-level modifications are done by the ldap_modify() function.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -200,7 +192,6 @@
             "name": "ldap_modify",
             "desc": "Modify the existing entries in the LDAP directory. The structure of the entry is same as in ldap_add().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -227,7 +218,6 @@
             "name": "ldap_bind",
             "desc": "Binds to the LDAP directory with specified RDN and password.\nIf bind_rdn and bind_password are not specified, an anonymous bind is attempted.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -254,7 +244,6 @@
         {
             "name": "ldap_set_rebind_proc",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -273,7 +262,6 @@
         {
             "name": "ldap_sort",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -296,7 +284,6 @@
         {
             "name": "ldap_start_tls",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -312,7 +299,6 @@
             "name": "ldap_unbind",
             "desc": "Unbinds from the LDAP directory.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -330,7 +316,6 @@
             "name": "ldap_get_option",
             "desc": "Sets retval to the value of the specified option.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -359,7 +344,6 @@
             "name": "ldap_set_option",
             "desc": "Sets the value of the specified option to be newval.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -386,7 +370,6 @@
         {
             "name": "ldap_close",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -402,7 +385,6 @@
             "name": "ldap_list",
             "desc": "Performs the search for a specified filter on the directory with the scope LDAP_SCOPE_ONELEVEL.\n\nLDAP_SCOPE_ONELEVEL means that the search should only return information that is at the level immediately below the base_dn given in the call. (Equivalent to typing \"ls\" and getting a list of files and folders in the current working directory.)",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -459,7 +441,6 @@
             "name": "ldap_read",
             "desc": "Performs the search for a specified filter on the directory with the scope LDAP_SCOPE_BASE. So it is equivalent to reading an entry from the directory.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -517,7 +498,6 @@
             "name": "ldap_search",
             "desc": "Performs the search for a specified filter on the directory with the scope of LDAP_SCOPE_SUBTREE. This is equivalent to searching the entire directory.\n\nFrom 4.0.5 on it's also possible to do parallel searches. To do this you use an array of link identifiers, rather than a single identifier, as the first argument. If you don't want the same base DN and the same filter for all the searches, you can also use an array of base DNs and\/or an array of filters. Those arrays must be of the same size as the link identifier array since the first entries of the arrays are used for one search, the second entries are used for another, and so on. When doing parallel searches an array of search result identifiers is returned, except in case of error, then the entry corresponding to the search will be FALSE. This is very much like the value normally returned, except that a result identifier is always returned when a search was made. There are some rare cases where the normal search returns FALSE while the parallel search returns an identifier.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -575,7 +555,6 @@
             "name": "ldap_rename",
             "desc": "The entry specified by dn is renamed\/moved.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -613,7 +592,6 @@
             "name": "ldap_delete",
             "desc": "Deletes a particular entry in LDAP directory.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -636,7 +614,6 @@
             "name": "ldap_compare",
             "desc": "Compare value of attribute with value of same attribute in an LDAP directory entry.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -669,7 +646,6 @@
             "name": "ldap_errno",
             "desc": "Returns the standardized error number returned by the last LDAP command. This number can be converted into a textual error message using ldap_err2str().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -687,7 +663,6 @@
             "name": "ldap_error",
             "desc": "Returns the string error message explaining the error generated by the last LDAP command for the given link_identifier. While LDAP errno numbers are standardized, different libraries return different or even localized textual error messages. Never check for a specific error message text, but always use an error number to check.\n\nUnless you lower your warning level in your php.ini sufficiently or prefix your LDAP commands with @ (at) characters to suppress warning output, the errors generated will also show up in your HTML output.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -705,7 +680,6 @@
             "name": "ldap_get_dn",
             "desc": "Finds out the DN of an entry in the result.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -727,7 +701,6 @@
             "name": "ldap_count_entries",
             "desc": "Returns the number of entries stored in the result of previous search operations.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -750,7 +723,6 @@
             "name": "ldap_get_entries",
             "desc": "Reads multiple entries from the given result, and then reading the attributes and multiple values.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -772,7 +744,6 @@
             "name": "ldap_first_entry",
             "desc": "Returns the entry identifier for first entry in the result. This entry identifier is then supplied to ldap_next_entry() routine to get successive entries from the result.\n\nEntries in the LDAP result are read sequentially using the ldap_first_entry() and ldap_next_entry() functions.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -794,7 +765,6 @@
             "name": "ldap_next_entry",
             "desc": "Retrieve the entries stored in the result. Successive calls to the ldap_next_entry() return entries one by one till there are no more entries. The first call to ldap_next_entry() is made after the call to ldap_first_entry() with the result_entry_identifier as returned from the ldap_first_entry().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -816,7 +786,6 @@
             "name": "ldap_get_attributes",
             "desc": "Reads attributes and values from an entry in the search result.\n\nHaving located a specific entry in the directory, you can find out what information is held for that entry by using this call. You would use this call for an application which \"browses\" directory entries and\/or where you do not know the structure of the directory entries. In many applications you will be searching for a specific attribute such as an email address or a surname, and won't care what other data is held.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "StringVec",
@@ -838,7 +807,6 @@
             "name": "ldap_first_attribute",
             "desc": "Gets the first attribute in the given entry. Remaining attributes are retrieved by calling ldap_next_attribute() successively.\n\nSimilar to reading entries, attributes are also read one by one from a particular entry.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -860,7 +828,6 @@
             "name": "ldap_next_attribute",
             "desc": "Retrieves the attributes in an entry. The first call to ldap_next_attribute() is made with the result_entry_identifier returned from ldap_first_attribute().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -881,7 +848,6 @@
         {
             "name": "ldap_first_reference",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -900,7 +866,6 @@
         {
             "name": "ldap_next_reference",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -919,7 +884,6 @@
         {
             "name": "ldap_parse_reference",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -943,7 +907,6 @@
         {
             "name": "ldap_parse_result",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -986,7 +949,6 @@
             "name": "ldap_free_result",
             "desc": "Frees up the memory allocated internally to store the result. All result memory will be automatically freed when the script terminates.\n\nTypically all the memory allocated for the LDAP result gets freed at the end of the script. In case the script is making successive searches which return large result sets, ldap_free_result() could be called to keep the runtime memory usage by the script low.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -1003,7 +965,6 @@
             "name": "ldap_get_values_len",
             "desc": "Reads all the values of the attribute in the entry in the result.\n\nThis function is used exactly like ldap_get_values() except that it handles binary data and not string data.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -1029,7 +990,6 @@
             "name": "ldap_get_values",
             "desc": "Reads all the values of the attribute in the entry in the result.\n\nThis call needs a result_entry_identifier, so needs to be preceded by one of the ldap search calls and one of the calls to get an individual entry.\n\nYou application will either be hard coded to look for certain attributes (such as \"surname\" or \"mail\") or you will have to use the ldap_get_attributes() call to work out what attributes exist for a given entry.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",

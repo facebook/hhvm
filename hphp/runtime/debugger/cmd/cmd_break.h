@@ -37,11 +37,6 @@ public:
   // The text to display when the debugger client processes "help break".
   virtual void help(DebuggerClient &client);
 
-  // Updates the client with information about the execution of this command.
-  // This information is not used by the command line client, but can
-  // be accessed via the debugger client API exposed to PHP programs.
-  virtual void setClientOutput(DebuggerClient &client);
-
   // Updates the breakpoint list in the proxy with the new list
   // received from the client. Then sends the command back to the
   // client as confirmation. Returns false if the confirmation message
@@ -52,12 +47,12 @@ public:
   // list, sends the command to the server and waits for a response.
   static void SendClientBreakpointListToServer(DebuggerClient &client);
 
-protected:
   // Carries out the Break command. This always involves an action on the
   // client and usually, but not always, involves the server by sending
   // this command to the server and waiting for its response.
-  virtual void onClientImpl(DebuggerClient &client);
+  virtual void onClient(DebuggerClient &client);
 
+protected:
   // Serializes this command into the given Thrift buffer.
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
 

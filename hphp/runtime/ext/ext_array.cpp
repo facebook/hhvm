@@ -19,13 +19,13 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/base/request_local.h"
-#include "hphp/runtime/base/zend_collator.h"
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/sort_flags.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/zend-collator.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/base/hphp_array.h"
+#include "hphp/runtime/base/hphp-array.h"
 #include "hphp/util/logger.h"
 
 #define SORT_DESC               3
@@ -303,7 +303,7 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
       v.unset(); // avoid contamination of the value that was strongly bound
       v = subarr1;
     } else {
-      arr1.addLval(key, true).setWithRef(value);
+      arr1.lvalAt(key, AccessFlags::Key).setWithRef(value);
     }
   }
 

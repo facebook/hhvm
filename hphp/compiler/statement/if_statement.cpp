@@ -20,7 +20,7 @@
 #include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/compiler/statement/block_statement.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 
 using namespace HPHP;
 

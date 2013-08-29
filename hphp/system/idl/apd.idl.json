@@ -7,7 +7,6 @@
             "name": "override_function",
             "desc": "Overrides built-in functions by replacing them in the symbol table.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -35,7 +34,6 @@
             "name": "rename_function",
             "desc": "Renames a orig_name to new_name in the global function table. Useful for temporarily overriding built-in functions.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -57,7 +55,6 @@
         {
             "name": "apd_set_browser_trace",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -69,7 +66,6 @@
             "name": "apd_set_pprof_trace",
             "desc": "Starts debugging to pprof_{process_id} in the dump directory.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -93,7 +89,6 @@
             "name": "apd_set_session_trace_socket",
             "desc": "Connects to the specified tcp_server (eg. tcplisten) and sends debugging data to the socket.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -125,7 +120,6 @@
         {
             "name": "apd_stop_trace",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -137,7 +131,6 @@
             "name": "apd_breakpoint",
             "desc": "This can be used to stop the running of your script, and await responses on the connected socket. To step the program, just send enter (a blank line), or enter a php command to be executed.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -150,7 +143,6 @@
             "name": "apd_continue",
             "desc": "Usually sent via the socket to restart the interpreter.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -163,7 +155,6 @@
             "name": "apd_echo",
             "desc": "Usually sent via the socket to request information about the running script.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",

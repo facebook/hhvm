@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_HHVM_HHIR_SIMPLIFIER_H_
 #define incl_HPHP_HHVM_HHIR_SIMPLIFIER_H_
 
-#include "hphp/runtime/base/smart_containers.h"
+#include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/vm/jit/cse.h"
 #include "hphp/runtime/vm/jit/ir.h"
 
@@ -64,6 +64,8 @@ struct Simplifier {
 private:
   SSATmp* simplifyMov(SSATmp* src);
   SSATmp* simplifyNot(SSATmp* src);
+  SSATmp* simplifyAbsInt(IRInstruction* inst);
+  SSATmp* simplifyAbsDbl(IRInstruction* inst);
   SSATmp* simplifyAdd(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifySub(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyMul(SSATmp* src1, SSATmp* src2);
@@ -118,7 +120,6 @@ private:
   SSATmp* simplifyIncRefCtx(IRInstruction* inst);
   SSATmp* simplifyCheckType(IRInstruction* inst);
   SSATmp* simplifyCheckStk(IRInstruction* inst);
-  SSATmp* simplifyLdThis(IRInstruction*);
   SSATmp* simplifyLdCls(IRInstruction* inst);
   SSATmp* simplifyLdClsPropAddr(IRInstruction*);
   SSATmp* simplifyLdCtx(IRInstruction*);
@@ -163,35 +164,44 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 struct StackValueInfo {
-  explicit StackValueInfo(SSATmp* value = nullptr)
+  explicit StackValueInfo(SSATmp* value)
     : value(value)
-    , knownType(value ? value->type() : Type::None)
+    , knownType(value->type())
     , spansCall(false)
+    , typeSrc(value->inst())
   {
     TRACE(5, "%s created\n", show().c_str());
   }
 
-  explicit StackValueInfo(Type type)
+  explicit StackValueInfo(IRInstruction* inst, Type type = Type::None)
     : value(nullptr)
     , knownType(type)
     , spansCall(false)
+    , typeSrc(inst)
   {
     TRACE(5, "%s created\n", show().c_str());
   }
 
   std::string show() const {
-    std::ostringstream out;
-    out << "StackValueInfo {";
-    out << (value ? value->inst()->toString() : knownType.toString());
-    if (spansCall) out << ", spans call";
-    out << "}";
+    std::string out = "StackValueInfo {";
 
-    return out.str();
+    if (value) {
+      out += value->inst()->toString();
+    } else {
+      folly::toAppend(knownType.toString(), " from ", typeSrc->toString(),
+                      &out);
+    }
+
+    if (spansCall) out += ", spans call";
+    out += "}";
+
+    return out;
   }
 
   SSATmp* value;   // may be null
   Type knownType;  // currently Type::None if we don't know (TODO(#2135185)
   bool spansCall;  // whether the tmp's definition was above a call
+  IRInstruction* typeSrc; // the instruction that gave us knownType
 
  private:
   TRACE_SET_MOD(hhir);

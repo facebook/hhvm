@@ -7,7 +7,6 @@
             "name": "simplexml_load_string",
             "desc": "Takes a well-formed XML string and returns it as an object.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -47,7 +46,6 @@
             "name": "simplexml_load_file",
             "desc": "Convert the well-formed XML document in the given file to an object.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -87,7 +85,6 @@
             "name": "simplexml_import_dom",
             "desc": "This function takes a node of a DOM document and makes it into a SimpleXML node. This new object can then be used as a native SimpleXML element.",
             "flags": [
-                "HasDocComment",
                 "ZendParamMode"
             ],
             "return": {
@@ -112,7 +109,6 @@
             "name": "libxml_get_errors",
             "desc": "Retrieve array of errors.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -125,7 +121,6 @@
             "name": "libxml_get_last_error",
             "desc": "Retrieve last error from libxml.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -138,7 +133,6 @@
             "name": "libxml_clear_errors",
             "desc": "libxml_clear_errors() clears the libxml error buffer.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null,
@@ -151,7 +145,6 @@
             "name": "libxml_use_internal_errors",
             "desc": "libxml_use_internal_errors() allows you to disable standard libxml errors and enable user error handling.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -170,7 +163,6 @@
             "name": "libxml_set_streams_context",
             "desc": "Sets the streams context for the next libxml document load or write.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null,
@@ -188,7 +180,6 @@
             "name": "libxml_disable_entity_loader",
             "desc": "Disable\/enable the ability to load external entities.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -217,7 +208,6 @@
             ],
             "desc": "Represents an element in an XML document.",
             "flags": [
-                "HasDocComment",
                 "NoDefaultSweep"
             ],
             "footer": "\n public:\n  Object m_doc;\n  xmlNodePtr m_node;\n  Variant m_children;\n  Variant m_attributes;\n  bool m_is_text;\n  bool m_free_text;\n  bool m_is_attribute;\n  bool m_is_children;\n  bool m_is_property;\n  virtual bool o_toBoolean() const;\n  virtual int64_t o_toInt64() const;\n  virtual double o_toDouble() const;\n  virtual Array o_toArray() const;\n private:\n  xmlXPathContextPtr m_xpath;",
@@ -225,7 +215,6 @@
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -260,7 +249,6 @@
                 {
                     "name": "offsetExists",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -275,7 +263,6 @@
                 {
                     "name": "offsetGet",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -290,7 +277,6 @@
                 {
                     "name": "offsetSet",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -309,7 +295,6 @@
                 {
                     "name": "offsetUnset",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -324,7 +309,6 @@
                 {
                     "name": "getIterator",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -336,7 +320,6 @@
                     "name": "count",
                     "desc": "This method counts the number of children of an element.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Int64",
@@ -348,7 +331,6 @@
                 {
                     "name": "xpath",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -365,7 +347,6 @@
                 {
                     "name": "registerXPathNamespace",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -384,7 +365,6 @@
                 {
                     "name": "asXML",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -400,7 +380,6 @@
                 {
                     "name": "getNamespaces",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "StringMap"
@@ -416,7 +395,6 @@
                 {
                     "name": "getDocNamespaces",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "StringMap"
@@ -432,7 +410,6 @@
                 {
                     "name": "children",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Object",
@@ -456,7 +433,6 @@
                 {
                     "name": "getName",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "String"
@@ -467,7 +443,6 @@
                 {
                     "name": "attributes",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Object"
@@ -490,7 +465,6 @@
                 {
                     "name": "addChild",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -515,7 +489,6 @@
                 {
                     "name": "addAttribute",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -540,7 +513,6 @@
                 {
                     "name": "__toString",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "String"
@@ -551,7 +523,6 @@
                 {
                     "name": "__get",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -566,7 +537,6 @@
                 {
                     "name": "__set",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -585,7 +555,6 @@
                 {
                     "name": "__isset",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -600,7 +569,6 @@
                 {
                     "name": "__unset",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -620,13 +588,11 @@
             "name": "LibXMLError",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -648,7 +614,6 @@
             ],
             "desc": "",
             "flags": [
-                "HasDocComment",
                 "NoDefaultSweep"
             ],
             "footer": "\npublic:\n  void reset_iterator(c_SimpleXMLElement *parent);\n\n  c_SimpleXMLElement *m_parent;\n  ArrayIter *m_iter1;\n  ArrayIter *m_iter2;\n  Object     m_temp;",
@@ -656,7 +621,6 @@
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -667,7 +631,6 @@
                 {
                     "name": "current",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -678,7 +641,6 @@
                 {
                     "name": "key",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -689,7 +651,6 @@
                 {
                     "name": "next",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -700,7 +661,6 @@
                 {
                     "name": "rewind",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"
@@ -711,7 +671,6 @@
                 {
                     "name": "valid",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"

@@ -5,13 +5,13 @@ Program %s/flow_gen.php exited normally.
 break flow_gen.php:12
 Breakpoint 1 set on line 12 of flow_gen.php
 @test(1)
-Breakpoint 1 reached at genFoo$continuation() on line 12 of %s/flow_gen.php
+Breakpoint 1 reached at genFoo() on line 12 of %s/flow_gen.php
   11 function genFoo($a) {
   12   $a = bar($a);
   13   $z = yield $a+5;
 
 next
-Break at genFoo$continuation() on line 13 of %s/flow_gen.php
+Break at genFoo() on line 13 of %s/flow_gen.php
   12   $a = bar($a);
   13   $z = yield $a+5;
   14   yield $z+1;
@@ -55,7 +55,7 @@ Break at Continuation::send()
 step
 Break at Continuation::send()
 step
-Break at genFoo$continuation() on line 11 of %s/flow_gen.php
+Break at genFoo() on line 11 of %s/flow_gen.php
   10 
   11 function genFoo($a) {
   12   $a = bar($a);
@@ -66,13 +66,13 @@ Break at genFoo$continuation() on line 11 of %s/flow_gen.php
   17 
 
 step
-Break at genFoo$continuation() on line 13 of %s/flow_gen.php
+Break at genFoo() on line 13 of %s/flow_gen.php
   12   $a = bar($a);
   13   $z = yield $a+5;
   14   yield $z+1;
 
 next
-Break at genFoo$continuation() on line 14 of %s/flow_gen.php
+Break at genFoo() on line 14 of %s/flow_gen.php
   13   $z = yield $a+5;
   14   yield $z+1;
   15   error_log('Finished in genFoo');
@@ -116,7 +116,7 @@ Break at Continuation::send()
 step
 Break at Continuation::send()
 step
-Break at genFoo$continuation() on line 11 of %s/flow_gen.php
+Break at genFoo() on line 11 of %s/flow_gen.php
   10 
   11 function genFoo($a) {
   12   $a = bar($a);
@@ -127,20 +127,20 @@ Break at genFoo$continuation() on line 11 of %s/flow_gen.php
   17 
 
 step
-Break at genFoo$continuation() on line 14 of %s/flow_gen.php
+Break at genFoo() on line 14 of %s/flow_gen.php
   13   $z = yield $a+5;
   14   yield $z+1;
   15   error_log('Finished in genFoo');
 
 next
-Break at genFoo$continuation() on line 15 of %s/flow_gen.php
+Break at genFoo() on line 15 of %s/flow_gen.php
   14   yield $z+1;
   15   error_log('Finished in genFoo');
   16 }
 
 next
 Finished in genFoo
-Break at genFoo$continuation() on line 11 of %s/flow_gen.php
+Break at genFoo() on line 11 of %s/flow_gen.php
   10 
   11 function genFoo($a) {
   12   $a = bar($a);

@@ -22,7 +22,7 @@
 #include "hphp/compiler/option.h"
 
 #include "hphp/util/json.h"
-#include "hphp/util/parser/parser.h"
+#include "hphp/parser/parser.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -73,7 +73,7 @@ public:
 
   FunctionScope(FunctionScopePtr orig, AnalysisResultConstPtr ar,
                 const std::string &name, const std::string &originalName,
-                StatementPtr stmt, ModifierExpressionPtr modifiers);
+                StatementPtr stmt, ModifierExpressionPtr modifiers, bool user);
 
   /**
    * System functions.
@@ -116,6 +116,9 @@ public:
   void setGenerator(bool f) { m_generator = f; }
   int allocYieldLabel() { return ++m_yieldLabelCount; }
   int getYieldLabelCount() const { return m_yieldLabelCount; }
+  bool isAsync() const { return m_async; }
+  void setAsync(bool f) { m_async = f; }
+
   bool needsClassParam();
 
   void setInlineSameContext(bool f) { m_inlineSameContext = f; }
@@ -246,6 +249,8 @@ public:
 
   /**
    * What is the inferred type of this function's return.
+   * Note that for generators and async functions, this is different
+   * from what caller actually gets when calling the function.
    */
   void pushReturnType();
   void setReturnType(AnalysisResultConstPtr ar, TypePtr type);
@@ -460,6 +465,7 @@ private:
   unsigned m_contextSensitive : 1;
   unsigned m_directInvoke : 1;
   unsigned m_generator : 1;
+  unsigned m_async : 1;
   unsigned m_noLSB : 1;
   unsigned m_nextLSB : 1;
   unsigned m_hasTry : 1;

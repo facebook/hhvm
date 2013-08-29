@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/ext_posix.h"
 #include "hphp/runtime/base/file.h"
+#include "folly/String.h"
 #include <sys/times.h>
 #include <sys/utsname.h>
 #include <sys/types.h>
@@ -367,7 +368,7 @@ bool f_posix_setuid(int uid) {
 }
 
 String f_posix_strerror(int errnum) {
-  return String(Util::safe_strerror(errnum));
+  return String(folly::errnoStr(errnum).toStdString());
 }
 
 const StaticString

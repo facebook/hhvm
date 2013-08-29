@@ -3,21 +3,20 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
+   | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
 
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/zend_functions.h"
-#include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/base/zend-string.h"
 
 namespace HPHP {
 
@@ -51,12 +50,6 @@ bool same(CVarRef v1, const StringData* v2) {
   if (!v1.isString()) return false;
   auto const sdata = v1.getStringData();
   return sdata == v2 || v2->same(sdata);
-}
-
-// TODO(#2298051) litstr must die
-bool same(CVarRef v1, litstr v2) {
-  StackStringData sd2(v2);
-  return same(v1, &sd2);
 }
 
 bool same(CVarRef v1, CStrRef v2) {

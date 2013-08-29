@@ -15,8 +15,8 @@
 */
 
 #include "hphp/system/systemlib.h"
-#include "hphp/runtime/base/hphp_system.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/hphp-system.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/class.h"
 
@@ -111,38 +111,16 @@ SystemLib::AllocSoapFaultObject(CVarRef code,
                                                  detail, name, header));
 }
 
-ObjectData* SystemLib::AllocKeysIterableObject(CVarRef mp) {
-  CREATE_AND_CONSTRUCT(KeysIterable, CREATE_VECTOR1(mp));
+ObjectData* SystemLib::AllocLazyKVZipIterableObject(CVarRef mp) {
+  CREATE_AND_CONSTRUCT(LazyKVZipIterable, CREATE_VECTOR1(mp));
 }
 
-ObjectData* SystemLib::AllocKVZippedIterableObject(CVarRef mp) {
-  CREATE_AND_CONSTRUCT(KVZippedIterable, CREATE_VECTOR1(mp));
+ObjectData* SystemLib::AllocLazyIterableViewObject(CVarRef iterable) {
+  CREATE_AND_CONSTRUCT(LazyIterableView, CREATE_VECTOR1(iterable));
 }
 
-ObjectData* SystemLib::AllocMappedKeyedIterableObject(CVarRef iterable,
-                                                      CVarRef callback) {
-  CREATE_AND_CONSTRUCT(MappedKeyedIterable, CREATE_VECTOR2(iterable,
-                                                           callback));
-}
-
-ObjectData* SystemLib::AllocFilteredKeyedIterableObject(CVarRef iterable,
-                                                        CVarRef callback) {
-  CREATE_AND_CONSTRUCT(FilteredKeyedIterable, CREATE_VECTOR2(iterable,
-                                                             callback));
-}
-
-ObjectData* SystemLib::AllocZippedKeyedIterableObject(CVarRef iterable1,
-                                                      CVarRef iterable2) {
-  CREATE_AND_CONSTRUCT(ZippedKeyedIterable, CREATE_VECTOR2(iterable1,
-                                                           iterable2));
-}
-
-ObjectData* SystemLib::AllocIterableViewObject(CVarRef iterable) {
-  CREATE_AND_CONSTRUCT(IterableView, CREATE_VECTOR1(iterable));
-}
-
-ObjectData* SystemLib::AllocKeyedIterableViewObject(CVarRef iterable) {
-  CREATE_AND_CONSTRUCT(KeyedIterableView, CREATE_VECTOR1(iterable));
+ObjectData* SystemLib::AllocLazyKeyedIterableViewObject(CVarRef iterable) {
+  CREATE_AND_CONSTRUCT(LazyKeyedIterableView, CREATE_VECTOR1(iterable));
 }
 
 #undef CREATE_AND_CONSTRUCT

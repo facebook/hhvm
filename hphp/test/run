@@ -48,6 +48,12 @@ Examples:
   # Quick tests in JIT mode with some extra runtime options:
   % $argv[0] test/quick -a '-vEval.JitMaxTranslations=120 -vEval.HHIRJumpOpts=0'
 
+  # All quick tests except debugger
+  % $argv[0] -e debugger test/quick
+
+  # All tests except those containing a string of 3 digits
+  % $argv[0] -E '/\d{3}/' all
+
 EOT;
   return usage().$help;
 }
@@ -119,6 +125,8 @@ function rel_path($to) {
 
 function get_options($argv) {
   $parameters = array(
+    'exclude:' => 'e:',
+    'exclude-pattern:' => 'E:',
     'repo' => 'r',
     'mode:' => 'm:',
     'server' => '',
@@ -127,6 +135,7 @@ function get_options($argv) {
     'fbmake' => '',
     'threads:' => '',
     'args:' => 'a:',
+    'log' => 'l',
   );
   $options = array();
   $files = array();
@@ -175,7 +184,7 @@ function map_convenience_filename($file) {
   return hphp_home().'/'.$mappage[$file];
 }
 
-function find_tests($files) {
+function find_tests($files, array $options = null) {
   if (!$files) {
     $files = array('quick');
   }
@@ -198,7 +207,20 @@ function find_tests($files) {
     error(usage());
   }
   asort($tests);
-  return array_filter($tests);
+  $tests = array_filter($tests);
+  if (!empty($options['exclude'])) {
+    $exclude = $options['exclude'];
+    $tests = array_filter($tests, function($test) use ($exclude) {
+      return (false === strpos($test, $exclude));
+    });
+  }
+  if (!empty($options['exclude-pattern'])) {
+    $exclude = $options['exclude-pattern'];
+    $tests = array_filter($tests, function($test) use ($exclude) {
+      return !preg_match($exclude, $test);
+    });
+  }
+  return $tests;
 }
 
 function find_test_ext($test, $ext) {
@@ -268,6 +290,7 @@ function hhvm_cmd($options, $test, $test_run = null) {
     '-vEval.EnableArgsInBacktraces=true',
     read_file(find_test_ext($test, 'opts')),
     extra_args($options),
+    '-vResourceLimit.CoreFileSize=0',
     '--file',
     escapeshellarg($test_run)
   ));
@@ -471,6 +494,10 @@ function run_test($options, $test) {
      1 => array("pipe", "w"),
      2 => array("pipe", "w"),
   );
+  if (isset($options['log'])) {
+    $hhvm_env['TRACE'] = 'printir:1';
+    $hhvm_env['HPHP_TRACE_FILE'] = $test . '.log';
+  }
   $process = proc_open("$hhvm 2>&1", $descriptorspec, $pipes, null, $hhvm_env);
   if (!is_resource($process)) {
     file_put_contents("$test.diff", "Couldn't invoke $hhvm");
@@ -495,7 +522,7 @@ function run_test($options, $test) {
   proc_close($process);
 
   // Needed for testing non-hhvm binaries that don't actually run the code
-  // e.g. util/parser/test/parse_tester.cpp
+  // e.g. parser/test/parse_tester.cpp
   if ($output == "FORCE PASS") {
     return true;
   }
@@ -619,7 +646,7 @@ function main($argv) {
   if (isset($options['help'])) {
     error(help());
   }
-  $tests = find_tests($files);
+  $tests = find_tests($files, $options);
 
   $threads = min(count($tests), idx($options, 'threads', num_cpus() + 1));
 

@@ -37,6 +37,7 @@
 #include "hphp/compiler/expression/include_expression.h"
 #include "hphp/compiler/expression/closure_expression.h"
 #include "hphp/compiler/expression/yield_expression.h"
+#include "hphp/compiler/expression/await_expression.h"
 #include "hphp/compiler/statement/statement.h"
 #include "hphp/compiler/statement/statement_list.h"
 #include "hphp/compiler/statement/catch_statement.h"
@@ -65,10 +66,10 @@
 #include "hphp/compiler/analysis/live_dict.h"
 #include "hphp/compiler/analysis/ref_dict.h"
 
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
-#include "hphp/util/parser/hphp.tab.hpp"
-#include "hphp/util/parser/location.h"
+#include "hphp/parser/hphp.tab.hpp"
+#include "hphp/parser/location.h"
 #include "hphp/util/util.h"
 
 #define spc(T,p) boost::static_pointer_cast<T>(p)
@@ -747,15 +748,6 @@ void AliasManager::killLocals() {
         goto kill_it;
 
       case Expression::KindOfBinaryOpExpression:
-        if (!(effects & emask) &&
-            getOpForAssignmentOp(spc(BinaryOpExpression, e)->getOp())) {
-          if (okToKill(spc(BinaryOpExpression, e)->getExp1(), false)) {
-            e->setContext(Expression::DeadStore);
-            m_replaced++;
-            ++it;
-            continue;
-          }
-        }
         cleanInterf(spc(BinaryOpExpression, e)->getExp1(), ++it, end, depth);
         continue;
 
@@ -1587,6 +1579,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
               cur = next;
             }
             if (!m_inCall &&
+                !last->is(Expression::KindOfAwaitExpression) &&
                 !last->is(Expression::KindOfYieldExpression) &&
                 ae->isUnused() && m_accessList.isLast(ae) &&
                 !e->hasAnyContext(Expression::AccessContext |

@@ -17,12 +17,13 @@
 
 #include "hphp/runtime/ext/ext_curl.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/base/string_buffer.h"
-#include "hphp/runtime/base/libevent_http_client.h"
-#include "hphp/runtime/base/curl_tls_workarounds.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/server/server_stats.h"
+#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/libevent-http-client.h"
+#include "hphp/runtime/base/curl-tls-workarounds.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "openssl/ssl.h"
 
 #define CURLOPT_RETURNTRANSFER 19913
 #define CURLOPT_BINARYTRANSFER 19914
@@ -123,7 +124,9 @@ public:
     curl_easy_setopt(m_cp, CURLOPT_DNS_CACHE_TIMEOUT, 120);
     curl_easy_setopt(m_cp, CURLOPT_MAXREDIRS, 20); // no infinite redirects
     curl_easy_setopt(m_cp, CURLOPT_NOSIGNAL, 1); // for multithreading mode
-    curl_easy_setopt(m_cp, CURLOPT_SSL_CTX_FUNCTION, curl_tls_workarounds_cb);
+    curl_easy_setopt(m_cp, CURLOPT_SSL_CTX_FUNCTION,
+                     CurlResource::ssl_ctx_callback);
+    curl_easy_setopt(m_cp, CURLOPT_SSL_CTX_DATA, (void*)this);
 
     curl_easy_setopt(m_cp, CURLOPT_TIMEOUT,
                      RuntimeOption::HttpDefaultTimeout);
@@ -237,7 +240,7 @@ public:
       // the reader function will be called
       curl_easy_setopt(m_cp, CURLOPT_POSTFIELDSIZE, 0);
     }
-    m_write.buf.reset();
+    m_write.buf.clear();
     m_write.content.clear();
     m_header.clear();
     memset(m_error_str, 0, sizeof(m_error_str));
@@ -252,7 +255,7 @@ public:
 
     /* CURLE_PARTIAL_FILE is returned by HEAD requests */
     if (m_error_no != CURLE_OK && m_error_no != CURLE_PARTIAL_FILE) {
-      m_write.buf.reset();
+      m_write.buf.clear();
       m_write.content.clear();
       return false;
     }
@@ -560,6 +563,30 @@ public:
       }
       break;
 
+    case CURLOPT_FB_TLS_VER_MAX:
+      {
+        int64_t val = value.toInt64();
+        if (value.isInteger() &&
+            (val == CURLOPT_FB_TLS_VER_MAX_1_0 ||
+             val == CURLOPT_FB_TLS_VER_MAX_1_1 ||
+             val == CURLOPT_FB_TLS_VER_MAX_NONE)) {
+            m_opts.set(int64_t(option), value);
+        } else {
+          raise_warning("You must pass CURLOPT_FB_TLS_VER_MAX_1_0, "
+                        "CURLOPT_FB_TLS_VER_MAX_1_1 or "
+                        "CURLOPT_FB_TLS_VER_MAX_NONE with "
+                        "CURLOPT_FB_TLS_VER_MAX");
+        }
+      }
+      break;
+    case CURLOPT_FB_TLS_CIPHER_SPEC:
+      if (value.isString() && !value.toString().empty()) {
+        m_opts.set(int64_t(option), value);
+      } else {
+        raise_warning("CURLOPT_FB_TLS_CIPHER_SPEC requires a non-empty string");
+      }
+      break;
+
     default:
       m_error_no = CURLE_FAILED_INIT;
       throw_invalid_argument("option: %ld", option);
@@ -737,6 +764,15 @@ private:
 
   bool m_phpException;
   bool m_emptyPost;
+
+  static CURLcode ssl_ctx_callback(CURL *curl, void *sslctx, void *parm);
+  typedef enum {
+    CURLOPT_FB_TLS_VER_MAX = 2147482624,
+    CURLOPT_FB_TLS_VER_MAX_NONE = 2147482625,
+    CURLOPT_FB_TLS_VER_MAX_1_1 = 2147482626,
+    CURLOPT_FB_TLS_VER_MAX_1_0 = 2147482627,
+    CURLOPT_FB_TLS_CIPHER_SPEC = 2147482628
+  } fb_specific_options;
 };
 IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(CurlResource);
 void CurlResource::sweep() {
@@ -746,6 +782,69 @@ void CurlResource::sweep() {
 }
 
 StaticString CurlResource::s_class_name("cURL handle");
+
+CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
+  // Set defaults from config.hdf
+  CURLcode r = curl_tls_workarounds_cb(curl, sslctx, parm);
+  if (r != CURLE_OK) {
+    return r;
+  }
+
+  // Convert params to proper types.
+  SSL_CTX* ctx = (SSL_CTX*)sslctx;
+  if (ctx == nullptr) {
+    raise_warning("supplied argument is not a valid SSL_CTX");
+    return CURLE_FAILED_INIT;
+  }
+  CurlResource* cp = (CurlResource*)parm;
+  if (cp == nullptr) {
+    raise_warning("supplied argument is not a valid cURL handle resource");
+    return CURLE_FAILED_INIT;
+  }
+
+  // Override cipher specs if necessary.
+  if (cp->m_opts.exists(int64_t(CURLOPT_FB_TLS_CIPHER_SPEC))) {
+    Variant untyped_value = cp->m_opts[int64_t(CURLOPT_FB_TLS_CIPHER_SPEC)];
+    if (untyped_value.isString() && !untyped_value.toString().empty()) {
+      SSL_CTX_set_cipher_list(ctx, untyped_value.toString().c_str());
+    } else {
+      raise_warning("CURLOPT_FB_TLS_CIPHER_SPEC requires a non-empty string");
+    }
+  }
+
+  // Override the maximum client TLS version if necessary.
+  if (cp->m_opts.exists(int64_t(CURLOPT_FB_TLS_VER_MAX))) {
+    // Get current options, unsetting the NO_TLSv1_* bits.
+    long cur_opts = SSL_CTX_get_options(ctx);
+#ifdef SSL_OP_NO_TLSv1_1
+    cur_opts &= ~SSL_OP_NO_TLSv1_1;
+#endif
+#ifdef SSL_OP_NO_TLSv1_2
+    cur_opts &= ~SSL_OP_NO_TLSv1_2;
+#endif
+    int64_t value = cp->m_opts[int64_t(CURLOPT_FB_TLS_VER_MAX)].toInt64();
+    if (value == CURLOPT_FB_TLS_VER_MAX_1_0) {
+#if defined (SSL_OP_NO_TLSv1_1) && defined (SSL_OP_NO_TLSv1_2)
+      cur_opts |= SSL_OP_NO_TLSv1_1 | SSL_OP_NO_TLSv1_2;
+#else
+      raise_notice("Requesting SSL_OP_NO_TLSv1_1, but this version of "
+                   "SSL does not support that option");
+#endif
+    } else if (value == CURLOPT_FB_TLS_VER_MAX_1_1) {
+#ifdef SSL_OP_NO_TLSv1_2
+      cur_opts |= SSL_OP_NO_TLSv1_2;
+#else
+      raise_notice("Requesting SSL_OP_NO_TLSv1_2, but this version of "
+                   "SSL does not support that option");
+#endif
+    } else if (value != CURLOPT_FB_TLS_VER_MAX_NONE) {
+      raise_notice("Invalid CURLOPT_FB_TLS_VER_MAX value");
+    }
+    SSL_CTX_set_options(ctx, cur_opts);
+  }
+
+  return CURLE_OK;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

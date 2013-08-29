@@ -121,6 +121,23 @@ struct LocalId : IRExtraData {
   uint32_t locId;
 };
 
+struct LdLocData : LocalId {
+  explicit LdLocData(uint32_t id, SSATmp* src)
+    : LocalId(id)
+    , valSrc(src)
+  {}
+
+  bool cseEquals(const LdLocData& o) const {
+    return LocalId::cseEquals(o) && valSrc == o.valSrc;
+  }
+  size_t cseHash() const {
+    return hash_int64_pair(LocalId::cseHash(), int64_t(valSrc));
+  }
+  std::string show() const;
+
+  SSATmp* valSrc;
+};
+
 struct IterId : IRExtraData {
   explicit IterId(uint32_t id)
     : iterId(id)
@@ -230,6 +247,19 @@ struct ActRecInfo : IRExtraData {
     return folly::to<std::string>(numArgsAndCtorFlag.first,
                                   numArgsAndCtorFlag.second ? ",ctor" : "",
                                   invName ? " M" : "");
+  }
+};
+
+/*
+ * Function pointer and parameter index for type profiling usage
+ */
+struct TypeProfileData : IRExtraData {
+  explicit TypeProfileData(int32_t param, const Func* func) : param(param),
+                                                              func(func) {}
+  int32_t param;
+  const Func* func;
+  std::string show() const {
+    return folly::to<std::string>(func->fullName()->data(), ":", param);
   }
 };
 
@@ -394,6 +424,36 @@ struct CreateContData : IRExtraData {
   const Func* genFunc;
 };
 
+/*
+ * Important during offset to determine if crossing inline function will also
+ * cross function call boundary.
+ */
+struct ReDefGeneratorSPData : IRExtraData {
+  explicit ReDefGeneratorSPData(bool spans) : spansCall(spans) {}
+
+  std::string show() const {
+    return folly::to<std::string>(spansCall);
+  }
+
+  bool spansCall;
+};
+
+/*
+ * StackOffset to adjust stack pointer by and boolean indicating whether or
+ * not the stack pointer in src1 used for analysis spans a function call.
+ */
+struct ReDefSPData : IRExtraData {
+  explicit ReDefSPData(int32_t off, bool spans = false) : offset(off),
+                                                          spansCall(spans) {}
+
+  std::string show() const {
+    return folly::to<std::string>(offset, ',', spansCall);
+  }
+
+  int32_t offset;
+  bool spansCall;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -405,14 +465,13 @@ struct CreateContData : IRExtraData {
 X(JmpSwitchDest,                JmpSwitchData);
 X(LdSSwitchDestFast,            LdSSwitchData);
 X(LdSSwitchDestSlow,            LdSSwitchData);
-X(RaiseUninitLoc,               LocalId);
 X(GuardLoc,                     LocalId);
 X(CheckLoc,                     LocalId);
 X(AssertLoc,                    LocalId);
 X(OverrideLoc,                  LocalId);
-X(LdLocAddr,                    LocalId);
+X(LdLocAddr,                    LdLocData);
 X(DecRefLoc,                    LocalId);
-X(LdLoc,                        LocalId);
+X(LdLoc,                        LdLocData);
 X(StLoc,                        LocalId);
 X(StLocNT,                      LocalId);
 X(IterFree,                     IterId);
@@ -431,16 +490,16 @@ X(CastStk,                      StackOffset);
 X(CoerceStk,                    StackOffset);
 X(AssertStk,                    StackOffset);
 X(AssertStkVal,                 StackOffset);
-X(ReDefSP,                      StackOffset);
-X(ReDefGeneratorSP,             StackOffset);
+X(ReDefSP,                      ReDefSPData);
+X(ReDefGeneratorSP,             ReDefGeneratorSPData);
 X(DefSP,                        StackOffset);
+X(DefInlineSP,                  StackOffset);
 X(LdStack,                      StackOffset);
 X(LdStackAddr,                  StackOffset);
 X(DecRefStack,                  StackOffset);
 X(DefInlineFP,                  DefInlineFPData);
 X(ReqBindJmp,                   BCOffset);
-X(ReqBindJmpNoIR,               BCOffset);
-X(ReqRetranslateNoIR,           BCOffset);
+X(ReqInterpret,                 BCOffset);
 X(ReqRetranslateOpt,            ReqRetransOptData);
 X(CheckCold,                    TransIDData);
 X(CallArray,                    CallArrayData);
@@ -462,6 +521,7 @@ X(SideExitGuardLoc,             SideExitGuardData);
 X(SideExitGuardStk,             SideExitGuardData);
 X(CheckDefinedClsEq,            CheckDefinedClsData);
 X(InterpOne,                    InterpOneData);
+X(TypeProfileFunc,              TypeProfileData);
 X(InterpOneCF,                  InterpOneData);
 X(CreateContFunc,               CreateContData);
 X(CreateContMeth,               CreateContData);
@@ -476,19 +536,30 @@ template<bool hasExtra, Opcode opc, class T> struct AssertExtraTypes {
   static void doassert() {
     assert(!"called extra on an opcode without extra data");
   }
+  static void doassert_same() {
+    assert(!"called extra on an opcode without extra data");
+  }
 };
 
 template<Opcode opc, class T> struct AssertExtraTypes<true,opc,T> {
+  typedef typename IRExtraDataType<opc>::type ExtraType;
+
   static void doassert() {
-    typedef typename IRExtraDataType<opc>::type ExtraType;
-    if (!std::is_same<ExtraType,T>::value) {
+    if (!std::is_base_of<T,ExtraType>::value) {
       assert(!"extra<T> was called with an extra data "
               "type that doesn't match the opcode type");
     }
   }
+  static void doassert_same() {
+    if (!std::is_same<T,ExtraType>::value) {
+      assert(!"extra<T> was called with an extra data type that "
+             "doesn't exactly match the opcode type");
+    }
+  }
 };
 
-// Asserts that Opcode opc has extradata and it is of type T.
+// Asserts that Opcode opc has extradata and it is of type T, or a
+// type derived from T.
 template<class T> void assert_opcode_extra(Opcode opc) {
 #define O(opcode, dstinfo, srcinfo, flags)      \
   case opcode:                                  \
@@ -500,6 +571,20 @@ template<class T> void assert_opcode_extra(Opcode opc) {
 #undef O
 }
 
+template<class T> void assert_opcode_extra_same(Opcode opc) {
+#define O(opcode, dstinfo, srcinfo, flags)      \
+  case opcode:                                  \
+    AssertExtraTypes<                           \
+      OpHasExtraData<opcode>::value,opcode,T    \
+    >::doassert_same();                         \
+    break;
+  switch (opc) { IR_OPCODES default: not_reached(); }
+#undef O
+}
+
+size_t cseHashExtra(Opcode opc, IRExtraData* data);
+bool cseEqualsExtra(Opcode opc, IRExtraData* a, IRExtraData* b);
+IRExtraData* cloneExtra(Opcode opc, IRExtraData* data, Arena& a);
 std::string showExtra(Opcode opc, const IRExtraData* data);
 
 //////////////////////////////////////////////////////////////////////

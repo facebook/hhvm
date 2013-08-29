@@ -18,7 +18,7 @@
 #include <pwd.h>
 #include <unistd.h>
 #include <sys/param.h>
-#include "hphp/runtime/base/http_client.h"
+#include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/runtime/ext/ext_mb.h"
 #include "hphp/runtime/ext/ext_url.h"

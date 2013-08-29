@@ -1,0 +1,4 @@
+bool(true)
+===RUN2===
+string(25) "Error while unserializing"
+bool(true)

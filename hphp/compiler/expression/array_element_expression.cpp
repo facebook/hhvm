@@ -22,9 +22,9 @@
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/static_member_expression.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/util/parser/hphp.tab.hpp"
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/parser/hphp.tab.hpp"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 using namespace HPHP;
 

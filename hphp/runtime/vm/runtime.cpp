@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/base/execution_context.h"
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/zend_string.h"
-#include "hphp/runtime/base/hphp_array.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_collections.h"
@@ -27,7 +27,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
-#include "hphp/runtime/base/zend_functions.h"
+#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/ext/ext_string.h"
 
 namespace HPHP {
@@ -59,21 +59,6 @@ void print_boolean(bool val) {
   if (val) {
     echo("1");
   }
-}
-
-HOT_FUNC_VM
-ArrayData* new_array(int capacity) {
-  ArrayData *a = ArrayData::Make(capacity);
-  a->incRefCount();
-  TRACE(2, "newArrayHelper: capacity %d\n", capacity);
-  return a;
-}
-
-ArrayData* new_tuple(int n, const TypedValue* values) {
-  auto a = ArrayData::Make(n, values);
-  a->incRefCount();
-  TRACE(2, "new_tuple: size %d\n", n);
-  return a;
 }
 
 #define NEW_COLLECTION_HELPER(name) \
@@ -132,7 +117,7 @@ tvPairToCString(DataType t, uint64_t v,
 StringData*
 concat_ss(StringData* v1, StringData* v2) {
   if (v1->getCount() > 1) {
-    StringData* ret = NEW(StringData)(v1, v2);
+    StringData* ret = StringData::Make(v1, v2);
     ret->setRefCount(1);
     decRefStr(v2);
     // Because v1->getCount() is greater than 1, we know we will never
@@ -162,7 +147,7 @@ concat_is(int64_t v1, StringData* v2) {
   }
   StringSlice s1(intstart, len1);
   StringSlice s2 = v2->slice();
-  StringData* ret = NEW(StringData)(s1, s2);
+  StringData* ret = StringData::Make(s1, s2);
   ret->incRefCount();
   decRefStr(v2);
   return ret;
@@ -184,7 +169,7 @@ concat_si(StringData* v1, int64_t v2) {
   }
   StringSlice s1 = v1->slice();
   StringSlice s2(intstart, len2);
-  StringData* ret = NEW(StringData)(s1, s2);
+  StringData* ret = StringData::Make(s1, s2);
   ret->incRefCount();
   decRefStr(v1);
   return ret;
@@ -203,7 +188,7 @@ concat_tv(DataType t1, uint64_t v1, DataType t2, uint64_t v2) {
   tvPairToCString(t2, v2, &s2, &s2len, &free2);
   StringSlice r1(s1, s1len);
   StringSlice r2(s2, s2len);
-  StringData* retval = NEW(StringData)(r1, r2);
+  StringData* retval = StringData::Make(r1, r2);
   retval->incRefCount();
   // If tvPairToCString allocated temporary buffers, free them now
   if (free1) free((void*)s1);
@@ -287,28 +272,6 @@ int64_t arr_to_bool(ArrayData* ad) {
   return retval;
 }
 
-/**
- * tv_to_bool will decrement tv's refcount if tv is a refcounted type
- */
-int64_t
-tv_to_bool(TypedValue* tv) {
-  using std::string;
-  bool retval;
-  if (IS_STRING_TYPE(tv->m_type)) {
-    StringData* sd = tv->m_data.pstr;
-    retval = bool(str0_to_bool(sd));
-  } else if (tv->m_type == KindOfArray) {
-    ArrayData* ad = tv->m_data.parr;
-    retval = bool(arr0_to_bool(ad));
-  } else {
-    retval = tvAsCVarRef(tv).toBoolean();
-  }
-  TRACE(2, Trace::prettyNode("TvToBool", *tv) + string(" -> ") +
-        string(retval ? "t" : "f") + string("\n"));
-  tvRefcountedDecRef(tv);
-  return int64_t(retval);
-}
-
 Unit* compile_file(const char* s, size_t sz, const MD5& md5,
                    const char* fname) {
   return g_hphp_compiler_parse(s, sz, md5, fname);
@@ -360,12 +323,12 @@ HphpArray* pack_args_into_array(ActRec* ar, int nargs) {
 HphpArray* get_static_locals(const ActRec* ar) {
   if (ar->m_func->isClosureBody()) {
     TypedValue* closureLoc = frame_local(ar, ar->m_func->numParams());
-    assert(dynamic_cast<c_Closure*>(closureLoc->m_data.pobj));
+    assert(closureLoc->m_data.pobj->instanceof(c_Closure::s_cls));
     return static_cast<c_Closure*>(closureLoc->m_data.pobj)->getStaticLocals();
   } else if (ar->m_func->isGeneratorFromClosure()) {
     c_Continuation* cont = frame_continuation(ar);
     TypedValue* closureLoc = frame_local(ar, cont->m_origFunc->numParams());
-    assert(dynamic_cast<c_Closure*>(closureLoc->m_data.pobj));
+    assert(closureLoc->m_data.pobj->instanceof(c_Closure::s_cls));
     return static_cast<c_Closure*>(closureLoc->m_data.pobj)->getStaticLocals();
   } else {
     return ar->m_func->getStaticLocals();

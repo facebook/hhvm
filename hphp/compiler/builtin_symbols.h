@@ -18,8 +18,8 @@
 #define incl_HPHP_BUILTIN_SYMBOLS_H_
 
 #include "hphp/compiler/hphp.h"
-#include "hphp/util/string_bag.h"
-#include "hphp/runtime/base/class_info.h"
+#include "hphp/util/string-bag.h"
+#include "hphp/runtime/base/class-info.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

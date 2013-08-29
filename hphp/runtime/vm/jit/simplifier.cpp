@@ -19,8 +19,9 @@
 #include <sstream>
 #include <type_traits>
 
-#include "hphp/runtime/base/smart_containers.h"
-#include "hphp/runtime/base/type_conversions.h"
+#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/trace-builder.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -38,16 +39,28 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   IRInstruction* inst = sp->inst();
 
   switch (inst->op()) {
+  case DefInlineSP:
   case DefSP:
-    return StackValueInfo();
+    return StackValueInfo { inst };
 
-  case ReDefGeneratorSP:
+  case ReDefGeneratorSP: {
+    auto const extra = inst->extra<ReDefGeneratorSP>();
+    auto info = getStackValue(inst->src(1), index);
+    if (extra->spansCall) info.spansCall = true;
+    return info;
+  }
+
   case StashGeneratorSP:
-    return getStackValue(inst->src(0), index);
-
-  case ReDefSP:
     return getStackValue(inst->src(1), index);
 
+  case ReDefSP: {
+    auto const extra = inst->extra<ReDefSP>();
+    auto info = getStackValue(inst->src(1), index);
+    if (extra->spansCall) info.spansCall = true;
+    return info;
+  }
+
+  case PassSP:
   case ExceptionBarrier:
     return getStackValue(inst->src(0), index);
 
@@ -66,7 +79,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     // We don't have a value, but we may know the type due to guarding
     // on it.
     if (inst->extra<StackOffset>()->offset == index) {
-      return StackValueInfo { inst->typeParam() };
+      return StackValueInfo { inst, inst->typeParam() };
     }
     return getStackValue(inst->src(0), index);
 
@@ -79,7 +92,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   case CallArray: {
     if (index == 0) {
       // return value from call
-      return StackValueInfo { nullptr };
+      return StackValueInfo { inst };
     }
     auto info =
       getStackValue(inst->src(0),
@@ -93,7 +106,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   case Call: {
     if (index == 0) {
       // return value from call
-      return StackValueInfo { nullptr };
+      return StackValueInfo { inst };
     }
     auto info =
       getStackValue(inst->src(0),
@@ -113,7 +126,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
         if (tmp->inst()->op() == IncRef) {
           tmp = tmp->inst()->src(0);
         }
-        if (!tmp->type().equals(Type::None)) {
+        if (!tmp->isA(Type::None)) {
           return StackValueInfo { tmp };
         }
       }
@@ -139,32 +152,32 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     // some instructions are kinda funny and mess with the stack
     // in places other than the top
     case Op::CGetL2:
-      if (index == 1) return StackValueInfo { resultType };
+      if (index == 1) return StackValueInfo { inst, resultType };
       if (index == 0) return getStackValue(prevSp, index);
       break;
     case Op::CGetL3:
-      if (index == 2) return StackValueInfo { resultType };
+      if (index == 2) return StackValueInfo { inst, resultType };
       if (index < 2)  return getStackValue(prevSp, index);
       break;
     case Op::UnpackCont:
-      if (index == 0) return StackValueInfo { Type::Cell };
-      if (index == 1) return StackValueInfo { Type::Int };
+      if (index == 0) return StackValueInfo { inst, Type::Cell };
+      if (index == 1) return StackValueInfo { inst, Type::Int };
       break;
     case Op::FPushCufSafe:
-      if (index == kNumActRecCells) return StackValueInfo { Type::Bool };
+      if (index == kNumActRecCells) return StackValueInfo { inst, Type::Bool };
       if (index == kNumActRecCells + 1) return getStackValue(prevSp, 0);
       break;
 
     default:
       if (index == 0 && !resultType.equals(Type::None)) {
-        return StackValueInfo { resultType };
+        return StackValueInfo { inst, resultType };
       }
       break;
     }
 
     // If the index we're looking for is a cell pushed by the InterpOne (other
     // than top of stack), we know nothing about its type.
-    if (index < extra.cellsPushed) return StackValueInfo{ nullptr };
+    if (index < extra.cellsPushed) return StackValueInfo{ inst };
 
     return getStackValue(prevSp, index + spAdjustment);
   }
@@ -172,25 +185,24 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   case SpillFrame:
   case CufIterSpillFrame:
     // pushes an ActRec
-    if (index < kNumActRecCells) return StackValueInfo { nullptr };
+    if (index < kNumActRecCells) return StackValueInfo { inst };
     return getStackValue(inst->src(0), index - kNumActRecCells);
 
   default:
     {
       // Assume it's a vector instruction.  This will assert in
-      // vectorBaseIdx if not.
-      auto const base = inst->src(vectorBaseIdx(inst));
+      // minstrBaseIdx if not.
+      auto const base = inst->src(minstrBaseIdx(inst));
       assert(base->inst()->op() == LdStackAddr);
       if (base->inst()->extra<LdStackAddr>()->offset == index) {
-        VectorEffects ve(inst);
-        assert(ve.baseTypeChanged || ve.baseValChanged);
-        return StackValueInfo { ve.baseType.derefIfPtr() };
+        MInstrEffects effects(inst);
+        assert(effects.baseTypeChanged || effects.baseValChanged);
+        return StackValueInfo { inst, effects.baseType.derefIfPtr() };
       }
       return getStackValue(base->inst()->src(0), index);
     }
   }
 
-  // Should not get here!
   not_reached();
 }
 
@@ -301,6 +313,8 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
 
   Opcode opc = inst->op();
   switch (opc) {
+  case AbsInt:    return simplifyAbsInt(inst);
+  case AbsDbl:    return simplifyAbsDbl(inst);
   case Add:       return simplifyAdd(src1, src2);
   case Sub:       return simplifySub(src1, src2);
   case Mul:       return simplifyMul(src1, src2);
@@ -390,7 +404,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case AssertNonNull:return simplifyAssertNonNull(inst);
 
   case LdCls:        return simplifyLdCls(inst);
-  case LdThis:       return simplifyLdThis(inst);
   case LdCtx:        return simplifyLdCtx(inst);
   case LdClsCtx:     return simplifyLdClsCtx(inst);
   case GetCtxFwdCall:return simplifyGetCtxFwdCall(inst);
@@ -541,9 +554,11 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
 
   if (srcType.subtypeOf(type)) {
     /*
-     * The type of the src is the same or more refined than type, so the
-     * guard is unnecessary.
+     * The type of the src is the same or more refined than type, so the guard
+     * is unnecessary. Constrain the guard so the resulting type isn't less
+     * specific that the CheckType would've produced.
      */
+    m_tb->constrainValue(src, categoryForType(type));
     return src;
   }
   if (type.strictSubtypeOf(srcType)) {
@@ -564,9 +579,9 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
   }
 
   /*
-   * We got a predicted type that is wrong -- it's incompatible with
-   * the tracked type.  So throw the prediction away, since it would
-   * always fail.
+   * XXX(t2774391): This code doesn't belong here. We got a predicted type that
+   * is wrong -- it's incompatible with the tracked type. So throw the
+   * prediction away, since it would always fail.
    */
   FTRACE(1, "WARNING: CheckType: removed incorrect prediction that {} is {}\n",
          srcType.toString(), type.toString());
@@ -582,6 +597,7 @@ SSATmp* Simplifier::simplifyCheckStk(IRInstruction* inst) {
   if (stkVal.knownType.equals(Type::None)) return nullptr;
 
   if (stkVal.knownType.subtypeOf(type)) {
+    m_tb->constrainStack(sp, offset, categoryForType(type));
     return sp;
   }
   return nullptr;
@@ -659,6 +675,28 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
   // TODO !(X | non_zero) --> 0
   default: (void)op;
   }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyAbsInt(IRInstruction* inst) {
+  auto src = inst->src(0);
+
+  if (src->isConst()) {
+    int64_t val = src->getValInt();
+    return val < 0 ? cns(-val) : cns(val);
+  }
+
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyAbsDbl(IRInstruction* inst) {
+  auto src = inst->src(0);
+
+  if (src->isConst()) {
+    double val = src->getValDbl();
+    return cns(fabs(val));
+  }
+
   return nullptr;
 }
 
@@ -1663,26 +1701,6 @@ SSATmp* Simplifier::simplifyLdClsPropAddr(IRInstruction* inst) {
   return nullptr;
 }
 
-/*
- * If we're in an inlined frame, use the this that we put in the
- * inlined ActRec.  (This could chase more intervening SpillStack
- * instructions to find the SpillFrame, but for now we don't inline
- * calls that will have that.)
- */
-SSATmp* Simplifier::simplifyLdThis(IRInstruction* inst) {
-  auto fpInst = inst->src(0)->inst();
-  if (fpInst->op() == DefInlineFP) {
-    auto spInst = fpInst->src(0)->inst();
-    if (spInst->op() == SpillFrame &&
-        spInst->src(3)->isA(Type::Obj)) {
-      return spInst->src(3);
-    }
-    return nullptr;
-  }
-
-  return nullptr;
-}
-
 SSATmp* Simplifier::simplifyUnbox(IRInstruction* inst) {
   auto* src = inst->src(0);
   auto type = outputType(inst);
@@ -1874,9 +1892,9 @@ SSATmp* Simplifier::simplifyDecRefLoc(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyLdLoc(IRInstruction* inst) {
-  if (inst->typeParam().isNull()) {
-    return cns(inst->typeParam());
-  }
+  // Ideally we'd replace LdLoc<Null,...> with a constant value of that type,
+  // but that prevents the guard relaxation code from tracing the source of
+  // values.
   return nullptr;
 }
 

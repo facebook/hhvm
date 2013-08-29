@@ -1,0 +1,145 @@
+Program %s/async_stack.php loaded. Type '[r]un' or '[c]ontinue' to go.
+break async_stack.php:7
+Breakpoint 1 set on line 7 of async_stack.php
+But wont break until file async_stack.php has been loaded.
+break async_stack.php:13
+Breakpoint 2 set on line 13 of async_stack.php
+But wont break until file async_stack.php has been loaded.
+break async_stack.php:19
+Breakpoint 3 set on line 19 of async_stack.php
+But wont break until file async_stack.php has been loaded.
+break async_stack.php:28
+Breakpoint 4 set on line 28 of async_stack.php
+But wont break until file async_stack.php has been loaded.
+continue
+In genFoo
+int(42)
+Breakpoint 4 reached at genFoo() on line 28 of %s/async_stack.php
+  27   var_dump($a);
+  28   $a++;
+  29   list($x, $y) = await GenArrayWaitHandle::Create(
+
+w
+#0   ()
+    at %s/async_stack.php:28
+#1  genFoo ()
+#2  Continuation::next ()
+#3  WaitHandle::join ()
+    at %s/async_stack.php:43
+#4  main (42)
+    at %s/async_stack.php:47
+wa
+Fetching async stacktrace...
+#0  genFoo [%d]
+#1  <<join>>
+c
+Breakpoint 3 reached at genBar() on line 19 of %s/async_stack.php
+  18 async function genBar($a) {
+  19   error_log('In genBar');
+  20   var_dump($a);
+
+w
+#0   ()
+    at %s/async_stack.php:19
+#1  genBar ()
+#2  Continuation::next ()
+#3  WaitHandle::join ()
+    at %s/async_stack.php:43
+#4  main (42)
+    at %s/async_stack.php:47
+wa
+Fetching async stacktrace...
+#0  genBar [%d]
+#1  <gen-array> [%d]
+#2  genFoo [%d]
+    at %s/async_stack.php:35
+#3  <<join>>
+c
+In genBar
+int(43)
+Finished in genBar
+Breakpoint 3 reached at genBar() on line 19 of %s/async_stack.php
+  18 async function genBar($a) {
+  19   error_log('In genBar');
+  20   var_dump($a);
+
+w
+#0   ()
+    at %s/async_stack.php:19
+#1  genBar ()
+#2  Continuation::next ()
+#3  WaitHandle::join ()
+    at %s/async_stack.php:43
+#4  main (42)
+    at %s/async_stack.php:47
+wa
+Fetching async stacktrace...
+#0  genBar [%d]
+#1  <gen-array> [%d]
+#2  genFoo [%d]
+    at %s/async_stack.php:35
+#3  <<join>>
+c
+In genBar
+int(44)
+Finished in genBar
+In gen2
+Breakpoint 2 reached at gen2() on line 13 of %s/async_stack.php
+  12   error_log('In gen2');
+  13   $x = gen1($a)->join();
+  14   error_log('Finished in gen2');
+
+w
+#0   ()
+    at %s/async_stack.php:13
+#1  gen2 ()
+#2  Continuation::next ()
+#3  WaitHandle::join ()
+    at %s/async_stack.php:43
+#4  main (42)
+    at %s/async_stack.php:47
+wa
+Fetching async stacktrace...
+#0  gen2 [%d]
+#1  <gen-array> [%d]
+#2  genFoo [%d]
+    at %s/async_stack.php:35
+#3  <<join>>
+c
+In gen1
+Breakpoint 1 reached at gen1() on line 7 of %s/async_stack.php
+   6   error_log('In gen1');
+   7   error_log('Finished in gen1');
+   8   return $a + 1;
+
+w
+#0   ()
+    at %s/async_stack.php:7
+#1  gen1 ()
+#2  Continuation::next ()
+#3  WaitHandle::join ()
+    at %s/async_stack.php:13
+#4  gen2 ()
+#5  Continuation::next ()
+#6  WaitHandle::join ()
+    at %s/async_stack.php:43
+#7  main (42)
+    at %s/async_stack.php:47
+w a
+Fetching async stacktrace...
+#0  gen1 [%d]
+#1  <<join>>
+#2  gen2 [%d]
+#3  <gen-array> [%d]
+#4  genFoo [%d]
+    at %s/async_stack.php:35
+#5  <<join>>
+c
+Finished in gen1
+Finished in gen2
+int(45)
+int(46)
+Finished in genFoo
+int(91)
+Program %s/async_stack.php exited normally.
+quit

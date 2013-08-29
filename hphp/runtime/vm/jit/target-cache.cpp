@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/jit/target-cache.h"
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/vm/unit.h"
@@ -333,7 +333,9 @@ void threadInit() {
   tl_targetCaches = mmap(nullptr, RuntimeOption::EvalJitTargetCacheSize,
                          PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
   always_assert(tl_targetCaches != MAP_FAILED);
-  hintHuge(tl_targetCaches, RuntimeOption::EvalJitTargetCacheSize);
+  if (RuntimeOption::EvalMapTgtCacheHuge) {
+    hintHuge(tl_targetCaches, RuntimeOption::EvalJitTargetCacheSize);
+  }
 
   void *shared_base = (char*)tl_targetCaches + s_persistent_start;
   /*
@@ -930,7 +932,7 @@ StaticMethodCache::lookupIR(Handle handle, const NamedEntity *ne,
                                          nullptr, // there may be an active this,
                                                // but we can just fall through
                                                // in that case.
-                                         (ActRec*)vmfp,
+                                         arGetContextClass((ActRec*)vmfp),
                                          false /*raise*/);
   if (LIKELY(res == LookupResult::MethodFoundNoThis &&
              !f->isAbstract() &&
@@ -973,7 +975,7 @@ StaticMethodCache::lookup(Handle handle, const NamedEntity *ne,
                                          nullptr, // there may be an active this,
                                                // but we can just fall through
                                                // in that case.
-                                         ec->getFP(),
+                                         arGetContextClass(ec->getFP()),
                                          false /*raise*/);
   if (LIKELY(res == LookupResult::MethodFoundNoThis &&
              !f->isAbstract() &&
@@ -1018,7 +1020,7 @@ StaticMethodFCache::lookupIR(Handle handle, const Class* cls,
   VMExecutionContext* ec = g_vmContext;
   LookupResult res = ec->lookupClsMethod(f, cls, methName,
                                          nullptr,
-                                         (ActRec*)vmfp,
+                                         arGetContextClass((ActRec*)vmfp),
                                          false /*raise*/);
   assert(res != LookupResult::MethodFoundWithThis); // Not possible: no this.
   if (LIKELY(res == LookupResult::MethodFoundNoThis && !f->isAbstract())) {

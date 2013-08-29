@@ -18,8 +18,8 @@
 #include "hphp/runtime/ext/filter/sanitizing_filters.h"
 #include "hphp/runtime/ext/ext_filter.h"
 #include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/zend-string.h"
 
 namespace HPHP {
 
@@ -38,12 +38,12 @@ static String php_filter_encode_html(CStrRef value,
 
   while (s < e) {
     if (chars[*s]) {
-      str += "&#";
-      str += s[0];
-      str += ';';
+      str.append("&#");
+      str.append(static_cast<int64_t>(s[0]));
+      str.append(';');
     } else {
       /* XXX: this needs to be optimized to work with blocks of 'safe' chars */
-      str += (char) s[0];
+      str.append(s[0]);
     }
     s++;
   }
@@ -81,11 +81,11 @@ static Variant php_filter_encode_url(CStrRef value, const unsigned char* chars,
 
   while (s < e) {
     if (tmp[*s]) {
-      str += '%';
-      str += (char) hexchars[(unsigned char) *s >> 4];
-      str += (char) hexchars[(unsigned char) *s & 15];
+      str.append('%');
+      str.append((char) hexchars[(unsigned char) *s >> 4]);
+      str.append((char) hexchars[(unsigned char) *s & 15]);
     } else {
-      str += (char) *s;
+      str.append((char) *s);
     }
     s++;
   }
@@ -113,7 +113,7 @@ static Variant php_filter_strip(CStrRef value, long flags) {
     } else if ((str[i] < 32) && (flags & k_FILTER_FLAG_STRIP_LOW)) {
     } else if ((str[i] == '`') && (flags & k_FILTER_FLAG_STRIP_BACKTICK)) {
     } else {
-      buf += (char) str[i];
+      buf.append((char) str[i]);
     }
   }
   return buf.detach();
@@ -145,7 +145,7 @@ static Variant filter_map_apply(CStrRef value, filter_map *map) {
   StringBuffer buf(len);
   for (i = 0; i < len; i++) {
     if ((*map)[str[i]]) {
-      buf += (char) str[i];
+      buf.append((char) str[i]);
     }
   }
   return buf.detach();

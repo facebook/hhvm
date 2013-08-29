@@ -3,37 +3,38 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
+   | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
 
 #include "hphp/runtime/base/file.h"
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/string_buffer.h"
-#include "hphp/runtime/base/type_conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/server/static_content_cache.h"
-#include "hphp/runtime/server/virtual_host.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/runtime_error.h"
-#include "hphp/runtime/base/array_init.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/server/static-content-cache.h"
+#include "hphp/runtime/server/virtual-host.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/util.h"
-#include "hphp/runtime/base/zend_string.h"
-#include "hphp/runtime/base/zend_printf.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "folly/String.h"
+
 #include <sys/file.h>
-#include "hphp/runtime/base/array_iterator.h"
-#include "hphp/runtime/base/stream_wrapper_registry.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -777,7 +778,7 @@ Array File::readCSV(int64_t length /* = 0 */, char delimiter_char /* = ',' */,
 }
 
 String File::getLastError() {
-  return Util::safe_strerror(errno);
+  return String(folly::errnoStr(errno).toStdString());
 }
 
 

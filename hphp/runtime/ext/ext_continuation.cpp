@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_asio.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 #include "hphp/runtime/ext/ext_spl.h"
 #include "hphp/runtime/ext/ext_variable.h"
@@ -43,7 +43,7 @@ Object f_hphp_create_continuation(CStrRef clsname,
 ///////////////////////////////////////////////////////////////////////////////
 
 c_Continuation::c_Continuation(Class* cb)
-    : ExtObjectData(cb)
+    : ExtObjectDataFlags<ObjectData::HasClone>(cb)
     , m_label(0)
     , m_index(-1LL)
     , m_key(-1LL)
@@ -58,7 +58,10 @@ c_Continuation::~c_Continuation() {
   if (ar->hasVarEnv()) {
     ar->getVarEnv()->detach(ar);
   } else {
-    frame_free_locals_inl(ar, ar->m_func->numLocals());
+    // Free locals, but don't trigger the EventHook for FunctionExit
+    // since the continuation function has already been exited. We
+    // don't want redundant calls.
+    frame_free_locals_inl_no_hook<false>(ar, ar->m_func->numLocals());
   }
 }
 
@@ -200,22 +203,23 @@ void c_Continuation::copyContinuationVars(ActRec* fp) {
   }
 }
 
-c_Continuation *c_Continuation::clone() {
-  const Func *origFunc = m_origFunc;
-  const Func *genFunc = actRec()->m_func;
+c_Continuation *c_Continuation::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_Continuation*>(obj);
+  const Func *origFunc = thiz->m_origFunc;
+  const Func *genFunc = thiz->actRec()->m_func;
 
   ActRec *fp = g_vmContext->getFP();
   c_Continuation* cont = origFunc->isMethod()
     ? g_vmContext->createContMeth(origFunc, genFunc, fp->getThisOrClass())
     : g_vmContext->createContFunc(origFunc, genFunc);
 
-  cont->copyContinuationVars(actRec());
+  cont->copyContinuationVars(thiz->actRec());
 
-  cont->o_subclassData.u16 = o_subclassData.u16;
-  cont->m_label = m_label;
-  cont->m_index = m_index;
-  cont->m_key   = m_key;
-  cont->m_value = m_value;
+  cont->o_subclassData.u16 = thiz->o_subclassData.u16;
+  cont->m_label = thiz->m_label;
+  cont->m_index = thiz->m_index;
+  cont->m_key   = thiz->m_key;
+  cont->m_value = thiz->m_value;
 
   return cont;
 }
@@ -246,6 +250,23 @@ void c_Continuation::call_raise(ObjectData* e) {
   arg.m_data.pobj = e;
 
   g_vmContext->invokeContFunc(func, this, &arg);
+}
+
+// Compute the bytecode offset at which execution will resume when
+// this continuation resumes. Only valid on started but not actually
+// running continuations.
+Offset c_Continuation::getNextExecutionOffset() const {
+  assert(started() && !running());
+  auto func = m_arPtr->m_func;
+  PC funcBase = func->unit()->entry() + func->base();
+  assert(toOp(*funcBase) == OpUnpackCont); // One byte
+  PC switchOffset = funcBase + 1;
+  assert(toOp(*switchOffset) == OpSwitch);
+  // The Switch opcode is one byte for the opcode itself, plus four
+  // bytes for the jmp table size, then the jump table.
+  Offset* jmpTable = (Offset*)(switchOffset + 5);
+  Offset relOff = jmpTable[m_label];
+  return func->base() + relOff + 1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

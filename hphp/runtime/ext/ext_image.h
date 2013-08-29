@@ -18,8 +18,8 @@
 #ifndef incl_HPHP_EXT_IMAGE_H_
 #define incl_HPHP_EXT_IMAGE_H_
 
-#include "hphp/runtime/base/base_includes.h"
-#include "hphp/runtime/base/zend_php_config.h"
+#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/zend-php-config.h"
 #include <gd.h>
 
 namespace HPHP {

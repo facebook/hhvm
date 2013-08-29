@@ -77,7 +77,7 @@ bool objOffsetEmpty(TypedValue& tvRef, ObjectData* base, CVarRef offset,
   }
   TypedValue* result = objOffsetGet(tvRef, base, offset, false);
   assert(result);
-  return empty(tvAsCVarRef(result));
+  return !cellToBool(*tvToCell(result));
 }
 
 void objOffsetAppend(ObjectData* base, TypedValue* val,

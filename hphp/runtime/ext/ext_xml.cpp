@@ -16,8 +16,8 @@
 */
 
 #include "hphp/runtime/ext/ext_xml.h"
-#include "hphp/runtime/base/zend_functions.h"
-#include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include <expat.h>
@@ -315,7 +315,7 @@ static Variant php_xml_parser_create_impl(CStrRef encoding_param,
 
   parser->target_encoding = encoding;
   parser->case_folding = 1;
-  setNull(parser->object);
+  parser->object.reset();
   parser->isparsing = 0;
 
   XML_SetUserData(parser->parser, parser);

@@ -19,10 +19,11 @@
 
 #include "hphp/util/util.h"
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/tread-hash-map.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/util/atomic.h"
+#include "hphp/util/data-block.h"
 
 namespace HPHP {
 
@@ -126,6 +127,14 @@ struct IndirectFixup {
   int32_t returnIpDisp;
 };
 
+struct PendingFixup {
+  TCA m_tca;
+  Fixup m_fixup;
+  PendingFixup() { }
+  PendingFixup(TCA tca, Fixup fixup) :
+    m_tca(tca), m_fixup(fixup) { }
+};
+
 class FixupMap {
   static const uint kInitCapac = 128;
   TRACE_SET_MOD(fixup);
@@ -145,35 +154,18 @@ public:
     m_fixups.insert(tca, FixupEntry(fixup));
   }
 
-  void recordIndirectFixup(CTCA tca, const IndirectFixup& indirect) {
-    TRACE(2, "FixupMapImpl::recordIndirectFixup: tca %p -> ripOff %d\n",
-          tca, indirect.returnIpDisp);
-    m_fixups.insert(tca, FixupEntry(indirect));
-  }
+  bool getFrameRegs(const ActRec* ar, const ActRec* prevAr,
+                    VMRegs* outVMRegs) const;
 
-  bool getFrameRegs(const ActRec* ar,
-                    const ActRec* prevAr,
-                    VMRegs* outVMRegs) const {
-    CTCA tca = (CTCA)ar->m_savedRip;
-    // Non-obvious off-by-one fun: if the *return address* points into the TC,
-    // then the frame we were running on in the TC is actually the previous
-    // frame.
-    ar = (const ActRec*)ar->m_savedRbp;
-    auto* ent = m_fixups.find(tca);
-    if (!ent) return false;
-    if (ent->isIndirect()) {
-      // Note: if indirect fixups happen frequently enough, we could
-      // just compare savedRip to be less than some threshold where
-      // stubs in a.code stop.
-      assert(prevAr);
-      auto pRealRip = ent->indirect.returnIpDisp +
-        uintptr_t(prevAr->m_savedRbp);
-      ent = m_fixups.find(*reinterpret_cast<CTCA*>(pRealRip));
-      assert(ent && !ent->isIndirect());
-    }
-    regsFromActRec(tca, ar, ent->fixup, outVMRegs);
-    return true;
-  }
+  void recordSyncPoint(CodeAddress frontier, Offset pcOff, Offset spOff);
+  void recordIndirectFixup(CodeAddress frontier, int dwordsPushed);
+  void fixup(VMExecutionContext* ec) const;
+  void fixupWork(VMExecutionContext* ec, ActRec* rbp) const;
+  void processPendingFixups();
+  void clearPendingFixups() { m_pendingFixups.clear(); }
+  bool pendingFixupsEmpty() const { return m_pendingFixups.empty(); }
+
+  static bool eagerRecord(const Func* func);
 
 private:
   union FixupEntry {
@@ -186,6 +178,12 @@ private:
 
     bool isIndirect() const { return firstElem < 0; }
   };
+
+  void recordIndirectFixup(CTCA tca, const IndirectFixup& indirect) {
+    TRACE(2, "FixupMapImpl::recordIndirectFixup: tca %p -> ripOff %d\n",
+          tca, indirect.returnIpDisp);
+    m_fixups.insert(tca, FixupEntry(indirect));
+  }
 
   const Opcode* pc(const ActRec* ar, const Func* f, const Fixup& fixup) const {
     assert(f);
@@ -212,6 +210,8 @@ private:
 
 private:
   TreadHashMap<CTCA,FixupEntry,ctca_identity_hash> m_fixups;
+
+  std::vector<PendingFixup> m_pendingFixups;
 };
 
 }}

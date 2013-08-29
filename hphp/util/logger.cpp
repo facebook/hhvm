@@ -16,11 +16,11 @@
 
 #include "hphp/util/logger.h"
 #include "hphp/util/base.h"
-#include "hphp/util/stack_trace.h"
+#include "hphp/util/stack-trace.h"
 #include "hphp/util/process.h"
 #include "hphp/util/exception.h"
 #include "util.h"
-#include "hphp/util/text_color.h"
+#include "hphp/util/text-color.h"
 #include <syslog.h>
 
 #define IMPLEMENT_LOGLEVEL(LOGLEVEL)                                    \

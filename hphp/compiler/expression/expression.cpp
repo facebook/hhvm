@@ -17,7 +17,7 @@
 #include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/parser/parser.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 #include "hphp/util/util.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
@@ -30,12 +30,13 @@
 #include "hphp/compiler/expression/array_element_expression.h"
 #include "hphp/compiler/expression/object_property_expression.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
+#include "hphp/compiler/expression/binary_op_expression.h"
 #include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/expression/function_call.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/util/hash.h"
-#include "hphp/runtime/base/array_iterator.h"
+#include "hphp/runtime/base/array-iterator.h"
 
 using namespace HPHP;
 
@@ -671,6 +672,14 @@ void Expression::computeLocalExprAltered() {
 bool Expression::isArray() const {
   if (is(KindOfUnaryOpExpression)) {
     return static_cast<const UnaryOpExpression*>(this)->getOp() == T_ARRAY;
+  }
+  return false;
+}
+
+bool Expression::isCollection() const {
+  if (is(KindOfBinaryOpExpression)) {
+    return
+      static_cast<const BinaryOpExpression*>(this)->getOp() == T_COLLECTION;
   }
   return false;
 }

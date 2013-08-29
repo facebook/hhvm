@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_CONTINUATION_H_
 
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -32,7 +32,7 @@ Object f_hphp_create_continuation(CStrRef clsname, CStrRef funcname, CStrRef ori
 ///////////////////////////////////////////////////////////////////////////////
 // class Continuation
 
-class c_Continuation : public ExtObjectData {
+class c_Continuation : public ExtObjectDataFlags<ObjectData::HasClone> {
  public:
   DECLARE_CLASS_NO_ALLOCATION(Continuation, Continuation, ObjectData)
   virtual void sweep();
@@ -80,7 +80,7 @@ public:
   String t_getorigfuncname();
   String t_getcalledclass();
 
-  c_Continuation* clone();
+  static c_Continuation* Clone(ObjectData* obj);
 
   static c_Continuation* alloc(const Func* origFunc, const Func* genFunc) {
     assert(origFunc);
@@ -133,6 +133,8 @@ public:
     }
   }
 
+  Offset getNextExecutionOffset() const;
+
 private:
   size_t getObjectSize() {
     return (char*)(m_arPtr + 1) - (char*)this;
@@ -147,10 +149,14 @@ public:
   int64_t m_index;
   Variant m_key;
   Variant m_value;
-  Func *m_origFunc;
+  Func* m_origFunc;
 
+  /* ActRec for continuation (does not live on stack) */
   ActRec* m_arPtr;
   p_ContinuationWaitHandle m_waitHandle;
+
+  /* temporary storage used to save the SP when inlining into a continuation */
+  void* m_stashedSP;
 
   String& getCalledClass() { not_reached(); }
 

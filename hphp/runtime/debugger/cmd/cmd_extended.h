@@ -38,18 +38,16 @@ public:
   virtual void help(DebuggerClient &client);
 
   virtual bool onServer(DebuggerProxy &proxy);
-
-protected:
-  // so CmdUser can override these functions
-  virtual const ExtendedCommandMap &getCommandMap();
-  virtual void invokeList(DebuggerClient &client, const std::string &cls);
-  virtual bool invokeHelp(DebuggerClient &client, const std::string &cls);
-  virtual bool invokeClient(DebuggerClient &client, const std::string &cls);
-
-  virtual void onClientImpl(DebuggerClient &client);
-  void helpImpl(DebuggerClient &client, const char *name);
+  virtual void onClient(DebuggerClient &client);
 
 private:
+  const ExtendedCommandMap &getCommandMap();
+  void invokeList(DebuggerClient &client, const std::string &cls);
+  bool invokeHelp(DebuggerClient &client, const std::string &cls);
+  bool invokeClient(DebuggerClient &client, const std::string &cls);
+
+  void helpImpl(DebuggerClient &client, const char *name);
+
   ExtendedCommandMap match(DebuggerClient &client, int argIndex);
   void helpCommands(DebuggerClient &client, const ExtendedCommandMap &matches);
 };

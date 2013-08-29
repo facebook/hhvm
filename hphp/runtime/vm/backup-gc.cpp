@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/backup-gc.h"
-#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/runtime-error.h"
 
 #include <fstream>
 #include <algorithm>
@@ -22,14 +22,16 @@
 #include <boost/noncopyable.hpp>
 #include <map>
 
+#include "folly/String.h"
+
 #include "hphp/util/assertions.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
-#include "hphp/runtime/base/execution_context.h"
-#include "hphp/runtime/base/smart_allocator.h"
-#include "hphp/runtime/base/memory_manager.h"
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/hphp_array.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/smart-allocator.h"
+#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
@@ -119,6 +121,10 @@ bool is_smart_allocated(ResourceData* obj) {
 template<class T>
 bool UNUSED is_smart_allocated(T* p) {
   return T::AllocatorType::getNoCheck()->isFromThisAllocator(p);
+}
+
+bool UNUSED is_smart_allocated(StringData* p) {
+  return StringData::Allocator::getNoCheck()->isFromThisAllocator(p);
 }
 
 bool is_static(void* obj) {
@@ -428,10 +434,8 @@ struct GarbageCollector {
   }
 
   void dealloc(SmartAllocatorImpl* sa, ObjectData* obj) const {
-    if (Sweepable* s = dynamic_cast<Sweepable*>(obj)) {
-      s->sweep();
-      s->unregister();
-    }
+    // Treat Sweepable specially?
+
     if (RuntimeOption::EnableObjDestructCall) {
       g_vmContext->m_liveBCObjs.erase(obj);
     }
@@ -567,7 +571,7 @@ void gc_detect_cycles(const std::string& filename) {
   std::ofstream out(filename.c_str());
   if (!out.is_open()) {
     raise_error("couldn't open output file for gc_detect_cycles, %s",
-                strerror(errno));
+                folly::errnoStr(errno).c_str());
     return;
   }
 

@@ -101,7 +101,7 @@ void CmdExtended::helpCommands(DebuggerClient &client,
   }
 }
 
-void CmdExtended::onClientImpl(DebuggerClient &client) {
+void CmdExtended::onClient(DebuggerClient &client) {
   if (client.arg(1, "help") || client.arg(1, "?")) {
     if (client.argCount() == 1) {
       help(client);

@@ -1,0 +1,15 @@
+array(1) {
+  [0]=>
+  string(3) "bar"
+}
+string(3) "tss"
+array(2) {
+  [0]=>
+  string(5) "bleep"
+  [1]=>
+  string(5) "bloop"
+}
+array(1) {
+  [0]=>
+  string(12) "hello world!"
+}

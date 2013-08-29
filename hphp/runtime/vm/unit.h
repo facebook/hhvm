@@ -17,16 +17,16 @@
 #ifndef incl_HPHP_VM_UNIT_H_
 #define incl_HPHP_VM_UNIT_H_
 
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/named-entity.h"
-#include "hphp/runtime/base/hphp_array.h"
+#include "hphp/runtime/base/hphp-array.h"
 #include "hphp/util/range.h"
-#include "hphp/util/parser/location.h"
+#include "hphp/parser/location.h"
 #include "hphp/runtime/base/md5.h"
-#include "hphp/util/tiny_vector.h"
+#include "hphp/util/tiny-vector.h"
 
 namespace HPHP {
 // Forward declarations.
@@ -644,7 +644,7 @@ public:
     m_cacheMask = 1 << (id & 7);
   }
   bool isInterpretOnly() const { return m_interpretOnly; }
-  void setInterpretOnly() { m_interpretOnly = false; }
+  void setInterpretOnly() { m_interpretOnly = true; }
   bool isMergeOnly() const { return m_mergeOnly; }
   void clearMergeOnly() { m_mergeOnly = false; }
   bool isEmpty() const { return m_mergeState & UnitMergeStateEmpty; }
@@ -807,16 +807,11 @@ class UnitEmitter {
   void emitDouble(double n, int64_t pos = -1) { emitImpl(n, pos); }
   bool insert(UnitOrigin unitOrigin, RepoTxn& txn);
   void commit(UnitOrigin unitOrigin);
-  Func* newFunc(const FuncEmitter* fe, Unit& unit, Id id, int line1, int line2,
-                Offset base, Offset past,
-                const StringData* name, Attr attrs, bool top,
-                const StringData* docComment, int numParams,
-                bool isClosureBody, bool isGenerator);
-  Func* newFunc(const FuncEmitter* fe, Unit& unit, PreClass* preClass,
+  Func* newFunc(const FuncEmitter* fe, Unit& unit, Id id, PreClass* preClass,
                 int line1, int line2, Offset base, Offset past,
                 const StringData* name, Attr attrs, bool top,
                 const StringData* docComment, int numParams,
-                bool isClosureBody, bool isGenerator);
+                bool needsNextClonedClosure);
   Unit* create();
   void returnSeen() { m_returnSeen = true; }
   void pushMergeableClass(PreClassEmitter* e);

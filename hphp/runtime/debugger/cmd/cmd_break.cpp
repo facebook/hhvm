@@ -478,7 +478,7 @@ bool CmdBreak::addToBreakpointListAndUpdateServer(
 // Carries out the Break command. This always involves an action on the
 // client and usually, but not always, involves the server by sending
 // this command to the server and waiting for its response.
-void CmdBreak::onClientImpl(DebuggerClient &client) {
+void CmdBreak::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
   bool regex = false;
@@ -553,60 +553,6 @@ void CmdBreak::onClientImpl(DebuggerClient &client) {
       "\tmethod invoke: {cls}::{method}()\n"
     );
   }
-}
-
-const StaticString
-  s_id("id"),
-  s_state("state"),
-  s_is_exception("is_exception"),
-  s_exception_class("exception_class"),
-  s_file("file"),
-  s_line1("line1"),
-  s_line2("line2"),
-  s_namespace("namespace"),
-  s_func("func"),
-  s_class("class"),
-  s_url("url"),
-  s_use_regex("use_regex"),
-  s_clause_type("clause_type"),
-  s_clause("clause"),
-  s_if("if"),
-  s_ampamp("ampamp"),
-  s_desc("desc");
-
-// Updates the client with information about the execution of this command.
-// This information is not used by the command line client, but can be accessed
-// via the debugger client API exposed to PHP programs.
-void CmdBreak::setClientOutput(DebuggerClient &client) {
-  // Output an array of current breakpoints including exceptions
-  client.setOutputType(DebuggerClient::OTValues);
-  Array values;
-  m_breakpoints = client.getBreakPoints();
-  for (int i = 0; i < (int)m_breakpoints->size(); i++) {
-    BreakPointInfoPtr bpi = m_breakpoints->at(i);
-    Array breakpoint;
-    breakpoint.set(s_id, bpi->index());
-    breakpoint.set(s_state, bpi->state(false));
-    if (bpi->m_interruptType == ExceptionThrown) {
-      breakpoint.set(s_is_exception, true);
-      breakpoint.set(s_exception_class, bpi->getExceptionClass());
-    } else {
-      breakpoint.set(s_is_exception, false);
-      breakpoint.set(s_file, bpi->m_file);
-      breakpoint.set(s_line1, bpi->m_line1);
-      breakpoint.set(s_line2, bpi->m_line2);
-      breakpoint.set(s_namespace, bpi->getNamespace());
-      breakpoint.set(s_func, bpi->getFunction());
-      breakpoint.set(s_class, bpi->getClass());
-    }
-    breakpoint.set(s_url, bpi->m_url);
-    breakpoint.set(s_use_regex, bpi->m_regex);
-    breakpoint.set(s_clause_type, bpi->m_check ? s_if : s_ampamp);
-    breakpoint.set(s_clause, bpi->m_clause);
-    breakpoint.set(s_desc, bpi->desc());
-    values.append(breakpoint);
-  }
-  client.setOTValues(values);
 }
 
 // Updates the breakpoint list in the proxy with the new list

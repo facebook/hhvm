@@ -20,6 +20,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/network.h"
+#include "folly/String.h"
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -266,11 +267,11 @@ int Util::copy(const char *srcfile, const char *dstfile) {
     if (rbytes == 0) break;
     if (rbytes == -1) {
       err = true;
-      Logger::Error("read failed: %s", safe_strerror(errno).c_str());
+      Logger::Error("read failed: %s", folly::errnoStr(errno).c_str());
     } else if ((wbytes = write(dstFd, buf, rbytes)) != rbytes) {
       err = true;
       Logger::Error("write failed: %zd, %s", wbytes,
-                    safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     }
     if (err) {
       close(srcFd);
@@ -342,27 +343,27 @@ int Util::directCopy(const char *srcfile, const char *dstfile) {
 
     if (rbytes == -1) {
       err = true;
-      Logger::Error("read failed: %s", safe_strerror(errno).c_str());
+      Logger::Error("read failed: %s", folly::errnoStr(errno).c_str());
     } else if (force_sync(srcFd) == -1) {
       err = true;
       Logger::Error("read sync failed: %s",
-                    safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     } else if (drop_cache(srcFd) == -1) {
       err = true;
       Logger::Error("read cache drop failed: %s",
-                    safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     } else if ((wbytes = write(dstFd, buf, rbytes)) != rbytes) {
       err = true;
       Logger::Error("write failed: %zd, %s", wbytes,
-                    safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     } else if (force_sync(dstFd) == -1) {
       err = true;
       Logger::Error("write sync failed: %s",
-                    safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     } else if (drop_cache(dstFd) == -1) {
       err = true;
       Logger::Error("write cache drop failed: %s",
-                    safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     }
     if (err) {
       close(srcFd);
@@ -398,21 +399,12 @@ int Util::directRename(const char *oldname, const char *newname) {
 int Util::ssystem(const char* command) {
   int ret = system(command);
   if (ret == -1) {
-    Logger::Error("system(\"%s\"): %s", command, safe_strerror(errno).c_str());
+    Logger::Error("system(\"%s\"): %s", command,
+                  folly::errnoStr(errno).c_str());
   } else if (ret != 0) {
     Logger::Error("command failed: \"%s\"", command);
   }
   return ret;
-}
-
-std::string Util::safe_strerror(int errnum) {
-  char buf[1024];
-#ifdef __GLIBC__
-  return strerror_r(errnum, buf, sizeof(buf));
-#else
-  strerror_r(errnum, buf, sizeof(buf));
-  return buf;
-#endif
 }
 
 size_t Util::dirname_helper(char *path, int len) {

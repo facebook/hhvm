@@ -12,14 +12,12 @@
             ],
             "desc": "Represents a connection to a set of memcached servers.",
             "flags": [
-                "HasDocComment"
             ],
             "footer": "\n private:\n  class Impl {\n  public:\n    Impl();\n    ~Impl();\n\n    memcached_st memcached;\n    bool compression;\n    int serializer;\n    int rescode;\n  };\n  typedef boost::shared_ptr<Impl> ImplPtr;\n  ImplPtr m_impl;\n\n  bool handleError(memcached_return status);\n  void toPayload(CVarRef value, std::vector<char> &payload, uint32 &flags);\n  bool toObject(Variant& value, const memcached_result_st &result);\n  memcached_return doCacheCallback(CVarRef callback, CStrRef key,\n                                   Variant& value);\n  bool getMultiImpl(CStrRef server_key, CArrRef keys, bool enableCas,\n                    Array *returnValue);\n  bool fetchImpl(memcached_result_st &result, Array &item);\n  typedef memcached_return_t (*SetOperation)(memcached_st *,\n      const char *, size_t, const char *, size_t, const char *, size_t,\n      time_t, uint32_t);\n  bool setOperationImpl(SetOperation op, CStrRef server_key,\n                        CStrRef key, CVarRef value, int expiration);\n  typedef memcached_return_t (*IncDecOperation)(memcached_st *,\n      const char *, size_t, uint32_t, uint64_t *);\n  Variant incDecOperationImpl(IncDecOperation op, CStrRef key, int64_t offset);\n\n  typedef std::map<std::string, ImplPtr> ImplMap;\n  static DECLARE_THREAD_LOCAL(ImplMap, s_persistentMap);",
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -36,7 +34,6 @@
                     "name": "add",
                     "desc": "Memcached::add() is similar to Memcached::set(), but the operation fails if the key already exists on the server.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -65,7 +62,6 @@
                     "name": "addByKey",
                     "desc": "Memcached::addByKey() is functionally equivalent to Memcached::add(), except that the free-form server_key can be used to map the key to a specific server. This is useful if you need to keep a bunch of related keys on a certain server.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -99,7 +95,6 @@
                     "name": "addServer",
                     "desc": "Memcached::addServer() adds the specified server to the server pool. No connection is established to the server at this time, but if you are using consistent key distribution option (via Memcached::DISTRIBUTION_CONSISTENT or Memcached::OPT_LIBKETAMA_COMPATIBLE), some of the internal data structures will have to be updated. Thus, if you need to add multiple servers, it is better to use Memcached::addServers() as the update then happens only once.\n\nThe same server may appear multiple times in the server pool, because no duplication checks are made. This is not advisable; instead, use the weight option to increase the selection weighting of this server.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -128,7 +123,6 @@
                     "name": "addServers",
                     "desc": "Memcached::addServers() adds servers to the server pool. Each entry in servers is supposed to be an array containing hostname, port, and, optionally, weight of the server. No connection is established to the servers at this time.\n\nThe same server may appear multiple times in the server pool, because no duplication checks are made. This is not advisable; instead, use the weight option to increase the selection weighting of this server.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -146,7 +140,6 @@
                     "name": "append",
                     "desc": "Memcached::append() appends the given value string to the value of an existing item. The reason that value is forced to be a string is that appending mixed types is not well-defined.\n\nIf the Memcached::OPT_COMPRESSION is enabled, the operation will fail and a warning will be issued, because appending compressed data to a value that is potentially already compressed is not possible.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -169,7 +162,6 @@
                     "name": "appendByKey",
                     "desc": "Memcached::appendByKey() is functionally equivalent to Memcached::append(), except that the free-form server_key can be used to map the key to a specific server.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -197,7 +189,6 @@
                     "name": "cas",
                     "desc": "Memcached::cas() performs a \"check and set\" operation, so that the item will be stored only if no other client has updated it since it was last fetched by this client. The check is done via the cas_token parameter which is a unique 64-bit value assigned to the existing item by memcache. See the documentation for Memcached::get*() methods for how to obtain this token. Note that the token is represented as a double due to the limitations of PHP's integer space.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -231,7 +222,6 @@
                     "name": "casByKey",
                     "desc": "Memcached::casByKey() is functionally equivalent to Memcached::cas(), except that the free-form server_key can be used to map the key to a specific server. This is useful if you need to keep a bunch of related keys on a certain server.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -270,7 +260,6 @@
                     "name": "decrement",
                     "desc": "Memcached::decrement() decrements a numeric item's value by the specified offset. If the item's value is not numeric, it is treated as if the value were 0. If the operation would decrease the value below 0, the new value will be 0. Memcached::decrement() will fail if the item does not exist.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -294,7 +283,6 @@
                     "name": "delete",
                     "desc": "Memcached::delete() deletes the key from the server. The time parameter is the amount of time in seconds (or Unix time until which) the client wishes the server to refuse add and replace commands for this key. For this amount of time, the item is put into a delete queue, which means that it won't possible to retrieve it by the get command, but add and replace command with this key will also fail (the set command will succeed, however). After the time passes, the item is finally deleted from server memory. The parameter time defaults to 0 (which means that the item will be deleted immediately and further storage commands with this key will succeed).",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -318,7 +306,6 @@
                     "name": "deleteByKey",
                     "desc": "Memcached::deleteByKey() is functionally equivalent to Memcached::delete(), except that the free-form server_key can be used to map the key to a specific server.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -347,7 +334,6 @@
                     "name": "fetch",
                     "desc": "Memcached::fetch() retrieves the next result from the last request.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -360,7 +346,6 @@
                     "name": "fetchAll",
                     "desc": "Memcached::fetchAll() retrieves all the remaining results from the last request.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -373,7 +358,6 @@
                     "name": "flush",
                     "desc": "Memcached::flush() invalidates all existing cache items immediately (by default) or after the delay specified. After invalidation none of the items will be returned in response to a retrieval command (unless it's stored again under the same key after Memcached::flush() has invalidated the items). The flush does not actually free all the memory taken up by the existing items; that will happen gradually as new items are stored.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -392,7 +376,6 @@
                     "name": "get",
                     "desc": "Memcached::get() returns the item that was previously stored under the key. If the item is found and cas_token variable is provided, it will contain the CAS token value for the item. See Memcached::cas() for how to use CAS tokens. Read-through caching callback may be specified via cache_cb parameter.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -423,7 +406,6 @@
                     "name": "getByKey",
                     "desc": "Memcached::getByKey() is functionally equivalent to Memcached::get(), except that the free-form server_key can be used to map the key to a specific server.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -459,7 +441,6 @@
                     "name": "getDelayed",
                     "desc": "Memcached::getDelayed() issues a request to memcache for multiple items the keys of which are specified in the keys array. The method does not wait for response and returns right away. When you are ready to collect the items, call either Memcached::fetch() or Memcached::fetchAll(). If with_cas is true, the CAS token values will also be requested.\n\nInstead of fetching the results explicitly, you can specify a result callback via value_cb parameter.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -489,7 +470,6 @@
                     "name": "getDelayedByKey",
                     "desc": "Memcached::getDelayedByKey() is functionally equivalent to Memcached::getDelayed(), except that the free-form server_key can be used to map the keys to a specific server.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -524,7 +504,6 @@
                     "name": "getMulti",
                     "desc": "Memcached::getMulti() is similar to Memcached::get(), but instead of a single key item, it retrieves multiple items the keys of which are specified in the keys array. If cas_tokens variable is provided, it is filled with the CAS token values for the found items.\n\nUnlike Memcached::get() it is not possible to specify a read-through cache callback for Memcached::getMulti(), because the memcache protocol does not provide information on which keys were not found in the multi-key request.\n\nThe flags parameter can be used to specify additional options for Memcached::getMulti(). Currently, the only available option is Memcached::GET_PRESERVE_ORDER that ensures that the keys are returned in the same order as they were requested in.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -555,7 +534,6 @@
                     "name": "getMultiByKey",
                     "desc": "Memcached::getMultiByKey() is functionally equivalent to Memcached::getMulti(), except that the free-form server_key can be used to map the keys to a specific server.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -591,7 +569,6 @@
                     "name": "getOption",
                     "desc": "This method returns the value of a Memcached option. Some options correspond to the ones defined by libmemcached, and some are specific to the extension. See Memcached Constants for more information.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -609,7 +586,6 @@
                     "name": "getResultCode",
                     "desc": "Memcached::getResultCode() returns one of the Memcached::RES_* constants that is the result of the last executed Memcached method.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Int64",
@@ -622,7 +598,6 @@
                     "name": "getResultMessage",
                     "desc": "Memcached::getResultMessage() returns a string that describes the result code of the last executed Memcached method.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "String",
@@ -635,7 +610,6 @@
                     "name": "getServerByKey",
                     "desc": "Memcached::getServerByKey() returns the server that would be selected by a particular server_key in all the Memcached::*ByKey() operations.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -653,7 +627,6 @@
                     "name": "getServerList",
                     "desc": "Memcached::getServerList() returns the list of all servers that are in its server pool.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "VariantVec",
@@ -666,7 +639,6 @@
                     "name": "getStats",
                     "desc": "Memcached::getStats() returns an array containing the state of all available memcache servers. See \ufffd memcache protocol specification for details on these statistics.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -679,7 +651,6 @@
                     "name": "getVersion",
                     "desc": "Memcached::getVersion() returns an array containing the version info for all available memcache servers.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -692,7 +663,6 @@
                     "name": "increment",
                     "desc": "Memcached::increment() increments a numeric item's value by the specified offset. If the item's value is not numeric, it is treated as if the value were 0. Memcached::increment() will fail if the item does not exist.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -716,7 +686,6 @@
                     "name": "prepend",
                     "desc": "Memcached::prepend() prepends the given value string to the value of an existing item. The reason that value is forced to be a string is that prepending mixed types is not well-defined.\n\nIf the Memcached::OPT_COMPRESSION is enabled, the operation will fail and a warning will be issued, because prepending compressed data to a value that is potentially already compressed is not possible.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -739,7 +708,6 @@
                     "name": "prependByKey",
                     "desc": "Memcached::prependByKey() is functionally equivalent to Memcached::prepend(), except that the free-form server_key can be used to map the key to a specific server.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -767,7 +735,6 @@
                     "name": "replace",
                     "desc": "Memcached::replace() is similar to Memcached::set(), but the operation fails if the key does not exist on the server.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -796,7 +763,6 @@
                     "name": "replaceByKey",
                     "desc": "Memcached::replaceByKey() is functionally equivalent to Memcached::replace(), except that the free-form server_key can be used to map the key to a specific server. This is useful if you need to keep a bunch of related keys on a certain server.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -830,7 +796,6 @@
                     "name": "set",
                     "desc": "Memcached::set() stores the value on a memcache server under the specified key. The expiration parameter can be used to control when the value is considered expired.\n\nThe value can be any valid PHP type except for resources, because those cannot be represented in a serialized form. If the Memcached::OPT_COMPRESSION option is turned on, the serialized value will also be compressed before storage.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -859,7 +824,6 @@
                     "name": "setByKey",
                     "desc": "Memcached::setByKey() is functionally equivalent to Memcached::set(), except that the free-form server_key can be used to map the key to a specific server. This is useful if you need to keep a bunch of related keys on a certain server.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -893,7 +857,6 @@
                     "name": "setMulti",
                     "desc": "Memcached::setMulti() is similar to Memcached::set(), but instead of a single key\/value item, it works on multiple items specified in items. The expiration time applies to all the items at once.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -917,7 +880,6 @@
                     "name": "setMultiByKey",
                     "desc": "Memcached::setMultiByKey() is functionally equivalent to Memcached::setMulti(), except that the free-form server_key can be used to map the keys from items to a specific server. This is useful if you need to keep a bunch of related keys on a certain server.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -946,7 +908,6 @@
                     "name": "setOption",
                     "desc": "This method sets the value of a Memcached option. Some options correspond to the ones defined by libmemcached, and some are specific to the extension. See Memcached Constants for more information.\n\nThe options listed below require values specified via constants.\n\nMemcached::OPT_HASH requires Memcached::HASH_* values.\n\nMemcached::OPT_DISTRIBUTION requires Memcached::DISTRIBUTION_* values.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",

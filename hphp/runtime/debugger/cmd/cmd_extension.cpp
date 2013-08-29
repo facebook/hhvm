@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_extension.h"
 #include "hphp/runtime/ext/ext_array.h"
-#include "hphp/util/text_art.h"
+#include "hphp/util/text-art.h"
 
 using namespace HPHP::Util::TextArt;
 
@@ -72,7 +72,7 @@ void CmdExtension::help(DebuggerClient &client) {
   );
 }
 
-void CmdExtension::onClientImpl(DebuggerClient &client) {
+void CmdExtension::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
   m_args = *client.args();
   CmdExtensionPtr cmd = client.xend<CmdExtension>(this);

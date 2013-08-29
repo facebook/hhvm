@@ -22,6 +22,7 @@
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
+IMPLEMENT_DEFAULT_EXTENSION(SPL);
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString

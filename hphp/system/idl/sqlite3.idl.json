@@ -53,14 +53,12 @@
             "name": "SQLite3",
             "desc": "A class that interfaces SQLite 3 databases.",
             "flags": [
-                "HasDocComment"
             ],
             "footer": "\n  public: void validate() const;\n  public: sqlite3 *m_raw_db;\n    DECLARE_BOOST_TYPES(UserDefinedFunc);\n    struct UserDefinedFunc {\n      int argc;\n      Variant func;\n      Variant step;\n      Variant fini;\n    };\n  public: UserDefinedFuncPtrVec m_udfs;",
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -89,7 +87,6 @@
                     "name": "open",
                     "desc": "Opens an SQLite 3 Database. If the build includes encryption, then it will attempt to use the key.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null,
@@ -119,7 +116,6 @@
                     "name": "busytimeout",
                     "desc": "Sets a busy handler that will sleep until the database is not locked or the timeout is reached.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -137,7 +133,6 @@
                     "name": "close",
                     "desc": "Closes the database connection.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -150,7 +145,6 @@
                     "name": "exec",
                     "desc": "Executes a result-less query against a given database.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -168,7 +162,6 @@
                     "name": "version",
                     "desc": "Returns the SQLite3 library version as a string constant and as a number.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "VariantMap",
@@ -181,7 +174,6 @@
                     "name": "lastinsertrowid",
                     "desc": "Returns the row ID of the most recent INSERT into the database.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Int64",
@@ -194,7 +186,6 @@
                     "name": "lasterrorcode",
                     "desc": "Returns the numeric result code of the most recent failed SQLite request.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Int64",
@@ -207,7 +198,6 @@
                     "name": "lasterrormsg",
                     "desc": "Returns English text describing the most recent failed SQLite request.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "String",
@@ -220,7 +210,6 @@
                     "name": "loadextension",
                     "desc": "Attempts to load an SQLite extension library.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -238,7 +227,6 @@
                     "name": "changes",
                     "desc": "Returns the number of database rows that were changed (or inserted or deleted) by the most recent SQL statement.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Int64",
@@ -251,7 +239,6 @@
                     "name": "escapestring",
                     "desc": "Returns a string that has been properly escaped for safe inclusion in an SQL statement.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "String",
@@ -269,7 +256,6 @@
                     "name": "prepare",
                     "desc": "Prepares an SQL statement for execution and returns an SQLite3Stmt object.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -287,7 +273,6 @@
                     "name": "query",
                     "desc": "Executes an SQL query, returning an SQLite3Result object if the query returns results.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -305,7 +290,6 @@
                     "name": "querysingle",
                     "desc": "Executes a query and returns a single result.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -329,7 +313,6 @@
                     "name": "createfunction",
                     "desc": "Registers a PHP function or user-defined function for use as an SQL scalar function for use within SQL statements.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -358,7 +341,6 @@
                     "name": "createaggregate",
                     "desc": "Registers a PHP function or user-defined function for use as an SQL aggregate function for use within SQL statements.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -391,7 +373,6 @@
                 {
                     "name": "openblob",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -424,14 +405,12 @@
             "name": "SQLite3Stmt",
             "desc": "A class that handles prepared statements for the SQLite 3 extension.",
             "flags": [
-                "HasDocComment"
             ],
             "footer": "\n  public: void validate() const;\n  public: p_SQLite3 m_db;\n  public: sqlite3_stmt *m_raw_stmt;\n    DECLARE_BOOST_TYPES(BoundParam);\n    struct BoundParam {\n      int type;\n      int index;\n      Variant value;\n    };\n  public: BoundParamPtrVec m_bound_params;",
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -451,7 +430,6 @@
                     "name": "paramcount",
                     "desc": "Returns the number of parameters within the prepared statement.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Int64",
@@ -464,7 +442,6 @@
                     "name": "close",
                     "desc": "Closes the prepared statement.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -477,7 +454,6 @@
                     "name": "reset",
                     "desc": "Resets the prepared statement to its state prior to execution. All bindings remain intact after reset.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -490,7 +466,6 @@
                     "name": "clear",
                     "desc": "Clears all current bound parameters.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -503,7 +478,6 @@
                     "name": "bindparam",
                     "desc": "Binds a parameter to a statement variable.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -533,7 +507,6 @@
                     "name": "bindvalue",
                     "desc": "Binds the value of a parameter to a statement variable.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -562,7 +535,6 @@
                     "name": "execute",
                     "desc": "Executes a prepared statement and returns a result set object.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -579,14 +551,12 @@
             "name": "SQLite3Result",
             "desc": "A class that handles result sets for the SQLite 3 extension.",
             "flags": [
-                "HasDocComment"
             ],
             "footer": "\n  public: void validate() const;\n  public: p_SQLite3Stmt m_stmt;",
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -598,7 +568,6 @@
                     "name": "numcolumns",
                     "desc": "Returns the number of columns in the result set.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Int64",
@@ -611,7 +580,6 @@
                     "name": "columnname",
                     "desc": "Returns the name of the column specified by the column_number.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "String",
@@ -629,7 +597,6 @@
                     "name": "columntype",
                     "desc": "Returns the type of the column identified by column_number.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Int64",
@@ -647,7 +614,6 @@
                     "name": "fetcharray",
                     "desc": "Fetches a result row as an associative or numerically indexed array or both. By default, fetches as both.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -665,7 +631,6 @@
                 {
                     "name": "reset",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -677,7 +642,6 @@
                     "name": "finalize",
                     "desc": "Closes the result set.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",

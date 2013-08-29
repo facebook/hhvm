@@ -18,23 +18,23 @@
 #include <iostream>
 #include <boost/scoped_ptr.hpp>
 
-#include "hphp/runtime/base/base_includes.h"
-#include "hphp/util/atomic_vector.h"
+#include "hphp/runtime/base/base-includes.h"
+#include "hphp/util/atomic-vector.h"
 #include "hphp/util/util.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/debug.h"
 #include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
-#include "hphp/runtime/base/file_repository.h"
+#include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/func-inline.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/util/parser/parser.h"
+#include "hphp/parser/parser.h"
 
 namespace HPHP {
 
@@ -130,7 +130,7 @@ void Func::setFullName() {
   }
 }
 
-void Func::initPrologues(int numParams, bool isGenerator) {
+void Func::initPrologues(int numParams) {
   m_funcBody = (TCA)HPHP::Transl::funcBodyHelperThunk;
 
   int maxNumPrologues = Func::getMaxNumPrologues(numParams);
@@ -144,7 +144,7 @@ void Func::initPrologues(int numParams, bool isGenerator) {
   }
 }
 
-void Func::init(int numParams, bool isGenerator) {
+void Func::init(int numParams) {
   // For methods, we defer setting the full name until m_cls is initialized
   m_maybeIntercepted = -1;
   if (!preClass()) {
@@ -169,11 +169,12 @@ void Func::init(int numParams, bool isGenerator) {
   m_magic = kMagic;
 #endif
   assert(m_name);
-  initPrologues(numParams, isGenerator);
+  initPrologues(numParams);
 }
 
 void* Func::allocFuncMem(
-    const StringData* name, int numParams, bool needsNextClonedClosure) {
+  const StringData* name, int numParams, bool needsNextClonedClosure,
+  bool lowMem) {
   int maxNumPrologues = Func::getMaxNumPrologues(numParams);
   int numExtraPrologues =
     maxNumPrologues > kNumFixedPrologues ?
@@ -183,7 +184,7 @@ void* Func::allocFuncMem(
   if (needsNextClonedClosure) {
     funcSize += sizeof(Func*);
   }
-  void* mem = Util::low_malloc(funcSize);
+  void* mem = lowMem ? Util::low_malloc(funcSize) : malloc(funcSize);
   if (needsNextClonedClosure) {
     // make room for nextClonedClosure to work
     Func** startOfFunc = (Func**) mem;
@@ -193,10 +194,9 @@ void* Func::allocFuncMem(
   return mem;
 }
 
-Func::Func(Unit& unit, Id id, int line1, int line2,
-           Offset base, Offset past, const StringData* name,
-           Attr attrs, bool top, const StringData* docComment, int numParams,
-           bool isGenerator)
+Func::Func(Unit& unit, Id id, PreClass* preClass, int line1, int line2,
+           Offset base, Offset past, const StringData* name, Attr attrs,
+           bool top, const StringData* docComment, int numParams)
   : m_unit(&unit)
   , m_cls(nullptr)
   , m_baseCls(nullptr)
@@ -210,33 +210,10 @@ Func::Func(Unit& unit, Id id, int line1, int line2,
   , m_funcId(InvalidFuncId)
   , m_hasPrivateAncestor(false)
 {
-  m_shared = new SharedData(nullptr, id, base, past, line1, line2,
+  m_shared = new SharedData(preClass, preClass ? -1 : id,
+                            base, past, line1, line2,
                             top, docComment);
-  init(numParams, isGenerator);
-}
-
-// Class method
-Func::Func(Unit& unit, PreClass* preClass, int line1, int line2, Offset base,
-           Offset past, const StringData* name, Attr attrs,
-           bool top, const StringData* docComment, int numParams,
-           bool isGenerator)
-  : m_unit(&unit)
-  , m_cls(nullptr)
-  , m_baseCls(nullptr)
-  , m_name(name)
-  , m_namedEntity(nullptr)
-  , m_refBitVal(0)
-  , m_cachedOffset(0)
-  , m_maxStackCells(0)
-  , m_numParams(0)
-  , m_attrs(attrs)
-  , m_funcId(InvalidFuncId)
-  , m_hasPrivateAncestor(false)
-{
-  Id id = -1;
-  m_shared = new SharedData(preClass, id, base, past, line1, line2,
-                            top, docComment);
-  init(numParams, isGenerator);
+  init(numParams);
 }
 
 Func::~Func() {
@@ -260,26 +237,47 @@ Func::~Func() {
 }
 
 void Func::destroy(Func* func) {
+  /*
+   * Funcs in PreClasses are just templates, and don't get used
+   * until they are cloned so we don't put them in low memory.
+   */
+  bool lowMem = !func->preClass() || func->m_cls;
   void* mem = func;
   if (func->isClosureBody() || func->isGeneratorFromClosure()) {
     Func** startOfFunc = (Func**) mem;
     mem = startOfFunc - 1; // move back by a pointer
     if (Func* f = startOfFunc[-1]) {
+      /*
+       * cloned closures use the prolog array to hold
+       * the per-clone post-prolog entry points.
+       * They're not real prologs, and they shouldn't be
+       * smashed, so clear them out here.
+       */
+      f->initPrologues(f->m_numParams);
       Func::destroy(f);
     }
   }
   func->~Func();
-  Util::low_free(mem);
+  if (lowMem) {
+    Util::low_free(mem);
+  } else {
+    free(mem);
+  }
 }
 
-Func* Func::clone() const {
+Func* Func::clone(Class* cls) const {
   Func* f = new (allocFuncMem(
-        m_name,
-        m_numParams,
-        isClosureBody() || isGeneratorFromClosure()
-  )) Func(*this);
-  f->initPrologues(m_numParams, isGenerator());
+                   m_name,
+                   m_numParams,
+                   isClosureBody() || isGeneratorFromClosure(),
+                   cls || !preClass())) Func(*this);
+
+  f->initPrologues(m_numParams);
   f->m_funcId = InvalidFuncId;
+  if (cls != f->m_cls) {
+    f->m_cls = cls;
+    f->setFullName();
+  }
   return f;
 }
 
@@ -295,9 +293,8 @@ const Func* Func::cloneAndSetClass(Class* cls) const {
     return ret;
   }
 
-  Func* clonedFunc = clone();
+  Func* clonedFunc = clone(cls);
   clonedFunc->setNewFuncId();
-  clonedFunc->setCls(cls);
 
   // Save it so we don't have to keep cloning it and retranslating
   Func** nextFunc = &this->nextClonedClosure();
@@ -678,7 +675,6 @@ DVFuncletsVec Func::getDVFunclets() const {
   return dvs;
 }
 
-
 Func::SharedData::SharedData(PreClass* preClass, Id id,
                              Offset base, Offset past, int line1, int line2,
                              bool top, const StringData* docComment)
@@ -975,15 +971,12 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
   if (!m_containsCalls) attrs = Attr(attrs | AttrPhpLeafFn);
 
-  Func* f = (m_pce == nullptr)
-    ? m_ue.newFunc(this, unit, m_id, m_line1, m_line2, m_base,
-                   m_past, m_name, attrs, m_top, m_docComment,
-                   m_params.size(), m_isClosureBody | m_isGeneratorFromClosure,
-                   m_isGenerator)
-    : m_ue.newFunc(this, unit, preClass, m_line1, m_line2, m_base,
-                   m_past, m_name, attrs, m_top, m_docComment,
-                   m_params.size(), m_isClosureBody | m_isGeneratorFromClosure,
-                   m_isGenerator);
+  assert(!m_pce == !preClass);
+  Func* f = m_ue.newFunc(this, unit, m_id, preClass, m_line1, m_line2, m_base,
+                         m_past, m_name, attrs, m_top, m_docComment,
+                         m_params.size(),
+                         m_isClosureBody | m_isGeneratorFromClosure);
+
   f->shared()->m_info = m_info;
   f->shared()->m_returnType = m_returnType;
   std::vector<Func::ParamInfo> pBuilder;

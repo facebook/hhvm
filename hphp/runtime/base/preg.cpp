@@ -3,29 +3,28 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
+   | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/string_util.h"
-#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 #include <pcre.h>
 #include <onigposix.h>
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/zend_functions.h"
-#include "hphp/runtime/base/array_iterator.h"
-#include "hphp/runtime/base/ini_setting.h"
-#include "hphp/runtime/base/thread_init_fini.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/thread-init-fini.h"
 #include "tbb/concurrent_hash_map.h"
 
 #define PREG_PATTERN_ORDER          1

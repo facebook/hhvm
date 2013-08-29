@@ -16,9 +16,11 @@
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/annotation.h"
+#include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
 #include "hphp/runtime/vm/jit/ir-translator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
+#include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -59,6 +61,8 @@ private:
 
   bool prepareInstruction();
   void addInstruction();
+  bool consumeInput(int i, const Transl::InputInfo& ii);
+  void recordDependencies();
 };
 
 RegionFormer::RegionFormer(const RegionContext& ctx, InterpSet& interp)
@@ -81,21 +85,19 @@ RegionDescPtr RegionFormer::go() {
   uint32_t numJmps = 0;
   for (auto const& lt : m_ctx.liveTypes) {
     auto t = lt.type;
-    if (t.strictSubtypeOf(Type::Obj)) t = t.unspecialize();
-
     if (t.subtypeOf(Type::Cls)) {
       m_ht.assertTypeStack(lt.location.stackOffset(), t);
+      m_curBlock->addPredicted(m_sk, RegionDesc::TypePred{lt.location, t});
     } else {
       m_ht.guardTypeLocation(lt.location, t);
     }
-    m_curBlock->addPredicted(m_sk, RegionDesc::TypePred{lt.location, t});
   }
 
   while (true) {
     if (!prepareInstruction()) break;
     Transl::annotate(&m_inst);
 
-    // Before doing the translation, check for tracelet-ending control flow.
+    // Instead of translating a Jmp, go to its destination.
     if (m_inst.op() == OpJmp && m_inst.imm[0].u_BA > 0 &&
         numJmps < Transl::Translator::MaxJmpsTracedThrough) {
       // Include the Jmp in the region and continue to its destination.
@@ -105,11 +107,6 @@ RegionDescPtr RegionFormer::go() {
 
       m_ht.setBcOff(m_sk.offset(), false);
       continue;
-    } else if (Transl::opcodeBreaksBB(m_inst.op()) ||
-               (Transl::dontGuardAnyInputs(m_inst.op()) &&
-                Transl::opcodeChangesPC(m_inst.op()))) {
-      // This instruction ends the tracelet.
-      break;
     }
 
     m_inst.interp = m_interp.count(m_sk);
@@ -126,6 +123,8 @@ RegionDescPtr RegionFormer::go() {
       break;
     }
 
+    if (m_inst.breaksTracelet) break;
+
     if (isFCallStar(m_inst.op())) m_arState.pop();
 
     // Advance sk and check the prediction, if any.
@@ -133,16 +132,10 @@ RegionDescPtr RegionFormer::go() {
     if (doPrediction) m_ht.checkTypeStack(0, m_inst.outPred, m_sk.offset());
   }
 
-  if (m_region) {
-    // Record the incrementally constructed reffiness predictions.
-    assert(!m_region->blocks.empty());
-    auto& frontBlock = *m_region->blocks.front();
-    for (auto const& dep : m_refDeps.m_arMap) {
-      frontBlock.addReffinessPred(m_startSk, {dep.second.m_mask,
-                                              dep.second.m_vals,
-                                              dep.first});
-    }
-  }
+  dumpTrace(2, m_ht.traceBuilder()->trace(), " after tracelet formation ",
+            nullptr, nullptr, nullptr, m_ht.traceBuilder()->guards());
+
+  if (m_region && !m_region->blocks.empty()) recordDependencies();
 
   return std::move(m_region);
 }
@@ -157,7 +150,9 @@ bool RegionFormer::prepareInstruction() {
   new (&m_inst) NormalizedInstruction();
   m_inst.source = m_sk;
   m_inst.m_unit = m_curUnit;
-  m_inst.breaksTracelet = false;
+  m_inst.breaksTracelet = Transl::opcodeBreaksBB(m_inst.op()) ||
+                            (Transl::dontGuardAnyInputs(m_inst.op()) &&
+                             Transl::opcodeChangesPC(m_inst.op()));
   m_inst.changesPC = Transl::opcodeChangesPC(m_inst.op());
   m_inst.funcd = m_arState.knownFunc();
   Transl::populateImmediates(m_inst);
@@ -165,7 +160,7 @@ bool RegionFormer::prepareInstruction() {
 
   Transl::InputInfos inputInfos;
   getInputs(m_startSk, m_inst, inputInfos, m_curBlock->func(), [&](int i) {
-    return m_ht.traceBuilder()->getLocalType(i);
+    return m_ht.traceBuilder()->localType(i, DataTypeGeneric);
   });
 
   // Read types for all the inputs and apply MetaData.
@@ -182,20 +177,7 @@ bool RegionFormer::prepareInstruction() {
   // Check all the inputs for unknown values.
   assert(inputInfos.size() == m_inst.inputs.size());
   for (unsigned i = 0; i < inputInfos.size(); ++i) {
-    auto const& ii = inputInfos[i];
-    auto const& rtt = m_inst.inputs[i]->rtt;
-
-    if (ii.dontBreak || ii.dontGuard) continue;
-    if (rtt.isVagueValue()) {
-      // Trying to consume a value without a precise enough type.
-      return false;
-    }
-    if (m_inst.ignoreInnerType || ii.dontGuardInner) continue;
-    if (rtt.isValue() && rtt.isRef() &&
-        (rtt.innerType() == KindOfInvalid || rtt.innerType() == KindOfAny)) {
-      // Trying to consume a boxed value without a guess for the inner type.
-      return false;
-    }
+    if (!consumeInput(i, inputInfos[i])) return false;
   }
 
   if (!m_inst.noOp && inputInfos.needsRefCheck) {
@@ -206,7 +188,7 @@ bool RegionFormer::prepareInstruction() {
       (m_ht.spOffset() - m_ctx.spOffset);
     try {
       m_inst.preppedByRef = m_arState.checkByRef(argNum, entryArDelta,
-                                               &m_refDeps);
+                                                 &m_refDeps);
     } catch (const Transl::UnknownInputExc& exn) {
       // We don't have a guess for the current ActRec.
       return false;
@@ -245,6 +227,68 @@ void RegionFormer::addInstruction() {
       m_curBlock->addInstruction();
     }
     m_curBlock->addInstruction();
+  }
+}
+
+/*
+ * Check if the current type for the location in ii is specific enough for what
+ * the current opcode wants. If not, return false.
+ */
+bool RegionFormer::consumeInput(int i, const Transl::InputInfo& ii) {
+  auto& rtt = m_inst.inputs[i]->rtt;
+  if (ii.dontGuard || !rtt.isValue()) return true;
+
+  if (!ii.dontBreak && !Type::fromRuntimeType(rtt).isKnownDataType()) {
+    // Trying to consume a value without a precise enough type.
+    FTRACE(1, "selectTracelet: {} tried to consume {}\n",
+           m_inst.toString(), m_inst.inputs[i]->pretty());
+    return false;
+  }
+
+  if (!rtt.isRef() || m_inst.ignoreInnerType || ii.dontGuardInner) {
+    return true;
+  }
+
+  if (!Type::fromDataType(rtt.innerType()).isKnownDataType()) {
+    // Trying to consume a boxed value without a guess for the inner type.
+    FTRACE(1, "selectTracelet: {} tried to consume ref {}\n",
+           m_inst.toString(), m_inst.inputs[i]->pretty());
+    return false;
+  }
+
+  return true;
+}
+
+/*
+ * Records any type/reffiness predictions we depend on in the region. Guards
+ * for locals and stack cells that are not used will be eliminated by the call
+ * to relaxGuards.
+ */
+void RegionFormer::recordDependencies() {
+  // Relax guards and record the ones that survived.
+  auto trace = m_ht.traceBuilder()->trace();
+  auto& firstBlock = *m_region->blocks.front();
+  auto blockStart = firstBlock.start();
+
+  auto changed = relaxGuards(trace, m_ht.irFactory(),
+                             *m_ht.traceBuilder()->guards());
+  visitGuards(trace, [&](const RegionDesc::Location& loc, Type type) {
+    RegionDesc::TypePred pred{loc, type};
+    FTRACE(1, "selectTracelet adding guard {}\n", show(pred));
+    firstBlock.addPredicted(blockStart, pred);
+  });
+  if (changed) {
+    dumpTrace(3, m_ht.traceBuilder()->trace(), " after guard relaxation ",
+              nullptr, nullptr, nullptr, m_ht.traceBuilder()->guards());
+  }
+
+  // Record the incrementally constructed reffiness predictions.
+  assert(!m_region->blocks.empty());
+  auto& frontBlock = *m_region->blocks.front();
+  for (auto const& dep : m_refDeps.m_arMap) {
+    frontBlock.addReffinessPred(m_startSk, {dep.second.m_mask,
+                                            dep.second.m_vals,
+                                            dep.first});
   }
 }
 }

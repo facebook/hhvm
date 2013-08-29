@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
@@ -38,14 +38,14 @@ const StaticString s_uuinvoke("__invoke");
 void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   auto const invokeFunc = getVMClass()->lookupMethod(s_uuinvoke.get());
 
-  if (invokeFunc->attrs() & AttrStatic) {
-    // Only set the class for static closures
-    m_thisOrClass = (ObjectData*)(intptr_t(ar->m_func->cls()) | 1LL);
-  } else {
-    // I don't care if it is a $this or a late bound class because we will just
-    // put it back in the same place on an ActRec.
-    m_thisOrClass = ar->m_this;
-    if (ar->hasThis()) {
+  m_thisOrClass = ar->m_this;
+  if (ar->hasThis()) {
+    if (invokeFunc->attrs() & AttrStatic) {
+      // Only set the class for static closures.
+      m_thisOrClass = reinterpret_cast<ObjectData*>(
+        reinterpret_cast<intptr_t>(ar->getThis()->getVMClass()) | 1LL
+      );
+    } else {
       ar->getThis()->incRefCount();
     }
   }
@@ -64,11 +64,12 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   }
 }
 
-c_Closure* c_Closure::clone() {
-  auto closure = static_cast<c_Closure*>(ObjectData::clone());
-  closure->m_VMStatics = m_VMStatics;
-  closure->m_thisOrClass = m_thisOrClass;
-  closure->m_func = m_func;
+c_Closure* c_Closure::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_Closure*>(obj);
+  auto closure = static_cast<c_Closure*>(obj->cloneImpl());
+  closure->m_VMStatics = thiz->m_VMStatics;
+  closure->m_thisOrClass = thiz->m_thisOrClass;
+  closure->m_func = thiz->m_func;
   return closure;
 }
 

@@ -18,8 +18,8 @@
 #ifndef incl_HPHP_JSON_PARSER_H_
 #define incl_HPHP_JSON_PARSER_H_
 
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/string_buffer.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/string-buffer.h"
 
 namespace HPHP {
 

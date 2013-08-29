@@ -18,7 +18,7 @@
 #define incl_HPHP_TEST_SERVER_H_
 
 #include "hphp/test/ext/test_code_run.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

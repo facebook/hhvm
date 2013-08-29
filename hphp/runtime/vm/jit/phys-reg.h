@@ -250,7 +250,7 @@ private:
   uint64_t m_bits;
 };
 
-static_assert(std::has_trivial_destructor<RegSet>::value,
+static_assert(boost::has_trivial_destructor<RegSet>::value,
               "RegSet must have a trivial destructor");
 
 //////////////////////////////////////////////////////////////////////

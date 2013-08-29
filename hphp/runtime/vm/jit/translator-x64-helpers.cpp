@@ -16,9 +16,9 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
-#include "hphp/runtime/base/file_repository.h"
+#include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/vm/event-hook.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/stats.h"
 
 #ifndef __APPLE__

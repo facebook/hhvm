@@ -7,8 +7,8 @@ foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
 endforeach(dir ${RECURSIVE_SOURCE_SUBDIRS})
 
 list(APPEND CXX_SOURCES ${files})
-list(APPEND CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../hhvm/process_init.cpp")
-list(APPEND CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../hhvm/global_variables.cpp")
+list(APPEND CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../hhvm/process-init.cpp")
+list(APPEND CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../hhvm/global-variables.cpp")
 
 add_executable(test ${CXX_SOURCES})
 

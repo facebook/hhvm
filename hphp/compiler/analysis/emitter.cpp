@@ -44,6 +44,7 @@
 #include "hphp/compiler/expression/static_member_expression.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/compiler/expression/yield_expression.h"
+#include "hphp/compiler/expression/await_expression.h"
 #include "hphp/compiler/statement/break_statement.h"
 #include "hphp/compiler/statement/case_statement.h"
 #include "hphp/compiler/statement/catch_statement.h"
@@ -76,19 +77,19 @@
 
 #include "hphp/util/logger.h"
 #include "hphp/util/util.h"
-#include "hphp/util/job_queue.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/util/job-queue.h"
+#include "hphp/parser/hphp.tab.hpp"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/zend_string.h"
-#include "hphp/runtime/base/type_conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/variable_serializer.h"
-#include "hphp/runtime/base/program_functions.h"
-#include "hphp/runtime/base/file_repository.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
 #include "hphp/runtime/vm/preclass-emit.h"
 
@@ -1872,7 +1873,7 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
     voidReturn = builtinFunc->info()->returnType == KindOfNull;
   } else if (fn->isValid() && fn->getFuncScope()) {
     ref = fn->getFuncScope()->isRefReturn();
-    if (!(fn->getFuncScope()->getReturnType())) {
+    if (!(fn->getActualType())) {
       voidReturn = true;
     }
   } else if (!fn->getName().empty()) {
@@ -2526,7 +2527,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         MethodStatementPtr m(static_pointer_cast<MethodStatement>(node));
         // Only called for fn defs not on the top level
         StringData* nName = StringData::GetStaticString(m->getOriginalName());
-        if (m->getFunctionScope()->isGenerator()) {
+        if (m->getFunctionScope()->isGenerator() ||
+            m->getFunctionScope()->isAsync()) {
           if (m->getFileScope() != m_file) {
             // the generator's definition is in another file typically
             // because it was defined in a trait that got inlined into
@@ -3238,6 +3240,13 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           e.False();
           e.ArrayIdx();
           return true;
+        } else if (call->isCallToFunction("abs")) {
+          if (params && params->getCount() == 1) {
+            visit((*params)[0]);
+            emitConvertToCell(e);
+            e.Abs();
+            return true;
+          }
         } else if (call->isCompilerCallToFunction("hphp_continuation_done")) {
           assert(params && params->getCount() == 1);
           visit((*params)[0]);
@@ -3964,10 +3973,65 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         assert(m_evalStack.size() == 1);
         return true;
       }
+      case Expression::KindOfAwaitExpression: {
+        AwaitExpressionPtr await(static_pointer_cast<AwaitExpression>(node));
+        assert(m_evalStack.size() == 0);
+
+        // evaluate expression passed to await
+        ExpressionPtr expr = await->getExpression();
+        visit(expr);
+        emitConvertToCell(e);
+
+        int64_t normalLabel = 2 * await->getLabel();
+        int64_t exceptLabel = normalLabel - 1;
+
+        // if expr is null, just continue
+        e.Dup();
+        e.IsNullC();
+        e.JmpNZ(m_yieldLabels[normalLabel]);
+
+        // if the type of expr is not WaitHandle (can be just Awaitable),
+        // call getWaitHandle() method.
+        AnalysisResultConstPtr ar = expr->getScope()->getContainingProgram();
+        TypePtr type = expr->getActualType();
+        if (!type || !Type::SubType(ar, type,
+                Type::GetType(Type::KindOfObject, "WaitHandle"))) {
+          emitConstMethodCallNoParams(e, "getWaitHandle");
+        }
+        assert(m_evalStack.size() == 1);
+
+        e.ContSuspend(normalLabel);
+
+        // emit return label for raise()
+        assert(m_evalStack.size() == 0);
+        e.Null();
+        m_yieldLabels[exceptLabel].set(e);
+
+        // throw received exception on the stack
+        e.Throw();
+
+        // emit return label for next()/send()
+        e.Null();
+        m_yieldLabels[normalLabel].set(e);
+
+        // continue with the received result on the stack
+        assert(m_evalStack.size() == 1);
+        return true;
+      }
     }
   }
 
   not_reached();
+}
+
+void EmitterVisitor::emitConstMethodCallNoParams(Emitter& e, string name) {
+  StringData* nameLit = StringData::GetStaticString(name);
+  {
+    FPIRegionRecorder fpi(this, m_ue, m_evalStack, m_ue.bcPos());
+    e.FPushObjMethodD(0, nameLit);
+  }
+  e.FCall(0);
+  emitConvertToCell(e);
 }
 
 int EmitterVisitor::scanStackForLocation(int iLast) {
@@ -5414,8 +5478,20 @@ void EmitterVisitor::emitPostponedMeths() {
       top_fes.push_back(fe);
     }
 
-    if (meth->getFunctionScope()->isGenerator()) {
-      emitMethodsForGenerator(p, top_fes);
+    if (meth->getFunctionScope()->isGenerator() ||
+        meth->getFunctionScope()->isAsync()) {
+      // emit the outer 'create generator' function
+      m_curFunc = fe;
+      fe->setHasGeneratorAsBody(true);
+      emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
+      emitGeneratorCreate(meth);
+
+      // emit the generator body
+      m_curFunc = createFuncEmitterForGeneratorBody(meth, fe, top_fes);
+      if (m_curFunc) {
+        emitMethodMetadata(meth, p.m_closureUseVars, m_curFunc->top());
+        emitGeneratorBody(meth);
+      }
     } else {
       m_curFunc = fe;
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
@@ -5472,9 +5548,10 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
     }
   }
 
-  // assign id to continuationVarArgsLocal (generators - both methods)
-  if ((fe->isGenerator() || fe->hasGeneratorAsBody()) &&
-      meth->hasCallToGetArgs()) {
+  // assign id to continuationVarArgsLocal (generators/async - both methods)
+  if (meth->hasCallToGetArgs() &&
+      (meth->getFunctionScope()->isGenerator() ||
+       meth->getFunctionScope()->isAsync())) {
     fe->allocVarId(s_continuationVarArgsLocal);
   }
 
@@ -5582,7 +5659,8 @@ void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
 
   if (funcScope->needsLocalThis() &&
       !funcScope->isStatic() &&
-      !funcScope->isGenerator()) {
+      !funcScope->isGenerator() &&
+      !funcScope->isAsync()) {
     assert(!m_curFunc->top());
     static const StringData* thisStr = StringData::GetStaticString("this");
     Id thisId = m_curFunc->lookupVarId(thisStr);
@@ -5626,18 +5704,10 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
   emitMethodDVInitializers(e, meth, topOfBody);
 }
 
-void EmitterVisitor::emitMethodsForGenerator(PostponedMeth& p,
-                                   vector<FuncEmitter*>& top_fes) {
-  MethodStatementPtr meth = p.m_meth;
-  FuncEmitter* fe = p.m_fe;
-  fe->setHasGeneratorAsBody(true);
-  // emit the original ("create generator") function
-  m_curFunc = fe;
-  emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
-  emitGeneratorCreate(meth);
-
-  // emit generator body
-  // create new emitter
+FuncEmitter* EmitterVisitor::createFuncEmitterForGeneratorBody(
+                               MethodStatementPtr meth,
+                               FuncEmitter* fe,
+                               vector<FuncEmitter*>& top_fes) {
   FuncEmitter* genFe;
   string genName = meth->getGeneratorName();
   if (fe->isMethod() && !fe->isClosureBody()) {
@@ -5648,7 +5718,7 @@ void EmitterVisitor::emitMethodsForGenerator(PostponedMeth& p,
   } else {
     if (!m_generatorEmitted.insert(genName).second){
       // generator body already emitted
-      return;
+      return nullptr;
     }
     genFe = new FuncEmitter(m_ue, -1, -1, StringData::GetStaticString(genName));
     top_fes.push_back(genFe);
@@ -5656,35 +5726,24 @@ void EmitterVisitor::emitMethodsForGenerator(PostponedMeth& p,
   }
   genFe->setIsGeneratorFromClosure(fe->isClosureBody());
   genFe->setIsGenerator(true);
-
-  m_curFunc = genFe;
-  emitMethodMetadata(meth, p.m_closureUseVars, genFe->top());
-  emitGeneratorBody(meth);
+  return genFe;
 }
 
 void EmitterVisitor::emitGeneratorCreate(MethodStatementPtr meth) {
   Emitter e(meth, m_ue, *this);
   Label topOfBody(e);
   emitMethodPrologue(e, meth);
-
-  if (m_curFunc->hasVar(s_continuationVarArgsLocal)) {
-    static const StringData* s_func_get_args =
-      StringData::GetStaticString("func_get_args");
-
-    Id local = m_curFunc->lookupVarId(s_continuationVarArgsLocal);
-    emitVirtualLocal(local);
-    e.FCallBuiltin(0, 0, s_func_get_args);
-    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut,
-                   false, 0, 0);
-    e.UnboxR();
-    emitSet(e);
-    e.PopC();
-  }
+  emitSetFuncGetArgs(e);
 
   // emit code to create generator object
   const StringData* nameStr = StringData::GetStaticString(
       meth->getGeneratorName());
   e.CreateCont(nameStr);
+
+  if (meth->getFunctionScope()->isAsync()){
+    emitConstMethodCallNoParams(e, "getWaitHandle");
+  }
+
   e.RetC();
 
   FuncFinisher ff(this, e, m_curFunc);
@@ -5710,6 +5769,22 @@ void EmitterVisitor::emitGeneratorBody(MethodStatementPtr meth) {
   }
 
   FuncFinisher ff(this, e, m_curFunc);
+}
+
+void EmitterVisitor::emitSetFuncGetArgs(Emitter& e) {
+  if (m_curFunc->hasVar(s_continuationVarArgsLocal)) {
+    static const StringData* s_func_get_args =
+      StringData::GetStaticString("func_get_args");
+
+    Id local = m_curFunc->lookupVarId(s_continuationVarArgsLocal);
+    emitVirtualLocal(local);
+    e.FCallBuiltin(0, 0, s_func_get_args);
+    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut,
+                   false, 0, 0);
+    e.UnboxR();
+    emitSet(e);
+    e.PopC();
+  }
 }
 
 void EmitterVisitor::emitMethodDVInitializers(Emitter& e,
@@ -6279,6 +6354,7 @@ void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   auto const nullable = td->annot->isNullable();
   auto const valueStr = td->annot->stripNullable().vanillaName();
   auto const kind =
+    td->annot->stripNullable().isFunction()  ? KindOfAny :
     td->annot->stripNullable().isMixed()     ? KindOfAny :
     !strcasecmp(valueStr.c_str(), "array")   ? KindOfArray :
     !strcasecmp(valueStr.c_str(), "int")     ? KindOfInt64 :
@@ -6490,6 +6566,9 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
           if (vNode->isArray()) {
             throw IncludeTimeFatalException(
               cc, "Arrays are not allowed in class constants");
+          } else if (vNode->isCollection()) {
+            throw IncludeTimeFatalException(
+              cc, "Collections are not allowed in class constants");
           } else if (vNode->isScalar()) {
             initScalar(tvVal, vNode);
           } else {

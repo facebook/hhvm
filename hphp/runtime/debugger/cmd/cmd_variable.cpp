@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_variable.h"
-#include "hphp/runtime/base/hphp_system.h"
+#include "hphp/runtime/base/hphp-system.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -76,10 +76,12 @@ void CmdVariable::PrintVariable(DebuggerClient &client, CStrRef varName) {
       String name = iter.first().toString();
       if (!name.equal(varName)) continue;
       String value = DebuggerClient::FormatVariable(iter.second(), 200);
-      client.print("%s", value.data());
+      client.output("%s", value.data());
     }
   }
 }
+
+const StaticString s_http_response_header("http_response_header");
 
 void CmdVariable::PrintVariables(DebuggerClient &client, CArrRef variables,
                                  bool global, CStrRef text) {
@@ -104,14 +106,13 @@ void CmdVariable::PrintVariables(DebuggerClient &client, CArrRef variables,
       }
 
       // we knew this is the last system global
-      if (global && name == "http_response_header") {
+      if (global && name == s_http_response_header) {
         client.output("%s", "");
         system = false;
       }
 
       ++i;
-      if (!client.isApiMode() &&
-          i % DebuggerClient::ScrollBlockSize == 0 &&
+      if (i % DebuggerClient::ScrollBlockSize == 0 &&
           client.ask("There are %zd more variables. Continue? [Y/n]",
                       variables.size() - i) == 'n') {
         break;
@@ -124,7 +125,7 @@ void CmdVariable::PrintVariables(DebuggerClient &client, CArrRef variables,
   }
 }
 
-void CmdVariable::onClientImpl(DebuggerClient &client) {
+void CmdVariable::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
   String text;
@@ -143,21 +144,6 @@ void CmdVariable::onClientImpl(DebuggerClient &client) {
     m_variables = cmd->m_variables;
     PrintVariables(client, cmd->m_variables, cmd->m_global, text);
   }
-}
-
-void CmdVariable::setClientOutput(DebuggerClient &client) {
-  client.setOutputType(DebuggerClient::OTValues);
-  Array values;
-  for (ArrayIter iter(m_variables); iter; ++iter) {
-    String name = iter.first().toString();
-    if (client.getDebuggerClientApiModeSerialize()) {
-      values.set(name,
-                 DebuggerClient::FormatVariable(iter.second(), 200));
-    } else {
-      values.set(name, iter.second());
-    }
-  }
-  client.setOTValues(values);
 }
 
 const StaticString s_GLOBALS("GLOBALS");

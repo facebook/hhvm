@@ -149,8 +149,3 @@ string(1) "B"
 bool(false)
 bool(false)
 
-resource(4) of type (stream)
-string(1) "E"
-bool(false)
-bool(false)
-

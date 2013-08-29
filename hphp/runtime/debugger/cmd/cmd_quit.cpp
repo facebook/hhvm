@@ -36,8 +36,8 @@ void CmdQuit::help(DebuggerClient &client) {
 
 // Carries out the Quit command by informing the server the client
 // is going away and then getting the client to quit.
-void CmdQuit::onClientImpl(DebuggerClient &client) {
-  TRACE(2, "CmdQuit::onClientImpl\n");
+void CmdQuit::onClient(DebuggerClient &client) {
+  TRACE(2, "CmdQuit::onClient\n");
   if (DebuggerCommand::displayedHelp(client)) return;
 
   if (client.argCount() == 0) {

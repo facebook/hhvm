@@ -18,8 +18,8 @@
 #ifndef incl_HPHP_EXT_OUTPUT_H_
 #define incl_HPHP_EXT_OUTPUT_H_
 
-#include "hphp/runtime/base/base_includes.h"
-#include "hphp/runtime/server/server_stats.h"
+#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/server/server-stats.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

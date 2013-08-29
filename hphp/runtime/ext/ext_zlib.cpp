@@ -17,13 +17,14 @@
 
 #include "hphp/runtime/ext/ext_zlib.h"
 #include "hphp/runtime/base/file.h"
-#include "hphp/runtime/base/mem_file.h"
-#include "hphp/runtime/base/zip_file.h"
-#include "hphp/runtime/base/stream_wrapper.h"
-#include "hphp/runtime/base/stream_wrapper_registry.h"
-#include "hphp/runtime/base/file_stream_wrapper.h"
+#include "hphp/runtime/base/mem-file.h"
+#include "hphp/runtime/base/zip-file.h"
+#include "hphp/runtime/base/stream-wrapper.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/util/compression.h"
 #include "hphp/util/logger.h"
+#include "folly/String.h"
 #ifdef HAVE_SNAPPY
 #include <snappy.h>
 #endif
@@ -321,7 +322,7 @@ Resource f_gzopen(CStrRef filename, CStrRef mode,
   Resource handle(file);
   bool ret = file->open(File::TranslatePath(filename), mode);
   if (!ret) {
-    raise_warning("%s",Util::safe_strerror(errno).c_str());
+    raise_warning("%s",folly::errnoStr(errno).c_str());
     return NULL;
   }
   return handle;

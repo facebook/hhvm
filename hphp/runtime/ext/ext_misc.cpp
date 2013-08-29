@@ -17,17 +17,17 @@
 
 #include "hphp/runtime/ext/ext_misc.h"
 
-#include "hphp/runtime/server/server_stats.h"
+#include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/exceptions.h"
-#include "hphp/runtime/base/zend_pack.h"
-#include "hphp/runtime/base/hphp_system.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/zend-pack.h"
+#include "hphp/runtime/base/hphp-system.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/util/parser/scanner.h"
-#include "hphp/runtime/base/class_info.h"
+#include "hphp/parser/scanner.h"
+#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
@@ -203,15 +203,7 @@ void f___halt_compiler() {
   // do nothing
 }
 
-Variant f_highlight_file(CStrRef filename, bool ret /* = false */) {
-  throw NotSupportedException(__func__, "PHP specific");
-}
-
 Variant f_show_source(CStrRef filename, bool ret /* = false */) {
-  throw NotSupportedException(__func__, "PHP specific");
-}
-
-Variant f_highlight_string(CStrRef str, bool ret /* = false */) {
   throw NotSupportedException(__func__, "PHP specific");
 }
 
@@ -354,7 +346,7 @@ String f_token_name(int64_t token) {
 #endif
 #define YYTOKEN(num, name) #name
 #define YYTOKEN_MAP static const char *names[] =
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 #undef YYTOKEN_MAP
 #undef YYTOKEN
 

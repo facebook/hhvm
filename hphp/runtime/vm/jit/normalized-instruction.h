@@ -20,7 +20,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "hphp/runtime/base/smart_containers.h"
+#include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/jit/type.h"

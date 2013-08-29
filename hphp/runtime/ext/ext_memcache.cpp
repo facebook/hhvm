@@ -16,8 +16,9 @@
 */
 
 #include "hphp/runtime/ext/ext_memcache.h"
-#include "hphp/runtime/base/request_local.h"
-#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/ext/libmemcached_portability.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/ini-setting.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -358,16 +359,19 @@ Variant c_Memcache::t_getversion() {
   }
 
   for (int x = 0; x < server_count; x++) {
-    memcached_server_instance_st instance =
+    LMCD_SERVER_POSITION_INSTANCE_TYPE instance =
       memcached_server_instance_by_position(&m_memcache, x);
+    uint8_t majorVersion = LMCD_SERVER_MAJOR_VERSION(instance);
+    uint8_t minorVersion = LMCD_SERVER_MINOR_VERSION(instance);
+    uint8_t microVersion = LMCD_SERVER_MICRO_VERSION(instance);
 
-    if (!instance->major_version) {
+    if (!majorVersion) {
       continue;
     }
 
-    version_len = snprintf(version, sizeof(version), "%d.%d.%d",
-        instance->major_version, instance->minor_version,
-        instance->micro_version);
+    version_len = snprintf(version, sizeof(version),
+        "%" PRIu8 ".%" PRIu8 ".%" PRIu8,
+        majorVersion, minorVersion, microVersion);
     return String(version, version_len, CopyString);
   }
 
@@ -458,12 +462,14 @@ Array c_Memcache::t_getstats(CStrRef type /* = null_string */,
     snprintf(extra_args, sizeof(extra_args), "%s", type.c_str());
   }
 
-  memcached_server_instance_st instance =
+  LMCD_SERVER_POSITION_INSTANCE_TYPE instance =
     memcached_server_instance_by_position(&m_memcache, 0);
+  const char *hostname = LMCD_SERVER_HOSTNAME(instance);
+  in_port_t port = LMCD_SERVER_PORT(instance);
 
   memcached_stat_st stats;
-  if (memcached_stat_servername(&stats, extra_args, instance->hostname,
-                                instance->port) != MEMCACHED_SUCCESS) {
+  if (memcached_stat_servername(&stats, extra_args, hostname,
+                                port) != MEMCACHED_SUCCESS) {
     return NULL;
   }
 
@@ -487,12 +493,15 @@ Array c_Memcache::t_getextendedstats(CStrRef type /* = null_string */,
   Array return_val;
 
   for (int server_id = 0; server_id < server_count; server_id++) {
-    memcached_server_instance_st server;
     memcached_stat_st *stat;
     char stats_key[30] = {0};
     size_t key_len;
 
-    server = memcached_server_instance_by_position(&m_memcache, server_id);
+    LMCD_SERVER_POSITION_INSTANCE_TYPE instance =
+      memcached_server_instance_by_position(&m_memcache, server_id);
+    const char *hostname = LMCD_SERVER_HOSTNAME(instance);
+    in_port_t port = LMCD_SERVER_PORT(instance);
+
     stat = stats + server_id;
 
     Array server_stats = memcache_build_stats(&m_memcache, stat, &ret);
@@ -500,8 +509,7 @@ Array c_Memcache::t_getextendedstats(CStrRef type /* = null_string */,
       continue;
     }
 
-    key_len = snprintf(stats_key, sizeof(stats_key),
-                       "%s:%d", server->hostname, server->port);
+    key_len = snprintf(stats_key, sizeof(stats_key), "%s:%d", hostname, port);
 
     return_val.set(String(stats_key, key_len, CopyString), server_stats);
   }

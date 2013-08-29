@@ -6,7 +6,6 @@
         {
             "name": "thrift_protocol_write_binary",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -41,7 +40,6 @@
         {
             "name": "thrift_protocol_read_binary",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -64,7 +62,6 @@
         {
             "name": "thrift_protocol_set_compact_version",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int32"
@@ -79,7 +76,6 @@
         {
             "name": "thrift_protocol_write_compact",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -110,7 +106,6 @@
         {
             "name": "thrift_protocol_read_compact",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"

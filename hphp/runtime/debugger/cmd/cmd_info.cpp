@@ -144,7 +144,7 @@ void CmdInfo::parseOneArg(DebuggerClient &client, string &subsymbol) {
   }
 }
 
-void CmdInfo::onClientImpl(DebuggerClient &client) {
+void CmdInfo::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
   string subsymbol;

@@ -18,16 +18,16 @@
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_fb.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/util/async_job.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/util/async-job.h"
 #include "hphp/util/timer.h"
 #include <dlfcn.h>
-#include "hphp/runtime/base/program_functions.h"
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/hdf.h"
-#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/base/ini-setting.h"
 
 using HPHP::Util::ScopedMem;
 
@@ -1203,12 +1203,12 @@ String apc_serialize(CVarRef value) {
   return vs.serialize(value, true);
 }
 
-Variant apc_unserialize(CStrRef str) {
+Variant apc_unserialize(const char* data, int len) {
   VariableUnserializer::Type sType =
     apcExtension::EnableApcSerialize ?
       VariableUnserializer::Type::APCSerialize :
       VariableUnserializer::Type::Serialize;
-  return unserialize_ex(str, sType);
+  return unserialize_ex(data, len, sType);
 }
 
 void reserialize(VariableUnserializer *uns, StringBuffer &buf) {

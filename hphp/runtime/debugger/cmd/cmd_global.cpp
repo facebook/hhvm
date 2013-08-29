@@ -47,7 +47,7 @@ void CmdGlobal::help(DebuggerClient &client) {
   );
 }
 
-void CmdGlobal::onClientImpl(DebuggerClient &client) {
+void CmdGlobal::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
   String text;
@@ -65,21 +65,6 @@ void CmdGlobal::onClientImpl(DebuggerClient &client) {
     m_globals = cmd->m_globals;
     CmdVariable::PrintVariables(client, cmd->m_globals, true, text);
   }
-}
-
-void CmdGlobal::setClientOutput(DebuggerClient &client) {
-  client.setOutputType(DebuggerClient::OTValues);
-  Array values;
-  for (ArrayIter iter(m_globals); iter; ++iter) {
-    String name = iter.first().toString();
-    if (client.getDebuggerClientApiModeSerialize()) {
-      values.set(name,
-                 DebuggerClient::FormatVariable(iter.second(), 200));
-    } else {
-      values.set(name, iter.second());
-    }
-  }
-  client.setOTValues(values);
 }
 
 bool CmdGlobal::onServer(DebuggerProxy &proxy) {

@@ -33,12 +33,12 @@
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/util/atomic.h"
 #include "hphp/util/util.h"
-#include "hphp/runtime/base/class_info.h"
-#include "hphp/runtime/base/type_conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/util/parser/hphp.tab.hpp"
-#include "hphp/runtime/base/variable_serializer.h"
-#include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/parser/hphp.tab.hpp"
+#include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/zend-string.h"
 
 using namespace HPHP;
 
@@ -63,7 +63,9 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
       m_inlineAsExpr(false), m_inlineSameContext(false),
       m_contextSensitive(false),
       m_directInvoke(false),
-      m_generator(false), m_noLSB(false), m_nextLSB(false),
+      m_generator(false),
+      m_async(false),
+      m_noLSB(false), m_nextLSB(false),
       m_hasTry(false), m_hasGoto(false), m_localRedeclaring(false),
       m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0), m_nextID(0),
       m_yieldLabelCount(0) {
@@ -89,7 +91,8 @@ FunctionScope::FunctionScope(FunctionScopePtr orig,
                              const string &name,
                              const string &originalName,
                              StatementPtr stmt,
-                             ModifierExpressionPtr modifiers)
+                             ModifierExpressionPtr modifiers,
+                             bool user)
     : BlockScope(name, orig->m_docComment, stmt,
                  BlockScope::FunctionScope),
       m_minParam(orig->m_minParam), m_maxParam(orig->m_maxParam),
@@ -101,14 +104,16 @@ FunctionScope::FunctionScope(FunctionScopePtr orig,
       m_overriding(orig->m_overriding), m_volatile(orig->m_volatile),
       m_persistent(orig->m_persistent),
       m_pseudoMain(orig->m_pseudoMain), m_magicMethod(orig->m_magicMethod),
-      m_system(orig->m_system), m_inlineable(orig->m_inlineable),
+      m_system(!user), m_inlineable(orig->m_inlineable),
       m_containsThis(orig->m_containsThis),
       m_containsBareThis(orig->m_containsBareThis), m_nrvoFix(orig->m_nrvoFix),
       m_inlineAsExpr(orig->m_inlineAsExpr),
       m_inlineSameContext(orig->m_inlineSameContext),
       m_contextSensitive(orig->m_contextSensitive),
       m_directInvoke(orig->m_directInvoke),
-      m_generator(orig->m_generator), m_noLSB(orig->m_noLSB),
+      m_generator(orig->m_generator),
+      m_async(orig->m_async),
+      m_noLSB(orig->m_noLSB),
       m_nextLSB(orig->m_nextLSB), m_hasTry(orig->m_hasTry),
       m_hasGoto(orig->m_hasGoto), m_localRedeclaring(orig->m_localRedeclaring),
       m_redeclaring(orig->m_redeclaring),
@@ -207,7 +212,9 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
       m_inlineAsExpr(false), m_inlineSameContext(false),
       m_contextSensitive(false),
       m_directInvoke(false),
-      m_generator(false), m_noLSB(false), m_nextLSB(false),
+      m_generator(false),
+      m_async(false),
+      m_noLSB(false), m_nextLSB(false),
       m_hasTry(false), m_hasGoto(false), m_localRedeclaring(false),
       m_redeclaring(-1), m_inlineIndex(0),
       m_optFunction(0) {
@@ -503,6 +510,7 @@ bool FunctionScope::mayUseVV() const {
   return (inPseudoMain() ||
           isVariableArgument() ||
           isGenerator() ||
+          isAsync() ||
           variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
           variables->getAttribute(VariableTable::ContainsExtract) ||
           variables->getAttribute(VariableTable::ContainsCompact) ||
@@ -823,7 +831,7 @@ bool FunctionScope::popReturnType() {
   m_prevReturn.reset();
   addUpdates(UseKindCallerReturn);
 #ifdef HPHP_INSTRUMENT_TYPE_INF
-  atomic_inc(RescheduleException::s_NumRetTypesChanged);
+  ++RescheduleException::s_NumRetTypesChanged;
 #endif /* HPHP_INSTRUMENT_TYPE_INF */
   return true;
 }
@@ -1022,7 +1030,7 @@ bool FunctionScope::needsAnonClosureClass(ParameterExpressionPtrVec &useVars) {
   useVars.clear();
   if (!isClosure()) return false;
   ParameterExpressionPtrIdxPairVec useVars0;
-  getClosureUseVars(useVars0, !m_generator);
+  getClosureUseVars(useVars0, !m_generator && !m_async);
   useVars.resize(useVars0.size());
   // C++ seems to be unable to infer the type here on pair_first_elem
   transform(useVars0.begin(),
@@ -1036,7 +1044,7 @@ bool FunctionScope::needsAnonClosureClass(
     ParameterExpressionPtrIdxPairVec &useVars) {
   useVars.clear();
   if (!isClosure()) return false;
-  getClosureUseVars(useVars, !m_generator);
+  getClosureUseVars(useVars, !m_generator && !m_async);
   return useVars.size() > 0 || getVariables()->hasStaticLocals();
 }
 

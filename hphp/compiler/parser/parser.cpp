@@ -18,7 +18,7 @@
 #include <boost/make_shared.hpp>
 
 #include "hphp/compiler/type_annotation.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 #include "hphp/compiler/analysis/file_scope.h"
 
 #include "hphp/compiler/expression/expression_list.h"
@@ -46,6 +46,7 @@
 #include "hphp/compiler/expression/encaps_list_expression.h"
 #include "hphp/compiler/expression/closure_expression.h"
 #include "hphp/compiler/expression/yield_expression.h"
+#include "hphp/compiler/expression/await_expression.h"
 #include "hphp/compiler/expression/user_attribute.h"
 
 #include "hphp/compiler/statement/function_statement.h"
@@ -91,7 +92,7 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 
-#include "hphp/runtime/base/file_repository.h"
+#include "hphp/runtime/base/file-repository.h"
 
 #ifdef FACEBOOK
 #include "hphp/facebook/src/compiler/fb_compiler_hooks.h"
@@ -794,68 +795,180 @@ void Parser::fixStaticVars() {
   m_staticVars.pop_back();
 }
 
-void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
-                        Token &name, Token &params, Token &stmt, Token *attr) {
-  ModifierExpressionPtr exp = modifiers?
+void Parser::checkFunctionContext(string funcName,
+                                  FunctionContext& funcContext,
+                                  ModifierExpressionPtr modifiers,
+                                  int returnsRef) {
+  funcContext.checkFinalAssertions();
+
+  // let async modifier be mandatory
+  if (funcContext.isAsync && !modifiers->isAsync()) {
+    PARSE_ERROR("Function '%s' contains 'await' but is not declared as async.",
+                funcName.c_str());
+  }
+
+  if (modifiers->isAsync() && returnsRef) {
+    PARSE_ERROR("Asynchronous function '%s' cannot return reference.",
+                funcName.c_str());
+  }
+}
+
+void Parser::prepareConstructorParameters(StatementListPtr stmts,
+                                          ExpressionListPtr params,
+                                          bool isAbstract) {
+  for (int i = 0, count = params->getCount(); i < count; i++) {
+    ParameterExpressionPtr param =
+        dynamic_pointer_cast<ParameterExpression>((*params)[i]);
+    TokenID mod = param->getModifier();
+    if (mod == 0) continue;
+
+    if (isAbstract) {
+       param->parseTimeFatal(Compiler::InvalidAttribute,
+                             "parameter modifiers not allowed on "
+                             "abstract __construct");
+    }
+    if (!stmts) {
+       param->parseTimeFatal(Compiler::InvalidAttribute,
+                             "parameter modifiers not allowed on "
+                             "__construct without a body");
+    }
+    if (param->annotation()) {
+      std::vector<std::string> typeNames;
+      param->annotation()->getAllSimpleNames(typeNames);
+      for (auto& typeName : typeNames) {
+        if (isTypeVarInImmediateScope(typeName)) {
+          param->parseTimeFatal(Compiler::InvalidAttribute,
+                                "parameter modifiers not supported with "
+                                "type variable annotation");
+        }
+      }
+    }
+    std::string name = param->getName();
+    SimpleVariablePtr value = NEW_EXP(SimpleVariable, name);
+    ScalarExpressionPtr prop = NEW_EXP(ScalarExpression, T_STRING, name);
+    SimpleVariablePtr self = NEW_EXP(SimpleVariable, "this");
+    ObjectPropertyExpressionPtr objProp =
+        NEW_EXP(ObjectPropertyExpression, self, prop);
+    AssignmentExpressionPtr assign =
+        NEW_EXP(AssignmentExpression, objProp, value, false);
+    ExpStatementPtr stmt = NEW_STMT(ExpStatement, assign);
+    stmts->insertElement(stmt);
+  }
+}
+
+string Parser::getFunctionName(FunctionType type, Token* name) {
+  switch (type) {
+    case FunctionType::Closure:
+      return newClosureName(m_clsName, m_containingFuncName);
+    case FunctionType::Function:
+      assert(name);
+      if (!m_lambdaMode) {
+        return name->text();
+      } else {
+        return name->text() + "{lambda}";
+      }
+    case FunctionType::Method:
+      assert(name);
+      return name->text();
+  }
+  not_reached();
+}
+
+StatementPtr Parser::onFunctionHelper(FunctionType type,
+                              Token *modifiers, Token &ret,
+                              Token &ref, Token *name, Token &params,
+                              Token &stmt, Token *attr, bool reloc) {
+  // prepare and validate function modifiers
+  ModifierExpressionPtr modifiersExp = modifiers && modifiers->exp ?
     dynamic_pointer_cast<ModifierExpression>(modifiers->exp)
     : NEW_EXP0(ModifierExpression);
-
-  if (!stmt->stmt) {
-    stmt->stmt = NEW_STMT0(StatementList);
+  modifiersExp->setHasPrivacy(type == FunctionType::Method);
+  if (type == FunctionType::Closure && !modifiersExp->validForClosure()) {
+    PARSE_ERROR("Invalid modifier on closure funciton.");
   }
+  if (type == FunctionType::Function && !modifiersExp->validForFunction()) {
+    PARSE_ERROR("Invalid modifier on function %s.", name->text().c_str());
+  }
+
+  StatementListPtr stmts = stmt->stmt || stmt->num() != 1 ?
+    dynamic_pointer_cast<StatementList>(stmt->stmt)
+    : NEW_EXP0(StatementList);
 
   ExpressionListPtr old_params =
     dynamic_pointer_cast<ExpressionList>(params->exp);
-  int attribute = m_file->popAttribute();
-  string comment = popComment();
-  LocationPtr loc = popFuncLocation();
 
-  FunctionContext funcContext = m_funcContexts.back();
-  m_funcContexts.pop_back();
-  m_prependingStatements.pop_back();
+  string funcName = getFunctionName(type, name);
 
-  funcContext.checkFinalAssertions();
-
-  bool hasCallToGetArgs = m_hasCallToGetArgs.back();
-  m_hasCallToGetArgs.pop_back();
+  if (type == FunctionType::Method && old_params &&
+      funcName == "__construct") {
+    prepareConstructorParameters(stmts, old_params,
+                                 modifiersExp->isAbstract());
+  }
 
   fixStaticVars();
 
-  FunctionStatementPtr func;
-
-  string funcName = name->text();
-  if (funcName.empty()) {
-    funcName = newClosureName(m_clsName, m_containingFuncName);
-  } else if (m_lambdaMode) {
-    funcName += "{lambda}";
-  }
+  int attribute = m_file->popAttribute();
+  string comment = popComment();
 
   ExpressionListPtr attrList;
   if (attr && attr->exp) {
     attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
   }
 
-  func = NEW_STMT(FunctionStatement, exp, ref->num(), funcName, old_params,
-                  ret.typeAnnotationName(),
-                  dynamic_pointer_cast<StatementList>(stmt->stmt),
-                  attribute, comment, attrList);
-  out->stmt = func;
+  // create function/method statement
+  FunctionStatementPtr func;
+  MethodStatementPtr mth;
+  if (type == FunctionType::Method) {
+    mth = NEW_STMT(MethodStatement, modifiersExp,
+                   ref->num(), funcName, old_params,
+                   ret.typeAnnotationName(), stmts,
+                   attribute, comment, attrList);
+    completeScope(mth->onInitialParse(m_ar, m_file));
+  } else {
+    func = NEW_STMT(FunctionStatement, modifiersExp,
+                   ref->num(), funcName, old_params,
+                   ret.typeAnnotationName(), stmts,
+                   attribute, comment, attrList);
 
-  {
     func->onParse(m_ar, m_file);
-  }
-  completeScope(func->getFunctionScope());
-
-  if (funcContext.isGenerator) {
-    func->getFunctionScope()->setGenerator(true);
-  }
-  func->getLocation()->line0 = loc->line0;
-  func->getLocation()->char0 = loc->char0;
-  if (func->ignored()) {
-    out->stmt = NEW_STMT0(StatementList);
+    completeScope(func->getFunctionScope());
+    if (func->ignored()) {
+      return NEW_STMT0(StatementList);
+    }
+    mth = func;
   }
 
-  func->setHasCallToGetArgs(hasCallToGetArgs);
+  // check and set generator/async flags
+  FunctionContext funcContext = m_funcContexts.back();
+  checkFunctionContext(funcName, funcContext, modifiersExp, ref->num());
+  mth->getFunctionScope()->setGenerator(funcContext.isGenerator);
+  mth->getFunctionScope()->setAsync(modifiersExp->isAsync());
+  m_funcContexts.pop_back();
+
+  mth->setHasCallToGetArgs(m_hasCallToGetArgs.back());
+  m_hasCallToGetArgs.pop_back();
+
+  LocationPtr loc = popFuncLocation();
+  if (reloc) {
+    mth->getLocation()->line0 = loc->line0;
+    mth->getLocation()->char0 = loc->char0;
+  }
+
+  m_prependingStatements.pop_back();
+  return mth;
+}
+
+void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
+                        Token &name, Token &params, Token &stmt, Token *attr) {
+  out->stmt = onFunctionHelper(FunctionType::Function,
+                modifiers, ret, ref, &name, params, stmt, attr, true);
+}
+
+void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
+                      Token &name, Token &params, Token &stmt,
+                      Token *attr, bool reloc /* = true */) {
+  out->stmt = onFunctionHelper(FunctionType::Method,
+                &modifiers, ret, ref, &name, params, stmt, attr, reloc);
 }
 
 void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
@@ -1082,111 +1195,6 @@ void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl,
   }
 }
 
-void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
-                      Token &name, Token &params, Token &stmt,
-                      Token *attr, bool reloc /* = true */) {
-  ModifierExpressionPtr exp = modifiers->exp ?
-    dynamic_pointer_cast<ModifierExpression>(modifiers->exp)
-    : NEW_EXP0(ModifierExpression);
-
-  StatementListPtr stmts;
-  if (!stmt->stmt && stmt->num() == 1) {
-    stmts = NEW_STMT0(StatementList);
-  } else {
-    stmts = dynamic_pointer_cast<StatementList>(stmt->stmt);
-  }
-
-  ExpressionListPtr old_params =
-    dynamic_pointer_cast<ExpressionList>(params->exp);
-
-  // look for argument promotion in ctor and add to function body
-  string funcName = name->text();
-  if (old_params && funcName == "__construct") {
-    bool isAbstract = (exp) ? exp->isAbstract() : false;
-    for (int i = 0, count = old_params->getCount(); i < count; i++) {
-      ParameterExpressionPtr param =
-          dynamic_pointer_cast<ParameterExpression>((*old_params)[i]);
-      TokenID mod = param->getModifier();
-      if (mod != 0) {
-        if (isAbstract) {
-           param->parseTimeFatal(Compiler::InvalidAttribute,
-                                 "parameter modifiers not allowed on "
-                                 "abstract __construct");
-        }
-        if (!stmts) {
-           param->parseTimeFatal(Compiler::InvalidAttribute,
-                                 "parameter modifiers not allowed on "
-                                 "__construct without a body");
-        }
-        if (param->annotation()) {
-          std::vector<std::string> typeNames;
-          param->annotation()->getAllSimpleNames(typeNames);
-          for (auto& typeName : typeNames) {
-            if (isTypeVarInImmediateScope(typeName)) {
-              param->parseTimeFatal(Compiler::InvalidAttribute,
-                                    "parameter modifiers not supported with "
-                                    "type variable annotation");
-            }
-          }
-        }
-        std::string name = param->getName();
-        SimpleVariablePtr value = NEW_EXP(SimpleVariable, name);
-        ScalarExpressionPtr prop = NEW_EXP(ScalarExpression, T_STRING, name);
-        SimpleVariablePtr self = NEW_EXP(SimpleVariable, "this");
-        ObjectPropertyExpressionPtr objProp =
-            NEW_EXP(ObjectPropertyExpression, self, prop);
-        AssignmentExpressionPtr assign =
-            NEW_EXP(AssignmentExpression, objProp, value, false);
-        ExpStatementPtr stmt = NEW_STMT(ExpStatement, assign);
-        stmts->insertElement(stmt);
-      }
-    }
-  }
-
-  int attribute = m_file->popAttribute();
-  string comment = popComment();
-  LocationPtr loc = popFuncLocation();
-
-  FunctionContext funcContext = m_funcContexts.back();
-  m_funcContexts.pop_back();
-  m_prependingStatements.pop_back();
-
-  funcContext.checkFinalAssertions();
-
-  bool hasCallToGetArgs = m_hasCallToGetArgs.back();
-  m_hasCallToGetArgs.pop_back();
-
-  fixStaticVars();
-
-  MethodStatementPtr mth;
-
-  if (funcName.empty()) {
-    funcName = newClosureName(m_clsName, m_containingFuncName);
-  }
-
-  ExpressionListPtr attrList;
-  if (attr && attr->exp) {
-    attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
-  }
-  mth = NEW_STMT(MethodStatement, exp, ref->num(), funcName,
-                 old_params,
-                 ret.typeAnnotationName(),
-                 stmts, attribute, comment,
-                 attrList);
-  out->stmt = mth;
-
-  if (reloc) {
-    mth->getLocation()->line0 = loc->line0;
-    mth->getLocation()->char0 = loc->char0;
-  }
-  completeScope(mth->onInitialParse(m_ar, m_file));
-
-  if (funcContext.isGenerator) {
-    mth->getFunctionScope()->setGenerator(true);
-  }
-
-  mth->setHasCallToGetArgs(hasCallToGetArgs);
-}
 
 void Parser::onMemberModifier(Token &out, Token *modifiers, Token &modifier) {
   ModifierExpressionPtr expList;
@@ -1383,85 +1391,137 @@ void Parser::onBreakContinue(Token &out, bool isBreak, Token* expr) {
 void Parser::onReturn(Token &out, Token *expr) {
   out->stmt = NEW_STMT(ReturnStatement, expr ? expr->exp : ExpressionPtr());
   if (!m_funcContexts.empty()) {
-    if (!m_funcContexts.back().setIsNotGenerator()) {
+    FunctionContext& fc = m_funcContexts.back();
+    if (fc.isGenerator) {
       Compiler::Error(InvalidYield, out->stmt);
       PARSE_ERROR("Cannot mix 'return' and 'yield' in the same function");
+      return;
     }
+    fc.hasReturn = true;
   }
 }
 
-static void invalidYield(LocationPtr loc) {
-  ExpressionPtr exp(new SimpleFunctionCall(BlockScopePtr(), loc, "yield",
+void Parser::invalidYield() {
+  ExpressionPtr exp(new SimpleFunctionCall(BlockScopePtr(),
+                                           getLocation(),
+                                           "yield",
                                            false,
                                            ExpressionListPtr(),
                                            ExpressionPtr()));
   Compiler::Error(Compiler::InvalidYield, exp);
 }
 
+bool Parser::canBeAsyncOrGenerator(string funcName, string clsName) {
+  if (clsName.empty()) {
+    return true;
+  }
+  if (strcasecmp(funcName.c_str(), clsName.c_str()) == 0) {
+    return false;
+  }
+  if (strncmp(funcName.c_str(), "__", 2) == 0) {
+    const char *fname = funcName.c_str() + 2;
+    if (!strcasecmp(fname, "construct") ||
+        !strcasecmp(fname, "destruct") ||
+        !strcasecmp(fname, "get") ||
+        !strcasecmp(fname, "set") ||
+        !strcasecmp(fname, "isset") ||
+        !strcasecmp(fname, "unset") ||
+        !strcasecmp(fname, "call") ||
+        !strcasecmp(fname, "callstatic") ||
+        !strcasecmp(fname, "invoke")) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool Parser::setIsGenerator() {
   if (m_funcContexts.empty()) {
-    invalidYield(getLocation());
+    invalidYield();
     PARSE_ERROR("Yield can only be used inside a function");
     return false;
   }
 
-  if (!m_funcContexts.back().setIsGenerator()) {
-    invalidYield(getLocation());
+  FunctionContext& fc = m_funcContexts.back();
+  if (fc.hasReturn) {
+    invalidYield();
     PARSE_ERROR("Cannot mix 'return' and 'yield' in the same function");
     return false;
   }
+  if (fc.isAsync) {
+    invalidYield();
+    PARSE_ERROR("'yield' is not allowed in async functions.");
+    return false;
+  }
+  fc.isGenerator = true;
 
-  if (!m_clsName.empty()) {
-    if (strcasecmp(m_funcName.c_str(), m_clsName.c_str()) == 0) {
-      invalidYield(getLocation());
-      PARSE_ERROR("'yield' is not allowed in potential constructors");
-      return false;
-    }
-
-    if (m_funcName[0] == '_' && m_funcName[1] == '_') {
-      const char *fname = m_funcName.c_str() + 2;
-      if (!strcasecmp(fname, "construct") ||
-          !strcasecmp(fname, "destruct") ||
-          !strcasecmp(fname, "get") ||
-          !strcasecmp(fname, "set") ||
-          !strcasecmp(fname, "isset") ||
-          !strcasecmp(fname, "unset") ||
-          !strcasecmp(fname, "call") ||
-          !strcasecmp(fname, "callstatic") ||
-          !strcasecmp(fname, "invoke")) {
-        invalidYield(getLocation());
-        PARSE_ERROR("'yield' is not allowed in constructor, destructor, or "
-                    "magic methods");
-        return false;
-      }
-    }
+  if (!canBeAsyncOrGenerator(m_funcName, m_clsName)) {
+    invalidYield();
+    PARSE_ERROR("'yield' is not allowed in constructor, destructor, or "
+                "magic methods");
+    return false;
   }
 
   return true;
 }
 
 void Parser::onYield(Token &out, Token &expr) {
-  if (!setIsGenerator()) {
-    return;
+  if (setIsGenerator()) {
+    out->exp = NEW_EXP(YieldExpression, ExpressionPtr(), expr->exp);
   }
-
-  out->exp = NEW_EXP(YieldExpression, ExpressionPtr(), expr->exp);
 }
 
 void Parser::onYieldPair(Token &out, Token &key, Token &val) {
-  if (!setIsGenerator()) {
-    return;
+  if (setIsGenerator()) {
+    out->exp = NEW_EXP(YieldExpression, key->exp, val->exp);
   }
-
-  out->exp = NEW_EXP(YieldExpression, key->exp, val->exp);
 }
 
 void Parser::onYieldBreak(Token &out) {
-  if (!setIsGenerator()) {
-    return;
+  if (setIsGenerator()) {
+    out->stmt = NEW_STMT(ReturnStatement, ExpressionPtr());
+  }
+}
+
+void Parser::invalidAwait() {
+  ExpressionPtr exp(new SimpleFunctionCall(BlockScopePtr(),
+                                           getLocation(),
+                                           "async",
+                                           false,
+                                           ExpressionListPtr(),
+                                           ExpressionPtr()));
+  Compiler::Error(Compiler::InvalidAwait, exp);
+}
+
+bool Parser::setIsAsync() {
+  if (m_funcContexts.empty()) {
+    invalidAwait();
+    PARSE_ERROR("'await' can only be used inside a function");
+    return false;
   }
 
-  out->stmt = NEW_STMT(ReturnStatement, ExpressionPtr());
+  FunctionContext& fc = m_funcContexts.back();
+  if (fc.isGenerator) {
+    invalidAwait();
+    PARSE_ERROR("'await' is not allowed in generators.");
+    return false;
+  }
+  fc.isAsync = true;
+
+  if (!canBeAsyncOrGenerator(m_funcName, m_clsName)) {
+    invalidAwait();
+    PARSE_ERROR("'await' is not allowed in constructors, destructors, or "
+                    "magic methods.");
+  }
+
+  return true;
+}
+
+
+void Parser::onAwait(Token &out, Token &expr) {
+  if (setIsAsync()) {
+    out->exp = NEW_EXP(AwaitExpression, expr->exp);
+  }
 }
 
 void Parser::onGlobal(Token &out, Token &expr) {
@@ -1592,23 +1652,16 @@ void Parser::onClosureStart(Token &name) {
   onFunctionStart(name, true);
 }
 
-void Parser::onClosure(Token &out, Token &ret, Token &ref, Token &params,
-                       Token &cparams, Token &stmts, bool is_static) {
-  Token func, name, modifiers;
-
-  ModifierExpressionPtr modifier_exp = NEW_EXP0(ModifierExpression);
-  modifiers->exp = modifier_exp;
-  if (is_static) {
-    modifier_exp->add(T_STATIC);
-  }
-  onFunction(func, &modifiers, ret, ref, name, params, stmts, 0);
+void Parser::onClosure(Token &out, Token* modifiers, Token &ret, Token &ref,
+                       Token &params, Token &cparams, Token &stmts) {
+  auto stmt = onFunctionHelper(FunctionType::Closure,
+                modifiers, ret, ref, nullptr, params, stmts, nullptr, true);
 
   ClosureExpressionPtr closure = NEW_EXP(
     ClosureExpression,
-    dynamic_pointer_cast<FunctionStatement>(func->stmt),
+    dynamic_pointer_cast<FunctionStatement>(stmt),
     dynamic_pointer_cast<ExpressionList>(cparams->exp));
   closure->getClosureFunction()->setContainingClosure(closure);
-  out.reset();
   out->exp = closure;
 }
 

@@ -21,11 +21,11 @@
 #include <boost/optional.hpp>
 
 #include "hphp/util/util.h"
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/tv_arith.h"
-#include "hphp/runtime/base/tv_conversions.h"
-#include "hphp/runtime/base/class_info.h"
-#include "hphp/runtime/base/array_iterator.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/tv-arith.h"
+#include "hphp/runtime/base/tv-conversions.h"
+#include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/func.h"
@@ -35,9 +35,9 @@
 namespace HPHP {
 
 inline ALWAYS_INLINE
-void SETOP_BODY(TypedValue* lhs, unsigned char op, Cell* rhs) {
+void SETOP_BODY_CELL(Cell* lhs, unsigned char op, Cell* rhs) {
+  assert(cellIsPlausible(*lhs));
   assert(cellIsPlausible(*rhs));
-  lhs = tvToCell(lhs);
 
   switch (op) {
   case SetOpPlusEqual:      cellAddEq(*lhs, *rhs); break;
@@ -65,8 +65,13 @@ void SETOP_BODY(TypedValue* lhs, unsigned char op, Cell* rhs) {
   }
 }
 
+inline ALWAYS_INLINE
+void SETOP_BODY(TypedValue* lhs, unsigned char op, Cell* rhs) {
+  SETOP_BODY_CELL(tvToCell(lhs), op, rhs);
+}
+
 class Func;
-class ActRec;
+struct ActRec;
 
 // max number of arguments for direct call to builtin
 const int kMaxBuiltinArgs = 5;
@@ -515,8 +520,6 @@ public:
   bool isValidAddress(uintptr_t v) {
     return v >= uintptr_t(m_elms) && v < uintptr_t(m_base);
   }
-  void protect();
-  void unprotect();
   void requestInit();
   void requestExit();
 

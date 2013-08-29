@@ -15,8 +15,8 @@
 */
 
 #include "hphp/runtime/server/server.h"
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/server/satellite_server.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/base/preg.h"
 #include <signal.h>
 

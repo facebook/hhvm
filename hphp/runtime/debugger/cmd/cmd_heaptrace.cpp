@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_heaptrace.h"
 
-#include "hphp/runtime/base/memory_profile.h"
+#include "hphp/runtime/base/memory-profile.h"
 #include "hphp/runtime/vm/unit.h"
 
 namespace HPHP { namespace Eval {
@@ -196,7 +196,7 @@ void CmdHeaptrace::printGraphToFile(DebuggerClient &client,
   client.print(folly::stringPrintf("Wrote heap graph to %s.", name));
 }
 
-void CmdHeaptrace::onClientImpl(DebuggerClient &client) {
+void CmdHeaptrace::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
   String format;

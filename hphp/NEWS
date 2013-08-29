@@ -1,4 +1,19 @@
-Future (next release):
+Next? 2-Sep-2013
+  - Implement CachingIterator
+  - Implement RecursiveCachingIterator
+  - Generalized heuristic for choosing when to inline in the jit
+
+"Achiote" 19-Aug-2013
+  - Async stack traces in the debugger via the "wa" command
+  - Fix late static binding in static closures
+  - Fix breakpoints on generators
+  - Add SplObserver and SplSubject interfaces
+  - Update Iterable interface and add toArray() method
+  - Allow __get for undefined properties
+  - Implement get_included_files()
+  - Limit use of huge pages
+
+"Churrasco" 05-Aug-2013
   - Implement stream_is_local
   - Implement read support for .phar
   - Implement assert with string arguments
@@ -6,8 +21,10 @@ Future (next release):
   - Implement php_strip_whitespace()
   - Support for timeouts in cli mode
   - Closure allocation optimizations (~2x faster to allocate a closure)
+  - Implement Redis session handler
+  - New memory profiler, hhprof, with pprof compatible output
 
-"Tamale" 7/22/2013
+"Tamale" 22-Jul-2013
   - Optimize vector-shaped Arrays (arrays with keys in range 0..size-1)
   - Enable HHBC by default in debug builds
   - Implement SplObjectStorage::getInfo()
@@ -17,7 +34,7 @@ Future (next release):
   - Modify PHP's ext/standard/math/tests/(pow|abs).phpt to be HHVM friendly
   - add XHP comment syntax based on http://www.w3.org/TR/REC-xml/#sec-comments
 
-"Wasabi Peas" 7/8/2013
+"Wasabi Peas" 08-Jul-2013
   - always_assert when we run out of TC space
   - Initial changes to get HHVM compiling on OSX
   - Consolodate ObjectData and Instance

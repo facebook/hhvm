@@ -1,5 +1,5 @@
 {
-    "preamble": "\n#include <runtime\/base\/zend\/zend_collator.h>\n\n\/\/ Avoid dragging in the icu namespace.\n#ifndef U_USING_ICU_NAMESPACE\n#define U_USING_ICU_NAMESPACE 0\n#endif\n\n#include <unicode\/utypes.h>\n#include <unicode\/ucnv.h>\n#include <unicode\/ustring.h>",
+    "preamble": "\n#include <runtime\/base\/zend\/zend-collator.h>\n\n\/\/ Avoid dragging in the icu namespace.\n#ifndef U_USING_ICU_NAMESPACE\n#define U_USING_ICU_NAMESPACE 0\n#endif\n\n#include <unicode\/utypes.h>\n#include <unicode\/ucnv.h>\n#include <unicode\/ustring.h>",
     "consts": [
     ],
     "funcs": [
@@ -9,7 +9,6 @@
             "name": "UConverter",
             "desc": "ICU UConverter class",
             "flags": [
-                "HasDocComment"
             ],
             "footer": "  private:\n    static void throwFailure(UErrorCode error,\n                             const char *fname,\n                             intl_error &merror);\n    bool checkLimits(int64_t available, int64_t needed);\n    void appendToUTarget(Variant val, UConverterToUnicodeArgs *args);\n    void appendFromUTarget(Variant val, UConverterFromUnicodeArgs *args);\n    static void ucnvToUCallback(c_UConverter *objval,\n                                UConverterToUnicodeArgs *args,\n                                const char *codeUnits, int32_t length,\n                                UConverterCallbackReason reason,\n                                UErrorCode *pErrorCode);\n    static void ucnvFromUCallback(c_UConverter *objval,\n                                  UConverterFromUnicodeArgs *args,\n                                  const UChar *codeUnits, int32_t length,\n                                  UChar32 codePoint,\n                                  UConverterCallbackReason reason,\n                                  UErrorCode *pErrorCode);\n    static bool setEncoding(CStrRef encoding,\n                            UConverter **pcnv,\n                            intl_error &err);\n    static bool setSubstChars(String chars, UConverter *cnv, intl_error &err);\n    bool setCallback(UConverter *cnv);\n    Variant defaultCallback(int64_t reason, VRefParam error);\n    static String doConvert(CStrRef str, UConverter *toCnv,\n                            UConverter *fromCnv, intl_error &err);\n  public:\n    intl_error  m_error;\n    UConverter *m_src;\n    UConverter *m_dest;",
             "funcs": [
@@ -17,7 +16,6 @@
                     "name": "__construct",
                     "desc": "Object constructor",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -52,7 +50,6 @@
                     "name": "getSourceEncoding",
                     "desc": "Returns the name of the source encoding",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "String",
@@ -65,7 +62,6 @@
                     "name": "setSourceEncoding",
                     "desc": "Changes the source encoding converter to the named encoding",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -82,7 +78,6 @@
                     "name": "getDestinationEncoding",
                     "desc": "Returns the name of the destination encoding",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "String",
@@ -95,7 +90,6 @@
                     "name": "setDestinationEncoding",
                     "desc": "Changes the destination encoding converter to the named encoding",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -112,7 +106,6 @@
                     "name": "getSourceType",
                     "desc": "Returns the source algorithmic encoding type (e.g. SBCS, DBCS, LATIN_1, UTF8, etc...)",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Int64",
@@ -125,7 +118,6 @@
                     "name": "getDestinationType",
                     "desc": "Returns the destination algorithmic encoding type (e.g. SBCS, DBCS, LATIN_1, UTF8, etc...)",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Int64",
@@ -138,7 +130,6 @@
                     "name": "getSubstChars",
                     "desc": "Returns the current substitution character used for conversion failures",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "String",
@@ -151,7 +142,6 @@
                     "name": "setSubstChars",
                     "desc": "Set the substitution character to use for conversion failures",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -169,7 +159,6 @@
                     "name": "fromUCallback",
                     "desc": "Issued by the object when converting to the target encoding",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -203,7 +192,6 @@
                     "name": "toUCallback",
                     "desc": "Issued by the object when converting from the source encoding",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -237,7 +225,6 @@
                     "name": "convert",
                     "desc": "Convert a string between the source\/destination encodings",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -261,8 +248,7 @@
                     "name": "transcode",
                     "desc": "Convert a string between two encodings",
                     "flags": [
-                        "IsStatic",
-                        "HasDocComment"
+                        "IsStatic"
                     ],
                     "return": {
                         "type": "Variant",
@@ -296,7 +282,6 @@
                     "name": "getErrorCode",
                     "desc": "Last UErrorCode associated with this converter",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Int64",
@@ -309,7 +294,6 @@
                     "name": "getErrorMessage",
                     "desc": "Last error message associated with this converter",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "String",
@@ -322,8 +306,7 @@
                     "name": "reasonText",
                     "desc": "Name of REASON_* constant",
                     "flags": [
-                        "IsStatic",
-                        "HasDocComment"
+                        "IsStatic"
                     ],
                     "return": {
                         "type": "String",
@@ -341,8 +324,7 @@
                     "name": "getAvailable",
                     "desc": "Returns list of available encodings",
                     "flags": [
-                        "IsStatic",
-                        "HasDocComment"
+                        "IsStatic"
                     ],
                     "return": {
                         "type": "StringVec",
@@ -355,8 +337,7 @@
                     "name": "getAliases",
                     "desc": "Returns valid aliases of the named encoding",
                     "flags": [
-                        "IsStatic",
-                        "HasDocComment"
+                        "IsStatic"
                     ],
                     "return": {
                         "type": "StringVec",
@@ -374,8 +355,7 @@
                     "name": "getStandards",
                     "desc": "Returns list supported standards",
                     "flags": [
-                        "IsStatic",
-                        "HasDocComment"
+                        "IsStatic"
                     ],
                     "return": {
                         "type": "StringVec",
@@ -388,8 +368,7 @@
                     "name": "getStandardName",
                     "desc": "Returns a standard name for a given converter name.",
                     "flags": [
-                        "IsStatic",
-                        "HasDocComment"
+                        "IsStatic"
                     ],
                     "return": {
                         "type": "String",
@@ -412,8 +391,7 @@
                     "name": "getMIMEName",
                     "desc": "Returns the MIME name for a given converter name.",
                     "flags": [
-                        "IsStatic",
-                        "HasDocComment"
+                        "IsStatic"
                     ],
                     "return": {
                         "type": "String",

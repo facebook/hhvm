@@ -16,6 +16,8 @@
 
 #include "gtest/gtest.h"
 
+#include "folly/ScopeGuard.h"
+
 #include "hphp/util/base.h"
 #include "hphp/runtime/vm/jit/ir.h"
 // for specialized object tests to get some real VM::Class
@@ -130,7 +132,10 @@ TEST(Type, Subtypes) {
 }
 
 TEST(Type, RuntimeType) {
-  HPHP::Transl::RuntimeType rt(new StringData());
+  auto sd = StringData::MakeMalloced("", 0);
+  SCOPE_EXIT { sd->destruct(); };
+
+  HPHP::Transl::RuntimeType rt(sd);
   Type t = Type::fromRuntimeType(rt);
   EXPECT_TRUE(t.subtypeOf(Type::Str));
   EXPECT_FALSE(t.subtypeOf(Type::Int));

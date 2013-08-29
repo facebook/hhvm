@@ -17,6 +17,7 @@
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
 #include "hphp/runtime/debugger/cmd/cmd_break.h"
 #include "hphp/runtime/debugger/cmd/cmd_print.h"
+#include "hphp/runtime/base/array-init.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -130,7 +131,7 @@ std::string CmdInterrupt::desc() const {
   return "";
 }
 
-void CmdInterrupt::onClientImpl(DebuggerClient &client) {
+void CmdInterrupt::onClient(DebuggerClient &client) {
   client.setCurrentLocation(m_threadId, m_bpi);
   if (!client.getDebuggerClientSmallStep()) {
     // Adjust line and char if it's not small stepping
@@ -210,7 +211,7 @@ void CmdInterrupt::onClientImpl(DebuggerClient &client) {
                            m_bpi->m_exceptionClass.c_str(),
                            m_bpi->site().c_str());
               client.shortCode(m_bpi);
-              if (client.isApiMode() || client.getLogFileHandler()) {
+              if (client.getLogFileHandler()) {
                 client.output(m_bpi->m_exceptionObject);
               }
             }
@@ -257,28 +258,6 @@ void CmdInterrupt::onClientImpl(DebuggerClient &client) {
   }
 }
 
-const StaticString
-  s_format("format"),
-  s_php("php"),
-  s_value("value");
-
-void CmdInterrupt::setClientOutput(DebuggerClient &client) {
-  client.setOutputType(DebuggerClient::OTCodeLoc);
-  client.setOTFileLine(m_bpi->m_file, m_bpi->m_line1);
-  Array values;
-  DebuggerClient::WatchPtrVec &watches = client.getWatches();
-  for (int i = 0; i < (int)watches.size(); i++) {
-    ArrayInit watch(3);
-    watch.set(s_format, watches[i]->first);
-    watch.set(s_php, watches[i]->second);
-    Variant v = CmdPrint().processWatch(client, watches[i]->first,
-                                        watches[i]->second);
-    watch.set(s_value, CmdPrint::FormatResult(watches[i]->first, v));
-    values.append(watch.create());
-  }
-  client.setOTValues(values);
-}
-
 bool CmdInterrupt::onServer(DebuggerProxy &proxy) {
   return proxy.sendToClient(this);
 }
@@ -299,10 +278,11 @@ bool CmdInterrupt::shouldBreak(DebuggerProxy &proxy,
     case ExceptionThrown:
       m_matched.clear();
       if (m_site) {
+        auto offset = m_site->getCurOffset();
         for (unsigned int i = 0; i < bps.size(); i++) {
           if (bps[i]->m_state != BreakPointInfo::Disabled &&
-              bps[i]->breakable(stackDepth) &&
-              bps[i]->cmatch(proxy, getInterruptType(), *getSite())) {
+              bps[i]->breakable(stackDepth, offset) &&
+              bps[i]->cmatch(proxy, getInterruptType(), *m_site)) {
             BreakPointInfoPtr bp(new BreakPointInfo());
             *bp = *bps[i]; // make a copy
             m_matched.push_back(bp);

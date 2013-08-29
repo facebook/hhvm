@@ -21,8 +21,8 @@
 #include <boost/container/flat_set.hpp>
 #include <string>
 #include "hphp/util/exception.h"
-#include "hphp/util/case_insensitive.h"
-#include "neo/neo_hdf.h"
+#include "hphp/util/case-insensitive.h"
+#include "hphp/neo/neo_hdf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

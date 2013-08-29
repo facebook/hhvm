@@ -46,14 +46,14 @@
 #include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/expression/simple_function_call.h"
 #include "hphp/runtime/ext/ext_json.h"
-#include "hphp/runtime/base/zend_printf.h"
-#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/zend-printf.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/util/atomic.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/util.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/process.h"
-#include "hphp/util/job_queue.h"
+#include "hphp/util/job-queue.h"
 #include "hphp/util/timer.h"
 
 using namespace HPHP;
@@ -456,8 +456,10 @@ void AnalysisResult::markRedeclaringClasses() {
    * as redeclaring for now.
    */
   for (auto& kv : m_classAliases) {
-    markRedeclaring(Util::toLower(kv.first));
-    markRedeclaring(Util::toLower(kv.second));
+    assert(kv.first == Util::toLower(kv.first));
+    assert(kv.second == Util::toLower(kv.second));
+    markRedeclaring(kv.first);
+    markRedeclaring(kv.second);
   }
 
   /*
@@ -467,7 +469,8 @@ void AnalysisResult::markRedeclaringClasses() {
    * that things like 'instanceof Foo' will not mean the same thing.
    */
   for (auto& name : m_typeAliasNames) {
-    markRedeclaring(Util::toLower(name));
+    assert(Util::toLower(name) == name);
+    markRedeclaring(name);
   }
 }
 
@@ -980,7 +983,7 @@ public:
 
   virtual void doJob(BlockScope *scope) {
 #ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
-    atomic_inc(AnalysisResult::s_NumDoJobCalls);
+    ++AnalysisResult::s_NumDoJobCalls;
     ConcurrentBlockScopeRawPtrIntHashMap::accessor acc;
     AnalysisResult::s_DoJobUniqueScopes.insert(acc,
       BlockScopeRawPtr(scope));
@@ -1040,13 +1043,13 @@ public:
                 break;
               case BlockScope::MarkProcessing:
 #ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
-                atomic_inc(AnalysisResult::s_NumForceRerunGlobal);
+                ++AnalysisResult::s_NumForceRerunGlobal;
 #endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
                 pf->first->setForceRerun(true);
                 break;
               case BlockScope::MarkProcessed:
 #ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
-                atomic_inc(AnalysisResult::s_NumReactivateGlobal);
+                ++AnalysisResult::s_NumReactivateGlobal;
 #endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
                 if (visitor->activateScope(pf->first)) {
                   visitor->enqueue(pf->first);
@@ -1082,7 +1085,7 @@ public:
               int m = pf->first->getMark();
               if (pf->second & useKinds && m == BlockScope::MarkProcessed) {
 #ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
-                atomic_inc(AnalysisResult::s_NumReactivateUseKinds);
+                ++AnalysisResult::s_NumReactivateUseKinds;
 #endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
                 bool ready = visitor->activateScope(pf->first);
                 always_assert(!ready);
@@ -1106,7 +1109,7 @@ public:
                 // in its entirety. Thus, we must force it to run again in
                 // order to be able to observe all the updates.
 #ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
-                atomic_inc(AnalysisResult::s_NumForceRerunUseKinds);
+                ++AnalysisResult::s_NumForceRerunUseKinds;
 #endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
                 always_assert(pf->first->getNumDepsToWaitFor() == 0);
                 pf->first->setForceRerun(true);
@@ -1237,11 +1240,11 @@ AnalysisResult::postWaitCallback(bool first,
 }
 
 #ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
-int AnalysisResult::s_NumDoJobCalls         = 0;
-int AnalysisResult::s_NumForceRerunGlobal   = 0;
-int AnalysisResult::s_NumReactivateGlobal   = 0;
-int AnalysisResult::s_NumForceRerunUseKinds = 0;
-int AnalysisResult::s_NumReactivateUseKinds = 0;
+std::atomic<int> AnalysisResult::s_NumDoJobCalls(0);
+std::atomic<int> AnalysisResult::s_NumForceRerunGlobal(0);
+std::atomic<int> AnalysisResult::s_NumReactivateGlobal(0);
+std::atomic<int> AnalysisResult::s_NumForceRerunUseKinds(0);
+std::atomic<int> AnalysisResult::s_NumReactivateUseKinds(0);
 
 ConcurrentBlockScopeRawPtrIntHashMap
   AnalysisResult::s_DoJobUniqueScopes;
@@ -1516,7 +1519,7 @@ DepthFirstVisitor<InferTypes, OptVisitor>::visitScope(BlockScopeRawPtr scope) {
         // there are potentially AST nodes which are interested in the updated
         // return type
 #ifdef HPHP_INSTRUMENT_TYPE_INF
-        atomic_inc(RescheduleException::s_NumForceRerunSelfCaller);
+        ++RescheduleException::s_NumForceRerunSelfCaller;
 #endif /* HPHP_INSTRUMENT_TYPE_INF */
         scope->setForceRerun(true);
       }
@@ -1533,7 +1536,7 @@ DepthFirstVisitor<InferTypes, OptVisitor>::visitScope(BlockScopeRawPtr scope) {
     // potential deadlock detected- reschedule
     // this scope to run at a later time
 #ifdef HPHP_INSTRUMENT_TYPE_INF
-    atomic_inc(RescheduleException::s_NumReschedules);
+    ++RescheduleException::s_NumReschedules;
 #endif /* HPHP_INSTRUMENT_TYPE_INF */
     ret |= scope->getUpdated();
     if (m) {
@@ -1590,9 +1593,9 @@ bool AnalysisResult::postWaitCallback<InferTypes>(
 }
 
 #ifdef HPHP_INSTRUMENT_TYPE_INF
-int RescheduleException::s_NumReschedules          = 0;
-int RescheduleException::s_NumForceRerunSelfCaller = 0;
-int RescheduleException::s_NumRetTypesChanged      = 0;
+std::atomic<int> RescheduleException::s_NumReschedules(0);
+std::atomic<int> RescheduleException::s_NumForceRerunSelfCaller(0);
+std::atomic<int> RescheduleException::s_NumRetTypesChanged(0);
 LProfileMap BaseTryLock::s_LockProfileMap;
 #endif /* HPHP_INSTRUMENT_TYPE_INF */
 

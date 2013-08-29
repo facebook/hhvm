@@ -80,6 +80,10 @@ HOT_FUNC_VM void setNewElem(TypedValue* base, Cell val) {
   SetNewElem<false>(base, &val);
 }
 
+HOT_FUNC_VM void setNewElemArray(TypedValue* base, Cell val) {
+  SetNewElemArray(base, &val);
+}
+
 void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis) {
   base = NewElem(mis->tvScratch, mis->tvRef, base);
   if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
@@ -129,12 +133,6 @@ int64_t convArrToIntHelper(ArrayData* a) {
   return a->empty() ? 0 : 1;
 }
 
-int64_t convDblToIntHelper(int64_t i) {
-  double d = reinterpretIntAsDbl(i);
-  return (d >= 0 ? d > std::numeric_limits<uint64_t>::max() ? 0u :
-          (uint64_t)d : (int64_t)d);
-}
-
 ObjectData* convCellToObjHelper(TypedValue tv) {
   // Note: the call sites of this function all assume that
   // no user code will run and no recoverable exceptions will
@@ -163,7 +161,7 @@ StringData* convIntToStrHelper(int64_t i) {
 
 StringData* convObjToStrHelper(ObjectData* o) {
   try {
-    auto s = o->t___tostring();
+    auto s = o->invokeToString();
     auto r = s.get();
     decRefObj(o);
     if (!r->isStatic()) r->incRefCount();
@@ -272,10 +270,13 @@ void VerifyParamTypeSlow(const Class* cls,
     if (def) {
       // There's no need to handle nullable typedefs specially here:
       // we already know we're checking a non-null object with the
-      // class `cls'.
+      // class `cls'.  We do however need to check for typedefs to
+      // mixed.
       if (def->kind == KindOfObject) {
         constraint = def->klass;
         if (constraint && cls->classof(constraint)) return;
+      } else if (def->kind == KindOfAny) {
+        return;
       }
     }
   }

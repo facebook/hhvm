@@ -18,7 +18,6 @@
 #define incl_HPHP_EVAL_DEBUGGER_CLIENT_SETTINGS_H_
 
 #define HPHPD_CLIENT_SETTINGS \
-  HPHPD_CLIENT_SETTING(ApiModeSerialize,    bool,  false)         \
   HPHPD_CLIENT_SETTING(MaxCodeLines,        int,   -1)            \
   HPHPD_CLIENT_SETTING(SmallStep,           bool,  false)         \
 

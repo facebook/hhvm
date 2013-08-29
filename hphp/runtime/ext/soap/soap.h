@@ -18,11 +18,11 @@
 #ifndef PHP_SOAP_H
 #define PHP_SOAP_H
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/ext/soap/sdl.h"
-#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/exceptions.h"
-#include "hphp/runtime/base/http_client.h"
+#include "hphp/runtime/base/http-client.h"
 #include "hphp/util/lock.h"
 
 ///////////////////////////////////////////////////////////////////////////////

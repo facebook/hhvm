@@ -54,7 +54,8 @@ const int64_t q_DateTimeZone$$PER_COUNTRY = 4096;
 ///////////////////////////////////////////////////////////////////////////////
 // methods
 
-c_DateTime::c_DateTime(Class* cb) : ExtObjectData(cb) {
+c_DateTime::c_DateTime(Class* cb)
+  : ExtObjectDataFlags<ObjectData::HasClone>(cb) {
 }
 
 c_DateTime::~c_DateTime() {
@@ -160,14 +161,14 @@ Object c_DateTime::t_sub(CObjRef interval) {
   return this;
 }
 
-c_DateTime* c_DateTime::clone() {
-  c_DateTime* dt = static_cast<c_DateTime*>(ObjectData::clone());
-  dt->m_dt = m_dt->cloneDateTime();
+c_DateTime* c_DateTime::Clone(ObjectData* obj) {
+  c_DateTime* dt = static_cast<c_DateTime*>(obj->cloneImpl());
+  dt->m_dt = static_cast<c_DateTime*>(obj)->m_dt->cloneDateTime();
   return dt;
 }
 
 c_DateTimeZone::c_DateTimeZone(Class* cb) :
-    ExtObjectData(cb) {
+    ExtObjectDataFlags<ObjectData::HasClone>(cb) {
 }
 
 c_DateTimeZone::~c_DateTimeZone() {
@@ -209,14 +210,16 @@ Array c_DateTimeZone::ti_listidentifiers() {
   return TimeZone::GetNames();
 }
 
-c_DateTimeZone* c_DateTimeZone::clone() {
-  c_DateTimeZone* dtz = static_cast<c_DateTimeZone*>(ObjectData::clone());
-  dtz->m_tz = m_tz->cloneTimeZone();
+c_DateTimeZone* c_DateTimeZone::Clone(ObjectData* obj) {
+  c_DateTimeZone* dtz = static_cast<c_DateTimeZone*>(obj->cloneImpl());
+  dtz->m_tz = static_cast<c_DateTimeZone*>(obj)->m_tz->cloneTimeZone();
   return dtz;
 }
 
-c_DateInterval::c_DateInterval(Class* cb) :
-    ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>(cb) {
+c_DateInterval::c_DateInterval(Class* cb)
+  : ExtObjectDataFlags<ObjectData::UseGet|
+                       ObjectData::UseSet|
+                       ObjectData::HasClone>(cb) {
 }
 
 c_DateInterval::~c_DateInterval() {
@@ -316,9 +319,9 @@ String c_DateInterval::t_format(CStrRef format) {
   return m_di->format(format);
 }
 
-c_DateInterval* c_DateInterval::clone() {
-  c_DateInterval *di = static_cast<c_DateInterval*>(ObjectData::clone());
-  di->m_di = m_di->cloneDateInterval();
+c_DateInterval* c_DateInterval::Clone(ObjectData* obj) {
+  c_DateInterval *di = static_cast<c_DateInterval*>(obj->cloneImpl());
+  di->m_di = static_cast<c_DateInterval*>(obj)->m_di->cloneDateInterval();
   return di;
 }
 

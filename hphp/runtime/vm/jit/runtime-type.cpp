@@ -181,7 +181,21 @@ RuntimeType::valueGeneric() const {
 const Class*
 RuntimeType::knownClass() const {
   consistencyCheck();
+  assert(hasKnownClass());
   return m_value.knownClass;
+}
+
+bool
+RuntimeType::hasArrayKind() const {
+  consistencyCheck();
+  return m_value.arrayKindValid;
+}
+
+ArrayData::ArrayKind
+RuntimeType::arrayKind() const {
+  consistencyCheck();
+  assert(hasArrayKind());
+  return m_value.arrayKind;
 }
 
 RuntimeType
@@ -203,6 +217,19 @@ RuntimeType::setKnownClass(const Class* klass) const {
   RuntimeType rtt(outerType(), innerType(), m_value.klass);
   rtt.m_kind = this->m_kind;
   rtt.m_value.knownClass = klass;
+  rtt.consistencyCheck();
+  return rtt;
+}
+
+RuntimeType
+RuntimeType::setArrayKind(ArrayData::ArrayKind arrayKind) const {
+  assert(isArray() || (isRef() && innerType() == KindOfArray));
+  RuntimeType rtt;
+  rtt.m_kind = this->m_kind;
+  rtt.m_value.outerType = outerType();
+  rtt.m_value.innerType = innerType();
+  rtt.m_value.arrayKindValid = true;
+  rtt.m_value.arrayKind = arrayKind;
   rtt.consistencyCheck();
   return rtt;
 }
@@ -281,7 +308,7 @@ bool RuntimeType::isClass() const {
   return isValue() && outerType() == KindOfClass;
 }
 
-bool RuntimeType::hasKnownType() const {
+bool RuntimeType::hasKnownClass() const {
   return isObject() && m_value.knownClass != nullptr;
 }
 
@@ -348,7 +375,7 @@ string RuntimeType::pretty() const {
     if (valueClass() != nullptr) {
       retval += folly::format("(OfClass {})",
                 valueClass()->name()->data()).str();
-    } else if (hasKnownType()) {
+    } else if (hasKnownClass()) {
       retval += folly::format("(Known Class {})",
                 knownClass()->name()->data()).str();
     }

@@ -19,6 +19,7 @@
 
 #include <iosfwd>
 #include "hphp/util/trace.h"
+#include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/linear-scan.h"
 
 namespace HPHP {
@@ -34,10 +35,9 @@ struct LifetimeInfo;
 // IRInstruction
 void print(std::ostream& ostream, const IRInstruction*,
            const RegAllocInfo* regs = nullptr,
-           const LifetimeInfo* lifetime = nullptr);
+           const LifetimeInfo* lifetime = nullptr,
+           const GuardConstraints* guards = nullptr);
 void print(const IRInstruction*);
-void printSrc(std::ostream& ostream, const IRInstruction*, uint32_t srcIndex,
-              const RegAllocInfo* regs, const LifetimeInfo* lifetime);
 
 // SSATmp
 void print(std::ostream& ostream, const SSATmp*,
@@ -50,7 +50,8 @@ void print(const SSATmp*);
 void print(std::ostream& ostream, const IRTrace*,
            const RegAllocInfo* regs = nullptr,
            const LifetimeInfo* lifetime = nullptr,
-           const AsmInfo* asmInfo = nullptr);
+           const AsmInfo* asmInfo = nullptr,
+           const GuardConstraints* guards = nullptr);
 void print(const IRTrace*);
 
 /*
@@ -72,7 +73,7 @@ void dumpTraceImpl(const IRTrace* trace, std::ostream& out,
 void dumpTrace(int level, const IRTrace* trace, const char* caption,
                const RegAllocInfo* regs = nullptr,
                const LifetimeInfo* lifetime = nullptr,
-               AsmInfo* ai = nullptr);
+               AsmInfo* ai = nullptr, const GuardConstraints* guards = nullptr);
 
 }}
 

@@ -26,7 +26,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/asm-x64.h"
 
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 
 using namespace HPHP::Transl;

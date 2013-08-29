@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_COLLECTION_H_
 #define incl_HPHP_EXT_COLLECTION_H_
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -32,7 +32,8 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
                                            ObjectData::UseGet|
                                            ObjectData::UseSet|
                                            ObjectData::UseIsset|
-                                           ObjectData::UseUnset> {
+                                           ObjectData::UseUnset|
+                                           ObjectData::HasClone> {
  public:
   DECLARE_CLASS(Vector, Vector, ObjectData)
 
@@ -52,7 +53,8 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   int64_t t_count();
   Object t_items();
   Object t_keys();
-  Object t_view();
+  Object t_lazy();
+  Object t_view(); // deprecated
   Object t_kvzip();
   Variant t_at(CVarRef key);
   Variant t_get(CVarRef key);
@@ -138,11 +140,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
     return m_size;
   }
 
-
   Array toArrayImpl() const;
-
-  Array o_toArray() const;
-  c_Vector* clone();
 
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
 
@@ -154,6 +152,8 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   void sort(int sort_flags, bool ascending);
   void usort(CVarRef cmp_function);
 
+  static c_Vector* Clone(ObjectData* obj);
+  static Array ToArray(const ObjectData* obj);
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
@@ -161,7 +161,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
   static void OffsetUnset(ObjectData* obj, TypedValue* key);
   static void OffsetAppend(ObjectData* obj, TypedValue* val);
-  static bool Equals(ObjectData* obj1, ObjectData* obj2);
+  static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
 
@@ -216,7 +216,8 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
                                         ObjectData::UseGet|
                                         ObjectData::UseSet|
                                         ObjectData::UseIsset|
-                                        ObjectData::UseUnset> {
+                                        ObjectData::UseUnset|
+                                        ObjectData::HasClone> {
  public:
   DECLARE_CLASS(Map, Map, ObjectData)
 
@@ -232,7 +233,8 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   int64_t t_count();
   Object t_items();
   Object t_keys();
-  Object t_view();
+  Object t_lazy();
+  Object t_view(); // deprecated
   Object t_kvzip();
   Variant t_at(CVarRef key);
   Variant t_get(CVarRef key);
@@ -243,14 +245,11 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   bool t_containskey(CVarRef key);
   Object t_remove(CVarRef key);
   Object t_removekey(CVarRef key);
-  Object t_discard(CVarRef key); // deprecated
   Array t_toarray();
   Array t_copyasarray(); // deprecated
   Array t_tokeysarray(); // deprecated
   Object t_values(); // deprecated
   Array t_tovaluesarray(); // deprecated
-  Object t_updatefromarray(CVarRef arr);
-  Object t_updatefromiterable(CVarRef it);
   Object t_differencebykey(CVarRef it);
   Object t_getiterator();
   Object t_map(CVarRef callback);
@@ -267,24 +266,24 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
   static void throwOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
-  TypedValue* at(int64_t key) {
+  TypedValue* at(int64_t key) const {
     Bucket* p = find(key);
     if (LIKELY(p != NULL)) return &p->data;
     throwOOB(key);
     return NULL;
   }
-  TypedValue* get(int64_t key) {
+  TypedValue* get(int64_t key) const {
     Bucket* p = find(key);
     if (p) return &p->data;
     return NULL;
   }
-  TypedValue* at(StringData* key) {
+  TypedValue* at(StringData* key) const {
     Bucket* p = find(key->data(), key->size(), key->hash());
     if (LIKELY(p != NULL)) return &p->data;
     throwOOB(key);
     return NULL;
   }
-  TypedValue* get(StringData* key) {
+  TypedValue* get(StringData* key) const {
     Bucket* p = find(key->data(), key->size(), key->hash());
     if (p) return &p->data;
     return NULL;
@@ -306,10 +305,10 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
     ++m_version;
     erase(find(key->data(), key->size(), key->hash()));
   }
-  bool contains(int64_t key) {
+  bool contains(int64_t key) const {
     return find(key);
   }
-  bool contains(StringData* key) {
+  bool contains(StringData* key) const {
     return find(key->data(), key->size(), key->hash());
   }
   void reserve(int64_t sz) {
@@ -325,9 +324,8 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   }
   Array toArrayImpl() const;
 
-  Array o_toArray() const;
-  c_Map* clone();
-
+  static c_Map* Clone(ObjectData* obj);
+  static Array ToArray(const ObjectData* obj);
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
@@ -335,7 +333,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
   static void OffsetUnset(ObjectData* obj, TypedValue* key);
   static void OffsetAppend(ObjectData* obj, TypedValue* val);
-  static bool Equals(ObjectData* obj1, ObjectData* obj2);
+  static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
 
@@ -520,7 +518,8 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
                                               ObjectData::UseGet|
                                               ObjectData::UseSet|
                                               ObjectData::UseIsset|
-                                              ObjectData::UseUnset> {
+                                              ObjectData::UseUnset|
+                                              ObjectData::HasClone> {
  public:
   DECLARE_CLASS(StableMap, StableMap, ObjectData)
 
@@ -536,7 +535,8 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   int64_t t_count();
   Object t_items();
   Object t_keys();
-  Object t_view();
+  Object t_lazy();
+  Object t_view(); // deprecated
   Object t_kvzip();
   Variant t_at(CVarRef key);
   Variant t_get(CVarRef key);
@@ -547,14 +547,11 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   bool t_containskey(CVarRef key);
   Object t_remove(CVarRef key);
   Object t_removekey(CVarRef key);
-  Object t_discard(CVarRef key); // deprecated
   Array t_toarray();
   Array t_copyasarray(); // deprecated
   Array t_tokeysarray(); // deprecated
   Object t_values(); // deprecated
   Array t_tovaluesarray(); // deprecated
-  Object t_updatefromarray(CVarRef arr);
-  Object t_updatefromiterable(CVarRef it);
   Object t_differencebykey(CVarRef it);
   Object t_getiterator();
   Object t_map(CVarRef callback);
@@ -627,9 +624,8 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   }
   Array toArrayImpl() const;
 
-  Array o_toArray() const;
-  c_StableMap* clone();
-
+  static c_StableMap* Clone(ObjectData* obj);
+  static Array ToArray(const ObjectData* obj);
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
@@ -637,7 +633,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
   static void OffsetUnset(ObjectData* obj, TypedValue* key);
   static void OffsetAppend(ObjectData* obj, TypedValue* val);
-  static bool Equals(ObjectData* obj1, ObjectData* obj2);
+  static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
 
@@ -784,7 +780,8 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
                                         ObjectData::UseGet|
                                         ObjectData::UseSet|
                                         ObjectData::UseIsset|
-                                        ObjectData::UseUnset> {
+                                        ObjectData::UseUnset|
+                                        ObjectData::HasClone> {
  public:
   DECLARE_CLASS(Set, Set, ObjectData)
 
@@ -801,10 +798,10 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   bool t_isempty();
   int64_t t_count();
   Object t_items();
-  Object t_view();
+  Object t_lazy();
+  Object t_view(); // deprecated
   bool t_contains(CVarRef key);
   Object t_remove(CVarRef key);
-  Object t_discard(CVarRef key);
   Array t_toarray();
   Object t_getiterator();
   Object t_map(CVarRef callback);
@@ -853,9 +850,8 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   }
   Array toArrayImpl() const;
 
-  Array o_toArray() const;
-  c_Set* clone();
-
+  static c_Set* Clone(ObjectData* obj);
+  static Array ToArray(const ObjectData* obj);
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
@@ -863,7 +859,7 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
   static void OffsetUnset(ObjectData* obj, TypedValue* key);
   static void OffsetAppend(ObjectData* obj, TypedValue* val);
-  static bool Equals(ObjectData* obj1, ObjectData* obj2);
+  static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
 
@@ -1005,10 +1001,11 @@ class c_SetIterator : public ExtObjectData {
 
 FORWARD_DECLARE_CLASS_BUILTIN(Pair);
 class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
-                                          ObjectData::UseGet|
-                                          ObjectData::UseSet|
-                                          ObjectData::UseIsset|
-                                          ObjectData::UseUnset> {
+                                         ObjectData::UseGet|
+                                         ObjectData::UseSet|
+                                         ObjectData::UseIsset|
+                                         ObjectData::UseUnset|
+                                         ObjectData::HasClone> {
  public:
   DECLARE_CLASS(Pair, Pair, ObjectData)
 
@@ -1020,7 +1017,8 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   int64_t t_count();
   Object t_items();
   Object t_keys();
-  Object t_view();
+  Object t_lazy();
+  Object t_view(); // deprecated
   Object t_kvzip();
   Variant t_at(CVarRef key);
   Variant t_get(CVarRef key);
@@ -1081,9 +1079,8 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
 
   Array toArrayImpl() const;
 
-  Array o_toArray() const;
-  c_Pair* clone();
-
+  static c_Pair* Clone(ObjectData* obj);
+  static Array ToArray(const ObjectData* obj);
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
@@ -1091,7 +1088,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
   static void OffsetUnset(ObjectData* obj, TypedValue* key);
   static void OffsetAppend(ObjectData* obj, TypedValue* val);
-  static bool Equals(ObjectData* obj1, ObjectData* obj2);
+  static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
   int64_t size() const {
@@ -1163,7 +1160,7 @@ int64_t collectionSize(ObjectData* obj);
 void collectionReserve(ObjectData* obj, int64_t sz);
 void collectionUnserialize(ObjectData* obj, VariableUnserializer* uns,
                            int64_t sz, char type);
-bool collectionEquals(ObjectData* obj1, ObjectData* obj2);
+bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2);
 void collectionDeepCopyTV(TypedValue* tv);
 ArrayData* collectionDeepCopyArray(ArrayData* arr);
 ObjectData* collectionDeepCopyVector(c_Vector* vec);

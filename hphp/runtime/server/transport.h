@@ -20,9 +20,9 @@
 #include "hphp/util/base.h"
 #include "hphp/util/compression.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/debuggable.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

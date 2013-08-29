@@ -7,7 +7,6 @@
             "name": "memcache_connect",
             "desc": "Memcache::connect() establishes a connection to the memcached server. The connection, which was opened using Memcache::connect() will be automatically closed at the end of script execution. Also you can close it with Memcache::close(). Also you can use memcache_connect() function.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Object",
@@ -42,7 +41,6 @@
             "name": "memcache_pconnect",
             "desc": "Memcache::pconnect() is similar to Memcache::connect() with the difference, that the connection it establishes is persistent. This connection is not closed after the end of script execution and by Memcache::close() function. Also you can use memcache_pconnect() function.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Object",
@@ -77,7 +75,6 @@
             "name": "memcache_add",
             "desc": "Memcache::add() stores variable var with key only if such key doesn't exist at the server yet. Also you can use memcache_add() function.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -116,7 +113,6 @@
             "name": "memcache_set",
             "desc": "Memcache::set() stores an item var with key on the memcached server. Parameter expire is expiration time in seconds. If it's 0, the item never expires (but memcached server doesn't guarantee this item to be stored all the time, it could be deleted from the cache to make place for other items). You can use MEMCACHE_COMPRESSED constant as flag value if you want to use on-the-fly compression (uses zlib).\n\nRemember that resource variables (i.e. file and connection descriptors) cannot be stored in the cache, because they cannot be adequately represented in serialized state. Also you can use memcache_set() function.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -155,7 +151,6 @@
             "name": "memcache_replace",
             "desc": "Memcache::replace() should be used to replace value of existing item with key. In case if item with such key doesn't exists, Memcache::replace() returns FALSE. For the rest Memcache::replace() behaves similarly to Memcache::set(). Also you can use memcache_replace() function.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -194,7 +189,6 @@
             "name": "memcache_get",
             "desc": "Memcache::get() returns previously stored data if an item with such key exists on the server at this moment.\n\nYou can pass array of keys to Memcache::get() to get array of values. The result array will contain only found key-value pairs.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -223,7 +217,6 @@
             "name": "memcache_delete",
             "desc": "Memcache::delete() deletes item with the key. If parameter timeout is specified, the item will expire after timeout seconds. Also you can use memcache_delete() function.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -251,7 +244,6 @@
             "name": "memcache_increment",
             "desc": "Memcache::increment() increments value of an item by the specified value. If item specified by key was not numeric and cannot be converted to a number, it will change its value to value. Memcache::increment() does not create an item if it doesn't already exist.\n\nDo not use Memcache::increment() with items that have been stored compressed because subsequent calls to Memcache::get() will fail. Also you can use memcache_increment() function.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -279,7 +271,6 @@
             "name": "memcache_decrement",
             "desc": "Memcache::decrement() decrements value of the item by value. Similarly to Memcache::increment(), current value of the item is being converted to numerical and after that value is substracted.\n\nNew item's value will not be less than zero.\n\nDo not use Memcache::decrement() with item, which was stored compressed, because consequent call to Memcache::get() will fail. Memcache::decrement() does not create an item if it didn't exist. Also you can use memcache_decrement() function.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -307,7 +298,6 @@
             "name": "memcache_close",
             "desc": "Memcache::close() closes connection to memcached server. This function doesn't close persistent connections, which are closed only during web-server shutdown\/restart. Also you can use memcache_close() function.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -324,7 +314,6 @@
             "name": "memcache_debug",
             "desc": "memcache_debug() turns on debug output if parameter on_off is equal to TRUE and turns off if it's FALSE.\n\nmemcache_debug() is accessible only if PHP was built with --enable-debug option and always returns TRUE in this case. Otherwise, this function has no effect and always returns FALSE.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -341,7 +330,6 @@
         {
             "name": "memcache_get_version",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -357,7 +345,6 @@
             "name": "memcache_flush",
             "desc": "Memcache::flush() immediately invalidates all existing items. Memcache::flush() doesn't actually free any resources, it only marks all the items as expired, so occupied memory will be overwritten by new items. Also you can use memcache_flush() function.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -378,7 +365,6 @@
         {
             "name": "memcache_setoptimeout",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -397,7 +383,6 @@
         {
             "name": "memcache_get_server_status",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64"
@@ -421,7 +406,6 @@
         {
             "name": "memcache_set_compress_threshold",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -445,7 +429,6 @@
         {
             "name": "memcache_get_stats",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap"
@@ -475,7 +458,6 @@
         {
             "name": "memcache_get_extended_stats",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap"
@@ -505,7 +487,6 @@
         {
             "name": "memcache_set_server_params",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -549,7 +530,6 @@
         {
             "name": "memcache_add_server",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -614,14 +594,12 @@
             ],
             "desc": "Represents a connection to a set of memcache servers.",
             "flags": [
-                "HasDocComment"
             ],
             "footer": "\n private:\n  memcached_st m_memcache;\n  int m_compress_threshold;\n  double m_min_compress_savings;",
             "funcs": [
                 {
                     "name": "__construct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": null
@@ -633,7 +611,6 @@
                     "name": "connect",
                     "desc": "Memcache::connect() establishes a connection to the memcached server. The connection, which was opened using Memcache::connect() will be automatically closed at the end of script execution. Also you can close it with Memcache::close(). Also you can use memcache_connect() function.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -668,7 +645,6 @@
                     "name": "pconnect",
                     "desc": "Memcache::pconnect() is similar to Memcache::connect() with the difference, that the connection it establishes is persistent. This connection is not closed after the end of script execution and by Memcache::close() function. Also you can use memcache_pconnect() function.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -703,7 +679,6 @@
                     "name": "add",
                     "desc": "Memcache::add() stores variable var with key only if such key doesn't exist at the server yet. Also you can use memcache_add() function.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -738,7 +713,6 @@
                     "name": "set",
                     "desc": "Memcache::set() stores an item var with key on the memcached server. Parameter expire is expiration time in seconds. If it's 0, the item never expires (but memcached server doesn't guarantee this item to be stored all the time, it could be deleted from the cache to make place for other items). You can use MEMCACHE_COMPRESSED constant as flag value if you want to use on-the-fly compression (uses zlib).\n\nRemember that resource variables (i.e. file and connection descriptors) cannot be stored in the cache, because they cannot be adequately represented in serialized state. Also you can use memcache_set() function.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -773,7 +747,6 @@
                     "name": "replace",
                     "desc": "Memcache::replace() should be used to replace value of existing item with key. In case if item with such key doesn't exists, Memcache::replace() returns FALSE. For the rest Memcache::replace() behaves similarly to Memcache::set(). Also you can use memcache_replace() function.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -808,7 +781,6 @@
                     "name": "get",
                     "desc": "Memcache::get() returns previously stored data if an item with such key exists on the server at this moment.\n\nYou can pass array of keys to Memcache::get() to get array of values. The result array will contain only found key-value pairs.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -833,7 +805,6 @@
                     "name": "delete",
                     "desc": "Memcache::delete() deletes item with the key. If parameter timeout is specified, the item will expire after timeout seconds. Also you can use memcache_delete() function.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -857,7 +828,6 @@
                     "name": "increment",
                     "desc": "Memcache::increment() increments value of an item by the specified value. If item specified by key was not numeric and cannot be converted to a number, it will change its value to value. Memcache::increment() does not create an item if it doesn't already exist.\n\nDo not use Memcache::increment() with items that have been stored compressed because subsequent calls to Memcache::get() will fail. Also you can use memcache_increment() function.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Int64",
@@ -881,7 +851,6 @@
                     "name": "decrement",
                     "desc": "Memcache::decrement() decrements value of the item by value. Similarly to Memcache::increment(), current value of the item is being converted to numerical and after that value is substracted.\n\nNew item's value will not be less than zero.\n\nDo not use Memcache::decrement() with item, which was stored compressed, because consequent call to Memcache::get() will fail. Memcache::decrement() does not create an item if it didn't exist. Also you can use memcache_decrement() function.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Int64",
@@ -905,7 +874,6 @@
                     "name": "getversion",
                     "desc": "Memcache::getVersion() returns a string with server's version number. Also you can use memcache_get_version() function.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant",
@@ -918,7 +886,6 @@
                     "name": "flush",
                     "desc": "Memcache::flush() immediately invalidates all existing items. Memcache::flush() doesn't actually free any resources, it only marks all the items as expired, so occupied memory will be overwritten by new items. Also you can use memcache_flush() function.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -935,7 +902,6 @@
                 {
                     "name": "setoptimeout",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -951,7 +917,6 @@
                     "name": "close",
                     "desc": "Memcache::close() closes connection to memcached server. This function doesn't close persistent connections, which are closed only during web-server shutdown\/restart. Also you can use memcache_close() function.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -964,7 +929,6 @@
                     "name": "getserverstatus",
                     "desc": "Memcache::getServerStatus() returns a the servers online\/offline status. You can also use memcache_get_server_status() function.\n\nThis function has been added to Memcache version 2.1.0.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Int64",
@@ -988,7 +952,6 @@
                     "name": "setcompressthreshold",
                     "desc": "Memcache::setCompressThreshold() enables automatic compression of large values. You can also use the memcache_set_compress_threshold() function.\n\nThis function has been added to Memcache version 2.0.0.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -1012,7 +975,6 @@
                     "name": "getstats",
                     "desc": "Memcache::getStats() returns an associative array with server's statistics. Array keys correspond to stats parameters and values to parameter's values. Also you can use memcache_get_stats() function.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "VariantMap",
@@ -1043,7 +1005,6 @@
                     "name": "getextendedstats",
                     "desc": "Memcache::getExtendedStats() returns a two-dimensional associative array with server statistics. Array keys correspond to host:port of server and values contain the individual server statistics. A failed server will have its corresponding entry set to FALSE. You can also use the memcache_get_extended_stats() function.\n\nThis function has been added to Memcache version 2.0.0.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "VariantMap",
@@ -1074,7 +1035,6 @@
                     "name": "setserverparams",
                     "desc": "Memcache::setServerParams() changes server parameters at runtime. You can also use the memcache_set_server_params() function.\n\nThis function has been added to Memcache version 2.1.0.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -1122,7 +1082,6 @@
                     "name": "addserver",
                     "desc": "Memcache::addServer() adds a server to the connection pool. The connection, which was opened using Memcache::addServer() will be automatically closed at the end of script execution, you can also close it manually with Memcache::close(). You can also use the memcache_add_server() function.\n\nWhen using this method (as opposed to Memcache::connect() and Memcache::pconnect()) the network connection is not established until actually needed. Thus there is no overhead in adding a large number of servers to the pool, even though they might not all be used.\n\nFailover may occur at any stage in any of the methods, as long as other servers are available the request the user won't notice. Any kind of socket or Memcached server level errors (except out-of-memory) may trigger the failover. Normal client errors such as adding an existing key will not trigger a failover.\n\nThis function has been added to Memcache version 2.0.0.",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -1186,7 +1145,6 @@
                 {
                     "name": "__destruct",
                     "flags": [
-                        "HasDocComment"
                     ],
                     "return": {
                         "type": "Variant"

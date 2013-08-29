@@ -20,7 +20,7 @@
 #include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/util/json.h"
-#include "hphp/util/parser/scanner.h"
+#include "hphp/parser/scanner.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

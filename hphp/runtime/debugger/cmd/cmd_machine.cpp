@@ -16,10 +16,10 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_machine.h"
 #include "hphp/runtime/debugger/cmd/cmd_signal.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/intercept.h"
-#include "hphp/runtime/base/array_init.h"
-#include "hphp/runtime/base/libevent_http_client.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/libevent-http-client.h"
 #include "hphp/util/process.h"
 
 namespace HPHP { namespace Eval {
@@ -142,9 +142,6 @@ bool CmdMachine::AttachSandbox(DebuggerClient &client,
   if (user == nullptr) {
     user = client.getCurrentUser().c_str();
   }
-  if (client.isApiMode()) {
-    force = true;
-  }
 
   DSandboxInfoPtr sandbox(new DSandboxInfo());
   sandbox->m_user = user ? user : "";
@@ -207,7 +204,7 @@ void CmdMachine::UpdateIntercept(DebuggerClient &client,
   client.xend<CmdMachine>(&cmd);
 }
 
-void CmdMachine::onClientImpl(DebuggerClient &client) {
+void CmdMachine::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
   if (client.argCount() == 0) {
     help(client);

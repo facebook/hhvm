@@ -19,7 +19,7 @@
 
 #include "hphp/util/lock.h"
 #include "hphp/runtime/debugger/debugger_proxy.h"
-#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "tbb/concurrent_hash_map.h"
 #include "tbb/concurrent_queue.h"
 

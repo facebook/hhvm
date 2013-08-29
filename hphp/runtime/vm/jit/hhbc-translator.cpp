@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/jit/code-gen.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/ir-factory.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -30,7 +30,7 @@
 #include "hphp/runtime/vm/jit/translator-x64.h"
 
 // Include last to localize effects to this file
-#include "hphp/util/assert_throw.h"
+#include "hphp/util/assert-throw.h"
 
 namespace HPHP {
 namespace JIT {
@@ -81,6 +81,7 @@ HhbcTranslator::HhbcTranslator(Offset startOffset,
   , m_lastBcOff(false)
   , m_hasExit(false)
   , m_stackDeficit(0)
+  , m_evalStack(*m_tb)
 {
   updateMarker();
   auto const fp = gen(DefFP);
@@ -143,6 +144,9 @@ void HhbcTranslator::refineType(SSATmp* tmp, Type type) {
     } else if (tmp->type().isNull() && type.isNull()) {
       // Refining Null to Uninit or InitNull is supported
       tmp->setType(type);
+    } else if (tmp->type().isArray() && type.isArray()) {
+      // Refine array kind
+      tmp->setType(type);
     } else {
       // At this point, we have no business refining the type of any
       // instructions other than the following, which all control
@@ -160,11 +164,13 @@ void HhbcTranslator::refineType(SSATmp* tmp, Type type) {
   }
 }
 
-SSATmp* HhbcTranslator::pop(Type type) {
-  SSATmp* opnd = m_evalStack.pop();
+SSATmp* HhbcTranslator::pop(Type type, DataTypeCategory cat) {
+  SSATmp* opnd = m_evalStack.pop(cat);
+
   if (opnd == nullptr) {
     uint32_t stackOff = m_stackDeficit;
     m_stackDeficit++;
+    m_tb->constrainStack(stackOff, cat);
     return gen(LdStack, type, StackOffset(stackOff), m_tb->sp());
   }
 
@@ -182,12 +188,13 @@ void HhbcTranslator::discard(unsigned n) {
 }
 
 // type is the type expected on the stack.
-void HhbcTranslator::popDecRef(Type type) {
-  if (SSATmp* src = m_evalStack.pop()) {
+void HhbcTranslator::popDecRef(Type type, DataTypeCategory cat) {
+  if (SSATmp* src = m_evalStack.pop(cat)) {
     gen(DecRef, src);
     return;
   }
 
+  m_tb->constrainStack(m_stackDeficit, cat);
   gen(DecRefStack, StackOffset(m_stackDeficit), type, m_tb->sp());
   m_stackDeficit++;
 }
@@ -208,11 +215,12 @@ void HhbcTranslator::extendStack(uint32_t index, Type type) {
   push(tmp);
 }
 
-SSATmp* HhbcTranslator::top(Type type, uint32_t index) {
-  SSATmp* tmp = m_evalStack.top(index);
+SSATmp* HhbcTranslator::top(Type type, uint32_t index,
+                            DataTypeCategory constraint) {
+  SSATmp* tmp = m_evalStack.top(constraint, index);
   if (!tmp) {
     extendStack(index, type);
-    tmp = m_evalStack.top(index);
+    tmp = m_evalStack.top(constraint, index);
   }
   assert(tmp);
   refineType(tmp, type);
@@ -223,13 +231,14 @@ void HhbcTranslator::replace(uint32_t index, SSATmp* tmp) {
   m_evalStack.replace(index, tmp);
 }
 
-Type HhbcTranslator::topType(uint32_t idx) const {
+Type HhbcTranslator::topType(uint32_t idx, DataTypeCategory constraint) const {
   FTRACE(5, "Asking for type of stack elem {}\n", idx);
   if (idx < m_evalStack.size()) {
-    return m_evalStack.top(idx)->type();
+    return m_evalStack.top(constraint, idx)->type();
   } else {
-    auto stkVal = getStackValue(m_tb->sp(),
-                                idx - m_evalStack.size() + m_stackDeficit);
+    auto absIdx = idx - m_evalStack.size() + m_stackDeficit;
+    auto stkVal = getStackValue(m_tb->sp(), absIdx);
+    m_tb->constrainStack(absIdx, constraint);
     if (stkVal.knownType.equals(Type::None)) return Type::Gen;
     return stkVal.knownType;
   }
@@ -250,18 +259,20 @@ size_t HhbcTranslator::spOffset() const {
  *   // sp_pre = some SpillStack, or maybe the DefSP
  *
  *   // FPI region:
+ *           [ StashGeneratorSP fp0 sp0 ]
  *     sp1   = SpillStack sp_pre, ...
  *     sp2   = SpillFrame sp1, ...
  *     // ... possibly more spillstacks due to argument expressions
  *     sp3   = SpillStack sp2, -argCount
  *     fp2   = DefInlineFP<func,retBC,retSP> sp2 sp1
- *     sp4   = ReDefSP<numLocals> fp2
+ *     sp4   = DefInlineSP<numLocals> fp2 sp1
  *
  *         // ... callee body ...
  *
  *           = InlineReturn fp2
  *
- *   sp5  = ReDefSP<returnOffset> fp0 sp1
+ * [ sp5  = ReDefGeneratorSP<spansCall> fp0 sp1     ]
+ * [ sp5  = ReDefSP<returnOffset,spansCall> fp0 sp1 ]
  *
  * The rest of the code then depends on sp5, and not any of the StkPtr
  * tree going through the callee body.  The sp5 tmp has the same view
@@ -269,8 +280,34 @@ size_t HhbcTranslator::spOffset() const {
  * before the return address is pushed but after the activation record
  * is popped.
  *
- * In DCE we attempt to remove the SpillFrame/InlineReturn/DefInlineFP
- * instructions if they aren't needed.
+ * In DCE we attempt to remove the SpillFrame/InlineReturn/DefInlineFP/
+ * DefInlineSP instructions if they aren't needed.  DefInlineSP and DefInlineFP
+ * become PassSP and PassFP respectively to avoid the need to relabel inlined
+ * IR instructions that refer to them.
+ *
+ * In the case of generators StashGeneratorSP and ReDefGeneratorSP are used to
+ * store/extract the value of the StkPtr from a field in the continuation class.
+ * This behavior is important because the StkPtr cannot be computed from the
+ * FramePtr and if a call occurs it cannot live across the FCall in a register.
+ *
+ * ReDefSP and ReDefGeneratorSP both take sp1, the stack pointer from before the
+ * inlined frame.  While this SSATmp may be dead if an FCall occurs in the
+ * inlined frame it is still useful for determining stack types in the
+ * simplifier.  Additionally these instructions both take an extradata
+ * `spansCall' which is true iff an FCall occurs anywhere between the start and
+ * end of the inlined function.  This is information is also used in the
+ * simplifier to determine when an SSATmp may be used in lieu of a load from
+ * the stack.
+ *
+ * At this time StLoc, ReDefSP, DefInlineSP, PassSP, SpillFrame, and DefInlineFP
+ * are all considered weak references to a frame pointer.  Additionally any
+ * instruction which calls native or may raise an error is considered a
+ * reference to the FP and prevent it from being elided.  This is done by
+ * inserting an InlineFPAnchor instruction when they are encountered.  These
+ * instructions are inserted initially by trace-builder and later removed and
+ * re-inserted during the reoptimize pass to ensure that they are not associated
+ * with instructions that have been removed in DCE or modified in the
+ * simplifier.
  */
 void HhbcTranslator::beginInlining(unsigned numParams,
                                    const Func* target,
@@ -297,10 +334,11 @@ void HhbcTranslator::beginInlining(unsigned numParams,
   data.target   = target;
   data.retBCOff = returnBcOffset;
   data.retSPOff = prevSPOff;
-  auto const calleeFP = gen(DefInlineFP, data, calleeSP, prevSP);
+
+  auto const calleeFP = gen(DefInlineFP, data, calleeSP, prevSP, m_tb->fp());
 
   m_bcStateStack.emplace_back(target->base(), target);
-  gen(ReDefSP, StackOffset(target->numLocals()), m_tb->fp(), m_tb->sp());
+  gen(DefInlineSP, StackOffset(target->numLocals()), m_tb->fp(), m_tb->sp());
 
   profileFunctionEntry("Inline");
 
@@ -313,11 +351,13 @@ void HhbcTranslator::beginInlining(unsigned numParams,
      * initialize non-parameter locals to KindOfUnknownin case we have
      * to leave the trace.
      */
-    always_assert(0 && "unimplemented");
     gen(StLoc, LocalId(i), calleeFP, m_tb->genDefUninit());
   }
 
   updateMarker();
+
+  m_fpiActiveStack.push(std::move(m_fpiStack.top()));
+  m_fpiStack.pop();
 }
 
 bool HhbcTranslator::isInlining() const {
@@ -474,7 +514,7 @@ void HhbcTranslator::emitNewArray(int capacity) {
 }
 
 void HhbcTranslator::emitNewTuple(int numArgs) {
-  // The new_tuple helper function needs array values passed to it
+  // The NewTuple opcode's helper needs array values passed to it
   // via the stack.  We use spillStack() to flush the eval stack and
   // obtain a pointer to the topmost item; if over-flushing becomes
   // a problem then we should refactor the NewTuple opcode to take
@@ -503,9 +543,9 @@ void HhbcTranslator::emitArrayAdd() {
 }
 
 void HhbcTranslator::emitAddElemC() {
-  // The AddElem* instructions decref their args, so don't decref
-  // pop'ed values.
-  auto kt = topC(1)->type();
+  // This is just to peek at the type; it'll be consumed for real down below and
+  // we don't want to constrain it if we're just going to InterpOne.
+  auto kt = topC(1, DataTypeGeneric)->type();
   Opcode op;
   if (kt.subtypeOf(Type::Int)) {
     op = AddElemIntKey;
@@ -516,9 +556,13 @@ void HhbcTranslator::emitAddElemC() {
     return;
   }
 
-  auto const val = popC();
+  // val is teleported from the stack to the array, so we don't have to do any
+  // refcounting.
+  auto const val = popC(DataTypeGeneric);
   auto const key = popC();
   auto const arr = popC();
+  // The AddElem* instructions decref their args, so don't decref pop'ed
+  // values.
   push(gen(op, arr, key, val));
 }
 
@@ -545,19 +589,34 @@ void HhbcTranslator::emitColAddNewElemC() {
   emitInterpOne(Type::Obj, 2);
 }
 
-void HhbcTranslator::emitCns(uint32_t id) {
+void HhbcTranslator::emitCnsCommon(uint32_t id,
+                                   uint32_t fallback,
+                                   bool error) {
+  assert(fallback == kInvalidId || !error);
   StringData* name = curUnit()->lookupLitstrId(id);
   SSATmp* cnsNameTmp = cns(name);
   const TypedValue* tv = Unit::lookupPersistentCns(name);
   SSATmp* result = nullptr;
   Type cnsType = Type::Cell;
+
+  SSATmp* fallbackNameTmp = nullptr;
+  if (fallback != kInvalidId) {
+    StringData* fallbackName = curUnit()->lookupLitstrId(fallback);
+    fallbackNameTmp = cns(fallbackName);
+  }
   if (tv) {
-    result =
+    if (tv->m_type == KindOfUninit) {
       // KindOfUninit is a dynamic system constant. always a slow
       // lookup.
-      tv->m_type == KindOfUninit
-        ? gen(LookupCns, cnsType, cnsNameTmp)
-        : staticTVCns(tv);
+      assert(!fallbackNameTmp);
+      if (error) {
+        result = gen(LookupCnsE, cnsType, cnsNameTmp);
+      } else {
+        result = gen(LookupCns, cnsType, cnsNameTmp);
+      }
+    } else {
+      result = staticTVCns(tv);
+    }
   } else {
     SSATmp* c1 = gen(LdCns, cnsType, cnsNameTmp);
     result = m_tb->cond(
@@ -570,19 +629,32 @@ void HhbcTranslator::emitCns(uint32_t id) {
       },
       [&] { // Taken: miss in TC, do lookup & init
         m_tb->hint(Block::Hint::Unlikely);
-        return gen(LookupCns, getCatchTrace(), cnsType, cnsNameTmp);
+        if (fallbackNameTmp) {
+          return gen(LookupCnsU, getCatchTrace(),
+                     cnsType, cnsNameTmp, fallbackNameTmp);
+        } else if (error) {
+          return gen(LookupCnsE, getCatchTrace(),
+                     cnsType, cnsNameTmp);
+        } else {
+          return gen(LookupCns, getCatchTrace(),
+                     cnsType, cnsNameTmp);
+        }
       }
     );
   }
   push(result);
 }
 
-void HhbcTranslator::emitCnsE(uint32_t id) {
-  PUNT(CnsE);
+void HhbcTranslator::emitCns(uint32_t id) {
+  emitCnsCommon(id, kInvalidId, false);
 }
 
-void HhbcTranslator::emitCnsU(uint32_t id) {
-  PUNT(CnsU);
+void HhbcTranslator::emitCnsE(uint32_t id) {
+  emitCnsCommon(id, kInvalidId, true);
+}
+
+void HhbcTranslator::emitCnsU(uint32_t id, uint32_t fallbackId) {
+  emitCnsCommon(id, fallbackId, false);
 }
 
 void HhbcTranslator::emitDefCns(uint32_t id) {
@@ -672,19 +744,19 @@ void HhbcTranslator::emitInitThisLoc(int32_t id) {
 
 void HhbcTranslator::emitCGetL(int32_t id) {
   IRTrace* exitTrace = getExitTrace();
-  pushIncRef(ldLocInnerWarn(id, exitTrace));
+  pushIncRef(ldLocInnerWarn(id, exitTrace, DataTypeCountnessInit));
 }
 
 void HhbcTranslator::emitCGetL2(int32_t id) {
   IRTrace* exitTrace = getExitTrace();
   IRTrace* catchTrace = getCatchTrace();
   SSATmp* oldTop = pop(Type::Gen);
-  pushIncRef(ldLocInnerWarn(id, exitTrace, catchTrace));
+  pushIncRef(ldLocInnerWarn(id, exitTrace, DataTypeCountnessInit, catchTrace));
   push(oldTop);
 }
 
 void HhbcTranslator::emitVGetL(int32_t id) {
-  auto value = ldLoc(id);
+  auto value = ldLoc(id, DataTypeSpecific);
   if (!value->type().isBoxed()) {
     if (value->isA(Type::Uninit)) {
       value = m_tb->genDefInitNull();
@@ -706,7 +778,7 @@ void HhbcTranslator::emitUnsetG(const StringData* gblName) {
 }
 
 void HhbcTranslator::emitUnsetL(int32_t id) {
-  auto const prev = ldLoc(id);
+  auto const prev = ldLoc(id, DataTypeCountness);
   gen(StLoc, LocalId(id), m_tb->fp(), m_tb->genDefUninit());
   gen(DecRef, prev);
 }
@@ -717,20 +789,23 @@ void HhbcTranslator::emitBindL(int32_t id) {
   // pseudo-main: the destructor could decref the value again after
   // we've stored it into the local.
   pushIncRef(newValue);
-  auto const oldValue = ldLoc(id);
+  auto const oldValue = ldLoc(id, DataTypeCountness);
   gen(StLoc, LocalId(id), m_tb->fp(), newValue);
   gen(DecRef, oldValue);
 }
 
 void HhbcTranslator::emitSetL(int32_t id) {
   auto const exitTrace = getExitTrace();
-  auto const src = popC();
+
+  // We're just going to store src into a local. stLoc will IncRef it, but if
+  // nobody else cares about the type a generic IncRef is better than a guard.
+  auto const src = popC(DataTypeGeneric);
   push(stLoc(id, exitTrace, src));
 }
 
 void HhbcTranslator::emitIncDecL(bool pre, bool inc, uint32_t id) {
   auto const exitTrace = getExitTrace();
-  auto const src = ldLocInnerWarn(id, exitTrace);
+  auto const src = ldLocInnerWarn(id, exitTrace, DataTypeSpecific);
 
   if (src->isA(Type::Bool)) {
     push(src);
@@ -801,7 +876,7 @@ static bool areBinaryArithTypesSupported(Opcode opc, Type t1, Type t2) {
 
 void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
   auto const exitTrace = getExitTrace();
-  auto const loc       = ldLocInnerWarn(id, exitTrace);
+  auto const loc       = ldLocInnerWarn(id, exitTrace, DataTypeSpecific);
 
   if (subOpc == Concat) {
     /*
@@ -904,10 +979,22 @@ SSATmp* HhbcTranslator::emitMIterInitCommon(int offset, Lambda genFunc) {
   return emitJmpCondHelper(offset, true, res);
 }
 
+namespace {
+void constrainIterLocals(TraceBuilder& tb) {}
+
+template<typename... Args>
+void constrainIterLocals(TraceBuilder& tb, uint32_t locId, Args... args) {
+  tb.constrainLocal(locId, DataTypeCountness, "Iter*");
+  constrainIterLocals(tb, args...);
+}
+}
+
 void HhbcTranslator::emitIterInit(uint32_t iterId,
                                   int offset,
                                   uint32_t valLocalId,
                                   bool invertCond) {
+  constrainIterLocals(*m_tb, valLocalId);
+
   emitIterInitCommon(offset, [&] (SSATmp* src) {
       return gen(IterInit,
                  Type::Bool,
@@ -924,6 +1011,8 @@ void HhbcTranslator::emitIterInitK(uint32_t iterId,
                                    uint32_t valLocalId,
                                    uint32_t keyLocalId,
                                    bool invertCond) {
+  constrainIterLocals(*m_tb, valLocalId, keyLocalId);
+
   emitIterInitCommon(offset, [&] (SSATmp* src) {
       return gen(IterInitK,
                  Type::Bool,
@@ -940,6 +1029,8 @@ void HhbcTranslator::emitIterNext(uint32_t iterId,
                                   int offset,
                                   uint32_t valLocalId,
                                   bool invertCond) {
+  constrainIterLocals(*m_tb, valLocalId);
+
   SSATmp* res = gen(
     IterNext,
     Type::Bool,
@@ -955,6 +1046,8 @@ void HhbcTranslator::emitIterNextK(uint32_t iterId,
                                    uint32_t valLocalId,
                                    uint32_t keyLocalId,
                                    bool invertCond) {
+  constrainIterLocals(*m_tb, valLocalId, keyLocalId);
+
   SSATmp* res = gen(
     IterNextK,
     Type::Bool,
@@ -970,6 +1063,8 @@ void HhbcTranslator::emitWIterInit(uint32_t iterId,
                                    int offset,
                                    uint32_t valLocalId,
                                    bool invertCond) {
+  constrainIterLocals(*m_tb, valLocalId);
+
   emitIterInitCommon(
     offset, [&] (SSATmp* src) {
       return gen(WIterInit,
@@ -987,6 +1082,8 @@ void HhbcTranslator::emitWIterInitK(uint32_t iterId,
                                     uint32_t valLocalId,
                                     uint32_t keyLocalId,
                                     bool invertCond) {
+  constrainIterLocals(*m_tb, valLocalId, keyLocalId);
+
   emitIterInitCommon(
     offset, [&] (SSATmp* src) {
       return gen(WIterInitK,
@@ -1004,6 +1101,8 @@ void HhbcTranslator::emitWIterNext(uint32_t iterId,
                                    int offset,
                                    uint32_t valLocalId,
                                    bool invertCond) {
+  constrainIterLocals(*m_tb, valLocalId);
+
   SSATmp* res = gen(
     WIterNext,
     Type::Bool,
@@ -1019,6 +1118,8 @@ void HhbcTranslator::emitWIterNextK(uint32_t iterId,
                                     uint32_t valLocalId,
                                     uint32_t keyLocalId,
                                     bool invertCond) {
+  constrainIterLocals(*m_tb, valLocalId, keyLocalId);
+
   SSATmp* res = gen(
     WIterNextK,
     Type::Bool,
@@ -1033,6 +1134,8 @@ void HhbcTranslator::emitWIterNextK(uint32_t iterId,
 void HhbcTranslator::emitMIterInit(uint32_t iterId,
                                   int offset,
                                   uint32_t valLocalId) {
+  constrainIterLocals(*m_tb, valLocalId);
+
   emitMIterInitCommon(offset, [&] (SSATmp* src) {
     return gen(
       MIterInit,
@@ -1049,6 +1152,8 @@ void HhbcTranslator::emitMIterInitK(uint32_t iterId,
                                    int offset,
                                    uint32_t valLocalId,
                                    uint32_t keyLocalId) {
+  constrainIterLocals(*m_tb, valLocalId, keyLocalId);
+
   emitMIterInitCommon(offset, [&] (SSATmp* src) {
     return gen(
       MIterInitK,
@@ -1065,6 +1170,8 @@ void HhbcTranslator::emitMIterInitK(uint32_t iterId,
 void HhbcTranslator::emitMIterNext(uint32_t iterId,
                                    int offset,
                                    uint32_t valLocalId) {
+  constrainIterLocals(*m_tb, valLocalId);
+
   SSATmp* res = gen(
     MIterNext,
     Type::Bool,
@@ -1079,6 +1186,8 @@ void HhbcTranslator::emitMIterNextK(uint32_t iterId,
                                     int offset,
                                     uint32_t valLocalId,
                                     uint32_t keyLocalId) {
+  constrainIterLocals(*m_tb, valLocalId, keyLocalId);
+
   SSATmp* res = gen(
     MIterNextK,
     Type::Bool,
@@ -1140,27 +1249,12 @@ void HhbcTranslator::emitIterBreak(const ImmVector& iv,
   gen(Jmp_, getExitTrace(offset));
 }
 
-typedef std::map<int, int> ContParamMap;
-/*
- * mapContParams builds a mapping between named locals in origFunc and
- * corresponding named locals in genFunc.
- */
-static
-void mapContParams(ContParamMap& map,
-                   const Func* origFunc, const Func* genFunc) {
-  const StringData* const* varNames = origFunc->localNames();
-  for (Id i = 0; i < origFunc->numNamedLocals(); ++i) {
-    map[i] = genFunc->lookupVarId(varNames[i]);
-  }
-}
-
 void HhbcTranslator::emitCreateCont(Id funNameStrId) {
   gen(ExitOnVarEnv, getExitSlowTrace()->front(), m_tb->fp());
 
   auto const genName = lookupStringId(funNameStrId);
   auto const origFunc = curFunc();
   auto const genFunc = origFunc->getGeneratorBody(genName);
-  auto const origLocals = origFunc->numLocals();
 
   auto const cont = origFunc->isMethod()
     ? gen(
@@ -1173,9 +1267,6 @@ void HhbcTranslator::emitCreateCont(Id funNameStrId) {
         CreateContData { origFunc, genFunc }
       );
 
-  ContParamMap params;
-  mapContParams(params, origFunc, genFunc);
-
   static auto const thisStr = StringData::GetStaticString("this");
   Id thisId = kInvalidId;
   const bool fillThis = origFunc->isMethod() &&
@@ -1185,16 +1276,17 @@ void HhbcTranslator::emitCreateCont(Id funNameStrId) {
 
   SSATmp* contAR = gen(
     LdRaw, Type::PtrToGen, cont, cns(RawMemSlot::ContARPtr));
-  for (int i = 0; i < origLocals; ++i) {
-    if (params[i] != kInvalidId) {
-      // We must generate an AssertLoc because we don't have tracelet
-      // guards on the object type in these outer generator functions.
-      gen(AssertLoc, Type::Gen, LocalId(i), m_tb->fp());
-      // Copy the value of the local to the cont object and set the
-      // local to uninit so that we don't need to change refcounts.
-      gen(StMem, contAR, cns(-cellsToBytes(params[i] + 1)), ldLoc(i));
-      gen(StLoc, LocalId(i), m_tb->fp(), m_tb->genDefUninit());
-    }
+  for (int i = 0; i < origFunc->numNamedLocals(); ++i) {
+    assert(i == genFunc->lookupVarId(origFunc->localVarName(i)));
+    // We must generate an AssertLoc because we don't have tracelet
+    // guards on the object type in these outer generator functions.
+    gen(AssertLoc, Type::Gen, LocalId(i), m_tb->fp());
+    // Copy the value of the local to the cont object and set the local to
+    // uninit so that we don't need to change refcounts. We pass
+    // DataTypeGeneric to ldLoc because we're just teleporting the value.
+    gen(StMem, contAR, cns(-cellsToBytes(i + 1)),
+        ldLoc(i, DataTypeGeneric));
+    gen(StLoc, LocalId(i), m_tb->fp(), m_tb->genDefUninit());
   }
   if (fillThis) {
     assert(thisId != kInvalidId);
@@ -1247,7 +1339,7 @@ void HhbcTranslator::emitContSuspendImpl(int64_t labelId) {
 
   // set m_value = popC();
   auto const oldValue = gen(LdContArValue, Type::Cell, m_tb->fp());
-  gen(StContArValue, m_tb->fp(), popC());
+  gen(StContArValue, m_tb->fp(), popC(DataTypeGeneric)); // teleporting value
   gen(DecRef, oldValue);
 
   // set m_label = labelId;
@@ -1303,7 +1395,7 @@ void HhbcTranslator::emitContRetC() {
 
   // set m_value = popC();
   auto const oldValue = gen(LdContArValue, Type::Cell, m_tb->fp());
-  gen(StContArValue, m_tb->fp(), popC());
+  gen(StContArValue, m_tb->fp(), popC(DataTypeGeneric)); // teleporting value
   gen(DecRef, oldValue);
 
   // transfer control
@@ -1390,8 +1482,11 @@ void HhbcTranslator::emitIncStat(int32_t counter, int32_t value, bool force) {
 }
 
 void HhbcTranslator::emitArrayIdx() {
-  Type arrType = topC(1)->type();
-  Type keyType = topC(2)->type();
+  // These types are just used to decide what to do; once we know what we're
+  // actually doing we constrain the values with the popC()s later on in this
+  // function.
+  Type arrType = topC(1, DataTypeGeneric)->type();
+  Type keyType = topC(2, DataTypeGeneric)->type();
 
   if (UNLIKELY(!arrType.subtypeOf(Type::Arr))) {
     // raise fatal
@@ -1400,7 +1495,7 @@ void HhbcTranslator::emitArrayIdx() {
   }
 
   if (UNLIKELY(keyType.subtypeOf(Type::Null))) {
-    SSATmp* def = popC();
+    SSATmp* def = popC(DataTypeGeneric); // def is just pushed back on the stack
     SSATmp* arr = popC();
     SSATmp* key = popC();
 
@@ -1416,7 +1511,9 @@ void HhbcTranslator::emitArrayIdx() {
     return;
   }
 
-  SSATmp* def = popC();
+  SSATmp* def = popC(DataTypeGeneric); // a helper will decref it but the
+                                       // translated code doesn't care about
+                                       // the type
   SSATmp* arr = popC();
   SSATmp* key = popC();
 
@@ -1480,7 +1577,10 @@ SSATmp* HhbcTranslator::emitLdClsPropAddrCached(const StringData* propName,
 
 SSATmp* HhbcTranslator::emitLdClsPropAddrOrExit(const StringData* propName,
                                                 Block* block) {
-  if (canUseSPropCache(m_evalStack.top(), propName, curClass())) {
+  auto top = m_evalStack.top(DataTypeGeneric);
+  assert(top->isA(Type::Cls));
+
+  if (canUseSPropCache(top, propName, curClass())) {
     return emitLdClsPropAddrCached(propName, block);
   }
 
@@ -1489,10 +1589,10 @@ SSATmp* HhbcTranslator::emitLdClsPropAddrOrExit(const StringData* propName,
   SSATmp* clsTmp = popA();
   SSATmp* prop = getStrName(propName);
   SSATmp* addr = gen(LdClsPropAddr,
-                           block,
-                           clsTmp,
-                           prop,
-                           cns(curClass()));
+                     block,
+                     clsTmp,
+                     prop,
+                     cns(curClass()));
   gen(DecRef, prop); // safe to do early because prop is a string
   return addr;
 }
@@ -1537,7 +1637,7 @@ void HhbcTranslator::emitIncDecS(bool pre, bool inc) {
 }
 
 void HhbcTranslator::emitMInstr(const NormalizedInstruction& ni) {
-  VectorTranslator(ni, *this).emit();
+  MInstrTranslator(ni, *this).emit();
 }
 
 /*
@@ -1546,7 +1646,7 @@ void HhbcTranslator::emitMInstr(const NormalizedInstruction& ni) {
  */
 void HhbcTranslator::emitIssetL(int32_t id) {
   auto const exitTrace = getExitTrace();
-  auto const ld = ldLocInner(id, exitTrace);
+  auto const ld = ldLocInner(id, exitTrace, DataTypeSpecific);
   push(gen(IsNType, Type::Null, ld));
 }
 
@@ -1564,7 +1664,7 @@ void HhbcTranslator::emitIssetS(const StringData* propName) {
 
 void HhbcTranslator::emitEmptyL(int32_t id) {
   auto const exitTrace = getExitTrace();
-  auto const ld = ldLocInner(id, exitTrace);
+  auto const ld = ldLocInner(id, exitTrace, DataTypeSpecific);
   push(gen(Not, gen(ConvCellToBool, ld)));
 }
 
@@ -1588,7 +1688,9 @@ void HhbcTranslator::emitIsTypeC(Type t) {
 
 void HhbcTranslator::emitIsTypeL(Type t, int id) {
   IRTrace* exitTrace = getExitTrace();
-  push(gen(IsType, t, ldLocInnerWarn(id, exitTrace)));
+  // TODO(t2598894) We should use the specific type if it's available but not
+  // require it.
+  push(gen(IsType, t, ldLocInnerWarn(id, exitTrace, DataTypeSpecific)));
 }
 
 void HhbcTranslator::emitIsNullL(int id)   { emitIsTypeL(Type::Null, id);}
@@ -1607,15 +1709,19 @@ void HhbcTranslator::emitIsBoolC()   { emitIsTypeC(Type::Bool);}
 void HhbcTranslator::emitIsDoubleC() { emitIsTypeC(Type::Dbl); }
 
 void HhbcTranslator::emitPopC() {
-  popDecRef(Type::Cell);
+  // A generic decref in one tracelet is better than multiple different
+  // tracelets with specialized decrefs.
+  popDecRef(Type::Cell, DataTypeGeneric);
 }
 
 void HhbcTranslator::emitPopV() {
-  popDecRef(Type::BoxedCell);
+  // see emitPopC
+  popDecRef(Type::BoxedCell, DataTypeGeneric);
 }
 
 void HhbcTranslator::emitPopR() {
-  popDecRef(Type::Gen);
+  // see emitPopC
+  popDecRef(Type::Gen, DataTypeGeneric);
 }
 
 void HhbcTranslator::emitDup() {
@@ -1838,21 +1944,8 @@ void HhbcTranslator::emitFPushActRec(SSATmp* func,
   auto actualStack = spillStack();
   auto returnSp = actualStack;
 
-  /*
-   * XXX. In a generator, we can't use ReDefSP to restore the stack
-   * pointer from the frame pointer if we inline the callee.  (This is
-   * because we don't really pay attention to usedefs for allocating
-   * registers to stack pointers, and rVmFp and rVmSp are not related
-   * to each other in a generator frame.)
-   *
-   * Instead, save it somewhere so we can move it back after.  This
-   * instruction will be dce'd if we don't inline the callee.
-   *
-   * TODO(#2288359): freeing up the special-ness of %rbx should
-   * allow us to avoid this sort of thing.
-   */
   if (curFunc()->isGenerator()) {
-    returnSp = gen(StashGeneratorSP, m_tb->sp());
+    gen(StashGeneratorSP, m_tb->fp(), m_tb->sp());
   }
 
   m_fpiStack.emplace(returnSp, m_tb->spOffset());
@@ -2061,14 +2154,16 @@ void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,
                                                              methodName,
                                                              magicCall,
                                                          /* staticLookup: */
-                                                             false);
+                                                             false,
+                                                             curClass());
   SSATmp* obj = popC();
   SSATmp* objOrCls = obj;
 
   if (!func) {
     if (baseClass && !(baseClass->attrs() & AttrInterface)) {
       MethodLookup::LookupResult res =
-        g_vmContext->lookupObjMethod(func, baseClass, methodName, false);
+        g_vmContext->lookupObjMethod(func, baseClass, methodName, curClass(),
+                                     false);
       if ((res == MethodLookup::LookupResult::MethodFoundWithThis ||
            res == MethodLookup::LookupResult::MethodFoundNoThis) &&
           !func->isAbstract()) {
@@ -2174,7 +2269,8 @@ void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
                                                              methodName,
                                                              magicCall,
                                                          /* staticLookup: */
-                                                             true);
+                                                             true,
+                                                             curClass());
   if (func) {
     SSATmp* objOrCls = genClsMethodCtx(func, baseClass);
     emitFPushActRec(cns(func),
@@ -2214,7 +2310,8 @@ void HhbcTranslator::emitFPushClsMethodF(int32_t           numParams,
 
   bool magicCall = false;
   const Func* func = lookupImmutableMethod(cls, methName, magicCall,
-                                           true /* staticLookup */);
+                                           true /* staticLookup */,
+                                           curClass());
   SSATmp* curCtxTmp = gen(LdCtx, FuncData(curFunc()), m_tb->fp());
   if (func) {
     SSATmp*   funcTmp = cns(func);
@@ -2248,14 +2345,20 @@ void HhbcTranslator::emitFCall(uint32_t numParams,
   SSATmp* params[numParams + 3];
   std::memset(params, 0, sizeof params);
   for (uint32_t i = 0; i < numParams; i++) {
-    params[numParams + 3 - i - 1] = popF();
+    // DataTypeGeneric is used because the Call instruction just spills the
+    // values to the stack unmodified.
+    params[numParams + 3 - i - 1] = popF(DataTypeGeneric);
+    if (RuntimeOption::EvalRuntimeTypeProfile && callee != nullptr
+        && params[numParams + 3 - i - 1] != nullptr) {
+      gen(TypeProfileFunc, TypeProfileData(i, callee),
+          params[numParams + 3 - i - 1]);
+    }
   }
   params[0] = spillStack();
   params[1] = cns(returnBcOffset);
   params[2] = callee ? cns(callee) : m_tb->genDefNull();
   SSATmp** decayedPtr = params;
   gen(Call, std::make_pair(numParams + 3, decayedPtr));
-
   if (!m_fpiStack.empty()) {
     m_fpiStack.pop();
   }
@@ -2329,7 +2432,7 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
         break;
       case KindOfDouble: assert(false);
       default:
-        args[i + 2] = ldStackAddr(numArgs - i - 1);
+        args[i + 2] = ldStackAddr(numArgs - i - 1, DataTypeSpecific);
         break;
     }
   }
@@ -2358,9 +2461,9 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
 
   assert(!(curFunc()->attrs() & AttrMayUseVV));
   assert(!curFunc()->isPseudoMain());
-  assert(!m_fpiStack.empty());
+  assert(!m_fpiActiveStack.empty());
 
-  emitDecRefLocalsInline(retVal);
+  auto useRet = emitDecRefLocalsInline(retVal);
 
   /*
    * Pop the ActRec and restore the stack and frame pointers.  It's
@@ -2372,14 +2475,16 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
   // Return to the caller function.  Careful between here and the
   // updateMarker() below, where the caller state isn't entirely set up.
   m_bcStateStack.pop_back();
-  m_fpiStack.pop();
+  m_fpiActiveStack.pop();
 
   // See the comment in beginInlining about generator frames.
   if (curFunc()->isGenerator()) {
-    gen(ReDefGeneratorSP, StackOffset(m_tb->spOffset()), m_tb->sp());
+    gen(ReDefGeneratorSP,
+        ReDefGeneratorSPData(m_tb->inlinedFrameSpansCall()),
+        m_tb->fp(), m_tb->sp());
   } else {
-    gen(ReDefSP,
-        StackOffset(m_tb->spOffset()), m_tb->fp(), m_tb->sp());
+    gen(ReDefSP,ReDefSPData(m_tb->spOffset(), m_tb->inlinedFrameSpansCall()),
+        m_tb->fp(), m_tb->sp());
   }
 
   /*
@@ -2393,9 +2498,14 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
   m_stackDeficit = 0;
 
   FTRACE(1, "]]] end inlining: {}\n", curFunc()->fullName()->data());
-  push(retVal);
+  push(useRet);
 
   updateMarker();
+}
+
+static bool isLoadInFrame(const SSATmp* fp, const IRInstruction* inst) {
+  return ((inst->op() == LdThis || inst->op() == LdLoc) &&
+          inst->src(0) == fp);
 }
 
 SSATmp* HhbcTranslator::emitDecRefLocalsInline(SSATmp* retVal) {
@@ -2413,7 +2523,7 @@ SSATmp* HhbcTranslator::emitDecRefLocalsInline(SSATmp* retVal) {
   if (retValSrcInstr->op() == IncRef) {
     retValSrcLoc = retValSrcInstr->src(0);
     retValSrcOpc = retValSrcLoc->inst()->op();
-    if (retValSrcOpc != LdLoc && retValSrcOpc != LdThis) {
+    if (!isLoadInFrame(m_tb->fp(), retValSrcLoc->inst())) {
       retValSrcLoc = nullptr;
       retValSrcOpc = Nop;
     }
@@ -2443,7 +2553,7 @@ SSATmp* HhbcTranslator::emitDecRefLocalsInline(SSATmp* retVal) {
     gen(DecRefLoc, Type::Gen, LocalId(id), m_tb->fp());
   }
 
-  return retValSrcLoc ? retValSrcLoc : retVal;
+  return !isInlining() && retValSrcLoc ? retValSrcLoc : retVal;
 }
 
 void HhbcTranslator::emitRet(Type type, bool freeInline) {
@@ -2462,10 +2572,15 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     gen(ReleaseVVOrExit, getExitSlowTrace(), m_tb->fp());
   }
   SSATmp* retVal = pop(type);
-
+  if (RuntimeOption::EvalRuntimeTypeProfile) {
+      gen(TypeProfileFunc, TypeProfileData(-1, curFunc), retVal);
+  }
   SSATmp* sp;
   if (freeInline) {
     SSATmp* useRet = emitDecRefLocalsInline(retVal);
+    for (unsigned i = 0; i < curFunc->numLocals(); ++i) {
+      m_tb->constrainLocal(i, DataTypeCountness, "inlined RetC/V");
+    }
     gen(StRetVal, m_tb->fp(), useRet);
     sp = gen(RetAdjustStack, m_tb->fp());
   } else {
@@ -2626,12 +2741,6 @@ void HhbcTranslator::setThisAvailable() {
 }
 
 void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type) {
-  if (type.strictSubtypeOf(Type::Obj)) {
-    gen(GuardLoc, type.unspecialize(), LocalId(locId), m_tb->fp());
-    SSATmp* loc = gen(LdLoc, type, LocalId(locId), m_tb->fp());
-    gen(GuardCls, type, loc);
-    return;
-  }
   gen(GuardLoc, type, LocalId(locId), m_tb->fp());
 }
 
@@ -2692,11 +2801,15 @@ void HhbcTranslator::checkTypeStack(uint32_t idx, Type type, Offset dest) {
   if (idx < m_evalStack.size()) {
     FTRACE(1, "checkTypeStack(){}: generating CheckType for {}\n",
            idx, type.toString());
-    SSATmp* tmp = m_evalStack.top(idx);
+    // CheckType only cares about its input type if the simplifier does
+    // something with it and that's handled if and when it happens.
+    SSATmp* tmp = m_evalStack.top(DataTypeGeneric, idx);
     assert(tmp);
     m_evalStack.replace(idx, gen(CheckType, type, exitTrace, tmp));
   } else {
     FTRACE(1, "checkTypeStack({}): no tmp: {}\n", idx, type.toString());
+    // Just like CheckType, CheckStk only cares about its input type if the
+    // simplifier does something with it.
     gen(CheckStk, type, exitTrace,
         StackOffset(idx - m_evalStack.size() + m_stackDeficit), m_tb->sp());
   }
@@ -2708,7 +2821,8 @@ void HhbcTranslator::checkTypeTopOfStack(Type type, Offset nextByteCode) {
 
 void HhbcTranslator::assertTypeStack(uint32_t idx, Type type) {
   if (idx < m_evalStack.size()) {
-    SSATmp* tmp = m_evalStack.top(idx);
+    // We're asserting a new type so we don't care about the previous type.
+    SSATmp* tmp = m_evalStack.top(DataTypeGeneric, idx);
     assert(tmp);
     m_evalStack.replace(idx, gen(AssertType, type, tmp));
   } else {
@@ -2725,7 +2839,8 @@ void HhbcTranslator::assertString(const RegionDesc::Location& loc,
     case T::Stack: {
       auto idx = loc.stackOffset();
       if (idx < m_evalStack.size()) {
-        DEBUG_ONLY SSATmp* oldStr = m_evalStack.top(idx);
+        // We're asserting a new type so we don't care about the previous type.
+        DEBUG_ONLY SSATmp* oldStr = m_evalStack.top(DataTypeGeneric, idx);
         assert(oldStr->type().maybe(Type::Str));
         m_evalStack.replace(idx, cns(str));
       } else {
@@ -2737,7 +2852,8 @@ void HhbcTranslator::assertString(const RegionDesc::Location& loc,
     break;
 
     case T::Local:
-      assert(m_tb->getLocalType(loc.localId()).maybe(Type::Str));
+      // We're asserting a new type so we don't care about the previous type.
+      assert(m_tb->localType(loc.localId(), DataTypeGeneric).maybe(Type::Str));
       gen(OverrideLocVal, LocalId(loc.localId()), m_tb->fp(), cns(str));
       break;
   }
@@ -2746,7 +2862,9 @@ void HhbcTranslator::assertString(const RegionDesc::Location& loc,
 /*
  * Creates a RuntimeType struct from a program location. This needs access to
  * more than just the location's type because RuntimeType includes known
- * constant values.
+ * constant values. All accesses to the stack and locals use DataTypeGeneric so
+ * this function should only be used for inspecting state; when the values are
+ * actually used they must be constrained further.
  */
 RuntimeType HhbcTranslator::rttFromLocation(const Location& loc) {
   Type t;
@@ -2756,7 +2874,7 @@ RuntimeType HhbcTranslator::rttFromLocation(const Location& loc) {
       auto i = loc.offset;
       assert(i >= 0);
       if (i < m_evalStack.size()) {
-        val = m_evalStack.top(i);
+        val = m_evalStack.top(DataTypeGeneric, i);
         t = val->type();
       } else {
         auto stackVal = getStackValue(m_tb->sp(),
@@ -2767,8 +2885,8 @@ RuntimeType HhbcTranslator::rttFromLocation(const Location& loc) {
     } break;
     case Location::Local: {
       auto l = loc.offset;
-      val = m_tb->getLocalValue(l);
-      t = val ? val->type() : m_tb->getLocalType(l);
+      val = m_tb->localValue(l, DataTypeGeneric);
+      t = val ? val->type() : m_tb->localType(l, DataTypeGeneric);
     } break;
     case Location::Litstr:
       return RuntimeType(curUnit()->lookupLitstrId(loc.offset));
@@ -2844,7 +2962,7 @@ void HhbcTranslator::guardRefs(int64_t entryArDelta,
 void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   const Func* func = curFunc();
   const TypeConstraint& tc = func->params()[paramId].typeConstraint();
-  auto locVal = ldLoc(paramId);
+  auto locVal = ldLoc(paramId, DataTypeSpecific);
   Type locType = locVal->type().unbox();
   assert(locType.isKnownDataType());
 
@@ -3130,7 +3248,7 @@ void HhbcTranslator::emitAGetC(const StringData* clsName) {
 }
 
 void HhbcTranslator::emitAGetL(int id, const StringData* clsName) {
-  auto const src = ldLocInner(id, getExitTrace());
+  auto const src = ldLocInner(id, getExitTrace(), DataTypeSpecific);
   if (isSupportedAGet(src, clsName)) {
     emitAGet(src, clsName);
   } else {
@@ -3379,6 +3497,28 @@ void HhbcTranslator::emitCeil() {
   auto dblVal = gen(ConvCellToDbl, val);
   gen(DecRef, val);
   push(gen(Ceil, dblVal));
+}
+
+void HhbcTranslator::emitAbs() {
+  auto value = popC();
+
+  if (value->isA(Type::Int)) {
+    push(gen(AbsInt, value));
+    return;
+  }
+
+  if (value->isA(Type::Dbl)) {
+    push(gen(AbsDbl, value));
+    return;
+  }
+
+  if (value->isA(Type::Arr)) {
+    gen(DecRef, value);
+    push(cns(false));
+    return;
+  }
+
+  PUNT(Abs);
 }
 
 #define BINOP(Opp)                            \
@@ -3681,7 +3821,7 @@ Type HhbcTranslator::interpOutputType(const NormalizedInstruction& inst) const {
   auto localType = [&]{
     auto locId = localInputId(inst);
     assert(locId >= 0 && locId < curFunc()->numLocals());
-    auto t = m_tb->getLocalType(locId);
+    auto t = m_tb->localType(locId, DataTypeSpecific);
     return t.equals(Type::None) ? Type::Gen : t;
   };
   auto cell = [](Type t) {
@@ -3776,7 +3916,7 @@ void HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst) {
 
     case OpSetOpL:
     case OpIncDecL: {
-      auto locType = m_tb->getLocalType(localInputId(inst));
+      auto locType = m_tb->localType(localInputId(inst), DataTypeSpecific);
       assert(!locType.equals(Type::None));
       auto stackType = inst.outputPredicted ? inst.outPred : topType(0);
       setImmLocType(0, locType.isBoxed() ? stackType.box() : stackType);
@@ -3814,21 +3954,22 @@ void HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst) {
           auto const& base = inst.inputs[mii.valCount()]->location;
           assert(base.space == Location::Local);
 
-          // VectorEffects expects to be used in the context of a normally
+          // MInstrEffects expects to be used in the context of a normally
           // translated instruction, not an interpOne. The two important
           // differences are that the base is normally a PtrTo* and we need to
           // supply an IR opcode representing the operation. SetWithRefElem is
           // used instead of SetElem because SetElem makes a few assumptions
           // about side exits that interpOne won't do.
-          auto const baseType = m_tb->getLocalType(base.offset).ptr();
+          auto const baseType = m_tb->localType(base.offset,
+                                                DataTypeSpecific).ptr();
           auto const isUnset = inst.op() == OpUnsetM;
           auto const isProp = mcodeMaybePropName(inst.immVecM[0]);
 
           if (isUnset && isProp) break;
           auto op = isProp ? SetProp : isUnset ? UnsetElem : SetWithRefElem;
-          VectorEffects ve(op, baseType);
-          if (ve.baseValChanged) {
-            gen(OverrideLoc, ve.baseType.deref(),
+          MInstrEffects effects(op, baseType);
+          if (effects.baseValChanged) {
+            gen(OverrideLoc, effects.baseType.deref(),
                 LocalId(base.offset), m_tb->fp());
           }
           break;
@@ -3952,7 +4093,7 @@ std::string HhbcTranslator::showStack() const {
                        stackDepth).str());
   for (unsigned i = 0; i < m_evalStack.size(); ++i) {
     while (checkFpi());
-    SSATmp* value = m_evalStack.top(i);
+    SSATmp* value = m_evalStack.top(DataTypeGeneric, i); // debug-only
     elem(value->inst()->toString());
   }
 
@@ -3988,7 +4129,9 @@ std::vector<SSATmp*> HhbcTranslator::peekSpillValues() const {
   std::vector<SSATmp*> ret;
   ret.reserve(m_evalStack.size());
   for (int i = 0; i < m_evalStack.size(); ++i) {
-    SSATmp* elem = m_evalStack.top(i);
+    // DataTypeGeneric is used here because SpillStack just teleports the
+    // values to memory.
+    SSATmp* elem = m_evalStack.top(DataTypeGeneric, i);
     ret.push_back(elem);
   }
   return ret;
@@ -4109,8 +4252,7 @@ IRTrace* HhbcTranslator::getExitTraceImpl(Offset targetBcOff,
   gen(SyncABIRegs, m_tb->fp(), stack);
 
   if (flag == ExitFlag::Interp) {
-    gen(targetBcOff == m_startBcOff ? ReqRetranslateNoIR : ReqBindJmpNoIR,
-        BCOffset(targetBcOff));
+    gen(ReqInterpret, BCOffset(targetBcOff));
     return exit;
   }
 
@@ -4163,9 +4305,10 @@ void HhbcTranslator::exceptionBarrier() {
   gen(ExceptionBarrier, sp);
 }
 
-SSATmp* HhbcTranslator::ldStackAddr(int32_t offset) {
+SSATmp* HhbcTranslator::ldStackAddr(int32_t offset, DataTypeCategory cat) {
   // You're almost certainly doing it wrong if you want to get the address of a
   // stack cell that's in m_evalStack.
+  m_tb->constrainStack(offset, cat);
   assert(offset >= (int32_t)m_evalStack.numCells());
   return gen(
     LdStackAddr,
@@ -4175,22 +4318,18 @@ SSATmp* HhbcTranslator::ldStackAddr(int32_t offset) {
   );
 }
 
-SSATmp* HhbcTranslator::ldLoc(uint32_t locId) {
-  return gen(
-    LdLoc,
-    Type::Gen,
-    LocalId(locId),
-    m_tb->fp()
-  );
+SSATmp* HhbcTranslator::ldLoc(uint32_t locId, DataTypeCategory cat) {
+  m_tb->constrainLocal(locId, cat, "LdLoc");
+  return gen(LdLoc, Type::Gen,
+             LdLocData(locId, m_tb->localValueSource(locId)),
+             m_tb->fp());
 }
 
-SSATmp* HhbcTranslator::ldLocAddr(uint32_t locId) {
-  return gen(
-    LdLocAddr,
-    Type::PtrToGen,
-    LocalId(locId),
-    m_tb->fp()
-  );
+SSATmp* HhbcTranslator::ldLocAddr(uint32_t locId, DataTypeCategory cat) {
+  m_tb->constrainLocal(locId, cat, "LdLocAddr");
+  return gen(LdLocAddr, Type::PtrToGen,
+             LdLocData(locId, m_tb->localValueSource(locId)),
+             m_tb->fp());
 }
 
 /*
@@ -4201,8 +4340,9 @@ SSATmp* HhbcTranslator::ldLocAddr(uint32_t locId) {
  *       the tracked type for this local.  This check may be optimized away
  *       if we can determine that the inner type must match the tracked type.
  */
-SSATmp* HhbcTranslator::ldLocInner(uint32_t locId, IRTrace* exitTrace) {
-  auto loc = ldLoc(locId);
+SSATmp* HhbcTranslator::ldLocInner(uint32_t locId, IRTrace* exitTrace,
+                                   DataTypeCategory constraint) {
+  auto loc = ldLoc(locId, constraint);
   assert((loc->type().isBoxed() || loc->type().notBoxed()) &&
          "Currently we don't handle traces where locals are maybeBoxed");
   return loc->type().isBoxed()
@@ -4217,11 +4357,13 @@ SSATmp* HhbcTranslator::ldLocInner(uint32_t locId, IRTrace* exitTrace) {
  * it calls this function.
  */
 SSATmp* HhbcTranslator::ldLocInnerWarn(uint32_t id, IRTrace* target,
+                                       DataTypeCategory constraint,
                                        IRTrace* catchTrace /*   = nullptr */) {
   if (!catchTrace) catchTrace = getCatchTrace();
-  auto const locVal = ldLocInner(id, target);
+  auto const locVal = ldLocInner(id, target, constraint);
 
   if (locVal->type().subtypeOf(Type::Uninit)) {
+    m_tb->constrainLocal(id, DataTypeCountnessInit, "ldLocInnerWarn");
     gen(RaiseUninitLoc, catchTrace, cns(curFunc()->localVarName(id)));
     return m_tb->genDefInitNull();
   }
@@ -4244,7 +4386,7 @@ SSATmp* HhbcTranslator::stLocImpl(uint32_t id,
                                   bool doRefCount) {
   assert(!newVal->type().maybeBoxed());
 
-  auto const oldLoc = ldLoc(id);
+  auto const oldLoc = ldLoc(id, DataTypeCountness);
   if (!(oldLoc->type().isBoxed() || oldLoc->type().notBoxed())) {
     PUNT(stLocImpl-maybeBoxedValue);
   }

@@ -45,9 +45,9 @@
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/analysis/alias_manager.h"
 
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 
-#include "hphp/util/parser/parser.h"
+#include "hphp/parser/parser.h"
 #include "hphp/util/util.h"
 
 using namespace HPHP;
@@ -473,7 +473,7 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
   FunctionScopeRawPtr funcScope = getFunctionScope();
   bool pseudoMain = funcScope->inPseudoMain();
 
-  if (m_stmt && funcScope->isFirstPass() && !funcScope->isGenerator()) {
+  if (m_stmt && funcScope->isFirstPass()) {
     if (pseudoMain ||
         funcScope->getReturnType() ||
         m_stmt->hasRetExp()) {
@@ -504,11 +504,6 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
   if (m_stmt) {
     m_stmt->inferTypes(ar);
   }
-
-  if (funcScope->isGenerator()) {
-    funcScope->setReturnType(ar,
-      Type::GetType(Type::KindOfObject, "Continuation"));
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -518,7 +513,7 @@ void MethodStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   FunctionScopeRawPtr funcScope = getFunctionScope();
 
   m_modifiers->outputPHP(cg, ar);
-  cg_printf(" function ");
+  cg_printf("function ");
   if (m_ref) cg_printf("&");
   if (!ParserBase::IsClosureName(m_name)) {
     cg_printf("%s", m_originalName.c_str());

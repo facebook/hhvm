@@ -34,7 +34,7 @@ void CmdAbort::help(DebuggerClient &client) {
   );
 }
 
-void CmdAbort::onClientImpl(DebuggerClient &client) {
+void CmdAbort::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
   if (client.argCount() == 0) {

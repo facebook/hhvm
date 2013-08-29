@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/base/intercept.h"
-#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/class-info.h"
 
 namespace HPHP {
 
@@ -143,17 +143,13 @@ struct Func {
   typedef FixedVector<EHEnt> EHEntVec;
   typedef FixedVector<FPIEnt> FPIEntVec;
 
-  Func(Unit& unit, Id id, int line1, int line2, Offset base,
+  Func(Unit& unit, Id id, PreClass* preClass, int line1, int line2, Offset base,
        Offset past, const StringData* name, Attr attrs, bool top,
-       const StringData* docComment, int numParams, bool isGenerator);
-  Func(Unit& unit, PreClass* preClass, int line1,
-       int line2, Offset base, Offset past,
-       const StringData* name, Attr attrs, bool top,
-       const StringData* docComment, int numParams, bool isGenerator);
+       const StringData* docComment, int numParams);
   ~Func();
   static void destroy(Func* func);
 
-  Func* clone() const;
+  Func* clone(Class* cls) const;
   const Func* cloneAndSetClass(Class* cls) const;
 
   void validate() const {
@@ -258,12 +254,7 @@ struct Func {
   Unit* unit() const { return m_unit; }
   PreClass* preClass() const { return shared()->m_preClass; }
   Class* cls() const { return m_cls; }
-  void setCls(Class* cls) {
-    m_cls = cls;
-    setFullName();
-  }
-  void setClsAndName(Class* cls, const StringData* name) {
-    m_cls = cls;
+  void setName(const StringData* name) {
     m_name = name;
     setFullName();
   }
@@ -392,7 +383,9 @@ struct Func {
   }
 
   static void* allocFuncMem(
-    const StringData* name, int numParams, bool needsNextClonedClosure);
+    const StringData* name, int numParams,
+    bool needsNextClonedClosure,
+    bool lowMem);
 
   void setPrologue(int index, unsigned char* tca) {
     m_prologueTable[index] = tca;
@@ -419,7 +412,7 @@ struct Func {
   void resetPrologues() {
     // Useful when killing code; forget what we've learned about the contents
     // of the translation cache.
-    initPrologues(m_numParams, isGenerator());
+    initPrologues(m_numParams);
   }
 
   const NamedEntity* getNamedEntity() const {
@@ -505,8 +498,8 @@ private:
 
 private:
   void setFullName();
-  void init(int numParams, bool isGenerator);
-  void initPrologues(int numParams, bool isGenerator);
+  void init(int numParams);
+  void initPrologues(int numParams);
   void appendParam(bool ref, const ParamInfo& info,
                    std::vector<ParamInfo>& pBuilder);
   void allocVarId(const StringData* name);

@@ -7,7 +7,6 @@
             "name": "gethostname",
             "desc": "Gets the standard host name for the local machine.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -20,7 +19,6 @@
             "name": "gethostbyaddr",
             "desc": "Returns the host name of the Internet host specified by ip_address.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -38,7 +36,6 @@
             "name": "gethostbyname",
             "desc": "Returns the IPv4 address of the Internet host specified by hostname.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -56,7 +53,6 @@
             "name": "gethostbynamel",
             "desc": "Returns a list of IPv4 addresses to which the Internet host specified by hostname resolves.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -74,7 +70,6 @@
             "name": "getprotobyname",
             "desc": "getprotobyname() returns the protocol number associated with the protocol name as per \/etc\/protocols.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -92,7 +87,6 @@
             "name": "getprotobynumber",
             "desc": "getprotobynumber() returns the protocol name associated with protocol number as per \/etc\/protocols.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -110,7 +104,6 @@
             "name": "getservbyname",
             "desc": "getservbyname() returns the Internet port which corresponds to service for the specified protocol as per \/etc\/services.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -133,7 +126,6 @@
             "name": "getservbyport",
             "desc": "getservbyport() returns the Internet service associated with port for the specified protocol as per \/etc\/services.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -155,7 +147,6 @@
         {
             "name": "inet_ntop",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -173,7 +164,6 @@
             "name": "inet_pton",
             "desc": "This function converts a human readable IPv4 or IPv6 address (if PHP was built with IPv6 support enabled) into an address family appropriate 32bit or 128bit binary structure.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -191,7 +181,6 @@
             "name": "ip2long",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -209,7 +198,6 @@
             "name": "long2ip",
             "desc": "The function long2ip() generates an Internet address in dotted format (i.e.: aaa.bbb.ccc.ddd) from the proper address representation.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -226,7 +214,6 @@
         {
             "name": "dns_check_record",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -247,7 +234,6 @@
             "name": "checkdnsrr",
             "desc": "Searches DNS for records of type type corresponding to host.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -271,7 +257,6 @@
             "name": "dns_get_record",
             "desc": "Fetch DNS Resource Records associated with the given hostname.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -307,7 +292,6 @@
         {
             "name": "dns_get_mx",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -334,7 +318,6 @@
             "name": "getmxrr",
             "desc": "Searches DNS for MX records corresponding to hostname.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -365,7 +348,6 @@
             "name": "fsockopen",
             "desc": "Initiates a socket connection to the resource specified by hostname.\n\nPHP supports targets in the Internet and Unix domains as described in List of Supported Socket Transports. A list of supported transports can also be retrieved using stream_get_transports().\n\nThe socket will by default be opened in blocking mode. You can switch it to non-blocking mode by using stream_set_blocking().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -409,7 +391,6 @@
             "name": "pfsockopen",
             "desc": "This function behaves exactly as fsockopen() with the difference that the connection is not closed after the script finishes. It is the persistent version of fsockopen().\nFor parameter information, see the fsockopen() documentation.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -446,7 +427,6 @@
         {
             "name": "socket_get_status",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -461,7 +441,6 @@
         {
             "name": "socket_set_blocking",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -480,7 +459,6 @@
         {
             "name": "socket_set_timeout",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean"
@@ -505,7 +483,6 @@
             "name": "header",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null,
@@ -553,7 +530,6 @@
             "name": "headers_list",
             "desc": "headers_list() will return a list of headers to be sent to the browser \/ client. To determine whether or not these headers have been sent yet, use headers_sent().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "StringVec",
@@ -566,7 +542,6 @@
             "name": "get_http_request_size",
             "desc": "get_http_request_size() will return the size of the http request.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int32",
@@ -579,7 +554,6 @@
             "name": "headers_sent",
             "desc": "Checks if or where headers have been sent.\n\nYou can't add any more header lines using the header() function once the header block has already been sent. Using this function you can at least prevent getting HTTP header related error messages. Another option is to use Output Buffering.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -606,7 +580,6 @@
             "name": "header_register_callback",
             "desc": "Registers a function that will be called when PHP starts sending output.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -624,7 +597,6 @@
             "name": "header_remove",
             "desc": "Removes an HTTP header previously set using header().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null,
@@ -643,7 +615,6 @@
             "name": "setcookie",
             "desc": null,
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -697,7 +668,6 @@
             "name": "setrawcookie",
             "desc": "setrawcookie() is exactly the same as setcookie() except that the cookie value will not be automatically urlencoded when sent to the browser.\nFor parameter information, see the setcookie() documentation.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -744,7 +714,6 @@
             "name": "define_syslog_variables",
             "desc": "Initializes all variables used in the syslog functions.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -756,7 +725,6 @@
             "name": "openlog",
             "desc": "openlog() opens a connection to the system logger for a program.\n\nThe use of openlog() is optional. It will automatically be called by syslog() if necessary, in which case ident will default to FALSE.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -784,7 +752,6 @@
             "name": "closelog",
             "desc": "closelog() closes the descriptor being used to write to the system logger. The use of closelog() is optional.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -797,7 +764,6 @@
             "name": "syslog",
             "desc": "syslog() generates a log message that will be distributed by the system logger.\n\nFor information on setting up a user defined log handler, see the syslog.conf (5) Unix manual page. More information on the syslog facilities and option can be found in the man pages for syslog (3) on Unix machines.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",

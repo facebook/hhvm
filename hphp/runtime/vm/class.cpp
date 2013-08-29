@@ -13,9 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/hphp_array.h"
+#include "hphp/runtime/base/hphp-array.h"
 #include "hphp/util/util.h"
 #include "hphp/util/debug.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
@@ -24,7 +24,7 @@
 #include "hphp/runtime/vm/request-arena.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/parser/parser.h"
+#include "hphp/parser/parser.h"
 
 #include <iostream>
 #include <algorithm>
@@ -1023,9 +1023,8 @@ void Class::setParent() {
 static Func* findSpecialMethod(Class* cls, const StringData* name) {
   if (!cls->preClass()->hasMethod(name)) return nullptr;
   Func* f = cls->preClass()->lookupMethod(name);
-  f = f->clone();
+  f = f->clone(cls);
   f->setNewFuncId();
-  f->setCls(cls);
   f->setBaseCls(cls);
   f->setHasPrivateAncestor(false);
   return f;
@@ -1241,9 +1240,9 @@ void Class::importTraitMethod(const TraitMethod&  traitMethod,
     }
     parentMethod = existingMethod;
   }
-  Func* f = method->clone();
+  Func* f = method->clone(this);
   f->setNewFuncId();
-  f->setClsAndName(this, methName);
+  f->setName(methName);
   f->setAttrs(modifiers);
   if (!parentMethod) {
     // New method
@@ -1451,9 +1450,8 @@ void Class::setMethods() {
       assert(parentMethod);
       methodOverrideCheck(parentMethod, method);
       // Overlay.
-      Func* f = method->clone();
+      Func* f = method->clone(this);
       f->setNewFuncId();
-      f->setCls(this);
       Class* baseClass;
       assert(!(f->attrs() & AttrPrivate) ||
              (parentMethod->attrs() & AttrPrivate));
@@ -1471,9 +1469,8 @@ void Class::setMethods() {
       // This is the first class that declares the method
       Class* baseClass = this;
       // Append.
-      Func* f = method->clone();
+      Func* f = method->clone(this);
       f->setNewFuncId();
-      f->setCls(this);
       f->setBaseCls(baseClass);
       f->setHasPrivateAncestor(false);
       builder.add(method->name(), f);
@@ -1497,10 +1494,7 @@ void Class::setMethods() {
       // we're cloning it so that we get a distinct set of static
       // locals and a separate translation, not a different context
       // class.
-      f = f->clone();
-      if (f->attrs() & AttrClone) {
-        f->setCls(this);
-      }
+      f = f->clone(f->attrs() & AttrClone ? this : f->cls());
       f->setNewFuncId();
     }
   }
@@ -2159,24 +2153,41 @@ Class* Class::findMethodBaseClass(const StringData* methName) {
 }
 
 void Class::getMethodNames(const Class* ctx, HphpArray* methods) const {
-  Func* const* pcMethods = m_preClass->methods();
-  for (size_t i = 0, sz = m_preClass->numMethods(); i < sz; i++) {
-    Func* func = pcMethods[i];
-    if (func->isGenerated()) continue;
-    if (!(func->attrs() & AttrPublic)) {
-      if (!ctx) continue;
-      if (ctx != this) {
-        if (func->attrs() & AttrPrivate) continue;
-        func = lookupMethod(func->name());
-        if (!ctx->classof(func->baseCls()) &&
-            !func->baseCls()->classof(ctx)) {
-          continue;
-        }
-      }
+  for (Slot i = 0; i < m_methods.size(); i++) {
+    Func* meth = m_methods[i];
+    StringData* methName = const_cast<StringData*>(meth->name());
+    Class* declCls = meth->cls();
+
+    // Only pick methods declared in this class, in order to match Zend's order.
+    // Inherited methods will be inserted in the recursive call later.
+    if (declCls != this) continue;
+
+    // Skip generated, internal methods.
+    if (meth->isGenerated()) continue;
+
+    // Public methods are always visible.
+    if ((meth->attrs() & AttrPublic)) {
+      methods->set(methName, true_varNR, false);
+      continue;
     }
-    methods->set(const_cast<StringData*>(func->name()), true_varNR, false);
+
+    // In anonymous contexts, only public methods are visible.
+    if (!ctx) continue;
+
+    // All methods are visible if the context is the class that declared them.
+    // If the context is not the declCls, protected methods are visible in
+    // context classes related the declCls.
+    if (declCls == ctx ||
+        ((meth->attrs() & AttrProtected) &&
+         (ctx->classof(declCls) || declCls->classof(ctx)))) {
+      methods->set(methName, true_varNR, false);
+    }
   }
+
+  // Now add the inherited methods.
   if (m_parent.get()) m_parent->getMethodNames(ctx, methods);
+
+  // Add interface methods that the class may not have implemented yet.
   for (int i = 0, sz = m_declInterfaces.size(); i < sz; i++) {
     m_declInterfaces[i]->getMethodNames(ctx, methods);
   }

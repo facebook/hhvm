@@ -145,14 +145,12 @@ struct IRInstruction {
    * share the same kind of extra data.
    */
   template<class T> const T* extra() const {
-    auto opcode = op();
-    if (debug) assert_opcode_extra<T>(opcode);
+    if (debug) assert_opcode_extra<T>(op());
     return static_cast<const T*>(m_extra);
   }
 
   /*
-   * Returns whether or not this opcode has an associated extra data
-   * struct.
+   * Returns whether or not this instruction has an extra data struct.
    */
   bool hasExtra() const;
 

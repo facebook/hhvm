@@ -18,7 +18,7 @@
 #ifndef incl_EXT_PHAR_H_
 #define incl_EXT_PHAR_H_
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

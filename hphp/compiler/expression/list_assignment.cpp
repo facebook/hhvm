@@ -23,7 +23,7 @@
 #include "hphp/compiler/expression/object_property_expression.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/compiler/expression/binary_op_expression.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 
 using namespace HPHP;
 
@@ -76,6 +76,7 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
     case Expression::KindOfExpressionList:
     case Expression::KindOfIncludeExpression:
     case Expression::KindOfYieldExpression:
+    case Expression::KindOfAwaitExpression:
       return ListAssignment::Regular;
 
     case Expression::KindOfListAssignment:
@@ -102,8 +103,12 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
 
     case Expression::KindOfBinaryOpExpression: {
       BinaryOpExpressionPtr b(static_pointer_cast<BinaryOpExpression>(rhs));
-      return b->isAssignmentOp() || b->getOp() == '+' ?
-        ListAssignment::Regular : ListAssignment::Null;
+      if (b->isAssignmentOp() ||
+          b->getOp() == '+' ||
+          b->getOp() == T_COLLECTION) {
+        return ListAssignment::Regular;
+      }
+      return ListAssignment::Null;
     }
     case Expression::KindOfQOpExpression:
       return ListAssignment::Checked;

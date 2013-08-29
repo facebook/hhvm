@@ -44,8 +44,8 @@ bool g_armMode = false;
 
 constexpr char* g_allIncludes = R"(
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/array_init.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/ext.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/runtime.h"

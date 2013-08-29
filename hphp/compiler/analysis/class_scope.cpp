@@ -34,14 +34,14 @@
 #include "hphp/compiler/statement/function_statement.h"
 #include "hphp/compiler/statement/method_statement.h"
 #include "hphp/compiler/statement/statement_list.h"
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/class-info.h"
 #include "hphp/compiler/statement/class_variable.h"
 #include "hphp/compiler/statement/class_constant.h"
 #include "hphp/compiler/statement/use_trait_statement.h"
 #include "hphp/compiler/statement/trait_prec_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
-#include "hphp/runtime/base/zend_string.h"
+#include "hphp/runtime/base/zend-string.h"
 #include "hphp/util/util.h"
 
 #include <boost/foreach.hpp>
@@ -425,7 +425,7 @@ ClassScope::importTraitMethod(const TraitMethod&  traitMethod,
 
   FunctionScopePtr cloneFuncScope
     (new HPHP::FunctionScope(funcScope, ar, methName, origMethName, cloneMeth,
-                             cloneMeth->getModifiers()));
+                             cloneMeth->getModifiers(), cScope->isUserClass()));
   cloneMeth->resetScope(cloneFuncScope, true);
   cloneFuncScope->setOuterScope(shared_from_this());
   informClosuresAboutScopeClone(cloneMeth, cloneFuncScope, ar);

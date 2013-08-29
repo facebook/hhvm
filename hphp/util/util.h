@@ -196,11 +196,6 @@ const char *canonicalize(const char *path, size_t len,
 std::string normalizeDir(const std::string &dirname);
 
 /**
- * Thread-safe strerror().
- */
-std::string safe_strerror(int errnum);
-
-/**
  * Thread-safe dirname().
  */
 std::string safe_dirname(const char *path, int len);

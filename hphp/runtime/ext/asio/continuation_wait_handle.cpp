@@ -347,5 +347,23 @@ void c_ContinuationWaitHandle::exitContext(context_idx_t ctx_idx) {
   }
 }
 
+// Get the filename in which execution will proceed when execution resumes.
+String c_ContinuationWaitHandle::getFileName() {
+  if (m_continuation.isNull()) return empty_string;
+  auto ar = m_continuation->actRec();
+  auto file = ar->m_func->unit()->filepath()->data();
+  if (ar->m_func->originalFilename()) {
+    file = ar->m_func->originalFilename()->data();
+  }
+  return file;
+}
+
+// Get the line number on which execution will proceed when execution resumes.
+int c_ContinuationWaitHandle::getLineNumber() {
+  if (m_continuation.isNull()) return -1;
+  auto const unit = m_continuation->actRec()->m_func->unit();
+  return unit->getLineNumber(m_continuation->getNextExecutionOffset());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

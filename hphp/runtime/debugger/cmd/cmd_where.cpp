@@ -15,8 +15,10 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_where.h"
-#include "hphp/runtime/base/array_iterator.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/ext_continuation.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,61 +52,84 @@ void CmdWhere::recvImpl(DebuggerThriftBuffer &thrift) {
 void CmdWhere::help(DebuggerClient &client) {
   client.helpTitle("Where Command");
   client.helpCmds(
-    "[w]here",           "displays current stacktrace",
-    "[w]here {num}",     "displays number of innermost frames",
-    "[w]here -{num}",    "displays number of outermost frames",
+    "[w]here", "displays current stacktrace",
+    "[w]here [a]sync", "displays the current async stacktrace",
+    "wa", "shortcut for [w]here [a]sync",
+    "[w]here {[a]sync]} {num}", "displays number of innermost frames",
+    "[w]here {[a]sync]} -{num}", "displays number of outermost frames",
     nullptr
   );
   client.helpBody(
     "Use '[u]p {num}' or '[d]own {num}' to walk up or down the stacktrace. "
     "Use '[f]rame {index}' to jump to one particular frame. At any frame, "
-    "use '[v]ariable' command to display all local variables."
+    "Use '[v]ariable' command to display all local variables.\n"
+    "\n"
+    "Use '[w]here [a]sync' from within an async method, like a generator, "
+    "to get the current stack of async methods."
   );
 }
 
 Array CmdWhere::fetchStackTrace(DebuggerClient &client) {
   Array st = client.getStackTrace();
-  if (st.isNull()) {
+  // Only grab a new stack trace if we don't have one cached, or if
+  // the one cached does not match the type of stack trace being
+  // requested.
+  bool isAsync = m_type == KindOfWhereAsync;
+  if (st.isNull() || (isAsync != client.isStackTraceAsync())) {
     m_stackArgs = client.getDebuggerStackArgs();
     CmdWherePtr cmd = client.xend<CmdWhere>(this);
     st = cmd->m_stacktrace;
-    client.setStackTrace(st);
+    client.setStackTrace(st, isAsync);
   }
   return st;
 }
 
-void CmdWhere::onClientImpl(DebuggerClient &client) {
+void CmdWhere::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
-  if (client.argCount() > 1) {
+  if (client.argCount() > 2) {
     help(client);
     return;
+  }
+  int argBase = 1;
+  if ((client.argCount() > 0) && client.arg(argBase, "async")) {
+    // We use a different command type for an async stack trace, so we
+    // can both send and receive different data and still keep the
+    // existing Where command unchanged. This ensures that old clients
+    // can still get a stack trace from a newer server, and vice
+    // versa.
+    m_type = KindOfWhereAsync;
+    argBase++;
+    client.info("Fetching async stacktrace...");
   }
 
   Array st = fetchStackTrace(client);
   if (st.empty()) {
-    client.info("(no stacktrace to display or in global scope)");
-    client.info("if you hit serialization limit, consider do "
-                 "\"set sa off\" and then get the stack without args");
+    if (m_type != KindOfWhereAsync) {
+      client.info("(no stacktrace to display or in global scope)");
+      client.info("If you hit the serialization limit, try "
+                  "\"set sa off\" to get the stack without args");
+    } else {
+      client.info("(no async stacktrace to display)");
+    }
     return;
   }
 
   // so list command can default to current frame
   client.moveToFrame(client.getFrame(), false);
 
-  if (client.argCount() == 0) {
+  if (client.argCount() < argBase) {
     int i = 0;
     for (ArrayIter iter(st); iter; ++iter) {
       client.printFrame(i, iter.second().toArray());
       ++i;
-      if (!client.isApiMode() &&
-          i % DebuggerClient::ScrollBlockSize == 0 &&
+      if (i % DebuggerClient::ScrollBlockSize == 0 &&
           client.ask("There are %zd more frames. Continue? [Y/n]",
                       st.size() - i) == 'n') {
         break;
       }
     }
   } else {
-    string snum = client.argValue(1);
+    string snum = client.argValue(argBase);
     int num = atoi(snum.c_str());
     if (snum[0] == '-') {
       snum = snum.substr(1);
@@ -132,11 +157,7 @@ void CmdWhere::onClientImpl(DebuggerClient &client) {
   }
 }
 
-void CmdWhere::setClientOutput(DebuggerClient &client) {
-  client.setOutputType(DebuggerClient::OTStacktrace);
-}
-
-void CmdWhere::processStackTrace() {
+void CmdWhere::removeArgs() {
   // Strip out the args from the stack
   static StaticString s_args("args");
   Array smallST;
@@ -154,10 +175,73 @@ void CmdWhere::processStackTrace() {
   m_stacktrace = smallST;
 }
 
+c_WaitableWaitHandle *objToWaitableWaitHandle(Object o) {
+  assert(o->instanceof(c_WaitableWaitHandle::s_cls));
+  return static_cast<c_WaitableWaitHandle*>(o.get());
+}
+
+const StaticString
+  s_function("function"),
+  s_id("id"),
+  s_file("file"),
+  s_line("line"),
+  s_ancestors("ancestors");
+
+// Add location information for the given continuation to the given frame.
+void addContinuationLocation(Array& frameData,
+                             c_ContinuationWaitHandle& contWh) {
+  // A running continuation is active on the normal stack, and we
+  // cannot compute the location just by inspecting the continuation
+  // alone.
+  if (contWh.isRunning()) return;
+  frameData.set(s_file, contWh.getFileName(), true);
+  frameData.set(s_line, contWh.getLineNumber(), true);
+}
+
+// Form a trace of the async stack starting with the currently running
+// generator, if any. For now we just toss in the function name and
+// id, as well as the pseudo-frames for context breaks at explicit
+// joins. Later we'll add more, like file and line, hopefully function
+// args, wait handle status, etc.
+Array createAsyncStacktrace() {
+  Array trace;
+  auto currentWaitHandle = f_asio_get_running();
+  if (currentWaitHandle.isNull()) return trace;
+  Array depStack =
+    objToWaitableWaitHandle(currentWaitHandle)->t_getdependencystack();
+  for (ArrayIter iter(depStack); iter; ++iter) {
+    if (iter.secondRef().isNull()) {
+      trace.append(ArrayInit(0).toVariant());
+    } else {
+      auto wh = objToWaitableWaitHandle(iter.secondRef().toObject());
+      auto parents = wh->t_getparents();
+      Array ancestors;
+      for (ArrayIter piter(parents); piter; ++piter) {
+        // Note: the parent list contains no nulls.
+        auto parent = objToWaitableWaitHandle(piter.secondRef().toObject());
+        ancestors.append(parent->t_getname());
+      }
+      Array frameData;
+      frameData.set(s_function, wh->t_getname(), true);
+      frameData.set(s_id, wh->t_getid(), true);
+      frameData.set(s_ancestors, ancestors, true);
+      // Continuation wait handles may have a source location to add.
+      auto contWh = dynamic_cast<c_ContinuationWaitHandle*>(wh);
+      if (contWh != nullptr) addContinuationLocation(frameData, *contWh);
+      trace.append(frameData);
+    }
+  }
+  return trace;
+}
+
 bool CmdWhere::onServer(DebuggerProxy &proxy) {
-  m_stacktrace = g_vmContext->debugBacktrace(false, true, false);
-  if (!m_stackArgs) {
-    processStackTrace();
+  if (m_type == KindOfWhereAsync) {
+    m_stacktrace = createAsyncStacktrace();
+  } else {
+    m_stacktrace = g_vmContext->debugBacktrace(false, true, false);
+    if (!m_stackArgs) {
+      removeArgs();
+    }
   }
   return proxy.sendToClient(this);
 }

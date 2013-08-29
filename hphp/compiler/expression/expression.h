@@ -76,6 +76,7 @@ class Variant;
     x(EncapsListExpression, None),              \
     x(ClosureExpression, None),                 \
     x(YieldExpression, None),                   \
+    x(AwaitExpression, None),                   \
     x(UserAttribute, None)
 
 class Expression : public Construct {
@@ -232,6 +233,7 @@ public:
   virtual bool isTemporary() const { return false; }
   virtual bool isScalar() const { return false; }
   bool isArray() const;
+  bool isCollection() const;
   virtual bool isRefable(bool checkError = false) const { return false; }
   virtual bool getScalarValue(Variant &value) { return false; }
   FileScopeRawPtr getUsedScalarScope(CodeGenerator& cg);

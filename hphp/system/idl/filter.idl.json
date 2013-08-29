@@ -223,7 +223,6 @@
             "name": "filter_list",
             "desc": "Returns a list of all supported filters",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -236,7 +235,6 @@
             "name": "filter_id",
             "desc": "Returns the filter ID belonging to a named filter",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -254,7 +252,6 @@
             "name": "filter_var",
             "desc": "Filters a variable with a specified filter",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",

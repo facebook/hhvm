@@ -3,15 +3,14 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
+   | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
 
@@ -21,6 +20,7 @@
 #include "hphp/util/exception.h"
 #include "hphp/util/util.h"
 #include "hphp/runtime/base/types.h"
+#include "folly/String.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -87,14 +87,6 @@ public:
     : InvalidOperandException("cannot perform this operation with arrays") {}
   virtual ~BadArrayOperandException() throw() {}
   EXCEPTION_COMMON_IMPL(BadArrayOperandException);
-};
-
-class BadTypeConversionException : public ExtendedException {
-public:
-  explicit BadTypeConversionException(const char *msg)
-    : ExtendedException("Bad type conversion: %s.", msg) {}
-  virtual ~BadTypeConversionException() throw() {}
-  EXCEPTION_COMMON_IMPL(BadTypeConversionException);
 };
 
 class OffsetOutOfRangeException : public ExtendedException {
@@ -182,7 +174,7 @@ class SystemCallFailure : public ExtendedException {
 public:
   explicit SystemCallFailure(const char *func)
     : ExtendedException("%s returned %d: %s.", func, errno,
-                        Util::safe_strerror(errno).c_str()) {}
+                        folly::errnoStr(errno).c_str()) {}
   virtual ~SystemCallFailure() throw() {}
   EXCEPTION_COMMON_IMPL(SystemCallFailure);
 };

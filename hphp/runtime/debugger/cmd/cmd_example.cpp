@@ -54,7 +54,7 @@ void CmdExample::help(DebuggerClient &client) {
   );
 }
 
-void CmdExample::onClientImpl(DebuggerClient &client) {
+void CmdExample::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
   if (client.argCount() == 1) {
     help(client);

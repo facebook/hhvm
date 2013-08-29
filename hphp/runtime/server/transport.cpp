@@ -17,21 +17,22 @@
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/upload.h"
-#include "hphp/runtime/server/server_stats.h"
+#include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/file.h"
-#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/datetime.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/url.h"
-#include "hphp/runtime/base/zend_url.h"
-#include "hphp/runtime/server/access_log.h"
+#include "hphp/runtime/base/zend-url.h"
+#include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/ext/ext_openssl.h"
 #include "hphp/util/compression.h"
 #include "hphp/util/util.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/timer.h"
-#include "hphp/runtime/base/hardware_counter.h"
+#include "hphp/runtime/base/hardware-counter.h"
+#include "folly/String.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -837,7 +838,7 @@ bool Transport::moveUploadedFileHelper(CStrRef filename, CStrRef destination) {
   if (Util::rename(filename.c_str(), dest.c_str()) < 0) {
     Logger::Error("Unable to move uploaded file %s to %s: %s.",
                   filename.c_str(), dest.c_str(),
-                  Util::safe_strerror(errno).c_str());
+                  folly::errnoStr(errno).c_str());
     return false;
   }
   Logger::Verbose("Successfully moved uploaded file %s to %s.",

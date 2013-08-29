@@ -15,7 +15,6 @@
             "name": "connection_aborted",
             "desc": "Checks whether the client disconnected.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -28,7 +27,6 @@
             "name": "connection_status",
             "desc": "Gets the connection status bitfield.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -41,7 +39,6 @@
             "name": "connection_timeout",
             "desc": "Determines whether the script timed out.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -53,7 +50,6 @@
         {
             "name": "constant",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -71,7 +67,6 @@
             "name": "define",
             "desc": "Defines a named constant at runtime.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -100,7 +95,6 @@
             "name": "defined",
             "desc": "Checks whether the given constant exists and is defined.\n\nIf you want to see if a variable exists, use isset() as defined() only applies to constants. If you want to see if a function exists, use function_exists().",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -123,7 +117,6 @@
         {
             "name": "die",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -140,7 +133,6 @@
             "name": "exit",
             "desc": "Terminates execution of the script. Shutdown functions and object destructors will always be executed even if exit() is called.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -159,7 +151,6 @@
             "name": "eval",
             "desc": "Evaluates the string given in code_str as PHP code. Among other things, this can be useful for storing code in a database text field for later execution.\n\nThere are some factors to keep in mind when using eval(). Remember that the string passed must be valid PHP code, including things like terminating statements with a semicolon so the parser doesn't die on the line after the eval(), and properly escaping things in code_str. To mix HTML output and PHP code you can use a closing PHP tag to leave PHP mode.\n\nAlso remember that variables given values under eval() will retain these values in the main script afterwards.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -177,7 +168,6 @@
             "name": "get_browser",
             "desc": "Attempts to determine the capabilities of the user's browser, by looking up the browser's information in the browscap.ini file.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -201,7 +191,6 @@
         {
             "name": "__halt_compiler",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null
@@ -210,33 +199,8 @@
             ]
         },
         {
-            "name": "highlight_file",
-            "desc": "Prints out or returns a syntax highlighted version of the code contained in filename using the colors defined in the built-in syntax highlighter for PHP.\n\nMany servers are configured to automatically highlight files with a phps extension. For example, example.phps when viewed will show the syntax highlighted source of the file. To enable this, add this line to the httpd.conf: AddType application\/x-httpd-php-source .phps",
-            "flags": [
-                "HasDocComment"
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "If return is set to TRUE, returns the highlighted code as a string instead of printing it out. Otherwise, it will return TRUE on success, FALSE on failure."
-            },
-            "args": [
-                {
-                    "name": "filename",
-                    "type": "String",
-                    "desc": "Path to the PHP file to be highlighted."
-                },
-                {
-                    "name": "ret",
-                    "type": "Boolean",
-                    "value": "false",
-                    "desc": "Set this parameter to TRUE to make this function return the highlighted code."
-                }
-            ]
-        },
-        {
             "name": "show_source",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant"
@@ -254,33 +218,9 @@
             ]
         },
         {
-            "name": "highlight_string",
-            "flags": [
-                "HasDocComment"
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "If return is set to TRUE, returns the highlighted code as a string instead of printing it out. Otherwise, it will return TRUE on success, FALSE on failure."
-            },
-            "args": [
-                {
-                    "name": "str",
-                    "type": "String",
-                    "desc": "The PHP code to be highlighted. This should include the opening tag."
-                },
-                {
-                    "name": "ret",
-                    "type": "Boolean",
-                    "value": "false",
-                    "desc": "Set this parameter to TRUE to make this function return the highlighted code."
-                }
-            ]
-        },
-        {
             "name": "ignore_user_abort",
             "desc": "Sets whether a client disconnect should cause a script to be aborted.\n\nWhen running PHP as a command line script, and the script's tty goes away without the script being terminated then the script will die the next time it tries to write anything, unless value is set to TRUE",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -299,7 +239,6 @@
             "name": "pack",
             "desc": "Pack given arguments into binary string according to format.\n\nThe idea for this function was taken from Perl and all formatting codes work the same as in Perl. However, there are some formatting codes that are missing such as Perl's \"u\" format code.\n\nNote that the distinction between signed and unsigned values only affects the function unpack(), where as function pack() gives the same result for signed and unsigned format codes.\n\nAlso note that PHP internally stores integer values as signed values of a machine-dependent size. If you give it an unsigned integer value too large to be stored that way it is converted to a float which often yields an undesired result.",
             "flags": [
-                "HasDocComment",
                 "VariableArguments"
             ],
             "return": {
@@ -318,7 +257,6 @@
             "name": "php_check_syntax",
             "desc": "Performs a syntax (lint) check on the specified filename testing for scripting errors.\n\nThis is similar to using php -l from the commandline except that this function will execute (but not output) the checked filename.\n\nFor example, if a function is defined in filename, this defined function will be available to the file that executed php_check_syntax(), but output from filename will be suppressed.\n\nFor technical reasons, this function is deprecated and removed from PHP. Instead, use php -l somefile.php from the commandline.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -342,7 +280,6 @@
         {
             "name": "sleep",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -360,7 +297,6 @@
             "name": "usleep",
             "desc": "Delays program execution for the given number of micro seconds.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": null,
@@ -378,7 +314,6 @@
             "name": "time_nanosleep",
             "desc": "Delays program execution for the given number of seconds and nanoseconds.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -401,7 +336,6 @@
             "name": "time_sleep_until",
             "desc": "Makes the script sleep until the specified timestamp.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -419,7 +353,6 @@
             "name": "uniqid",
             "desc": "Gets a prefixed unique identifier based on the current time in microseconds.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -444,7 +377,6 @@
             "name": "unpack",
             "desc": "Unpacks from a binary string into an array according to the given format.\n\nunpack() works slightly different from Perl as the unpacked data is stored in an associative array. To accomplish this you have to name the different format codes and separate them by a slash \/.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -467,7 +399,6 @@
             "name": "sys_getloadavg",
             "desc": "Returns three samples representing the average system load (the number of processes in the system run queue) over the last 1, 5 and 15 minutes, respectively.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap",
@@ -480,7 +411,6 @@
             "name": "token_get_all",
             "desc": "token_get_all() parses the given source string into PHP language tokens using the Zend engine's lexical scanner.\n\nFor a list of parser tokens, see List of Parser Tokens, or use token_name() to translate a token value into its string representation.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "VariantMap",
@@ -498,7 +428,6 @@
             "name": "token_name",
             "desc": "token_name() gets the symbolic name for a PHP token value.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -516,7 +445,6 @@
             "name": "hphp_to_string",
             "desc": "Casts a given value to a string.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",

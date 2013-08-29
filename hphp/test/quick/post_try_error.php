@@ -1,0 +1,3 @@
+<?php
+
+try {} asdf {}

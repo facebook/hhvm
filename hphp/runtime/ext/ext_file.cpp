@@ -20,21 +20,22 @@
 #include "hphp/runtime/ext/ext_stream.h"
 #include "hphp/runtime/ext/ext_options.h"
 #include "hphp/runtime/ext/ext_hash.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/runtime_error.h"
-#include "hphp/runtime/base/ini_setting.h"
-#include "hphp/runtime/base/array_util.h"
-#include "hphp/runtime/base/http_client.h"
-#include "hphp/runtime/base/request_local.h"
-#include "hphp/runtime/server/static_content_cache.h"
-#include "hphp/runtime/base/zend_scanf.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/array-util.h"
+#include "hphp/runtime/base/http-client.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/server/static-content-cache.h"
+#include "hphp/runtime/base/zend-scanf.h"
 #include "hphp/runtime/base/pipe.h"
-#include "hphp/runtime/base/stream_wrapper_registry.h"
-#include "hphp/runtime/base/file_stream_wrapper.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/util.h"
 #include "hphp/util/process.h"
+#include "folly/String.h"
 #include <dirent.h>
 #include <glob.h>
 #include <sys/types.h>
@@ -59,7 +60,7 @@
 #define CHECK_SYSTEM(exp)                                 \
   if ((exp) != 0) {                                       \
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,  \
-                    Util::safe_strerror(errno).c_str());  \
+                    folly::errnoStr(errno).c_str());      \
     return false;                                         \
   }                                                       \
 
@@ -92,7 +93,7 @@ namespace HPHP {
 static bool check_error(const char *function, int line, bool ret) {
   if (!ret) {
     Logger::Verbose("%s/%d: %s", function, line,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
   }
   return ret;
 }
@@ -541,7 +542,7 @@ Variant f_readfile(CStrRef filename, bool use_include_path /* = false */,
   Variant f = f_fopen(filename, "rb", use_include_path, context);
   if (same(f, false)) {
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     return false;
   }
   Variant ret = f_fpassthru(f.toResource());
@@ -801,7 +802,7 @@ bool f_is_dir(CStrRef filename) {
   }
   bool isRelative = (filename.charAt(0) != '/');
   if (isRelative) cwd = g_context->getCwd();
-  if (!isRelative || cwd == RuntimeOption::SourceRoot.c_str()) {
+  if (!isRelative || cwd == String(RuntimeOption::SourceRoot)) {
     if (File::IsVirtualDirectory(filename)) {
       return true;
     }
@@ -855,7 +856,7 @@ Variant f_readlink_internal(CStrRef path, bool warning_compliance) {
   int ret = readlink(File::TranslatePath(path).data(), buff, PATH_MAX-1);
   if (ret < 0) {
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     if (warning_compliance) {
       raise_warning("readlink(): No such file or directory %s",path.c_str());
     }
@@ -1051,7 +1052,7 @@ bool f_touch(CStrRef filename, int64_t mtime /* = 0 */, int64_t atime /* = 0 */)
     if (f == NULL) {
       Logger::Verbose("%s/%d: Unable to create file %s because %s",
                       __FUNCTION__, __LINE__, translated.data(),
-                      Util::safe_strerror(errno).c_str());
+                      folly::errnoStr(errno).c_str());
       return false;
     }
     fclose(f);
@@ -1265,7 +1266,7 @@ Variant f_tempnam(CStrRef dir, CStrRef prefix) {
   int fd = mkstemp(buf);
   if (fd < 0) {
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     return false;
   }
 

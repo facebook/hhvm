@@ -7,7 +7,6 @@
             "name": "bcscale",
             "desc": "Sets the default scale parameter for all subsequent bc math functions that do not explicitly specify a scale parameter.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Boolean",
@@ -25,7 +24,6 @@
             "name": "bcadd",
             "desc": "Sums left_operand and right_operand.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -54,7 +52,6 @@
             "name": "bcsub",
             "desc": "Subtracts the right_operand from the left_operand.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -83,7 +80,6 @@
             "name": "bccomp",
             "desc": "Compares the left_operand to the right_operand and returns the result as an integer.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Int64",
@@ -112,7 +108,6 @@
             "name": "bcmul",
             "desc": "Multiply the left_operand by the right_operand.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -141,7 +136,6 @@
             "name": "bcdiv",
             "desc": "Divides the left_operand by the right_operand.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -170,7 +164,6 @@
             "name": "bcmod",
             "desc": "Get the modulus of the left_operand using modulus.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -193,7 +186,6 @@
             "name": "bcpow",
             "desc": "Raise left_operand to the power right_operand.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "String",
@@ -222,7 +214,6 @@
             "name": "bcpowmod",
             "desc": "Use the fast-exponentiation method to raise left_operand to the power right_operand with respect to the modulus modulus.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",
@@ -256,7 +247,6 @@
             "name": "bcsqrt",
             "desc": "Return the square root of the operand.",
             "flags": [
-                "HasDocComment"
             ],
             "return": {
                 "type": "Variant",

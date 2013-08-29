@@ -304,6 +304,16 @@ class Composed;
 template<class Expected>
 class TypeAssertion;
 
+class Concat;
+
+class RangeConcat;
+
+class Cycle;
+
+class Batch;
+
+class Dereference;
+
 /*
  * Sinks
  */

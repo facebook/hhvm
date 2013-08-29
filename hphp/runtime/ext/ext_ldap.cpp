@@ -17,8 +17,9 @@
 
 #include "hphp/runtime/ext/ext_ldap.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/util/thread_local.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/util/thread-local.h"
+#include "folly/String.h"
 #include <lber.h>
 
 #define LDAP_DEPRECATED 1
@@ -556,7 +557,7 @@ Variant f_ldap_connect(CStrRef hostname /* = null_string */,
     return ret;
   }
   raise_warning("Unable to initialize LDAP: %s",
-                Util::safe_strerror(errno).c_str());
+                folly::errnoStr(errno).c_str());
   return false;
 }
 

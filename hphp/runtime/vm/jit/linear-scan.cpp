@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/jit/linear-scan.h"
 
-#include "hphp/runtime/base/smart_containers.h"
+#include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/vm/jit/ir-factory.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -454,6 +454,8 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
         assert(opc == DefSP ||
                opc == ReDefSP ||
                opc == ReDefGeneratorSP ||
+               opc == PassSP ||
+               opc == DefInlineSP ||
                opc == Call ||
                opc == CallArray ||
                opc == SpillStack ||
@@ -470,13 +472,12 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
                opc == CastStk ||
                opc == CoerceStk ||
                opc == SideExitGuardStk  ||
-               VectorEffects::supported(opc));
+               MInstrEffects::supported(opc));
         assignRegToTmp(&m_regs[int(rVmSp)], &dst, 0);
         numAllocated++;
         continue;
       }
       if (!abnormalFramePtr && dst.isA(Type::FramePtr)) {
-        assert(opc == DefFP || opc == FreeActRec || opc == DefInlineFP);
         assignRegToTmp(&m_regs[int(rVmFp)], &dst, 0);
         numAllocated++;
         continue;
@@ -777,8 +778,8 @@ void LinearScan::computePreColoringHint() {
           m_preColoringHint.add(inst->src(arg.ival), 0, reg++);
           break;
         case ArgType::TV:
-        case ArgType::VecKeyS:
-        case ArgType::VecKeyIS:
+        case ArgType::MemberKeyS:
+        case ArgType::MemberKeyIS:
           m_preColoringHint.add(inst->src(arg.ival), 0, reg++);
           m_preColoringHint.add(inst->src(arg.ival), 1, reg++);
           break;

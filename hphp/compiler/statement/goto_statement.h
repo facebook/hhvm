@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_GOTO_STATEMENT_H_
 #define incl_HPHP_GOTO_STATEMENT_H_
 
-#include "hphp/util/parser/parser.h"
+#include "hphp/parser/parser.h"
 #include "hphp/compiler/statement/statement.h"
 
 namespace HPHP {

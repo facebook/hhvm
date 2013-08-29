@@ -25,8 +25,8 @@
 #include <boost/type_traits/is_integral.hpp>
 #include <boost/type_traits/is_enum.hpp>
 
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/complex-types.h"
 
 /*
  * This module contains helpers for serializing and deserializing

@@ -16,17 +16,17 @@
 */
 
 #include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/base/string_buffer.h"
-#include "hphp/runtime/base/zend_string.h"
-#include "hphp/runtime/base/zend_url.h"
-#include "hphp/runtime/base/zend_printf.h"
-#include "hphp/runtime/base/zend_scanf.h"
+#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/zend-url.h"
+#include "hphp/runtime/base/zend-printf.h"
+#include "hphp/runtime/base/zend-scanf.h"
 #include "hphp/runtime/base/bstring.h"
-#include "hphp/runtime/base/request_local.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/util/lock.h"
 #include <locale.h>
-#include "hphp/runtime/server/http_request_handler.h"
-#include "hphp/runtime/server/http_protocol.h"
+#include "hphp/runtime/server/http-request-handler.h"
+#include "hphp/runtime/server/http-protocol.h"
 
 namespace HPHP {
 
@@ -405,20 +405,22 @@ Variant f_money_format(CStrRef format, double number) {
 }
 
 String f_number_format(double number, int decimals /* = 0 */,
-                       CStrRef dec_point /* = "." */,
-                       CStrRef thousands_sep /* = "," */) {
+                       CVarRef dec_point /* = "." */,
+                       CVarRef thousands_sep /* = "," */) {
   char ch_dec_point = '.';
   if (!dec_point.isNull()) {
-    if (dec_point.size() >= 1) {
-      ch_dec_point = dec_point[0];
+    CStrRef s = dec_point.toString();
+    if (s.size() >= 1) {
+      ch_dec_point = s[0];
     } else {
       ch_dec_point = 0;
     }
   }
   char ch_thousands_sep = ',';
   if (!thousands_sep.isNull()) {
-    if (thousands_sep.size() >= 1) {
-      ch_thousands_sep = thousands_sep[0];
+    CStrRef s = thousands_sep.toString();
+    if (s.size() >= 1) {
+      ch_thousands_sep = s[0];
     } else {
       ch_thousands_sep = 0;
     }
@@ -866,7 +868,7 @@ String f_html_entity_decode(CStrRef str, int quote_style /* = k_ENT_COMPAT */,
 String f_htmlentities(CStrRef str, int quote_style /* = k_ENT_COMPAT */,
                       CStrRef charset /* = "ISO-8859-1" */,
                       bool double_encode /* = true */) {
-  // dropping double_encode parameters and see runtime/base/zend_html.h
+  // dropping double_encode parameters and see runtime/base/zend-html.h
   const char *scharset = charset.data();
   if (!*scharset) scharset = "UTF-8";
   return StringUtil::HtmlEncode(str, (StringUtil::QuoteStyle)quote_style,
@@ -880,7 +882,7 @@ String f_htmlspecialchars_decode(CStrRef str,
 String f_htmlspecialchars(CStrRef str, int quote_style /* = k_ENT_COMPAT */,
                           CStrRef charset /* = "ISO-8859-1" */,
                           bool double_encode /* = true */) {
-  // dropping double_encode parameters and see runtime/base/zend_html.h
+  // dropping double_encode parameters and see runtime/base/zend-html.h
   const char *scharset = charset.data();
   if (!*scharset) scharset = "UTF-8";
   return StringUtil::HtmlEncode(str, (StringUtil::QuoteStyle)quote_style,
@@ -972,7 +974,7 @@ Variant f_strtr(CStrRef str, CVarRef from, CVarRef to /* = null_variant */) {
       if (arr.exists(key)) {
         String replace = arr[key].toString();
         if (!replace.empty()) {
-          result += replace;
+          result.append(replace);
         }
         pos += len;
         found = true;
@@ -980,7 +982,7 @@ Variant f_strtr(CStrRef str, CVarRef from, CVarRef to /* = null_variant */) {
       }
     }
     if (!found) {
-      result += s[pos++];
+      result.append(s[pos++]);
     }
   }
   return result.detach();

@@ -16,7 +16,7 @@
 
 #include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/compiler/expression/object_property_expression.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/statement/statement_list.h"
@@ -29,8 +29,8 @@
 #include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/compiler/expression/binary_op_expression.h"
 #include "hphp/compiler/expression/encaps_list_expression.h"
-#include "hphp/runtime/base/type_conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/compiler/parser/parser.h"
 
 using namespace HPHP;
@@ -256,10 +256,10 @@ bool UnaryOpExpression::preCompute(CVarRef value, Variant &result) {
         result = toBoolean(value);
         break;
       case T_EMPTY:
-        result = empty(value);
+        result = !toBoolean(value);
         break;
       case T_ISSET:
-        result = isset(value);
+        result = is_not_null(value);
         break;
       case T_INC:
       case T_DEC:
@@ -335,7 +335,7 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
     for (; i < n; i++) {
       ExpressionPtr e((*el)[i]);
       if (!e || !e->isScalar() || !e->getScalarValue(value)) break;
-      if (!isset(value)) {
+      if (value.isNull()) {
         result = false;
       }
     }

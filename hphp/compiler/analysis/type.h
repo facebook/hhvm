@@ -19,7 +19,7 @@
 
 #include "hphp/compiler/hphp.h"
 #include "hphp/util/json.h"
-#include "hphp/util/case_insensitive.h"
+#include "hphp/util/case-insensitive.h"
 #include "hphp/runtime/base/types.h"
 
 

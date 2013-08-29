@@ -3828,14 +3828,31 @@ inline bool OPTBLD_INLINE VMExecutionContext::cellInstanceOf(
   return false;
 }
 
+inline ALWAYS_INLINE
+bool VMExecutionContext::iopInstanceOfHelper(const StringData* str1, Cell* c2) {
+  const NamedEntity* rhs = Unit::GetNamedEntity(str1);
+  // Because of other codepaths, an un-normalized name might enter the
+  // table without a Class* so we need to check if it's there.
+  if (LIKELY(rhs->getCachedClass() != nullptr)) {
+    return cellInstanceOf(c2, rhs);
+  }
+  auto normName = normalizeNS(str1);
+  if (normName) {
+    rhs = Unit::GetNamedEntity(normName.get());
+    if (LIKELY(rhs->getCachedClass() != nullptr)) {
+      return cellInstanceOf(c2, rhs);
+    }
+  }
+  return false;
+}
+
 inline void OPTBLD_INLINE VMExecutionContext::iopInstanceOf(PC& pc) {
   NEXT();
   Cell* c1 = m_stack.topC();   // c2 instanceof c1
   Cell* c2 = m_stack.indC(1);
   bool r = false;
   if (IS_STRING_TYPE(c1->m_type)) {
-    const NamedEntity* rhs = Unit::GetNamedEntity(c1->m_data.pstr);
-    r = cellInstanceOf(c2, rhs);
+    r = iopInstanceOfHelper(c1->m_data.pstr, c2);
   } else if (c1->m_type == KindOfObject) {
     if (c2->m_type == KindOfObject) {
       ObjectData* lhs = c2->m_data.pobj;

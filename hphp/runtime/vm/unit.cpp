@@ -787,7 +787,7 @@ Class* Unit::getClass(const NamedEntity* ne,
       }
     }
 
-    if (tryAutoload && AutoloadHandler::s_instance->class___autoload(name->data())) {
+    if (tryAutoload && AutoloadHandler::s_instance->class___autoload(name->data())){
       return loadMissingClass(ne, name);
     }
   }

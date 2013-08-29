@@ -221,7 +221,7 @@ index 9cd03cd..3f60f54 100644
  
  	void (*gencb)(struct evhttp_request *req, void *);
 diff --git a/http.c b/http.c
-index efcec40..e10d114 100644
+index efcec40..a836968 100644
 --- a/http.c
 +++ b/http.c
 @@ -219,6 +219,13 @@ static int evhttp_decode_uri_internal(const char *uri, size_t length,
@@ -440,7 +440,15 @@ index efcec40..e10d114 100644
  	req->userdone = 1;
  
  	if (req->chunked) {
-@@ -2293,7 +2379,8 @@ accept_socket(int fd, short what, void *arg)
+@@ -2231,6 +2317,7 @@ evhttp_handle_request(struct evhttp_request *req, void *arg)
+ 	if (req->uri == NULL) {
+ 		event_debug(("%s: bad request", __func__));
+ 		if (req->evcon->state == EVCON_DISCONNECTED) {
++			req->userdone = 1;
+ 			evhttp_connection_fail(req->evcon, EVCON_HTTP_EOF);
+ 		} else {
+ 			event_debug(("%s: sending error", __func__));
+@@ -2293,7 +2380,8 @@ accept_socket(int fd, short what, void *arg)
  }
  
  int
@@ -450,7 +458,7 @@ index efcec40..e10d114 100644
  {
  	int fd;
  	int res;
-@@ -2301,7 +2388,7 @@ evhttp_bind_socket(struct evhttp *http, const char *address, u_short port)
+@@ -2301,7 +2389,7 @@ evhttp_bind_socket(struct evhttp *http, const char *address, u_short port)
  	if ((fd = bind_socket(address, port, 1 /*reuse*/)) == -1)
  		return (-1);
  
@@ -459,7 +467,7 @@ index efcec40..e10d114 100644
  		event_warn("%s: listen", __func__);
  		EVUTIL_CLOSESOCKET(fd);
  		return (-1);
-@@ -2309,13 +2396,42 @@ evhttp_bind_socket(struct evhttp *http, const char *address, u_short port)
+@@ -2309,13 +2397,42 @@ evhttp_bind_socket(struct evhttp *http, const char *address, u_short port)
  
  	res = evhttp_accept_socket(http, fd);
  	
@@ -503,7 +511,7 @@ index efcec40..e10d114 100644
  int
  evhttp_accept_socket(struct evhttp *http, int fd)
  {
-@@ -2345,6 +2461,25 @@ evhttp_accept_socket(struct evhttp *http, int fd)
+@@ -2345,6 +2462,25 @@ evhttp_accept_socket(struct evhttp *http, int fd)
  	return (0);
  }
  
@@ -529,7 +537,7 @@ index efcec40..e10d114 100644
  static struct evhttp*
  evhttp_new_object(void)
  {
-@@ -2527,6 +2662,11 @@ evhttp_request_new(void (*cb)(struct evhttp_request *, void *), void *arg)
+@@ -2527,6 +2663,11 @@ evhttp_request_new(void (*cb)(struct evhttp_request *, void *), void *arg)
  void
  evhttp_request_free(struct evhttp_request *req)
  {
@@ -541,7 +549,7 @@ index efcec40..e10d114 100644
  	if (req->remote_host != NULL)
  		free(req->remote_host);
  	if (req->uri != NULL)
-@@ -2657,13 +2797,78 @@ evhttp_get_request(struct evhttp *http, int fd,
+@@ -2657,13 +2798,78 @@ evhttp_get_request(struct evhttp *http, int fd,
  	 * if we want to accept more than one request on a connection,
  	 * we need to know which http server it belongs to.
  	 */

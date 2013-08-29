@@ -947,7 +947,10 @@ static size_t strip_tags_impl(char *rbuf, int len, int *stateptr,
 
     case '"':
     case '\'':
-      if (state == 2 && *(p-1) != '\\') {
+      if (state == 4) {
+        /* Inside <!-- comment --> */
+        break;
+      } else if (state == 2 && *(p-1) != '\\') {
         if (lc == c) {
           lc = '\0';
         } else if (lc != '\\') {

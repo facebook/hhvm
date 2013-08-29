@@ -1114,6 +1114,7 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
   if (m_handlers.isNull() && !forceSplStack) {
     if (function_exists(s___autoload)) {
       invoke(s___autoload, params, -1, true, false);
+      set_classes___autoload(className);
       m_running = l_running;
       return true;
     }

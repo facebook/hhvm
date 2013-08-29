@@ -1,1 +1,2 @@
-string(21) "f1, f2, f3, var_dump."
+string(5) "f1f2."
+string(9) "f1f2f3, !"

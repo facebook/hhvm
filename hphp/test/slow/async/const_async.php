@@ -2,9 +2,7 @@
 
 class F {
   const async = 'async';
-  async
-
-    function foo () {
+  async function foo () {
     return self::async;
   }
 }

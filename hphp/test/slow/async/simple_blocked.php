@@ -8,12 +8,10 @@ async function ret1() {
 }
 
 async function await1() {
+  await block();
   $b = await ret1();
   return 1 + $b;
 }
 
-function retWh() { return await1(); }
-function retValue() { return retWh()->join(); }
-
-var_dump(retValue());
-
+var_dump(ret1()->join());
+var_dump(await1()->join());

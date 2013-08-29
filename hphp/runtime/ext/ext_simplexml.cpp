@@ -72,6 +72,20 @@ StaticString XmlDocWrapper::s_class_name("xmlDoc");
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
+static Object find_node(CVarRef children, xmlNodePtr node) {
+  for (ArrayIter iter(children.toArray()); iter; ++iter) {
+    if (iter.second().isObject()) {
+      c_SimpleXMLElement *elem = iter.second().toObject().getTyped<c_SimpleXMLElement>();
+      Object ret = elem->m_node == node ? elem : find_node(elem->m_children, node);
+      if (!ret.isNull()) return ret;
+    } else if(iter.second().isArray()) {
+      Object ret = find_node(iter.second(), node);
+      if (!ret.isNull()) return ret;
+    }
+  }
+  return NULL;
+}
+
 static inline bool match_ns(xmlNodePtr node, CStrRef ns, bool is_prefix) {
   if (ns.empty()) {
     return true;
@@ -129,12 +143,14 @@ static void add_property(Array &properties, xmlNodePtr node, Object value) {
   }
 }
 
-static Object create_text(CResRef doc, xmlNodePtr node,
+static Object create_text(c_SimpleXMLElement *root,
+                          CResRef doc, xmlNodePtr node,
                           CStrRef value, CStrRef ns,
                           bool is_prefix, bool free_text) {
   Object obj = create_object(doc.getTyped<XmlDocWrapper>()->
                              getClass(), Array(), false);
   c_SimpleXMLElement *elem = obj.getTyped<c_SimpleXMLElement>();
+  elem->m_root = root;
   elem->m_doc = doc;
   elem->m_node = node->parent; // assign to parent, not node
   elem->m_children.set(0, value);
@@ -144,24 +160,28 @@ static Object create_text(CResRef doc, xmlNodePtr node,
   return obj;
 }
 
-static Array create_children(CResRef doc, xmlNodePtr root,
+static Array create_children(c_SimpleXMLElement *m_root,
+                             CResRef doc, xmlNodePtr root,
                              CStrRef ns, bool is_prefix);
 
-static Object create_element(CResRef doc, xmlNodePtr node,
+static Object create_element(c_SimpleXMLElement *root, 
+                             CResRef doc, xmlNodePtr node,
                              CStrRef ns, bool is_prefix) {
   Object obj = create_object(doc.getTyped<XmlDocWrapper>()->
                              getClass(), Array(), false);
   c_SimpleXMLElement *elem = obj.getTyped<c_SimpleXMLElement>();
+  elem->m_root = root ? root : elem;
   elem->m_doc = doc;
   elem->m_node = node;
   if (node) {
-    elem->m_children = create_children(doc, node, ns, is_prefix);
+    elem->m_children = create_children(elem->m_root, doc, node, ns, is_prefix);
     elem->m_attributes = collect_attributes(node, ns, is_prefix);
   }
   return obj;
 }
 
-static Array create_children(CResRef doc, xmlNodePtr root,
+static Array create_children(c_SimpleXMLElement *m_root,
+                             CResRef doc, xmlNodePtr root,
                              CStrRef ns, bool is_prefix) {
   Array properties = Array::Create();
   for (xmlNodePtr node = root->children; node; node = node->next) {
@@ -177,7 +197,7 @@ static Array create_children(CResRef doc, xmlNodePtr root,
         if (node->content && *node->content && !xmlIsBlankNode(node)) {
           add_property
             (properties, root,
-             create_text(doc, node, node_list_to_string(root->doc, node),
+             create_text(m_root, doc, node, node_list_to_string(root->doc, node),
                          ns, is_prefix, true));
         }
         continue;
@@ -190,10 +210,10 @@ static Array create_children(CResRef doc, xmlNodePtr root,
       if (child && (child->type == XML_TEXT_NODE ||
                     child->type == XML_CDATA_SECTION_NODE)
                 && !xmlIsBlankNode(child)) {
-        sub = create_text(doc, child, node_list_to_string(root->doc, child),
+        sub = create_text(m_root, doc, child, node_list_to_string(root->doc, child),
                           ns, is_prefix, false);
       } else {
-        sub = create_element(doc, node, ns, is_prefix);
+        sub = create_element(m_root, doc, node, ns, is_prefix);
       }
       add_property(properties, node, sub);
     }
@@ -266,7 +286,7 @@ Variant f_simplexml_import_dom(CObjRef node,
   if (nodep && nodep->type == XML_ELEMENT_NODE) {
     Resource obj =
       Resource(NEWOBJ(XmlDocWrapper)(nodep->doc, class_name, node));
-    return create_element(obj, nodep, String(), false);
+    return create_element(NULL, obj, nodep, String(), false);
   } else {
     raise_warning("Invalid Nodetype to import");
     return uninit_null();
@@ -302,7 +322,7 @@ Variant f_simplexml_load_string(CStrRef data,
     return false;
   }
 
-  return create_element(Resource(NEWOBJ(XmlDocWrapper)(doc, cls->nameRef())),
+  return create_element(NULL, Resource(NEWOBJ(XmlDocWrapper)(doc, cls->nameRef())),
                                            root, ns, is_prefix);
 }
 
@@ -324,7 +344,7 @@ c_SimpleXMLElement::c_SimpleXMLElement(Class* cb) :
                        ObjectData::UseUnset|
                        ObjectData::CallToImpl|
                        ObjectData::HasClone>(cb),
-      m_node(NULL), m_is_text(false), m_free_text(false),
+      m_root(NULL), m_node(NULL), m_is_text(false), m_free_text(false),
       m_is_attribute(false), m_is_children(false), m_is_property(false),
       m_is_array(false), m_xpath(nullptr) {
   m_children = Array::Create();
@@ -353,7 +373,7 @@ c_SimpleXMLElement* c_SimpleXMLElement::Clone(ObjectData* obj) {
   node->m_is_property = thiz->m_is_property;
   node->m_is_array = thiz->m_is_array;
   node->m_children =
-    create_children(thiz->m_doc, thiz->m_node, String(), false);
+    create_children(NULL, thiz->m_doc, thiz->m_node, String(), false);
   node->m_attributes = collect_attributes(thiz->m_node, String(), false);
   return node;
 }
@@ -378,7 +398,7 @@ void c_SimpleXMLElement::t___construct(CStrRef data, int64_t options /* = 0 */,
       Resource(NEWOBJ(XmlDocWrapper)(doc, o_getClassName()));
     m_node = xmlDocGetRootElement(doc);
     if (m_node) {
-      m_children = create_children(m_doc, m_node, ns, is_prefix);
+      m_children = create_children(NULL, m_doc, m_node, ns, is_prefix);
       m_attributes = collect_attributes(m_node, ns, is_prefix);
     }
   } else {
@@ -430,24 +450,20 @@ Variant c_SimpleXMLElement::t_xpath(CStrRef path) {
   for (int i = 0; i < result->nodeNr; ++i) {
     xmlNodePtr nodeptr = result->nodeTab[i];
     Object sub;
-    /**
-     * Detect the case where the last selector is text(), simplexml
-     * always accesses the text() child by default, therefore we assign
-     * to the parent node.
-     */
-    switch (nodeptr->type) {
-    case XML_TEXT_NODE:
-    case XML_CDATA_SECTION_NODE:
-      sub = create_element(m_doc, nodeptr->parent, String(), false);
-      break;
-    case XML_ELEMENT_NODE:
-      sub = create_element(m_doc, nodeptr, String(), false);
-      break;
-    case XML_ATTRIBUTE_NODE:
-      sub = create_element(m_doc, nodeptr->parent, String(), false);
-      break;
-    default:
-      break;
+    if (m_node == nodeptr) {
+      sub = this;
+    } else {
+      switch (nodeptr->type) {
+        case XML_TEXT_NODE:
+        case XML_CDATA_SECTION_NODE:
+        case XML_ATTRIBUTE_NODE:
+          sub = find_node(m_root->m_children, nodeptr->parent);
+          break;
+        case XML_ELEMENT_NODE:
+          sub = find_node(m_root->m_children, nodeptr);
+        default:
+          break;
+      }
     }
     ret.append(sub);
   }
@@ -541,6 +557,7 @@ Object c_SimpleXMLElement::t_children(CStrRef ns /* = "" */,
   Object obj = create_object(m_doc.getTyped<XmlDocWrapper>()->
                              getClass(), Array(), false);
   c_SimpleXMLElement *elem = obj.getTyped<c_SimpleXMLElement>();
+  elem->m_root = m_root;
   elem->m_doc = m_doc;
   elem->m_node = m_node;
   elem->m_is_text = m_is_text;
@@ -607,6 +624,7 @@ Object c_SimpleXMLElement::t_attributes(CStrRef ns /* = "" */,
   Object obj = create_object(m_doc.getTyped<XmlDocWrapper>()->
                              getClass(), Array(), false);
   c_SimpleXMLElement *elem = obj.getTyped<c_SimpleXMLElement>();
+  elem->m_root = m_root;
   elem->m_doc = m_doc;
   elem->m_node = m_node;
   elem->m_is_attribute = true;
@@ -666,7 +684,7 @@ Variant c_SimpleXMLElement::t_addchild(CStrRef qname,
     xmlFree(prefix);
   }
 
-  Object child = create_element(m_doc, newnode, newns, false);
+  Object child = create_element(m_root, m_doc, newnode, newns, false);
   if (m_children.toArray().exists(newname)) {
     Variant &tmp = m_children.lvalAt(newname);
     if (tmp.isArray()) {
@@ -698,7 +716,7 @@ Variant c_SimpleXMLElement::t_addchild(CStrRef qname,
       m_children = m_children.toArray().merge(children);
 
       // We return a clean element because the retval -can- be casted to string.
-      return create_element(m_doc, newnode, newns, false);
+      return create_element(m_root, m_doc, newnode, newns, false);
     }
   }
   return child;
@@ -787,6 +805,7 @@ Variant c_SimpleXMLElement::t___get(Variant name) {
     Object obj = create_object(m_doc.getTyped<XmlDocWrapper>()->
                                getClass(), Array(), false);
     c_SimpleXMLElement *e = obj.getTyped<c_SimpleXMLElement>();
+    e->m_root = elem->m_root;
     e->m_doc = elem->m_doc;
     e->m_node = elem->m_node;
     e->m_children.assignRef(elem->m_children);
@@ -910,7 +929,7 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
 
   if (newnode) {
     String ns((char*)m_node->ns, CopyString);
-    Object child = create_element(m_doc, newnode, ns, false);
+    Object child = create_element(m_root, m_doc, newnode, ns, false);
     if (m_is_attribute) {
       m_attributes.set(name, child);
       m_children.set(s_attributes, m_attributes);
@@ -1116,7 +1135,8 @@ void c_SimpleXMLElementIterator::reset_iterator() {
   // same name of mine.
   if (m_parent->m_is_property) {
     String name = m_parent->t_getname();
-    Object obj = create_element(m_parent->m_doc, m_parent->m_node->parent,
+    Object obj = create_element(m_parent->m_root, m_parent->m_doc, 
+                                m_parent->m_node->parent,
                                 "", false);
     m_parent = obj.getTyped<c_SimpleXMLElement>();
     Variant children = m_parent->m_children[name];

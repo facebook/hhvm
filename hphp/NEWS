@@ -24,6 +24,10 @@ Next? 2-Sep-2013
   - Closure allocation optimizations (~2x faster to allocate a closure)
   - Implement Redis session handler
   - New memory profiler, hhprof, with pprof compatible output
+  - Update isset($string[$k]) and empty($string[$k) to PHP 5.5 semantics
+  - Fixed a few parser bugs
+  - Fixed a few bugs with token_get_all()
+  - Fix (string)$obj semantics when __toString() is not defined
 
 "Tamale" 22-Jul-2013
   - Optimize vector-shaped Arrays (arrays with keys in range 0..size-1)

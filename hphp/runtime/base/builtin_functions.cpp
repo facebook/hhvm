@@ -986,12 +986,14 @@ void AutoloadHandler::requestInit() {
   m_handlers.reset();
   m_map.reset();
   m_map_root.reset();
+  m_classes___autoload.reset();
 }
 
 void AutoloadHandler::requestShutdown() {
   m_handlers.reset();
   m_map.reset();
   m_map_root.reset();
+  m_classes___autoload.reset();
 }
 
 bool AutoloadHandler::setMap(CArrRef map, CStrRef root) {
@@ -1206,7 +1208,13 @@ String AutoloadHandler::getSignature(CVarRef handler) {
   }
   return lName;
 }
-
+void AutoloadHandler::set_classes___autoload(CStrRef className){
+  if (m_classes___autoload.isNull()) {m_classes___autoload = Array::Create(className,TRUE);}
+  else{if(!m_classes___autoload.exists(className))m_classes___autoload.set(className,TRUE);}
+}
+bool AutoloadHandler::class___autoload(CStrRef className){
+  return m_classes___autoload.exists(className);
+}
 bool function_exists(CStrRef function_name) {
   return HPHP::Unit::lookupFunc(function_name.get()) != nullptr;
 }

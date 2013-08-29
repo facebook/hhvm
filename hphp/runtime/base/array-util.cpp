@@ -53,10 +53,6 @@ Variant ArrayUtil::Combine(CArrRef keys, CArrRef values) {
     throw_invalid_argument("keys and values not same count");
     return false;
   }
-  if (keys.empty()) {
-    throw_invalid_argument("keys and values empty");
-    return false;
-  }
 
   Array ret = Array::Create();
   for (ArrayIter iter1(keys), iter2(values); iter1; ++iter1, ++iter2) {

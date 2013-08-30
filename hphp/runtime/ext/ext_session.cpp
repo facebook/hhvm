@@ -39,7 +39,7 @@
 #include <dirent.h>
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(session);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool ini_on_update_save_handler(CStrRef value, void *p);
@@ -1817,20 +1817,17 @@ bool f_session_is_registered(CStrRef varname) {
      "Relying on this feature is highly discouraged.");
 }
 
-void c_SessionHandler::t___construct() { }
-c_SessionHandler::c_SessionHandler(Class* cb) : ExtObjectData(cb) {}
-c_SessionHandler::~c_SessionHandler() { }
-
-bool c_SessionHandler::t_open(CStrRef save_path, CStrRef session_id) {
+static bool HHVM_METHOD(SessionHandler, hhopen,
+                        CStrRef save_path, CStrRef session_id) {
   return PS(default_mod) &&
     PS(default_mod)->open(save_path->data(), session_id->data());
 }
 
-bool c_SessionHandler::t_close() {
+static bool HHVM_METHOD(SessionHandler, hhclose) {
   return PS(default_mod) && PS(default_mod)->close();
 }
 
-String c_SessionHandler::t_read(CStrRef session_id) {
+static String HHVM_METHOD(SessionHandler, hhread, CStrRef session_id) {
   String value;
   if (PS(default_mod) && PS(default_mod)->read(PS(id).data(), value)) {
     php_session_decode(value);
@@ -1839,20 +1836,35 @@ String c_SessionHandler::t_read(CStrRef session_id) {
   return uninit_null();
 }
 
-bool c_SessionHandler::t_write(CStrRef session_id, CStrRef session_data) {
+static bool HHVM_METHOD(SessionHandler, hhwrite,
+                        CStrRef session_id, CStrRef session_data) {
   return PS(default_mod) &&
     PS(default_mod)->write(session_id->data(), session_data->data());
 }
 
-bool c_SessionHandler::t_destroy(CStrRef session_id) {
+static bool HHVM_METHOD(SessionHandler, hhdestroy, CStrRef session_id) {
   return PS(default_mod) && PS(default_mod)->destroy(session_id->data());
 }
 
-bool c_SessionHandler::t_gc(int maxlifetime) {
+static bool HHVM_METHOD(SessionHandler, hhgc, int maxlifetime) {
   int nrdels = -1;
   return PS(default_mod) && PS(default_mod)->gc(maxlifetime, &nrdels);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+static class SessionExtension : public Extension {
+ public:
+  SessionExtension() : Extension("session") { }
+  virtual void moduleLoad(Hdf config) {
+    HHVM_ME(SessionHandler, hhopen);
+    HHVM_ME(SessionHandler, hhclose);
+    HHVM_ME(SessionHandler, hhread);
+    HHVM_ME(SessionHandler, hhwrite);
+    HHVM_ME(SessionHandler, hhdestroy);
+    HHVM_ME(SessionHandler, hhgc);
+  }
+} s_session_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -48,6 +48,7 @@ hphp/system/php/filter/filter_var_array.php
 hphp/system/php/filter/filter_input_array.php
 
 hphp/system/php/sessions/SessionHandlerInterface.php
+hphp/system/php/sessions/SessionHandler.php
 hphp/system/php/sessions/session_set_save_handler.php
 
 hphp/system/php/redis/RedisException.php

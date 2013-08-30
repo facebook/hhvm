@@ -163,33 +163,6 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// class SessionHandler
-
-class SessionModule;
-
-FORWARD_DECLARE_CLASS_BUILTIN(SessionHandler);
-class c_SessionHandler : public ExtObjectData {
- public:
-  DECLARE_CLASS(SessionHandler, SessionHandler, ObjectData)
-
-  // need to implement
-  public: c_SessionHandler(Class* cls = c_SessionHandler::s_cls);
-  public: ~c_SessionHandler();
-  public: void t___construct();
-  public: bool t_open(CStrRef save_path, CStrRef session_id);
-  public: bool t_close();
-  public: String t_read(CStrRef session_id);
-  public: bool t_write(CStrRef session_id, CStrRef session_data);
-  public: bool t_destroy(CStrRef session_id);
-  public: bool t_gc(int maxlifetime);
-
-  // implemented by HPHP
-  public: c_SessionHandler *create();
-
-  private: SessionModule* m_mod;
-};
-
-///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // incl_HPHP_EXT_SESSION_H_

@@ -58,6 +58,8 @@ void Type::InitTypeHintMap() {
   assert(s_HHTypeHintTypes.empty());
 
   s_TypeHintTypes["array"] = Type::Array;
+  s_TypeHintTypes["resource"] = Type::Resource;
+  s_TypeHintTypes["callable"] = Type::Variant;
 
   s_HHTypeHintTypes["array"] = Type::Array;
   s_HHTypeHintTypes["bool"]    = Type::Boolean;
@@ -68,6 +70,8 @@ void Type::InitTypeHintMap() {
   s_HHTypeHintTypes["double"]  = Type::Double;
   s_HHTypeHintTypes["float"]   = Type::Double;
   s_HHTypeHintTypes["string"]  = Type::String;
+  s_HHTypeHintTypes["resource"] = Type::Resource;
+  s_HHTypeHintTypes["callable"] = Type::Variant;
 }
 
 const Type::TypePtrMap &Type::GetTypeHintTypes(bool hhType) {

@@ -3079,7 +3079,10 @@ void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
     PUNT(InstanceOfD_MaybeObj);
   }
   if (!src->isA(Type::Obj)) {
-    bool res = (src->isA(Type::Arr) && interface_supports_array(className));
+    bool res = ((src->isA(Type::Arr) && interface_supports_array(className))) ||
+      (src->isA(Type::Str) && interface_supports_string(className)) ||
+      (src->isA(Type::Int) && interface_supports_int(className)) ||
+      (src->isA(Type::Dbl) && interface_supports_double(className));
     push(cns(res));
     gen(DecRef, src);
     return;

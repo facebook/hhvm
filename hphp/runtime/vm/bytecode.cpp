@@ -3818,14 +3818,39 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCastObject(PC& pc) {
 inline bool OPTBLD_INLINE VMExecutionContext::cellInstanceOf(
   TypedValue* tv, const NamedEntity* ne) {
   assert(tv->m_type != KindOfRef);
-  if (tv->m_type == KindOfObject) {
-    Class* cls = Unit::lookupClass(ne);
-    if (cls) return tv->m_data.pobj->instanceof(cls);
-  } else if (tv->m_type == KindOfArray) {
-    Class* cls = Unit::lookupClass(ne);
-    if (cls && interface_supports_array(cls->name())) {
-      return true;
-    }
+  Class* cls = nullptr;
+  switch (tv->m_type) {
+    case KindOfObject:
+      cls = Unit::lookupClass(ne);
+      if (cls) return tv->m_data.pobj->instanceof(cls);
+      break;
+    case KindOfArray:
+      cls = Unit::lookupClass(ne);
+      if (cls && interface_supports_array(cls->name())) {
+        return true;
+      }
+      break;
+    case KindOfString:
+    case KindOfStaticString:
+      cls = Unit::lookupClass(ne);
+      if (cls && interface_supports_string(cls->name())) {
+        return true;
+      }
+      break;
+    case KindOfInt64:
+      cls = Unit::lookupClass(ne);
+      if (cls && interface_supports_int(cls->name())) {
+        return true;
+      }
+      break;
+    case KindOfDouble:
+      cls = Unit::lookupClass(ne);
+      if (cls && interface_supports_double(cls->name())) {
+        return true;
+      }
+      break;
+    default:
+      return false;
   }
   return false;
 }

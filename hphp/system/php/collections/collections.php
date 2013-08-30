@@ -48,6 +48,9 @@ interface MapAccess extends ConstMapAccess,
 interface Indexish extends KeyedTraversable {
 }
 
+interface XHPChild {
+}
+
 interface ConstVector extends ConstCollection,
                               ConstIndexAccess,
                               KeyedIterable,
@@ -517,7 +520,7 @@ class LazyZipKeyedIterator implements KeyedIterator {
 
 class LazyZipKeyedIterable implements KeyedIterable {
   use LazyKeyedIterable;
-  
+
   private $iterable1;
   private $iterable2;
 

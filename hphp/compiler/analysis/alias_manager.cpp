@@ -2637,8 +2637,11 @@ private:
     if (sv && se) {
       const string &s = se->getLiteralString();
       if (s.empty()) return ExpressionPtr();
-      if (interface_supports_array(s)) {
-        // This could be an array, so don't assert anything
+      if (interface_supports_array(s) ||
+          interface_supports_string(s) ||
+          interface_supports_int(s) ||
+          interface_supports_double(s))  {
+        // This could be a primitive type, so don't assert anything
         return ExpressionPtr();
       }
       TypePtr o(Type::CreateObjectType(Util::toLower(s)));

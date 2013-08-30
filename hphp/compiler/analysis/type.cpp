@@ -80,9 +80,12 @@ void Type::ResetTypeHintTypes() {
 }
 
 TypePtr Type::CreateObjectType(const std::string &clsname) {
-  // For interfaces that support arrays we're pessimistic and
+  // For interfaces that support primitive types, we're pessimistic and
   // we treat it as a Variant
-  if (interface_supports_array(clsname)) {
+  if (interface_supports_array(clsname) ||
+      interface_supports_string(clsname) ||
+      interface_supports_int(clsname) ||
+      interface_supports_double(clsname)) {
     return Type::Variant;
   }
   return TypePtr(new Type(KindOfObject, clsname));
@@ -91,9 +94,12 @@ TypePtr Type::CreateObjectType(const std::string &clsname) {
 TypePtr Type::GetType(KindOf kindOf, const std::string &clsname /* = "" */) {
   assert(kindOf);
   if (!clsname.empty()) {
-    // For interfaces that support arrays we're pessimistic and
+    // For interfaces that support primitive types we're pessimistic and
     // we treat it as a Variant
-    if (interface_supports_array(clsname)) {
+    if (interface_supports_array(clsname) ||
+        interface_supports_string(clsname) ||
+        interface_supports_int(clsname) ||
+        interface_supports_double(clsname)) {
       return Type::Variant;
     }
     return TypePtr(new Type(kindOf, clsname));

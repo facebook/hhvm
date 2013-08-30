@@ -598,10 +598,27 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
         case T_LOGICAL_AND:
           result = v1.toBoolean() && v2.toBoolean(); break;
         case T_INSTANCEOF: {
-          if (v1.isArray() && v2.isString() &&
-              interface_supports_array(v2.getStringData())) {
-            result = true;
-            break;
+          if (v2.isString()) {
+            if (v1.isArray() &&
+                interface_supports_array(v2.getStringData())) {
+              result = true;
+              break;
+            }
+            if (v1.isString() &&
+                interface_supports_string(v2.getStringData())) {
+              result = true;
+              break;
+            }
+            if (v1.isInteger() &&
+                interface_supports_int(v2.getStringData())) {
+              result = true;
+              break;
+            }
+            if (v1.isDouble() &&
+                interface_supports_double(v2.getStringData())) {
+              result = true;
+              break;
+            }
           }
           result = false;
           break;

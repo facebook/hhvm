@@ -68,7 +68,8 @@ const StaticString
   s_failure("failure"),
   s_Traversable("Traversable"),
   s_KeyedTraversable("KeyedTraversable"),
-  s_Indexish("Indexish");
+  s_Indexish("Indexish"),
+  s_XHPChild("XHPChild");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -778,14 +779,43 @@ String concat4(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4) {
 bool interface_supports_array(const StringData* s) {
   return (s->isame(s_Traversable.get()) ||
           s->isame(s_KeyedTraversable.get()) ||
-          s->isame(s_Indexish.get()));
+          s->isame(s_Indexish.get()) ||
+          s->isame(s_XHPChild.get()));
 }
 
 bool interface_supports_array(const std::string& n) {
   const char* s = n.c_str();
   return ((n.size() == 11 && !strcasecmp(s, "Traversable")) ||
           (n.size() == 16 && !strcasecmp(s, "KeyedTraversable")) ||
-          (n.size() == 8 && !strcasecmp(s, "Indexish")));
+          (n.size() == 8 && !strcasecmp(s, "Indexish")) ||
+          (n.size() == 8 && !strcasecmp(s, "XHPChild")));
+}
+
+bool interface_supports_string(const StringData* s) {
+  return (s->isame(s_XHPChild.get()));
+}
+
+bool interface_supports_string(const std::string& n) {
+  const char *s = n.c_str();
+  return (n.size() == 8 && !strcasecmp(s, "XHPChild"));
+}
+
+bool interface_supports_int(const StringData* s) {
+  return (s->isame(s_XHPChild.get()));
+}
+
+bool interface_supports_int(const std::string& n) {
+  const char *s = n.c_str();
+  return (n.size() == 8 && !strcasecmp(s, "XHPChild"));
+}
+
+bool interface_supports_double(const StringData* s) {
+  return (s->isame(s_XHPChild.get()));
+}
+
+bool interface_supports_double(const std::string& n) {
+  const char *s = n.c_str();
+  return (n.size() == 8 && !strcasecmp(s, "XHPChild"));
 }
 
 Variant include_impl_invoke(CStrRef file, bool once, const char *currentDir) {

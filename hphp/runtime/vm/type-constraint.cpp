@@ -208,13 +208,33 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
     return !selfOrParentOrCallable && checkTypedefObj(tv);
   }
 
-  if (tv->m_type == KindOfArray &&
-      isObjectOrTypedef() &&
-      interface_supports_array(m_typeName)) {
-    return true;
-  }
-
   if (isObjectOrTypedef()) {
+    switch (tv->m_type) {
+      case KindOfArray:
+        if (interface_supports_array(m_typeName)) {
+          return true;
+        }
+        break;
+      case KindOfString:
+      case KindOfStaticString:
+        if (interface_supports_string(m_typeName)) {
+          return true;
+        }
+        break;
+      case KindOfInt64:
+        if (interface_supports_int(m_typeName)) {
+          return true;
+        }
+        break;
+      case KindOfDouble:
+        if (interface_supports_double(m_typeName)) {
+          return true;
+        }
+        break;
+      default:
+        break;
+    }
+
     if (isCallable()) {
       return f_is_callable(tvAsCVarRef(tv));
     }

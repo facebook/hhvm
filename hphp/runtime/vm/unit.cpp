@@ -794,7 +794,7 @@ Class* Unit::getClass(const NamedEntity* ne,
 }
 
 bool Unit::classExists(const StringData* name, bool autoload, Attr typeAttrs) {
-if(!function_exists(s___autoload)){autoload=false;}
+  if(name->size()==0)return false;
   Class* cls = Unit::getClass(name, autoload);
   return cls && (cls->attrs() & (AttrInterface | AttrTrait)) == typeAttrs;
 }

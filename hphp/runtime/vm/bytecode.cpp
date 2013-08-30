@@ -1031,7 +1031,7 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
       // this private method, so this private method is not accessible.
       // We need to keep going because the context class may define a
       // private method with this name.
-      spl_override(method))? accessible = true; :accessible = false;
+      spl_override(method) ? accessible = true : accessible = false;
     } else {
       // If the context class is derived from the class that first
       // declared this protected method, then we know this method is

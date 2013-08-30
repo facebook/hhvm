@@ -65,6 +65,9 @@ hphp/system/php/asio/InvalidOperationException.php
 hphp/system/php/collections/collections.php
 hphp/system/php/dom/DOMException.php
 hphp/system/php/file_system/Directory.php
+hphp/system/php/hash/furchash.php
+hphp/system/php/hash/hash.php
+hphp/system/php/hash/hphp_murmurhash.php
 hphp/system/php/json/JsonSerializable.php
 hphp/system/php/lang/ErrorException.php
 hphp/system/php/misc/highlight.php

@@ -610,11 +610,11 @@ String f_write_hdf_string(CArrRef data) {
 }
 
 Variant f_md5_file(CStrRef filename, bool raw_output /* = false */) {
-  return f_hash_file("md5", filename, raw_output);
+  return HHVM_FN(hash_file)("md5", filename, raw_output);
 }
 
 Variant f_sha1_file(CStrRef filename, bool raw_output /* = false */) {
-  return f_hash_file("sha1", filename, raw_output);
+  return HHVM_FN(hash_file)("sha1", filename, raw_output);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

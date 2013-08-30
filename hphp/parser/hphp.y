@@ -1167,27 +1167,27 @@ non_empty_method_parameter_list:
     '=' static_scalar                  { _p->onParam($$,NULL,$3,$4,0,
                                                      &$6,&$1,&$2);}
   | non_empty_method_parameter_list ','
-    parameter_modifiers
     optional_user_attributes
+    parameter_modifiers
     hh_type_opt T_VARIABLE             { _p->onParam($$,&$1,$5,$6,0,
-                                                     NULL,&$4,&$3);}
+                                                     NULL,&$3,&$4);}
   | non_empty_method_parameter_list ','
-    parameter_modifiers
     optional_user_attributes
+    parameter_modifiers
     hh_type_opt '&' T_VARIABLE         { _p->onParam($$,&$1,$5,$7,1,
-                                                     NULL,&$4,&$3);}
+                                                     NULL,&$3,&$4);}
   | non_empty_method_parameter_list ','
-    parameter_modifiers
     optional_user_attributes
+    parameter_modifiers
     hh_type_opt '&' T_VARIABLE
     '=' static_scalar                  { _p->onParam($$,&$1,$5,$7,1,
-                                                     &$9,&$4,&$3);}
+                                                     &$9,&$3,&$4);}
   | non_empty_method_parameter_list ','
-    parameter_modifiers
     optional_user_attributes
+    parameter_modifiers
     hh_type_opt T_VARIABLE
     '=' static_scalar                  { _p->onParam($$,&$1,$5,$6,0,
-                                                     &$8,&$4,&$3);}
+                                                     &$8,&$3,&$4);}
 ;
 
 parameter_list:

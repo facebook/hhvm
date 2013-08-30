@@ -2,6 +2,7 @@ future
   - Optimize closure invocation and __invoke (~3x faster to invoke)
 
 "Kimchi" 2-Sep-2013
+  - Fix order of custom attributes and visibility in  ctor arg promotion
   - Implement CachingIterator
   - Implement RecursiveCachingIterator
   - Generalized heuristic for choosing when to inline in the jit

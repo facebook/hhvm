@@ -15,6 +15,9 @@
 */
 
 #include "hphp/util/exception.h"
+
+#include <string>
+
 #include "util.h"
 #include "hphp/util/base.h"
 
@@ -24,6 +27,10 @@ namespace HPHP {
 Exception::Exception(const char *fmt, ...)
   : m_handled(false) {
   va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
+}
+
+Exception::Exception(const std::string& msg)
+  : m_handled(false), m_msg(msg) {
 }
 
 Exception::Exception(const Exception &e)

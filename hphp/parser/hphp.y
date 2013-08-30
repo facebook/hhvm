@@ -921,7 +921,7 @@ function_declaration_statement:
                                          _p->pushLabelInfo();}
     '(' parameter_list ')'
     hh_opt_return_type
-    '{' inner_statement_list '}'       { _p->onFunction($$,nullptr,$8,$2,$3,$6,$10,nullptr);
+    function_body                      { _p->onFunction($$,nullptr,$8,$2,$3,$6,$9,nullptr);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();}
   | non_empty_member_modifiers
@@ -931,7 +931,7 @@ function_declaration_statement:
                                          _p->pushLabelInfo();}
     '(' parameter_list ')'
     hh_opt_return_type
-    '{' inner_statement_list '}'       { _p->onFunction($$,&$1,$9,$3,$4,$7,$11,nullptr);
+    function_body                      { _p->onFunction($$,&$1,$9,$3,$4,$7,$10,nullptr);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();}
   | non_empty_user_attributes
@@ -941,7 +941,7 @@ function_declaration_statement:
                                          _p->pushLabelInfo();}
     '(' parameter_list ')'
     hh_opt_return_type
-    '{' inner_statement_list '}'       { _p->onFunction($$,&$2,$10,$4,$5,$8,$12,&$1);
+    function_body                      { _p->onFunction($$,&$2,$10,$4,$5,$8,$11,&$1);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();}
 ;
@@ -1433,6 +1433,11 @@ xhp_children_decl_tag:
   | T_XHP_CATEGORY_LABEL               { $1.xhpLabel(0); $$ = $1; $$ = 4;}
 ;
 
+function_body:
+    ';'                                { $$.reset();}
+  | '{' inner_statement_list '}'       { _p->finishStatement($$, $2); $$ = 1;}
+;
+
 method_body:
     ';'                                { $$.reset();}
   | '{' inner_statement_list '}'       { _p->finishStatement($$, $2); $$ = 1;}
@@ -1616,6 +1621,7 @@ expr_no_variable:
     parameter_list ')'
     hh_opt_return_type lexical_vars
     '{' inner_statement_list '}'       { Token u; u.reset();
+                                         _p->finishStatement($10, $10); $10 = 1;
                                          _p->onClosure($$,0,u,$2,$5,$8,$10);
                                          _p->popLabelInfo();}
   | non_empty_member_modifiers function_loc
@@ -1624,6 +1630,7 @@ expr_no_variable:
     parameter_list ')'
     hh_opt_return_type lexical_vars
     '{' inner_statement_list '}'       { Token u; u.reset();
+                                         _p->finishStatement($11, $11); $11 = 1;
                                          _p->onClosure($$,&$1,u,$3,$6,$9,$11);
                                          _p->popLabelInfo();}
   | dim_expr                           { $$ = $1;}

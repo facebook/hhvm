@@ -536,6 +536,7 @@ enum Attr {
   AttrBuiltin = (1 << 20),       //                     X    //
   AttrAllowOverride = (1 << 21), //                     X    //
   AttrSkipFrame = (1 << 22),     //                     X    //
+  AttrNative = (1 << 23),        //                     X    //
 };
 
 inline Attr operator|(Attr a, Attr b) { return Attr((int)a | (int)b); }

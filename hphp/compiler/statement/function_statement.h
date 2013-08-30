@@ -33,7 +33,7 @@ public:
   FunctionStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                     ModifierExpressionPtr modifiers, bool ref,
                     const std::string &name, ExpressionListPtr params,
-                    const std::string &retTypeConstraint,
+                    TypeAnnotationPtr retTypeAnnotation,
                     StatementListPtr stmt, int attr,
                     const std::string &docComment,
                     ExpressionListPtr attrList);

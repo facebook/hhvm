@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/util/hdf.h"
+#include "hphp/runtime/vm/native.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

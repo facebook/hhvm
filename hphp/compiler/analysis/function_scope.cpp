@@ -286,6 +286,10 @@ void FunctionScope::setParamSpecs(AnalysisResultPtr ar) {
   }
 }
 
+bool FunctionScope::hasUserAttr(const char *attr) const {
+  return m_userAttributes.find(attr) != m_userAttributes.end();
+}
+
 bool FunctionScope::isZendParamMode() const {
   return m_attributeClassInfo & ClassInfo::ZendParamMode;
 }
@@ -308,6 +312,10 @@ bool FunctionScope::isStatic() const {
 
 bool FunctionScope::isAbstract() const {
   return m_modifiers && m_modifiers->isAbstract();
+}
+
+bool FunctionScope::isNative() const {
+  return hasUserAttr("__native");
 }
 
 bool FunctionScope::isFinal() const {

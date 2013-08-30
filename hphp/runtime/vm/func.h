@@ -564,6 +564,7 @@ public:
   private:
     bool m_ref; // True if parameter is passed by reference.
   };
+
   typedef std::vector<ParamInfo> ParamInfoVec;
 
   FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n);
@@ -656,15 +657,27 @@ public:
   void setContainsCalls() { m_containsCalls = true; }
 
   void addUserAttribute(const StringData* name, TypedValue tv);
+  int parseNativeAttributes(Attr &attrs) const;
 
   void commit(RepoTxn& txn) const;
   Func* create(Unit& unit, PreClass* preClass = nullptr) const;
 
   void setBuiltinFunc(const ClassInfo::MethodInfo* info,
       BuiltinFunction bif, BuiltinFunction nif, Offset base);
+  void setBuiltinFunc(BuiltinFunction bif, BuiltinFunction nif,
+                      Attr attrs, Offset base);
 
   void setOriginalFilename(const StringData* name) {
     m_originalFilename = name;
+  }
+
+  void setReturnType(DataType dt) { m_returnType = dt; }
+  void setDocComment(const char *dc) {
+    m_docComment = StringData::GetStaticString(dc);
+  }
+  void setLocation(int l1, int l2) {
+    m_line1 = l1;
+    m_line2 = l2;
   }
 
 private:

@@ -628,11 +628,16 @@ public:
   void postponeSinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);
   void postponeCinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);
   void emitPostponedMeths();
+  void bindUserAttributes(MethodStatementPtr meth,
+                          FuncEmitter *fe,
+                          bool &allowOverride);
+  void bindNativeFunc(MethodStatementPtr meth, FuncEmitter *fe);
   void emitMethodMetadata(MethodStatementPtr meth,
                           ClosureUseVarVec* useVars,
                           bool top);
   void fillFuncEmitterParams(FuncEmitter* fe,
-                             ExpressionListPtr params);
+                             ExpressionListPtr params,
+                             bool builtin = false);
   void emitMethodPrologue(Emitter& e, MethodStatementPtr meth);
   void emitMethod(MethodStatementPtr meth);
   FuncEmitter* createFuncEmitterForGeneratorBody(

@@ -18,6 +18,7 @@
 #define incl_HPHP_METHOD_STATEMENT_H_
 
 #include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/type_annotation.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,14 +35,14 @@ protected:
   MethodStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS,
                   ModifierExpressionPtr modifiers, bool ref,
                   const std::string &name, ExpressionListPtr params,
-                  const std::string &retTypeConstraint, StatementListPtr stmt,
+                  TypeAnnotationPtr retTypeAnnotation, StatementListPtr stmt,
                   int attr, const std::string &docComment,
                   ExpressionListPtr attrList, bool method = true);
 public:
   MethodStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                   ModifierExpressionPtr modifiers, bool ref,
                   const std::string &name, ExpressionListPtr params,
-                  const std::string &retTypeConstraint, StatementListPtr stmt,
+                  TypeAnnotationPtr retTypeAnnotation, StatementListPtr stmt,
                   int attr, const std::string &docComment,
                   ExpressionListPtr attrList, bool method = true);
 
@@ -64,7 +65,10 @@ public:
   std::string getOriginalFilename() const { return m_originalFilename; }
   ExpressionListPtr getParams() { return m_params;}
   const std::string getReturnTypeConstraint() const {
-    return m_retTypeConstraint;
+    return m_retTypeAnnotation.get() ? m_retTypeAnnotation->fullName() : "";
+  }
+  const TypeAnnotationPtr retTypeAnnotation() const {
+    return m_retTypeAnnotation;
   }
   StatementListPtr getStmts() { return m_stmt;}
   bool isRef(int index = -1) const;
@@ -136,7 +140,7 @@ protected:
   std::string m_originalClassName;
   std::string m_originalFilename;
   ExpressionListPtr m_params;
-  std::string m_retTypeConstraint;
+  TypeAnnotationPtr m_retTypeAnnotation;
   StatementListPtr m_stmt;
   std::string m_docComment;
   ClosureExpressionRawPtr m_containingClosure;

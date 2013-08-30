@@ -51,6 +51,7 @@
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_error.h"
@@ -1459,7 +1460,8 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
   // cppext functions/methods have their own logic for raising
   // warnings for missing arguments, so we only need to do this work
   // for non-cppext functions/methods
-  if (raiseMissingArgumentWarnings && !func->info()) {
+  if (raiseMissingArgumentWarnings && !func->info() &&
+      !(func->attrs() & AttrNative)) {
     // need to sync m_pc to pc for backtraces/re-entry
     SYNC();
     const Func::ParamInfoVec& paramInfo = func->params();
@@ -5749,75 +5751,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCall(PC& pc) {
   doFCall(ar, pc);
 }
 
-// Return a function pointer type for calling a builtin with a given
-// return value and args.
-template<class Ret, class... Args> struct NativeFunction {
-  typedef Ret (*type)(Args...);
-};
-
-// Recursively pack all parameters up to call a native builtin.
-template<class Ret, size_t NArgs, size_t CurArg> struct NativeFuncCaller;
-template<class Ret, size_t NArgs, size_t CurArg> struct NativeFuncCaller {
-  template<class... Args>
-  static Ret call(const Func* func, TypedValue* tvs, Args... args) {
-    typedef NativeFuncCaller<Ret,NArgs - 1,CurArg + 1> NextArgT;
-    DataType type = func->params()[CurArg].builtinType();
-    if (type == KindOfDouble) {
-      // pass TV.m_data.dbl by value with C++ calling convention for doubles
-      return NextArgT::call(func, tvs - 1, args..., tvs->m_data.dbl);
-    }
-    if (type == KindOfInt64 || type == KindOfBoolean) {
-      // pass TV.m_data.num by value
-      return NextArgT::call(func, tvs - 1, args..., tvs->m_data.num);
-    }
-    if (IS_STRING_TYPE(type) || type == KindOfArray || type == KindOfObject ||
-        type == KindOfResource) {
-      // pass ptr to TV.m_data for String&, Array&, or Object&
-      return NextArgT::call(func, tvs - 1, args..., &tvs->m_data);
-    }
-    // final case is for passing full value as Variant&
-    return NextArgT::call(func, tvs - 1, args..., tvs);
-  }
-};
-template<class Ret, size_t CurArg> struct NativeFuncCaller<Ret,0,CurArg> {
-  template<class... Args>
-  static Ret call(const Func* f, TypedValue*, Args... args) {
-    typedef typename NativeFunction<Ret,Args...>::type FuncType;
-    return reinterpret_cast<FuncType>(f->nativeFuncPtr())(args...);
-  }
-};
-
-template<class Ret>
-static Ret makeNativeCall(const Func* f, TypedValue* args, size_t numArgs) {
-  static_assert(kMaxBuiltinArgs == 5,
-                "makeNativeCall needs updates for kMaxBuiltinArgs");
-  switch (numArgs) {
-  case 0: return NativeFuncCaller<Ret,0,0>::call(f, args);
-  case 1: return NativeFuncCaller<Ret,1,0>::call(f, args);
-  case 2: return NativeFuncCaller<Ret,2,0>::call(f, args);
-  case 3: return NativeFuncCaller<Ret,3,0>::call(f, args);
-  case 4: return NativeFuncCaller<Ret,4,0>::call(f, args);
-  case 5: return NativeFuncCaller<Ret,5,0>::call(f, args);
-  default: assert(false);
-  }
-  not_reached();
-}
-
-template<class Ret>
-static int makeNativeRefCall(const Func* f, Ret* ret,
-                             TypedValue* args, size_t numArgs) {
-  switch (numArgs) {
-  case 0: return NativeFuncCaller<int64_t,0,0>::call(f, args, ret);
-  case 1: return NativeFuncCaller<int64_t,1,0>::call(f, args, ret);
-  case 2: return NativeFuncCaller<int64_t,2,0>::call(f, args, ret);
-  case 3: return NativeFuncCaller<int64_t,3,0>::call(f, args, ret);
-  case 4: return NativeFuncCaller<int64_t,4,0>::call(f, args, ret);
-  case 5: return NativeFuncCaller<int64_t,5,0>::call(f, args, ret);
-  default: assert(false);
-  }
-  not_reached();
-}
-
 inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
   NEXT();
   DECODE_IVA(numArgs);
@@ -5830,81 +5763,16 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
                 m_fp->m_func->unit()->lookupLitstrId(id)->data());
   }
   TypedValue* args = m_stack.indTV(numArgs-1);
-  assert(numArgs == func->numParams());
-  bool zendParamMode = func->info()->attribute & ClassInfo::ZendParamMode;
   TypedValue ret;
-
-  for (int i = 0; i < numNonDefault; i++) {
-    const Func::ParamInfo& pi = func->params()[i];
-
-#define CASE(kind)                                      \
-  case KindOf##kind:                                    \
-    if (zendParamMode) {                                \
-      if (!tvCoerceParamTo##kind##InPlace(&args[-i])) { \
-        raise_param_type_warning(                       \
-          func->name()->data(),                         \
-          i+1,                                          \
-          KindOf##kind,                                 \
-          args[-i].m_type                               \
-        );                                              \
-        ret.m_type = KindOfUninit;                      \
-        goto free_frame;                                \
-      }                                                 \
-    } else {                                            \
-      tvCastTo##kind##InPlace(&args[-i]);               \
-    }                                                   \
-    break; /* end of case */
-
-    switch (pi.builtinType()) {
-      CASE(Boolean)
-      CASE(Int64)
-      CASE(Double)
-      CASE(String)
-      CASE(Array)
-      CASE(Object)
-      CASE(Resource)
-      case KindOfUnknown:
-        break;
-      default:
-        not_reached();
-    }
-
-#undef CASE
+  if (Native::coerceFCallArgs(args, numArgs, numNonDefault, func)) {
+    Native::callFunc(func, nullptr, args, numArgs, ret);
+  } else {
+    ret.m_type = KindOfNull;
   }
 
-  ret.m_type = func->returnType();
-  switch (func->returnType()) {
-  case KindOfBoolean:
-    ret.m_data.num = makeNativeCall<bool>(func, args, numArgs);
-    break;
-  case KindOfNull:  /* void return type */
-  case KindOfInt64:
-    ret.m_data.num = makeNativeCall<int64_t>(func, args, numArgs);
-    break;
-  case KindOfString:
-  case KindOfStaticString:
-  case KindOfArray:
-  case KindOfObject:
-  case KindOfResource:
-    makeNativeRefCall(func, &ret.m_data, args, numArgs);
-    if (ret.m_data.num == 0) {
-      ret.m_type = KindOfNull;
-    }
-    break;
-  case KindOfUnknown:
-    makeNativeRefCall(func, &ret, args, numArgs);
-    if (ret.m_type == KindOfUninit) {
-      ret.m_type = KindOfNull;
-    }
-    break;
-  default:
-    not_reached();
-  }
-
-free_frame:
   frame_free_args(args, numNonDefault);
   m_stack.ndiscard(numArgs);
-  memcpy(m_stack.allocTV(), &ret, sizeof(TypedValue));
+  tvCopy(ret, *m_stack.allocTV());
 }
 
 bool VMExecutionContext::prepareArrayArgs(ActRec* ar, Array& arrayArgs) {

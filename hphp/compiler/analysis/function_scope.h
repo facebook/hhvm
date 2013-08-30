@@ -90,6 +90,8 @@ public:
 
   void addModifier(int mod);
 
+  bool hasUserAttr(const char *attr) const;
+
   /**
    * What kind of function this is.
    */
@@ -100,6 +102,7 @@ public:
   bool isPrivate() const;
   bool isStatic() const;
   bool isAbstract() const;
+  bool isNative() const;
   bool isFinal() const;
   bool isMagic() const;
   bool isRefParam(int index) const;

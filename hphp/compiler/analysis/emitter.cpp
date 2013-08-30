@@ -80,6 +80,7 @@
 #include "hphp/util/job-queue.h"
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/base/stats.h"
@@ -1873,7 +1874,7 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
     voidReturn = builtinFunc->info()->returnType == KindOfNull;
   } else if (fn->isValid() && fn->getFuncScope()) {
     ref = fn->getFuncScope()->isRefReturn();
-    if (!(fn->getActualType())) {
+    if (!(fn->getActualType()) && !fn->getFuncScope()->isNative()) {
       voidReturn = true;
     }
   } else if (!fn->getName().empty()) {
@@ -5478,8 +5479,8 @@ void EmitterVisitor::emitPostponedMeths() {
       top_fes.push_back(fe);
     }
 
-    if (meth->getFunctionScope()->isGenerator() ||
-        meth->getFunctionScope()->isAsync()) {
+    FunctionScopePtr funcScope = meth->getFunctionScope();
+    if (funcScope->isGenerator() || funcScope->isAsync()) {
       // emit the outer 'create generator' function
       m_curFunc = fe;
       fe->setHasGeneratorAsBody(true);
@@ -5494,8 +5495,12 @@ void EmitterVisitor::emitPostponedMeths() {
       }
     } else {
       m_curFunc = fe;
-      emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
-      emitMethod(meth);
+      if (funcScope->isNative()) {
+        bindNativeFunc(meth, fe);
+      } else {
+        emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
+        emitMethod(meth);
+      }
     }
 
     delete p.m_closureUseVars;
@@ -5507,29 +5512,107 @@ void EmitterVisitor::emitPostponedMeths() {
   }
 }
 
-void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
-                                        ClosureUseVarVec* useVars,
-                                        bool top) {
-  FuncEmitter* fe = m_curFunc;
-
-  // user attributes
-  bool allowOverride = false;
+void EmitterVisitor::bindUserAttributes(MethodStatementPtr meth,
+                                        FuncEmitter *fe,
+                                        bool &allowOverride) {
   const FunctionScope::UserAttributeMap& userAttrs =
     meth->getFunctionScope()->userAttributes();
-  for (FunctionScope::UserAttributeMap::const_iterator it = userAttrs.begin();
-       it != userAttrs.end(); ++it) {
-    if (it->first == "__Overridable") {
+  for (auto& attr : userAttrs) {
+    if (attr.first == "__Overridable") {
       allowOverride = true;
       continue;
     }
-    const StringData* uaName = StringData::GetStaticString(it->first);
-    ExpressionPtr uaValue = it->second;
+    const StringData* uaName = StringData::GetStaticString(attr.first);
+    ExpressionPtr uaValue = attr.second;
     assert(uaValue);
     assert(uaValue->isScalar());
     TypedValue tv;
     initScalar(tv, uaValue);
     fe->addUserAttribute(uaName, tv);
   }
+}
+
+void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
+                                    FuncEmitter *fe) {
+  if (SystemLib::s_inited) {
+    throw IncludeTimeFatalException(meth,
+          "Native functions/methods may only be defined in systemlib");
+  }
+
+  auto modifiers = meth->getModifiers();
+  bool allowOverride = false;
+  bindUserAttributes(meth, fe, allowOverride);
+
+  Attr attributes = AttrNative | AttrUnique | AttrPersistent;
+  if (meth->isRef()) {
+    attributes = attributes | AttrReference;
+  }
+  auto pce = fe->pce();
+  if (pce) {
+    if (modifiers->isStatic()) {
+      attributes = attributes | AttrStatic;
+    }
+    if (modifiers->isFinal()) {
+      attributes = attributes | AttrFinal;
+    }
+    if (modifiers->isAbstract()) {
+      attributes = attributes | AttrAbstract;
+    }
+    if (modifiers->isPrivate()) {
+      attributes = attributes | AttrPrivate;
+    } else {
+      attributes = attributes | (modifiers->isProtected()
+                              ? AttrProtected : AttrPublic);
+    }
+  } else {
+    if (allowOverride) {
+      attributes = attributes | AttrAllowOverride;
+    }
+  }
+
+  const Location* sLoc = meth->getLocation().get();
+  fe->setLocation(sLoc->line0, sLoc->line1);
+  fe->setDocComment(meth->getDocComment().c_str());
+  fe->setReturnType(meth->retTypeAnnotation()->dataType());
+  fe->setMaxStackCells(kNumActRecCells + 1);
+  fe->setReturnTypeConstraint(
+      StringData::GetStaticString(meth->getReturnTypeConstraint()));
+
+  FunctionScopePtr funcScope = meth->getFunctionScope();
+  const char *funcname  = funcScope->getName().c_str();
+  const char *classname = pce ? pce->name()->data() : nullptr;
+  BuiltinFunction nif = Native::GetBuiltinFunction(funcname, classname,
+                                                   modifiers->isStatic());
+  BuiltinFunction bif = pce ? Native::methodWrapper
+                            : Native::functionWrapper;
+
+  if (!nif) {
+    bif = Native::unimplementedWrapper;
+  } else if (fe->parseNativeAttributes(attributes) & Native::AttrActRec) {
+    // Call this native function with a raw ActRec*
+    // rather than pulling out args for normal func calling
+    bif = nif;
+    nif = nullptr;
+  }
+
+  Emitter e(meth, m_ue, *this);
+  Label topOfBody(e);
+  emitMethodPrologue(e, meth);
+
+  Offset base = m_ue.bcPos();
+  fe->setBuiltinFunc(bif, nif, attributes, base);
+  fillFuncEmitterParams(fe, meth->getParams(), true);
+  e.NativeImpl();
+  FuncFinisher ff(this, e, fe);
+  emitMethodDVInitializers(e, meth, topOfBody);
+}
+
+void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
+                                        ClosureUseVarVec* useVars,
+                                        bool top) {
+  FuncEmitter* fe = m_curFunc;
+  bool allowOverride = false;
+  bindUserAttributes(meth, fe, allowOverride);
 
   // assign ids to parameters (all methods)
   int numParam = meth->getParams() ? meth->getParams()->getCount() : 0;
@@ -5585,7 +5668,8 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
 }
 
 void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
-                                           ExpressionListPtr params){
+                                           ExpressionListPtr params,
+                                           bool builtin /*= false */){
   int numParam = params ? params->getCount() : 0;
   for (int i = 0; i < numParam; i++) {
     ParameterExpressionPtr par(
@@ -5596,6 +5680,11 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
     auto const typeConstraint = determine_type_constraint(par);
     if (typeConstraint.hasConstraint()) {
       pi.setTypeConstraint(typeConstraint);
+    }
+    if (builtin) {
+      if (auto const typeAnnotation = par->annotation()) {
+        pi.setBuiltinType(typeAnnotation->dataType());
+      }
     }
 
     if (par->hasUserType()) {

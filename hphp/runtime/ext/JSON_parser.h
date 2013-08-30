@@ -25,7 +25,7 @@ namespace HPHP {
 
 void utf16_to_utf8(HPHP::StringBuffer &buf, unsigned short utf16);
 bool JSON_parser(HPHP::Variant &z, const char *p, int length,
-                 bool assoc/*<fb>*/, bool loose/*</fb>*/);
+                 bool assoc/*<fb>*/, int64_t options/*</fb>*/);
 
 enum json_error_codes {
   JSON_ERROR_NONE = 0,

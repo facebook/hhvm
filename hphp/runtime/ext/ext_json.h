@@ -40,9 +40,10 @@ extern const int64_t k_JSON_UNESCAPED_SLASHES;
 extern const int64_t k_JSON_PRETTY_PRINT;
 extern const int64_t k_JSON_UNESCAPED_UNICODE;
 extern const int64_t k_JSON_FB_LOOSE;
-extern const int64_t k_JSON_FB_LOOSE;
 extern const int64_t k_JSON_FB_EXTRA_ESCAPES;
 extern const int64_t k_JSON_FB_UNLIMITED;
+extern const int64_t k_JSON_FB_COLLECTIONS;
+extern const int64_t k_JSON_FB_STABLE_MAPS;
 
 // For json.idl.json registartion to use in PHP-land.
 // Duplicating values in the JSON_parser.h enum.

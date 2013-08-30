@@ -34,6 +34,8 @@ SOFTWARE.
 #include "hphp/runtime/base/utf8-decode.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/thread-init-fini.h"
+#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/ext_collections.h"
 
 #define MAX_LENGTH_OF_LONG 20
 static const char long_min_digits[] = "9223372036854775808";
@@ -515,7 +517,7 @@ static void attach_zval(json_parser *json, CStrRef key,
  * machine with a stack.
  */
 bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
-                 bool loose/*</fb>*/) {
+                 int64_t options/*</fb>*/) {
   int b;  /* the next character */
   int c;  /* the next character class */
   int s;  /* the next state */
@@ -524,6 +526,9 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
   int the_state = 0;
 
   /*<fb>*/
+  bool loose = options & k_JSON_FB_LOOSE;
+  bool stable_maps = options & k_JSON_FB_STABLE_MAPS;
+  bool collections = stable_maps || (options & k_JSON_FB_COLLECTIONS);
   int qchr = 0;
   int const *byte_class;
   if (loose) {
@@ -616,11 +621,23 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
           } else {
             top.unset();
           }
-          if (!assoc) {
-            top = SystemLib::AllocStdClassObject();
+          /*<fb>*/
+          if (collections) {
+            if (stable_maps) {
+              top = NEWOBJ(c_StableMap)();
+            } else {
+              top = NEWOBJ(c_Map)();
+            }
           } else {
-            top = Array::Create();
+          /*</fb>*/
+            if (!assoc) {
+              top = SystemLib::AllocStdClassObject();
+            } else {
+              top = Array::Create();
+            }
+          /*<fb>*/
           }
+          /*</fb>*/
           JSON(the_kstack)[JSON(the_top)] = key->detach();
           JSON_RESET_TYPE();
         }
@@ -670,12 +687,19 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
         the_state = 2;
 
         if (JSON(the_top) > 0) {
+          Variant &top = JSON(the_zstack)[JSON(the_top)];
           if (JSON(the_top) == 1) {
-            JSON(the_zstack)[JSON(the_top)].assignRef(z);
+            top.assignRef(z);
           } else {
-            JSON(the_zstack)[JSON(the_top)].unset();
+            top.unset();
           }
-          JSON(the_zstack)[JSON(the_top)] = Array::Create();
+          /*<fb>*/
+          if (collections) {
+            top = NEWOBJ(c_Vector)();
+          } else {
+            top = Array::Create();
+          }
+          /*</fb>*/
           JSON(the_kstack)[JSON(the_top)] = key->detach();
           JSON_RESET_TYPE();
         }

@@ -904,6 +904,8 @@ static int execute_program_impl(int argc, char** argv) {
       .options(desc)
       .positional(p)
       .allow_unregistered()
+      .style(command_line_style::default_style ^
+                         command_line_style::allow_guessing)
       .run();
     // argvPos will track where we are in the original argv array
     int argvPos = 1;

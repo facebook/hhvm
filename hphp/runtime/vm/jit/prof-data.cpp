@@ -201,7 +201,7 @@ TransID ProfData::addTrans(const Tracelet& tracelet, TransKind kind,
   Offset  lastBcOff = tracelet.m_instrStream.last->source.offset();
   auto region = kind == TransProfile ? selectTraceletLegacy(tracelet) : nullptr;
   if (region) {
-    size_t nBlocks = region->blocks.size();
+    DEBUG_ONLY size_t nBlocks = region->blocks.size();
     assert(nBlocks == 1 || (nBlocks > 1 && region->blocks[0]->inlinedCallee()));
     region->blocks.back()->setPostConditions(pconds);
   }

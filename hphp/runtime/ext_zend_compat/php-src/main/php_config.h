@@ -2124,7 +2124,9 @@
 #define PHP_MHASH_BC 1
 
 /* */
+#ifndef PHP_MYSQL_UNIX_SOCK_ADDR
 #define PHP_MYSQL_UNIX_SOCK_ADDR "/var/lib/mysql/mysql.sock"
+#endif
 
 /* */
 /* #undef PHP_OCI8_DEF_DIR */

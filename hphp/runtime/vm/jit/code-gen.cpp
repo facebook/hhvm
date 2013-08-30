@@ -4399,7 +4399,7 @@ void CodeGenerator::cgLdVectorBase(IRInstruction* inst) {
 void CodeGenerator::cgLdPairBase(IRInstruction* inst) {
   SSATmp* pair = inst->src(0);
   assert(pair->type().strictSubtypeOf(Type::Obj) &&
-      pair->type().getClass() == c_Pair::s_cls);
+         pair->type().getClass() == c_Pair::s_cls);
   auto pairReg = m_regs[pair].reg();
   m_as.lea(pairReg[c_Pair::dataOffset()], m_regs[inst->dst()].reg());
 }
@@ -4407,41 +4407,23 @@ void CodeGenerator::cgLdPairBase(IRInstruction* inst) {
 void CodeGenerator::cgLdElem(IRInstruction* inst) {
   SSATmp* base = inst->src(0);
   auto baseReg = m_regs[base].reg();
-
-  static_assert(sizeof(TypedValue) == 16,
-                "TypedValue size expected to be 16 bytes");
   auto idx = inst->src(1);
   if (idx->isConst()) {
-    int64_t idxVal = idx->getValInt();
-    idxVal <<= 4;
-    cgLoad(inst->dst(), baseReg[idxVal]);
+    cgLoad(inst->dst(), baseReg[idx->getValInt()]);
   } else {
-    auto idxReg = m_regs[idx].reg();
-    emitMovRegReg(m_as, idxReg, m_rScratch);
-    // compute the number of bytes to add to the base pointer
-    m_as.shlq(4, m_rScratch);
-    cgLoad(inst->dst(), baseReg[m_rScratch]);
+    cgLoad(inst->dst(), baseReg[m_regs[idx].reg()]);
   }
 }
 
 void CodeGenerator::cgStElem(IRInstruction* inst) {
   SSATmp* base = inst->src(0);
   auto baseReg = m_regs[base].reg();
-
-  static_assert(sizeof(TypedValue) == 16,
-                "TypedValue size expected to be 16 bytes");
   auto srcValue = inst->src(2);
   auto idx = inst->src(1);
   if (idx->isConst()) {
-    int64_t idxVal = idx->getValInt();
-    idxVal <<= 4;
-    cgStore(baseReg[idxVal], srcValue);
+    cgStore(baseReg[idx->getValInt()], srcValue);
   } else {
-    auto idxReg = m_regs[idx].reg();
-    emitMovRegReg(m_as, idxReg, m_rScratch);
-    // compute the number of bytes to add to the base pointer
-    m_as.shlq(4, m_rScratch);
-    cgStore(baseReg[m_rScratch], srcValue);
+    cgStore(baseReg[m_regs[idx].reg()], srcValue);
   }
 }
 

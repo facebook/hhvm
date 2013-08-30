@@ -1644,22 +1644,24 @@ void HhbcTranslator::MInstrTranslator::emitArrayGet(SSATmp* key) {
 
 void HhbcTranslator::MInstrTranslator::emitVectorGet(SSATmp* key) {
   assert(key->isA(Type::Int));
-  if (key->isConst()) {
-    auto idx = key->getValInt();
-    if (idx < 0) {
-      PUNT(emitVectorGet);
-    }
+  if (key->isConst() && key->getValInt() < 0) {
+    PUNT(emitVectorGet);
   }
   SSATmp* size = gen(LdVectorSize, m_base);
   gen(CheckBounds, key, size);
   SSATmp* base = gen(LdVectorBase, m_base);
-  SSATmp* value = gen(LdElem, base, key);
+  static_assert(sizeof(TypedValue) == 16,
+                "TypedValue size expected to be 16 bytes");
+  auto idx = gen(Shl, key, cns(4));
+  SSATmp* value = gen(LdElem, base, idx);
   m_result = gen(IncRef, value);
 }
 
 void HhbcTranslator::MInstrTranslator::emitPairGet(SSATmp* key) {
   SSATmp* value;
   assert(key->isA(Type::Int));
+  static_assert(sizeof(TypedValue) == 16,
+                "TypedValue size expected to be 16 bytes");
   if (key->isConst()) {
     auto idx = key->getValInt();
     if (idx < 0 || idx > 1) {
@@ -1667,11 +1669,13 @@ void HhbcTranslator::MInstrTranslator::emitPairGet(SSATmp* key) {
     }
     // no reason to check bounds
     SSATmp* base = gen(LdPairBase, m_base);
-    value = gen(LdElem, base, key);
+    auto index = cns(key->getValInt() << 4);
+    value = gen(LdElem, base, index);
   } else {
     gen(CheckBounds, key, cns(1));
     SSATmp* base = gen(LdPairBase, m_base);
-    value = gen(LdElem, base, key);
+    auto idx = gen(Shl, key, cns(4));
+    value = gen(LdElem, base, idx);
   }
   m_result = gen(IncRef, value);
 }
@@ -2213,19 +2217,22 @@ void HhbcTranslator::MInstrTranslator::emitSetWithRefNewElem() {
 void HhbcTranslator::MInstrTranslator::emitVectorSet(
     SSATmp* key, SSATmp* value) {
   assert(key->isA(Type::Int));
-  if (key->isConst()) {
-    auto idx = key->getValInt();
-    if (idx < 0) {
-      PUNT(emitVectorSet); // will throw
-    }
+  if (key->isConst() && key->getValInt() < 0) {
+    PUNT(emitVectorSet); // will throw
   }
   SSATmp* size = gen(LdVectorSize, m_base);
   gen(CheckBounds, key, size);
+
   SSATmp* increffed = gen(IncRef, value);
   SSATmp* vecBase = gen(LdVectorBase, m_base);
-  SSATmp* oldVal = gen(LdElem, vecBase, key);
-  gen(StElem, vecBase, key, value);
+  SSATmp* oldVal;
+  static_assert(sizeof(TypedValue) == 16,
+                "TypedValue size expected to be 16 bytes");
+  auto idx = gen(Shl, key, cns(4));
+  oldVal = gen(LdElem, vecBase, idx);
+  gen(StElem, vecBase, idx, value);
   gen(DecRef, oldVal);
+
   m_result = increffed;
 }
 

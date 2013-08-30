@@ -782,7 +782,7 @@ D:T = LdProp<T> S0:Obj S1:ConstInt [ -> L ]
 D:Cell = LdElem S0:PtrToCell S1:Int
 
   Loads the element at index S1 from the base pointer in S0.
-  The index in S1 is the number of Cells from the base in S0.
+  The index in S1 is the number of bytes from the base in S0.
 
 D:T = LdRef<T> S0:Cell& [ -> L ]
 
@@ -1213,7 +1213,7 @@ StPropNT S0:Obj S1:Int S2:Gen
 StElem S0:PtrToCell S1:Int S2:Cell
 
   Store S2 into the location given by the index S1 from base pointer
-  S0. The index in S1 is the number of Cells from the base in S0.
+  S0. The index in S1 is the number of bytes from the base in S0.
 
 StLoc<localId> S0:FramePtr S1:Gen
 

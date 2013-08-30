@@ -95,7 +95,7 @@ public:
   /**
    * What kind of function this is.
    */
-  bool isUserFunction() const { return !m_system;}
+  bool isUserFunction() const { return !m_system && !isNative(); }
   bool isDynamic() const { return m_dynamic; }
   bool isPublic() const;
   bool isProtected() const;

@@ -786,7 +786,7 @@ Class* Unit::getClass(const NamedEntity* ne,
       }
     }
 
-    if (tryAutoload && AutoloadHandler::s_instance->class___autoload(name->data())){
+    if (tryAutoload){
       return loadMissingClass(ne, name);
     }
   }
@@ -794,7 +794,6 @@ Class* Unit::getClass(const NamedEntity* ne,
 }
 
 bool Unit::classExists(const StringData* name, bool autoload, Attr typeAttrs) {
-  if(name->size()==0)return false;
   Class* cls = Unit::getClass(name, autoload);
   return cls && (cls->attrs() & (AttrInterface | AttrTrait)) == typeAttrs;
 }

@@ -245,6 +245,19 @@ RegionDescPtr selectHotTrace(TransID triggerId,
     }
     assert(maxArc != nullptr);
 
+    // Break after the first block if it corresponds to a DV funclet.
+    // This is to avoid generating many large regions including the
+    // function body entry.
+    if (prevId == InvalidID) {
+      const Func* func = profData->transFunc(tid);
+      Offset  bcOffset = profData->transStartBcOff(tid);
+      if (func->isDVEntry(bcOffset)) {
+        FTRACE(5, "selectHotRegion: breaking region because it started at a "
+               "DV Funclet Translation {} (BC offset {})\n", tid, bcOffset);
+        break;
+      }
+    }
+
     prevId = tid;
     tid = maxArc->dst();
   }

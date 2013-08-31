@@ -33,6 +33,7 @@ namespace JIT {
 using Transl::TransID;
 using Transl::TransKind;
 using Transl::Tracelet;
+using Transl::TCA;
 
 /**
  * A simple class of a growable number of profiling counters with
@@ -64,6 +65,72 @@ class ProfCounters {
   vector<T*>            m_chunks;
 };
 
+typedef std::vector<TCA> PrologueCallersVec;
+
+/**
+ * A record with the callers for each profiling prologue.  Besides
+ * their main entry points, prologues optionally have a guard entry
+ * point that checks that we're in the right function before falling
+ * through to the main prologue entry (see
+ * TranslatorX64::emitFuncGuard).  We need to keep track of both kinds
+ * of callers for each prologue, so that we can smash them
+ * appropriately when regenerating prologues.
+ */
+class PrologueCallersRec : private boost::noncopyable {
+ public:
+  const PrologueCallersVec& mainCallers()  const;
+  const PrologueCallersVec& guardCallers() const;
+  void                      addMainCaller(TCA caller);
+  void                      addGuardCaller(TCA caller);
+  void                      clearAllCallers();
+
+ private:
+  PrologueCallersVec m_mainCallers;
+  PrologueCallersVec m_guardCallers;
+};
+
+typedef std::unique_ptr<PrologueCallersRec> PrologueCallersRecPtr;
+
+struct PrologueID {
+  PrologueID(FuncId funcId, int nArgs)
+      : m_funcId(funcId)
+      , m_nArgs(nArgs)
+    { }
+
+  FuncId funcId() const { return m_funcId; }
+  int    nArgs()  const { return m_nArgs;  }
+
+  bool operator==(const PrologueID& other) const {
+    return m_funcId == other.m_funcId && m_nArgs == other.m_nArgs;
+  }
+
+  bool operator<(const PrologueID& other) const {
+    return ((m_funcId <  other.m_funcId) ||
+            (m_funcId == other.m_funcId && m_nArgs < other.m_nArgs));
+  }
+
+  struct Hasher {
+    size_t operator()(PrologueID pid) const {
+      return hash_int64_pair(pid.funcId(), pid.nArgs());
+    }
+  };
+
+ private:
+  FuncId m_funcId;
+  int    m_nArgs;
+};
+
+/**
+ * A simple wrapper for a map from profiling prologues to TransIDs.
+ */
+class PrologueToTransMap {
+ public:
+  void    add(FuncId funcId, int numArgs, TransID transId);
+  TransID get(FuncId funcId, int numArgs) const;
+
+ private:
+  hphp_hash_map<PrologueID, TransID, PrologueID::Hasher> m_prologueIdToTransId;
+};
 
 /**
  * A profiling record kept for each translation in JitPGO mode.
@@ -73,6 +140,7 @@ class ProfTransRec {
   ProfTransRec(TransID id, TransKind kind, Offset lastBcOff, const SrcKey& sk,
                RegionDescPtr region);
   ProfTransRec(TransID id, TransKind kind, const SrcKey& sk);
+  ProfTransRec(TransID id, TransKind kind, const SrcKey& sk, int nArgs);
 
   TransID              transId()    const;
   TransKind            kind()       const;
@@ -82,12 +150,19 @@ class ProfTransRec {
   Func*                func()       const;
   FuncId               funcId()     const;
   RegionDescPtr        region()     const;
+  PrologueCallersRec*  prologueCallers() const;
+  int                  prologueArgs() const;
 
  private:
-  TransID              m_id;  // sequential ID of the assiciated translation
+  TransID              m_id;  // sequential ID of the associated translation
   TransKind            m_kind;
-  Offset               m_lastBcOff;  // offset of the last bytecode instr
-  RegionDescPtr        m_region;
+  union {
+    Offset             m_lastBcOff;     // offset of the last bytecode instr
+                                        // for non-prologue translations
+    int                m_prologueArgs;  // for prologues
+  };
+  RegionDescPtr        m_region;           // for TransProfile translations
+  PrologueCallersRecPtr m_prologueCallers; // for TransProflogue translations
   SrcKey               m_sk;
 };
 
@@ -117,13 +192,27 @@ public:
   TransKind               transKind(TransID id)       const;
   int64_t                 transCounter(TransID id)    const;
   int64_t*                transCounterAddr(TransID id);
+  TransID                 prologueTransId(const Func* func,
+                                          int nArgs)  const;
+  TransID                 dvFuncletTransId(const Func* func,
+                                           int nArgs) const;
+  PrologueCallersRec*     prologueCallers(TransID id) const;
+  PrologueCallersRec*     prologueCallers(const Func* func, int nArgs) const;
+  int                     prologueArgs(TransID id)    const;
 
   TransID                 addTrans(const Tracelet&       tracelet,
                                    const RegionContext&  rCtx,
                                    TransKind             kind,
                                    const PostConditions& pconds);
-  TransID                 addTransPrologue(const SrcKey& sk);
+  TransID                 addTransPrologue(TransKind kind, const SrcKey& sk,
+                                           int nArgs);
   TransID                 addTransAnchor(const SrcKey& sk);
+  PrologueCallersRec*     findPrologueCallersRec(const Func* func,
+                                                 int nArgs) const;
+  void                    addPrologueMainCaller(const Func* func, int nArgs,
+                                                TCA caller);
+  void                    addPrologueGuardCaller(const Func* func, int nArgs,
+                                                 TCA caller);
 
   bool                    optimized(const SrcKey& sk) const;
   void                    setOptimized(const SrcKey& sk);
@@ -132,7 +221,10 @@ private:
   uint32_t                m_numTrans;
   vector<ProfTransRecPtr> m_transRecs;
   ProfCounters<int64_t>   m_counters;
-  SrcKeySet               m_optimized;  // set of SrcKeys already optimized
+  SrcKeySet               m_optimized;   // set of SrcKeys already optimized
+  PrologueToTransMap      m_prologueDB;  // maps (Func,nArgs) => prolog TransID
+  PrologueToTransMap      m_dvFuncletDB; // maps (Func,nArgs) => DV funclet
+                                         //                      TransID
 };
 
 } }

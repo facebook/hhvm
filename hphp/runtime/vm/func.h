@@ -250,6 +250,9 @@ struct Func {
 
   void getFuncInfo(ClassInfo::MethodInfo* mi) const;
   DVFuncletsVec getDVFunclets() const;
+  bool isEntry(Offset offset) const;
+  bool isDVEntry(Offset offset) const;
+  int  getDVEntryNumParams(Offset offset) const;
 
   Unit* unit() const { return m_unit; }
   PreClass* preClass() const { return shared()->m_preClass; }
@@ -410,6 +413,7 @@ struct Func {
     // numParams.
     return numParams + 2;
   }
+  void resetPrologue(int numParams);
   void resetPrologues() {
     // Useful when killing code; forget what we've learned about the contents
     // of the translation cache.

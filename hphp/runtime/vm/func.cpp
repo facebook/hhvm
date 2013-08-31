@@ -137,6 +137,11 @@ void Func::setFullName() {
   }
 }
 
+void Func::resetPrologue(int numParams) {
+  auto const& stubs = Translator::Get()->uniqueStubs;
+  m_prologueTable[numParams] = stubs.fcallHelperThunk;
+}
+
 void Func::initPrologues(int numParams) {
   auto const& stubs = Translator::Get()->uniqueStubs;
 
@@ -722,6 +727,27 @@ const Func* Func::getGeneratorBody(const StringData* name) const {
     return Unit::lookupFunc(name);
   }
 }
+
+bool Func::isEntry(Offset offset) const {
+  return offset == base() || isDVEntry(offset);
+}
+
+bool Func::isDVEntry(Offset offset) const {
+  for (int i = 0; i < numParams(); i++) {
+    const ParamInfo& pi = params()[i];
+    if (pi.hasDefaultValue() && pi.funcletOff() == offset) return true;
+  }
+  return false;
+}
+
+int Func::getDVEntryNumParams(Offset offset) const {
+  for (int i = 0; i < numParams(); i++) {
+    const ParamInfo& pi = params()[i];
+    if (pi.hasDefaultValue() && pi.funcletOff() == offset) return i;
+  }
+  return -1;
+}
+
 
 //=============================================================================
 // FuncEmitter.

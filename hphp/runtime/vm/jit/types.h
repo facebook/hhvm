@@ -55,6 +55,7 @@ const TransID InvalidID = -1LL;
  *                inserting profiling counters
  *   - Optimize : translate one region performing optimizations that may
  *                leverage data collected by Profile translations
+ *   - Proflogue: a profiling function prologue
  */
 #define TRANS_KINDS \
     DO(Anchor)      \
@@ -63,6 +64,7 @@ const TransID InvalidID = -1LL;
     DO(Live)        \
     DO(Profile)     \
     DO(Optimize)    \
+    DO(Proflogue)   \
     DO(Invalid)     \
 
 enum TransKind {

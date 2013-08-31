@@ -3613,7 +3613,8 @@ InitThisLoc <local variable id>    []  ->  []
 
   Initialize this local variable. This instruction checks the current instance,
   and if it is not null this instruction stores it to the specified local
-  variable. If the current instance is null, this instruction does nothing.
+  variable. If the current instance is null, or if this bytecode appears in
+  a function body that is not a class method, this instruction does nothing.
 
 StaticLoc <local variable id> <litstr id>    []  ->  [C:Bool]
 

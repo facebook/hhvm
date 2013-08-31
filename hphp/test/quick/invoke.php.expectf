@@ -1,0 +1,21 @@
+This is Normal
+object(Normal)#1 (0) {
+}
+~Normal
+This is Weird
+%ANULL
+~Weird
+This is Weird2
+object(Weird2)#1 (0) {
+}
+~Weird2
+This is Weird3
+object(Weird3)#1 (0) {
+}
+~Weird3
+closure
+%ANULL
+static closure
+%ANULL
+About to fail:
+HipHop Fatal error: Function name must be a string in %s on line 41

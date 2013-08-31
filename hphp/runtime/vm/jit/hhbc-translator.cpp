@@ -742,7 +742,7 @@ void HhbcTranslator::emitInitThisLoc(int32_t id) {
     // Do nothing if this is null
     return;
   }
-  SSATmp* tmpThis = gen(LdThis, getExitSlowTrace(), m_tb->fp());
+  auto const tmpThis = gen(LdThis, getExitSlowTrace(), m_tb->fp());
   gen(StLoc, LocalId(id), m_tb->fp(), gen(IncRef, tmpThis));
 }
 

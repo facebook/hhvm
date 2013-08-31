@@ -390,7 +390,6 @@ public:
   bool autoloadConstant(StringData* name);
   bool autoloadType(CStrRef name);
   bool setMap(CArrRef map, CStrRef root);
-  bool class___autoload(CStrRef className);
   DECLARE_STATIC_REQUEST_LOCAL(AutoloadHandler, s_instance);
 
 private:
@@ -398,12 +397,10 @@ private:
   Result loadFromMap(CStrRef name, CStrRef kind, bool toLower,
                      const T &checkExists);
   static String getSignature(CVarRef handler);
-  void set_classes___autoload(CStrRef className);
 
   Array m_map;
   String m_map_root;
   Array m_handlers;
-  Array m_classes___autoload;
   bool m_running;
 };
 

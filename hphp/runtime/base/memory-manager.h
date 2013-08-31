@@ -178,15 +178,7 @@ public:
     std::vector<SmartAllocatorImpl*>::const_iterator m_it;
   };
 
-  /**
-   * Without calling this, everything should work as if there is no memory
-   * manager.
-   */
-  void enable() { m_enabled = true; }
-  void disable() { m_enabled = false; }
-  bool isEnabled() { return m_enabled; }
-
-  /**
+  /*
    * Register a smart allocator. Done by SmartAlloctorImpl's constructor.
    */
   void add(SmartAllocatorImpl *allocator);

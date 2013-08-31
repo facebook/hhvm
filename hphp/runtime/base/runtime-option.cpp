@@ -308,7 +308,6 @@ int64_t RuntimeOption::MaxSQLRowCount = 10000;
 int64_t RuntimeOption::MaxMemcacheKeyCount = 0;
 int RuntimeOption::SocketDefaultTimeout = 5;
 bool RuntimeOption::LockCodeMemory = false;
-bool RuntimeOption::EnableMemoryManager = true;
 bool RuntimeOption::CheckMemory = false;
 int RuntimeOption::MaxArrayChain = INT_MAX;
 bool RuntimeOption::WarnOnCollectionToArray = false;
@@ -827,10 +826,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     server["ForbiddenFileExtensions"].get(ForbiddenFileExtensions);
 
     LockCodeMemory = server["LockCodeMemory"].getBool(false);
-    EnableMemoryManager = server["EnableMemoryManager"].getBool(true);
-    if (!EnableMemoryManager) {
-      MemoryManager::TheMemoryManager()->disable();
-    }
     CheckMemory = server["CheckMemory"].getBool();
     MaxArrayChain = server["MaxArrayChain"].getInt32(INT_MAX);
     if (MaxArrayChain != INT_MAX) {

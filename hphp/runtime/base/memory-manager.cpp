@@ -170,8 +170,10 @@ void MemoryManager::AllocIterator::next() {
   ++m_it;
 }
 
-MemoryManager::MemoryManager() : m_front(0), m_limit(0),
-  m_enabled(RuntimeOption::EnableMemoryManager) {
+MemoryManager::MemoryManager()
+  : m_front(nullptr)
+  , m_limit(nullptr)
+{
 #ifdef USE_JEMALLOC
   threadStats(m_allocated, m_deallocated, m_cactive, m_cactiveLimit);
 #endif

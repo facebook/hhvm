@@ -761,36 +761,27 @@ String f_ini_set(CStrRef varname, CStrRef newvalue) {
 }
 
 int64_t f_memory_get_allocation() {
-  if (RuntimeOption::EnableMemoryManager) {
-    MemoryManager *mm = MemoryManager::TheMemoryManager();
-    const MemoryUsageStats &stats = mm->getStats(true);
-    int64_t ret = stats.totalAlloc;
-    ret -= request_arena().slackEstimate() +
-           varenv_arena().slackEstimate();
-    return ret;
-  }
-  return 0;
+  MemoryManager *mm = MemoryManager::TheMemoryManager();
+  const MemoryUsageStats &stats = mm->getStats(true);
+  int64_t ret = stats.totalAlloc;
+  ret -= request_arena().slackEstimate() +
+         varenv_arena().slackEstimate();
+  return ret;
 }
 
 int64_t f_memory_get_peak_usage(bool real_usage /* = false */) {
-  if (RuntimeOption::EnableMemoryManager) {
-    MemoryManager *mm = MemoryManager::TheMemoryManager();
-    const MemoryUsageStats &stats = mm->getStats(true);
-    return real_usage ? stats.peakUsage : stats.peakAlloc;
-  }
-  return (int64_t)Process::GetProcessRSS(Process::GetProcessId()) * 1024 * 1024;
+  MemoryManager *mm = MemoryManager::TheMemoryManager();
+  const MemoryUsageStats &stats = mm->getStats(true);
+  return real_usage ? stats.peakUsage : stats.peakAlloc;
 }
 
 int64_t f_memory_get_usage(bool real_usage /* = false */) {
-  if (RuntimeOption::EnableMemoryManager) {
-    MemoryManager *mm = MemoryManager::TheMemoryManager();
-    const MemoryUsageStats &stats = mm->getStats(true);
-    int64_t ret = real_usage ? stats.usage : stats.alloc;
-    ret -= request_arena().slackEstimate() +
-           varenv_arena().slackEstimate();
-    return ret;
-  }
-  return (int64_t)Process::GetProcessRSS(Process::GetProcessId()) * 1024 * 1024;
+  MemoryManager *mm = MemoryManager::TheMemoryManager();
+  const MemoryUsageStats &stats = mm->getStats(true);
+  int64_t ret = real_usage ? stats.usage : stats.alloc;
+  ret -= request_arena().slackEstimate() +
+         varenv_arena().slackEstimate();
+  return ret;
 }
 
 Variant f_php_ini_loaded_file() {

@@ -150,10 +150,6 @@ flood error logs.
     # maximum memory size for image processing
     ImageMemoryMaxBytes = Upload.UploadMaxFileSize * 2
 
-    # Recommended to turn this on to avoid memory leaks and to enable the
-    # RequestInitDocument and RequestInitFunction features.
-    EnableMemoryManager = false
-
     # Only for debugging memory problems. When turned on, server will report
     # SmartAllocator's usage for each thread to stdout.
     CheckMemory = false

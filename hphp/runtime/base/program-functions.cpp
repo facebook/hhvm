@@ -1479,20 +1479,17 @@ static bool hphp_warmup(ExecutionContext *context,
   error = false;
   std::string errorMsg;
 
-  MemoryManager *mm = MemoryManager::TheMemoryManager();
-  if (mm->isEnabled()) {
-    ServerStatsHelper ssh("reqinit");
-    try {
-      if (!reqInitDoc.empty()) {
-        include_impl_invoke(reqInitDoc, true);
-      }
-      if (!reqInitFunc.empty()) {
-        invoke(reqInitFunc.c_str(), Array());
-      }
-      context->backupSession();
-    } catch (...) {
-      handle_reqinit_exception(ret, context, errorMsg, error);
+  ServerStatsHelper ssh("reqinit");
+  try {
+    if (!reqInitDoc.empty()) {
+      include_impl_invoke(reqInitDoc, true);
     }
+    if (!reqInitFunc.empty()) {
+      invoke(reqInitFunc.c_str(), Array());
+    }
+    context->backupSession();
+  } catch (...) {
+    handle_reqinit_exception(ret, context, errorMsg, error);
   }
 
   return ret;
@@ -1513,11 +1510,6 @@ void hphp_session_init() {
   StatCache::requestInit();
 
   g_vmContext->requestInit();
-}
-
-bool hphp_is_warmup_enabled() {
-  MemoryManager *mm = MemoryManager::TheMemoryManager();
-  return mm->isEnabled();
 }
 
 ExecutionContext *hphp_context_init() {
@@ -1620,7 +1612,7 @@ void hphp_session_exit() {
   }
   mm->resetStats();
 
-  if (mm->isEnabled()) {
+  {
     ServerStatsHelper ssh("rollback");
     // sweep may call g_context->, which is a noCheck, so we need to
     // reinitialize g_context here
@@ -1639,10 +1631,6 @@ void hphp_session_exit() {
     // Do any post-sweep cleanup necessary for global variables
     free_global_variables_after_sweep();
     g_context.getCheck();
-  } else {
-    g_context.getCheck();
-    ServerStatsHelper ssh("free");
-    free_global_variables();
   }
 
   ThreadInfo::s_threadInfo->onSessionExit();

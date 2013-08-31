@@ -908,7 +908,7 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
     w->writeEntry("start", DateTime(ts.m_start.tv_sec).
                   toString(DateTime::DateFormatCookie).data());
     w->writeEntry("duration", format_duration(duration));
-    if (ts.m_requestCount > 0 && ts.m_mm->isEnabled()) {
+    if (ts.m_requestCount > 0) {
       MemoryUsageStats stats;
       ts.m_mm->getStatsSafe(stats);
       w->beginObject("memory");

@@ -61,6 +61,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/ext_spl.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/type_profile.h"
 #include "hphp/runtime/base/server/source_root_info.h"

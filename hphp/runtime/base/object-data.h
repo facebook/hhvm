@@ -73,7 +73,6 @@ class ObjectData {
     RealPropExist = 16,    // For property_exists
   };
 
-  static int ObjAllocatorSizeClassCount;
  private:
   static DECLARE_THREAD_LOCAL_NO_CHECK(int, os_max_id);
 
@@ -118,8 +117,7 @@ class ObjectData {
     }
     size_t nProps = cls->numDeclProperties();
     size_t size = sizeForNProps(nProps);
-    ObjectData* obj = (ObjectData*)ALLOCOBJSZ(size);
-    new (obj) ObjectData(cls);
+    auto const obj = new (MM().objMalloc(size)) ObjectData(cls);
     if (UNLIKELY(cls->callsCustomInstanceInit())) {
       /*
         This must happen after the constructor finishes,
@@ -135,10 +133,16 @@ class ObjectData {
     return obj;
   }
 
-  // Given a Class that is assumed to be a concrete, regular (not a
-  // trait or interface), pure PHP class, and an allocator index,
-  // return a new, uninitialized object of that class.
-  static ObjectData* newInstanceRaw(Class* cls, int idx);
+  /*
+   * Given a Class that is assumed to be a concrete, regular (not a
+   * trait or interface), pure PHP class, and an allocation size,
+   * return a new, uninitialized object of that class.
+   *
+   * newInstanceRaw should be called only when size <=
+   * MemoryManager::kMaxSmartSize, otherwise use newInstanceRawBig.
+   */
+  static ObjectData* newInstanceRaw(Class* cls, uint32_t size);
+  static ObjectData* newInstanceRawBig(Class* cls, size_t size);
 
  private:
   void instanceInit(Class* cls) {
@@ -444,96 +448,6 @@ inline
 CountableHelper::~CountableHelper() {
   m_object->decRefCount();
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// Calculate item sizes for object allocators
-
-#define WORD_SIZE sizeof(TypedValue)
-#define ALIGN_WORD(n) ((n) + (WORD_SIZE - (n) % WORD_SIZE) % WORD_SIZE)
-
-// Mapping from index to size class for objects. Mapping in the other
-// direction is available from ObjectSizeClass<> below.
-template<int Idx> class ObjectSizeTable {
-  enum { prevSize = ObjectSizeTable<Idx - 1>::value };
-public:
-  enum {
-    value = ALIGN_WORD(prevSize + (prevSize >> 1))
-  };
-};
-
-template<> struct ObjectSizeTable<0> {
-  enum { value = sizeof(ObjectData) };
-};
-
-#undef WORD_SIZE
-#undef ALIGN_WORD
-
-/*
- * This determines the highest size class we can have by looking for
- * the first entry in our table that is larger than the hard coded
- * SmartAllocator SLAB_SIZE. This is because you can't (currently)
- * SmartAllocate chunks that are potentially bigger than a slab. If
- * you introduce a bigger size class, SmartAllocator will hit an
- * assertion at runtime. The last size class currently goes up to
- * 97096 bytes -- enough room for 6064 TypedValues. Hopefully that's
- * enough.
- */
-template<int Index>
-struct DetermineLargestSizeClass {
-  typedef typename boost::mpl::eval_if_c<
-    (ObjectSizeTable<Index>::value > SLAB_SIZE),
-    boost::mpl::int_<Index>,
-    DetermineLargestSizeClass<Index + 1>
-  >::type type;
-};
-const int NumObjectSizeClasses = DetermineLargestSizeClass<0>::type::value;
-
-template<size_t Sz, int Index> struct LookupObjSizeIndex {
-  enum { index =
-    Sz <= ObjectSizeTable<Index>::value
-      ? Index : LookupObjSizeIndex<Sz,Index + 1>::index };
-};
-template<size_t Sz> struct LookupObjSizeIndex<Sz,NumObjectSizeClasses> {
-  enum { index = NumObjectSizeClasses };
-};
-
-template<size_t Sz>
-struct ObjectSizeClass {
-  enum {
-    index = LookupObjSizeIndex<Sz,0>::index,
-    value = ObjectSizeTable<index>::value
-  };
-};
-
-typedef ObjectAllocatorBase*(*ObjectAllocatorBaseGetter)(void);
-
-class ObjectAllocatorCollector {
-public:
-  static std::map<int, ObjectAllocatorBaseGetter> &getWrappers() {
-    static std::map<int, ObjectAllocatorBaseGetter> wrappers;
-    return wrappers;
-  }
-};
-
-template <typename T>
-void* ObjectAllocatorInitSetup() {
-  ThreadLocalSingleton<ObjectAllocator<
-    ObjectSizeClass<sizeof(T)>::value> > tls;
-  int index = ObjectSizeClass<sizeof(T)>::index;
-  ObjectAllocatorCollector::getWrappers()[index] =
-    (ObjectAllocatorBaseGetter)tls.getCheck;
-  GetAllocatorInitList().insert((AllocatorThreadLocalInit)(tls.getCheck));
-  return (void*)tls.getNoCheck;
-}
-
-/*
- * Return the index in ThreadInfo::m_allocators for the allocator
- * responsible for a given object size.
- *
- * There is a maximum limit on the size of allocatable objects.  If
- * this is reached, this function returns -1.
- */
-int object_alloc_size_to_index(size_t size);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Attribute helpers

@@ -3625,13 +3625,13 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
 
   // Next, allocate the object
   size_t size = ObjectData::sizeForNProps(cls->numDeclProperties());
-  int allocator = object_alloc_size_to_index(size);
-  assert(allocator != -1);
   cgCallHelper(m_as,
-               CppCall(getMethodPtr(&ObjectData::newInstanceRaw)),
+               size <= MemoryManager::kMaxSmartSize
+                 ? CppCall(getMethodPtr(&ObjectData::newInstanceRaw))
+                 : CppCall(getMethodPtr(&ObjectData::newInstanceRawBig)),
                callDest(dstReg),
                SyncOptions::kSyncPoint,
-               ArgGroup(m_regs).imm((uint64_t)cls).imm(allocator));
+               ArgGroup(m_regs).imm((uint64_t)cls).imm(size));
 
   // Set the attributes, if any
   int odAttrs = cls->getODAttrs();

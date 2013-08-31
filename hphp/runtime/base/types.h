@@ -314,7 +314,6 @@ public:
 public:
   static DECLARE_THREAD_LOCAL_NO_CHECK(ThreadInfo, s_threadInfo);
 
-  std::vector<ObjectAllocatorBase *> m_allocators;
   RequestInjectionData m_reqInjectionData;
 
   // For infinite recursion detection.  m_stacklimit is the lowest
@@ -349,15 +348,6 @@ public:
   void onSessionExit();
   void setPendingException(Exception* e);
   void clearPendingException();
-  ObjectAllocatorBase* instanceSizeAllocator(size_t size) {
-    int index = object_alloc_size_to_index(size);
-    ASSERT_NOT_IMPLEMENTED(index != -1);
-    return m_allocators[index];
-  }
-
-  ObjectAllocatorBase* instanceIdxAllocator(int index) {
-    return m_allocators[index];
-  }
 
   static bool valid(ThreadInfo* info);
 };

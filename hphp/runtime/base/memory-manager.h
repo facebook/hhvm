@@ -348,6 +348,13 @@ public:
   void* smartMallocSize(uint32_t size);
   void smartFreeSize(void* p, uint32_t size);
 
+  ALWAYS_INLINE void* objMalloc(size_t size) {
+    if (LIKELY(size <= kMaxSmartSize)) {
+      return smartMallocSize(size);
+    }
+    return smartMallocSizeBig(size);
+  }
+
   /*
    * Allocate/deallocate smart-allocated memory that is too big for
    * the small size classes.

@@ -32,7 +32,6 @@
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/member-operations.h"
-#include "hphp/runtime/vm/object-allocator-sizes.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
 
@@ -766,55 +765,6 @@ Variant ObjectData::offsetGet(Variant key) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
-template<int Idx>
-struct FindIndex {
-  static int run(int size) {
-    if (size <= ObjectSizeTable<Idx>::value) {
-      return Idx;
-    }
-    return FindIndex<Idx + 1>::run(size);
-  }
-};
-
-template<>
-struct FindIndex<NumObjectSizeClasses> {
-  static int run(int) {
-    return -1;
-  }
-};
-
-template<int Idx>
-struct FindSize {
-  static int run(int idx) {
-    if (idx == Idx) {
-      return ObjectSizeTable<Idx>::value;
-    }
-    return FindSize<Idx + 1>::run(idx);
-  }
-};
-
-template<>
-struct FindSize<NumObjectSizeClasses> {
-  static int run(int) {
-    not_reached();
-  }
-};
-
-}
-
-int object_alloc_size_to_index(size_t size) {
-  return FindIndex<0>::run(size);
-}
-
-// This returns the maximum size for the size class
-size_t object_alloc_index_to_size(int idx) {
-  return FindSize<0>::run(idx);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 const StaticString
   s___get(LITSTR_INIT("__get")),
   s___set(LITSTR_INIT("__set")),
@@ -825,8 +775,6 @@ const StaticString
   s___wakeup(LITSTR_INIT("__wakeup"));
 
 TRACE_SET_MOD(runtime);
-
-int ObjectData::ObjAllocatorSizeClassCount = InitializeAllocators();
 
 void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
                     size_t nProps) {
@@ -875,10 +823,12 @@ ObjectData* ObjectData::callCustomInstanceInit() {
 }
 
 HOT_FUNC_VM
-ObjectData* ObjectData::newInstanceRaw(Class* cls, int idx) {
-  ObjectData* obj = (ObjectData*)ALLOCOBJIDX(idx);
-  new (obj) ObjectData(cls, NoInit::noinit);
-  return obj;
+ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
+  return new (MM().smartMallocSize(size)) ObjectData(cls, NoInit::noinit);
+}
+
+ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
+  return new (MM().smartMallocSizeBig(size)) ObjectData(cls, NoInit::noinit);
 }
 
 void ObjectData::operator delete(void* p) {
@@ -892,7 +842,12 @@ void ObjectData::operator delete(void* p) {
     TypedValue* prop = &propVec[i];
     tvRefcountedDecRef(prop);
   }
-  DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
+
+  auto const size = sizeForNProps(nProps) + builtinPropSize;
+  if (LIKELY(size <= MemoryManager::kMaxSmartSize)) {
+    return MM().smartFreeSize(this_, size);
+  }
+  MM().smartFreeSizeBig(this_, size);
 }
 
 Object ObjectData::FromArray(ArrayData* properties) {

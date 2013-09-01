@@ -103,5 +103,4 @@ TypedValue* ldGblAddrDefHelper(StringData* name) {
   return r;
 }
 
-
 }}

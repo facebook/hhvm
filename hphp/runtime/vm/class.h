@@ -692,6 +692,7 @@ public:
   static size_t classVecOff() { return offsetof(Class, m_classVec); }
   static size_t classVecLenOff() { return offsetof(Class, m_classVecLen); }
   static Offset getMethodsOffset() { return offsetof(Class, m_methods); }
+  static ptrdiff_t invokeFuncOff() { return offsetof(Class, m_invoke); }
   typedef IndexedStringMap<Func*,false,Slot> MethodMap;
 
 public:
@@ -816,6 +817,7 @@ private:
   Func* m_ctor;
   Func* m_dtor;
   Func* m_toString;
+  Func* m_invoke;    // __invoke, iff non-static (or closure)
 
   // Vector of 86pinit() methods that need to be called to complete instance
   // property initialization, and a pointer to a 86sinit() method that needs to
@@ -867,8 +869,6 @@ private:
 
   SPropMap m_staticProperties;
 
-  MethodToTraitListMap m_importMethToTraitMap;
-
 public:
   void getChildren(std::vector<TypedValue *> &out);
 
@@ -885,19 +885,6 @@ private:
   // Vector of Class pointers that encodes the inheritance hierarchy, including
   // this Class as the last element.
   Class* m_classVec[1]; // Dynamically sized; must come last.
-};
-
-struct class_hash {
-  size_t operator()(const Class* c) const {
-    return hash_int64((intptr_t)c);
-  }
-};
-
-struct class_same {
-  bool operator()(const Class* c1, const Class* c2) const {
-    assert(c1 && c2);
-    return (void*)c1 == (void*)c2;
-  }
 };
 
 } // HPHP

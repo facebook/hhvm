@@ -2445,6 +2445,16 @@ void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
              });
 }
 
+void CodeGenerator::cgLdObjInvoke(IRInstruction* inst) {
+  auto const rsrc = m_regs[inst->src(0)].reg();
+  auto const rdst = m_regs[inst->dst()].reg();
+  auto& a = m_as;
+
+  a.   loadq  (rsrc[Class::invokeFuncOff()], rdst);
+  a.   testq  (rdst, rdst);
+  emitFwdJcc  (a, CC_Z, inst->taken());
+}
+
 void CodeGenerator::cgStRetVal(IRInstruction* inst) {
   auto  const rFp = m_regs[inst->src(0)].reg();
   auto* const val = inst->src(1);

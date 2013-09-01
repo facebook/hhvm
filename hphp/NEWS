@@ -1,5 +1,7 @@
-"Kimchi" 2-Sep-2013
+future
+  - Optimize closure invocation and __invoke (~3x faster to invoke)
 
+"Kimchi" 2-Sep-2013
   - Implement CachingIterator
   - Implement RecursiveCachingIterator
   - Generalized heuristic for choosing when to inline in the jit

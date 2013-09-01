@@ -972,6 +972,11 @@ LdObjMethod S0:Cls S1:ConstStr S2:StkPtr
   cache. Fatals if the class does not have an accessible method with
   the given name and does not have a __call method.
 
+D:Func = LdObjInvoke S0:Cls -> L
+
+  Try to load a cached non-static __invoke Func from the Class in S0,
+  or branch to L if it is not present.
+
 D:Cls = LdObjClass S0:Obj
 
   Load the class out of the object in S0 and put it in D.
@@ -1045,14 +1050,14 @@ D:Arr = NewTuple S0:ConstInt S1:StkPtr
 
 D:StkPtr = SpillFrame<numArgs,invName> S0:StkPtr
                                        S1:FramePtr
-                                       S2:Func
+                                       S2:{Func|FuncCls|FuncCtx|Null}
                                        S3:{Ctx|Class|Null}
 
   Operands:
 
      S0 - caller stack pointer
      S1 - caller frame pointer
-     S2 - callee Func
+     S2 - callee Func, context, FuncCls, FuncCtx, or null
      S3 - object (for FPushObjMethod*), class (for FPushClsMethod*), or
           null (for FPushFunc*).
 

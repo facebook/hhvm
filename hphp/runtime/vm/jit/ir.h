@@ -369,12 +369,13 @@ O(LdClsMethodFCache,        D(FuncCtx), C(Cls)                                \
                                           CStr                                \
                                           S(Obj,Cls,Ctx)                      \
                                           S(FramePtr),              N|C|E|Er) \
-O(GetCtxFwdCall,                D(Ctx), S(Ctx) S(Func),                    C) \
+O(GetCtxFwdCall,                D(Ctx), S(Ctx) C(Func),                    C) \
 O(LdClsMethod,                 D(Func), S(Cls) C(Int),                     C) \
 O(LdPropAddr,              D(PtrToGen), S(Obj) C(Int),                     C) \
 O(LdClsPropAddr,           D(PtrToGen), S(Cls) S(Str) C(Cls),       C|E|N|Er) \
 O(LdClsPropAddrCached,     D(PtrToGen), S(Cls) CStr CStr C(Cls),    C|E|N|Er) \
 O(LdObjMethod,                      ND, S(Cls) CStr S(StkPtr),   E|N|Refs|Er) \
+O(LdObjInvoke,                 D(Func), S(Cls),                           NF) \
 O(LdGblAddrDef,            D(PtrToGen), S(Str),                      E|N|CRc) \
 O(LdGblAddr,               D(PtrToGen), S(Str),                            N) \
 O(LdObjClass,                   D(Cls), S(Obj),                            C) \

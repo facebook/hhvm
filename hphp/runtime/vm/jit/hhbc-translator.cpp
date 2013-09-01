@@ -2133,20 +2133,25 @@ void HhbcTranslator::emitFPushFuncU(int32_t numParams,
 }
 
 void HhbcTranslator::emitFPushFunc(int32_t numParams) {
-  // input must be a string or an object implementing __invoke();
-  // otherwise fatal
-  SSATmp* funcName = popC();
-  if (!funcName->isString()) {
+  if (topC()->isA(Type::Obj)) {
+    return emitFPushFuncObj(numParams);
+  }
+  if (!topC()->isA(Type::Str)) {
     PUNT(FPushFunc_not_Str);
   }
-  emitFPushFunc(numParams, funcName);
-}
-
-void HhbcTranslator::emitFPushFunc(int32_t numParams, SSATmp* funcName) {
+  auto const funcName = popC();
   emitFPushActRec(gen(LdFunc, getCatchTrace(), funcName),
                   m_tb->genDefInitNull(),
                   numParams,
                   nullptr);
+}
+
+void HhbcTranslator::emitFPushFuncObj(int32_t numParams) {
+  auto const slowExit = getExitSlowTrace();
+  auto const obj      = popC();
+  auto const cls      = gen(LdObjClass, obj);
+  auto const func     = gen(LdObjInvoke, slowExit, cls);
+  emitFPushActRec(func, obj, numParams, nullptr);
 }
 
 void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,

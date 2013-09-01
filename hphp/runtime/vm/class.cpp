@@ -1029,18 +1029,37 @@ static Func* findSpecialMethod(Class* cls, const StringData* name) {
   return f;
 }
 
-void Class::setSpecial() {
-  static StringData* sd_toString = StringData::GetStaticString("__toString");
-  static StringData* sd_uuconstruct =
-    StringData::GetStaticString("__construct");
-  static StringData* sd_uudestruct =
-    StringData::GetStaticString("__destruct");
+const StaticString
+  s_toString("__toString"),
+  s_construct("__construct"),
+  s_destruct("__destruct"),
+  s_invoke("__invoke");
 
-  m_toString = lookupMethod(sd_toString);
-  m_dtor = lookupMethod(sd_uudestruct);
+void Class::setSpecial() {
+  m_toString = lookupMethod(s_toString.get());
+  m_dtor = lookupMethod(s_destruct.get());
+
+  /*
+   * The invoke method is only cached in the Class for a fast path JIT
+   * translation.  If someone defines a weird __invoke (e.g. as a
+   * static method), we don't bother caching it here so the translated
+   * code won't have to check for that case.
+   *
+   * Note that AttrStatic on a closure's __invoke Func* means it is a
+   * static closure---but the call to __invoke still works as if it
+   * were a non-static method call---so they are excluded from that
+   * here.  (The closure prologue uninstalls the $this and installs
+   * the appropriate static context.)
+   */
+  m_invoke = lookupMethod(s_invoke.get());
+  if (m_invoke &&
+      (m_invoke->attrs() & AttrStatic) &&
+       !m_invoke->isClosureBody()) {
+    m_invoke = nullptr;
+  }
 
   // Look for __construct() declared in either this class or a trait
-  Func* fConstruct = lookupMethod(sd_uuconstruct);
+  Func* fConstruct = lookupMethod(s_construct.get());
   if (fConstruct && (fConstruct->preClass() == m_preClass.get() ||
                      fConstruct->preClass()->attrs() & AttrTrait)) {
     m_ctor = fConstruct;

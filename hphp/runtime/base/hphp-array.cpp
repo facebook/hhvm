@@ -285,6 +285,8 @@ HphpArray* HphpArray::packedToMixed() {
 //   no KindOfInvalid tombstones
 //
 bool HphpArray::checkInvariants() const {
+  static_assert(sizeof(Elm) == 24, "");
+
   assert(m_size <= m_used);
   assert(m_used <= m_cap);
   assert(m_tableMask > 0 && ((m_tableMask+1) & m_tableMask) == 0);
@@ -786,6 +788,19 @@ void HphpArray::growPacked() {
 }
 
 void HphpArray::compact(bool renumber /* = false */) {
+  struct ElmKey {
+    ElmKey() {}
+    ElmKey(int32_t hash, StringData* key) {
+      this->hash = hash;
+      this->key = key;
+    }
+    int32_t hash;
+    union {
+      StringData* key;
+      int64_t ikey;
+    };
+  };
+
   assert(!isPacked());
   ElmKey mPos;
   if (m_pos != ArrayData::invalid_index) {

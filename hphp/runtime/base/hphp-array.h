@@ -288,19 +288,6 @@ public:
     }
   };
 
-  struct ElmKey {
-    ElmKey() {}
-    ElmKey(int32_t hash, StringData* key) {
-      this->hash = hash;
-      this->key = key;
-    }
-    int32_t hash;
-    union {
-      StringData* key;
-      int64_t ikey;
-    };
-  };
-
   // Element index, with special values < 0 used for hash tables.
   // NOTE: Unfortunately, g++ on x64 tends to generate worse machine code for
   // 32-bit ints than it does for 64-bit ints. As such, we have deliberately

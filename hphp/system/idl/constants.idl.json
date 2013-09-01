@@ -6998,6 +6998,14 @@
             "value": 339
         },
         {
+            "name": "T_TRAIT",
+            "value": 390
+        },
+        {
+            "name": "T_TRAIT_C",
+            "value": 392
+        },
+        {
             "name": "T_TRY",
             "value": 337
         },

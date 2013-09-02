@@ -887,6 +887,8 @@ class UnitEmitter {
   std::vector<Typedef> m_typedefs;
 };
 
+//////////////////////////////////////////////////////////////////////
+
 class UnitRepoProxy : public RepoProxy {
   friend class Unit;
   friend class UnitEmitter;
@@ -1003,12 +1005,7 @@ class UnitRepoProxy : public RepoProxy {
 #undef URP_OP
 };
 
-/**
- * AllFuncs
- * MutableAllFuncs
- *
- * Range over all Func's in a single unit.
- */
+//////////////////////////////////////////////////////////////////////
 
 struct ConstPreClassMethodRanger {
   typedef Func* const* Iter;
@@ -1025,10 +1022,10 @@ struct MutablePreClassMethodRanger {
     return pc->mutableMethods();
   }
 };
+
 template<typename FuncRange,
          typename GetMethods>
-class AllFuncsImpl {
- public:
+struct AllFuncsImpl {
   explicit AllFuncsImpl(const Unit* unit)
     : fr(unit->funcs())
     , mr(0, 0)
@@ -1051,7 +1048,8 @@ class AllFuncsImpl {
     if (fr.empty() && mr.empty()) skip();
     return f;
   }
- private:
+
+private:
   void skip() {
     assert(fr.empty());
     while (!cr.empty() && mr.empty()) {
@@ -1066,19 +1064,19 @@ class AllFuncsImpl {
   Unit::PreClassRange cr;
 };
 
-typedef AllFuncsImpl<Unit::FuncRange, ConstPreClassMethodRanger> AllFuncs;
-typedef AllFuncsImpl<Unit::MutableFuncRange, MutablePreClassMethodRanger> MutableAllFuncs;
+typedef AllFuncsImpl<Unit::FuncRange,ConstPreClassMethodRanger> AllFuncs;
+typedef AllFuncsImpl<Unit::MutableFuncRange,MutablePreClassMethodRanger>
+  MutableAllFuncs;
 
-/**
- *
+/*
  * Range over all defined classes.
  */
 class AllClasses {
-protected:
   NamedEntityMap::iterator m_next, m_end;
   Class* m_current;
   void next();
   void skip();
+
 public:
   AllClasses();
   bool empty() const;
@@ -1086,7 +1084,9 @@ public:
   Class* popFront();
 };
 
-/**
+//////////////////////////////////////////////////////////////////////
+
+/*
  * If name starts with '\\', returns a new String with the leading
  * slash stripped. Otherwise returns a null string.
  */
@@ -1097,6 +1097,8 @@ inline String normalizeNS(const StringData* name) {
   }
   return null_string;
 }
+
+//////////////////////////////////////////////////////////////////////
 
 }
 #endif

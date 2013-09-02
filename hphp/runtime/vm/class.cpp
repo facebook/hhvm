@@ -191,8 +191,9 @@ void PreClass::prettyPrint(std::ostream &out) const {
 // Class.
 
 Class* Class::newClass(PreClass* preClass, Class* parent) {
-  unsigned classVecLen = (parent != nullptr) ? parent->m_classVecLen+1 : 1;
-  void* mem = Util::low_malloc(sizeForNClasses(classVecLen));
+  auto const classVecLen = parent != nullptr ? parent->m_classVecLen + 1 : 1;
+  auto const size = offsetof(Class, m_classVec) + sizeof(Class*) * classVecLen;
+  auto const mem = Util::low_malloc(size);
   try {
     return new (mem) Class(preClass, parent, classVecLen);
   } catch (...) {
@@ -2455,7 +2456,7 @@ void Class::setSPropData(TypedValue* sPropData) const {
   handleToRef<TypedValue*>(m_propSDataCache) = sPropData;
 }
 
-void Class::getChildren(std::vector<TypedValue *> &out) {
+void Class::getChildren(std::vector<TypedValue*>& out) {
   for (Slot i = 0; i < m_staticProperties.size(); ++i) {
     if (m_staticProperties[i].m_class != this) continue;
     out.push_back(&m_staticProperties[i].m_val);
@@ -2469,4 +2470,4 @@ bool Class::isCppSerializable() const {
     (clsInfo()->getAttribute() & ClassInfo::IsCppSerializable);
 }
 
- } // HPHP::VM
+} // HPHP::VM

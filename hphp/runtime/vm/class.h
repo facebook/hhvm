@@ -347,11 +347,8 @@ private:
   ConstMap m_constants;
 };
 
-// It is possible for multiple Class'es to refer to the same PreClass, and we
-// need to make sure that the PreClass lives for as long as an associated Class
-// still exists (even if the associated Unit has been unloaded).  Therefore,
-// use AtomicSmartPtr's to enforce this invariant.
 typedef AtomicSmartPtr<PreClass> PreClassPtr;
+typedef AtomicSmartPtr<Class> ClassPtr;
 
 /*
  * Class represents the full definition of a user class in a given
@@ -359,14 +356,7 @@ typedef AtomicSmartPtr<PreClass> PreClassPtr;
  *
  * See PreClass for more on the distinction.
  */
-typedef AtomicSmartPtr<Class> ClassPtr;
-class Class : public AtomicCountable {
-public:
-  friend class ExecutionContext;
-  friend class ObjectData;
-  friend class ResourceData;
-  friend class Unit;
-
+struct Class : AtomicCountable {
   enum class Avail {
     False,
     True,
@@ -442,14 +432,17 @@ public:
   typedef std::vector<const Func*> InitVec;
   typedef std::vector<std::pair<const StringData*, const StringData*> >
           TraitAliasVec;
-
   typedef IndexedStringMap<Class*,true,int> InterfaceMap;
+  typedef IndexedStringMap<Func*,false,Slot> MethodMap;
 
-public:
-  // Call newClass() instead of directly calling new.
+  /*
+   * Allocate a new Class object.
+   *
+   * Eventually deallocated using atomicRelease(), but can go through
+   * some phase changes before that (see destroy().)
+   */
   static Class* newClass(PreClass* preClass, Class* parent);
-  Class(PreClass* preClass, Class* parent, unsigned classVecLen);
-  ~Class();
+
   /*
    * destroy() is called when a Class becomes unreachable. This may happen
    * before its refCount hits zero, because it is referred to by
@@ -463,12 +456,14 @@ public:
    * Class.
    */
   void destroy();
+
   /*
    * atomicRelease() is called when the (atomic) refCount hits zero.
    * The class is completely dead at this point, and its memory is
    * freed immediately.
    */
   void atomicRelease();
+
   /*
    * releaseRefs() is called when a Class is put into the zombie state,
    * to free any references to child classes, interfaces and traits
@@ -476,15 +471,12 @@ public:
    * (in case we bypassed the zombie state).
    */
   void releaseRefs();
+
   /*
    * isZombie() returns true if this class has been logically destroyed,
    * but needed to be preserved due to outstanding references.
    */
   bool isZombie() const { return !m_cachedOffset; }
-
-  static size_t sizeForNClasses(unsigned nClasses) {
-    return offsetof(Class, m_classVec) + (sizeof(Class*) * nClasses);
-  }
 
   Avail avail(Class *&parent, bool tryAutoload = false) const;
   bool classof(const Class* cls) const {
@@ -646,6 +638,12 @@ public:
    */
   DataType clsCnsType(const StringData* clsCnsName) const;
 
+  /*
+   * Tracing interface.  (Returns the set of static properties for the
+   * Tracer.)
+   */
+  void getChildren(std::vector<TypedValue*>& out);
+
   void initialize() const;
   void initPropHandle() const;
   unsigned propHandle() const { return m_propDataCache; }
@@ -693,9 +691,7 @@ public:
   static size_t classVecLenOff() { return offsetof(Class, m_classVecLen); }
   static Offset getMethodsOffset() { return offsetof(Class, m_methods); }
   static ptrdiff_t invokeFuncOff() { return offsetof(Class, m_invoke); }
-  typedef IndexedStringMap<Func*,false,Slot> MethodMap;
 
-public:
   static hphp_hash_map<const StringData*, const HhbcExtClassInfo*,
                        string_data_hash, string_data_isame> s_extClassHash;
 
@@ -717,11 +713,36 @@ public:
                                  int& offset, uint8_t& mask);
 
 private:
+  friend class ExecutionContext;
+  friend class ObjectData;
+  friend class ResourceData;
+  friend class Unit;
+
   typedef tbb::concurrent_hash_map<
     const StringData*, uint64_t, pointer_hash<StringData>> InstanceCounts;
   typedef hphp_hash_map<const StringData*, unsigned,
                         pointer_hash<StringData>> InstanceBitsMap;
   typedef std::bitset<128> InstanceBits;
+  typedef IndexedStringMap<Const,true,Slot> ConstMap;
+  typedef IndexedStringMap<Prop,true,Slot> PropMap;
+  typedef IndexedStringMap<SProp,true,Slot> SPropMap;
+
+  struct TraitMethod {
+    TraitMethod(Class* trait, Func* method, Attr modifiers)
+      : m_trait(trait)
+      , m_method(method)
+      , m_modifiers(modifiers)
+    {}
+
+    Class* m_trait;
+    Func*  m_method;
+    Attr   m_modifiers;
+  };
+  typedef std::list<TraitMethod> TraitMethodList;
+  typedef hphp_hash_map<const StringData*, TraitMethodList, string_data_hash,
+                        string_data_isame> MethodToTraitListMap;
+
+private:
   static const size_t kInstanceBits = sizeof(InstanceBits) * CHAR_BIT;
   static InstanceCounts s_instanceCounts;
   static ReadWriteMutex s_instanceCountsLock;
@@ -729,20 +750,9 @@ private:
   static ReadWriteMutex s_instanceBitsLock;
   static std::atomic<bool> s_instanceBitsInit;
 
-  struct TraitMethod {
-    Class*            m_trait;
-    Func*             m_method;
-    Attr              m_modifiers;
-    TraitMethod(Class* trait, Func* method, Attr modifiers) :
-        m_trait(trait), m_method(method), m_modifiers(modifiers) { }
-  };
-
-  typedef IndexedStringMap<Const,true,Slot> ConstMap;
-  typedef IndexedStringMap<Prop,true,Slot> PropMap;
-  typedef IndexedStringMap<SProp,true,Slot> SPropMap;
-  typedef std::list<TraitMethod> TraitMethodList;
-  typedef hphp_hash_map<const StringData*, TraitMethodList, string_data_hash,
-                        string_data_isame> MethodToTraitListMap;
+private:
+  Class(PreClass* preClass, Class* parent, unsigned classVecLen);
+  ~Class();
 
   void initialize(TypedValue*& sPropData) const;
   HphpArray* initClsCnsData() const;
@@ -801,6 +811,7 @@ private:
   void setInstanceBitsAndParents();
   template<bool setParents> void setInstanceBitsImpl();
 
+private:
   PreClassPtr m_preClass;
   ClassPtr m_parent;
   std::vector<ClassPtr> m_declInterfaces; // interfaces this class declares in
@@ -829,7 +840,9 @@ private:
   // + A static property of this class is accessed.
   InitVec m_pinitVec;
   InitVec m_sinitVec;
+
   const ClassInfo* m_clsInfo;
+
   unsigned m_needInitialization : 1;      // requires initialization,
                                           // due to [ps]init or simply
                                           // having static members
@@ -848,42 +861,33 @@ public:
 private:
   unsigned m_propDataCache;
   unsigned m_propSDataCache;
-
   BuiltinCtorFunction m_InstanceCtor;
-
   ConstMap m_constants;
 
-  // Properties.
-  //
-  // Each ObjectData is created with enough trailing space to directly store
-  // the vector of declared properties. To look up a property by name and
-  // determine whether it is declared, use m_declPropMap. If the declared
-  // property index is already known (as may be the case when executing via
-  // the TC), property metadata in m_declPropInfo can be directly accessed.
-  //
-  // m_declPropInit is indexed by the Slot values from m_declProperties, and
-  // contains initialization information.
-
+  /*
+   * Each ObjectData is created with enough trailing space to directly store
+   * the vector of declared properties. To look up a property by name and
+   * determine whether it is declared, use m_declPropMap. If the declared
+   * property index is already known (as may be the case when executing via
+   * the TC), property metadata in m_declPropInfo can be directly accessed.
+   *
+   * m_declPropInit is indexed by the Slot values from m_declProperties, and
+   * contains initialization information.
+   */
   PropMap m_declProperties;
   PropInitVec m_declPropInit;
-
   SPropMap m_staticProperties;
 
 public:
-  void getChildren(std::vector<TypedValue *> &out);
+  Class* m_nextClass; // used by Unit
 
-public: // used in Unit
-  Class* m_nextClass;
 private:
-  // m_instanceBits and m_classVec are both used for efficient
-  // instanceof checking in translated code.
-
-  // Bitmap of parent classes and implemented interfaces. Each bit corresponds
-  // to a commonly used class name, determined during the profiling warmup
-  // requests.
+  // Bitmap of parent classes and implemented interfaces. Each bit
+  // corresponds to a commonly used class name, determined during the
+  // profiling warmup requests.
   InstanceBits m_instanceBits;
-  // Vector of Class pointers that encodes the inheritance hierarchy, including
-  // this Class as the last element.
+  // Vector of Class pointers that encodes the inheritance hierarchy,
+  // including this Class as the last element.
   Class* m_classVec[1]; // Dynamically sized; must come last.
 };
 

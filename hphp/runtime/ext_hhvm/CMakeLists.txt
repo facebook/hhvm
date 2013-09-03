@@ -60,6 +60,9 @@ foreach (header ${CXX_HEADERS})
 endforeach()
 
 auto_sources(HPHP_IDLS "*.idl.json" "RECURSE" "${HPHP_HOME}/hphp/system/idl")
+if (NOT LINUX)
+	list(REMOVE_ITEM HPHP_IDLS "${HPHP_HOME}/hphp/system/idl/calendar.idl.json")
+endif()
 add_custom_command(OUTPUT ${INFOTABS_SOURCE}
                    DEPENDS ${CXX_HEADERS} gen-infotabs
                    COMMAND "${HPHP_HOME}/hphp/tools/bootstrap/gen-infotabs"

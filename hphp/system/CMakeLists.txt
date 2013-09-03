@@ -1,4 +1,7 @@
 auto_sources(IDL_SRCS "*.idl.json" "RECURSE" "${HPHP_HOME}/hphp/system/idl")
+if (NOT LINUX)
+	list(REMOVE_ITEM IDL_SRCS "${HPHP_HOME}/hphp/system/idl/calendar.idl.json")
+endif()
 
 add_custom_command(OUTPUT "class_map.cpp" "constants.h"
                    DEPENDS ${IDL_SRCS} gen-class-map

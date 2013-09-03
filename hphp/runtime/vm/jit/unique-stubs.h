@@ -124,6 +124,20 @@ struct UniqueStubs {
    * The stub we jump to when a stack overflow check fails.
    */
   TCA stackOverflowHelper;
+
+  /*
+   * A Func's prologue table is initialized to this stub for every entry. The
+   * stub calls fcallHelper, which looks up or generates the appropriate
+   * prologue and returns it. The stub then dispatches to the prologue.
+   */
+  TCA fcallHelperThunk;
+
+  /*
+   * A Func's "function body entry point" is initialized to this stub. The stub
+   * calls funcBodyHelper, which creates a real translation. The stub then
+   * dispatches to the translation.
+   */
+  TCA funcBodyHelperThunk;
 };
 
 //////////////////////////////////////////////////////////////////////

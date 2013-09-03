@@ -79,7 +79,7 @@ void verifyFuncReferencesSevered() {
     void visit(Func* f) {
       for (int i = 0; i < f->numPrologues(); ++i) {
         DEBUG_ONLY TCA pro = (TCA)f->getPrologue(i);
-        assert(pro == (TCA)fcallHelperThunk);
+        assert(pro == Translator::Get()->uniqueStubs.fcallHelperThunk);
       }
     }
   } verify;

@@ -137,7 +137,9 @@ void Func::setFullName() {
 }
 
 void Func::initPrologues(int numParams) {
-  m_funcBody = (TCA)HPHP::Transl::funcBodyHelperThunk;
+  auto const& stubs = Translator::Get()->uniqueStubs;
+
+  m_funcBody = stubs.funcBodyHelperThunk;
 
   int maxNumPrologues = Func::getMaxNumPrologues(numParams);
   int numPrologues =
@@ -146,7 +148,7 @@ void Func::initPrologues(int numParams) {
 
   TRACE(2, "initPrologues func %p %d\n", this, numPrologues);
   for (int i = 0; i < numPrologues; i++) {
-    m_prologueTable[i] = (TCA)HPHP::Transl::fcallHelperThunk;
+    m_prologueTable[i] = stubs.fcallHelperThunk;
   }
 }
 

@@ -15,27 +15,11 @@
 */
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
-#include "hphp/runtime/vm/jit/target-cache.h"
-#include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/stats.h"
-
-#ifndef __APPLE__
-#define ASM_HELPER_ALIGNMENT ".align 16\n"
-#define ASM_HELPER_FUNC_NAME(name) #name
-#else
-#define ASM_HELPER_ALIGNMENT ".align 4\n" // on OSX this is 2^value
-#define ASM_HELPER_FUNC_NAME(name) "_" #name
-#endif
 
 namespace HPHP {
 namespace Transl {
-
-inline bool
-checkEval(HPHP::Eval::PhpFile* efile) {
-  return !TargetCache::testAndSetBit(efile->getId());
-}
 
 /*
  * reserve the VM stack pointer within this translation unit
@@ -76,54 +60,6 @@ static void setupAfterPrologue(ActRec* fp) {
   }
 }
 
-/*
- * fcallHelperThunk--
- *
- *   Func's prologue entries initially point here. Vector into fcallHelper,
- *   where we can translate a new prologue.
- */
-static_assert(rStashedAR == reg::r15,
-  "__fcallHelperThunk needs to be modified for ABI changes");
-asm(
-  ".byte 0\n"
-  ASM_HELPER_ALIGNMENT
-  ".globl __fcallHelperThunk\n"
-"__fcallHelperThunk:\n"
-#if defined(__x86_64__)
-  // fcallHelper is used for prologues, and (in the case of
-  // closures) for dispatch to the function body. In the first
-  // case, there's a call, in the second, there's a jmp.
-  // We can differentiate by comparing r15 and rVmFp
-  "mov %r15, %rdi\n"
-  "cmp %r15, %rbp\n"
-  "jne 1f\n"
-  "call " ASM_HELPER_FUNC_NAME(fcallHelper) "\n"
-  "jmp *%rax\n"
-  // fcallHelper may call doFCall. doFCall changes the return ip
-  // pointed to by r15 so that it points to TranslatorX64::m_retHelper,
-  // which does a REQ_POST_INTERP_RET service request. So we need to
-  // to pop the return address into r15 + m_savedRip before calling
-  // fcallHelper, and then push it back from r15 + m_savedRip after
-  // fcallHelper returns in case it has changed it.
-  "1: pop 0x8(%r15)\n"
-  // There is a brief span from enterTCAtPrologue until the function
-  // is entered where rbp is *below* the new actrec, and is missing
-  // a number of c++ frames. The new actrec is linked onto the c++
-  // frames, however, so switch it into rbp in case fcallHelper throws.
-  "xchg %r15,%rbp\n"
-  "call " ASM_HELPER_FUNC_NAME(fcallHelper) "\n"
-  "xchg %r15,%rbp\n"
-  "push 0x8(%r15)\n"
-  "jmp *%rax\n"
-  "ud2\n"
-#elif defined(__AARCH64EL__)
-  "brk 0\n"
-#else
-# error You sure have your work cut out for you
-#endif
-);
-
-extern "C"
 TCA fcallHelper(ActRec* ar) {
   try {
     TCA tca =
@@ -176,27 +112,6 @@ TCA fcallHelper(ActRec* ar) {
     throw;
   }
 }
-
-asm (
-  ".byte 0\n"
-  ASM_HELPER_ALIGNMENT
-  ".globl __funcBodyHelperThunk\n"
-"__funcBodyHelperThunk:\n"
-#if defined(__x86_64__)
-  /*
-   * when this helper is called, a jmp direct from the tc (from the
-   * fcallArrayHelper). So we don't need to worry about stack parity.
-   */
-  "mov %rbp, %rdi\n"
-  "call " ASM_HELPER_FUNC_NAME(funcBodyHelper) "\n"
-  "jmp *%rax\n"
-  "ud2\n"
-#elif defined(__AARCH64EL__)
-  "brk 0\n"
-#else
-# error You sure have your work cut out for you
-#endif
-);
 
 /*
  * This is used to generate an entry point for the entry

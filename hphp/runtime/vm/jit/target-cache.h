@@ -133,8 +133,6 @@ bool classIsPersistent(const Class* cls);
 
 CacheHandle ptrToHandle(const void*);
 
-TCA fcallHelper(ActRec* ar);
-
 template<typename T = void>
 static inline T*
 handleToPtr(CacheHandle h) {

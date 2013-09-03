@@ -284,7 +284,7 @@ TCA TranslatorX64::retranslateOpt(TransID transId, bool align) {
                       func->getDVFunclets().size() == 0);
 
   if (!alreadyOptimized) {
-    if (setFuncBody) func->setFuncBody((TCA)funcBodyHelperThunk);
+    if (setFuncBody) func->setFuncBody(uniqueStubs.funcBodyHelperThunk);
     invalidateSrcKey(sk);
   } else {
     // Bail if we already reached the maximum number of translations per SrcKey.
@@ -727,7 +727,7 @@ TranslatorX64::emitCallArrayPrologue(const Func* func,
 TCA
 TranslatorX64::getCallArrayPrologue(Func* func) {
   TCA tca = func->getFuncBody();
-  if (tca != (TCA)funcBodyHelperThunk) return tca;
+  if (tca != uniqueStubs.funcBodyHelperThunk) return tca;
 
   DVFuncletsVec dvs = func->getDVFunclets();
 
@@ -735,7 +735,7 @@ TranslatorX64::getCallArrayPrologue(Func* func) {
     LeaseHolder writer(s_writeLease);
     if (!writer) return nullptr;
     tca = func->getFuncBody();
-    if (tca != (TCA)funcBodyHelperThunk) return tca;
+    if (tca != uniqueStubs.funcBodyHelperThunk) return tca;
     tca = emitCallArrayPrologue(func, dvs);
     func->setFuncBody(tca);
   } else {
@@ -778,7 +778,9 @@ funcPrologueHasGuard(TCA prologue, const Func* func) {
 
 static TCA
 funcPrologueToGuard(TCA prologue, const Func* func) {
-  if (!prologue || prologue == (TCA)fcallHelperThunk) return prologue;
+  if (!prologue || prologue == Translator::Get()->uniqueStubs.fcallHelperThunk) {
+    return prologue;
+  }
   return prologue -
     (deltaFits(uintptr_t(func), sz::dword) ?
      kFuncGuardShortLen :
@@ -800,7 +802,7 @@ TranslatorX64::smashPrologueGuards(TCA* prologues, int numPrologues,
                                    const Func* func) {
   DEBUG_ONLY std::unique_ptr<LeaseHolder> writer;
   for (int i = 0; i < numPrologues; i++) {
-    if (prologues[i] != (TCA)fcallHelperThunk
+    if (prologues[i] != uniqueStubs.fcallHelperThunk
         && funcPrologueHasGuard(prologues[i], func)) {
       if (debug) {
         /*
@@ -912,7 +914,8 @@ bool
 TranslatorX64::checkCachedPrologue(const Func* func, int paramIdx,
                                    TCA& prologue) const {
   prologue = (TCA)func->getPrologue(paramIdx);
-  if (prologue != (TCA)fcallHelperThunk && !s_replaceInFlight) {
+  if (prologue != uniqueStubs.fcallHelperThunk &&
+      !s_replaceInFlight) {
     TRACE(1, "cached prologue %s(%d) -> cached %p\n",
           func->fullName()->data(), paramIdx, prologue);
     assert(isValidCodeAddress(prologue));
@@ -1782,9 +1785,9 @@ TranslatorX64::enterTC(TCA start, void* data) {
       sk = SrcKey(liveFunc(), newPc);
       start = getTranslation(TranslArgs(sk, true));
     }
-    assert(start == (TCA)HPHP::Transl::funcBodyHelperThunk ||
+    assert(start == uniqueStubs.funcBodyHelperThunk ||
            isValidCodeAddress(start) ||
-           (start == (TCA)HPHP::Transl::fcallHelperThunk &&
+           (start == uniqueStubs.fcallHelperThunk &&
             info.saved_rStashedAr == (uintptr_t)data));
     assert(!s_writeLease.amOwner());
     const Func* func = (vmfp() ? (ActRec*)vmfp() : (ActRec*)data)->m_func;

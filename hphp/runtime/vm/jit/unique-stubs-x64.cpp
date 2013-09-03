@@ -476,12 +476,77 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
   a.    loadq  (rVmFp[AROFF(m_func)], rax);
   a.    loadq  (rax[Func::funcBodyOff()], rax);
   a.    jmp    (rax);
+  a.    ud2    ();
 
 asm_label(a, noCallee);
   a.    addq   (8, rsp);
   a.    ret    ();
 
   log("fcallArrayHelper", uniqueStubs.fcallArrayHelper);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void emitFCallHelperThunk(UniqueStubs& uniqueStubs) {
+  TCA (*helper)(ActRec*) = &fcallHelper;
+  Asm a { tx64->stubsCode };
+
+  moveToAlign(a);
+  uniqueStubs.fcallHelperThunk = a.frontier();
+
+  Label popAndXchg;
+
+  // fcallHelper is used for prologues, and (in the case of
+  // closures) for dispatch to the function body. In the first
+  // case, there's a call, in the second, there's a jmp.
+  // We can differentiate by comparing r15 and rVmFp
+  a.    movq   (rStashedAR, argNumToRegName[0]);
+  a.    cmpq   (rStashedAR, rVmFp);
+  a.    jne8   (popAndXchg);
+  emitCall(a, CppCall(helper));
+  a.    jmp    (rax);
+  // The ud2 is a hint to the processor that the fall-through path of the
+  // indirect jump (which it statically predicts as most likely) is not
+  // possible.
+  a.    ud2    ();
+
+  // fcallHelper may call doFCall. doFCall changes the return ip
+  // pointed to by r15 so that it points to TranslatorX64::m_retHelper,
+  // which does a REQ_POST_INTERP_RET service request. So we need to
+  // to pop the return address into r15 + m_savedRip before calling
+  // fcallHelper, and then push it back from r15 + m_savedRip after
+  // fcallHelper returns in case it has changed it.
+asm_label(a, popAndXchg);
+  // There is a brief span from enterTCAtPrologue until the function
+  // is entered where rbp is *below* the new actrec, and is missing
+  // a number of c++ frames. The new actrec is linked onto the c++
+  // frames, however, so switch it into rbp in case fcallHelper throws.
+  a.    xchgq  (rStashedAR, rVmFp);
+  a.    pop    (rVmFp[AROFF(m_savedRip)]);
+  emitCall(a, CppCall(helper));
+  a.    push   (rVmFp[AROFF(m_savedRip)]);
+  a.    xchgq  (rStashedAR, rVmFp);
+  a.    jmp    (rax);
+  a.    ud2    ();
+
+  log("fcallHelperThunk", uniqueStubs.fcallHelperThunk);
+}
+
+void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
+  TCA (*helper)(ActRec*) = &funcBodyHelper;
+  Asm a { tx64->stubsCode };
+
+  moveToAlign(a);
+  uniqueStubs.funcBodyHelperThunk = a.frontier();
+
+  // This helper is called via a direct jump from the TC (from
+  // fcallArrayHelper). So the stack parity is already correct.
+  a.    movq   (rVmFp, argNumToRegName[0]);
+  emitCall(a, CppCall(helper));
+  a.    jmp    (rax);
+  a.    ud2    ();
+
+  log("funcBodyHelperThunk", uniqueStubs.funcBodyHelperThunk);
 }
 
 }
@@ -500,7 +565,9 @@ UniqueStubs emitUniqueStubs() {
     emitGenericDecRefHelpers,
     emitFreeLocalsHelpers,
     emitFuncPrologueRedispatch,
-    emitFCallArrayHelper
+    emitFCallArrayHelper,
+    emitFCallHelperThunk,
+    emitFuncBodyHelperThunk,
   };
   for (auto& f : functions) f(us);
   return us;

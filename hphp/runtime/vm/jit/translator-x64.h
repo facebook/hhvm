@@ -74,8 +74,6 @@ extern __thread TranslatorX64* tx64;
 
 extern void* interpOneEntryPoints[];
 
-extern "C" TCA funcBodyHelper(ActRec* fp);
-
 struct TReqInfo;
 struct Label;
 
@@ -458,8 +456,8 @@ const size_t kExpectedPerTrampolineSize = 11;
 const size_t kMaxNumTrampolines = kTrampolinesBlockSize /
   kExpectedPerTrampolineSize;
 
-void fcallHelperThunk() asm ("__fcallHelperThunk");
-void funcBodyHelperThunk() asm ("__funcBodyHelperThunk");
+TCA fcallHelper(ActRec* ar);
+TCA funcBodyHelper(ActRec* ar);
 void functionEnterHelper(const ActRec* ar);
 int64_t decodeCufIterHelper(Iter* it, TypedValue func);
 

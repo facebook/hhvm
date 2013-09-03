@@ -262,12 +262,13 @@ bool LibEventTransport::isServerStopping() {
 void LibEventTransport::sendImpl(const void *data, int size, int code,
                                  bool chunked) {
   assert(data);
-  assert(!m_sendEnded);
   assert(!m_sendStarted || chunked);
   if (m_sendEnded) {
     // This should never happen, but when it does we have to bail out,
     // since there's no sensible way to send data at this point and
     // trying to do so will horribly corrupt memory.
+    // TODO #2821803: Figure out whether this is caused by another bug
+    // somewhere.
     return;
   }
   if (chunked) {

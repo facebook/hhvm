@@ -2067,6 +2067,9 @@
 #define PACKAGE_TARNAME ""
 
 /* Define to the version of this package. */
+#ifdef PACKAGE_VERSION
+# undef PACKAGE_VERSION
+#endif
 #define PACKAGE_VERSION ""
 
 /* */

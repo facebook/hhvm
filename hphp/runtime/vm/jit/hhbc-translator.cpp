@@ -21,6 +21,7 @@
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/ir-factory.h"
@@ -3040,8 +3041,8 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   // defined yet - all paths below are tolerant of a null constraint.
   if (!classIsUniqueOrCtxParent(knownConstraint)) knownConstraint = nullptr;
 
-  Class::initInstanceBits();
-  bool haveBit = Class::haveInstanceBit(clsName);
+  InstanceBits::init();
+  bool haveBit = InstanceBits::lookup(clsName) != 0;
   SSATmp* constraint = knownConstraint ? cns(knownConstraint)
                                        : gen(LdClsCachedSafe, cns(clsName));
   locVal = gen(Unbox, getExitTrace(), locVal);
@@ -3096,8 +3097,8 @@ void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
   SSATmp* objClass     = gen(LdObjClass, src);
   SSATmp* ssaClassName = cns(className);
 
-  Class::initInstanceBits();
-  const bool haveBit = Class::haveInstanceBit(className);
+  InstanceBits::init();
+  const bool haveBit = InstanceBits::lookup(className) != 0;
 
   Class* const maybeCls = Unit::lookupUniqueClass(className);
   const bool isNormalClass = classIsUniqueNormalClass(maybeCls);

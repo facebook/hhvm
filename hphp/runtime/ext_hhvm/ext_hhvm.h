@@ -39,7 +39,7 @@ struct HhbcExtMethodInfo {
 
 struct HhbcExtClassInfo {
   const char* m_name;
-  ObjectData* (*m_InstanceCtor)(HPHP::Class*);
+  ObjectData* (*m_instanceCtor)(HPHP::Class*);
   int m_sizeof;
   long long m_methodCount;
   const HhbcExtMethodInfo* m_methods;

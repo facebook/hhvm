@@ -14,6 +14,9 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/preclass-emit.h"
+
+#include "folly/Memory.h"
+
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/blob-helper.h"
 
@@ -53,7 +56,7 @@ PreClassEmitter::PreClassEmitter(UnitEmitter& ue,
   , m_name(n)
   , m_id(id)
   , m_hoistable(hoistable)
-  , m_InstanceCtor(nullptr)
+  , m_instanceCtor(nullptr)
   , m_builtinPropSize(0)
 {}
 
@@ -170,7 +173,7 @@ void PreClassEmitter::setBuiltinClassInfo(const ClassInfo* info,
     m_attrs = m_attrs | AttrTrait;
   }
   m_attrs = m_attrs | AttrUnique;
-  m_InstanceCtor = ctorFunc;
+  m_instanceCtor = ctorFunc;
   m_builtinPropSize = sz - sizeof(ObjectData);
 }
 
@@ -180,10 +183,12 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
       !RuntimeOption::RepoAuthoritative && SystemLib::s_inited) {
     attrs = Attr(attrs & ~AttrPersistent);
   }
-  PreClass* pc = new PreClass(&unit, m_line1, m_line2, m_offset, m_name,
-                              attrs, m_parent, m_docComment, m_id,
-                              m_hoistable);
-  pc->m_InstanceCtor = m_InstanceCtor;
+
+  auto pc = folly::make_unique<PreClass>(
+    &unit, m_line1, m_line2, m_offset, m_name,
+    attrs, m_parent, m_docComment, m_id,
+    m_hoistable);
+  pc->m_instanceCtor = m_instanceCtor;
   pc->m_builtinPropSize = m_builtinPropSize;
   pc->m_interfaces = m_interfaces;
   pc->m_usedTraits = m_usedTraits;
@@ -194,7 +199,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   PreClass::MethodMap::Builder methodBuild;
   for (MethodVec::const_iterator it = m_methods.begin();
        it != m_methods.end(); ++it) {
-    Func* f = (*it)->create(unit, pc);
+    Func* f = (*it)->create(unit, pc.get());
     methodBuild.add(f->name(), f);
   }
   pc->m_methods.create(methodBuild);
@@ -202,7 +207,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   PreClass::PropMap::Builder propBuild;
   for (unsigned i = 0; i < m_propMap.size(); ++i) {
     const Prop& prop = m_propMap[i];
-    propBuild.add(prop.name(), PreClass::Prop(pc,
+    propBuild.add(prop.name(), PreClass::Prop(pc.get(),
                                               prop.name(),
                                               prop.attrs(),
                                               prop.typeConstraint(),
@@ -215,14 +220,14 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   PreClass::ConstMap::Builder constBuild;
   for (unsigned i = 0; i < m_constMap.size(); ++i) {
     const Const& const_ = m_constMap[i];
-    constBuild.add(const_.name(), PreClass::Const(pc,
+    constBuild.add(const_.name(), PreClass::Const(pc.get(),
                                                   const_.name(),
                                                   const_.typeConstraint(),
                                                   const_.val(),
                                                   const_.phpCode()));
   }
   pc->m_constants.create(constBuild);
-  return pc;
+  return pc.release();
 }
 
 template<class SerDe> void PreClassEmitter::serdeMetaData(SerDe& sd) {

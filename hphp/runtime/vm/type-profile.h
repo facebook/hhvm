@@ -23,7 +23,6 @@ namespace HPHP {
 
 class StringData;
 
-
 struct TypeProfileKey {
   enum KeyType {
     MethodName,
@@ -54,6 +53,6 @@ inline bool shouldProfile() {
   return profileOn;
 }
 
- }
+}
 
 #endif // TYPE_PROFILE_H_

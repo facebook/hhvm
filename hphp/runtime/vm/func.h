@@ -766,6 +766,6 @@ FRP_OPS
 #undef FRP_OP
 };
 
- }
+}
 
 #endif

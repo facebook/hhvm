@@ -105,7 +105,7 @@ void ObjectData::destruct() {
 // class info
 
 CStrRef ObjectData::o_getClassName() const {
-  return *(const String*)(&m_cls->m_preClass->nameRef());
+  return *(const String*)(&m_cls->preClass()->nameRef());
 }
 
 HOT_FUNC
@@ -357,9 +357,9 @@ void ObjectData::o_getArray(Array& props, bool pubOnly /* = false */) const {
   // Iterate over declared properties and insert {mangled name --> prop} pairs.
   const Class* cls = m_cls;
   do {
-    getProps(cls, pubOnly, cls->m_preClass.get(), props, inserted);
-    for (auto const& trait : cls->m_usedTraits) {
-      getProps(cls, pubOnly, trait->m_preClass.get(), props, inserted);
+    getProps(cls, pubOnly, cls->preClass(), props, inserted);
+    for (auto const& trait : cls->usedTraits()) {
+      getProps(cls, pubOnly, trait->preClass(), props, inserted);
     }
     cls = cls->parent();
   } while (cls);
@@ -404,7 +404,7 @@ Array ObjectData::o_toArray() const {
 
 Array ObjectData::o_toIterArray(CStrRef context,
                                 bool getRef /* = false */) {
-  size_t size = m_cls->m_declPropNumAccessible +
+  size_t size = m_cls->declPropNumAccessible() +
                 (o_properties.get() ? o_properties.get()->size() : 0);
   auto retval = ArrayData::Make(size);
   Class* ctx = nullptr;
@@ -416,8 +416,8 @@ Array ObjectData::o_toIterArray(CStrRef context,
   // hierarchy, in declaration order.
   const Class* klass = m_cls;
   while (klass) {
-    const PreClass::Prop* props = klass->m_preClass->properties();
-    const size_t numProps = klass->m_preClass->numProperties();
+    const PreClass::Prop* props = klass->preClass()->properties();
+    const size_t numProps = klass->preClass()->numProperties();
 
     for (size_t i = 0; i < numProps; ++i) {
       auto key = const_cast<StringData*>(props[i].name());
@@ -659,7 +659,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
           String propName = name;
           Slot propInd = m_cls->getDeclPropIndex(m_cls, name.get(), accessible);
           if (accessible && propInd != kInvalidSlot) {
-            if (m_cls->m_declProperties[propInd].m_attrs & AttrPrivate) {
+            if (m_cls->declProperties()[propInd].m_attrs & AttrPrivate) {
               propName = concat4(s_zero, o_getClassName(), s_zero, name);
             }
           }
@@ -995,7 +995,7 @@ void ObjectData::propImpl(TypedValue*& retval, TypedValue& tvRef,
 
         raise_error("Cannot access %s property %s::$%s",
                     priv ? "private" : "protected",
-                    m_cls->m_preClass->name()->data(),
+                    m_cls->preClass()->name()->data(),
                     key->data());
       }
     }
@@ -1412,13 +1412,13 @@ String ObjectData::invokeToString() {
         notify_user = &raise_warning;
       }
       notify_user("Method %s::__toString() must return a string value",
-                  m_cls->m_preClass->name()->data());
+                  m_cls->preClass()->name()->data());
     }
     return tv.m_data.pstr;
   }
   raise_recoverable_error(
     "Object of class %s could not be converted to string",
-    m_cls->m_preClass->name()->data()
+    m_cls->preClass()->name()->data()
   );
   // If the user error handler decides to allow execution to continue,
   // we return the empty string.

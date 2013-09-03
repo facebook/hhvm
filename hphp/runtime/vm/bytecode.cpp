@@ -3914,7 +3914,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopInstanceOfD(PC& pc) {
   NEXT();
   DECODE(Id, id);
   if (shouldProfile()) {
-    Class::profileInstanceOf(m_fp->m_func->unit()->lookupLitstrId(id));
+    InstanceBits::profile(m_fp->m_func->unit()->lookupLitstrId(id));
   }
   const NamedEntity* ne = m_fp->m_func->unit()->lookupNamedEntityId(id);
   Cell* c1 = m_stack.topC();

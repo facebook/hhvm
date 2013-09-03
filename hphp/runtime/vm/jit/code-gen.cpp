@@ -1970,7 +1970,7 @@ void CodeGenerator::emitInstanceBitmaskCheck(IRInstruction* inst) {
 
   int offset;
   uint8_t mask;
-  if (!Class::getInstanceBitMask(testClassName, offset, mask)) {
+  if (!InstanceBits::getMask(testClassName, offset, mask)) {
     always_assert(!"cgInstanceOfBitmask had no bitmask");
   }
   a.    testb  (int8_t(mask), rObjClass[offset]);

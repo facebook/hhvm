@@ -609,7 +609,7 @@ Class* Unit::defClass(const PreClass* preClass,
     newClass->m_cachedOffset = nameList->m_cachedClassOffset;
 
     newClass.get()->incAtomicCount();
-    if (Class::s_instanceBitsInit.load(std::memory_order_acquire)) {
+    if (InstanceBits::initFlag.load(std::memory_order_acquire)) {
       // If the instance bitmap has already been set up, we can just
       // initialize our new class's bits and add ourselves to the class
       // list normally.
@@ -620,8 +620,8 @@ Class* Unit::defClass(const PreClass* preClass,
       // initialized since we checked, initialize the bits normally. If not,
       // we must add the new class to the class list before dropping the lock
       // to ensure its bits are initialized when the time comes.
-      ReadLock l(Class::s_instanceBitsLock);
-      if (Class::s_instanceBitsInit.load(std::memory_order_acquire)) {
+      ReadLock l(InstanceBits::lock);
+      if (InstanceBits::initFlag.load(std::memory_order_acquire)) {
         newClass->setInstanceBits();
       }
       nameList->pushClass(newClass.get());

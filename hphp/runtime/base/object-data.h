@@ -108,8 +108,8 @@ class ObjectData {
 
   // Call newInstance() to instantiate a PHP object
   static ObjectData* newInstance(Class* cls) {
-    if (cls->m_InstanceCtor) {
-      return cls->m_InstanceCtor(cls);
+    if (auto const ctor = cls->instanceCtor()) {
+      return ctor(cls);
     }
     Attr attrs = cls->attrs();
     if (UNLIKELY(attrs & (AttrAbstract | AttrInterface | AttrTrait))) {

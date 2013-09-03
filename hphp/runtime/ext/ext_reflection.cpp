@@ -690,11 +690,9 @@ static Array get_class_info(const ClassInfo *cls) {
     for (ClassInfo::MethodVec::const_iterator iter = methods.begin();
          iter != methods.end(); ++iter) {
       ClassInfo::MethodInfo *m = *iter;
-      if ((m->attribute & ClassInfo::IsInherited) == 0) {
-        Array info = Array::Create();
-        set_method_info(info, m, cls);
-        arr.set(StringUtil::ToLower(m->name), info);
-      }
+      Array info = Array::Create();
+      set_method_info(info, m, cls);
+      arr.set(StringUtil::ToLower(m->name), info);
     }
     ret.set(s_methods, VarNR(arr));
   }

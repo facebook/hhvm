@@ -30,7 +30,10 @@ endmacro()
 
 string(LENGTH "${HPHP_HOME}/hphp/" HPHP_DIR_LEN)
 
-set(RECURSIVE_SOURCE_SUBDIRS "${HPHP_HOME}/hphp/runtime/ext" "${HPHP_HOME}/hphp/runtime/ext_zend_compat")
+set(RECURSIVE_SOURCE_SUBDIRS "${HPHP_HOME}/hphp/runtime/ext")
+if (LINUX)
+	list(APPEND RECURSIVE_SOURCE_SUBDIRS "${HPHP_HOME}/hphp/runtime/ext_zend_compat")
+endif()
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
 	auto_sources(files "*.cpp" "RECURSE" ${dir})
 	foreach (f ${files})

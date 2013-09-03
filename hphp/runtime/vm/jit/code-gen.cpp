@@ -65,7 +65,6 @@ namespace {
 using namespace Util;
 using namespace Transl::reg;
 using namespace X64; // XXX: we need to split the x64-specific parts out
-using Transl::CppCall;
 
 TRACE_SET_MOD(hhir);
 
@@ -904,7 +903,7 @@ void CodeGenerator::cgCallHelper(Asm& a,
   regSaver.bytesPushed(shuffleArgs(a, args));
 
   // do the call; may use a trampoline
-  m_tx64->emitCall(a, call);
+  emitCall(a, call);
   if (memory_profiling || sync != SyncOptions::kNoSyncPoint) {
     // if we are profiling the heap, we always need to sync because
     // regs need to be correct during smart allocations no matter
@@ -2508,7 +2507,7 @@ void CodeGenerator::emitTraceRet(Asm& a) {
   a.    movq  (rVmSp, rsi);
   a.    loadq (*rsp, rdx); // return ip from native stack
   // do the call; may use a trampoline
-  m_tx64->emitCall(a, TCA(traceRet));
+  emitCall(a, TCA(traceRet));
 }
 
 void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
@@ -3285,7 +3284,7 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
        */
       if (offset == 0 && baseReg == rVmSp) {
         // Decref'ing top of vm stack, very likely a popR
-        m_tx64->emitCall(m_as, m_tx64->uniqueStubs.irPopRHelper);
+        emitCall(m_as, m_tx64->uniqueStubs.irPopRHelper);
       } else {
         if (baseReg == rsp) {
           // Because we just pushed %rdi, %rsp is 8 bytes below where
@@ -3293,7 +3292,7 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
           offset += sizeof(int64_t);
         }
         m_as.lea(baseReg[offset], rdi);
-        m_tx64->emitCall(m_as, m_tx64->uniqueStubs.dtorGenericStub);
+        emitCall(m_as, m_tx64->uniqueStubs.dtorGenericStub);
       }
       recordSyncPoint(m_as);
     }
@@ -5402,7 +5401,7 @@ void CodeGenerator::cgCheckInitMem(IRInstruction* inst) {
 
 void CodeGenerator::cgExitWhenSurprised(IRInstruction* inst) {
   Block* label = inst->taken();
-  m_tx64->emitTestSurpriseFlags(m_as);
+  emitTestSurpriseFlags(m_as);
   emitFwdJcc(CC_NZ, label);
 }
 
@@ -5980,7 +5979,7 @@ static void emitTraceCall(CodeGenerator::Asm& as,
   as.mov_reg64_reg64(rVmSp, reg::rsi);
   as.mov_imm64_reg(pcOff, reg::rdx);
   // do the call; may use a trampoline
-  tx64->emitCall(as, (TCA)traceCallback);
+  emitCall(as, (TCA)traceCallback);
 }
 
 void CodeGenerator::print() const {

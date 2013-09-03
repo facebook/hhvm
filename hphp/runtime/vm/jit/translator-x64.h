@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/base/smart-containers.h"
@@ -66,36 +67,6 @@ struct FreeStubList {
   FreeStubList() : m_list(nullptr) {}
   TCA maybePop();
   void push(TCA stub);
-};
-
-struct CppCall {
-  template<class Ret, class... Args>
-  explicit CppCall(Ret (*pfun)(Args...))
-    : m_kind(Direct)
-    , m_fptr(reinterpret_cast<void*>(pfun))
-  {}
-
-  explicit CppCall(void* p)
-    : m_kind(Direct)
-    , m_fptr(p)
-  {}
-
-  explicit CppCall(int off) : m_kind(Virtual), m_offset(off) {}
-
-  CppCall(CppCall const&) = default;
-
-  bool isDirect()  const { return m_kind == Direct;  }
-  bool isVirtual() const { return m_kind == Virtual; }
-
-  const void* getAddress() const { return m_fptr; }
-  int         getOffset()  const { return m_offset; }
-
- private:
-  enum { Direct, Virtual } m_kind;
-  union {
-    void* m_fptr;
-    int   m_offset;
-  };
 };
 
 class TranslatorX64;
@@ -223,6 +194,7 @@ private:
   ////////////////////////////////////////
 public:
   TCA getCallArrayPrologue(Func* func);
+
   void smashPrologueGuards(TCA* prologues, int numPrologues, const Func* func);
   TCA funcPrologue(Func* func, int nArgs, ActRec* ar = nullptr);
   bool checkCachedPrologue(const Func* func, int param, TCA& plgOut) const;
@@ -232,9 +204,6 @@ private:
   TCA emitCallArrayPrologue(const Func* func, const DVFuncletsVec& dvs);
   TCA emitFuncGuard(Asm& a, const Func *f);
   void emitStackCheck(int funcDepth, Offset pc);
-  void emitStackCheckDynamic(int numArgs, Offset pc);
-  void emitTestSurpriseFlags(Asm& a);
-  void emitCheckSurpriseFlagsEnter(bool inTracelet, Fixup fixup);
   TCA  emitTransCounterInc(Asm& a);
 
   void emitRB(Asm& a, Trace::RingBufferType t, SrcKey sk,
@@ -296,11 +265,9 @@ private:
   //
   ////////////////////////////////////////
 public:
-  void emitCall(Asm& a, TCA dest);
-  void emitCall(Asm& a, CppCall call);
+  TCA getNativeTrampoline(TCA helperAddress);
 
 private:
-  TCA getNativeTrampoline(TCA helperAddress);
   TCA emitNativeTrampoline(TCA helperAddress);
 
   ////////////////////////////////////////
@@ -336,7 +303,7 @@ private:
                            trampolinesCode);
   }
 
-  static CppCall getDtorCall(DataType type);
+  static JIT::CppCall getDtorCall(DataType type);
 
 private:
   void invalidateSrcKey(SrcKey sk);

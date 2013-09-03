@@ -276,6 +276,58 @@ void emitExitSlowStats(Asm& as, const Func* func, SrcKey dest) {
   }
 }
 
+void emitCall(Asm& a, TCA dest) {
+  if (a.jmpDeltaFits(dest) && !Stats::enabled()) {
+    a.    call(dest);
+  } else {
+    a.    call(TranslatorX64::Get()->getNativeTrampoline(dest));
+  }
+}
+
+void emitCall(Asm& a, CppCall call) {
+  if (call.isDirect()) {
+    return emitCall(a, (TCA)call.getAddress());
+  }
+  // Virtual call.
+  // Load method's address from proper offset off of object in rdi,
+  // using rax as scratch.
+  a.  loadq  (*rdi, rax);
+  a.  call   (rax[call.getOffset()]);
+}
+
+void emitTestSurpriseFlags(Asm& a) {
+  static_assert(RequestInjectionData::LastFlag < (1 << 8),
+                "Translator assumes RequestInjectionFlags fit in one byte");
+  a.    testb((int8_t)0xff, rVmTl[TargetCache::kConditionFlagsOff]);
+}
+
+void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
+                                 bool inTracelet, FixupMap& fixupMap,
+                                 Fixup fixup) {
+  Asm a { mainCode };
+  Asm astubs { stubsCode };
+
+  emitTestSurpriseFlags(a);
+  a.  jnz  (stubsCode.frontier());
+
+  astubs.  movq  (rVmFp, argNumToRegName[0]);
+  if (false) { // typecheck
+    const ActRec* ar = nullptr;
+    functionEnterHelper(ar);
+  }
+  emitCall(astubs, (TCA)&functionEnterHelper);
+  if (inTracelet) {
+    fixupMap.recordSyncPoint(stubsCode.frontier(),
+                             fixup.m_pcOffset, fixup.m_spOffset);
+  } else {
+    // If we're being called while generating a func prologue, we
+    // have to record the fixup directly in the fixup map instead of
+    // going through the pending fixup path like normal.
+    fixupMap.recordFixup(stubsCode.frontier(), fixup);
+  }
+  astubs.  jmp   (mainCode.frontier());
+}
+
 void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
   assert(s0 != s1);
   if (d0 == s1 && d1 != InvalidReg) {

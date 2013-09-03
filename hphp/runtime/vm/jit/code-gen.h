@@ -22,16 +22,11 @@
 #include "hphp/runtime/vm/jit/ir-factory.h"
 #include "hphp/runtime/vm/jit/linear-scan.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 
-namespace HPHP {
-
-namespace Transl {
-class CppCall;
-}
-
-namespace JIT {
+namespace HPHP { namespace JIT {
 
 struct ArgGroup;
 
@@ -168,14 +163,14 @@ private:
 
   // Main call helper:
   void cgCallHelper(Asm& a,
-                    const Transl::CppCall& call,
+                    const CppCall& call,
                     const CallDest& dstInfo,
                     SyncOptions sync,
                     ArgGroup& args,
                     RegSet toSave);
   // Overload to make the toSave RegSet optional:
   void cgCallHelper(Asm& a,
-                    const Transl::CppCall& call,
+                    const CppCall& call,
                     const CallDest& dstInfo,
                     SyncOptions sync,
                     ArgGroup& args);

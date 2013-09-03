@@ -137,7 +137,7 @@ TCA emitNAryStub(Asm& a, CppCall c) {
   {
     RegSet s = kGPCallerSaved - alreadySaved;
     PhysRegSaverParity rs(Parity, a, s);
-    tx64->emitCall(a, c);
+    emitCall(a, c);
   }
   a.    pop  (rbp);  // }
   a.    ret  ();

@@ -51,7 +51,7 @@ struct FuncPtr {
 
   FuncType type;
   union {
-    Transl::CppCall call;
+    CppCall call;
     uint64_t srcIdx;
   };
 };

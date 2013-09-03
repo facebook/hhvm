@@ -210,39 +210,18 @@ TranslatorX64::emitRB(X64Assembler& a,
   a.    call((TCA)ringbufferMsg);
 }
 
-void
-TranslatorX64::emitCall(X64Assembler& a, TCA dest) {
-  if (a.jmpDeltaFits(dest) && !Stats::enabled()) {
-    a.    call(dest);
-  } else {
-    a.    call(getNativeTrampoline(dest));
-  }
-}
-
-void
-TranslatorX64::emitCall(X64Assembler& a, CppCall call) {
-  if (call.isDirect()) {
-    return emitCall(a, (TCA)call.getAddress());
-  }
-  // Virtual call.
-  // Load method's address from proper offset off of object in rdi,
-  // using rax as scratch.
-  a.loadq(*rdi, rax);
-  a.call(rax[call.getOffset()]);
-}
-
-CppCall TranslatorX64::getDtorCall(DataType type) {
+JIT::CppCall TranslatorX64::getDtorCall(DataType type) {
   switch (type) {
   case BitwiseKindOfString:
-    return CppCall(getMethodPtr(&StringData::release));
+    return JIT::CppCall(getMethodPtr(&StringData::release));
   case KindOfArray:
-    return CppCall(getMethodPtr(&ArrayData::release));
+    return JIT::CppCall(getMethodPtr(&ArrayData::release));
   case KindOfObject:
-    return CppCall(getMethodPtr(&ObjectData::release));
+    return JIT::CppCall(getMethodPtr(&ObjectData::release));
   case KindOfResource:
-    return CppCall(getMethodPtr(&ResourceData::release));
+    return JIT::CppCall(getMethodPtr(&ResourceData::release));
   case KindOfRef:
-    return CppCall(getMethodPtr(&RefData::release));
+    return JIT::CppCall(getMethodPtr(&RefData::release));
   default:
     assert(false);
     NOT_REACHED();
@@ -614,40 +593,6 @@ TranslatorX64::emitStackCheck(int funcDepth, Offset pc) {
   a.    sub_imm64_reg64(funcDepth + Stack::sSurprisePageSize, rAsm);
   a.    jl(uniqueStubs.stackOverflowHelper); // Unlikely branch to failure.
   // Success.
-}
-
-// Tests the surprise flags for the current thread. Should be used
-// before a jnz to surprise handling code.
-void
-TranslatorX64::emitTestSurpriseFlags(Asm& a) {
-  static_assert(RequestInjectionData::LastFlag < (1 << 8),
-                "Translator assumes RequestInjectionFlags fit in one byte");
-  a.    testb((int8_t)0xff, rVmTl[TargetCache::kConditionFlagsOff]);
-}
-
-void
-TranslatorX64::emitCheckSurpriseFlagsEnter(bool inTracelet, Fixup fixup) {
-  Asm a { mainCode };
-  Asm astubs { stubsCode };
-  emitTestSurpriseFlags(a);
-  a.  jnz  (stubsCode.frontier());
-
-  astubs.  movq  (rVmFp, argNumToRegName[0]);
-  if (false) { // typecheck
-    const ActRec* ar = nullptr;
-    functionEnterHelper(ar);
-  }
-  emitCall(astubs, (TCA)&functionEnterHelper);
-  if (inTracelet) {
-    m_fixupMap.recordSyncPoint(stubsCode.frontier(),
-                               fixup.m_pcOffset, fixup.m_spOffset);
-  } else {
-    // If we're being called while generating a func prologue, we
-    // have to record the fixup directly in the fixup map instead of
-    // going through the pending fixup path like normal.
-    m_fixupMap.recordFixup(stubsCode.frontier(), fixup);
-  }
-  astubs.  jmp   (mainCode.frontier());
 }
 
 void
@@ -1332,7 +1277,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
   // Check surprise flags in the same place as the interpreter: after
   // setting up the callee's frame but before executing any of its
   // code
-  emitCheckSurpriseFlagsEnter(false, fixup);
+  emitCheckSurpriseFlagsEnter(mainCode, stubsCode, false, m_fixupMap, fixup);
 
   if (func->isClosureBody() && func->cls()) {
     int entry = nPassed <= numParams ? nPassed : numParams + 1;
@@ -1363,7 +1308,8 @@ TranslatorX64::emitBindCall(SrcKey srcKey, const Func* funcd, int numArgs) {
     assert(funcd->numIterators() == 0);
     Asm a { mainCode };
     emitLea(a, rVmSp, cellsToBytes(numArgs), rVmFp);
-    emitCheckSurpriseFlagsEnter(true, Fixup(0, numArgs));
+    emitCheckSurpriseFlagsEnter(mainCode, stubsCode, true, m_fixupMap,
+                                Fixup(0, numArgs));
     // rVmSp is already correctly adjusted, because there's no locals
     // other than the arguments passed.
     auto retval = emitNativeImpl(funcd, false /* don't jump to return */);

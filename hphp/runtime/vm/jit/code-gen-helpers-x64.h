@@ -63,6 +63,19 @@ void emitLdClsCctx(Asm& as, PhysReg srcReg, PhysReg dstReg);
 
 void emitExitSlowStats(Asm& as, const Func* func, SrcKey dest);
 
+void emitCall(Asm& as, TCA dest);
+void emitCall(Asm& as, CppCall call);
+
+/*
+ * Tests the surprise flags for the current thread. Should be used
+ * before a jnz to surprise handling code.
+ */
+void emitTestSurpriseFlags(Asm& as);
+
+void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
+                                 bool inTracelet, FixupMap& fixupMap,
+                                 Fixup fixup);
+
 template<class Mem>
 void emitLoadReg(Asm& as, Mem mem, PhysReg reg) {
   assert(reg != InvalidReg);

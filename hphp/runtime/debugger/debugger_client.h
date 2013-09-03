@@ -289,7 +289,6 @@ public:
   const MacroPtrVec &getMacros() const { return m_macros;}
   bool deleteMacro(int index);
 
-  DECLARE_DBG_SETTING_ACCESSORS
   DECLARE_DBG_CLIENT_SETTING_ACCESSORS
 
   std::string getLogFile () const { return m_logFile; }
@@ -322,8 +321,8 @@ private:
   int m_tutorial;
   std::set<std::string> m_tutorialVisited;
   bool m_scriptMode; // Is this client being scripted by a test?
+  bool m_neverSaveConfig; // So that tests can avoid clobbering the config file
 
-  DECLARE_DBG_SETTING
   DECLARE_DBG_CLIENT_SETTING
 
   std::string m_logFile;

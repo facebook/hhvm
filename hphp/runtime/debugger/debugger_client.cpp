@@ -2210,6 +2210,8 @@ void DebuggerClient::loadConfig() {
     m_configFileName.clear();
   }
 
+  auto neverSaveConfig = m_config["NeverSaveConfig"].getBool(false);
+  m_neverSaveConfig = true; // Prevent saving config while reading it
   s_use_utf8 = m_config["UTF8"].getBool(true);
   m_config["UTF8"] = s_use_utf8; // for starter
 
@@ -2223,17 +2225,16 @@ void DebuggerClient::loadConfig() {
 
   m_tutorial = m_config["Tutorial"].getInt32(0);
   m_scriptMode = m_config["ScriptMode"].getBool();
-  setDebuggerBypassCheck(m_config["BypassAccessCheck"].getBool());
+
   setDebuggerClientSmallStep(m_config["SmallStep"].getBool());
+  setDebuggerClientMaxCodeLines(m_config["MaxCodeLines"].getInt16(-1));
+  setDebuggerClientBypassCheck(m_config["BypassAccessCheck"].getBool());
   int printLevel = m_config["PrintLevel"].getInt16(3);
   if (printLevel > 0 && printLevel < MinPrintLevel) {
     printLevel = MinPrintLevel;
   }
-  setDebuggerPrintLevel(printLevel);
-
-  int maxCodeLines = m_config["MaxCodeLines"].getInt16(-1);
-  m_config["MaxCodeLines"] = maxCodeLines;
-  setDebuggerClientMaxCodeLines(maxCodeLines);
+  setDebuggerClientPrintLevel(printLevel);
+  setDebuggerClientStackArgs(m_config["StackArgs"].getBool(true));
 
   m_config["Tutorial"]["Visited"].get(m_tutorialVisited);
 
@@ -2247,13 +2248,15 @@ void DebuggerClient::loadConfig() {
   m_sourceRoot = m_config["SourceRoot"].getString();
   m_zendExe = m_config["ZendExecutable"].getString("php");
 
-  if (needToWriteFile) {
+  m_neverSaveConfig = neverSaveConfig;
+  if (needToWriteFile && !neverSaveConfig) {
     saveConfig(); // so to generate a starter for people
   }
 }
 
 void DebuggerClient::saveConfig() {
   TRACE(2, "DebuggerClient::saveConfig\n");
+  if (m_neverSaveConfig) return;
   if (m_configFileName.empty()) {
     // we are not touching a file that was not successfully loaded earlier
     return;

@@ -264,7 +264,12 @@ void LibEventTransport::sendImpl(const void *data, int size, int code,
   assert(data);
   assert(!m_sendEnded);
   assert(!m_sendStarted || chunked);
-
+  if (m_sendEnded) {
+    // This should never happen, but when it does we have to bail out,
+    // since there's no sensible way to send data at this point and
+    // trying to do so will horribly corrupt memory.
+    return;
+  }
   if (chunked) {
     assert(m_method != Method::HEAD);
     evbuffer *chunk = evbuffer_new();

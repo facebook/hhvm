@@ -2211,43 +2211,6 @@ void raiseUndefVariable(StringData* nm) {
   decRefStr(nm);
 }
 
-// This intentionally excludes Int/Int, which is handled separately
-// from cases involving the FPU.
-bool
-mathEquivTypes(RuntimeType lt, RuntimeType rt) {
-  return (lt.isDouble() && rt.isDouble()) ||
-   (lt.isInt() && rt.isDouble()) ||
-   (lt.isDouble() && rt.isInt());
-}
-
-ObjectData*
-HOT_FUNC_VM
-newInstanceHelper(Class* cls, int numArgs, ActRec* ar, ActRec* prevAr) {
-  const Func* f = cls->getCtor();
-  ObjectData* ret = nullptr;
-  if (UNLIKELY(!(f->attrs() & AttrPublic))) {
-    VMRegAnchor _;
-    UNUSED MethodLookup::LookupResult res =
-      g_vmContext->lookupCtorMethod(f, cls, true /*raise*/);
-    assert(res == MethodLookup::LookupResult::MethodFoundWithThis);
-  }
-  // Don't start pushing the AR until newInstance returns; it may reenter.
-  ret = newInstance(cls);
-  f->validate();
-  ar->m_func = f;
-  ar->initNumArgs(numArgs, true /*fromCtor*/);
-  // Count stack and this.
-  ret->incRefCount();
-  ret->incRefCount();
-  ar->setThis(ret);
-  ar->setVarEnv(nullptr);
-  arSetSfp(ar, prevAr);
-  TRACE(2, "newInstanceHelper: AR %p: f %p, savedRbp %#" PRIx64
-        ", savedRip %#" PRIx64 ", this %p\n",
-        ar, ar->m_func, ar->m_savedRbp, ar->m_savedRip, ar->m_this);
-  return ret;
-}
-
 TCA
 TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
   auto& a = atrampolines;

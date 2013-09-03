@@ -21,7 +21,7 @@
 
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/vm/jit/block.h"
-#include "hphp/runtime/vm/jit/trace.h"
+#include "hphp/runtime/vm/jit/ir-trace.h"
 
 namespace HPHP { namespace JIT {
 

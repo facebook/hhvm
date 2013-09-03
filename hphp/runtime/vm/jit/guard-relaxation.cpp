@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
-#include "hphp/runtime/vm/jit/trace.h"
+#include "hphp/runtime/vm/jit/ir-trace.h"
 #include "hphp/runtime/vm/jit/trace-builder.h"
 
 namespace HPHP { namespace JIT {

@@ -118,7 +118,7 @@ int64_t f_set_file_buffer(CResRef stream, int buffer);
 ///////////////////////////////////////////////////////////////////////////////
 // stream sockets: ext_socket has better implementation of socket functions
 
-Variant f_stream_socket_accept(CResRef server_socket, double timeout = 0.0,
+Variant f_stream_socket_accept(CResRef server_socket, double timeout = -1.0,
                                VRefParam peername = uninit_null());
 
 Variant f_stream_socket_server(CStrRef local_socket, VRefParam errnum = uninit_null(),
@@ -126,7 +126,7 @@ Variant f_stream_socket_server(CStrRef local_socket, VRefParam errnum = uninit_n
                               int flags = 0, CResRef context = null_resource);
 
 Variant f_stream_socket_client(CStrRef remote_socket, VRefParam errnum = uninit_null(),
-                              VRefParam errstr = uninit_null(), double timeout = 0.0,
+                              VRefParam errstr = uninit_null(), double timeout = -1.0,
                               int flags = 0, CResRef context = null_resource);
 
 Variant f_stream_socket_enable_crypto(CResRef stream, bool enable,

@@ -382,7 +382,7 @@
                 {
                     "name": "timeout",
                     "type": "Double",
-                    "value": "0.0",
+                    "value": "-1.0",
                     "desc": "The connection timeout, in seconds.\n\nIf you need to set a timeout for reading\/writing data over the socket, use stream_set_timeout(), as the timeout parameter to fsockopen() only applies while connecting the socket."
                 }
             ]
@@ -420,7 +420,7 @@
                 {
                     "name": "timeout",
                     "type": "Double",
-                    "value": "0.0"
+                    "value": "-1.0"
                 }
             ]
         },

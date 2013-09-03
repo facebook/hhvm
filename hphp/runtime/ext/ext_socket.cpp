@@ -1012,7 +1012,7 @@ Variant sockopen_impl(const Util::HostURL &hosturl, VRefParam errnum,
   Resource ret;
   Socket *sock = NULL;
 
-  if (timeout <= 0) timeout = RuntimeOption::SocketDefaultTimeout;
+  if (timeout < 0) timeout = RuntimeOption::SocketDefaultTimeout;
   // test if protocol is SSL
   SSLSocket *sslsock = SSLSocket::Create(hosturl, timeout);
   if (sslsock) {
@@ -1100,7 +1100,7 @@ Variant sockopen_impl(const Util::HostURL &hosturl, VRefParam errnum,
 Variant f_fsockopen(CStrRef hostname, int port /* = -1 */,
                     VRefParam errnum /* = null */,
                     VRefParam errstr /* = null */,
-                    double timeout /* = 0.0 */) {
+                    double timeout /* = -1.0 */) {
   Util::HostURL hosturl(static_cast<const std::string>(hostname), port);
   return sockopen_impl(hosturl, errnum, errstr, timeout, false);
 }
@@ -1108,7 +1108,7 @@ Variant f_fsockopen(CStrRef hostname, int port /* = -1 */,
 Variant f_pfsockopen(CStrRef hostname, int port /* = -1 */,
                      VRefParam errnum /* = null */,
                      VRefParam errstr /* = null */,
-                     double timeout /* = 0.0 */) {
+                     double timeout /* = -1.0 */) {
   // TODO: persistent socket handling
   Util::HostURL hosturl(static_cast<const std::string>(hostname), port);
   return sockopen_impl(hosturl, errnum, errstr, timeout, true);

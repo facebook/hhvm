@@ -56,14 +56,14 @@ bool f_getmxrr(CStrRef hostname, VRefParam mxhosts,
 
 Variant sockopen_impl(const Util::HostURL &hosturl,
                       VRefParam errnum, VRefParam errstr,
-                      double timeout = 0.0, bool persistent = false);
+                      double timeout = -1.0, bool persistent = false);
 Variant f_fsockopen(CStrRef hostname, int port = -1,
                     VRefParam errnum = uninit_null(),
-                    VRefParam errstr = uninit_null(), double timeout = 0.0);
+                    VRefParam errstr = uninit_null(), double timeout = -1.0);
 
 Variant f_pfsockopen(CStrRef hostname, int port = -1,
                      VRefParam errnum = uninit_null(),
-                     VRefParam errstr = uninit_null(), double timeout = 0.0);
+                     VRefParam errstr = uninit_null(), double timeout = -1.0);
 
 Variant f_socket_get_status(CResRef stream);
 

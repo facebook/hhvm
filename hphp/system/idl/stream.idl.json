@@ -706,7 +706,7 @@
                 {
                     "name": "timeout",
                     "type": "Double",
-                    "value": "0.0",
+                    "value": "-1.0",
                     "desc": "Override the default socket accept timeout. Time should be given in seconds."
                 },
                 {
@@ -792,7 +792,7 @@
                 {
                     "name": "timeout",
                     "type": "Double",
-                    "value": "0.0",
+                    "value": "-1.0",
                     "desc": "Number of seconds until the connect() system call should timeout. This parameter only applies when not making asynchronous connection attempts.\n\nTo set a timeout for reading\/writing data over the socket, use the stream_set_timeout(), as the timeout only applies while making connecting the socket."
                 },
                 {

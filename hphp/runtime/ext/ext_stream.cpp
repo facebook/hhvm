@@ -410,7 +410,7 @@ static String get_sockaddr_name(struct sockaddr *sa, socklen_t sl) {
 }
 
 Variant f_stream_socket_accept(CResRef server_socket,
-                               double timeout /* = 0.0 */,
+                               double timeout /* = -1.0 */,
                                VRefParam peername /* = null */) {
   Socket *sock = server_socket.getTyped<Socket>();
   pollfd p;
@@ -420,6 +420,9 @@ Variant f_stream_socket_accept(CResRef server_socket,
   p.events = (POLLIN|POLLERR|POLLHUP);
   p.revents = 0;
   IOStatusHelper io("socket_accept");
+  if (timeout == -1) {
+    timeout = RuntimeOption::SocketDefaultTimeout;
+  }
   n = poll(&p, 1, (uint64_t)(timeout * 1000.0));
   if (n > 0) {
     struct sockaddr sa;
@@ -447,7 +450,7 @@ Variant f_stream_socket_server(CStrRef local_socket,
 Variant f_stream_socket_client(CStrRef remote_socket,
                                VRefParam errnum /* = null */,
                                VRefParam errstr /* = null */,
-                               double timeout /* = 0.0 */,
+                               double timeout /* = -1.0 */,
                                int flags /* = 0 */,
                                CResRef context /* = null_object */) {
   Util::HostURL hosturl(static_cast<const std::string>(remote_socket));

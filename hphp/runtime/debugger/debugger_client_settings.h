@@ -23,6 +23,7 @@
   HPHPD_CLIENT_SETTING(StackArgs,           bool,  true)          \
   HPHPD_CLIENT_SETTING(MaxCodeLines,        int,   -1)            \
   HPHPD_CLIENT_SETTING(SmallStep,           bool,  false)         \
+  HPHPD_CLIENT_SETTING(ShortPrintCharCount, int,   -1)            \
 
 class DebuggerClientSettings {
 public:

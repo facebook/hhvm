@@ -2229,12 +2229,14 @@ void DebuggerClient::loadConfig() {
   setDebuggerClientSmallStep(m_config["SmallStep"].getBool());
   setDebuggerClientMaxCodeLines(m_config["MaxCodeLines"].getInt16(-1));
   setDebuggerClientBypassCheck(m_config["BypassAccessCheck"].getBool());
-  int printLevel = m_config["PrintLevel"].getInt16(3);
+  int printLevel = m_config["PrintLevel"].getInt16(5);
   if (printLevel > 0 && printLevel < MinPrintLevel) {
     printLevel = MinPrintLevel;
   }
   setDebuggerClientPrintLevel(printLevel);
   setDebuggerClientStackArgs(m_config["StackArgs"].getBool(true));
+  setDebuggerClientShortPrintCharCount(
+    m_config["ShortPrintCharCount"].getInt16(200));
 
   m_config["Tutorial"]["Visited"].get(m_tutorialVisited);
 

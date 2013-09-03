@@ -1,5 +1,9 @@
 c
 = $a
+set cc 100
+= $a
+set cc -1
+= $a
 p $a
 p $s
 p r $s

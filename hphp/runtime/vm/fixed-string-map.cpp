@@ -28,13 +28,10 @@ class Func;
 
 static const StringData* null_key;
 
-inline bool strEqual(bool caseSensitive,
-                     const StringData* sd1, const StringData* sd2) {
+template<bool CaseSensitive>
+inline bool strEqual(const StringData* sd1, const StringData* sd2) {
   if (sd1 == sd2) return true;
-  if (sd1->size() != sd2->size()) return false;
-  return caseSensitive ?
-      (0 == memcmp(sd1->data(), sd2->data(), sd1->size())) :
-      bstrcaseeq(sd1->data(), sd2->data(), sd1->size());
+  return CaseSensitive ? sd1->same(sd2) : sd1->isame(sd2);
 }
 
 template<class V, bool CaseSensitive, class E>
@@ -73,7 +70,7 @@ void FixedStringMap<V,CaseSensitive,E>::add(const StringData* sd, const V& v) {
   while (elm->sd) {
     assert(numProbes++ < m_mask + 1);
     // Semantics for multiple insertion: new value wins.
-    if (strEqual(CaseSensitive, elm->sd, sd)) break;
+    if (strEqual<CaseSensitive>(elm->sd, sd)) break;
     if (UNLIKELY(++elm == &m_table[m_mask + 1])) elm = m_table;
   }
   elm->sd = sd;
@@ -87,7 +84,7 @@ V* FixedStringMap<V,CaseSensitive,E>::find(const StringData* sd) const {
   for(;;) {
     assert(numProbes++ < m_mask + 1);
     if (UNLIKELY(nullptr == elm->sd)) return nullptr;
-    if (strEqual(CaseSensitive, elm->sd, sd)) return &elm->data;
+    if (strEqual<CaseSensitive>(elm->sd, sd)) return &elm->data;
     if (UNLIKELY(++elm == &m_table[m_mask + 1])) elm = m_table;
   }
 }

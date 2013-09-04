@@ -59,6 +59,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/ext_spl.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/server/source-root-info.h"
@@ -910,7 +911,13 @@ TypedValue* VMExecutionContext::lookupClsCns(const StringData* cls,
                                              const StringData* cns) {
   return lookupClsCns(Unit::GetNamedEntity(cls), cls, cns);
 }
-
+//SPL autoload override private and protected
+bool spl_override(const Func* method){
+	Class* baseClass = method->baseCls();
+	String a_f=StrNR(method->name()->data()).asString();
+	String a_c=StrNR(baseClass->preClass()->name()->data()).asString();	
+	return SPL::s_instance->bool_spl_register_class(a_c+"::"+a_f);
+}
 // Look up the method specified by methodName from the class specified by cls
 // and enforce accessibility. Accessibility checks depend on the relationship
 // between the class that first declared the method (baseClass) and the context
@@ -981,6 +988,7 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
     // The anonymous context cannot access protected or private methods,
     // so we can fail fast here.
     if (ctx == nullptr) {
+      if(spl_override(method)) return method;
       if (raise) {
         raise_error("Call to %s method %s::%s from anonymous context",
                     (method->attrs() & AttrPrivate) ? "private" : "protected",
@@ -995,7 +1003,7 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
       // this private method, so this private method is not accessible.
       // We need to keep going because the context class may define a
       // private method with this name.
-      accessible = false;
+      spl_override(method) ? accessible = true : accessible = false;
     } else {
       // If the context class is derived from the class that first
       // declared this protected method, then we know this method is

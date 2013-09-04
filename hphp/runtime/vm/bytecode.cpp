@@ -5951,11 +5951,7 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
 }
 
 bool VMExecutionContext::doFCallArrayTC(PC pc) {
-  if (debug) {
-    DEBUG_ONLY DECLARE_STACK_POINTER(sp);
-    // native stack pointer should be 16-byte aligned.
-    assert(uintptr_t(sp) % 16 == 0);
-  }
+  Util::assert_native_stack_aligned();
   assert(tl_regState == VMRegState::DIRTY);
   tl_regState = VMRegState::CLEAN;
   auto const ret = doFCallArray(pc);

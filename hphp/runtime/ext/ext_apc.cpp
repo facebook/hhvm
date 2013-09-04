@@ -393,7 +393,8 @@ void apc_load(int thread) {
       apcExtension::PrimeLibrary.empty() ||
       !apcExtension::Enable) {
     static uint64_t keep_entry_points_around_under_lto;
-    if (++keep_entry_points_around_under_lto == UINT64_MAX) {
+    if (++keep_entry_points_around_under_lto ==
+        std::numeric_limits<uint64_t>::max()) {
       // this had better never happen...
 
       // Fill out a cache_info to prevent g++ from optimizing out

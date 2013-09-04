@@ -84,7 +84,8 @@ typedef enum {
     num *= 10;                     \
     num += NUM(*str++);            \
     if (num >= INT_MAX / 10) {     \
-      while (isdigit((int)*str++));\
+      while (isdigit((int)*str++)) \
+        continue;                  \
       break;                       \
     }                              \
   }                                \

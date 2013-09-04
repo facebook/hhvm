@@ -27,6 +27,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+inline void compiler_membar( ) {
+  asm volatile("" : : :"memory");
+}
+
 template<class T>
 inline void assert_address_is_atomically_accessible(T* address) {
   static_assert(
@@ -64,7 +68,7 @@ template<class T> inline T atomic_acquire_load(const T* address) {
   assert_address_is_atomically_accessible(address);
 
   T ret = *address; // acquire barrier on x64
-  Util::compiler_membar();
+  compiler_membar();
   return ret;
 }
 
@@ -72,7 +76,7 @@ template<class T, class U>
 inline void atomic_release_store(T* address, U val) {
   assert_address_is_atomically_accessible(address);
 
-  Util::compiler_membar();
+  compiler_membar();
   *address = val; // release barrier on x64 (as long as no one is
                   // doing any non-temporal moves or whatnot).
 }

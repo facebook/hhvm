@@ -364,10 +364,6 @@ inline bool stack_in_bounds(ThreadInfo *&info) {
   return stack_top_ptr() >= info->m_stacklimit;
 }
 
-inline bool is_stack_ptr(void* p) {
-  return p > stack_top_ptr() && ThreadInfo::t_stackbase >= p;
-}
-
 // The ThreadInfo pointer itself must be from the current stack frame.
 inline void check_recursion(ThreadInfo *&info) {
   if (!stack_in_bounds(info)) {

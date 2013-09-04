@@ -230,7 +230,7 @@ keyToVP(TypeProfileKey key, KeyToVPMode mode) {
     // Zero first, then claim. It seems safer to temporarily zero out some
     // other function's values than to have this new function using the
     // possibly-non-trivial prediction from an unrelated function.
-    Util::compiler_membar();
+    compiler_membar();
     vp.m_tag = uint32_t(h);
     return &l[replaceCandidate];
   }

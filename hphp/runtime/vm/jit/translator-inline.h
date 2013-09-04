@@ -89,11 +89,7 @@ static inline size_t bytesToCells(int nBytes) {
 struct VMRegAnchor : private boost::noncopyable {
   VMRegState m_old;
   VMRegAnchor() {
-    if (debug) {
-      DEBUG_ONLY DECLARE_STACK_POINTER(sp);
-      // native stack pointer should be 16-byte aligned.
-      assert(uintptr_t(sp) % 16 == 0);
-    }
+    Util::assert_native_stack_aligned();
     m_old = tl_regState;
     Translator::Get()->sync();
   }

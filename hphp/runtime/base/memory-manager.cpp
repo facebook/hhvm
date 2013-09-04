@@ -125,7 +125,7 @@ static inline void threadStats(uint64_t*& allocated, uint64_t*& deallocated,
   if (headRoom != 0 && headRoom < MemoryManager::s_cactiveLimitCeiling) {
     cactiveLimit = MemoryManager::s_cactiveLimitCeiling - headRoom;
   } else {
-    cactiveLimit = SIZE_MAX;
+    cactiveLimit = std::numeric_limits<size_t>::max();
   }
 }
 #endif
@@ -178,7 +178,7 @@ MemoryManager::MemoryManager()
   threadStats(m_allocated, m_deallocated, m_cactive, m_cactiveLimit);
 #endif
   resetStats();
-  m_stats.maxBytes = INT64_MAX;
+  m_stats.maxBytes = std::numeric_limits<int64_t>::max();
   // make the circular-lists empty.
   m_sweep.next = m_sweep.prev = &m_sweep;
   m_strings.next = m_strings.prev = &m_strings;
@@ -214,7 +214,7 @@ void MemoryManager::refreshStatsHelperStop() {
   HttpServer::Server->stop();
   // Increase the limit to the maximum possible value, so that this method
   // won't be called again.
-  m_cactiveLimit = SIZE_MAX;
+  m_cactiveLimit = std::numeric_limits<size_t>::max();
 }
 #endif
 

@@ -2077,7 +2077,7 @@ static int scan(Scanner *s) {
 {
   YYCTYPE yych;
 
-  if ((YYLIMIT - YYCURSOR) < 2) YYFILL(2);
+  if ((YYLIMIT - YYCURSOR) < 2) { YYFILL(2); }
   yych = *YYCURSOR;
   switch (yych) {
   case 0x00:  goto yy11;
@@ -2177,7 +2177,7 @@ yy7:
   { RET(PDO_PARSER_BIND_POS); }
 yy8:
   ++YYCURSOR;
-  if (YYLIMIT <= YYCURSOR) YYFILL(1);
+  if (YYLIMIT <= YYCURSOR) { YYFILL(1); }
   yych = *YYCURSOR;
   switch (yych) {
   case 0x00:
@@ -2194,7 +2194,7 @@ yy11:
   { RET(PDO_PARSER_EOI); }
 yy13:
   ++YYCURSOR;
-  if (YYLIMIT <= YYCURSOR) YYFILL(1);
+  if (YYLIMIT <= YYCURSOR) { YYFILL(1); }
   yych = *YYCURSOR;
   switch (yych) {
   case ':':
@@ -2205,7 +2205,7 @@ yy15:
   { RET(PDO_PARSER_TEXT); }
 yy16:
   ++YYCURSOR;
-  if (YYLIMIT <= YYCURSOR) YYFILL(1);
+  if (YYLIMIT <= YYCURSOR) { YYFILL(1); }
   yych = *YYCURSOR;
   switch (yych) {
   case '0':
@@ -2277,7 +2277,7 @@ yy18:
   { RET(PDO_PARSER_BIND); }
 yy19:
   ++YYCURSOR;
-  if (YYLIMIT <= YYCURSOR) YYFILL(1);
+  if (YYLIMIT <= YYCURSOR) { YYFILL(1); }
   yych = *YYCURSOR;
 yy20:
   switch (yych) {
@@ -2291,7 +2291,7 @@ yy21:
   goto yy3;
 yy22:
   ++YYCURSOR;
-  if (YYLIMIT <= YYCURSOR) YYFILL(1);
+  if (YYLIMIT <= YYCURSOR) { YYFILL(1); }
   yych = *YYCURSOR;
   if (yych <= 0x00) goto yy21;
   goto yy19;
@@ -2300,7 +2300,7 @@ yy23:
   { RET(PDO_PARSER_TEXT); }
 yy25:
   ++YYCURSOR;
-  if (YYLIMIT <= YYCURSOR) YYFILL(1);
+  if (YYLIMIT <= YYCURSOR) { YYFILL(1); }
   yych = *YYCURSOR;
 yy26:
   switch (yych) {
@@ -2311,7 +2311,7 @@ yy26:
   }
 yy27:
   ++YYCURSOR;
-  if (YYLIMIT <= YYCURSOR) YYFILL(1);
+  if (YYLIMIT <= YYCURSOR) { YYFILL(1); }
   yych = *YYCURSOR;
   if (yych <= 0x00) goto yy21;
   goto yy25;

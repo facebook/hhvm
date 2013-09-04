@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_UTIL_H_
 #define incl_HPHP_UTIL_H_
 
+#include <cassert>
 #include <atomic>
 #include <vector>
 #include <string>
@@ -303,22 +304,44 @@ void find(std::vector<std::string> &out,
  */
 std::string format_pattern(const std::string &pattern, bool prefixSlash);
 
-inline void compiler_membar( ) {
-  asm volatile("" : : :"memory");
-}
-
 /**
  * Portable macros for mapping machine stack and frame pointers to variables.
  */
 #if defined(__x86_64__)
-#  define DECLARE_STACK_POINTER(sp) register void*   sp asm("rsp");
-#  define DECLARE_FRAME_POINTER(fp) register ActRec* fp asm("rbp");
+
+#  define DECLARE_STACK_POINTER(sp)               \
+     void* sp;                                    \
+     asm volatile("mov %%rsp, %0" : "=r" (sp) ::)
+
+#  if defined(__clang__)
+#    define DECLARE_FRAME_POINTER(fp)               \
+       ActRec* fp;                                  \
+       asm volatile("mov %%rbp, %0" : "=r" (fp) ::)
+#  else
+#    define DECLARE_FRAME_POINTER(fp) register ActRec* fp asm("rbp");
+#  endif
+
 #elif defined(__AARCH64EL__)
+
+#  if defined(__clang__)
+#    error Clang implementation not done for ARM
+#  endif
+
 #  define DECLARE_STACK_POINTER(sp) register void*   sp asm("sp");
 #  define DECLARE_FRAME_POINTER(fp) register ActRec* fp asm("x29");
+
 #else
+
 #  error What are the stack and frame pointers called on your architecture?
+
 #endif
+
+inline void assert_native_stack_aligned() {
+#ifndef NDEBUG
+  DECLARE_STACK_POINTER(sp);
+  assert(reinterpret_cast<uintptr_t>(sp) % 16 == 0);
+#endif
+}
 
 /**
  * 64-bit equivalents of 32-bit htonl() and ntohq().

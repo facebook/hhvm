@@ -96,7 +96,7 @@ private:
 #if defined(DEBUG) || defined(PACKED_TV)
 private:
   Magic m_magic;
-  int32_t m_padding;
+  UNUSED int32_t m_padding;
 public:
   mutable RefCount m_count;
 private:

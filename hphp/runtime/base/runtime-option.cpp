@@ -23,6 +23,7 @@
 #endif
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
+#include <limits>
 
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -126,7 +127,8 @@ int RuntimeOption::FiberCount = 1;
 int RuntimeOption::RequestTimeoutSeconds = 0;
 int RuntimeOption::PspTimeoutSeconds = 0;
 size_t RuntimeOption::ServerMemoryHeadRoom = 0;
-int64_t RuntimeOption::RequestMemoryMaxBytes = INT64_MAX;
+int64_t RuntimeOption::RequestMemoryMaxBytes =
+  std::numeric_limits<int64_t>::max();
 int64_t RuntimeOption::ImageMemoryMaxBytes = 0;
 int RuntimeOption::ResponseQueueCount;
 int RuntimeOption::ServerGracefulShutdownWait;
@@ -710,7 +712,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     RequestTimeoutSeconds = server["RequestTimeoutSeconds"].getInt32(0);
     PspTimeoutSeconds = server["PspTimeoutSeconds"].getInt32(0);
     ServerMemoryHeadRoom = server["MemoryHeadRoom"].getInt64(0);
-    RequestMemoryMaxBytes = server["RequestMemoryMaxBytes"].getInt64(INT64_MAX);
+    RequestMemoryMaxBytes = server["RequestMemoryMaxBytes"].
+      getInt64(std::numeric_limits<int64_t>::max());
     ResponseQueueCount = server["ResponseQueueCount"].getInt32(0);
     if (ResponseQueueCount <= 0) {
       ResponseQueueCount = ServerThreadCount / 10;

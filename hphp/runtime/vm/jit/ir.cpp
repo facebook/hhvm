@@ -750,12 +750,12 @@ IRInstruction* IRInstruction::clone(IRFactory* factory) const {
 }
 
 SSATmp* IRInstruction::src(uint32_t i) const {
-  if (i >= numSrcs()) return nullptr;
+  always_assert(i < numSrcs());
   return m_srcs[i];
 }
 
 void IRInstruction::setSrc(uint32_t i, SSATmp* newSrc) {
-  assert(i < numSrcs());
+  always_assert(i < numSrcs());
   m_srcs[i] = newSrc;
 }
 

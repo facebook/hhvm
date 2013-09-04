@@ -285,7 +285,7 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
 
   case StRefNT:
   case StRef: {
-    m_refCountedMemValue = inst->src(2);
+    m_refCountedMemValue = inst->src(1);
     SSATmp* newRef = inst->dst();
     SSATmp* prevRef = inst->src(0);
     // update other tracked locals that also contain prevRef

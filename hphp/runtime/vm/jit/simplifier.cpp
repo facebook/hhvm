@@ -308,8 +308,8 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
     m_insts.pop();
   };
 
-  SSATmp* src1 = inst->src(0);
-  SSATmp* src2 = inst->src(1);
+  SSATmp* src1 = inst->numSrcs() < 1 ? nullptr : inst->src(0);
+  SSATmp* src2 = inst->numSrcs() < 2 ? nullptr : inst->src(1);
 
   Opcode opc = inst->op();
   switch (opc) {

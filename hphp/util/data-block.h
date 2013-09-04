@@ -25,7 +25,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/util.h"
 
-namespace HPHP { namespace Transl {
+namespace HPHP {
 
 #define TRACEMOD ::HPHP::Trace::datablock
 
@@ -210,6 +210,6 @@ typedef DataBlock CodeBlock;
 
 #undef TRACEMOD
 
-}}
+}
 
 #endif

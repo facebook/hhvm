@@ -966,39 +966,39 @@ class RawMemSlot {
     : m_offset(offset), m_size(size), m_type(type), m_allowExtra(allowExtra) { }
 
   static RawMemSlot& GetContLabel() {
-    static RawMemSlot m(CONTOFF(m_label), Transl::sz::dword, Type::Int);
+    static RawMemSlot m(CONTOFF(m_label), sz::dword, Type::Int);
     return m;
   }
   static RawMemSlot& GetContIndex() {
-    static RawMemSlot m(CONTOFF(m_index), Transl::sz::qword, Type::Int);
+    static RawMemSlot m(CONTOFF(m_index), sz::qword, Type::Int);
     return m;
   }
   static RawMemSlot& GetContARPtr() {
-    static RawMemSlot m(CONTOFF(m_arPtr), Transl::sz::qword, Type::StkPtr);
+    static RawMemSlot m(CONTOFF(m_arPtr), sz::qword, Type::StkPtr);
     return m;
   }
   static RawMemSlot& GetContState() {
     static RawMemSlot m(c_Continuation::stateOffset(),
-      Transl::sz::byte, Type::Int);
+      sz::byte, Type::Int);
     return m;
   }
   static RawMemSlot& GetStrLen() {
-    static RawMemSlot m(StringData::sizeOffset(), Transl::sz::dword, Type::Int);
+    static RawMemSlot m(StringData::sizeOffset(), sz::dword, Type::Int);
     return m;
   }
   static RawMemSlot& GetFuncNumParams() {
-    static RawMemSlot m(Func::numParamsOff(), Transl::sz::dword, Type::Int);
+    static RawMemSlot m(Func::numParamsOff(), sz::dword, Type::Int);
     return m;
   }
   static RawMemSlot& GetContEntry() {
     static RawMemSlot m(
       Func::prologueTableOff(),
-      Transl::sz::qword, Type::TCA);
+      sz::qword, Type::TCA);
     return m;
   }
   static RawMemSlot& GetMisCtx() {
     using namespace HPHP::Transl;
-    static RawMemSlot m(HHIR_MISOFF(ctx), Transl::sz::qword, Type::Cls);
+    static RawMemSlot m(HHIR_MISOFF(ctx), sz::qword, Type::Cls);
     return m;
   }
 

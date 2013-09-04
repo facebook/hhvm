@@ -105,6 +105,7 @@
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/jit/x64-util.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
+#include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/unwind.h"
 
 #include "hphp/runtime/vm/jit/translator-x64-internal.h"
@@ -166,10 +167,6 @@ static StaticString s___callStatic(LITSTR_INIT("__callStatic"));
 // be the optimal point in certain benchmarks. #microoptimization
 static const int kLocalsToInitializeInline = 9;
 
-// An intentionally funny-looking-in-core-dumps constant for uninitialized
-// instruction pointers.
-static const uint64_t kUninitializedRIP = 0xba5eba11acc01ade;
-
 // stubBlock --
 //   Used to emit a bunch of outlined code that is unconditionally jumped to.
 template <typename L>
@@ -177,37 +174,6 @@ void stubBlock(X64Assembler& hot, X64Assembler& cold, const L& body) {
   hot.  jmp(cold.frontier());
   guardDiamond(cold, body);
   cold. jmp(hot.frontier());
-}
-
-void
-TranslatorX64::emitRB(X64Assembler& a,
-                      Trace::RingBufferType t,
-                      SrcKey sk, RegSet toSave) {
-  if (!Trace::moduleEnabledRelease(Trace::tx64, 3)) {
-    return;
-  }
-  PhysRegSaver rs(a, toSave | kSpecialCrossTraceRegs);
-  int arg = 0;
-  a.    emitImmReg(t, argNumToRegName[arg++]);
-  a.    emitImmReg(sk.getFuncId(), argNumToRegName[arg++]);
-  a.    emitImmReg(sk.offset(), argNumToRegName[arg++]);
-  a.    call((TCA)ringbufferEntry);
-}
-
-void
-TranslatorX64::emitRB(X64Assembler& a,
-                      Trace::RingBufferType t,
-                      const char* msg,
-                      RegSet toSave) {
-  if (!Trace::moduleEnabledRelease(Trace::tx64, 3)) {
-    return;
-  }
-  PhysRegSaver save(a, toSave | kSpecialCrossTraceRegs);
-  int arg = 0;
-  a.    emitImmReg((uintptr_t)msg, argNumToRegName[arg++]);
-  a.    emitImmReg(strlen(msg), argNumToRegName[arg++]);
-  a.    emitImmReg(t, argNumToRegName[arg++]);
-  a.    call((TCA)ringbufferMsg);
 }
 
 JIT::CppCall TranslatorX64::getDtorCall(DataType type) {
@@ -487,54 +453,6 @@ TranslatorX64::translate(const TranslArgs& args) {
   return start;
 }
 
-/*
- * Returns true if the given current frontier can have an nBytes-long
- * instruction written without any risk of cache-tearing.
- */
-bool isSmashable(Address frontier, int nBytes, int offset /* = 0 */) {
-  assert(nBytes <= int(kX64CacheLineSize));
-  uintptr_t iFrontier = uintptr_t(frontier) + offset;
-  uintptr_t lastByte = uintptr_t(frontier) + nBytes - 1;
-  return (iFrontier & ~kX64CacheLineMask) == (lastByte & ~kX64CacheLineMask);
-}
-
-/*
- * Call before emitting a test-jcc sequence. Inserts a nop gap such that after
- * writing a testBytes-long instruction, the frontier will be smashable.
- */
-void prepareForTestAndSmash(Asm& a, int testBytes, TestAndSmashFlags flags) {
-  switch (flags) {
-  case TestAndSmashFlags::kAlignJcc:
-    prepareForSmash(a, testBytes + kJmpccLen, testBytes);
-    assert(isSmashable(a.frontier() + testBytes, kJmpccLen));
-    break;
-  case TestAndSmashFlags::kAlignJccImmediate:
-    prepareForSmash(a,
-                    testBytes + kJmpccLen,
-                    testBytes + kJmpccLen - kJmpImmBytes);
-    assert(isSmashable(a.frontier() + testBytes, kJmpccLen,
-                       kJmpccLen - kJmpImmBytes));
-    break;
-  case TestAndSmashFlags::kAlignJccAndJmp:
-    // Ensure that the entire jcc, and the entire jmp are smashable
-    // (but we dont need them both to be in the same cache line)
-    prepareForSmash(a, testBytes + kJmpccLen, testBytes);
-    prepareForSmash(a, testBytes + kJmpccLen + kJmpLen, testBytes + kJmpccLen);
-    assert(isSmashable(a.frontier() + testBytes, kJmpccLen));
-    assert(isSmashable(a.frontier() + testBytes + kJmpccLen, kJmpLen));
-    break;
-  }
-}
-
-void prepareForSmash(X64Assembler& a, int nBytes, int offset /* = 0 */) {
-  if (!isSmashable(a.frontier(), nBytes, offset)) {
-    int gapSize = (~(uintptr_t(a.frontier()) + offset) &
-                   kX64CacheLineMask) + 1;
-    a.emitNop(gapSize);
-    assert(isSmashable(a.frontier(), nBytes, offset));
-  }
-}
-
 void
 TranslatorX64::smash(CodeBlock &cb, TCA src, TCA dest, bool isCall) {
   assert(canWrite());
@@ -706,19 +624,20 @@ TCA
 TranslatorX64::emitCallArrayPrologue(const Func* func,
                                    const DVFuncletsVec& dvs) {
   Asm a { mainCode };
+  Asm astubs { stubsCode };
   TCA start = mainCode.frontier();
   if (dvs.size() == 1) {
     a.   cmp_imm32_disp_reg32(dvs[0].first,
                               AROFF(m_numArgsAndCtorFlag), rVmFp);
-    emitBindJcc(a, CC_LE, SrcKey(func, dvs[0].second));
-    emitBindJmp(a, SrcKey(func, func->base()));
+    emitBindJcc(a, astubs, CC_LE, SrcKey(func, dvs[0].second));
+    emitBindJmp(a, astubs, SrcKey(func, func->base()));
   } else {
     a.   load_reg64_disp_reg32(rVmFp, AROFF(m_numArgsAndCtorFlag), rax);
     for (unsigned i = 0; i < dvs.size(); i++) {
       a.   cmp_imm32_reg32(dvs[i].first, rax);
-      emitBindJcc(a, CC_LE, SrcKey(func, dvs[i].second));
+      emitBindJcc(a, astubs, CC_LE, SrcKey(func, dvs[i].second));
     }
-    emitBindJmp(a, SrcKey(func, func->base()));
+    emitBindJmp(a, astubs, SrcKey(func, func->base()));
   }
   return start;
 }
@@ -1288,155 +1207,10 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
     a.    loadq   (rax[Func::prologueTableOff() + sizeof(TCA)*entry], rax);
     a.    jmp     (rax);
   } else {
-    emitBindJmp(a, funcBody);
+    Asm astubs { stubsCode };
+    emitBindJmp(a, astubs, funcBody);
   }
   return funcBody;
-}
-
-static bool
-isNativeImplCall(const Func* funcd, int numArgs) {
-  return funcd && funcd->info() && numArgs == funcd->numParams();
-}
-
-int32_t // returns the amount by which rVmSp should be adjusted
-TranslatorX64::emitBindCall(SrcKey srcKey, const Func* funcd, int numArgs) {
-  // If this is a call to a builtin and we don't need any argument
-  // munging, we can skip the prologue system and do it inline.
-  if (isNativeImplCall(funcd, numArgs)) {
-    StoreImmPatcher patchIP(mainCode, (uint64_t)mainCode.frontier(), reg::rax,
-                            cellsToBytes(numArgs) + AROFF(m_savedRip),
-                            rVmSp);
-    assert(funcd->numLocals() == funcd->numParams());
-    assert(funcd->numIterators() == 0);
-    Asm a { mainCode };
-    emitLea(a, rVmSp, cellsToBytes(numArgs), rVmFp);
-    emitCheckSurpriseFlagsEnter(mainCode, stubsCode, true, m_fixupMap,
-                                Fixup(0, numArgs));
-    // rVmSp is already correctly adjusted, because there's no locals
-    // other than the arguments passed.
-    auto retval = emitNativeImpl(funcd, false /* don't jump to return */);
-    patchIP.patch(uint64_t(mainCode.frontier()));
-    return retval;
-  }
-
-  Asm a { mainCode };
-  if (debug) {
-    a.    storeq (kUninitializedRIP,
-                  rVmSp[cellsToBytes(numArgs) + AROFF(m_savedRip)]);
-  }
-  // Stash callee's rVmFp into rStashedAR for the callee's prologue
-  emitLea(a, rVmSp, cellsToBytes(numArgs), rStashedAR);
-  emitBindCallHelper(srcKey, funcd, numArgs);
-  return 0;
-}
-
-void
-TranslatorX64::emitBindCallHelper(SrcKey srcKey,
-                                  const Func* funcd,
-                                  int numArgs) {
-  // Whatever prologue we're branching to will check at runtime that we
-  // went to the right Func*, correcting if necessary. We treat the first
-  // Func we encounter as a decent prediction. Make space to burn in a
-  // TCA.
-  JIT::ReqBindCall* req = m_globalData.alloc<JIT::ReqBindCall>();
-
-  Asm a { mainCode };
-  prepareForSmash(a, kCallLen);
-  TCA toSmash = mainCode.frontier();
-  a.    call(stubsCode.frontier());
-
-  Asm astubs { stubsCode };
-  astubs.    mov_reg64_reg64(rStashedAR, serviceReqArgRegs[1]);
-  emitPopRetIntoActRec(astubs);
-  emitServiceReq(astubs, JIT::REQ_BIND_CALL, req);
-
-  TRACE(1, "will bind static call: tca %p, this %p, funcd %p, astubs %p\n",
-        toSmash, this, funcd, stubsCode.frontier());
-  req->m_toSmash = toSmash;
-  req->m_nArgs = numArgs;
-  req->m_sourceInstr = srcKey;
-  req->m_isImmutable = (bool)funcd;
-
-  return;
-}
-
-/*
- * NativeImpl is a special operation in the sense that it must be the
- * only opcode in a function body, and also functions as the return.
- *
- * if emitSavedRIPReturn is false, it returns the amount by which
- * rVmSp should be adjusted, otherwise, it emits code to perform
- * the adjustment (this allows us to combine updates to rVmSp)
- */
-int32_t TranslatorX64::emitNativeImpl(const Func* func,
-                                      bool emitSavedRIPReturn) {
-  BuiltinFunction builtinFuncPtr = func->builtinFuncPtr();
-  if (false) { // typecheck
-    ActRec* ar = nullptr;
-    builtinFuncPtr(ar);
-  }
-
-  TRACE(2, "calling builtin preClass %p func %p\n", func->preClass(),
-    builtinFuncPtr);
-  /*
-   * Call the native implementation. This will free the locals for us in the
-   * normal case. In the case where an exception is thrown, the VM unwinder
-   * will handle it for us.
-   */
-  Asm a { mainCode };
-  a.   mov_reg64_reg64(rVmFp, argNumToRegName[0]);
-  if (m_fixupMap.eagerRecord(func)) {
-    emitEagerSyncPoint(a, func->getEntry(), 0);
-  }
-  emitCall(a, (TCA)builtinFuncPtr);
-
-  /*
-   * We're sometimes calling this while curFunc() isn't really the
-   * builtin---make sure to properly record the sync point as if we
-   * are inside the builtin.
-   *
-   * The assumption here is that for builtins, the generated func
-   * contains only a single opcode (NativeImpl), and there are no
-   * non-argument locals.
-   */
-  assert(func->numIterators() == 0 && func->isBuiltin());
-  assert(func->numLocals() == func->numParams());
-  assert(toOp(*func->getEntry()) == OpNativeImpl);
-  assert(instrLen((Op*)func->getEntry()) == func->past() - func->base());
-  Offset pcOffset = 0;  // NativeImpl is the only instruction in the func
-  Offset stackOff = func->numLocals(); // Builtin stubs have no
-                                       // non-arg locals
-  m_fixupMap.recordSyncPoint(mainCode.frontier(), pcOffset, stackOff);
-
-  if (emitSavedRIPReturn) {
-    // push the return address to get ready to ret.
-    a.   push  (rVmFp[AROFF(m_savedRip)]);
-  }
-
-  /*
-   * The native implementation already put the return value on the
-   * stack for us, and handled cleaning up the arguments.  We have to
-   * update the frame pointer and the stack pointer, and load the
-   * return value into the return register so the trace we are
-   * returning to has it where it expects.
-   *
-   * TODO(#1273094): we should probably modify the actual builtins to
-   * return values via registers (rax:edx) using the C ABI and do a
-   * reg-to-reg move.
-   */
-  int nLocalCells = func->numSlotsInFrame();
-  if (emitSavedRIPReturn) {
-    a. add_imm64_reg64(sizeof(ActRec) + cellsToBytes(nLocalCells-1), rVmSp);
-  }
-  a.   load_reg64_disp_reg64(rVmFp, AROFF(m_savedRbp), rVmFp);
-
-  emitRB(a, RBTypeFuncExit, func->fullName()->data());
-  if (emitSavedRIPReturn) {
-    a. ret();
-    translator_not_reached(a);
-    return 0;
-  }
-  return sizeof(ActRec) + cellsToBytes(nLocalCells-1);
 }
 
 /*
@@ -1564,58 +1338,6 @@ TranslatorX64::bindJmpccSecond(TCA toSmash, const Offset off,
     destRec->chainFrom(IncomingBranch::jccFrom(toSmash));
   }
   return branch;
-}
-
-static void emitJmpOrJcc(X64Assembler& a, ConditionCode cc, TCA addr) {
-  if (cc == CC_None) {
-    a.   jmp(addr);
-  } else {
-    a.   jcc((ConditionCode)cc, addr);
-  }
-}
-
-/*
- * emitBindJ --
- *
- *   Emit code to lazily branch (optionally on condition cc) to the
- *   srckey in next.
- *   Assumes current basic block is closed (outputs synced, etc.).
- */
-void
-TranslatorX64::emitBindJ(Asm& _a, ConditionCode cc, SrcKey dest,
-                         JIT::ServiceRequest req) {
-  prepareForSmash(_a, cc == CC_None ? (int)kJmpLen : kJmpccLen);
-  TCA toSmash = _a.frontier();
-  if (_a.base() == stubsCode.base()) {
-    emitJmpOrJcc(_a, cc, toSmash);
-  }
-
-  setJmpTransID(toSmash);
-
-  Asm astubs { stubsCode };
-  TCA sr = (req == JIT::REQ_BIND_JMP
-            ? emitEphemeralServiceReq(astubs, getFreeStub(), req, toSmash,
-                                      dest.offset())
-            : emitServiceReq(astubs, req, toSmash, dest.offset()));
-
-  if (_a.base() == stubsCode.base()) {
-    CodeCursor cursor(_a, toSmash);
-    emitJmpOrJcc(_a, cc, sr);
-  } else {
-    emitJmpOrJcc(_a, cc, sr);
-  }
-}
-
-void
-TranslatorX64::emitBindJcc(Asm& _a, ConditionCode cc, SrcKey dest,
-                           JIT::ServiceRequest req /* = REQ_BIND_JCC */) {
-  emitBindJ(_a, cc, dest, req);
-}
-
-void
-TranslatorX64::emitBindJmp(Asm& _a, SrcKey dest,
-                           JIT::ServiceRequest req /* = REQ_BIND_JMP */) {
-  emitBindJ(_a, CC_None, dest, req);
 }
 
 void TranslatorX64::emitResolvedDeps(const ChangeMap& resolvedDeps) {

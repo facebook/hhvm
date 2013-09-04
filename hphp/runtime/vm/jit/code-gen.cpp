@@ -51,6 +51,7 @@
 #include "hphp/runtime/vm/jit/layout.h"
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
+#include "hphp/runtime/vm/jit/service-requests-x64.h"
 
 using HPHP::Transl::TCA;
 using namespace HPHP::Transl::TargetCache;
@@ -2590,11 +2591,11 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
     if (data->bounded) {
       indexVal -= data->base;
       if (indexVal >= data->cases - 2 || indexVal < 0) {
-        m_tx64->emitBindJmp(m_as, SrcKey(data->func, data->defaultOff));
+        emitBindJmp(m_as, m_astubs, SrcKey(data->func, data->defaultOff));
         return;
       }
     }
-    m_tx64->emitBindJmp(m_as, SrcKey(data->func, data->targets[indexVal]));
+    emitBindJmp(m_as, m_astubs, SrcKey(data->func, data->targets[indexVal]));
   }
 }
 
@@ -2867,8 +2868,9 @@ void CodeGenerator::cgSyncABIRegs(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
-  m_tx64->emitBindJmp(
+  emitBindJmp(
     m_as,
+    m_astubs,
     SrcKey(curFunc(), inst->extra<ReqBindJmp>()->offset)
   );
 }
@@ -3743,7 +3745,8 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   bool isImmutable = (func->isConst() && !func->type().isNull());
   const Func* funcd = isImmutable ? func->getValFunc() : nullptr;
   assert(m_as.base() == m_tx64->mainCode.base());
-  int32_t adjust = m_tx64->emitBindCall(srcKey, funcd, numArgs);
+  int32_t adjust = emitBindCall(m_tx64->mainCode, m_tx64->stubsCode,
+                                srcKey, funcd, numArgs);
   if (adjust) {
     m_as.addq (adjust, rVmSp);
   }
@@ -4551,7 +4554,7 @@ void CodeGenerator::emitSideExitGuard(Type type,
   emitTypeTest(type, typeSrc, dataSrc,
     [&](ConditionCode cc) {
       auto const sk = SrcKey(curFunc(), taken);
-      m_tx64->emitBindJcc(m_as, ccNegate(cc), sk, REQ_BIND_SIDE_EXIT);
+      emitBindJcc(m_as, m_astubs, ccNegate(cc), sk, REQ_BIND_SIDE_EXIT);
   });
 }
 

@@ -81,7 +81,7 @@ public:
   int    m_module_number;
   int64_t  m_cache_expire;
 
-  Object m_ps_session_handler;
+  ObjectData *m_ps_session_handler;
 
   SessionSerializer *m_serializer;
 
@@ -104,6 +104,7 @@ public:
       m_cookie_httponly(false), m_mod(nullptr), m_default_mod(nullptr),
       m_session_status(None), m_gc_probability(0), m_gc_divisor(0),
       m_gc_maxlifetime(0), m_module_number(0), m_cache_expire(0),
+      m_ps_session_handler(nullptr),
       m_serializer(nullptr), m_auto_start(false), m_use_cookies(false),
       m_use_only_cookies(false), m_use_trans_sid(false),
       m_apply_trans_sid(false), m_hash_bits_per_character(0), m_send_cookie(0),
@@ -126,6 +127,7 @@ public:
     }
     m_id.reset();
     m_session_status = Session::None;
+    m_ps_session_handler = nullptr;
   }
 
   void requestShutdownImpl();
@@ -195,6 +197,10 @@ void SessionRequestData::requestShutdownImpl() {
     try {
       m_mod->close();
     } catch (...) {}
+  }
+  if (ObjectData* obj = m_ps_session_handler) {
+    m_ps_session_handler = nullptr;
+    decRefObj(obj);
   }
   m_id.reset();
 }
@@ -898,7 +904,7 @@ public:
 
   virtual bool open(const char *save_path, const char *session_name) {
     return vm_call_user_func(
-       CREATE_VECTOR2(PS(ps_session_handler),
+       CREATE_VECTOR2(Object(PS(ps_session_handler)),
                       String("open")),
        CREATE_VECTOR2(String(save_path, CopyString),
                       String(session_name, CopyString))).toBoolean();
@@ -906,14 +912,14 @@ public:
 
   virtual bool close() {
     return vm_call_user_func(
-       CREATE_VECTOR2(PS(ps_session_handler),
+       CREATE_VECTOR2(Object(PS(ps_session_handler)),
                       String("close")),
        Array::Create()).toBoolean();
   }
 
   virtual bool read(const char *key, String &value) {
     Variant ret = vm_call_user_func(
-       CREATE_VECTOR2(PS(ps_session_handler),
+       CREATE_VECTOR2(Object(PS(ps_session_handler)),
                       String("read")),
        CREATE_VECTOR1(String(key, CopyString)));
     if (ret.isString()) {
@@ -925,21 +931,21 @@ public:
 
   virtual bool write(const char *key, CStrRef value) {
     return vm_call_user_func(
-       CREATE_VECTOR2(PS(ps_session_handler),
+       CREATE_VECTOR2(Object(PS(ps_session_handler)),
                       String("write")),
        CREATE_VECTOR2(String(key, CopyString), value)).toBoolean();
   }
 
   virtual bool destroy(const char *key) {
     return vm_call_user_func(
-       CREATE_VECTOR2(PS(ps_session_handler),
+       CREATE_VECTOR2(Object(PS(ps_session_handler)),
                       String("destroy")),
        CREATE_VECTOR1(String(key, CopyString))).toBoolean();
   }
 
   virtual bool gc(int maxlifetime, int *nrdels) {
     return vm_call_user_func(
-       CREATE_VECTOR2(PS(ps_session_handler),
+       CREATE_VECTOR2(Object(PS(ps_session_handler)),
                       String("gc")),
        CREATE_VECTOR1((int64_t)maxlifetime)).toBoolean();
   }
@@ -1530,7 +1536,13 @@ bool f_hphp_session_set_save_handler(CObjRef sessionhandler,
 
   PS(default_mod) = PS(mod);
 
-  PS(ps_session_handler) = sessionhandler;
+  if (ObjectData* obj = PS(ps_session_handler)) {
+    PS(ps_session_handler) = nullptr;
+    decRefObj(obj);
+  }
+  PS(ps_session_handler) = sessionhandler.get();
+  PS(ps_session_handler)->incRefCount();
+
   if (register_shutdown) {
     f_register_shutdown_function(1, String("session_write_close"));
   }

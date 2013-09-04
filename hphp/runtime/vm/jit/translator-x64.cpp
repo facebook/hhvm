@@ -3091,6 +3091,9 @@ bool TranslatorX64::addDbgGuards(const Unit* unit) {
   // be very rare, so go with it now.
   for (SrcDB::iterator it = m_srcDB.begin(); it != m_srcDB.end(); ++it) {
     SrcKey const sk = SrcKey::fromAtomicInt(it->first);
+    // We may have a SrcKey to a deleted function. NB: this may miss a
+    // race with deleting a Func. See task #2826313.
+    if (!Func::isFuncIdValid(sk.getFuncId())) continue;
     SrcRec& sr = *it->second;
     if (sr.unitMd5() == unit->md5() &&
         !sr.hasDebuggerGuard() &&

@@ -166,6 +166,7 @@ struct Func {
   void setNewFuncId();
   static FuncId nextFuncId();
   static const Func* fromFuncId(FuncId id);
+  static bool isFuncIdValid(FuncId id);
 
   void rename(const StringData* name);
   int numSlotsInFrame() const;

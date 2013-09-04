@@ -114,6 +114,11 @@ const Func* Func::fromFuncId(FuncId id) {
   return func;
 }
 
+bool Func::isFuncIdValid(FuncId id) {
+  assert(id < s_nextFuncId);
+  return s_funcVec.get(id) != nullptr;
+}
+
 void Func::setFullName() {
   assert(m_name->isStatic());
   if (m_cls) {

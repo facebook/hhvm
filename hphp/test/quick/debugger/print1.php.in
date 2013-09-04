@@ -1,7 +1,11 @@
 c
 = $a
+n
+= $a
+y
 set cc 100
 = $a
+y
 set cc -1
 = $a
 p $a

@@ -1066,7 +1066,7 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
 // This function is only entered when the machine being debugged is paused.
 //
 // If this function returns it means the process is running again.
-// NB: exceptions derrived from DebuggerException or DebuggerClientExeption
+// NB: exceptions derived from DebuggerException or DebuggerClientExeption
 // indicate the machine remains paused.
 void DebuggerClient::console() {
   TRACE(2, "DebuggerClient::console\n");
@@ -1235,7 +1235,10 @@ char DebuggerClient::ask(const char *fmt, ...) {
   }
   fwrite(msg.data(), 1, msg.length(), stdout);
   fflush(stdout);
-  return tolower(getchar());
+  auto input = readline("");
+  if (input == nullptr) return ' ';
+  if (strlen(input) > 0) return tolower(input[0]);
+  return ' ';
 }
 
 #define DWRITE(ptr, size, nmemb, stream)                                \
@@ -1407,7 +1410,7 @@ void DebuggerClient::tutorial(const char *text) {
   Array lines = StringUtil::Explode(ret, "\n").toArray();
 
   StringBuffer sb;
-  String header = "  Tutorial - '[h]elp [t]utorial off' to turn off  ";
+  String header = "  Tutorial - '[h]elp [t]utorial off|auto' to turn off  ";
   String hr = StringUtil::Repeat(BOX_H, LineWidth - 2);
 
   sb.append(BOX_UL); sb.append(hr); sb.append(BOX_UR); sb.append("\n");

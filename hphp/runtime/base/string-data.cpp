@@ -580,6 +580,7 @@ MutableSlice StringData::reserve(int cap) {
     // a perf win, but it might make sense to do it for Mode::Malloc
     // as well.  Will be revisited soon.
     cap += cap >> 2;
+    if (cap > MaxCap) cap = MaxCap;
     m_data = static_cast<char*>(smart_realloc(m_data, cap + 1));
     setModeAndCap(Mode::Smart, cap + 1);
     break;
@@ -589,6 +590,7 @@ MutableSlice StringData::reserve(int cap) {
     break;
   }
 
+  assert(checkSane());
   return MutableSlice(m_data, cap);
 }
 
@@ -1017,7 +1019,7 @@ bool StringData::checkSane() const {
                 "layout for the StaticString map");
 
   assert(uint32_t(size()) <= MaxSize);
-  assert(uint32_t(capacity()) < MaxSize);
+  assert(uint32_t(capacity()) <= MaxCap);
   assert(size() >= 0);
 
   if (!isShared()) {

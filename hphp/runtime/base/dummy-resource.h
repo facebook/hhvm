@@ -35,8 +35,10 @@ public:
   DECLARE_RESOURCE_ALLOCATION(DummyResource);
   DummyResource();
   static StaticString s_class_name;
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
-  virtual bool isInvalid() const { return true; }
+  String m_class_name;
+  virtual CStrRef o_getClassNameHook() const;
+  virtual bool isInvalid() const { return m_class_name.empty(); }
+  void o_setResourceId(int64_t id) { o_id = id; }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -135,4 +135,12 @@ hello
 p v $s
 string(5) "hello"
 
+p $ch
+Resource id #6 of type cURL handle
+p r $ch
+Resource id #6
+p v $ch
+resource(6) of type (cURL handle)
+
+
 quit

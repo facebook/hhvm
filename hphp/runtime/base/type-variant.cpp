@@ -1792,6 +1792,30 @@ void Variant::unserialize(VariableUnserializer *uns,
       return; // array has '}' terminating
     }
     break;
+  case 'L':
+    {
+      int64_t id = uns->readInt();
+      sep = uns->readChar();
+      if (sep != ':') {
+        throw Exception("Expected ':' but got '%c'", sep);
+      }
+      String rsrcName;
+      rsrcName.unserialize(uns);
+      sep = uns->readChar();
+      if (sep != '{') {
+        throw Exception("Expected '{' but got '%c'", sep);
+      }
+      sep = uns->readChar();
+      if (sep != '}') {
+        throw Exception("Expected '}' but got '%c'", sep);
+      }
+      DummyResource* rsrc = NEWOBJ(DummyResource);
+      rsrc->o_setResourceId(id);
+      rsrc->m_class_name = rsrcName;
+      operator=(rsrc);
+      return; // resource has '}' terminating
+    }
+    break;
   case 'O':
   case 'V':
   case 'K':

@@ -646,6 +646,10 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
     if (!m_rsrcName.empty()) {
       m_buf->append("Resource id #");
       m_buf->append(m_rsrcId);
+      if (m_type == Type::DebuggerDump) {
+        m_buf->append(" of type ");
+        m_buf->append(m_rsrcName);
+      }
       break;
     } else if (!m_objClass.empty()) {
       m_buf->append(m_objClass);
@@ -715,7 +719,15 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
   case Type::Serialize:
   case Type::APCSerialize:
   case Type::DebuggerSerialize:
-    if (!m_objClass.empty()) {
+    if (!m_rsrcName.empty() && m_type == Type::DebuggerSerialize) {
+      m_buf->append("L:");
+      m_buf->append(m_rsrcId);
+      m_buf->append(":");
+      m_buf->append((int)m_rsrcName.size());
+      m_buf->append(":\"");
+      m_buf->append(m_rsrcName);
+      m_buf->append("\"{");
+    } else if (!m_objClass.empty()) {
       m_buf->append(m_objCode);
       m_buf->append(":");
       m_buf->append((int)m_objClass.size());

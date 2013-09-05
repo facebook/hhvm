@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Test showing async stacks in the debugger.
 

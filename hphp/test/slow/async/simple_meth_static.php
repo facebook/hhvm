@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class F {
   async function ret1() { return 1; }

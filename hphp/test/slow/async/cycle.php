@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 async function bar($a) {
   return $a;

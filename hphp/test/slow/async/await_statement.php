@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 async function f() {
   print "this takes soooo looong...\n";

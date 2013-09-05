@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function block() { return RescheduleWaitHandle::create(1,1); };
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Test showing breakpoints on async functions in the debugger.
 

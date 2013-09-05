@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 async function fibonacci($a) {
   if ($a <= 1) return 1;

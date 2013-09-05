@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Test the following using async
 // - Stepping over awaits.

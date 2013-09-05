@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 async function ret1() { return 1; }
 async function await1() {

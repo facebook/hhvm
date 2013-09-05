@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class F {
   function __construct($a) { $this->a = $a; }

@@ -388,28 +388,28 @@ bool TestParserExpr::TestClosure() {
 }
 
 bool TestParserExpr::TestAwaitExpression() {
-  V("<?php async function foo() { await goo(); await $hoo; return; }",
+  V("<?hh async function foo() { await goo(); await $hoo; return; }",
     "async function foo() {\n"
     "await goo();\n"
     "await $hoo;\n"
     "return;\n"
     "}\n");
 
-  V("<?php async function foo() { $a = await b(); return; }",
+  V("<?hh async function foo() { $a = await b(); return; }",
     "async function foo() {\n"
     "$a = await b();\n"
     "return;\n"
     "}\n");
 
-  V("<?php async function foo() { return await $a; }",
+  V("<?hh async function foo() { return await $a; }",
     "async function foo() {\n"
     "return await $a;\n"
     "}\n");
 
-  V("<?php $a = async function($a) { return await $a; }; ",
+  V("<?hh $a = async function($a) { return await $a; }; ",
     "$a = async function ($a) {\nreturn await $a;\n}\n;\n");
 
-  V("<?php class A { "
+  V("<?hh class A { "
     "static async function foo() { return 1; } "
     "private async function goo() { return 2; } }",
     "class A {\n"

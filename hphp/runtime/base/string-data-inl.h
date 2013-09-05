@@ -108,12 +108,15 @@ inline void StringData::destruct() {
 
 //////////////////////////////////////////////////////////////////////
 
-inline StringData* StringData::Escalate(StringData* in) {
-  if (in->m_count != 1 || in->isImmutable()) {
-    return StringData::Make(in->data(), in->size(), CopyString);
-  }
-  in->m_hash = 0;
-  return in;
+inline StringData* StringData::modifyChar(int offset, char c) {
+  assert(offset >= 0 && offset < size() && !isStatic());
+  assert(getCount() <= 1);
+
+  if (isImmutable()) escalate(size());
+  m_data[offset] = c;
+  m_hash = 0;
+
+  return this;
 }
 
 //////////////////////////////////////////////////////////////////////

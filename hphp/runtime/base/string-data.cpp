@@ -691,38 +691,6 @@ StringData *StringData::getChar(int offset) const {
   return GetStaticString("");
 }
 
-// mutations
-void StringData::setChar(int offset, CStrRef substring) {
-  assert(!isStatic());
-  if (offset >= 0) {
-    StringSlice s = slice();
-    if (s.len == 0) {
-      // PHP will treat data as an array and we don't want to follow that.
-      throw OffsetOutOfRangeException();
-    }
-    char c = substring.empty() ? 0 : substring.data()[0];
-    if (uint32_t(offset) < s.len) {
-      ((char*)s.ptr)[offset] = c;
-    } else if (offset <= RuntimeOption::StringOffsetLimit) {
-      uint32_t newlen = offset + 1;
-      MutableSlice buf = isImmutable() ? escalate(newlen) : reserve(newlen);
-      memset(buf.ptr + s.len, ' ', newlen - s.len);
-      buf.ptr[offset] = c;
-      setSize(newlen);
-    } else {
-      throw OffsetOutOfRangeException();
-    }
-    m_hash = 0; // since we modified the string.
-  }
-}
-
-void StringData::setChar(int offset, char ch) {
-  assert(offset >= 0 && offset < size() && !isStatic());
-  if (isImmutable()) escalate(size());
-  ((char*)rawdata())[offset] = ch;
-  m_hash = 0;
-}
-
 void StringData::inc() {
   assert(!isStatic());
   assert(!empty());
@@ -823,14 +791,6 @@ void StringData::negate() {
     buf[i] = ~(buf[i]);
   }
   m_hash = 0;
-}
-
-void StringData::set(CStrRef key, CStrRef v) {
-  setChar(key.toInt32(), v);
-}
-
-void StringData::set(CVarRef key, CStrRef v) {
-  setChar(key.toInt32(), v);
 }
 
 void StringData::preCompute() const {

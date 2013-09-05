@@ -1270,12 +1270,32 @@ CVarRef Variant::SetImpl(Variant *self, T key, CVarRef v, bool isKey) {
     goto retry;
   case KindOfStaticString:
   case KindOfString: {
-    StringData *s = self->m_data.pstr;
-    if (s->empty()) {
-      goto create;
-    }
-    StringData *es = StringData::Escalate(s);
-    es->set(key, v.toString());
+    auto const s = self->m_data.pstr;
+    if (s->empty()) goto create;
+
+    auto const es = [&]() -> StringData* {
+      auto const offset = HPHP::toInt64(key);
+      auto const r = s->slice();
+      if (offset < 0) return s;
+      if (r.len == 0) throw OffsetOutOfRangeException();
+
+      String str = v.toString();
+      auto const ch = str.empty() ? 0 : str.data()[0];
+      if (offset < r.len && s->getCount() <= 1) {
+        return s->modifyChar(offset, ch);
+      }
+      if (offset > RuntimeOption::StringOffsetLimit) {
+        throw OffsetOutOfRangeException();
+      }
+      uint32_t newlen = offset + 1;
+      auto const sd = StringData::Make(newlen);
+      auto const mslice = sd->mutableSlice();
+      memcpy(mslice.ptr, r.ptr, r.len);
+      memset(mslice.ptr + r.len, ' ', newlen - r.len);
+      mslice.ptr[offset] = ch;
+      sd->setSize(newlen);
+      return sd;
+    }();
     if (es != s) self->set(es);
     break;
   }

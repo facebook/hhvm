@@ -646,6 +646,13 @@ bool TestCppBase::TestVariant() {
     VS(v[s_1], "test");
     VS(v[Variant("1")], "test");
   }
+  {
+    Variant v = "asd";
+    v.set(0, "b");
+    VS(v, "bsd");
+    v.set(6, "c");
+    VS(v, "bsd   c");
+  }
 
   // membership
   {

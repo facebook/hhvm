@@ -220,15 +220,6 @@ public:
   bool isStatic() const { return m_count == RefCountStaticValue; }
 
   /*
-   * Returns a copy of in if its reference count is not 1 or if it is
-   * immutable.
-   *
-   * Resets the hash if not for unknown reasons, probably
-   * unnecessarily.
-   */
-  static StringData* Escalate(StringData* in);
-
-  /*
    * Get the wrapped SharedVariant, or return null if this string is
    * not shared.
    */
@@ -323,22 +314,28 @@ public:
   }
   bool isZero() const { return size() == 1 && rawdata()[0] == '0'; }
 
-  /**
-   * Mutations.
+  /*
+   * Change the character at offset `offset' to `c'.
+   *
+   * May return a reallocated StringData* if this string was a shared
+   * string.
+   *
+   * Pre: offset >= 0 && offset < size()
+   *      getCount() <= 1
+   *      !isStatic()
    */
-  StringData *getChar(int offset) const;
-  void setChar(int offset, CStrRef substring);
-  void setChar(int offset, char ch);
+  StringData* modifyChar(int offset, char c);
+
+  /*
+   * Return a string containing the character at `offset', if it is in
+   * range.  Otherwise raises a warning and returns an empty string.
+   *
+   * All return values are guaranteed to be static strings.
+   */
+  StringData* getChar(int offset) const;
+
   void inc();
   void negate();
-  void set(bool    key, CStrRef v) { setChar(key ? 1 : 0, v); }
-  void set(char    key, CStrRef v) { setChar(key, v); }
-  void set(short   key, CStrRef v) { setChar(key, v); }
-  void set(int     key, CStrRef v) { setChar(key, v); }
-  void set(int64_t   key, CStrRef v) { setChar(key, v); }
-  void set(double  key, CStrRef v) { setChar((int64_t)key, v); }
-  void set(CStrRef key, CStrRef v);
-  void set(CVarRef key, CStrRef v);
 
   /*
    * Type conversion functions.

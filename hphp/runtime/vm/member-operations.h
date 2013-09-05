@@ -677,6 +677,7 @@ inline StringData* SetElemString(TypedValue* base, TypedValue* key,
     }
     return nullptr;
   }
+
   // Convert key to string offset.
   int64_t x = castKeyToInt<keyType>(key);
   if (UNLIKELY(x < 0 || x >= StringData::MaxSize)) {
@@ -689,6 +690,7 @@ inline StringData* SetElemString(TypedValue* base, TypedValue* key,
     tvWriteNull(value);
     return nullptr;
   }
+
   // Compute how long the resulting string will be. Type needs
   // to agree with x.
   int64_t slen;
@@ -697,6 +699,7 @@ inline StringData* SetElemString(TypedValue* base, TypedValue* key,
   } else {
     slen = baseLen;
   }
+
   // Extract the first character of (string)value.
   char y[2];
   {
@@ -716,11 +719,19 @@ inline StringData* SetElemString(TypedValue* base, TypedValue* key,
     }
     decRefStr(valStr);
   }
+
   // Create and save the result.
   if (x >= 0 && x < baseLen && base->m_data.pstr->getCount() <= 1) {
-    // Modify base in place.  This is safe because the LHS owns the only
-    // reference.
-    base->m_data.pstr->setChar(x, y[0]);
+    // Modify base in place.  This is safe because the LHS owns the
+    // only reference.
+    auto const oldp = base->m_data.pstr;
+    auto const newp = oldp->modifyChar(x, y[0]);
+    if (UNLIKELY(newp != oldp)) {
+      newp->incRefCount();
+      decRefStr(oldp);
+      base->m_data.pstr = newp;
+      base->m_type = KindOfString;
+    }
   } else {
     StringData* sd = StringData::Make(slen);
     char* s = sd->mutableSlice().ptr;

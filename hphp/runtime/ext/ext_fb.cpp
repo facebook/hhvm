@@ -565,62 +565,61 @@ const uint64_t kCodeMask            = 0x0f;
 const uint64_t kCodePrefix          = 0xf0;
 
 
-static void fb_compact_serialize_code(
-  StringData* sd, FbCompactSerializeCode code) {
-
+static void fb_compact_serialize_code(StringBuffer& sb,
+                                      FbCompactSerializeCode code) {
   assert(code == (code & kCodeMask));
   uint8_t v = (kCodePrefix | code);
-  sd->append(reinterpret_cast<char*>(&v), 1);
+  sb.append(reinterpret_cast<char*>(&v), 1);
 }
 
-static void fb_compact_serialize_int64(StringData* sd, int64_t val) {
+static void fb_compact_serialize_int64(StringBuffer& sb, int64_t val) {
   if (val >= 0 && (uint64_t)val <= kInt7Mask) {
     uint8_t nval = val;
-    sd->append(reinterpret_cast<char*>(&nval), 1);
+    sb.append(reinterpret_cast<char*>(&nval), 1);
 
   } else if (val >= 0 && (uint64_t)val <= kInt13Mask) {
     uint16_t nval = htons(kInt13Prefix | val);
-    sd->append(reinterpret_cast<char*>(&nval), 2);
+    sb.append(reinterpret_cast<char*>(&nval), 2);
 
   } else if (val == (int64_t)(int16_t)val) {
-    fb_compact_serialize_code(sd, FB_CS_INT16);
+    fb_compact_serialize_code(sb, FB_CS_INT16);
     uint16_t nval = htons(val);
-    sd->append(reinterpret_cast<char*>(&nval), 2);
+    sb.append(reinterpret_cast<char*>(&nval), 2);
 
   } else if (val >= 0 && (uint64_t)val <= kInt20Mask) {
     uint32_t nval = htonl(kInt20Prefix | val);
     // Skip most significant byte
-    sd->append(reinterpret_cast<char*>(&nval) + 1, 3);
+    sb.append(reinterpret_cast<char*>(&nval) + 1, 3);
 
   } else if (val == (int64_t)(int32_t)val) {
-    fb_compact_serialize_code(sd, FB_CS_INT32);
+    fb_compact_serialize_code(sb, FB_CS_INT32);
     uint32_t nval = htonl(val);
-    sd->append(reinterpret_cast<char*>(&nval), 4);
+    sb.append(reinterpret_cast<char*>(&nval), 4);
 
   } else if (val >= 0 && (uint64_t)val <= kInt54Mask) {
     uint64_t nval = htonll(kInt54Prefix | val);
     // Skip most significant byte
-    sd->append(reinterpret_cast<char*>(&nval) + 1, 7);
+    sb.append(reinterpret_cast<char*>(&nval) + 1, 7);
 
   } else {
-    fb_compact_serialize_code(sd, FB_CS_INT64);
+    fb_compact_serialize_code(sb, FB_CS_INT64);
     uint64_t nval = htonll(val);
-    sd->append(reinterpret_cast<char*>(&nval), 8);
+    sb.append(reinterpret_cast<char*>(&nval), 8);
   }
 }
 
-static void fb_compact_serialize_string(StringData* sd, CStrRef str) {
+static void fb_compact_serialize_string(StringBuffer& sb, CStrRef str) {
   int len = str.size();
   if (len == 0) {
-    fb_compact_serialize_code(sd, FB_CS_STRING_0);
+    fb_compact_serialize_code(sb, FB_CS_STRING_0);
   } else {
     if (len == 1) {
-      fb_compact_serialize_code(sd, FB_CS_STRING_1);
+      fb_compact_serialize_code(sb, FB_CS_STRING_1);
     } else {
-      fb_compact_serialize_code(sd, FB_CS_STRING_N);
-      fb_compact_serialize_int64(sd, len);
+      fb_compact_serialize_code(sb, FB_CS_STRING_N);
+      fb_compact_serialize_int64(sb, len);
     }
-    sd->append(str.data(), len);
+    sb.append(str.data(), len);
   }
 }
 
@@ -650,42 +649,40 @@ static bool fb_compact_serialize_is_list(CArrRef arr, int64_t& index_limit) {
   return true;
 }
 
-static int fb_compact_serialize_variant(StringData* sd, CVarRef var, int depth);
+static int fb_compact_serialize_variant(StringBuffer& sd,
+  CVarRef var, int depth);
 
 static void fb_compact_serialize_array_as_list_map(
-  StringData* sd, CArrRef arr, int64_t index_limit, int depth) {
-
-  fb_compact_serialize_code(sd, FB_CS_LIST_MAP);
+    StringBuffer& sb, CArrRef arr, int64_t index_limit, int depth) {
+  fb_compact_serialize_code(sb, FB_CS_LIST_MAP);
   for (int64_t i = 0; i < index_limit; ++i) {
     if (arr.exists(i)) {
-      fb_compact_serialize_variant(sd, arr[i], depth + 1);
+      fb_compact_serialize_variant(sb, arr[i], depth + 1);
     } else {
-      fb_compact_serialize_code(sd, FB_CS_SKIP);
+      fb_compact_serialize_code(sb, FB_CS_SKIP);
     }
   }
-  fb_compact_serialize_code(sd, FB_CS_STOP);
+  fb_compact_serialize_code(sb, FB_CS_STOP);
 }
 
 static void fb_compact_serialize_array_as_map(
-  StringData* sd, CArrRef arr, int depth) {
-
-  fb_compact_serialize_code(sd, FB_CS_MAP);
+    StringBuffer& sb, CArrRef arr, int depth) {
+  fb_compact_serialize_code(sb, FB_CS_MAP);
   for (ArrayIter it(arr); it; ++it) {
     Variant key = it.first();
     if (key.isNumeric()) {
-      fb_compact_serialize_int64(sd, key.toInt64());
+      fb_compact_serialize_int64(sb, key.toInt64());
     } else {
-      fb_compact_serialize_string(sd, key.toString());
+      fb_compact_serialize_string(sb, key.toString());
     }
-    fb_compact_serialize_variant(sd, it.second(), depth + 1);
+    fb_compact_serialize_variant(sb, it.second(), depth + 1);
   }
-  fb_compact_serialize_code(sd, FB_CS_STOP);
+  fb_compact_serialize_code(sb, FB_CS_STOP);
 }
 
 
 static int fb_compact_serialize_variant(
-  StringData* sd, CVarRef var, int depth) {
-
+    StringBuffer& sb, CVarRef var, int depth) {
   if (depth > 256) {
     return 1;
   }
@@ -693,32 +690,32 @@ static int fb_compact_serialize_variant(
   switch (var.getType()) {
     case KindOfUninit:
     case KindOfNull:
-      fb_compact_serialize_code(sd, FB_CS_NULL);
+      fb_compact_serialize_code(sb, FB_CS_NULL);
       break;
 
     case KindOfBoolean:
       if (var.toInt64()) {
-        fb_compact_serialize_code(sd, FB_CS_TRUE);
+        fb_compact_serialize_code(sb, FB_CS_TRUE);
       } else {
-        fb_compact_serialize_code(sd, FB_CS_FALSE);
+        fb_compact_serialize_code(sb, FB_CS_FALSE);
       }
       break;
 
     case KindOfInt64:
-      fb_compact_serialize_int64(sd, var.toInt64());
+      fb_compact_serialize_int64(sb, var.toInt64());
       break;
 
     case KindOfDouble:
     {
-      fb_compact_serialize_code(sd, FB_CS_DOUBLE);
+      fb_compact_serialize_code(sb, FB_CS_DOUBLE);
       double d = var.toDouble();
-      sd->append(reinterpret_cast<char*>(&d), 8);
+      sb.append(reinterpret_cast<char*>(&d), 8);
       break;
     }
 
     case KindOfStaticString:
     case KindOfString:
-      fb_compact_serialize_string(sd, var.toString());
+      fb_compact_serialize_string(sb, var.toString());
       break;
 
     case KindOfArray:
@@ -726,9 +723,9 @@ static int fb_compact_serialize_variant(
       Array arr = var.toArray();
       int64_t index_limit;
       if (fb_compact_serialize_is_list(arr, index_limit)) {
-        fb_compact_serialize_array_as_list_map(sd, arr, index_limit, depth);
+        fb_compact_serialize_array_as_list_map(sb, arr, index_limit, depth);
       } else {
-        fb_compact_serialize_array_as_map(sd, arr, depth);
+        fb_compact_serialize_array_as_map(sb, arr, depth);
       }
       break;
     }
@@ -759,16 +756,12 @@ Variant f_fb_compact_serialize(CVarRef thing) {
     }
   }
 
-  auto sd = StringData::Make();
-  // StringData will throw a FatalErrorException if we try to grow it too large,
-  // so no need to check for length.
-  // FIXME(#2683961): this exception case leaks the StringData.
-  if (fb_compact_serialize_variant(sd, thing, 0)) {
-    sd->release();
+  StringBuffer sb;
+  if (fb_compact_serialize_variant(sb, thing, 0)) {
     return uninit_null();
   }
 
-  return Variant(sd);
+  return sb.detach();
 }
 
 int fb_compact_unserialize_int64_from_buffer(

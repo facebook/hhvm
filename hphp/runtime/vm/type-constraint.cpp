@@ -93,7 +93,7 @@ void TypeConstraint::init() {
            "Only nullable extended type hints are implemented");
   }
 
-  if (blacklistedName(m_typeName)) {
+  if (isExtended() && blacklistedName(m_typeName)) {
     m_typeName = nullptr;
   }
   if (m_typeName == nullptr) {

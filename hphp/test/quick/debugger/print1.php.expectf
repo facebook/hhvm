@@ -142,5 +142,13 @@ Resource id #6
 p v $ch
 resource(6) of type (cURL handle)
 
+p $c
+"some custom string"
+= $d
+Array
+(
+    [c] => "some custom string"
+)
+
 
 quit

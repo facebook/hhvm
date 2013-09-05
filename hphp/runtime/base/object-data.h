@@ -298,6 +298,7 @@ class ObjectData {
   bool hasToString();
 
   Variant invokeSleep();
+  Variant invokeToDebugDisplay();
   Variant invokeWakeup();
 
   static int GetMaxId() ATTRIBUTE_COLD;

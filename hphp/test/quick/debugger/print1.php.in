@@ -15,4 +15,6 @@ p v $s
 p $ch
 p r $ch
 p v $ch
+p $c
+= $d
 

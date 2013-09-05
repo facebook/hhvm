@@ -566,6 +566,7 @@ void ObjectData::serialize(VariableSerializer* serializer) const {
 }
 
 const StaticString
+  s_PHP_DebugDisplay("__PHP_DebugDisplay"),
   s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
   s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name"),
   s_PHP_Unserializable_Class_Name("__PHP_Unserializable_Class_Name");
@@ -685,6 +686,25 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
     } else {
       CStrRef className = o_getClassName();
       Array properties = o_toArray();
+      if (serializer->getType() ==
+        VariableSerializer::Type::DebuggerSerialize) {
+        try {
+           auto val = const_cast<ObjectData*>(this)->invokeToDebugDisplay();
+           if (val.isInitialized()) {
+             properties.lvalAt(s_PHP_DebugDisplay).assign(val);
+           }
+        } catch (...) {
+          raise_warning("%s::__toDebugDisplay() throws exception",
+            o_getClassName().data());
+        }
+      }
+      if (serializer->getType() == VariableSerializer::Type::DebuggerDump) {
+        Variant* debugDispVal = o_realProp(s_PHP_DebugDisplay, 0);
+        if (debugDispVal) {
+          debugDispVal->serialize(serializer);
+          return;
+        }
+      }
       if (serializer->getType() != VariableSerializer::Type::VarDump &&
           className == s_PHP_Incomplete_Class) {
         Variant* cname = o_realProp(s_PHP_Incomplete_Class_Name, 0);
@@ -772,6 +792,7 @@ const StaticString
   s___unset(LITSTR_INIT("__unset")),
   s___init__(LITSTR_INIT("__init__")),
   s___sleep(LITSTR_INIT("__sleep")),
+  s___toDebugDisplay(LITSTR_INIT("__toDebugDisplay")),
   s___wakeup(LITSTR_INIT("__wakeup"));
 
 TRACE_SET_MOD(runtime);
@@ -1380,6 +1401,17 @@ void ObjectData::getProps(const Class* klass, bool pubOnly,
 
 Variant ObjectData::invokeSleep() {
   const Func* method = m_cls->lookupMethod(s___sleep.get());
+  if (method) {
+    TypedValue tv;
+    g_vmContext->invokeFuncFew(&tv, method, this);
+    return tvAsVariant(&tv);
+  } else {
+    return uninit_null();
+  }
+}
+
+Variant ObjectData::invokeToDebugDisplay() {
+  const Func* method = m_cls->lookupMethod(s___toDebugDisplay.get());
   if (method) {
     TypedValue tv;
     g_vmContext->invokeFuncFew(&tv, method, this);

@@ -1,0 +1,12 @@
+HipHop Warning: Creating default object from empty value in %s/test/slow/ext_array/1773.php on line 5
+bool(true)
+array(4) {
+  [0]=>
+  int(220)
+  [3]=>
+  int(230)
+  [2]=>
+  int(240)
+  [1]=>
+  int(250)
+}

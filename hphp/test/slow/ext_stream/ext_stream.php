@@ -28,10 +28,10 @@ function retry_bind_server($udp = false) {
     $address = $scheme."127.0.0.1:" . $port;
 
     if ($udp) {
-      $server = stream_socket_server($address, $errno, $errstr,
+      $server = @stream_socket_server($address, $errno, $errstr,
                                      STREAM_SERVER_BIND);
     } else {
-      $server = stream_socket_server($address);
+      $server = @stream_socket_server($address);
     }
     if ($server !== false) {
       return array($port, $address, $server);
@@ -47,10 +47,10 @@ function retry_bind_server6($udp = false) {
     $address = $scheme."[::1]:" . $port;
 
     if ($udp) {
-      $server = stream_socket_server($address, $errno, $errstr,
+      $server = @stream_socket_server($address, $errno, $errstr,
                                      STREAM_SERVER_BIND);
     } else {
-      $server = stream_socket_server($address);
+      $server = @stream_socket_server($address);
     }
     if ($server !== false) {
       return array($port, $address, $server);

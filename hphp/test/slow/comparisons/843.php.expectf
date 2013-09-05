@@ -1,0 +1,25 @@
+1	YYYY	'1.2' == true	
+2	NNNN	'1.2' == false	
+3	NNNN	'1.2' == 1	
+4	NNNN	'1.2' == 0	
+5	NNNN	'1.2' == -1	
+6	NNNN	'1.2' == '1'	
+7	NNNN	'1.2' == '0'	
+8	NNNN	'1.2' == '-1'	
+9	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/843.php on line 126
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/843.php on line 130
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/843.php on line 133
+NN	'1.2' == nullptr	
+10	NNNN	'1.2' == array()	
+11	NNNN	'1.2' == array(1)	
+12	NNNN	'1.2' == array(2)	
+13	NNNN	'1.2' == array('1')	
+14	NNNN	'1.2' == array('0' => '1')	
+15	NNNN	'1.2' == array('a')	
+16	NNNN	'1.2' == array('a' => 1)	
+17	NNNN	'1.2' == array('b' => 1)	
+18	NNNN	'1.2' == array('a' => 1, 'b' => 2)	
+19	NNNN	'1.2' == array(array('a' => 1))	
+20	NNNN	'1.2' == array(array('b' => 1))	
+21	NNNN	'1.2' == 'php'	
+22	NNNN	'1.2' == ''	

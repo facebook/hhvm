@@ -1,0 +1,91 @@
+1	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 6
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 9
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 14
+NN	nullptr === true	
+2	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 21
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 24
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 29
+NN	nullptr === false	
+3	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 36
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 39
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 44
+NN	nullptr === 1	
+4	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 51
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 54
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 59
+NN	nullptr === 0	
+5	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 66
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 69
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 74
+NN	nullptr === -1	
+6	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 81
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 84
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 89
+NN	nullptr === '1'	
+7	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 96
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 99
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 104
+NN	nullptr === '0'	
+8	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 111
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 114
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 119
+NN	nullptr === '-1'	
+9	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 126
+HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 126
+YHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 129
+HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 130
+YHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 133
+HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 134
+YY	nullptr === nullptr	
+10	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 141
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 144
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 149
+NN	nullptr === array()	
+11	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 156
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 159
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 164
+NN	nullptr === array(1)	
+12	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 171
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 174
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 179
+NN	nullptr === array(2)	
+13	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 186
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 189
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 194
+NN	nullptr === array('1')	
+14	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 201
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 204
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 209
+NN	nullptr === array('0' => '1')	
+15	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 216
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 219
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 224
+NN	nullptr === array('a')	
+16	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 231
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 234
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 239
+NN	nullptr === array('a' => 1)	
+17	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 246
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 249
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 254
+NN	nullptr === array('b' => 1)	
+18	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 261
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 264
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 269
+NN	nullptr === array('a' => 1, 'b' => 2)	
+19	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 276
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 279
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 284
+NN	nullptr === array(array('a' => 1))	
+20	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 291
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 294
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 299
+NN	nullptr === array(array('b' => 1))	
+21	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 306
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 309
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 314
+NN	nullptr === 'php'	
+22	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 321
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 324
+NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/875.php on line 329
+NN	nullptr === ''	

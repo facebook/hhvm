@@ -39,7 +39,7 @@ foreach ($token_range as $potential_token) {
     continue;
   }
 
-  if ($expected_exceptions[$token_name]) {
+  if (isset($expected_exceptions[$token_name])) {
     continue;
   }
 

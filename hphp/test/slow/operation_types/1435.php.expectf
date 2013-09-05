@@ -1,0 +1,2 @@
+HipHop Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1435.php on line 4
+int(1)

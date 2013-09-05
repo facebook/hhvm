@@ -1,0 +1,84 @@
+string(4) "axAX"
+string(4) "axAX"
+**************************
+int(1)
+int(1)
+int(1)
+int(1)
+int(4)
+int(4)
+int(4)
+bool(false)
+HipHop Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 14
+bool(false)
+HipHop Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 15
+bool(false)
+HipHop Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 16
+bool(false)
+HipHop Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 17
+bool(false)
+HipHop Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 18
+bool(false)
+HipHop Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 19
+bool(false)
+HipHop Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 20
+bool(false)
+**************************
+int(1)
+int(1)
+int(4)
+int(4)
+int(4)
+int(4)
+int(4)
+bool(false)
+HipHop Warning: Offset is greater than the length of haystack string in %s/test/slow/ext_string/1765.php on line 30
+bool(false)
+int(4)
+int(1)
+int(1)
+int(1)
+bool(false)
+HipHop Warning: Offset is greater than the length of haystack string in %s/test/slow/ext_string/1765.php on line 36
+bool(false)
+**************************
+int(0)
+int(0)
+int(0)
+int(1)
+int(2)
+int(4)
+int(4)
+bool(false)
+HipHop Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 46
+bool(false)
+HipHop Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 47
+bool(false)
+HipHop Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 48
+bool(false)
+HipHop Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 49
+bool(false)
+HipHop Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 50
+bool(false)
+HipHop Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 51
+bool(false)
+HipHop Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 52
+bool(false)
+**************************
+int(1)
+int(1)
+int(4)
+int(4)
+int(4)
+int(4)
+int(4)
+bool(false)
+HipHop Warning: Offset is greater than the length of haystack string in %s/test/slow/ext_string/1765.php on line 62
+bool(false)
+int(4)
+int(2)
+int(2)
+int(1)
+int(0)
+HipHop Warning: Offset is greater than the length of haystack string in %s/test/slow/ext_string/1765.php on line 68
+bool(false)

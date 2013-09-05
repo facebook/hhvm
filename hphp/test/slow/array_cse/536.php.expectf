@@ -1,0 +1,9 @@
+int(0)
+HipHop Warning: Cannot use a scalar value as an array in %s/test/slow/array_cse/536.php on line 6
+HipHop Warning: Cannot use a scalar value as an array in %s/test/slow/array_cse/536.php on line 7
+NULL
+HipHop Notice: Undefined index: 2 in %s/test/slow/array_cse/536.php on line 11
+NULL
+HipHop Warning: Cannot use a scalar value as an array in %s/test/slow/array_cse/536.php on line 10
+HipHop Warning: Cannot use a scalar value as an array in %s/test/slow/array_cse/536.php on line 11
+NULL

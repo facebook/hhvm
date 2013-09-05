@@ -14,7 +14,7 @@ function get_random_port() {
 function bind_random_port($socket, $address) {
   for ($i = 0; $i < 20; $i++) {
     $port = get_random_port();
-    if (socket_bind($socket, $address, $port)) return $port;
+    if (@socket_bind($socket, $address, $port)) return $port;
   }
   return 0;
 }

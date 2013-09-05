@@ -1,0 +1,9 @@
+HipHop Notice: Undefined variable: a in %s/test/slow/eval_order/1527.php on line 7
+array(3) {
+  [0]=>
+  NULL
+  [1]=>
+  int(1)
+  [2]=>
+  int(1)
+}

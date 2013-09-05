@@ -1,0 +1,5 @@
+string(2) "ok"
+HipHop Notice: Undefined variable: b in %s/test/slow/dynamic_variables/1151.php on line 6
+NULL
+HipHop Notice: Undefined variable: p_b in %s/test/slow/dynamic_variables/1151.php on line 7
+NULL

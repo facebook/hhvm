@@ -1,0 +1,27 @@
+bool(false)
+bool(false)
+HipHop Notice: Use of undefined constant INT_MAX - assumed 'INT_MAX' in %s/test/slow/ext_fb/utf8_substr.php on line 9
+bool(false)
+string(3) "hon"
+HipHop Notice: Use of undefined constant INT_MAX - assumed 'INT_MAX' in %s/test/slow/ext_fb/utf8_substr.php on line 11
+bool(false)
+string(1) "X"
+HipHop Notice: Use of undefined constant INT_MAX - assumed 'INT_MAX' in %s/test/slow/ext_fb/utf8_substr.php on line 15
+bool(false)
+string(2) "el"
+string(2) "\u"
+HipHop Notice: Use of undefined constant INT_MAX - assumed 'INT_MAX' in %s/test/slow/ext_fb/utf8_substr.php on line 20
+bool(false)
+HipHop Notice: Use of undefined constant INT_MAX - assumed 'INT_MAX' in %s/test/slow/ext_fb/utf8_substr.php on line 21
+bool(false)
+string(1) "d"
+bool(false)
+string(1) "X"
+string(1) "Y"
+string(2) "DD"
+string(5) "abcde"
+string(3) "cde"
+bool(false)
+string(2) "de"
+string(4) "�("
+string(7) "\uFFFD("

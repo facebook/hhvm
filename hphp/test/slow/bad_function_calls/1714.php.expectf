@@ -1,0 +1,2 @@
+HipHop Warning: array_chunk() expects exactly 2 parameters, 1 given in %s/test/slow/bad_function_calls/1714.php on line 5
+int(1)

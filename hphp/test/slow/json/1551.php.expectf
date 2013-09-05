@@ -1,0 +1,9 @@
+array(1) {
+  [0]=>
+  &array(1) {
+    [0]=>
+    *RECURSION*
+  }
+}
+HipHop Warning: json_encode(): recursion detected in %s/test/slow/json/1551.php on line 6
+string(8) "[[null]]"

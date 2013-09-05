@@ -1,6 +1,6 @@
 array(4) {
   ["dirname"]=>
-  string(%d) %s
+  string(%d) "%s/test/slow/ext_file"
   ["basename"]=>
   string(17) "test_ext_file.txt"
   ["extension"]=>

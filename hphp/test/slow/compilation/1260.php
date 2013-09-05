@@ -4,4 +4,5 @@ function test() {
  $a = 0;
  $a += $b;
 }
- test();
+test();
+echo "done\n";

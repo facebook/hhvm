@@ -1,0 +1,7 @@
+HipHop Warning: Sort comparators should not return a boolean since it may result in a different sort order than expected. The comparator should return an integer or double (negative if left is less than right, positive if left is greater than right, zero otherwise). in %s/test/slow/array_functions/usort.php on line 8
+array(2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(1)
+}

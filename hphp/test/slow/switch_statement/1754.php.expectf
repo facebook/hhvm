@@ -1,0 +1,37 @@
+int(0)
+ goes to: 0int(-1)
+ goes to: defaultint(1)
+ goes to: 1int(2)
+ goes to: defaultbool(true)
+ goes to: 5bool(false)
+ goes to: 0NULL
+ goes to: 0array(0) {
+}
+ goes to: defaultfloat(1)
+ goes to: 1string(4) "1abc"
+ goes to: 1string(1) "3"
+ goes to: defaultstring(3) "foo"
+ goes to: 0object(M)#1 (0) {
+}
+ goes to: HipHop Notice: Object of class M could not be converted to int in %s/test/slow/switch_statement/1754.php on line 112
+1string(1) "0"
+ goes to: 0string(0) ""
+ goes to: 0string(4) "jazz"
+ goes to: 0string(2) "-1"
+ goes to: -1string(1) "1"
+ goes to: defaultbool(true)
+ goes to: -10bool(false)
+ goes to: 0float(5000000.392)
+ goes to: defaultfloat(5000000.5)
+ goes to: defaultfloat(5000000.5001)
+ goes to: defaultfloat(5000000)
+ goes to: 5000000float(-INF)
+ goes to: defaultstring(12) "5000000.3920"
+ goes to: defaultstring(9) "5000000.5"
+ goes to: defaultstring(12) "5000000.5001"
+ goes to: defaultstring(9) "5000000.0"
+ goes to: 5000000int(9223372036854775807)
+ goes to: defaultint(-120)
+ goes to: defaultint(0)
+ goes to: 05 or 7bool(true)
+ goes to: 5defaultdefault

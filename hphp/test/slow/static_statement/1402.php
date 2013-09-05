@@ -4,8 +4,8 @@ function test() {
   if (false) {
     static $static_var = +3;
   }
-  echo $static_var . "\n";
+  var_dump($static_var);
   $static_var = 4;
-  echo $static_var . "\n";
+  var_dump($static_var);
 }
 test();

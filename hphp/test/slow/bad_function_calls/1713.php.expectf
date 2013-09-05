@@ -1,0 +1,5 @@
+HipHop Warning: array_push() expects exactly 2 parameters, 1 given in %s/test/slow/bad_function_calls/1713.php on line 5
+array(1) {
+  [0]=>
+  int(1)
+}

@@ -6599,7 +6599,7 @@
         },
         {
             "name": "T_COMPILER_HALT_OFFSET",
-            "value": 405
+            "value": 407
         },
         {
             "name": "T_CONCAT_EQUAL",
@@ -6615,7 +6615,7 @@
         },
         {
             "name": "T_CONTINUE",
-            "value": 332
+            "value": 333
         },
         {
             "name": "T_CURLY_OPEN",
@@ -6767,7 +6767,7 @@
         },
         {
             "name": "T_GOTO",
-            "value": 333
+            "value": 332
         },
         {
             "name": "T_HALT_COMPILER",
@@ -6800,6 +6800,10 @@
         {
             "name": "T_INSTANCEOF",
             "value": 288
+        },
+        {
+            "name": "T_INSTEADOF",
+            "value": 391
         },
         {
             "name": "T_INTERFACE",
@@ -7040,6 +7044,10 @@
         {
             "name": "T_XOR_EQUAL",
             "value": 269
+        },
+        {
+            "name": "T_YIELD",
+            "value": 381
         },
         {
             "name": "ULOC_ACTUAL_LOCALE",

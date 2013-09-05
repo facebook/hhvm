@@ -31,9 +31,6 @@ endmacro()
 string(LENGTH "${HPHP_HOME}/hphp/" HPHP_DIR_LEN)
 
 set(RECURSIVE_SOURCE_SUBDIRS "${HPHP_HOME}/hphp/runtime/ext")
-if (LINUX)
-	list(APPEND RECURSIVE_SOURCE_SUBDIRS "${HPHP_HOME}/hphp/runtime/ext_zend_compat/calendar")
-endif()
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
 	auto_sources(files "*.cpp" "RECURSE" ${dir})
 	foreach (f ${files})
@@ -60,9 +57,7 @@ foreach (header ${CXX_HEADERS})
 endforeach()
 
 auto_sources(HPHP_IDLS "*.idl.json" "RECURSE" "${HPHP_HOME}/hphp/system/idl")
-if (NOT LINUX)
-	list(REMOVE_ITEM HPHP_IDLS "${HPHP_HOME}/hphp/system/idl/calendar.idl.json")
-endif()
+list(REMOVE_ITEM HPHP_IDLS "${HPHP_HOME}/hphp/system/idl/calendar.idl.json")
 list(REMOVE_ITEM HPHP_IDLS "${HPHP_HOME}/hphp/system/idl/gettext.idl.json")
 
 add_custom_command(OUTPUT ${INFOTABS_SOURCE}

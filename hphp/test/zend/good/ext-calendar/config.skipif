@@ -1,0 +1,6 @@
+<?php
+// TODO: This should properly be extension_loaded("calendar")
+// but calendar doesn't currently have an Extension struct
+// Blame @ptarjan
+if (!function_exists("cal_info")) echo "skip";
+

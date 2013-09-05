@@ -1,7 +1,5 @@
 auto_sources(IDL_SRCS "*.idl.json" "RECURSE" "${HPHP_HOME}/hphp/system/idl")
-if (NOT LINUX)
-	list(REMOVE_ITEM IDL_SRCS "${HPHP_HOME}/hphp/system/idl/calendar.idl.json")
-endif()
+list(REMOVE_ITEM IDL_SRCS "${HPHP_HOME}/hphp/system/idl/calendar.idl.json")
 list(REMOVE_ITEM IDL_SRCS "${HPHP_HOME}/hphp/system/idl/gettext.idl.json")
 
 add_custom_command(OUTPUT "class_map.cpp" "constants.h"

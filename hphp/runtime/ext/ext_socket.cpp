@@ -775,7 +775,7 @@ Variant f_socket_send(CResRef socket, CStrRef buf, int len, int flags) {
 }
 
 Variant f_socket_sendto(CResRef socket, CStrRef buf, int len, int flags,
-                        CStrRef addr, int port /* = 0 */) {
+                        CStrRef addr, int port /* = -1 */) {
   Socket *sock = socket.getTyped<Socket>();
   if (len > buf.size()) {
     len = buf.size();
@@ -795,6 +795,11 @@ Variant f_socket_sendto(CResRef socket, CStrRef buf, int len, int flags,
     break;
   case AF_INET:
     {
+      if (port == -1) {
+        throw_missing_arguments_nr("socket_sendto", 6, 5);
+        return false;
+      }
+
       struct sockaddr_in  sin;
       memset(&sin, 0, sizeof(sin));
       sin.sin_family = AF_INET;
@@ -809,6 +814,11 @@ Variant f_socket_sendto(CResRef socket, CStrRef buf, int len, int flags,
     break;
   case AF_INET6:
     {
+      if (port == -1) {
+        throw_missing_arguments_nr("socket_sendto", 6, 5);
+        return false;
+      }
+
       struct sockaddr_in6  sin6;
       memset(&sin6, 0, sizeof(sin6));
       sin6.sin6_family = AF_INET6;
@@ -863,7 +873,7 @@ const StaticString
   s_0_0_0_0("0.0.0.0");
 
 Variant f_socket_recvfrom(CResRef socket, VRefParam buf, int len, int flags,
-                      VRefParam name, VRefParam port /* = 0 */) {
+                      VRefParam name, VRefParam port /* = -1*/) {
   if (len <= 0) {
     return false;
   }
@@ -896,6 +906,11 @@ Variant f_socket_recvfrom(CResRef socket, VRefParam buf, int len, int flags,
     break;
   case AF_INET:
     {
+      if (int(port) == -1) {
+        throw_missing_arguments_nr("socket_recvfrom", 5, 4);
+        return false;
+      }
+
       struct sockaddr_in sin;
       slen = sizeof(sin);
       memset(&sin, 0, slen);
@@ -920,6 +935,11 @@ Variant f_socket_recvfrom(CResRef socket, VRefParam buf, int len, int flags,
     break;
   case AF_INET6:
     {
+      if (int(port) == -1) {
+        throw_missing_arguments_nr("socket_recvfrom", 5, 4);
+        return false;
+      }
+
       struct sockaddr_in6 sin6;
       slen = sizeof(sin6);
       memset(&sin6, 0, slen);

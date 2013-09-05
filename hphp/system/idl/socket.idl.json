@@ -526,7 +526,7 @@
                 {
                     "name": "port",
                     "type": "Int32",
-                    "value": "0",
+                    "value": "-1",
                     "desc": "port is the remote port number at which the data will be sent."
                 }
             ]
@@ -604,7 +604,7 @@
                 {
                     "name": "port",
                     "type": "Variant",
-                    "value": "0",
+                    "value": "-1",
                     "desc": "This argument only applies to AF_INET and AF_INET6 sockets, and specifies the remote port from which the data is received. If the socket is connection-oriented, port will be NULL.",
                     "ref": true
                 }

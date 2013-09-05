@@ -314,7 +314,10 @@ bool spl_register_class_normalize(CVarRef func, bool get, bool throws = true , b
   get ? res = AutoloadHandler::s_instance->addHandler(func, prepend) : res = true;
   if(res)return res;
   }
-
+  if(func.isObject()){
+    get ? res = AutoloadHandler::s_instance->addHandler(func, prepend) : res = true;
+    if(res)return res;
+  }
   if (!res && throws) {
     throw_spl_exception("Invalid autoload_function specified");
   }

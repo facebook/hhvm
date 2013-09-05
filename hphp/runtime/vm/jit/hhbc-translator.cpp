@@ -3793,11 +3793,6 @@ Type setOpResult(Type locType, Type valType, SetOpOp op) {
 
 uint32_t localInputId(const NormalizedInstruction& inst) {
   switch (inst.op()) {
-    case OpUnpackCont:
-    case OpContSuspend:
-    case OpContRetC:
-      return 0;
-
     case OpSetWithRefLM:
     case OpFPassL:
       return inst.imm[1].u_HA;

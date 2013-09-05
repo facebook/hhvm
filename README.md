@@ -28,6 +28,10 @@ If you want to help but don't know where to start, try fixing some of the [Zend 
 
 Before changes can be accepted a [Contributors Licensing Agreement](http://developers.facebook.com/opensource/cla) ([pdf](https://github.com/facebook/hiphop-php/raw/master/hphp/doc/FB_Individual_CLA.pdf) - print, sign, scan, link) must be signed.
 
-## Licence
+## License
 
 HipHop VM is licensed under the PHP and Zend licenses except as otherwise noted.
+
+## Reporting Crashes
+
+See [Reporting Crashes](https://github.com/facebook/hiphop-php/wiki/Reporting-Crashes) for helpful tips on how to report crashes in an actionable manner.

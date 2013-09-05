@@ -16,6 +16,7 @@
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
 
 #include "folly/CpuId.h"
+
 #include "hphp/util/trace.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_continuation.h"
@@ -3805,16 +3806,15 @@ uint32_t localInputId(const NormalizedInstruction& inst) {
 
 }
 
-Type HhbcTranslator::interpOutputType(const NormalizedInstruction& inst) const {
+Type HhbcTranslator::interpOutputType(
+    const NormalizedInstruction& inst,
+    folly::Optional<Type>& checkTypeType) const {
   using namespace Transl::InstrFlags;
   auto localType = [&]{
     auto locId = localInputId(inst);
     assert(locId >= 0 && locId < curFunc()->numLocals());
     auto t = m_tb->localType(locId, DataTypeSpecific);
     return t.equals(Type::None) ? Type::Gen : t;
-  };
-  auto cell = [](Type t) {
-    return t.unbox();
   };
   auto boxed = [](Type t) {
     if (t.equals(Type::Gen)) return t;
@@ -3853,9 +3853,7 @@ Type HhbcTranslator::interpOutputType(const NormalizedInstruction& inst) const {
     case OutVUnknown:    return Type::BoxedCell;
 
     case OutSameAsInput: return topType(0);
-    case OutCInput:      return cell(topType(0));
     case OutVInput:      return boxed(topType(0));
-    case OutCInputL:     return cell(localType());
     case OutVInputL:     return boxed(localType());
     case OutFInputL:
     case OutFInputR:     not_reached();
@@ -3874,6 +3872,20 @@ Type HhbcTranslator::interpOutputType(const NormalizedInstruction& inst) const {
     case OutFPushCufSafe: return Type::None;
 
     case OutNone:       return Type::None;
+
+    case OutCInput: {
+      auto ttype = topType(0);
+      if (ttype.notBoxed()) return ttype;
+      checkTypeType = ttype.unbox();
+      return Type::Cell;
+    }
+
+    case OutCInputL: {
+      auto ltype = localType();
+      if (ltype.notBoxed()) return ltype;
+      checkTypeType = ltype.unbox();
+      return Type::Cell;
+    }
   }
   not_reached();
 }
@@ -4000,13 +4012,17 @@ void HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst) {
 }
 
 void HhbcTranslator::emitInterpOne(const NormalizedInstruction& inst) {
-  auto stackType = interpOutputType(inst);
+  folly::Optional<Type> checkTypeType;
+  auto stackType = interpOutputType(inst, checkTypeType);
   auto popped = getStackPopped(inst);
   auto pushed = getStackPushed(inst);
   FTRACE(1, "emitting InterpOne for {}, result = {}, popped {}, pushed {}\n",
          inst.toString(), stackType.toString(), popped, pushed);
   emitInterpOne(stackType, popped, pushed);
   interpOutputLocals(inst);
+  if (checkTypeType) {
+    checkTypeTopOfStack(*checkTypeType, inst.nextSk().offset());
+  }
 }
 
 void HhbcTranslator::emitInterpOne(Type outType, int popped) {

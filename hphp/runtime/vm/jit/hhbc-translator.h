@@ -21,6 +21,8 @@
 #include <memory>
 #include <stack>
 
+#include "folly/Optional.h"
+
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/member-operations.h"
@@ -718,7 +720,8 @@ private:
   SSATmp* emitMIterInitCommon(int offset, Lambda genFunc);
   SSATmp* staticTVCns(const TypedValue*);
 
-  Type interpOutputType(const NormalizedInstruction&) const;
+  Type interpOutputType(const NormalizedInstruction&,
+                        folly::Optional<Type>&) const;
   void interpOutputLocals(const NormalizedInstruction&);
 
 private: // Exit trace creation routines.

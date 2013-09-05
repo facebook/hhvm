@@ -347,11 +347,9 @@ Array f_token_get_all(CStrRef source) {
 String f_token_name(int64_t token) {
 
 #undef YYTOKENTYPE
-#ifdef YYTOKEN_MAP
 #undef YYTOKEN_MAP
 #undef YYTOKEN
-#endif
-#define YYTOKEN(num, name) #name
+#define YYTOKEN(num, name) #name,
 #define YYTOKEN_MAP static const char *names[] =
 #include "hphp/parser/hphp.tab.hpp"
 #undef YYTOKEN_MAP
@@ -372,3 +370,20 @@ String f_hphp_to_string(CVarRef v) {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#undef YYTOKENTYPE
+#undef YYTOKEN_MAP
+#undef YYTOKEN
+#define YYTOKEN(num, name)                      \
+  extern const int64_t k_##name = num;
+#define YYTOKEN_MAP namespace HPHP
+
+#include "hphp/parser/hphp.tab.hpp"
+
+namespace HPHP {
+extern const int64_t k_T_DOUBLE_COLON = k_T_PAAMAYIM_NEKUDOTAYIM;
+}
+
+#undef YYTOKEN_MAP
+#undef YYTOKEN
+

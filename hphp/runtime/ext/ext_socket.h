@@ -45,6 +45,7 @@ Variant f_socket_server(CStrRef hostname, int port = -1,
                         VRefParam errnum = uninit_null(),
                         VRefParam errstr = uninit_null());
 Variant socket_server_impl(const Util::HostURL &hosturl,
+                           int flags = k_STREAM_SERVER_BIND|k_STREAM_SERVER_LISTEN,
                            VRefParam errnum = uninit_null(),
                            VRefParam errstr = uninit_null());
 Variant f_socket_accept(CResRef socket);

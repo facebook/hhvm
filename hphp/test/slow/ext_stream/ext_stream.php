@@ -21,12 +21,37 @@ function get_random_port() {
 // On the continuous integration server, it's not unlikely that we'll
 // fail to bind one of these random ports.  Retry a few times and hope
 // for the best.
-function retry_bind_server() {
+function retry_bind_server($udp = false) {
   for ($i = 0; $i < 20; ++$i) {
     $port = get_random_port();
-    $address = "127.0.0.1:" . $port;
+    $scheme = $udp ? "udp://" : "tcp://";
+    $address = $scheme."127.0.0.1:" . $port;
 
-    $server = stream_socket_server($address);
+    if ($udp) {
+      $server = stream_socket_server($address, $errno, $errstr,
+                                     STREAM_SERVER_BIND);
+    } else {
+      $server = stream_socket_server($address);
+    }
+    if ($server !== false) {
+      return array($port, $address, $server);
+    }
+  }
+  throw new Exception("Couldn't bind server");
+}
+
+function retry_bind_server6($udp = false) {
+  for ($i = 0; $i < 20; ++$i) {
+    $port = get_random_port();
+    $scheme = $udp ? "udp://" : "tcp://";
+    $address = $scheme."[::1]:" . $port;
+
+    if ($udp) {
+      $server = stream_socket_server($address, $errno, $errstr,
+                                     STREAM_SERVER_BIND);
+    } else {
+      $server = stream_socket_server($address);
+    }
     if ($server !== false) {
       return array($port, $address, $server);
     }
@@ -128,6 +153,41 @@ function test_stream_socket_recvfrom_tcp() {
   VS($buffer, "testing");
 }
 
+function test_stream_socket_recvfrom_tcp6() {
+  list($port, $address, $server) = retry_bind_server6();
+  $client = stream_socket_client($address);
+
+  $s = stream_socket_accept($server);
+  $text = "testing6";
+  VERIFY(stream_socket_sendto($client, $text, 0, $address) != false);
+
+  $buffer = stream_socket_recvfrom($s, 100);
+  VS($buffer, "testing6");
+}
+
+function test_stream_socket_recvfrom_udp() {
+  list($port, $address, $server) = retry_bind_server(true);
+  $client = stream_socket_client($address);
+
+  $text = "testing-udp";
+  VERIFY(stream_socket_sendto($client, $text, 0, $address) != false);
+
+  $buffer = stream_socket_recvfrom($server, 100);
+  VS($buffer, "testing-udp");
+}
+
+function test_stream_socket_recvfrom_udp6() {
+  list($port, $address, $server) = retry_bind_server(true);
+  $client = stream_socket_client($address);
+
+  $text = "testing-udp6";
+  VERIFY(stream_socket_sendto($client, $text, 0, $address) != false);
+
+  $buffer = stream_socket_recvfrom($server, 100);
+  VS($buffer, "testing-udp6");
+}
+
+
 function test_stream_socket_recvfrom_unix() {
   $tmpsock = tempnam('/tmp', 'vmstreamtest');
   unlink($tmpsock);
@@ -169,6 +229,9 @@ test_stream_misc();
 test_stream_wrapper_restore();
 test_stream_select();
 test_stream_socket_recvfrom_tcp();
+test_stream_socket_recvfrom_tcp6();
+test_stream_socket_recvfrom_udp();
+test_stream_socket_recvfrom_udp6();
 test_stream_socket_recvfrom_unix();
 test_stream_socket_sendto_issue324();
 test_stream_socket_shutdown();

@@ -317,32 +317,6 @@ bool f_stream_wrapper_unregister(CStrRef protocol) {
 ///////////////////////////////////////////////////////////////////////////////
 // stream socket functions
 
-// Extract host:port pair.
-// 192.168.1.1:80 -> 192.168.1.0 80
-// [2a03:2880::1]:80 -> [2a03:2880::1] 80
-static void parse_host(CStrRef address, String &host, int &port) {
-
-  if (address.find('[') != std::string::npos) {
-    auto epos = address.rfind(']');
-    if (epos != std::string::npos) {
-      auto cpos = address.rfind(':', epos);
-      if (cpos != std::string::npos) {
-        port = address.substr(cpos + 1).toInt16();
-      }
-    }
-    host = address.substr(0, epos + 1);
-  } else {
-    auto cpos = address.rfind(':');
-    if (cpos != std::string::npos) {
-      host = address.substr(0, cpos);
-      port = address.substr(cpos + 1).toInt16();
-    } else {
-      host = address;
-      port = 0;
-    }
-  }
-}
-
 static Socket *socket_accept_impl(CResRef socket, struct sockaddr *addr,
                                   socklen_t *addrlen) {
   Socket *sock = socket.getTyped<Socket>();
@@ -444,7 +418,7 @@ Variant f_stream_socket_server(CStrRef local_socket,
                                int flags /* = 0 */,
                                CResRef context /* = null_object */) {
   Util::HostURL hosturl(static_cast<const std::string>(local_socket));
-  return socket_server_impl(hosturl, errnum, errstr);
+  return socket_server_impl(hosturl, flags, errnum, errstr);
 }
 
 Variant f_stream_socket_client(CStrRef remote_socket,
@@ -487,13 +461,17 @@ Variant f_stream_socket_pair(int domain, int type, int protocol) {
 
 Variant f_stream_socket_recvfrom(CResRef socket, int length,
                                  int flags /* = 0 */,
-                                 CStrRef address /* = null_string */) {
-  String host; int port;
-  parse_host(address, host, port);
-  Variant ret;
+                                 VRefParam address /* = null_string */) {
+  Variant ret, host, port;
   Variant retval = f_socket_recvfrom(socket, ref(ret), length, flags,
-                                     host, port);
+                                     ref(host), ref(port));
   if (!same(retval, false) && retval.toInt64() >= 0) {
+    Socket *sock = socket.getTyped<Socket>();
+    if (sock->getType() == AF_INET6) {
+      address = "[" + host.toString() + "]:" + port.toInt32();
+    } else {
+      address = host.toString() + ":" + port.toInt32();
+    }
     return ret.toString(); // watch out, "ret", not "retval"
   }
   return false;
@@ -509,7 +487,9 @@ Variant f_stream_socket_sendto(CResRef socket, CStrRef data,
     host = sock->getAddress();
     port = sock->getPort();
   } else {
-    parse_host(address, host, port);
+    Util::HostURL hosturl(static_cast<std::string>(address));
+    host = hosturl.getHost();
+    port = hosturl.getPort();
   }
 
   return f_socket_sendto(socket, data, data.size(), flags, host, port);

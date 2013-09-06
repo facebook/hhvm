@@ -121,9 +121,11 @@ int64_t f_set_file_buffer(CResRef stream, int buffer);
 Variant f_stream_socket_accept(CResRef server_socket, double timeout = -1.0,
                                VRefParam peername = uninit_null());
 
-Variant f_stream_socket_server(CStrRef local_socket, VRefParam errnum = uninit_null(),
-                              VRefParam errstr = uninit_null(),
-                              int flags = 0, CResRef context = null_resource);
+Variant f_stream_socket_server(CStrRef local_socket,
+                               VRefParam errnum = uninit_null(),
+                               VRefParam errstr = uninit_null(),
+                               int flags = k_STREAM_SERVER_BIND|k_STREAM_SERVER_LISTEN,
+                               CResRef context = null_resource);
 
 Variant f_stream_socket_client(CStrRef remote_socket, VRefParam errnum = uninit_null(),
                               VRefParam errstr = uninit_null(), double timeout = -1.0,
@@ -138,7 +140,7 @@ Variant f_stream_socket_get_name(CResRef handle, bool want_peer);
 Variant f_stream_socket_pair(int domain, int type, int protocol);
 
 Variant f_stream_socket_recvfrom(CResRef socket, int length, int flags = 0,
-                                CStrRef address = null_string);
+                                 VRefParam address = uninit_null());
 
 Variant f_stream_socket_sendto(CResRef socket, CStrRef data, int flags = 0,
                            CStrRef address = null_string);

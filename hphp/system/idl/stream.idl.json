@@ -750,7 +750,7 @@
                 {
                     "name": "flags",
                     "type": "Int32",
-                    "value": "0",
+                    "value": "k_STREAM_SERVER_BIND|k_STREAM_SERVER_LISTEN",
                     "desc": "A bitmask field which may be set to any combination of socket creation flags.\n\nFor UDP sockets, you must use STREAM_SERVER_BIND as the flags parameter."
                 },
                 {
@@ -919,9 +919,10 @@
                 },
                 {
                     "name": "address",
-                    "type": "String",
-                    "value": "null_string",
-                    "desc": "If address is provided it will be populated with the address of the remote socket."
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "If address is provided it will be populated with the address of the remote socket.",
+                    "ref": true
                 }
             ]
         },

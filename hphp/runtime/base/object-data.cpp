@@ -376,20 +376,20 @@ Array ObjectData::o_toArray() const {
   // We can quickly tell if this object is a collection, which lets us avoid
   // checking for each class in turn if it's not one.
   if (isCollection()) {
-    // The collection classes are final and have no parent, so direct comparison
-    // of their m_cls is okay
-    if (m_cls == c_Vector::s_cls) {
+    if (instanceof(c_Vector::s_cls)) {
       return c_Vector::ToArray(this);
-    } else if (m_cls == c_Map::s_cls) {
+    } else if (instanceof(c_Map::s_cls)) {
       return c_Map::ToArray(this);
-    } else if (m_cls == c_StableMap::s_cls) {
+    } else if (instanceof(c_StableMap::s_cls)) {
       return c_StableMap::ToArray(this);
-    } else if (m_cls == c_Set::s_cls) {
+    } else if (instanceof(c_Set::s_cls)) {
       return c_Set::ToArray(this);
-    } else if (m_cls == c_Pair::s_cls) {
+    } else if (instanceof(c_Pair::s_cls)) {
       return c_Pair::ToArray(this);
     }
-    not_reached();
+    // It's undefined what happens if you reach not_reached. We want to be sure
+    // to hard fail if we get here.
+    always_assert(false);
   } else if (UNLIKELY(getAttribute(CallToImpl))) {
     // If we end up with other classes that need special behavior, turn the
     // assert into an if and add cases.
@@ -736,17 +736,15 @@ void ObjectData::dump() const {
 ObjectData* ObjectData::clone() {
   if (getAttribute(HasClone)) {
     if (isCollection()) {
-      // The collection classes are final and have no parent, so direct
-      // comparison of their m_cls is okay.
-      if (m_cls == c_Vector::s_cls) {
+      if (instanceof(c_Vector::s_cls)) {
         return c_Vector::Clone(this);
-      } else if (m_cls == c_Map::s_cls) {
+      } else if (instanceof(c_Map::s_cls)) {
         return c_Map::Clone(this);
-      } else if (m_cls == c_StableMap::s_cls) {
+      } else if (instanceof(c_StableMap::s_cls)) {
         return c_StableMap::Clone(this);
-      } else if (m_cls == c_Set::s_cls) {
+      } else if (instanceof(c_Set::s_cls)) {
         return c_Set::Clone(this);
-      } else if (m_cls == c_Pair::s_cls) {
+      } else if (instanceof(c_Pair::s_cls)) {
         return c_Pair::Clone(this);
       }
     } else if (instanceof(c_Closure::s_cls)) {
@@ -764,7 +762,7 @@ ObjectData* ObjectData::clone() {
     } else if (instanceof(c_SimpleXMLElement::s_cls)) {
       return c_SimpleXMLElement::Clone(this);
     }
-    not_reached();
+    always_assert(false);
   }
 
   return cloneImpl();

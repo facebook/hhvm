@@ -4235,6 +4235,8 @@ c_Pair::c_Pair(Class* cb) :
                        ObjectData::UseUnset|
                        ObjectData::HasClone>(cb),
     m_size(0) {
+  tvWriteUninit(&elm0);
+  tvWriteUninit(&elm1);
 }
 
 c_Pair::~c_Pair() {
@@ -4263,7 +4265,7 @@ Array c_Pair::toArrayImpl() const {
 
 c_Pair* c_Pair::Clone(ObjectData* obj) {
   auto thiz = static_cast<c_Pair*>(obj);
-  auto pair = NEWOBJ(c_Pair)();
+  auto pair = static_cast<c_Pair*>(obj->cloneImpl());
   pair->incRefCount();
   pair->m_size = 2;
   cellDup(thiz->elm0, pair->elm0);

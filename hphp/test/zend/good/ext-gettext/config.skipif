@@ -1,6 +1,2 @@
 <?php
-// TODO: This should properly be extension_loaded("gettext")
-// but gettext doesn't currently have an Extension struct
-// Blame @ptarjan
-if (!function_exists("gettext")) echo "skip";
-
+if (!extension_loaded("gettext")) echo "skip"; 

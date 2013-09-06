@@ -135,10 +135,35 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_MODULE_GLOBALS_CTOR_D(module)  void ZEND_MODULE_GLOBALS_CTOR_N(module)(zend_##module##_globals *module##_globals TSRMLS_DC)
 #define ZEND_MODULE_GLOBALS_DTOR_D(module)  void ZEND_MODULE_GLOBALS_DTOR_N(module)(zend_##module##_globals *module##_globals TSRMLS_DC)
 
-#define ZEND_GET_MODULE(name) \
-    BEGIN_EXTERN_C()\
-  ZEND_DLEXPORT zend_module_entry *get_module(void) { return &name##_module_entry; }\
-    END_EXTERN_C()
+class ZendExtension : public HPHP::Extension {
+private:
+  virtual zend_module_entry *getEntry() = 0;
+public:
+  explicit ZendExtension(const char* name) : HPHP::Extension(name) {}
+  virtual void moduleInit() {
+    zend_module_entry* entry = getEntry();
+    if (entry->module_startup_func) {
+      entry->module_startup_func(1, 1);
+    }
+  }
+  virtual void moduleShutdown() {
+    zend_module_entry* entry = getEntry();
+    if (entry->module_shutdown_func) {
+      entry->module_shutdown_func(1, 1);
+    }
+  }
+};
+
+#define ZEND_GET_MODULE(module_name) \
+  static class module_name##ZendExtension : public ZendExtension { \
+    public: \
+      module_name##ZendExtension() \
+      : ZendExtension(module_name##_module_entry.name) {} \
+    private: \
+    zend_module_entry *getEntry() { \
+      return &module_name##_module_entry; \
+    } \
+  } s_##module_name##_extension;
 
 #define ZEND_BEGIN_MODULE_GLOBALS(module_name)    \
   typedef struct _zend_##module_name##_globals {

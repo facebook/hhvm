@@ -350,7 +350,7 @@ void HhbcTranslator::beginInlining(unsigned numParams,
   for (unsigned i = numParams; i < target->numLocals(); ++i) {
     /*
      * Here we need to be generating hopefully-dead stores to
-     * initialize non-parameter locals to KindOfUnknownin case we have
+     * initialize non-parameter locals to KindOfUninit in case we have
      * to leave the trace.
      */
     gen(StLoc, LocalId(i), calleeFP, m_tb->genDefUninit());
@@ -2478,7 +2478,7 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
         if (zendParamMode) {
           gen(
             CoerceStk,
-            Type::fromDataType(pi.builtinType(), KindOfInvalid),
+            Type(pi.builtinType()),
             StackOffset(numArgs - i - 1),
             getExitSlowTrace(),
             m_tb->sp()
@@ -2486,7 +2486,7 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
         } else {
           gen(
             CastStk,
-            Type::fromDataType(pi.builtinType(), KindOfInvalid),
+            Type(pi.builtinType()),
             StackOffset(numArgs - i - 1),
             m_tb->sp()
           );
@@ -2508,7 +2508,7 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
     switch (pi.builtinType()) {
       case KindOfBoolean:
       case KindOfInt64:
-        args[i + 2] = top(Type::fromDataType(pi.builtinType(), KindOfInvalid),
+        args[i + 2] = top(Type(pi.builtinType()),
                           numArgs - i - 1);
         break;
       case KindOfDouble: assert(false);
@@ -2519,10 +2519,13 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
   }
 
   // Generate call and set return type
+  auto const retDt = callee->returnType();
+  auto retType = retDt == KindOfUnknown ? Type::Cell : Type(retDt);
+  if (callee->attrs() & ClassInfo::IsReference) retType = retType.box();
+
   auto const ret = gen(
     CallBuiltin,
-    Type::fromDataTypeWithRef(callee->returnType(),
-                              (callee->attrs() & ClassInfo::IsReference)),
+    retType,
     std::make_pair(argsSize, (SSATmp**)&args)
   );
 
@@ -2974,7 +2977,7 @@ RuntimeType HhbcTranslator::rttFromLocation(const Location& loc) {
     case Location::Litint:
       return RuntimeType(loc.offset);
     case Location::This:
-      return RuntimeType(KindOfObject, KindOfInvalid, curFunc()->cls());
+      return RuntimeType(KindOfObject, KindOfNone, curFunc()->cls());
     case Location::Invalid:
     case Location::Iter:
       not_reached();
@@ -2988,7 +2991,7 @@ RuntimeType HhbcTranslator::rttFromLocation(const Location& loc) {
     if (val->type().isString())  return RuntimeType(val->getValStr());
     if (val->type().isCls())     return RuntimeType(val->getValClass());
   }
-  return t.toRuntimeType();
+  return t.equals(Type::None) ? RuntimeType(KindOfAny) : t.toRuntimeType();
 }
 
 static uint64_t packBitVec(const vector<bool>& bits, unsigned i) {

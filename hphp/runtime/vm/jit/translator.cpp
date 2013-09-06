@@ -55,6 +55,9 @@
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/vm/runtime.h"
 
+#define KindOfUnknown DontUseKindOfUnknownInThisFile
+#define KindOfInvalid DontUseKindOfInvalidInThisFile
+
 namespace HPHP {
 namespace Transl {
 
@@ -96,7 +99,7 @@ struct TraceletContext {
 
   RuntimeType currentType(const Location& l) const;
   DynLocation* recordRead(const InputInfo& l, bool useHHIR,
-                          DataType staticType = KindOfInvalid);
+                          DataType staticType = KindOfAny);
   void recordWrite(DynLocation* dl);
   void recordDelete(const Location& l);
   void recordJmp();
@@ -204,7 +207,7 @@ Translator::liveType(const Cell* outer, const Location& l, bool specialize) {
   DataType outerType = (DataType)outer->m_type;
   assert(IS_REAL_TYPE(outerType));
   DataType valueType = outerType;
-  DataType innerType = KindOfInvalid;
+  DataType innerType = KindOfNone;
   const Cell* valCell = outer;
   if (outerType == KindOfRef) {
     // Variant. Pick up the inner type, too.
@@ -254,9 +257,9 @@ RuntimeType Translator::outThisObjectType() {
            liveFrame()->getThis()->getVMClass()->classof(ctx));
     TRACE(2, "OutThisObject: derived from Class \"%s\"\n",
           ctx->name()->data());
-    return RuntimeType(KindOfObject, KindOfInvalid, ctx);
+    return RuntimeType(KindOfObject, KindOfNone, ctx);
   }
-  return RuntimeType(KindOfObject, KindOfInvalid);
+  return RuntimeType(KindOfObject, KindOfNone);
 }
 
 bool Translator::liveFrameIsPseudoMain() {
@@ -265,7 +268,7 @@ bool Translator::liveFrameIsPseudoMain() {
 }
 
 static int64_t typeToMask(DataType t) {
-  return (t == KindOfInvalid) ? 1 : (1 << (1 + getDataTypeIndex(t)));
+  return (t == KindOfAny) ? 1 : (1 << (1 + getDataTypeIndex(t)));
 }
 
 struct InferenceRule {
@@ -289,8 +292,8 @@ static DataType inferType(const InferenceRule* rules,
       return rules[i].result;
     }
   }
-  // We return KindOfInvalid by default if none of the rules applied.
-  return KindOfInvalid;
+  // We return KindOfAny by default if none of the rules applied.
+  return KindOfAny;
 }
 
 /*
@@ -300,7 +303,7 @@ static DataType inferType(const InferenceRule* rules,
 
 #define TYPE_MASK(name) \
   static const int64_t name ## Mask = typeToMask(KindOf ## name);
-TYPE_MASK(Invalid);
+TYPE_MASK(Any);
 TYPE_MASK(Uninit);
 TYPE_MASK(Null);
 TYPE_MASK(Boolean);
@@ -316,7 +319,7 @@ static const InferenceRule ArithRules[] = {
   { ArrayMask, KindOfArray },
   // If one of the inputs is known to be a String or if one of the input
   // types is unknown, the output type is Unknown
-  { StringMask | InvalidMask, KindOfInvalid },
+  { StringMask | AnyMask, KindOfAny },
   // Default to Int64
   { 0, KindOfInt64 },
 };
@@ -333,7 +336,7 @@ static const InferenceRule BitOpRules[] = {
     IntMask | DoubleMask | ArrayMask | ObjectMask,
     KindOfInt64 },
   { StringMask, KindOfString },
-  { 0, KindOfInvalid },
+  { 0, KindOfAny },
 };
 
 static RuntimeType bitOpType(DynLocation* a, DynLocation* b) {
@@ -461,7 +464,7 @@ predictMVec(const NormalizedInstruction* ni) {
   auto info = getFinalPropertyOffset(*ni,
                                      ni->func()->cls(),
                                      getMInstrInfo(ni->mInstrOp()));
-  if (info.offset != -1 && info.hphpcType != KindOfInvalid) {
+  if (info.offset != -1 && info.hphpcType != KindOfNone) {
     FTRACE(1, "prediction for CGetM prop: {}, hphpc\n",
            int(info.hphpcType));
     return std::make_pair(info.hphpcType, 1.0);
@@ -480,7 +483,7 @@ predictMVec(const NormalizedInstruction* ni) {
     return pred;
   }
 
-  return std::make_pair(KindOfInvalid, 0.0);
+  return std::make_pair(KindOfAny, 0.0);
 }
 
 /*
@@ -491,10 +494,10 @@ predictMVec(const NormalizedInstruction* ni) {
 static DataType
 predictOutputs(SrcKey startSk,
                const NormalizedInstruction* ni) {
-  if (!RuntimeOption::EvalJitTypePrediction) return KindOfInvalid;
+  if (!RuntimeOption::EvalJitTypePrediction) return KindOfAny;
 
   // In JitPGO mode, disable type prediction to avoid side exits
-  if (RuntimeOption::EvalJitPGO) return KindOfInvalid;
+  if (RuntimeOption::EvalJitPGO) return KindOfAny;
 
   if (RuntimeOption::EvalJitStressTypePredPercent &&
       RuntimeOption::EvalJitStressTypePredPercent > int(get_random() % 100)) {
@@ -608,7 +611,7 @@ predictOutputs(SrcKey startSk,
         break;
 
       default:
-        baseType = Type::fromRuntimeType(ni->inputs[1]->rtt);
+        baseType = Type(ni->inputs[1]->rtt);
     }
     if (baseType.isString()) return KindOfString;
 
@@ -617,12 +620,12 @@ predictOutputs(SrcKey startSk,
   }
 
   static const double kAccept = 1.0;
-  std::pair<DataType, double> pred = std::make_pair(KindOfInvalid, 0.0);
+  std::pair<DataType, double> pred = std::make_pair(KindOfAny, 0.0);
   // Type predictions grow tracelets, and can have a side effect of making
   // them combinatorially explode if they bring in precondtions that vary a
   // lot. Get more conservative as evidence mounts that this is a
   // polymorphic tracelet.
-  if (tx64->numTranslations(startSk) >= kTooPolyPred) return KindOfInvalid;
+  if (tx64->numTranslations(startSk) >= kTooPolyPred) return KindOfAny;
   if (ni->op() == OpCGetS) {
     const StringData* propName = ni->inputs[1]->rtt.valueStringOrNull();
     if (propName) {
@@ -650,7 +653,7 @@ predictOutputs(SrcKey startSk,
     assert(pred.first != KindOfUninit);
     return pred.first;
   }
-  return KindOfInvalid;
+  return KindOfAny;
 }
 
 /**
@@ -677,7 +680,7 @@ static RuntimeType setOpOutputType(NormalizedInstruction* ni,
     }
     case SetOpConcatEqual: return RuntimeType(KindOfString);
     case SetOpDivEqual:
-    case SetOpModEqual:    return RuntimeType(KindOfInvalid);
+    case SetOpModEqual:    return RuntimeType(KindOfAny);
     case SetOpAndEqual:
     case SetOpOrEqual:
     case SetOpXorEqual:    return bitOpType(&locLocation, inputs[kValIdx]);
@@ -705,15 +708,15 @@ getDynLocType(const SrcKey startSk,
     CS(OutDouble,      KindOfDouble);
     CS(OutString,      KindOfString);
     CS(OutNull,        KindOfNull);
-    CS(OutUnknown,     KindOfInvalid); // Subtle interaction with BB-breaking.
-    CS(OutFDesc,       KindOfInvalid); // Unclear if OutFDesc has a purpose.
+    CS(OutUnknown,     KindOfAny); // Subtle interaction with BB-breaking.
+    CS(OutFDesc,       KindOfAny); // Unclear if OutFDesc has a purpose.
     CS(OutArray,       KindOfArray);
     CS(OutObject,      KindOfObject);
     CS(OutResource,    KindOfResource);
 #undef CS
     case OutPred: {
       auto dt = predictOutputs(startSk, ni);
-      if (dt != KindOfInvalid) ni->outputPredicted = true;
+      if (dt != KindOfAny) ni->outputPredicted = true;
       return RuntimeType(dt);
     }
 
@@ -754,7 +757,7 @@ getDynLocType(const SrcKey startSk,
         TRACE(1, "CNS %s: guessing runtime type %d\n", sd->data(), tv->m_type);
         return RuntimeType(tv->m_type);
       }
-      return RuntimeType(KindOfInvalid);
+      return RuntimeType(KindOfAny);
     }
 
     case OutNullUninit: {
@@ -786,7 +789,7 @@ getDynLocType(const SrcKey startSk,
     }
 
     case OutVUnknown: {
-      return RuntimeType(KindOfRef, KindOfInvalid);
+      return RuntimeType(KindOfRef, KindOfAny);
     }
 
     case OutArith: {
@@ -847,15 +850,15 @@ getDynLocType(const SrcKey startSk,
 
     case OutIncDec: {
       const RuntimeType &inRtt = ni->inputs[0]->rtt;
-      // TODO: instead of KindOfInvalid this should track the actual
+      // TODO: instead of KindOfAny this should track the actual
       // type we will get from interping a non-int IncDec.
       return RuntimeType(IS_INT_TYPE(inRtt.valueType()) ?
-                         KindOfInt64 : KindOfInvalid);
+                         KindOfInt64 : KindOfAny);
     }
 
     case OutStrlen: {
       auto const& rtt = ni->inputs[0]->rtt;
-      return RuntimeType(rtt.isString() ? KindOfInt64 : KindOfInvalid);
+      return RuntimeType(rtt.isString() ? KindOfInt64 : KindOfAny);
     }
 
     case OutCInput: {
@@ -881,10 +884,17 @@ getDynLocType(const SrcKey startSk,
       return setOpOutputType(ni, inputs);
     }
 
-    case OutNone:
-    default:
-      return RuntimeType(KindOfInvalid);
+    case OutVInput:
+    case OutVInputL:
+    case OutFInputL:
+    case OutFInputR:
+    case OutFPushCufSafe: {
+      return RuntimeType(KindOfAny);
+    }
+
+    case OutNone: not_reached();
   }
+  always_assert(false && "Invalid output type constraint");
 }
 
 /*
@@ -1361,8 +1371,8 @@ bool outputIsPredicted(SrcKey startSk,
     // All OutPred ops except for SetM have a single stack output for now.
     assert(iInfo.out == Stack1 || inst.op() == OpSetM);
     auto dt = predictOutputs(startSk, &inst);
-    if (dt != KindOfInvalid) {
-      inst.outPred = Type::fromDataType(dt);
+    if (dt != KindOfAny) {
+      inst.outPred = Type(dt);
     } else {
       doPrediction = false;
     }
@@ -1464,15 +1474,15 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         SKTRACE(1, ni->source, "MetaInfo DataTypePredicted for input %d; "
                 "newType = %d\n", arg, DataType(info.m_data));
         InputInfo& ii = inputInfos[arg];
-        DynLocation* dl = tas.recordRead(ii, false, KindOfInvalid);
+        DynLocation* dl = tas.recordRead(ii, false, KindOfAny);
         NormalizedInstruction* src = findInputSrc(tas.m_t->m_instrStream.last,
                                                   dl);
         if (src) {
           // Update the rtt and mark src's output as predicted if either:
-          //  a) we don't have type information yet (ie, it's KindOfInvalid), or
+          //  a) we don't have type information yet (ie, it's KindOfAny), or
           //  b) src's output was predicted. This is assuming that the
           //     front-end's prediction is more accurate.
-          if (dl->rtt.outerType() == KindOfInvalid || src->outputPredicted) {
+          if (dl->rtt.outerType() == KindOfAny || src->outputPredicted) {
             SKTRACE(1, ni->source, "MetaInfo DataTypePredicted for input %d; "
                     "replacing oldType = %d with newType = %d\n", arg,
                     dl->rtt.outerType(), DataType(info.m_data));
@@ -1492,7 +1502,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         DynLocation* dl = tas.recordRead(ii, true, (DataType)info.m_data);
         if (dl->rtt.outerType() != info.m_data &&
             (!dl->isString() || info.m_data != KindOfString)) {
-          if (dl->rtt.outerType() != KindOfInvalid) {
+          if (dl->rtt.outerType() != KindOfAny) {
             // Either static analysis is wrong, or
             // this was mis-predicted by the type
             // profiler, or this code is unreachable,
@@ -1581,7 +1591,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
           if (dl->rtt.isRef()) {
             dl->rtt = RuntimeType(KindOfRef, KindOfObject, metaCls);
           } else {
-            dl->rtt = RuntimeType(KindOfObject, KindOfInvalid, metaCls);
+            dl->rtt = RuntimeType(KindOfObject, KindOfNone, metaCls);
           }
         }
         break;
@@ -2060,8 +2070,8 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
         if (op == OpIncDecL) {
           assert(ni->inputs.size() == 1);
           const RuntimeType &inRtt = ni->inputs[0]->rtt;
-          RuntimeType rtt = IS_INT_TYPE(inRtt.valueType()) ? inRtt :
-            RuntimeType(KindOfInvalid);
+          RuntimeType rtt =
+            IS_INT_TYPE(inRtt.valueType()) ? inRtt : RuntimeType(KindOfAny);
           DynLocation* incDecLoc =
             t.newDynLocation(ni->inputs[0]->location, rtt);
           assert(incDecLoc->location.isLocal());
@@ -2085,7 +2095,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
         if (op == OpStaticLocInit || op == OpInitThisLoc) {
           ni->outLocal = t.newDynLocation(Location(Location::Local,
                                                    ni->imm[0].u_OA),
-                                          KindOfInvalid);
+                                          KindOfAny);
           continue;
         }
         if (op == OpSetM || op == OpSetOpM ||
@@ -2113,7 +2123,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
                 // Strings and bools produce value-dependent results; "" and
                 // false upgrade to an array successfully, while other values
                 // fail and leave the lhs unmodified.
-                DynLocation* baseLoc = t.newDynLocation(locLoc, KindOfInvalid);
+                DynLocation* baseLoc = t.newDynLocation(locLoc, KindOfAny);
                 assert(baseLoc->isLocal());
                 ni->outLocal = baseLoc;
               } else if (inLoc->rtt.valueType() == KindOfUninit ||
@@ -2184,9 +2194,9 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           outVal->location = Location(Location::Local, off);
           if (op == OpMIterInit || op == OpMIterInitK ||
               op == OpMIterNext || op == OpMIterNextK) {
-            outVal->rtt = RuntimeType(KindOfRef, KindOfInvalid);
+            outVal->rtt = RuntimeType(KindOfRef, KindOfAny);
           } else {
-            outVal->rtt = RuntimeType(KindOfInvalid);
+            outVal->rtt = RuntimeType(KindOfAny);
           }
           ni->outLocal = outVal;
           if (op == OpIterInitK || op == OpIterNextK ||
@@ -2195,7 +2205,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
             DynLocation* outKey = t.newDynLocation();
             int keyOff = getImm((Op*)ni->pc(), kKeyImmIdx).u_IVA;
             outKey->location = Location(Location::Local, keyOff);
-            outKey->rtt = RuntimeType(KindOfInvalid);
+            outKey->rtt = RuntimeType(KindOfAny);
             ni->outLocal2 = outKey;
           }
           continue;
@@ -2315,6 +2325,8 @@ RuntimeType TraceletContext::currentType(const Location& l) const {
 DynLocation* TraceletContext::recordRead(const InputInfo& ii,
                                          bool useHHIR,
                                          DataType staticType) {
+  if (staticType == KindOfNone) staticType = KindOfAny;
+
   DynLocation* dl;
   const Location& l = ii.loc;
   if (!mapGet(m_currentMap, l, &dl)) {
@@ -2326,7 +2338,7 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii,
     if (ii.dontGuard && !l.isLiteral()) {
       assert(!useHHIR || staticType != KindOfRef);
       dl = m_t->newDynLocation(l, RuntimeType(staticType));
-      if (useHHIR && staticType != KindOfInvalid) {
+      if (useHHIR && staticType != KindOfAny) {
         m_resolvedDeps[l] = dl;
       }
     } else {
@@ -2341,10 +2353,10 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii,
 
       if (!l.isLiteral()) {
         if (m_varEnvTaint && dl->isValue() && dl->isLocal()) {
-          dl->rtt = RuntimeType(KindOfInvalid);
+          dl->rtt = RuntimeType(KindOfAny);
         } else if ((m_aliasTaint && dl->canBeAliased()) ||
                    (rtt.isValue() && rtt.isRef() && ii.dontGuardInner)) {
-          dl->rtt = rtt.setValueType(KindOfInvalid);
+          dl->rtt = rtt.setValueType(KindOfAny);
         }
         // Record that we depend on the live type of the specified location
         // as well (and remember what the live type was)
@@ -2383,7 +2395,7 @@ void TraceletContext::aliasTaint() {
     if (dl->canBeAliased()) {
       TRACE(1, "(%s, %" PRId64 ") <- inner type invalidated\n",
             it->first.spaceName(), it->first.offset);
-      RuntimeType newRtt = dl->rtt.setValueType(KindOfInvalid);
+      RuntimeType newRtt = dl->rtt.setValueType(KindOfAny);
       it->second = m_t->newDynLocation(dl->location, newRtt);
     }
   }
@@ -2398,7 +2410,7 @@ void TraceletContext::varEnvTaint() {
       TRACE(1, "(%s, %" PRId64 ") <- type invalidated\n",
             it->first.spaceName(), it->first.offset);
       it->second = m_t->newDynLocation(dl->location,
-                                       RuntimeType(KindOfInvalid));
+                                       RuntimeType(KindOfAny));
     }
   }
 }
@@ -2464,7 +2476,7 @@ const Class* GuardType::getSpecializedClass() const {
 }
 
 bool GuardType::isSpecific() const {
-  return outerType > KindOfInvalid;
+  return outerType > KindOfNone;
 }
 
 bool GuardType::isSpecialized() const {
@@ -2849,7 +2861,6 @@ void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
                       relxType.getInnerType(),
                       relxType.getSpecializedClass()).pretty().c_str());
     assert(deps[loc->location] == loc);
-    assert(relxType.getOuterType() != KindOfInvalid);
     deps[loc->location]->rtt = relxType.getRuntimeType();
   }
 }
@@ -2984,8 +2995,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
       FTRACE(1, "analyzeCallee: {} has unknown type\n", callerLoc.pretty());
       return;
     }
-    if (type.isValue() && type.isRef() &&
-        type.innerType() == KindOfInvalid) {
+    if (type.isValue() && type.isRef() && type.innerType() == KindOfAny) {
       FTRACE(1, "analyzeCallee: {} has unknown inner-refdata type\n",
              callerLoc.pretty());
       return;
@@ -3211,7 +3221,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
       InputInfos inputInfos;
       getInputsImpl(t.m_sk, ni, stackFrameOffset, inputInfos, sk.func(),
       [&](int i) {
-        return Type::fromRuntimeType(
+        return Type(
           tas.currentType(Location(Location::Local, i)));
       });
       bool noOp = applyInputMetaData(metaHand, ni, tas, inputInfos);
@@ -3250,7 +3260,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
           }
           if (!ni->ignoreInnerType && !ii.dontGuardInner) {
             if (rtt.isValue() && rtt.isRef() &&
-                rtt.innerType() == KindOfInvalid) {
+                rtt.innerType() == KindOfAny) {
               throwUnknownInput();
             }
           }
@@ -3277,7 +3287,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     } catch (UnknownInputExc& uie) {
       // Subtle: if this instruction consumes an unknown runtime type,
       // break the BB on the *previous* instruction. We know that a
-      // previous instruction exists, because the KindOfInvalid must
+      // previous instruction exists, because the KindOfAny must
       // have come from somewhere.
       always_assert(t.m_instrStream.last);
       SKTRACE(2, sk, "Consumed unknown input (%s:%d); breaking BB at "
@@ -3344,7 +3354,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
 
     if (ni->outputPredicted) {
       assert(ni->outStack);
-      ni->outPred = Type::fromDynLocation(ni->outStack);
+      ni->outPred = Type(ni->outStack);
     }
 
     t.m_stackChange += getStackDelta(*ni);
@@ -3595,7 +3605,7 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
       case Unit::MetaInfo::Kind::DataTypePredicted: {
         if (metaMode == MetaMode::Legacy) break;
         auto const loc = stackFilter(inst.inputs[arg]->location).toLocation();
-        auto const t = Type::fromDataType(DataType(info.m_data));
+        auto const t = Type(DataType(info.m_data));
         auto const offset = inst.source.offset();
 
         // These 'predictions' mean the type is InitNull or the predicted type,
@@ -3609,7 +3619,7 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
       case Unit::MetaInfo::Kind::DataTypeInferred: {
         hhbcTrans.assertTypeLocation(
           stackFilter(inst.inputs[arg]->location).toLocation(),
-          Type::fromDataType(DataType(info.m_data)));
+          Type(DataType(info.m_data)));
         updateType();
         break;
       }
@@ -3645,7 +3655,7 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
           if (rtt.isRef()) {
             rtt = RuntimeType(KindOfRef, KindOfObject, metaCls);
           } else {
-            rtt = RuntimeType(KindOfObject, KindOfInvalid, metaCls);
+            rtt = RuntimeType(KindOfObject, KindOfNone, metaCls);
           }
         }
         break;

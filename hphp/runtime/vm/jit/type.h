@@ -31,6 +31,7 @@ struct RuntimeType;
 namespace JIT {
 
 using Transl::RuntimeType;
+using Transl::DynLocation;
 
 #define IRT_BOXES(name, bit)                                            \
   IRT(name,             (bit))                                          \
@@ -143,10 +144,12 @@ class Type {
   {}
 
   explicit Type(bits_t bits, ArrayData::ArrayKind arrayKind)
-    : m_bits(bits),
-      m_arrayKindValid(true),
-      m_arrayKind(arrayKind)
+    : m_bits(bits)
+    , m_arrayKindValid(true)
+    , m_arrayKind(arrayKind)
   {}
+
+  static bits_t bitsFromDataType(DataType outer, DataType inner);
 
 public:
 # define IRT(name, ...) static const Type name;
@@ -156,6 +159,14 @@ public:
   explicit Type(bits_t bits = kNone)
     : m_bits(bits), m_class(nullptr)
   {}
+
+  explicit Type(DataType outerType, DataType innerType = KindOfInvalid)
+    : m_bits(bitsFromDataType(outerType, innerType))
+    , m_class(nullptr)
+  {}
+
+  explicit Type(const RuntimeType& rtt);
+  explicit Type(const DynLocation* dl);
 
   size_t hash() const {
     return hash_int64_pair(m_bits, reinterpret_cast<uintptr_t>(m_class));
@@ -576,12 +587,6 @@ public:
   DataType toDataType() const;
   RuntimeType toRuntimeType() const;
 
-  static Type fromDataType(
-    DataType outerType,
-    DataType innerType = KindOfInvalid);
-  static Type fromRuntimeType(const Transl::RuntimeType& rtt);
-  static Type fromDynLocation(const Transl::DynLocation* dynLoc);
-
   // return true if this corresponds to a type that
   // is passed by value in C++
   bool isSimpleType() const {
@@ -599,21 +604,6 @@ public:
            || subtypeOf(Type::Obj)
            || subtypeOf(Type::Res);
   }
-
-  // In tx64, KindOfUnknown is used to represent Variants (Type::Cell).
-  // fromDataType() maps this to Type::None, which must be mapped
-  // back to Type::Cell. This is not the best place to handle this.
-  // See task #208726.
-  static Type fromDataTypeWithCell(DataType type) {
-    Type t = fromDataType(type);
-    return t.equals(Type::None) ? Type::Cell : t;
-  }
-
-  static Type fromDataTypeWithRef(DataType outerType, bool isRef) {
-    Type t = fromDataTypeWithCell(outerType);
-    return isRef ? t.box() : t;
-  }
-
 };
 
 /*

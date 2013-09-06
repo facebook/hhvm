@@ -100,7 +100,7 @@ JIT::Type getInferredOrPredictedType(const NormalizedInstruction& i) {
   NormalizedInstruction::OutputUse u = i.getOutputUsage(i.outStack);
   if (u == NormalizedInstruction::OutputUse::Inferred ||
      (u == NormalizedInstruction::OutputUse::Used && i.outputPredicted)) {
-    return JIT::Type::fromRuntimeType(i.outStack->rtt);
+    return JIT::Type(i.outStack->rtt);
   }
   return JIT::Type::None;
 }
@@ -121,7 +121,7 @@ void IRTranslator::checkType(const Transl::Location& l,
   switch (l.space) {
     case Location::Stack: {
       uint32_t stackOffset = locPhysicalOffset(l);
-      JIT::Type type = JIT::Type::fromRuntimeType(rtt);
+      JIT::Type type = JIT::Type(rtt);
       if (type.subtypeOf(Type::Cls)) {
         m_hhbcTrans.assertTypeStack(stackOffset, type);
       } else {
@@ -130,7 +130,7 @@ void IRTranslator::checkType(const Transl::Location& l,
       break;
     }
     case Location::Local:
-      m_hhbcTrans.guardTypeLocal(l.offset, Type::fromRuntimeType(rtt));
+      m_hhbcTrans.guardTypeLocal(l.offset, Type(rtt));
       break;
 
     case Location::Iter:
@@ -152,11 +152,11 @@ void IRTranslator::assertType(const Transl::Location& l,
       // tx64LocPhysicalOffset returns positive offsets for stack values,
       // relative to rVmSp
       uint32_t stackOffset = locPhysicalOffset(l);
-      m_hhbcTrans.assertTypeStack(stackOffset, Type::fromRuntimeType(rtt));
+      m_hhbcTrans.assertTypeStack(stackOffset, Type(rtt));
       break;
     }
     case Location::Local:  // Stack frame's registers; offset == local register
-      m_hhbcTrans.assertTypeLocal(l.offset, Type::fromRuntimeType(rtt));
+      m_hhbcTrans.assertTypeLocal(l.offset, Type(rtt));
       break;
 
     case Location::Invalid:           // Unknown location
@@ -1579,7 +1579,7 @@ IRTranslator::passPredictedAndInferredTypes(const NormalizedInstruction& i) {
   if (!i.outStack || i.breaksTracelet) return;
 
   NormalizedInstruction::OutputUse u = i.getOutputUsage(i.outStack);
-  JIT::Type jitType = JIT::Type::fromRuntimeType(i.outStack->rtt);
+  JIT::Type jitType = JIT::Type(i.outStack->rtt);
 
   if (u == NormalizedInstruction::OutputUse::Inferred) {
     TRACE(1, "irPassPredictedAndInferredTypes: output inferred as %s\n",

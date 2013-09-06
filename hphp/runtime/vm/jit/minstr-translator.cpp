@@ -409,7 +409,7 @@ void HhbcTranslator::MInstrTranslator::emitMPre() {
 
 void HhbcTranslator::MInstrTranslator::emitMTrace() {
   auto rttStr = [this](int i) {
-    return Type::fromRuntimeType(m_ni.inputs[i]->rtt).unbox().toString();
+    return Type(m_ni.inputs[i]->rtt).unbox().toString();
   };
   std::ostringstream shape;
   int iInd = m_mii.valCount();

@@ -229,8 +229,8 @@ class RuntimeType {
     assert(m_kind == VALUE || m_kind == ITER);
     if (m_kind == VALUE) {
       assert(m_value.innerType != KindOfRef);
-      assert(m_value.outerType == KindOfRef ||
-             m_value.innerType == KindOfInvalid);
+      assert((m_value.outerType == KindOfRef) ==
+             (m_value.innerType != KindOfNone));
       assert(m_value.outerType == KindOfString ||
              m_value.innerType == KindOfString ||
              m_value.outerType == KindOfClass ||
@@ -258,11 +258,11 @@ class RuntimeType {
   }
 
   void init(DataType outer,
-            DataType inner = KindOfInvalid,
+            DataType inner = KindOfNone,
             const Class* klass = nullptr);
 
  public:
-  explicit RuntimeType(DataType outer, DataType inner = KindOfInvalid,
+  explicit RuntimeType(DataType outer, DataType inner = KindOfNone,
                        const Class* = nullptr);
   explicit RuntimeType(const StringData*);
   explicit RuntimeType(const ArrayData*);

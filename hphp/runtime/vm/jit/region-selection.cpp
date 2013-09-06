@@ -353,7 +353,7 @@ RegionDescPtr selectTraceletLegacy(const Transl::Tracelet& tlet) {
 
     typedef RegionDesc R;
     auto addPred = [&](const R::Location& loc) {
-      auto type = Type::fromRuntimeType(dep.second->rtt);
+      auto type = Type(dep.second->rtt);
       frontBlock.addPredicted(tlet.m_sk, {loc, type});
     };
 

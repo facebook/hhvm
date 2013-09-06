@@ -37,6 +37,7 @@ enum DataType: DataTypeInt {
 
   KindOfInvalid          = -1,
   KindOfUnknown          = KindOfInvalid,
+  KindOfNone             = KindOfInvalid,
 
   /**
    * Beware if you change the order, as we may have a few type checks

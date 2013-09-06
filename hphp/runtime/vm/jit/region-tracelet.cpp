@@ -444,7 +444,7 @@ bool RegionFormer::consumeInput(int i, const Transl::InputInfo& ii) {
   auto& rtt = m_inst.inputs[i]->rtt;
   if (ii.dontGuard || !rtt.isValue()) return true;
 
-  if (!ii.dontBreak && !Type::fromRuntimeType(rtt).isKnownDataType()) {
+  if (!ii.dontBreak && !Type(rtt).isKnownDataType()) {
     // Trying to consume a value without a precise enough type.
     FTRACE(1, "selectTracelet: {} tried to consume {}\n",
            m_inst.toString(), m_inst.inputs[i]->pretty());
@@ -455,7 +455,7 @@ bool RegionFormer::consumeInput(int i, const Transl::InputInfo& ii) {
     return true;
   }
 
-  if (!Type::fromDataType(rtt.innerType()).isKnownDataType()) {
+  if (!Type(rtt.innerType()).isKnownDataType()) {
     // Trying to consume a boxed value without a guess for the inner type.
     FTRACE(1, "selectTracelet: {} tried to consume ref {}\n",
            m_inst.toString(), m_inst.inputs[i]->pretty());

@@ -87,7 +87,7 @@ struct DynLocation {
 
   DynLocation(Location l, RuntimeType t) : location(l), rtt(t) {}
 
-  DynLocation() : location(), rtt(KindOfInvalid) {}
+  DynLocation() : location(), rtt() {}
 
   bool operator==(const DynLocation& r) const {
     return rtt == r.rtt && location == r.location;
@@ -208,8 +208,8 @@ class UnknownInputExc : public std::runtime_error {
 
 class GuardType {
  public:
-  explicit GuardType(DataType outer = KindOfInvalid,
-                     DataType inner = KindOfInvalid);
+  explicit GuardType(DataType outer = KindOfAny,
+                     DataType inner = KindOfNone);
   explicit GuardType(const RuntimeType& rtt);
            GuardType(const GuardType& other);
   const DataType   getOuterType() const;

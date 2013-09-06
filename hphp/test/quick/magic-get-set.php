@@ -100,3 +100,24 @@ $obj->foo++;
 var_dump($obj);
 $obj = null;
 
+echo "\n******************************\n\n";
+
+class G {
+   public function __get($name) {
+      if (strlen($name) > 1) {
+         $out = array();
+         foreach (str_split($name) as $char) {
+            $out[] = $this->$char;
+         }
+         return $out;
+      }
+
+      return ord($name);
+   }
+}
+
+$obj = new G();
+var_dump($obj->a);
+var_dump($obj->hello);
+$obj = null;
+

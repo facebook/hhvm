@@ -954,7 +954,6 @@ void ObjectData::invokeSet(TypedValue* retval, const StringData* key,
 }
 
 #define MAGIC_PROP_BODY(name, attr) \
-  AttributeClearer a((attr), this); \
   const Func* meth = m_cls->lookupMethod(name); \
   assert(meth); \
   TypedValue args[1] = { \

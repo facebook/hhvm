@@ -525,19 +525,6 @@ Out& readData(In*& it) {
 }
 } // namespace HPHP
 
-namespace boost {
-
-template <typename T, typename U>
-HPHP::hphp_raw_ptr<T> dynamic_pointer_cast(HPHP::hphp_raw_ptr<U> p) {
-  return HPHP::hphp_raw_ptr<T>(dynamic_cast<T*>(p.get()));
-}
-
-template <typename T, typename U>
-HPHP::hphp_raw_ptr<T> static_pointer_cast(HPHP::hphp_raw_ptr<U> p) {
-  return HPHP::hphp_raw_ptr<T>(static_cast<T*>(p.get()));
-}
-}
-
 inline bool ptr_is_low_mem(void* ptr) {
   static_assert(sizeof(void*) == 8, "Unexpected pointer size");
   return !((uint64_t)ptr & 0xffffffff00000000ull);
@@ -549,6 +536,16 @@ namespace HPHP {
   using boost::lexical_cast;
   using boost::dynamic_pointer_cast;
   using boost::static_pointer_cast;
+
+  template <typename T, typename U>
+  HPHP::hphp_raw_ptr<T> dynamic_pointer_cast(HPHP::hphp_raw_ptr<U> p) {
+    return HPHP::hphp_raw_ptr<T>(dynamic_cast<T*>(p.get()));
+  }
+
+  template <typename T, typename U>
+  HPHP::hphp_raw_ptr<T> static_pointer_cast(HPHP::hphp_raw_ptr<U> p) {
+    return HPHP::hphp_raw_ptr<T>(static_cast<T*>(p.get()));
+  }
 }
 
 #endif

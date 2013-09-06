@@ -160,10 +160,10 @@ int AssignmentExpression::getKidCount() const {
 void AssignmentExpression::setNthKid(int n, ConstructPtr cp) {
   switch (m_rhsFirst ? 1 - n : n) {
     case 0:
-      m_variable = boost::dynamic_pointer_cast<Expression>(cp);
+      m_variable = dynamic_pointer_cast<Expression>(cp);
       break;
     case 1:
-      m_value = boost::dynamic_pointer_cast<Expression>(cp);
+      m_value = dynamic_pointer_cast<Expression>(cp);
       break;
     default:
       assert(false);

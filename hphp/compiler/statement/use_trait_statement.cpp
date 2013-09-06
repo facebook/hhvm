@@ -93,10 +93,10 @@ int UseTraitStatement::getKidCount() const {
 void UseTraitStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_exp = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      m_exp = dynamic_pointer_cast<ExpressionList>(cp);
       break;
     case 1:
-      m_stmt = boost::dynamic_pointer_cast<StatementList>(cp);
+      m_stmt = dynamic_pointer_cast<StatementList>(cp);
       break;
     default:
       assert(false);

@@ -108,7 +108,7 @@ int ClassConstantExpression::getKidCount() const {
 void ClassConstantExpression::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_class = boost::dynamic_pointer_cast<Expression>(cp);
+      m_class = dynamic_pointer_cast<Expression>(cp);
       break;
     default:
       assert(false);

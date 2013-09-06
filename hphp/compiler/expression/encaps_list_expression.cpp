@@ -70,7 +70,7 @@ int EncapsListExpression::getKidCount() const {
 void EncapsListExpression::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_exps = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      m_exps = dynamic_pointer_cast<ExpressionList>(cp);
       break;
     default:
       assert(false);

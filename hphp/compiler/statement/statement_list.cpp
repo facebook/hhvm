@@ -291,7 +291,7 @@ void StatementList::setNthKid(int n, ConstructPtr cp) {
   if (n >= s) {
     assert(false);
   } else {
-    m_stmts[n] = boost::dynamic_pointer_cast<Statement>(cp);
+    m_stmts[n] = dynamic_pointer_cast<Statement>(cp);
   }
 }
 

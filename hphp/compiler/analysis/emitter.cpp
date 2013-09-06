@@ -109,9 +109,6 @@ namespace Compiler {
 
 TRACE_SET_MOD(emitter)
 
-using boost::dynamic_pointer_cast;
-using boost::static_pointer_cast;
-
 namespace {
   const StringData* s_continuationVarArgsLocal
     = StringData::GetStaticString("0ContinuationVarArgsLocal");
@@ -1958,7 +1955,7 @@ bool isTupleInit(ExpressionPtr init_expr, int* cap) {
 bool EmitterVisitor::visit(ConstructPtr node) {
   bool ret = visitImpl(node);
   if (!Option::WholeProgram || !ret) return ret;
-  ExpressionPtr e = boost::dynamic_pointer_cast<Expression>(node);
+  ExpressionPtr e = dynamic_pointer_cast<Expression>(node);
   if (!e || e->isScalar()) return ret;
   DataType dt = KindOfUnknown;
   if (!e->maybeInited()) {

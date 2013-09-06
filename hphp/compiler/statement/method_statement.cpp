@@ -476,13 +476,13 @@ int MethodStatement::getKidCount() const {
 void MethodStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_modifiers = boost::dynamic_pointer_cast<ModifierExpression>(cp);
+      m_modifiers = dynamic_pointer_cast<ModifierExpression>(cp);
       break;
     case 1:
-      m_params = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      m_params = dynamic_pointer_cast<ExpressionList>(cp);
       break;
     case 2:
-      m_stmt = boost::dynamic_pointer_cast<StatementList>(cp);
+      m_stmt = dynamic_pointer_cast<StatementList>(cp);
       break;
     default:
       assert(false);

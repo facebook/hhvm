@@ -1095,10 +1095,10 @@ void ClassScope::getAllParents(AnalysisResultConstPtr ar,
                                std::vector<std::string> &names) {
   if (m_stmt) {
     if (isInterface()) {
-      boost::dynamic_pointer_cast<InterfaceStatement>
+      dynamic_pointer_cast<InterfaceStatement>
         (m_stmt)->getAllParents(ar, names);
     } else {
-      boost::dynamic_pointer_cast<ClassStatement>
+      dynamic_pointer_cast<ClassStatement>
         (m_stmt)->getAllParents(ar, names);
     }
   } else {

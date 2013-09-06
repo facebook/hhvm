@@ -79,7 +79,7 @@ int ReturnStatement::getKidCount() const {
 void ReturnStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_exp = boost::dynamic_pointer_cast<Expression>(cp);
+      m_exp = dynamic_pointer_cast<Expression>(cp);
       break;
     default:
       assert(false);

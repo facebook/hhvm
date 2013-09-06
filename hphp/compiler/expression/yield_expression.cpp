@@ -77,10 +77,10 @@ int YieldExpression::getKidCount() const {
 void YieldExpression::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_keyExp = boost::dynamic_pointer_cast<Expression>(cp);
+      m_keyExp = dynamic_pointer_cast<Expression>(cp);
       break;
     case 1:
-      m_valExp = boost::dynamic_pointer_cast<Expression>(cp);
+      m_valExp = dynamic_pointer_cast<Expression>(cp);
       break;
     default:
       assert(false);

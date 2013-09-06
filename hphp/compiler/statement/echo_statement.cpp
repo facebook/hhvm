@@ -64,7 +64,7 @@ int EchoStatement::getKidCount() const {
 void EchoStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_exp = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      m_exp = dynamic_pointer_cast<ExpressionList>(cp);
       break;
     default:
       assert(false);

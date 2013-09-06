@@ -75,13 +75,13 @@ int QOpExpression::getKidCount() const {
 void QOpExpression::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_condition = boost::dynamic_pointer_cast<Expression>(cp);
+      m_condition = dynamic_pointer_cast<Expression>(cp);
       break;
     case 1:
-      m_expYes = boost::dynamic_pointer_cast<Expression>(cp);
+      m_expYes = dynamic_pointer_cast<Expression>(cp);
       break;
     case 2:
-      m_expNo = boost::dynamic_pointer_cast<Expression>(cp);
+      m_expNo = dynamic_pointer_cast<Expression>(cp);
       break;
     default:
       assert(false);

@@ -80,7 +80,7 @@ int FinallyStatement::getKidCount() const {
 void FinallyStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_stmt = boost::dynamic_pointer_cast<Statement>(cp);
+      m_stmt = dynamic_pointer_cast<Statement>(cp);
       break;
     default:
       assert(false);

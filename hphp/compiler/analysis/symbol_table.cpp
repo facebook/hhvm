@@ -65,13 +65,13 @@ TypePtr Symbol::setType(AnalysisResultConstPtr ar, BlockScopeRawPtr scope,
     // at this point, you *must* have a lock (if you are user scope)
     if (scope->is(BlockScope::FunctionScope)) {
       FunctionScopeRawPtr f =
-        boost::static_pointer_cast<FunctionScope>(scope);
+        static_pointer_cast<FunctionScope>(scope);
       if (f->isUserFunction()) {
         f->getInferTypesMutex().assertOwnedBySelf();
       }
     } else if (scope->is(BlockScope::ClassScope)) {
       ClassScopeRawPtr c =
-        boost::static_pointer_cast<ClassScope>(scope);
+        static_pointer_cast<ClassScope>(scope);
       if (c->isUserClass()) {
         c->getInferTypesMutex().assertOwnedBySelf();
       }

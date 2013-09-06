@@ -131,7 +131,7 @@ int ParameterExpression::getKidCount() const {
 void ParameterExpression::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_defaultValue = boost::dynamic_pointer_cast<Expression>(cp);
+      m_defaultValue = dynamic_pointer_cast<Expression>(cp);
       break;
     default:
       break;

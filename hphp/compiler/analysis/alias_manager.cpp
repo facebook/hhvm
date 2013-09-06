@@ -72,8 +72,8 @@
 #include "hphp/parser/location.h"
 #include "hphp/util/util.h"
 
-#define spc(T,p) boost::static_pointer_cast<T>(p)
-#define dpc(T,p) boost::dynamic_pointer_cast<T>(p)
+#define spc(T,p) static_pointer_cast<T>(p)
+#define dpc(T,p) dynamic_pointer_cast<T>(p)
 
 using namespace HPHP;
 using std::string;
@@ -3606,7 +3606,7 @@ public:
 
   bool walk() { ControlFlowGraphWalker::walk(*this); return m_changed; }
   int afterEach(ConstructRawPtr p, int i, ConstructPtr kid) {
-    if (ExpressionRawPtr e = boost::dynamic_pointer_cast<Expression>(kid)) {
+    if (ExpressionRawPtr e = dynamic_pointer_cast<Expression>(kid)) {
       if (e->isTypeAssertion()) return WalkContinue; // nothing to do
 
       bool safeForProp =

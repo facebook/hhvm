@@ -94,10 +94,10 @@ int ArrayPairExpression::getKidCount() const {
 void ArrayPairExpression::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_name = boost::dynamic_pointer_cast<Expression>(cp);
+      m_name = dynamic_pointer_cast<Expression>(cp);
       break;
     case 1:
-      m_value = boost::dynamic_pointer_cast<Expression>(cp);
+      m_value = dynamic_pointer_cast<Expression>(cp);
       break;
     default:
       assert(false);

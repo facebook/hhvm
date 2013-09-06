@@ -373,7 +373,7 @@ void RefDict::updateAccess(ExpressionPtr e) {
 
 int RefDictWalker::after(ConstructRawPtr cp) {
   if (SimpleVariableRawPtr s =
-      boost::dynamic_pointer_cast<SimpleVariable>(cp)) {
+      dynamic_pointer_cast<SimpleVariable>(cp)) {
     if (int id = s->getCanonID()) {
       if (first_pass) {
         if (s->isAvailable() && m_block->getBit(DataFlow::PRefIn, id)) {

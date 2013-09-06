@@ -113,7 +113,7 @@ public:
   virtual std::string getName() const { return "";}
 
   StatementPtr getNthStmt(int n) const {
-    return boost::dynamic_pointer_cast<Statement>(getNthKid(n));
+    return dynamic_pointer_cast<Statement>(getNthKid(n));
   }
 
  /**

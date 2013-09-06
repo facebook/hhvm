@@ -185,6 +185,14 @@ public:
     m_px = nullptr;
     return ret;
   }
+
+  // Take ownership of a reference without touching the ref count
+  static Object attach(ObjectData *object) {
+    Object o;
+    o.m_px = object;
+    return o;
+  }
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////

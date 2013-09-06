@@ -4732,7 +4732,8 @@ ArrayData* collectionDeepCopyArray(ArrayData* arr) {
 }
 
 ObjectData* collectionDeepCopyVector(c_Vector* vec) {
-  Object o = vec = c_Vector::Clone(vec);
+  vec = c_Vector::Clone(vec);
+  Object o = Object::attach(vec);
   size_t sz = vec->m_size;
   for (size_t i = 0; i < sz; ++i) {
     collectionDeepCopyTV(&vec->m_data[i]);
@@ -4741,7 +4742,8 @@ ObjectData* collectionDeepCopyVector(c_Vector* vec) {
 }
 
 ObjectData* collectionDeepCopyMap(c_Map* mp) {
-  Object o = mp = c_Map::Clone(mp);
+  mp = c_Map::Clone(mp);
+  Object o = Object::attach(mp);
   uint lastSlot = mp->m_nLastSlot;
   for (uint i = 0; i <= lastSlot; ++i) {
     c_Map::Bucket* p = mp->fetchBucket(i);
@@ -4753,7 +4755,8 @@ ObjectData* collectionDeepCopyMap(c_Map* mp) {
 }
 
 ObjectData* collectionDeepCopyStableMap(c_StableMap* smp) {
-  Object o = smp = c_StableMap::Clone(smp);
+  smp = c_StableMap::Clone(smp);
+  Object o = Object::attach(smp);
   for (c_StableMap::Bucket* p = smp->m_pListHead; p; p = p->pListNext) {
     collectionDeepCopyTV(&p->data);
   }
@@ -4761,12 +4764,12 @@ ObjectData* collectionDeepCopyStableMap(c_StableMap* smp) {
 }
 
 ObjectData* collectionDeepCopySet(c_Set* st) {
-  Object o = st = c_Set::Clone(st);
-  return o.detach();
+  return c_Set::Clone(st);
 }
 
 ObjectData* collectionDeepCopyPair(c_Pair* pair) {
-  Object o = pair = c_Pair::Clone(pair);
+  pair = c_Pair::Clone(pair);
+  Object o = Object::attach(pair);
   collectionDeepCopyTV(&pair->elm0);
   collectionDeepCopyTV(&pair->elm1);
   return o.detach();

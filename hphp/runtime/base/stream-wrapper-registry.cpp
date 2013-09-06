@@ -28,7 +28,7 @@ namespace HPHP { namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
-class RequestWrappers : RequestEventHandler {
+class RequestWrappers : public RequestEventHandler {
  public:
   virtual void requestInit() {}
   virtual void requestShutdown() {
@@ -47,7 +47,7 @@ typedef std::map<std::string,Wrapper*> wrapper_map_t;
 static wrapper_map_t s_wrappers;
 
 // Request local registry for user defined wrappers and disabled builtins
-static IMPLEMENT_THREAD_LOCAL(RequestWrappers, s_request_wrappers);
+IMPLEMENT_STATIC_REQUEST_LOCAL(RequestWrappers, s_request_wrappers);
 
 bool registerWrapper(const std::string &scheme, Wrapper *wrapper) {
   assert(s_wrappers.find(scheme) == s_wrappers.end());

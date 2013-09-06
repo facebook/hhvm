@@ -40,6 +40,8 @@ public:
   Array m_options;
   Array m_params;
 };
+
+//Create class for to catch shutdown request event. We need to disable stream wrappers registered dynamically on requestshutdown
 class StreamRegister: public RequestEventHandler {
 public:
   virtual void requestInit();

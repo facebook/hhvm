@@ -48,7 +48,7 @@ class TraceBuilder;
  * other pass.
  */
 struct Simplifier {
-  explicit Simplifier(TraceBuilder* t) : m_tb(t) {}
+  explicit Simplifier(TraceBuilder& t) : m_tb(t) {}
 
   /*
    * Simplify performs a number of optimizations.
@@ -154,7 +154,7 @@ private: // tracebuilder forwarders
   template<class... Args> SSATmp* gen(Opcode op, BCMarker marker, Args&&...);
 
 private:
-  TraceBuilder* const m_tb;
+  TraceBuilder& m_tb;
 
   // The current instruction being simplified is always at
   // m_insts.top(). This has to be a stack instead of just a pointer

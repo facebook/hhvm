@@ -286,17 +286,17 @@ bool canUseSPropCache(SSATmp* clsTmp,
 //////////////////////////////////////////////////////////////////////
 
 template<class... Args> SSATmp* Simplifier::cns(Args&&... cns) {
-  return m_tb->cns(std::forward<Args>(cns)...);
+  return m_tb.cns(std::forward<Args>(cns)...);
 }
 
 template<class... Args> SSATmp* Simplifier::gen(Opcode op, Args&&... args) {
   assert(!m_insts.empty());
-  return m_tb->gen(op, m_insts.top()->marker(), std::forward<Args>(args)...);
+  return m_tb.gen(op, m_insts.top()->marker(), std::forward<Args>(args)...);
 }
 
 template<class... Args> SSATmp* Simplifier::gen(Opcode op, BCMarker marker,
                                                 Args&&... args) {
-  return m_tb->gen(op, marker, std::forward<Args>(args)...);
+  return m_tb.gen(op, marker, std::forward<Args>(args)...);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -447,7 +447,7 @@ SSATmp* Simplifier::simplifySpillStack(IRInstruction* inst) {
     auto* srcInst = spillVals[i]->inst();
     if (srcInst->op() == LdStack && srcInst->src(0) == sp &&
         srcInst->extra<LdStack>()->offset == offset) {
-      spillVals[i] = m_tb->genDefNone();
+      spillVals[i] = m_tb.genDefNone();
     }
     cellOff++;
   }
@@ -476,7 +476,7 @@ SSATmp* Simplifier::simplifyCall(IRInstruction* inst) {
     // we don't need to spill it.
     if (srcInst->op() == LdStack && srcInst->src(0) == sp &&
         srcInst->extra<LdStack>()->offset == offset) {
-      spillVals[i] = m_tb->genDefNone();
+      spillVals[i] = m_tb.genDefNone();
     }
   }
 
@@ -559,7 +559,7 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
      * is unnecessary. Constrain the guard so the resulting type isn't less
      * specific that the CheckType would've produced.
      */
-    m_tb->constrainValue(src, categoryForType(type));
+    m_tb.constrainValue(src, categoryForType(type));
     return src;
   }
   if (type.strictSubtypeOf(srcType)) {
@@ -598,7 +598,7 @@ SSATmp* Simplifier::simplifyCheckStk(IRInstruction* inst) {
   if (stkVal.knownType.equals(Type::None)) return nullptr;
 
   if (stkVal.knownType.subtypeOf(type)) {
-    m_tb->constrainStack(sp, offset, categoryForType(type));
+    m_tb.constrainStack(sp, offset, categoryForType(type));
     return sp;
   }
   return nullptr;

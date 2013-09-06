@@ -103,8 +103,8 @@ static void insertAsserts(IRTrace* trace, IRFactory& factory) {
   });
 }
 
-void optimizeTrace(IRTrace* trace, TraceBuilder* traceBuilder) {
-  auto& irFactory = traceBuilder->factory();
+void optimizeTrace(IRTrace* trace, TraceBuilder& traceBuilder) {
+  auto& irFactory = traceBuilder.factory();
 
   auto finishPass = [&](const char* msg) {
     dumpTrace(6, trace, folly::format("after {}", msg).str().c_str());
@@ -132,7 +132,7 @@ void optimizeTrace(IRTrace* trace, TraceBuilder* traceBuilder) {
   if (RuntimeOption::EvalHHIRExtraOptPass
       && (RuntimeOption::EvalHHIRCse
           || RuntimeOption::EvalHHIRSimplification)) {
-    traceBuilder->reoptimize();
+    traceBuilder.reoptimize();
     finishPass("reoptimize");
     // Cleanup any dead code left around by CSE/Simplification
     // Ideally, this would be controlled by a flag returned

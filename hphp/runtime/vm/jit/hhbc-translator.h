@@ -118,7 +118,7 @@ struct HhbcTranslator {
 
   // Accessors.
   IRTrace* trace() const { return m_tb->trace(); }
-  TraceBuilder* traceBuilder() const { return m_tb.get(); }
+  TraceBuilder& traceBuilder() const { return *m_tb.get(); }
   IRFactory& irFactory() { return m_irFactory; }
 
   // In between each emit* call, irtranslator indicates the new

@@ -33,7 +33,7 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
                            IRFactory& irFactory,
                            const Func* func)
   : m_irFactory(irFactory)
-  , m_simplifier(this)
+  , m_simplifier(*this)
   , m_mainTrace(makeTrace(func, initialBcOffset))
   , m_curTrace(m_mainTrace.get())
   , m_curBlock(nullptr)

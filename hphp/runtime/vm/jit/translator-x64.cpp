@@ -2496,7 +2496,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
             RuntimeOption::EvalJitPGOUsePostConditions &&
             m_mode == TransProfile &&
             result == Success) {
-          pconds = m_irTrans->hhbcTrans().traceBuilder()->getKnownTypes();
+          pconds = m_irTrans->hhbcTrans().traceBuilder().getKnownTypes();
         }
       }
 
@@ -2691,7 +2691,7 @@ void TranslatorX64::traceCodeGen() {
                         const RegAllocInfo* regs,
                         const LifetimeInfo* lifetime) {
     dumpTrace(level, trace, msg, regs, lifetime, nullptr,
-              ht.traceBuilder()->guards());
+              ht.traceBuilder().guards());
     assert(checkCfg(trace, ht.irFactory()));
   };
 

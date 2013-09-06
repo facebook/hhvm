@@ -39,7 +39,7 @@ void eliminateDeadCode(IRTrace*, IRFactory&);
 /*
  * Run all the optimization passes.
  */
-void optimizeTrace(IRTrace*, TraceBuilder*);
+void optimizeTrace(IRTrace*, TraceBuilder&);
 
 //////////////////////////////////////////////////////////////////////
 

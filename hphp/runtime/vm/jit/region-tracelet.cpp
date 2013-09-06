@@ -218,8 +218,8 @@ RegionDescPtr RegionFormer::go() {
     if (doPrediction) m_ht.checkTypeStack(0, m_inst.outPred, m_sk.offset());
   }
 
-  dumpTrace(2, m_ht.traceBuilder()->trace(), " after tracelet formation ",
-            nullptr, nullptr, nullptr, m_ht.traceBuilder()->guards());
+  dumpTrace(2, m_ht.traceBuilder().trace(), " after tracelet formation ",
+            nullptr, nullptr, nullptr, m_ht.traceBuilder().guards());
 
   if (m_region && !m_region->blocks.empty()) recordDependencies();
 
@@ -250,7 +250,7 @@ bool RegionFormer::prepareInstruction() {
 
   Transl::InputInfos inputInfos;
   getInputs(m_startSk, m_inst, inputInfos, m_curBlock->func(), [&](int i) {
-    return m_ht.traceBuilder()->localType(i, DataTypeGeneric);
+    return m_ht.traceBuilder().localType(i, DataTypeGeneric);
   });
 
   // Read types for all the inputs and apply MetaData.
@@ -472,20 +472,20 @@ bool RegionFormer::consumeInput(int i, const Transl::InputInfo& ii) {
  */
 void RegionFormer::recordDependencies() {
   // Relax guards and record the ones that survived.
-  auto trace = m_ht.traceBuilder()->trace();
+  auto trace = m_ht.traceBuilder().trace();
   auto& firstBlock = *m_region->blocks.front();
   auto blockStart = firstBlock.start();
 
   auto changed = relaxGuards(trace, m_ht.irFactory(),
-                             *m_ht.traceBuilder()->guards());
+                             *m_ht.traceBuilder().guards());
   visitGuards(trace, [&](const RegionDesc::Location& loc, Type type) {
     RegionDesc::TypePred pred{loc, type};
     FTRACE(1, "selectTracelet adding guard {}\n", show(pred));
     firstBlock.addPredicted(blockStart, pred);
   });
   if (changed) {
-    dumpTrace(3, m_ht.traceBuilder()->trace(), " after guard relaxation ",
-              nullptr, nullptr, nullptr, m_ht.traceBuilder()->guards());
+    dumpTrace(3, m_ht.traceBuilder().trace(), " after guard relaxation ",
+              nullptr, nullptr, nullptr, m_ht.traceBuilder().guards());
   }
 
   // Record the incrementally constructed reffiness predictions.

@@ -73,7 +73,7 @@ var_dump (substr('\xIñtërnâtiônàlizætiøn',3) );
 /* start <0 && -start > length */
 echo "\n*** Start before the first char ***\n";
 var_dump (substr("abcd" , -8) );
- 
+
 echo"\nDone";
 
 ?>

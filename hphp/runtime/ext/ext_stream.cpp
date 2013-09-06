@@ -43,13 +43,22 @@
 
 namespace HPHP {
 
+IMPLEMENT_REQUEST_LOCAL(StreamRegister, StreamRegister::s_instance);
 IMPLEMENT_OBJECT_ALLOCATION(StreamContext);
 ///////////////////////////////////////////////////////////////////////////////
 
 StaticString StreamContext::s_class_name("StreamContext");
 
 ///////////////////////////////////////////////////////////////////////////////
+void StreamRegister::requestInit() {}
 
+void StreamRegister::requestShutdown() {
+  Array streams=Stream::enumWrappers();
+  int s=streams.size(); 
+  for( int i = 6; i < s; i = i + 1 ){
+  Stream::disableWrapper(streams[i].toString());
+  }
+}
 Resource f_stream_context_create(CArrRef options /* = null_array */,
                                  CArrRef params /* = null_array */) {
   return Resource(NEWOBJ(StreamContext)(options, params));
@@ -290,6 +299,7 @@ bool f_stream_register_wrapper(CStrRef protocol, CStrRef classname) {
 }
 
 bool f_stream_wrapper_register(CStrRef protocol, CStrRef classname) {
+  if(!StreamRegister::s_instance->m_listen)StreamRegister::s_instance->listen();
   std::unique_ptr<Stream::Wrapper> wrapper;
   try {
     wrapper = std::unique_ptr<Stream::Wrapper>(

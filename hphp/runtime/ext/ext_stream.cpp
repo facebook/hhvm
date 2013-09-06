@@ -55,8 +55,9 @@ void StreamRegister::requestInit() {}
 void StreamRegister::requestShutdown() {
   Array streams=Stream::enumWrappers();
   int s=streams.size(); 
-  for( int i = 6; i < s; i = i + 1 ){
-  Stream::disableWrapper(streams[i].toString());
+  //no need to disable static registered stream wrappers: "compress.zlib" - "file" - "http" - "https" - "phar" - "php" so we loop from 6
+  for(int i=6; i<s; i=i+1){
+    Stream::disableWrapper(streams[i].toString());
   }
 }
 Resource f_stream_context_create(CArrRef options /* = null_array */,

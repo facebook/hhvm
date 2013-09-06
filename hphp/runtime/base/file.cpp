@@ -623,11 +623,14 @@ Array File::readCSV(int64_t length /* = 0 */, char delimiter_char /* = ',' */,
 
     tptr = temp;
 
-    /* 1. Strip any leading space */
-    for (; bptr < limit; ++bptr) {
-      if (!isspace((int)*(unsigned char *)bptr) || *bptr == delimiter_char) {
-        break;
-      }
+    /* 1. Strip any leading space before an enclosure */
+
+    const char *tmp = bptr;
+    while ((*tmp != delimiter_char) && isspace((int)*(unsigned char *)tmp)) {
+      ++tmp;
+    }
+    if (*tmp == enclosure_char) {
+      bptr = tmp;
     }
 
     if (first_field && bptr == line_end) {
@@ -724,10 +727,10 @@ Array File::readCSV(int64_t length /* = 0 */, char delimiter_char /* = ',' */,
             state = 0;
             break;
           default:
-            if (*bptr == escape_char) {
-              state = 1;
-            } else if (*bptr == enclosure_char) {
+            if (*bptr == enclosure_char) {
               state = 2;
+            } else if (*bptr == escape_char) {
+              state = 1;
             }
             bptr++;
             break;

@@ -50,12 +50,17 @@
 #include <pwd.h>
 #include <fnmatch.h>
 
-#define CHECK_HANDLE(handle, f)                         \
+#define CHECK_HANDLE_BASE(handle, f, ret) \
   File *f = handle.getTyped<File>(true, true);          \
-  if (f == NULL || f->isClosed()) {                     \
+  if (f == nullptr || f->isClosed()) {                  \
     raise_warning("Not a valid stream resource");       \
-    return false;                                       \
+    return (ret);                                       \
   }                                                     \
+
+#define CHECK_HANDLE(handle, f) \
+  CHECK_HANDLE_BASE(handle, f, false)
+#define CHECK_HANDLE_RET_NULL(handle, f) \
+  CHECK_HANDLE_BASE(handle, f, null_variant)
 
 #define CHECK_SYSTEM(exp)                                 \
   if ((exp) != 0) {                                       \
@@ -381,7 +386,7 @@ Variant f_fgetcsv(CResRef handle, int64_t length /* = 0 */,
     throw_invalid_argument("escape: %s", enclosure.data());
     return false;
   }
-  CHECK_HANDLE(handle, f);
+  CHECK_HANDLE_RET_NULL(handle, f);
   Array ret = f->readCSV(length, delimiter.charAt(0), enclosure.charAt(0),
                          escape.charAt(0));
   if (!ret.isNull()) {

@@ -30,7 +30,6 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/smart-object.h"
-#include "hphp/runtime/base/list-assignment.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/util/util.h"

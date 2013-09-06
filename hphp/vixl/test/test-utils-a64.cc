@@ -58,20 +58,38 @@ bool Equal64(uint64_t expected, const RegisterDump*, uint64_t result) {
 
 
 bool EqualFP32(float expected, const RegisterDump*, float result) {
-  if (result != expected) {
-    printf("Expected %.20f\t Found %.20f\n", expected, result);
+  if (float_to_rawbits(expected) == float_to_rawbits(result)) {
+    return true;
+  } else {
+    if (isnan(expected) || (expected == 0.0)) {
+      printf("Expected 0x%08" PRIx32 "\t Found 0x%08" PRIx32 "\n",
+             float_to_rawbits(expected), float_to_rawbits(result));
+    } else {
+      printf("Expected %.9f (0x%08" PRIx32 ")\t "
+             "Found %.9f (0x%08" PRIx32 ")\n",
+             expected, float_to_rawbits(expected),
+             result, float_to_rawbits(result));
+    }
+    return false;
   }
-
-  return expected == result;
 }
 
 
 bool EqualFP64(double expected, const RegisterDump*, double result) {
-  if (result != expected) {
-    printf("Expected %.20f\t Found %.20f\n", expected, result);
+  if (double_to_rawbits(expected) == double_to_rawbits(result)) {
+    return true;
   }
 
-  return expected == result;
+  if (isnan(expected) || (expected == 0.0)) {
+    printf("Expected 0x%016" PRIx64 "\t Found 0x%016" PRIx64 "\n",
+           double_to_rawbits(expected), double_to_rawbits(result));
+  } else {
+    printf("Expected %.17f (0x%016" PRIx64 ")\t "
+           "Found %.17f (0x%016" PRIx64 ")\n",
+           expected, double_to_rawbits(expected),
+           result, double_to_rawbits(result));
+  }
+  return false;
 }
 
 
@@ -111,15 +129,8 @@ bool EqualFP32(float expected,
            float_to_rawbits(expected), expected, result_64);
     return false;
   }
-  if (expected == 0.0) {
-    return Equal32(float_to_rawbits(expected), core,
-                   core->sreg_bits(fpreg.code()));
-  } else if (isnan(expected)) {
-    return isnan(core->sreg(fpreg.code()));
-  } else {
-    float result = core->sreg(fpreg.code());
-    return EqualFP32(expected, core, result);
-  }
+
+  return EqualFP32(expected, core, core->sreg(fpreg.code()));
 }
 
 
@@ -127,15 +138,7 @@ bool EqualFP64(double expected,
                const RegisterDump* core,
                const FPRegister& fpreg) {
   assert(fpreg.Is64Bits());
-  if (expected == 0.0) {
-    return Equal64(double_to_rawbits(expected), core,
-                   core->dreg_bits(fpreg.code()));
-  } else if (isnan(expected)) {
-    return isnan(core->dreg(fpreg.code()));
-  } else {
-    double result = core->dreg(fpreg.code());
-    return EqualFP64(expected, core, result);
-  }
+  return EqualFP64(expected, core, core->dreg(fpreg.code()));
 }
 
 
@@ -176,9 +179,10 @@ bool EqualNzcv(uint32_t expected, uint32_t result) {
     printf("Expected: %c%c%c%c\t Found: %c%c%c%c\n",
         FlagN(expected), FlagZ(expected), FlagC(expected), FlagV(expected),
         FlagN(result), FlagZ(result), FlagC(result), FlagV(result));
+    return false;
   }
 
-  return result == expected;
+  return true;
 }
 
 

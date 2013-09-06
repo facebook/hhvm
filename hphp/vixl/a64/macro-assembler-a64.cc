@@ -338,6 +338,7 @@ void MacroAssembler::ConditionalCompareMacro(const Register& rn,
                                              StatusFlags nzcv,
                                              Condition cond,
                                              ConditionalCompareOp op) {
+  assert((cond != al) && (cond != nv));
   if ((operand.IsShiftedRegister() && (operand.shift_amount() == 0)) ||
       (operand.IsImmediate() && IsImmConditionalCompare(operand.immediate()))) {
     // The immediate can be encoded in the instruction, or the operand is an
@@ -1078,6 +1079,32 @@ void MacroAssembler::Log(TraceParameters parameters) {
 #endif
 }
 
+
+void MacroAssembler::EnableInstrumentation() {
+  assert(!isprint(InstrumentStateEnable));
+  InstructionAccurateScope scope(this, 1);
+  movn(xzr, InstrumentStateEnable);
+}
+
+
+void MacroAssembler::DisableInstrumentation() {
+  assert(!isprint(InstrumentStateDisable));
+  InstructionAccurateScope scope(this, 1);
+  movn(xzr, InstrumentStateDisable);
+}
+
+
+void MacroAssembler::AnnotateInstrumentation(const char* marker_name) {
+  assert(strlen(marker_name) == 2);
+
+  // We allow only printable characters in the marker names. Unprintable
+  // characters are reserved for controlling features of the instrumentation.
+  assert(isprint(marker_name[0]) && isprint(marker_name[1]));
+
+  InstructionAccurateScope scope(this, 1);
+  movn(xzr, (marker_name[1] << 8) | marker_name[0]);
+}
+
 void MacroAssembler::HostCall(uint8_t argc) {
 #ifndef USE_SIMULATOR
 #error This is not going to work on real hardware
@@ -1088,6 +1115,5 @@ void MacroAssembler::HostCall(uint8_t argc) {
   hlt(kHostCallOpcode);
   dc32(argc);
 }
-
 
 }  // namespace vixl

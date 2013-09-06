@@ -25,12 +25,36 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "hphp/vixl/a64/simulator-a64.h"
-
-#include <cmath>
+#include <math.h>
 
 namespace vixl {
 
 const Instruction* Simulator::kEndOfSimAddress = nullptr;
+
+void SimSystemRegister::SetBits(int msb, int lsb, uint32_t bits) {
+  int width = msb - lsb + 1;
+  assert(is_uintn(width, bits) || is_intn(width, bits));
+
+  bits <<= lsb;
+  uint32_t mask = ((1 << width) - 1) << lsb;
+  assert((mask & write_ignore_mask_) == 0);
+
+  value_ = (value_ & ~mask) | (bits & mask);
+}
+
+
+SimSystemRegister SimSystemRegister::DefaultValueFor(SystemRegister id) {
+  switch (id) {
+    case NZCV:
+      return SimSystemRegister(0x00000000, NZCVWriteIgnoreMask);
+    case FPCR:
+      return SimSystemRegister(0x00000000, FPCRWriteIgnoreMask);
+    default:
+      not_reached();
+      return SimSystemRegister();
+  }
+}
+
 
 Simulator::Simulator(Decoder* decoder, FILE* stream) {
   // Ensure shift operations act as the simulator expects.
@@ -54,12 +78,16 @@ Simulator::Simulator(Decoder* decoder, FILE* stream) {
   print_disasm_ = new PrintDisassembler(stream_);
   coloured_trace_ = false;
   disasm_trace_ = false;
+
+  // Set the sample period to 10, as the VIXL examples and tests are short.
+  instrumentation_ = new Instrument("vixl_stats.csv", 10);
 }
 
 
 void Simulator::ResetState() {
-  // Reset the processor state.
-  psr_ = 0;
+  // Reset the system registers.
+  nzcv_ = SimSystemRegister::DefaultValueFor(NZCV);
+  fpcr_ = SimSystemRegister::DefaultValueFor(FPCR);
 
   // Reset registers to 0.
   pc_ = nullptr;
@@ -81,6 +109,9 @@ Simulator::~Simulator() {
   // The decoder may outlive the simulator.
   decoder_->RemoveVisitor(print_disasm_);
   delete print_disasm_;
+
+  decoder_->RemoveVisitor(instrumentation_);
+  delete instrumentation_;
 }
 
 
@@ -95,14 +126,6 @@ void Simulator::RunFrom(Instruction* first) {
   pc_ = first;
   pc_modified_ = false;
   Run();
-}
-
-
-void Simulator::SetFlags(uint32_t new_flags) {
-  assert((new_flags & ~kConditionFlagsMask) == 0);
-  psr_ &= ~kConditionFlagsMask;
-  // Set the new flags.
-  psr_ |= new_flags;
 }
 
 
@@ -198,14 +221,14 @@ int64_t Simulator::AddWithCarry(unsigned reg_size,
 
     result = signed_sum & kWRegMask;
     // Compute the C flag by comparing the sum to the max unsigned integer.
-    C = CFlag * (((kWMaxUInt - u1) < (u2 + carry_in)) ||
-                 ((kWMaxUInt - u1 - carry_in) < u2));
+    C = ((kWMaxUInt - u1) < (u2 + carry_in)) ||
+        ((kWMaxUInt - u1 - carry_in) < u2);
     // Overflow iff the sign bit is the same for the two inputs and different
     // for the result.
     int64_t s_src1 = src1 << (kXRegSize - kWRegSize);
     int64_t s_src2 = src2 << (kXRegSize - kWRegSize);
     int64_t s_result = result << (kXRegSize - kWRegSize);
-    V = VFlag * (((s_src1 ^ s_src2) >= 0) && ((s_src1 ^ s_result) < 0));
+    V = ((s_src1 ^ s_src2) >= 0) && ((s_src1 ^ s_result) < 0);
 
   } else {
     u1 = static_cast<uint64_t>(src1);
@@ -213,17 +236,22 @@ int64_t Simulator::AddWithCarry(unsigned reg_size,
 
     result = signed_sum;
     // Compute the C flag by comparing the sum to the max unsigned integer.
-    C = CFlag * (((kXMaxUInt - u1) < (u2 + carry_in)) ||
-                 ((kXMaxUInt - u1 - carry_in) < u2));
+    C = ((kXMaxUInt - u1) < (u2 + carry_in)) ||
+        ((kXMaxUInt - u1 - carry_in) < u2);
     // Overflow iff the sign bit is the same for the two inputs and different
     // for the result.
-    V = VFlag * (((src1 ^ src2) >= 0) && ((src1 ^ result) < 0));
+    V = ((src1 ^ src2) >= 0) && ((src1 ^ result) < 0);
   }
 
   N = CalcNFlag(result, reg_size);
   Z = CalcZFlag(result);
 
-  if (set_flags) SetFlags(N | Z | C | V);
+  if (set_flags) {
+    nzcv().SetN(N);
+    nzcv().SetZ(Z);
+    nzcv().SetC(C);
+    nzcv().SetV(V);
+  }
   return result;
 }
 
@@ -297,27 +325,26 @@ int64_t Simulator::ExtendValue(unsigned reg_size,
 
 
 void Simulator::FPCompare(double val0, double val1) {
-  unsigned new_flags;
+  AssertSupportedFPCR();
 
+  // TODO: This assumes that the C++ implementation handles comparisons in the
+  // way that we expect (as per AssertSupportedFPCR()).
   if ((isnan(val0) != 0) || (isnan(val1) != 0)) {
-    new_flags = CVFlag;
+    nzcv().SetRawValue(FPUnorderedFlag);
+  } else if (val0 < val1) {
+    nzcv().SetRawValue(FPLessThanFlag);
+  } else if (val0 > val1) {
+    nzcv().SetRawValue(FPGreaterThanFlag);
+  } else if (val0 == val1) {
+    nzcv().SetRawValue(FPEqualFlag);
   } else {
-    if (val0 < val1) {
-      new_flags = NFlag;
-    } else {
-      new_flags = CFlag;
-      if (val0 == val1) {
-        new_flags |= ZFlag;
-      }
-    }
+    not_reached();
   }
-  SetFlags(new_flags);
 }
 
 
-void Simulator::PrintFlags(bool print_all) {
+void Simulator::PrintSystemRegisters(bool print_all) {
   static bool first_run = true;
-  static uint32_t last_flags;
 
   // Define some colour codes to use for the register dump.
   // TODO: Find a more elegant way of defining these.
@@ -325,14 +352,33 @@ void Simulator::PrintFlags(bool print_all) {
   char const * const clr_flag_name  = (coloured_trace_) ? ("\033[1;30m") : ("");
   char const * const clr_flag_value = (coloured_trace_) ? ("\033[1;37m") : ("");
 
-  if (print_all || first_run || (last_flags != nzcv())) {
-    fprintf(stream_, "# %sFLAGS: %sN:%1d Z:%1d C:%1d V:%1d%s\n",
+  static SimSystemRegister last_nzcv;
+  if (print_all || first_run || (last_nzcv.RawValue() != nzcv().RawValue())) {
+    fprintf(stream_, "# %sFLAGS: %sN:%d Z:%d C:%d V:%d%s\n",
             clr_flag_name,
             clr_flag_value,
             N(), Z(), C(), V(),
             clr_normal);
   }
-  last_flags = nzcv();
+  last_nzcv = nzcv();
+
+  static SimSystemRegister last_fpcr;
+  if (print_all || first_run || (last_fpcr.RawValue() != fpcr().RawValue())) {
+    static const char * rmode[] = {
+      "0b00 (Round to Nearest)",
+      "0b01 (Round towards Plus Infinity)",
+      "0b10 (Round towards Minus Infinity)",
+      "0b11 (Round towards Zero)"
+    };
+    assert(fpcr().RMode() <= (sizeof(rmode) / sizeof(rmode[0])));
+    fprintf(stream_, "# %sFPCR: %sAHP:%d DN:%d FZ:%d RMode:%s%s\n",
+            clr_flag_name,
+            clr_flag_value,
+            fpcr().AHP(), fpcr().DN(), fpcr().FZ(), rmode[fpcr().RMode()],
+            clr_normal);
+  }
+  last_fpcr = fpcr();
+
   first_run = false;
 }
 
@@ -405,7 +451,7 @@ void Simulator::PrintFPRegisters(bool print_all_regs) {
 
 
 void Simulator::PrintProcessorState() {
-  PrintFlags();
+  PrintSystemRegisters();
   PrintRegisters();
   PrintFPRegisters();
 }
@@ -413,8 +459,15 @@ void Simulator::PrintProcessorState() {
 
 // Visitors---------------------------------------------------------------------
 
-void Simulator::VisitUnknown(Instruction* instr) {
-  printf("Unknown instruction at 0x%p: 0x%08" PRIx32 "\n",
+void Simulator::VisitUnimplemented(Instruction* instr) {
+  printf("Unimplemented instruction at 0x%p: 0x%08" PRIx32 "\n",
+         reinterpret_cast<void*>(instr), instr->InstructionBits());
+  not_implemented();
+}
+
+
+void Simulator::VisitUnallocated(Instruction* instr) {
+  printf("Unallocated instruction at 0x%p: 0x%08" PRIx32 "\n",
          reinterpret_cast<void*>(instr), instr->InstructionBits());
   not_implemented();
 }
@@ -614,7 +667,10 @@ void Simulator::LogicalHelper(Instruction* instr, int64_t op2) {
   }
 
   if (update_flags) {
-    SetFlags(CalcNFlag(result, reg_size) | CalcZFlag(result));
+    nzcv().SetN(CalcNFlag(result, reg_size));
+    nzcv().SetZ(CalcZFlag(result));
+    nzcv().SetC(0);
+    nzcv().SetV(0);
   }
 
   set_reg(reg_size, instr->Rd(), result, instr->RdMode());
@@ -647,7 +703,7 @@ void Simulator::ConditionalCompareHelper(Instruction* instr, int64_t op2) {
     }
   } else {
     // If the condition fails, set the status flags to the nzcv immediate.
-    SetFlags(instr->Nzcv() << Flags_offset);
+    nzcv().SetFlags(instr->Nzcv());
   }
 }
 
@@ -1221,6 +1277,8 @@ void Simulator::VisitExtract(Instruction* instr) {
 
 
 void Simulator::VisitFPImmediate(Instruction* instr) {
+  AssertSupportedFPCR();
+
   unsigned dest = instr->Rd();
   switch (instr->Mask(FPImmediateMask)) {
     case FMOV_s_imm: set_sreg(dest, instr->ImmFP32()); break;
@@ -1231,8 +1289,12 @@ void Simulator::VisitFPImmediate(Instruction* instr) {
 
 
 void Simulator::VisitFPIntegerConvert(Instruction* instr) {
+  AssertSupportedFPCR();
+
   unsigned dst = instr->Rd();
   unsigned src = instr->Rn();
+
+  FPRounding round = RMode();
 
   switch (instr->Mask(FPIntegerConvertMask)) {
     case FCVTMS_ws:
@@ -1280,57 +1342,69 @@ void Simulator::VisitFPIntegerConvert(Instruction* instr) {
     case FMOV_sw: set_sreg_bits(dst, wreg(src)); break;
     case FMOV_dx: set_dreg_bits(dst, xreg(src)); break;
 
-    // We only support conversions to double, and only when that double can
-    // exactly represent a given integer. This means all 32-bit integers, and a
-    // subset of 64-bit integers.
-    case SCVTF_dw: {
-      set_dreg(dst, wreg(src));
-      break;
-    }
-    case SCVTF_dx: {
-      double value = static_cast<double>(xreg(src));
-      assert(static_cast<int64_t>(value) == xreg(src));
-      set_dreg(dst, static_cast<int64_t>(value));
-      break;
-    }
+    // A 32-bit input can be handled in the same way as a 64-bit input, since
+    // the sign- or zero-extension will not affect the conversion.
+    case SCVTF_dx: set_dreg(dst, FixedToDouble(xreg(src), 0, round)); break;
+    case SCVTF_dw: set_dreg(dst, FixedToDouble(wreg(src), 0, round)); break;
+    case UCVTF_dx: set_dreg(dst, UFixedToDouble(xreg(src), 0, round)); break;
     case UCVTF_dw: {
-      set_dreg(dst, static_cast<uint32_t>(wreg(src)));
+      set_dreg(dst, UFixedToDouble(static_cast<uint32_t>(wreg(src)), 0, round));
       break;
     }
-    case UCVTF_dx: {
-      double value = static_cast<double>(static_cast<uint64_t>(xreg(src)));
-      assert(static_cast<uint64_t>(value) == static_cast<uint64_t>(xreg(src)));
-      set_dreg(dst, static_cast<uint64_t>(value));
+    case SCVTF_sx: set_sreg(dst, FixedToFloat(xreg(src), 0, round)); break;
+    case SCVTF_sw: set_sreg(dst, FixedToFloat(wreg(src), 0, round)); break;
+    case UCVTF_sx: set_sreg(dst, UFixedToFloat(xreg(src), 0, round)); break;
+    case UCVTF_sw: {
+      set_sreg(dst, UFixedToFloat(static_cast<uint32_t>(wreg(src)), 0, round));
       break;
     }
-    default: not_implemented();
+
+    default: not_reached();
   }
 }
 
 
 void Simulator::VisitFPFixedPointConvert(Instruction* instr) {
+  AssertSupportedFPCR();
+
   unsigned dst = instr->Rd();
   unsigned src = instr->Rn();
   int fbits = 64 - instr->FPScale();
 
-  // We only support two cases: unsigned and signed conversion from fixed point
-  // values in X registers to floating point values in D registers. We rely on
-  // casting to convert from integer to floating point, and assert that the
-  // fractional part of the number is zero.
+  FPRounding round = RMode();
+
   switch (instr->Mask(FPFixedPointConvertMask)) {
-    case UCVTF_dx_fixed: {
-      uint64_t value = static_cast<uint64_t>(xreg(src));
-      assert((value & ((1UL << fbits) - 1)) == 0);
-      set_dreg(dst, static_cast<double>(value >> fbits));
+    // A 32-bit input can be handled in the same way as a 64-bit input, since
+    // the sign- or zero-extension will not affect the conversion.
+    case SCVTF_dx_fixed:
+      set_dreg(dst, FixedToDouble(xreg(src), fbits, round));
+      break;
+    case SCVTF_dw_fixed:
+      set_dreg(dst, FixedToDouble(wreg(src), fbits, round));
+      break;
+    case UCVTF_dx_fixed:
+      set_dreg(dst, UFixedToDouble(xreg(src), fbits, round));
+      break;
+    case UCVTF_dw_fixed: {
+      set_dreg(dst,
+               UFixedToDouble(static_cast<uint32_t>(wreg(src)), fbits, round));
       break;
     }
-    case SCVTF_dx_fixed: {
-      int64_t value = xreg(src);
-      assert((value & ((1UL << fbits) - 1)) == 0);
-      set_dreg(dst, static_cast<double>(value >> fbits));
+    case SCVTF_sx_fixed:
+      set_sreg(dst, FixedToFloat(xreg(src), fbits, round));
+      break;
+    case SCVTF_sw_fixed:
+      set_sreg(dst, FixedToFloat(wreg(src), fbits, round));
+      break;
+    case UCVTF_sx_fixed:
+      set_sreg(dst, UFixedToFloat(xreg(src), fbits, round));
+      break;
+    case UCVTF_sw_fixed: {
+      set_sreg(dst,
+               UFixedToFloat(static_cast<uint32_t>(wreg(src)), fbits, round));
       break;
     }
-    default: not_implemented();
+    default: not_reached();
   }
 }
 
@@ -1380,6 +1454,8 @@ uint64_t Simulator::FPToUInt64(double value, FPRounding rmode) {
 
 
 void Simulator::VisitFPCompare(Instruction* instr) {
+  AssertSupportedFPCR();
+
   unsigned reg_size = instr->FPType() == FP32 ? kSRegSize : kDRegSize;
   double fn_val = fpreg(reg_size, instr->Rn());
 
@@ -1394,6 +1470,8 @@ void Simulator::VisitFPCompare(Instruction* instr) {
 
 
 void Simulator::VisitFPConditionalCompare(Instruction* instr) {
+  AssertSupportedFPCR();
+
   switch (instr->Mask(FPConditionalCompareMask)) {
     case FCCMP_s:
     case FCCMP_d: {
@@ -1404,7 +1482,7 @@ void Simulator::VisitFPConditionalCompare(Instruction* instr) {
         FPCompare(fpreg(reg_size, instr->Rn()), fpreg(reg_size, instr->Rm()));
       } else {
         // If the condition fails, set the status flags to the nzcv immediate.
-        SetFlags(instr->Nzcv() << Flags_offset);
+        nzcv().SetFlags(instr->Nzcv());
       }
       break;
     }
@@ -1414,6 +1492,8 @@ void Simulator::VisitFPConditionalCompare(Instruction* instr) {
 
 
 void Simulator::VisitFPConditionalSelect(Instruction* instr) {
+  AssertSupportedFPCR();
+
   unsigned reg_size = instr->FPType() == FP32 ? kSRegSize : kDRegSize;
 
   double selected_val;
@@ -1432,6 +1512,8 @@ void Simulator::VisitFPConditionalSelect(Instruction* instr) {
 
 
 void Simulator::VisitFPDataProcessing1Source(Instruction* instr) {
+  AssertSupportedFPCR();
+
   unsigned fd = instr->Rd();
   unsigned fn = instr->Rn();
 
@@ -1448,9 +1530,253 @@ void Simulator::VisitFPDataProcessing1Source(Instruction* instr) {
     case FRINTN_d: set_dreg(fd, FPRoundInt(dreg(fn), FPTieEven)); break;
     case FRINTZ_s: set_sreg(fd, FPRoundInt(sreg(fn), FPZero)); break;
     case FRINTZ_d: set_dreg(fd, FPRoundInt(dreg(fn), FPZero)); break;
-    case FCVT_ds: set_dreg(fd, sreg(fn)); break;
+    case FCVT_ds: set_dreg(fd, FPToDouble(sreg(fn))); break;
+    case FCVT_sd: set_sreg(fd, FPToFloat(dreg(fn), FPTieEven)); break;
     default: not_implemented();
   }
+}
+
+
+// Assemble the specified IEEE-754 components into the target type and apply
+// appropriate rounding.
+//  sign:     0 = positive, 1 = negative
+//  exponent: Unbiased IEEE-754 exponent.
+//  mantissa: The mantissa of the input. The top bit (which is not encoded for
+//            normal IEEE-754 values) must not be omitted. This bit has the
+//            value 'pow(2, exponent)'.
+//
+// The input value is assumed to be a normalized value. That is, the input may
+// not be infinity or NaN. If the source value is subnormal, it must be
+// normalized before calling this function such that the highest set bit in the
+// mantissa has the value 'pow(2, exponent)'.
+//
+// Callers should use FPRoundToFloat or FPRoundToDouble directly, rather than
+// calling a templated FPRound.
+template <class T, int ebits, int mbits>
+static T FPRound(int64_t sign, int64_t exponent, uint64_t mantissa,
+                 FPRounding round_mode) {
+  assert((sign == 0) || (sign == 1));
+
+  // Only the FPTieEven rounding mode is implemented.
+  assert(round_mode == FPTieEven);
+  USE(round_mode);
+
+  // Rounding can promote subnormals to normals, and normals to infinities. For
+  // example, a double with exponent 127 (FLT_MAX_EXP) would appear to be
+  // encodable as a float, but rounding based on the low-order mantissa bits
+  // could make it overflow. With ties-to-even rounding, this value would become
+  // an infinity.
+
+  // ---- Rounding Method ----
+  //
+  // The exponent is irrelevant in the rounding operation, so we treat the
+  // lowest-order bit that will fit into the result ('onebit') as having
+  // the value '1'. Similarly, the highest-order bit that won't fit into
+  // the result ('halfbit') has the value '0.5'. The 'point' sits between
+  // 'onebit' and 'halfbit':
+  //
+  //            These bits fit into the result.
+  //               |---------------------|
+  //  mantissa = 0bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  //                                     ||
+  //                                    / |
+  //                                   /  halfbit
+  //                               onebit
+  //
+  // For subnormal outputs, the range of representable bits is smaller and
+  // the position of onebit and halfbit depends on the exponent of the
+  // input, but the method is otherwise similar.
+  //
+  //   onebit(frac)
+  //     |
+  //     | halfbit(frac)          halfbit(adjusted)
+  //     | /                      /
+  //     | |                      |
+  //  0b00.0 (exact)      -> 0b00.0 (exact)                    -> 0b00
+  //  0b00.0...           -> 0b00.0...                         -> 0b00
+  //  0b00.1 (exact)      -> 0b00.0111..111                    -> 0b00
+  //  0b00.1...           -> 0b00.1...                         -> 0b01
+  //  0b01.0 (exact)      -> 0b01.0 (exact)                    -> 0b01
+  //  0b01.0...           -> 0b01.0...                         -> 0b01
+  //  0b01.1 (exact)      -> 0b01.1 (exact)                    -> 0b10
+  //  0b01.1...           -> 0b01.1...                         -> 0b10
+  //  0b10.0 (exact)      -> 0b10.0 (exact)                    -> 0b10
+  //  0b10.0...           -> 0b10.0...                         -> 0b10
+  //  0b10.1 (exact)      -> 0b10.0111..111                    -> 0b10
+  //  0b10.1...           -> 0b10.1...                         -> 0b11
+  //  0b11.0 (exact)      -> 0b11.0 (exact)                    -> 0b11
+  //  ...                   /             |                      /   |
+  //                       /              |                     /    |
+  //                                                           /     |
+  // adjusted = frac - (halfbit(mantissa) & ~onebit(frac));   /      |
+  //
+  //                   mantissa = (mantissa >> shift) + halfbit(adjusted);
+
+  static const int mantissa_offset = 0;
+  static const int exponent_offset = mantissa_offset + mbits;
+  static const int sign_offset = exponent_offset + ebits;
+  assert(sign_offset == (sizeof(T) * 8 - 1));
+
+  // Bail out early for zero inputs.
+  if (mantissa == 0) {
+    return sign << sign_offset;
+  }
+
+  // If all bits in the exponent are set, the value is infinite or NaN.
+  // This is true for all binary IEEE-754 formats.
+  static const int infinite_exponent = (1 << ebits) - 1;
+  static const int max_normal_exponent = infinite_exponent - 1;
+
+  // Apply the exponent bias to encode it for the result. Doing this early makes
+  // it easy to detect values that will be infinite or subnormal.
+  exponent += max_normal_exponent >> 1;
+
+  if (exponent > max_normal_exponent) {
+    // Overflow: The input is too large for the result type to represent. The
+    // FPTieEven rounding mode handles overflows using infinities.
+    exponent = infinite_exponent;
+    mantissa = 0;
+    return (sign << sign_offset) |
+           (exponent << exponent_offset) |
+           (mantissa << mantissa_offset);
+  }
+
+  // Calculate the shift required to move the top mantissa bit to the proper
+  // place in the destination type.
+  const int highest_significant_bit = 63 - CountLeadingZeros(mantissa, 64);
+  int shift = highest_significant_bit - mbits;
+
+  if (exponent <= 0) {
+    // The output will be subnormal (before rounding).
+
+    // For subnormal outputs, the shift must be adjusted by the exponent. The +1
+    // is necessary because the exponent of a subnormal value (encoded as 0) is
+    // the same as the exponent of the smallest normal value (encoded as 1).
+    shift += -exponent + 1;
+
+    // Handle inputs that would produce a zero output.
+    //
+    // Shifts higher than highest_significant_bit+1 will always produce a zero
+    // result. A shift of exactly highest_significant_bit+1 might produce a
+    // non-zero result after rounding.
+    if (shift > (highest_significant_bit + 1)) {
+      // The result will always be +/-0.0.
+      return sign << sign_offset;
+    }
+
+    // Properly encode the exponent for a subnormal output.
+    exponent = 0;
+  } else {
+    // Clear the topmost mantissa bit, since this is not encoded in IEEE-754
+    // normal values.
+    mantissa &= ~(1UL << highest_significant_bit);
+  }
+
+  if (shift > 0) {
+    // We have to shift the mantissa to the right. Some precision is lost, so we
+    // need to apply rounding.
+    uint64_t onebit_mantissa = (mantissa >> (shift)) & 1;
+    uint64_t halfbit_mantissa = (mantissa >> (shift-1)) & 1;
+    uint64_t adjusted = mantissa - (halfbit_mantissa & ~onebit_mantissa);
+    T halfbit_adjusted = (adjusted >> (shift-1)) & 1;
+
+    T result = (sign << sign_offset) |
+               (exponent << exponent_offset) |
+               ((mantissa >> shift) << mantissa_offset);
+
+    // A very large mantissa can overflow during rounding. If this happens, the
+    // exponent should be incremented and the mantissa set to 1.0 (encoded as
+    // 0). Applying halfbit_adjusted after assembling the float has the nice
+    // side-effect that this case is handled for free.
+    //
+    // This also handles cases where a very large finite value overflows to
+    // infinity, or where a very large subnormal value overflows to become
+    // normal.
+    return result + halfbit_adjusted;
+  } else {
+    // We have to shift the mantissa to the left (or not at all). The input
+    // mantissa is exactly representable in the output mantissa, so apply no
+    // rounding correction.
+    return (sign << sign_offset) |
+           (exponent << exponent_offset) |
+           ((mantissa << -shift) << mantissa_offset);
+  }
+}
+
+
+// See FPRound for a description of this function.
+static inline double FPRoundToDouble(int64_t sign, int64_t exponent,
+                                     uint64_t mantissa, FPRounding round_mode) {
+  int64_t bits =
+      FPRound<int64_t, kDoubleExponentBits, kDoubleMantissaBits>(sign,
+                                                                 exponent,
+                                                                 mantissa,
+                                                                 round_mode);
+  return rawbits_to_double(bits);
+}
+
+
+// See FPRound for a description of this function.
+static inline float FPRoundToFloat(int64_t sign, int64_t exponent,
+                                   uint64_t mantissa, FPRounding round_mode) {
+  int32_t bits =
+      FPRound<int32_t, kFloatExponentBits, kFloatMantissaBits>(sign,
+                                                               exponent,
+                                                               mantissa,
+                                                               round_mode);
+  return rawbits_to_float(bits);
+}
+
+
+double Simulator::FixedToDouble(int64_t src, int fbits, FPRounding round) {
+  if (src >= 0) {
+    return UFixedToDouble(src, fbits, round);
+  } else {
+    // This works for all negative values, including INT64_MIN.
+    return -UFixedToDouble(-src, fbits, round);
+  }
+}
+
+
+double Simulator::UFixedToDouble(uint64_t src, int fbits, FPRounding round) {
+  // An input of 0 is a special case because the result is effectively
+  // subnormal: The exponent is encoded as 0 and there is no implicit 1 bit.
+  if (src == 0) {
+    return 0.0;
+  }
+
+  // Calculate the exponent. The highest significant bit will have the value
+  // 2^exponent.
+  const int highest_significant_bit = 63 - CountLeadingZeros(src, 64);
+  const int64_t exponent = highest_significant_bit - fbits;
+
+  return FPRoundToDouble(0, exponent, src, round);
+}
+
+
+float Simulator::FixedToFloat(int64_t src, int fbits, FPRounding round) {
+  if (src >= 0) {
+    return UFixedToFloat(src, fbits, round);
+  } else {
+    // This works for all negative values, including INT64_MIN.
+    return -UFixedToFloat(-src, fbits, round);
+  }
+}
+
+
+float Simulator::UFixedToFloat(uint64_t src, int fbits, FPRounding round) {
+  // An input of 0 is a special case because the result is effectively
+  // subnormal: The exponent is encoded as 0 and there is no implicit 1 bit.
+  if (src == 0) {
+    return 0.0f;
+  }
+
+  // Calculate the exponent. The highest significant bit will have the value
+  // 2^exponent.
+  const int highest_significant_bit = 63 - CountLeadingZeros(src, 64);
+  const int32_t exponent = highest_significant_bit - fbits;
+
+  return FPRoundToFloat(0, exponent, src, round);
 }
 
 
@@ -1490,7 +1816,97 @@ double Simulator::FPRoundInt(double value, FPRounding round_mode) {
 }
 
 
+double Simulator::FPToDouble(float value) {
+  switch (fpclassify(value)) {
+    case FP_NAN: {
+      // Convert NaNs as the processor would, assuming that FPCR.DN (default
+      // NaN) is not set:
+      //  - The sign is propagated.
+      //  - The payload (mantissa) is transferred entirely, except that the top
+      //    bit is forced to '1', making the result a quiet NaN. The unused
+      //    (low-order) payload bits are set to 0.
+      uint32_t raw = float_to_rawbits(value);
+
+      uint64_t sign = raw >> 31;
+      uint64_t exponent = (1 << 11) - 1;
+      uint64_t payload = unsigned_bitextract_64(21, 0, raw);
+      payload <<= (52 - 23);  // The unused low-order bits should be 0.
+      payload |= (1L << 51);  // Force a quiet NaN.
+
+      return rawbits_to_double((sign << 63) | (exponent << 52) | payload);
+    }
+
+    case FP_ZERO:
+    case FP_NORMAL:
+    case FP_SUBNORMAL:
+    case FP_INFINITE: {
+      // All other inputs are preserved in a standard cast, because every value
+      // representable using an IEEE-754 float is also representable using an
+      // IEEE-754 double.
+      return static_cast<double>(value);
+    }
+  }
+
+  not_reached();
+  return static_cast<double>(value);
+}
+
+
+float Simulator::FPToFloat(double value, FPRounding round_mode) {
+  // Only the FPTieEven rounding mode is implemented.
+  assert(round_mode == FPTieEven);
+  USE(round_mode);
+
+  switch (fpclassify(value)) {
+    case FP_NAN: {
+      // Convert NaNs as the processor would, assuming that FPCR.DN (default
+      // NaN) is not set:
+      //  - The sign is propagated.
+      //  - The payload (mantissa) is transferred as much as possible, except
+      //    that the top bit is forced to '1', making the result a quiet NaN.
+      uint64_t raw = double_to_rawbits(value);
+
+      uint32_t sign = raw >> 63;
+      uint32_t exponent = (1 << 8) - 1;
+      uint32_t payload = unsigned_bitextract_64(50, 52 - 23, raw);
+      payload |= (1 << 22);   // Force a quiet NaN.
+
+      return rawbits_to_float((sign << 31) | (exponent << 23) | payload);
+    }
+
+    case FP_ZERO:
+    case FP_INFINITE: {
+      // In a C++ cast, any value representable in the target type will be
+      // unchanged. This is always the case for +/-0.0 and infinities.
+      return static_cast<float>(value);
+    }
+
+    case FP_NORMAL:
+    case FP_SUBNORMAL: {
+      // Convert double-to-float as the processor would, assuming that FPCR.FZ
+      // (flush-to-zero) is not set.
+      uint64_t raw = double_to_rawbits(value);
+      // Extract the IEEE-754 double components.
+      uint32_t sign = raw >> 63;
+      // Extract the exponent and remove the IEEE-754 encoding bias.
+      int32_t exponent = unsigned_bitextract_64(62, 52, raw) - 1023;
+      // Extract the mantissa and add the implicit '1' bit.
+      uint64_t mantissa = unsigned_bitextract_64(51, 0, raw);
+      if (fpclassify(value) == FP_NORMAL) {
+        mantissa |= (1UL << 52);
+      }
+      return FPRoundToFloat(sign, exponent, mantissa, round_mode);
+    }
+  }
+
+  not_reached();
+  return value;
+}
+
+
 void Simulator::VisitFPDataProcessing2Source(Instruction* instr) {
+  AssertSupportedFPCR();
+
   unsigned fd = instr->Rd();
   unsigned fn = instr->Rn();
   unsigned fm = instr->Rm();
@@ -1514,6 +1930,8 @@ void Simulator::VisitFPDataProcessing2Source(Instruction* instr) {
 
 
 void Simulator::VisitFPDataProcessing3Source(Instruction* instr) {
+  AssertSupportedFPCR();
+
   unsigned fd = instr->Rd();
   unsigned fn = instr->Rn();
   unsigned fm = instr->Rm();
@@ -1576,16 +1994,16 @@ void Simulator::VisitSystem(Instruction* instr) {
     switch (instr->Mask(SystemSysRegMask)) {
       case MRS: {
         switch (instr->ImmSystemRegister()) {
-          case NZCV: set_xreg(instr->Rt(), nzcv()); break;
+          case NZCV: set_xreg(instr->Rt(), nzcv().RawValue()); break;
+          case FPCR: set_xreg(instr->Rt(), fpcr().RawValue()); break;
           default: not_implemented();
         }
         break;
       }
       case MSR: {
         switch (instr->ImmSystemRegister()) {
-          case NZCV:
-            SetFlags(xreg(instr->Rt()) & kConditionFlagsMask);
-            break;
+          case NZCV: nzcv().SetRawValue(xreg(instr->Rt())); break;
+          case FPCR: fpcr().SetRawValue(xreg(instr->Rt())); break;
           default: not_implemented();
         }
         break;

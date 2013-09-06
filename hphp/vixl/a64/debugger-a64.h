@@ -87,10 +87,10 @@ enum TraceParameters {
   LOG_DISASM     = 1 << 0,  // Log disassembly.
   LOG_REGS       = 1 << 1,  // Log general purpose registers.
   LOG_FP_REGS    = 1 << 2,  // Log floating-point registers.
-  LOG_FLAGS      = 1 << 3,  // Log the status flags.
+  LOG_SYS_REGS   = 1 << 3,  // Log the flags and system registers.
 
-  LOG_STATE      = LOG_REGS | LOG_FP_REGS | LOG_FLAGS,
-  LOG_ALL        = LOG_DISASM | LOG_REGS | LOG_FP_REGS | LOG_FLAGS
+  LOG_STATE      = LOG_REGS | LOG_FP_REGS | LOG_SYS_REGS,
+  LOG_ALL        = LOG_DISASM | LOG_REGS | LOG_FP_REGS | LOG_SYS_REGS
 };
 
 // Debugger parameters
@@ -147,7 +147,7 @@ class Debugger : public Simulator {
 
   inline bool pending_request() { return pending_request_; }
   inline void update_pending_request() {
-    const int kLoggingMask = LOG_FLAGS | LOG_REGS | LOG_FP_REGS;
+    const int kLoggingMask = LOG_STATE;
     const bool logging = (log_parameters_ & kLoggingMask) != 0;
     const bool debugging = IsDebuggerRunning();
 
@@ -160,7 +160,7 @@ class Debugger : public Simulator {
                    const FormatToken* format);
 
  private:
-  void LogFlags();
+  void LogSystemRegisters();
   void LogRegisters();
   void LogFPRegisters();
   void LogProcessorState();

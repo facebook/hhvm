@@ -72,6 +72,13 @@ const unsigned kLinkRegCode = 30;
 const unsigned kZeroRegCode = 31;
 const unsigned kSPRegInternalCode = 63;
 const unsigned kRegCodeMask = 0x1f;
+
+// AArch64 floating-point specifics. These match IEEE-754.
+const unsigned kDoubleMantissaBits = 52;
+const unsigned kDoubleExponentBits = 11;
+const unsigned kFloatMantissaBits = 23;
+const unsigned kFloatExponentBits = 8;
+
 const float kFP32PositiveInfinity = rawbits_to_float(0x7f800000);
 const float kFP32NegativeInfinity = rawbits_to_float(0xff800000);
 const double kFP64PositiveInfinity = rawbits_to_double(0x7ff0000000000000UL);
@@ -80,9 +87,11 @@ const double kFP64NegativeInfinity = rawbits_to_double(0xfff0000000000000UL);
 // This value is a signalling NaN as both a double and as a float (taking the
 // least-significant word).
 const double kFP64SignallingNaN = rawbits_to_double(0x7ff000007f800001);
+const float kFP32SignallingNaN = rawbits_to_float(0x7f800001);
 
 // A similar value, but as a quiet NaN.
 const double kFP64QuietNaN = rawbits_to_double(0x7ff800007fc00001);
+const float kFP32QuietNaN = rawbits_to_float(0x7fc00001);
 
 enum LSDataSize {
   LSByte        = 0,
@@ -108,10 +117,14 @@ enum AddrMode {
 };
 
 enum FPRounding {
-  FPTieEven,
-  FPPositiveInfinity,
-  FPNegativeInfinity,
-  FPZero,
+  // The first four values are encodable directly by FPCR<RMode>.
+  FPTieEven = 0x0,
+  FPPositiveInfinity = 0x1,
+  FPNegativeInfinity = 0x2,
+  FPZero = 0x3,
+
+  // The final rounding mode is only available when explicitly specified by the
+  // instruction (such as with fcvta). It cannot be set in FPCR.
   FPTieAway
 };
 
@@ -145,21 +158,17 @@ class Instruction {
     return signed_bitextract_32(msb, lsb, bits);
   }
 
-#ifdef DEBUG
-  uint32_t SpacedBits(int num_bits, ...) const;
-#endif
-
   inline Instr Mask(uint32_t mask) const {
     return InstructionBits() & mask;
   }
 
   #define DEFINE_GETTER(Name, HighBit, LowBit, Func)             \
   inline int64_t Name() const { return Func(HighBit, LowBit); }
-  FIELDS_LIST(DEFINE_GETTER)
+  INSTRUCTION_FIELDS_LIST(DEFINE_GETTER)
   #undef DEFINE_GETTER
 
-  // ImmPCRel is a compound field (not present in FIELDS_LIST), formed from
-  // ImmPCRelLo and ImmPCRelHi.
+  // ImmPCRel is a compound field (not present in INSTRUCTION_FIELDS_LIST),
+  // formed from ImmPCRelLo and ImmPCRelHi.
   int ImmPCRel() const {
     int const offset = ((ImmPCRelHi() << ImmPCRelLo_width) | ImmPCRelLo());
     int const width = ImmPCRelLo_width + ImmPCRelHi_width;
@@ -210,6 +219,11 @@ class Instruction {
 
   inline bool IsLoadOrStore() const {
     return Mask(LoadStoreAnyFMask) == LoadStoreAnyFixed;
+  }
+
+  inline bool IsMovn() const {
+    return (Mask(MoveWideImmediateMask) == MOVN_x) ||
+           (Mask(MoveWideImmediateMask) == MOVN_w);
   }
 
   // Indicate whether Rd can be the stack pointer or the zero register. This

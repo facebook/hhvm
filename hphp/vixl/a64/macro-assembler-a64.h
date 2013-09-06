@@ -296,8 +296,12 @@ class MacroAssembler : public Assembler {
     assert(!rm.IsZero());
     asrv(rd, rn, rm);
   }
-  void B(Label* label, Condition cond = al) {
+  void B(Label* label) {
+    b(label);
+  }
+  void B(Label* label, Condition cond) {
     assert(allow_macro_instructions_);
+    assert((cond != al) && (cond != nv));
     b(label, cond);
   }
   void Bfi(const Register& rd,
@@ -388,6 +392,7 @@ class MacroAssembler : public Assembler {
     assert(!rd.IsZero());
     assert(!rn.IsZero());
     assert(!rm.IsZero());
+    assert((cond != al) && (cond != nv));
     csel(rd, rn, rm, cond);
   }
   void Cset(const Register& rd, Condition cond) {
@@ -408,6 +413,7 @@ class MacroAssembler : public Assembler {
     assert(!rd.IsZero());
     assert(!rn.IsZero());
     assert(!rm.IsZero());
+    assert((cond != al) && (cond != nv));
     csinc(rd, rn, rm, cond);
   }
   void Csinv(const Register& rd,
@@ -418,6 +424,7 @@ class MacroAssembler : public Assembler {
     assert(!rd.IsZero());
     assert(!rn.IsZero());
     assert(!rm.IsZero());
+    assert((cond != al) && (cond != nv));
     csinv(rd, rn, rm, cond);
   }
   void Csneg(const Register& rd,
@@ -428,6 +435,7 @@ class MacroAssembler : public Assembler {
     assert(!rd.IsZero());
     assert(!rn.IsZero());
     assert(!rm.IsZero());
+    assert((cond != al) && (cond != nv));
     csneg(rd, rn, rm, cond);
   }
   void Extr(const Register& rd,
@@ -453,6 +461,7 @@ class MacroAssembler : public Assembler {
              StatusFlags nzcv,
              Condition cond) {
     assert(allow_macro_instructions_);
+    assert((cond != al) && (cond != nv));
     fccmp(fn, fm, nzcv, cond);
   }
   void Fcmp(const FPRegister& fn, const FPRegister& fm) {
@@ -474,7 +483,12 @@ class MacroAssembler : public Assembler {
              const FPRegister& fm,
              Condition cond) {
     assert(allow_macro_instructions_);
+    assert((cond != al) && (cond != nv));
     fcsel(fd, fn, fm, cond);
+  }
+  void Fcvt(const FPRegister& fd, const FPRegister& fn) {
+    assert(allow_macro_instructions_);
+    fcvt(fd, fn);
   }
   void Fcvtms(const Register& rd, const FPRegister& fn) {
     assert(allow_macro_instructions_);
@@ -568,10 +582,6 @@ class MacroAssembler : public Assembler {
   void Fsqrt(const FPRegister& fd, const FPRegister& fn) {
     assert(allow_macro_instructions_);
     fsqrt(fd, fn);
-  }
-  void Fcvt(const FPRegister& fd, const FPRegister& fn) {
-    assert(allow_macro_instructions_);
-    fcvt(fd, fn);
   }
   void Fsub(const FPRegister& fd, const FPRegister& fn, const FPRegister& fm) {
     assert(allow_macro_instructions_);
@@ -1067,6 +1077,16 @@ class MacroAssembler : public Assembler {
   // __ Log(LOG_FLAGS)
   // Will output the flags.
   void Log(TraceParameters parameters);
+
+  // Enable or disable instrumentation when an Instrument visitor is attached to
+  // the simulator.
+  void EnableInstrumentation();
+  void DisableInstrumentation();
+
+  // Add a marker to the instrumentation data produced by an Instrument visitor.
+  // The name is a two character string that will be attached to the marker in
+  // the output data.
+  void AnnotateInstrumentation(const char* marker_name);
 
   // Pseudo-instruction that will call a function made of host machine code
   // using host calling conventions. It will take the function address from x16

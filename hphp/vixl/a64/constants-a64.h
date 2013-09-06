@@ -44,94 +44,118 @@ R(8)  R(9)  R(10) R(11) R(12) R(13) R(14) R(15)                                \
 R(16) R(17) R(18) R(19) R(20) R(21) R(22) R(23)                                \
 R(24) R(25) R(26) R(27) R(28) R(29) R(30) R(31)
 
-#define FIELDS_LIST(V)                                                         \
+#define INSTRUCTION_FIELDS_LIST(V_)                                            \
 /* Register fields */                                                          \
-V(Rd, 4, 0, Bits)                        /* Destination register.     */       \
-V(Rn, 9, 5, Bits)                        /* First source register.    */       \
-V(Rm, 20, 16, Bits)                      /* Second source register.   */       \
-V(Ra, 14, 10, Bits)                      /* Third source register.    */       \
-V(Rt, 4, 0, Bits)                        /* Load dest / store source. */       \
-V(Rt2, 14, 10, Bits)                     /* Load second dest /        */       \
+V_(Rd, 4, 0, Bits)                        /* Destination register.     */      \
+V_(Rn, 9, 5, Bits)                        /* First source register.    */      \
+V_(Rm, 20, 16, Bits)                      /* Second source register.   */      \
+V_(Ra, 14, 10, Bits)                      /* Third source register.    */      \
+V_(Rt, 4, 0, Bits)                        /* Load dest / store source. */      \
+V_(Rt2, 14, 10, Bits)                     /* Load second dest /        */      \
                                          /* store second source.      */       \
-V(PrefetchMode, 4, 0, Bits)                                                    \
+V_(PrefetchMode, 4, 0, Bits)                                                   \
                                                                                \
 /* Common bits */                                                              \
-V(SixtyFourBits, 31, 31, Bits)                                                 \
-V(FlagsUpdate, 29, 29, Bits)                                                   \
+V_(SixtyFourBits, 31, 31, Bits)                                                \
+V_(FlagsUpdate, 29, 29, Bits)                                                  \
                                                                                \
 /* PC relative addressing */                                                   \
-V(ImmPCRelHi, 23, 5, SignedBits)                                               \
-V(ImmPCRelLo, 30, 29, Bits)                                                    \
+V_(ImmPCRelHi, 23, 5, SignedBits)                                              \
+V_(ImmPCRelLo, 30, 29, Bits)                                                   \
                                                                                \
 /* Add/subtract/logical shift register */                                      \
-V(ShiftDP, 23, 22, Bits)                                                       \
-V(ImmDPShift, 15, 10, Bits)                                                    \
+V_(ShiftDP, 23, 22, Bits)                                                      \
+V_(ImmDPShift, 15, 10, Bits)                                                   \
                                                                                \
 /* Add/subtract immediate */                                                   \
-V(ImmAddSub, 21, 10, Bits)                                                     \
-V(ShiftAddSub, 23, 22, Bits)                                                   \
+V_(ImmAddSub, 21, 10, Bits)                                                    \
+V_(ShiftAddSub, 23, 22, Bits)                                                  \
                                                                                \
 /* Add/substract extend */                                                     \
-V(ImmExtendShift, 12, 10, Bits)                                                \
-V(ExtendMode, 15, 13, Bits)                                                    \
+V_(ImmExtendShift, 12, 10, Bits)                                               \
+V_(ExtendMode, 15, 13, Bits)                                                   \
                                                                                \
 /* Move wide */                                                                \
-V(ImmMoveWide, 20, 5, Bits)                                                    \
-V(ShiftMoveWide, 22, 21, Bits)                                                 \
+V_(ImmMoveWide, 20, 5, Bits)                                                   \
+V_(ShiftMoveWide, 22, 21, Bits)                                                \
                                                                                \
 /* Logical immediate, bitfield and extract */                                  \
-V(BitN, 22, 22, Bits)                                                          \
-V(ImmRotate, 21, 16, Bits)                                                     \
-V(ImmSetBits, 15, 10, Bits)                                                    \
-V(ImmR, 21, 16, Bits)                                                          \
-V(ImmS, 15, 10, Bits)                                                          \
+V_(BitN, 22, 22, Bits)                                                         \
+V_(ImmRotate, 21, 16, Bits)                                                    \
+V_(ImmSetBits, 15, 10, Bits)                                                   \
+V_(ImmR, 21, 16, Bits)                                                         \
+V_(ImmS, 15, 10, Bits)                                                         \
                                                                                \
 /* Test and branch immediate */                                                \
-V(ImmTestBranch, 18, 5, SignedBits)                                            \
-V(ImmTestBranchBit40, 23, 19, Bits)                                            \
-V(ImmTestBranchBit5, 31, 31, Bits)                                             \
+V_(ImmTestBranch, 18, 5, SignedBits)                                           \
+V_(ImmTestBranchBit40, 23, 19, Bits)                                           \
+V_(ImmTestBranchBit5, 31, 31, Bits)                                            \
                                                                                \
 /* Conditionals */                                                             \
-V(Condition, 15, 12, Bits)                                                     \
-V(ConditionBranch, 3, 0, Bits)                                                 \
-V(Nzcv, 3, 0, Bits)                                                            \
-V(ImmCondCmp, 20, 16, Bits)                                                    \
-V(ImmCondBranch, 23, 5, SignedBits)                                            \
+V_(Condition, 15, 12, Bits)                                                    \
+V_(ConditionBranch, 3, 0, Bits)                                                \
+V_(Nzcv, 3, 0, Bits)                                                           \
+V_(ImmCondCmp, 20, 16, Bits)                                                   \
+V_(ImmCondBranch, 23, 5, SignedBits)                                           \
                                                                                \
 /* Floating point */                                                           \
-V(FPType, 23, 22, Bits)                                                        \
-V(ImmFP, 20, 13, Bits)                                                         \
-V(FPScale, 15, 10, Bits)                                                       \
+V_(FPType, 23, 22, Bits)                                                       \
+V_(ImmFP, 20, 13, Bits)                                                        \
+V_(FPScale, 15, 10, Bits)                                                      \
                                                                                \
 /* Load Store */                                                               \
-V(ImmLS, 20, 12, SignedBits)                                                   \
-V(ImmLSUnsigned, 21, 10, Bits)                                                 \
-V(ImmLSPair, 21, 15, SignedBits)                                               \
-V(SizeLS, 31, 30, Bits)                                                        \
-V(ImmShiftLS, 12, 12, Bits)                                                    \
+V_(ImmLS, 20, 12, SignedBits)                                                  \
+V_(ImmLSUnsigned, 21, 10, Bits)                                                \
+V_(ImmLSPair, 21, 15, SignedBits)                                              \
+V_(SizeLS, 31, 30, Bits)                                                       \
+V_(ImmShiftLS, 12, 12, Bits)                                                   \
                                                                                \
 /* Other immediates */                                                         \
-V(ImmUncondBranch, 25, 0, SignedBits)                                          \
-V(ImmCmpBranch, 23, 5, SignedBits)                                             \
-V(ImmLLiteral, 23, 5, SignedBits)                                              \
-V(ImmException, 20, 5, Bits)                                                   \
-V(ImmHint, 11, 5, Bits)                                                        \
-V(ImmSystemRegister, 19, 5, Bits)                                              \
+V_(ImmUncondBranch, 25, 0, SignedBits)                                         \
+V_(ImmCmpBranch, 23, 5, SignedBits)                                            \
+V_(ImmLLiteral, 23, 5, SignedBits)                                             \
+V_(ImmException, 20, 5, Bits)                                                  \
+V_(ImmHint, 11, 5, Bits)                                                       \
                                                                                \
-/* System */                                                                   \
-V(Cn, 15, 12, Bits)                                                            \
-V(Cm, 11, 8, Bits)
+/* System (MRS, MSR) */                                                        \
+V_(ImmSystemRegister, 19, 5, Bits)                                             \
+V_(SysO0, 19, 19, Bits)                                                        \
+V_(SysOp1, 18, 16, Bits)                                                       \
+V_(SysOp2, 7, 5, Bits)                                                         \
+V_(CRn, 15, 12, Bits)                                                          \
+V_(CRm, 11, 8, Bits)                                                           \
+
+
+#define SYSTEM_REGISTER_FIELDS_LIST(V_, M_)                                    \
+/* NZCV */                                                                     \
+V_(Flags, 31, 28, Bits)                                                        \
+V_(N, 31, 31, Bits)                                                            \
+V_(Z, 30, 30, Bits)                                                            \
+V_(C, 29, 29, Bits)                                                            \
+V_(V, 28, 28, Bits)                                                            \
+M_(NZCV, Flags_mask)                                                           \
+                                                                               \
+/* FPCR */                                                                     \
+V_(AHP, 26, 26, Bits)                                                          \
+V_(DN, 25, 25, Bits)                                                           \
+V_(FZ, 24, 24, Bits)                                                           \
+V_(RMode, 23, 22, Bits)                                                        \
+M_(FPCR, AHP_mask | DN_mask | FZ_mask | RMode_mask)
+
 
 // Fields offsets.
 #define DECLARE_FIELDS_OFFSETS(Name, HighBit, LowBit, X)                       \
 const int Name##_offset = LowBit;                                              \
 const int Name##_width = HighBit - LowBit + 1;                                 \
-const int Name##_mask = ((1 << Name##_width) - 1) << LowBit;
-FIELDS_LIST(DECLARE_FIELDS_OFFSETS)
+const uint32_t Name##_mask = ((1 << Name##_width) - 1) << LowBit;
+#define NOTHING(A, B)
+INSTRUCTION_FIELDS_LIST(DECLARE_FIELDS_OFFSETS)
+SYSTEM_REGISTER_FIELDS_LIST(DECLARE_FIELDS_OFFSETS, NOTHING)
+#undef NOTHING
 #undef DECLARE_FIELDS_BITS
 
-// ImmPCRel is a compound field (not present in FIELDS_LIST), formed from
-// ImmPCRelLo and ImmPCRelHi.
+// ImmPCRel is a compound field (not present in INSTRUCTION_FIELDS_LIST), formed
+// from ImmPCRelLo and ImmPCRelHi.
 const int ImmPCRel_mask = ImmPCRelLo_mask | ImmPCRelHi_mask;
 
 // Condition codes.
@@ -150,11 +174,14 @@ enum Condition {
   lt = 11,
   gt = 12,
   le = 13,
-  al = 14
+  al = 14,
+  nv = 15  // Behaves as always/al.
 };
 
 inline Condition InvertCondition(Condition cond) {
-  assert(cond != al);
+  // Conditions al and nv behave identically, as "always true". They can't be
+  // inverted, because there is no "always false" condition.
+  assert((cond != al) && (cond != nv));
   return static_cast<Condition>(cond ^ 1);
 }
 
@@ -163,31 +190,32 @@ enum FlagsUpdate {
   LeaveFlags = 0
 };
 
-const int N_offset = 31;
-const int Z_offset = 30;
-const int C_offset = 29;
-const int V_offset = 28;
-const int Flags_offset = V_offset;
-
 enum StatusFlags {
   NoFlag    = 0,
-  VFlag     = 0x10000000u,
-  CFlag     = 0x20000000u,
-  CVFlag    = 0x30000000u,
-  ZFlag     = 0x40000000u,
-  ZVFlag    = 0x50000000u,
-  ZCFlag    = 0x60000000u,
-  ZCVFlag   = 0x70000000u,
-  NFlag     = 0x80000000u,
-  NVFlag    = 0x90000000u,
-  NCFlag    = 0xa0000000u,
-  NCVFlag   = 0xb0000000u,
-  NZFlag    = 0xc0000000u,
-  NZVFlag   = 0xd0000000u,
-  NZCFlag   = 0xe0000000u,
-  NZCVFlag  = 0xf0000000u
+
+  // Derive the flag combinations from the system register bit descriptions.
+  NFlag     = N_mask,
+  ZFlag     = Z_mask,
+  CFlag     = C_mask,
+  VFlag     = V_mask,
+  NZFlag    = NFlag | ZFlag,
+  NCFlag    = NFlag | CFlag,
+  NVFlag    = NFlag | VFlag,
+  ZCFlag    = ZFlag | CFlag,
+  ZVFlag    = ZFlag | VFlag,
+  CVFlag    = CFlag | VFlag,
+  NZCFlag   = NFlag | ZFlag | CFlag,
+  NZVFlag   = NFlag | ZFlag | VFlag,
+  NCVFlag   = NFlag | CFlag | VFlag,
+  ZCVFlag   = ZFlag | CFlag | VFlag,
+  NZCVFlag  = NFlag | ZFlag | CFlag | VFlag,
+
+  // Floating-point comparison results.
+  FPEqualFlag       = ZCFlag,
+  FPLessThanFlag    = NFlag,
+  FPGreaterThanFlag = CFlag,
+  FPUnorderedFlag   = CVFlag
 };
-const unsigned int Flags_mask = NZCVFlag;
 
 enum Shift {
   NO_SHIFT = -1,
@@ -220,10 +248,18 @@ enum SystemHint {
 
 // System/special register names.
 // This information is not encoded as one field but as the concatenation of
-// multiple fields (lsb of Op0, Op1, Crn, Crm, Op2).
+// multiple fields (Op0<0>, Op1, Crn, Crm, Op2).
 enum SystemRegister {
-  NZCV = ((0xb << 16) | (0x4 << Cn_offset) | (0x2 << Cm_offset)) >>
-      ImmSystemRegister_offset
+  NZCV = ((0x1 << SysO0_offset) |
+          (0x3 << SysOp1_offset) |
+          (0x4 << CRn_offset) |
+          (0x2 << CRm_offset) |
+          (0x0 << SysOp2_offset)) >> ImmSystemRegister_offset,
+  FPCR = ((0x1 << SysO0_offset) |
+          (0x3 << SysOp1_offset) |
+          (0x4 << CRn_offset) |
+          (0x4 << CRm_offset) |
+          (0x0 << SysOp2_offset)) >> ImmSystemRegister_offset
 };
 
 // Instruction enumerations.
@@ -516,7 +552,12 @@ enum ExceptionOp {
   ExceptionMask  = 0xFFE0001F,
   HLT            = ExceptionFixed | 0x00400000,
   BRK            = ExceptionFixed | 0x00200000,
-  SVC            = ExceptionFixed | 0x00000001
+  SVC            = ExceptionFixed | 0x00000001,
+  HVC            = ExceptionFixed | 0x00000002,
+  SMC            = ExceptionFixed | 0x00000003,
+  DCPS1          = ExceptionFixed | 0x00A00001,
+  DCPS2          = ExceptionFixed | 0x00A00002,
+  DCPS3          = ExceptionFixed | 0x00A00003
 };
 
 // Any load or store.
@@ -766,24 +807,32 @@ enum DataProcessing2SourceOp {
   DataProcessing2SourceFixed = 0x1AC00000,
   DataProcessing2SourceFMask = 0x5FE00000,
   DataProcessing2SourceMask  = 0xFFE0FC00,
-  UDIV_w                     = DataProcessing2SourceFixed | 0x00000800,
-  UDIV_x                     = DataProcessing2SourceFixed | 0x80000800,
-  UDIV                       = UDIV_w,
-  SDIV_w                     = DataProcessing2SourceFixed | 0x00000C00,
-  SDIV_x                     = DataProcessing2SourceFixed | 0x80000C00,
-  SDIV                       = SDIV_w,
-  LSLV_w                     = DataProcessing2SourceFixed | 0x00002000,
-  LSLV_x                     = DataProcessing2SourceFixed | 0x80002000,
-  LSLV                       = LSLV_w,
-  LSRV_w                     = DataProcessing2SourceFixed | 0x00002400,
-  LSRV_x                     = DataProcessing2SourceFixed | 0x80002400,
-  LSRV                       = LSRV_w,
-  ASRV_w                     = DataProcessing2SourceFixed | 0x00002800,
-  ASRV_x                     = DataProcessing2SourceFixed | 0x80002800,
-  ASRV                       = ASRV_w,
-  RORV_w                     = DataProcessing2SourceFixed | 0x00002C00,
-  RORV_x                     = DataProcessing2SourceFixed | 0x80002C00,
-  RORV                       = RORV_w
+  UDIV_w  = DataProcessing2SourceFixed | 0x00000800,
+  UDIV_x  = DataProcessing2SourceFixed | 0x80000800,
+  UDIV    = UDIV_w,
+  SDIV_w  = DataProcessing2SourceFixed | 0x00000C00,
+  SDIV_x  = DataProcessing2SourceFixed | 0x80000C00,
+  SDIV    = SDIV_w,
+  LSLV_w  = DataProcessing2SourceFixed | 0x00002000,
+  LSLV_x  = DataProcessing2SourceFixed | 0x80002000,
+  LSLV    = LSLV_w,
+  LSRV_w  = DataProcessing2SourceFixed | 0x00002400,
+  LSRV_x  = DataProcessing2SourceFixed | 0x80002400,
+  LSRV    = LSRV_w,
+  ASRV_w  = DataProcessing2SourceFixed | 0x00002800,
+  ASRV_x  = DataProcessing2SourceFixed | 0x80002800,
+  ASRV    = ASRV_w,
+  RORV_w  = DataProcessing2SourceFixed | 0x00002C00,
+  RORV_x  = DataProcessing2SourceFixed | 0x80002C00,
+  RORV    = RORV_w,
+  CRC32B  = DataProcessing2SourceFixed | 0x00004000,
+  CRC32H  = DataProcessing2SourceFixed | 0x00004400,
+  CRC32W  = DataProcessing2SourceFixed | 0x00004800,
+  CRC32X  = DataProcessing2SourceFixed | SixtyFourBits | 0x00004C00,
+  CRC32CB = DataProcessing2SourceFixed | 0x00005000,
+  CRC32CH = DataProcessing2SourceFixed | 0x00005400,
+  CRC32CW = DataProcessing2SourceFixed | 0x00005800,
+  CRC32CX = DataProcessing2SourceFixed | SixtyFourBits | 0x00005C00
 };
 
 // Data processing 3 source.
@@ -1038,11 +1087,18 @@ enum FPFixedPointConvertOp {
   UCVTF_dx_fixed  = UCVTF_fixed | SixtyFourBits | FP64
 };
 
-// Unknown instruction. These are defined to make fixed bit assertion easier.
-enum UnknownOp {
-  UnknownFixed = 0x00000000,
-  UnknownFMask = 0x00000000
+// Unimplemented and unallocated instructions. These are defined to make fixed
+// bit assertion easier.
+enum UnimplementedOp {
+  UnimplementedFixed = 0x00000000,
+  UnimplementedFMask = 0x00000000
 };
+
+enum UnallocatedOp {
+  UnallocatedFixed = 0x00000000,
+  UnallocatedFMask = 0x00000000
+};
+
 }  // namespace vixl
 
 #endif  // VIXL_A64_CONSTANTS_A64_H_

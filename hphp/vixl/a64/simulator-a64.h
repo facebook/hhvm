@@ -32,6 +32,7 @@
 #include "hphp/vixl/a64/instructions-a64.h"
 #include "hphp/vixl/a64/assembler-a64.h"
 #include "hphp/vixl/a64/disasm-a64.h"
+#include "hphp/vixl/a64/instrument-a64.h"
 
 namespace vixl {
 
@@ -62,6 +63,58 @@ const unsigned kPrintfLength = 2 * kInstructionSize;
 
 const Instr kHostCallOpcode = 0xdeb4;
 const unsigned kHostCallCountOffset = 1 * kInstructionSize;
+
+// The proper way to initialize a simulated system register (such as NZCV) is as
+// follows:
+//  SimSystemRegister nzcv = SimSystemRegister::DefaultValueFor(NZCV);
+class SimSystemRegister {
+ public:
+  // The default constructor represents a register which has no writable bits.
+  // It is not possible to set its value to anything other than 0.
+  SimSystemRegister() : value_(0), write_ignore_mask_(0xffffffff) { }
+
+  inline uint32_t RawValue() const {
+    return value_;
+  }
+
+  inline void SetRawValue(uint32_t new_value) {
+    value_ = (value_ & write_ignore_mask_) | (new_value & ~write_ignore_mask_);
+  }
+
+  inline uint32_t Bits(int msb, int lsb) const {
+    return unsigned_bitextract_32(msb, lsb, value_);
+  }
+
+  inline int32_t SignedBits(int msb, int lsb) const {
+    return signed_bitextract_32(msb, lsb, value_);
+  }
+
+  void SetBits(int msb, int lsb, uint32_t bits);
+
+  // Default system register values.
+  static SimSystemRegister DefaultValueFor(SystemRegister id);
+
+#define DEFINE_GETTER(Name, HighBit, LowBit, Func)                            \
+  inline uint32_t Name() const { return Func(HighBit, LowBit); }              \
+  inline void Set##Name(uint32_t bits) { SetBits(HighBit, LowBit, bits); }
+#define DEFINE_WRITE_IGNORE_MASK(Name, Mask)                                  \
+  static const uint32_t Name##WriteIgnoreMask = ~static_cast<uint32_t>(Mask);
+
+  SYSTEM_REGISTER_FIELDS_LIST(DEFINE_GETTER, DEFINE_WRITE_IGNORE_MASK)
+
+#undef DEFINE_ZERO_BITS
+#undef DEFINE_GETTER
+
+ protected:
+  // Most system registers only implement a few of the bits in the word. Other
+  // bits are "read-as-zero, write-ignored". The write_ignore_mask argument
+  // describes the bits which are not modifiable.
+  SimSystemRegister(uint32_t value, uint32_t write_ignore_mask)
+      : value_(value), write_ignore_mask_(write_ignore_mask) { }
+
+  uint32_t value_;
+  uint32_t write_ignore_mask_;
+};
 
 class Simulator : public DecoderVisitor {
  public:
@@ -281,14 +334,19 @@ class Simulator : public DecoderVisitor {
   REGISTER_CODE_LIST(FPREG_ACCESSORS)
   #undef FPREG_ACCESSORS
 
-  bool N() { return (psr_ & NFlag) != 0; }
-  bool Z() { return (psr_ & ZFlag) != 0; }
-  bool C() { return (psr_ & CFlag) != 0; }
-  bool V() { return (psr_ & VFlag) != 0; }
-  uint32_t nzcv() { return psr_ & (NFlag | ZFlag | CFlag | VFlag); }
+  bool N() { return nzcv_.N() != 0; }
+  bool Z() { return nzcv_.Z() != 0; }
+  bool C() { return nzcv_.C() != 0; }
+  bool V() { return nzcv_.V() != 0; }
+  SimSystemRegister& nzcv() { return nzcv_; }
+
+  // TODO(jbramley): Find a way to make the fpcr_ members return the proper
+  // types, so this accessor is not necessary.
+  FPRounding RMode() { return static_cast<FPRounding>(fpcr_.RMode()); }
+  SimSystemRegister& fpcr() { return fpcr_; }
 
   // Debug helpers
-  void PrintFlags(bool print_all = false);
+  void PrintSystemRegisters(bool print_all = false);
   void PrintRegisters(bool print_all_regs = false);
   void PrintFPRegisters(bool print_all_regs = false);
   void PrintProcessorState();
@@ -313,6 +371,16 @@ class Simulator : public DecoderVisitor {
         decoder_->RemoveVisitor(print_disasm_);
       }
       disasm_trace_ = value;
+    }
+  }
+  inline void set_instruction_stats(bool value) {
+    if (value != instruction_stats_) {
+      if (value) {
+        decoder_->AppendVisitor(instrumentation_);
+      } else {
+        decoder_->RemoveVisitor(instrumentation_);
+      }
+      instruction_stats_ = value;
     }
   }
 
@@ -348,6 +416,7 @@ class Simulator : public DecoderVisitor {
         return !Z() && (N() == V());
       case le:
         return !(!Z() && (N() == V()));
+      case nv:  // Fall through.
       case al:
         return true;
       default:
@@ -408,6 +477,12 @@ class Simulator : public DecoderVisitor {
 
   void FPCompare(double val0, double val1);
   double FPRoundInt(double value, FPRounding round_mode);
+  double FPToDouble(float value);
+  float FPToFloat(double value, FPRounding round_mode);
+  double FixedToDouble(int64_t src, int fbits, FPRounding round_mode);
+  double UFixedToDouble(uint64_t src, int fbits, FPRounding round_mode);
+  float FixedToFloat(int64_t src, int fbits, FPRounding round_mode);
+  float UFixedToFloat(uint64_t src, int fbits, FPRounding round_mode);
   int32_t FPToInt32(double value, FPRounding rmode);
   int64_t FPToInt64(double value, FPRounding rmode);
   uint32_t FPToUInt32(double value, FPRounding rmode);
@@ -426,6 +501,9 @@ class Simulator : public DecoderVisitor {
   FILE* stream_;
   PrintDisassembler* print_disasm_;
 
+  // Instruction statistics instrumentation.
+  Instrument* instrumentation_;
+
   // General purpose registers. Register 31 is the stack pointer.
   SimRegister registers_[kNumberOfRegisters];
 
@@ -435,17 +513,33 @@ class Simulator : public DecoderVisitor {
   // Program Status Register.
   // bits[31, 27]: Condition flags N, Z, C, and V.
   //               (Negative, Zero, Carry, Overflow)
-  uint32_t psr_;
+  SimSystemRegister nzcv_;
 
-  // Condition flags.
-  void SetFlags(uint32_t new_flags);
+  // Floating-Point Control Register
+  SimSystemRegister fpcr_;
 
-  static inline uint32_t CalcNFlag(int64_t result, unsigned reg_size) {
-    return ((result >> (reg_size - 1)) & 1) * NFlag;
+  // Only a subset of FPCR features are supported by the simulator. This helper
+  // checks that the FPCR settings are supported.
+  //
+  // This is checked when floating-point instructions are executed, not when
+  // FPCR is set. This allows generated code to modify FPCR for external
+  // functions, or to save and restore it when entering and leaving generated
+  // code.
+  void AssertSupportedFPCR() {
+    assert(fpcr().DN() == 0);             // No default-NaN support.
+    assert(fpcr().FZ() == 0);             // No flush-to-zero support.
+    assert(fpcr().RMode() == FPTieEven);  // Ties-to-even rounding only.
+
+    // The simulator does not support half-precision operations so fpcr().AHP()
+    // is irrelevant, and is not checked here.
   }
 
-  static inline uint32_t CalcZFlag(int64_t result) {
-    return (result == 0) ? static_cast<uint32_t>(ZFlag) : 0;
+  static inline int CalcNFlag(uint64_t result, unsigned reg_size) {
+    return (result >> (reg_size - 1)) & 1;
+  }
+
+  static inline int CalcZFlag(uint64_t result) {
+    return result == 0;
   }
 
   static const uint32_t kConditionFlagsMask = 0xf0000000;
@@ -473,8 +567,12 @@ class Simulator : public DecoderVisitor {
 
  private:
   bool coloured_trace_;
+
   // Indicates whether the disassembly trace is active.
   bool disasm_trace_;
+
+  // Indicates whether the instruction instrumentation is active.
+  bool instruction_stats_;
 };
 }  // namespace vixl
 

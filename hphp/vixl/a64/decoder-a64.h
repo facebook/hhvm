@@ -33,17 +33,6 @@
 #include "hphp/vixl/a64/instructions-a64.h"
 
 
-#ifdef DEBUG
-  #define UNALLOC(I, P)                                                       \
-    if (I->P) {                                                               \
-      printf("Instruction 0x%08" PRIx32 " uses an unallocated encoding.\n",   \
-             I->InstructionBits());                                           \
-    }                                                                         \
-    assert(!(I->P));
-#else
-  #define UNALLOC(I, P) ((void) 0)
-#endif
-
 // List macro containing all visitors needed by the decoder class.
 
 #define VISITOR_LIST(V)             \
@@ -89,7 +78,8 @@
   V(FPDataProcessing3Source)        \
   V(FPIntegerConvert)               \
   V(FPFixedPointConvert)            \
-  V(Unknown)
+  V(Unallocated)                    \
+  V(Unimplemented)
 
 namespace vixl {
 
@@ -146,42 +136,62 @@ class Decoder: public DecoderVisitor {
 
   // Remove a previously registered visitor class from the list of visitors
   // stored by the decoder.
-  void RemoveVisitor(DecoderVisitor *visitor);
+  void RemoveVisitor(DecoderVisitor* visitor);
 
   #define DECLARE(A) void Visit##A(Instruction* instr);
   VISITOR_LIST(DECLARE)
   #undef DECLARE
 
  private:
+  // Decode the PC relative addressing instruction, and call the corresponding
+  // visitors.
+  // On entry, instruction bits 27:24 = 0x0.
+  void DecodePCRelAddressing(Instruction* instr);
+
+  // Decode the add/subtract immediate instruction, and call the corresponding
+  // visitors.
+  // On entry, instruction bits 27:24 = 0x1.
+  void DecodeAddSubImmediate(Instruction* instr);
+
   // Decode the branch, system command, and exception generation parts of
   // the instruction tree, and call the corresponding visitors.
-  // On entry, instruction bits 27:24 = {0x0, 0x4, 0x5, 0x6, 0x7}.
-  void DecodeBranchSystemException(Instruction *instr);
+  // On entry, instruction bits 27:24 = {0x4, 0x5, 0x6, 0x7}.
+  void DecodeBranchSystemException(Instruction* instr);
 
   // Decode the load and store parts of the instruction tree, and call
   // the corresponding visitors.
   // On entry, instruction bits 27:24 = {0x8, 0x9, 0xC, 0xD}.
-  void DecodeLoadStore(Instruction *instr);
+  void DecodeLoadStore(Instruction* instr);
 
   // Decode the logical immediate and move wide immediate parts of the
   // instruction tree, and call the corresponding visitors.
   // On entry, instruction bits 27:24 = 0x2.
-  void DecodeLogical(Instruction *instr);
+  void DecodeLogical(Instruction* instr);
 
   // Decode the bitfield and extraction parts of the instruction tree,
   // and call the corresponding visitors.
   // On entry, instruction bits 27:24 = 0x3.
-  void DecodeBitfieldExtract(Instruction *instr);
+  void DecodeBitfieldExtract(Instruction* instr);
 
   // Decode the data processing parts of the instruction tree, and call the
   // corresponding visitors.
   // On entry, instruction bits 27:24 = {0x1, 0xA, 0xB}.
-  void DecodeDataProcessing(Instruction *instr);
+  void DecodeDataProcessing(Instruction* instr);
 
   // Decode the floating point parts of the instruction tree, and call the
   // corresponding visitors.
   // On entry, instruction bits 27:24 = {0xE, 0xF}.
-  void DecodeFP(Instruction *instr);
+  void DecodeFP(Instruction* instr);
+
+  // Decode the Advanced SIMD (NEON) load/store part of the instruction tree,
+  // and call the corresponding visitors.
+  // On entry, instruction bits 29:25 = 0x6.
+  void DecodeAdvSIMDLoadStore(Instruction* instr);
+
+  // Decode the Advanced SIMD (NEON) data processing part of the instruction
+  // tree, and call the corresponding visitors.
+  // On entry, instruction bits 27:25 = 0x7.
+  void DecodeAdvSIMDDataProcessing(Instruction* instr);
 };
 }  // namespace vixl
 

@@ -40,6 +40,13 @@ IMPLEMENT_DEFAULT_EXTENSION(tokenizer);
 
 const double k_INF = std::numeric_limits<double>::infinity();
 const double k_NAN = std::numeric_limits<double>::quiet_NaN();
+const bool k_PHP_DEBUG =
+#if DEBUG
+        true;
+#else
+        false;
+#endif
+
 
 ///////////////////////////////////////////////////////////////////////////////
 

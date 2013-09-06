@@ -52,6 +52,7 @@ String f_token_name(int64_t token);
 String f_hphp_to_string(CVarRef v);
 extern const double k_INF;
 extern const double k_NAN;
+extern const bool k_PHP_DEBUG;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

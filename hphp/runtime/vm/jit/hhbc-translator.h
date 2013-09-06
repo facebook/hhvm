@@ -535,7 +535,7 @@ private:
 
     void prependToTraces(IRInstruction* inst) {
       for (auto t : m_failedTraceVec) {
-        t->front()->prepend(inst->clone(&m_irf));
+        t->front()->prepend(m_irf.cloneInstruction(inst));
       }
     }
 

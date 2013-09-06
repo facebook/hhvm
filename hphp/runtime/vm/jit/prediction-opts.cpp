@@ -60,12 +60,12 @@ bool instructionsAreSinkable(InputIterator first, InputIterator last) {
  * Optimizations that try to hoist CheckType instructions so that we
  * can specialize code earlier and avoid generic operations.
  */
-void optimizePredictions(IRTrace* const trace, IRFactory* const irFactory) {
+void optimizePredictions(IRTrace* const trace, IRFactory& irFactory) {
   FTRACE(5, "PredOpts:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "PredOpts:^^^^^^^^^^^^^^^^^^^^^\n"); };
 
   auto const sortedBlocks = folly::lazy([&]{
-    return rpoSortCfg(trace, *irFactory);
+    return rpoSortCfg(trace, irFactory);
   });
 
   /*
@@ -112,7 +112,7 @@ void optimizePredictions(IRTrace* const trace, IRFactory* const irFactory) {
      * to either the taken block (exit) or the fallthrough block
      * (specialized).
      */
-    auto const newCheckType = irFactory->gen(
+    auto const newCheckType = irFactory.gen(
       CheckTypeMem,
       checkType->marker(),
       checkType->typeParam(),
@@ -136,7 +136,7 @@ void optimizePredictions(IRTrace* const trace, IRFactory* const irFactory) {
      * IncRef so that any uses of its dest point to the correct new
      * value.  We'll copyProp and get rid of this in a later pass.
      */
-    irFactory->replace(
+    irFactory.replace(
       checkType,
       Mov,
       incRef->dst()

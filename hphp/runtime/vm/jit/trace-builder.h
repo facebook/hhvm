@@ -100,7 +100,7 @@ struct TraceBuilder {
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
 
   IRTrace* trace() const { return m_curTrace; }
-  IRFactory* factory() { return &m_irFactory; }
+  IRFactory& factory() { return m_irFactory; }
   int32_t spOffset() { return m_spOffset; }
   SSATmp* sp() const { return m_spValue; }
   SSATmp* fp() const { return m_fpValue; }

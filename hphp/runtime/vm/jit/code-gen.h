@@ -61,7 +61,7 @@ enum class SyncOptions {
 
 // Information about where code was generated, for pretty-printing.
 struct AsmInfo {
-  explicit AsmInfo(const IRFactory* factory)
+  explicit AsmInfo(const IRFactory& factory)
     : instRanges(factory, TcaRange(nullptr, nullptr))
     , asmRanges(factory, TcaRange(nullptr, nullptr))
     , astubRanges(factory, TcaRange(nullptr, nullptr))
@@ -78,7 +78,7 @@ typedef StateVector<IRInstruction, RegSet> LiveRegs;
 // Stuff we need to preserve between blocks while generating code,
 // and address information produced during codegen.
 struct CodegenState {
-  CodegenState(const IRFactory* factory, const RegAllocInfo& regs,
+  CodegenState(const IRFactory& factory, const RegAllocInfo& regs,
                const LiveRegs& liveRegs, const LifetimeInfo* lifetime,
                AsmInfo* asmInfo)
     : patches(factory, nullptr)
@@ -596,7 +596,7 @@ ObjectData* createClHelper(Class*, int, ActRec*, TypedValue*);
 void genCodeForTrace(IRTrace*                trace,
                      CodeBlock&              mainCode,
                      CodeBlock&              stubsCode,
-                     IRFactory*              irFactory,
+                     IRFactory&              irFactory,
                      vector<TransBCMapping>* bcMap,
                      TranslatorX64*          tx64,
                      const RegAllocInfo&     regs,

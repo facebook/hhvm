@@ -23,7 +23,7 @@ TRACE_SET_MOD(hhir);
 //////////////////////////////////////////////////////////////////////
 
 void cloneToBlock(const BlockList& rpoBlocks,
-                  IRFactory* const irFactory,
+                  IRFactory& irFactory,
                   Block::iterator const first,
                   Block::iterator const last,
                   Block* const target) {
@@ -47,7 +47,7 @@ void cloneToBlock(const BlockList& rpoBlocks,
     assert(!it->isControlFlow());
 
     FTRACE(5, "cloneToBlock({}): {}\n", target->id(), it->toString());
-    auto const newInst = irFactory->cloneInstruction(&*it);
+    auto const newInst = irFactory.cloneInstruction(&*it);
 
     if (auto const numDests = newInst->numDsts()) {
       for (int i = 0; i < numDests; ++i) {

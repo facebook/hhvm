@@ -48,10 +48,23 @@ struct StateVector {
     "StateVector can only be used with Block, IRInstruction, or SSATmp"
   );
 
-  StateVector(const IRFactory* factory, Info init)
+  StateVector(const IRFactory& factory, Info init)
     : m_factory(factory)
     , m_info(numIds(factory, static_cast<Key*>(nullptr)), init)
     , m_init(init) {
+  }
+
+  StateVector(const StateVector& other)
+    : m_factory(other.m_factory)
+    , m_info(other.m_info)
+    , m_init(other.m_init)
+  {}
+
+  StateVector& operator=(const StateVector& other) {
+    assert(&other.m_factory == &m_factory);
+    m_info = other.m_info;
+    m_init = other.m_init;
+    return *this;
   }
 
   void reset() {
@@ -82,14 +95,14 @@ struct StateVector {
   const_iterator cend()   const { return m_info.cend(); }
 
 private:
-  static unsigned numIds(const IRFactory* factory, IRInstruction*) {
-    return factory->numInsts();
+  static unsigned numIds(const IRFactory& factory, IRInstruction*) {
+    return factory.numInsts();
   }
-  static unsigned numIds(const IRFactory* factory, SSATmp*) {
-    return factory->numTmps();
+  static unsigned numIds(const IRFactory& factory, SSATmp*) {
+    return factory.numTmps();
   }
-  static unsigned numIds(const IRFactory* factory, Block*) {
-    return factory->numBlocks();
+  static unsigned numIds(const IRFactory& factory, Block*) {
+    return factory.numBlocks();
   }
 
 private:
@@ -99,7 +112,7 @@ private:
   }
 
 private:
-  const IRFactory* m_factory;
+  const IRFactory& m_factory;
   InfoVector m_info;
   Info m_init;
 };

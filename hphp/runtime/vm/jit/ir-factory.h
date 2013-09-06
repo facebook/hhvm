@@ -182,7 +182,7 @@ public:
   template<class... Args>
   IRInstruction* gen(Args&&... args) {
     return makeInstruction(
-      [this] (IRInstruction* inst) { return inst->clone(this); },
+      [this] (IRInstruction* inst) { return cloneInstruction(inst); },
       std::forward<Args>(args)...
     );
   }
@@ -198,7 +198,7 @@ public:
   template<class... Args>
   void replace(IRInstruction* old, Opcode op, Args... args) {
     makeInstruction(
-      [&] (IRInstruction* replacement) { old->become(this, replacement); },
+      [&] (IRInstruction* replacement) { old->become(*this, replacement); },
       op,
       old->marker(),
       std::forward<Args>(args)...
@@ -206,7 +206,7 @@ public:
   }
 
   /*
-   * Clone an instruction and its sources.
+   * Deep-copy an IRInstruction and its src/dests.
    */
   IRInstruction* cloneInstruction(const IRInstruction* inst) {
     auto newInst = new (m_arena) IRInstruction(

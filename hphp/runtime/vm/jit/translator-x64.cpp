@@ -2699,14 +2699,14 @@ void TranslatorX64::traceCodeGen() {
   optimizeTrace(trace, ht.traceBuilder());
   finishPass(" after optimizing ", kOptLevel, nullptr, nullptr);
 
-  auto* factory = &ht.irFactory();
+  auto& factory = ht.irFactory();
   recordBCInstr(OpTraceletGuard, mainCode, mainCode.frontier());
 
   if (dumpIREnabled()) {
     LifetimeInfo lifetime(factory);
     RegAllocInfo regs = allocRegsForTrace(trace, factory, &lifetime);
     finishPass(" after reg alloc ", kRegAllocLevel, &regs, &lifetime);
-    assert(checkRegisters(trace, *factory, regs));
+    assert(checkRegisters(trace, factory, regs));
     AsmInfo ai(factory);
     genCodeForTrace(trace, mainCode, stubsCode, factory, &m_bcMap, this, regs,
                     &lifetime, &ai);
@@ -2715,7 +2715,7 @@ void TranslatorX64::traceCodeGen() {
   } else {
     RegAllocInfo regs = allocRegsForTrace(trace, factory);
     finishPass(" after reg alloc ", kRegAllocLevel, nullptr, nullptr);
-    assert(checkRegisters(trace, *factory, regs));
+    assert(checkRegisters(trace, factory, regs));
     genCodeForTrace(trace, mainCode, stubsCode, factory, &m_bcMap, this, regs);
   }
 

@@ -39,7 +39,7 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   , m_curBlock(nullptr)
   , m_enableCse(false)
   , m_enableSimplification(false)
-  , m_snapshots(&irFactory, nullptr)
+  , m_snapshots(irFactory, nullptr)
   , m_spValue(nullptr)
   , m_fpValue(nullptr)
   , m_spOffset(initialSpOffsetFromFp)
@@ -676,7 +676,7 @@ SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
         StringData::GetStaticString("Internal error: static analysis was "
                                     "wrong about a local variable's type.");
       auto* errorInst = m_irFactory.gen(RaiseError, inst->marker(), cns(error));
-      inst->become(&m_irFactory, errorInst);
+      inst->become(m_irFactory, errorInst);
 
       // It's not a disaster to generate this in unreachable code for
       // now. t2590033.
@@ -951,7 +951,7 @@ SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst, CloneFlag doClone) {
   }
   // Couldn't CSE or simplify the instruction; clone it and append.
   if (inst->op() != Nop) {
-    if (doClone == CloneFlag::Yes) inst = inst->clone(&m_irFactory);
+    if (doClone == CloneFlag::Yes) inst = m_irFactory.cloneInstruction(inst);
     appendInstruction(inst);
     // returns nullptr if instruction has no dest, returns the first
     // (possibly only) dest otherwise
@@ -1359,7 +1359,7 @@ void TraceBuilder::killLocalsForCall() {
 
       if (t->inst()->op() == LdConst) {
         // make the new DefConst instruction
-        IRInstruction* clone = t->inst()->clone(&m_irFactory);
+        IRInstruction* clone = m_irFactory.cloneInstruction(t->inst());
         clone->setOpcode(DefConst);
         loc.value = clone->dst();
         continue;

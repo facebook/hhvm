@@ -730,9 +730,9 @@ void IRInstruction::convertToMov() {
   assert(m_numDsts == 1);
 }
 
-void IRInstruction::become(IRFactory* factory, IRInstruction* other) {
+void IRInstruction::become(IRFactory& factory, IRInstruction* other) {
   assert(other->isTransient() || m_numDsts == other->m_numDsts);
-  auto& arena = factory->arena();
+  auto& arena = factory.arena();
 
   // Copy all but m_id, m_taken.from, m_listNode, m_marker, and don't clone
   // dests---the whole point of become() is things still point to us.
@@ -743,10 +743,6 @@ void IRInstruction::become(IRFactory* factory, IRInstruction* other) {
   m_srcs = new (arena) SSATmp*[m_numSrcs];
   std::copy(other->m_srcs, other->m_srcs + m_numSrcs, m_srcs);
   setTaken(other->taken());
-}
-
-IRInstruction* IRInstruction::clone(IRFactory* factory) const {
-  return factory->cloneInstruction(this);
 }
 
 SSATmp* IRInstruction::src(uint32_t i) const {

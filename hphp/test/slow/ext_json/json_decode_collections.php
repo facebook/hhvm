@@ -168,6 +168,9 @@ function report($msg, $obj1, $obj2) {
 // Works only when objects consist of
 // hack collections and primitive types.
 function is_equal($obj1, $obj2) {
+  if ($obj1 === null && $obj2 === null) {
+    return true;
+  }
   $type1 = get_class($obj1);
   $type2 = get_class($obj2);
   if ($type1 !== $type2) {

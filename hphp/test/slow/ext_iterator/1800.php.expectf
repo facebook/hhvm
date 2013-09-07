@@ -15,4 +15,4 @@ array(5) {
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/symlink => 3
 "
 }
-Total: 5 files, 4561 bytes
+Total: 5 files, %d bytes

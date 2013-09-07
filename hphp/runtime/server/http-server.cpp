@@ -434,6 +434,17 @@ void HttpServer::checkMemory() {
   }
 }
 
+void HttpServer::getSatelliteStats(vector<std::pair<std::string, int>> *stats) {
+  for (auto i : m_satellites) {
+    std::pair<std::string, int> active("satellite." + i->getName() + ".load",
+                                       i->getActiveWorker());
+    std::pair<std::string, int> queued("satellite." + i->getName() + ".queued",
+                                       i->getQueuedJobs());
+    stats->push_back(active);
+    stats->push_back(queued);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // page server
 

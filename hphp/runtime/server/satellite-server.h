@@ -47,6 +47,8 @@ public:
 
   virtual void start() = 0;
   virtual void stop() = 0;
+  virtual int getActiveWorker() = 0;
+  virtual int getQueuedJobs() = 0;
 
 private:
   std::string m_name;

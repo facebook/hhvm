@@ -1,1 +1,2 @@
-Trying to load testCore via ClassAutoloader::loader() myClass
+Trying to load testCore via ClassAutoloader::loader()
+string(7) "myClass"

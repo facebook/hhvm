@@ -375,8 +375,16 @@ struct Inc {
 
   void nonNumericString(Cell& cell) const {
     auto const sd = cell.m_data.pstr;
-    auto const newSd = StringData::Make(sd, CopyString);
-    newSd->inc();
+    auto const newSd = [&]() -> StringData* {
+      auto const tmp = StringData::Make(sd, CopyString);
+      auto const tmp2 = tmp->increment();
+      if (tmp2 != tmp) {
+        assert(tmp->getCount() == 0);
+        tmp->release();
+        return tmp2;
+      }
+      return tmp;
+    }();
     newSd->incRefCount();
     decRefStr(sd);
     cellCopy(make_tv<KindOfString>(newSd), cell);

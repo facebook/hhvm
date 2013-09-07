@@ -81,27 +81,13 @@ inline StringData* StringData::Make(const StringData* s1, const char* lit2) {
 
 //////////////////////////////////////////////////////////////////////
 
-inline StringData* StringData::MakeMalloced(const char* data, int len) {
-  auto const sd = static_cast<StringData*>(malloc(sizeof(StringData)));
-  try {
-    sd->initMalloc(data, len);
-  } catch (...) {
-    free(sd);
-    throw;
-  }
-  assert(sd->checkSane());
-  return sd;
-}
-
-//////////////////////////////////////////////////////////////////////
-
 inline void StringData::destruct() {
   assert(checkSane());
 
   // N.B. APC code assumes it is legal to call destruct() on a static
   // string.  Probably it shouldn't do that....
   if (!isStatic()) {
-    releaseDataSlowPath();
+    assert(m_data == static_cast<void*>(this + 1));
     free(this);
   }
 }
@@ -112,6 +98,7 @@ inline void StringData::invalidateHash() {
   assert(!isImmutable());
   assert(getCount() <= 1);
   m_hash = 0;
+  assert(checkSane());
 }
 
 inline void StringData::setSize(int len) {
@@ -120,17 +107,17 @@ inline void StringData::setSize(int len) {
   m_data[len] = 0;
   m_len = len;
   m_hash = 0;
+  assert(checkSane());
 }
 
 inline StringData* StringData::modifyChar(int offset, char c) {
   assert(offset >= 0 && offset < size() && !isStatic());
   assert(getCount() <= 1);
 
-  if (isImmutable()) escalate(size());
-  m_data[offset] = c;
-  m_hash = 0;
-
-  return this;
+  auto const sd = isShared() ? escalate(size()) : this;
+  sd->m_data[offset] = c;
+  sd->m_hash = 0;
+  return sd;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -138,5 +125,3 @@ inline StringData* StringData::modifyChar(int offset, char c) {
 }
 
 #endif
-
-

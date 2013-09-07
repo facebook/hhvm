@@ -397,22 +397,30 @@ StringData* StringData::Make(const char* data, CopyStringMode) {
 }
 
 HOT_FUNC
-void StringData::initMalloc(const char* data, int len) {
+StringData* StringData::MakeMalloced(const char* data, int len) {
   if (UNLIKELY(uint32_t(len) > MaxSize)) {
     throw_string_too_large(len);
   }
 
-  m_lenAndCount = len;
-  m_capAndHash  = -static_cast<uint32_t>(len + 1); // cap < 0 means malloc'd
-  m_data        = static_cast<char*>(malloc(len + 1));
+  auto const cap = static_cast<uint32_t>(len) + 1;
+  auto const sd = static_cast<StringData*>(
+    std::malloc(sizeof(StringData) + cap)
+  );
 
-  m_data[len] = 0;
-  memcpy(m_data, data, len);
+  sd->m_lenAndCount = len;
+  sd->m_capAndHash  = cap;
+  sd->m_data        = reinterpret_cast<char*>(sd + 1);
 
-  assert(m_hash == 0);
-  assert(m_count == 0);
-  assert(checkSane());
-  assert(mode() == Mode::Malloc);
+  sd->m_data[len] = 0;
+  auto const mcret = memcpy(sd->m_data, data, len);
+  auto const ret   = reinterpret_cast<StringData*>(mcret) - 1;
+
+  assert(ret == sd);
+  assert(ret->m_hash == 0);
+  assert(ret->m_count == 0);
+  assert(ret->isFlat());
+  assert(ret->checkSane());
+  return ret;
 }
 
 HOT_FUNC
@@ -470,25 +478,12 @@ StringData* StringData::Make(StringSlice s1, const char* lit2) {
 HOT_FUNC NEVER_INLINE
 void StringData::releaseDataSlowPath() {
   assert(!isFlat());
+  assert(isShared());
   assert(checkSane());
 
-  auto const loadedMode = modeNonFlat();
-
-  if (loadedMode == Mode::Smart) {
-    smart_free(m_data);
-    freeForSize(this, sizeof(StringData) + promotedPayload()->oldFlatCap);
-    return;
-  }
-
-  if (loadedMode == Mode::Shared) {
-    sharedPayload()->shared->decRef();
-    delist();
-    freeForSize(this, sizeof(StringData) + sizeof(SharedPayload));
-    return;
-  }
-
-  assert(loadedMode == Mode::Malloc);
-  free(m_data);
+  sharedPayload()->shared->decRef();
+  delist();
+  freeForSize(this, sizeof(StringData) + sizeof(SharedPayload));
 }
 
 HOT_FUNC
@@ -519,10 +514,13 @@ StringData* StringData::Make(int reserveLen) {
   return sd;
 }
 
-void StringData::append(const char* s, int len) {
+StringData* StringData::append(StringSlice range) {
   assert(!isStatic() && getCount() <= 1);
 
-  if (len == 0) return;
+  auto s = range.ptr;
+  auto const len = range.len;
+
+  if (len == 0) return this;
   if (UNLIKELY(uint32_t(len) > MaxSize)) {
     throw_string_too_large(len);
   }
@@ -530,81 +528,51 @@ void StringData::append(const char* s, int len) {
     throw_string_too_large2(size_t(len) + size_t(m_len));
   }
 
-  const uint32_t newLen = m_len + len;
+  auto const newLen = m_len + len;
 
   /*
-   * In case we're being to asked to append our own string, we need to
-   * load the old pointer value (it might change when we reserve
-   * below).
-   *
-   * We don't allow appending with an interior pointers here, although
-   * we may be asked to append less than the whole string.
+   * We may have an aliasing append.  We don't allow appending with an
+   * interior pointer, although we may be asked to append less than
+   * the whole string in an aliasing situation.
    */
-  auto const oldDataPtr = rawdata();
   assert(uintptr_t(s) <= uintptr_t(rawdata()) ||
          uintptr_t(s) >= uintptr_t(rawdata() + capacity()));
   assert(s != rawdata() || len <= m_len);
 
-  auto const mslice = UNLIKELY(isShared()) ? escalate(newLen)
+  auto const target = UNLIKELY(isShared()) ? escalate(newLen)
                                            : reserve(newLen);
-  if (UNLIKELY(s == oldDataPtr)) s = mslice.ptr;
+  auto const mslice = target->mutableSlice();
 
   /*
    * memcpy is safe even if it's a self append---the regions will be
-   * disjoint, since s can't point past our oldDataPtr, and len is
-   * smaller than the old length.
+   * disjoint, since s can't point past the start of our source
+   * pointer, and len is smaller than the old length.
    */
   memcpy(mslice.ptr + m_len, s, len);
 
-  setSize(newLen);
-  assert(checkSane());
+  target->setSize(newLen);
+  assert(target->checkSane());
+
+  return target;
 }
 
-MutableSlice StringData::reserve(int cap) {
+StringData* StringData::reserve(int cap) {
   assert(!isImmutable() && m_count <= 1 && cap >= 0);
-  if (cap + 1 <= capacity()) return mutableSlice();
+  assert(isFlat());
 
-  switch (mode()) {
-  default: assert(false);
-  case Mode::Flat:
-    {
-      auto const newData = static_cast<char*>(smart_malloc(cap + 1));
-      memcpy(newData, m_data, m_len + 1);   // includes \0
-      m_data = newData;
-      promotedPayload()->oldFlatCap = m_cap;
-      setModeAndCap(Mode::Smart, cap + 1);
-    }
-    break;
-  case Mode::Smart:
-    // We only use geometric growth when we're heading to the smart
-    // allocator.  This is mostly because it was what was tested as
-    // a perf win, but it might make sense to do it for Mode::Malloc
-    // as well.  Will be revisited soon.
-    cap += cap >> 2;
-    if (cap > MaxCap) cap = MaxCap;
-    m_data = static_cast<char*>(smart_realloc(m_data, cap + 1));
-    setModeAndCap(Mode::Smart, cap + 1);
-    break;
-  case Mode::Malloc:
-    m_data = static_cast<char*>(realloc(m_data, cap + 1));
-    setModeAndCap(Mode::Malloc, cap + 1);
-    break;
-  }
+  if (cap + 1 <= capacity()) return this;
 
-  assert(checkSane());
-  return MutableSlice(m_data, cap);
-}
-
-StringData* StringData::shrink(int len) {
-  setSize(len);
-
-  // Only shrink allocation for malloc'd strings.
-  if (mode() == Mode::Malloc) {
-    m_data = (char*) realloc(m_data, len + 1);
-    setModeAndCap(Mode::Malloc, len + 1);
-  }
-
-  return this;
+  cap += cap >> 2;
+  if (cap > MaxCap) cap = MaxCap;
+  auto const sd = Make(cap);
+  auto const src = slice();
+  auto const dst = sd->mutableData();
+  sd->setSize(src.len);
+  auto const mcret = memcpy(dst, src.ptr, src.len);
+  auto const ret = static_cast<StringData*>(mcret) - 1;
+  assert(ret == sd);
+  assert(ret->checkSane());
+  return ret;
 }
 
 StringData* StringData::copy(bool sharedMemory /* = false */) const {
@@ -621,30 +589,19 @@ StringData* StringData::copy(bool sharedMemory /* = false */) const {
   return StringData::Make(slice(), CopyString);
 }
 
-/*
- * Change to smart-malloced string.  Then returns a mutable slice of
- * the usable string buffer (minus space for the null terminator).
- */
-MutableSlice StringData::escalate(uint32_t cap) {
+// State transition from Mode::Shared to Mode::Flat.
+StringData* StringData::escalate(uint32_t cap) {
   assert(isShared() && !isStatic() && cap >= m_len);
 
-  auto const buf = static_cast<char*>(smart_malloc(cap + 1));
-  auto const s = slice();
-  memcpy(buf, s.ptr, s.len);
-  buf[s.len] = 0;
-
-  sharedPayload()->shared->decRef();
-  delist();
-
-  // We have to store this so we know what to free later.
-  promotedPayload()->oldFlatCap = sizeof(SharedPayload);
-
-  m_data = buf;
-  setModeAndCap(Mode::Smart, cap + 1);
-  // clear precomputed hashcode XXX why
-  m_hash = 0;
-  assert(checkSane());
-  return MutableSlice(buf, cap);
+  auto const sd = Make(cap);
+  auto const src = slice();
+  auto const dst = sd->mutableData();
+  sd->setSize(src.len);
+  auto const mcret = memcpy(dst, src.ptr, src.len);
+  auto const ret = static_cast<StringData*>(mcret) - 1;
+  assert(ret == sd);
+  assert(ret->checkSane());
+  return ret;
 }
 
 void StringData::dump() const {
@@ -691,15 +648,18 @@ StringData *StringData::getChar(int offset) const {
   return GetStaticString("");
 }
 
-void StringData::inc() {
+StringData* StringData::increment() {
   assert(!isStatic());
   assert(!empty());
 
-  if (isImmutable()) {
-    escalate(m_len + 1);
-  } else {
-    reserve(m_len + 1);
-  }
+  auto const sd = UNLIKELY(isShared())
+    ? escalate(m_len + 1)
+    : reserve(m_len + 1);
+  sd->incrementHelper();
+  return sd;
+}
+
+void StringData::incrementHelper() {
   m_hash = 0;
 
   enum class CharKind {
@@ -981,11 +941,6 @@ bool StringData::checkSane() const {
     assert(m_data == voidPayload());
   } else {
     assert(m_data && m_data != voidPayload());
-  }
-
-  if (isSmart()) {
-    assert(promotedPayload()->oldFlatCap < capacity());
-    assert(promotedPayload()->oldFlatCap >= sizeof(PromotedPayload));
   }
 
   return true;

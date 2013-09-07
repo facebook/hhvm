@@ -110,6 +110,7 @@ void StringBuffer::clear() {
 
 void StringBuffer::release() {
   if (m_str) {
+    assert(m_str->getCount() == 0);
     m_buffer[m_len] = 0; // appease StringData::checkSane()
     m_str->release();
   }
@@ -131,7 +132,13 @@ char* StringBuffer::appendCursor(int size) {
   } else if (m_cap - m_len < size) {
     m_buffer[m_len] = 0;
     m_str->setSize(m_len);
-    MutableSlice s = m_str->reserve(m_len + size);
+    auto const tmp = m_str->reserve(m_len + size);
+    if (UNLIKELY(tmp != m_str)) {
+      assert(m_str->getCount() == 0);
+      m_str->release();
+      m_str = tmp;
+    }
+    auto const s = m_str->mutableSlice();
     m_buffer = s.ptr;
     m_cap = s.len;
   }
@@ -295,7 +302,13 @@ void StringBuffer::growBy(int spaceRequired) {
 
   m_buffer[m_len] = 0;
   m_str->setSize(m_len);
-  MutableSlice s = m_str->reserve(new_size);
+  auto const tmp = m_str->reserve(new_size);
+  if (UNLIKELY(tmp != m_str)) {
+    assert(m_str->getCount() == 0);
+    m_str->release();
+    m_str = tmp;
+  }
+  auto const s = m_str->mutableSlice();
   m_buffer = s.ptr;
   m_cap = s.len;
 }

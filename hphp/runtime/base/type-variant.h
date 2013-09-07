@@ -1376,15 +1376,15 @@ inline Variant &concat_assign(Variant &v1, litstr s2) = delete;
 
 inline Variant &concat_assign(Variant &v1, CStrRef s2) {
   if (v1.getType() == KindOfString) {
-    StringData *data = v1.getStringData();
-    if (data->getCount() == 1) {
-      data->append(s2.data(), s2.size());
+    auto& str = v1.asStrRef();
+    if (str->getCount() == 1) {
+      str += StringSlice{s2.data(), static_cast<uint32_t>(s2.size())};
       return v1;
     }
   }
-  String s1 = v1.toString();
-  s1 += s2;
 
+  auto s1 = v1.toString();
+  s1 += s2;
   v1 = s1;
   return v1;
 }

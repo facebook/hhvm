@@ -84,49 +84,12 @@ enum ReserveStringMode { ReserveString };
  * Here's a breakdown of string modes, and which configurations are
  * allowed in which allocation mode:
  *
- *          | MakeLowMalloced |  MakeMalloced  | Normal Make (request local)
- *          +-----------------+----------------+----------------------------
- *   Flat   |       X         |                |      X
- *   Smart  |                 |                |      X
- *   Malloc |                 |       X        |
- *   Shared |                 |                |      X
- *
- * The mode discrimination logic is the following:
- *
- *  mode := m_data == this + 1 ? Flat   :
- *          m_cap > 0          ? Smart  :
- *          m_cap == 0         ? Shared : Malloc;
- *
- * (For this, in Malloc mode, the buffer capacity is actually -m_cap.)
+ *          | LowMalloced | Malloced | Normal (request local)
+ *          +-------------+----------+------------------------
+ *   Flat   |      X      |     X    |    X
+ *   Shared |             |          |    X
  */
-class StringData {
-  StringData(const StringData&); // disable copying
-  StringData& operator=(const StringData&);
-
-  enum class Mode : uint8_t {
-    Flat  = 0x0,  // string immediately follows StringData in memory
-    Shared  = 0x1,  // shared memory string
-    Malloc  = 0x2,  // m_big.data is malloc'd
-    Smart   = 0x3,  // m_big.data is smart_malloc'd
-  };
-
-  // When a string transitions from either Flat or Shared to Smart,
-  // we need to keep the old capacity around in the previous Flat
-  // slot so we know what to tell the allocator the size was when we
-  // free this.
-  //
-  // TODO(#1802148): make append() always allocate a new string so
-  // Mode::Smart can go away.
-  struct PromotedPayload {
-    uint32_t oldFlatCap;
-  };
-
-  struct SharedPayload {
-    SweepNode node;
-    SharedVariant* shared;
-  };
-
-public:
+struct StringData {
   /*
    * Max length of a string, not counting the terminal 0.
    *
@@ -196,6 +159,11 @@ public:
    *
    * StringDatas allocated with this function must be freed by calling
    * destruct(), instead of release().
+   *
+   * Important: no string functions which change the StringData may be
+   * called on the returned pointer (e.g. append).  These functions
+   * below are marked by saying they require the string to be request
+   * local.
    */
   static StringData* MakeMalloced(const char* data, int len);
 
@@ -228,17 +196,30 @@ public:
     return nullptr;
   }
 
-  void append(StringSlice r) { append(r.ptr, r.len); }
-  void append(const char *s, int len);
+  /*
+   * Append the supplied range to this string.  If there is not
+   * sufficient capacity in this string to contain the range, a new
+   * string may be returned.
+   *
+   * Pre: !isStatic() && getCount() <= 1
+   * Pre: the string is request-local
+   */
+  StringData* append(StringSlice r);
+
+  // TODO(#2846749): replace uses with appropriate ::Make calls.
   StringData* copy(bool sharedMemory = false) const;
 
   /*
    * Reserve space for a string of length `maxLen' (not counting null
    * terminator).
    *
-   * Returns a slice with the same extents as mutableSlice.
+   * May not be called for strings created with MakeMalloced or
+   * MakeLowMalloced.
+   *
+   * Returns: possibly a new StringData, if we had to reallocate.  The
+   * returned pointer is not yet incref'd.
    */
-  MutableSlice reserve(int maxLen);
+  StringData* reserve(int maxLen);
 
   /*
    * Returns a mutable slice with extents sized to the *buffer* this
@@ -264,8 +245,6 @@ public:
   StringSlice slice() const {
     return StringSlice(m_data, m_len);
   }
-
-  StringData* shrink(int len); // setSize and maybe realloc
 
   /*
    * If external users of this object want to modify it (e.g. through
@@ -303,9 +282,7 @@ public:
    *
    * For shared strings, returns zero.
    */
-  uint32_t capacity() const {
-    return std::abs(m_cap);
-  }
+  uint32_t capacity() const { return m_cap; }
 
   DataType isNumericWithVal(int64_t &lval, double &dval, int allow_errors) const;
   bool isNumeric() const;
@@ -326,6 +303,7 @@ public:
    * Pre: offset >= 0 && offset < size()
    *      getCount() <= 1
    *      !isStatic()
+   *      string must be request local
    */
   StringData* modifyChar(int offset, char c);
 
@@ -337,7 +315,14 @@ public:
    */
   StringData* getChar(int offset) const;
 
-  void inc();
+  /*
+   * Increment this string in the manner of php's ++ operator.  May
+   * return a new string if it had to resize.
+   *
+   * Pre: !isStatic() && !isEmpty()
+   *      string must be request local
+   */
+  StringData* increment();
 
   /*
    * Type conversion functions.
@@ -412,9 +397,17 @@ public:
   static Array GetConstants();
 
 private:
+  struct SharedPayload {
+    SweepNode node;
+    SharedVariant* shared;
+  };
+
+private:
   static StringData* MakeLowMalloced(StringSlice);
   static StringData* InsertStaticString(StringSlice);
 
+  StringData(const StringData&) = delete;
+  StringData& operator=(const StringData&) = delete;
   ~StringData() = delete;
 
 private:
@@ -426,20 +419,14 @@ private:
   SharedPayload* sharedPayload() {
     return static_cast<SharedPayload*>(voidPayload());
   }
-  const PromotedPayload* promotedPayload() const {
-    return static_cast<const PromotedPayload*>(voidPayload());
-  }
-  PromotedPayload* promotedPayload() {
-    return static_cast<PromotedPayload*>(voidPayload());
-  }
 
-  void initMalloc(const char* data, int len);
   void releaseData();
   void releaseDataSlowPath();
   int numericCompare(const StringData *v2) const;
-  MutableSlice escalate(uint32_t cap);
+  StringData* escalate(uint32_t cap);
   void enlist();
   void delist();
+  void incrementHelper();
 
   void destructLowMalloc() ATTRIBUTE_COLD;
 
@@ -451,26 +438,6 @@ private:
   bool isShared() const { return !m_cap; }
   bool isImmutable() const { return isStatic() || isShared(); }
   bool isFlat() const { return m_data == voidPayload(); }
-  bool isSmart() const { return !isFlat() && m_cap > 0; }
-
-  Mode modeNonFlat() const {
-    assert(!isFlat());
-    return m_cap > 0 ? Mode::Smart :
-           m_cap == 0 ? Mode::Shared : Mode::Malloc;
-  }
-
-  Mode mode() const {
-    if (isFlat()) return Mode::Flat;
-    return modeNonFlat();
-  }
-
-  void setModeAndCap(Mode newMode, uint32_t cap) {
-    assert(newMode != Mode::Flat);
-    assert(cap < std::numeric_limits<int32_t>::max());
-    m_cap = newMode == Mode::Smart ? cap :
-            newMode == Mode::Shared ? 0 : -cap;
-    assert(mode() == newMode);
-  }
 
   // Only call preCompute() and setStatic() in a thread-neutral context!
   void preCompute() const;

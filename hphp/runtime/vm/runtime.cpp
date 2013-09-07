@@ -124,11 +124,17 @@ concat_ss(StringData* v1, StringData* v2) {
     // have to release the string here
     v1->decRefCount();
     return ret;
-  } else {
-    v1->append(v2->slice());
-    decRefStr(v2);
-    return v1;
   }
+
+  auto const newV1 = v1->append(v2->slice());
+  decRefStr(v2);
+  if (UNLIKELY(newV1 != v1)) {
+    assert(v1->getCount() == 1);
+    v1->release();
+    newV1->incRefCount();
+    return newV1;
+  }
+  return v1;
 }
 
 /**

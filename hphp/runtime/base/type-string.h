@@ -194,11 +194,14 @@ public:
   }
   CStrRef shrink(int len) {
     assert(m_px);
-    m_px->shrink(len);
+    m_px->setSize(len);
     return *this;
   }
   MutableSlice reserve(int size) {
-    return m_px ? m_px->reserve(size) : MutableSlice("", 0);
+    if (!m_px) return MutableSlice("", 0);
+    auto const tmp = m_px->reserve(size);
+    if (UNLIKELY(tmp != m_px)) StringBase::operator=(tmp);
+    return m_px->mutableSlice();
   }
   const char *c_str() const {
     return m_px ? m_px->data() : "";

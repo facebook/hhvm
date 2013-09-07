@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/file-repository.h"
+#include "hphp/runtime/base/request-local.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,6 +41,15 @@ public:
   Array m_params;
 };
 
+//Create class for to catch shutdown request event. We need to disable stream wrappers registered dynamically on requestshutdown
+class StreamRegister: public RequestEventHandler {
+public:
+  virtual void requestInit();
+  virtual void requestShutdown();
+  DECLARE_STATIC_REQUEST_LOCAL(StreamRegister, s_instance);
+  void listen(){ m_listen=true;  }
+  bool m_listen;
+};
 Resource f_stream_context_create(CArrRef options = null_array,
                                  CArrRef params = null_array);
 

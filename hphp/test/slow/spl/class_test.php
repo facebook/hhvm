@@ -4,4 +4,5 @@ class testCore {
         var_dump("myClass");
     }
 }
+var_dump("myClass expect");
 ?>

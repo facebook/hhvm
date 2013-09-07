@@ -108,6 +108,20 @@ inline void StringData::destruct() {
 
 //////////////////////////////////////////////////////////////////////
 
+inline void StringData::invalidateHash() {
+  assert(!isImmutable());
+  assert(getCount() <= 1);
+  m_hash = 0;
+}
+
+inline void StringData::setSize(int len) {
+  assert(len >= 0 && len < capacity() && !isImmutable());
+  assert(getCount() <= 1);
+  m_data[len] = 0;
+  m_len = len;
+  m_hash = 0;
+}
+
 inline StringData* StringData::modifyChar(int offset, char c) {
   assert(offset >= 0 && offset < size() && !isStatic());
   assert(getCount() <= 1);

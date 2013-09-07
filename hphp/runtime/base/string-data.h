@@ -267,13 +267,16 @@ public:
 
   StringData* shrink(int len); // setSize and maybe realloc
 
-  StringData* setSize(int len) {
-    assert(len >= 0 && len < capacity() && !isImmutable());
-    m_data[len] = 0;
-    m_len = len;
-    m_hash = 0; // invalidate old hash
-    return this;
-  }
+  /*
+   * If external users of this object want to modify it (e.g. through
+   * mutableSlice or mutableData()), they are responsible for either
+   * calling setSize() if the mutation changed the size of the
+   * string, or invalidateHash() if not.
+   *
+   * Pre: !isStatic && getCount() <= 1
+   */
+  void invalidateHash();
+  void setSize(int len);
 
   /*
    * StringData should not generally be allocated on the stack,
@@ -335,7 +338,6 @@ public:
   StringData* getChar(int offset) const;
 
   void inc();
-  void negate();
 
   /*
    * Type conversion functions.

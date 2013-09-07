@@ -781,18 +781,6 @@ void StringData::inc() {
   }
 }
 
-void StringData::negate() {
-  if (empty()) return;
-  // Assume we're a fresh mutable copy.
-  assert(!isImmutable() && m_count <= 1 && m_hash == 0);
-  StringSlice s = slice();
-  char *buf = (char*)s.ptr;
-  for (int i = 0, len = s.len; i < len; i++) {
-    buf[i] = ~(buf[i]);
-  }
-  m_hash = 0;
-}
-
 void StringData::preCompute() const {
   assert(!isShared()); // because we are gonna reuse the space!
   StringSlice s = slice();

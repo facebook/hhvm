@@ -513,8 +513,22 @@ void cellBitNot(Cell& cell) {
       cell.m_data.pstr->decRefCount(); // can't go to zero
       cell.m_data.pstr = newSd;
       cell.m_type = KindOfString;
+    } else {
+      // Unless we go through this branch, the string was just freshly
+      // created, so the following mutation will be safe wrt its
+      // internal hash caching.
+      cell.m_data.pstr->invalidateHash();
     }
-    cell.m_data.pstr->negate();
+
+    {
+      auto const sd   = cell.m_data.pstr;
+      auto const len  = sd->size();
+      auto const data = sd->mutableData();
+      assert(sd->getCount() == 1);
+      for (uint32_t i = 0; i < len; ++i) {
+        data[i] = ~data[i];
+      }
+    }
     break;
 
   default:

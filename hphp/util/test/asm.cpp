@@ -24,8 +24,12 @@
 #include <cstring>
 
 #include <boost/regex.hpp>
-#include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
+
+#include "folly/Format.h"
+#include "folly/String.h"
+
+#include "hphp/util/disasm.h"
 
 namespace HPHP { namespace Transl {
 
@@ -62,7 +66,7 @@ const bool testMax = getenv("ASM_TEST_MAX");
 bool match_opcode_line(const std::string& line,
                        std::string& opName,
                        std::string& opArgs) {
-  static boost::regex re { R"([^\t]*\t[^\t]*\t([a-zA-Z0-9]+)\s+(.*))" };
+  static boost::regex re{ R"(([^\s]*)\s+(.*))" };
   boost::smatch cm;
   if (!regex_match(line, cm, re)) return false;
   opName = cm[1];
@@ -71,16 +75,21 @@ bool match_opcode_line(const std::string& line,
 }
 
 void compare(const char* expectedOpName,
-             std::istream& in,
+             const std::vector<std::string>& actuals,
              const std::vector<std::string>& expecteds) {
   auto expectIt = expecteds.begin();
 
-  std::string expect, real;
+  std::string expect;
   std::string opName, opArgs;
-  while (std::getline(in, real)) {
+  for (auto& real : actuals) {
     if (!match_opcode_line(real, opName, opArgs)) continue;
 
-    EXPECT_EQ(expectedOpName, opName);
+    // The xed library will add operand size suffixes on any opcode
+    // that affects memory.  We could figure this out and check for
+    // it, but it's good enough just to see that the opcode has the
+    // prefix we expect.
+    EXPECT_EQ(true, boost::starts_with(opName, expectedOpName))
+      << "expected " << expectedOpName << ", got " << opName;
 
     if (expectIt == expecteds.end()) {
       EXPECT_EQ(1, 0) << "Incorrect number of assembler lines";
@@ -96,45 +105,26 @@ void compare(const char* expectedOpName,
     << "More lines expected than read";
 }
 
-void dump_disasm(Asm& a, std::ifstream& dump) {
-  char filename[32];
-  char outfile[32];
-  std::strcpy(filename, "/tmp/asmtmXXXXXX");
-  std::strcpy(outfile, "/tmp/asmtmXXXXXX");
-  close(mkstemp(filename));
-  close(mkstemp(outfile));
+std::vector<std::string> dump_disasm(Asm& a) {
+  Disasm dis(Disasm::Options()
+               .addresses(false)
+               .forceAttSyntax(true));
+  std::ostringstream sstream;
+  dis.disasm(sstream, a.base(), a.base() + a.used());
 
-  std::FILE* fp = std::fopen(filename, "w");
-  std::fwrite(a.base(), a.used(), 1, fp);
-  std::fclose(fp);
-
-  const char* objdump = getenv("HHVM_OBJDUMP_PATH");
-  if (!objdump) {
-    objdump = "objdump";
-  }
-
-  system(str(boost::format(
-    "'%s' -D -b binary -mi386 -M x86-64 %s > %s")
-      % objdump
-      % filename
-      % outfile
-    ).c_str());
-
-  dump.open(outfile);
-  unlink(outfile);
-  if (!dump.is_open()) std::abort();
+  std::vector<std::string> ret;
+  folly::split('\n', sstream.str(), ret);
+  return ret;
 }
 
 void expect_asm(Asm& a, const std::string& str) {
-  std::ifstream dump;
-  dump_disasm(a, dump);
+  auto const dump = dump_disasm(a);
 
   std::ostringstream out;
   out << '\n';
 
-  std::string line;
   std::string opName, opArgs;
-  while (std::getline(dump, line)) {
+  for (auto& line : dump) {
     if (match_opcode_line(line, opName, opArgs)) {
       out << opName << ' ' << opArgs << '\n';
     }
@@ -270,14 +260,7 @@ void expected_disp_str(intptr_t disp, std::ostream& out) {
 
 std::string expected_str(MemoryRef mr) {
   std::ostringstream out;
-  /*
-   * Operations with "rbp-like" registers still are encoded with a
-   * displacement byte, even if the displacement is zero.  This wouldn't
-   * matter, but objdump displays the zero displacements for these
-   * registers (presumably because of this), so we have to add it to our
-   * expected string in that case.
-   */
-  if (mr.r.base == rbp || mr.r.base == r13 || mr.r.disp != 0) {
+  if (mr.r.disp != 0) {
     expected_disp_str(mr.r.disp, out);
   }
   out << '(' << expected_str(mr.r.base) << ')';
@@ -286,8 +269,7 @@ std::string expected_str(MemoryRef mr) {
 
 std::string expected_str(IndexedMemoryRef imr) {
   std::ostringstream out;
-  // See above about the rbp/r13 thing.
-  if (imr.r.base == rbp || imr.r.base == r13 || imr.r.disp != 0) {
+  if (imr.r.disp != 0) {
     expected_disp_str(imr.r.disp, out);
   }
   out << '(' << expected_str(imr.r.base)
@@ -315,8 +297,7 @@ void dotest(const char* opName, Asm& a, void (Asm::*memFn)(Arg)) {
     (a.*memFn)(ar);
   }
 
-  std::ifstream dump;
-  dump_disasm(a, dump);
+  auto const dump = dump_disasm(a);
   compare(opName, dump, expecteds);
   a.clear();
 }
@@ -328,16 +309,14 @@ void dotest(const char* opName, Asm& a, void (Asm::*memFn)(Arg1, Arg2),
 
   for (auto& ar1 : args1) {
     for (auto& ar2 : args2) {
-      expecteds.push_back(str(
-        boost::format("%s,%s") % expected_str(ar1)
-                               % expected_str(ar2)
-      ));
+      expecteds.push_back(
+        folly::format("{}, {}", expected_str(ar1), expected_str(ar2)).str()
+      );
       (a.*memFn)(ar1, ar2);
     }
   }
 
-  std::ifstream dump;
-  dump_disasm(a, dump);
+  auto const dump = dump_disasm(a);
   compare(opName, dump, expecteds);
   a.clear();
 }
@@ -457,13 +436,13 @@ TEST(Asm, General) {
   dotest("mov", a, OpRSM32(&Asm::storel));
   dotest("mov", a, OpRSM64(&Asm::storeq));
 
-  dotest("movzbl", a, OpMR32(&Asm::loadzbl));
-  dotest("movzbl", a, OpSMR32(&Asm::loadzbl));
-  dotest("movzbl", a, OpR8R32(&Asm::movzbl));
+  dotest("movzx", a, OpMR32(&Asm::loadzbl));
+  dotest("movzx", a, OpSMR32(&Asm::loadzbl));
+  dotest("movzx", a, OpR8R32(&Asm::movzbl));
 
-  dotest("movsbq", a, OpMR64(&Asm::loadsbq));
-  dotest("movsbq", a, OpSMR64(&Asm::loadsbq));
-  dotest("movsbq", a, OpR8R64(&Asm::movsbq));
+  dotest("movsx", a, OpMR64(&Asm::loadsbq));
+  dotest("movsx", a, OpSMR64(&Asm::loadsbq));
+  dotest("movsx", a, OpR8R64(&Asm::movsbq));
 
   FULL_OP(add);
   FULL_OP(xor);
@@ -514,17 +493,17 @@ TEST(Asm, WordSizeInstructions) {
   expect_asm(a, R"(
 inc %ax
 decw (%r8)
-add %ax,%bx
-xor %r10w,%r11w
-mov %cx,%si
-mov %ax,(%rbx)
-test %r10w,0x10(%rsi)
-sub (%rcx),%ax
-or 0x100(%r11),%dx
-shl $0x3,%di
-and $0x5555,%r12w
-movw $0x1,(%r9)
-movw $0x1,0x100(%rax)
+add %ax, %bx
+xor %r10w, %r11w
+mov %cx, %si
+movw %ax, (%rbx)
+testw %r10w, 0x10(%rsi)
+subw (%rcx), %ax
+orw 0x100(%r11), %dx
+shl $0x3, %di
+and $0x5555, %r12w
+movw $0x1, (%r9)
+movw $0x1, 0x100(%rax)
 )");
 }
 
@@ -579,16 +558,16 @@ TEST(Asm, HighByteReg) {
   // that need a rex prefix
   std::vector<Reg8> hiregs = {ah, bh, ch, dh};
   std::vector<Reg32> reg32s = {eax, ecx, esi, ebp};
-  dotest("movzbl", a, OpR8R32(&Asm::movzbl), hiregs, reg32s);
+  dotest("movzx", a, OpR8R32(&Asm::movzbl), hiregs, reg32s);
 
   a.    movb   (al, ah);
   a.    testb  (0x1, ah);
   a.    cmpb   (ch, dh);
 
   expect_asm(a, R"(
-mov %al,%ah
-test $0x1,%ah
-cmp %ch,%dh
+mov %al, %ah
+test $0x1, %ah
+cmp %ch, %dh
 )");
 }
 
@@ -609,14 +588,14 @@ TEST(Asm, RandomJunk) {
   a.    ret    ();
 
   expect_asm(a, R"(
-push %rbp
-mov %rsp,%rbp
-sub $0x80,%rsp
-mov $0x0,%eax
+pushq %rbp
+mov %rsp, %rbp
+sub $0x80, %rsp
+mov $0x0, %eax
 inc %rax
-mov %rax,0x8(%rsp)
-mov 0x8(%rsp),%rdi
-pop %rbp
+movq %rax, 0x8(%rsp)
+movq 0x8(%rsp), %rdi
+popq %rbp
 retq )" "\n"); // string concat to avoid space at end of line after retq
 }
 
@@ -644,13 +623,13 @@ TEST(Asm, AluBytes) {
 
 #undef FROB
 
-#define FROB(name) \
-#name " %sil,%al\n"          \
-#name " $0xf,%al\n"          \
-#name " %sil,0x10(%rcx)\n"   \
-#name " 0x10(%rsp),%sil\n"   \
-#name " (%rcx,%rsi,8),%al\n" \
-#name " %al,(%rcx,%rsi,8)\n"
+#define FROB(name)                              \
+#name " %sil, %al\n"                            \
+#name " $0xf, %al\n"                            \
+#name "b %sil, 0x10(%rcx)\n"                    \
+#name "b 0x10(%rsp), %sil\n"                    \
+#name "b (%rcx,%rsi,8), %al\n"                  \
+#name "b %al, (%rcx,%rsi,8)\n"
 
   expect_asm(a, "\n" INSTRS "");
 
@@ -665,10 +644,10 @@ TEST(Asm, AluBytes) {
   a.   testb(sil, rcx[rsi * 8]);
 
   expect_asm(a, R"(
-test %sil,%al
-test $0xf,%al
-test %sil,0x10(%rcx)
-test %sil,(%rcx,%rsi,8)
+test %sil, %al
+test $0xf, %al
+testb %sil, 0x10(%rcx)
+testb %sil, (%rcx,%rsi,8)
 )");
 }
 
@@ -679,9 +658,9 @@ TEST(Asm, CMov) {
   a.   cload_reg64_disp_reg64(CC_Z, rax, 0, rax);
   a.   cload_reg64_disp_reg32(CC_Z, rax, 0, rax);
   expect_asm(a, R"(
-test %rax,%rax
-cmove (%rax),%rax
-cmove (%rax),%eax
+test %rax, %rax
+cmovzq (%rax), %rax
+cmovzl (%rax), %eax
 )");
 }
 
@@ -741,12 +720,12 @@ TEST(Asm, ShiftingWithCl) {
   a.    sarq(rsi);
   a.    sarq(r8);
   expect_asm(a, R"(
-shl %cl,%rax
-shl %cl,%rdx
-shl %cl,%r8
-sar %cl,%rbx
-sar %cl,%rsi
-sar %cl,%r8
+shl %cl, %rax
+shl %cl, %rdx
+shl %cl, %r8
+sar %cl, %rbx
+sar %cl, %rsi
+sar %cl, %r8
 )");
 }
 
@@ -761,10 +740,10 @@ TEST(Asm, FloatRounding) {
     a.    roundsd(RoundDirection::truncate, xmm12, xmm9);
 
     expect_asm(a, R"(
-roundsd $0x0,%xmm1,%xmm2
-roundsd $0x1,%xmm2,%xmm4
-roundsd $0x2,%xmm8,%xmm7
-roundsd $0x3,%xmm12,%xmm9
+roundsd $0x0, %xmm1, %xmm2
+roundsd $0x1, %xmm2, %xmm4
+roundsd $0x2, %xmm8, %xmm7
+roundsd $0x3, %xmm12, %xmm9
 )");
   }
 }
@@ -778,11 +757,11 @@ TEST(Asm, SSEDivision) {
   a.    divsd(xmm15, xmm0);
   a.    divsd(xmm12, xmm8);
   expect_asm(a, R"(
-divsd %xmm0,%xmm1
-divsd %xmm1,%xmm2
-divsd %xmm2,%xmm0
-divsd %xmm15,%xmm0
-divsd %xmm12,%xmm8
+divsd %xmm0, %xmm1
+divsd %xmm1, %xmm2
+divsd %xmm2, %xmm0
+divsd %xmm15, %xmm0
+divsd %xmm12, %xmm8
 )");
 }
 
@@ -795,11 +774,11 @@ TEST(Asm, SSESqrt) {
   a.    sqrtsd(xmm15, xmm0);
   a.    sqrtsd(xmm12, xmm8);
   expect_asm(a, R"(
-sqrtsd %xmm0,%xmm1
-sqrtsd %xmm1,%xmm2
-sqrtsd %xmm2,%xmm0
-sqrtsd %xmm15,%xmm0
-sqrtsd %xmm12,%xmm8
+sqrtsd %xmm0, %xmm1
+sqrtsd %xmm1, %xmm2
+sqrtsd %xmm2, %xmm0
+sqrtsd %xmm15, %xmm0
+sqrtsd %xmm12, %xmm8
 )");
 }
 
@@ -812,11 +791,11 @@ TEST(Asm, DoubleToIntConv) {
   a.    cvttsd2siq(xmm15, rdx);
   a.    cvttsd2siq(xmm12, r12);
   expect_asm(a, R"(
-cvttsd2si %xmm0,%rax
-cvttsd2si %xmm1,%rbx
-cvttsd2si %xmm2,%rcx
-cvttsd2si %xmm15,%rdx
-cvttsd2si %xmm12,%r12
+cvttsd2si %xmm0, %rax
+cvttsd2si %xmm1, %rbx
+cvttsd2si %xmm2, %rcx
+cvttsd2si %xmm15, %rdx
+cvttsd2si %xmm12, %r12
 )");
 }
 

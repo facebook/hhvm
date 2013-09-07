@@ -177,7 +177,9 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
     if (xed_error != XED_ERROR_NONE) error("disasm error: xed_decode failed");
 
     // Get disassembled instruction in codeStr
-    if (!xed_format_context(s_xed_syntax, &xedd, codeStr,
+    auto const syntax = m_opts.m_forceAttSyntax ? XED_SYNTAX_ATT
+                                                : s_xed_syntax;
+    if (!xed_format_context(syntax, &xedd, codeStr,
                             MAX_INSTR_ASM_LEN, ip, nullptr)) {
       error("disasm error: xed_format_context failed");
     }
@@ -203,8 +205,10 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
       out << ' ';
     }
     out << m_opts.m_color;
-    const char* fmt = m_opts.m_relativeOffset ? "{:3x}: " : "{:#10x}: ";
-    out << folly::format(fmt, ip - (m_opts.m_relativeOffset ? codeBase : 0));
+    if (m_opts.m_addresses) {
+      const char* fmt = m_opts.m_relativeOffset ? "{:3x}: " : "{:#10x}: ";
+      out << folly::format(fmt, ip - (m_opts.m_relativeOffset ? codeBase : 0));
+    }
     if (m_opts.m_printEncoding) {
       // print encoding, like in objdump
       unsigned posi = 0;

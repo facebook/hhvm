@@ -6,7 +6,7 @@
         }
         private function loader($className) {
             echo 'Trying to load ', $className, ' via ', __METHOD__, "()\n";
-            include './class_'.str_replace("Core","",$className) . '.php';
+            include dirname(__FILE__).'/class_'.str_replace("Core","",$className) . '.php';
         }
     }
 

@@ -403,6 +403,7 @@ private:
   };
 
 private:
+  static StringData* MakeSVSlowPath(SharedVariant*, uint32_t len);
   static StringData* MakeLowMalloced(StringSlice);
   static StringData* InsertStaticString(StringSlice);
 

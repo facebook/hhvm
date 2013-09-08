@@ -303,13 +303,14 @@ StringData* StringData::MakeLowMalloced(StringSlice sl) {
   auto const sd = static_cast<StringData*>(
     Util::low_malloc(sizeof(StringData) + sl.len + 1)
   );
+  auto const data = reinterpret_cast<char*>(sd + 1);
 
-  sd->m_data        = reinterpret_cast<char*>(sd + 1);
+  sd->m_data        = data;
   sd->m_lenAndCount = sl.len;
   sd->m_capAndHash  = sl.len + 1;
 
-  sd->m_data[sl.len] = 0;
-  auto const mcret = memcpy(sd->m_data, sl.ptr, sl.len);
+  data[sl.len] = 0;
+  auto const mcret = memcpy(data, sl.ptr, sl.len);
   auto const ret   = reinterpret_cast<StringData*>(mcret) - 1;
 
   assert(ret == sd);
@@ -328,19 +329,7 @@ void StringData::destructLowMalloc() {
 
 //////////////////////////////////////////////////////////////////////
 
-inline void StringData::enlist() {
-  assert(isShared());
-  auto& head = MemoryManager::TheMemoryManager()->m_strings;
-  // insert after head
-  auto const next = head.next;
-  auto& payload = *sharedPayload();
-  assert(uintptr_t(next) != kMallocFreeWord);
-  payload.node.next = next;
-  payload.node.prev = &head;
-  next->prev = head.next = &payload.node;
-}
-
-inline void StringData::delist() {
+ALWAYS_INLINE void StringData::delist() {
   assert(isShared());
   auto& payload = *sharedPayload();
   auto const next = payload.node.next;
@@ -374,18 +363,21 @@ StringData* StringData::Make(StringSlice sl, CopyStringMode) {
   auto const allocRet = allocFlatForLen(sl.len);
   auto const sd       = allocRet.first;
   auto const cap      = allocRet.second;
+  auto const data     = reinterpret_cast<char*>(sd + 1);
 
-  sd->m_data         = reinterpret_cast<char*>(sd + 1);
+  sd->m_data         = data;
   sd->m_lenAndCount  = sl.len;
   sd->m_capAndHash   = cap - sizeof(StringData);
 
-  sd->m_data[sl.len] = 0;
-  auto const mcret = memcpy(sd->m_data, sl.ptr, sl.len);
+  data[sl.len] = 0;
+  auto const mcret = memcpy(data, sl.ptr, sl.len);
   auto const ret   = reinterpret_cast<StringData*>(mcret) - 1;
 
   assert(ret == sd);
-  assert(ret->m_hash == 0);
+  assert(ret->m_len == sl.len);
   assert(ret->m_count == 0);
+  assert(ret->m_cap == cap - sizeof(StringData));
+  assert(ret->m_hash == 0);
   assert(ret->isFlat());
   assert(ret->checkSane());
   return ret;
@@ -421,32 +413,6 @@ StringData* StringData::MakeMalloced(const char* data, int len) {
   assert(ret->isFlat());
   assert(ret->checkSane());
   return ret;
-}
-
-HOT_FUNC
-StringData* StringData::Make(SharedVariant* shared) {
-  assert(shared && size_t(shared->stringLength()) <= size_t(MaxSize));
-
-  auto const len = shared->stringLength();
-  auto const data = shared->stringData();
-  if (LIKELY(len <= SmallStringReserve)) {
-    return Make(StringSlice(data, len), CopyString);
-  }
-
-  auto const sd = static_cast<StringData*>(
-    MM().smartMallocSize(sizeof(StringData) + sizeof(SharedPayload))
-  );
-
-  sd->m_data        = const_cast<char*>(data);
-  sd->m_lenAndCount = len;
-  sd->m_capAndHash  = 0;   // cap == 0 means Shared.
-
-  sd->sharedPayload()->shared = shared;
-  sd->enlist();
-  shared->incRef();
-
-  assert(sd->checkSane());
-  return sd;
 }
 
 HOT_FUNC
@@ -504,7 +470,6 @@ StringData* StringData::Make(int reserveLen) {
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   data[0] = 0;
-
   sd->m_data        = data;
   sd->m_lenAndCount = 0;
   sd->m_capAndHash  = cap - sizeof(StringData);

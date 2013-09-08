@@ -136,6 +136,86 @@ StringCase:
   assert(m_type != KindOfResource);
 }
 
+ALWAYS_INLINE void StringData::enlist() {
+  assert(isShared());
+  auto& head = MemoryManager::TheMemoryManager()->m_strings;
+  // insert after head
+  auto const next = head.next;
+  auto& payload = *sharedPayload();
+  assert(uintptr_t(next) != kMallocFreeWord);
+  payload.node.next = next;
+  payload.node.prev = &head;
+  next->prev = head.next = &payload.node;
+}
+
+HOT_FUNC NEVER_INLINE
+StringData* StringData::MakeSVSlowPath(SharedVariant* shared, uint32_t len) {
+  auto const data       = shared->stringData();
+  auto const hash       = shared->rawStringData()->m_hash & STRHASH_MASK;
+  auto const capAndHash = static_cast<uint64_t>(hash) << 32;
+
+  auto const sd = static_cast<StringData*>(
+    MM().smartMallocSize(sizeof(StringData) + sizeof(SharedPayload))
+  );
+
+  sd->m_data        = const_cast<char*>(data);
+  sd->m_lenAndCount = len;
+  sd->m_capAndHash  = capAndHash;
+
+  sd->sharedPayload()->shared = shared;
+  sd->enlist();
+  shared->incRef();
+
+  assert(sd->m_len == len);
+  assert(sd->m_count == 0);
+  assert(sd->m_cap == 0); // cap == 0 means shared
+  assert(sd->m_hash == hash);
+  assert(sd->checkSane());
+  return sd;
+}
+
+StringData* StringData::Make(SharedVariant* shared) {
+  // No need to check if len > MaxSize, because if it were we'd never
+  // have made the StringData in the SharedVariant without throwing.
+  assert(size_t(shared->stringLength()) <= size_t(MaxSize));
+
+  auto const len        = shared->stringLength();
+  if (UNLIKELY(len > SmallStringReserve)) {
+    return MakeSVSlowPath(shared, len);
+  }
+
+  auto const psrc       = shared->stringData();
+  auto const hash       = shared->rawStringData()->m_hash & STRHASH_MASK;
+
+  auto const needed = static_cast<uint32_t>(sizeof(StringData) + len + 1);
+  auto const cap    = MemoryManager::smartSizeClass(needed);
+  auto const sd     = static_cast<StringData*>(MM().smartMallocSize(cap));
+  auto const pdst   = reinterpret_cast<char*>(sd + 1);
+
+  auto const capAndHash = static_cast<uint64_t>(hash) << 32 |
+    (cap - sizeof(StringData));
+
+  sd->m_data = pdst;
+  sd->m_lenAndCount = len;
+  sd->m_capAndHash  = capAndHash;
+
+  pdst[len] = 0;
+  auto const mcret = memcpy(pdst, psrc, len);
+  auto const ret   = reinterpret_cast<StringData*>(mcret) - 1;
+
+  // Note: this return value thing is doing a dead lea into %rsi in
+  // the caller for some reason.
+
+  assert(ret == sd);
+  assert(ret->m_len == len);
+  assert(ret->m_count == 0);
+  assert(ret->m_cap == cap - sizeof(StringData));
+  assert(ret->m_hash == hash);
+  assert(ret->isFlat());
+  assert(ret->checkSane());
+  return ret;
+}
+
 HOT_FUNC
 Variant SharedVariant::toLocal() {
   switch (m_type) {

@@ -62,6 +62,15 @@ if (MYSQL_UNIX_SOCK_ADDR)
   add_definitions(-DPHP_MYSQL_UNIX_SOCK_ADDR="${MYSQL_UNIX_SOCK_ADDR}")
 endif()
 
+# postgres checks
+find_package(PgSQL)
+if (NOT PGSQL_FOUND)
+    unset(PGSQL_FOUND CACHE)
+else()
+    add_definitions(-DHAVE_PGSQL)
+endif()
+include_directories(${PGSQL_INCLUDE_DIR})
+
 # libmemcached checks
 find_package(Libmemcached REQUIRED)
 if (LIBMEMCACHED_VERSION VERSION_LESS "0.39")
@@ -286,6 +295,10 @@ else()
 	add_definitions(-DSKIP_IMAP_GSS=1)
 endif()
 
+if (LINK_PAM)
+	find_package(Libpam REQUIRED)
+endif()
+
 if (NOT CCLIENT_HAS_SSL)
 	add_definitions(-DSKIP_IMAP_SSL=1)
 endif()
@@ -437,11 +450,12 @@ endif()
 	target_link_libraries(${target} ${NCURSES_LIBRARY})
 	target_link_libraries(${target} ${CCLIENT_LIBRARY})
 
-	if (CCLIENT_NEEDS_PAM)
+    if (CCLIENT_NEEDS_PAM OR LINK_PAM)
 		target_link_libraries(${target} ${PAM_LIBRARY})
 	endif()
 
         target_link_libraries(${target} ${LIBDWARF_LIBRARIES})
         target_link_libraries(${target} ${LIBELF_LIBRARIES})
 
+    target_link_libraries(${target} ${PGSQL_LIBRARY})
 endmacro()

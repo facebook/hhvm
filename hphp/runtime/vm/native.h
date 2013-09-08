@@ -214,7 +214,7 @@ bool registerConstant(const StringData* cnsName, Cell cns) {
 
 template<DataType DType>
 typename std::enable_if<
-  !std::is_same<typename detail::DataTypeCPPType<DType>::type,void>::value,
+  !(std::is_same<typename detail::DataTypeCPPType<DType>::type,void>::value),
   bool>::type
 registerConstant(const StringData* cnsName,
                  typename detail::DataTypeCPPType<DType>::type val) {

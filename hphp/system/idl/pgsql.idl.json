@@ -1,0 +1,285 @@
+{
+    "preamble": [
+
+    ],
+    "consts": [ ],
+    "funcs": [
+        {
+            "name": "pg_convert",
+            "desc": "pg_convert() checks and converts the values in assoc_array into suitable values for use in an SQL statement. Precondition for pg_convert() is the existence of a table table_name which has at least as many columns as assoc_array has elements. The fieldnames in table_name must match the indices in assoc_array and the corresponding datatypes must be compatible. Returns an array with the converted values on success, FALSE otherwise.\n\nIf there are boolean fields in table_name don't use the constant TRUE in assoc_array. It will be converted to the string 'TRUE' which is no valid entry for boolean fields in PostgreSQL. Use one of t, true, 1, y, yes instead. Warning: This function is EXPERIMENTAL. The behaviour of this function, its name, and surrounding documentation may change without notice in a future release of PHP. This function should be used at your own risk.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "An array of converted values, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "connection",
+                    "type": "Resource",
+                    "desc": "PostgreSQL database connection resource."
+                },
+                {
+                    "name": "table_name",
+                    "type": "String",
+                    "desc": "Name of the table against which to convert types."
+                },
+                {
+                    "name": "assoc_array",
+                    "type": "VariantMap",
+                    "desc": "Data to be converted."
+                },
+                {
+                    "name": "options",
+                    "type": "Int32",
+                    "desc": "Any number of PGSQL_CONV_IGNORE_DEFAULT, PGSQL_CONV_FORCE_NULL or PGSQL_CONV_IGNORE_NOT_NULL, combined.",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "pg_copy_from",
+            "desc": "pg_copy_from() inserts records into a table from rows. It issues a COPY FROM SQL command internally to insert records.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "connection",
+                    "type": "Resource",
+                    "desc": "PostgreSQL database connection resource."
+                },
+                {
+                    "name": "table_name",
+                    "type": "String",
+                    "desc": "Name of the table into which to copy the rows."
+                },
+                {
+                    "name": "rows",
+                    "type": "StringVec",
+                    "desc": "An array of data to be copied into table_name. Each value in rows becomes a row in table_name. Each value in rows should be a delimited string of the values to insert into each field. Values should be linefeed terminated."
+                },
+                {
+                    "name": "delimiter",
+                    "type": "String",
+                    "desc": "The token that separates values for each field in each element of rows. Default is TAB.",
+                    "value": "\"\\t\""
+                },
+                {
+                    "name": "null_as",
+                    "type": "String",
+                    "desc": "How SQL NULL values are represented in the rows. Default is \\N (\"\\\\N\").",
+                    "value": "\"\\n\""
+                }
+            ]
+        },
+        {
+            "name": "pg_copy_to",
+            "desc": "pg_copy_to() copies a table to an array. It issues COPY TO SQL command internally to retrieve records.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "An array with one element for each line of COPY data. It returns FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "connection",
+                    "type": "Resource",
+                    "desc": "PostgreSQL database connection resource."
+                },
+                {
+                    "name": "table_name",
+                    "type": "String",
+                    "desc": "Name of the table from which to copy the data into rows."
+                },
+                {
+                    "name": "delimiter",
+                    "type": "String",
+                    "desc": "The token that separates values for each field in each element of rows. Default is TAB.",
+                    "value": "\"\\t\""
+                },
+                {
+                    "name": "null_as",
+                    "type": "String",
+                    "desc": "How SQL NULL values are represented in the rows. Default is \\N (\"\\\\N\").",
+                    "value": "\"\\n\""
+                }
+            ]
+        },
+        {
+            "name": "pg_end_copy",
+            "desc": "pg_end_copy() syncs the PostgreSQL frontend (usually a web server process) with the PostgreSQL server after doing a copy operation performed by pg_put_line(). pg_end_copy() must be issued, otherwise the PostgreSQL server may get out of sync with the frontend and will report an error.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "connection",
+                    "type": "Resource",
+                    "desc": "PostgreSQL database connection resource."
+                }
+            ]
+        },
+        {
+            "name": "pg_field_type",
+            "desc": "pg_field_type() returns a string containing the base type name of the given field_number in the given PostgreSQL result resource.\n\nIf the field uses a PostgreSQL domain (rather than a basic type), it is the name of the domain's underlying type that is returned, rather than the name of the domain itself.\n\nThis function used to be called pg_fieldtype().",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "A string containing the base name of the field's type, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "result",
+                    "type": "Resource",
+                    "desc": "PostgreSQL query result resource, returned by pg_query(), pg_query_params() or pg_execute() (among others)."
+                },
+                {
+                    "name": "field_number",
+                    "type": "Int64",
+                    "desc": "Field number, starting from 0."
+                }
+            ]
+        },
+        {
+            "name": "pg_get_notify",
+            "desc": "pg_get_notify() gets notifications generated by a NOTIFY SQL command. To receive notifications, the LISTEN SQL command must be issued.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "An array containing the NOTIFY message name and backend PID. Otherwise if no NOTIFY is waiting, then FALSE is returned."
+            },
+            "args": [
+                {
+                    "name": "connection",
+                    "type": "Resource",
+                    "desc": "PostgreSQL database connection resource."
+                },
+                {
+                    "name": "result_type",
+                    "type": "Int64",
+                    "desc": "An optional parameter that controls how the returned array is indexed. result_type is a constant and can take the following values: PGSQL_ASSOC, PGSQL_NUM and PGSQL_BOTH. Using PGSQL_NUM, pg_get_notify() will return an array with numerical indices, using PGSQL_ASSOC it will return only associative indices while PGSQL_BOTH, the default, will return both numerical and associative indices.",
+                    "value": "k_PGSQL_BOTH"
+                }
+            ]
+        },
+        {
+            "name": "pg_last_oid",
+            "desc": "pg_last_oid() is used to retrieve the OID assigned to an inserted row.\n\nOID field became an optional field from PostgreSQL 7.2 and will not be present by default in PostgreSQL 8.1. When the OID field is not present in a table, the programmer must use pg_result_status() to check for successful insertion.\n\nTo get the value of a SERIAL field in an inserted row, it is necessary to use the PostgreSQL CURRVAL function, naming the sequence whose last value is required. If the name of the sequence is unknown, the pg_get_serial_sequence PostgreSQL 8.0 function is necessary.\n\nPostgreSQL 8.1 has a function LASTVAL that returns the value of the most recently used sequence in the session. This avoids the need for naming the sequence, table or column altogether.\n\nThis function used to be called pg_getlastoid().",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "A string containing the OID assigned to the most recently inserted row in the specified connection, or FALSE on error or no available OID."
+            },
+            "args": [
+                {
+                    "name": "result",
+                    "type": "Resource",
+                    "desc": "PostgreSQL query result resource, returned by pg_query(), pg_query_params() or pg_execute() (among others)."
+                }
+            ]
+        },
+        {
+            "name": "pg_pconnect",
+            "desc": "pg_pconnect() opens a connection to a PostgreSQL database. It returns a connection resource that is needed by other PostgreSQL functions.\n\nIf a second call is made to pg_pconnect() with the same connection_string as an existing connection, the existing connection will be returned unless you pass PGSQL_CONNECT_FORCE_NEW as connect_type.\n\nTo enable persistent connection, the pgsql.allow_persistent php.ini directive must be set to \"On\" (which is the default). The maximum number of persistent connection can be defined with the pgsql.max_persistent php.ini directive (defaults to -1 for no limit). The total number of connections can be set with the pgsql.max_links php.ini directive.\n\npg_close() will not close persistent links generated by pg_pconnect().",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "PostgreSQL connection resource on success, FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "connection_string",
+                    "type": "String",
+                    "desc": "The connection_string can be empty to use all default parameters, or it can contain one or more parameter settings separated by whitespace. Each parameter setting is in the form keyword = value. Spaces around the equal sign are optional. To write an empty value or a value containing spaces, surround it with single quotes, e.g., keyword = 'a value'. Single quotes and backslashes within the value must be escaped with a backslash, i.e., \\' and \\\\.\n\nThe currently recognized parameter keywords are: host, hostaddr, port, dbname, user, password, connect_timeout, options, tty (ignored), sslmode, requiressl (deprecated in favor of sslmode), and service. Which of these arguments exist depends on your PostgreSQL version."
+                },
+                {
+                    "name": "connect_type",
+                    "type": "Int64",
+                    "desc": "If PGSQL_CONNECT_FORCE_NEW is passed, then a new connection is created, even if the connection_string is identical to an existing connection.",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "pg_set_client_encoding",
+            "desc": "pg_set_client_encoding() sets the client encoding and returns 0 if success or -1 if error.\n\nPostgreSQL will automatically convert data in the backend database encoding into the frontend encoding.\n\nThe function used to be called pg_setclientencoding().",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Returns 0 on success or -1 on error."
+            },
+            "args": [
+                {
+                    "name": "connection",
+                    "type": "Resource",
+                    "desc": "PostgreSQL database connection resource."
+                },
+                {
+                    "name": "encoding",
+                    "type": "String",
+                    "desc": "The required client encoding. One of SQL_ASCII, EUC_JP, EUC_CN, EUC_KR, EUC_TW, UNICODE, MULE_INTERNAL, LATINX (X=1...9), KOI8, WIN, ALT, SJIS, BIG5 or WIN1250.\n\nThe exact list of available encodings depends on your PostgreSQL version, so check your PostgreSQL manual for a more specific list."
+                }
+            ]
+        },
+        {
+            "name": "pg_trace",
+            "desc": "pg_trace() enables tracing of the PostgreSQL frontend\/backend communication to a file. To fully understand the results, one needs to be familiar with the internals of PostgreSQL communication protocol.\n\nFor those who are not, it can still be useful for tracing errors in queries sent to the server, you could do for example grep '^To backend' trace.log and see what queries actually were sent to the PostgreSQL server. For more information, refer to the PostgreSQL Documentation.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "pathname",
+                    "type": "String",
+                    "desc": "The full path and file name of the file in which to write the trace log. Same as in fopen()."
+                },
+                {
+                    "name": "mode",
+                    "type": "String",
+                    "desc": "File access mode, same as for fopen()."
+                },
+                {
+                    "name": "connection",
+                    "type": "Resource",
+                    "desc": "PostgreSQL database connection resource."
+                }
+            ]
+        },
+        {
+            "name": "pg_untrace",
+            "desc": "Stop tracing started by pg_trace().",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Always returns TRUE."
+            },
+            "args": [
+                {
+                    "name": "connection",
+                    "type": "Resource",
+                    "desc": "PostgreSQL database connection resource."
+                }
+            ]
+        }
+    ],
+    "classes": [
+
+    ]
+}

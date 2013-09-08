@@ -41,7 +41,13 @@ namespace HPHP {
 static_assert(
   sizeof(HphpArray) == 152,
   "Performance is sensitive to sizeof(HphpArray)."
-  " Make sure you changed it with good reason and then update this assert.");
+  " Make sure you changed it with good reason and then update this assert."
+);
+
+static_assert(
+  sizeof(ArrayData) == 24,
+  "ArrayData is expected to take 3 q-words"
+);
 
 TRACE_SET_MOD(runtime);
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,12 +74,22 @@ TRACE_SET_MOD(runtime);
  * separately.  Even larger tables allocate the hashtable and slots
  * contiguously.
  */
-void *HphpArray::SmaAllocatorInitSetup = SmartAllocatorInitSetup<HphpArray>();
+void* HphpArray::SmaAllocatorInitSetup = SmartAllocatorInitSetup<HphpArray>();
 
 //=============================================================================
 // Static members.
 
-HphpArray HphpArray::s_theEmptyArray(StaticEmptyArray);
+std::aligned_storage<
+  sizeof(HphpArray),
+  alignof(HphpArray)
+>::type s_theEmptyArray;
+
+struct HphpArray::EmptyArrayInitializer {
+  EmptyArrayInitializer() {
+    new (HphpArray::GetStaticEmptyArray()) HphpArray(StaticEmptyArray);
+  }
+};
+HphpArray::EmptyArrayInitializer HphpArray::s_arrayInitializer;
 
 //=============================================================================
 // Helpers.
@@ -211,12 +227,6 @@ inline void HphpArray::destroy() {
   if (elms != m_inline_data.slots) modeFree(elms);
 }
 
-HphpArray::~HphpArray() {
-  assert(checkInvariants());
-  if (isPacked()) destroyPacked();
-  else destroy();
-}
-
 HOT_FUNC_VM
 void HphpArray::ReleasePacked(ArrayData* ad) {
   auto a = asPacked(ad);
@@ -300,6 +310,7 @@ bool HphpArray::checkInvariants() const {
     // can't have a tombstone at the end; m_used should have been trimmed.
     assert(!isTombstone(m_data[m_used - 1].data.m_type));
   }
+
   switch (m_kind) {
   case kPackedKind:
     assert(m_size == m_used);
@@ -321,7 +332,8 @@ bool HphpArray::checkInvariants() const {
     assert(false);
     break;
   }
-  if (this == &s_theEmptyArray) {
+
+  if (this == GetStaticEmptyArray()) {
     assert(m_size == 0);
     assert(m_used == 0);
     assert(isPacked());
@@ -1743,7 +1755,7 @@ NEVER_INLINE HphpArray* HphpArray::copyMixed() const {
 
 HOT_FUNC_VM
 HphpArray* ArrayData::MakeTuple(uint size, const TypedValue* data) {
-  auto a = NEW(HphpArray)(size, data);
+  auto a = HphpArray::Make(size, data);
   a->setRefCount(1);
   TRACE(2, "MakeTuple: size %d\n", size);
   return a;
@@ -1751,7 +1763,7 @@ HphpArray* ArrayData::MakeTuple(uint size, const TypedValue* data) {
 
 HOT_FUNC_VM
 HphpArray* ArrayData::MakeReserve(uint capacity) {
-  auto a = NEW(HphpArray)(capacity);
+  auto a = HphpArray::Make(capacity);
   a->setRefCount(1);
   TRACE(2, "MakeReserve: capacity %d\n", capacity);
   return a;

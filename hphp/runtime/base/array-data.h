@@ -111,7 +111,17 @@ public:
   static ArrayData *CreateRef(CVarRef value);
   static ArrayData *CreateRef(CVarRef name, CVarRef value);
 
+  /*
+   * Create a new array with estimated capacity.  The returned array
+   * is not yet incref'd.
+   */
   static HphpArray* Make(uint capacity);
+
+  /*
+   * Create an array or tuple-style array.
+   *
+   * N.B. unlike the above, the returned HphpArray is already incref'd.
+   */
   static HphpArray* MakeReserve(uint capacity);
   static HphpArray* MakeTuple(uint size, const TypedValue*);
 
@@ -520,6 +530,7 @@ public:
  protected:
   ArrayKind m_kind;
   const AllocationMode m_allocMode;
+  UNUSED uint16_t m_forSubClasses; // unused space that subclasses may use
   uint32_t m_size;
   int32_t m_pos;
   mutable RefCount m_count;

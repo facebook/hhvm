@@ -29,10 +29,6 @@ class ArrayInit;
 struct MemoryProfile;
 
 class HphpArray : public ArrayData {
-  enum SortFlavor { IntegerSort, StringSort, GenericSort };
-public:
-  friend class ArrayInit;
-
   // Load factor scaler.  If S is the # of elements, C is the
   // power-of-2 capacity, and L=LoadScale, we grow when S > C-C/L.
   // So 2 gives 0.5 load factor, 4 gives 0.75 load factor, 8 gives
@@ -40,37 +36,48 @@ public:
   static const uint LoadScale = 4;
 
 public:
-  static HphpArray* GetStaticEmptyArray() {
-    return &s_theEmptyArray;
+  struct Elm {
+    /* The key is either a string pointer or an int value, and the _count
+     * field in data is used to discriminate the key type. _count = 0 means
+     * int, nonzero values contain 32 bits of a string's hashcode.
+     * It is critical that when we return &data to clients, that they not
+     * read or write the _count field! */
+    union {
+      int64_t ikey;
+      StringData* key;
+    };
+    // We store values here, but also some information local to this array:
+    // data.m_aux.u_hash contains either 0 (for an int key) or a string
+    // hashcode; the high bit is the int/string key descriminator.
+    // data.m_type == KindOfInvalid if this is an empty slot in the
+    // array (e.g. after a key is deleted).
+    TypedValueAux data;
+    bool hasStrKey() const {
+      return data.hash() != 0;
+    }
+    bool hasIntKey() const {
+      return data.hash() == 0;
+    }
+    int32_t hash() const {
+      return data.hash();
+    }
+    void setStrKey(StringData* k, strhash_t h) {
+      key = k;
+      data.hash() = int32_t(h) | 0x80000000;
+      k->incRefCount();
+    }
+    void setIntKey(int64_t k) {
+      ikey = k;
+      data.hash() = 0;
+    }
+  };
+
+  template<class... Args> static HphpArray* Make(Args&&... args) {
+    return NEW(HphpArray)(std::forward<Args>(args)...);
   }
 
-private:
-  enum class ClonePacked {};
-  HphpArray(const HphpArray& other, AllocationMode, ClonePacked);
+  static HphpArray* GetStaticEmptyArray();
 
-  enum class CloneMixed {};
-  HphpArray(const HphpArray& other, AllocationMode, CloneMixed);
-
-  // convert in-place from kPackedKind to kMixedKind: fill in keys & hashtable
-  HphpArray* packedToMixed();
-
-  // Safe downcast helpers
-  static HphpArray* asPacked(ArrayData* ad);
-  static const HphpArray* asPacked(const ArrayData* ad);
-  static HphpArray* asMixed(ArrayData* ad);
-  static const HphpArray* asMixed(const ArrayData* ad);
-  static HphpArray* asHphpArray(ArrayData* ad);
-  static const HphpArray* asHphpArray(const ArrayData* ad);
-
-public:
-  // Create an empty array with enough capacity for nSize elements.
-  explicit HphpArray(uint nSize);
-
-  // Create and initialize an array with size elements, populated by
-  // moving (without refcounting) and reversing vals.
-  HphpArray(uint size, const TypedValue* vals); // make tuple
-
-  ~HphpArray();
   void destroyPacked();
   void destroy();
 
@@ -83,8 +90,6 @@ public:
     }
     return nextElm(m_data, 0);
   }
-
-  // override/implement ArrayData api's
 
   // these using directives ensure the full set of overloaded functions
   // are visible in this class, to avoid triggering implicit conversions
@@ -161,10 +166,6 @@ public:
   static ArrayData* CopyWithStrongIterators(const ArrayData*);
   static ArrayData* NonSmartCopy(const ArrayData*);
 
-  HphpArray* copyImpl() const;
-  HphpArray* copyPacked() const;
-  HphpArray* copyMixed() const;
-
   static ArrayData* AppendPacked(ArrayData*, CVarRef v, bool copy);
   static ArrayData* Append(ArrayData*, CVarRef v, bool copy);
   static ArrayData* AppendRef(ArrayData*, CVarRef v, bool copy);
@@ -183,12 +184,16 @@ public:
   static void RenumberPacked(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static void OnSetEvalScalarPacked(ArrayData*);
+  static void ReleasePacked(ArrayData*);
+  static void Release(ArrayData*);
 
   // overrides ArrayData
   static bool ValidFullPos(const ArrayData*, const FullPos &fp);
   static bool AdvanceFullPos(ArrayData*, FullPos& fp);
 
-  // END overide/implements section
+  HphpArray* copyImpl() const;
+  HphpArray* copyPacked() const;
+  HphpArray* copyMixed() const;
 
   // nvGet and friends.
   // "nv" stands for non-variant. If we know the types of keys and values
@@ -201,6 +206,8 @@ public:
   static TypedValue* NvGetStrPacked(const ArrayData*, const StringData* k);
   static TypedValue* NvGetInt(const ArrayData*, int64_t ki);
   static TypedValue* NvGetStr(const ArrayData*, const StringData* k);
+  static void NvGetKeyPacked(const ArrayData*, TypedValue* out, ssize_t pos);
+  static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
 
   void nvBind(int64_t k, const TypedValue* v) {
     ArrayData::setRef(k, tvAsCVarRef(v), false);
@@ -211,8 +218,6 @@ public:
   void nvAppend(const TypedValue* v) {
     nextInsertPacked(tvAsCVarRef(v));
   }
-  static void NvGetKeyPacked(const ArrayData*, TypedValue* out, ssize_t pos);
-  static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
   bool nvInsert(StringData* k, TypedValue *v);
 
   /**
@@ -224,19 +229,15 @@ public:
    */
   static ArrayData* AddNewElemC(ArrayData* a, TypedValue value);
 
-  /**
+  /*
    * Inline helpers to be called directly from the TC
    */
   static TypedValue GetCellIntPacked(const ArrayData* ad, int64_t ki);
   static uint64_t IssetIntPacked(const ArrayData* ad, int64_t ki);
 
-private:
-  template <typename AccessorT>
-  SortFlavor preSort(const AccessorT& acc, bool checkTypes);
-
-  void postSort(bool resetKeys);
-
-public:
+  /*
+   * Sorting routines.
+   */
   static ArrayData* EscalateForSort(ArrayData* ad);
   static void Ksort(ArrayData*, int sort_flags, bool ascending);
   static void Sort(ArrayData*, int sort_flags, bool ascending);
@@ -250,43 +251,6 @@ public:
     return t < KindOfUninit;
     static_assert(KindOfUninit == 0 && KindOfInvalid < 0, "");
   }
-
-  // Array element.
-  struct Elm {
-    /* The key is either a string pointer or an int value, and the _count
-     * field in data is used to discriminate the key type. _count = 0 means
-     * int, nonzero values contain 32 bits of a string's hashcode.
-     * It is critical that when we return &data to clients, that they not
-     * read or write the _count field! */
-    union {
-      int64_t ikey;
-      StringData* key;
-    };
-    // We store values here, but also some information local to this array:
-    // data.m_aux.u_hash contains either 0 (for an int key) or a string
-    // hashcode; the high bit is the int/string key descriminator.
-    // data.m_type == KindOfInvalid if this is an empty slot in the
-    // array (e.g. after a key is deleted).
-    TypedValueAux data;
-    bool hasStrKey() const {
-      return data.hash() != 0;
-    }
-    bool hasIntKey() const {
-      return data.hash() == 0;
-    }
-    int32_t hash() const {
-      return data.hash();
-    }
-    void setStrKey(StringData* k, strhash_t h) {
-      key = k;
-      data.hash() = int32_t(h) | 0x80000000;
-      k->incRefCount();
-    }
-    void setIntKey(int64_t k) {
-      ikey = k;
-      data.hash() = 0;
-    }
-  };
 
   // Element index, with special values < 0 used for hash tables.
   // NOTE: Unfortunately, g++ on x64 tends to generate worse machine code for
@@ -313,58 +277,65 @@ public:
   void getArrayElm(ssize_t pos, TypedValue* out, TypedValue* keyOut) const;
   bool isTombstone(ssize_t pos) const;
 
-private:
-  // Small: Array elements and the hash table are allocated inline.
-  //
-  //            +--------------------+
-  // this -->   | HphpArray fields   |
-  //            +--------------------+
-  // m_data --> | slot 0 ...         | SmallSize slots for elements.
-  //            | slot SmallSize-1   |
-  //            +--------------------+
-  // m_hash --> |                    | 2^MinLgTableSize hash table entries.
-  //            +--------------------+
-  //
-  // Medium: Just the hash table is allocated inline, array elements
-  // are allocated from malloc.
-  //
-  //            +--------------------+
-  // this -->   | HphpArray fields   |
-  //            +--------------------+
-  // m_hash --> |                    | 2^K hash table entries
-  //            +--------------------+
-  //
-  //            +--------------------+
-  // m_data --> | slot 0             | 0.75 * 2^K slots for elements.
-  //            | slot 1             |
-  //            | ...                |
-  //            +--------------------+
-  //
-  // Big: Array elements and the hash table are contiguously allocated, and
-  // elements are pointer aligned.
-  //
-  //            +--------------------+
-  // m_data --> | slot 0             | 0.75 * 2^K slots for elements.
-  //            | slot 1             |
-  //            | ...                |
-  //            +--------------------+
-  // m_hash --> |                    | 2^K hash table entries.
-  //            +--------------------+
+  static bool validElmInd(ssize_t ei) {
+    return (ei > ssize_t(ElmIndEmpty));
+  }
 
-  uint32_t m_used;       // Number of used elements (values or tombstones)
-  uint32_t m_cap;        // Number of Elms we can use before having to grow.
-  uint32_t m_tableMask;  // Bitmask used when indexing into the hash table.
-  uint32_t m_hLoad;      // Hash table load (# of non-empty slots).
-  int64_t  m_nextKI;     // Next integer key to use for append.
-  Elm*     m_data;       // Contains elements and hash table.
-  ElmInd*  m_hash;       // Hash table.
-  union {
-    struct {
-      Elm slots[SmallSize];
-      ElmInd hash[SmallHashSize];
-    } m_inline_data;
-    ElmInd m_inline_hash[sizeof(m_inline_data) / sizeof(ElmInd)];
-  };
+  static size_t computeTableSize(uint32_t tableMask) {
+    return size_t(tableMask) + size_t(1U);
+  }
+
+  static size_t computeMaxElms(uint32_t tableMask) {
+    return size_t(tableMask) - size_t(tableMask) / LoadScale;
+  }
+
+  static size_t computeDataSize(uint32_t tableMask) {
+    return computeTableSize(tableMask) * sizeof(ElmInd) +
+      computeMaxElms(tableMask) * sizeof(Elm);
+  }
+
+private:
+  friend class ArrayInit;
+  friend struct MemoryProfile;
+  struct EmptyArrayInitializer;
+  enum class ClonePacked {};
+  enum class CloneMixed {};
+  enum EmptyMode { StaticEmptyArray };
+  enum SortFlavor { IntegerSort, StringSort, GenericSort };
+
+private:
+  DECLARE_SMART_ALLOCATION(HphpArray);
+  static EmptyArrayInitializer s_arrayInitializer;
+
+private:
+  // Safe downcast helpers
+  static HphpArray* asPacked(ArrayData* ad);
+  static const HphpArray* asPacked(const ArrayData* ad);
+  static HphpArray* asMixed(ArrayData* ad);
+  static const HphpArray* asMixed(const ArrayData* ad);
+  static HphpArray* asHphpArray(ArrayData* ad);
+  static const HphpArray* asHphpArray(const ArrayData* ad);
+
+  static void getElmKey(const Elm& e, TypedValue* out);
+
+private: // Private construction/destruction, use ::Make publically
+  explicit HphpArray(EmptyMode);
+  explicit HphpArray(uint nSize);
+  HphpArray(uint size, const TypedValue* vals); // make tuple
+  HphpArray(const HphpArray& other, AllocationMode, ClonePacked);
+  HphpArray(const HphpArray& other, AllocationMode, CloneMixed);
+  ~HphpArray() = delete;
+
+private:
+  void initHash(size_t tableSize);
+  void initNonEmpty(const HphpArray& other);
+
+  template <typename AccessorT>
+  SortFlavor preSort(const AccessorT& acc, bool checkTypes);
+  void postSort(bool resetKeys);
+
+  // convert in-place from kPackedKind to kMixedKind: fill in keys & hashtable
+  HphpArray* packedToMixed();
 
   ssize_t nextElm(Elm* elms, ssize_t ei) const {
     assert(ei >= -1);
@@ -380,8 +351,6 @@ private:
   // Assert a bunch of invariants about this array then return true.
   // usage:  assert(checkInvariants());
   bool checkInvariants() const;
-
-  static void getElmKey(const Elm& e, TypedValue* out);
 
   template <class Hit>
   ElmInd findBody(size_t h0, Hit) const;
@@ -471,50 +440,77 @@ private:
   void resize();
   void resizeIfNeeded();
 
-  // Memory allocator methods.
-  DECLARE_SMART_ALLOCATION(HphpArray);
-  static void ReleasePacked(ArrayData*);
-  static void Release(ArrayData*);
-
 private:
-  enum EmptyMode { StaticEmptyArray };
-  explicit HphpArray(EmptyMode);
-  // static singleton empty array.  Not a subclass because we want a fast
-  // isHphpArray implementation; HphpArray should be effectively final.
-  static HphpArray s_theEmptyArray;
+  // Small: Array elements and the hash table are allocated inline.
+  //
+  //            +--------------------+
+  // this -->   | HphpArray fields   |
+  //            +--------------------+
+  // m_data --> | slot 0 ...         | SmallSize slots for elements.
+  //            | slot SmallSize-1   |
+  //            +--------------------+
+  // m_hash --> |                    | 2^MinLgTableSize hash table entries.
+  //            +--------------------+
+  //
+  // Medium: Just the hash table is allocated inline, array elements
+  // are allocated from malloc.
+  //
+  //            +--------------------+
+  // this -->   | HphpArray fields   |
+  //            +--------------------+
+  // m_hash --> |                    | 2^K hash table entries
+  //            +--------------------+
+  //
+  //            +--------------------+
+  // m_data --> | slot 0             | 0.75 * 2^K slots for elements.
+  //            | slot 1             |
+  //            | ...                |
+  //            +--------------------+
+  //
+  // Big: Array elements and the hash table are contiguously allocated, and
+  // elements are pointer aligned.
+  //
+  //            +--------------------+
+  // m_data --> | slot 0             | 0.75 * 2^K slots for elements.
+  //            | slot 1             |
+  //            | ...                |
+  //            +--------------------+
+  // m_hash --> |                    | 2^K hash table entries.
+  //            +--------------------+
 
-  void initHash(size_t tableSize);
-  void initNonEmpty(const HphpArray& other);
-
-public:
-  static bool validElmInd(ssize_t /*HphpArray::ElmInd*/ ei) {
-    return (ei > ssize_t(HphpArray::ElmIndEmpty));
-  }
-
-  static size_t computeTableSize(uint32_t tableMask) {
-    return size_t(tableMask) + size_t(1U);
-  }
-
-  static size_t computeMaxElms(uint32_t tableMask) {
-    return size_t(tableMask) - size_t(tableMask) / HphpArray::LoadScale;
-  }
-
-  static size_t computeDataSize(uint32_t tableMask) {
-    return computeTableSize(tableMask) * sizeof(HphpArray::ElmInd) +
-      computeMaxElms(tableMask) * sizeof(HphpArray::Elm);
-  }
-
-  friend struct MemoryProfile;
+  uint32_t m_used;       // Number of used elements (values or tombstones)
+  uint32_t m_cap;        // Number of Elms we can use before having to grow.
+  uint32_t m_tableMask;  // Bitmask used when indexing into the hash table.
+  uint32_t m_hLoad;      // Hash table load (# of non-empty slots).
+  int64_t  m_nextKI;     // Next integer key to use for append.
+  Elm*     m_data;       // Contains elements and hash table.
+  ElmInd*  m_hash;       // Hash table.
+  union {
+    struct {
+      Elm slots[SmallSize];
+      ElmInd hash[SmallHashSize];
+    } m_inline_data;
+    ElmInd m_inline_hash[sizeof(m_inline_data) / sizeof(ElmInd)];
+  };
 };
 
-//=============================================================================
-// inline for performance reasons
+extern std::aligned_storage<
+  sizeof(HphpArray),
+  alignof(HphpArray)
+>::type s_theEmptyArray;
 
-inline HphpArray* ArrayData::Make(uint capacity) {
-  return NEW(HphpArray)(capacity);
+//=============================================================================
+
+inline HphpArray* HphpArray::GetStaticEmptyArray() {
+  void* vp = &s_theEmptyArray;
+  return static_cast<HphpArray*>(vp);
 }
 
-// HphpArray has more than one kind, so reuse ArrayData's virtual dispatch.
+inline HphpArray* ArrayData::Make(uint capacity) {
+  return HphpArray::Make(capacity);
+}
+
+// HphpArray has more than one kind, so reuse ArrayData's dispatch.
 inline void HphpArray::release() {
   ArrayData::release();
 }

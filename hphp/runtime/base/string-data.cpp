@@ -62,8 +62,9 @@ std::pair<StringData*,uint32_t> allocFlatForLen(uint32_t len) {
   }
 
   auto const cap = needed;
-  auto const sd = static_cast<StringData*>(MM().smartMallocSizeBig(cap));
-  return std::make_pair(sd, cap);
+  auto const ret = MM().smartMallocSizeBig(cap);
+  return std::make_pair(static_cast<StringData*>(ret.first),
+                        static_cast<uint32_t>(ret.second));
 }
 
 ALWAYS_INLINE

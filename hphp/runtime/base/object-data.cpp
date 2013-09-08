@@ -842,7 +842,8 @@ ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
 }
 
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
-  return new (MM().smartMallocSizeBig(size)) ObjectData(cls, NoInit::noinit);
+  return new (MM().smartMallocSizeBig(size).first)
+    ObjectData(cls, NoInit::noinit);
 }
 
 void ObjectData::operator delete(void* p) {

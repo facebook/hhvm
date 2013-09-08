@@ -351,11 +351,15 @@ public:
   void* smartMallocSize(uint32_t size);
   void smartFreeSize(void* p, uint32_t size);
 
+  /*
+   * Helper for allocating objects---uses the small size classes if
+   * size is small enough, and otherwise smartMallocSizeBig.
+   */
   ALWAYS_INLINE void* objMalloc(size_t size) {
     if (LIKELY(size <= kMaxSmartSize)) {
       return smartMallocSize(size);
     }
-    return smartMallocSizeBig(size);
+    return smartMallocSizeBig(size).first;
   }
 
   ALWAYS_INLINE void objFree(void* vp, size_t size) {
@@ -369,9 +373,11 @@ public:
    * Allocate/deallocate smart-allocated memory that is too big for
    * the small size classes.
    *
-   * The returned pointer is guaranteed to be 16-byte aligned.
+   * Returns a pointer and the actual size of the allocation, which
+   * may be larger than the requested size.  The returned pointer is
+   * guaranteed to be 16-byte aligned.
    */
-  void* smartMallocSizeBig(size_t size);
+  std::pair<void*,size_t> smartMallocSizeBig(size_t size);
   void smartFreeSizeBig(void* vp, size_t size);
 
   // allocate nbytes from the current slab, aligned to 16-bytes
@@ -400,6 +406,7 @@ private:
   void refreshStatsHelperExceeded();
 #ifdef USE_JEMALLOC
   void refreshStatsHelperStop();
+  void* smartMallocSizeBigHelper(void*&, size_t&, size_t);
 #endif
 
 private:

@@ -70,13 +70,21 @@ inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
 }
 
 ALWAYS_INLINE
-void* MemoryManager::smartMallocSizeBig(size_t bytes) {
+std::pair<void*,size_t> MemoryManager::smartMallocSizeBig(size_t bytes) {
+#ifdef USE_JEMALLOC
+  void* ptr;
+  size_t sz;
+  auto const retptr = smartMallocSizeBigHelper(ptr, sz, bytes);
+  return std::make_pair(retptr, sz);
+#else
   m_stats.usage += bytes;
   // TODO(#2831116): we only add sizeof(SmallNode) so smartMallocBig
   // can subtract it.
-  auto const ptr = smartMallocBig(bytes + sizeof(SmallNode));
-  FTRACE(1, "smartMallocBig: {} ({} bytes)\n", ptr, bytes);
-  return ptr;
+  auto const ret = smartMallocBig(bytes + sizeof(SmallNode));
+  FTRACE(1, "smartMallocBig: {} ({} requested, {} usable)\n",
+         ret.first, bytes, ret.second);
+  return std::make_pair(ret, bytes);
+#endif
 }
 
 ALWAYS_INLINE

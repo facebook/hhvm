@@ -446,6 +446,18 @@ void* MemoryManager::smartMallocBig(size_t nbytes) {
   return smartEnlist(n);
 }
 
+#ifdef USE_JEMALLOC
+NEVER_INLINE
+void* MemoryManager::smartMallocSizeBigHelper(void*& ptr,
+                                              size_t& szOut,
+                                              size_t bytes) {
+  m_stats.usage += bytes;
+  allocm(&ptr, &szOut, bytes + sizeof(SweepNode), 0);
+  szOut -= sizeof(SweepNode);
+  return smartEnlist(static_cast<SweepNode*>(ptr));
+}
+#endif
+
 NEVER_INLINE
 void* MemoryManager::smartCallocBig(size_t totalbytes) {
   assert(totalbytes > 0);

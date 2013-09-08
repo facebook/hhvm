@@ -132,6 +132,11 @@ private:
   IRTrace* m_main;            // ptr to parent trace if this is an exit trace
 };
 
+// defined here to avoid circular dependency
+inline bool Block::isMain() const {
+  return m_trace->isMain();
+}
+
 }}
 
 #endif

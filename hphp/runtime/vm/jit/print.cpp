@@ -272,6 +272,12 @@ void print(const IRTrace* trace) {
   print(std::cout, trace);
 }
 
+std::string IRTrace::toString() const {
+  std::ostringstream out;
+  print(out, this, nullptr);
+  return out.str();
+}
+
 // Print unlikely blocks at the end in normal generation.  If we have
 // asmInfo, order the blocks based on how they were layed out.
 static smart::vector<Block*> blocks(const IRTrace* trace,

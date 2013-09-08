@@ -71,7 +71,9 @@ struct Block : boost::noncopyable {
    *
    * Currently there is only ever a single main trace exit.
    */
-  bool isMainExit() const;
+  bool isMainExit() const {
+    return isMain() && isExit();
+  }
 
   /*
    * Returns true if this block is part of the main trace.  I.e. it is
@@ -80,9 +82,11 @@ struct Block : boost::noncopyable {
   bool isMain() const;
 
   /*
-   * Returns: !taken() && !next().
+   * Returns true if this block has no successors.
    */
-  bool isExit() const;
+  bool isExit() const {
+    return !taken() && !next();
+  }
 
   /*
    * Returns whether this block is the initial entry block for the

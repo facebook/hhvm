@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/base/shared-map.h"
+#include "hphp/runtime/base/immutable-obj.h"
 #include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP {
@@ -53,6 +54,7 @@ SharedVariant::SharedVariant(CVarRef source, bool serialized,
       m_data.str = source.getStringData();
       break;
     }
+
 StringCase:
   case KindOfString:
     {
@@ -63,15 +65,19 @@ StringCase:
         // for unserialization.
         s = apc_reserialize(s);
       }
-      StringData* st = StringData::LookupStaticString(s.get());
+
+      auto const st = StringData::LookupStaticString(s.get());
       if (st) {
         m_data.str = st;
         m_type = KindOfStaticString;
         break;
       }
-      m_data.str = s->copy(true);
+
+      assert(!s->isStatic()); // would've been handled above
+      m_data.str = StringData::MakeMalloced(s->data(), s->size());
       break;
     }
+
   case KindOfArray:
     {
       ArrayData *arr = source.getArrayData();

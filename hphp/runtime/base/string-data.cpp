@@ -540,20 +540,6 @@ StringData* StringData::reserve(int cap) {
   return ret;
 }
 
-StringData* StringData::copy(bool sharedMemory /* = false */) const {
-  if (isStatic()) {
-    // Static strings cannot change, and are always available.
-    return const_cast<StringData*>(this);
-  }
-  if (sharedMemory) {
-    // Even if it's literal, it might come from hphpi's class info
-    // which will be freed at the end of the request, and so must be
-    // copied.
-    return StringData::MakeMalloced(data(), size());
-  }
-  return StringData::Make(slice(), CopyString);
-}
-
 // State transition from Mode::Shared to Mode::Flat.
 StringData* StringData::escalate(uint32_t cap) {
   assert(isShared() && !isStatic() && cap >= m_len);

@@ -17,8 +17,6 @@
 #ifndef incl_HPHP_STRING_DATA_H_
 #define incl_HPHP_STRING_DATA_H_
 
-#include <cmath>
-
 #include "hphp/util/hash.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/word-same.h"
@@ -205,9 +203,6 @@ struct StringData {
    * Pre: the string is request-local
    */
   StringData* append(StringSlice r);
-
-  // TODO(#2846749): replace uses with appropriate ::Make calls.
-  StringData* copy(bool sharedMemory = false) const;
 
   /*
    * Reserve space for a string of length `maxLen' (not counting null

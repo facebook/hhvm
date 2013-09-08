@@ -23,7 +23,6 @@
 #include "hphp/util/atomic.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/immutable-map.h"
-#include "hphp/runtime/base/immutable-obj.h"
 
 #if (defined(__APPLE__) || defined(__APPLE_CC__)) && (defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__))
 # if defined(__LITTLE_ENDIAN__)
@@ -42,6 +41,7 @@ class SharedMap;
 class SharedVariantStats;
 class VectorData;
 class ImmutableMap;
+struct ImmutableObj;
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -200,7 +200,7 @@ Transl::Translator* tx() {
     var = m_fp->m_func->unit()->lookupLitstrId(id);       \
   } while (false)
 
-#define DECODE_HA(var) DECODE_IVA(var)
+#define DECODE_LA(var) DECODE_IVA(var)
 #define DECODE_IA(var) DECODE_IVA(var)
 
 #define DECODE_ITER_LIST(typeList, idList, vecLen) \
@@ -4282,7 +4282,7 @@ OPTBLD_INLINE void VMExecutionContext::iopAGetC(PC& pc) {
 
 OPTBLD_INLINE void VMExecutionContext::iopAGetL(PC& pc) {
   NEXT();
-  DECODE_HA(local);
+  DECODE_LA(local);
   TypedValue* top = m_stack.allocTV();
   TypedValue* fr = frame_local_inner(m_fp, local);
   lookupClsRef(fr, top);
@@ -4315,7 +4315,7 @@ static inline void cgetl_body(ActRec* fp,
 
 OPTBLD_INLINE void VMExecutionContext::iopCGetL(PC& pc) {
   NEXT();
-  DECODE_HA(local);
+  DECODE_LA(local);
   Cell* to = m_stack.allocC();
   TypedValue* fr = frame_local(m_fp, local);
   cgetl_body(m_fp, fr, to, local);
@@ -4323,7 +4323,7 @@ OPTBLD_INLINE void VMExecutionContext::iopCGetL(PC& pc) {
 
 OPTBLD_INLINE void VMExecutionContext::iopCGetL2(PC& pc) {
   NEXT();
-  DECODE_HA(local);
+  DECODE_LA(local);
   TypedValue* oldTop = m_stack.topTV();
   TypedValue* newTop = m_stack.allocTV();
   memcpy(newTop, oldTop, sizeof *newTop);
@@ -4334,7 +4334,7 @@ OPTBLD_INLINE void VMExecutionContext::iopCGetL2(PC& pc) {
 
 OPTBLD_INLINE void VMExecutionContext::iopCGetL3(PC& pc) {
   NEXT();
-  DECODE_HA(local);
+  DECODE_LA(local);
   TypedValue* oldTop = m_stack.topTV();
   TypedValue* oldSubTop = m_stack.indTV(1);
   TypedValue* newTop = m_stack.allocTV();
@@ -4451,7 +4451,7 @@ static inline void vgetl_body(TypedValue* fr, TypedValue* to) {
 
 OPTBLD_INLINE void VMExecutionContext::iopVGetL(PC& pc) {
   NEXT();
-  DECODE_HA(local);
+  DECODE_LA(local);
   Ref* to = m_stack.allocV();
   TypedValue* fr = frame_local(m_fp, local);
   vgetl_body(fr, to);
@@ -4594,7 +4594,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIssetM(PC& pc) {
 #define IOP_TYPE_CHECK_INSTR_L(checkInit, what, predicate)          \
 OPTBLD_INLINE void VMExecutionContext::iopIs ## what ## L(PC& pc) { \
   NEXT();                                                           \
-  DECODE_HA(local);                                                 \
+  DECODE_LA(local);                                                 \
   TypedValue* tv = frame_local(m_fp, local);                        \
   if (checkInit && tv->m_type == KindOfUninit) {                    \
     raise_undefined_local(m_fp, local);                             \
@@ -4632,7 +4632,7 @@ IOP_TYPE_CHECK_INSTR(true,   Bool, is_bool)
 
 OPTBLD_INLINE void VMExecutionContext::iopEmptyL(PC& pc) {
   NEXT();
-  DECODE_HA(local);
+  DECODE_LA(local);
   TypedValue* loc = frame_local(m_fp, local);
   bool e = !cellToBool(*tvToCell(loc));
   TypedValue* tv1 = m_stack.allocTV();
@@ -4722,7 +4722,7 @@ OPTBLD_INLINE void VMExecutionContext::iopArrayIdx(PC& pc) {
 
 OPTBLD_INLINE void VMExecutionContext::iopSetL(PC& pc) {
   NEXT();
-  DECODE_HA(local);
+  DECODE_LA(local);
   assert(local < m_fp->m_func->numLocals());
   Cell* fr = m_stack.topC();
   TypedValue* to = frame_local(m_fp, local);
@@ -4821,7 +4821,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetWithRefLM(PC& pc) {
   DECLARE_SETHELPER_ARGS
   bool skip = setHelperPre<false, true, false, false, 0,
                            VectorLeaveCode::ConsumeAll>(MEMBERHELPERPRE_ARGS);
-  DECODE_HA(local);
+  DECODE_LA(local);
   if (!skip) {
     TypedValue* from = frame_local(m_fp, local);
     tvAsVariant(base) = withRefBind(tvAsVariant(from));
@@ -4844,7 +4844,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetWithRefRM(PC& pc) {
 
 OPTBLD_INLINE void VMExecutionContext::iopSetOpL(PC& pc) {
   NEXT();
-  DECODE_HA(local);
+  DECODE_LA(local);
   DECODE(unsigned char, op);
   Cell* fr = m_stack.topC();
   Cell* to = tvToCell(frame_local(m_fp, local));
@@ -4955,7 +4955,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpM(PC& pc) {
 
 OPTBLD_INLINE void VMExecutionContext::iopIncDecL(PC& pc) {
   NEXT();
-  DECODE_HA(local);
+  DECODE_LA(local);
   DECODE(unsigned char, op);
   TypedValue* to = m_stack.allocTV();
   tvWriteUninit(to);
@@ -5042,7 +5042,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIncDecM(PC& pc) {
 
 OPTBLD_INLINE void VMExecutionContext::iopBindL(PC& pc) {
   NEXT();
-  DECODE_HA(local);
+  DECODE_LA(local);
   Ref* fr = m_stack.topV();
   TypedValue* to = frame_local(m_fp, local);
   tvBind(fr, to);
@@ -5112,7 +5112,7 @@ OPTBLD_INLINE void VMExecutionContext::iopBindM(PC& pc) {
 
 OPTBLD_INLINE void VMExecutionContext::iopUnsetL(PC& pc) {
   NEXT();
-  DECODE_HA(local);
+  DECODE_LA(local);
   assert(local < m_fp->m_func->numLocals());
   TypedValue* tv = frame_local(m_fp, local);
   tvRefcountedDecRef(tv);
@@ -5681,7 +5681,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPassL(PC& pc) {
   ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);
   NEXT();
   DECODE_IVA(paramId);
-  DECODE_HA(local);
+  DECODE_LA(local);
   assert(paramId < ar->numArgs());
   TypedValue* fr = frame_local(m_fp, local);
   TypedValue* to = m_stack.allocTV();
@@ -5997,7 +5997,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIterInit(PC& pc) {
   NEXT();
   DECODE_IA(itId);
   DECODE(Offset, offset);
-  DECODE_HA(val);
+  DECODE_LA(val);
   Cell* c1 = m_stack.topC();
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
@@ -6011,8 +6011,8 @@ OPTBLD_INLINE void VMExecutionContext::iopIterInitK(PC& pc) {
   NEXT();
   DECODE_IA(itId);
   DECODE(Offset, offset);
-  DECODE_HA(val);
-  DECODE_HA(key);
+  DECODE_LA(val);
+  DECODE_LA(key);
   Cell* c1 = m_stack.topC();
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
@@ -6028,7 +6028,7 @@ OPTBLD_INLINE void VMExecutionContext::iopWIterInit(PC& pc) {
   NEXT();
   DECODE_IA(itId);
   DECODE(Offset, offset);
-  DECODE_HA(val);
+  DECODE_LA(val);
   Cell* c1 = m_stack.topC();
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
@@ -6042,8 +6042,8 @@ OPTBLD_INLINE void VMExecutionContext::iopWIterInitK(PC& pc) {
   NEXT();
   DECODE_IA(itId);
   DECODE(Offset, offset);
-  DECODE_HA(val);
-  DECODE_HA(key);
+  DECODE_LA(val);
+  DECODE_LA(key);
   Cell* c1 = m_stack.topC();
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
@@ -6083,7 +6083,7 @@ OPTBLD_INLINE void VMExecutionContext::iopMIterInit(PC& pc) {
   NEXT();
   DECODE_IA(itId);
   DECODE(Offset, offset);
-  DECODE_HA(val);
+  DECODE_LA(val);
   Ref* r1 = m_stack.topV();
   assert(r1->m_type == KindOfRef);
   Iter* it = frame_iter(m_fp, itId);
@@ -6096,8 +6096,8 @@ OPTBLD_INLINE void VMExecutionContext::iopMIterInitK(PC& pc) {
   NEXT();
   DECODE_IA(itId);
   DECODE(Offset, offset);
-  DECODE_HA(val);
-  DECODE_HA(key);
+  DECODE_LA(val);
+  DECODE_LA(key);
   Ref* r1 = m_stack.topV();
   assert(r1->m_type == KindOfRef);
   Iter* it = frame_iter(m_fp, itId);
@@ -6111,7 +6111,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIterNext(PC& pc) {
   NEXT();
   DECODE_IA(itId);
   DECODE(Offset, offset);
-  DECODE_HA(val);
+  DECODE_LA(val);
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
   if (it->next()) {
@@ -6125,8 +6125,8 @@ OPTBLD_INLINE void VMExecutionContext::iopIterNextK(PC& pc) {
   NEXT();
   DECODE_IA(itId);
   DECODE(Offset, offset);
-  DECODE_HA(val);
-  DECODE_HA(key);
+  DECODE_LA(val);
+  DECODE_LA(key);
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
   TypedValue* tv2 = frame_local(m_fp, key);
@@ -6142,7 +6142,7 @@ OPTBLD_INLINE void VMExecutionContext::iopWIterNext(PC& pc) {
   NEXT();
   DECODE_IA(itId);
   DECODE(Offset, offset);
-  DECODE_HA(val);
+  DECODE_LA(val);
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
   if (it->next()) {
@@ -6156,8 +6156,8 @@ OPTBLD_INLINE void VMExecutionContext::iopWIterNextK(PC& pc) {
   NEXT();
   DECODE_IA(itId);
   DECODE(Offset, offset);
-  DECODE_HA(val);
-  DECODE_HA(key);
+  DECODE_LA(val);
+  DECODE_LA(key);
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
   TypedValue* tv2 = frame_local(m_fp, key);
@@ -6173,7 +6173,7 @@ OPTBLD_INLINE void VMExecutionContext::iopMIterNext(PC& pc) {
   NEXT();
   DECODE_IA(itId);
   DECODE(Offset, offset);
-  DECODE_HA(val);
+  DECODE_LA(val);
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
   if (miter_next_key(it, tv1, nullptr)) {
@@ -6186,8 +6186,8 @@ OPTBLD_INLINE void VMExecutionContext::iopMIterNextK(PC& pc) {
   NEXT();
   DECODE_IA(itId);
   DECODE(Offset, offset);
-  DECODE_HA(val);
-  DECODE_HA(key);
+  DECODE_LA(val);
+  DECODE_LA(key);
   Iter* it = frame_iter(m_fp, itId);
   TypedValue* tv1 = frame_local(m_fp, val);
   TypedValue* tv2 = frame_local(m_fp, key);

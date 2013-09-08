@@ -123,7 +123,7 @@ int immSize(const Op* opcode, int idx) {
 #undef ARGTYPE
 #undef ARGTYPEVEC
   };
-  if (immType(*opcode, idx) == IVA || immType(*opcode, idx) == HA ||
+  if (immType(*opcode, idx) == IVA || immType(*opcode, idx) == LA ||
       immType(*opcode, idx) == IA) {
     intptr_t offset = 1;
     if (idx >= 1) offset += immSize(opcode, 0);
@@ -187,7 +187,7 @@ ArgUnion getImm(const Op* opcode, int idx) {
   }
   always_assert(cursor == idx);
   ArgType type = immType(*opcode, idx);
-  if (type == IVA || type == HA || type == IA) {
+  if (type == IVA || type == LA || type == IA) {
     retval.u_IVA = decodeVariableSizeImm((const uint8_t**)&p);
   } else if (!immIsVector(*opcode, cursor)) {
     memcpy(&retval.bytes, p, immSize(opcode, idx));
@@ -198,7 +198,7 @@ ArgUnion getImm(const Op* opcode, int idx) {
 
 ArgUnion* getImmPtr(const Op* opcode, int idx) {
   assert(immType(*opcode, idx) != IVA);
-  assert(immType(*opcode, idx) != HA);
+  assert(immType(*opcode, idx) != LA);
   assert(immType(*opcode, idx) != IA);
   const Op* ptr = opcode + 1;
   for (int i = 0; i < idx; i++) {
@@ -278,7 +278,7 @@ Offset* instrJumpOffset(Op* instr) {
 #define SA 0
 #define AA 0
 #define BA 1
-#define HA 0
+#define LA 0
 #define IA 0
 #define OA 0
 #define ONE(a) a
@@ -294,7 +294,7 @@ Offset* instrJumpOffset(Op* instr) {
 #undef DA
 #undef SA
 #undef AA
-#undef HA
+#undef LA
 #undef IA
 #undef BA
 #undef OA
@@ -857,7 +857,7 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
 #define H_ILA READIVEC()
 #define H_IVA READIVA()
 #define H_I64A READ(int64_t)
-#define H_HA READV()
+#define H_LA READV()
 #define H_IA READV()
 #define H_DA READ(double)
 #define H_BA READOFF()
@@ -892,7 +892,7 @@ OPCODES
 #undef H_ILA
 #undef H_IVA
 #undef H_I64A
-#undef H_HA
+#undef H_LA
 #undef H_IA
 #undef H_DA
 #undef H_BA

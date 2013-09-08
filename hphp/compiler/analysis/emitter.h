@@ -111,7 +111,7 @@ public:
 #define SLA std::vector<StrOff>&
 #define ILA std::vector<IterPair>&
 #define IVA int32_t
-#define HA int32_t
+#define LA int32_t
 #define IA int32_t
 #define I64A int64_t
 #define DA double
@@ -131,7 +131,7 @@ public:
 #undef SLA
 #undef ILA
 #undef IVA
-#undef HA
+#undef LA
 #undef IA
 #undef I64A
 #undef DA

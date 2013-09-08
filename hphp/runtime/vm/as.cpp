@@ -338,7 +338,7 @@ struct FPIReg {
   int fpOff;
 };
 
-/**
+/*
  * Tracks the depth of the stack in a given block of instructions.
  *
  * This structure is linked to a block of instructions (usually starting at a
@@ -356,7 +356,7 @@ struct StackDepth {
   int minOffsetLine;
   boost::optional<int> baseValue;
 
-  /**
+  /*
    * During the parsing process, when a Jmp instruction is encountered, the
    * StackDepth structure for this jump becomes linked to the StackDepth
    * structure of the label (which is added to the listeners list).
@@ -378,7 +378,7 @@ struct StackDepth {
   void addListener(AsmState& as, StackDepth* target);
   void setBase(AsmState& as, int stackDepth);
 
-  /**
+  /*
    * Sets the baseValue such as the current stack depth matches the
    * parameter.
    *
@@ -998,7 +998,7 @@ OpcodeParserMap opcode_parsers;
 #define IMM_SA   as.ue->emitInt32(as.ue->mergeLitstr(read_litstr(as)))
 #define IMM_I64A as.ue->emitInt64(read_opcode_arg<int64_t>(as))
 #define IMM_DA   as.ue->emitDouble(read_opcode_arg<double>(as))
-#define IMM_HA   as.ue->emitIVA(as.getLocalId(  \
+#define IMM_LA   as.ue->emitIVA(as.getLocalId(  \
                    read_opcode_arg<std::string>(as)))
 #define IMM_IA   as.ue->emitIVA(as.getIterId( \
                    read_opcode_arg<int32_t>(as)))
@@ -1128,7 +1128,7 @@ OPCODES
 #undef IMM_SA
 #undef IMM_DA
 #undef IMM_IVA
-#undef IMM_HA
+#undef IMM_LA
 #undef IMM_BA
 #undef IMM_BLA
 #undef IMM_SLA

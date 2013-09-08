@@ -437,13 +437,13 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
       }
       break;
     }
-    case HA: { // home address (id of local variable)
+    case LA: { // local argument (id of local variable)
       PC ha_pc = pc;
       int32_t k = decodeVariableSizeImm(&ha_pc);
       ok &= checkLocal(pc, k);
       break;
     }
-    case IA: { // iterator address (id of iterator variable)
+    case IA: { // iterator argument (id of iterator variable)
       PC ia_pc = pc;
       int32_t k = decodeVariableSizeImm(&ia_pc);
       if (k >= numIters()) {

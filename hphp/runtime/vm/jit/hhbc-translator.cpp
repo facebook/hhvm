@@ -3870,10 +3870,10 @@ uint32_t localInputId(const NormalizedInstruction& inst) {
   switch (inst.op()) {
     case OpSetWithRefLM:
     case OpFPassL:
-      return inst.imm[1].u_HA;
+      return inst.imm[1].u_LA;
 
     default:
-      return inst.imm[0].u_HA;
+      return inst.imm[0].u_LA;
   }
 }
 
@@ -3968,7 +3968,7 @@ void HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst) {
   if (!(getInstrInfo(inst.op()).out & Local)) return;
 
   auto setImmLocType = [&](uint32_t id, Type t) {
-    gen(OverrideLoc, t, LocalId(inst.imm[id].u_HA), m_tb->fp());
+    gen(OverrideLoc, t, LocalId(inst.imm[id].u_LA), m_tb->fp());
   };
 
   switch (inst.op()) {

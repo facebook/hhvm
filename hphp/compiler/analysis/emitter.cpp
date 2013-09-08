@@ -270,7 +270,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
     getEmitterVisitor().prepareEvalStack();                             \
     POP_##pop;                                                          \
     const int nIn UNUSED = COUNT_##pop;                                 \
-    POP_HA_##imm;                                                       \
+    POP_LA_##imm;                                                       \
     PUSH_##push;                                                        \
     getUnitEmitter().emitOp(Op##name);                                  \
     IMPL_##imm;                                                         \
@@ -308,7 +308,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define DEC_SLA std::vector<StrOff>&
 #define DEC_ILA std::vector<IterPair>&
 #define DEC_IVA int32_t
-#define DEC_HA int32_t
+#define DEC_LA int32_t
 #define DEC_IA int32_t
 #define DEC_I64A int64_t
 #define DEC_DA double
@@ -357,36 +357,36 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define POP_FV(i) getEmitterVisitor().popEvalStack(StackSym::F, i, curPos)
 
 // Pop of virtual "locs" on the stack that turn into immediates.
-#define POP_HA_ONE(t) \
-  POP_HA_##t(nIn)
-#define POP_HA_TWO(t1, t2) \
-  POP_HA_##t1(nIn);    \
-  POP_HA_##t2(nIn)
-#define POP_HA_THREE(t1, t2, t3) \
-  POP_HA_##t1(nIn);          \
-  POP_HA_##t2(nIn);          \
-  POP_HA_##t3(nIn)
-#define POP_HA_FOUR(t1, t2, t3, t4) \
-  POP_HA_##t1(nIn);             \
-  POP_HA_##t2(nIn);             \
-  POP_HA_##t3(nIn);             \
-  POP_HA_##t4(nIn)
+#define POP_LA_ONE(t) \
+  POP_LA_##t(nIn)
+#define POP_LA_TWO(t1, t2) \
+  POP_LA_##t1(nIn);    \
+  POP_LA_##t2(nIn)
+#define POP_LA_THREE(t1, t2, t3) \
+  POP_LA_##t1(nIn);          \
+  POP_LA_##t2(nIn);          \
+  POP_LA_##t3(nIn)
+#define POP_LA_FOUR(t1, t2, t3, t4) \
+  POP_LA_##t1(nIn);             \
+  POP_LA_##t2(nIn);             \
+  POP_LA_##t3(nIn);             \
+  POP_LA_##t4(nIn)
 
-#define POP_HA_NA
-#define POP_HA_MA(i)
-#define POP_HA_BLA(i)
-#define POP_HA_SLA(i)
-#define POP_HA_ILA(i)
-#define POP_HA_IVA(i)
-#define POP_HA_IA(i)
-#define POP_HA_I64A(i)
-#define POP_HA_DA(i)
-#define POP_HA_SA(i)
-#define POP_HA_AA(i)
-#define POP_HA_BA(i)
-#define POP_HA_OA(i)
+#define POP_LA_NA
+#define POP_LA_MA(i)
+#define POP_LA_BLA(i)
+#define POP_LA_SLA(i)
+#define POP_LA_ILA(i)
+#define POP_LA_IVA(i)
+#define POP_LA_IA(i)
+#define POP_LA_I64A(i)
+#define POP_LA_DA(i)
+#define POP_LA_SA(i)
+#define POP_LA_AA(i)
+#define POP_LA_BA(i)
+#define POP_LA_OA(i)
 
-#define POP_HA_HA(i) \
+#define POP_LA_LA(i) \
   getEmitterVisitor().popSymbolicLocal(opcode, i, curPos)
 
 #define PUSH_NOV
@@ -493,10 +493,10 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define IMPL3_IVA IMPL_IVA(a3)
 #define IMPL4_IVA IMPL_IVA(a4)
 
-#define IMPL1_HA IMPL_IVA(a1)
-#define IMPL2_HA IMPL_IVA(a2)
-#define IMPL3_HA IMPL_IVA(a3)
-#define IMPL4_HA IMPL_IVA(a4)
+#define IMPL1_LA IMPL_IVA(a1)
+#define IMPL2_LA IMPL_IVA(a2)
+#define IMPL3_LA IMPL_IVA(a3)
+#define IMPL4_LA IMPL_IVA(a4)
 
 #define IMPL1_IA IMPL_IVA(a1)
 #define IMPL2_IA IMPL_IVA(a2)
@@ -560,7 +560,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef NA
 #undef DEC_MA
 #undef DEC_IVA
-#undef DEC_HA
+#undef DEC_LA
 #undef DEC_IA
 #undef DEC_I64A
 #undef DEC_DA
@@ -587,21 +587,21 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef POP_FMANY
 #undef POP_CVMANY
 #undef POP_CMANY
-#undef POP_HA_ONE
-#undef POP_HA_TWO
-#undef POP_HA_THREE
-#undef POP_HA_FOUR
-#undef POP_HA_NA
-#undef POP_HA_MA
-#undef POP_HA_IVA
-#undef POP_HA_IA
-#undef POP_HA_I64A
-#undef POP_HA_DA
-#undef POP_HA_SA
-#undef POP_HA_AA
-#undef POP_HA_BA
-#undef POP_HA_OA
-#undef POP_HA_HA
+#undef POP_LA_ONE
+#undef POP_LA_TWO
+#undef POP_LA_THREE
+#undef POP_LA_FOUR
+#undef POP_LA_NA
+#undef POP_LA_MA
+#undef POP_LA_IVA
+#undef POP_LA_IA
+#undef POP_LA_I64A
+#undef POP_LA_DA
+#undef POP_LA_SA
+#undef POP_LA_AA
+#undef POP_LA_BA
+#undef POP_LA_OA
+#undef POP_LA_LA
 #undef PUSH_NOV
 #undef PUSH_ONE
 #undef PUSH_TWO
@@ -643,10 +643,10 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef IMPL2_IVA
 #undef IMPL3_IVA
 #undef IMPL4_IVA
-#undef IMPL1_HA
-#undef IMPL2_HA
-#undef IMPL3_HA
-#undef IMPL4_HA
+#undef IMPL1_LA
+#undef IMPL2_LA
+#undef IMPL3_LA
+#undef IMPL4_LA
 #undef IMPL1_IA
 #undef IMPL2_IA
 #undef IMPL3_IA

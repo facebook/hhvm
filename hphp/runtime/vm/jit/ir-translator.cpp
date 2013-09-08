@@ -1002,7 +1002,7 @@ IRTranslator::translateCheckThis(const NormalizedInstruction& i) {
 
 void
 IRTranslator::translateInitThisLoc(const NormalizedInstruction& i) {
-  HHIR_EMIT(InitThisLoc, i.imm[0].u_HA);
+  HHIR_EMIT(InitThisLoc, i.imm[0].u_LA);
 }
 
 void

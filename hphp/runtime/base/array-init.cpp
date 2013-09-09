@@ -30,13 +30,15 @@ ArrayInit::ArrayInit(ssize_t n) {
     // Force compilation of PolicyArray
     m_data = NEW(PolicyArray)(n);
   } else {
-    m_data = ArrayData::Make(n);
+    m_data = HphpArray::MakeReserve(n);
+    m_data->setRefCount(0);
   }
 }
 
 HOT_FUNC
 ArrayInit::ArrayInit(ssize_t n, MapInit)
-  : m_data(ArrayData::Make(n)) {
+  : m_data(HphpArray::MakeReserve(n)) {
+  m_data->setRefCount(0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

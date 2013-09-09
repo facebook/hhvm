@@ -1338,7 +1338,6 @@ void VMExecutionContext::shuffleMagicArgs(ActRec* ar) {
   // We need to make an array containing all the arguments passed by the
   // caller and put it where the second argument is
   ArrayData* argArray = pack_args_into_array(ar, nargs);
-  argArray->incRefCount();
   // Remove the arguments from the stack
   for (int i = 0; i < nargs; ++i) {
     m_stack.popC();
@@ -3419,7 +3418,7 @@ OPTBLD_INLINE void VMExecutionContext::iopArray(PC& pc) {
 
 OPTBLD_INLINE void VMExecutionContext::iopNewArray(PC& pc) {
   NEXT();
-  auto arr = ArrayData::MakeReserve(HphpArray::SmallSize);
+  auto arr = HphpArray::MakeReserve(HphpArray::SmallSize);
   m_stack.pushArrayNoRc(arr);
 }
 

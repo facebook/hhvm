@@ -54,6 +54,12 @@ class ArrayData {
   static const ssize_t invalid_index = -1;
 
  protected:
+   /*
+    * NOTE: HphpArray no longer calls these constructors.  If you
+    * change them, change the HphpArray::Make functions as
+    * appropriate.
+    */
+
   explicit ArrayData(ArrayKind kind)
     : m_kind(kind)
     , m_allocMode(AllocationMode::smart)
@@ -89,7 +95,6 @@ class ArrayData {
     , m_count(0)
     , m_strongIterators(nullptr)
   {}
-  void setRefCount(RefCount n) { m_count = n; }
 
   void destroy() {
     // If there are any strong iterators pointing to this array, they need
@@ -101,6 +106,7 @@ class ArrayData {
 
 public:
   IMPLEMENT_COUNTABLE_METHODS
+  void setRefCount(RefCount n) { m_count = n; }
 
   /**
    * Create a new ArrayData with specified array element(s).
@@ -110,20 +116,6 @@ public:
   static ArrayData *Create(CVarRef name, CVarRef value);
   static ArrayData *CreateRef(CVarRef value);
   static ArrayData *CreateRef(CVarRef name, CVarRef value);
-
-  /*
-   * Create a new array with estimated capacity.  The returned array
-   * is not yet incref'd.
-   */
-  static HphpArray* Make(uint capacity);
-
-  /*
-   * Create an array or tuple-style array.
-   *
-   * N.B. unlike the above, the returned HphpArray is already incref'd.
-   */
-  static HphpArray* MakeReserve(uint capacity);
-  static HphpArray* MakeTuple(uint size, const TypedValue*);
 
   /**
    * Type conversion functions. All other types are handled inside Array class.
@@ -521,28 +513,34 @@ public:
   static bool IsValidKey(CVarRef k);
   static bool IsValidKey(const StringData* k) { return k; }
 
-  // allocation helpers either call smart_malloc api or regular
-  // malloc, depending on m_allocMode
-  void* modeAlloc(size_t nbytes) const;
-  void* modeRealloc(void* ptr, size_t nbytes) const;
-  void modeFree(void* ptr) const;
-
- protected:
-  ArrayKind m_kind;
-  const AllocationMode m_allocMode;
-  UNUSED uint16_t m_forSubClasses; // unused space that subclasses may use
-  uint32_t m_size;
-  int32_t m_pos;
-  mutable RefCount m_count;
- private:
+protected:
+  // The following fields are blocked into unions with qwords so we
+  // can combine the stores when initializing arrays.  (gcc won't do
+  // this on its own.)
+  union {
+    struct {
+      ArrayKind m_kind;
+      AllocationMode m_allocMode;
+      UNUSED uint16_t m_forSubClasses; // unused space that subclasses may use
+      uint32_t m_size;
+    };
+    uint64_t m_kindModeAndSize;
+  };
+  union {
+    struct {
+      int32_t m_pos;
+      mutable RefCount m_count;
+    };
+    uint64_t m_posAndCount;   // be careful, m_pos is signed
+  };
   FullPos* m_strongIterators; // head of linked list
 
- public: // for the JIT
+public: // for the JIT
   static uint32_t getKindOff() {
     return (uintptr_t)&((ArrayData*)0)->m_kind;
   }
 
- public: // for heap profiler
+public: // for heap profiler
   void getChildren(std::vector<TypedValue *> &out);
 };
 

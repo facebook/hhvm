@@ -46,9 +46,13 @@ class ArrayIter;
  * escalation.
  */
 class Array : protected SmartPtr<ArrayData> {
- typedef SmartPtr<ArrayData> ArrayBase;
+  typedef SmartPtr<ArrayData> ArrayBase;
 
- public:
+  explicit Array(ArrayData* ad, ArrayBase::NoIncRef)
+   : ArrayBase(ad, ArrayBase::NoIncRef{})
+  {}
+
+public:
   /**
    * Create an empty array or an array with one element. Note these are
    * different than those copying constructors that also take one value.
@@ -57,9 +61,15 @@ class Array : protected SmartPtr<ArrayData> {
   static Array Create(CVarRef value) { return ArrayData::Create(value);}
   static Array Create(CVarRef key, CVarRef value);
 
- public:
+public:
   Array() {}
   ~Array();
+
+  static Array attach(ArrayData* ad) {
+    Array a(ad, SmartPtr::NoIncRef{});
+    a.m_px = ad;
+    return a;
+  }
 
   ArrayData* get() const { return m_px; }
   void reset() { ArrayBase::reset(); }

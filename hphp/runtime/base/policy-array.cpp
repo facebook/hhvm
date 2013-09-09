@@ -512,7 +512,8 @@ bool PolicyArray::AdvanceFullPos(ArrayData* ad, FullPos &fp) {
 }
 
 HphpArray* PolicyArray::toHphpArray() const {
-  auto result = ArrayData::Make(m_size);
+  auto result = HphpArray::MakeReserve(m_size);
+  result->setRefCount(0);
   FOR_EACH_RANGE (i, 0, m_size) {
     if (hasStrKey(toPos(i))) {
       result->add(key(toPos(i)).getStringData(), val(toPos(i)), false);

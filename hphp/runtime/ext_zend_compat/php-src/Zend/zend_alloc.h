@@ -148,8 +148,10 @@ END_EXTERN_C()
   efree_rel(z)
 
 /* fast cache for HashTables */
-#define ALLOC_HASHTABLE(ht)  \
-  (ht) = HashTable::Make(0);
+#define ALLOC_HASHTABLE(ht)                               \
+  (ht) = [&]{ auto ret = HPHP::HphpArray::MakeReserve(0); \
+              ret->setRefCount(0);                        \
+              return ret; }()
 
 #define FREE_HASHTABLE(ht)
 

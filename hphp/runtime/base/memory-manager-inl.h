@@ -35,18 +35,6 @@ inline uint32_t MemoryManager::smartSizeClass(uint32_t reqBytes) {
   return ret;
 }
 
-// allocate nbytes from the current slab, aligned to 16-bytes
-inline void* MemoryManager::slabAlloc(size_t nbytes) {
-  const size_t kAlignMask = 15;
-  assert((nbytes & 7) == 0);
-  char* ptr = (char*)(uintptr_t(m_front + kAlignMask) & ~kAlignMask);
-  if (ptr + nbytes <= m_limit) {
-    m_front = ptr + nbytes;
-    return ptr;
-  }
-  return newSlab(nbytes);
-}
-
 inline void* MemoryManager::smartMallocSize(uint32_t bytes) {
   assert(bytes > 0);
   assert(bytes <= kMaxSmartSize);

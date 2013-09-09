@@ -402,6 +402,18 @@ NEVER_INLINE char* MemoryManager::newSlab(size_t nbytes) {
   return slab;
 }
 
+// allocate nbytes from the current slab, aligned to 16-bytes
+void* MemoryManager::slabAlloc(size_t nbytes) {
+  const size_t kAlignMask = 15;
+  assert((nbytes & 7) == 0);
+  char* ptr = (char*)(uintptr_t(m_front + kAlignMask) & ~kAlignMask);
+  if (ptr + nbytes <= m_limit) {
+    m_front = ptr + nbytes;
+    return ptr;
+  }
+  return newSlab(nbytes);
+}
+
 NEVER_INLINE
 void* MemoryManager::smartMallocSlab(size_t padbytes) {
   SmallNode* n = (SmallNode*) slabAlloc(padbytes);

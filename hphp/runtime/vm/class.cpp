@@ -456,8 +456,8 @@ Class::PropInitVec* Class::initPropsImpl() const {
   {
     Array args;
 
-    HphpArray* propArr = ArrayData::Make(nProps);
-    Variant arg0(propArr);
+    HphpArray* propArr = HphpArray::MakeReserve(nProps);
+    Variant arg0(Array::attach(propArr));
 
     args.appendRef(arg0);
     assert(propArr->getCount() == 1);  // Don't want to trigger COW
@@ -652,8 +652,8 @@ TypedValue* Class::initSPropsImpl() const {
   // They'll put their initialized values into an array, and we'll read any
   // values we need out of the array later.
   if (hasNonscalarInit) {
-    HphpArray* propData = ArrayData::Make(m_staticProperties.size());
-    Variant arg0(propData);
+    HphpArray* propData = HphpArray::MakeReserve(m_staticProperties.size());
+    Variant arg0(Array::attach(propData));
 
     // The 86sinit functions will initialize some subset of the static props.
     // Set all of them to a sentinel object so we can distinguish these.
@@ -792,8 +792,7 @@ TypedValue Class::getStaticPropInitVal(const SProp& prop) {
 
 HphpArray* Class::initClsCnsData() const {
   Slot nConstants = m_constants.size();
-  HphpArray* constants = ArrayData::Make(nConstants);
-  constants->incRefCount();
+  HphpArray* constants = HphpArray::MakeReserve(nConstants);
 
   if (m_parent.get() != nullptr) {
     if (g_vmContext->getClsCnsData(m_parent.get()) == nullptr) {

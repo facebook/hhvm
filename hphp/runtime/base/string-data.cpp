@@ -95,6 +95,7 @@ StringData* StringData::MakeStatic(StringSlice sl) {
   data[sl.len] = 0;
   auto const mcret = memcpy(data, sl.ptr, sl.len);
   auto const ret   = reinterpret_cast<StringData*>(mcret) - 1;
+  // Recalculating ret from mcret avoids a spill.
 
   assert(ret->m_hash == 0);
   assert(ret->m_count == 0);
@@ -158,6 +159,7 @@ StringData* StringData::Make(StringSlice sl, CopyStringMode) {
   data[sl.len] = 0;
   auto const mcret = memcpy(data, sl.ptr, sl.len);
   auto const ret   = reinterpret_cast<StringData*>(mcret) - 1;
+  // Recalculating ret from mcret avoids a spill.
 
   assert(ret == sd);
   assert(ret->m_len == sl.len);
@@ -192,6 +194,7 @@ StringData* StringData::MakeMalloced(const char* data, int len) {
   sd->m_data[len] = 0;
   auto const mcret = memcpy(sd->m_data, data, len);
   auto const ret   = reinterpret_cast<StringData*>(mcret) - 1;
+  // Recalculating ret from mcret avoids a spill.
 
   assert(ret == sd);
   assert(ret->m_hash == 0);
@@ -315,12 +318,16 @@ StringData* StringData::reserve(int cap) {
 
   cap += cap >> 2;
   if (cap > MaxCap) cap = MaxCap;
+
   auto const sd = Make(cap);
   auto const src = slice();
   auto const dst = sd->mutableData();
   sd->setSize(src.len);
+
   auto const mcret = memcpy(dst, src.ptr, src.len);
   auto const ret = static_cast<StringData*>(mcret) - 1;
+  // Recalculating ret from mcret avoids a spill.
+
   assert(ret == sd);
   assert(ret->checkSane());
   return ret;
@@ -334,8 +341,11 @@ StringData* StringData::escalate(uint32_t cap) {
   auto const src = slice();
   auto const dst = sd->mutableData();
   sd->setSize(src.len);
+
   auto const mcret = memcpy(dst, src.ptr, src.len);
   auto const ret = static_cast<StringData*>(mcret) - 1;
+  // Recalculating ret from mcret avoids a spill.
+
   assert(ret == sd);
   assert(ret->checkSane());
   return ret;

@@ -143,6 +143,7 @@ StringCase:
   assert(m_type != KindOfResource);
 }
 
+// Defined here for inlining into MakeSVSlowPath below.
 ALWAYS_INLINE void StringData::enlist() {
   assert(isShared());
   auto& head = MemoryManager::TheMemoryManager()->m_strings;
@@ -209,6 +210,7 @@ StringData* StringData::Make(SharedVariant* shared) {
   pdst[len] = 0;
   auto const mcret = memcpy(pdst, psrc, len);
   auto const ret   = reinterpret_cast<StringData*>(mcret) - 1;
+  // Recalculating ret from mcret avoids a spill.
 
   // Note: this return value thing is doing a dead lea into %rsi in
   // the caller for some reason.

@@ -50,10 +50,10 @@ enum CopyStringMode { CopyString };
 /*
  * Runtime representation of PHP strings.
  *
- * StringData's have several different modes, not all of which we want
- * to keep forever.  The main mode is Flat, which means StringData
- * is a header in a contiguous allocation with the character array for
- * the string.
+ * StringData's have two different modes, not all of which we want to
+ * keep forever.  The main mode is Flat, which means StringData is a
+ * header in a contiguous allocation with the character array for the
+ * string.  The other is for SharedVariant-backed StringDatas.
  *
  * StringDatas can also be allocated in multiple ways.  Normally, they
  * are created through one of the Make overloads, which drops them in

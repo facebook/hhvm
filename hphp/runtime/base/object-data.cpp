@@ -406,7 +406,8 @@ Array ObjectData::o_toIterArray(CStrRef context,
                                 bool getRef /* = false */) {
   size_t size = m_cls->declPropNumAccessible() +
                 (o_properties.get() ? o_properties.get()->size() : 0);
-  auto retval = ArrayData::Make(size);
+  auto retval = HphpArray::MakeReserve(size);
+  Array returnArray { Array::attach(retval) };
   Class* ctx = nullptr;
   if (!context.empty()) {
     ctx = Unit::lookupClass(context.get());
@@ -477,7 +478,7 @@ Array ObjectData::o_toIterArray(CStrRef context,
     }
   }
 
-  return Array(retval);
+  return returnArray;
 }
 
 static bool decode_invoke(CStrRef s, ObjectData* obj, bool fatal,
@@ -892,7 +893,7 @@ Object ObjectData::FromArray(ArrayData* properties) {
 
 void ObjectData::initDynProps(int numDynamic /* = 0 */) {
   // Create o_properties with room for numDynamic
-  o_properties.asArray() = ArrayData::Make(numDynamic);
+  o_properties.asArray() = Array::attach(HphpArray::MakeReserve(numDynamic));
 }
 
 Slot ObjectData::declPropInd(TypedValue* prop) const {

@@ -332,7 +332,7 @@ Array hhvm_get_frame_args(const ActRec* ar) {
   }
   int numParams = ar->m_func->numParams();
   int numArgs = ar->numArgs();
-  auto retval = ArrayData::Make(numArgs);
+  auto retval = HphpArray::MakeReserve(numArgs);
 
   TypedValue* local = (TypedValue*)(uintptr_t(ar) - sizeof(TypedValue));
   for (int i = 0; i < numArgs; ++i) {
@@ -347,7 +347,7 @@ Array hhvm_get_frame_args(const ActRec* ar) {
     }
   }
 
-  return Array(retval);
+  return Array::attach(retval);
 }
 
 Variant f_func_get_args() {

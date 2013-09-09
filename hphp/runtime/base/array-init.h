@@ -305,7 +305,9 @@ private:
  */
 class PackedArrayInit {
 public:
-  explicit PackedArrayInit(size_t n) : m_vec(ArrayData::Make(n)) {}
+  explicit PackedArrayInit(size_t n) : m_vec(HphpArray::MakeReserve(n)) {
+    m_vec->setRefCount(0);
+  }
 
   PackedArrayInit(PackedArrayInit&& other) : m_vec(other.m_vec) {
     other.m_vec = nullptr;

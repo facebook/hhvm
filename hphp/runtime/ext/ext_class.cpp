@@ -99,20 +99,22 @@ Array f_get_class_methods(CVarRef class_or_object) {
   if (!cls) return Array();
   VMRegAnchor _;
 
-  auto retVal = ArrayData::Make(cls->numMethods());
+  auto retVal      = HphpArray::MakeReserve(cls->numMethods());
+  auto arrayHolder = Array::attach(retVal);
   cls->getMethodNames(arGetContextClassFromBuiltin(g_vmContext->getFP()),
                       retVal);
-  return Array(retVal).keys();
+  return arrayHolder.keys();
 }
 
 Array vm_get_class_constants(CStrRef className) {
   Class* cls = Unit::loadClass(className.get());
+
   if (cls == NULL) {
-    return ArrayData::Make(0);
+    return Array::attach(HphpArray::MakeReserve(0));
   }
 
   size_t numConstants = cls->numConstants();
-  auto retVal = ArrayData::Make(numConstants);
+  auto retVal = HphpArray::MakeReserve(numConstants);
   const Class::Const* consts = cls->constants();
   for (size_t i = 0; i < numConstants; i++) {
     // Note: hphpc doesn't include inherited constants in
@@ -128,7 +130,7 @@ Array vm_get_class_constants(CStrRef className) {
     }
   }
 
-  return retVal;
+  return Array::attach(retVal);
 }
 
 Array f_get_class_constants(CStrRef class_name) {
@@ -160,7 +162,7 @@ Array vm_get_class_vars(CStrRef className) {
   CallerFrame cf;
   Class* ctx = arGetContextClass(cf());
 
-  auto ret = ArrayData::Make(numDeclProps + numSProps);
+  auto ret = HphpArray::MakeReserve(numDeclProps + numSProps);
 
   for (size_t i = 0; i < numDeclProps; ++i) {
     StringData* name = const_cast<StringData*>(propInfo[i].m_name);
@@ -181,7 +183,7 @@ Array vm_get_class_vars(CStrRef className) {
     }
   }
 
-  return ret;
+  return Array::attach(ret);
 }
 
 Array f_get_class_vars(CStrRef class_name) {

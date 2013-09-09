@@ -71,7 +71,7 @@ DataType TypeAnnotation::dataType(bool expectedType /*= false */) const {
     return KindOfObject;
   }
   if (m_typeArgs) {
-    return m_name.compare("array") ? KindOfArray : KindOfObject;
+    return !m_name.compare("array") ? KindOfArray : KindOfObject;
   }
   if (!expectedType && (m_nullable || m_soft)) {
     return KindOfUnknown;

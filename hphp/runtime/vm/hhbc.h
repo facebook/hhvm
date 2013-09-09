@@ -621,14 +621,7 @@ enum AstubsOp {
 #define HIGH_OPCODES \
   O(FuncPrologue) \
   O(TraceletGuard) \
-  O(NativeTrampoline) \
-  O(ServiceRequest) \
-  O(DtorStub) \
-  O(SyncOutputs) \
-  O(RetFromInterp) \
-  O(ResumeHelper) \
-  O(RequireHelper) \
-  O(DefClsHelper) \
+  O(NativeTrampoline)
 
 enum HighOp {
   OpHighStart = OpAstubCount-1,

@@ -293,6 +293,7 @@ private:
 private:
   void drawCFG(std::ofstream& out) const;
 
+public:
   CodeBlock& codeBlockFor(TCA addr) {
     assert(mainCode.base() != hotCode.base()   &&
            mainCode.base() != stubsCode.base() &&
@@ -300,6 +301,7 @@ private:
     return codeBlockChoose(addr, mainCode, hotCode, profCode, stubsCode,
                            trampolinesCode);
   }
+private:
 
   static JIT::CppCall getDtorCall(DataType type);
 
@@ -362,7 +364,9 @@ private:
                             const CodeBlock& cb,
                             const TCA start,
                             bool exit, bool inPrologue);
+public:
   void recordGdbStub(const CodeBlock& cb, TCA start, const char* name);
+private:
   void recordBCInstr(uint32_t op, const CodeBlock& cb, const TCA addr);
 
 
@@ -394,7 +398,7 @@ public:
   TranslatorX64();
   virtual ~TranslatorX64();
 
-  void initGdb();
+  void initUniqueStubs();
   static TranslatorX64* Get();
 
   // Called before entering a new PHP "world."

@@ -2845,43 +2845,12 @@ TranslatorX64::TranslatorX64()
 
   assert(base - tcStart <= allocationSize);
   assert(base - tcStart + kRoundUp > allocationSize);
-
-  // Put the following stubs into ahot, rather than a.
-  CodeBlockSelector asmSel(CodeBlockSelector::Args(this).hot(true));
-
-  // Emit some special helpers that are shared across translations.
-
-  // Emit a byte of padding. This is a kind of hacky way to
-  // avoid hitting an assert in recordGdbStub when we call
-  // it with m_callToExit - 1 as the start address.
-  Asm astubs { stubsCode };
-  astubs.emitNop(1);
-
-  uniqueStubs = JIT::X64::emitUniqueStubs();
 }
 
-// do gdb specific initialization. This has to happen after
-// the TranslatorX64 constructor is called, because gdb initialization
-// calls backs into TranslatorX64::Get()
-void TranslatorX64::initGdb() {
-  // On a backtrace, gdb tries to locate the calling frame at address
-  // returnRIP-1. However, for the first VM frame, there is no code at
-  // returnRIP-1, since the AR was set up manually. For this frame,
-  // record the tracelet address as starting from callToExit-1, so gdb
-  // does not barf
-  recordGdbStub(stubsCode, uniqueStubs.callToExit - 1, "HHVM::callToExit");
-
-  // TODO(2812468): move all this to unique-stubs and make it make sense.
-
-  recordBCInstr(OpRetFromInterp, stubsCode, uniqueStubs.retHelper);
-  recordGdbStub(stubsCode, uniqueStubs.retHelper - 1, "HHVM::retHelper");
-  recordBCInstr(OpResumeHelper, stubsCode, uniqueStubs.resumeHelper);
-  recordBCInstr(OpDefClsHelper, stubsCode, uniqueStubs.defClsHelper);
-  recordBCInstr(OpDtorStub, stubsCode,
-                uniqueStubs.dtorStubs[typeToDestrIndex(BitwiseKindOfString)]);
-  recordGdbStub(stubsCode,
-                uniqueStubs.dtorStubs[typeToDestrIndex(BitwiseKindOfString)],
-                "HHVM::destructorStub");
+void TranslatorX64::initUniqueStubs() {
+  // Put the following stubs into ahot, rather than a.
+  CodeBlockSelector asmSel(CodeBlockSelector::Args(this).hot(true));
+  uniqueStubs = JIT::X64::emitUniqueStubs();
 }
 
 TranslatorX64*
@@ -2892,7 +2861,7 @@ TranslatorX64::Get() {
    */
   if (!nextTx64) {
     nextTx64 = new TranslatorX64();
-    nextTx64->initGdb();
+    nextTx64->initUniqueStubs();
   }
   if (!tx64) {
     tx64 = nextTx64;

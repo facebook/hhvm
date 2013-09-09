@@ -26,11 +26,13 @@
 #include "hphp/runtime/base/array-util.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/base/zend-scanf.h"
 #include "hphp/runtime/base/pipe.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
+#include "hphp/runtime/base/directory.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/util.h"
@@ -247,7 +249,7 @@ bool f_feof(CResRef handle) {
 
 Variant f_fstat(CResRef handle) {
   PlainFile *file = handle.getTyped<PlainFile>(true, true);
-  if (file == NULL) {
+  if (!file) {
     raise_warning("Not a valid stream resource");
     return false;
   }
@@ -431,7 +433,7 @@ Variant f_file_put_contents(CStrRef filename, CVarRef data,
   case KindOfResource:
     {
       File *fsrc = data.toResource().getTyped<File>(true, true);
-      if (fsrc == NULL) {
+      if (!fsrc) {
         raise_warning("Not a valid stream resource");
         return false;
       }
@@ -1054,7 +1056,7 @@ bool f_touch(CStrRef filename, int64_t mtime /* = 0 */, int64_t atime /* = 0 */)
   /* create the file if it doesn't exist already */
   if (accessSyscall(translated, F_OK)) {
     FILE *f = fopen(translated.data(), "w");
-    if (f == NULL) {
+    if (!f) {
       Logger::Verbose("%s/%d: Unable to create file %s because %s",
                       __FUNCTION__, __LINE__, translated.data(),
                       folly::errnoStr(errno).c_str());
@@ -1336,71 +1338,37 @@ bool f_chroot(CStrRef directory) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class Directory : public SweepableResourceData {
-public:
-  explicit Directory(DIR *handle) : dir(handle) {
-    assert(handle);
-  }
-
-  ~Directory() {
-    close();
-  }
-
-  static StaticString s_class_name;
-  // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
-
-  void close() {
-    if (dir) {
-      closedir(dir);
-      dir = NULL;
-    }
-  }
-
-  DIR *dir;
-};
-
-StaticString Directory::s_class_name("Directory");
-
-class DirectoryRequestData : public RequestEventHandler {
-public:
-  virtual void requestInit() {
-    defaultDirectory.reset();
-  }
-
-  virtual void requestShutdown() {
-    defaultDirectory.reset();
-  }
-
+/**
+ * A stack maintains the states of nested structures.
+ */
+struct directory_data {
   Resource defaultDirectory;
 };
-IMPLEMENT_STATIC_REQUEST_LOCAL(DirectoryRequestData, s_directory_data);
+IMPLEMENT_THREAD_LOCAL(directory_data, s_directory_data);
+InitFiniNode init([&] () {
+  s_directory_data->defaultDirectory.detach();
+}, InitFiniNode::When::ThreadInit);
 
 const StaticString
   s_handle("handle"),
   s_path("path");
 
-static DIR *get_dir(CResRef dir_handle) {
-  Resource obj;
+static Directory *get_dir(CResRef dir_handle) {
   if (dir_handle.isNull()) {
-    obj = s_directory_data->defaultDirectory;
-  } else {
-    Array arr = dir_handle.toArray();
-    if (arr.exists(s_handle)) {
-      obj = arr[s_handle].toResource();
-    } else {
-      obj = dir_handle;
+    auto defaultDir = s_directory_data->defaultDirectory;
+    if (defaultDir.isNull()) {
+      raise_warning("no Directory resource supplied");
+      return nullptr;
     }
+    return get_dir(defaultDir);
   }
-  if (obj.get()) {
-    Directory *d = obj.getTyped<Directory>(true, true);
-    if (d == NULL) {
-      raise_warning("Not a valid directory");
-      return NULL;
-    }
-    return d->dir;
+
+  Directory *d = dir_handle.getTyped<Directory>(true, true);
+  if (!d) {
+    raise_warning("Not a valid directory resource");
+    return nullptr;
   }
-  return NULL;
+  return d;
 }
 
 Variant f_dir(CStrRef directory) {
@@ -1415,34 +1383,33 @@ Variant f_dir(CStrRef directory) {
 }
 
 Variant f_opendir(CStrRef path, CVarRef context /* = null */) {
-  DIR *dir = opendir(File::TranslatePath(path).data());
-  if (dir == NULL) {
+  Stream::Wrapper* w = Stream::getWrapperFromURI(path);
+  Directory *p = w->opendir(path);
+  if (!p) {
     return false;
   }
-
-  Directory *p = new Directory(dir);
   s_directory_data->defaultDirectory = p;
   return Resource(p);
 }
 
-Variant f_readdir(CResRef dir_handle) {
-  DIR *dir = get_dir(dir_handle);
-  if (dir) {
-    struct dirent entry;
-    struct dirent *result;
-    CHECK_SYSTEM(readdir_r(dir, &entry, &result));
-    if (result) {
-      return String(entry.d_name, CopyString);
-    }
+Variant f_readdir(CResRef dir_handle /* = null */) {
+  Directory *dir = get_dir(dir_handle);
+  if (!dir) {
+    return false;
   }
-  return false;
+  String s = dir->read();
+  if (!s) {
+    return false;
+  }
+  return s;
 }
 
-void f_rewinddir(CResRef dir_handle) {
-  DIR *dir = get_dir(dir_handle);
-  if (dir) {
-    rewinddir(dir);
+void f_rewinddir(CResRef dir_handle /* = null */) {
+  Directory *dir = get_dir(dir_handle);
+  if (!dir) {
+    return;
   }
+  dir->rewind();
 }
 
 static bool StringDescending(CStrRef s1, CStrRef s2) {
@@ -1455,21 +1422,20 @@ static bool StringAscending(CStrRef s1, CStrRef s2) {
 
 Variant f_scandir(CStrRef directory, bool descending /* = false */,
                   CVarRef context /* = null */) {
-  DIR *dir = opendir(File::TranslatePath(directory).data());
-  if (dir == NULL) {
+  Stream::Wrapper* w = Stream::getWrapperFromURI(directory);
+  Directory *dir = w->opendir(directory);
+  if (!dir) {
     return false;
   }
-  Resource deleter(new Directory(dir));
+  Resource deleter(dir);
 
   std::vector<String> names;
   while (true) {
-    struct dirent entry;
-    struct dirent *result;
-    CHECK_SYSTEM(readdir_r(dir, &entry, &result));
-    if (result == NULL) {
+    String name = dir->read();
+    if (!name) {
       break;
     }
-    names.push_back(String(entry.d_name, CopyString));
+    names.push_back(name);
   }
 
   if (descending) {
@@ -1485,25 +1451,15 @@ Variant f_scandir(CStrRef directory, bool descending /* = false */,
   return ret;
 }
 
-void f_closedir(CResRef dir_handle) {
-  if (!dir_handle.isNull()) {
-    Resource obj;
-    Array arr = dir_handle.toArray();
-    if (arr.exists(s_handle)) {
-      obj = arr[s_handle].toResource();
-    } else {
-      obj = dir_handle;
-    }
-    if (same(s_directory_data->defaultDirectory, obj)) {
-      s_directory_data->defaultDirectory = NULL;
-    }
-    Directory *d = obj.getTyped<Directory>(true, true);
-    if (d == NULL) {
-      raise_warning("Not a valid directory");
-    } else {
-      d->close();
-    }
+void f_closedir(CResRef dir_handle /* = null */) {
+  Directory *d = get_dir(dir_handle);
+  if (!d) {
+    return;
   }
+  if (same(s_directory_data->defaultDirectory, d)) {
+    s_directory_data->defaultDirectory = nullptr;
+  }
+  d->close();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

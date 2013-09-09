@@ -149,11 +149,11 @@ bool f_chdir(CStrRef directory);
 bool f_chroot(CStrRef directory);
 Variant f_dir(CStrRef directory);
 Variant f_opendir(CStrRef path, CVarRef context = uninit_null());
-Variant f_readdir(CResRef dir_handle);
-void f_rewinddir(CResRef dir_handle);
+Variant f_readdir(CResRef dir_handle = null_resource);
+void f_rewinddir(CResRef dir_handle = null_resource);
 Variant f_scandir(CStrRef directory, bool descending = false,
                   CVarRef context = uninit_null());
-void f_closedir(CResRef dir_handle);
+void f_closedir(CResRef dir_handle = null_resource);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

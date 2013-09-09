@@ -17,6 +17,11 @@
 #ifndef incl_HPHP_RESOURCE_DATA_H_
 #define incl_HPHP_RESOURCE_DATA_H_
 
+#ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
+#error Directly including 'resource_data.h' is prohibited. \
+       Include 'complex_types.h' instead.
+#endif
+
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/sweepable.h"
 

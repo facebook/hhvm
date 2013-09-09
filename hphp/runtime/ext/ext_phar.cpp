@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/mem-file.h"
+#include "hphp/runtime/base/directory.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,7 +31,8 @@ static const StaticString
   s_size("size"),
   s_mtime("mtime"),
   s_atime("atime"),
-  s_ctime("ctime");
+  s_ctime("ctime"),
+  s_opendir("opendir");
 
 static class PharStreamWrapper : public Stream::Wrapper {
  public:
@@ -51,7 +53,7 @@ static class PharStreamWrapper : public Stream::Wrapper {
       nullptr,
       SystemLib::s_PharClass
     );
-    CStrRef contents = ret.toString();
+    String contents = ret.toString();
 
     MemFile* file = NEWOBJ(MemFile)(contents.data(), contents.size());
     return file;
@@ -82,6 +84,24 @@ static class PharStreamWrapper : public Stream::Wrapper {
 
   virtual int lstat(CStrRef path, struct stat* buf) {
     return stat(path, buf);
+  }
+
+  virtual Directory* opendir(CStrRef path) {
+    static Func* f = SystemLib::s_PharClass->lookupMethod(s_opendir.get());
+    Variant ret;
+    g_vmContext->invokeFunc(
+      ret.asTypedValue(),
+      f,
+      CREATE_VECTOR1(path),
+      nullptr,
+      SystemLib::s_PharClass
+    );
+    Array files = ret.toArray();
+    if (files.empty()) {
+      raise_warning("No such file or directory");
+      return nullptr;
+    }
+    return NEWOBJ(ArrayDirectory)(files);
   }
 
  private:

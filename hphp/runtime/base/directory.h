@@ -14,52 +14,67 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef HPHP_STREAM_WRAPPER_H
-#define HPHP_STREAM_WRAPPER_H
+#ifndef incl_HPHP_DIRECTORY_H_
+#define incl_HPHP_DIRECTORY_H_
 
-#include <string>
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/array-iterator.h"
 
-#include <boost/noncopyable.hpp>
+#include <dirent.h>
 
 namespace HPHP {
-
-class Directory;
-
-namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Wrapper : boost::noncopyable {
- public:
-  Wrapper() : m_isLocal(true) { }
-  void registerAs(const std::string &scheme);
-
-  virtual File* open(CStrRef filename, CStrRef mode,
-                     int options, CVarRef context) = 0;
-  virtual int access(CStrRef path, int mode) {
-    return -1;
-  }
-  virtual int lstat(CStrRef path, struct stat* buf) {
-    return -1;
-  }
-  virtual int stat(CStrRef path, struct stat* buf) {
-    return -1;
-  }
-  virtual Directory* opendir(CStrRef path) {
-    return nullptr;
+class Directory : public SweepableResourceData {
+public:
+  virtual void close() = 0;
+  virtual String read() = 0;
+  virtual void rewind() = 0;
+  void sweep() {
+    close();
   }
 
-  virtual ~Wrapper() {}
+  static StaticString s_class_name;
+  // overriding ResourceData
+  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
 
-  /**
-   * Is there a chance that open() could return a file that is local?
-   */
-  bool m_isLocal;
+  String getLastError() {
+    return String(folly::errnoStr(errno).toStdString());
+  }
+};
+
+class PlainDirectory : public Directory {
+public:
+  DECLARE_RESOURCE_ALLOCATION(PlainDirectory);
+
+  explicit PlainDirectory(CStrRef path);
+  ~PlainDirectory();
+
+  virtual void close();
+  virtual String read();
+  virtual void rewind();
+  bool isValid() const;
+
+private:
+  DIR *m_dir;
+};
+
+class ArrayDirectory : public Directory {
+public:
+  DECLARE_RESOURCE_ALLOCATION(ArrayDirectory);
+
+  explicit ArrayDirectory(CArrRef a) : m_it(a) {}
+
+  virtual void close() {}
+  virtual String read();
+  virtual void rewind();
+
+private:
+  ArrayIter m_it;
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-}
 
-#endif // HPHP_STREAM_WRAPPER_REGISTRY_H
+#endif // incl_HPHP_DIRECTORY_H_

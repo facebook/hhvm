@@ -25,6 +25,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+class Directory;
+
 class FileStreamWrapper : public Stream::Wrapper {
  public:
   static MemFile* openFromCache(CStrRef filename, CStrRef mode);
@@ -39,6 +41,7 @@ class FileStreamWrapper : public Stream::Wrapper {
   virtual int lstat(CStrRef path, struct stat* buf) {
     return ::lstat(File::TranslatePath(path).data(), buf);
   }
+  virtual Directory* opendir(CStrRef path);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

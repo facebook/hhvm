@@ -611,7 +611,7 @@ class Variant : private TypedValue {
   Variant  operator -- (int) = delete;
 
   /**
-   * Iterator functions. See array_iterator.h for end() and next().
+   * Iterator functions. See array-iterator.h for end() and next().
    */
   ArrayIter begin(CStrRef context = null_string) const;
   // used by generated code

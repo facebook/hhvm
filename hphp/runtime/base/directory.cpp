@@ -14,52 +14,67 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef HPHP_STREAM_WRAPPER_H
-#define HPHP_STREAM_WRAPPER_H
-
-#include <string>
+#include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/file.h"
-
-#include <boost/noncopyable.hpp>
+#include <sys/types.h>
 
 namespace HPHP {
 
-class Directory;
+IMPLEMENT_OBJECT_ALLOCATION(PlainDirectory)
+IMPLEMENT_OBJECT_ALLOCATION(ArrayDirectory)
 
-namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Wrapper : boost::noncopyable {
- public:
-  Wrapper() : m_isLocal(true) { }
-  void registerAs(const std::string &scheme);
+StaticString Directory::s_class_name("Directory");
 
-  virtual File* open(CStrRef filename, CStrRef mode,
-                     int options, CVarRef context) = 0;
-  virtual int access(CStrRef path, int mode) {
-    return -1;
+///////////////////////////////////////////////////////////////////////////////
+
+PlainDirectory::PlainDirectory(CStrRef path) {
+  m_dir = ::opendir(path.data());
+}
+
+PlainDirectory::~PlainDirectory() {
+  close();
+}
+
+void PlainDirectory::close() {
+  if (m_dir) {
+    ::closedir(m_dir);
+    m_dir = nullptr;
   }
-  virtual int lstat(CStrRef path, struct stat* buf) {
-    return -1;
+}
+
+String PlainDirectory::read() {
+  struct dirent entry;
+  struct dirent *result;
+  int ret = readdir_r(m_dir, &entry, &result);
+  if (ret != 0 || !result) {
+    return null_string;
   }
-  virtual int stat(CStrRef path, struct stat* buf) {
-    return -1;
-  }
-  virtual Directory* opendir(CStrRef path) {
-    return nullptr;
+  return String(entry.d_name, CopyString);
+}
+
+void PlainDirectory::rewind() {
+  ::rewinddir(m_dir);
+}
+
+bool PlainDirectory::isValid() const {
+  return m_dir;
+}
+
+String ArrayDirectory::read() {
+  if (!m_it) {
+    return null_string;
   }
 
-  virtual ~Wrapper() {}
+  String ret = m_it.second();
+  ++m_it;
+  return ret;
+}
 
-  /**
-   * Is there a chance that open() could return a file that is local?
-   */
-  bool m_isLocal;
-};
+void ArrayDirectory::rewind() {
+  m_it.setPos(0);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-}
-
-#endif // HPHP_STREAM_WRAPPER_REGISTRY_H

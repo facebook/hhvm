@@ -19,6 +19,14 @@ function bind_random_port($socket, $address) {
   return 0;
 }
 
+function create_listen_random_port() {
+  for ($i = 0; $i < 20; $i++) {
+    $port = get_random_port();
+    if (@socket_create_listen($port)) return $port;
+  }
+  return 0;
+}
+
 function get_client_server() {
   $server = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
   $port = bind_random_port($server, "127.0.0.1");
@@ -37,8 +45,7 @@ function get_client_server() {
 $s = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 var_dump($s);
 
-$port = get_random_port();
-socket_create_listen($port);
+$port = create_listen_random_port();
 
 var_dump(socket_create_pair(AF_UNIX, SOCK_STREAM, 0, $fds));
 var_dump(count($fds));

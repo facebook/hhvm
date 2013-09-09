@@ -32,6 +32,6 @@ bool(true)
 bool(true)
 bool(true)
 NULL
-HipHop Warning: unable to bind address127.0.0.1:80 [13]: Permission denied in %s/test/slow/ext_socket/ext_socket.php on line 85
+HipHop Warning: unable to bind address127.0.0.1:80 [13]: Permission denied in %s/test/slow/ext_socket/ext_socket.php on line 92
 bool(true)
 int(0)

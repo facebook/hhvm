@@ -4,9 +4,12 @@
  Description: Gets line from file pointer and parse for CSV fields
 */
 
-/* Testing fgetcsv() to read from a file when provided with default value of arguments */
+/*
+   Testing fgetcsv() to read from a file opened in various write modes and 
+   enclosure argument with two characters
+*/
 
-echo "*** Testing fgetcsv() : with default arguments value ***\n";
+echo "*** Testing fgetcsv() : with two chars as enclosure & delimiter ***\n";
 
 /* the array is with three elements in it. Each element should be read as 
    1st element is delimiter, 2nd element is enclosure 
@@ -23,13 +26,11 @@ $csv_lists = array (
   array(':', '&', '&""""&:&"&:,:":&,&:,,,,')
 );
 
-$filename = dirname(__FILE__) . '/fgetcsv_variation7.tmp';
+$filename = dirname(__FILE__) . '/fgetcsv_variation24.tmp';
 @unlink($filename);
 
-$file_modes = array ("r","rb", "rt", "r+", "r+b", "r+t",
-                     "a+", "a+b", "a+t",
-                     "w+", "w+b", "w+t",
-                     "x+", "x+b", "x+t"); 
+$file_modes = array ("w+", "w+b", "w+t",
+                     "x+", "x+b", "x+t");
 
 $loop_counter = 1;
 foreach ($csv_lists as $csv_list) {
@@ -68,13 +69,15 @@ foreach ($csv_lists as $csv_list) {
 
     // call fgetcsv() to parse csv fields
 
-    // use only default arguments 
+    // use delimiter & enclosure char of two chars 
     fseek($file_handle, 0, SEEK_SET);
-    var_dump( fgetcsv($file_handle) );
+    $del = "++";
+    $enc = "%%";
+    var_dump( fgetcsv($file_handle, 1024, $del, $enc) );
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );
-
+    
     // close the file
     fclose($file_handle);
     //delete file

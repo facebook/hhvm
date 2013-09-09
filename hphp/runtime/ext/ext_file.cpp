@@ -376,21 +376,24 @@ Variant f_fgetcsv(CResRef handle, int64_t length /* = 0 */,
                   CStrRef delimiter /* = "," */,
                   CStrRef enclosure /* = "\"" */,
                   CStrRef escape /* = "\\" */) {
-  if (delimiter.size() != 1) {
-    throw_invalid_argument("delimiter: %s", delimiter.data());
-    return false;
-  }
-  if (enclosure.size() != 1) {
-    throw_invalid_argument("enclosure: %s", enclosure.data());
-    return false;
-  }
-  if (escape.size() != 1) {
-    throw_invalid_argument("escape: %s", enclosure.data());
-    return false;
-  }
+  char delimiter_char = ',', enclosure_char = '"', escape_char = '\\';
+
+  // match the behavior of Zend PHP
+  #define FGETCSV_CHECK_ARG(NAME)                         \
+    if (NAME.size() == 0) {                               \
+      throw_invalid_argument(#NAME ": %s", NAME.data());  \
+      return false;                                       \
+    } else if (NAME.size() > 1) {                         \
+      raise_notice(#NAME " must be a single character");  \
+    }                                                     \
+    NAME ## _char = NAME.charAt(0);                       \
+
+  FGETCSV_CHECK_ARG(delimiter);
+  FGETCSV_CHECK_ARG(enclosure);
+  FGETCSV_CHECK_ARG(escape);
+
   CHECK_HANDLE_RET_NULL(handle, f);
-  Array ret = f->readCSV(length, delimiter.charAt(0), enclosure.charAt(0),
-                         escape.charAt(0));
+  Array ret = f->readCSV(length, delimiter_char, enclosure_char, escape_char);
   if (!ret.isNull()) {
     return ret;
   }

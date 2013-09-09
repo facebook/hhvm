@@ -4,9 +4,9 @@
  Description: Gets line from file pointer and parse for CSV fields
 */
 
-/* Testing fgetcsv() by providing two characters for enclosure and delimiter parameters */
+/* Testing fgetcsv() to read from a file when provided with default value of arguments */
 
-echo "*** Testing fgetcsv() : with two chars as enclosure & delimiter ***\n";
+echo "*** Testing fgetcsv() : with default arguments value ***\n";
 
 /* the array is with three elements in it. Each element should be read as 
    1st element is delimiter, 2nd element is enclosure 
@@ -23,11 +23,13 @@ $csv_lists = array (
   array(':', '&', '&""""&:&"&:,:":&,&:,,,,')
 );
 
-$filename = dirname(__FILE__) . '/fgetcsv_variation12.tmp';
+$filename = dirname(__FILE__) . '/fgetcsv_variation7.tmp';
 @unlink($filename);
 
 $file_modes = array ("r","rb", "rt", "r+", "r+b", "r+t",
-                     "a+", "a+b", "a+t");
+                     "a+", "a+b", "a+t",
+                     "w+", "w+b", "w+t",
+                     "x+", "x+b", "x+t"); 
 
 $loop_counter = 1;
 foreach ($csv_lists as $csv_list) {
@@ -46,7 +48,6 @@ foreach ($csv_lists as $csv_list) {
     $enclosure = $csv_list[1];
     $csv_field = $csv_list[2];
     fwrite($file_handle, $csv_field . "\n");
- 
     // write another line of text and a blank line
     // this will be used to test, if the fgetcsv() read more than a line and its
     // working when only a blank line is read
@@ -67,15 +68,13 @@ foreach ($csv_lists as $csv_list) {
 
     // call fgetcsv() to parse csv fields
 
-    // use delimiter & enclosure char of two chars 
+    // use only default arguments 
     fseek($file_handle, 0, SEEK_SET);
-    $del = "++";
-    $enc = "%%";
-    var_dump( fgetcsv($file_handle, 1024, $del, $enc) );
+    var_dump( fgetcsv($file_handle) );
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );
-    
+
     // close the file
     fclose($file_handle);
     //delete file

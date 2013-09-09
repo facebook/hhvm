@@ -129,26 +129,29 @@ class SplFileObject extends SplFileInfo
    *                     lines are skipped.
    */
   public function fgetcsv(
-      $delimiter = null,
-      $enclosure = null,
-      $escape = null) {
+      $delimiter = ',',
+      $enclosure = '"',
+      $escape = '\\') {
 
-    if (!$delimiter) {
-      $delimiter = $this->delimiter;
-    }
-    if (!$enclosure) {
-      $enclosure = $this->enclosure;
-    }
-    if (!$escape) {
-      $escape = $this->escape;
+    $args = array(
+      'delimiter' => $delimiter,
+      'enclosure' => $enclosure,
+      'escape' => $escape,
+    );
+
+    foreach ($args as $name => $arg) {
+      if (!is_string($arg) || strlen($arg) != 1) {
+        error_log("HipHop Warning: $name must be a character");
+        return false;
+      }
     }
 
     return fgetcsv(
       $this->rsrc,
       $this->maxLineLen,
-      $delimiter,
-      $enclosure,
-      $escape
+      $args['delimiter'],
+      $args['enclosure'],
+      $args['escape'],
     );
   }
 

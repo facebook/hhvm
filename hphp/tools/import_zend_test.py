@@ -151,6 +151,7 @@ bad_tests = (
     '/zend/bug54265.php',
 
     # broken in contbuild
+    '/ext-standard-strings/bug51059.php'
     '/ext-standard-strings/setlocale_variation1.php',
     '/ext-standard-strings/setlocale_basic1.php',
     '/ext-standard-strings/setlocale_basic2.php',
@@ -530,7 +531,7 @@ def walk(filename, source):
             test += '?>\n'
         test += sections['CLEAN']
 
-    # If you put an exception in here, please send a pull request upstream to 
+    # If you put an exception in here, please send a pull request upstream to
     # php-src. Then when it gets merged kill your hack.
     if 'bug60771.php' in full_dest_filename:
         test = test.replace("?>", "unlink('test.php');\n?>")
@@ -700,12 +701,12 @@ if not os.path.isdir('test/zend/all'):
         shutil.copytree('test/zend/bad', 'test/zend/all')
 
         for filename in other_files:
-            dest_dir = os.path.dirname('test/zend/all/'+filename)
+            dest_dir = os.path.dirname('test/zend/all/' + filename)
             if not os.path.exists(dest_dir):
                 os.makedirs(dest_dir)
             shutil.copyfile(
-                'test/zend/good/'+filename, 
-                'test/zend/all/'+filename
+                'test/zend/good/' + filename,
+                'test/zend/all/' + filename
             )
 else:
     print "Running all tests from zend/all"

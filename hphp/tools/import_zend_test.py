@@ -209,6 +209,89 @@ bad_tests = (
     '/zend/lsb_022.php',
 )
 
+# Tests that work but not in repo mode
+norepo_tests = (
+    # TODO: See if any of these should work in repo mode
+    '/ext-bz2/with_strings.php',
+    '/ext-pdo_sqlite/bug33841.php',
+    '/ext-pdo_sqlite/bug46139.php',
+    '/ext-pdo_sqlite/bug52487.php',
+    '/ext-sqlite3/bug47159.php',
+    '/ext-sqlite3/sqlite3_01_open.php',
+    '/ext-sqlite3/sqlite3_02_create.php',
+    '/ext-sqlite3/sqlite3_03_insert.php',
+    '/ext-sqlite3/sqlite3_04_update.php',
+    '/ext-sqlite3/sqlite3_05_delete.php',
+    '/ext-sqlite3/sqlite3_09_blob_bound_param.php',
+    '/ext-sqlite3/sqlite3_13_skip_all_cleanup.php',
+    '/ext-sqlite3/sqlite3_14_querysingle.php',
+    '/ext-sqlite3/sqlite3_16_select_no_results.php',
+    '/ext-sqlite3/sqlite3_18_changes.php',
+    '/ext-sqlite3/sqlite3_19_columninfo.php',
+    '/ext-sqlite3/sqlite3_20_error.php',
+    '/ext-sqlite3/sqlite3_24_last_insert_rowid.php',
+    '/ext-sqlite3/sqlite3stmt_paramCount_basic.php',
+    '/ext-sqlite3/sqlite3stmt_paramCount_error.php',
+    '/ext-standard-class_object/class_exists_basic_001.php',
+    '/ext-standard-class_object/get_declared_classes_variation1.php',
+    '/ext-standard-class_object/get_declared_interfaces_variation1.php',
+    '/ext-standard-class_object/get_declared_traits_variation1.php',
+    '/ext-standard-class_object/interface_exists_variation3.php',
+    '/ext-standard-class_object/interface_exists_variation4.php',
+    '/ext-standard-general_functions/is_numeric.php',
+    '/ext-standard-math/abs.php',
+    '/ext-standard-math/pow.php',
+    '/ext-standard-serialize/bug30234.php',
+    '/ext-standard-url/parse_url_basic_002.php',
+    '/ext-standard-url/parse_url_basic_003.php',
+    '/ext-standard-url/parse_url_basic_004.php',
+    '/ext-standard-url/parse_url_basic_005.php',
+    '/ext-standard-url/parse_url_basic_006.php',
+    '/ext-standard-url/parse_url_basic_007.php',
+    '/ext-standard-url/parse_url_basic_008.php',
+    '/ext-standard-url/parse_url_basic_009.php',
+    '/tests-classes/autoload_001.php',
+    '/tests-classes/autoload_002.php',
+    '/tests-classes/autoload_003.php',
+    '/tests-classes/autoload_005.php',
+    '/tests-classes/autoload_006.php',
+    '/tests-classes/autoload_010.php',
+    '/tests-classes/autoload_018.php',
+    '/tests-classes/constants_scope_001.php',
+    '/tests-lang/static_variation_001.php',
+    '/tests-lang/static_variation_002.php',
+    '/zend/014.php',
+    '/zend/035.php',
+    '/zend/bug28444.php',
+    '/zend/bug30519.php',
+    '/zend/bug30922.php',
+    '/zend/bug36006.php',
+    '/zend/bug43651.php',
+    '/zend/bug44141.php',
+    '/zend/bug55578.php',
+    '/zend/bug63741.php',
+    '/zend/class_alias_013.php',
+    '/zend/class_constants_003.php',
+    '/zend/class_exists_001.php',
+    '/zend/constants_005.php',
+    '/zend/errmsg_007.php',
+    '/zend/errmsg_026.php',
+    '/zend/errmsg_035.php',
+    '/zend/errmsg_036.php',
+    '/zend/error_reporting04.php',
+    '/zend/error_reporting09.php',
+    '/zend/jump14.php',
+    '/zend/lsb_013.php',
+    '/zend/ns_041.php',
+    '/zend-traits/bug60369.php',
+    '/zend-traits/bug60809.php',
+    '/zend-traits-bugs/overridding-conflicting-property-initializer.php',
+    '/zend-traits/error_003.php',
+    '/zend-traits/property003.php',
+    '/zend-traits/property004.php',
+    '/zend/unset_cv01.php',
+)
+
 # Random other files that zend wants
 other_files = (
     '/ext-calendar/skipif.inc',
@@ -394,9 +477,9 @@ def walk(filename, source):
         return
 
     dest_filename = os.path.basename(filename)
-    suite, path = source.split('/tests', 2)
+    suite, path = source.split('/tests/', 1)
     suite = suite.lower().replace('/', '-')
-    source_dir = suite + path
+    source_dir = os.path.join(suite, path)
 
     cur_dir = os.path.dirname(__file__)
     dest_subdir = os.path.join(cur_dir, '../test/zend/all', source_dir)
@@ -746,16 +829,20 @@ for test in results:
         if test in filename:
             good = False
 
+    needs_norepo = False
     if good:
         dest_file = good_file
         delete_file = bad_file
         subpath = 'good'
+        for test in norepo_tests:
+            if test in filename:
+                needs_norepo = True
     else:
         dest_file = bad_file
         delete_file = good_file
         subpath = 'bad'
 
-    exps = glob.glob(filename+'.expect*')
+    exps = glob.glob(filename + '.expect*')
     if not exps:
         # this file is probably generated while running tests :(
         continue
@@ -763,10 +850,12 @@ for test in results:
     source_file_exp = exps[0]
     _, dest_ext = os.path.splitext(source_file_exp)
     shutil.copyfile(filename, dest_file)
-    file(dest_file+dest_ext, 'w').write(
+    file(dest_file + dest_ext, 'w').write(
         file(source_file_exp).read().replace('/all', '/' + subpath)
     )
-    for f in glob.glob(delete_file+"*"):
+    if needs_norepo:
+        file(dest_file + '.norepo', 'w')
+    for f in glob.glob(delete_file + "*"):
         os.unlink(f)
 
 # extra random files needed for tests...

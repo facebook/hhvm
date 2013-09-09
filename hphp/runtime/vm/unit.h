@@ -70,7 +70,8 @@ enum UnitMergeState {
   UnitMergeStateEmpty = 32
 };
 
-inline bool ALWAYS_INLINE isMergeKindReq(UnitMergeKind k) {
+ALWAYS_INLINE
+bool isMergeKindReq(UnitMergeKind k) {
   return k == UnitMergeKindReqDoc;
 }
 

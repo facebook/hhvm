@@ -21,7 +21,7 @@
 
 namespace HPHP { namespace JIT {
 
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 int64_t ak_exist_string_impl(ArrayData* arr, StringData* key) {
   int64_t n;
   if (key->isStrictlyInteger(n)) {
@@ -61,7 +61,7 @@ int64_t ak_exist_int_obj(ObjectData* obj, int64_t key) {
   return res;
 }
 
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 TypedValue& getDefaultIfNullCell(TypedValue* tv, TypedValue& def) {
   if (UNLIKELY(nullptr == tv)) {
     // refcount is already correct since def was never decrefed

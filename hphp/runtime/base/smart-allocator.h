@@ -213,7 +213,7 @@ void *SmartAllocatorInitSetup() {
 
 #define DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                         \
   public:                                                               \
-  inline ALWAYS_INLINE void operator delete(void* p) {                  \
+  ALWAYS_INLINE void operator delete(void* p) {                  \
     static_assert(std::is_base_of<ResourceData,T>::value, "");          \
     assert(sizeof(T) <= MemoryManager::kMaxSmartSize);                  \
     MM().smartFreeSize(p, sizeof(T));                                   \

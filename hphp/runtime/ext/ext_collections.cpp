@@ -1706,9 +1706,8 @@ void c_Map::add(TypedValue* val) {
 
 #define STRING_HASH(x)   (int32_t(x) | 0x80000000)
 
-bool inline hitStringKey(const c_Map::Bucket* p, const char* k,
-                         int len, int32_t hash) ALWAYS_INLINE;
-bool inline hitStringKey(const c_Map::Bucket* p, const char* k,
+ALWAYS_INLINE
+bool hitStringKey(const c_Map::Bucket* p, const char* k,
                   int len, int32_t hash) {
   assert(p->validValue());
   if (p->hasIntKey()) return false;
@@ -1718,8 +1717,8 @@ bool inline hitStringKey(const c_Map::Bucket* p, const char* k,
                        memcmp(data, k, len) == 0);
 }
 
-bool inline hitIntKey(const c_Map::Bucket* p, int64_t ki) ALWAYS_INLINE;
-bool inline hitIntKey(const c_Map::Bucket* p, int64_t ki) {
+ALWAYS_INLINE
+bool hitIntKey(const c_Map::Bucket* p, int64_t ki) {
   assert(p->validValue());
   return p->ikey == ki && p->hasIntKey();
 }
@@ -1794,7 +1793,7 @@ c_Map::Bucket* c_Map::findForInsert(const char* k, int len,
 
 // findForNewInsert() is only safe to use if you know for sure that the
 // key is not already present in the Map.
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 c_Map::Bucket* c_Map::findForNewInsert(size_t h0) const {
   size_t tableMask = m_nLastSlot;
   size_t probeIndex = h0 & tableMask;
@@ -2883,10 +2882,9 @@ void c_StableMap::add(TypedValue* val) {
   }
 }
 
-bool inline sm_hit_string_key(const c_StableMap::Bucket* p,
-                              const char* k, int len, int32_t hash) ALWAYS_INLINE;
-bool inline sm_hit_string_key(const c_StableMap::Bucket* p,
-                              const char* k, int len, int32_t hash) {
+ALWAYS_INLINE
+bool sm_hit_string_key(const c_StableMap::Bucket* p, const char* k,
+                       int len, int32_t hash) {
   if (p->hasIntKey()) return false;
   const char* data = p->skey->data();
   return data == k || (p->hash() == hash &&
@@ -3835,9 +3833,8 @@ void c_Set::add(TypedValue* val) {
 
 #define STRING_HASH(x)   (int32_t(x) | 0x80000000)
 
-bool inline hitString(const c_Set::Bucket* p, const char* k,
-                         int len, int32_t hash) ALWAYS_INLINE;
-bool inline hitString(const c_Set::Bucket* p, const char* k,
+ALWAYS_INLINE
+bool hitString(const c_Set::Bucket* p, const char* k,
                          int len, int32_t hash) {
   assert(p->validValue());
   if (p->hasInt()) return false;
@@ -3847,8 +3844,8 @@ bool inline hitString(const c_Set::Bucket* p, const char* k,
                        memcmp(data, k, len) == 0);
 }
 
-bool inline hitInt(const c_Set::Bucket* p, int64_t ki) ALWAYS_INLINE;
-bool inline hitInt(const c_Set::Bucket* p, int64_t ki) {
+ALWAYS_INLINE
+bool hitInt(const c_Set::Bucket* p, int64_t ki) {
   assert(p->validValue());
   return p->hasInt() && p->data.m_data.num == ki;
 }
@@ -3923,7 +3920,7 @@ c_Set::Bucket* c_Set::findForInsert(const char* k, int len,
 
 // findForNewInsert() is only safe to use if you know for sure that the
 // value is not already present in the Set.
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 c_Set::Bucket* c_Set::findForNewInsert(size_t h0) const {
   size_t tableMask = m_nLastSlot;
   size_t probeIndex = h0 & tableMask;

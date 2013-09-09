@@ -94,7 +94,7 @@ frame_continuation(const ActRec* fp) {
  */
 
 template<bool unwinding>
-inline void ALWAYS_INLINE
+void ALWAYS_INLINE
 frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
   assert(numLocals == fp->m_func->numLocals());
   assert(!fp->hasInvName());
@@ -128,7 +128,7 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
 }
 
 template<bool unwinding>
-inline void ALWAYS_INLINE
+void ALWAYS_INLINE
 frame_free_locals_inl_no_hook(ActRec* fp, int numLocals) {
   if (fp->hasThis()) {
     ObjectData* this_ = fp->getThis();
@@ -140,26 +140,26 @@ frame_free_locals_inl_no_hook(ActRec* fp, int numLocals) {
   frame_free_locals_helper_inl<unwinding>(fp, numLocals);
 }
 
-inline void ALWAYS_INLINE
+void ALWAYS_INLINE
 frame_free_locals_inl(ActRec* fp, int numLocals) {
   frame_free_locals_inl_no_hook<false>(fp, numLocals);
   EventHook::FunctionExit(fp);
 }
 
-inline void ALWAYS_INLINE
+void ALWAYS_INLINE
 frame_free_locals_unwind(ActRec* fp, int numLocals) {
   frame_free_locals_inl_no_hook<true>(fp, numLocals);
   EventHook::FunctionExit(fp);
 }
 
-inline void ALWAYS_INLINE
+void ALWAYS_INLINE
 frame_free_locals_no_this_inl(ActRec* fp, int numLocals) {
   frame_free_locals_helper_inl<false>(fp, numLocals);
   EventHook::FunctionExit(fp);
 }
 
 // Helper for iopFCallBuiltin.
-inline void ALWAYS_INLINE
+void ALWAYS_INLINE
 frame_free_args(TypedValue* args, int count) {
   for (int i = 0; i < count; i++) {
     TypedValue* loc = args - i;

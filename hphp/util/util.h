@@ -67,7 +67,7 @@ namespace HPHP { namespace Util {
 #pragma GCC diagnostic error "-Wunused-variable"
 #endif
 
-#define ALWAYS_INLINE      __attribute__((always_inline))
+#define ALWAYS_INLINE      inline __attribute__((always_inline))
 #define NEVER_INLINE       __attribute__((noinline))
 #define INLINE_SINGLE_CALLER ALWAYS_INLINE
 #define UNUSED             __attribute__((unused))

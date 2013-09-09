@@ -115,7 +115,7 @@ public:
 #endif
 };
 
-ALWAYS_INLINE inline void decRefRef(RefData* ref) {
+ALWAYS_INLINE void decRefRef(RefData* ref) {
   if (ref->decRefCount() == 0) ref->release();
 }
 

@@ -161,7 +161,7 @@ inline void releaseKey(StringData* keySD) {
 }
 
 // Post: base is a Cell*
-inline ALWAYS_INLINE void opPre(TypedValue*& base, DataType& type) {
+ALWAYS_INLINE void opPre(TypedValue*& base, DataType& type) {
   // Get inner variant if necessary.
   type = base->m_type;
   if (type == KindOfRef) {

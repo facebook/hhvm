@@ -266,7 +266,7 @@ Variant ObjectData::o_get(CStrRef propName, bool error /* = true */,
 }
 
 template <class T>
-inline ALWAYS_INLINE Variant ObjectData::o_setImpl(CStrRef propName, T v,
+ALWAYS_INLINE Variant ObjectData::o_setImpl(CStrRef propName, T v,
                                                    CStrRef context) {
   if (UNLIKELY(!*propName.data())) {
     throw_invalid_property_name(propName);

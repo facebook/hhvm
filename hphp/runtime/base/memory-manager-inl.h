@@ -81,7 +81,7 @@ inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
   FTRACE(1, "smartFreeSize: {} ({} bytes)\n", ptr, bytes);
 }
 
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 void* MemoryManager::smartMallocSizeBig(size_t bytes) {
   m_stats.usage += bytes;
   // TODO(#2831116): we only add sizeof(SmallNode) so smartMallocBig
@@ -91,7 +91,7 @@ void* MemoryManager::smartMallocSizeBig(size_t bytes) {
   return ptr;
 }
 
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 void MemoryManager::smartFreeSizeBig(void* vp, size_t bytes) {
   m_stats.usage -= bytes;
   FTRACE(1, "smartFreeBig: {} ({} bytes)\n", vp, bytes);

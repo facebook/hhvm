@@ -156,7 +156,8 @@ std::pair<StringData*,uint32_t> allocFlatForLen(uint32_t len) {
   return std::make_pair(sd, cap);
 }
 
-ALWAYS_INLINE void freeForSize(void* vp, uint32_t size) {
+ALWAYS_INLINE
+void freeForSize(void* vp, uint32_t size) {
   if (LIKELY(size <= MemoryManager::kMaxSmartSize)) {
     return MM().smartFreeSize(vp, size);
   }

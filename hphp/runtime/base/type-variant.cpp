@@ -252,7 +252,8 @@ const RawDestructor g_destructors[] = {
   (RawDestructor)getMethodPtr(&RefData::release),
 };
 
-inline ALWAYS_INLINE void Variant::destructDataImpl(RefData* data, DataType t) {
+ALWAYS_INLINE
+void Variant::destructDataImpl(RefData* data, DataType t) {
   assert(IS_REFCOUNTED_TYPE(t));
   assert(IS_REAL_TYPE(t));
   if (data->decRefCount() == 0) {
@@ -263,7 +264,8 @@ inline ALWAYS_INLINE void Variant::destructDataImpl(RefData* data, DataType t) {
   }
 }
 
-inline ALWAYS_INLINE void Variant::destructImpl() {
+ALWAYS_INLINE
+void Variant::destructImpl() {
   destructDataImpl(m_data.pref, m_type);
 }
 
@@ -1228,8 +1230,8 @@ Variant &Variant::lvalBlackHole() {
 }
 
 template <typename T>
-inline ALWAYS_INLINE CVarRef Variant::SetImpl(Variant *self, T key,
-                                              CVarRef v, bool isKey) {
+ALWAYS_INLINE
+CVarRef Variant::SetImpl(Variant *self, T key, CVarRef v, bool isKey) {
   retry:
   if (LIKELY(self->m_type == KindOfArray)) {
     ArrayData *escalated;
@@ -1353,8 +1355,8 @@ CVarRef Variant::append(CVarRef v) {
 }
 
 template <typename T>
-inline ALWAYS_INLINE CVarRef Variant::SetRefImpl(Variant *self, T key,
-                                                 CVarRef v, bool isKey) {
+ALWAYS_INLINE
+CVarRef Variant::SetRefImpl(Variant *self, T key, CVarRef v, bool isKey) {
   retry:
   if (LIKELY(self->m_type == KindOfArray)) {
     ArrayData *escalated;

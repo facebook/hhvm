@@ -32,7 +32,7 @@ namespace HPHP {
  * allocated memory).  The final word compare is adjusted to handle
  * the slack in lenBytes so only the bytes we care about are compared.
  */
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 bool wordsame(const void* mem1, const void* mem2, size_t lenBytes) {
   auto p1 = reinterpret_cast<const uint32_t*>(mem1);
   auto p2 = reinterpret_cast<const uint32_t*>(mem2);

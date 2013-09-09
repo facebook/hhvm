@@ -51,13 +51,13 @@ int Vdso::ClockGetTime(int clk_id, timespec *ts) {
   return s_vdso.clockGetTime(clk_id, ts);
 }
 
-inline ALWAYS_INLINE int64_t Vdso::clockGetTimeNS(int clk_id) {
+ALWAYS_INLINE int64_t Vdso::clockGetTimeNS(int clk_id) {
   if (m_clock_gettime_ns)
     return m_clock_gettime_ns(clk_id);
   return -1;
 }
 
-inline ALWAYS_INLINE int Vdso::clockGetTime(int clk_id, timespec *ts) {
+ALWAYS_INLINE int Vdso::clockGetTime(int clk_id, timespec *ts) {
   if (m_clock_gettime) {
     memset(ts, 0, sizeof(*ts));
     return m_clock_gettime(clk_id, ts);

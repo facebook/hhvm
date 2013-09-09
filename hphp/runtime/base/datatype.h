@@ -233,7 +233,7 @@ const unsigned int kDestrTableSize = 6;
 
 #define TYPE_TO_DESTR_IDX(t) ((t) >> kShiftDataTypeToDestrIndex)
 
-inline ALWAYS_INLINE unsigned typeToDestrIndex(DataType t) {
+ALWAYS_INLINE unsigned typeToDestrIndex(DataType t) {
   assert(t == KindOfString || t == KindOfArray || t == KindOfObject ||
          t == KindOfResource || t == KindOfRef);
   return TYPE_TO_DESTR_IDX(t);

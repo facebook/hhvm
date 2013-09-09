@@ -510,7 +510,7 @@ Variant &Array::lvalAt(CVarRef key, ACCESSPARAMS_IMPL) {
 }
 
 template<typename T>
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 void Array::setImpl(const T &key, CVarRef v) {
   if (!m_px) {
     ArrayData *data = ArrayData::Create(key, v);
@@ -522,7 +522,7 @@ void Array::setImpl(const T &key, CVarRef v) {
 }
 
 template<typename T>
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 void Array::setRefImpl(const T &key, CVarRef v) {
   if (!m_px) {
     ArrayData *data = ArrayData::CreateRef(key, v);
@@ -535,7 +535,7 @@ void Array::setRefImpl(const T &key, CVarRef v) {
 }
 
 template<typename T>
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 void Array::addImpl(const T &key, CVarRef v) {
   if (!m_px) {
     ArrayData *data = ArrayData::Create(key, v);

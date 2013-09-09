@@ -114,14 +114,14 @@ inline void tvDecRef(TypedValue* tv) {
 }
 
 // Assumes 'tv' is live
-ALWAYS_INLINE inline void tvRefcountedDecRef(TypedValue* tv) {
+ALWAYS_INLINE void tvRefcountedDecRef(TypedValue* tv) {
   if (IS_REFCOUNTED_TYPE(tv->m_type)) {
     tvDecRef(tv);
   }
 }
 
 // decref when the count is known not to reach zero
-ALWAYS_INLINE inline void tvDecRefOnly(TypedValue* tv) {
+ALWAYS_INLINE void tvDecRefOnly(TypedValue* tv) {
   assert(!tvWillBeReleased(tv));
   if (IS_REFCOUNTED_TYPE(tv->m_type)) {
     tv->m_data.pstr->decRefCount();
@@ -151,7 +151,7 @@ inline void tvIncRef(TypedValue* tv) {
   tv->m_data.pstr->incRefCount();
 }
 
-ALWAYS_INLINE inline void tvRefcountedIncRef(TypedValue* tv) {
+ALWAYS_INLINE void tvRefcountedIncRef(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   if (IS_REFCOUNTED_TYPE(tv->m_type)) {
     tvIncRef(tv);

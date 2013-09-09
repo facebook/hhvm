@@ -599,7 +599,7 @@ struct ArrayFunctions {
 
 extern const ArrayFunctions g_array_funcs;
 
-ALWAYS_INLINE inline
+ALWAYS_INLINE
 void decRefArr(ArrayData* arr) {
   if (arr->decRefCount() == 0) arr->release();
 }

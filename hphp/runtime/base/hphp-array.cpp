@@ -135,7 +135,7 @@ HphpArray::HphpArray(EmptyMode)
 }
 
 // for internal use by nonSmartCopy() and copyPacked()
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray::HphpArray(const HphpArray& other, AllocationMode mode, ClonePacked)
     : ArrayData(other.m_kind, mode, other.m_size)
     , m_used(other.m_used)
@@ -153,7 +153,7 @@ HphpArray::HphpArray(const HphpArray& other, AllocationMode mode, ClonePacked)
 }
 
 // For internal use by nonSmartCopy() and copyMixed()
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray::HphpArray(const HphpArray& other, AllocationMode mode, CloneMixed)
     : ArrayData(other.m_kind, mode, other.m_size)
     , m_used(other.m_used)
@@ -455,7 +455,7 @@ static bool hitIntKey(const HphpArray::Elm& e, int64_t ki) {
 // 2, this guarantees a probe sequence of length tableSize that probes all
 // table elements exactly once.
 
-template <class Hit> inline ALWAYS_INLINE
+template <class Hit> ALWAYS_INLINE
 HphpArray::ElmInd HphpArray::findBody(size_t h0, Hit hit) const {
   // tableMask, probeIndex, and pos are explicitly 64-bit, because performance
   // regressed when they were 32-bit types via auto.  Test carefully.
@@ -516,7 +516,7 @@ HphpArray::ElmInd* warnUnbalanced(size_t n, HphpArray::ElmInd* ei) {
   return ei;
 }
 
-template <class Hit> inline ALWAYS_INLINE
+template <class Hit> ALWAYS_INLINE
 HphpArray::ElmInd* HphpArray::findForInsertBody(size_t h0, Hit hit) const {
   // tableMask, probeIndex, and pos are explicitly 64-bit, because performance
   // regressed when they were 32-bit types via auto.  Test carefully.
@@ -612,14 +612,14 @@ bool HphpArray::ExistsStr(const ArrayData* ad, const StringData* k) {
 //=============================================================================
 // Append/insert/update.
 
-inline ALWAYS_INLINE bool HphpArray::isFull() const {
+ALWAYS_INLINE bool HphpArray::isFull() const {
   assert(!isPacked());
   assert(m_used <= m_cap);
   assert(m_hLoad <= m_cap);
   return m_used == m_cap || m_hLoad == m_cap;
 }
 
-inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElm(ElmInd* ei) {
+ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElm(ElmInd* ei) {
   assert(!validElmInd(*ei) && !isFull());
   assert(m_size != 0 || m_used == 0);
   ++m_size;
@@ -631,7 +631,7 @@ inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElm(ElmInd* ei) {
   return &m_data[i];
 }
 
-inline ALWAYS_INLINE TypedValue& HphpArray::allocNextElm(uint32_t i) {
+ALWAYS_INLINE TypedValue& HphpArray::allocNextElm(uint32_t i) {
   assert(isPacked() && i == m_size);
   if (i == m_cap) growPacked();
   auto next = i + 1;
@@ -640,7 +640,7 @@ inline ALWAYS_INLINE TypedValue& HphpArray::allocNextElm(uint32_t i) {
   return m_data[i].data;
 }
 
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray::Elm* HphpArray::newElm(ElmInd* ei, size_t h0) {
   if (isFull()) return newElmGrow(h0);
   return allocElm(ei);
@@ -652,45 +652,45 @@ HphpArray::Elm* HphpArray::newElmGrow(size_t h0) {
   return allocElm(findForNewInsert(h0));
 }
 
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray* HphpArray::initVal(TypedValue& tv, CVarRef v) {
   tvAsUninitializedVariant(&tv).constructValHelper(v);
   return this;
 }
 
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray* HphpArray::initRef(TypedValue& tv, CVarRef v) {
   tvAsUninitializedVariant(&tv).constructRefHelper(v);
   return this;
 }
 
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray* HphpArray::getLval(TypedValue& tv, Variant*& ret) {
   ret = &tvAsVariant(&tv);
   return this;
 }
 
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray* HphpArray::initLval(TypedValue& tv, Variant*& ret) {
   tvWriteNull(&tv);
   ret = &tvAsVariant(&tv);
   return this;
 }
 
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray* HphpArray::initWithRef(TypedValue& tv, CVarRef v) {
   tvWriteNull(&tv);
   tvAsVariant(&tv).setWithRef(v);
   return this;
 }
 
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray* HphpArray::setVal(TypedValue& tv, CVarRef v) {
   tvAsVariant(&tv).assignValHelper(v);
   return this;
 }
 
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray* HphpArray::setRef(TypedValue& tv, CVarRef v) {
   tvAsVariant(&tv).assignRefHelper(v);
   return this;
@@ -700,7 +700,7 @@ HphpArray* HphpArray::setRef(TypedValue& tv, CVarRef v) {
  * This is a streamlined copy of Variant.constructValHelper()
  * with no incref+decref because we're moving v to this array.
  */
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray* HphpArray::moveVal(TypedValue& tv, TypedValue v) {
   tv.m_type = typeInitNull(v.m_type);
   tv.m_data.num = v.m_data.num;
@@ -740,7 +740,7 @@ HphpArray::ElmInd* HphpArray::reallocData(size_t maxElms, size_t tableSize) {
          (ElmInd*)(uintptr_t(m_data) + dataSize);
 }
 
-inline ALWAYS_INLINE void HphpArray::resizeIfNeeded() {
+ALWAYS_INLINE void HphpArray::resizeIfNeeded() {
   if (isFull()) resize();
 }
 
@@ -990,7 +990,7 @@ inline ArrayData* HphpArray::addValWithRef(StringData* key, CVarRef data) {
   return this;
 }
 
-inline INLINE_SINGLE_CALLER
+INLINE_SINGLE_CALLER
 ArrayData* HphpArray::update(int64_t ki, CVarRef data) {
   ElmInd* ei = findForInsert(ki);
   if (validElmInd(*ei)) {
@@ -1002,7 +1002,7 @@ ArrayData* HphpArray::update(int64_t ki, CVarRef data) {
   return initVal(e->data, data);
 }
 
-inline INLINE_SINGLE_CALLER
+INLINE_SINGLE_CALLER
 ArrayData* HphpArray::update(StringData* key, CVarRef data) {
   strhash_t h = key->hash();
   ElmInd* ei = findForInsert(key, h);

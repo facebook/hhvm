@@ -198,7 +198,7 @@ typedef std::map<std::string, ResourceMap> ResourceMapMap;
 // ResourceData.
 template<> inline SmartPtr<ResourceData>::~SmartPtr() {}
 
-ALWAYS_INLINE inline void decRefRes(ResourceData* res) {
+ALWAYS_INLINE void decRefRes(ResourceData* res) {
   if (res->decRefCount() == 0) res->release();
 }
 

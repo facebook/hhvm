@@ -216,11 +216,11 @@ class Variant : private TypedValue {
   }
 
 #ifdef INLINE_VARIANT_HELPER
-  inline ALWAYS_INLINE
+  ALWAYS_INLINE
   /* implicit */ Variant(CVarRef v) { constructValHelper(v); }
-  inline ALWAYS_INLINE
+  ALWAYS_INLINE
   /* implicit */ Variant(CVarStrongBind v) { constructRefHelper(variant(v)); }
-  inline ALWAYS_INLINE
+  ALWAYS_INLINE
   /* implicit */ Variant(CVarWithRefBind v) {
     constructWithRefHelper(variant(v));
   }
@@ -276,8 +276,8 @@ class Variant : private TypedValue {
   }
 
  private:
-  inline ALWAYS_INLINE void destructImpl();
-  inline ALWAYS_INLINE static void destructDataImpl(RefData* d, DataType t);
+  ALWAYS_INLINE void destructImpl();
+  ALWAYS_INLINE static void destructDataImpl(RefData* d, DataType t);
   friend class VarNR;
 
  public:
@@ -312,12 +312,12 @@ class Variant : private TypedValue {
 ///////////////////////////////////////////////////////////////////////////////
 // int64
 
-  inline ALWAYS_INLINE int64_t asInt64Val() const {
+  ALWAYS_INLINE int64_t asInt64Val() const {
     assert(m_type == KindOfInt64);
     return m_data.num;
   }
 
-  inline ALWAYS_INLINE int64_t toInt64Val() const {
+  ALWAYS_INLINE int64_t toInt64Val() const {
     assert(is(KindOfInt64));
     return
         LIKELY(m_type == KindOfInt64) ?
@@ -327,12 +327,12 @@ class Variant : private TypedValue {
 ///////////////////////////////////////////////////////////////////////////////
 // double
 
-  inline ALWAYS_INLINE double asDoubleVal() const {
+  ALWAYS_INLINE double asDoubleVal() const {
     assert(m_type == KindOfDouble);
     return m_data.dbl;
   }
 
-  inline ALWAYS_INLINE double toDoubleVal() const {
+  ALWAYS_INLINE double toDoubleVal() const {
     assert(is(KindOfDouble));
     return
         LIKELY(m_type == KindOfDouble) ?
@@ -342,12 +342,12 @@ class Variant : private TypedValue {
 ///////////////////////////////////////////////////////////////////////////////
 // boolean
 
-  inline ALWAYS_INLINE bool asBooleanVal() const {
+  ALWAYS_INLINE bool asBooleanVal() const {
     assert(m_type == KindOfBoolean);
     return m_data.num;
   }
 
-  inline ALWAYS_INLINE bool toBooleanVal() const {
+  ALWAYS_INLINE bool toBooleanVal() const {
     assert(is(KindOfBoolean));
     return
         LIKELY(m_type == KindOfBoolean) ?
@@ -357,24 +357,24 @@ class Variant : private TypedValue {
 ///////////////////////////////////////////////////////////////////////////////
 // string
 
-  inline ALWAYS_INLINE const String& asCStrRef() const {
+  ALWAYS_INLINE const String& asCStrRef() const {
     assert(IS_STRING_TYPE(m_type) && m_data.pstr);
     return *reinterpret_cast<const String*>(&m_data.pstr);
   }
 
-  inline ALWAYS_INLINE const String& toCStrRef() const {
+  ALWAYS_INLINE const String& toCStrRef() const {
     assert(is(KindOfString) || is(KindOfStaticString));
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr);
     return *reinterpret_cast<const String*>(LIKELY(IS_STRING_TYPE(m_type)) ?
         &m_data.pstr : &m_data.pref->tv()->m_data.pstr);
   }
 
-  inline ALWAYS_INLINE String& asStrRef() {
+  ALWAYS_INLINE String& asStrRef() {
     assert(IS_STRING_TYPE(m_type) && m_data.pstr);
     return *reinterpret_cast<String*>(&m_data.pstr);
   }
 
-  inline ALWAYS_INLINE String& toStrRef() {
+  ALWAYS_INLINE String& toStrRef() {
     assert(is(KindOfString) || is(KindOfStaticString));
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr);
     return *reinterpret_cast<String*>(LIKELY(IS_STRING_TYPE(m_type)) ?
@@ -384,24 +384,24 @@ class Variant : private TypedValue {
 ///////////////////////////////////////////////////////////////////////////////
 // array
 
-  inline ALWAYS_INLINE const Array& asCArrRef() const {
+  ALWAYS_INLINE const Array& asCArrRef() const {
     assert(m_type == KindOfArray && m_data.parr);
     return *reinterpret_cast<const Array*>(&m_data.parr);
   }
 
-  inline ALWAYS_INLINE const Array& toCArrRef() const {
+  ALWAYS_INLINE const Array& toCArrRef() const {
     assert(is(KindOfArray));
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.parr : m_data.parr);
     return *reinterpret_cast<const Array*>(LIKELY(m_type == KindOfArray) ?
         &m_data.parr : &m_data.pref->tv()->m_data.parr);
   }
 
-  inline ALWAYS_INLINE Array& asArrRef() {
+  ALWAYS_INLINE Array& asArrRef() {
     assert(m_type == KindOfArray && m_data.parr);
     return *reinterpret_cast<Array*>(&m_data.parr);
   }
 
-  inline ALWAYS_INLINE Array& toArrRef() {
+  ALWAYS_INLINE Array& toArrRef() {
     assert(is(KindOfArray));
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.parr : m_data.parr);
     return *reinterpret_cast<Array*>(LIKELY(m_type == KindOfArray) ?
@@ -411,34 +411,34 @@ class Variant : private TypedValue {
 ///////////////////////////////////////////////////////////////////////////////
 // object
 
-  inline ALWAYS_INLINE const Object& asCObjRef() const {
+  ALWAYS_INLINE const Object& asCObjRef() const {
     assert(m_type == KindOfObject && m_data.pobj);
     return *reinterpret_cast<const Object*>(&m_data.pobj);
   }
 
-  inline ALWAYS_INLINE const Object& toCObjRef() const {
+  ALWAYS_INLINE const Object& toCObjRef() const {
     assert(is(KindOfObject));
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pobj : m_data.pobj);
     return *reinterpret_cast<const Object*>(LIKELY(m_type == KindOfObject) ?
         &m_data.pobj : &m_data.pref->tv()->m_data.pobj);
   }
 
-  inline ALWAYS_INLINE Object & asObjRef() {
+  ALWAYS_INLINE Object & asObjRef() {
     assert(m_type == KindOfObject && m_data.pobj);
     return *reinterpret_cast<Object*>(&m_data.pobj);
   }
 
-  inline ALWAYS_INLINE const Resource& asCResRef() const {
+  ALWAYS_INLINE const Resource& asCResRef() const {
     assert(m_type == KindOfResource && m_data.pobj);
     return *reinterpret_cast<const Resource*>(&m_data.pobj);
   }
 
-  inline ALWAYS_INLINE Resource & asResRef() {
+  ALWAYS_INLINE Resource & asResRef() {
     assert(m_type == KindOfResource && m_data.pres);
     return *reinterpret_cast<Resource*>(&m_data.pres);
   }
 
-  inline ALWAYS_INLINE Object& toObjRef() {
+  ALWAYS_INLINE Object& toObjRef() {
     assert(is(KindOfObject));
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pobj : m_data.pobj);
     return *reinterpret_cast<Object*>(LIKELY(m_type == KindOfObject) ?
@@ -825,12 +825,12 @@ class Variant : private TypedValue {
   Variant &lvalRef(CVarRef key, Variant& tmp, ACCESSPARAMS_DECL);
 
   template <typename T>
-  inline ALWAYS_INLINE static CVarRef SetImpl(
-    Variant *self, T key, CVarRef v, bool isKey);
+  ALWAYS_INLINE static CVarRef SetImpl(Variant *self, T key, CVarRef v,
+                                       bool isKey);
 
   template <typename T>
-  inline ALWAYS_INLINE static CVarRef SetRefImpl(
-    Variant *self, T key, CVarRef v, bool isKey);
+  ALWAYS_INLINE static CVarRef SetRefImpl(Variant *self, T key, CVarRef v,
+                                          bool isKey);
 
   CVarRef set(int     key, CVarRef v) { return set((int64_t)key, v); }
   CVarRef set(int64_t   key, CVarRef v);
@@ -1022,7 +1022,7 @@ class Variant : private TypedValue {
   // only called from constructor
   void init(ObjectData *v);
 
-  static inline ALWAYS_INLINE
+  static ALWAYS_INLINE
   void AssignValHelper(Variant *self, const Variant *other) {
     if (UNLIKELY(self->m_type == KindOfRef)) self = self->m_data.pref->var();
     if (UNLIKELY(other->m_type == KindOfRef)) other = other->m_data.pref->var();
@@ -1048,7 +1048,7 @@ class Variant : private TypedValue {
 #ifdef INLINE_VARIANT_HELPER
 public:
 #endif
-  static inline ALWAYS_INLINE void PromoteToRef(CVarRef v) {
+  static ALWAYS_INLINE void PromoteToRef(CVarRef v) {
     assert(&v != &null_variant);
     if (v.m_type != KindOfRef) {
       RefData *ref = NEW(RefData)(v.m_type, v.m_data.num);
@@ -1057,11 +1057,11 @@ public:
     }
   }
 
-  inline ALWAYS_INLINE void assignValHelper(CVarRef v) {
+  ALWAYS_INLINE void assignValHelper(CVarRef v) {
     AssignValHelper(this, &v);
   }
 
-  inline ALWAYS_INLINE void assignRefHelper(CVarRef v) {
+  ALWAYS_INLINE void assignRefHelper(CVarRef v) {
     PromoteToRef(v);
     RefData* r = v.m_data.pref;
     r->incRefCount(); // in case destruct() triggers deletion of v
@@ -1074,14 +1074,14 @@ public:
   }
 
 public:
-  inline ALWAYS_INLINE void constructRefHelper(CVarRef v) {
+  ALWAYS_INLINE void constructRefHelper(CVarRef v) {
     PromoteToRef(v);
     v.m_data.pref->incRefCount();
     m_data.pref = v.m_data.pref;
     m_type = KindOfRef;
   }
 
-  inline ALWAYS_INLINE void constructValHelper(CVarRef v) {
+  ALWAYS_INLINE void constructValHelper(CVarRef v) {
     const Variant *other =
       UNLIKELY(v.m_type == KindOfRef) ? v.m_data.pref->var() : &v;
     assert(this != other);
@@ -1103,7 +1103,7 @@ public:
     v.reset();
   }
 
-  inline ALWAYS_INLINE
+  ALWAYS_INLINE
   void setWithRefHelper(CVarRef v, bool destroy) {
     assert(this != &v);
 
@@ -1122,7 +1122,7 @@ public:
     if (destroy) destructData(d, t);
   }
 
-  inline ALWAYS_INLINE
+  ALWAYS_INLINE
   void constructWithRefHelper(CVarRef v) {
     setWithRefHelper(v, false);
   }
@@ -1132,11 +1132,11 @@ private:
 #endif
 
   template<typename T>
-  static inline ALWAYS_INLINE Variant &LvalAtImpl0(
-      Variant *self, T key, Variant *tmp, bool blackHole, ACCESSPARAMS_DECL);
+  static ALWAYS_INLINE Variant &LvalAtImpl0(Variant *self, T key, Variant *tmp,
+                                            bool blackHole, ACCESSPARAMS_DECL);
 
   template<typename T>
-  inline ALWAYS_INLINE Variant &lvalAtImpl(T key, ACCESSPARAMS_DECL);
+  ALWAYS_INLINE Variant &lvalAtImpl(T key, ACCESSPARAMS_DECL);
 
  private:
   /**

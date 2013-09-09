@@ -33,7 +33,7 @@ namespace HPHP {
 static Mutex s_mutex;
 ///////////////////////////////////////////////////////////////////////////////
 
-template <class Op> inline ALWAYS_INLINE
+template <class Op> ALWAYS_INLINE
 String stringForEachBuffered(uint32_t bufLen, CStrRef str, Op action) {
   StringBuffer sb(bufLen);
   StringSlice sl  = str.slice();
@@ -47,7 +47,7 @@ String stringForEachBuffered(uint32_t bufLen, CStrRef str, Op action) {
   return sb.detach();
 }
 
-template <bool mutate, class Op> inline ALWAYS_INLINE
+template <bool mutate, class Op> ALWAYS_INLINE
 String stringForEach(uint32_t len, CStrRef str, Op action) {
   String ret = mutate ? str : String(len, ReserveString);
 
@@ -67,7 +67,7 @@ String stringForEach(uint32_t len, CStrRef str, Op action) {
   return ret;
 }
 
-template <class Op> inline ALWAYS_INLINE
+template <class Op> ALWAYS_INLINE
 String stringForEachFast(CStrRef str, Op action) {
   if (str.empty()) {
     return str;
@@ -343,7 +343,7 @@ String f_strtoupper(CStrRef str) {
   return stringForEachFast(str, toupper);
 }
 
-template <class OpTo, class OpIs> inline ALWAYS_INLINE
+template <class OpTo, class OpIs> ALWAYS_INLINE
 String stringToCaseFirst(CStrRef str, OpTo tocase, OpIs iscase) {
   if (str.empty() || iscase(str[0])) {
     return str;
@@ -383,7 +383,7 @@ String f_strip_tags(CStrRef str, CStrRef allowable_tags /* = "" */) {
   return StringUtil::StripHTMLTags(str, allowable_tags);
 }
 
-template <bool left, bool right> inline ALWAYS_INLINE
+template <bool left, bool right> ALWAYS_INLINE
 String stringTrim(CStrRef str, CStrRef charlist) {
   char flags[256];
   string_charmask(charlist.c_str(), charlist.size(), flags);

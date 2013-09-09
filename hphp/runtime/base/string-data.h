@@ -505,7 +505,7 @@ private:
  */
 const uint32_t SmallStringReserve = 64 - sizeof(StringData) - 1;
 
-ALWAYS_INLINE inline void decRefStr(StringData* s) {
+ALWAYS_INLINE void decRefStr(StringData* s) {
   if (s->decRefCount() == 0) s->release();
 }
 

@@ -1,5 +1,5 @@
 <?php
-$file = dirname(__FILE__) . "/bug39538.csv";
+$file = dirname(__FILE__) . "/bug53848.csv";
 @unlink($file);
 file_put_contents($file, "a,b\n  c,  d");
 $fp = fopen($file, "r");

@@ -45,8 +45,6 @@ function get_client_server() {
 $s = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 var_dump($s);
 
-$port = create_listen_random_port();
-
 var_dump(socket_create_pair(AF_UNIX, SOCK_STREAM, 0, $fds));
 var_dump(count($fds));
 
@@ -68,12 +66,6 @@ list($client, $s) = get_client_server();
 $text = "send/recv";
 var_dump(socket_send($client, $text, 4, 0));
 var_dump(socket_recv($s, $buffer, 100, 0));
-var_dump($buffer);
-
-list($client, $s) = get_client_server();
-$text = "more specific";
-var_dump(socket_sendto($client, $text, 4, 0, "127.0.0.1", $port));
-var_dump(socket_recvfrom($s, $buffer, 100, 0, $name, $vport));
 var_dump($buffer);
 
 $s = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);

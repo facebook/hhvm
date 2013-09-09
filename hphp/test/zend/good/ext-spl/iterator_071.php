@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 $arr = array(array(1,2),2);
 $arrOb = new ArrayObject($arr);
@@ -6,9 +6,9 @@ $arrOb = new ArrayObject($arr);
 $recArrIt = new RecursiveArrayIterator($arrOb->getIterator());
 
 class MyRecursiveIteratorIterator extends RecursiveIteratorIterator {
-    
+
     function nextelement() {
-    	echo __METHOD__."\n";
+	echo __METHOD__."\n";
     }
 }
 

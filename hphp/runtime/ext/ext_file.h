@@ -64,8 +64,8 @@ Variant f_fgetcsv(CResRef handle, int64_t length = 0, CStrRef delimiter = ",",
 // file name based file operations
 
 Variant f_file_get_contents(CStrRef filename, bool use_include_path = false,
-                            CVarRef context = uninit_null(), int64_t offset = 0,
-                            int64_t maxlen = 0);
+                            CVarRef context = uninit_null(),
+                            int64_t offset = -1, int64_t maxlen = -1);
 Variant f_file_put_contents(CStrRef filename, CVarRef data, int flags = 0,
                             CVarRef context = uninit_null());
 Variant f_file(CStrRef filename, int flags = 0, CVarRef context = uninit_null());

@@ -82,8 +82,8 @@ Resource f_stream_filter_prepend(CResRef stream, CStrRef filtername,
                                int read_write = 0,
                                CVarRef params = null_variant);
 
-Variant f_stream_get_contents(CResRef handle, int maxlen = 0,
-                              int offset = 0);
+Variant f_stream_get_contents(CResRef handle, int maxlen = -1,
+                              int offset = -1);
 
 Array f_stream_get_filters();
 

@@ -154,21 +154,32 @@ Resource f_stream_filter_prepend(CResRef stream, CStrRef filtername,
   throw NotSupportedException(__func__, "stream filter is not supported");
 }
 
-Variant f_stream_get_contents(CResRef handle, int maxlen /* = 0 */,
-                              int offset /* = 0 */) {
-  if (maxlen < 0) {
+Variant f_stream_get_contents(CResRef handle, int maxlen /* = -1 */,
+                              int offset /* = -1 */) {
+  if (maxlen < -1) {
     throw_invalid_argument("maxlen: %d", maxlen);
     return false;
   }
 
-  File *file = handle.getTyped<File>();
-  if (offset > 0 && !file->seek(offset, SEEK_SET) ) {
+  if (maxlen == 0) {
+    return String();
+  }
+
+  File *file = handle.getTyped<File>(false /* nullOkay */,
+                                     true /* badTypeOkay */);
+  if (!file) {
+    throw_invalid_argument(
+      "stream_get_contents() expects parameter 1 to be a resource");
+    return false;
+  }
+
+  if (offset >= 0 && !file->seek(offset, SEEK_SET) ) {
     raise_warning("Failed to seek to position %d in the stream", offset);
     return false;
   }
 
   String ret;
-  if (maxlen) {
+  if (maxlen != -1) {
     ret = String(maxlen, ReserveString);
     char *buf = ret.mutableSlice().ptr;
     maxlen = file->readImpl(buf, maxlen);

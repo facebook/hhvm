@@ -405,8 +405,8 @@ Variant f_fgetcsv(CResRef handle, int64_t length /* = 0 */,
 Variant f_file_get_contents(CStrRef filename,
                             bool use_include_path /* = false */,
                             CVarRef context /* = null */,
-                            int64_t offset /* = 0 */,
-                            int64_t maxlen /* = 0 */) {
+                            int64_t offset /* = -1 */,
+                            int64_t maxlen /* = -1 */) {
   Variant stream = f_fopen(filename, "rb", use_include_path, context);
   if (same(stream, false)) return false;
   return f_stream_get_contents(stream.toResource(), maxlen, offset);

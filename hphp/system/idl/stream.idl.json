@@ -355,14 +355,14 @@
                 {
                     "name": "maxlen",
                     "type": "Int32",
-                    "value": "0",
+                    "value": "-1",
                     "desc": "The maximum bytes to read. Defaults to -1 (read all the remaining buffer)."
                 },
                 {
                     "name": "offset",
                     "type": "Int32",
-                    "value": "0",
-                    "desc": "Seek to the specified offset before reading."
+                    "value": "-1",
+                    "desc": "Seek to the specified offset before reading. Defaults to -1 (don't seek)."
                 }
             ]
         },

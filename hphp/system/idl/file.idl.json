@@ -599,13 +599,13 @@
                 {
                     "name": "offset",
                     "type": "Int64",
-                    "value": "0",
+                    "value": "-1",
                     "desc": "The offset where the reading starts on the original stream."
                 },
                 {
                     "name": "maxlen",
                     "type": "Int64",
-                    "value": "0",
+                    "value": "-1",
                     "desc": "Maximum length of data read. The default is to read until end of file is reached. Note that this parameter is applied to the stream processed by the filters."
                 }
             ]

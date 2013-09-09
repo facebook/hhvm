@@ -1,6 +1,6 @@
 array(5) {
   [0]=>
-  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir => 4096
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir => %d
 "
   [1]=>
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/empty => 0

@@ -464,29 +464,15 @@ static Mutex s_bfdMutex;
 static bfdMap s_bfds;
 
 static bool fill_bfd_cache(const char *filename, bfd_cache *p) {
-  bfd* abfd = nullptr;
-  while (true) {
-    abfd = bfd_openr(filename, nullptr); // hard to avoid heap here!
-    if (!abfd) return true;
-    abfd->flags |= BFD_DECOMPRESS;
-
-    char **match;
-    if (bfd_check_format(abfd, bfd_archive) ||
-        !bfd_check_format_matches(abfd, bfd_object, &match)) {
-      bfd_close(abfd);
-      return true;
-    }
-
-    std::string dir = Util::safe_dirname(filename, strlen(filename));
-    char* link = bfd_follow_gnu_debuglink(abfd, dir.c_str());
-    if (!link) break;
-    bfd_close(abfd);
-    filename = link;
-  }
-
-  p->syms = nullptr;
+  bfd *abfd = bfd_openr(filename, nullptr); // hard to avoid heap here!
+  if (!abfd) return true;
+  abfd->flags |= BFD_DECOMPRESS;
   p->abfd = abfd;
-  if (!slurp_symtab(&p->syms, abfd)) {
+  p->syms = nullptr;
+  char **match;
+  if (bfd_check_format(abfd, bfd_archive) ||
+      !bfd_check_format_matches(abfd, bfd_object, &match) ||
+      !slurp_symtab(&p->syms, abfd)) {
     bfd_close(abfd);
     return true;
   }

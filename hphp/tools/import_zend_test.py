@@ -170,6 +170,7 @@ bad_tests = (
     '/ext-posix/posix_getgroups_basic.php',
 
     # concurrency issues
+    '/ext-ftp/ftp_chmod_basic.php',
     '/ext-mysql/001.php',
     '/ext-mysql/bug47438.php',
     '/ext-mysql/mysql_client_encoding.php',

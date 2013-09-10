@@ -340,6 +340,7 @@ bool RuntimeOption::CheckSymLink = false;
 int RuntimeOption::MaxUserFunctionId = (2 * 65536);
 bool RuntimeOption::EnableFinallyStatement = false;
 bool RuntimeOption::EnableArgsInBacktraces = true;
+bool RuntimeOption::EnableZendCompat = false;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
@@ -1087,6 +1088,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     EnableShortTags= eval["EnableShortTags"].getBool(true);
     EnableAspTags = eval["EnableAspTags"].getBool();
     EnableXHP = eval["EnableXHP"].getBool(false);
+    EnableZendCompat = eval["EnableZendCompat"].getBool(false);
 
     if (EnableHipHopSyntax) {
       // If EnableHipHopSyntax is true, it forces EnableXHP to true

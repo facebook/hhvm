@@ -7437,6 +7437,10 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     const ClassInfo::MethodInfo* mi = ClassInfo::FindFunction(name);
     assert(mi &&
       "MethodInfo not found; may be a problem with the .idl.json files");
+    if ((mi->attribute & ClassInfo::ZendCompat) &&
+        !RuntimeOption::EnableZendCompat) {
+      continue;
+    }
     if (Unit::lookupFunc(name)) {
       // already provided by systemlib, rename to allow the php
       // version to delegate if necessary

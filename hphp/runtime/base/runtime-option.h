@@ -335,6 +335,7 @@ public:
   static int MaxUserFunctionId;
   static bool EnableFinallyStatement;
   static bool EnableArgsInBacktraces;
+  static bool EnableZendCompat;
 
   static int GetScannerType();
 

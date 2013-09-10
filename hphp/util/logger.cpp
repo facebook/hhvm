@@ -117,7 +117,7 @@ void Logger::Log(LogLevelType level, const std::string &msg,
 }
 
 FILE *Logger::GetStandardOut(LogLevelType level) {
-  return level <= LogWarning ? stderr : stdout;
+  return stderr;
 }
 
 int Logger::GetSyslogLevel(LogLevelType level) {

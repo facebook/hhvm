@@ -294,8 +294,8 @@ inline TypedValue* ElemObject(TypedValue& tvRef, TypedValue* base,
  * $result = $base[$key];
  */
 template <bool warn, KeyType keyType = KeyType::Any>
-inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
-                        TypedValue* base, TypedValue* key) {
+NEVER_INLINE TypedValue* ElemSlow(TypedValue& tvScratch, TypedValue& tvRef,
+                                  TypedValue* base, TypedValue* key) {
   DataType type;
   opPre(base, type);
   switch (type) {
@@ -318,6 +318,18 @@ inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
     assert(false);
     return nullptr;
   }
+}
+
+/**
+ * Fast path for Elem assuming base is an Array
+ */
+template <bool warn, KeyType keyType = KeyType::Any>
+inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
+                        TypedValue* base, TypedValue* key) {
+  if (LIKELY(base->m_type == KindOfArray)) {
+    return ElemArray<warn, keyType>(base->m_data.parr, key);
+  }
+  return ElemSlow<warn, keyType>(tvScratch, tvRef, base, key);
 }
 
 /**
@@ -874,7 +886,8 @@ inline void SetElemArray(TypedValue* base, TypedValue* key,
  * get around.
  */
 template <bool setResult, KeyType keyType = KeyType::Any>
-inline StringData* SetElem(TypedValue* base, TypedValue* key, Cell* value) {
+NEVER_INLINE
+StringData* SetElemSlow(TypedValue* base, TypedValue* key, Cell* value) {
   DataType type;
   opPre(base, type);
   switch (type) {
@@ -902,6 +915,18 @@ inline StringData* SetElem(TypedValue* base, TypedValue* key, Cell* value) {
     not_reached();
     return nullptr;
   }
+}
+
+/**
+ * Fast path for SetElem assuming base is an Array
+ */
+template <bool setResult, KeyType keyType = KeyType::Any>
+inline StringData* SetElem(TypedValue* base, TypedValue* key, Cell* value) {
+  if (LIKELY(base->m_type == KindOfArray)) {
+    SetElemArray<setResult, keyType>(base, key, value);
+    return nullptr;
+  }
+  return SetElemSlow<setResult, keyType>(base, key, value);
 }
 
 /**
@@ -1401,11 +1426,17 @@ inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
   }
 }
 
+/**
+ * UnsetElemArray when key is an Int64
+ */
 inline ArrayData* UnsetElemArrayRawKey(ArrayData* a, int64_t key,
                                        bool copy) {
   return a->remove(key, copy);
 }
 
+/**
+ * UnsetElemArray when key is a String
+ */
 inline ArrayData* UnsetElemArrayRawKey(ArrayData* a, StringData* key,
                                        bool copy) {
   int64_t n;
@@ -1416,6 +1447,9 @@ inline ArrayData* UnsetElemArrayRawKey(ArrayData* a, StringData* key,
   }
 }
 
+/**
+ * UnsetElem when base is an Array
+ */
 template <KeyType keyType>
 inline void UnsetElemArray(TypedValue* base, TypedValue* key) {
   ArrayData* a = base->m_data.parr;
@@ -1443,8 +1477,12 @@ inline void UnsetElemArray(TypedValue* base, TypedValue* key) {
   }
 }
 
+/**
+ * unset($base[$member])
+ */
 template <KeyType keyType = KeyType::Any>
-inline void UnsetElem(TypedValue* base, TypedValue* member) {
+NEVER_INLINE
+void UnsetElemSlow(TypedValue* base, TypedValue* member) {
   TypedValue scratch;
   DataType type;
   opPre(base, type);
@@ -1468,6 +1506,18 @@ inline void UnsetElem(TypedValue* base, TypedValue* member) {
   }
   default: break; // Do nothing.
   }
+}
+
+/**
+ * Fast path for UnsetElem assuming base is an Array
+ */
+template <KeyType keyType = KeyType::Any>
+inline void UnsetElem(TypedValue* base, TypedValue* member) {
+  if (LIKELY(base->m_type == KindOfArray)) {
+    UnsetElemArray<keyType>(base, member);
+    return;
+  }
+  return UnsetElemSlow<keyType>(base, member);
 }
 
 /**
@@ -1560,8 +1610,9 @@ inline bool IssetEmptyElemArray(TypedValue* base, TypedValue* key) {
  * isset/empty($base[$key])
  */
 template <bool useEmpty, KeyType keyType = KeyType::Any>
-inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
-                           TypedValue* base, TypedValue* key) {
+NEVER_INLINE
+bool IssetEmptyElemSlow(TypedValue& tvScratch, TypedValue& tvRef,
+                        TypedValue* base, TypedValue* key) {
   DataType type;
   opPre(base, type);
   switch (type) {
@@ -1575,6 +1626,18 @@ inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
   default:
     return useEmpty;
   }
+}
+
+/**
+ * Fast path for IssetEmptyElem assuming base is an Array
+ */
+template <bool useEmpty, KeyType keyType = KeyType::Any>
+inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
+                           TypedValue* base, TypedValue* key) {
+  if (LIKELY(base->m_type == KindOfArray)) {
+    return IssetEmptyElemArray<useEmpty, keyType>(base, key);
+  }
+  return IssetEmptyElemSlow<useEmpty, keyType>(tvScratch, tvRef, base, key);
 }
 
 template <bool warn>

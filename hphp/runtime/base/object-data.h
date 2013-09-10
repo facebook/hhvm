@@ -235,7 +235,7 @@ class ObjectData {
   }
 
   int64_t o_toInt64() const {
-    if (UNLIKELY(getAttribute(CallToImpl))) {
+    if (UNLIKELY(getAttribute(CallToImpl) && !isCollection())) {
       return o_toInt64Impl();
     }
     raiseObjToIntNotice(o_getClassName().data());
@@ -243,7 +243,7 @@ class ObjectData {
   }
 
   double o_toDouble() const {
-    if (UNLIKELY(getAttribute(CallToImpl))) {
+    if (UNLIKELY(getAttribute(CallToImpl) && !isCollection())) {
       return o_toDoubleImpl();
     }
     return o_toInt64();

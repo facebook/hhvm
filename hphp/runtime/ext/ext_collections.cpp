@@ -98,6 +98,7 @@ c_Vector::c_Vector(Class* cb) :
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
                        ObjectData::UseUnset|
+                       ObjectData::CallToImpl|
                        ObjectData::HasClone>(cb),
     m_data(nullptr), m_size(0), m_capacity(0), m_version(0) {
 }
@@ -280,7 +281,7 @@ Object c_Vector::t_clear() {
 }
 
 bool c_Vector::t_isempty() {
-  return (m_size == 0);
+  return !toBoolImpl();
 }
 
 int64_t c_Vector::t_count() {
@@ -887,6 +888,9 @@ Array c_Vector::ToArray(const ObjectData* obj) {
   check_collection_cast_to_array();
   return static_cast<const c_Vector*>(obj)->toArrayImpl();
 }
+bool c_Vector::ToBool(const ObjectData* obj) {
+  return static_cast<const c_Vector*>(obj)->toBoolImpl();
+}
 
 TypedValue* c_Vector::OffsetGet(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
@@ -1045,6 +1049,7 @@ c_Map::c_Map(Class* cb) :
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
                        ObjectData::UseUnset|
+                       ObjectData::CallToImpl|
                        ObjectData::HasClone>(cb),
     m_size(0), m_load(0), m_nLastSlot(0), m_version(0) {
   m_data = (Bucket*)emptyMapSlot;
@@ -1167,7 +1172,7 @@ Object c_Map::t_clear() {
 }
 
 bool c_Map::t_isempty() {
-  return (m_size == 0);
+  return !toBoolImpl();
 }
 
 int64_t c_Map::t_count() {
@@ -1996,6 +2001,10 @@ Array c_Map::ToArray(const ObjectData* obj) {
   return static_cast<const c_Map*>(obj)->toArrayImpl();
 }
 
+bool c_Map::ToBool(const ObjectData* obj) {
+  return static_cast<const c_Map*>(obj)->toBoolImpl();
+}
+
 TypedValue* c_Map::OffsetGet(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
   auto mp = static_cast<c_Map*>(obj);
@@ -2219,6 +2228,7 @@ c_StableMap::c_StableMap(Class* cb) :
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
                        ObjectData::UseUnset|
+                       ObjectData::CallToImpl|
                        ObjectData::HasClone>(cb),
     m_version(0), m_pListHead(nullptr), m_pListTail(nullptr) {
   m_size = 0;
@@ -2356,7 +2366,7 @@ Object c_StableMap::t_clear() {
 }
 
 bool c_StableMap::t_isempty() {
-  return (m_size == 0);
+  return !toBoolImpl();
 }
 
 int64_t c_StableMap::t_count() {
@@ -3269,6 +3279,10 @@ Array c_StableMap::ToArray(const ObjectData* obj) {
   return static_cast<const c_StableMap*>(obj)->toArrayImpl();
 }
 
+bool c_StableMap::ToBool(const ObjectData* obj) {
+  return static_cast<const c_StableMap*>(obj)->toBoolImpl();
+}
+
 TypedValue* c_StableMap::OffsetGet(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
   auto smp = static_cast<c_StableMap*>(obj);
@@ -3492,6 +3506,7 @@ c_Set::c_Set(Class* cb) :
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
                        ObjectData::UseUnset|
+                       ObjectData::CallToImpl|
                        ObjectData::HasClone>(cb),
     m_size(0), m_load(0), m_nLastSlot(0), m_version(0) {
   m_data = (Bucket*)emptySetSlot;
@@ -3598,7 +3613,7 @@ Object c_Set::t_clear() {
 }
 
 bool c_Set::t_isempty() {
-  return (m_size == 0);
+  return !toBoolImpl();
 }
 
 int64_t c_Set::t_count() {
@@ -4092,6 +4107,10 @@ void c_Set::Bucket::dump() {
 Array c_Set::ToArray(const ObjectData* obj) {
   check_collection_cast_to_array();
   return static_cast<const c_Set*>(obj)->toArrayImpl();
+}
+
+bool c_Set::ToBool(const ObjectData* obj) {
+  return static_cast<const c_Set*>(obj)->toBoolImpl();
 }
 
 TypedValue* c_Set::OffsetGet(ObjectData* obj, TypedValue* key) {

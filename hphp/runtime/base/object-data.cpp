@@ -115,20 +115,37 @@ bool ObjectData::o_instanceof(CStrRef s) const {
 }
 
 bool ObjectData::o_toBooleanImpl() const noexcept {
-  // SimpleXMLElement is the only class that has custom bool casting. If others
-  // are added in future, just turn this assert into an if and add cases.
-  assert(instanceof(c_SimpleXMLElement::classof()));
-  return c_SimpleXMLElement::ToBoolean(this);
+  if (isCollection()) {
+    if (instanceof(c_Vector::classof())) {
+      return c_Vector::ToBool(this);
+    } else if (instanceof(c_Map::classof())) {
+      return c_Map::ToBool(this);
+    } else if (instanceof(c_StableMap::classof())) {
+      return c_StableMap::ToBool(this);
+    } else if (instanceof(c_Set::classof())) {
+      return c_Set::ToBool(this);
+    } else {
+      always_assert(false);
+    }
+  } else if (instanceof(c_SimpleXMLElement::classof())) {
+    // SimpleXMLElement is the only non-collection class that has custom
+    // bool casting.
+    return c_SimpleXMLElement::ToBoolean(this);
+  }
+  always_assert(false);
+  return false;
 }
 int64_t ObjectData::o_toInt64Impl() const noexcept {
-  // SimpleXMLElement is the only class that has custom int casting. If others
-  // are added in future, just turn this assert into an if and add cases.
+  // SimpleXMLElement is the only class that has proper custom int casting.
+  // If others are added in future, just turn this assert into an if and
+  // add cases.
   assert(instanceof(c_SimpleXMLElement::classof()));
   return c_SimpleXMLElement::ToInt64(this);
 }
 double ObjectData::o_toDoubleImpl() const noexcept {
-  // SimpleXMLElement is the only class that has custom double casting. If
-  // others are added in future, just turn this assert into an if and add cases.
+  // SimpleXMLElement is the only non-collection class that has custom
+  // double casting. If others are added in future, just turn this assert
+  // into an if and add cases.
   assert(instanceof(c_SimpleXMLElement::classof()));
   return c_SimpleXMLElement::ToDouble(this);
 }
@@ -1474,5 +1491,3 @@ ObjectData* ObjectData::cloneImpl() {
 }
 
 } // HPHP
-
-

@@ -33,6 +33,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
                                            ObjectData::UseSet|
                                            ObjectData::UseIsset|
                                            ObjectData::UseUnset|
+                                           ObjectData::CallToImpl|
                                            ObjectData::HasClone> {
  public:
   DECLARE_CLASS_NO_SWEEP(Vector)
@@ -143,6 +144,9 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   }
 
   Array toArrayImpl() const;
+  bool toBoolImpl() const {
+    return (m_size != 0);
+  }
 
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
 
@@ -156,6 +160,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
 
   static c_Vector* Clone(ObjectData* obj);
   static Array ToArray(const ObjectData* obj);
+  static bool ToBool(const ObjectData* obj);
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
@@ -222,6 +227,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
                                         ObjectData::UseSet|
                                         ObjectData::UseIsset|
                                         ObjectData::UseUnset|
+                                        ObjectData::CallToImpl|
                                         ObjectData::HasClone> {
  public:
   DECLARE_CLASS_NO_SWEEP(Map)
@@ -330,9 +336,13 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
     return m_size;
   }
   Array toArrayImpl() const;
+  bool toBoolImpl() const {
+    return (m_size != 0);
+  }
 
   static c_Map* Clone(ObjectData* obj);
   static Array ToArray(const ObjectData* obj);
+  static bool ToBool(const ObjectData* obj);
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
@@ -343,6 +353,8 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
+
+  static uint sizeOffset() { return offsetof(c_Map, m_size); }
 
   static const int32_t KindOfTombstone = -1;
 
@@ -526,6 +538,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
                                               ObjectData::UseSet|
                                               ObjectData::UseIsset|
                                               ObjectData::UseUnset|
+                                              ObjectData::CallToImpl|
                                               ObjectData::HasClone> {
  public:
   DECLARE_CLASS_NO_SWEEP(StableMap)
@@ -632,9 +645,13 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
     return m_size;
   }
   Array toArrayImpl() const;
+  bool toBoolImpl() const {
+    return (m_size != 0);
+  }
 
   static c_StableMap* Clone(ObjectData* obj);
   static Array ToArray(const ObjectData* obj);
+  static bool ToBool(const ObjectData* obj);
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
@@ -645,6 +662,8 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
+
+  static uint sizeOffset() { return offsetof(c_StableMap, m_size); }
 
   struct Bucket {
     Bucket() : ikey(0), pListNext(nullptr), pListLast(nullptr), pNext(nullptr) {
@@ -795,6 +814,7 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
                                         ObjectData::UseSet|
                                         ObjectData::UseIsset|
                                         ObjectData::UseUnset|
+                                        ObjectData::CallToImpl|
                                         ObjectData::HasClone> {
  public:
   DECLARE_CLASS_NO_SWEEP(Set)
@@ -863,9 +883,13 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
     return m_size;
   }
   Array toArrayImpl() const;
+  bool toBoolImpl() const {
+    return (m_size != 0);
+  }
 
   static c_Set* Clone(ObjectData* obj);
   static Array ToArray(const ObjectData* obj);
+  static bool ToBool(const ObjectData* obj);
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
@@ -876,6 +900,8 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
+
+  static uint sizeOffset() { return offsetof(c_Set, m_size); }
 
   struct Bucket {
     /**

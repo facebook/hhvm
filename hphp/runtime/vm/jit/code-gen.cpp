@@ -2152,17 +2152,60 @@ void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
   auto srcReg = m_regs[src].reg();
 
   m_as.testw   (ObjectData::CallToImpl, srcReg[ObjectData::attributeOff()]);
-  unlikelyIfThenElse(CC_NZ, [&] (Asm& a) {
-    cgCallHelper(
-      a,
-      CppCall(convObjToBoolHelper),
-      callDest(dst),
-      SyncOptions::kSyncPoint,
-      ArgGroup(m_regs)
+  unlikelyIfThenElse(
+    CC_NZ,
+    [&] (Asm& a) {
+      // Switch on the type of the srcReg object, with a case for each type
+      // of Collection with CallToImpl
+      Label endSwitch;
+      Label caseVector, caseMap, caseStableMap, caseSet;
+
+      a.cmpq(c_Vector::classof(), srcReg[ObjectData::getVMClassOffset()]);
+      a.je8(caseVector);
+
+      a.cmpq(c_Map::classof(), srcReg[ObjectData::getVMClassOffset()]);
+      a.je8(caseMap);
+
+      a.cmpq(c_StableMap::classof(), srcReg[ObjectData::getVMClassOffset()]);
+      a.je8(caseStableMap);
+
+      a.cmpq(c_Set::classof(), srcReg[ObjectData::getVMClassOffset()]);
+      a.je8(caseSet);
+
+      // default: object not collection
+      cgCallHelper(
+        a,
+        CppCall(convObjToBoolHelper),
+        callDest(dst),
+        SyncOptions::kSyncPoint,
+        ArgGroup(m_regs)
         .ssa(src));
-  }, [&] (Asm& a) {
-    a.movb(1, rbyte(dstReg));
-  });
+      a.jmp8(endSwitch);
+
+      asm_label(a, caseVector); // case object instanceof Vector:
+      a.cmpl(0, srcReg[c_Vector::sizeOffset()]); // 48
+      a.setne(rbyte(dstReg)); // truthy iff size not zero
+      a.jmp8(endSwitch);
+
+      asm_label(a, caseMap); // case object instanceof Map:
+      a.cmpl(0, srcReg[c_Map::sizeOffset()]); // 48
+      a.setne(rbyte(dstReg)); // truthy iff size not zero
+      a.jmp8(endSwitch);
+
+      asm_label(a, caseStableMap); // case object instanceof StableMap:
+      a.cmpl(0, srcReg[c_StableMap::sizeOffset()]); // 36 (hmmm)
+      a.setne(rbyte(dstReg)); // truthy iff size not zero
+      a.jmp8(endSwitch);
+
+      asm_label(a, caseSet); // case object instanceof Set:
+      a.cmpl(0, srcReg[c_Set::sizeOffset()]); // 48
+      a.setne(rbyte(dstReg)); // truthy iff size not zero
+      a.jmp8(endSwitch);
+
+      asm_label(a, endSwitch);
+    }, [&] (Asm& a) {
+      a.movb(1, rbyte(dstReg));
+    });
 }
 
 void CodeGenerator::emitConvBoolOrIntToDbl(IRInstruction* inst) {

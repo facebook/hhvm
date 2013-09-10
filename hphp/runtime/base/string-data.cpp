@@ -287,7 +287,10 @@ Array StringData::GetConstants() {
         StrNR key(const_cast<StringData*>(to_sdata(it->first)));
         ClassInfo::ConstantInfo* ci =
           (ClassInfo::ConstantInfo*)(void*)tv.m_data.pref;
-        a.set(key, ci->getDeferredValue(), true);
+        auto cns = ci->getDeferredValue();
+        if (cns.isInitialized()) {
+          a.set(key, cns, true);
+        }
       }
     }
   }

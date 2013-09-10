@@ -941,7 +941,9 @@ Cell* Unit::lookupCns(const StringData* cnsName) {
       auto const tvRet = const_cast<Variant&>(
         ci->getDeferredValue()).asTypedValue();
       assert(cellIsPlausible(*tvRet));
-      return tvRet;
+      if (LIKELY(tvRet->m_type != KindOfUninit)) {
+        return tvRet;
+      }
     }
   }
   if (UNLIKELY(TargetCache::s_constants != nullptr)) {

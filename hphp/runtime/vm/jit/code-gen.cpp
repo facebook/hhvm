@@ -5138,34 +5138,44 @@ static Cell lookupCnsHelper(const TypedValue* tv,
                             StringData* nm,
                             bool error) {
   assert(tv->m_type == KindOfUninit);
-  Cell *cns = nullptr;
-  Cell c1;
+
+  // Deferred constants such as SID
   if (UNLIKELY(tv->m_data.pref != nullptr)) {
     ClassInfo::ConstantInfo* ci =
       (ClassInfo::ConstantInfo*)(void*)tv->m_data.pref;
-    cns = const_cast<Variant&>(ci->getDeferredValue()).asTypedValue();
-    cellDup(*cns, c1);
-  } else {
-    if (UNLIKELY(TargetCache::s_constants != nullptr)) {
-      cns = TargetCache::s_constants->HphpArray::nvGet(nm);
-    }
-    if (!cns) {
-      cns = Unit::loadCns(const_cast<StringData*>(nm));
-    }
-    if (UNLIKELY(!cns)) {
-      if (error) {
-        raise_error("Undefined constant '%s'", nm->data());
-      } else {
-        raise_notice(Strings::UNDEFINED_CONSTANT, nm->data(), nm->data());
-        c1.m_data.pstr = const_cast<StringData*>(nm);
-        c1.m_type = KindOfStaticString;
-      }
-    } else {
-      c1.m_type = cns->m_type;
-      c1.m_data = cns->m_data;
+    Cell *cns = const_cast<Variant&>(ci->getDeferredValue()).asTypedValue();
+    if (LIKELY(cns->m_type != KindOfUninit)) {
+      Cell c1;
+      cellDup(*cns, c1);
+      return c1;
     }
   }
-  return c1;
+
+  Cell *cns = nullptr;
+  if (UNLIKELY(TargetCache::s_constants != nullptr)) {
+    cns = TargetCache::s_constants->HphpArray::nvGet(nm);
+  }
+  if (!cns) {
+    cns = Unit::loadCns(const_cast<StringData*>(nm));
+  }
+  if (LIKELY(cns != nullptr)) {
+    Cell c1;
+    c1.m_type = cns->m_type;
+    c1.m_data = cns->m_data;
+    return c1;
+  }
+
+  // Undefined constants
+  if (error) {
+    raise_error("Undefined constant '%s'", nm->data());
+  } else {
+    raise_notice(Strings::UNDEFINED_CONSTANT, nm->data(), nm->data());
+    Cell c1;
+    c1.m_data.pstr = const_cast<StringData*>(nm);
+    c1.m_type = KindOfStaticString;
+    return c1;
+  }
+  not_reached();
 }
 
 void CodeGenerator::cgLookupCnsCommon(IRInstruction* inst) {

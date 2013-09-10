@@ -477,9 +477,7 @@ def walk(filename, source):
         return
 
     dest_filename = os.path.basename(filename)
-    suite, path = source.split('/tests/', 1)
-    suite = suite.lower().replace('/', '-')
-    source_dir = os.path.join(suite, path)
+    source_dir = source.lower().replace('/tests', '').replace('/', '-')
 
     cur_dir = os.path.dirname(__file__)
     dest_subdir = os.path.join(cur_dir, '../test/zend/all', source_dir)
@@ -645,6 +643,8 @@ def walk(filename, source):
     if 'ext-standard-file/bug45181.php' in full_dest_filename:
         test = test.replace('rmdir("bug45181_x");',
                 'chdir("..");\nrmdir("bug45181_x");')
+    if 'ext-standard-file/bug53848.php' in full_dest_filename:
+        test = test.replace('bug39538.csv', 'bug53848.csv')
     if 'bug61139.php' in full_dest_filename:
         test += "\nunlink('someFile');\n?>"
     if '/ext-pdo_' in full_dest_filename:

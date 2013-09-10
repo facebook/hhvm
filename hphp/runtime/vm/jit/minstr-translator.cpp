@@ -1856,7 +1856,7 @@ static inline bool issetEmptyElemImpl(TypedValue* base, TypedValue keyVal,
   // mis == nullptr if we proved that it won't be used. mis->tvScratch and
   // mis->tvRef are ok because those params are passed by
   // reference.
-  return HPHP::IssetEmptyElem<isEmpty, false, keyType>(
+  return HPHP::IssetEmptyElem<isEmpty, keyType>(
     mis->tvScratch, mis->tvRef, base, key);
 }
 

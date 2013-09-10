@@ -1470,9 +1470,14 @@ inline void UnsetElem(TypedValue* base, TypedValue* member) {
   }
 }
 
-template<bool useEmpty>
+/**
+ * IssetEmptyElem when base is an Object
+ */
+template<bool useEmpty, KeyType keyType>
 inline bool IssetEmptyElemObj(TypedValue& tvRef, ObjectData* instance,
                               TypedValue* key) {
+  TypedValue scratch;
+  initScratchKey<keyType>(scratch, key);
   if (useEmpty) {
     if (LIKELY(instance->isCollection())) {
       return collectionEmpty(instance, key);
@@ -1488,26 +1493,21 @@ inline bool IssetEmptyElemObj(TypedValue& tvRef, ObjectData* instance,
   }
 }
 
-template <bool useEmpty, bool isObj = false, KeyType keyType = KeyType::Any>
-inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
-                           TypedValue* base, TypedValue* key) {
+/**
+ * IssetEmptyElem when base is a String
+ */
+template <bool useEmpty, KeyType keyType>
+inline bool IssetEmptyElemString(TypedValue& tvScratch, TypedValue* base,
+                                 TypedValue* key) {
+  // TODO Task #2716479: Fix this so that the warnings raised match
+  // Zend PHP.
   TypedValue scratch;
-  if (isObj) {
-    initScratchKey<keyType>(scratch, key);
-    return IssetEmptyElemObj<useEmpty>(
-      tvRef, reinterpret_cast<ObjectData*>(base), key);
-  }
-
-  TypedValue* result;
-  DataType type;
-  opPre(base, type);
-  switch (type) {
-  case KindOfStaticString:
-  case KindOfString: {
-    // TODO Task #2716479: Fix this so that the warnings raised match
-    // Zend PHP.
+  initScratchKey<keyType>(scratch, key);
+  int64_t x;
+  if (LIKELY(key->m_type == KindOfInt64)) {
+    x = key->m_data.num;
+  } else {
     TypedValue tv;
-    initScratchKey<keyType>(scratch, key);
     cellDup(*key, tv);
     bool badKey = false;
     if (IS_STRING_TYPE(tv.m_type)) {
@@ -1530,37 +1530,50 @@ inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
     if (badKey) {
       return useEmpty;
     }
-    int64_t x = tv.m_data.num;
-    if (x < 0 || x >= base->m_data.pstr->size()) {
-      return useEmpty;
-    }
-    if (!useEmpty) {
-      return true;
-    }
-    tvScratch.m_data.pstr = base->m_data.pstr->getChar(x);
-    assert(tvScratch.m_data.pstr->isStatic());
-    tvScratch.m_type = KindOfStaticString;
-    result = &tvScratch;
-    break;
+    x = tv.m_data.num;
   }
-  case KindOfArray: {
-    result = ElemArray<false, keyType>(base->m_data.parr, key);
-    break;
-  }
-  case KindOfObject: {
-    initScratchKey<keyType>(scratch, key);
-    return IssetEmptyElemObj<useEmpty>(tvRef, base->m_data.pobj, key);
-    break;
-  }
-  default: {
+  if (x < 0 || x >= base->m_data.pstr->size()) {
     return useEmpty;
   }
+  if (!useEmpty) {
+    return true;
   }
+  tvScratch.m_data.pstr = base->m_data.pstr->getChar(x);
+  assert(tvScratch.m_data.pstr->isStatic());
+  tvScratch.m_type = KindOfStaticString;
+  return !cellToBool(*tvToCell(&tvScratch));
+}
 
+/**
+ * IssetEmptyElem when base is an Array
+ */
+template <bool useEmpty, KeyType keyType>
+inline bool IssetEmptyElemArray(TypedValue* base, TypedValue* key) {
+  TypedValue* result = ElemArray<false, keyType>(base->m_data.parr, key);
   if (useEmpty) {
     return !cellToBool(*tvToCell(result));
-  } else {
-    return !tvIsNull(tvToCell(result));
+  }
+  return !tvIsNull(tvToCell(result));
+}
+
+/**
+ * isset/empty($base[$key])
+ */
+template <bool useEmpty, KeyType keyType = KeyType::Any>
+inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
+                           TypedValue* base, TypedValue* key) {
+  DataType type;
+  opPre(base, type);
+  switch (type) {
+  case KindOfStaticString:
+  case KindOfString:
+    return IssetEmptyElemString<useEmpty, keyType>(tvScratch, base, key);
+  case KindOfArray:
+    return IssetEmptyElemArray<useEmpty, keyType>(base, key);
+  case KindOfObject:
+    return IssetEmptyElemObj<useEmpty, keyType>(tvRef, base->m_data.pobj, key);
+  default:
+    return useEmpty;
   }
 }
 

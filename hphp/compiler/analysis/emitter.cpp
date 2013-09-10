@@ -5486,17 +5486,30 @@ determine_type_constraint(const ParameterExpressionPtr& par) {
   }
 
   if (auto annot = par->annotation()) {
-    if (!annot->isNullable()) return {};
-    if (annot->isSoft() || annot->isFunction()) return {};
+    auto flags = TypeConstraint::ExtendedHint | TypeConstraint::HHType;
+
+    // We only care about a subset of extended type constaints:
+    // typevar
+    // nullable
+    //
+    // If a constraint it both, nullable and a typevar, we don't need
+    // to flag it as nullable, because it will get dropped.
+    if (annot->isTypeVar()) {
+      flags = flags | TypeConstraint::TypeVar;
+    } else if (annot->isNullable()) {
+      flags = flags | TypeConstraint::Nullable;
+      if (annot->isSoft() || annot->isFunction()) {
+        return {};
+      }
+    } else {
+      return {};
+    }
 
     auto strippedName = annot->stripNullable().vanillaName();
-    if (strippedName.empty()) return {};
 
     return TypeConstraint{
       StringData::GetStaticString(strippedName),
-      TypeConstraint::Nullable |
-        TypeConstraint::ExtendedHint |
-        TypeConstraint::HHType
+      flags
     };
   }
 

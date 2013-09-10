@@ -31,7 +31,7 @@ TypeAnnotation::TypeAnnotation(const std::string &name,
                                 m_tuple(false),
                                 m_function(false),
                                 m_xhp(false),
-                                m_typevar(false) {}
+                                m_typevar(false) { }
 
 std::string TypeAnnotation::vanillaName() const {
   // filter out types that should not be exposed to the runtime

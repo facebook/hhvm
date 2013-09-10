@@ -33,9 +33,12 @@ DECLARE_BOOST_TYPES(TypeAnnotation);
 class ParameterExpression : public Expression {
 public:
   ParameterExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
-                      TypeAnnotationPtr type, bool hhType,
+                      TypeAnnotationPtr type,
+                      bool hhType,
                       const std::string &name,
-                      bool ref, TokenID modifier, ExpressionPtr defaultValue,
+                      bool ref,
+                      TokenID modifier,
+                      ExpressionPtr defaultValue,
                       ExpressionPtr attributeList);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;

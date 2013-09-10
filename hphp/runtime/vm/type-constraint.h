@@ -50,6 +50,15 @@ public:
      * php.  For example "?Foo".
      */
     ExtendedHint = 0x4,
+
+    /**
+     * Indicates that a type constraint is a type variable. For example,
+     * the constraint on $x is a TypeVar.
+     * class Foo<T> {
+     *   public function bar(T $x) { ... }
+     * }
+     */
+    TypeVar = 0x8,
   };
 
 private:
@@ -146,6 +155,7 @@ public:
   }
 
   bool isExtended() const { return m_flags & ExtendedHint; }
+  bool isTypeVar() const { return m_flags & TypeVar; }
 
   bool compat(const TypeConstraint& other) const {
     if (other.isExtended() || isExtended()) {

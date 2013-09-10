@@ -88,6 +88,15 @@ void TypeConstraint::init() {
     }
   }
 
+  if (isTypeVar()) {
+    // We kept the type variable type constraint to correctly check child
+    // classes implementing abstract methods or interfaces.
+    //
+    // This type constraint is never actually used, so we can just return.
+    // We could also do:
+    // m_type.m_dt = KindOfAny;
+    return;
+  }
   if (m_typeName && isExtended()) {
     assert(nullable() &&
            "Only nullable extended type hints are implemented");

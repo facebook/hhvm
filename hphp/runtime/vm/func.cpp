@@ -67,7 +67,8 @@ void Func::parametersCompat(const PreClass* preClass, const Func* imeth) const {
   // imeth's corresponding parameter typehints.
   unsigned firstOptional = 0;
   for (unsigned i = 0; i < iparams.size(); ++i) {
-    if (!params[i].typeConstraint().compat(iparams[i].typeConstraint())) {
+    if (!params[i].typeConstraint().compat(iparams[i].typeConstraint())
+        && !iparams[i].typeConstraint().isTypeVar()) {
       decl_incompat(preClass, imeth);
     }
     if (!iparams[i].hasDefaultValue()) {

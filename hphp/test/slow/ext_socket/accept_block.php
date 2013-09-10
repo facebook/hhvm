@@ -3,7 +3,7 @@
 $socket = null;
 while (!$socket) {
   $port = rand(50000, 65535);
-  $socket = stream_socket_server(
+  $socket = @stream_socket_server(
     "tcp://127.0.0.1:$port",
     $errno,
     $errstr,

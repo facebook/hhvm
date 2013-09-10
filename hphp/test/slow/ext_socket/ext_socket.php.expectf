@@ -1,5 +1,6 @@
 resource(4) of type (stream)
 bool(true)
+bool(true)
 int(2)
 int(1)
 int(1)
@@ -23,9 +24,14 @@ string(4) "send"
 bool(true)
 bool(true)
 bool(true)
+int(4)
+int(4)
+string(4) "more"
+bool(true)
+bool(true)
+bool(true)
 bool(true)
 bool(true)
 NULL
-HipHop Warning: unable to bind address127.0.0.1:80 [13]: Permission denied in %s/test/slow/ext_socket/ext_socket.php on line 84
 bool(true)
 int(0)

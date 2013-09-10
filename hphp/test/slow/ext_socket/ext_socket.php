@@ -12,7 +12,7 @@ function get_random_port() {
 }
 
 function bind_random_port($socket, $address) {
-  for ($i = 0; $i < 20; $i++) {
+  for ($i = 0; $i < 100; $i++) {
     $port = get_random_port();
     if (@socket_bind($socket, $address, $port)) return $port;
   }
@@ -20,7 +20,7 @@ function bind_random_port($socket, $address) {
 }
 
 function create_listen_random_port() {
-  for ($i = 0; $i < 20; $i++) {
+  for ($i = 0; $i < 100; $i++) {
     $port = get_random_port();
     if (@socket_create_listen($port)) return $port;
   }
@@ -45,6 +45,8 @@ function get_client_server() {
 $s = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 var_dump($s);
 
+var_dump(create_listen_random_port() != 0);
+
 var_dump(socket_create_pair(AF_UNIX, SOCK_STREAM, 0, $fds));
 var_dump(count($fds));
 
@@ -68,6 +70,17 @@ var_dump(socket_send($client, $text, 4, 0));
 var_dump(socket_recv($s, $buffer, 100, 0));
 var_dump($buffer);
 
+list($client, $s) = get_client_server();
+$text = "more specific";
+for ($i = 0; $i < 100; $i++) {
+  $port = get_random_port();
+  $res = socket_sendto($client, $text, 4, 0, "127.0.0.1", $port);
+  if ($res !== false) break;
+}
+var_dump($res);
+var_dump(socket_recvfrom($s, $buffer, 100, 0, $name, $vport));
+var_dump($buffer);
+
 $s = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 $port = bind_random_port($s, "127.0.0.1");
 var_dump($port != 0);
@@ -81,7 +94,7 @@ var_dump(socket_listen($s));
 var_dump(socket_close($s));
 
 $s = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-socket_bind($s, "127.0.0.1", 80);
+@socket_bind($s, "127.0.0.1", 80);
 if (socket_last_error($s) == 13) {
   var_dump(socket_strerror(13) == "Permission denied");
   socket_clear_error($s);

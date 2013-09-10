@@ -357,6 +357,7 @@ struct Func {
    * Was this generated specially by the compiler to aide the runtime?
    */
   bool isGenerated() const { return shared()->m_isGenerated; }
+  bool isAsync() const { return shared()->m_isAsync; }
   bool hasStaticLocals() const { return !shared()->m_staticVars.empty(); }
   int numStaticLocals() const { return shared()->m_staticVars.size(); }
   const ClassInfo::MethodInfo* info() const { return shared()->m_info; }
@@ -480,6 +481,7 @@ private:
     bool m_isPairGenerator : 1;
     bool m_hasGeneratorAsBody : 1;
     bool m_isGenerated : 1;
+    bool m_isAsync : 1;
     UserAttributeMap m_userAttributes;
     const StringData* m_retTypeConstraint;
     // per-func filepath for traits flattened during repo construction
@@ -657,6 +659,9 @@ public:
 
   void setContainsCalls() { m_containsCalls = true; }
 
+  void setIsAsync(bool isAsync) { m_isAsync = isAsync; }
+  bool isAsync() const { return m_isAsync; }
+
   void addUserAttribute(const StringData* name, TypedValue tv);
   int parseNativeAttributes(Attr &attrs) const;
 
@@ -720,6 +725,7 @@ private:
   bool m_isPairGenerator;
   bool m_hasGeneratorAsBody;
   bool m_containsCalls;
+  bool m_isAsync;
 
   Func::UserAttributeMap m_userAttributes;
 

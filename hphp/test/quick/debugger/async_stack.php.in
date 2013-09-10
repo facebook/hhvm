@@ -1,7 +1,9 @@
-break async_stack.php:7
-break async_stack.php:13
-break async_stack.php:19
-break async_stack.php:28
+break async_stack.php:8
+break async_stack.php:9
+break async_stack.php:15
+break async_stack.php:24
+break async_stack.php:31
+break async_stack.php:39
 continue
 w
 wa
@@ -17,5 +19,8 @@ wa
 c
 w
 w a
+c
+w
+wa
 c
 quit

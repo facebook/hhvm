@@ -6,14 +6,21 @@ next
 next
 next
 next
+next
 continue
 @test(2)
 out
 next
+continue
 break clear all
-continue
-break flow_gen_async.php:14
+break flow_gen_async.php:10
 @test(3)
+out
+next
+continue
+break clear all
+break flow_gen_async.php:15
+@test(4)
 next
 next
 next
@@ -23,7 +30,7 @@ next
 next
 next
 continue
-@test(4)
+@test(5)
 out
 next
 break clear all

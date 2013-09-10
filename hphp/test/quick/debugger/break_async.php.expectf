@@ -14,34 +14,19 @@ Breakpoint 2 reached at main() on line 43 of %s/break_async.php
 break genFoo()
 Breakpoint 3 set upon entering genFoo()
 c
-Breakpoint 3 reached at genFoo() on line 25 of %s/break_async.php
-  24 
+Breakpoint 3 reached at genFoo() on line 26 of %s/break_async.php
   25 async function genFoo($a) {
+  26   error_log('In genFoo');
+  27   var_dump($a);
+
+n
+In genFoo
+Break at genFoo() on line 27 of %s/break_async.php
   26   error_log('In genFoo');
   27   var_dump($a);
   28   $a++;
-  29   list($x, $y) = await GenArrayWaitHandle::Create(
-  30     array(
-  31       genBar($a),
-  32       genBar($a + 1),
-  33       gen2($a + 2)
-  34     )
-  35   );
-  36   var_dump($x);
-  37   var_dump($y);
-  38   error_log('Finished in genFoo');
-  39   return $x + $y;
-  40 }
-  41 
-
-n
-Break at genFoo() on line 26 of %s/break_async.php
-  25 async function genFoo($a) {
-  26   error_log('In genFoo');
-  27   var_dump($a);
 
 c
-In genFoo
 int(42)
 In genBar
 int(43)
@@ -50,64 +35,21 @@ In genBar
 int(44)
 Finished in genBar
 In gen2
-Breakpoint 1 reached at gen1() on line 5 of %s/break_async.php
-   4 
+Breakpoint 1 reached at gen1() on line 6 of %s/break_async.php
    5 async function gen1($a) {
+   6   error_log('In gen1');
+   7   error_log('Finished in gen1');
+
+n
+In gen1
+Break at gen1() on line 7 of %s/break_async.php
    6   error_log('In gen1');
    7   error_log('Finished in gen1');
    8   return $a + 1;
-   9 }
-  10 
-
-n
-Break at gen1() on line 6 of %s/break_async.php
-   5 async function gen1($a) {
-   6   error_log('In gen1');
-   7   error_log('Finished in gen1');
 
 c
-In gen1
 Finished in gen1
 Finished in gen2
-Breakpoint 3 reached at genFoo() on line 25 of %s/break_async.php
-  24 
-  25 async function genFoo($a) {
-  26   error_log('In genFoo');
-  27   var_dump($a);
-  28   $a++;
-  29   list($x, $y) = await GenArrayWaitHandle::Create(
-  30     array(
-  31       genBar($a),
-  32       genBar($a + 1),
-  33       gen2($a + 2)
-  34     )
-  35   );
-  36   var_dump($x);
-  37   var_dump($y);
-  38   error_log('Finished in genFoo');
-  39   return $x + $y;
-  40 }
-  41 
-
-n
-Break at genFoo() on line 29 of %s/break_async.php
-  28   $a++;
-  29   list($x, $y) = await GenArrayWaitHandle::Create(
-  30     array(
-  31       genBar($a),
-  32       genBar($a + 1),
-  33       gen2($a + 2)
-  34     )
-  35   );
-  36   var_dump($x);
-
-n
-Break at genFoo() on line 36 of %s/break_async.php
-  35   );
-  36   var_dump($x);
-  37   var_dump($y);
-
-c
 int(45)
 int(46)
 Finished in genFoo

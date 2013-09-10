@@ -25,7 +25,11 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(CmdNext);
 class CmdNext : public CmdFlowControl {
 public:
-  CmdNext() : CmdFlowControl(KindOfNext), m_stepContTag(nullptr) {}
+  CmdNext() :
+      CmdFlowControl(KindOfNext)
+      , m_stepContTag(nullptr)
+      , m_skippingCreateAsync(false)
+    {}
 
   virtual void help(DebuggerClient& client);
   virtual void onSetup(DebuggerProxy& proxy, CmdInterrupt& interrupt);
@@ -33,6 +37,7 @@ public:
 
 private:
   void stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc);
+  void stepAfterCreateAsync();
   bool hasStepCont();
   bool atStepContOffset(Unit* unit, Offset o);
   void setupStepCont(ActRec* fp, PC pc);
@@ -41,6 +46,7 @@ private:
 
   StepDestination m_stepCont;
   void* m_stepContTag; // Unique identifier for the continuation we're stepping
+  bool m_skippingCreateAsync;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

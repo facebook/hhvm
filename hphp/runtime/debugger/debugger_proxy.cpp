@@ -239,6 +239,30 @@ void DebuggerProxy::setBreakPoints(BreakPointInfoPtrVec &breakpoints) {
   // to hold it over the longer operation to set breakpoints in each file later.
   {
     WriteLock lock(m_breakMutex);
+    // breakpoints holds a list of fresh new BreakPointInfo objects that
+    // have been deserialized from the client's list of breakpoints.
+    // The existing BreakPointInfo objects may include non empty values
+    // for m_stack. If these get thrown away, breakpoints that are temporarily
+    // disabled will suddenly fire again, which is not what we want to
+    // happen if we create a new breakpoint or just even list breakpoints.
+    auto it = m_breakpoints.begin();
+    for (auto it1 = breakpoints.begin(); it1 != breakpoints.end(); ++it1)  {
+      BreakPointInfoPtr newBreakPoint = *it1;
+      do {
+        for (auto it2 = it; it2 != m_breakpoints.end(); ) {
+          BreakPointInfoPtr oldBreakPoint = *it2++;
+          if (oldBreakPoint->same(newBreakPoint)) {
+            newBreakPoint->transferStack(oldBreakPoint);
+            it = it2;
+            goto next_breakpoint;
+          }
+        }
+        if (it == m_breakpoints.begin()) goto next_breakpoint;
+        // Only searched a part of m_breakpoints. Reset it and try again.
+        it = m_breakpoints.begin();
+      } while (true);
+      next_breakpoint: continue;
+    }
     m_breakpoints = breakpoints;
     m_hasBreakPoints = !m_breakpoints.empty();
   }

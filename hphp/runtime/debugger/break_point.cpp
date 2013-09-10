@@ -282,6 +282,11 @@ void BreakPointInfo::setClause(const std::string &clause, bool check) {
   m_check = check;
 }
 
+void BreakPointInfo::transferStack(BreakPointInfoPtr bpi) {
+  if (bpi->m_stack.empty()) return;
+  m_stack.splice(m_stack.begin(), bpi->m_stack);
+}
+
 // Disables the breakpoint at the given stack level.
 // Following this call, BreakPointInfo::breakable will return false until
 // a subsequent call to BreakPointInfo::setBreakable with a lower or equal

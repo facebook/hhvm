@@ -637,7 +637,10 @@ O_STK(ElemUX,              D(PtrToGen), C(TCA)                                \
                                           S(PtrToCell),MElem|E|N|Mem|Refs|Er) \
 O(ArrayGet,                    D(Cell), C(TCA)                                \
                                           S(Arr)                              \
-                                          S(Int,Str),     C|N|PRc|Refs|Mem|Er)\
+                                          S(Int,Str),    C|N|PRc|Refs|Mem|Er) \
+O(StringGet,              D(StaticStr), C(TCA)                                \
+                                          S(Str)                              \
+                                          S(Int),        C|N|PRc|Refs|Mem|Er) \
 O(VectorGet,                   D(Cell), C(TCA)                                \
                                           S(Obj)                              \
                                           S(Int),            E|N|Mem|Refs|Er) \
@@ -719,6 +722,7 @@ O_STK(BindNewElem,                  ND, S(PtrToGen)                           \
 O(ArrayIsset,                  D(Bool), C(TCA)                                \
                                           S(Arr)                              \
                                           S(Int,Str),        E|N|Mem|Refs|Er) \
+O(StringIsset,                 D(Bool), S(Str) S(Int),                     C) \
 O(VectorIsset,                 D(Bool), C(TCA)                                \
                                           S(Obj)                              \
                                           S(Int),            E|N|Mem|Refs)    \

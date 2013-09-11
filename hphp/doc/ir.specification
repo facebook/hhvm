@@ -763,7 +763,7 @@ D:PtrToCell = LdVectorBase S0:Obj<Vector>
 D:PtrToCell = LdPairBase S0:Obj<Pair>
 
   Loads the base pointer to an array of Cells from the given collection
-  instance in S0. 
+  instance in S0.
 
 D:T = LdMem<T> S0:PtrToGen S1:ConstInt [ -> L ]
 
@@ -1968,6 +1968,10 @@ D:Cell = ArrayGet S0:ConstTCA S1:Arr S2:{Int|Str}
 
   Get element with key S2 from base S1.
 
+D:StaticStr = StringGet S0:ConstTCA S1:Str S2:Int
+
+  Get string representing character at position S2 from base string S1.
+
 D:Cell = VectorGet S0:ConstTCA S1:Obj<Vector> S2:{Int}
 
   Get element with key S2 from base S1. S1 is a Vector instance.
@@ -2078,6 +2082,10 @@ D:Bool = ArrayIsset S0:ConstTCA S1:Arr S2:{Int|Str}
 
   Returns true iff the element at key S2 in the base S1 is set.
 
+D:Bool = StringIsset S0:Str S1:Int
+
+  Returns true iff the string S0 has a character at position S1.
+
 D:Bool = VectorIsset S0:ConstTCA S1:Obj<Vector> S2:{Int}
 
   Returns true iff the element at key S2 in the base S1 is set. S1 is a
@@ -2107,7 +2115,7 @@ D:Bool = EmptyElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
   Returns true iff the element at key S2 in S1 is set and not equal
   (as defined by the hhbc Eq instruction) to false.
 
-CheckBounds S0:Int S1:Int 
+CheckBounds S0:Int S1:Int
 
   Check that the index in S0 is between 0 (included) and the values in S1
   (excluded). Throws if out of bounds.

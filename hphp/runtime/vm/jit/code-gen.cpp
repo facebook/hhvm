@@ -316,6 +316,7 @@ CALL_OPCODE(ElemArray)
 CALL_STK_OPCODE(ElemDX)
 CALL_STK_OPCODE(ElemUX)
 CALL_OPCODE(ArrayGet)
+CALL_OPCODE(StringGet)
 CALL_OPCODE(VectorGet)
 CALL_OPCODE(PairGet)
 CALL_OPCODE(MapGet)
@@ -4351,6 +4352,25 @@ void CodeGenerator::cgLdRef(IRInstruction* inst) {
   cgLoad(inst->dst(),
          m_regs[inst->src(0)].reg()[RefData::tvOffset()],
          inst->taken());
+}
+
+void CodeGenerator::cgStringIsset(IRInstruction* inst) {
+  auto str = inst->src(0);
+  auto idx = inst->src(1);
+  auto dstReg = m_regs[inst->dst()].reg();
+  auto strReg = [&]() {
+    if (str->isConst()) {
+      emitLoadImm(m_as, (int64_t)str->getValStr(), m_rScratch);
+      return PhysReg(m_rScratch);
+    }
+    return m_regs[str].reg();
+  }();
+  if (idx->isConst()) {
+    m_as.cmpl(idx->getValInt(), strReg[StringData::sizeOffset()]);
+  } else {
+    m_as.cmpl(r32(m_regs[idx].reg()), strReg[StringData::sizeOffset()]);
+  }
+  m_as.setnbe(rbyte(dstReg));
 }
 
 void CodeGenerator::cgCheckBounds(IRInstruction* inst) {

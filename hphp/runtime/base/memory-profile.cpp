@@ -131,7 +131,7 @@ size_t MemoryProfile::getSizeOfArray(ArrayData *arr) {
     size_t tableSize = HphpArray::computeTableSize(ha->m_tableMask);
     size_t maxElms = HphpArray::computeMaxElms(ha->m_tableMask);
     if (maxElms > HphpArray::SmallSize) {
-      size_t hashSize = tableSize * sizeof(HphpArray::ElmInd);
+      size_t hashSize = tableSize * sizeof(int32_t);
       size_t dataSize = maxElms * sizeof(HphpArray::Elm);
       size += (hashSize <= sizeof(ha->m_inline_hash))
         ? dataSize

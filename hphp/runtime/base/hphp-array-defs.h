@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HPHP_ARRAY_INL_H_
-#define incl_HPHP_HPHP_ARRAY_INL_H_
+#ifndef incl_HPHP_HPHP_ARRAY_DEFS_H_
+#define incl_HPHP_HPHP_ARRAY_DEFS_H_
 
 #include "hphp/runtime/base/hphp-array.h"
 #include "hphp/util/stacktrace-profiler.h"
@@ -39,19 +39,19 @@ inline void ArrayData::modeFree(void* ptr) const {
 }
 
 inline void HphpArray::initHash(size_t tableSize) {
-  assert(HphpArray::ElmIndEmpty == -1);
+  assert(HphpArray::Empty == -1);
   memset(m_hash, 0xffU, tableSize * sizeof(*m_hash));
   m_hLoad = 0;
 }
 
 ALWAYS_INLINE
-HphpArray::ElmInd* HphpArray::findForNewInsert(size_t h0) const {
+int32_t* HphpArray::findForNewInsert(size_t h0) const {
   assert(!isPacked());
-  size_t tableMask = m_tableMask;
-  size_t probeIndex = h0 & tableMask;
-  ElmInd* ei = &m_hash[probeIndex];
-  return !validElmInd(*ei) ? ei :
-         findForNewInsertLoop(tableMask, h0);
+  size_t mask = m_tableMask;
+  auto table = m_hash;
+  auto ei = &table[h0 & mask];
+  return !validPos(*ei) ? ei :
+         findForNewInsertLoop(table, h0, mask);
 }
 
 inline bool HphpArray::isTombstone(ssize_t pos) const {
@@ -169,7 +169,30 @@ HphpArray::IssetIntPacked(const ArrayData* ad, int64_t ki) {
          (a->m_data[ki].data.m_type != KindOfNull);
 }
 
+inline bool HphpArray::validPos(ssize_t pos) {
+  return pos >= 0;
+  static_assert(ssize_t(Empty) == ssize_t(-1), "");
+}
+
+inline bool HphpArray::validPos(int32_t pos) {
+  return pos >= 0;
+  static_assert(Empty == -1, "");
+}
+
+inline size_t HphpArray::computeTableSize(uint32_t tableMask) {
+  return size_t(tableMask) + size_t(1U);
+}
+
+inline size_t HphpArray::computeMaxElms(uint32_t tableMask) {
+  return size_t(tableMask) - size_t(tableMask) / LoadScale;
+}
+
+inline size_t HphpArray::computeDataSize(uint32_t tableMask) {
+  return computeTableSize(tableMask) * sizeof(int32_t) +
+    computeMaxElms(tableMask) * sizeof(Elm);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_HPHP_ARRAY_INL_H_
+#endif // incl_HPHP_HPHP_ARRAY_DEFS_H_

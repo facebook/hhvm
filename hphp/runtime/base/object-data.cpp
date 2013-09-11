@@ -440,7 +440,7 @@ Array ObjectData::o_toIterArray(CStrRef context,
   // Now get dynamic properties.
   if (o_properties.get()) {
     ssize_t iter = o_properties.get()->iter_begin();
-    while (iter != HphpArray::ElmIndEmpty) {
+    while (iter != ArrayData::invalid_index) {
       TypedValue key;
       static_cast<HphpArray*>(o_properties.get())->nvGetKey(&key, iter);
       iter = o_properties.get()->iter_advance(iter);
@@ -1470,7 +1470,7 @@ void ObjectData::cloneSet(ObjectData* clone) {
   if (o_properties.get()) {
     clone->initDynProps();
     ssize_t iter = o_properties.get()->iter_begin();
-    while (iter != HphpArray::ElmIndEmpty) {
+    while (iter != ArrayData::invalid_index) {
       auto props = static_cast<HphpArray*>(o_properties.get());
       TypedValue key;
       props->nvGetKey(&key, iter);

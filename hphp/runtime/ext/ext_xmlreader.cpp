@@ -557,6 +557,11 @@ Variant c_XMLReader::t___get(Variant name) {
   int retint = 0;
 
   PropertyAccessor *propertyMap = xmlreader_properties_map.get(name);
+  if (!propertyMap) {
+    raiseUndefProp(name.getStringData());
+    return uninit_null();
+  }
+
   if (m_ptr) {
     if (propertyMap->getter_char) {
       retchar = propertyMap->getter_char(m_ptr);

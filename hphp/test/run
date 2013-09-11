@@ -42,9 +42,6 @@ Examples:
   # Slow array tests, in RepoAuthoritative:
   % $argv[0] -r test/slow/array
 
-  # Slow array tests, in JIT/interp X RepoAuthoritative/default:
-  % $argv[0] -x test/slow/array
-
   # Zend tests with a "z" in their name:
   % $argv[0] $ztestexample
 
@@ -139,7 +136,6 @@ function get_options($argv) {
     'threads:' => '',
     'args:' => 'a:',
     'log' => 'l',
-    'matrix' => 'x',
   );
   $options = array();
   $files = array();
@@ -433,7 +429,13 @@ class Status {
   }
 }
 
-function execute_tests($options, $tests) {
+function run($options, $tests, $bad_test_file) {
+  if (isset($options['verbose'])) {
+    Status::setMode(Status::MODE_VERBOSE);
+  }
+  if (isset($options['fbmake'])) {
+    Status::setMode(Status::MODE_FBMAKE);
+  }
   foreach ($tests as $test) {
     $status = run_test($options, $test);
     if ($status === 'skip') {
@@ -443,37 +445,6 @@ function execute_tests($options, $tests) {
     } else {
       Status::fail($test);
     }
-  }
-}
-
-function run($options, $tests, $bad_test_file) {
-  if (isset($options['verbose'])) {
-    Status::setMode(Status::MODE_VERBOSE);
-  }
-  if (isset($options['fbmake'])) {
-    Status::setMode(Status::MODE_FBMAKE);
-  }
-  $option_sets = array();
-  if (isset($options['matrix'])) {
-    if (isset($options['mode'])) {
-      error("-m is not compatible with -x");
-    }
-    if (isset($options['repo'])) {
-      error("-r is not compatible with -x");
-    }
-    // With -x, run with all four modes (interp+jit X repoauth+not)
-    $option_sets[] = array_merge($options, array('mode' => 'interp'));
-    $option_sets[] = array_merge($options, array('mode' => 'jit'));
-    $option_sets[] = array_merge($options, array('mode' => 'interp',
-                                                 'repo' => true));
-    $option_sets[] = array_merge($options, array('mode' => 'jit',
-                                                 'repo' => true));
-  } else {
-    // Just run with the passed in options with the mode they specified
-    $option_sets[] = $options;
-  }
-  foreach ($option_sets as $option_set) {
-    execute_tests($option_set, $tests);
   }
   file_put_contents($bad_test_file, json_encode(Status::getResults()));
   foreach (Status::getResults() as $result) {
@@ -681,11 +652,7 @@ function main($argv) {
   $threads = min(count($tests), idx($options, 'threads', num_cpus() + 1));
 
   if (!isset($options['fbmake'])) {
-    if (isset($options['matrix'])) {
-      print "Running ".(count($tests)*4)." tests in $threads threads (matrix)\n";
-    } else {
-      print "Running ".count($tests)." tests in $threads threads\n";
-    }
+    print "Running ".count($tests)." tests in $threads threads\n";
   }
 
   # Try to construct the buckets so the test results are ready in approximately

@@ -32,7 +32,7 @@ TEST(JobQueue, Ordering) {
 
     bool expired;
     for (int i = 0; i < 100; ++i) {
-      EXPECT_EQ(i, job_queue.dequeueMaybeExpired(0, false, &expired));
+      EXPECT_EQ(i, job_queue.dequeueMaybeExpired(0, 0, false, &expired));
     }
   }
 
@@ -47,7 +47,8 @@ TEST(JobQueue, Ordering) {
 
     bool expired;
     for (int i = 0; i < 100; ++i) {
-      EXPECT_EQ(100 - i - 1, job_queue.dequeueMaybeExpired(0, false, &expired));
+      EXPECT_EQ(100 - i - 1, job_queue.dequeueMaybeExpired(0, 0,
+                                                           false, &expired));
     }
   }
 
@@ -62,10 +63,11 @@ TEST(JobQueue, Ordering) {
 
     bool expired;
     for (int i = 0; i < 50; ++i) {
-      EXPECT_EQ(100 - i - 1, job_queue.dequeueMaybeExpired(0, false, &expired));
+      EXPECT_EQ(100 - i - 1, job_queue.dequeueMaybeExpired(0, 0,
+                                                           false, &expired));
     }
     for (int i = 0; i < 50; ++i) {
-      EXPECT_EQ(i, job_queue.dequeueMaybeExpired(0, false, &expired));
+      EXPECT_EQ(i, job_queue.dequeueMaybeExpired(0, 0, false, &expired));
     }
   }
 }
@@ -83,12 +85,14 @@ TEST(JobQueue, Expiration) {
     fifo_queue.enqueue(3);
 
     bool expired = false;
-    EXPECT_EQ(1, fifo_queue.dequeueMaybeExpiredImpl(0, true, timeOk, &expired));
+    EXPECT_EQ(1, fifo_queue.dequeueMaybeExpiredImpl(0, 0, true,
+                                                    timeOk, &expired));
     EXPECT_FALSE(expired);
-    EXPECT_EQ(2, fifo_queue.dequeueMaybeExpiredImpl(0, true, timeExpired,
+    EXPECT_EQ(2, fifo_queue.dequeueMaybeExpiredImpl(0, 0, true, timeExpired,
                                                     &expired));
     EXPECT_TRUE(expired);
-    EXPECT_EQ(3, fifo_queue.dequeueMaybeExpiredImpl(0, true, timeOk, &expired));
+    EXPECT_EQ(3, fifo_queue.dequeueMaybeExpiredImpl(0, 0, true,
+                                                    timeOk, &expired));
     EXPECT_FALSE(expired);
   }
 
@@ -99,14 +103,16 @@ TEST(JobQueue, Expiration) {
     lifo_queue.enqueue(3);
 
     bool expired = false;
-    EXPECT_EQ(3, lifo_queue.dequeueMaybeExpiredImpl(0, true, timeOk, &expired));
+    EXPECT_EQ(3, lifo_queue.dequeueMaybeExpiredImpl(0, 0,
+                                                    true, timeOk, &expired));
     EXPECT_FALSE(expired);
     // now we should get a job from the beginning of the queue even though we
     // are in lifo mode before request expiration is enabled.
-    EXPECT_EQ(1, lifo_queue.dequeueMaybeExpiredImpl(0, true, timeExpired,
+    EXPECT_EQ(1, lifo_queue.dequeueMaybeExpiredImpl(0, 0, true, timeExpired,
                                                     &expired));
     EXPECT_TRUE(expired);
-    EXPECT_EQ(2, lifo_queue.dequeueMaybeExpiredImpl(0, true, timeOk, &expired));
+    EXPECT_EQ(2, lifo_queue.dequeueMaybeExpiredImpl(0, 0,
+                                                    true, timeOk, &expired));
     EXPECT_FALSE(expired);
   }
 
@@ -126,16 +132,16 @@ TEST(JobQueue, Expiration) {
 
     // having job reaper should not affect anything other threads are doing.
     bool expired = false;
-    EXPECT_EQ(1, lifo_queue.dequeueMaybeExpired(0, true, &expired));
+    EXPECT_EQ(1, lifo_queue.dequeueMaybeExpired(0, 0, true, &expired));
     EXPECT_TRUE(expired);
-    EXPECT_EQ(2, lifo_queue.dequeueMaybeExpired(1, true, &expired));
+    EXPECT_EQ(2, lifo_queue.dequeueMaybeExpired(1, 0, true, &expired));
     EXPECT_TRUE(expired);
 
     // now no more jobs are expired. job reaper would block.
     std::atomic<int> value(-1);
     std::thread thread([&]() {
         bool expired;
-        value.store(lifo_queue.dequeueMaybeExpired(1, true, &expired));
+        value.store(lifo_queue.dequeueMaybeExpired(1, 0, true, &expired));
       });
     EXPECT_EQ(-1, value.load());
     // even if you notify it.
@@ -143,7 +149,7 @@ TEST(JobQueue, Expiration) {
     EXPECT_EQ(-1, value.load());
 
     // but normal workers should proceed.
-    EXPECT_EQ(5, lifo_queue.dequeueMaybeExpired(0, true, &expired));
+    EXPECT_EQ(5, lifo_queue.dequeueMaybeExpired(0, 0, true, &expired));
     EXPECT_FALSE(expired);
 
     // now set the first job to be expired.
@@ -159,7 +165,7 @@ TEST(JobQueue, Expiration) {
     std::thread thread1([&]() {
         bool expired;
         try {
-          lifo_queue.dequeueMaybeExpired(1, true, &expired);
+          lifo_queue.dequeueMaybeExpired(1, 0, true, &expired);
         } catch (const JobQueue<int>::StopSignal&) {
           exceptionCaught = true;
         }
@@ -180,12 +186,12 @@ TEST(JobQueue, Priority) {
   fifo_queue.enqueue(6, 2);
 
   bool expired;
-  EXPECT_EQ(3, fifo_queue.dequeueMaybeExpired(0, true, &expired));
-  EXPECT_EQ(6, fifo_queue.dequeueMaybeExpired(0, true, &expired));
-  EXPECT_EQ(5, fifo_queue.dequeueMaybeExpired(0, true, &expired));
-  EXPECT_EQ(1, fifo_queue.dequeueMaybeExpired(0, true, &expired));
-  EXPECT_EQ(2, fifo_queue.dequeueMaybeExpired(0, true, &expired));
-  EXPECT_EQ(4, fifo_queue.dequeueMaybeExpired(0, true, &expired));
+  EXPECT_EQ(3, fifo_queue.dequeueMaybeExpired(0, 0, true, &expired));
+  EXPECT_EQ(6, fifo_queue.dequeueMaybeExpired(0, 0, true, &expired));
+  EXPECT_EQ(5, fifo_queue.dequeueMaybeExpired(0, 0, true, &expired));
+  EXPECT_EQ(1, fifo_queue.dequeueMaybeExpired(0, 0, true, &expired));
+  EXPECT_EQ(2, fifo_queue.dequeueMaybeExpired(0, 0, true, &expired));
+  EXPECT_EQ(4, fifo_queue.dequeueMaybeExpired(0, 0, true, &expired));
 }
 
 }

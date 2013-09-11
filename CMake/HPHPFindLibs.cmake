@@ -28,6 +28,13 @@ if (FEATURES_HEADER)
 	add_definitions("-DHAVE_FEATURES_H=1")
 endif()
 
+# numa.h
+find_path(NUMA_INCLUDE_PATH numa.h)
+if (NUMA_INCLUDE_PATH)
+	add_definitions("-DHAVE_NUMA=1")
+	include_directories(${NUMA_INCLUDE_PATH})
+endif()
+
 # google-glog
 find_package(Glog REQUIRED)
 include_directories(${LIBGLOG_INCLUDE_DIR})

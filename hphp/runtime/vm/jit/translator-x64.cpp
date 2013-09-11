@@ -2691,6 +2691,7 @@ TranslatorX64::TranslatorX64()
   base += -(uint64_t)base & (kRoundUp - 1);
 
   m_unwindRegistrar = register_unwind_region(base, m_totalSize - kGDataSize);
+  Util::numa_interleave(base, m_totalSize);
 
   TRACE(1, "init atrampolines @%p\n", base);
 

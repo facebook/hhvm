@@ -22,6 +22,7 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/concurrent-shared-store.h"
 #include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/util/alloc.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/logger.h"
 #include <sys/mman.h>
@@ -247,6 +248,7 @@ bool SharedStoreFileStorage::addFile() {
     close(fd);
     return false;
   }
+  Util::numa_interleave(addr, m_chunkSize);
   m_current = addr;
   m_chunkRemain = m_chunkSize - PaddingSize;
   m_chunks.push_back(addr);

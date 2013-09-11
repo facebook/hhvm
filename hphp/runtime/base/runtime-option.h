@@ -434,6 +434,8 @@ public:
   F(uint32_t, InitialNamedEntityTableSize,  30000)                      \
   F(uint32_t, InitialStaticStringTableSize, 100000)                     \
   F(uint32_t, PCRETableSize, kPCREInitialTableSize)                     \
+  F(bool, EnableNuma, ServerExecutionMode())                            \
+  F(bool, EnableNumaLocal, ServerExecutionMode())                       \
   /* */                                                                 \
 
 #define F(type, name, unused) \

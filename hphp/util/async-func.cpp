@@ -32,7 +32,8 @@ void* AsyncFuncImpl::s_finiFuncArg = nullptr;
 AsyncFuncImpl::AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func)
     : m_obj(obj), m_func(func),
       m_threadStack(nullptr), m_threadId(0),
-      m_exception(nullptr), m_stopped(false), m_noInit(false) {
+      m_exception(nullptr), m_node(0),
+      m_stopped(false), m_noInit(false) {
 }
 
 AsyncFuncImpl::~AsyncFuncImpl() {
@@ -41,15 +42,18 @@ AsyncFuncImpl::~AsyncFuncImpl() {
 }
 
 void *AsyncFuncImpl::ThreadFunc(void *obj) {
-  Util::init_stack_limits(((AsyncFuncImpl*)obj)->getThreadAttr());
+  auto self = static_cast<AsyncFuncImpl*>(obj);
+  Util::init_stack_limits(self->getThreadAttr());
+  Util::set_numa_binding(self->m_node);
 
-  ((AsyncFuncImpl*)obj)->threadFuncImpl();
+  self->threadFuncImpl();
   return nullptr;
 }
 
 void AsyncFuncImpl::start() {
   struct rlimit rlim;
 
+  m_node = Util::next_numa_node();
   // Allocate the thread-stack
   pthread_attr_init(&m_attr);
 
@@ -64,6 +68,10 @@ void AsyncFuncImpl::start() {
     if (pthread_attr_getguardsize(&m_attr, &guardsize) == 0 && guardsize) {
       mprotect(m_threadStack, guardsize, PROT_NONE);
     }
+
+    madvise(m_threadStack, rlim.rlim_cur, MADV_DONTNEED);
+    Util::numa_bind_to(m_threadStack, rlim.rlim_cur, m_node);
+
     pthread_attr_setstack(&m_attr, m_threadStack, rlim.rlim_cur);
   }
 

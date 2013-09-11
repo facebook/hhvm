@@ -130,11 +130,13 @@ public:
     m_ps_session_handler = nullptr;
   }
 
-  void requestShutdownImpl();
   virtual void requestShutdown() {
-    f_session_write_close();
-    requestShutdownImpl();
+    // We don't actually want to do our requestShutdownImpl here---it
+    // is run explicitly from the execution context, because it could
+    // run user code.
   }
+
+  void requestShutdownImpl();
 
 public:
   bool m_threadInited;
@@ -203,6 +205,11 @@ void SessionRequestData::requestShutdownImpl() {
     decRefObj(obj);
   }
   m_id.reset();
+}
+
+void ext_session_request_shutdown() {
+  f_session_write_close();
+  s_session->requestShutdownImpl();
 }
 
 std::vector<SessionModule*> SessionModule::RegisteredModules;

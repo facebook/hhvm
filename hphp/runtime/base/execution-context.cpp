@@ -508,6 +508,8 @@ void BaseExecutionContext::onShutdownPreSend() {
   obFlushAll(); // in case obStart was called without obFlush
 }
 
+extern void ext_session_request_shutdown();
+
 void BaseExecutionContext::onShutdownPostSend() {
   ServerStats::SetThreadMode(ServerStats::ThreadMode::PostProcessing);
   try {
@@ -533,6 +535,14 @@ void BaseExecutionContext::onShutdownPostSend() {
   } catch (...) {
     Logger::Error("unknown exception was thrown from psp");
   }
+
+  /*
+   * This has to happen before requestEventHandler shutdown hooks,
+   * because it can run user code which may need to access other
+   * RequestLocal objects (such as the stream registry).
+   */
+  ext_session_request_shutdown();
+
   ServerStats::SetThreadMode(ServerStats::ThreadMode::Idling);
 }
 

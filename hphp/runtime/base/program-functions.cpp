@@ -31,7 +31,6 @@
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/admin-request-handler.h"
 #include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/server/server-name-indication.h"
 #include "hphp/runtime/server/server-note.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/util/process.h"
@@ -655,27 +654,6 @@ static int start_server(const std::string &username) {
      RuntimeOption::AdminLogFile,
      username);
 
-  void *sslCTX = nullptr;
-  if (RuntimeOption::EnableSSL) {
-#ifdef _EVENT_USE_OPENSSL
-    struct ssl_config config;
-    if (RuntimeOption::SSLCertificateFile != "" &&
-        RuntimeOption::SSLCertificateKeyFile != "") {
-      config.cert_file = (char*)RuntimeOption::SSLCertificateFile.c_str();
-      config.pk_file = (char*)RuntimeOption::SSLCertificateKeyFile.c_str();
-      sslCTX = evhttp_init_openssl(&config);
-      if (!RuntimeOption::SSLCertificateDir.empty()) {
-        ServerNameIndication::load(sslCTX, config,
-                                   RuntimeOption::SSLCertificateDir);
-      }
-    } else {
-      Logger::Error("Invalid certificate file or key file");
-    }
-#else
-    Logger::Error("A SSL enabled libevent is required");
-#endif
-  }
-
 #if !defined(SKIP_USER_CHANGE)
   if (!username.empty()) {
     if (Logger::UseCronolog) {
@@ -689,7 +667,7 @@ static int start_server(const std::string &username) {
 
   // Create the HttpServer before any warmup requests to properly
   // initialize the process
-  HttpServer::Server = HttpServerPtr(new HttpServer(sslCTX));
+  HttpServer::Server = HttpServerPtr(new HttpServer());
 
   if (memory_profiling) {
     Logger::Info("Starting up profiling server");

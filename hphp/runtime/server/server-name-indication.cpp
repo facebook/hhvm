@@ -26,9 +26,9 @@
 
 namespace HPHP {
 
-hphp_string_map<SSL_CTX *> ServerNameIndication::sn_ctxd_map;
-std::string ServerNameIndication::path;
-struct ssl_config ServerNameIndication::config;
+hphp_string_map<SSL_CTX *> ServerNameIndication::s_sn_ctxd_map;
+std::string ServerNameIndication::s_path;
+ServerNameIndication::CertHanlderFn ServerNameIndication::s_certHandlerFn;
 
 const std::string ServerNameIndication::crt_ext = ".crt";
 const std::string ServerNameIndication::key_ext = ".key";
@@ -36,57 +36,42 @@ const std::string ServerNameIndication::key_ext = ".key";
 /**
  * Given a default SSL config, SSL_CTX, and certificate path, load certs.
  */
-void ServerNameIndication::load(void *ctx, const struct ssl_config &cfg,
-                                const std::string &cert_dir) {
-
-  if (!ctx) {
-    return;
-  }
-
+void ServerNameIndication::load(const std::string &cert_dir,
+                                CertHanlderFn certHandlerFn) {
   // We use these later to dynamically load certs, so make copies.
-  path = cert_dir;
-  config = cfg;
+  s_path = cert_dir;
+  s_certHandlerFn = certHandlerFn;
 
   // Ensure path ends with '/'. This helps our pruning later.
-  if (path.size() > 0 && path[path.size() - 1] != '/') {
-    path.append("/");
+  if (s_path.size() > 0 && s_path[s_path.size() - 1] != '/') {
+    s_path.append("/");
   }
 
   vector<std::string> server_names;
-  find_server_names(path, server_names);
+  find_server_names(s_path, server_names);
 
   for (vector<std::string>::iterator it = server_names.begin();
       it != server_names.end();
       ++it) {
-    loadFromFile(*it);
+    loadFromFile(*it, certHandlerFn);
   }
-
-  // Register our per-request server name indication callback.
-  // We register our callback even if there's no additional certs so that
-  // a cert added in the future will get picked up without a restart.
-  SSL_CTX_set_tlsext_servername_callback(
-      (SSL_CTX*)ctx,
-      ServerNameIndication::callback);
 }
 
-bool ServerNameIndication::loadFromFile(const std::string &server_name) {
-  std::string key_file = path + server_name + key_ext;
-  std::string crt_file = path + server_name + crt_ext;
-  struct ssl_config tmp_config = config;
+bool ServerNameIndication::loadFromFile(const std::string &server_name,
+                                        CertHanlderFn certHandlerFn) {
+  std::string key_file = s_path + server_name + key_ext;
+  std::string crt_file = s_path + server_name + crt_ext;
 
   if (!fileIsValid(key_file) || !fileIsValid(crt_file)) {
     return false;
   }
 
-  // Create an SSL_CTX for this cert pair.
-  tmp_config.cert_file = (char *)(crt_file.c_str());
-  tmp_config.pk_file = (char *)(key_file.c_str());
-  SSL_CTX *tmp_ctx = (SSL_CTX*)evhttp_init_openssl(&tmp_config);
-  if (tmp_ctx) {
-    sn_ctxd_map.insert(make_pair(server_name, tmp_ctx));
-    return true;
-  }
-  return false;
+  return certHandlerFn(server_name, key_file, crt_file);
+}
+
+void ServerNameIndication::insertSNICtx(const std::string &server_name,
+                                        SSL_CTX *ctx) {
+  s_sn_ctxd_map.insert(make_pair(server_name, ctx));
 }
 
 bool ServerNameIndication::fileIsValid(const std::string &filename) {
@@ -178,8 +163,8 @@ bool ServerNameIndication::setCTXFromMemory(SSL *ssl, const std::string &name) {
   if (!ssl || name.empty()) {
     return false;
   }
-  hphp_string_map<SSL_CTX *>::iterator it = sn_ctxd_map.find(name);
-  if (it != sn_ctxd_map.end()) {
+  hphp_string_map<SSL_CTX *>::iterator it = s_sn_ctxd_map.find(name);
+  if (it != s_sn_ctxd_map.end()) {
     SSL_CTX *ctx = it->second;
     if (ctx && ctx == SSL_set_SSL_CTX(ssl, ctx)) {
       return true;
@@ -189,7 +174,9 @@ bool ServerNameIndication::setCTXFromMemory(SSL *ssl, const std::string &name) {
 }
 
 bool ServerNameIndication::setCTXFromFile(SSL *ssl, const std::string &name) {
-  return loadFromFile(name) && setCTXFromMemory(ssl, name);
+  return s_certHandlerFn &&
+    loadFromFile(name, s_certHandlerFn) && setCTXFromMemory(ssl, name);
+  return false;
 }
 
 }

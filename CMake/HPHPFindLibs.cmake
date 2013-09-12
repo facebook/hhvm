@@ -445,4 +445,9 @@ endif()
         target_link_libraries(${target} ${LIBDWARF_LIBRARIES})
         target_link_libraries(${target} ${LIBELF_LIBRARIES})
 
+	       include_directories(/export/dev_hhvm/usr/include/Ice)
+
+        target_link_libraries(${target} /export/dev_hhvm/usr/lib/Ice/libIce.so)
+        target_link_libraries(${target} /export/dev_hhvm/usr/lib/Ice/libIceUtil.so)
+
 endmacro()

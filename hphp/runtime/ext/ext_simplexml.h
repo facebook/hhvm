@@ -85,6 +85,7 @@ class c_SimpleXMLElement :
   static double  ToDouble(const ObjectData* obj) noexcept;
   static Array   ToArray(const ObjectData* obj);
 
+  c_SimpleXMLElement *m_root;
   Resource m_doc;
   xmlNodePtr m_node;
   Variant m_children;

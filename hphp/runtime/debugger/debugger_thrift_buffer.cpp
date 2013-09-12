@@ -23,7 +23,7 @@ namespace HPHP {
 TRACE_SET_MOD(debugger);
 
 String DebuggerThriftBuffer::readImpl() {
-  TRACE(2, "DebuggerThriftBuffer::readImpl\n");
+  TRACE(7, "DebuggerThriftBuffer::readImpl\n");
   assert(m_size <= BUFFER_SIZE);
   int nread = m_socket->readImpl(m_buffer, m_size);
   m_buffer[nread] = '\0';
@@ -31,7 +31,7 @@ String DebuggerThriftBuffer::readImpl() {
 }
 
 void DebuggerThriftBuffer::flushImpl(CStrRef data) {
-  TRACE(2, "DebuggerThriftBuffer::flushImpl\n");
+  TRACE(7, "DebuggerThriftBuffer::flushImpl\n");
   m_socket->write(data);
 }
 
@@ -49,7 +49,7 @@ const StaticString
 
 template<typename T>
 static inline int serializeImpl(T data, String& sdata) {
-  TRACE(2, "DebuggerWireHelpers::serializeImpl\n");
+  TRACE(7, "DebuggerWireHelpers::serializeImpl\n");
   VariableSerializer vs(VariableSerializer::Type::DebuggerSerialize);
   try {
     sdata = vs.serialize(data, true);
@@ -64,7 +64,7 @@ static inline int serializeImpl(T data, String& sdata) {
 }
 
 static inline int unserializeImpl(CStrRef sdata, Variant& data) {
-  TRACE(2, "DebuggerWireHelpers::unserializeImpl(CStrRef sdata,\n");
+  TRACE(7, "DebuggerWireHelpers::unserializeImpl(CStrRef sdata,\n");
   if (sdata.same(s_hit_limit)) {
     return DebuggerWireHelpers::HitLimit;
   }
@@ -83,22 +83,22 @@ static inline int unserializeImpl(CStrRef sdata, Variant& data) {
 }
 
 int DebuggerWireHelpers::WireSerialize(CArrRef data, String& sdata) {
-  TRACE(2, "DebuggerWireHelpers::WireSerialize(CArrRef data,\n");
+  TRACE(7, "DebuggerWireHelpers::WireSerialize(CArrRef data,\n");
   return serializeImpl(data, sdata);
 }
 
 int DebuggerWireHelpers::WireSerialize(CObjRef data, String& sdata) {
-  TRACE(2, "DebuggerWireHelpers::WireSerialize(CObjRef data,\n");
+  TRACE(7, "DebuggerWireHelpers::WireSerialize(CObjRef data,\n");
   return serializeImpl(data, sdata);
 }
 
 int DebuggerWireHelpers::WireSerialize(CVarRef data, String& sdata) {
-  TRACE(2, "DebuggerWireHelpers::WireSerialize(CVarRef data,\n");
+  TRACE(7, "DebuggerWireHelpers::WireSerialize(CVarRef data,\n");
   return serializeImpl(data, sdata);
 }
 
 int DebuggerWireHelpers::WireUnserialize(String& sdata, Array& data) {
-  TRACE(2, "DebuggerWireHelpers::WireUnserialize, Array& data)\n");
+  TRACE(7, "DebuggerWireHelpers::WireUnserialize, Array& data)\n");
   Variant v;
   int ret = unserializeImpl(sdata, v);
   if (ret != NoError) {
@@ -113,7 +113,7 @@ int DebuggerWireHelpers::WireUnserialize(String& sdata, Array& data) {
 }
 
 int DebuggerWireHelpers::WireUnserialize(String& sdata, Object& data) {
-  TRACE(2, "DebuggerWireHelpers::WireUnserialize, Object& data\n");
+  TRACE(7, "DebuggerWireHelpers::WireUnserialize, Object& data\n");
   Variant v;
   int ret = unserializeImpl(sdata, v);
   if (ret != NoError) {
@@ -128,7 +128,7 @@ int DebuggerWireHelpers::WireUnserialize(String& sdata, Object& data) {
 }
 
 int DebuggerWireHelpers::WireUnserialize(String& sdata, Variant& data) {
-  TRACE(2, "DebuggerWireHelpers::WireUnserialize\n");
+  TRACE(7, "DebuggerWireHelpers::WireUnserialize\n");
   return unserializeImpl(sdata, data);
 }
 

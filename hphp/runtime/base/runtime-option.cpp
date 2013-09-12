@@ -23,6 +23,7 @@
 #endif
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
+#include <limits>
 
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -126,7 +127,8 @@ int RuntimeOption::FiberCount = 1;
 int RuntimeOption::RequestTimeoutSeconds = 0;
 int RuntimeOption::PspTimeoutSeconds = 0;
 size_t RuntimeOption::ServerMemoryHeadRoom = 0;
-int64_t RuntimeOption::RequestMemoryMaxBytes = INT64_MAX;
+int64_t RuntimeOption::RequestMemoryMaxBytes =
+  std::numeric_limits<int64_t>::max();
 int64_t RuntimeOption::ImageMemoryMaxBytes = 0;
 int RuntimeOption::ResponseQueueCount;
 int RuntimeOption::ServerGracefulShutdownWait;
@@ -308,7 +310,6 @@ int64_t RuntimeOption::MaxSQLRowCount = 10000;
 int64_t RuntimeOption::MaxMemcacheKeyCount = 0;
 int RuntimeOption::SocketDefaultTimeout = 5;
 bool RuntimeOption::LockCodeMemory = false;
-bool RuntimeOption::EnableMemoryManager = true;
 bool RuntimeOption::CheckMemory = false;
 int RuntimeOption::MaxArrayChain = INT_MAX;
 bool RuntimeOption::WarnOnCollectionToArray = false;
@@ -339,6 +340,7 @@ bool RuntimeOption::CheckSymLink = false;
 int RuntimeOption::MaxUserFunctionId = (2 * 65536);
 bool RuntimeOption::EnableFinallyStatement = false;
 bool RuntimeOption::EnableArgsInBacktraces = true;
+bool RuntimeOption::EnableZendCompat = false;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
@@ -373,6 +375,14 @@ static inline std::string regionSelectorDefault() {
   return "";
 #endif
 #endif
+}
+
+static inline bool hhirRelaxGuardsDefault() {
+  return RuntimeOption::EvalJitRegionSelector == "tracelet";
+}
+
+static inline bool hhbcRelaxGuardsDefault() {
+  return true;
 }
 
 static inline bool hugePagesSoundNice() {
@@ -711,7 +721,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     RequestTimeoutSeconds = server["RequestTimeoutSeconds"].getInt32(0);
     PspTimeoutSeconds = server["PspTimeoutSeconds"].getInt32(0);
     ServerMemoryHeadRoom = server["MemoryHeadRoom"].getInt64(0);
-    RequestMemoryMaxBytes = server["RequestMemoryMaxBytes"].getInt64(INT64_MAX);
+    RequestMemoryMaxBytes = server["RequestMemoryMaxBytes"].
+      getInt64(std::numeric_limits<int64_t>::max());
     ResponseQueueCount = server["ResponseQueueCount"].getInt32(0);
     if (ResponseQueueCount <= 0) {
       ResponseQueueCount = ServerThreadCount / 10;
@@ -827,10 +838,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     server["ForbiddenFileExtensions"].get(ForbiddenFileExtensions);
 
     LockCodeMemory = server["LockCodeMemory"].getBool(false);
-    EnableMemoryManager = server["EnableMemoryManager"].getBool(true);
-    if (!EnableMemoryManager) {
-      MemoryManager::TheMemoryManager()->disable();
-    }
     CheckMemory = server["CheckMemory"].getBool();
     MaxArrayChain = server["MaxArrayChain"].getInt32(INT_MAX);
     if (MaxArrayChain != INT_MAX) {
@@ -1081,6 +1088,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     EnableShortTags= eval["EnableShortTags"].getBool(true);
     EnableAspTags = eval["EnableAspTags"].getBool();
     EnableXHP = eval["EnableXHP"].getBool(false);
+    EnableZendCompat = eval["EnableZendCompat"].getBool(false);
 
     if (EnableHipHopSyntax) {
       // If EnableHipHopSyntax is true, it forces EnableXHP to true

@@ -295,11 +295,9 @@ static void get_color(int tokid, int prev, int next,
 
   TRACE(7, "debugger_base:get_color\n");
 #undef YYTOKENTYPE
-#ifdef YYTOKEN_MAP
 #undef YYTOKEN_MAP
 #undef YYTOKEN
-#endif
-#define YYTOKEN(num, name) (char)(CodeColorKeyword * 2)
+#define YYTOKEN(num, name) (char)(CodeColorKeyword * 2),
 #define YYTOKEN_MAP static char code[] =
 #include "hphp/parser/hphp.tab.hpp"
 #undef YYTOKEN_MAP

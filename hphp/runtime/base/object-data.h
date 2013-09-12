@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/macros.h"
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/system/systemlib.h"
 #include <boost/mpl/eval_if.hpp>
@@ -72,12 +73,6 @@ class ObjectData {
     RealPropExist = 16,    // For property_exists
   };
 
-  // ResourceData overrides this setting IsResourceClass to true;
-  // various macros check whether type T is a resource type by
-  // inspecting "T::IsResourceClass".
-  static const bool IsResourceClass = false;
-
-  static int ObjAllocatorSizeClassCount;
  private:
   static DECLARE_THREAD_LOCAL_NO_CHECK(int, os_max_id);
 
@@ -113,8 +108,8 @@ class ObjectData {
 
   // Call newInstance() to instantiate a PHP object
   static ObjectData* newInstance(Class* cls) {
-    if (cls->m_InstanceCtor) {
-      return cls->m_InstanceCtor(cls);
+    if (auto const ctor = cls->instanceCtor()) {
+      return ctor(cls);
     }
     Attr attrs = cls->attrs();
     if (UNLIKELY(attrs & (AttrAbstract | AttrInterface | AttrTrait))) {
@@ -122,8 +117,7 @@ class ObjectData {
     }
     size_t nProps = cls->numDeclProperties();
     size_t size = sizeForNProps(nProps);
-    ObjectData* obj = (ObjectData*)ALLOCOBJSZ(size);
-    new (obj) ObjectData(cls);
+    auto const obj = new (MM().objMalloc(size)) ObjectData(cls);
     if (UNLIKELY(cls->callsCustomInstanceInit())) {
       /*
         This must happen after the constructor finishes,
@@ -139,10 +133,16 @@ class ObjectData {
     return obj;
   }
 
-  // Given a Class that is assumed to be a concrete, regular (not a
-  // trait or interface), pure PHP class, and an allocator index,
-  // return a new, uninitialized object of that class.
-  static ObjectData* newInstanceRaw(Class* cls, int idx);
+  /*
+   * Given a Class that is assumed to be a concrete, regular (not a
+   * trait or interface), pure PHP class, and an allocation size,
+   * return a new, uninitialized object of that class.
+   *
+   * newInstanceRaw should be called only when size <=
+   * MemoryManager::kMaxSmartSize, otherwise use newInstanceRawBig.
+   */
+  static ObjectData* newInstanceRaw(Class* cls, uint32_t size);
+  static ObjectData* newInstanceRawBig(Class* cls, size_t size);
 
  private:
   void instanceInit(Class* cls) {
@@ -298,6 +298,7 @@ class ObjectData {
   bool hasToString();
 
   Variant invokeSleep();
+  Variant invokeToDebugDisplay();
   Variant invokeWakeup();
 
   static int GetMaxId() ATTRIBUTE_COLD;
@@ -333,9 +334,6 @@ class ObjectData {
 
   void cloneSet(ObjectData* clone);
   ObjectData* cloneImpl();
-
-  void invokeUserMethod(TypedValue* retval, const Func* method,
-                        CArrRef params);
 
   const Func* methodNamed(const StringData* sd) const {
     return getVMClass()->lookupMethod(sd);
@@ -453,96 +451,6 @@ CountableHelper::~CountableHelper() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Calculate item sizes for object allocators
-
-#define WORD_SIZE sizeof(TypedValue)
-#define ALIGN_WORD(n) ((n) + (WORD_SIZE - (n) % WORD_SIZE) % WORD_SIZE)
-
-// Mapping from index to size class for objects. Mapping in the other
-// direction is available from ObjectSizeClass<> below.
-template<int Idx> class ObjectSizeTable {
-  enum { prevSize = ObjectSizeTable<Idx - 1>::value };
-public:
-  enum {
-    value = ALIGN_WORD(prevSize + (prevSize >> 1))
-  };
-};
-
-template<> struct ObjectSizeTable<0> {
-  enum { value = sizeof(ObjectData) };
-};
-
-#undef WORD_SIZE
-#undef ALIGN_WORD
-
-/*
- * This determines the highest size class we can have by looking for
- * the first entry in our table that is larger than the hard coded
- * SmartAllocator SLAB_SIZE. This is because you can't (currently)
- * SmartAllocate chunks that are potentially bigger than a slab. If
- * you introduce a bigger size class, SmartAllocator will hit an
- * assertion at runtime. The last size class currently goes up to
- * 97096 bytes -- enough room for 6064 TypedValues. Hopefully that's
- * enough.
- */
-template<int Index>
-struct DetermineLargestSizeClass {
-  typedef typename boost::mpl::eval_if_c<
-    (ObjectSizeTable<Index>::value > SLAB_SIZE),
-    boost::mpl::int_<Index>,
-    DetermineLargestSizeClass<Index + 1>
-  >::type type;
-};
-const int NumObjectSizeClasses = DetermineLargestSizeClass<0>::type::value;
-
-template<size_t Sz, int Index> struct LookupObjSizeIndex {
-  enum { index =
-    Sz <= ObjectSizeTable<Index>::value
-      ? Index : LookupObjSizeIndex<Sz,Index + 1>::index };
-};
-template<size_t Sz> struct LookupObjSizeIndex<Sz,NumObjectSizeClasses> {
-  enum { index = NumObjectSizeClasses };
-};
-
-template<size_t Sz>
-struct ObjectSizeClass {
-  enum {
-    index = LookupObjSizeIndex<Sz,0>::index,
-    value = ObjectSizeTable<index>::value
-  };
-};
-
-typedef ObjectAllocatorBase*(*ObjectAllocatorBaseGetter)(void);
-
-class ObjectAllocatorCollector {
-public:
-  static std::map<int, ObjectAllocatorBaseGetter> &getWrappers() {
-    static std::map<int, ObjectAllocatorBaseGetter> wrappers;
-    return wrappers;
-  }
-};
-
-template <typename T>
-void* ObjectAllocatorInitSetup() {
-  ThreadLocalSingleton<ObjectAllocator<
-    ObjectSizeClass<sizeof(T)>::value> > tls;
-  int index = ObjectSizeClass<sizeof(T)>::index;
-  ObjectAllocatorCollector::getWrappers()[index] =
-    (ObjectAllocatorBaseGetter)tls.getCheck;
-  GetAllocatorInitList().insert((AllocatorThreadLocalInit)(tls.getCheck));
-  return (void*)tls.getNoCheck;
-}
-
-/*
- * Return the index in ThreadInfo::m_allocators for the allocator
- * responsible for a given object size.
- *
- * There is a maximum limit on the size of allocatable objects.  If
- * this is reached, this function returns -1.
- */
-int object_alloc_size_to_index(size_t size);
-
-///////////////////////////////////////////////////////////////////////////////
 // Attribute helpers
 class AttributeSetter {
 public:
@@ -570,7 +478,7 @@ private:
   ObjectData* m_o;
 };
 
-ALWAYS_INLINE inline void decRefObj(ObjectData* obj) {
+ALWAYS_INLINE void decRefObj(ObjectData* obj) {
   if (obj->decRefCount() == 0) obj->release();
 }
 

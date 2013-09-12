@@ -44,16 +44,30 @@ typedef uint8_t* CodeAddress;
  * DataBlock is a simple bump-allocating wrapper around a chunk of memory.
  */
 struct DataBlock : private boost::noncopyable {
-  friend class X64Assembler;
 
-  DataBlock() : base(nullptr), frontier(nullptr), size(0) {}
+  DataBlock() : m_base(nullptr), m_frontier(nullptr), m_size(0) {}
+
+  DataBlock(DataBlock&& other)
+    : m_base(other.m_base), m_frontier(other.m_frontier), m_size(other.m_size) {
+    other.m_base = other.m_frontier = nullptr;
+    other.m_size = 0;
+  }
+
+  DataBlock& operator=(DataBlock&& other) {
+    m_base = other.m_base;
+    m_frontier = other.m_frontier;
+    m_size = other.m_size;
+    other.m_base = other.m_frontier = nullptr;
+    other.m_size = 0;
+    return *this;
+  }
 
   /**
    * Uses an existing chunk of memory.
    */
   void init(Address start, size_t sz) {
-    base = frontier = start;
-    size = sz;
+    m_base = m_frontier = start;
+    m_size = sz;
   }
 
   /*
@@ -68,8 +82,8 @@ struct DataBlock : private boost::noncopyable {
    */
   void* allocAt(size_t &frontierOff, size_t sz, size_t align = 16) {
     align = Util::roundUpToPowerOfTwo(align);
-    uint8_t* frontier = base + frontierOff;
-    assert(base && frontier);
+    uint8_t* frontier = m_base + frontierOff;
+    assert(m_base && frontier);
     int slop = uintptr_t(frontier) & (align - 1);
     if (slop) {
       int leftInBlock = (align - slop);
@@ -78,55 +92,55 @@ struct DataBlock : private boost::noncopyable {
     }
     assert((uintptr_t(frontier) & (align - 1)) == 0);
     frontierOff += sz;
-    assert(frontierOff <= size);
+    assert(frontierOff <= m_size);
     return frontier;
   }
 
   template<typename T> T* alloc(size_t align = 16, int n = 1) {
-    size_t frontierOff = frontier - base;
+    size_t frontierOff = m_frontier - m_base;
     T* retval = (T*)allocAt(frontierOff, sizeof(T) * n, align);
-    frontier = base + frontierOff;
+    m_frontier = m_base + frontierOff;
     return retval;
   }
 
   bool canEmit(size_t nBytes) {
-    assert(frontier >= base);
-    assert(frontier <= base + size);
-    return frontier + nBytes <= base + size;
+    assert(m_frontier >= m_base);
+    assert(m_frontier <= m_base + m_size);
+    return m_frontier + nBytes <= m_base + m_size;
   }
 
   bool isValidAddress(const CodeAddress tca) const {
-    return tca >= base && tca < (base + size);
+    return tca >= m_base && tca < (m_base + m_size);
   }
 
   void byte(const uint8_t byte) {
     always_assert(canEmit(sz::byte));
-    TRACE(10, "%p b : %02x\n", frontier, byte);
-    *frontier = byte;
-    frontier += sz::byte;
+    TRACE(10, "%p b : %02x\n", m_frontier, byte);
+    *m_frontier = byte;
+    m_frontier += sz::byte;
   }
   void word(const uint16_t word) {
     always_assert(canEmit(sz::word));
-    *(uint16_t*)frontier = word;
-    TRACE(10, "%p w : %04x\n", frontier, word);
-    frontier += sz::word;
+    *(uint16_t*)m_frontier = word;
+    TRACE(10, "%p w : %04x\n", m_frontier, word);
+    m_frontier += sz::word;
   }
   void dword(const uint32_t dword) {
     always_assert(canEmit(sz::dword));
-    TRACE(10, "%p d : %08x\n", frontier, dword);
-    *(uint32_t*)frontier = dword;
-    frontier += sz::dword;
+    TRACE(10, "%p d : %08x\n", m_frontier, dword);
+    *(uint32_t*)m_frontier = dword;
+    m_frontier += sz::dword;
   }
   void qword(const uint64_t qword) {
     always_assert(canEmit(sz::qword));
-    TRACE(10, "%p q : %016" PRIx64 "\n", frontier, qword);
-    *(uint64_t*)frontier = qword;
-    frontier += sz::qword;
+    TRACE(10, "%p q : %016" PRIx64 "\n", m_frontier, qword);
+    *(uint64_t*)m_frontier = qword;
+    m_frontier += sz::qword;
   }
 
   void bytes(size_t n, const uint8_t *bs) {
     always_assert(canEmit(n));
-    TRACE(10, "%p [%ld b] : [%p]\n", frontier, n, bs);
+    TRACE(10, "%p [%ld b] : [%p]\n", m_frontier, n, bs);
     if (n <= 8) {
       // If it is a modest number of bytes, try executing in one machine
       // store. This allows control-flow edges, including nop, to be
@@ -135,7 +149,7 @@ struct DataBlock : private boost::noncopyable {
         uint64_t qword;
         uint8_t bytes[8];
       } u;
-      u.qword = *(uint64_t*)frontier;
+      u.qword = *(uint64_t*)m_frontier;
       for (size_t i = 0; i < n; ++i) {
         u.bytes[i] = bs[i];
       }
@@ -144,44 +158,52 @@ struct DataBlock : private boost::noncopyable {
       // atomic store.  We're not using atomic_release_store() because
       // this code path occurs even when it may span cache lines, and
       // that function asserts about this.
-      *reinterpret_cast<uint64_t*>(frontier) = u.qword;
+      *reinterpret_cast<uint64_t*>(m_frontier) = u.qword;
     } else {
-      memcpy(frontier, bs, n);
+      memcpy(m_frontier, bs, n);
     }
-    frontier += n;
+    m_frontier += n;
   }
 
-  Address getBase() const { return base; }
-  Address getFrontier() const { return frontier; }
+  void skip(size_t nbytes) {
+    alloc<uint8_t>(1, nbytes);
+  }
+
+  Address base() const { return m_base; }
+  Address frontier() const { return m_frontier; }
+
+  void setFrontier(Address addr) {
+    m_frontier = addr;
+  }
 
   size_t capacity() const {
-    return size;
+    return m_size;
   }
 
   size_t used() const {
-    return frontier - base;
+    return m_frontier - m_base;
   }
 
   size_t available() const {
-    return size - (frontier - base);
+    return m_size - (m_frontier - m_base);
   }
 
   bool contains(CodeAddress addr) const {
-    return addr >= base && addr < (base + size);
+    return addr >= m_base && addr < (m_base + m_size);
   }
 
   bool empty() const {
-    return base == frontier;
+    return m_base == m_frontier;
   }
 
   void clear() {
-    frontier = base;
+    m_frontier = m_base;
   }
 
  protected:
-  Address base;
-  Address frontier;
-  size_t size;
+  Address m_base;
+  Address m_frontier;
+  size_t m_size;
 };
 
 typedef DataBlock CodeBlock;

@@ -242,11 +242,13 @@ struct ElmUCompare {
   ElmUCompare() : warned(false) {}
   bool operator()(ElmT left, ElmT right) const {
     Variant ret;
-    TypedValue args[2];
-    tvDup(*acc.getValue(left).asTypedValue(), args[0]);
-    tvDup(*acc.getValue(right).asTypedValue(), args[1]);
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), *ctx,
-                               2, args);
+    {
+      TypedValue args[2] = {
+        *acc.getValue(left).asCell(),
+        *acc.getValue(right).asCell()
+      };
+      g_vmContext->invokeFuncFew(ret.asTypedValue(), *ctx, 2, args);
+    }
     if (ret.isInteger()) {
       return ret.toInt64() < 0;
     }
@@ -277,10 +279,11 @@ struct ElmUCompare {
         return false;
       }
       Variant ret2;
-      tvDup(*acc.getValue(right).asTypedValue(), args[0]);
-      tvDup(*acc.getValue(left).asTypedValue(), args[1]);
-      g_vmContext->invokeFuncFew(ret2.asTypedValue(), *ctx,
-                                 2, args);
+      TypedValue args[2] = {
+        *acc.getValue(right).asCell(),
+        *acc.getValue(left).asCell()
+      };
+      g_vmContext->invokeFuncFew(ret2.asTypedValue(), *ctx, 2, args);
       if (ret2.isBoolean()) {
         return ret2.toBoolean();
       }

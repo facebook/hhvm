@@ -282,6 +282,11 @@ void BreakPointInfo::setClause(const std::string &clause, bool check) {
   m_check = check;
 }
 
+void BreakPointInfo::transferStack(BreakPointInfoPtr bpi) {
+  if (bpi->m_stack.empty()) return;
+  m_stack.splice(m_stack.begin(), bpi->m_stack);
+}
+
 // Disables the breakpoint at the given stack level.
 // Following this call, BreakPointInfo::breakable will return false until
 // a subsequent call to BreakPointInfo::setBreakable with a lower or equal
@@ -432,7 +437,7 @@ std::string BreakPointInfo::state(bool padding) const {
 }
 
 std::string BreakPointInfo::regex(const std::string &name) const {
-  TRACE(2, "BreakPointInfo::regex\n");
+  TRACE(7, "BreakPointInfo::regex\n");
   if (m_regex) {
     return "regex{" + name + "}";
   }
@@ -440,7 +445,7 @@ std::string BreakPointInfo::regex(const std::string &name) const {
 }
 
 std::string BreakPointInfo::getNamespace() const {
-  TRACE(2, "BreakPointInfo::getNamespace\n");
+  TRACE(7, "BreakPointInfo::getNamespace\n");
   if (!m_funcs.empty()) {
     return m_funcs[0]->m_namespace;
   }
@@ -448,7 +453,7 @@ std::string BreakPointInfo::getNamespace() const {
 }
 
 std::string BreakPointInfo::getClass() const {
-  TRACE(2, "BreakPointInfo::getClass\n");
+  TRACE(7, "BreakPointInfo::getClass\n");
   if (!m_funcs.empty()) {
     return m_funcs[0]->m_class;
   }
@@ -456,7 +461,7 @@ std::string BreakPointInfo::getClass() const {
 }
 
 std::string BreakPointInfo::getFunction() const {
-  TRACE(2, "BreakPointInfo::getFunction\n");
+  TRACE(7, "BreakPointInfo::getFunction\n");
   if (!m_funcs.empty()) {
     return m_funcs[0]->m_function;
   }
@@ -464,7 +469,7 @@ std::string BreakPointInfo::getFunction() const {
 }
 
 std::string BreakPointInfo::getFuncName() const {
-  TRACE(2, "BreakPointInfo::getFuncName\n");
+  TRACE(7, "BreakPointInfo::getFuncName\n");
   if (!m_funcs.empty()) {
     return m_funcs[0]->getName();
   }
@@ -472,7 +477,7 @@ std::string BreakPointInfo::getFuncName() const {
 }
 
 std::string BreakPointInfo::site() const {
-  TRACE(2, "BreakPointInfo::site\n");
+  TRACE(7, "BreakPointInfo::site\n");
   string ret;
 
   string preposition = "at ";
@@ -924,7 +929,7 @@ bool BreakPointInfo::MatchFile(const char *haystack, int haystack_len,
 // Returns true if file is a suffix path of fullPath
 bool BreakPointInfo::MatchFile(const std::string& file,
                                const std::string& fullPath) {
-  TRACE(2, "BreakPointInfo::MatchFile(const std::string&\n");
+  TRACE(7, "BreakPointInfo::MatchFile(const std::string&\n");
   if (file == fullPath) {
     return true;
   }
@@ -956,14 +961,14 @@ bool BreakPointInfo::MatchClass(const char *fcls, const std::string &bcls,
     return Match(fcls, 0, bcls, true, true);
   }
 
-  StackStringData sdBClsName(bcls.c_str());
-  Class* clsB = Unit::lookupClass(&sdBClsName);
+  String sdBClsName(bcls);
+  Class* clsB = Unit::lookupClass(sdBClsName.get());
   if (!clsB) return false;
-  StackStringData sdFClsName(fcls);
-  Class* clsF = Unit::lookupClass(&sdFClsName);
+  String sdFClsName(fcls, CopyString);
+  Class* clsF = Unit::lookupClass(sdFClsName.get());
   if (clsB == clsF) return true;
-  StackStringData sdFuncName(func);
-  Func* f = clsB->lookupMethod(&sdFuncName);
+  String sdFuncName(func, CopyString);
+  Func* f = clsB->lookupMethod(sdFuncName.get());
   return f && f->baseCls() == clsF;
 }
 
@@ -1068,7 +1073,8 @@ bool BreakPointInfo::checkClause(DebuggerProxy &proxy) {
       // Don't hit more breakpoints while attempting to decide if we should stop
       // at this breakpoint.
       EvalBreakControl eval(true);
-      Variant ret = proxy.ExecutePHP(m_php, output, 0,
+      bool failed;
+      Variant ret = proxy.ExecutePHP(m_php, output, 0, failed,
                                      DebuggerProxy::ExecutePHPFlagsNone);
       if (m_check) {
         return ret.toBoolean();

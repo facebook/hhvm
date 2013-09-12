@@ -79,7 +79,7 @@ int IfStatement::getKidCount() const {
 void IfStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_stmts = boost::dynamic_pointer_cast<StatementList>(cp);
+      m_stmts = dynamic_pointer_cast<StatementList>(cp);
       break;
     default:
       assert(false);

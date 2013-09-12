@@ -440,7 +440,7 @@ const char* PrintCommand::kArguments =  "<entity>";
 const char* PrintCommand::kHelp =
   "  print the given entity\n"
   "  entity can be 'regs' for W and X registers, 'fpregs' for S and D\n"
-  "  registers, 'flags' for CPU flags and 'pc'."
+  "  registers, 'sysregs' for system registers (including NZCV) or 'pc'."
 ;
 
 const char* MemCommand::kAliases[] = { "mem", "m", nullptr };
@@ -621,8 +621,8 @@ void Debugger::VisitException(Instruction* instr) {
 }
 
 
-void Debugger::LogFlags() {
-  if (log_parameters_ & LOG_FLAGS) PrintFlags();
+void Debugger::LogSystemRegisters() {
+  if (log_parameters_ & LOG_SYS_REGS) PrintSystemRegisters();
 }
 
 
@@ -637,7 +637,7 @@ void Debugger::LogFPRegisters() {
 
 
 void Debugger::LogProcessorState() {
-  LogFlags();
+  LogSystemRegisters();
   LogRegisters();
   LogFPRegisters();
 }
@@ -775,7 +775,7 @@ void Debugger::DoLog(Instruction* instr) {
   // We don't support a one-shot LOG_DISASM.
   assert((parameters & LOG_DISASM) == 0);
   // Print the requested information.
-  if (parameters & LOG_FLAGS) PrintFlags(true);
+  if (parameters & LOG_SYS_REGS) PrintSystemRegisters(true);
   if (parameters & LOG_REGS) PrintRegisters(true);
   if (parameters & LOG_FP_REGS) PrintFPRegisters(true);
 
@@ -1121,9 +1121,10 @@ bool DebugCommand::Match(const char* name, const char** aliases) {
 DebugCommand* DebugCommand::Parse(char* line) {
   std::vector<Token*> args;
 
-  for (char* chunk = strtok(line, " ");
+  char* saveptr = nullptr;
+  for (char* chunk = strtok_r(line, " ", &saveptr);
        chunk != nullptr;
-       chunk = strtok(nullptr, " ")) {
+       chunk = strtok_r(nullptr, " ", &saveptr)) {
     args.push_back(Token::Tokenize(chunk));
   }
 
@@ -1322,8 +1323,8 @@ bool PrintCommand::Run(Debugger* debugger) {
       debugger->PrintRegisters(true);
     } else if (strcmp(identifier, "fpregs") == 0) {
       debugger->PrintFPRegisters(true);
-    } else if (strcmp(identifier, "flags") == 0) {
-      debugger->PrintFlags(true);
+    } else if (strcmp(identifier, "sysregs") == 0) {
+      debugger->PrintSystemRegisters(true);
     } else if (strcmp(identifier, "pc") == 0) {
       printf("pc = %16p\n", reinterpret_cast<void*>(debugger->pc()));
     } else {

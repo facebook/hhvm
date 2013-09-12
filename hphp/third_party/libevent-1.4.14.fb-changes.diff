@@ -1,7 +1,8 @@
-diff -uNr libevent.20130829_origin/configure.in libevent/configure.in
---- libevent.20130829_origin/configure.in	2013-08-29 14:28:28.360510269 +0800
-+++ libevent/configure.in	2013-08-29 13:55:47.500667916 +0800
-@@ -3,7 +3,7 @@
+diff --git i/configure.in w/configure.in
+index 68d7987..c165529 100644
+--- i/configure.in
++++ w/configure.in
+@@ -3,7 +3,7 @@ dnl Dug Song <dugsong@monkey.org>
  AC_INIT(event.c)
  
  AM_INIT_AUTOMAKE(libevent,1.4.14b-stable)
@@ -10,10 +11,11 @@ diff -uNr libevent.20130829_origin/configure.in libevent/configure.in
  dnl AM_MAINTAINER_MODE
  
  AC_CANONICAL_HOST
-diff -uNr libevent.20130829_origin/event.c libevent/event.c
---- libevent.20130829_origin/event.c	2013-08-29 14:28:28.361524046 +0800
-+++ libevent/event.c	2013-08-29 13:55:47.502666862 +0800
-@@ -138,10 +138,12 @@
+diff --git a/event.c b/event.c
+index 74ba5c4..06984b8 100644
+--- a/event.c
++++ b/event.c
+@@ -138,10 +138,12 @@ detect_monotonic(void)
  static int
  gettime(struct event_base *base, struct timeval *tp)
  {
@@ -26,7 +28,7 @@ diff -uNr libevent.20130829_origin/event.c libevent/event.c
  
  #if defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_MONOTONIC)
  	if (use_monotonic) {
-@@ -481,7 +483,7 @@
+@@ -481,7 +483,7 @@ event_base_loop(struct event_base *base, int flags)
  	int res, done;
  
  	/* clear time cache */
@@ -35,7 +37,7 @@ diff -uNr libevent.20130829_origin/event.c libevent/event.c
  
  	if (base->sig.ev_signal_added)
  		evsignal_base = base;
-@@ -533,13 +535,13 @@
+@@ -533,13 +535,13 @@ event_base_loop(struct event_base *base, int flags)
  		gettime(base, &base->event_tv);
  
  		/* clear time cache */
@@ -51,7 +53,7 @@ diff -uNr libevent.20130829_origin/event.c libevent/event.c
  
  		timeout_process(base);
  
-@@ -552,7 +554,7 @@
+@@ -552,7 +554,7 @@ event_base_loop(struct event_base *base, int flags)
  	}
  
  	/* clear time cache */
@@ -60,10 +62,11 @@ diff -uNr libevent.20130829_origin/event.c libevent/event.c
  
  	event_debug(("%s: asked to terminate loop.", __func__));
  	return (0);
-diff -uNr libevent.20130829_origin/evhttp.h libevent/evhttp.h
---- libevent.20130829_origin/evhttp.h	2013-08-29 14:28:28.361524046 +0800
-+++ libevent/evhttp.h	2013-08-29 13:55:47.460511302 +0800
-@@ -81,12 +81,50 @@
+diff --git a/evhttp.h b/evhttp.h
+index 7ddf720..13c8b79 100644
+--- a/evhttp.h
++++ b/evhttp.h
+@@ -81,12 +81,50 @@ struct evhttp *evhttp_new(struct event_base *base);
   * @param http a pointer to an evhttp object
   * @param address a string containing the IP address to listen(2) on
   * @param port the port number to listen on
@@ -115,7 +118,7 @@ diff -uNr libevent.20130829_origin/evhttp.h libevent/evhttp.h
   * Makes an HTTP server accept connections on the specified socket
   *
   * This may be useful to create a socket and then fork multiple instances
-@@ -105,6 +143,21 @@
+@@ -105,6 +143,21 @@ int evhttp_bind_socket(struct evhttp *http, const char *address, u_short port);
  int evhttp_accept_socket(struct evhttp *http, int fd);
  
  /**
@@ -137,7 +140,7 @@ diff -uNr libevent.20130829_origin/evhttp.h libevent/evhttp.h
   * Free the previously created HTTP server.
   *
   * Works only if no requests are currently being served.
-@@ -134,6 +187,28 @@
+@@ -134,6 +187,28 @@ void evhttp_set_gencb(struct evhttp *,
   */
  void evhttp_set_timeout(struct evhttp *, int timeout_in_secs);
  
@@ -166,7 +169,7 @@ diff -uNr libevent.20130829_origin/evhttp.h libevent/evhttp.h
  /* Request/Response functionality */
  
  /**
-@@ -157,6 +232,19 @@
+@@ -157,6 +232,19 @@ void evhttp_send_error(struct evhttp_request *req, int error,
  void evhttp_send_reply(struct evhttp_request *req, int code,
      const char *reason, struct evbuffer *databuf);
  
@@ -186,7 +189,7 @@ diff -uNr libevent.20130829_origin/evhttp.h libevent/evhttp.h
  /* Low-level response interface, for streaming/chunked replies */
  void evhttp_send_reply_start(struct evhttp_request *, int, const char *);
  void evhttp_send_reply_chunk(struct evhttp_request *, struct evbuffer *);
-@@ -210,6 +298,7 @@
+@@ -210,6 +298,7 @@ struct {
  
  	enum evhttp_request_kind kind;
  	enum evhttp_cmd_type type;
@@ -194,7 +197,7 @@ diff -uNr libevent.20130829_origin/evhttp.h libevent/evhttp.h
  
  	char *uri;			/* uri after HTTP request was parsed */
  
-@@ -224,6 +313,8 @@
+@@ -224,6 +313,8 @@ struct {
  	int chunked:1,                  /* a chunked request */
  	    userdone:1;                 /* the user has sent all data */
  
@@ -203,10 +206,11 @@ diff -uNr libevent.20130829_origin/evhttp.h libevent/evhttp.h
  	struct evbuffer *output_buffer;	/* outgoing post or data */
  
  	/* Callback */
-diff -uNr libevent.20130829_origin/http-internal.h libevent/http-internal.h
---- libevent.20130829_origin/http-internal.h	2013-08-29 14:28:28.362532855 +0800
-+++ libevent/http-internal.h	2013-08-29 13:55:47.500667916 +0800
-@@ -116,6 +116,9 @@
+diff --git a/http-internal.h b/http-internal.h
+index 9cd03cd..3f60f54 100644
+--- a/http-internal.h
++++ b/http-internal.h
+@@ -116,6 +116,9 @@ struct evhttp {
  	TAILQ_HEAD(httpcbq, evhttp_cb) callbacks;
          struct evconq connections;
  
@@ -216,10 +220,11 @@ diff -uNr libevent.20130829_origin/http-internal.h libevent/http-internal.h
          int timeout;
  
  	void (*gencb)(struct evhttp_request *req, void *);
-diff -uNr libevent.20130829_origin/http.c libevent/http.c
---- libevent.20130829_origin/http.c	2013-08-29 14:28:28.364520317 +0800
-+++ libevent/http.c	2013-08-29 14:28:51.462665807 +0800
-@@ -219,6 +219,13 @@
+diff --git a/http.c b/http.c
+index efcec40..a836968 100644
+--- a/http.c
++++ b/http.c
+@@ -219,6 +219,13 @@ static int evhttp_decode_uri_internal(const char *uri, size_t length,
  void evhttp_read(int, short, void *);
  void evhttp_write(int, short, void *);
  
@@ -233,7 +238,7 @@ diff -uNr libevent.20130829_origin/http.c libevent/http.c
  #ifndef HAVE_STRSEP
  /* strsep replacement for platforms that lack it.  Only works if
   * del is one character long. */
-@@ -478,7 +485,6 @@
+@@ -478,7 +485,6 @@ evhttp_make_header_response(struct evhttp_connection *evcon,
  			evhttp_add_header(req->output_headers,
  			    "Connection", "keep-alive");
  
@@ -241,7 +246,7 @@ diff -uNr libevent.20130829_origin/http.c libevent/http.c
  			/* 
  			 * we need to add the content length if the
  			 * user did not give it, this is required for
-@@ -488,7 +494,6 @@
+@@ -488,7 +494,6 @@ evhttp_make_header_response(struct evhttp_connection *evcon,
  				req->output_headers,
  				(long)EVBUFFER_LENGTH(req->output_buffer));
  		}
@@ -249,7 +254,7 @@ diff -uNr libevent.20130829_origin/http.c libevent/http.c
  
  	/* Potentially add headers for unidentified content. */
  	if (EVBUFFER_LENGTH(req->output_buffer)) {
-@@ -687,14 +692,14 @@
+@@ -687,14 +692,14 @@ void
  evhttp_write(int fd, short what, void *arg)
  {
  	struct evhttp_connection *evcon = arg;
@@ -266,7 +271,7 @@ diff -uNr libevent.20130829_origin/http.c libevent/http.c
  	if (n == -1) {
  		event_debug(("%s: evbuffer_write", __func__));
  		evhttp_connection_fail(evcon, EVCON_HTTP_EOF);
-@@ -706,6 +711,7 @@
+@@ -706,6 +711,7 @@ evhttp_write(int fd, short what, void *arg)
  		evhttp_connection_fail(evcon, EVCON_HTTP_EOF);
  		return;
  	}
@@ -274,7 +279,7 @@ diff -uNr libevent.20130829_origin/http.c libevent/http.c
  
  	if (EVBUFFER_LENGTH(evcon->output_buffer) != 0) {
  		evhttp_add_event(&evcon->ev, 
-@@ -1012,11 +1018,9 @@
+@@ -1012,11 +1018,9 @@ evhttp_connection_free(struct evhttp_connection *evcon)
  		TAILQ_REMOVE(&evcon->requests, req, next);
  		evhttp_request_free(req);
  	}
@@ -289,7 +294,7 @@ diff -uNr libevent.20130829_origin/http.c libevent/http.c
  
  	if (event_initialized(&evcon->close_ev))
  		event_del(&evcon->close_ev);
-@@ -1101,10 +1105,16 @@
+@@ -1101,10 +1105,16 @@ evhttp_connection_reset(struct evhttp_connection *evcon)
  	}
  	evcon->state = EVCON_DISCONNECTED;
  
@@ -310,7 +315,7 @@ diff -uNr libevent.20130829_origin/http.c libevent/http.c
  }
  
  static void
-@@ -1278,19 +1288,52 @@
+@@ -1278,19 +1288,52 @@ evhttp_parse_request_line(struct evhttp_request *req, char *line)
  	if (line == NULL)
  		return (-1);
  	uri = strsep(&line, " ");
@@ -365,7 +370,7 @@ diff -uNr libevent.20130829_origin/http.c libevent/http.c
  	} else {
  		event_debug(("%s: bad method %s on request %p from %s",
  			__func__, method, req, req->remote_host));
-@@ -1963,10 +2006,44 @@
+@@ -1963,10 +2006,44 @@ evhttp_send_reply(struct evhttp_request *req, int code, const char *reason,
  	evhttp_send(req, databuf);
  }
  
@@ -410,7 +415,7 @@ diff -uNr libevent.20130829_origin/http.c libevent/http.c
  	evhttp_response_code(req, code, reason);
  	if (req->major == 1 && req->minor == 1) {
  		/* use chunked encoding for HTTP/1.1 */
-@@ -1986,6 +2063,8 @@
+@@ -1986,6 +2063,8 @@ evhttp_send_reply_chunk(struct evhttp_request *req, struct evbuffer *databuf)
  	if (evcon == NULL)
  		return;
  
@@ -419,7 +424,7 @@ diff -uNr libevent.20130829_origin/http.c libevent/http.c
  	if (req->chunked) {
  		evbuffer_add_printf(evcon->output_buffer, "%x\r\n",
  				    (unsigned)EVBUFFER_LENGTH(databuf));
-@@ -2007,7 +2086,14 @@
+@@ -2007,7 +2086,14 @@ evhttp_send_reply_end(struct evhttp_request *req)
  		return;
  	}
  
@@ -435,7 +440,7 @@ diff -uNr libevent.20130829_origin/http.c libevent/http.c
  	req->userdone = 1;
  
  	if (req->chunked) {
-@@ -2231,6 +2317,7 @@
+@@ -2231,6 +2317,7 @@ evhttp_handle_request(struct evhttp_request *req, void *arg)
  	if (req->uri == NULL) {
  		event_debug(("%s: bad request", __func__));
  		if (req->evcon->state == EVCON_DISCONNECTED) {
@@ -443,7 +448,7 @@ diff -uNr libevent.20130829_origin/http.c libevent/http.c
  			evhttp_connection_fail(req->evcon, EVCON_HTTP_EOF);
  		} else {
  			event_debug(("%s: sending error", __func__));
-@@ -2293,7 +2380,8 @@
+@@ -2293,7 +2380,8 @@ accept_socket(int fd, short what, void *arg)
  }
  
  int
@@ -453,7 +458,7 @@ diff -uNr libevent.20130829_origin/http.c libevent/http.c
  {
  	int fd;
  	int res;
-@@ -2301,7 +2389,7 @@
+@@ -2301,7 +2389,7 @@ evhttp_bind_socket(struct evhttp *http, const char *address, u_short port)
  	if ((fd = bind_socket(address, port, 1 /*reuse*/)) == -1)
  		return (-1);
  
@@ -462,7 +467,7 @@ diff -uNr libevent.20130829_origin/http.c libevent/http.c
  		event_warn("%s: listen", __func__);
  		EVUTIL_CLOSESOCKET(fd);
  		return (-1);
-@@ -2309,13 +2397,42 @@
+@@ -2309,13 +2397,42 @@ evhttp_bind_socket(struct evhttp *http, const char *address, u_short port)
  
  	res = evhttp_accept_socket(http, fd);
  	
@@ -506,7 +511,7 @@ diff -uNr libevent.20130829_origin/http.c libevent/http.c
  int
  evhttp_accept_socket(struct evhttp *http, int fd)
  {
-@@ -2345,6 +2462,25 @@
+@@ -2345,6 +2462,25 @@ evhttp_accept_socket(struct evhttp *http, int fd)
  	return (0);
  }
  
@@ -532,7 +537,7 @@ diff -uNr libevent.20130829_origin/http.c libevent/http.c
  static struct evhttp*
  evhttp_new_object(void)
  {
-@@ -2527,6 +2663,11 @@
+@@ -2527,6 +2663,11 @@ evhttp_request_new(void (*cb)(struct evhttp_request *, void *), void *arg)
  void
  evhttp_request_free(struct evhttp_request *req)
  {
@@ -544,7 +549,7 @@ diff -uNr libevent.20130829_origin/http.c libevent/http.c
  	if (req->remote_host != NULL)
  		free(req->remote_host);
  	if (req->uri != NULL)
-@@ -2657,13 +2798,78 @@
+@@ -2657,13 +2798,78 @@ evhttp_get_request(struct evhttp *http, int fd,
  	 * if we want to accept more than one request on a connection,
  	 * we need to know which http server it belongs to.
  	 */

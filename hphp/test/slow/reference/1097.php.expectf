@@ -1,0 +1,64 @@
+HipHop Warning: Cannot access property on non-object in %s/test/slow/reference/1097.php on line 4
+NULL
+HipHop Warning: Creating default object from empty value in %s/test/slow/reference/1097.php on line 5
+array(1) {
+  [0]=>
+  object(stdClass)#1 (1) {
+    ["foo"]=>
+    array(1) {
+      ["a"]=>
+      array(1) {
+        ["b"]=>
+        int(5)
+      }
+    }
+  }
+}
+HipHop Warning: Creating default object from empty value in %s/test/slow/reference/1097.php on line 11
+HipHop Warning: Creating default object from empty value in %s/test/slow/reference/1097.php on line 11
+object(stdClass)#1 (1) {
+  ["foo"]=>
+  array(1) {
+    [1]=>
+    object(stdClass)#2 (1) {
+      ["prop"]=>
+      NULL
+    }
+  }
+}
+HipHop Warning: Creating default object from empty value in %s/test/slow/reference/1097.php on line 14
+HipHop Warning: Creating default object from empty value in %s/test/slow/reference/1097.php on line 14
+object(stdClass)#3 (1) {
+  ["foo"]=>
+  array(1) {
+    [1]=>
+    object(stdClass)#4 (1) {
+      ["prop"]=>
+      NULL
+    }
+  }
+}
+HipHop Warning: Creating default object from empty value in %s/test/slow/reference/1097.php on line 16
+HipHop Warning: Creating default object from empty value in %s/test/slow/reference/1097.php on line 16
+object(stdClass)#5 (1) {
+  ["foo"]=>
+  array(1) {
+    [1]=>
+    object(stdClass)#6 (1) {
+      ["prop"]=>
+      &NULL
+    }
+  }
+}
+HipHop Warning: Creating default object from empty value in %s/test/slow/reference/1097.php on line 19
+HipHop Warning: Creating default object from empty value in %s/test/slow/reference/1097.php on line 19
+object(stdClass)#7 (1) {
+  ["foo"]=>
+  array(1) {
+    [1]=>
+    object(stdClass)#8 (1) {
+      ["prop"]=>
+      NULL
+    }
+  }
+}

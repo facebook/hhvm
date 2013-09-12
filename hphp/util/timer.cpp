@@ -139,7 +139,7 @@ SlowTimer::SlowTimer(int64_t msThreshold, const char *location, const char *info
 
 SlowTimer::~SlowTimer() {
   int64_t msec = getTime();
-  if (msec >= m_msThreshold) {
+  if (msec >= m_msThreshold && m_msThreshold != 0) {
     Logger::Error("SlowTimer [%" PRId64 "ms] at %s: %s",
                   msec, m_location.c_str(), m_info.c_str());
   }

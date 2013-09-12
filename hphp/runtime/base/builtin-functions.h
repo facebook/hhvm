@@ -106,6 +106,12 @@ inline bool is_empty_string(CVarRef v) {
 
 bool interface_supports_array(const StringData* s);
 bool interface_supports_array(const std::string& n);
+bool interface_supports_string(const StringData* s);
+bool interface_supports_string(const std::string& n);
+bool interface_supports_int(const StringData* s);
+bool interface_supports_int(const std::string& n);
+bool interface_supports_double(const StringData* s);
+bool interface_supports_double(const std::string& n);
 
 ///////////////////////////////////////////////////////////////////////////////
 // misc functions

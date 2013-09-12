@@ -231,10 +231,10 @@ int InterfaceStatement::getKidCount() const {
 void InterfaceStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_stmt = boost::dynamic_pointer_cast<StatementList>(cp);
+      m_stmt = dynamic_pointer_cast<StatementList>(cp);
       break;
     case 1:
-      m_base = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      m_base = dynamic_pointer_cast<ExpressionList>(cp);
       break;
     default:
       assert(false);

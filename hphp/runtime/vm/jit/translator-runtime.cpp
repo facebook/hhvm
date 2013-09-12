@@ -160,39 +160,17 @@ StringData* convIntToStrHelper(int64_t i) {
 }
 
 StringData* convObjToStrHelper(ObjectData* o) {
-  try {
-    auto s = o->invokeToString();
-    auto r = s.get();
-    decRefObj(o);
-    if (!r->isStatic()) r->incRefCount();
-    return r;
-  } catch (...) {
-    // spill object back to stack. unwinder
-    // will take care of decreffing it.
-    VMRegAnchor _;
-    TypedValue* spillSlot = (TypedValue *)vmsp();
-    spillSlot->m_data.pobj = o;
-    spillSlot->m_type = KindOfObject;
-    throw;
-  }
+  auto s = o->invokeToString();
+  auto r = s.get();
+  if (!r->isStatic()) r->incRefCount();
+  return r;
 }
 
 StringData* convResToStrHelper(ResourceData* o) {
-  try {
-    auto s = o->o_toString();
-    auto r = s.get();
-    decRefRes(o);
-    if (!r->isStatic()) r->incRefCount();
-    return r;
-  } catch (...) {
-    // spill object back to stack. unwinder
-    // will take care of decreffing it.
-    VMRegAnchor _;
-    TypedValue* spillSlot = (TypedValue *)vmsp();
-    spillSlot->m_data.pres = o;
-    spillSlot->m_type = KindOfResource;
-    throw;
-  }
+  auto s = o->o_toString();
+  auto r = s.get();
+  if (!r->isStatic()) r->incRefCount();
+  return r;
 }
 
 const StaticString
@@ -207,11 +185,11 @@ StringData* convCellToStrHelper(TypedValue tv) {
   case KindOfBoolean:  return tv.m_data.num ? s_1.get() : s_empty.get();
   case KindOfInt64:    return convIntToStrHelper(tv.m_data.num);
   case KindOfDouble:   return convDblToStrHelper(tv.m_data.num);
+  case KindOfString:   tv.m_data.pstr->incRefCount();
+                       /* fallthrough */
   case KindOfStaticString:
-  case KindOfString:   // No incref, since there is also a logical decref of
-                       // our argument.
                        return tv.m_data.pstr;
-  case KindOfArray:    tvDecRefArr(&tv); return s_Array.get();
+  case KindOfArray:    return s_Array.get();
   case KindOfObject:   return convObjToStrHelper(tv.m_data.pobj);
   case KindOfResource: return convResToStrHelper(tv.m_data.pres);
   default:             not_reached();

@@ -188,7 +188,7 @@ public:
   }
 
   FileScopePtr shared_from_this() {
-    return boost::static_pointer_cast<FileScope>
+    return static_pointer_cast<FileScope>
       (BlockScope::shared_from_this());
   }
 

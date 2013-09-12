@@ -61,7 +61,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
   FTRACE(1, "function entry for {}: using selectMethod\n",
          context.func->fullName()->data());
 
-  auto ret = smart::make_unique<RegionDesc>();
+  auto ret = std::make_shared<RegionDesc>();
 
   Arena arena;
   GraphBuilder gb(arena, context.func);
@@ -79,7 +79,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
     auto const start  = unit->offsetOf(b->start);
     auto const length = numInstrs(b->start, b->end);
     ret->blocks.emplace_back(
-      smart::make_unique<RegionDesc::Block>(context.func, start, length)
+      std::make_shared<RegionDesc::Block>(context.func, start, length)
     );
   }
 

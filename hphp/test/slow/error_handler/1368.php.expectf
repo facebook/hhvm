@@ -1,0 +1,4 @@
+HipHop Fatal error: Uncaught exception 'Exception' with message 'bomb' in %s/test/slow/error_handler/1368.php:12
+Stack trace:
+#0 {main}
+bool(true)

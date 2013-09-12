@@ -660,11 +660,17 @@ class Assembler {
   // Branch to register with return hint.
   void ret(const Register& xn = lr);
 
-  // Branch to label.
-  void b(Label* label, Condition cond = al);
+  // Unconditional branch to label.
+  void b(Label* label);
 
-  // Branch to PC offset.
-  void b(int imm26, Condition cond = al);
+  // Conditional branch to label.
+  void b(Label* label, Condition cond);
+
+  // Unconditional branch to PC offset.
+  void b(int imm26);
+
+  // Conditional branch to PC offset.
+  void b(int imm19, Condition cond);
 
   // Branch with link to label.
   void bl(Label* label);
@@ -1212,9 +1218,6 @@ class Assembler {
   // FP round to integer (towards zero).
   void frintz(const FPRegister& fd, const FPRegister& fn);
 
-  // FP convert single to double precision.
-  void fcvt(const FPRegister& fd, const FPRegister& fn);
-
   // FP compare registers.
   void fcmp(const FPRegister& fn, const FPRegister& fm);
 
@@ -1237,6 +1240,9 @@ class Assembler {
   void FPConvertToInt(const Register& rd,
                       const FPRegister& fn,
                       FPIntegerConvertOp op);
+
+  // FP convert between single and double precision.
+  void fcvt(const FPRegister& fd, const FPRegister& fn);
 
   // Convert FP to unsigned integer (round towards -infinity).
   void fcvtmu(const Register& rd, const FPRegister& fn);

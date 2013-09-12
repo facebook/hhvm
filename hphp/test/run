@@ -309,7 +309,8 @@ function hhvm_cmd($options, $test, $test_run = null) {
 
 function hphp_cmd($options, $test) {
   return implode(" ", array(
-    idx_file($_ENV, 'HPHP_BIN', bin_root().'/hphp/hhvm/hphp'),
+    idx_file($_ENV, 'HPHP_BIN', bin_root().'/hphp/hhvm/hhvm'),
+    '--hphp',
     '--config',
     find_file($test, 'hphp_config.hdf'),
     read_file("$test.hphp_opts"),

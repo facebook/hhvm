@@ -32,13 +32,6 @@
 
 namespace HPHP {
 
-#ifdef DEBUG_MEMORY_LEAK
-#define DEBUGGING_SMART_ALLOCATOR 1
-#endif
-
-//#define DEBUGGING_SMART_ALLOCATOR 1
-//#define SMART_ALLOCATOR_DEBUG_FREE
-
 ///////////////////////////////////////////////////////////////////////////////
 
 template<class T>
@@ -49,39 +42,15 @@ inline void smart_allocator_check_type() {
     "Cannot allocate types other than ObjectData and ResourceData");
 }
 
-#ifdef DEBUGGING_SMART_ALLOCATOR
-#define NEW(T) new T
-#define NEWOBJ(T) new T
-#define NEWOBJSZ(T,SZ) new (malloc(SZ)) T
-#define ALLOCOBJSZ(SZ) (malloc(SZ))
-#define ALLOCOBJIDX(I) (malloc(object_alloc_index_to_size(I)))
-#define DELETE(T) delete
-#define DELETEOBJSZ(SZ) free
-#define DELETEOBJ(NS,T,OBJ) delete OBJ
-#define RELEASEOBJ(NS,T,OBJ) ::operator delete(OBJ)
-#define SWEEPOBJ(T) delete this
-#else
 #define NEW(T) new (T::AllocatorType::getNoCheck()) T
-#define NEWOBJ(T) new                                     \
-  ((smart_allocator_check_type<T>(), ThreadLocalSingleton \
-    <ObjectAllocator<ObjectSizeClass<sizeof(T)>::value>>  \
-    ::getNoCheck())) T
-#define NEWOBJSZ(T,SZ) \
-  new ((smart_allocator_check_type<T>(), info->instanceSizeAllocator(SZ))) T
-#define ALLOCOBJSZ(SZ) (ThreadInfo::s_threadInfo.getNoCheck()->\
-                        instanceSizeAllocator(SZ)->alloc())
-#define ALLOCOBJIDX(I) (ThreadInfo::s_threadInfo.getNoCheck()-> \
-                        instanceIdxAllocator(I)->alloc())
+
+#define NEWOBJ(T) new (HPHP::MM().smartMallocSize(sizeof(T))) T
+
+#define NEWOBJSZ(T,SZ) new (HPHP::MM().objMalloc(SZ)) T
+
 #define DELETE(T) T::AllocatorType::getNoCheck()->release
-#define DELETEOBJSZ(SZ) (ThreadInfo::s_threadInfo.getNoCheck()->\
-                         instanceSizeAllocator(SZ)->release)
+
 #define DELETEOBJ(NS,T,OBJ) delete OBJ
-#define RELEASEOBJ(NS,T,OBJ)                              \
-  (ThreadLocalSingleton                                   \
-    <ObjectAllocator<ObjectSizeClass<sizeof(T)>::value>>  \
-    ::getNoCheck())->release(OBJ)
-#define SWEEPOBJ(T) this->~T()
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 /**
@@ -242,31 +211,22 @@ void *SmartAllocatorInitSetup() {
 ///////////////////////////////////////////////////////////////////////////////
 // This allocator is for unknown but fixed sized classes, like ObjectData.
 
-#define DECLARE_OBJECT_ALLOCATION_NO_SWEEP(T)                           \
+#define DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                         \
   public:                                                               \
-  /* static void *ObjAllocatorInitSetup; */                             \
-  inline ALWAYS_INLINE void operator delete(void *p) {                  \
-    if (T::IsResourceClass) {                                           \
-      RELEASEOBJ(NS, T, p);                                             \
-      return;                                                           \
-    }                                                                   \
-    ObjectData* this_ = (ObjectData*)p;                                 \
-    Class* cls = this_->getVMClass();                                   \
-    size_t nProps = cls->numDeclProperties();                           \
-    size_t builtinPropSize = cls->builtinPropSize();                    \
-    TypedValue* propVec =                                               \
-      (TypedValue *)((uintptr_t)this_ + sizeof(ObjectData) +            \
-                     builtinPropSize);                                  \
-    for (unsigned i = 0; i < nProps; ++i) {                             \
-      TypedValue* prop = &propVec[i];                                   \
-      tvRefcountedDecRef(prop);                                         \
-    }                                                                   \
-    DELETEOBJSZ(ObjectData::sizeForNProps(nProps) +                     \
-                builtinPropSize)(this_);                                \
+  ALWAYS_INLINE void operator delete(void* p) {                  \
+    static_assert(std::is_base_of<ResourceData,T>::value, "");          \
+    assert(sizeof(T) <= MemoryManager::kMaxSmartSize);                  \
+    MM().smartFreeSize(p, sizeof(T));                                   \
   }
 
+#define DECLARE_RESOURCE_ALLOCATION(T)                                  \
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                               \
+  virtual void sweep();
+
 #define DECLARE_OBJECT_ALLOCATION(T)                                    \
-  DECLARE_OBJECT_ALLOCATION_NO_SWEEP(T)                                 \
+  static void typeCheck() {                                             \
+    static_assert(std::is_base_of<ObjectData,T>::value, "");            \
+  }                                                                     \
   virtual void sweep();
 
 #define IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP_CLS(NS,T)          \
@@ -279,38 +239,10 @@ void *SmartAllocatorInitSetup() {
 #define IMPLEMENT_OBJECT_ALLOCATION_CLS(NS,T)                           \
   IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP_CLS(NS,T);               \
   void NS::T::sweep() {                                                 \
-    SWEEPOBJ(T);                                                        \
+    this->~T();                                                         \
   }
 
 #define IMPLEMENT_OBJECT_ALLOCATION(T) IMPLEMENT_OBJECT_ALLOCATION_CLS(HPHP,T)
-
-class ObjectAllocatorBase : public SmartAllocatorImpl {
-public:
-  ObjectAllocatorBase(int itemSize);
-
-  void release(void *p) {
-    if (p) {
-      dealloc(p);
-    }
-  }
-};
-
-template<int S>
-class ObjectAllocator : public ObjectAllocatorBase {
-public:
-  static void Create(void* storage) {
-    new (storage) ObjectAllocator<S>();
-    static_assert(unsigned(S) <= SLAB_SIZE, "slab too small");
-  }
-  static void Delete(ObjectAllocator *p) {
-    p->~ObjectAllocator();
-  }
-  static void OnThreadExit(ObjectAllocator *p) {
-    p->~ObjectAllocator();
-  }
-
-  ObjectAllocator() : ObjectAllocatorBase(S) { }
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 }
@@ -321,20 +253,10 @@ inline void *operator new(size_t sizeT, HPHP::SmartAllocator<T> *a) {
   return a->alloc(HPHP::SmartAllocatorImpl::itemSizeRoundup(sizeof(T)));
 }
 
-inline void *operator new(size_t sizeT, HPHP::ObjectAllocatorBase *a) {
-  assert(sizeT <= size_t(a->getItemSize()));
-  return a->alloc();
-}
-
 template<typename T>
 inline void operator delete(void *p, HPHP::SmartAllocator<T> *a) {
   assert(p);
   a->dealloc((T*)p);
-}
-
-inline void operator delete(void *p , HPHP::ObjectAllocatorBase *a) {
-  assert(p);
-  a->dealloc(p);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

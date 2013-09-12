@@ -27,8 +27,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <libgen.h>
-#include <execinfo.h>
-#include <cxxabi.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -866,53 +864,6 @@ std::string Util::format_pattern(const std::string &pattern,
   }
   ret += '#';
   return ret;
-}
-
-char* Util::getNativeFunctionName(void* codeAddr) {
-  void* buf[1] = {codeAddr};
-  char** symbols = backtrace_symbols(buf, 1);
-  char* functionName = nullptr;
-  if (symbols != nullptr) {
-    //
-    // the output from backtrace_symbols looks like this:
-    // ../path/hhvm/hhvm(_ZN4HPHP2VM6Transl17interpOneIterInitEv+0) [0x17cebe9]
-    //
-    // we first want to extract the mangled name from it to get this:
-    // _ZN4HPHP2VM6Transl17interpOneIterInitEv
-    //
-    // and then pass this to abi::__cxa_demangle to get the demanged name:
-    // HPHP::Transl::interpOneIterInit()
-    //
-    // Sometimes, though, backtrace_symbols can't find the function name
-    // and ends up giving us a blank managled name, like this:
-    // ../path/hhvm/hhvm() [0x17e4d01]
-    // or this: [0x7fffca800130]
-    //
-    char* start = strchr(*symbols, '(');
-    if (start) {
-      start++;
-      char* end = strchr(start, '+');
-      if (end != nullptr) {
-        size_t len = end-start;
-        functionName = new char[len+1];
-        strncpy(functionName, start, len);
-        functionName[len] = '\0';
-        int status;
-        char* demangledName = abi::__cxa_demangle(functionName, 0, 0, &status);
-        if (status == 0) {
-          delete []functionName;
-          functionName = demangledName;
-        }
-      }
-    }
-  }
-  free(symbols);
-  if (functionName == nullptr) {
-#define MAX_ADDR_HEX_LEN 40
-    functionName = new char[MAX_ADDR_HEX_LEN + 3];
-    sprintf(functionName, "%40p", codeAddr);
-  }
-  return functionName;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

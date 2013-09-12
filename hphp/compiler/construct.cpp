@@ -44,7 +44,7 @@ void Construct::resetScope(BlockScopeRawPtr scope, bool resetOrigScope) {
   setBlockScope(scope);
   if (resetOrigScope) {
     ExpressionPtr expr =
-      boost::dynamic_pointer_cast<Expression>(shared_from_this());
+      dynamic_pointer_cast<Expression>(shared_from_this());
     if (expr) {
       expr->setOriginalScope(scope);
     }
@@ -439,7 +439,7 @@ public:
     // HACK: dump the closure function as a "child" of the
     // closure expression
     ClosureExpressionPtr c =
-      boost::dynamic_pointer_cast<ClosureExpression>(cp);
+      dynamic_pointer_cast<ClosureExpression>(cp);
     if (c) {
       c->getClosureFunction()->dump(m_spc, m_ar);
     }

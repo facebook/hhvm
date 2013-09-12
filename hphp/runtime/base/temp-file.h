@@ -28,7 +28,7 @@ namespace HPHP {
  */
 class TempFile : public PlainFile {
 public:
-  DECLARE_OBJECT_ALLOCATION(TempFile);
+  DECLARE_RESOURCE_ALLOCATION(TempFile);
 
   explicit TempFile(bool autoDelete = true);
   virtual ~TempFile();

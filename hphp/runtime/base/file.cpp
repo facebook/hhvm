@@ -598,6 +598,7 @@ Array File::readCSV(int64_t length /* = 0 */, char delimiter_char /* = ',' */,
 
   int64_t temp_len, line_end_len;
   bool first_field = true;
+  int inc_len;
 
   /* Now into new section that parses buf for delimiter/enclosure fields */
 
@@ -623,11 +624,15 @@ Array File::readCSV(int64_t length /* = 0 */, char delimiter_char /* = ',' */,
 
     tptr = temp;
 
-    /* 1. Strip any leading space */
-    for (; bptr < limit; ++bptr) {
-      if (!isspace((int)*(unsigned char *)bptr) || *bptr == delimiter_char) {
-        break;
-      }
+    /* 1. Strip any leading space before an enclosure */
+
+    inc_len = (bptr < limit);
+    const char *tmp = bptr;
+    while ((*tmp != delimiter_char) && isspace((int)*(unsigned char *)tmp)) {
+      ++tmp;
+    }
+    if (*tmp == enclosure_char) {
+      bptr = tmp;
     }
 
     if (first_field && bptr == line_end) {
@@ -637,7 +642,7 @@ Array File::readCSV(int64_t length /* = 0 */, char delimiter_char /* = ',' */,
     first_field = false;
 
     /* 2. Read field, leaving bptr pointing at start of next field */
-    if (bptr < limit && *bptr == enclosure_char) {
+    if (inc_len != 0 && *bptr == enclosure_char) {
       int state = 0;
 
       bptr++;  /* move on to first character in field */
@@ -645,7 +650,6 @@ Array File::readCSV(int64_t length /* = 0 */, char delimiter_char /* = ',' */,
 
       /* 2A. handle enclosure delimited field */
 
-      int inc_len = 1;
       for (;;) {
         switch (inc_len) {
         case 0:
@@ -683,7 +687,7 @@ Array File::readCSV(int64_t length /* = 0 */, char delimiter_char /* = ',' */,
                 if ((size_t)temp_len > (size_t)(limit - buf)) {
                   goto quit_loop_2;
                 }
-                return ret;
+                goto out;
               }
               temp_len += new_len;
               char *new_temp = (char*)realloc(temp, temp_len);
@@ -724,10 +728,10 @@ Array File::readCSV(int64_t length /* = 0 */, char delimiter_char /* = ',' */,
             state = 0;
             break;
           default:
-            if (*bptr == escape_char) {
-              state = 1;
-            } else if (*bptr == enclosure_char) {
+            if (*bptr == enclosure_char) {
               state = 2;
+            } else if (*bptr == escape_char) {
+              state = 1;
             }
             bptr++;
             break;
@@ -739,26 +743,51 @@ Array File::readCSV(int64_t length /* = 0 */, char delimiter_char /* = ',' */,
 
     quit_loop_2:
       /* look up for a delimiter */
-      for (; bptr < limit; ++bptr) {
-        if (*bptr == delimiter_char) {
+
+      for (;;) {
+        switch (inc_len) {
+        case 0:
+          goto quit_loop_3;
+
+        case 1:
+          if (*bptr == delimiter_char) {
+            goto quit_loop_3;
+          }
+          break;
+        default:
           break;
         }
+        bptr += inc_len;
+        inc_len = (bptr < limit ? 1 : 0);
       }
 
+    quit_loop_3:
       memcpy(tptr, hunk_begin, bptr - hunk_begin);
       tptr += (bptr - hunk_begin);
-      if (bptr < limit) ++bptr;
+      bptr += inc_len;
       comp_end = tptr;
     } else {
-      /* 2B. Handle non-enclosure field */
+      /* 3B. Handle non-enclosure field */
 
       hunk_begin = bptr;
 
-      for (; bptr < limit; ++bptr) {
-        if (*bptr == delimiter_char) {
+      for (;;) {
+        switch (inc_len) {
+        case 0:
+          goto quit_loop_4;
+        case 1:
+          if (*bptr == delimiter_char) {
+            goto quit_loop_4;
+          }
+          break;
+        default:
           break;
         }
+        bptr += inc_len;
+        inc_len = (bptr < limit ? 1 : 0);
       }
+
+    quit_loop_4:
       memcpy(tptr, hunk_begin, bptr - hunk_begin);
       tptr += (bptr - hunk_begin);
 
@@ -771,7 +800,8 @@ Array File::readCSV(int64_t length /* = 0 */, char delimiter_char /* = ',' */,
     /* 3. Now pass our field back to php */
     *comp_end = '\0';
     ret.append(String(temp, comp_end - temp, CopyString));
-  } while (bptr < limit);
+  } while (inc_len > 0);
+out:
 
   free(temp);
   return ret;

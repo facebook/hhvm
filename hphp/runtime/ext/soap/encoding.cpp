@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/soap/encoding.h"
 #include "hphp/runtime/ext/soap/soap.h"
 #include "hphp/runtime/ext/ext_soap.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/string-buffer.h"
 
 namespace HPHP {
@@ -874,7 +875,7 @@ static Variant to_zval_hexbin(encodeTypePtr type, xmlNodePtr data) {
       throw SoapException("Encoding: Violation of encoding rules");
     }
     String str =
-      StringUtil::HexDecode(String((const char*)data->children->content));
+      f_hex2bin(String((const char*)data->children->content));
     if (str.isNull()) {
       throw SoapException("Encoding: Violation of encoding rules");
     }
@@ -978,7 +979,7 @@ static xmlNodePtr to_xml_hexbin(encodeTypePtr type, CVarRef data, int style,
   xmlAddChild(parent, ret);
   FIND_ZVAL_NULL(data, ret, style);
 
-  String str = StringUtil::HexEncode(data.toString());
+  String str = f_bin2hex(data.toString());
   xmlAddChild(ret, xmlNewTextLen(BAD_CAST(str.data()), str.size()));
 
   if (style == SOAP_ENCODED) {

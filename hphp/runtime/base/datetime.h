@@ -32,7 +32,7 @@ namespace HPHP {
  */
 class DateTime : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(DateTime);
+  DECLARE_RESOURCE_ALLOCATION(DateTime);
 
   /**
    * Different RFC/ISO date/time formats for toString(DateFormat).

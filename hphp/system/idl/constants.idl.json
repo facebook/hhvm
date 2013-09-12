@@ -5158,42 +5158,6 @@
             "value": 0
         },
         {
-            "name": "POSIX_F_OK",
-            "value": 0
-        },
-        {
-            "name": "POSIX_R_OK",
-            "value": 4
-        },
-        {
-            "name": "POSIX_S_IFBLK",
-            "value": 24576
-        },
-        {
-            "name": "POSIX_S_IFCHR",
-            "value": 8192
-        },
-        {
-            "name": "POSIX_S_IFIFO",
-            "value": 4096
-        },
-        {
-            "name": "POSIX_S_IFREG",
-            "value": 32768
-        },
-        {
-            "name": "POSIX_S_IFSOCK",
-            "value": 49152
-        },
-        {
-            "name": "POSIX_W_OK",
-            "value": 2
-        },
-        {
-            "name": "POSIX_X_OK",
-            "value": 1
-        },
-        {
             "name": "PREG_BACKTRACK_LIMIT_ERROR",
             "value": 2
         },
@@ -6527,215 +6491,215 @@
         },
         {
             "name": "T_ABSTRACT",
-            "value": 346
+            "type": "Int64"
         },
         {
             "name": "T_AND_EQUAL",
-            "value": 271
+            "type": "Int64"
         },
         {
             "name": "T_ARRAY",
-            "value": 360
+            "type": "Int64"
         },
         {
             "name": "T_ARRAY_CAST",
-            "value": 292
+            "type": "Int64"
         },
         {
             "name": "T_AS",
-            "value": 326
+            "type": "Int64"
         },
         {
             "name": "T_BAD_CHARACTER",
-            "value": 313
+            "type": "Int64"
         },
         {
             "name": "T_BOOLEAN_AND",
-            "value": 279
+            "type": "Int64"
         },
         {
             "name": "T_BOOLEAN_OR",
-            "value": 278
+            "type": "Int64"
         },
         {
             "name": "T_BOOL_CAST",
-            "value": 290
+            "type": "Int64"
         },
         {
             "name": "T_BREAK",
-            "value": 331
+            "type": "Int64"
         },
         {
             "name": "T_CASE",
-            "value": 329
+            "type": "Int64"
         },
         {
             "name": "T_CATCH",
-            "value": 338
+            "type": "Int64"
         },
         {
             "name": "T_CHARACTER",
-            "value": 312
+            "type": "Int64"
         },
         {
             "name": "T_CLASS",
-            "value": 353
+            "type": "Int64"
         },
         {
             "name": "T_CLASS_C",
-            "value": 361
+            "type": "Int64"
         },
         {
             "name": "T_CLONE",
-            "value": 298
+            "type": "Int64"
         },
         {
             "name": "T_CLOSE_TAG",
-            "value": 370
+            "type": "Int64"
         },
         {
             "name": "T_COMMENT",
-            "value": 366
+            "type": "Int64"
         },
         {
             "name": "T_COMPILER_HALT_OFFSET",
-            "value": 405
+            "type": "Int64"
         },
         {
             "name": "T_CONCAT_EQUAL",
-            "value": 273
+            "type": "Int64"
         },
         {
             "name": "T_CONST",
-            "value": 335
+            "type": "Int64"
         },
         {
             "name": "T_CONSTANT_ENCAPSED_STRING",
-            "value": 315
+            "type": "Int64"
         },
         {
             "name": "T_CONTINUE",
-            "value": 332
+            "type": "Int64"
         },
         {
             "name": "T_CURLY_OPEN",
-            "value": 375
+            "type": "Int64"
         },
         {
             "name": "T_DEC",
-            "value": 296
+            "type": "Int64"
         },
         {
             "name": "T_DECLARE",
-            "value": 324
+            "type": "Int64"
         },
         {
             "name": "T_DEFAULT",
-            "value": 330
+            "type": "Int64"
         },
         {
             "name": "T_DIR",
-            "value": 379
+            "type": "Int64"
         },
         {
             "name": "T_DIV_EQUAL",
-            "value": 274
+            "type": "Int64"
         },
         {
             "name": "T_DNUMBER",
-            "value": 306
+            "type": "Int64"
         },
         {
             "name": "T_DO",
-            "value": 317
+            "type": "Int64"
         },
         {
             "name": "T_DOC_COMMENT",
-            "value": 367
+            "type": "Int64"
         },
         {
             "name": "T_DOLLAR_OPEN_CURLY_BRACES",
-            "value": 374
+            "type": "Int64"
         },
         {
             "name": "T_DOUBLE_ARROW",
-            "value": 358
+            "type": "Int64"
         },
         {
             "name": "T_DOUBLE_CAST",
-            "value": 294
+            "type": "Int64"
         },
         {
             "name": "T_DOUBLE_COLON",
-            "value": 376
+            "type": "Int64"
         },
         {
             "name": "T_ECHO",
-            "value": 316
+            "type": "Int64"
         },
         {
             "name": "T_ELSE",
-            "value": 303
+            "type": "Int64"
         },
         {
             "name": "T_ELSEIF",
-            "value": 302
+            "type": "Int64"
         },
         {
             "name": "T_EMPTY",
-            "value": 351
+            "type": "Int64"
         },
         {
             "name": "T_ENCAPSED_AND_WHITESPACE",
-            "value": 314
+            "type": "Int64"
         },
         {
             "name": "T_ENDDECLARE",
-            "value": 325
+            "type": "Int64"
         },
         {
             "name": "T_ENDFOR",
-            "value": 321
+            "type": "Int64"
         },
         {
             "name": "T_ENDFOREACH",
-            "value": 323
+            "type": "Int64"
         },
         {
             "name": "T_ENDIF",
-            "value": 304
+            "type": "Int64"
         },
         {
             "name": "T_ENDSWITCH",
-            "value": 328
+            "type": "Int64"
         },
         {
             "name": "T_ENDWHILE",
-            "value": 319
+            "type": "Int64"
         },
         {
             "name": "T_END_HEREDOC",
-            "value": 373
+            "type": "Int64"
         },
         {
             "name": "T_EVAL",
-            "value": 260
+            "type": "Int64"
         },
         {
             "name": "T_EXIT",
-            "value": 300
+            "type": "Int64"
         },
         {
             "name": "T_EXTENDS",
-            "value": 355
+            "type": "Int64"
         },
         {
             "name": "T_FILE",
-            "value": 365
+            "type": "Int64"
         },
         {
             "name": "T_FINAL",
-            "value": 345
+            "type": "Int64"
         },
         {
             "name": "T_FMT",
@@ -6747,291 +6711,307 @@
         },
         {
             "name": "T_FOR",
-            "value": 320
+            "type": "Int64"
         },
         {
             "name": "T_FOREACH",
-            "value": 322
+            "type": "Int64"
         },
         {
             "name": "T_FUNCTION",
-            "value": 334
+            "type": "Int64"
         },
         {
             "name": "T_FUNC_C",
-            "value": 363
+            "type": "Int64"
         },
         {
             "name": "T_GLOBAL",
-            "value": 341
+            "type": "Int64"
         },
         {
             "name": "T_GOTO",
-            "value": 333
+            "type": "Int64"
         },
         {
             "name": "T_HALT_COMPILER",
-            "value": 352
+            "type": "Int64"
         },
         {
             "name": "T_IF",
-            "value": 301
+            "type": "Int64"
         },
         {
             "name": "T_IMPLEMENTS",
-            "value": 356
+            "type": "Int64"
         },
         {
             "name": "T_INC",
-            "value": 297
+            "type": "Int64"
         },
         {
             "name": "T_INCLUDE",
-            "value": 262
+            "type": "Int64"
         },
         {
             "name": "T_INCLUDE_ONCE",
-            "value": 261
+            "type": "Int64"
         },
         {
             "name": "T_INLINE_HTML",
-            "value": 311
+            "type": "Int64"
         },
         {
             "name": "T_INSTANCEOF",
-            "value": 288
+            "type": "Int64"
+        },
+        {
+            "name": "T_INSTEADOF",
+            "type": "Int64"
         },
         {
             "name": "T_INTERFACE",
-            "value": 354
+            "type": "Int64"
         },
         {
             "name": "T_INT_CAST",
-            "value": 295
+            "type": "Int64"
         },
         {
             "name": "T_ISSET",
-            "value": 350
+            "type": "Int64"
         },
         {
             "name": "T_IS_EQUAL",
-            "value": 283
+            "type": "Int64"
         },
         {
             "name": "T_IS_GREATER_OR_EQUAL",
-            "value": 284
+            "type": "Int64"
         },
         {
             "name": "T_IS_IDENTICAL",
-            "value": 281
+            "type": "Int64"
         },
         {
             "name": "T_IS_NOT_EQUAL",
-            "value": 282
+            "type": "Int64"
         },
         {
             "name": "T_IS_NOT_IDENTICAL",
-            "value": 280
+            "type": "Int64"
         },
         {
             "name": "T_IS_SMALLER_OR_EQUAL",
-            "value": 285
+            "type": "Int64"
         },
         {
             "name": "T_LINE",
-            "value": 364
+            "type": "Int64"
         },
         {
             "name": "T_LIST",
-            "value": 359
+            "type": "Int64"
         },
         {
             "name": "T_LNUMBER",
-            "value": 305
+            "type": "Int64"
         },
         {
             "name": "T_LOGICAL_AND",
-            "value": 265
+            "type": "Int64"
         },
         {
             "name": "T_LOGICAL_OR",
-            "value": 263
+            "type": "Int64"
         },
         {
             "name": "T_LOGICAL_XOR",
-            "value": 264
+            "type": "Int64"
         },
         {
             "name": "T_METHOD_C",
-            "value": 362
+            "type": "Int64"
         },
         {
             "name": "T_MINUS_EQUAL",
-            "value": 276
+            "type": "Int64"
         },
         {
             "name": "T_MOD_EQUAL",
-            "value": 272
+            "type": "Int64"
         },
         {
             "name": "T_MUL_EQUAL",
-            "value": 275
+            "type": "Int64"
         },
         {
             "name": "T_NAMESPACE",
-            "value": 377
+            "type": "Int64"
         },
         {
             "name": "T_NEW",
-            "value": 299
+            "type": "Int64"
         },
         {
             "name": "T_NS_C",
-            "value": 378
+            "type": "Int64"
         },
         {
             "name": "T_NS_SEPARATOR",
-            "value": 380
+            "type": "Int64"
         },
         {
             "name": "T_NUM_STRING",
-            "value": 310
+            "type": "Int64"
         },
         {
             "name": "T_OBJECT_CAST",
-            "value": 291
+            "type": "Int64"
         },
         {
             "name": "T_OBJECT_OPERATOR",
-            "value": 357
+            "type": "Int64"
         },
         {
             "name": "T_OPEN_TAG",
-            "value": 368
+            "type": "Int64"
         },
         {
             "name": "T_OPEN_TAG_WITH_ECHO",
-            "value": 369
+            "type": "Int64"
         },
         {
             "name": "T_OR_EQUAL",
-            "value": 270
+            "type": "Int64"
         },
         {
             "name": "T_PAAMAYIM_NEKUDOTAYIM",
-            "value": 376
+            "type": "Int64"
         },
         {
             "name": "T_PLUS_EQUAL",
-            "value": 277
+            "type": "Int64"
         },
         {
             "name": "T_PRINT",
-            "value": 266
+            "type": "Int64"
         },
         {
             "name": "T_PRIVATE",
-            "value": 344
+            "type": "Int64"
         },
         {
             "name": "T_PROTECTED",
-            "value": 343
+            "type": "Int64"
         },
         {
             "name": "T_PUBLIC",
-            "value": 342
+            "type": "Int64"
         },
         {
             "name": "T_REQUIRE",
-            "value": 259
+            "type": "Int64"
         },
         {
             "name": "T_REQUIRE_ONCE",
-            "value": 258
+            "type": "Int64"
         },
         {
             "name": "T_RETURN",
-            "value": 336
+            "type": "Int64"
         },
         {
             "name": "T_SL",
-            "value": 287
+            "type": "Int64"
         },
         {
             "name": "T_SL_EQUAL",
-            "value": 268
+            "type": "Int64"
         },
         {
             "name": "T_SR",
-            "value": 286
+            "type": "Int64"
         },
         {
             "name": "T_SR_EQUAL",
-            "value": 267
+            "type": "Int64"
         },
         {
             "name": "T_START_HEREDOC",
-            "value": 372
+            "type": "Int64"
         },
         {
             "name": "T_STATIC",
-            "value": 347
+            "type": "Int64"
         },
         {
             "name": "T_STRING",
-            "value": 307
+            "type": "Int64"
         },
         {
             "name": "T_STRING_CAST",
-            "value": 293
+            "type": "Int64"
         },
         {
             "name": "T_STRING_VARNAME",
-            "value": 308
+            "type": "Int64"
         },
         {
             "name": "T_SWITCH",
-            "value": 327
+            "type": "Int64"
         },
         {
             "name": "T_THROW",
-            "value": 339
+            "type": "Int64"
+        },
+        {
+            "name": "T_TRAIT",
+            "type": "Int64"
+        },
+        {
+            "name": "T_TRAIT_C",
+            "type": "Int64"
         },
         {
             "name": "T_TRY",
-            "value": 337
+            "type": "Int64"
         },
         {
             "name": "T_UNSET",
-            "value": 349
+            "type": "Int64"
         },
         {
             "name": "T_UNSET_CAST",
-            "value": 289
+            "type": "Int64"
         },
         {
             "name": "T_USE",
-            "value": 340
+            "type": "Int64"
         },
         {
             "name": "T_VAR",
-            "value": 348
+            "type": "Int64"
         },
         {
             "name": "T_VARIABLE",
-            "value": 309
+            "type": "Int64"
         },
         {
             "name": "T_WHILE",
-            "value": 318
+            "type": "Int64"
         },
         {
             "name": "T_WHITESPACE",
-            "value": 371
+            "type": "Int64"
         },
         {
             "name": "T_XOR_EQUAL",
-            "value": 269
+            "type": "Int64"
+        },
+        {
+            "name": "T_YIELD",
+            "type": "Int64"
         },
         {
             "name": "ULOC_ACTUAL_LOCALE",

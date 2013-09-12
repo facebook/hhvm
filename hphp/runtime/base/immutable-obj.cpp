@@ -15,6 +15,12 @@
 */
 
 #include "hphp/runtime/base/immutable-obj.h"
+
+#include <cstdlib>
+
+#include "hphp/util/logger.h"
+
+#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/shared-variant.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/array-init.h"
@@ -22,85 +28,97 @@
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
-#include "hphp/util/logger.h"
-
 namespace HPHP {
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
-ImmutableObj::ImmutableObj(ObjectData *obj) {
-  // This function assumes the object and object/array down the tree have no
-  // internal reference and does not implements serializable interface.
+ImmutableObj::ImmutableObj(ObjectData* obj)
+  : m_cls(obj->o_getClassName().get())
+{
+  assert(m_cls->isStatic());
+
+  // This function assumes the object and object/array down the tree
+  // have no internal references and do not implement the serializable
+  // interface.
   assert(!obj->instanceof(SystemLib::s_SerializableClass));
-  m_cls = obj->o_getClassName()->copy(true);
+
   Array props;
   obj->o_getArray(props, false);
   m_propCount = 0;
   if (props.empty()) {
     m_props = nullptr;
-  } else {
-    m_props = (Prop*)malloc(sizeof(Prop) * props.size());
-    for (ArrayIter it(props); !it.end(); it.next()) {
-      assert(m_propCount < props.size());
-      Variant key(it.first());
-      assert(key.isString());
-      CVarRef value = it.secondRef();
-      SharedVariant *val = nullptr;
-      if (!value.isNull()) {
-        val = new SharedVariant(value, false, true, true);
-      }
-      m_props[m_propCount].val = val;
-      m_props[m_propCount].name = key.getStringData()->copy(true);
-      m_propCount++;
+    return;
+  }
+
+  m_props = static_cast<Prop*>(malloc(sizeof(Prop) * props.size()));
+  for (ArrayIter it(props); !it.end(); it.next()) {
+    assert(m_propCount < props.size());
+    Variant key(it.first());
+    assert(key.isString());
+    CVarRef value = it.secondRef();
+    SharedVariant *val = nullptr;
+    if (!value.isNull()) {
+      val = new SharedVariant(value, false, true, true);
     }
+
+    auto const keySD = key.getStringData();
+
+    m_props[m_propCount].val = val;
+    m_props[m_propCount].name = LIKELY(keySD->isStatic())
+      ? keySD
+      : StringData::MakeMalloced(keySD->data(), keySD->size());
+    m_propCount++;
   }
 }
 
-Object ImmutableObj::getObject() {
+ImmutableObj::~ImmutableObj() {
+  assert(m_cls->isStatic());
+
+  if (m_props) {
+    for (int i = 0; i < m_propCount; i++) {
+      if (m_props[i].val) m_props[i].val->decRef();
+      if (UNLIKELY(!m_props[i].name->isStatic())) {
+        m_props[i].name->destruct();
+      }
+    }
+    free(m_props);
+  }
+}
+
+Object ImmutableObj::getObject() const {
   Object obj;
   try {
     obj = create_object_only(m_cls);
-  } catch (ClassNotFoundException &e) {
+  } catch (ClassNotFoundException& e) {
     Logger::Error("ImmutableObj::getObject(): Cannot find class %s",
                   m_cls->data());
     return obj;
   }
   obj.get()->clearNoDestruct();
+
   ArrayInit ai(m_propCount);
   for (int i = 0; i < m_propCount; i++) {
-    ai.add(String(m_props[i].name->copy()),
-           m_props[i].val ? m_props[i].val->toLocal() : null_variant,
-           true);
+    auto const name = m_props[i].name;
+    ai.add(
+      String(name->isStatic() ? name
+                              : StringData::Make(name->slice(), CopyString)),
+      m_props[i].val ? m_props[i].val->toLocal() : null_variant,
+      true
+    );
   }
+
   Array v = ai.create();
   obj->o_setArray(v);
   obj->invokeWakeup();
   return obj;
 }
 
-ImmutableObj::~ImmutableObj() {
-  if (m_props) {
-    for (int i = 0; i < m_propCount; i++) {
-      m_props[i].name->destruct();
-      if (m_props[i].val) m_props[i].val->decRef();
-    }
-    free(m_props);
-  }
-  m_cls->destruct();
-}
-
-void ImmutableObj::getSizeStats(SharedVariantStats *stats) {
+void ImmutableObj::getSizeStats(SharedVariantStats* stats) const {
   stats->initStats();
-  if (m_cls->isStatic()) {
-    stats->dataTotalSize += sizeof(ImmutableObj) + sizeof(Prop) * m_propCount;
-  } else {
-    stats->dataSize += m_cls->size();
-    stats->dataTotalSize += sizeof(ImmutableObj) + sizeof(Prop) * m_propCount +
-                            sizeof(StringData) + m_cls->size();
-  }
+  stats->dataTotalSize += sizeof(ImmutableObj) + sizeof(Prop) * m_propCount;
 
   for (int i = 0; i < m_propCount; i++) {
-    StringData *sd = m_props[i].name;
+    auto const sd = m_props[i].name;
     if (!sd->isStatic()) {
       stats->dataSize += sd->size();
       stats->dataTotalSize += sizeof(StringData) + sd->size();
@@ -113,14 +131,11 @@ void ImmutableObj::getSizeStats(SharedVariantStats *stats) {
   }
 }
 
-int32_t ImmutableObj::getSpaceUsage() {
+int32_t ImmutableObj::getSpaceUsage() const {
   int32_t size = sizeof(ImmutableObj) + sizeof(Prop) * m_propCount;
-  if (!m_cls->isStatic()) {
-    size += sizeof(StringData) + m_cls->size();
-  }
 
   for (int i = 0; i < m_propCount; i++) {
-    StringData *sd = m_props[i].name;
+    auto const sd = m_props[i].name;
     if (!sd->isStatic()) {
       size += sizeof(StringData) + sd->size();
     }
@@ -131,5 +146,6 @@ int32_t ImmutableObj::getSpaceUsage() {
   return size;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
 }

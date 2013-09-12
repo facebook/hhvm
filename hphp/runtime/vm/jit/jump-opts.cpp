@@ -30,7 +30,7 @@ TRACE_SET_MOD(hhir);
 
 namespace {
 
-Block* findMainExitBlock(IRTrace* trace, IRFactory* irFactory) {
+Block* findMainExitBlock(IRTrace* trace, IRFactory& irFactory) {
   assert(trace->isMain());
   auto const back = trace->back();
 
@@ -42,7 +42,7 @@ Block* findMainExitBlock(IRTrace* trace, IRFactory* irFactory) {
    * something like the assert below to find the main exit.)
    */
   if (debug) {
-    auto const sorted = rpoSortCfg(trace, *irFactory);
+    auto const sorted = rpoSortCfg(trace, irFactory);
     auto it = sorted.rbegin();
     while (it != sorted.rend() && !(*it)->isMain()) {
       ++it;
@@ -107,7 +107,7 @@ bool jccCanBeDirectExit(Opcode opc) {
  * This leads to more efficient code because the service request stubs
  * will patch jumps in the main trace instead of off-trace.
  */
-void optimizeCondTraceExit(IRTrace* trace, IRFactory* irFactory) {
+void optimizeCondTraceExit(IRTrace* trace, IRFactory& irFactory) {
   FTRACE(5, "CondExit:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "CondExit:^^^^^^^^^^^^^^^^^^^^^\n"); };
 
@@ -138,7 +138,7 @@ void optimizeCondTraceExit(IRTrace* trace, IRFactory* irFactory) {
   data.notTaken = reqBindJmp.extra<ReqBindJmp>()->offset;
 
   FTRACE(5, "replacing {} with {}\n", jccInst->id(), opcodeName(newOpcode));
-  irFactory->replace(
+  irFactory.replace(
     &reqBindJmp,
     newOpcode,
     data,
@@ -155,7 +155,7 @@ void optimizeCondTraceExit(IRTrace* trace, IRFactory* irFactory) {
  * branch to "normal exits".  We can optimize these into the
  * SideExitGuard* instructions that can be patched in place.
  */
-void optimizeSideExits(IRTrace* trace, IRFactory* irFactory) {
+void optimizeSideExits(IRTrace* trace, IRFactory& irFactory) {
   FTRACE(5, "SideExit:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "SideExit:^^^^^^^^^^^^^^^^^^^^^\n"); };
 
@@ -182,9 +182,9 @@ void optimizeSideExits(IRTrace* trace, IRFactory* irFactory) {
 
     auto const block = inst->block();
     block->insert(block->iteratorTo(inst),
-                  irFactory->cloneInstruction(syncABI));
+                  irFactory.cloneInstruction(syncABI));
 
-    irFactory->replace(
+    irFactory.replace(
       inst,
       isStack ? SideExitGuardStk : SideExitGuardLoc,
       inst->typeParam(),
@@ -201,7 +201,7 @@ void optimizeSideExits(IRTrace* trace, IRFactory* irFactory) {
 // If main trace ends with an unconditional jump, and the target is not
 // reached by any other branch, then copy the target of the jump to the
 // end of the trace
-void eliminateUnconditionalJump(IRTrace* trace, IRFactory* irFactory) {
+void eliminateUnconditionalJump(IRTrace* trace) {
   Block* lastBlock = trace->back();
   auto lastInst = lastBlock->backIter(); // iterator to last instruction
   IRInstruction& jmp = *lastInst;
@@ -214,8 +214,8 @@ void eliminateUnconditionalJump(IRTrace* trace, IRFactory* irFactory) {
   }
 }
 
-void optimizeJumps(IRTrace* trace, IRFactory* irFactory) {
-  eliminateUnconditionalJump(trace, irFactory);
+void optimizeJumps(IRTrace* trace, IRFactory& irFactory) {
+  eliminateUnconditionalJump(trace);
 
   if (RuntimeOption::EvalHHIRDirectExit) {
     optimizeCondTraceExit(trace, irFactory);

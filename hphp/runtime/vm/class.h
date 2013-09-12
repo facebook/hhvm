@@ -17,14 +17,11 @@
 #ifndef incl_HPHP_VM_CLASS_H_
 #define incl_HPHP_VM_CLASS_H_
 
-#include <bitset>
-#include "tbb/concurrent_hash_map.h"
-#include <atomic>
-
-#include "hphp/runtime/base/types.h"
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/range.h"
+#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/fixed-string-map.h"
+#include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
 
 namespace HPHP {
@@ -307,7 +304,7 @@ class PreClass : public AtomicCountable {
     return &m_properties[s];
   }
 
-  BuiltinCtorFunction instanceCtor() const { return m_InstanceCtor; }
+  BuiltinCtorFunction instanceCtor() const { return m_instanceCtor; }
   int builtinPropSize() const { return m_builtinPropSize; }
 
   void prettyPrint(std::ostream& out) const;
@@ -336,7 +333,7 @@ private:
   const StringData* m_name;
   const StringData* m_parent;
   const StringData* m_docComment;
-  BuiltinCtorFunction m_InstanceCtor;
+  BuiltinCtorFunction m_instanceCtor;
   InterfaceVec m_interfaces;
   UsedTraitVec m_usedTraits;
   TraitPrecRuleVec m_traitPrecRules;
@@ -347,11 +344,8 @@ private:
   ConstMap m_constants;
 };
 
-// It is possible for multiple Class'es to refer to the same PreClass, and we
-// need to make sure that the PreClass lives for as long as an associated Class
-// still exists (even if the associated Unit has been unloaded).  Therefore,
-// use AtomicSmartPtr's to enforce this invariant.
 typedef AtomicSmartPtr<PreClass> PreClassPtr;
+typedef AtomicSmartPtr<Class> ClassPtr;
 
 /*
  * Class represents the full definition of a user class in a given
@@ -359,14 +353,7 @@ typedef AtomicSmartPtr<PreClass> PreClassPtr;
  *
  * See PreClass for more on the distinction.
  */
-typedef AtomicSmartPtr<Class> ClassPtr;
-class Class : public AtomicCountable {
-public:
-  friend class ExecutionContext;
-  friend class ObjectData;
-  friend class ResourceData;
-  friend class Unit;
-
+struct Class : AtomicCountable {
   enum class Avail {
     False,
     True,
@@ -442,14 +429,17 @@ public:
   typedef std::vector<const Func*> InitVec;
   typedef std::vector<std::pair<const StringData*, const StringData*> >
           TraitAliasVec;
-
   typedef IndexedStringMap<Class*,true,int> InterfaceMap;
+  typedef IndexedStringMap<Func*,false,Slot> MethodMap;
 
-public:
-  // Call newClass() instead of directly calling new.
+  /*
+   * Allocate a new Class object.
+   *
+   * Eventually deallocated using atomicRelease(), but can go through
+   * some phase changes before that (see destroy().)
+   */
   static Class* newClass(PreClass* preClass, Class* parent);
-  Class(PreClass* preClass, Class* parent, unsigned classVecLen);
-  ~Class();
+
   /*
    * destroy() is called when a Class becomes unreachable. This may happen
    * before its refCount hits zero, because it is referred to by
@@ -463,12 +453,14 @@ public:
    * Class.
    */
   void destroy();
+
   /*
    * atomicRelease() is called when the (atomic) refCount hits zero.
    * The class is completely dead at this point, and its memory is
    * freed immediately.
    */
   void atomicRelease();
+
   /*
    * releaseRefs() is called when a Class is put into the zombie state,
    * to free any references to child classes, interfaces and traits
@@ -476,15 +468,12 @@ public:
    * (in case we bypassed the zombie state).
    */
   void releaseRefs();
+
   /*
    * isZombie() returns true if this class has been logically destroyed,
    * but needed to be preserved due to outstanding references.
    */
   bool isZombie() const { return !m_cachedOffset; }
-
-  static size_t sizeForNClasses(unsigned nClasses) {
-    return offsetof(Class, m_classVec) + (sizeof(Class*) * nClasses);
-  }
 
   Avail avail(Class *&parent, bool tryAutoload = false) const;
   bool classof(const Class* cls) const {
@@ -543,6 +532,7 @@ public:
   size_t numStaticProperties() const { return m_staticProperties.size(); }
   const Prop* declProperties() const { return m_declProperties.accessList(); }
   size_t numDeclProperties() const { return m_declProperties.size(); }
+  uint32_t declPropNumAccessible() const { return m_declPropNumAccessible; }
   const Const* constants() const { return m_constants.accessList(); }
   size_t numConstants() const { return m_constants.size(); }
   Attr attrs() const {
@@ -577,7 +567,7 @@ public:
   int getODAttrs() const { return m_ODAttrs; }
 
   int builtinPropSize() const { return m_builtinPropSize; }
-  BuiltinCtorFunction instanceCtor() const { return m_InstanceCtor; }
+  BuiltinCtorFunction instanceCtor() const { return m_instanceCtor; }
   bool isCppSerializable() const;
 
   // Interfaces this class declares in its "implements" clause.
@@ -646,6 +636,12 @@ public:
    */
   DataType clsCnsType(const StringData* clsCnsName) const;
 
+  /*
+   * Tracing interface.  (Returns the set of static properties for the
+   * Tracer.)
+   */
+  void getChildren(std::vector<TypedValue*>& out);
+
   void initialize() const;
   void initPropHandle() const;
   unsigned propHandle() const { return m_propDataCache; }
@@ -655,6 +651,9 @@ public:
   TypedValue* initSProps() const;
   Class* getCached() const;
   void setCached();
+
+  void setInstanceBits();
+  void setInstanceBitsAndParents();
 
   // Returns kInvalidSlot if we can't find this property.
   Slot lookupDeclProp(const StringData* propName) const {
@@ -692,57 +691,37 @@ public:
   static size_t classVecOff() { return offsetof(Class, m_classVec); }
   static size_t classVecLenOff() { return offsetof(Class, m_classVecLen); }
   static Offset getMethodsOffset() { return offsetof(Class, m_methods); }
-  typedef IndexedStringMap<Func*,false,Slot> MethodMap;
+  static ptrdiff_t invokeFuncOff() { return offsetof(Class, m_invoke); }
+  static size_t instanceBitsOff() { return offsetof(Class, m_instanceBits); }
 
-public:
   static hphp_hash_map<const StringData*, const HhbcExtClassInfo*,
                        string_data_hash, string_data_isame> s_extClassHash;
 
-  /*
-   * During warmup, we profile the most common classes involved in
-   * instanceof checks in order to set up a bitmask for each class to
-   * allow these checks to be performed quickly by the JIT.
-   *
-   * initInstanceBits() must be called by the first translation which
-   * uses instance bits, while holding the write lease.  The accessors
-   * for instance bits (haveInstanceBit, getInstanceBitMask) also
-   * require holding the write lease.
-   */
-  static size_t instanceBitsOff() { return offsetof(Class, m_instanceBits); }
-  static void profileInstanceOf(const StringData* name);
-  static void initInstanceBits();
-  static bool haveInstanceBit(const StringData* name);
-  static bool getInstanceBitMask(const StringData* name,
-                                 int& offset, uint8_t& mask);
-
 private:
-  typedef tbb::concurrent_hash_map<
-    const StringData*, uint64_t, pointer_hash<StringData>> InstanceCounts;
-  typedef hphp_hash_map<const StringData*, unsigned,
-                        pointer_hash<StringData>> InstanceBitsMap;
-  typedef std::bitset<128> InstanceBits;
-  static const size_t kInstanceBits = sizeof(InstanceBits) * CHAR_BIT;
-  static InstanceCounts s_instanceCounts;
-  static ReadWriteMutex s_instanceCountsLock;
-  static InstanceBitsMap s_instanceBits;
-  static ReadWriteMutex s_instanceBitsLock;
-  static std::atomic<bool> s_instanceBitsInit;
-
-  struct TraitMethod {
-    Class*            m_trait;
-    Func*             m_method;
-    Attr              m_modifiers;
-    TraitMethod(Class* trait, Func* method, Attr modifiers) :
-        m_trait(trait), m_method(method), m_modifiers(modifiers) { }
-  };
-
   typedef IndexedStringMap<Const,true,Slot> ConstMap;
   typedef IndexedStringMap<Prop,true,Slot> PropMap;
   typedef IndexedStringMap<SProp,true,Slot> SPropMap;
+
+  struct TraitMethod {
+    TraitMethod(Class* trait, Func* method, Attr modifiers)
+      : m_trait(trait)
+      , m_method(method)
+      , m_modifiers(modifiers)
+    {}
+
+    Class* m_trait;
+    Func*  m_method;
+    Attr   m_modifiers;
+  };
   typedef std::list<TraitMethod> TraitMethodList;
   typedef hphp_hash_map<const StringData*, TraitMethodList, string_data_hash,
                         string_data_isame> MethodToTraitListMap;
 
+private:
+  Class(PreClass* preClass, Class* parent, unsigned classVecLen);
+  ~Class();
+
+private:
   void initialize(TypedValue*& sPropData) const;
   HphpArray* initClsCnsData() const;
   PropInitVec* initPropsImpl() const;
@@ -796,10 +775,9 @@ private:
   void setInterfaces();
   void setClassVec();
   void setUsedTraits();
-  void setInstanceBits();
-  void setInstanceBitsAndParents();
   template<bool setParents> void setInstanceBitsImpl();
 
+private:
   PreClassPtr m_preClass;
   ClassPtr m_parent;
   std::vector<ClassPtr> m_declInterfaces; // interfaces this class declares in
@@ -816,6 +794,7 @@ private:
   Func* m_ctor;
   Func* m_dtor;
   Func* m_toString;
+  Func* m_invoke;    // __invoke, iff non-static (or closure)
 
   // Vector of 86pinit() methods that need to be called to complete instance
   // property initialization, and a pointer to a 86sinit() method that needs to
@@ -827,7 +806,9 @@ private:
   // + A static property of this class is accessed.
   InitVec m_pinitVec;
   InitVec m_sinitVec;
+
   const ClassInfo* m_clsInfo;
+
   unsigned m_needInitialization : 1;      // requires initialization,
                                           // due to [ps]init or simply
                                           // having static members
@@ -836,68 +817,44 @@ private:
                                           // on new instances?
   unsigned m_hasDeepInitProps : 1;
   unsigned m_attrCopy : 28;               // cache of m_preClass->attrs().
-  int m_ODAttrs;
+  int32_t m_ODAttrs;
 
-  int m_builtinPropSize;
-  int m_declPropNumAccessible;
+  int32_t m_builtinPropSize;
+  int32_t m_declPropNumAccessible;
   unsigned m_classVecLen;
 public:
   unsigned m_cachedOffset; // used by Unit
 private:
   unsigned m_propDataCache;
   unsigned m_propSDataCache;
-
-  BuiltinCtorFunction m_InstanceCtor;
-
+  BuiltinCtorFunction m_instanceCtor;
   ConstMap m_constants;
 
-  // Properties.
-  //
-  // Each ObjectData is created with enough trailing space to directly store
-  // the vector of declared properties. To look up a property by name and
-  // determine whether it is declared, use m_declPropMap. If the declared
-  // property index is already known (as may be the case when executing via
-  // the TC), property metadata in m_declPropInfo can be directly accessed.
-  //
-  // m_declPropInit is indexed by the Slot values from m_declProperties, and
-  // contains initialization information.
-
+  /*
+   * Each ObjectData is created with enough trailing space to directly store
+   * the vector of declared properties. To look up a property by name and
+   * determine whether it is declared, use m_declPropMap. If the declared
+   * property index is already known (as may be the case when executing via
+   * the TC), property metadata in m_declPropInfo can be directly accessed.
+   *
+   * m_declPropInit is indexed by the Slot values from m_declProperties, and
+   * contains initialization information.
+   */
   PropMap m_declProperties;
   PropInitVec m_declPropInit;
-
   SPropMap m_staticProperties;
 
-  MethodToTraitListMap m_importMethToTraitMap;
-
 public:
-  void getChildren(std::vector<TypedValue *> &out);
+  Class* m_nextClass; // used by Unit
 
-public: // used in Unit
-  Class* m_nextClass;
 private:
-  // m_instanceBits and m_classVec are both used for efficient
-  // instanceof checking in translated code.
-
-  // Bitmap of parent classes and implemented interfaces. Each bit corresponds
-  // to a commonly used class name, determined during the profiling warmup
-  // requests.
-  InstanceBits m_instanceBits;
-  // Vector of Class pointers that encodes the inheritance hierarchy, including
-  // this Class as the last element.
+  // Bitmap of parent classes and implemented interfaces. Each bit
+  // corresponds to a commonly used class name, determined during the
+  // profiling warmup requests.
+  InstanceBits::BitSet m_instanceBits;
+  // Vector of Class pointers that encodes the inheritance hierarchy,
+  // including this Class as the last element.
   Class* m_classVec[1]; // Dynamically sized; must come last.
-};
-
-struct class_hash {
-  size_t operator()(const Class* c) const {
-    return hash_int64((intptr_t)c);
-  }
-};
-
-struct class_same {
-  bool operator()(const Class* c1, const Class* c2) const {
-    assert(c1 && c2);
-    return (void*)c1 == (void*)c2;
-  }
 };
 
 } // HPHP

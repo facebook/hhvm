@@ -50,6 +50,14 @@
             "type": "Int64"
         },
         {
+            "name": "JSON_FB_COLLECTIONS",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_FB_STABLE_MAPS",
+            "type": "Int64"
+        },
+        {
             "name": "JSON_ERROR_NONE",
             "type": "Int64"
         },

@@ -30,24 +30,6 @@ extern const StaticString k_HPHP_TRIM_CHARLIST;
  */
 class StringUtil {
 public:
-  enum class ToUpperType {
-    All,
-    First,
-    Words
-  };
-
-  enum class ToLowerType {
-    All,
-    First,
-    Words
-  };
-
-  enum class TrimType {
-    Left  = 1,
-    Right = 2,
-    Both  = 3
-  };
-
   enum class PadType {
     Left = 0,
     Right = 1,
@@ -67,18 +49,9 @@ public:
    * Manipulations. Note, all these functions will create a new string than
    * modifying input, although names of these functions sound like mutating.
    */
-  static String ToLower(CStrRef input, ToLowerType type = ToLowerType::All);
-  static String ToUpper(CStrRef input, ToUpperType type = ToUpperType::All);
-  static String Trim(CStrRef input, TrimType type = TrimType::Both,
-                     CStrRef charlist = k_HPHP_TRIM_CHARLIST);
   static String Pad(CStrRef input, int final_length,
                     CStrRef pad_string = " ", PadType type = PadType::Right);
-  static String Reverse(CStrRef input);
-  static String Repeat(CStrRef input, int count);
-  static String Shuffle(CStrRef input);
   static String StripHTMLTags(CStrRef input, CStrRef allowable_tags = "");
-  static String WordWrap(CStrRef input, int width,
-                         CStrRef wordbreak = "\n", bool cut = false);
 
   /**
    * Split/joins.
@@ -93,11 +66,6 @@ public:
   /**
    * Encoding/decoding.
    */
-  static String CEncode(CStrRef input, CStrRef charlist);
-  static String CDecode(CStrRef input);
-  static String SqlEncode(CStrRef input);
-  static String SqlDecode(CStrRef input);
-  static String RegExEncode(CStrRef input);
   static String HtmlEncode(CStrRef input, QuoteStyle quoteStyle,
                            const char *charset, bool nbsp);
   static String HtmlEncodeExtra(CStrRef input, QuoteStyle quoteStyle,
@@ -106,8 +74,6 @@ public:
                            const char *charset, bool all);
   static String QuotedPrintableEncode(CStrRef input);
   static String QuotedPrintableDecode(CStrRef input);
-  static String HexEncode(CStrRef input);
-  static String HexDecode(CStrRef input);
   static String UUEncode(CStrRef input);
   static String UUDecode(CStrRef input);
   static String Base64Encode(CStrRef input);

@@ -8,6 +8,10 @@
         {
             "name": "NAN",
             "type": "Double"
+        },
+        {
+            "name": "PHP_DEBUG",
+            "type": "Boolean"
         }
     ],
     "funcs": [

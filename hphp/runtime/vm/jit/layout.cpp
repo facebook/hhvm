@@ -41,7 +41,7 @@ void postorderWalk(smart::vector<Block*>& out,
 }
 
 smart::vector<Block*> rpoForCodegen(const IRFactory& factory, Block* head) {
-  StateVector<Block,bool> visited(&factory, false);
+  StateVector<Block,bool> visited(factory, false);
   smart::vector<Block*> ret;
   ret.reserve(factory.numBlocks());
   postorderWalk(ret, visited, head);

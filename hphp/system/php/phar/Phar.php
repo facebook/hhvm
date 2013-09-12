@@ -980,7 +980,7 @@ class Phar extends RecursiveDirectoryIterator
    */
   private static function resolveDotDots($pieces) {
     $starts_with_slash = false;
-    if (count($pieces[0]) > 0 && !$pieces[0]) {
+    if (count($pieces) > 0 && !$pieces[0]) {
       $starts_with_slash = true;
     }
 
@@ -1005,25 +1005,71 @@ class Phar extends RecursiveDirectoryIterator
 
   /**
    * For the stream wrapper to stat a file. Same response format as stat().
+   * Called from C++.
    */
-  public static function stat($full_filename) {
+  private static function stat($full_filename) {
     list($phar, $filename) = self::getPharAndFile($full_filename);
     if (!isset($phar->fileInfo[$filename])) {
-      return false;
+      $dir = self::opendir($full_filename);
+      if (!$dir) {
+        return false;
+      }
+
+      return array(
+        'size' => 0,
+        'atime' => 0,
+        'mtime' => 0,
+        'ctime' => 0,
+        'mode' => POSIX_S_IFDIR,
+      );
     }
+
     $info = $phar->fileInfo[$filename];
     return array(
       'size' => $info[0],
       'atime' => $info[1],
       'mtime' => $info[1],
       'ctime' => $info[1],
+      'mode' => POSIX_S_IFREG,
     );
   }
 
   /**
-   * Used by the stream wrapper to open phar:// files
+   * Simulates opendir() and readdir() and rewinddir() using an array.
+   * Returns any files that start with $prefix.
+   * Called from C++.
    */
-  public static function openPhar($full_filename) {
+  private static function opendir($full_prefix) {
+    list($phar, $prefix) = self::getPharAndFile($full_prefix);
+    $prefix = rtrim($prefix, '/');
+
+    $ret = array();
+    foreach ($phar->fileInfo as $filename => $_) {
+      if (!$prefix) {
+        if (strpos($filename, '/') === false) {
+          $ret[$filename] = true;
+        }
+      } else {
+        if (strpos($filename, $prefix) === 0) {
+          $entry = substr($filename, strlen($prefix) + 1);
+          if (strlen($entry) > 0) {
+            $next_slash = strpos($entry, '/');
+            if ($next_slash !== false) {
+              $entry = substr($entry, 0, $next_slash);
+            }
+            $ret[$entry] = true;
+          }
+        }
+      }
+    }
+    return array_keys($ret);
+  }
+
+  /**
+   * Used by the stream wrapper to open phar:// files.
+   * Called from C++.
+   */
+  private static function openPhar($full_filename) {
     list($phar, $filename) = self::getPharAndFile($full_filename);
     return $phar->getFileData($filename);
   }

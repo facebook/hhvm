@@ -78,7 +78,7 @@ TransCFG::TransCFG(FuncId funcId,
   // add nodes
   for (TransID tid = 0; tid < profData->numTrans(); tid++) {
     if (profData->transKind(tid) == TransProfile &&
-        profData->transBlock(tid) != nullptr &&
+        profData->transRegion(tid) != nullptr &&
         profData->transFuncId(tid) == funcId) {
       int64_t counter = profData->transCounter(tid);
       int64_t weight  = RuntimeOption::EvalJitPGOThreshold - counter;

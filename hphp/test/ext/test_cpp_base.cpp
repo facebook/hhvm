@@ -28,6 +28,7 @@
 #include "hphp/runtime/server/ip-block-map.h"
 #include "hphp/test/ext/test_mysql_info.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/ext/ext_string.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -170,7 +171,7 @@ bool TestCppBase::TestString() {
 
   // manipulations
   {
-    String s = StringUtil::ToLower("Test");
+    String s = f_strtolower("Test");
     VS(s.c_str(), "test");
   }
 
@@ -644,6 +645,13 @@ bool TestCppBase::TestVariant() {
     VS(v[Variant(1.5)], "test");
     VS(v[s_1], "test");
     VS(v[Variant("1")], "test");
+  }
+  {
+    Variant v = "asd";
+    v.set(0, "b");
+    VS(v, "bsd");
+    v.set(6, "c");
+    VS(v, "bsd   c");
   }
 
   // membership

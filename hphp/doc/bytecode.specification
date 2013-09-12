@@ -720,6 +720,9 @@ location descriptors is given below:
       a classref and whose name is given by value of a cell.
   C - cell; location is a temporary value given by a cell.
   R - return value; location is a temporary value given by a cell or a ref
+  H - $this; location is the $this pointer in the current frame. Must
+      only be used in a frame that is known to have a non-null $this
+      pointer; CheckThis is most commonly used to ensure this.
 
 There are several groups of similarly named instructions where the name of each
 instruction ends with a different location descriptor (for example, Set*). Each
@@ -756,7 +759,7 @@ number of cells from the stack. In most cases the immediate vector arguments
 are ordered such that the loc-desc comes first (deepest in the stack), with the
 last M-vector element last (shallowest in the stack). However, classrefs that
 are part of the BaseSC and BaseSL loc-desc inputs always come last (the cell
-input to BaseSC comes first though).  Instuctions accepting an immediate vector 
+input to BaseSC comes first though).  Instuctions accepting an immediate vector
 containing a list of iterators and iterator types use the notation "<iter-vec>".
 
 In addition to describing each instruction, this instruction set documentation
@@ -1999,6 +2002,11 @@ BaseSL <local variable id>    [A]  ->  [B]
   outputs a base that references the static property. Otherwise, this operation
   throws a fatal error.
 
+BaseH     []  ->  [B]
+
+  Get base from $this. This operation assumes that the current frame contains a
+  valid $this pointer and outputs a base containing the object in $this.
+
 ElemC                        [C B]  ->  [B]
 ElemL <local variable id>    [B]  ->  [B]
 
@@ -3101,6 +3109,7 @@ CGetM <loc-desc/M-vector>    [C..C]  ->  [C]
     GL         | BaseGLW
     SC         | BaseSC
     SL         | BaseSL
+    H          | BaseH
 
 VGetM <loc-desc/M-vector>    [C..C]  ->  [V]
 
@@ -3118,6 +3127,7 @@ VGetM <loc-desc/M-vector>    [C..C]  ->  [V]
     GL         | BaseGLD
     SC         | BaseSC
     SL         | BaseSL
+    H          | BaseH
 
 FPassM <param id> <loc-desc/M-vector>    [C..C]  ->  [F]
 
@@ -3141,6 +3151,7 @@ IssetM <loc-desc/M-vector>    [C..C]  ->  [C:Bool]
     GL         | BaseGL
     SC         | BaseSC
     SL         | BaseSL
+    H          | BaseH
 
 EmptyM <loc-desc/M-vector>    [C..C]  ->  [C:Bool]
 
@@ -3158,6 +3169,7 @@ EmptyM <loc-desc/M-vector>    [C..C]  ->  [C:Bool]
     GL         | BaseGL
     SC         | BaseSC
     SL         | BaseSL
+    H          | BaseH
 
 SetM <loc-desc/M-vector>    [C..C C]  ->  [C]
 
@@ -3175,6 +3187,7 @@ SetM <loc-desc/M-vector>    [C..C C]  ->  [C]
     GL         | BaseGLD
     SC         | BaseSC
     SL         | BaseSL
+    H          | BaseH
 
 SetWithRefLM <loc-desc/M-vector> <local variable id> [C..C] -> []
 
@@ -3192,6 +3205,7 @@ SetWithRefLM <loc-desc/M-vector> <local variable id> [C..C] -> []
     GL         | BaseGLD
     SC         | BaseSC
     SL         | BaseSL
+    H          | BaseH
 
 SetWithRefRM <loc-desc/M-vector> [C..C R] -> []
 
@@ -3209,6 +3223,7 @@ SetWithRefRM <loc-desc/M-vector> [C..C R] -> []
     GL         | BaseGLD
     SC         | BaseSC
     SL         | BaseSL
+    H          | BaseH
 
 SetOpM <op> <loc-desc/M-vector>    [C..C C]  ->  [C]
 
@@ -3226,6 +3241,7 @@ SetOpM <op> <loc-desc/M-vector>    [C..C C]  ->  [C]
     GL         | BaseGLWD
     SC         | BaseSC
     SL         | BaseSL
+    H          | BaseH
 
 IncDecM <op> <loc-desc/M-vector>    [C..C]  ->  [C]
 
@@ -3243,6 +3259,7 @@ IncDecM <op> <loc-desc/M-vector>    [C..C]  ->  [C]
     GL         | BaseGLWD
     SC         | BaseSC
     SL         | BaseSL
+    H          | BaseH
 
 BindM <loc-desc/M-vector>    [C..C V]  ->  [V]
 
@@ -3260,6 +3277,7 @@ BindM <loc-desc/M-vector>    [C..C V]  ->  [V]
     GL         | BaseGLD
     SC         | BaseSC
     SL         | BaseSL
+    H          | BaseH
 
 UnsetM <loc-desc/M-vector>    [C..C]  ->  []
 
@@ -3277,6 +3295,7 @@ UnsetM <loc-desc/M-vector>    [C..C]  ->  []
     GL         | BaseGL
     SC         | BaseSC
     SL         | BaseSL
+    H          | BaseH
 
 
 11. Iterator instructions
@@ -3613,7 +3632,8 @@ InitThisLoc <local variable id>    []  ->  []
 
   Initialize this local variable. This instruction checks the current instance,
   and if it is not null this instruction stores it to the specified local
-  variable. If the current instance is null, this instruction does nothing.
+  variable. If the current instance is null, or if this bytecode appears in
+  a function body that is not a class method, this instruction does nothing.
 
 StaticLoc <local variable id> <litstr id>    []  ->  [C:Bool]
 
@@ -3721,6 +3741,13 @@ CreateCont <function name>    []  ->  [C]
   Continuation will store a reference to the function named by the string
   immediate to be used as its body.
 
+CreateAsync <function name> <label id> <number of iterators>   [C]  ->  [C]
+
+  Analogy of CreateCont for async functions. Creates a Continuation object, 
+  updates its label with <label id> immediate and stores a value from the stack 
+  to its m_value field. Unlike CreateCont, it also copies the first 
+  <number of iterators> iterators into the continuation frame.
+
 ContEnter [C]  ->  []
 
   This instruction may only appear in non-static methods of the Continuation
@@ -3795,7 +3822,6 @@ ContHandle    [C]  ->  []
   Handle exception from continuation body. $this must be a Continuation
   object. Marks the continuation as no longer running and finished and rethrows
   the exception on the top of the stack.
-
 
 Basic statement transformations
 -------------------------------

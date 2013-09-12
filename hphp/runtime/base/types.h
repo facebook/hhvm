@@ -314,7 +314,6 @@ public:
 public:
   static DECLARE_THREAD_LOCAL_NO_CHECK(ThreadInfo, s_threadInfo);
 
-  std::vector<ObjectAllocatorBase *> m_allocators;
   RequestInjectionData m_reqInjectionData;
 
   // For infinite recursion detection.  m_stacklimit is the lowest
@@ -349,15 +348,6 @@ public:
   void onSessionExit();
   void setPendingException(Exception* e);
   void clearPendingException();
-  ObjectAllocatorBase* instanceSizeAllocator(size_t size) {
-    int index = object_alloc_size_to_index(size);
-    ASSERT_NOT_IMPLEMENTED(index != -1);
-    return m_allocators[index];
-  }
-
-  ObjectAllocatorBase* instanceIdxAllocator(int index) {
-    return m_allocators[index];
-  }
 
   static bool valid(ThreadInfo* info);
 };
@@ -372,10 +362,6 @@ inline void* stack_top_ptr() {
 
 inline bool stack_in_bounds(ThreadInfo *&info) {
   return stack_top_ptr() >= info->m_stacklimit;
-}
-
-inline bool is_stack_ptr(void* p) {
-  return p > stack_top_ptr() && ThreadInfo::t_stackbase >= p;
 }
 
 // The ThreadInfo pointer itself must be from the current stack frame.
@@ -536,6 +522,7 @@ enum Attr {
   AttrBuiltin = (1 << 20),       //                     X    //
   AttrAllowOverride = (1 << 21), //                     X    //
   AttrSkipFrame = (1 << 22),     //                     X    //
+  AttrNative = (1 << 23),        //                     X    //
 };
 
 inline Attr operator|(Attr a, Attr b) { return Attr((int)a | (int)b); }

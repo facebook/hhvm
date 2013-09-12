@@ -1,0 +1,4 @@
+HipHop Fatal error: Uncaught exception 'Exception' with message 'test' in %s/test/slow/error_handler/1371.php:14
+Stack trace:
+#0 {main}
+string(15) "Exception: test"

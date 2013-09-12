@@ -1,0 +1,36 @@
+HipHop Warning: no Directory resource supplied in %s/test/slow/ext_phar/opendir.php on line 3
+bool(false)
+resource(4) of type (Directory)
+string(9) "index.php"
+bool(false)
+string(9) "index.php"
+bool(false)
+array(1) {
+  [0]=>
+  string(9) "index.php"
+}
+HipHop Warning: No such file or directory in %s/test/slow/ext_phar/opendir.php on line 15
+bool(false)
+resource(5) of type (Directory)
+array(5) {
+  [0]=>
+  bool(false)
+  [1]=>
+  string(18) "ChangeLog.markdown"
+  [2]=>
+  string(4) "File"
+  [3]=>
+  string(7) "LICENSE"
+  [4]=>
+  string(15) "README.markdown"
+}
+array(4) {
+  [0]=>
+  string(18) "ChangeLog.markdown"
+  [1]=>
+  string(4) "File"
+  [2]=>
+  string(7) "LICENSE"
+  [3]=>
+  string(15) "README.markdown"
+}

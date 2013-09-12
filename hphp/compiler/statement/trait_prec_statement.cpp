@@ -90,13 +90,13 @@ int TraitPrecStatement::getKidCount() const {
 void TraitPrecStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_traitName = boost::dynamic_pointer_cast<ScalarExpression>(cp);
+      m_traitName = dynamic_pointer_cast<ScalarExpression>(cp);
       break;
     case 1:
-      m_methodName = boost::dynamic_pointer_cast<ScalarExpression>(cp);
+      m_methodName = dynamic_pointer_cast<ScalarExpression>(cp);
       break;
     case 2:
-      m_otherTraitNames = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      m_otherTraitNames = dynamic_pointer_cast<ExpressionList>(cp);
       break;
     default:
       assert(false);

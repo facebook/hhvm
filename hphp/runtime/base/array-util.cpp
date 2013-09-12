@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/ext_string.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,10 +52,6 @@ Variant ArrayUtil::CreateArray(int start_index, int num, CVarRef value) {
 Variant ArrayUtil::Combine(CArrRef keys, CArrRef values) {
   if (keys.size() != values.size()) {
     throw_invalid_argument("keys and values not same count");
-    return false;
-  }
-  if (keys.empty()) {
-    throw_invalid_argument("keys and values empty");
     return false;
   }
 
@@ -483,9 +480,9 @@ Variant ArrayUtil::ChangeKeyCase(CArrRef input, bool lower) {
     Variant key(iter.first());
     if (key.isString()) {
       if (lower) {
-        ret.set(StringUtil::ToLower(key.toString()), iter.secondRef());
+        ret.set(f_strtolower(key.toString()), iter.secondRef());
       } else {
-        ret.set(StringUtil::ToUpper(key.toString()), iter.secondRef());
+        ret.set(f_strtoupper(key.toString()), iter.secondRef());
       }
     } else {
       ret.set(key, iter.secondRef());

@@ -73,6 +73,9 @@ void TypeConstraint::init() {
       { StringData::GetStaticString("array"),    { KindOfArray,
                                                    MetaType::Precise }},
 
+      { StringData::GetStaticString("resource"), { KindOfResource,
+                                                   MetaType::Precise }},
+
       { StringData::GetStaticString("self"),     { KindOfObject,
                                                    MetaType::Self }},
       { StringData::GetStaticString("parent"),   { KindOfObject,
@@ -85,12 +88,21 @@ void TypeConstraint::init() {
     }
   }
 
+  if (isTypeVar()) {
+    // We kept the type variable type constraint to correctly check child
+    // classes implementing abstract methods or interfaces.
+    //
+    // This type constraint is never actually used, so we can just return.
+    // We could also do:
+    // m_type.m_dt = KindOfAny;
+    return;
+  }
   if (m_typeName && isExtended()) {
     assert(nullable() &&
            "Only nullable extended type hints are implemented");
   }
 
-  if (blacklistedName(m_typeName)) {
+  if (isExtended() && blacklistedName(m_typeName)) {
     m_typeName = nullptr;
   }
   if (m_typeName == nullptr) {
@@ -176,7 +188,7 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
     // Perfect match seems common enough to be worth skipping the hash
     // table lookup.
     if (m_typeName->isame(tv->m_data.pobj->getVMClass()->name())) {
-      if (shouldProfile()) Class::profileInstanceOf(m_typeName);
+      if (shouldProfile()) InstanceBits::profile(m_typeName);
       return true;
     }
     const Class *c = nullptr;
@@ -197,7 +209,7 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
       c = Unit::lookupClass(m_namedEntity);
     }
     if (shouldProfile() && c) {
-      Class::profileInstanceOf(c->preClass()->name());
+      InstanceBits::profile(c->preClass()->name());
     }
     if (c && tv->m_data.pobj->instanceof(c)) {
       return true;
@@ -205,13 +217,33 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
     return !selfOrParentOrCallable && checkTypedefObj(tv);
   }
 
-  if (tv->m_type == KindOfArray &&
-      isObjectOrTypedef() &&
-      interface_supports_array(m_typeName)) {
-    return true;
-  }
-
   if (isObjectOrTypedef()) {
+    switch (tv->m_type) {
+      case KindOfArray:
+        if (interface_supports_array(m_typeName)) {
+          return true;
+        }
+        break;
+      case KindOfString:
+      case KindOfStaticString:
+        if (interface_supports_string(m_typeName)) {
+          return true;
+        }
+        break;
+      case KindOfInt64:
+        if (interface_supports_int(m_typeName)) {
+          return true;
+        }
+        break;
+      case KindOfDouble:
+        if (interface_supports_double(m_typeName)) {
+          return true;
+        }
+        break;
+      default:
+        break;
+    }
+
     if (isCallable()) {
       return f_is_callable(tvAsCVarRef(tv));
     }

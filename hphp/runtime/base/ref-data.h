@@ -96,7 +96,7 @@ private:
 #if defined(DEBUG) || defined(PACKED_TV)
 private:
   Magic m_magic;
-  int32_t m_padding;
+  UNUSED int32_t m_padding;
 public:
   mutable RefCount m_count;
 private:
@@ -115,7 +115,7 @@ public:
 #endif
 };
 
-ALWAYS_INLINE inline void decRefRef(RefData* ref) {
+ALWAYS_INLINE void decRefRef(RefData* ref) {
   if (ref->decRefCount() == 0) ref->release();
 }
 

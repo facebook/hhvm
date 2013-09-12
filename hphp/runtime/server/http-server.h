@@ -49,6 +49,7 @@ public:
   void takeoverShutdown(HPHP::Server* server);
 
   ServerPtr getPageServer() { return m_pageServer;}
+  void getSatelliteStats(vector<std::pair<std::string, int>> *stats);
 
 private:
   bool m_stopped;

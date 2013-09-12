@@ -107,13 +107,13 @@ int CatchStatement::getKidCount() const {
 void CatchStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_variable = boost::dynamic_pointer_cast<SimpleVariable>(cp);
+      m_variable = dynamic_pointer_cast<SimpleVariable>(cp);
       break;
     case 1:
-      m_stmt = boost::dynamic_pointer_cast<Statement>(cp);
+      m_stmt = dynamic_pointer_cast<Statement>(cp);
       break;
     case 2:
-      m_finallyStmt = boost::dynamic_pointer_cast<Statement>(cp);
+      m_finallyStmt = dynamic_pointer_cast<Statement>(cp);
     default:
       assert(false);
       break;

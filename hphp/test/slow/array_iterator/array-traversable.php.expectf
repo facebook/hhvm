@@ -11,4 +11,4 @@ array(0) {
 Indexish Array 
 array(0) {
 }
-HipHop Fatal error: Argument 1 passed to ifoo() must be an instance of IFoo, array given in %s on line %d
+HipHop Fatal error: Argument 1 passed to ifoo() must be an instance of IFoo, array given in %s/test/slow/array_iterator/array-traversable.php on line 20

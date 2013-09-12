@@ -23,15 +23,7 @@ namespace JIT {
 RegionDescPtr selectHotBlock(TransID transId,
                              const ProfData* profData,
                              const TransCFG& cfg) {
-  RegionDescPtr region = smart::make_unique<JIT::RegionDesc>();
-
-  RegionDesc::BlockPtr block = profData->transBlock(transId);
-
-  if (block != nullptr) {
-    region->blocks.emplace_back(block);
-  }
-
-  return region;
+  return profData->transRegion(transId);
 }
 
 } }

@@ -44,7 +44,7 @@ inline void HphpArray::initHash(size_t tableSize) {
   m_hLoad = 0;
 }
 
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray::ElmInd* HphpArray::findForNewInsert(size_t h0) const {
   assert(!isPacked());
   size_t tableMask = m_tableMask;
@@ -71,7 +71,7 @@ inline void HphpArray::getElmKey(const Elm& e, TypedValue* out) {
   str->incRefCount();
 }
 
-template <bool withRef> inline ALWAYS_INLINE
+template <bool withRef> ALWAYS_INLINE
 void HphpArray::getArrayElm(ssize_t pos, TypedValue* valOut,
                             TypedValue* keyOut) const {
   assert(size_t(pos) < m_used);

@@ -33,17 +33,6 @@ namespace HPHP {
  */
 const std::size_t kExpectedMPxOffset = 0;
 
-/**
- * Work with Countable to implement reference counting. For example,
- *
- *   class MyClassData : public Countable {
- *     // now MyClassData has a counter to keep track of references
- *   };
- *
- *   class MyClass : public SmartPtr<MyClassData> {
- *     // now MyClassData becomes an inner pointer that's managed by SmartPtr
- *   };
- */
 template<typename T>
 class SmartPtr {
 public:
@@ -163,23 +152,25 @@ private:
  * Thread-safe ref-counting smart pointer.
  */
 template<typename T>
-class AtomicSmartPtr {
-public:
-  AtomicSmartPtr() : m_px(nullptr) {}
-  explicit AtomicSmartPtr(T* px) : m_px(px) {
+struct AtomicSmartPtr {
+  explicit AtomicSmartPtr(T* px = nullptr) : m_px(px) {
     if (m_px) m_px->incAtomicCount();
   }
+
   template<class Y>
   explicit AtomicSmartPtr(Y* px) : m_px(px) {
     if (m_px) m_px->incAtomicCount();
   }
+
   AtomicSmartPtr(const AtomicSmartPtr<T>& src) : m_px(nullptr) {
     operator=(src.get());
   }
+
   template<class Y>
   AtomicSmartPtr(const AtomicSmartPtr<Y>& src) : m_px(nullptr) {
     operator=(src.get());
   }
+
   ~AtomicSmartPtr() {
     if (m_px && m_px->decAtomicCount() == 0) {
       m_px->atomicRelease();
@@ -199,7 +190,7 @@ public:
   AtomicSmartPtr& operator=(T* px) {
     if (m_px != px) {
       if (m_px && m_px->decAtomicCount() == 0) {
-        delete m_px;
+        m_px->atomicRelease();
       }
       m_px = px;
       if (m_px) {
@@ -213,7 +204,7 @@ public:
     T* npx = dynamic_cast<T*>(px);
     if (m_px != npx) {
       if (m_px && m_px->decAtomicCount() == 0) {
-        delete m_px;
+        m_px->atomicRelease();
       }
       m_px = npx;
       if (m_px) {
@@ -245,8 +236,8 @@ public:
     operator=((T*)nullptr);
   }
 
-protected:
-  T* m_px; // raw pointer
+private:
+  T* m_px;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -23,7 +23,11 @@
 
 #include <boost/noncopyable.hpp>
 
-namespace HPHP { namespace Stream {
+namespace HPHP {
+
+class Directory;
+
+namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////
 
 class Wrapper : boost::noncopyable {
@@ -42,6 +46,9 @@ class Wrapper : boost::noncopyable {
   virtual int stat(CStrRef path, struct stat* buf) {
     return -1;
   }
+  virtual Directory* opendir(CStrRef path) {
+    return nullptr;
+  }
 
   virtual ~Wrapper() {}
 
@@ -52,6 +59,7 @@ class Wrapper : boost::noncopyable {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
+}
 
 #endif // HPHP_STREAM_WRAPPER_REGISTRY_H

@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/plain-file.h"
+#include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/server/static-content-cache.h"
 #include <memory>
 
@@ -55,6 +56,17 @@ File* FileStreamWrapper::open(CStrRef filename, CStrRef mode,
     return nullptr;
   }
   return file.release();
+}
+
+Directory* FileStreamWrapper::opendir(CStrRef path) {
+  std::unique_ptr<PlainDirectory> dir(
+    NEWOBJ(PlainDirectory)(File::TranslatePath(path))
+  );
+  if (!dir->isValid()) {
+    raise_warning("%s", dir->getLastError().c_str());
+    return nullptr;
+  }
+  return dir.release();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

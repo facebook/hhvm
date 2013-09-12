@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/ext/util.h"
 #include "hphp/util/util.h"
 
 namespace HPHP {
@@ -72,7 +73,7 @@ bool f_class_alias(CStrRef original,
                    bool autoload /* = true */) {
   auto const origClass =
     autoload ? Unit::loadClass(original.get())
-             : Unit::lookupClass(original.get());
+             : lookup_class(original.get());
   if (!origClass) {
     raise_warning("Class %s not found", original->data());
     return false;
@@ -135,8 +136,8 @@ Array f_get_class_constants(CStrRef class_name) {
 }
 
 Array vm_get_class_vars(CStrRef className) {
-  Class* cls = Unit::lookupClass(className.get());
-  if (cls == NULL) {
+  const Class* cls = lookup_class(className.get());
+  if (!cls) {
     raise_error("Unknown class %s", className->data());
   }
   cls->initialize();
@@ -228,7 +229,7 @@ Variant f_get_parent_class(CVarRef object /* = null_variant */) {
     return false;
   }
 
-  Class* cls = Unit::lookupClass(class_name.toString().get());
+  const Class* cls = lookup_class(class_name.toString().get());
   if (cls) {
     auto& parentClass = *(const String*)(&cls->parentRef());
     if (!parentClass.empty()) {
@@ -247,7 +248,7 @@ static bool is_a_impl(CVarRef class_or_object, CStrRef class_name,
   const Class* cls = get_cls(class_or_object);
   if (!cls) return false;
   if (cls->attrs() & AttrTrait) return false;
-  const Class* other = Unit::lookupClass(class_name.get());
+  const Class* other = lookup_class(class_name.get());
   if (!other) return false;
   if (other->attrs() & AttrTrait) return false;
   if (other == cls) return !subclass_only;
@@ -288,7 +289,7 @@ Variant f_property_exists(CVarRef class_or_object, CStrRef property) {
     return Variant(Variant::NullInit());
   }
 
-  Class* cls = Unit::lookupClass(get_classname(class_or_object).get());
+  Class* cls = lookup_class(get_classname(class_or_object).get());
   if (!cls) {
     return false;
   }

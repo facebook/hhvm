@@ -209,7 +209,7 @@ public:
 
 class MySQLResult : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(MySQLResult);
+  DECLARE_RESOURCE_ALLOCATION(MySQLResult);
 
   explicit MySQLResult(MYSQL_RES *res, bool localized = false);
   virtual ~MySQLResult();

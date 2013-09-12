@@ -344,7 +344,7 @@ ConstructPtr SimpleFunctionCall::getNthKid(int n) const {
 
 void SimpleFunctionCall::setNthKid(int n, ConstructPtr cp) {
   if (n == 1) {
-    m_safeDef = boost::dynamic_pointer_cast<Expression>(cp);
+    m_safeDef = dynamic_pointer_cast<Expression>(cp);
   } else {
     FunctionCall::setNthKid(n, cp);
   }

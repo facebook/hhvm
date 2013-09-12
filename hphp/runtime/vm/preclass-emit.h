@@ -160,7 +160,7 @@ class PreClassEmitter {
   const StringData* m_docComment;
   Id m_id;
   PreClass::Hoistable m_hoistable;
-  BuiltinCtorFunction m_InstanceCtor;
+  BuiltinCtorFunction m_instanceCtor;
   int m_builtinPropSize;
 
   std::vector<const StringData*> m_interfaces;

@@ -1,0 +1,25 @@
+1	NNNN	array(array('a' => 1)) <> true	
+2	YYYY	array(array('a' => 1)) <> false	
+3	YYYY	array(array('a' => 1)) <> 1	
+4	YYYY	array(array('a' => 1)) <> 0	
+5	YYYY	array(array('a' => 1)) <> -1	
+6	YYYY	array(array('a' => 1)) <> '1'	
+7	YYYY	array(array('a' => 1)) <> '0'	
+8	YYYY	array(array('a' => 1)) <> '-1'	
+9	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/931.php on line 126
+YHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/931.php on line 130
+YHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/931.php on line 133
+YY	array(array('a' => 1)) <> nullptr	
+10	YYYY	array(array('a' => 1)) <> array()	
+11	YYYY	array(array('a' => 1)) <> array(1)	
+12	YYYY	array(array('a' => 1)) <> array(2)	
+13	YYYY	array(array('a' => 1)) <> array('1')	
+14	YYYY	array(array('a' => 1)) <> array('0' => '1')	
+15	YYYY	array(array('a' => 1)) <> array('a')	
+16	YYYY	array(array('a' => 1)) <> array('a' => 1)	
+17	YYYY	array(array('a' => 1)) <> array('b' => 1)	
+18	YYYY	array(array('a' => 1)) <> array('a' => 1, 'b' => 2)	
+19	NNNN	array(array('a' => 1)) <> array(array('a' => 1))	
+20	YYYY	array(array('a' => 1)) <> array(array('b' => 1))	
+21	YYYY	array(array('a' => 1)) <> 'php'	
+22	YYYY	array(array('a' => 1)) <> ''	

@@ -22,16 +22,11 @@
 #include "hphp/runtime/vm/jit/ir-factory.h"
 #include "hphp/runtime/vm/jit/linear-scan.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 
-namespace HPHP {
-
-namespace Transl {
-class CppCall;
-}
-
-namespace JIT {
+namespace HPHP { namespace JIT {
 
 struct ArgGroup;
 
@@ -66,7 +61,7 @@ enum class SyncOptions {
 
 // Information about where code was generated, for pretty-printing.
 struct AsmInfo {
-  explicit AsmInfo(const IRFactory* factory)
+  explicit AsmInfo(const IRFactory& factory)
     : instRanges(factory, TcaRange(nullptr, nullptr))
     , asmRanges(factory, TcaRange(nullptr, nullptr))
     , astubRanges(factory, TcaRange(nullptr, nullptr))
@@ -83,7 +78,7 @@ typedef StateVector<IRInstruction, RegSet> LiveRegs;
 // Stuff we need to preserve between blocks while generating code,
 // and address information produced during codegen.
 struct CodegenState {
-  CodegenState(const IRFactory* factory, const RegAllocInfo& regs,
+  CodegenState(const IRFactory& factory, const RegAllocInfo& regs,
                const LiveRegs& liveRegs, const LifetimeInfo* lifetime,
                AsmInfo* asmInfo)
     : patches(factory, nullptr)
@@ -168,26 +163,38 @@ private:
 
   // Main call helper:
   void cgCallHelper(Asm& a,
-                    const Transl::CppCall& call,
+                    const CppCall& call,
                     const CallDest& dstInfo,
                     SyncOptions sync,
                     ArgGroup& args,
                     RegSet toSave);
   // Overload to make the toSave RegSet optional:
   void cgCallHelper(Asm& a,
-                    const Transl::CppCall& call,
+                    const CppCall& call,
                     const CallDest& dstInfo,
                     SyncOptions sync,
                     ArgGroup& args);
   void cgInterpOneCommon(IRInstruction* inst);
 
-  void cgStore(PhysReg base,
-               int64_t off,
+  template<class MemRef>
+  void cgStore(MemRef dst,
                SSATmp* src,
                bool genStoreType = true);
-  void cgStoreTypedValue(PhysReg base, int64_t off, SSATmp* src);
+  template<class MemRef>
+  void cgStoreTypedValue(MemRef dst, SSATmp* src);
 
-  void cgLoad(PhysReg base, int64_t off, IRInstruction* inst);
+  // helpers to load a value in dst. When label is not null a type check
+  // is performed against value to ensure it is of the type expected by dst
+  template<class MemRef>
+  void cgLoad(SSATmp* dst, MemRef value, Block* label = nullptr);
+  template<class MemRef>
+  void cgLoadTypedValue(SSATmp* dst, MemRef base, Block* label = nullptr);
+
+  // internal helper to manage register conflicts from (Indexed)MemoryRef
+  // source to PhysReg destination. They may fail in resolving conflicts
+  // in which case the returned *MemoryRef will have an InvalidReg base.
+  IndexedMemoryRef resolveRegCollision(PhysReg dst, IndexedMemoryRef value);
+  MemoryRef resolveRegCollision(PhysReg dst, MemoryRef value);
 
   template<class Loc1, class Loc2, class JmpFn>
   void emitTypeTest(Type type,
@@ -246,8 +253,6 @@ private:
   void emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,
                                     PhysReg      thisReg,
                                     Transl::TargetCache::CacheHandle& ch);
-
-  void cgLoadTypedValue(PhysReg base, int64_t off, IRInstruction* inst);
 
   void cgJcc(IRInstruction* inst);        // helper
   void cgReqBindJcc(IRInstruction* inst); // helper
@@ -404,8 +409,8 @@ private:
   void print() const;
 
 private:
-  Asm&                m_as;       // current "main" assembler
-  Asm&                m_astubs;   // assembler for stubs and other cold code.
+  Asm&                m_as;  // current "main" assembler
+  Asm&                m_astubs; // for stubs and other cold code
   TranslatorX64*      m_tx64;
   CodegenState&       m_state;
   const RegAllocInfo& m_regs;
@@ -589,9 +594,9 @@ const Func* loadClassCtor(Class* cls);
 ObjectData* createClHelper(Class*, int, ActRec*, TypedValue*);
 
 void genCodeForTrace(IRTrace*                trace,
-                     CodeGenerator::Asm&     a,
-                     CodeGenerator::Asm&     astubs,
-                     IRFactory*              irFactory,
+                     CodeBlock&              mainCode,
+                     CodeBlock&              stubsCode,
+                     IRFactory&              irFactory,
                      vector<TransBCMapping>* bcMap,
                      TranslatorX64*          tx64,
                      const RegAllocInfo&     regs,

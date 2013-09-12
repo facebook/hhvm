@@ -34,6 +34,7 @@
 #include "hphp/runtime/vm/func-inline.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/native.h"
 #include "hphp/parser/parser.h"
 
 namespace HPHP {
@@ -66,7 +67,8 @@ void Func::parametersCompat(const PreClass* preClass, const Func* imeth) const {
   // imeth's corresponding parameter typehints.
   unsigned firstOptional = 0;
   for (unsigned i = 0; i < iparams.size(); ++i) {
-    if (!params[i].typeConstraint().compat(iparams[i].typeConstraint())) {
+    if (!params[i].typeConstraint().compat(iparams[i].typeConstraint())
+        && !iparams[i].typeConstraint().isTypeVar()) {
       decl_incompat(preClass, imeth);
     }
     if (!iparams[i].hasDefaultValue()) {
@@ -113,6 +115,11 @@ const Func* Func::fromFuncId(FuncId id) {
   return func;
 }
 
+bool Func::isFuncIdValid(FuncId id) {
+  assert(id < s_nextFuncId);
+  return s_funcVec.get(id) != nullptr;
+}
+
 void Func::setFullName() {
   assert(m_name->isStatic());
   if (m_cls) {
@@ -131,7 +138,9 @@ void Func::setFullName() {
 }
 
 void Func::initPrologues(int numParams) {
-  m_funcBody = (TCA)HPHP::Transl::funcBodyHelperThunk;
+  auto const& stubs = Translator::Get()->uniqueStubs;
+
+  m_funcBody = stubs.funcBodyHelperThunk;
 
   int maxNumPrologues = Func::getMaxNumPrologues(numParams);
   int numPrologues =
@@ -140,7 +149,7 @@ void Func::initPrologues(int numParams) {
 
   TRACE(2, "initPrologues func %p %d\n", this, numPrologues);
   for (int i = 0; i < numPrologues; i++) {
-    m_prologueTable[i] = (TCA)HPHP::Transl::fcallHelperThunk;
+    m_prologueTable[i] = stubs.fcallHelperThunk;
   }
 }
 
@@ -476,28 +485,33 @@ Id Func::lookupVarId(const StringData* name) const {
   return shared()->m_localNames.findIndex(name);
 }
 
+static void print_attrs(std::ostream& out, Attr attrs) {
+  if (attrs & AttrStatic)    { out << " static"; }
+  if (attrs & AttrPublic)    { out << " public"; }
+  if (attrs & AttrProtected) { out << " protected"; }
+  if (attrs & AttrPrivate)   { out << " private"; }
+  if (attrs & AttrAbstract)  { out << " abstract"; }
+  if (attrs & AttrFinal)     { out << " final"; }
+  if (attrs & AttrPhpLeafFn) { out << " (leaf)"; }
+  if (attrs & AttrHot)       { out << " (hot)"; }
+}
+
 void Func::prettyPrint(std::ostream& out) const {
   if (isPseudoMain()) {
     out << "Pseudo-main";
   } else if (preClass() != nullptr) {
-    out << "Method ";
-    if (m_attrs & AttrStatic) { out << "static "; }
-    if (m_attrs & AttrPublic) { out << "public "; }
-    if (m_attrs & AttrProtected) { out << "protected "; }
-    if (m_attrs & AttrPrivate) { out << "private "; }
-    if (m_attrs & AttrAbstract) { out << "abstract "; }
-    if (m_attrs & AttrFinal) { out << "final "; }
-    if (m_attrs & AttrPhpLeafFn) { out << "(leaf) "; }
+    out << "Method";
+    print_attrs(out, m_attrs);
     if (cls() != nullptr) {
-      out << fullName()->data();
+      out << ' ' << fullName()->data();
     } else {
-      out << preClass()->name()->data() << "::" << m_name->data();
+      out << ' ' << preClass()->name()->data() << "::" << m_name->data();
     }
   } else {
-    out << "Function " << m_name->data();
+    out << "Function";
+    print_attrs(out, m_attrs);
+    out << ' ' << m_name->data();
   }
-
-  if (m_attrs & AttrHot) out << " (hot)";
 
   out << " at " << base();
   if (shared()->m_id != -1) {
@@ -939,6 +953,43 @@ void FuncEmitter::addUserAttribute(const StringData* name, TypedValue tv) {
   m_userAttributes[name] = tv;
 }
 
+/* <<__Native>> user attribute causes systemlib declarations
+ * to hook internal (C++) implementation of funcs/methods
+ *
+ * The Native attribute may have the following sub-options
+ *  "ActRec": The internal function takes a fixed prototype
+ *      TypedValue* funcname(ActRec *ar);
+ *      Note that systemlib declaration must still be hack annotated
+ *  "NoInjection": Do not include this fram in backtraces
+ *
+ *  e.g.   <<__Native("ActRec")>> function foo():mixed;
+ */
+static const StaticString s_native("__Native");
+static const StaticString s_actrec("ActRec");
+static const StaticString s_noinjection("NoInjection");
+
+int FuncEmitter::parseNativeAttributes(Attr &attrs) const {
+  int ret = Native::AttrNone;
+
+  auto it = m_userAttributes.find(s_native.get());
+  assert(it != m_userAttributes.end());
+  const TypedValue userAttr = it->second;
+  assert(userAttr.m_type == KindOfArray);
+  for (ArrayIter it(userAttr.m_data.parr); it; ++it) {
+    Variant userAttrVal = it.second();
+    if (userAttrVal.isString()) {
+      String userAttrStrVal = userAttrVal.toString();
+      if (userAttrStrVal->isame(s_actrec.get())) {
+        ret = ret | Native::AttrActRec;
+      }
+      if (userAttrStrVal->isame(s_noinjection.get())) {
+        attrs = attrs | AttrNoInjection;
+      }
+    }
+  }
+  return ret;
+}
+
 void FuncEmitter::commit(RepoTxn& txn) const {
   Repo& repo = Repo::get();
   FuncRepoProxy& frp = repo.frp();
@@ -1015,6 +1066,25 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_retTypeConstraint = m_retTypeConstraint;
   f->shared()->m_originalFilename = m_originalFilename;
   f->shared()->m_isGenerated = isGenerated;
+
+  if (attrs & AttrNative) {
+    auto nif = Native::GetBuiltinFunction(m_name,
+                                          m_pce ? m_pce->name() : nullptr,
+                                          f->isStatic());
+    if (nif) {
+      Attr dummy = AttrNone;
+      if (parseNativeAttributes(dummy) && Native::AttrActRec) {
+        f->shared()->m_builtinFuncPtr = nif;
+        f->shared()->m_nativeFuncPtr = nullptr;
+      } else {
+        f->shared()->m_nativeFuncPtr = nif;
+        f->shared()->m_builtinFuncPtr = m_pce ? Native::methodWrapper
+                                              : Native::functionWrapper;
+      }
+    } else {
+      f->shared()->m_builtinFuncPtr = Native::unimplementedWrapper;
+    }
+  }
   return f;
 }
 
@@ -1022,51 +1092,44 @@ void FuncEmitter::setBuiltinFunc(const ClassInfo::MethodInfo* info,
                                  BuiltinFunction bif, BuiltinFunction nif,
                                  Offset base) {
   assert(info);
-  assert(bif);
   m_info = info;
-  m_builtinFuncPtr = bif;
-  m_nativeFuncPtr = nif;
-  m_base = base;
-  m_top = true;
-  m_docComment = StringData::GetStaticString(info->docComment);
-  m_line1 = 0;
-  m_line2 = 0;
-  m_attrs = AttrBuiltin | AttrSkipFrame;
-  // TODO: Task #1137917: See if we can avoid marking most builtins with
-  // "MayUseVV" and still make things work
-  m_attrs = m_attrs | AttrMayUseVV;
+  Attr attrs = AttrBuiltin;
   if (info->attribute & (ClassInfo::RefVariableArguments |
                          ClassInfo::MixedVariableArguments)) {
-    m_attrs = m_attrs | AttrVariadicByRef;
+    attrs = attrs | AttrVariadicByRef;
   }
   if (info->attribute & ClassInfo::IsReference) {
-    m_attrs = m_attrs | AttrReference;
+    attrs = attrs | AttrReference;
   }
   if (info->attribute & ClassInfo::NoInjection) {
-    m_attrs = m_attrs | AttrNoInjection;
+    attrs = attrs | AttrNoInjection;
   }
   if (pce()) {
     if (info->attribute & ClassInfo::IsStatic) {
-      m_attrs = m_attrs | AttrStatic;
+      attrs = attrs | AttrStatic;
     }
     if (info->attribute & ClassInfo::IsFinal) {
-      m_attrs = m_attrs | AttrFinal;
+      attrs = attrs | AttrFinal;
     }
     if (info->attribute & ClassInfo::IsAbstract) {
-      m_attrs = m_attrs | AttrAbstract;
+      attrs = attrs | AttrAbstract;
     }
     if (info->attribute & ClassInfo::IsPrivate) {
-      m_attrs = m_attrs | AttrPrivate;
+      attrs = attrs | AttrPrivate;
     } else if (info->attribute & ClassInfo::IsProtected) {
-      m_attrs = m_attrs | AttrProtected;
+      attrs = attrs | AttrProtected;
     } else {
-      m_attrs = m_attrs | AttrPublic;
+      attrs = attrs | AttrPublic;
     }
   } else if (info->attribute & ClassInfo::AllowOverride) {
-    m_attrs = m_attrs | AttrAllowOverride;
+    attrs = attrs | AttrAllowOverride;
   }
 
-  m_returnType = info->returnType;
+  setReturnType(info->returnType);
+  setDocComment(info->docComment);
+  setLocation(0, 0);
+  setBuiltinFunc(bif, nif, attrs, base);
+
   for (unsigned i = 0; i < info->parameters.size(); ++i) {
     // For builtin only, we use a dummy ParamInfo
     FuncEmitter::ParamInfo pi;
@@ -1074,6 +1137,18 @@ void FuncEmitter::setBuiltinFunc(const ClassInfo::MethodInfo* info,
     pi.setBuiltinType(info->parameters[i]->argType);
     appendParam(StringData::GetStaticString(info->parameters[i]->name), pi);
   }
+}
+
+void FuncEmitter::setBuiltinFunc(BuiltinFunction bif, BuiltinFunction nif,
+                                 Attr attrs, Offset base) {
+  assert(bif);
+  m_builtinFuncPtr = bif;
+  m_nativeFuncPtr = nif;
+  m_base = base;
+  m_top = true;
+  // TODO: Task #1137917: See if we can avoid marking most builtins with
+  // "MayUseVV" and still make things work
+  m_attrs = attrs | AttrBuiltin | AttrSkipFrame | AttrMayUseVV;
 }
 
 template<class SerDe>

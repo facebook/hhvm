@@ -30,16 +30,16 @@ class IRInstruction;
 /*
  * The main optimization passes, in the order they run.
  */
-void optimizeMemoryAccesses(IRTrace*, IRFactory*);
-void optimizePredictions(IRTrace*, IRFactory*);
-void optimizeJumps(IRTrace*, IRFactory*);
-void eliminateUnconditionalJump(IRTrace*, IRFactory*);
-void eliminateDeadCode(IRTrace*, IRFactory*);
+void optimizeMemoryAccesses(IRTrace*, IRFactory&);
+void optimizePredictions(IRTrace*, IRFactory&);
+void optimizeJumps(IRTrace*, IRFactory&);
+void eliminateUnconditionalJump(IRTrace*);
+void eliminateDeadCode(IRTrace*, IRFactory&);
 
 /*
  * Run all the optimization passes.
  */
-void optimizeTrace(IRTrace*, TraceBuilder*);
+void optimizeTrace(IRTrace*, TraceBuilder&);
 
 //////////////////////////////////////////////////////////////////////
 

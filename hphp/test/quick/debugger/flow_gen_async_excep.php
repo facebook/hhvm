@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Test stepping with continuations and exceptions around throws. Specifically,
 // we want to ensure that an exception handler executing at the same stack depth

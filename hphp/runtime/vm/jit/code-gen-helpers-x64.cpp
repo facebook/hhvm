@@ -29,10 +29,7 @@
 #include "hphp/runtime/vm/jit/x64-util.h"
 #include "hphp/runtime/vm/jit/ir.h"
 
-namespace HPHP {
-namespace JIT {
-
-namespace {
+namespace HPHP { namespace JIT { namespace X64 {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -42,9 +39,7 @@ using namespace Transl::reg;
 
 TRACE_SET_MOD(hhir);
 
-} // unnamed namespace
-
-namespace CodeGenHelpersX64 {
+//////////////////////////////////////////////////////////////////////
 
 /*
  * It's not normally ok to directly use tracelet abi registers in
@@ -55,6 +50,30 @@ namespace CodeGenHelpersX64 {
  */
 using Transl::rVmFp;
 using Transl::rVmSp;
+
+/*
+ * Satisfy an alignment constraint. If we're in a reachable section
+ * of code, bridge the gap with nops. Otherwise, int3's.
+ */
+void moveToAlign(Asm& aa,
+                 const size_t align /* =kJmpTargetAlign */,
+                 const bool unreachable /* =true */) {
+  using namespace HPHP::Util;
+  assert(isPowerOfTwo(align));
+  size_t leftInBlock = align - ((align - 1) & uintptr_t(aa.frontier()));
+  if (leftInBlock == align) return;
+  if (unreachable) {
+    if (leftInBlock > 2) {
+      aa.ud2();
+      leftInBlock -= 2;
+    }
+    if (leftInBlock > 0) {
+      aa.emitInt3s(leftInBlock);
+    }
+    return;
+  }
+  aa.emitNop(leftInBlock);
+}
 
 void emitEagerSyncPoint(Asm& as, const HPHP::Opcode* pc, const Offset spDiff) {
   static COff spOff = offsetof(VMExecutionContext, m_stack) +
@@ -132,7 +151,7 @@ struct IfCountNotStatic {
   typedef CondBlock<FAST_REFCOUNT_OFFSET,
                     RefCountStaticValue,
                     CC_Z,
-                    field_type(RefData, m_count)> NonStaticCondBlock;
+                    hphp_field_type(RefData, m_count)> NonStaticCondBlock;
   NonStaticCondBlock *m_cb; // might be null
   IfCountNotStatic(Asm& as,
                    PhysReg reg,
@@ -257,6 +276,58 @@ void emitExitSlowStats(Asm& as, const Func* func, SrcKey dest) {
   }
 }
 
+void emitCall(Asm& a, TCA dest) {
+  if (a.jmpDeltaFits(dest) && !Stats::enabled()) {
+    a.    call(dest);
+  } else {
+    a.    call(TranslatorX64::Get()->getNativeTrampoline(dest));
+  }
+}
+
+void emitCall(Asm& a, CppCall call) {
+  if (call.isDirect()) {
+    return emitCall(a, (TCA)call.getAddress());
+  }
+  // Virtual call.
+  // Load method's address from proper offset off of object in rdi,
+  // using rax as scratch.
+  a.  loadq  (*rdi, rax);
+  a.  call   (rax[call.getOffset()]);
+}
+
+void emitTestSurpriseFlags(Asm& a) {
+  static_assert(RequestInjectionData::LastFlag < (1 << 8),
+                "Translator assumes RequestInjectionFlags fit in one byte");
+  a.    testb((int8_t)0xff, rVmTl[TargetCache::kConditionFlagsOff]);
+}
+
+void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
+                                 bool inTracelet, FixupMap& fixupMap,
+                                 Fixup fixup) {
+  Asm a { mainCode };
+  Asm astubs { stubsCode };
+
+  emitTestSurpriseFlags(a);
+  a.  jnz  (stubsCode.frontier());
+
+  astubs.  movq  (rVmFp, argNumToRegName[0]);
+  if (false) { // typecheck
+    const ActRec* ar = nullptr;
+    functionEnterHelper(ar);
+  }
+  emitCall(astubs, (TCA)&functionEnterHelper);
+  if (inTracelet) {
+    fixupMap.recordSyncPoint(stubsCode.frontier(),
+                             fixup.m_pcOffset, fixup.m_spOffset);
+  } else {
+    // If we're being called while generating a func prologue, we
+    // have to record the fixup directly in the fixup map instead of
+    // going through the pending fixup path like normal.
+    fixupMap.recordFixup(stubsCode.frontier(), fixup);
+  }
+  astubs.  jmp   (mainCode.frontier());
+}
+
 void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
   assert(s0 != s1);
   if (d0 == s1 && d1 != InvalidReg) {
@@ -314,6 +385,109 @@ ConditionCode opToConditionCode(Opcode opc) {
   default:
     always_assert(0);
   }
+}
+
+/*
+ * emitServiceReqWork --
+ *
+ *   Call a translator service co-routine. The code emitted here
+ *   reenters the enterTC loop, invoking the requested service. Control
+ *   will be returned non-locally to the next logical instruction in
+ *   the TC.
+ *
+ *   Return value is a destination; we emit the bulky service
+ *   request code into astubs.
+ *
+ *   Returns a continuation that will run after the arguments have been
+ *   emitted. This is gross, but is a partial workaround for the inability
+ *   to capture argument packs in the version of gcc we're using.
+ */
+TCA
+emitServiceReqWork(Asm& as, TCA start, bool persist, SRFlags flags,
+                   ServiceRequest req, const ServiceReqArgVec& argv) {
+  assert(start);
+  const bool align = flags & SRFlags::Align;
+
+  /*
+   * Remember previous state of the code cache.
+   */
+  boost::optional<CodeCursor> maybeCc = boost::none;
+  if (start != as.frontier()) {
+    maybeCc = boost::in_place<CodeCursor>(boost::ref(as), start);
+  }
+
+  /* max space for moving to align, saving VM regs plus emitting args */
+  static const int
+    kVMRegSpace = 0x14,
+    kMovSize = 0xa,
+    kNumServiceRegs = sizeof(serviceReqArgRegs) / sizeof(PhysReg),
+    kMaxStubSpace = kJmpTargetAlign - 1 + kVMRegSpace +
+      kNumServiceRegs * kMovSize;
+  if (align) {
+    moveToAlign(as);
+  }
+  TCA retval = as.frontier();
+  TRACE(3, "Emit Service Req @%p %s(", start, serviceReqName(req));
+  /*
+   * Move args into appropriate regs. Eager VMReg save may bash flags,
+   * so set the CondCode arguments first.
+   */
+  for (int i = 0; i < argv.size(); ++i) {
+    assert(i < kNumServiceReqArgRegs);
+    auto reg = serviceReqArgRegs[i];
+    const auto& argInfo = argv[i];
+    switch(argv[i].m_kind) {
+      case ServiceReqArgInfo::Immediate: {
+        TRACE(3, "%" PRIx64 ", ", argInfo.m_imm);
+        as.    emitImmReg(argInfo.m_imm, reg);
+      } break;
+      case ServiceReqArgInfo::CondCode: {
+        // Already set before VM reg save.
+        DEBUG_ONLY TCA start = as.frontier();
+        as.    setcc(argInfo.m_cc, rbyte(reg));
+        assert(start - as.frontier() <= kMovSize);
+        TRACE(3, "cc(%x), ", argInfo.m_cc);
+      } break;
+      default: not_reached();
+    }
+  }
+  emitEagerVMRegSave(as, JIT::RegSaveFlags::SaveFP);
+  if (persist) {
+    as.  emitImmReg(0, rAsm);
+  } else {
+    as.  emitImmReg((uint64_t)start, rAsm);
+  }
+  TRACE(3, ")\n");
+  as.    emitImmReg(req, rdi);
+
+  /*
+   * Weird hand-shaking with enterTC: reverse-call a service routine.
+   *
+   * In the case of some special stubs (m_callToExit, m_retHelper), we
+   * have already unbalanced the return stack by doing a ret to
+   * something other than enterTCHelper.  In that case
+   * SRJmpInsteadOfRet indicates to fake the return.
+   */
+  if (flags & SRFlags::JmpInsteadOfRet) {
+    as.  pop(rax);
+    as.  jmp(rax);
+  } else {
+    as.  ret();
+  }
+
+  // TODO(2796856): we should record an OpServiceRequest pseudo-bytecode here.
+
+  translator_not_reached(as);
+  if (!persist) {
+    /*
+     * Recycled stubs need to be uniformly sized. Make space for the
+     * maximal possible service requests.
+     */
+    assert(as.frontier() - start <= kMaxStubSpace);
+    as.emitNop(start + kMaxStubSpace - as.frontier());
+    assert(as.frontier() - start == kMaxStubSpace);
+  }
+  return retval;
 }
 
 }}}

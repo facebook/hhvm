@@ -45,6 +45,7 @@ Variant f_socket_server(CStrRef hostname, int port = -1,
                         VRefParam errnum = uninit_null(),
                         VRefParam errstr = uninit_null());
 Variant socket_server_impl(const Util::HostURL &hosturl,
+                           int flags = k_STREAM_SERVER_BIND|k_STREAM_SERVER_LISTEN,
                            VRefParam errnum = uninit_null(),
                            VRefParam errstr = uninit_null());
 Variant f_socket_accept(CResRef socket);
@@ -52,10 +53,10 @@ Variant f_socket_read(CResRef socket, int length, int type = 0);
 Variant f_socket_write(CResRef socket, CStrRef buffer, int length = 0);
 Variant f_socket_send(CResRef socket, CStrRef buf, int len, int flags);
 Variant f_socket_sendto(CResRef socket, CStrRef buf, int len, int flags,
-                        CStrRef addr, int port = 0);
+                        CStrRef addr, int port = -1);
 Variant f_socket_recv(CResRef socket, VRefParam buf, int len, int flags);
 Variant f_socket_recvfrom(CResRef socket, VRefParam buf, int len, int flags,
-                          VRefParam name, VRefParam port = 0);
+                          VRefParam name, VRefParam port = -1);
 bool f_socket_shutdown(CResRef socket, int how = 0);
 void f_socket_close(CResRef socket);
 String f_socket_strerror(int errnum);

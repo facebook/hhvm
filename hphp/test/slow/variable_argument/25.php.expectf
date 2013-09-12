@@ -1,0 +1,12 @@
+array(1) {
+  [0]=>
+  string(3) "buz"
+}
+string(3) "buz"
+int(1)
+int(42)
+array(0) {
+}
+HipHop Warning: func_get_arg():  Argument 0 not passed to function in %s/test/slow/variable_argument/25.php on line 17
+bool(false)
+int(0)

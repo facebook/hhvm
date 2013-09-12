@@ -49,11 +49,11 @@ TCA SrcRec::getFallbackTranslation() const {
 
 void SrcRec::chainFrom(IncomingBranch br) {
   assert(br.type() == IncomingBranch::Tag::ADDR    ||
-         tx64->a.           contains(br.toSmash()) ||
-         tx64->ahot.        contains(br.toSmash()) ||
-         tx64->aprof.       contains(br.toSmash()) ||
-         tx64->astubs.      contains(br.toSmash()) ||
-         tx64->atrampolines.contains(br.toSmash()));
+         tx64->mainCode.       contains(br.toSmash()) ||
+         tx64->hotCode.        contains(br.toSmash()) ||
+         tx64->profCode.       contains(br.toSmash()) ||
+         tx64->stubsCode.      contains(br.toSmash()) ||
+         tx64->trampolinesCode.contains(br.toSmash()));
   TCA destAddr = getTopTranslation();
   m_incomingBranches.push_back(br);
   TRACE(1, "SrcRec(%p)::chainFrom %p -> %p (type %d); %zd incoming branches\n",
@@ -66,7 +66,7 @@ void SrcRec::emitFallbackJump(TCA from, int cc /* = -1 */) {
   TCA destAddr = getFallbackTranslation();
   auto incoming = cc < 0 ? IncomingBranch::jmpFrom(from)
                          : IncomingBranch::jccFrom(from);
-  auto& a = tx64->getAsmFor(from);
+  Asm a { tx64->codeBlockFor(from) };
 
   // emit dummy jump to be smashed via patch()
   if (cc < 0) {
@@ -140,7 +140,7 @@ void SrcRec::patchIncomingBranches(TCA newStart) {
     // We have a debugger guard, so all jumps to us funnel through
     // this.  Just smash m_dbgBranchGuardSrc.
     TRACE(1, "smashing m_dbgBranchGuardSrc @%p\n", m_dbgBranchGuardSrc);
-    TranslatorX64::smashJmp(tx64->getAsmFor(m_dbgBranchGuardSrc),
+    TranslatorX64::smashJmp(tx64->codeBlockFor(m_dbgBranchGuardSrc),
                             m_dbgBranchGuardSrc,
                             newStart);
     return;
@@ -189,9 +189,9 @@ void SrcRec::patch(IncomingBranch branch, TCA dest) {
   switch (branch.type()) {
   case IncomingBranch::Tag::JMP: {
     auto toSmash = branch.toSmash();
-    auto& a = tx64->getAsmFor(toSmash);
-    CodeCursor cg(a, branch.toSmash());
-    TranslatorX64::smashJmp(a, branch.toSmash(), dest);
+    auto& cb = tx64->codeBlockFor(toSmash);
+    CodeCursor cg(cb, branch.toSmash());
+    TranslatorX64::smashJmp(cb, branch.toSmash(), dest);
     break;
   }
 

@@ -1,0 +1,2 @@
+HipHop Warning: json_encode(): recursion detected in %s/test/slow/json/1555.php on line 7
+string(20) "{"foo":{"foo":null}}"

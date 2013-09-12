@@ -73,7 +73,9 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   void t_shuffle();
   Object t_getiterator();
   Object t_map(CVarRef callback);
+  Object t_mapwithkey(CVarRef callback);
   Object t_filter(CVarRef callback);
+  Object t_filterwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
   String t___tostring();
   Variant t___get(Variant name);
@@ -165,6 +167,9 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
 
+  static uint sizeOffset() { return offsetof(c_Vector, m_size); }
+  static uint dataOffset() { return offsetof(c_Vector, m_data); }
+
  private:
   void grow();
   static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
@@ -253,7 +258,9 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   Object t_differencebykey(CVarRef it);
   Object t_getiterator();
   Object t_map(CVarRef callback);
+  Object t_mapwithkey(CVarRef callback);
   Object t_filter(CVarRef callback);
+  Object t_filterwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
   String t___tostring();
   Variant t___get(Variant name);
@@ -555,7 +562,9 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   Object t_differencebykey(CVarRef it);
   Object t_getiterator();
   Object t_map(CVarRef callback);
+  Object t_mapwithkey(CVarRef callback);
   Object t_filter(CVarRef callback);
+  Object t_filterwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
   String t___tostring();
   Variant t___get(Variant name);
@@ -643,7 +652,8 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
     }
     explicit Bucket(TypedValue* tv) : ikey(0), pListNext(nullptr),
         pListLast(nullptr), pNext(nullptr) {
-      tvDup(*tv, data);
+      assert(tv->m_type != KindOfRef);
+      cellDup(*tv, data);
       data.hash() = 0;
     }
     ~Bucket();
@@ -1026,7 +1036,9 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   Array t_toarray();
   Object t_getiterator();
   Object t_map(CVarRef callback);
+  Object t_mapwithkey(CVarRef callback);
   Object t_filter(CVarRef callback);
+  Object t_filterwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
   String t___tostring();
   Variant t___get(Variant name);
@@ -1094,6 +1106,8 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   int64_t size() const {
     return 2;
   }
+
+  static uint dataOffset() { return offsetof(c_Pair, elm0); }
 
  private:
   static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
@@ -1172,7 +1186,7 @@ ObjectData* collectionDeepCopyPair(c_Pair* pair);
 ///////////////////////////////////////////////////////////////////////////////
 
 inline TypedValue* cvarToCell(const Variant* v) {
-  return const_cast<TypedValue*>(tvToCell(v->asTypedValue()));
+  return const_cast<TypedValue*>(v->asCell());
 }
 
 inline Variant& collectionOffsetGet(ObjectData* obj, bool offset) {
@@ -1216,6 +1230,8 @@ inline bool isOptimizableCollectionClass(const Class* klass) {
 
 
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer);
+
+void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
 ///////////////////////////////////////////////////////////////////////////////
 

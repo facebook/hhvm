@@ -759,6 +759,12 @@ D:T* = LdLocAddr<T,localId,valSrc> S0:FramePtr
   Loads the address of the local slot localId from the frame S0 into D. See
   LdLoc for a description of valSrc.
 
+D:PtrToCell = LdVectorBase S0:Obj<Vector>
+D:PtrToCell = LdPairBase S0:Obj<Pair>
+
+  Loads the base pointer to an array of Cells from the given collection
+  instance in S0. 
+
 D:T = LdMem<T> S0:PtrToGen S1:ConstInt [ -> L ]
 
   Loads from S0 + S1 (in bytes) and puts the value in D. If the
@@ -772,6 +778,11 @@ D:T = LdProp<T> S0:Obj S1:ConstInt [ -> L ]
   given by S1 and puts the value in D. If the optional label L is
   specified and the loaded value's type does not match T, this
   instruction does not load into D and transfers control to L.
+
+D:Cell = LdElem S0:PtrToCell S1:Int
+
+  Loads the element at index S1 from the base pointer in S0.
+  The index in S1 is the number of bytes from the base in S0.
 
 D:T = LdRef<T> S0:Cell& [ -> L ]
 
@@ -961,6 +972,11 @@ LdObjMethod S0:Cls S1:ConstStr S2:StkPtr
   cache. Fatals if the class does not have an accessible method with
   the given name and does not have a __call method.
 
+D:Func = LdObjInvoke S0:Cls -> L
+
+  Try to load a cached non-static __invoke Func from the Class in S0,
+  or branch to L if it is not present.
+
 D:Cls = LdObjClass S0:Obj
 
   Load the class out of the object in S0 and put it in D.
@@ -1034,14 +1050,14 @@ D:Arr = NewTuple S0:ConstInt S1:StkPtr
 
 D:StkPtr = SpillFrame<numArgs,invName> S0:StkPtr
                                        S1:FramePtr
-                                       S2:Func
+                                       S2:{Func|FuncCls|FuncCtx|Null}
                                        S3:{Ctx|Class|Null}
 
   Operands:
 
      S0 - caller stack pointer
      S1 - caller frame pointer
-     S2 - callee Func
+     S2 - callee Func, context, FuncCls, FuncCtx, or null
      S3 - object (for FPushObjMethod*), class (for FPushClsMethod*), or
           null (for FPushFunc*).
 
@@ -1199,6 +1215,11 @@ StPropNT S0:Obj S1:Int S2:Gen
   Store S2 into the location S0 + S1 (in bytes), without storing the
   type tag.
 
+StElem S0:PtrToCell S1:Int S2:Cell
+
+  Store S2 into the location given by the index S1 from base pointer
+  S0. The index in S1 is the number of bytes from the base in S0.
+
 StLoc<localId> S0:FramePtr S1:Gen
 
   Store S1 to local number localId on the frame pointed to by S0.
@@ -1225,7 +1246,7 @@ StRaw S0:?? S1:ConstInt S2:??
   "Raw" store to memory---i.e. outside of our type-system.
 
   S0 is the base address, and is an untyped pointer.  S1 is a constant
-  from the RawMemSlow::Kind enum, which describes the offset from the
+  from the RawMemSlot::Kind enum, which describes the offset from the
   base, and the size.  The value in S2 depends on the value of S1.
 
 D:StkPtr = SpillStack S0:StkP S1:ConstInt, S2...
@@ -1809,6 +1830,11 @@ CIterFree<IterId> S0:FramePtr
   Free the iterator variable whose index is given by IterId in the stack
   frame pointed to by S0.
 
+IterCopy S0:FramePtr S1:ConstInt S2:PtrToGen S3:ConstInt
+
+  Copy iterator from stack frame S0 at offset S1 to the continuation
+  frame given by S2 at offset S3. Used for copying iterators in CreateAsync.
+
 
 19. Member instruction support
 
@@ -2080,6 +2106,15 @@ D:Bool = EmptyElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 
   Returns true iff the element at key S2 in S1 is set and not equal
   (as defined by the hhbc Eq instruction) to false.
+
+CheckBounds S0:Int S1:Int 
+
+  Check that the index in S0 is between 0 (included) and the values in S1
+  (excluded). Throws if out of bounds.
+
+D:Int = LdVectorSize S0:Obj<Vector>
+
+  Return the size of the given Vector in S0.
 
 20. Exception/unwinding support
 

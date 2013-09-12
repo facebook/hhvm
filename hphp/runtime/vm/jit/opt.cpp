@@ -13,12 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/jit/opt.h"
-#include "hphp/runtime/vm/jit/trace-builder.h"
+
 #include "hphp/util/trace.h"
+#include "hphp/runtime/vm/jit/check.h"
+#include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/ir-factory.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/check.h"
+#include "hphp/runtime/vm/jit/trace-builder.h"
 
 namespace HPHP {
 namespace JIT {
@@ -39,11 +42,11 @@ static void insertAfter(IRInstruction* definer, IRInstruction* inst) {
  * a refcounted value.  The value must be something we can safely dereference
  * to check the _count field.
  */
-static void insertRefCountAsserts(IRInstruction& inst, IRFactory* factory) {
+static void insertRefCountAsserts(IRInstruction& inst, IRFactory& factory) {
   for (SSATmp& dst : inst.dsts()) {
     Type t = dst.type();
     if (t.subtypeOf(Type::Counted | Type::StaticStr | Type::StaticArr)) {
-      insertAfter(&inst, factory->gen(DbgAssertRefCount, inst.marker(), &dst));
+      insertAfter(&inst, factory.gen(DbgAssertRefCount, inst.marker(), &dst));
     }
   }
 }
@@ -52,7 +55,7 @@ static void insertRefCountAsserts(IRInstruction& inst, IRFactory* factory) {
  * Insert a DbgAssertTv instruction for each stack location stored to by
  * a SpillStack instruction.
  */
-static void insertSpillStackAsserts(IRInstruction& inst, IRFactory* factory) {
+static void insertSpillStackAsserts(IRInstruction& inst, IRFactory& factory) {
   SSATmp* sp = inst.dst();
   auto const vals = inst.srcs().subpiece(2);
   auto* block = inst.block();
@@ -60,14 +63,14 @@ static void insertSpillStackAsserts(IRInstruction& inst, IRFactory* factory) {
   for (unsigned i = 0, n = vals.size(); i < n; ++i) {
     Type t = vals[i]->type();
     if (t.subtypeOf(Type::Gen)) {
-      IRInstruction* addr = factory->gen(LdStackAddr,
-                                         inst.marker(),
-                                         Type::PtrToGen,
-                                         StackOffset(i),
-                                         sp);
+      IRInstruction* addr = factory.gen(LdStackAddr,
+                                        inst.marker(),
+                                        Type::PtrToGen,
+                                        StackOffset(i),
+                                        sp);
       block->insert(pos, addr);
-      IRInstruction* check = factory->gen(DbgAssertPtr, inst.marker(),
-                                          addr->dst());
+      IRInstruction* check = factory.gen(DbgAssertPtr, inst.marker(),
+                                         addr->dst());
       block->insert(pos, check);
     }
   }
@@ -77,8 +80,8 @@ static void insertSpillStackAsserts(IRInstruction& inst, IRFactory* factory) {
  * Insert asserts at various points in the IR.
  * TODO: t2137231 Insert DbgAssertPtr at points that use or produces a GenPtr
  */
-static void insertAsserts(IRTrace* trace, IRFactory* factory) {
-  forEachTraceBlock(trace, [=](Block* block) {
+static void insertAsserts(IRTrace* trace, IRFactory& factory) {
+  forEachTraceBlock(trace, [&](Block* block) {
     for (auto it = block->begin(), end = block->end(); it != end; ) {
       IRInstruction& inst = *it;
       ++it;
@@ -88,14 +91,14 @@ static void insertAsserts(IRTrace* trace, IRFactory* factory) {
       }
       if (inst.op() == Call) {
         SSATmp* sp = inst.dst();
-        IRInstruction* addr = factory->gen(LdStackAddr,
-                                           inst.marker(),
-                                           Type::PtrToGen,
-                                           StackOffset(0),
-                                           sp);
+        IRInstruction* addr = factory.gen(LdStackAddr,
+                                          inst.marker(),
+                                          Type::PtrToGen,
+                                          StackOffset(0),
+                                          sp);
         insertAfter(&inst, addr);
-        insertAfter(addr, factory->gen(DbgAssertPtr, inst.marker(),
-                                       addr->dst()));
+        insertAfter(addr, factory.gen(DbgAssertPtr, inst.marker(),
+                                      addr->dst()));
         continue;
       }
       if (!inst.isBlockEnd()) insertRefCountAsserts(inst, factory);
@@ -103,17 +106,17 @@ static void insertAsserts(IRTrace* trace, IRFactory* factory) {
   });
 }
 
-void optimizeTrace(IRTrace* trace, TraceBuilder* traceBuilder) {
-  IRFactory* irFactory = traceBuilder->factory();
+void optimizeTrace(IRTrace* trace, TraceBuilder& traceBuilder) {
+  auto& irFactory = traceBuilder.factory();
 
   auto finishPass = [&](const char* msg) {
     dumpTrace(6, trace, folly::format("after {}", msg).str().c_str());
-    assert(checkCfg(trace, *irFactory));
-    assert(checkTmpsSpanningCalls(trace, *irFactory));
+    assert(checkCfg(trace, irFactory));
+    assert(checkTmpsSpanningCalls(trace, irFactory));
     if (debug) forEachTraceInst(trace, assertOperandTypes);
   };
 
-  auto doPass = [&](void (*fn)(IRTrace*, IRFactory*),
+  auto doPass = [&](void (*fn)(IRTrace*, IRFactory&),
                     const char* msg) {
     fn(trace, irFactory);
     finishPass(msg);
@@ -124,7 +127,14 @@ void optimizeTrace(IRTrace* trace, TraceBuilder* traceBuilder) {
     eliminateDeadCode(trace, irFactory);
     finishPass(folly::format("{} DCE", which).str().c_str());
   };
+
+  if (RuntimeOption::EvalHHIRRelaxGuards) {
+    auto changed = relaxGuards(trace, irFactory, *traceBuilder.guards());
+    if (changed) finishPass("guard relaxation");
+  }
+
   dce("initial");
+
   if (RuntimeOption::EvalHHIRPredictionOpts) {
     doPass(optimizePredictions, "prediction opts");
   }
@@ -132,7 +142,7 @@ void optimizeTrace(IRTrace* trace, TraceBuilder* traceBuilder) {
   if (RuntimeOption::EvalHHIRExtraOptPass
       && (RuntimeOption::EvalHHIRCse
           || RuntimeOption::EvalHHIRSimplification)) {
-    traceBuilder->reoptimize();
+    traceBuilder.reoptimize();
     finishPass("reoptimize");
     // Cleanup any dead code left around by CSE/Simplification
     // Ideally, this would be controlled by a flag returned

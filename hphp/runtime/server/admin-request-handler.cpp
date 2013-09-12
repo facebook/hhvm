@@ -138,7 +138,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "                  be handled\n"
         "/check-mem:       report memory quick statistics in log file\n"
         "/check-sql:       report SQL table statistics\n"
-
+        "/check-sat        how many satellite threads are actively handling\n"
+        "                  requests and queued waiting to be handled\n"
         "/status.xml:      show server status in XML\n"
         "/status.json:     show server status in JSON\n"
         "/status.html:     show server status in HTML\n"
@@ -598,6 +599,23 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
   if (cmd == "check-pl-queued") {
     int count = PageletServer::GetQueuedJobs();
     transport->sendString(lexical_cast<string>(count));
+    return true;
+  }
+  if (cmd == "check-sat") {
+    vector<std::pair<std::string, int>> stats;
+    HttpServer::Server->getSatelliteStats(&stats);
+    std::stringstream out;
+    bool first = true;
+    out << "{" << endl;
+    auto appendStat = [&](const std::string &name, int value) {
+       out << (!first ? "," : "") << "  \"" << name << "\":" << value << endl;
+       first = false;
+    };
+    for (auto i : stats) {
+      appendStat(i.first, i.second);
+    }
+    out << "}" << endl;
+    transport->sendString(out.str());
     return true;
   }
   if (cmd == "check-mem") {

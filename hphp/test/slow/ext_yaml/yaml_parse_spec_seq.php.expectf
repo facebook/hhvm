@@ -1,0 +1,44 @@
+array(2) {
+  ["Block style"]=>
+  array(9) {
+    [0]=>
+    string(7) "Mercury"
+    [1]=>
+    string(5) "Venus"
+    [2]=>
+    string(5) "Earth"
+    [3]=>
+    string(4) "Mars"
+    [4]=>
+    string(7) "Jupiter"
+    [5]=>
+    string(6) "Saturn"
+    [6]=>
+    string(6) "Uranus"
+    [7]=>
+    string(7) "Neptune"
+    [8]=>
+    string(5) "Pluto"
+  }
+  ["Flow style"]=>
+  array(9) {
+    [0]=>
+    string(7) "Mercury"
+    [1]=>
+    string(5) "Venus"
+    [2]=>
+    string(5) "Earth"
+    [3]=>
+    string(4) "Mars"
+    [4]=>
+    string(7) "Jupiter"
+    [5]=>
+    string(6) "Saturn"
+    [6]=>
+    string(6) "Uranus"
+    [7]=>
+    string(7) "Neptune"
+    [8]=>
+    string(5) "Pluto"
+  }
+}

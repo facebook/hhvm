@@ -58,6 +58,8 @@ void Type::InitTypeHintMap() {
   assert(s_HHTypeHintTypes.empty());
 
   s_TypeHintTypes["array"] = Type::Array;
+  s_TypeHintTypes["resource"] = Type::Resource;
+  s_TypeHintTypes["callable"] = Type::Variant;
 
   s_HHTypeHintTypes["array"] = Type::Array;
   s_HHTypeHintTypes["bool"]    = Type::Boolean;
@@ -68,6 +70,8 @@ void Type::InitTypeHintMap() {
   s_HHTypeHintTypes["double"]  = Type::Double;
   s_HHTypeHintTypes["float"]   = Type::Double;
   s_HHTypeHintTypes["string"]  = Type::String;
+  s_HHTypeHintTypes["resource"] = Type::Resource;
+  s_HHTypeHintTypes["callable"] = Type::Variant;
 }
 
 const Type::TypePtrMap &Type::GetTypeHintTypes(bool hhType) {
@@ -80,9 +84,12 @@ void Type::ResetTypeHintTypes() {
 }
 
 TypePtr Type::CreateObjectType(const std::string &clsname) {
-  // For interfaces that support arrays we're pessimistic and
+  // For interfaces that support primitive types, we're pessimistic and
   // we treat it as a Variant
-  if (interface_supports_array(clsname)) {
+  if (interface_supports_array(clsname) ||
+      interface_supports_string(clsname) ||
+      interface_supports_int(clsname) ||
+      interface_supports_double(clsname)) {
     return Type::Variant;
   }
   return TypePtr(new Type(KindOfObject, clsname));
@@ -91,9 +98,12 @@ TypePtr Type::CreateObjectType(const std::string &clsname) {
 TypePtr Type::GetType(KindOf kindOf, const std::string &clsname /* = "" */) {
   assert(kindOf);
   if (!clsname.empty()) {
-    // For interfaces that support arrays we're pessimistic and
+    // For interfaces that support primitive types we're pessimistic and
     // we treat it as a Variant
-    if (interface_supports_array(clsname)) {
+    if (interface_supports_array(clsname) ||
+        interface_supports_string(clsname) ||
+        interface_supports_int(clsname) ||
+        interface_supports_double(clsname)) {
       return Type::Variant;
     }
     return TypePtr(new Type(kindOf, clsname));

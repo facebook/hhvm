@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/native-calls.h"
 
+#include "hphp/util/abi-cxx.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/base/stats.h"
@@ -55,12 +56,12 @@ FuncPtr fssa(uint64_t i) { return FuncPtr { FuncType::SSA, i }; }
 
 template<class Ret, class T, class... Args>
 FuncPtr method(Ret (T::*fp)(Args...) const) {
-  return FuncPtr(reinterpret_cast<TCA>(Util::getMethodPtr(fp)));
+  return FuncPtr(reinterpret_cast<TCA>(getMethodPtr(fp)));
 }
 
 template<class Ret, class T, class... Args>
 FuncPtr method(Ret (T::*fp)(Args...)) {
-  return FuncPtr(reinterpret_cast<TCA>(Util::getMethodPtr(fp)));
+  return FuncPtr(reinterpret_cast<TCA>(getMethodPtr(fp)));
 }
 
 auto constexpr SSA      = ArgType::SSA;

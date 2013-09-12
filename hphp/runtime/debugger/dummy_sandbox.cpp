@@ -76,7 +76,6 @@ const StaticString s__SERVER("_SERVER");
 void DummySandbox::run() {
   TRACE(2, "DummySandbox::run\n");
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
-  Debugger::RegisterThread();
   while (!m_stopped) {
     try {
       CLISession hphpSession;

@@ -231,14 +231,14 @@ void ExpressionList::stripConcat() {
   for (int i = 0; i < el.getCount(); ) {
     ExpressionPtr &e = el[i];
     if (e->is(Expression::KindOfUnaryOpExpression)) {
-      UnaryOpExpressionPtr u(boost::static_pointer_cast<UnaryOpExpression>(e));
+      UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(e));
       if (u->getOp() == '(') {
         e = u->getExpression();
       }
     }
     if (e->is(Expression::KindOfBinaryOpExpression)) {
       BinaryOpExpressionPtr b
-        (boost::static_pointer_cast<BinaryOpExpression>(e));
+        (static_pointer_cast<BinaryOpExpression>(e));
       if (b->getOp() == '.') {
         e = b->getExp1();
         el.insertElement(b->getExp2(), i + 1);
@@ -335,7 +335,7 @@ void ExpressionList::setNthKid(int n, ConstructPtr cp) {
   if (n >= m) {
     assert(false);
   } else {
-    m_exps[n] = boost::dynamic_pointer_cast<Expression>(cp);
+    m_exps[n] = dynamic_pointer_cast<Expression>(cp);
   }
 }
 

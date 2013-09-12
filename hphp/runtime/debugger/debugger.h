@@ -49,7 +49,6 @@ public:
   // Add a new sandbox a debugger can connect to.
   static void RegisterSandbox(const DSandboxInfo &sandbox);
   static void UnregisterSandbox(CStrRef id);
-  static void RegisterThread();
 
   //  Add/remove/change DebuggerProxy.
   static DebuggerProxyPtr CreateProxy(SmartPtr<Socket> socket, bool local);

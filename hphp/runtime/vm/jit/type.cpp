@@ -41,7 +41,7 @@ DataType Type::toDataType() const {
 
   // Order is important here: types must progress from more specific
   // to less specific to return the most specific DataType.
-  if (subtypeOf(None))          return KindOfInvalid;
+  if (subtypeOf(None))          return KindOfNone;
   if (subtypeOf(Uninit))        return KindOfUninit;
   if (subtypeOf(Null))          return KindOfNull;
   if (subtypeOf(Bool))          return KindOfBoolean;
@@ -67,67 +67,64 @@ RuntimeType Type::toRuntimeType() const {
   return RuntimeType(toDataType());
 }
 
-Type Type::fromDataType(DataType outerType,
-                        DataType innerType /* = KindOfInvalid */) {
-  assert(innerType != KindOfRef);
+Type::Type(const RuntimeType& rtt)
+  : m_bits(bitsFromDataType(rtt.outerType(), rtt.innerType()))
+  , m_class(nullptr)
+{
+  if (rtt.outerType() == KindOfObject && rtt.hasKnownClass()) {
+    m_class = rtt.knownClass();
+  } else if (rtt.outerType() == KindOfArray && rtt.hasArrayKind()) {
+    m_arrayKindValid = true;
+    m_arrayKind = rtt.arrayKind();
+  }
+}
 
-  switch (outerType) {
-    case KindOfInvalid       : return None;
-    case KindOfUninit        : return Uninit;
-    case KindOfNull          : return InitNull;
-    case KindOfBoolean       : return Bool;
-    case KindOfInt64         : return Int;
-    case KindOfDouble        : return Dbl;
-    case KindOfStaticString  : return StaticStr;
-    case KindOfString        : return Str;
-    case KindOfArray         : return Arr;
-    case KindOfResource      : return Res;
-    case KindOfObject        : return Obj;
-    case KindOfClass         : return Cls;
-    case KindOfUncountedInit : return UncountedInit;
-    case KindOfUncounted     : return Uncounted;
-    case KindOfAny           : return Gen;
+Type::Type(const DynLocation* dl) {
+  // Temporary stop-gap until we embrace gcc 4.8 fully
+  // At that point we can switch to ctor delegation
+  new (this) Type((assert(dl), dl->rtt));
+}
+
+Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
+  assert(outer != KindOfInvalid);
+  assert(inner != KindOfRef);
+  assert(IMPLIES(inner == KindOfNone, outer != KindOfRef));
+
+  switch (outer) {
+    case KindOfUninit        : return kUninit;
+    case KindOfNull          : return kInitNull;
+    case KindOfBoolean       : return kBool;
+    case KindOfInt64         : return kInt;
+    case KindOfDouble        : return kDbl;
+    case KindOfStaticString  : return kStaticStr;
+    case KindOfString        : return kStr;
+    case KindOfArray         : return kArr;
+    case KindOfResource      : return kRes;
+    case KindOfObject        : return kObj;
+    case KindOfClass         : return kCls;
+    case KindOfUncountedInit : return kUncountedInit;
+    case KindOfUncounted     : return kUncounted;
+    case KindOfAny           : return kGen;
     case KindOfRef: {
-      if (innerType == KindOfInvalid || innerType == KindOfAny) {
-        return BoxedCell;
+      if (inner == KindOfAny) {
+        return kBoxedCell;
       } else {
-        return fromDataType(innerType).box();
+        assert(inner != KindOfUninit);
+        return bitsFromDataType(inner, KindOfNone) << kBoxShift;
       }
     }
-    default                  : not_reached();
+    default                  : always_assert(false && "Unsupported DataType");
   }
-}
-
-Type Type::fromRuntimeType(const RuntimeType& rtt) {
-  Type t = fromDataType(rtt.outerType(), rtt.innerType());
-  if (rtt.outerType() == KindOfObject && rtt.hasKnownClass()) {
-    return t.specialize(rtt.knownClass());
-  }
-  if (rtt.outerType() == KindOfArray && rtt.hasArrayKind()) {
-    return t.specialize(rtt.arrayKind());
-  }
-  return t;
-}
-
-Type Type::fromDynLocation(const Transl::DynLocation* dynLoc) {
-  if (!dynLoc) {
-    return Type::None;
-  }
-  DataType dt = dynLoc->rtt.outerType();
-  if (dt == KindOfUnknown) {
-    return Type::Gen;
-  }
-  return Type::fromDataType(dt, dynLoc->rtt.innerType());
 }
 
 Type liveTVType(const TypedValue* tv) {
+  assert(tv->m_type == KindOfClass || tvIsPlausible(*tv));
+
   if (tv->m_type == KindOfObject) {
-    Type t = Type::fromDataType(KindOfObject, KindOfInvalid);
-    return t.specialize(tv->m_data.pobj->getVMClass());
+    return Type::Obj.specialize(tv->m_data.pobj->getVMClass());
   }
   if (tv->m_type == KindOfArray) {
-    Type t = Type::fromDataType(KindOfArray, KindOfInvalid);
-    return t.specialize(tv->m_data.parr->kind());
+    return Type::Arr.specialize(tv->m_data.parr->kind());
   }
 
   auto outer = tv->m_type;
@@ -138,7 +135,7 @@ Type liveTVType(const TypedValue* tv) {
     inner = tv->m_data.pref->tv()->m_type;
     if (inner == KindOfStaticString) inner = KindOfString;
   }
-  return Type::fromDataType(outer, inner);
+  return Type(outer, inner);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -150,7 +147,7 @@ Type setElemReturn(const IRInstruction* inst) {
   auto baseType = inst->src(minstrBaseIdx(inst))->type().strip();
 
   // If the base is a Str, the result will always be a CountedStr (or
-  // an exception). If the baes might be a str, the result wil be
+  // an exception). If the base might be a str, the result wil be
   // CountedStr or Nullptr. Otherwise, the result is always Nullptr.
   if (baseType.subtypeOf(Type::Str)) {
     return Type::CountedStr;

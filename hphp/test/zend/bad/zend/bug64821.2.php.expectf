@@ -1,4 +1,4 @@
 HipHop Fatal error: %s
 Stack trace:
 #0 {main}
-  thrown in hphp/test/zend/bad/zend/bug64821.2.phpt on line %d
+  thrown in %s on line %d

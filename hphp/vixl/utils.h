@@ -79,7 +79,7 @@ inline uint32_t unsigned_bitextract_32(int msb, int lsb, uint32_t x) {
 }
 
 inline uint64_t unsigned_bitextract_64(int msb, int lsb, uint64_t x) {
-  return (x >> lsb) & ((1 << (1 + msb - lsb)) - 1);
+  return (x >> lsb) & ((static_cast<uint64_t>(1) << (1 + msb - lsb)) - 1);
 }
 
 inline int32_t signed_bitextract_32(int msb, int lsb, int32_t x) {

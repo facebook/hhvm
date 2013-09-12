@@ -23,17 +23,17 @@ using namespace HPHP;
 
 bool FunctionWalker::SkipRecurse(ConstructPtr cp) {
   StatementPtr s(
-    boost::dynamic_pointer_cast<Statement>(cp));
+    dynamic_pointer_cast<Statement>(cp));
   return SkipRecurse(s);
 }
 bool FunctionWalker::SkipRecurse(ConstructConstPtr cp) {
   StatementConstPtr s(
-    boost::dynamic_pointer_cast<const Statement>(cp));
+    dynamic_pointer_cast<const Statement>(cp));
   return SkipRecurse(s);
 }
 bool FunctionWalker::SkipRecurse(ConstructRawPtr cp) {
   StatementRawPtr s(
-    boost::dynamic_pointer_cast<Statement>(cp));
+    dynamic_pointer_cast<Statement>(cp));
   return SkipRecurse(s);
 }
 

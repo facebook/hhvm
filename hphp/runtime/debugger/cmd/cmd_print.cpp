@@ -329,8 +329,8 @@ void CmdPrint::onClient(DebuggerClient &client) {
     client.addWatch(format, m_body);
     return;
   }
-  m_bypassAccessCheck = client.getDebuggerBypassCheck();
-  m_printLevel = client.getDebuggerPrintLevel();
+  m_bypassAccessCheck = client.getDebuggerClientBypassCheck();
+  m_printLevel = client.getDebuggerClientPrintLevel();
   assert(m_printLevel <= 0 || m_printLevel >= DebuggerClient::MinPrintLevel);
   m_frame = client.getFrame();
   CmdPrintPtr res = client.xendWithNestedExecution<CmdPrint>(this);
@@ -350,9 +350,10 @@ bool CmdPrint::onServer(DebuggerProxy &proxy) {
   g_vmContext->setDebuggerBypassCheck(m_bypassAccessCheck);
   {
     EvalBreakControl eval(m_noBreak);
+    bool failed;
     m_ret =
       proxy.ExecutePHP(DebuggerProxy::MakePHPReturn(m_body),
-                       m_output, m_frame,
+                       m_output, m_frame, failed,
                        DebuggerProxy::ExecutePHPFlagsAtInterrupt |
                        (!proxy.isLocal() ? DebuggerProxy::ExecutePHPFlagsLog :
                         DebuggerProxy::ExecutePHPFlagsNone));

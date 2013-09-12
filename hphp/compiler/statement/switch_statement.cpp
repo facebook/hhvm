@@ -127,10 +127,10 @@ int SwitchStatement::getKidCount() const {
 void SwitchStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_exp = boost::dynamic_pointer_cast<Expression>(cp);
+      m_exp = dynamic_pointer_cast<Expression>(cp);
       break;
     case 1:
-      m_cases = boost::dynamic_pointer_cast<StatementList>(cp);
+      m_cases = dynamic_pointer_cast<StatementList>(cp);
       break;
     default:
       assert(false);

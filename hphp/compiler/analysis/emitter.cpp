@@ -80,6 +80,7 @@
 #include "hphp/util/job-queue.h"
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/base/stats.h"
@@ -107,9 +108,6 @@ namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(emitter)
-
-using boost::dynamic_pointer_cast;
-using boost::static_pointer_cast;
 
 namespace {
   const StringData* s_continuationVarArgsLocal
@@ -265,22 +263,22 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
   return count;
 }
 
-#define O(name, imm, pop, push, flags) \
-  void Emitter::name(imm) { \
-    auto const opcode = Op::name; \
-    Offset curPos UNUSED = getUnitEmitter().bcPos(); \
-    getEmitterVisitor().prepareEvalStack(); \
-    POP_##pop; \
-    const int nIn UNUSED = COUNT_##pop; \
-    POP_HA_##imm; \
-    PUSH_##push; \
-    getUnitEmitter().emitOp(Op##name); \
-    IMPL_##imm; \
+#define O(name, imm, pop, push, flags)                                  \
+  void Emitter::name(imm) {                                             \
+    auto const opcode = Op::name;                                       \
+    Offset curPos UNUSED = getUnitEmitter().bcPos();                    \
+    getEmitterVisitor().prepareEvalStack();                             \
+    POP_##pop;                                                          \
+    const int nIn UNUSED = COUNT_##pop;                                 \
+    POP_LA_##imm;                                                       \
+    PUSH_##push;                                                        \
+    getUnitEmitter().emitOp(Op##name);                                  \
+    IMPL_##imm;                                                         \
     getUnitEmitter().recordSourceLocation(m_tempLoc ? m_tempLoc.get() : \
                                           m_node->getLocation().get(), curPos); \
-    if (flags & TF) getEmitterVisitor().restoreJumpTargetEvalStack(); \
-    if (isFCallStar(opcode)) getEmitterVisitor().recordCall(); \
-    getEmitterVisitor().setPrevOpcode(opcode); \
+    if (flags & TF) getEmitterVisitor().restoreJumpTargetEvalStack();   \
+    if (opcode == Op::FCall) getEmitterVisitor().recordCall();          \
+    getEmitterVisitor().setPrevOpcode(opcode);                          \
   }
 
 #define COUNT_NOV 0
@@ -310,7 +308,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define DEC_SLA std::vector<StrOff>&
 #define DEC_ILA std::vector<IterPair>&
 #define DEC_IVA int32_t
-#define DEC_HA int32_t
+#define DEC_LA int32_t
 #define DEC_IA int32_t
 #define DEC_I64A int64_t
 #define DEC_DA double
@@ -359,36 +357,36 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define POP_FV(i) getEmitterVisitor().popEvalStack(StackSym::F, i, curPos)
 
 // Pop of virtual "locs" on the stack that turn into immediates.
-#define POP_HA_ONE(t) \
-  POP_HA_##t(nIn)
-#define POP_HA_TWO(t1, t2) \
-  POP_HA_##t1(nIn);    \
-  POP_HA_##t2(nIn)
-#define POP_HA_THREE(t1, t2, t3) \
-  POP_HA_##t1(nIn);          \
-  POP_HA_##t2(nIn);          \
-  POP_HA_##t3(nIn)
-#define POP_HA_FOUR(t1, t2, t3, t4) \
-  POP_HA_##t1(nIn);             \
-  POP_HA_##t2(nIn);             \
-  POP_HA_##t3(nIn);             \
-  POP_HA_##t4(nIn)
+#define POP_LA_ONE(t) \
+  POP_LA_##t(nIn)
+#define POP_LA_TWO(t1, t2) \
+  POP_LA_##t1(nIn);    \
+  POP_LA_##t2(nIn)
+#define POP_LA_THREE(t1, t2, t3) \
+  POP_LA_##t1(nIn);          \
+  POP_LA_##t2(nIn);          \
+  POP_LA_##t3(nIn)
+#define POP_LA_FOUR(t1, t2, t3, t4) \
+  POP_LA_##t1(nIn);             \
+  POP_LA_##t2(nIn);             \
+  POP_LA_##t3(nIn);             \
+  POP_LA_##t4(nIn)
 
-#define POP_HA_NA
-#define POP_HA_MA(i)
-#define POP_HA_BLA(i)
-#define POP_HA_SLA(i)
-#define POP_HA_ILA(i)
-#define POP_HA_IVA(i)
-#define POP_HA_IA(i)
-#define POP_HA_I64A(i)
-#define POP_HA_DA(i)
-#define POP_HA_SA(i)
-#define POP_HA_AA(i)
-#define POP_HA_BA(i)
-#define POP_HA_OA(i)
+#define POP_LA_NA
+#define POP_LA_MA(i)
+#define POP_LA_BLA(i)
+#define POP_LA_SLA(i)
+#define POP_LA_ILA(i)
+#define POP_LA_IVA(i)
+#define POP_LA_IA(i)
+#define POP_LA_I64A(i)
+#define POP_LA_DA(i)
+#define POP_LA_SA(i)
+#define POP_LA_AA(i)
+#define POP_LA_BA(i)
+#define POP_LA_OA(i)
 
-#define POP_HA_HA(i) \
+#define POP_LA_LA(i) \
   getEmitterVisitor().popSymbolicLocal(opcode, i, curPos)
 
 #define PUSH_NOV
@@ -495,10 +493,10 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define IMPL3_IVA IMPL_IVA(a3)
 #define IMPL4_IVA IMPL_IVA(a4)
 
-#define IMPL1_HA IMPL_IVA(a1)
-#define IMPL2_HA IMPL_IVA(a2)
-#define IMPL3_HA IMPL_IVA(a3)
-#define IMPL4_HA IMPL_IVA(a4)
+#define IMPL1_LA IMPL_IVA(a1)
+#define IMPL2_LA IMPL_IVA(a2)
+#define IMPL3_LA IMPL_IVA(a3)
+#define IMPL4_LA IMPL_IVA(a4)
 
 #define IMPL1_IA IMPL_IVA(a1)
 #define IMPL2_IA IMPL_IVA(a2)
@@ -562,7 +560,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef NA
 #undef DEC_MA
 #undef DEC_IVA
-#undef DEC_HA
+#undef DEC_LA
 #undef DEC_IA
 #undef DEC_I64A
 #undef DEC_DA
@@ -589,21 +587,21 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef POP_FMANY
 #undef POP_CVMANY
 #undef POP_CMANY
-#undef POP_HA_ONE
-#undef POP_HA_TWO
-#undef POP_HA_THREE
-#undef POP_HA_FOUR
-#undef POP_HA_NA
-#undef POP_HA_MA
-#undef POP_HA_IVA
-#undef POP_HA_IA
-#undef POP_HA_I64A
-#undef POP_HA_DA
-#undef POP_HA_SA
-#undef POP_HA_AA
-#undef POP_HA_BA
-#undef POP_HA_OA
-#undef POP_HA_HA
+#undef POP_LA_ONE
+#undef POP_LA_TWO
+#undef POP_LA_THREE
+#undef POP_LA_FOUR
+#undef POP_LA_NA
+#undef POP_LA_MA
+#undef POP_LA_IVA
+#undef POP_LA_IA
+#undef POP_LA_I64A
+#undef POP_LA_DA
+#undef POP_LA_SA
+#undef POP_LA_AA
+#undef POP_LA_BA
+#undef POP_LA_OA
+#undef POP_LA_LA
 #undef PUSH_NOV
 #undef PUSH_ONE
 #undef PUSH_TWO
@@ -645,10 +643,10 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef IMPL2_IVA
 #undef IMPL3_IVA
 #undef IMPL4_IVA
-#undef IMPL1_HA
-#undef IMPL2_HA
-#undef IMPL3_HA
-#undef IMPL4_HA
+#undef IMPL1_LA
+#undef IMPL2_LA
+#undef IMPL3_LA
+#undef IMPL4_LA
 #undef IMPL1_IA
 #undef IMPL2_IA
 #undef IMPL3_IA
@@ -1873,7 +1871,7 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
     voidReturn = builtinFunc->info()->returnType == KindOfNull;
   } else if (fn->isValid() && fn->getFuncScope()) {
     ref = fn->getFuncScope()->isRefReturn();
-    if (!(fn->getActualType())) {
+    if (!(fn->getActualType()) && !fn->getFuncScope()->isNative()) {
       voidReturn = true;
     }
   } else if (!fn->getName().empty()) {
@@ -1957,7 +1955,7 @@ bool isTupleInit(ExpressionPtr init_expr, int* cap) {
 bool EmitterVisitor::visit(ConstructPtr node) {
   bool ret = visitImpl(node);
   if (!Option::WholeProgram || !ret) return ret;
-  ExpressionPtr e = boost::dynamic_pointer_cast<Expression>(node);
+  ExpressionPtr e = dynamic_pointer_cast<Expression>(node);
   if (!e || e->isScalar()) return ret;
   DataType dt = KindOfUnknown;
   if (!e->maybeInited()) {
@@ -2212,6 +2210,25 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
       case Statement::KindOfReturnStatement: {
         ReturnStatementPtr r(static_pointer_cast<ReturnStatement>(node));
+
+        // if returning from (outer) async function,
+        // wrap the result into StaticResultWaitHandle
+        if (node->getFunctionScope()->isAsync() &&
+            !m_curFunc->isGenerator()) {
+          if (visit(r->getRetExp())) {
+            emitConvertToCell(e);
+          } else {
+            e.Null();
+          }
+          Id tempLocal = emitSetUnnamedL(e);
+          Offset start = m_ue.bcPos();
+          emitFreePendingIters(e);
+          emitCreateStaticWaitHandle(e, "StaticResultWaitHandle",
+            [&]() { emitPushAndFreeUnnamedL(e, tempLocal, start); });
+          e.RetC();
+          return false;
+        }
+
         bool retV = false;
         if (visit(r->getRetExp())) {
           if (r->getRetExp()->getContext() & Expression::RefValue) {
@@ -3853,6 +3870,21 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           }
         }
 
+        // We're still at the closure definition site. Emit code to instantiate
+        // the new anonymous class, with the use variables as arguments.
+        ExpressionListPtr valuesList(ce->getClosureValues());
+        for (int i = 0; i < useCount; ++i) {
+          emitBuiltinCallArg(e, (*valuesList)[i], i, useVars[i].second);
+        }
+
+        if (node->getFunctionScope()->isAsync() && m_curFunc->isGenerator()) {
+          // Closure definition in the body of async function. The closure
+          // body was already emitted, so we just create the object here.
+          assert(ce->getClosureClassName());
+          e.CreateCl(useCount, ce->getClosureClassName());
+          return true;
+        }
+
         // The parser generated a unique name for the function,
         // use that for the class
         std::string clsName = ce->getClosureFunction()->getOriginalName();
@@ -3865,13 +3897,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         }
 
         StringData* className = StringData::GetStaticString(clsName);
-
-        // We're still at the closure definition site. Emit code to instantiate
-        // the new anonymous class, with the use variables as arguments.
-        ExpressionListPtr valuesList(ce->getClosureValues());
-        for (int i = 0; i < useCount; ++i) {
-          emitBuiltinCallArg(e, (*valuesList)[i], i, useVars[i].second);
-        }
 
         if (Option::WholeProgram) {
           int my_id;
@@ -3891,14 +3916,15 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           }
         }
 
-        e.CreateCl(useCount, className);
+        ce->setClosureClassName(StringData::GetStaticString(clsName));
+        e.CreateCl(useCount, ce->getClosureClassName());
 
         // From here on out, we're creating a new class to hold the closure.
         const static StringData* parentName =
           StringData::GetStaticString("Closure");
         const Location* sLoc = ce->getLocation().get();
         PreClassEmitter* pce = m_ue.newPreClassEmitter(
-          className, PreClass::AlwaysHoistable);
+          ce->getClosureClassName(), PreClass::AlwaysHoistable);
         pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(),
                   AttrUnique | AttrPersistent, parentName, nullptr);
 
@@ -3982,13 +4008,11 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         visit(expr);
         emitConvertToCell(e);
 
-        int64_t normalLabel = 2 * await->getLabel();
-        int64_t exceptLabel = normalLabel - 1;
-
         // if expr is null, just continue
+        Label awaitNull;
         e.Dup();
         e.IsNullC();
-        e.JmpNZ(m_yieldLabels[normalLabel]);
+        e.JmpNZ(awaitNull);
 
         // if the type of expr is not WaitHandle (can be just Awaitable),
         // call getWaitHandle() method.
@@ -4000,22 +4024,42 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         }
         assert(m_evalStack.size() == 1);
 
-        e.ContSuspend(normalLabel);
+        // suspend if it is not finished
+        Label finished;
+        e.Dup();        // keep wait handle on the stack
+        emitConstMethodCallNoParams(e, "isFinished");
+        e.JmpNZ(finished);
 
-        // emit return label for raise()
-        assert(m_evalStack.size() == 0);
-        e.Null();
-        m_yieldLabels[exceptLabel].set(e);
-
-        // throw received exception on the stack
-        e.Throw();
-
-        // emit return label for next()/send()
-        e.Null();
-        m_yieldLabels[normalLabel].set(e);
-
-        // continue with the received result on the stack
+        // the work is not yet finished, we had to suspend
+        int64_t normalLabel = 2 * await->getLabel();
+        int64_t exceptLabel = normalLabel - 1;
+        if (m_curFunc->isGenerator()) {
+          // suspend continuation
+          e.ContSuspend(normalLabel);
+          e.Null();
+          m_yieldLabels[exceptLabel].set(e);
+          e.Throw();
+          e.Null();
+        } else {
+          // create new continuation and return it's wait handle
+          auto meth = static_pointer_cast<MethodStatement>(
+                        node->getFunctionScope()->getStmt());
+          const StringData* nameStr =
+            StringData::GetStaticString(meth->getGeneratorName());
+          e.CreateAsync(nameStr, normalLabel, m_pendingIters.size());
+          emitConstMethodCallNoParams(e, "getWaitHandle");
+          e.RetC();
+        }
+        // emit code to continue without suspend
+        finished.set(e);
+        emitConstMethodCallNoParams(e, "join");
         assert(m_evalStack.size() == 1);
+
+        // resume here next time
+        if (m_curFunc->isGenerator()) {
+          m_yieldLabels[normalLabel].set(e);
+        }
+        awaitNull.set(e);
         return true;
       }
     }
@@ -4371,6 +4415,10 @@ Id EmitterVisitor::emitVisitAndSetUnnamedL(Emitter& e, ExpressionPtr exp) {
   visit(exp);
   emitConvertToCell(e);
 
+  return emitSetUnnamedL(e);
+}
+
+Id EmitterVisitor::emitSetUnnamedL(Emitter& e) {
   // HACK: emitVirtualLocal would pollute m_evalStack before visiting exp,
   //       YieldExpression won't be happy
   Id tempLocal = m_curFunc->allocUnnamedLocal();
@@ -5364,8 +5412,9 @@ static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
     attrs = attrs | AttrAllowOverride;
   }
 
-  if (meth->hasCallToGetArgs() ||
-      (!fe->hasGeneratorAsBody() && funcScope->mayUseVV())) {
+  // if hasCallToGetArgs() or if mayUseVV and is not 'create generator' function
+  if (meth->hasCallToGetArgs() || (funcScope->mayUseVV() &&
+        (!funcScope->isGenerator() || fe->isGenerator()))) {
     attrs = attrs | AttrMayUseVV;
   }
 
@@ -5437,17 +5486,30 @@ determine_type_constraint(const ParameterExpressionPtr& par) {
   }
 
   if (auto annot = par->annotation()) {
-    if (!annot->isNullable()) return {};
-    if (annot->isSoft() || annot->isFunction()) return {};
+    auto flags = TypeConstraint::ExtendedHint | TypeConstraint::HHType;
+
+    // We only care about a subset of extended type constaints:
+    // typevar
+    // nullable
+    //
+    // If a constraint it both, nullable and a typevar, we don't need
+    // to flag it as nullable, because it will get dropped.
+    if (annot->isTypeVar()) {
+      flags = flags | TypeConstraint::TypeVar;
+    } else if (annot->isNullable()) {
+      flags = flags | TypeConstraint::Nullable;
+      if (annot->isSoft() || annot->isFunction()) {
+        return {};
+      }
+    } else {
+      return {};
+    }
 
     auto strippedName = annot->stripNullable().vanillaName();
-    if (strippedName.empty()) return {};
 
     return TypeConstraint{
       StringData::GetStaticString(strippedName),
-      TypeConstraint::Nullable |
-        TypeConstraint::ExtendedHint |
-        TypeConstraint::HHType
+      flags
     };
   }
 
@@ -5478,8 +5540,8 @@ void EmitterVisitor::emitPostponedMeths() {
       top_fes.push_back(fe);
     }
 
-    if (meth->getFunctionScope()->isGenerator() ||
-        meth->getFunctionScope()->isAsync()) {
+    auto funcScope = meth->getFunctionScope();
+    if (funcScope->isGenerator()) {
       // emit the outer 'create generator' function
       m_curFunc = fe;
       fe->setHasGeneratorAsBody(true);
@@ -5492,10 +5554,27 @@ void EmitterVisitor::emitPostponedMeths() {
         emitMethodMetadata(meth, p.m_closureUseVars, m_curFunc->top());
         emitGeneratorBody(meth);
       }
+    } else if (funcScope->isAsync()) {
+      // emit the outer function (which creates continuation if blocked)
+      m_curFunc = fe;
+      fe->setHasGeneratorAsBody(true);
+      emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
+      emitAsyncMethod(meth);
+
+      // emit the generator body
+      m_curFunc = createFuncEmitterForGeneratorBody(meth, fe, top_fes);
+      if (m_curFunc) {
+        emitMethodMetadata(meth, p.m_closureUseVars, m_curFunc->top());
+        emitGeneratorBody(meth);
+      }
     } else {
       m_curFunc = fe;
-      emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
-      emitMethod(meth);
+      if (funcScope->isNative()) {
+        bindNativeFunc(meth, fe);
+      } else {
+        emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
+        emitMethod(meth);
+      }
     }
 
     delete p.m_closureUseVars;
@@ -5507,29 +5586,107 @@ void EmitterVisitor::emitPostponedMeths() {
   }
 }
 
-void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
-                                        ClosureUseVarVec* useVars,
-                                        bool top) {
-  FuncEmitter* fe = m_curFunc;
-
-  // user attributes
-  bool allowOverride = false;
+void EmitterVisitor::bindUserAttributes(MethodStatementPtr meth,
+                                        FuncEmitter *fe,
+                                        bool &allowOverride) {
   const FunctionScope::UserAttributeMap& userAttrs =
     meth->getFunctionScope()->userAttributes();
-  for (FunctionScope::UserAttributeMap::const_iterator it = userAttrs.begin();
-       it != userAttrs.end(); ++it) {
-    if (it->first == "__Overridable") {
+  for (auto& attr : userAttrs) {
+    if (attr.first == "__Overridable") {
       allowOverride = true;
       continue;
     }
-    const StringData* uaName = StringData::GetStaticString(it->first);
-    ExpressionPtr uaValue = it->second;
+    const StringData* uaName = StringData::GetStaticString(attr.first);
+    ExpressionPtr uaValue = attr.second;
     assert(uaValue);
     assert(uaValue->isScalar());
     TypedValue tv;
     initScalar(tv, uaValue);
     fe->addUserAttribute(uaName, tv);
   }
+}
+
+void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
+                                    FuncEmitter *fe) {
+  if (SystemLib::s_inited) {
+    throw IncludeTimeFatalException(meth,
+          "Native functions/methods may only be defined in systemlib");
+  }
+
+  auto modifiers = meth->getModifiers();
+  bool allowOverride = false;
+  bindUserAttributes(meth, fe, allowOverride);
+
+  Attr attributes = AttrNative | AttrUnique | AttrPersistent;
+  if (meth->isRef()) {
+    attributes = attributes | AttrReference;
+  }
+  auto pce = fe->pce();
+  if (pce) {
+    if (modifiers->isStatic()) {
+      attributes = attributes | AttrStatic;
+    }
+    if (modifiers->isFinal()) {
+      attributes = attributes | AttrFinal;
+    }
+    if (modifiers->isAbstract()) {
+      attributes = attributes | AttrAbstract;
+    }
+    if (modifiers->isPrivate()) {
+      attributes = attributes | AttrPrivate;
+    } else {
+      attributes = attributes | (modifiers->isProtected()
+                              ? AttrProtected : AttrPublic);
+    }
+  } else {
+    if (allowOverride) {
+      attributes = attributes | AttrAllowOverride;
+    }
+  }
+
+  const Location* sLoc = meth->getLocation().get();
+  fe->setLocation(sLoc->line0, sLoc->line1);
+  fe->setDocComment(meth->getDocComment().c_str());
+  fe->setReturnType(meth->retTypeAnnotation()->dataType());
+  fe->setMaxStackCells(kNumActRecCells + 1);
+  fe->setReturnTypeConstraint(
+      StringData::GetStaticString(meth->getReturnTypeConstraint()));
+
+  FunctionScopePtr funcScope = meth->getFunctionScope();
+  const char *funcname  = funcScope->getName().c_str();
+  const char *classname = pce ? pce->name()->data() : nullptr;
+  BuiltinFunction nif = Native::GetBuiltinFunction(funcname, classname,
+                                                   modifiers->isStatic());
+  BuiltinFunction bif = pce ? Native::methodWrapper
+                            : Native::functionWrapper;
+
+  if (!nif) {
+    bif = Native::unimplementedWrapper;
+  } else if (fe->parseNativeAttributes(attributes) & Native::AttrActRec) {
+    // Call this native function with a raw ActRec*
+    // rather than pulling out args for normal func calling
+    bif = nif;
+    nif = nullptr;
+  }
+
+  Emitter e(meth, m_ue, *this);
+  Label topOfBody(e);
+  emitMethodPrologue(e, meth);
+
+  Offset base = m_ue.bcPos();
+  fe->setBuiltinFunc(bif, nif, attributes, base);
+  fillFuncEmitterParams(fe, meth->getParams(), true);
+  e.NativeImpl();
+  FuncFinisher ff(this, e, fe);
+  emitMethodDVInitializers(e, meth, topOfBody);
+}
+
+void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
+                                        ClosureUseVarVec* useVars,
+                                        bool top) {
+  FuncEmitter* fe = m_curFunc;
+  bool allowOverride = false;
+  bindUserAttributes(meth, fe, allowOverride);
 
   // assign ids to parameters (all methods)
   int numParam = meth->getParams() ? meth->getParams()->getCount() : 0;
@@ -5555,8 +5712,9 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
     fe->allocVarId(s_continuationVarArgsLocal);
   }
 
-  // assign ids to local variables (not in generator create)
-  if (!fe->hasGeneratorAsBody()) {
+  // assign ids to local variables (not in 'create generator' method)
+  if (!meth->getFunctionScope()->isGenerator() ||
+      fe->isGenerator()) {
     assignLocalVariableIds(meth->getFunctionScope());
   }
 
@@ -5585,7 +5743,8 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
 }
 
 void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
-                                           ExpressionListPtr params){
+                                           ExpressionListPtr params,
+                                           bool builtin /*= false */){
   int numParam = params ? params->getCount() : 0;
   for (int i = 0; i < numParam; i++) {
     ParameterExpressionPtr par(
@@ -5596,6 +5755,11 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
     auto const typeConstraint = determine_type_constraint(par);
     if (typeConstraint.hasConstraint()) {
       pi.setTypeConstraint(typeConstraint);
+    }
+    if (builtin) {
+      if (auto const typeAnnotation = par->annotation()) {
+        pi.setBuiltinType(typeAnnotation->dataType());
+      }
     }
 
     if (par->hasUserType()) {
@@ -5659,8 +5823,7 @@ void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
 
   if (funcScope->needsLocalThis() &&
       !funcScope->isStatic() &&
-      !funcScope->isGenerator() &&
-      !funcScope->isAsync()) {
+      !funcScope->isGenerator()) {
     assert(!m_curFunc->top());
     static const StringData* thisStr = StringData::GetStaticString("this");
     Id thisId = m_curFunc->lookupVarId(thisStr);
@@ -5702,6 +5865,58 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
   FuncFinisher ff(this, e, m_curFunc);
 
   emitMethodDVInitializers(e, meth, topOfBody);
+}
+
+void EmitterVisitor::emitAsyncMethod(MethodStatementPtr meth) {
+  Emitter e(meth, m_ue, *this);
+  Label topOfBody(e);
+  emitMethodPrologue(e, meth);
+  emitSetFuncGetArgs(e);
+
+  // emit method body
+  Offset start = m_ue.bcPos();
+  visit(meth->getStmts());
+  assert(m_evalStack.size() == 0);
+
+  // if the current position is reachable, emit code to return null
+  if (currentPositionIsReachable()) {
+    emitCreateStaticWaitHandle(e, "StaticResultWaitHandle",
+                               [&](){ e.Null(); });
+    e.RetC();
+  }
+
+  // wrap the whole body into a try-catch block
+  Offset end = m_ue.bcPos();
+  ExnHandlerRegion* r = new ExnHandlerRegion(start, end);
+  m_exnHandlers.push_back(r);
+
+  Label* label = new Label(e);
+  StringData* excLit = StringData::GetStaticString("Exception");
+  r->m_names.insert(excLit);
+  r->m_catchLabels.push_back(std::pair<StringData*, Label*>(excLit, label));
+
+  // catch block
+  emitCreateStaticWaitHandle(e, "StaticExceptionWaitHandle",
+                             [&](){ e.Catch(); });
+  e.RetC();
+
+  FuncFinisher ff(this, e, m_curFunc);
+
+  emitMethodDVInitializers(e, meth, topOfBody);
+}
+
+void EmitterVisitor::emitCreateStaticWaitHandle(Emitter& e, std::string cls,
+                                          std::function<void()> emitParam) {
+  StringData* createLit = StringData::GetStaticString("create");
+  StringData* clsLit = StringData::GetStaticString(cls);
+  {
+    FPIRegionRecorder fpi(this, m_ue, m_evalStack, m_ue.bcPos());
+    e.FPushClsMethodD(1, createLit, clsLit);
+    emitParam();
+    e.FPassC(0);
+  }
+  e.FCall(1);
+  emitConvertToCell(e);
 }
 
 FuncEmitter* EmitterVisitor::createFuncEmitterForGeneratorBody(
@@ -7235,6 +7450,10 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     const ClassInfo::MethodInfo* mi = ClassInfo::FindFunction(name);
     assert(mi &&
       "MethodInfo not found; may be a problem with the .idl.json files");
+    if ((mi->attribute & ClassInfo::ZendCompat) &&
+        !RuntimeOption::EnableZendCompat) {
+      continue;
+    }
     if (Unit::lookupFunc(name)) {
       // already provided by systemlib, rename to allow the php
       // version to delegate if necessary
@@ -7417,7 +7636,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
                                                   PreClass::AlwaysHoistable);
     pce->init(0, 0, ue->bcPos(), AttrUnique|AttrPersistent, parentName,
               nullptr);
-    pce->setBuiltinClassInfo(e.ci, e.info->m_InstanceCtor, e.info->m_sizeof);
+    pce->setBuiltinClassInfo(e.ci, e.info->m_instanceCtor, e.info->m_sizeof);
     {
       ClassInfo::InterfaceVec intfVec = e.ci->getInterfacesVec();
       for (unsigned i = 0; i < intfVec.size(); ++i) {

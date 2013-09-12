@@ -86,13 +86,6 @@
                     "type": "Variant",
                     "desc": "Whether it was successful or not.",
                     "ref": true
-                },
-                {
-                    "name": "errcode",
-                    "type": "Variant",
-                    "value": "null_variant",
-                    "desc": "One of those FB_UNSERIALIZE_ constants to describe what the decoding error was, if it failed.",
-                    "ref": true
                 }
             ]
         },
@@ -530,29 +523,6 @@
                 "type": null
             },
             "args": [
-            ]
-        },
-        {
-            "name": "xhprof_run_trace",
-            "desc": "Re-runs a prior trace and generates xhprof output.",
-            "flags": [
-                "HipHopSpecific"
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "Profile result."
-            },
-            "args": [
-                {
-                    "name": "packedTrace",
-                    "type": "String",
-                    "desc": "A packed trace returned from xhprof_disable."
-                },
-                {
-                    "name": "flags",
-                    "type": "Int32",
-                    "desc": "One of those XHPROF_FLAGS_ constant to specify what to profile."
-                }
             ]
         },
         {

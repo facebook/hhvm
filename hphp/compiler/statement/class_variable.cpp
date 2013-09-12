@@ -214,10 +214,10 @@ int ClassVariable::getKidCount() const {
 void ClassVariable::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_modifiers = boost::dynamic_pointer_cast<ModifierExpression>(cp);
+      m_modifiers = dynamic_pointer_cast<ModifierExpression>(cp);
       break;
     case 1:
-      m_declaration = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      m_declaration = dynamic_pointer_cast<ExpressionList>(cp);
       break;
     default:
       assert(false);

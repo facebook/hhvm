@@ -28,6 +28,7 @@ void CmdEval::sendImpl(DebuggerThriftBuffer &thrift) {
   thrift.write(m_output);
   thrift.write(m_frame);
   thrift.write(m_bypassAccessCheck);
+  if (this->m_version == 2) thrift.write(m_failed);
 }
 
 void CmdEval::recvImpl(DebuggerThriftBuffer &thrift) {
@@ -35,15 +36,25 @@ void CmdEval::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_output);
   thrift.read(m_frame);
   thrift.read(m_bypassAccessCheck);
+  if (this->m_version == 2) thrift.read(m_failed);
+  // Old senders will set version to 0. A new sender sets it to 1
+  // and then expects an answer using version 2.
+  // Note that version 1 is the same format as version 0, so old
+  // receivers will not break when receiving a version 1 message.
+  // This code ensures that version 2 messages are received only
+  // by receivers that previously sent a version 1 message (thus
+  // indicating their ability to deal with version 2 messages).
+  if (this->m_version == 1) this->m_version = 2;
 }
 
 void CmdEval::onClient(DebuggerClient &client) {
   m_body = client.getCode();
   m_frame = client.getFrame();
-  m_bypassAccessCheck = client.getDebuggerBypassCheck();
-  DebuggerCommandPtr res =
-    client.xendWithNestedExecution<DebuggerCommand>(this);
+  m_bypassAccessCheck = client.getDebuggerClientBypassCheck();
+  CmdEvalPtr res =
+     client.xendWithNestedExecution<CmdEval>(this);
   res->handleReply(client);
+  m_failed = res->m_failed;
 }
 
 void CmdEval::handleReply(DebuggerClient &client) {
@@ -56,7 +67,7 @@ bool CmdEval::onServer(DebuggerProxy &proxy) {
   PCFilter* locSave = g_vmContext->m_lastLocFilter;
   g_vmContext->m_lastLocFilter = new PCFilter();
   g_vmContext->setDebuggerBypassCheck(m_bypassAccessCheck);
-  proxy.ExecutePHP(m_body, m_output, m_frame,
+  proxy.ExecutePHP(m_body, m_output, m_frame, m_failed,
                    DebuggerProxy::ExecutePHPFlagsAtInterrupt |
                    (!proxy.isLocal() ? DebuggerProxy::ExecutePHPFlagsLog :
                     DebuggerProxy::ExecutePHPFlagsNone));

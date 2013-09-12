@@ -422,7 +422,6 @@ public:
   void requestInit();
   void requestExit();
 
-  static void getElem(TypedValue* base, TypedValue* key, TypedValue* dest);
   static c_Continuation* createContFunc(const Func* origFunc,
                                         const Func* genFunc);
   static c_Continuation* createContMeth(const Func* origFunc,
@@ -476,6 +475,7 @@ private:
   template<class Op> void implCellBinOp(PC&, Op op);
   template<class Op> void implCellBinOpBool(PC&, Op op);
   bool cellInstanceOf(TypedValue* c, const HPHP::NamedEntity* s);
+  bool iopInstanceOfHelper(const StringData* s1, Cell* c2);
   bool initIterator(PC& pc, PC& origPc, Iter* it,
                     Offset offset, Cell* c1);
   bool initIteratorM(PC& pc, PC& origPc, Iter* it,
@@ -625,7 +625,7 @@ public:
   void invokeUnit(TypedValue* retval, HPHP::Unit* unit);
   HPHP::Unit* compileEvalString(StringData* code);
   CStrRef createFunction(CStrRef args, CStrRef code);
-  void evalPHPDebugger(TypedValue* retval, StringData *code, int frame);
+  bool evalPHPDebugger(TypedValue* retval, StringData *code, int frame);
   void enterDebuggerDummyEnv();
   void exitDebuggerDummyEnv();
   void preventReturnsToTC();
@@ -664,7 +664,9 @@ public:
   bool m_dbgNoBreak;
   bool doFCall(HPHP::ActRec* ar, PC& pc);
   bool doFCallArray(PC& pc);
+  bool doFCallArrayTC(PC pc);
   CVarRef getEvaledArg(const StringData* val, CStrRef namespacedName);
+
 private:
   void enterVMWork(ActRec* enterFnAr);
   void enterVMPrologue(ActRec* enterFnAr);
@@ -688,7 +690,7 @@ public:
   void syncGdbState();
   enum InvokeFlags {
     InvokeNormal = 0,
-    InvokeIgnoreByRefErrors = 1,
+    InvokeCuf = 1,
     InvokePseudoMain = 2
   };
   void invokeFunc(TypedValue* retval,
@@ -704,13 +706,17 @@ public:
                   CArrRef params,
                   VarEnv* varEnv = nullptr) {
     invokeFunc(retval, ctx.func, params, ctx.this_, ctx.cls, varEnv,
-               ctx.invName, InvokeIgnoreByRefErrors);
+               ctx.invName);
   }
+  void invokeFuncCleanupHelper(TypedValue* retval,
+                               ActRec* ar,
+                               int numArgsPushed);
   void invokeFuncFew(TypedValue* retval,
                      const HPHP::Func* f,
                      void* thisOrCls,
                      StringData* invName,
-                     int argc, TypedValue* argv);
+                     int argc,
+                     const TypedValue* argv);
   void invokeFuncFew(TypedValue* retval,
                      const HPHP::Func* f,
                      void* thisOrCls,
@@ -719,7 +725,8 @@ public:
   }
   void invokeFuncFew(TypedValue* retval,
                      const CallCtx& ctx,
-                     int argc, TypedValue* argv) {
+                     int argc,
+                     const TypedValue* argv) {
     invokeFuncFew(retval, ctx.func,
                   ctx.this_ ? (void*)ctx.this_ :
                   ctx.cls ? (char*)ctx.cls + 1 : nullptr,

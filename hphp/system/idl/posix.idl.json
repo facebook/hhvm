@@ -1,6 +1,114 @@
 {
     "preamble": "",
     "consts": [
+        {
+            "name": "POSIX_S_IFMT",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_S_IFSOCK",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_S_IFLNK",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_S_IFREG",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_S_IFBLK",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_S_IFDIR",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_S_IFCHR",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_S_IFIFO",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_S_ISUID",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_S_ISGID",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_S_ISVTX",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_S_IRWXU",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_S_IRUSR",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_S_IWUSR",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_S_IXUSR",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_S_IRWXG",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_S_IRGRP",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_S_IWGRP",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_S_IXGRP",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_S_IRWXO",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_S_IROTH",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_S_IWOTH",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_S_IXOTH",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_F_OK",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_X_OK",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_W_OK",
+            "type": "Int64"
+        },
+        {
+            "name": "POSIX_R_OK",
+            "type": "Int64"
+        }
     ],
     "funcs": [
         {

@@ -17,6 +17,7 @@
 #include "hphp/runtime/debugger/cmd/cmd_info.h"
 #include "hphp/runtime/debugger/cmd/cmd_variable.h"
 #include "hphp/runtime/ext/ext_reflection.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/util/logger.h"
 
@@ -292,7 +293,7 @@ void CmdInfo::PrintDocComments(StringBuffer &sb, CArrRef info) {
       space1 = matches1[1].toString().size();
       space2 = matches2[1].toString().size();
     }
-    String spaces = StringUtil::Repeat(" ", space2 - space1 - 1);
+    String spaces = f_str_repeat(" ", space2 - space1 - 1);
     sb.printf("%s%s\n", spaces.data(), doc.data());
   }
 }

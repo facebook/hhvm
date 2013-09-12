@@ -29,6 +29,7 @@
 #include "hphp/runtime/server/replay-transport.h"
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/base/http-client.h"
+#include "hphp/runtime/ext/ext_string.h"
 
 #define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
 
@@ -267,7 +268,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
     // they are security-critical.
     if (RuntimeOption::LogHeaderMangle != 0) {
       String key = "HTTP_";
-      key += StringUtil::ToUpper(iter->first).replace("-","_");
+      key += f_strtoupper(iter->first).replace("-","_");
       if (server.asArrRef().exists(key)) {
         if (!(++bad_request_count % RuntimeOption::LogHeaderMangle)) {
           Logger::Warning(
@@ -283,7 +284,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
 
     for (unsigned int i = 0; i < values.size(); i++) {
       String key = "HTTP_";
-      key += StringUtil::ToUpper(iter->first).replace("-", "_");
+      key += f_strtoupper(iter->first).replace("-", "_");
       server.set(key, String(values[i]));
     }
   }

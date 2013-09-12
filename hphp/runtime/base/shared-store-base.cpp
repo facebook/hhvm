@@ -33,43 +33,7 @@
 
 namespace HPHP {
 
-///////////////////////////////////////////////////////////////////////////////
-// SharedStore
-
-SharedStore::SharedStore(int id) : m_id(id) {
-}
-
-SharedStore::~SharedStore() {
-}
-
-std::string SharedStore::GetSkeleton(CStrRef key) {
-  std::string ret;
-  const char *p = key.data();
-  ret.reserve(key.size());
-  bool added = false; // whether consecutive numbers are replaced by # yet
-  for (int i = 0; i < key.size(); i++) {
-    char ch = *p++;
-    if (ch >= '0' && ch <= '9') {
-      if (!added) {
-        ret += '#';
-        added = true;
-      }
-    } else {
-      added = false;
-      ret += ch;
-    }
-  }
-  return ret;
-}
-
-bool SharedStore::erase(CStrRef key, bool expired /* = false */) {
-  bool success = eraseImpl(key, expired);
-
-  if (RuntimeOption::EnableStats && RuntimeOption::EnableAPCStats) {
-    ServerStats::Log(success ? "apc.erased" : "apc.erase", 1);
-  }
-  return success;
-}
+//////////////////////////////////////////////////////////////////////
 
 void StoreValue::set(SharedVariant *v, int64_t ttl) {
   var = v;
@@ -79,8 +43,7 @@ bool StoreValue::expired() const {
   return expiry && time(nullptr) >= expiry;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// SharedStores
+//////////////////////////////////////////////////////////////////////
 
 SharedStores s_apc_store;
 
@@ -292,4 +255,5 @@ bool SharedStoreFileStorage::addFile() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
 }

@@ -32,8 +32,8 @@ public:
   static int64_t ClockGetTimeNS(int clk_id);
   static int ClockGetTime(int clk_id, timespec *ts);
 
-  inline ALWAYS_INLINE int clockGetTime(int clk_id, timespec *ts);
-  inline ALWAYS_INLINE int64_t clockGetTimeNS(int clk_id);
+  ALWAYS_INLINE int clockGetTime(int clk_id, timespec *ts);
+  ALWAYS_INLINE int64_t clockGetTimeNS(int clk_id);
 
 private:
   void *m_handle;

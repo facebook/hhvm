@@ -1,0 +1,10 @@
+array(4) {
+  ["canonical"]=>
+  bool(true)
+  ["answer"]=>
+  bool(false)
+  ["logical"]=>
+  bool(true)
+  ["option"]=>
+  bool(true)
+}

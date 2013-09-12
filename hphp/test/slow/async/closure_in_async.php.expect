@@ -1,0 +1,8 @@
+closure
+int(1)
+asyncclosure
+int(3)
+closure
+int(3)
+asyncclosure
+int(5)

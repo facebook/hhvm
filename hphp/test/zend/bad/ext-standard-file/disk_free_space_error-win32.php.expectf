@@ -8,16 +8,16 @@ NULL
 HipHop Warning: %s
 NULL
 HipHop Warning: %s
- in hphp/test/zend/bad/ext-standard-file/disk_free_space_error-win32.phpt on line %d
+ in %s on line %d
 bool(false)
 HipHop Warning: %s
- in hphp/test/zend/bad/ext-standard-file/disk_free_space_error-win32.phpt on line %d
+ in %s on line %d
 bool(false)
 HipHop Warning: %s
- in hphp/test/zend/bad/ext-standard-file/disk_free_space_error-win32.phpt on line %d
+ in %s on line %d
 bool(false)
 HipHop Warning: %s
- in hphp/test/zend/bad/ext-standard-file/disk_free_space_error-win32.phpt on line %d
+ in %s on line %d
 bool(false)
 
 -- Done --

@@ -20,6 +20,8 @@
 #include "hphp/util/stack-trace.h"
 #include <stdarg.h>
 
+#include <string>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -35,6 +37,7 @@ namespace HPHP {
 class Exception : public std::exception {
 public:
   Exception(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  explicit Exception(const std::string& msg);
   Exception(const Exception &e);
   Exception();
 

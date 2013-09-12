@@ -1,0 +1,65 @@
+array(3) {
+  [0]=>
+  array(1) {
+    ["a"]=>
+    string(1) "b"
+  }
+  [1]=>
+  string(21) "tag:yaml.org,2002:map"
+  [2]=>
+  int(0)
+}
+array(3) {
+  [0]=>
+  array(1) {
+    ["c"]=>
+    string(1) "d"
+  }
+  [1]=>
+  string(21) "tag:yaml.org,2002:map"
+  [2]=>
+  int(0)
+}
+array(3) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(1) "e"
+    [1]=>
+    string(1) "f"
+  }
+  [1]=>
+  string(21) "tag:yaml.org,2002:seq"
+  [2]=>
+  int(0)
+}
+array(3) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(1) "g"
+    [1]=>
+    string(1) "h"
+  }
+  [1]=>
+  string(21) "tag:yaml.org,2002:seq"
+  [2]=>
+  int(0)
+}
+array(3) {
+  [0]=>
+  array(4) {
+    ["implicit_map"]=>
+    string(21) "tag:yaml.org,2002:map"
+    ["explicit_map"]=>
+    string(21) "tag:yaml.org,2002:map"
+    ["implicit_seq"]=>
+    string(21) "tag:yaml.org,2002:seq"
+    ["explicit_seq"]=>
+    string(21) "tag:yaml.org,2002:seq"
+  }
+  [1]=>
+  string(21) "tag:yaml.org,2002:map"
+  [2]=>
+  int(0)
+}

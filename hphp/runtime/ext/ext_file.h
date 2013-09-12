@@ -64,8 +64,8 @@ Variant f_fgetcsv(CResRef handle, int64_t length = 0, CStrRef delimiter = ",",
 // file name based file operations
 
 Variant f_file_get_contents(CStrRef filename, bool use_include_path = false,
-                            CVarRef context = uninit_null(), int64_t offset = 0,
-                            int64_t maxlen = 0);
+                            CVarRef context = uninit_null(),
+                            int64_t offset = -1, int64_t maxlen = -1);
 Variant f_file_put_contents(CStrRef filename, CVarRef data, int flags = 0,
                             CVarRef context = uninit_null());
 Variant f_file(CStrRef filename, int flags = 0, CVarRef context = uninit_null());
@@ -149,11 +149,11 @@ bool f_chdir(CStrRef directory);
 bool f_chroot(CStrRef directory);
 Variant f_dir(CStrRef directory);
 Variant f_opendir(CStrRef path, CVarRef context = uninit_null());
-Variant f_readdir(CResRef dir_handle);
-void f_rewinddir(CResRef dir_handle);
+Variant f_readdir(CResRef dir_handle = null_resource);
+void f_rewinddir(CResRef dir_handle = null_resource);
 Variant f_scandir(CStrRef directory, bool descending = false,
                   CVarRef context = uninit_null());
-void f_closedir(CResRef dir_handle);
+void f_closedir(CResRef dir_handle = null_resource);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

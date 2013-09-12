@@ -154,7 +154,7 @@ bool isUnguardedLoad(IRInstruction* inst) {
 
 // removeUnreachable erases unreachable blocks from trace, and returns
 // a sorted list of the remaining blocks.
-BlockList removeUnreachable(IRTrace* trace, IRFactory* factory) {
+BlockList removeUnreachable(IRTrace* trace, IRFactory& factory) {
   FTRACE(5, "RemoveUnreachable:vvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "RemoveUnreachable:^^^^^^^^^^^^^^^^^^^^\n"); };
 
@@ -178,7 +178,7 @@ BlockList removeUnreachable(IRTrace* trace, IRFactory* factory) {
   // 2. get a list of reachable blocks by sorting them, and erase any
   //    blocks that are unreachable.
   bool needsReflow = false;
-  BlockList blocks = rpoSortCfg(trace, *factory);
+  BlockList blocks = rpoSortCfg(trace, factory);
   StateVector<Block, bool> reachable(factory, false);
   for (Block* b : blocks) reachable[b] = true;
   for (Block* b : blocks) {
@@ -228,8 +228,8 @@ initInstructions(const BlockList& blocks, DceState& state) {
         Opcode srcOpc = srcInst->op();
         if (srcOpc != DefConst) {
           assert(srcInst->op() == IncRef);
-          assert(state[srcInst].isDead()); // IncRef isn't essential so it should
-                                           // be dead here
+          assert(state[srcInst].isDead()); // IncRef isn't essential so it
+                                           // should be dead here
           state[srcInst].setDecRefNZed();
         }
       }
@@ -317,7 +317,7 @@ void optimizeRefCount(IRTrace* trace, DceState& state, UseCounts& uses) {
  *    * replace each use of the original incref's result with the new
  *      incref's result.
  */
-void sinkIncRefs(IRTrace* trace, IRFactory* irFactory, DceState& state) {
+void sinkIncRefs(IRTrace* trace, IRFactory& irFactory, DceState& state) {
   assert(trace->isMain());
 
   assert(trace->back()->back()->op() != Jmp_);
@@ -339,7 +339,7 @@ void sinkIncRefs(IRTrace* trace, IRFactory* irFactory, DceState& state) {
     for (auto* inst : boost::adaptors::reverse(toSink)) {
       // prepend inserts an instruction to the beginning of a block, after
       // the label. Therefore, we iterate through toSink in the reversed order.
-      auto* sunkInst = irFactory->gen(IncRef, inst->marker(), inst->src(0));
+      auto* sunkInst = irFactory.gen(IncRef, inst->marker(), inst->src(0));
       state[sunkInst].setLive();
       exit->front()->prepend(sunkInst);
 
@@ -364,7 +364,7 @@ void sinkIncRefs(IRTrace* trace, IRFactory* irFactory, DceState& state) {
   // An exit trace may be entered from multiple exit points. We keep track of
   // which exit traces we already pushed sunk IncRefs to, so that we won't push
   // them multiple times.
-  boost::dynamic_bitset<> pushedTo(irFactory->numBlocks());
+  boost::dynamic_bitset<> pushedTo(irFactory.numBlocks());
   forEachInst(trace, [&](IRInstruction* inst) {
     if (inst->op() == IncRef) {
       // Must be REFCOUNT_CONSUMED or REFCOUNT_CONSUMED_OFF_TRACE;
@@ -407,7 +407,7 @@ void sinkIncRefs(IRTrace* trace, IRFactory* irFactory, DceState& state) {
  * of a DefInlineFP.  In this case we can kill both, which may allow
  * removing a SpillFrame as well.
  */
-void optimizeActRecs(IRTrace* trace, DceState& state, IRFactory* factory,
+void optimizeActRecs(IRTrace* trace, DceState& state, IRFactory& factory,
                      UseCounts& uses) {
   FTRACE(5, "AR:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "AR:^^^^^^^^^^^^^^^^^^^^^\n"); };
@@ -468,9 +468,9 @@ void optimizeActRecs(IRTrace* trace, DceState& state, IRFactory* factory,
 
             Offset retBCOff = srcInst->extra<DefInlineFP>()->retBCOff;
             retFixupMap[srcInst->dst()] = retBCOff;
-            factory->replace(srcInst, PassFP, srcInst->src(2));
+            factory.replace(srcInst, PassFP, srcInst->src(2));
             if (stkInst->op() == SpillFrame) {
-              factory->replace(stkInst, PassSP, stkInst->src(0));
+              factory.replace(stkInst, PassSP, stkInst->src(0));
             }
           }
         }
@@ -528,7 +528,7 @@ void optimizeActRecs(IRTrace* trace, DceState& state, IRFactory* factory,
           FTRACE(5, "{} ({}) masking\n",
                  opcodeName(inst->op()),
                  inst->id());
-          factory->replace(inst, PassSP, inst->src(1));
+          factory.replace(inst, PassSP, inst->src(1));
           break;
         }
       }
@@ -568,7 +568,7 @@ void optimizeActRecs(IRTrace* trace, DceState& state, IRFactory* factory,
                      opcodeName(inst->op()),
                      inst->id());
               Offset retBCOff = retFixupMap[fpInst->dst()];
-              inst->setSrc(1, factory->cns(retBCOff));
+              inst->setSrc(1, factory.cns(retBCOff));
             }
           }
         }
@@ -640,7 +640,7 @@ void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
 
 // Publicly exported functions:
 
-void eliminateDeadCode(IRTrace* trace, IRFactory* irFactory) {
+void eliminateDeadCode(IRTrace* trace, IRFactory& irFactory) {
   auto removeEmptyExitTraces = [&] {
     trace->exitTraces().remove_if([](IRTrace* exit) {
       return exit->blocks().empty();
@@ -653,7 +653,7 @@ void eliminateDeadCode(IRTrace* trace, IRFactory* irFactory) {
 
   // Ensure that main trace doesn't unconditionally jump to an exit
   // trace.  This invariant is needed by the ref-counting optimization.
-  eliminateUnconditionalJump(trace, irFactory);
+  eliminateUnconditionalJump(trace);
 
   // mark the essential instructions and add them to the initial
   // work list; this will also mark reachable exit traces. All

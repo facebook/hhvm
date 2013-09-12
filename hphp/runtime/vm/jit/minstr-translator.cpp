@@ -409,7 +409,7 @@ void HhbcTranslator::MInstrTranslator::emitMPre() {
 
 void HhbcTranslator::MInstrTranslator::emitMTrace() {
   auto rttStr = [this](int i) {
-    return Type::fromRuntimeType(m_ni.inputs[i]->rtt).unbox().toString();
+    return Type(m_ni.inputs[i]->rtt).unbox().toString();
   };
   std::ostringstream shape;
   int iInd = m_mii.valCount();
@@ -520,7 +520,7 @@ SSATmp* HhbcTranslator::MInstrTranslator::getInput(unsigned i,
   assert(mapContains(m_stackInputs, i) == (l.space == Location::Stack));
   switch (l.space) {
     case Location::Stack:
-      return m_ht.top(Type::Gen | Type::Cls, m_stackInputs[i], cat);
+      return m_ht.top(Type::StackElem, m_stackInputs[i], cat);
 
     case Location::Local:
       return m_ht.ldLoc(l.offset, cat);
@@ -744,6 +744,8 @@ void HhbcTranslator::MInstrTranslator::emitBaseG() {
   static const OpFunc opFuncs[] = {baseG, baseGW, baseGD, baseGWD};
   OpFunc opFunc = opFuncs[mia & MIA_base];
   SSATmp* gblName = getBase();
+  if (!gblName->isA(Type::Str)) PUNT(BaseG-non-string-name);
+
   m_base = gen(BaseG,
                getEmptyCatchTrace(),
                cns(reinterpret_cast<TCA>(opFunc)),
@@ -1642,29 +1644,41 @@ void HhbcTranslator::MInstrTranslator::emitArrayGet(SSATmp* key) {
 }
 #undef HELPER_TABLE
 
-namespace MInstrHelpers {
-TypedValue vectorGet(c_Vector* vec, int64_t key) {
-  TypedValue* ret = vec->at(key);
-  return *ret;
-}
-}
-
 void HhbcTranslator::MInstrTranslator::emitVectorGet(SSATmp* key) {
-  SSATmp* value = gen(VectorGet, getCatchTrace(),
-                      cns((TCA)MInstrHelpers::vectorGet), m_base, key);
+  assert(key->isA(Type::Int));
+  if (key->isConst() && key->getValInt() < 0) {
+    PUNT(emitVectorGet);
+  }
+  SSATmp* size = gen(LdVectorSize, m_base);
+  gen(CheckBounds, key, size);
+  SSATmp* base = gen(LdVectorBase, m_base);
+  static_assert(sizeof(TypedValue) == 16,
+                "TypedValue size expected to be 16 bytes");
+  auto idx = gen(Shl, key, cns(4));
+  SSATmp* value = gen(LdElem, base, idx);
   m_result = gen(IncRef, value);
 }
 
-namespace MInstrHelpers {
-TypedValue pairGet(c_Pair* pair, int64_t key) {
-  TypedValue* ret = pair->at(key);
-  return *ret;
-}
-}
-
 void HhbcTranslator::MInstrTranslator::emitPairGet(SSATmp* key) {
-  SSATmp* value = gen(PairGet, getCatchTrace(),
-                      cns((TCA)MInstrHelpers::pairGet), m_base, key);
+  SSATmp* value;
+  assert(key->isA(Type::Int));
+  static_assert(sizeof(TypedValue) == 16,
+                "TypedValue size expected to be 16 bytes");
+  if (key->isConst()) {
+    auto idx = key->getValInt();
+    if (idx < 0 || idx > 1) {
+      PUNT(emitPairGet);
+    }
+    // no reason to check bounds
+    SSATmp* base = gen(LdPairBase, m_base);
+    auto index = cns(key->getValInt() << 4);
+    value = gen(LdElem, base, index);
+  } else {
+    gen(CheckBounds, key, cns(1));
+    SSATmp* base = gen(LdPairBase, m_base);
+    auto idx = gen(Shl, key, cns(4));
+    value = gen(LdElem, base, idx);
+  }
   m_result = gen(IncRef, value);
 }
 
@@ -1842,7 +1856,7 @@ static inline bool issetEmptyElemImpl(TypedValue* base, TypedValue keyVal,
   // mis == nullptr if we proved that it won't be used. mis->tvScratch and
   // mis->tvRef are ok because those params are passed by
   // reference.
-  return HPHP::IssetEmptyElem<isEmpty, false, keyType>(
+  return HPHP::IssetEmptyElem<isEmpty, keyType>(
     mis->tvScratch, mis->tvRef, base, key);
 }
 
@@ -2202,17 +2216,26 @@ void HhbcTranslator::MInstrTranslator::emitSetWithRefNewElem() {
   m_result = nullptr;
 }
 
-namespace MInstrHelpers {
-void vectorSet(c_Vector* vec, int64_t key, Cell value) {
-  vec->set(key, &value);
-}
-}
-
 void HhbcTranslator::MInstrTranslator::emitVectorSet(
     SSATmp* key, SSATmp* value) {
-  gen(VectorSet, getCatchTrace(),
-      cns((TCA)MInstrHelpers::vectorSet), m_base, key, value);
-  m_result = value;
+  assert(key->isA(Type::Int));
+  if (key->isConst() && key->getValInt() < 0) {
+    PUNT(emitVectorSet); // will throw
+  }
+  SSATmp* size = gen(LdVectorSize, m_base);
+  gen(CheckBounds, key, size);
+
+  SSATmp* increffed = gen(IncRef, value);
+  SSATmp* vecBase = gen(LdVectorBase, m_base);
+  SSATmp* oldVal;
+  static_assert(sizeof(TypedValue) == 16,
+                "TypedValue size expected to be 16 bytes");
+  auto idx = gen(Shl, key, cns(4));
+  oldVal = gen(LdElem, vecBase, idx);
+  gen(StElem, vecBase, idx, value);
+  gen(DecRef, oldVal);
+
+  m_result = increffed;
 }
 
 template<KeyType keyType>

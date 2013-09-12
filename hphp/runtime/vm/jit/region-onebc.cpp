@@ -26,8 +26,8 @@ namespace HPHP { namespace JIT {
  * opcode as the region, and guards on everything.
  */
 RegionDescPtr selectOneBC(const RegionContext& ctx) {
-  auto ret = smart::make_unique<RegionDesc>();
-  auto blk = smart::make_unique<RegionDesc::Block>(ctx.func, ctx.bcOffset, 1);
+  auto ret = std::make_shared<RegionDesc>();
+  auto blk = std::make_shared<RegionDesc::Block>(ctx.func, ctx.bcOffset, 1);
 
   for (auto& live : ctx.liveTypes) {
     blk->addPredicted(SrcKey{ctx.func, ctx.bcOffset},

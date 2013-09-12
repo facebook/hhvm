@@ -349,7 +349,7 @@ Variant f_socket_create_listen(int port, int backlog /* = 128 */) {
   }
 
   if (::bind(sock->fd(), (struct sockaddr *)&la, sizeof(la)) < 0) {
-    SOCKET_ERROR(sock, "unable to bind to given adress", errno);
+    SOCKET_ERROR(sock, "unable to bind to given address", errno);
     return false;
   }
 
@@ -671,10 +671,13 @@ Variant f_socket_server(CStrRef hostname, int port /* = -1 */,
                         VRefParam errnum /* = null */,
                         VRefParam errstr /* = null */) {
   Util::HostURL hosturl(static_cast<const std::string>(hostname), port);
-  return socket_server_impl(hosturl, errnum, errstr);
+  return socket_server_impl(hosturl,
+                            k_STREAM_SERVER_BIND|k_STREAM_SERVER_LISTEN,
+                            errnum, errstr);
 }
 
 Variant socket_server_impl(const Util::HostURL &hosturl,
+                           int flags, /* = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN */
                            VRefParam errnum /* = null */,
                            VRefParam errstr /* = null */) {
   Resource ret;
@@ -691,11 +694,14 @@ Variant socket_server_impl(const Util::HostURL &hosturl,
                     hosturl.getPort(), sa_ptr, sa_size)) {
     return false;
   }
-  if (::bind(sock->fd(), sa_ptr, sa_size) < 0) {
-    SOCKET_ERROR(sock, "unable to bind to given adress", errno);
+  int yes = 1;
+  setsockopt(sock->fd(), SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+  if ((flags & k_STREAM_SERVER_BIND) != 0 &&
+      ::bind(sock->fd(), sa_ptr, sa_size) < 0) {
+    SOCKET_ERROR(sock, "unable to bind to given address", errno);
     return false;
   }
-  if (listen(sock->fd(), 128) < 0) {
+  if ((flags & k_STREAM_SERVER_LISTEN) != 0 && listen(sock->fd(), 128) < 0) {
     SOCKET_ERROR(sock, "unable to listen on socket", errno);
     return false;
   }
@@ -775,7 +781,7 @@ Variant f_socket_send(CResRef socket, CStrRef buf, int len, int flags) {
 }
 
 Variant f_socket_sendto(CResRef socket, CStrRef buf, int len, int flags,
-                        CStrRef addr, int port /* = 0 */) {
+                        CStrRef addr, int port /* = -1 */) {
   Socket *sock = socket.getTyped<Socket>();
   if (len > buf.size()) {
     len = buf.size();
@@ -795,6 +801,11 @@ Variant f_socket_sendto(CResRef socket, CStrRef buf, int len, int flags,
     break;
   case AF_INET:
     {
+      if (port == -1) {
+        throw_missing_arguments_nr("socket_sendto", 6, 5);
+        return false;
+      }
+
       struct sockaddr_in  sin;
       memset(&sin, 0, sizeof(sin));
       sin.sin_family = AF_INET;
@@ -809,6 +820,11 @@ Variant f_socket_sendto(CResRef socket, CStrRef buf, int len, int flags,
     break;
   case AF_INET6:
     {
+      if (port == -1) {
+        throw_missing_arguments_nr("socket_sendto", 6, 5);
+        return false;
+      }
+
       struct sockaddr_in6  sin6;
       memset(&sin6, 0, sizeof(sin6));
       sin6.sin6_family = AF_INET6;
@@ -863,7 +879,7 @@ const StaticString
   s_0_0_0_0("0.0.0.0");
 
 Variant f_socket_recvfrom(CResRef socket, VRefParam buf, int len, int flags,
-                      VRefParam name, VRefParam port /* = 0 */) {
+                      VRefParam name, VRefParam port /* = -1*/) {
   if (len <= 0) {
     return false;
   }
@@ -896,10 +912,14 @@ Variant f_socket_recvfrom(CResRef socket, VRefParam buf, int len, int flags,
     break;
   case AF_INET:
     {
+      if (int(port) == -1) {
+        throw_missing_arguments_nr("socket_recvfrom", 5, 4);
+        return false;
+      }
+
       struct sockaddr_in sin;
       slen = sizeof(sin);
       memset(&sin, 0, slen);
-      sin.sin_family = AF_INET;
 
       retval = recvfrom(sock->fd(), recv_buf, len, flags,
                         (struct sockaddr *)&sin, (socklen_t *)&slen);
@@ -920,10 +940,14 @@ Variant f_socket_recvfrom(CResRef socket, VRefParam buf, int len, int flags,
     break;
   case AF_INET6:
     {
+      if (int(port) == -1) {
+        throw_missing_arguments_nr("socket_recvfrom", 5, 4);
+        return false;
+      }
+
       struct sockaddr_in6 sin6;
       slen = sizeof(sin6);
       memset(&sin6, 0, slen);
-      sin6.sin6_family = AF_INET6;
 
       retval = recvfrom(sock->fd(), recv_buf, len, flags,
                         (struct sockaddr *)&sin6, (socklen_t *)&slen);
@@ -1012,7 +1036,7 @@ Variant sockopen_impl(const Util::HostURL &hosturl, VRefParam errnum,
   Resource ret;
   Socket *sock = NULL;
 
-  if (timeout <= 0) timeout = RuntimeOption::SocketDefaultTimeout;
+  if (timeout < 0) timeout = RuntimeOption::SocketDefaultTimeout;
   // test if protocol is SSL
   SSLSocket *sslsock = SSLSocket::Create(hosturl, timeout);
   if (sslsock) {
@@ -1100,7 +1124,7 @@ Variant sockopen_impl(const Util::HostURL &hosturl, VRefParam errnum,
 Variant f_fsockopen(CStrRef hostname, int port /* = -1 */,
                     VRefParam errnum /* = null */,
                     VRefParam errstr /* = null */,
-                    double timeout /* = 0.0 */) {
+                    double timeout /* = -1.0 */) {
   Util::HostURL hosturl(static_cast<const std::string>(hostname), port);
   return sockopen_impl(hosturl, errnum, errstr, timeout, false);
 }
@@ -1108,7 +1132,7 @@ Variant f_fsockopen(CStrRef hostname, int port /* = -1 */,
 Variant f_pfsockopen(CStrRef hostname, int port /* = -1 */,
                      VRefParam errnum /* = null */,
                      VRefParam errstr /* = null */,
-                     double timeout /* = 0.0 */) {
+                     double timeout /* = -1.0 */) {
   // TODO: persistent socket handling
   Util::HostURL hosturl(static_cast<const std::string>(hostname), port);
   return sockopen_impl(hosturl, errnum, errstr, timeout, true);

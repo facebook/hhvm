@@ -39,7 +39,7 @@
 #include <dirent.h>
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(session);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool ini_on_update_save_handler(CStrRef value, void *p);
@@ -81,7 +81,7 @@ public:
   int    m_module_number;
   int64_t  m_cache_expire;
 
-  Object m_ps_session_handler;
+  ObjectData *m_ps_session_handler;
 
   SessionSerializer *m_serializer;
 
@@ -104,6 +104,7 @@ public:
       m_cookie_httponly(false), m_mod(nullptr), m_default_mod(nullptr),
       m_session_status(None), m_gc_probability(0), m_gc_divisor(0),
       m_gc_maxlifetime(0), m_module_number(0), m_cache_expire(0),
+      m_ps_session_handler(nullptr),
       m_serializer(nullptr), m_auto_start(false), m_use_cookies(false),
       m_use_only_cookies(false), m_use_trans_sid(false),
       m_apply_trans_sid(false), m_hash_bits_per_character(0), m_send_cookie(0),
@@ -126,6 +127,7 @@ public:
     }
     m_id.reset();
     m_session_status = Session::None;
+    m_ps_session_handler = nullptr;
   }
 
   void requestShutdownImpl();
@@ -196,6 +198,10 @@ void SessionRequestData::requestShutdownImpl() {
       m_mod->close();
     } catch (...) {}
   }
+  if (ObjectData* obj = m_ps_session_handler) {
+    m_ps_session_handler = nullptr;
+    decRefObj(obj);
+  }
   m_id.reset();
 }
 
@@ -263,12 +269,12 @@ String SessionModule::create_sid() {
     }
   }
 
-  Variant context = f_hash_init(PS(hash_func));
+  Variant context = HHVM_FN(hash_init)(PS(hash_func));
   if (same(context, false)) {
     Logger::Error("Invalid session hash function: %s", PS(hash_func).c_str());
     return String();
   }
-  if (!f_hash_update(context.toResource(), buf.detach())) {
+  if (!HHVM_FN(hash_update)(context.toResource(), buf.detach())) {
     Logger::Error("hash_update() failed");
     return String();
   }
@@ -283,7 +289,7 @@ String SessionModule::create_sid() {
         n = ::read(fd, rbuf, (to_read < (int)sizeof(rbuf) ?
                               to_read : (int)sizeof(buf)));
         if (n <= 0) break;
-        if (!f_hash_update(context.toResource(),
+        if (!HHVM_FN(hash_update)(context.toResource(),
                            String((const char *)rbuf, n, CopyString))) {
           Logger::Error("hash_update() failed");
           ::close(fd);
@@ -295,7 +301,7 @@ String SessionModule::create_sid() {
     }
   }
 
-  String hashed = f_hash_final(context.toResource());
+  String hashed = HHVM_FN(hash_final)(context.toResource());
 
   if (PS(hash_bits_per_character) < 4 || PS(hash_bits_per_character) > 6) {
     PS(hash_bits_per_character) = 4;
@@ -414,11 +420,8 @@ bool SystemlibSessionModule::open(const char *save_path,
 
   Variant savePath = String(save_path, CopyString);
   Variant sessionName = String(session_name, CopyString);
-  TypedValue args[2];
-  tvDup(*savePath.asTypedValue(), args[0]);
-  tvDup(*sessionName.asTypedValue(), args[1]);
   Variant ret;
-
+  TypedValue args[2] = { *savePath.asCell(), *sessionName.asCell() };
   g_vmContext->invokeFuncFew(ret.asTypedValue(), m_open, obj,
                              nullptr, 2, args);
 
@@ -438,8 +441,7 @@ bool SystemlibSessionModule::close() {
   }
 
   Variant ret;
-  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_close, obj,
-                             nullptr, 0, nullptr);
+  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_close, obj);
   s_obj->destroy();
 
   if (ret.isBoolean() && ret.toBoolean()) {
@@ -454,12 +456,9 @@ bool SystemlibSessionModule::read(const char *key, String &value) {
   ObjectData *obj = getObject();
 
   Variant sessionKey = String(key, CopyString);
-  TypedValue args[1];
-  tvDup(*sessionKey.asTypedValue(), args[0]);
   Variant ret;
-
   g_vmContext->invokeFuncFew(ret.asTypedValue(), m_read, obj,
-                             nullptr, 1, args);
+                             nullptr, 1, sessionKey.asCell());
 
   if (ret.isString()) {
     value = ret.toString();
@@ -475,11 +474,8 @@ bool SystemlibSessionModule::write(const char *key, CStrRef value) {
 
   Variant sessionKey = String(key, CopyString);
   Variant sessionVal = value;
-  TypedValue args[2];
-  tvDup(*sessionKey.asTypedValue(), args[0]);
-  tvDup(*sessionVal.asTypedValue(), args[1]);
   Variant ret;
-
+  TypedValue args[2] = { *sessionKey.asCell(), *sessionVal.asCell() };
   g_vmContext->invokeFuncFew(ret.asTypedValue(), m_write, obj,
                              nullptr, 2, args);
 
@@ -495,12 +491,9 @@ bool SystemlibSessionModule::destroy(const char *key) {
   ObjectData *obj = getObject();
 
   Variant sessionKey = String(key, CopyString);
-  TypedValue args[1];
-  tvDup(*sessionKey.asTypedValue(), args[0]);
   Variant ret;
-
   g_vmContext->invokeFuncFew(ret.asTypedValue(), m_destroy, obj,
-                             nullptr, 1, args);
+                             nullptr, 1, sessionKey.asCell());
 
   if (ret.isBoolean() && ret.toBoolean()) {
     return true;
@@ -514,12 +507,9 @@ bool SystemlibSessionModule::gc(int maxlifetime, int *nrdels) {
   ObjectData *obj = getObject();
 
   Variant maxLifeTime = maxlifetime;
-  TypedValue args[1];
-  tvDup(*maxLifeTime.asTypedValue(), args[0]);
   Variant ret;
-
   g_vmContext->invokeFuncFew(ret.asTypedValue(), m_gc, obj,
-                             nullptr, 1, args);
+                             nullptr, 1, maxLifeTime.asCell());
 
   if (ret.isInteger()) {
     if (nrdels) {
@@ -914,7 +904,7 @@ public:
 
   virtual bool open(const char *save_path, const char *session_name) {
     return vm_call_user_func(
-       CREATE_VECTOR2(PS(ps_session_handler),
+       CREATE_VECTOR2(Object(PS(ps_session_handler)),
                       String("open")),
        CREATE_VECTOR2(String(save_path, CopyString),
                       String(session_name, CopyString))).toBoolean();
@@ -922,14 +912,14 @@ public:
 
   virtual bool close() {
     return vm_call_user_func(
-       CREATE_VECTOR2(PS(ps_session_handler),
+       CREATE_VECTOR2(Object(PS(ps_session_handler)),
                       String("close")),
        Array::Create()).toBoolean();
   }
 
   virtual bool read(const char *key, String &value) {
     Variant ret = vm_call_user_func(
-       CREATE_VECTOR2(PS(ps_session_handler),
+       CREATE_VECTOR2(Object(PS(ps_session_handler)),
                       String("read")),
        CREATE_VECTOR1(String(key, CopyString)));
     if (ret.isString()) {
@@ -941,21 +931,21 @@ public:
 
   virtual bool write(const char *key, CStrRef value) {
     return vm_call_user_func(
-       CREATE_VECTOR2(PS(ps_session_handler),
+       CREATE_VECTOR2(Object(PS(ps_session_handler)),
                       String("write")),
        CREATE_VECTOR2(String(key, CopyString), value)).toBoolean();
   }
 
   virtual bool destroy(const char *key) {
     return vm_call_user_func(
-       CREATE_VECTOR2(PS(ps_session_handler),
+       CREATE_VECTOR2(Object(PS(ps_session_handler)),
                       String("destroy")),
        CREATE_VECTOR1(String(key, CopyString))).toBoolean();
   }
 
   virtual bool gc(int maxlifetime, int *nrdels) {
     return vm_call_user_func(
-       CREATE_VECTOR2(PS(ps_session_handler),
+       CREATE_VECTOR2(Object(PS(ps_session_handler)),
                       String("gc")),
        CREATE_VECTOR1((int64_t)maxlifetime)).toBoolean();
   }
@@ -1546,7 +1536,13 @@ bool f_hphp_session_set_save_handler(CObjRef sessionhandler,
 
   PS(default_mod) = PS(mod);
 
-  PS(ps_session_handler) = sessionhandler;
+  if (ObjectData* obj = PS(ps_session_handler)) {
+    PS(ps_session_handler) = nullptr;
+    decRefObj(obj);
+  }
+  PS(ps_session_handler) = sessionhandler.get();
+  PS(ps_session_handler)->incRefCount();
+
   if (register_shutdown) {
     f_register_shutdown_function(1, String("session_write_close"));
   }
@@ -1817,20 +1813,17 @@ bool f_session_is_registered(CStrRef varname) {
      "Relying on this feature is highly discouraged.");
 }
 
-void c_SessionHandler::t___construct() { }
-c_SessionHandler::c_SessionHandler(Class* cb) : ExtObjectData(cb) {}
-c_SessionHandler::~c_SessionHandler() { }
-
-bool c_SessionHandler::t_open(CStrRef save_path, CStrRef session_id) {
+static bool HHVM_METHOD(SessionHandler, hhopen,
+                        CStrRef save_path, CStrRef session_id) {
   return PS(default_mod) &&
     PS(default_mod)->open(save_path->data(), session_id->data());
 }
 
-bool c_SessionHandler::t_close() {
+static bool HHVM_METHOD(SessionHandler, hhclose) {
   return PS(default_mod) && PS(default_mod)->close();
 }
 
-String c_SessionHandler::t_read(CStrRef session_id) {
+static String HHVM_METHOD(SessionHandler, hhread, CStrRef session_id) {
   String value;
   if (PS(default_mod) && PS(default_mod)->read(PS(id).data(), value)) {
     php_session_decode(value);
@@ -1839,20 +1832,35 @@ String c_SessionHandler::t_read(CStrRef session_id) {
   return uninit_null();
 }
 
-bool c_SessionHandler::t_write(CStrRef session_id, CStrRef session_data) {
+static bool HHVM_METHOD(SessionHandler, hhwrite,
+                        CStrRef session_id, CStrRef session_data) {
   return PS(default_mod) &&
     PS(default_mod)->write(session_id->data(), session_data->data());
 }
 
-bool c_SessionHandler::t_destroy(CStrRef session_id) {
+static bool HHVM_METHOD(SessionHandler, hhdestroy, CStrRef session_id) {
   return PS(default_mod) && PS(default_mod)->destroy(session_id->data());
 }
 
-bool c_SessionHandler::t_gc(int maxlifetime) {
+static bool HHVM_METHOD(SessionHandler, hhgc, int maxlifetime) {
   int nrdels = -1;
   return PS(default_mod) && PS(default_mod)->gc(maxlifetime, &nrdels);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+static class SessionExtension : public Extension {
+ public:
+  SessionExtension() : Extension("session") { }
+  virtual void moduleLoad(Hdf config) {
+    HHVM_ME(SessionHandler, hhopen);
+    HHVM_ME(SessionHandler, hhclose);
+    HHVM_ME(SessionHandler, hhread);
+    HHVM_ME(SessionHandler, hhwrite);
+    HHVM_ME(SessionHandler, hhdestroy);
+    HHVM_ME(SessionHandler, hhgc);
+  }
+} s_session_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

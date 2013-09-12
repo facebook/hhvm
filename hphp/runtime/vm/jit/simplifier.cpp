@@ -286,17 +286,17 @@ bool canUseSPropCache(SSATmp* clsTmp,
 //////////////////////////////////////////////////////////////////////
 
 template<class... Args> SSATmp* Simplifier::cns(Args&&... cns) {
-  return m_tb->cns(std::forward<Args>(cns)...);
+  return m_tb.cns(std::forward<Args>(cns)...);
 }
 
 template<class... Args> SSATmp* Simplifier::gen(Opcode op, Args&&... args) {
   assert(!m_insts.empty());
-  return m_tb->gen(op, m_insts.top()->marker(), std::forward<Args>(args)...);
+  return m_tb.gen(op, m_insts.top()->marker(), std::forward<Args>(args)...);
 }
 
 template<class... Args> SSATmp* Simplifier::gen(Opcode op, BCMarker marker,
                                                 Args&&... args) {
-  return m_tb->gen(op, marker, std::forward<Args>(args)...);
+  return m_tb.gen(op, marker, std::forward<Args>(args)...);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -308,8 +308,8 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
     m_insts.pop();
   };
 
-  SSATmp* src1 = inst->src(0);
-  SSATmp* src2 = inst->src(1);
+  SSATmp* src1 = inst->numSrcs() < 1 ? nullptr : inst->src(0);
+  SSATmp* src2 = inst->numSrcs() < 2 ? nullptr : inst->src(1);
 
   Opcode opc = inst->op();
   switch (opc) {
@@ -361,6 +361,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case ConvDblToStr:  return simplifyConvDblToStr(inst);
   case ConvIntToStr:  return simplifyConvIntToStr(inst);
   case ConvCellToBool:return simplifyConvCellToBool(inst);
+  case ConvCellToStr: return simplifyConvCellToStr(inst);
   case ConvCellToInt: return simplifyConvCellToInt(inst);
   case ConvCellToDbl: return simplifyConvCellToDbl(inst);
   case Floor:         return simplifyFloor(inst);
@@ -446,7 +447,7 @@ SSATmp* Simplifier::simplifySpillStack(IRInstruction* inst) {
     auto* srcInst = spillVals[i]->inst();
     if (srcInst->op() == LdStack && srcInst->src(0) == sp &&
         srcInst->extra<LdStack>()->offset == offset) {
-      spillVals[i] = m_tb->genDefNone();
+      spillVals[i] = m_tb.genDefNone();
     }
     cellOff++;
   }
@@ -475,7 +476,7 @@ SSATmp* Simplifier::simplifyCall(IRInstruction* inst) {
     // we don't need to spill it.
     if (srcInst->op() == LdStack && srcInst->src(0) == sp &&
         srcInst->extra<LdStack>()->offset == offset) {
-      spillVals[i] = m_tb->genDefNone();
+      spillVals[i] = m_tb.genDefNone();
     }
   }
 
@@ -557,8 +558,13 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
      * The type of the src is the same or more refined than type, so the guard
      * is unnecessary. Constrain the guard so the resulting type isn't less
      * specific that the CheckType would've produced.
+     *
+     * TODO(t2598894): This might not be optimal: if the CheckType is guarding
+     * to a less specific type but nobody cares about the more specific type
+     * coming in, we might be able to have fewer translations by eliminating
+     * the earlier guard and leaving the less specific CheckType.
      */
-    m_tb->constrainValue(src, categoryForType(type));
+    m_tb.constrainValue(src, categoryForType(type));
     return src;
   }
   if (type.strictSubtypeOf(srcType)) {
@@ -578,14 +584,9 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
     return nullptr;
   }
 
-  /*
-   * XXX(t2774391): This code doesn't belong here. We got a predicted type that
-   * is wrong -- it's incompatible with the tracked type. So throw the
-   * prediction away, since it would always fail.
-   */
-  FTRACE(1, "WARNING: CheckType: removed incorrect prediction that {} is {}\n",
-         srcType.toString(), type.toString());
-  return src;
+  FTRACE(1, "WARNING: CheckType that will always fail: prediction that "
+         "{} is {}\n", srcType, type);
+  return nullptr;
 }
 
 SSATmp* Simplifier::simplifyCheckStk(IRInstruction* inst) {
@@ -597,7 +598,7 @@ SSATmp* Simplifier::simplifyCheckStk(IRInstruction* inst) {
   if (stkVal.knownType.equals(Type::None)) return nullptr;
 
   if (stkVal.knownType.subtypeOf(type)) {
-    m_tb->constrainStack(sp, offset, categoryForType(type));
+    m_tb.constrainStack(sp, offset, categoryForType(type));
     return sp;
   }
   return nullptr;
@@ -709,15 +710,15 @@ SSATmp* Simplifier::simplifyAbsDbl(IRInstruction* inst) {
         return cns(int64_t(0 OP 0));                                    \
       }                                                                 \
       /* Null op ConstInt */                                            \
-      if (src2->type() == Type::Int) {                                  \
+      if (src2->isA(Type::Int)) {                                       \
         return cns(int64_t(0 OP src2->getValInt()));                    \
       }                                                                 \
       /* Null op ConstBool */                                           \
-      if (src2->type() == Type::Bool) {                                 \
+      if (src2->isA(Type::Bool)) {                                      \
         return cns(int64_t(0 OP src2->getValBool()));                   \
       }                                                                 \
       /* Null op StaticStr */                                           \
-      if (src2->type() == Type::StaticStr) {                            \
+      if (src2->isA(Type::StaticStr)) {                                 \
         const StringData* str = src2->getValStr();                      \
         if (str->isInteger()) {                                         \
           return cns(int64_t(0 OP str->toInt64()));                     \
@@ -725,23 +726,23 @@ SSATmp* Simplifier::simplifyAbsDbl(IRInstruction* inst) {
         return cns(int64_t(0 OP 0));                                    \
       }                                                                 \
     }                                                                   \
-    if (src1->type() == Type::Int) {                                    \
+    if (src1->isA(Type::Int)) {                                         \
       /* ConstInt op Null */                                            \
       if (src2->type().isNull()) {                                      \
         return cns(int64_t(src1->getValInt()) OP 0);                    \
       }                                                                 \
       /* ConstInt op ConstInt */                                        \
-      if (src2->type() == Type::Int) {                                  \
+      if (src2->isA(Type::Int)) {                                       \
         return cns(int64_t(src1->getValInt() OP                         \
                            src2->getValInt()));                         \
       }                                                                 \
       /* ConstInt op ConstBool */                                       \
-      if (src2->type() == Type::Bool) {                                 \
+      if (src2->isA(Type::Bool)) {                                      \
         return cns(int64_t(src1->getValInt() OP                         \
-                         int(src2->getValBool())));                     \
+                           int(src2->getValBool())));                   \
       }                                                                 \
       /* ConstInt op StaticStr */                                       \
-      if (src2->type() == Type::StaticStr) {                            \
+      if (src2->isA(Type::StaticStr)) {                                 \
         const StringData* str = src2->getValStr();                      \
         if (str->isInteger()) {                                         \
           return cns(int64_t(src1->getValInt() OP str->toInt64()));     \
@@ -749,23 +750,23 @@ SSATmp* Simplifier::simplifyAbsDbl(IRInstruction* inst) {
         return cns(int64_t(src1->getValInt() OP 0));                    \
       }                                                                 \
     }                                                                   \
-    if (src1->type() == Type::Bool) {                                   \
+    if (src1->isA(Type::Bool)) {                                        \
       /* ConstBool op Null */                                           \
       if (src2->type().isNull()) {                                      \
         return cns(int64_t(src1->getValBool() OP 0));                   \
       }                                                                 \
       /* ConstBool op ConstInt */                                       \
-      if (src2->type() == Type::Int) {                                  \
+      if (src2->isA(Type::Int)) {                                       \
         return cns(int64_t(int(src1->getValBool()) OP                   \
-                         src2->getValInt()));                           \
+                           src2->getValInt()));                         \
       }                                                                 \
       /* ConstBool op ConstBool */                                      \
-      if (src2->type() == Type::Bool) {                                 \
+      if (src2->isA(Type::Bool)) {                                      \
         return cns(int64_t(src1->getValBool() OP                        \
-                         src2->getValBool()));                          \
+                           src2->getValBool()));                        \
       }                                                                 \
       /* ConstBool op StaticStr */                                      \
-      if (src2->type() == Type::StaticStr) {                            \
+      if (src2->isA(Type::StaticStr)) {                                 \
         const StringData* str = src2->getValStr();                      \
         if (str->isInteger()) {                                         \
           return cns(int64_t(int(src1->getValBool()) OP str->toInt64())); \
@@ -773,7 +774,7 @@ SSATmp* Simplifier::simplifyAbsDbl(IRInstruction* inst) {
         return cns(int64_t(int(src1->getValBool()) OP 0));              \
       }                                                                 \
     }                                                                   \
-    if (src1->type() == Type::StaticStr) {                              \
+    if (src1->isA(Type::StaticStr)) {                                   \
       const StringData* str = src1->getValStr();                        \
       int64_t strInt = 0;                                               \
       if (str->isInteger()) {                                           \
@@ -784,15 +785,15 @@ SSATmp* Simplifier::simplifyAbsDbl(IRInstruction* inst) {
         return cns(int64_t(strInt OP 0));                               \
       }                                                                 \
       /* StaticStr op ConstInt */                                       \
-      if (src2->type() == Type::Int) {                                  \
+      if (src2->isA(Type::Int)) {                                       \
         return cns(int64_t(strInt OP src2->getValInt()));               \
       }                                                                 \
       /* StaticStr op ConstBool */                                      \
-      if (src2->type() == Type::Bool) {                                 \
+      if (src2->isA(Type::Bool)) {                                      \
         return cns(int64_t(strInt OP int(src2->getValBool())));         \
       }                                                                 \
       /* StaticStr op StaticStr */                                      \
-      if (src2->type() == Type::StaticStr) {                            \
+      if (src2->isA(Type::StaticStr)) {                                 \
         const StringData* str2 = src2->getValStr();                     \
         if (str2->isInteger()) {                                        \
           return cns(int64_t(strInt OP str2->toInt64()));               \
@@ -859,11 +860,11 @@ SSATmp* Simplifier::simplifyAbsDbl(IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyAdd(SSATmp* src1, SSATmp* src2) {
   SIMPLIFY_DISTRIBUTIVE(+, *, Add, Mul);
-  if (src2->isConst() && src2->type() == Type::Int) {
+  if (src2->isConst() && src2->isA(Type::Int)) {
     int64_t src2Val = src2->getValInt();
     // X + 0 --> X
     if (src2Val == 0) {
-      if (src1->type() == Type::Bool) {
+      if (src1->isA(Type::Bool)) {
         return gen(ConvBoolToInt, src1);
       }
       return src1;
@@ -878,7 +879,7 @@ SSATmp* Simplifier::simplifyAdd(SSATmp* src1, SSATmp* src2) {
   Opcode op2 = inst2->op();
   if (op2 == Sub) {
     SSATmp* src = inst2->src(0);
-    if (src->isConst() && src->type() == Type::Int) {
+    if (src->isConst() && src->isA(Type::Int)) {
       if (src->getValInt() == 0) {
         return gen(Sub, src1, inst2->src(1));
       }
@@ -893,11 +894,11 @@ SSATmp* Simplifier::simplifySub(SSATmp* src1, SSATmp* src2) {
   if (src1 == src2) {
     return cns(0);
   }
-  if (src2->isConst() && src2->type() == Type::Int) {
+  if (src2->isConst() && src2->isA(Type::Int)) {
     int64_t src2Val = src2->getValInt();
     // X - 0 --> X
     if (src2Val == 0) {
-      if (src1->type() == Type::Bool) {
+      if (src1->isA(Type::Bool)) {
         return gen(ConvBoolToInt, src1);
       }
       return src1;
@@ -912,7 +913,7 @@ SSATmp* Simplifier::simplifySub(SSATmp* src1, SSATmp* src2) {
   Opcode op2 = inst2->op();
   if (op2 == Sub) {
     SSATmp* src = inst2->src(0);
-    if (src->isConst() && src->type() == Type::Int) {
+    if (src->isConst() && src->isA(Type::Int)) {
       if (src->getValInt() == 0) {
         return gen(Add, src1, inst2->src(1));
       }
@@ -927,7 +928,7 @@ SSATmp* Simplifier::simplifySub(SSATmp* src1, SSATmp* src2) {
 
 SSATmp* Simplifier::simplifyMul(SSATmp* src1, SSATmp* src2) {
   SIMPLIFY_COMMUTATIVE(*, Mul);
-  if (src2->isConst() && src2->type() == Type::Int) {
+  if (src2->isConst() && src2->isA(Type::Int)) {
     // X * (-1) --> -X
     if (src2->getValInt() == -1) {
       return gen(Sub, cns(0), src1);
@@ -938,7 +939,7 @@ SSATmp* Simplifier::simplifyMul(SSATmp* src1, SSATmp* src2) {
     }
     // X * 1 --> X
     if (src2->getValInt() == 1) {
-      if (src1->type() == Type::Bool) {
+      if (src1->isA(Type::Bool)) {
         return gen(ConvBoolToInt, src1);
       }
       return src1;
@@ -1143,16 +1144,19 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
   // Perform some execution optimizations immediately
   // ---------------------------------------------------------------------
 
+  auto const type1 = src1->type();
+  auto const type2 = src2->type();
+
   // Identity optimization
   if ((src1 == src2 || chaseIncRefs(src1) == chaseIncRefs(src2)) &&
-      src1->type() != Type::Dbl) {
+      type1.not(Type::Dbl)) {
     // (val1 == val1) does not simplify to true when val1 is a NaN
     return cns(bool(cmpOp(opName, 0, 0)));
   }
 
-  // need both types to be unboxed and known to simplify
-  if (!src1->type().notBoxed() || src1->type() == Type::Cell ||
-      !src2->type().notBoxed() || src2->type() == Type::Cell) {
+  // need both types to be unboxed to simplify, and the code below assumes the
+  // types are known DataTypes.
+  if (!type1.isKnownUnboxedDataType() || !type2.isKnownUnboxedDataType()) {
     return nullptr;
   }
 
@@ -1162,17 +1166,16 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
 
   if (opName == Same || opName == NSame) {
     // OpSame and OpNSame do not perform type juggling
-    if (src1->type() != src2->type()) {
-      if (!(src1->type().isString() && src2->type().isString())) {
-        return cns(opName == NSame);
-      }
+    if (type1.toDataType() != type2.toDataType() &&
+        !(type1.isString() && type2.isString())) {
+      return cns(opName == NSame);
     }
 
     // src1 and src2 are same type, treating Str and StaticStr as the same
 
-    // OpSame and OpNSame have special rules for string and object
-    // Other types may simplify to OpEq and OpNeq, respectively
-    if (src1->type().isString() && src2->type().isString()) {
+    // OpSame and OpNSame have special rules for string, array, object, and
+    // resource.  Other types may simplify to OpEq and OpNeq, respectively
+    if (type1.isString() && type2.isString()) {
       if (src1->isConst() && src2->isConst()) {
         auto str1 = src1->getValStr();
         auto str2 = src2->getValStr();
@@ -1182,21 +1185,14 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
         return nullptr;
       }
     }
-    if (src1->type() == Type::Obj && src2->type() == Type::Obj) {
+
+    auto const badTypes = Type::Obj | Type::Res | Type::Arr;
+    if (type1.maybe(badTypes) || type2.maybe(badTypes)) {
       return nullptr;
     }
-    if (src1->type() == Type::Res || src2->type() == Type::Res) {
-      return nullptr;
-    }
-    // for arrays, don't simplify Same to Eq
-    if (src1->type() == Type::Arr && src2->type() == Type::Arr) {
-      return nullptr;
-    }
-    // Type is neither a string nor an object - simplify to OpEq/OpNeq
-    if (opName == Same) {
-      return newInst(Eq, src1, src2);
-    }
-    return newInst(Neq, src1, src2);
+
+    // Type is a primitive type - simplify to Eq/Neq
+    return newInst(opName == Same ? Eq : Neq, src1, src2);
   }
 
   // ---------------------------------------------------------------------
@@ -1204,7 +1200,7 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
   // ---------------------------------------------------------------------
 
   // Null cmp Null
-  if (src1->type().isNull() && src2->type().isNull()) {
+  if (type1.isNull() && type2.isNull()) {
     return cns(bool(cmpOp(opName, 0, 0)));
   }
   // const cmp const
@@ -1212,18 +1208,18 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
   // TODO: can simplify const arrays when sizes are different or both 0
   if (src1->isConst() && src2->isConst()) {
     // StaticStr cmp StaticStr
-    if (src1->type() == Type::StaticStr &&
-        src2->type() == Type::StaticStr) {
+    if (src1->isA(Type::StaticStr) &&
+        src2->isA(Type::StaticStr)) {
       int cmp = src1->getValStr()->compare(src2->getValStr());
       return cns(bool(cmpOp(opName, cmp, 0)));
     }
     // ConstInt cmp ConstInt
-    if (src1->type() == Type::Int && src2->type() == Type::Int) {
+    if (src1->isA(Type::Int) && src2->isA(Type::Int)) {
       return cns(bool(
         cmpOp(opName, src1->getValInt(), src2->getValInt())));
     }
     // ConstBool cmp ConstBool
-    if (src1->type() == Type::Bool && src2->type() == Type::Bool) {
+    if (src1->isA(Type::Bool) && src2->isA(Type::Bool)) {
       return cns(bool(
         cmpOp(opName, src1->getValBool(), src2->getValBool())));
     }
@@ -1235,7 +1231,7 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
   // ---------------------------------------------------------------------
 
   // Perform constant-bool optimizations
-  if (src2->type() == Type::Bool && src2->isConst()) {
+  if (src2->isA(Type::Bool) && src2->isConst()) {
     bool b = src2->getValBool();
 
     // The result of the comparison might be independent of the truth
@@ -1268,8 +1264,8 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
   // Then stop - there are no more simplifications left
   // ---------------------------------------------------------------------
 
-  if (src1->type() == src2->type() ||
-      (src1->type().isString() && src2->type().isString())) {
+  if (type1.toDataType() == type2.toDataType() ||
+      (type1.isString() && type2.isString())) {
     if (src1->isConst() && !src2->isConst()) {
       return newInst(commuteQueryOp(opName), src2, src1);
     }
@@ -1282,43 +1278,43 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
   // ---------------------------------------------------------------------
 
   // nulls get canonicalized to the right
-  if (src1->type().isNull()) {
+  if (type1.isNull()) {
     return newInst(commuteQueryOp(opName), src2, src1);
   }
 
   // case 1a: null cmp string. Convert null to ""
-  if (src1->type().isString() && src2->type().isNull()) {
+  if (type1.isString() && type2.isNull()) {
     return newInst(opName, src1, cns(StringData::GetStaticString("")));
   }
 
   // case 1b: null cmp object. Convert null to false and the object to true
-  if (src1->type().isObj() && src2->type().isNull()) {
+  if (type1.isObj() && type2.isNull()) {
     return newInst(opName, cns(true), cns(false));
   }
 
   // case 2a: null cmp anything. Convert null to false
-  if (src2->type().isNull()) {
+  if (type2.isNull()) {
     return newInst(opName, src1, cns(false));
   }
 
   // bools get canonicalized to the right
-  if (src1->type() == Type::Bool) {
+  if (src1->isA(Type::Bool)) {
     return newInst(commuteQueryOp(opName), src2, src1);
   }
 
   // case 2b: bool cmp anything. Convert anything to bool
-  if (src2->type() == Type::Bool) {
+  if (src2->isA(Type::Bool)) {
     if (src1->isConst()) {
-      if (src1->type() == Type::Int) {
+      if (src1->isA(Type::Int)) {
         return newInst(opName, cns(bool(src1->getValInt())), src2);
-      } else if (src1->type().isString()) {
+      } else if (type1.isString()) {
         auto str = src1->getValStr();
         return newInst(opName, cns(str->toBoolean()), src2);
       }
     }
 
     // Optimize comparison between int and const bool
-    if (src1->type() == Type::Int && src2->isConst()) {
+    if (src1->isA(Type::Int) && src2->isConst()) {
       // Based on the const bool optimization (above) opName should be OpEq
       always_assert(opName == Eq);
 
@@ -1340,12 +1336,12 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
   // same-type simplification is performed above
 
   // strings get canonicalized to the left
-  if (src2->type().isString()) {
+  if (type2.isString()) {
     return newInst(commuteQueryOp(opName), src2, src1);
   }
 
   // ints get canonicalized to the right
-  if (src1->type() == Type::Int) {
+  if (src1->isA(Type::Int)) {
     return newInst(commuteQueryOp(opName), src2, src1);
   }
 
@@ -1354,8 +1350,7 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
   //  cases (specifically, string-int). Other cases (like string-string)
   //  are dealt with earlier, while other cases (like number-resource)
   //  are not caught at all (and end up exiting this macro at the bottom).
-  if (src1->type().isString() && src1->isConst() &&
-      src2->type() == Type::Int) {
+  if (type1.isString() && src1->isConst() && src2->isA(Type::Int)) {
     auto str = src1->getValStr();
     int64_t si; double sd;
     auto st = str->isNumericWithVal(si, sd, true /* allow errors */);
@@ -1435,8 +1430,8 @@ SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyConcat(SSATmp* src1, SSATmp* src2) {
-  if (src1->isConst() && src1->type() == Type::StaticStr &&
-      src2->isConst() && src2->type() == Type::StaticStr) {
+  if (src1->isConst() && src1->isA(Type::StaticStr) &&
+      src2->isConst() && src2->isA(Type::StaticStr)) {
     StringData* str1 = const_cast<StringData *>(src1->getValStr());
     StringData* str2 = const_cast<StringData *>(src2->getValStr());
     StringData* merge = StringData::GetStaticString(concat_ss(str1, str2));
@@ -1621,6 +1616,23 @@ SSATmp* Simplifier::simplifyConvCellToBool(IRInstruction* inst) {
   if (srcType.isInt())    return gen(ConvIntToBool, src);
   if (srcType.isString()) return gen(ConvStrToBool, src);
   if (srcType.isObj())    return gen(ConvObjToBool, src);
+  if (srcType.isRes())    return nullptr; // No specialization yet
+
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyConvCellToStr(IRInstruction* inst) {
+  auto const src     = inst->src(0);
+  auto const srcType = src->type();
+
+  if (srcType.isBool())   return gen(ConvBoolToStr, src);
+  if (srcType.isNull())   return cns(StringData::GetStaticString(""));
+  if (srcType.isArray())  return cns(StringData::GetStaticString("Array"));
+  if (srcType.isDbl())    return gen(ConvDblToStr, src);
+  if (srcType.isInt())    return gen(ConvIntToStr, src);
+  if (srcType.isString()) return gen(IncRef, src);
+  if (srcType.isObj())    return gen(ConvObjToStr, src);
+  if (srcType.isRes())    return gen(ConvResToStr, src);
 
   return nullptr;
 }
@@ -1636,6 +1648,7 @@ SSATmp* Simplifier::simplifyConvCellToInt(IRInstruction* inst) {
   if (srcType.isDbl())    return gen(ConvDblToInt, src);
   if (srcType.isString()) return gen(ConvStrToInt, src);
   if (srcType.isObj())    return gen(ConvObjToInt, inst->taken(), src);
+  if (srcType.isRes())    return nullptr; // No specialization yet
 
   return nullptr;
 }
@@ -1651,6 +1664,7 @@ SSATmp* Simplifier::simplifyConvCellToDbl(IRInstruction* inst) {
   if (srcType.isInt())    return gen(ConvIntToDbl, src);
   if (srcType.isString()) return gen(ConvStrToDbl, src);
   if (srcType.isObj())    return gen(ConvObjToDbl, inst->taken(), src);
+  if (srcType.isRes())    return nullptr; // No specialization yet
 
   return nullptr;
 }
@@ -1860,7 +1874,7 @@ SSATmp* Simplifier::simplifyAssertStk(IRInstruction* inst) {
   if (info.value) assert(info.value->isA(inst->typeParam()));
 
   if (info.knownType.subtypeOf(inst->typeParam())) {
-    inst->convertToNop();
+    inst->convertToMov();
   }
   return nullptr;
 }

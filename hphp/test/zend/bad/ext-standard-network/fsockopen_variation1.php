@@ -1,11 +1,12 @@
 <?php
+$port = rand(50000, 65535);
 
 echo "Open a server socket\n";
-$server = stream_socket_server('tcp://127.0.0.1:31337');
+$server = stream_socket_server('tcp://127.0.0.1:'.$port);
 
 echo "\nCalling fsockopen() without a protocol in the hostname string:\n";
 $hostname = '127.0.0.1';
-$port = '31337';
+$port = ''.$port;
 $client = fsockopen($hostname, $port);
 var_dump($client);
 fclose($client);

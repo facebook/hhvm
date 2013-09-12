@@ -28,7 +28,7 @@ namespace HPHP {
  */
 class MemFile : public File {
 public:
-  DECLARE_OBJECT_ALLOCATION(MemFile);
+  DECLARE_RESOURCE_ALLOCATION(MemFile);
 
   MemFile();
   MemFile(const char *data, int64_t len);

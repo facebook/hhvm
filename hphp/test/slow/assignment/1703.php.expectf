@@ -1,0 +1,22 @@
+object(ClassA)#1 (1) {
+  ["val"]=>
+  NULL
+}
+int(1)
+object(ClassA)#1 (1) {
+  ["val"]=>
+  NULL
+}
+int(1)
+object(ClassA)#1 (1) {
+  ["val"]=>
+  int(1)
+}
+string(3) "val"
+int(2)
+object(ClassA)#1 (1) {
+  ["val"]=>
+  int(2)
+}
+%S%wNULL
+int(2)

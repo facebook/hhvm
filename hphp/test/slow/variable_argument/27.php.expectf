@@ -1,0 +1,42 @@
+HipHop Warning: func_get_arg():  The argument number should be >= 0 in %s/test/slow/variable_argument/27.php on line 4
+bool(false)
+int(10)
+HipHop Warning: func_get_arg():  Argument 1 not passed to function in %s/test/slow/variable_argument/27.php on line 6
+bool(false)
+HipHop Warning: func_get_arg():  Argument 2 not passed to function in %s/test/slow/variable_argument/27.php on line 7
+HipHop Warning: func_get_arg():  Argument 1 not passed to function in %s/test/slow/variable_argument/27.php on line 13
+bool(false)
+HipHop Warning: func_get_arg():  The argument number should be >= 0 in %s/test/slow/variable_argument/27.php on line 16
+bool(false)
+int(0)
+int(1)
+int(2)
+HipHop Warning: func_get_arg():  Argument 3 not passed to function in %s/test/slow/variable_argument/27.php on line 20
+bool(false)
+HipHop Warning: func_get_arg():  The argument number should be >= 0 in %s/test/slow/variable_argument/27.php on line 23
+bool(false)
+int(0)
+int(1)
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+int(3)
+HipHop Warning: func_get_arg():  Argument 4 not passed to function in %s/test/slow/variable_argument/27.php on line 28
+bool(false)
+array(1) {
+  [0]=>
+  int(30)
+}
+int(30)
+int(30)
+HipHop Warning: i() expects exactly 1 parameter, 0 given in %s/test/slow/variable_argument/27.php on line 31
+array(0) {
+}
+HipHop Warning: func_get_arg():  Argument 0 not passed to function in %s/test/slow/variable_argument/27.php on line 33
+bool(false)
+HipHop Warning: func_get_arg():  Argument 0 not passed to function in %s/test/slow/variable_argument/27.php on line 34
+HipHop Warning: func_get_arg():  Argument 0 not passed to function in %s/test/slow/variable_argument/27.php on line 36
+bool(false)

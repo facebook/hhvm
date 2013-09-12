@@ -1,4 +1,9 @@
 run
+break break1.php:6
+@ foo('test_break1')
+break list
+continue
+break clear all
 break break1.php:7
 break break1.php:77
 break list

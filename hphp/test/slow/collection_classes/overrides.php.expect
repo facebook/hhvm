@@ -1,0 +1,29 @@
+overridden clone
+object(YoloPair)#1 (2) {
+  [0]=>
+  NULL
+  [1]=>
+  NULL
+}
+object(YoloPair)#2 (2) {
+  [0]=>
+  NULL
+  [1]=>
+  NULL
+}
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  NULL
+}
+object(YoloVector)#3 (1) {
+  [0]=>
+  int(123)
+}
+object(YoloVector)#4 (0) {
+}
+array(1) {
+  [0]=>
+  int(123)
+}

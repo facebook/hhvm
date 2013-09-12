@@ -97,10 +97,10 @@ int CaseStatement::getKidCount() const {
 void CaseStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_condition = boost::dynamic_pointer_cast<Expression>(cp);
+      m_condition = dynamic_pointer_cast<Expression>(cp);
       break;
     case 1:
-      m_stmt = boost::dynamic_pointer_cast<Statement>(cp);
+      m_stmt = dynamic_pointer_cast<Statement>(cp);
       break;
     default:
       assert(false);

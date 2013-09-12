@@ -41,7 +41,13 @@ namespace HPHP {
 static_assert(
   sizeof(HphpArray) == 152,
   "Performance is sensitive to sizeof(HphpArray)."
-  " Make sure you changed it with good reason and then update this assert.");
+  " Make sure you changed it with good reason and then update this assert."
+);
+
+static_assert(
+  sizeof(ArrayData) == 24,
+  "ArrayData is expected to take 3 q-words"
+);
 
 TRACE_SET_MOD(runtime);
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,12 +74,22 @@ TRACE_SET_MOD(runtime);
  * separately.  Even larger tables allocate the hashtable and slots
  * contiguously.
  */
-void *HphpArray::SmaAllocatorInitSetup = SmartAllocatorInitSetup<HphpArray>();
+void* HphpArray::SmaAllocatorInitSetup = SmartAllocatorInitSetup<HphpArray>();
 
 //=============================================================================
 // Static members.
 
-HphpArray HphpArray::s_theEmptyArray(StaticEmptyArray);
+std::aligned_storage<
+  sizeof(HphpArray),
+  alignof(HphpArray)
+>::type s_theEmptyArray;
+
+struct HphpArray::EmptyArrayInitializer {
+  EmptyArrayInitializer() {
+    new (HphpArray::GetStaticEmptyArray()) HphpArray(StaticEmptyArray);
+  }
+};
+HphpArray::EmptyArrayInitializer HphpArray::s_arrayInitializer;
 
 //=============================================================================
 // Helpers.
@@ -135,7 +151,7 @@ HphpArray::HphpArray(EmptyMode)
 }
 
 // for internal use by nonSmartCopy() and copyPacked()
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray::HphpArray(const HphpArray& other, AllocationMode mode, ClonePacked)
     : ArrayData(other.m_kind, mode, other.m_size)
     , m_used(other.m_used)
@@ -153,7 +169,7 @@ HphpArray::HphpArray(const HphpArray& other, AllocationMode mode, ClonePacked)
 }
 
 // For internal use by nonSmartCopy() and copyMixed()
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray::HphpArray(const HphpArray& other, AllocationMode mode, CloneMixed)
     : ArrayData(other.m_kind, mode, other.m_size)
     , m_used(other.m_used)
@@ -209,12 +225,6 @@ inline void HphpArray::destroy() {
     tvRefcountedDecRef(&e.data);
   }
   if (elms != m_inline_data.slots) modeFree(elms);
-}
-
-HphpArray::~HphpArray() {
-  assert(checkInvariants());
-  if (isPacked()) destroyPacked();
-  else destroy();
 }
 
 HOT_FUNC_VM
@@ -285,6 +295,8 @@ HphpArray* HphpArray::packedToMixed() {
 //   no KindOfInvalid tombstones
 //
 bool HphpArray::checkInvariants() const {
+  static_assert(sizeof(Elm) == 24, "");
+
   assert(m_size <= m_used);
   assert(m_used <= m_cap);
   assert(m_tableMask > 0 && ((m_tableMask+1) & m_tableMask) == 0);
@@ -298,6 +310,7 @@ bool HphpArray::checkInvariants() const {
     // can't have a tombstone at the end; m_used should have been trimmed.
     assert(!isTombstone(m_data[m_used - 1].data.m_type));
   }
+
   switch (m_kind) {
   case kPackedKind:
     assert(m_size == m_used);
@@ -319,7 +332,8 @@ bool HphpArray::checkInvariants() const {
     assert(false);
     break;
   }
-  if (this == &s_theEmptyArray) {
+
+  if (this == GetStaticEmptyArray()) {
     assert(m_size == 0);
     assert(m_used == 0);
     assert(isPacked());
@@ -453,7 +467,7 @@ static bool hitIntKey(const HphpArray::Elm& e, int64_t ki) {
 // 2, this guarantees a probe sequence of length tableSize that probes all
 // table elements exactly once.
 
-template <class Hit> inline ALWAYS_INLINE
+template <class Hit> ALWAYS_INLINE
 HphpArray::ElmInd HphpArray::findBody(size_t h0, Hit hit) const {
   // tableMask, probeIndex, and pos are explicitly 64-bit, because performance
   // regressed when they were 32-bit types via auto.  Test carefully.
@@ -480,19 +494,6 @@ NEVER_INLINE
 ssize_t HphpArray::find(int64_t ki) const {
   // all vector methods should work w/out touching the hashtable
   assert(!isPacked());
-  if (size_t(ki) < m_used) {
-    // Try to get at it without dirtying a data cache line.
-    auto& e = m_data[ki];
-    if (!isTombstone(e.data.m_type) && hitIntKey(e, ki)) {
-      Stats::inc(Stats::HA_FindIntFast);
-      // Our results had better match the other path
-      assert(ki == findBody(ki, [ki] (const Elm& e) {
-        return hitIntKey(e, ki);
-      }));
-      return ki;
-    }
-  }
-  Stats::inc(Stats::HA_FindIntSlow);
   return findBody(ki, [ki] (const Elm& e) {
     return hitIntKey(e, ki);
   });
@@ -514,7 +515,7 @@ HphpArray::ElmInd* warnUnbalanced(size_t n, HphpArray::ElmInd* ei) {
   return ei;
 }
 
-template <class Hit> inline ALWAYS_INLINE
+template <class Hit> ALWAYS_INLINE
 HphpArray::ElmInd* HphpArray::findForInsertBody(size_t h0, Hit hit) const {
   // tableMask, probeIndex, and pos are explicitly 64-bit, because performance
   // regressed when they were 32-bit types via auto.  Test carefully.
@@ -610,14 +611,14 @@ bool HphpArray::ExistsStr(const ArrayData* ad, const StringData* k) {
 //=============================================================================
 // Append/insert/update.
 
-inline ALWAYS_INLINE bool HphpArray::isFull() const {
+ALWAYS_INLINE bool HphpArray::isFull() const {
   assert(!isPacked());
   assert(m_used <= m_cap);
   assert(m_hLoad <= m_cap);
   return m_used == m_cap || m_hLoad == m_cap;
 }
 
-inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElm(ElmInd* ei) {
+ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElm(ElmInd* ei) {
   assert(!validElmInd(*ei) && !isFull());
   assert(m_size != 0 || m_used == 0);
   ++m_size;
@@ -629,7 +630,7 @@ inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElm(ElmInd* ei) {
   return &m_data[i];
 }
 
-inline ALWAYS_INLINE TypedValue& HphpArray::allocNextElm(uint32_t i) {
+ALWAYS_INLINE TypedValue& HphpArray::allocNextElm(uint32_t i) {
   assert(isPacked() && i == m_size);
   if (i == m_cap) growPacked();
   auto next = i + 1;
@@ -638,7 +639,7 @@ inline ALWAYS_INLINE TypedValue& HphpArray::allocNextElm(uint32_t i) {
   return m_data[i].data;
 }
 
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray::Elm* HphpArray::newElm(ElmInd* ei, size_t h0) {
   if (isFull()) return newElmGrow(h0);
   return allocElm(ei);
@@ -650,45 +651,45 @@ HphpArray::Elm* HphpArray::newElmGrow(size_t h0) {
   return allocElm(findForNewInsert(h0));
 }
 
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray* HphpArray::initVal(TypedValue& tv, CVarRef v) {
   tvAsUninitializedVariant(&tv).constructValHelper(v);
   return this;
 }
 
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray* HphpArray::initRef(TypedValue& tv, CVarRef v) {
   tvAsUninitializedVariant(&tv).constructRefHelper(v);
   return this;
 }
 
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray* HphpArray::getLval(TypedValue& tv, Variant*& ret) {
   ret = &tvAsVariant(&tv);
   return this;
 }
 
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray* HphpArray::initLval(TypedValue& tv, Variant*& ret) {
   tvWriteNull(&tv);
   ret = &tvAsVariant(&tv);
   return this;
 }
 
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray* HphpArray::initWithRef(TypedValue& tv, CVarRef v) {
   tvWriteNull(&tv);
   tvAsVariant(&tv).setWithRef(v);
   return this;
 }
 
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray* HphpArray::setVal(TypedValue& tv, CVarRef v) {
   tvAsVariant(&tv).assignValHelper(v);
   return this;
 }
 
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray* HphpArray::setRef(TypedValue& tv, CVarRef v) {
   tvAsVariant(&tv).assignRefHelper(v);
   return this;
@@ -698,7 +699,7 @@ HphpArray* HphpArray::setRef(TypedValue& tv, CVarRef v) {
  * This is a streamlined copy of Variant.constructValHelper()
  * with no incref+decref because we're moving v to this array.
  */
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 HphpArray* HphpArray::moveVal(TypedValue& tv, TypedValue v) {
   tv.m_type = typeInitNull(v.m_type);
   tv.m_data.num = v.m_data.num;
@@ -738,7 +739,7 @@ HphpArray::ElmInd* HphpArray::reallocData(size_t maxElms, size_t tableSize) {
          (ElmInd*)(uintptr_t(m_data) + dataSize);
 }
 
-inline ALWAYS_INLINE void HphpArray::resizeIfNeeded() {
+ALWAYS_INLINE void HphpArray::resizeIfNeeded() {
   if (isFull()) resize();
 }
 
@@ -786,6 +787,19 @@ void HphpArray::growPacked() {
 }
 
 void HphpArray::compact(bool renumber /* = false */) {
+  struct ElmKey {
+    ElmKey() {}
+    ElmKey(int32_t hash, StringData* key) {
+      this->hash = hash;
+      this->key = key;
+    }
+    int32_t hash;
+    union {
+      StringData* key;
+      int64_t ikey;
+    };
+  };
+
   assert(!isPacked());
   ElmKey mPos;
   if (m_pos != ArrayData::invalid_index) {
@@ -975,7 +989,7 @@ inline ArrayData* HphpArray::addValWithRef(StringData* key, CVarRef data) {
   return this;
 }
 
-inline INLINE_SINGLE_CALLER
+INLINE_SINGLE_CALLER
 ArrayData* HphpArray::update(int64_t ki, CVarRef data) {
   ElmInd* ei = findForInsert(ki);
   if (validElmInd(*ei)) {
@@ -987,7 +1001,7 @@ ArrayData* HphpArray::update(int64_t ki, CVarRef data) {
   return initVal(e->data, data);
 }
 
-inline INLINE_SINGLE_CALLER
+INLINE_SINGLE_CALLER
 ArrayData* HphpArray::update(StringData* key, CVarRef data) {
   strhash_t h = key->hash();
   ElmInd* ei = findForInsert(key, h);
@@ -1550,9 +1564,30 @@ ArrayData* HphpArray::Pop(ArrayData* ad, Variant& value) {
   return a;
 }
 
+ArrayData* HphpArray::DequeuePacked(ArrayData* ad, Variant& value) {
+  auto a = asPacked(ad);
+  if (a->getCount() > 1) a = a->copyPacked();
+  // To conform to PHP behavior, we invalidate all strong iterators when an
+  // element is removed from the beginning of the array.
+  a->freeStrongIterators();
+  auto elms = a->m_data;
+  if (a->m_size > 0) {
+    auto n = a->m_size - 1;
+    auto& tv = elms[0].data;
+    value = std::move(tvAsVariant(&tv)); // no incref+decref
+    memmove(&elms[0], &elms[1], n * sizeof(elms[0]));
+    a->m_size = a->m_used = n;
+    a->m_pos = n > 0 ? 0 : invalid_index;
+  } else {
+    value = uninit_null();
+    a->m_pos = invalid_index;
+  }
+  return a;
+}
+
 ArrayData* HphpArray::Dequeue(ArrayData* ad, Variant& value) {
-  auto a = asHphpArray(ad);
-  if (a->getCount() > 1) a = a->copyImpl();
+  auto a = asMixed(ad);
+  if (a->getCount() > 1) a = a->copyMixed();
   // To conform to PHP behavior, we invalidate all strong iterators when an
   // element is removed from the beginning of the array.
   a->freeStrongIterators();
@@ -1561,16 +1596,6 @@ ArrayData* HphpArray::Dequeue(ArrayData* ad, Variant& value) {
   if (validElmInd(pos)) {
     Elm* e = &elms[pos];
     value = tvAsCVarRef(&e->data);
-    if (a->isPacked()) {
-      if (a->m_size == 1) {
-        assert(pos == 0);
-        a->m_size = a->m_used = 0;
-        a->m_pos = invalid_index;
-        tvRefcountedDecRef(&e->data);
-        return a;
-      }
-      a->packedToMixed();
-    }
     ElmInd* ei = e->hasStrKey() ?  a->findForInsert(e->key, e->hash()) :
                  a->findForInsert(e->ikey);
     a->erase(ei, false);
@@ -1580,17 +1605,31 @@ ArrayData* HphpArray::Dequeue(ArrayData* ad, Variant& value) {
   }
   // To conform to PHP behavior, the dequeue operation resets the array's
   // internal iterator
-  a->m_pos = ssize_t(a->nextElm(elms, ElmIndEmpty));
+  a->m_pos = a->nextElm(elms, ElmIndEmpty);
+  return a;
+}
+
+ArrayData* HphpArray::PrependPacked(ArrayData* ad, CVarRef v, bool copy) {
+  auto a = asPacked(ad);
+  if (a->getCount() > 1) a = a->copyPacked();
+  // To conform to PHP behavior, we invalidate all strong iterators when an
+  // element is added to the beginning of the array.
+  a->freeStrongIterators();
+  size_t n = a->m_size;
+  if (n > 0) {
+    if (n == a->m_cap) a->growPacked();
+    auto elms = a->m_data;
+    memmove(&elms[1], &elms[0], n * sizeof(elms[0]));
+  }
+  a->m_size = a->m_used = n + 1;
+  a->m_pos = 0;
+  a->initVal(a->m_data[0].data, v);
   return a;
 }
 
 ArrayData* HphpArray::Prepend(ArrayData* ad, CVarRef v, bool copy) {
-  auto a = asHphpArray(ad);
-  if (a->getCount() > 1) a = a->copyImpl();
-  if (a->isPacked()) {
-    // todo t2606310: fast path - same as add for empty vectors
-    a->packedToMixed();
-  }
+  auto a = asMixed(ad);
+  if (a->getCount() > 1) a = a->copyMixed();
   // To conform to PHP behavior, we invalidate all strong iterators when an
   // element is added to the beginning of the array.
   a->freeStrongIterators();
@@ -1616,7 +1655,7 @@ ArrayData* HphpArray::Prepend(ArrayData* ad, CVarRef v, bool copy) {
   a->compact(true);
   // To conform to PHP behavior, the prepend operation resets the array's
   // internal iterator
-  a->m_pos = ssize_t(a->nextElm(elms, ElmIndEmpty));
+  a->m_pos = a->nextElm(elms, ElmIndEmpty);
   return a;
 }
 
@@ -1703,7 +1742,7 @@ NEVER_INLINE HphpArray* HphpArray::copyMixed() const {
 
 HOT_FUNC_VM
 HphpArray* ArrayData::MakeTuple(uint size, const TypedValue* data) {
-  auto a = NEW(HphpArray)(size, data);
+  auto a = HphpArray::Make(size, data);
   a->setRefCount(1);
   TRACE(2, "MakeTuple: size %d\n", size);
   return a;
@@ -1711,7 +1750,7 @@ HphpArray* ArrayData::MakeTuple(uint size, const TypedValue* data) {
 
 HOT_FUNC_VM
 HphpArray* ArrayData::MakeReserve(uint capacity) {
-  auto a = NEW(HphpArray)(capacity);
+  auto a = HphpArray::Make(capacity);
   a->setRefCount(1);
   TRACE(2, "MakeReserve: capacity %d\n", capacity);
   return a;

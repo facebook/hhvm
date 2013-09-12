@@ -69,14 +69,26 @@ void CmdVariable::help(DebuggerClient &client) {
 
 void CmdVariable::PrintVariable(DebuggerClient &client, CStrRef varName) {
   CmdVariable cmd;
+  auto charCount = client.getDebuggerClientShortPrintCharCount();
   cmd.m_frame = client.getFrame();
   CmdVariablePtr rcmd = client.xend<CmdVariable>(&cmd);
   if (!rcmd->m_variables.empty()) {
     for (ArrayIter iter(rcmd->m_variables); iter; ++iter) {
       String name = iter.first().toString();
       if (!name.equal(varName)) continue;
-      String value = DebuggerClient::FormatVariable(iter.second(), 200);
-      client.output("%s", value.data());
+      String value = DebuggerClient::FormatVariable(iter.second(), -1);
+      auto excess = value.length() - charCount;
+      if (charCount <= 0 || excess <= 0) {
+        client.output("%s", value.data());
+      } else {
+        client.output("%s", value.substr(0, charCount).data());
+        if (client.ask("There are %d more characters. Continue? [y/N]", excess)
+            == 'y') {
+          client.output("%s", value.substr(charCount).data());
+          client.tutorial("You can use 'set cc = n' to increase the character"
+              " limit. 'set cc = -1' will remove the limit.");
+        }
+      }
     }
   }
 }

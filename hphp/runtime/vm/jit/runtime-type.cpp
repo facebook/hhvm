@@ -22,6 +22,9 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
+#define KindOfUnknown DontUseKindOfUnknownInThisFile
+#define KindOfInvalid DontUseKindOfInvalidInThisFile
+
 namespace HPHP {
 namespace Transl {
 
@@ -37,7 +40,7 @@ normalizeDataType(DataType dt) {
 }
 
 void RuntimeType::init(DataType outer,
-                       DataType inner /* = KindOfInvalid */,
+                       DataType inner /* = KindOfNone */,
                        const Class* klass /*= nullptr*/) {
   m_value.outerType = outer;
   m_value.innerType = inner;
@@ -46,7 +49,7 @@ void RuntimeType::init(DataType outer,
   consistencyCheck();
 }
 
-RuntimeType::RuntimeType(DataType outer, DataType inner /* = KindOfInvalid */,
+RuntimeType::RuntimeType(DataType outer, DataType inner /* = KindOfNone */,
                          const Class* klass /* = NULL */)
   : m_kind(VALUE) {
   init(normalizeDataType(outer), normalizeDataType(inner), klass);
@@ -79,12 +82,12 @@ RuntimeType::RuntimeType(int64_t value)
 
 RuntimeType::RuntimeType(const Class* klass)
   : m_kind(VALUE) {
-  init(KindOfClass, KindOfInvalid, klass);
+  init(KindOfClass, KindOfNone, klass);
 }
 
 RuntimeType::RuntimeType() :
   m_kind(VALUE) {
-  init(KindOfInvalid);
+  init(KindOfNone);
 }
 
 RuntimeType::RuntimeType(const Iter* it) :
@@ -268,8 +271,8 @@ bool RuntimeType::isRef() const {
 }
 
 bool RuntimeType::isVagueValue() const {
-  return m_kind == VALUE && (outerType() == KindOfInvalid ||
-                             outerType() == KindOfAny);
+  assert(IMPLIES(m_kind == VALUE, outerType() != KindOfNone));
+  return m_kind == VALUE && outerType() == KindOfAny;
 }
 
 bool RuntimeType::isRefCounted() const {

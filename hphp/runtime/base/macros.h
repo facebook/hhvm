@@ -81,7 +81,6 @@ namespace HPHP {
 #define INVOKE_FEW_ARGS_IMPL_ARGS INVOKE_FEW_ARGS(IMPL,INVOKE_FEW_ARGS_COUNT)
 
 #define DECLARE_CLASS_COMMON_NO_SWEEP(cls, originalName)                \
-  DECLARE_OBJECT_ALLOCATION_NO_SWEEP(c_##cls)                           \
   public:                                                               \
   static const char *GetClassName() { return #originalName; }           \
   static StaticString s_class_name;                                     \

@@ -466,6 +466,7 @@ static bfdMap s_bfds;
 static bool fill_bfd_cache(const char *filename, bfd_cache *p) {
   bfd *abfd = bfd_openr(filename, nullptr); // hard to avoid heap here!
   if (!abfd) return true;
+  abfd->flags |= BFD_DECOMPRESS;
   p->abfd = abfd;
   p->syms = nullptr;
   char **match;

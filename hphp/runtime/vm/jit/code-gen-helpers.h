@@ -21,6 +21,36 @@
 
 namespace HPHP { namespace JIT {
 
+struct CppCall {
+  template<class Ret, class... Args>
+  explicit CppCall(Ret (*pfun)(Args...))
+    : m_kind(Direct)
+    , m_fptr(reinterpret_cast<void*>(pfun))
+  {}
+
+  explicit CppCall(void* p)
+    : m_kind(Direct)
+    , m_fptr(p)
+  {}
+
+  explicit CppCall(int off) : m_kind(Virtual), m_offset(off) {}
+
+  CppCall(CppCall const&) = default;
+
+  bool isDirect()  const { return m_kind == Direct;  }
+  bool isVirtual() const { return m_kind == Virtual; }
+
+  const void* getAddress() const { return m_fptr; }
+  int         getOffset()  const { return m_offset; }
+
+ private:
+  enum { Direct, Virtual } m_kind;
+  union {
+    void* m_fptr;
+    int   m_offset;
+  };
+};
+
 /*
  * SaveFP uses rVmFp, as usual. SavePC requires the caller to have
  * placed the PC offset of the instruction about to be executed in

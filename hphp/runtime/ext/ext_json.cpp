@@ -36,6 +36,8 @@ const int64_t k_JSON_UNESCAPED_UNICODE = 1<<8;
 const int64_t k_JSON_FB_LOOSE          = 1<<20;
 const int64_t k_JSON_FB_UNLIMITED      = 1<<21;
 const int64_t k_JSON_FB_EXTRA_ESCAPES  = 1<<22;
+const int64_t k_JSON_FB_COLLECTIONS    = 1<<23;
+const int64_t k_JSON_FB_STABLE_MAPS    = 1<<24;
 
 const int64_t k_JSON_ERROR_NONE
   = json_error_codes::JSON_ERROR_NONE;
@@ -83,9 +85,11 @@ Variant f_json_decode(CStrRef json, bool assoc /* = false */,
     json_options = k_JSON_FB_LOOSE;
   }
 
+  const int64_t supported_options =
+    k_JSON_FB_LOOSE | k_JSON_FB_COLLECTIONS | k_JSON_FB_STABLE_MAPS;
   Variant z;
   if (JSON_parser(z, json.data(), json.size(), assoc,
-                  (json_options & k_JSON_FB_LOOSE))) {
+                  (json_options & supported_options))) {
     return z;
   }
 

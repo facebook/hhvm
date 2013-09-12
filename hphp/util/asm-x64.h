@@ -746,59 +746,52 @@ struct Label;
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-class X64Assembler {
+class X64Assembler : private boost::noncopyable {
   friend struct Label;
+  friend class CodeCursor;
 
 public:
-  X64Assembler() : codeBlock(nullptr) {}
-
-  void init(DataBlock* db) {
-    codeBlock = db;
-  }
+  explicit X64Assembler(CodeBlock& cb) : codeBlock(cb) {}
 
   CodeAddress base() const {
-    return codeBlock->base;
+    return codeBlock.base();
   }
 
   CodeAddress frontier() const {
-    return codeBlock->frontier;
+    return codeBlock.frontier();
   }
 
   void setFrontier(CodeAddress newFrontier) {
-    codeBlock->frontier = newFrontier;
+    codeBlock.setFrontier(newFrontier);
   }
 
   size_t capacity() const {
-    return codeBlock->capacity();
+    return codeBlock.capacity();
   }
 
   size_t used() const {
-    return codeBlock->used();
+    return codeBlock.used();
   }
 
   size_t available() const {
-    return codeBlock->available();
+    return codeBlock.available();
   }
 
   bool contains(CodeAddress addr) const {
-    return codeBlock->contains(addr);
+    return codeBlock.contains(addr);
   }
 
   bool empty() const {
-    return codeBlock->empty();
+    return codeBlock.empty();
   }
 
   void clear() {
-    codeBlock->clear();
+    codeBlock.clear();
   }
 
   bool canEmit(size_t nBytes) const {
     assert(capacity() >= used());
     return nBytes < (capacity() - used());
-  }
-
-  void skip(size_t nBytes) {
-    (void)codeBlock->alloc<uint8_t>(1, nBytes);
   }
 
   /*
@@ -1042,7 +1035,7 @@ public:
    */
 
   bool jmpDeltaFits(CodeAddress dest) {
-    int64_t delta = dest - (codeBlock->frontier + 5);
+    int64_t delta = dest - (codeBlock.frontier() + 5);
     return deltaFits(delta, sz::dword);
   }
 
@@ -1084,7 +1077,7 @@ public:
   }
 
   void jmpAuto(CodeAddress dest) {
-    auto delta = dest - (codeBlock->frontier + 2);
+    auto delta = dest - (codeBlock.frontier() + 2);
     if (deltaFits(delta, sz::byte)) {
       jmp8(dest);
     } else {
@@ -1093,7 +1086,7 @@ public:
   }
 
   void jccAuto(ConditionCode cc, CodeAddress dest) {
-    auto delta = dest - (codeBlock->frontier + 2);
+    auto delta = dest - (codeBlock.frontier() + 2);
     if (deltaFits(delta, sz::byte)) {
       jcc8(cc, dest);
     } else {
@@ -1202,8 +1195,9 @@ public:
   }
 
   void emitInt3s(int n) {
-    memset(codeBlock->frontier, 0xcc, n);
-    codeBlock->frontier += n;
+    for (auto i = 0; i < n; ++i) {
+      byte(0xcc);
+    }
   }
 
   void emitNop(int n) {
@@ -1236,28 +1230,27 @@ public:
    */
 
   void byte(uint8_t b) {
-    codeBlock->byte(b);
+    codeBlock.byte(b);
   }
   void word(uint16_t w) {
-    codeBlock->word(w);
+    codeBlock.word(w);
   }
   void dword(uint32_t dw) {
-    codeBlock->dword(dw);
+    codeBlock.dword(dw);
   }
   void qword(uint64_t qw) {
-    codeBlock->qword(qw);
+    codeBlock.qword(qw);
   }
   void bytes(size_t n, const uint8_t* bs) {
-    codeBlock->bytes(n, bs);
+    codeBlock.bytes(n, bs);
   }
 
   // op %r
   // ------
   // Restrictions:
   //     r cannot be set to 'none'
-  void emitCR(X64Instr op, int jcond,
-              RegNumber regN,
-              int opSz = sz::qword) ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitCR(X64Instr op, int jcond, RegNumber regN, int opSz = sz::qword) {
     assert(regN != reg::noreg);
     int r = int(regN);
 
@@ -1294,16 +1287,18 @@ public:
     emitModrm(3, rval, r);
   }
 
-  void emitR(X64Instr op, RegNumber r, int opSz = sz::qword)
-      ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitR(X64Instr op, RegNumber r, int opSz = sz::qword) {
     emitCR(op, 0, r, opSz);
   }
 
-  void emitR32(X64Instr op, RegNumber r) ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitR32(X64Instr op, RegNumber r) {
     emitCR(op, 0, r, sz::dword);
   }
 
-  void emitR16(X64Instr op, RegNumber r) ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitR16(X64Instr op, RegNumber r) {
     emitCR(op, 0, r, sz::word);
   }
 
@@ -1312,9 +1307,9 @@ public:
   // Restrictions:
   //     r1 cannot be set to 'reg::noreg'
   //     r2 cannot be set to 'reg::noreg'
-  void emitCRR(X64Instr op, int jcond, RegNumber rn1,
-               RegNumber rn2, int opSz = sz::qword)
-      ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitCRR(X64Instr op, int jcond, RegNumber rn1, RegNumber rn2,
+               int opSz = sz::qword) {
     assert(rn1 != reg::noreg && rn2 != reg::noreg);
     int r1 = int(rn1);
     int r2 = int(rn2);
@@ -1378,28 +1373,27 @@ public:
     }
   }
 
-  void emitCRR32(X64Instr op, int jcond, RegNumber r1,
-                 RegNumber r2)
-      ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitCRR32(X64Instr op, int jcond, RegNumber r1, RegNumber r2) {
     emitCRR(op, jcond, r1, r2, sz::dword);
   }
 
-  void emitRR(X64Instr op, RegNumber r1, RegNumber r2,
-              int opSz = sz::qword)
-      ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitRR(X64Instr op, RegNumber r1, RegNumber r2, int opSz = sz::qword) {
     emitCRR(op, 0, r1, r2, opSz);
   }
 
-  void emitRR32(X64Instr op, RegNumber r1,
-                RegNumber r2) ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitRR32(X64Instr op, RegNumber r1, RegNumber r2) {
     emitCRR(op, 0, r1, r2, sz::dword);
   }
 
-  void emitRR16(X64Instr op, RegNumber r1,
-                RegNumber r2) ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitRR16(X64Instr op, RegNumber r1, RegNumber r2) {
     emitCRR(op, 0, r1, r2, sz::word);
   }
 
+  ALWAYS_INLINE
   void emitRR8(X64Instr op, RegNumber r1, RegNumber r2) {
     emitCRR(op, 0, r1, r2, sz::byte);
   }
@@ -1408,9 +1402,9 @@ public:
   // -----------
   // Restrictions:
   //     r cannot be set to 'reg::noreg'
+  ALWAYS_INLINE
   void emitIR(X64Instr op, RegNumber rname, ssize_t imm,
-              int opSz = sz::qword)
-      ALWAYS_INLINE {
+              int opSz = sz::qword) {
     assert(rname != reg::noreg);
     int r = int(rname);
     // Opsize prefix
@@ -1470,16 +1464,17 @@ public:
     emitImmediate(op, imm, immSize);
   }
 
-  void emitIR32(X64Instr op, RegNumber r, ssize_t imm)
-      ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitIR32(X64Instr op, RegNumber r, ssize_t imm) {
     emitIR(op, r, imm, sz::dword);
   }
 
-  void emitIR16(X64Instr op, RegNumber r, ssize_t imm)
-      ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitIR16(X64Instr op, RegNumber r, ssize_t imm) {
     emitIR(op, r, safe_cast<int16_t>(imm), sz::word);
   }
 
+  ALWAYS_INLINE
   void emitIR8(X64Instr op, RegNumber r, ssize_t imm) {
     emitIR(op, r, safe_cast<int8_t>(imm), sz::byte);
   }
@@ -1489,9 +1484,9 @@ public:
   // Restrictions:
   //     r1 cannot be set to 'reg::noreg'
   //     r2 cannot be set to 'reg::noreg'
-  void emitIRR(X64Instr op, RegNumber rn1, RegNumber rn2,
-               ssize_t imm, int opSz = sz::qword)
-      ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitIRR(X64Instr op, RegNumber rn1, RegNumber rn2, ssize_t imm,
+               int opSz = sz::qword) {
     assert(rn1 != reg::noreg && rn2 != reg::noreg);
     int r1 = int(rn1);
     int r2 = int(rn2);
@@ -1532,8 +1527,8 @@ public:
     emitImmediate(op, imm, immSize);
   }
 
-  void emitCI(X64Instr op, int jcond, ssize_t imm, int opSz = sz::qword)
-      ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitCI(X64Instr op, int jcond, ssize_t imm, int opSz = sz::qword) {
     // Opsize prefix
     prefixBytes(op.flags, opSz);
     // REX
@@ -1559,48 +1554,49 @@ public:
     emitImmediate(op, imm, immSize);
   }
 
-  void emitI(X64Instr op, ssize_t imm, int opSz = sz::qword)
-      ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitI(X64Instr op, ssize_t imm, int opSz = sz::qword) {
     emitCI(op, 0, imm, opSz);
   }
 
-  void emitJ8(X64Instr op, ssize_t imm)
-    ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitJ8(X64Instr op, ssize_t imm) {
     assert((op.flags & IF_JCC) == 0);
-    ssize_t delta = imm - ((ssize_t)codeBlock->frontier + 2);
+    ssize_t delta = imm - ((ssize_t)codeBlock.frontier() + 2);
     // Emit opcode and 8-bit immediate
     byte(0xEB);
     byte(safe_cast<int8_t>(delta));
   }
 
-  void emitCJ8(X64Instr op, int jcond, ssize_t imm)
-    ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitCJ8(X64Instr op, int jcond, ssize_t imm) {
     // this is for jcc only
     assert(op.flags & IF_JCC);
-    ssize_t delta = imm - ((ssize_t)codeBlock->frontier + 2);
+    ssize_t delta = imm - ((ssize_t)codeBlock.frontier() + 2);
     // Emit opcode
     byte(jcond | 0x70);
     // Emit 8-bit offset
     byte(safe_cast<int8_t>(delta));
   }
 
-  void emitJ32(X64Instr op, ssize_t imm) ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitJ32(X64Instr op, ssize_t imm) {
     // call and jmp are supported, jcc is not supported
     assert((op.flags & IF_JCC) == 0);
     int32_t delta =
-      safe_cast<int32_t>(imm - ((ssize_t)codeBlock->frontier + 5));
+      safe_cast<int32_t>(imm - ((ssize_t)codeBlock.frontier() + 5));
     uint8_t *bdelta = (uint8_t*)&delta;
     uint8_t instr[] = { op.table[2],
       bdelta[0], bdelta[1], bdelta[2], bdelta[3] };
     bytes(5, instr);
   }
 
-  void emitCJ32(X64Instr op, int jcond, ssize_t imm)
-      ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitCJ32(X64Instr op, int jcond, ssize_t imm) {
     // jcc is supported, call and jmp are not supported
     assert(op.flags & IF_JCC);
     int32_t delta =
-      safe_cast<int32_t>(imm - ((ssize_t)codeBlock->frontier + 6));
+      safe_cast<int32_t>(imm - ((ssize_t)codeBlock.frontier() + 6));
     uint8_t* bdelta = (uint8_t*)&delta;
     uint8_t instr[6] = { 0x0f, uint8_t(0x80 | jcond),
       bdelta[0], bdelta[1], bdelta[2], bdelta[3] };
@@ -1622,14 +1618,15 @@ public:
   // -----------------------------------------------------------------
   // Restrictions:
   //     ir cannot be set to 'sp'
-  void emitCMX(X64Instr op, int jcond, RegNumber brName,
-               RegNumber irName, int s, int disp,
+  ALWAYS_INLINE
+  void emitCMX(X64Instr op, int jcond, RegNumber brName, RegNumber irName,
+               int s, int disp,
                RegNumber rName,
                bool reverse = false,
                ssize_t imm = 0,
                bool hasImmediate = false,
                int opSz = sz::qword,
-               bool ripRelative = false) ALWAYS_INLINE {
+               bool ripRelative = false) {
     assert(irName != reg::rsp);
 
     int ir = int(irName);
@@ -1764,115 +1761,123 @@ public:
     }
   }
 
-  void emitIM(X64Instr op, RegNumber br, RegNumber ir,
-              int s, int disp, ssize_t imm, int opSz = sz::qword)
-        ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitIM(X64Instr op, RegNumber br, RegNumber ir, int s, int disp,
+              ssize_t imm, int opSz = sz::qword) {
     emitCMX(op, 0, br, ir, s, disp, reg::noreg, false, imm, true, opSz);
   }
 
-  void emitIM8(X64Instr op, RegNumber br, RegNumber ir, int s,
-               int disp, ssize_t imm) ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitIM8(X64Instr op, RegNumber br, RegNumber ir, int s, int disp,
+               ssize_t imm) {
     emitCMX(op, 0, br, ir, s, disp, reg::noreg, false, imm, true,
             sz::byte);
   }
 
-  void emitIM16(X64Instr op, RegNumber br, RegNumber ir, int s,
-                int disp, ssize_t imm) ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitIM16(X64Instr op, RegNumber br, RegNumber ir, int s, int disp,
+                ssize_t imm) {
     emitCMX(op, 0, br, ir, s, disp, reg::noreg, false, imm, true,
             sz::word);
   }
 
-  void emitIM32(X64Instr op, RegNumber br, RegNumber ir, int s,
-                int disp, ssize_t imm) ALWAYS_INLINE {
-    emitCMX(op, 0, br, ir, s, disp, reg::noreg, false, imm, true,
-            sz::dword);
+  ALWAYS_INLINE
+  void emitIM32(X64Instr op, RegNumber br, RegNumber ir, int s, int disp,
+                ssize_t imm) {
+    emitCMX(op, 0, br, ir, s, disp, reg::noreg, false, imm, true, sz::dword);
   }
 
-  void emitRM(X64Instr op, RegNumber br, RegNumber ir, int s,
-              int disp, RegNumber r, int opSz = sz::qword)
-        ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitRM(X64Instr op, RegNumber br, RegNumber ir, int s, int disp,
+              RegNumber r, int opSz = sz::qword) {
     emitCMX(op, 0, br, ir, s, disp, r, false, 0, false, opSz);
   }
 
-  void emitRM32(X64Instr op, RegNumber br, RegNumber ir, int s,
-                int disp, RegNumber r) ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitRM32(X64Instr op, RegNumber br, RegNumber ir, int s, int disp,
+                RegNumber r) {
     emitCMX(op, 0, br, ir, s, disp, r, false, 0, false, sz::dword);
   }
 
-  void emitRM16(X64Instr op, RegNumber br, RegNumber ir, int s,
-                int disp, RegNumber r) ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitRM16(X64Instr op, RegNumber br, RegNumber ir, int s, int disp,
+                RegNumber r) {
     emitCMX(op, 0, br, ir, s, disp, r, false, 0, false, sz::word);
   }
 
-  void emitRM8(X64Instr op, RegNumber br, RegNumber ir, int s,
-               int disp, RegNumber r) {
+  ALWAYS_INLINE
+  void emitRM8(X64Instr op, RegNumber br, RegNumber ir, int s, int disp,
+               RegNumber r) {
     emitCMX(op, 0, br, ir, s, disp, r, false, 0, false, sz::byte);
   }
 
-  void emitCMR(X64Instr op, int jcond, RegNumber br,
-               RegNumber ir, int s, int disp, RegNumber r,
-               int opSz = sz::qword) ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitCMR(X64Instr op, int jcond, RegNumber br, RegNumber ir,
+               int s, int disp, RegNumber r, int opSz = sz::qword) {
     emitCMX(op, jcond, br, ir, s, disp, r, true, 0, false, opSz);
   }
 
-  void emitMR(X64Instr op, RegNumber br, RegNumber ir, int s,
-              int disp, RegNumber r, int opSz = sz::qword,
-              bool ripRelative = false) ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitMR(X64Instr op, RegNumber br, RegNumber ir, int s, int disp,
+              RegNumber r, int opSz = sz::qword, bool ripRelative = false) {
     emitCMX(op, 0, br, ir, s, disp, r, true, 0, false, opSz, ripRelative);
   }
 
-  void emitMR32(X64Instr op, RegNumber br, RegNumber ir,
-                int s, int disp, RegNumber r) ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitMR32(X64Instr op, RegNumber br, RegNumber ir, int s, int disp,
+                RegNumber r) {
     emitCMX(op, 0, br, ir, s, disp, r, true, 0, false, sz::dword);
   }
 
-  void emitMR16(X64Instr op, RegNumber br, RegNumber ir,
-                int s, int disp, RegNumber r) ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitMR16(X64Instr op, RegNumber br, RegNumber ir, int s, int disp,
+                RegNumber r) {
     emitCMX(op, 0, br, ir, s, disp, r, true, 0, false, sz::word);
   }
 
-  void emitMR8(X64Instr op, RegNumber br, RegNumber ir,
-               int s, int disp, RegNumber r) ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitMR8(X64Instr op, RegNumber br, RegNumber ir, int s, int disp,
+               RegNumber r) {
     emitCMX(op, 0, br, ir, s, disp, r, true, 0, false, sz::byte);
   }
 
-  void emitIRM(X64Instr op, RegNumber br, RegNumber ir,
-               int s, int disp, RegNumber r, ssize_t imm,
-               int opSz = sz::qword) ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitIRM(X64Instr op, RegNumber br, RegNumber ir, int s, int disp,
+               RegNumber r, ssize_t imm, int opSz = sz::qword) {
     emitCMX(op, 0, br, ir, s, disp, r, false, imm, true, opSz);
   }
 
-  void emitIMR(X64Instr op, RegNumber br, RegNumber ir,
-               int s, int disp, RegNumber r, ssize_t imm,
-               int opSz = sz::qword) ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitIMR(X64Instr op, RegNumber br, RegNumber ir, int s, int disp,
+               RegNumber r, ssize_t imm, int opSz = sz::qword) {
     emitCMX(op, 0, br, ir, s, disp, r, true, imm, true, opSz);
   }
 
-  void emitM(X64Instr op, RegNumber br, RegNumber ir,
-             int s, int disp, int opSz = sz::qword) ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emitM(X64Instr op, RegNumber br, RegNumber ir, int s, int disp,
+             int opSz = sz::qword) {
     emitCMX(op, 0, br, ir, s, disp, reg::noreg, false, 0, false, opSz);
   }
 
-  void emitM32(X64Instr op, RegNumber br, RegNumber ir,
-               int s, int disp) ALWAYS_INLINE {
-    emitCMX(op, 0, br, ir, s, disp, reg::noreg, false, 0, false,
-            sz::dword);
+  ALWAYS_INLINE
+  void emitM32(X64Instr op, RegNumber br, RegNumber ir, int s, int disp) {
+    emitCMX(op, 0, br, ir, s, disp, reg::noreg, false, 0, false, sz::dword);
   }
 
-  void emitM16(X64Instr op, RegNumber br, RegNumber ir,
-               int s, int disp) ALWAYS_INLINE {
-    emitCMX(op, 0, br, ir, s, disp, reg::noreg, false, 0, false,
-            sz::word);
+  ALWAYS_INLINE
+  void emitM16(X64Instr op, RegNumber br, RegNumber ir, int s, int disp) {
+    emitCMX(op, 0, br, ir, s, disp, reg::noreg, false, 0, false, sz::word);
   }
 
+  ALWAYS_INLINE
   void emitCM(X64Instr op, int jcond, RegNumber br,
-              RegNumber ir, int s, int disp, int opSz = sz::qword)
-        ALWAYS_INLINE {
+              RegNumber ir, int s, int disp, int opSz = sz::qword) {
     emitCMX(op, jcond, br, ir, s, disp, reg::noreg, false, 0, false, opSz);
   }
 
   // emit (with no arguments)
-  void emit(X64Instr op) ALWAYS_INLINE {
+  ALWAYS_INLINE
+  void emit(X64Instr op) {
     if ((op.flags & IF_NO_REXW) == 0) {
       byte(0x48);
     }
@@ -2431,9 +2436,7 @@ private:
 #undef UIMR
 #undef URIP
 
-  // This has to be a pointer because it's uninitialized when X64Assembler
-  // is constructed.
-  CodeBlock* codeBlock;
+  CodeBlock& codeBlock;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -2531,7 +2534,7 @@ private:
     JumpInfo info;
     info.type = type;
     info.a = a;
-    info.addr = a->codeBlock->getFrontier();
+    info.addr = a->codeBlock.frontier();
     m_toPatch.push_back(info);
   }
 
@@ -2567,20 +2570,19 @@ inline void X64Assembler::call(Label& l) { l.call(*this); }
 #endif
 
 class UndoMarker {
-  typedef X64Assembler Asm;
-  Asm& m_a;
+  CodeBlock& m_cb;
   CodeAddress m_oldFrontier;
   public:
-  explicit UndoMarker(Asm& a)
-    : m_a(a)
-    , m_oldFrontier(a.frontier()) {
+  explicit UndoMarker(CodeBlock& cb)
+    : m_cb(cb)
+    , m_oldFrontier(cb.frontier()) {
     TRACE_MOD(Trace::trans, 1, "RewindTo: %p\n",
               m_oldFrontier);
   }
 
   void undo() {
-    m_a.setFrontier(m_oldFrontier);
-    TRACE_MOD(Trace::trans, 1, "Restore: %p\n", m_a.frontier());
+    m_cb.setFrontier(m_oldFrontier);
+    TRACE_MOD(Trace::trans, 1, "Restore: %p\n", m_cb.frontier());
   }
 };
 
@@ -2589,10 +2591,16 @@ class UndoMarker {
  */
 class CodeCursor : public UndoMarker {
   public:
-  CodeCursor(X64Assembler& a, CodeAddress newFrontier) :
-    UndoMarker(a) {
-    a.setFrontier(newFrontier);
+  CodeCursor(CodeBlock& cb, CodeAddress newFrontier) :
+    UndoMarker(cb) {
+    cb.setFrontier(newFrontier);
   }
+
+  explicit CodeCursor(X64Assembler& as, CodeAddress newFrontier)
+      : UndoMarker(as.codeBlock) {
+    as.codeBlock.setFrontier(newFrontier);
+  }
+
   ~CodeCursor() {
     undo();
   }
@@ -2606,7 +2614,7 @@ class CodeCursor : public UndoMarker {
 
 class StoreImmPatcher {
  public:
-  StoreImmPatcher(X64Assembler& as, uint64_t initial, RegNumber reg,
+  StoreImmPatcher(CodeBlock& cb, uint64_t initial, RegNumber reg,
                   int32_t offset, RegNumber base);
   void patch(uint64_t actual);
  private:
@@ -2619,18 +2627,18 @@ class StoreImmPatcher {
  *
  * E.g.:
  *
- *   Asm& a = asmChoose(toPatch, a, astubs);
+ *   Asm& a = codeBlockChoose(toPatch, a, astubs);
  *   a.patchJmp(...);
  */
-inline X64Assembler& asmChoose(CodeAddress addr) {
-  assert(false && "addr was not part of any known assembler");
-  NOT_REACHED();
-  return *static_cast<X64Assembler*>(nullptr);
+inline CodeBlock& codeBlockChoose(CodeAddress addr) {
+  assert(false && "addr was not part of any known code block");
+  not_reached();
+  return *static_cast<CodeBlock*>(nullptr);
 }
-template<class... Asm>
-X64Assembler& asmChoose(CodeAddress addr, X64Assembler& a, Asm&... as) {
+template<class... Blocks>
+CodeBlock& codeBlockChoose(CodeAddress addr, CodeBlock& a, Blocks&... as) {
   if (a.contains(addr)) return a;
-  return asmChoose(addr, as...);
+  return codeBlockChoose(addr, as...);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -375,8 +375,16 @@ struct Inc {
 
   void nonNumericString(Cell& cell) const {
     auto const sd = cell.m_data.pstr;
-    auto const newSd = StringData::Make(sd, CopyString);
-    newSd->inc();
+    auto const newSd = [&]() -> StringData* {
+      auto const tmp = StringData::Make(sd, CopyString);
+      auto const tmp2 = tmp->increment();
+      if (tmp2 != tmp) {
+        assert(tmp->getCount() == 0);
+        tmp->release();
+        return tmp2;
+      }
+      return tmp;
+    }();
     newSd->incRefCount();
     decRefStr(sd);
     cellCopy(make_tv<KindOfString>(newSd), cell);
@@ -513,8 +521,22 @@ void cellBitNot(Cell& cell) {
       cell.m_data.pstr->decRefCount(); // can't go to zero
       cell.m_data.pstr = newSd;
       cell.m_type = KindOfString;
+    } else {
+      // Unless we go through this branch, the string was just freshly
+      // created, so the following mutation will be safe wrt its
+      // internal hash caching.
+      cell.m_data.pstr->invalidateHash();
     }
-    cell.m_data.pstr->negate();
+
+    {
+      auto const sd   = cell.m_data.pstr;
+      auto const len  = sd->size();
+      auto const data = sd->mutableData();
+      assert(sd->getCount() == 1);
+      for (uint32_t i = 0; i < len; ++i) {
+        data[i] = ~data[i];
+      }
+    }
     break;
 
   default:

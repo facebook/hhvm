@@ -24,7 +24,6 @@ ADD_DEFINITIONS("-DHHVM -DHHVM_BINARY=1 -DHHVM_PATH=\\\"${HPHP_HOME}/hphp/hhvm/h
 
 set(RECURSIVE_SOURCE_SUBDIRS runtime/base runtime/debugger runtime/eval runtime/ext runtime/server runtime/vm util zend neo parser vixl)
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
-
 	auto_sources(files "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
 	list(APPEND CXX_SOURCES ${files})
 

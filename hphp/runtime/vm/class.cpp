@@ -37,11 +37,6 @@ static StringData* sd86sinit = StringData::GetStaticString("86sinit");
 
 hphp_hash_map<const StringData*, const HhbcExtClassInfo*,
               string_data_hash, string_data_isame> Class::s_extClassHash;
-Class::InstanceCounts Class::s_instanceCounts;
-ReadWriteMutex Class::s_instanceCountsLock(RankInstanceCounts);
-Class::InstanceBitsMap Class::s_instanceBits;
-ReadWriteMutex Class::s_instanceBitsLock(RankInstanceBits);
-std::atomic<bool> Class::s_instanceBitsInit{false};
 
 const StringData* PreClass::manglePropName(const StringData* className,
                                            const StringData* propName,
@@ -141,7 +136,7 @@ PreClass::PreClass(Unit* unit, int line1, int line2, Offset o,
     : m_unit(unit), m_line1(line1), m_line2(line2), m_offset(o), m_id(id),
       m_builtinPropSize(0), m_attrs(attrs), m_hoistable(hoistable),
       m_name(n), m_parent(parent), m_docComment(docComment),
-      m_InstanceCtor(nullptr) {
+      m_instanceCtor(nullptr) {
   m_namedEntity = Unit::GetNamedEntity(n);
 }
 
@@ -191,8 +186,9 @@ void PreClass::prettyPrint(std::ostream &out) const {
 // Class.
 
 Class* Class::newClass(PreClass* preClass, Class* parent) {
-  unsigned classVecLen = (parent != nullptr) ? parent->m_classVecLen+1 : 1;
-  void* mem = Util::low_malloc(sizeForNClasses(classVecLen));
+  auto const classVecLen = parent != nullptr ? parent->m_classVecLen + 1 : 1;
+  auto const size = offsetof(Class, m_classVec) + sizeof(Class*) * classVecLen;
+  auto const mem = Util::low_malloc(size);
   try {
     return new (mem) Class(preClass, parent, classVecLen);
   } catch (...) {
@@ -205,7 +201,7 @@ Class::Class(PreClass* preClass, Class* parent, unsigned classVecLen)
   : m_preClass(PreClassPtr(preClass)), m_parent(parent),
     m_traitsBeginIdx(0), m_traitsEndIdx(0), m_clsInfo(nullptr),
     m_builtinPropSize(0), m_classVecLen(classVecLen), m_cachedOffset(0),
-    m_propDataCache(-1), m_propSDataCache(-1), m_InstanceCtor(nullptr),
+    m_propDataCache(-1), m_propSDataCache(-1), m_instanceCtor(nullptr),
     m_nextClass(nullptr) {
   setParent();
   setUsedTraits();
@@ -348,121 +344,6 @@ bool Class::verifyPersistent() const {
 const Func* Class::getDeclaredCtor() const {
   const Func* f = getCtor();
   return f->name() != sd86ctor ? f : nullptr;
-}
-
-void Class::initInstanceBits() {
-  assert(Transl::Translator::WriteLease().amOwner());
-  if (s_instanceBitsInit.load(std::memory_order_acquire)) return;
-
-  // First, grab a write lock on s_instanceCounts and grab the current set of
-  // counts as quickly as possible to minimize blocking other threads still
-  // trying to profile instance checks.
-  typedef std::pair<const StringData*, unsigned> Count;
-  std::vector<Count> counts;
-  uint64_t total = 0;
-  {
-    // If you think of the read-write lock as a shared-exclusive lock instead,
-    // the fact that we're grabbing a write lock to iterate over the table
-    // makes more sense: it's safe to concurrently modify a
-    // tbb::concurrent_hash_map, but iteration is not guaranteed to be safe
-    // with concurrent insertions.
-    WriteLock l(s_instanceCountsLock);
-    for (auto& pair : s_instanceCounts) {
-      counts.push_back(pair);
-      total += pair.second;
-    }
-  }
-  std::sort(counts.begin(), counts.end(), [&](const Count& a, const Count& b) {
-    return a.second > b.second;
-  });
-
-  // Next, initialize s_instanceBits with the top 127 most checked classes. Bit
-  // 0 is reserved as an 'initialized' flag
-  unsigned i = 1;
-  uint64_t accum = 0;
-  for (auto& item : counts) {
-    if (i >= kInstanceBits) break;
-    if (Class* cls = Unit::lookupUniqueClass(item.first)) {
-      if (!(cls->attrs() & AttrUnique)) {
-        continue;
-      }
-    }
-    s_instanceBits[item.first] = i;
-    accum += item.second;
-    ++i;
-  }
-
-  // Print out stats about what we ended up using
-  if (Trace::moduleEnabledRelease(Trace::instancebits, 1)) {
-    Trace::traceRelease("%s: %u classes, %" PRIu64 " (%.2f%%) of warmup"
-                        " checks\n",
-                        __FUNCTION__, i-1, accum, 100.0 * accum / total);
-    if (Trace::moduleEnabledRelease(Trace::instancebits, 2)) {
-      accum = 0;
-      i = 1;
-      for (auto& pair : counts) {
-        if (i >= 256) {
-          Trace::traceRelease("skipping the remainder of the %zu classes\n",
-                              counts.size());
-          break;
-        }
-        accum += pair.second;
-        Trace::traceRelease("%3u %5.2f%% %7u -- %6.2f%% %7" PRIu64 " %s\n",
-                            i++, 100.0 * pair.second / total, pair.second,
-                            100.0 * accum / total, accum,
-                            pair.first->data());
-      }
-    }
-  }
-
-  // Finally, update m_instanceBits on every Class that currently exists. This
-  // must be done while holding a lock that blocks insertion of new Classes
-  // into their class lists, but in practice most Classes will already be
-  // created by now and this process takes at most 10ms.
-  WriteLock l(s_instanceBitsLock);
-  for (AllClasses ac; !ac.empty(); ) {
-    Class* c = ac.popFront();
-    c->setInstanceBitsAndParents();
-  }
-
-  s_instanceBitsInit.store(true, std::memory_order_release);
-}
-
-void Class::profileInstanceOf(const StringData* name) {
-  assert(name->isStatic());
-  unsigned inc = 1;
-  Class* c = Unit::lookupClass(name);
-  if (c && (c->attrs() & AttrInterface)) {
-    // Favor interfaces
-    inc = 250;
-  }
-  InstanceCounts::accessor acc;
-
-  // The extra layer of locking is here so that initInstanceBits can safely
-  // iterate over s_instanceCounts while building its map of names to bits.
-  ReadLock l(s_instanceCountsLock);
-  if (!s_instanceCounts.insert(acc, InstanceCounts::value_type(name, inc))) {
-    acc->second += inc;
-  }
-}
-
-bool Class::haveInstanceBit(const StringData* name) {
-  assert(Transl::Translator::WriteLease().amOwner());
-  assert(s_instanceBitsInit.load(std::memory_order_acquire));
-  return mapContains(s_instanceBits, name);
-}
-
-bool Class::getInstanceBitMask(const StringData* name,
-                               int& offset, uint8_t& mask) {
-  assert(Transl::Translator::WriteLease().amOwner());
-  assert(s_instanceBitsInit.load(std::memory_order_acquire));
-  const size_t bitWidth = sizeof(mask) * CHAR_BIT;
-  unsigned bit;
-  if (!mapGet(s_instanceBits, name, &bit)) return false;
-  assert(bit >= 1 && bit < kInstanceBits);
-  offset = offsetof(Class, m_instanceBits) + bit / bitWidth * sizeof(mask);
-  mask = 1u << (bit % bitWidth);
-  return true;
 }
 
 /*
@@ -639,7 +520,7 @@ Class::PropInitVec* Class::initPropsImpl() const {
 
         auto const* value = propArr->nvGet(k);
         assert(value);
-        tvDup(*value, prop);
+        cellDup(*value, prop);
       }
     }
   }
@@ -823,7 +704,7 @@ TypedValue* Class::initSPropsImpl() const {
     if (sProp.m_class == this) {
       auto const* value = getValueFromArr(propName);
       if (value) {
-        tvDup(*value, spropTable[slot]);
+        cellDup(*value, spropTable[slot]);
       } else {
         assert(tvIsStatic(&sProp.m_val));
         spropTable[slot] = sProp.m_val;
@@ -834,7 +715,7 @@ TypedValue* Class::initSPropsImpl() const {
                                               visible, accessible);
       auto const* value = getValueFromArr(propName);
       if (value) {
-        tvDup(*value, *storage);
+        cellDup(*value, *storage);
       }
 
       tvBindIndirect(&spropTable[slot], storage);
@@ -969,12 +850,11 @@ Cell* Class::clsCnsGet(const StringData* clsCnsName) const {
     static StringData* sd86cinit = StringData::GetStaticString("86cinit");
     const Func* meth86cinit =
       m_constants[clsCnsInd].m_class->lookupMethod(sd86cinit);
-    TypedValue tv[1];
-    tv->m_data.pstr = (StringData*)clsCnsName;
-    tv->m_type = KindOfString;
-    clsCnsName->incRefCount();
+    TypedValue args[1] = {
+      make_tv<KindOfString>(const_cast<StringData*>(clsCnsName))
+    };
     g_vmContext->invokeFuncFew(clsCns, meth86cinit, ActRec::encodeClass(this),
-                               nullptr, 1, tv);
+                               nullptr, 1, args);
   }
   assert(cellIsPlausible(*clsCns));
   return clsCns;
@@ -1011,11 +891,11 @@ void Class::setParent() {
   m_attrCopy = m_preClass->attrs();
   // Handle stuff specific to cppext classes
   if (m_preClass->instanceCtor()) {
-    m_InstanceCtor = m_preClass->instanceCtor();
+    m_instanceCtor = m_preClass->instanceCtor();
     m_builtinPropSize = m_preClass->builtinPropSize();
     m_clsInfo = ClassInfo::FindSystemClassInterfaceOrTrait(nameRef());
   } else if (m_parent.get()) {
-    m_InstanceCtor = m_parent->m_InstanceCtor;
+    m_instanceCtor = m_parent->m_instanceCtor;
     m_builtinPropSize = m_parent->m_builtinPropSize;
   }
 }
@@ -1030,18 +910,37 @@ static Func* findSpecialMethod(Class* cls, const StringData* name) {
   return f;
 }
 
-void Class::setSpecial() {
-  static StringData* sd_toString = StringData::GetStaticString("__toString");
-  static StringData* sd_uuconstruct =
-    StringData::GetStaticString("__construct");
-  static StringData* sd_uudestruct =
-    StringData::GetStaticString("__destruct");
+const StaticString
+  s_toString("__toString"),
+  s_construct("__construct"),
+  s_destruct("__destruct"),
+  s_invoke("__invoke");
 
-  m_toString = lookupMethod(sd_toString);
-  m_dtor = lookupMethod(sd_uudestruct);
+void Class::setSpecial() {
+  m_toString = lookupMethod(s_toString.get());
+  m_dtor = lookupMethod(s_destruct.get());
+
+  /*
+   * The invoke method is only cached in the Class for a fast path JIT
+   * translation.  If someone defines a weird __invoke (e.g. as a
+   * static method), we don't bother caching it here so the translated
+   * code won't have to check for that case.
+   *
+   * Note that AttrStatic on a closure's __invoke Func* means it is a
+   * static closure---but the call to __invoke still works as if it
+   * were a non-static method call---so they are excluded from that
+   * here.  (The closure prologue uninstalls the $this and installs
+   * the appropriate static context.)
+   */
+  m_invoke = lookupMethod(s_invoke.get());
+  if (m_invoke &&
+      (m_invoke->attrs() & AttrStatic) &&
+       !m_invoke->isClosureBody()) {
+    m_invoke = nullptr;
+  }
 
   // Look for __construct() declared in either this class or a trait
-  Func* fConstruct = lookupMethod(sd_uuconstruct);
+  Func* fConstruct = lookupMethod(s_construct.get());
   if (fConstruct && (fConstruct->preClass() == m_preClass.get() ||
                      fConstruct->preClass()->attrs() & AttrTrait)) {
     m_ctor = fConstruct;
@@ -2127,7 +2026,7 @@ void Class::setInstanceBitsImpl() {
   // are initialized yet.
   if (m_instanceBits.test(0)) return;
 
-  InstanceBits bits;
+  InstanceBits::BitSet bits;
   bits.set(0);
   auto setBits = [&](Class* c) {
     if (setParents) c->setInstanceBitsAndParents();
@@ -2136,8 +2035,8 @@ void Class::setInstanceBitsImpl() {
   if (m_parent.get()) setBits(m_parent.get());
   for (auto& di : m_declInterfaces) setBits(di.get());
 
-  unsigned bit;
-  if (mapGet(s_instanceBits, m_preClass->name(), &bit)) {
+  // XXX: this assert fails on the initFlag; oops.
+  if (unsigned bit = InstanceBits::lookup(m_preClass->name())) {
     bits.set(bit);
   }
   m_instanceBits = bits;
@@ -2386,7 +2285,7 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
     m_data = (TypedValueAux*)realloc(m_data, size * sizeof(*m_data));
     assert(m_data);
   }
-  tvDup(v, m_data[m_size++]);
+  cellDup(v, m_data[m_size++]);
 }
 
 using Transl::TargetCache::handleToRef;
@@ -2437,7 +2336,7 @@ void Class::setSPropData(TypedValue* sPropData) const {
   handleToRef<TypedValue*>(m_propSDataCache) = sPropData;
 }
 
-void Class::getChildren(std::vector<TypedValue *> &out) {
+void Class::getChildren(std::vector<TypedValue*>& out) {
   for (Slot i = 0; i < m_staticProperties.size(); ++i) {
     if (m_staticProperties[i].m_class != this) continue;
     out.push_back(&m_staticProperties[i].m_val);
@@ -2451,4 +2350,4 @@ bool Class::isCppSerializable() const {
     (clsInfo()->getAttribute() & ClassInfo::IsCppSerializable);
 }
 
- } // HPHP::VM
+} // HPHP::VM

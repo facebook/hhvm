@@ -18,6 +18,7 @@
 #define incl_HPHP_TYPEANNOTATION_H_
 
 #include "hphp/util/base.h"
+#include "hphp/runtime/base/datatype.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -131,6 +132,17 @@ public:
    * Add a new element to this type list for this TypeAnnotation.
    */
   void appendToTypeList(TypeAnnotationPtr typeList);
+
+  /*
+   * Root datatype, ignores inner types for generics
+   *
+   * For nullable or soft types, KindOfUnknown will be returned
+   * since the annotation could represent more than one type.
+   *
+   * To get the expected type even with nullable/soft annotations
+   * pass TRUE for the optional argument.
+   */
+  DataType dataType(bool expectedType = false) const;
 
 private:
   void functionTypeName(std::string &name) const;

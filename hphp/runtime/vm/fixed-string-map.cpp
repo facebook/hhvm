@@ -28,24 +28,21 @@ class Func;
 
 static const StringData* null_key;
 
-inline bool strEqual(bool case_sensitive,
-                     const StringData* sd1, const StringData* sd2) {
+template<bool CaseSensitive>
+inline bool strEqual(const StringData* sd1, const StringData* sd2) {
   if (sd1 == sd2) return true;
-  if (sd1->size() != sd2->size()) return false;
-  return case_sensitive ?
-      (0 == memcmp(sd1->data(), sd2->data(), sd1->size())) :
-      bstrcaseeq(sd1->data(), sd2->data(), sd1->size());
+  return CaseSensitive ? sd1->same(sd2) : sd1->isame(sd2);
 }
 
-template <typename V, bool case_sensitive>
-void FixedStringMap<V, case_sensitive>::clear() {
+template<class V, bool CaseSensitive, class E>
+void FixedStringMap<V,CaseSensitive,E>::clear() {
   if (m_table != (Elm*)&null_key) free(m_table);
   m_table = nullptr;
   m_mask = 0;
 }
 
-template <typename V, bool case_sensitive>
-void FixedStringMap<V, case_sensitive>::init(int num) {
+template<class V, bool CaseSensitive, class E>
+void FixedStringMap<V,CaseSensitive,E>::init(int num) {
   if (!num) {
     m_table = (Elm*)&null_key;
     m_mask = 0;
@@ -64,8 +61,8 @@ void FixedStringMap<V, case_sensitive>::init(int num) {
   m_mask = capac - 1;
 }
 
-template <typename V, bool case_sensitive>
-void FixedStringMap<V, case_sensitive>::add(const StringData* sd, const V& v) {
+template<class V, bool CaseSensitive, class E>
+void FixedStringMap<V,CaseSensitive,E>::add(const StringData* sd, const V& v) {
   assert(sd->isStatic());
 
   Elm* elm = &m_table[sd->hash() & m_mask];
@@ -73,31 +70,31 @@ void FixedStringMap<V, case_sensitive>::add(const StringData* sd, const V& v) {
   while (elm->sd) {
     assert(numProbes++ < m_mask + 1);
     // Semantics for multiple insertion: new value wins.
-    if (strEqual(case_sensitive, elm->sd, sd)) break;
+    if (strEqual<CaseSensitive>(elm->sd, sd)) break;
     if (UNLIKELY(++elm == &m_table[m_mask + 1])) elm = m_table;
   }
   elm->sd = sd;
   elm->data = v;
 }
 
-template <typename V, bool case_sensitive>
-V* FixedStringMap<V, case_sensitive>::find(const StringData* sd) const {
+template<class V, bool CaseSensitive, class E>
+V* FixedStringMap<V,CaseSensitive,E>::find(const StringData* sd) const {
   Elm* elm = &m_table[sd->hash() & m_mask];
   UNUSED unsigned numProbes = 0;
   for(;;) {
     assert(numProbes++ < m_mask + 1);
     if (UNLIKELY(nullptr == elm->sd)) return nullptr;
-    if (strEqual(case_sensitive, elm->sd, sd)) return &elm->data;
+    if (strEqual<CaseSensitive>(elm->sd, sd)) return &elm->data;
     if (UNLIKELY(++elm == &m_table[m_mask + 1])) elm = m_table;
   }
 }
 
-template class FixedStringMap<Slot, false>;
-template class FixedStringMap<Slot, true>;
-template class FixedStringMap<Id, false>;
-template class FixedStringMap<Id, true>;
-template class FixedStringMap<Func*, false>;
-template class FixedStringMap<unsigned char* /* TCA */, true>;
+template class FixedStringMap<Slot,false,Slot>;
+template class FixedStringMap<Slot,true,Slot>;
+template class FixedStringMap<Id,false,Id>;
+template class FixedStringMap<Id,true,Id>;
+template class FixedStringMap<Func*,false,int32_t>;
+template class FixedStringMap<unsigned char* /* TCA */,true,int32_t>;
 
 ///////////////////////////////////////////////////////////////////////////////
 

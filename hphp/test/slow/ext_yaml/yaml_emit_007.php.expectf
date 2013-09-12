@@ -1,0 +1,9 @@
+string(56) "---
+a: a
+b: b
+c: &refid1
+  a: a
+  b: b
+  c: *refid1
+...
+"

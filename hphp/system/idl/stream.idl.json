@@ -355,14 +355,14 @@
                 {
                     "name": "maxlen",
                     "type": "Int32",
-                    "value": "0",
+                    "value": "-1",
                     "desc": "The maximum bytes to read. Defaults to -1 (read all the remaining buffer)."
                 },
                 {
                     "name": "offset",
                     "type": "Int32",
-                    "value": "0",
-                    "desc": "Seek to the specified offset before reading."
+                    "value": "-1",
+                    "desc": "Seek to the specified offset before reading. Defaults to -1 (don't seek)."
                 }
             ]
         },
@@ -706,7 +706,7 @@
                 {
                     "name": "timeout",
                     "type": "Double",
-                    "value": "0.0",
+                    "value": "-1.0",
                     "desc": "Override the default socket accept timeout. Time should be given in seconds."
                 },
                 {
@@ -750,7 +750,7 @@
                 {
                     "name": "flags",
                     "type": "Int32",
-                    "value": "0",
+                    "value": "k_STREAM_SERVER_BIND|k_STREAM_SERVER_LISTEN",
                     "desc": "A bitmask field which may be set to any combination of socket creation flags.\n\nFor UDP sockets, you must use STREAM_SERVER_BIND as the flags parameter."
                 },
                 {
@@ -792,7 +792,7 @@
                 {
                     "name": "timeout",
                     "type": "Double",
-                    "value": "0.0",
+                    "value": "-1.0",
                     "desc": "Number of seconds until the connect() system call should timeout. This parameter only applies when not making asynchronous connection attempts.\n\nTo set a timeout for reading\/writing data over the socket, use the stream_set_timeout(), as the timeout only applies while making connecting the socket."
                 },
                 {
@@ -919,9 +919,10 @@
                 },
                 {
                     "name": "address",
-                    "type": "String",
-                    "value": "null_string",
-                    "desc": "If address is provided it will be populated with the address of the remote socket."
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "If address is provided it will be populated with the address of the remote socket.",
+                    "ref": true
                 }
             ]
         },

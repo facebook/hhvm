@@ -1,0 +1,3 @@
+bool(true)
+HipHop Warning: Constant foo already defined in %s/test/slow/constant/1603.php on line 4
+bool(false)

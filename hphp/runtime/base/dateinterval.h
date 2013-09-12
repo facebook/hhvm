@@ -63,7 +63,7 @@ typedef boost::shared_ptr<timelib_rel_time> DateIntervalPtr;
  */
 class DateInterval : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(DateInterval);
+  DECLARE_RESOURCE_ALLOCATION(DateInterval);
   static StaticString s_class_name;
   CStrRef o_getClassNameHook() const { return s_class_name; }
 

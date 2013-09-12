@@ -1,0 +1,2 @@
+HipHop Fatal error: Call to undefined method a1::foo from context b1 in %s/test/slow/call_static/1894.php on line 10
+string(7) "errored"

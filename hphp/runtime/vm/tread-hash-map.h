@@ -200,7 +200,7 @@ private:
     Table* old = m_table;
 
     // 75% occupancy, avoiding the FPU.
-    if (LIKELY(old->size < (old->capac / 4 + old->capac / 2))) {
+    if (LIKELY((old->size) < (old->capac / 4 + old->capac / 2))) {
       return old;
     }
 

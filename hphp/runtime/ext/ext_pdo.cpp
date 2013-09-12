@@ -21,6 +21,7 @@
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/string-buffer.h"
@@ -590,7 +591,7 @@ static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
   object->o_set("queryString", stmt->query_string);
   TypedValue ret;
   ObjectData* inst = object.get();
-  inst->invokeUserMethod(&ret, cls->getCtor(), ctor_args.toArray());
+  g_vmContext->invokeFunc(&ret, cls->getCtor(), ctor_args.toArray(), inst);
   tvRefcountedDecRef(&ret);
 }
 
@@ -653,10 +654,10 @@ static bool pdo_stmt_describe_columns(sp_PDOStatement stmt) {
         stmt->dbh->desired_case != PDO_CASE_NATURAL) {
       switch (stmt->dbh->desired_case) {
       case PDO_CASE_UPPER:
-        name = StringUtil::ToUpper(name);
+        name = f_strtoupper(name);
         break;
       case PDO_CASE_LOWER:
-        name = StringUtil::ToLower(name);
+        name = f_strtolower(name);
         break;
       default:;
       }
@@ -2076,7 +2077,7 @@ static int scan(Scanner *s) {
 {
   YYCTYPE yych;
 
-  if ((YYLIMIT - YYCURSOR) < 2) YYFILL(2);
+  if ((YYLIMIT - YYCURSOR) < 2) { YYFILL(2); }
   yych = *YYCURSOR;
   switch (yych) {
   case 0x00:  goto yy11;
@@ -2176,7 +2177,7 @@ yy7:
   { RET(PDO_PARSER_BIND_POS); }
 yy8:
   ++YYCURSOR;
-  if (YYLIMIT <= YYCURSOR) YYFILL(1);
+  if (YYLIMIT <= YYCURSOR) { YYFILL(1); }
   yych = *YYCURSOR;
   switch (yych) {
   case 0x00:
@@ -2193,7 +2194,7 @@ yy11:
   { RET(PDO_PARSER_EOI); }
 yy13:
   ++YYCURSOR;
-  if (YYLIMIT <= YYCURSOR) YYFILL(1);
+  if (YYLIMIT <= YYCURSOR) { YYFILL(1); }
   yych = *YYCURSOR;
   switch (yych) {
   case ':':
@@ -2204,7 +2205,7 @@ yy15:
   { RET(PDO_PARSER_TEXT); }
 yy16:
   ++YYCURSOR;
-  if (YYLIMIT <= YYCURSOR) YYFILL(1);
+  if (YYLIMIT <= YYCURSOR) { YYFILL(1); }
   yych = *YYCURSOR;
   switch (yych) {
   case '0':
@@ -2276,7 +2277,7 @@ yy18:
   { RET(PDO_PARSER_BIND); }
 yy19:
   ++YYCURSOR;
-  if (YYLIMIT <= YYCURSOR) YYFILL(1);
+  if (YYLIMIT <= YYCURSOR) { YYFILL(1); }
   yych = *YYCURSOR;
 yy20:
   switch (yych) {
@@ -2290,7 +2291,7 @@ yy21:
   goto yy3;
 yy22:
   ++YYCURSOR;
-  if (YYLIMIT <= YYCURSOR) YYFILL(1);
+  if (YYLIMIT <= YYCURSOR) { YYFILL(1); }
   yych = *YYCURSOR;
   if (yych <= 0x00) goto yy21;
   goto yy19;
@@ -2299,7 +2300,7 @@ yy23:
   { RET(PDO_PARSER_TEXT); }
 yy25:
   ++YYCURSOR;
-  if (YYLIMIT <= YYCURSOR) YYFILL(1);
+  if (YYLIMIT <= YYCURSOR) { YYFILL(1); }
   yych = *YYCURSOR;
 yy26:
   switch (yych) {
@@ -2310,7 +2311,7 @@ yy26:
   }
 yy27:
   ++YYCURSOR;
-  if (YYLIMIT <= YYCURSOR) YYFILL(1);
+  if (YYLIMIT <= YYCURSOR) { YYFILL(1); }
   yych = *YYCURSOR;
   if (yych <= 0x00) goto yy21;
   goto yy25;

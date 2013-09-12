@@ -124,7 +124,7 @@ int ClosureExpression::getKidCount() const {
 void ClosureExpression::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_values = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      m_values = dynamic_pointer_cast<ExpressionList>(cp);
       break;
     default:
       assert(false);

@@ -171,6 +171,7 @@ static int getNextTokenType(int t) {
 %x ST_END_HEREDOC
 %x ST_LOOKING_FOR_PROPERTY
 %x ST_LOOKING_FOR_VARNAME
+%x ST_LOOKING_FOR_COLON
 %x ST_VAR_OFFSET
 %x ST_LT_CHECK
 %x ST_COMMENT
@@ -196,7 +197,7 @@ TOKENS [;:,.\[\]()|^&+\-*/=%!~$<>?@]
 ANY_CHAR (.|[\n])
 NEWLINE ("\r"|"\n"|"\r\n")
 XHPLABEL {LABEL}([:-]{LABEL})*
-COMMENT_REGEX ([\/][\*]([^\*]|(\*[^/]))*[\*][\/]|"//"[^\r\n]*{NEWLINE})
+COMMENT_REGEX ("/*"([^\*]|("*"[^/]))*"*/"|("//"|"#")[^\r\n]*{NEWLINE})
 WHITESPACE_AND_COMMENTS ([ \n\r\t]|({COMMENT_REGEX}))+
 
 /*
@@ -226,7 +227,6 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"const"                { RETTOKEN(T_CONST);}
 <ST_IN_SCRIPTING>"return"               { RETTOKEN(T_RETURN); }
 <ST_IN_SCRIPTING>"yield"                { RETTOKEN(T_YIELD);}
-<ST_IN_SCRIPTING>"await"                { RETTOKEN(T_AWAIT);}
 <ST_IN_SCRIPTING>"try"                  { RETTOKEN(T_TRY);}
 <ST_IN_SCRIPTING>"catch"                { RETTOKEN(T_CATCH);}
 <ST_IN_SCRIPTING>"finally"              { RETTOKEN(T_FINALLY);}
@@ -354,12 +354,6 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
   RETSTEP('(');
 }
 
-<ST_IN_SCRIPTING>"async"/{WHITESPACE_AND_COMMENTS}"function" {
-  // 'async' is parsed to T_ASYNC only in front of 'function' to allow consts
-  // named 'async'. As soon as there are no such consts, this should be removed
-  RETTOKEN(T_ASYNC);
-}
-
 <ST_IN_SCRIPTING>"eval"               { RETTOKEN(T_EVAL);}
 <ST_IN_SCRIPTING>"include"            { RETTOKEN(T_INCLUDE);}
 <ST_IN_SCRIPTING>"include_once"       { RETTOKEN(T_INCLUDE_ONCE);}
@@ -411,9 +405,32 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"shape"              { HH_ONLY_KEYWORD(T_SHAPE); }
 <ST_IN_SCRIPTING>"type"               { HH_ONLY_KEYWORD(T_UNRESOLVED_TYPE); }
 <ST_IN_SCRIPTING>"newtype"            { HH_ONLY_KEYWORD(T_UNRESOLVED_NEWTYPE); }
+<ST_IN_SCRIPTING>"await"              { HH_ONLY_KEYWORD(T_AWAIT);}
+<ST_IN_SCRIPTING>"async"/{WHITESPACE_AND_COMMENTS}[a-zA-Z0-9_\x7f-\xff] {
+  HH_ONLY_KEYWORD(T_ASYNC);
+}
 
 <ST_IN_SCRIPTING>"tuple"/("("|{WHITESPACE_AND_COMMENTS}"(") {
   HH_ONLY_KEYWORD(T_TUPLE);
+}
+
+<ST_IN_SCRIPTING>"?"/":"[a-zA-Z_\x7f-\xff] {
+  int ntt = getNextTokenType(_scanner->lastToken());
+  if (!_scanner->isXHPSyntaxEnabled() ||
+      ((ntt & NextTokenType::XhpClassName) && _scanner->lastToken() != '}')) {
+    RETSTEP('?');
+  }
+  /* If XHP is enabled and "?:" occurs in a place where an XHP class name is
+     not expected or it occurs after "}", drop into the ST_LOOKING_FOR_COLON
+     state to avoid potentially treating ":" as the beginning of an XHP class
+     name */
+  BEGIN(ST_LOOKING_FOR_COLON);
+  RETSTEP('?');
+}
+
+<ST_LOOKING_FOR_COLON>":" {
+  BEGIN(ST_IN_SCRIPTING);
+  RETSTEP(':');
 }
 
 <ST_IN_SCRIPTING>"..." {
@@ -522,6 +539,24 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         STEPPOS(T_DOLLAR_OPEN_CURLY_BRACES);
         yy_push_state(ST_LOOKING_FOR_VARNAME, yyscanner);
         return T_DOLLAR_OPEN_CURLY_BRACES;
+}
+
+<ST_IN_SCRIPTING>"}"/":"[a-zA-Z_\x7f-\xff] {
+        STEPPOS('}');
+        // We need to be robust against a '}' in PHP code with
+        // no corresponding '{'
+        struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+        if (yyg->yy_start_stack_ptr) {
+          yy_pop_state(yyscanner);
+          if (YY_START == ST_IN_SCRIPTING) {
+            /* If XHP is enabled and "}:" occurs (and "}" does not cause us
+               to transition to some state other than ST_IN_SCRIPTING), drop
+               into the ST_LOOKING_FOR_COLON state to avoid potentially
+               treating ":" as the beginning of an XHP class name */
+            BEGIN(ST_LOOKING_FOR_COLON);
+          }
+        }
+        return '}';
 }
 
 <ST_IN_SCRIPTING>"}" {

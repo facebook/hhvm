@@ -59,14 +59,14 @@ using std::map;
 MethodStatement::MethodStatement
 (STATEMENT_CONSTRUCTOR_BASE_PARAMETERS,
  ModifierExpressionPtr modifiers, bool ref, const string &name,
- ExpressionListPtr params, const std::string &retTypeConstraint,
+ ExpressionListPtr params, TypeAnnotationPtr retTypeAnnotation,
  StatementListPtr stmt, int attr, const string &docComment,
  ExpressionListPtr attrList, bool method /* = true */)
   : Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES),
     m_method(method), m_ref(ref), m_hasCallToGetArgs(false), m_attribute(attr),
     m_cppLength(-1), m_modifiers(modifiers),
     m_originalName(name), m_params(params),
-    m_retTypeConstraint(retTypeConstraint), m_stmt(stmt),
+    m_retTypeAnnotation(retTypeAnnotation), m_stmt(stmt),
     m_docComment(docComment), m_attrList(attrList) {
   m_name = Util::toLower(name);
   checkParameters();
@@ -75,14 +75,14 @@ MethodStatement::MethodStatement
 MethodStatement::MethodStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  ModifierExpressionPtr modifiers, bool ref, const string &name,
- ExpressionListPtr params, const std::string &retTypeConstraint,
+ ExpressionListPtr params, TypeAnnotationPtr retTypeAnnotation,
  StatementListPtr stmt,
  int attr, const string &docComment, ExpressionListPtr attrList,
  bool method /* = true */)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(MethodStatement)),
     m_method(method), m_ref(ref), m_hasCallToGetArgs(false), m_attribute(attr),
     m_cppLength(-1), m_modifiers(modifiers), m_originalName(name),
-    m_params(params), m_retTypeConstraint(retTypeConstraint),
+    m_params(params), m_retTypeAnnotation(retTypeAnnotation),
     m_stmt(stmt), m_docComment(docComment), m_attrList(attrList) {
   m_name = Util::toLower(name);
   checkParameters();
@@ -184,16 +184,25 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
   setBlockScope(funcScope);
 
   funcScope->setParamCounts(ar, -1, -1);
+
+  if (funcScope->isNative()) {
+    funcScope->setReturnType(ar,
+                             Type::GetType(m_retTypeAnnotation->dataType()));
+  }
+
   return funcScope;
 }
 
 void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
                                    ClassScopePtr classScope) {
 
+  FunctionScopeRawPtr fs = getFunctionScope();
+  const bool isNative = fs->isNative();
   if (m_modifiers) {
     if (classScope->isInterface()) {
       if (m_modifiers->isProtected() || m_modifiers->isPrivate() ||
-          m_modifiers->isAbstract()  || m_modifiers->isFinal()) {
+          m_modifiers->isAbstract()  || m_modifiers->isFinal() ||
+          isNative) {
         m_modifiers->parseTimeFatal(
           Compiler::InvalidAttribute,
           "Access type for interface method %s::%s() must be omitted",
@@ -201,13 +210,14 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
       }
     }
     if (m_modifiers->isAbstract()) {
-      if (m_modifiers->isPrivate() || m_modifiers->isFinal()) {
+      if (m_modifiers->isPrivate() || m_modifiers->isFinal() || isNative) {
         m_modifiers->parseTimeFatal(
           Compiler::InvalidAttribute,
           "Cannot declare abstract method %s::%s() %s",
           classScope->getOriginalName().c_str(),
           getOriginalName().c_str(),
-          m_modifiers->isPrivate() ? "private" : "final");
+          m_modifiers->isPrivate() ? "private" :
+           (m_modifiers->isFinal() ? "final" : "native"));
       }
       if (!classScope->isInterface() && !classScope->isAbstract()) {
         /* note that classScope->isAbstract() returns true for traits */
@@ -224,16 +234,28 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
                        getOriginalName().c_str());
       }
     }
+    if (isNative) {
+      if (getStmts()) {
+        parseTimeFatal(Compiler::InvalidAttribute,
+                       "Native method %s::%s() cannot contain body",
+                       classScope->getOriginalName().c_str(),
+                       getOriginalName().c_str());
+      }
+      if (!m_retTypeAnnotation) {
+        parseTimeFatal(Compiler::InvalidAttribute,
+                       "Native method %s::%s() must have a return type hint",
+                       classScope->getOriginalName().c_str(),
+                       getOriginalName().c_str());
+      }
+    }
   }
   if ((!m_modifiers || !m_modifiers->isAbstract()) &&
-      !getStmts() && !classScope->isInterface()) {
+      !getStmts() && !classScope->isInterface() && !isNative) {
     parseTimeFatal(Compiler::InvalidAttribute,
                    "Non-abstract method %s::%s() must contain body",
                    classScope->getOriginalName().c_str(),
                    getOriginalName().c_str());
   }
-
-  FunctionScopeRawPtr fs = getFunctionScope();
 
   classScope->addFunction(ar, fs);
 
@@ -251,6 +273,10 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
       ParameterExpressionPtr param =
         dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
       param->parseHandler(classScope);
+      if (isNative && !param->hasUserType()) {
+        parseTimeFatal(Compiler::InvalidAttribute,
+                       "Native method calls must have type hints on all args");
+      }
     }
   }
   FunctionScope::RecordFunctionInfo(m_name, fs);
@@ -450,13 +476,13 @@ int MethodStatement::getKidCount() const {
 void MethodStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_modifiers = boost::dynamic_pointer_cast<ModifierExpression>(cp);
+      m_modifiers = dynamic_pointer_cast<ModifierExpression>(cp);
       break;
     case 1:
-      m_params = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      m_params = dynamic_pointer_cast<ExpressionList>(cp);
       break;
     case 2:
-      m_stmt = boost::dynamic_pointer_cast<StatementList>(cp);
+      m_stmt = dynamic_pointer_cast<StatementList>(cp);
       break;
     default:
       assert(false);

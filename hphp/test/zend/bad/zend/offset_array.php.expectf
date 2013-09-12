@@ -7,7 +7,7 @@ NULL
 int(2)
 int(1)
 
-Strict Standards: Resource ID#%d used as offset, casting to integer (%d) in hphp/test/zend/bad/zend/offset_array.phpt on line %d
+Strict Standards: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 int(%d)
 HipHop Warning: %s
 NULL

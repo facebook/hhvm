@@ -2,7 +2,7 @@
 
 -- Testing gmmktime() function with more than expected no. of arguments --
 
-Deprecated: gmmktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/gmmktime_error.phpt on line %d
+Deprecated: gmmktime(): The is_dst parameter is deprecated in %s on line %d
 int(1218182888)
 HipHop Warning: %s
 bool(false)

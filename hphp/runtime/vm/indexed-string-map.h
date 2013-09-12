@@ -43,17 +43,22 @@ template<class T,
 struct IndexedStringMap {
   struct Builder;
 
-  explicit IndexedStringMap() : m_vec(0), m_size(0) {}
+  explicit IndexedStringMap() : m_vec(0) {
+    setSize(0);
+  }
 
   ~IndexedStringMap() {
     delete [] m_vec;
   }
 
+  IndexedStringMap(const IndexedStringMap&) = delete;
+  IndexedStringMap& operator=(const IndexedStringMap&) = delete;
+
   void clear() {
     delete [] m_vec;
     m_vec = nullptr;
     m_map.clear();
-    m_size = 0;
+    setSize(0);
   }
 
   /*
@@ -61,7 +66,7 @@ struct IndexedStringMap {
    * builder below.
    */
   void create(const Builder& b) {
-    assert(!m_size && "IndexedStringMap::create called more than once");
+    assert(!size() && "IndexedStringMap::create called more than once");
     m_map.init(b.size());
     if (!b.size()) {
       assert(!m_vec);
@@ -71,7 +76,7 @@ struct IndexedStringMap {
       return;
     }
     m_vec = new T[b.size()];
-    m_size = b.size();
+    setSize(b.size());
 
     std::copy(b.m_list.begin(), b.m_list.end(), m_vec);
     for (typename Builder::const_iterator it = b.begin();
@@ -82,7 +87,8 @@ struct IndexedStringMap {
   }
 
   bool contains(const StringData* k) const { return m_map.find(k); }
-  Index size() const { return m_size; }
+  Index size() const { return m_map.extra(); }
+  bool empty() const { return size() != 0; }
   const T* accessList() const { return m_vec; }
   T* mutableAccessList() { return m_vec; }
 
@@ -113,18 +119,14 @@ struct IndexedStringMap {
   }
 
 public:
-  static size_t vecOff() { return offsetof(IndexedStringMap, m_vec); }
-  static size_t sizeOff() { return offsetof(IndexedStringMap, m_size); }
+  static ptrdiff_t vecOff() { return offsetof(IndexedStringMap, m_vec); }
 
 private:
-  typedef FixedStringMap<Index,CaseSensitive> Map;
+  void setSize(Index size) { m_map.extra() = size; }
 
-  IndexedStringMap(const IndexedStringMap&);
-  IndexedStringMap& operator=(const IndexedStringMap&);
-
+private:
   T* m_vec;
-  Index m_size;
-  Map m_map;
+  FixedStringMap<Index,CaseSensitive,Index> m_map;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -297,6 +297,22 @@ public:
   EXCEPTION_COMMON_IMPL(PhpFileDoesNotExistException);
 };
 
+class RequestTimeoutException : public FatalErrorException {
+public:
+  RequestTimeoutException(const std::string &msg, const Array& backtrace)
+    : FatalErrorException(msg, backtrace) {}
+  virtual ~RequestTimeoutException() throw() {}
+  EXCEPTION_COMMON_IMPL(RequestTimeoutException);
+};
+
+class RequestMemoryExceededException : public FatalErrorException {
+public:
+  RequestMemoryExceededException(const std::string &msg, const Array& backtrace)
+    : FatalErrorException(msg, backtrace) {}
+  virtual ~RequestMemoryExceededException() throw() {}
+  EXCEPTION_COMMON_IMPL(RequestMemoryExceededException);
+};
+
 void throw_null_pointer_exception() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
 ///////////////////////////////////////////////////////////////////////////////

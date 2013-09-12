@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/ext_process.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/thread-init-fini.h"
@@ -466,8 +467,7 @@ String f_exec(CStrRef command, VRefParam output /* = null */,
     return String();
   }
 
-  return StringUtil::Trim(lines[count - 1].toString(),
-                          StringUtil::TrimType::Right);
+  return f_rtrim(lines[count - 1].toString());
 }
 
 void f_passthru(CStrRef command, VRefParam return_var /* = null */) {
@@ -514,8 +514,7 @@ String f_system(CStrRef command, VRefParam return_var /* = null */) {
     return String();
   }
 
-  return StringUtil::Trim(lines[count - 1].toString(),
-                          StringUtil::TrimType::Right);
+  return f_rtrim(lines[count - 1].toString());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -523,7 +522,7 @@ String f_system(CStrRef command, VRefParam return_var /* = null */) {
 
 class ChildProcess : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(ChildProcess)
+  DECLARE_RESOURCE_ALLOCATION(ChildProcess)
 
   pid_t child;
   Array pipes;

@@ -361,7 +361,9 @@ bool LightProcess::initShadow(const std::string &prefix, int id,
   afdt_error_t err;
   m_afdt_lfd = afdt_listen(m_afdtFilename.c_str(), &err);
   if (m_afdt_lfd < 0) {
-    Logger::Warning("Unable to afdt_listen");
+    Logger::Warning("Unable to afdt_listen to %s: %d %s",
+                    m_afdtFilename.c_str(),
+                    errno, folly::errnoStr(errno).c_str());
     return false;
   }
 
@@ -380,10 +382,11 @@ bool LightProcess::initShadow(const std::string &prefix, int id,
       Logger::Warning("Unable to setsid");
       exit(-1);
     }
-    m_afdt_fd =
-      afdt_connect(m_afdtFilename.c_str(), &err);
+    m_afdt_fd = afdt_connect(m_afdtFilename.c_str(), &err);
     if (m_afdt_fd < 0) {
-      Logger::Warning("Unable to afdt_connect");
+      Logger::Warning("Unable to afdt_connect, filename %s: %d %s",
+                      m_afdtFilename.c_str(),
+                      errno, folly::errnoStr(errno).c_str());
       exit(-1);
     }
     int fd1 = p1.detachOut();
@@ -412,10 +415,11 @@ bool LightProcess::initShadow(const std::string &prefix, int id,
     m_shadowProcess = child;
 
     sockaddr addr;
-    socklen_t addrlen;
+    socklen_t addrlen = sizeof(addr);
     m_afdt_fd = accept(m_afdt_lfd, &addr, &addrlen);
     if (m_afdt_fd < 0) {
-      Logger::Warning("Unable to establish afdt connection");
+      Logger::Warning("Unable to establish afdt connection: %d %s",
+                      errno, folly::errnoStr(errno).c_str());
       closeShadow();
       return false;
     }

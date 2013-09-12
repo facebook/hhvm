@@ -19,12 +19,12 @@
 
 namespace HPHP {
 
-inline ALWAYS_INLINE Func** getCachedFuncAddr(unsigned offset) {
+ALWAYS_INLINE Func** getCachedFuncAddr(unsigned offset) {
   assert(offset != 0u);
   return (Func**)Transl::TargetCache::handleToPtr(offset);
 }
 
-inline ALWAYS_INLINE void setCachedFunc(Func* func, bool debugger) {
+ALWAYS_INLINE void setCachedFunc(Func* func, bool debugger) {
   assert(!func->isMethod());
   Func** funcAddr = getCachedFuncAddr(func->getCachedOffset());
   if (UNLIKELY(*funcAddr != nullptr)) {

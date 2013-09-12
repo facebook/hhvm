@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_LIBMEMCACHED_PORTABILITY_H_
 #define incl_HPHP_EXT_LIBMEMCACHED_PORTABILITY_H_
 
-#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x01000009
+#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x01000017
 
 #define LMCD_SERVER_BY_KEY_INSTANCE_TYPE   const memcached_instance_st*
 #define LMCD_SERVER_CALLBACK_INSTANCE_TYPE const memcached_instance_st*
@@ -30,9 +30,18 @@
 #define LMCD_SERVER_HOSTNAME(server)      memcached_server_name(server)
 #define LMCD_SERVER_PORT(server)          memcached_server_port(server)
 
-#elif defined(LIBMEMCACHED_VERSION_HEX) && \
-      LIBMEMCACHED_VERSION_HEX == 0x01000008
-#error libmemcached 1.0.8 is unsupported, either upgrade or downgrade
+#elif defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX>=0x01000009
+
+#define LMCD_SERVER_BY_KEY_INSTANCE_TYPE   const memcached_server_instance_st
+#define LMCD_SERVER_CALLBACK_INSTANCE_TYPE memcached_server_instance_st
+#define LMCD_SERVER_POSITION_INSTANCE_TYPE memcached_server_instance_st
+
+#define LMCD_SERVER_MAJOR_VERSION(server) memcached_server_major_version(server)
+#define LMCD_SERVER_MINOR_VERSION(server) memcached_server_minor_version(server)
+#define LMCD_SERVER_MICRO_VERSION(server) memcached_server_micro_version(server)
+#define LMCD_SERVER_HOSTNAME(server)      memcached_server_name(server)
+#define LMCD_SERVER_PORT(server)          memcached_server_port(server)
+
 #else
 
 #define LMCD_SERVER_BY_KEY_INSTANCE_TYPE   const memcached_server_instance_st

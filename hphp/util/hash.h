@@ -18,6 +18,7 @@
 #define incl_HPHP_HASH_H_
 
 #include <stdint.h>
+#include <cstring>
 
 #include "hphp/util/util.h"
 
@@ -68,16 +69,16 @@ const bool useHash128 = true;
 #define ROTL64(x,y) rotl64(x,y)
 #define BIG_CONSTANT(x) (x##LLU)
 
-inline ALWAYS_INLINE uint64_t rotl64(uint64_t x, int8_t r) {
+ALWAYS_INLINE uint64_t rotl64(uint64_t x, int8_t r) {
   return (x << r) | (x >> (64 - r));
 }
 
-inline ALWAYS_INLINE uint32_t rotl32(uint32_t x, int8_t r) {
+ALWAYS_INLINE uint32_t rotl32(uint32_t x, int8_t r) {
   return (x << r) | (x >> (32 - r));
 }
 
 template <bool caseSensitive>
-inline ALWAYS_INLINE uint64_t getblock64(const uint64_t *p, int i) {
+ALWAYS_INLINE uint64_t getblock64(const uint64_t *p, int i) {
   uint64_t block = p[i];
   if (!caseSensitive) {
     block &= 0xdfdfdfdfdfdfdfdfLLU; // a-z => A-Z
@@ -86,7 +87,7 @@ inline ALWAYS_INLINE uint64_t getblock64(const uint64_t *p, int i) {
 }
 
 template <bool caseSensitive>
-inline ALWAYS_INLINE uint32_t getblock32(const uint32_t *p, int i) {
+ALWAYS_INLINE uint32_t getblock32(const uint32_t *p, int i) {
   uint32_t block = p[i];
   if (!caseSensitive) {
     block &= 0xdfdfdfdfU; // a-z => A-Z
@@ -95,7 +96,7 @@ inline ALWAYS_INLINE uint32_t getblock32(const uint32_t *p, int i) {
 }
 
 template <bool caseSensitive>
-inline ALWAYS_INLINE uint8_t getblock8(const uint8_t *p, int i) {
+ALWAYS_INLINE uint8_t getblock8(const uint8_t *p, int i) {
   uint8_t block = p[i];
   if (!caseSensitive) {
     block &= 0xdfU; // a-z => A-Z
@@ -105,7 +106,7 @@ inline ALWAYS_INLINE uint8_t getblock8(const uint8_t *p, int i) {
 
 //-----------------------------------------------------------------------------
 // Finalization mix - force all bits of a hash block to avalanche
-inline ALWAYS_INLINE uint64_t fmix64(uint64_t k) {
+ALWAYS_INLINE uint64_t fmix64(uint64_t k) {
   k ^= k >> 33;
   k *= BIG_CONSTANT(0xff51afd7ed558ccd);
   k ^= k >> 33;
@@ -114,7 +115,7 @@ inline ALWAYS_INLINE uint64_t fmix64(uint64_t k) {
   return k;
 }
 
-inline ALWAYS_INLINE uint32_t fmix32(uint32_t h) {
+ALWAYS_INLINE uint32_t fmix32(uint32_t h) {
   h ^= h >> 16;
   h *= 0x85ebca6b;
   h ^= h >> 13;
@@ -124,8 +125,7 @@ inline ALWAYS_INLINE uint32_t fmix32(uint32_t h) {
 }
 
 template <bool caseSensitive>
-inline ALWAYS_INLINE uint32_t hash32(const void *key, size_t len,
-                                     uint32_t seed) {
+ALWAYS_INLINE uint32_t hash32(const void *key, size_t len, uint32_t seed) {
   const uint8_t *data = (const uint8_t *)key;
   const size_t nblocks = len / 4;
   uint32_t h1 = seed;
@@ -167,8 +167,8 @@ inline ALWAYS_INLINE uint32_t hash32(const void *key, size_t len,
 // Optimized for 64-bit architectures.  MurmurHash3 also implements a 128-bit
 // hash that is optimized for 32-bit architectures (omitted here).
 template <bool caseSensitive>
-inline ALWAYS_INLINE void hash128(const void *key, size_t len, uint64_t seed,
-                                  uint64_t out[2]) {
+ALWAYS_INLINE void hash128(const void *key, size_t len, uint64_t seed,
+                           uint64_t out[2]) {
   const uint8_t *data = (const uint8_t *)key;
   const size_t nblocks = len / 16;
   uint64_t h1 = seed;

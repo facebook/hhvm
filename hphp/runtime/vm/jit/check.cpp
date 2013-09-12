@@ -213,7 +213,7 @@ bool checkCfg(IRTrace* trace, const IRFactory& factory) {
 
   // visit dom tree in preorder, checking all tmps
   auto const children = findDomChildren(blocks);
-  StateVector<SSATmp, bool> defined0(&factory, false);
+  StateVector<SSATmp, bool> defined0(factory, false);
   forPreorderDoms(blocks.front(), children, defined0,
                   [] (Block* block, StateVector<SSATmp, bool>& defined) {
     for (IRInstruction& inst : *block) {
@@ -252,7 +252,7 @@ bool checkTmpsSpanningCalls(IRTrace* trace, const IRFactory& irFactory) {
 
   bool isValid = true;
   forPreorderDoms(
-    blocks.front(), children, State(&irFactory, false),
+    blocks.front(), children, State(irFactory, false),
     [&] (Block* b, State& state) {
       for (auto& inst : *b) {
         for (auto& src : inst.srcs()) {
@@ -272,11 +272,13 @@ bool checkTmpsSpanningCalls(IRTrace* trace, const IRFactory& irFactory) {
           if (src->isA(Type::FramePtr)) continue;
           if (src->isConst()) continue;
           if (!state[src]) {
-            FTRACE(1, "checkTmpsSpanningCalls failed\n"
-                      "  instruction: {}\n"
-                      "  src:         {}\n",
-                      inst.toString(),
-                      src->toString());
+            auto msg = folly::format("checkTmpsSpanningCalls failed\n"
+                                     "  instruction: {}\n"
+                                     "  src:         {}\n",
+                                     inst.toString(),
+                                     src->toString()).str();
+            std::cerr << msg;
+            FTRACE(1, "{}", msg);
             isValid = false;
           }
         }
@@ -304,8 +306,8 @@ bool checkRegisters(IRTrace* trace, const IRFactory& factory,
   assert(checkCfg(trace, factory));
 
   auto blocks = rpoSortCfg(trace, factory);
-  StateVector<Block, RegState> states(&factory, RegState());
-  StateVector<Block, bool> reached(&factory, false);
+  StateVector<Block, RegState> states(factory, RegState());
+  StateVector<Block, bool> reached(factory, false);
   for (auto* block : blocks) {
     RegState state = states[block];
     for (IRInstruction& inst : *block) {

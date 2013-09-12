@@ -32,7 +32,6 @@
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/member-operations.h"
-#include "hphp/runtime/vm/object-allocator-sizes.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
 
@@ -106,7 +105,7 @@ void ObjectData::destruct() {
 // class info
 
 CStrRef ObjectData::o_getClassName() const {
-  return *(const String*)(&m_cls->m_preClass->nameRef());
+  return *(const String*)(&m_cls->preClass()->nameRef());
 }
 
 HOT_FUNC
@@ -267,7 +266,7 @@ Variant ObjectData::o_get(CStrRef propName, bool error /* = true */,
 }
 
 template <class T>
-inline ALWAYS_INLINE Variant ObjectData::o_setImpl(CStrRef propName, T v,
+ALWAYS_INLINE Variant ObjectData::o_setImpl(CStrRef propName, T v,
                                                    CStrRef context) {
   if (UNLIKELY(!*propName.data())) {
     throw_invalid_property_name(propName);
@@ -358,9 +357,9 @@ void ObjectData::o_getArray(Array& props, bool pubOnly /* = false */) const {
   // Iterate over declared properties and insert {mangled name --> prop} pairs.
   const Class* cls = m_cls;
   do {
-    getProps(cls, pubOnly, cls->m_preClass.get(), props, inserted);
-    for (auto const& trait : cls->m_usedTraits) {
-      getProps(cls, pubOnly, trait->m_preClass.get(), props, inserted);
+    getProps(cls, pubOnly, cls->preClass(), props, inserted);
+    for (auto const& trait : cls->usedTraits()) {
+      getProps(cls, pubOnly, trait->preClass(), props, inserted);
     }
     cls = cls->parent();
   } while (cls);
@@ -377,20 +376,20 @@ Array ObjectData::o_toArray() const {
   // We can quickly tell if this object is a collection, which lets us avoid
   // checking for each class in turn if it's not one.
   if (isCollection()) {
-    // The collection classes are final and have no parent, so direct comparison
-    // of their m_cls is okay
-    if (m_cls == c_Vector::s_cls) {
+    if (instanceof(c_Vector::s_cls)) {
       return c_Vector::ToArray(this);
-    } else if (m_cls == c_Map::s_cls) {
+    } else if (instanceof(c_Map::s_cls)) {
       return c_Map::ToArray(this);
-    } else if (m_cls == c_StableMap::s_cls) {
+    } else if (instanceof(c_StableMap::s_cls)) {
       return c_StableMap::ToArray(this);
-    } else if (m_cls == c_Set::s_cls) {
+    } else if (instanceof(c_Set::s_cls)) {
       return c_Set::ToArray(this);
-    } else if (m_cls == c_Pair::s_cls) {
+    } else if (instanceof(c_Pair::s_cls)) {
       return c_Pair::ToArray(this);
     }
-    not_reached();
+    // It's undefined what happens if you reach not_reached. We want to be sure
+    // to hard fail if we get here.
+    always_assert(false);
   } else if (UNLIKELY(getAttribute(CallToImpl))) {
     // If we end up with other classes that need special behavior, turn the
     // assert into an if and add cases.
@@ -405,7 +404,7 @@ Array ObjectData::o_toArray() const {
 
 Array ObjectData::o_toIterArray(CStrRef context,
                                 bool getRef /* = false */) {
-  size_t size = m_cls->m_declPropNumAccessible +
+  size_t size = m_cls->declPropNumAccessible() +
                 (o_properties.get() ? o_properties.get()->size() : 0);
   auto retval = ArrayData::Make(size);
   Class* ctx = nullptr;
@@ -417,8 +416,8 @@ Array ObjectData::o_toIterArray(CStrRef context,
   // hierarchy, in declaration order.
   const Class* klass = m_cls;
   while (klass) {
-    const PreClass::Prop* props = klass->m_preClass->properties();
-    const size_t numProps = klass->m_preClass->numProperties();
+    const PreClass::Prop* props = klass->preClass()->properties();
+    const size_t numProps = klass->preClass()->numProperties();
 
     for (size_t i = 0; i < numProps; ++i) {
       auto key = const_cast<StringData*>(props[i].name());
@@ -534,19 +533,19 @@ Variant ObjectData::o_invoke_few_args(CStrRef s, int count,
   switch(count) {
     default: not_implemented();
 #if INVOKE_FEW_ARGS_COUNT > 6
-    case 10: tvDup(*a9.asTypedValue(), args[9]);
-    case  9: tvDup(*a8.asTypedValue(), args[8]);
-    case  8: tvDup(*a7.asTypedValue(), args[7]);
-    case  7: tvDup(*a6.asTypedValue(), args[6]);
+    case 10: tvCopy(*a9.asTypedValue(), args[9]);
+    case  9: tvCopy(*a8.asTypedValue(), args[8]);
+    case  8: tvCopy(*a7.asTypedValue(), args[7]);
+    case  7: tvCopy(*a6.asTypedValue(), args[6]);
 #endif
 #if INVOKE_FEW_ARGS_COUNT > 3
-    case  6: tvDup(*a5.asTypedValue(), args[5]);
-    case  5: tvDup(*a4.asTypedValue(), args[4]);
-    case  4: tvDup(*a3.asTypedValue(), args[3]);
+    case  6: tvCopy(*a5.asTypedValue(), args[5]);
+    case  5: tvCopy(*a4.asTypedValue(), args[4]);
+    case  4: tvCopy(*a3.asTypedValue(), args[3]);
 #endif
-    case  3: tvDup(*a2.asTypedValue(), args[2]);
-    case  2: tvDup(*a1.asTypedValue(), args[1]);
-    case  1: tvDup(*a0.asTypedValue(), args[0]);
+    case  3: tvCopy(*a2.asTypedValue(), args[2]);
+    case  2: tvCopy(*a1.asTypedValue(), args[1]);
+    case  1: tvCopy(*a0.asTypedValue(), args[0]);
     case  0: break;
   }
 
@@ -567,6 +566,7 @@ void ObjectData::serialize(VariableSerializer* serializer) const {
 }
 
 const StaticString
+  s_PHP_DebugDisplay("__PHP_DebugDisplay"),
   s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
   s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name"),
   s_PHP_Unserializable_Class_Name("__PHP_Unserializable_Class_Name");
@@ -660,7 +660,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
           String propName = name;
           Slot propInd = m_cls->getDeclPropIndex(m_cls, name.get(), accessible);
           if (accessible && propInd != kInvalidSlot) {
-            if (m_cls->m_declProperties[propInd].m_attrs & AttrPrivate) {
+            if (m_cls->declProperties()[propInd].m_attrs & AttrPrivate) {
               propName = concat4(s_zero, o_getClassName(), s_zero, name);
             }
           }
@@ -686,6 +686,25 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
     } else {
       CStrRef className = o_getClassName();
       Array properties = o_toArray();
+      if (serializer->getType() ==
+        VariableSerializer::Type::DebuggerSerialize) {
+        try {
+           auto val = const_cast<ObjectData*>(this)->invokeToDebugDisplay();
+           if (val.isInitialized()) {
+             properties.lvalAt(s_PHP_DebugDisplay).assign(val);
+           }
+        } catch (...) {
+          raise_warning("%s::__toDebugDisplay() throws exception",
+            o_getClassName().data());
+        }
+      }
+      if (serializer->getType() == VariableSerializer::Type::DebuggerDump) {
+        Variant* debugDispVal = o_realProp(s_PHP_DebugDisplay, 0);
+        if (debugDispVal) {
+          debugDispVal->serialize(serializer);
+          return;
+        }
+      }
       if (serializer->getType() != VariableSerializer::Type::VarDump &&
           className == s_PHP_Incomplete_Class) {
         Variant* cname = o_realProp(s_PHP_Incomplete_Class_Name, 0);
@@ -717,17 +736,15 @@ void ObjectData::dump() const {
 ObjectData* ObjectData::clone() {
   if (getAttribute(HasClone)) {
     if (isCollection()) {
-      // The collection classes are final and have no parent, so direct
-      // comparison of their m_cls is okay.
-      if (m_cls == c_Vector::s_cls) {
+      if (instanceof(c_Vector::s_cls)) {
         return c_Vector::Clone(this);
-      } else if (m_cls == c_Map::s_cls) {
+      } else if (instanceof(c_Map::s_cls)) {
         return c_Map::Clone(this);
-      } else if (m_cls == c_StableMap::s_cls) {
+      } else if (instanceof(c_StableMap::s_cls)) {
         return c_StableMap::Clone(this);
-      } else if (m_cls == c_Set::s_cls) {
+      } else if (instanceof(c_Set::s_cls)) {
         return c_Set::Clone(this);
-      } else if (m_cls == c_Pair::s_cls) {
+      } else if (instanceof(c_Pair::s_cls)) {
         return c_Pair::Clone(this);
       }
     } else if (instanceof(c_Closure::s_cls)) {
@@ -745,7 +762,7 @@ ObjectData* ObjectData::clone() {
     } else if (instanceof(c_SimpleXMLElement::s_cls)) {
       return c_SimpleXMLElement::Clone(this);
     }
-    not_reached();
+    always_assert(false);
   }
 
   return cloneImpl();
@@ -759,60 +776,9 @@ Variant ObjectData::offsetGet(Variant key) {
     return uninit_null();
   }
   Variant v;
-  TypedValue args[1];
-  tvDup(*key.asTypedValue(), args[0]);
   g_vmContext->invokeFuncFew(v.asTypedValue(), method,
-                             this, nullptr, 1, args);
+                             this, nullptr, 1, key.asCell());
   return v;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-namespace {
-
-template<int Idx>
-struct FindIndex {
-  static int run(int size) {
-    if (size <= ObjectSizeTable<Idx>::value) {
-      return Idx;
-    }
-    return FindIndex<Idx + 1>::run(size);
-  }
-};
-
-template<>
-struct FindIndex<NumObjectSizeClasses> {
-  static int run(int) {
-    return -1;
-  }
-};
-
-template<int Idx>
-struct FindSize {
-  static int run(int idx) {
-    if (idx == Idx) {
-      return ObjectSizeTable<Idx>::value;
-    }
-    return FindSize<Idx + 1>::run(idx);
-  }
-};
-
-template<>
-struct FindSize<NumObjectSizeClasses> {
-  static int run(int) {
-    not_reached();
-  }
-};
-
-}
-
-int object_alloc_size_to_index(size_t size) {
-  return FindIndex<0>::run(size);
-}
-
-// This returns the maximum size for the size class
-size_t object_alloc_index_to_size(int idx) {
-  return FindSize<0>::run(idx);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -824,11 +790,10 @@ const StaticString
   s___unset(LITSTR_INIT("__unset")),
   s___init__(LITSTR_INIT("__init__")),
   s___sleep(LITSTR_INIT("__sleep")),
+  s___toDebugDisplay(LITSTR_INIT("__toDebugDisplay")),
   s___wakeup(LITSTR_INIT("__wakeup"));
 
 TRACE_SET_MOD(runtime);
-
-int ObjectData::ObjAllocatorSizeClassCount = InitializeAllocators();
 
 void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
                     size_t nProps) {
@@ -877,29 +842,31 @@ ObjectData* ObjectData::callCustomInstanceInit() {
 }
 
 HOT_FUNC_VM
-ObjectData* ObjectData::newInstanceRaw(Class* cls, int idx) {
-  ObjectData* obj = (ObjectData*)ALLOCOBJIDX(idx);
-  new (obj) ObjectData(cls, NoInit::noinit);
-  return obj;
+ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
+  return new (MM().smartMallocSize(size)) ObjectData(cls, NoInit::noinit);
+}
+
+ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
+  return new (MM().smartMallocSizeBig(size)) ObjectData(cls, NoInit::noinit);
 }
 
 void ObjectData::operator delete(void* p) {
   ObjectData* this_ = (ObjectData*)p;
   Class* cls = this_->getVMClass();
   size_t nProps = cls->numDeclProperties();
-  // cppext classes have their own implementation of delete
-  assert(this_->builtinPropSize() == 0);
-  TypedValue* propVec = (TypedValue*)((uintptr_t)this_ + sizeof(ObjectData));
+  size_t builtinPropSize = cls->builtinPropSize();
+  TypedValue* propVec = (TypedValue*)((uintptr_t)this_ + sizeof(ObjectData) +
+                                      builtinPropSize);
   for (unsigned i = 0; i < nProps; ++i) {
     TypedValue* prop = &propVec[i];
     tvRefcountedDecRef(prop);
   }
-  DELETEOBJSZ(sizeForNProps(nProps))(this_);
-}
 
-void ObjectData::invokeUserMethod(TypedValue* retval, const Func* method,
-                                  CArrRef params) {
-  g_vmContext->invokeFunc(retval, method, params, this);
+  auto const size = sizeForNProps(nProps) + builtinPropSize;
+  if (LIKELY(size <= MemoryManager::kMaxSmartSize)) {
+    return MM().smartFreeSize(this_, size);
+  }
+  MM().smartFreeSizeBig(this_, size);
 }
 
 Object ObjectData::FromArray(ArrayData* properties) {
@@ -977,15 +944,21 @@ void ObjectData::invokeSet(TypedValue* retval, const StringData* key,
   AttributeClearer a(UseSet, this);
   const Func* meth = m_cls->lookupMethod(s___set.get());
   assert(meth);
-  invokeUserMethod(retval, meth,
-                   CREATE_VECTOR2(CStrRef(key), tvAsVariant(val)));
+  TypedValue args[2] = {
+    make_tv<KindOfString>(const_cast<StringData*>(key)),
+    *tvToCell(val)
+  };
+  g_vmContext->invokeFuncFew(retval, meth, this, nullptr, 2, args);
 }
 
 #define MAGIC_PROP_BODY(name, attr) \
   AttributeClearer a((attr), this); \
   const Func* meth = m_cls->lookupMethod(name); \
   assert(meth); \
-  invokeUserMethod(retval, meth, CREATE_VECTOR1(CStrRef(key))); \
+  TypedValue args[1] = { \
+    make_tv<KindOfString>(const_cast<StringData*>(key)) \
+  }; \
+  g_vmContext->invokeFuncFew(retval, meth, this, nullptr, 1, args);
 
 void ObjectData::invokeGet(TypedValue* retval, const StringData* key) {
   MAGIC_PROP_BODY(s___get.get(), UseGet);
@@ -1041,7 +1014,7 @@ void ObjectData::propImpl(TypedValue*& retval, TypedValue& tvRef,
 
         raise_error("Cannot access %s property %s::$%s",
                     priv ? "private" : "protected",
-                    m_cls->m_preClass->name()->data(),
+                    m_cls->preClass()->name()->data(),
                     key->data());
       }
     }
@@ -1199,13 +1172,13 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
       SETOP_BODY(&tvResult, op, val);
       if (getAttribute(UseSet)) {
         assert(tvRef.m_type == KindOfUninit);
-        tvDup(tvResult, tvRef);
+        cellDup(*tvToCell(&tvResult), tvRef);
         TypedValue ignored;
         invokeSet(&ignored, key, &tvRef);
         tvRefcountedDecRef(&ignored);
         propVal = &tvRef;
       } else {
-        tvDup(tvResult, *propVal);
+        cellDup(*tvToCell(&tvResult), *propVal);
       }
     } else {
       propVal = tvToCell(propVal);
@@ -1435,6 +1408,17 @@ Variant ObjectData::invokeSleep() {
   }
 }
 
+Variant ObjectData::invokeToDebugDisplay() {
+  const Func* method = m_cls->lookupMethod(s___toDebugDisplay.get());
+  if (method) {
+    TypedValue tv;
+    g_vmContext->invokeFuncFew(&tv, method, this);
+    return tvAsVariant(&tv);
+  } else {
+    return uninit_null();
+  }
+}
+
 Variant ObjectData::invokeWakeup() {
   const Func* method = m_cls->lookupMethod(s___wakeup.get());
   if (method) {
@@ -1458,13 +1442,13 @@ String ObjectData::invokeToString() {
         notify_user = &raise_warning;
       }
       notify_user("Method %s::__toString() must return a string value",
-                  m_cls->m_preClass->name()->data());
+                  m_cls->preClass()->name()->data());
     }
     return tv.m_data.pstr;
   }
   raise_recoverable_error(
     "Object of class %s could not be converted to string",
-    m_cls->m_preClass->name()->data()
+    m_cls->preClass()->name()->data()
   );
   // If the user error handler decides to allow execution to continue,
   // we return the empty string.

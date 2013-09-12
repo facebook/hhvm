@@ -64,6 +64,7 @@ namespace Trace {
       TM(trans)       \
       TM(tx64)        \
       TM(tx64stats)   \
+      TM(ustubs)      \
       TM(unwind)      \
       TM(txlease)     \
       TM(fixup)       \
@@ -276,6 +277,27 @@ inline std::string color(const char* fg, const char* bg) {
 
 //////////////////////////////////////////////////////////////////////
 
+FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_toString, toString);
+
 } // HPHP
+
+namespace folly {
+template<typename Val>
+struct FormatValue<Val,
+                   typename std::enable_if<
+                     HPHP::has_toString<Val, std::string() const>::value,
+                     void
+                   >::type> {
+  explicit FormatValue(const Val& val) : m_val(val) {}
+
+  template<typename Callback> void format(FormatArg& arg, Callback& cb) const {
+    format_value::formatString(m_val.toString(), arg, cb);
+  }
+
+ private:
+  const Val& m_val;
+};
+}
+
 #endif /* incl_HPHP_TRACE_H_ */
 

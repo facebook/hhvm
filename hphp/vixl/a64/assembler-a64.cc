@@ -437,13 +437,18 @@ void Assembler::ret(const Register& xn) {
 }
 
 
-void Assembler::b(int imm26, Condition cond) {
-  if (cond == al) {
-    Emit(B | ImmUncondBranch(imm26));
-  } else {
-    // The immediate field is only 19bit wide here.
-    Emit(B_cond | ImmCondBranch(imm26) | cond);
-  }
+void Assembler::b(int imm26) {
+  Emit(B | ImmUncondBranch(imm26));
+}
+
+
+void Assembler::b(int imm19, Condition cond) {
+  Emit(B_cond | ImmCondBranch(imm19) | cond);
+}
+
+
+void Assembler::b(Label* label) {
+  b(UpdateAndGetInstructionOffsetTo(label));
 }
 
 
@@ -749,28 +754,33 @@ void Assembler::csneg(const Register& rd,
 
 
 void Assembler::cset(const Register &rd, Condition cond) {
+  assert((cond != al) && (cond != nv));
   Register zr = AppropriateZeroRegFor(rd);
   csinc(rd, zr, zr, InvertCondition(cond));
 }
 
 
 void Assembler::csetm(const Register &rd, Condition cond) {
+  assert((cond != al) && (cond != nv));
   Register zr = AppropriateZeroRegFor(rd);
   csinv(rd, zr, zr, InvertCondition(cond));
 }
 
 
 void Assembler::cinc(const Register &rd, const Register &rn, Condition cond) {
+  assert((cond != al) && (cond != nv));
   csinc(rd, rn, rn, InvertCondition(cond));
 }
 
 
 void Assembler::cinv(const Register &rd, const Register &rn, Condition cond) {
+  assert((cond != al) && (cond != nv));
   csinv(rd, rn, rn, InvertCondition(cond));
 }
 
 
 void Assembler::cneg(const Register &rd, const Register &rn, Condition cond) {
+  assert((cond != al) && (cond != nv));
   csneg(rd, rn, rn, InvertCondition(cond));
 }
 
@@ -782,7 +792,6 @@ void Assembler::ConditionalSelect(const Register& rd,
                                   ConditionalSelectOp op) {
   assert(rd.size() == rn.size());
   assert(rd.size() == rm.size());
-  assert(cond != al);
   Emit(SF(rd) | op | Rm(rm) | Cond(cond) | Rn(rn) | Rd(rd));
 }
 
@@ -1258,14 +1267,6 @@ void Assembler::frintz(const FPRegister& fd,
 }
 
 
-void Assembler::fcvt(const FPRegister& fd,
-                     const FPRegister& fn) {
-  // Only float to double conversion is supported.
-  assert(fd.Is64Bits() && fn.Is32Bits());
-  FPDataProcessing1Source(fd, fn, FCVT_ds);
-}
-
-
 void Assembler::fcmp(const FPRegister& fn,
                      const FPRegister& fm) {
   assert(fn.size() == fm.size());
@@ -1299,7 +1300,6 @@ void Assembler::fcsel(const FPRegister& fd,
                       Condition cond) {
   assert(fd.size() == fn.size());
   assert(fd.size() == fm.size());
-  assert(cond != al);
   Emit(FPType(fd) | FCSEL | Rm(fm) | Cond(cond) | Rn(fn) | Rd(fd));
 }
 
@@ -1308,6 +1308,20 @@ void Assembler::FPConvertToInt(const Register& rd,
                                const FPRegister& fn,
                                FPIntegerConvertOp op) {
   Emit(SF(rd) | FPType(fn) | op | Rn(fn) | Rd(rd));
+}
+
+
+void Assembler::fcvt(const FPRegister& fd,
+                     const FPRegister& fn) {
+  if (fd.Is64Bits()) {
+    // Convert float to double.
+    assert(fn.Is32Bits());
+    FPDataProcessing1Source(fd, fn, FCVT_ds);
+  } else {
+    // Convert double to float.
+    assert(fn.Is64Bits());
+    FPDataProcessing1Source(fd, fn, FCVT_sd);
+  }
 }
 
 
@@ -1348,13 +1362,9 @@ void Assembler::fcvtzs(const Register& rd,
 void Assembler::scvtf(const FPRegister& fd,
                       const Register& rn,
                       unsigned fbits) {
-  // We support double register destinations only.
-  assert(fd.Is64Bits());
   if (fbits == 0) {
     Emit(SF(rn) | FPType(fd) | SCVTF | Rn(rn) | Rd(fd));
   } else {
-    // For fixed point numbers, we support X register sources only.
-    assert(rn.Is64Bits());
     Emit(SF(rn) | FPType(fd) | SCVTF_fixed | FPScale(64 - fbits) | Rn(rn) |
          Rd(fd));
   }
@@ -1364,13 +1374,9 @@ void Assembler::scvtf(const FPRegister& fd,
 void Assembler::ucvtf(const FPRegister& fd,
                       const Register& rn,
                       unsigned fbits) {
-  // We support double register destinations only.
-  assert(fd.Is64Bits());
   if (fbits == 0) {
     Emit(SF(rn) | FPType(fd) | UCVTF | Rn(rn) | Rd(fd));
   } else {
-    // For fixed point numbers, we support X register sources only.
-    assert(rn.Is64Bits());
     Emit(SF(rn) | FPType(fd) | UCVTF_fixed | FPScale(64 - fbits) | Rn(rn) |
          Rd(fd));
   }

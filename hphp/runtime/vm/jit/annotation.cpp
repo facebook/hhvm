@@ -64,7 +64,7 @@ decodeNameAndArgs(const StringData* enc, string& outName, int& outNumArgs) {
   outName = name;
 }
 
-static void recordNameAndArgs(const SrcKey& sk,
+static void recordNameAndArgs(const SrcKey sk,
                               const StringData* name,
                               int numArgs) {
   CallRecord cr;
@@ -73,11 +73,10 @@ static void recordNameAndArgs(const SrcKey& sk,
   s_callDB.insert(std::make_pair(sk, cr));
 }
 
-static void recordFunc(NormalizedInstruction& i,
-                       const SrcKey& sk,
+static void recordFunc(const SrcKey sk,
                        const Func* func) {
   FTRACE(2, "annotation: recordFunc: {}@{} {}\n",
-         i.m_unit->filepath()->data(),
+         sk.unit()->filepath()->data(),
          sk.offset(),
          func->fullName()->data());
 
@@ -87,12 +86,11 @@ static void recordFunc(NormalizedInstruction& i,
   s_callDB.insert(std::make_pair(sk, cr));
 }
 
-static void recordActRecPush(NormalizedInstruction& i,
-                             const Unit* unit,
+static void recordActRecPush(const SrcKey sk,
                              const StringData* name,
                              const StringData* clsName,
                              bool staticCall) {
-  const SrcKey& sk = i.source;
+  auto unit = sk.unit();
   FTRACE(2, "annotation: recordActRecPush: {}@{} {}{}{} ({}static)\n",
          unit->filepath()->data(),
          sk.offset(),
@@ -112,11 +110,11 @@ static void recordActRecPush(NormalizedInstruction& i,
   if (clsName) {
     const Class* cls = Unit::lookupUniqueClass(clsName);
     bool magic = false;
-    Class* ctx = i.source.func()->cls();
+    Class* ctx = sk.func()->cls();
     const Func* func = lookupImmutableMethod(cls, name, magic,
                                              staticCall, ctx);
     if (func) {
-      recordFunc(i, fcall, func);
+      recordFunc(fcall, func);
     }
     return;
   }
@@ -125,7 +123,7 @@ static void recordActRecPush(NormalizedInstruction& i,
     // this will never go into a call cache, so we dont need to
     // encode the args. it will be used in OpFCall below to
     // set the i->funcd.
-    recordFunc(i, fcall, func);
+    recordFunc(fcall, func);
   } else {
     // It's not enough to remember the function name; we also need to encode
     // the number of arguments and current flag disposition.
@@ -179,7 +177,7 @@ void annotate(NormalizedInstruction* i) {
         funcName = cls->getCtor()->name();
       }
       assert(funcName->isStatic());
-      recordActRecPush(*i, i->m_unit, funcName, className,
+      recordActRecPush(i->source, funcName, className,
                        i->op() == OpFPushClsMethodD ||
                        i->op() == OpFPushClsMethodF);
     } break;

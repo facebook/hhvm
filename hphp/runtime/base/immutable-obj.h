@@ -17,35 +17,48 @@
 #ifndef incl_HPHP_IMMUTABLE_OBJ_H_
 #define incl_HPHP_IMMUTABLE_OBJ_H_
 
-#include "hphp/runtime/base/types.h"
-#include "hphp/util/hash.h"
-#include "hphp/util/atomic.h"
+#include <cinttypes>
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-class SharedVariant;
-class SharedVariantStats;
+//////////////////////////////////////////////////////////////////////
 
-class ImmutableObj {
-public:
-  explicit ImmutableObj(ObjectData *obj);
-  Object getObject();
+struct SharedVariant;
+struct SharedVariantStats;
+struct ObjectData;
+struct StringData;
+struct Object;
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Representation of an object stored in APC.
+ */
+struct ImmutableObj {
+  explicit ImmutableObj(ObjectData* obj);
   ~ImmutableObj();
-  void getSizeStats(SharedVariantStats *stats);
-  int32_t getSpaceUsage();
 
+  ImmutableObj(const ImmutableObj&) = delete;
+  ImmutableObj& operator=(const ImmutableObj&) = delete;
+
+  Object getObject() const;
+  void getSizeStats(SharedVariantStats* stats) const;
+  int32_t getSpaceUsage() const;
+
+private:
   struct Prop {
-    StringData *name;
-    SharedVariant *val;
+    StringData* name;
+    SharedVariant* val;
   };
+
 private:
   Prop* m_props;
   int m_propCount;
-  StringData *m_cls;
+  StringData* const m_cls;  // static string
 };
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
 }
 
-#endif /* incl_HPHP_IMMUTABLE_OBJ_H_ */
+#endif

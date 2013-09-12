@@ -243,10 +243,10 @@ int ListAssignment::getKidCount() const {
 void ListAssignment::setNthKid(int n, ConstructPtr cp) {
   switch (m_rhsFirst ? 1 - n : n) {
     case 0:
-      m_variables = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      m_variables = dynamic_pointer_cast<ExpressionList>(cp);
       break;
     case 1:
-      m_array = boost::dynamic_pointer_cast<Expression>(cp);
+      m_array = dynamic_pointer_cast<Expression>(cp);
       break;
     default:
       assert(false);

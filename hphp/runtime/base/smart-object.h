@@ -97,7 +97,7 @@ template <typename T>
 class SmartResource : public Resource {
 public:
   SmartResource()           { }
-  explicit SmartResource(CVarRef v) : Resource(v.toObject().get()) { }
+  explicit SmartResource(CVarRef v) : Resource(v.toResource().get()) { }
   /* implicit */ SmartResource(T *data) : Resource(data) { }
   template<class Y>
   explicit SmartResource(Y *data) : Resource(data) { }

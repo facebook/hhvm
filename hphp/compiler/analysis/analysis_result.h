@@ -343,12 +343,12 @@ private:
   std::string m_outputPath;
 public:
   AnalysisResultPtr shared_from_this() {
-    return boost::static_pointer_cast<AnalysisResult>
+    return static_pointer_cast<AnalysisResult>
       (BlockScope::shared_from_this());
   }
 
   AnalysisResultConstPtr shared_from_this() const {
-    return boost::static_pointer_cast<const AnalysisResult>
+    return static_pointer_cast<const AnalysisResult>
       (BlockScope::shared_from_this());
   }
 

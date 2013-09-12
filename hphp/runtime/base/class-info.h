@@ -48,8 +48,7 @@ public:
     IsProtected            = (1 <<  7), //           x             x
     IsPrivate              = (1 <<  8), //           x             x
     IsStatic               = (1 <<  9), //           x             x
-    // FIXME (#2163116): IsCppAbstract = (1 << 10) in idl/base.php
-    IsInherited            = (1 << 10), //                         x
+    IsCppAbstract          = (1 << 10), //    x
     HasCall                = IsPublic,  //    x
     HasCallStatic          = IsProtected,//   x
     AllowOverride          = IsPrivate, //                  x
@@ -58,6 +57,8 @@ public:
 
     // need a non-zero number for const char * maps
     IsNothing              = (1 << 13),
+
+    ZendCompat             = (1 << 14), //                  x      x
 
     HasGeneratorAsBody     = (1 << 15), //                  x      x
     IsCppSerializable      = (1 << 15), //    x

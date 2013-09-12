@@ -21,6 +21,8 @@
 #include <memory>
 #include <stack>
 
+#include "folly/Optional.h"
+
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/member-operations.h"
@@ -50,7 +52,7 @@ struct EvalStack {
     m_vector.push_back(tmp);
   }
 
-  SSATmp* pop(DataTypeCategory cat) {
+  SSATmp* pop(TypeConstraint cat) {
     if (m_vector.size() == 0) {
       return nullptr;
     }
@@ -81,6 +83,7 @@ struct EvalStack {
     return ret;
   }
 
+  bool empty() const { return m_vector.empty(); }
   int  size()  const { return m_vector.size(); }
   void clear()       { m_vector.clear(); }
 
@@ -116,7 +119,7 @@ struct HhbcTranslator {
 
   // Accessors.
   IRTrace* trace() const { return m_tb->trace(); }
-  TraceBuilder* traceBuilder() const { return m_tb.get(); }
+  TraceBuilder& traceBuilder() const { return *m_tb.get(); }
   IRFactory& irFactory() { return m_irFactory; }
 
   // In between each emit* call, irtranslator indicates the new
@@ -151,6 +154,7 @@ struct HhbcTranslator {
                      const Func* target,
                      Offset returnBcOffset);
   bool isInlining() const;
+  int inliningDepth() const;
   void profileFunctionEntry(const char* category);
   void profileInlineFunctionShape(const std::string& str);
   void profileSmallFunctionShape(const std::string& str);
@@ -272,7 +276,7 @@ struct HhbcTranslator {
                       int32_t funcId,
                       int32_t fallbackFuncId);
   void emitFPushFunc(int32_t numParams);
-  void emitFPushFunc(int32_t numParams, SSATmp* funcName);
+  void emitFPushFuncObj(int32_t numParams);
   SSATmp* genClsMethodCtx(const Func* callee, const Class* cls);
   void emitFPushClsMethodD(int32_t numParams,
                            int32_t methodNameStrId,
@@ -422,6 +426,7 @@ struct HhbcTranslator {
 
   // continuations
   void emitCreateCont(Id funNameStrId);
+  void emitCreateAsync(Id funNameStrId, int64_t labelId, int iters);
   void emitContEnter(int32_t returnBcOffset);
   void emitUnpackCont();
   void emitContReturnControl();
@@ -532,7 +537,7 @@ private:
 
     void prependToTraces(IRInstruction* inst) {
       for (auto t : m_failedTraceVec) {
-        t->front()->prepend(inst->clone(&m_irf));
+        t->front()->prepend(m_irf.cloneInstruction(inst));
       }
     }
 
@@ -717,7 +722,8 @@ private:
   SSATmp* emitMIterInitCommon(int offset, Lambda genFunc);
   SSATmp* staticTVCns(const TypedValue*);
 
-  Type interpOutputType(const NormalizedInstruction&) const;
+  Type interpOutputType(const NormalizedInstruction&,
+                        folly::Optional<Type>&) const;
   void interpOutputLocals(const NormalizedInstruction&);
 
 private: // Exit trace creation routines.
@@ -786,6 +792,7 @@ public:
   Offset      bcOff()     const { return m_bcStateStack.back().bcOff; }
   SrcKey      curSrcKey() const { return SrcKey(curFunc(), bcOff()); }
   size_t      spOffset()  const;
+  Type        topType(uint32_t i, DataTypeCategory c = DataTypeSpecific) const;
 
 private:
   /*
@@ -826,11 +833,11 @@ private:
    */
   SSATmp* push(SSATmp* tmp);
   SSATmp* pushIncRef(SSATmp* tmp) { return push(gen(IncRef, tmp)); }
-  SSATmp* pop(Type type, DataTypeCategory cat = DataTypeSpecific);
-  void    popDecRef(Type type, DataTypeCategory cat = DataTypeCountness);
+  SSATmp* pop(Type type, TypeConstraint tc = DataTypeSpecific);
+  void    popDecRef(Type type, TypeConstraint tc = DataTypeCountness);
   void    discard(unsigned n);
-  SSATmp* popC(DataTypeCategory cat = DataTypeSpecific) {
-    return pop(Type::Cell, cat);
+  SSATmp* popC(TypeConstraint tc = DataTypeSpecific) {
+    return pop(Type::Cell, {tc.category, std::min(Type::Cell, tc.knownType)});
   }
   SSATmp* popV() { return pop(Type::BoxedCell); }
   SSATmp* popR() { return pop(Type::Gen);       }
@@ -844,7 +851,6 @@ private:
     return top(Type::Cell, i, cat);
   }
   SSATmp* topV(uint32_t i = 0) { return top(Type::BoxedCell, i); }
-  Type    topType(uint32_t i, DataTypeCategory c = DataTypeSpecific) const;
   std::vector<SSATmp*> peekSpillValues() const;
   SSATmp* emitSpillStack(SSATmp* sp,
                          const std::vector<SSATmp*>& spillVals);

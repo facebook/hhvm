@@ -1,0 +1,14 @@
+array(6) {
+  ["canonical"]=>
+  int(685230)
+  ["decimal"]=>
+  int(685230)
+  ["octal"]=>
+  int(685230)
+  ["hexadecimal"]=>
+  int(685230)
+  ["binary"]=>
+  int(685230)
+  ["sexagesimal"]=>
+  int(685230)
+}

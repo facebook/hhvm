@@ -25,19 +25,19 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_hash(CStrRef algo, CStrRef data, bool raw_output = false);
-Array f_hash_algos();
-Variant f_hash_init(CStrRef algo, int options = 0, CStrRef key = null_string);
-Variant f_hash_file(CStrRef algo, CStrRef filename, bool raw_output = false);
-String f_hash_final(CResRef context, bool raw_output = false);
-Variant f_hash_hmac_file(CStrRef algo, CStrRef filename, CStrRef key, bool raw_output = false);
-Variant f_hash_hmac(CStrRef algo, CStrRef data, CStrRef key, bool raw_output = false);
-bool f_hash_update_file(CResRef init_context, CStrRef filename, CObjRef stream_context = Object());
-int64_t f_hash_update_stream(CResRef context, CResRef handle, int length = -1);
-bool f_hash_update(CResRef context, CStrRef data);
-int64_t f_furchash_hphp_ext(CStrRef key, int len, int nPart);
-bool f_furchash_hphp_ext_supported();
-int64_t f_hphp_murmurhash(CStrRef key, int len, int seed);
+Variant HHVM_FUNCTION(hash, CStrRef algo, CStrRef data,
+                            bool raw_output = false);
+Array HHVM_FUNCTION(hash_algos);
+Variant HHVM_FUNCTION(hash_init, CStrRef algo, int64_t options = 0,
+                                 CStrRef key = null_string);
+Variant HHVM_FUNCTION(hash_file, CStrRef algo, CStrRef filename,
+                                 bool raw_output = false);
+String HHVM_FUNCTION(hash_final, CResRef context, bool raw_output = false);
+bool HHVM_FUNCTION(hash_update, CResRef context, CStrRef data);
+int64_t HHVM_FUNCTION(furchash_hphp_ext, CStrRef key,
+                                         int64_t len, int64_t nPart);
+int64_t HHVM_FUNCTION(hphp_murmurhash, CStrRef key,
+                                       int64_t len, int64_t seed);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

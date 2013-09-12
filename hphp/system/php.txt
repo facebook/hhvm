@@ -48,6 +48,7 @@ hphp/system/php/filter/filter_var_array.php
 hphp/system/php/filter/filter_input_array.php
 
 hphp/system/php/sessions/SessionHandlerInterface.php
+hphp/system/php/sessions/SessionHandler.php
 hphp/system/php/sessions/session_set_save_handler.php
 
 hphp/system/php/redis/RedisException.php
@@ -65,10 +66,14 @@ hphp/system/php/asio/InvalidOperationException.php
 hphp/system/php/collections/collections.php
 hphp/system/php/dom/DOMException.php
 hphp/system/php/file_system/Directory.php
+hphp/system/php/hash/furchash.php
+hphp/system/php/hash/hash.php
+hphp/system/php/hash/hphp_murmurhash.php
 hphp/system/php/json/JsonSerializable.php
 hphp/system/php/lang/ErrorException.php
 hphp/system/php/misc/highlight.php
 hphp/system/php/misc/php_strip_whitespace.php
+hphp/system/php/misc/str_getcsv.php
 hphp/system/php/pdo/PDOException.php
 hphp/system/php/redis/Redis.php
 hphp/system/php/redis/RedisSessionModule.php

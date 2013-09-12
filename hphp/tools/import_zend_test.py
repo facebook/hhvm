@@ -47,6 +47,7 @@ no_import = (
     '/ext/session/tests/session_module_name_variation2.phpt',
     '/tests/func/010.phpt',
     '/tests/lang/bug21820.phpt',
+    '/Zend/tests/bug64660.phpt',
 
     # intermittent segfaults
     '/Zend/tests/001.phpt',
@@ -79,15 +80,12 @@ no_import = (
     '/ext/xmlwriter/examples/',
 
     # not implemented extensions
-    '/ext/calendar',
     '/ext/com_dotnet',
     '/ext/dba',
     '/ext/dom',
     '/ext/enchant',
     '/ext/ereg',
     '/ext/fileinfo',
-    '/ext/ftp',
-    '/ext/gettext',
     '/ext/gmp',
     '/ext/interbase',
     '/ext/mssql',
@@ -153,6 +151,7 @@ bad_tests = (
     '/zend/bug54265.php',
 
     # broken in contbuild
+    '/ext-standard-strings/bug51059.php'
     '/ext-standard-strings/setlocale_variation1.php',
     '/ext-standard-strings/setlocale_basic1.php',
     '/ext-standard-strings/setlocale_basic2.php',
@@ -171,6 +170,7 @@ bad_tests = (
     '/ext-posix/posix_getgroups_basic.php',
 
     # concurrency issues
+    '/ext-ftp/ftp_chmod_basic.php',
     '/ext-mysql/001.php',
     '/ext-mysql/bug47438.php',
     '/ext-mysql/mysql_client_encoding.php',
@@ -179,6 +179,9 @@ bad_tests = (
     '/ext-sqlite3/sqlite3_25_create_aggregate.php',
     '/ext-sockets/socket_connect_params.php',
     '/ext-sockets/socket_getpeername_ipv4loop.php',
+    '/ext-standard-file/fread_socket_variation1.php',
+    '/ext-standard-network/fsockopen_variation1.php',
+    '/ext-standard-network/shutdown.php',
 
     # time tests are hard to write, these are poorly written
     '/ext-date/bug48187.php',
@@ -196,8 +199,6 @@ bad_tests = (
     '/ext-standard-strings/moneyformat.php',
 
     # works in interp but fails in JIT
-    '/ext-date/DateTime_add-february.php',
-    '/ext-date/gmdate_variation8.php',
     '/ext-standard-array/array_next_error2.php',
     '/ext-standard-array/prev_error3.php',
     '/ext-standard-class_object/get_object_vars_variation_003.php',
@@ -209,8 +210,92 @@ bad_tests = (
     '/zend/lsb_022.php',
 )
 
+# Tests that work but not in repo mode
+norepo_tests = (
+    # TODO: See if any of these should work in repo mode
+    '/ext-bz2/with_strings.php',
+    '/ext-pdo_sqlite/bug33841.php',
+    '/ext-pdo_sqlite/bug46139.php',
+    '/ext-pdo_sqlite/bug52487.php',
+    '/ext-sqlite3/bug47159.php',
+    '/ext-sqlite3/sqlite3_01_open.php',
+    '/ext-sqlite3/sqlite3_02_create.php',
+    '/ext-sqlite3/sqlite3_03_insert.php',
+    '/ext-sqlite3/sqlite3_04_update.php',
+    '/ext-sqlite3/sqlite3_05_delete.php',
+    '/ext-sqlite3/sqlite3_09_blob_bound_param.php',
+    '/ext-sqlite3/sqlite3_13_skip_all_cleanup.php',
+    '/ext-sqlite3/sqlite3_14_querysingle.php',
+    '/ext-sqlite3/sqlite3_16_select_no_results.php',
+    '/ext-sqlite3/sqlite3_18_changes.php',
+    '/ext-sqlite3/sqlite3_19_columninfo.php',
+    '/ext-sqlite3/sqlite3_20_error.php',
+    '/ext-sqlite3/sqlite3_24_last_insert_rowid.php',
+    '/ext-sqlite3/sqlite3stmt_paramCount_basic.php',
+    '/ext-sqlite3/sqlite3stmt_paramCount_error.php',
+    '/ext-standard-class_object/class_exists_basic_001.php',
+    '/ext-standard-class_object/get_declared_classes_variation1.php',
+    '/ext-standard-class_object/get_declared_interfaces_variation1.php',
+    '/ext-standard-class_object/get_declared_traits_variation1.php',
+    '/ext-standard-class_object/interface_exists_variation3.php',
+    '/ext-standard-class_object/interface_exists_variation4.php',
+    '/ext-standard-general_functions/is_numeric.php',
+    '/ext-standard-math/abs.php',
+    '/ext-standard-math/pow.php',
+    '/ext-standard-serialize/bug30234.php',
+    '/ext-standard-url/parse_url_basic_002.php',
+    '/ext-standard-url/parse_url_basic_003.php',
+    '/ext-standard-url/parse_url_basic_004.php',
+    '/ext-standard-url/parse_url_basic_005.php',
+    '/ext-standard-url/parse_url_basic_006.php',
+    '/ext-standard-url/parse_url_basic_007.php',
+    '/ext-standard-url/parse_url_basic_008.php',
+    '/ext-standard-url/parse_url_basic_009.php',
+    '/tests-classes/autoload_001.php',
+    '/tests-classes/autoload_002.php',
+    '/tests-classes/autoload_003.php',
+    '/tests-classes/autoload_005.php',
+    '/tests-classes/autoload_006.php',
+    '/tests-classes/autoload_010.php',
+    '/tests-classes/autoload_018.php',
+    '/tests-classes/constants_scope_001.php',
+    '/tests-lang/static_variation_001.php',
+    '/tests-lang/static_variation_002.php',
+    '/zend/014.php',
+    '/zend/035.php',
+    '/zend/bug28444.php',
+    '/zend/bug30519.php',
+    '/zend/bug30922.php',
+    '/zend/bug36006.php',
+    '/zend/bug43651.php',
+    '/zend/bug44141.php',
+    '/zend/bug55578.php',
+    '/zend/bug63741.php',
+    '/zend/class_alias_013.php',
+    '/zend/class_constants_003.php',
+    '/zend/class_exists_001.php',
+    '/zend/constants_005.php',
+    '/zend/errmsg_007.php',
+    '/zend/errmsg_026.php',
+    '/zend/errmsg_035.php',
+    '/zend/errmsg_036.php',
+    '/zend/error_reporting04.php',
+    '/zend/error_reporting09.php',
+    '/zend/jump14.php',
+    '/zend/lsb_013.php',
+    '/zend/ns_041.php',
+    '/zend-traits/bug60369.php',
+    '/zend-traits/bug60809.php',
+    '/zend-traits-bugs/overridding-conflicting-property-initializer.php',
+    '/zend-traits/error_003.php',
+    '/zend-traits/property003.php',
+    '/zend-traits/property004.php',
+    '/zend/unset_cv01.php',
+)
+
 # Random other files that zend wants
 other_files = (
+    '/ext-calendar/skipif.inc',
     '/ext-curl/curl_testdata1.txt',
     '/ext-curl/curl_testdata2.txt',
     '/ext-date/examine_diff.inc',
@@ -227,6 +312,8 @@ other_files = (
     '/ext-date/DateTime_data-fall-type3-type3.inc',
     '/ext-date/DateTime_data-fall-type2-type2.inc',
     '/ext-exif/bug48378.jpeg',
+    '/ext-ftp/cert.pem',
+    '/ext-ftp/server.inc',
     '/ext-gd/Tuffy.ttf',
     '/ext-gd/bug37346.gif',
     '/ext-gd/bug38112.gif',
@@ -239,6 +326,23 @@ other_files = (
     '/ext-gd/src.gd2',
     '/ext-gd/src.wbmp',
     '/ext-gd/test8859.ttf',
+    '/ext-gettext/locale/en/LC_CTYPE/dgettextTest.mo',
+    '/ext-gettext/locale/en/LC_CTYPE/dgettextTest.po',
+    '/ext-gettext/locale/en/LC_CTYPE/dgettextTest_switched.po',
+    '/ext-gettext/locale/en/LC_CTYPE/dgettextTest_switch.mo',
+    '/ext-gettext/locale/en/LC_CTYPE/dgettextTest_switch.po',
+    '/ext-gettext/locale/en/LC_CTYPE/dngettextTest.mo',
+    '/ext-gettext/locale/en/LC_CTYPE/dngettextTest.po',
+    '/ext-gettext/locale/en/LC_MESSAGES/dgettextTest.mo',
+    '/ext-gettext/locale/en/LC_MESSAGES/dgettextTest.po',
+    '/ext-gettext/locale/en/LC_MESSAGES/dgettextTest_switch.mo',
+    '/ext-gettext/locale/en/LC_MESSAGES/dgettextTest_switch.po',
+    '/ext-gettext/locale/en/LC_MESSAGES/dngettextTest.mo',
+    '/ext-gettext/locale/en/LC_MESSAGES/dngettextTest.po',
+    '/ext-gettext/locale/en/LC_MESSAGES/messages.mo',
+    '/ext-gettext/locale/en/LC_MESSAGES/messages.po',
+    '/ext-gettext/locale/fi/LC_MESSAGES/messages.mo',
+    '/ext-gettext/locale/fi/LC_MESSAGES/messages.po',
     '/ext-intl/ut_common.inc',
     '/ext-ldap/connect.inc',
     '/ext-mbstring/common.inc',
@@ -312,6 +416,7 @@ other_files = (
     '/tests-lang/inc.inc',
     '/tests-lang/inc_throw.inc',
     '/tests/quicktester.inc',
+    '/zend/014.inc',
     '/zend/bug46665_autoload.inc',
     '/zend/bug54804.inc',
     '/zend/nowdoc.inc',
@@ -369,6 +474,9 @@ def mkdir_p(path):
         pass
 
 def walk(filename, source):
+    if not '/tests' in source:
+        return
+
     dest_filename = os.path.basename(filename)
     source_dir = source.lower().replace('/tests', '').replace('/', '-')
 
@@ -384,6 +492,12 @@ def walk(filename, source):
     full_dest_filename = full_dest_filename.replace('.phpt', '.php')
 
     if not '.phpt' in filename:
+        def replace(find, replace):
+            data = file(full_dest_filename).read().replace(find, replace)
+            file(full_dest_filename, 'w').write(data)
+
+        if '/ext-ftp/server.inc' in full_dest_filename:
+            replace('stream_socket_server', '@stream_socket_server')
         return
 
     print "Importing %s" % full_dest_filename
@@ -423,9 +537,6 @@ def walk(filename, source):
 
             # tests are really inconsistent about whitespace
             exp = re.sub(r'(\r\n|\r|\n)', '\n', exp.strip())
-
-            exp = exp.replace('in %s on', 'in %s/%s/%s on' %
-                    ('hphp/test/zend/all', source_dir, dest_filename))
 
             # PHP puts a newline in that we don't
             exp = exp.replace('\n\nFatal error:', '\nFatal error:')
@@ -502,7 +613,7 @@ def walk(filename, source):
             test += '?>\n'
         test += sections['CLEAN']
 
-    # If you put an exception in here, please send a pull request upstream to 
+    # If you put an exception in here, please send a pull request upstream to
     # php-src. Then when it gets merged kill your hack.
     if 'bug60771.php' in full_dest_filename:
         test = test.replace("?>", "unlink('test.php');\n?>")
@@ -533,6 +644,8 @@ def walk(filename, source):
     if 'ext-standard-file/bug45181.php' in full_dest_filename:
         test = test.replace('rmdir("bug45181_x");',
                 'chdir("..");\nrmdir("bug45181_x");')
+    if 'ext-standard-file/bug53848.php' in full_dest_filename:
+        test = test.replace('bug39538.csv', 'bug53848.csv')
     if 'bug61139.php' in full_dest_filename:
         test += "\nunlink('someFile');\n?>"
     if '/ext-pdo_' in full_dest_filename:
@@ -617,32 +730,51 @@ def walk(filename, source):
         test = test.replace("plainfile.txt.gz", "gzfile_basic.txt.gz")
     if '/ext-zlib/gzfile_basic2.php' in full_dest_filename:
         test = test.replace("plainfile.txt", "gzfile_basic2.txt")
+    if '/ext-standard-network/fsockopen_variation1.php' in full_dest_filename:
+        test = test.replace("<?php", "<?php\n$port = rand(50000, 65535);")
+        test = test.replace("31337'", "'.$port")
+    if '/ext-standard-network/shutdown.php' in full_dest_filename:
+        test = test.replace("<?php", "<?php\n$port = rand(50000, 65535);")
+        test = test.replace("31337'", "'.$port")
+    if '/ext-standard-file/fread_socket_variation1.php' in full_dest_filename:
+        test = test.replace("<?php", "<?php\n$port = rand(50000, 65535);")
+        test = test.replace("31337'", "'.$port")
+    if '/ext-ftp/ftp_fget_basic1.php' in full_dest_filename:
+        test = test.replace("localfile.txt", "ftp_fget_basic1.txt")
+    if '/ext-ftp/ftp_fget_basic2.php' in full_dest_filename:
+        test = test.replace("localfile.txt", "ftp_fget_basic2.txt")
+    if '/ext-ftp/ftp_fget_basic3.php' in full_dest_filename:
+        test = test.replace("localfile.txt", "ftp_fget_basic3.txt")
+    if '/ext-ftp/ftp_nb_fget_basic1.php' in full_dest_filename:
+        test = test.replace("localfile.txt", "ftp_nb_fget_basic1.txt")
+    if '/ext-ftp/ftp_nb_fget_basic2.php' in full_dest_filename:
+        test = test.replace("localfile.txt", "ftp_nb_fget_basic2.txt")
+    if '/ext-ftp/ftp_nb_fget_basic3.php' in full_dest_filename:
+        test = test.replace("localfile.txt", "ftp_nb_fget_basic3.txt")
 
     file(full_dest_filename, 'w').write(test)
 
 if args.zend_path:
-    test_dirs = (('Zend/tests'), ('tests'), ('sapi'), ('ext'))
     def should_import(filename):
         for bad in no_import:
             if bad in filename:
                 return False
         return True
 
-    for source in test_dirs:
-        for root, dirs, files in os.walk(os.path.join(args.zend_path, source)):
-            for filename in files:
-                full_file = os.path.join(root, filename)
+    for root, dirs, files in os.walk(args.zend_path):
+        for filename in files:
+            full_file = os.path.join(root, filename)
 
-                def matches(patterns):
-                    if not patterns:
+            def matches(patterns):
+                if not patterns:
+                    return True
+                for pattern in patterns:
+                    if pattern in full_file:
                         return True
-                    for pattern in patterns:
-                        if pattern in full_file:
-                            return True
-                    return False
+                return False
 
-                if matches(args.only) and should_import(full_file):
-                    walk(full_file, root.replace(args.zend_path, ''))
+            if matches(args.only) and should_import(full_file):
+                walk(full_file, root.replace(args.zend_path, ''))
 
 if not os.path.isdir('test/zend/all'):
     if args.zend_path:
@@ -653,12 +785,12 @@ if not os.path.isdir('test/zend/all'):
         shutil.copytree('test/zend/bad', 'test/zend/all')
 
         for filename in other_files:
-            dest_dir = os.path.dirname('test/zend/all/'+filename)
+            dest_dir = os.path.dirname('test/zend/all/' + filename)
             if not os.path.exists(dest_dir):
                 os.makedirs(dest_dir)
             shutil.copyfile(
-                'test/zend/good/'+filename, 
-                'test/zend/all/'+filename
+                'test/zend/good/' + filename,
+                'test/zend/all/' + filename
             )
 else:
     print "Running all tests from zend/all"
@@ -698,16 +830,20 @@ for test in results:
         if test in filename:
             good = False
 
+    needs_norepo = False
     if good:
         dest_file = good_file
         delete_file = bad_file
         subpath = 'good'
+        for test in norepo_tests:
+            if test in filename:
+                needs_norepo = True
     else:
         dest_file = bad_file
         delete_file = good_file
         subpath = 'bad'
 
-    exps = glob.glob(filename+'.expect*')
+    exps = glob.glob(filename + '.expect*')
     if not exps:
         # this file is probably generated while running tests :(
         continue
@@ -715,10 +851,12 @@ for test in results:
     source_file_exp = exps[0]
     _, dest_ext = os.path.splitext(source_file_exp)
     shutil.copyfile(filename, dest_file)
-    file(dest_file+dest_ext, 'w').write(
+    file(dest_file + dest_ext, 'w').write(
         file(source_file_exp).read().replace('/all', '/' + subpath)
     )
-    for f in glob.glob(delete_file+"*"):
+    if needs_norepo:
+        file(dest_file + '.norepo', 'w')
+    for f in glob.glob(delete_file + "*"):
         os.unlink(f)
 
 # extra random files needed for tests...
@@ -728,10 +866,11 @@ for root, dirs, files in os.walk('test/zend/all'):
 
         for name in other_files:
             if name in filename:
-                dest = filename.replace('all', 'good', 1)
-                dir = os.path.dirname(dest)
-                mkdir_p(dir)
-                shutil.copyfile(filename, dest)
+                for subdir in ('good', 'bad'):
+                    dest = filename.replace('all', subdir, 1)
+                    dir = os.path.dirname(dest)
+                    mkdir_p(dir)
+                    shutil.copyfile(filename, dest)
 
 if not args.dirty:
     shutil.rmtree('test/zend/all')

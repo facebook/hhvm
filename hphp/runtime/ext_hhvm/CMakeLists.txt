@@ -29,14 +29,18 @@ macro(EXT_HHVM_FILE SOURCES HEADERS REL EHHVM_OS EHHVM_ARCH)
 endmacro()
 
 string(LENGTH "${HPHP_HOME}/hphp/" HPHP_DIR_LEN)
-auto_sources(files "*.cpp" "RECURSE" "${HPHP_HOME}/hphp/runtime/ext")
-foreach (f ${files})
-	if (NOT ${f} MATCHES ".ext_hhvm.cpp")
-		string(LENGTH ${f} f_LEN)
-		math(EXPR f_REL_LEN "${f_LEN} - ${HPHP_DIR_LEN}")
-		string(SUBSTRING ${f} ${HPHP_DIR_LEN} ${f_REL_LEN} f_REL)
-		EXT_HHVM_FILE(CXX_SOURCES CXX_HEADERS ${f_REL} ${EXT_HHVM_OS} ${EXT_HHVM_ARCH})
-	endif()
+
+set(RECURSIVE_SOURCE_SUBDIRS "${HPHP_HOME}/hphp/runtime/ext")
+foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
+	auto_sources(files "*.cpp" "RECURSE" ${dir})
+	foreach (f ${files})
+		if (NOT ${f} MATCHES ".ext_hhvm.cpp")
+			string(LENGTH ${f} f_LEN)
+			math(EXPR f_REL_LEN "${f_LEN} - ${HPHP_DIR_LEN}")
+			string(SUBSTRING ${f} ${HPHP_DIR_LEN} ${f_REL_LEN} f_REL)
+			EXT_HHVM_FILE(CXX_SOURCES CXX_HEADERS ${f_REL} ${EXT_HHVM_OS} ${EXT_HHVM_ARCH})
+		endif()
+	endforeach()
 endforeach()
 EXT_HHVM_FILE(CXX_SOURCES CXX_HEADERS "runtime/base/builtin-functions.cpp" ${EXT_HHVM_OS} ${EXT_HHVM_ARCH})
 
@@ -53,6 +57,11 @@ foreach (header ${CXX_HEADERS})
 endforeach()
 
 auto_sources(HPHP_IDLS "*.idl.json" "RECURSE" "${HPHP_HOME}/hphp/system/idl")
+list(REMOVE_ITEM HPHP_IDLS "${HPHP_HOME}/hphp/system/idl/calendar.idl.json")
+list(REMOVE_ITEM HPHP_IDLS "${HPHP_HOME}/hphp/system/idl/ftp.idl.json")
+list(REMOVE_ITEM HPHP_IDLS "${HPHP_HOME}/hphp/system/idl/gettext.idl.json")
+list(REMOVE_ITEM HPHP_IDLS "${HPHP_HOME}/hphp/system/idl/yaml.idl.json")
+
 add_custom_command(OUTPUT ${INFOTABS_SOURCE}
                    DEPENDS ${CXX_HEADERS} gen-infotabs
                    COMMAND "${HPHP_HOME}/hphp/tools/bootstrap/gen-infotabs"

@@ -83,16 +83,16 @@ int TraitAliasStatement::getKidCount() const {
 void TraitAliasStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_traitName = boost::dynamic_pointer_cast<ScalarExpression>(cp);
+      m_traitName = dynamic_pointer_cast<ScalarExpression>(cp);
       break;
     case 1:
-      m_methodName = boost::dynamic_pointer_cast<ScalarExpression>(cp);
+      m_methodName = dynamic_pointer_cast<ScalarExpression>(cp);
       break;
     case 2:
-      m_modifiers = boost::dynamic_pointer_cast<ModifierExpression>(cp);
+      m_modifiers = dynamic_pointer_cast<ModifierExpression>(cp);
       break;
     case 3:
-      m_newMethodName = boost::dynamic_pointer_cast<ScalarExpression>(cp);
+      m_newMethodName = dynamic_pointer_cast<ScalarExpression>(cp);
       break;
     default:
       assert(false);

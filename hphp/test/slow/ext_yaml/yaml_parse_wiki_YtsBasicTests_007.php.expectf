@@ -1,0 +1,13 @@
+array(2) {
+  ["foo"]=>
+  string(8) "whatever"
+  ["bar"]=>
+  array(3) {
+    ["fruit"]=>
+    string(5) "apple"
+    ["name"]=>
+    string(5) "steve"
+    ["sport"]=>
+    string(8) "baseball"
+  }
+}

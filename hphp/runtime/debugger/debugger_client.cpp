@@ -24,6 +24,7 @@
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/runtime/ext/ext_socket.h"
 #include "hphp/runtime/ext/ext_network.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/util/text-color.h"
 #include "hphp/util/text-art.h"
 #include "hphp/util/logger.h"
@@ -384,7 +385,7 @@ String DebuggerClient::FormatInfoVec(const IDebuggable::InfoVec &info,
 
 String DebuggerClient::FormatTitle(const char *title) {
   TRACE(2, "DebuggerClient::FormatTitle\n");
-  String dash = StringUtil::Repeat(BOX_H, (LineWidth - strlen(title)) / 2 - 4);
+  String dash = f_str_repeat(BOX_H, (LineWidth - strlen(title)) / 2 - 4);
 
   StringBuffer sb;
   sb.append("\n");
@@ -1066,7 +1067,7 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
 // This function is only entered when the machine being debugged is paused.
 //
 // If this function returns it means the process is running again.
-// NB: exceptions derrived from DebuggerException or DebuggerClientExeption
+// NB: exceptions derived from DebuggerException or DebuggerClientExeption
 // indicate the machine remains paused.
 void DebuggerClient::console() {
   TRACE(2, "DebuggerClient::console\n");
@@ -1235,7 +1236,10 @@ char DebuggerClient::ask(const char *fmt, ...) {
   }
   fwrite(msg.data(), 1, msg.length(), stdout);
   fflush(stdout);
-  return tolower(getchar());
+  auto input = readline("");
+  if (input == nullptr) return ' ';
+  if (strlen(input) > 0) return tolower(input[0]);
+  return ' ';
 }
 
 #define DWRITE(ptr, size, nmemb, stream)                                \
@@ -1306,7 +1310,7 @@ IMPLEMENT_COLOR_OUTPUT(error,    stderr,  ErrorColor);
 
 string DebuggerClient::wrap(const std::string &s) {
   TRACE(2, "DebuggerClient::wrap\n");
-  String ret = StringUtil::WordWrap(String(s.c_str(), s.size(), CopyString),
+  String ret = f_wordwrap(String(s.c_str(), s.size(), CopyString),
                                     LineWidth - 4, "\n", true);
   return string(ret.data(), ret.size());
 }
@@ -1365,8 +1369,8 @@ void DebuggerClient::helpCmds(const std::vector<const char *> &cmds) {
       continue;
     }
 
-    cmd = StringUtil::WordWrap(cmd, left, "\n", true);
-    desc = StringUtil::WordWrap(desc, right, "\n", true);
+    cmd = f_wordwrap(cmd, left, "\n", true);
+    desc = f_wordwrap(desc, right, "\n", true);
     Array lines1 = StringUtil::Explode(cmd, "\n").toArray();
     Array lines2 = StringUtil::Explode(desc, "\n").toArray();
     for (int n = 0; n < lines1.size() || n < lines2.size(); n++) {
@@ -1378,7 +1382,7 @@ void DebuggerClient::helpCmds(const std::vector<const char *> &cmds) {
       line.append("  ");
       line.append(lines2[n].toString());
 
-      sb.append(StringUtil::Trim(line.detach(), StringUtil::TrimType::Right));
+      sb.append(f_rtrim(line.detach()));
       sb.append("\n");
     }
   }
@@ -1403,20 +1407,20 @@ void DebuggerClient::tutorial(const char *text) {
   if (m_tutorial < 0) return;
 
   String ret = String(text).replace("\t", "    ");
-  ret = StringUtil::WordWrap(ret, LineWidth - 4, "\n", true);
+  ret = f_wordwrap(ret, LineWidth - 4, "\n", true);
   Array lines = StringUtil::Explode(ret, "\n").toArray();
 
   StringBuffer sb;
-  String header = "  Tutorial - '[h]elp [t]utorial off' to turn off  ";
-  String hr = StringUtil::Repeat(BOX_H, LineWidth - 2);
+  String header = "  Tutorial - '[h]elp [t]utorial off|auto' to turn off  ";
+  String hr = f_str_repeat(BOX_H, LineWidth - 2);
 
   sb.append(BOX_UL); sb.append(hr); sb.append(BOX_UR); sb.append("\n");
 
   int wh = (LineWidth - 2 - header.size()) / 2;
   sb.append(BOX_V);
-  sb.append(StringUtil::Repeat(" ", wh));
+  sb.append(f_str_repeat(" ", wh));
   sb.append(header);
-  sb.append(StringUtil::Repeat(" ", wh));
+  sb.append(f_str_repeat(" ", wh));
   sb.append(BOX_V);
   sb.append("\n");
 
@@ -1790,8 +1794,7 @@ void DebuggerClient::processTakeCode() {
       m_line = m_line.substr(0, m_line.size() - 1);
     }
     m_code = string("<?php $_=(") + m_line.substr(1) + "); ";
-    processEval();
-    CmdVariable::PrintVariable(*this, s_UNDERSCORE);
+    if (processEval()) CmdVariable::PrintVariable(*this, s_UNDERSCORE);
     return;
   } else if (first != '<') {
     usageLogCommand("eval", m_line);
@@ -1814,11 +1817,13 @@ void DebuggerClient::processTakeCode() {
   }
 }
 
-void DebuggerClient::processEval() {
+bool DebuggerClient::processEval() {
   TRACE(2, "DebuggerClient::processEval\n");
   m_inputState = TakingCommand;
   m_acLiveListsDirty = true;
-  CmdEval().onClient(*this);
+  CmdEval eval;
+  eval.onClient(*this);
+  return !eval.failed();
 }
 
 void DebuggerClient::swapHelp() {
@@ -2209,6 +2214,8 @@ void DebuggerClient::loadConfig() {
     m_configFileName.clear();
   }
 
+  auto neverSaveConfig = m_config["NeverSaveConfig"].getBool(false);
+  m_neverSaveConfig = true; // Prevent saving config while reading it
   s_use_utf8 = m_config["UTF8"].getBool(true);
   m_config["UTF8"] = s_use_utf8; // for starter
 
@@ -2222,17 +2229,18 @@ void DebuggerClient::loadConfig() {
 
   m_tutorial = m_config["Tutorial"].getInt32(0);
   m_scriptMode = m_config["ScriptMode"].getBool();
-  setDebuggerBypassCheck(m_config["BypassAccessCheck"].getBool());
+
   setDebuggerClientSmallStep(m_config["SmallStep"].getBool());
-  int printLevel = m_config["PrintLevel"].getInt16(3);
+  setDebuggerClientMaxCodeLines(m_config["MaxCodeLines"].getInt16(-1));
+  setDebuggerClientBypassCheck(m_config["BypassAccessCheck"].getBool());
+  int printLevel = m_config["PrintLevel"].getInt16(5);
   if (printLevel > 0 && printLevel < MinPrintLevel) {
     printLevel = MinPrintLevel;
   }
-  setDebuggerPrintLevel(printLevel);
-
-  int maxCodeLines = m_config["MaxCodeLines"].getInt16(-1);
-  m_config["MaxCodeLines"] = maxCodeLines;
-  setDebuggerClientMaxCodeLines(maxCodeLines);
+  setDebuggerClientPrintLevel(printLevel);
+  setDebuggerClientStackArgs(m_config["StackArgs"].getBool(true));
+  setDebuggerClientShortPrintCharCount(
+    m_config["ShortPrintCharCount"].getInt16(200));
 
   m_config["Tutorial"]["Visited"].get(m_tutorialVisited);
 
@@ -2246,13 +2254,15 @@ void DebuggerClient::loadConfig() {
   m_sourceRoot = m_config["SourceRoot"].getString();
   m_zendExe = m_config["ZendExecutable"].getString("php");
 
-  if (needToWriteFile) {
+  m_neverSaveConfig = neverSaveConfig;
+  if (needToWriteFile && !neverSaveConfig) {
     saveConfig(); // so to generate a starter for people
   }
 }
 
 void DebuggerClient::saveConfig() {
   TRACE(2, "DebuggerClient::saveConfig\n");
+  if (m_neverSaveConfig) return;
   if (m_configFileName.empty()) {
     // we are not touching a file that was not successfully loaded earlier
     return;

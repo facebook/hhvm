@@ -31,7 +31,7 @@ TypeAnnotation::TypeAnnotation(const std::string &name,
                                 m_tuple(false),
                                 m_function(false),
                                 m_xhp(false),
-                                m_typevar(false) {}
+                                m_typevar(false) { }
 
 std::string TypeAnnotation::vanillaName() const {
   // filter out types that should not be exposed to the runtime
@@ -66,6 +66,29 @@ std::string TypeAnnotation::fullName() const {
   return name;
 }
 
+DataType TypeAnnotation::dataType(bool expectedType /*= false */) const {
+  if (m_function || m_xhp || m_tuple) {
+    return KindOfObject;
+  }
+  if (m_typeArgs) {
+    return !m_name.compare("array") ? KindOfArray : KindOfObject;
+  }
+  if (!expectedType && (m_nullable || m_soft)) {
+    return KindOfUnknown;
+  }
+  if (!m_name.compare("null") || !m_name.compare("void")) {
+    return KindOfNull;
+  }
+  if (!m_name.compare("bool"))     return KindOfBoolean;
+  if (!m_name.compare("int"))      return KindOfInt64;
+  if (!m_name.compare("float"))    return KindOfDouble;
+  if (!m_name.compare("string"))   return KindOfString;
+  if (!m_name.compare("array"))    return KindOfArray;
+  if (!m_name.compare("resource")) return KindOfResource;
+  if (!m_name.compare("mixed"))    return KindOfUnknown;
+
+  return KindOfObject;
+}
 
 void TypeAnnotation::getAllSimpleNames(std::vector<std::string>& names) const {
   names.push_back(m_name);

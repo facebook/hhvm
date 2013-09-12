@@ -14,4 +14,4 @@ array(3) {
   [2]=>
   int(3)
 }
-HipHop Fatal error: Argument must implement interface Traversable in %s/hphp/test/slow/iterator/iterator_to_array.php on line 11
+HipHop Fatal error: Argument must implement interface Traversable in %s/test/slow/iterator/iterator_to_array.php on line 11

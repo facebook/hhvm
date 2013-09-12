@@ -120,13 +120,13 @@ int FunctionCall::getKidCount() const {
 void FunctionCall::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_class = boost::dynamic_pointer_cast<Expression>(cp);
+      m_class = dynamic_pointer_cast<Expression>(cp);
       break;
     case 1:
-      m_nameExp = boost::dynamic_pointer_cast<Expression>(cp);
+      m_nameExp = dynamic_pointer_cast<Expression>(cp);
       break;
     case 2:
-      m_params = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      m_params = dynamic_pointer_cast<ExpressionList>(cp);
       break;
     default:
       assert(false);

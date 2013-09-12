@@ -35,6 +35,7 @@
 #define INSTR_SIZE (1024)
 #define SETUP_CLASS(ASMCLASS)                                                  \
   byte* buf = static_cast<byte*>(malloc(INSTR_SIZE));                          \
+  __attribute__((unused)) uint32_t encoding = 0;                               \
   ASMCLASS* masm = new ASMCLASS(buf, INSTR_SIZE);                              \
   Decoder* decoder = new Decoder();                                            \
   Disassembler* disasm = new Disassembler();                                   \
@@ -48,6 +49,18 @@
   masm->FinalizeCode();                                                        \
   decoder->Decode(reinterpret_cast<Instruction*>(buf));                        \
   ASSERT_STREQ(EXP, disasm->GetOutput());
+
+#define COMPARE_PREFIX(ASM, EXP)                                               \
+  masm->Reset();                                                               \
+  masm->ASM;                                                                   \
+  masm->FinalizeCode();                                                        \
+  decoder->Decode(reinterpret_cast<Instruction*>(buf));                        \
+  encoding = *reinterpret_cast<uint32_t*>(buf);                                \
+  if (strncmp(disasm->GetOutput(), EXP, strlen(EXP)) != 0) {                   \
+    printf("Encoding: %08" PRIx32 "\nExpected: %s\nFound:    %s\n",            \
+           encoding, EXP, disasm->GetOutput());                                \
+    abort();                                                                   \
+  }
 
 #define CLEANUP()                                                              \
   delete disasm;                                                               \
@@ -715,6 +728,8 @@ TEST(Disasm, branch) {
   COMPARE(b(INST_OFF(-0x8000000)), "b #-0x8000000");
   COMPARE(b(INST_OFF(0xffffc), eq), "b.eq #+0xffffc");
   COMPARE(b(INST_OFF(-0x100000), mi), "b.mi #-0x100000");
+  COMPARE(b(INST_OFF(0xffffc), al), "b.al #+0xffffc");
+  COMPARE(b(INST_OFF(-0x100000), nv), "b.nv #-0x100000");
   COMPARE(bl(INST_OFF(0x4)), "bl #+0x4");
   COMPARE(bl(INST_OFF(-0x4)), "bl #-0x4");
   COMPARE(bl(INST_OFF(0xffffc)), "bl #+0xffffc");
@@ -723,9 +738,9 @@ TEST(Disasm, branch) {
   COMPARE(cbz(x1, INST_OFF(-0x100000)), "cbz x1, #-0x100000");
   COMPARE(cbnz(w2, INST_OFF(0xffffc)), "cbnz w2, #+0xffffc");
   COMPARE(cbnz(x3, INST_OFF(-0x100000)), "cbnz x3, #-0x100000");
-  COMPARE(tbz(x4, 0, INST_OFF(0x7ffc)), "tbz x4, #0, #+0x7ffc");
+  COMPARE(tbz(x4, 0, INST_OFF(0x7ffc)), "tbz w4, #0, #+0x7ffc");
   COMPARE(tbz(x5, 63, INST_OFF(-0x8000)), "tbz x5, #63, #-0x8000");
-  COMPARE(tbnz(x6, 0, INST_OFF(0x7ffc)), "tbnz x6, #0, #+0x7ffc");
+  COMPARE(tbnz(x6, 0, INST_OFF(0x7ffc)), "tbnz w6, #0, #+0x7ffc");
   COMPARE(tbnz(x7, 63, INST_OFF(-0x8000)), "tbnz x7, #63, #-0x8000");
 
   COMPARE(br(x0), "br x0");
@@ -1165,10 +1180,10 @@ TEST(Disasm, load_store_pair_nontemp) {
 TEST(Disasm, load_literal) {
   SETUP();
 
-  COMPARE(ldr(x10, 0x1234567890abcdefUL),  "ldr x10, #8 (0x1234567890abcdef)");
-  COMPARE(ldr(w20, 0xfedcba09),  "ldr w20, #8 (0xfedcba09)");
-  COMPARE(ldr(d11, 1.234),  "ldr d11, #8 (1.2340)");
-  COMPARE(ldr(s22, 2.5),  "ldr s22, #8 (2.5000)");
+  COMPARE_PREFIX(ldr(x10, 0x1234567890abcdefUL),  "ldr x10, pc+8");
+  COMPARE_PREFIX(ldr(w20, 0xfedcba09),  "ldr w20, pc+8");
+  COMPARE_PREFIX(ldr(d11, 1.234),  "ldr d11, pc+8");
+  COMPARE_PREFIX(ldr(s22, 2.5),  "ldr s22, pc+8");
 
   CLEANUP();
 }
@@ -1195,20 +1210,31 @@ TEST(Disasm, cond_select) {
   COMPARE(cneg(w5, w6, hs), "cneg w5, w6, hs");
   COMPARE(cneg(x7, x8, lo), "cneg x7, x8, lo");
 
+  COMPARE(csel(x0, x1, x2, al), "csel x0, x1, x2, al");
+  COMPARE(csel(x1, x2, x3, nv), "csel x1, x2, x3, nv");
+  COMPARE(csinc(x2, x3, x4, al), "csinc x2, x3, x4, al");
+  COMPARE(csinc(x3, x4, x5, nv), "csinc x3, x4, x5, nv");
+  COMPARE(csinv(x4, x5, x6, al), "csinv x4, x5, x6, al");
+  COMPARE(csinv(x5, x6, x7, nv), "csinv x5, x6, x7, nv");
+  COMPARE(csneg(x6, x7, x8, al), "csneg x6, x7, x8, al");
+  COMPARE(csneg(x7, x8, x9, nv), "csneg x7, x8, x9, nv");
+
   CLEANUP();
 }
 
 TEST(Disasm, cond_cmp) {
   SETUP();
 
-  COMPARE(ccmn(w0, Operand(w1), NZCVFlag, eq), "ccmn w0, w1, #NZCV, eq");
-  COMPARE(ccmn(x2, Operand(x3), NZCFlag, ne), "ccmn x2, x3, #NZCv, ne");
-  COMPARE(ccmp(w4, Operand(w5), NZVFlag, hs), "ccmp w4, w5, #NZcV, hs");
-  COMPARE(ccmp(x6, Operand(x7), NZFlag, lo), "ccmp x6, x7, #NZcv, lo");
-  COMPARE(ccmn(w8, Operand(31), NFlag, mi), "ccmn w8, #31, #Nzcv, mi");
-  COMPARE(ccmn(x9, Operand(30), NCFlag, pl), "ccmn x9, #30, #NzCv, pl");
-  COMPARE(ccmp(w10, Operand(29), NVFlag, vs), "ccmp w10, #29, #NzcV, vs");
-  COMPARE(ccmp(x11, Operand(28), NFlag, vc), "ccmp x11, #28, #Nzcv, vc");
+  COMPARE(ccmn(w0, w1, NZCVFlag, eq), "ccmn w0, w1, #NZCV, eq");
+  COMPARE(ccmn(x2, x3, NZCFlag, ne), "ccmn x2, x3, #NZCv, ne");
+  COMPARE(ccmp(w4, w5, NZVFlag, hs), "ccmp w4, w5, #NZcV, hs");
+  COMPARE(ccmp(x6, x7, NZFlag, lo), "ccmp x6, x7, #NZcv, lo");
+  COMPARE(ccmn(w8, 31, NFlag, mi), "ccmn w8, #31, #Nzcv, mi");
+  COMPARE(ccmn(x9, 30, NCFlag, pl), "ccmn x9, #30, #NzCv, pl");
+  COMPARE(ccmp(w10, 29, NVFlag, vs), "ccmp w10, #29, #NzcV, vs");
+  COMPARE(ccmp(x11, 28, NFlag, vc), "ccmp x11, #28, #Nzcv, vc");
+  COMPARE(ccmn(w12, w13, NoFlag, al), "ccmn w12, w13, #nzcv, al");
+  COMPARE(ccmp(x14, 27, ZVFlag, nv), "ccmp x14, #27, #nZcV, nv");
 
   CLEANUP();
 }
@@ -1323,6 +1349,8 @@ TEST(Disasm, fp_cond_compare) {
   COMPARE(fccmp(d6, d7, NFlag, vs), "fccmp d6, d7, #Nzcv, vs");
   COMPARE(fccmp(d30, d0, NZFlag, vc), "fccmp d30, d0, #NZcv, vc");
   COMPARE(fccmp(d31, d31, ZFlag, hs), "fccmp d31, d31, #nZcv, hs");
+  COMPARE(fccmp(s14, s15, CVFlag, al), "fccmp s14, s15, #nzCV, al");
+  COMPARE(fccmp(d16, d17, CFlag, nv), "fccmp d16, d17, #nzCv, nv");
 
   CLEANUP();
 }
@@ -1335,6 +1363,8 @@ TEST(Disasm, fp_select) {
   COMPARE(fcsel(s31, s31, s30, ne), "fcsel s31, s31, s30, ne");
   COMPARE(fcsel(d0, d1, d2, mi), "fcsel d0, d1, d2, mi");
   COMPARE(fcsel(d31, d30, d31, pl), "fcsel d31, d30, d31, pl");
+  COMPARE(fcsel(s14, s15, s16, al), "fcsel s14, s15, s16, al");
+  COMPARE(fcsel(d17, d18, d19, nv), "fcsel d17, d18, d19, nv");
 
   CLEANUP();
 }
@@ -1360,15 +1390,27 @@ TEST(Disasm, fcvt_scvtf_ucvtf) {
   COMPARE(fcvtzs(x20, s21), "fcvtzs x20, s21");
   COMPARE(fcvtzs(w22, s23), "fcvtzs w22, s23");
   COMPARE(scvtf(d24, w25), "scvtf d24, w25");
-  COMPARE(scvtf(d26, x27), "scvtf d26, x27");
+  COMPARE(scvtf(s24, w25), "scvtf s24, w25");
+  COMPARE(scvtf(d26, x0), "scvtf d26, x0");
+  COMPARE(scvtf(s26, x0), "scvtf s26, x0");
   COMPARE(ucvtf(d28, w29), "ucvtf d28, w29");
+  COMPARE(ucvtf(s28, w29), "ucvtf s28, w29");
   COMPARE(ucvtf(d0, x1), "ucvtf d0, x1");
+  COMPARE(ucvtf(s0, x1), "ucvtf s0, x1");
+  COMPARE(ucvtf(d0, x1, 0), "ucvtf d0, x1");
+  COMPARE(ucvtf(s0, x1, 0), "ucvtf s0, x1");
   COMPARE(scvtf(d1, x2, 1), "scvtf d1, x2, #1");
+  COMPARE(scvtf(s1, x2, 1), "scvtf s1, x2, #1");
   COMPARE(scvtf(d3, x4, 15), "scvtf d3, x4, #15");
+  COMPARE(scvtf(s3, x4, 15), "scvtf s3, x4, #15");
   COMPARE(scvtf(d5, x6, 32), "scvtf d5, x6, #32");
+  COMPARE(scvtf(s5, x6, 32), "scvtf s5, x6, #32");
   COMPARE(ucvtf(d7, x8, 2), "ucvtf d7, x8, #2");
+  COMPARE(ucvtf(s7, x8, 2), "ucvtf s7, x8, #2");
   COMPARE(ucvtf(d9, x10, 16), "ucvtf d9, x10, #16");
+  COMPARE(ucvtf(s9, x10, 16), "ucvtf s9, x10, #16");
   COMPARE(ucvtf(d11, x12, 33), "ucvtf d11, x12, #33");
+  COMPARE(ucvtf(s11, x12, 33), "ucvtf s11, x12, #33");
   COMPARE(fcvtms(w0, s1), "fcvtms w0, s1");
   COMPARE(fcvtms(x2, s3), "fcvtms x2, s3");
   COMPARE(fcvtms(w4, d5), "fcvtms w4, d5");
@@ -1387,6 +1429,7 @@ TEST(Disasm, system_mrs) {
 
   COMPARE(mrs(x0, NZCV), "mrs x0, nzcv");
   COMPARE(mrs(x30, NZCV), "mrs x30, nzcv");
+  COMPARE(mrs(x15, FPCR), "mrs x15, fpcr");
 
   CLEANUP();
 }
@@ -1397,6 +1440,7 @@ TEST(Disasm, system_msr) {
 
   COMPARE(msr(NZCV, x0), "msr nzcv, x0");
   COMPARE(msr(NZCV, x30), "msr nzcv, x30");
+  COMPARE(msr(FPCR, x15), "msr fpcr, x15");
 
   CLEANUP();
 }
@@ -1448,7 +1492,7 @@ TEST(Disasm, log) {
 
   // All Log calls should produce the same instruction.
   COMPARE(Log(LOG_ALL), "hlt #0xdeb3");
-  COMPARE(Log(LOG_FLAGS), "hlt #0xdeb3");
+  COMPARE(Log(LOG_SYS_REGS), "hlt #0xdeb3");
 
   CLEANUP();
 }

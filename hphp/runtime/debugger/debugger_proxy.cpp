@@ -132,6 +132,10 @@ std::string DebuggerProxy::getSandboxId() {
   return m_sandbox.id();
 }
 
+// Forms a list of all threads which are currently blocked within this
+// proxy. There is the thread currently processing an interrupt, plus
+// any other threads stacked up in blockUntilOwn() (represented in the
+// m_threads set).
 void DebuggerProxy::getThreads(DThreadInfoPtrVec &threads) {
   TRACE(2, "DebuggerProxy::getThreads\n");
   Lock lock(this);
@@ -174,6 +178,8 @@ void DebuggerProxy::updateSandbox(DSandboxInfoPtr sandbox) {
   }
 }
 
+// Cause the proxy to debug the given thread. Other threads will stack
+// up in blockUntilOwn() (depending on the thread mode).
 bool DebuggerProxy::switchThread(DThreadInfoPtr thread) {
   TRACE(2, "DebuggerProxy::switchThread\n");
   Lock lock(this);
@@ -184,6 +190,19 @@ bool DebuggerProxy::switchThread(DThreadInfoPtr thread) {
   return false;
 }
 
+// Change the thread mode, and mark the given (or calling) thread as
+// the current thread for this proxy, depending on the thread mode.
+//
+// We have three thread modes: Normal, Sticky, and Exclusive. For more
+// details, see the help for CmdThread. In short, in Normal mode any
+// thread may hit and process an interrupt. The first thread to hit an
+// interrupt becomes the current thread, and all others block until
+// the current thread is done with its interrupt.
+//
+// In Exclusive mode, only the current thread may process interrupts;
+// All others will ignore interrupts. In Sticky mode, the current
+// thread continues to block others (even while running) until the
+// mode is switched back to Normal.
 void DebuggerProxy::switchThreadMode(ThreadMode mode,
                                      int64_t threadId /* = 0 */) {
   TRACE(2, "DebuggerProxy::switchThreadMode\n");
@@ -191,7 +210,6 @@ void DebuggerProxy::switchThreadMode(ThreadMode mode,
   m_threadMode = mode;
   if (threadId) {
     m_thread = threadId;
-    m_newThread.reset();
     notifyAll(); // since threadId != 0, we're still waking up just one thread
   } else if (mode == Normal) {
     m_thread = 0;
@@ -199,9 +217,7 @@ void DebuggerProxy::switchThreadMode(ThreadMode mode,
   } else {
     m_thread = (int64_t)Process::GetThreadId();
   }
-  if (mode == Normal) {
-    m_flow.reset();
-  }
+  TRACE(2, "Current thread is now %" PRIx64 "\n", m_thread);
 }
 
 void DebuggerProxy::startDummySandbox() {
@@ -223,6 +239,30 @@ void DebuggerProxy::setBreakPoints(BreakPointInfoPtrVec &breakpoints) {
   // to hold it over the longer operation to set breakpoints in each file later.
   {
     WriteLock lock(m_breakMutex);
+    // breakpoints holds a list of fresh new BreakPointInfo objects that
+    // have been deserialized from the client's list of breakpoints.
+    // The existing BreakPointInfo objects may include non empty values
+    // for m_stack. If these get thrown away, breakpoints that are temporarily
+    // disabled will suddenly fire again, which is not what we want to
+    // happen if we create a new breakpoint or just even list breakpoints.
+    auto it = m_breakpoints.begin();
+    for (auto it1 = breakpoints.begin(); it1 != breakpoints.end(); ++it1)  {
+      BreakPointInfoPtr newBreakPoint = *it1;
+      do {
+        for (auto it2 = it; it2 != m_breakpoints.end(); ) {
+          BreakPointInfoPtr oldBreakPoint = *it2++;
+          if (oldBreakPoint->same(newBreakPoint)) {
+            newBreakPoint->transferStack(oldBreakPoint);
+            it = it2;
+            goto next_breakpoint;
+          }
+        }
+        if (it == m_breakpoints.begin()) goto next_breakpoint;
+        // Only searched a part of m_breakpoints. Reset it and try again.
+        it = m_breakpoints.begin();
+      } while (true);
+      next_breakpoint: continue;
+    }
     m_breakpoints = breakpoints;
     m_hasBreakPoints = !m_breakpoints.empty();
   }
@@ -230,7 +270,7 @@ void DebuggerProxy::setBreakPoints(BreakPointInfoPtrVec &breakpoints) {
 }
 
 void DebuggerProxy::getBreakPoints(BreakPointInfoPtrVec &breakpoints) {
-  TRACE(2, "DebuggerProxy::getBreakPoints\n");
+  TRACE(7, "DebuggerProxy::getBreakPoints\n");
   ReadLock lock(m_breakMutex);
   breakpoints = m_breakpoints;
 }
@@ -262,9 +302,7 @@ void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
   // the opcode hook. This could be for a breakpoint, stepping, etc.
 
   // Wait until this thread is the one this proxy wants to debug.
-  if (!blockUntilOwn(cmd, true)) {
-    return;
-  }
+  if (!blockUntilOwn(cmd, true)) return;
 
   // We know we're on the "current" thread, so we can process any active flow
   // command, stop if we're at a breakpoint, handle other interrupts, etc.
@@ -284,32 +322,28 @@ void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
         SCOPE_EXIT { enableSignalPolling(); };
         processInterrupt(cmd);
       } catch (const DebuggerException &e) {
+        TRACE(2, "DebuggerException from processInterrupt!\n");
         switchThreadMode(Normal);
         throw;
       } catch (...) {
+        TRACE(2, "Unknown exception from processInterrupt!\n");
         assert(false); // no other exceptions should be seen here
         switchThreadMode(Normal);
         throw;
       }
-      if (cmd.getInterruptType() == PSPEnded) {
-        switchThreadMode(Normal);
-        return; // we are done with this thread
-      }
-      if (!m_newThread) {
-        break; // we're not switching threads
-      }
-
+      if (cmd.getInterruptType() == PSPEnded) break;
+      if (!m_newThread) break; // we're not switching threads
       switchThreadMode(Normal, m_newThread->m_id);
+      m_newThread.reset();
       blockUntilOwn(cmd, false);
     }
   }
 
-  if (m_threadMode == Normal) {
-    Lock lock(this);
-    m_thread = 0;
-    notify();
-  } else if (cmd.getInterruptType() == PSPEnded) {
-    switchThreadMode(Normal); // we are done with this thread
+  if ((m_threadMode == Normal) || (cmd.getInterruptType() == PSPEnded)) {
+    // If the thread mode is Normal we let other threads with
+    // interrupts go ahead and process them. We also do this when the
+    // thread is at PSPEnded because the thread is done.
+    switchThreadMode(Normal);
   }
 }
 
@@ -425,6 +459,7 @@ void DebuggerProxy::pollSignal() {
     // We've noticed that the socket has closed. Stop and destory this proxy.
     TRACE_RB(2, "DebuggerProxy::pollSignal: "
              "lost communication with the client, stopping proxy\n");
+    Debugger::UsageLog("server", getSandboxId(), "ProxyError", "Signal poll");
     stop();
   }
   TRACE_RB(2, "DebuggerProxy::pollSignal: ended\n");
@@ -480,6 +515,8 @@ static void append_stderr(const char *header, const char *msg,
   }
 }
 
+// Record info about the current thread for the debugger client to use
+// when listing all threads which are interrupted.
 DThreadInfoPtr DebuggerProxy::createThreadInfo(const std::string &desc) {
   TRACE(2, "DebuggerProxy::createThreadInfo\n");
   DThreadInfoPtr info(new DThreadInfo());
@@ -501,28 +538,32 @@ DThreadInfoPtr DebuggerProxy::createThreadInfo(const std::string &desc) {
 // breakpoints, then if there are no breakpoints which could effect this
 // thread we simply return false and stop processing the current interrupt.
 bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
-  TRACE(2, "DebuggerProxy::blockUntilOwn\n");
   int64_t self = cmd.getThreadId();
+  TRACE(2, "DebuggerProxy::blockUntilOwn for thread %" PRIx64 "\n", self);
 
   Lock lock(this);
   if (m_thread && m_thread != self) {
     if (check && (m_threadMode == Exclusive || !checkBreakPoints(cmd))) {
       // Flow control commands only belong to sticky thread
+      TRACE(2, "No need to interrupt this thread\n");
       return false;
     }
     m_threads[self] = createThreadInfo(cmd.desc());
     while (!m_stopped && m_thread && m_thread != self) {
+      TRACE(2, "Waiting...\n");
       wait(1);
 
-      // if for whatever reason, m_thread isn't debugging anymore (for example,
+      // If for whatever reason, m_thread isn't debugging anymore (for example,
       // it runs in Sticky mode, but it finishes running), kick it out.
-      if (!Debugger::IsThreadDebugging(m_thread)) {
+      if (m_thread && !Debugger::IsThreadDebugging(m_thread)) {
+        TRACE(2, "Old thread abandoned debugging, taking over!\n");
         m_threadMode = Normal;
-        m_thread = self;
+        m_thread = 0;
         m_newThread.reset();
         m_flow.reset();
       }
     }
+    TRACE(2, "Ready to become current thread for this proxy\n");
     m_threads.erase(self);
     if (m_stopped) return false;
     if (!checkBreakPoints(cmd)) {
@@ -533,8 +574,10 @@ bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
 
   // This thread is now the one the proxy considers the current thread.
   if (m_thread == 0) {
+    TRACE(2, "Updating current thread\n");
     m_thread = self;
   }
+  TRACE(2, "Current thread for this proxy tid=%" PRIx64 "\n", self);
   return true;
 }
 
@@ -613,6 +656,8 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
   // Do the server-side work for this interrupt, which just notifies the client.
   if (!cmd.onServer(*this)) {
     TRACE_RB(1, "Failed to send CmdInterrupt to client\n");
+    Debugger::UsageLog("server", getSandboxId(), "ProxyError",
+                       "Send interrupt");
     stopAndThrow();
   }
 
@@ -640,6 +685,8 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
           TRACE_RB(2, "Incomplete flow command %d remaining on proxy for "
                    "further processing\n", m_flow->getType());
           if (m_threadMode == Normal) {
+            // We want the flow command to complete on the thread that
+            // starts it.
             switchThreadMode(Sticky);
           }
         } else {
@@ -662,10 +709,14 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
       if (res) {
         if (!res->onServer(*this)) {
           TRACE_RB(1, "Failed to execute cmd %d from client\n", res->getType());
+          Debugger::UsageLog("server", getSandboxId(), "ProxyError",
+                             "Command failed");
           cmdFailure = true;
         }
       } else {
         TRACE_RB(1, "Failed to receive cmd from client\n");
+        Debugger::UsageLog("server", getSandboxId(), "ProxyError",
+                           "Command receive failed");
         cmdFailure = true;
       }
     } catch (const DebuggerException &e) {
@@ -673,10 +724,14 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
     } catch (const std::exception& e) {
       Logger::Warning(DEBUGGER_LOG_TAG
        "Cmd type %d onServer() threw exception %s", res->getType(), e.what());
+      Debugger::UsageLog("server", getSandboxId(), "ProxyError",
+                         "Command exception");
       cmdFailure = true;
     } catch (...) {
       Logger::Warning(DEBUGGER_LOG_TAG
        "Cmd type %d onServer() threw non standard exception", res->getType());
+      Debugger::UsageLog("server", getSandboxId(), "ProxyError",
+                         "Command exception");
       cmdFailure = true;
     }
     if (cmdFailure) stopAndThrow();
@@ -687,7 +742,7 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
-                                  int frame, int flags) {
+                                  int frame, bool &failed, int flags) {
   TRACE(2, "DebuggerProxy::ExecutePHP\n");
   Variant ret;
   // Wire up stdout and stderr to our own string buffer so we can pass
@@ -698,37 +753,28 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
   if (flags & ExecutePHPFlagsLog) {
     Logger::SetThreadHook(append_stderr, &sb);
   }
-  try {
-    String code(php.c_str(), php.size(), CopyString);
-    // We're about to start executing more PHP. This is typically done
-    // in response to commands from the client, and the client expects
-    // those commands to send more interrupts since, of course, the
-    // user might want to debug the code we're about to run. If we're
-    // already processing an interrupt, enable signal polling around
-    // the execution of the new PHP to ensure that we can handle
-    // signals while doing so.
-    if (flags & ExecutePHPFlagsAtInterrupt) enableSignalPolling();
-    SCOPE_EXIT {
-      if (flags & ExecutePHPFlagsAtInterrupt) disableSignalPolling();
-    };
-    g_vmContext->evalPHPDebugger((TypedValue*)&ret, code.get(), frame);
-  } catch (InvalidFunctionCallException &e) {
-    sb.append(Debugger::ColorStderr(String(e.what())));
-    sb.append(Debugger::ColorStderr(
-              "You may also need to connect to a host "
-              "(e.g., machine connect localhost)."));
-  } catch (Exception &e) {
-    sb.append(Debugger::ColorStderr(String(e.what())));
-  } catch (Object &e) {
-    if (e->hasToString()) {
-      sb.append(Debugger::ColorStderr(e.toString()));
-    } else {
-      sb.append(Debugger::ColorStderr
-                (String("(object without __toString() is thrown)")));
-    }
-  } catch (...) {
-    sb.append(Debugger::ColorStderr(String("(unknown exception was thrown)")));
-  }
+  String code(php.c_str(), php.size(), CopyString);
+  // We're about to start executing more PHP. This is typically done
+  // in response to commands from the client, and the client expects
+  // those commands to send more interrupts since, of course, the
+  // user might want to debug the code we're about to run. If we're
+  // already processing an interrupt, enable signal polling around
+  // the execution of the new PHP to ensure that we can handle
+  // signals while doing so.
+  //
+  // Note: we must switch the thread mode to Sticky so we block
+  // other threads which may hit interrupts while we're running,
+  // since nested processInterrupt() calls would normally release
+  // other threads on the way out.
+  assert(m_thread == (int64_t)Process::GetThreadId());
+  ThreadMode origThreadMode = m_threadMode;
+  switchThreadMode(Sticky, m_thread);
+  if (flags & ExecutePHPFlagsAtInterrupt) enableSignalPolling();
+  SCOPE_EXIT {
+    if (flags & ExecutePHPFlagsAtInterrupt) disableSignalPolling();
+    switchThreadMode(origThreadMode, m_thread);
+  };
+  failed = g_vmContext->evalPHPDebugger((TypedValue*)&ret, code.get(), frame);
   g_context->setStdout(nullptr, nullptr);
   g_context->swapOutputBuffer(save);
   if (flags & ExecutePHPFlagsLog) {

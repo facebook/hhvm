@@ -169,7 +169,7 @@ class Array : protected SmartPtr<ArrayData> {
                   const void *value_data = nullptr) const;
 
   /**
-   * Iterator functions. See array_iterator.h for end() and next().
+   * Iterator functions. See array-iterator.h for end() and next().
    */
   ArrayIter begin(CStrRef context = null_string) const;
 

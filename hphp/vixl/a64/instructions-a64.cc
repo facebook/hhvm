@@ -29,19 +29,6 @@
 
 namespace vixl {
 
-#ifdef DEBUG
-uint32_t Instruction::SpacedBits(int num_bits, ...) const {
-  va_list bit_list;
-  va_start(bit_list, num_bits);
-  int32_t result = 0;
-  for (int i = 0; i < num_bits; i++) {
-    result = (result << 1) | Bit(va_arg(bit_list, int));
-  }
-  va_end(bit_list);
-  return result;
-}
-#endif
-
 
 static uint64_t RotateRight(uint64_t value,
                             unsigned int rotate,
@@ -67,6 +54,9 @@ static uint64_t RepeatBitsAcrossReg(unsigned reg_size,
 }
 
 
+// Logical immediates can't encode zero, so a return value of zero is used to
+// indicate a failure case. Specifically, where the constraints on imm_s are
+// not met.
 uint64_t Instruction::ImmLogical() {
   unsigned reg_size = SixtyFourBits() ? kXRegSize : kWRegSize;
   int64_t n = BitN();
@@ -91,15 +81,21 @@ uint64_t Instruction::ImmLogical() {
   //
 
   if (n == 1) {
-    assert(imm_s != 0x3F);
+    if (imm_s == 0x3F) {
+      return 0;
+    }
     uint64_t bits = (1UL << (imm_s + 1)) - 1;
     return RotateRight(bits, imm_r, 64);
   } else {
-    assert((imm_s >> 1) != 0x1F);
+    if ((imm_s >> 1) == 0x1F) {
+      return 0;
+    }
     for (int width = 0x20; width >= 0x2; width >>= 1) {
       if ((imm_s & width) == 0) {
         int mask = width - 1;
-        assert((imm_s & mask) != mask);
+        if ((imm_s & mask) == mask) {
+          return 0;
+        }
         uint64_t bits = (1UL << ((imm_s & mask) + 1)) - 1;
         return RepeatBitsAcrossReg(reg_size,
                                    RotateRight(bits, imm_r & mask, width),

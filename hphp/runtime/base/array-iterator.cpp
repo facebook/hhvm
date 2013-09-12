@@ -391,13 +391,13 @@ ArrayIter::ArrayIter(Mappish* coll, VersionableSparse)
 }
 
 template<class Tuplish>
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 bool ArrayIter::iterNext(Fixed) {
   return ++m_pos < static_cast<Tuplish*>(getObject())->size();
 }
 
 template<class Vectorish>
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 bool ArrayIter::iterNext(Versionable) {
   Vectorish* vec = static_cast<Vectorish*>(getObject());
   if (UNLIKELY(m_version != vec->getVersion())) {
@@ -407,7 +407,7 @@ bool ArrayIter::iterNext(Versionable) {
 }
 
 template<class Mappish>
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 bool ArrayIter::iterNext(VersionableSparse) {
   Mappish* coll = static_cast<Mappish*>(getObject());
   if (UNLIKELY(m_version != coll->getVersion())) {
@@ -418,37 +418,37 @@ bool ArrayIter::iterNext(VersionableSparse) {
 }
 
 template<class Tuplish>
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 Variant ArrayIter::iterKey(Fixed) {
   return m_pos;
 }
 
 template<class Vectorish>
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 Variant ArrayIter::iterKey(Versionable) {
   return m_pos;
 }
 
 template<class Mappish>
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 Variant ArrayIter::iterKey(VersionableSparse) {
   return static_cast<Mappish*>(getObject())->iter_key(m_pos);
 }
 
 template<class Tuplish>
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 Variant ArrayIter::iterValue(Fixed) {
   return tvAsCVarRef(static_cast<Tuplish*>(getObject())->get(m_pos));
 }
 
 template<class Vectorish>
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 Variant ArrayIter::iterValue(Versionable) {
   return tvAsCVarRef(static_cast<Vectorish*>(getObject())->get(m_pos));
 }
 
 template<class Mappish>
-inline ALWAYS_INLINE
+ALWAYS_INLINE
 Variant ArrayIter::iterValue(VersionableSparse) {
   return tvAsCVarRef(static_cast<Mappish*>(getObject())->iter_value(m_pos));
 }

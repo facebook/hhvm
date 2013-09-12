@@ -64,7 +64,21 @@ int main(int argc, const char* argv[]) {
   // Declare the fg_ and tg_ stubs
 
   for (auto const& func : funcs) {
-    cpp << "TypedValue* fg_" << func.name() << "(ActRec* ar);\n";
+    fbstring name = func.lowerName();
+    if (func.flags() & ZendCompat) {
+      cpp << "} // End namespace\n";
+      cpp << "void zif_" << name << "(HPHP::ActRec* ar, HPHP::TypedValue* return_value);\n";
+      cpp << "HPHP::TypedValue* fg_" << name << "(HPHP::ActRec* ar){\n";
+      cpp << "  HPHP::TypedValue return_value;\n";
+      cpp << "  HPHP::tvWriteNull(&return_value);\n";
+      cpp << "  zif_" << name << "(ar, &return_value);\n";
+      cpp << "  HPHP::tvDup(return_value, ar->m_r);\n";
+      cpp << "  return nullptr;\n";
+      cpp << "}\n";
+      cpp << "namespace HPHP {\n";
+    } else {
+      cpp << "TypedValue* fg_" << name << "(ActRec* ar);\n";
+    }
   }
 
   for (auto const& klass : classes) {
@@ -79,6 +93,8 @@ int main(int argc, const char* argv[]) {
   }
 
   cpp << "\n";
+  cpp << "}\n";
+  cpp << "namespace HPHP {\n";
 
   ///////////////////////////////////////
   // Define the name - fg_ - fh_ mappings
@@ -96,8 +112,16 @@ int main(int argc, const char* argv[]) {
     }
     first = false;
 
-    cpp << "{ \"" << func.name() << "\", fg_" << func.name()
-        << ", (void *)&fh_" << func.name() << " }";
+    auto ns = "";
+    auto prefix = "fh_";
+    if (func.flags() & ZendCompat) {
+      ns = "::";
+      prefix = "zif_";
+    }
+
+    fbstring name = func.lowerName();
+    cpp << "{ \"" << name << "\", " << ns << "fg_" << name
+        << ", (void *)&" << ns << prefix << name << " }";
   }
   cpp << "\n};\n\n";
 

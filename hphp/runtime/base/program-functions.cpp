@@ -42,6 +42,7 @@
 #include "hphp/util/light-process.h"
 #include "hphp/util/repo-schema.h"
 #include "hphp/util/current-executable.h"
+#include "hphp/util/service-data.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/ext_fb.h"
@@ -302,6 +303,22 @@ static void handle_exception_append_bt(std::string& errorMsg,
   }
 }
 
+static void bump_counter_and_rethrow() {
+  try {
+    throw;
+  } catch (const RequestTimeoutException& e) {
+    static auto requestTimeoutCounter = ServiceData::createTimeseries(
+      "requests_timed_out", {ServiceData::StatsType::COUNT});
+    requestTimeoutCounter->addValue(1);
+    throw;
+  } catch (const RequestMemoryExceededException& e) {
+    static auto requestMemoryExceededCounter = ServiceData::createTimeseries(
+      "requests_memory_exceeded", {ServiceData::StatsType::COUNT});
+    requestMemoryExceededCounter->addValue(1);
+    throw;
+  }
+}
+
 static void handle_exception_helper(bool& ret,
                                     ExecutionContext* context,
                                     std::string& errorMsg,
@@ -309,7 +326,7 @@ static void handle_exception_helper(bool& ret,
                                     bool& error,
                                     bool richErrorMsg) {
   try {
-    throw;
+    bump_counter_and_rethrow();
   } catch (const Eval::DebuggerException &e) {
     throw;
   } catch (const ExitException &e) {
@@ -813,6 +830,75 @@ static void close_server_log_file(int kind) {
   }
 }
 
+static int compute_hhvm_argc(const options_description& desc,
+                             int argc, char** argv) {
+  enum ArgCode {
+    NO_ARG = 0,
+    ARG_REQUIRED = 1,
+    ARG_OPTIONAL = 2
+  };
+  const auto& vec = desc.options();
+  std::map<string,ArgCode> long_options;
+  std::map<string,ArgCode> short_options;
+  // Build lookup maps for the short options and the long options
+  for (unsigned i = 0; i < vec.size(); ++i) {
+    auto opt = vec[i];
+    auto long_name = opt->long_name();
+    ArgCode code = NO_ARG;
+    if (opt->semantic()->max_tokens() == 1) {
+      if (opt->semantic()->min_tokens() == 1) {
+        code = ARG_REQUIRED;
+      } else {
+        code = ARG_OPTIONAL;
+      }
+    }
+    long_options[long_name] = code;
+    auto format_name = opt->format_name();
+    if (format_name.size() >= 2 && format_name[0] == '-' &&
+        format_name[1] != '-') {
+      auto short_name = format_name.substr(1,1);
+      short_options[short_name] = code;
+    }
+  }
+  // Loop over the args
+  int pos = 1;
+  while (pos < argc) {
+    const char* str = argv[pos];
+    int len = strlen(str);
+    if (len == 2 && memcmp(str, "--", 2) == 0) {
+      // We found "--". All args after this are intended for the
+      // PHP application
+      ++pos;
+      break;
+    }
+    if (len >= 3 && str[0] == '-' && str[1] == '-') {
+      // Handle long options
+      ++pos;
+      string s(str+2);
+      auto it = long_options.find(s);
+      if (it != long_options.end() && it->second != NO_ARG && pos < argc &&
+          (it->second == ARG_REQUIRED || argv[pos][0] != '-')) {
+        ++pos;
+      }
+    } else if (len >= 2 && str[0] == '-') {
+      // Handle short options
+      ++pos;
+      string s;
+      s.append(1, str[1]);
+      auto it = short_options.find(s);
+      if (it != short_options.end() && it->second != 0 && len == 2 &&
+          pos < argc && (it->second == ARG_REQUIRED || argv[pos][0] != '-')) {
+        ++pos;
+      }
+    } else {
+      // We've found a non-option argument. This arg and all args
+      // that follow are intended for the PHP application
+      break;
+    }
+  }
+  return pos;
+}
+
 static int execute_program_impl(int argc, char** argv) {
   string usage = "Usage:\n\n   ";
   usage += argv[0];
@@ -886,67 +972,47 @@ static int execute_program_impl(int argc, char** argv) {
   positional_options_description p;
   p.add("arg", -1);
   variables_map vm;
+
+  // Before invoking the boost command line parser, we do a manual pass
+  // to find the first occurrence of either "--" or a non-option argument
+  // in order to determine which arguments should be consumed by HHVM and
+  // which arguments should be passed along to the PHP application. This
+  // is necessary so that the boost command line parser doesn't choke on
+  // args intended for the PHP application.
+  int hhvm_argc = compute_hhvm_argc(desc, argc, argv);
+
   try {
-    // We use the boost command line parser to do the initial parsing,
-    // and then we do a manual pass to find the first occurrence of
-    // either "--" or a non-option argument so that we can properly
-    // determine which arguments should be consumed by HHVM and which
-    // arguments should be passed to the PHP application.
-    //
-    // We instruct the boost command line parser to allow unrecognized
-    // options and we manually deal with raising an error when there is
-    // an unrecognized option; we need to do this because otherwise the
-    // boost parser may choke on arguments intended for PHP application.
-    // Also, during the manual pass we keep track of our position in the
-    // original argv array so that we can correctly detect the first
-    // occurrence of "--" (since the boost parser swallows this token).
-    auto opts = command_line_parser(argc, argv)
+    // Invoke the boost command line parser to parse the args for HHVM.
+    auto opts = command_line_parser(hhvm_argc, argv)
       .options(desc)
       .positional(p)
-      .allow_unregistered()
+      // If these style options are changed, compute_hhvm_argc() will
+      // need to be updated appropriately
+      .style(command_line_style::default_style &
+             ~command_line_style::allow_guessing &
+             ~command_line_style::allow_sticky &
+             ~command_line_style::long_allow_adjacent)
       .run();
-    // argvPos will track where we are in the original argv array
-    int argvPos = 1;
-    for (unsigned i = 0; i < opts.options.size(); ++i) {
-      const auto& option = opts.options[i];
-      if (option.unregistered) {
-        Logger::Error("Error in command line: unknown option %s",
-                      option.original_tokens[0].c_str());
-        cout << desc << "n";
-        return -1;
+    // Manually append the args for the PHP application.
+    int pos = 0;
+    for (unsigned m = 0; m < opts.options.size(); ++m) {
+      const auto& bo = opts.options[m];
+      if (bo.string_key == "arg") {
+        ++pos;
       }
-      // Check if we've encountered "--" and make sure that argvPos
-      // accounts for it
-      bool foundDashDash = !strcmp(argv[argvPos], "--");
-      if (foundDashDash) {
-        ++argvPos;
-      }
-      // If we haven't encountered "--" or the first non-option
-      // argument, update argvPos appropriately and keep scanning
-      if (!foundDashDash && option.position_key == -1) {
-        argvPos += option.original_tokens.size();
-        continue;
-      }
-      // We've found the first occurrence of "--" or a non-option
-      // argument. Truncate opts.options, and then take all the
-      // remaining arguments from the original argv array and insert
-      // them into opts.options.
-      opts.options.resize(i);
-      std::vector<basic_option<char> > vec;
-      int pos = 0;
-      for (int m = argvPos; m < argc; ++m) {
-        string str = argv[m];
-        basic_option<char> bo;
-        bo.string_key = "arg";
-        bo.position_key = pos++;
-        bo.value.push_back(str);
-        bo.original_tokens.push_back(str);
-        bo.unregistered = false;
-        bo.case_insensitive = false;
-        opts.options.push_back(bo);
-      }
-      break;
     }
+    for (unsigned m = hhvm_argc; m < argc; ++m) {
+      string str = argv[m];
+      basic_option<char> bo;
+      bo.string_key = "arg";
+      bo.position_key = pos++;
+      bo.value.push_back(str);
+      bo.original_tokens.push_back(str);
+      bo.unregistered = false;
+      bo.case_insensitive = false;
+      opts.options.push_back(bo);
+    }
+    // Process the options
     store(opts, vm);
     notify(vm);
     if (po.mode == "d") po.mode = "debug";
@@ -1172,7 +1238,6 @@ static int execute_program_impl(int argc, char** argv) {
         return 1;
       }
       Eval::Debugger::RegisterSandbox(localProxy->getDummyInfo());
-      Eval::Debugger::RegisterThread();
       StringVecPtr client_args;
       bool restart = false;
       ret = 0;
@@ -1414,20 +1479,17 @@ static bool hphp_warmup(ExecutionContext *context,
   error = false;
   std::string errorMsg;
 
-  MemoryManager *mm = MemoryManager::TheMemoryManager();
-  if (mm->isEnabled()) {
-    ServerStatsHelper ssh("reqinit");
-    try {
-      if (!reqInitDoc.empty()) {
-        include_impl_invoke(reqInitDoc, true);
-      }
-      if (!reqInitFunc.empty()) {
-        invoke(reqInitFunc.c_str(), Array());
-      }
-      context->backupSession();
-    } catch (...) {
-      handle_reqinit_exception(ret, context, errorMsg, error);
+  ServerStatsHelper ssh("reqinit");
+  try {
+    if (!reqInitDoc.empty()) {
+      include_impl_invoke(reqInitDoc, true);
     }
+    if (!reqInitFunc.empty()) {
+      invoke(reqInitFunc.c_str(), Array());
+    }
+    context->backupSession();
+  } catch (...) {
+    handle_reqinit_exception(ret, context, errorMsg, error);
   }
 
   return ret;
@@ -1448,11 +1510,6 @@ void hphp_session_init() {
   StatCache::requestInit();
 
   g_vmContext->requestInit();
-}
-
-bool hphp_is_warmup_enabled() {
-  MemoryManager *mm = MemoryManager::TheMemoryManager();
-  return mm->isEnabled();
 }
 
 ExecutionContext *hphp_context_init() {
@@ -1555,7 +1612,7 @@ void hphp_session_exit() {
   }
   mm->resetStats();
 
-  if (mm->isEnabled()) {
+  {
     ServerStatsHelper ssh("rollback");
     // sweep may call g_context->, which is a noCheck, so we need to
     // reinitialize g_context here
@@ -1574,10 +1631,6 @@ void hphp_session_exit() {
     // Do any post-sweep cleanup necessary for global variables
     free_global_variables_after_sweep();
     g_context.getCheck();
-  } else {
-    g_context.getCheck();
-    ServerStatsHelper ssh("free");
-    free_global_variables();
   }
 
   ThreadInfo::s_threadInfo->onSessionExit();

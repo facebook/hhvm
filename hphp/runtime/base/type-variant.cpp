@@ -31,6 +31,7 @@
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/util/util.h"
+#include "hphp/util/abi-cxx.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
@@ -244,14 +245,15 @@ static_assert(kDestrTableSize == 6,
 
 const RawDestructor g_destructors[] = {
   nullptr,
-  (RawDestructor)Util::getMethodPtr(&StringData::release),
-  (RawDestructor)Util::getMethodPtr(&ArrayData::release),
-  (RawDestructor)Util::getMethodPtr(&ObjectData::release),
-  (RawDestructor)Util::getMethodPtr(&ResourceData::release),
-  (RawDestructor)Util::getMethodPtr(&RefData::release),
+  (RawDestructor)getMethodPtr(&StringData::release),
+  (RawDestructor)getMethodPtr(&ArrayData::release),
+  (RawDestructor)getMethodPtr(&ObjectData::release),
+  (RawDestructor)getMethodPtr(&ResourceData::release),
+  (RawDestructor)getMethodPtr(&RefData::release),
 };
 
-inline ALWAYS_INLINE void Variant::destructDataImpl(RefData* data, DataType t) {
+ALWAYS_INLINE
+void Variant::destructDataImpl(RefData* data, DataType t) {
   assert(IS_REFCOUNTED_TYPE(t));
   assert(IS_REAL_TYPE(t));
   if (data->decRefCount() == 0) {
@@ -262,7 +264,8 @@ inline ALWAYS_INLINE void Variant::destructDataImpl(RefData* data, DataType t) {
   }
 }
 
-inline ALWAYS_INLINE void Variant::destructImpl() {
+ALWAYS_INLINE
+void Variant::destructImpl() {
   destructDataImpl(m_data.pref, m_type);
 }
 
@@ -1227,8 +1230,8 @@ Variant &Variant::lvalBlackHole() {
 }
 
 template <typename T>
-inline ALWAYS_INLINE CVarRef Variant::SetImpl(Variant *self, T key,
-                                              CVarRef v, bool isKey) {
+ALWAYS_INLINE
+CVarRef Variant::SetImpl(Variant *self, T key, CVarRef v, bool isKey) {
   retry:
   if (LIKELY(self->m_type == KindOfArray)) {
     ArrayData *escalated;
@@ -1267,12 +1270,32 @@ inline ALWAYS_INLINE CVarRef Variant::SetImpl(Variant *self, T key,
     goto retry;
   case KindOfStaticString:
   case KindOfString: {
-    StringData *s = self->m_data.pstr;
-    if (s->empty()) {
-      goto create;
-    }
-    StringData *es = StringData::Escalate(s);
-    es->set(key, v.toString());
+    auto const s = self->m_data.pstr;
+    if (s->empty()) goto create;
+
+    auto const es = [&]() -> StringData* {
+      auto const offset = HPHP::toInt64(key);
+      auto const r = s->slice();
+      if (offset < 0) return s;
+      if (r.len == 0) throw OffsetOutOfRangeException();
+
+      String str = v.toString();
+      auto const ch = str.empty() ? 0 : str.data()[0];
+      if (offset < r.len && s->getCount() <= 1) {
+        return s->modifyChar(offset, ch);
+      }
+      if (offset > RuntimeOption::StringOffsetLimit) {
+        throw OffsetOutOfRangeException();
+      }
+      uint32_t newlen = offset + 1;
+      auto const sd = StringData::Make(newlen);
+      auto const mslice = sd->mutableSlice();
+      memcpy(mslice.ptr, r.ptr, r.len);
+      memset(mslice.ptr + r.len, ' ', newlen - r.len);
+      mslice.ptr[offset] = ch;
+      sd->setSize(newlen);
+      return sd;
+    }();
     if (es != s) self->set(es);
     break;
   }
@@ -1352,8 +1375,8 @@ CVarRef Variant::append(CVarRef v) {
 }
 
 template <typename T>
-inline ALWAYS_INLINE CVarRef Variant::SetRefImpl(Variant *self, T key,
-                                                 CVarRef v, bool isKey) {
+ALWAYS_INLINE
+CVarRef Variant::SetRefImpl(Variant *self, T key, CVarRef v, bool isKey) {
   retry:
   if (LIKELY(self->m_type == KindOfArray)) {
     ArrayData *escalated;
@@ -1789,6 +1812,30 @@ void Variant::unserialize(VariableUnserializer *uns,
       v.unserialize(uns);
       operator=(v);
       return; // array has '}' terminating
+    }
+    break;
+  case 'L':
+    {
+      int64_t id = uns->readInt();
+      sep = uns->readChar();
+      if (sep != ':') {
+        throw Exception("Expected ':' but got '%c'", sep);
+      }
+      String rsrcName;
+      rsrcName.unserialize(uns);
+      sep = uns->readChar();
+      if (sep != '{') {
+        throw Exception("Expected '{' but got '%c'", sep);
+      }
+      sep = uns->readChar();
+      if (sep != '}') {
+        throw Exception("Expected '}' but got '%c'", sep);
+      }
+      DummyResource* rsrc = NEWOBJ(DummyResource);
+      rsrc->o_setResourceId(id);
+      rsrc->m_class_name = rsrcName;
+      operator=(rsrc);
+      return; // resource has '}' terminating
     }
     break;
   case 'O':

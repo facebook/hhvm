@@ -49,7 +49,7 @@ const StaticString
 
 class CurlResource : public SweepableResourceData {
 private:
-  DECLARE_OBJECT_ALLOCATION(CurlResource)
+  DECLARE_RESOURCE_ALLOCATION(CurlResource)
 
   class WriteHandler {
   public:
@@ -1118,7 +1118,7 @@ Variant f_curl_close(CResRef ch) {
 
 class CurlMultiResource : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(CurlMultiResource)
+  DECLARE_RESOURCE_ALLOCATION(CurlMultiResource)
 
   static StaticString s_class_name;
   // overriding ResourceData
@@ -1383,7 +1383,7 @@ Variant f_curl_multi_close(CResRef mh) {
 
 class LibEventHttpHandle : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(LibEventHttpHandle)
+  DECLARE_RESOURCE_ALLOCATION(LibEventHttpHandle)
 
   static StaticString s_class_name;
   // overriding ResourceData

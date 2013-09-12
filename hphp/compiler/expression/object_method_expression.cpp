@@ -116,7 +116,7 @@ ConstructPtr ObjectMethodExpression::getNthKid(int n) const {
 
 void ObjectMethodExpression::setNthKid(int n, ConstructPtr cp) {
   if (!n) {
-    m_object = boost::dynamic_pointer_cast<Expression>(cp);
+    m_object = dynamic_pointer_cast<Expression>(cp);
   } else {
     FunctionCall::setNthKid(n, cp);
   }

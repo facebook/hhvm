@@ -35,7 +35,7 @@ typedef std::map<std::string, TimeZoneInfo> MapStringToTimeZoneInfo;
  */
 class TimeZone : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(TimeZone);
+  DECLARE_RESOURCE_ALLOCATION(TimeZone);
 
   /**
    * Get/set current timezone that controls how local time is interpreted.

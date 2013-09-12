@@ -67,6 +67,7 @@ function session_set_save_handler(
     return hphp_session_set_save_handler($open, $close);
   }
   return hphp_session_set_save_handler(
-    new _SessionForwardingHandler($open, $close, $read, $write, $destroy, $gc)
+    new _SessionForwardingHandler($open, $close, $read, $write, $destroy, $gc),
+    false
   );
 }

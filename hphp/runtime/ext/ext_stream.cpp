@@ -154,21 +154,32 @@ Resource f_stream_filter_prepend(CResRef stream, CStrRef filtername,
   throw NotSupportedException(__func__, "stream filter is not supported");
 }
 
-Variant f_stream_get_contents(CResRef handle, int maxlen /* = 0 */,
-                              int offset /* = 0 */) {
-  if (maxlen < 0) {
+Variant f_stream_get_contents(CResRef handle, int maxlen /* = -1 */,
+                              int offset /* = -1 */) {
+  if (maxlen < -1) {
     throw_invalid_argument("maxlen: %d", maxlen);
     return false;
   }
 
-  File *file = handle.getTyped<File>();
-  if (offset > 0 && !file->seek(offset, SEEK_SET) ) {
+  if (maxlen == 0) {
+    return String();
+  }
+
+  File *file = handle.getTyped<File>(false /* nullOkay */,
+                                     true /* badTypeOkay */);
+  if (!file) {
+    throw_invalid_argument(
+      "stream_get_contents() expects parameter 1 to be a resource");
+    return false;
+  }
+
+  if (offset >= 0 && !file->seek(offset, SEEK_SET) ) {
     raise_warning("Failed to seek to position %d in the stream", offset);
     return false;
   }
 
   String ret;
-  if (maxlen) {
+  if (maxlen != -1) {
     ret = String(maxlen, ReserveString);
     char *buf = ret.mutableSlice().ptr;
     maxlen = file->readImpl(buf, maxlen);
@@ -317,32 +328,6 @@ bool f_stream_wrapper_unregister(CStrRef protocol) {
 ///////////////////////////////////////////////////////////////////////////////
 // stream socket functions
 
-// Extract host:port pair.
-// 192.168.1.1:80 -> 192.168.1.0 80
-// [2a03:2880::1]:80 -> [2a03:2880::1] 80
-static void parse_host(CStrRef address, String &host, int &port) {
-
-  if (address.find('[') != std::string::npos) {
-    auto epos = address.rfind(']');
-    if (epos != std::string::npos) {
-      auto cpos = address.rfind(':', epos);
-      if (cpos != std::string::npos) {
-        port = address.substr(cpos + 1).toInt16();
-      }
-    }
-    host = address.substr(0, epos + 1);
-  } else {
-    auto cpos = address.rfind(':');
-    if (cpos != std::string::npos) {
-      host = address.substr(0, cpos);
-      port = address.substr(cpos + 1).toInt16();
-    } else {
-      host = address;
-      port = 0;
-    }
-  }
-}
-
 static Socket *socket_accept_impl(CResRef socket, struct sockaddr *addr,
                                   socklen_t *addrlen) {
   Socket *sock = socket.getTyped<Socket>();
@@ -410,7 +395,7 @@ static String get_sockaddr_name(struct sockaddr *sa, socklen_t sl) {
 }
 
 Variant f_stream_socket_accept(CResRef server_socket,
-                               double timeout /* = 0.0 */,
+                               double timeout /* = -1.0 */,
                                VRefParam peername /* = null */) {
   Socket *sock = server_socket.getTyped<Socket>();
   pollfd p;
@@ -420,6 +405,9 @@ Variant f_stream_socket_accept(CResRef server_socket,
   p.events = (POLLIN|POLLERR|POLLHUP);
   p.revents = 0;
   IOStatusHelper io("socket_accept");
+  if (timeout == -1) {
+    timeout = RuntimeOption::SocketDefaultTimeout;
+  }
   n = poll(&p, 1, (uint64_t)(timeout * 1000.0));
   if (n > 0) {
     struct sockaddr sa;
@@ -441,13 +429,13 @@ Variant f_stream_socket_server(CStrRef local_socket,
                                int flags /* = 0 */,
                                CResRef context /* = null_object */) {
   Util::HostURL hosturl(static_cast<const std::string>(local_socket));
-  return socket_server_impl(hosturl, errnum, errstr);
+  return socket_server_impl(hosturl, flags, errnum, errstr);
 }
 
 Variant f_stream_socket_client(CStrRef remote_socket,
                                VRefParam errnum /* = null */,
                                VRefParam errstr /* = null */,
-                               double timeout /* = 0.0 */,
+                               double timeout /* = -1.0 */,
                                int flags /* = 0 */,
                                CResRef context /* = null_object */) {
   Util::HostURL hosturl(static_cast<const std::string>(remote_socket));
@@ -484,13 +472,17 @@ Variant f_stream_socket_pair(int domain, int type, int protocol) {
 
 Variant f_stream_socket_recvfrom(CResRef socket, int length,
                                  int flags /* = 0 */,
-                                 CStrRef address /* = null_string */) {
-  String host; int port;
-  parse_host(address, host, port);
-  Variant ret;
+                                 VRefParam address /* = null_string */) {
+  Variant ret, host, port;
   Variant retval = f_socket_recvfrom(socket, ref(ret), length, flags,
-                                     host, port);
+                                     ref(host), ref(port));
   if (!same(retval, false) && retval.toInt64() >= 0) {
+    Socket *sock = socket.getTyped<Socket>();
+    if (sock->getType() == AF_INET6) {
+      address = "[" + host.toString() + "]:" + port.toInt32();
+    } else {
+      address = host.toString() + ":" + port.toInt32();
+    }
     return ret.toString(); // watch out, "ret", not "retval"
   }
   return false;
@@ -506,7 +498,9 @@ Variant f_stream_socket_sendto(CResRef socket, CStrRef data,
     host = sock->getAddress();
     port = sock->getPort();
   } else {
-    parse_host(address, host, port);
+    Util::HostURL hosturl(static_cast<std::string>(address));
+    host = hosturl.getHost();
+    port = hosturl.getPort();
   }
 
   return f_socket_sendto(socket, data, data.size(), flags, host, port);

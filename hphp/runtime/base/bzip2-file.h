@@ -28,7 +28,7 @@ namespace HPHP {
 
 class BZ2File : public File {
 public:
-  DECLARE_OBJECT_ALLOCATION(BZ2File);
+  DECLARE_RESOURCE_ALLOCATION(BZ2File);
 
   static StaticString s_class_name;
   // overriding ResourceData

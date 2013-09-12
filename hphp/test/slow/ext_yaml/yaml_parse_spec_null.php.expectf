@@ -1,0 +1,31 @@
+array(3) {
+  [0]=>
+  NULL
+  [1]=>
+  array(4) {
+    ["empty"]=>
+    NULL
+    ["canonical"]=>
+    NULL
+    ["english"]=>
+    NULL
+    [""]=>
+    string(8) "null key"
+  }
+  [2]=>
+  array(1) {
+    ["sparse"]=>
+    array(5) {
+      [0]=>
+      NULL
+      [1]=>
+      string(9) "2nd entry"
+      [2]=>
+      NULL
+      [3]=>
+      string(9) "4th entry"
+      [4]=>
+      NULL
+    }
+  }
+}

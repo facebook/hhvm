@@ -33,7 +33,7 @@ var_dump(assert_options(-1));
 var_dump(simplexml_load_string('', 'INVALID_CLASS'));
 var_dump(simplexml_load_string('', 'stdClass'));
 var_dump(stream_get_contents('', -1));
-$fp = fopen('test/sample_dir/file', 'r');
+$fp = fopen(__DIR__.'/../../sample_dir/file', 'r');
 var_dump(fgets($fp, -1));
 fclose($fp);
 $tmpfname = tempnam('', str_repeat('a', 128));

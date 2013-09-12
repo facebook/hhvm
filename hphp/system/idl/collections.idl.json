@@ -361,7 +361,22 @@
                     "name": "map",
                     "flags": [
                     ],
-                    "desc": "Returns a KeyedIterable of the values produced by applying the specified callback on the values of this Vector.",
+                    "desc": "Returns a Vector of the values produced by applying the specified callback on each value from this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "mapWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector of the values produced by applying the specified callback on each key and value from this Vector.",
                     "return": {
                         "type": "Object"
                     },
@@ -376,7 +391,22 @@
                     "name": "filter",
                     "flags": [
                     ],
-                    "desc": "Returns a KeyedIterable of all the values from this Vector for which the specified callback returns true.",
+                    "desc": "Returns a Vector of all the values from this Vector for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "filterWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector of all the values from this Vector for which the specified callback returns true.",
                     "return": {
                         "type": "Object"
                     },
@@ -1062,7 +1092,22 @@
                     "name": "map",
                     "flags": [
                     ],
-                    "desc": "Returns a KeyedIterable of the values produced by applying the specified callback on the values of this Map.",
+                    "desc": "Returns a Map of the keys/values produced by applying the specified callback on each value from this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "mapWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Map of the keys/values produced by applying the specified callback on each key and value from this Map.",
                     "return": {
                         "type": "Object"
                     },
@@ -1077,7 +1122,22 @@
                     "name": "filter",
                     "flags": [
                     ],
-                    "desc": "Returns a KeyedIterable of all the values from this Map for which the specified callback returns true.",
+                    "desc": "Returns a Map of all the keys/values from this Map for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "filterWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Map of all the keys/values from this Map for which the specified callback returns true.",
                     "return": {
                         "type": "Object"
                     },
@@ -1660,7 +1720,22 @@
                     "name": "map",
                     "flags": [
                     ],
-                    "desc": "Returns a KeyedIterable of the values produced by applying the specified callback on the values of this StableMap.",
+                    "desc": "Returns a StableMap of the keys/values produced by applying the specified callback on each value from this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "mapWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns a StableMap of the keys/values produced by applying the specified callback on each key and value from this StableMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -1675,7 +1750,22 @@
                     "name": "filter",
                     "flags": [
                     ],
-                    "desc": "Returns a KeyedIterable of all the values from this StableMap for which the specified callback returns true.",
+                    "desc": "Returns a StableMap of all the keys/values from this StableMap for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "filterWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns a StableMap of all the keys/values from this StableMap for which the specified callback returns true.",
                     "return": {
                         "type": "Object"
                     },
@@ -2065,7 +2155,7 @@
                     "name": "map",
                     "flags": [
                     ],
-                    "desc": "Returns an Iterable of the values produced by applying the specified callback on the values of this Set.",
+                    "desc": "Returns a Set of the values produced by applying the specified callback on each value from this Set.",
                     "return": {
                         "type": "Object"
                     },
@@ -2080,7 +2170,7 @@
                     "name": "filter",
                     "flags": [
                     ],
-                    "desc": "Returns a Iterable of all the values from this Set for which the specified callback returns true.",
+                    "desc": "Returns a Set of all the values from this Set for which the specified callback returns true.",
                     "return": {
                         "type": "Object"
                     },
@@ -2442,7 +2532,22 @@
                     "name": "map",
                     "flags": [
                     ],
-                    "desc": "Returns a KeyedIterable of the values produced by applying the specified callback on the values of this Pair.",
+                    "desc": "Returns a Vector of the values produced by applying the specified callback on each value from this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "mapWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector of the values produced by applying the specified callback on each key and value from this Pair.",
                     "return": {
                         "type": "Object"
                     },
@@ -2457,7 +2562,22 @@
                     "name": "filter",
                     "flags": [
                     ],
-                    "desc": "Returns a KeyedIterable of all the values from this Pair for which the specified callback returns true.",
+                    "desc": "Returns a Vector of all the values from this Pair for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "filterWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector of all the values from this Pair for which the specified callback returns true.",
                     "return": {
                         "type": "Object"
                     },

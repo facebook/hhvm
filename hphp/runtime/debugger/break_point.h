@@ -154,6 +154,7 @@ public:
 
   void setClause(const std::string &clause, bool check);
   void toggle();
+  void transferStack(BreakPointInfoPtr bpi);
   void setState(State state) { m_state = state; }
 
   bool valid();

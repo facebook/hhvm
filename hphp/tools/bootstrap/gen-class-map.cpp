@@ -138,11 +138,19 @@ static void declareConstants(std::ostream &out,
                              const fbvector<PhpConst>& consts,
                              bool extrn) {
   for (auto c : consts) {
-    if (!c.hasValue()) {
-      continue;
-    }
+    /*
+     * If there's no value, we assume there's an
+     * "extern const k_Name = value;" in the c++,
+     * plus an "extern const k_Name;" in a header
+     * included by ext.h.
+     * For the parser tokens T_*, we have the definitions
+     * but no header declarations.
+     * The exception for KindOfInt64 below is to make sure
+     * we declare them in class_map.cpp before using them.
+     */
+    if (!c.hasValue() && c.kindOf() != KindOfInt64) continue;
 
-    if (extrn) {
+    if (extrn || !c.hasValue()) {
       out << "extern const " << c.getCppType() << " " << c.varname() << ";\n";
     } else if (c.kindOf() == KindOfString) {
       fbstring val = c.value();
@@ -179,7 +187,8 @@ static void outputConstants(const char *outputfn,
                         HipHopSpecific|VariableArguments|\
                         RefVariableArguments|MixedVariableArguments|\
                         NeedsActRec|FunctionIsFoldable|\
-                        NoInjection|NoEffect|HasOptFunction|ZendParamMode)
+                        NoInjection|NoEffect|HasOptFunction|ZendParamMode|\
+                        ZendCompat)
 
 static void writeFunction(std::ostream& out, const PhpFunc& func) {
   auto flags = (func.flags() & FUNC_FLAG_MASK) | IsSystem | IsNothing;

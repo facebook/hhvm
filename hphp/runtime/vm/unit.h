@@ -70,7 +70,8 @@ enum UnitMergeState {
   UnitMergeStateEmpty = 32
 };
 
-inline bool ALWAYS_INLINE isMergeKindReq(UnitMergeKind k) {
+ALWAYS_INLINE
+bool isMergeKindReq(UnitMergeKind k) {
   return k == UnitMergeKindReqDoc;
 }
 
@@ -447,8 +448,9 @@ struct Unit {
 
   MD5 md5() const { return m_md5; }
 
-  static NamedEntity* GetNamedEntity(const StringData *)
-    __attribute__((__flatten__));
+  static NamedEntity* GetNamedEntity(const StringData *str,
+                                     bool allowCreate = true) FLATTEN;
+
   static size_t GetNamedEntityTableSize();
   static Array getUserFunctions();
   static Array getClassesInfo();
@@ -471,6 +473,8 @@ struct Unit {
     assert(id < Id(m_namedInfo.size()));
     const NamedEntityPair &ne = m_namedInfo[id];
     assert(ne.first);
+    assert(ne.first->data()[ne.first->size()] == 0);
+    assert(ne.first->data()[0] != '\\');
     if (UNLIKELY(!ne.second)) {
       const_cast<const NamedEntity*&>(ne.second) = GetNamedEntity(ne.first);
     }
@@ -884,6 +888,8 @@ class UnitEmitter {
   std::vector<Typedef> m_typedefs;
 };
 
+//////////////////////////////////////////////////////////////////////
+
 class UnitRepoProxy : public RepoProxy {
   friend class Unit;
   friend class UnitEmitter;
@@ -1000,12 +1006,7 @@ class UnitRepoProxy : public RepoProxy {
 #undef URP_OP
 };
 
-/**
- * AllFuncs
- * MutableAllFuncs
- *
- * Range over all Func's in a single unit.
- */
+//////////////////////////////////////////////////////////////////////
 
 struct ConstPreClassMethodRanger {
   typedef Func* const* Iter;
@@ -1022,10 +1023,10 @@ struct MutablePreClassMethodRanger {
     return pc->mutableMethods();
   }
 };
+
 template<typename FuncRange,
          typename GetMethods>
-class AllFuncsImpl {
- public:
+struct AllFuncsImpl {
   explicit AllFuncsImpl(const Unit* unit)
     : fr(unit->funcs())
     , mr(0, 0)
@@ -1048,7 +1049,8 @@ class AllFuncsImpl {
     if (fr.empty() && mr.empty()) skip();
     return f;
   }
- private:
+
+private:
   void skip() {
     assert(fr.empty());
     while (!cr.empty() && mr.empty()) {
@@ -1063,19 +1065,19 @@ class AllFuncsImpl {
   Unit::PreClassRange cr;
 };
 
-typedef AllFuncsImpl<Unit::FuncRange, ConstPreClassMethodRanger> AllFuncs;
-typedef AllFuncsImpl<Unit::MutableFuncRange, MutablePreClassMethodRanger> MutableAllFuncs;
+typedef AllFuncsImpl<Unit::FuncRange,ConstPreClassMethodRanger> AllFuncs;
+typedef AllFuncsImpl<Unit::MutableFuncRange,MutablePreClassMethodRanger>
+  MutableAllFuncs;
 
-/**
- *
+/*
  * Range over all defined classes.
  */
 class AllClasses {
-protected:
   NamedEntityMap::iterator m_next, m_end;
   Class* m_current;
   void next();
   void skip();
+
 public:
   AllClasses();
   bool empty() const;
@@ -1083,17 +1085,21 @@ public:
   Class* popFront();
 };
 
-/**
+//////////////////////////////////////////////////////////////////////
+
+/*
  * If name starts with '\\', returns a new String with the leading
  * slash stripped. Otherwise returns a null string.
  */
-inline const String normalizeNS(const StringData* name) {
+inline String normalizeNS(const StringData* name) {
   assert(name->data()[name->size()] == 0);
   if (name->data()[0] == '\\') {
     return String(name->data() + 1);
   }
   return null_string;
 }
+
+//////////////////////////////////////////////////////////////////////
 
 }
 #endif

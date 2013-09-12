@@ -26,7 +26,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <cmath>
+#include <math.h>
+#include <float.h>
 #include <gtest/gtest.h>
 
 #include "hphp/vixl/test/test-utils-a64.h"
@@ -81,7 +82,7 @@ namespace vixl {
 //
 // e.g. ASSERT_EQUAL_64(0.5, d30);
 //
-// If more advance computation is required before the assert then access the
+// If more advanced computation is required before the assert then access the
 // RegisterDump named core directly:
 //
 //   ASSERT_EQUAL_64(0x1234, core->reg_x0() & 0xffff);
@@ -1431,7 +1432,7 @@ TEST(Assembler, branch_cond) {
   // For each 'cmp' instruction below, condition codes other than the ones
   // following it would branch.
 
-  __ Cmp(x1, Operand(0));
+  __ Cmp(x1, 0);
   __ B(&wrong, eq);
   __ B(&wrong, lo);
   __ B(&wrong, mi);
@@ -1444,7 +1445,7 @@ TEST(Assembler, branch_cond) {
   __ Mov(x0, 0x0);
   __ Bind(&ok_1);
 
-  __ Cmp(x1, Operand(1));
+  __ Cmp(x1, 1);
   __ B(&wrong, ne);
   __ B(&wrong, lo);
   __ B(&wrong, mi);
@@ -1457,7 +1458,7 @@ TEST(Assembler, branch_cond) {
   __ Mov(x0, 0x0);
   __ Bind(&ok_2);
 
-  __ Cmp(x1, Operand(2));
+  __ Cmp(x1, 2);
   __ B(&wrong, eq);
   __ B(&wrong, hs);
   __ B(&wrong, pl);
@@ -1470,7 +1471,7 @@ TEST(Assembler, branch_cond) {
   __ Mov(x0, 0x0);
   __ Bind(&ok_3);
 
-  __ Cmp(x2, Operand(1));
+  __ Cmp(x2, 1);
   __ B(&wrong, eq);
   __ B(&wrong, lo);
   __ B(&wrong, mi);
@@ -1482,6 +1483,17 @@ TEST(Assembler, branch_cond) {
   __ B(&ok_4, le);
   __ Mov(x0, 0x0);
   __ Bind(&ok_4);
+
+  Label ok_5;
+  __ b(&ok_5, al);
+  __ Mov(x0, 0x0);
+  __ Bind(&ok_5);
+
+  Label ok_6;
+  __ b(&ok_6, nv);
+  __ Mov(x0, 0x0);
+  __ Bind(&ok_6);
+
   END();
 
   __ Bind(&wrong);
@@ -3371,21 +3383,28 @@ TEST(Assembler, ccmp) {
   START();
   __ Mov(w16, 0);
   __ Mov(w17, 1);
-  __ Cmp(w16, Operand(w16));
-  __ Ccmp(w16, Operand(w17), NCFlag, eq);
+  __ Cmp(w16, w16);
+  __ Ccmp(w16, w17, NCFlag, eq);
   __ Mrs(x0, NZCV);
 
-  __ Cmp(w16, Operand(w16));
-  __ Ccmp(w16, Operand(w17), NCFlag, ne);
+  __ Cmp(w16, w16);
+  __ Ccmp(w16, w17, NCFlag, ne);
   __ Mrs(x1, NZCV);
 
-  __ Cmp(x16, Operand(x16));
-  __ Ccmn(x16, Operand(2), NZCVFlag, eq);
+  __ Cmp(x16, x16);
+  __ Ccmn(x16, 2, NZCVFlag, eq);
   __ Mrs(x2, NZCV);
 
-  __ Cmp(x16, Operand(x16));
-  __ Ccmn(x16, Operand(2), NZCVFlag, ne);
+  __ Cmp(x16, x16);
+  __ Ccmn(x16, 2, NZCVFlag, ne);
   __ Mrs(x3, NZCV);
+
+  __ ccmp(x16, x16, NZCVFlag, al);
+  __ Mrs(x4, NZCV);
+
+  __ ccmp(x16, x16, NZCVFlag, nv);
+  __ Mrs(x5, NZCV);
+
   END();
 
   RUN();
@@ -3394,6 +3413,8 @@ TEST(Assembler, ccmp) {
   ASSERT_EQUAL_32(NCFlag, w1);
   ASSERT_EQUAL_32(NoFlag, w2);
   ASSERT_EQUAL_32(NZCVFlag, w3);
+  ASSERT_EQUAL_32(ZCFlag, w4);
+  ASSERT_EQUAL_32(ZCFlag, w5);
 
   TEARDOWN();
 }
@@ -3480,6 +3501,9 @@ TEST(Assembler, csel) {
   __ Csinc(w2, w24, w25, mi);
   __ Csinc(w3, w24, w25, pl);
 
+  __ csel(w13, w24, w25, al);
+  __ csel(x14, x24, x25, nv);
+
   __ Cmp(x16, Operand(1));
   __ Csinv(x4, x24, x25, gt);
   __ Csinv(x5, x24, x25, le);
@@ -3491,6 +3515,10 @@ TEST(Assembler, csel) {
   __ Cinc(x10, x25, ne);
   __ Cinv(x11, x24, ne);
   __ Cneg(x12, x24, ne);
+
+  __ csel(w15, w24, w25, al);
+  __ csel(x17, x24, x25, nv);
+
   END();
 
   RUN();
@@ -3508,6 +3536,10 @@ TEST(Assembler, csel) {
   ASSERT_EQUAL_64(0x0000001f00000020UL, x10);
   ASSERT_EQUAL_64(0xfffffff0fffffff0UL, x11);
   ASSERT_EQUAL_64(0xfffffff0fffffff1UL, x12);
+  ASSERT_EQUAL_64(0x0000000f, x13);
+  ASSERT_EQUAL_64(0x0000000f0000000fUL, x14);
+  ASSERT_EQUAL_64(0x0000000f, x15);
+  ASSERT_EQUAL_64(0x0000000f0000000fUL, x17);
 
   TEARDOWN();
 }
@@ -4425,37 +4457,43 @@ TEST(Assembler, fccmp) {
   __ Fmov(d19, -1.0);
   __ Mov(x20, 0);
 
-  __ Cmp(x20, Operand(0));
+  __ Cmp(x20, 0);
   __ Fccmp(s16, s16, NoFlag, eq);
   __ Mrs(x0, NZCV);
 
-  __ Cmp(x20, Operand(0));
+  __ Cmp(x20, 0);
   __ Fccmp(s16, s16, VFlag, ne);
   __ Mrs(x1, NZCV);
 
-  __ Cmp(x20, Operand(0));
+  __ Cmp(x20, 0);
   __ Fccmp(s16, s17, CFlag, ge);
   __ Mrs(x2, NZCV);
 
-  __ Cmp(x20, Operand(0));
+  __ Cmp(x20, 0);
   __ Fccmp(s16, s17, CVFlag, lt);
   __ Mrs(x3, NZCV);
 
-  __ Cmp(x20, Operand(0));
+  __ Cmp(x20, 0);
   __ Fccmp(d18, d18, ZFlag, le);
   __ Mrs(x4, NZCV);
 
-  __ Cmp(x20, Operand(0));
+  __ Cmp(x20, 0);
   __ Fccmp(d18, d18, ZVFlag, gt);
   __ Mrs(x5, NZCV);
 
-  __ Cmp(x20, Operand(0));
+  __ Cmp(x20, 0);
   __ Fccmp(d18, d19, ZCVFlag, ls);
   __ Mrs(x6, NZCV);
 
-  __ Cmp(x20, Operand(0));
+  __ Cmp(x20, 0);
   __ Fccmp(d18, d19, NFlag, hi);
   __ Mrs(x7, NZCV);
+
+  __ fccmp(s16, s16, NFlag, al);
+  __ Mrs(x8, NZCV);
+
+  __ fccmp(d18, d18, NFlag, nv);
+  __ Mrs(x9, NZCV);
   END();
 
   RUN();
@@ -4468,6 +4506,8 @@ TEST(Assembler, fccmp) {
   ASSERT_EQUAL_32(ZVFlag, w5);
   ASSERT_EQUAL_32(CFlag, w6);
   ASSERT_EQUAL_32(NFlag, w7);
+  ASSERT_EQUAL_32(ZCFlag, w8);
+  ASSERT_EQUAL_32(ZCFlag, w9);
 
   TEARDOWN();
 }
@@ -4549,11 +4589,13 @@ TEST(Assembler, fcsel) {
   __ Fmov(d18, 3.0);
   __ Fmov(d19, 4.0);
 
-  __ Cmp(x16, Operand(0));
+  __ Cmp(x16, 0);
   __ Fcsel(s0, s16, s17, eq);
   __ Fcsel(s1, s16, s17, ne);
   __ Fcsel(d2, d18, d19, eq);
   __ Fcsel(d3, d18, d19, ne);
+  __ fcsel(s4, s16, s17, al);
+  __ fcsel(d5, d18, d19, nv);
   END();
 
   RUN();
@@ -4562,6 +4604,8 @@ TEST(Assembler, fcsel) {
   ASSERT_EQUAL_FP32(2.0, s1);
   ASSERT_EQUAL_FP64(3.0, d2);
   ASSERT_EQUAL_FP64(4.0, d3);
+  ASSERT_EQUAL_FP32(1.0, s4);
+  ASSERT_EQUAL_FP64(3.0, d5);
 
   TEARDOWN();
 }
@@ -4861,7 +4905,7 @@ TEST(Assembler, frintz) {
 }
 
 
-TEST(Assembler, fcvt) {
+TEST(Assembler, fcvt_ds) {
   SETUP();
 
   START();
@@ -4876,6 +4920,10 @@ TEST(Assembler, fcvt) {
   __ Fmov(s24, kFP32NegativeInfinity);
   __ Fmov(s25, 0.0);
   __ Fmov(s26, -0.0);
+  __ Fmov(s27, FLT_MAX);
+  __ Fmov(s28, FLT_MIN);
+  __ Fmov(s29, rawbits_to_float(0x7fc12345));   // Quiet NaN.
+  __ Fmov(s30, rawbits_to_float(0x7f812345));   // Signalling NaN.
 
   __ Fcvt(d0, s16);
   __ Fcvt(d1, s17);
@@ -4888,6 +4936,10 @@ TEST(Assembler, fcvt) {
   __ Fcvt(d8, s24);
   __ Fcvt(d9, s25);
   __ Fcvt(d10, s26);
+  __ Fcvt(d11, s27);
+  __ Fcvt(d12, s28);
+  __ Fcvt(d13, s29);
+  __ Fcvt(d14, s30);
   END();
 
   RUN();
@@ -4903,8 +4955,132 @@ TEST(Assembler, fcvt) {
   ASSERT_EQUAL_FP64(kFP64NegativeInfinity, d8);
   ASSERT_EQUAL_FP64(0.0f, d9);
   ASSERT_EQUAL_FP64(-0.0f, d10);
+  ASSERT_EQUAL_FP64(FLT_MAX, d11);
+  ASSERT_EQUAL_FP64(FLT_MIN, d12);
+
+  // Check that the NaN payload is preserved according to A64 conversion rules:
+  //  - The sign bit is preserved.
+  //  - The top bit of the mantissa is forced to 1 (making it a quiet NaN).
+  //  - The remaining mantissa bits are copied until they run out.
+  //  - The low-order bits that haven't already been assigned are set to 0.
+  ASSERT_EQUAL_FP64(rawbits_to_double(0x7ff82468a0000000), d13);
+  ASSERT_EQUAL_FP64(rawbits_to_double(0x7ff82468a0000000), d14);
 
   TEARDOWN();
+}
+
+
+TEST(Assembler, fcvt_sd) {
+  // There are a huge number of corner-cases to check, so this test iterates
+  // through a list. The list is then negated and checked again (since the sign
+  // is irrelevant in ties-to-even rounding), so the list shouldn't include any
+  // negative values.
+  //
+  // Note that this test only checks ties-to-even rounding, because that is all
+  // that the simulator supports.
+  struct {double in; float expected;} test[] = {
+    // Check some simple conversions.
+    {0.0, 0.0f},
+    {1.0, 1.0f},
+    {1.5, 1.5f},
+    {2.0, 2.0f},
+    {FLT_MAX, FLT_MAX},
+    //  - The smallest normalized float.
+    {pow(2, -126), pow(2, -126)},
+    //  - Normal floats that need (ties-to-even) rounding.
+    //    For normalized numbers:
+    //         bit 29 (0x0000000020000000) is the lowest-order bit which will
+    //                                     fit in the float's mantissa.
+    {rawbits_to_double(0x3ff0000000000000), rawbits_to_float(0x3f800000)},
+    {rawbits_to_double(0x3ff0000000000001), rawbits_to_float(0x3f800000)},
+    {rawbits_to_double(0x3ff0000010000000), rawbits_to_float(0x3f800000)},
+    {rawbits_to_double(0x3ff0000010000001), rawbits_to_float(0x3f800001)},
+    {rawbits_to_double(0x3ff0000020000000), rawbits_to_float(0x3f800001)},
+    {rawbits_to_double(0x3ff0000020000001), rawbits_to_float(0x3f800001)},
+    {rawbits_to_double(0x3ff0000030000000), rawbits_to_float(0x3f800002)},
+    {rawbits_to_double(0x3ff0000030000001), rawbits_to_float(0x3f800002)},
+    {rawbits_to_double(0x3ff0000040000000), rawbits_to_float(0x3f800002)},
+    {rawbits_to_double(0x3ff0000040000001), rawbits_to_float(0x3f800002)},
+    {rawbits_to_double(0x3ff0000050000000), rawbits_to_float(0x3f800002)},
+    {rawbits_to_double(0x3ff0000050000001), rawbits_to_float(0x3f800003)},
+    {rawbits_to_double(0x3ff0000060000000), rawbits_to_float(0x3f800003)},
+    //  - A mantissa that overflows into the exponent during rounding.
+    {rawbits_to_double(0x3feffffff0000000), rawbits_to_float(0x3f800000)},
+    //  - The largest double that rounds to a normal float.
+    {rawbits_to_double(0x47efffffefffffff), rawbits_to_float(0x7f7fffff)},
+
+    // Doubles that are too big for a float.
+    {kFP64PositiveInfinity, kFP32PositiveInfinity},
+    {DBL_MAX, kFP32PositiveInfinity},
+    //  - The smallest exponent that's too big for a float.
+    {pow(2, 128), kFP32PositiveInfinity},
+    //  - This exponent is in range, but the value rounds to infinity.
+    {rawbits_to_double(0x47effffff0000000), kFP32PositiveInfinity},
+
+    // Doubles that are too small for a float.
+    //  - The smallest (subnormal) double.
+    {DBL_MIN, 0.0},
+    //  - The largest double which is too small for a subnormal float.
+    {rawbits_to_double(0x3690000000000000), rawbits_to_float(0x00000000)},
+
+    // Normal doubles that become subnormal floats.
+    //  - The largest subnormal float.
+    {rawbits_to_double(0x380fffffc0000000), rawbits_to_float(0x007fffff)},
+    //  - The smallest subnormal float.
+    {rawbits_to_double(0x36a0000000000000), rawbits_to_float(0x00000001)},
+    //  - Subnormal floats that need (ties-to-even) rounding.
+    //    For these subnormals:
+    //         bit 34 (0x0000000400000000) is the lowest-order bit which will
+    //                                     fit in the float's mantissa.
+    {rawbits_to_double(0x37c159e000000000), rawbits_to_float(0x00045678)},
+    {rawbits_to_double(0x37c159e000000001), rawbits_to_float(0x00045678)},
+    {rawbits_to_double(0x37c159e200000000), rawbits_to_float(0x00045678)},
+    {rawbits_to_double(0x37c159e200000001), rawbits_to_float(0x00045679)},
+    {rawbits_to_double(0x37c159e400000000), rawbits_to_float(0x00045679)},
+    {rawbits_to_double(0x37c159e400000001), rawbits_to_float(0x00045679)},
+    {rawbits_to_double(0x37c159e600000000), rawbits_to_float(0x0004567a)},
+    {rawbits_to_double(0x37c159e600000001), rawbits_to_float(0x0004567a)},
+    {rawbits_to_double(0x37c159e800000000), rawbits_to_float(0x0004567a)},
+    {rawbits_to_double(0x37c159e800000001), rawbits_to_float(0x0004567a)},
+    {rawbits_to_double(0x37c159ea00000000), rawbits_to_float(0x0004567a)},
+    {rawbits_to_double(0x37c159ea00000001), rawbits_to_float(0x0004567b)},
+    {rawbits_to_double(0x37c159ec00000000), rawbits_to_float(0x0004567b)},
+    //  - The smallest double which rounds up to become a subnormal float.
+    {rawbits_to_double(0x3690000000000001), rawbits_to_float(0x00000001)},
+
+    // Check NaN payload preservation.
+    {rawbits_to_double(0x7ff82468a0000000), rawbits_to_float(0x7fc12345)},
+    {rawbits_to_double(0x7ff82468bfffffff), rawbits_to_float(0x7fc12345)},
+    //  - Signalling NaNs become quiet NaNs.
+    {rawbits_to_double(0x7ff02468a0000000), rawbits_to_float(0x7fc12345)},
+    {rawbits_to_double(0x7ff02468bfffffff), rawbits_to_float(0x7fc12345)},
+    {rawbits_to_double(0x7ff000001fffffff), rawbits_to_float(0x7fc00000)},
+  };
+  int count = sizeof(test) / sizeof(test[0]);
+
+  for (int i = 0; i < count; i++) {
+    double in = test[i].in;
+    float expected = test[i].expected;
+
+    // We only expect positive input.
+    assert(signbit(in) == 0);
+    assert(signbit(expected) == 0);
+
+    SETUP();
+    START();
+
+    __ Fmov(d10, in);
+    __ Fcvt(s20, d10);
+
+    __ Fmov(d11, -in);
+    __ Fcvt(s21, d11);
+
+    END();
+    RUN();
+    ASSERT_EQUAL_FP32(expected, s20);
+    ASSERT_EQUAL_FP32(-expected, s21);
+    TEARDOWN();
+  }
 }
 
 
@@ -5522,130 +5698,325 @@ TEST(Assembler, fcvtzu) {
 }
 
 
-TEST(Assembler, scvtf_ucvtf) {
+// Test that scvtf and ucvtf can convert the 64-bit input into the expected
+// value. All possible values of 'fbits' are tested. The expected value is
+// modified accordingly in each case.
+//
+// The expected value is specified as the bit encoding of the expected double
+// produced by scvtf (expected_scvtf_bits) as well as ucvtf
+// (expected_ucvtf_bits).
+//
+// Where the input value is representable by int32_t or uint32_t, conversions
+// from W registers will also be tested.
+static void TestUScvtfHelper(uint64_t in,
+                             uint64_t expected_scvtf_bits,
+                             uint64_t expected_ucvtf_bits) {
+  uint64_t u64 = in;
+  uint32_t u32 = u64 & 0xffffffff;
+  int64_t s64 = static_cast<int64_t>(in);
+  int32_t s32 = s64 & 0x7fffffff;
+
+  bool cvtf_s32 = (s64 == s32);
+  bool cvtf_u32 = (u64 == u32);
+
+  double results_scvtf_x[65];
+  double results_ucvtf_x[65];
+  double results_scvtf_w[33];
+  double results_ucvtf_w[33];
+
   SETUP();
-
   START();
-  __ Mov(w0, 42424242);
-  __ Mov(x1, 0x7ffffffffffffc00UL);  // Largest double < INT64_MAX.
-  __ Mov(w2, 0xffffffff);             // 32-bit -1.
-  __ Mov(x3, 0xffffffffffffffffUL);  // 64-bit -1.
-  __ Mov(x4, 0xfffffffffffff800UL);  // Largest double < UINT64_MAX.
-  __ Scvtf(d0, w0);
-  __ Scvtf(d1, x1);
-  __ Scvtf(d2, w2);
-  __ Scvtf(d3, x2);
-  __ Scvtf(d4, x3);
-  __ Scvtf(d5, x4);
-  __ Ucvtf(d6, w0);
-  __ Ucvtf(d7, x1);
-  __ Ucvtf(d8, w2);
-  __ Ucvtf(d9, x2);
-  __ Ucvtf(d10, x4);
-  END();
 
+  __ Mov(x0, reinterpret_cast<int64_t>(results_scvtf_x));
+  __ Mov(x1, reinterpret_cast<int64_t>(results_ucvtf_x));
+  __ Mov(x2, reinterpret_cast<int64_t>(results_scvtf_w));
+  __ Mov(x3, reinterpret_cast<int64_t>(results_ucvtf_w));
+
+  __ Mov(x10, s64);
+
+  // Corrupt the top word, in case it is accidentally used during W-register
+  // conversions.
+  __ Mov(x11, 0x5555555555555555);
+  __ Bfi(x11, x10, 0, kWRegSize);
+
+  // Test integer conversions.
+  __ Scvtf(d0, x10);
+  __ Ucvtf(d1, x10);
+  __ Scvtf(d2, w11);
+  __ Ucvtf(d3, w11);
+  __ Str(d0, MemOperand(x0));
+  __ Str(d1, MemOperand(x1));
+  __ Str(d2, MemOperand(x2));
+  __ Str(d3, MemOperand(x3));
+
+  // Test all possible values of fbits.
+  for (int fbits = 1; fbits <= 32; fbits++) {
+    __ Scvtf(d0, x10, fbits);
+    __ Ucvtf(d1, x10, fbits);
+    __ Scvtf(d2, w11, fbits);
+    __ Ucvtf(d3, w11, fbits);
+    __ Str(d0, MemOperand(x0, fbits * kDRegSizeInBytes));
+    __ Str(d1, MemOperand(x1, fbits * kDRegSizeInBytes));
+    __ Str(d2, MemOperand(x2, fbits * kDRegSizeInBytes));
+    __ Str(d3, MemOperand(x3, fbits * kDRegSizeInBytes));
+  }
+
+  // Conversions from W registers can only handle fbits values <= 32, so just
+  // test conversions from X registers for 32 < fbits <= 64.
+  for (int fbits = 33; fbits <= 64; fbits++) {
+    __ Scvtf(d0, x10, fbits);
+    __ Ucvtf(d1, x10, fbits);
+    __ Str(d0, MemOperand(x0, fbits * kDRegSizeInBytes));
+    __ Str(d1, MemOperand(x1, fbits * kDRegSizeInBytes));
+  }
+
+  END();
   RUN();
 
-  ASSERT_EQUAL_FP64(42424242.0, d0);
-  ASSERT_EQUAL_FP64(9223372036854774784.0, d1);
-  ASSERT_EQUAL_FP64(-1.0, d2);
-  ASSERT_EQUAL_FP64(4294967295.0, d3);
-  ASSERT_EQUAL_FP64(-1.0, d4);
-  ASSERT_EQUAL_FP64(-2048.0, d5);
-  ASSERT_EQUAL_FP64(42424242.0, d6);
-  ASSERT_EQUAL_FP64(9223372036854774784.0, d7);
-  ASSERT_EQUAL_FP64(4294967295.0, d8);
-  ASSERT_EQUAL_FP64(4294967295.0, d9);
-  ASSERT_EQUAL_FP64(18446744073709549568.0, d10);
+  // Check the results.
+  double expected_scvtf_base = rawbits_to_double(expected_scvtf_bits);
+  double expected_ucvtf_base = rawbits_to_double(expected_ucvtf_bits);
+
+  for (int fbits = 0; fbits <= 32; fbits++) {
+    double expected_scvtf = expected_scvtf_base / pow(2, fbits);
+    double expected_ucvtf = expected_ucvtf_base / pow(2, fbits);
+    ASSERT_EQUAL_FP64(expected_scvtf, results_scvtf_x[fbits]);
+    ASSERT_EQUAL_FP64(expected_ucvtf, results_ucvtf_x[fbits]);
+    if (cvtf_s32) ASSERT_EQUAL_FP64(expected_scvtf, results_scvtf_w[fbits]);
+    if (cvtf_u32) ASSERT_EQUAL_FP64(expected_ucvtf, results_ucvtf_w[fbits]);
+  }
+  for (int fbits = 33; fbits <= 64; fbits++) {
+    double expected_scvtf = expected_scvtf_base / pow(2, fbits);
+    double expected_ucvtf = expected_ucvtf_base / pow(2, fbits);
+    ASSERT_EQUAL_FP64(expected_scvtf, results_scvtf_x[fbits]);
+    ASSERT_EQUAL_FP64(expected_ucvtf, results_ucvtf_x[fbits]);
+  }
 
   TEARDOWN();
 }
 
 
-TEST(Assembler, scvtf_ucvtf_fixed) {
+TEST(Assembler, scvtf_ucvtf_double) {
+  // Simple conversions of positive numbers which require no rounding; the
+  // results should not depened on the rounding mode, and ucvtf and scvtf should
+  // produce the same result.
+  TestUScvtfHelper(0x0000000000000000, 0x0000000000000000, 0x0000000000000000);
+  TestUScvtfHelper(0x0000000000000001, 0x3ff0000000000000, 0x3ff0000000000000);
+  TestUScvtfHelper(0x0000000040000000, 0x41d0000000000000, 0x41d0000000000000);
+  TestUScvtfHelper(0x0000000100000000, 0x41f0000000000000, 0x41f0000000000000);
+  TestUScvtfHelper(0x4000000000000000, 0x43d0000000000000, 0x43d0000000000000);
+  // Test mantissa extremities.
+  TestUScvtfHelper(0x4000000000000400, 0x43d0000000000001, 0x43d0000000000001);
+  // The largest int32_t that fits in a double.
+  TestUScvtfHelper(0x000000007fffffff, 0x41dfffffffc00000, 0x41dfffffffc00000);
+  // Values that would be negative if treated as an int32_t.
+  TestUScvtfHelper(0x00000000ffffffff, 0x41efffffffe00000, 0x41efffffffe00000);
+  TestUScvtfHelper(0x0000000080000000, 0x41e0000000000000, 0x41e0000000000000);
+  TestUScvtfHelper(0x0000000080000001, 0x41e0000000200000, 0x41e0000000200000);
+  // The largest int64_t that fits in a double.
+  TestUScvtfHelper(0x7ffffffffffffc00, 0x43dfffffffffffff, 0x43dfffffffffffff);
+  // Check for bit pattern reproduction.
+  TestUScvtfHelper(0x0123456789abcde0, 0x43723456789abcde, 0x43723456789abcde);
+  TestUScvtfHelper(0x0000000012345678, 0x41b2345678000000, 0x41b2345678000000);
+
+  // Simple conversions of negative int64_t values. These require no rounding,
+  // and the results should not depend on the rounding mode.
+  TestUScvtfHelper(0xffffffffc0000000, 0xc1d0000000000000, 0x43effffffff80000);
+  TestUScvtfHelper(0xffffffff00000000, 0xc1f0000000000000, 0x43efffffffe00000);
+  TestUScvtfHelper(0xc000000000000000, 0xc3d0000000000000, 0x43e8000000000000);
+
+  // Conversions which require rounding.
+  TestUScvtfHelper(0x1000000000000000, 0x43b0000000000000, 0x43b0000000000000);
+  TestUScvtfHelper(0x1000000000000001, 0x43b0000000000000, 0x43b0000000000000);
+  TestUScvtfHelper(0x1000000000000080, 0x43b0000000000000, 0x43b0000000000000);
+  TestUScvtfHelper(0x1000000000000081, 0x43b0000000000001, 0x43b0000000000001);
+  TestUScvtfHelper(0x1000000000000100, 0x43b0000000000001, 0x43b0000000000001);
+  TestUScvtfHelper(0x1000000000000101, 0x43b0000000000001, 0x43b0000000000001);
+  TestUScvtfHelper(0x1000000000000180, 0x43b0000000000002, 0x43b0000000000002);
+  TestUScvtfHelper(0x1000000000000181, 0x43b0000000000002, 0x43b0000000000002);
+  TestUScvtfHelper(0x1000000000000200, 0x43b0000000000002, 0x43b0000000000002);
+  TestUScvtfHelper(0x1000000000000201, 0x43b0000000000002, 0x43b0000000000002);
+  TestUScvtfHelper(0x1000000000000280, 0x43b0000000000002, 0x43b0000000000002);
+  TestUScvtfHelper(0x1000000000000281, 0x43b0000000000003, 0x43b0000000000003);
+  TestUScvtfHelper(0x1000000000000300, 0x43b0000000000003, 0x43b0000000000003);
+  // Check rounding of negative int64_t values (and large uint64_t values).
+  TestUScvtfHelper(0x8000000000000000, 0xc3e0000000000000, 0x43e0000000000000);
+  TestUScvtfHelper(0x8000000000000001, 0xc3e0000000000000, 0x43e0000000000000);
+  TestUScvtfHelper(0x8000000000000200, 0xc3e0000000000000, 0x43e0000000000000);
+  TestUScvtfHelper(0x8000000000000201, 0xc3dfffffffffffff, 0x43e0000000000000);
+  TestUScvtfHelper(0x8000000000000400, 0xc3dfffffffffffff, 0x43e0000000000000);
+  TestUScvtfHelper(0x8000000000000401, 0xc3dfffffffffffff, 0x43e0000000000001);
+  TestUScvtfHelper(0x8000000000000600, 0xc3dffffffffffffe, 0x43e0000000000001);
+  TestUScvtfHelper(0x8000000000000601, 0xc3dffffffffffffe, 0x43e0000000000001);
+  TestUScvtfHelper(0x8000000000000800, 0xc3dffffffffffffe, 0x43e0000000000001);
+  TestUScvtfHelper(0x8000000000000801, 0xc3dffffffffffffe, 0x43e0000000000001);
+  TestUScvtfHelper(0x8000000000000a00, 0xc3dffffffffffffe, 0x43e0000000000001);
+  TestUScvtfHelper(0x8000000000000a01, 0xc3dffffffffffffd, 0x43e0000000000001);
+  TestUScvtfHelper(0x8000000000000c00, 0xc3dffffffffffffd, 0x43e0000000000002);
+  // Round up to produce a result that's too big for the input to represent.
+  TestUScvtfHelper(0x7ffffffffffffe00, 0x43e0000000000000, 0x43e0000000000000);
+  TestUScvtfHelper(0x7fffffffffffffff, 0x43e0000000000000, 0x43e0000000000000);
+  TestUScvtfHelper(0xfffffffffffffc00, 0xc090000000000000, 0x43f0000000000000);
+  TestUScvtfHelper(0xffffffffffffffff, 0xbff0000000000000, 0x43f0000000000000);
+}
+
+
+// The same as TestUScvtfHelper, but convert to floats.
+static void TestUScvtf32Helper(uint64_t in,
+                               uint32_t expected_scvtf_bits,
+                               uint32_t expected_ucvtf_bits) {
+  uint64_t u64 = in;
+  uint32_t u32 = u64 & 0xffffffff;
+  int64_t s64 = static_cast<int64_t>(in);
+  int32_t s32 = s64 & 0x7fffffff;
+
+  bool cvtf_s32 = (s64 == s32);
+  bool cvtf_u32 = (u64 == u32);
+
+  float results_scvtf_x[65];
+  float results_ucvtf_x[65];
+  float results_scvtf_w[33];
+  float results_ucvtf_w[33];
+
   SETUP();
-
   START();
-  __ Mov(x0, 0);
-  __ Mov(x1, 0x0000000000010000UL);
-  __ Mov(x2, 0x7fffffffffff0000UL);
-  __ Mov(x3, 0x8000000000000000UL);
-  __ Mov(x4, 0xffffffffffff0000UL);
-  __ Mov(x5, 0x0000000100000000UL);
-  __ Mov(x6, 0x7fffffff00000000UL);
-  __ Mov(x7, 0xffffffff00000000UL);
-  __ Mov(x8, 0x1000000000000000UL);
-  __ Mov(x9, 0x7000000000000000UL);
-  __ Mov(x10, 0xf000000000000000UL);
 
-  __ Scvtf(d0, x0, 16);
-  __ Scvtf(d1, x1, 16);
-  __ Scvtf(d2, x2, 16);
-  __ Scvtf(d3, x3, 16);
-  __ Scvtf(d4, x4, 16);
-  __ Scvtf(d5, x0, 32);
-  __ Scvtf(d6, x5, 32);
-  __ Scvtf(d7, x6, 32);
-  __ Scvtf(d8, x3, 32);
-  __ Scvtf(d9, x7, 32);
-  __ Scvtf(d10, x0, 60);
-  __ Scvtf(d11, x8, 60);
-  __ Scvtf(d12, x9, 60);
-  __ Scvtf(d13, x3, 60);
-  __ Scvtf(d14, x10, 60);
-  __ Ucvtf(d15, x0, 16);
-  __ Ucvtf(d16, x1, 16);
-  __ Ucvtf(d17, x2, 16);
-  __ Ucvtf(d18, x3, 16);
-  __ Ucvtf(d19, x4, 16);
-  __ Ucvtf(d20, x0, 32);
-  __ Ucvtf(d21, x5, 32);
-  __ Ucvtf(d22, x6, 32);
-  __ Ucvtf(d23, x3, 32);
-  __ Ucvtf(d24, x7, 32);
-  __ Ucvtf(d25, x0, 60);
-  __ Ucvtf(d26, x8, 60);
-  __ Ucvtf(d27, x9, 60);
-  __ Ucvtf(d28, x3, 60);
-  __ Ucvtf(d29, x10, 60);
+  __ Mov(x0, reinterpret_cast<int64_t>(results_scvtf_x));
+  __ Mov(x1, reinterpret_cast<int64_t>(results_ucvtf_x));
+  __ Mov(x2, reinterpret_cast<int64_t>(results_scvtf_w));
+  __ Mov(x3, reinterpret_cast<int64_t>(results_ucvtf_w));
+
+  __ Mov(x10, s64);
+
+  // Corrupt the top word, in case it is accidentally used during W-register
+  // conversions.
+  __ Mov(x11, 0x5555555555555555);
+  __ Bfi(x11, x10, 0, kWRegSize);
+
+  // Test integer conversions.
+  __ Scvtf(s0, x10);
+  __ Ucvtf(s1, x10);
+  __ Scvtf(s2, w11);
+  __ Ucvtf(s3, w11);
+  __ Str(s0, MemOperand(x0));
+  __ Str(s1, MemOperand(x1));
+  __ Str(s2, MemOperand(x2));
+  __ Str(s3, MemOperand(x3));
+
+  // Test all possible values of fbits.
+  for (int fbits = 1; fbits <= 32; fbits++) {
+    __ Scvtf(s0, x10, fbits);
+    __ Ucvtf(s1, x10, fbits);
+    __ Scvtf(s2, w11, fbits);
+    __ Ucvtf(s3, w11, fbits);
+    __ Str(s0, MemOperand(x0, fbits * kSRegSizeInBytes));
+    __ Str(s1, MemOperand(x1, fbits * kSRegSizeInBytes));
+    __ Str(s2, MemOperand(x2, fbits * kSRegSizeInBytes));
+    __ Str(s3, MemOperand(x3, fbits * kSRegSizeInBytes));
+  }
+
+  // Conversions from W registers can only handle fbits values <= 32, so just
+  // test conversions from X registers for 32 < fbits <= 64.
+  for (int fbits = 33; fbits <= 64; fbits++) {
+    __ Scvtf(s0, x10, fbits);
+    __ Ucvtf(s1, x10, fbits);
+    __ Str(s0, MemOperand(x0, fbits * kSRegSizeInBytes));
+    __ Str(s1, MemOperand(x1, fbits * kSRegSizeInBytes));
+  }
 
   END();
-
   RUN();
 
-  ASSERT_EQUAL_FP64(0.0, d0);
-  ASSERT_EQUAL_FP64(1.0, d1);
-  ASSERT_EQUAL_FP64(140737488355327.0, d2);
-  ASSERT_EQUAL_FP64(-140737488355328.0, d3);
-  ASSERT_EQUAL_FP64(-1.0, d4);
-  ASSERT_EQUAL_FP64(0.0, d5);
-  ASSERT_EQUAL_FP64(1.0, d6);
-  ASSERT_EQUAL_FP64(2147483647.0, d7);
-  ASSERT_EQUAL_FP64(-2147483648.0, d8);
-  ASSERT_EQUAL_FP64(-1.0, d9);
-  ASSERT_EQUAL_FP64(0.0, d10);
-  ASSERT_EQUAL_FP64(1.0, d11);
-  ASSERT_EQUAL_FP64(7.0, d12);
-  ASSERT_EQUAL_FP64(-8.0, d13);
-  ASSERT_EQUAL_FP64(-1.0, d14);
+  // Check the results.
+  float expected_scvtf_base = rawbits_to_float(expected_scvtf_bits);
+  float expected_ucvtf_base = rawbits_to_float(expected_ucvtf_bits);
 
-  ASSERT_EQUAL_FP64(0.0, d15);
-  ASSERT_EQUAL_FP64(1.0, d16);
-  ASSERT_EQUAL_FP64(140737488355327.0, d17);
-  ASSERT_EQUAL_FP64(140737488355328.0, d18);
-  ASSERT_EQUAL_FP64(281474976710655.0, d19);
-  ASSERT_EQUAL_FP64(0.0, d20);
-  ASSERT_EQUAL_FP64(1.0, d21);
-  ASSERT_EQUAL_FP64(2147483647.0, d22);
-  ASSERT_EQUAL_FP64(2147483648.0, d23);
-  ASSERT_EQUAL_FP64(4294967295.0, d24);
-  ASSERT_EQUAL_FP64(0.0, d25);
-  ASSERT_EQUAL_FP64(1.0, d26);
-  ASSERT_EQUAL_FP64(7.0, d27);
-  ASSERT_EQUAL_FP64(8.0, d28);
-  ASSERT_EQUAL_FP64(15.0, d29);
+  for (int fbits = 0; fbits <= 32; fbits++) {
+    float expected_scvtf = expected_scvtf_base / pow(2, fbits);
+    float expected_ucvtf = expected_ucvtf_base / pow(2, fbits);
+    ASSERT_EQUAL_FP32(expected_scvtf, results_scvtf_x[fbits]);
+    ASSERT_EQUAL_FP32(expected_ucvtf, results_ucvtf_x[fbits]);
+    if (cvtf_s32) ASSERT_EQUAL_FP32(expected_scvtf, results_scvtf_w[fbits]);
+    if (cvtf_u32) ASSERT_EQUAL_FP32(expected_ucvtf, results_ucvtf_w[fbits]);
+    break;
+  }
+  for (int fbits = 33; fbits <= 64; fbits++) {
+    break;
+    float expected_scvtf = expected_scvtf_base / pow(2, fbits);
+    float expected_ucvtf = expected_ucvtf_base / pow(2, fbits);
+    ASSERT_EQUAL_FP32(expected_scvtf, results_scvtf_x[fbits]);
+    ASSERT_EQUAL_FP32(expected_ucvtf, results_ucvtf_x[fbits]);
+  }
 
   TEARDOWN();
+}
+
+
+TEST(Assembler, scvtf_ucvtf_float) {
+  // Simple conversions of positive numbers which require no rounding; the
+  // results should not depened on the rounding mode, and ucvtf and scvtf should
+  // produce the same result.
+  TestUScvtf32Helper(0x0000000000000000, 0x00000000, 0x00000000);
+  TestUScvtf32Helper(0x0000000000000001, 0x3f800000, 0x3f800000);
+  TestUScvtf32Helper(0x0000000040000000, 0x4e800000, 0x4e800000);
+  TestUScvtf32Helper(0x0000000100000000, 0x4f800000, 0x4f800000);
+  TestUScvtf32Helper(0x4000000000000000, 0x5e800000, 0x5e800000);
+  // Test mantissa extremities.
+  TestUScvtf32Helper(0x0000000000800001, 0x4b000001, 0x4b000001);
+  TestUScvtf32Helper(0x4000008000000000, 0x5e800001, 0x5e800001);
+  // The largest int32_t that fits in a float.
+  TestUScvtf32Helper(0x000000007fffff80, 0x4effffff, 0x4effffff);
+  // Values that would be negative if treated as an int32_t.
+  TestUScvtf32Helper(0x00000000ffffff00, 0x4f7fffff, 0x4f7fffff);
+  TestUScvtf32Helper(0x0000000080000000, 0x4f000000, 0x4f000000);
+  TestUScvtf32Helper(0x0000000080000100, 0x4f000001, 0x4f000001);
+  // The largest int64_t that fits in a float.
+  TestUScvtf32Helper(0x7fffff8000000000, 0x5effffff, 0x5effffff);
+  // Check for bit pattern reproduction.
+  TestUScvtf32Helper(0x0000000000876543, 0x4b076543, 0x4b076543);
+
+  // Simple conversions of negative int64_t values. These require no rounding,
+  // and the results should not depend on the rounding mode.
+  TestUScvtf32Helper(0xfffffc0000000000, 0xd4800000, 0x5f7ffffc);
+  TestUScvtf32Helper(0xc000000000000000, 0xde800000, 0x5f400000);
+
+  // Conversions which require rounding.
+  TestUScvtf32Helper(0x0000800000000000, 0x57000000, 0x57000000);
+  TestUScvtf32Helper(0x0000800000000001, 0x57000000, 0x57000000);
+  TestUScvtf32Helper(0x0000800000800000, 0x57000000, 0x57000000);
+  TestUScvtf32Helper(0x0000800000800001, 0x57000001, 0x57000001);
+  TestUScvtf32Helper(0x0000800001000000, 0x57000001, 0x57000001);
+  TestUScvtf32Helper(0x0000800001000001, 0x57000001, 0x57000001);
+  TestUScvtf32Helper(0x0000800001800000, 0x57000002, 0x57000002);
+  TestUScvtf32Helper(0x0000800001800001, 0x57000002, 0x57000002);
+  TestUScvtf32Helper(0x0000800002000000, 0x57000002, 0x57000002);
+  TestUScvtf32Helper(0x0000800002000001, 0x57000002, 0x57000002);
+  TestUScvtf32Helper(0x0000800002800000, 0x57000002, 0x57000002);
+  TestUScvtf32Helper(0x0000800002800001, 0x57000003, 0x57000003);
+  TestUScvtf32Helper(0x0000800003000000, 0x57000003, 0x57000003);
+  // Check rounding of negative int64_t values (and large uint64_t values).
+  TestUScvtf32Helper(0x8000000000000000, 0xdf000000, 0x5f000000);
+  TestUScvtf32Helper(0x8000000000000001, 0xdf000000, 0x5f000000);
+  TestUScvtf32Helper(0x8000004000000000, 0xdf000000, 0x5f000000);
+  TestUScvtf32Helper(0x8000004000000001, 0xdeffffff, 0x5f000000);
+  TestUScvtf32Helper(0x8000008000000000, 0xdeffffff, 0x5f000000);
+  TestUScvtf32Helper(0x8000008000000001, 0xdeffffff, 0x5f000001);
+  TestUScvtf32Helper(0x800000c000000000, 0xdefffffe, 0x5f000001);
+  TestUScvtf32Helper(0x800000c000000001, 0xdefffffe, 0x5f000001);
+  TestUScvtf32Helper(0x8000010000000000, 0xdefffffe, 0x5f000001);
+  TestUScvtf32Helper(0x8000010000000001, 0xdefffffe, 0x5f000001);
+  TestUScvtf32Helper(0x8000014000000000, 0xdefffffe, 0x5f000001);
+  TestUScvtf32Helper(0x8000014000000001, 0xdefffffd, 0x5f000001);
+  TestUScvtf32Helper(0x8000018000000000, 0xdefffffd, 0x5f000002);
+  // Round up to produce a result that's too big for the input to represent.
+  TestUScvtf32Helper(0x000000007fffffc0, 0x4f000000, 0x4f000000);
+  TestUScvtf32Helper(0x000000007fffffff, 0x4f000000, 0x4f000000);
+  TestUScvtf32Helper(0x00000000ffffff80, 0x4f800000, 0x4f800000);
+  TestUScvtf32Helper(0x00000000ffffffff, 0x4f800000, 0x4f800000);
+  TestUScvtf32Helper(0x7fffffc000000000, 0x5f000000, 0x5f000000);
+  TestUScvtf32Helper(0x7fffffffffffffff, 0x5f000000, 0x5f000000);
+  TestUScvtf32Helper(0xffffff8000000000, 0xd3000000, 0x5f800000);
+  TestUScvtf32Helper(0xffffffffffffffff, 0xbf800000, 0x5f800000);
 }
 
 
@@ -5668,22 +6039,35 @@ TEST(Assembler, system_mrs) {
   // Set the Z, C and V flags.
   __ Add(w0, w2, w2, SetFlags);
   __ Mrs(x5, NZCV);
+
+  // Read the default FPCR.
+  __ Mrs(x6, FPCR);
   END();
 
   RUN();
 
-  // TODO: The assertions below should be ASSERT_EQUAL_64(flag, X register), but
-  // the flag (enum) will be sign extended, since the assertion's argument type
-  // is int64_t.
+  // NZCV
   ASSERT_EQUAL_32(ZCFlag, w3);
   ASSERT_EQUAL_32(NFlag, w4);
   ASSERT_EQUAL_32(ZCVFlag, w5);
+
+  // FPCR
+  // The default FPCR on Linux-based platforms is 0.
+  ASSERT_EQUAL_32(0, w6);
 
   TEARDOWN();
 }
 
 
 TEST(Assembler, system_msr) {
+  // All FPCR fields that must be implemented: AHP, DN, FZ, RMode
+  const uint64_t fpcr_core = 0x07c00000;
+
+  // All FPCR fields (including fields which may be read-as-zero):
+  //  Stride, Len
+  //  IDE, IXE, UFE, OFE, DZE, IOE
+  const uint64_t fpcr_all = fpcr_core | 0x00379f00;
+
   SETUP();
 
   START();
@@ -5710,12 +6094,37 @@ TEST(Assembler, system_msr) {
   __ Cinc(x7, x7, hs);  // C
   __ Cinc(x7, x7, vc);  // !V
 
+  // All core FPCR fields must be writable.
+  __ Mov(x8, fpcr_core);
+  __ Msr(FPCR, x8);
+  __ Mrs(x8, FPCR);
+
+  // All FPCR fields, including optional ones. This part of the test doesn't
+  // achieve much other than ensuring that supported fields can be cleared by
+  // the next test.
+  __ Mov(x9, fpcr_all);
+  __ Msr(FPCR, x9);
+  __ Mrs(x9, FPCR);
+  __ And(x9, x9, fpcr_core);
+
+  // The undefined bits must ignore writes.
+  // It's conceivable that a future version of the architecture could use these
+  // fields (making this test fail), but in the meantime this is a useful test
+  // for the simulator.
+  __ Mov(x10, ~fpcr_all);
+  __ Msr(FPCR, x10);
+  __ Mrs(x10, FPCR);
+
   END();
 
   RUN();
 
   // We should have incremented x7 (from 0) exactly 8 times.
   ASSERT_EQUAL_64(8, x7);
+
+  ASSERT_EQUAL_64(fpcr_core, x8);
+  ASSERT_EQUAL_64(fpcr_core, x9);
+  ASSERT_EQUAL_64(0, x10);
 
   TEARDOWN();
 }

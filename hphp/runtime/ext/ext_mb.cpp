@@ -21,6 +21,7 @@
 #include "hphp/runtime/ext/php_unicode.h"
 #include "hphp/runtime/ext/unicode_data.h"
 #include "hphp/runtime/ext/ext_process.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/ini-setting.h"
@@ -3839,7 +3840,7 @@ static int _php_mbstr_parse_mail_headers(Array &ht, const char *str,
           if (!fld_name.empty() && !fld_val.empty()) {
             /* FIXME: some locale free implementation is
              * really required here,,, */
-            ht.set(StringUtil::ToUpper(fld_name), fld_val);
+            ht.set(f_strtoupper(fld_name), fld_val);
           }
           state = 1;
         }
@@ -3872,7 +3873,7 @@ out:
     if (!fld_name.empty() && !fld_val.empty()) {
       /* FIXME: some locale free implementation is
        * really required here,,, */
-      ht.set(StringUtil::ToUpper(fld_name), fld_val);
+      ht.set(f_strtoupper(fld_name), fld_val);
     }
   }
   return state;

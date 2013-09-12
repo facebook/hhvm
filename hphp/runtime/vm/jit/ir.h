@@ -243,9 +243,9 @@ O(ConvCellToBool,              D(Bool), S(Cell),                           N) \
 O(ConvArrToDbl,                 D(Dbl), S(Arr),                          C|N) \
 O(ConvBoolToDbl,                D(Dbl), S(Bool),                           C) \
 O(ConvIntToDbl,                 D(Dbl), S(Int),                            C) \
-O(ConvObjToDbl,                 D(Dbl), S(Obj),                       N|Er|K) \
-O(ConvStrToDbl,                 D(Dbl), S(Str),                          N|K) \
-O(ConvCellToDbl,                D(Dbl), S(Cell),                      N|Er|K) \
+O(ConvObjToDbl,                 D(Dbl), S(Obj),                         N|Er) \
+O(ConvStrToDbl,                 D(Dbl), S(Str),                            N) \
+O(ConvCellToDbl,                D(Dbl), S(Cell),                        N|Er) \
                                                                               \
 O(ConvArrToInt,                 D(Int), S(Arr),                          C|N) \
 O(ConvBoolToInt,                D(Int), S(Bool),                           C) \
@@ -259,9 +259,9 @@ O(ConvCellToObj,                D(Obj), S(Cell),                     N|CRc|K) \
 O(ConvBoolToStr,          D(StaticStr), S(Bool),                           C) \
 O(ConvDblToStr,                 D(Str), S(Dbl),                            N) \
 O(ConvIntToStr,                 D(Str), S(Int),                            N) \
-O(ConvObjToStr,                 D(Str), S(Obj),                   N|Er|CRc|K) \
-O(ConvResToStr,                 D(Str), S(Res),                   N|Er|CRc|K) \
-O(ConvCellToStr,                D(Str), S(Cell),                  N|Er|CRc|K) \
+O(ConvObjToStr,                 D(Str), S(Obj),                         N|Er) \
+O(ConvResToStr,                 D(Str), S(Res),                         N|Er) \
+O(ConvCellToStr,                D(Str), S(Cell),                        N|Er) \
                                                                               \
 O(ExtendsClass,                D(Bool), S(Cls) C(Cls),                     C) \
 O(InstanceOf,                  D(Bool), S(Cls) S(Cls),                   C|N) \
@@ -325,17 +325,22 @@ O(CheckInit,                        ND, S(Gen),                           NF) \
 O(CheckInitMem,                     ND, S(PtrToGen) C(Int),               NF) \
 O(CheckCold,                        ND, NA,                                E) \
 O(CheckNullptr,                     ND, S(CountedStr,Nullptr),            NF) \
+O(CheckBounds,                      ND, S(Int) S(Int),                E|N|Er) \
+O(LdVectorSize,                 D(Int), S(Obj),                            E) \
 O(AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr),            NF) \
 O(Unbox,                     DUnbox(0), S(Gen),                           NF) \
 O(Box,                         DBox(0), S(Init),             E|N|Mem|CRc|PRc) \
 O(UnboxPtr,               D(PtrToCell), S(PtrToGen),                      NF) \
 O(BoxPtr,            D(PtrToBoxedCell), S(PtrToGen),                   N|Mem) \
+O(LdVectorBase,           D(PtrToCell), S(Obj),                            E) \
+O(LdPairBase,             D(PtrToCell), S(Obj),                            E) \
 O(LdStack,                      DParam, S(StkPtr),                        NF) \
 O(LdLoc,                        DParam, S(FramePtr),                      NF) \
 O(LdStackAddr,                  DParam, S(StkPtr),                         C) \
 O(LdLocAddr,                    DParam, S(FramePtr),                       C) \
 O(LdMem,                        DParam, S(PtrToGen) C(Int),               NF) \
 O(LdProp,                       DParam, S(Obj) C(Int),                    NF) \
+O(LdElem,                      D(Cell), S(PtrToCell) S(Int),      E|Mem|Refs) \
 O(LdRef,                        DParam, S(BoxedCell),                     NF) \
 O(LdThis,                       D(Obj), S(FramePtr),                       C) \
 O(LdRetAddr,                D(RetAddr), S(FramePtr),                      NF) \
@@ -364,12 +369,13 @@ O(LdClsMethodFCache,        D(FuncCtx), C(Cls)                                \
                                           CStr                                \
                                           S(Obj,Cls,Ctx)                      \
                                           S(FramePtr),              N|C|E|Er) \
-O(GetCtxFwdCall,                D(Ctx), S(Ctx) S(Func),                    C) \
+O(GetCtxFwdCall,                D(Ctx), S(Ctx) C(Func),                    C) \
 O(LdClsMethod,                 D(Func), S(Cls) C(Int),                     C) \
 O(LdPropAddr,              D(PtrToGen), S(Obj) C(Int),                     C) \
 O(LdClsPropAddr,           D(PtrToGen), S(Cls) S(Str) C(Cls),       C|E|N|Er) \
 O(LdClsPropAddrCached,     D(PtrToGen), S(Cls) CStr CStr C(Cls),    C|E|N|Er) \
 O(LdObjMethod,                      ND, S(Cls) CStr S(StkPtr),   E|N|Refs|Er) \
+O(LdObjInvoke,                 D(Func), S(Cls),                           NF) \
 O(LdGblAddrDef,            D(PtrToGen), S(Str),                      E|N|CRc) \
 O(LdGblAddr,               D(PtrToGen), S(Str),                            N) \
 O(LdObjClass,                   D(Cls), S(Obj),                            C) \
@@ -415,6 +421,11 @@ O(StLocNT,                          ND, S(FramePtr) S(Gen),        E|Mem|CRc) \
 O(StRef,                       DBox(1), S(BoxedCell) S(Cell), E|Mem|CRc|Refs) \
 O(StRefNT,                     DBox(1), S(BoxedCell) S(Cell),      E|Mem|CRc) \
 O(StRaw,                            ND, SUnk,                          E|Mem) \
+O(StElem,                           ND, S(PtrToCell)                          \
+                                          S(Int)                              \
+                                          S(Cell),                 E|Mem|CRc) \
+O(IterCopy,                         ND, S(FramePtr) S(Int)                    \
+                                        S(PtrToGen) S(Int),            E|Mem) \
 O(LdStaticLocCached,      D(BoxedCell), C(CacheHandle),                   NF) \
 O(StaticLocInit,          D(BoxedCell), CStr                                  \
                                           S(FramePtr)                         \
@@ -504,7 +515,7 @@ O(ContArUpdateIdx,                  ND, S(FramePtr) S(Int),            E|Mem) \
 O(LdContArRaw,                  DParam, S(FramePtr) C(Int),               NF) \
 O(StContArRaw,                      ND, S(FramePtr) C(Int) S(Gen),     E|Mem) \
 O(LdContArValue,                DParam, S(FramePtr),                      NF) \
-O(StContArValue,                    ND, S(FramePtr) S(Gen),   E|Mem|CRc|Refs) \
+O(StContArValue,                    ND, S(FramePtr) S(Cell),  E|Mem|CRc|Refs) \
 O(LdContArKey,                  DParam, S(FramePtr),                      NF) \
 O(StContArKey,                      ND, S(FramePtr) S(Gen),   E|Mem|CRc|Refs) \
 O(IterInit,                    D(Bool), S(Arr,Obj)                            \
@@ -756,6 +767,11 @@ enum class Opcode : uint16_t {
  * a runtime check.
  */
 bool isGuardOp(Opcode opc);
+
+/*
+ * Returns the corresponding Assert* opcode for a guard instruction.
+ */
+Opcode guardToAssert(Opcode opc);
 
 /*
  * A "query op" is any instruction returning Type::Bool that is both
@@ -1076,9 +1092,8 @@ struct CatchInfo {
 
 typedef folly::Range<TCA> TcaRange;
 
-// Key is instruction id. Used instead of StateVector because it's
-// expected to be very sparse.
-typedef smart::flat_map<uint32_t, DataTypeCategory> GuardConstraints;
+// Used instead of StateVector because it's expected to be very sparse.
+typedef smart::flat_map<const IRInstruction*, TypeConstraint> GuardConstraints;
 
 /*
  * Counts the number of cells a SpillStack will logically push.  (Not
@@ -1088,8 +1103,6 @@ typedef smart::flat_map<uint32_t, DataTypeCategory> GuardConstraints;
 int32_t spillValueCells(IRInstruction* spillStack);
 
 bool isConvIntOrPtrToBool(IRInstruction* instr);
-
-FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_toString, toString);
 
 } // namespace JIT
 } // namespace HPHP
@@ -1113,22 +1126,6 @@ template<> struct FormatValue<HPHP::JIT::Opcode> {
 
  private:
   HPHP::JIT::Opcode m_op;
-};
-
-template<typename Val>
-struct FormatValue<Val,
-                   typename std::enable_if<
-                     HPHP::JIT::has_toString<Val, std::string() const>::value,
-                     void
-                   >::type> {
-  explicit FormatValue(const Val& val) : m_val(val) {}
-
-  template<typename Callback> void format(FormatArg& arg, Callback& cb) const {
-    format_value::formatString(m_val.toString(), arg, cb);
-  }
-
- private:
-  const Val& m_val;
 };
 }
 

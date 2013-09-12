@@ -132,7 +132,7 @@ bool(true)
 -- Iteration 24 --
 bool(true)
 
-Strict Standards: Resource ID#%d used as offset, casting to integer (%d) in hphp/test/zend/bad/ext-session/session_encode_error2.phpt on line %d
+Strict Standards: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 HipHop Notice: %s
 bool(false)
 bool(true)

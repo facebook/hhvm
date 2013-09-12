@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_UTIL_H_
 #define incl_HPHP_UTIL_H_
 
+#include <cassert>
 #include <atomic>
 #include <vector>
 #include <string>
@@ -66,7 +67,7 @@ namespace HPHP { namespace Util {
 #pragma GCC diagnostic error "-Wunused-variable"
 #endif
 
-#define ALWAYS_INLINE      __attribute__((always_inline))
+#define ALWAYS_INLINE      inline __attribute__((always_inline))
 #define NEVER_INLINE       __attribute__((noinline))
 #define INLINE_SINGLE_CALLER ALWAYS_INLINE
 #define UNUSED             __attribute__((unused))
@@ -303,55 +304,43 @@ void find(std::vector<std::string> &out,
  */
 std::string format_pattern(const std::string &pattern, bool prefixSlash);
 
-inline void compiler_membar( ) {
-  asm volatile("" : : :"memory");
-}
-
 /**
  * Portable macros for mapping machine stack and frame pointers to variables.
  */
 #if defined(__x86_64__)
-#  define DECLARE_STACK_POINTER(sp) register void*   sp asm("rsp");
-#  define DECLARE_FRAME_POINTER(fp) register ActRec* fp asm("rbp");
+
+#  define DECLARE_STACK_POINTER(sp)               \
+     void* sp;                                    \
+     asm volatile("mov %%rsp, %0" : "=r" (sp) ::)
+
+#  if defined(__clang__)
+#    define DECLARE_FRAME_POINTER(fp)               \
+       ActRec* fp;                                  \
+       asm volatile("mov %%rbp, %0" : "=r" (fp) ::)
+#  else
+#    define DECLARE_FRAME_POINTER(fp) register ActRec* fp asm("rbp");
+#  endif
+
 #elif defined(__AARCH64EL__)
+
+#  if defined(__clang__)
+#    error Clang implementation not done for ARM
+#  endif
+
 #  define DECLARE_STACK_POINTER(sp) register void*   sp asm("sp");
 #  define DECLARE_FRAME_POINTER(fp) register ActRec* fp asm("x29");
+
 #else
+
 #  error What are the stack and frame pointers called on your architecture?
+
 #endif
 
-/**
- * Given the address of a C++ function, returns that function's name
- * or a hex string representation of the address if it can't find
- * the function's name. Attempts to demangle C++ function names. It's
- * the caller's responsibility to free the returned C string.
- */
-char* getNativeFunctionName(void* codeAddr);
-
-/**
- * Get the vtable offset corresponding to a method pointer. NB: only works
- * for single inheritance. For no inheritance at all, use
- * getMethodPtr. ABI-specific, don't play on or around.
- */
-template <typename MethodPtr>
-int64_t getVTableOffset(MethodPtr meth) {
-  union {
-    MethodPtr meth;
-    int64_t offset;
-  } u;
-  u.meth = meth;
-  return u.offset - 1;
-}
-
-template <typename MethodPtr>
-union MethodPtrU {
-  MethodPtr meth;
-  void* ptr;
-};
-
-template <typename MethodPtr>
-constexpr void* getMethodPtr(MethodPtr meth) {
-  return ((MethodPtrU<MethodPtr>*)(&meth))->ptr;
+inline void assert_native_stack_aligned() {
+#ifndef NDEBUG
+  DECLARE_STACK_POINTER(sp);
+  assert(reinterpret_cast<uintptr_t>(sp) % 16 == 0);
+#endif
 }
 
 /**

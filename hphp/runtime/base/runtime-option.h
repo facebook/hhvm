@@ -301,7 +301,6 @@ public:
   static int64_t MaxMemcacheKeyCount;
   static int  SocketDefaultTimeout;
   static bool LockCodeMemory;
-  static bool EnableMemoryManager;
   static bool CheckMemory;
   static int MaxArrayChain;
   static bool WarnOnCollectionToArray;
@@ -336,6 +335,7 @@ public:
   static int MaxUserFunctionId;
   static bool EnableFinallyStatement;
   static bool EnableArgsInBacktraces;
+  static bool EnableZendCompat;
 
   static int GetScannerType();
 
@@ -388,7 +388,6 @@ public:
   F(bool, JitDisabledByHphpd,          false)                           \
   F(bool, ThreadingJit,                false)                           \
   F(bool, JitTransCounters,            false)                           \
-  F(bool, JitMGeneric,                 true)                            \
   F(bool, HHIRGenericDtorHelper,       true)                            \
   F(bool, HHIRCse,                     true)                            \
   F(bool, HHIRSimplification,          true)                            \
@@ -412,13 +411,14 @@ public:
   F(bool, HHIRDeadCodeElim,            true)                            \
   F(bool, HHIRPredictionOpts,          true)                            \
   F(bool, HHIRStressCodegenBlocks,     false)                           \
-  F(bool, HHIRRelaxGuards,             true)                            \
   /* Region compiler flags */                                           \
   F(string,   JitRegionSelector,       regionSelectorDefault())         \
   F(bool,     JitPGO,                  false)                           \
   F(uint64_t, JitPGOThreshold,         kDefaultJitPGOThreshold)         \
   F(bool,     JitPGOHotOnly,           ServerExecutionMode())           \
   F(bool,     JitPGOUsePostConditions, true)                            \
+  F(bool, HHIRRelaxGuards,             hhirRelaxGuardsDefault())        \
+  F(bool, HHBCRelaxGuards,             hhbcRelaxGuardsDefault())        \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \
   F(bool, DumpTC,                      false)                           \

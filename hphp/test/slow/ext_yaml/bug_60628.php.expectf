@@ -1,0 +1,44 @@
+-- callback value --
+array(1) {
+  [0]=>
+  string(10) "look upper"
+}
+string(6) "!mytag"
+int(0)
+-- end callback value --
+-- native value --
+array(1) {
+  ["data"]=>
+  array(2) {
+    ["data"]=>
+    array(1) {
+      [0]=>
+      string(10) "look upper"
+    }
+    ["another"]=>
+    string(4) "test"
+  }
+}
+-- end native value --
+-- callback value --
+array(1) {
+  [0]=>
+  string(10) "look upper"
+}
+string(6) "!mytag"
+int(0)
+-- end callback value --
+-- parsed value --
+array(1) {
+  ["data"]=>
+  array(2) {
+    ["data"]=>
+    array(1) {
+      [0]=>
+      string(10) "look upper"
+    }
+    ["another"]=>
+    string(4) "test"
+  }
+}
+-- end parsed value --

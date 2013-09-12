@@ -69,20 +69,31 @@ VariableTable::VariableTable(BlockScope &blockScope)
 
 void VariableTable::getLocalVariableNames(vector<string> &syms) const {
   FunctionScopeRawPtr fs = getScopePtr()->getContainingFunction();
-  bool dollarThisIsSpecial = (fs->getContainingClass() ||
-                              fs->inPseudoMain());
+  bool dollarThisIsSpecial = fs->getContainingClass() ||
+                             fs->inPseudoMain() ||
+                             // In closures, $this is "sometimes"
+                             // special (if it's a closure in a method
+                             // body), but it easiest to just always
+                             // treat it special.
+                             fs->isClosure();
 
+  bool hadThisSym = false;
   for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
     const string& name = m_symbolVec[i]->getName();
     if (name == "this" && dollarThisIsSpecial) {
-      // The "this" variable in methods and pseudo-main is special and is
-      // handled separately below.
+      /*
+       * The "this" variable in methods, pseudo-main, or closures is
+       * special and is handled separately below.
+       *
+       * Closures are the specialest.
+       */
+      hadThisSym = true;
       continue;
     }
     syms.push_back(name);
   }
 
-  if (fs->needsLocalThis()) {
+  if (fs->needsLocalThis() || (hadThisSym && fs->isClosure())) {
     assert(dollarThisIsSpecial);
     // We only need a local variable named "this" if the current function
     // contains an occurrence of "$this" that is not part of a property

@@ -21,9 +21,11 @@
 
 #include "folly/Memory.h"
 
+#include "hphp/util/trace.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/runtime/base/memory-usage-stats.h"
 
+#include <array>
 #include <vector>
 #include <deque>
 #include <queue>
@@ -155,6 +157,10 @@ class MemoryManager : boost::noncopyable {
   static void* TlsInitSetup;
 public:
   typedef ThreadLocalSingleton<MemoryManager> TlsWrapper;
+  struct MaskAlloc;
+
+  static constexpr size_t kMaxSmartSize = 2048;
+
   static void Create(void* storage);
   static void Delete(MemoryManager*);
   static void OnThreadExit(MemoryManager*);
@@ -178,15 +184,7 @@ public:
     std::vector<SmartAllocatorImpl*>::const_iterator m_it;
   };
 
-  /**
-   * Without calling this, everything should work as if there is no memory
-   * manager.
-   */
-  void enable() { m_enabled = true; }
-  void disable() { m_enabled = false; }
-  bool isEnabled() { return m_enabled; }
-
-  /**
+  /*
    * Register a smart allocator. Done by SmartAlloctorImpl's constructor.
    */
   void add(SmartAllocatorImpl *allocator);
@@ -300,52 +298,112 @@ public:
     }
   }
 
-  class MaskAlloc {
-    MemoryManager *m_mm;
-  public:
-    explicit MaskAlloc(MemoryManager *mm) : m_mm(mm) {
+  struct MaskAlloc {
+    explicit MaskAlloc(MemoryManager* mm) : m_mm(mm) {
       // capture all mallocs prior to construction
       m_mm->refreshStats();
     }
     ~MaskAlloc() {
-#ifdef USE_JEMALLOC
+  #ifdef USE_JEMALLOC
       // exclude mallocs and frees since construction
       if (s_statsEnabled) {
         m_mm->m_prevAllocated = int64_t(*m_mm->m_allocated);
-        m_mm->m_delta = int64_t(*m_mm->m_allocated) - int64_t(*m_mm->m_deallocated);
+        m_mm->m_delta = int64_t(*m_mm->m_allocated) -
+          int64_t(*m_mm->m_deallocated);
       }
-#endif
+  #endif
     }
+
+    MaskAlloc(const MaskAlloc&) = delete;
+    MaskAlloc& operator=(const MaskAlloc&) = delete;
+
+  private:
+    MemoryManager* const m_mm;
   };
 
-  void* smartMalloc(size_t nbytes);
-  void* smartRealloc(void* ptr, size_t nbytes);
-  void* smartCallocBig(size_t totalbytes);
-  void  smartFree(void* ptr);
-  static const size_t kMaxSmartSize = 2048;
+  /*
+   * Return the smart size class for a given requested allocation
+   * size.
+   *
+   * The return value is greater than or equal to the parameter, and
+   * less than or equal to MaxSmallSize.
+   *
+   * Pre: requested <= kMaxSmartSize
+   */
+  static uint32_t smartSizeClass(uint32_t requested);
+
+  /*
+   * Allocate/deallocate a smart-allocated memory block in a given
+   * small size class.  You must be able to tell the deallocation
+   * function how big the allocation was.
+   *
+   * The size passed to smartMallocSize does not need to be an exact
+   * size class.  The size passed to smartFreeSize must be the exact
+   * size that was passed to smartMallocSize for that allocation.
+   *
+   * The returned pointer is guaranteed to be 16-byte aligned.
+   *
+   * Pre: size > 0 && size <= kMaxSmartSize
+   */
+  void* smartMallocSize(uint32_t size);
+  void smartFreeSize(void* p, uint32_t size);
+
+  ALWAYS_INLINE void* objMalloc(size_t size) {
+    if (LIKELY(size <= kMaxSmartSize)) {
+      return smartMallocSize(size);
+    }
+    return smartMallocSizeBig(size);
+  }
+
+  /*
+   * Allocate/deallocate smart-allocated memory that is too big for
+   * the small size classes.
+   *
+   * The returned pointer is guaranteed to be 16-byte aligned.
+   */
+  void* smartMallocSizeBig(size_t size);
+  void smartFreeSizeBig(void* vp, size_t size);
 
   // allocate nbytes from the current slab, aligned to 16-bytes
   void* slabAlloc(size_t nbytes);
+
+private:
+  friend void* smart_malloc(size_t nbytes);
+  friend void* smart_calloc(size_t count, size_t bytes);
+  friend void* smart_realloc(void* ptr, size_t nbytes);
+  friend void  smart_free(void* ptr);
+
+  struct SmallNode {
+    size_t padbytes;  // <= kMaxSmartSize means small block
+  };
 
 private:
   char* newSlab(size_t nbytes);
   void* smartEnlist(SweepNode*);
   void* smartMallocSlab(size_t padbytes);
   void* smartMallocBig(size_t nbytes);
+  void* smartCallocBig(size_t nbytes);
   void  smartFreeBig(SweepNode*);
+  void* smartMalloc(size_t nbytes);
+  void* smartRealloc(void* ptr, size_t nbytes);
+  void  smartFree(void* ptr);
   void refreshStatsHelperExceeded();
 #ifdef USE_JEMALLOC
   void refreshStatsHelperStop();
 #endif
 
 private:
-  static const unsigned kLgSizeQuantum = 4; // 16 bytes
-  static const unsigned kNumSizes = kMaxSmartSize >> kLgSizeQuantum;
-  static const size_t kMask = (1 << kLgSizeQuantum) - 1;
+  static constexpr unsigned kLgSizeQuantum = 4; // 16 bytes
+  static constexpr unsigned kNumSizes = kMaxSmartSize >> kLgSizeQuantum;
+  static constexpr size_t kSmartSizeMask = (1 << kLgSizeQuantum) - 1;
 
 private:
-  char *m_front, *m_limit;
-  GarbageList m_smartfree[kNumSizes];
+  TRACE_SET_MOD(smartalloc);
+
+  char* m_front;
+  char* m_limit;
+  std::array<GarbageList,kNumSizes> m_sizeTrackedFree;
+  std::array<GarbageList,kNumSizes> m_sizeUntrackedFree;
   SweepNode m_sweep;   // oversize smart_malloc'd blocks
   SweepNode m_strings; // in-place node is head of circular list
   MemoryUsageStats m_stats;
@@ -370,25 +428,24 @@ public:
   friend class StringData; // for enlist/delist access to m_strings
 };
 
-//
-// smart_malloc api for request-scoped memory
-//
-// These functions behave like malloc, but get memory from the current
-// thread's MemoryManager instance.  At request-end, any un-freed memory
-// is explicitly freed and garbage filled.  If any pointers to this memory
-// survive beyond a request, they'll be dangling pointers.
-//
-// Block sizes <= MemoryManager::kMaxSmartSize are region-allocated
-// and are only guaranteed to be 8-byte aligned.  Larger blocks are
-// directly malloc'd (with a header) and are 16-byte aligned.
-//
-// Clients must not mix/match calls between smart_malloc and malloc:
-//  - these blocks have a header that malloc wouldn't grok
-//  - memory is auto-freed at request-end, unlike malloc
-//  - all bookeeping is thread local; freeing a smart_malloc block
-//    from a different thread than it was malloc'd from, even while
-//    the original request is still running, will just crash and burn.
-//
+/*
+ * smart_malloc api for request-scoped memory
+ *
+ * This is the most generic entry point to the SmartAllocator.  If you
+ * easily know the size of the allocation at free time, it might be
+ * more efficient to use MM() apis directory.
+ *
+ * These functions behave like C's malloc/free, but get memory from
+ * the current thread's MemoryManager instance.  At request-end, any
+ * un-freed memory is explicitly freed (and in debug, garbage filled).
+ * If any pointers to this memory survive beyond a request, they'll be
+ * dangling pointers.
+ *
+ * Block sizes <= MemoryManager::kMaxSmartSize are region-allocated
+ * and are only guaranteed to be 8-byte aligned.  Larger blocks are
+ * directly malloc'd (with a header) and are 16-byte aligned.
+ *
+ */
 void* smart_malloc(size_t nbytes);
 void* smart_calloc(size_t count, size_t bytes);
 void* smart_realloc(void* ptr, size_t nbytes);
@@ -429,7 +486,14 @@ void smart_delete_array(T* t, size_t count) {
   smart_free(t);
 }
 
-///////////////////////////////////////////////////////////////////////////////
+inline MemoryManager& MM() {
+  return *MemoryManager::TheMemoryManager();
 }
 
-#endif // incl_HPHP_MEMORY_MANAGER_H_
+///////////////////////////////////////////////////////////////////////////////
+
+}
+
+#include "hphp/runtime/base/memory-manager-inl.h"
+
+#endif

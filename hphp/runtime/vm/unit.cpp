@@ -112,13 +112,15 @@ static void initializeNamedDataMap() {
                        config);
 }
 
-NamedEntity* Unit::GetNamedEntity(const StringData* str) {
+NamedEntity* Unit::GetNamedEntity(const StringData* str,
+                                  bool allowCreate /*=true*/) {
   if (UNLIKELY(!s_namedDataMap)) {
     initializeNamedDataMap();
   }
   NamedEntityMap::iterator it = s_namedDataMap->find(str);
   if (LIKELY(it != s_namedDataMap->end())) return &it->second;
-  return getNamedEntityHelper(str);
+  if (LIKELY(allowCreate)) { return getNamedEntityHelper(str); }
+  return nullptr;
 }
 
 void NamedEntity::setCachedFunc(Func* f) {
@@ -607,8 +609,7 @@ Class* Unit::defClass(const PreClass* preClass,
     newClass->m_cachedOffset = nameList->m_cachedClassOffset;
 
     newClass.get()->incAtomicCount();
-    newClass.get()->setCached();
-    if (Class::s_instanceBitsInit.load(std::memory_order_acquire)) {
+    if (InstanceBits::initFlag.load(std::memory_order_acquire)) {
       // If the instance bitmap has already been set up, we can just
       // initialize our new class's bits and add ourselves to the class
       // list normally.
@@ -619,12 +620,18 @@ Class* Unit::defClass(const PreClass* preClass,
       // initialized since we checked, initialize the bits normally. If not,
       // we must add the new class to the class list before dropping the lock
       // to ensure its bits are initialized when the time comes.
-      ReadLock l(Class::s_instanceBitsLock);
-      if (Class::s_instanceBitsInit.load(std::memory_order_acquire)) {
+      ReadLock l(InstanceBits::lock);
+      if (InstanceBits::initFlag.load(std::memory_order_acquire)) {
         newClass->setInstanceBits();
       }
       nameList->pushClass(newClass.get());
     }
+    /*
+     * call setCached after adding to the class list, otherwise the
+     * target-cache short circuit at the top could return a class
+     * which is not yet on the clsList().
+     */
+    newClass.get()->setCached();
     DEBUGGER_ATTACHED_ONLY(phpDebuggerDefClassHook(newClass.get()));
     return newClass.get();
   }
@@ -934,7 +941,9 @@ Cell* Unit::lookupCns(const StringData* cnsName) {
       auto const tvRet = const_cast<Variant&>(
         ci->getDeferredValue()).asTypedValue();
       assert(cellIsPlausible(*tvRet));
-      return tvRet;
+      if (LIKELY(tvRet->m_type != KindOfUninit)) {
+        return tvRet;
+      }
     }
   }
   if (UNLIKELY(TargetCache::s_constants != nullptr)) {
@@ -1409,40 +1418,42 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
         if (UNLIKELY(m_mergeState & UnitMergeStateNeedsCompact)) {
           SimpleLock lock(unitInitLock);
           if (!(m_mergeState & UnitMergeStateNeedsCompact)) return;
-          /*
-           * All the classes are known to be unique, and we just got
-           * here, so all were successfully defined. We can now go
-           * back and convert all UnitMergeKindClass entries to
-           * UnitMergeKindUniqueDefinedClass, and all hoistable
-           * classes to their Class*'s instead of PreClass*'s.
-           *
-           * We can also remove any Persistent Class/Func*'s,
-           * and any requires of modules that are (now) empty
-           */
-          size_t delta = compactUnitMergeInfo(mi, nullptr);
-          UnitMergeInfo* newMi = mi;
-          if (delta) {
-            newMi = UnitMergeInfo::alloc(mi->m_mergeablesSize - delta);
-          }
-          /*
-           * In the case where mi == newMi, there's an apparent
-           * race here. Although we have a lock, so we're the only
-           * ones modifying this, there could be any number of
-           * readers. But thats ok, because it doesnt matter
-           * whether they see the old contents or the new.
-           */
-          compactUnitMergeInfo(mi, newMi);
-          if (newMi != mi) {
-            this->m_mergeInfo = newMi;
-            Treadmill::deferredFree(mi);
-            if (isMergeOnly() &&
-                newMi->m_firstHoistableFunc == newMi->m_mergeablesSize) {
-              m_mergeState |= UnitMergeStateEmpty;
+          if (!redoHoistable) {
+            /*
+             * All the classes are known to be unique, and we just got
+             * here, so all were successfully defined. We can now go
+             * back and convert all UnitMergeKindClass entries to
+             * UnitMergeKindUniqueDefinedClass, and all hoistable
+             * classes to their Class*'s instead of PreClass*'s.
+             *
+             * We can also remove any Persistent Class/Func*'s,
+             * and any requires of modules that are (now) empty
+             */
+            size_t delta = compactUnitMergeInfo(mi, nullptr);
+            UnitMergeInfo* newMi = mi;
+            if (delta) {
+              newMi = UnitMergeInfo::alloc(mi->m_mergeablesSize - delta);
             }
+            /*
+             * In the case where mi == newMi, there's an apparent
+             * race here. Although we have a lock, so we're the only
+             * ones modifying this, there could be any number of
+             * readers. But thats ok, because it doesnt matter
+             * whether they see the old contents or the new.
+             */
+            compactUnitMergeInfo(mi, newMi);
+            if (newMi != mi) {
+              this->m_mergeInfo = newMi;
+              Treadmill::deferredFree(mi);
+              if (isMergeOnly() &&
+                  newMi->m_firstHoistableFunc == newMi->m_mergeablesSize) {
+                m_mergeState |= UnitMergeStateEmpty;
+              }
+            }
+            assert(newMi->m_firstMergeablePreClass == newMi->m_mergeablesSize ||
+                   isMergeOnly());
           }
           m_mergeState &= ~UnitMergeStateNeedsCompact;
-          assert(newMi->m_firstMergeablePreClass == newMi->m_mergeablesSize ||
-                 isMergeOnly());
         }
         return;
     }

@@ -1,7 +1,7 @@
-Strict Standards: Non-static method foo::bar() should not be called statically in hphp/test/zend/bad/zend/009.phpt on line %d
+Strict Standards: Non-static method foo::bar() should not be called statically in %s on line %d
 string(3) "foo"
 
-Strict Standards: Non-static method foo::bar() should not be called statically in hphp/test/zend/bad/zend/009.phpt on line %d
+Strict Standards: Non-static method foo::bar() should not be called statically in %s on line %d
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"

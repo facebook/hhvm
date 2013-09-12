@@ -138,17 +138,6 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params) {
   return vm_call_user_func(function, params);
 }
 
-Object f_call_user_func_array_async(CVarRef function, CArrRef params) {
-  raise_error("%s is no longer supported", __func__);
-  return null_object;
-}
-
-Object f_call_user_func_async(int _argc, CVarRef function,
-                              CArrRef _argv /* = null_array */) {
-  raise_error("%s is no longer supported", __func__);
-  return null_object;
-}
-
 Variant f_check_user_func_async(CVarRef handles, int timeout /* = -1 */) {
   raise_error("%s is no longer supported", __func__);
   return uninit_null();

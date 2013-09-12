@@ -86,6 +86,7 @@ static const std::unordered_map<int, fbstring> g_phpTypeMap =
 static const std::unordered_map<fbstring, FuncFlags> g_flagsMap =
 {
   {"ZendParamMode",                  ZendParamMode},
+  {"ZendCompat",                     ZendCompat},
   {"IsAbstract",                     IsAbstract},
   {"IsFinal",                        IsFinal},
   {"IsPublic",                       IsPublic},

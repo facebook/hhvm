@@ -15,17 +15,29 @@
 */
 
 #include "hphp/util/file-cache.h"
-#include "hphp/util/exception.h"
-#include "hphp/util/compression.h"
-#include "util.h"
-#include "hphp/util/logger.h"
-#include "folly/String.h"
+
 #include <sys/mman.h>
 
+#include <set>
+#include <string>
+
+#include "folly/String.h"
+#include "hphp/util/exception.h"
+#include "hphp/util/compression.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/util.h"
+
 namespace HPHP {
+
+using std::set;
+using std::string;
+
+static const short kFileCacheVersion_1 = 1;
+static const short kCurrentFileCacheVersion = kFileCacheVersion_1;
+
 ///////////////////////////////////////////////////////////////////////////////
 
-std::string FileCache::SourceRoot;
+string FileCache::SourceRoot;
 
 ///////////////////////////////////////////////////////////////////////////////
 // helper
@@ -38,6 +50,7 @@ static bool read_bytes(FILE *f, char *buf, int len) {
   }
   return nread;
 }
+
 static bool read_bytes(char *&ptr, char *end, char *buf, int len) {
   if (ptr + len <= end) {
     memcpy(buf, ptr, len);
@@ -48,6 +61,12 @@ static bool read_bytes(char *&ptr, char *end, char *buf, int len) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+FileCache::FileCache()
+    : m_fd(-1),
+      m_size(0),
+      m_addr(nullptr) {
+}
 
 FileCache::~FileCache() {
   for (FileMap::iterator iter = m_files.begin(); iter != m_files.end();
@@ -72,23 +91,7 @@ FileCache::~FileCache() {
   }
 }
 
-void FileCache::writeDirectories(const char *name) {
-  string sname = name;
-  for (int i = 1; i < (int)sname.size(); i++) {
-    if (sname[i] == '/') {
-      string dir = sname.substr(0, i);
-      if (!exists(dir.c_str())) {
-        Buffer &buffer = m_files[dir];
-        buffer.len = -2; // directory
-        buffer.data = nullptr;
-        buffer.clen = -2;
-        buffer.cdata = nullptr;
-      }
-    }
-  }
-}
-
-std::string FileCache::GetRelativePath(const char *path) {
+string FileCache::GetRelativePath(const char *path) {
   assert(path);
 
   string relative = path;
@@ -163,9 +166,6 @@ void FileCache::write(const char *name, const char *fullpath) {
   writeDirectories(name);
 }
 
-#define FILE_CACHE_VERSION_1 1
-#define CURRENT_FILE_CACHE_VERSION FILE_CACHE_VERSION_1
-
 void FileCache::save(const char *filename) {
   assert(filename && *filename);
 
@@ -177,20 +177,24 @@ void FileCache::save(const char *filename) {
 
   // write an invalid length followed by a version number
   short minus_one = -1;
-  short version = CURRENT_FILE_CACHE_VERSION;
+  short version = kCurrentFileCacheVersion;
+
   fwrite(&minus_one, sizeof(minus_one), 1, f);
   fwrite(&version, sizeof(version), 1, f);
-  for (FileMap::const_iterator iter = m_files.begin(); iter != m_files.end();
-       ++iter) {
-    short name_len = iter->first.size();
-    const char *name = iter->first.data();
+
+  for (auto& file : m_files) {
+    short name_len = file.first.size();
+    const char *name = file.first.data();
     assert(name_len);
+
     fwrite(&name_len, sizeof(short), 1, f);
     fwrite(name, name_len, 1, f);
 
-    const Buffer &buffer = iter->second;
+    const Buffer &buffer = file.second;
+
     char c = buffer.cdata ? 1 : 0;
     fwrite(&c, 1, 1, f);
+
     if (c) {
       assert(buffer.clen > 0);
       fwrite(&buffer.clen, sizeof(int), 1, f);
@@ -243,6 +247,7 @@ void FileCache::load(const char *filename, bool onDemandUncompress,
     read_bytes(f, (char*)&tmp, sizeof(tmp));
     read_bytes(f, (char*)&tmp, sizeof(tmp));
   }
+
   while (true) {
     short name_len;
     if (!read_bytes(f, (char*)&name_len, sizeof(short)) || name_len <= 0) {
@@ -487,21 +492,35 @@ int64_t FileCache::fileSize(const char *name, bool isRelative) const {
   return fileSize(GetRelativePath(name).c_str(), true);
 }
 
-void FileCache::dump() {
-  // sort by file names
-  std::set<string> files;
-  for (FileMap::const_iterator iter = m_files.begin(); iter != m_files.end();
-       ++iter) {
-    files.insert(iter->first);
+void FileCache::dump() const {
+  set<string> files;
+
+  // For sorting purposes.
+  for (auto& file: m_files) {
+    files.insert(file.first);
   }
 
-  // output
-  for (std::set<string>::const_iterator iter = files.begin();
-      iter != files.end();
-      ++iter) {
-    printf("%s\n", iter->c_str());
+  for (auto& name: files) {
+    printf("%s\n", name.c_str());
   }
 }
 
-///////////////////////////////////////////////////////////////////////////////
+// --- Private functions.
+
+void FileCache::writeDirectories(const char* name) {
+  string sname = name;
+  for (int i = 1; i < (int)sname.size(); i++) {
+    if (sname[i] == '/') {
+      string dir = sname.substr(0, i);
+      if (!exists(dir.c_str())) {
+        Buffer &buffer = m_files[dir];
+        buffer.len = -2; // directory
+        buffer.data = nullptr;
+        buffer.clen = -2;
+        buffer.cdata = nullptr;
+      }
+    }
+  }
 }
+
+}   // namespace HPHP

@@ -124,11 +124,17 @@ concat_ss(StringData* v1, StringData* v2) {
     // have to release the string here
     v1->decRefCount();
     return ret;
-  } else {
-    v1->append(v2->slice());
-    decRefStr(v2);
-    return v1;
   }
+
+  auto const newV1 = v1->append(v2->slice());
+  decRefStr(v2);
+  if (UNLIKELY(newV1 != v1)) {
+    assert(v1->getCount() == 1);
+    v1->release();
+    newV1->incRefCount();
+    return newV1;
+  }
+  return v1;
 }
 
 /**
@@ -454,6 +460,22 @@ HOT_FUNC int64_t modHelper(int64_t left, int64_t right) {
   // We already dealt with divide-by-zero up in hhbctranslator.
   assert(right != 0);
   return left % right;
+}
+
+void defClsHelper(PreClass* preClass) {
+  using namespace Transl;
+
+  assert(tl_regState == VMRegState::DIRTY);
+  tl_regState = VMRegState::CLEAN;
+  Unit::defClass(preClass);
+
+  /*
+   * UniqueStubs::defClsHelper sync'd the registers for us already.
+   * This means if an exception propagates we want to leave things as
+   * VMRegState::CLEAN, since we're still in sync.  Only set it to
+   * dirty if we are actually returning to run in the TC again.
+   */
+  tl_regState = VMRegState::DIRTY;
 }
 
 } // HPHP::VM

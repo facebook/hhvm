@@ -15,13 +15,14 @@
 */
 #include "hphp/runtime/vm/jit/print.h"
 
+#include "hphp/util/disasm.h"
+#include "hphp/util/text-color.h"
+#include "hphp/util/abi-cxx.h"
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/linear-scan.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/util/disasm.h"
-#include "hphp/util/text-color.h"
 
 namespace HPHP {  namespace JIT {
 
@@ -62,8 +63,8 @@ void printOpcode(std::ostream& os, const IRInstruction* inst,
     if (isGuard) os << punc(",");
   }
   if (isGuard) {
-    auto it = guards->find(inst->id());
-    os << (it == guards->end() ? "unused" : typeCategoryName(it->second));
+    auto it = guards->find(inst);
+    os << (it == guards->end() ? "unused" : it->second.toString());
   }
   os << color(ANSI_COLOR_LIGHT_BLUE)
      << '>'
@@ -203,7 +204,7 @@ static void printConst(std::ostream& os, IRInstruction* inst) {
     os << "NamedEntity(" << ne << ")";
   } else if (t.subtypeOf(Type::TCA)) {
     TCA tca = c->as<TCA>();
-    auto name = Util::getNativeFunctionName(tca);
+    auto name = getNativeFunctionName(tca);
     SCOPE_EXIT { free(name); };
     os << folly::format("TCA: {}({})", tca,
       boost::trim_copy(std::string(name)));
@@ -269,6 +270,12 @@ void print(const SSATmp* tmp) {
 
 void print(const IRTrace* trace) {
   print(std::cout, trace);
+}
+
+std::string IRTrace::toString() const {
+  std::ostringstream out;
+  print(out, this, nullptr);
+  return out.str();
 }
 
 // Print unlikely blocks at the end in normal generation.  If we have

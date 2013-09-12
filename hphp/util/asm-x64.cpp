@@ -33,9 +33,10 @@
 
 namespace HPHP { namespace Transl {
 
-StoreImmPatcher::StoreImmPatcher(X64Assembler& as, uint64_t initial,
+StoreImmPatcher::StoreImmPatcher(CodeBlock& cb, uint64_t initial,
                                  RegNumber reg,
                                  int32_t offset, RegNumber base) {
+  X64Assembler as { cb };
   m_is32 = deltaFits(initial, sz::dword);
   if (m_is32) {
     as.store_imm64_disp_reg64(initial, offset, base);
@@ -43,7 +44,7 @@ StoreImmPatcher::StoreImmPatcher(X64Assembler& as, uint64_t initial,
     as.mov_imm64_reg(initial, reg);
     as.store_reg64_disp_reg64(reg, offset, base);
   }
-  m_addr = as.frontier() - (m_is32 ? 4 : 8);
+  m_addr = cb.frontier() - (m_is32 ? 4 : 8);
   assert((m_is32 ?  (uint64_t)*(int32_t*)m_addr : *(uint64_t*)m_addr)
          == initial);
 }

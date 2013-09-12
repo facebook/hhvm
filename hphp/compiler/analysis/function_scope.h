@@ -90,16 +90,19 @@ public:
 
   void addModifier(int mod);
 
+  bool hasUserAttr(const char *attr) const;
+
   /**
    * What kind of function this is.
    */
-  bool isUserFunction() const { return !m_system;}
+  bool isUserFunction() const { return !m_system && !isNative(); }
   bool isDynamic() const { return m_dynamic; }
   bool isPublic() const;
   bool isProtected() const;
   bool isPrivate() const;
   bool isStatic() const;
   bool isAbstract() const;
+  bool isNative() const;
   bool isFinal() const;
   bool isMagic() const;
   bool isRefParam(int index) const;

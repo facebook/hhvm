@@ -395,6 +395,21 @@ In server mode, this command will simply abort current page handling
 without restarting anything.
 
 
+    ---------------------------- Set Command ----------------------------
+
+    set bac on/off    on makes debugger bypass access checks on class members
+    set lf path/off   turn logging on and specify log file
+    set pl level      if level > 0, only print out object trees to that depth
+    set cc count      display at most count characters when doing = command
+    set ss on/off     on makes the debugger take small steps (not entire lines)
+    set sa on/off     on makes where command display argument values
+    set mcl limit     display at most limit source lines at breakpoints
+
+Use this command to change default settings. The new values are persisted into
+the configuration file that normally can be found at ~/.hphpd.hdf.
+
+Level, count and limit can be <= 0, in which case they are unlimited.
+
     ---------------------------- Step Command ----------------------------
 
     [s]tep {count=1}     steps into lines of code

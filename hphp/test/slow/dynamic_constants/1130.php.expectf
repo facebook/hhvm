@@ -1,0 +1,5 @@
+HipHop Notice: Use of undefined constant TEST - assumed 'TEST' in %s/test/slow/dynamic_constants/1130.php on line 3
+string(4) "TEST"
+int(1)
+HipHop Warning: Constant TEST already defined in %s/test/slow/dynamic_constants/1130.php on line 6
+int(1)

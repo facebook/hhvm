@@ -23,13 +23,22 @@ namespace HPHP { namespace Eval {
 TRACE_SET_MOD(debugger);
 
 void CmdConfig::help(DebuggerClient &client) {
-  client.helpTitle("Config Command");
-  client.helpCmds("set <var> <value>", "set variable <var> to be <value>",
-                   "set", "list current values of variables",
-                   nullptr);
+  client.helpTitle("Set Command");
+  client.helpCmds(
+    "set bac on/off","on makes debugger bypass access checks on class members",
+    "set lf path/off","turn logging on and specify log file",
+    "set pl level","if level > 0, only print out object trees to that depth",
+    "set cc count","display at most count characters when doing = command",
+    "set ss on/off",
+      "on makes the debugger take small steps (not entire lines)",
+    "set sa on/off","on makes where command display argument values",
+    "set mcl limit","display at most limit source lines at breakpoints",
+    nullptr);
   client.helpBody(
-    "Use this command to set up config variable, "
-    "e.g. turning on/off a special mode."
+    "Use this command to change default settings. "
+    "The new values are persisted into "
+    "the configuration file that normally can be found at ~/.hphpd.hdf. "
+    "Level, count and limit can be <= 0, in which case they are unlimited."
   );
 }
 
@@ -51,10 +60,10 @@ void CmdConfig::onClient(DebuggerClient &client) {
       client.print("BypassAccessCheck(bac) set to on.\n"
                     "All code executed from debugger is bypassing "
                     "access check!");
-      client.setDebuggerBypassCheck(true);
+      client.setDebuggerClientBypassCheck(true);
     } else if (value == "off") {
       client.print("BypassAccessCheck(bac) set to off");
-      client.setDebuggerBypassCheck(false);
+      client.setDebuggerClientBypassCheck(false);
     } else {
       help(client);
     }
@@ -93,8 +102,18 @@ void CmdConfig::onClient(DebuggerClient &client) {
       client.error("%d is invalid for PrintLevel(pl)", pl);
       return;
     }
-    client.setDebuggerPrintLevel(pl);
+    client.setDebuggerClientPrintLevel(pl);
     client.print("PrintLevel(pl) is set to %d", pl);
+    return;
+  }
+  if (var == "ShortPrintCharCount" || var == "cc") {
+    int cc = strtol(value.c_str(), nullptr, 10);
+    if (cc < -1) {
+      client.error("%d is invalid for ShortPrintCharCount(cc)", cc);
+    } else {
+      client.setDebuggerClientShortPrintCharCount(cc);
+      client.print("ShortPrintCharCount(cc) is set to %d", cc);
+    }
     return;
   }
   if (var == "SmallStep" || var == "ss") {
@@ -112,10 +131,10 @@ void CmdConfig::onClient(DebuggerClient &client) {
   if (var == "StackArgs" || var == "sa") {
     if (value == "on") {
       client.print("StackArgs(sa) set to on.\n");
-      client.setDebuggerStackArgs(true);
+      client.setDebuggerClientStackArgs(true);
     } else if (value == "off") {
       client.print("StackArgs(sa) set to off");
-      client.setDebuggerStackArgs(false);
+      client.setDebuggerClientStackArgs(false);
     } else {
       help(client);
     }
@@ -144,12 +163,14 @@ void CmdConfig::listVars(DebuggerClient &client) {
   client.print("LogFile(lf) %s", LogFile == "" ?
                                     "off" : LogFile.c_str());
   client.print("BypassAccessCheck(bac) %s",
-                client.getDebuggerBypassCheck() ? "on" : "off");
-  client.print("PrintLevel(pl) %d", client.getDebuggerPrintLevel());
+                client.getDebuggerClientBypassCheck() ? "on" : "off");
+  client.print("PrintLevel(pl) %d", client.getDebuggerClientPrintLevel());
+  client.print("ShortPrintCharCount(cc) %d",
+               client.getDebuggerClientShortPrintCharCount());
   client.print("SmallStep(ss) %s",
                 client.getDebuggerClientSmallStep() ? "on" : "off");
   client.print("StackArgs(sa) %s",
-                client.getDebuggerStackArgs() ? "on" : "off");
+                client.getDebuggerClientStackArgs() ? "on" : "off");
   client.print("MaxCodeLines(mcl) %d",
                 client.getDebuggerClientMaxCodeLines());
 }

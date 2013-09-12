@@ -128,6 +128,19 @@ void c_ContinuationWaitHandle::initialize(c_Continuation* continuation, uint16_t
   m_depth = depth;
 
   setState(STATE_SCHEDULED);
+
+  // In async functions, continutions are created only after the execution is
+  // blocked (i.e. with non-zero return label). If this is the case,
+  // update the state and child accordingly.
+  if (continuation->m_label > 0) {
+    m_continuation->start();
+    Cell* value = m_continuation->m_value.asCell();
+    assert(c_WaitHandle::fromCell(value));
+    auto child = static_cast<c_WaitableWaitHandle*>(value->m_data.pobj);
+    assert(!child->isFinished());
+    m_child = child;
+    blockOn(child);
+  }
   if (isInContext()) {
     getContext()->schedule(this);
   }

@@ -204,13 +204,13 @@ struct IRInstruction {
    *
    * Pre: other->isTransient() || numDsts() == other->numDsts()
    */
-  void become(IRFactory*, IRInstruction* other);
+  void become(IRFactory&, IRInstruction* other);
 
-  /*
-   * Deep-copy an IRInstruction, using factory to allocate memory for
-   * the IRInstruction itself, and its srcs/dests.
-   */
-  IRInstruction* clone(IRFactory* factory) const;
+  bool       is() const { return false; }
+  template<typename... Args>
+  bool       is(Opcode op, Args&&... args) {
+    return m_op == op || is(std::forward<Args>(args)...);
+  }
 
   Opcode     op()   const       { return m_op; }
   void       setOpcode(Opcode newOpc)  { m_op = newOpc; }

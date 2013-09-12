@@ -21,10 +21,12 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#define SOCKET_ERROR(sock, msg, errn)                           \
-  sock->setError(errn);                                         \
-  raise_warning("%s [%d]: %s", msg, errn,                       \
-                  folly::errnoStr(errn).c_str())                \
+#define SOCKET_ERROR(sock, msg, errn)                                 \
+  sock->setError(errn);                                               \
+  if (errn != EAGAIN && errn != EWOULDBLOCK && errn != EINPROGRESS) { \
+    raise_warning("%s [%d]: %s", msg, errn,                           \
+                    folly::errnoStr(errn).c_str());                   \
+  }                                                                   \
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

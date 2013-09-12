@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_mysql.h"
+#include "hphp/runtime/ext/FBSerialize.h"
 #include "hphp/util/db-conn.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/stat-cache.h"
@@ -29,7 +30,6 @@
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/intercept.h"
-#include "hphp/runtime/vm/backup-gc.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "unicode/uchar.h"
 #include "unicode/utf8.h"
@@ -98,362 +98,140 @@ enum TType {
 /* Return the smallest (supported) unsigned length that can store the value */
 #define LEN_SIZE(x) ((((unsigned)x) == ((uint8_t)x)) ? 1 : 4)
 
-static int fb_serialized_size(CVarRef thing, int depth, int *bytes) {
-  if (depth > 256) {
-    return 1;
+/**
+ * Hphp datatype conforming to datatype requirements in
+ * FBSerialize.h
+ */
+struct HphpVariant {
+  typedef Variant VariantType;
+  typedef Array MapType;
+  typedef Array VectorType;
+  typedef String StringType;
+
+  // variant accessors
+  static HPHP::serialize::Type type(const VariantType& obj) {
+    switch (obj.getType()) {
+      case KindOfUninit:
+      case KindOfNull:       return HPHP::serialize::Type::NULLT;
+      case KindOfBoolean:    return HPHP::serialize::Type::BOOL;
+      case KindOfDouble:     return HPHP::serialize::Type::DOUBLE;
+      case KindOfInt64:      return HPHP::serialize::Type::INT64;
+      case KindOfArray:      return HPHP::serialize::Type::MAP;
+      case KindOfStaticString:
+      case KindOfString:     return HPHP::serialize::Type::STRING;
+      default:
+        throw HPHP::serialize::SerializeError(
+          "don't know how to serialize HPHP Variant");
+    }
+  }
+  static int64_t asInt64(const VariantType& obj) { return obj.toInt64(); }
+  static bool asBool(const VariantType& obj) { return obj.toInt64() != 0; }
+  static double asDouble(const VariantType& obj) { return obj.toDouble(); }
+  static CStrRef asString(const VariantType& obj) {
+    return obj.toCStrRef();
+  }
+  static CArrRef asMap(const VariantType& obj) { return obj.toCArrRef(); }
+  static CArrRef asVector(const VariantType& obj) { return obj.toCArrRef(); }
+
+  // variant creators
+  static VariantType createNull() { return null_variant; }
+  static VariantType fromInt64(int64_t val) { return val; }
+  static VariantType fromBool(bool val) { return val; }
+  static VariantType fromDouble(double val) { return val; }
+  static VariantType fromString(const StringType& str) { return str; }
+  static VariantType fromMap(const MapType& map) { return map; }
+  static VariantType fromVector(const VectorType& vec) { return vec; }
+
+  // map methods
+  static MapType createMap() { return Array::Create(); }
+  static HPHP::serialize::Type mapKeyType(CVarRef k) {
+    return type(k);
+  }
+  static int64_t mapKeyAsInt64(CVarRef k) { return k.toInt64(); }
+  static CStrRef mapKeyAsString(CVarRef k) {
+    return k.toCStrRef();
+  }
+  template <typename Key>
+  static void mapSet(MapType& map, Key&& k, VariantType&& v) {
+    map.set(std::move(k), std::move(v));
+  }
+  static int64_t mapSize(const MapType& map) { return map.size(); }
+  static ArrayIter mapIterator(const MapType& map) {
+    return ArrayIter(map);
+  }
+  static bool mapNotEnd(const MapType& map, ArrayIter& it) {
+    return !it.end();
+  }
+  static void mapNext(ArrayIter& it) { ++it; }
+  static Variant mapKey(ArrayIter& it) { return it.first(); }
+  static const VariantType& mapValue(ArrayIter& it) { return it.secondRef(); }
+
+  // vector methods
+  static VectorType createVector() { return Array::Create(); }
+  static void vectorAppend(VectorType& vec, const VariantType& v) {
+    vec.append(v);
+  }
+  static ArrayIter vectorIterator(const VectorType& vec) {
+    return ArrayIter(vec);
+  }
+  static bool vectorNotEnd(const VectorType& vec, ArrayIter& it) {
+    return !it.end();
+  }
+  static void vectorNext(ArrayIter& it) { ++it; }
+  static const VariantType& vectorValue(ArrayIter& it) {
+    return it.secondRef();
   }
 
-  /* Get the size for an object, including one byte for the type */
-  switch (thing.getType()) {
-  case KindOfUninit:
-  case KindOfNull:      *bytes = 1; break;     /* type */
-  case KindOfBoolean:   *bytes = 2; break;    /* type + sizeof(char) */
-  case KindOfInt64:     *bytes = 1 + INT_SIZE(thing.toInt64()); break;
-  case KindOfDouble:    *bytes = 9; break;     /* type + sizeof(double) */
-  case KindOfStaticString:
-  case KindOfString:
-    {
-      int len = thing.toString().size();
-      *bytes = 1 + LEN_SIZE(len) + len;
-      break;
-    }
-  case KindOfArray:
-    {
-      int64_t size = 2;
-      Array arr = thing.toArray();
-      for (ArrayIter iter(arr); iter; ++iter) {
-        Variant key = iter.first();
-        if (key.isNumeric()) {
-          int64_t index = key.toInt64();
-          size += 1 + INT_SIZE(index);
-        } else {
-          int len = key.toString().size();
-          size += 1 + LEN_SIZE(len) + len;
-        }
-        int additional_bytes = 0;
-        if (fb_serialized_size(iter.second(), depth + 1,
-                               &additional_bytes)) {
-          return 1;
-        }
-        size += additional_bytes;
-      }
-      if (size > StringData::MaxSize) return 1;
-      *bytes = (int)size;
-      break;
-    }
-  default:
-    return 1;
+  // string methods
+  static StringType stringFromData(const char* src, int n) {
+    return StringData::Make(src, n, CopyString);
   }
-  return 0;
-}
-
-static void fb_serialize_long_into_buffer(int64_t val, char *buff, int *pos) {
-  switch (INT_SIZE(val)) {
-  case 1:
-    buff[(*pos)++] = T_BYTE;
-    buff[(*pos)++] = (int8_t)val;
-    break;
-  case 2:
-    buff[(*pos)++] = T_I16;
-    *(int16_t *)(buff + (*pos)) = htons(val);
-    (*pos) += 2;
-    break;
-  case 4:
-    buff[(*pos)++] = T_I32;
-    *(int32_t *)(buff + (*pos)) = htonl(val);
-    (*pos) += 4;
-    break;
-  case 8:
-    buff[(*pos)++] = T_I64;
-    *(int64_t *)(buff + (*pos)) = htonll(val);
-    (*pos) += 8;
-    break;
+  static size_t stringLen(const StringType& str) { return str.size(); }
+  static const char* stringData(const StringType& str) {
+    return str.data();
   }
-}
-
-static void fb_serialize_string_into_buffer(CStrRef str, char *buf, int *pos) {
-  int len = str.size();
-  switch (LEN_SIZE(len)) {
-  case 1:
-    buf[(*pos)++] = T_VARCHAR;
-    buf[(*pos)++] = (uint8_t)len;
-    break;
-  case 4:
-    buf[(*pos)++] = T_STRING;
-    *(uint32_t *)(buf + (*pos)) = htonl(len);
-    (*pos) += 4;
-    break;
-  }
-
-  /* memcpy the string into the buffer */
-  memcpy(buf + (*pos), str.data(), len);
-  (*pos) += len;
-}
-
-static bool fb_serialize_into_buffer(CVarRef thing, char *buff, int *pos) {
-  switch (thing.getType()) {
-  case KindOfNull:
-    buff[(*pos)++] = T_NULL;
-    break;
-  case KindOfBoolean:
-    buff[(*pos)++] = T_BOOLEAN;
-    buff[(*pos)++] = (int8_t)thing.toInt64();
-    break;
-  case KindOfInt64:
-    fb_serialize_long_into_buffer(thing.toInt64(), buff, pos);
-    break;
-  case KindOfDouble:
-    buff[(*pos)++] = T_DOUBLE;
-    *(double *)(buff + (*pos)) = thing.toDouble();
-    (*pos) += 8;
-    break;
-  case KindOfStaticString:
-  case KindOfString:
-    fb_serialize_string_into_buffer(thing.toString(), buff, pos);
-    break;
-  case KindOfArray:
-    {
-      buff[(*pos)++] = T_STRUCT;
-      Array arr = thing.toArray();
-      for (ArrayIter iter(arr); iter; ++iter) {
-        Variant key = iter.first();
-        if (key.isNumeric()) {
-          int64_t index = key.toInt64();
-          fb_serialize_long_into_buffer(index, buff, pos);
-        } else {
-          fb_serialize_string_into_buffer(key.toString(), buff, pos);
-        }
-
-        if (!fb_serialize_into_buffer(iter.second(), buff, pos)) {
-          return false;
-        }
-      }
-
-      /* Write the final stop marker */
-      buff[(*pos)++] = T_STOP;
-    }
-    break;
-  default:
-    raise_warning("unserializable object unexpectedly passed through "
-                  "fb_serialized_size");
-    assert(false);
-  }
-  return true;
-}
-
-/* Check if there are enough bytes left in the buffer */
-#define CHECK_ENOUGH(bytes, pos, num) do {                  \
-    if ((int)(bytes) > (int)((num) - (pos))) {              \
-      return FB_UNSERIALIZE_UNEXPECTED_END;                 \
-    }                                                       \
-  } while (0)
-
-int fb_unserialize_from_buffer(Variant &res, const char *buff,
-                               int buff_len, int *pos) {
-
-  /* Check we have at least 1 byte for the type */
-  CHECK_ENOUGH(1, *pos, buff_len);
-
-  int type;
-  switch (type = buff[(*pos)++]) {
-  case T_NULL:
-    res = uninit_null();
-    break;
-  case T_BOOLEAN:
-    CHECK_ENOUGH(sizeof(int8_t), *pos, buff_len);
-    res = (bool)(int8_t)buff[(*pos)++];
-    break;
-  case T_BYTE:
-    CHECK_ENOUGH(sizeof(int8_t), *pos, buff_len);
-    res = (int8_t)buff[(*pos)++];
-    break;
-  case T_I16:
-    {
-      CHECK_ENOUGH(sizeof(int16_t), *pos, buff_len);
-      int16_t ret = (int16_t)ntohs(*(int16_t *)(buff + (*pos)));
-      (*pos) += 2;
-      res = ret;
-      break;
-    }
-  case T_I32:
-    {
-      CHECK_ENOUGH(sizeof(int32_t), *pos, buff_len);
-      int32_t ret = (int32_t)ntohl(*(int32_t *)(buff + (*pos)));
-      (*pos) += 4;
-      res = ret;
-      break;
-    }
-  case T_I64:
-    {
-      CHECK_ENOUGH(sizeof(int64_t), *pos, buff_len);
-      int64_t ret = (int64_t)ntohll(*(int64_t *)(buff + (*pos)));
-      (*pos) += 8;
-      res = (int64_t)ret;
-      break;
-    }
-  case T_DOUBLE:
-    {
-      CHECK_ENOUGH(sizeof(double), *pos, buff_len);
-      double ret = *(double *)(buff + (*pos));
-      (*pos) += 8;
-      res = ret;
-      break;
-    }
-  case T_VARCHAR:
-    {
-      CHECK_ENOUGH(sizeof(uint8_t), *pos, buff_len);
-      int len = (uint8_t)buff[(*pos)++];
-
-      CHECK_ENOUGH(len, *pos, buff_len);
-      StringData* ret = StringData::Make(buff + (*pos), len, CopyString);
-      (*pos) += len;
-      res = ret;
-      break;
-    }
-  case T_STRING:
-    {
-      CHECK_ENOUGH(sizeof(uint32_t), *pos, buff_len);
-      int len = (uint32_t)ntohl(*(uint32_t *)(buff + (*pos)));
-      (*pos) += 4;
-
-      CHECK_ENOUGH(len, *pos, buff_len);
-      StringData* ret = StringData::Make(buff + (*pos), len, CopyString);
-      (*pos) += len;
-      res = ret;
-      break;
-    }
-  case T_STRUCT:
-    {
-      Array ret = Array::Create();
-      /* Need at least 1 byte for type/stop */
-      CHECK_ENOUGH(1, *pos, buff_len);
-      while ((type = buff[(*pos)++]) != T_STOP) {
-        String key;
-        int64_t index = 0;
-        switch(type) {
-        case T_BYTE:
-          CHECK_ENOUGH(sizeof(int8_t), *pos, buff_len);
-          index = (int8_t)buff[(*pos)++];
-          break;
-        case T_I16:
-          {
-            CHECK_ENOUGH(sizeof(int16_t), *pos, buff_len);
-            index = (int16_t)ntohs(*(int16_t *)(buff + (*pos)));
-            (*pos) += 2;
-            break;
-          }
-        case T_I32:
-          {
-            CHECK_ENOUGH(sizeof(int32_t), *pos, buff_len);
-            index = (int32_t)ntohl(*(int32_t *)(buff + (*pos)));
-            (*pos) += 4;
-            break;
-          }
-        case T_I64:
-          {
-            CHECK_ENOUGH(sizeof(int64_t), *pos, buff_len);
-            index = (int64_t)ntohll(*(int64_t *)(buff + (*pos)));
-            (*pos) += 8;
-            break;
-          }
-        case T_VARCHAR:
-          {
-            CHECK_ENOUGH(sizeof(uint8_t), *pos, buff_len);
-            int len = (uint8_t)buff[(*pos)++];
-
-            CHECK_ENOUGH(len, *pos, buff_len);
-            key = StringData::Make(buff + (*pos), len, CopyString);
-            (*pos) += len;
-            break;
-          }
-        case T_STRING:
-          {
-            CHECK_ENOUGH(sizeof(uint32_t), *pos, buff_len);
-            int len = (uint32_t)ntohl(*(uint32_t *)(buff + (*pos)));
-            (*pos) += 4;
-
-            CHECK_ENOUGH(len, *pos, buff_len);
-            key = StringData::Make(buff + (*pos), len, CopyString);
-            (*pos) += len;
-            break;
-          }
-        default:
-          return FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE;
-        }
-
-        Variant value;
-        int retval;
-        if ((retval = fb_unserialize_from_buffer(value, buff, buff_len, pos))) {
-          return retval;
-        }
-        if (!key.isNull()) {
-          ret.set(key, value);
-        } else {
-          ret.set(index, value);
-        }
-        /* Need at least 1 byte for type/stop (see start of loop) */
-        CHECK_ENOUGH(1, *pos, buff_len);
-      }
-      res = ret;
-    }
-    break;
-  default:
-    return FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE;
-  }
-
-  return 0;
-}
+};
 
 Variant f_fb_serialize(CVarRef thing) {
-  int len;
-  if (fb_serialized_size(thing, 0, &len)) {
-    return uninit_null();
+  try {
+    size_t len =
+      HPHP::serialize::FBSerializer<HphpVariant>::serializedSize(thing);
+    String s(len, ReserveString);
+    HPHP::serialize::FBSerializer<HphpVariant>::serialize(
+      thing, s.mutableSlice().ptr);
+    return s.setSize(len);
+  } catch (const HPHP::serialize::SerializeError&) {
+    return null_variant;
   }
-  String s(len, ReserveString);
-  int pos = 0;
-  fb_serialize_into_buffer(thing, s.mutableSlice().ptr, &pos);
-  assert(pos == len);
-  return s.setSize(len);
 }
 
-Variant f_fb_unserialize(CVarRef thing, VRefParam success,
-                         VRefParam errcode /* = null_variant */) {
+Variant f_fb_unserialize(CVarRef thing, VRefParam success) {
   if (thing.isString()) {
     String sthing = thing.toString();
 
-    return fb_unserialize(sthing.data(), sthing.size(),
-                          ref(success), ref(errcode));
+    if (sthing.size() && (sthing.data()[0] & 0x80)) {
+      return fb_compact_unserialize(sthing.data(), sthing.size(),
+                                    ref(success));
+    } else {
+      return fb_unserialize(sthing.data(), sthing.size(),
+                            ref(success));
+    }
   }
 
   success = false;
-  errcode = FB_UNSERIALIZE_NONSTRING_VALUE;
   return false;
 }
 
-Variant fb_unserialize(const char* str, int len, VRefParam success,
-                         VRefParam errcode /* = null_variant */) {
-  int pos = 0;
-  errcode = uninit_null();
-  int errcd;
-  Variant ret;
-  success = false;
-
-  // high bit set: it's a fb_compact_serialize'd
-  if (str != nullptr && len > 0 && (str[0] & 0x80)) {
-    errcd = fb_compact_unserialize_from_buffer(
-      ret, str, len, pos);
-  } else {
-    errcd = fb_unserialize_from_buffer(
-      ret, str, len, &pos);
-  }
-
-  if (errcd) {
-    errcode = errcd;
+Variant fb_unserialize(const char* str, int len, VRefParam success) {
+  try {
+    auto res = HPHP::serialize::FBUnserializer<HphpVariant>::unserialize(
+      folly::StringPiece(str, len));
+    success = true;
+    return res;
+  } catch (const HPHP::serialize::UnserializeError&) {
+    success = false;
     return false;
   }
-
-  success = true;
-  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -566,62 +344,61 @@ const uint64_t kCodeMask            = 0x0f;
 const uint64_t kCodePrefix          = 0xf0;
 
 
-static void fb_compact_serialize_code(
-  StringData* sd, FbCompactSerializeCode code) {
-
+static void fb_compact_serialize_code(StringBuffer& sb,
+                                      FbCompactSerializeCode code) {
   assert(code == (code & kCodeMask));
   uint8_t v = (kCodePrefix | code);
-  sd->append(reinterpret_cast<char*>(&v), 1);
+  sb.append(reinterpret_cast<char*>(&v), 1);
 }
 
-static void fb_compact_serialize_int64(StringData* sd, int64_t val) {
+static void fb_compact_serialize_int64(StringBuffer& sb, int64_t val) {
   if (val >= 0 && (uint64_t)val <= kInt7Mask) {
     uint8_t nval = val;
-    sd->append(reinterpret_cast<char*>(&nval), 1);
+    sb.append(reinterpret_cast<char*>(&nval), 1);
 
   } else if (val >= 0 && (uint64_t)val <= kInt13Mask) {
     uint16_t nval = htons(kInt13Prefix | val);
-    sd->append(reinterpret_cast<char*>(&nval), 2);
+    sb.append(reinterpret_cast<char*>(&nval), 2);
 
   } else if (val == (int64_t)(int16_t)val) {
-    fb_compact_serialize_code(sd, FB_CS_INT16);
+    fb_compact_serialize_code(sb, FB_CS_INT16);
     uint16_t nval = htons(val);
-    sd->append(reinterpret_cast<char*>(&nval), 2);
+    sb.append(reinterpret_cast<char*>(&nval), 2);
 
   } else if (val >= 0 && (uint64_t)val <= kInt20Mask) {
     uint32_t nval = htonl(kInt20Prefix | val);
     // Skip most significant byte
-    sd->append(reinterpret_cast<char*>(&nval) + 1, 3);
+    sb.append(reinterpret_cast<char*>(&nval) + 1, 3);
 
   } else if (val == (int64_t)(int32_t)val) {
-    fb_compact_serialize_code(sd, FB_CS_INT32);
+    fb_compact_serialize_code(sb, FB_CS_INT32);
     uint32_t nval = htonl(val);
-    sd->append(reinterpret_cast<char*>(&nval), 4);
+    sb.append(reinterpret_cast<char*>(&nval), 4);
 
   } else if (val >= 0 && (uint64_t)val <= kInt54Mask) {
     uint64_t nval = htonll(kInt54Prefix | val);
     // Skip most significant byte
-    sd->append(reinterpret_cast<char*>(&nval) + 1, 7);
+    sb.append(reinterpret_cast<char*>(&nval) + 1, 7);
 
   } else {
-    fb_compact_serialize_code(sd, FB_CS_INT64);
+    fb_compact_serialize_code(sb, FB_CS_INT64);
     uint64_t nval = htonll(val);
-    sd->append(reinterpret_cast<char*>(&nval), 8);
+    sb.append(reinterpret_cast<char*>(&nval), 8);
   }
 }
 
-static void fb_compact_serialize_string(StringData* sd, CStrRef str) {
+static void fb_compact_serialize_string(StringBuffer& sb, CStrRef str) {
   int len = str.size();
   if (len == 0) {
-    fb_compact_serialize_code(sd, FB_CS_STRING_0);
+    fb_compact_serialize_code(sb, FB_CS_STRING_0);
   } else {
     if (len == 1) {
-      fb_compact_serialize_code(sd, FB_CS_STRING_1);
+      fb_compact_serialize_code(sb, FB_CS_STRING_1);
     } else {
-      fb_compact_serialize_code(sd, FB_CS_STRING_N);
-      fb_compact_serialize_int64(sd, len);
+      fb_compact_serialize_code(sb, FB_CS_STRING_N);
+      fb_compact_serialize_int64(sb, len);
     }
-    sd->append(str.data(), len);
+    sb.append(str.data(), len);
   }
 }
 
@@ -651,42 +428,40 @@ static bool fb_compact_serialize_is_list(CArrRef arr, int64_t& index_limit) {
   return true;
 }
 
-static int fb_compact_serialize_variant(StringData* sd, CVarRef var, int depth);
+static int fb_compact_serialize_variant(StringBuffer& sd,
+  CVarRef var, int depth);
 
 static void fb_compact_serialize_array_as_list_map(
-  StringData* sd, CArrRef arr, int64_t index_limit, int depth) {
-
-  fb_compact_serialize_code(sd, FB_CS_LIST_MAP);
+    StringBuffer& sb, CArrRef arr, int64_t index_limit, int depth) {
+  fb_compact_serialize_code(sb, FB_CS_LIST_MAP);
   for (int64_t i = 0; i < index_limit; ++i) {
     if (arr.exists(i)) {
-      fb_compact_serialize_variant(sd, arr[i], depth + 1);
+      fb_compact_serialize_variant(sb, arr[i], depth + 1);
     } else {
-      fb_compact_serialize_code(sd, FB_CS_SKIP);
+      fb_compact_serialize_code(sb, FB_CS_SKIP);
     }
   }
-  fb_compact_serialize_code(sd, FB_CS_STOP);
+  fb_compact_serialize_code(sb, FB_CS_STOP);
 }
 
 static void fb_compact_serialize_array_as_map(
-  StringData* sd, CArrRef arr, int depth) {
-
-  fb_compact_serialize_code(sd, FB_CS_MAP);
+    StringBuffer& sb, CArrRef arr, int depth) {
+  fb_compact_serialize_code(sb, FB_CS_MAP);
   for (ArrayIter it(arr); it; ++it) {
     Variant key = it.first();
     if (key.isNumeric()) {
-      fb_compact_serialize_int64(sd, key.toInt64());
+      fb_compact_serialize_int64(sb, key.toInt64());
     } else {
-      fb_compact_serialize_string(sd, key.toString());
+      fb_compact_serialize_string(sb, key.toString());
     }
-    fb_compact_serialize_variant(sd, it.second(), depth + 1);
+    fb_compact_serialize_variant(sb, it.second(), depth + 1);
   }
-  fb_compact_serialize_code(sd, FB_CS_STOP);
+  fb_compact_serialize_code(sb, FB_CS_STOP);
 }
 
 
 static int fb_compact_serialize_variant(
-  StringData* sd, CVarRef var, int depth) {
-
+    StringBuffer& sb, CVarRef var, int depth) {
   if (depth > 256) {
     return 1;
   }
@@ -694,32 +469,32 @@ static int fb_compact_serialize_variant(
   switch (var.getType()) {
     case KindOfUninit:
     case KindOfNull:
-      fb_compact_serialize_code(sd, FB_CS_NULL);
+      fb_compact_serialize_code(sb, FB_CS_NULL);
       break;
 
     case KindOfBoolean:
       if (var.toInt64()) {
-        fb_compact_serialize_code(sd, FB_CS_TRUE);
+        fb_compact_serialize_code(sb, FB_CS_TRUE);
       } else {
-        fb_compact_serialize_code(sd, FB_CS_FALSE);
+        fb_compact_serialize_code(sb, FB_CS_FALSE);
       }
       break;
 
     case KindOfInt64:
-      fb_compact_serialize_int64(sd, var.toInt64());
+      fb_compact_serialize_int64(sb, var.toInt64());
       break;
 
     case KindOfDouble:
     {
-      fb_compact_serialize_code(sd, FB_CS_DOUBLE);
+      fb_compact_serialize_code(sb, FB_CS_DOUBLE);
       double d = var.toDouble();
-      sd->append(reinterpret_cast<char*>(&d), 8);
+      sb.append(reinterpret_cast<char*>(&d), 8);
       break;
     }
 
     case KindOfStaticString:
     case KindOfString:
-      fb_compact_serialize_string(sd, var.toString());
+      fb_compact_serialize_string(sb, var.toString());
       break;
 
     case KindOfArray:
@@ -727,9 +502,9 @@ static int fb_compact_serialize_variant(
       Array arr = var.toArray();
       int64_t index_limit;
       if (fb_compact_serialize_is_list(arr, index_limit)) {
-        fb_compact_serialize_array_as_list_map(sd, arr, index_limit, depth);
+        fb_compact_serialize_array_as_list_map(sb, arr, index_limit, depth);
       } else {
-        fb_compact_serialize_array_as_map(sd, arr, depth);
+        fb_compact_serialize_array_as_map(sb, arr, depth);
       }
       break;
     }
@@ -760,17 +535,21 @@ Variant f_fb_compact_serialize(CVarRef thing) {
     }
   }
 
-  auto sd = StringData::Make();
-  // StringData will throw a FatalErrorException if we try to grow it too large,
-  // so no need to check for length.
-  // FIXME(#2683961): this exception case leaks the StringData.
-  if (fb_compact_serialize_variant(sd, thing, 0)) {
-    sd->release();
+  StringBuffer sb;
+  if (fb_compact_serialize_variant(sb, thing, 0)) {
     return uninit_null();
   }
 
-  return Variant(sd);
+  return sb.detach();
 }
+
+/* Check if there are enough bytes left in the buffer */
+#define CHECK_ENOUGH(bytes, pos, num) do {                      \
+    if ((int)(bytes) > (int)((num) - (pos))) {                  \
+      return FB_UNSERIALIZE_UNEXPECTED_END;                     \
+    }                                                           \
+  } while (0)
+
 
 int fb_compact_unserialize_int64_from_buffer(
   int64_t& out, const char* buf, int n, int& p) {
@@ -986,7 +765,6 @@ Variant fb_compact_unserialize(const char* str, int len,
 
 Variant f_fb_compact_unserialize(CVarRef thing, VRefParam success,
                                  VRefParam errcode /* = null_variant */) {
-
   if (!thing.isString()) {
     success = false;
     errcode = FB_UNSERIALIZE_NONSTRING_VALUE;

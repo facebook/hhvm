@@ -1,0 +1,8 @@
+array(3) {
+  ["red"]=>
+  string(5) "baron"
+  ["white"]=>
+  string(5) "walls"
+  ["blue"]=>
+  string(7) "berries"
+}

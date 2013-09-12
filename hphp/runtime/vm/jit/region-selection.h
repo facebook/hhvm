@@ -61,13 +61,14 @@ struct RegionDesc {
   template<typename... Args>
   Block* addBlock(Args&&... args) {
     blocks.push_back(
-      smart::make_unique<Block>(std::forward<Args>(args)...));
+      std::make_shared<Block>(std::forward<Args>(args)...));
     return blocks.back().get();
   }
 
-  smart::vector<BlockPtr> blocks;
+  std::vector<BlockPtr> blocks;
 };
-typedef smart::unique_ptr<RegionDesc>::type RegionDescPtr;
+
+typedef std::shared_ptr<RegionDesc> RegionDescPtr;
 
 /*
  * Specification of an HHBC-visible location that can have a type
@@ -167,14 +168,7 @@ class RegionDesc::Block {
   typedef flat_map<SrcKey, const Func*> KnownFuncMap;
 
 public:
-  explicit Block(const Func* func, Offset start, int length)
-    : m_func(func)
-    , m_start(start)
-    , m_length(length)
-    , m_inlinedCallee(nullptr)
-  {
-    checkInvariants();
-  }
+  explicit Block(const Func* func, Offset start, int length);
 
   Block& operator=(const Block&) = delete;
 
@@ -185,7 +179,10 @@ public:
   const Unit* unit() const { return m_func->unit(); }
   const Func* func() const { return m_func; }
   SrcKey start() const { return SrcKey { m_func, m_start }; }
+  SrcKey last() const { return SrcKey { m_func, m_last }; }
   int length() const { return m_length; }
+  bool empty() const { return length() == 0; }
+  bool contains(SrcKey sk) const;
 
   /*
    * Set and get whether or not this block ends with an inlined FCall. Inlined
@@ -195,7 +192,6 @@ public:
   void setInlinedCallee(const Func* callee) {
     assert(callee);
     m_inlinedCallee = callee;
-    checkInvariants();
   }
   const Func* inlinedCallee() const {
     return m_inlinedCallee;
@@ -204,10 +200,12 @@ public:
   /*
    * Increase the length of the Block by 1.
    */
-  void addInstruction() {
-    ++m_length;
-    checkInvariants();
-  }
+  void addInstruction();
+
+  /*
+   * Remove all instructions after sk from the block.
+   */
+  void truncateAfter(SrcKey sk);
 
   /*
    * Add a predicted type to this block.
@@ -251,11 +249,14 @@ public:
   const PostConditions& postConds()  const { return m_postConds; }
 
 private:
-  void checkInvariants() const;
+  void checkInstructions() const;
+  void checkInstruction(Op op) const;
+  void checkMetadata() const;
 
 private:
   const Func*    m_func;
   const Offset   m_start;
+  Offset         m_last;
   int            m_length;
   const Func*    m_inlinedCallee;
 
@@ -334,10 +335,10 @@ RegionDescPtr selectHotRegion(Transl::TransID transId,
                               Transl::TranslatorX64* tx64);
 
 /*
- * Creates a Block corresponding to tracelet tlet. This function
- * assumes that tlet contains a single block.
+ * Create a compilation region corresponding to a tracelet, using
+ * the old analyze() framework.
  */
-RegionDesc::BlockPtr createBlock(const Transl::Tracelet& tlet);
+RegionDescPtr selectTraceletLegacy(const Transl::Tracelet& tlet);
 
 /*
  * Debug stringification for various things.
@@ -347,6 +348,7 @@ std::string show(RegionDesc::TypePred);
 std::string show(const RegionDesc::ReffinessPred&);
 std::string show(RegionContext::LiveType);
 std::string show(RegionContext::PreLiveAR);
+std::string show(const RegionContext&);
 std::string show(const RegionDesc::Block&);
 std::string show(const RegionDesc&);
 

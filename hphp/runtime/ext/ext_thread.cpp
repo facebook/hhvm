@@ -46,14 +46,11 @@ bool f_hphp_service_thread_stopped(int timeout) {
 }
 
 bool f_hphp_thread_is_warmup_enabled() {
-  return hphp_is_warmup_enabled();
+  return true;
 }
 
 void f_hphp_thread_set_warmup_enabled() {
-  raise_warning("hphp_thread_set_warmup_enabled is deprecated, to enable "
-                "the RequestInitFunction and RequestInitDocument features "
-                "please set Server.EnableMemoryManager=true in your HipHop "
-                "config");
+  raise_warning("hphp_thread_set_warmup_enabled is deprecated");
 }
 
 int64_t f_hphp_get_thread_id() {

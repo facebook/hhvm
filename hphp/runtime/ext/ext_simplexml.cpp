@@ -36,7 +36,7 @@ IMPLEMENT_DEFAULT_EXTENSION(SimpleXML);
 // it go out of scope.
 class XmlDocWrapper : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION_NO_SWEEP(XmlDocWrapper)
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(XmlDocWrapper)
 
   static StaticString s_class_name;
   // overriding ResourceData

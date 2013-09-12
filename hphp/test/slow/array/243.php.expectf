@@ -1,0 +1,9 @@
+HipHop Warning: Cannot use a scalar value as an array in %s/test/slow/array/243.php on line 10
+string(3) "one"
+array(1) {
+  [0]=>
+  object(X)#1 (0) {
+  }
+}
+string(3) "two"
+string(5) "three"

@@ -29,6 +29,7 @@
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_output.h"
 #include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/runtime/ext/ext_string.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -728,7 +729,7 @@ static sdlFunctionPtr get_doc_function(sdl *sdl, xmlNodePtr params) {
 
 static sdlFunctionPtr get_function(sdl *sdl, const char *function_name) {
   if (sdl) {
-    String lowered = StringUtil::ToLower(function_name);
+    String lowered = f_strtolower(function_name);
     sdlFunctionMap::iterator iter = sdl->functions.find(lowered.data());
     if (iter == sdl->functions.end()) {
       iter = sdl->requests.find(lowered.data());
@@ -2012,7 +2013,7 @@ void c_SoapServer::t_addfunction(CVarRef func) {
                         function_name.data());
         return;
       }
-      m_soap_functions.ft.set(StringUtil::ToLower(function_name), 1);
+      m_soap_functions.ft.set(f_strtolower(function_name), 1);
       m_soap_functions.ftOriginal.set(function_name, 1);
     }
   }
@@ -2052,7 +2053,7 @@ static bool valid_function(c_SoapServer *server, Object &soap_obj,
   } else if (server->m_soap_functions.functions_all) {
     return f_function_exists(fn_name);
   } else if (!server->m_soap_functions.ft.empty()) {
-    return server->m_soap_functions.ft.exists(StringUtil::ToLower(fn_name));
+    return server->m_soap_functions.ft.exists(f_strtolower(fn_name));
   }
   HPHP::Func* f = cls->lookupMethod(fn_name.get());
   return (f && f->isPublic());

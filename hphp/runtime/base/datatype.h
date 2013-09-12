@@ -37,6 +37,7 @@ enum DataType: DataTypeInt {
 
   KindOfInvalid          = -1,
   KindOfUnknown          = KindOfInvalid,
+  KindOfNone             = KindOfInvalid,
 
   /**
    * Beware if you change the order, as we may have a few type checks
@@ -90,7 +91,7 @@ const DataType KindOfRefCountThreshold = KindOfStaticString;
   func(Specific)                                \
   func(Specialized)
 
-enum class DataTypeCategory {
+enum class DataTypeCategory : uint8_t {
 #define DT(name) name,
   DT_CATEGORIES(DT)
 #undef DT
@@ -233,7 +234,7 @@ const unsigned int kDestrTableSize = 6;
 
 #define TYPE_TO_DESTR_IDX(t) ((t) >> kShiftDataTypeToDestrIndex)
 
-inline ALWAYS_INLINE unsigned typeToDestrIndex(DataType t) {
+ALWAYS_INLINE unsigned typeToDestrIndex(DataType t) {
   assert(t == KindOfString || t == KindOfArray || t == KindOfObject ||
          t == KindOfResource || t == KindOfRef);
   return TYPE_TO_DESTR_IDX(t);

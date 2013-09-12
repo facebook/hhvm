@@ -99,7 +99,7 @@ array(1) {
   }
 }
 
-Deprecated: preg_replace(): The /e modifier is deprecated, use preg_replace_callback instead in hphp/test/zend/bad/ext-pcre/004.phpt on line %d
+Deprecated: preg_replace(): The /e modifier is deprecated, use preg_replace_callback instead in %s on line %d
 string(9) "hello
 
 

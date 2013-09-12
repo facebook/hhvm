@@ -173,10 +173,10 @@ int ObjectPropertyExpression::getKidCount() const {
 void ObjectPropertyExpression::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_object = boost::dynamic_pointer_cast<Expression>(cp);
+      m_object = dynamic_pointer_cast<Expression>(cp);
       break;
     case 1:
-      m_property = boost::dynamic_pointer_cast<Expression>(cp);
+      m_property = dynamic_pointer_cast<Expression>(cp);
       break;
     default:
       assert(false);

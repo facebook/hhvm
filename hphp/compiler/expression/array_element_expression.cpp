@@ -217,10 +217,10 @@ int ArrayElementExpression::getKidCount() const {
 void ArrayElementExpression::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_variable = boost::dynamic_pointer_cast<Expression>(cp);
+      m_variable = dynamic_pointer_cast<Expression>(cp);
       break;
     case 1:
-      m_offset = boost::dynamic_pointer_cast<Expression>(cp);
+      m_offset = dynamic_pointer_cast<Expression>(cp);
       break;
     default:
       assert(false);

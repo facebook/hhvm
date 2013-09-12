@@ -41,7 +41,7 @@ typedef StateVector<IRInstruction, uint32_t> LinearIdVector;
 typedef StateVector<SSATmp, UseInfo> UsesVector;
 
 struct LifetimeInfo {
-  explicit LifetimeInfo(const IRFactory* factory)
+  explicit LifetimeInfo(const IRFactory& factory)
     : linear(factory, 0), uses(factory, UseInfo()) {
   }
   explicit LifetimeInfo(const LinearIdVector& linear,
@@ -185,7 +185,7 @@ private:
 };
 
 struct RegAllocInfo {
-  explicit RegAllocInfo(const IRFactory* factory)
+  explicit RegAllocInfo(const IRFactory& factory)
     : m_regs(factory, RegisterInfo()) {}
   RegAllocInfo(const RegAllocInfo& other) : m_regs(other.m_regs) {}
   RegAllocInfo(RegAllocInfo&& other) : m_regs(other.m_regs) {}
@@ -206,7 +206,7 @@ inline std::ostream& operator<<(std::ostream& os, SpillInfo si) {
  * The main entry point for register allocation.  Called prior to code
  * generation.
  */
-RegAllocInfo allocRegsForTrace(IRTrace*, IRFactory*, LifetimeInfo* = nullptr);
+RegAllocInfo allocRegsForTrace(IRTrace*, IRFactory&, LifetimeInfo* = nullptr);
 
 // Native stack layout:
 // |               |

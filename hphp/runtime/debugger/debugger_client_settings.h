@@ -18,8 +18,12 @@
 #define incl_HPHP_EVAL_DEBUGGER_CLIENT_SETTINGS_H_
 
 #define HPHPD_CLIENT_SETTINGS \
+  HPHPD_CLIENT_SETTING(BypassCheck,         bool,  false)         \
+  HPHPD_CLIENT_SETTING(PrintLevel,          int,   -1)            \
+  HPHPD_CLIENT_SETTING(StackArgs,           bool,  true)          \
   HPHPD_CLIENT_SETTING(MaxCodeLines,        int,   -1)            \
   HPHPD_CLIENT_SETTING(SmallStep,           bool,  false)         \
+  HPHPD_CLIENT_SETTING(ShortPrintCharCount, int,   -1)            \
 
 class DebuggerClientSettings {
 public:
@@ -44,11 +48,14 @@ type getDebuggerClient##name () const {                 \
 }                                                       \
 void setDebuggerClient##name (type in##name) {          \
   m_dbgClientSettings.m_s##name = in##name;             \
+  m_config[#name] = m_dbgClientSettings.m_s##name;      \
+  saveConfig();                                         \
 }                                                       \
 
 
 #define DECLARE_DBG_CLIENT_SETTING_ACCESSORS            \
 HPHPD_CLIENT_SETTINGS
+
 
 // leaving HPHPD_CLIENT_SETTING defined so that DECLARE_DBG_SETTING_ACCESSORS is
 // effective

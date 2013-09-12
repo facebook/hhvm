@@ -203,7 +203,7 @@ public:
     */
   virtual int getKidCount() const { return 0; }
   ExpressionPtr getNthExpr(int n) const { return
-      boost::static_pointer_cast<Expression>(getNthKid(n)); }
+      static_pointer_cast<Expression>(getNthKid(n)); }
 
   /**
    * For cse & canonicalization

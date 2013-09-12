@@ -31,6 +31,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/util.h"
 #include "hphp/util/process.h"
@@ -68,7 +69,8 @@ const StaticString
   s_failure("failure"),
   s_Traversable("Traversable"),
   s_KeyedTraversable("KeyedTraversable"),
-  s_Indexish("Indexish");
+  s_Indexish("Indexish"),
+  s_XHPChild("XHPChild");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -345,7 +347,7 @@ Variant vm_call_user_func(CVarRef function, CArrRef params,
   }
   Variant ret;
   g_vmContext->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
-                          nullptr, invName);
+                          nullptr, invName, ExecutionContext::InvokeCuf);
   return ret;
 }
 
@@ -623,6 +625,7 @@ void throw_infinite_recursion_exception() {
     throw UncatchableException("infinite recursion detected");
   }
 }
+
 Exception* generate_request_timeout_exception() {
   Exception* ret = nullptr;
   ThreadInfo *info = ThreadInfo::s_threadInfo.getNoCheck();
@@ -638,7 +641,7 @@ Exception* generate_request_timeout_exception() {
   if (RuntimeOption::InjectedStackTrace) {
     exceptionStack = g_vmContext->debugBacktrace(false, true, true).get();
   }
-  ret = new FatalErrorException(exceptionMsg, exceptionStack.get());
+  ret = new RequestTimeoutException(exceptionMsg, exceptionStack.get());
 
   return ret;
 }
@@ -648,7 +651,7 @@ Exception* generate_memory_exceeded_exception() {
   if (RuntimeOption::InjectedStackTrace) {
     exceptionStack = g_vmContext->debugBacktrace(false, true, true).get();
   }
-  return new FatalErrorException(
+  return new RequestMemoryExceededException(
     "request has exceeded memory limit", exceptionStack.get());
 }
 
@@ -778,14 +781,43 @@ String concat4(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4) {
 bool interface_supports_array(const StringData* s) {
   return (s->isame(s_Traversable.get()) ||
           s->isame(s_KeyedTraversable.get()) ||
-          s->isame(s_Indexish.get()));
+          s->isame(s_Indexish.get()) ||
+          s->isame(s_XHPChild.get()));
 }
 
 bool interface_supports_array(const std::string& n) {
   const char* s = n.c_str();
   return ((n.size() == 11 && !strcasecmp(s, "Traversable")) ||
           (n.size() == 16 && !strcasecmp(s, "KeyedTraversable")) ||
-          (n.size() == 8 && !strcasecmp(s, "Indexish")));
+          (n.size() == 8 && !strcasecmp(s, "Indexish")) ||
+          (n.size() == 8 && !strcasecmp(s, "XHPChild")));
+}
+
+bool interface_supports_string(const StringData* s) {
+  return (s->isame(s_XHPChild.get()));
+}
+
+bool interface_supports_string(const std::string& n) {
+  const char *s = n.c_str();
+  return (n.size() == 8 && !strcasecmp(s, "XHPChild"));
+}
+
+bool interface_supports_int(const StringData* s) {
+  return (s->isame(s_XHPChild.get()));
+}
+
+bool interface_supports_int(const std::string& n) {
+  const char *s = n.c_str();
+  return (n.size() == 8 && !strcasecmp(s, "XHPChild"));
+}
+
+bool interface_supports_double(const StringData* s) {
+  return (s->isame(s_XHPChild.get()));
+}
+
+bool interface_supports_double(const std::string& n) {
+  const char *s = n.c_str();
+  return (n.size() == 8 && !strcasecmp(s, "XHPChild"));
 }
 
 Variant include_impl_invoke(CStrRef file, bool once, const char *currentDir) {
@@ -1026,7 +1058,7 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(CStrRef name,
     CVarRef &type_map = m_map.get()->get(kind);
     auto const typeMapCell = type_map.asCell();
     if (typeMapCell->m_type != KindOfArray) return Failure;
-    String canonicalName = toLower ? StringUtil::ToLower(name) : name;
+    String canonicalName = toLower ? f_strtolower(name) : name;
     CVarRef &file = typeMapCell->m_data.parr->get(canonicalName);
     bool ok = false;
     if (file.isString()) {
@@ -1191,7 +1223,7 @@ String AutoloadHandler::getSignature(CVarRef handler) {
   if (!f_is_callable(handler, false, ref(name))) {
     return null_string;
   }
-  String lName = StringUtil::ToLower(name.toString());
+  String lName = f_strtolower(name.toString());
   if (handler.isArray()) {
     Variant first = handler.getArrayData()->get(int64_t(0));
     if (first.isObject()) {

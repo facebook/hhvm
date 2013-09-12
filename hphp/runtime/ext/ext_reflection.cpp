@@ -18,12 +18,14 @@
 #include "hphp/runtime/ext/ext_reflection.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_misc.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/parser/parser.h"
+#include "hphp/runtime/ext/util.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -689,11 +691,9 @@ static Array get_class_info(const ClassInfo *cls) {
     for (ClassInfo::MethodVec::const_iterator iter = methods.begin();
          iter != methods.end(); ++iter) {
       ClassInfo::MethodInfo *m = *iter;
-      if ((m->attribute & ClassInfo::IsInherited) == 0) {
-        Array info = Array::Create();
-        set_method_info(info, m, cls);
-        arr.set(StringUtil::ToLower(m->name), info);
-      }
+      Array info = Array::Create();
+      set_method_info(info, m, cls);
+      arr.set(f_strtolower(m->name), info);
     }
     ret.set(s_methods, VarNR(arr));
   }
@@ -830,7 +830,7 @@ Array f_hphp_get_class_info(CVarRef name) {
       if (m->isGenerated()) continue;
       Array info = Array::Create();
       set_method_info(info, m);
-      arr.set(StringUtil::ToLower(m->nameRef()), VarNR(info));
+      arr.set(f_strtolower(m->nameRef()), VarNR(info));
     }
 
     Func* const* clsMethods = cls->methods();
@@ -841,7 +841,7 @@ Array f_hphp_get_class_info(CVarRef name) {
       if (m->isGenerated()) continue;
       Array info = Array::Create();
       set_method_info(info, m);
-      arr.set(StringUtil::ToLower(m->nameRef()), VarNR(info));
+      arr.set(f_strtolower(m->nameRef()), VarNR(info));
     }
     ret.set(s_methods, VarNR(arr));
   }
@@ -987,14 +987,9 @@ void f_hphp_set_property(CObjRef obj, CStrRef cls, CStrRef prop,
 
 Variant f_hphp_get_static_property(CStrRef cls, CStrRef prop, bool force) {
   StringData* sd = cls.get();
-  Class* class_ = Unit::lookupClass(sd);
-  if (class_ == nullptr) {
-    String normName = normalizeNS(sd);
-    if (normName) {
-      return f_hphp_get_static_property(normName, prop, force);
-    } else {
-      raise_error("Non-existent class %s", sd->data());
-    }
+  Class* class_ = lookup_class(sd);
+  if (!class_) {
+    raise_error("Non-existent class %s", sd->data());
   }
   VMRegAnchor _;
   bool visible, accessible;
@@ -1016,14 +1011,9 @@ Variant f_hphp_get_static_property(CStrRef cls, CStrRef prop, bool force) {
 void f_hphp_set_static_property(CStrRef cls, CStrRef prop, CVarRef value,
                                 bool force) {
   StringData* sd = cls.get();
-  Class* class_ = Unit::lookupClass(sd);
-  if (class_ == nullptr) {
-    String normName = normalizeNS(sd);
-    if (normName) {
-      return f_hphp_set_static_property(normName, prop, value, force);
-    } else {
-      raise_error("Non-existent class %s", sd->data());
-    }
+  Class* class_ = lookup_class(sd);
+  if (!class_) {
+    raise_error("Non-existent class %s", sd->data());
   }
   VMRegAnchor _;
   bool visible, accessible;

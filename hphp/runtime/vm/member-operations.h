@@ -161,7 +161,7 @@ inline void releaseKey(StringData* keySD) {
 }
 
 // Post: base is a Cell*
-inline ALWAYS_INLINE void opPre(TypedValue*& base, DataType& type) {
+ALWAYS_INLINE void opPre(TypedValue*& base, DataType& type) {
   // Get inner variant if necessary.
   type = base->m_type;
   if (type == KindOfRef) {
@@ -294,8 +294,8 @@ inline TypedValue* ElemObject(TypedValue& tvRef, TypedValue* base,
  * $result = $base[$key];
  */
 template <bool warn, KeyType keyType = KeyType::Any>
-inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
-                        TypedValue* base, TypedValue* key) {
+NEVER_INLINE TypedValue* ElemSlow(TypedValue& tvScratch, TypedValue& tvRef,
+                                  TypedValue* base, TypedValue* key) {
   DataType type;
   opPre(base, type);
   switch (type) {
@@ -318,6 +318,18 @@ inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
     assert(false);
     return nullptr;
   }
+}
+
+/**
+ * Fast path for Elem assuming base is an Array
+ */
+template <bool warn, KeyType keyType = KeyType::Any>
+inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
+                        TypedValue* base, TypedValue* key) {
+  if (LIKELY(base->m_type == KindOfArray)) {
+    return ElemArray<warn, keyType>(base->m_data.parr, key);
+  }
+  return ElemSlow<warn, keyType>(tvScratch, tvRef, base, key);
 }
 
 /**
@@ -677,6 +689,7 @@ inline StringData* SetElemString(TypedValue* base, TypedValue* key,
     }
     return nullptr;
   }
+
   // Convert key to string offset.
   int64_t x = castKeyToInt<keyType>(key);
   if (UNLIKELY(x < 0 || x >= StringData::MaxSize)) {
@@ -689,6 +702,7 @@ inline StringData* SetElemString(TypedValue* base, TypedValue* key,
     tvWriteNull(value);
     return nullptr;
   }
+
   // Compute how long the resulting string will be. Type needs
   // to agree with x.
   int64_t slen;
@@ -697,6 +711,7 @@ inline StringData* SetElemString(TypedValue* base, TypedValue* key,
   } else {
     slen = baseLen;
   }
+
   // Extract the first character of (string)value.
   char y[2];
   {
@@ -716,11 +731,19 @@ inline StringData* SetElemString(TypedValue* base, TypedValue* key,
     }
     decRefStr(valStr);
   }
+
   // Create and save the result.
   if (x >= 0 && x < baseLen && base->m_data.pstr->getCount() <= 1) {
-    // Modify base in place.  This is safe because the LHS owns the only
-    // reference.
-    base->m_data.pstr->setChar(x, y[0]);
+    // Modify base in place.  This is safe because the LHS owns the
+    // only reference.
+    auto const oldp = base->m_data.pstr;
+    auto const newp = oldp->modifyChar(x, y[0]);
+    if (UNLIKELY(newp != oldp)) {
+      newp->incRefCount();
+      decRefStr(oldp);
+      base->m_data.pstr = newp;
+      base->m_type = KindOfString;
+    }
   } else {
     StringData* sd = StringData::Make(slen);
     char* s = sd->mutableSlice().ptr;
@@ -863,7 +886,8 @@ inline void SetElemArray(TypedValue* base, TypedValue* key,
  * get around.
  */
 template <bool setResult, KeyType keyType = KeyType::Any>
-inline StringData* SetElem(TypedValue* base, TypedValue* key, Cell* value) {
+NEVER_INLINE
+StringData* SetElemSlow(TypedValue* base, TypedValue* key, Cell* value) {
   DataType type;
   opPre(base, type);
   switch (type) {
@@ -891,6 +915,18 @@ inline StringData* SetElem(TypedValue* base, TypedValue* key, Cell* value) {
     not_reached();
     return nullptr;
   }
+}
+
+/**
+ * Fast path for SetElem assuming base is an Array
+ */
+template <bool setResult, KeyType keyType = KeyType::Any>
+inline StringData* SetElem(TypedValue* base, TypedValue* key, Cell* value) {
+  if (LIKELY(base->m_type == KindOfArray)) {
+    SetElemArray<setResult, keyType>(base, key, value);
+    return nullptr;
+  }
+  return SetElemSlow<setResult, keyType>(base, key, value);
 }
 
 /**
@@ -1390,11 +1426,17 @@ inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
   }
 }
 
+/**
+ * UnsetElemArray when key is an Int64
+ */
 inline ArrayData* UnsetElemArrayRawKey(ArrayData* a, int64_t key,
                                        bool copy) {
   return a->remove(key, copy);
 }
 
+/**
+ * UnsetElemArray when key is a String
+ */
 inline ArrayData* UnsetElemArrayRawKey(ArrayData* a, StringData* key,
                                        bool copy) {
   int64_t n;
@@ -1405,6 +1447,9 @@ inline ArrayData* UnsetElemArrayRawKey(ArrayData* a, StringData* key,
   }
 }
 
+/**
+ * UnsetElem when base is an Array
+ */
 template <KeyType keyType>
 inline void UnsetElemArray(TypedValue* base, TypedValue* key) {
   ArrayData* a = base->m_data.parr;
@@ -1432,8 +1477,12 @@ inline void UnsetElemArray(TypedValue* base, TypedValue* key) {
   }
 }
 
+/**
+ * unset($base[$member])
+ */
 template <KeyType keyType = KeyType::Any>
-inline void UnsetElem(TypedValue* base, TypedValue* member) {
+NEVER_INLINE
+void UnsetElemSlow(TypedValue* base, TypedValue* member) {
   TypedValue scratch;
   DataType type;
   opPre(base, type);
@@ -1459,9 +1508,26 @@ inline void UnsetElem(TypedValue* base, TypedValue* member) {
   }
 }
 
-template<bool useEmpty>
+/**
+ * Fast path for UnsetElem assuming base is an Array
+ */
+template <KeyType keyType = KeyType::Any>
+inline void UnsetElem(TypedValue* base, TypedValue* member) {
+  if (LIKELY(base->m_type == KindOfArray)) {
+    UnsetElemArray<keyType>(base, member);
+    return;
+  }
+  return UnsetElemSlow<keyType>(base, member);
+}
+
+/**
+ * IssetEmptyElem when base is an Object
+ */
+template<bool useEmpty, KeyType keyType>
 inline bool IssetEmptyElemObj(TypedValue& tvRef, ObjectData* instance,
                               TypedValue* key) {
+  TypedValue scratch;
+  initScratchKey<keyType>(scratch, key);
   if (useEmpty) {
     if (LIKELY(instance->isCollection())) {
       return collectionEmpty(instance, key);
@@ -1477,27 +1543,22 @@ inline bool IssetEmptyElemObj(TypedValue& tvRef, ObjectData* instance,
   }
 }
 
-template <bool useEmpty, bool isObj = false, KeyType keyType = KeyType::Any>
-inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
-                           TypedValue* base, TypedValue* key) {
+/**
+ * IssetEmptyElem when base is a String
+ */
+template <bool useEmpty, KeyType keyType>
+inline bool IssetEmptyElemString(TypedValue& tvScratch, TypedValue* base,
+                                 TypedValue* key) {
+  // TODO Task #2716479: Fix this so that the warnings raised match
+  // Zend PHP.
   TypedValue scratch;
-  if (isObj) {
-    initScratchKey<keyType>(scratch, key);
-    return IssetEmptyElemObj<useEmpty>(
-      tvRef, reinterpret_cast<ObjectData*>(base), key);
-  }
-
-  TypedValue* result;
-  DataType type;
-  opPre(base, type);
-  switch (type) {
-  case KindOfStaticString:
-  case KindOfString: {
-    // TODO Task #2716479: Fix this so that the warnings raised match
-    // Zend PHP.
+  initScratchKey<keyType>(scratch, key);
+  int64_t x;
+  if (LIKELY(key->m_type == KindOfInt64)) {
+    x = key->m_data.num;
+  } else {
     TypedValue tv;
-    initScratchKey<keyType>(scratch, key);
-    tvDup(*key, tv);
+    cellDup(*key, tv);
     bool badKey = false;
     if (IS_STRING_TYPE(tv.m_type)) {
       const char* str = tv.m_data.pstr->data();
@@ -1519,38 +1580,64 @@ inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
     if (badKey) {
       return useEmpty;
     }
-    int64_t x = tv.m_data.num;
-    if (x < 0 || x >= base->m_data.pstr->size()) {
-      return useEmpty;
-    }
-    if (!useEmpty) {
-      return true;
-    }
-    tvScratch.m_data.pstr = base->m_data.pstr->getChar(x);
-    assert(tvScratch.m_data.pstr->isStatic());
-    tvScratch.m_type = KindOfStaticString;
-    result = &tvScratch;
-    break;
+    x = tv.m_data.num;
   }
-  case KindOfArray: {
-    result = ElemArray<false, keyType>(base->m_data.parr, key);
-    break;
-  }
-  case KindOfObject: {
-    initScratchKey<keyType>(scratch, key);
-    return IssetEmptyElemObj<useEmpty>(tvRef, base->m_data.pobj, key);
-    break;
-  }
-  default: {
+  if (x < 0 || x >= base->m_data.pstr->size()) {
     return useEmpty;
   }
+  if (!useEmpty) {
+    return true;
   }
+  tvScratch.m_data.pstr = base->m_data.pstr->getChar(x);
+  assert(tvScratch.m_data.pstr->isStatic());
+  tvScratch.m_type = KindOfStaticString;
+  return !cellToBool(*tvToCell(&tvScratch));
+}
 
+/**
+ * IssetEmptyElem when base is an Array
+ */
+template <bool useEmpty, KeyType keyType>
+inline bool IssetEmptyElemArray(TypedValue* base, TypedValue* key) {
+  TypedValue* result = ElemArray<false, keyType>(base->m_data.parr, key);
   if (useEmpty) {
     return !cellToBool(*tvToCell(result));
-  } else {
-    return !tvIsNull(tvToCell(result));
   }
+  return !tvIsNull(tvToCell(result));
+}
+
+/**
+ * isset/empty($base[$key])
+ */
+template <bool useEmpty, KeyType keyType = KeyType::Any>
+NEVER_INLINE
+bool IssetEmptyElemSlow(TypedValue& tvScratch, TypedValue& tvRef,
+                        TypedValue* base, TypedValue* key) {
+  DataType type;
+  opPre(base, type);
+  switch (type) {
+  case KindOfStaticString:
+  case KindOfString:
+    return IssetEmptyElemString<useEmpty, keyType>(tvScratch, base, key);
+  case KindOfArray:
+    return IssetEmptyElemArray<useEmpty, keyType>(base, key);
+  case KindOfObject:
+    return IssetEmptyElemObj<useEmpty, keyType>(tvRef, base->m_data.pobj, key);
+  default:
+    return useEmpty;
+  }
+}
+
+/**
+ * Fast path for IssetEmptyElem assuming base is an Array
+ */
+template <bool useEmpty, KeyType keyType = KeyType::Any>
+inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
+                           TypedValue* base, TypedValue* key) {
+  if (LIKELY(base->m_type == KindOfArray)) {
+    return IssetEmptyElemArray<useEmpty, keyType>(base, key);
+  }
+  return IssetEmptyElemSlow<useEmpty, keyType>(tvScratch, tvRef, base, key);
 }
 
 template <bool warn>

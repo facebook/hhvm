@@ -17,6 +17,7 @@
 #include "hphp/runtime/server/libevent-server-with-takeover.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "folly/String.h"
 #include <afdt.h>
 
@@ -243,7 +244,7 @@ int LibEventServerWithTakeover::getAcceptSocket() {
     Logger::Error(
         "AFDT did not receive a file descriptor: "
         "response = '%s'",
-        StringUtil::CEncode(resp, null_string).data());
+        f_addcslashes(resp, null_string).data());
     errno = EADDRINUSE;
     return -1;
   }
@@ -309,7 +310,7 @@ void LibEventServerWithTakeover::start() {
       Logger::Error(
           "Old server could not shut down: "
           "response = '%s'",
-          StringUtil::CEncode(resp, null_string).data());
+          f_addcslashes(resp, null_string).data());
     } else {
       Logger::Info("takeover: old satellites have shut down");
     }

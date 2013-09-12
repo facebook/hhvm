@@ -32,6 +32,34 @@ namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(posix);
 ///////////////////////////////////////////////////////////////////////////////
 
+const int64_t k_POSIX_S_IFMT = S_IFMT;
+const int64_t k_POSIX_S_IFSOCK = S_IFSOCK;
+const int64_t k_POSIX_S_IFLNK = S_IFLNK;
+const int64_t k_POSIX_S_IFREG = S_IFREG;
+const int64_t k_POSIX_S_IFBLK = S_IFBLK;
+const int64_t k_POSIX_S_IFDIR = S_IFDIR;
+const int64_t k_POSIX_S_IFCHR = S_IFCHR;
+const int64_t k_POSIX_S_IFIFO = S_IFIFO;
+const int64_t k_POSIX_S_ISUID = S_ISUID;
+const int64_t k_POSIX_S_ISGID = S_ISGID;
+const int64_t k_POSIX_S_ISVTX = S_ISVTX;
+const int64_t k_POSIX_S_IRWXU = S_IRWXU;
+const int64_t k_POSIX_S_IRUSR = S_IRUSR;
+const int64_t k_POSIX_S_IWUSR = S_IWUSR;
+const int64_t k_POSIX_S_IXUSR = S_IXUSR;
+const int64_t k_POSIX_S_IRWXG = S_IRWXG;
+const int64_t k_POSIX_S_IRGRP = S_IRGRP;
+const int64_t k_POSIX_S_IWGRP = S_IWGRP;
+const int64_t k_POSIX_S_IXGRP = S_IXGRP;
+const int64_t k_POSIX_S_IRWXO = S_IRWXO;
+const int64_t k_POSIX_S_IROTH = S_IROTH;
+const int64_t k_POSIX_S_IWOTH = S_IWOTH;
+const int64_t k_POSIX_S_IXOTH = S_IXOTH;
+const int64_t k_POSIX_F_OK = F_OK;
+const int64_t k_POSIX_X_OK = X_OK;
+const int64_t k_POSIX_W_OK = W_OK;
+const int64_t k_POSIX_R_OK = R_OK;
+
 bool f_posix_access(CStrRef file, int mode /* = 0 */) {
   String path = File::TranslatePath(file);
   if (path.empty()) {

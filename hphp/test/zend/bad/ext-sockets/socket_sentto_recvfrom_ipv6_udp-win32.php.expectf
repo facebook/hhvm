@@ -1,5 +1,5 @@
 HipHop Warning: %s
- in hphp/test/zend/bad/ext-sockets/socket_sentto_recvfrom_ipv6_udp-win32.phpt on line %d
+ in %s on line %d
 HipHop Warning: %s
 HipHop Warning: %s
 HipHop Warning: %s

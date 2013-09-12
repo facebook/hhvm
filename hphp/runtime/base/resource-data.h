@@ -17,6 +17,11 @@
 #ifndef incl_HPHP_RESOURCE_DATA_H_
 #define incl_HPHP_RESOURCE_DATA_H_
 
+#ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
+#error Directly including 'resource_data.h' is prohibited. \
+       Include 'complex_types.h' instead.
+#endif
+
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/sweepable.h"
 
@@ -27,8 +32,6 @@ namespace HPHP {
  * Base class of all PHP resources.
  */
 class ResourceData {
- public:
-  static const bool IsResourceClass = true;
  private:
   static DECLARE_THREAD_LOCAL_NO_CHECK(int, os_max_resource_id);
 
@@ -200,7 +203,7 @@ typedef std::map<std::string, ResourceMap> ResourceMapMap;
 // ResourceData.
 template<> inline SmartPtr<ResourceData>::~SmartPtr() {}
 
-ALWAYS_INLINE inline void decRefRes(ResourceData* res) {
+ALWAYS_INLINE void decRefRes(ResourceData* res) {
   if (res->decRefCount() == 0) res->release();
 }
 

@@ -28,7 +28,7 @@ namespace HPHP {
  */
 class PlainFile : public File {
 public:
-  DECLARE_OBJECT_ALLOCATION(PlainFile);
+  DECLARE_RESOURCE_ALLOCATION(PlainFile);
 
   explicit PlainFile(FILE *stream = nullptr, bool nonblocking = false);
   explicit PlainFile(int fd, bool nonblocking = false);

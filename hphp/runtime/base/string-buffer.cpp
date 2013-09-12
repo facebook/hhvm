@@ -13,24 +13,26 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/base/string-buffer.h"
+
+#include <algorithm>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include "folly/Conv.h"
+
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/ext/ext_json.h"
 
 #include "hphp/util/alloc.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
-#include <algorithm>
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StringBuffer::StringBuffer(int initialSize /* = StringData::MaxSmallSize */)
+StringBuffer::StringBuffer(int initialSize /* = SmallStringReserve */)
   : m_initialCap(initialSize)
   , m_maxBytes(kDefaultOutputLimit)
   , m_len(0)
@@ -108,6 +110,7 @@ void StringBuffer::clear() {
 
 void StringBuffer::release() {
   if (m_str) {
+    assert(m_str->getCount() == 0);
     m_buffer[m_len] = 0; // appease StringData::checkSane()
     m_str->release();
   }
@@ -129,7 +132,13 @@ char* StringBuffer::appendCursor(int size) {
   } else if (m_cap - m_len < size) {
     m_buffer[m_len] = 0;
     m_str->setSize(m_len);
-    MutableSlice s = m_str->reserve(m_len + size);
+    auto const tmp = m_str->reserve(m_len + size);
+    if (UNLIKELY(tmp != m_str)) {
+      assert(m_str->getCount() == 0);
+      m_str->release();
+      m_str = tmp;
+    }
+    auto const s = m_str->mutableSlice();
     m_buffer = s.ptr;
     m_cap = s.len;
   }
@@ -293,10 +302,18 @@ void StringBuffer::growBy(int spaceRequired) {
 
   m_buffer[m_len] = 0;
   m_str->setSize(m_len);
-  MutableSlice s = m_str->reserve(new_size);
+  auto const tmp = m_str->reserve(new_size);
+  if (UNLIKELY(tmp != m_str)) {
+    assert(m_str->getCount() == 0);
+    m_str->release();
+    m_str = tmp;
+  }
+  auto const s = m_str->mutableSlice();
   m_buffer = s.ptr;
   m_cap = s.len;
 }
+
+//////////////////////////////////////////////////////////////////////
 
 CstrBuffer::CstrBuffer(int cap)
   : m_buffer((char*)Util::safe_malloc(cap + 1)), m_len(0), m_cap(cap) {
@@ -308,10 +325,10 @@ CstrBuffer::CstrBuffer(const char *filename)
   struct stat sb;
   if (stat(filename, &sb) == 0) {
     if (sb.st_size > kMaxCap - 1) {
-      std::ostringstream out;
-      out << "file " << filename << " is too large";
-      throw StringBufferLimitException(kMaxCap,
-                                       String(out.str().c_str()));
+      auto const str = folly::to<std::string>(
+        "file ", filename, " is too large"
+      );
+      throw StringBufferLimitException(kMaxCap, String(str.c_str()));
     }
     m_cap = sb.st_size;
     m_buffer = (char *)Util::safe_malloc(m_cap + 1);
@@ -339,8 +356,12 @@ CstrBuffer::~CstrBuffer() {
   free(m_buffer);
 }
 
-void CstrBuffer::append(const char* data, int len) {
+void CstrBuffer::append(StringSlice slice) {
+  auto const data = slice.ptr;
+  auto const len = slice.len;
+
   assert(m_buffer && len >= 0);
+
   unsigned newlen = m_len + len;
   if (newlen + 1 > m_cap) {
     if (newlen + 1 > kMaxCap) {
@@ -363,7 +384,6 @@ String CstrBuffer::detach() {
   m_len = m_cap = 0;
   return s;
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 }

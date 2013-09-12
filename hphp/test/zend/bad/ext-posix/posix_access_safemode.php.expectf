@@ -1,3 +1,3 @@
-Deprecated: Directive 'safe_mode' is deprecated in PHP 5.3 and greater in hphp/test/zend/bad/ext-posix/posix_access_safemode.phpt on line %d
+Deprecated: Directive 'safe_mode' is deprecated in PHP 5.3 and greater in %s on line %d
 bool(false)
 ===DONE===

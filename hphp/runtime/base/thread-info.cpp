@@ -41,15 +41,6 @@ ThreadInfo::ThreadInfo()
   assert(!t_stackbase);
   t_stackbase = static_cast<char*>(stack_top_ptr());
 
-  map<int, ObjectAllocatorBaseGetter> &wrappers =
-    ObjectAllocatorCollector::getWrappers();
-  m_allocators.resize(wrappers.rbegin()->first + 1);
-  for (map<int, ObjectAllocatorBaseGetter>::iterator it = wrappers.begin();
-       it != wrappers.end(); it++) {
-    m_allocators[it->first] = it->second();
-    assert(it->second() != nullptr);
-  }
-
   m_mm = MemoryManager::TheMemoryManager();
 
   m_profiler = nullptr;

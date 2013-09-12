@@ -106,6 +106,12 @@ public:
     m_server->stop();
     m_server->waitForEnd();
   }
+  virtual int getActiveWorker() {
+    return m_server->getActiveWorker();
+  }
+  virtual int getQueuedJobs() {
+    return m_server->getQueuedJobs();
+  }
 
 private:
   bool checkURL(const std::string &path) const {
@@ -144,6 +150,12 @@ public:
     m_server->stop();
     m_server->waitForEnd();
   }
+  virtual int getActiveWorker() {
+    return m_server->getActiveWorker();
+  }
+  virtual int getQueuedJobs() {
+    return m_server->getQueuedJobs();
+  }
 private:
   ServerPtr m_server;
 };
@@ -171,6 +183,12 @@ public:
   virtual void stop() {
     m_server->stop();
     m_server->waitForEnd();
+  }
+  virtual int getActiveWorker() {
+    return m_server->getActiveWorker();
+  }
+  virtual int getQueuedJobs() {
+    return m_server->getQueuedJobs();
   }
 private:
   ServerPtr m_server;

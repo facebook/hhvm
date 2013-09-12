@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_DYNAMIC_CONTENT_CACHE_H_
 #define incl_HPHP_DYNAMIC_CONTENT_CACHE_H_
 
+#include <memory>
+
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/util/mutex.h"
 
@@ -42,16 +44,14 @@ public:
   void store(const std::string &name, const char *data, int size);
 
 private:
-  ReadWriteMutex m_mutex;
-
-  DECLARE_BOOST_TYPES(ResourceFile);
-  class ResourceFile {
-  public:
-    CstrBufferPtr file;
-    CstrBufferPtr compressed;
+  struct ResourceFile {
+    std::shared_ptr<CstrBuffer> file;
+    std::shared_ptr<CstrBuffer> compressed;
   };
 
-  StringToResourceFilePtrMap m_files;
+  ReadWriteMutex m_mutex;
+  hphp_hash_map<std::string,std::shared_ptr<ResourceFile>,string_hash>
+    m_files;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

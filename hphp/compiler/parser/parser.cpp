@@ -921,13 +921,13 @@ StatementPtr Parser::onFunctionHelper(FunctionType type,
   if (type == FunctionType::Method) {
     mth = NEW_STMT(MethodStatement, modifiersExp,
                    ref->num(), funcName, old_params,
-                   ret.typeAnnotationName(), stmts,
+                   ret.typeAnnotation, stmts,
                    attribute, comment, attrList);
     completeScope(mth->onInitialParse(m_ar, m_file));
   } else {
     func = NEW_STMT(FunctionStatement, modifiersExp,
                    ref->num(), funcName, old_params,
-                   ret.typeAnnotationName(), stmts,
+                   ret.typeAnnotation, stmts,
                    attribute, comment, attrList);
 
     func->onParse(m_ar, m_file);
@@ -1194,7 +1194,6 @@ void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl,
         dynamic_pointer_cast<ExpressionList>(decl->exp));
   }
 }
-
 
 void Parser::onMemberModifier(Token &out, Token *modifiers, Token &modifier) {
   ModifierExpressionPtr expList;

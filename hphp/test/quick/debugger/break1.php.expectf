@@ -2,6 +2,20 @@ Program %s/break1.php loaded. Type '[r]un' or '[c]ontinue' to go.
 run
 break1.php loaded
 Program %s/break1.php exited normally.
+break break1.php:6
+Breakpoint 1 set on line 6 of break1.php
+@ foo('test_break1')
+Breakpoint 1 reached at foo() on line 6 of %s/break1.php
+   5 function foo($x) {
+   6   $y = $x.'_suffix';
+   7   error_log($y);
+
+break list
+  1	ALWAYS    on line 6 of break1.php
+continue
+test_break1_suffix
+break clear all
+All breakpoints are cleared.
 break break1.php:7
 Breakpoint 1 set on line 7 of break1.php
 break break1.php:77

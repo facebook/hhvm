@@ -27,7 +27,7 @@ namespace HPHP {
  */
 class Pipe : public PlainFile {
 public:
-  DECLARE_OBJECT_ALLOCATION(Pipe);
+  DECLARE_RESOURCE_ALLOCATION(Pipe);
 
   Pipe();
   virtual ~Pipe();

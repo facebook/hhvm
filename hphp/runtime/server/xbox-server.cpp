@@ -371,7 +371,7 @@ bool XboxServer::PostMessage(CStrRef message,
 
 class XboxTask : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(XboxTask)
+  DECLARE_RESOURCE_ALLOCATION(XboxTask)
 
   XboxTask(CStrRef message, CStrRef reqInitDoc = "") {
     m_job = new XboxTransport(message, reqInitDoc);

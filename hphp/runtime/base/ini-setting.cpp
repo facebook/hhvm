@@ -234,7 +234,7 @@ bool IniSetting::Get(CStrRef name, String &value) {
   }
   if (name == s_memory_limit) {
     int64_t v = g_context->getRequestMemoryMaxBytes();
-    if (v == INT64_MAX) v = -1;
+    if (v == std::numeric_limits<int64_t>::max()) v = -1;
     value = String(v);
     return true;
   }

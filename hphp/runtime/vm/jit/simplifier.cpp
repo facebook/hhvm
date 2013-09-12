@@ -65,7 +65,10 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     return getStackValue(inst->src(0), index);
 
   case SideExitGuardStk:
-    always_assert(0 && "simplifier is not tested for running after jumpopts");
+    if (inst->extra<SideExitGuardData>()->checkedSlot == index) {
+      return StackValueInfo { inst, inst->typeParam() };
+    }
+    return getStackValue(inst->src(0), index);
 
   case AssertStk:
     // fallthrough

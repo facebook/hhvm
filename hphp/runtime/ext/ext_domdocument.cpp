@@ -1547,7 +1547,7 @@ public:
   bool isset(ObjectData *obj, CStrRef name) {
     const_iterator iter = find(name.data());
     if (iter == end()) return false;
-    return !iter->second->test_isset ||
+    return !iter->second->test_isset &&
       !iter->second->getter(obj).isNull();
   }
 };
@@ -1559,7 +1559,7 @@ public:
   xmlNodePtr nodep = domnode->m_node;                   \
   if (nodep == NULL) {                                  \
     php_dom_throw_error(INVALID_STATE_ERR, 0);          \
-    return uninit_null();                                        \
+    return uninit_null();                               \
   }                                                     \
 
 #define CHECK_WRITE_NODE(nodep)                         \
@@ -2857,7 +2857,7 @@ void c_DOMCDATASection::t___construct(CStrRef value) {
   xmlDocPtr docp = (xmlDocPtr)domdoc->m_node;                   \
   if (docp == NULL) {                                           \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                  \
-    return uninit_null();                                                \
+    return uninit_null();                                       \
   }                                                             \
 
 #define CHECK_WRITE_DOC(docp)                                   \
@@ -2870,7 +2870,11 @@ void c_DOMCDATASection::t___construct(CStrRef value) {
 
 static Variant dom_document_doctype_read(CObjRef obj) {
   CHECK_DOC(docp);
-  return create_node_object((xmlNodePtr)xmlGetIntSubset(docp), domdoc);
+  auto const& dtd = (xmlNodePtr)xmlGetIntSubset(docp);
+  if (dtd == nullptr) {
+    return uninit_null();
+  }
+  return create_node_object(dtd, domdoc);
 }
 
 static Variant dom_document_implementation_read(CObjRef obj) {

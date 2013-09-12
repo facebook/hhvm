@@ -7,7 +7,7 @@ $ICE = Ice_initialize();
     try
     {
 	echo "======================";		
-	   $p = $ICE->stringToProxy("classdemo:tcp -h 192.168.206.192 -p 10002");
+	   $p = $ICE->stringToProxy("classdemo:tcp -h 127.0.0.1 -p 10002");
 	   $p->ice_timeout(1000);
 	
       $hello = com_jd_CommontIceRpcServicePrxHelper::checkedCast($p);

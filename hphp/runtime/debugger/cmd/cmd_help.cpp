@@ -26,6 +26,7 @@ void CmdHelp::HelpAll(DebuggerClient &client) {
     "Session Commands", "",
     "[m]achine",    "connects to an HHVM server",
     "[t]hread",     "switches between different threads",
+    "[s]et",        "various configuration options for hphpd",
     "[q]uit",       "quits debugger",
 
     "Program Flow Control", "",

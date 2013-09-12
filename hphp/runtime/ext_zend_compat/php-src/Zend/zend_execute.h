@@ -28,9 +28,20 @@
 #include "zend_variables.h"
 
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/ZendExecutionStack.h"
 
 BEGIN_EXTERN_C()
 ZEND_API int zend_lookup_class(const char *name, int name_length, zend_class_entry ***ce TSRMLS_DC);
+
+static zend_always_inline void zend_vm_stack_push(void *ptr TSRMLS_DC)
+{
+  ZendExecutionStack::push(ptr);
+}
+
+static zend_always_inline void *zend_vm_stack_pop(TSRMLS_D)
+{
+  return ZendExecutionStack::pop();
+}
 
 /* services */
 ZEND_API const char *get_active_class_name(const char **space TSRMLS_DC);

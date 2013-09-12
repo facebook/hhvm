@@ -142,6 +142,7 @@ struct _zend_object_handlers {
 
 extern ZEND_API zend_object_handlers std_object_handlers;
 
+ZEND_API HashTable *zend_std_get_properties(zval *object TSRMLS_DC);
 ZEND_API inline int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type TSRMLS_DC) {
   return FAILURE;
 }

@@ -28,7 +28,7 @@ ObjectData* new_ZendObjectData_Instance(Class* cls) {
   size_t nProps = cls->numDeclProperties();
   size_t builtinPropSize = sizeof(c_ZendObjectData) - sizeof(ObjectData);
   size_t size = ObjectData::sizeForNProps(nProps) + builtinPropSize;
-  auto inst = new (MM().objMallocLogged(size)) c_ZendObjectData(cls);
+  auto obj = new (MM().objMallocLogged(size)) c_ZendObjectData(cls);
 
   zend_class_entry* ce = zend_hphp_class_to_class_entry(cls);
   auto create_func = ce->create_object;
@@ -48,9 +48,22 @@ ObjectData* new_ZendObjectData_Instance(Class* cls) {
     zend_object *object;
     ov = zend_objects_new(&object, ce);
   }
-  inst->setHandle(ov.handle);
+  obj->setHandle(ov.handle);
 
-  return inst;
+  if (UNLIKELY(cls->callsCustomInstanceInit())) {
+    /*
+      This must happen after the constructor finishes,
+      because it can leak references to obj AND it can
+      throw exceptions. If we have this in the ObjectData
+      constructor, and it throws, obj will be partially
+      destroyed (ie ~ObjectData will be called, resetting
+      the vtable pointer) leaving dangling references
+      to the object (eg in backtraces).
+    */
+    obj->callCustomInstanceInit();
+  }
+
+  return obj;
 }
 
 }

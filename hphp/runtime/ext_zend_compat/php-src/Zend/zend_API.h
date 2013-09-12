@@ -147,6 +147,9 @@ public:
       return;
     }
     zend_module_entry* entry = getEntry();
+    if (entry->globals_ctor) {
+      entry->globals_ctor(entry->globals_ptr);
+    }
     if (entry->module_startup_func) {
       entry->module_startup_func(1, 1);
     }
@@ -158,6 +161,9 @@ public:
     zend_module_entry* entry = getEntry();
     if (entry->module_shutdown_func) {
       entry->module_shutdown_func(1, 1);
+    }
+    if (entry->globals_dtor) {
+      entry->globals_dtor(entry->globals_ptr);
     }
   }
 };
@@ -208,6 +214,7 @@ public:
 #define INIT_CLASS_ENTRY_INIT_METHODS(class_container, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
   {                             \
     class_container.create_object = NULL;         \
+    (void)functions; \
   }
 
 #define INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, handle_fcall, handle_propget, handle_propset) \
@@ -222,6 +229,7 @@ BEGIN_EXTERN_C()
 
 ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_entry TSRMLS_DC);
 ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce, char *parent_name TSRMLS_DC);
+ZEND_API void zend_class_implements(zend_class_entry *class_entry TSRMLS_DC, int num_interfaces, ...);
 
 #define ZEND_PARSE_PARAMS_QUIET 1<<1
 ZEND_API int zend_parse_parameters(int num_args TSRMLS_DC, const char *type_spec, ...);
@@ -282,10 +290,12 @@ ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *na
 
 ZEND_API zend_class_entry *zend_get_class_entry(const zval *zobject TSRMLS_DC);
 ZEND_API int zend_get_object_classname(const zval *object, const char **class_name, zend_uint *class_name_len TSRMLS_DC);
+ZEND_API const char *zend_get_type_by_const(int type);
 
 #define getThis() (this_ptr)
 
-#define ZEND_NUM_ARGS()    (ar->numArgs())
+#define ARG_COUNT(dummy)  (ht)
+#define ZEND_NUM_ARGS()    (ht)
 
 #define array_init(arg)      _array_init((arg), 0 ZEND_FILE_LINE_CC)
 #define array_init_size(arg, size) _array_init((arg), (size) ZEND_FILE_LINE_CC)
@@ -356,6 +366,11 @@ ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value);
 ZEND_API int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, zend_uint param_count, zval *params[] TSRMLS_DC);
 ZEND_API int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, zend_uint param_count, zval **params[], int no_separation, HashTable *symbol_table TSRMLS_DC);
 
+ZEND_API extern const zend_fcall_info empty_fcall_info;
+ZEND_API extern const zend_fcall_info_cache empty_fcall_info_cache;
+
+ZEND_API int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TSRMLS_DC);
+
 /** Build zend_call_info/cache from a zval*
  *
  * Caller is responsible to provide a return value, otherwise the we will crash.
@@ -366,18 +381,31 @@ ZEND_API int call_user_function_ex(HashTable *function_table, zval **object_pp, 
  * The callable_name argument may be NULL.
  * Set check_flags to IS_CALLABLE_STRICT for every new usage!
  */
-ZEND_API inline int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_info *fci, zend_fcall_info_cache *fcc, char **callable_name, char **error TSRMLS_DC) {
-  not_implemented();
-  return FAILURE;
-}
+ZEND_API int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_info *fci, zend_fcall_info_cache *fcc, char **callable_name, char **error TSRMLS_DC);
+
+/** Clear arguments connected with zend_fcall_info *fci
+ * If free_mem is not zero then the params array gets free'd as well
+ */
+ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, int free_mem);
+
+/** Save current arguments from zend_fcall_info *fci
+ * params array will be set to NULL
+ */
+ZEND_API void zend_fcall_info_args_save(zend_fcall_info *fci, int *param_count, zval ****params);
+
+/** Free arguments connected with zend_fcall_info *fci andset back saved ones.
+ */
+ZEND_API void zend_fcall_info_args_restore(zend_fcall_info *fci, int param_count, zval ***params);
+
+/** Set or clear the arguments in the zend_call_info struct taking care of
+ * refcount. If args is NULL and arguments are set then those are cleared.
+ */
+ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC);
 
 /** Call a function using information created by zend_fcall_info_init()/args().
  * If args is given then those replace the argument info in fci is temporarily.
  */
-ZEND_API inline int zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval **retval, zval *args TSRMLS_DC) {
-  not_implemented();
-  return FAILURE;
-}
+ZEND_API int zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval **retval, zval *args TSRMLS_DC);
 END_EXTERN_C()
 
 #define CHECK_ZVAL_NULL_PATH(p) (Z_STRLEN_P(p) != strlen(Z_STRVAL_P(p)))
@@ -469,7 +497,7 @@ END_EXTERN_C()
 #define RETURN_FALSE            { RETVAL_FALSE; return; }
 #define RETURN_TRUE             { RETVAL_TRUE; return; }
 
-#define HASH_OF(p) (Z_TYPE_P(p)==IS_ARRAY ? Z_ARRVAL_P(p) : ((Z_TYPE_P(p)==IS_OBJECT ? Z_OBJ_HT_P(p)->o_toArray().detach() : NULL)))
+#define HASH_OF(p) (Z_TYPE_P(p)==IS_ARRAY ? Z_ARRVAL_P(p) : ((Z_TYPE_P(p)==IS_OBJECT ? Z_OBJPROP_P(p) : NULL)))
 #define ZVAL_IS_NULL(z) (Z_TYPE_P(z)==IS_NULL)
 
 /* For compatibility */

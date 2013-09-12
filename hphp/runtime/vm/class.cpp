@@ -2374,4 +2374,13 @@ bool Class::isCollectionClass() const {
          Collection::InvalidType;
 }
 
+RefData* Class::zGetSProp(Class* ctx, const StringData* sPropName,
+                          bool& visible, bool& accessible) const {
+  auto tv = getSProp(ctx, sPropName, visible, accessible);
+  if (tv->m_type != KindOfRef) {
+    tvBox(tv);
+  }
+  return tv->m_data.pref;
+}
+
 } // HPHP::VM

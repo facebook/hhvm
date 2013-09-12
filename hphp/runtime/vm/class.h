@@ -716,6 +716,13 @@ struct Class : AtomicCountable {
   static hphp_hash_map<const StringData*, const HhbcExtClassInfo*,
                        string_data_hash, string_data_isame> s_extClassHash;
 
+  /**
+   * Used by the ext_zend_compat layer.
+   * Identical to getSProp but the output is boxed.
+   */
+  RefData* zGetSProp(Class* ctx, const StringData* sPropName,
+                     bool& visible, bool& accessible) const;
+
 private:
   typedef IndexedStringMap<Const,true,Slot> ConstMap;
   typedef IndexedStringMap<Prop,true,Slot> PropMap;

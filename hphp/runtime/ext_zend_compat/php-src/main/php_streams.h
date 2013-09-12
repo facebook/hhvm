@@ -52,17 +52,105 @@ END_EXTERN_C()
  * retrieve using file_get_wrapper_data(). */
 
 typedef struct _php_stream php_stream;
+typedef struct _php_stream_wrapper php_stream_wrapper;
 typedef struct _php_stream_context php_stream_context;
+typedef struct _php_stream_filter php_stream_filter;
 
+#include "streams/php_stream_transport.h"
 #include "streams/php_stream_context.h"
+#include "streams/php_stream_filter_api.h"
+
+typedef struct _php_stream_statbuf {
+	struct stat sb; /* regular info */
+	/* extended info to go here some day: content-type etc. etc. */
+} php_stream_statbuf;
+
+/* operations on streams that are file-handles */
+typedef struct _php_stream_ops  {
+	/* stdio like functions - these are mandatory! */
+	size_t (*write)(php_stream *stream, const char *buf, size_t count TSRMLS_DC);
+	size_t (*read)(php_stream *stream, char *buf, size_t count TSRMLS_DC);
+	int    (*close)(php_stream *stream, int close_handle TSRMLS_DC);
+	int    (*flush)(php_stream *stream TSRMLS_DC);
+
+	const char *label; /* label for this ops structure */
+
+	/* these are optional */
+	int (*seek)(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC);
+	int (*cast)(php_stream *stream, int castas, void **ret TSRMLS_DC);
+	int (*stat)(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
+	int (*set_option)(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC);
+} php_stream_ops;
+
+#define PHP_STREAM_FLAG_NO_SEEK						1
+#define PHP_STREAM_FLAG_NO_BUFFER					2
+
+#define PHP_STREAM_FLAG_EOL_UNIX					0 /* also includes DOS */
+#define PHP_STREAM_FLAG_DETECT_EOL					4
+#define PHP_STREAM_FLAG_EOL_MAC						8
+
+/* set this when the stream might represent "interactive" data.
+ * When set, the read buffer will avoid certain operations that
+ * might otherwise cause the read to block for much longer than
+ * is strictly required. */
+#define PHP_STREAM_FLAG_AVOID_BLOCKING				16
+
+#define PHP_STREAM_FLAG_NO_CLOSE					32
+
+#define PHP_STREAM_FLAG_IS_DIR						64
+
+#define PHP_STREAM_FLAG_NO_FCLOSE					128
+
 
 struct _php_stream {
   _php_stream(HPHP::File *file) : hphp_file(file) {}
   HPHP::File *hphp_file;
+	
+  php_stream_ops *ops;
+	void *abstract;			/* convenience pointer for abstraction */
 
-  void *abstract;         /* convenience pointer for abstraction */
-  zval *wrapperdata;      /* fgetwrapperdata retrieves this */
-};
+	php_stream_filter_chain readfilters, writefilters;
+
+	php_stream_wrapper *wrapper; /* which wrapper was used to open the stream */
+	void *wrapperthis;		/* convenience pointer for a instance of a wrapper */
+	zval *wrapperdata;		/* fgetwrapperdata retrieves this */
+
+	int fgetss_state;		/* for fgetss to handle multiline tags */
+	int is_persistent;
+	char mode[16];			/* "rwb" etc. ala stdio */
+	int rsrc_id;			/* used for auto-cleanup */
+	int in_free;			/* to prevent recursion during free */
+	/* so we know how to clean it up correctly.  This should be set to
+	 * PHP_STREAM_FCLOSE_XXX as appropriate */
+	int fclose_stdiocast;
+	FILE *stdiocast;    /* cache this, otherwise we might leak! */
+#if ZEND_DEBUG
+	int __exposed;	/* non-zero if exposed as a zval somewhere */
+#endif
+	char *orig_path;
+
+	php_stream_context *context;
+	int flags;	/* PHP_STREAM_FLAG_XXX */
+
+	/* buffer */
+	off_t position; /* of underlying stream */
+	unsigned char *readbuf;
+	size_t readbuflen;
+	off_t readpos;
+	off_t writepos;
+
+	/* how much data to read when filling buffer */
+	size_t chunk_size;
+
+	int eof;
+
+#if ZEND_DEBUG
+	const char *open_filename;
+	uint open_lineno;
+#endif
+
+	struct _php_stream *enclosing_stream; /* this is a private stream owned by enclosing_stream */
+}; /* php_stream */
 
 #define php_stream_from_zval(xstr, ppzval) \
   { \
@@ -70,6 +158,26 @@ struct _php_stream {
     ZEND_FETCH_RESOURCE2((__file), HPHP::File *, (ppzval), -1, "stream", php_file_le_stream(), php_file_le_pstream()) \
     (xstr) = new (HPHP::request_arena()) php_stream(__file); \
   }
+
+/* allocate a new stream for a particular ops */
+BEGIN_EXTERN_C()
+PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract,
+		const char *persistent_id, const char *mode STREAMS_DC TSRMLS_DC);
+END_EXTERN_C()
+#define php_stream_alloc(ops, thisptr, persistent_id, mode)	_php_stream_alloc((ops), (thisptr), (persistent_id), (mode) STREAMS_CC TSRMLS_CC)
+
+#define php_stream_get_resource_id(stream)		(stream)->rsrc_id
+#if ZEND_DEBUG
+/* use this to tell the stream that it is OK if we don't explicitly close it */
+# define php_stream_auto_cleanup(stream)	{ (stream)->__exposed++; }
+/* use this to assign the stream to a zval and tell the stream that is
+ * has been exported to the engine; it will expect to be closed automatically
+ * when the resources are auto-destructed */
+# define php_stream_to_zval(stream, zval)	{ ZVAL_RESOURCE(zval, (stream)->rsrc_id); (stream)->__exposed++; }
+#else
+# define php_stream_auto_cleanup(stream)	/* nothing */
+# define php_stream_to_zval(stream, zval)	{ ZVAL_RESOURCE(zval, (stream)->rsrc_id); }
+#endif
 
 #define PHP_STREAM_FREE_CALL_DTOR      1 /* call ops->close */
 #define PHP_STREAM_FREE_RELEASE_STREAM    2 /* pefree(stream) */
@@ -127,10 +235,70 @@ PHPAPI inline int _php_stream_putc(php_stream *stream, int c TSRMLS_DC) {
 }
 #define php_stream_putc(stream, c)  _php_stream_putc((stream), (c) TSRMLS_CC)
 
+PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC);
+#define php_stream_set_option(stream, option, value, ptrvalue)	_php_stream_set_option((stream), (option), (value), (ptrvalue) TSRMLS_CC)
+
+/* Flags for mkdir method in wrapper ops */
+#define PHP_STREAM_MKDIR_RECURSIVE	1
+/* define REPORT ERRORS 8 (below) */
+
+/* Flags for rmdir method in wrapper ops */
+/* define REPORT_ERRORS 8 (below) */
+
+/* Flags for url_stat method in wrapper ops */
+#define PHP_STREAM_URL_STAT_LINK	1
+#define PHP_STREAM_URL_STAT_QUIET	2
+
+/* change the blocking mode of stream: value == 1 => blocking, value == 0 => non-blocking. */
+#define PHP_STREAM_OPTION_BLOCKING	1
+
+/* change the buffering mode of stream. value is a PHP_STREAM_BUFFER_XXXX value, ptrparam is a ptr to a size_t holding
+ * the required buffer size */
+#define PHP_STREAM_OPTION_READ_BUFFER	2
+#define PHP_STREAM_OPTION_WRITE_BUFFER	3
+
+#define PHP_STREAM_BUFFER_NONE	0	/* unbuffered */
+#define PHP_STREAM_BUFFER_LINE	1	/* line buffered */
+#define PHP_STREAM_BUFFER_FULL	2	/* fully buffered */
+
+/* set the timeout duration for reads on the stream. ptrparam is a pointer to a struct timeval * */
+#define PHP_STREAM_OPTION_READ_TIMEOUT	4
+#define PHP_STREAM_OPTION_SET_CHUNK_SIZE	5
+
+/* set or release lock on a stream */
+#define PHP_STREAM_OPTION_LOCKING		6
+
+/* whether or not locking is supported */
+#define PHP_STREAM_LOCK_SUPPORTED		1
+
+#define php_stream_supports_lock(stream)	_php_stream_set_option((stream), PHP_STREAM_OPTION_LOCKING, 0, (void *) PHP_STREAM_LOCK_SUPPORTED TSRMLS_CC) == 0 ? 1 : 0
+#define php_stream_lock(stream, mode)		_php_stream_set_option((stream), PHP_STREAM_OPTION_LOCKING, (mode), (void *) NULL TSRMLS_CC)
+
+/* option code used by the php_stream_xport_XXX api */
+#define PHP_STREAM_OPTION_XPORT_API			7 /* see php_stream_transport.h */
+#define PHP_STREAM_OPTION_CRYPTO_API		8 /* see php_stream_transport.h */
+#define PHP_STREAM_OPTION_MMAP_API			9 /* see php_stream_mmap.h */
+#define PHP_STREAM_OPTION_TRUNCATE_API		10
+
+#define PHP_STREAM_TRUNCATE_SUPPORTED	0
+#define PHP_STREAM_TRUNCATE_SET_SIZE	1	/* ptrparam is a pointer to a size_t */
+
+#define php_stream_truncate_supported(stream)	(_php_stream_set_option((stream), PHP_STREAM_OPTION_TRUNCATE_API, PHP_STREAM_TRUNCATE_SUPPORTED, NULL TSRMLS_CC) == PHP_STREAM_OPTION_RETURN_OK ? 1 : 0)
+
+#define PHP_STREAM_OPTION_META_DATA_API		11 /* ptrparam is a zval* to which to add meta data information */
+#define php_stream_populate_meta_data(stream, zv)	(_php_stream_set_option((stream), PHP_STREAM_OPTION_META_DATA_API, 0, zv TSRMLS_CC) == PHP_STREAM_OPTION_RETURN_OK ? 1 : 0)
+
+/* Check if the stream is still "live"; for sockets/pipes this means the socket
+ * is still connected; for files, this does not really have meaning */
+#define PHP_STREAM_OPTION_CHECK_LIVENESS	12 /* no parameters */
+
+#define PHP_STREAM_OPTION_RETURN_OK			 0 /* option set OK */
+#define PHP_STREAM_OPTION_RETURN_ERR		-1 /* problem setting option */
+#define PHP_STREAM_OPTION_RETURN_NOTIMPL	-2 /* underlying stream does not implement; streams can handle it instead */
 
 /* copy up to maxlen bytes from src to dest.  If maxlen is PHP_STREAM_COPY_ALL,
  * copy until eof(src). */
-#define PHP_STREAM_COPY_ALL    ((size_t)-1)
+#define PHP_STREAM_COPY_ALL		((size_t)-1)
 
 #include "streams/php_stream_plain_wrapper.h"
 

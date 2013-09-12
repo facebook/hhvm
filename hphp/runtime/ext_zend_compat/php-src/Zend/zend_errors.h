@@ -37,7 +37,7 @@
 #define E_USER_NOTICE       static_cast<int>(HPHP::ErrorConstants::ErrorModes::USER_NOTICE)
 #define E_STRICT            static_cast<int>(HPHP::ErrorConstants::ErrorModes::STRICT)
 #define E_RECOVERABLE_ERROR static_cast<int>(HPHP::ErrorConstants::ErrorModes::RECOVERABLE_ERROR)
-#define E_DEPRECATED        static_cast<int>(HPHP::ErrorConstants::ErrorModes::DEPRECATED)
+#define E_DEPRECATED        static_cast<int>(HPHP::ErrorConstants::ErrorModes::PHP_DEPRECATED)
 #define E_USER_DEPRECATED   static_cast<int>(HPHP::ErrorConstants::ErrorModes::USER_DEPRECATED)
 
 #define E_ALL (E_ERROR | E_WARNING | E_PARSE | E_NOTICE | E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_COMPILE_WARNING | E_USER_ERROR | E_USER_WARNING | E_USER_NOTICE | E_RECOVERABLE_ERROR | E_DEPRECATED | E_USER_DEPRECATED | E_STRICT)

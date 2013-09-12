@@ -1236,7 +1236,6 @@ ZEND_ARG_INFO(0, size)
 ZEND_ARG_INFO(0, strong)
 ZEND_END_ARG_INFO()
 
-#ifndef HHVM
 static zend_function_entry oauth_provider_methods[] = { /* {{{ */
     SOP_ME(__construct,      arginfo_oauth_provider__construct,    ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)
     SOP_ME(consumerHandler,  arginfo_oauth_provider_handler,    ZEND_ACC_PUBLIC)
@@ -1256,7 +1255,6 @@ static zend_function_entry oauth_provider_methods[] = { /* {{{ */
     PHP_MALIAS(oauthprovider,  is2LeggedEndpoint, isRequestTokenEndpoint, arginfo_oauth_provider_req_token, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
-#endif
 
 static zend_object_value oauth_provider_create_object(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {

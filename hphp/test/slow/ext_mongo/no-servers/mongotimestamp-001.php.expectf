@@ -1,0 +1,5 @@
+Timestamp(0, 0)
+Timestamp(%d, 0)
+Timestamp(12345, 67890)
+Timestamp(100, 1)
+Timestamp(%d, 2)

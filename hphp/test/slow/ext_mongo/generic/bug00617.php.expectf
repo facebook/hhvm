@@ -1,0 +1,19 @@
+ARRAY:
+int(22)
+string(64) "- Found unknown connection string option 'timeou' with value '4'"
+int(23)
+string(87) "You can not use both slaveOkay and read-preferences. Please switch to read-preferences."
+int(25)
+string(34) "Unrecognized or unsupported option"
+STRING:
+int(21)
+string(29) "- Found an empty option value"
+int(21)
+string(28) "- Found an empty option name"
+int(22)
+string(64) "- Found unknown connection string option 'timeou' with value '4'"
+int(23)
+string(87) "You can not use both slaveOkay and read-preferences. Please switch to read-preferences."
+OTHERS:
+int(23)
+string(87) "You can not use both slaveOkay and read-preferences. Please switch to read-preferences."

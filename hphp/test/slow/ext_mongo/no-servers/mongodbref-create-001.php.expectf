@@ -1,0 +1,6 @@
+array(2) {
+  ["$ref"]=>
+  string(3) "foo"
+  ["$id"]=>
+  int(123)
+}

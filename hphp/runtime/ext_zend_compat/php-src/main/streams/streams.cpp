@@ -86,3 +86,60 @@ PHPAPI php_stream_context *php_stream_context_alloc(TSRMLS_D)
   return context;
 }
 
+/* allocate a new stream for a particular ops */
+PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract, const char *persistent_id, const char *mode STREAMS_DC TSRMLS_DC) /* {{{ */
+{
+	php_stream *ret;
+
+	ret = (php_stream*) pemalloc(sizeof(php_stream), persistent_id ? 1 : 0);
+
+	memset(ret, 0, sizeof(php_stream));
+
+	ret->readfilters.stream = ret;
+	ret->writefilters.stream = ret;
+
+#if STREAM_DEBUG
+fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persistent_id);
+#endif
+
+	ret->ops = ops;
+	ret->abstract = abstract;
+	ret->is_persistent = persistent_id ? 1 : 0;
+	ret->chunk_size = FG(def_chunk_size);
+
+	if (FG(auto_detect_line_endings)) {
+		ret->flags |= PHP_STREAM_FLAG_DETECT_EOL;
+	}
+
+	if (persistent_id) {
+		zend_rsrc_list_entry le;
+
+		le.type = le_pstream;
+		le.ptr = ret;
+		le.refcount = 0;
+
+		if (FAILURE == zend_hash_update(&EG(persistent_list), (char *)persistent_id,
+					strlen(persistent_id) + 1,
+					(void *)&le, sizeof(le), NULL)) {
+
+			pefree(ret, 1);
+			return NULL;
+		}
+	}
+
+	ret->rsrc_id = ZEND_REGISTER_RESOURCE(NULL, ret, persistent_id ? le_pstream : le_stream);
+	strlcpy(ret->mode, mode, sizeof(ret->mode));
+
+	ret->wrapper          = NULL;
+	ret->wrapperthis      = NULL;
+	ret->wrapperdata      = NULL;
+	ret->stdiocast        = NULL;
+	ret->orig_path        = NULL;
+	ret->context          = NULL;
+	ret->readbuf          = NULL;
+	ret->enclosing_stream = NULL;
+
+	return ret;
+}
+/* }}} */
+

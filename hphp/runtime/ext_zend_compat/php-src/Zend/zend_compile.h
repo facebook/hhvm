@@ -140,6 +140,15 @@ ZEND_API zend_bool zend_is_auto_global(const char *name, uint name_len TSRMLS_DC
 
 #include "zend_globals_macros.h"
 
+/* var status for backpatching */
+#define BP_VAR_R			0
+#define BP_VAR_W			1
+#define BP_VAR_RW			2
+#define BP_VAR_IS			3
+#define BP_VAR_NA			4	/* if not applicable */
+#define BP_VAR_FUNC_ARG		5
+#define BP_VAR_UNSET		6
+
 #define ZEND_SEND_BY_VAL     0
 #define ZEND_SEND_BY_REF     1
 #define ZEND_SEND_PREFER_REF 2

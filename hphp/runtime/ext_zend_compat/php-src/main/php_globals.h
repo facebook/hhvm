@@ -35,7 +35,6 @@ const HPHP::StaticString
   s__REQUEST("_REQUEST"),
   s__SERVER("_SERVER");
 
-// Assume you only want to use it on http_globals
 #define PG(v) PG_##v()
 
 /* Track vars */

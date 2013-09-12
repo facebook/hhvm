@@ -1,5 +1,27 @@
+/*
+   +----------------------------------------------------------------------+
+   | Zend Engine                                                          |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 2.00 of the Zend license,     |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.zend.com/license/2_00.txt.                                |
+   | If you did not receive a copy of the Zend license and are unable to  |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@zend.com so we can mail you a copy immediately.              |
+   +----------------------------------------------------------------------+
+   | Authors: Andi Gutmans <andi@zend.com>                                |
+   |          Zeev Suraski <zeev@zend.com>                                |
+   +----------------------------------------------------------------------+
+*/
+
+/* $Id$ */
+
 #include "zend.h"
 #include "zend_hash.h"
+#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_qsort.h"
 #include "hphp/util/safesort.h"
 
@@ -8,9 +30,8 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKe
     return FAILURE;
   }
   assert(arKey[nKeyLength - 1] == '\0');
-  HPHP::String key(arKey, nKeyLength - 1, HPHP::CopyString);
 
-  if ((flag & HASH_ADD) && ht->exists(key.get())) {
+  if ((flag & HASH_ADD) && zend_hash_exists(ht, arKey, nKeyLength)) {
     return FAILURE;
   }
   /*
@@ -18,6 +39,7 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKe
    * zSet() operation could return a new HashTable, but currently this
    * is not possible.
    */
+  HPHP::String key(arKey, nKeyLength - 1, HPHP::CopyString);
   ht->zSet(key.get(), (*(zval**)pData));
   return SUCCESS;
 }
@@ -33,7 +55,7 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void
     return SUCCESS;
   }
 
-  if (flag & HASH_ADD && ht->exists(h)) {
+  if (flag & HASH_ADD && zend_hash_index_exists(ht, h)) {
     return FAILURE;
   }
 
@@ -42,6 +64,37 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void
    */
   ht->zSet(h, (*(zval**)pData));
   return SUCCESS;
+}
+
+ZEND_API void zend_hash_apply_with_arguments(HashTable *ht TSRMLS_DC, apply_func_args_t apply_func, int num_args, ...) {
+	va_list args;
+	zend_hash_key hash_key;
+
+  for (HPHP::ArrayIter it(ht); it; ++it) {
+		int result;
+		va_start(args, num_args);
+    if (it.first().isInteger()) {
+      hash_key.arKey = "";
+      hash_key.nKeyLength = 0;
+      hash_key.h = it.first().asInt64Val();
+    } else {
+      assert(it.first().isString());
+      hash_key.arKey = it.first().asCStrRef().data();
+      hash_key.nKeyLength = it.first().asCStrRef().size() + 1;
+      hash_key.h = 0;
+    }
+    zval* data = it.zSecond();
+		result = apply_func(&data, num_args, args, &hash_key);
+
+		if (result & ZEND_HASH_APPLY_REMOVE) {
+      not_implemented();
+		}
+		if (result & ZEND_HASH_APPLY_STOP) {
+			va_end(args);
+			break;
+		}
+		va_end(args);
+	}
 }
 
 ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, int flag) {
@@ -111,6 +164,13 @@ ZEND_API int zend_hash_index_find(const HashTable *ht, ulong h, void **pData) {
   auto p = (zval***)pData;
   *p = &val->m_data.pref;
   return SUCCESS;
+}
+
+ZEND_API int zend_hash_exists(const HashTable *ht, const char *arKey, uint nKeyLength)
+{
+  return ht->exists(
+    HPHP::StrNR(HPHP::String(arKey, nKeyLength-1, HPHP::CopyString).get())
+  );
 }
 
 ZEND_API ulong zend_hash_next_free_element(const HashTable *ht) {
@@ -226,6 +286,10 @@ ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_f
     pCopyConstructor((void*)(&tv->m_data.pref));
   }
 #endif
+}
+
+ZEND_API int zend_hash_index_exists(const HashTable *ht, ulong h) {
+  return ht->exists(h);
 }
 
 ZEND_API int zend_hash_num_elements(const HashTable *ht) {

@@ -21,45 +21,85 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/ZendExecutionStack.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/ZendObjectData.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zval-helpers.h"
+
+// zend.h is way to big to include here
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class TypedValue;
+class RefData;
 
 void zPrepArgs(ActRec* ar);
 
+typedef void (*zend_ext_func)(
+  // The number of args passed to this function.
+  // Usually accessed with ARG_COUNT() or ZEND_NUM_ARGS.
+  int ht,
+  // The return value. Written to with RETURN_* macros.
+  RefData* return_value,
+  // The same as the previous arg but a **. This is provided so that the callee
+  // can set the caller's zval* to point to a different zval. This is needed if
+  // a builtin function wants to return by reference.
+  RefData** return_value_ptr,
+  // The $this in the method. Accessed with getThis().
+  RefData* this_ptr,
+  // An optimization that extensions can use (but I haven't seen one use it
+  // yet). If we can detect that the return value isn't used, we could pass in 0
+  // here and the ext wouldn't set it.
+  int return_value_used
+);
+
 inline TypedValue* zend_wrap_func(
     ActRec* ar,
-    void (*builtin_func)(ActRec*, RefData*, RefData*),
+    zend_ext_func builtin_func,
     int numParams,
     bool isReturnRef) {
 
   // Prepare the arguments and return value before they are
   // exposed to the PHP extension
   zPrepArgs(ar);
-  Variant return_value(RefData::Make(*init_null_variant.asTypedValue()));
-  Variant this_ptr(RefData::Make(*init_null_variant.asTypedValue()));
+
+  // Using Variant so exceptions will decref them
+  Variant return_value_var(
+    RefData::Make(*init_null_variant.asTypedValue()),
+    Variant::noInc
+  );
+  TypedValue* return_value = return_value_var.asTypedValue();
+
+  Variant this_ptr_var(
+    RefData::Make(*init_null_variant.asTypedValue()),
+    Variant::noInc
+  );
+  TypedValue* this_ptr = this_ptr_var.asTypedValue();
+
   if (ar->hasThis()) {
     tvWriteObject(
       ar->getThis(),
-      this_ptr.asTypedValue()->m_data.pref->tv()
+      this_ptr->m_data.pref->tv()
     );
   }
 
+  auto *return_value_ptr = &return_value->m_data.pref;
+
   // Invoke the PHP extension function/method
+  ZendExecutionStack::pushHHVMStack();
   builtin_func(
-    ar,
-    return_value.asTypedValue()->m_data.pref,
-    this_ptr.asTypedValue()->m_data.pref
+    ar->numArgs(),
+    return_value->m_data.pref,
+    return_value_ptr,
+    this_ptr->m_data.pref,
+    1
   );
+  ZendExecutionStack::popHHVMStack();
 
   // Take care of freeing the args, tearing down the ActRec,
   // and moving the return value to the right place
   frame_free_locals_inl(ar, numParams);
-  memcpy(&ar->m_r, return_value.asTypedValue(), sizeof(TypedValue));
-  return_value.asTypedValue()->m_type = KindOfNull;
+  memcpy(&ar->m_r, return_value, sizeof(TypedValue));
+  return_value->m_type = KindOfNull;
   if (isReturnRef) {
     if (!ar->m_r.m_data.pref->isReferenced()) {
       tvUnbox(&ar->m_r);

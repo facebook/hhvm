@@ -87,5 +87,5 @@ file_put_contents(
 
 print "Generating $ext_name.idl.json file from php.net\n";
 $idl_dir = __DIR__.'/../../system/idl';
-// exec("php $idl_dir/newext.php $ext_name");
+exec("php $idl_dir/newext.php $ext_name");
 rename("$ext_name.idl.json", "$idl_dir/$ext_name.idl.json");

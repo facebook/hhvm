@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/tv-helpers.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zval-helpers.h"
 
 #define ZEND_ENGINE_2
 
@@ -241,8 +242,8 @@ typedef enum {
 
 #include "zend_hash.h"
 
-#define INTERNAL_FUNCTION_PARAMETERS HPHP::ActRec* ar, zval* return_value, zval* this_ptr
-#define INTERNAL_FUNCTION_PARAM_PASSTHRU ar, return_value, this_ptr
+#define INTERNAL_FUNCTION_PARAMETERS int ht, zval *return_value, zval **return_value_ptr, zval *this_ptr, int return_value_used TSRMLS_DC
+#define INTERNAL_FUNCTION_PARAM_PASSTHRU ht, return_value, return_value_ptr, this_ptr, return_value_used TSRMLS_CC
 
 #if defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)
 void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((noreturn));
@@ -257,13 +258,6 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 #include "hphp/runtime/ext_zend_compat/hhvm/ZendObjectData.h"
 
 typedef struct _zend_class_entry zend_class_entry;
-
-struct _zend_class_entry {
-  const char *name;
-  zend_uint name_length;
-  HPHP::Class *hphp_class;
-  zend_object_value (*create_object)(zend_class_entry *class_type);
-};
 
 // typedef struct HPHP::ObjectData zend_object;
 typedef struct _zend_object {
@@ -370,6 +364,23 @@ zend_always_inline zend_bool zval_unset_isref_p(zval* pz) {
 zend_always_inline zend_bool zval_set_isref_to_p(zval* pz, zend_bool isref) {
   return isref ? zval_set_isref_p(pz) : zval_unset_isref_p(pz);
 }
+
+struct _zend_serialize_data;
+struct _zend_unserialize_data;
+
+typedef struct _zend_serialize_data zend_serialize_data;
+typedef struct _zend_unserialize_data zend_unserialize_data;
+
+struct _zend_class_entry {
+  const char *name;
+  zend_uint name_length;
+  HPHP::Class *hphp_class;
+  zend_object_value (*create_object)(zend_class_entry *class_type);
+
+	/* serializer callbacks */
+	int (*serialize)(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC);
+	int (*unserialize)(zval **object, zend_class_entry *ce, const unsigned char *buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC);
+};
 
 #include "zend_stream.h"
 
@@ -499,5 +510,11 @@ END_EXTERN_C()
 
 #include "zend_operators.h"
 #include "zend_variables.h"
+
+typedef enum {
+  EH_NORMAL = 0,
+  EH_SUPPRESS,
+  EH_THROW
+} zend_error_handling_t;
 
 #endif /* ZEND_H */

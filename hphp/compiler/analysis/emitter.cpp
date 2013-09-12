@@ -7614,6 +7614,7 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
   }
 }
 
+StaticString s_construct("__construct");
 static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
                                      ssize_t numBuiltinClasses) {
   MD5 md5("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
@@ -7709,6 +7710,8 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
         pce->addInterface(intf);
       }
     }
+
+    bool hasCtor = false;
     for (ssize_t j = 0; j < e.info->m_methodCount; ++j) {
       const HhbcExtMethodInfo* methodInfo = &(e.info->m_methods[j]);
       static const StringData* continuationCls =
@@ -7723,6 +7726,10 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
           mapGet(contMethods, methName, &cmeth)) {
         emitContinuationMethod(*ue, fe, cmeth, metaInfo);
       } else {
+        if (e.name->isame(s_construct.get())) {
+          hasCtor = true;
+        }
+
         // Build the function
         BuiltinFunction bcf =
           (BuiltinFunction)methodInfo->m_pGenericMethod;
@@ -7737,6 +7744,19 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       fe->finish(past, false);
       ue->recordFunction(fe);
     }
+    if (!hasCtor) {
+      static const StringData* methName = makeStaticString("86ctor");
+      FuncEmitter* fe = ue->newMethodEmitter(methName, pce);
+      bool added UNUSED = pce->addMethod(fe);
+      assert(added);
+      fe->init(0, 0, ue->bcPos(), AttrPublic, false, empty_string.get());
+      ue->emitOp(OpNull);
+      ue->emitOp(OpRetC);
+      fe->setMaxStackCells(1);
+      fe->finish(ue->bcPos(), false);
+      ue->recordFunction(fe);
+    }
+
     {
       ClassInfo::ConstantVec cnsVec = e.ci->getConstantsVec();
       for (unsigned i = 0; i < cnsVec.size(); ++i) {

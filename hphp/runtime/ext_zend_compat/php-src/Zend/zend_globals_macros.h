@@ -23,6 +23,13 @@
 #define ZEND_GLOBALS_MACROS_H
 
 /* Executor */
-# define EG(v) (0)
+# define EG(v) EG_##v()
+
+zval*& EG_exception();
+zval*& EG_prev_exception();
+HashTable& EG_regular_list();
+HashTable& EG_persistent_list();
+zend_error_handling_t& EG_error_handling();
+HashTable* EG_function_table();
 
 #endif /* ZEND_GLOBALS_MACROS_H */

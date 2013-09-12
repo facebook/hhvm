@@ -310,6 +310,14 @@ class ObjectData {
 
   static int GetMaxId() ATTRIBUTE_COLD;
 
+  /**
+   * Used by the ext_zend_compat layer.
+   * Identical to o_get but the output is boxed.
+   */
+  RefData* zGetProp(Class* ctx, const StringData* key,
+                    bool& visible, bool& accessible,
+                    bool& unset);
+
  public:
   bool hasDynProps() const { return o_properties.size(); }
   void reserveProperties(int nProp);

@@ -93,6 +93,7 @@ class Variant : private TypedValue {
   explicit Variant(NullInit) { m_type = KindOfNull; }
   enum class NoInit {};
   explicit Variant(NoInit) {}
+  enum NoInc { noInc = 0 };
 
   void destruct();
   static void destructData(RefData* num, DataType t);
@@ -138,6 +139,7 @@ class Variant : private TypedValue {
   /* implicit */ Variant(ObjectData *v);
   /* implicit */ Variant(ResourceData *v);
   /* implicit */ Variant(RefData *r);
+  /* implicit */ Variant(RefData *r, NoInc);
 
   // for static strings only
   explicit Variant(const StringData *v);

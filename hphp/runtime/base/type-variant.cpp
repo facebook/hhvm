@@ -204,6 +204,16 @@ Variant::Variant(RefData *r) {
   m_type = KindOfRef;
   if (r) {
     m_data.pref = r;
+    r->incRefCount();
+  } else {
+    m_type = KindOfNull;
+  }
+}
+
+Variant::Variant(RefData *r, NoInc) {
+  m_type = KindOfRef;
+  if (r) {
+    m_data.pref = r;
   } else {
     m_type = KindOfNull;
   }

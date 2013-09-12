@@ -162,6 +162,9 @@ ZEND_API int zend_binary_strcasecmp(const char *s1, uint len1, const char *s2, u
 ZEND_API int zend_binary_strncasecmp(const char *s1, uint len1, const char *s2, uint len2, uint length);
 ZEND_API int zend_binary_strncasecmp_l(const char *s1, uint len1, const char *s2, uint len2, uint length);
 
+ZEND_API int zend_atoi(const char *str, int str_len);
+ZEND_API long zend_atol(const char *str, int str_len);
+
 END_EXTERN_C()
 
 #define convert_to_ex_master(ppzv, lower_type, upper_type)  \
@@ -242,9 +245,10 @@ inline ZArrVal zval_get_arrval(const zval &z) {
 #define Z_ARRVAL(zval)      (zval_get_arrval(zval))
 #define Z_OBJVAL(zval)      (zval_follow_ref(zval).m_data.pobj)
 #define Z_OBJ_HANDLE(zval)  (Z_OBJVAL(zval)->o_getId())
-#define Z_OBJ_HT(zval)      (Z_OBJVAL(zval))
+#define Z_OBJ_HT(zval)      (not_implemented())
 #define Z_OBJCE(zval)       (zend_get_class_entry(&(zval) TSRMLS_CC))
-#define Z_OBJPROP(zval)     (Z_OBJ_HT((zval))->get_properties(&(zval) TSRMLS_CC))
+// TODO the .detach is leaking here
+#define Z_OBJPROP(zval)     (Z_OBJVAL((zval))->o_toArray().detach())
 #define Z_OBJ_HANDLER(zval, hf)  (Z_OBJ_HT((zval))->hf)
 #define Z_RESVAL(zval)      (zval_get_resource_id(zval))
 #define Z_OBJDEBUG(zval,is_tmp)  ((Z_OBJ_HANDLER((zval),get_debug_info)?Z_OBJ_HANDLER((zval),get_debug_info)(&(zval),&is_tmp TSRMLS_CC):(is_tmp=0,Z_OBJ_HANDLER((zval),get_properties)?Z_OBJPROP(zval):NULL)))

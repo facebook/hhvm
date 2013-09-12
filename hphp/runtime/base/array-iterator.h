@@ -175,6 +175,11 @@ class ArrayIter {
     assert(ad && m_pos != ArrayData::invalid_index);
     return const_cast<ArrayData*>(ad)->nvGetValueRef(m_pos);
   }
+  /**
+   * Used by the ext_zend_compat layer.
+   * Identical to nvSecond but the output is boxed.
+   */
+  RefData* zSecond();
 
   bool hasArrayData() {
     return !((intptr_t)m_data & 1);

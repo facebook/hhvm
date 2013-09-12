@@ -126,6 +126,7 @@ typedef int (*apply_func_t)(void *pDest TSRMLS_DC);
 typedef int (*apply_func_arg_t)(void *pDest, void *argument TSRMLS_DC);
 typedef int (*apply_func_args_t)(void *pDest TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key);
 
+ZEND_API void zend_hash_apply_with_arguments(HashTable *ht TSRMLS_DC, apply_func_args_t apply_func, int, ...);
 
 /* Deletes */
 ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, int flag);
@@ -140,6 +141,12 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint n
 ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, void **pData);
 ZEND_API int zend_hash_quick_find(const HashTable *ht, const char *arKey, uint nKeyLength, ulong h, void **pData);
 ZEND_API int zend_hash_index_find(const HashTable *ht, ulong h, void **pData);
+
+/* Misc */
+ZEND_API int zend_hash_exists(const HashTable *ht, const char *arKey, uint nKeyLength);
+ZEND_API int zend_hash_quick_exists(const HashTable *ht, const char *arKey, uint nKeyLength, ulong h);
+ZEND_API int zend_hash_index_exists(const HashTable *ht, ulong h);
+ZEND_API ulong zend_hash_next_free_element(const HashTable *ht);
 
 /* Misc */
 ZEND_API ulong zend_hash_next_free_element(const HashTable *ht);

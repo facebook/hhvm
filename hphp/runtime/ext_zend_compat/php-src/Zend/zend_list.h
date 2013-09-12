@@ -23,6 +23,7 @@
 #define ZEND_LIST_H
 
 #include "zend_hash.h"
+#include "zend_globals.h"
 
 BEGIN_EXTERN_C()
 
@@ -34,9 +35,11 @@ namespace HPHP {
     public:
       DECLARE_RESOURCE_ALLOCATION(ZendResourceData);
       ZendResourceData(void* ptr, int type) : ptr(ptr), type(type) {}
+      ZendResourceData() {}
       ~ZendResourceData() {}
       void* ptr;
       int type;
+      int refcount;
       int id;
   };
   class ZendNormalResourceDataHolder : public ZendResourceData {

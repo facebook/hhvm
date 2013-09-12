@@ -547,6 +547,14 @@ Variant ArrayIter::iterValue(VersionableSparse) {
   return tvAsCVarRef(static_cast<Mappish*>(getObject())->iter_value(m_pos));
 }
 
+RefData* ArrayIter::zSecond() {
+  auto tv = nvSecond();
+  if (tv->m_type != KindOfRef) {
+    tvBox(tv);
+  }
+  return tv->m_data.pref;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // FullPos
 

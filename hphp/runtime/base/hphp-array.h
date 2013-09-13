@@ -372,14 +372,18 @@ private:
 
   template <class Hit>
   ssize_t findImpl(size_t h0, Hit) const;
+  ssize_t find(int64_t ki) const;
+  ssize_t find(const StringData* s, strhash_t prehash) const;
 
   template <class Hit>
   int32_t* findForInsertImpl(size_t h0, Hit) const;
-
-  ssize_t find(int64_t ki) const;
-  ssize_t find(const StringData* s, strhash_t prehash) const;
   int32_t* findForInsert(int64_t ki) const;
   int32_t* findForInsert(const StringData* k, strhash_t prehash) const;
+
+  template <class Hit, class Remove>
+  ssize_t findForRemoveImpl(size_t h0, Hit, Remove) const;
+  ssize_t findForRemove(int64_t ki, bool updateNext);
+  ssize_t findForRemove(const StringData* k, strhash_t prehash);
 
   ssize_t iter_advance_helper(ssize_t prev) const ATTRIBUTE_COLD;
 
@@ -409,8 +413,7 @@ private:
   ArrayData* updateRef(StringData* key, CVarRef data);
 
   void adjustFullPos(ssize_t pos);
-
-  ArrayData* erase(int32_t* ei, bool updateNext);
+  void erase(ssize_t pos);
 
   HphpArray* copyImpl(HphpArray* target) const;
 

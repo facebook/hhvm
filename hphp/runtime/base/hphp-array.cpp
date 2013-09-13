@@ -773,6 +773,71 @@ HphpArray::findForInsert(const StringData* s, strhash_t prehash) const {
   });
 }
 
+template <class Hit, class Remove> ALWAYS_INLINE
+ssize_t HphpArray::findForRemoveImpl(size_t h0, Hit hit, Remove remove) const {
+  assert(m_hLoad <= computeMaxElms(m_tableMask));
+  size_t mask = m_tableMask;
+  auto* elms = m_data;
+  auto* hashtable = m_hash;
+  for (size_t i = 1, probe = h0;; ++i) {
+    auto* ei = &hashtable[probe & mask];
+    ssize_t pos = *ei;
+    if (validPos(pos)) {
+      if (hit(elms[pos])) {
+        remove(elms[pos]);
+        *ei = Tombstone;
+        return pos;
+      }
+    } else {
+      if (pos == Empty) {
+        // not found, terminate search
+        return pos;
+      }
+    }
+    probe += i;
+    assert(probe == (h0 + (i + i*i) / 2));
+    assert(i <= mask);
+  }
+}
+
+NEVER_INLINE
+ssize_t HphpArray::findForRemove(int64_t ki, bool updateNext) {
+  // all vector methods should work w/out touching the hashtable
+  assert(!isPacked());
+  return findForRemoveImpl(ki,
+      [&] (const Elm& e) {
+        return hitIntKey(e, ki);
+      },
+      [this, ki, updateNext] (Elm& e) {
+        assert(ki == e.ikey);
+        // Match PHP 5.3.1 semantics
+        // Hacky: don't removed the unsigned cast, else g++ can optimize away
+        // the check for == 0x7fff..., since there is no signed int k
+        // for which k-1 == 0x7fff...
+        if ((uint64_t)ki == (uint64_t)m_nextKI-1
+              && (ki == 0x7fffffffffffffffLL || updateNext)) {
+          --m_nextKI;
+        }
+      }
+  );
+}
+
+NEVER_INLINE ssize_t
+HphpArray::findForRemove(const StringData* s, strhash_t prehash) {
+  // all vector methods should work w/out touching the hashtable
+  assert(!isPacked());
+  auto h = prehash | STRHASH_MSB;
+  return findForRemoveImpl(prehash,
+      [&] (const Elm& e) {
+        return hitStringKey(e, s, h);
+      },
+      [] (Elm& e) {
+        decRefStr(e.key);
+        e.setIntKey(0);
+      }
+    );
+}
+
 NEVER_INLINE int32_t*
 HphpArray::findForNewInsertLoop(int32_t* table, size_t h0, size_t mask) {
   /* Quadratic probe. */
@@ -1440,11 +1505,8 @@ void HphpArray::adjustFullPos(ssize_t pos) {
   }
 }
 
-ArrayData* HphpArray::erase(int32_t* ei, bool updateNext) {
-  ssize_t pos = *ei;
-  if (!validPos(pos)) {
-    return this;
-  }
+void HphpArray::erase(ssize_t pos) {
+  assert(validPos(pos));
 
   // move strong iterators to the previous element
   if (strongIterators()) adjustFullPos(pos);
@@ -1461,23 +1523,6 @@ ArrayData* HphpArray::erase(int32_t* ei, bool updateNext) {
   DataType oldType = tv->m_type;
   uint64_t oldDatum = tv->m_data.num;
   tv->m_type = KindOfInvalid;
-  // Free the key if necessary, and clear the h and key fields in order to
-  // increase the chances that subsequent searches will quickly/safely fail
-  // when encountering tombstones, even though checking for KindOfInvalid is
-  // the last validation step during search.
-  if (e.hasStrKey()) {
-    decRefStr(e.key);
-    e.setIntKey(0);
-  } else {
-    // Match PHP 5.3.1 semantics
-    // Hacky: don't removed the unsigned cast, else g++ can optimize away
-    // the check for == 0x7fff..., since there is no signed int k
-    // for which k-1 == 0x7fff...
-    if ((uint64_t)e.ikey == (uint64_t)m_nextKI-1
-          && (e.ikey == 0x7fffffffffffffffLL || updateNext)) {
-      --m_nextKI;
-    }
-  }
   --m_size;
   // If this element was last, adjust m_used.
   if (size_t(pos + 1) == m_used) {
@@ -1486,7 +1531,6 @@ ArrayData* HphpArray::erase(int32_t* ei, bool updateNext) {
     } while (m_used > 0 && isTombstone(elms[m_used - 1].data.m_type));
   }
   // Mark the hash entry as "deleted".
-  *ei = Tombstone;
   assert(m_used <= m_cap);
   assert(m_hLoad <= m_cap);
 
@@ -1497,7 +1541,6 @@ ArrayData* HphpArray::erase(int32_t* ei, bool updateNext) {
     // Compact in order to keep elms from being overly sparse.
     compact(false);
   }
-  return this;
 }
 
 ArrayData* HphpArray::RemoveIntPacked(ArrayData* ad, int64_t k, bool copy) {
@@ -1506,7 +1549,8 @@ ArrayData* HphpArray::RemoveIntPacked(ArrayData* ad, int64_t k, bool copy) {
   // todo t2606310: what is probability of (k == size-1)
   if (size_t(k) < a->m_size) {
     a->packedToMixed();
-    return a->erase(a->findForInsert(k), false);
+    auto pos = a->findForRemove(k, false);
+    if (validPos(pos)) a->erase(pos);
   }
   return a; // key didn't exist, so we're still vector
 }
@@ -1514,7 +1558,9 @@ ArrayData* HphpArray::RemoveIntPacked(ArrayData* ad, int64_t k, bool copy) {
 ArrayData* HphpArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
   auto a = asMixed(ad);
   if (copy) a = a->copyMixed();
-  return a->erase(a->findForInsert(k), false);
+  auto pos = a->findForRemove(k, false);
+  if (validPos(pos)) a->erase(pos);
+  return a;
 }
 
 ArrayData*
@@ -1528,7 +1574,9 @@ ArrayData*
 HphpArray::RemoveStr(ArrayData* ad, const StringData* key, bool copy) {
   auto a = asMixed(ad);
   if (copy) a = a->copyMixed();
-  return a->erase(a->findForInsert(key, key->hash()), false);
+  auto pos = a->findForRemove(key, key->hash());
+  if (validPos(pos)) a->erase(pos);
+  return a;
 }
 
 ArrayData* HphpArray::CopyPacked(const ArrayData* ad) {
@@ -1765,9 +1813,10 @@ ArrayData* HphpArray::Pop(ArrayData* ad, Variant& value) {
     auto& e = elms[pos];
     assert(!isTombstone(e.data.m_type));
     value = tvAsCVarRef(&e.data);
-    auto ei = e.hasStrKey() ? a->findForInsert(e.key, e.hash()) :
-              a->findForInsert(e.ikey);
-    a->erase(ei, true);
+    auto pos2 = e.hasStrKey() ? a->findForRemove(e.key, e.hash()) :
+                a->findForRemove(e.ikey, true);
+    assert(pos2 == pos);
+    a->erase(pos2);
   } else {
     value = uninit_null();
   }
@@ -1809,9 +1858,10 @@ ArrayData* HphpArray::Dequeue(ArrayData* ad, Variant& value) {
   if (validPos(pos)) {
     auto& e = elms[pos];
     value = tvAsCVarRef(&e.data);
-    auto ei = e.hasStrKey() ? a->findForInsert(e.key, e.hash()) :
-              a->findForInsert(e.ikey);
-    a->erase(ei, false);
+    auto pos2 = e.hasStrKey() ? a->findForRemove(e.key, e.hash()) :
+                a->findForRemove(e.ikey, false);
+    assert(pos2 == pos);
+    a->erase(pos2);
     a->compact(true);
   } else {
     value = uninit_null();

@@ -755,7 +755,6 @@ inline bool isTypePred(const Op op) {
   return op >= OpIsNullC && op <= OpIsObjectL;
 }
 int instrLen(const Op* opcode);
-InstrFlags instrFlags(Op opcode);
 int numSuccs(const Op* opcode);
 bool pushesActRec(Op opcode);
 
@@ -819,10 +818,23 @@ struct StackTransInfo {
   int pos;
 };
 
-bool instrIsControlFlow(Op opcode);
 bool instrIsNonCallControlFlow(Op opcode);
 bool instrAllowsFallThru(Op opcode);
 bool instrReadsCurrentFpi(Op opcode);
+
+constexpr InstrFlags instrFlagsData[] = {
+#define O(unusedName, unusedImm, unusedPop, unusedPush, flags) flags,
+  OPCODES
+#undef O
+};
+
+constexpr inline InstrFlags instrFlags(Op opcode) {
+  return instrFlagsData[uint8_t(opcode)];
+}
+
+constexpr inline bool instrIsControlFlow(Op opcode) {
+  return (instrFlags(opcode) & CF) != 0;
+}
 
 inline bool isFPush(Op opcode) {
   return opcode >= OpFPushFunc && opcode <= OpFPushCufSafe;

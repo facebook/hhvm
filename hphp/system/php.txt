@@ -56,6 +56,7 @@ hphp/system/php/redis/RedisException.php
 hphp/system/php/phar/PharException.php
 hphp/system/php/phar/Phar.php
 hphp/system/php/phar/PharFileInfo.php
+hphp/system/php/phar/PharData.php
 
 # If you have no inheritance relationship, go here in alphabetical order
 hphp/system/php/XhprofFrame.php

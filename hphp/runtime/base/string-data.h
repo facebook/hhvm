@@ -63,9 +63,6 @@ enum AttachStringMode { AttachString };
 // itself was smart-allocated.
 enum CopyStringMode { CopyString };
 
-// reserve space for buffer that will be filled in by client.
-enum ReserveStringMode { ReserveString };
-
 /*
  * Runtime representation of PHP strings.
  *
@@ -123,8 +120,8 @@ struct StringData {
    * These do the same thing as the above CopyStringMode constructors,
    * except that it will also free `data'.
    */
-  static StringData* Make(const char* data, AttachStringMode);
-  static StringData* Make(const char* data, int len, AttachStringMode);
+  static StringData* Make(char* data, AttachStringMode);
+  static StringData* Make(char* data, int len, AttachStringMode);
 
   /*
    * Create a new request-local string by concatenating two existing
@@ -166,6 +163,35 @@ struct StringData {
   static StringData* MakeMalloced(const char* data, int len);
 
   /*
+   * Offset accessor for the JIT compiler.
+   */
+  static std::ptrdiff_t sizeOffset() { return offsetof(StringData, m_len); }
+
+  /*
+   * Shared StringData's have a sweep list running through them for
+   * decrefing the SharedVariant they are fronting.  This function
+   * must be called at request cleanup time to handle this.
+   */
+  static void sweepAll();
+
+  /*
+   * Access to static strings.  TODO(#2872838): move this to another
+   * module.
+   */
+  static StringData* GetStaticString(const StringData* str);
+  static StringData* GetStaticString(StringSlice);
+  static StringData* GetStaticString(const std::string& str);
+  static StringData* GetStaticString(const String& str);
+  static StringData* GetStaticString(const char* str, size_t len);
+  static StringData* GetStaticString(const char* str);
+  static StringData* GetStaticString(char c);
+  static StringData* LookupStaticString(const StringData* str);
+  static size_t GetStaticStringCount();
+  static uint32_t GetCnsHandle(const StringData* cnsName);
+  static uint32_t DefCnsHandle(const StringData* cnsName, bool persistent);
+  static Array GetConstants();
+
+  /*
    * Called to return a StringData to the smart allocator.  This is
    * normally called when the reference count goes to zero (e.g. with
    * a helper like decRefStr).
@@ -179,20 +205,17 @@ struct StringData {
   void destruct();
 
   /*
-   * Reference counting related.
+   * Reference-counting related.
    */
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
-  void setRefCount(RefCount n) { m_count = n;}
-  bool isStatic() const { return m_count == RefCountStaticValue; }
+  void setRefCount(RefCount n);
+  bool isStatic() const;
 
   /*
    * Get the wrapped SharedVariant, or return null if this string is
    * not shared.
    */
-  SharedVariant* getSharedVariant() const {
-    if (isShared()) return sharedPayload()->shared;
-    return nullptr;
-  }
+  SharedVariant* getSharedVariant() const;
 
   /*
    * Append the supplied range to this string.  If there is not
@@ -217,19 +240,6 @@ struct StringData {
   StringData* reserve(int maxLen);
 
   /*
-   * Returns a mutable slice with extents sized to the *buffer* this
-   * StringData wraps, not the string, minus space for an implicit
-   * null terminator.
-   *
-   * Note: please do not introduce new uses of this API that write
-   * nulls 1 byte past slice.len---we want to weed those out.
-   */
-  MutableSlice mutableSlice() {
-    assert(!isImmutable());
-    return MutableSlice(m_data, capacity() - 1);
-  }
-
-  /*
    * Returns a slice with extents sized to the *string* that this
    * StringData wraps.  This range does not include a null terminator.
    *
@@ -237,15 +247,23 @@ struct StringData {
    * include a null-terminator if possible.  (We would like to make
    * this unnecessary eventually.)
    */
-  StringSlice slice() const {
-    return StringSlice(m_data, m_len);
-  }
+  StringSlice slice() const;
+
+  /*
+   * Returns a mutable slice with extents sized to the *buffer* this
+   * StringData wraps, not the string, minus space for an implicit
+   * null terminator.
+   *
+   * Note: please do not introduce new uses of this API that write
+   * nulls 1 byte past slice.len---we want to weed those out.
+   */
+  MutableSlice bufferSlice();
 
   /*
    * If external users of this object want to modify it (e.g. through
-   * mutableSlice or mutableData()), they are responsible for either
-   * calling setSize() if the mutation changed the size of the
-   * string, or invalidateHash() if not.
+   * bufferSlice or mutableData()), they are responsible for either
+   * calling setSize() if the mutation changed the size of the string,
+   * or invalidateHash() if not.
    *
    * Pre: !isStatic && getCount() <= 1
    */
@@ -254,22 +272,37 @@ struct StringData {
 
   /*
    * StringData should not generally be allocated on the stack,
-   * because references to it could escape.
+   * because references to it could escape.  This function is for
+   * debugging: it asserts that the addres of this doesn't point into
+   * the C++ stack.
    */
-  void checkStack() {
-    assert(uintptr_t(this) - Util::s_stackLimit >= Util::s_stackSize);
-  }
+  void checkStack() const;
 
-  const char* data() const {
-    // TODO: t1800106: re-enable this assert
-    //assert(rawdata()[size()] == 0); // all strings must be null-terminated
-    return rawdata();
-  }
-  char* mutableData() const { return m_data; }
+  /*
+   * Access to the string's data as a character array.
+   *
+   * Please try to prefer slice() in new code, instead of assuming
+   * this is null terminated.
+   */
+  const char* data() const;
 
-  int size() const { return m_len; }
-  bool empty() const { return size() == 0; }
-  static uint sizeOffset() { return offsetof(StringData, m_len); }
+  /*
+   * Mutable version of data().
+   */
+  char* mutableData() const;
+
+  /*
+   * Accessor for the length of a string.
+   *
+   * Note: size() returns a signed int for historical reasons.  It is
+   * guaranteed to be greater than zero and less than MaxSize.
+   */
+  int size() const;
+
+  /*
+   * Returns: size() == 0
+   */
+  bool empty() const;
 
   /*
    * Return the capacity of this string's buffer, including the space
@@ -277,17 +310,47 @@ struct StringData {
    *
    * For shared strings, returns zero.
    */
-  uint32_t capacity() const { return m_cap; }
+  uint32_t capacity() const;
 
-  DataType isNumericWithVal(int64_t &lval, double &dval, int allow_errors) const;
+  /*
+   * Simultaneously query whether this string is numeric, and pull out
+   * the numeric value of the string (as either an int or a double).
+   *
+   * The allow_errors flag is a boolean that does something currently
+   * undocumented.
+   *
+   * Returns: KindOfNull, KindOfInt64 or KindOfDouble.  The int64_t or
+   * double out reference params are populated in the latter two cases
+   * with the numeric value of the string.  The KindOfNull case
+   * indicates the string is not numeric.
+   */
+  DataType isNumericWithVal(int64_t&, double&, int allowErrors) const;
+
+  /*
+   * Returns true if this string is numeric.
+   *
+   * In effect: isNumericWithVal(i, d, false) != KindOfNull
+   */
   bool isNumeric() const;
+
+  /*
+   * Returns whether this string is numeric and an integer.
+   *
+   * In effect: isNumericWithVal(i, d, false) == KindOfInt64
+   */
   bool isInteger() const;
-  bool isStrictlyInteger(int64_t &res) const {
-    if (isStatic() && m_hash < 0) return false;
-    StringSlice s = slice();
-    return is_strictly_integer(s.ptr, s.len, res);
-  }
-  bool isZero() const { return size() == 1 && rawdata()[0] == '0'; }
+
+  /*
+   * Returns true if this string is "strictly" an integer in the sense
+   * of is_strictly_integer from util/hash.h, and if so provides the
+   * integer value in res.
+   */
+  bool isStrictlyInteger(int64_t& res) const;
+
+  /*
+   * Returns whether this string contains a single character '0'.
+   */
+  bool isZero() const;
 
   /*
    * Change the character at offset `offset' to `c'.
@@ -323,9 +386,9 @@ struct StringData {
    * Type conversion functions.
    */
   bool toBoolean() const;
-  char toByte(int base = 10) const { return toInt64(base);}
-  short toInt16(int base = 10) const { return toInt64(base);}
-  int toInt32(int base = 10) const { return toInt64(base);}
+  char toByte(int base = 10) const { return toInt64(base); }
+  short toInt16(int base = 10) const { return toInt64(base); }
+  int toInt32(int base = 10) const { return toInt64(base); }
   int64_t toInt64(int base = 10) const;
   double toDouble() const;
   DataType toNumeric(int64_t& lval, double& dval) const;
@@ -334,62 +397,41 @@ struct StringData {
   /*
    * Returns: case insensitive hash value for this string.
    */
-  strhash_t hash() const {
-    strhash_t h = m_hash & STRHASH_MASK;
-    return h ? h : hashHelper();
-  }
+  strhash_t hash() const;
 
   /*
-   * Comparisons.
+   * Equality comparison, in the sense of php's string == operator.
+   * (I.e. numeric strings are compared numerically.)
    */
   bool equal(const StringData* s) const;
 
-  bool same(const StringData* s) const {
-    assert(s);
-    size_t len = m_len;
-    if (len != s->m_len) return false;
-    // The underlying buffer and its length are 32-bit aligned, ensured by
-    // StringData layout, smart_malloc, or malloc. So compare words.
-    assert(uintptr_t(rawdata()) % 4 == 0);
-    assert(uintptr_t(s->rawdata()) % 4 == 0);
-    return wordsame(rawdata(), s->rawdata(), len);
-  }
-
-  bool isame(const StringData *s) const {
-    assert(s);
-    if (m_len != s->m_len) return false;
-    return bstrcaseeq(rawdata(), s->rawdata(), m_len);
-  }
-
-  int compare(const StringData *v2) const;
+  /*
+   * Exact comparison, in the sense of php's string === operator.
+   * (Exact, case-sensitive comparison.)
+   */
+  bool same(const StringData* s) const;
 
   /*
-   * Shared StringData's have a sweep list running through them for
-   * decrefing the SharedVariant they are fronting.  This function
-   * must be called at request cleanup time to handle this.
+   * Case-insensitive exact string comparison.  (Numeric strings are
+   * not treated specially.)
    */
-  static void sweepAll();
+  bool isame(const StringData* s) const;
+
+  /*
+   * Implements comparison in the sense of php's operator < on
+   * strings.  (I.e. this compares numeric strings numerically, and
+   * other strings lexicographically.)
+   *
+   * Returns: a number less than zero if *this is less than *v2,
+   * greater than zero if *this is greater than *v2, or zero if
+   * this->equal(v2).
+   */
+  int compare(const StringData* v2) const;
 
   /*
    * Debug dumping of a StringData to stdout.
    */
   void dump() const;
-
-  static StringData* GetStaticString(const StringData* str);
-  static StringData* GetStaticString(StringSlice);
-  static StringData* GetStaticString(const std::string& str);
-  static StringData* GetStaticString(const String& str);
-  static StringData* GetStaticString(const char* str, size_t len);
-  static StringData* GetStaticString(const char* str);
-  static StringData* GetStaticString(char c);
-
-  /* check if a static string exists that is the same as str
-   * and if so, return it. Else, return nullptr. */
-  static StringData *LookupStaticString(const StringData* str);
-  static size_t GetStaticStringCount();
-  static uint32_t GetCnsHandle(const StringData* cnsName);
-  static uint32_t DefCnsHandle(const StringData* cnsName, bool persistent);
-  static Array GetConstants();
 
 private:
   struct SharedPayload {
@@ -407,14 +449,14 @@ private:
   ~StringData() = delete;
 
 private:
-  const void* voidPayload() const { return this + 1; }
-  void* voidPayload() { return this + 1; }
-  const SharedPayload* sharedPayload() const {
-    return static_cast<const SharedPayload*>(voidPayload());
-  }
-  SharedPayload* sharedPayload() {
-    return static_cast<SharedPayload*>(voidPayload());
-  }
+  const void* voidPayload() const;
+  void* voidPayload();
+  const SharedPayload* sharedPayload() const;
+  SharedPayload* sharedPayload();
+
+  bool isShared() const;
+  bool isFlat() const;
+  bool isImmutable() const;
 
   void releaseData();
   void releaseDataSlowPath();
@@ -423,19 +465,9 @@ private:
   void enlist();
   void delist();
   void incrementHelper();
-
   void destructLowMalloc() ATTRIBUTE_COLD;
-
   strhash_t hashHelper() const NEVER_INLINE;
-
   bool checkSane() const;
-  const char* rawdata() const { return m_data; }
-
-  bool isShared() const { return !m_cap; }
-  bool isImmutable() const { return isStatic() || isShared(); }
-  bool isFlat() const { return m_data == voidPayload(); }
-
-  // Only call preCompute() and setStatic() in a thread-neutral context!
   void preCompute() const;
   void setStatic() const;
 
@@ -461,35 +493,33 @@ private:
   };
 };
 
+//////////////////////////////////////////////////////////////////////
+
 /*
  * A reasonable length to reserve for small strings.  This is the
  * default reserve size for StringData::Make(), also.
  */
 const uint32_t SmallStringReserve = 64 - sizeof(StringData) - 1;
 
-ALWAYS_INLINE void decRefStr(StringData* s) {
-  if (s->decRefCount() == 0) s->release();
-}
+/*
+ * DecRef a string s, calling release if its reference count goes to
+ * zero.
+ *
+ * Pre: either s must have been allocated as a request-local string,
+ * or it must be a static string.  (I.e. it can not be created with
+ * MakeMalloced.)
+ */
+void decRefStr(StringData* s);
 
-struct string_data_hash {
-  size_t operator()(const StringData *s) const {
-    return s->hash();
-  }
-};
+//////////////////////////////////////////////////////////////////////
 
-struct string_data_same {
-  bool operator()(const StringData *s1, const StringData *s2) const {
-    assert(s1 && s2);
-    return s1->same(s2);
-  }
-};
-
-struct string_data_isame {
-  bool operator()(const StringData *s1, const StringData *s2) const {
-    assert(s1 && s2);
-    return s1->isame(s2);
-  }
-};
+/*
+ * Function objects the forward to the StringData member functions of
+ * the same name.
+ */
+struct string_data_hash;
+struct string_data_same;
+struct string_data_isame;
 
 //////////////////////////////////////////////////////////////////////
 

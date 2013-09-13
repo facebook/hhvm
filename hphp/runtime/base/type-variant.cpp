@@ -1289,7 +1289,7 @@ CVarRef Variant::SetImpl(Variant *self, T key, CVarRef v, bool isKey) {
       }
       uint32_t newlen = offset + 1;
       auto const sd = StringData::Make(newlen);
-      auto const mslice = sd->mutableSlice();
+      auto const mslice = sd->bufferSlice();
       memcpy(mslice.ptr, r.ptr, r.len);
       memset(mslice.ptr + r.len, ' ', newlen - r.len);
       mslice.ptr[offset] = ch;

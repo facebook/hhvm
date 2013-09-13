@@ -33,7 +33,7 @@ static void throwIntOOB(int64_t key, bool isVector = false) ATTRIBUTE_COLD
 void throwIntOOB(int64_t key, bool isVector /* = false */) {
   static const size_t reserveSize = 50;
   String msg(reserveSize, ReserveString);
-  char* buf = msg.mutableSlice().ptr;
+  char* buf = msg.bufferSlice().ptr;
   int sz = sprintf(buf, "Integer key %" PRId64 " is %s", key,
                    isVector ? "out of bounds" : "not defined");
   assert(sz <= reserveSize);

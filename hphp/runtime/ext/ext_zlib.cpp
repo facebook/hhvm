@@ -96,7 +96,7 @@ static Variant gzcompress(const char *data, int len, int level /* = -1 */) {
   }
   unsigned long l2 = len + (len / PHP_ZLIB_MODIFIER) + 15;
   String str(l2, ReserveString);
-  char *s2 = str.mutableSlice().ptr;
+  char *s2 = str.bufferSlice().ptr;
 
   int status;
   if (level >= 0) {
@@ -160,7 +160,7 @@ static Variant gzdeflate(const char *data, int len, int level /* = -1 */) {
   stream.avail_out = len + (len / PHP_ZLIB_MODIFIER) + 15 + 1; // room for \0
 
   String str(stream.avail_out, ReserveString);
-  char* s2 = str.mutableSlice().ptr;
+  char* s2 = str.bufferSlice().ptr;
 
   stream.next_out = (Bytef*)s2;
 
@@ -420,7 +420,7 @@ Variant f_qlzcompress(CStrRef data, int level /* = 1 */) {
   }
 
   String str(data.size() + 400, ReserveString);
-  char* compressed = str.mutableSlice().ptr;
+  char* compressed = str.bufferSlice().ptr;
   size_t size = 0;
 
   switch (level) {
@@ -475,7 +475,7 @@ Variant f_qlzuncompress(CStrRef data, int level /* = 1 */) {
   }
 
   String s = String(size, ReserveString);
-  char *decompressed = s.mutableSlice().ptr;
+  char *decompressed = s.bufferSlice().ptr;
   size_t dsize = 0;
 
   switch (level) {
@@ -529,7 +529,7 @@ Variant f_snuncompress(CStrRef data) {
 
   snappy::GetUncompressedLength(data.data(), data.size(), &dsize);
   String s = String(dsize, ReserveString);
-  char *uncompressed = s.mutableSlice().ptr;
+  char *uncompressed = s.bufferSlice().ptr;
 
   if (!snappy::RawUncompress(data.data(), data.size(), uncompressed)) {
     return false;
@@ -552,7 +552,7 @@ typedef struct nzlib_format_s {
 Variant f_nzcompress(CStrRef uncompressed) {
   size_t len = compressBound(uncompressed.size());
   String str(sizeof(nzlib_format_t) + len, ReserveString);
-  nzlib_format_t* format = (nzlib_format_t*)str.mutableSlice().ptr;
+  nzlib_format_t* format = (nzlib_format_t*)str.bufferSlice().ptr;
 
   format->magic = htonl(NZLIB_MAGIC);
   format->uncompressed_sz = htonl(uncompressed.size());
@@ -581,7 +581,7 @@ Variant f_nzuncompress(CStrRef compressed) {
   }
 
   String str(len, ReserveString);
-  char* uncompressed = str.mutableSlice().ptr;
+  char* uncompressed = str.bufferSlice().ptr;
   int rc = uncompress((Bytef*)uncompressed, &len, format->buf,
                       compressed.size() - sizeof(*format));
   if (rc != Z_OK) {
@@ -637,7 +637,7 @@ Variant f_lz4compress(CStrRef uncompressed) {
   int headerSize = VarintSize(uncompressed.size());
   bufsize += headerSize;  // for the header
   String s = String(bufsize, ReserveString);
-  char *compressed = s.mutableSlice().ptr;
+  char *compressed = s.bufferSlice().ptr;
 
   VarintEncode(uncompressed.size(), &compressed);  // write the header
 
@@ -659,7 +659,7 @@ Variant f_lz4hccompress(CStrRef uncompressed) {
   int headerSize = VarintSize(uncompressed.size());
   bufsize += headerSize;  // for the header
   String s = String(bufsize, ReserveString);
-  char *compressed = s.mutableSlice().ptr;
+  char *compressed = s.bufferSlice().ptr;
 
   VarintEncode(uncompressed.size(), &compressed);  // write the header
 
@@ -680,7 +680,7 @@ Variant f_lz4uncompress(CStrRef compressed) {
   }
 
   String s = String(dsize, ReserveString);
-  char *uncompressed = s.mutableSlice().ptr;
+  char *uncompressed = s.bufferSlice().ptr;
   int ret = LZ4_uncompress(compressed_ptr, uncompressed, dsize);
 
   if (ret <= 0) {

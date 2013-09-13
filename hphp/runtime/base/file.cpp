@@ -185,7 +185,7 @@ String File::read(int64_t length) {
   }
 
   String s = String(length, ReserveString);
-  char *ret = s.mutableSlice().ptr;
+  char *ret = s.bufferSlice().ptr;
   int64_t copied = 0;
   int64_t avail = m_writepos - m_readpos;
 
@@ -480,7 +480,7 @@ String File::readRecord(CStrRef delimiter, int64_t maxlen /* = 0 */) {
 
   if (toread >= 0) {
     String s = String(toread, ReserveString);
-    char *buf = s.mutableSlice().ptr;
+    char *buf = s.bufferSlice().ptr;
     if (toread) {
       memcpy(buf, m_buffer + m_readpos, toread);
     }

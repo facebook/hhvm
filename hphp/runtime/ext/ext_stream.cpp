@@ -181,7 +181,7 @@ Variant f_stream_get_contents(CResRef handle, int maxlen /* = -1 */,
   String ret;
   if (maxlen != -1) {
     ret = String(maxlen, ReserveString);
-    char *buf = ret.mutableSlice().ptr;
+    char *buf = ret.bufferSlice().ptr;
     maxlen = file->readImpl(buf, maxlen);
     if (maxlen < 0) {
       return false;

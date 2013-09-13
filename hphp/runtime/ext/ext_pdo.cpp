@@ -2510,7 +2510,7 @@ safe:
 rewrite:
     /* allocate output buffer */
     out = String(newbuffer_len, ReserveString);
-    newbuffer = out.mutableSlice().ptr;
+    newbuffer = out.bufferSlice().ptr;
     out.setSize(newbuffer_len);
 
     /* and build the query */

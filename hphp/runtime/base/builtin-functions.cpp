@@ -754,7 +754,7 @@ String concat3(CStrRef s1, CStrRef s2, CStrRef s3) {
   StringSlice r3 = s3.slice();
   int len = r1.len + r2.len + r3.len;
   StringData* str = StringData::Make(len);
-  MutableSlice r = str->mutableSlice();
+  auto const r = str->bufferSlice();
   memcpy(r.ptr,                   r1.ptr, r1.len);
   memcpy(r.ptr + r1.len,          r2.ptr, r2.len);
   memcpy(r.ptr + r1.len + r2.len, r3.ptr, r3.len);
@@ -769,7 +769,7 @@ String concat4(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4) {
   StringSlice r4 = s4.slice();
   int len = r1.len + r2.len + r3.len + r4.len;
   StringData* str = StringData::Make(len);
-  MutableSlice r = str->mutableSlice();
+  auto const r = str->bufferSlice();
   memcpy(r.ptr,                            r1.ptr, r1.len);
   memcpy(r.ptr + r1.len,                   r2.ptr, r2.len);
   memcpy(r.ptr + r1.len + r2.len,          r3.ptr, r3.len);

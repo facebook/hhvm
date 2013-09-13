@@ -298,6 +298,8 @@ Array StringData::GetConstants() {
   return a;
 }
 
+//////////////////////////////////////////////////////////////////////
+
 StringData* StringData::MakeLowMalloced(StringSlice sl) {
   if (UNLIKELY(sl.len > MaxSize)) {
     throw_string_too_large(sl.len);
@@ -503,13 +505,13 @@ StringData* StringData::append(StringSlice range) {
    * interior pointer, although we may be asked to append less than
    * the whole string in an aliasing situation.
    */
-  assert(uintptr_t(s) <= uintptr_t(rawdata()) ||
-         uintptr_t(s) >= uintptr_t(rawdata() + capacity()));
-  assert(s != rawdata() || len <= m_len);
+  assert(uintptr_t(s) <= uintptr_t(data()) ||
+         uintptr_t(s) >= uintptr_t(data() + capacity()));
+  assert(s != data() || len <= m_len);
 
   auto const target = UNLIKELY(isShared()) ? escalate(newLen)
                                            : reserve(newLen);
-  auto const mslice = target->mutableSlice();
+  auto const mslice = target->bufferSlice();
 
   /*
    * memcpy is safe even if it's a self append---the regions will be
@@ -763,7 +765,7 @@ bool StringData::toBoolean() const {
 }
 
 int64_t StringData::toInt64(int base /* = 10 */) const {
-  return strtoll(rawdata(), nullptr, base);
+  return strtoll(data(), nullptr, base);
 }
 
 double StringData::toDouble() const {
@@ -845,7 +847,7 @@ int StringData::compare(const StringData *v2) const {
     int len1 = size();
     int len2 = v2->size();
     int len = len1 < len2 ? len1 : len2;
-    ret = memcmp(rawdata(), v2->rawdata(), len);
+    ret = memcmp(data(), v2->data(), len);
     if (ret) return ret;
     if (len1 == len2) return 0;
     return len < len1 ? 1 : -1;

@@ -924,7 +924,7 @@ class CompactReader {
 
       if (size && (size + 1)) {
         String s = String(size, ReserveString);
-        char* buf = s.mutableSlice().ptr;
+        char* buf = s.bufferSlice().ptr;
 
         transport.readBytes(buf, size);
         return s.setSize(size);

@@ -377,7 +377,7 @@ bool FileRepository::readActualFile(const StringData *name,
   int fd = open(name->data(), O_RDONLY);
   if (!fd) return false; // ignore file open exception
   String str = String(fileSize, ReserveString);
-  char *input = str.mutableSlice().ptr;
+  char *input = str.bufferSlice().ptr;
   if (!input) return false;
   int nbytes = read(fd, input, fileSize);
   close(fd);

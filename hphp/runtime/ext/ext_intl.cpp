@@ -742,7 +742,7 @@ static Variant php_intl_idn_to_46(CStrRef domain, int64_t options, IdnVariant id
   status = U_ZERO_ERROR;
   converted_capacity = 255; // no domain name may exceed this
   String result(converted_capacity, ReserveString); // reserves converted_capacity+1 characters.
-  converted = result.mutableSlice().ptr;
+  converted = result.bufferSlice().ptr;
   if (mode == INTL_IDN_TO_ASCII) {
     converted_len = uidna_nameToASCII_UTF8(uts46, (char*)domain.data(), domain.size(),
       converted, converted_capacity, &info, &status);

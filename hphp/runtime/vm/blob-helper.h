@@ -300,7 +300,7 @@ private:
     if (sz == uint32_t(-1)) return String();
 
     String s = String(sz, ReserveString);
-    char* pch = s.mutableSlice().ptr;
+    char* pch = s.bufferSlice().ptr;
     assert(m_last - m_p >= sz);
     std::copy(m_p, m_p + sz, pch);
     m_p += sz;

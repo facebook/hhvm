@@ -27,8 +27,8 @@
 #include "hphp/runtime/base/ini-setting.h"
 
 extern "C" {
-#include "mbfl/mbfl_convert.h"
-#include "mbfl/mbfilter.h"
+#include <mbfl/mbfl_convert.h>
+#include <mbfl/mbfilter.h>
 #include <oniguruma.h>
 }
 
@@ -1268,7 +1268,7 @@ Variant f_mb_convert_kana(CStrRef str, CStrRef option /* = null_string */,
 
   ret = mbfl_ja_jp_hantozen(&string, &result, opt);
   if (ret != NULL) {
-    return String((const char*)ret->val, ret->len, AttachString);
+    return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
 }
@@ -1325,7 +1325,7 @@ static Variant php_mbfl_convert(CVarRef var,
     string->len = svar.size();
     mbfl_string *ret =
       mbfl_buffer_converter_feed_result(convd, string, result);
-    return String((const char*)ret->val, ret->len, AttachString);
+    return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
 
   return var;
@@ -1434,7 +1434,7 @@ Variant f_mb_decode_mimeheader(CStrRef str) {
   ret = mbfl_mime_header_decode(&string, &result,
                                 MBSTRG(current_internal_encoding));
   if (ret != NULL) {
-    return String((const char*)ret->val, ret->len, AttachString);
+    return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
 }
@@ -1483,7 +1483,7 @@ static Variant php_mb_numericentity_exec(CStrRef str, CVarRef convmap,
   ret = mbfl_html_numeric_entity(&string, &result, iconvmap, mapsize, type);
   free(iconvmap);
   if (ret != NULL) {
-    return String((const char*)ret->val, ret->len, AttachString);
+    return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
 }
@@ -1609,7 +1609,7 @@ Variant f_mb_encode_mimeheader(CStrRef str, CStrRef charset /* = null_string */,
   ret = mbfl_mime_header_encode(&string, &result, charsetenc, transenc,
                                 linefeed.data(), indent);
   if (ret != NULL) {
-    return String((const char*)ret->val, ret->len, AttachString);
+    return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
 }
@@ -1969,7 +1969,7 @@ String f_mb_output_handler(CStrRef contents, int status) {
     MBSTRG(outconv) = NULL;
   }
 
-  return String((const char *)result.val, result.len, AttachString);
+  return String(reinterpret_cast<char*>(result.val), result.len, AttachString);
 }
 
 typedef struct _php_mb_encoding_handler_info_t {
@@ -2244,7 +2244,7 @@ static Variant php_mb_substr(CStrRef str, int from, int len,
     ret = mbfl_strcut(&string, &result, from, len);
   }
   if (ret != NULL) {
-    return String((const char*)ret->val, ret->len, AttachString);
+    return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
 }
@@ -2300,7 +2300,7 @@ Variant f_mb_strimwidth(CStrRef str, int start, int width,
 
   ret = mbfl_strimwidth(&string, &marker, &result, start, width);
   if (ret != NULL) {
-    return String((const char *)ret->val, ret->len, AttachString);
+    return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
 }
@@ -2397,7 +2397,7 @@ Variant f_mb_stristr(CStrRef haystack, CStrRef needle, bool part /* = false */,
   }
 
   if (ret != NULL) {
-    return String((const char*)ret->val, ret->len, AttachString);
+    return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
 }
@@ -2602,7 +2602,7 @@ Variant f_mb_strrchr(CStrRef haystack, CStrRef needle, bool part /* = false */,
   }
 
   if (ret != NULL) {
-    return String((const char*)ret->val, ret->len, AttachString);
+    return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
 }
@@ -2654,7 +2654,7 @@ Variant f_mb_strrichr(CStrRef haystack, CStrRef needle, bool part /* = false */,
   }
 
   if (ret != NULL) {
-    return String((const char*)ret->val, ret->len, AttachString);
+    return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
 }
@@ -2702,7 +2702,7 @@ Variant f_mb_strstr(CStrRef haystack, CStrRef needle, bool part /* = false */,
   }
 
   if (ret != NULL) {
-    return String((const char*)ret->val, ret->len, AttachString);
+    return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
 }
@@ -4068,7 +4068,8 @@ bool f_mb_send_mail(CStrRef to, CStrRef subject, CStrRef message,
       (&orig_str, &conv_str, tran_cs, head_enc,
        "\n", sizeof("Subject: [PHP-jp nnnnnnnn]"));
     if (pstr != NULL) {
-      encoded_subject = String((const char *)pstr->val, pstr->len,
+      encoded_subject = String(reinterpret_cast<char*>(pstr->val),
+                               pstr->len,
                                AttachString);
     }
   } else {
@@ -4101,7 +4102,8 @@ bool f_mb_send_mail(CStrRef to, CStrRef subject, CStrRef message,
       }
     }
     if (pstr != NULL) {
-      encoded_message = String((const char *)pstr->val, pstr->len,
+      encoded_message = String(reinterpret_cast<char*>(pstr->val),
+                               pstr->len,
                                AttachString);
     }
   } else {

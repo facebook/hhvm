@@ -561,8 +561,8 @@ std::string Util::canonicalize(const std::string &path) {
  * limitations under the License.
  */
 
-const char *Util::canonicalize(const char *addpath, size_t addlen,
-                               bool collapse_slashes /* = true */) {
+char* Util::canonicalize(const char *addpath, size_t addlen,
+                         bool collapse_slashes /* = true */) {
   assert(strlen(addpath) == addlen);
   // 4 for slashes at start, after root, and at end, plus trailing
   // null

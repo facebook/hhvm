@@ -493,7 +493,7 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
 
     subarray.set(s_type, s_TXT);
     String s = String(dlen, ReserveString);
-    tp = (unsigned char *)s.mutableSlice().ptr;
+    tp = (unsigned char *)s.bufferSlice().ptr;
 
     while (ll < dlen) {
       n = cp[ll];

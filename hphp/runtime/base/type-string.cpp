@@ -569,7 +569,7 @@ void String::unserialize(VariableUnserializer *uns,
     throw Exception("Expected '%c' but got '%c'", delimiter0, ch);
   }
   StringData *px = StringData::Make(int(size));
-  MutableSlice buf = px->mutableSlice();
+  auto const buf = px->bufferSlice();
   assert(size <= buf.len);
   uns->read(buf.ptr, size);
   px->setSize(size);

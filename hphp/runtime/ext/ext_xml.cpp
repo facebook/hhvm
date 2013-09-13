@@ -883,7 +883,7 @@ String f_xml_error_string(int code) {
 
 String f_utf8_decode(CStrRef data) {
   String str = String(data.size(), ReserveString);
-  char *newbuf = str.mutableSlice().ptr;
+  char *newbuf = str.bufferSlice().ptr;
   int newlen = 0;
   const char *s = data.data();
   for (int pos = data.size(); pos > 0; ) {
@@ -924,7 +924,7 @@ String f_utf8_decode(CStrRef data) {
 
 String f_utf8_encode(CStrRef data) {
   String str = String(data.size() * 4, ReserveString);
-  char *newbuf = str.mutableSlice().ptr;
+  char *newbuf = str.bufferSlice().ptr;
   int newlen = 0;
   const char *s = data.data();
   for (int pos = data.size(); pos > 0; pos--, s++) {

@@ -610,7 +610,7 @@ public:
     }
 
     String s = String(m_st_size, ReserveString);
-    char *val = s.mutableSlice().ptr;
+    char *val = s.bufferSlice().ptr;
 
 #if defined(HAVE_PREAD)
     long n = pread(m_fd, val, m_st_size, 0);

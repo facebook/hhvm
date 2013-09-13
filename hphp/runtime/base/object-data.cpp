@@ -1415,27 +1415,33 @@ Variant ObjectData::invokeWakeup() {
 
 String ObjectData::invokeToString() {
   const Func* method = m_cls->getToString();
-  if (method) {
-    TypedValue tv;
-    g_vmContext->invokeFuncFew(&tv, method, this);
-    if (!IS_STRING_TYPE(tv.m_type)) {
-      void (*notify_user)(const char*, ...) = &raise_error;
-      if (hphpiCompat) {
-        tvCastToStringInPlace(&tv);
-        notify_user = &raise_warning;
-      }
-      notify_user("Method %s::__toString() must return a string value",
-                  m_cls->preClass()->name()->data());
-    }
-    return tv.m_data.pstr;
+  if (!method) {
+    // If the object does not define a __toString() method, raise a
+    // recoverable error
+    raise_recoverable_error(
+      "Object of class %s could not be converted to string",
+      m_cls->preClass()->name()->data()
+    );
+    // If the user error handler decides to allow execution to continue,
+    // we return the empty string.
+    return empty_string;
   }
-  raise_recoverable_error(
-    "Object of class %s could not be converted to string",
-    m_cls->preClass()->name()->data()
-  );
-  // If the user error handler decides to allow execution to continue,
-  // we return the empty string.
-  return empty_string;
+  TypedValue tv;
+  g_vmContext->invokeFuncFew(&tv, method, this);
+  if (!IS_STRING_TYPE(tv.m_type)) {
+    // Discard the value returned by the __toString() method and raise
+    // a recoverable error
+    tvRefcountedDecRef(tv);
+    raise_recoverable_error(
+      "Method %s::__toString() must return a string value",
+      m_cls->preClass()->name()->data());
+    // If the user error handler decides to allow execution to continue,
+    // we return the empty string.
+    return empty_string;
+  }
+  String ret = tv.m_data.pstr;
+  decRefStr(tv.m_data.pstr);
+  return ret;
 }
 
 bool ObjectData::hasToString() {

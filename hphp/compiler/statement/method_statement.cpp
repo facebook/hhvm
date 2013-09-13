@@ -419,7 +419,7 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
           funcScope->setOverriding(Type::Variant, Type::Variant);
           paramCount = 1;
         } else if (m_name == "__tostring") {
-          funcScope->setOverriding(Type::String);
+          // do nothing
         } else if (m_name == "__clone") {
           funcScope->setOverriding(Type::Variant);
         } else {

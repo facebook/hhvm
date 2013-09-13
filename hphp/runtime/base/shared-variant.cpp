@@ -201,6 +201,7 @@ StringData* StringData::Make(SharedVariant* shared) {
 
   auto const psrc       = shared->stringData();
   auto const hash       = shared->rawStringData()->m_hash & STRHASH_MASK;
+  assert(hash != 0);
 
   auto const needed = static_cast<uint32_t>(sizeof(StringData) + len + 1);
   auto const cap    = MemoryManager::smartSizeClass(needed);
@@ -210,7 +211,7 @@ StringData* StringData::Make(SharedVariant* shared) {
   auto const capAndHash = static_cast<uint64_t>(hash) << 32 |
     (cap - sizeof(StringData));
 
-  sd->m_data = pdst;
+  sd->m_data        = pdst;
   sd->m_lenAndCount = len;
   sd->m_capAndHash  = capAndHash;
 

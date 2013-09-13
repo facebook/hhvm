@@ -189,7 +189,7 @@ StringData* StringData::MakeMalloced(const char* data, int len) {
   );
 
   sd->m_lenAndCount = len;
-  sd->m_capAndHash  = cap;
+  sd->m_cap         = cap;
   sd->m_data        = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data[len] = 0;
@@ -197,8 +197,10 @@ StringData* StringData::MakeMalloced(const char* data, int len) {
   auto const ret   = reinterpret_cast<StringData*>(mcret) - 1;
   // Recalculating ret from mcret avoids a spill.
 
+  ret->preCompute();
+
   assert(ret == sd);
-  assert(ret->m_hash == 0);
+  assert(ret->m_hash != 0);
   assert(ret->m_count == 0);
   assert(ret->isFlat());
   assert(ret->checkSane());
@@ -473,7 +475,6 @@ void StringData::incrementHelper() {
 }
 
 void StringData::preCompute() const {
-  assert(!isShared()); // because we are gonna reuse the space!
   StringSlice s = slice();
   m_hash = hash_string(s.ptr, s.len);
   assert(m_hash >= 0);
@@ -632,8 +633,8 @@ int StringData::compare(const StringData *v2) const {
 
 HOT_FUNC
 strhash_t StringData::hashHelper() const {
-  strhash_t h = isShared() ? sharedPayload()->shared->stringHash()
-                           : hash_string_inline(m_data, m_len);
+  assert(!isShared());
+  strhash_t h = hash_string_inline(m_data, m_len);
   assert(h >= 0);
   m_hash |= h;
   return h;

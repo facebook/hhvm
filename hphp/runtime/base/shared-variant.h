@@ -105,11 +105,6 @@ public:
     return m_data.str;
   }
 
-  strhash_t stringHash() const {
-    assert(is(KindOfString) || is(KindOfStaticString));
-    return m_data.str->hash(); // XXX technically a data race
-  }
-
   size_t arrSize() const {
     assert(is(KindOfArray));
     if (isPacked()) return m_data.packed->size();

@@ -36,8 +36,6 @@ IMPLEMENT_DEFAULT_EXTENSION(exif);
 IMPLEMENT_DEFAULT_EXTENSION(gd);
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString Image::s_class_name("gd");
-
 #define HAS_GDIMAGESETANTIALIASED
 
 #if defined(HAS_GDIMAGEANTIALIAS)
@@ -65,8 +63,12 @@ StaticString Image::s_class_name("gd");
 Image::~Image() {
   if (m_gdImage) {
     gdImageDestroy(m_gdImage);
-    m_gdImage = NULL;
   }
+}
+
+void Image::sweep() {
+  // Base class version calls delete this
+  SweepableResourceData::sweep();
 }
 
 class ImageMemoryAlloc: public RequestEventHandler {

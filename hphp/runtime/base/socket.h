@@ -38,15 +38,20 @@ class Socket : public File {
 public:
   // We cannot use object allocation for this class, because
   // we need to support pfsockopen() that can make a socket persistent.
+  void* operator new(size_t s) {
+    return ::operator new(s);
+  }
+  void operator delete(void* p) {
+    return ::operator delete(p);
+  }
 
   Socket();
   Socket(int sockfd, int type, const char *address = nullptr, int port = 0,
          double timeout = 0);
   virtual ~Socket();
 
-  static StaticString s_class_name;
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return s_class_name; }
+  CStrRef o_getClassNameHook() const { return classnameof(); }
 
   // implementing File
   virtual bool open(CStrRef filename, CStrRef mode);
@@ -56,6 +61,7 @@ public:
   virtual bool eof();
   virtual Array getMetaData();
   virtual int64_t tell();
+  virtual void sweep() FOLLY_OVERRIDE;
 
   // check if the socket is still open
   virtual bool checkLiveness();

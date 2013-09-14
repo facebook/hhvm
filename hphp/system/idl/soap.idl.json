@@ -56,6 +56,7 @@
             "name": "SoapServer",
             "desc": null,
             "flags": [
+                "NoDefaultSweep"
             ],
             "footer": "\n  public: int                        m_type;\n  public: soapFunctions              m_soap_functions;\n  public: soapClass                  m_soap_class;\n  public: Object                     m_soap_object;\n  public: String                     m_actor;\n  public: String                     m_uri;\n  public: int                        m_version;\n  public: sdl                       *m_sdl;\n  public: xmlCharEncodingHandlerPtr  m_encoding;\n  public: Array                      m_classmap;\n  public: encodeMap                 *m_typemap;\n  public: int                        m_features;\n  public: Array                      m_soap_headers;\n  public: int                        m_send_errors;",
             "funcs": [
@@ -242,6 +243,7 @@
             "name": "SoapClient",
             "desc": null,
             "flags": [
+                "NoDefaultSweep"
             ],
             "footer": "\n  public: int                         m_soap_version;\n  public: sdl                        *m_sdl;\n  public: xmlCharEncodingHandlerPtr   m_encoding;\n  public: encodeMap                  *m_typemap;\n  public: Array                       m_classmap;\n  public: int                         m_features;\n  public: String                      m_uri;\n  public: String                      m_location;\n  public: int                         m_style;\n  public: int                         m_use;\n  public: String                      m_login;\n  public: String                      m_password;\n  public: int                         m_authentication;\n  public: bool                        m_digest;\n  public: String                      m_proxy_host;\n  public: int                         m_proxy_port;\n  public: String                      m_proxy_login;\n  public: String                      m_proxy_password;\n  public: int                         m_connection_timeout;\n  public: int                         m_max_redirect;\n  public: bool                        m_use11;\n  public: String                      m_user_agent;\n  public: bool                        m_compression;\n  public: Variant                     m_default_headers;\n  public: Variant                     m_cookies;\n  public: bool                        m_exceptions;\n  public: Variant                     m_soap_fault;\n  public: bool                        m_trace;\n  public: Variant                     m_last_request;\n  public: Variant                     m_last_response;\n  public: Variant                     m_last_request_headers;\n  public: Variant                     m_last_response_headers;\n",
             "funcs": [
@@ -464,6 +466,7 @@
             "name": "SoapVar",
             "desc": "A class representing a variable or object for use with SOAP services.",
             "flags": [
+                "NoDefaultSweep"
             ],
             "footer": "\n  public: Variant m_value;\n  public: int64_t m_type;\n  public: String  m_stype;\n  public: String  m_ns;\n  public: String  m_name;\n  public: String  m_namens;",
             "funcs": [
@@ -513,6 +516,7 @@
             "name": "SoapParam",
             "desc": "Represents parameter to a SOAP call.",
             "flags": [
+                "NoDefaultSweep"
             ],
             "footer": "\n  public: String  m_name;\n  public: String  m_data;",
             "funcs": [
@@ -542,6 +546,7 @@
             "name": "SoapHeader",
             "desc": "Represents a SOAP header.",
             "flags": [
+                "NoDefaultSweep"
             ],
             "footer": "\n  public: String  m_namespace;\n  public: String  m_name;\n  public: Variant m_data;\n  public: bool    m_mustUnderstand;\n  public: Variant m_actor;",
             "funcs": [

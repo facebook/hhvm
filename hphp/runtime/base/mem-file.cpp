@@ -24,11 +24,6 @@
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(MemFile)
-///////////////////////////////////////////////////////////////////////////////
-
-StaticString MemFile::s_class_name("MemFile");
-
 ///////////////////////////////////////////////////////////////////////////////
 
 MemFile::MemFile()
@@ -48,6 +43,11 @@ MemFile::MemFile(const char *data, int64_t len)
 
 MemFile::~MemFile() {
   closeImpl();
+}
+
+void MemFile::sweep() {
+  closeImpl();
+  File::sweep();
 }
 
 bool MemFile::open(CStrRef filename, CStrRef mode) {

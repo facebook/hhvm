@@ -226,9 +226,9 @@ public:
   DateTime();
   explicit DateTime(int64_t timestamp, bool utc = false); // from a timestamp
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("DateTime");
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return s_class_name; }
+  CStrRef o_getClassNameHook() const { return classnameof(); }
 
   // informational
   bool local() const { return m_time->is_localtime;}

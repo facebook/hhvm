@@ -1886,7 +1886,7 @@ void Variant::unserialize(VariableUnserializer *uns,
           obj->o_set(s_PHP_Unserializable_Class_Name, clsName);
         } else {
           obj = ObjectData::newInstance(cls);
-          if (UNLIKELY(cls == c_Pair::s_cls && size != 2)) {
+          if (UNLIKELY(cls == c_Pair::classof() && size != 2)) {
             throw Exception("Pair objects must have exactly 2 elements");
           }
         }

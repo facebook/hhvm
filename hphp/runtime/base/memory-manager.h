@@ -384,6 +384,14 @@ struct MemoryManager : boost::noncopyable {
   // allocate nbytes from the current slab, aligned to 16-bytes
   void* slabAlloc(size_t nbytes);
 
+  /**
+    Returns true iff a sweep is in progress.
+  */
+  static bool sweeping() {
+    return !TlsWrapper::isNull() &&
+      MemoryManager::TheMemoryManager()->m_sweeping;
+  }
+
 private:
   friend void* smart_malloc(size_t nbytes);
   friend void* smart_calloc(size_t count, size_t bytes);
@@ -468,6 +476,9 @@ public:
   static bool s_statsEnabled;
   static size_t s_cactiveLimitCeiling;
 #endif
+
+private:
+  bool m_sweeping;
 
   friend class StringData; // for enlist/delist access to m_strings
 };

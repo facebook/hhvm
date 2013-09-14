@@ -38,9 +38,9 @@ class XmlDocWrapper : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(XmlDocWrapper)
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("xmlDoc");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   XmlDocWrapper(xmlDocPtr doc, CStrRef cls, Object domNode = nullptr)
     : m_doc(doc), m_cls(cls), m_domNode(domNode) {
@@ -52,7 +52,7 @@ public:
 
   CStrRef getClass() { return m_cls; }
 
-  void sweep() {
+  void sweep() FOLLY_OVERRIDE {
     // if m_domNode isn't null, then he owns the m_doc. Otherwise, I own it
     if (m_doc && m_domNode.isNull()) {
       xmlFreeDoc(m_doc);
@@ -65,8 +65,6 @@ private:
   // Hold onto the original owner of the doc so it doesn't get free()d.
   Object m_domNode;
 };
-
-StaticString XmlDocWrapper::s_class_name("xmlDoc");
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
@@ -308,7 +306,7 @@ Variant f_simplexml_load_string(CStrRef data,
       throw_invalid_argument("class not found: %s", class_name.data());
       return uninit_null();
     }
-    if (!cls->classof(c_SimpleXMLElement::s_cls)) {
+    if (!cls->classof(c_SimpleXMLElement::classof())) {
       throw_invalid_argument(
         "simplexml_load_string() expects parameter 2 to be a class name "
         "derived from SimpleXMLElement, '%s' given",
@@ -316,7 +314,7 @@ Variant f_simplexml_load_string(CStrRef data,
       return uninit_null();
     }
   } else {
-    cls = c_SimpleXMLElement::s_cls;
+    cls = c_SimpleXMLElement::classof();
   }
 
   xmlDocPtr doc = xmlReadMemory(data.data(), data.size(),

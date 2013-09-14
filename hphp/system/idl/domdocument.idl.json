@@ -1460,6 +1460,7 @@
             "name": "DOMNode",
             "desc": "",
             "flags": [
+                     "NoDefaultSweep"
             ],
             "footer": "\npublic:\n  virtual ObjectData *clone();\n  virtual p_DOMDocument doc() { return m_doc;}\n  p_DOMDocument m_doc;\n  xmlNodePtr m_node;",
             "funcs": [
@@ -1837,6 +1838,7 @@
             "parent": "DOMNode",
             "desc": "DOMAttr represents an attribute in the DOMElement object.",
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -1925,6 +1927,7 @@
             "parent": "DOMNode",
             "desc": "Represents nodes with character data. No nodes directly correspond to this class, but other nodes do inherit from it.",
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -2102,6 +2105,7 @@
             "parent": "DOMCharacterData",
             "desc": "Represents comment nodes, characters delimited by <!-- and -->.",
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -2128,6 +2132,7 @@
             "parent": "DOMCharacterData",
             "desc": "The DOMText class inherits from DOMCharacterData and represents the textual content of a DOMElement or DOMAttr.",
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -2229,6 +2234,7 @@
             "parent": "DOMText",
             "desc": "",
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -2896,6 +2902,7 @@
             "parent": "DOMNode",
             "desc": "",
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -2934,6 +2941,7 @@
             "parent": "DOMNode",
             "desc": "Each DOMDocument has a doctype attribute whose value is either NULL or a DOMDocumentType object.",
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -3001,6 +3009,7 @@
             "parent": "DOMNode",
             "desc": "",
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -3448,6 +3457,7 @@
             "parent": "DOMNode",
             "desc": "This interface represents a known entity, either parsed or unparsed, in an XML document.",
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -3515,6 +3525,7 @@
             "parent": "DOMNode",
             "desc": "",
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -3540,6 +3551,7 @@
             "parent": "DOMNode",
             "desc": "",
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -3607,6 +3619,7 @@
             "parent": "DOMNode",
             "desc": "",
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -3766,6 +3779,7 @@
             ],
             "desc": "",
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -3904,6 +3918,7 @@
             ],
             "desc": "",
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -3997,6 +4012,7 @@
             "name": "DOMImplementation",
             "desc": "The DOMImplementation interface provides a number of methods for performing operations that are independent of any particular instance of the document object model.",
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {

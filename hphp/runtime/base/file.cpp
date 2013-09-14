@@ -40,7 +40,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
-StaticString File::s_class_name("File");
 StaticString File::s_resource_name("stream");
 
 IMPLEMENT_REQUEST_LOCAL(FileData, s_file_data);
@@ -153,11 +152,20 @@ File::~File() {
   closeImpl();
 }
 
+void File::sweep() {
+  // Clear non-smart state without deleting `this`. Therefore assumes
+  // `this` has been smart allocated. Note that the derived class'
+  // sweep() is responsible for closing m_fd and any other non-smart
+  // resources it might have allocated.
+  assert(!valid());
+  free(m_buffer);
+  m_name.~string();
+  m_mode.~string();
+}
+
 void File::closeImpl() {
-  if (m_buffer) {
-    free(m_buffer);
-    m_buffer = nullptr;
-  }
+  free(m_buffer);
+  m_buffer = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

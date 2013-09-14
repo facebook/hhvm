@@ -61,9 +61,12 @@ public:
   explicit TimeZone(CStrRef name);
   explicit TimeZone(timelib_tzinfo *tzi);
 
-  static StaticString s_class_name;
+  static StaticString& classnameof() {
+    static StaticString result("TimeZone");
+    return result;
+  }
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return s_class_name; }
+  CStrRef o_getClassNameHook() const { return classnameof(); }
 
   /**
    * Whether this represents a valid timezone.

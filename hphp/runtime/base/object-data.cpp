@@ -117,19 +117,19 @@ bool ObjectData::o_instanceof(CStrRef s) const {
 bool ObjectData::o_toBooleanImpl() const noexcept {
   // SimpleXMLElement is the only class that has custom bool casting. If others
   // are added in future, just turn this assert into an if and add cases.
-  assert(instanceof(c_SimpleXMLElement::s_cls));
+  assert(instanceof(c_SimpleXMLElement::classof()));
   return c_SimpleXMLElement::ToBoolean(this);
 }
 int64_t ObjectData::o_toInt64Impl() const noexcept {
   // SimpleXMLElement is the only class that has custom int casting. If others
   // are added in future, just turn this assert into an if and add cases.
-  assert(instanceof(c_SimpleXMLElement::s_cls));
+  assert(instanceof(c_SimpleXMLElement::classof()));
   return c_SimpleXMLElement::ToInt64(this);
 }
 double ObjectData::o_toDoubleImpl() const noexcept {
   // SimpleXMLElement is the only class that has custom double casting. If
   // others are added in future, just turn this assert into an if and add cases.
-  assert(instanceof(c_SimpleXMLElement::s_cls));
+  assert(instanceof(c_SimpleXMLElement::classof()));
   return c_SimpleXMLElement::ToDouble(this);
 }
 
@@ -370,15 +370,15 @@ Array ObjectData::o_toArray() const {
   // We can quickly tell if this object is a collection, which lets us avoid
   // checking for each class in turn if it's not one.
   if (isCollection()) {
-    if (instanceof(c_Vector::s_cls)) {
+    if (instanceof(c_Vector::classof())) {
       return c_Vector::ToArray(this);
-    } else if (instanceof(c_Map::s_cls)) {
+    } else if (instanceof(c_Map::classof())) {
       return c_Map::ToArray(this);
-    } else if (instanceof(c_StableMap::s_cls)) {
+    } else if (instanceof(c_StableMap::classof())) {
       return c_StableMap::ToArray(this);
-    } else if (instanceof(c_Set::s_cls)) {
+    } else if (instanceof(c_Set::classof())) {
       return c_Set::ToArray(this);
-    } else if (instanceof(c_Pair::s_cls)) {
+    } else if (instanceof(c_Pair::classof())) {
       return c_Pair::ToArray(this);
     }
     // It's undefined what happens if you reach not_reached. We want to be sure
@@ -387,7 +387,7 @@ Array ObjectData::o_toArray() const {
   } else if (UNLIKELY(getAttribute(CallToImpl))) {
     // If we end up with other classes that need special behavior, turn the
     // assert into an if and add cases.
-    assert(instanceof(c_SimpleXMLElement::s_cls));
+    assert(instanceof(c_SimpleXMLElement::classof()));
     return c_SimpleXMLElement::ToArray(this);
   } else {
     Array ret(ArrayData::Create());
@@ -731,30 +731,30 @@ void ObjectData::dump() const {
 ObjectData* ObjectData::clone() {
   if (getAttribute(HasClone)) {
     if (isCollection()) {
-      if (instanceof(c_Vector::s_cls)) {
+      if (instanceof(c_Vector::classof())) {
         return c_Vector::Clone(this);
-      } else if (instanceof(c_Map::s_cls)) {
+      } else if (instanceof(c_Map::classof())) {
         return c_Map::Clone(this);
-      } else if (instanceof(c_StableMap::s_cls)) {
+      } else if (instanceof(c_StableMap::classof())) {
         return c_StableMap::Clone(this);
-      } else if (instanceof(c_Set::s_cls)) {
+      } else if (instanceof(c_Set::classof())) {
         return c_Set::Clone(this);
-      } else if (instanceof(c_Pair::s_cls)) {
+      } else if (instanceof(c_Pair::classof())) {
         return c_Pair::Clone(this);
       }
-    } else if (instanceof(c_Closure::s_cls)) {
+    } else if (instanceof(c_Closure::classof())) {
       return c_Closure::Clone(this);
-    } else if (instanceof(c_Continuation::s_cls)) {
+    } else if (instanceof(c_Continuation::classof())) {
       return c_Continuation::Clone(this);
-    } else if (instanceof(c_DateTime::s_cls)) {
+    } else if (instanceof(c_DateTime::classof())) {
       return c_DateTime::Clone(this);
-    } else if (instanceof(c_DateTimeZone::s_cls)) {
+    } else if (instanceof(c_DateTimeZone::classof())) {
       return c_DateTimeZone::Clone(this);
-    } else if (instanceof(c_DateInterval::s_cls)) {
+    } else if (instanceof(c_DateInterval::classof())) {
       return c_DateInterval::Clone(this);
-    } else if (instanceof(c_DOMNode::s_cls)) {
+    } else if (instanceof(c_DOMNode::classof())) {
       return c_DOMNode::Clone(this);
-    } else if (instanceof(c_SimpleXMLElement::s_cls)) {
+    } else if (instanceof(c_SimpleXMLElement::classof())) {
       return c_SimpleXMLElement::Clone(this);
     }
     always_assert(false);

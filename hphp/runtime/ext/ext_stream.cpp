@@ -44,12 +44,9 @@
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(StreamContext);
 ///////////////////////////////////////////////////////////////////////////////
 
-StreamContext* get_stream_context(CVarRef stream_or_context);
-
-StaticString StreamContext::s_class_name("stream-context");
+static StreamContext* get_stream_context(CVarRef stream_or_context);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -578,7 +575,7 @@ bool f_stream_socket_shutdown(CResRef stream, int how) {
   return f_socket_shutdown(stream, how);
 }
 
-StreamContext* get_stream_context(CVarRef stream_or_context) {
+static StreamContext* get_stream_context(CVarRef stream_or_context) {
   if (!stream_or_context.isResource()) {
     return nullptr;
   }

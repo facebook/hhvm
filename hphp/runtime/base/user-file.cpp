@@ -21,10 +21,8 @@
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(UserFile)
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString UserFile::s_class_name("UserFile");
 StaticString s_stream_open("stream_open");
 StaticString s_stream_close("stream_close");
 StaticString s_stream_read("stream_read");
@@ -69,6 +67,12 @@ UserFile::UserFile(Class *cls, int options /*= 0 */,
 }
 
 UserFile::~UserFile() {
+}
+
+void UserFile::sweep() {
+  // Just sweep the base, then nothing to do because `this` is
+  // smart-allocated and so is m_obj.
+  File::sweep();
 }
 
 const Func* UserFile::lookupMethod(const StringData* name) {

@@ -41,7 +41,7 @@ namespace HPHP {
   };
   class ZendNormalResourceDataHolder : public ZendResourceData {
     public:
-      ZendNormalResourceDataHolder(ResourceData* rd) :
+      explicit ZendNormalResourceDataHolder(ResourceData* rd) :
           ZendResourceData(nullptr, -1), m_rd(rd) {}
       ~ZendNormalResourceDataHolder() {}
       ResourceData* getResourceData() { return m_rd; }

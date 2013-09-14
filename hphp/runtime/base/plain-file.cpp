@@ -21,12 +21,6 @@
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(PlainFile)
-
-///////////////////////////////////////////////////////////////////////////////
-
-StaticString PlainFile::s_class_name("PlainFile");
-
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
@@ -48,6 +42,11 @@ PlainFile::PlainFile(int fd, bool nonblocking)
 
 PlainFile::~PlainFile() {
   closeImpl();
+}
+
+void PlainFile::sweep() {
+  PlainFile::closeImpl();
+  File::sweep();
 }
 
 bool PlainFile::open(CStrRef filename, CStrRef mode) {

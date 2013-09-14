@@ -384,16 +384,14 @@ public:
 
   XboxTransport *getJob() { return m_job;}
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("XboxTask");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
 private:
   XboxTransport *m_job;
 };
 IMPLEMENT_OBJECT_ALLOCATION(XboxTask)
-
-StaticString XboxTask::s_class_name("XboxTask");
 
 ///////////////////////////////////////////////////////////////////////////////
 

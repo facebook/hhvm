@@ -116,11 +116,17 @@ class Key : public SweepableResourceData {
 public:
   EVP_PKEY *m_key;
   explicit Key(EVP_PKEY *key) : m_key(key) { assert(m_key);}
-  ~Key() { if (m_key) EVP_PKEY_free(m_key);}
+  ~Key() {
+    if (m_key) EVP_PKEY_free(m_key);
+  }
+  void sweep() FOLLY_OVERRIDE {
+    // Base class calls delete this, which should work.
+    SweepableResourceData::sweep();
+  }
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("OpenSSL key");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   bool isPrivate() {
     assert(m_key);
@@ -243,7 +249,7 @@ public:
 
     if (public_key && !ocert.isNull() && key == NULL) {
       /* extract public key from X509 cert */
-      key = (EVP_PKEY *)X509_get_pubkey(ocert.getTyped<Certificate>()->m_cert);
+      key = (EVP_PKEY *)X509_get_pubkey(ocert.getTyped<Certificate>()->get());
     }
 
     if (key) {
@@ -254,20 +260,30 @@ public:
   }
 };
 
-StaticString Key::s_class_name("OpenSSL key");
-
 /**
  * Certificate Signing Request
  */
 class CSRequest : public SweepableResourceData {
-public:
   X509_REQ *m_csr;
-  explicit CSRequest(X509_REQ *csr) : m_csr(csr) { assert(m_csr);}
-  ~CSRequest() { if (m_csr) X509_REQ_free(m_csr);}
 
-  static StaticString s_class_name;
+public:
+  explicit CSRequest(X509_REQ *csr) : m_csr(csr) {
+    assert(m_csr);
+  }
+
+  ~CSRequest() {
+    // X509_REQ_free(nullptr) is a no-op
+    X509_REQ_free(m_csr);
+  }
+
+  void sweep() FOLLY_OVERRIDE {
+    // Base class calls delete this, which should work.
+    SweepableResourceData::sweep();
+  }
+
+  CLASSNAME_IS("OpenSSL X.509 CSR");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   static X509_REQ *Get(CVarRef var, Resource &ocsr) {
     ocsr = Get(var);
@@ -296,8 +312,6 @@ public:
     return Resource();
   }
 };
-
-StaticString CSRequest::s_class_name("OpenSSL X.509 CSR");
 
 class php_x509_request {
 public:

@@ -4393,7 +4393,7 @@ void CodeGenerator::cgCheckBounds(IRInstruction* inst) {
 void CodeGenerator::cgLdVectorSize(IRInstruction* inst) {
   SSATmp* vec = inst->src(0);
   assert(vec->type().strictSubtypeOf(Type::Obj) &&
-         vec->type().getClass() == c_Vector::s_cls);
+         vec->type().getClass() == c_Vector::classof());
   auto vecReg = m_regs[vec].reg();
   m_as.loadl(vecReg[c_Vector::sizeOffset()],
              toReg32(m_regs[inst->dst()].reg()));
@@ -4402,7 +4402,7 @@ void CodeGenerator::cgLdVectorSize(IRInstruction* inst) {
 void CodeGenerator::cgLdVectorBase(IRInstruction* inst) {
   SSATmp* vec = inst->src(0);
   assert(vec->type().strictSubtypeOf(Type::Obj) &&
-         vec->type().getClass() == c_Vector::s_cls);
+         vec->type().getClass() == c_Vector::classof());
   auto vecReg = m_regs[vec].reg();
   m_as.loadq(vecReg[c_Vector::dataOffset()], m_regs[inst->dst()].reg());
 }
@@ -4410,7 +4410,7 @@ void CodeGenerator::cgLdVectorBase(IRInstruction* inst) {
 void CodeGenerator::cgLdPairBase(IRInstruction* inst) {
   SSATmp* pair = inst->src(0);
   assert(pair->type().strictSubtypeOf(Type::Obj) &&
-         pair->type().getClass() == c_Pair::s_cls);
+         pair->type().getClass() == c_Pair::classof());
   auto pairReg = m_regs[pair].reg();
   m_as.lea(pairReg[c_Pair::dataOffset()], m_regs[inst->dst()].reg());
 }

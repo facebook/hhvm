@@ -922,7 +922,13 @@ c_PDO::c_PDO(Class* cb) : ExtObjectData(cb) {
 }
 
 c_PDO::~c_PDO() {
-  m_dbh.reset(); // needed for sweeping
+}
+
+void c_PDO::sweep() {
+  // PDOConnection is not sweepable, so clean it up manually.
+  static_assert(!std::is_base_of<Sweepable, PDOConnection>::value,
+                "Remove the call to reset() below.");
+  m_dbh.reset();
 }
 
 void c_PDO::t___construct(CStrRef dsn, CStrRef username /* = null_string */,
@@ -2611,9 +2617,12 @@ c_PDOStatement::c_PDOStatement(Class* cb) :
 }
 
 c_PDOStatement::~c_PDOStatement() {
-  // needed for sweeping
   m_stmt.reset();
   m_row.reset();
+}
+
+void c_PDOStatement::sweep() {
+  // No resources allocated outside HHVM's control
 }
 
 void c_PDOStatement::t___construct() {

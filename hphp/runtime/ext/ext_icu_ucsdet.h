@@ -36,13 +36,13 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class EncodingDetector
 
-FORWARD_DECLARE_CLASS_BUILTIN(EncodingDetector);
+FORWARD_DECLARE_CLASS(EncodingDetector);
 class c_EncodingDetector : public ExtObjectData {
  public:
-  DECLARE_CLASS(EncodingDetector, EncodingDetector, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(EncodingDetector)
 
   // need to implement
-  public: c_EncodingDetector(Class* cls = c_EncodingDetector::s_cls);
+  public: c_EncodingDetector(Class* cls = c_EncodingDetector::classof());
   public: ~c_EncodingDetector();
   public: void t___construct();
   public: void t_settext(CStrRef text);
@@ -61,13 +61,13 @@ class c_EncodingDetector : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class EncodingMatch
 
-FORWARD_DECLARE_CLASS_BUILTIN(EncodingMatch);
+FORWARD_DECLARE_CLASS(EncodingMatch);
 class c_EncodingMatch : public ExtObjectData {
  public:
-  DECLARE_CLASS(EncodingMatch, EncodingMatch, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(EncodingMatch)
 
   // need to implement
-  public: c_EncodingMatch(Class* cls = c_EncodingMatch::s_cls);
+  public: c_EncodingMatch(Class* cls = c_EncodingMatch::classof());
   public: ~c_EncodingMatch();
   public: void t___construct();
   public: bool t_isvalid();

@@ -74,13 +74,13 @@ String f_xmlwriter_output_memory(CObjRef xmlwriter, bool flush = true);
 ///////////////////////////////////////////////////////////////////////////////
 // class XMLWriter
 
-FORWARD_DECLARE_CLASS_BUILTIN(XMLWriter);
+FORWARD_DECLARE_CLASS(XMLWriter);
 class c_XMLWriter : public ExtObjectData, public Sweepable {
  public:
-  DECLARE_CLASS(XMLWriter, XMLWriter, ObjectData)
+  DECLARE_CLASS(XMLWriter)
 
   // need to implement
-  public: c_XMLWriter(Class* cls = c_XMLWriter::s_cls);
+  public: c_XMLWriter(Class* cls = c_XMLWriter::classof());
   public: ~c_XMLWriter();
   public: void t___construct();
   public: bool t_openmemory();

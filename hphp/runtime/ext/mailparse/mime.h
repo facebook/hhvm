@@ -42,13 +42,13 @@ public:
   static bool ProcessLine(MimePart *workpart, CStrRef line);
 
 public:
-  DECLARE_RESOURCE_ALLOCATION(MimePart);
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(MimePart);
 
   MimePart();
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("mailparse_mail_structure")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   bool parse(const char *buf, int bufsize);
   Variant extract(CVarRef filename, CVarRef callbackfunc, int decode,

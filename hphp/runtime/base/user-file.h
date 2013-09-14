@@ -30,9 +30,8 @@ public:
                     CVarRef context = uninit_null());
   virtual ~UserFile();
 
-  static StaticString s_class_name;
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return s_class_name; }
+  CStrRef o_getClassNameHook() const { return classnameof(); }
 
   virtual bool open(CStrRef filename, CStrRef mode);
   virtual bool close();

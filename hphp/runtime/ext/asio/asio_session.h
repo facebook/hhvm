@@ -26,12 +26,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-FORWARD_DECLARE_CLASS_BUILTIN(WaitHandle);
-FORWARD_DECLARE_CLASS_BUILTIN(GenArrayWaitHandle);
-FORWARD_DECLARE_CLASS_BUILTIN(GenMapWaitHandle);
-FORWARD_DECLARE_CLASS_BUILTIN(GenVectorWaitHandle);
-FORWARD_DECLARE_CLASS_BUILTIN(SetResultToRefWaitHandle);
-FORWARD_DECLARE_CLASS_BUILTIN(ContinuationWaitHandle);
+FORWARD_DECLARE_CLASS(WaitHandle);
+FORWARD_DECLARE_CLASS(GenArrayWaitHandle);
+FORWARD_DECLARE_CLASS(GenMapWaitHandle);
+FORWARD_DECLARE_CLASS(GenVectorWaitHandle);
+FORWARD_DECLARE_CLASS(SetResultToRefWaitHandle);
+FORWARD_DECLARE_CLASS(ContinuationWaitHandle);
 
 class AsioSession {
   public:
@@ -89,26 +89,26 @@ class AsioSession {
 
     // callback: on failed
     void setOnFailedCallback(ObjectData* on_failed_callback) {
-      assert(!on_failed_callback || on_failed_callback->instanceof(c_Closure::s_cls));
+      assert(!on_failed_callback || on_failed_callback->instanceof(c_Closure::classof()));
       m_onFailedCallback = on_failed_callback;
     }
     void onFailed(CObjRef exception);
 
     // ContinuationWaitHandle callbacks:
     void setOnContinuationCreateCallback(ObjectData* on_start) {
-      assert(!on_start || on_start->instanceof(c_Closure::s_cls));
+      assert(!on_start || on_start->instanceof(c_Closure::classof()));
       m_onContinuationCreateCallback = on_start;
     }
     void setOnContinuationYieldCallback(ObjectData* on_yield) {
-      assert(!on_yield || on_yield->instanceof(c_Closure::s_cls));
+      assert(!on_yield || on_yield->instanceof(c_Closure::classof()));
       m_onContinuationYieldCallback = on_yield;
     }
     void setOnContinuationSuccessCallback(ObjectData* on_success) {
-      assert(!on_success || on_success->instanceof(c_Closure::s_cls));
+      assert(!on_success || on_success->instanceof(c_Closure::classof()));
       m_onContinuationSuccessCallback = on_success;
     }
     void setOnContinuationFailCallback(ObjectData* on_fail) {
-      assert(!on_fail || on_fail->instanceof(c_Closure::s_cls));
+      assert(!on_fail || on_fail->instanceof(c_Closure::classof()));
       m_onContinuationFailCallback = on_fail;
     }
     bool hasOnContinuationCreateCallback() { return m_onContinuationCreateCallback.get(); }
@@ -122,7 +122,7 @@ class AsioSession {
 
     // WaitHandle callbacks:
     void setOnJoinCallback(ObjectData* on_join) {
-      assert(!on_join || on_join->instanceof(c_Closure::s_cls));
+      assert(!on_join || on_join->instanceof(c_Closure::classof()));
       m_onJoinCallback = on_join;
     }
     bool hasOnJoinCallback() { return m_onJoinCallback.get(); }
@@ -130,7 +130,7 @@ class AsioSession {
 
     // GenArrayWaitHandle callbacks:
     void setOnGenArrayCreateCallback(ObjectData* on_create) {
-      assert(!on_create || on_create->instanceof(c_Closure::s_cls));
+      assert(!on_create || on_create->instanceof(c_Closure::classof()));
       m_onGenArrayCreateCallback = on_create;
     }
     bool hasOnGenArrayCreateCallback() { return m_onGenArrayCreateCallback.get(); }
@@ -138,7 +138,7 @@ class AsioSession {
 
     // GenMapWaitHandle callbacks:
     void setOnGenMapCreateCallback(ObjectData* on_create) {
-      assert(!on_create || on_create->instanceof(c_Closure::s_cls));
+      assert(!on_create || on_create->instanceof(c_Closure::classof()));
       m_onGenMapCreateCallback = on_create;
     }
     bool hasOnGenMapCreateCallback() { return m_onGenMapCreateCallback.get(); }
@@ -146,7 +146,7 @@ class AsioSession {
 
     // GenVectorWaitHandle callbacks:
     void setOnGenVectorCreateCallback(ObjectData* on_create) {
-      assert(!on_create || on_create->instanceof(c_Closure::s_cls));
+      assert(!on_create || on_create->instanceof(c_Closure::classof()));
       m_onGenVectorCreateCallback = on_create;
     }
     bool hasOnGenVectorCreateCallback() { return m_onGenVectorCreateCallback.get(); }
@@ -154,7 +154,7 @@ class AsioSession {
 
     // SetResultToRefWaitHandle callbacks:
     void setOnSetResultToRefCreateCallback(ObjectData* on_create) {
-      assert(!on_create || on_create->instanceof(c_Closure::s_cls));
+      assert(!on_create || on_create->instanceof(c_Closure::classof()));
       m_onSetResultToRefCreateCallback = on_create;
     }
     bool hasOnSetResultToRefCreateCallback() { return m_onSetResultToRefCreateCallback.get(); }

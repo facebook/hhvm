@@ -773,7 +773,7 @@ EOT
     fprintf($f, "  // constructor must call setAttributes(%s)\n",
             implode('|', $flags));
   }
-  fprintf($f, "  public: c_%s(Class* cls = c_%s::s_cls);\n",
+  fprintf($f, "  public: c_%s(Class* cls = c_%s::classof());\n",
           $class['name'], $class['name']);
   fprintf($f, "  public: ~c_%s();\n", $class['name']);
   foreach ($class['methods'] as $m) {

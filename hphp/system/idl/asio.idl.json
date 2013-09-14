@@ -83,7 +83,8 @@
             "desc": "A wait handle representing asynchronous operation",
             "flags": [
                 "IsAbstract",
-                "IsCppAbstract"
+                "IsCppAbstract",
+                "NoDefaultSweep"
             ],
             "ifaces": [
                 "Awaitable"
@@ -234,7 +235,8 @@
             "desc": "A wait handle that is always finished",
             "flags": [
                 "IsAbstract",
-                "IsCppAbstract"
+                "IsCppAbstract",
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -257,6 +259,7 @@
             "parent": "StaticWaitHandle",
             "desc": "A wait handle representing static result",
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -297,6 +300,7 @@
             "parent": "StaticWaitHandle",
             "desc": "A wait handle representing statically failed operation",
             "flags": [
+                     "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -338,7 +342,8 @@
             "desc": "A wait handle that can be waited upon",
             "flags": [
                 "IsAbstract",
-                "IsCppAbstract"
+                "IsCppAbstract",
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -410,7 +415,8 @@
             "desc": "A wait handle that can be blocked on a dependency",
             "flags": [
                 "IsAbstract",
-                "IsCppAbstract"
+                "IsCppAbstract",
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -433,6 +439,7 @@
             "parent": "BlockableWaitHandle",
             "desc": "A wait handle representing asynchronous execution powered by Continuation",
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -555,6 +562,7 @@
             "parent": "BlockableWaitHandle",
             "desc": "A wait handle representing an array of asynchronous operations",
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -613,6 +621,7 @@
             "parent": "BlockableWaitHandle",
             "desc": "A wait handle representing a map of asynchronous operations",
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -671,6 +680,7 @@
             "parent": "BlockableWaitHandle",
             "desc": "A wait handle representing a vector of asynchronous operations",
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -729,6 +739,7 @@
             "parent": "BlockableWaitHandle",
             "desc": "A wait handle proxy that sets result to a given reference",
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -793,6 +804,7 @@
             "parent": "WaitableWaitHandle",
             "desc": "A wait handle that succeeds with null once desired scheduling priority is eligible for execution",
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {

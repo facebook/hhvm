@@ -31,12 +31,12 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class Closure
 
-FORWARD_DECLARE_CLASS_BUILTIN(Closure);
+FORWARD_DECLARE_CLASS(Closure);
 class c_Closure : public ExtObjectDataFlags<ObjectData::HasClone> {
  public:
-  DECLARE_CLASS(Closure, Closure, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(Closure)
 
-  c_Closure(Class* cls = c_Closure::s_cls)
+  c_Closure(Class* cls = c_Closure::classof())
     : ExtObjectDataFlags<ObjectData::HasClone>(cls)
   {
     if (debug) {

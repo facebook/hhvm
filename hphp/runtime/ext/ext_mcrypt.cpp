@@ -35,6 +35,10 @@ public:
   }
 
   ~MCrypt() {
+    MCrypt::close();
+  }
+
+  void sweep() FOLLY_OVERRIDE {
     close();
   }
 
@@ -46,15 +50,13 @@ public:
     }
   }
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("MCrypt");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   MCRYPT m_td;
   bool m_init;
 };
-
-StaticString MCrypt::s_class_name("MCrypt");
 
 typedef enum {
   RANDOM = 0,

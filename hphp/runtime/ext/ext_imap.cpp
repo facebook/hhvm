@@ -48,8 +48,8 @@ public:
   }
 
   // overriding ResourceData
-  static StaticString s_class_name;
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  CLASSNAME_IS("imap");
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   void close();
 
@@ -65,7 +65,6 @@ public:
   int64_t m_flag;
 };
 
-StaticString ImapStream::s_class_name("imap");
 IMPLEMENT_OBJECT_ALLOCATION(ImapStream);
 
 ///////////////////////////////////////////////////////////////////////////////

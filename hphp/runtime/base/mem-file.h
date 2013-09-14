@@ -34,9 +34,9 @@ public:
   MemFile(const char *data, int64_t len);
   virtual ~MemFile();
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("MemFile");
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return s_class_name; }
+  CStrRef o_getClassNameHook() const { return classnameof(); }
 
   virtual bool open(CStrRef filename, CStrRef mode);
   virtual bool close();

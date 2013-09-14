@@ -40,13 +40,13 @@ extern const StaticString q_DateTime$$RFC3339;
 extern const StaticString q_DateTime$$RSS;
 extern const StaticString q_DateTime$$W3C;
 
-FORWARD_DECLARE_CLASS_BUILTIN(DateTime);
+FORWARD_DECLARE_CLASS(DateTime);
 class c_DateTime : public ExtObjectDataFlags<ObjectData::HasClone> {
  public:
-  DECLARE_CLASS(DateTime, DateTime, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(DateTime)
 
   // need to implement
-  public: c_DateTime(Class* cls = c_DateTime::s_cls);
+  public: c_DateTime(Class* cls = c_DateTime::classof());
   public: ~c_DateTime();
   public: Object t_add(CObjRef interval);
   public: void t___construct(CStrRef time = "now",
@@ -106,13 +106,13 @@ extern const int64_t q_DateTimeZone$$ALL;
 extern const int64_t q_DateTimeZone$$ALL_WITH_BC;
 extern const int64_t q_DateTimeZone$$PER_COUNTRY;
 
-FORWARD_DECLARE_CLASS_BUILTIN(DateTimeZone);
+FORWARD_DECLARE_CLASS(DateTimeZone);
 class c_DateTimeZone : public ExtObjectDataFlags<ObjectData::HasClone> {
  public:
-  DECLARE_CLASS(DateTimeZone, DateTimeZone, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(DateTimeZone)
 
   // need to implement
-  public: c_DateTimeZone(Class* cls = c_DateTimeZone::s_cls);
+  public: c_DateTimeZone(Class* cls = c_DateTimeZone::classof());
   public: ~c_DateTimeZone();
   public: void t___construct(CStrRef timezone);
   public: Array t_getlocation();
@@ -147,15 +147,15 @@ class c_DateTimeZone : public ExtObjectDataFlags<ObjectData::HasClone> {
 ///////////////////////////////////////////////////////////////////////////////
 // class DateInterval
 
-FORWARD_DECLARE_CLASS_BUILTIN(DateInterval);
+FORWARD_DECLARE_CLASS(DateInterval);
 class c_DateInterval : public ExtObjectDataFlags<ObjectData::UseGet|
                                                  ObjectData::UseSet|
                                                  ObjectData::HasClone> {
  public:
-  DECLARE_CLASS(DateInterval, DateInterval, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(DateInterval)
 
   // need to implement
-  public: c_DateInterval(Class* cls = c_DateInterval::s_cls);
+  public: c_DateInterval(Class* cls = c_DateInterval::classof());
   public: ~c_DateInterval();
   public: void t___construct(CStrRef interval_spec);
   public: Variant t___get(Variant member);

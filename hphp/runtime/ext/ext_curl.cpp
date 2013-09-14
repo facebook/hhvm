@@ -93,9 +93,9 @@ private:
   };
 
 public:
-  static StaticString s_class_name;
+  CLASSNAME_IS("cURL handle")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   explicit CurlResource(CStrRef url)
     : m_exception(nullptr), m_phpException(false), m_emptyPost(true) {
@@ -781,8 +781,6 @@ void CurlResource::sweep() {
   closeForSweep();
 }
 
-StaticString CurlResource::s_class_name("cURL handle");
-
 CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
   // Set defaults from config.hdf
   CURLcode r = curl_tls_workarounds_cb(curl, sslctx, parm);
@@ -1120,9 +1118,9 @@ class CurlMultiResource : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(CurlMultiResource)
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("cURL Multi Handle")
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return s_class_name; }
+  CStrRef o_getClassNameHook() const { return classnameof(); }
 
   CurlMultiResource() {
     m_multi = curl_multi_init();
@@ -1208,8 +1206,6 @@ void CurlMultiResource::sweep() {
     curl_multi_cleanup(m_multi);
   }
 }
-
-StaticString CurlMultiResource::s_class_name("cURL Multi Handle");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1385,9 +1381,9 @@ class LibEventHttpHandle : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(LibEventHttpHandle)
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("LibEventHttp");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   explicit LibEventHttpHandle(LibEventHttpClientPtr client) : m_client(client) {
   }
@@ -1401,8 +1397,6 @@ public:
   LibEventHttpClientPtr m_client;
 };
 IMPLEMENT_OBJECT_ALLOCATION(LibEventHttpHandle)
-
-StaticString LibEventHttpHandle::s_class_name("LibEventHttp");
 
 static LibEventHttpClientPtr prepare_client
 (CStrRef url, CStrRef data, CArrRef headers, int timeout,

@@ -158,7 +158,7 @@ int main(int argc, const char* argv[]) {
         << ", sizeof(c_" << klass.name() << ')'
         << ", hhbc_ext_method_count_" << klass.name()
         << ", hhbc_ext_methods_" << klass.name()
-        << ", &c_" << klass.name() << "::s_cls }";
+        << ", &c_" << klass.name() << "::classof() }";
   }
   cpp << "\n};\n\n";
   cpp << "} // namespace HPHP\n";

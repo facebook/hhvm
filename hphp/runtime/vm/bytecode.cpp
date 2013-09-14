@@ -6698,7 +6698,7 @@ OPTBLD_INLINE void VMExecutionContext::iopCreateAsync(PC& pc) {
 
 static inline c_Continuation* this_continuation(const ActRec* fp) {
   ObjectData* obj = fp->getThis();
-  assert(obj->instanceof(c_Continuation::s_cls));
+  assert(obj->instanceof(c_Continuation::classof()));
   return static_cast<c_Continuation*>(obj);
 }
 

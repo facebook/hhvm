@@ -148,12 +148,13 @@ public:
         const char *password, const char *database,
         MYSQL* raw_connection = nullptr);
   ~MySQL();
+  void sweep() FOLLY_OVERRIDE;
   void setLastError(const char *func);
   void close();
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("mysql link")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
   virtual bool isInvalid() const { return m_conn == nullptr; }
 
   bool connect(CStrRef host, int port, CStrRef socket, CStrRef username,
@@ -214,9 +215,9 @@ public:
   explicit MySQLResult(MYSQL_RES *res, bool localized = false);
   virtual ~MySQLResult();
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("mysql result")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   void close() {
     if (m_res) {

@@ -399,7 +399,7 @@ void c_Vector::t_sort(CVarRef col /* = null */) {
       throw e;
     }
     ObjectData* obj = col.getObjectData();
-    if (!obj->instanceof(c_Collator::s_cls)) {
+    if (!obj->instanceof(c_Collator::classof())) {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Expected col to be an instance of Collator"));
       throw e;
@@ -729,7 +729,7 @@ Variant c_Vector::ti_slice(CVarRef vec, CVarRef offset,
     throw e;
   }
   ObjectData* obj = vec.getObjectData();
-  if (!obj->instanceof(c_Vector::s_cls)) {
+  if (!obj->instanceof(c_Vector::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "vec must be an instance of Vector"));
     throw e;
@@ -1631,7 +1631,7 @@ Object c_Map::ti_fromitems(CVarRef iterable) {
     Variant v = iter.second();
     TypedValue* tv = v.asCell();
     if (UNLIKELY(tv->m_type != KindOfObject ||
-                 !tv->m_data.pobj->instanceof(c_Pair::s_cls))) {
+                 !tv->m_data.pobj->instanceof(c_Pair::classof()))) {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Parameter must be an instance of Iterable<Pair>"));
       throw e;
@@ -1685,7 +1685,7 @@ void c_Map::throwOOB(StringData* key) {
 
 void c_Map::add(TypedValue* val) {
   if (UNLIKELY(val->m_type != KindOfObject ||
-               !val->m_data.pobj->instanceof(c_Pair::s_cls))) {
+               !val->m_data.pobj->instanceof(c_Pair::classof()))) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter must be an instance of Pair"));
     throw e;
@@ -2806,7 +2806,7 @@ Object c_StableMap::ti_fromitems(CVarRef iterable) {
     Variant v = iter.second();
     TypedValue* tv = cvarToCell(&v);
     if (UNLIKELY(tv->m_type != KindOfObject ||
-                 !tv->m_data.pobj->instanceof(c_Pair::s_cls))) {
+                 !tv->m_data.pobj->instanceof(c_Pair::classof()))) {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Parameter must be an instance of Iterable<Pair>"));
       throw e;
@@ -2861,7 +2861,7 @@ void c_StableMap::throwOOB(StringData* key) {
 
 void c_StableMap::add(TypedValue* val) {
   if (UNLIKELY(val->m_type != KindOfObject ||
-               !val->m_data.pobj->instanceof(c_Pair::s_cls))) {
+               !val->m_data.pobj->instanceof(c_Pair::classof()))) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter must be an instance of Pair"));
     throw e;

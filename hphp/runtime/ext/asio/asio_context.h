@@ -26,10 +26,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-FORWARD_DECLARE_CLASS_BUILTIN(WaitableWaitHandle);
-FORWARD_DECLARE_CLASS_BUILTIN(ContinuationWaitHandle);
-FORWARD_DECLARE_CLASS_BUILTIN(RescheduleWaitHandle);
-FORWARD_DECLARE_CLASS_BUILTIN(ExternalThreadEventWaitHandle);
+FORWARD_DECLARE_CLASS(WaitableWaitHandle);
+FORWARD_DECLARE_CLASS(ContinuationWaitHandle);
+FORWARD_DECLARE_CLASS(RescheduleWaitHandle);
+FORWARD_DECLARE_CLASS(ExternalThreadEventWaitHandle);
 
 typedef uint8_t context_idx_t;
 

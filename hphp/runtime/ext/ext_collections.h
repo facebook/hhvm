@@ -27,7 +27,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class Vector
 
-FORWARD_DECLARE_CLASS_BUILTIN(Vector);
+FORWARD_DECLARE_CLASS(Vector);
 class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
                                            ObjectData::UseGet|
                                            ObjectData::UseSet|
@@ -35,10 +35,10 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
                                            ObjectData::UseUnset|
                                            ObjectData::HasClone> {
  public:
-  DECLARE_CLASS(Vector, Vector, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(Vector)
 
  public:
-  explicit c_Vector(Class* cls = c_Vector::s_cls);
+  explicit c_Vector(Class* cls = c_Vector::classof());
   ~c_Vector();
   void freeData();
   void t___construct(CVarRef iterable = null_variant);
@@ -190,13 +190,13 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
 ///////////////////////////////////////////////////////////////////////////////
 // class VectorIterator
 
-FORWARD_DECLARE_CLASS_BUILTIN(VectorIterator);
+FORWARD_DECLARE_CLASS(VectorIterator);
 class c_VectorIterator : public ExtObjectData {
  public:
-  DECLARE_CLASS(VectorIterator, VectorIterator, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(VectorIterator)
 
  public:
-  explicit c_VectorIterator(Class* cls = c_VectorIterator::s_cls);
+  explicit c_VectorIterator(Class* cls = c_VectorIterator::classof());
   ~c_VectorIterator();
   void t___construct();
   Variant t_current();
@@ -216,7 +216,7 @@ class c_VectorIterator : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class Map
 
-FORWARD_DECLARE_CLASS_BUILTIN(Map);
+FORWARD_DECLARE_CLASS(Map);
 class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
                                         ObjectData::UseGet|
                                         ObjectData::UseSet|
@@ -224,10 +224,10 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
                                         ObjectData::UseUnset|
                                         ObjectData::HasClone> {
  public:
-  DECLARE_CLASS(Map, Map, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(Map)
 
  public:
-  explicit c_Map(Class* cls = c_Map::s_cls);
+  explicit c_Map(Class* cls = c_Map::classof());
   ~c_Map();
   void freeData();
   void t___construct(CVarRef iterable = null_variant);
@@ -494,13 +494,13 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
 ///////////////////////////////////////////////////////////////////////////////
 // class MapIterator
 
-FORWARD_DECLARE_CLASS_BUILTIN(MapIterator);
+FORWARD_DECLARE_CLASS(MapIterator);
 class c_MapIterator : public ExtObjectData {
  public:
-  DECLARE_CLASS(MapIterator, MapIterator, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(MapIterator)
 
  public:
-  explicit c_MapIterator(Class* cls = c_MapIterator::s_cls);
+  explicit c_MapIterator(Class* cls = c_MapIterator::classof());
   ~c_MapIterator();
   void t___construct();
   Variant t_current();
@@ -520,7 +520,7 @@ class c_MapIterator : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class StableMap
 
-FORWARD_DECLARE_CLASS_BUILTIN(StableMap);
+FORWARD_DECLARE_CLASS(StableMap);
 class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
                                               ObjectData::UseGet|
                                               ObjectData::UseSet|
@@ -528,10 +528,10 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
                                               ObjectData::UseUnset|
                                               ObjectData::HasClone> {
  public:
-  DECLARE_CLASS(StableMap, StableMap, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(StableMap)
 
  public:
-  explicit c_StableMap(Class* cls = c_StableMap::s_cls);
+  explicit c_StableMap(Class* cls = c_StableMap::classof());
   ~c_StableMap();
   void freeData();
   void t___construct(CVarRef iterable = null_variant);
@@ -763,13 +763,13 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
 ///////////////////////////////////////////////////////////////////////////////
 // class StableMapIterator
 
-FORWARD_DECLARE_CLASS_BUILTIN(StableMapIterator);
+FORWARD_DECLARE_CLASS(StableMapIterator);
 class c_StableMapIterator : public ExtObjectData {
  public:
-  DECLARE_CLASS(StableMapIterator, StableMapIterator, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(StableMapIterator)
 
  public:
-  explicit c_StableMapIterator(Class* cls = c_StableMapIterator::s_cls);
+  explicit c_StableMapIterator(Class* cls = c_StableMapIterator::classof());
   ~c_StableMapIterator();
   void t___construct();
   Variant t_current();
@@ -789,7 +789,7 @@ class c_StableMapIterator : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class Set
 
-FORWARD_DECLARE_CLASS_BUILTIN(Set);
+FORWARD_DECLARE_CLASS(Set);
 class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
                                         ObjectData::UseGet|
                                         ObjectData::UseSet|
@@ -797,12 +797,12 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
                                         ObjectData::UseUnset|
                                         ObjectData::HasClone> {
  public:
-  DECLARE_CLASS(Set, Set, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(Set)
 
  public:
   static const int32_t KindOfTombstone = -1;
 
-  explicit c_Set(Class* cls = c_Set::s_cls);
+  explicit c_Set(Class* cls = c_Set::classof());
   ~c_Set();
   void freeData();
   void t___construct(CVarRef iterable = null_variant);
@@ -987,13 +987,13 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
 ///////////////////////////////////////////////////////////////////////////////
 // class SetIterator
 
-FORWARD_DECLARE_CLASS_BUILTIN(SetIterator);
+FORWARD_DECLARE_CLASS(SetIterator);
 class c_SetIterator : public ExtObjectData {
  public:
-  DECLARE_CLASS(SetIterator, SetIterator, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(SetIterator)
 
  public:
-  explicit c_SetIterator(Class* cls = c_SetIterator::s_cls);
+  explicit c_SetIterator(Class* cls = c_SetIterator::classof());
   ~c_SetIterator();
   void t___construct();
   Variant t_current();
@@ -1013,7 +1013,7 @@ class c_SetIterator : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class Pair
 
-FORWARD_DECLARE_CLASS_BUILTIN(Pair);
+FORWARD_DECLARE_CLASS(Pair);
 class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
                                          ObjectData::UseGet|
                                          ObjectData::UseSet|
@@ -1021,10 +1021,10 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
                                          ObjectData::UseUnset|
                                          ObjectData::HasClone> {
  public:
-  DECLARE_CLASS(Pair, Pair, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(Pair)
 
  public:
-  explicit c_Pair(Class* cls = c_Pair::s_cls);
+  explicit c_Pair(Class* cls = c_Pair::classof());
   ~c_Pair();
   void t___construct();
   bool t_isempty();
@@ -1137,13 +1137,13 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
 ///////////////////////////////////////////////////////////////////////////////
 // class PairIterator
 
-FORWARD_DECLARE_CLASS_BUILTIN(PairIterator);
+FORWARD_DECLARE_CLASS(PairIterator);
 class c_PairIterator : public ExtObjectData {
  public:
-  DECLARE_CLASS(PairIterator, PairIterator, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(PairIterator)
 
  public:
-  explicit c_PairIterator(Class* cls = c_PairIterator::s_cls);
+  explicit c_PairIterator(Class* cls = c_PairIterator::classof());
   ~c_PairIterator();
   void t___construct();
   Variant t_current();
@@ -1228,8 +1228,8 @@ inline void collectionOffsetAppend(ObjectData* obj, CVarRef val) {
 }
 
 inline bool isOptimizableCollectionClass(const Class* klass) {
-  return klass == c_Vector::s_cls || klass == c_Map::s_cls ||
-         klass == c_StableMap::s_cls || klass == c_Pair::s_cls;
+  return klass == c_Vector::classof() || klass == c_Map::classof() ||
+         klass == c_StableMap::classof() || klass == c_Pair::classof();
 }
 
 

@@ -27,11 +27,11 @@ namespace HPHP {
 
 class StreamContext : public ResourceData {
 public:
-  DECLARE_RESOURCE_ALLOCATION(StreamContext);
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(StreamContext);
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("StreamContext")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   StreamContext(CArrRef options, CArrRef params)
     : m_options(options), m_params(params) {

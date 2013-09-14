@@ -76,13 +76,13 @@ extern const int64_t q_Collator$$UPPER_FIRST;
 ///////////////////////////////////////////////////////////////////////////////
 // class Collator
 
-FORWARD_DECLARE_CLASS_BUILTIN(Collator);
+FORWARD_DECLARE_CLASS(Collator);
 class c_Collator : public ExtObjectData, public Sweepable {
  public:
-  DECLARE_CLASS(Collator, Collator, ObjectData)
+  DECLARE_CLASS(Collator)
 
   // need to implement
-  public: c_Collator(Class* cls = c_Collator::s_cls);
+  public: c_Collator(Class* cls = c_Collator::classof());
   public: ~c_Collator();
   public: void t___construct(CStrRef locale);
   public: bool t_asort(VRefParam arr, int64_t sort_flag = q_Collator$$SORT_REGULAR);
@@ -116,13 +116,13 @@ extern const int64_t q_Normalizer$$NFKC;
 ///////////////////////////////////////////////////////////////////////////////
 // class Normalizer
 
-FORWARD_DECLARE_CLASS_BUILTIN(Normalizer);
+FORWARD_DECLARE_CLASS(Normalizer);
 class c_Normalizer : public ExtObjectData, public Sweepable {
  public:
-  DECLARE_CLASS(Normalizer, Normalizer, ObjectData)
+  DECLARE_CLASS(Normalizer)
 
   // need to implement
-  public: c_Normalizer(Class* cls = c_Normalizer::s_cls);
+  public: c_Normalizer(Class* cls = c_Normalizer::classof());
   public: ~c_Normalizer();
   public: void t___construct();
   public: static Variant ti_isnormalized(CStrRef input, int64_t form = q_Normalizer$$FORM_C);

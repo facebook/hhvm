@@ -118,7 +118,7 @@ public:
   static ArrayData* EscalateForSort(ArrayData*);
 
   // implements Sweepable.sweep()
-  void sweep() { m_arr->decRef(); }
+  void sweep() FOLLY_OVERRIDE { m_arr->decRef(); }
 
 private:
   ssize_t getIndex(int64_t k) const;

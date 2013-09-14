@@ -96,8 +96,9 @@ class ObjectData {
     o_id = ++(*os_max_id);
   }
 
-  // Disallow copy construction
+  // Disallow copy construction and assignemt
   ObjectData(const ObjectData&) = delete;
+  ObjectData& operator=(const ObjectData&) = delete;
 
  public:
   void setStatic() const { assert(false); }

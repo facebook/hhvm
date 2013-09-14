@@ -29,6 +29,13 @@ namespace HPHP {
  * clear out request-local allocations that are not smart-allocated.
  */
 class Sweepable {
+  /**
+   * Sweepable objects are not supposed to be copied or assigned
+   * naively.
+   */
+  Sweepable(const Sweepable&) = delete;
+  Sweepable& operator=(const Sweepable&) = delete;
+
 public:
   struct Node {
     Node *next, *prev;
@@ -44,10 +51,10 @@ public:
   virtual ~Sweepable();
 
   /*
-   * Default sweep behavior is to delete ourselves.  Note that this is
-   * not appropriate for a smart-allocated class.
+   * There is no default behavior. Make sure this function frees all
+   * NON-SMART-ALLOCATED resources ONLY.
    */
-  virtual void sweep() { delete this; }
+  virtual void sweep() = 0;
 
   /*
    * Note: "Persistent" here means that the object will stay alive
@@ -67,7 +74,7 @@ public:
 
 private:
   Node m_sweepNode;
-  int m_persistentCount;
+  unsigned int m_persistentCount;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -13,7 +13,8 @@
             "desc": "An ordered collection where values are keyed using integers 0 thru n-1 in order.",
             "flags": [
                 "IsFinal",
-                "IsCppSerializable"
+                "IsCppSerializable",
+                "NoDefaultSweep"
             ],
             "footer": "\n private:\n  TypedValue* m_data;\n  int size;\n  int capacity;",
             "funcs": [
@@ -648,7 +649,8 @@
             ],
             "desc": "An iterator implementation for iterating over a Vector.",
             "flags": [
-                "IsFinal"
+                "IsFinal",
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -728,7 +730,8 @@
             "desc": "An unordered dictionary-style collection.",
             "flags": [
                 "IsFinal",
-                "IsCppSerializable"
+                "IsCppSerializable",
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -1276,7 +1279,8 @@
             ],
             "desc": "An iterator implementation for iterating over a Map.",
             "flags": [
-                "IsFinal"
+                "IsFinal",
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -1356,7 +1360,8 @@
             "desc": "An ordered dictionary-style collection.",
             "flags": [
                 "IsFinal",
-                "IsCppSerializable"
+                "IsCppSerializable",
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -1904,7 +1909,8 @@
             ],
             "desc": "An iterator implementation for iterating over a StableMap.",
             "flags": [
-                "IsFinal"
+                "IsFinal",
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -1984,7 +1990,8 @@
             "desc": "An unordered set-style collection.",
             "flags": [
                 "IsFinal",
-                "IsCppSerializable"
+                "IsCppSerializable",
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -2336,7 +2343,8 @@
             ],
             "desc": "An iterator implementation for iterating over a Set.",
             "flags": [
-                "IsFinal"
+                "IsFinal",
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -2415,7 +2423,8 @@
             "desc": "An ordered fixed-sized container.",
             "flags": [
                 "IsFinal",
-                "IsCppSerializable"
+                "IsCppSerializable",
+                "NoDefaultSweep"
             ],
             "footer": "\n private:\n  int size;\n  int capacity;",
             "funcs": [
@@ -2659,7 +2668,8 @@
             ],
             "desc": "An iterator implementation for iterating over a Pair.",
             "flags": [
-                "IsFinal"
+                "IsFinal",
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {

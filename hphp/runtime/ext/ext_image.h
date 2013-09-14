@@ -34,15 +34,16 @@ struct gfxinfo {
 
 class Image : public SweepableResourceData {
 public:
-  Image() { m_gdImage = NULL;}
-  explicit Image(gdImagePtr gdImage) { m_gdImage = gdImage;}
+  Image() : m_gdImage(nullptr) {}
+  explicit Image(gdImagePtr gdImage) : m_gdImage(gdImage) {}
   ~Image();
+  void sweep() FOLLY_OVERRIDE;
   gdImagePtr get() { return m_gdImage;}
-  void reset() { m_gdImage = NULL;}
+  void reset() { m_gdImage = nullptr;}
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("gd")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
   virtual bool isInvalid() const { return m_gdImage == nullptr; }
 
 private:

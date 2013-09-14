@@ -5180,7 +5180,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
     raise_warning("Not allowed to call handler '%s()'.", handler.data());
   } else {
     Variant retval = vm_call_user_func(handler, args);
-    if (retval.instanceof(c_DOMNode::s_cls)) {
+    if (retval.instanceof(c_DOMNode::classof())) {
       if (intern->m_node_list.empty()) {
         intern->m_node_list = Array::Create();
       }

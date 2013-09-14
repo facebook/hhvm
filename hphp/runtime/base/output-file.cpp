@@ -21,11 +21,6 @@
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(OutputFile)
-///////////////////////////////////////////////////////////////////////////////
-
-StaticString OutputFile::s_class_name("OutputFile");
-
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
@@ -39,7 +34,12 @@ OutputFile::OutputFile(CStrRef filename) {
 }
 
 OutputFile::~OutputFile() {
+  OutputFile::closeImpl();
+}
+
+void OutputFile::sweep() {
   closeImpl();
+  File::sweep();
 }
 
 bool OutputFile::open(CStrRef filename, CStrRef mode) {

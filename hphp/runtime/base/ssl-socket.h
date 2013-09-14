@@ -51,14 +51,15 @@ public:
   SSLSocket();
   SSLSocket(int sockfd, int type, const char *address = nullptr, int port = 0);
   virtual ~SSLSocket();
+  void sweep() FOLLY_OVERRIDE;
 
   // will setup and enable crypto
   bool onConnect();
   bool onAccept();
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("SSLSocket")
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return s_class_name; }
+  CStrRef o_getClassNameHook() const { return classnameof(); }
 
   // overriding Socket
   virtual bool close();
@@ -101,11 +102,21 @@ class Certificate : public SweepableResourceData {
 public:
   X509 *m_cert;
   explicit Certificate(X509 *cert) : m_cert(cert) { assert(m_cert);}
-  ~Certificate() { if (m_cert) X509_free(m_cert);}
+  ~Certificate() {
+    if (m_cert) X509_free(m_cert);
+  }
+  void sweep() FOLLY_OVERRIDE {
+    // calls delete this
+    SweepableResourceData::sweep();
+  }
 
-  static StaticString s_class_name;
+  X509* get() {
+    return m_cert;
+  }
+
+  CLASSNAME_IS("OpenSSL X.509")
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return s_class_name; }
+  CStrRef o_getClassNameHook() const { return classnameof(); }
 
   /**
    * Given a variant, coerce it into an X509 object. It can be:

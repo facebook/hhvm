@@ -52,7 +52,7 @@ void c_GenMapWaitHandle::t___construct() {
 }
 
 void c_GenMapWaitHandle::ti_setoncreatecallback(CVarRef callback) {
-  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set GenMapWaitHandle::onCreate: on_create_cb not a closure"));
     throw e;
@@ -61,12 +61,12 @@ void c_GenMapWaitHandle::ti_setoncreatecallback(CVarRef callback) {
 }
 
 Object c_GenMapWaitHandle::ti_create(CVarRef dependencies) {
-  if (UNLIKELY(!dependencies.instanceof(c_Map::s_cls))) {
+  if (UNLIKELY(!dependencies.instanceof(c_Map::classof()))) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Expected dependencies to be an instance of Map"));
     throw e;
   }
-  assert(dependencies.getObjectData()->instanceof(c_Map::s_cls));
+  assert(dependencies.getObjectData()->instanceof(c_Map::classof()));
   p_Map deps = static_cast<c_Map*>(dependencies.getObjectData())->clone();
   for (ssize_t iter_pos = deps->iter_begin();
        iter_pos;
@@ -87,7 +87,7 @@ Object c_GenMapWaitHandle::ti_create(CVarRef dependencies) {
 
     Cell* current = tvAssertCell(deps->iter_value(iter_pos));
     assert(current->m_type == KindOfObject);
-    assert(current->m_data.pobj->instanceof(c_WaitHandle::s_cls));
+    assert(current->m_data.pobj->instanceof(c_WaitHandle::classof()));
     auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
     if (child->isSucceeded()) {
@@ -95,7 +95,7 @@ Object c_GenMapWaitHandle::ti_create(CVarRef dependencies) {
     } else if (child->isFailed()) {
       putException(exception, child->getException());
     } else {
-      assert(child->instanceof(c_WaitableWaitHandle::s_cls));
+      assert(child->instanceof(c_WaitableWaitHandle::classof()));
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
       p_GenMapWaitHandle my_wh = NEWOBJ(c_GenMapWaitHandle)();
@@ -137,7 +137,7 @@ void c_GenMapWaitHandle::onUnblocked() {
 
     Cell* current = tvAssertCell(m_deps->iter_value(m_iterPos));
     assert(current->m_type == KindOfObject);
-    assert(current->m_data.pobj->instanceof(c_WaitHandle::s_cls));
+    assert(current->m_data.pobj->instanceof(c_WaitHandle::classof()));
     auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
     if (child->isSucceeded()) {
@@ -145,7 +145,7 @@ void c_GenMapWaitHandle::onUnblocked() {
     } else if (child->isFailed()) {
       putException(m_exception, child->getException());
     } else {
-      assert(child->instanceof(c_WaitHandle::s_cls));
+      assert(child->instanceof(c_WaitHandle::classof()));
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
       try {
@@ -198,7 +198,7 @@ void c_GenMapWaitHandle::enterContext(context_idx_t ctx_idx) {
     Cell* current = tvAssertCell(m_deps->iter_value(m_iterPos));
 
     assert(current->m_type == KindOfObject);
-    assert(current->m_data.pobj->instanceof(c_WaitableWaitHandle::s_cls));
+    assert(current->m_data.pobj->instanceof(c_WaitableWaitHandle::classof()));
     auto child_wh = static_cast<c_WaitableWaitHandle*>(current->m_data.pobj);
     child_wh->enterContext(ctx_idx);
   }
@@ -214,14 +214,14 @@ void c_GenMapWaitHandle::enterContext(context_idx_t ctx_idx) {
 
       Cell* current = tvAssertCell(m_deps->iter_value(iter_pos));
       assert(current->m_type == KindOfObject);
-      assert(current->m_data.pobj->instanceof(c_WaitHandle::s_cls));
+      assert(current->m_data.pobj->instanceof(c_WaitHandle::classof()));
       auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
       if (child->isFinished()) {
         continue;
       }
 
-      assert(child->instanceof(c_WaitableWaitHandle::s_cls));
+      assert(child->instanceof(c_WaitableWaitHandle::classof()));
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
       child_wh->enterContext(ctx_idx);
     }

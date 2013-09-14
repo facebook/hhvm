@@ -69,18 +69,15 @@ int64_t f_ftok(CStrRef pathname, CStrRef proj) {
 
 class MessageQueue : public ResourceData {
 public:
-  DECLARE_RESOURCE_ALLOCATION(MessageQueue)
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(MessageQueue)
 
   int64_t key;
   int id;
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("MessageQueue");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 };
-IMPLEMENT_OBJECT_ALLOCATION(MessageQueue)
-
-StaticString MessageQueue::s_class_name("MessageQueue");
 
 Variant f_msg_get_queue(int64_t key, int64_t perms /* = 0666 */) {
   int id = msgget(key, 0);
@@ -304,9 +301,9 @@ public:
   int count;        // Acquire count for auto-release.
   int auto_release; // flag that says to auto-release.
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("Semaphore");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   bool op(bool acquire) {
     struct sembuf sop;
@@ -335,9 +332,10 @@ public:
   }
 
   ~Semaphore() {
-    struct sembuf sop[2];
-    int opcount = 1;
+    Semaphore::sweep();
+  }
 
+  void sweep() FOLLY_OVERRIDE {
     /*
      * if count == -1, semaphore has been removed
      * Need better way to handle this
@@ -345,6 +343,9 @@ public:
     if (count == -1 || !auto_release) {
       return;
     }
+
+    sembuf sop[2];
+    int opcount = 1;
 
     /* Decrement the usage count. */
     sop[0].sem_num = SYSVSEM_USAGE;
@@ -356,14 +357,12 @@ public:
       sop[1].sem_num = SYSVSEM_SEM;
       sop[1].sem_op  = count;
       sop[1].sem_flg = SEM_UNDO;
-      opcount++;
+      opcount = 2;
     }
 
     semop(semid, sop, opcount);
   }
 };
-
-StaticString Semaphore::s_class_name("Semaphore");
 
 bool f_sem_acquire(CResRef sem_identifier) {
   return sem_identifier.getTyped<Semaphore>()->op(true);

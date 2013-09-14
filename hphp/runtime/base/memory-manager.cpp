@@ -34,6 +34,7 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
+#include "folly/ScopeGuard.h"
 
 namespace HPHP {
 
@@ -162,9 +163,9 @@ void MemoryManager::OnThreadExit(MemoryManager* mm) {
 }
 
 MemoryManager::MemoryManager()
-  : m_front(nullptr)
-  , m_limit(nullptr)
-{
+    : m_front(nullptr)
+    , m_limit(nullptr)
+    , m_sweeping(false) {
 #ifdef USE_JEMALLOC
   threadStats(m_allocated, m_deallocated, m_cactive, m_cactiveLimit);
 #endif
@@ -210,6 +211,8 @@ void MemoryManager::refreshStatsHelperStop() {
 #endif
 
 void MemoryManager::sweepAll() {
+  m_sweeping = true;
+  SCOPE_EXIT { m_sweeping = false; };
   Sweepable::SweepAll();
 }
 

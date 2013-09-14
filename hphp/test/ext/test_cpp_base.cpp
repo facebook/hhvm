@@ -72,7 +72,6 @@ private:
 class SomeClass {
 public:
   SomeClass() : m_data(0) {}
-  void sweep() {}
   void dump() { printf("data: %d\n", m_data);}
   int m_data;
 };

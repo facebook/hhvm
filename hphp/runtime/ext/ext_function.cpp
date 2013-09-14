@@ -116,7 +116,7 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
     ObjectData *d = tv_func->m_data.pobj;
     const Func* invoke = d->getVMClass()->lookupMethod(s__invoke.get());
     if (name.isReferenced()) {
-      if (d->instanceof(c_Closure::s_cls)) {
+      if (d->instanceof(c_Closure::classof())) {
         // Hack to stop the mangled name from showing up
         name = s_Closure__invoke;
       } else {

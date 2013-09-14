@@ -49,7 +49,8 @@ void Sweepable::SweepAll() {
   while (t_sweep.next != &t_sweep) {
     Node* n = t_sweep.next;
     n->delist();
-    Sweepable* s = (Sweepable*)(uintptr_t(n) - offsetof(Sweepable,m_sweepNode));
+    auto s = reinterpret_cast<Sweepable*>(uintptr_t(n)
+                                          - offsetof(Sweepable, m_sweepNode));
     if (s->m_persistentCount == 0) {
       s->sweep();
     } else {

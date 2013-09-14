@@ -51,7 +51,7 @@ void c_GenArrayWaitHandle::t___construct() {
 }
 
 void c_GenArrayWaitHandle::ti_setoncreatecallback(CVarRef callback) {
-  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set GenArrayWaitHandle::onCreate: on_create_cb not a closure"));
     throw e;
@@ -91,7 +91,7 @@ Object c_GenArrayWaitHandle::ti_create(CArrRef dependencies) {
     }
 
     assert(current->m_type == KindOfObject);
-    assert(current->m_data.pobj->instanceof(c_WaitHandle::s_cls));
+    assert(current->m_data.pobj->instanceof(c_WaitHandle::classof()));
     auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
     if (child->isSucceeded()) {
@@ -99,7 +99,7 @@ Object c_GenArrayWaitHandle::ti_create(CArrRef dependencies) {
     } else if (child->isFailed()) {
       putException(exception, child->getException());
     } else {
-      assert(child->instanceof(c_WaitableWaitHandle::s_cls));
+      assert(child->instanceof(c_WaitableWaitHandle::classof()));
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
       p_GenArrayWaitHandle my_wh = NEWOBJ(c_GenArrayWaitHandle)();
@@ -147,7 +147,7 @@ void c_GenArrayWaitHandle::onUnblocked() {
     }
 
     assert(current->m_type == KindOfObject);
-    assert(current->m_data.pobj->instanceof(c_WaitHandle::s_cls));
+    assert(current->m_data.pobj->instanceof(c_WaitHandle::classof()));
     auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
     if (child->isSucceeded()) {
@@ -208,7 +208,7 @@ void c_GenArrayWaitHandle::enterContext(context_idx_t ctx_idx) {
     Cell* current = tvAssertCell(m_deps->nvGetValueRef(m_iterPos));
 
     assert(current->m_type == KindOfObject);
-    assert(current->m_data.pobj->instanceof(c_WaitableWaitHandle::s_cls));
+    assert(current->m_data.pobj->instanceof(c_WaitableWaitHandle::classof()));
     auto child_wh = static_cast<c_WaitableWaitHandle*>(current->m_data.pobj);
     child_wh->enterContext(ctx_idx);
   }
@@ -228,14 +228,14 @@ void c_GenArrayWaitHandle::enterContext(context_idx_t ctx_idx) {
       }
 
       assert(current->m_type == KindOfObject);
-      assert(current->m_data.pobj->instanceof(c_WaitHandle::s_cls));
+      assert(current->m_data.pobj->instanceof(c_WaitHandle::classof()));
       auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
       if (child->isFinished()) {
         continue;
       }
 
-      assert(child->instanceof(c_WaitableWaitHandle::s_cls));
+      assert(child->instanceof(c_WaitableWaitHandle::classof()));
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
       child_wh->enterContext(ctx_idx);
     }

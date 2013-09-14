@@ -37,9 +37,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString MySQL::s_class_name("mysql link");
-StaticString MySQLResult::s_class_name("mysql result");
-
 bool mysqlExtension::ReadOnly = false;
 #ifdef FACEBOOK
 bool mysqlExtension::Localize = false;
@@ -79,11 +76,11 @@ MySQLResult::~MySQLResult() {
   close();
   if (m_fields) {
     smart_delete_array(m_fields, m_field_count);
-    m_fields = NULL;
+    m_fields = nullptr;
   }
   if (m_conn) {
     m_conn->decRefCount();
-    m_conn = NULL;
+    m_conn = nullptr;
   }
 }
 
@@ -260,6 +257,11 @@ MySQL::~MySQL() {
   close();
 }
 
+void MySQL::sweep() {
+  // may or may not be smart allocated
+  delete this;
+}
+
 void MySQL::setLastError(const char *func) {
   assert(m_conn);
   m_last_error_set = true;
@@ -270,14 +272,15 @@ void MySQL::setLastError(const char *func) {
 }
 
 void MySQL::close() {
-  if (m_conn) {
-    m_last_error_set = false;
-    m_last_errno = 0;
-    m_xaction_count = 0;
-    m_last_error.clear();
-    mysql_close(m_conn);
-    m_conn = NULL;
+  if (!m_conn) {
+    return;
   }
+  m_last_error_set = false;
+  m_last_errno = 0;
+  m_xaction_count = 0;
+  m_last_error.clear();
+  mysql_close(m_conn);
+  m_conn = nullptr;
 }
 
 bool MySQL::connect(CStrRef host, int port, CStrRef socket, CStrRef username,

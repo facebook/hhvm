@@ -22,10 +22,6 @@ namespace HPHP {
 
 IMPLEMENT_OBJECT_ALLOCATION(TempFile)
 ///////////////////////////////////////////////////////////////////////////////
-
-StaticString TempFile::s_class_name("TempFile");
-
-///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
 TempFile::TempFile(bool autoDelete /* = true */) : m_autoDelete(autoDelete) {

@@ -1625,8 +1625,9 @@ SSATmp* Simplifier::simplifyConvCellToBool(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyConvCellToStr(IRInstruction* inst) {
-  auto const src     = inst->src(0);
-  auto const srcType = src->type();
+  auto const src        = inst->src(0);
+  auto const srcType    = src->type();
+  auto const catchTrace = inst->taken();
 
   if (srcType.isBool())   return gen(ConvBoolToStr, src);
   if (srcType.isNull())   return cns(makeStaticString(""));
@@ -1634,8 +1635,8 @@ SSATmp* Simplifier::simplifyConvCellToStr(IRInstruction* inst) {
   if (srcType.isDbl())    return gen(ConvDblToStr, src);
   if (srcType.isInt())    return gen(ConvIntToStr, src);
   if (srcType.isString()) return gen(IncRef, src);
-  if (srcType.isObj())    return gen(ConvObjToStr, src);
-  if (srcType.isRes())    return gen(ConvResToStr, src);
+  if (srcType.isObj())    return gen(ConvObjToStr, catchTrace, src);
+  if (srcType.isRes())    return gen(ConvResToStr, catchTrace, src);
 
   return nullptr;
 }

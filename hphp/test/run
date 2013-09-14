@@ -74,7 +74,7 @@ function idx($array, $key, $default = null) {
 function idx_file($array, $key, $default = null) {
   $file = is_file(idx($array, $key)) ? realpath($array[$key]) : $default;
   if (!is_file($file)) {
-    error("$file doesn't exist");
+    error("$file doesn't exist. Did you forget to build first?");
   }
   return rel_path($file);
 }
@@ -276,13 +276,17 @@ function extra_args($options) {
   return idx($options, 'args', '');
 }
 
+function hhvm_path() {
+  return idx_file($_ENV, 'HHVM_BIN', bin_root().'/hphp/hhvm/hhvm');
+}
+
 // Return the command and the env to run it in.
 function hhvm_cmd($options, $test, $test_run = null) {
   if ($test_run === null) {
     $test_run = $test;
   }
   $cmd = implode(" ", array(
-    idx_file($_ENV, 'HHVM_BIN', bin_root().'/hphp/hhvm/hhvm'),
+    hhvm_path(),
     '--config',
     find_test_ext($test, 'hdf'),
     find_debug_config($test, 'hphpd.hdf'),
@@ -309,7 +313,7 @@ function hhvm_cmd($options, $test, $test_run = null) {
 
 function hphp_cmd($options, $test) {
   return implode(" ", array(
-    idx_file($_ENV, 'HPHP_BIN', bin_root().'/hphp/hhvm/hhvm'),
+    hhvm_path(),
     '--hphp',
     '--config',
     find_file($test, 'hphp_config.hdf'),
@@ -649,6 +653,8 @@ function main($argv) {
   }
   $tests = find_tests($files, $options);
 
+  hhvm_path(); // check that binary exists
+
   $threads = min(count($tests), idx($options, 'threads', num_cpus() + 1));
 
   if (!isset($options['fbmake'])) {
@@ -693,8 +699,8 @@ function main($argv) {
     $json = json_decode(file_get_contents($bad_test_file), true);
     if (!is_array($json)) {
       error(
-        "A test thread didn't send json to the controller. WTF. ".
-        "If your code isn't horribly broken, please complain loudly"
+        "No JSON output was received from a test thread. ".
+        "This might be a bug in the test script."
       );
     }
     $results = array_merge($results, $json);

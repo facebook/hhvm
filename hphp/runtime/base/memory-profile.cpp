@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/pprof-server.h"
 #include "hphp/runtime/base/hphp-value.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/base/hphp-array-defs.h"
 
 #include <boost/make_shared.hpp>
 

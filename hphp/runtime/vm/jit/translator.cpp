@@ -2870,7 +2870,7 @@ bool callDestroysLocals(const NormalizedInstruction& inst,
                         const Func* caller) {
   auto* unit = caller->unit();
   auto checkTaintId = [&](Id id) {
-    static const StringData* s_extract = StringData::GetStaticString("extract");
+    static const StringData* s_extract = makeStaticString("extract");
     return unit->lookupLitstrId(id)->isame(s_extract);
   };
 

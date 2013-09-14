@@ -235,7 +235,7 @@ struct BlobDecoder {
 
   void decode(const StringData*& sd) {
     String s(decodeString());
-    sd = s.get() ? StringData::GetStaticString(s) : 0;
+    sd = s.get() ? makeStaticString(s) : 0;
   }
 
   void decode(TypedValue& tv) {

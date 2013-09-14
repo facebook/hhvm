@@ -1675,7 +1675,7 @@ void HphpArray::OnSetEvalScalar(ArrayData* ad) {
     if (!isTombstone(e.data.m_type)) {
       auto key = e.key;
       if (e.hasStrKey() && !key->isStatic()) {
-        e.key = StringData::GetStaticString(key);
+        e.key = makeStaticString(key);
         decRefStr(key);
       }
       tvAsVariant(&e.data).setEvalScalar();

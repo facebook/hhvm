@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/shared-map.h"
 #include "hphp/runtime/base/immutable-obj.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/static-string-table.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -66,7 +67,7 @@ StringCase:
         s = apc_reserialize(s);
       }
 
-      auto const st = StringData::LookupStaticString(s.get());
+      auto const st = lookupStaticString(s.get());
       if (st) {
         m_data.str = st;
         m_type = KindOfStaticString;

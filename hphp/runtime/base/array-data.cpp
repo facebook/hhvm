@@ -46,7 +46,7 @@ static ArrayDataMap s_arrayDataMap;
 ArrayData *ArrayData::GetScalarArray(ArrayData *arr,
                                      const StringData *key /* = nullptr */) {
   if (!key) {
-    key = StringData::GetStaticString(f_serialize(arr).get());
+    key = makeStaticString(f_serialize(arr).get());
   } else {
     assert(key->isStatic());
     assert(key->same(f_serialize(arr).get()));

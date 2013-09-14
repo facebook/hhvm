@@ -92,7 +92,7 @@ static NamedEntityMap *s_namedDataMap;
 static NEVER_INLINE
 NamedEntity* getNamedEntityHelper(const StringData* str) {
   if (!str->isStatic()) {
-    str = StringData::GetStaticString(str);
+    str = makeStaticString(str);
   }
 
   auto res = s_namedDataMap->insert(str, NamedEntity());
@@ -905,7 +905,7 @@ void Unit::initialMerge() {
               StringData* s = (StringData*)((char*)obj - (int)k);
               auto* v = (TypedValueAux*) m_mergeInfo->mergeableData(ix + 1);
               ix += sizeof(*v) / sizeof(void*);
-              v->cacheHandle() = StringData::DefCnsHandle(
+              v->cacheHandle() = makeCnsHandle(
                 s, k == UnitMergeKindPersistentDefine);
               if (k == UnitMergeKindPersistentDefine) {
                 mergeCns(TargetCache::handleToRef<TypedValue>(v->cacheHandle()),
@@ -928,7 +928,7 @@ void Unit::initialMerge() {
 }
 
 Cell* Unit::lookupCns(const StringData* cnsName) {
-  TargetCache::CacheHandle handle = StringData::GetCnsHandle(cnsName);
+  auto const handle = lookupCnsHandle(cnsName);
   if (LIKELY(handle != 0)) {
     TypedValue& tv = TargetCache::handleToRef<TypedValue>(handle);
     if (LIKELY(tv.m_type != KindOfUninit)) {
@@ -953,7 +953,7 @@ Cell* Unit::lookupCns(const StringData* cnsName) {
 }
 
 Cell* Unit::lookupPersistentCns(const StringData* cnsName) {
-  TargetCache::CacheHandle handle = StringData::GetCnsHandle(cnsName);
+  auto const handle = lookupCnsHandle(cnsName);
   if (!TargetCache::isPersistentHandle(handle)) return nullptr;
   auto const ret = &TargetCache::handleToRef<TypedValue>(handle);
   assert(cellIsPlausible(*ret));
@@ -980,8 +980,7 @@ TypedValue* Unit::loadCns(const StringData* cnsName) {
 
 bool Unit::defCns(const StringData* cnsName, const TypedValue* value,
                   bool persistent /* = false */) {
-  TargetCache::CacheHandle handle =
-    StringData::DefCnsHandle(cnsName, persistent);
+  auto const handle = makeCnsHandle(cnsName, persistent);
 
   if (UNLIKELY(handle == 0)) {
     if (UNLIKELY(!TargetCache::s_constants)) {
@@ -1032,8 +1031,7 @@ void Unit::defDynamicSystemConstant(const StringData* cnsName,
         s_stderr.equal(cnsName)))) {
     return;
   }
-  TargetCache::CacheHandle handle =
-    StringData::DefCnsHandle(cnsName, true);
+  auto const handle = makeCnsHandle(cnsName, true);
   assert(handle);
   TypedValue* cns = &TargetCache::handleToRef<TypedValue>(handle);
   assert(cns->m_type == KindOfUninit);
@@ -1756,7 +1754,7 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
 
 Unit* UnitRepoProxy::load(const std::string& name, const MD5& md5) {
   UnitEmitter ue(md5);
-  ue.setFilepath(StringData::GetStaticString(name));
+  ue.setFilepath(makeStaticString(name));
   // Look for a repo that contains a unit with matching MD5.
   int repoId;
   for (repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
@@ -2270,7 +2268,7 @@ void UnitEmitter::setLines(const LineTable& lines) {
 Id UnitEmitter::mergeLitstr(const StringData* litstr) {
   LitstrMap::const_iterator it = m_litstr2id.find(litstr);
   if (it == m_litstr2id.end()) {
-    const StringData* str = StringData::GetStaticString(litstr);
+    const StringData* str = makeStaticString(litstr);
     Id id = m_litstrs.size();
     m_litstrs.push_back(str);
     m_litstr2id[str] = id;
@@ -2283,7 +2281,7 @@ Id UnitEmitter::mergeLitstr(const StringData* litstr) {
 Id UnitEmitter::mergeArray(ArrayData* a, const StringData* key /* = NULL */) {
   if (key == nullptr) {
     String s = f_serialize(a);
-    key = StringData::GetStaticString(s.get());
+    key = makeStaticString(s.get());
   }
 
   ArrayIdMap::const_iterator it = m_array2id.find(key);
@@ -2306,7 +2304,7 @@ FuncEmitter* UnitEmitter::getMain() {
 
 void UnitEmitter::initMain(int line1, int line2) {
   assert(m_fes.size() == 0);
-  StringData* name = StringData::GetStaticString("");
+  StringData* name = makeStaticString("");
   FuncEmitter* pseudomain = newFuncEmitter(name);
   Attr attrs = AttrMayUseVV;
   pseudomain->init(line1, line2, 0, attrs, false, name);
@@ -2556,7 +2554,7 @@ Unit* UnitEmitter::create() {
   {
     const std::string& dirname = Util::safe_dirname(m_filepath->data(),
                                                     m_filepath->size());
-    u->m_dirpath = StringData::GetStaticString(dirname);
+    u->m_dirpath = makeStaticString(dirname);
   }
   u->m_md5 = m_md5;
   for (unsigned i = 0; i < m_litstrs.size(); ++i) {

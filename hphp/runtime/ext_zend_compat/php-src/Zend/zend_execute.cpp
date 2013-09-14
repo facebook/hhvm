@@ -1,7 +1,7 @@
 #include "zend_execute.h"
 
 ZEND_API int zend_lookup_class(const char *name, int name_length, zend_class_entry ***ce TSRMLS_DC) {
-  HPHP::StringData *class_name = HPHP::StringData::GetStaticString(name, name_length);
+  HPHP::StringData *class_name = HPHP::makeStaticString(name, name_length);
   **ce = HPHP::Unit::loadClass(class_name);
   return **ce == nullptr ? FAILURE : SUCCESS;
 }

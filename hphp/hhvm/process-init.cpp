@@ -139,7 +139,7 @@ void ProcessInit() {
                                                        hhbc_ext_funcs_count);
   SystemLib::s_nativeFuncUnit->merge();
   SystemLib::s_nullFunc =
-    Unit::lookupFunc(StringData::GetStaticString("86null"));
+    Unit::lookupFunc(makeStaticString("86null"));
 
   // We call a special bytecode emitter function to build the native
   // unit which will contain all of our cppext functions and classes.
@@ -168,7 +168,7 @@ void ProcessInit() {
   // Retrieve all of the class pointers
   for (long long i = 0; i < hhbc_ext_class_count; ++i) {
     const HhbcExtClassInfo* info = hhbc_ext_classes + i;
-    const StringData* name = StringData::GetStaticString(info->m_name);
+    const StringData* name = makeStaticString(info->m_name);
     const NamedEntity* ne = Unit::GetNamedEntity(name);
     Class* cls = Unit::lookupClass(ne);
     assert(cls);

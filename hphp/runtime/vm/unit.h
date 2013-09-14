@@ -281,7 +281,7 @@ struct TypedefReq {
 // (const StringData*) versus (StringData*)
 //
 // All (const StringData*) values are static strings that came from e.g.
-// StringData::GetStaticString().  Therefore no reference counting is required.
+// makeStaticString().  Therefore no reference counting is required.
 //
 //==============================================================================
 

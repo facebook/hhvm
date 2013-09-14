@@ -2245,14 +2245,14 @@ void CodeGenerator::cgConvBoolToStr(IRInstruction* inst) {
   if (srcReg == InvalidReg) {
     auto constVal = src->getValBool();
     if (!constVal) {
-      m_as.mov_imm64_reg((uint64_t)StringData::GetStaticString(""), dstReg);
+      m_as.mov_imm64_reg((uint64_t)makeStaticString(""), dstReg);
     } else {
-      m_as.mov_imm64_reg((uint64_t)StringData::GetStaticString("1"), dstReg);
+      m_as.mov_imm64_reg((uint64_t)makeStaticString("1"), dstReg);
     }
   } else {
     m_as.testb(Reg8(int(srcReg)), Reg8(int(srcReg)));
-    m_as.mov_imm64_reg((uint64_t)StringData::GetStaticString(""), dstReg);
-    m_as.mov_imm64_reg((uint64_t)StringData::GetStaticString("1"), m_rScratch);
+    m_as.mov_imm64_reg((uint64_t)makeStaticString(""), dstReg);
+    m_as.mov_imm64_reg((uint64_t)makeStaticString("1"), m_rScratch);
     m_as.cmov_reg64_reg64(CC_NZ, m_rScratch, dstReg);
   }
 }
@@ -5117,7 +5117,7 @@ void CodeGenerator::cgLdCls(IRInstruction* inst) {
 
 static StringData* fullConstName(const StringData* cls,
                                  const StringData* cnsName) {
-  return StringData::GetStaticString(
+  return makeStaticString(
     Util::toLower(cls->data()) + "::" + cnsName->data()
   );
 }
@@ -5149,7 +5149,7 @@ void CodeGenerator::cgLookupClsCns(IRInstruction* inst) {
 void CodeGenerator::cgLdCns(IRInstruction* inst) {
   const StringData* cnsName = inst->src(0)->getValStr();
 
-  TargetCache::CacheHandle ch = StringData::DefCnsHandle(cnsName, false);
+  auto const ch = makeCnsHandle(cnsName, false);
   // Has an unlikely branch to a LookupCns
   cgLoad(inst->dst(), rVmTl[ch], inst->taken());
 }
@@ -5204,8 +5204,8 @@ void CodeGenerator::cgLookupCnsCommon(IRInstruction* inst) {
   assert(inst->typeParam() == Type::Cell);
   assert(cnsNameTmp->isConst() && cnsNameTmp->type() == Type::StaticStr);
 
-  const StringData* cnsName = cnsNameTmp->getValStr();
-  TargetCache::CacheHandle ch = StringData::DefCnsHandle(cnsName, false);
+  auto const cnsName = cnsNameTmp->getValStr();
+  auto const ch = makeCnsHandle(cnsName, false);
 
   ArgGroup args(m_regs);
   args.addr(rVmTl, ch)
@@ -5278,8 +5278,7 @@ void CodeGenerator::cgLookupCnsU(IRInstruction* inst) {
   const StringData* cnsName = cnsNameTmp->getValStr();
 
   const StringData* fallbackName = fallbackNameTmp->getValStr();
-  TargetCache::CacheHandle fallbackCh =
-    StringData::DefCnsHandle(fallbackName, false);
+  auto const fallbackCh = makeCnsHandle(fallbackName, false);
 
   ArgGroup args(m_regs);
   args.addr(rVmTl, fallbackCh)

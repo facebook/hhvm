@@ -219,7 +219,7 @@ static const StringData* getInvokeName(ActRec *ar) {
   }
   String clsname(cls->name());
   String funcname(func->name());
-  return StringData::GetStaticString(clsname + "::" + funcname);
+  return makeStaticString(clsname + "::" + funcname);
 }
 
 static inline bool nativeWrapperCheckArgs(ActRec* ar) {

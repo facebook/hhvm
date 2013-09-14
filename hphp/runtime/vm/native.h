@@ -76,7 +76,7 @@
 #define HHVM_FUNCTION(fn, ...) \
         HHVM_FN(fn)(__VA_ARGS__)
 #define HHVM_NAMED_FE(fn, fimpl) Native::registerBuiltinFunction(\
-                          StringData::GetStaticString(#fn), fimpl)
+                          makeStaticString(#fn), fimpl)
 #define HHVM_FE(fn) HHVM_NAMED_FE(fn, HHVM_FN(fn))
 
 /* Macros related to declaring/registering internal implementations
@@ -92,7 +92,7 @@
 #define HHVM_METHOD(cn, fn, ...) \
         HHVM_MN(cn,fn)(CObjRef this_, ##__VA_ARGS__)
 #define HHVM_NAMED_ME(cn,fn,mimpl) Native::registerBuiltinFunction(\
-                          StringData::GetStaticString(#cn "->" #fn), \
+                          makeStaticString(#cn "->" #fn), \
                           mimpl)
 #define HHVM_ME(cn,fn) HHVM_NAMED_ME(cn,fn, HHVM_MN(cn,fn))
 
@@ -109,7 +109,7 @@
 #define HHVM_STATIC_METHOD(cn, fn, ...) \
         HHVM_STATIC_MN(cn,fn)(const Class *self_, ##__VA_ARGS__)
 #define HHVM_NAMED_STATIC_ME(cn,fn,mimpl) Native::registerBuiltinFunction(\
-                          StringData::GetStaticString(#cn "::" #fn), \
+                          makeStaticString(#cn "::" #fn), \
                           mimpl)
 #define HHVE_STATIC_ME(cn,fn) HHVM_NAMED_STATIC_FE(cn,fn,HHVM_STATIC_MN(cn,fn))
 
@@ -198,8 +198,8 @@ inline BuiltinFunction GetBuiltinFunction(const StringData* fname,
 inline BuiltinFunction GetBuiltinFunction(const char* fname,
                                           const char* cname = nullptr,
                                           bool isStatic = false) {
-  return GetBuiltinFunction(StringData::GetStaticString(fname),
-                    cname ? StringData::GetStaticString(cname) : nullptr,
+  return GetBuiltinFunction(makeStaticString(fname),
+                    cname ? makeStaticString(cname) : nullptr,
                     isStatic);
 }
 

@@ -1601,7 +1601,7 @@ void Variant::setEvalScalar() {
   case KindOfString: {
     StringData *pstr = m_data.pstr;
     if (!pstr->isStatic()) {
-      StringData *sd = StringData::GetStaticString(pstr);
+      StringData *sd = makeStaticString(pstr);
       decRefStr(pstr);
       m_data.pstr = sd;
       assert(m_data.pstr->isStatic());

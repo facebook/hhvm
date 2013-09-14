@@ -1168,7 +1168,7 @@ static int execute_program_impl(int argc, char** argv) {
     hphp_process_init();
     try {
       HPHP::Eval::PhpFile* phpFile = g_vmContext->lookupPhpFile(
-        StringData::GetStaticString(po.lint.c_str()), "", nullptr);
+        makeStaticString(po.lint.c_str()), "", nullptr);
       if (phpFile == nullptr) {
         throw FileOpenException(po.lint.c_str());
       }
@@ -1402,10 +1402,10 @@ void hphp_process_init() {
   init_thread_locals();
 
   // Initialize per-process dynamic PHP-visible consts before ClassInfo::Load()
-  k_PHP_BINARY = StringData::GetStaticString(current_executable_path());
-  k_PHP_BINDIR = StringData::GetStaticString(current_executable_directory());
-  k_PHP_OS = StringData::GetStaticString(f_php_uname("s"));
-  k_PHP_SAPI = StringData::GetStaticString(RuntimeOption::ExecutionMode);
+  k_PHP_BINARY = makeStaticString(current_executable_path());
+  k_PHP_BINDIR = makeStaticString(current_executable_directory());
+  k_PHP_OS = makeStaticString(f_php_uname("s"));
+  k_PHP_SAPI = makeStaticString(RuntimeOption::ExecutionMode);
 
   ClassInfo::Load();
   Process::InitProcessStatics();

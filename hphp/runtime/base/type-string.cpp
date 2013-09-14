@@ -47,7 +47,7 @@ static const StringData* convert_integer_helper(int64_t n) {
 
   tmpbuf[20] = '\0';
   p = conv_10(n, &is_negative, &tmpbuf[20], &len);
-  return StringData::GetStaticString(p);
+  return makeStaticString(p);
 }
 
 void String::PreConvertInteger(int64_t n) {
@@ -598,15 +598,15 @@ void String::dump() const {
 // StaticString
 
 StaticString::StaticString(litstr s) {
-  m_px = StringData::GetStaticString(s);
+  m_px = makeStaticString(s);
 }
 
 StaticString::StaticString(litstr s, int length) {
-  m_px = StringData::GetStaticString(s, length);
+  m_px = makeStaticString(s, length);
 }
 
 StaticString::StaticString(std::string s) {
-  m_px = StringData::GetStaticString(s.c_str(), s.size());
+  m_px = makeStaticString(s.c_str(), s.size());
 }
 
 StaticString::StaticString(const StaticString &str) {

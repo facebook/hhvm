@@ -1491,7 +1491,7 @@ ObjectData* ObjectData::cloneImpl() {
   ObjectData* obj;
   Object o = obj = ObjectData::newInstance(m_cls);
   cloneSet(obj);
-  static StringData* sd__clone = StringData::GetStaticString("__clone");
+  static StringData* sd__clone = makeStaticString("__clone");
   const Func* method = obj->m_cls->lookupMethod(sd__clone);
   if (method) {
     TypedValue tv;

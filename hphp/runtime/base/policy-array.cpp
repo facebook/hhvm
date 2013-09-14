@@ -821,7 +821,7 @@ void PolicyArray::OnSetEvalScalar(ArrayData* ad) {
     if (a->hasStrKey(pos)) {
       auto k = a->key(pos).getStringData();
       if (!k->isStatic()) {
-        auto sk = StringData::GetStaticString(k);
+        auto sk = makeStaticString(k);
         decRefStr(k);
         // Andrei TODO: inefficient, does one incref and then decref
         a->setKey(pos, sk);

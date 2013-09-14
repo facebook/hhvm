@@ -185,7 +185,7 @@ static size_t allocBitImpl(const StringData* name, PHPNameSpace ns) {
   }
   s_bits_to_go--;
   if (name != nullptr && ns != NSInvalid) {
-    if (!name->isStatic()) name = StringData::GetStaticString(name);
+    if (!name->isStatic()) name = makeStaticString(name);
     if (!map.insert(HandleMapCS::value_type(name, s_next_bit)))
       NOT_REACHED();
   }
@@ -284,7 +284,7 @@ namedAlloc(PHPNameSpace where, const StringData* name,
   }
   Handle retval = allocLocked(where == NSPersistent, numBytes, align);
   if (name) {
-    if (!name->isStatic()) name = StringData::GetStaticString(name);
+    if (!name->isStatic()) name = makeStaticString(name);
     if (!map.insert(typename HI::Map::value_type(name, retval))) NOT_REACHED();
     TRACE(1, "TargetCache: inserted \"%s\", %d\n", name->data(), int(retval));
   } else if (where == NSDynFunction) {
@@ -886,7 +886,7 @@ allocStaticMethodCache(const StringData* clsName,
   // choose must delimit possible class and method names, so we might
   // as well ape the source syntax
   const StringData* joinedName =
-    StringData::GetStaticString(String(clsName->data()) + String("::") +
+    makeStaticString(String(clsName->data()) + String("::") +
                                 String(methName->data()) + String(":") +
                                 String(ctxName));
 

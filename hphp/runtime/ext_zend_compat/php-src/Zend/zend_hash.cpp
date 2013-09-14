@@ -5,7 +5,7 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKe
     return FAILURE;
   }
   assert(arKey[nKeyLength - 1] == '\0');
-  auto key = HPHP::StringData::GetStaticString(arKey, nKeyLength - 1);
+  auto key = HPHP::makeStaticString(arKey, nKeyLength - 1);
 
   if ((flag & HASH_ADD) && ht->exists(key)) {
     return FAILURE;
@@ -33,7 +33,7 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint n
     ht->remove(h, false);
   } else {
     assert(arKey[nKeyLength - 1] == '\0');
-    auto key = HPHP::StringData::GetStaticString(arKey, nKeyLength - 1);
+    auto key = HPHP::makeStaticString(arKey, nKeyLength - 1);
     ht->remove(key, false);
   }
   return SUCCESS;
@@ -58,7 +58,7 @@ ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLen
     return FAILURE;
   }
   assert(arKey[nKeyLength - 1] == '\0');
-  auto key = HPHP::StringData::GetStaticString(arKey, nKeyLength - 1);
+  auto key = HPHP::makeStaticString(arKey, nKeyLength - 1);
 
   *pData = tvHolder.getNext();
   **pData = ht->nvGet(key);

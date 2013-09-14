@@ -31,9 +31,9 @@
 
 namespace HPHP {
 
-static StringData* sd86ctor = StringData::GetStaticString("86ctor");
-static StringData* sd86pinit = StringData::GetStaticString("86pinit");
-static StringData* sd86sinit = StringData::GetStaticString("86sinit");
+static StringData* sd86ctor = makeStaticString("86ctor");
+static StringData* sd86pinit = makeStaticString("86pinit");
+static StringData* sd86sinit = makeStaticString("86sinit");
 
 hphp_hash_map<const StringData*, const HhbcExtClassInfo*,
               string_data_hash, string_data_isame> Class::s_extClassHash;
@@ -51,7 +51,7 @@ const StringData* PreClass::manglePropName(const StringData* className,
     mangledName.push_back('*');
     mangledName.push_back('\0');
     mangledName += propName->data();
-    return StringData::GetStaticString(mangledName);
+    return makeStaticString(mangledName);
   }
   case AttrPrivate: {
     std::string mangledName = "";
@@ -59,7 +59,7 @@ const StringData* PreClass::manglePropName(const StringData* className,
     mangledName += className->data();
     mangledName.push_back('\0');
     mangledName += propName->data();
-    return StringData::GetStaticString(mangledName);
+    return makeStaticString(mangledName);
   }
   default: not_reached();
   }
@@ -847,7 +847,7 @@ Cell* Class::clsCnsGet(const StringData* clsCnsName) const {
   clsCns = clsCnsData->nvGetValueRef(clsCnsInd);
   if (clsCns->m_type == KindOfUninit) {
     // The class constant has not been initialized yet; do so.
-    static StringData* sd86cinit = StringData::GetStaticString("86cinit");
+    static StringData* sd86cinit = makeStaticString("86cinit");
     const Func* meth86cinit =
       m_constants[clsCnsInd].m_class->lookupMethod(sd86cinit);
     TypedValue args[1] = {
@@ -875,7 +875,7 @@ void Class::setParent() {
     Attr attrs = m_parent->attrs();
     if (UNLIKELY(attrs & (AttrFinal | AttrInterface | AttrTrait))) {
       static StringData* sd___MockClass =
-        StringData::GetStaticString("__MockClass");
+        makeStaticString("__MockClass");
       if (!(attrs & AttrFinal) ||
           m_preClass->userAttributes().find(sd___MockClass) ==
           m_preClass->userAttributes().end()) {
@@ -1048,7 +1048,7 @@ void Class::addTraitAlias(const StringData* traitName,
   char buf[traitName->size() + origMethName->size() + 9];
   sprintf(buf, "%s::%s", (traitName->empty() ? "(null)" : traitName->data()),
           origMethName->data());
-  const StringData* origName = StringData::GetStaticString(buf);
+  const StringData* origName = makeStaticString(buf);
   m_traitAliases.push_back(std::pair<const StringData*, const StringData*>
                            (newMethName, origName));
 }
@@ -1261,7 +1261,7 @@ void Class::methodOverrideCheck(const Func* parentMethod, const Func* method) {
 
   if ((parentMethod->attrs() & AttrFinal)) {
     static StringData* sd___MockClass =
-      StringData::GetStaticString("__MockClass");
+      makeStaticString("__MockClass");
     if (m_preClass->userAttributes().find(sd___MockClass) ==
         m_preClass->userAttributes().end()) {
       raise_error("Cannot override final method %s::%s()",
@@ -1418,14 +1418,14 @@ void Class::setMethods() {
 }
 
 void Class::setODAttributes() {
-  static StringData* sd__sleep = StringData::GetStaticString("__sleep");
-  static StringData* sd__get = StringData::GetStaticString("__get");
-  static StringData* sd__set = StringData::GetStaticString("__set");
-  static StringData* sd__isset = StringData::GetStaticString("__isset");
-  static StringData* sd__unset = StringData::GetStaticString("__unset");
-  static StringData* sd__call = StringData::GetStaticString("__call");
+  static StringData* sd__sleep = makeStaticString("__sleep");
+  static StringData* sd__get = makeStaticString("__get");
+  static StringData* sd__set = makeStaticString("__set");
+  static StringData* sd__isset = makeStaticString("__isset");
+  static StringData* sd__unset = makeStaticString("__unset");
+  static StringData* sd__call = makeStaticString("__call");
   static StringData* sd__callStatic
-    = StringData::GetStaticString("__callStatic");
+    = makeStaticString("__callStatic");
 
   m_ODAttrs = 0;
   if (lookupMethod(sd__sleep     )) { m_ODAttrs |= ObjectData::HasSleep;      }
@@ -1888,8 +1888,8 @@ void Class::setInitializers() {
   m_hasInitMethods = (m_pinitVec.size() > 0 || m_sinitVec.size() > 0);
 
   // The __init__ method defined in the Exception class gets special treatment
-  static StringData* sd__init__ = StringData::GetStaticString("__init__");
-  static StringData* sd_exn = StringData::GetStaticString("Exception");
+  static StringData* sd__init__ = makeStaticString("__init__");
+  static StringData* sd_exn = makeStaticString("Exception");
   const Func* einit = lookupMethod(sd__init__);
   m_callsCustomInstanceInit =
     (einit && einit->preClass()->name()->isame(sd_exn));

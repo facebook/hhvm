@@ -241,7 +241,7 @@ VarEnv::VarEnv()
   globalArray.m_data.parr =
     new (request_arena()) GlobalNameValueTableWrapper(&*m_nvTable);
   globalArray.m_data.parr->incRefCount();
-  m_nvTable->set(StringData::GetStaticString("GLOBALS"), &globalArray);
+  m_nvTable->set(makeStaticString("GLOBALS"), &globalArray);
   tvRefcountedDecRef(&globalArray);
 }
 
@@ -948,7 +948,7 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
     method = cls->lookupMethod(methodName);
     while (!method) {
       static StringData* sd__construct
-        = StringData::GetStaticString("__construct");
+        = makeStaticString("__construct");
       if (UNLIKELY(methodName == sd__construct)) {
         // We were looking up __construct and failed to find it. Fall back
         // to old-style constructor: same as class name.
@@ -2075,7 +2075,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
 
     if (fp->m_func->isClosureBody()) {
       static StringData* s_closure_label =
-          StringData::GetStaticString("{closure}");
+          makeStaticString("{closure}");
       funcname = s_closure_label;
     }
 
@@ -2253,7 +2253,7 @@ const ClassInfo::ConstantInfo* VMExecutionContext::findConstantInfo(
   if (it != m_constInfo.end()) {
     return it->second;
   }
-  StringData* key = StringData::GetStaticString(name.get());
+  StringData* key = makeStaticString(name.get());
   ClassInfo::ConstantInfo* ci = new ClassInfo::ConstantInfo();
   ci->name = *(const String*)&key;
   ci->valueLen = 0;
@@ -2518,7 +2518,7 @@ Unit* VMExecutionContext::compileEvalString(StringData* code) {
   EvaledUnitsMap::accessor acc;
   // Promote this to a static string; otherwise it may get swept
   // across requests.
-  code = StringData::GetStaticString(code);
+  code = makeStaticString(code);
   if (s_evaledUnits.insert(acc, code)) {
     acc->second = compile_string(code->data(), code->size());
   }
@@ -2533,17 +2533,17 @@ CStrRef VMExecutionContext::createFunction(CStrRef args, CStrRef code) {
   // has the bonus feature that the value of __FUNCTION__ inside the created
   // function will match Zend. (Note: Zend will actually fatal if there's a
   // user function named __lambda_func when you call create_function. Huzzah!)
-  static StringData* oldName = StringData::GetStaticString("__lambda_func");
+  static StringData* oldName = makeStaticString("__lambda_func");
   std::ostringstream codeStr;
   codeStr << "<?php function " << oldName->data()
           << "(" << args.data() << ") {"
           << code.data() << "}\n";
-  StringData* evalCode = StringData::GetStaticString(codeStr.str());
+  StringData* evalCode = makeStaticString(codeStr.str());
   Unit* unit = compile_string(evalCode->data(), evalCode->size());
   // Move the function to a different name.
   std::ostringstream newNameStr;
   newNameStr << '\0' << "lambda_" << ++m_lambdaCounter;
-  StringData* newName = StringData::GetStaticString(newNameStr.str());
+  StringData* newName = makeStaticString(newNameStr.str());
   unit->renameFunc(oldName, newName);
   m_createdFuncs.push_back(unit);
   unit->merge();
@@ -5193,7 +5193,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushFunc(PC& pc) {
     origSd = c1->m_data.pstr;
     func = Unit::loadFunc(origSd);
   } else if (c1->m_type == KindOfObject) {
-    static StringData* invokeName = StringData::GetStaticString("__invoke");
+    static StringData* invokeName = makeStaticString("__invoke");
     origObj = c1->m_data.pobj;
     const Class* cls = origObj->getVMClass();
     func = cls->lookupMethod(invokeName);

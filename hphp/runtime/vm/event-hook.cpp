@@ -198,7 +198,7 @@ bool EventHook::onFunctionEnter(const ActRec* ar, int funcType) {
           }
           break;
         case PseudoMain:
-          name = StringData::GetStaticString(
+          name = makeStaticString(
             std::string("run_init::") + ar->m_func->unit()->filepath()->data())
             ->data();
           break;

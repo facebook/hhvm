@@ -215,7 +215,7 @@ Array f_get_defined_constants(bool categorize /* = false */) {
   if (categorize) {
     Array categorized_consts;
     // Get all defined constants - user and system
-    Array all_consts = StringData::GetConstants();
+    Array all_consts = lookupDefinedConstants();
     // Get all system constants, including dynamic ones
     Array sys_consts = ClassInfo::GetSystemConstants(true);
     Array user_consts = all_consts.diff(sys_consts, true, false);
@@ -224,7 +224,7 @@ Array f_get_defined_constants(bool categorize /* = false */) {
     return categorized_consts;
   }
   else {
-    return StringData::GetConstants();
+    return lookupDefinedConstants();
   }
 }
 

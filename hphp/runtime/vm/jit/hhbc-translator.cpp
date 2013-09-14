@@ -394,8 +394,8 @@ void HhbcTranslator::profileFunctionEntry(const char* category) {
 
   gen(
     IncStatGrouped,
-    cns(StringData::GetStaticString("FunctionEntry")),
-    cns(StringData::GetStaticString(category)),
+    cns(makeStaticString("FunctionEntry")),
+    cns(makeStaticString(category)),
     cns(1)
   );
 }
@@ -403,8 +403,8 @@ void HhbcTranslator::profileFunctionEntry(const char* category) {
 void HhbcTranslator::profileInlineFunctionShape(const std::string& str) {
   gen(
     IncStatGrouped,
-    cns(StringData::GetStaticString("InlineShape")),
-    cns(StringData::GetStaticString(str)),
+    cns(makeStaticString("InlineShape")),
+    cns(makeStaticString(str)),
     cns(1)
   );
 }
@@ -412,8 +412,8 @@ void HhbcTranslator::profileInlineFunctionShape(const std::string& str) {
 void HhbcTranslator::profileSmallFunctionShape(const std::string& str) {
   gen(
     IncStatGrouped,
-    cns(StringData::GetStaticString("SmallFunctions")),
-    cns(StringData::GetStaticString(str)),
+    cns(makeStaticString("SmallFunctions")),
+    cns(makeStaticString(str)),
     cns(1)
   );
 }
@@ -421,8 +421,8 @@ void HhbcTranslator::profileSmallFunctionShape(const std::string& str) {
 void HhbcTranslator::profileFailedInlShape(const std::string& str) {
   gen(
     IncStatGrouped,
-    cns(StringData::GetStaticString("FailedInl")),
-    cns(StringData::GetStaticString(str)),
+    cns(makeStaticString("FailedInl")),
+    cns(makeStaticString(str)),
     cns(1)
   );
 }
@@ -1279,7 +1279,7 @@ void HhbcTranslator::emitCreateCont(Id funNameStrId) {
         CreateContData { origFunc, genFunc }
       );
 
-  static auto const thisStr = StringData::GetStaticString("this");
+  static auto const thisStr = makeStaticString("this");
   Id thisId = kInvalidId;
   const bool fillThis = origFunc->isMethod() &&
     !origFunc->isStatic() &&
@@ -1340,7 +1340,7 @@ void HhbcTranslator::emitCreateAsync(Id funNameStrId,
   gen(StRaw, cont, cns(RawMemSlot::ContLabel), cns(label));
   gen(StProp, cont, cns(CONTOFF(m_value)), popC());
 
-  static auto const thisStr = StringData::GetStaticString("this");
+  static auto const thisStr = makeStaticString("this");
   Id thisId = kInvalidId;
   const bool fillThis = origFunc->isMethod() &&
     !origFunc->isStatic() &&
@@ -1962,7 +1962,7 @@ void HhbcTranslator::emitFPushCufOp(Op op, Class* cls, StringData* invName,
     SSATmp* callable = topC(safe ? 1 : 0);
     // The most common type for the callable in this case is Arr. We
     // can't really do better than the interpreter here, so punt.
-    SPUNT(StringData::GetStaticString(
+    SPUNT(makeStaticString(
             folly::format("FPushCuf-{}",
                           callable->type().toString()).str())
           ->data());
@@ -3648,7 +3648,7 @@ void HhbcTranslator::emitDiv() {
         popC();
         popC();
         gen(RaiseWarning,
-            cns(StringData::GetStaticString(Strings::DIVISION_BY_ZERO)));
+            cns(makeStaticString(Strings::DIVISION_BY_ZERO)));
         push(cns(false));
         return;
       }
@@ -3696,7 +3696,7 @@ void HhbcTranslator::emitDiv() {
   auto const exit = getExitTraceWarn(
     nextBcOff(),
     exitSpillValues,
-    StringData::GetStaticString(Strings::DIVISION_BY_ZERO)
+    makeStaticString(Strings::DIVISION_BY_ZERO)
   );
 
   assert(divisor->isA(Type::Dbl) && dividend->isA(Type::Dbl));
@@ -3721,7 +3721,7 @@ void HhbcTranslator::emitMod() {
   auto const exit = getExitTraceWarn(
     nextBcOff(),
     exitSpillValues,
-    StringData::GetStaticString(Strings::DIVISION_BY_ZERO)
+    makeStaticString(Strings::DIVISION_BY_ZERO)
   );
   gen(JmpZero, exit, tr);
 

@@ -615,12 +615,12 @@ bool SimpleFunctionCall::isSimpleDefine(StringData **outName,
   Variant v;
   if (!(*m_params)[0]->getScalarValue(v) || !v.isString()) return false;
   if (outName) {
-    *outName = StringData::GetStaticString(v.toCStrRef().get());
+    *outName = makeStaticString(v.toCStrRef().get());
   }
   if (!(*m_params)[1]->getScalarValue(v) || v.isArray()) return false;
   if (outValue) {
     if (v.isString()) {
-      v = StringData::GetStaticString(v.toCStrRef().get());
+      v = makeStaticString(v.toCStrRef().get());
     }
     *outValue = *v.asTypedValue();
   }

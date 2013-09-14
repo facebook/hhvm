@@ -74,7 +74,7 @@ Variant f_icu_match(CStrRef pattern, CStrRef subject,
     }
 
     if (s_patternCacheMap.insert(
-      accessor, StringData::GetStaticString(spattern.get()))) {
+      accessor, makeStaticString(spattern.get()))) {
       accessor->second = rpattern;
     } else {
       delete rpattern;

@@ -148,7 +148,7 @@ Variant *get_intercept_handler(CStrRef name, char* flag) {
     if (*flag == -1) {
       StringData *sd = name.get();
       if (!sd->isStatic()) {
-        sd = StringData::GetStaticString(sd);
+        sd = makeStaticString(sd);
       }
       s_registered_flags[StrNR(sd)].push_back(flag);
       *flag = 0;

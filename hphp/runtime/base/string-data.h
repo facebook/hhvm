@@ -63,10 +63,10 @@ enum CopyStringMode { CopyString };
  * Here's a breakdown of string modes, and which configurations are
  * allowed in which allocation mode:
  *
- *          | LowMalloced | Malloced | Normal (request local)
- *          +-------------+----------+------------------------
- *   Flat   |      X      |     X    |    X
- *   Shared |             |          |    X
+ *          | Static | Malloced | Normal (request local)
+ *          +-------------+----------+-------------------
+ *   Flat   |   X    |     X    |    X
+ *   Shared |        |          |    X
  */
 struct StringData {
   /*
@@ -147,6 +147,16 @@ struct StringData {
   static StringData* MakeMalloced(const char* data, int len);
 
   /*
+   * Allocate a string with malloc, using the low-memory allocator if
+   * jemalloc is available, and setting it as a static string.
+   *
+   * This api is only for the static-string-table.cpp.  The returned
+   * StringData is not expected to be reference counted, and must be
+   * deallocated using destructStatic.
+   */
+  static StringData* MakeStatic(StringSlice);
+
+  /*
    * Offset accessor for the JIT compiler.
    */
   static std::ptrdiff_t sizeOffset() { return offsetof(StringData, m_len); }
@@ -157,23 +167,6 @@ struct StringData {
    * must be called at request cleanup time to handle this.
    */
   static void sweepAll();
-
-  /*
-   * Access to static strings.  TODO(#2872838): move this to another
-   * module.
-   */
-  static StringData* GetStaticString(const StringData* str);
-  static StringData* GetStaticString(StringSlice);
-  static StringData* GetStaticString(const std::string& str);
-  static StringData* GetStaticString(const String& str);
-  static StringData* GetStaticString(const char* str, size_t len);
-  static StringData* GetStaticString(const char* str);
-  static StringData* GetStaticString(char c);
-  static StringData* LookupStaticString(const StringData* str);
-  static size_t GetStaticStringCount();
-  static uint32_t GetCnsHandle(const StringData* cnsName);
-  static uint32_t DefCnsHandle(const StringData* cnsName, bool persistent);
-  static Array GetConstants();
 
   /*
    * Called to return a StringData to the smart allocator.  This is
@@ -187,6 +180,12 @@ struct StringData {
    * using this function instead of release().
    */
   void destruct();
+
+  /*
+   * StringData objects allocated with MakeStatic should be freed
+   * using this function.
+   */
+  void destructStatic() ATTRIBUTE_COLD;
 
   /*
    * Reference-counting related.
@@ -216,7 +215,7 @@ struct StringData {
    * terminator).
    *
    * May not be called for strings created with MakeMalloced or
-   * MakeLowMalloced.
+   * MakeStatic.
    *
    * Returns: possibly a new StringData, if we had to reallocate.  The
    * returned pointer is not yet incref'd.
@@ -425,7 +424,6 @@ private:
 
 private:
   static StringData* MakeSVSlowPath(SharedVariant*, uint32_t len);
-  static StringData* MakeLowMalloced(StringSlice);
   static StringData* InsertStaticString(StringSlice);
 
   StringData(const StringData&) = delete;
@@ -449,7 +447,6 @@ private:
   void enlist();
   void delist();
   void incrementHelper();
-  void destructLowMalloc() ATTRIBUTE_COLD;
   strhash_t hashHelper() const NEVER_INLINE;
   bool checkSane() const;
   void preCompute() const;

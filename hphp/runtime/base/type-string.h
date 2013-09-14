@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/hphp-value.h"
+#include "hphp/runtime/base/static-string-table.h"
 
 namespace HPHP {
 
@@ -73,10 +74,10 @@ public:
 
   // create a string from a character
   static String FromChar(char ch) {
-    return StringData::GetStaticString(ch);
+    return makeStaticString(ch);
   }
   static String FromCStr(const char* str) {
-    return StringData::GetStaticString(str);
+    return makeStaticString(str);
   }
 
   static const StringData *ConvertInteger(int64_t n) ATTRIBUTE_COLD;

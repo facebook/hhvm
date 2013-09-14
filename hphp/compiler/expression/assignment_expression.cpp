@@ -180,11 +180,11 @@ bool AssignmentExpression::isSimpleGlobalAssign(StringData **name,
   Variant v;
   if (!m_value->getScalarValue(v) || v.is(KindOfArray)) return false;
   if (name) {
-    *name = StringData::GetStaticString(ae->getGlobalName());
+    *name = makeStaticString(ae->getGlobalName());
   }
   if (tv) {
     if (v.isString()) {
-      v = StringData::GetStaticString(v.toCStrRef().get());
+      v = makeStaticString(v.toCStrRef().get());
     }
     *tv = *v.asTypedValue();
   }

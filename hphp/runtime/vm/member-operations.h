@@ -265,7 +265,7 @@ inline TypedValue* ElemString(TypedValue& tvScratch, TypedValue* base,
     if (warn) {
       raise_warning("Out of bounds");
     }
-    static StringData* sd = StringData::GetStaticString("");
+    static StringData* sd = makeStaticString("");
     tvScratch.m_data.pstr = sd;
     tvScratch.m_type = KindOfString;
   } else {

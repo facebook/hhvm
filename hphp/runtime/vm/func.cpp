@@ -40,9 +40,9 @@
 namespace HPHP {
 
 TRACE_SET_MOD(hhbc);
-const StringData* Func::s___call = StringData::GetStaticString("__call");
+const StringData* Func::s___call = makeStaticString("__call");
 const StringData* Func::s___callStatic =
-  StringData::GetStaticString("__callStatic");
+  makeStaticString("__callStatic");
 
 //=============================================================================
 // Func.
@@ -123,7 +123,7 @@ bool Func::isFuncIdValid(FuncId id) {
 void Func::setFullName() {
   assert(m_name->isStatic());
   if (m_cls) {
-    m_fullName = StringData::GetStaticString(
+    m_fullName = makeStaticString(
       std::string(m_cls->name()->data()) + "::" + m_name->data());
   } else {
     m_fullName = m_name;
@@ -1138,7 +1138,7 @@ void FuncEmitter::setBuiltinFunc(const ClassInfo::MethodInfo* info,
     FuncEmitter::ParamInfo pi;
     pi.setRef((bool)(info->parameters[i]->attribute & ClassInfo::IsReference));
     pi.setBuiltinType(info->parameters[i]->argType);
-    appendParam(StringData::GetStaticString(info->parameters[i]->name), pi);
+    appendParam(makeStaticString(info->parameters[i]->name), pi);
   }
 }
 

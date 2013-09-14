@@ -673,7 +673,7 @@ SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
        * This is triggering for a case where the tracked state says the local is
        * InitNull but the AssertLoc says it's Str. */
       static auto const error =
-        StringData::GetStaticString("Internal error: static analysis was "
+        makeStaticString("Internal error: static analysis was "
                                     "wrong about a local variable's type.");
       auto* errorInst = m_irFactory.gen(RaiseError, inst->marker(), cns(error));
       inst->become(m_irFactory, errorInst);

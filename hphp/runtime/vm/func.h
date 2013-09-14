@@ -679,7 +679,7 @@ public:
 
   void setReturnType(DataType dt) { m_returnType = dt; }
   void setDocComment(const char *dc) {
-    m_docComment = StringData::GetStaticString(dc);
+    m_docComment = makeStaticString(dc);
   }
   void setLocation(int l1, int l2) {
     m_line1 = l1;

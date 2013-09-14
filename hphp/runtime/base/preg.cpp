@@ -122,7 +122,7 @@ static const pcre_cache_entry*
 insert_cached_pcre(CStrRef regex, const pcre_cache_entry* ent) {
   assert(s_pcreCacheMap);
   auto pair = s_pcreCacheMap->insert(
-    PCREEntry(StringData::GetStaticString(regex.get()), ent));
+    PCREEntry(makeStaticString(regex.get()), ent));
   if (!pair.second) {
     delete ent;
     if (s_pcreCacheMap->size() < RuntimeOption::EvalPCRETableSize) {

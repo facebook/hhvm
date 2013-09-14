@@ -2132,8 +2132,8 @@ interpOne##opcode(ActRec* ar, Cell* sp, Offset pcOff) {                 \
   VMExecutionContext* ec = g_vmContext;                                 \
   Stats::inc(Stats::Instr_InterpOne ## opcode);                         \
   if (Trace::moduleEnabled(Trace::interpOne, 1)) {                      \
-    static const StringData* cat = StringData::GetStaticString("interpOne"); \
-    static const StringData* name = StringData::GetStaticString(#opcode);    \
+    static const StringData* cat = makeStaticString("interpOne"); \
+    static const StringData* name = makeStaticString(#opcode);    \
     Stats::incStatGrouped(cat, name, 1);                                \
   }                                                                     \
   INC_TPC(interp_one)                                                   \

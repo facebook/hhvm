@@ -1026,12 +1026,12 @@ void LinearScan::genSpillStats(IRTrace* trace, int numSpillLocs) {
     }
   );
 
-  static StringData* spillStats = StringData::GetStaticString("SpillStats");
-  static StringData* mainSpills = StringData::GetStaticString("MainSpills");
-  static StringData* mainReloads = StringData::GetStaticString("MainReloads");
-  static StringData* exitSpills = StringData::GetStaticString("ExitSpills");
-  static StringData* exitReloads = StringData::GetStaticString("ExitReloads");
-  static StringData* spillSpace = StringData::GetStaticString("SpillSpace");
+  static StringData* spillStats = makeStaticString("SpillStats");
+  static StringData* mainSpills = makeStaticString("MainSpills");
+  static StringData* mainReloads = makeStaticString("MainReloads");
+  static StringData* exitSpills = makeStaticString("ExitSpills");
+  static StringData* exitReloads = makeStaticString("ExitReloads");
+  static StringData* spillSpace = makeStaticString("SpillSpace");
 
   auto const marker = trace->front()->front()->marker();
   auto addStat = [&](const StringData* key, int value) {

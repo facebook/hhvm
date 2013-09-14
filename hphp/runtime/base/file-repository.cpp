@@ -191,7 +191,7 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
   }
 
   TRACE(1, "FR fast path miss: %s\n", rname->data());
-  const StringData *n = StringData::GetStaticString(name.get());
+  const StringData *n = makeStaticString(name.get());
 
   PhpFile* toKill = nullptr;
   SCOPE_EXIT {
@@ -280,7 +280,7 @@ bool FileRepository::findFile(const StringData *path, struct stat *s) {
       }
     }
     MD5 md5;
-    const StringData* spath = StringData::GetStaticString(path);
+    const StringData* spath = makeStaticString(path);
     UnitMd5Map::accessor acc;
     if (s_unitMd5Map.insert(acc, spath)) {
       bool present = Repo::get().findFile(
@@ -413,7 +413,7 @@ bool FileRepository::readRepoMd5(const StringData *path,
   }
   if (!found) {
     UnitMd5Map::accessor acc;
-    path = StringData::GetStaticString(path);
+    path = makeStaticString(path);
     if (s_unitMd5Map.insert(acc, path)) {
       if (!Repo::get().findFile(path->data(),
                                     SourceRootInfo::GetCurrentSourceRoot(),

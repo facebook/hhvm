@@ -318,7 +318,7 @@ void phpSetBreakPoints(Eval::DebuggerProxy* proxy) {
     bp->m_bindState = Eval::BreakPointInfo::Unknown;
     auto className = bp->getClass();
     if (!className.empty()) {
-      auto clsName = StringData::GetStaticString(className);
+      auto clsName = makeStaticString(className);
       auto cls = Unit::lookupClass(clsName);
       if (cls == nullptr) continue;
       bp->m_bindState = Eval::BreakPointInfo::KnownToBeInvalid;
@@ -339,7 +339,7 @@ void phpSetBreakPoints(Eval::DebuggerProxy* proxy) {
     }
     auto funcName = bp->getFuncName();
     if (!funcName.empty()) {
-      auto fName = StringData::GetStaticString(funcName);
+      auto fName = makeStaticString(funcName);
       Func* f = Unit::lookupFunc(fName);
       if (f == nullptr) continue;
       if (f->hasGeneratorAsBody() && !f->isAsync()) {
@@ -347,7 +347,7 @@ void phpSetBreakPoints(Eval::DebuggerProxy* proxy) {
         // function which has been turned into a stub which creates a
         // continuation. We want to set the breakpoint on the
         // continuation function instead.
-        fName = StringData::GetStaticString(funcName + "$continuation");
+        fName = makeStaticString(funcName + "$continuation");
         f = Unit::lookupFunc(fName);
         if (f == nullptr) continue;
       }
@@ -374,10 +374,10 @@ void phpSetBreakPoints(Eval::DebuggerProxy* proxy) {
       bp->m_bindState = Eval::BreakPointInfo::KnownToBeValid;
       continue;
     } else if (!exceptionClassName.empty()) {
-      auto expClsName = StringData::GetStaticString(exceptionClassName);
+      auto expClsName = makeStaticString(exceptionClassName);
       auto cls = Unit::lookupClass(expClsName);
       if (cls != nullptr) {
-        auto baseClsName = StringData::GetStaticString("Exception");
+        auto baseClsName = makeStaticString("Exception");
         auto baseCls = Unit::lookupClass(baseClsName);
         if (baseCls != nullptr) {
           if (cls->classof(baseCls)) {

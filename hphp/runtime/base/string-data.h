@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_STRING_DATA_H_
 #define incl_HPHP_STRING_DATA_H_
 
+#include "hphp/util/slice.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/word-same.h"
@@ -37,23 +38,6 @@ class Array;
 class String;
 
 //////////////////////////////////////////////////////////////////////
-
-/*
- * A Slice is a compact way to refer to an extent of array elements.
- * This type is designed to be passed around by value.  Methods on slice
- * are set up to match the Boost Range<T> concept.
- */
-template <class T>
-struct Slice {
-  T* ptr;        // pointer to bytes, not necessarily \0 teriminated
-  uint32_t len;  // number of bytes, not counting possible \0
-  Slice(T* ptr, uint32_t len) : ptr(ptr), len(len) {}
-  T* begin() const { return ptr; }
-  T* end() const { return ptr + len; }
-  uint32_t size() const { return len; }
-};
-typedef Slice<const char> StringSlice;
-typedef Slice<char> MutableSlice;
 
 // Copy the passed-in string and free the buffer immediately.
 enum AttachStringMode { AttachString };

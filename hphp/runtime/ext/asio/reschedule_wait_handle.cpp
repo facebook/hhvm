@@ -27,8 +27,10 @@ namespace {
   StaticString s_reschedule("<reschedule>");
 }
 
-const int q_RescheduleWaitHandle$$QUEUE_DEFAULT = AsioContext::QUEUE_DEFAULT;
-const int q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO = AsioContext::QUEUE_NO_PENDING_IO;
+const int64_t q_RescheduleWaitHandle$$QUEUE_DEFAULT =
+  AsioContext::QUEUE_DEFAULT;
+const int64_t q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO =
+  AsioContext::QUEUE_NO_PENDING_IO;
 
 c_RescheduleWaitHandle::c_RescheduleWaitHandle(Class *cb)
     : c_WaitableWaitHandle(cb) {
@@ -43,7 +45,7 @@ void c_RescheduleWaitHandle::t___construct() {
   throw e;
 }
 
-Object c_RescheduleWaitHandle::ti_create(int queue, int priority) {
+Object c_RescheduleWaitHandle::ti_create(int64_t queue, int priority) {
   if (UNLIKELY(
       queue != q_RescheduleWaitHandle$$QUEUE_DEFAULT &&
       queue != q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO)) {

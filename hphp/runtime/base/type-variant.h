@@ -1051,7 +1051,7 @@ public:
   static ALWAYS_INLINE void PromoteToRef(CVarRef v) {
     assert(&v != &null_variant);
     if (v.m_type != KindOfRef) {
-      RefData *ref = NEW(RefData)(v.m_type, v.m_data.num);
+      auto const ref = RefData::Make(v.m_type, v.m_data.num);
       const_cast<Variant&>(v).m_type = KindOfRef;
       const_cast<Variant&>(v).m_data.pref = ref;
     }
@@ -1389,7 +1389,16 @@ inline Variant &concat_assign(Variant &v1, CStrRef s2) {
   return v1;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+// Defined here for include order reasons.
+inline RefData::~RefData() {
+  assert(m_magic == Magic::kMagic);
+  tvAsVariant(&m_tv).~Variant();
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 #endif // incl_HPHP_VARIANT_H_

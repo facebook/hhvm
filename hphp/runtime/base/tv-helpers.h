@@ -130,7 +130,7 @@ ALWAYS_INLINE void tvDecRefOnly(TypedValue* tv) {
 
 // tvBoxHelper sets the refcount of the newly allocated inner cell to 1
 inline RefData* tvBoxHelper(DataType type, uint64_t datum) {
-  return NEW(RefData)(type, datum);
+  return RefData::Make(type, datum);
 }
 
 // Assumes 'tv' is live

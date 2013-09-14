@@ -18,13 +18,6 @@
 
 namespace HPHP {
 
-IMPLEMENT_SMART_ALLOCATION(RefData);
-
-RefData::~RefData() {
-  assert(m_magic == Magic::kMagic);
-  tvAsVariant(&m_tv).~Variant();
-}
-
 void RefData::dump() const {
   VariableSerializer vs(VariableSerializer::Type::VarDump);
   String ret(vs.serialize(tvAsCVarRef(&m_tv), true));

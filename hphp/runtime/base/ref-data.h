@@ -32,24 +32,27 @@ namespace HPHP {
  */
 class RefData {
   enum class Magic : uint64_t { kMagic = 0xfacefaceb00cb00c };
-public:
-  RefData() {
-    // intentional use of = to only assign in debug builds
-    assert(static_cast<bool>(m_magic = Magic::kMagic));
-  }
-  RefData(DataType t, int64_t datum) {
-    // intentional use of = to only assign in debug builds
-    assert(static_cast<bool>(m_magic = Magic::kMagic));
-    init(t, datum);
-  }
-  ~RefData();
 
-  // Don't extend Countable but use these methods to directly
-  // update m_count, declared below.
+public:
+
+  /*
+   * Create a RefData, allocated in the request local heap.
+   */
+  static RefData* Make(DataType t, int64_t datum) {
+    return new (MM().smartMallocSize(sizeof(RefData))) RefData(t, datum);
+  }
+
+  /*
+   * Deallocate a RefData.
+   */
+  void release() {
+    this->~RefData();
+    MM().smartFreeSize(this, sizeof(RefData));
+  }
+
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
 
   // Memory allocator methods
-  DECLARE_SMART_ALLOCATION(RefData);
   void dump() const;
 
   const TypedValue* tv() const {
@@ -77,8 +80,11 @@ public:
   }
 
 private:
-  // initialize this value by laundering uninitNull -> Null
-  void init(DataType t, int64_t datum) {
+  RefData(DataType t, int64_t datum) {
+    // intentional use of = to only assign in debug builds
+    assert(static_cast<bool>(m_magic = Magic::kMagic));
+
+    // Initialize this value by laundering uninitNull -> Null.
     m_count = 1;
     if (!IS_NULL_TYPE(t)) {
       m_tv.m_type = t;
@@ -87,6 +93,8 @@ private:
       m_tv.m_type = KindOfNull;
     }
   }
+
+  ~RefData();
 
   static void compileTimeAsserts() {
     static_assert(offsetof(RefData, m_count) == FAST_REFCOUNT_OFFSET, "");

@@ -404,8 +404,6 @@ private:
   ArrayData* addLvalImpl(StringData* key, strhash_t h, Variant*& ret);
   ArrayData* addVal(int64_t ki, CVarRef data);
   ArrayData* addVal(StringData* key, CVarRef data);
-  ArrayData* addValWithRef(int64_t ki, CVarRef data);
-  ArrayData* addValWithRef(StringData* key, CVarRef data);
 
   ArrayData* update(int64_t ki, CVarRef data);
   ArrayData* update(StringData* key, CVarRef data);

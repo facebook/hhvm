@@ -1245,30 +1245,6 @@ inline ArrayData* HphpArray::addVal(StringData* key, CVarRef data) {
   return initVal(e.data, data);
 }
 
-inline ArrayData* HphpArray::addValWithRef(int64_t ki, CVarRef data) {
-  resizeIfNeeded();
-  auto ei = findForInsert(ki);
-  if (!validPos(*ei)) {
-    auto& e = allocElm(ei);
-    e.setIntKey(ki);
-    if (ki >= m_nextKI) m_nextKI = ki + 1;
-    initWithRef(e.data, data);
-  }
-  return this;
-}
-
-inline ArrayData* HphpArray::addValWithRef(StringData* key, CVarRef data) {
-  resizeIfNeeded();
-  strhash_t h = key->hash();
-  auto ei = findForInsert(key, h);
-  if (!validPos(*ei)) {
-    auto& e = allocElm(ei);
-    e.setStrKey(key, h);
-    initWithRef(e.data, data);
-  }
-  return this;
-}
-
 INLINE_SINGLE_CALLER
 ArrayData* HphpArray::update(int64_t ki, CVarRef data) {
   auto ei = findForInsert(ki);
@@ -1753,11 +1729,25 @@ ArrayData* HphpArray::Plus(ArrayData* ad, const ArrayData* elems, bool copy) {
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
     CVarRef value = it.secondRef();
+    TypedValue* tv;
     if (key.asTypedValue()->m_type == KindOfInt64) {
-      a->addValWithRef(key.toInt64(), value);
+      auto k = key.toInt64();
+      auto ei = a->findForInsert(k);
+      if (validPos(*ei)) continue;
+      auto& e = a->newElm(ei, k);
+      e.setIntKey(k);
+      if (k >= a->m_nextKI) a->m_nextKI = k + 1;
+      tv = &e.data;
     } else {
-      a->addValWithRef(key.getStringData(), value);
+      auto k = key.getStringData();
+      strhash_t h = k->hash();
+      auto ei = a->findForInsert(k, h);
+      if (validPos(*ei)) continue;
+      auto& e = a->newElm(ei, h);
+      e.setStrKey(k, h);
+      tv = &e.data;
     }
+    a->initWithRef(*tv, value);
   }
   return a;
 }

@@ -765,7 +765,8 @@ ArgUnion* getImmPtr(const Op* opcode, int idx);
 
 // Pass a pointer to the pointer to the immediate; this function will advance
 // the pointer past the immediate
-inline int32_t decodeVariableSizeImm(const unsigned char** immPtr) {
+ALWAYS_INLINE
+int32_t decodeVariableSizeImm(const unsigned char** immPtr) {
   const unsigned char small = **immPtr;
   if (UNLIKELY(small & 0x1)) {
     const unsigned int large = *((const unsigned int*)*immPtr);

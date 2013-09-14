@@ -36,7 +36,6 @@
 #include "hphp/util/async-func.h"
 #include "hphp/util/current-executable.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/smart-allocator.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/vm/repo.h"

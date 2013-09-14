@@ -91,7 +91,7 @@ namespace HPHP {
   static void *ObjAllocatorInitSetup;                                   \
   static const char *GetClassName() { return #originalName; }           \
   static StaticString s_class_name;                                     \
-  static HPHP::Class* s_cls;                                        \
+  static HPHP::Class* s_cls;
 
 #define DECLARE_CLASS_COMMON(cls, originalName)                         \
   DECLARE_OBJECT_ALLOCATION(c_##cls)                                    \
@@ -125,8 +125,33 @@ namespace HPHP {
   IMPLEMENT_OBJECT_ALLOCATION(c_##cls)                                  \
 
 #define IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(cls)                           \
-  IMPLEMENT_CLASS_COMMON(cls)                                           \
-  IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(c_##cls)                 \
+  IMPLEMENT_CLASS_COMMON(cls)
+
+//////////////////////////////////////////////////////////////////////
+
+#define NEWOBJ(T) new (HPHP::MM().smartMallocSize(sizeof(T))) T
+#define DELETEOBJ(NS,T,OBJ) delete OBJ
+
+#define DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                         \
+  public:                                                               \
+  ALWAYS_INLINE void operator delete(void* p) {                         \
+    static_assert(std::is_base_of<ResourceData,T>::value, "");          \
+    assert(sizeof(T) <= MemoryManager::kMaxSmartSize);                  \
+    MM().smartFreeSize(p, sizeof(T));                                   \
+  }
+
+#define DECLARE_RESOURCE_ALLOCATION(T)                                  \
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                               \
+  virtual void sweep();
+
+#define DECLARE_OBJECT_ALLOCATION(T)                                    \
+  static void typeCheck() {                                             \
+    static_assert(std::is_base_of<ObjectData,T>::value, "");            \
+  }                                                                     \
+  virtual void sweep();
+
+#define IMPLEMENT_OBJECT_ALLOCATION(T)          \
+  void HPHP::T::sweep() { this->~T(); }
 
 ///////////////////////////////////////////////////////////////////////////////
 // code instrumentation or injections

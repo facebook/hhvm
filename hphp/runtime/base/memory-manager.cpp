@@ -26,7 +26,6 @@
 #include <algorithm>
 #include <cstdint>
 
-#include "hphp/runtime/base/smart-allocator.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/memory-profile.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -37,9 +36,14 @@
 #include "hphp/util/trace.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(smartalloc);
+
+//////////////////////////////////////////////////////////////////////
+
+const uint32_t SLAB_SIZE = 2 << 20;
+
+//////////////////////////////////////////////////////////////////////
 
 #ifdef USE_JEMALLOC
 bool MemoryManager::s_statsEnabled = false;
@@ -133,13 +137,12 @@ static inline void threadStats(uint64_t*& allocated, uint64_t*& deallocated,
 #endif
 
 static void* MemoryManagerInit() {
-  // We store the free list pointers right at the start of each object,
-  // overlapping SmartHeader.data, and we also clobber _count as a
-  // free-object flag when the object is deallocated.
-  // This assert just makes sure they don't overflow.
-  static_assert(FAST_REFCOUNT_OFFSET + sizeof(int) <=
-                SmartAllocatorImpl::MinItemSize,
-                "MinItemSize is too small");
+  // We store the free list pointers right at the start of each
+  // object, overlapping SmartHeader.data, and we also clobber _count
+  // as a free-object flag when the object is deallocated.  This
+  // assert just makes sure they don't overflow.
+  assert(FAST_REFCOUNT_OFFSET + sizeof(int) <=
+    MemoryManager::smartSizeClass(1));
   MemoryManager::TlsWrapper tls;
   return (void*)tls.getNoCheck;
 }
@@ -156,20 +159,6 @@ void MemoryManager::Delete(MemoryManager* mm) {
 
 void MemoryManager::OnThreadExit(MemoryManager* mm) {
   mm->~MemoryManager();
-}
-
-MemoryManager::AllocIterator::AllocIterator(const MemoryManager* mman)
-  : m_mman(*mman)
-  , m_it(m_mman.m_smartAllocators.begin())
-{}
-
-SmartAllocatorImpl*
-MemoryManager::AllocIterator::current() const {
-  return m_it == m_mman.m_smartAllocators.end() ? 0 : *m_it;
-}
-
-void MemoryManager::AllocIterator::next() {
-  ++m_it;
 }
 
 MemoryManager::MemoryManager()
@@ -220,31 +209,26 @@ void MemoryManager::refreshStatsHelperStop() {
 }
 #endif
 
-void MemoryManager::add(SmartAllocatorImpl *allocator) {
-  assert(allocator);
-  m_smartAllocators.push_back(allocator);
-}
-
 void MemoryManager::sweepAll() {
   Sweepable::SweepAll();
 }
 
 void MemoryManager::rollback() {
   StringData::sweepAll();
-  for (unsigned int i = 0, n = m_smartAllocators.size(); i < n; i++) {
-    m_smartAllocators[i]->clear();
-  }
+
   // free smart-malloc slabs
-  for (auto i = m_slabs.begin(), end = m_slabs.end(); i != end; ++i) {
-    free(*i);
+  for (auto slab : m_slabs) {
+    free(slab);
   }
   m_slabs.clear();
+
   // free large allocation blocks
   for (SweepNode *n = m_sweep.next, *next; n != &m_sweep; n = next) {
     next = n->next;
     free(n);
   }
   m_sweep.next = m_sweep.prev = &m_sweep;
+
   // zero out freelists
   for (auto& i : m_sizeUntrackedFree) i.clear();
   for (auto& i : m_sizeTrackedFree)   i.clear();
@@ -502,25 +486,6 @@ void* smart_realloc(void* ptr, size_t nbytes) {
 HOT_FUNC
 void smart_free(void* ptr) {
   if (ptr) MM().smartFree(ptr);
-}
-
-// SmartAllocator facade
-
-HOT_FUNC
-void* SmartAllocatorImpl::alloc(size_t nbytes) {
-  assert(nbytes == size_t(m_itemSize));
-  MM().getStats().usage += nbytes;
-  void* ptr = m_free.maybePop();
-  if (UNLIKELY(!ptr)) {
-    ptr = MM().slabAlloc(nbytes);
-  }
-  TRACE(1, "alloc %zu -> %p\n", nbytes, ptr);
-  MemoryProfile::logAllocation(ptr, nbytes);
-  return ptr;
-}
-
-void SmartAllocatorImpl::logDealloc(void *ptr) {
-  MemoryProfile::logDeallocation(ptr);
 }
 
 //////////////////////////////////////////////////////////////////////

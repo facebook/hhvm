@@ -65,7 +65,6 @@ private:
   // Hold onto the original owner of the doc so it doesn't get free()d.
   Object m_domNode;
 };
-IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(XmlDocWrapper)
 
 StaticString XmlDocWrapper::s_class_name("xmlDoc");
 

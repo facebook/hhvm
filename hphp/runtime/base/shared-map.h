@@ -30,7 +30,6 @@ namespace HPHP {
  * Wrapper for a shared memory map.
  */
 class SharedMap : public ArrayData, Sweepable {
-public:
   explicit SharedMap(SharedVariant* source)
     : ArrayData(kSharedKind)
     , m_arr(source)
@@ -40,6 +39,13 @@ public:
   }
 
   ~SharedMap();
+
+public:
+  template<class... Args>
+  static SharedMap* Make(Args&&... args) {
+    return new (MM().smartMallocSize(sizeof(SharedMap)))
+      SharedMap(std::forward<Args>(args)...);
+  }
 
   static SharedVariant *GetSharedVariant(const ArrayData* ad);
 
@@ -106,10 +112,6 @@ public:
   static bool ValidFullPos(const ArrayData*, const FullPos& fp);
   static bool AdvanceFullPos(ArrayData*, FullPos& fp);
 
-  /**
-   * Memory allocator methods.
-   */
-  DECLARE_SMART_ALLOCATION(SharedMap);
   static void Release(ArrayData*);
 
   static ArrayData* Escalate(const ArrayData*);

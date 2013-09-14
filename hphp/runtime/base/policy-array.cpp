@@ -174,8 +174,6 @@ void SimpleArrayStore::prepend(const Variant& v, uint length,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_SMART_ALLOCATION(PolicyArray)
-
 PolicyArray::PolicyArray(uint capacity)
     : ArrayData(kPolicyKind)
     , Store(m_allocMode, capacity) {
@@ -533,7 +531,7 @@ ArrayData* PolicyArray::EscalateForSort(ArrayData* ad) {
 ArrayData* PolicyArray::Copy(const ArrayData* ad) {
   auto a = asPolicyArray(ad);
   APILOG(a) << "()";
-  auto result = NEW(PolicyArray)(*a,
+  auto result = PolicyArray::Make(*a,
       a->capacity() + (a->m_size == a->capacity()), a->m_allocMode);
   assert(result->getCount() == 0);
   return result;
@@ -541,7 +539,7 @@ ArrayData* PolicyArray::Copy(const ArrayData* ad) {
 
 PolicyArray* PolicyArray::copy(uint capacity) {
   APILOG(this) << "(" << capacity << ")";
-  return NEW(PolicyArray)(*this, capacity, m_allocMode);
+  return PolicyArray::Make(*this, capacity, m_allocMode);
 }
 
 ArrayData* PolicyArray::CopyWithStrongIterators(const ArrayData* ad) {

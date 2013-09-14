@@ -559,7 +559,7 @@ public:
     return wstatus;
   }
 };
-IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(ChildProcess);
+
 void ChildProcess::sweep() {
   // do nothing here, as everything will be collected by SmartAllocator
 }

@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/policy-array.h"
 #include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/base/runtime-option.h"
 
@@ -26,9 +25,6 @@ HOT_FUNC
 ArrayInit::ArrayInit(ssize_t n) {
   if (!n) {
     m_data = HphpArray::GetStaticEmptyArray();
-  } else if (false) {
-    // Force compilation of PolicyArray
-    m_data = NEW(PolicyArray)(n);
   } else {
     m_data = HphpArray::MakeReserve(n);
     m_data->setRefCount(0);

@@ -35,8 +35,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class SmartAllocatorImpl;
-
 struct SweepNode {
   SweepNode* next;
   union {
@@ -170,25 +168,6 @@ struct MemoryManager : boost::noncopyable {
   }
 
   MemoryManager();
-
-  // State for iteration over all the smart allocators registered in a
-  // memory manager.
-  struct AllocIterator {
-    explicit AllocIterator(const MemoryManager* mman);
-
-    // Returns null if we're at the end.
-    SmartAllocatorImpl* current() const;
-    void next();
-
-  private:
-    const MemoryManager& m_mman;
-    std::vector<SmartAllocatorImpl*>::const_iterator m_it;
-  };
-
-  /*
-   * Register a smart allocator. Done by SmartAlloctorImpl's constructor.
-   */
-  void add(SmartAllocatorImpl *allocator);
 
   /**
    * Mark current allocator's position as ending point of a generation and
@@ -451,7 +430,6 @@ private:
   SweepNode m_strings; // in-place node is head of circular list
   MemoryUsageStats m_stats;
 
-  std::vector<SmartAllocatorImpl*> m_smartAllocators;
   std::vector<char*> m_slabs;
 
 #ifdef USE_JEMALLOC

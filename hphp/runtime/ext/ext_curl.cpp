@@ -774,7 +774,7 @@ private:
     CURLOPT_FB_TLS_CIPHER_SPEC = 2147482628
   } fb_specific_options;
 };
-IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(CurlResource);
+
 void CurlResource::sweep() {
   m_write.buf.release();
   m_write_header.buf.release();
@@ -1202,7 +1202,7 @@ private:
   CURLM *m_multi;
   Array m_easyh;
 };
-IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(CurlMultiResource);
+
 void CurlMultiResource::sweep() {
   if (m_multi) {
     curl_multi_cleanup(m_multi);

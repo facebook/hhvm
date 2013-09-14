@@ -2198,8 +2198,6 @@ void c_MapIterator::t_rewind() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_SMART_ALLOCATION_CLS(c_StableMap, Bucket);
-
 #define CONNECT_TO_GLOBAL_DLLIST(mapobj, element)                       \
 do {                                                                    \
   (element)->pListLast = (mapobj)->m_pListTail;                         \
@@ -2246,7 +2244,7 @@ void c_StableMap::deleteBuckets() {
   while (p) {
     Bucket* q = p;
     p = p->pListNext;
-    DELETE(Bucket)(q);
+    q->release();
   }
 }
 
@@ -2299,7 +2297,7 @@ c_StableMap* c_StableMap::Clone(ObjectData* obj) {
 
   Bucket *last = nullptr;
   for (Bucket* p = thiz->m_pListHead; p; p = p->pListNext) {
-    Bucket *np = NEW(c_StableMap::Bucket)();
+    Bucket *np = Bucket::Make();
     cellDup(p->data, np->data);
     uint nIndex;
     if (p->hasIntKey()) {
@@ -2636,7 +2634,7 @@ Object c_StableMap::t_map(CVarRef callback) {
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
-    Bucket *np = NEW(c_StableMap::Bucket)(ret.asCell());
+    Bucket *np = Bucket::Make(ret.asCell());
     uint nIndex;
     if (p->hasIntKey()) {
       np->setIntKey(p->ikey);
@@ -2687,7 +2685,7 @@ Object c_StableMap::t_mapwithkey(CVarRef callback) {
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
-    Bucket *np = NEW(c_StableMap::Bucket)(ret.asTypedValue());
+    Bucket *np = Bucket::Make(ret.asTypedValue());
     uint nIndex;
     if (p->hasIntKey()) {
       np->setIntKey(p->ikey);
@@ -2950,7 +2948,7 @@ bool c_StableMap::update(int64_t h, TypedValue* data) {
   if (++m_size > m_nTableSize) {
     adjustCapacity();
   }
-  p = NEW(c_StableMap::Bucket)(data);
+  p = Bucket::Make(data);
   p->setIntKey(h);
   uint nIndex = (h & m_nTableMask);
   p->pNext = m_arBuckets[nIndex];
@@ -2974,7 +2972,7 @@ bool c_StableMap::update(StringData *key, TypedValue* data) {
   if (++m_size > m_nTableSize) {
     adjustCapacity();
   }
-  p = NEW(c_StableMap::Bucket)(data);
+  p = Bucket::Make(data);
   p->setStrKey(key, h);
   uint nIndex = (h & m_nTableMask);
   p->pNext = m_arBuckets[nIndex];
@@ -3004,7 +3002,7 @@ void c_StableMap::erase(Bucket** prev) {
       m_pListTail = p->pListLast;
     }
     m_size--;
-    DELETE(Bucket)(p);
+    p->release();
   }
 }
 
@@ -3252,6 +3250,11 @@ c_StableMap::Bucket::~Bucket() {
   tvRefcountedDecRef(&data);
 }
 
+void c_StableMap::Bucket::release() {
+  this->~Bucket();
+  MM().smartFreeSize(this, sizeof(Bucket));
+}
+
 void c_StableMap::Bucket::dump() {
   printf("c_StableMap::Bucket: %" PRIx64 ", %p, %p, %p\n",
          hashKey(), pListNext, pListLast, pNext);
@@ -3401,7 +3404,7 @@ void c_StableMap::Unserialize(ObjectData* obj,
       auto h = k.toInt64();
       p = smp->find(h);
       if (UNLIKELY(p != nullptr)) goto do_unserialize;
-      p = NEW(c_StableMap::Bucket)();
+      p = Bucket::Make();
       p->setIntKey(h);
       nIndex = (h & smp->m_nTableMask);
     } else if (k.isString()) {
@@ -3409,7 +3412,7 @@ void c_StableMap::Unserialize(ObjectData* obj,
       auto h = key->hash();
       p = smp->find(key->data(), key->size(), h);
       if (UNLIKELY(p != nullptr)) goto do_unserialize;
-      p = NEW(c_StableMap::Bucket)();
+      p = Bucket::Make();
       p->setStrKey(key, h);
       nIndex = (h & smp->m_nTableMask);
     } else {

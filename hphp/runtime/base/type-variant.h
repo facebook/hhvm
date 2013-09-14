@@ -30,7 +30,6 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-array.h"
-#include "hphp/runtime/base/smart-allocator.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/macros.h"
 

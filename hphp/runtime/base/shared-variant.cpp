@@ -13,8 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/base/shared-variant.h"
+
+#include "folly/ScopeGuard.h"
+
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/base/shared-map.h"
@@ -253,7 +255,7 @@ Variant SharedVariant::toLocal() {
       if (getSerializedArray()) {
         return apc_unserialize(m_data.str->data(), m_data.str->size());
       }
-      return NEW(SharedMap)(this);
+      return SharedMap::Make(this);
     }
   case KindOfUninit:
   case KindOfNull:
@@ -300,7 +302,9 @@ void SharedVariant::dump(std::string &out) {
       out += "array: ";
       out += m_data.str->data();
     } else {
-      SharedMap(this).dump(out);
+      auto sm = SharedMap::Make(this);
+      SCOPE_EXIT { sm->release(); };
+      sm->dump(out);
     }
     break;
   case KindOfUninit:

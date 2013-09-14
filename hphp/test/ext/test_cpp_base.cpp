@@ -39,7 +39,6 @@ TestCppBase::TestCppBase() {
 
 bool TestCppBase::RunTests(const std::string &which) {
   bool ret = true;
-  RUN_TEST(TestSmartAllocator);
   RUN_TEST(TestString);
   RUN_TEST(TestArray);
   RUN_TEST(TestObject);
@@ -77,47 +76,6 @@ public:
   void dump() { printf("data: %d\n", m_data);}
   int m_data;
 };
-
-static StaticString s_TestResource("TestResource");
-
-class TestResource : public ResourceData {
-public:
-  // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return s_TestResource; }
-};
-
-typedef SmartAllocator<SomeClass>
-        SomeClassAlloc;
-
-bool TestCppBase::TestSmartAllocator() {
-  int iMax = 1000000;
-  int64_t time1, time2;
-  {
-    static IMPLEMENT_THREAD_LOCAL(SomeClassAlloc, allocator);
-
-    Timer t;
-    for (int i = 0; i < iMax; i++) {
-      SomeClass *obj = new (allocator.get()) SomeClass();
-      allocator.get()->dealloc(obj);
-    }
-    time1 = t.getMicroSeconds();
-    if (!Test::s_quiet) {
-      printf("SmartAlloctor: %" PRId64 " us\n", time1);
-    }
-  }
-  {
-    Timer t;
-    for (int i = 0; i < iMax; i++) {
-      SomeClass *obj = new SomeClass();
-      delete obj;
-    }
-    time2 = t.getMicroSeconds();
-    if (!Test::s_quiet) {
-      printf("malloc/free: %" PRId64 " us\n", time2);
-    }
-  }
-  return Count(true);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // data types
@@ -586,7 +544,6 @@ bool TestCppBase::TestObject() {
     auto os = f_serialize(o);
     VS(os, "O:1:\"B\":1:{s:3:\"obj\";O:1:\"A\":1:{s:1:\"a\";i:10;}}");
   }
-  VERIFY(!equal(Resource(new TestResource()), Resource(new TestResource()) ));
   return Count(true);
 }
 
@@ -763,29 +720,6 @@ bool TestCppBase::TestVariant() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-class TestGlobals {
-public:
-  TestGlobals() {
-    String a = "apple";
-    m_string = a + "orange"; // so mallocing m_data internally
-
-    m_array = CREATE_MAP2("a", "apple", "b", "orange");
-  }
-
-  Variant m_string;
-  Array m_array;
-  Variant m_string2;
-  Array m_array2;
-  Variant m_conn;
-  Variant m_curlconn;
-  Variant m_curlMultiConn;
-  String key;
-  String value;
-  DECLARE_SMART_ALLOCATION(TestGlobals);
-  void dump() {}
-};
-IMPLEMENT_SMART_ALLOCATION(TestGlobals);
 
 /* Pull 32bit Big Endian words from an in6_addr */
 static inline long in6addrWord(struct in6_addr addr, char wordNo) {

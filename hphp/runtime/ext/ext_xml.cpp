@@ -65,8 +65,6 @@ public:
   int isparsing;
 };
 
-IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(XmlParser);
-
 XmlParser::XmlParser() : case_folding(0), parser(NULL),
     target_encoding(NULL), level(0), toffset(0), curtag(0),
     ltags(NULL), lastwasopen(0), skipwhite(0), isparsing(0) {

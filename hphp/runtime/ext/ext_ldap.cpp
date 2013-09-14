@@ -117,7 +117,7 @@ public:
   BerElement *ber;
   Resource result; // Reference to LdapResult to avoid premature deallocation
 };
-IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(LdapResultEntry)
+
 void LdapResultEntry::sweep() {
   close();
 }

@@ -38,7 +38,6 @@ class TestCppBase : public TestBase {
   virtual bool RunTests(const std::string &which);
 
   // building blocks
-  bool TestSmartAllocator();
   bool TestIpBlockMap();
 
   /**

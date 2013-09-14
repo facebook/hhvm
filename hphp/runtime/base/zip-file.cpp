@@ -20,7 +20,6 @@
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(ZipFile);
 ///////////////////////////////////////////////////////////////////////////////
 
 StaticString ZipFile::s_class_name("ZipFile");

@@ -203,7 +203,7 @@ HphpArray* HphpArray::MakeReserve(uint32_t capacity) {
 }
 
 HOT_FUNC_VM
-HphpArray* HphpArray::MakeTuple(uint32_t size, const TypedValue* values) {
+HphpArray* HphpArray::MakePacked(uint32_t size, const TypedValue* values) {
   assert(size > 0);
 
   auto const cmret = computeCapAndMask(size);

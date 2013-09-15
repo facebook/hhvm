@@ -938,7 +938,7 @@ static const struct {
   { OpString,      {None,             Stack1,       OutStringImm,      1 }},
   { OpArray,       {None,             Stack1,       OutArrayImm,       1 }},
   { OpNewArray,    {None,             Stack1,       OutArray,          1 }},
-  { OpNewTuple,    {StackN,           Stack1,       OutArray,          0 }},
+  { OpNewPackedArray, {StackN,        Stack1,       OutArray,          0 }},
   { OpAddElemC,    {StackTop3,        Stack1,       OutArray,         -2 }},
   { OpAddElemV,    {StackTop3,        Stack1,       OutArray,         -2 }},
   { OpAddNewElemC, {StackTop2,        Stack1,       OutArray,         -1 }},
@@ -1296,7 +1296,7 @@ int64_t getStackPopped(const NormalizedInstruction& ni) {
     case OpFCallArray:   return kNumActRecCells + 1;
 
     case OpFCallBuiltin:
-    case OpNewTuple:
+    case OpNewPackedArray:
     case OpCreateCl:     return ni.imm[0].u_IVA;
 
     default:             break;
@@ -1332,7 +1332,7 @@ int getStackDelta(const NormalizedInstruction& ni) {
     }
 
     case OpFCallBuiltin:
-    case OpNewTuple:
+    case OpNewPackedArray:
     case OpCreateCl:
       return 1 - ni.imm[0].u_IVA;
 

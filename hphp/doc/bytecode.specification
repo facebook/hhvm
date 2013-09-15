@@ -850,7 +850,7 @@ NewArray    []  ->  [C:Arr]
 
   New array. Creates a new empty array and pushes it onto the stack.
 
-NewTuple <num elems>    [C..C]  ->  [C]
+NewPackedArray <num elems>    [C..C]  ->  [C]
 
   New array. Creates a new array from the top %1 cells on the stack,
   pops those cells, then pushes the new array onto the stack. Elements

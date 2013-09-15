@@ -3422,11 +3422,11 @@ OPTBLD_INLINE void VMExecutionContext::iopNewArray(PC& pc) {
   m_stack.pushArrayNoRc(arr);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopNewTuple(PC& pc) {
+OPTBLD_INLINE void VMExecutionContext::iopNewPackedArray(PC& pc) {
   NEXT();
   DECODE_IVA(n);
   // This constructor moves values, no inc/decref is necessary.
-  auto* a = HphpArray::MakeTuple(n, m_stack.topC());
+  auto* a = HphpArray::MakePacked(n, m_stack.topC());
   m_stack.ndiscard(n);
   m_stack.pushArrayNoRc(a);
 }

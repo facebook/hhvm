@@ -1932,13 +1932,13 @@ void EmitterVisitor::visitKids(ConstructPtr c) {
 }
 
 /*
- * isTupleInit() returns true if this expression list looks like a vanilla
- * tuple-shaped array with no keys, no ref values; e.g. array(x,y,z),
- * where we can NewTuple to create the array.  In that case the elements are
+ * isPackedInit() returns true if this expression list looks like an
+ * array with no keys and no ref values; e.g. array(x,y,z).
+ * In this case we can NewPackedArray to create the array. The elements are
  * pushed on the stack, so we arbitrarily limit this to a small multiple of
  * HphpArray::SmallSize (12).
  */
-bool isTupleInit(ExpressionPtr init_expr, int* cap) {
+bool isPackedInit(ExpressionPtr init_expr, int* size) {
   if (init_expr->getKindOf() != Expression::KindOfExpressionList) return false;
   ExpressionListPtr el = static_pointer_cast<ExpressionList>(init_expr);
   int n = el->getCount();
@@ -1949,7 +1949,7 @@ bool isTupleInit(ExpressionPtr init_expr, int* cap) {
     ArrayPairExpressionPtr ap = static_pointer_cast<ArrayPairExpression>(ex);
     if (ap->getName() != nullptr || ap->isRef()) return false;
   }
-  *cap = n;
+  *size = n;
   return true;
 }
 
@@ -2615,7 +2615,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           return true;
         }
         if (op == T_ARRAY) {
-          int tuple_cap;
+          int num_elems;
           if (u->isScalar()) {
             TypedValue tv;
             tvWriteUninit(&tv);
@@ -2623,17 +2623,17 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             if (m_staticArrays.size() == 0) {
               e.Array(tv.m_data.parr);
             }
-          } else if (isTupleInit(u->getExpression(), &tuple_cap)) {
+          } else if (isPackedInit(u->getExpression(), &num_elems)) {
             // evaluate array values onto stack
             ExpressionListPtr el =
               static_pointer_cast<ExpressionList>(u->getExpression());
-            for (int i = 0; i < tuple_cap; i++) {
+            for (int i = 0; i < num_elems; i++) {
               ArrayPairExpressionPtr ap =
                 static_pointer_cast<ArrayPairExpression>((*el)[i]);
               visit(ap->getValue());
               emitConvertToCell(e);
             }
-            e.NewTuple(tuple_cap);
+            e.NewPackedArray(num_elems);
           } else {
             assert(m_staticArrays.size() == 0);
             ExpressionPtr ex = u->getExpression();

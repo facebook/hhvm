@@ -1313,9 +1313,9 @@ IRTranslator::translateFCallArray(const NormalizedInstruction& i) {
 }
 
 void
-IRTranslator::translateNewTuple(const NormalizedInstruction& i) {
+IRTranslator::translateNewPackedArray(const NormalizedInstruction& i) {
   int numArgs = i.imm[0].u_IVA;
-  HHIR_EMIT(NewTuple, numArgs);
+  HHIR_EMIT(NewPackedArray, numArgs);
 }
 
 void

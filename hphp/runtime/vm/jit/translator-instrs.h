@@ -34,7 +34,7 @@
   CASE(String) \
   CASE(Array) \
   CASE(NewArray) \
-  CASE(NewTuple) \
+  CASE(NewPackedArray) \
   CASE(NewCol) \
   CASE(Nop) \
   CASE(AddElemC) \

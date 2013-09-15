@@ -81,7 +81,7 @@ public:
   static HphpArray* MakeReserve(uint32_t capacity);
 
   /*
-   * Allocate a "tuple"-style HphpArray.  This is an array in packed
+   * Allocate a packed HphpArray.  This is an array in packed
    * mode, containing `size' values, in the reverse order of the
    * `values' array.
    *
@@ -91,7 +91,7 @@ public:
    *
    * Pre: size > 0
    */
-  static HphpArray* MakeTuple(uint32_t size, const TypedValue* values);
+  static HphpArray* MakePacked(uint32_t size, const TypedValue* values);
 
   /*
    * Return a pointer to the singleton static empty array.  This is

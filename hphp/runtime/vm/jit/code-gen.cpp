@@ -274,7 +274,7 @@ CALL_OPCODE(TypeProfileFunc)
 CALL_OPCODE(CreateContFunc)
 CALL_OPCODE(CreateContMeth)
 CALL_OPCODE(NewArray)
-CALL_OPCODE(NewTuple)
+CALL_OPCODE(NewPackedArray)
 CALL_OPCODE(AllocObj)
 CALL_OPCODE(LdClsCtor);
 CALL_OPCODE(PrintStr)

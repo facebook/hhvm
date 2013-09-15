@@ -5203,7 +5203,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushFunc(PC& pc) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
   if (func == nullptr) {
-    raise_error("Call to undefined function %s()", c1->m_data.pstr->data());
+    raise_error("Undefined function: %s", c1->m_data.pstr->data());
   }
   assert(!origObj || !origSd);
   assert(origObj || origSd);
@@ -5234,7 +5234,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushFuncD(PC& pc) {
   const NamedEntityPair nep = m_fp->m_func->unit()->lookupNamedEntityPairId(id);
   Func* func = Unit::loadFunc(nep.second, nep.first);
   if (func == nullptr) {
-    raise_error("Call to undefined function %s()",
+    raise_error("Undefined function: %s",
                 m_fp->m_func->unit()->lookupLitstrId(id)->data());
   }
   ActRec* ar = fPushFuncImpl(func, numArgs);

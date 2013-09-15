@@ -2216,8 +2216,10 @@ void HhbcTranslator::emitFPushFunc(int32_t numParams) {
   if (!topC()->isA(Type::Str)) {
     PUNT(FPushFunc_not_Str);
   }
+
+  auto const catchTrace = getCatchTrace();
   auto const funcName = popC();
-  emitFPushActRec(gen(LdFunc, getCatchTrace(), funcName),
+  emitFPushActRec(gen(LdFunc, catchTrace, funcName),
                   m_tb->genDefInitNull(),
                   numParams,
                   nullptr);

@@ -14,7 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifdef __x86_64__
+// ASan is less precise than valgrind and believes this function overruns reads
+#if defined(__x86_64__) && !defined(ENABLE_ASAN)
 
 #include <emmintrin.h>
 #include <stdint.h>

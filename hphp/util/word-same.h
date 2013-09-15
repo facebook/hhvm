@@ -22,6 +22,9 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+// ASan is less precise than valgrind and believes this function overruns reads
+#ifndef ENABLE_ASAN
+
 /*
  * Word at a time comparison for two memory regions of length
  * `lenBytes' + 1 (for the null terminator).  Returns true if the
@@ -34,6 +37,7 @@ namespace HPHP {
  */
 ALWAYS_INLINE
 bool wordsame(const void* mem1, const void* mem2, size_t lenBytes) {
+  assert(reinterpret_cast<const uintptr_t>(mem1) % 4 == 0);
   auto p1 = reinterpret_cast<const uint32_t*>(mem1);
   auto p2 = reinterpret_cast<const uint32_t*>(mem2);
   auto constexpr W = sizeof(*p1);
@@ -46,6 +50,16 @@ bool wordsame(const void* mem1, const void* mem2, size_t lenBytes) {
   auto shift = 8 * (W - 1) - 8 * (lenBytes % W);
   return (*p1 << shift) == (*p2 << shift);
 }
+
+#else // ENABLE_ASAN
+
+ALWAYS_INLINE
+bool wordsame(const void* mem1, const void* mem2, size_t lenBytes) {
+  assert(reinterpret_cast<const uintptr_t>(mem1) % 4 == 0);
+  return !memcmp(mem1, mem2, lenBytes+1);
+}
+
+#endif
 
 //////////////////////////////////////////////////////////////////////
 

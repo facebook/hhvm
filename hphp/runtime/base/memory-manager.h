@@ -21,6 +21,7 @@
 
 #include "folly/Memory.h"
 
+#include "hphp/util/alloc.h" // must be included before USE_JEMALLOC is used
 #include "hphp/util/trace.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/runtime/base/memory-usage-stats.h"

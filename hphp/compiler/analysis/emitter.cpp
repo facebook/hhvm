@@ -2620,7 +2620,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             TypedValue tv;
             tvWriteUninit(&tv);
             initScalar(tv, u);
-            if (m_staticArrays.size() == 0) {
+            if (m_staticArrays.empty()) {
               e.Array(tv.m_data.parr);
             }
           } else if (isPackedInit(u->getExpression(), &num_elems)) {
@@ -2635,7 +2635,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             }
             e.NewPackedArray(num_elems);
           } else {
-            assert(m_staticArrays.size() == 0);
+            assert(m_staticArrays.empty());
             ExpressionPtr ex = u->getExpression();
             if (ex->getKindOf() == Expression::KindOfExpressionList) {
               ExpressionListPtr el(static_pointer_cast<ExpressionList>(ex));
@@ -3728,8 +3728,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           static_pointer_cast<ArrayPairExpression>(node));
 
         ExpressionPtr key = ap->getName();
-        if (m_staticArrays.size()) {
-          HphpArray* a = m_staticArrays.back();
+        if (!m_staticArrays.empty()) {
           ExpressionPtr val = ap->getValue();
 
           // Value.
@@ -3787,9 +3786,10 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             } else {
               not_implemented();
             }
-            a->set(tvAsCVarRef(&tvKey), tvAsVariant(&tvVal), false);
+            m_staticArrays.back().set(tvAsCVarRef(&tvKey),
+                                      tvAsVariant(&tvVal));
           } else {
-            a->append(tvAsCVarRef(&tvVal), false);
+            m_staticArrays.back().append(tvAsCVarRef(&tvVal));
           }
         } else {
           // Assume new array is on top of stack
@@ -7284,19 +7284,12 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
     case Expression::KindOfUnaryOpExpression: {
       UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(val));
       if (u->getOp() == T_ARRAY) {
-        auto a = HphpArray::MakeReserve(0);
-        m_staticArrays.push_back(a);
-
+        m_staticArrays.push_back(Array::attach(HphpArray::MakeReserve(0)));
         visit(u->getExpression());
-
-        HphpArray* va = m_staticArrays.back();
+        tvVal = make_tv<KindOfArray>(
+          ArrayData::GetScalarArray(m_staticArrays.back().get())
+        );
         m_staticArrays.pop_back();
-
-        auto sa = ArrayData::GetScalarArray(va);
-        tvVal.m_data.parr = sa;
-        tvVal.m_type = KindOfArray;
-
-        decRefArr(a);
         break;
       }
       // Fall through

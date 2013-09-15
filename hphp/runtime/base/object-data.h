@@ -259,7 +259,7 @@ class ObjectData {
   Array o_toIterArray(CStrRef context, bool getRef = false);
 
   Variant* o_realProp(CStrRef s, int flags,
-                      CStrRef context = null_string) const;
+                      CStrRef context = null_string);
 
   Variant o_get(CStrRef s, bool error = true,
                 CStrRef context = null_string);
@@ -304,8 +304,8 @@ class ObjectData {
   static int GetMaxId() ATTRIBUTE_COLD;
 
  public:
-  CArrRef getDynProps() const { return o_properties; }
-  void initProperties(int nProp);
+  bool hasDynProps() const { return o_properties.size(); }
+  void reserveProperties(int nProp);
 
   // heap profiling helpers
   void getChildren(std::vector<TypedValue*> &out) {
@@ -316,8 +316,7 @@ class ObjectData {
     }
 
     // dynamic properties
-    ArrayData* props = o_properties.get();
-    if (props) {
+    if (auto props = o_properties.get()) {
       props->getChildren(out);
     }
   }
@@ -430,7 +429,7 @@ class ObjectData {
   // Pointer to this object's class
   Class* m_cls;
   // Storage for dynamic properties
-  ArrNR o_properties;
+  Array o_properties;
   // Numeric identifier of this object (used for var_dump())
   int o_id;
 

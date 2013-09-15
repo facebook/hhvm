@@ -108,9 +108,6 @@ class ResourceData {
   // that walk the SmartAllocator heaps can distinguish between objects and
   // resources
   Class* m_cls;
-  // Storage for dynamic properties
-  ArrNR o_properties;
-
 } __attribute__((aligned(16)));
 
 /**

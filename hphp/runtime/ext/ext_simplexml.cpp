@@ -950,7 +950,7 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
 
 bool c_SimpleXMLElement::ToBoolean(const ObjectData* obj) noexcept {
   auto thiz = static_cast<const c_SimpleXMLElement*>(obj);
-  if (thiz->m_node || thiz->getDynProps().size()) {
+  if (thiz->m_node || thiz->hasDynProps()) {
     if (thiz->m_is_array || thiz->m_is_children ||
        (thiz->m_node->parent &&
         thiz->m_node->parent->type == XML_DOCUMENT_NODE)) {

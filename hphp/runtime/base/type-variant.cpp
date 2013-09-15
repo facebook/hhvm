@@ -1704,7 +1704,10 @@ static void unserializeProp(VariableUnserializer *uns,
     // Dynamic property. If this is the first, and we're using HphpArray,
     // we need to pre-allocate space in the array to ensure the elements
     // dont move during unserialization.
-    obj->initProperties(nProp);
+    //
+    // TODO(#2881866): this assumption means we can't do reallocations
+    // when promoting kPackedKind -> kMixedKind.
+    obj->reserveProperties(nProp);
     t = obj->o_realProp(realKey, ObjectData::RealPropCreate, context);
     if (!t) {
       // When accessing protected/private property from wrong context,

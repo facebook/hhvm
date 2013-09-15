@@ -142,7 +142,7 @@ size_t MemoryProfile::getSizeOfArray(ArrayData *arr) {
 
 // static
 size_t MemoryProfile::getSizeOfObject(ObjectData *obj) {
-  ArrayData* props = obj->o_properties.get();
+  auto const props = obj->o_properties.get();
   return getSizeOfPtr(obj) + (props ? getSizeOfArray(props) : 0);
 }
 

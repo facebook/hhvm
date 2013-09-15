@@ -35,6 +35,7 @@ hphp/system/php/spl/interfaces/OuterIterator.php
 hphp/system/php/spl/iterators/IteratorIterator.php
 hphp/system/php/spl/iterators/FilterIterator.php
 hphp/system/php/spl/iterators/RecursiveFilterIterator.php
+hphp/system/php/spl/iterators/RegexIterator.php
 
 hphp/system/php/spl/iterators/ArrayIterator.php
 hphp/system/php/spl/iterators/RecursiveArrayIterator.php

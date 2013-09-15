@@ -341,6 +341,7 @@ inline void MemoryManager::smartFree(void* ptr) {
   auto const n = static_cast<SweepNode*>(ptr) - 1;
   auto const padbytes = n->padbytes;
   if (LIKELY(padbytes <= kMaxSmartSize)) {
+    assert(memset(ptr, kSmartFreeFill, padbytes - sizeof(SmallNode)));
     auto const idx = (padbytes - 1) >> kLgSizeQuantum;
     assert(idx < kNumSizes && idx >= 0);
     FTRACE(1, "smartFree: {}\n", ptr);

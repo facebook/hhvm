@@ -48,10 +48,10 @@ struct SweepNode {
 // jemalloc uses 0x5a but we use 0x6a so we can tell the difference
 // when debugging.  There's also 0x7a for some cases of ex-TypedValue
 // memory.
-const char kSmartFreeFill = 0x6a;
-const char kTVTrashFill = 0x7a;
-const uintptr_t kSmartFreeWord = 0x6a6a6a6a6a6a6a6aLL;
-const uintptr_t kMallocFreeWord = 0x5a5a5a5a5a5a5a5aLL;
+constexpr char kSmartFreeFill = 0x6a;
+constexpr char kTVTrashFill = 0x7a;
+constexpr uintptr_t kSmartFreeWord = 0x6a6a6a6a6a6a6a6aLL;
+constexpr uintptr_t kMallocFreeWord = 0x5a5a5a5a5a5a5a5aLL;
 
 /**
  * A garbage list is a freelist of items that uses the space in the items
@@ -156,9 +156,7 @@ public:
  *  3. Freelance memory, malloced by extensions or STL classes, that are
  *     completely out of MemoryManager's control.
  */
-class MemoryManager : boost::noncopyable {
-  static void* TlsInitSetup;
-public:
+struct MemoryManager : boost::noncopyable {
   typedef ThreadLocalSingleton<MemoryManager> TlsWrapper;
   struct MaskAlloc;
 
@@ -393,6 +391,32 @@ private:
     size_t padbytes;  // <= kMaxSmartSize means small block
   };
 
+  /*
+   * Debug mode header.
+   *
+   * This sits in front of the user payload for small allocations, and
+   * in front of the SweepNode in big allocations.  The allocatedMagic
+   * aliases the space for the GarbageList pointers, but should catch
+   * double frees due to kAllocatedMagic.
+   *
+   * We set requestedSize to kFreedMagic when a block is not
+   * allocated.
+   */
+  struct DebugHeader {
+    static constexpr uintptr_t kAllocatedMagic =
+                               (static_cast<size_t>(1) << 63) - 0xfac3;
+    static constexpr size_t kFreedMagic = static_cast<size_t>(-1);
+
+    uintptr_t allocatedMagic;
+    size_t requestedSize;
+    size_t returnedCap;
+    size_t padding;
+  };
+
+  static constexpr unsigned kLgSizeQuantum = 4; // 16 bytes
+  static constexpr unsigned kNumSizes = kMaxSmartSize >> kLgSizeQuantum;
+  static constexpr size_t kSmartSizeMask = (1 << kLgSizeQuantum) - 1;
+
 private:
   char* newSlab(size_t nbytes);
   void* smartEnlist(SweepNode*);
@@ -408,14 +432,16 @@ private:
   void refreshStatsHelperStop();
   void* smartMallocSizeBigHelper(void*&, size_t&, size_t);
 #endif
-
-private:
-  static constexpr unsigned kLgSizeQuantum = 4; // 16 bytes
-  static constexpr unsigned kNumSizes = kMaxSmartSize >> kLgSizeQuantum;
-  static constexpr size_t kSmartSizeMask = (1 << kLgSizeQuantum) - 1;
+  bool checkPreFree(DebugHeader*, size_t, size_t);
+  template<class SizeT> static SizeT debugAddExtra(SizeT);
+  template<class SizeT> static SizeT debugRemoveExtra(SizeT);
+  void* debugPostAllocate(void*, size_t, size_t);
+  void* debugPreFree(void*, size_t, size_t);
 
 private:
   TRACE_SET_MOD(smartalloc);
+
+  static void* TlsInitSetup;
 
   char* m_front;
   char* m_limit;
@@ -424,7 +450,6 @@ private:
   SweepNode m_sweep;   // oversize smart_malloc'd blocks
   SweepNode m_strings; // in-place node is head of circular list
   MemoryUsageStats m_stats;
-  bool m_enabled;
 
   std::vector<SmartAllocatorImpl*> m_smartAllocators;
   std::vector<char*> m_slabs;
@@ -432,8 +457,8 @@ private:
 #ifdef USE_JEMALLOC
   uint64_t* m_allocated;
   uint64_t* m_deallocated;
-  int64_t  m_delta;
-  int64_t  m_prevAllocated;
+  int64_t m_delta;
+  int64_t m_prevAllocated;
   size_t* m_cactive;
   size_t m_cactiveLimit;
 

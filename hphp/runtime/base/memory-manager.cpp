@@ -23,6 +23,9 @@
 #endif
 #define __STDC_LIMIT_MACROS
 
+#include <algorithm>
+#include <cstdint>
+
 #include "hphp/runtime/base/smart-allocator.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/memory-profile.h"
@@ -33,12 +36,11 @@
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
 
-#include <stdint.h>
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(smartalloc);
+
 #ifdef USE_JEMALLOC
 bool MemoryManager::s_statsEnabled = false;
 size_t MemoryManager::s_cactiveLimitCeiling = 0;
@@ -227,19 +229,13 @@ void MemoryManager::sweepAll() {
   Sweepable::SweepAll();
 }
 
-struct SmallNode {
-  size_t padbytes; // <= kMaxSmartSize means small block
-};
-
-typedef std::vector<char*>::const_iterator SlabIter;
-
 void MemoryManager::rollback() {
   StringData::sweepAll();
   for (unsigned int i = 0, n = m_smartAllocators.size(); i < n; i++) {
     m_smartAllocators[i]->clear();
   }
   // free smart-malloc slabs
-  for (SlabIter i = m_slabs.begin(), end = m_slabs.end(); i != end; ++i) {
+  for (auto i = m_slabs.begin(), end = m_slabs.end(); i != end; ++i) {
     free(*i);
   }
   m_slabs.clear();
@@ -452,9 +448,13 @@ void* MemoryManager::smartMallocSizeBigHelper(void*& ptr,
                                               size_t& szOut,
                                               size_t bytes) {
   m_stats.usage += bytes;
-  allocm(&ptr, &szOut, bytes + sizeof(SweepNode), 0);
-  szOut -= sizeof(SweepNode);
-  return smartEnlist(static_cast<SweepNode*>(ptr));
+  allocm(&ptr, &szOut, debugAddExtra(bytes + sizeof(SweepNode)), 0);
+  szOut = debugRemoveExtra(szOut - sizeof(SweepNode));
+  return debugPostAllocate(
+    smartEnlist(static_cast<SweepNode*>(ptr)),
+    bytes,
+    szOut
+  );
 }
 #endif
 
@@ -521,6 +521,64 @@ void* SmartAllocatorImpl::alloc(size_t nbytes) {
 
 void SmartAllocatorImpl::logDealloc(void *ptr) {
   MemoryProfile::logDeallocation(ptr);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+#ifdef DEBUG
+
+void* MemoryManager::debugPostAllocate(void* p,
+                                       size_t bytes,
+                                       size_t returnedCap) {
+  auto const header = static_cast<DebugHeader*>(p);
+  header->allocatedMagic = DebugHeader::kAllocatedMagic;
+  header->requestedSize = bytes;
+  header->returnedCap = returnedCap;
+  header->padding = 0;
+  return header + 1;
+}
+
+void* MemoryManager::debugPreFree(void* p,
+                                  size_t bytes,
+                                  size_t userSpecifiedBytes) {
+  auto const header = reinterpret_cast<DebugHeader*>(p) - 1;
+  assert(checkPreFree(header, bytes, userSpecifiedBytes));
+  header->allocatedMagic = 0; // will get a freelist pointer shortly
+  header->requestedSize = DebugHeader::kFreedMagic;
+  memset(header + 1, kSmartFreeFill, bytes);
+  return header;
+}
+
+#endif
+
+bool MemoryManager::checkPreFree(DebugHeader* p,
+                                 size_t bytes,
+                                 size_t userSpecifiedBytes) {
+  assert(debug);
+
+  assert(p->allocatedMagic == DebugHeader::kAllocatedMagic);
+
+  if (userSpecifiedBytes != 0) {
+    // For size-specified frees, the size they report when freeing
+    // must be either what they asked for, or what we returned as the
+    // actual capacity;
+    assert(userSpecifiedBytes == p->requestedSize ||
+           userSpecifiedBytes == p->returnedCap);
+  }
+
+  if (p->requestedSize <= MemoryManager::kMaxSmartSize) {
+    auto const ptrInt = reinterpret_cast<uintptr_t>(p);
+    DEBUG_ONLY auto it = std::find_if(
+      begin(m_slabs), end(m_slabs),
+      [&] (char* base) {
+        auto const baseInt = reinterpret_cast<uintptr_t>(base);
+        return ptrInt >= baseInt && ptrInt < baseInt + SLAB_SIZE;
+      }
+    );
+    assert(it != end(m_slabs));
+  }
+
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

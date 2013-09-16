@@ -787,6 +787,11 @@ void LinearScan::computePreColoringHint() {
         case ArgType::Imm:
           break;
       }
+      // Some opcodes (ex. SetM) can have more arguments than there are argument
+      // registers. These will always spill so don't do any coloring for them.
+      if (reg >= kNumRegisterArgs) {
+        break;
+      }
     }
     return;
   }
@@ -1446,6 +1451,7 @@ void LinearScan::PreColoringHint::clear() {
 // Provide a hint that (<tmp>, <index>) is used as the <argNum>-th arg
 // in next native.
 void LinearScan::PreColoringHint::add(SSATmp* tmp, uint32_t index, int argNum) {
+  assert(argNum < kNumRegisterArgs);
   int reg = int(argNumToRegName[argNum]);
   assert(reg >= 0 && reg < kNumGPRegs);
   m_preColoredTmps[reg].first  = tmp;

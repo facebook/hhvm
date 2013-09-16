@@ -204,6 +204,79 @@ inline BuiltinFunction GetBuiltinFunction(const char* fname,
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// Global constants
+
+inline
+bool registerConstant(const StringData* cnsName, Cell cns) {
+  assert(cellIsPlausible(cns));
+  return Unit::defCns(cnsName, &cns, true);
+}
+
+template<DataType DType>
+typename std::enable_if<
+  !std::is_same<typename detail::DataTypeCPPType<DType>::type,void>::value,
+  bool>::type
+registerConstant(const StringData* cnsName,
+                 typename detail::DataTypeCPPType<DType>::type val) {
+  return registerConstant(cnsName, make_tv<DType>(val));
+}
+
+template<DataType DType>
+typename std::enable_if<
+  std::is_same<typename detail::DataTypeCPPType<DType>::type,void>::value,
+  bool>::type
+registerConstant(const StringData* cnsName) {
+  return registerConstant(cnsName, make_tv<DType>());
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Class Constants
+
+typedef std::map<const StringData*,TypedValue> ClassConstantMap;
+typedef hphp_hash_map<const StringData*, ClassConstantMap,
+                      string_data_hash, string_data_isame> ClassConstantMapMap;
+extern ClassConstantMapMap s_class_constant_map;
+
+inline
+bool registerClassConstant(const StringData *clsName,
+                           const StringData *cnsName,
+                           Cell cns) {
+  assert(cellIsPlausible(cns));
+  auto &cls = s_class_constant_map[clsName];
+  assert(cls.find(cnsName) == cls.end());
+  cls[cnsName] = cns;
+  return true;
+}
+
+template<DataType DType>
+typename std::enable_if<
+  !std::is_same<typename detail::DataTypeCPPType<DType>::type,void>::value,
+  bool>::type
+registerClassConstant(const StringData* clsName,
+                      const StringData* cnsName,
+                      typename detail::DataTypeCPPType<DType>::type val) {
+  return registerClassConstant(clsName, cnsName, make_tv<DType>(val));
+}
+
+template<DataType DType>
+typename std::enable_if<
+  std::is_same<typename detail::DataTypeCPPType<DType>::type,void>::value,
+  bool>::type
+registerClassConstant(const StringData* clsName,
+                      const StringData* cnsName) {
+  return registerClassConstant(clsName, cnsName, make_tv<DType>());
+}
+
+inline
+const ClassConstantMap* getClassConstants(const StringData* clsName) {
+  auto clsit = s_class_constant_map.find(const_cast<StringData*>(clsName));
+  if (clsit == s_class_constant_map.end()) {
+    return nullptr;
+  }
+  return &clsit->second;
+}
+
+//////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Native
 
 #endif // _incl_HPHP_RUNTIME_VM_NATIVE_H

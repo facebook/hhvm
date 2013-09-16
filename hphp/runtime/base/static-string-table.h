@@ -97,7 +97,7 @@ uint32_t makeCnsHandle(const StringData* cnsName, bool persistent);
  * Return an array of all the defined constants in the current
  * execution context.
  */
-Array lookupDefinedConstants();
+Array lookupDefinedConstants(bool categorize = false);
 
 //////////////////////////////////////////////////////////////////////
 

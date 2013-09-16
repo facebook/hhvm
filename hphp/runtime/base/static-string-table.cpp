@@ -235,31 +235,44 @@ uint32_t makeCnsHandle(const StringData* cnsName, bool persistent) {
   return it->second;
 }
 
-Array lookupDefinedConstants() {
+const StaticString s_user("user");
+const StaticString s_Core("Core");
+Array lookupDefinedConstants(bool categorize /*= false */) {
   assert(s_stringDataMap);
-  Array a(Transl::TargetCache::s_constants);
+  Array usr(Transl::TargetCache::s_constants);
+  Array sys;
 
   for (StringDataMap::const_iterator it = s_stringDataMap->begin();
        it != s_stringDataMap->end(); ++it) {
     if (it->second) {
+      Array *tbl = (categorize &&
+                    Transl::TargetCache::isPersistentHandle(it->second))
+                 ? &sys : &usr;
       auto& tv =
         Transl::TargetCache::handleToRef<TypedValue>(it->second);
       if (tv.m_type != KindOfUninit) {
         StrNR key(const_cast<StringData*>(to_sdata(it->first)));
-        a.set(key, tvAsVariant(&tv), true);
+        tbl->set(key, tvAsVariant(&tv), true);
       } else if (tv.m_data.pref) {
         StrNR key(const_cast<StringData*>(to_sdata(it->first)));
         ClassInfo::ConstantInfo* ci =
           (ClassInfo::ConstantInfo*)(void*)tv.m_data.pref;
         auto cns = ci->getDeferredValue();
         if (cns.isInitialized()) {
-          a.set(key, cns, true);
+          tbl->set(key, cns, true);
         }
       }
     }
   }
 
-  return a;
+  if (categorize) {
+    Array ret;
+    ret.set(s_user, usr);
+    ret.set(s_Core, sys);
+    return ret;
+  } else {
+    return usr;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

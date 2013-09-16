@@ -209,23 +209,8 @@ String f_get_current_user() {
   return ret;
 }
 
-StaticString s_user("user");
-StaticString s_core("Core");
 Array f_get_defined_constants(bool categorize /* = false */) {
-  if (categorize) {
-    Array categorized_consts;
-    // Get all defined constants - user and system
-    Array all_consts = lookupDefinedConstants();
-    // Get all system constants, including dynamic ones
-    Array sys_consts = ClassInfo::GetSystemConstants(true);
-    Array user_consts = all_consts.diff(sys_consts, true, false);
-    categorized_consts.set(s_user, user_consts);
-    categorized_consts.set(s_core, sys_consts);
-    return categorized_consts;
-  }
-  else {
-    return lookupDefinedConstants();
-  }
+  return lookupDefinedConstants(categorize);
 }
 
 String f_get_include_path() {

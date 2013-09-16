@@ -1408,27 +1408,27 @@ SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
 
   // The comparisons below won't work for these cases covered by this
   // assert, and we currently don't generate these types.
-  assert(type.isKnownUnboxedDataType() && type != Type::StaticStr);
+  assert(type.isKnownUnboxedDataType());
 
-  // CountedStr and StaticStr are disjoint, but compatible for this purpose.
-  if (type.isString() && srcType.isString()) {
-    return cns(trueSense);
-  }
+  // Testing for StaticStr will make you miss out on CountedStr, and vice versa,
+  // and similarly for arrays. PHP treats both types of string the same, so if
+  // the distinction matters to you here, be careful.
+  assert(IMPLIES(type.isString(), type.equals(Type::Str)));
+  assert(IMPLIES(type.isArray(), type.equals(Type::Arr)));
 
   // The types are disjoint; the result must be false.
   if ((srcType & type).equals(Type::Bottom)) {
     return cns(!trueSense);
   }
 
-  // The src type is a subtype of the tested type. You'd think the result would
-  // always be true, but it's not for is_object.
-  if (!type.subtypeOf(Type::Obj) && srcType.subtypeOf(type)) {
+  // The src type is a subtype of the tested type; the result must be true.
+  if (srcType.subtypeOf(type)) {
     return cns(trueSense);
   }
 
   // At this point, either the tested type is a subtype of the src type, or they
-  // are non-disjoint but neither is a subtype of the other. (Or it's the weird
-  // Obj case.) We can't simplify this away.
+  // are non-disjoint but neither is a subtype of the other. We can't simplify
+  // this away.
   return nullptr;
 }
 

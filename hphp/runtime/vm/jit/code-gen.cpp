@@ -1832,32 +1832,6 @@ void CodeGenerator::emitIsTypeTest(IRInstruction* inst, JmpFn doJcc) {
       inst->typeParam().strictSubtypeOf(Type::Res)) {
     CG_PUNT(IsType-SpecializedUnsupported);
   }
-  if (inst->typeParam().equals(Type::Obj) ||
-      inst->typeParam().equals(Type::Res)) {
-    auto const srcReg = m_regs[src].reg();
-    if (src->isA(Type::PtrToGen)) {
-      emitTestTVType(m_as, KindOfObject, srcReg[TVOFF(m_type)]);
-      TCA toPatch = m_as.frontier();
-      m_as.   jne8(toPatch);  // 1
-
-      // Get the ObjectData*
-      emitDeref(m_as, srcReg, m_rScratch);
-      m_as.   cmpq(SystemLib::s_resourceClass,
-                   m_rScratch[ObjectData::getVMClassOffset()]);
-      // 1:
-      m_as.patchJcc8(toPatch, m_as.frontier());
-    } else {
-      // Cases where src isn't an Obj should have been simplified away
-      if (!src->isA(Type::Obj) && !src->isA(Type::Res)) {
-        CG_PUNT(IsType-KnownWrongType);
-      }
-      m_as.   cmpq(SystemLib::s_resourceClass,
-                   srcReg[ObjectData::getVMClassOffset()]);
-    }
-    // At this point, the flags say "equal" if is_object is false.
-    doJcc(CC_NE);
-    return;
-  }
 
   if (src->isA(Type::PtrToGen)) {
     PhysReg base = m_regs[src].reg();
@@ -1871,6 +1845,7 @@ void CodeGenerator::emitIsTypeTest(IRInstruction* inst, JmpFn doJcc) {
 
   PhysReg typeSrcReg = m_regs[src].reg(1); // type register
   if (typeSrcReg == InvalidReg) {
+    // Should only get here if the simplifier didn't run
     CG_PUNT(IsType-KnownType);
   }
   PhysReg dataSrcReg = m_regs[src].reg(); // data register

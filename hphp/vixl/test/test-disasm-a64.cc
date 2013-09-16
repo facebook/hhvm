@@ -36,7 +36,9 @@
 #define SETUP_CLASS(ASMCLASS)                                                  \
   byte* buf = static_cast<byte*>(malloc(INSTR_SIZE));                          \
   __attribute__((unused)) uint32_t encoding = 0;                               \
-  ASMCLASS* masm = new ASMCLASS(buf, INSTR_SIZE);                              \
+  HPHP::CodeBlock cb;                                                          \
+  cb.init(buf, INSTR_SIZE);                                                    \
+  ASMCLASS* masm = new ASMCLASS(cb);                                           \
   Decoder* decoder = new Decoder();                                            \
   Disassembler* disasm = new Disassembler();                                   \
   decoder->AppendVisitor(disasm)

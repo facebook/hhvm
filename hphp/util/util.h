@@ -28,8 +28,6 @@
 #include <stdarg.h>
 #include "arpa/inet.h" // For htonl().
 
-#include <boost/utility.hpp>
-
 #include "folly/Likely.h"
 
 /**
@@ -378,13 +376,6 @@ template <class T>
 T& getDataRef(void* base, unsigned offset) {
   return *(T*)((char*)base + offset);
 }
-
-template<class T>
-struct Nuller : private boost::noncopyable {
-  explicit Nuller(const T** p) : p(p) {}
-  ~Nuller() { *p = 0; }
-  T const** const p;
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

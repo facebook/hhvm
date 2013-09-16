@@ -17,17 +17,13 @@
 #ifndef incl_HPHP_DATA_BLOCK_H
 #define incl_HPHP_DATA_BLOCK_H
 
-#include <boost/noncopyable.hpp>
 #include <cstdint>
 #include <sys/mman.h>
 
 #include "hphp/util/assertions.h"
-#include "hphp/util/trace.h"
 #include "hphp/util/util.h"
 
 namespace HPHP {
-
-#define TRACEMOD ::HPHP::Trace::datablock
 
 namespace sz {
   constexpr int nosize = 0;
@@ -43,9 +39,12 @@ typedef uint8_t* CodeAddress;
 /**
  * DataBlock is a simple bump-allocating wrapper around a chunk of memory.
  */
-struct DataBlock : private boost::noncopyable {
+struct DataBlock {
 
   DataBlock() : m_base(nullptr), m_frontier(nullptr), m_size(0) {}
+
+  DataBlock(const DataBlock& other) = delete;
+  DataBlock& operator=(const DataBlock& other) = delete;
 
   DataBlock(DataBlock&& other)
     : m_base(other.m_base), m_frontier(other.m_frontier), m_size(other.m_size) {
@@ -115,32 +114,27 @@ struct DataBlock : private boost::noncopyable {
 
   void byte(const uint8_t byte) {
     always_assert(canEmit(sz::byte));
-    TRACE(10, "%p b : %02x\n", m_frontier, byte);
     *m_frontier = byte;
     m_frontier += sz::byte;
   }
   void word(const uint16_t word) {
     always_assert(canEmit(sz::word));
     *(uint16_t*)m_frontier = word;
-    TRACE(10, "%p w : %04x\n", m_frontier, word);
     m_frontier += sz::word;
   }
   void dword(const uint32_t dword) {
     always_assert(canEmit(sz::dword));
-    TRACE(10, "%p d : %08x\n", m_frontier, dword);
     *(uint32_t*)m_frontier = dword;
     m_frontier += sz::dword;
   }
   void qword(const uint64_t qword) {
     always_assert(canEmit(sz::qword));
-    TRACE(10, "%p q : %016" PRIx64 "\n", m_frontier, qword);
     *(uint64_t*)m_frontier = qword;
     m_frontier += sz::qword;
   }
 
   void bytes(size_t n, const uint8_t *bs) {
     always_assert(canEmit(n));
-    TRACE(10, "%p [%ld b] : [%p]\n", m_frontier, n, bs);
     if (n <= 8) {
       // If it is a modest number of bytes, try executing in one machine
       // store. This allows control-flow edges, including nop, to be
@@ -200,6 +194,11 @@ struct DataBlock : private boost::noncopyable {
     m_frontier = m_base;
   }
 
+  void zero() {
+    memset(m_base, 0, m_frontier - m_base);
+    clear();
+  }
+
  protected:
   Address m_base;
   Address m_frontier;
@@ -207,8 +206,6 @@ struct DataBlock : private boost::noncopyable {
 };
 
 typedef DataBlock CodeBlock;
-
-#undef TRACEMOD
 
 }
 

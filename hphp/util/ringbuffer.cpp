@@ -22,6 +22,7 @@
 #include <atomic>
 #include <cstdio>
 #include <cstring>
+#include <unistd.h>
 
 namespace HPHP {
 namespace Trace {

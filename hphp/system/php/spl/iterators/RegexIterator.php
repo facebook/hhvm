@@ -142,11 +142,25 @@ class RegexIterator extends FilterIterator
         return false;
     }
 
+    /**
+     * ( excerpt from http://php.net/manual/en/filteriterator.key.php )
+     *
+     * Get the current key.
+     *
+     * @return mixed
+     */
     public function key()
     {
         return $this->key;
     }
 
+    /**
+     * ( excerpt from http://php.net/manual/en/filteriterator.current.php )
+     *
+     * Get the current element value. 
+     *
+     * @return mixed
+     */
     public function current()
     {
         return $this->current;

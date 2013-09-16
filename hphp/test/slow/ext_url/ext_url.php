@@ -87,6 +87,8 @@ function test_http_build_query() {
   $obj->foo = 'bar';
   $obj->baz = 'boom';
   VS(http_build_query($obj), "foo=bar&baz=boom");
+
+  VS(http_build_query(Map { 'a' => 'b' }), "a=b");
 }
 
 function test_parse_url() {

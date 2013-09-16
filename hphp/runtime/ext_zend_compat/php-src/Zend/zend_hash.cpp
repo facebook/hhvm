@@ -10,6 +10,12 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKe
   if ((flag & HASH_ADD) && ht->exists(key.get())) {
     return FAILURE;
   }
+  /*
+   * TODO(#2887942): we should eventually be handling the fact that
+   * zSet() operation could return a new HashTable, but currently this
+   * is not possible.  (Eventually we probably need a m_kind for zend
+   * arrays that is just a proxy that does the write barrier for us.)
+   */
   ht->zSet(key.get(), (*(zval**)pData));
   return SUCCESS;
 }
@@ -24,6 +30,9 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void
     return FAILURE;
   }
 
+  /*
+   * TODO(#2887942): See comment in _zend_hash_add_or_update above.
+   */
   ht->zSet(h, (*(zval**)pData));
   return SUCCESS;
 }

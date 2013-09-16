@@ -280,6 +280,9 @@ RefData* staticLocInitImpl(StringData* name, ActRec* fp, TypedValue val,
 
   TypedValue *mapVal = map->nvGet(name);
   if (!mapVal) {
+    /*
+     * TODO(#2887942): unchecked array set
+     */
     map->set(name, tvAsCVarRef(&val), false);
     mapVal = map->nvGet(name);
   }

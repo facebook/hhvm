@@ -652,6 +652,9 @@ TypedValue* Class::initSPropsImpl() const {
   // They'll put their initialized values into an array, and we'll read any
   // values we need out of the array later.
   if (hasNonscalarInit) {
+    /*
+     * TODO(#2887942): this array has unchecked mutations.
+     */
     HphpArray* propData = HphpArray::MakeReserve(m_staticProperties.size());
     Variant arg0(Array::attach(propData));
 
@@ -792,6 +795,9 @@ TypedValue Class::getStaticPropInitVal(const SProp& prop) {
 
 HphpArray* Class::initClsCnsData() const {
   Slot nConstants = m_constants.size();
+  /*
+   * TODO(#2887942): this array has unchecked mutations
+   */
   HphpArray* constants = HphpArray::MakeReserve(nConstants);
 
   if (m_parent.get() != nullptr) {
@@ -2086,6 +2092,9 @@ void Class::getMethodNames(const Class* ctx, HphpArray* methods) const {
 
     // Public methods are always visible.
     if ((meth->attrs() & AttrPublic)) {
+      /*
+       * TODO(#2887942): unchecked mutation
+       */
       methods->set(methName, true_varNR, false);
       continue;
     }
@@ -2099,6 +2108,9 @@ void Class::getMethodNames(const Class* ctx, HphpArray* methods) const {
     if (declCls == ctx ||
         ((meth->attrs() & AttrProtected) &&
          (ctx->classof(declCls) || declCls->classof(ctx)))) {
+      /*
+       * TODO(#2887942): unchecked mutation
+       */
       methods->set(methName, true_varNR, false);
     }
   }

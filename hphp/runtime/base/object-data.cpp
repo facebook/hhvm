@@ -399,8 +399,8 @@ Array ObjectData::o_toArray() const {
 Array ObjectData::o_toIterArray(CStrRef context,
                                 bool getRef /* = false */) {
   size_t size = m_cls->declPropNumAccessible() + o_properties.size();
-  auto retval = HphpArray::MakeReserve(size);
-  Array returnArray { Array::attach(retval) };
+  Array retArray { Array::attach(HphpArray::MakeReserve(size)) };
+
   Class* ctx = nullptr;
   if (!context.empty()) {
     ctx = Unit::lookupClass(context.get());
@@ -422,9 +422,9 @@ Array ObjectData::o_toIterArray(CStrRef context,
           if (val->m_type != KindOfRef) {
             tvBox(val);
           }
-          retval->nvBind(key, val);
+          retArray.setRef(StrNR(key), tvAsCVarRef(val), true /* isKey */);
         } else {
-          retval->set(key, tvAsCVarRef(val), false);
+          retArray.set(StrNR(key), tvAsCVarRef(val), true /* isKey */);
         }
       }
     }
@@ -449,9 +449,9 @@ Array ObjectData::o_toIterArray(CStrRef context,
           if (val->m_type != KindOfRef) {
             tvBox(val);
           }
-          retval->nvBind(key.m_data.num, val);
+          retArray.setRef(key.m_data.num, tvAsCVarRef(val));
         } else {
-          retval->set(key.m_data.num, tvAsCVarRef(val), false);
+          retArray.set(key.m_data.num, tvAsCVarRef(val));
         }
         continue;
       }
@@ -462,15 +462,15 @@ Array ObjectData::o_toIterArray(CStrRef context,
         if (val->m_type != KindOfRef) {
           tvBox(val);
         }
-        retval->nvBind(strKey, val);
+        retArray.setRef(StrNR(strKey), tvAsCVarRef(val), true /* isKey */);
       } else {
-        retval->set(strKey, tvAsCVarRef(val), false);
+        retArray.set(StrNR(strKey), tvAsCVarRef(val), true /* isKey */);
       }
       decRefStr(strKey);
     }
   }
 
-  return returnArray;
+  return retArray;
 }
 
 static bool decode_invoke(CStrRef s, ObjectData* obj, bool fatal,

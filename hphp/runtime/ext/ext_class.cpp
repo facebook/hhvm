@@ -107,30 +107,30 @@ Array f_get_class_methods(CVarRef class_or_object) {
 }
 
 Array vm_get_class_constants(CStrRef className) {
-  Class* cls = Unit::loadClass(className.get());
-
+  auto const cls = Unit::loadClass(className.get());
   if (cls == NULL) {
     return Array::attach(HphpArray::MakeReserve(0));
   }
 
-  size_t numConstants = cls->numConstants();
-  auto retVal = HphpArray::MakeReserve(numConstants);
-  const Class::Const* consts = cls->constants();
+  auto const numConstants = cls->numConstants();
+  ArrayInit arrayInit(numConstants);
+
+  auto const consts = cls->constants();
   for (size_t i = 0; i < numConstants; i++) {
     // Note: hphpc doesn't include inherited constants in
     // get_class_constants(), so mimic that behavior
     if (consts[i].m_class == cls) {
-      StringData* name  = const_cast<StringData*>(consts[i].m_name);
-      const TypedValue* value = &consts[i].m_val;
+      auto const name  = const_cast<StringData*>(consts[i].m_name);
+      auto value = &consts[i].m_val;
       // Handle dynamically set constants
       if (value->m_type == KindOfUninit) {
         value = cls->clsCnsGet(consts[i].m_name);
       }
-      retVal->set(name, tvAsCVarRef(value), false);
+      arrayInit.set(name, tvAsCVarRef(value), true /* isKey */);
     }
   }
 
-  return Array::attach(retVal);
+  return arrayInit.toArray();
 }
 
 Array f_get_class_constants(CStrRef class_name) {
@@ -162,7 +162,7 @@ Array vm_get_class_vars(CStrRef className) {
   CallerFrame cf;
   Class* ctx = arGetContextClass(cf());
 
-  auto ret = HphpArray::MakeReserve(numDeclProps + numSProps);
+  ArrayInit arr(numDeclProps + numSProps);
 
   for (size_t i = 0; i < numDeclProps; ++i) {
     StringData* name = const_cast<StringData*>(propInfo[i].m_name);
@@ -170,7 +170,7 @@ Array vm_get_class_vars(CStrRef className) {
     assert(name->size() != 0);
     if (Class::IsPropAccessible(propInfo[i], ctx)) {
       const TypedValue* value = &((*propVals)[i]);
-      ret->set(name, tvAsCVarRef(value), false);
+      arr.set(name, tvAsCVarRef(value), true /* isKey */);
     }
   }
 
@@ -178,12 +178,12 @@ Array vm_get_class_vars(CStrRef className) {
     bool vis, access;
     TypedValue* value = cls->getSProp(ctx, sPropInfo[i].m_name, vis, access);
     if (access) {
-      ret->set(const_cast<StringData*>(sPropInfo[i].m_name),
-               tvAsCVarRef(value), false);
+      arr.set(const_cast<StringData*>(sPropInfo[i].m_name),
+        tvAsCVarRef(value), true /* isKey */);
     }
   }
 
-  return Array::attach(ret);
+  return arr.toArray();
 }
 
 Array f_get_class_vars(CStrRef class_name) {

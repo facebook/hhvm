@@ -6363,7 +6363,7 @@ lookupStatic(StringData* name,
   if (val == nullptr) {
     TypedValue tv;
     tvWriteUninit(&tv);
-    // TODO(#2836647): needs to check return value
+    // TODO(#2887942): need write barrier
     map->set(name, tvAsCVarRef(&tv), false);
     val = map->nvGet(name);
     inited = false;

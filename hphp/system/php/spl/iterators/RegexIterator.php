@@ -4,12 +4,13 @@ class RegexIterator extends FilterIterator
 {
     /* Constants */
 
-    const MATCH = 0 ;
-    const GET_MATCH = 1 ;
-    const ALL_MATCHES = 2 ;
-    const SPLIT = 3 ;
-    const REPLACE = 4 ;
-    const USE_KEY = 1 ;
+    const MATCH = 0;
+    const GET_MATCH = 1;
+    const ALL_MATCHES = 2;
+    const SPLIT = 3;
+    const REPLACE = 4;
+
+    const USE_KEY = 1;
 
 
     /* Properties */
@@ -35,7 +36,14 @@ class RegexIterator extends FilterIterator
      */
     private $pregFlags;
 
+    /**
+     * @var mixed
+     */
     private $key;
+
+    /**
+     * @var mixed
+     */
     private $current;
 
     /**
@@ -63,12 +71,13 @@ class RegexIterator extends FilterIterator
      *                             - RegexIterator::REPLACE: none.
      *                             - RegexIterator::SPLIT: See preg_split().
      */
-    public __construct (Iterator $iterator, $regex, $mode = self::MATCH, $flags = 0, $preg_flags = 0)
+    public function __construct(Iterator $iterator, $regex, $mode = self::MATCH, $flags = 0, $preg_flags = 0)
     {
         parent::__construct($iterator);
 
+        $this->setMode($mode);
+
         $this->regex       = $regex;
-        $this->mode        = $mode;
         $this->flags       = $flags;
         $this->pregFlags   = $preg_flags;
         $this->replacement = '';
@@ -87,14 +96,14 @@ class RegexIterator extends FilterIterator
         $this->key     = parent::key();
         $this->current = parent::current();
 
-        $subject = ($this->flags & self::USE_KEY) 
-            ? $this->key 
-            : $this->current;
+        $matches = array();
+        $useKey  = ($this->flags & self::USE_KEY);
+        $subject = $useKey 
+            ? (string) $this->key 
+            : (string) $this->current;
 
         switch ($this->mode) {
             case self::MATCH:
-                $matches = array();
-
                 return (preg_match($this->regex, $subject, $matches, $this->pregFlags) > 0);
 
             case self::GET_MATCH:
@@ -105,25 +114,21 @@ class RegexIterator extends FilterIterator
             case self::ALL_MATCHES:
                 $this->current = array();
 
-                preg_match_all($this->regex, $subject, $this->current, $this->pregFlags);
-
-                return true;
+                return (preg_match_all($this->regex, $subject, $this->current, $this->pregFlags) > 0);
 
             case self::SPLIT:
                 $this->current = preg_split($this->regex, $subject, null, $this->pregFlags);
 
-                return ($this->current && $this->current > 1);
+                return ($this->current && count($this->current) > 1);
 
             case self::REPLACE:
-                $this->current = array();
-
-                $result = preg_split($this->regex, $this->replacement, $subject);
+                $result = preg_replace($this->regex, $this->replacement, $subject);
 
                 if ($result === null || $result === $subject) {
                     return false;
                 }
 
-                if ($this->flags & self::USE_KEY) {
+                if ($useKey) {
                     $this->key = $result;
 
                     return true;

@@ -121,7 +121,7 @@ Array f_error_get_last() {
   if (lastError.isNull()) {
     return (ArrayData *)NULL;
   }
-  return CREATE_MAP2(s_message, g_context->getLastError(),
+  return make_map_array(s_message, g_context->getLastError(),
                      s_type, g_context->getLastErrorNumber());
 }
 

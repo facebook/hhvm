@@ -605,7 +605,7 @@ Array f_getopt(CStrRef options, CVarRef longopts /* = null_variant */) {
       if (ret.exists(optname_int)) {
         Variant &e = ret.lvalAt(optname_int);
         if (!e.isArray()) {
-          ret.set(optname_int, CREATE_VECTOR2(e, val));
+          ret.set(optname_int, make_packed_array(e, val));
         } else {
           e.append(val);
         }
@@ -618,7 +618,7 @@ Array f_getopt(CStrRef options, CVarRef longopts /* = null_variant */) {
       if (ret.exists(key)) {
         Variant &e = ret.lvalAt(key);
         if (!e.isArray()) {
-          ret.set(key, CREATE_VECTOR2(e, val));
+          ret.set(key, make_packed_array(e, val));
         } else {
           e.append(val);
         }

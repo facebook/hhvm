@@ -87,7 +87,7 @@ bool TestExtServer::test_pagelet_server_task_result() {
     String url = baseurl + String(i);
     String header = baseheader + String(i);
     String post = basepost + String(i);
-    Resource task = f_pagelet_server_task_start(url, CREATE_VECTOR1(header),
+    Resource task = f_pagelet_server_task_start(url, make_packed_array(header),
                                                 post);
     tasks.push_back(task);
   }

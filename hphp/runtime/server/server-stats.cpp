@@ -972,7 +972,7 @@ Array ServerStats::EndNetworkProfile() {
     for (IOStatusMap::const_iterator iter = status.begin();
          iter != status.end(); ++iter) {
       ret.set(String(iter->first),
-              CREATE_MAP2(s_ct, iter->second.count,
+              make_map_array(s_ct, iter->second.count,
                           s_wt, iter->second.wall_time));
     }
     status.clear();
@@ -1224,7 +1224,7 @@ Array ServerStats::getThreadIOStatuses() {
   for (IOStatusMap::const_iterator iter = status.begin();
        iter != status.end(); ++iter) {
     ret.set(String(iter->first),
-            CREATE_MAP2(s_ct, iter->second.count,
+            make_map_array(s_ct, iter->second.count,
                         s_wt, iter->second.wall_time));
   }
   status.clear();

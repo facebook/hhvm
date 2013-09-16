@@ -687,7 +687,7 @@ xmlNodePtr to_xml_user(encodeTypePtr type, CVarRef data, int style,
   xmlNodePtr ret = NULL;
   if (type && type->map && !type->map->to_xml.isNull()) {
     Variant return_value = vm_call_user_func(type->map->to_xml,
-                                                  CREATE_VECTOR1(data));
+                                                  make_packed_array(data));
     if (return_value.isString()) {
       String sdoc = return_value.toString();
       xmlDocPtr doc = soap_xmlParseMemory(sdoc.data(), sdoc.size());
@@ -718,7 +718,7 @@ Variant to_zval_user(encodeTypePtr type, xmlNodePtr node) {
     xmlFreeNode(copy);
 
     return_value = vm_call_user_func(type->map->to_zval,
-                                          CREATE_VECTOR1(data));
+                                          make_packed_array(data));
   }
   return return_value;
 }

@@ -496,7 +496,7 @@ void _xml_defaultHandler(void *userData, const XML_Char *s, int len) {
   XmlParser *parser = (XmlParser *)userData;
 
   if (parser && parser->defaultHandler.toBoolean()) {
-    xml_call_handler(parser, parser->defaultHandler, CREATE_VECTOR2(
+    xml_call_handler(parser, parser->defaultHandler, make_packed_array(
         parser, _xml_xmlchar_zval(s, len, parser->target_encoding)));
   }
 }

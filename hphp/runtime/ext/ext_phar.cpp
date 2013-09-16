@@ -50,7 +50,7 @@ static class PharStreamWrapper : public Stream::Wrapper {
     g_vmContext->invokeFunc(
       ret.asTypedValue(),
       f,
-      CREATE_VECTOR1(filename),
+      make_packed_array(filename),
       nullptr,
       SystemLib::s_PharClass
     );
@@ -94,7 +94,7 @@ static class PharStreamWrapper : public Stream::Wrapper {
     g_vmContext->invokeFunc(
       ret.asTypedValue(),
       f,
-      CREATE_VECTOR1(path),
+      make_packed_array(path),
       nullptr,
       SystemLib::s_PharClass
     );
@@ -113,7 +113,7 @@ static class PharStreamWrapper : public Stream::Wrapper {
     g_vmContext->invokeFunc(
       ret.asTypedValue(),
       f,
-      CREATE_VECTOR1(path),
+      make_packed_array(path),
       nullptr,
       SystemLib::s_PharClass
     );

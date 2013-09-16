@@ -72,9 +72,9 @@ Object createObject(CStrRef obj_typename, int nargs = 0,
   }
   Array args;
   if (nargs == 1) {
-    args = CREATE_VECTOR1(arg1);
+    args = make_packed_array(arg1);
   } else if (nargs == 2 ) {
-    args = CREATE_VECTOR2(arg1, arg2);
+    args = make_packed_array(arg1, arg2);
   }
   return create_object(obj_typename, args);
 }

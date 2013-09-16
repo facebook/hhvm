@@ -655,7 +655,7 @@ public:
       {
         int data_size = size * nmemb;
         Variant ret = ch->do_callback(
-          t->callback, CREATE_VECTOR3(Resource(ch), t->fp->fd(), data_size));
+          t->callback, make_packed_array(Resource(ch), t->fp->fd(), data_size));
         if (ret.isString()) {
           String sret = ret.toString();
           length = data_size < sret.size() ? data_size : sret.size();
@@ -687,7 +687,7 @@ public:
       {
         Variant ret = ch->do_callback(
           t->callback,
-          CREATE_VECTOR2(Resource(ch), String(data, length, CopyString)));
+          make_packed_array(Resource(ch), String(data, length, CopyString)));
         length = ret.toInt64();
       }
       break;
@@ -717,7 +717,7 @@ public:
       {
         Variant ret = ch->do_callback(
           t->callback,
-          CREATE_VECTOR2(Resource(ch), String(data, length, CopyString)));
+          make_packed_array(Resource(ch), String(data, length, CopyString)));
         length = ret.toInt64();
       }
       break;

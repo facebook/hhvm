@@ -3089,15 +3089,15 @@ Variant c_PDOStatement::t_debugdumpparams() {
   params.append(m_stmt->query_string.data());
   f->printf("SQL: [%d] %.*s\n", params);
 
-  f->printf("Params:  %d\n", CREATE_VECTOR1(m_stmt->bound_params.size()));
+  f->printf("Params:  %d\n", make_packed_array(m_stmt->bound_params.size()));
   for (ArrayIter iter(m_stmt->bound_params); iter; ++iter) {
     if (iter.first().isString()) {
       String key = iter.first().toString();
-      params = CREATE_VECTOR3(key.size(), key.size(), key.data());
+      params = make_packed_array(key.size(), key.size(), key.data());
       f->printf("Key: Name: [%d] %.*s\n", params);
     } else {
       f->printf("Key: Position #%ld:\n",
-                CREATE_VECTOR1(iter.first().toInt64()));
+                make_packed_array(iter.first().toInt64()));
     }
 
     PDOBoundParam *param = iter.second().toResource().getTyped<PDOBoundParam>();

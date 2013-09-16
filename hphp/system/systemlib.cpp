@@ -69,36 +69,36 @@ ObjectData* SystemLib::AllocPinitSentinel() {
   return inst;
 
 ObjectData* SystemLib::AllocExceptionObject(CVarRef message) {
-  CREATE_AND_CONSTRUCT(Exception, CREATE_VECTOR1(message));
+  CREATE_AND_CONSTRUCT(Exception, make_packed_array(message));
 }
 
 ObjectData* SystemLib::AllocBadMethodCallExceptionObject(CVarRef message) {
-  CREATE_AND_CONSTRUCT(BadMethodCallException, CREATE_VECTOR1(message));
+  CREATE_AND_CONSTRUCT(BadMethodCallException, make_packed_array(message));
 }
 
 ObjectData* SystemLib::AllocInvalidArgumentExceptionObject(CVarRef message) {
-  CREATE_AND_CONSTRUCT(InvalidArgumentException, CREATE_VECTOR1(message));
+  CREATE_AND_CONSTRUCT(InvalidArgumentException, make_packed_array(message));
 }
 
 ObjectData* SystemLib::AllocRuntimeExceptionObject(CVarRef message) {
-  CREATE_AND_CONSTRUCT(RuntimeException, CREATE_VECTOR1(message));
+  CREATE_AND_CONSTRUCT(RuntimeException, make_packed_array(message));
 }
 
 ObjectData* SystemLib::AllocOutOfBoundsExceptionObject(CVarRef message) {
-  CREATE_AND_CONSTRUCT(OutOfBoundsException, CREATE_VECTOR1(message));
+  CREATE_AND_CONSTRUCT(OutOfBoundsException, make_packed_array(message));
 }
 
 ObjectData* SystemLib::AllocInvalidOperationExceptionObject(CVarRef message) {
-  CREATE_AND_CONSTRUCT(InvalidOperationException, CREATE_VECTOR1(message));
+  CREATE_AND_CONSTRUCT(InvalidOperationException, make_packed_array(message));
 }
 
 ObjectData* SystemLib::AllocDOMDocumentObject(CStrRef version,
                                               CStrRef encoding) {
-  CREATE_AND_CONSTRUCT(DOMDocument, CREATE_VECTOR2(version, encoding));
+  CREATE_AND_CONSTRUCT(DOMDocument, make_packed_array(version, encoding));
 }
 
 ObjectData* SystemLib::AllocDOMExceptionObject(CVarRef message, CVarRef code) {
-  CREATE_AND_CONSTRUCT(DOMException, CREATE_VECTOR2(message, code));
+  CREATE_AND_CONSTRUCT(DOMException, make_packed_array(message, code));
 }
 
 ObjectData*
@@ -108,20 +108,20 @@ SystemLib::AllocSoapFaultObject(CVarRef code,
                                 CVarRef detail /* = null_variant */,
                                 CVarRef name /* = null_variant */,
                                 CVarRef header /* = null_variant */) {
-  CREATE_AND_CONSTRUCT(SoapFault, CREATE_VECTOR6(code, message, actor,
+  CREATE_AND_CONSTRUCT(SoapFault, make_packed_array(code, message, actor,
                                                  detail, name, header));
 }
 
 ObjectData* SystemLib::AllocLazyKVZipIterableObject(CVarRef mp) {
-  CREATE_AND_CONSTRUCT(LazyKVZipIterable, CREATE_VECTOR1(mp));
+  CREATE_AND_CONSTRUCT(LazyKVZipIterable, make_packed_array(mp));
 }
 
 ObjectData* SystemLib::AllocLazyIterableViewObject(CVarRef iterable) {
-  CREATE_AND_CONSTRUCT(LazyIterableView, CREATE_VECTOR1(iterable));
+  CREATE_AND_CONSTRUCT(LazyIterableView, make_packed_array(iterable));
 }
 
 ObjectData* SystemLib::AllocLazyKeyedIterableViewObject(CVarRef iterable) {
-  CREATE_AND_CONSTRUCT(LazyKeyedIterableView, CREATE_VECTOR1(iterable));
+  CREATE_AND_CONSTRUCT(LazyKeyedIterableView, make_packed_array(iterable));
 }
 
 #undef CREATE_AND_CONSTRUCT

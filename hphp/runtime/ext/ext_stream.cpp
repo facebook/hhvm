@@ -212,7 +212,7 @@ Variant f_stream_get_meta_data(CResRef stream) {
 }
 
 Array f_stream_get_transports() {
-  return CREATE_VECTOR4("tcp", "udp", "unix", "udg");
+  return make_packed_array("tcp", "udp", "unix", "udg");
 }
 
 String f_stream_resolve_include_path(CStrRef filename,
@@ -246,7 +246,7 @@ bool f_stream_set_timeout(CResRef stream, int seconds,
   if (stream.getTyped<Socket>(false, true)) {
     return f_socket_set_option
       (stream, SOL_SOCKET, SO_RCVTIMEO,
-       CREATE_MAP2(s_sec, seconds, s_usec, microseconds));
+       make_map_array(s_sec, seconds, s_usec, microseconds));
   }
   return false;
 }

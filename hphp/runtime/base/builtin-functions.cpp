@@ -1094,7 +1094,7 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(CStrRef name,
     //  - true means the map was updated. try again
     //  - false means we should stop applying autoloaders (only affects classes)
     //  - anything else means keep going
-    Variant action = vm_call_user_func(func, CREATE_VECTOR2(kind, name));
+    Variant action = vm_call_user_func(func, make_packed_array(kind, name));
     auto const actionCell = action.asCell();
     if (actionCell->m_type == KindOfBoolean) {
       if (actionCell->m_data.num) continue;
@@ -1199,7 +1199,7 @@ bool AutoloadHandler::addHandler(CVarRef handler, bool prepend) {
     m_handlers.add(name, handler, true);
   } else {
     // This adds the handler at the beginning
-    m_handlers = CREATE_MAP1(name, handler) + m_handlers;
+    m_handlers = make_map_array(name, handler) + m_handlers;
   }
   return true;
 }

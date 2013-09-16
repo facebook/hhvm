@@ -1196,9 +1196,9 @@ Variant f_fb_call_user_func_safe_return(int _argc, CVarRef function,
 
 Array f_fb_call_user_func_array_safe(CVarRef function, CArrRef params) {
   if (f_is_callable(function)) {
-    return CREATE_VECTOR2(true, vm_call_user_func(function, params));
+    return make_packed_array(true, vm_call_user_func(function, params));
   }
-  return CREATE_VECTOR2(false, uninit_null());
+  return make_packed_array(false, uninit_null());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

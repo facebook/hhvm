@@ -298,7 +298,7 @@ Variant f_apc_exists(CVarRef key, int64_t cache_id /* = 0 */) {
 const StaticString s_start_time("start_time");
 
 Variant f_apc_cache_info(int64_t cache_id /* = 0 */, bool limited /* = false */) {
-  return CREATE_MAP1(s_start_time, start_time());
+  return make_map_array(s_start_time, start_time());
 }
 
 Array f_apc_sma_info(bool limited /* = false */) {

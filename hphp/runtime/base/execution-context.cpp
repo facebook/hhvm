@@ -286,7 +286,7 @@ bool BaseExecutionContext::obFlush() {
         try {
           Variant tout =
             vm_call_user_func(last->handler,
-                                   CREATE_VECTOR2(last->oss.detach(), flag));
+                                   make_packed_array(last->oss.detach(), flag));
           prev->oss.append(tout.toString());
           last->oss.clear();
         } catch (...) {
@@ -300,7 +300,7 @@ bool BaseExecutionContext::obFlush() {
       try {
         Variant tout =
           vm_call_user_func(last->handler,
-                                 CREATE_VECTOR2(last->oss.detach(), flag));
+                                 make_packed_array(last->oss.detach(), flag));
         String sout = tout.toString();
         writeStdout(sout.data(), sout.size());
         last->oss.clear();
@@ -420,7 +420,7 @@ void BaseExecutionContext::resetCurrentBuffer() {
 void BaseExecutionContext::registerShutdownFunction(CVarRef function,
                                                     Array arguments,
                                                     ShutdownType type) {
-  Array callback = CREATE_MAP2(s_name, function, s_args, arguments);
+  Array callback = make_map_array(s_name, function, s_args, arguments);
   Variant &funcs = m_shutdowns.lvalAt(type);
   funcs.append(callback);
 }
@@ -670,7 +670,7 @@ bool BaseExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
       ErrorStateHelper esh(this, ErrorState::ExecutingUserHandler);
       if (!same(vm_call_user_func
                 (m_userErrorHandlers.back().first,
-                 CREATE_VECTOR6(errnum, String(e.getMessage()), errfile,
+                 make_packed_array(errnum, String(e.getMessage()), errfile,
                                 errline, "", backtrace)),
                 false)) {
         return true;
@@ -730,7 +730,7 @@ bool BaseExecutionContext::onUnhandledException(Object e) {
     if (!m_userExceptionHandlers.empty()) {
       if (!same(vm_call_user_func
                 (m_userExceptionHandlers.back(),
-                 CREATE_VECTOR1(e)),
+                 make_packed_array(e)),
                 false)) {
         return true;
       }

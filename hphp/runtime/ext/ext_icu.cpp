@@ -119,7 +119,7 @@ Variant f_icu_match(CStrRef pattern, CStrRef subject,
           }
 
           start = usubject.countChar32(0, start);
-          matches->append(CREATE_VECTOR2(match, start));
+          matches->append(make_packed_array(match, start));
         } else {
           matches->append(match);
         }

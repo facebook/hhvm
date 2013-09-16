@@ -1146,7 +1146,7 @@ void c_SimpleXMLElementIterator::reset_iterator() {
                                 "", false);
     m_parent = obj.getTyped<c_SimpleXMLElement>();
     Variant children = m_parent->m_children[name];
-    m_parent->m_children = CREATE_MAP1(name, children);
+    m_parent->m_children = make_map_array(name, children);
     // fall through
   }
 

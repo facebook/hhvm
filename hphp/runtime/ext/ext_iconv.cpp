@@ -1685,7 +1685,7 @@ Variant f_iconv_mime_decode_headers(CStrRef encoded_headers,
       if (ret.exists(header)) {
         Variant elem = ret[header];
         if (!elem.is(KindOfArray)) {
-          ret.set(header, CREATE_VECTOR2(elem, value));
+          ret.set(header, make_packed_array(elem, value));
         } else {
           elem.append(value);
           ret.set(header, elem);

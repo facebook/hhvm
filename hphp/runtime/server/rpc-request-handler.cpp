@@ -309,7 +309,8 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
         case 1: response = m_context->obDetachContents(); break;
         case 2:
           response =
-            f_json_encode(CREATE_MAP2(s_output, m_context->obDetachContents(),
+            f_json_encode(
+              make_map_array(s_output, m_context->obDetachContents(),
                                       s_return, f_json_encode(funcRet)));
           break;
         case 3: response = f_serialize(funcRet); break;

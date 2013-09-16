@@ -911,24 +911,24 @@ public:
 
   virtual bool open(const char *save_path, const char *session_name) {
     return vm_call_user_func(
-       CREATE_VECTOR2(Object(PS(ps_session_handler)),
+       make_packed_array(Object(PS(ps_session_handler)),
                       String("open")),
-       CREATE_VECTOR2(String(save_path, CopyString),
+       make_packed_array(String(save_path, CopyString),
                       String(session_name, CopyString))).toBoolean();
   }
 
   virtual bool close() {
     return vm_call_user_func(
-       CREATE_VECTOR2(Object(PS(ps_session_handler)),
+       make_packed_array(Object(PS(ps_session_handler)),
                       String("close")),
        Array::Create()).toBoolean();
   }
 
   virtual bool read(const char *key, String &value) {
     Variant ret = vm_call_user_func(
-       CREATE_VECTOR2(Object(PS(ps_session_handler)),
+       make_packed_array(Object(PS(ps_session_handler)),
                       String("read")),
-       CREATE_VECTOR1(String(key, CopyString)));
+       make_packed_array(String(key, CopyString)));
     if (ret.isString()) {
       value = ret.toString();
       return true;
@@ -938,23 +938,23 @@ public:
 
   virtual bool write(const char *key, CStrRef value) {
     return vm_call_user_func(
-       CREATE_VECTOR2(Object(PS(ps_session_handler)),
+       make_packed_array(Object(PS(ps_session_handler)),
                       String("write")),
-       CREATE_VECTOR2(String(key, CopyString), value)).toBoolean();
+       make_packed_array(String(key, CopyString), value)).toBoolean();
   }
 
   virtual bool destroy(const char *key) {
     return vm_call_user_func(
-       CREATE_VECTOR2(Object(PS(ps_session_handler)),
+       make_packed_array(Object(PS(ps_session_handler)),
                       String("destroy")),
-       CREATE_VECTOR1(String(key, CopyString))).toBoolean();
+       make_packed_array(String(key, CopyString))).toBoolean();
   }
 
   virtual bool gc(int maxlifetime, int *nrdels) {
     return vm_call_user_func(
-       CREATE_VECTOR2(Object(PS(ps_session_handler)),
+       make_packed_array(Object(PS(ps_session_handler)),
                       String("gc")),
-       CREATE_VECTOR1((int64_t)maxlifetime)).toBoolean();
+       make_packed_array((int64_t)maxlifetime)).toBoolean();
   }
 };
 static UserSessionModule s_user_session_module;

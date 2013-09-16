@@ -149,7 +149,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     called_on = Variant(const_cast<StringData*>(ar->getClass()->name()));
   }
   Array intArgs =
-    CREATE_VECTOR5(ar->m_func->fullNameRef(),
+    make_packed_array(ar->m_func->fullNameRef(),
                    called_on,
                    get_frame_args_with_ref(ar),
                    h->asCArrRef()[1],

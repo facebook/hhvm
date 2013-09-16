@@ -1518,15 +1518,17 @@ bool Unit::getOffsetRanges(int line, OffsetRangeVec& offsets) const {
 }
 
 bool Unit::getOffsetRange(Offset pc, OffsetRange& range) const {
-  if (m_repoId == RepoIdInvalid) {
-    return false;
+  LineEntry key = LineEntry(pc, -1);
+  std::vector<LineEntry>::const_iterator it =
+    upper_bound(m_lineTable.begin(), m_lineTable.end(), key);
+  if (it != m_lineTable.end()) {
+    assert(pc < it->pastOffset());
+    Offset base = it == m_lineTable.begin() ? 0 : (it-1)->pastOffset();
+    range.m_base = base;
+    range.m_past = it->pastOffset();
+    return true;
   }
-  UnitRepoProxy& urp = Repo::get().urp();
-  if (urp.getBaseOffsetAtPCLoc(m_repoId).get(m_sn, pc, range.m_base) ||
-      urp.getBaseOffsetAfterPCLoc(m_repoId).get(m_sn, pc, range.m_past)) {
-    return false;
-  }
-  return true;
+  return false;
 }
 
 const Func* Unit::getFunc(Offset pc) const {

@@ -699,7 +699,7 @@ Func::SharedData::SharedData(PreClass* preClass, Id id,
     m_docComment(docComment), m_top(top), m_isClosureBody(false),
     m_isGenerator(false), m_isGeneratorFromClosure(false),
     m_isPairGenerator(false), m_hasGeneratorAsBody(false),
-    m_isGenerated(false), m_originalFilename(nullptr) {
+    m_isGenerated(false), m_isAsync(false), m_originalFilename(nullptr) {
 }
 
 Func::SharedData::~SharedData() {
@@ -750,6 +750,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , m_isPairGenerator(false)
   , m_hasGeneratorAsBody(false)
   , m_containsCalls(false)
+  , m_isAsync(false)
   , m_info(nullptr)
   , m_builtinFuncPtr(nullptr)
   , m_originalFilename(nullptr)
@@ -775,6 +776,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , m_isPairGenerator(false)
   , m_hasGeneratorAsBody(false)
   , m_containsCalls(false)
+  , m_isAsync(false)
   , m_info(nullptr)
   , m_builtinFuncPtr(nullptr)
   , m_originalFilename(nullptr)
@@ -1066,6 +1068,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_retTypeConstraint = m_retTypeConstraint;
   f->shared()->m_originalFilename = m_originalFilename;
   f->shared()->m_isGenerated = isGenerated;
+  f->shared()->m_isAsync = m_isAsync;
 
   if (attrs & AttrNative) {
     auto nif = Native::GetBuiltinFunction(m_name,
@@ -1171,6 +1174,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (m_isPairGenerator)
     (m_hasGeneratorAsBody)
     (m_containsCalls)
+    (m_isAsync)
 
     (m_params)
     (m_localNames)

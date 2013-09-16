@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ARRAY_INLINE_H_
-#define incl_HPHP_ARRAY_INLINE_H_
+#ifndef incl_HPHP_ARRAY_DEFS_H_
+#define incl_HPHP_ARRAY_DEFS_H_
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/complex-types.h"
@@ -341,4 +341,4 @@ inline SharedVariant* ArrayData::getSharedVariant() {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_ARRAY_INLINE_H_
+#endif // incl_HPHP_ARRAY_DEFS_H_

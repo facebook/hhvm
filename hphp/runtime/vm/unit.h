@@ -721,6 +721,9 @@ private:
   uint8_t m_cacheMask;
   bool m_mergeOnly;
   bool m_interpretOnly;
+  // list of (line, offset) where offset is the offset of the first byte code
+  // of the next line if there is one, m_bclen otherwise.
+  // sorted by offset. line values are not assumed to be unique.
   LineTable m_lineTable;
   FuncTable m_funcTable;
   mutable PseudoMainCacheMap *m_pseudoMainCache;

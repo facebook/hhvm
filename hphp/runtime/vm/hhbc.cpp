@@ -259,15 +259,6 @@ int instrLen(const Op* opcode) {
   return len;
 }
 
-InstrFlags instrFlags(Op opcode) {
-  static const InstrFlags instrFlagsData[] = {
-#define O(unusedName, unusedImm, unusedPop, unusedPush, flags) flags,
-    OPCODES
-#undef O
-  };
-  return instrFlagsData[uint8_t(opcode)];
-}
-
 Offset* instrJumpOffset(Op* instr) {
   static const int8_t jumpMask[] = {
 #define NA 0
@@ -915,11 +906,6 @@ const char* opcodeToName(Op op) {
     return namesArr[uint8_t(op)];
   }
   return "Invalid";
-}
-
-bool instrIsControlFlow(Op opcode) {
-  InstrFlags opFlags = instrFlags(opcode);
-  return (opFlags & CF) != 0;
 }
 
 bool instrIsNonCallControlFlow(Op opcode) {

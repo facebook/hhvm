@@ -126,16 +126,16 @@ void HphpArray::postSort(bool resetKeys) {
   initHash(tableSize);
   if (resetKeys) {
     for (uint32_t pos = 0; pos < m_used; ++pos) {
-      Elm* e = &m_data[pos];
-      if (e->hasStrKey()) decRefStr(e->key);
-      e->setIntKey(pos);
+      auto& e = m_data[pos];
+      if (e.hasStrKey()) decRefStr(e.key);
+      e.setIntKey(pos);
       m_hash[pos] = pos;
     }
     m_nextKI = m_size;
   } else {
     for (uint32_t pos = 0; pos < m_used; ++pos) {
-      Elm* e = &m_data[pos];
-      ElmInd* ei = findForNewInsert(e->hasIntKey() ? e->ikey : e->hash());
+      auto& e = m_data[pos];
+      auto ei = findForNewInsert(e.hasIntKey() ? e.ikey : e.hash());
       *ei = pos;
     }
   }

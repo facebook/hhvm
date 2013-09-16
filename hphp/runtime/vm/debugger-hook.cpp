@@ -189,11 +189,14 @@ static void addBreakPointFuncEntry(const Func* f) {
 // it will only return true if the given function is the generator,
 // not the stub which makes the generator. I.e., given name="genFoo"
 // this will return true when f's name is "genFoo$continuation", and
-// false for "genFoo".
+// false for "genFoo". Note that while async functions follow the same
+// general codegen strategy as generators, the original function still
+// starts the work, so we treat generators from async functions
+// normally.
 static bool matchFunctionName(string name, const Func* f) {
-  if (f->hasGeneratorAsBody()) return false; // Original function.
+  if (f->hasGeneratorAsBody() && !f->isAsync()) return false; // Original func
   auto funcName = f->name()->data();
-  if (!f->isGenerator()) {
+  if (!f->isGenerator() || f->isAsync()) {
     return name == funcName;
   } else {
     DEBUG_ONLY string s(funcName);
@@ -339,7 +342,7 @@ void phpSetBreakPoints(Eval::DebuggerProxy* proxy) {
       auto fName = StringData::GetStaticString(funcName);
       Func* f = Unit::lookupFunc(fName);
       if (f == nullptr) continue;
-      if (f->hasGeneratorAsBody()) {
+      if (f->hasGeneratorAsBody() && !f->isAsync()) {
         // This function is a generator, and it's the original
         // function which has been turned into a stub which creates a
         // continuation. We want to set the breakpoint on the

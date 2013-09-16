@@ -261,6 +261,8 @@ static CallMap s_callMap {
                  {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
     {ArrayGet, fssa(0), DTV, SSync,
                  {{SSA, 1}, {SSA, 2}}},
+    {StringGet, fssa(0), DSSA, SSync,
+                 {{SSA, 1}, {SSA, 2}}},
     {VectorGet, fssa(0), DTV, SSync,
                  {{SSA, 1}, {SSA, 2}}},
     {PairGet,  fssa(0), DTV, SSync,

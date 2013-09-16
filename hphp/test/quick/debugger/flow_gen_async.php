@@ -6,6 +6,7 @@
 
 async function genBar($a) {
   var_dump($a);
+  await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
   error_log('Finished in genBar');
   return $a + 2;
 }

@@ -2213,8 +2213,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
         // if returning from (outer) async function,
         // wrap the result into StaticResultWaitHandle
-        if (node->getFunctionScope()->isAsync() &&
-            !m_curFunc->isGenerator()) {
+        if (m_curFunc->isAsync() && !m_curFunc->isGenerator()) {
           if (visit(r->getRetExp())) {
             emitConvertToCell(e);
           } else {
@@ -3877,7 +3876,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           emitBuiltinCallArg(e, (*valuesList)[i], i, useVars[i].second);
         }
 
-        if (node->getFunctionScope()->isAsync() && m_curFunc->isGenerator()) {
+        if (m_curFunc->isAsync() && m_curFunc->isGenerator()) {
           // Closure definition in the body of async function. The closure
           // body was already emitted, so we just create the object here.
           assert(ce->getClosureClassName());
@@ -5558,12 +5557,14 @@ void EmitterVisitor::emitPostponedMeths() {
       // emit the outer function (which creates continuation if blocked)
       m_curFunc = fe;
       fe->setHasGeneratorAsBody(true);
+      fe->setIsAsync(true);
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
       emitAsyncMethod(meth);
 
       // emit the generator body
       m_curFunc = createFuncEmitterForGeneratorBody(meth, fe, top_fes);
       if (m_curFunc) {
+        m_curFunc->setIsAsync(true);
         emitMethodMetadata(meth, p.m_closureUseVars, m_curFunc->top());
         emitGeneratorBody(meth);
       }

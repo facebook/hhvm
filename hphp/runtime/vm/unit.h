@@ -888,6 +888,7 @@ class UnitEmitter {
    */
   std::vector<std::pair<Offset,SourceLoc> > m_sourceLocTab;
   std::vector<std::pair<Offset,const FuncEmitter*> > m_feTab;
+  LineTable m_lineTable;
   std::vector<Typedef> m_typedefs;
 };
 

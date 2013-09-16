@@ -2253,15 +2253,7 @@ void UnitEmitter::setBcMeta(const uchar* bc_meta, size_t bc_meta_len) {
 }
 
 void UnitEmitter::setLines(const LineTable& lines) {
-  Offset prevPastOffset = 0;
-  for (size_t i = 0; i < lines.size(); ++i) {
-    const LineEntry* line = &lines[i];
-    Location sLoc;
-    sLoc.line0 = sLoc.line1 = line->val();
-    Offset pastOffset = line->pastOffset();
-    recordSourceLocation(&sLoc, prevPastOffset);
-    prevPastOffset = pastOffset;
-  }
+  this->m_lineTable = lines;
 }
 
 Id UnitEmitter::mergeLitstr(const StringData* litstr) {
@@ -2656,7 +2648,11 @@ Unit* UnitEmitter::create() {
   }
   assert(ix == mi->m_mergeablesSize);
   mi->mergeableObj(ix) = (void*)UnitMergeKindDone;
-  u->m_lineTable = createLineTable(m_sourceLocTab, m_bclen);
+  if (m_lineTable.size() == 0) {
+    u->m_lineTable = createLineTable(m_sourceLocTab, m_bclen);
+  } else {
+    u->m_lineTable = m_lineTable;
+  }
   for (size_t i = 0; i < m_feTab.size(); ++i) {
     assert(m_feTab[i].second->past() == m_feTab[i].first);
     assert(m_fMap.find(m_feTab[i].second) != m_fMap.end());

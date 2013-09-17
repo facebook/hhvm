@@ -1007,6 +1007,9 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     ParserBase::IsClosureName(m_name->toCPPString()) || m_isGenerator;
 
   Attr attrs = m_attrs;
+  if (preClass && preClass->attrs() & AttrInterface) {
+    attrs = Attr(attrs | AttrAbstract);
+  }
   if (attrs & AttrPersistent &&
       ((RuntimeOption::EvalJitEnableRenameFunction && !isGenerated) ||
        (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited))) {

@@ -476,24 +476,24 @@ struct Class : AtomicCountable {
   bool isZombie() const { return !m_cachedOffset; }
 
   Avail avail(Class *&parent, bool tryAutoload = false) const;
+
+  /*
+   * classof() determines if this represents a non-strict subtype of cls.
+   */
   bool classof(const Class* cls) const {
     /*
-      If cls is an interface, we can simply check to
-      see if cls is in this->m_interfaces.
-      Otherwise, if this is not an interface,
-      the classVec check will determine whether its
-      an instance of cls (including the case where
-      this and cls are the same trait).
-      Otherwise, this is an interface, and cls
-      is not, so we need to return false. But the classVec
-      check can never return true in that case (cls's
-      classVec contains only non-interfaces,
-      while this->classVec is either empty, or contains
+      If cls is an interface, we can simply check to see if cls is in
+      this->m_interfaces.  Otherwise, if this is not an interface, the classVec
+      check will determine whether its an instance of cls (including the case
+      where this and cls are the same trait).  Otherwise, this is an interface,
+      and cls is not, so we need to return false. But the classVec check can
+      never return true in that case (cls's classVec contains only
+      non-interfaces, while this->classVec is either empty, or contains
       interfaces).
     */
     if (UNLIKELY(cls->attrs() & AttrInterface)) {
-      return m_interfaces.lookupDefault(cls->m_preClass->name(), nullptr)
-        == cls;
+      return this == cls ||
+        m_interfaces.lookupDefault(cls->m_preClass->name(), nullptr) == cls;
     }
     if (m_classVecLen >= cls->m_classVecLen) {
       return (m_classVec[cls->m_classVecLen-1] == cls);
@@ -503,6 +503,13 @@ struct Class : AtomicCountable {
   bool ifaceofDirect(const StringData* name) const {
     return m_interfaces.lookupDefault(name, nullptr) != nullptr;
   }
+
+  /*
+   * Assuming this and cls are both regular classes (not interfaces or traits),
+   * return their lowest common ancestor, or nullptr if they're unrelated.
+   */
+  const Class* commonAncestor(const Class* cls) const;
+
   const StringData* name() const {
     return m_preClass->name();
   }
@@ -857,6 +864,16 @@ private:
   // including this Class as the last element.
   Class* m_classVec[1]; // Dynamically sized; must come last.
 };
+
+inline bool isTrait(const Class* cls) {
+  return cls->attrs() & AttrTrait;
+}
+inline bool isInterface(const Class* cls) {
+  return cls->attrs() & AttrInterface;
+}
+inline bool isNormalClass(const Class* cls ) {
+  return !(cls->attrs() & (AttrTrait | AttrInterface));
+}
 
 } // HPHP
 

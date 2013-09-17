@@ -4980,12 +4980,12 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
 
   auto t = srcCtxTmp->type();
   assert(!t.equals(Type::Cls));
-  if (t.equals(Type::Cctx)) {
+  if (t <= Type::Cctx) {
     return; // done: destCtxReg already has srcCtxReg
-  } else if (t == Type::Obj) {
+  } else if (t <= Type::Obj) {
     // unconditionally run code produced by emitGetCtxFwdCallWithThisDyn below
     // break
-  } else if (t == Type::Ctx) {
+  } else if (t <= Type::Ctx) {
     // dynamically check if we have a This pointer and
     // call emitGetCtxFwdCallWithThisDyn below
     m_as.testb(1, rbyte(destCtxReg));

@@ -33,6 +33,20 @@ TRACE_SET_MOD(hhir);
 
 //////////////////////////////////////////////////////////////////////
 
+bool Type::checkValid() const {
+  if (m_extra) {
+    assert((!(m_bits & kAnyObj) || !(m_bits & kAnyArr)) &&
+           "Conflicting specialization");
+
+    if (canSpecializeArrayKind() && hasArrayKind()) {
+      assert(!(m_extra & 0xffffffffffff0000) &&
+             "Non-zero padding bits in Type with array kind");
+    }
+  }
+
+  return true;
+}
+
 DataType Type::toDataType() const {
   assert(!isPtr());
   if (isBoxed()) {
@@ -61,10 +75,19 @@ DataType Type::toDataType() const {
 
 RuntimeType Type::toRuntimeType() const {
   assert(!isPtr());
-  if (isBoxed()) {
-    return RuntimeType(KindOfRef, innerType().toDataType());
+  auto const outer = isBoxed() ? KindOfRef : toDataType();
+  auto const inner = isBoxed() ? innerType().toDataType() : KindOfNone;
+  auto rtt = RuntimeType{outer, inner};
+
+  if (isSpecialized()) {
+    if (isArray()) {
+      return rtt.setArrayKind(getArrayKind());
+    } else {
+      return rtt.setKnownClass(getClass());
+    }
   }
-  return RuntimeType(toDataType());
+
+  return rtt;
 }
 
 Type::Type(const RuntimeType& rtt)
@@ -80,8 +103,9 @@ Type::Type(const RuntimeType& rtt)
 }
 
 Type::Type(const DynLocation* dl) {
-  // Temporary stop-gap until we embrace gcc 4.8 fully
-  // At that point we can switch to ctor delegation
+  // Temporary stop-gap until we embrace gcc 4.8 fully, and only ok because
+  // Type has no non-POD members. At that point we can switch to ctor
+  // delegation.
   new (this) Type((assert(dl), dl->rtt));
 }
 
@@ -115,6 +139,259 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
     }
     default                  : always_assert(false && "Unsupported DataType");
   }
+}
+
+namespace {
+// ClassOps and ArrayOps are used below to write code that can perform set
+// operations on both Class and ArrayKind specializations.
+struct ClassOps {
+  static bool subtypeOf(const Class* a, const Class* b) {
+    return a->classof(b);
+  }
+
+  static folly::Optional<const Class*> commonAncestor(const Class* a,
+                                                      const Class* b) {
+    if (!isNormalClass(a) || !isNormalClass(b)) return folly::none;
+    if (auto result = a->commonAncestor(b)) return result;
+
+    return folly::none;
+  }
+};
+
+struct ArrayOps {
+  static bool subtypeOf(ArrayData::ArrayKind a, ArrayData::ArrayKind b) {
+    return a == b;
+  }
+
+  static folly::Optional<ArrayData::ArrayKind> commonAncestor(
+    ArrayData::ArrayKind a, ArrayData::ArrayKind b) {
+    if (a == b) return a;
+    return folly::none;
+  }
+};
+}
+
+// Union and Intersect implement part of the logic for operator| and operator&,
+// respectively. Each has two static methods:
+//
+// combineClass: called when at least one of *this or b is specialized and
+//               they can both specialize on Class.
+// combineDifferent: called when *this and b can specialize different ways
+//                   and at least one of the two is specialized.
+
+struct Type::Union {
+  template<typename Ops, typename T>
+  static Type combineSame(bits_t bits, bits_t typeMask,
+                          folly::Optional<T> aOpt,
+                          folly::Optional<T> bOpt) {
+    // If one or both types are not specialized, the specialization is lost
+    if (!(aOpt && bOpt)) return Type(bits);
+
+    auto const a = *aOpt;
+    auto const b = *bOpt;
+
+    // If the specialization is the same, keep it.
+    if (a == b)            return Type(bits, a);
+
+    // If one is a subtype of the other, their union is the least specific of
+    // the two.
+    if (Ops::subtypeOf(a, b))     return Type(bits, b);
+    if (Ops::subtypeOf(b, a))     return Type(bits, a);
+
+    // Check for a common ancestor.
+    if (auto p = Ops::commonAncestor(a, b)) return Type(bits, *p);
+
+    // a and b are unrelated but we can't hold both of them in a Type. Dropping
+    // the specialization returns a supertype of their true union. It's not
+    // optimal but not incorrect.
+    return Type(bits);
+  }
+
+  /*
+   * combineExtra returns a's m_extra field if the union of a and b would
+   * contain a's specialization. Otherwise it returns 0. Assumes a and b can
+   * specialize differently.
+   */
+  static uintptr_t combineExtra(Type a, Type b) {
+    if (!a.isSpecialized()) return 0;
+    assert(a.canSpecializeClass() != b.canSpecializeClass());
+
+    if (a.getClass()) {
+      // We know b can specialize on array kind so it can't contain any members
+      // of AnyObj. a's class will be preserved in the union.
+      assert(!(b.m_bits & kAnyObj));
+      return a.m_extra;
+    }
+
+    if (a.hasArrayKind()) {
+      // We know b can specialize on object class so it can't contain any members
+      // of AnyArr. a's array kind will be preserved in the union.
+      assert(!(b.m_bits & kAnyArr));
+      return a.m_extra;
+    }
+
+    not_reached();
+  }
+
+  static Type combineDifferent(bits_t newBits, Type a, Type b) {
+    // a and b can specialize differently. Figure out if each Type's
+    // specialization would be preserved in the union operation, sanity check,
+    // and keep the specialization that survived.
+    auto const aExtra = combineExtra(a, b);
+    auto const bExtra = combineExtra(b, a);
+
+    assert(!(aExtra && bExtra) && "Conflicting specializations in operator|");
+    return Type(newBits, aExtra ? aExtra : bExtra);
+  }
+};
+
+struct Type::Intersect {
+  template<typename Ops, typename T>
+  static Type combineSame(bits_t bits, bits_t typeMask,
+                          folly::Optional<T> aOpt,
+                          folly::Optional<T> bOpt) {
+    // We shouldn't get here if neither is specialized.
+    assert(aOpt || bOpt);
+
+    // If we know both, attempt to combine them.
+    if (aOpt && bOpt) {
+      auto const a = *aOpt;
+      auto const b = *bOpt;
+
+      // When a and b are the same, keep the specialization.
+      if (a == b)        return Type(bits, a);
+
+      // If one is a subtype of the other, their intersection is the most
+      // specific of the two.
+      if (Ops::subtypeOf(a, b)) return Type(bits, a);
+      if (Ops::subtypeOf(b, a)) return Type(bits, b);
+
+      // a and b are unrelated so we have to remove the specialized type. This
+      // means dropping the specialization and the bits that correspond to the
+      // type that was specialized.
+      return Type(bits & ~typeMask);
+    }
+
+    if (aOpt) return Type(bits, *aOpt);
+    if (bOpt) return Type(bits, *bOpt);
+
+    not_reached();
+  }
+
+  static Type combineDifferent(bits_t newBits, Type a, Type b) {
+    // Since a and b are each eligible for different specializations, their
+    // intersection can't have any specialization left.
+    return Type(newBits);
+  }
+};
+
+/*
+ * combine handles the cases that have similar shapes between & and |: neither
+ * is specialized or both have the same possible specialization type. Other
+ * cases delegate back to Oper.
+ */
+template<typename Oper>
+Type Type::combine(bits_t newBits, Type other) const {
+  static_assert(std::is_same<Oper, Union>::value ||
+                std::is_same<Oper, Intersect>::value,
+                "Type::combine given unsupported template argument");
+
+  // If neither type is specialized, the result is simple.
+  if (LIKELY(!isSpecialized() && !other.isSpecialized())) {
+    return Type(newBits);
+  }
+
+  // If one of the types can't be specialized while the other is specialized,
+  // preserve the specialization.
+  if (!canSpecializeAny() || !other.canSpecializeAny()) {
+    auto const specType = isSpecialized() ? specializedType()
+                                          : other.specializedType();
+
+    // If the specialized type doesn't exist in newBits, drop the
+    // specialization.
+    if (newBits & specType.m_bits) return Type(newBits, specType.m_extra);
+    return Type(newBits);
+  }
+
+  // If both types are eligible for the same kind of specialization and at
+  // least one is specialized, delegate to Oper::combineSame.
+  if (canSpecializeClass() && other.canSpecializeClass()) {
+    folly::Optional<const Class*> aClass, bClass;
+    if (getClass()) aClass = getClass();
+    if (other.getClass()) bClass = other.getClass();
+
+    return Oper::template combineSame<ClassOps>(newBits, kAnyObj,
+                                                aClass, bClass);
+  }
+
+  if (canSpecializeArrayKind() && other.canSpecializeArrayKind()) {
+    folly::Optional<ArrayData::ArrayKind> aKind, bKind;
+    if (hasArrayKind()) aKind = getArrayKind();
+    if (other.hasArrayKind()) bKind = other.getArrayKind();
+
+    return Oper::template combineSame<ArrayOps>(newBits, kAnyArr, aKind, bKind);
+  }
+
+  // The types are eligible for different kinds of specialization and at least
+  // one is specialized, so delegate to Oper::combineDifferent.
+  return Oper::combineDifferent(newBits, *this, other);
+}
+
+Type Type::operator|(Type other) const {
+  auto const newBits = m_bits | other.m_bits;
+  return combine<Union>(newBits, other);
+}
+Type Type::operator&(Type other) const {
+  auto const newBits = m_bits & other.m_bits;
+  return combine<Intersect>(newBits, other);
+}
+
+Type Type::operator-(Type other) const {
+  auto const newBits = m_bits & ~other.m_bits;
+  auto const spec1 = isSpecialized();
+  auto const spec2 = other.isSpecialized();
+
+  // The common easy case is when neither type is specialized.
+  if (LIKELY(!spec1 && !spec2)) return Type(newBits);
+
+  if (spec1 && spec2) {
+    if (canSpecializeClass() != other.canSpecializeClass()) {
+      // Both are specialized but in different ways. Our specialization is
+      // preserved.
+      return Type(newBits, m_extra);
+    }
+
+    // Subtracting different specializations of the same type could get messy
+    // so we don't support it for now.
+    assert(specializedType() == other.specializedType() &&
+           "Incompatible specialized types given to operator-");
+
+    // If we got here, both types have the same specialization, so it's removed
+    // from the result.
+    return Type(newBits);
+  }
+
+  // If masking out other's bits removed all of the bits that correspond to our
+  // specialization, take it out. Otherwise, preserve it.
+  if (spec1) {
+    if (canSpecializeClass()) {
+      if (!(newBits & kAnyObj)) return Type(newBits);
+      return Type(newBits, m_class);
+    }
+    if (canSpecializeArrayKind()) {
+      if (!(newBits & kAnyArr)) return Type(newBits);
+      return Type(newBits, m_arrayKind);
+    }
+    not_reached();
+  }
+
+  // Only other is specialized. This is fine as long as none of the bits
+  // corresponding to other's specialization are set in *this. Otherwise we'd
+  // have to represent things like "all classes except X".
+  assert(IMPLIES(other.canSpecializeArrayKind(), !(m_bits & kAnyArr)) &&
+         IMPLIES(other.canSpecializeClass(), !(m_bits & kAnyObj)) &&
+         "Unsupported specialization subtraction");
+  return Type(newBits);
 }
 
 Type liveTVType(const TypedValue* tv) {

@@ -190,7 +190,9 @@ class ObjectData {
     return offsetof(ObjectData, m_cls);
   }
   static size_t attributeOff() { return offsetof(ObjectData, o_attribute); }
-  bool instanceof(const Class* c) const;
+  bool instanceof(const Class* c) const {
+    return m_cls->classof(c);
+  }
 
   bool isCollection() const {
     return getCollectionType() != Collection::InvalidType;

@@ -198,6 +198,11 @@ TEST(Type, CanRunDtor) {
   expectTrue(Type::Init);
   expectTrue(Type::Top);
   expectTrue(Type::StackElem);
+  expectTrue(Type::AnyObj);
+  expectTrue(Type::AnyRes);
+  expectTrue(Type::AnyArr);
+  expectTrue(Type::AnyCountedArr);
+  expectTrue(Type::AnyCell);
 
   for (Type t : types) {
     EXPECT_FALSE(t.canRunDtor()) << t.toString() << ".canRunDtor == false";

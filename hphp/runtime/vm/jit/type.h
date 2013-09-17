@@ -34,11 +34,17 @@ namespace JIT {
 using Transl::RuntimeType;
 using Transl::DynLocation;
 
-#define IRT_BOXES(name, bit)                                            \
-  IRT(name,             (bit))                                          \
-  IRT(Boxed##name,      (bit) << kBoxShift)                             \
-  IRT(PtrTo##name,      (bit) << kPtrShift)                             \
-  IRT(PtrToBoxed##name, (bit) << kPtrBoxShift)
+#define IRT_BOXES(name, bits)                                           \
+  IRT(name,             (bits))                                         \
+  IRT(Boxed##name,      (bits) << kBoxShift)                            \
+  IRT(PtrTo##name,      (bits) << kPtrShift)                            \
+  IRT(PtrToBoxed##name, (bits) << kPtrBoxShift)
+
+#define IRT_BOXES_WITH_ANY(name, bits)                                  \
+  IRT_BOXES(name, bits)                                                 \
+  IRT(Any##name, k##name | kBoxed##name | kPtrTo##name |                \
+                 kPtrToBoxed##name)
+
 
 #define IRT_PHP(c)                                                      \
   c(Uninit,       1ULL << 0)                                            \
@@ -111,8 +117,25 @@ using Transl::DynLocation;
 #define IRT_PRIMITIVE IRT_PHP(IRT_BOXES) IRT_RUNTIME
 
 // All types
-#define IR_TYPES IRT_USERLAND(IRT_BOXES) IRT_RUNTIME IRT_UNIONS IRT_SPECIAL
+#define IR_TYPES IRT_USERLAND(IRT_BOXES_WITH_ANY) IRT_RUNTIME IRT_UNIONS \
+  IRT_SPECIAL
 
+/*
+ * Type is used to represent the types of values in the jit. Every Type
+ * represents a set of types, with Type::Top being a superset of all Types and
+ * Type::Bottom being a subset of all Types. The elements forming these sets of
+ * types come from the types of PHP-visible values (Str, Obj, Int, ...) and
+ * runtime-internal types (Func, TCA, ActRec, ...).
+ *
+ * Types can be constructed from the predefined constants or by composing
+ * existing Types in various ways. Unions, intersections, and subtractions are
+ * all supported, though for implementation-specific reasons certain
+ * combinations of specialized types cannot be represented. A type is
+ * considered specialized if it refers to a specific Class or a
+ * ArrayData::ArrayKind. As an example, if A and B are unrelated Classes,
+ * Obj<A> | Obj<B> is impossible to represent. However, if B is a subclass of
+ * A, Obj<A> | Obj<B> == Obj<B>, which can be represented as a Type.
+ */
 class Type {
   typedef uint64_t bits_t;
 
@@ -120,7 +143,7 @@ class Type {
   static const size_t kPtrShift = kBoxShift * 2;
   static const size_t kPtrBoxShift = kBoxShift + kPtrShift;
 
-  enum TypeBits {
+  enum TypedBits {
 #define IRT(name, bits) k##name = (bits),
   IR_TYPES
 #undef IRT
@@ -128,42 +151,68 @@ class Type {
 
   union {
     bits_t m_bits;
-    TypeBits m_typedBits;
+    TypedBits m_typedBits;
   };
 
   union {
+    uintptr_t m_extra;
     const Class* m_class;
     struct {
       bool m_arrayKindValid;
       ArrayData::ArrayKind m_arrayKind;
+      static_assert(sizeof(m_arrayKind) == 1,
+                    "Type expects ArrayKind to be one byte");
+      char padding[6];
     };
   };
 
-  // private ctors to build a specialized type
+  bool checkValid() const;
+
+  explicit Type(bits_t bits, uintptr_t extra = 0)
+    : m_bits(bits), m_extra(extra)
+  {
+    assert(checkValid());
+  }
+
   explicit Type(bits_t bits, const Class* klass)
     : m_bits(bits), m_class(klass)
-  {}
+  {
+    assert(checkValid());
+  }
 
   explicit Type(bits_t bits, ArrayData::ArrayKind arrayKind)
     : m_bits(bits)
     , m_arrayKindValid(true)
     , m_arrayKind(arrayKind)
-  {}
+    , padding{0} // Keeping all 8 bytes of m_extra valid makes some comparisons
+                 // simpler
+  {
+    assert(checkValid());
+  }
 
   static bits_t bitsFromDataType(DataType outer, DataType inner);
+
+  // combine, Union, and Intersect are used for operator| and operator&. See
+  // .cpp for details.
+  template<typename Oper>
+  Type combine(bits_t newBits, Type b) const;
+
+  struct Union;
+  struct Intersect;
 
 public:
 # define IRT(name, ...) static const Type name;
   IR_TYPES
 # undef IRT
 
-  explicit Type(bits_t bits = kNone)
-    : m_bits(bits), m_class(nullptr)
+  Type()
+    : m_bits(kNone)
+    , m_extra(0)
   {}
 
   explicit Type(DataType outerType, DataType innerType = KindOfInvalid)
     : m_bits(bitsFromDataType(outerType, innerType))
-    , m_class(nullptr)
+    , m_extra(0)
   {}
 
   explicit Type(const RuntimeType& rtt);
@@ -173,52 +222,17 @@ public:
     return hash_int64_pair(m_bits, reinterpret_cast<uintptr_t>(m_class));
   }
 
-  bool operator==(Type other) const {
-    return equals(other);
-  }
+  bool operator==(Type other) const { return equals(other); }
+  bool operator!=(Type other) const { return !operator==(other); }
 
-  bool operator!=(Type other) const {
-    return !operator==(other);
-  }
+  Type operator|(Type other) const;
+  Type& operator|=(Type other) { return *this = *this | other; }
 
-  Type operator|(Type other) const {
-    assert(!canSpecializeClass() ||
-           (m_class == nullptr && other.m_class == nullptr));
-    Type t = Type(m_bits | other.m_bits);
-    if (t.canSpecializeArrayKind() &&
-        hasArrayKind() && other.hasArrayKind() &&
-        getArrayKind() == other.getArrayKind()) {
-      return t.specialize(m_arrayKind);
-    }
-    return t;
-  }
+  Type operator&(Type other) const;
+  Type& operator&=(Type other) { return *this = *this & other; }
 
-  Type& operator|=(Type other) {
-    return *this = *this | other;
-  }
-
-  Type operator&(Type other) const {
-    Type t = Type(m_bits & other.m_bits);
-    if (canSpecializeClass() &&
-        m_class != nullptr && other.m_class != nullptr) {
-      if (m_class->classof(other.m_class)) {
-        return t.specialize(other.m_class);
-      } else if (other.m_class->classof(m_class)) {
-        return t.specialize(m_class);
-      }
-    } else if (canSpecializeArrayKind() &&
-               hasArrayKind() && other.hasArrayKind() &&
-               getArrayKind() == other.getArrayKind()) {
-      return t.specialize(m_arrayKind);
-    }
-    return t;
-  }
-
-  Type operator-(Type other) const {
-    assert(m_class == nullptr && other.m_class == nullptr);
-    assert(!m_arrayKindValid && !other.m_arrayKindValid);
-    return Type(m_bits & ~other.m_bits);
-  }
+  Type operator-(Type other) const;
+  Type& operator-=(Type other) { return *this = *this - other; }
 
   std::string toString() const;
   static std::string debugString(Type t);
@@ -327,36 +341,33 @@ public:
    * True if type can have a specialized class.
    */
   bool canSpecializeClass() const {
-    bits_t objectBits = Obj.m_bits | BoxedObj.m_bits | PtrToObj.m_bits |
-      PtrToBoxedObj.m_bits;
-    return (m_bits & objectBits) == m_bits;
+    return (m_bits & kAnyObj) && !(m_bits & kAnyArr);
   }
 
   /*
    * True if type can have a specialized array kind.
    */
   bool canSpecializeArrayKind() const {
-    bits_t arrayBits = Arr.m_bits | BoxedArr.m_bits | PtrToArr.m_bits |
-      PtrToBoxedArr.m_bits;
-    return (m_bits & arrayBits) == m_bits;
+    return (m_bits & kAnyArr) && !(m_bits & kAnyObj);
+  }
+
+  bool canSpecializeAny() const {
+    return canSpecializeClass() || canSpecializeArrayKind();
   }
 
   /*
    * Returns true if this is same type or a subtype of any of the arguments.
    */
   bool subtypeOf(Type t2) const {
-    if ((m_bits & t2.m_bits) != m_bits) {
-      return false;
-    }
+    if ((m_bits & t2.m_bits) != m_bits) return false;
+
     if (canSpecializeClass()) {
       return t2.m_class == nullptr ||
-        (m_class != nullptr
-         && m_class->classof(t2.m_class));
+        (m_class != nullptr && m_class->classof(t2.m_class));
     }
     if (canSpecializeArrayKind()) {
       return !t2.m_arrayKindValid ||
-        (m_arrayKindValid
-         && m_arrayKind == t2.m_arrayKind);
+        (m_arrayKindValid && m_arrayKind == t2.m_arrayKind);
     }
     return true;
   }
@@ -392,18 +403,7 @@ public:
    * probably mean subtypeOf.
    */
   bool equals(Type t2) const {
-    if (m_bits != t2.m_bits) {
-      return false;
-    }
-    if (canSpecializeClass()) {
-      return m_class == t2.m_class;
-    }
-    if (canSpecializeArrayKind()) {
-      // Use m_class to represent the arrayKind bits.
-      return m_arrayKindValid == t2.m_arrayKindValid &&
-             m_arrayKind == t2.m_arrayKind;
-    }
-    return true;
+    return m_bits == t2.m_bits && m_extra == t2.m_extra;
   }
 
   /*
@@ -411,7 +411,7 @@ public:
    * precisely equal (due to specialization, for example).
    */
   bool isSameKindOf(Type t2) const {
-    return isKnownDataType() && m_bits == t2.m_bits;
+    return isKnownDataType() && toDataType() == t2.toDataType();
   }
 
   /*
@@ -461,22 +461,34 @@ public:
   }
 
   const Class* getClass() const {
-    assert(isObj());
+    assert(canSpecializeClass());
     return m_class;
   }
 
   bool hasArrayKind() const {
+    assert(canSpecializeArrayKind());
     return m_arrayKindValid;
   }
 
   ArrayData::ArrayKind getArrayKind() const {
-    assert(isArray() && hasArrayKind());
+    assert(canSpecializeArrayKind() && hasArrayKind());
     return m_arrayKind;
+  }
+
+  // Returns a subset of *this containing only the members relating to its
+  // specialization.
+  //
+  // {Int|Str|Obj<C>|BoxedObj<C>}.specializedType() == {Obj<C>|BoxedObj<C>}
+  Type specializedType() const {
+    assert(isSpecialized());
+    if (canSpecializeClass()) return *this & AnyObj;
+    if (canSpecializeArrayKind()) return *this & AnyArr;
+    not_reached();
   }
 
   Type innerType() const {
     assert(isBoxed());
-    return Type(m_bits >> kBoxShift, m_class);
+    return Type(m_bits >> kBoxShift, m_extra);
   }
 
   /*
@@ -519,20 +531,14 @@ public:
   // This computes the type effects of the Unbox opcode.
   Type unbox() const {
     assert(subtypeOf(Gen));
-    const Class* klass = m_class;
-    ArrayData::ArrayKind kind = m_arrayKind;
-    Type t = (*this & Cell) | (*this & BoxedCell).innerType();
-    return
-      canSpecializeClass() ? t.specialize(klass) :
-      canSpecializeArrayKind() && hasArrayKind() ? t.specialize(kind) :
-      t;
+    return (*this & Cell) | (*this & BoxedCell).innerType();
   }
 
   Type deref() const {
     assert(isPtr());
     auto t = Type(m_bits >> kPtrShift);
     return
-      canSpecializeClass() ? t.specialize(m_class) :
+      canSpecializeClass() && m_class ? t.specialize(m_class) :
       canSpecializeArrayKind() && hasArrayKind() ? t.specialize(m_arrayKind) :
       t;
   }
@@ -570,7 +576,7 @@ public:
   }
 
   Type unspecialize() const {
-    return Type(m_bits, nullptr);
+    return Type(m_bits);
   }
 
   Type specialize(ArrayData::ArrayKind arrayKind) const {

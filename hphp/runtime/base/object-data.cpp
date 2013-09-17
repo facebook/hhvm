@@ -62,10 +62,6 @@ ObjectData::~ObjectData() {
   }
 }
 
-bool ObjectData::instanceof(const Class* c) const {
-  return m_cls->classof(c);
-}
-
 HOT_FUNC
 void ObjectData::destruct() {
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {

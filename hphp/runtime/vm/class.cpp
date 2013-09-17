@@ -417,6 +417,22 @@ Class::Avail Class::avail(Class*& parent, bool tryAutoload /*=false*/) const {
   return Avail::True;
 }
 
+const Class* Class::commonAncestor(const Class* cls) const {
+  assert(isNormalClass(this) && isNormalClass(cls));
+
+  // Walk up m_classVec for both classes to look for a common ancestor.
+  auto vecIdx = std::min(m_classVecLen, cls->m_classVecLen) - 1;
+  do {
+    assert(vecIdx >= 0 &&
+           vecIdx < m_classVecLen && vecIdx < cls->m_classVecLen);
+    if (m_classVec[vecIdx] == cls->m_classVec[vecIdx]) {
+      return m_classVec[vecIdx];
+    }
+  } while (vecIdx--);
+
+  return nullptr;
+}
+
 void Class::initialize(TypedValue*& sProps) const {
   if (m_pinitVec.size() > 0) {
     if (getPropData() == nullptr) {

@@ -58,28 +58,39 @@ std::string Type::toString() const {
   if (isBoxed()) {
     return folly::to<std::string>("Boxed", innerType().toString());
   }
-
-  if (strictSubtypeOf(Type::Obj)) {
-    return folly::format("Obj<{}>", m_class->name()->data()).str();
+  if (isPtr()) {
+    return folly::to<std::string>("PtrTo", deref().toString());
   }
 
-  if (canSpecializeArrayKind() && hasArrayKind()) {
-    std::string typeName = [&] {
-#     define IRT(name, ...) if (subtypeOf(name)) return #name;
-      IR_TYPES
-#     undef IRT
+  auto t = *this;
+  std::vector<std::string> parts;
+  if (isSpecialized()) {
+    if (canSpecializeClass()) {
+      assert(m_class);
+      parts.push_back(folly::to<std::string>(Type(m_bits & kAnyObj).toString(),
+                                             '<', m_class->name()->data(),
+                                             '>'));
+      t -= AnyObj;
+    } else if (canSpecializeArrayKind()) {
+      assert(hasArrayKind());
+      parts.push_back(
+        folly::to<std::string>(Type(m_bits & kAnyArr).toString(), '<',
+                               ArrayData::kindToString(m_arrayKind), '>'));
+      t -= AnyArr;
+    } else {
       not_reached();
-    }();
-    return folly::format("{}<{}>", typeName,
-                         ArrayData::kindToString(m_arrayKind)).str();
+    }
   }
 
   // Concat all of the primitive types in the custom union type
-  std::vector<std::string> types;
-# define IRT(name, ...) if (name.subtypeOf(*this)) types.push_back(#name);
+# define IRT(name, ...) if (name <= t) parts.push_back(#name);
   IRT_PRIMITIVE
 # undef IRT
-  return folly::format("{{{}}}", folly::join('|', types)).str();
+    assert(!parts.empty());
+  if (parts.size() == 1) {
+    return parts.front();
+  }
+  return folly::format("{{{}}}", folly::join('|', parts)).str();
 }
 
 std::string Type::debugString(Type t) {

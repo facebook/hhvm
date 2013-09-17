@@ -384,11 +384,7 @@ bool FuncChecker::checkLocal(PC pc, int k) {
 }
 
 bool FuncChecker::checkString(PC pc, Id id) {
-  if (id < 0 || unsigned(id) >= unit()->numLitstrs()) {
-    error("invalid string id %d at %d\n", id, offset(pc));
-    return false;
-  }
-  return true;
+  return unit()->checkStringId(id);
 }
 
 /**

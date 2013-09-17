@@ -1522,6 +1522,8 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
     return false;
   }
 
+  LitstrTable::get().setReading();
+
   bool ret = true;
   if (!warmupOnly) {
     try {
@@ -1530,7 +1532,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
         funcRet->assignVal(invoke(cmd.c_str(), funcParams));
       } else {
         if (isServer) hphp_chdir_file(cmd);
-         include_impl_invoke(cmd.c_str(), once);
+        include_impl_invoke(cmd.c_str(), once);
       }
     } catch (...) {
       handle_invoke_exception(ret, context, errorMsg, error, richErrorMsg);

@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/funcdict.h"
+#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -105,10 +106,12 @@ void ProcessInit() {
   bool rp = RuntimeOption::AlwaysUseRelativePath;
   bool sf = RuntimeOption::SafeFileAccess;
   bool ah = RuntimeOption::EvalAllowHhas;
+  bool wp = Option::WholeProgram;
   RuntimeOption::EvalDumpBytecode &= ~1;
   RuntimeOption::AlwaysUseRelativePath = false;
   RuntimeOption::SafeFileAccess = false;
   RuntimeOption::EvalAllowHhas = true;
+  Option::WholeProgram = false;
 
   Transl::TargetCache::requestInit();
   string hhas;
@@ -119,6 +122,11 @@ void ProcessInit() {
     Logger::Error("Unable to find/load systemlib.php");
     _exit(1);
   }
+
+  LitstrTable::init();
+  LitstrTable::get().setWriting();
+  Repo::get().loadLitstrs();
+
   // Save this in case the debugger needs it. Once we know if this
   // process does not have debugger support, we'll clear it.
   SystemLib::s_source = slib;
@@ -149,6 +157,8 @@ void ProcessInit() {
   Unit* nativeClassUnit = build_native_class_unit(hhbc_ext_classes,
                                                   hhbc_ext_class_count);
   SystemLib::s_nativeClassUnit = nativeClassUnit;
+
+  LitstrTable::get().setReading();
 
   // Load the nativelib unit to build the Class objects
   SystemLib::s_nativeClassUnit->merge();
@@ -193,6 +203,7 @@ void ProcessInit() {
   RuntimeOption::SafeFileAccess = sf;
   RuntimeOption::EvalDumpBytecode = db;
   RuntimeOption::EvalAllowHhas = ah;
+  Option::WholeProgram = wp;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

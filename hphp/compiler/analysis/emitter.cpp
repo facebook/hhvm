@@ -7800,6 +7800,11 @@ static UnitEmitter* emitHHBCVisitor(AnalysisResultPtr ar, FileScopeRawPtr fsp) {
   assert(ue != nullptr);
 
   if (Option::GenerateTextHHBC) {
+    // TODO(#2973538): Move HHBC text generation to after all the
+    // units are created, and get rid of the LitstrTable locking,
+    // since it won't be needed in that case.
+    LitstrTable::get().mutex().lock();
+    LitstrTable::get().setReading();
     std::unique_ptr<Unit> unit(ue->create());
     std::string fullPath = AnalysisResult::prepareFile(
       ar->getOutputPath().c_str(), Option::UserFilePrefix + fsp->getName(),
@@ -7814,6 +7819,8 @@ static UnitEmitter* emitHHBCVisitor(AnalysisResultPtr ar, FileScopeRawPtr fsp) {
       cg.printRaw(unit->toString().c_str());
       f.close();
     }
+    LitstrTable::get().setWriting();
+    LitstrTable::get().mutex().unlock();
   }
 
   return ue;
@@ -7912,6 +7919,13 @@ static void batchCommit(std::vector<UnitEmitter*>& ues) {
   ues.clear();
 }
 
+static void commitLitstrs() {
+  Repo& repo = Repo::get();
+  RepoTxn txn(repo);
+  repo.insertLitstrs(txn, UnitOrigin::File);
+  txn.commit();
+}
+
 /**
  * This is the entry point for offline bytecode generation.
  */
@@ -7922,6 +7936,8 @@ void emitAllHHBC(AnalysisResultPtr ar) {
     threadCount = nFiles;
   }
   if (!threadCount) threadCount = 1;
+
+  LitstrTable::get().setWriting();
 
   /* there is a race condition in the first call to
      makeStaticString. Make sure we dont hit it */
@@ -7968,6 +7984,7 @@ void emitAllHHBC(AnalysisResultPtr ar) {
         break;
       }
     }
+    commitLitstrs();
   } else {
     dispatcher.waitEmpty();
   }

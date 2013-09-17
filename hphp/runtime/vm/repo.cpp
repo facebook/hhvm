@@ -81,7 +81,7 @@ Repo::Repo()
     m_dbc(nullptr), m_localReadable(false), m_localWritable(false),
     m_evalRepoId(-1), m_txDepth(0), m_rollback(false), m_beginStmt(*this),
     m_rollbackStmt(*this), m_commitStmt(*this), m_urp(*this), m_pcrp(*this),
-    m_frp(*this) {
+    m_frp(*this), m_lsrp(*this) {
 #define RP_OP(c, o) \
   m_##o[RepoIdLocal] = &m_##o##Local; \
   m_##o[RepoIdCentral] = &m_##o##Central;
@@ -107,6 +107,10 @@ void Repo::setCliFile(const std::string& cliFile) {
   assert(s_cliFile.empty());
   assert(t_dh.isNull());
   s_cliFile = cliFile;
+}
+
+void Repo::loadLitstrs() {
+  m_lsrp.load();
 }
 
 Unit* Repo::loadUnit(const std::string& name, const MD5& md5) {
@@ -328,6 +332,10 @@ void Repo::commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin) {
              e.what());
     assert(false);
   }
+}
+
+void Repo::insertLitstrs(RepoTxn& txn, UnitOrigin unitOrigin) {
+  LitstrTable::get().insert(txn, unitOrigin);
 }
 
 void Repo::connect() {
@@ -673,6 +681,7 @@ bool Repo::createSchema(int repoId) {
     m_urp.createSchema(repoId, txn);
     m_pcrp.createSchema(repoId, txn);
     m_frp.createSchema(repoId, txn);
+    m_lsrp.createSchema(repoId, txn);
 
     txn.commit();
   } catch (RepoExc& re) {

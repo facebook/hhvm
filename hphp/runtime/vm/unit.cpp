@@ -23,6 +23,7 @@
 
 #include "folly/ScopeGuard.h"
 
+#include "hphp/compiler/option.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/util.h"
 #include "hphp/util/atomic.h"
@@ -332,6 +333,13 @@ Array Unit::getTraitsInfo() {
   return array;
 }
 
+bool Unit::checkStringId(Id id) const {
+  if (isGlobalLitstrId(id)) {
+    return decodeGlobalLitstrId(id) <  LitstrTable::get().numLitstrs();
+  }
+  return id >= 0 && unsigned(id) < numLitstrs();
+}
+
 bool Unit::MetaHandle::findMeta(const Unit* unit, Offset offset) {
   if (!unit->m_bc_meta_len) return false;
   assert(unit->m_bc_meta);
@@ -372,6 +380,39 @@ bool Unit::MetaHandle::nextArg(MetaInfo& info) {
   info.m_arg = *ptr++;
   info.m_data = decodeVariableSizeImm(&ptr);
   return true;
+}
+
+//=============================================================================
+// LitstrTable.
+
+LitstrTable* LitstrTable::s_litstrTable = nullptr;
+
+Id LitstrTable::mergeLitstr(const StringData* litstr) {
+  m_mutex.lock();
+  assert(!m_safeToRead);
+  auto it = m_litstr2id.find(litstr);
+  if (it == m_litstr2id.end()) {
+    const StringData* str = makeStaticString(litstr);
+    Id id = m_litstrs.size();
+    NamedEntityPair np = { str, nullptr };
+    m_litstr2id[str] = id;
+    m_litstrs.push_back(str);
+    m_namedInfo.push_back(np);
+    m_mutex.unlock();
+    return id;
+  } else {
+    m_mutex.unlock();
+    return it->second;
+  }
+}
+
+void LitstrTable::insert(RepoTxn& txn, UnitOrigin uo) {
+  Repo& repo = Repo::get();
+  LitstrRepoProxy& lsrp = repo.lsrp();
+  int repoId = Repo::get().repoIdForNewUnit(uo);
+  for (int i = 0; i < m_litstrs.size(); ++i) {
+    lsrp.insertLitstr(repoId).insert(txn, i, m_litstrs[i]);
+  }
 }
 
 //=============================================================================
@@ -1873,7 +1914,7 @@ bool UnitRepoProxy::GetUnitStmt
     if (!query.row()) {
       return true;
     }
-    int64_t unitSn;                            /**/ query.getInt64(0, unitSn);
+    int64_t unitSn;                          /**/ query.getInt64(0, unitSn);
     const void* bc; size_t bclen;            /**/ query.getBlob(1, bc, bclen);
     const void* bc_meta; size_t bc_meta_len; /**/ query.getBlob(2, bc_meta,
                                                                 bc_meta_len);
@@ -1934,7 +1975,7 @@ void UnitRepoProxy::GetUnitLitstrsStmt
     if (query.row()) {
       Id litstrId;        /**/ query.getId(0, litstrId);
       StringData* litstr; /**/ query.getStaticString(1, litstr);
-      Id id UNUSED = ue.mergeLitstr(litstr);
+      Id id UNUSED = ue.mergeUnitLitstr(litstr);
       assert(id == litstrId);
     }
   } while (!query.done());
@@ -2189,8 +2230,8 @@ void UnitEmitter::setLines(const LineTable& lines) {
   this->m_lineTable = lines;
 }
 
-Id UnitEmitter::mergeLitstr(const StringData* litstr) {
-  LitstrMap::const_iterator it = m_litstr2id.find(litstr);
+Id UnitEmitter::mergeUnitLitstr(const StringData* litstr) {
+  auto it = m_litstr2id.find(litstr);
   if (it == m_litstr2id.end()) {
     const StringData* str = makeStaticString(litstr);
     Id id = m_litstrs.size();
@@ -2200,6 +2241,13 @@ Id UnitEmitter::mergeLitstr(const StringData* litstr) {
   } else {
     return it->second;
   }
+}
+
+Id UnitEmitter::mergeLitstr(const StringData* litstr) {
+  if (Option::WholeProgram) {
+    return encodeGlobalLitstrId(LitstrTable::get().mergeLitstr(litstr));
+  }
+  return mergeUnitLitstr(litstr);
 }
 
 Id UnitEmitter::mergeArray(ArrayData* a, const StringData* key /* = NULL */) {

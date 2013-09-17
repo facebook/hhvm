@@ -288,6 +288,54 @@ struct TypedefReq {
 //
 //==============================================================================
 
+// Functions for differentiating global litstrId's from unit-local Id's.
+const int kGlobalLitstrOffset = 0x40000000;
+inline bool isGlobalLitstrId(Id id) { return id >= kGlobalLitstrOffset; }
+inline Id encodeGlobalLitstrId(Id id) { return id + kGlobalLitstrOffset; }
+inline Id decodeGlobalLitstrId(Id id) { return id - kGlobalLitstrOffset; }
+
+/*
+ * Global table of literal strings.  This can only be safely used when
+ * the repo is built in WholeProgram mode and run in RepoAuthoritative
+ * mode.
+ */
+class LitstrTable {
+private:
+  static LitstrTable* s_litstrTable;
+
+public:
+  static void init() {
+    LitstrTable::s_litstrTable = new LitstrTable();
+  }
+
+  static LitstrTable& get() {
+    return *LitstrTable::s_litstrTable;
+  }
+
+  ~LitstrTable() {}
+  Id mergeLitstr(const StringData* litstr);
+  size_t numLitstrs() { return m_namedInfo.size(); }
+  StringData* lookupLitstrId(Id id) const;
+  const NamedEntity* lookupNamedEntityId(Id id) const;
+  const NamedEntityPair& lookupNamedEntityPairId(Id id) const;
+  void insert(RepoTxn& txn, UnitOrigin uo);
+  Mutex& mutex() { return m_mutex; }
+
+  void setReading() { m_safeToRead = true; }
+  void setWriting() { m_safeToRead = false; }
+
+private:
+  LitstrTable() {}
+  typedef hphp_hash_map<const StringData*, Id,
+                        string_data_hash, string_data_same> LitstrMap;
+
+  LitstrMap m_litstr2id;
+  std::vector<const StringData*> m_litstrs;
+  std::vector<NamedEntityPair> m_namedInfo;
+  Mutex m_mutex;
+  std::atomic<bool> m_safeToRead;
+};
+
 /*
  * Metadata about a compilation unit.
  *
@@ -463,16 +511,27 @@ struct Unit {
   size_t numLitstrs() const {
     return m_namedInfo.size();
   }
+
   StringData* lookupLitstrId(Id id) const {
+    if (isGlobalLitstrId(id)) {
+      return LitstrTable::get().lookupLitstrId(decodeGlobalLitstrId(id));
+    }
     assert(id >= 0 && id < Id(m_namedInfo.size()));
     return const_cast<StringData*>(m_namedInfo[id].first);
   }
 
   const NamedEntity* lookupNamedEntityId(Id id) const {
+    if (isGlobalLitstrId(id)) {
+      return LitstrTable::get().lookupNamedEntityId(decodeGlobalLitstrId(id));
+    }
     return lookupNamedEntityPairId(id).second;
   }
 
   const NamedEntityPair& lookupNamedEntityPairId(Id id) const {
+    if (isGlobalLitstrId(id)) {
+      auto decodedId = decodeGlobalLitstrId(id);
+      return LitstrTable::get().lookupNamedEntityPairId(decodedId);
+    }
     assert(id < Id(m_namedInfo.size()));
     const NamedEntityPair &ne = m_namedInfo[id];
     assert(ne.first);
@@ -483,6 +542,8 @@ struct Unit {
     }
     return ne;
   }
+
+  bool checkStringId(Id id) const;
 
   size_t numArrays() const {
     return m_arrays.size();
@@ -766,6 +827,7 @@ class UnitEmitter {
   const MD5& md5() const { return m_md5; }
   Id addTypedef(const Typedef& td);
   Id mergeLitstr(const StringData* litstr);
+  Id mergeUnitLitstr(const StringData* litstr);
   Id mergeArray(ArrayData* a, const StringData* key=nullptr);
   FuncEmitter* getMain();
   void initMain(int line1, int line2);
@@ -906,6 +968,39 @@ class UnitEmitter {
   LineTable m_lineTable;
   std::vector<Typedef> m_typedefs;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Member functions of LitstrTable inlined for perf.  Must come after
+ * Unit definition to break circular dependences.
+ */
+inline
+StringData* LitstrTable::lookupLitstrId(Id id) const {
+  assert(m_safeToRead);
+  assert(id >= 0 && id < Id(s_litstrTable->m_litstrs.size()));
+  return const_cast<StringData*>(s_litstrTable->m_litstrs[id]);
+}
+
+inline
+const NamedEntity* LitstrTable::lookupNamedEntityId(Id id) const {
+  assert(m_safeToRead);
+  return lookupNamedEntityPairId(id).second;
+}
+
+inline
+const NamedEntityPair& LitstrTable::lookupNamedEntityPairId(Id id) const {
+  assert(m_safeToRead);
+  assert(id >= 0 && id < Id(s_litstrTable->m_namedInfo.size()));
+  const NamedEntityPair& ne = s_litstrTable->m_namedInfo[id];
+  assert(ne.first);
+  assert(ne.first->data()[ne.first->size()] == 0);
+  assert(ne.first->data()[0] != '\\');
+  if (UNLIKELY(!ne.second)) {
+    const_cast<const NamedEntity*&>(ne.second) = Unit::GetNamedEntity(ne.first);
+  }
+  return ne;
+}
 
 //////////////////////////////////////////////////////////////////////
 

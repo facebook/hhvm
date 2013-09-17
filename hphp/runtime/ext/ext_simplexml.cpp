@@ -405,7 +405,7 @@ void c_SimpleXMLElement::t___construct(CStrRef data, int64_t options /* = 0 */,
       Resource(NEWOBJ(XmlDocWrapper)(doc, o_getClassName()));
     m_node = xmlDocGetRootElement(doc);
     if (m_node) {
-      m_children = create_children(nullptr, m_doc, m_node, ns, is_prefix);
+      m_children = create_children(this, m_doc, m_node, ns, is_prefix);
       m_attributes = collect_attributes(m_node, ns, is_prefix);
     }
   } else {

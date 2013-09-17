@@ -27,6 +27,7 @@
 #include <locale.h>
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/http-protocol.h"
+#include "hphp/runtime/ext/ext_variable.h"
 
 namespace HPHP {
 
@@ -1460,8 +1461,16 @@ Variant f_strtr(CStrRef str, CVarRef from, CVarRef to /* = null_variant */) {
 }
 
 void f_parse_str(CStrRef str, VRefParam arr /* = null */) {
-  arr = Array::Create();
-  HttpProtocol::DecodeParameters(arr, str.data(), str.size());
+  Variant result;
+
+  HttpProtocol::DecodeParameters(result, str.data(), str.size());
+
+  if(!arr.isReferenced()) {
+    f_extract(result.toArray());
+    return;
+  }
+
+  arr = result.toArray();
 }
 
 Variant f_setlocale(int _argc, int category, CVarRef locale, CArrRef _argv /* = null_array */) {

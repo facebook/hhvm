@@ -5024,8 +5024,8 @@ void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
   unlikelyIfBlock(CC_E, [&] (Asm& a) {
     cgCallHelper(
       a,
-      CppCall(target ? SPropCache::lookupIR<false>
-                     : SPropCache::lookupIR<true>), // raise on error
+      CppCall(target ? SPropCache::lookup<false>
+                     : SPropCache::lookup<true>), // raise on error
       callDest(tmpReg),
       SyncOptions::kSyncPoint, // could re-enter to init properties
       ArgGroup(m_regs).imm(ch).ssa(cls).ssa(propName).ssa(cxt)

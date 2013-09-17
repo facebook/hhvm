@@ -623,7 +623,7 @@ Array Array::keys(CVarRef search_value /* = null_variant */,
   if (!search_value.isInitialized()) {
     PackedArrayInit ai(size());
     for (ArrayIter iter(*this); iter; ++iter) {
-      ai.add(iter.first());
+      ai.append(iter.first());
     }
     return ai.toArray();
   }
@@ -631,7 +631,7 @@ Array Array::keys(CVarRef search_value /* = null_variant */,
   for (ArrayIter iter(*this); iter; ++iter) {
     if ((strict && HPHP::same(iter.secondRef(), search_value)) ||
         (!strict && HPHP::equal(iter.secondRef(), search_value))) {
-      ai.add(iter.first());
+      ai.append(iter.first());
     }
   }
   return ai.toArray();
@@ -640,7 +640,7 @@ Array Array::keys(CVarRef search_value /* = null_variant */,
 Array Array::values() const {
   PackedArrayInit ai(size());
   for (ArrayIter iter(*this); iter; ++iter) {
-    ai.add(withRefBind(iter.secondRef()));
+    ai.appendWithRef(iter.secondRef());
   }
   return ai.toArray();
 }

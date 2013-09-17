@@ -514,8 +514,10 @@ HphpArray* PolicyArray::toHphpArray() const {
   result->setRefCount(0);
   FOR_EACH_RANGE (i, 0, m_size) {
     if (hasStrKey(toPos(i))) {
+      // TODO(#2887942): unchecked add
       result->add(key(toPos(i)).getStringData(), val(toPos(i)), false);
     } else {
+      // TODO(#2887942): unchecked add
       result->add(key(toPos(i)).getInt64(), val(toPos(i)), false);
     }
   }

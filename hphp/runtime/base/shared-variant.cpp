@@ -393,7 +393,7 @@ ArrayData* SharedVariant::loadElems(const SharedMap &sharedMap) {
   if (getIsVector()) {
     PackedArrayInit ai(count);
     for (uint i = 0; i < count; i++) {
-      ai.add(sharedMap.getValueRef(i));
+      ai.append(sharedMap.getValueRef(i));
     }
     elems = ai.create();
   } else {

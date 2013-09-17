@@ -109,22 +109,25 @@ void EventHook::RunUserProfiler(const ActRec* ar, int mode) {
 static Array get_frame_args_with_ref(const ActRec* ar) {
   int numParams = ar->m_func->numParams();
   int numArgs = ar->numArgs();
-  HphpArray* retval = HphpArray::MakeReserve(numArgs);
 
-  TypedValue* local = (TypedValue*)(uintptr_t(ar) - sizeof(TypedValue));
+  PackedArrayInit retArray(numArgs);
+
+  auto local = reinterpret_cast<TypedValue*>(
+    uintptr_t(ar) - sizeof(TypedValue)
+  );
   for (int i = 0; i < numArgs; ++i) {
     if (i < numParams) {
       // This corresponds to one of the function's formal parameters, so it's
       // on the stack.
-      retval->appendWithRef(tvAsCVarRef(local), false);
+      retArray.appendWithRef(tvAsCVarRef(local));
       --local;
     } else {
       // This is not a formal parameter, so it's in the ExtraArgs.
-      retval->appendWithRef(tvAsCVarRef(ar->getExtraArg(i - numParams)), false);
+      retArray.appendWithRef(tvAsCVarRef(ar->getExtraArg(i - numParams)));
     }
   }
 
-  return Array::attach(retval);
+  return retArray.toArray();
 }
 
 bool EventHook::RunInterceptHandler(ActRec* ar) {
@@ -149,11 +152,13 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     called_on = Variant(const_cast<StringData*>(ar->getClass()->name()));
   }
   Array intArgs =
-    make_packed_array(ar->m_func->fullNameRef(),
-                   called_on,
-                   get_frame_args_with_ref(ar),
-                   h->asCArrRef()[1],
-                   ref(doneFlag));
+    PackedArrayInit(5)
+      .append(ar->m_func->fullNameRef())
+      .append(called_on)
+      .append(get_frame_args_with_ref(ar))
+      .append(h->asCArrRef()[1])
+      .appendRef(doneFlag)
+      .toArray();
 
   Variant ret = vm_call_user_func(h->asCArrRef()[0], intArgs);
   if (doneFlag.toBoolean()) {

@@ -154,8 +154,17 @@ bool UserFile::open(CStrRef filename, CStrRef mode) {
   // bool stream_open($path, $mode, $options, &$opened_path)
   bool success = false;
   Variant opened_path;
-  Variant ret = invoke(m_StreamOpen, s_stream_open, make_packed_array(
-                       filename, mode, m_options, ref(opened_path)), success);
+  Variant ret = invoke(
+    m_StreamOpen,
+    s_stream_open,
+    PackedArrayInit(4)
+      .append(filename)
+      .append(mode)
+      .append(m_options)
+      .appendRef(opened_path)
+      .toArray(),
+    success
+  );
   if (success && (ret.toBoolean() == true)) {
     return true;
   }

@@ -989,7 +989,7 @@ ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, char **cal
 ZEND_API int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, zend_uint param_count, zval **params[], int no_separation, HashTable *symbol_table TSRMLS_DC) {
   HPHP::PackedArrayInit ad_params(param_count);
   for (int i = 0; i < param_count; i++) {
-    ad_params.add(tvAsVariant((*params[i])->tv()));
+    ad_params.append(tvAsVariant((*params[i])->tv()));
   }
   HPHP::Variant retval = vm_call_user_func(tvAsCVarRef(function_name->tv()), ad_params.toArray());
   if (!retval.isInitialized()) {

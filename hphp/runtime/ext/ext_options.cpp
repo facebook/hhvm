@@ -153,9 +153,9 @@ Variant f_assert(CVarRef assertion) {
     auto const unit = fp->m_func->unit();
 
     PackedArrayInit ai(3);
-    ai.add(String(unit->filepath()));
-    ai.add(Variant(unit->getLineNumber(callerOffset)));
-    ai.add(assertion.isString() ? assertion.toString() : String(""));
+    ai.append(String(unit->filepath()));
+    ai.append(Variant(unit->getLineNumber(callerOffset)));
+    ai.append(assertion.isString() ? assertion.toString() : String(""));
     f_call_user_func(1, s_option_data->assertCallback, ai.toArray());
   }
 

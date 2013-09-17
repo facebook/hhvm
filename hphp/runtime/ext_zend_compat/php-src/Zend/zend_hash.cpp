@@ -22,6 +22,7 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKe
 
 ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) {
   if (flag & HASH_NEXT_INSERT) {
+    // TODO(#2887942): append can return an escalated array
     ht->zAppend(*(zval**)pData);
     return SUCCESS;
   }
@@ -190,6 +191,7 @@ ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *p
 }
 
 ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size, int overwrite ZEND_FILE_LINE_DC) {
+  // TODO(#2887942): unchecked plus
   target->plus(source, false);
   for (HPHP::ArrayIter it(source); !it.end(); it.next()) {
     auto tv = (HPHP::TypedValue*)it.secondRef().asTypedValue();

@@ -232,12 +232,6 @@ public:
   static void NvGetKeyPacked(const ArrayData*, TypedValue* out, ssize_t pos);
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
 
-  void nvBind(int64_t k, const TypedValue* v) {
-    ArrayData::setRef(k, tvAsCVarRef(v), false);
-  }
-  void nvBind(StringData* k, const TypedValue* v) {
-    ArrayData::setRef(k, tvAsCVarRef(v), false);
-  }
   void nvAppend(const TypedValue* v) {
     nextInsertPacked(tvAsCVarRef(v));
   }

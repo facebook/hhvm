@@ -332,22 +332,24 @@ Array hhvm_get_frame_args(const ActRec* ar) {
   }
   int numParams = ar->m_func->numParams();
   int numArgs = ar->numArgs();
-  auto retval = HphpArray::MakeReserve(numArgs);
 
-  TypedValue* local = (TypedValue*)(uintptr_t(ar) - sizeof(TypedValue));
+  PackedArrayInit retInit(numArgs);
+  auto local = reinterpret_cast<TypedValue*>(
+    uintptr_t(ar) - sizeof(TypedValue)
+  );
   for (int i = 0; i < numArgs; ++i) {
     if (i < numParams) {
       // This corresponds to one of the function's formal parameters, so it's
       // on the stack.
-      retval->nvAppend(local);
+      retInit.append(tvAsCVarRef(local));
       --local;
     } else {
       // This is not a formal parameter, so it's in the ExtraArgs.
-      retval->nvAppend(ar->getExtraArg(i - numParams));
+      retInit.append(tvAsCVarRef(ar->getExtraArg(i - numParams)));
     }
   }
 
-  return Array::attach(retval);
+  return retInit.toArray();
 }
 
 Variant f_func_get_args() {

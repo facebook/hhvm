@@ -266,18 +266,33 @@ public:
     if (m_vec) m_vec->release();
   }
 
-  PackedArrayInit& add(CVarRef v) {
+  /*
+   * Append a new element to the packed array.
+   */
+  PackedArrayInit& append(CVarRef v) {
     m_vec->nvAppend(v.asTypedValue());
     return *this;
   }
 
-  PackedArrayInit& add(CVarWithRefBind v) {
-    HphpArray::AppendWithRefPacked(m_vec, variant(v), false);
+  /*
+   * Box v if it is not already boxed, and append a new element that
+   * is KindOfRef and points to the same RefData as v.
+   *
+   * Post: v.getRawType() == KindOfRef
+   */
+  PackedArrayInit& appendRef(CVarRef v) {
+    HphpArray::AppendRefPacked(m_vec, v, false);
     return *this;
   }
 
-  PackedArrayInit& add(RefResult v) {
-    HphpArray::AppendRefPacked(m_vec, variant(v), false);
+  /*
+   * Append v, preserving references in the way php does.  That is, if
+   * v is a KindOfRef with refcount > 1, the new element in *this will
+   * be KindOfRef and share the same RefData.  Otherwise, the new
+   * element is split.
+   */
+  PackedArrayInit& appendWithRef(CVarRef v) {
+    HphpArray::AppendWithRefPacked(m_vec, v, false);
     return *this;
   }
 
@@ -311,7 +326,7 @@ namespace make_array_detail {
 
   template<class Val, class... Vals>
   void packed_impl(PackedArrayInit& init, Val&& val, Vals&&... vals) {
-    init.add(std::forward<Val>(val));
+    init.append(std::forward<Val>(val));
     packed_impl(init, std::forward<Vals>(vals)...);
   }
 
@@ -331,12 +346,15 @@ namespace make_array_detail {
 }
 
 /*
- * Helper for creating packed arrays (vector-like).
+ * Helper for creating packed arrays (vector-like) that don't contain
+ * references.
  *
  * Usage:
  *
  *   auto newArray = make_packed_array(1, 2, 3, 4);
  *
+ * If you need to deal with references, you currently have to use
+ * PackedArrayInit directly.
  */
 template<class... Vals>
 Array make_packed_array(Vals&&... vals) {

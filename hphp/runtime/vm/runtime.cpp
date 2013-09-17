@@ -313,6 +313,7 @@ HphpArray* pack_args_into_array(ActRec* ar, int nargs) {
   HphpArray* argArray = HphpArray::MakeReserve(nargs);
   for (int i = 0; i < nargs; ++i) {
     TypedValue* tv = (TypedValue*)(ar) - (i+1);
+    // TODO(#2887942): unchecked appendWithRef
     argArray->HphpArray::appendWithRef(tvAsCVarRef(tv), false);
   }
   if (!ar->hasInvName()) {
@@ -321,6 +322,7 @@ HphpArray* pack_args_into_array(ActRec* ar, int nargs) {
   }
   // This is a magic call, so we need to shuffle the args
   HphpArray* magicArgs = HphpArray::MakeReserve(2);
+  // TODO(#2887942): unchecked append calls.
   magicArgs->append(ar->getInvName(), false);
   magicArgs->append(argArray, false);
   return magicArgs;

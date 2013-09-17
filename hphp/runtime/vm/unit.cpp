@@ -991,6 +991,7 @@ bool Unit::defCns(const StringData* cnsName, const TypedValue* value,
        */
       TargetCache::s_constants = HphpArray::MakeReserve(1);
     }
+    // TODO(#2887942): unchecked insert
     if (TargetCache::s_constants->nvInsert(
           const_cast<StringData*>(cnsName), const_cast<TypedValue*>(value))) {
       return true;

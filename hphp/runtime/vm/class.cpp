@@ -484,12 +484,14 @@ Class::PropInitVec* Class::initPropsImpl() const {
       // Replace undefined values with tvSentinel, which acts as a
       // unique sentinel for undefined properties in 86pinit().
       if (prop.m_type == KindOfUninit) {
+        // TODO(#2887942): unchecked insert
         propArr->nvInsert(const_cast<StringData*>(k), tvSentinel);
       } else {
         // This may seem pointless, but if you don't populate all the keys,
         // you'll get "undefined index" notices in the case where a
         // scalar-initialized property overrides a parent's
         // non-scalar-initialized property of the same name.
+        // TODO(#2887942): unchecked insert
         propArr->nvInsert(const_cast<StringData*>(k), &prop);
       }
     }

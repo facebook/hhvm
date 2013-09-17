@@ -176,7 +176,7 @@ Array c_Vector::toArrayImpl() const {
   PackedArrayInit ai(m_size);
   uint sz = m_size;
   for (uint i = 0; i < sz; ++i) {
-    ai.add(tvAsCVarRef(&m_data[i]));
+    ai.append(tvAsCVarRef(&m_data[i]));
   }
   return ai.toArray();
 }
@@ -1346,9 +1346,9 @@ Array c_Map::t_tokeysarray() {
     Bucket& p = m_data[i];
     if (!p.validValue()) continue;
     if (p.hasIntKey()) {
-      ai.add((int64_t)p.ikey);
+      ai.append(int64_t{p.ikey});
     } else {
-      ai.add(*(const String*)(&p.skey));
+      ai.append(*(const String*)(&p.skey));
     }
   }
   return ai.toArray();
@@ -1383,7 +1383,7 @@ Array c_Map::t_tovaluesarray() {
   for (uint i = 0; i <= m_nLastSlot; ++i) {
     Bucket& p = m_data[i];
     if (!p.validValue()) continue;
-    ai.add(tvAsCVarRef(&p.data));
+    ai.append(tvAsCVarRef(&p.data));
   }
   return ai.toArray();
 }
@@ -2532,9 +2532,9 @@ Array c_StableMap::t_tokeysarray() {
   Bucket* p = m_pListHead;
   while (p) {
     if (p->hasIntKey()) {
-      ai.add((int64_t)p->ikey);
+      ai.append(int64_t{p->ikey});
     } else {
-      ai.add(*(const String*)(&p->skey));
+      ai.append(*(const String*)(&p->skey));
     }
     p = p->pListNext;
   }
@@ -2564,7 +2564,7 @@ Array c_StableMap::t_tovaluesarray() {
   PackedArrayInit ai(m_size);
   Bucket* p = m_pListHead;
   while (p) {
-    ai.add(tvAsCVarRef(&p->data));
+    ai.append(tvAsCVarRef(&p->data));
     p = p->pListNext;
   }
   return ai.toArray();
@@ -3540,7 +3540,7 @@ Array c_Set::toArrayImpl() const {
   for (uint i = 0; i <= m_nLastSlot; ++i) {
     Bucket& p = m_data[i];
     if (p.validValue()) {
-      ai.add(tvAsCVarRef(&p.data));
+      ai.append(tvAsCVarRef(&p.data));
     }
   }
   return ai.toArray();
@@ -4257,10 +4257,7 @@ void c_Pair::t___construct() {
 }
 
 Array c_Pair::toArrayImpl() const {
-  PackedArrayInit ai(2);
-  ai.add(tvAsCVarRef(&elm0));
-  ai.add(tvAsCVarRef(&elm1));
-  return ai.toArray();
+  return make_packed_array(tvAsCVarRef(&elm0), tvAsCVarRef(&elm1));
 }
 
 c_Pair* c_Pair::Clone(ObjectData* obj) {

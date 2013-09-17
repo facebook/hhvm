@@ -538,18 +538,22 @@ TranslatorX64::shuffleArgsForMagicCall(ActRec* ar) {
   assert(invName);
   ar->setVarEnv(nullptr);
   int nargs = ar->numArgs();
+
   // We need to make an array containing all the arguments passed by the
   // caller and put it where the second argument is
-  HphpArray* argArray = HphpArray::MakeReserve(nargs);
+  PackedArrayInit aInit(nargs);
   for (int i = 0; i < nargs; ++i) {
-    TypedValue* tv =
-      (TypedValue*)(uintptr_t(ar) - (i+1) * sizeof(TypedValue));
-    argArray->nvAppend(tv);
+    auto const tv = reinterpret_cast<TypedValue*>(
+      uintptr_t(ar) - (i+1) * sizeof(TypedValue)
+    );
+    aInit.append(tvAsCVarRef(tv));
     tvRefcountedDecRef(tv);
   }
+
   // Put invName in the slot for first argument
   setArgInActRec(ar, 0, uint64_t(invName), BitwiseKindOfString);
   // Put argArray in the slot for second argument
+  auto const argArray = aInit.toArray().detach();
   setArgInActRec(ar, 1, uint64_t(argArray), KindOfArray);
   // Fix up ActRec's numArgs
   ar->initNumArgs(2);

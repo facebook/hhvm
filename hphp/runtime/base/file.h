@@ -24,6 +24,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+class StreamContext;
+
 class FileData : public RequestEventHandler {
 public:
   FileData() : m_pcloseRet(0) {}
@@ -118,6 +120,7 @@ public:
   virtual Array getMetaData();
   virtual Array getWrapperMetaData() { return null_array; }
   virtual const char *getStreamType() const { return "";}
+  virtual StreamContext *getStreamContext() { return m_stream_context; }
 
   std::string getMode() { return m_mode; }
 
@@ -176,6 +179,8 @@ protected:
 
   std::string m_name;
   std::string m_mode;
+
+  StreamContext *m_stream_context;
 
   void closeImpl();
 

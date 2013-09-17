@@ -2372,7 +2372,7 @@ void c_SoapClient::t___construct(CVarRef wsdl,
       if (!sc) {
         throw SoapException("'stream_context' is not a StreamContext");
       }
-      m_stream_context_options = sc->m_options;
+      m_stream_context_options = sc->getOptions();
     }
 
     if (options.exists(s_soap_version)) {

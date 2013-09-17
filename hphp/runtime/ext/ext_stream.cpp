@@ -47,33 +47,96 @@ namespace HPHP {
 IMPLEMENT_OBJECT_ALLOCATION(StreamContext);
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString StreamContext::s_class_name("StreamContext");
+StreamContext* get_stream_context(CVarRef stream_or_context);
+
+StaticString StreamContext::s_class_name("stream-context");
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Resource f_stream_context_create(CArrRef options /* = null_array */,
-                                 CArrRef params /* = null_array */) {
+Variant f_stream_context_create(CArrRef options /* = null_array */,
+                                CArrRef params /* = null_array */) {
+  if (!options.isNull() && !StreamContext::validateOptions(options)) {
+    return false;
+  }
   return Resource(NEWOBJ(StreamContext)(options, params));
 }
 
 Resource f_stream_context_get_default(CArrRef options /* = null_array */) {
+
   throw NotImplementedException(__func__);
 }
 
 Variant f_stream_context_get_options(CResRef stream_or_context) {
-  throw NotImplementedException(__func__);
+  StreamContext* context = get_stream_context(stream_or_context);
+  if (!context) {
+    raise_warning("Invalid stream/context parameter");
+    return false;
+  }
+  return context->getOptions();
 }
 
-bool f_stream_context_set_option(CResRef stream_or_context,
-                                 CVarRef wrapper,
-                                 CStrRef option /* = null_string */,
+bool f_stream_context_set_option0(StreamContext* context,
+                                  CArrRef options) {
+  if (!StreamContext::validateOptions(options)) {
+    raise_warning("options should have the form "
+                  "[\"wrappername\"][\"optionname\"] = $value");
+    return false;
+  }
+  context->mergeOptions(options);
+  return true;
+}
+
+bool f_stream_context_set_option1(StreamContext* context,
+                                  CStrRef wrapper,
+                                  CStrRef option,
+                                  CVarRef value) {
+  context->setOption(wrapper, option, value);
+  return true;
+}
+
+bool f_stream_context_set_option(CVarRef stream_or_context,
+                                 CVarRef wrapper_or_options,
+                                 CVarRef option /* = null_variant */,
                                  CVarRef value /* = null_variant */) {
-  throw NotImplementedException(__func__);
+  StreamContext* context = get_stream_context(stream_or_context);
+  if (!context) {
+    raise_warning("Invalid stream/context parameter");
+    return false;
+  }
+  if (wrapper_or_options.isArray() &&
+      !option.isInitialized() &&
+      !value.isInitialized()) {
+    return f_stream_context_set_option0(context, wrapper_or_options.toArray());
+  } else if (wrapper_or_options.isString() &&
+             option.isInitialized() &&
+             option.isString() &&
+             value.isInitialized()) {
+    return f_stream_context_set_option1(context, wrapper_or_options.toString(),
+                                        option.toString(), value);
+  } else {
+    raise_warning("called with wrong number or type of parameters; please RTM");
+    return false;
+  }
 }
 
-bool f_stream_context_set_param(CResRef stream_or_context,
-                                CArrRef params) {
-  throw NotImplementedException(__func__);
+Variant f_stream_context_get_params(CResRef stream_or_context) {
+  StreamContext* context = get_stream_context(stream_or_context);
+  if (!context) {
+    raise_warning("Invalid stream/context parameter");
+    return false;
+  }
+  return context->getParams();
+}
+
+bool f_stream_context_set_params(CResRef stream_or_context,
+                                 CArrRef params) {
+  StreamContext* context = get_stream_context(stream_or_context);
+  if (!context || !StreamContext::validateParams(params)) {
+    raise_warning("Invalid stream/context parameter");
+    return false;
+  }
+  context->mergeParams(params);
+  return true;
 }
 
 Variant f_stream_copy_to_stream(CResRef source, CResRef dest,
@@ -513,6 +576,124 @@ Variant f_stream_socket_sendto(CResRef socket, CStrRef data,
 
 bool f_stream_socket_shutdown(CResRef stream, int how) {
   return f_socket_shutdown(stream, how);
+}
+
+StreamContext* get_stream_context(CVarRef stream_or_context) {
+  if (!stream_or_context.isResource()) {
+    return nullptr;
+  }
+  CResRef resource = stream_or_context.asCResRef();
+  StreamContext* context = resource.getTyped<StreamContext>();
+  if (context != nullptr) {
+    return context;
+  }
+  File* file = resource.getTyped<File>();
+  if (file != nullptr) {
+    return file->getStreamContext();
+  }
+  return nullptr;
+}
+
+bool StreamContext::validateOptions(CVarRef options) {
+  if (options.isNull() || !options.isArray()) {
+    return false;
+  }
+  CArrRef arr = options.toArray();
+  for (ArrayIter it(arr); it; ++it) {
+    if (!it.first().isString() || !it.second().isArray()) {
+      return false;
+    }
+    CArrRef opts = it.second().toArray();
+    for (ArrayIter it2(opts); it2; ++it2) {
+      if (!it2.first().isString()) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+void StreamContext::mergeOptions(CArrRef options) {
+  if (m_options.isNull()) {
+    m_options = Array::Create();
+  }
+  for (ArrayIter it(options); it; ++it) {
+    Variant wrapper = it.first();
+    if (!m_options.exists(wrapper)) {
+      m_options.set(wrapper, Array::Create());
+    }
+    assert(m_options[wrapper].isArray());
+    Array& opts = m_options.lvalAt(wrapper).toArrRef();
+    Array new_opts = it.second().toArray();
+    for (ArrayIter it2(new_opts); it2; ++it2) {
+      opts.set(it2.first(), it2.second());
+    }
+  }
+}
+
+void StreamContext::setOption(CStrRef wrapper,
+                               CStrRef option,
+                               CVarRef value) {
+  if (m_options.isNull()) {
+    m_options = Array::Create();
+  }
+  if (!m_options.exists(wrapper)) {
+    m_options.set(wrapper, Array::Create());
+  }
+  assert(m_options[wrapper].isArray());
+  Array& opts = m_options.lvalAt(wrapper).toArrRef();
+  opts.set(option, value);
+}
+
+Array StreamContext::getOptions() const {
+  if (m_options.isNull()) {
+    return Array::Create();
+  }
+  return m_options;
+}
+
+bool StreamContext::validateParams(CVarRef params) {
+  if (params.isNull() || !params.isArray()) {
+    return false;
+  }
+  CArrRef arr = params.toArray();
+  CStrRef options_key = String::FromCStr("options");
+  for (ArrayIter it(arr); it; ++it) {
+    if (!it.first().isString()) {
+      return false;
+    }
+    if (it.first().toString() == options_key) {
+      if (!StreamContext::validateOptions(it.second())) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+void StreamContext::mergeParams(CArrRef params) {
+  if (m_params.isNull()) {
+    m_params = Array::Create();
+  }
+  CStrRef notification_key = String::FromCStr("notification");
+  if (params.exists(notification_key)) {
+    m_params.set(notification_key, params[notification_key]);
+  }
+  CStrRef options_key = String::FromCStr("options");
+  if (params.exists(options_key)) {
+    assert(params[options_key].isArray());
+    mergeOptions(params[options_key].toArray());
+  }
+}
+
+Array StreamContext::getParams() const {
+  Array params = m_params;
+  if (params.isNull()) {
+    params = Array::Create();
+  }
+  CStrRef options_key = String::FromCStr("options");
+  params.set(options_key, getOptions());
+  return params;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

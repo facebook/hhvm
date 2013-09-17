@@ -6357,42 +6357,65 @@ OPTBLD_INLINE void VMExecutionContext::iopInitThisLoc(PC& pc) {
   }
 }
 
-/*
- * Helper for StaticLoc and StaticLocInit.
- */
-static inline void
-lookupStatic(StringData* name,
-             const ActRec* fp,
-             TypedValue*&val, bool& inited) {
-  HphpArray* map = get_static_locals(fp);
-  assert(map != nullptr);
-  val = map->nvGet(name);
-  if (val == nullptr) {
-    TypedValue tv;
-    tvWriteUninit(&tv);
-    // TODO(#2887942): need write barrier
-    map->set(name, tvAsCVarRef(&tv), false);
-    val = map->nvGet(name);
-    inited = false;
-  } else {
-    inited = true;
+static RefData* lookupStaticInClosure(StringData* name,
+                                      const ActRec* fp,
+                                      bool& inited,
+                                      const Func* func) {
+  auto const closureLoc = frame_local(fp, func->numParams());
+  assert(closureLoc->m_data.pobj->instanceof(c_Closure::classof()));
+  return lookupStaticFromArray(
+    static_cast<c_Closure*>(closureLoc->m_data.pobj)->getStaticLocals(),
+    name,
+    inited
+  );
+}
+
+static RefData* lookupStaticInGeneratorFromClosure(StringData* name,
+                                                   const ActRec* fp,
+                                                   bool& inited) {
+  auto const cont = frame_continuation(fp);
+  auto const closureLoc = frame_local(fp, cont->m_origFunc->numParams());
+  assert(closureLoc->m_data.pobj->instanceof(c_Closure::classof()));
+  return lookupStaticFromArray(
+    static_cast<c_Closure*>(closureLoc->m_data.pobj)->getStaticLocals(),
+    name,
+    inited
+  );
+}
+
+static inline RefData* lookupStatic(StringData* name,
+                                    const ActRec* fp,
+                                    bool& inited) {
+  auto const func = fp->m_func;
+
+  if (UNLIKELY(func->isClosureBody())) {
+    return lookupStaticInClosure(name, fp, inited, func);
   }
+  if (UNLIKELY(func->isGeneratorFromClosure())) {
+    return lookupStaticInGeneratorFromClosure(name, fp, inited);
+  }
+
+  auto const handle = TargetCache::allocStaticLocal(func, name);
+  auto refData = TargetCache::handleToPtr<RefData>(handle);
+  inited = !refData->isUninitializedInTargetCache();
+  if (!inited) refData->initInTargetCache();
+  return refData;
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopStaticLoc(PC& pc) {
   NEXT();
   DECODE_IVA(localId);
   DECODE_LITSTR(var);
-  TypedValue* fr = nullptr;
+
   bool inited;
-  lookupStatic(var, m_fp, fr, inited);
-  assert(fr != nullptr);
-  if (fr->m_type != KindOfRef) {
-    assert(!inited);
-    tvBox(fr);
+  auto const refData = lookupStatic(var, m_fp, inited);
+  if (!inited) {
+    refData->tv()->m_type = KindOfNull;
   }
-  TypedValue* tvLocal = frame_local(m_fp, localId);
-  tvBind(fr, tvLocal);
+
+  auto const tvLocal = frame_local(m_fp, localId);
+  auto const tmpTV = make_tv<KindOfRef>(refData);
+  tvBind(&tmpTV, tvLocal);
   if (inited) {
     m_stack.pushTrue();
   } else {
@@ -6404,21 +6427,18 @@ OPTBLD_INLINE void VMExecutionContext::iopStaticLocInit(PC& pc) {
   NEXT();
   DECODE_IVA(localId);
   DECODE_LITSTR(var);
-  TypedValue* fr = nullptr;
+
   bool inited;
-  lookupStatic(var, m_fp, fr, inited);
-  assert(fr != nullptr);
-  assert(!inited || fr->m_type == KindOfRef);
+  auto const refData = lookupStatic(var, m_fp, inited);
+
   if (!inited) {
-    Cell* initVal = m_stack.topC();
-    cellDup(*initVal, *fr);
+    auto const initVal = m_stack.topC();
+    cellDup(*initVal, *refData->tv());
   }
-  if (fr->m_type != KindOfRef) {
-    assert(!inited);
-    tvBox(fr);
-  }
-  TypedValue* tvLocal = frame_local(m_fp, localId);
-  tvBind(fr, tvLocal);
+
+  auto const tvLocal = frame_local(m_fp, localId);
+  auto const tmpTV = make_tv<KindOfRef>(refData);
+  tvBind(&tmpTV, tvLocal);
   m_stack.discard();
 }
 

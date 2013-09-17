@@ -3654,6 +3654,8 @@ StaticLocInit <local variable id> <litstr id>    [C]  ->  []
   the local variable, assigns $1 to the local variable, and marks the static
   variable as initialized.
 
+  The cell in $1 must not be a reference counted type.
+
 Catch    []  ->  [C:Obj]
 
   Catch. Retrieves the current exception object and pushes it onto the stack.

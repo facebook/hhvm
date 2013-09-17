@@ -24,28 +24,60 @@
 
 namespace HPHP {
 
-/**
- * We heap allocate a RefData when we make a reference to something. A Variant
- * or TypedValue can be KindOfRef and point to a RefData, but the value held
- * here must not be KindOfRef.
+/*
+ * We heap allocate a RefData when we make a reference to something.
+ * A Variant or TypedValue can be KindOfRef and point to a RefData,
+ * but the value held here must not be KindOfRef.
  *
- * RefDatas are also used by the PHP extension compatibility layer to represent
- * "zvals". Because zvals can be shared by multiple things "by value", it was
- * necessary to add fields to RefData to support this. As a consequence, the
- * m_count field is not the "real" refcount of a RefData - instead the real
- * refcount can be computed by calling getRealCount() (which simply adds the
- * m_count and m_cow fields together). When the m_count field is decremented
- * to 0, the refdata_after_decref_helper() helper function gets called. This
- * help will either free the RefData (if the "real" refcount has reached 0) or
- * it will update the m_count and m_cow fields appropriately.
+ * RefData's are also used to implement static locals, but in this
+ * case the RefData itself is allocated in TargetCache rather than on
+ * the heap.  Note that generally speaking a RefData should never
+ * contain KindOfUninit, *except* uninitialized RefDatas for this
+ * TargetCache case.
  *
- * For more info on the PHP extension compatibility layer, check out the
- * documentation at "doc/php.extension.compat.layer".
+ * RefDatas are also used by the PHP extension compatibility layer to
+ * represent "zvals". Because zvals can be shared by multiple things
+ * "by value", it was necessary to add fields to RefData to support
+ * this. As a consequence, the m_count field is not the "real"
+ * refcount of a RefData - instead the real refcount can be computed
+ * by calling getRealCount() (which simply adds the m_count and m_cow
+ * fields together). When the m_count field is decremented to 0, the
+ * refdata_after_decref_helper() helper function gets called. This
+ * help will either free the RefData (if the "real" refcount has
+ * reached 0) or it will update the m_count and m_cow fields
+ * appropriately.
+ *
+ * For more info on the PHP extension compatibility layer, check out
+ * the documentation at "doc/php.extension.compat.layer".
  */
-class RefData {
+struct RefData {
   enum class Magic : uint64_t { kMagic = 0xfacefaceb00cb00c };
 
-public:
+  /*
+   * Some RefData's (static locals) are allocated in TargetCache, and
+   * live until the end of the request.  In this case, we start with a
+   * reference count to keep it alive.
+   *
+   * Note that the JIT accesses target cache RefDatas directly---if
+   * you need to change how initialization works it keep that up to
+   * date.
+   */
+  void initInTargetCache() {
+    assert(isUninitializedInTargetCache());
+    m_count = 1;
+    assert(static_cast<bool>(m_magic = Magic::kMagic)); // assign magic
+    assert(m_cowAndZ == 0);
+  }
+
+  /*
+   * For RefDatas in TargetCache, we need a way to check if they are
+   * initialized while avoiding the usual m_magic assertions (m_magic
+   * will be zero if it's not initialized).  This function does that.
+   */
+  bool isUninitializedInTargetCache() const {
+    return m_tv.m_type == KindOfUninit;
+  }
+
   /*
    * Create a RefData, allocated in the request local heap.
    */
@@ -77,7 +109,14 @@ public:
   const Variant* var() const { return (const Variant*)tv(); }
   Variant* var() { return reinterpret_cast<Variant*>(tv()); }
 
-  static constexpr size_t tvOffset() { return offsetof(RefData, m_tv); }
+  static ptrdiff_t magicOffset() {
+#ifdef DEBUG
+    return offsetof(RefData, m_magic);
+#else
+    not_reached();
+#endif
+  }
+  static constexpr ptrdiff_t tvOffset() { return offsetof(RefData, m_tv); }
 
   void assertValid() const {
     assert(m_magic == Magic::kMagic);

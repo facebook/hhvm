@@ -1338,6 +1338,10 @@ IRTranslator::translateStaticLocInit(const NormalizedInstruction& i) {
   HHIR_EMIT(StaticLocInit, i.imm[0].u_IVA, i.imm[1].u_SA);
 }
 
+void IRTranslator::translateStaticLoc(const NormalizedInstruction& i) {
+  HHIR_EMIT(StaticLoc, i.imm[0].u_IVA, i.imm[1].u_SA);
+}
+
 // check class hierarchy and fail if no match
 void
 IRTranslator::translateVerifyParamType(const NormalizedInstruction& i) {

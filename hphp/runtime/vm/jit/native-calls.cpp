@@ -203,8 +203,6 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
     {StaticLocInit,      staticLocInit, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {TV, 2}}},
-    {StaticLocInitCached, staticLocInitCached, DSSA, SNone,
-                           {{SSA, 0}, {SSA, 1}, {TV, 2}, {SSA, 3}}},
     {LdFuncCached,       FixedFuncCache::lookupUnknownFunc, DSSA, SSync,
                            {{SSA, 0}}},
     {LdFuncCachedU,      FixedFuncCache::lookupUnknownFunc, DSSA, SSync,

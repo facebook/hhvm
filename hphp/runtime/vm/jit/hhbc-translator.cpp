@@ -934,34 +934,72 @@ void HhbcTranslator::emitTraitExists(const StringData* traitName) {
 }
 
 void HhbcTranslator::emitStaticLocInit(uint32_t locId, uint32_t litStrId) {
-  const StringData* name = lookupStringId(litStrId);
-  SSATmp* value = popC();
-  SSATmp* box;
+  auto const name  = lookupStringId(litStrId);
+  auto const value = popC();
 
   // Closures and generators from closures don't satisfy the "one static per
   // source location" rule that the inline fastpath requires
-  if (curFunc()->isClosureBody() || curFunc()->isGeneratorFromClosure()) {
-    box = gen(StaticLocInit, cns(name), m_tb->fp(), value);
-  } else {
-    SSATmp* ch = cns(TargetCache::allocStatic(), Type::CacheHandle);
-    SSATmp* cachedBox = nullptr;
-    box = m_tb->cond(curFunc(),
-      [&](Block* taken) {
-        // Careful: cachedBox is only ok to use in the 'next' branch.
-        cachedBox = gen(LdStaticLocCached, taken, ch);
+  auto const box = [&]{
+    if (curFunc()->isClosureBody() || curFunc()->isGeneratorFromClosure()) {
+      return gen(StaticLocInit, cns(name), m_tb->fp(), value);
+    }
+
+    auto const cachedBox =
+      gen(LdStaticLocCached, StaticLocName { curFunc(), name });
+    m_tb->ifThen(
+      curFunc(),
+      [&] (Block* taken) {
+        gen(CheckStaticLocInit, taken, cachedBox);
       },
-      [&] { // next: The local is already initialized
-        return gen(IncRef, cachedBox);
-      },
-      [&] { // taken: We missed in the cache
+      [&] {
         m_tb->hint(Block::Hint::Unlikely);
-        return gen(StaticLocInitCached,
-                         cns(name), m_tb->fp(), value, ch);
+        gen(StaticLocInitCached, cachedBox, value);
       }
     );
+    return cachedBox;
+  }();
+  gen(StLoc, LocalId(locId), m_tb->fp(), gen(IncRef, box));
+  // We don't need to decref value---it's a bytecode invariant that
+  // our Cell was not ref-counted.
+}
+
+void HhbcTranslator::emitStaticLoc(uint32_t locId, uint32_t litStrId) {
+  auto const name = lookupStringId(litStrId);
+
+  if (curFunc()->isClosureBody() || curFunc()->isGeneratorFromClosure()) {
+    auto const box = gen(
+      StaticLocInit, cns(name), m_tb->fp(), m_tb->genDefNull()
+    );
+    gen(StLoc, LocalId(locId), m_tb->fp(), gen(IncRef, box));
+    push(cns(true));
   }
-  gen(StLoc, LocalId(locId), m_tb->fp(), box);
-  gen(DecRef, value);
+
+  auto const box = gen(LdStaticLocCached, StaticLocName { curFunc(), name });
+  auto const res = m_tb->cond(
+    curFunc(),
+    [&] (Block* taken) {
+      gen(CheckStaticLocInit, taken, box);
+    },
+    [&] { // Next: the static local is already initialized
+      return m_tb->genLdConst(true);
+    },
+    [&] { // Taken: need to initialize the static local
+      /*
+       * Even though this path is "cold", we're not marking it
+       * unlikely because the size of the instructions this will
+       * generate is about 10 bytes, which is not much larger than the
+       * 5 byte jump to astubs would be.
+       *
+       * One note about StaticLoc: we're literally always going to
+       * generate a fallthrough trace here that is cold (the code that
+       * initializes the static local).  TODO(#2894612).
+       */
+      gen(StaticLocInitCached, box, m_tb->genDefNull());
+      return m_tb->genLdConst(false);
+    }
+  );
+  gen(StLoc, LocalId(locId), m_tb->fp(), gen(IncRef, box));
+  push(res);
 }
 
 void HhbcTranslator::emitReqDoc(const StringData* name) {

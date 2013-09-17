@@ -14,6 +14,9 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/jit/target-cache.h"
+
+#include "folly/Hash.h"
+
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/types.h"
@@ -83,7 +86,7 @@ TRACE_SET_MOD(targetcache);
 static StaticString s___call(LITSTR_INIT("__call"));
 
 // Shorthand.
-typedef CacheHandle Handle;
+typedef CacheHandle Handle; // TODO(#2879005): rename CacheHandle to Handle
 
 // Helper for lookup failures. msg should be a printf-style static
 // format with one %s parameter, which name will be substituted into.
@@ -108,8 +111,7 @@ static size_t s_next_bit;
 static size_t s_bits_to_go;
 static int s_tc_fd;
 
-// Mapping from names to targetcache locations. Protected by the translator
-// write lease.
+// Mapping from names to targetcache locations.
 typedef tbb::concurrent_hash_map<const StringData*, Handle,
         StringDataHashICompare>
   HandleMapIS;
@@ -118,12 +120,45 @@ typedef tbb::concurrent_hash_map<const StringData*, Handle,
         StringDataHashCompare>
   HandleMapCS;
 
+namespace {
+
+struct StaticLocalKey {
+  struct HashCompare;
+
+  FuncId funcId;
+  const StringData* localName;
+};
+
+struct StaticLocalKey::HashCompare {
+  bool equal(StaticLocalKey k1, StaticLocalKey k2) const {
+    assert(k1.localName->isStatic());
+    assert(k2.localName->isStatic());
+    return k1.funcId == k2.funcId && k1.localName == k2.localName;
+  }
+
+  size_t hash(StaticLocalKey k) const {
+    return folly::hash::hash_128_to_64(
+      std::hash<FuncId>()(k.funcId),
+      k.localName->hash()
+    );
+  }
+};
+
+typedef tbb::concurrent_hash_map<
+  StaticLocalKey,
+  Handle,
+  StaticLocalKey::HashCompare
+> StaticLocalMap;
+
 // handleMaps[NSConstant]['FOO'] is the cache associated with the constant
 // FOO, eg. handleMaps is a rare instance of shared, mutable state across
 // the request threads in the translator: it is essentially a lazily
 // constructed link table for tl_targetCaches.
 HandleMapIS handleMapsIS[NumInsensitive];
 HandleMapCS handleMapsCS[NumCaseSensitive];
+StaticLocalMap s_staticLocalMap;
+
+}
 
 // Vector of cache handles
 typedef std::vector<Handle> HandleVector;
@@ -735,10 +770,26 @@ CacheHandle allocConstant(uint32_t* handlep, bool persistent) {
   return *handlep;
 }
 
+CacheHandle allocStaticLocal(const Func* func, const StringData* name) {
+  auto const mapKey = StaticLocalKey { func->getFuncId(), name };
 
-CacheHandle allocStatic() {
-  return namedAlloc<NSInvalid>(nullptr, sizeof(TypedValue*),
-                               sizeof(TypedValue*));
+  StaticLocalMap::const_accessor acc;
+  if (s_staticLocalMap.find(acc, mapKey)) {
+    return acc->second;
+  }
+
+  Lock l(s_handleMutex);
+  if (s_staticLocalMap.find(acc, mapKey)) {
+    return acc->second;
+  }
+
+  Handle retval = allocLocked(false /* persistent */,
+                              sizeof(RefData),
+                              alignof(RefData));
+  if (!s_staticLocalMap.insert(StaticLocalMap::value_type(mapKey, retval))) {
+    always_assert(0);
+  }
+  return retval;
 }
 
 CacheHandle allocClassConstant(StringData* name) {

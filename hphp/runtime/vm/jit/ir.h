@@ -426,14 +426,12 @@ O(StElem,                           ND, S(PtrToCell)                          \
                                           S(Cell),                 E|Mem|CRc) \
 O(IterCopy,                         ND, S(FramePtr) S(Int)                    \
                                         S(PtrToGen) S(Int),            E|Mem) \
-O(LdStaticLocCached,      D(BoxedCell), C(CacheHandle),                   NF) \
+O(LdStaticLocCached,      D(BoxedCell), NA,                               NF) \
+O(CheckStaticLocInit,               ND, S(BoxedCell),                     NF) \
 O(StaticLocInit,          D(BoxedCell), CStr                                  \
                                           S(FramePtr)                         \
                                           S(Cell),               PRc|E|N|Mem) \
-O(StaticLocInitCached,    D(BoxedCell), CStr                                  \
-                                          S(FramePtr)                         \
-                                          S(Cell)                             \
-                                            C(CacheHandle),      PRc|E|N|Mem) \
+O(StaticLocInitCached,              ND, S(BoxedCell) S(Cell),              E) \
 O(SpillStack,                D(StkPtr), S(StkPtr) C(Int) SSpills,        CRc) \
 O(SpillFrame,                D(StkPtr), S(StkPtr)                             \
                                           S(FramePtr)                         \

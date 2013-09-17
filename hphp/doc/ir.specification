@@ -476,6 +476,12 @@ D:CountedStr = AssertNonNull S0:{Nullptr|CountedStr}
   Returns S0, with Nullptr removed from its type. This instruction currently
   supports a very limited range of types but can be expanded if needed.
 
+CheckStaticLocInit S0:BoxedCell -> L
+
+  Check if the static local target cache RefData represented by S0 is
+  initialized, and if not branch to L.
+
+
 2. Arithmetic
 
 
@@ -1010,10 +1016,11 @@ D:T = LdRaw<T> S0:?? S1:ConstInt
   from the RawMemSlot::Kind enum, which describes the offset from the
   base, and the size.  The value in D is assumed to be of type T.
 
-D:BoxedCell = LdStaticLocCached S0:ConstCacheHandle -> L
+D:BoxedCell = LdStaticLocCached<func,staticLocalName>
 
-  Load static local value from the targetcache from handle S0. If the
-  slot is uninitialized, branch to L.
+  Load the address of the static local RefData from the targetcache
+  for function `func' with the static local variable named
+  `staticLocalName'.
 
 
 8. Allocation
@@ -1532,15 +1539,10 @@ D:BoxedCell = StaticLocInit S0:ConstStr S1:FramePtr S2:Cell
   the static local has not yet been initialized, its value will be set
   to S2. The returned value is not stored in the frame S1.
 
-D:BoxedCell = StaticLocInitCached S0:ConstStr S1:FramePtr S2:Cell
-                                  S3:ConstCacheHandle
+StaticLocInitCached S0:BoxedCell S1:Cell
 
-  Get boxed value to initialize static local named S0 in frame S1. If
-  the static local has not yet been initialized, its value will be set
-  to S2. The returned value is stored in the targetcache at handle S3,
-  but is not stored in the frame S1. This instruction assumes that the
-  current function is not a closure body or a generator from a
-  closure.
+  Assuming S0 is an uninitialized static local target cache slot,
+  initialize it by setting it to the value of S1.
 
 PrintStr S0:Str
 PrintInt S1:Int

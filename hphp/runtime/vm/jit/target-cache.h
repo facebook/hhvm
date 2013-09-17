@@ -21,7 +21,6 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/util/asm-x64.h"
-#include <boost/static_assert.hpp>
 
 namespace HPHP {
 namespace Transl {
@@ -101,7 +100,7 @@ enum PHPNameSpace {
   NSClsInitProp,
   NSClsInitSProp,
 
-  NumInsensitive, _NS_placeholder = NumInsensitive-1,
+  NumInsensitive, NS_placeholder = NumInsensitive-1,
 
   NSConstant,
   NSClassConstant,
@@ -321,17 +320,19 @@ TypedValue lookupClassConstantTv(TypedValue* cache,
                                  const StringData* cns);
 
 /*
- * Static locals. Each StaticLocInit we translate gets its own soft
- * reference to the variant where it resides.
+ * Static locals.
+ *
+ * For normal functions, static locals are allocated as RefData's that
+ * live in TargetCache.  Note that we don't put closures or
+ * generatorFromClosure locals here because they are per-instance.
  */
-CacheHandle allocStatic();
+CacheHandle allocStaticLocal(const Func*, const StringData*);
 
 /*
  * Static properties.  We only cache statically known property name
  * references from within the class.  Current statistics shows in
  * class references dominating by 91.5% of all static property access.
  */
-
 class SPropCache {
 private:
   static inline SPropCache* cacheAtHandle(CacheHandle handle) {

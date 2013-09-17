@@ -506,9 +506,6 @@ public:
   typedef hphp_hash_map<const HPHP::Class*, HphpArray*,
                         pointer_hash<HPHP::Class> > SPropDataMap;
   SPropDataMap m_sPropData;
-  typedef hphp_hash_map<const HPHP::Func*, HphpArray*,
-                        pointer_hash<HPHP::Func> > FuncStaticCtxMap;
-  FuncStaticCtxMap m_funcStaticCtx;
 
   const HPHP::Func* lookupMethodCtx(const HPHP::Class* cls,
                                         const StringData* methodName,
@@ -533,16 +530,6 @@ public:
                            CArrRef params,
                            bool init = true);
   ObjectData* createObjectOnly(StringData* clsName);
-
-  HphpArray* getFuncStaticCtx(const HPHP::Func* f) {
-    FuncStaticCtxMap::iterator it = m_funcStaticCtx.find(f);
-    if (it != m_funcStaticCtx.end()) {
-      return it->second;
-    }
-
-    auto array = HphpArray::MakeReserve(f->numStaticLocals());
-    return m_funcStaticCtx[f] = array;
-  }
 
   HphpArray* getClsCnsData(const HPHP::Class* class_) const {
     ClsCnsDataMap::const_iterator it = m_clsCnsData.find(class_);

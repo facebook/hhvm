@@ -557,10 +557,6 @@ void Func::prettyPrint(std::ostream& out) const {
   }
 }
 
-HphpArray* Func::getStaticLocals() const {
-  return g_vmContext->getFuncStaticCtx(this);
-}
-
 void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
   assert(mi);
   if (info() != nullptr) {

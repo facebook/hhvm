@@ -35,6 +35,61 @@ static std::string punc(const char* str) {
     color(ANSI_COLOR_DARK_GRAY), str, color(ANSI_COLOR_END)).str();
 }
 
+static std::string constToString(Type t, const ConstData* c) {
+  std::ostringstream os;
+  os << color(ANSI_COLOR_LIGHT_BLUE);
+  SCOPE_EXIT { os << color(ANSI_COLOR_END); };
+
+  if (t == Type::Int) {
+    os << c->as<int64_t>();
+  } else if (t == Type::Dbl) {
+    os << c->as<double>();
+  } else if (t == Type::Bool) {
+    os << (c->as<bool>() ? "true" : "false");
+  } else if (t.isString()) {
+    auto str = c->as<const StringData*>();
+    os << "\""
+       << Util::escapeStringForCPP(str->data(), str->size())
+       << "\"";
+  } else if (t.isArray()) {
+    auto arr = c->as<const ArrayData*>();
+    if (arr->empty()) {
+      os << "array()";
+    } else {
+      os << "Array(" << arr << ")";
+    }
+  } else if (t.isNull() || t.subtypeOf(Type::Nullptr)) {
+    os << t.toString();
+  } else if (t.subtypeOf(Type::Func)) {
+    auto func = c->as<const Func*>();
+    os << "Func(" << (func ? func->fullName()->data() : "0") << ")";
+  } else if (t.subtypeOf(Type::Cls)) {
+    auto cls = c->as<const Class*>();
+    os << "Cls(" << (cls ? cls->name()->data() : "0") << ")";
+  } else if (t.subtypeOf(Type::Cctx)) {
+    auto cls = reinterpret_cast<const Class*>(c->as<uintptr_t>() - 1);
+    os << "Cctx(" << (cls ? cls->name()->data() : "0") << ")";
+  } else if (t.subtypeOf(Type::NamedEntity)) {
+    auto ne = c->as<const NamedEntity*>();
+    os << "NamedEntity(" << ne << ")";
+  } else if (t.subtypeOf(Type::TCA)) {
+    TCA tca = c->as<TCA>();
+    auto name = getNativeFunctionName(tca);
+    SCOPE_EXIT { free(name); };
+    os << folly::format("TCA: {}({})", tca,
+      boost::trim_copy(std::string(name)));
+  } else if (t.subtypeOf(Type::None)) {
+    os << "None:" << c->as<int64_t>();
+  } else if (t.isPtr()) {
+    os << folly::format("{}({:#x})", t.toString(), c->as<uint64_t>());
+  } else if (t.subtypeOf(Type::CacheHandle)) {
+    os << folly::format("CacheHandle({:#x})", c->as<int64_t>());
+  } else {
+    not_reached();
+  }
+  return os.str();
+}
+
 void printOpcode(std::ostream& os, const IRInstruction* inst,
                  const GuardConstraints* guards) {
   os << color(ANSI_COLOR_CYAN)
@@ -49,6 +104,7 @@ void printOpcode(std::ostream& os, const IRInstruction* inst,
 
   if (!hasTypeParam && !hasExtra && !isGuard) return;
   os << color(ANSI_COLOR_LIGHT_BLUE) << '<' << color(ANSI_COLOR_END);
+
   if (hasTypeParam) {
     os << color(ANSI_COLOR_GREEN)
        << typeParam.toString()
@@ -56,16 +112,23 @@ void printOpcode(std::ostream& os, const IRInstruction* inst,
        ;
     if (hasExtra || isGuard) os << punc(",");
   }
-  if (hasExtra) {
-    os << color(ANSI_COLOR_GREEN)
-       << showExtra(inst->op(), inst->rawExtra())
-       << color(ANSI_COLOR_END);
-    if (isGuard) os << punc(",");
+
+  if (inst->op() == LdConst) {
+    os << constToString(inst->typeParam(), inst->extra<LdConst>());
+  } else {
+    if (hasExtra) {
+      os << color(ANSI_COLOR_GREEN)
+         << showExtra(inst->op(), inst->rawExtra())
+         << color(ANSI_COLOR_END);
+      if (isGuard) os << punc(",");
+    }
   }
+
   if (isGuard) {
     auto it = guards->find(inst);
     os << (it == guards->end() ? "unused" : it->second.toString());
   }
+
   os << color(ANSI_COLOR_LIGHT_BLUE)
      << '>'
      << color(ANSI_COLOR_END);
@@ -164,65 +227,11 @@ void print(const IRInstruction* inst) {
   std::cerr << std::endl;
 }
 
-static void printConst(std::ostream& os, IRInstruction* inst) {
-  os << color(ANSI_COLOR_LIGHT_BLUE);
-  SCOPE_EXIT { os << color(ANSI_COLOR_END); };
-
-  auto t = inst->typeParam();
-  auto c = inst->extra<DefConst>();
-  if (t == Type::Int) {
-    os << c->as<int64_t>();
-  } else if (t == Type::Dbl) {
-    os << c->as<double>();
-  } else if (t == Type::Bool) {
-    os << (c->as<bool>() ? "true" : "false");
-  } else if (t.isString()) {
-    auto str = c->as<const StringData*>();
-    os << "\""
-       << Util::escapeStringForCPP(str->data(), str->size())
-       << "\"";
-  } else if (t.isArray()) {
-    auto arr = inst->extra<DefConst>()->as<const ArrayData*>();
-    if (arr->empty()) {
-      os << "array()";
-    } else {
-      os << "Array(" << arr << ")";
-    }
-  } else if (t.isNull() || t.subtypeOf(Type::Nullptr)) {
-    os << t.toString();
-  } else if (t.subtypeOf(Type::Func)) {
-    auto func = c->as<const Func*>();
-    os << "Func(" << (func ? func->fullName()->data() : "0") << ")";
-  } else if (t.subtypeOf(Type::Cls)) {
-    auto cls = c->as<const Class*>();
-    os << "Cls(" << (cls ? cls->name()->data() : "0") << ")";
-  } else if (t.subtypeOf(Type::Cctx)) {
-    auto cls = reinterpret_cast<const Class*>(c->as<uintptr_t>() - 1);
-    os << "Cctx(" << (cls ? cls->name()->data() : "0") << ")";
-  } else if (t.subtypeOf(Type::NamedEntity)) {
-    auto ne = c->as<const NamedEntity*>();
-    os << "NamedEntity(" << ne << ")";
-  } else if (t.subtypeOf(Type::TCA)) {
-    TCA tca = c->as<TCA>();
-    auto name = getNativeFunctionName(tca);
-    SCOPE_EXIT { free(name); };
-    os << folly::format("TCA: {}({})", tca,
-      boost::trim_copy(std::string(name)));
-  } else if (t.subtypeOf(Type::None)) {
-    os << "None:" << c->as<int64_t>();
-  } else if (t.isPtr()) {
-    os << folly::format("{}({:#x})", t.toString(), c->as<uint64_t>());
-  } else if (t.subtypeOf(Type::CacheHandle)) {
-    os << folly::format("CacheHandle({:#x})", c->as<int64_t>());
-  } else {
-    not_reached();
-  }
-}
-
 void print(std::ostream& os, const SSATmp* tmp, const RegAllocInfo* regs,
            const LifetimeInfo* lifetime, bool printLastUse) {
   if (tmp->inst()->op() == DefConst) {
-    printConst(os, tmp->inst());
+    os << constToString(tmp->inst()->typeParam(),
+                        tmp->inst()->extra<DefConst>());
     return;
   }
   os << color(ANSI_COLOR_WHITE);

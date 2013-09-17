@@ -279,21 +279,6 @@ Unit* compile_string(const char* s, size_t sz, const char* fname) {
   return g_hphp_compiler_parse(s, sz, md5, fname);
 }
 
-HphpArray* get_static_locals(const ActRec* ar) {
-  if (ar->m_func->isClosureBody()) {
-    TypedValue* closureLoc = frame_local(ar, ar->m_func->numParams());
-    assert(closureLoc->m_data.pobj->instanceof(c_Closure::classof()));
-    return static_cast<c_Closure*>(closureLoc->m_data.pobj)->getStaticLocals();
-  } else if (ar->m_func->isGeneratorFromClosure()) {
-    c_Continuation* cont = frame_continuation(ar);
-    TypedValue* closureLoc = frame_local(ar, cont->m_origFunc->numParams());
-    assert(closureLoc->m_data.pobj->instanceof(c_Closure::classof()));
-    return static_cast<c_Closure*>(closureLoc->m_data.pobj)->getStaticLocals();
-  } else {
-    return ar->m_func->getStaticLocals();
-  }
-}
-
 void collection_setm_wk1_v0(ObjectData* obj, TypedValue* value) {
   assert(obj);
   collectionAppend(obj, value);

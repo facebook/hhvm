@@ -72,9 +72,9 @@ public:
   static c_Closure* Clone(ObjectData* obj);
 
 private:
-  SmartPtr<HphpArray> m_VMStatics;
   ObjectData* m_thisOrClass;
   const Func* m_func;
+  SmartPtr<HphpArray> m_VMStatics;
 };
 
 }

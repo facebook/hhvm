@@ -299,7 +299,6 @@ CALL_OPCODE(RaiseError)
 CALL_OPCODE(RaiseWarning)
 CALL_OPCODE(IncStatGrouped)
 CALL_OPCODE(StaticLocInit)
-CALL_OPCODE(StaticLocInitCached)
 CALL_OPCODE(ArrayIdx)
 CALL_OPCODE(LdGblAddrDef)
 
@@ -4151,12 +4150,39 @@ void CodeGenerator::cgStRaw(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdStaticLocCached(IRInstruction* inst) {
-  auto ch = inst->src(0)->getValRawInt();
-  auto outReg = m_regs[inst->dst()].reg();
+  auto const extra = inst->extra<LdStaticLocCached>();
+  auto const ch = TargetCache::allocStaticLocal(extra->func, extra->name);
+  auto const dst = m_regs[inst->dst()].reg();
+  auto& a = m_as;
+  emitLea(a, rVmTl[ch], dst);
+}
 
-  m_as.loadq (rVmTl[ch], outReg);
-  m_as.testq (outReg, outReg);
-  emitFwdJcc(m_as, CC_Z, inst->taken());
+void CodeGenerator::cgCheckStaticLocInit(IRInstruction* inst) {
+  auto const src = m_regs[inst->src(0)].reg();
+  auto& a = m_as;
+  emitCmpTVType(a, KindOfUninit, src[RefData::tvOffset() + TVOFF(m_type)]);
+  emitFwdJcc(a, CC_E, inst->taken());
+}
+
+void CodeGenerator::cgStaticLocInitCached(IRInstruction* inst) {
+  auto const rdSrc = m_regs[inst->src(0)].reg();
+  auto& a = m_as;
+
+  // If we're here, the target-cache-local RefData is all zeros, so we
+  // can initialize it by storing the new value into it's TypedValue
+  // and incrementing the RefData reference count (which will set it
+  // to 1).
+  //
+  // We are storing the rdSrc value into the static, but we don't need
+  // to inc ref it because it's a bytecode invariant that it's not a
+  // reference counted type.
+  cgStore(rdSrc[RefData::tvOffset()], inst->src(1));
+  a.    incl   (rdSrc[FAST_REFCOUNT_OFFSET]);
+  if (debug) {
+    static_assert(sizeof(RefData::Magic::kMagic) == sizeof(uint64_t), "");
+    a.  storeq (static_cast<int64_t>(RefData::Magic::kMagic),
+                rdSrc[RefData::magicOffset()]);
+  }
 }
 
 template<class MemRef>

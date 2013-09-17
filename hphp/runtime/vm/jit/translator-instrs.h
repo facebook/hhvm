@@ -114,6 +114,7 @@
   CASE(VerifyParamType) \
   CASE(InstanceOfD) \
   CASE(StaticLocInit) \
+  CASE(StaticLoc) \
   CASE(IterInit) \
   CASE(IterInitK) \
   CASE(IterNext) \

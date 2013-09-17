@@ -365,7 +365,8 @@ struct HhbcTranslator {
   void emitInterfaceExists(const StringData* ifaceName);
   void emitTraitExists(const StringData* traitName);
 
-  void emitStaticLocInit(uint32_t varId, uint32_t listStrId);
+  void emitStaticLocInit(uint32_t varId, uint32_t litStrId);
+  void emitStaticLoc(uint32_t varId, uint32_t litStrId);
   void emitReqDoc(const StringData* name);
 
   // iterators

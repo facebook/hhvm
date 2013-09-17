@@ -344,7 +344,7 @@ inline void cellSet(const Cell& fr, Cell& to) {
 
 // Assumes 'to' and 'fr' are live
 // Assumes that 'fr->m_type == KindOfRef'
-inline void tvBind(TypedValue* fr, TypedValue* to) {
+inline void tvBind(const TypedValue* fr, TypedValue* to) {
   assert(fr->m_type == KindOfRef);
   DataType oldType = to->m_type;
   uint64_t oldDatum = to->m_data.num;

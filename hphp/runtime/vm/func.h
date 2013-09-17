@@ -248,7 +248,6 @@ struct Func {
     return isPseudoMain() || (isMethod() && !isStatic());
   }
 
-  HphpArray* getStaticLocals() const;
   void getFuncInfo(ClassInfo::MethodInfo* mi) const;
   DVFuncletsVec getDVFunclets() const;
 

@@ -17,11 +17,38 @@
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
 #include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
-namespace HPHP { namespace Transl {
+namespace HPHP {
+
+//////////////////////////////////////////////////////////////////////
+
+// Defined here so it can be inlined below.
+RefData* lookupStaticFromArray(HphpArray* map,
+                               StringData* name,
+                               bool& inited) {
+  TypedValue* val = map->nvGet(name);
+  if (val == nullptr) {
+    TypedValue tv;
+    tvWriteUninit(&tv);
+    // TODO(#2887942): need write barrier
+    map->setRef(name, tvAsCVarRef(&tv), false);
+    inited = false;
+    assert(tv.m_data.pref->getCount() == 2);
+    tv.m_data.pref->decRefCount();
+    return tv.m_data.pref;
+  }
+  inited = true;
+  assert(val->m_type == KindOfRef);
+  return val->m_data.pref;
+}
+
+namespace Transl {
+
+//////////////////////////////////////////////////////////////////////
 
 ArrayData* addElemIntKeyHelper(ArrayData* ad,
                                int64_t key,
@@ -262,49 +289,25 @@ void VerifyParamTypeSlow(const Class* cls,
   VerifyParamTypeFail(param);
 }
 
-template<bool useTargetCache>
-RefData* staticLocInitImpl(StringData* name, ActRec* fp, TypedValue val,
-                           TargetCache::CacheHandle ch) {
-  assert(useTargetCache == (bool)ch);
-  HphpArray* map;
-  if (useTargetCache) {
-    // If we have a cache handle, we know the current func isn't a
-    // closure or generator closure so we can directly grab its static
-    // locals map.
-    const Func* func = fp->m_func;
-    assert(!(func->isClosureBody() || func->isGeneratorFromClosure()));
-    map = func->getStaticLocals();
-  } else {
-    map = get_static_locals(fp);
-  }
-
-  TypedValue *mapVal = map->nvGet(name);
-  if (!mapVal) {
-    /*
-     * TODO(#2887942): unchecked array set
-     */
-    map->set(name, tvAsCVarRef(&val), false);
-    mapVal = map->nvGet(name);
-  }
-  if (mapVal->m_type != KindOfRef) {
-    tvBox(mapVal);
-  }
-  assert(mapVal->m_type == KindOfRef);
-  RefData* ret = mapVal->m_data.pref;
-  if (useTargetCache) {
-    *TargetCache::handleToPtr<RefData*>(ch) = ret;
-  }
-  ret->incRefCount();
-  return ret;
-}
-
 RefData* staticLocInit(StringData* name, ActRec* fp, TypedValue val) {
-  return staticLocInitImpl<false>(name, fp, val, 0);
-}
+  auto const func = fp->m_func;
+  auto const map = [&]{
+    auto const closureLoc =
+      LIKELY(func->isClosureBody())
+        ? frame_local(fp, func->numParams())
+        : frame_local(fp, frame_continuation(fp)->m_origFunc->numParams());
+    assert(closureLoc->m_data.pobj->instanceof(c_Closure::classof()));
+    return static_cast<c_Closure*>(closureLoc->m_data.pobj)->
+      getStaticLocals();
+  }();
 
-RefData* staticLocInitCached(StringData* name, ActRec* fp, TypedValue val,
-                             TargetCache::CacheHandle ch) {
-  return staticLocInitImpl<true>(name, fp, val, ch);
+  bool inited;
+  auto const refData = lookupStaticFromArray(map, name, inited);
+  if (!inited) {
+    cellCopy(val, *refData->tv());
+  }
+  refData->incRefCount();
+  return refData;
 }
 
 HOT_FUNC_VM
@@ -313,4 +316,6 @@ bool instanceOfHelper(const Class* objClass,
   return testClass && objClass->classof(testClass);
 }
 
-} }
+//////////////////////////////////////////////////////////////////////
+
+}}

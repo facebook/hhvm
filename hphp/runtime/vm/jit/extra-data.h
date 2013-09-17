@@ -366,6 +366,25 @@ struct ClsCnsName : IRExtraData {
 };
 
 /*
+ * The name of a static local in a function.
+ */
+struct StaticLocName : IRExtraData {
+  StaticLocName(const Func* func, const StringData* name)
+    : func(func)
+    , name(name)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>(
+      func->fullName()->data(), "$", name->data()
+    );
+  }
+
+  const Func* func;
+  const StringData* name;
+};
+
+/*
  * The name of a class, and the expected Class* at runtime.
  */
 struct CheckDefinedClsData : IRExtraData {
@@ -505,6 +524,7 @@ X(CheckCold,                    TransIDData);
 X(CallArray,                    CallArrayData);
 X(LdClsCns,                     ClsCnsName);
 X(LookupClsCns,                 ClsCnsName);
+X(LdStaticLocCached,            StaticLocName);
 X(ReqBindJmpGt,                 ReqBindJccData);
 X(ReqBindJmpGte,                ReqBindJccData);
 X(ReqBindJmpLt,                 ReqBindJccData);

@@ -252,20 +252,25 @@ bool f_stream_set_timeout(CResRef stream, int seconds,
 }
 
 int64_t f_stream_set_write_buffer(CResRef stream, int buffer) {
-  PlainFile *file = stream.getTyped<PlainFile>(false, true);
-  if (file) {
-    switch (buffer) {
-    case PHP_STREAM_BUFFER_NONE:
-      return setvbuf(file->getStream(), NULL, _IONBF, 0);
-    case PHP_STREAM_BUFFER_LINE:
-      return setvbuf(file->getStream(), NULL, _IOLBF, BUFSIZ);
-    case PHP_STREAM_BUFFER_FULL:
-      return setvbuf(file->getStream(), NULL, _IOFBF, BUFSIZ);
-    default:
-      break;
-    }
+  PlainFile *plain_file = stream.getTyped<PlainFile>(false, true);
+  if (!plain_file) {
+    return -1;
   }
-  return -1;
+  FILE* file = plain_file->getStream();
+  if (!file) {
+    return -1;
+  }
+
+  switch (buffer) {
+  case PHP_STREAM_BUFFER_NONE:
+    return setvbuf(file, nullptr, _IONBF, 0);
+  case PHP_STREAM_BUFFER_LINE:
+    return setvbuf(file, nullptr, _IOLBF, BUFSIZ);
+  case PHP_STREAM_BUFFER_FULL:
+    return setvbuf(file, nullptr, _IOFBF, BUFSIZ);
+  default:
+    return -1;
+  }
 }
 
 int64_t f_set_file_buffer(CResRef stream, int buffer) {

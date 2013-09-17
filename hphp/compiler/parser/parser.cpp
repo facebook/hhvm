@@ -642,7 +642,6 @@ void Parser::onUnaryOpExp(Token &out, Token &operand, int op, bool front) {
   case T_INC:
   case T_DEC:
   case T_ISSET:
-  case T_EMPTY:
   case T_UNSET:
     if (dynamic_pointer_cast<FunctionCall>(operand->exp)) {
       PARSE_ERROR("Can't use return value in write context");

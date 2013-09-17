@@ -2330,6 +2330,8 @@ encaps_var_offset:
 internal_functions:
     T_ISSET '(' variable_list ')'      { UEXP($$,$3,T_ISSET,1);}
   | T_EMPTY '(' variable ')'           { UEXP($$,$3,T_EMPTY,1);}
+  | T_EMPTY '(' expr_no_variable ')'   { UEXP($$,$3,'!',1);}
+  | T_EMPTY '(' expr_with_parens ')'   { UEXP($$,$3,'!',1);}
   | T_INCLUDE expr                     { UEXP($$,$2,T_INCLUDE,1);}
   | T_INCLUDE_ONCE expr                { UEXP($$,$2,T_INCLUDE_ONCE,1);}
   | T_EVAL '(' expr ')'                { UEXP($$,$3,T_EVAL,1);}

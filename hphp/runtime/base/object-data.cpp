@@ -815,23 +815,25 @@ const TypedValue* ObjectData::propVec() const {
   return const_cast<ObjectData*>(this)->propVec();
 }
 
+/**
+ * Only call this if cls->callsCustomInstanceInit() is true
+ */
 ObjectData* ObjectData::callCustomInstanceInit() {
   const Func* init = m_cls->lookupMethod(s___init__.get());
-  if (init != nullptr) {
-    TypedValue tv;
-    // We need to incRef/decRef here because we're still a new (m_count
-    // == 0) object and invokeFunc is going to expect us to have a
-    // reasonable refcount.
-    try {
-      incRefCount();
-      g_vmContext->invokeFuncFew(&tv, init, this);
-      decRefCount();
-      assert(!IS_REFCOUNTED_TYPE(tv.m_type));
-    } catch (...) {
-      this->setNoDestruct();
-      decRefObj(this);
-      throw;
-    }
+  assert(init);
+  TypedValue tv;
+  // We need to incRef/decRef here because we're still a new (m_count
+  // == 0) object and invokeFunc is going to expect us to have a
+  // reasonable refcount.
+  try {
+    incRefCount();
+    g_vmContext->invokeFuncFew(&tv, init, this);
+    decRefCount();
+    assert(!IS_REFCOUNTED_TYPE(tv.m_type));
+  } catch (...) {
+    this->setNoDestruct();
+    decRefObj(this);
+    throw;
   }
   return this;
 }

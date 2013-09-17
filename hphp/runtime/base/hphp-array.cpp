@@ -714,7 +714,9 @@ ssize_t HphpArray::find(const StringData* s, strhash_t prehash) const {
 
 NEVER_INLINE
 int32_t* warnUnbalanced(size_t n, int32_t* ei) {
-  raise_error("Array is too unbalanced (%lu)", n);
+  if (n > size_t(RuntimeOption::MaxArrayChain)) {
+    raise_error("Array is too unbalanced (%lu)", n);
+  }
   return ei;
 }
 
@@ -747,15 +749,13 @@ int32_t* HphpArray::findForInsertImpl(size_t h0, Hit hit) const {
     } else {
       if (!ret) ret = ei;
       if (pos == Empty) {
-        return LIKELY(i <= 100) ||
-          LIKELY(i <= size_t(RuntimeOption::MaxArrayChain)) ?
-          ret : warnUnbalanced(i, ret);
+        return LIKELY(i <= 100) ? ret : warnUnbalanced(i, ret);
       }
     }
   }
 }
 
-NEVER_INLINE int32_t* HphpArray::findForInsert(int64_t ki) const {
+int32_t* HphpArray::findForInsert(int64_t ki) const {
   // all vector methods should work w/out touching the hashtable
   assert(!isPacked());
   return findForInsertImpl(ki, [ki] (const Elm& e) {
@@ -763,7 +763,7 @@ NEVER_INLINE int32_t* HphpArray::findForInsert(int64_t ki) const {
   });
 }
 
-NEVER_INLINE int32_t*
+int32_t*
 HphpArray::findForInsert(const StringData* s, strhash_t prehash) const {
   // all vector methods should work w/out touching the hashtable
   assert(!isPacked());
@@ -771,6 +771,28 @@ HphpArray::findForInsert(const StringData* s, strhash_t prehash) const {
   return findForInsertImpl(prehash, [s, h] (const Elm& e) {
     return hitStringKey(e, s, h);
   });
+}
+
+HphpArray::InsertPos HphpArray::insert(int64_t k) {
+  auto ei = findForInsert(k);
+  if (validPos(*ei)) {
+    return InsertPos(true, m_data[*ei].data);
+  }
+  if (k >= m_nextKI && m_nextKI >= 0) m_nextKI = k + 1;
+  auto& e = newElm(ei, k);
+  e.setIntKey(k);
+  return InsertPos(false, e.data);
+}
+
+HphpArray::InsertPos HphpArray::insert(StringData* k) {
+  strhash_t h = k->hash();
+  auto ei = findForInsert(k, h);
+  if (validPos(*ei)) {
+    return InsertPos(true, m_data[*ei].data);
+  }
+  auto& e = newElm(ei, h);
+  e.setStrKey(k, h);
+  return InsertPos(false, e.data);
 }
 
 template <class Hit, class Remove> ALWAYS_INLINE
@@ -1206,7 +1228,7 @@ ArrayData* HphpArray::nextInsertRef(CVarRef data) {
 ArrayData* HphpArray::nextInsertWithRef(CVarRef data) {
   resizeIfNeeded();
   int64_t ki = m_nextKI;
-  auto ei = findForInsert(ki);
+  auto ei = findForNewInsert(ki);
   assert(!validPos(*ei));
 
   // Allocate a new element.
@@ -1216,28 +1238,12 @@ ArrayData* HphpArray::nextInsertWithRef(CVarRef data) {
   return initWithRef(e.data, data);
 }
 
-ArrayData* HphpArray::addLvalImpl(int64_t ki, Variant*& ret) {
+template <class K>
+ArrayData* HphpArray::addLvalImpl(K k, Variant*& ret) {
   assert(!isPacked());
-  auto ei = findForInsert(ki);
-  if (validPos(*ei)) {
-    return getLval(m_data[*ei].data, ret);
-  }
-  auto& e = newElm(ei, ki);
-  e.setIntKey(ki);
-  if (ki >= m_nextKI && m_nextKI >= 0) m_nextKI = ki + 1;
-  return initLval(e.data, ret);
-}
-
-ArrayData* HphpArray::addLvalImpl(StringData* key, strhash_t h,
-                                  Variant*& ret) {
-  assert(key && !isPacked());
-  auto ei = findForInsert(key, h);
-  if (validPos(*ei)) {
-    return getLval(m_data[*ei].data, ret);
-  }
-  auto& e = newElm(ei, h);
-  e.setStrKey(key, h);
-  return initLval(e.data, ret);
+  auto p = insert(k);
+  if (!p.found) tvWriteNull(&p.tv);
+  return getLval(p.tv, ret);
 }
 
 inline ArrayData* HphpArray::addVal(int64_t ki, CVarRef data) {
@@ -1260,54 +1266,32 @@ inline ArrayData* HphpArray::addVal(StringData* key, CVarRef data) {
   return initVal(e.data, data);
 }
 
-INLINE_SINGLE_CALLER
-ArrayData* HphpArray::update(int64_t ki, CVarRef data) {
-  auto ei = findForInsert(ki);
-  if (validPos(*ei)) {
-    return setVal(m_data[*ei].data, data);
+template <class K> INLINE_SINGLE_CALLER
+ArrayData* HphpArray::update(K k, CVarRef data) {
+  auto p = insert(k);
+  if (p.found) {
+    return setVal(p.tv, data);
   }
-  auto& e = newElm(ei, ki);
-  e.setIntKey(ki);
-  if (ki >= m_nextKI && m_nextKI >= 0) m_nextKI = ki + 1;
-  return initVal(e.data, data);
+  return initVal(p.tv, data);
 }
 
-INLINE_SINGLE_CALLER
-ArrayData* HphpArray::update(StringData* key, CVarRef data) {
-  strhash_t h = key->hash();
-  auto ei = findForInsert(key, h);
-  if (validPos(*ei)) {
-    return setVal(m_data[*ei].data, data);
+template <class K>
+ArrayData* HphpArray::updateRef(K k, CVarRef data) {
+  assert(!isPacked());
+  auto p = insert(k);
+  if (p.found) {
+    return setRef(p.tv, data);
   }
-  auto& e = newElm(ei, h);
-  e.setStrKey(key, h);
-  return initVal(e.data, data);
+  return initRef(p.tv, data);
 }
 
-INLINE_SINGLE_CALLER
-void HphpArray::zSetImpl(int64_t ki, RefData* data) {
-  auto ei = findForInsert(ki);
-  if (validPos(*ei)) {
-    zSetVal(m_data[*ei].data, data);
-    return;
+template <class K> INLINE_SINGLE_CALLER
+void HphpArray::zSetImpl(K k, RefData* data) {
+  auto p = insert(k);
+  if (p.found) {
+    return zSetVal(p.tv, data);
   }
-  auto& e = newElm(ei, ki);
-  e.setIntKey(ki);
-  if (ki >= m_nextKI && m_nextKI >= 0) m_nextKI = ki + 1;
-  zInitVal(e.data, data);
-}
-
-INLINE_SINGLE_CALLER
-void HphpArray::zSetImpl(StringData* key, RefData* data) {
-  strhash_t h = key->hash();
-  auto ei = findForInsert(key, h);
-  if (validPos(*ei)) {
-    zSetVal(m_data[*ei].data, data);
-    return;
-  }
-  auto& e = newElm(ei, h);
-  e.setStrKey(key, h);
-  zInitVal(e.data, data);
+  return zInitVal(p.tv, data);
 }
 
 INLINE_SINGLE_CALLER
@@ -1325,30 +1309,6 @@ void HphpArray::zAppendImpl(RefData* data) {
   e.setIntKey(ki);
   m_nextKI = ki + 1;
   zInitVal(e.data, data);
-}
-
-ArrayData* HphpArray::updateRef(int64_t ki, CVarRef data) {
-  assert(!isPacked());
-  auto ei = findForInsert(ki);
-  if (validPos(*ei)) {
-    return setRef(m_data[*ei].data, data);
-  }
-  auto& e = newElm(ei, ki);
-  e.setIntKey(ki);
-  if (ki >= m_nextKI && m_nextKI >= 0) m_nextKI = ki + 1;
-  return initRef(e.data, data);
-}
-
-ArrayData* HphpArray::updateRef(StringData* key, CVarRef data) {
-  assert(!isPacked());
-  strhash_t h = key->hash();
-  auto ei = findForInsert(key, h);
-  if (validPos(*ei)) {
-    return setRef(m_data[*ei].data, data);
-  }
-  auto& e = newElm(ei, h);
-  e.setStrKey(key, h);
-  return initRef(e.data, data);
 }
 
 // return true if Elm contains a Reference that won't be flattened
@@ -1385,14 +1345,14 @@ HphpArray::LvalStrPacked(ArrayData* ad, StringData* key, Variant*& ret,
                          bool copy) {
   auto a = asPacked(ad);
   if (copy) a = a->copyPacked();
-  return a->packedToMixed()->addLvalImpl(key, key->hash(), ret);
+  return a->packedToMixed()->addLvalImpl(key, ret);
 }
 
 ArrayData* HphpArray::LvalStr(ArrayData* ad, StringData* key, Variant*& ret,
                               bool copy) {
   auto a = asMixed(ad);
   if (copy) a = a->copyMixed();
-  return a->addLvalImpl(key, key->hash(), ret);
+  return a->addLvalImpl(key, ret);
 }
 
 ArrayData* HphpArray::LvalNewPacked(ArrayData* ad, Variant*& ret, bool copy) {
@@ -1710,14 +1670,9 @@ bool HphpArray::nvInsert(StringData *k, TypedValue *data) {
     packedToMixed();
     // todo t2606310: we know key doesn't exist.
   }
-  strhash_t h = k->hash();
-  auto ei = findForInsert(k, h);
-  if (validPos(*ei)) {
-    return false;
-  }
-  auto& e = newElm(ei, h);
-  e.setStrKey(k, h);
-  initVal(e.data, tvAsVariant(data));
+  auto p = insert(k);
+  if (p.found) return false;
+  initVal(p.tv, tvAsVariant(data));
   return true;
 }
 
@@ -1811,25 +1766,12 @@ ArrayData* HphpArray::Plus(ArrayData* ad, const ArrayData* elems, bool copy) {
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
     CVarRef value = it.secondRef();
-    TypedValue* tv;
-    if (key.asTypedValue()->m_type == KindOfInt64) {
-      auto k = key.toInt64();
-      auto ei = a->findForInsert(k);
-      if (validPos(*ei)) continue;
-      auto& e = a->newElm(ei, k);
-      e.setIntKey(k);
-      if (k >= a->m_nextKI) a->m_nextKI = k + 1;
-      tv = &e.data;
-    } else {
-      auto k = key.getStringData();
-      strhash_t h = k->hash();
-      auto ei = a->findForInsert(k, h);
-      if (validPos(*ei)) continue;
-      auto& e = a->newElm(ei, h);
-      e.setStrKey(k, h);
-      tv = &e.data;
+    auto tv = key.asTypedValue();
+    auto p = tv->m_type == KindOfInt64 ? a->insert(tv->m_data.num) :
+             a->insert(tv->m_data.pstr);
+    if (!p.found) {
+      a->initWithRef(p.tv, value);
     }
-    a->initWithRef(*tv, value);
   }
   return a;
 }
@@ -1849,7 +1791,7 @@ ArrayData* HphpArray::Merge(ArrayData* ad, const ArrayData* elems, bool copy) {
     } else {
       Variant *p;
       StringData *sd = key.getStringData();
-      a->addLvalImpl(sd, sd->hash(), p);
+      a->addLvalImpl(sd, p);
       p->setWithRef(value);
     }
   }

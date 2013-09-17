@@ -377,6 +377,14 @@ private:
   int32_t* findForInsert(int64_t ki) const;
   int32_t* findForInsert(const StringData* k, strhash_t prehash) const;
 
+  struct InsertPos {
+    InsertPos(bool found, TypedValue& tv) : found(found), tv(tv) {}
+    bool found;
+    TypedValue& tv;
+  };
+  InsertPos insert(int64_t k);
+  InsertPos insert(StringData* k);
+
   template <class Hit, class Remove>
   ssize_t findForRemoveImpl(size_t h0, Hit, Remove) const;
   ssize_t findForRemove(int64_t ki, bool updateNext);
@@ -397,18 +405,13 @@ private:
   HphpArray* nextInsertPacked(CVarRef data);
   ArrayData* nextInsertRef(CVarRef data);
   ArrayData* nextInsertWithRef(CVarRef data);
-  ArrayData* addLvalImpl(int64_t ki, Variant*& ret);
-  ArrayData* addLvalImpl(StringData* key, strhash_t h, Variant*& ret);
   ArrayData* addVal(int64_t ki, CVarRef data);
   ArrayData* addVal(StringData* key, CVarRef data);
 
-  ArrayData* update(int64_t ki, CVarRef data);
-  ArrayData* update(StringData* key, CVarRef data);
-  ArrayData* updateRef(int64_t ki, CVarRef data);
-  ArrayData* updateRef(StringData* key, CVarRef data);
-
-  void zSetImpl(int64_t ki, RefData* data);
-  void zSetImpl(StringData* key, RefData* data);
+  template <class K> ArrayData* addLvalImpl(K k, Variant*& ret);
+  template <class K> ArrayData* update(K k, CVarRef data);
+  template <class K> ArrayData* updateRef(K k, CVarRef data);
+  template <class K> void zSetImpl(K k, RefData* data);
   void zAppendImpl(RefData* data);
 
   void adjustFullPos(ssize_t pos);

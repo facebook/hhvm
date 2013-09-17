@@ -278,6 +278,30 @@ struct MemoryManager : boost::noncopyable {
     }
   }
 
+  /**
+   * How much memory this thread has allocated.
+   */
+  int64_t getAllocated() const {
+#ifdef USE_JEMALLOC
+    assert(m_allocated);
+    return *m_allocated;
+#else
+    return 0;
+#endif
+  }
+
+  /**
+   * How much memory this thread has freed.
+   */
+  int64_t getDeallocated() const {
+#ifdef USE_JEMALLOC
+    assert(m_deallocated);
+    return *m_deallocated;
+#else
+    return 0;
+#endif
+  }
+
   struct MaskAlloc {
     explicit MaskAlloc(MemoryManager* mm) : m_mm(mm) {
       // capture all mallocs prior to construction

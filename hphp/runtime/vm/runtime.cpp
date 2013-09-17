@@ -308,26 +308,6 @@ Unit* compile_string(const char* s, size_t sz, const char* fname) {
   return g_hphp_compiler_parse(s, sz, md5, fname);
 }
 
-// Returned array has refcount one! Caller must not incref.
-HphpArray* pack_args_into_array(ActRec* ar, int nargs) {
-  HphpArray* argArray = HphpArray::MakeReserve(nargs);
-  for (int i = 0; i < nargs; ++i) {
-    TypedValue* tv = (TypedValue*)(ar) - (i+1);
-    // TODO(#2887942): unchecked appendWithRef
-    argArray->HphpArray::appendWithRef(tvAsCVarRef(tv), false);
-  }
-  if (!ar->hasInvName()) {
-    // If this is not a magic call, we're done
-    return argArray;
-  }
-  // This is a magic call, so we need to shuffle the args
-  HphpArray* magicArgs = HphpArray::MakeReserve(2);
-  // TODO(#2887942): unchecked append calls.
-  magicArgs->append(ar->getInvName(), false);
-  magicArgs->append(argArray, false);
-  return magicArgs;
-}
-
 HphpArray* get_static_locals(const ActRec* ar) {
   if (ar->m_func->isClosureBody()) {
     TypedValue* closureLoc = frame_local(ar, ar->m_func->numParams());

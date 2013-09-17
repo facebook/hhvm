@@ -1329,25 +1329,38 @@ Array VMExecutionContext::getLocalDefinedVariables(int frame) {
   return ret.toArray();
 }
 
+static Array pack_magic_args(ActRec* ar, int nargs) {
+  PackedArrayInit argInit(nargs);
+  for (int i = 0; i < nargs; ++i) {
+    TypedValue* tv = (TypedValue*)(ar) - (i+1);
+    argInit.append(tvAsCVarRef(tv));
+  }
+  return argInit.toArray();
+}
+
 void VMExecutionContext::shuffleMagicArgs(ActRec* ar) {
   // We need to put this where the first argument is
   StringData* invName = ar->getInvName();
   int nargs = ar->numArgs();
   ar->setVarEnv(nullptr);
   assert(!ar->hasVarEnv() && !ar->hasInvName());
-  // We need to make an array containing all the arguments passed by the
-  // caller and put it where the second argument is
-  ArrayData* argArray = pack_args_into_array(ar, nargs);
+
+  // We need to make an array containing all the arguments passed by
+  // the caller and put it where the second argument is.
+  Array argArray = pack_magic_args(ar, nargs);
+
   // Remove the arguments from the stack
   for (int i = 0; i < nargs; ++i) {
     m_stack.popC();
   }
+
   // Move invName to where the first argument belongs, no need
   // to incRef/decRef since we are transferring ownership
   m_stack.pushStringNoRc(invName);
+
   // Move argArray to where the second argument belongs. We've already
   // incReffed the array above so we don't need to do it here.
-  m_stack.pushArrayNoRc(argArray);
+  m_stack.pushArrayNoRc(argArray.detach());
 
   ar->setNumArgs(2);
 }

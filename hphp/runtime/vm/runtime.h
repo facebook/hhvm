@@ -183,8 +183,6 @@ Unit* build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
 Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
                                   ssize_t numBuiltinClasses);
 
-HphpArray* pack_args_into_array(ActRec* ar, int nargs);
-
 inline ObjectData*
 newInstance(Class* cls) {
   assert(cls);

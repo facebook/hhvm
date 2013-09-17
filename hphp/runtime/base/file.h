@@ -122,6 +122,8 @@ public:
   virtual const char *getStreamType() const { return "";}
   virtual StreamContext *getStreamContext() { return m_stream_context; }
 
+  int64_t bufferedLen() { return m_writepos - m_readpos; }
+
   std::string getMode() { return m_mode; }
 
   /**

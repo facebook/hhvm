@@ -38,10 +38,6 @@ if (LIBINOTIFY_INCLUDE_DIR)
 	include_directories(${LIBINOTIFY_INCLUDE_DIR})
 endif()
 
-# unwind checks
-find_package(Libunwind REQUIRED)
-include_directories(${LIBUNWIND_INCLUDE_DIR})
-
 # iconv checks
 find_package(Libiconv REQUIRED)
 include_directories(${LIBICONV_INCLUDE_DIR})
@@ -142,9 +138,6 @@ if (ICU_FOUND)
 	endif ()
 	include_directories(${ICU_INCLUDE_DIRS})
 endif (ICU_FOUND)
-
-# (google heap OR cpu profiler) AND libunwind 
-FIND_LIBRARY(UNWIND_LIB unwind)
 
 # jemalloc/tmalloc and profiler
 if (USE_GOOGLE_HEAP_PROFILER OR USE_GOOGLE_CPU_PROFILER)
@@ -360,7 +353,6 @@ macro(hphp_link target)
 	endif()
 
 	target_link_libraries(${target} ${Boost_LIBRARIES})
-	target_link_libraries(${target} ${LIBUNWIND_LIBRARY})
 	target_link_libraries(${target} ${MYSQL_CLIENT_LIBS})
 	target_link_libraries(${target} ${PCRE_LIBRARY})
 	target_link_libraries(${target} ${ICU_DATA_LIBRARIES} ${ICU_I18N_LIBRARIES} ${ICU_LIBRARIES})

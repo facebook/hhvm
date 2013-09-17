@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 
-#include <libunwind.h>
 #include <vector>
 #include <memory>
 #include <cxxabi.h>

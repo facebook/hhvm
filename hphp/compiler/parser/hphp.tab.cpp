@@ -639,7 +639,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 
 
 /* Line 189 of yacc.c  */
-#line 643 "new_hphp.tab.cpp"
+#line 643 "hphp.tab.cpp"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -849,7 +849,7 @@ typedef struct YYLTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 853 "new_hphp.tab.cpp"
+#line 853 "hphp.tab.cpp"
 
 #ifdef short
 # undef short
@@ -5298,10 +5298,11 @@ YYLTYPE yylloc;
 	yytype_int16 *yyss1 = yyss;
 	struct yyalloc *yyptr =
 	  (struct yyalloc *) YYSTACK_ALLOC (YYSTACK_BYTES (yystacksize));
+      memset(yyptr, 0, YYSTACK_BYTES (yystacksize));
 	if (! yyptr)
 	  goto yyexhaustedlab;
 	YYSTACK_RELOCATE (yyss_alloc, yyss);
-	YYSTACK_RELOCATE (yyvs_alloc, yyvs);
+	YYSTACK_RELOCATE_RESET (yyvs_alloc, yyvs);
 	YYSTACK_RELOCATE (yyls_alloc, yyls);
 #  undef YYSTACK_RELOCATE
 	if (yyss1 != yyssa)
@@ -6263,9 +6264,9 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 1007 "hphp.y"
-    { Token t_ext, t_imp;
-                                         t_ext.reset(); t_imp.reset();
-                                         _p->onClass((yyval),T_TRAIT,(yyvsp[(2) - (7)]),t_ext,t_imp,
+    { Token t_ext;
+                                         t_ext.reset(); 
+                                         _p->onClass((yyval),T_TRAIT,(yyvsp[(2) - (7)]),t_ext,(yyvsp[(4) - (7)]),
                                                      (yyvsp[(6) - (7)]), 0);
                                          _p->popClass();
                                          _p->popTypeScope();;}
@@ -6283,9 +6284,9 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 1018 "hphp.y"
-    { Token t_ext, t_imp;
-                                         t_ext.reset(); t_imp.reset();
-                                         _p->onClass((yyval),T_TRAIT,(yyvsp[(3) - (8)]),t_ext,t_imp,
+    { Token t_ext;
+                                         t_ext.reset(); 
+                                         _p->onClass((yyval),T_TRAIT,(yyvsp[(3) - (8)]),t_ext,(yyvsp[(5) - (8)]),
                                                      (yyvsp[(7) - (8)]), &(yyvsp[(1) - (8)]));
                                          _p->popClass();
                                          _p->popTypeScope();;}
@@ -10833,7 +10834,7 @@ yyreduce:
 
 
 /* Line 1455 of yacc.c  */
-#line 10837 "new_hphp.tab.cpp"
+#line 10837 "hphp.tab.cpp"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -11040,6 +11041,7 @@ yyreturn:
 #ifndef yyoverflow
   if (yyss != yyssa)
     YYSTACK_FREE (yyss);
+  YYSTACK_CLEANUP;
 #endif
 #if YYERROR_VERBOSE
   if (yymsg != yymsgbuf)

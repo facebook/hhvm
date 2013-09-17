@@ -1948,6 +1948,24 @@ void Class::checkInterfaceMethods() {
   }
 }
 
+/*
+ * Look up the interfaces implemented by traits used by the class, and add them
+ * to the provided builder.
+ */
+void Class::addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const {
+
+  for (auto const& trait : m_usedTraits) {
+    int numIfcs = trait->m_interfaces.size();
+
+    for (int i = 0; i < numIfcs; i++) {
+      Class* interface = trait->m_interfaces[i];
+      if (builder.find(interface->name()) == builder.end()) {
+        builder.add(interface->name(), interface);
+      }
+    }
+  }
+}
+
 void Class::setInterfaces() {
   InterfaceMap::Builder interfacesBuilder;
   if (m_parent.get() != nullptr) {
@@ -1982,6 +2000,9 @@ void Class::setInterfaces() {
       }
     }
   }
+
+  addInterfacesFromUsedTraits(interfacesBuilder);
+
   m_interfaces.create(interfacesBuilder);
   checkInterfaceMethods();
 }

@@ -62,9 +62,11 @@ public: // ObjectData overrides
 public:
   ObjectData* getThisOrClass() { return m_thisOrClass; }
   const Func* getInvokeFunc() { return m_func; }
-  HphpArray* getStaticLocals();
   TypedValue* getUseVars() { return propVec(); }
-  int getNumUseVars() { return m_cls->numDeclProperties(); }
+  TypedValue* getStaticVar(Slot s) { return propVec() + s; }
+  int32_t getNumUseVars() const {
+    return m_cls->numDeclProperties() - m_func->numStaticLocals();
+  }
 
   static size_t funcOffset() { return offsetof(c_Closure, m_func); }
   static size_t ctxOffset() { return offsetof(c_Closure, m_thisOrClass); }
@@ -74,7 +76,6 @@ public:
 private:
   ObjectData* m_thisOrClass;
   const Func* m_func;
-  SmartPtr<HphpArray> m_VMStatics;
 };
 
 }

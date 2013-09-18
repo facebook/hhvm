@@ -54,33 +54,31 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   Class* scope = ar->m_func->cls();
   m_func = invokeFunc->cloneAndSetClass(scope);
 
-  // copy the props to instance variables
-  assert(m_cls->numDeclProperties() == numArgs);
+  /*
+   * Copy the use vars to instance variables, and initialize any
+   * instance properties that are for static locals to KindOfUninit.
+   */
+  auto const numDeclProperties = m_cls->numDeclProperties();
+  assert(numDeclProperties - numArgs == m_func->numStaticLocals());
   TypedValue* beforeCurUseVar = sp + numArgs;
   TypedValue* curProperty = propVec();
-  for (int i = 0; i < numArgs; i++) {
+  int i = 0;
+  assert(numArgs <= numDeclProperties);
+  for (; i < numArgs; i++) {
     // teleport the references in here so we don't incref
     tvCopy(*--beforeCurUseVar, *curProperty++);
+  }
+  for (; i < numDeclProperties; ++i) {
+    tvWriteUninit(curProperty++);
   }
 }
 
 c_Closure* c_Closure::Clone(ObjectData* obj) {
   auto thiz = static_cast<c_Closure*>(obj);
   auto closure = static_cast<c_Closure*>(obj->cloneImpl());
-  closure->m_VMStatics = thiz->m_VMStatics;
   closure->m_thisOrClass = thiz->m_thisOrClass;
   closure->m_func = thiz->m_func;
   return closure;
-}
-
-HphpArray* c_Closure::getStaticLocals() {
-  if (m_VMStatics.get() == NULL) {
-    m_VMStatics = SmartPtr<HphpArray>(
-      HphpArray::MakeReserve(1),
-      SmartPtr<HphpArray>::NoIncRef{}
-    );
-  }
-  return m_VMStatics.get();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

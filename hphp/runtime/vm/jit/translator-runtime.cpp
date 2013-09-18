@@ -26,20 +26,24 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+const StaticString s_staticPrefix("86static_");
+
 // Defined here so it can be inlined below.
-RefData* lookupStaticFromArray(HphpArray* map,
-                               StringData* name,
-                               bool& inited) {
-  TypedValue* val = map->nvGet(name);
-  if (val == nullptr) {
-    TypedValue tv;
-    tvWriteUninit(&tv);
-    // TODO(#2887942): need write barrier
-    map->setRef(name, tvAsCVarRef(&tv), false);
+RefData* lookupStaticFromClosure(ObjectData* closure,
+                                 StringData* name,
+                                 bool& inited) {
+  assert(closure->instanceof(c_Closure::classof()));
+  String str(StringData::Make(s_staticPrefix->slice(), name->slice()));
+  auto const cls = closure->getVMClass();
+  auto const slot = cls->lookupDeclProp(str.get());
+  assert(slot != kInvalidSlot);
+  auto const val = static_cast<c_Closure*>(closure)->getStaticVar(slot);
+
+  if (val->m_type == KindOfUninit) {
     inited = false;
-    assert(tv.m_data.pref->getCount() == 2);
-    tv.m_data.pref->decRefCount();
-    return tv.m_data.pref;
+    val->m_type = KindOfNull;
+    tvBox(val);
+    return val->m_data.pref;
   }
   inited = true;
   assert(val->m_type == KindOfRef);
@@ -289,31 +293,28 @@ void VerifyParamTypeSlow(const Class* cls,
   VerifyParamTypeFail(param);
 }
 
-RefData* staticLocInit(StringData* name, ActRec* fp, TypedValue val) {
+HOT_FUNC_VM
+bool instanceOfHelper(const Class* objClass,
+                      const Class* testClass) {
+  return testClass && objClass->classof(testClass);
+}
+
+RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val) {
   auto const func = fp->m_func;
-  auto const map = [&]{
-    auto const closureLoc =
-      LIKELY(func->isClosureBody())
-        ? frame_local(fp, func->numParams())
-        : frame_local(fp, frame_continuation(fp)->m_origFunc->numParams());
-    assert(closureLoc->m_data.pobj->instanceof(c_Closure::classof()));
-    return static_cast<c_Closure*>(closureLoc->m_data.pobj)->
-      getStaticLocals();
-  }();
+  assert(func->isClosureBody() || func->isGeneratorFromClosure());
+  auto const closureLoc =
+    LIKELY(func->isClosureBody())
+      ? frame_local(fp, func->numParams())
+      : frame_local(fp, frame_continuation(fp)->m_origFunc->numParams());
 
   bool inited;
-  auto const refData = lookupStaticFromArray(map, name, inited);
+  auto const refData = lookupStaticFromClosure(
+    closureLoc->m_data.pobj, name, inited);
   if (!inited) {
     cellCopy(val, *refData->tv());
   }
   refData->incRefCount();
   return refData;
-}
-
-HOT_FUNC_VM
-bool instanceOfHelper(const Class* objClass,
-                      const Class* testClass) {
-  return testClass && objClass->classof(testClass);
 }
 
 //////////////////////////////////////////////////////////////////////

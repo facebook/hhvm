@@ -193,9 +193,9 @@ newInstance(Class* cls) {
 }
 
 // Returns a RefData* that is already incref'd.
-RefData* lookupStaticFromArray(HphpArray* map,
-                               StringData* name,
-                               bool& inited);
+RefData* lookupStaticFromClosure(ObjectData* closure,
+                                 StringData* name,
+                                 bool& inited);
 
 /*
  * A few functions are exposed by libhphp_analysis and used in

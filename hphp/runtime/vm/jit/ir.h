@@ -428,7 +428,7 @@ O(IterCopy,                         ND, S(FramePtr) S(Int)                    \
                                         S(PtrToGen) S(Int),            E|Mem) \
 O(LdStaticLocCached,      D(BoxedCell), NA,                               NF) \
 O(CheckStaticLocInit,               ND, S(BoxedCell),                     NF) \
-O(StaticLocInit,          D(BoxedCell), CStr                                  \
+O(ClosureStaticLocInit,   D(BoxedCell), CStr                                  \
                                           S(FramePtr)                         \
                                           S(Cell),               PRc|E|N|Mem) \
 O(StaticLocInitCached,              ND, S(BoxedCell) S(Cell),              E) \

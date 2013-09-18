@@ -531,7 +531,8 @@ private:
   std::deque<PostponedNonScalars> m_postponedCinits;
   std::deque<PostponedClosureCtor> m_postponedClosureCtors;
   PendingIterVec m_pendingIters;
-  hphp_hash_set<std::string> m_generatorEmitted;
+  hphp_hash_map<std::string,FuncEmitter*> m_generatorEmitted;
+  hphp_hash_set<std::string> m_nonTopGeneratorEmitted;
   hphp_hash_set<std::string> m_topMethodEmitted;
   SymbolicStack m_evalStack;
   bool m_evalStackIsUnknown;
@@ -641,7 +642,7 @@ public:
                              bool builtin = false);
   void emitMethodPrologue(Emitter& e, MethodStatementPtr meth);
   void emitMethod(MethodStatementPtr meth);
-  FuncEmitter* createFuncEmitterForGeneratorBody(
+  std::pair<FuncEmitter*,bool> createFuncEmitterForGeneratorBody(
                  MethodStatementPtr meth,
                  FuncEmitter* fe,
                  vector<FuncEmitter*>& top_fes);

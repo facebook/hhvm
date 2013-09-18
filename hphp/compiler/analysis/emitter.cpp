@@ -2553,8 +2553,14 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             // with its own file.
             return false;
           }
-          if (!m_generatorEmitted.insert(m->getOriginalName()).second) {
-            // its possible to see the same generator more than once
+
+          /*
+           * Hack: when a generator is declared at non-top level, we
+           * currently just take whatever the first one we saw was.
+           *
+           * FIXME/TODO(#2906383).
+           */
+          if (!m_nonTopGeneratorEmitted.insert(m->getOriginalName()).second) {
             return false;
           }
 
@@ -3943,7 +3949,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(),
                   AttrUnique | AttrPersistent, parentName, nullptr);
 
-        // Instance properties.
+        // Instance properties---one for each use var, and one for
+        // each static local.
         TypedValue uninit;
         tvWriteUninit(&uninit);
         for (auto& useVar : useVars) {
@@ -5564,8 +5571,10 @@ void EmitterVisitor::emitPostponedMeths() {
       emitGeneratorCreate(meth);
 
       // emit the generator body
-      m_curFunc = createFuncEmitterForGeneratorBody(meth, fe, top_fes);
-      if (m_curFunc) {
+      bool needsEmit;
+      std::tie(m_curFunc, needsEmit) =
+        createFuncEmitterForGeneratorBody(meth, fe, top_fes);
+      if (needsEmit) {
         emitMethodMetadata(meth, p.m_closureUseVars, m_curFunc->top());
         emitGeneratorBody(meth);
       }
@@ -5578,8 +5587,10 @@ void EmitterVisitor::emitPostponedMeths() {
       emitAsyncMethod(meth);
 
       // emit the generator body
-      m_curFunc = createFuncEmitterForGeneratorBody(meth, fe, top_fes);
-      if (m_curFunc) {
+      bool needsEmit;
+      std::tie(m_curFunc, needsEmit) =
+        createFuncEmitterForGeneratorBody(meth, fe, top_fes);
+      if (needsEmit) {
         m_curFunc->setIsAsync(true);
         emitMethodMetadata(meth, p.m_closureUseVars, m_curFunc->top());
         emitGeneratorBody(meth);
@@ -5591,6 +5602,26 @@ void EmitterVisitor::emitPostponedMeths() {
       } else {
         emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
         emitMethod(meth);
+      }
+    }
+
+    if (fe->isClosureBody()) {
+      TypedValue uninit;
+      tvWriteUninit(&uninit);
+      for (auto& sv : m_curFunc->svInfo()) {
+        auto const str = makeStaticString(
+          folly::format("86static_{}", sv.name->data()).str());
+        fe->pce()->addProperty(str, AttrPrivate, nullptr, nullptr,
+                               &uninit, KindOfInvalid);
+        if (m_curFunc != fe) {
+          // In the case of a generator (these func emitters will be
+          // different), we need to propagate the information about
+          // static locals from the generator implementation function
+          // to the generator creation function.  (This is necessary
+          // for the runtime to know how many of the properties on a
+          // closure are for static locals vs. use vars.)
+          fe->addStaticVar(sv);
+        }
       }
     }
 
@@ -5936,7 +5967,8 @@ void EmitterVisitor::emitCreateStaticWaitHandle(Emitter& e, std::string cls,
   emitConvertToCell(e);
 }
 
-FuncEmitter* EmitterVisitor::createFuncEmitterForGeneratorBody(
+std::pair<FuncEmitter*,bool>
+EmitterVisitor::createFuncEmitterForGeneratorBody(
                                MethodStatementPtr meth,
                                FuncEmitter* fe,
                                vector<FuncEmitter*>& top_fes) {
@@ -5948,17 +5980,21 @@ FuncEmitter* EmitterVisitor::createFuncEmitterForGeneratorBody(
     bool UNUSED added = fe->pce()->addMethod(genFe);
     assert(added);
   } else {
-    if (!m_generatorEmitted.insert(genName).second){
-      // generator body already emitted
-      return nullptr;
+    auto it = m_generatorEmitted.find(genName);
+    if (it != end(m_generatorEmitted)) {
+      // Generator body already emitted.  This can happen because in
+      // traits, we emit only a single generator body, but one
+      // generator creator function per use of the trait.
+      return std::make_pair(it->second, false);
     }
     genFe = new FuncEmitter(m_ue, -1, -1, makeStaticString(genName));
+    m_generatorEmitted[genName] = genFe;
     top_fes.push_back(genFe);
     genFe->setTop(true);
   }
   genFe->setIsGeneratorFromClosure(fe->isClosureBody());
   genFe->setIsGenerator(true);
-  return genFe;
+  return std::make_pair(genFe, true);
 }
 
 void EmitterVisitor::emitGeneratorCreate(MethodStatementPtr meth) {

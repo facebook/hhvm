@@ -1533,11 +1533,12 @@ RaiseWarning S0:Str
 
   Raises a warning with the text in S0 as its message.
 
-D:BoxedCell = StaticLocInit S0:ConstStr S1:FramePtr S2:Cell
+D:BoxedCell = ClosureStaticLocInit S0:ConstStr S1:FramePtr S2:Cell
 
-  Get boxed value to initialize static local named S0 in frame S1. If
-  the static local has not yet been initialized, its value will be set
-  to S2. The returned value is not stored in the frame S1.
+  Get boxed value to initialize static local named S0 in frame S1,
+  where S1 must be either a closure or generatorFromClosure function.
+  If the static local has not yet been initialized, its value will be
+  set to S2.
 
 StaticLocInitCached S0:BoxedCell S1:Cell
 

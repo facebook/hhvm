@@ -609,6 +609,7 @@ public:
 
   void setMaxStackCells(int cells) { m_maxStackCells = cells; }
   void addStaticVar(Func::SVInfo svInfo);
+  const SVInfoVec& svInfo() const { return m_staticVars; }
 
   UnitEmitter& ue() const { return m_ue; }
   PreClassEmitter* pce() const { return m_pce; }

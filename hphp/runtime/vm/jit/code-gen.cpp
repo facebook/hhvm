@@ -298,7 +298,7 @@ CALL_OPCODE(RaiseUndefProp)
 CALL_OPCODE(RaiseError)
 CALL_OPCODE(RaiseWarning)
 CALL_OPCODE(IncStatGrouped)
-CALL_OPCODE(StaticLocInit)
+CALL_OPCODE(ClosureStaticLocInit)
 CALL_OPCODE(ArrayIdx)
 CALL_OPCODE(LdGblAddrDef)
 

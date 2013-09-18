@@ -6357,42 +6357,22 @@ OPTBLD_INLINE void VMExecutionContext::iopInitThisLoc(PC& pc) {
   }
 }
 
-static RefData* lookupStaticInClosure(StringData* name,
-                                      const ActRec* fp,
-                                      bool& inited,
-                                      const Func* func) {
-  auto const closureLoc = frame_local(fp, func->numParams());
-  assert(closureLoc->m_data.pobj->instanceof(c_Closure::classof()));
-  return lookupStaticFromArray(
-    static_cast<c_Closure*>(closureLoc->m_data.pobj)->getStaticLocals(),
-    name,
-    inited
-  );
-}
-
-static RefData* lookupStaticInGeneratorFromClosure(StringData* name,
-                                                   const ActRec* fp,
-                                                   bool& inited) {
-  auto const cont = frame_continuation(fp);
-  auto const closureLoc = frame_local(fp, cont->m_origFunc->numParams());
-  assert(closureLoc->m_data.pobj->instanceof(c_Closure::classof()));
-  return lookupStaticFromArray(
-    static_cast<c_Closure*>(closureLoc->m_data.pobj)->getStaticLocals(),
-    name,
-    inited
-  );
-}
-
 static inline RefData* lookupStatic(StringData* name,
                                     const ActRec* fp,
                                     bool& inited) {
   auto const func = fp->m_func;
 
   if (UNLIKELY(func->isClosureBody())) {
-    return lookupStaticInClosure(name, fp, inited, func);
+    return lookupStaticFromClosure(
+      frame_local(fp, func->numParams())->m_data.pobj, name, inited);
   }
   if (UNLIKELY(func->isGeneratorFromClosure())) {
-    return lookupStaticInGeneratorFromClosure(name, fp, inited);
+    auto const cont = frame_continuation(fp);
+    return lookupStaticFromClosure(
+      frame_local(fp, cont->m_origFunc->numParams())->m_data.pobj,
+      name,
+      inited
+    );
   }
 
   auto const handle = TargetCache::allocStaticLocal(func, name);

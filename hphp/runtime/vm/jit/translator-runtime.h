@@ -111,7 +111,7 @@ int64_t switchDoubleHelper(int64_t val, int64_t base, int64_t nTargets);
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets);
 int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets);
 
-RefData* staticLocInit(StringData* name, ActRec* fp, TypedValue val);
+RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val);
 
 bool instanceOfHelper(const Class* objClass, const Class* testClass);
 

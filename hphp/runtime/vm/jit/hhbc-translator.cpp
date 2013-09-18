@@ -941,7 +941,7 @@ void HhbcTranslator::emitStaticLocInit(uint32_t locId, uint32_t litStrId) {
   // source location" rule that the inline fastpath requires
   auto const box = [&]{
     if (curFunc()->isClosureBody() || curFunc()->isGeneratorFromClosure()) {
-      return gen(StaticLocInit, cns(name), m_tb->fp(), value);
+      return gen(ClosureStaticLocInit, cns(name), m_tb->fp(), value);
     }
 
     auto const cachedBox =
@@ -968,7 +968,7 @@ void HhbcTranslator::emitStaticLoc(uint32_t locId, uint32_t litStrId) {
 
   if (curFunc()->isClosureBody() || curFunc()->isGeneratorFromClosure()) {
     auto const box = gen(
-      StaticLocInit, cns(name), m_tb->fp(), m_tb->genDefNull()
+      ClosureStaticLocInit, cns(name), m_tb->fp(), m_tb->genDefNull()
     );
     gen(StLoc, LocalId(locId), m_tb->fp(), gen(IncRef, box));
     push(cns(true));
@@ -2194,12 +2194,30 @@ void HhbcTranslator::emitCreateCl(int32_t numParams, int32_t funNameStrId) {
   for (int32_t i = 0; i < numParams; ++i) {
     args[numParams - i - 1] = popF();
   }
-  for (int32_t i = 0; i < numParams; ++i) {
+
+  int32_t propId = 0;
+  for (; propId < numParams; ++propId) {
     gen(
       StClosureArg,
-      PropByteOffset(cls->declPropOffset(i)),
+      PropByteOffset(cls->declPropOffset(propId)),
       closure,
-      args[i]
+      args[propId]
+    );
+  }
+
+  // Closure static variables are per instance, and need to start
+  // uninitialized.  After numParams use vars, the remaining instance
+  // properties hold any static locals.
+  assert(cls->numDeclProperties() ==
+      clonedFunc->numStaticLocals() + numParams);
+  for (int32_t numDeclProperties = cls->numDeclProperties();
+      propId < numDeclProperties;
+      ++propId) {
+    gen(
+      StClosureArg,
+      PropByteOffset(cls->declPropOffset(propId)),
+      closure,
+      m_tb->genDefUninit()
     );
   }
 

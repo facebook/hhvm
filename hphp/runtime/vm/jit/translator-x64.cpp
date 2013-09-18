@@ -1080,7 +1080,10 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
 
   int numLocals = numParams;
   if (func->isClosureBody()) {
-    int numUseVars = func->cls()->numDeclProperties();
+    // Closure object properties are the use vars followed by the
+    // static locals (which are per-instance).
+    int numUseVars = func->cls()->numDeclProperties() -
+                     func->numStaticLocals();
 
     emitLea(a, rVmFp[-cellsToBytes(numParams)], rVmSp);
 

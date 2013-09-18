@@ -327,6 +327,7 @@ private:
   Array m_map;
   String m_map_root;
   Array m_handlers;
+  Array m_loading;
   bool m_running;
 };
 

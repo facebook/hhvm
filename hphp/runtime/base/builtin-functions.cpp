@@ -1139,20 +1139,32 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
       if (res != Failure) return res == Success;
     }
   }
+  if (m_loading.valueExists(className))
+    return false;
+  else
+    m_loading.append(className);
+
   Array params = PackedArrayInit(1).add(className).toArray();
   bool l_running = m_running;
+  String l_className;
   m_running = true;
   if (m_handlers.isNull() && !forceSplStack) {
     if (function_exists(s___autoload)) {
       invoke(s___autoload, params, -1, true, false);
       m_running = l_running;
+      l_className = m_loading.pop();
+      assert(l_className == className);
       return true;
     }
     m_running = l_running;
+    l_className = m_loading.pop();
+    assert(l_className == className);
     return false;
   }
   if (m_handlers.isNull() || m_handlers->empty()) {
     m_running = l_running;
+    l_className = m_loading.pop();
+    assert(l_className == className);
     return false;
   }
   Object autoloadException;
@@ -1179,6 +1191,8 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
     }
   }
   m_running = l_running;
+  l_className = m_loading.pop();
+  assert(l_className == className);
   if (!autoloadException.isNull()) {
     throw autoloadException;
   }

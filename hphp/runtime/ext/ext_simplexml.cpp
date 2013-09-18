@@ -369,7 +369,7 @@ c_SimpleXMLElement* c_SimpleXMLElement::Clone(ObjectData* obj) {
   auto thiz = static_cast<c_SimpleXMLElement*>(obj);
   c_SimpleXMLElement *node =
     static_cast<c_SimpleXMLElement*>(obj->cloneImpl());
-  node->m_root = thiz->m_root;
+  node->m_root = node;
   node->m_doc = thiz->m_doc;
   node->m_node = thiz->m_node;
   node->m_is_text = thiz->m_is_text;
@@ -379,7 +379,7 @@ c_SimpleXMLElement* c_SimpleXMLElement::Clone(ObjectData* obj) {
   node->m_is_property = thiz->m_is_property;
   node->m_is_array = thiz->m_is_array;
   node->m_children =
-    create_children(thiz->m_root, thiz->m_doc, thiz->m_node, String(), false);
+    create_children(node->m_root, thiz->m_doc, thiz->m_node, String(), false);
   node->m_attributes = collect_attributes(thiz->m_node, String(), false);
   return node;
 }

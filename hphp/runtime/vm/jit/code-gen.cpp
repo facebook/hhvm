@@ -54,6 +54,7 @@
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/ir-trace.h"
 #include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/code-gen-arm.h"
 
 using HPHP::Transl::TCA;
 using namespace HPHP::Transl::TargetCache;
@@ -157,6 +158,16 @@ ArgDesc::ArgDesc(SSATmp* tmp, const RegisterInfo& info, bool val)
   m_kind = Kind::Imm;
 }
 
+//////////////////////////////////////////////////////////////////////
+
+void AsmInfo::updateForInstruction(IRInstruction* inst, TCA start, TCA end) {
+  auto* block = inst->block();
+  instRanges[inst] = TcaRange(start, end);
+  asmRanges[block] = TcaRange(asmRanges[block].start(), end);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 const Func* CodeGenerator::curFunc() const {
   assert(m_curInst->marker().valid());
   return m_curInst->marker().func;
@@ -194,6 +205,8 @@ Address CodeGenerator::cgInst(IRInstruction* inst) {
   Opcode opc = inst->op();
   auto const start = m_as.frontier();
   m_rScratch = selectScratchReg(inst);
+  m_curInst = inst;
+  SCOPE_EXIT { m_curInst = nullptr; };
 
   switch (opc) {
 #define O(name, dsts, srcs, flags)                                \
@@ -2482,33 +2495,6 @@ void CodeGenerator::cgLdRetAddr(IRInstruction* inst) {
   auto fpReg = m_regs[inst->src(0)].reg(0);
   assert(fpReg != InvalidReg);
   m_as.push(fpReg[AROFF(m_savedRip)]);
-}
-
-void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
-  const Func* func = fp->m_func;
-  func->validate();
-  if (func->cls()) {
-    assert(!func->cls()->isZombie());
-  }
-  if (fp->hasVarEnv()) {
-    assert(fp->getVarEnv()->getCfp() == fp);
-  }
-  // TODO: validate this pointer from actrec
-  int numLocals = func->numLocals();
-  assert(sp <= (Cell*)fp - func->numSlotsInFrame()
-         || func->isGenerator());
-  if (checkLocals) {
-    int numParams = func->numParams();
-    for (int i=0; i < numLocals; i++) {
-      if (i >= numParams && func->isGenerator() && i < func->numNamedLocals()) {
-        continue;
-      }
-      assert(tvIsPlausible(*frame_local(fp, i)));
-    }
-  }
-  // We unfortunately can't do the same kind of check for the stack
-  // without knowing about FPI regions, because it may contain
-  // ActRecs.
 }
 
 void traceRet(ActRec* fp, Cell* sp, void* rip) {
@@ -5913,13 +5899,6 @@ void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
   emitAssertRefCount(m_as, m_regs[inst->src(0)].reg());
 }
 
-void traceCallback(ActRec* fp, Cell* sp, int64_t pcOff, void* rip) {
-  if (HPHP::Trace::moduleEnabled(HPHP::Trace::hhirTracelets)) {
-    FTRACE(0, "{} {} {}\n", fp->m_func->fullName()->data(), pcOff, rip);
-  }
-  checkFrame(fp, sp, /*checkLocals*/true);
-}
-
 void CodeGenerator::cgDbgAssertType(IRInstruction* inst) {
   emitTypeTest(inst->typeParam(),
                m_regs[inst->src(0)].reg(1),
@@ -5971,18 +5950,6 @@ void CodeGenerator::cgRBTrace(IRInstruction* inst) {
                SyncOptions::kNoSyncPoint, args);
 }
 
-static void emitTraceCall(CodeGenerator::Asm& as,
-                          int64_t pcOff,
-                          Transl::TranslatorX64* tx64) {
-  // call to a trace function
-  as.mov_imm64_reg((int64_t)as.frontier(), reg::rcx);
-  as.mov_reg64_reg64(rVmFp, reg::rdi);
-  as.mov_reg64_reg64(rVmSp, reg::rsi);
-  as.mov_imm64_reg(pcOff, reg::rdx);
-  // do the call; may use a trampoline
-  emitCall(as, (TCA)traceCallback);
-}
-
 void CodeGenerator::print() const {
   JIT::print(std::cout, m_unit,
              &m_state.regs, m_state.lifetime, m_state.asmInfo);
@@ -6017,13 +5984,10 @@ void CodeGenerator::cgBlock(Block* block, vector<TransBCMapping>* bcMap) {
                                       m_astubs.frontier()});
       prevMarker = inst->marker();
     }
-    m_curInst = inst;
-    auto nuller = folly::makeGuard([&]{ m_curInst = nullptr; });
+
     auto* addr = cgInst(inst);
     if (m_state.asmInfo && addr) {
-      m_state.asmInfo->instRanges[inst] = TcaRange(addr, m_as.frontier());
-      m_state.asmInfo->asmRanges[block] =
-        TcaRange(m_state.asmInfo->asmRanges[block].start(), m_as.frontier());
+      m_state.asmInfo->updateForInstruction(inst, addr, m_as.frontier());
     }
   }
 }
@@ -6096,12 +6060,18 @@ void genCode(CodeBlock& mainCode,
     IRInstruction* last = block->back();
     state.noTerminalJmp_ = last->op() == Jmp_ && nextBlock == last->taken();
 
-    CodeGenerator cg(unit, cb, stubsCode, tx64, state);
     if (state.asmInfo) {
       state.asmInfo->asmRanges[block] = TcaRange(aStart, cb.frontier());
     }
 
-    cg.cgBlock(block, bcMap);
+    if (RuntimeOption::EvalSimulateARM) {
+      ARM::CodeGenerator cg(unit, cb, stubsCode, tx64, state);
+      cg.cgBlock(block, bcMap);
+    } else {
+      CodeGenerator cg(unit, cb, stubsCode, tx64, state);
+      cg.cgBlock(block, bcMap);
+    }
+
     if (auto next = block->next()) {
       if (next != nextBlock) {
         // If there's a fallthrough block and it's not the next thing
@@ -6121,8 +6091,7 @@ void genCode(CodeBlock& mainCode,
   };
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    Asm as { mainCode };
-    emitTraceCall(as, unit.bcOff(), tx64);
+    emitTraceCall(mainCode, unit.bcOff());
   }
 
   auto const linfo = layoutBlocks(unit);

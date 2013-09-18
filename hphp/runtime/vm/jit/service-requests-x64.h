@@ -23,6 +23,25 @@
 namespace HPHP { namespace JIT { namespace X64 {
 
 typedef Transl::X64Assembler Asm;
+using Transl::TCA;
+
+/*
+ * emitServiceReqWork --
+ *
+ *   Call a translator service co-routine. The code emitted here
+ *   reenters the enterTC loop, invoking the requested service. Control
+ *   will be returned non-locally to the next logical instruction in
+ *   the TC.
+ *
+ *   Return value is a destination; we emit the bulky service
+ *   request code into astubs.
+ *
+ *   Returns a continuation that will run after the arguments have been
+ *   emitted. This is gross, but is a partial workaround for the inability
+ *   to capture argument packs in the version of gcc we're using.
+ */
+TCA emitServiceReqWork(Asm& as, TCA start, bool persist, SRFlags flags,
+                       ServiceRequest req, const ServiceReqArgVec& argInfo);
 
 void emitBindJcc(Asm& a, Asm& astubs, Transl::ConditionCode cc,
                  SrcKey dest, ServiceRequest req = REQ_BIND_JCC);

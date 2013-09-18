@@ -71,6 +71,8 @@ struct AsmInfo {
   StateVector<IRInstruction,TcaRange> instRanges;
   StateVector<Block,TcaRange> asmRanges;
   StateVector<Block,TcaRange> astubRanges;
+
+  void updateForInstruction(IRInstruction* inst, TCA start, TCA end);
 };
 
 typedef StateVector<IRInstruction, RegSet> LiveRegs;

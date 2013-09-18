@@ -435,6 +435,7 @@ public:
   F(uint32_t, PCRETableSize, kPCREInitialTableSize)                     \
   F(bool, EnableNuma, ServerExecutionMode())                            \
   F(bool, EnableNumaLocal, ServerExecutionMode())                       \
+  F(bool, SimulateARM,                 false)                           \
   /* */                                                                 \
 
 #define F(type, name, unused) \

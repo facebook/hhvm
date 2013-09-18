@@ -1,0 +1,588 @@
+/*
+   +----------------------------------------------------------------------+
+   | HipHop for PHP                                                       |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+*/
+
+#include "hphp/runtime/vm/jit/code-gen-arm.h"
+
+#include "hphp/runtime/vm/jit/abi-arm.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+
+namespace HPHP { namespace JIT { namespace ARM {
+
+TRACE_SET_MOD(hhir);
+
+using namespace vixl;
+
+//////////////////////////////////////////////////////////////////////
+
+#define NOOP_OPCODE(name) void CodeGenerator::cg##name(IRInstruction*) {}
+
+NOOP_OPCODE(DefConst)
+NOOP_OPCODE(DefFP)
+NOOP_OPCODE(DefSP)
+NOOP_OPCODE(AssertLoc)
+NOOP_OPCODE(OverrideLoc)
+NOOP_OPCODE(OverrideLocVal)
+NOOP_OPCODE(SmashLocals)
+NOOP_OPCODE(AssertStk)
+NOOP_OPCODE(AssertStkVal)
+NOOP_OPCODE(Nop)
+NOOP_OPCODE(DefLabel)
+NOOP_OPCODE(ExceptionBarrier)
+NOOP_OPCODE(InlineFPAnchor)
+
+// XXX
+NOOP_OPCODE(DbgAssertPtr);
+
+#undef NOOP_OPCODE
+
+//////////////////////////////////////////////////////////////////////
+
+void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
+            const Func* vmFunc) {
+  throw FailedCodeGen(file, line, func, bcOff, vmFunc);
+}
+
+#define PUNT_OPCODE(name)                                         \
+  void CodeGenerator::cg##name(IRInstruction* inst) {             \
+    cgPunt(__FILE__, __LINE__, #name, m_curInst->marker().bcOff,  \
+           curFunc());                                            \
+  }
+
+PUNT_OPCODE(CheckType)
+PUNT_OPCODE(AssertType)
+PUNT_OPCODE(CheckTypeMem)
+PUNT_OPCODE(GuardLoc)
+PUNT_OPCODE(GuardStk)
+PUNT_OPCODE(CheckStk)
+PUNT_OPCODE(CheckLoc)
+PUNT_OPCODE(CastStk)
+PUNT_OPCODE(CoerceStk)
+PUNT_OPCODE(CheckDefinedClsEq)
+PUNT_OPCODE(GuardRefs)
+PUNT_OPCODE(BeginCatch)
+PUNT_OPCODE(EndCatch)
+PUNT_OPCODE(LdUnwinderValue)
+PUNT_OPCODE(DeleteUnwinderException)
+PUNT_OPCODE(Add)
+PUNT_OPCODE(Sub)
+PUNT_OPCODE(Mul)
+PUNT_OPCODE(DivDbl)
+PUNT_OPCODE(Mod)
+PUNT_OPCODE(Sqrt)
+PUNT_OPCODE(AbsInt)
+PUNT_OPCODE(AbsDbl)
+PUNT_OPCODE(BitAnd)
+PUNT_OPCODE(BitOr)
+PUNT_OPCODE(BitXor)
+PUNT_OPCODE(BitNot)
+PUNT_OPCODE(LogicXor)
+PUNT_OPCODE(Not)
+PUNT_OPCODE(Shl)
+PUNT_OPCODE(Shr)
+PUNT_OPCODE(ConvBoolToArr)
+PUNT_OPCODE(ConvDblToArr)
+PUNT_OPCODE(ConvIntToArr)
+PUNT_OPCODE(ConvObjToArr)
+PUNT_OPCODE(ConvStrToArr)
+PUNT_OPCODE(ConvCellToArr)
+PUNT_OPCODE(ConvArrToBool)
+PUNT_OPCODE(ConvDblToBool)
+PUNT_OPCODE(ConvIntToBool)
+PUNT_OPCODE(ConvStrToBool)
+PUNT_OPCODE(ConvObjToBool)
+PUNT_OPCODE(ConvCellToBool)
+PUNT_OPCODE(ConvArrToDbl)
+PUNT_OPCODE(ConvBoolToDbl)
+PUNT_OPCODE(ConvIntToDbl)
+PUNT_OPCODE(ConvObjToDbl)
+PUNT_OPCODE(ConvStrToDbl)
+PUNT_OPCODE(ConvCellToDbl)
+PUNT_OPCODE(ConvArrToInt)
+PUNT_OPCODE(ConvBoolToInt)
+PUNT_OPCODE(ConvDblToInt)
+PUNT_OPCODE(ConvObjToInt)
+PUNT_OPCODE(ConvStrToInt)
+PUNT_OPCODE(ConvCellToInt)
+PUNT_OPCODE(ConvCellToObj)
+PUNT_OPCODE(ConvBoolToStr)
+PUNT_OPCODE(ConvDblToStr)
+PUNT_OPCODE(ConvIntToStr)
+PUNT_OPCODE(ConvObjToStr)
+PUNT_OPCODE(ConvResToStr)
+PUNT_OPCODE(ConvCellToStr)
+PUNT_OPCODE(ExtendsClass)
+PUNT_OPCODE(InstanceOf)
+PUNT_OPCODE(InstanceOfIface)
+PUNT_OPCODE(IsTypeMem)
+PUNT_OPCODE(IsNTypeMem)
+PUNT_OPCODE(Gt)
+PUNT_OPCODE(Gte)
+PUNT_OPCODE(Lt)
+PUNT_OPCODE(Lte)
+PUNT_OPCODE(Eq)
+PUNT_OPCODE(Neq)
+PUNT_OPCODE(Same)
+PUNT_OPCODE(NSame)
+PUNT_OPCODE(Floor)
+PUNT_OPCODE(Ceil)
+PUNT_OPCODE(InstanceOfBitmask)
+PUNT_OPCODE(NInstanceOfBitmask)
+PUNT_OPCODE(IsType)
+PUNT_OPCODE(IsNType)
+PUNT_OPCODE(JmpGt)
+PUNT_OPCODE(JmpGte)
+PUNT_OPCODE(JmpLt)
+PUNT_OPCODE(JmpLte)
+PUNT_OPCODE(JmpEq)
+PUNT_OPCODE(JmpNeq)
+PUNT_OPCODE(JmpSame)
+PUNT_OPCODE(JmpNSame)
+PUNT_OPCODE(JmpInstanceOfBitmask)
+PUNT_OPCODE(JmpNInstanceOfBitmask)
+PUNT_OPCODE(JmpIsType)
+PUNT_OPCODE(JmpIsNType)
+PUNT_OPCODE(JmpZero)
+PUNT_OPCODE(JmpNZero)
+PUNT_OPCODE(Jmp_)
+PUNT_OPCODE(ReqBindJmpGt)
+PUNT_OPCODE(ReqBindJmpGte)
+PUNT_OPCODE(ReqBindJmpLt)
+PUNT_OPCODE(ReqBindJmpLte)
+PUNT_OPCODE(ReqBindJmpEq)
+PUNT_OPCODE(ReqBindJmpNeq)
+PUNT_OPCODE(ReqBindJmpSame)
+PUNT_OPCODE(ReqBindJmpNSame)
+PUNT_OPCODE(ReqBindJmpInstanceOfBitmask)
+PUNT_OPCODE(ReqBindJmpNInstanceOfBitmask)
+PUNT_OPCODE(ReqBindJmpZero)
+PUNT_OPCODE(ReqBindJmpNZero)
+PUNT_OPCODE(SideExitGuardLoc)
+PUNT_OPCODE(SideExitGuardStk)
+PUNT_OPCODE(JmpIndirect)
+PUNT_OPCODE(CheckSurpriseFlags)
+PUNT_OPCODE(SurpriseHook)
+PUNT_OPCODE(FunctionExitSurpriseHook)
+PUNT_OPCODE(ExitOnVarEnv)
+PUNT_OPCODE(ReleaseVVOrExit)
+PUNT_OPCODE(RaiseError)
+PUNT_OPCODE(RaiseWarning)
+PUNT_OPCODE(CheckInit)
+PUNT_OPCODE(CheckInitMem)
+PUNT_OPCODE(CheckCold)
+PUNT_OPCODE(CheckNullptr)
+PUNT_OPCODE(CheckBounds)
+PUNT_OPCODE(LdVectorSize)
+PUNT_OPCODE(AssertNonNull)
+PUNT_OPCODE(Unbox)
+PUNT_OPCODE(Box)
+PUNT_OPCODE(UnboxPtr)
+PUNT_OPCODE(BoxPtr)
+PUNT_OPCODE(LdVectorBase)
+PUNT_OPCODE(LdPairBase)
+PUNT_OPCODE(LdStack)
+PUNT_OPCODE(LdLoc)
+PUNT_OPCODE(LdLocAddr)
+PUNT_OPCODE(LdMem)
+PUNT_OPCODE(LdProp)
+PUNT_OPCODE(LdElem)
+PUNT_OPCODE(LdRef)
+PUNT_OPCODE(LdThis)
+PUNT_OPCODE(LdRetAddr)
+PUNT_OPCODE(LdConst)
+PUNT_OPCODE(ConvClsToCctx)
+PUNT_OPCODE(LdCtx)
+PUNT_OPCODE(LdCctx)
+PUNT_OPCODE(LdCls)
+PUNT_OPCODE(LdClsCached)
+PUNT_OPCODE(LdClsCachedSafe)
+PUNT_OPCODE(LdClsCtx)
+PUNT_OPCODE(LdClsCctx)
+PUNT_OPCODE(LdClsCns)
+PUNT_OPCODE(LookupClsCns)
+PUNT_OPCODE(LdCns)
+PUNT_OPCODE(LookupCns)
+PUNT_OPCODE(LookupCnsE)
+PUNT_OPCODE(LookupCnsU)
+PUNT_OPCODE(LdClsMethodCache)
+PUNT_OPCODE(LdClsMethodFCache)
+PUNT_OPCODE(GetCtxFwdCall)
+PUNT_OPCODE(LdClsMethod)
+PUNT_OPCODE(LdPropAddr)
+PUNT_OPCODE(LdClsPropAddr)
+PUNT_OPCODE(LdClsPropAddrCached)
+PUNT_OPCODE(LdObjMethod)
+PUNT_OPCODE(LdObjInvoke)
+PUNT_OPCODE(LdGblAddrDef)
+PUNT_OPCODE(LdGblAddr)
+PUNT_OPCODE(LdObjClass)
+PUNT_OPCODE(LdFunc)
+PUNT_OPCODE(LdFuncCached)
+PUNT_OPCODE(LdFuncCachedU)
+PUNT_OPCODE(LdFuncCachedSafe)
+PUNT_OPCODE(LdARFuncPtr)
+PUNT_OPCODE(LdSSwitchDestFast)
+PUNT_OPCODE(LdSSwitchDestSlow)
+PUNT_OPCODE(LdSwitchDblIndex)
+PUNT_OPCODE(LdSwitchStrIndex)
+PUNT_OPCODE(LdSwitchObjIndex)
+PUNT_OPCODE(JmpSwitchDest)
+PUNT_OPCODE(AllocObj)
+PUNT_OPCODE(AllocObjFast)
+PUNT_OPCODE(LdClsCtor)
+PUNT_OPCODE(StClosureFunc)
+PUNT_OPCODE(StClosureArg)
+PUNT_OPCODE(StClosureCtx)
+PUNT_OPCODE(NewArray)
+PUNT_OPCODE(NewPackedArray)
+PUNT_OPCODE(LdRaw)
+PUNT_OPCODE(FreeActRec)
+PUNT_OPCODE(Call)
+PUNT_OPCODE(CallArray)
+PUNT_OPCODE(CallBuiltin)
+PUNT_OPCODE(NativeImpl)
+PUNT_OPCODE(RetCtrl)
+PUNT_OPCODE(StRetVal)
+PUNT_OPCODE(RetAdjustStack)
+PUNT_OPCODE(StMem)
+PUNT_OPCODE(StMemNT)
+PUNT_OPCODE(StProp)
+PUNT_OPCODE(StPropNT)
+PUNT_OPCODE(StLoc)
+PUNT_OPCODE(StLocNT)
+PUNT_OPCODE(StRef)
+PUNT_OPCODE(StRefNT)
+PUNT_OPCODE(StRaw)
+PUNT_OPCODE(StElem)
+PUNT_OPCODE(IterCopy)
+PUNT_OPCODE(LdStaticLocCached)
+PUNT_OPCODE(CheckStaticLocInit)
+PUNT_OPCODE(ClosureStaticLocInit)
+PUNT_OPCODE(StaticLocInitCached)
+PUNT_OPCODE(SpillFrame)
+PUNT_OPCODE(CufIterSpillFrame)
+PUNT_OPCODE(ReqBindJmp)
+PUNT_OPCODE(ReqInterpret)
+PUNT_OPCODE(ReqRetranslateOpt)
+PUNT_OPCODE(ReqRetranslate)
+PUNT_OPCODE(SyncABIRegs)
+PUNT_OPCODE(Mov)
+PUNT_OPCODE(LdAddr)
+PUNT_OPCODE(IncRef)
+PUNT_OPCODE(IncRefCtx)
+PUNT_OPCODE(DecRefLoc)
+PUNT_OPCODE(DecRefStack)
+PUNT_OPCODE(DecRefThis)
+PUNT_OPCODE(GenericRetDecRefs)
+PUNT_OPCODE(DecRef)
+PUNT_OPCODE(DecRefMem)
+PUNT_OPCODE(DecRefNZ)
+PUNT_OPCODE(DecRefNZOrBranch)
+PUNT_OPCODE(DefInlineFP)
+PUNT_OPCODE(InlineReturn)
+PUNT_OPCODE(DefInlineSP)
+PUNT_OPCODE(ReDefSP)
+PUNT_OPCODE(PassSP)
+PUNT_OPCODE(PassFP)
+PUNT_OPCODE(StashGeneratorSP)
+PUNT_OPCODE(ReDefGeneratorSP)
+PUNT_OPCODE(VerifyParamCls)
+PUNT_OPCODE(VerifyParamCallable)
+PUNT_OPCODE(VerifyParamFail)
+PUNT_OPCODE(RaiseUninitLoc)
+PUNT_OPCODE(WarnNonObjProp)
+PUNT_OPCODE(ThrowNonObjProp)
+PUNT_OPCODE(RaiseUndefProp)
+PUNT_OPCODE(PrintStr)
+PUNT_OPCODE(PrintInt)
+PUNT_OPCODE(PrintBool)
+PUNT_OPCODE(AddElemStrKey)
+PUNT_OPCODE(AddElemIntKey)
+PUNT_OPCODE(AddNewElem)
+PUNT_OPCODE(ConcatStrStr)
+PUNT_OPCODE(ConcatIntStr)
+PUNT_OPCODE(ConcatStrInt)
+PUNT_OPCODE(ConcatCellCell)
+PUNT_OPCODE(ArrayAdd)
+PUNT_OPCODE(AKExists)
+PUNT_OPCODE(Spill)
+PUNT_OPCODE(Reload)
+PUNT_OPCODE(CreateContFunc)
+PUNT_OPCODE(CreateContMeth)
+PUNT_OPCODE(ContEnter)
+PUNT_OPCODE(ContPreNext)
+PUNT_OPCODE(ContStartedCheck)
+PUNT_OPCODE(ContSetRunning)
+PUNT_OPCODE(ContValid)
+PUNT_OPCODE(ContArIncKey)
+PUNT_OPCODE(ContArUpdateIdx)
+PUNT_OPCODE(LdContArRaw)
+PUNT_OPCODE(StContArRaw)
+PUNT_OPCODE(LdContArValue)
+PUNT_OPCODE(StContArValue)
+PUNT_OPCODE(LdContArKey)
+PUNT_OPCODE(StContArKey)
+PUNT_OPCODE(IterInit)
+PUNT_OPCODE(IterInitK)
+PUNT_OPCODE(IterNext)
+PUNT_OPCODE(IterNextK)
+PUNT_OPCODE(WIterInit)
+PUNT_OPCODE(WIterInitK)
+PUNT_OPCODE(WIterNext)
+PUNT_OPCODE(WIterNextK)
+PUNT_OPCODE(MIterInit)
+PUNT_OPCODE(MIterInitK)
+PUNT_OPCODE(MIterNext)
+PUNT_OPCODE(MIterNextK)
+PUNT_OPCODE(IterFree)
+PUNT_OPCODE(MIterFree)
+PUNT_OPCODE(DecodeCufIter)
+PUNT_OPCODE(CIterFree)
+PUNT_OPCODE(DefMIStateBase)
+PUNT_OPCODE(BaseG)
+PUNT_OPCODE(PropX)
+PUNT_OPCODE(PropDX)
+PUNT_OPCODE(PropDXStk)
+PUNT_OPCODE(CGetProp)
+PUNT_OPCODE(VGetProp)
+PUNT_OPCODE(VGetPropStk)
+PUNT_OPCODE(BindProp)
+PUNT_OPCODE(BindPropStk)
+PUNT_OPCODE(SetProp)
+PUNT_OPCODE(SetPropStk)
+PUNT_OPCODE(UnsetProp)
+PUNT_OPCODE(SetOpProp)
+PUNT_OPCODE(SetOpPropStk)
+PUNT_OPCODE(IncDecProp)
+PUNT_OPCODE(IncDecPropStk)
+PUNT_OPCODE(EmptyProp)
+PUNT_OPCODE(IssetProp)
+PUNT_OPCODE(ElemX)
+PUNT_OPCODE(ElemArray)
+PUNT_OPCODE(ElemDX)
+PUNT_OPCODE(ElemDXStk)
+PUNT_OPCODE(ElemUX)
+PUNT_OPCODE(ElemUXStk)
+PUNT_OPCODE(ArrayGet)
+PUNT_OPCODE(StringGet)
+PUNT_OPCODE(VectorGet)
+PUNT_OPCODE(PairGet)
+PUNT_OPCODE(MapGet)
+PUNT_OPCODE(StableMapGet)
+PUNT_OPCODE(CGetElem)
+PUNT_OPCODE(VGetElem)
+PUNT_OPCODE(VGetElemStk)
+PUNT_OPCODE(BindElem)
+PUNT_OPCODE(BindElemStk)
+PUNT_OPCODE(ArraySet)
+PUNT_OPCODE(VectorSet)
+PUNT_OPCODE(MapSet)
+PUNT_OPCODE(StableMapSet)
+PUNT_OPCODE(ArraySetRef)
+PUNT_OPCODE(SetElem)
+PUNT_OPCODE(SetElemStk)
+PUNT_OPCODE(SetWithRefElem)
+PUNT_OPCODE(SetWithRefElemStk)
+PUNT_OPCODE(UnsetElem)
+PUNT_OPCODE(UnsetElemStk)
+PUNT_OPCODE(SetOpElem)
+PUNT_OPCODE(SetOpElemStk)
+PUNT_OPCODE(IncDecElem)
+PUNT_OPCODE(IncDecElemStk)
+PUNT_OPCODE(SetNewElem)
+PUNT_OPCODE(SetNewElemStk)
+PUNT_OPCODE(SetNewElemArray)
+PUNT_OPCODE(SetNewElemArrayStk)
+PUNT_OPCODE(SetWithRefNewElem)
+PUNT_OPCODE(SetWithRefNewElemStk)
+PUNT_OPCODE(BindNewElem)
+PUNT_OPCODE(BindNewElemStk)
+PUNT_OPCODE(ArrayIsset)
+PUNT_OPCODE(StringIsset)
+PUNT_OPCODE(VectorIsset)
+PUNT_OPCODE(PairIsset)
+PUNT_OPCODE(MapIsset)
+PUNT_OPCODE(StableMapIsset)
+PUNT_OPCODE(IssetElem)
+PUNT_OPCODE(EmptyElem)
+PUNT_OPCODE(IncStat)
+PUNT_OPCODE(TypeProfileFunc)
+PUNT_OPCODE(IncStatGrouped)
+PUNT_OPCODE(RBTrace)
+PUNT_OPCODE(IncTransCounter)
+PUNT_OPCODE(ArrayIdx)
+PUNT_OPCODE(DbgAssertRefCount)
+PUNT_OPCODE(DbgAssertType)
+
+#undef PUNT_OPCODE
+
+//////////////////////////////////////////////////////////////////////
+
+void CodeGenerator::emitRegGetsRegPlusImm(vixl::MacroAssembler& as,
+                                          vixl::Register dstReg,
+                                          vixl::Register srcReg,
+                                          int64_t imm) {
+  if (imm != 0) {
+    as.  Add  (dstReg, srcReg, imm);
+  } else if (dstReg.code() != srcReg.code()) {
+    as.  Mov  (dstReg, srcReg);
+  } // else nothing
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void CodeGenerator::cgLdStackAddr(IRInstruction* inst) {
+  auto const dstReg  = x2a(m_state.regs[inst->dst()].reg());
+  auto const baseReg = x2a(m_state.regs[inst->src(0)].reg());
+  auto const offset  = cellsToBytes(inst->extra<LdStackAddr>()->offset);
+  emitRegGetsRegPlusImm(m_as, dstReg, baseReg, offset);
+}
+
+void CodeGenerator::cgSpillStack(IRInstruction* inst) {
+  // TODO(2966414): so much of this logic could be shared. The opcode itself
+  // should probably be broken up.
+  SSATmp* dst             = inst->dst();
+  SSATmp* sp              = inst->src(0);
+  auto const spDeficit    = inst->src(1)->getValInt();
+  auto const spillVals    = inst->srcs().subpiece(2);
+  auto const numSpillSrcs = spillVals.size();
+  auto const dstReg       = x2a(m_state.regs[dst].reg());
+  auto const spReg        = x2a(m_state.regs[sp].reg());
+  auto const spillCells   = spillValueCells(inst);
+
+  int64_t adjustment = (spDeficit - spillCells) * sizeof(Cell);
+  for (uint32_t i = 0; i < numSpillSrcs; ++i) {
+    const int64_t offset = i * sizeof(Cell) + adjustment;
+    if (spillVals[i]->type() == Type::None) {
+      // The simplifier detected that we're storing the same value
+      // already in there.
+      continue;
+    }
+
+    auto* val = spillVals[i];
+    auto* inst = val->inst();
+    while (inst->isPassthrough()) {
+      inst = inst->getPassthroughValue()->inst();
+    }
+    // If our value came from a LdStack on the same sp and offset,
+    // we don't need to spill it.
+    if (inst->op() == LdStack && inst->src(0) == sp &&
+        inst->extra<LdStack>()->offset * sizeof(Cell) == offset) {
+      FTRACE(6, "{}: Not spilling spill value {} from {}\n",
+             __func__, i, inst->toString());
+    } else {
+      // XXX this is a cut-down version of cgStore.
+      if (val->isConst()) {
+        m_as. Mov (rAsm, val->getValBits());
+        m_as. Str (rAsm, spReg[offset]);
+      } else {
+        auto reg = x2a(m_state.regs[val].reg());
+        m_as. Str   (reg, spReg[offset]);
+      }
+      m_as. Mov   (rAsm, val->type().toDataType());
+      m_as. Str   (rAsm.W(), spReg[offset + TVOFF(m_type)]);
+    }
+  }
+
+  emitRegGetsRegPlusImm(m_as, dstReg, spReg, adjustment);
+}
+
+void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {
+  auto fpReg = x2a(m_state.regs[inst->src(0)].reg());
+  auto spReg = x2a(m_state.regs[inst->src(1)].reg());
+  auto pcOff = inst->extra<InterpOneData>()->bcOff;
+
+  auto opc = *(curFunc()->unit()->at(pcOff));
+  auto* interpOneHelper = interpOneEntryPoints[opc];
+
+  m_as.   Push   (x29, x30);
+
+  // TODO(2966997): this really should be saving caller-save registers and
+  // basically doing everything else that cgCallHelper does. This only works
+  // now because no caller-saved registers are live.
+  m_as.   Mov    (rHostCallReg, reinterpret_cast<uint64_t>(interpOneHelper));
+  m_as.   Mov    (argReg(0), fpReg);
+  m_as.   Mov    (argReg(1), spReg);
+  m_as.   Mov    (argReg(2), pcOff);
+  m_as.   HostCall(3);
+
+  m_as.   Pop    (x30, x29);
+}
+
+void CodeGenerator::cgInterpOne(IRInstruction* inst) {
+  cgInterpOneCommon(inst);
+
+  auto const& extra = *inst->extra<InterpOne>();
+  auto newSpReg = x2a(m_state.regs[inst->dst()].reg());
+
+  auto spAdjustBytes = cellsToBytes(extra.cellsPopped - extra.cellsPushed);
+  emitRegGetsRegPlusImm(m_as, newSpReg, newSpReg, spAdjustBytes);
+}
+
+void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
+  cgInterpOneCommon(inst);
+
+  m_as.   Ldr   (rVmFp, rReturnReg[offsetof(VMExecutionContext, m_fp)]);
+  m_as.   Ldr   (rVmSp, rReturnReg[offsetof(VMExecutionContext, m_stack) +
+                                   Stack::topOfStackOffset()]);
+
+  emitServiceReq(tx64->mainCode, REQ_RESUME);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Address CodeGenerator::cgInst(IRInstruction* inst) {
+  Opcode opc = inst->op();
+  auto const start = m_as.frontier();
+  m_curInst = inst;
+  SCOPE_EXIT { m_curInst = nullptr; };
+
+  switch (opc) {
+#define O(name, dsts, srcs, flags)                                \
+  case name: FTRACE(7, "cg" #name "\n");                          \
+             cg ## name (inst);                                   \
+             return m_as.frontier() == start ? nullptr : start;
+    IR_OPCODES
+#undef O
+  default:
+    assert(0);
+    return nullptr;
+  }
+}
+
+void CodeGenerator::cgBlock(Block* block, vector<TransBCMapping>* bcMap) {
+  FTRACE(6, "cgBlock: {}\n", block->id());
+
+  BCMarker prevMarker;
+  for (IRInstruction& instr : *block) {
+    IRInstruction* inst = &instr;
+    // If we're on the first instruction of the block or we have a new
+    // marker since the last instruction, update the bc mapping.
+    if ((!prevMarker.valid() || inst->marker() != prevMarker) &&
+        m_tx64->isTransDBEnabled() && bcMap) {
+      bcMap->push_back(TransBCMapping{inst->marker().bcOff,
+                                      m_as.frontier(),
+                                      m_astubs.frontier()});
+      prevMarker = inst->marker();
+    }
+
+    auto* addr = cgInst(inst);
+    if (m_state.asmInfo && addr) {
+      m_state.asmInfo->updateForInstruction(inst, addr, m_as.frontier());
+    }
+  }
+}
+
+}}}

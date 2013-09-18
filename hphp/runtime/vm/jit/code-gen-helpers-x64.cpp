@@ -57,6 +57,9 @@ using Transl::rVmSp;
  */
 void moveToAlign(CodeBlock& cb,
                  const size_t align /* =kJmpTargetAlign */) {
+  // TODO(2967396) implement properly, move function
+  if (RuntimeOption::EvalSimulateARM) return;
+
   using namespace HPHP::Util;
   X64Assembler a { cb };
   assert(isPowerOfTwo(align));
@@ -340,6 +343,20 @@ void emitRB(X64Assembler& a,
   a.    emitImmReg(strlen(msg), argNumToRegName[arg++]);
   a.    emitImmReg(t, argNumToRegName[arg++]);
   a.    call((TCA)Trace::ringbufferMsg);
+}
+
+void emitTraceCall(CodeBlock& cb, int64_t pcOff) {
+  // TODO(2967396) implement properly, move function
+  if (RuntimeOption::EvalSimulateARM) return;
+
+  Asm as { cb };
+  // call to a trace function
+  as.mov_imm64_reg((int64_t)as.frontier(), reg::rcx);
+  as.mov_reg64_reg64(rVmFp, reg::rdi);
+  as.mov_reg64_reg64(rVmSp, reg::rsi);
+  as.mov_imm64_reg(pcOff, reg::rdx);
+  // do the call; may use a trampoline
+  emitCall(as, (TCA)traceCallback);
 }
 
 void emitTestSurpriseFlags(Asm& a) {

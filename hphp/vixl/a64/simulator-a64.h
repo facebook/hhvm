@@ -208,6 +208,12 @@ class Simulator : public DecoderVisitor {
     registers_[code].w = value;
   }
 
+  template<typename T>
+  inline void set_xreg(unsigned code, T* value,
+                       Reg31Mode r31mode = Reg31IsZeroRegister) {
+    set_xreg(code, reinterpret_cast<int64_t>(value), r31mode);
+  }
+
   inline void set_xreg(unsigned code, int64_t value,
                        Reg31Mode r31mode = Reg31IsZeroRegister) {
     assert(code < kNumberOfRegisters);

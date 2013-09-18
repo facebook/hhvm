@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
+#include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 
 namespace HPHP {
@@ -78,6 +79,7 @@ void emitJmpOrJcc(Asm& as, ConditionCode cc, TCA dest);
 void emitRB(Asm& a, Trace::RingBufferType t, const char* msgm,
             RegSet toSave = RegSet());
 
+void emitTraceCall(CodeBlock& cb, int64_t pcOff);
 
 /*
  * Tests the surprise flags for the current thread. Should be used

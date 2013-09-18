@@ -127,6 +127,9 @@ void iterFreeHelper(Iter* iter);
 void miterFreeHelper(Iter* iter);
 void citerFreeHelper(Iter* iter);
 
+void checkFrame(ActRec* fp, Cell* sp, bool checkLocals);
+void traceCallback(ActRec* fp, Cell* sp, int64_t pcOff, void* rip);
+
 } }
 
 #endif

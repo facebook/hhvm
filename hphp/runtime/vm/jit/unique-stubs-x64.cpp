@@ -42,38 +42,6 @@ TRACE_SET_MOD(ustubs);
 
 namespace {
 
-// Utility for logging stubs addresses during startup and registering
-// the gdb symbols.  It's often useful to know where they were when
-// debugging.
-TCA add(const char* name, TCA start) {
-  auto const inAStubs = start > tx64->stubsCode.base();
-  UNUSED auto const stop = inAStubs ? tx64->stubsCode.frontier()
-                                    : tx64->mainCode.frontier();
-
-  FTRACE(1, "unique stub: {} {} -- {:4} bytes: {}\n",
-         inAStubs ? "astubs @ "
-                  : "  ahot @  ",
-         static_cast<void*>(start),
-         static_cast<size_t>(stop - start),
-         name);
-
-  ONTRACE(2,
-    [&]{
-      Disasm dasm(Disasm::Options().indent(4));
-      std::ostringstream os;
-      dasm.disasm(os, start, stop);
-      FTRACE(2, "{}\n", os.str());
-    }()
-  );
-
-  tx64->recordGdbStub(
-    tx64->codeBlockFor(start),
-    start,
-    strdup(folly::format("HHVM::{}", name).str().c_str())
-  );
-  return start;
-}
-
 TCA emitRetFromInterpretedFrame() {
   Asm a { tx64->stubsCode };
   moveToAlign(tx64->stubsCode);
@@ -160,14 +128,14 @@ void emitCallToExit(UniqueStubs& uniqueStubs) {
   // returnRIP-1, since the AR was set up manually. For this frame,
   // record the tracelet address as starting from this callToExit-1,
   // so gdb does not barf.
-  uniqueStubs.callToExit = add("callToExit", stub);
+  uniqueStubs.callToExit = uniqueStubs.add("callToExit", stub);
 }
 
 void emitReturnHelpers(UniqueStubs& us) {
-  us.retHelper    = add("retHelper", emitRetFromInterpretedFrame());
-  us.genRetHelper = add("genRetHelper",
-                        emitRetFromInterpretedGeneratorFrame());
-  us.retInlHelper = add("retInlHelper", emitRetFromInterpretedFrame());
+  us.retHelper    = us.add("retHelper", emitRetFromInterpretedFrame());
+  us.genRetHelper = us.add("genRetHelper",
+                           emitRetFromInterpretedGeneratorFrame());
+  us.retInlHelper = us.add("retInlHelper", emitRetFromInterpretedFrame());
 }
 
 void emitResumeHelpers(UniqueStubs& uniqueStubs) {
@@ -186,7 +154,7 @@ void emitResumeHelpers(UniqueStubs& uniqueStubs) {
   a.   loadq  (rax[spOff], rVmSp);
   emitServiceReq(tx64->stubsCode, REQ_RESUME);
 
-  add("resumeHelpers", uniqueStubs.resumeHelper);
+  uniqueStubs.add("resumeHelpers", uniqueStubs.resumeHelper);
 }
 
 void emitDefClsHelper(UniqueStubs& uniqueStubs) {
@@ -203,7 +171,7 @@ void emitDefClsHelper(UniqueStubs& uniqueStubs) {
                     Stack::topOfStackOffset()]);
   a.   jmp    (TCA(helper));
 
-  add("defClsHelper", uniqueStubs.defClsHelper);
+  uniqueStubs.add("defClsHelper", uniqueStubs.defClsHelper);
 }
 
 void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
@@ -222,23 +190,23 @@ void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
   emitEagerVMRegSave(a, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
   emitServiceReq(tx64->stubsCode, REQ_STACK_OVERFLOW);
 
-  add("stackOverflowHelper", uniqueStubs.stackOverflowHelper);
+  uniqueStubs.add("stackOverflowHelper", uniqueStubs.stackOverflowHelper);
 }
 
 void emitDtorStubs(UniqueStubs& uniqueStubs) {
-  auto const strDtor = add("dtorStr", emitUnaryStub(
+  auto const strDtor = uniqueStubs.add("dtorStr", emitUnaryStub(
     tx64->stubsCode, CppCall(getMethodPtr(&StringData::release))
   ));
-  auto const arrDtor = add("dtorArr", emitUnaryStub(
+  auto const arrDtor = uniqueStubs.add("dtorArr", emitUnaryStub(
     tx64->stubsCode, CppCall(getVTableOffset(&HphpArray::release))
   ));
-  auto const objDtor = add("dtorObj", emitUnaryStub(
+  auto const objDtor = uniqueStubs.add("dtorObj", emitUnaryStub(
     tx64->stubsCode, CppCall(getMethodPtr(&ObjectData::release))
   ));
-  auto const resDtor = add("dtorRes", emitUnaryStub(
+  auto const resDtor = uniqueStubs.add("dtorRes", emitUnaryStub(
     tx64->stubsCode, CppCall(getMethodPtr(&ResourceData::release))
   ));
-  auto const refDtor = add("dtorRef", emitUnaryStub(
+  auto const refDtor = uniqueStubs.add("dtorRef", emitUnaryStub(
     tx64->stubsCode, CppCall((void*)(&refdata_after_decref_helper))
   ));
 
@@ -292,7 +260,7 @@ asm_label(a, release);
   }
   a.    ret    ();
 
-  add("genericDtors", uniqueStubs.irPopRHelper);
+  uniqueStubs.add("genericDtors", uniqueStubs.irPopRHelper);
 }
 
 void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
@@ -359,7 +327,7 @@ asm_label(a, loopHead);
   a.    addq   (AROFF(m_r) + sizeof(TypedValue), rVmSp);
   a.    ret    (8);
 
-  add("freeLocalsHelpers", uniqueStubs.freeManyLocalsHelper);
+  uniqueStubs.add("freeLocalsHelpers", uniqueStubs.freeManyLocalsHelper);
 }
 
 void emitFuncPrologueRedispatch(UniqueStubs& uniqueStubs) {
@@ -405,7 +373,7 @@ asm_label(a, numParamsCheck);
   a.    jmp    (rax);
   a.    ud2    ();
 
-  add("funcPrologueRedispatch", uniqueStubs.funcPrologueRedispatch);
+  uniqueStubs.add("funcPrologueRedispatch", uniqueStubs.funcPrologueRedispatch);
 }
 
 void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
@@ -482,7 +450,7 @@ asm_label(a, noCallee);
   a.    addq   (8, rsp);
   a.    ret    ();
 
-  add("fcallArrayHelper", uniqueStubs.fcallArrayHelper);
+  uniqueStubs.add("fcallArrayHelper", uniqueStubs.fcallArrayHelper);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -529,7 +497,7 @@ asm_label(a, popAndXchg);
   a.    jmp    (rax);
   a.    ud2    ();
 
-  add("fcallHelperThunk", uniqueStubs.fcallHelperThunk);
+  uniqueStubs.add("fcallHelperThunk", uniqueStubs.fcallHelperThunk);
 }
 
 void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
@@ -546,7 +514,7 @@ void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
   a.    jmp    (rax);
   a.    ud2    ();
 
-  add("funcBodyHelperThunk", uniqueStubs.funcBodyHelperThunk);
+  uniqueStubs.add("funcBodyHelperThunk", uniqueStubs.funcBodyHelperThunk);
 }
 
 }

@@ -1817,7 +1817,7 @@ double Simulator::FPRoundInt(double value, FPRounding round_mode) {
 
 
 double Simulator::FPToDouble(float value) {
-  switch (fpclassify(value)) {
+  switch (std::fpclassify(value)) {
     case FP_NAN: {
       // Convert NaNs as the processor would, assuming that FPCR.DN (default
       // NaN) is not set:
@@ -1857,7 +1857,7 @@ float Simulator::FPToFloat(double value, FPRounding round_mode) {
   assert(round_mode == FPTieEven);
   USE(round_mode);
 
-  switch (fpclassify(value)) {
+  switch (std::fpclassify(value)) {
     case FP_NAN: {
       // Convert NaNs as the processor would, assuming that FPCR.DN (default
       // NaN) is not set:
@@ -1892,7 +1892,7 @@ float Simulator::FPToFloat(double value, FPRounding round_mode) {
       int32_t exponent = unsigned_bitextract_64(62, 52, raw) - 1023;
       // Extract the mantissa and add the implicit '1' bit.
       uint64_t mantissa = unsigned_bitextract_64(51, 0, raw);
-      if (fpclassify(value) == FP_NORMAL) {
+      if (std::fpclassify(value) == FP_NORMAL) {
         mantissa |= (1UL << 52);
       }
       return FPRoundToFloat(sign, exponent, mantissa, round_mode);

@@ -25,6 +25,8 @@
 
 namespace HPHP {
 
+TRACE_SET_MOD(runtime);
+
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_staticPrefix("86static_");
@@ -537,6 +539,42 @@ void miterFreeHelper(Iter* iter) {
 
 void citerFreeHelper(Iter* iter) {
   iter->cfree();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
+  const Func* func = fp->m_func;
+  func->validate();
+  if (func->cls()) {
+    assert(!func->cls()->isZombie());
+  }
+  if (fp->hasVarEnv()) {
+    assert(fp->getVarEnv()->getCfp() == fp);
+  }
+  // TODO: validate this pointer from actrec
+  int numLocals = func->numLocals();
+  assert(sp <= (Cell*)fp - func->numSlotsInFrame()
+         || func->isGenerator());
+  if (checkLocals) {
+    int numParams = func->numParams();
+    for (int i=0; i < numLocals; i++) {
+      if (i >= numParams && func->isGenerator() && i < func->numNamedLocals()) {
+        continue;
+      }
+      assert(tvIsPlausible(*frame_local(fp, i)));
+    }
+  }
+  // We unfortunately can't do the same kind of check for the stack
+  // without knowing about FPI regions, because it may contain
+  // ActRecs.
+}
+
+void traceCallback(ActRec* fp, Cell* sp, int64_t pcOff, void* rip) {
+  if (HPHP::Trace::moduleEnabled(HPHP::Trace::hhirTracelets)) {
+    FTRACE(0, "{} {} {}\n", fp->m_func->fullName()->data(), pcOff, rip);
+  }
+  checkFrame(fp, sp, /*checkLocals*/true);
 }
 
 //////////////////////////////////////////////////////////////////////

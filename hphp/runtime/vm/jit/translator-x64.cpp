@@ -68,6 +68,12 @@
 #include "hphp/util/repo-schema.h"
 #include "hphp/util/cycles.h"
 
+#include "hphp/vixl/a64/decoder-a64.h"
+#include "hphp/vixl/a64/disasm-a64.h"
+#include "hphp/vixl/a64/simulator-a64.h"
+
+#include "hphp/runtime/vm/jit/abi-arm.h"
+#include "hphp/runtime/vm/jit/unique-stubs-arm.h"
 #include "hphp/runtime/vm/jit/unique-stubs-x64.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/php-debug.h"
@@ -1667,12 +1673,44 @@ TranslatorX64::enterTC(TCA start, void* data) {
       auto skData = sk.valid() ? sk.toAtomicInt() : uint64_t(-1LL);
       Trace::ringbufferEntry(RBTypeEnterTC, skData, (uint64_t)start);
     }
-    // We have to force C++ to spill anything that might be in a callee-saved
-    // register (aside from rbp). enterTCHelper does not save them.
-    CALLEE_SAVED_BARRIER();
-    enterTCHelper(vmsp(), vmfp(), start, &info, vmFirstAR(),
-                  tl_targetCaches);
-    CALLEE_SAVED_BARRIER();
+
+    if (RuntimeOption::EvalSimulateARM) {
+      vixl::PrintDisassembler disasm(stdout);
+      vixl::Decoder decoder;
+      if (getenv("ARM_DISASM")) {
+        decoder.AppendVisitor(&disasm);
+      }
+      vixl::Simulator sim(&decoder, stdout);
+
+      g_vmContext->m_activeSims.push_back(&sim);
+      SCOPE_EXIT { g_vmContext->m_activeSims.pop_back(); };
+
+      sim.   set_xreg(JIT::ARM::rGContextReg.code(), g_vmContext);
+      sim.   set_xreg(JIT::ARM::rVmFp.code(), vmfp());
+      sim.   set_xreg(JIT::ARM::rVmSp.code(), vmsp());
+      sim.   set_xreg(JIT::ARM::rVmTl.code(), tl_targetCaches);
+
+      sim.RunFrom(vixl::Instruction::Cast(start));
+
+      info.requestNum = sim.xreg(0);
+      info.args[0] = sim.xreg(1);
+      info.args[1] = sim.xreg(2);
+      info.args[2] = sim.xreg(3);
+      info.args[3] = sim.xreg(4);
+      info.args[4] = sim.xreg(5);
+      info.saved_rStashedAr = sim.xreg(JIT::ARM::rStashedAR.code());
+
+      info.stubAddr = reinterpret_cast<TCA>(sim.xreg(JIT::ARM::rAsm.code()));
+
+      fflush(stdout);
+    } else {
+      // We have to force C++ to spill anything that might be in a callee-saved
+      // register (aside from rbp). enterTCHelper does not save them.
+      CALLEE_SAVED_BARRIER();
+      enterTCHelper(vmsp(), vmfp(), start, &info, vmFirstAR(),
+                    tl_targetCaches);
+      CALLEE_SAVED_BARRIER();
+    }
     assert(g_vmContext->m_stack.isValidAddress((uintptr_t)vmsp()));
 
     tl_regState = VMRegState::CLEAN; // Careful: pc isn't sync'ed yet.
@@ -2740,7 +2778,11 @@ TranslatorX64::TranslatorX64()
 void TranslatorX64::initUniqueStubs() {
   // Put the following stubs into ahot, rather than a.
   CodeBlockSelector asmSel(CodeBlockSelector::Args(this).hot(true));
-  uniqueStubs = JIT::X64::emitUniqueStubs();
+  if (RuntimeOption::EvalSimulateARM) {
+    uniqueStubs = JIT::ARM::emitUniqueStubs();
+  } else {
+    uniqueStubs = JIT::X64::emitUniqueStubs();
+  }
 }
 
 TranslatorX64*

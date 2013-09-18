@@ -36,6 +36,10 @@
 #define PHP_OUTPUT_HANDLER_CONT   (1<<1)
 #define PHP_OUTPUT_HANDLER_END    (1<<2)
 
+namespace vixl {
+class Simulator;
+}
+
 namespace HPHP {
 class c_Continuation;
 namespace Eval {
@@ -755,6 +759,8 @@ public:
   static int64_t s_threadIdxCounter;
   Variant m_setprofileCallback;
   bool m_executingSetprofileCallback;
+
+  std::vector<vixl::Simulator*> m_activeSims;
 };
 
 class ExecutionContext : public VMExecutionContext {};

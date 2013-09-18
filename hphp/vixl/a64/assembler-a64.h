@@ -30,6 +30,7 @@
 #include <list>
 
 #include "hphp/util/data-block.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/vixl/globals.h"
 #include "hphp/vixl/utils.h"
@@ -46,6 +47,7 @@ constexpr int kRegListSizeInBits = sizeof(RegList) * 8;
 // need to declare them in advance.
 class Register;
 class FPRegister;
+class MemOperand;
 
 
 class CPURegister {
@@ -199,6 +201,8 @@ class Register : public CPURegister {
     assert(IsRegister() || IsNone());
     return IsValidRegister();
   }
+
+  MemOperand operator[](const ptrdiff_t offset) const;
 
   static const Register& WRegFromCode(unsigned code);
   static const Register& XRegFromCode(unsigned code);
@@ -649,6 +653,9 @@ class Assembler {
     return UpdateAndGetByteOffsetTo(label) >> kInstructionSizeLog2;
   }
 
+  HPHP::Transl::TCA frontier() const {
+    return cb_.frontier();
+  }
 
   // Instruction set functions.
 

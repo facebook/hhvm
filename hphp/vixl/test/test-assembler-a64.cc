@@ -5067,8 +5067,8 @@ TEST(Assembler, fcvt_sd) {
     float expected = test[i].expected;
 
     // We only expect positive input.
-    assert(signbit(in) == 0);
-    assert(signbit(expected) == 0);
+    assert(std::signbit(in) == 0);
+    assert(std::signbit(expected) == 0);
 
     SETUP();
     START();

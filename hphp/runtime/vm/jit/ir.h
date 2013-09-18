@@ -772,6 +772,7 @@ O(TypeProfileFunc,                  ND, S(Gen),                          E|N) \
 O(IncStatGrouped,                   ND, CStr CStr C(Int),            E|N|Mem) \
 O(RBTrace,                          ND, NA,                              E|N) \
 O(IncTransCounter,                  ND, NA,                                E) \
+O(IncProfCounter,                   ND, NA,                                E) \
 O(ArrayIdx,                    D(Cell), C(TCA)                                \
                                           S(Arr)                              \
                                           S(Int,Str)                          \

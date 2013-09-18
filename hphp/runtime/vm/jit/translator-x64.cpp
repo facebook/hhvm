@@ -198,9 +198,24 @@ JIT::CppCall TranslatorX64::getDtorCall(DataType type) {
 bool TranslatorX64::profileSrcKey(const SrcKey& sk) const {
   if (!sk.func()->shouldPGO()) return false;
 
-  if (profData()->optimized(sk)) return false;
+  if (profData()->optimized(sk.getFuncId())) return false;
 
   return true;
+}
+
+/*
+ * Invalidate the SrcDB entries for func's SrcKeys that have any
+ * Profile translation.
+ */
+void TranslatorX64::invalidateFuncProfSrcKeys(const Func* func) {
+  assert(RuntimeOption::EvalJitPGO);
+  FuncId funcId = func->getFuncId();
+  for (TransID tid = 0; tid < m_profData->numTrans(); tid++) {
+    if (m_profData->transFuncId(tid) == funcId &&
+        m_profData->transKind(tid) == TransProfile) {
+      invalidateSrcKey(m_profData->transSrcKey(tid));
+    }
+  }
 }
 
 TCA TranslatorX64::retranslate(const TranslArgs& args) {
@@ -263,40 +278,59 @@ TCA TranslatorX64::retranslateOpt(TransID transId, bool align) {
   always_assert(m_profData->transRegion(transId) != nullptr);
 
   Func* func = m_profData->transFunc(transId);
+  FuncId funcId = func->getFuncId();
   const SrcKey& sk = m_profData->transSrcKey(transId);
 
-  if (func->isEntry(sk.offset()) && !prologuesWereRegenerated(func)) {
-    regeneratePrologues(func);
-  }
-
-  // We may get here multiple times because different translations of
-  // the same SrcKey hit the optimization threshold.  Only the first
-  // time around we want to invalidate the existing translations.
-  bool alreadyOptimized = m_profData->optimized(sk);
-  m_profData->setOptimized(sk);
+  bool alreadyOptimized = m_profData->optimized(funcId);
+  m_profData->setOptimized(funcId);
 
   bool setFuncBody = (!alreadyOptimized &&
                       func->base() == sk.offset() &&
                       func->getDVFunclets().size() == 0);
 
-  if (!alreadyOptimized) {
-    if (setFuncBody) func->setFuncBody(uniqueStubs.funcBodyHelperThunk);
-    invalidateSrcKey(sk);
-  } else {
+  SCOPE_EXIT{ m_mode = TransInvalid; };
+
+  if (alreadyOptimized) {
     // Bail if we already reached the maximum number of translations per SrcKey.
     // Note that this can only happen with multi-threading.
     SrcRec* srcRec = getSrcRec(sk);
     assert(srcRec);
     size_t nTrans = srcRec->translations().size();
     if (nTrans >= RuntimeOption::EvalJitMaxTranslations + 1) return nullptr;
+
+    m_mode = TransOptimize;
+    auto translArgs = TranslArgs(sk, align).transId(transId);
+    if (setFuncBody) translArgs.setFuncBody();
+    return retranslate(translArgs);
   }
 
-  m_mode = TransOptimize;
-  SCOPE_EXIT { m_mode = TransInvalid; };
-  auto translArgs = TranslArgs(sk, align).transId(transId);
-  if (setFuncBody) translArgs.setFuncBody();
+  // Invalidate SrcDB's entries for all func's SrcKeys.
+  if (setFuncBody) func->setFuncBody(uniqueStubs.funcBodyHelperThunk);
+  invalidateFuncProfSrcKeys(func);
 
-  return retranslate(translArgs);
+  // Regenerate the prologues and DV funclets before the actual function body.
+  regeneratePrologues(func);
+
+  // Regionize func and translate all its regions.
+  std::vector<JIT::RegionDescPtr> regions;
+  JIT::regionizeFunc(func, this, regions);
+
+  TCA funcStart = nullptr;
+  for (auto region : regions) {
+    m_mode = TransOptimize;
+    SrcKey regionSk = region->blocks[0]->start();
+    auto translArgs = TranslArgs(regionSk, align).region(region);
+    if (setFuncBody) {
+      translArgs.setFuncBody();
+      setFuncBody = false;
+    }
+    TCA regionStart = retranslate(translArgs);
+    if (funcStart == nullptr) {
+      assert(regionStart);
+      funcStart = regionStart;
+    }
+  }
+  return funcStart;
 }
 
 /*
@@ -426,7 +460,7 @@ TranslatorX64::createTranslation(const TranslArgs& args) {
     addTranslation(TransRec(sk, sk.unit()->md5(), TransAnchor,
                             astart, asize, stubstart, stubsize));
     if (m_profData) {
-      m_profData->addTransAnchor(sk);
+      m_profData->addTransNonProf(TransAnchor, sk);
     }
     assert(!isTransDBEnabled() || getTransRec(stubstart)->kind == TransAnchor);
   }
@@ -753,6 +787,9 @@ void TranslatorX64::regeneratePrologue(TransID prologueTransId) {
       if (funcletTransId != InvalidID) {
         invalidateSrcKey(funcletSK);
         retranslate(TranslArgs(funcletSK, false).transId(funcletTransId));
+        // Flag that this translation has been retranslated, so that
+        // it's not retranslated again along with the function body.
+        m_profData->setOptimized(funcletSK);
       }
     }
   }
@@ -1710,16 +1747,13 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
 void
 TranslatorX64::translateWork(const TranslArgs& args) {
   auto sk = args.m_sk;
-  std::unique_ptr<Tracelet> tp = analyze(sk);
-  Tracelet& t = *tp;
+  std::unique_ptr<Tracelet> tp;
 
   SKTRACE(1, sk, "translateWork\n");
   assert(m_srcDB.find(sk));
 
   TCA        start = mainCode.frontier();
   TCA        stubStart = stubsCode.frontier();
-  TCA        counterStart = 0;
-  uint8_t    counterLen = 0;
   SrcRec&    srcRec = *getSrcRec(sk);
   TransKind  transKind = TransInterp;
   UndoMarker undoA(mainCode);
@@ -1749,18 +1783,26 @@ TranslatorX64::translateWork(const TranslArgs& args) {
     JIT::RegionDescPtr region;
     if (RuntimeOption::EvalJitPGO) {
       if (m_mode == TransOptimize) {
-        TransID transId = args.m_transId;
-        assert(transId != InvalidID);
-        region = JIT::selectHotRegion(transId, this);
-        if (region && region->blocks.size() == 0) region = nullptr;
+        region = args.m_region;
+        if (region) {
+          assert(region->blocks.size() > 0);
+        } else {
+          TransID transId = args.m_transId;
+          assert(transId != InvalidID);
+          region = JIT::selectHotRegion(transId, this);
+          assert(region);
+          if (region && region->blocks.size() == 0) region = nullptr;
+        }
       } else {
-        // We always go through the tracelet translator in this case
+        assert(m_mode == TransProfile || m_mode == TransLive);
+        tp = analyze(sk);
       }
     } else {
+      tp = analyze(sk);
       JIT::RegionContext rContext { sk.func(), sk.offset(), liveSpOff() };
       FTRACE(2, "populating live context for region\n");
       populateLiveContext(rContext);
-      region = JIT::selectRegion(rContext, &t);
+      region = JIT::selectRegion(rContext, tp.get());
     }
 
     TranslateResult result = Retry;
@@ -1789,12 +1831,17 @@ TranslatorX64::translateWork(const TranslArgs& args) {
         }
       }
       if (!region || result == Failure) {
-        FTRACE(1, "trying irTranslateTracelet\n");
-        assertCleanState();
+        // If the region translator failed for an Optimize
+        // translation, it's OK to do a Live translation for the
+        // function entry.  We lazily create the tracelet here in this
+        // case.
         if (m_mode == TransOptimize) {
           m_mode = TransLive;
+          tp = analyze(sk);
         }
-        result = translateTracelet(t);
+        FTRACE(1, "trying translateTracelet\n");
+        assertCleanState();
+        result = translateTracelet(*tp);
 
         // If we're profiling, grab the postconditions so we can
         // use them in region selection whenever we decide to
@@ -1825,7 +1872,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
     assertCleanState();
     TRACE(1,
           "emitting %d-instr interp request for failed translation\n",
-          int(t.m_numOpcodes));
+          int(tp->m_numOpcodes));
     Asm a { mainCode };
     Asm astubs { stubsCode };
     // Add a counter for the translation if requested
@@ -1833,17 +1880,16 @@ TranslatorX64::translateWork(const TranslArgs& args) {
       emitTransCounterInc(a);
     }
     a.    jmp(emitServiceReq(stubsCode, JIT::REQ_INTERPRET,
-                             t.m_sk.offset(), t.m_numOpcodes));
+                             sk.offset(), tp ? tp->m_numOpcodes : 1));
     // Fall through.
   }
 
   m_fixupMap.processPendingFixups();
   processPendingCatchTraces();
 
-  addTranslation(TransRec(sk, sk.unit()->md5(), transKind, t, start,
+  addTranslation(TransRec(sk, sk.unit()->md5(), transKind, tp.get(), start,
                           mainCode.frontier() - start, stubStart,
                           stubsCode.frontier() - stubStart,
-                          counterStart, counterLen,
                           m_bcMap));
   m_bcMap.clear();
 
@@ -1852,9 +1898,13 @@ TranslatorX64::translateWork(const TranslArgs& args) {
   recordGdbTranslation(sk, sk.func(), stubsCode, stubStart,
                        false, false);
   if (RuntimeOption::EvalJitPGO) {
-    JIT::RegionContext rContext { sk.func(), sk.offset(), liveSpOff() };
-    populateLiveContext(rContext);
-    m_profData->addTrans(t, rContext, transKind, pconds);
+    if (transKind == TransProfile) {
+      JIT::RegionContext rContext { sk.func(), sk.offset(), liveSpOff() };
+      populateLiveContext(rContext);
+      m_profData->addTransProfile(*tp, rContext, pconds);
+    } else {
+      m_profData->addTransNonProf(transKind, sk);
+    }
   }
   // SrcRec::newTranslation() makes this code reachable. Do this last;
   // otherwise there's some chance of hitting in the reader threads whose
@@ -1889,12 +1939,12 @@ TranslatorX64::translateTracelet(Tracelet& t) {
         ht.emitIncTransCounter();
       }
 
-      // For profiling translations, emit a CheckCold instruction to
-      // trigger retranslation.  However, we don't do this for
-      // translations that correspond to DV Funclets because those are
-      // retranslated along with their corresponding prologues.
-      if (m_mode == TransProfile && !t.func()->isDVEntry(sk.offset())) {
-        ht.emitCheckCold(m_profData->curTransID());
+      if (m_mode == TransProfile) {
+        if (t.func()->base() == sk.offset()) {
+          ht.emitCheckCold(m_profData->curTransID());
+        } else {
+          ht.emitIncProfCounter(m_profData->curTransID());
+        }
       }
 
       m_irTrans->hhbcTrans().emitRB(RBTypeTraceletBody, t.m_sk);

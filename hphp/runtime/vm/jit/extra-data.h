@@ -597,6 +597,7 @@ X(ReqBindJmp,                   BCOffset);
 X(ReqInterpret,                 BCOffset);
 X(ReqRetranslateOpt,            ReqRetransOptData);
 X(CheckCold,                    TransIDData);
+X(IncProfCounter,               TransIDData);
 X(CallArray,                    CallArrayData);
 X(LdClsCns,                     ClsCnsName);
 X(LookupClsCns,                 ClsCnsName);

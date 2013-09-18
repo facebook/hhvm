@@ -4016,25 +4016,29 @@ const char *getTransKindName(TransKind kind) {
 TransRec::TransRec(SrcKey                   s,
                    MD5                      _md5,
                    TransKind                _kind,
-                   const Tracelet&          t,
+                   const Tracelet*          t,
                    TCA                      _aStart,
                    uint32_t                 _aLen,
                    TCA                      _astubsStart,
                    uint32_t                 _astubsLen,
-                   TCA                      _counterStart,
-                   uint8_t                  _counterLen,
-                   vector<TransBCMapping>   _bcMapping) :
-    id(0), kind(_kind), src(s), md5(_md5),
-    bcStopOffset(t.nextSk().offset()), aStart(_aStart), aLen(_aLen),
-    astubsStart(_astubsStart), astubsLen(_astubsLen),
-    counterStart(_counterStart), counterLen(_counterLen),
-    bcMapping(_bcMapping) {
-  for (DepMap::const_iterator dep = t.m_dependencies.begin();
-       dep != t.m_dependencies.end();
-       ++dep) {
-    dependencies.push_back(*dep->second);
+                   vector<TransBCMapping>   _bcMapping)
+    : id(0)
+    , kind(_kind)
+    , src(s)
+    , md5(_md5)
+    , bcStopOffset(t ? t->nextSk().offset() : 0)
+    , aStart(_aStart)
+    , aLen(_aLen)
+    , astubsStart(_astubsStart)
+    , astubsLen(_astubsLen)
+    , bcMapping(_bcMapping) {
+  if (t != nullptr) {
+    for (auto dep : t->m_dependencies) {
+      dependencies.push_back(*dep.second);
+    }
   }
 }
+
 
 string
 TransRec::print(uint64_t profCount) const {

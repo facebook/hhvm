@@ -398,7 +398,7 @@ const uint64_t kEvalVMStackElmsDefault =
  ;
 const uint32_t kEvalVMInitialGlobalTableSizeDefault = 512;
 static const int kDefaultWarmupRequests = debug ? 1 : 11;
-static const int kDefaultJitPGOThreshold = debug ? 2 : 1000;
+static const int kDefaultJitPGOThreshold = debug ? 2 : 100;
 #define F(type, name, def) \
   type RuntimeOption::Eval ## name = type(def);
 EVALFLAGS();

@@ -200,28 +200,30 @@ public:
   PrologueCallersRec*     prologueCallers(const Func* func, int nArgs) const;
   int                     prologueArgs(TransID id)    const;
 
-  TransID                 addTrans(const Tracelet&       tracelet,
-                                   const RegionContext&  rCtx,
-                                   TransKind             kind,
-                                   const PostConditions& pconds);
+  TransID                 addTransProfile(const Tracelet&       tracelet,
+                                          const RegionContext&  rCtx,
+                                          const PostConditions& pconds);
+  TransID                 addTransNonProf(TransKind kind,
+                                          const SrcKey& sk);
   TransID                 addTransPrologue(TransKind kind, const SrcKey& sk,
                                            int nArgs);
-  TransID                 addTransAnchor(const SrcKey& sk);
   PrologueCallersRec*     findPrologueCallersRec(const Func* func,
                                                  int nArgs) const;
   void                    addPrologueMainCaller(const Func* func, int nArgs,
                                                 TCA caller);
   void                    addPrologueGuardCaller(const Func* func, int nArgs,
                                                  TCA caller);
-
   bool                    optimized(const SrcKey& sk) const;
+  bool                    optimized(FuncId funcId) const;
   void                    setOptimized(const SrcKey& sk);
+  void                    setOptimized(FuncId funcId);
 
 private:
   uint32_t                m_numTrans;
   vector<ProfTransRecPtr> m_transRecs;
   ProfCounters<int64_t>   m_counters;
-  SrcKeySet               m_optimized;   // set of SrcKeys already optimized
+  SrcKeySet               m_optimizedSKs;   // set of SrcKeys already optimized
+  FuncIdSet               m_optimizedFuncs; // set of funcs already optimized
   PrologueToTransMap      m_prologueDB;  // maps (Func,nArgs) => prolog TransID
   PrologueToTransMap      m_dvFuncletDB; // maps (Func,nArgs) => DV funclet
                                          //                      TransID

@@ -503,6 +503,7 @@ namespace RDS {
  */
 typedef uint32_t FuncId;
 constexpr FuncId InvalidFuncId = FuncId(-1LL);
+typedef hphp_hash_set<FuncId> FuncIdSet;
 
 /*
  * Special types that are not relevant to the runtime as a whole.

@@ -1689,6 +1689,10 @@ void HhbcTranslator::emitIncTransCounter() {
   m_tb->gen(IncTransCounter);
 }
 
+void HhbcTranslator::emitIncProfCounter(TransID transId) {
+  m_tb->gen(IncProfCounter, TransIDData(transId));
+}
+
 void HhbcTranslator::emitCheckCold(TransID transId) {
   m_tb->gen(CheckCold, makeExitOpt(transId), TransIDData(transId));
 }

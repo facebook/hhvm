@@ -241,6 +241,7 @@ private:
 
 private:
   void invalidateSrcKey(SrcKey sk);
+  void invalidateFuncProfSrcKeys(const Func* func);
 
 public:
   FixupMap& fixupMap() { return m_fixupMap; }

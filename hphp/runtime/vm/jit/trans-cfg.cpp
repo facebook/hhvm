@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/trans-cfg.h"
+#include "hphp/runtime/vm/jit/region-selection.h"
 
 namespace HPHP {
 namespace JIT {
@@ -79,7 +80,10 @@ TransCFG::TransCFG(FuncId funcId,
   for (TransID tid = 0; tid < profData->numTrans(); tid++) {
     if (profData->transKind(tid) == TransProfile &&
         profData->transRegion(tid) != nullptr &&
-        profData->transFuncId(tid) == funcId) {
+        profData->transFuncId(tid) == funcId &&
+        // This will skip DV Funclets if they were already
+        // retranslated w/ the prologues:
+        !profData->optimized(profData->transSrcKey(tid))) {
       int64_t counter = profData->transCounter(tid);
       int64_t weight  = RuntimeOption::EvalJitPGOThreshold - counter;
       addNode(tid, weight);
@@ -89,13 +93,18 @@ TransCFG::TransCFG(FuncId funcId,
   // add arcs
   for (TransID dstId : nodes()) {
     SrcKey dstSK = profData->transSrcKey(dstId);
+    RegionDesc::BlockPtr dstBlock = profData->transRegion(dstId)->blocks[0];
     const SrcRec* dstSR = srcDB.find(dstSK);
     FTRACE(5, "TransCFG: adding incoming arcs in dstId = {}\n", dstId);
     TransIDSet predIDs = findPredTrans(dstSR, jmpToTransID);
     for (auto predId : predIDs) {
       if (hasNode(predId)) {
-        FTRACE(5, "TransCFG: adding arc {} -> {}\n", predId, dstId);
-        addArc(predId, dstId, TransCFG::Arc::kUnknownWeight);
+        auto predPostConds =
+          profData->transRegion(predId)->blocks.back()->postConds();
+        if (preCondsAreSatisfied(dstBlock, predPostConds)) {
+          FTRACE(5, "TransCFG: adding arc {} -> {}\n", predId, dstId);
+          addArc(predId, dstId, TransCFG::Arc::kUnknownWeight);
+        }
       }
     }
   }
@@ -156,6 +165,15 @@ void TransCFG::addNode(TransID id, int64_t weight) {
 
 bool TransCFG::hasNode(TransID id) const {
   return m_idToIdx.find(id) != m_idToIdx.end();
+}
+
+TransCFG::ArcPtrVec TransCFG::arcs() const {
+  ArcPtrVec arcs;
+  for (auto node : nodes()) {
+    const ArcPtrVec& nodeOutArcs = outArcs(node);
+    arcs.insert(arcs.end(), nodeOutArcs.begin(), nodeOutArcs.end());
+  }
+  return arcs;
 }
 
 void TransCFG::addArc(TransID srcId, TransID dstId, int64_t weight) {

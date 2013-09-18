@@ -56,7 +56,8 @@ class TransCFG {
     bool    m_guessed; // whether or not m_weight was guessed
   };
 
-  typedef std::vector<Arc*> ArcPtrVec;
+  typedef std::vector<Arc*>                      ArcPtrVec;
+  typedef hphp_hash_set<Arc*, pointer_hash<Arc>> ArcPtrSet;
 
   class Node {
    public:
@@ -86,6 +87,7 @@ class TransCFG {
            const TcaTransIDMap& jmpToTransID);
 
   const vector<TransID>& nodes() const { return m_transIds; }
+  ArcPtrVec              arcs()  const;
   int64_t                weight(TransID id) const;
   void                   setNodeWeight(TransID id, int64_t weight);
   const ArcPtrVec&       inArcs(TransID id) const;

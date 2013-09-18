@@ -117,37 +117,16 @@ static void mergePostConds(PostConditions& dst,
   }
 }
 
-static bool postCondMismatch(const RegionDesc::TypePred& postCond,
-                             const RegionDesc::TypePred& preCond) {
-  return postCond.location == preCond.location &&
-         !preCond.type.maybe(postCond.type);
-}
-
-static bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
-                                 const PostConditions& prevPostConds) {
-  const auto& preConds = block->typePreds();
-  for (const auto& it : preConds) {
-    for (const auto& post : prevPostConds) {
-      const RegionDesc::TypePred& preCond = it.second;
-      if (postCondMismatch(post, preCond)) {
-        FTRACE(6, "preCondsAreSatisfied: postcondition check failed!\n"
-               "  postcondition was {}, precondition was {}\n",
-               show(post), show(preCond));
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
 RegionDescPtr selectHotTrace(TransID triggerId,
                              const ProfData* profData,
                              TransCFG& cfg,
-                             TransIDSet& selectedSet) {
+                             TransIDSet& selectedSet,
+                             TransIDVec* selectedVec) {
   JIT::RegionDescPtr region = std::make_shared<JIT::RegionDesc>();
   TransID tid    = triggerId;
   TransID prevId = InvalidID;
   selectedSet.clear();
+  if (selectedVec) selectedVec->clear();
 
   PostConditions accumPostConds;
 
@@ -158,7 +137,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
 
     // If the debugger is attached, only allow single-block regions.
     if (prevId != InvalidID && isDebuggerAttachedProcess()) {
-      FTRACE(5, "selectHotRegion: breaking region at Translation {} "
+      FTRACE(2, "selectHotTrace: breaking region at Translation {} "
              "because of debugger is attached\n", tid);
       break;
     }
@@ -168,14 +147,38 @@ RegionDescPtr selectHotTrace(TransID triggerId,
     if (prevId != InvalidID) {
       auto nRefDeps = blockRegion->blocks[0]->reffinessPreds().size();
       if (nRefDeps > 0) {
-        FTRACE(5, "selectHotRegion: breaking region because of refDeps ({}) at "
+        FTRACE(2, "selectHotTrace: breaking region because of refDeps ({}) at "
                "Translation {}\n", nRefDeps, tid);
         break;
       }
     }
 
+    // Break if block is not the first and it corresponds to the main
+    // function body entry.  This is to prevent creating multiple
+    // large regions containing the function body (starting at various
+    // DV funclets).
+    if (prevId != InvalidID) {
+      const Func* func = profData->transFunc(tid);
+      Offset  bcOffset = profData->transStartBcOff(tid);
+      if (func->base() == bcOffset) {
+        FTRACE(2, "selectHotTrace: breaking region because reached the main "
+               "function body entry at Translation {} (BC offset {})\n",
+               tid, bcOffset);
+        break;
+      }
+    }
+
+    if (prevId != InvalidID) {
+      auto sk = profData->transSrcKey(tid);
+      if (profData->optimized(sk)) {
+        FTRACE(2, "selectHotTrace: breaking region because next sk already "
+               "optimized, for Translation {}\n", tid);
+        break;
+      }
+    }
+
     // Break trace if translation tid cannot follow the execution of
-    // the entire translation prevTd.  This can only happen if the
+    // the entire translation prevId.  This can only happen if the
     // execution of prevId takes a side exit that leads to the
     // execution of tid.
     if (prevId != InvalidID) {
@@ -183,16 +186,12 @@ RegionDescPtr selectHotTrace(TransID triggerId,
       const Unit* unit = profData->transFunc(prevId)->unit();
       OffsetSet succOffs = findSuccOffsets(lastInstr, unit);
       if (!setContains(succOffs, profData->transSrcKey(tid).offset())) {
-        if (HPHP::Trace::moduleEnabled(HPHP::Trace::pgo, 5)) {
-          FTRACE(5, "selectHotTrace: WARNING: Breaking region @: {}\n",
+        if (HPHP::Trace::moduleEnabled(HPHP::Trace::pgo, 2)) {
+          FTRACE(2, "selectHotTrace: WARNING: Breaking region @: {}\n",
                  JIT::show(*region));
-          FTRACE(5, "selectHotTrace: next translation selected: tid = {}\n{}\n",
+          FTRACE(2, "selectHotTrace: next translation selected: tid = {}\n{}\n",
                  tid, JIT::show(*blockRegion));
-          std::string succStr("succOffs = ");
-          for (auto succ : succOffs) {
-            succStr += lexical_cast<std::string>(succ);
-          }
-          FTRACE(5, "\n{}\n", succStr);
+          FTRACE(2, "\nsuccOffs = {}\n", folly::join(", ", succOffs));
         }
         break;
       }
@@ -200,17 +199,18 @@ RegionDescPtr selectHotTrace(TransID triggerId,
     region->blocks.insert(region->blocks.end(), blockRegion->blocks.begin(),
                           blockRegion->blocks.end());
     selectedSet.insert(tid);
+    if (selectedVec) selectedVec->push_back(tid);
 
     Op lastOp = *(profData->transLastInstr(tid));
     if (breaksRegion(lastOp)) {
-      FTRACE(5, "selectHotTrace: breaking region because of last instruction "
+      FTRACE(2, "selectHotTrace: breaking region because of last instruction "
              "in Translation {}: {}\n", tid, opcodeToName(lastOp));
       break;
     }
 
     auto outArcs = cfg.outArcs(tid);
     if (outArcs.size() == 0) {
-      FTRACE(5, "selectHotTrace: breaking region because there's no successor "
+      FTRACE(2, "selectHotTrace: breaking region because there's no successor "
              "for Translation {}\n", tid);
       break;
     }
@@ -230,7 +230,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
     }
 
     if (possibleOutArcs.size() == 0) {
-      FTRACE(5, "selectHotTrace: breaking region because postcondition check "
+      FTRACE(2, "selectHotTrace: breaking region because postcondition check "
              "pruned all successors of Translation {}\n", tid);
       break;
     }
@@ -244,20 +244,6 @@ RegionDescPtr selectHotTrace(TransID triggerId,
       }
     }
     assert(maxArc != nullptr);
-
-    // Break after the first block if it corresponds to a DV funclet.
-    // This is to avoid generating many large regions including the
-    // function body entry.
-    if (prevId == InvalidID) {
-      const Func* func = profData->transFunc(tid);
-      Offset  bcOffset = profData->transStartBcOff(tid);
-      if (func->isDVEntry(bcOffset)) {
-        FTRACE(5, "selectHotRegion: breaking region because it started at a "
-               "DV Funclet Translation {} (BC offset {})\n", tid, bcOffset);
-        break;
-      }
-    }
-
     prevId = tid;
     tid = maxArc->dst();
   }

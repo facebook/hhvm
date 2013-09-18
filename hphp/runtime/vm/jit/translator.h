@@ -264,19 +264,17 @@ struct TransBCMapping {
  * A record with various information about a translation.
  */
 struct TransRec {
-  TransID                 id;
-  TransKind               kind;
-  SrcKey                  src;
-  MD5                     md5;
-  Offset                  bcStopOffset;
-  vector<DynLocation>     dependencies;
-  TCA                     aStart;
-  uint32_t                  aLen;
-  TCA                     astubsStart;
-  uint32_t                  astubsLen;
-  TCA                     counterStart;
-  uint8_t                   counterLen;
-  vector<TransBCMapping>  bcMapping;
+  TransID                id;
+  TransKind              kind;
+  SrcKey                 src;
+  MD5                    md5;
+  Offset                 bcStopOffset;
+  vector<DynLocation>    dependencies;
+  TCA                    aStart;
+  uint32_t               aLen;
+  TCA                    astubsStart;
+  uint32_t               astubsLen;
+  vector<TransBCMapping> bcMapping;
 
   TransRec() {}
 
@@ -284,24 +282,22 @@ struct TransRec {
            MD5       _md5,
            TransKind _kind,
            TCA       _aStart = 0,
-           uint32_t    _aLen = 0,
+           uint32_t  _aLen = 0,
            TCA       _astubsStart = 0,
-           uint32_t    _astubsLen = 0) :
+           uint32_t  _astubsLen = 0) :
       id(0), kind(_kind), src(s), md5(_md5), bcStopOffset(0),
       aStart(_aStart), aLen(_aLen),
-      astubsStart(_astubsStart), astubsLen(_astubsLen),
-      counterStart(0), counterLen(0) { }
+      astubsStart(_astubsStart), astubsLen(_astubsLen)
+    { }
 
   TransRec(SrcKey                   s,
            MD5                      _md5,
            TransKind                _kind,
-           const Tracelet&          t,
+           const Tracelet*          t,
            TCA                      _aStart = 0,
            uint32_t                 _aLen = 0,
            TCA                      _astubsStart = 0,
            uint32_t                 _astubsLen = 0,
-           TCA                      _counterStart = 0,
-           uint8_t                  _counterLen = 0,
            vector<TransBCMapping>  _bcMapping = vector<TransBCMapping>());
 
   void setID(TransID newID) { id = newID; }
@@ -315,6 +311,7 @@ struct TranslArgs {
       , m_interp(false)
       , m_setFuncBody(false)
       , m_transId(InvalidID)
+      , m_region(nullptr)
     {}
 
   TranslArgs& sk(const SrcKey& sk) {
@@ -337,12 +334,17 @@ struct TranslArgs {
     m_transId = transId;
     return *this;
   }
+  TranslArgs& region(JIT::RegionDescPtr region) {
+    m_region = region;
+    return *this;
+  }
 
   SrcKey m_sk;
   bool m_align;
   bool m_interp;
   bool m_setFuncBody;
   TransID m_transId;
+  JIT::RegionDescPtr m_region;
 };
 
 /*

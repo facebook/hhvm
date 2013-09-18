@@ -5917,6 +5917,13 @@ void CodeGenerator::cgIncTransCounter(IRInstruction* inst) {
   emitTransCounterInc(m_as);
 }
 
+void CodeGenerator::cgIncProfCounter(IRInstruction* inst) {
+  TransID  transId = inst->extra<TransIDData>()->transId;
+  auto counterAddr = m_tx64->profData()->transCounterAddr(transId);
+  emitLoadImm(m_as, uint64_t(counterAddr), m_rScratch);
+  m_as.decq(m_rScratch[0]);
+}
+
 void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
   emitAssertRefCount(m_as, m_regs[inst->src(0)].reg());
 }

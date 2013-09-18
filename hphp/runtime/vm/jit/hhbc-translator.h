@@ -453,6 +453,7 @@ struct HhbcTranslator {
   void emitStrlen();
   void emitIncStat(int32_t counter, int32_t value, bool force = false);
   void emitIncTransCounter();
+  void emitIncProfCounter(Transl::TransID transId);
   void emitCheckCold(Transl::TransID transId);
   void emitRB(Trace::RingBufferType t, SrcKey sk);
   void emitRB(Trace::RingBufferType t, std::string msg) {

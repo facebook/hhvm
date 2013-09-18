@@ -29,10 +29,13 @@ namespace JIT {
 static const Trace::Module TRACEMOD = Trace::pgo;
 
 using Transl::Tracelet;
+using Transl::TransLive;
 using Transl::TransAnchor;
+using Transl::TransInterp;
 using Transl::TransPrologue;
 using Transl::TransProflogue;
 using Transl::TransProfile;
+using Transl::TransOptimize;
 using Transl::InvalidID;
 
 ///////////   Counters   //////////
@@ -121,7 +124,8 @@ ProfTransRec::ProfTransRec(TransID       id,
     , m_lastBcOff(-1)
     , m_region(nullptr)
     , m_sk(sk) {
-  assert(kind == TransAnchor);
+  assert(kind == TransAnchor || kind == TransOptimize ||
+         kind == TransInterp || kind == TransLive);
 }
 
 ProfTransRec::ProfTransRec(TransID       id,
@@ -277,11 +281,19 @@ int ProfData::prologueArgs(TransID id) const {
 }
 
 bool ProfData::optimized(const SrcKey& sk) const {
-  return mapContains(m_optimized, sk);
+  return mapContains(m_optimizedSKs, sk);
+}
+
+bool ProfData::optimized(FuncId funcId) const {
+  return mapContains(m_optimizedFuncs, funcId);
 }
 
 void ProfData::setOptimized(const SrcKey& sk) {
-  m_optimized.insert(sk);
+  m_optimizedSKs.insert(sk);
+}
+
+void ProfData::setOptimized(FuncId funcId) {
+  m_optimizedFuncs.insert(funcId);
 }
 
 RegionDescPtr ProfData::transRegion(TransID id) const {
@@ -290,37 +302,35 @@ RegionDescPtr ProfData::transRegion(TransID id) const {
   return pTransRec.region();
 }
 
-TransID ProfData::addTrans(const Tracelet&       tracelet,
-                           const RegionContext&  rCtx,
-                           TransKind             kind,
-                           const PostConditions& pconds) {
+TransID ProfData::addTransProfile(const Tracelet&       tracelet,
+                                  const RegionContext&  rCtx,
+                                  const PostConditions& pconds) {
   TransID transId   = m_numTrans++;
   Offset  lastBcOff = tracelet.m_instrStream.last->source.offset();
-  auto region = kind == TransProfile ? selectTraceletLegacy(rCtx, tracelet)
-                                     : nullptr;
-  if (region) {
-    DEBUG_ONLY size_t nBlocks = region->blocks.size();
-    assert(nBlocks == 1 || (nBlocks > 1 && region->blocks[0]->inlinedCallee()));
-    region->blocks.back()->setPostConditions(pconds);
-  }
-  m_transRecs.emplace_back(new ProfTransRec(transId, kind, lastBcOff,
+  auto       region = selectTraceletLegacy(rCtx, tracelet);
+
+  assert(region);
+  DEBUG_ONLY size_t nBlocks = region->blocks.size();
+  assert(nBlocks == 1 || (nBlocks > 1 && region->blocks[0]->inlinedCallee()));
+
+  region->blocks.back()->setPostConditions(pconds);
+  m_transRecs.emplace_back(new ProfTransRec(transId, TransProfile, lastBcOff,
                                             tracelet.m_sk, region));
-  // For profiling translations of DV funclets, add an entry into the
-  // dvFuncletDB.
-  if (kind == TransProfile) {
-    const Func* func = tracelet.m_sk.func();
-    FuncId    funcId = func->getFuncId();
-    Offset  bcOffset = tracelet.m_sk.offset();
-    if (func->isDVEntry(bcOffset)) {
-      int nParams = func->getDVEntryNumParams(bcOffset);
-      // Normal DV funclets don't have type guards, and thus have a
-      // single translation.  However, some special functions written
-      // in hhas (e.g. array_map) have complex DV funclets that get
-      // retranslated for different types.  For those functions,
-      // m_dvFuncletDB keeps the TransID for their first translation.
-      if (m_dvFuncletDB.get(funcId, nParams) == InvalidID) {
-        m_dvFuncletDB.add(funcId, nParams, transId);
-      }
+
+  // If the translation corresponds to a DV Funclet, then add an entry
+  // into dvFuncletDB.
+  const Func* func = tracelet.m_sk.func();
+  FuncId    funcId = func->getFuncId();
+  Offset  bcOffset = tracelet.m_sk.offset();
+  if (func->isDVEntry(bcOffset)) {
+    int nParams = func->getDVEntryNumParams(bcOffset);
+    // Normal DV funclets don't have type guards, and thus have a
+    // single translation.  However, some special functions written
+    // in hhas (e.g. array_map) have complex DV funclets that get
+    // retranslated for different types.  For those functions,
+    // m_dvFuncletDB keeps the TransID for their first translation.
+    if (m_dvFuncletDB.get(funcId, nParams) == InvalidID) {
+      m_dvFuncletDB.add(funcId, nParams, transId);
     }
   }
   return transId;
@@ -338,9 +348,11 @@ TransID ProfData::addTransPrologue(TransKind kind, const SrcKey& sk,
   return transId;
 }
 
-TransID ProfData::addTransAnchor(const SrcKey& sk) {
+TransID ProfData::addTransNonProf(TransKind kind, const SrcKey& sk) {
+  assert(kind == TransAnchor || kind == TransInterp ||
+         kind == TransLive   || kind == TransOptimize);
   TransID transId = m_numTrans++;
-  m_transRecs.emplace_back(new ProfTransRec(transId, TransAnchor, sk));
+  m_transRecs.emplace_back(new ProfTransRec(transId, kind, sk));
   return transId;
 }
 

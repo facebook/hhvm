@@ -143,18 +143,36 @@ Variant f_array_column(CVarRef input, CVarRef val_key,
 }
 
 Variant f_array_combine(CVarRef keys, CVarRef values) {
-  getCheckedArray(keys);
-  getCheckedArray(values);
-  return ArrayUtil::Combine(arr_keys, arr_values);
+  const auto& cell_keys = *keys.asCell();
+  const auto& cell_values = *values.asCell();
+  if (UNLIKELY(!isContainer(cell_keys) || !isContainer(cell_values))) {
+    raise_warning("Invalid operand type was used: array_combine expects "
+                  "arrays or collections");
+    return uninit_null();
+  }
+  if (UNLIKELY(getContainerSize(cell_keys) != getContainerSize(cell_values))) {
+    raise_warning("array_combine(): Both parameters should have an equal "
+                  "number of elements");
+    return false;
+  }
+  Array ret = ArrayData::Create();
+  for (ArrayIter iter1(cell_keys), iter2(cell_values);
+       iter1; ++iter1, ++iter2) {
+    ret.lvalAt(iter1.secondRefPlus()).setWithRef(iter2.secondRefPlus());
+  }
+  return ret;
 }
+
 Variant f_array_count_values(CVarRef input) {
   getCheckedArray(input);
   return ArrayUtil::CountValues(arr_input);
 }
+
 Variant f_array_fill_keys(CVarRef keys, CVarRef value) {
   getCheckedArray(keys);
   return ArrayUtil::CreateArray(arr_keys, value);
 }
+
 Variant f_array_fill(int start_index, int num, CVarRef value) {
   return ArrayUtil::CreateArray(start_index, num, value);
 }
@@ -231,10 +249,62 @@ bool f_key_exists(CVarRef key, CVarRef search) {
   return f_array_key_exists(key, search);
 }
 
+static Variant
+arrayKeysSetHelper(const Cell& cell_input, CVarRef search_value, bool strict) {
+  ArrayIter iter(cell_input);
+  if (LIKELY(!search_value.isInitialized())) {
+    PackedArrayInit ai(getContainerSize(cell_input));
+    for (; iter; ++iter) {
+      ai.append(iter.second());
+    }
+    return ai.toArray();
+  }
+  PackedArrayInit ai(0);
+  for (; iter; ++iter) {
+    if ((strict && HPHP::same(iter.secondRefPlus(), search_value)) ||
+        (!strict && HPHP::equal(iter.secondRefPlus(), search_value))) {
+      ai.append(iter.second());
+    }
+  }
+  return ai.toArray();
+}
+
 Variant f_array_keys(CVarRef input, CVarRef search_value /* = null_variant */,
                      bool strict /* = false */) {
-  getCheckedArray(input);
-  return arr_input.keys(search_value, strict);
+  const auto& cell_input = *input.asCell();
+  if (UNLIKELY(!isContainer(cell_input))) {
+    goto warn;
+  }
+  {
+    // We treat Sets differently. For Sets, we pretend the values are
+    // also the keys (similar to how Set::toArray() behaves).
+    bool isSetType =
+      cell_input.m_type == KindOfObject &&
+      cell_input.m_data.pobj->getCollectionType() == Collection::SetType;
+    if (UNLIKELY(isSetType)) {
+      return arrayKeysSetHelper(cell_input, search_value, strict);
+    }
+    ArrayIter iter(cell_input);
+    if (LIKELY(!search_value.isInitialized())) {
+      PackedArrayInit ai(getContainerSize(cell_input));
+      for (; iter; ++iter) {
+        ai.append(iter.first());
+      }
+      return ai.toArray();
+    }
+    PackedArrayInit ai(0);
+    for (; iter; ++iter) {
+      if ((strict && HPHP::same(iter.secondRefPlus(), search_value)) ||
+          (!strict && HPHP::equal(iter.secondRefPlus(), search_value))) {
+        ai.append(iter.first());
+      }
+    }
+    return ai.toArray();
+  }
+warn:
+  raise_warning("array_keys() expects parameter 1 to be an array "
+                "or collection");
+  return uninit_null();
 }
 
 static Variant map_func(CArrRef params, const void *data) {
@@ -551,7 +621,7 @@ int64_t f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv /
           newArray.append(_argv->getValueRef(pos));
         }
       }
-      for (ArrayIter iter(array); iter; ++iter) {
+      for (ArrayIter iter(array.toArray()); iter; ++iter) {
         Variant key(iter.first());
         CVarRef value(iter.secondRef());
         if (key.isInteger()) {
@@ -571,8 +641,17 @@ int64_t f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv /
 }
 
 Variant f_array_values(CVarRef input) {
-  getCheckedArray(input);
-  return arr_input.values();
+  const auto& cell_input = *input.asCell();
+  if (!isContainer(cell_input)) {
+    raise_warning("array_values() expects parameter 1 to be an array "
+                  "or collection");
+    return uninit_null();
+  }
+  PackedArrayInit ai(getContainerSize(cell_input));
+  for (ArrayIter iter(cell_input); iter; ++iter) {
+    ai.appendWithRef(iter.secondRefPlus());
+  }
+  return ai.toArray();
 }
 
 static void walk_func(VRefParam value, CVarRef key, CVarRef userdata,
@@ -668,6 +747,9 @@ int64_t f_count(CVarRef var, bool recursive /* = false */) {
   case KindOfObject:
     {
       Object obj = var.toObject();
+      if (obj->isCollection()) {
+        return obj->getCollectionSize();
+      }
       if (obj.instanceof(SystemLib::s_CountableClass)) {
         return obj->o_invoke_few_args(s_count, 0).toInt64();
       }

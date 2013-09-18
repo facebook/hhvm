@@ -49,20 +49,6 @@ Variant ArrayUtil::CreateArray(int start_index, int num, CVarRef value) {
   return ret;
 }
 
-Variant ArrayUtil::Combine(CArrRef keys, CArrRef values) {
-  if (keys.size() != values.size()) {
-    throw_invalid_argument("keys and values not same count");
-    return false;
-  }
-
-  Array ret = Array::Create();
-  for (ArrayIter iter1(keys), iter2(values); iter1; ++iter1, ++iter2) {
-    CVarRef v(iter2.secondRef());
-    ret.lvalAt(iter1.secondRef()).setWithRef(v);
-  }
-  return ret;
-}
-
 Variant ArrayUtil::Chunk(CArrRef input, int size,
                          bool preserve_keys /* = false */) {
   if (size < 1) {
@@ -461,14 +447,6 @@ Variant ArrayUtil::CountValues(CArrRef input) {
     }
   }
   return ret;
-}
-
-Array ArrayUtil::EnsureIntKeys(CArrRef input) {
-  assert(!input.isNull());
-  if (!input.get()->isVectorData()) {
-    return input.values();
-  }
-  return input;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

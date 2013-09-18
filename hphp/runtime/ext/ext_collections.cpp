@@ -75,14 +75,14 @@ static inline ArrayIter getArrayIterHelper(CVarRef v, size_t& sz) {
   if (v.isObject()) {
     ObjectData* obj = v.getObjectData();
     if (obj->isCollection()) {
-      sz = collectionSize(obj);
+      sz = obj->getCollectionSize();
       return ArrayIter(obj);
     }
     bool isIterable;
     Object iterable = obj->iterableObject(isIterable);
     if (isIterable) {
       sz = 0;
-      return ArrayIter(iterable, ArrayIter::transferOwner);
+      return ArrayIter(iterable.detach(), ArrayIter::noInc);
     }
   }
   Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -100,7 +100,7 @@ c_Vector::c_Vector(Class* cb) :
                        ObjectData::UseUnset|
                        ObjectData::CallToImpl|
                        ObjectData::HasClone>(cb),
-    m_data(nullptr), m_size(0), m_capacity(0), m_version(0) {
+    m_size(0), m_data(nullptr), m_capacity(0), m_version(0) {
 }
 
 c_Vector::~c_Vector() {
@@ -1896,17 +1896,6 @@ void c_Map::adjustCapacityImpl(int64_t sz) {
   smart_free(oldBuckets);
 }
 
-ssize_t c_Map::iter_begin() const {
-  if (!m_size) return 0;
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket* p = fetchBucket(i);
-    if (p->validValue()) {
-      return reinterpret_cast<ssize_t>(p);
-    }
-  }
-  return 0;
-}
-
 ssize_t c_Map::iter_next(ssize_t pos) const {
   if (pos == 0) {
     return 0;
@@ -3017,11 +3006,6 @@ void c_StableMap::adjustCapacityImpl(int64_t sz) {
   }
 }
 
-ssize_t c_StableMap::iter_begin() const {
-  Bucket* p = m_pListHead;
-  return reinterpret_cast<ssize_t>(p);
-}
-
 ssize_t c_StableMap::iter_next(ssize_t pos) const {
   if (pos == 0) {
     return 0;
@@ -4038,17 +4022,6 @@ void c_Set::adjustCapacityImpl(int64_t sz) {
   smart_free(oldBuckets);
 }
 
-ssize_t c_Set::iter_begin() const {
-  if (!m_size) return 0;
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket* p = fetchBucket(i);
-    if (p->validValue()) {
-      return reinterpret_cast<ssize_t>(p);
-    }
-  }
-  return 0;
-}
-
 ssize_t c_Set::iter_next(ssize_t pos) const {
   if (pos == 0) {
     return 0;
@@ -4695,7 +4668,7 @@ KEYEDITERABLE_MATERIALIZE_METHODS(Pair)
 
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
   assert(obj->isCollection());
-  int64_t sz = collectionSize(obj);
+  int64_t sz = obj->getCollectionSize();
   if (obj->getCollectionType() == Collection::VectorType ||
       obj->getCollectionType() == Collection::SetType ||
       obj->getCollectionType() == Collection::PairType) {
@@ -5197,24 +5170,6 @@ bool collectionOffsetEmpty(ObjectData* obj, CVarRef offset) {
     default:
       assert(false);
       return true;
-  }
-}
-
-int64_t collectionSize(ObjectData* obj) {
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-      return static_cast<c_Vector*>(obj)->t_count();
-    case Collection::MapType:
-      return static_cast<c_Map*>(obj)->t_count();
-    case Collection::StableMapType:
-      return static_cast<c_StableMap*>(obj)->t_count();
-    case Collection::SetType:
-      return static_cast<c_Set*>(obj)->t_count();
-    case Collection::PairType:
-      return static_cast<c_Pair*>(obj)->t_count();
-    default:
-      assert(false);
-      return 0;
   }
 }
 

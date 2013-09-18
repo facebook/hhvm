@@ -1311,13 +1311,6 @@ void HphpArray::zAppendImpl(RefData* data) {
   zInitVal(e.data, data);
 }
 
-// return true if Elm contains a Reference that won't be flattened
-// by a copy, or an object.
-static inline bool isContainer(const TypedValue& tv) {
-  auto& v = tvAsCVarRef(&tv);
-  return v.isReferenced() || v.isObject();
-}
-
 ArrayData* HphpArray::LvalIntPacked(ArrayData* ad, int64_t k, Variant*& ret,
                                     bool copy) {
   auto a = asPacked(ad);

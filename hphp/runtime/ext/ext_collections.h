@@ -185,17 +185,24 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   void grow();
   static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
-  TypedValue* m_data;
   uint m_size;
+  TypedValue* m_data;
   uint m_capacity;
   int32_t m_version;
 
+  friend ObjectData* collectionDeepCopyVector(c_Vector* vec);
   friend class c_VectorIterator;
   friend class c_Map;
   friend class c_StableMap;
   friend class c_Pair;
   friend class ArrayIter;
-  friend ObjectData* collectionDeepCopyVector(c_Vector* vec);
+
+  static void compileTimeAssertions() {
+    // For performance, all native collection classes have their m_size field
+    // at the same offset.
+    static_assert(
+      offsetof(c_Vector, m_size) == FAST_COLLECTION_SIZE_OFFSET, "");
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -443,8 +450,8 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
    * 2 elements).
    */
 
-  Bucket* m_data;
   uint m_size;
+  Bucket* m_data;
   uint m_load;
   uint m_nLastSlot;
   int32_t m_version;
@@ -498,7 +505,16 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
 
   void deleteBuckets();
 
-  ssize_t iter_begin() const;
+  ssize_t iter_begin() const {
+    if (!m_size) return 0;
+    for (uint i = 0; i <= m_nLastSlot; ++i) {
+      Bucket* p = fetchBucket(i);
+      if (p->validValue()) {
+        return reinterpret_cast<ssize_t>(p);
+      }
+    }
+    return 0;
+  }
   ssize_t iter_next(ssize_t prev) const;
   ssize_t iter_prev(ssize_t prev) const;
   Variant iter_key(ssize_t pos) const;
@@ -512,6 +528,12 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   friend class c_StableMap;
   friend class ArrayIter;
   friend class c_GenMapWaitHandle;
+
+  static void compileTimeAssertions() {
+    // For performance, all native collection classes have their m_size field
+    // at the same offset.
+    static_assert(offsetof(c_Map, m_size) == FAST_COLLECTION_SIZE_OFFSET, "");
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -780,7 +802,10 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
 
   void deleteBuckets();
 
-  ssize_t iter_begin() const;
+  ssize_t iter_begin() const {
+    Bucket* p = m_pListHead;
+    return reinterpret_cast<ssize_t>(p);
+  }
   ssize_t iter_next(ssize_t prev) const;
   ssize_t iter_prev(ssize_t prev) const;
   Variant iter_key(ssize_t pos) const;
@@ -793,6 +818,13 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   friend class c_Vector;
   friend class c_Map;
   friend class ArrayIter;
+
+  static void compileTimeAssertions() {
+    // For performance, all native collection classes have their m_size field
+    // at the same offset.
+    static_assert(
+      offsetof(c_StableMap, m_size) == FAST_COLLECTION_SIZE_OFFSET, "");
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -967,8 +999,8 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
    * we decide when to grow or shrink the table.
    */
 
-  Bucket* m_data;
   uint m_size;
+  Bucket* m_data;
   uint m_load;
   uint m_nLastSlot;
   int32_t m_version;
@@ -1015,7 +1047,16 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
 
   void deleteBuckets();
 
-  ssize_t iter_begin() const;
+  ssize_t iter_begin() const {
+    if (!m_size) return 0;
+    for (uint i = 0; i <= m_nLastSlot; ++i) {
+      Bucket* p = fetchBucket(i);
+      if (p->validValue()) {
+        return reinterpret_cast<ssize_t>(p);
+      }
+    }
+    return 0;
+  }
   ssize_t iter_next(ssize_t prev) const;
   ssize_t iter_prev(ssize_t prev) const;
   const TypedValue* iter_value(ssize_t pos) const;
@@ -1029,6 +1070,12 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   friend class c_Map;
   friend class c_StableMap;
   friend class ArrayIter;
+
+  static void compileTimeAssertions() {
+    // For performance, all native collection classes have their m_size field
+    // at the same offset.
+    static_assert(offsetof(c_Set, m_size) == FAST_COLLECTION_SIZE_OFFSET, "");
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1160,7 +1207,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
   int64_t size() const {
-    return 2;
+    return m_size;
   }
 
   static uint dataOffset() { return offsetof(c_Pair, elm0); }
@@ -1184,6 +1231,12 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   friend class c_Map;
   friend class c_StableMap;
   friend class ArrayIter;
+
+  static void compileTimeAssertions() {
+    // For performance, all native collection classes have their m_size field
+    // at the same offset.
+    static_assert(offsetof(c_Pair, m_size) == FAST_COLLECTION_SIZE_OFFSET, "");
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1226,7 +1279,6 @@ void collectionOffsetSet(ObjectData* obj, CVarRef offset, CVarRef val);
 bool collectionOffsetContains(ObjectData* obj, CVarRef offset);
 bool collectionOffsetIsset(ObjectData* obj, CVarRef offset);
 bool collectionOffsetEmpty(ObjectData* obj, CVarRef offset);
-int64_t collectionSize(ObjectData* obj);
 void collectionReserve(ObjectData* obj, int64_t sz);
 void collectionUnserialize(ObjectData* obj, VariableUnserializer* uns,
                            int64_t sz, char type);

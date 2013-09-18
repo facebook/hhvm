@@ -618,25 +618,6 @@ Variant Array::key(CVarRef search_value, bool strict /* = false */) const {
   return false; // PHP uses "false" over null in many places
 }
 
-Array Array::keys(CVarRef search_value /* = null_variant */,
-                  bool strict /* = false */) const {
-  if (!search_value.isInitialized()) {
-    PackedArrayInit ai(size());
-    for (ArrayIter iter(*this); iter; ++iter) {
-      ai.append(iter.first());
-    }
-    return ai.toArray();
-  }
-  PackedArrayInit ai(0);
-  for (ArrayIter iter(*this); iter; ++iter) {
-    if ((strict && HPHP::same(iter.secondRef(), search_value)) ||
-        (!strict && HPHP::equal(iter.secondRef(), search_value))) {
-      ai.append(iter.first());
-    }
-  }
-  return ai.toArray();
-}
-
 Array Array::values() const {
   PackedArrayInit ai(size());
   for (ArrayIter iter(*this); iter; ++iter) {

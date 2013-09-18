@@ -44,12 +44,6 @@ public:
   static Variant CreateArray(int start_index, int num, CVarRef value);
 
   /**
-   * Creates an array by using the elements of the first parameter as keys
-   * and the elements of the second as the corresponding values.
-   */
-  static Variant Combine(CArrRef keys, CArrRef values);
-
-  /**
    * Split array into chunks.
    */
   static Variant Chunk(CArrRef input, int size, bool preserve_keys = false);
@@ -108,13 +102,6 @@ public:
    * as value.
    */
   static Variant CountValues(CArrRef input);
-
-  /**
-   * Returns input as a numerically indexed array starting from zero
-   * with no gaps. Is optimized for the case where input is already
-   * correct. Assumes input is not null.
-   */
-  static Array EnsureIntKeys(CArrRef input);
 
   /////////////////////////////////////////////////////////////////////////////
   // Manipulations. Note, all these functions will create a new array than

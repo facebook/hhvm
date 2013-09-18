@@ -171,7 +171,7 @@ Object ObjectData::iterableObject(bool& isIterable,
       isIterable = true;
       return o;
     }
-    obj = iterator.getObjectData();
+    obj = o;
   }
   isIterable = false;
   return obj;
@@ -184,7 +184,7 @@ ArrayIter ObjectData::begin(CStrRef context /* = null_string */) {
   }
   Object iterable = iterableObject(isIterable);
   if (isIterable) {
-    return ArrayIter(iterable, ArrayIter::transferOwner);
+    return ArrayIter(iterable.detach(), ArrayIter::noInc);
   } else {
     return ArrayIter(iterable->o_toIterArray(context));
   }

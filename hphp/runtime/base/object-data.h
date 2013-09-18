@@ -199,6 +199,9 @@ class ObjectData {
     // Return the upper 3 bits of o_attribute
     return (Collection::Type)((uint16_t)(o_attribute >> 13) & 7);
   }
+  size_t getCollectionSize() const {
+    return *(uint*)((char*)this + FAST_COLLECTION_SIZE_OFFSET);
+  }
 
   bool implementsIterator() {
     return (instanceof(SystemLib::s_IteratorClass));

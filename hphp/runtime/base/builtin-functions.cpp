@@ -472,7 +472,12 @@ void throw_collection_compare_exception() {
   throw e;
 }
 
-// TODO
+void throw_param_is_not_container() {
+  static const string msg("Parameter must be an array or collection");
+  Object e(SystemLib::AllocInvalidArgumentExceptionObject(msg));
+  throw e;
+}
+
 void check_collection_compare(ObjectData* obj) {
   if (obj && obj->isCollection()) throw_collection_compare_exception();
 }

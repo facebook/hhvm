@@ -181,13 +181,42 @@ void throw_instance_method_fatal(const char *name);
 void throw_iterator_not_valid() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 void throw_collection_modified() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 void throw_collection_property_exception() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
-void throw_collection_compare_exception() ATTRIBUTE_COLD;
+void throw_collection_compare_exception() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+void throw_param_is_not_container() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 void check_collection_compare(ObjectData* obj);
 void check_collection_compare(ObjectData* obj1, ObjectData* obj2);
 void check_collection_cast_to_array();
 
 Object create_object_only(CStrRef s);
 Object create_object(CStrRef s, const Array &params, bool init = true);
+
+inline bool isContainer(const Cell& c) {
+  assert(cellIsPlausible(c));
+  return c.m_type == KindOfArray ||
+         (c.m_type == KindOfObject && c.m_data.pobj->isCollection());
+}
+
+inline bool isContainer(CVarRef v) {
+  return isContainer(*v.asCell());
+}
+
+inline size_t getContainerSize(const Cell& c) {
+  assert(cellIsPlausible(c));
+  if (c.m_type == KindOfArray) {
+    return c.m_data.parr->size();
+  }
+  if (c.m_type == KindOfObject) {
+    auto o = c.m_data.pobj;
+    if (o->isCollection()) {
+      return o->getCollectionSize();
+    }
+  }
+  throw_param_is_not_container();
+}
+
+inline size_t getContainerSize(CVarRef v) {
+  return getContainerSize(*v.asCell());
+}
 
 /**
  * Argument count handling.

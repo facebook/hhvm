@@ -17,6 +17,7 @@
 #include "hphp/test/ext/test_ext_memcached.h"
 #include "hphp/runtime/ext/ext_memcached.h"
 #include "hphp/runtime/ext/ext_options.h"
+#include "hphp/runtime/ext/ext_array.h"
 #include "hphp/test/ext/test_memcached_info.inc"
 
 IMPLEMENT_SEP_EXTENSION_TEST(Memcached);
@@ -120,7 +121,7 @@ bool TestExtMemcached::test_Memcached_types() {
   }
 
   VERIFY(memc->t_setmulti(list, EXPIRATION));
-  Variant res = memc->t_getmulti(list.keys());
+  Variant res = memc->t_getmulti(f_array_keys(list).toArray());
   VERIFY(res.isArray());
   Array resArray = res.toArray();
   VERIFY(resArray->size() == list.size());

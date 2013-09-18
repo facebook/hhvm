@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/ext_collections.h"
 
 // inline methods of HphpArray.
@@ -40,120 +40,176 @@ const StaticString
 ///////////////////////////////////////////////////////////////////////////////
 // ArrayIter
 
-ArrayIter::ArrayIter() : m_pos(ArrayData::invalid_index) {
-  m_data = nullptr;
+HOT_FUNC
+ArrayIter::ArrayIter(const ArrayData* data) {
+  arrInit(data);
 }
 
 HOT_FUNC
-ArrayIter::ArrayIter(const ArrayData *data) {
-  setArrayData(data);
-  if (data) {
-    data->incRefCount();
-    m_pos = data->iter_begin();
-  } else {
-    m_pos = ArrayData::invalid_index;
-  }
+ArrayIter::ArrayIter(CArrRef array) {
+  arrInit(array.get());
 }
 
-HOT_FUNC
-ArrayIter::ArrayIter(CArrRef array) : m_pos(0) {
-  const ArrayData* ad = array.get();
-  setArrayData(ad);
-  if (ad) {
-    ad->incRefCount();
-    m_pos = ad->iter_begin();
-  } else {
-    m_pos = ArrayData::invalid_index;
-  }
+ArrayIter::ArrayIter(ObjectData* obj)
+  : m_pos(ArrayData::invalid_index) {
+  objInit<true>(obj);
 }
 
-void ArrayIter::reset() {
+ArrayIter::ArrayIter(ObjectData* obj, NoInc)
+  : m_pos(ArrayData::invalid_index) {
+  objInit<false>(obj);
+}
+
+ArrayIter::ArrayIter(CObjRef obj)
+  : m_pos(ArrayData::invalid_index) {
+  objInit<true>(obj.get());
+}
+
+ArrayIter::ArrayIter(const Cell& c) {
+  cellInit(c);
+}
+
+ArrayIter::ArrayIter(CVarRef v) {
+  cellInit(*v.asCell());
+}
+
+ArrayIter::ArrayIter(const ArrayIter& iter) {
+  m_data = iter.m_data;
+  m_pos = iter.m_pos;
+  m_version = iter.m_version;
+  m_itype = iter.m_itype;
   if (hasArrayData()) {
     const ArrayData* ad = getArrayData();
-    m_data = nullptr;
-    if (ad) decRefArr(const_cast<ArrayData*>(ad));
-    return;
+    if (ad) const_cast<ArrayData*>(ad)->incRefCount();
+  } else {
+    ObjectData* obj = getObject();
+    assert(obj);
+    obj->incRefCount();
   }
-  ObjectData* obj = getObject();
-  m_data = nullptr;
-  assert(obj);
-  decRefObj(obj);
 }
 
+HOT_FUNC
+void ArrayIter::arrInit(const ArrayData* arr) {
+  setArrayData(arr);
+  if (arr) {
+    arr->incRefCount();
+    m_pos = arr->iter_begin();
+  } else {
+    m_pos = ArrayData::invalid_index;
+  }
+}
+
+void ArrayIter::VectorInit(ArrayIter* iter, ObjectData* obj) {
+  auto vec = static_cast<c_Vector*>(obj);
+  iter->m_version = vec->getVersion();
+  iter->m_pos = 0;
+}
+void ArrayIter::MapInit(ArrayIter* iter, ObjectData* obj) {
+  auto mp = static_cast<c_Map*>(obj);
+  iter->m_version = mp->getVersion();
+  iter->m_pos = mp->iter_begin();
+}
+void ArrayIter::StableMapInit(ArrayIter* iter, ObjectData* obj) {
+  auto smp = static_cast<c_StableMap*>(obj);
+  iter->m_version = smp->getVersion();
+  iter->m_pos = smp->iter_begin();
+}
+void ArrayIter::SetInit(ArrayIter* iter, ObjectData* obj) {
+  auto st = static_cast<c_Set*>(obj);
+  iter->m_version = st->getVersion();
+  iter->m_pos = st->iter_begin();
+}
+void ArrayIter::PairInit(ArrayIter* iter, ObjectData* obj) {
+  iter->m_pos = 0;
+}
+void ArrayIter::IteratorObjInit(ArrayIter* iter, ObjectData* obj) {
+  assert(obj->instanceof(SystemLib::s_IteratorClass));
+  try {
+    obj->o_invoke_few_args(s_rewind, 0);
+  } catch (...) {
+    // Regardless of whether the incRef template parameter is true or
+    // false, at this point this ArrayIter "owns" a reference to the
+    // object and is responsible for decreffing the object when the
+    // ArrayIter's lifetime ends. Normally ArrayIter's destructor takes
+    // care of this, but the destructor will not get invoked if an
+    // exception is thrown before the constructor finishes so we have
+    // to manually handle decreffing the object here.
+    iter->m_data = nullptr;
+    if (debug) iter->m_itype = TypeUndefined;
+    decRefObj(obj);
+    throw;
+  }
+}
+
+const ArrayIter::InitFuncPtr ArrayIter::initFuncTable[6] = {
+  &ArrayIter::IteratorObjInit,
+  &ArrayIter::VectorInit,
+  &ArrayIter::MapInit,
+  &ArrayIter::StableMapInit,
+  &ArrayIter::SetInit,
+  &ArrayIter::PairInit,
+};
+
 template <bool incRef>
-void ArrayIter::objInit(ObjectData *obj) {
+void ArrayIter::objInit(ObjectData* obj) {
   assert(obj);
   setObject(obj);
   if (incRef) {
     obj->incRefCount();
   }
-  switch (getCollectionType()) {
-    case Collection::VectorType: {
-      m_version = getVector()->getVersion();
-      m_pos = 0;
-      break;
-    }
-    case Collection::MapType: {
-      c_Map* mp = getMap();
-      m_version = mp->getVersion();
-      m_pos = mp->iter_begin();
-      break;
-    }
-    case Collection::StableMapType: {
-      c_StableMap* smp = getStableMap();
-      m_version = smp->getVersion();
-      m_pos = smp->iter_begin();
-      break;
-    }
-    case Collection::SetType: {
-      c_Set* st = getSet();
-      m_version = st->getVersion();
-      m_pos = st->iter_begin();
-      break;
-    }
-    case Collection::PairType: {
-      m_pos = 0;
-      break;
-    }
-    default: {
-      assert(obj->instanceof(SystemLib::s_IteratorClass));
-      obj->o_invoke_few_args(s_rewind, 0);
-      break;
-    }
+  initFuncTable[getCollectionType()](this, obj);
+}
+
+void ArrayIter::cellInit(const Cell& c) {
+  assert(cellIsPlausible(c));
+  if (LIKELY(c.m_type == KindOfArray)) {
+    arrInit(c.m_data.parr);
+  } else if (LIKELY(c.m_type == KindOfObject)) {
+    objInit<true>(c.m_data.pobj);
+  } else {
+    arrInit(nullptr);
   }
-}
-
-ArrayIter::ArrayIter(ObjectData *obj)
-  : m_pos(ArrayData::invalid_index) {
-  objInit<true>(obj);
-}
-
-ArrayIter::ArrayIter(Object &obj, TransferOwner)
-  : m_pos(ArrayData::invalid_index) {
-  objInit<false>(obj.get());
-  (void) obj.detach();
-}
-
-// Special constructor used by the VM. This constructor does not increment the
-// refcount of the specified object.
-ArrayIter::ArrayIter(ObjectData *obj, NoInc)
-  : m_pos(ArrayData::invalid_index) {
-  objInit<false>(obj);
 }
 
 HOT_FUNC
-ArrayIter::~ArrayIter() {
+void ArrayIter::destruct() {
   if (hasArrayData()) {
     const ArrayData* ad = getArrayData();
+    if (debug) m_itype = TypeUndefined;
     if (ad) decRefArr(const_cast<ArrayData*>(ad));
+    return;
+  }
+  ObjectData* obj = getObject();
+  if (debug) m_itype = TypeUndefined;
+  assert(obj);
+  decRefObj(obj);
+}
+
+ArrayIter& ArrayIter::operator=(const ArrayIter& iter) {
+  reset();
+  m_data = iter.m_data;
+  m_pos = iter.m_pos;
+  m_version = iter.m_version;
+  m_itype = iter.m_itype;
+  if (hasArrayData()) {
+    const ArrayData* ad = getArrayData();
+    if (ad) const_cast<ArrayData*>(ad)->incRefCount();
   } else {
     ObjectData* obj = getObject();
     assert(obj);
-    decRefObj(obj);
+    obj->incRefCount();
   }
-  if (debug) {
-    m_itype = TypeUndefined;
-  }
+  return *this;
+}
+
+ArrayIter& ArrayIter::operator=(ArrayIter&& iter) {
+  reset();
+  m_data = iter.m_data;
+  m_pos = iter.m_pos;
+  m_version = iter.m_version;
+  m_itype = iter.m_itype;
+  iter.m_data = nullptr;
+  return *this;
 }
 
 bool ArrayIter::endHelper() {
@@ -259,7 +315,7 @@ Variant ArrayIter::firstHelper() {
 
 HOT_FUNC
 Variant ArrayIter::second() {
-  if (hasArrayData()) {
+  if (LIKELY(hasArrayData())) {
     assert(m_pos != ArrayData::invalid_index);
     const ArrayData* ad = getArrayData();
     assert(ad);
@@ -304,52 +360,6 @@ Variant ArrayIter::second() {
   }
 }
 
-void ArrayIter::secondHelper(Variant& v) {
-  switch (getCollectionType()) {
-    case Collection::VectorType: {
-      c_Vector* vec = getVector();
-      if (UNLIKELY(m_version != vec->getVersion())) {
-        throw_collection_modified();
-      }
-      v = tvAsCVarRef(vec->at(m_pos));
-      break;
-    }
-    case Collection::MapType: {
-      c_Map* mp = getMap();
-      if (UNLIKELY(m_version != mp->getVersion())) {
-        throw_collection_modified();
-      }
-      v = tvAsCVarRef(mp->iter_value(m_pos));
-      break;
-    }
-    case Collection::StableMapType: {
-      c_StableMap* smp = getStableMap();
-      if (UNLIKELY(m_version != smp->getVersion())) {
-        throw_collection_modified();
-      }
-      v = tvAsCVarRef(smp->iter_value(m_pos));
-      break;
-    }
-    case Collection::SetType: {
-      c_Set* st = getSet();
-      if (UNLIKELY(m_version != st->getVersion())) {
-        throw_collection_modified();
-      }
-      v = tvAsCVarRef(st->iter_value(m_pos));
-      break;
-    }
-    case Collection::PairType: {
-      v = tvAsCVarRef(getPair()->at(m_pos));
-      break;
-    }
-    default: {
-      ObjectData* obj = getIteratorObj();
-      v = obj->o_invoke_few_args(s_current, 0);
-      break;
-    }
-  }
-}
-
 HOT_FUNC
 CVarRef ArrayIter::secondRef() {
   if (!hasArrayData()) {
@@ -360,6 +370,52 @@ CVarRef ArrayIter::secondRef() {
   const ArrayData* ad = getArrayData();
   assert(ad);
   return ad->getValueRef(m_pos);
+}
+
+HOT_FUNC
+CVarRef ArrayIter::secondRefPlus() {
+  if (LIKELY(hasArrayData())) {
+    assert(m_pos != ArrayData::invalid_index);
+    const ArrayData* ad = getArrayData();
+    assert(ad);
+    return ad->getValueRef(m_pos);
+  }
+  switch (getCollectionType()) {
+    case Collection::VectorType: {
+      c_Vector* vec = getVector();
+      if (UNLIKELY(m_version != vec->getVersion())) {
+        throw_collection_modified();
+      }
+      return tvAsCVarRef(vec->at(m_pos));
+    }
+    case Collection::MapType: {
+      c_Map* mp = getMap();
+      if (UNLIKELY(m_version != mp->getVersion())) {
+        throw_collection_modified();
+      }
+      return tvAsCVarRef(mp->iter_value(m_pos));
+    }
+    case Collection::StableMapType: {
+      c_StableMap* smp = getStableMap();
+      if (UNLIKELY(m_version != smp->getVersion())) {
+        throw_collection_modified();
+      }
+      return tvAsCVarRef(smp->iter_value(m_pos));
+    }
+    case Collection::SetType: {
+      c_Set* st = getSet();
+      if (UNLIKELY(m_version != st->getVersion())) {
+        throw_collection_modified();
+      }
+      return tvAsCVarRef(st->iter_value(m_pos));
+    }
+    case Collection::PairType: {
+      return tvAsCVarRef(getPair()->at(m_pos));
+    }
+    default: {
+      throw_param_is_not_container();
+    }
+  }
 }
 
 //
@@ -687,7 +743,7 @@ bool Iter::init(TypedValue* c1) {
     } else {
       Object obj = c1->m_data.pobj->iterableObject(isIterator);
       if (isIterator) {
-        (void) new (&arr()) ArrayIter(obj, ArrayIter::transferOwner);
+        (void) new (&arr()) ArrayIter(obj.detach(), ArrayIter::noInc);
       } else {
         Class* ctx = arGetContextClass(g_vmContext->getFP());
         CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
@@ -779,7 +835,7 @@ void iterKey(ArrayIter* iter, TypedValue* out) {
 template<class Coll, class Style>
 HOT_FUNC static
 int64_t iterInit(Iter* dest, Coll* coll,
-              TypedValue* valOut, TypedValue* keyOut) {
+                 TypedValue* valOut, TypedValue* keyOut) {
   int64_t size = coll->size();
   if (UNLIKELY(size == 0)) {
     decRefObj(coll);
@@ -1018,7 +1074,7 @@ class FreeObj {
  */
 HOT_FUNC
 static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
-                      TypedValue* valOut, TypedValue* keyOut) {
+                                   TypedValue* valOut, TypedValue* keyOut) {
   valOut = tvToCell(valOut);
   if (keyOut) {
     keyOut = tvToCell(keyOut);
@@ -1029,12 +1085,7 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
     if (obj->implementsIterator()) {
       TRACE(2, "%s: I %p, obj %p, ctx %p, collection or Iterator\n",
             __func__, dest, obj, ctx);
-      try {
-        (void) new (&dest->arr()) ArrayIter(obj, ArrayIter::noInc);
-      } catch (...) {
-        decRefObj(obj);
-        throw;
-      }
+      (void) new (&dest->arr()) ArrayIter(obj, ArrayIter::noInc);
       itType = ArrayIter::TypeIterator;
     } else {
       bool isIteratorAggregate;
@@ -1052,7 +1103,7 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
       if (isIteratorAggregate) {
         TRACE(2, "%s: I %p, obj %p, ctx %p, IteratorAggregate\n",
               __func__, dest, obj, ctx);
-        (void) new (&dest->arr()) ArrayIter(itObj, ArrayIter::transferOwner);
+        (void) new (&dest->arr()) ArrayIter(itObj.detach(), ArrayIter::noInc);
         itType = ArrayIter::TypeIterator;
       } else {
         TRACE(2, "%s: I %p, obj %p, ctx %p, iterate as array\n",
@@ -1386,6 +1437,36 @@ int64_t miter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   }
 
   return 1LL;
+}
+
+ArrayIter getContainerIter(CVarRef v) {
+  auto c = v.asCell();
+  if (c->m_type == KindOfArray) {
+    ArrayData* a = c->m_data.parr;
+    return ArrayIter(a);
+  }
+  if (c->m_type == KindOfObject) {
+    ObjectData* o = c->m_data.pobj;
+    if (o->isCollection()) return ArrayIter(o);
+  }
+  throw_param_is_not_container();
+}
+
+ArrayIter getContainerIter(CVarRef v, size_t& sz) {
+  auto c = v.asCell();
+  if (c->m_type == KindOfArray) {
+    auto a = c->m_data.parr;
+    sz = a->size();
+    return ArrayIter(a);
+  }
+  if (c->m_type == KindOfObject) {
+    auto o = c->m_data.pobj;
+    if (o->isCollection()) {
+      sz = o->getCollectionSize();
+      return ArrayIter(o);
+    }
+  }
+  throw_param_is_not_container();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/ext/util.h"
+#include "hphp/runtime/ext/ext_array.h"
 #include "hphp/util/util.h"
 
 namespace HPHP {
@@ -103,7 +104,7 @@ Array f_get_class_methods(CVarRef class_or_object) {
   auto arrayHolder = Array::attach(retVal);
   cls->getMethodNames(arGetContextClassFromBuiltin(g_vmContext->getFP()),
                       retVal);
-  return arrayHolder.keys();
+  return f_array_keys(arrayHolder).toArray();
 }
 
 Array f_get_class_constants(CStrRef className) {

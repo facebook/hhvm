@@ -54,15 +54,16 @@ class ArrayIter {
                   // IteratorAggregate
   };
 
+  enum NoInc { noInc = 0 };
+  enum NoIncNonNull { noIncNonNull = 0 };
+
   /**
    * Constructors.
    */
-  ArrayIter();
+  ArrayIter() : m_pos(ArrayData::invalid_index) {
+    m_data = nullptr;
+  }
   explicit ArrayIter(const ArrayData* data);
-
-  enum NoInc { noInc = 0 };
-  // Special constructor used by the VM. This constructor does not increment
-  // the refcount of the specified array.
   ArrayIter(const ArrayData* data, NoInc) {
     setArrayData(data);
     if (data) {
@@ -71,43 +72,57 @@ class ArrayIter {
       m_pos = ArrayData::invalid_index;
     }
   }
-  // This is also a special constructor used by the VM. This constructor
-  // doesn't increment the array's refcount and assumes that the array is not
-  // empty.
-  enum NoIncNonNull { noIncNonNull = 0 };
+  explicit ArrayIter(const HphpArray*) = delete;
   ArrayIter(const HphpArray* data, NoIncNonNull) {
     assert(data);
     setArrayData(data);
     m_pos = data->getIterBegin();
   }
   explicit ArrayIter(CArrRef array);
-  void reset();
-
- private:
-  // not defined.
-  // Either use ArrayIter(const ArrayData*) or
-  //            ArrayIter(const HphpArray*, NoIncNonNull)
-  explicit ArrayIter(const HphpArray*);
-  template <bool incRef>
-  void objInit(ObjectData* obj);
-
- public:
   explicit ArrayIter(ObjectData* obj);
   ArrayIter(ObjectData* obj, NoInc);
-  enum TransferOwner { transferOwner };
-  ArrayIter(Object& obj, TransferOwner);
+  explicit ArrayIter(CObjRef obj);
+  explicit ArrayIter(const Cell& c);
+  explicit ArrayIter(CVarRef v);
 
-  ~ArrayIter();
+  // Copy ctor
+  ArrayIter(const ArrayIter& iter);
+
+  // Move ctor
+  ArrayIter(ArrayIter&& iter) {
+    m_data = iter.m_data;
+    m_pos = iter.m_pos;
+    m_version = iter.m_version;
+    m_itype = iter.m_itype;
+    iter.m_data = nullptr;
+  }
+
+  // Copy assignment
+  ArrayIter& operator=(const ArrayIter& iter);
+
+  // Move assignment
+  ArrayIter& operator=(ArrayIter&& iter);
+
+  // Destructor
+  ~ArrayIter() {
+    destruct();
+  }
+
+  void reset() {
+    destruct();
+    m_data = nullptr;
+  }
 
   explicit operator bool() { return !end(); }
   void operator++() { next(); }
-
   bool end() {
     if (LIKELY(hasArrayData())) {
       return m_pos == ArrayData::invalid_index;
     }
     return endHelper();
   }
+  bool endHelper();
+
   void next() {
     if (LIKELY(hasArrayData())) {
       const ArrayData* ad = getArrayData();
@@ -118,6 +133,7 @@ class ArrayIter {
     }
     nextHelper();
   }
+  void nextHelper();
 
   Variant first() {
     if (LIKELY(hasArrayData())) {
@@ -128,24 +144,16 @@ class ArrayIter {
     }
     return firstHelper();
   }
-  Variant second();
-  void second(Variant& v) {
-    if (LIKELY(hasArrayData())) {
-      const ArrayData* ad = getArrayData();
-      assert(ad);
-      assert(m_pos != ArrayData::invalid_index);
-      v = ad->getValueRef(m_pos);
-      return;
-    }
-    secondHelper(v);
-  }
-  CVarRef secondRef();
-
+  Variant firstHelper();
   void nvFirst(TypedValue* out) {
     const ArrayData* ad = getArrayData();
     assert(ad && m_pos != ArrayData::invalid_index);
     const_cast<ArrayData*>(ad)->nvGetKey(out, m_pos);
   }
+
+  Variant second();
+  CVarRef secondRef();
+  CVarRef secondRefPlus();
   TypedValue* nvSecond() {
     const ArrayData* ad = getArrayData();
     assert(ad && m_pos != ArrayData::invalid_index);
@@ -220,7 +228,6 @@ class ArrayIter {
   template<class Mappish>
   Variant iterKey(VersionableSparse);
 
-  public:
   const ArrayData* getArrayData() {
     assert(hasArrayData());
     return m_data;
@@ -243,7 +250,26 @@ class ArrayIter {
     return (ObjectData*)((intptr_t)m_obj & ~1);
   }
 
-  private:
+ private:
+  void arrInit(const ArrayData* arr);
+
+  template <bool incRef>
+  void objInit(ObjectData* obj);
+
+  void cellInit(const Cell& c);
+
+  static void VectorInit(ArrayIter* iter, ObjectData* obj);
+  static void MapInit(ArrayIter* iter, ObjectData* obj);
+  static void StableMapInit(ArrayIter* iter, ObjectData* obj);
+  static void SetInit(ArrayIter* iter, ObjectData* obj);
+  static void PairInit(ArrayIter* iter, ObjectData* obj);
+  static void IteratorObjInit(ArrayIter* iter, ObjectData* obj);
+
+  typedef void(*InitFuncPtr)(ArrayIter*,ObjectData*);
+  static const InitFuncPtr initFuncTable[6];
+
+  void destruct();
+
   c_Vector* getVector() {
     assert(hasCollection() && getCollectionType() == Collection::VectorType);
     return (c_Vector*)((intptr_t)m_obj & ~1);
@@ -281,11 +307,6 @@ class ArrayIter {
     assert((intptr_t(obj) & 1) == 0);
     m_obj = (ObjectData*)((intptr_t)obj | 1);
   }
-
-  bool endHelper();
-  void nextHelper();
-  Variant firstHelper();
-  void secondHelper(Variant& v);
 
   union {
     const ArrayData* m_data;
@@ -572,6 +593,9 @@ int64_t new_miter_object(Iter* dest, RefData* obj, Class* ctx,
                         TypedValue* val, TypedValue* key);
 int64_t new_miter_other(Iter* dest, RefData* data);
 int64_t miter_next_key(Iter* dest, TypedValue* val, TypedValue* key);
+
+ArrayIter getContainerIter(CVarRef v);
+ArrayIter getContainerIter(CVarRef v, size_t& sz);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

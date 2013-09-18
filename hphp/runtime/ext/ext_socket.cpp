@@ -649,7 +649,7 @@ Variant f_socket_select(VRefParam read, VRefParam write, VRefParam except,
    * that we selected, but return only the readable sockets */
   if (!read.isNull()) {
     auto hasData = Array::Create();
-    for (ArrayIter iter(read); iter; ++iter) {
+    for (ArrayIter iter(read.toArray()); iter; ++iter) {
       File *file = iter.second().toResource().getTyped<File>();
       if (file->bufferedLen() > 0) {
         hasData.append(iter.second());

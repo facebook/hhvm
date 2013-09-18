@@ -1,0 +1,834 @@
+bool(true)
+array(3) {
+  [11]=>
+  string(1) "a"
+  [22]=>
+  string(1) "d"
+  [33]=>
+  string(1) "c"
+}
+bool(true)
+array(3) {
+  [11]=>
+  string(1) "a"
+  [22]=>
+  string(1) "d"
+  [33]=>
+  string(1) "c"
+}
+bool(true)
+array(3) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+}
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "c"
+  [2]=>
+  string(1) "d"
+}
+bool(true)
+array(3) {
+  [11]=>
+  string(1) "a"
+  [22]=>
+  string(1) "d"
+  [33]=>
+  string(1) "c"
+}
+bool(true)
+array(3) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+}
+array(3) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "c"
+  [2]=>
+  string(1) "d"
+}
+========
+bool(true)
+array(3) {
+  [11]=>
+  string(1) "a"
+  [22]=>
+  string(1) "d"
+  [33]=>
+  string(1) "c"
+}
+bool(true)
+array(3) {
+  [11]=>
+  string(1) "a"
+  [22]=>
+  string(1) "d"
+  [33]=>
+  string(1) "c"
+}
+bool(true)
+array(3) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+}
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "c"
+  [2]=>
+  string(1) "d"
+}
+bool(true)
+array(3) {
+  [11]=>
+  string(1) "a"
+  [22]=>
+  string(1) "d"
+  [33]=>
+  string(1) "c"
+}
+bool(true)
+array(3) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+}
+array(3) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "c"
+  [2]=>
+  string(1) "d"
+}
+========
+bool(true)
+array(3) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+}
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "c"
+  [2]=>
+  string(1) "d"
+}
+bool(true)
+array(3) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+}
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "c"
+  [2]=>
+  string(1) "d"
+}
+bool(true)
+array(3) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+}
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "c"
+  [2]=>
+  string(1) "d"
+}
+bool(true)
+array(3) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+}
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "c"
+  [2]=>
+  string(1) "d"
+}
+bool(true)
+array(3) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+}
+array(3) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "c"
+  [2]=>
+  string(1) "d"
+}
+========
+bool(true)
+array(3) {
+  [11]=>
+  string(1) "a"
+  [22]=>
+  string(1) "d"
+  [33]=>
+  string(1) "c"
+}
+bool(true)
+array(3) {
+  [11]=>
+  string(1) "a"
+  [22]=>
+  string(1) "d"
+  [33]=>
+  string(1) "c"
+}
+bool(true)
+array(3) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+}
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "c"
+  [2]=>
+  string(1) "d"
+}
+bool(true)
+array(3) {
+  [11]=>
+  string(1) "a"
+  [22]=>
+  string(1) "d"
+  [33]=>
+  string(1) "c"
+}
+bool(true)
+array(3) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+}
+array(3) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "c"
+  [2]=>
+  string(1) "d"
+}
+========
+bool(true)
+array(3) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+}
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "d"
+}
+bool(true)
+array(3) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+}
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "d"
+}
+bool(true)
+array(3) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+}
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "d"
+}
+bool(true)
+array(3) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+}
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "d"
+}
+bool(true)
+array(3) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+}
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "c"
+  [2]=>
+  string(1) "d"
+}
+
+
+========
+
+
+bool(true)
+array(4) {
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  int(22)
+  ["c"]=>
+  int(33)
+  ["d"]=>
+  string(2) "22"
+}
+bool(true)
+array(4) {
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  int(22)
+  ["c"]=>
+  int(33)
+  ["d"]=>
+  string(2) "22"
+}
+bool(true)
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+array(4) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+  [3]=>
+  string(2) "22"
+}
+bool(true)
+array(4) {
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  int(22)
+  ["c"]=>
+  int(33)
+  ["d"]=>
+  string(2) "22"
+}
+bool(true)
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+array(4) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+  [3]=>
+  string(2) "22"
+}
+========
+bool(true)
+array(4) {
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  int(22)
+  ["c"]=>
+  int(33)
+  ["d"]=>
+  string(2) "22"
+}
+bool(true)
+array(4) {
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  int(22)
+  ["c"]=>
+  int(33)
+  ["d"]=>
+  string(2) "22"
+}
+bool(true)
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+array(4) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+  [3]=>
+  string(2) "22"
+}
+bool(true)
+array(4) {
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  int(22)
+  ["c"]=>
+  int(33)
+  ["d"]=>
+  string(2) "22"
+}
+bool(true)
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+array(4) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+  [3]=>
+  string(2) "22"
+}
+========
+bool(true)
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+array(4) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+  [3]=>
+  string(2) "22"
+}
+bool(true)
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+array(4) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+  [3]=>
+  string(2) "22"
+}
+bool(true)
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+array(4) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+  [3]=>
+  string(2) "22"
+}
+bool(true)
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+array(4) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+  [3]=>
+  string(2) "22"
+}
+bool(true)
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+array(4) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+  [3]=>
+  string(2) "22"
+}
+========
+bool(true)
+array(4) {
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  int(22)
+  ["c"]=>
+  int(33)
+  ["d"]=>
+  string(2) "22"
+}
+bool(true)
+array(4) {
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  int(22)
+  ["c"]=>
+  int(33)
+  ["d"]=>
+  string(2) "22"
+}
+bool(true)
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+array(4) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+  [3]=>
+  string(2) "22"
+}
+bool(true)
+array(4) {
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  int(22)
+  ["c"]=>
+  int(33)
+  ["d"]=>
+  string(2) "22"
+}
+bool(true)
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+array(4) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+  [3]=>
+  string(2) "22"
+}
+========
+bool(true)
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+array(4) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+  [3]=>
+  string(2) "22"
+}
+bool(true)
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+array(4) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+  [3]=>
+  string(2) "22"
+}
+bool(true)
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+array(4) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+  [3]=>
+  string(2) "22"
+}
+bool(true)
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+array(4) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+  [3]=>
+  string(2) "22"
+}
+bool(true)
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+array(4) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+  [3]=>
+  string(2) "22"
+}
+
+
+========
+
+
+bool(true)
+array(2) {
+  ["a"]=>
+  string(1) "a"
+  [1]=>
+  int(1)
+}
+bool(true)
+array(2) {
+  ["a"]=>
+  string(1) "b"
+  [1]=>
+  int(2)
+}
+bool(true)
+array(2) {
+  ["b"]=>
+  string(1) "b"
+  [2]=>
+  int(2)
+}
+bool(true)
+array(2) {
+  ["b"]=>
+  string(1) "b"
+  [2]=>
+  int(2)
+}

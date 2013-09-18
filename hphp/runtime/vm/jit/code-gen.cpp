@@ -2145,6 +2145,8 @@ void CodeGenerator::cgConvIntToBool(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
+  const size_t sizeOff = FAST_COLLECTION_SIZE_OFFSET;
+
   SSATmp* dst = inst->dst();
   auto dstReg = m_regs[dst].reg();
   assert(dstReg != InvalidReg);
@@ -2155,22 +2157,21 @@ void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
   unlikelyIfThenElse(
     CC_NZ,
     [&] (Asm& a) {
-      // Switch on the type of the srcReg object, with a case for each type
-      // of Collection with CallToImpl
+      // Switch on the type of the srcReg object, with a case for each
+      // type of Collection with CallToImpl
       Label endSwitch;
-      Label caseVector, caseMap, caseStableMap, caseSet;
+      Label caseCollection;
 
+      // TODO(2918379): Find a cheaper way to check if an object is a
+      // native collection
       a.cmpq(c_Vector::classof(), srcReg[ObjectData::getVMClassOffset()]);
-      a.je8(caseVector);
-
+      a.je8(caseCollection);
       a.cmpq(c_Map::classof(), srcReg[ObjectData::getVMClassOffset()]);
-      a.je8(caseMap);
-
+      a.je8(caseCollection);
       a.cmpq(c_StableMap::classof(), srcReg[ObjectData::getVMClassOffset()]);
-      a.je8(caseStableMap);
-
+      a.je8(caseCollection);
       a.cmpq(c_Set::classof(), srcReg[ObjectData::getVMClassOffset()]);
-      a.je8(caseSet);
+      a.je8(caseCollection);
 
       // default: object not collection
       cgCallHelper(
@@ -2182,25 +2183,10 @@ void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
         .ssa(src));
       a.jmp8(endSwitch);
 
-      asm_label(a, caseVector); // case object instanceof Vector:
-      a.cmpl(0, srcReg[c_Vector::sizeOffset()]); // 48
+      asm_label(a, caseCollection);
+      a.cmpl(0, srcReg[sizeOff]);
       a.setne(rbyte(dstReg)); // truthy iff size not zero
-      a.jmp8(endSwitch);
-
-      asm_label(a, caseMap); // case object instanceof Map:
-      a.cmpl(0, srcReg[c_Map::sizeOffset()]); // 48
-      a.setne(rbyte(dstReg)); // truthy iff size not zero
-      a.jmp8(endSwitch);
-
-      asm_label(a, caseStableMap); // case object instanceof StableMap:
-      a.cmpl(0, srcReg[c_StableMap::sizeOffset()]); // 36 (hmmm)
-      a.setne(rbyte(dstReg)); // truthy iff size not zero
-      a.jmp8(endSwitch);
-
-      asm_label(a, caseSet); // case object instanceof Set:
-      a.cmpl(0, srcReg[c_Set::sizeOffset()]); // 48
-      a.setne(rbyte(dstReg)); // truthy iff size not zero
-      a.jmp8(endSwitch);
+      // fall through
 
       asm_label(a, endSwitch);
     }, [&] (Asm& a) {

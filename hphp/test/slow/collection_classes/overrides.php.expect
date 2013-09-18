@@ -1,9 +1,5 @@
 overridden clone
-object(YoloPair)#1 (2) {
-  [0]=>
-  NULL
-  [1]=>
-  NULL
+object(YoloPair)#1 (0) {
 }
 object(YoloPair)#2 (2) {
   [0]=>

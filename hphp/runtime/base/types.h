@@ -82,6 +82,12 @@ extern const Array empty_array;
  */
 const size_t FAST_REFCOUNT_OFFSET = 12;
 
+/*
+ * All native collection class have their m_size field at the same
+ * offset in the object.
+ */
+const size_t FAST_COLLECTION_SIZE_OFFSET = 36;
+
 /**
  * These are underlying data structures for the above complex data types. Since
  * we use reference counting to achieve copy-on-write and automatic object

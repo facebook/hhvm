@@ -121,7 +121,15 @@ static void url_encode_array(StringBuffer &ret, CVarRef varr,
     return; // recursive
   }
 
-  Array arr = varr.toArray();
+  Array arr;
+  if (varr.is(KindOfObject)) {
+    Object o = varr.toObject();
+    arr = (o.objectForCall()->isCollection()) ?
+      varr.toArray() :
+      f_get_object_vars(o).toArray();
+  } else {
+    arr = varr.toArray();
+  }
 
   for (ArrayIter iter(arr); iter; ++iter) {
     Variant data = iter.second();

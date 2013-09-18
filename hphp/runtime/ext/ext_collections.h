@@ -657,6 +657,14 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
       data.hash() = 0;
     }
     ~Bucket();
+
+    template<class... Args>
+    static Bucket* Make(Args&&... args) {
+      return new (MM().smartMallocSize(sizeof(Bucket)))
+        Bucket(std::forward<Args>(args)...);
+    }
+    void release();
+
     // set the top bit for string hashes to make sure the hash
     // value is never zero. hash value 0 corresponds to integer key.
     static inline int32_t encodeHash(strhash_t h) {
@@ -695,10 +703,6 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
       return data.hash();
     }
 
-    /**
-     * Memory allocator methods.
-     */
-    DECLARE_SMART_ALLOCATION(Bucket);
     void dump();
   };
 

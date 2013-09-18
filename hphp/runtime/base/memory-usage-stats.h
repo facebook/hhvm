@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_RUNTIME_BASE_MEMORY_USAGESTATS_H_
 #define incl_HPHP_RUNTIME_BASE_MEMORY_USAGESTATS_H_
 
+#include "hphp/util/alloc.h" // must be included before USE_JEMALLOC is used
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////

@@ -1004,9 +1004,9 @@ trait_declaration_statement:
     trait_decl_name                    { $2.setText(_p->nsDecl($2.text()));
                                          _p->onClassStart(T_TRAIT, $2);}
     implements_list
-    '{' class_statement_list '}'       { Token t_ext, t_imp;
-                                         t_ext.reset(); t_imp.reset();
-                                         _p->onClass($$,T_TRAIT,$2,t_ext,t_imp,
+    '{' class_statement_list '}'       { Token t_ext;
+                                         t_ext.reset(); 
+                                         _p->onClass($$,T_TRAIT,$2,t_ext,$4,
                                                      $6, 0);
                                          _p->popClass();
                                          _p->popTypeScope();}
@@ -1015,9 +1015,9 @@ trait_declaration_statement:
     trait_decl_name                    { $3.setText(_p->nsDecl($3.text()));
                                          _p->onClassStart(T_TRAIT, $3);}
     implements_list
-    '{' class_statement_list '}'       { Token t_ext, t_imp;
-                                         t_ext.reset(); t_imp.reset();
-                                         _p->onClass($$,T_TRAIT,$3,t_ext,t_imp,
+    '{' class_statement_list '}'       { Token t_ext;
+                                         t_ext.reset(); 
+                                         _p->onClass($$,T_TRAIT,$3,t_ext,$5,
                                                      $7, &$1);
                                          _p->popClass();
                                          _p->popTypeScope();}
@@ -2330,6 +2330,8 @@ encaps_var_offset:
 internal_functions:
     T_ISSET '(' variable_list ')'      { UEXP($$,$3,T_ISSET,1);}
   | T_EMPTY '(' variable ')'           { UEXP($$,$3,T_EMPTY,1);}
+  | T_EMPTY '(' expr_no_variable ')'   { UEXP($$,$3,'!',1);}
+  | T_EMPTY '(' expr_with_parens ')'   { UEXP($$,$3,'!',1);}
   | T_INCLUDE expr                     { UEXP($$,$2,T_INCLUDE,1);}
   | T_INCLUDE_ONCE expr                { UEXP($$,$2,T_INCLUDE_ONCE,1);}
   | T_EVAL '(' expr ')'                { UEXP($$,$3,T_EVAL,1);}

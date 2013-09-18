@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/base/thread-init-fini.h"
-#include "hphp/runtime/base/smart-allocator.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/server/server-stats.h"
@@ -59,8 +58,6 @@ void init_thread_locals(void *arg /* = NULL */) {
   get_server_note();
   g_persistentObjects.getCheck();
   MemoryManager::TlsWrapper::getCheck();
-  InitAllocatorThreadLocal();
-  RefData::AllocatorType::getCheck();
   ThreadInfo::s_threadInfo.getCheck();
   g_context.getCheck();
   AsioSession::Init();

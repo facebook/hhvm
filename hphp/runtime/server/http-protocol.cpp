@@ -176,7 +176,6 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
     int size = 0;
     const void *data = transport->getPostData(size);
     if (data && size) {
-      assert(((char*)data)[size] == 0); // we need a NULL terminated string
       string boundary;
       int content_length = atoi(contentLength.c_str());
       bool rfc1867Post = IsRfc1867(contentType, boundary);
@@ -378,7 +377,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
     server.set(s_PATH_INFO, r.pathInfo());
   }
 
-  server.set(s_argv, CREATE_VECTOR1(r.queryString()));
+  server.set(s_argv, make_packed_array(r.queryString()));
   server.set(s_argc, 1);
   server.set(s_GATEWAY_INTERFACE, s_CGI_1_1);
   server.set(s_SERVER_ADDR, String(RuntimeOption::ServerPrimaryIP));

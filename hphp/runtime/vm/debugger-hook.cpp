@@ -189,11 +189,14 @@ static void addBreakPointFuncEntry(const Func* f) {
 // it will only return true if the given function is the generator,
 // not the stub which makes the generator. I.e., given name="genFoo"
 // this will return true when f's name is "genFoo$continuation", and
-// false for "genFoo".
+// false for "genFoo". Note that while async functions follow the same
+// general codegen strategy as generators, the original function still
+// starts the work, so we treat generators from async functions
+// normally.
 static bool matchFunctionName(string name, const Func* f) {
-  if (f->hasGeneratorAsBody()) return false; // Original function.
+  if (f->hasGeneratorAsBody() && !f->isAsync()) return false; // Original func
   auto funcName = f->name()->data();
-  if (!f->isGenerator()) {
+  if (!f->isGenerator() || f->isAsync()) {
     return name == funcName;
   } else {
     DEBUG_ONLY string s(funcName);
@@ -315,7 +318,7 @@ void phpSetBreakPoints(Eval::DebuggerProxy* proxy) {
     bp->m_bindState = Eval::BreakPointInfo::Unknown;
     auto className = bp->getClass();
     if (!className.empty()) {
-      auto clsName = StringData::GetStaticString(className);
+      auto clsName = makeStaticString(className);
       auto cls = Unit::lookupClass(clsName);
       if (cls == nullptr) continue;
       bp->m_bindState = Eval::BreakPointInfo::KnownToBeInvalid;
@@ -336,15 +339,15 @@ void phpSetBreakPoints(Eval::DebuggerProxy* proxy) {
     }
     auto funcName = bp->getFuncName();
     if (!funcName.empty()) {
-      auto fName = StringData::GetStaticString(funcName);
+      auto fName = makeStaticString(funcName);
       Func* f = Unit::lookupFunc(fName);
       if (f == nullptr) continue;
-      if (f->hasGeneratorAsBody()) {
+      if (f->hasGeneratorAsBody() && !f->isAsync()) {
         // This function is a generator, and it's the original
         // function which has been turned into a stub which creates a
         // continuation. We want to set the breakpoint on the
         // continuation function instead.
-        fName = StringData::GetStaticString(funcName + "$continuation");
+        fName = makeStaticString(funcName + "$continuation");
         f = Unit::lookupFunc(fName);
         if (f == nullptr) continue;
       }
@@ -371,10 +374,10 @@ void phpSetBreakPoints(Eval::DebuggerProxy* proxy) {
       bp->m_bindState = Eval::BreakPointInfo::KnownToBeValid;
       continue;
     } else if (!exceptionClassName.empty()) {
-      auto expClsName = StringData::GetStaticString(exceptionClassName);
+      auto expClsName = makeStaticString(exceptionClassName);
       auto cls = Unit::lookupClass(expClsName);
       if (cls != nullptr) {
-        auto baseClsName = StringData::GetStaticString("Exception");
+        auto baseClsName = makeStaticString("Exception");
         auto baseCls = Unit::lookupClass(baseClsName);
         if (baseCls != nullptr) {
           if (cls->classof(baseCls)) {

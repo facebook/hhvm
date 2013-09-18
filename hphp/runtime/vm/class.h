@@ -776,6 +776,7 @@ private:
   void setClassVec();
   void setUsedTraits();
   template<bool setParents> void setInstanceBitsImpl();
+  void addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const;
 
 private:
   PreClassPtr m_preClass;

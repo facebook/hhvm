@@ -65,8 +65,6 @@ public:
   int isparsing;
 };
 
-IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(XmlParser);
-
 XmlParser::XmlParser() : case_folding(0), parser(NULL),
     target_encoding(NULL), level(0), toffset(0), curtag(0),
     ltags(NULL), lastwasopen(0), skipwhite(0), isparsing(0) {
@@ -498,7 +496,7 @@ void _xml_defaultHandler(void *userData, const XML_Char *s, int len) {
   XmlParser *parser = (XmlParser *)userData;
 
   if (parser && parser->defaultHandler.toBoolean()) {
-    xml_call_handler(parser, parser->defaultHandler, CREATE_VECTOR2(
+    xml_call_handler(parser, parser->defaultHandler, make_packed_array(
         parser, _xml_xmlchar_zval(s, len, parser->target_encoding)));
   }
 }
@@ -883,7 +881,7 @@ String f_xml_error_string(int code) {
 
 String f_utf8_decode(CStrRef data) {
   String str = String(data.size(), ReserveString);
-  char *newbuf = str.mutableSlice().ptr;
+  char *newbuf = str.bufferSlice().ptr;
   int newlen = 0;
   const char *s = data.data();
   for (int pos = data.size(); pos > 0; ) {
@@ -924,7 +922,7 @@ String f_utf8_decode(CStrRef data) {
 
 String f_utf8_encode(CStrRef data) {
   String str = String(data.size() * 4, ReserveString);
-  char *newbuf = str.mutableSlice().ptr;
+  char *newbuf = str.bufferSlice().ptr;
   int newlen = 0;
   const char *s = data.data();
   for (int pos = data.size(); pos > 0; pos--, s++) {

@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/pprof-server.h"
 #include "hphp/runtime/base/hphp-value.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/base/hphp-array-defs.h"
 
 #include <boost/make_shared.hpp>
 
@@ -131,11 +132,9 @@ size_t MemoryProfile::getSizeOfArray(ArrayData *arr) {
     size_t tableSize = HphpArray::computeTableSize(ha->m_tableMask);
     size_t maxElms = HphpArray::computeMaxElms(ha->m_tableMask);
     if (maxElms > HphpArray::SmallSize) {
-      size_t hashSize = tableSize * sizeof(HphpArray::ElmInd);
+      size_t hashSize = tableSize * sizeof(int32_t);
       size_t dataSize = maxElms * sizeof(HphpArray::Elm);
-      size += (hashSize <= sizeof(ha->m_inline_hash))
-        ? dataSize
-        : dataSize + hashSize;
+      size += dataSize + hashSize;
     }
   }
   return size;
@@ -143,7 +142,7 @@ size_t MemoryProfile::getSizeOfArray(ArrayData *arr) {
 
 // static
 size_t MemoryProfile::getSizeOfObject(ObjectData *obj) {
-  ArrayData* props = obj->o_properties.get();
+  auto const props = obj->o_properties.get();
   return getSizeOfPtr(obj) + (props ? getSizeOfArray(props) : 0);
 }
 

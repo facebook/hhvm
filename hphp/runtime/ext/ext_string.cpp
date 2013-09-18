@@ -27,6 +27,7 @@
 #include <locale.h>
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/http-protocol.h"
+#include "hphp/runtime/ext/ext_variable.h"
 
 namespace HPHP {
 
@@ -52,7 +53,7 @@ String stringForEach(uint32_t len, CStrRef str, Op action) {
   String ret = mutate ? str : String(len, ReserveString);
 
   StringSlice srcSlice = str.slice();
-  MutableSlice dstSlice = ret.mutableSlice();
+  auto const dstSlice = ret.bufferSlice();
 
   const char* src = srcSlice.begin();
   const char* end = srcSlice.end();
@@ -1439,7 +1440,7 @@ Variant f_strtr(CStrRef str, CVarRef from, CVarRef to /* = null_variant */) {
       maxlen = slen - pos;
     }
     bool found = false;
-    memcpy(key.mutableSlice().ptr, s + pos, maxlen);
+    memcpy(key.bufferSlice().ptr, s + pos, maxlen);
     for (int len = maxlen; len >= minlen; len--) {
       key.setSize(len);
       if (arr.exists(key)) {
@@ -1460,8 +1461,16 @@ Variant f_strtr(CStrRef str, CVarRef from, CVarRef to /* = null_variant */) {
 }
 
 void f_parse_str(CStrRef str, VRefParam arr /* = null */) {
-  arr = Array::Create();
-  HttpProtocol::DecodeParameters(arr, str.data(), str.size());
+  Variant result;
+
+  HttpProtocol::DecodeParameters(result, str.data(), str.size());
+
+  if(!arr.isReferenced()) {
+    f_extract(result.toArray());
+    return;
+  }
+
+  arr = result.toArray();
 }
 
 Variant f_setlocale(int _argc, int category, CVarRef locale, CArrRef _argv /* = null_array */) {

@@ -50,37 +50,37 @@ void TypeConstraint::init() {
       const StringData* name;
       Type type;
     } pairs[] = {
-      { StringData::GetStaticString("bool"),     { KindOfBoolean,
+      { makeStaticString("bool"),     { KindOfBoolean,
                                                    MetaType::Precise }},
-      { StringData::GetStaticString("boolean"),  { KindOfBoolean,
-                                                   MetaType::Precise }},
-
-      { StringData::GetStaticString("int"),      { KindOfInt64,
-                                                   MetaType::Precise }},
-      { StringData::GetStaticString("integer"),  { KindOfInt64,
+      { makeStaticString("boolean"),  { KindOfBoolean,
                                                    MetaType::Precise }},
 
-      { StringData::GetStaticString("real"),     { KindOfDouble,
+      { makeStaticString("int"),      { KindOfInt64,
                                                    MetaType::Precise }},
-      { StringData::GetStaticString("double"),   { KindOfDouble,
-                                                   MetaType::Precise }},
-      { StringData::GetStaticString("float"),    { KindOfDouble,
+      { makeStaticString("integer"),  { KindOfInt64,
                                                    MetaType::Precise }},
 
-      { StringData::GetStaticString("string"),   { KindOfString,
+      { makeStaticString("real"),     { KindOfDouble,
+                                                   MetaType::Precise }},
+      { makeStaticString("double"),   { KindOfDouble,
+                                                   MetaType::Precise }},
+      { makeStaticString("float"),    { KindOfDouble,
                                                    MetaType::Precise }},
 
-      { StringData::GetStaticString("array"),    { KindOfArray,
+      { makeStaticString("string"),   { KindOfString,
                                                    MetaType::Precise }},
 
-      { StringData::GetStaticString("resource"), { KindOfResource,
+      { makeStaticString("array"),    { KindOfArray,
                                                    MetaType::Precise }},
 
-      { StringData::GetStaticString("self"),     { KindOfObject,
+      { makeStaticString("resource"), { KindOfResource,
+                                                   MetaType::Precise }},
+
+      { makeStaticString("self"),     { KindOfObject,
                                                    MetaType::Self }},
-      { StringData::GetStaticString("parent"),   { KindOfObject,
+      { makeStaticString("parent"),   { KindOfObject,
                                                    MetaType::Parent }},
-      { StringData::GetStaticString("callable"), { KindOfObject,
+      { makeStaticString("callable"), { KindOfObject,
                                                    MetaType::Callable }},
     };
     for (unsigned i = 0; i < sizeof(pairs) / sizeof(Pair); ++i) {

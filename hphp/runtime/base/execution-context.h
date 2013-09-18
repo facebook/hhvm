@@ -540,8 +540,7 @@ public:
       return it->second;
     }
 
-    auto array = ArrayData::Make(f->numStaticLocals());
-    array->incRefCount();
+    auto array = HphpArray::MakeReserve(f->numStaticLocals());
     return m_funcStaticCtx[f] = array;
   }
 

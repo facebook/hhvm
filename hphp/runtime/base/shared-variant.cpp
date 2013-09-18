@@ -13,13 +13,16 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/base/shared-variant.h"
+
+#include "folly/ScopeGuard.h"
+
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/base/shared-map.h"
 #include "hphp/runtime/base/immutable-obj.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/static-string-table.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -66,7 +69,7 @@ StringCase:
         s = apc_reserialize(s);
       }
 
-      auto const st = StringData::LookupStaticString(s.get());
+      auto const st = lookupStaticString(s.get());
       if (st) {
         m_data.str = st;
         m_type = KindOfStaticString;
@@ -142,6 +145,7 @@ StringCase:
   assert(m_type != KindOfResource);
 }
 
+// Defined here for inlining into MakeSVSlowPath below.
 ALWAYS_INLINE void StringData::enlist() {
   assert(isShared());
   auto& head = MemoryManager::TheMemoryManager()->m_strings;
@@ -208,6 +212,7 @@ StringData* StringData::Make(SharedVariant* shared) {
   pdst[len] = 0;
   auto const mcret = memcpy(pdst, psrc, len);
   auto const ret   = reinterpret_cast<StringData*>(mcret) - 1;
+  // Recalculating ret from mcret avoids a spill.
 
   // Note: this return value thing is doing a dead lea into %rsi in
   // the caller for some reason.
@@ -250,7 +255,7 @@ Variant SharedVariant::toLocal() {
       if (getSerializedArray()) {
         return apc_unserialize(m_data.str->data(), m_data.str->size());
       }
-      return NEW(SharedMap)(this);
+      return SharedMap::Make(this);
     }
   case KindOfUninit:
   case KindOfNull:
@@ -297,7 +302,9 @@ void SharedVariant::dump(std::string &out) {
       out += "array: ";
       out += m_data.str->data();
     } else {
-      SharedMap(this).dump(out);
+      auto sm = SharedMap::Make(this);
+      SCOPE_EXIT { sm->release(); };
+      sm->dump(out);
     }
     break;
   case KindOfUninit:

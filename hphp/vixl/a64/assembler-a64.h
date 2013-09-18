@@ -29,6 +29,8 @@
 
 #include <list>
 
+#include "hphp/util/data-block.h"
+
 #include "hphp/vixl/globals.h"
 #include "hphp/vixl/utils.h"
 #include "hphp/vixl/a64/instructions-a64.h"
@@ -559,13 +561,13 @@ class Label {
     assert(!IsLinked() || IsBound());
   }
 
-  inline Instruction* link() const { return link_; }
-  inline Instruction* target() const { return target_; }
+  inline HPHP::CodeAddress link() const { return link_; }
+  inline HPHP::CodeAddress target() const { return target_; }
 
   inline bool IsBound() const { return is_bound_; }
   inline bool IsLinked() const { return link_ != nullptr; }
 
-  inline void set_link(Instruction* new_link) { link_ = new_link; }
+  inline void set_link(HPHP::CodeAddress new_link) { link_ = new_link; }
 
   static const int kEndOfChain = 0;
 
@@ -577,9 +579,9 @@ class Label {
   // link_ points to the latest branch instruction generated branching to this
   // branch.
   // If link_ is not nullptr, the label has been linked to.
-  Instruction* link_;
+  HPHP::CodeAddress link_;
   // The label location.
-  Instruction* target_;
+  HPHP::CodeAddress target_;
 
   friend class Assembler;
 };
@@ -602,11 +604,11 @@ enum LiteralPoolEmitOption {
 // Literal pool entry.
 class Literal {
  public:
-  Literal(Instruction* pc, uint64_t imm, unsigned size)
+  Literal(HPHP::CodeAddress pc, uint64_t imm, unsigned size)
       : pc_(pc), value_(imm), size_(size) {}
 
  private:
-  Instruction* pc_;
+  HPHP::CodeAddress pc_;
   int64_t value_;
   unsigned size_;
 
@@ -617,7 +619,7 @@ class Literal {
 // Assembler.
 class Assembler {
  public:
-  Assembler(byte* buffer, unsigned buffer_size);
+  explicit Assembler(HPHP::CodeBlock& cb);
 
   // The destructor asserts that one of the following is true:
   //  * The Assembler object has not been used.
@@ -1290,8 +1292,8 @@ class Assembler {
     // Pad with NUL characters until pc_ is aligned.
     const char pad[] = {'\0', '\0', '\0', '\0'};
     assert(sizeof(pad) == kInstructionSize);
-    Instruction* next_pc = AlignUp(pc_, kInstructionSize);
-    EmitData(&pad, next_pc - pc_);
+    auto next_pc = AlignUp(cb_.frontier(), kInstructionSize);
+    EmitData(&pad, next_pc - cb_.frontier());
   }
 
   // Code generation helpers.
@@ -1549,15 +1551,16 @@ class Assembler {
 
   // Size of the code generated in bytes
   uint64_t SizeOfCodeGenerated() const {
-    assert((pc_ >= buffer_) && (pc_ < (buffer_ + buffer_size_)));
-    return pc_ - buffer_;
+    assert(cb_.available() > 0);
+    return cb_.used();
   }
 
   // Size of the code generated since label to the current position.
   uint64_t SizeOfCodeGeneratedSince(Label* label) const {
     assert(label->IsBound());
-    assert((pc_ >= label->target()) && (pc_ < (buffer_ + buffer_size_)));
-    return pc_ - label->target();
+    auto addr = label->target();
+    assert(cb_.frontier() >= addr);
+    return cb_.frontier() - addr;
   }
 
 
@@ -1569,7 +1572,7 @@ class Assembler {
     if (--literal_pool_monitor_ == 0) {
       // Has the literal pool been blocked for too long?
       assert(literals_.empty() ||
-             (pc_ < (literals_.back()->pc_ + kMaxLoadLiteralRange)));
+             (cb_.frontier() < (literals_.back()->pc_ + kMaxLoadLiteralRange)));
     }
   }
 
@@ -1714,23 +1717,20 @@ class Assembler {
 
   // Emit the instruction at pc_.
   void Emit(Instr instruction) {
-    assert(sizeof(*pc_) == 1);
-    assert(sizeof(instruction) == kInstructionSize);
-    assert((pc_ + sizeof(instruction)) <= (buffer_ + buffer_size_));
+    assert(cb_.canEmit(sizeof(instruction)));
+    assert(sizeof(instruction) == sizeof(uint32_t));
 
 #ifdef DEBUG
     finalized_ = false;
 #endif
 
-    memcpy(pc_, &instruction, sizeof(instruction));
-    pc_ += sizeof(instruction);
+    cb_.dword(instruction);
     CheckBufferSpace();
   }
 
   // Emit data inline in the instruction stream.
   void EmitData(void const * data, unsigned size) {
-    assert(sizeof(*pc_) == 1);
-    assert((pc_ + size) <= (buffer_ + buffer_size_));
+    assert(cb_.canEmit(size));
 
 #ifdef DEBUG
     finalized_ = false;
@@ -1738,25 +1738,22 @@ class Assembler {
 
     // TODO: Record this 'instruction' as data, so that it can be disassembled
     // correctly.
-    memcpy(pc_, data, size);
-    pc_ += size;
+    cb_.bytes(size, reinterpret_cast<const uint8_t*>(data));
     CheckBufferSpace();
   }
 
   inline void CheckBufferSpace() {
-    assert(pc_ < (buffer_ + buffer_size_));
-    if (pc_ > next_literal_pool_check_) {
+    assert(cb_.available() > 0);
+    if (cb_.frontier() > next_literal_pool_check_) {
       CheckLiteralPool();
     }
   }
 
   // The buffer into which code and relocation info are generated.
-  Instruction* buffer_;
-  // Buffer size, in bytes.
-  unsigned buffer_size_;
-  Instruction* pc_;
+  HPHP::CodeBlock& cb_;
+
   std::list<Literal*> literals_;
-  Instruction* next_literal_pool_check_;
+  HPHP::CodeAddress next_literal_pool_check_;
   unsigned literal_pool_monitor_;
 
   friend class BlockLiteralPoolScope;

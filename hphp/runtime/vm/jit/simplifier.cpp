@@ -65,7 +65,10 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     return getStackValue(inst->src(0), index);
 
   case SideExitGuardStk:
-    always_assert(0 && "simplifier is not tested for running after jumpopts");
+    if (inst->extra<SideExitGuardData>()->checkedSlot == index) {
+      return StackValueInfo { inst, inst->typeParam() };
+    }
+    return getStackValue(inst->src(0), index);
 
   case AssertStk:
     // fallthrough
@@ -992,7 +995,7 @@ SSATmp* Simplifier::simplifyDivDbl(IRInstruction* inst) {
   // X / 0 -> bool(false)
   if (src2Val == 0.0) {
     gen(RaiseWarning,
-        cns(StringData::GetStaticString(Strings::DIVISION_BY_ZERO)));
+        cns(makeStaticString(Strings::DIVISION_BY_ZERO)));
     return cns(false);
   }
 
@@ -1284,7 +1287,7 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
 
   // case 1a: null cmp string. Convert null to ""
   if (type1.isString() && type2.isNull()) {
-    return newInst(opName, src1, cns(StringData::GetStaticString("")));
+    return newInst(opName, src1, cns(makeStaticString("")));
   }
 
   // case 1b: null cmp object. Convert null to false and the object to true
@@ -1405,27 +1408,27 @@ SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
 
   // The comparisons below won't work for these cases covered by this
   // assert, and we currently don't generate these types.
-  assert(type.isKnownUnboxedDataType() && type != Type::StaticStr);
+  assert(type.isKnownUnboxedDataType());
 
-  // CountedStr and StaticStr are disjoint, but compatible for this purpose.
-  if (type.isString() && srcType.isString()) {
-    return cns(trueSense);
-  }
+  // Testing for StaticStr will make you miss out on CountedStr, and vice versa,
+  // and similarly for arrays. PHP treats both types of string the same, so if
+  // the distinction matters to you here, be careful.
+  assert(IMPLIES(type.isString(), type.equals(Type::Str)));
+  assert(IMPLIES(type.isArray(), type.equals(Type::Arr)));
 
   // The types are disjoint; the result must be false.
   if ((srcType & type).equals(Type::Bottom)) {
     return cns(!trueSense);
   }
 
-  // The src type is a subtype of the tested type. You'd think the result would
-  // always be true, but it's not for is_object.
-  if (!type.subtypeOf(Type::Obj) && srcType.subtypeOf(type)) {
+  // The src type is a subtype of the tested type; the result must be true.
+  if (srcType.subtypeOf(type)) {
     return cns(trueSense);
   }
 
   // At this point, either the tested type is a subtype of the src type, or they
-  // are non-disjoint but neither is a subtype of the other. (Or it's the weird
-  // Obj case.) We can't simplify this away.
+  // are non-disjoint but neither is a subtype of the other. We can't simplify
+  // this away.
   return nullptr;
 }
 
@@ -1434,7 +1437,7 @@ SSATmp* Simplifier::simplifyConcat(SSATmp* src1, SSATmp* src2) {
       src2->isConst() && src2->isA(Type::StaticStr)) {
     StringData* str1 = const_cast<StringData *>(src1->getValStr());
     StringData* str2 = const_cast<StringData *>(src2->getValStr());
-    StringData* merge = StringData::GetStaticString(concat_ss(str1, str2));
+    StringData* merge = makeStaticString(concat_ss(str1, str2));
     return cns(merge);
   }
   return nullptr;
@@ -1579,9 +1582,9 @@ SSATmp* Simplifier::simplifyConvBoolToStr(IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
     if (src->getValBool()) {
-      return cns(StringData::GetStaticString("1"));
+      return cns(makeStaticString("1"));
     }
-    return cns(StringData::GetStaticString(""));
+    return cns(makeStaticString(""));
   }
   return nullptr;
 }
@@ -1590,7 +1593,7 @@ SSATmp* Simplifier::simplifyConvDblToStr(IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
     String dblStr(buildStringData(src->getValDbl()));
-    return cns(StringData::GetStaticString(dblStr));
+    return cns(makeStaticString(dblStr));
   }
   return nullptr;
 }
@@ -1599,7 +1602,7 @@ SSATmp* Simplifier::simplifyConvIntToStr(IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
     return cns(
-      StringData::GetStaticString(folly::to<std::string>(src->getValInt()))
+      makeStaticString(folly::to<std::string>(src->getValInt()))
     );
   }
   return nullptr;
@@ -1622,17 +1625,18 @@ SSATmp* Simplifier::simplifyConvCellToBool(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyConvCellToStr(IRInstruction* inst) {
-  auto const src     = inst->src(0);
-  auto const srcType = src->type();
+  auto const src        = inst->src(0);
+  auto const srcType    = src->type();
+  auto const catchTrace = inst->taken();
 
   if (srcType.isBool())   return gen(ConvBoolToStr, src);
-  if (srcType.isNull())   return cns(StringData::GetStaticString(""));
-  if (srcType.isArray())  return cns(StringData::GetStaticString("Array"));
+  if (srcType.isNull())   return cns(makeStaticString(""));
+  if (srcType.isArray())  return cns(makeStaticString("Array"));
   if (srcType.isDbl())    return gen(ConvDblToStr, src);
   if (srcType.isInt())    return gen(ConvIntToStr, src);
   if (srcType.isString()) return gen(IncRef, src);
-  if (srcType.isObj())    return gen(ConvObjToStr, src);
-  if (srcType.isRes())    return gen(ConvResToStr, src);
+  if (srcType.isObj())    return gen(ConvObjToStr, catchTrace, src);
+  if (srcType.isRes())    return gen(ConvResToStr, catchTrace, src);
 
   return nullptr;
 }

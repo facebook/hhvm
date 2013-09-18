@@ -47,8 +47,8 @@ namespace vixl {
 
 class MacroAssembler : public Assembler {
  public:
-  MacroAssembler(byte * buffer, unsigned buffer_size)
-      : Assembler(buffer, buffer_size),
+  explicit MacroAssembler(HPHP::CodeBlock& cb)
+      : Assembler(cb),
 #ifdef DEBUG
         allow_macro_instructions_(true),
 #endif

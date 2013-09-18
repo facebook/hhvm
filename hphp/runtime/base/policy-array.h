@@ -19,8 +19,8 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/smart-allocator.h"
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP {
@@ -322,8 +322,14 @@ class PolicyArray : public ArrayData, private SimpleArrayStore {
   static const PolicyArray* asPolicyArray(const ArrayData* ad);
 
 public:
-  // Memory allocator methods.
-  DECLARE_SMART_ALLOCATION(PolicyArray);
+  template<class... Args> static PolicyArray* Make(Args&&... args) {
+    return new (MM().smartMallocSize(sizeof(PolicyArray)))
+      PolicyArray(std::forward<Args>(args)...);
+  }
+  void release() {
+    this->~PolicyArray();
+    MM().smartFreeSize(this, sizeof(PolicyArray));
+  }
   static void Release(ArrayData*);
 
   explicit PolicyArray(uint size);

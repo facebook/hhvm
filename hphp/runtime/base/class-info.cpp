@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/array-util.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/externals.h"
@@ -422,7 +423,7 @@ void ClassInfo::GetSymbolNames(std::vector<String> &classes,
   for (ArrayIter iter(funcs2); iter; ++iter) {
     functions.push_back(iter.second().toString());
   }
-  Array consts = StringData::GetConstants();
+  Array consts = lookupDefinedConstants();
   constants.reserve(consts.size());
   for (ArrayIter iter(consts); iter; ++iter) {
     constants.push_back(iter.first().toString());
@@ -493,18 +494,18 @@ const {
 ///////////////////////////////////////////////////////////////////////////////
 // load functions
 
-static String makeStaticString(const char *s) {
+static String staticString(const char *s) {
   if (!s) {
     return null_string;
   }
-  return StringData::GetStaticString(s);
+  return makeStaticString(s);
 }
 
 void ClassInfo::ReadUserAttributes(const char **&p,
                                    std::vector<const UserAttributeInfo*> &userAttrVec) {
   while (*p) {
     UserAttributeInfo *userAttr = new UserAttributeInfo();
-    userAttr->name = makeStaticString(*p++);
+    userAttr->name = staticString(*p++);
 
     const char *len = *p++;
     const char *valueText = *p++;
@@ -526,7 +527,7 @@ ClassInfo::MethodInfo *ClassInfo::MethodInfo::getDeclared() {
 
 ClassInfo::MethodInfo::MethodInfo(const char **&p) {
   attribute = (Attribute)(int64_t)(*p++);
-  name = makeStaticString(*p++);
+  name = staticString(*p++);
   docComment = "";
   if (attribute & ClassInfo::IsRedeclared) {
     volatile_redec_offset = (int)(int64_t)(*p++);
@@ -569,7 +570,7 @@ ClassInfo::MethodInfo::MethodInfo(const char **&p) {
 
     while (*p) {
       ConstantInfo *staticVariable = new ConstantInfo();
-      staticVariable->name = makeStaticString(*p++);
+      staticVariable->name = staticString(*p++);
       staticVariable->valueLen = (int64_t)(*p++);
       staticVariable->valueText = *p++;
       VariableUnserializer vu(staticVariable->valueText,
@@ -598,8 +599,8 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
   // from hphp_process_init() in the thread-neutral initialization phase.
   // It is OK to create StaticStrings here, and throw the smart ptrs away,
   // because the underlying static StringData will not be released.
-  m_name = makeStaticString(*p++);
-  m_parent = makeStaticString(*p++);
+  m_name = staticString(*p++);
+  m_parent = staticString(*p++);
   m_parentInfo = 0;
 
   m_file = *p++;
@@ -613,7 +614,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
   m_docComment = *p++;
 
   while (*p) {
-    String iface_name = makeStaticString(*p++);
+    String iface_name = staticString(*p++);
     assert(m_interfaces.find(iface_name) == m_interfaces.end());
     m_interfaces.insert(iface_name);
     m_interfacesVec.push_back(iface_name);
@@ -632,7 +633,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
   while (*p) {
     PropertyInfo *property = new PropertyInfo();
     property->attribute = (Attribute)(int64_t)(*p++);
-    property->name = makeStaticString(*p++);
+    property->name = staticString(*p++);
     property->type = DataType((int)uintptr_t(*p++));
     property->owner = this;
     assert(m_properties.find(property->name) == m_properties.end());
@@ -643,7 +644,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
 
   while (*p) {
     ConstantInfo *constant = new ConstantInfo();
-    constant->name = makeStaticString(*p++);
+    constant->name = staticString(*p++);
     const char *len_or_cw = *p++;
     constant->valueText = *p++;
 
@@ -680,7 +681,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
 
   while (*p) {
     UserAttributeInfo *userAttr = new UserAttributeInfo();
-    userAttr->name = makeStaticString(*p++);
+    userAttr->name = staticString(*p++);
 
     const char *len = *p++;
     const char *valueText = *p++;

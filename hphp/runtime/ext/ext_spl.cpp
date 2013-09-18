@@ -316,7 +316,7 @@ namespace {
 class ExtensionList : public RequestEventHandler {
 public:
   virtual void requestInit() {
-    extensions = CREATE_VECTOR2(String(".inc"), String(".php"));
+    extensions = make_packed_array(String(".inc"), String(".php"));
   }
   virtual void requestShutdown() {
     extensions.reset();

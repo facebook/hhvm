@@ -182,7 +182,7 @@ struct HhbcTranslator {
   void emitInitThisLoc(int32_t id);
   void emitArray(int arrayId);
   void emitNewArray(int capacity);
-  void emitNewTuple(int n);
+  void emitNewPackedArray(int n);
 
   void emitArrayAdd();
   void emitAddElemC();
@@ -502,6 +502,8 @@ private:
     void emitArraySet(SSATmp* key, SSATmp* value);
     void emitArrayGet(SSATmp* key);
     void emitArrayIsset();
+    void emitStringGet(SSATmp* key);
+    void emitStringIsset();
     void emitVectorSet(SSATmp* key, SSATmp* value);
     void emitVectorGet(SSATmp* key);
     void emitVectorIsset();
@@ -575,6 +577,8 @@ private:
       None,
       // simple opcode on Array
       Array,
+      // simple opcode on String
+      String,
       // simple opcode on Vector* (c_Vector*)
       Vector,
       // simple opcode on Map* (c_Map*)

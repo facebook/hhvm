@@ -94,7 +94,7 @@ bool TestServer::VerifyServerResponse(const char *input, const char **outputs,
       }
       if (header) {
         f_curl_setopt(c.toResource(), k_CURLOPT_HTTPHEADER,
-                      CREATE_VECTOR1(header));
+                      make_packed_array(header));
       }
       if (responseHeader) {
         f_curl_setopt(c.toResource(), k_CURLOPT_HEADER, 1);

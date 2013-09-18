@@ -185,9 +185,9 @@ String File::read(int64_t length) {
   }
 
   String s = String(length, ReserveString);
-  char *ret = s.mutableSlice().ptr;
+  char *ret = s.bufferSlice().ptr;
   int64_t copied = 0;
-  int64_t avail = m_writepos - m_readpos;
+  int64_t avail = bufferedLen();
 
   while (avail < length && !eof()) {
     if (m_buffer == nullptr) {
@@ -202,7 +202,7 @@ String File::read(int64_t length) {
 
     m_writepos = readImpl(m_buffer, CHUNK_SIZE);
     m_readpos = 0;
-    avail = m_writepos - m_readpos;
+    avail = bufferedLen();
 
     if (avail == 0 || m_nonblocking) {
       // For nonblocking mode, temporary out of data.
@@ -210,7 +210,7 @@ String File::read(int64_t length) {
     }
   }
 
-  avail = m_writepos - m_readpos;
+  avail = bufferedLen();
   if (avail > 0) {
     int64_t n = length < avail ? length : avail;
     memcpy(ret + copied, m_buffer + m_readpos, n);
@@ -255,7 +255,7 @@ bool File::seek(int64_t offset, int whence /* = SEEK_SET */) {
     throw NotSupportedException(__func__, "cannot seek backwards");
   }
   if (offset > 0) {
-    int64_t avail = m_writepos - m_readpos;
+    int64_t avail = bufferedLen();
     assert(avail >= 0);
     if (avail >= offset) {
       m_readpos += offset;
@@ -352,7 +352,7 @@ String File::readLine(int64_t maxlen /* = 0 */) {
   size_t total_copied = 0;
   char *ret = nullptr;
   for (;;) {
-    int64_t avail = m_writepos - m_readpos;
+    int64_t avail = bufferedLen();
     if (avail > 0) {
       int64_t cpysz = 0;
       bool done = false;
@@ -408,7 +408,7 @@ String File::readLine(int64_t maxlen /* = 0 */) {
       }
       m_writepos = readImpl(m_buffer, CHUNK_SIZE);
       m_readpos = 0;
-      if (m_writepos - m_readpos == 0) {
+      if (bufferedLen() == 0) {
         break;
       }
     }
@@ -432,17 +432,17 @@ String File::readRecord(CStrRef delimiter, int64_t maxlen /* = 0 */) {
     maxlen = CHUNK_SIZE;
   }
 
-  int64_t avail = m_writepos - m_readpos;
+  int64_t avail = bufferedLen();
   if (m_buffer == nullptr) {
     m_buffer = (char *)malloc(CHUNK_SIZE * 3);
   }
   if (avail < maxlen && !eof()) {
     assert(m_writepos + maxlen - avail <= CHUNK_SIZE * 3);
     m_writepos += readImpl(m_buffer + m_writepos, maxlen - avail);
-    maxlen = m_writepos - m_readpos;
+    maxlen = bufferedLen();
   }
   if (m_readpos >= CHUNK_SIZE) {
-    memcpy(m_buffer, m_buffer + m_readpos, m_writepos - m_readpos);
+    memcpy(m_buffer, m_buffer + m_readpos, bufferedLen());
     m_writepos -= m_readpos;
     m_readpos = 0;
   }
@@ -455,9 +455,9 @@ String File::readRecord(CStrRef delimiter, int64_t maxlen /* = 0 */) {
   } else {
     if (delimiter.size() == 1) {
       e = (const char *)memchr(m_buffer + m_readpos, delimiter.charAt(0),
-                               m_writepos - m_readpos);
+                               bufferedLen());
     } else {
-      int64_t pos = string_find(m_buffer + m_readpos, m_writepos - m_readpos,
+      int64_t pos = string_find(m_buffer + m_readpos, bufferedLen(),
                               delimiter.data(), delimiter.size(), 0, true);
       if (pos >= 0) {
         e = m_buffer + m_readpos + pos;
@@ -480,7 +480,7 @@ String File::readRecord(CStrRef delimiter, int64_t maxlen /* = 0 */) {
 
   if (toread >= 0) {
     String s = String(toread, ReserveString);
-    char *buf = s.mutableSlice().ptr;
+    char *buf = s.bufferSlice().ptr;
     if (toread) {
       memcpy(buf, m_buffer + m_readpos, toread);
     }

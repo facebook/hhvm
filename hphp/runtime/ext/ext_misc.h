@@ -33,7 +33,6 @@ bool f_define(CStrRef name, CVarRef value, bool case_insensitive = false);
 bool f_defined(CStrRef name, bool autoload = true);
 Variant f_die(CVarRef status = null_variant);
 Variant f_exit(CVarRef status = null_variant);
-Variant f_eval(CStrRef code_str);
 Variant f_get_browser(CStrRef user_agent = null_string, bool return_array = false);
 void f___halt_compiler();
 Variant f_show_source(CStrRef filename, bool ret = false);

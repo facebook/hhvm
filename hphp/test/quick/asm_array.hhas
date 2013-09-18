@@ -105,7 +105,7 @@ unset_label:  String "win\n"
               FPushFuncD 1 "var_dump"
               Int 1
               String "b"
-              NewTuple 2
+              NewPackedArray 2
               FPassC 0
               FCall 1
               PopR

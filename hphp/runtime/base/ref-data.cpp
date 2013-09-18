@@ -18,17 +18,19 @@
 
 namespace HPHP {
 
-IMPLEMENT_SMART_ALLOCATION(RefData);
-
-RefData::~RefData() {
-  assert(m_magic == Magic::kMagic);
-  tvAsVariant(&m_tv).~Variant();
-}
-
 void RefData::dump() const {
   VariableSerializer vs(VariableSerializer::Type::VarDump);
   String ret(vs.serialize(tvAsCVarRef(&m_tv), true));
   printf("RefData: %s", ret.c_str());
+}
+
+void refdata_after_decref_helper(RefData* ref) {
+  if (LIKELY(!ref->m_cow)) {
+    ref->release();
+    return;
+  }
+  ref->m_count = 1;
+  ref->m_cowAndZ = 0;
 }
 
 }

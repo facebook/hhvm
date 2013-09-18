@@ -23,7 +23,9 @@
 #endif
 #define __STDC_LIMIT_MACROS
 
-#include "hphp/runtime/base/smart-allocator.h"
+#include <algorithm>
+#include <cstdint>
+
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/memory-profile.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -33,12 +35,16 @@
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
 
-#include <stdint.h>
-
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(smartalloc);
+
+//////////////////////////////////////////////////////////////////////
+
+const uint32_t SLAB_SIZE = 2 << 20;
+
+//////////////////////////////////////////////////////////////////////
+
 #ifdef USE_JEMALLOC
 bool MemoryManager::s_statsEnabled = false;
 size_t MemoryManager::s_cactiveLimitCeiling = 0;
@@ -131,13 +137,12 @@ static inline void threadStats(uint64_t*& allocated, uint64_t*& deallocated,
 #endif
 
 static void* MemoryManagerInit() {
-  // We store the free list pointers right at the start of each object,
-  // overlapping SmartHeader.data, and we also clobber _count as a
-  // free-object flag when the object is deallocated.
-  // This assert just makes sure they don't overflow.
-  static_assert(FAST_REFCOUNT_OFFSET + sizeof(int) <=
-                SmartAllocatorImpl::MinItemSize,
-                "MinItemSize is too small");
+  // We store the free list pointers right at the start of each
+  // object, overlapping SmartHeader.data, and we also clobber _count
+  // as a free-object flag when the object is deallocated.  This
+  // assert just makes sure they don't overflow.
+  assert(FAST_REFCOUNT_OFFSET + sizeof(int) <=
+    MemoryManager::smartSizeClass(1));
   MemoryManager::TlsWrapper tls;
   return (void*)tls.getNoCheck;
 }
@@ -154,20 +159,6 @@ void MemoryManager::Delete(MemoryManager* mm) {
 
 void MemoryManager::OnThreadExit(MemoryManager* mm) {
   mm->~MemoryManager();
-}
-
-MemoryManager::AllocIterator::AllocIterator(const MemoryManager* mman)
-  : m_mman(*mman)
-  , m_it(m_mman.m_smartAllocators.begin())
-{}
-
-SmartAllocatorImpl*
-MemoryManager::AllocIterator::current() const {
-  return m_it == m_mman.m_smartAllocators.end() ? 0 : *m_it;
-}
-
-void MemoryManager::AllocIterator::next() {
-  ++m_it;
 }
 
 MemoryManager::MemoryManager()
@@ -218,37 +209,26 @@ void MemoryManager::refreshStatsHelperStop() {
 }
 #endif
 
-void MemoryManager::add(SmartAllocatorImpl *allocator) {
-  assert(allocator);
-  m_smartAllocators.push_back(allocator);
-}
-
 void MemoryManager::sweepAll() {
   Sweepable::SweepAll();
 }
 
-struct SmallNode {
-  size_t padbytes; // <= kMaxSmartSize means small block
-};
-
-typedef std::vector<char*>::const_iterator SlabIter;
-
 void MemoryManager::rollback() {
   StringData::sweepAll();
-  for (unsigned int i = 0, n = m_smartAllocators.size(); i < n; i++) {
-    m_smartAllocators[i]->clear();
-  }
+
   // free smart-malloc slabs
-  for (SlabIter i = m_slabs.begin(), end = m_slabs.end(); i != end; ++i) {
-    free(*i);
+  for (auto slab : m_slabs) {
+    free(slab);
   }
   m_slabs.clear();
+
   // free large allocation blocks
   for (SweepNode *n = m_sweep.next, *next; n != &m_sweep; n = next) {
     next = n->next;
     free(n);
   }
   m_sweep.next = m_sweep.prev = &m_sweep;
+
   // zero out freelists
   for (auto& i : m_sizeUntrackedFree) i.clear();
   for (auto& i : m_sizeTrackedFree)   i.clear();
@@ -341,6 +321,7 @@ inline void MemoryManager::smartFree(void* ptr) {
   auto const n = static_cast<SweepNode*>(ptr) - 1;
   auto const padbytes = n->padbytes;
   if (LIKELY(padbytes <= kMaxSmartSize)) {
+    assert(memset(ptr, kSmartFreeFill, padbytes - sizeof(SmallNode)));
     auto const idx = (padbytes - 1) >> kLgSizeQuantum;
     assert(idx < kNumSizes && idx >= 0);
     FTRACE(1, "smartFree: {}\n", ptr);
@@ -402,6 +383,18 @@ NEVER_INLINE char* MemoryManager::newSlab(size_t nbytes) {
   return slab;
 }
 
+// allocate nbytes from the current slab, aligned to 16-bytes
+void* MemoryManager::slabAlloc(size_t nbytes) {
+  const size_t kAlignMask = 15;
+  assert((nbytes & 7) == 0);
+  char* ptr = (char*)(uintptr_t(m_front + kAlignMask) & ~kAlignMask);
+  if (ptr + nbytes <= m_limit) {
+    m_front = ptr + nbytes;
+    return ptr;
+  }
+  return newSlab(nbytes);
+}
+
 NEVER_INLINE
 void* MemoryManager::smartMallocSlab(size_t padbytes) {
   SmallNode* n = (SmallNode*) slabAlloc(padbytes);
@@ -432,6 +425,22 @@ void* MemoryManager::smartMallocBig(size_t nbytes) {
   );
   return smartEnlist(n);
 }
+
+#ifdef USE_JEMALLOC
+NEVER_INLINE
+void* MemoryManager::smartMallocSizeBigHelper(void*& ptr,
+                                              size_t& szOut,
+                                              size_t bytes) {
+  m_stats.usage += bytes;
+  allocm(&ptr, &szOut, debugAddExtra(bytes + sizeof(SweepNode)), 0);
+  szOut = debugRemoveExtra(szOut - sizeof(SweepNode));
+  return debugPostAllocate(
+    smartEnlist(static_cast<SweepNode*>(ptr)),
+    bytes,
+    szOut
+  );
+}
+#endif
 
 NEVER_INLINE
 void* MemoryManager::smartCallocBig(size_t totalbytes) {
@@ -479,23 +488,62 @@ void smart_free(void* ptr) {
   if (ptr) MM().smartFree(ptr);
 }
 
-// SmartAllocator facade
+//////////////////////////////////////////////////////////////////////
 
-HOT_FUNC
-void* SmartAllocatorImpl::alloc(size_t nbytes) {
-  assert(nbytes == size_t(m_itemSize));
-  MM().getStats().usage += nbytes;
-  void* ptr = m_free.maybePop();
-  if (UNLIKELY(!ptr)) {
-    ptr = MM().slabAlloc(nbytes);
-  }
-  TRACE(1, "alloc %zu -> %p\n", nbytes, ptr);
-  MemoryProfile::logAllocation(ptr, nbytes);
-  return ptr;
+#ifdef DEBUG
+
+void* MemoryManager::debugPostAllocate(void* p,
+                                       size_t bytes,
+                                       size_t returnedCap) {
+  auto const header = static_cast<DebugHeader*>(p);
+  header->allocatedMagic = DebugHeader::kAllocatedMagic;
+  header->requestedSize = bytes;
+  header->returnedCap = returnedCap;
+  header->padding = 0;
+  return header + 1;
 }
 
-void SmartAllocatorImpl::logDealloc(void *ptr) {
-  MemoryProfile::logDeallocation(ptr);
+void* MemoryManager::debugPreFree(void* p,
+                                  size_t bytes,
+                                  size_t userSpecifiedBytes) {
+  auto const header = reinterpret_cast<DebugHeader*>(p) - 1;
+  assert(checkPreFree(header, bytes, userSpecifiedBytes));
+  header->allocatedMagic = 0; // will get a freelist pointer shortly
+  header->requestedSize = DebugHeader::kFreedMagic;
+  memset(header + 1, kSmartFreeFill, bytes);
+  return header;
+}
+
+#endif
+
+bool MemoryManager::checkPreFree(DebugHeader* p,
+                                 size_t bytes,
+                                 size_t userSpecifiedBytes) {
+  assert(debug);
+
+  assert(p->allocatedMagic == DebugHeader::kAllocatedMagic);
+
+  if (userSpecifiedBytes != 0) {
+    // For size-specified frees, the size they report when freeing
+    // must be either what they asked for, or what we returned as the
+    // actual capacity;
+    assert(userSpecifiedBytes == p->requestedSize ||
+           userSpecifiedBytes == p->returnedCap);
+  }
+
+  if (p->requestedSize <= MemoryManager::kMaxSmartSize) {
+    auto const ptrInt = reinterpret_cast<uintptr_t>(p);
+    DEBUG_ONLY auto it = std::find_if(
+      begin(m_slabs), end(m_slabs),
+      [&] (char* base) {
+        auto const baseInt = reinterpret_cast<uintptr_t>(base);
+        return ptrInt >= baseInt && ptrInt < baseInt + SLAB_SIZE;
+      }
+    );
+    assert(it != end(m_slabs));
+  }
+
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

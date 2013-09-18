@@ -281,7 +281,7 @@ struct TypedefReq {
 // (const StringData*) versus (StringData*)
 //
 // All (const StringData*) values are static strings that came from e.g.
-// StringData::GetStaticString().  Therefore no reference counting is required.
+// makeStaticString().  Therefore no reference counting is required.
 //
 //==============================================================================
 
@@ -721,6 +721,9 @@ private:
   uint8_t m_cacheMask;
   bool m_mergeOnly;
   bool m_interpretOnly;
+  // list of (line, offset) where offset is the offset of the first byte code
+  // of the next line if there is one, m_bclen otherwise.
+  // sorted by offset. line values are not assumed to be unique.
   LineTable m_lineTable;
   FuncTable m_funcTable;
   mutable PseudoMainCacheMap *m_pseudoMainCache;
@@ -885,6 +888,7 @@ class UnitEmitter {
    */
   std::vector<std::pair<Offset,SourceLoc> > m_sourceLocTab;
   std::vector<std::pair<Offset,const FuncEmitter*> > m_feTab;
+  LineTable m_lineTable;
   std::vector<Typedef> m_typedefs;
 };
 

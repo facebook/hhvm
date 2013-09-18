@@ -39,7 +39,7 @@ StringBuffer::StringBuffer(int initialSize /* = SmallStringReserve */)
 {
   assert(initialSize > 0);
   m_str = StringData::Make(initialSize);
-  MutableSlice s = m_str->mutableSlice();
+  auto const s = m_str->bufferSlice();
   m_buffer = s.ptr;
   m_cap = s.len;
 }
@@ -138,7 +138,7 @@ char* StringBuffer::appendCursor(int size) {
       m_str->release();
       m_str = tmp;
     }
-    auto const s = m_str->mutableSlice();
+    auto const s = m_str->bufferSlice();
     m_buffer = s.ptr;
     m_cap = s.len;
   }
@@ -308,7 +308,7 @@ void StringBuffer::growBy(int spaceRequired) {
     m_str->release();
     m_str = tmp;
   }
-  auto const s = m_str->mutableSlice();
+  auto const s = m_str->bufferSlice();
   m_buffer = s.ptr;
   m_cap = s.len;
 }

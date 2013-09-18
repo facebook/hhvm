@@ -1,0 +1,649 @@
+
+
+Test 1.e8f1cd28133d79ecd660002f1c660d0e:
+array (
+  0 => 'aaa',
+  1 => 'abc',
+  2 => 'abd',
+)
+ Result: true
+
+Test 2.c2ded12173dd2996927378cae37eb275:
+array (
+  0 => '_',
+  1 => '1',
+  2 => 'm',
+)
+ Result: true
+
+Test 3.54071c968d71cb98c5d379145f8d7d38:
+array (
+  0 => 'a',
+  1 => 'aa',
+  2 => 'aaa',
+)
+ Result: true
+
+Test 4.19abe63d6f6dfef65b0e3c9ab4826b07:
+array (
+  0 => 'ab',
+  1 => 'b',
+  2 => 'ba',
+)
+ Result: true
+
+Test 5.9a8dc0a9bc771368c2f1fc3d02754610:
+array (
+  0 => 'a',
+  1 => 'c',
+  2 => 'e',
+)
+ Result: true
+
+Test 6.ab530b060e5e54a65bfb8b9f8fc61870:
+array (
+  0 => '25',
+  1 => '36',
+  2 => '100',
+)
+ Result: true
+
+Test 7.0718dd838509017bded2ed307a6e785f:
+array (
+  0 => 2,
+  1 => 5,
+  2 => '30',
+)
+ Result: true
+
+Test 8.923d65739c5219c634616ffd100a50e4:
+array (
+  0 => '',
+  1 => ' a',
+  2 => 'd',
+)
+ Result: true
+
+Test 9.289bc2f28e87d3201ec9d7e8477ae1b0:
+array (
+  0 => ' a',
+  1 => 'd ',
+  2 => 'f ',
+)
+ Result: true
+
+Test 10.de0fd958484f2377a645835d7fbcf124:
+array (
+  0 => NULL,
+  1 => '3',
+  2 => 'a',
+)
+ Result: true
+
+Test 11.dd2b8f0adb37c45d528cad1a0cc0f361:
+array (
+  0 => 'i',
+  1 => 'k',
+  2 => 'y',
+)
+ Result: true
+
+Test 12.1e6b4d6f7df9d4580317634ea46d8208:
+array (
+  0 => '100',
+  1 => '25',
+  2 => '36',
+)
+ Result: true
+
+Test 13.cec115dc9850b98dfbdf102efa09e61b:
+array (
+  0 => 2,
+  1 => '30',
+  2 => 5,
+)
+ Result: true
+
+Test 14.923d65739c5219c634616ffd100a50e4:
+array (
+  0 => '',
+  1 => ' a',
+  2 => 'd',
+)
+ Result: true
+
+Test 15.dd2b8f0adb37c45d528cad1a0cc0f361:
+array (
+  0 => 'i',
+  1 => 'k',
+  2 => 'y',
+)
+ Result: true
+
+Test 16.e3441f05c85fdad33e329a5db8631e80:
+array (
+  0 => 'ааа',
+  1 => 'абв',
+  2 => 'абв',
+  3 => 'абг',
+)
+ Result: true
+
+Test 17.91480b10473a0c96a4cd6d88c23c577a:
+array (
+  0 => 'а',
+  1 => 'аа',
+  2 => 'ааа',
+)
+ Result: true
+
+Test 18.fdd3fe3981476039164aa000bf9177f2:
+array (
+  0 => 'i',
+  1 => 'y',
+  2 => 'k',
+)
+ Result: truearray(5) {
+  [0]=>
+  int(25)
+  [1]=>
+  string(5) "30.12"
+  [2]=>
+  string(4) "30.2"
+  [3]=>
+  int(36)
+  [4]=>
+  int(100)
+}
+array(5) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(25)
+  [2]=>
+  string(5) "30.12"
+  [3]=>
+  string(4) "30.2"
+  [4]=>
+  int(36)
+}
+array(5) {
+  [0]=>
+  int(25)
+  [1]=>
+  string(5) "30.12"
+  [2]=>
+  string(4) "30.2"
+  [3]=>
+  int(36)
+  [4]=>
+  int(100)
+}
+array(3) {
+  [0]=>
+  string(2) "25"
+  [1]=>
+  string(2) "36"
+  [2]=>
+  string(3) "100"
+}
+array(3) {
+  [0]=>
+  string(3) "100"
+  [1]=>
+  string(2) "25"
+  [2]=>
+  string(2) "36"
+}
+array(3) {
+  [0]=>
+  string(2) "25"
+  [1]=>
+  string(2) "36"
+  [2]=>
+  string(3) "100"
+}
+array(9) {
+  [0]=>
+  int(2)
+  [1]=>
+  string(1) "2"
+  [2]=>
+  int(5)
+  [3]=>
+  int(10)
+  [4]=>
+  int(11)
+  [5]=>
+  int(17)
+  [6]=>
+  string(2) "30"
+  [7]=>
+  string(2) "54"
+  [8]=>
+  int(64)
+}
+array(9) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(11)
+  [2]=>
+  int(17)
+  [3]=>
+  string(1) "2"
+  [4]=>
+  int(2)
+  [5]=>
+  string(2) "30"
+  [6]=>
+  int(5)
+  [7]=>
+  string(2) "54"
+  [8]=>
+  int(64)
+}
+array(9) {
+  [0]=>
+  int(2)
+  [1]=>
+  string(1) "2"
+  [2]=>
+  int(5)
+  [3]=>
+  int(10)
+  [4]=>
+  int(11)
+  [5]=>
+  int(17)
+  [6]=>
+  string(2) "30"
+  [7]=>
+  string(2) "54"
+  [8]=>
+  int(64)
+}
+array(9) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(2)
+  [2]=>
+  int(5)
+  [3]=>
+  int(10)
+  [4]=>
+  int(11)
+  [5]=>
+  int(17)
+  [6]=>
+  int(30)
+  [7]=>
+  int(54)
+  [8]=>
+  int(64)
+}
+array(9) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(11)
+  [2]=>
+  int(17)
+  [3]=>
+  int(2)
+  [4]=>
+  int(2)
+  [5]=>
+  int(30)
+  [6]=>
+  int(5)
+  [7]=>
+  int(54)
+  [8]=>
+  int(64)
+}
+array(9) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(2)
+  [2]=>
+  int(5)
+  [3]=>
+  int(10)
+  [4]=>
+  int(11)
+  [5]=>
+  int(17)
+  [6]=>
+  int(30)
+  [7]=>
+  int(54)
+  [8]=>
+  int(64)
+}
+array(5) {
+  [0]=>
+  int(25)
+  [1]=>
+  string(5) "30.12"
+  [2]=>
+  string(4) "30.2"
+  [3]=>
+  int(36)
+  [4]=>
+  int(100)
+}
+array(5) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(25)
+  [2]=>
+  string(5) "30.12"
+  [3]=>
+  string(4) "30.2"
+  [4]=>
+  int(36)
+}
+array(5) {
+  [0]=>
+  int(25)
+  [1]=>
+  string(5) "30.12"
+  [2]=>
+  string(4) "30.2"
+  [3]=>
+  int(36)
+  [4]=>
+  int(100)
+}
+array(3) {
+  [0]=>
+  string(2) "25"
+  [1]=>
+  string(2) "36"
+  [2]=>
+  string(3) "100"
+}
+array(3) {
+  [0]=>
+  string(3) "100"
+  [1]=>
+  string(2) "25"
+  [2]=>
+  string(2) "36"
+}
+array(3) {
+  [0]=>
+  string(2) "25"
+  [1]=>
+  string(2) "36"
+  [2]=>
+  string(3) "100"
+}
+array(9) {
+  [0]=>
+  int(2)
+  [1]=>
+  string(1) "2"
+  [2]=>
+  int(5)
+  [3]=>
+  int(10)
+  [4]=>
+  int(11)
+  [5]=>
+  int(17)
+  [6]=>
+  string(2) "30"
+  [7]=>
+  string(2) "54"
+  [8]=>
+  int(64)
+}
+array(9) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(11)
+  [2]=>
+  int(17)
+  [3]=>
+  string(1) "2"
+  [4]=>
+  int(2)
+  [5]=>
+  string(2) "30"
+  [6]=>
+  int(5)
+  [7]=>
+  string(2) "54"
+  [8]=>
+  int(64)
+}
+array(9) {
+  [0]=>
+  int(2)
+  [1]=>
+  string(1) "2"
+  [2]=>
+  int(5)
+  [3]=>
+  int(10)
+  [4]=>
+  int(11)
+  [5]=>
+  int(17)
+  [6]=>
+  string(2) "30"
+  [7]=>
+  string(2) "54"
+  [8]=>
+  int(64)
+}
+array(9) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(2)
+  [2]=>
+  int(5)
+  [3]=>
+  int(10)
+  [4]=>
+  int(11)
+  [5]=>
+  int(17)
+  [6]=>
+  int(30)
+  [7]=>
+  int(54)
+  [8]=>
+  int(64)
+}
+array(9) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(11)
+  [2]=>
+  int(17)
+  [3]=>
+  int(2)
+  [4]=>
+  int(2)
+  [5]=>
+  int(30)
+  [6]=>
+  int(5)
+  [7]=>
+  int(54)
+  [8]=>
+  int(64)
+}
+array(9) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(2)
+  [2]=>
+  int(5)
+  [3]=>
+  int(10)
+  [4]=>
+  int(11)
+  [5]=>
+  int(17)
+  [6]=>
+  int(30)
+  [7]=>
+  int(54)
+  [8]=>
+  int(64)
+}
+Locale: 'EN-US-ODESSA'
+  ULOC_VALID_LOCALE     = 'en_US'
+Locale: 'UK_UA_ODESSA'
+  ULOC_VALID_LOCALE     = 'uk_UA'
+Locale: 'uk-ua_CALIFORNIA@currency=;currency=GRN'
+  ULOC_VALID_LOCALE     = 'uk_UA'
+Locale: ''
+  ULOC_VALID_LOCALE     = '%s'
+Locale: 'root'
+  ULOC_VALID_LOCALE     = 'root'
+Locale: 'uk@currency=EURO'
+  ULOC_VALID_LOCALE     = 'uk'
+array (
+  0 => 'a',
+  1 => 'b',
+  2 => 'c',
+)
+array (
+  0 => 'a',
+  1 => 'b',
+  2 => 'c',
+)
+array (
+  0 => 'b',
+  1 => 'a',
+  2 => 'c',
+)
+array (
+  0 => 'а',
+  1 => 'б',
+  2 => 'в',
+)
+array (
+  0 => 'а',
+  1 => 'б',
+  2 => 'в',
+)
+array (
+  0 => 'б',
+  1 => 'а',
+  2 => 'в',
+)
+di Silva < Di Silva < diSilva < U.S.A. < USA
+di Silva = diSilva < Di Silva < U.S.A. = USA
+di Silva < diSilva < Di Silva < U.S.A. < USA
+
+
+
+Test 1.e8f1cd28133d79ecd660002f1c660d0e:
+array (
+  0 => 'aaa',
+  1 => 'abc',
+  2 => 'abd',
+)
+ Result: true
+
+Test 2.c2ded12173dd2996927378cae37eb275:
+array (
+  0 => '_',
+  1 => '1',
+  2 => 'm',
+)
+ Result: true
+
+Test 3.54071c968d71cb98c5d379145f8d7d38:
+array (
+  0 => 'a',
+  1 => 'aa',
+  2 => 'aaa',
+)
+ Result: true
+
+Test 4.19abe63d6f6dfef65b0e3c9ab4826b07:
+array (
+  0 => 'ab',
+  1 => 'b',
+  2 => 'ba',
+)
+ Result: true
+
+Test 5.9a8dc0a9bc771368c2f1fc3d02754610:
+array (
+  0 => 'a',
+  1 => 'c',
+  2 => 'e',
+)
+ Result: true
+
+Test 6.923d65739c5219c634616ffd100a50e4:
+array (
+  0 => '',
+  1 => ' a',
+  2 => 'd',
+)
+ Result: true
+
+Test 7.289bc2f28e87d3201ec9d7e8477ae1b0:
+array (
+  0 => ' a',
+  1 => 'd ',
+  2 => 'f ',
+)
+ Result: true
+
+Test 8.de0fd958484f2377a645835d7fbcf124:
+array (
+  0 => NULL,
+  1 => '3',
+  2 => 'a',
+)
+ Result: true
+
+Test 9.dd2b8f0adb37c45d528cad1a0cc0f361:
+array (
+  0 => 'i',
+  1 => 'k',
+  2 => 'y',
+)
+ Result: true
+
+Test 10.e3441f05c85fdad33e329a5db8631e80:
+array (
+  0 => 'ааа',
+  1 => 'абв',
+  2 => 'абв',
+  3 => 'абг',
+)
+ Result: true
+
+Test 11.91480b10473a0c96a4cd6d88c23c577a:
+array (
+  0 => 'а',
+  1 => 'аа',
+  2 => 'ааа',
+)
+ Result: true
+
+Test 12.fdd3fe3981476039164aa000bf9177f2:
+array (
+  0 => 'i',
+  1 => 'y',
+  2 => 'k',
+)
+ Result: true

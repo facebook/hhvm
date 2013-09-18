@@ -31,9 +31,9 @@
 
 namespace HPHP {
 
-static StringData* sd86ctor = StringData::GetStaticString("86ctor");
-static StringData* sd86pinit = StringData::GetStaticString("86pinit");
-static StringData* sd86sinit = StringData::GetStaticString("86sinit");
+static StringData* sd86ctor = makeStaticString("86ctor");
+static StringData* sd86pinit = makeStaticString("86pinit");
+static StringData* sd86sinit = makeStaticString("86sinit");
 
 hphp_hash_map<const StringData*, const HhbcExtClassInfo*,
               string_data_hash, string_data_isame> Class::s_extClassHash;
@@ -51,7 +51,7 @@ const StringData* PreClass::manglePropName(const StringData* className,
     mangledName.push_back('*');
     mangledName.push_back('\0');
     mangledName += propName->data();
-    return StringData::GetStaticString(mangledName);
+    return makeStaticString(mangledName);
   }
   case AttrPrivate: {
     std::string mangledName = "";
@@ -59,7 +59,7 @@ const StringData* PreClass::manglePropName(const StringData* className,
     mangledName += className->data();
     mangledName.push_back('\0');
     mangledName += propName->data();
-    return StringData::GetStaticString(mangledName);
+    return makeStaticString(mangledName);
   }
   default: not_reached();
   }
@@ -456,8 +456,8 @@ Class::PropInitVec* Class::initPropsImpl() const {
   {
     Array args;
 
-    HphpArray* propArr = ArrayData::Make(nProps);
-    Variant arg0(propArr);
+    HphpArray* propArr = HphpArray::MakeReserve(nProps);
+    Variant arg0(Array::attach(propArr));
 
     args.appendRef(arg0);
     assert(propArr->getCount() == 1);  // Don't want to trigger COW
@@ -652,8 +652,8 @@ TypedValue* Class::initSPropsImpl() const {
   // They'll put their initialized values into an array, and we'll read any
   // values we need out of the array later.
   if (hasNonscalarInit) {
-    HphpArray* propData = ArrayData::Make(m_staticProperties.size());
-    Variant arg0(propData);
+    HphpArray* propData = HphpArray::MakeReserve(m_staticProperties.size());
+    Variant arg0(Array::attach(propData));
 
     // The 86sinit functions will initialize some subset of the static props.
     // Set all of them to a sentinel object so we can distinguish these.
@@ -792,8 +792,7 @@ TypedValue Class::getStaticPropInitVal(const SProp& prop) {
 
 HphpArray* Class::initClsCnsData() const {
   Slot nConstants = m_constants.size();
-  HphpArray* constants = ArrayData::Make(nConstants);
-  constants->incRefCount();
+  HphpArray* constants = HphpArray::MakeReserve(nConstants);
 
   if (m_parent.get() != nullptr) {
     if (g_vmContext->getClsCnsData(m_parent.get()) == nullptr) {
@@ -847,7 +846,7 @@ Cell* Class::clsCnsGet(const StringData* clsCnsName) const {
   clsCns = clsCnsData->nvGetValueRef(clsCnsInd);
   if (clsCns->m_type == KindOfUninit) {
     // The class constant has not been initialized yet; do so.
-    static StringData* sd86cinit = StringData::GetStaticString("86cinit");
+    static StringData* sd86cinit = makeStaticString("86cinit");
     const Func* meth86cinit =
       m_constants[clsCnsInd].m_class->lookupMethod(sd86cinit);
     TypedValue args[1] = {
@@ -875,7 +874,7 @@ void Class::setParent() {
     Attr attrs = m_parent->attrs();
     if (UNLIKELY(attrs & (AttrFinal | AttrInterface | AttrTrait))) {
       static StringData* sd___MockClass =
-        StringData::GetStaticString("__MockClass");
+        makeStaticString("__MockClass");
       if (!(attrs & AttrFinal) ||
           m_preClass->userAttributes().find(sd___MockClass) ==
           m_preClass->userAttributes().end()) {
@@ -972,7 +971,7 @@ void Class::setSpecial() {
   // Use 86ctor(), since no program-supplied constructor exists
   m_ctor = findSpecialMethod(this, sd86ctor);
   assert(m_ctor && "class had no user-defined constructor or 86ctor");
-  assert((m_ctor->attrs() & ~AttrBuiltin) ==
+  assert((m_ctor->attrs() & ~AttrBuiltin & ~AttrAbstract) ==
          (AttrPublic|AttrNoInjection|AttrPhpLeafFn));
 }
 
@@ -1048,7 +1047,7 @@ void Class::addTraitAlias(const StringData* traitName,
   char buf[traitName->size() + origMethName->size() + 9];
   sprintf(buf, "%s::%s", (traitName->empty() ? "(null)" : traitName->data()),
           origMethName->data());
-  const StringData* origName = StringData::GetStaticString(buf);
+  const StringData* origName = makeStaticString(buf);
   m_traitAliases.push_back(std::pair<const StringData*, const StringData*>
                            (newMethName, origName));
 }
@@ -1261,7 +1260,7 @@ void Class::methodOverrideCheck(const Func* parentMethod, const Func* method) {
 
   if ((parentMethod->attrs() & AttrFinal)) {
     static StringData* sd___MockClass =
-      StringData::GetStaticString("__MockClass");
+      makeStaticString("__MockClass");
     if (m_preClass->userAttributes().find(sd___MockClass) ==
         m_preClass->userAttributes().end()) {
       raise_error("Cannot override final method %s::%s()",
@@ -1418,14 +1417,14 @@ void Class::setMethods() {
 }
 
 void Class::setODAttributes() {
-  static StringData* sd__sleep = StringData::GetStaticString("__sleep");
-  static StringData* sd__get = StringData::GetStaticString("__get");
-  static StringData* sd__set = StringData::GetStaticString("__set");
-  static StringData* sd__isset = StringData::GetStaticString("__isset");
-  static StringData* sd__unset = StringData::GetStaticString("__unset");
-  static StringData* sd__call = StringData::GetStaticString("__call");
+  static StringData* sd__sleep = makeStaticString("__sleep");
+  static StringData* sd__get = makeStaticString("__get");
+  static StringData* sd__set = makeStaticString("__set");
+  static StringData* sd__isset = makeStaticString("__isset");
+  static StringData* sd__unset = makeStaticString("__unset");
+  static StringData* sd__call = makeStaticString("__call");
   static StringData* sd__callStatic
-    = StringData::GetStaticString("__callStatic");
+    = makeStaticString("__callStatic");
 
   m_ODAttrs = 0;
   if (lookupMethod(sd__sleep     )) { m_ODAttrs |= ObjectData::HasSleep;      }
@@ -1888,8 +1887,8 @@ void Class::setInitializers() {
   m_hasInitMethods = (m_pinitVec.size() > 0 || m_sinitVec.size() > 0);
 
   // The __init__ method defined in the Exception class gets special treatment
-  static StringData* sd__init__ = StringData::GetStaticString("__init__");
-  static StringData* sd_exn = StringData::GetStaticString("Exception");
+  static StringData* sd__init__ = makeStaticString("__init__");
+  static StringData* sd_exn = makeStaticString("Exception");
   const Func* einit = lookupMethod(sd__init__);
   m_callsCustomInstanceInit =
     (einit && einit->preClass()->name()->isame(sd_exn));
@@ -1949,6 +1948,24 @@ void Class::checkInterfaceMethods() {
   }
 }
 
+/*
+ * Look up the interfaces implemented by traits used by the class, and add them
+ * to the provided builder.
+ */
+void Class::addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const {
+
+  for (auto const& trait : m_usedTraits) {
+    int numIfcs = trait->m_interfaces.size();
+
+    for (int i = 0; i < numIfcs; i++) {
+      Class* interface = trait->m_interfaces[i];
+      if (builder.find(interface->name()) == builder.end()) {
+        builder.add(interface->name(), interface);
+      }
+    }
+  }
+}
+
 void Class::setInterfaces() {
   InterfaceMap::Builder interfacesBuilder;
   if (m_parent.get() != nullptr) {
@@ -1983,6 +2000,9 @@ void Class::setInterfaces() {
       }
     }
   }
+
+  addInterfacesFromUsedTraits(interfacesBuilder);
+
   m_interfaces.create(interfacesBuilder);
   checkInterfaceMethods();
 }

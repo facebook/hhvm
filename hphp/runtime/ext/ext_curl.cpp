@@ -655,7 +655,7 @@ public:
       {
         int data_size = size * nmemb;
         Variant ret = ch->do_callback(
-          t->callback, CREATE_VECTOR3(Resource(ch), t->fp->fd(), data_size));
+          t->callback, make_packed_array(Resource(ch), t->fp->fd(), data_size));
         if (ret.isString()) {
           String sret = ret.toString();
           length = data_size < sret.size() ? data_size : sret.size();
@@ -687,7 +687,7 @@ public:
       {
         Variant ret = ch->do_callback(
           t->callback,
-          CREATE_VECTOR2(Resource(ch), String(data, length, CopyString)));
+          make_packed_array(Resource(ch), String(data, length, CopyString)));
         length = ret.toInt64();
       }
       break;
@@ -717,7 +717,7 @@ public:
       {
         Variant ret = ch->do_callback(
           t->callback,
-          CREATE_VECTOR2(Resource(ch), String(data, length, CopyString)));
+          make_packed_array(Resource(ch), String(data, length, CopyString)));
         length = ret.toInt64();
       }
       break;
@@ -774,7 +774,7 @@ private:
     CURLOPT_FB_TLS_CIPHER_SPEC = 2147482628
   } fb_specific_options;
 };
-IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(CurlResource);
+
 void CurlResource::sweep() {
   m_write.buf.release();
   m_write_header.buf.release();
@@ -1202,7 +1202,7 @@ private:
   CURLM *m_multi;
   Array m_easyh;
 };
-IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(CurlMultiResource);
+
 void CurlMultiResource::sweep() {
   if (m_multi) {
     curl_multi_cleanup(m_multi);

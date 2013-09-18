@@ -308,9 +308,9 @@ Unit* compile_string(const char* s, size_t sz, const char* fname) {
   return g_hphp_compiler_parse(s, sz, md5, fname);
 }
 
-// Returned array has refcount zero! Caller must refcount.
+// Returned array has refcount one! Caller must not incref.
 HphpArray* pack_args_into_array(ActRec* ar, int nargs) {
-  HphpArray* argArray = ArrayData::Make(nargs);
+  HphpArray* argArray = HphpArray::MakeReserve(nargs);
   for (int i = 0; i < nargs; ++i) {
     TypedValue* tv = (TypedValue*)(ar) - (i+1);
     argArray->HphpArray::appendWithRef(tvAsCVarRef(tv), false);
@@ -320,7 +320,7 @@ HphpArray* pack_args_into_array(ActRec* ar, int nargs) {
     return argArray;
   }
   // This is a magic call, so we need to shuffle the args
-  HphpArray* magicArgs = ArrayData::Make(2);
+  HphpArray* magicArgs = HphpArray::MakeReserve(2);
   magicArgs->append(ar->getInvName(), false);
   magicArgs->append(argArray, false);
   return magicArgs;

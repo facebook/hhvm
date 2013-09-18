@@ -18,6 +18,8 @@
 #define incl_HPHP_VM_CODEGENHELPERS_X64_H_
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/ringbuffer.h"
+
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -42,6 +44,15 @@ constexpr size_t kJmpTargetAlign = 16;
 void moveToAlign(Asm &aa, const size_t alignment = kJmpTargetAlign,
                  const bool unreachable = true);
 
+enum class TestAndSmashFlags {
+  kAlignJccImmediate,
+  kAlignJcc,
+  kAlignJccAndJmp
+};
+void prepareForTestAndSmash(Asm&, int testBytes, TestAndSmashFlags flags);
+void prepareForSmash(Asm&, int nBytes, int offset = 0);
+bool isSmashable(Address frontier, int nBytes, int offset = 0);
+
 void emitEagerSyncPoint(Asm& as, const HPHP::Opcode* pc,
                                  const Offset spDiff);
 void emitEagerVMRegSave(Asm& as, RegSaveFlags flags);
@@ -65,6 +76,14 @@ void emitExitSlowStats(Asm& as, const Func* func, SrcKey dest);
 
 void emitCall(Asm& as, TCA dest);
 void emitCall(Asm& as, CppCall call);
+
+void emitJmpOrJcc(Asm& as, ConditionCode cc, TCA dest);
+
+void emitRB(Asm& a, Trace::RingBufferType t, SrcKey sk,
+            RegSet toSave = RegSet());
+void emitRB(Asm& a, Trace::RingBufferType t, const char* msgm,
+            RegSet toSave = RegSet());
+
 
 /*
  * Tests the surprise flags for the current thread. Should be used

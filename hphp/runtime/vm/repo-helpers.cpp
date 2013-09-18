@@ -347,7 +347,7 @@ void RepoQuery::getTypedValue(int iCol, TypedValue& tv) {
     String s = String((const char*)blob, size, CopyString);
     Variant v = unserialize_from_string(s);
     if (v.isString()) {
-      v = String(StringData::GetStaticString(v.asCStrRef().get()));
+      v = String(makeStaticString(v.asCStrRef().get()));
     } else if (v.isArray()) {
       v = Array(ArrayData::GetScalarArray(v.asCArrRef().get()));
     } else {
@@ -379,7 +379,7 @@ void RepoQuery::getStaticString(int iCol, StringData*& s) {
     const char* text;
     size_t size;
     getText(iCol, text, size);
-    s = StringData::GetStaticString(text, size);
+    s = makeStaticString(text, size);
   }
 }
 

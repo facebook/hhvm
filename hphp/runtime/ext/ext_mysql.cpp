@@ -57,8 +57,6 @@ mysqlExtension s_mysql_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(MySQLResult);
-
 MySQLResult::MySQLResult(MYSQL_RES *res, bool localized /* = false */)
   : m_res(res)
   , m_current_async_row(nullptr)

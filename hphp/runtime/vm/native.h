@@ -66,17 +66,17 @@
  *   virtual moduleLoad(Hdf config) {
  *     HHVM_NAME_FE(sum, my_sum_function)
  *   }
- * Or an explicit call to RegisterBuildinFunction()
+ * Or an explicit call to registerBuildinFunction()
  *   static const StaticString s_sum("sum");
  *   virtual moduleLoad(Hdf config) {
- *     Native::RegisterBuiltinFunction(s_sum.get(), (void*)my_sum_function);
+ *     Native::registerBuiltinFunction(s_sum.get(), (void*)my_sum_function);
  *   }
  */
 #define HHVM_FN(fn) f_ ## fn
 #define HHVM_FUNCTION(fn, ...) \
         HHVM_FN(fn)(__VA_ARGS__)
-#define HHVM_NAMED_FE(fn, fimpl) Native::RegisterBuiltinFunction(\
-                          StringData::GetStaticString(#fn), fimpl)
+#define HHVM_NAMED_FE(fn, fimpl) Native::registerBuiltinFunction(\
+                          makeStaticString(#fn), fimpl)
 #define HHVM_FE(fn) HHVM_NAMED_FE(fn, HHVM_FN(fn))
 
 /* Macros related to declaring/registering internal implementations
@@ -91,8 +91,8 @@
 #define HHVM_MN(cn,fn) c_ ## cn ## _ni_ ## fn
 #define HHVM_METHOD(cn, fn, ...) \
         HHVM_MN(cn,fn)(CObjRef this_, ##__VA_ARGS__)
-#define HHVM_NAMED_ME(cn,fn,mimpl) Native::RegisterBuiltinFunction(\
-                          StringData::GetStaticString(#cn "->" #fn), \
+#define HHVM_NAMED_ME(cn,fn,mimpl) Native::registerBuiltinFunction(\
+                          makeStaticString(#cn "->" #fn), \
                           mimpl)
 #define HHVM_ME(cn,fn) HHVM_NAMED_ME(cn,fn, HHVM_MN(cn,fn))
 
@@ -108,8 +108,8 @@
 #define HHVM_STATIC_MN(cn,fn) c_ ## cn ## _ns_ ## fn
 #define HHVM_STATIC_METHOD(cn, fn, ...) \
         HHVM_STATIC_MN(cn,fn)(const Class *self_, ##__VA_ARGS__)
-#define HHVM_NAMED_STATIC_ME(cn,fn,mimpl) Native::RegisterBuiltinFunction(\
-                          StringData::GetStaticString(#cn "::" #fn), \
+#define HHVM_NAMED_STATIC_ME(cn,fn,mimpl) Native::registerBuiltinFunction(\
+                          makeStaticString(#cn "::" #fn), \
                           mimpl)
 #define HHVE_STATIC_ME(cn,fn) HHVM_NAMED_STATIC_FE(cn,fn,HHVM_STATIC_MN(cn,fn))
 
@@ -177,7 +177,7 @@ typedef hphp_hash_map<const StringData*, BuiltinFunction,
 extern BuiltinFunctionMap s_builtinFunctions;
 
 template <class Fun>
-inline void RegisterBuiltinFunction(const StringData* fname, Fun func) {
+inline void registerBuiltinFunction(const StringData* fname, Fun func) {
   static_assert(
     std::is_pointer<Fun>::value &&
     std::is_function<typename std::remove_pointer<Fun>::type>::value,
@@ -198,9 +198,82 @@ inline BuiltinFunction GetBuiltinFunction(const StringData* fname,
 inline BuiltinFunction GetBuiltinFunction(const char* fname,
                                           const char* cname = nullptr,
                                           bool isStatic = false) {
-  return GetBuiltinFunction(StringData::GetStaticString(fname),
-                    cname ? StringData::GetStaticString(cname) : nullptr,
+  return GetBuiltinFunction(makeStaticString(fname),
+                    cname ? makeStaticString(cname) : nullptr,
                     isStatic);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Global constants
+
+inline
+bool registerConstant(const StringData* cnsName, Cell cns) {
+  assert(cellIsPlausible(cns));
+  return Unit::defCns(cnsName, &cns, true);
+}
+
+template<DataType DType>
+typename std::enable_if<
+  !std::is_same<typename detail::DataTypeCPPType<DType>::type,void>::value,
+  bool>::type
+registerConstant(const StringData* cnsName,
+                 typename detail::DataTypeCPPType<DType>::type val) {
+  return registerConstant(cnsName, make_tv<DType>(val));
+}
+
+template<DataType DType>
+typename std::enable_if<
+  std::is_same<typename detail::DataTypeCPPType<DType>::type,void>::value,
+  bool>::type
+registerConstant(const StringData* cnsName) {
+  return registerConstant(cnsName, make_tv<DType>());
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Class Constants
+
+typedef std::map<const StringData*,TypedValue> ClassConstantMap;
+typedef hphp_hash_map<const StringData*, ClassConstantMap,
+                      string_data_hash, string_data_isame> ClassConstantMapMap;
+extern ClassConstantMapMap s_class_constant_map;
+
+inline
+bool registerClassConstant(const StringData *clsName,
+                           const StringData *cnsName,
+                           Cell cns) {
+  assert(cellIsPlausible(cns));
+  auto &cls = s_class_constant_map[clsName];
+  assert(cls.find(cnsName) == cls.end());
+  cls[cnsName] = cns;
+  return true;
+}
+
+template<DataType DType>
+typename std::enable_if<
+  !std::is_same<typename detail::DataTypeCPPType<DType>::type,void>::value,
+  bool>::type
+registerClassConstant(const StringData* clsName,
+                      const StringData* cnsName,
+                      typename detail::DataTypeCPPType<DType>::type val) {
+  return registerClassConstant(clsName, cnsName, make_tv<DType>(val));
+}
+
+template<DataType DType>
+typename std::enable_if<
+  std::is_same<typename detail::DataTypeCPPType<DType>::type,void>::value,
+  bool>::type
+registerClassConstant(const StringData* clsName,
+                      const StringData* cnsName) {
+  return registerClassConstant(clsName, cnsName, make_tv<DType>());
+}
+
+inline
+const ClassConstantMap* getClassConstants(const StringData* clsName) {
+  auto clsit = s_class_constant_map.find(const_cast<StringData*>(clsName));
+  if (clsit == s_class_constant_map.end()) {
+    return nullptr;
+  }
+  return &clsit->second;
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -102,7 +102,7 @@ void CmdConstant::onClient(DebuggerClient &client) {
 
 bool CmdConstant::onServer(DebuggerProxy &proxy) {
   try {
-    m_constants = StringData::GetConstants();
+    m_constants = lookupDefinedConstants();
   } catch (...) {}
   return proxy.sendToClient(this);
 }

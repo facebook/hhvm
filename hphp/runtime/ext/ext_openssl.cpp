@@ -1151,7 +1151,7 @@ bool f_openssl_open(CStrRef sealed_data, VRefParam open_data, CStrRef env_key,
   EVP_PKEY *pkey = okey.getTyped<Key>()->m_key;
 
   String s = String(sealed_data.size(), ReserveString);
-  unsigned char *buf = (unsigned char *)s.mutableSlice().ptr;
+  unsigned char *buf = (unsigned char *)s.bufferSlice().ptr;
 
   EVP_CIPHER_CTX ctx;
   int len1, len2;
@@ -1818,7 +1818,7 @@ bool f_openssl_private_decrypt(CStrRef data, VRefParam decrypted, CVarRef key,
   EVP_PKEY *pkey = okey.getTyped<Key>()->m_key;
   int cryptedlen = EVP_PKEY_size(pkey);
   String s = String(cryptedlen, ReserveString);
-  unsigned char *cryptedbuf = (unsigned char *)s.mutableSlice().ptr;
+  unsigned char *cryptedbuf = (unsigned char *)s.bufferSlice().ptr;
 
   int successful = 0;
   switch (pkey->type) {
@@ -1856,7 +1856,7 @@ bool f_openssl_private_encrypt(CStrRef data, VRefParam crypted, CVarRef key,
   EVP_PKEY *pkey = okey.getTyped<Key>()->m_key;
   int cryptedlen = EVP_PKEY_size(pkey);
   String s = String(cryptedlen, ReserveString);
-  unsigned char *cryptedbuf = (unsigned char *)s.mutableSlice().ptr;
+  unsigned char *cryptedbuf = (unsigned char *)s.bufferSlice().ptr;
 
   int successful = 0;
   switch (pkey->type) {
@@ -1890,7 +1890,7 @@ bool f_openssl_public_decrypt(CStrRef data, VRefParam decrypted, CVarRef key,
   EVP_PKEY *pkey = okey.getTyped<Key>()->m_key;
   int cryptedlen = EVP_PKEY_size(pkey);
   String s = String(cryptedlen, ReserveString);
-  unsigned char *cryptedbuf = (unsigned char *)s.mutableSlice().ptr;
+  unsigned char *cryptedbuf = (unsigned char *)s.bufferSlice().ptr;
 
   int successful = 0;
   switch (pkey->type) {
@@ -1928,7 +1928,7 @@ bool f_openssl_public_encrypt(CStrRef data, VRefParam crypted, CVarRef key,
   EVP_PKEY *pkey = okey.getTyped<Key>()->m_key;
   int cryptedlen = EVP_PKEY_size(pkey);
   String s = String(cryptedlen, ReserveString);
-  unsigned char *cryptedbuf = (unsigned char *)s.mutableSlice().ptr;
+  unsigned char *cryptedbuf = (unsigned char *)s.bufferSlice().ptr;
 
   int successful = 0;
   switch (pkey->type) {
@@ -2010,7 +2010,7 @@ Variant f_openssl_seal(CStrRef data, VRefParam sealed_data, VRefParam env_keys,
   int len1, len2;
 
   s = String(data.size() + EVP_CIPHER_CTX_block_size(&ctx), ReserveString);
-  buf = (unsigned char *)s.mutableSlice().ptr;
+  buf = (unsigned char *)s.bufferSlice().ptr;
   if (!EVP_SealInit(&ctx, cipher_type, eks, eksl, nullptr, pkeys, nkeys) ||
       !EVP_SealUpdate(&ctx, buf, &len1, (unsigned char *)data.data(),
                       data.size())) {
@@ -2080,7 +2080,7 @@ bool f_openssl_sign(CStrRef data, VRefParam signature, CVarRef priv_key_id,
   EVP_PKEY *pkey = okey.getTyped<Key>()->m_key;
   int siglen = EVP_PKEY_size(pkey);
   String s = String(siglen, ReserveString);
-  unsigned char *sigbuf = (unsigned char *)s.mutableSlice().ptr;
+  unsigned char *sigbuf = (unsigned char *)s.bufferSlice().ptr;
 
   EVP_MD_CTX md_ctx;
   EVP_SignInit(&md_ctx, mdtype);
@@ -2404,7 +2404,7 @@ Variant f_openssl_random_pseudo_bytes(int length,
   unsigned char *buffer = NULL;
 
   String s = String(length, ReserveString);
-  buffer = (unsigned char *)s.mutableSlice().ptr;
+  buffer = (unsigned char *)s.bufferSlice().ptr;
 
   crypto_strong = false;
 
@@ -2443,7 +2443,7 @@ static String php_openssl_validate_iv(String piv, int iv_required_len) {
   }
 
   String s = String(iv_required_len, ReserveString);
-  iv_new = s.mutableSlice().ptr;
+  iv_new = s.bufferSlice().ptr;
   memset(iv_new, 0, iv_required_len);
 
   if (piv.size() <= 0) {
@@ -2484,7 +2484,7 @@ Variant f_openssl_encrypt(CStrRef data, CStrRef method, CStrRef password,
    */
   if (keylen > password.size()) {
     String s = String(keylen, ReserveString);
-    char *keybuf = s.mutableSlice().ptr;
+    char *keybuf = s.bufferSlice().ptr;
     memset(keybuf, 0, keylen);
     memcpy(keybuf, password.data(), password.size());
     key = s.setSize(keylen);
@@ -2502,7 +2502,7 @@ Variant f_openssl_encrypt(CStrRef data, CStrRef method, CStrRef password,
 
   int outlen = data.size() + EVP_CIPHER_block_size(cipher_type);
   String rv = String(outlen, ReserveString);
-  unsigned char *outbuf = (unsigned char*)rv.mutableSlice().ptr;
+  unsigned char *outbuf = (unsigned char*)rv.bufferSlice().ptr;
 
   EVP_CIPHER_CTX cipher_ctx;
 
@@ -2564,7 +2564,7 @@ Variant f_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password,
    */
    if (keylen > password.size()) {
     String s = String(keylen, ReserveString);
-    char *keybuf = s.mutableSlice().ptr;
+    char *keybuf = s.bufferSlice().ptr;
     memset(keybuf, 0, keylen);
     memcpy(keybuf, password.data(), password.size());
     key = s.setSize(keylen);
@@ -2577,7 +2577,7 @@ Variant f_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password,
 
   int outlen = decoded_data.size() + EVP_CIPHER_block_size(cipher_type);
   String rv = String(outlen, ReserveString);
-  unsigned char *outbuf = (unsigned char*)rv.mutableSlice().ptr;
+  unsigned char *outbuf = (unsigned char*)rv.bufferSlice().ptr;
 
   EVP_CIPHER_CTX cipher_ctx;
   EVP_DecryptInit(&cipher_ctx, cipher_type, NULL, NULL);
@@ -2614,7 +2614,7 @@ Variant f_openssl_digest(CStrRef data, CStrRef method,
   }
   int siglen = EVP_MD_size(mdtype);
   String rv = String(siglen, ReserveString);
-  unsigned char *sigbuf = (unsigned char *)rv.mutableSlice().ptr;
+  unsigned char *sigbuf = (unsigned char *)rv.bufferSlice().ptr;
   EVP_MD_CTX md_ctx;
 
   EVP_DigestInit(&md_ctx, mdtype);

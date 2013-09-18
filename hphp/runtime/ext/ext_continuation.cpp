@@ -252,11 +252,9 @@ void c_Continuation::call_raise(ObjectData* e) {
   g_vmContext->invokeContFunc(func, this, &arg);
 }
 
-// Compute the bytecode offset at which execution will resume when
-// this continuation resumes. Only valid on started but not actually
-// running continuations.
-Offset c_Continuation::getNextExecutionOffset() const {
-  assert(started() && !running());
+// Compute the bytecode offset at which execution will resume assuming
+// the given label.
+Offset c_Continuation::getExecutionOffset(int32_t label) const {
   auto func = m_arPtr->m_func;
   PC funcBase = func->unit()->entry() + func->base();
   assert(toOp(*funcBase) == OpUnpackCont); // One byte
@@ -264,9 +262,20 @@ Offset c_Continuation::getNextExecutionOffset() const {
   assert(toOp(*switchOffset) == OpSwitch);
   // The Switch opcode is one byte for the opcode itself, plus four
   // bytes for the jmp table size, then the jump table.
+  if (label >= *(int32_t*)(switchOffset + 1)) {
+    return InvalidAbsoluteOffset;
+  }
   Offset* jmpTable = (Offset*)(switchOffset + 5);
-  Offset relOff = jmpTable[m_label];
+  Offset relOff = jmpTable[label];
   return func->base() + relOff + 1;
+}
+
+// Compute the bytecode offset at which execution will resume when
+// this continuation resumes. Only valid on started but not actually
+// running continuations.
+Offset c_Continuation::getNextExecutionOffset() const {
+  assert(!running());
+  return getExecutionOffset(m_label);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

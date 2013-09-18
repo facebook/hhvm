@@ -46,18 +46,16 @@ inline StringData* StringData::Make(const StringData* s, CopyStringMode) {
 
 // AttachString
 
-inline StringData* StringData::Make(const char* data, AttachStringMode) {
+inline StringData* StringData::Make(char* data, AttachStringMode) {
   auto const sd = Make(data, CopyString);
-  free(const_cast<char*>(data)); // XXX
+  free(data);
   assert(sd->checkSane());
   return sd;
 }
 
-inline StringData* StringData::Make(const char* data,
-                                    int len,
-                                    AttachStringMode) {
+inline StringData* StringData::Make(char* data, int len, AttachStringMode) {
   auto const sd = Make(StringSlice(data, len), CopyString);
-  free(const_cast<char*>(data)); // XXX
+  free(data);
   assert(sd->checkSane());
   return sd;
 }
@@ -94,6 +92,25 @@ inline void StringData::destruct() {
 
 //////////////////////////////////////////////////////////////////////
 
+inline void StringData::setRefCount(RefCount n) { m_count = n; }
+inline bool StringData::isStatic() const {
+  return m_count == RefCountStaticValue;
+}
+
+inline SharedVariant* StringData::getSharedVariant() const {
+  if (isShared()) return sharedPayload()->shared;
+  return nullptr;
+}
+
+inline StringSlice StringData::slice() const {
+  return StringSlice(m_data, m_len);
+}
+
+inline MutableSlice StringData::bufferSlice() {
+  assert(!isImmutable());
+  return MutableSlice(m_data, capacity() - 1);
+}
+
 inline void StringData::invalidateHash() {
   assert(!isImmutable());
   assert(getCount() <= 1);
@@ -110,6 +127,31 @@ inline void StringData::setSize(int len) {
   assert(checkSane());
 }
 
+inline void StringData::checkStack() const {
+  assert(uintptr_t(this) - Util::s_stackLimit >= Util::s_stackSize);
+}
+
+inline const char* StringData::data() const {
+  // TODO: t1800106: re-enable this assert
+  //assert(m_data[size()] == 0); // all strings must be null-terminated
+  return m_data;
+}
+
+inline char* StringData::mutableData() const { return m_data; }
+inline int StringData::size() const { return m_len; }
+inline bool StringData::empty() const { return size() == 0; }
+inline uint32_t StringData::capacity() const { return m_cap; }
+
+inline bool StringData::isStrictlyInteger(int64_t& res) const {
+  if (isStatic() && m_hash < 0) return false;
+  auto const s = slice();
+  return is_strictly_integer(s.ptr, s.len, res);
+}
+
+inline bool StringData::isZero() const  {
+  return size() == 1 && data()[0] == '0';
+}
+
 inline StringData* StringData::modifyChar(int offset, char c) {
   assert(offset >= 0 && offset < size() && !isStatic());
   assert(getCount() <= 1);
@@ -119,6 +161,72 @@ inline StringData* StringData::modifyChar(int offset, char c) {
   sd->m_hash = 0;
   return sd;
 }
+
+inline strhash_t StringData::hash() const {
+  strhash_t h = m_hash & STRHASH_MASK;
+  return h ? h : hashHelper();
+}
+
+inline bool StringData::same(const StringData* s) const {
+  assert(s);
+  size_t len = m_len;
+  if (len != s->m_len) return false;
+  // The underlying buffer and its length are 32-bit aligned, ensured by
+  // StringData layout, smart_malloc, or malloc. So compare words.
+  assert(uintptr_t(data()) % 4 == 0);
+  assert(uintptr_t(s->data()) % 4 == 0);
+  return wordsame(data(), s->data(), len);
+}
+
+inline bool StringData::isame(const StringData* s) const {
+  assert(s);
+  if (m_len != s->m_len) return false;
+  return bstrcaseeq(data(), s->data(), m_len);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+inline const void* StringData::voidPayload() const { return this + 1; }
+inline void* StringData::voidPayload() { return this + 1; }
+
+inline const StringData::SharedPayload* StringData::sharedPayload() const {
+  return static_cast<const SharedPayload*>(voidPayload());
+}
+inline StringData::SharedPayload* StringData::sharedPayload() {
+  return static_cast<SharedPayload*>(voidPayload());
+}
+
+inline bool StringData::isShared() const { return !m_cap; }
+inline bool StringData::isFlat() const { return m_data == voidPayload(); }
+inline bool StringData::isImmutable() const {
+  return isStatic() || isShared();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+ALWAYS_INLINE void decRefStr(StringData* s) {
+  if (s->decRefCount() == 0) s->release();
+}
+
+struct string_data_hash {
+  size_t operator()(const StringData *s) const {
+    return s->hash();
+  }
+};
+
+struct string_data_same {
+  bool operator()(const StringData *s1, const StringData *s2) const {
+    assert(s1 && s2);
+    return s1->same(s2);
+  }
+};
+
+struct string_data_isame {
+  bool operator()(const StringData *s1, const StringData *s2) const {
+    assert(s1 && s2);
+    return s1->isame(s2);
+  }
+};
 
 //////////////////////////////////////////////////////////////////////
 

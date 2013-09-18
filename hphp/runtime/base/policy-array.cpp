@@ -174,8 +174,6 @@ void SimpleArrayStore::prepend(const Variant& v, uint length,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_SMART_ALLOCATION(PolicyArray)
-
 PolicyArray::PolicyArray(uint capacity)
     : ArrayData(kPolicyKind)
     , Store(m_allocMode, capacity) {
@@ -512,7 +510,8 @@ bool PolicyArray::AdvanceFullPos(ArrayData* ad, FullPos &fp) {
 }
 
 HphpArray* PolicyArray::toHphpArray() const {
-  auto result = ArrayData::Make(m_size);
+  auto result = HphpArray::MakeReserve(m_size);
+  result->setRefCount(0);
   FOR_EACH_RANGE (i, 0, m_size) {
     if (hasStrKey(toPos(i))) {
       result->add(key(toPos(i)).getStringData(), val(toPos(i)), false);
@@ -532,7 +531,7 @@ ArrayData* PolicyArray::EscalateForSort(ArrayData* ad) {
 ArrayData* PolicyArray::Copy(const ArrayData* ad) {
   auto a = asPolicyArray(ad);
   APILOG(a) << "()";
-  auto result = NEW(PolicyArray)(*a,
+  auto result = PolicyArray::Make(*a,
       a->capacity() + (a->m_size == a->capacity()), a->m_allocMode);
   assert(result->getCount() == 0);
   return result;
@@ -540,7 +539,7 @@ ArrayData* PolicyArray::Copy(const ArrayData* ad) {
 
 PolicyArray* PolicyArray::copy(uint capacity) {
   APILOG(this) << "(" << capacity << ")";
-  return NEW(PolicyArray)(*this, capacity, m_allocMode);
+  return PolicyArray::Make(*this, capacity, m_allocMode);
 }
 
 ArrayData* PolicyArray::CopyWithStrongIterators(const ArrayData* ad) {
@@ -821,7 +820,7 @@ void PolicyArray::OnSetEvalScalar(ArrayData* ad) {
     if (a->hasStrKey(pos)) {
       auto k = a->key(pos).getStringData();
       if (!k->isStatic()) {
-        auto sk = StringData::GetStaticString(k);
+        auto sk = makeStaticString(k);
         decRefStr(k);
         // Andrei TODO: inefficient, does one incref and then decref
         a->setKey(pos, sk);

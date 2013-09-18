@@ -151,14 +151,12 @@ process_double:
   }
 }
 
-
 HPHP::DataType& Z_TYPE(const zval& z) {
-  HPHP::DataType* dt = &const_cast<zval*>(&z)->m_type;
+  HPHP::DataType* dt = &const_cast<zval*>(&z)->tv()->m_type;
+  assert(*dt != HPHP::KindOfRef);
   if (*dt == HPHP::KindOfStaticString) {
     *dt = IS_STRING;
-  } else if (*dt == HPHP::KindOfRef) {
-    HPHP::RefData* r = z.m_data.pref;
-    return Z_TYPE(*r->tv());
   }
   return *dt;
 }
+

@@ -49,14 +49,16 @@ int main(int argc, const char* argv[]) {
 
   std::ofstream cpp(argv[1]);
 
-  cpp << "#include \"hphp/runtime/ext_hhvm/ext_hhvm.h\"\n";
-  cpp << "#include \"hphp/runtime/ext/ext.h\"\n";
-  cpp << "#include \"ext_hhvm_infotabs.h\"\n";
-  cpp << "namespace HPHP {\n";
-  cpp << "  struct TypedValue;\n";
-  cpp << "  struct ActRec;\n";
-  cpp << "  class Class;\n";
-  cpp << "\n\n";
+  cpp << "#include \"hphp/runtime/ext_hhvm/ext_hhvm.h\"\n"
+      << "#include \"hphp/runtime/ext_hhvm/ext_zend_compat.h\"\n"
+      << "#include \"hphp/runtime/ext/ext.h\"\n"
+      << "#include \"hphp/runtime/vm/runtime.h\"\n"
+      << "#include \"ext_hhvm_infotabs.h\"\n"
+      << "namespace HPHP {\n"
+      << "  struct TypedValue;\n"
+      << "  struct ActRec;\n"
+      << "  class Class;\n"
+      << "\n\n";
 
   std::unordered_set<fbstring> classesWithCtors;
 
@@ -66,16 +68,14 @@ int main(int argc, const char* argv[]) {
   for (auto const& func : funcs) {
     fbstring name = func.lowerName();
     if (func.flags() & ZendCompat) {
-      cpp << "} // End namespace\n";
-      cpp << "void zif_" << name << "(HPHP::ActRec* ar, HPHP::TypedValue* return_value);\n";
-      cpp << "HPHP::TypedValue* fg_" << name << "(HPHP::ActRec* ar){\n";
-      cpp << "  HPHP::TypedValue return_value;\n";
-      cpp << "  HPHP::tvWriteNull(&return_value);\n";
-      cpp << "  zif_" << name << "(ar, &return_value);\n";
-      cpp << "  HPHP::tvDup(return_value, ar->m_r);\n";
-      cpp << "  return nullptr;\n";
-      cpp << "}\n";
-      cpp << "namespace HPHP {\n";
+      cpp << "} // End namespace\n"
+          << "void zif_" << name
+          << "(HPHP::ActRec* ar, HPHP::RefData* return_value);\n"
+          << "HPHP::TypedValue* fg_" << name << "(HPHP::ActRec* ar){\n"
+          << "  return zend_wrap_func(ar, zif_" << name << ", "
+          << func.numParams() << ", " << func.isReturnRef() << ");\n"
+          << "}\n"
+          << "namespace HPHP {\n";
     } else {
       cpp << "TypedValue* fg_" << name << "(ActRec* ar);\n";
     }
@@ -112,16 +112,14 @@ int main(int argc, const char* argv[]) {
     }
     first = false;
 
-    auto ns = "";
     auto prefix = "fh_";
     if (func.flags() & ZendCompat) {
-      ns = "::";
       prefix = "zif_";
     }
 
     fbstring name = func.lowerName();
-    cpp << "{ \"" << name << "\", " << ns << "fg_" << name
-        << ", (void *)&" << ns << prefix << name << " }";
+    cpp << "{ \"" << name << "\", " << "fg_" << name
+        << ", (void *)&" << prefix << name << " }";
   }
   cpp << "\n};\n\n";
 

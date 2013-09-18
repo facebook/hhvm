@@ -9,7 +9,7 @@ function main() {
   // test static array
   $a = array('zero', 'one');
   var_dump(current($a));
-  // test NewTuple array
+  // test packed array
   $a = array('zero', ($x ? 'one' : 'one'));
   var_dump(current($a));
 }

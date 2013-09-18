@@ -137,6 +137,7 @@ public:
     }
   }
 
+  Offset getExecutionOffset(int32_t label) const;
   Offset getNextExecutionOffset() const;
 
 private:

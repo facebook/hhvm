@@ -130,7 +130,7 @@ String StringUtil::Implode(CArrRef items, CStrRef delim) {
   assert(i == size);
 
   String s = String(len, ReserveString);
-  char *buffer = s.mutableSlice().ptr;
+  char *buffer = s.bufferSlice().ptr;
   const char *sdelim = delim.data();
   char *p = buffer;
   for (int i = 0; i < size; i++) {
@@ -406,7 +406,7 @@ String StringUtil::Translate(CStrRef input, CStrRef from, CStrRef to) {
 
   int len = input.size();
   String retstr(len, ReserveString);
-  char *ret = retstr.mutableSlice().ptr;
+  char *ret = retstr.bufferSlice().ptr;
   memcpy(ret, input.data(), len);
   auto trlen = std::min(from.size(), to.size());
   string_translate(ret, len, from.data(), to.data(), trlen);

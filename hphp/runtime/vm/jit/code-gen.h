@@ -470,7 +470,7 @@ private:
  *   ArgGroup args;
  *   args.imm(0)
  *       .reg(rax)
- *       .immPtr(StringData::GetStaticString("Yo"))
+ *       .immPtr(makeStaticString("Yo"))
  *       ;
  *   assert(args.size() == 3);
  */

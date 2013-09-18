@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/smart-allocator.h"
 #include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {
@@ -63,7 +62,7 @@ public:
     }
     void setStrKey(StringData* k, strhash_t h) {
       key = k;
-      data.hash() = int32_t(h) | 0x80000000;
+      data.hash() = h | STRHASH_MSB;
       k->incRefCount();
     }
     void setIntKey(int64_t k) {
@@ -72,14 +71,33 @@ public:
     }
   };
 
-  template<class... Args> static HphpArray* Make(Args&&... args) {
-    return NEW(HphpArray)(std::forward<Args>(args)...);
-  }
+  /*
+   * Allocate a new, empty, request-local HphpArray in packed mode,
+   * with enough space reserved for `capacity' members.
+   *
+   * The returned array is already incref'd.
+   */
+  static HphpArray* MakeReserve(uint32_t capacity);
 
+  /*
+   * Allocate a packed HphpArray.  This is an array in packed
+   * mode, containing `size' values, in the reverse order of the
+   * `values' array.
+   *
+   * This function takes ownership of the TypedValues in `values'.
+   *
+   * The returned array is already incref'd.
+   *
+   * Pre: size > 0
+   */
+  static HphpArray* MakePacked(uint32_t size, const TypedValue* values);
+
+  /*
+   * Return a pointer to the singleton static empty array.  This is
+   * used for initial empty arrays (COW will cause it to escalate to a
+   * request-local array if it is modified).
+   */
   static HphpArray* GetStaticEmptyArray();
-
-  void destroyPacked();
-  void destroy();
 
   // This behaves the same as iter_begin except that it assumes
   // this array is not empty and its not virtual.
@@ -91,7 +109,7 @@ public:
     return nextElm(m_data, 0);
   }
 
-  // these using directives ensure the full set of overloaded functions
+  // These using directives ensure the full set of overloaded functions
   // are visible in this class, to avoid triggering implicit conversions
   // from a CVarRef key to int64.
   using ArrayData::exists;
@@ -102,6 +120,7 @@ public:
   using ArrayData::add;
   using ArrayData::remove;
   using ArrayData::nvGet;
+  using ArrayData::release;
 
   // implements ArrayData
   static CVarRef GetValueRef(const ArrayData*, ssize_t pos);
@@ -138,6 +157,10 @@ public:
                                  bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, CVarRef v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, CVarRef v, bool copy);
+
+  static void ZSetInt(ArrayData*, int64_t k, RefData* v);
+  static void ZSetStr(ArrayData*, StringData* k, RefData* v);
+  static void ZAppend(ArrayData* ad, RefData* v);
 
   // implements ArrayData
   static ArrayData* SetRefInt(ArrayData* ad, int64_t k, CVarRef v,
@@ -256,10 +279,9 @@ public:
   // NOTE: Unfortunately, g++ on x64 tends to generate worse machine code for
   // 32-bit ints than it does for 64-bit ints. As such, we have deliberately
   // chosen to use ssize_t in some places where ideally we *should* have used
-  // ElmInd.
-  typedef int32_t ElmInd;
-  static const ElmInd ElmIndEmpty      = -1; // == ArrayData::invalid_index
-  static const ElmInd ElmIndTombstone  = -2;
+  // int32_t.
+  static const int32_t Empty      = -1; // == ArrayData::invalid_index
+  static const int32_t Tombstone  = -2;
 
   // Use a minimum of an 4-element hash table.  Valid range: [2..32]
   static const uint32_t MinLgTableSize = 2;
@@ -277,22 +299,11 @@ public:
   void getArrayElm(ssize_t pos, TypedValue* out, TypedValue* keyOut) const;
   bool isTombstone(ssize_t pos) const;
 
-  static bool validElmInd(ssize_t ei) {
-    return (ei > ssize_t(ElmIndEmpty));
-  }
-
-  static size_t computeTableSize(uint32_t tableMask) {
-    return size_t(tableMask) + size_t(1U);
-  }
-
-  static size_t computeMaxElms(uint32_t tableMask) {
-    return size_t(tableMask) - size_t(tableMask) / LoadScale;
-  }
-
-  static size_t computeDataSize(uint32_t tableMask) {
-    return computeTableSize(tableMask) * sizeof(ElmInd) +
-      computeMaxElms(tableMask) * sizeof(Elm);
-  }
+  static bool validPos(ssize_t pos);
+  static bool validPos(int32_t pos);
+  static size_t computeTableSize(uint32_t tableMask);
+  static size_t computeMaxElms(uint32_t tableMask);
+  static size_t computeDataSize(uint32_t tableMask);
 
 private:
   friend class ArrayInit;
@@ -303,8 +314,12 @@ private:
   enum EmptyMode { StaticEmptyArray };
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
 
+  struct PromotedPayload {
+    uint32_t oldCap;
+    uint32_t oldMask;
+  };
+
 private:
-  DECLARE_SMART_ALLOCATION(HphpArray);
   static EmptyArrayInitializer s_arrayInitializer;
 
 private:
@@ -316,19 +331,25 @@ private:
   static HphpArray* asHphpArray(ArrayData* ad);
   static const HphpArray* asHphpArray(const ArrayData* ad);
 
+  static HphpArray* Make(EmptyMode);
   static void getElmKey(const Elm& e, TypedValue* out);
 
-private: // Private construction/destruction, use ::Make publically
-  explicit HphpArray(EmptyMode);
-  explicit HphpArray(uint nSize);
-  HphpArray(uint size, const TypedValue* vals); // make tuple
-  HphpArray(const HphpArray& other, AllocationMode, ClonePacked);
-  HphpArray(const HphpArray& other, AllocationMode, CloneMixed);
+private:
+  static HphpArray* CopyPacked(const HphpArray& other, AllocationMode);
+  static HphpArray* CopyMixed(const HphpArray& other, AllocationMode);
+
+  HphpArray() = delete;
+  HphpArray(const HphpArray&) = delete;
+  HphpArray& operator=(const HphpArray&) = delete;
   ~HphpArray() = delete;
 
 private:
   void initHash(size_t tableSize);
   void initNonEmpty(const HphpArray& other);
+
+  PromotedPayload& promotedPayload() {
+    return *reinterpret_cast<PromotedPayload*>(this + 1);
+  }
 
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
@@ -344,7 +365,7 @@ private:
         return ei;
       }
     }
-    return (ssize_t)ElmIndEmpty;
+    return invalid_index;
   }
   ssize_t prevElm(Elm* elms, ssize_t ei) const;
 
@@ -353,15 +374,19 @@ private:
   bool checkInvariants() const;
 
   template <class Hit>
-  ElmInd findBody(size_t h0, Hit) const;
-
-  template <class Hit>
-  ElmInd* findForInsertBody(size_t h0, Hit) const;
-
+  ssize_t findImpl(size_t h0, Hit) const;
   ssize_t find(int64_t ki) const;
   ssize_t find(const StringData* s, strhash_t prehash) const;
-  ElmInd* findForInsert(int64_t ki) const;
-  ElmInd* findForInsert(const StringData* k, strhash_t prehash) const;
+
+  template <class Hit>
+  int32_t* findForInsertImpl(size_t h0, Hit) const;
+  int32_t* findForInsert(int64_t ki) const;
+  int32_t* findForInsert(const StringData* k, strhash_t prehash) const;
+
+  template <class Hit, class Remove>
+  ssize_t findForRemoveImpl(size_t h0, Hit, Remove) const;
+  ssize_t findForRemove(int64_t ki, bool updateNext);
+  ssize_t findForRemove(const StringData* k, strhash_t prehash);
 
   ssize_t iter_advance_helper(ssize_t prev) const ATTRIBUTE_COLD;
 
@@ -370,8 +395,9 @@ private:
    * the relevant key is not already present in the array. Otherwise this can
    * put the array into a bad state; use with caution.
    */
-  ElmInd* findForNewInsert(size_t h0) const;
-  ElmInd* findForNewInsertLoop(size_t tableMask, size_t h0) const;
+  int32_t* findForNewInsert(size_t h0) const;
+  static int32_t* findForNewInsertLoop(int32_t* table, size_t h0,
+                                       size_t mask);
 
   bool nextInsert(CVarRef data);
   HphpArray* nextInsertPacked(CVarRef data);
@@ -381,24 +407,25 @@ private:
   ArrayData* addLvalImpl(StringData* key, strhash_t h, Variant*& ret);
   ArrayData* addVal(int64_t ki, CVarRef data);
   ArrayData* addVal(StringData* key, CVarRef data);
-  ArrayData* addValWithRef(int64_t ki, CVarRef data);
-  ArrayData* addValWithRef(StringData* key, CVarRef data);
 
   ArrayData* update(int64_t ki, CVarRef data);
   ArrayData* update(StringData* key, CVarRef data);
   ArrayData* updateRef(int64_t ki, CVarRef data);
   ArrayData* updateRef(StringData* key, CVarRef data);
 
-  void adjustFullPos(ElmInd pos);
+  void zSetImpl(int64_t ki, RefData* data);
+  void zSetImpl(StringData* key, RefData* data);
+  void zAppendImpl(RefData* data);
 
-  ArrayData* erase(ElmInd* ei, bool updateNext);
+  void adjustFullPos(ssize_t pos);
+  void erase(ssize_t pos);
 
   HphpArray* copyImpl(HphpArray* target) const;
 
   bool isFull() const;
-  Elm* newElm(ElmInd* e, size_t h0);
-  Elm* newElmGrow(size_t h0);
-  Elm* allocElm(ElmInd* ei);
+  Elm& newElm(int32_t* ei, size_t h0);
+  Elm& newElmGrow(size_t h0);
+  Elm& allocElm(int32_t* ei);
   TypedValue& allocNextElm(uint32_t i);
 
   HphpArray* setVal(TypedValue& tv, CVarRef v);
@@ -410,10 +437,10 @@ private:
   HphpArray* initWithRef(TypedValue& tv, CVarRef v);
   HphpArray* moveVal(TypedValue& tv, TypedValue v);
 
-  ElmInd* allocData(size_t maxElms, size_t tableSize);
-  ElmInd* reallocData(size_t maxElms, size_t tableSize);
+  void zInitVal(TypedValue& tv, RefData* v);
+  void zSetVal(TypedValue& tv, RefData* v);
 
-  /**
+  /*
    * grow() increases the hash table size and the number of slots for
    * elements by a factor of 2. grow() rebuilds the hash table, but it
    * does not compact the elements.
@@ -439,6 +466,10 @@ private:
    */
   void resize();
   void resizeIfNeeded();
+
+  bool isFlat() const {
+    return m_data == static_cast<const void*>(this + 1);
+  }
 
 private:
   // Small: Array elements and the hash table are allocated inline.
@@ -478,24 +509,31 @@ private:
   // m_hash --> |                    | 2^K hash table entries.
   //            +--------------------+
 
-  uint32_t m_used;       // Number of used elements (values or tombstones)
-  uint32_t m_cap;        // Number of Elms we can use before having to grow.
-  uint32_t m_tableMask;  // Bitmask used when indexing into the hash table.
-  uint32_t m_hLoad;      // Hash table load (# of non-empty slots).
-  int64_t  m_nextKI;     // Next integer key to use for append.
-  Elm*     m_data;       // Contains elements and hash table.
-  ElmInd*  m_hash;       // Hash table.
+  // Some of these are packed into qword-sized unions so we can
+  // combine stores during initialization.  (gcc won't do it on its
+  // own.)
   union {
     struct {
-      Elm slots[SmallSize];
-      ElmInd hash[SmallHashSize];
-    } m_inline_data;
-    ElmInd m_inline_hash[sizeof(m_inline_data) / sizeof(ElmInd)];
+      uint32_t m_cap;       // Number of Elms we can use before having to grow.
+      uint32_t m_used;      // Number of used elements (values or tombstones)
+    };
+    uint64_t m_capAndUsed;
   };
+  union {
+    struct {
+      uint32_t m_tableMask; // Bitmask used when indexing into the hash table.
+      uint32_t m_hLoad;     // Hash table load (# of non-empty slots).
+    };
+    uint64_t m_maskAndLoad;
+  };
+  int64_t  m_nextKI;        // Next integer key to use for append.
+  Elm*     m_data;          // Contains elements and hash table.
+  int32_t* m_hash;          // Hash table.
 };
 
 extern std::aligned_storage<
-  sizeof(HphpArray),
+  sizeof(HphpArray) +
+    sizeof(HphpArray::Elm) * HphpArray::SmallSize,
   alignof(HphpArray)
 >::type s_theEmptyArray;
 
@@ -504,15 +542,6 @@ extern std::aligned_storage<
 inline HphpArray* HphpArray::GetStaticEmptyArray() {
   void* vp = &s_theEmptyArray;
   return static_cast<HphpArray*>(vp);
-}
-
-inline HphpArray* ArrayData::Make(uint capacity) {
-  return HphpArray::Make(capacity);
-}
-
-// HphpArray has more than one kind, so reuse ArrayData's dispatch.
-inline void HphpArray::release() {
-  ArrayData::release();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

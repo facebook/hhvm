@@ -52,7 +52,7 @@ GlobalNameValueTableWrapper::GlobalNameValueTableWrapper(
   NameValueTable* tab) : NameValueTableWrapper(tab) {
 
   Variant arr(HphpArray::GetStaticEmptyArray());
-#define X(s,v) tab->set(StringData::GetStaticString(#s), v.asTypedValue());
+#define X(s,v) tab->set(makeStaticString(#s), v.asTypedValue());
 
   X(argc,                 init_null_variant);
   X(argv,                 init_null_variant);

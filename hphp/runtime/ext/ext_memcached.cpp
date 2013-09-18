@@ -310,7 +310,7 @@ bool c_Memcached::t_getdelayedbykey(CStrRef server_key, CArrRef keys,
 
   MemcachedResultWrapper result(&m_impl->memcached); Array item;
   while (fetchImpl(result.value, item)) {
-    vm_call_user_func(value_cb, CREATE_VECTOR2(Variant(this), item));
+    vm_call_user_func(value_cb, make_packed_array(Variant(this), item));
   }
 
   if (m_impl->rescode != q_Memcached$$RES_END) return false;
@@ -392,7 +392,7 @@ bool c_Memcached::fetchImpl(memcached_result_st &result, Array &item) {
   String sKey(key, keyLength, CopyString);
   double cas = (double) memcached_result_cas(&result);
 
-  item = CREATE_MAP3(s_key, sKey, s_value, value, s_cas, cas);
+  item = make_map_array(s_key, sKey, s_value, value, s_cas, cas);
   return true;
 }
 
@@ -613,11 +613,11 @@ memcached_return_t doServerListCallback(const memcached_st *ptr,
   const char* hostname = LMCD_SERVER_HOSTNAME(server);
   in_port_t port = LMCD_SERVER_PORT(server);
 #ifdef LMCD_SERVER_QUERY_INCLUDES_WEIGHT
-  returnValue->append(CREATE_MAP3(s_host, String(hostname, CopyString),
+  returnValue->append(make_map_array(s_host, String(hostname, CopyString),
                                   s_port, (int32_t)port,
                                   s_weight, (int32_t)server->weight));
 #else
-  returnValue->append(CREATE_MAP2(s_host, String(hostname, CopyString),
+  returnValue->append(make_map_array(s_host, String(hostname, CopyString),
                                   s_port, (int32_t)port));
 #endif
   return MEMCACHED_SUCCESS;
@@ -649,11 +649,11 @@ Variant c_Memcached::t_getserverbykey(CStrRef server_key) {
   const char* hostname = LMCD_SERVER_HOSTNAME(server);
   in_port_t port = LMCD_SERVER_PORT(server);
 #ifdef LMCD_SERVER_QUERY_INCLUDES_WEIGHT
-  Array returnValue = CREATE_MAP3(s_host, String(hostname, CopyString),
+  Array returnValue = make_map_array(s_host, String(hostname, CopyString),
                                   s_port, (int32_t)port,
                                   s_weight, (int32_t)server->weight);
 #else
-  Array returnValue = CREATE_MAP2(s_host, String(hostname, CopyString),
+  Array returnValue = make_map_array(s_host, String(hostname, CopyString),
                                   s_port, (int32_t)port);
 #endif
   return returnValue;

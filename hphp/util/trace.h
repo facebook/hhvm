@@ -110,6 +110,7 @@ namespace Trace {
       TM(smartalloc) \
       /* Heap tracing */ \
       TM(heap) \
+      TM(servicereq) \
       /* Temporary catetories, to save compilation time */ \
       TM(tmp0)  TM(tmp1)  TM(tmp2)  TM(tmp3)               \
       TM(tmp4)  TM(tmp5)  TM(tmp6)  TM(tmp7)               \

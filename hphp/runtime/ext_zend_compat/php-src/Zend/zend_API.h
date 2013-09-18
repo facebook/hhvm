@@ -319,11 +319,8 @@ END_EXTERN_C()
 #define ZVAL_STRINGL(z, s, l, duplicate) do {                       \
     const char *__s=(s); int __l=(l);                               \
     zval *__z = (z);                                                \
-    auto &__dest = zval_follow_ref(*__z).m_data.pstr;               \
-    __dest = HPHP::String(__s, __l, HPHP::CopyString).detach();     \
-    if (duplicate == 0) {                                           \
-      efree(__s);                                                   \
-    }                                                               \
+    __z->tv()->m_data.pstr =                                        \
+      HPHP::String(__s, __l, HPHP::CopyString).detach();            \
     Z_TYPE_P(__z) = IS_STRING;                                      \
   } while (0)
 

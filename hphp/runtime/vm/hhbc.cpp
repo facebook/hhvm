@@ -259,15 +259,6 @@ int instrLen(const Op* opcode) {
   return len;
 }
 
-InstrFlags instrFlags(Op opcode) {
-  static const InstrFlags instrFlagsData[] = {
-#define O(unusedName, unusedImm, unusedPop, unusedPush, flags) flags,
-    OPCODES
-#undef O
-  };
-  return instrFlagsData[uint8_t(opcode)];
-}
-
 Offset* instrJumpOffset(Op* instr) {
   static const int8_t jumpMask[] = {
 #define NA 0
@@ -397,7 +388,7 @@ int instrNumPops(const Op* opcode) {
   // For most instructions, we know how many values are popped based
   // solely on the opcode
   if (n >= 0) return n;
-  // FCall and NewTuple specify how many values are popped in their
+  // FCall and NewPackedArray specify how many values are popped in their
   // first immediate
   if (n == -3) return getImm(opcode, 0).u_IVA;
   // For instructions with vector immediates, we have to scan the
@@ -915,11 +906,6 @@ const char* opcodeToName(Op op) {
     return namesArr[uint8_t(op)];
   }
   return "Invalid";
-}
-
-bool instrIsControlFlow(Op opcode) {
-  InstrFlags opFlags = instrFlags(opcode);
-  return (opFlags & CF) != 0;
 }
 
 bool instrIsNonCallControlFlow(Op opcode) {

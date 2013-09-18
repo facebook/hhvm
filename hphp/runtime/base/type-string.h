@@ -27,17 +27,26 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/hphp-value.h"
+#include "hphp/runtime/base/static-string-table.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////
+
 class Array;
 class String;
 class VarNR;
 
-// helpers
+// reserve space for buffer that will be filled in by client.
+enum ReserveStringMode { ReserveString };
+
+//////////////////////////////////////////////////////////////////////
+
 StringData* buildStringData(int     n);
 StringData* buildStringData(int64_t   n);
 StringData* buildStringData(double  n);
+
+//////////////////////////////////////////////////////////////////////
 
 /**
  * String type wrapping around StringData to implement copy-on-write and
@@ -65,10 +74,10 @@ public:
 
   // create a string from a character
   static String FromChar(char ch) {
-    return StringData::GetStaticString(ch);
+    return makeStaticString(ch);
   }
   static String FromCStr(const char* str) {
-    return StringData::GetStaticString(str);
+    return makeStaticString(str);
   }
 
   static const StringData *ConvertInteger(int64_t n) ATTRIBUTE_COLD;
@@ -139,7 +148,7 @@ public:
     m_px->setRefCount(1);
   }
   // attach to null terminated malloc'ed string, maybe free it now.
-  String(const char *s, AttachStringMode mode) {
+  String(char* s, AttachStringMode mode) {
     if (s) {
       m_px = StringData::Make(s, mode);
       m_px->setRefCount(1);
@@ -153,7 +162,7 @@ public:
     }
   }
   // attach to binary malloc'ed string
-  String(const char *s, int length, AttachStringMode mode) {
+  String(char* s, int length, AttachStringMode mode) {
     if (s) {
       m_px = StringData::Make(s, length, mode);
       m_px->setRefCount(1);
@@ -201,7 +210,7 @@ public:
     if (!m_px) return MutableSlice("", 0);
     auto const tmp = m_px->reserve(size);
     if (UNLIKELY(tmp != m_px)) StringBase::operator=(tmp);
-    return m_px->mutableSlice();
+    return m_px->bufferSlice();
   }
   const char *c_str() const {
     return m_px ? m_px->data() : "";
@@ -218,8 +227,8 @@ public:
   StringSlice slice() const {
     return m_px ? m_px->slice() : StringSlice("", 0);
   }
-  MutableSlice mutableSlice() {
-    return m_px ? m_px->mutableSlice() : MutableSlice("", 0);
+  MutableSlice bufferSlice() {
+    return m_px ? m_px->bufferSlice() : MutableSlice("", 0);
   }
   bool isNull() const {
     return m_px == nullptr;
@@ -557,7 +566,8 @@ private:
 extern const StaticString empty_string;
 String getDataTypeString(DataType t);
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
 }
 
-#endif // incl_HPHP_STRING_H_
+#endif

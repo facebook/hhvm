@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ARRAY_INLINE_H_
-#define incl_HPHP_ARRAY_INLINE_H_
+#ifndef incl_HPHP_ARRAY_DEFS_H_
+#define incl_HPHP_ARRAY_DEFS_H_
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/complex-types.h"
@@ -176,6 +176,18 @@ inline ArrayData* ArrayData::set(int64_t k, CVarRef v, bool copy) {
 
 inline ArrayData* ArrayData::set(StringData* k, CVarRef v, bool copy) {
   return g_array_funcs.setStr[m_kind](this, k, v, copy);
+}
+
+inline void ArrayData::zSet(int64_t k, RefData* v) {
+  g_array_funcs.zSetInt[m_kind](this, k, v);
+}
+
+inline void ArrayData::zSet(StringData* k, RefData* v) {
+  g_array_funcs.zSetStr[m_kind](this, k, v);
+}
+
+inline void ArrayData::zAppend(RefData* v) {
+  g_array_funcs.zAppend[m_kind](this, v);
 }
 
 inline size_t ArrayData::vsize() const {
@@ -341,4 +353,4 @@ inline SharedVariant* ArrayData::getSharedVariant() {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_ARRAY_INLINE_H_
+#endif // incl_HPHP_ARRAY_DEFS_H_

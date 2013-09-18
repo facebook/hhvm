@@ -23,6 +23,8 @@
 #include "hphp/util/util.h"
 #include "hphp/util/logger.h"
 
+#include "folly/Format.h"
+
 namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -123,35 +125,27 @@ struct JEMallocInitializer {
     dummy += "!";         // so the definition of dummy isn't optimized out
 #endif  /* __GLIBC__ */
     // Create a special arena to be used for allocating objects in low memory.
-    int err;
     size_t sz = sizeof(low_arena);
-    if ((err = mallctl("arenas.extend", &low_arena, &sz, nullptr, 0)) != 0) {
+    if (mallctl("arenas.extend", &low_arena, &sz, nullptr, 0) != 0) {
       // Error; bail out.
       return;
     }
-    size_t mib[3];
-    size_t miblen = sizeof(mib) / sizeof(size_t);
     const char *dss = "primary";
-    if ((err = mallctlnametomib("arena.0.dss", mib, &miblen)) != 0) {
+    if (mallctl(folly::format("arena.{}.dss", low_arena).str().c_str(),
+                nullptr, nullptr,
+                (void *)&dss, sizeof(const char *)) != 0) {
       // Error; bail out.
       return;
     }
-    mib[1] = low_arena;
-    if ((err = mallctlbymib(mib, miblen, nullptr, nullptr, (void *)&dss,
-        sizeof(const char *))) != 0) {
-      // Error; bail out.
-      return;
-    }
-    // Maintain the invariant that the region surrounding the current brk
-    // is mapped huge. Burn whatever slack needed to align low memory.
+
+    // We normally maintain the invariant that the region surrounding the
+    // current brk is mapped huge, but we don't know yet whether huge pages
+    // are enabled for low memory. Round up to the start of a huge page,
+    // and set the high water mark to one below.
     unsigned leftInPage = kHugePageSize - (uintptr_t(sbrk(0)) & kHugePageMask);
     (void) sbrk(leftInPage);
     assert((uintptr_t(sbrk(0)) & kHugePageMask) == 0);
-    highest_lowmall_addr = sbrk(0);
-    if (low_huge_pages.load()) {
-      --low_huge_pages;
-      hintHuge(highest_lowmall_addr.load(), kHugePageSize);
-    }
+    highest_lowmall_addr = (char*)sbrk(0) - 1;
   }
 };
 
@@ -175,6 +169,8 @@ static void low_malloc_hugify(void* ptr) {
   // to be randomly accessed. This makes them good candidates for mapping
   // with huge pages. Track a high water mark, and incrementally map each
   // huge page we low_malloc with a huge mapping.
+  int remaining = low_huge_pages.load();
+  if (!remaining) return;
   for (void* oldValue = highest_lowmall_addr.load(); ptr > oldValue; ) {
     if (highest_lowmall_addr.compare_exchange_weak(oldValue, ptr)) {
       uintptr_t prevRegion = uintptr_t(oldValue) >> kLgHugeGranularity;
@@ -184,8 +180,7 @@ static void low_malloc_hugify(void* ptr) {
         // intervening regions. prevRegion is already huge, so bump the
         // region we're hugening by 1.
         int pages = newRegion - prevRegion;
-        int remaining = low_huge_pages.load();
-        while (remaining) {
+        do {
           if (pages > remaining) pages = remaining;
 
           if (low_huge_pages.compare_exchange_weak(remaining,
@@ -194,7 +189,7 @@ static void low_malloc_hugify(void* ptr) {
                      pages << kLgHugeGranularity);
             break;
           }
-        }
+        } while (remaining);
       }
       break;
     }
@@ -210,9 +205,11 @@ void* low_malloc_impl(size_t size) {
 }
 
 void low_malloc_skip_huge(void* start, void* end) {
-  low_malloc_hugify((char*)start - 1);
-  for (void* oldValue = highest_lowmall_addr.load(); end > oldValue; ) {
-    if (highest_lowmall_addr.compare_exchange_weak(oldValue, end)) break;
+  if (low_huge_pages.load()) {
+    low_malloc_hugify((char*)start - 1);
+    for (void* oldValue = highest_lowmall_addr.load(); end > oldValue; ) {
+      if (highest_lowmall_addr.compare_exchange_weak(oldValue, end)) break;
+    }
   }
 }
 

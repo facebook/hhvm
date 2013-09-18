@@ -819,7 +819,7 @@
                     "args": [
                         {
                             "name": "queue",
-                            "type": "Int32",
+                            "type": "Int64",
                             "desc": "A scheduling queue to use (defined by QUEUE_* constants)"
                         },
                         {
@@ -833,12 +833,12 @@
             "consts": [
                 {
                     "name": "QUEUE_DEFAULT",
-                    "type": "Int32",
+                    "type": "Int64",
                     "desc": "A queue that is run whenever there is nothing else to do"
                 },
                 {
                     "name": "QUEUE_NO_PENDING_IO",
-                    "type": "Int32",
+                    "type": "Int64",
                     "desc": "A queue that is run only once there is no pending I\/O operation"
                 }
             ]

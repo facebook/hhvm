@@ -26,6 +26,7 @@
 #include "zend.h"
 
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/hphp-array.h"
 
 #define HASH_KEY_IS_STRING 1
 #define HASH_KEY_IS_LONG 2
@@ -56,7 +57,6 @@ struct _hashtable;
 
 typedef HPHP::ArrayData HashTable;
 
-
 typedef struct _zend_hash_key {
   const char *arKey;
   uint nKeyLength;
@@ -84,7 +84,7 @@ ZEND_API void zend_hash_clean(HashTable *ht);
 #define zend_hash_init_ex(ht, nSize, pHashFunction, pDestructor, persistent, bApplyProtection)    _zend_hash_init_ex((ht), (nSize), (pHashFunction), (pDestructor), (persistent), (bApplyProtection) ZEND_FILE_LINE_CC)
 
 /* additions/updates/changes */
-ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, zval **pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
+ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
 #define zend_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest) \
     _zend_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, HASH_UPDATE ZEND_FILE_LINE_CC)
 #define zend_hash_add(ht, arKey, nKeyLength, pData, nDataSize, pDest) \
@@ -96,7 +96,7 @@ ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, ui
 #define zend_hash_quick_add(ht, arKey, nKeyLength, h, pData, nDataSize, pDest) \
     _zend_hash_quick_add_or_update(ht, arKey, nKeyLength, h, pData, nDataSize, pDest, HASH_ADD ZEND_FILE_LINE_CC)
 
-ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, zval **pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
+ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
 #define zend_hash_index_update(ht, h, pData, nDataSize, pDest) \
     _zend_hash_index_update_or_next_insert(ht, h, pData, nDataSize, pDest, HASH_UPDATE ZEND_FILE_LINE_CC)
 #define zend_hash_next_index_insert(ht, pData, nDataSize, pDest) \
@@ -124,7 +124,7 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint n
     zend_hash_del_key_or_index(ht, NULL, 0, h, HASH_DEL_INDEX)
 
 /* Data retreival */
-ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, zval ***pData);
+ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, void **pData);
 ZEND_API int zend_hash_index_find(const HashTable *ht, ulong h, void **pData);
 
 /* Misc */
@@ -137,7 +137,7 @@ ZEND_API int zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, char **str_index, uint *str_length, ulong *num_index, zend_bool duplicate, HashPosition *pos);
 ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos);
-ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, zval ***pData, HashPosition *pos);
+ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosition *pos);
 ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *pos);
 
 #define zend_hash_has_more_elements(ht) \
@@ -213,7 +213,7 @@ END_EXTERN_C()
   ZEND_HANDLE_NUMERIC_EX(key, length, idx, return func);          \
 } while (0)
 
-inline int zend_symtable_update(HashTable *ht, const char *arKey, uint nKeyLength, zval **pData, uint nDataSize, void **pDest)          \
+inline int zend_symtable_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest)          \
 {
   ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
   return zend_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest);

@@ -23,8 +23,8 @@
 
 namespace HPHP {
 
-IMPLEMENT_SMART_ALLOCATION_HOT(SharedMap);
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
 HOT_FUNC
 CVarRef SharedMap::getValueRef(ssize_t pos) const {
   SharedVariant *sv = m_arr->getValue(pos);
@@ -55,8 +55,7 @@ SharedVariant* SharedMap::GetSharedVariant(const ArrayData* ad) {
   return a->m_arr;
 }
 
-HOT_FUNC
-SharedMap::~SharedMap() {
+ALWAYS_INLINE SharedMap::~SharedMap() {
   if (m_localCache) {
     for (TypedValue* tv = m_localCache, *end = tv + m_arr->arrCap();
          tv < end; ++tv) {
@@ -69,7 +68,9 @@ SharedMap::~SharedMap() {
 
 HOT_FUNC
 void SharedMap::Release(ArrayData* ad) {
-  asSharedMap(ad)->release();
+  auto const smap = asSharedMap(ad);
+  smap->~SharedMap();
+  MM().smartFreeSize(smap, sizeof(SharedMap));
 }
 
 inline SharedMap* SharedMap::asSharedMap(ArrayData* ad) {

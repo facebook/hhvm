@@ -42,7 +42,7 @@ void* writer(void* that) {
 
 void* reader(void* that) {
   FixupMap* m = (FixupMap*)that;
-  const StringData* sd = StringData::GetStaticString("test");
+  const StringData* sd = makeStaticString("test");
   // ar2: a mock actrec, requires a Func, which can't be builtin.
   Unit u;
   Func f(u, 1, nullptr, 1, 1, 0, 0, sd, AttrNone, true, nullptr, 0);

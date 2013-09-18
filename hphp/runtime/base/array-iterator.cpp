@@ -853,11 +853,14 @@ static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
   if (typeArray) {
     TypedValue* cur = arrIter.nvSecond();
     if (cur->m_type == KindOfRef) {
-      if (!withRef || cur->m_data.pref->getCount() == 1) {
-        cur = cur->m_data.pref->tv();
+      if (!withRef || !cur->m_data.pref->isReferenced()) {
+        cellDup(*(cur->m_data.pref->tv()), *out);
+      } else {
+        refDup(*cur, *out);
       }
+    } else {
+      cellDup(*cur, *out);
     }
-    tvDup(*cur, *out);
   } else {
     Variant val = arrIter.second();
     assert(val.getRawType() != KindOfRef);
@@ -922,7 +925,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   {
     HphpArray* arr = (HphpArray*)ad;
     if (LIKELY(arr->getSize() != 0)) {
-      if (UNLIKELY(tvWillBeReleased(valOut))) {
+      if (UNLIKELY(tvDecRefWillCallHelper(valOut))) {
         goto cold;
       }
       tvDecRefOnly(valOut);
@@ -961,8 +964,8 @@ int64_t new_iter_array_key(Iter* dest, ArrayData* ad,
     HphpArray* arr = (HphpArray*)ad;
     if (LIKELY(arr->getSize() != 0)) {
       if (!withRef) {
-        if (UNLIKELY(tvWillBeReleased(valOut)) ||
-            UNLIKELY(tvWillBeReleased(keyOut))) {
+        if (UNLIKELY(tvDecRefWillCallHelper(valOut)) ||
+            UNLIKELY(tvDecRefWillCallHelper(keyOut))) {
           goto cold;
         }
         tvDecRefOnly(valOut);
@@ -1228,7 +1231,7 @@ int64_t iter_next(Iter* iter, TypedValue* valOut) {
         return 0;
       }
     } while (arr->isTombstone(pos));
-    if (UNLIKELY(tvWillBeReleased(valOut))) {
+    if (UNLIKELY(tvDecRefWillCallHelper(valOut))) {
       goto cold;
     }
     tvDecRefOnly(valOut);
@@ -1275,10 +1278,10 @@ int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
       }
     } while (arr->isTombstone(pos));
     if (!withRef) {
-      if (UNLIKELY(tvWillBeReleased(valOut))) {
+      if (UNLIKELY(tvDecRefWillCallHelper(valOut))) {
         goto cold;
       }
-      if (UNLIKELY(tvWillBeReleased(keyOut))) {
+      if (UNLIKELY(tvDecRefWillCallHelper(keyOut))) {
         goto cold;
       }
       tvDecRefOnly(valOut);

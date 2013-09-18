@@ -26,7 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_fb_serialize(CVarRef thing);
-Variant f_fb_unserialize(CVarRef thing, VRefParam success, VRefParam errcode = null_variant);
+Variant f_fb_unserialize(CVarRef thing, VRefParam success);
 Variant f_fb_compact_serialize(CVarRef thing);
 Variant f_fb_compact_unserialize(CVarRef thing, VRefParam success, VRefParam errcode = null_variant);
 bool f_fb_could_include(CStrRef file);
@@ -74,12 +74,7 @@ extern const int64_t k_XHPROF_FLAGS_MALLOC;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int fb_unserialize_from_buffer(Variant &res, const char *buff, int buff_len,
-                               int *pos);
-int fb_compact_unserialize_from_buffer(Variant &res, const char *buff,
-                                       int buff_len, int &pos);
-Variant fb_unserialize(const char* str, int len, VRefParam success,
-                       VRefParam errcode = null_variant);
+Variant fb_unserialize(const char* str, int len, VRefParam success);
 Variant fb_compact_unserialize(const char* str, int len,
                                VRefParam success,
                                VRefParam errcode = null_variant);

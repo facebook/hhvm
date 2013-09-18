@@ -156,7 +156,7 @@ bool ConcurrentTableSharedStore::eraseImpl(CStrRef key, bool expired) {
   ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
                                 m_lockingFlag);
   Map::accessor acc;
-  if (m_vars.find(acc, key.data())) {
+  if (m_vars.find(acc, tagStringData(key.get()))) {
     if (expired && !acc->second.expired()) {
       return false;
     }
@@ -242,7 +242,7 @@ bool ConcurrentTableSharedStore::handlePromoteObj(CStrRef key,
   SharedVariant *converted = svar->convertObj(value);
   if (converted) {
     Map::accessor acc;
-    if (!m_vars.find(acc, key.data())) {
+    if (!m_vars.find(acc, tagStringData(key.get()))) {
       // There is a chance another thread deletes the key when this thread is
       // converting the object. In that case, we just bail
       converted->decRef();
@@ -301,7 +301,7 @@ bool ConcurrentTableSharedStore::get(CStrRef key, Variant &value) {
   bool promoteObj = false;
   {
     Map::const_accessor acc;
-    if (!m_vars.find(acc, key.data())) {
+    if (!m_vars.find(acc, tagStringData(key.get()))) {
       log_apc(std_apc_miss);
       return false;
     } else {
@@ -368,7 +368,7 @@ int64_t ConcurrentTableSharedStore::inc(CStrRef key, int64_t step, bool &found) 
   StoreValue *sval;
   {
     Map::accessor acc;
-    if (m_vars.find(acc, key.data())) {
+    if (m_vars.find(acc, tagStringData(key.get()))) {
       sval = &acc->second;
       if (!sval->expired()) {
         ret = get_int64_value(sval) + step;
@@ -390,7 +390,7 @@ bool ConcurrentTableSharedStore::cas(CStrRef key, int64_t old, int64_t val) {
   StoreValue *sval;
   {
     Map::accessor acc;
-    if (m_vars.find(acc, key.data())) {
+    if (m_vars.find(acc, tagStringData(key.get()))) {
       sval = &acc->second;
       if (!sval->expired() && get_int64_value(sval) == old) {
         SharedVariant *var = construct(Variant(val));
@@ -411,7 +411,7 @@ bool ConcurrentTableSharedStore::exists(CStrRef key) {
   bool expired = false;
   {
     Map::const_accessor acc;
-    if (!m_vars.find(acc, key.data())) {
+    if (!m_vars.find(acc, tagStringData(key.get()))) {
       log_apc(std_apc_miss);
       return false;
     } else {

@@ -74,7 +74,7 @@ Variant BZ2File::error() {
   int errnum;
   const char * errstr;
   errstr = BZ2_bzerror(m_bzFile, &errnum);
-  return CREATE_MAP2(s_errno, errnum, s_errstr, String(errstr));
+  return make_map_array(s_errno, errnum, s_errstr, String(errstr));
 }
 
 bool BZ2File::flush() {

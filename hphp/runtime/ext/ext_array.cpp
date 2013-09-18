@@ -842,7 +842,7 @@ Variant f_range(CVarRef low, CVarRef high, CVarRef step /* = 1 */) {
 
 static int cmp_func(CVarRef v1, CVarRef v2, const void *data) {
   Variant *callback = (Variant *)data;
-  return vm_call_user_func(*callback, CREATE_VECTOR2(v1, v2)).toInt32();
+  return vm_call_user_func(*callback, make_packed_array(v1, v2)).toInt32();
 }
 
 #define COMMA ,

@@ -39,7 +39,7 @@ const StaticString
   s_user("user");
 
 Array f_get_defined_functions() {
-  return CREATE_MAP2(s_internal, ClassInfo::GetSystemFunctions(),
+  return make_map_array(s_internal, ClassInfo::GetSystemFunctions(),
                      s_user, ClassInfo::GetUserFunctions());
 }
 
@@ -191,7 +191,7 @@ Variant f_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth,
   url += "/call_user_func_serialized?auth=";
   url += auth.data();
 
-  Array blob = CREATE_MAP2(s_func, function, s_args, _argv);
+  Array blob = make_map_array(s_func, function, s_args, _argv);
   String message = f_serialize(blob);
 
   vector<string> headers;
@@ -332,7 +332,7 @@ Array hhvm_get_frame_args(const ActRec* ar) {
   }
   int numParams = ar->m_func->numParams();
   int numArgs = ar->numArgs();
-  auto retval = ArrayData::Make(numArgs);
+  auto retval = HphpArray::MakeReserve(numArgs);
 
   TypedValue* local = (TypedValue*)(uintptr_t(ar) - sizeof(TypedValue));
   for (int i = 0; i < numArgs; ++i) {
@@ -347,7 +347,7 @@ Array hhvm_get_frame_args(const ActRec* ar) {
     }
   }
 
-  return Array(retval);
+  return Array::attach(retval);
 }
 
 Variant f_func_get_args() {

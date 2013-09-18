@@ -193,14 +193,6 @@ Variant f_exit(CVarRef status /* = null_variant */) {
   throw ExitException(status.toInt32());
 }
 
-Variant f_eval(CStrRef code_str) {
-  String prefixedCode = concat("<?php ", code_str);
-  Unit* unit = g_vmContext->compileEvalString(prefixedCode.get());
-  TypedValue retVal;
-  g_vmContext->invokeUnit(&retVal, unit);
-  return tvAsVariant(&retVal);
-}
-
 Variant f_get_browser(CStrRef user_agent /* = null_string */,
                       bool return_array /* = false */) {
   throw NotSupportedException(__func__, "bad idea");
@@ -260,7 +252,7 @@ Variant f_time_nanosleep(int seconds, int nanoseconds) {
     return true;
   }
   if (errno == EINTR) {
-    return CREATE_MAP2(s_seconds, (int64_t)rem.tv_sec,
+    return make_map_array(s_seconds, (int64_t)rem.tv_sec,
                        s_nanoseconds, (int64_t)rem.tv_nsec);
   }
   return false;
@@ -322,7 +314,7 @@ Variant f_unpack(CStrRef format, CStrRef data) {
 Array f_sys_getloadavg() {
   double load[3];
   getloadavg(load, 3);
-  return CREATE_VECTOR3(load[0], load[1], load[2]);
+  return make_packed_array(load[0], load[1], load[2]);
 }
 
 
@@ -337,7 +329,7 @@ Array f_token_get_all(CStrRef source) {
     if (tokid < 256) {
       res.append(String::FromChar((char)tokid));
     } else {
-      Array p = CREATE_VECTOR3(tokid, String(tok.text()), loc.line0);
+      Array p = make_packed_array(tokid, String(tok.text()), loc.line0);
       res.append(p);
     }
   }

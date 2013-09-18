@@ -649,7 +649,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
       m_tmp_sig[i] = CVV;
     }
     return m_tmp_sig;
-  case OpNewTuple:  // ONE(IVA),     CMANY,   ONE(CV)
+  case OpNewPackedArray:  // ONE(IVA),     CMANY,   ONE(CV)
     for (int i = 0, n = instrNumPops((Op*)pc); i < n; ++i) {
       m_tmp_sig[i] = CV;
     }

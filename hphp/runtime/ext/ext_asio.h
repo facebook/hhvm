@@ -478,8 +478,8 @@ class c_SetResultToRefWaitHandle : public c_BlockableWaitHandle {
 ///////////////////////////////////////////////////////////////////////////////
 // class RescheduleWaitHandle
 
-extern const int q_RescheduleWaitHandle$$QUEUE_DEFAULT;
-extern const int q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO;
+extern const int64_t q_RescheduleWaitHandle$$QUEUE_DEFAULT;
+extern const int64_t q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO;
 
 /**
  * A wait handle that is enqueued into a given priority queue and once desired
@@ -496,7 +496,7 @@ class c_RescheduleWaitHandle : public c_WaitableWaitHandle {
   public: c_RescheduleWaitHandle(Class* cls = c_RescheduleWaitHandle::s_cls);
   public: ~c_RescheduleWaitHandle();
   public: void t___construct();
-  public: static Object ti_create(int queue, int priority);
+  public: static Object ti_create(int64_t queue, int priority);
 
  public:
   void run();

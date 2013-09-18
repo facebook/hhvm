@@ -185,7 +185,7 @@ static size_t allocBitImpl(const StringData* name, PHPNameSpace ns) {
   }
   s_bits_to_go--;
   if (name != nullptr && ns != NSInvalid) {
-    if (!name->isStatic()) name = StringData::GetStaticString(name);
+    if (!name->isStatic()) name = makeStaticString(name);
     if (!map.insert(HandleMapCS::value_type(name, s_next_bit)))
       NOT_REACHED();
   }
@@ -284,7 +284,7 @@ namedAlloc(PHPNameSpace where, const StringData* name,
   }
   Handle retval = allocLocked(where == NSPersistent, numBytes, align);
   if (name) {
-    if (!name->isStatic()) name = StringData::GetStaticString(name);
+    if (!name->isStatic()) name = makeStaticString(name);
     if (!map.insert(typename HI::Map::value_type(name, retval))) NOT_REACHED();
     TRACE(1, "TargetCache: inserted \"%s\", %d\n", name->data(), int(retval));
   } else if (where == NSDynFunction) {
@@ -770,45 +770,6 @@ lookupClassConstantTv(TypedValue* cache,
 // *SPropCache
 //
 
-TypedValue*
-SPropCache::lookup(Handle handle, const Class *cls, const StringData *name) {
-  // The fast path is in-TC. If we get here, we have already missed.
-  SPropCache* thiz = cacheAtHandle(handle);
-  Stats::inc(Stats::TgtCache_SPropMiss);
-  Stats::inc(Stats::TgtCache_SPropHit, -1);
-  assert(cls && name);
-  assert(!thiz->m_tv);
-  TRACE(3, "SPropCache miss: %s::$%s\n", cls->name()->data(),
-        name->data());
-  // This is valid only if the lookup comes from an in-class method
-  Class *ctx = const_cast<Class*>(cls);
-  if (debug) {
-    VMRegAnchor _;
-    assert(ctx == arGetContextClass((ActRec*)vmfp()));
-  }
-  bool visible, accessible;
-  TypedValue* val;
-  val = cls->getSProp(ctx, name, visible, accessible);
-  if (UNLIKELY(!visible)) {
-    string methodName;
-    string_printf(methodName, "%s::$%s",
-                  cls->name()->data(), name->data());
-    undefinedError("Invalid static property access: %s", methodName.c_str());
-  }
-  // We only cache in class references, thus we can always cache them
-  // once the property is known to exist
-  assert(accessible);
-  thiz->m_tv = val;
-  TRACE(3, "SPropCache::lookup(\"%s::$%s\") %p -> %p t%d\n",
-        cls->name()->data(),
-        name->data(),
-        val,
-        val->m_data.pref,
-        val->m_type);
-  assert(val->m_type >= MinDataType && val->m_type < MaxNumDataTypes);
-  return val;
-}
-
 template<bool raiseOnError>
 TypedValue*
 SPropCache::lookupSProp(const Class *cls, const StringData *name, Class* ctx) {
@@ -835,8 +796,8 @@ template TypedValue* SPropCache::lookupSProp<false>(const Class *cls,
 
 template<bool raiseOnError>
 TypedValue*
-SPropCache::lookupIR(Handle handle, const Class *cls, const StringData *name,
-                     Class* ctx) {
+SPropCache::lookup(Handle handle, const Class *cls, const StringData *name,
+                   Class* ctx) {
   // The fast path is in-TC. If we get here, we have already missed.
   SPropCache* thiz = cacheAtHandle(handle);
   Stats::inc(Stats::TgtCache_SPropMiss);
@@ -861,15 +822,15 @@ SPropCache::lookupIR(Handle handle, const Class *cls, const StringData *name,
   return val;
 }
 
-template TypedValue* SPropCache::lookupIR<true>(Handle handle,
-                                                const Class *cls,
-                                                const StringData *name,
-                                                Class* ctx);
+template TypedValue* SPropCache::lookup<true>(Handle handle,
+                                              const Class *cls,
+                                              const StringData *name,
+                                              Class* ctx);
 
-template TypedValue* SPropCache::lookupIR<false>(Handle handle,
-                                                 const Class *cls,
-                                                 const StringData *name,
-                                                 Class* ctx);
+template TypedValue* SPropCache::lookup<false>(Handle handle,
+                                               const Class *cls,
+                                               const StringData *name,
+                                               Class* ctx);
 
 //=============================================================================
 // StaticMethodCache
@@ -886,7 +847,7 @@ allocStaticMethodCache(const StringData* clsName,
   // choose must delimit possible class and method names, so we might
   // as well ape the source syntax
   const StringData* joinedName =
-    StringData::GetStaticString(String(clsName->data()) + String("::") +
+    makeStaticString(String(clsName->data()) + String("::") +
                                 String(methName->data()) + String(":") +
                                 String(ctxName));
 

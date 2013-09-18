@@ -241,7 +241,7 @@ VarEnv::VarEnv()
   globalArray.m_data.parr =
     new (request_arena()) GlobalNameValueTableWrapper(&*m_nvTable);
   globalArray.m_data.parr->incRefCount();
-  m_nvTable->set(StringData::GetStaticString("GLOBALS"), &globalArray);
+  m_nvTable->set(makeStaticString("GLOBALS"), &globalArray);
   tvRefcountedDecRef(&globalArray);
 }
 
@@ -948,7 +948,7 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
     method = cls->lookupMethod(methodName);
     while (!method) {
       static StringData* sd__construct
-        = StringData::GetStaticString("__construct");
+        = makeStaticString("__construct");
       if (UNLIKELY(methodName == sd__construct)) {
         // We were looking up __construct and failed to find it. Fall back
         // to old-style constructor: same as class name.
@@ -1338,7 +1338,6 @@ void VMExecutionContext::shuffleMagicArgs(ActRec* ar) {
   // We need to make an array containing all the arguments passed by the
   // caller and put it where the second argument is
   ArrayData* argArray = pack_args_into_array(ar, nargs);
-  argArray->incRefCount();
   // Remove the arguments from the stack
   for (int i = 0; i < nargs; ++i) {
     m_stack.popC();
@@ -2075,7 +2074,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
 
     if (fp->m_func->isClosureBody()) {
       static StringData* s_closure_label =
-          StringData::GetStaticString("{closure}");
+          makeStaticString("{closure}");
       funcname = s_closure_label;
     }
 
@@ -2253,7 +2252,7 @@ const ClassInfo::ConstantInfo* VMExecutionContext::findConstantInfo(
   if (it != m_constInfo.end()) {
     return it->second;
   }
-  StringData* key = StringData::GetStaticString(name.get());
+  StringData* key = makeStaticString(name.get());
   ClassInfo::ConstantInfo* ci = new ClassInfo::ConstantInfo();
   ci->name = *(const String*)&key;
   ci->valueLen = 0;
@@ -2518,7 +2517,7 @@ Unit* VMExecutionContext::compileEvalString(StringData* code) {
   EvaledUnitsMap::accessor acc;
   // Promote this to a static string; otherwise it may get swept
   // across requests.
-  code = StringData::GetStaticString(code);
+  code = makeStaticString(code);
   if (s_evaledUnits.insert(acc, code)) {
     acc->second = compile_string(code->data(), code->size());
   }
@@ -2533,17 +2532,17 @@ CStrRef VMExecutionContext::createFunction(CStrRef args, CStrRef code) {
   // has the bonus feature that the value of __FUNCTION__ inside the created
   // function will match Zend. (Note: Zend will actually fatal if there's a
   // user function named __lambda_func when you call create_function. Huzzah!)
-  static StringData* oldName = StringData::GetStaticString("__lambda_func");
+  static StringData* oldName = makeStaticString("__lambda_func");
   std::ostringstream codeStr;
   codeStr << "<?php function " << oldName->data()
           << "(" << args.data() << ") {"
           << code.data() << "}\n";
-  StringData* evalCode = StringData::GetStaticString(codeStr.str());
+  StringData* evalCode = makeStaticString(codeStr.str());
   Unit* unit = compile_string(evalCode->data(), evalCode->size());
   // Move the function to a different name.
   std::ostringstream newNameStr;
   newNameStr << '\0' << "lambda_" << ++m_lambdaCounter;
-  StringData* newName = StringData::GetStaticString(newNameStr.str());
+  StringData* newName = makeStaticString(newNameStr.str());
   unit->renameFunc(oldName, newName);
   m_createdFuncs.push_back(unit);
   unit->merge();
@@ -2865,8 +2864,11 @@ static inline void lookupClsRef(TypedValue* input,
 
 static UNUSED int innerCount(const TypedValue* tv) {
   if (IS_REFCOUNTED_TYPE(tv->m_type)) {
-    // We're using pref here arbitrarily; any refcounted union member works.
-    return tv->m_data.pref->m_count;
+    if (tv->m_type == KindOfRef) {
+      return tv->m_data.pref->getRealCount();
+    } else {
+      return tv->m_data.pref->m_count;
+    }
   }
   return -1;
 }
@@ -3419,15 +3421,15 @@ OPTBLD_INLINE void VMExecutionContext::iopArray(PC& pc) {
 
 OPTBLD_INLINE void VMExecutionContext::iopNewArray(PC& pc) {
   NEXT();
-  auto arr = ArrayData::MakeReserve(HphpArray::SmallSize);
+  auto arr = HphpArray::MakeReserve(HphpArray::SmallSize);
   m_stack.pushArrayNoRc(arr);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopNewTuple(PC& pc) {
+OPTBLD_INLINE void VMExecutionContext::iopNewPackedArray(PC& pc) {
   NEXT();
   DECODE_IVA(n);
   // This constructor moves values, no inc/decref is necessary.
-  auto* a = HphpArray::MakeTuple(n, m_stack.topC());
+  auto* a = HphpArray::MakePacked(n, m_stack.topC());
   m_stack.ndiscard(n);
   m_stack.pushArrayNoRc(a);
 }
@@ -5193,7 +5195,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushFunc(PC& pc) {
     origSd = c1->m_data.pstr;
     func = Unit::loadFunc(origSd);
   } else if (c1->m_type == KindOfObject) {
-    static StringData* invokeName = StringData::GetStaticString("__invoke");
+    static StringData* invokeName = makeStaticString("__invoke");
     origObj = c1->m_data.pobj;
     const Class* cls = origObj->getVMClass();
     func = cls->lookupMethod(invokeName);
@@ -5204,7 +5206,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushFunc(PC& pc) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
   if (func == nullptr) {
-    raise_error("Call to undefined function %s()", c1->m_data.pstr->data());
+    raise_error("Undefined function: %s", c1->m_data.pstr->data());
   }
   assert(!origObj || !origSd);
   assert(origObj || origSd);
@@ -5235,7 +5237,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushFuncD(PC& pc) {
   const NamedEntityPair nep = m_fp->m_func->unit()->lookupNamedEntityPairId(id);
   Func* func = Unit::loadFunc(nep.second, nep.first);
   if (func == nullptr) {
-    raise_error("Call to undefined function %s()",
+    raise_error("Undefined function: %s",
                 m_fp->m_func->unit()->lookupLitstrId(id)->data());
   }
   ActRec* ar = fPushFuncImpl(func, numArgs);
@@ -5869,9 +5871,11 @@ bool VMExecutionContext::prepareArrayArgs(ActRec* ar, Array& arrayArgs) {
     ExtraArgs* extraArgs = ExtraArgs::allocateUninit(extra);
     for (int i = 0; i < extra; ++i) {
       TypedValue* to = extraArgs->getExtraArg(i);
-      tvDup(*args->getValueRef(pos).asTypedValue(), *to);
-      if (to->m_type == KindOfRef && to->m_data.pref->m_count == 2) {
-        tvUnbox(to);
+      const TypedValue* from = args->getValueRef(pos).asTypedValue();
+      if (from->m_type == KindOfRef && from->m_data.pref->isReferenced()) {
+        refDup(*from, *to);
+      } else {
+        cellDup(*tvToCell(from), *to);
       }
       pos = args->iter_advance(pos);
     }
@@ -6359,6 +6363,7 @@ lookupStatic(StringData* name,
   if (val == nullptr) {
     TypedValue tv;
     tvWriteUninit(&tv);
+    // TODO(#2836647): needs to check return value
     map->set(name, tvAsCVarRef(&tv), false);
     val = map->nvGet(name);
     inited = false;
@@ -6396,6 +6401,7 @@ OPTBLD_INLINE void VMExecutionContext::iopStaticLocInit(PC& pc) {
   bool inited;
   lookupStatic(var, m_fp, fr, inited);
   assert(fr != nullptr);
+  assert(!inited || fr->m_type == KindOfRef);
   if (!inited) {
     Cell* initVal = m_stack.topC();
     cellDup(*initVal, *fr);
@@ -6744,9 +6750,9 @@ OPTBLD_INLINE void VMExecutionContext::iopContSuspendK(PC& pc) {
   c_Continuation* cont = frame_continuation(m_fp);
 
   TypedValue* val = m_stack.topTV();
-  m_stack.popTV();
-  cont->c_Continuation::t_update_key(label, tvAsCVarRef(m_stack.topTV()),
+  cont->c_Continuation::t_update_key(label, tvAsCVarRef(m_stack.indTV(1)),
                                      tvAsCVarRef(val));
+  m_stack.popTV();
   m_stack.popTV();
 
   EventHook::FunctionExit(m_fp);

@@ -109,7 +109,7 @@ void EventHook::RunUserProfiler(const ActRec* ar, int mode) {
 static Array get_frame_args_with_ref(const ActRec* ar) {
   int numParams = ar->m_func->numParams();
   int numArgs = ar->numArgs();
-  HphpArray* retval = ArrayData::Make(numArgs);
+  HphpArray* retval = HphpArray::MakeReserve(numArgs);
 
   TypedValue* local = (TypedValue*)(uintptr_t(ar) - sizeof(TypedValue));
   for (int i = 0; i < numArgs; ++i) {
@@ -124,7 +124,7 @@ static Array get_frame_args_with_ref(const ActRec* ar) {
     }
   }
 
-  return Array(retval);
+  return Array::attach(retval);
 }
 
 bool EventHook::RunInterceptHandler(ActRec* ar) {
@@ -149,7 +149,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     called_on = Variant(const_cast<StringData*>(ar->getClass()->name()));
   }
   Array intArgs =
-    CREATE_VECTOR5(ar->m_func->fullNameRef(),
+    make_packed_array(ar->m_func->fullNameRef(),
                    called_on,
                    get_frame_args_with_ref(ar),
                    h->asCArrRef()[1],
@@ -198,7 +198,7 @@ bool EventHook::onFunctionEnter(const ActRec* ar, int funcType) {
           }
           break;
         case PseudoMain:
-          name = StringData::GetStaticString(
+          name = makeStaticString(
             std::string("run_init::") + ar->m_func->unit()->filepath()->data())
             ->data();
           break;

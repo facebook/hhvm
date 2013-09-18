@@ -1,22 +1,22 @@
 #include "zend_hash.h"
 
-ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, zval **pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) {
+ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) {
   if (nKeyLength <= 0) {
     return FAILURE;
   }
   assert(arKey[nKeyLength - 1] == '\0');
-  auto key = HPHP::StringData::GetStaticString(arKey, nKeyLength - 1);
+  HPHP::String key(arKey, nKeyLength - 1, HPHP::CopyString);
 
-  if ((flag & HASH_ADD) && ht->exists(key)) {
+  if ((flag & HASH_ADD) && ht->exists(key.get())) {
     return FAILURE;
   }
-  ht->set(key, tvAsVariant(*pData), false);
+  ht->zSet(key.get(), (*(zval**)pData));
   return SUCCESS;
 }
 
-ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, zval **pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) {
+ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) {
   if (flag & HASH_NEXT_INSERT) {
-    ht->append(tvAsVariant(*pData), false);
+    ht->zAppend(*(zval**)pData);
     return SUCCESS;
   }
 
@@ -24,7 +24,7 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, zval
     return FAILURE;
   }
 
-  ht->set(h, tvAsVariant(*pData), false);
+  ht->zSet(h, (*(zval**)pData));
   return SUCCESS;
 }
 
@@ -33,8 +33,8 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint n
     ht->remove(h, false);
   } else {
     assert(arKey[nKeyLength - 1] == '\0');
-    auto key = HPHP::StringData::GetStaticString(arKey, nKeyLength - 1);
-    ht->remove(key, false);
+    HPHP::String key(arKey, nKeyLength - 1, HPHP::CopyString);
+    ht->remove(key.get(), false);
   }
   return SUCCESS;
 }
@@ -51,23 +51,36 @@ class TypedValueHolder {
     uint8_t m_pos;
     HPHP::TypedValue* m_data[16];
 };
-static __thread TypedValueHolder tvHolder;
 
-ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, zval ***pData) {
+ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, void **pData) {
   if (nKeyLength <= 0) {
     return FAILURE;
   }
   assert(arKey[nKeyLength - 1] == '\0');
-  auto key = HPHP::StringData::GetStaticString(arKey, nKeyLength - 1);
-
-  *pData = tvHolder.getNext();
-  **pData = ht->nvGet(key);
-  return **pData == nullptr ? FAILURE : SUCCESS;
+  HPHP::String key(arKey, nKeyLength - 1, HPHP::CopyString);
+  auto val = ht->nvGet(key.get());
+  if (!val) {
+    return FAILURE;
+  }
+  if (val->m_type != HPHP::KindOfRef) {
+    HPHP::tvBox(val);
+  }
+  auto p = (zval***)pData;
+  *p = &val->m_data.pref;
+  return SUCCESS;
 }
 
 ZEND_API int zend_hash_index_find(const HashTable *ht, ulong h, void **pData) {
-  *pData = ht->nvGet(h);
-  return *pData == nullptr ? FAILURE : SUCCESS;
+  auto val = ht->nvGet(h);
+  if (!val) {
+    return FAILURE;
+  }
+  if (val->m_type != HPHP::KindOfRef) {
+    HPHP::tvBox(val);
+  }
+  auto p = (zval***)pData;
+  *p = &val->m_data.pref;
+  return SUCCESS;
 }
 
 ZEND_API ulong zend_hash_next_free_element(const HashTable *ht) {
@@ -139,7 +152,7 @@ ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos)
   }
 }
 
-ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, zval ***pData, HashPosition *pos) {
+ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosition *pos) {
   HashPosition hp = ht->getPosition();
   if (pos) {
     hp = *pos;
@@ -147,8 +160,15 @@ ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, zval ***pData, HashPos
   if (hp == ht->invalid_index) {
     return FAILURE;
   }
-  *pData = tvHolder.getNext();
-  **pData = ht->nvGetValueRef(hp);
+  auto val = ht->nvGetValueRef(hp);
+  if (!val) {
+    return FAILURE;
+  }
+  if (val->m_type != HPHP::KindOfRef) {
+    HPHP::tvBox(val);
+  }
+  auto p = (zval***)pData;
+  *p = &val->m_data.pref;
   return SUCCESS;
 }
 
@@ -163,7 +183,10 @@ ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *p
 ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size, int overwrite ZEND_FILE_LINE_DC) {
   target->plus(source, false);
   for (HPHP::ArrayIter it(source); !it.end(); it.next()) {
-    const void *tv = it.secondRef().asTypedValue();
-    pCopyConstructor(const_cast<void*>(tv));
+    auto tv = (HPHP::TypedValue*)it.secondRef().asTypedValue();
+    if (tv->m_type != HPHP::KindOfRef) {
+      HPHP::tvBox(tv);
+    }
+    pCopyConstructor((void*)(&tv->m_data.pref));
   }
 }

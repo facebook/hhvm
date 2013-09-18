@@ -208,7 +208,7 @@ static Variant php_hash_do_hash(CStrRef algo, CStrRef data, bool isfilename,
   }
 
   String raw = String(ops->digest_size, ReserveString);
-  char *digest = raw.mutableSlice().ptr;
+  char *digest = raw.bufferSlice().ptr;
   ops->hash_final((unsigned char *)digest, context);
   free(context);
 
@@ -304,7 +304,7 @@ String HHVM_FUNCTION(hash_final, CResRef context,
   HashContext *hash = context.getTyped<HashContext>();
 
   String raw = String(hash->ops->digest_size, ReserveString);
-  char *digest = raw.mutableSlice().ptr;
+  char *digest = raw.bufferSlice().ptr;
   hash->ops->hash_final((unsigned char *)digest, hash->context);
   if (hash->options & k_HASH_HMAC) {
     finalize_hmac_key(hash->key, hash->ops, hash->context, digest);

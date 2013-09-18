@@ -21,66 +21,9 @@
 #include "hphp/runtime/base/hphp-array.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-// macros for creating vectors or maps
 
-#define CREATE_VECTOR1(e)                                               \
-  PackedArrayInit(1).add(e).toArray()
-#define CREATE_VECTOR2(e1, e2)                                          \
-  PackedArrayInit(2).add(e1).add(e2).toArray()
-#define CREATE_VECTOR3(e1, e2, e3)                                      \
-  PackedArrayInit(3).add(e1).add(e2).add(e3).toArray()
-#define CREATE_VECTOR4(e1, e2, e3, e4)                                  \
-  PackedArrayInit(4).add(e1).add(e2).add(e3).add(e4).toArray()
-#define CREATE_VECTOR5(e1, e2, e3, e4, e5)                              \
-  PackedArrayInit(5).add(e1).add(e2).add(e3).add(e4).add(e5).toArray()
-#define CREATE_VECTOR6(e1, e2, e3, e4, e5, e6)                          \
-  PackedArrayInit(6).add(e1).add(e2).add(e3).add(e4).add(e5).add(e6).toArray()
+//////////////////////////////////////////////////////////////////////
 
-inline String initkey(const char* s) { return String(s); }
-inline int64_t initkey(int k) { return k; }
-inline int64_t initkey(int64_t k) { return k; }
-inline CStrRef initkey(CStrRef k) { return k; }
-
-#define CREATE_MAP1(n, e) Array(ArrayInit(1).set(initkey(n), e).create())
-#define CREATE_MAP2(n1, e1, n2, e2)\
-  Array(ArrayInit(2).set(initkey(n1), e1)\
-                    .set(initkey(n2), e2).create())
-#define CREATE_MAP3(n1, e1, n2, e2, n3, e3)\
-  Array(ArrayInit(3).set(initkey(n1), e1)\
-                    .set(initkey(n2), e2)\
-                    .set(initkey(n3), e3).create())
-#define CREATE_MAP4(n1, e1, n2, e2, n3, e3, n4, e4)\
-  Array(ArrayInit(4).set(initkey(n1), e1)\
-                    .set(initkey(n2), e2)\
-                    .set(initkey(n3), e3)\
-                    .set(initkey(n4), e4).create())
-#define CREATE_MAP5(n1, e1, n2, e2, n3, e3, n4, e4, n5, e5)\
-  Array(ArrayInit(5).set(initkey(n1), e1)\
-                    .set(initkey(n2), e2)\
-                    .set(initkey(n3), e3)\
-                    .set(initkey(n4), e4)\
-                    .set(initkey(n5), e5).create())
-#define CREATE_MAP6(n1, e1, n2, e2, n3, e3, n4, e4, n5, e5, n6, e6)\
-  Array(ArrayInit(6).set(initkey(n1), e1)\
-                    .set(initkey(n2), e2)\
-                    .set(initkey(n3), e3)\
-                    .set(initkey(n4), e4)\
-                    .set(initkey(n5), e5)\
-                    .set(initkey(n6), e6).create())
-
-///////////////////////////////////////////////////////////////////////////////
-// ArrayInit
-
-/**
- * When an Array is created, ArrayInit completely skips the use of
- * ArrayElement, (the set methods mimic the constructors of ArrayElement).
- * The setRef method handles the case where the value needs to be a reference.
- *
- * For arrays that need to have C++ references/pointers to their elements for
- * an extended period of time, set keepRef to true, so that there will not
- * be reference-breaking escalation.
- */
 class ArrayInit {
 public:
   enum MapInit { mapInit };
@@ -300,12 +243,16 @@ private:
   ArrayData* m_data;
 };
 
+//////////////////////////////////////////////////////////////////////
+
 /*
  * Initializer for a vector-shaped array.
  */
 class PackedArrayInit {
 public:
-  explicit PackedArrayInit(size_t n) : m_vec(ArrayData::Make(n)) {}
+  explicit PackedArrayInit(size_t n) : m_vec(HphpArray::MakeReserve(n)) {
+    m_vec->setRefCount(0);
+  }
 
   PackedArrayInit(PackedArrayInit&& other) : m_vec(other.m_vec) {
     other.m_vec = nullptr;
@@ -356,7 +303,69 @@ private:
   HphpArray* m_vec;
 };
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+namespace make_array_detail {
+
+  inline void packed_impl(PackedArrayInit&) {}
+
+  template<class Val, class... Vals>
+  void packed_impl(PackedArrayInit& init, Val&& val, Vals&&... vals) {
+    init.add(std::forward<Val>(val));
+    packed_impl(init, std::forward<Vals>(vals)...);
+  }
+
+  inline String init_key(const char* s) { return String(s); }
+  inline int64_t init_key(int k) { return k; }
+  inline int64_t init_key(int64_t k) { return k; }
+  inline CStrRef init_key(CStrRef k) { return k; }
+
+  inline void map_impl(ArrayInit&) {}
+
+  template<class Key, class Val, class... KVPairs>
+  void map_impl(ArrayInit& init, Key&& key, Val&& val, KVPairs&&... kvpairs) {
+    init.set(init_key(std::forward<Key>(key)), std::forward<Val>(val));
+    map_impl(init, std::forward<KVPairs>(kvpairs)...);
+  }
+
 }
 
-#endif /* incl_HPHP_ARRAY_INIT_H_ */
+/*
+ * Helper for creating packed arrays (vector-like).
+ *
+ * Usage:
+ *
+ *   auto newArray = make_packed_array(1, 2, 3, 4);
+ *
+ */
+template<class... Vals>
+Array make_packed_array(Vals&&... vals) {
+  PackedArrayInit init(sizeof...(vals));
+  make_array_detail::packed_impl(init, std::forward<Vals>(vals)...);
+  return init.toArray();
+}
+
+/*
+ * Helper for creating map-like arrays (kMixedKind).  Takes pairs of
+ * arguments for the keys and values.
+ *
+ * Usage:
+ *
+ *   auto newArray = make_map_array(keyOne, valueOne,
+ *                                  otherKey, otherValue);
+ *
+ */
+template<class... KVPairs>
+Array make_map_array(KVPairs&&... kvpairs) {
+  static_assert(
+    sizeof...(kvpairs) % 2 == 0, "make_map_array needs key value pairs");
+  ArrayInit init(sizeof...(kvpairs) / 2);
+  make_array_detail::map_impl(init, std::forward<KVPairs>(kvpairs)...);
+  return init.toArray();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}
+
+#endif

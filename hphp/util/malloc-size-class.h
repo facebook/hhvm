@@ -21,6 +21,8 @@
 
 #include "hphp/util/assertions.h"
 
+#include "hphp/util/alloc.h" // must be included before USE_JEMALLOC is used
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////

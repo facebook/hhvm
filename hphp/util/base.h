@@ -127,14 +127,6 @@ const bool debug =
 #endif
   ;
 
-const bool use_jemalloc =
-#ifdef USE_JEMALLOC
-  true
-#else
-  false
-#endif
-  ;
-
 const bool packed_tv =
 #ifdef PACKED_TV
   true

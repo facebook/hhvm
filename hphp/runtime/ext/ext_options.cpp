@@ -209,23 +209,8 @@ String f_get_current_user() {
   return ret;
 }
 
-StaticString s_user("user");
-StaticString s_core("Core");
 Array f_get_defined_constants(bool categorize /* = false */) {
-  if (categorize) {
-    Array categorized_consts;
-    // Get all defined constants - user and system
-    Array all_consts = StringData::GetConstants();
-    // Get all system constants, including dynamic ones
-    Array sys_consts = ClassInfo::GetSystemConstants(true);
-    Array user_consts = all_consts.diff(sys_consts, true, false);
-    categorized_consts.set(s_user, user_consts);
-    categorized_consts.set(s_core, sys_consts);
-    return categorized_consts;
-  }
-  else {
-    return StringData::GetConstants();
-  }
+  return lookupDefinedConstants(categorize);
 }
 
 String f_get_include_path() {
@@ -620,7 +605,7 @@ Array f_getopt(CStrRef options, CVarRef longopts /* = null_variant */) {
       if (ret.exists(optname_int)) {
         Variant &e = ret.lvalAt(optname_int);
         if (!e.isArray()) {
-          ret.set(optname_int, CREATE_VECTOR2(e, val));
+          ret.set(optname_int, make_packed_array(e, val));
         } else {
           e.append(val);
         }
@@ -633,7 +618,7 @@ Array f_getopt(CStrRef options, CVarRef longopts /* = null_variant */) {
       if (ret.exists(key)) {
         Variant &e = ret.lvalAt(key);
         if (!e.isArray()) {
-          ret.set(key, CREATE_VECTOR2(e, val));
+          ret.set(key, make_packed_array(e, val));
         } else {
           e.append(val);
         }

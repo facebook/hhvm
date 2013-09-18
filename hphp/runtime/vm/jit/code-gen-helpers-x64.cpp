@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/ringbuffer.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/base/runtime-option.h"
@@ -73,6 +74,54 @@ void moveToAlign(Asm& aa,
     return;
   }
   aa.emitNop(leftInBlock);
+}
+
+/*
+ * Returns true if the given current frontier can have an nBytes-long
+ * instruction written without any risk of cache-tearing.
+ */
+bool isSmashable(Address frontier, int nBytes, int offset /* = 0 */) {
+  assert(nBytes <= int(kX64CacheLineSize));
+  uintptr_t iFrontier = uintptr_t(frontier) + offset;
+  uintptr_t lastByte = uintptr_t(frontier) + nBytes - 1;
+  return (iFrontier & ~kX64CacheLineMask) == (lastByte & ~kX64CacheLineMask);
+}
+
+void prepareForSmash(X64Assembler& a, int nBytes, int offset /* = 0 */) {
+  if (!isSmashable(a.frontier(), nBytes, offset)) {
+    int gapSize = (~(uintptr_t(a.frontier()) + offset) &
+                   kX64CacheLineMask) + 1;
+    a.emitNop(gapSize);
+    assert(isSmashable(a.frontier(), nBytes, offset));
+  }
+}
+
+/*
+ * Call before emitting a test-jcc sequence. Inserts a nop gap such that after
+ * writing a testBytes-long instruction, the frontier will be smashable.
+ */
+void prepareForTestAndSmash(Asm& a, int testBytes, TestAndSmashFlags flags) {
+  switch (flags) {
+  case TestAndSmashFlags::kAlignJcc:
+    prepareForSmash(a, testBytes + kJmpccLen, testBytes);
+    assert(isSmashable(a.frontier() + testBytes, kJmpccLen));
+    break;
+  case TestAndSmashFlags::kAlignJccImmediate:
+    prepareForSmash(a,
+                    testBytes + kJmpccLen,
+                    testBytes + kJmpccLen - kJmpImmBytes);
+    assert(isSmashable(a.frontier() + testBytes, kJmpccLen,
+                       kJmpccLen - kJmpImmBytes));
+    break;
+  case TestAndSmashFlags::kAlignJccAndJmp:
+    // Ensure that the entire jcc, and the entire jmp are smashable
+    // (but we dont need them both to be in the same cache line)
+    prepareForSmash(a, testBytes + kJmpccLen, testBytes);
+    prepareForSmash(a, testBytes + kJmpccLen + kJmpLen, testBytes + kJmpccLen);
+    assert(isSmashable(a.frontier() + testBytes, kJmpccLen));
+    assert(isSmashable(a.frontier() + testBytes + kJmpccLen, kJmpLen));
+    break;
+  }
 }
 
 void emitEagerSyncPoint(Asm& as, const HPHP::Opcode* pc, const Offset spDiff) {
@@ -293,6 +342,43 @@ void emitCall(Asm& a, CppCall call) {
   // using rax as scratch.
   a.  loadq  (*rdi, rax);
   a.  call   (rax[call.getOffset()]);
+}
+
+void emitJmpOrJcc(Asm& a, ConditionCode cc, TCA dest) {
+  if (cc == CC_None) {
+    a.   jmp(dest);
+  } else {
+    a.   jcc((ConditionCode)cc, dest);
+  }
+}
+
+void emitRB(X64Assembler& a,
+            Trace::RingBufferType t,
+            SrcKey sk, RegSet toSave) {
+  if (!Trace::moduleEnabledRelease(Trace::tx64, 3)) {
+    return;
+  }
+  PhysRegSaver rs(a, toSave | kSpecialCrossTraceRegs);
+  int arg = 0;
+  a.    emitImmReg(t, argNumToRegName[arg++]);
+  a.    emitImmReg(sk.getFuncId(), argNumToRegName[arg++]);
+  a.    emitImmReg(sk.offset(), argNumToRegName[arg++]);
+  a.    call((TCA)Trace::ringbufferEntry);
+}
+
+void emitRB(X64Assembler& a,
+            Trace::RingBufferType t,
+            const char* msg,
+            RegSet toSave) {
+  if (!Trace::moduleEnabledRelease(Trace::tx64, 3)) {
+    return;
+  }
+  PhysRegSaver save(a, toSave | kSpecialCrossTraceRegs);
+  int arg = 0;
+  a.    emitImmReg((uintptr_t)msg, argNumToRegName[arg++]);
+  a.    emitImmReg(strlen(msg), argNumToRegName[arg++]);
+  a.    emitImmReg(t, argNumToRegName[arg++]);
+  a.    call((TCA)Trace::ringbufferMsg);
 }
 
 void emitTestSurpriseFlags(Asm& a) {

@@ -68,7 +68,7 @@ bool TestExtMemcached::test_Memcached_get_set() {
   CREATE_MEMCACHED();
 
   const char *key = "foo";
-  Array value = CREATE_MAP1("foo", "bar");
+  Array value = make_map_array("foo", "bar");
   memc->t_set(key, value, EXPIRATION);
   VS(memc->t_get(key), value);
 
@@ -107,7 +107,7 @@ bool TestExtMemcached::test_Memcached_types() {
   list.add(s_float_zero, 0.0);
   list.add(s_null, uninit_null());
   list.add(s_array_empty, Array());
-  list.add(s_array, CREATE_VECTOR4(1, 2, 3, "foo"));
+  list.add(s_array, make_packed_array(1, 2, 3, "foo"));
 
   CREATE_MEMCACHED();
   for (ArrayIter iter(list); iter; ++iter) {

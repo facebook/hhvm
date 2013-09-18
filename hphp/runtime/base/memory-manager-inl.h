@@ -28,23 +28,39 @@ static_assert(
   "Size-specified smart malloc functions assume this"
 );
 
+//////////////////////////////////////////////////////////////////////
+
+template<class SizeT> ALWAYS_INLINE
+SizeT MemoryManager::debugAddExtra(SizeT sz) {
+  if (!debug) return sz;
+  return sz + sizeof(DebugHeader);
+}
+
+template<class SizeT> ALWAYS_INLINE
+SizeT MemoryManager::debugRemoveExtra(SizeT sz) {
+  if (!debug) return sz;
+  return sz - sizeof(DebugHeader);
+}
+
+#ifndef DEBUG
+
+ALWAYS_INLINE void* MemoryManager::debugPostAllocate(void* p, size_t, size_t) {
+  return p;
+}
+
+ALWAYS_INLINE void* MemoryManager::debugPreFree(void* p, size_t, size_t) {
+  return p;
+}
+
+#endif
+
+//////////////////////////////////////////////////////////////////////
+
 inline uint32_t MemoryManager::smartSizeClass(uint32_t reqBytes) {
   assert(reqBytes <= kMaxSmartSize);
   auto const ret = (reqBytes + kSmartSizeMask) & ~kSmartSizeMask;
   assert(ret <= kMaxSmartSize);
   return ret;
-}
-
-// allocate nbytes from the current slab, aligned to 16-bytes
-inline void* MemoryManager::slabAlloc(size_t nbytes) {
-  const size_t kAlignMask = 15;
-  assert((nbytes & 7) == 0);
-  char* ptr = (char*)(uintptr_t(m_front + kAlignMask) & ~kAlignMask);
-  if (ptr + nbytes <= m_limit) {
-    m_front = ptr + nbytes;
-    return ptr;
-  }
-  return newSlab(nbytes);
 }
 
 inline void* MemoryManager::smartMallocSize(uint32_t bytes) {
@@ -59,12 +75,12 @@ inline void* MemoryManager::smartMallocSize(uint32_t bytes) {
   assert(i < kNumSizes);
   void* p = m_sizeUntrackedFree[i].maybePop();
   if (UNLIKELY(p == nullptr)) {
-    p = slabAlloc(MemoryManager::smartSizeClass(bytes));
+    p = slabAlloc(debugAddExtra(MemoryManager::smartSizeClass(bytes)));
   }
   assert(reinterpret_cast<uintptr_t>(p) % 16 == 0);
 
   FTRACE(1, "smartMallocSize: {} -> {}\n", bytes, p);
-  return p;
+  return debugPostAllocate(p, bytes, bytes);
 }
 
 inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
@@ -74,28 +90,36 @@ inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
 
   unsigned i = (bytes - 1) >> kLgSizeQuantum;
   assert(i < kNumSizes);
-  assert(memset(ptr, kSmartFreeFill, bytes));
-  m_sizeUntrackedFree[i].push(ptr);
+  m_sizeUntrackedFree[i].push(debugPreFree(ptr, bytes, bytes));
   m_stats.usage -= bytes;
 
   FTRACE(1, "smartFreeSize: {} ({} bytes)\n", ptr, bytes);
 }
 
 ALWAYS_INLINE
-void* MemoryManager::smartMallocSizeBig(size_t bytes) {
+std::pair<void*,size_t> MemoryManager::smartMallocSizeBig(size_t bytes) {
+#ifdef USE_JEMALLOC
+  void* ptr;
+  size_t sz;
+  auto const retptr = smartMallocSizeBigHelper(ptr, sz, bytes);
+  FTRACE(1, "smartMallocBig: {} ({} requested, {} usable)\n",
+         retptr, bytes, sz);
+  return std::make_pair(retptr, sz);
+#else
   m_stats.usage += bytes;
   // TODO(#2831116): we only add sizeof(SmallNode) so smartMallocBig
   // can subtract it.
-  auto const ptr = smartMallocBig(bytes + sizeof(SmallNode));
-  FTRACE(1, "smartMallocBig: {} ({} bytes)\n", ptr, bytes);
-  return ptr;
+  auto const ret = smartMallocBig(debugAddExtra(bytes + sizeof(SmallNode)));
+  FTRACE(1, "smartMallocBig: {} ({} bytes)\n", ret, bytes);
+  return std::make_pair(debugPostAllocate(ret, bytes, bytes), bytes);
+#endif
 }
 
 ALWAYS_INLINE
 void MemoryManager::smartFreeSizeBig(void* vp, size_t bytes) {
   m_stats.usage -= bytes;
   FTRACE(1, "smartFreeBig: {} ({} bytes)\n", vp, bytes);
-  return smartFreeBig(static_cast<SweepNode*>(vp) - 1);
+  return smartFreeBig(static_cast<SweepNode*>(debugPreFree(vp, bytes, 0)) - 1);
 }
 
 //////////////////////////////////////////////////////////////////////

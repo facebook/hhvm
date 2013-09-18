@@ -121,7 +121,7 @@ Variant UserFile::invoke(const Func *func, CStrRef name,
     {
       Variant ret;
       g_vmContext->invokeFunc(ret.asTypedValue(), func,
-                              CREATE_VECTOR2(name, args), m_obj.get());
+                              make_packed_array(name, args), m_obj.get());
       success = true;
       return ret;
     }
@@ -154,7 +154,7 @@ bool UserFile::open(CStrRef filename, CStrRef mode) {
   // bool stream_open($path, $mode, $options, &$opened_path)
   bool success = false;
   Variant opened_path;
-  Variant ret = invoke(m_StreamOpen, s_stream_open, CREATE_VECTOR4(
+  Variant ret = invoke(m_StreamOpen, s_stream_open, make_packed_array(
                        filename, mode, m_options, ref(opened_path)), success);
   if (success && (ret.toBoolean() == true)) {
     return true;
@@ -181,7 +181,7 @@ int64_t UserFile::readImpl(char *buffer, int64_t length) {
   // String stread_read($count)
   bool success = false;
   String str = invoke(m_StreamRead, s_stream_read,
-                      CREATE_VECTOR1(length), success);
+                      make_packed_array(length), success);
   if (!success) {
     raise_warning("%s::stream_read is not implemented",
                   m_cls->name()->data());
@@ -205,7 +205,7 @@ int64_t UserFile::writeImpl(const char *buffer, int64_t length) {
   // stream_write($data)
   bool success = false;
   int64_t didWrite = invoke(m_StreamWrite, s_stream_write,
-                          CREATE_VECTOR1(String(buffer, length, CopyString)),
+                          make_packed_array(String(buffer, length, CopyString)),
                           success).toInt64();
   if (!success) {
     raise_warning("%s::stream_write is not implemented",
@@ -230,7 +230,7 @@ bool UserFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   // bool stream_seek($offset, $whence)
   bool success = false;
   bool sought  = invoke(m_StreamSeek, s_stream_seek,
-                        CREATE_VECTOR2(offset, whence), success).toBoolean();
+                        make_packed_array(offset, whence), success).toBoolean();
   return success ? sought : false;
 }
 
@@ -285,7 +285,7 @@ bool UserFile::lock(int operation, bool &wouldBlock) {
   // bool stream_lock(int $operation)
   bool success = false;
   Variant ret = invoke(m_StreamLock, s_stream_lock,
-                       CREATE_VECTOR1(op), success);
+                       make_packed_array(op), success);
   if (!success) {
     if (operation) {
       raise_warning("%s::stream_lock is not implemented!",

@@ -1695,7 +1695,7 @@ Variant f_imap_utf8(CStrRef mime_encoded_text) {
   if (src.data && src.data != dest.data) {
     free(src.data);
   }
-  return String((const char*)dest.data, dest.size, AttachString);
+  return String(reinterpret_cast<char*>(dest.data), dest.size, AttachString);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

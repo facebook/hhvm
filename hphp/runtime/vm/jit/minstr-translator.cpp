@@ -360,11 +360,14 @@ void HhbcTranslator::MInstrTranslator::checkMIState() {
   const bool simpleCollectionGet = isCGetM && singleElem &&
     baseType.strictSubtypeOf(Type::Obj) &&
     isOptimizableCollectionClass(baseType.getClass());
+  const bool simpleStringOp = (isCGetM || isIssetM) && isSingle &&
+    isSimpleBase() && mcodeMaybeArrayIntKey(m_ni.immVecM[0]) &&
+    baseType.subtypeOf(Type::Str);
 
   if (simpleProp || singlePropSet ||
       simpleArraySet || simpleArrayGet || simpleCollectionGet ||
       simpleArrayUnset || badUnset || simpleCollectionIsset ||
-      simpleArrayIsset) {
+      simpleArrayIsset || simpleStringOp) {
     setNoMIState();
     if (simpleCollectionGet || simpleCollectionIsset) {
       m_tb.constrainValue(baseVal, DataTypeSpecialized);
@@ -437,8 +440,8 @@ void HhbcTranslator::MInstrTranslator::emitMTrace() {
   }
   shape << '>';
   gen(IncStatGrouped,
-           cns(StringData::GetStaticString("vector instructions")),
-           cns(StringData::GetStaticString(shape.str())),
+           cns(makeStaticString("vector instructions")),
+           cns(makeStaticString(shape.str())),
            cns(1));
 }
 
@@ -629,6 +632,16 @@ HhbcTranslator::MInstrTranslator::simpleCollectionOp() {
           return SimpleOp::Array;
         }
       }
+    } else if (baseType.subtypeOf(Type::Str) &&
+               mcodeMaybeArrayIntKey(m_ni.immVecM[0])) {
+      SSATmp* key = getInput(m_mii.valCount() + 1);
+      if (key->isA(Type::Int)) {
+        // Don't bother with SetM on strings, because profile data
+        // shows it basically never happens.
+        if (op == OpCGetM || op == OpIssetM) {
+          return SimpleOp::String;
+        }
+      }
     } else if (baseType.strictSubtypeOf(Type::Obj)) {
       const Class* klass = baseType.getClass();
       if (klass == c_Vector::s_cls ||
@@ -660,6 +673,7 @@ void HhbcTranslator::MInstrTranslator::constrainSimpleOpBase() {
   switch (type) {
     case SimpleOp::None:
     case SimpleOp::Array:
+    case SimpleOp::String:
       return;
 
     case SimpleOp::Vector:
@@ -1069,7 +1083,7 @@ void HhbcTranslator::MInstrTranslator::emitElem() {
       m_ht.exceptionBarrier();
       gen(
         RaiseError,
-        cns(StringData::GetStaticString(Strings::OP_NOT_SUPPORTED_STRING))
+        cns(makeStaticString(Strings::OP_NOT_SUPPORTED_STRING))
       );
       m_base = uninit;
       return;
@@ -1644,6 +1658,21 @@ void HhbcTranslator::MInstrTranslator::emitArrayGet(SSATmp* key) {
 }
 #undef HELPER_TABLE
 
+namespace MInstrHelpers {
+StringData* stringGetI(StringData* str, uint64_t x) {
+  if (LIKELY(x < str->size())) {
+    return str->getChar(x);
+  }
+  raise_warning("Out of bounds");
+  return makeStaticString("");
+}
+}
+
+void HhbcTranslator::MInstrTranslator::emitStringGet(SSATmp* key) {
+  assert(key->isA(Type::Int));
+  m_result = gen(StringGet, cns((TCA)MInstrHelpers::stringGetI), m_base, key);
+}
+
 void HhbcTranslator::MInstrTranslator::emitVectorGet(SSATmp* key) {
   assert(key->isA(Type::Int));
   if (key->isConst() && key->getValInt() < 0) {
@@ -1787,6 +1816,9 @@ void HhbcTranslator::MInstrTranslator::emitCGetElem() {
   switch (simpleOpType) {
   case SimpleOp::Array:
     emitArrayGet(key);
+    break;
+  case SimpleOp::String:
+    emitStringGet(key);
     break;
   case SimpleOp::Vector:
     emitVectorGet(key);
@@ -1940,6 +1972,11 @@ void HhbcTranslator::MInstrTranslator::emitArrayIsset() {
 }
 #undef HELPER_TABLE
 
+void HhbcTranslator::MInstrTranslator::emitStringIsset() {
+  auto key = getKey();
+  m_result = gen(StringIsset, m_base, key);
+}
+
 namespace MInstrHelpers {
 uint64_t vectorIsset(c_Vector* vec, int64_t index) {
   return vec->get(index) != nullptr;
@@ -2039,6 +2076,9 @@ void HhbcTranslator::MInstrTranslator::emitIssetElem() {
   switch (simpleOpType) {
   case SimpleOp::Array:
     emitArrayIsset();
+    break;
+  case SimpleOp::String:
+    emitStringIsset();
     break;
   case SimpleOp::Vector:
     emitVectorIsset();
@@ -2342,6 +2382,9 @@ void HhbcTranslator::MInstrTranslator::emitSetElem() {
   case SimpleOp::Array:
     emitArraySet(key, value);
     break;
+  case SimpleOp::String:
+    not_reached();
+    break;
   case SimpleOp::Vector:
     emitVectorSet(key, value);
     break;
@@ -2502,7 +2545,7 @@ void HhbcTranslator::MInstrTranslator::emitUnsetElem() {
   if (baseType.subtypeOf(Type::Str)) {
     m_ht.exceptionBarrier();
     gen(RaiseError,
-             cns(StringData::GetStaticString(Strings::CANT_UNSET_STRING)));
+             cns(makeStaticString(Strings::CANT_UNSET_STRING)));
     return;
   }
   if (baseType.not(Type::Arr | Type::Obj)) {

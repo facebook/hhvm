@@ -305,7 +305,7 @@ Variant f_filter_var(CVarRef variable, int64_t filter /* = 516 */,
   Variant ret;
   FAIL_IF(!filter_var(ret, variable, filter, options));
   if (filter_flags & k_FILTER_FORCE_ARRAY && !ret.isArray()) {
-    ret = CREATE_VECTOR1(ret);
+    ret = make_packed_array(ret);
   }
   return ret;
 }

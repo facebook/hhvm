@@ -25,7 +25,15 @@
 BEGIN_EXTERN_C()
 
 ZEND_API inline void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC) {
-  HPHP::tvRefcountedDecRef(zvalue);
+  if (!IS_REFCOUNTED_TYPE(zvalue->tv()->m_type)) {
+    return;
+  }
+  bool willRelease = tvDecRefWillRelease(zvalue->tv());
+  tvDecRefHelper(zvalue->tv()->m_type, zvalue->tv()->m_data.num);
+  if (willRelease) {
+    zvalue->tv()->m_type = HPHP::KindOfNull;
+    zvalue->tv()->m_data.num = 0;
+  }
 }
 
 zend_always_inline void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
@@ -34,7 +42,16 @@ zend_always_inline void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 }
 
 ZEND_API inline void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC) {
-  HPHP::tvRefcountedIncRef(zvalue);
+  if (HPHP::IS_STRING_TYPE(zvalue->tv()->m_type)) {
+    zvalue->tv()->m_data.pstr =
+      HPHP::StringData::Make(zvalue->tv()->m_data.pstr, HPHP::CopyString);
+    zvalue->tv()->m_data.pstr->incRefCount();
+  } else if (zvalue->tv()->m_type == HPHP::KindOfArray) {
+    zvalue->tv()->m_data.parr = zvalue->tv()->m_data.parr->copy();
+    zvalue->tv()->m_data.parr->incRefCount();
+  } else if (IS_REFCOUNTED_TYPE(zvalue->tv()->m_type)) {
+    zvalue->tv()->m_data.pstr->incRefCount();
+  }
 }
 
 zend_always_inline void _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
@@ -43,14 +60,14 @@ zend_always_inline void _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 }
 
 ZEND_API inline void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC) {
-  _zval_dtor(*zval_ptr);
+  HPHP::decRefRef(*zval_ptr);
 }
 #define zval_copy_ctor(zvalue) _zval_copy_ctor((zvalue) ZEND_FILE_LINE_CC)
 #define zval_dtor(zvalue) _zval_dtor((zvalue) ZEND_FILE_LINE_CC)
 #define zval_ptr_dtor(zval_ptr) _zval_ptr_dtor((zval_ptr) ZEND_FILE_LINE_CC)
 
-ZEND_API inline void zval_add_ref(zval *p) {
-  HPHP::tvRefcountedIncRef(p);
+ZEND_API inline void zval_add_ref(zval **p) {
+  (*p)->zAddRef();
 }
 
 END_EXTERN_C()

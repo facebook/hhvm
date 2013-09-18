@@ -437,7 +437,7 @@ String c_UConverter::doConvert(CStrRef str,
   // Explicitly include the space for a \u0000 UChar since String
   // only allocates one extra byte (not the 2 needed)
   String tempStr(sizeof(UChar) * (temp_len + 1), ReserveString);
-  UChar *temp = (UChar*) tempStr.mutableSlice().ptr;
+  UChar *temp = (UChar*) tempStr.bufferSlice().ptr;
 
   error = U_ZERO_ERROR;
   temp_len = ucnv_toUChars(fromCnv, temp, temp_len,
@@ -457,7 +457,7 @@ String c_UConverter::doConvert(CStrRef str,
     return uninit_null();
   }
   String destStr(dest_len, ReserveString);
-  char *dest = (char*) destStr.mutableSlice().ptr;
+  char *dest = (char*) destStr.bufferSlice().ptr;
 
   error = U_ZERO_ERROR;
   dest_len = ucnv_fromUChars(toCnv, dest, dest_len,

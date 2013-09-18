@@ -604,7 +604,7 @@ struct AsmState : private boost::noncopyable {
     for (Label::CatchesMap::const_iterator it = label.ehCatches.begin();
         it != label.ehCatches.end();
         ++it) {
-      Id exId = ue->mergeLitstr(StringData::GetStaticString(it->first));
+      Id exId = ue->mergeLitstr(makeStaticString(it->first));
       for (std::vector<size_t>::const_iterator idx_it = it->second.begin();
           idx_it != it->second.end();
           ++idx_it) {
@@ -662,7 +662,7 @@ struct AsmState : private boost::noncopyable {
       error("local variables must be prefixed with $");
     }
 
-    const StringData* sd = StringData::GetStaticString(name.c_str() + 1);
+    const StringData* sd = makeStaticString(name.c_str() + 1);
     fe->allocVarId(sd);
     return fe->lookupVarId(sd);
   }
@@ -788,7 +788,7 @@ const StringData* read_litstr(AsmState& as) {
   if (!as.in.readQuotedStr(strVal)) {
     as.error("expected quoted string literal");
   }
-  return StringData::GetStaticString(strVal);
+  return makeStaticString(strVal);
 }
 
 ArrayData* read_litarray(AsmState& as) {
@@ -958,7 +958,7 @@ SSwitchJmpVector read_sswitch_jmpvector(AsmState& as) {
     as.in.readword(defLabel);
 
     ret.push_back(std::make_pair(
-      as.ue->mergeLitstr(StringData::GetStaticString(caseStr)),
+      as.ue->mergeLitstr(makeStaticString(caseStr)),
       defLabel
     ));
 
@@ -988,7 +988,7 @@ OpcodeParserMap opcode_parsers;
 #define IMM_THREE(t1, t2, t3) IMM_##t1; IMM_##t2; IMM_##t3
 #define IMM_FOUR(t1, t2, t3, t4) IMM_##t1; IMM_##t2; IMM_##t3; IMM_##t4
 
-// FCall and NewTuple need to know the the first imm do POP_*MANY.
+// FCall and NewPackedArray need to know the the first imm do POP_*MANY.
 #define IMM_IVA do {                            \
     int imm = read_opcode_arg<int64_t>(as);     \
     as.ue->emitIVA(imm);                        \
@@ -1483,7 +1483,7 @@ void parse_parameter_list(AsmState& as) {
       ch = as.in.getc();
       if (ch == '(') {
         String str = parse_long_string(as);
-        param.setPhpCode(StringData::GetStaticString(str));
+        param.setPhpCode(makeStaticString(str));
         TypedValue tv;
         tvWriteUninit(&tv);
         if (str.size() == 4) {
@@ -1508,7 +1508,7 @@ void parse_parameter_list(AsmState& as) {
       }
     }
 
-    as.fe->appendParam(StringData::GetStaticString(name), param);
+    as.fe->appendParam(makeStaticString(name), param);
 
     if (ch == ')') break;
     if (ch != ',') as.error("expected , between parameter names");
@@ -1531,7 +1531,7 @@ void parse_function(AsmState& as) {
     as.error(".function must have a name");
   }
 
-  as.fe = as.ue->newFuncEmitter(StringData::GetStaticString(name));
+  as.fe = as.ue->newFuncEmitter(makeStaticString(name));
   as.fe->init(as.in.getLineNumber(), as.in.getLineNumber() + 1 /* XXX */,
               as.ue->bcPos(), attrs, true, 0);
 
@@ -1555,7 +1555,7 @@ void parse_method(AsmState& as) {
     as.error(".method requires a method name");
   }
 
-  as.fe = as.ue->newMethodEmitter(StringData::GetStaticString(name), as.pce);
+  as.fe = as.ue->newMethodEmitter(makeStaticString(name), as.pce);
   as.pce->addMethod(as.fe);
   as.fe->init(as.in.getLineNumber(), as.in.getLineNumber() + 1 /* XXX */,
               as.ue->bcPos(), attrs, true, 0);
@@ -1595,7 +1595,7 @@ TypedValue parse_member_tv_initializer(AsmState& as) {
 
     tvAsVariant(&tvInit) = parse_php_serialized(as);
     if (IS_STRING_TYPE(tvInit.m_type)) {
-      tvInit.m_data.pstr = StringData::GetStaticString(tvInit.m_data.pstr);
+      tvInit.m_data.pstr = makeStaticString(tvInit.m_data.pstr);
       as.ue->mergeLitstr(tvInit.m_data.pstr);
     } else if (IS_ARRAY_TYPE(tvInit.m_type)) {
       tvInit.m_data.parr = ArrayData::GetScalarArray(tvInit.m_data.parr);
@@ -1630,7 +1630,7 @@ void parse_property(AsmState& as) {
   }
 
   TypedValue tvInit = parse_member_tv_initializer(as);
-  as.pce->addProperty(StringData::GetStaticString(name),
+  as.pce->addProperty(makeStaticString(name),
                       attrs, empty_string.get(),
                       empty_string.get(),
                       &tvInit,
@@ -1650,7 +1650,7 @@ void parse_constant(AsmState& as) {
   }
 
   TypedValue tvInit = parse_member_tv_initializer(as);
-  as.pce->addConstant(StringData::GetStaticString(name),
+  as.pce->addConstant(makeStaticString(name),
                       empty_string.get(), &tvInit,
                       empty_string.get());
 }
@@ -1665,7 +1665,7 @@ void parse_default_ctor(AsmState& as) {
   assert(!as.fe && as.pce);
 
   as.fe = as.ue->newMethodEmitter(
-    StringData::GetStaticString("86ctor"), as.pce);
+    makeStaticString("86ctor"), as.pce);
   as.pce->addMethod(as.fe);
   as.fe->init(as.in.getLineNumber(), as.in.getLineNumber(),
               as.ue->bcPos(), AttrPublic, true, 0);
@@ -1699,7 +1699,7 @@ void parse_use(AsmState& as) {
   }
 
   for (size_t i = 0; i < usedTraits.size(); ++i) {
-    as.pce->addUsedTrait(StringData::GetStaticString(usedTraits[i]));
+    as.pce->addUsedTrait(makeStaticString(usedTraits[i]));
   }
   as.in.skipWhitespace();
   if (as.in.peek() != '{') {
@@ -1747,19 +1747,19 @@ void parse_use(AsmState& as) {
       }
 
       as.pce->addTraitAliasRule(PreClass::TraitAliasRule(
-        StringData::GetStaticString(traitName),
-        StringData::GetStaticString(identifier),
-        StringData::GetStaticString(alias),
+        makeStaticString(traitName),
+        makeStaticString(identifier),
+        makeStaticString(alias),
         attrs));
     } else if (as.in.tryConsume("insteadof")) {
       PreClass::TraitPrecRule precRule(
-        StringData::GetStaticString(traitName),
-        StringData::GetStaticString(identifier));
+        makeStaticString(traitName),
+        makeStaticString(identifier));
 
       bool addedOtherTraits = false;
       std::string whom;
       while (as.in.readword(whom)) {
-        precRule.addOtherTraitName(StringData::GetStaticString(whom));
+        precRule.addOtherTraitName(makeStaticString(whom));
         addedOtherTraits = true;
       }
       if (!addedOtherTraits) {
@@ -1847,16 +1847,16 @@ void parse_class(AsmState& as) {
     as.in.expect(')');
   }
 
-  as.pce = as.ue->newPreClassEmitter(StringData::GetStaticString(name),
+  as.pce = as.ue->newPreClassEmitter(makeStaticString(name),
                                      PreClass::MaybeHoistable);
   as.pce->init(as.in.getLineNumber(),
                as.in.getLineNumber() + 1, // XXX
                as.ue->bcPos(),
                attrs,
-               StringData::GetStaticString(parentName),
+               makeStaticString(parentName),
                empty_string.get());
   for (size_t i = 0; i < ifaces.size(); ++i) {
-    as.pce->addInterface(StringData::GetStaticString(ifaces[i]));
+    as.pce->addInterface(makeStaticString(ifaces[i]));
   }
 
   as.in.expectWs('{');
@@ -1956,7 +1956,7 @@ void parse(AsmState& as) {
 UnitEmitter* assemble_string(const char*code, int codeLen,
                              const char* filename, const MD5& md5) {
   std::unique_ptr<UnitEmitter> ue(new UnitEmitter(md5));
-  StringData* sd = StringData::GetStaticString(filename);
+  StringData* sd = makeStaticString(filename);
   ue->setFilepath(sd);
 
   try {
@@ -1969,7 +1969,7 @@ UnitEmitter* assemble_string(const char*code, int codeLen,
     ue->setFilepath(sd);
     ue->initMain(1, 1);
     ue->emitOp(OpString);
-    ue->emitInt32(ue->mergeLitstr(StringData::GetStaticString(e.what())));
+    ue->emitInt32(ue->mergeLitstr(makeStaticString(e.what())));
     ue->emitOp(OpFatal);
     FuncEmitter* fe = ue->getMain();
     fe->setMaxStackCells(kNumActRecCells + 1);

@@ -24,11 +24,7 @@
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/util/compatibility.h"
-#ifdef HHVM_FBMAKE
 #include "hphp/system/constants.h"
-#else
-#include "system/constants.h"
-#endif
 ///////////////////////////////////////////////////////////////////////////////
 
 #endif // incl_HPHP_BASE_INCLUDES_H_

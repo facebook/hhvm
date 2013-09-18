@@ -85,8 +85,8 @@ void CmdVariable::PrintVariable(DebuggerClient &client, CStrRef varName) {
         if (client.ask("There are %d more characters. Continue? [y/N]", excess)
             == 'y') {
           client.output("%s", value.substr(charCount).data());
-          client.tutorial("You can use 'set cc = n' to increase the character"
-              " limit. 'set cc = -1' will remove the limit.");
+          client.tutorial("You can use 'set cc n' to increase the character"
+              " limit. 'set cc -1' will remove the limit.");
         }
       }
     }

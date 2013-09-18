@@ -5,14 +5,12 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKe
     return FAILURE;
   }
   assert(arKey[nKeyLength - 1] == '\0');
-  // TODO Task #2893280: We shouldn't make a static string here, we should
-  // just use a regular non-static StringData
-  auto key = HPHP::makeStaticString(arKey, nKeyLength - 1);
+  HPHP::String key(arKey, nKeyLength - 1, HPHP::CopyString);
 
-  if ((flag & HASH_ADD) && ht->exists(key)) {
+  if ((flag & HASH_ADD) && ht->exists(key.get())) {
     return FAILURE;
   }
-  ht->zSet(key, (*(zval**)pData));
+  ht->zSet(key.get(), (*(zval**)pData));
   return SUCCESS;
 }
 
@@ -35,10 +33,8 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint n
     ht->remove(h, false);
   } else {
     assert(arKey[nKeyLength - 1] == '\0');
-    // TODO Task #2893280: We shouldn't make a static string here, we should
-    // just use a regular non-static StringData
-    auto key = HPHP::makeStaticString(arKey, nKeyLength - 1);
-    ht->remove(key, false);
+    HPHP::String key(arKey, nKeyLength - 1, HPHP::CopyString);
+    ht->remove(key.get(), false);
   }
   return SUCCESS;
 }
@@ -61,10 +57,8 @@ ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLen
     return FAILURE;
   }
   assert(arKey[nKeyLength - 1] == '\0');
-  // TODO Task #2893280: We shouldn't make a static string here, we should
-  // just use a regular non-static StringData
-  auto key = HPHP::makeStaticString(arKey, nKeyLength - 1);
-  auto val = ht->nvGet(key);
+  HPHP::String key(arKey, nKeyLength - 1, HPHP::CopyString);
+  auto val = ht->nvGet(key.get());
   if (!val) {
     return FAILURE;
   }

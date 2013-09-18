@@ -564,7 +564,7 @@ inline static void appendstring(char **buffer, int *pos, int *size,
                                 const char *add,
                                 int min_width, int max_width, char padding,
                                 int alignment, int len, int neg, int expprec,
-                                int always_sign) {
+                                int always_sign, bool nullterm = true) {
   register int npad;
   int req_size;
   int copy_len;
@@ -576,7 +576,10 @@ inline static void appendstring(char **buffer, int *pos, int *size,
     npad = 0;
   }
 
-  req_size = *pos + (min_width > copy_len ? min_width : copy_len) + 1;
+  req_size = *pos + (min_width > copy_len ? min_width : copy_len);
+  if (nullterm) {
+    req_size += 1;
+  }
 
   if (req_size > *size) {
     while (req_size > *size) {
@@ -595,7 +598,7 @@ inline static void appendstring(char **buffer, int *pos, int *size,
       (*buffer)[(*pos)++] = padding;
     }
   }
-  memcpy(&(*buffer)[*pos], add, copy_len + 1);
+  memcpy(&(*buffer)[*pos], add, nullterm ? copy_len + 1 : copy_len);
   *pos += copy_len;
   if (alignment == ALIGN_LEFT) {
     while (npad--) {
@@ -1565,9 +1568,10 @@ fmt_error:
         }
       }
       /*
-       * Print the string s.
+       * Print the (for now) non-null terminated string s.
        */
-      appendstring(&result, &outpos, &size, s, 0, 0, ' ', 0, s_len, 0, 0, 0);
+      appendstring(&result, &outpos, &size, s, 0, 0, ' ', 0, s_len, 0, 0, 0,
+                   false);
 
       if (adjust_width && adjust == LEFT && min_width > s_len) {
         for (int i = 0; i < min_width - s_len; i++) {
@@ -1578,6 +1582,10 @@ fmt_error:
 skip_output:
     fmt++;
   }
+  /*
+   * Add the terminating null here since it wasn't added incrementally above
+   * once the whole string has been composed.
+   */
   result[outpos] = NUL;
   *outbuf = result;
   return outpos;

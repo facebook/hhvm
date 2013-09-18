@@ -1071,7 +1071,7 @@ void c_SimpleXMLElement::t_offsetset(CVarRef index, CVarRef newvalue) {
     t_offsetunset(index);
   }
 
-  if (m_node == nullptr || m_is_text) {
+  if (m_node == nullptr) {
     raise_error("cannot create attribute on this node");
     return;
   }

@@ -50,28 +50,28 @@ static void stats_on_delete(StringData* key, const StoreValue* sval, bool exp) {
   }
 }
 static bool check_key_prefix(const std::vector<std::string>& list,
-                             const char *key) {
+                             const char *key, size_t keyLen) {
   for (unsigned int i = 0; i < list.size(); ++i) {
     const char *prefix = list[i].c_str();
-    int len = list[i].size();
-    if (memcmp(key, prefix, len) == 0) {
-      // Skip the size calculation.
+    size_t prefixLen = list[i].size();
+    if (keyLen >= prefixLen && memcmp(key, prefix, prefixLen) == 0) {
       return true;
     }
   }
   return false;
 }
-static bool check_skip(const char *key) {
-  return check_key_prefix(RuntimeOption::APCSizeSkipPrefix, key);
+static bool check_skip(const char *key, size_t keyLen) {
+  return check_key_prefix(RuntimeOption::APCSizeSkipPrefix, key, keyLen);
 }
-static bool check_noTTL(const char *key) {
-  return check_key_prefix(apcExtension::NoTTLPrefix, key);
+static bool check_noTTL(const char *key, size_t keyLen) {
+  return check_key_prefix(apcExtension::NoTTLPrefix, key, keyLen);
 }
 
 // stats_on_update should be called before updating sval with new value
 static void stats_on_update(const StringData* key, const StoreValue* sval,
                             const SharedVariant* svar, int64_t ttl) {
-  if (RuntimeOption::EnableAPCSizeStats && !check_skip(key->data())) {
+  if (RuntimeOption::EnableAPCSizeStats &&
+      !check_skip(key->data(), key->size())) {
     int32_t newSize = svar->getSpaceUsage();
     SharedStoreStats::updateDirect(sval->size, newSize);
     sval->size = newSize;
@@ -86,7 +86,8 @@ static void stats_on_update(const StringData* key, const StoreValue* sval,
 // stats_on_add should be called after writing sval with the value
 static void stats_on_add(const StringData* key, const StoreValue* sval,
                          int64_t ttl, bool prime, bool file) {
-  if (RuntimeOption::EnableAPCSizeStats && !check_skip(key->data())) {
+  if (RuntimeOption::EnableAPCSizeStats &&
+      !check_skip(key->data(), key->size())) {
     int32_t size = sval->var->getSpaceUsage();
     SharedStoreStats::addDirect(key->size(), size, prime, file);
     sval->size = size;
@@ -482,7 +483,7 @@ bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef value, int64_t ttl,
       }
     }
     int64_t adjustedTtl = adjust_ttl(ttl, overwritePrime);
-    if (check_noTTL(key.data())) {
+    if (check_noTTL(key.data(), key.size())) {
       adjustedTtl = 0;
     }
     sval->set(svar, adjustedTtl);

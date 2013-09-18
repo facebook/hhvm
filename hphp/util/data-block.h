@@ -18,6 +18,7 @@
 #define incl_HPHP_DATA_BLOCK_H
 
 #include <cstdint>
+#include <cstring>
 #include <sys/mman.h>
 
 #include "hphp/util/assertions.h"

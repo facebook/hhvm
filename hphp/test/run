@@ -235,7 +235,7 @@ function find_file($test, $name) {
 }
 
 function find_file_for_dir($dir, $name) {
-  while (($dir !== '.') && is_dir($dir)) {
+  while (($dir !== '.' && $dir !== '/') && is_dir($dir)) {
     $file = "$dir/$name";
     if (is_file($file)) {
       return $file;
@@ -260,15 +260,16 @@ function find_debug_config($test, $name) {
 function mode_cmd($options) {
   $repo_args = "-vRepo.Local.Mode=-- -vRepo.Central.Path=".verify_hhbc();
   $jit_args = "$repo_args -vEval.Jit=true";
-  $mode = idx($options, 'mode');
+  $mode = idx($options, 'mode', '');
   switch ($mode) {
     case '':
     case 'jit':
+    case 'automain':
       return "$jit_args";
     case 'interp':
       return "$repo_args -vEval.Jit=0";
     default:
-      error("-m must be one of jit | interp. Got: '$mode'");
+      error("-m must be one of jit | interp | automain. Got: '$mode'");
   }
 }
 
@@ -282,10 +283,15 @@ function hhvm_path() {
 
 // Return the command and the env to run it in.
 function hhvm_cmd($options, $test, $test_run = null) {
+  $use_automain = false;
   if ($test_run === null) {
-    $test_run = $test;
+    $use_automain = 'automain' === idx($options, 'mode')
+      && 'php' === pathinfo($test, PATHINFO_EXTENSION);
+    $test_run = $use_automain
+      ? __DIR__.'/pseudomain_wrapper.php'
+      : $test;
   }
-  $cmd = implode(" ", array(
+  $cmd = implode(' ', array(
     hhvm_path(),
     '--config',
     find_test_ext($test, 'hdf'),
@@ -296,7 +302,8 @@ function hhvm_cmd($options, $test, $test_run = null) {
     extra_args($options),
     '-vResourceLimit.CoreFileSize=0',
     '--file',
-    escapeshellarg($test_run)
+    escapeshellarg($test_run),
+    $use_automain ? escapeshellarg($test) : ''
   ));
   $env = $_ENV;
   $in = find_test_ext($test, 'in');
@@ -472,17 +479,22 @@ function skip_test($options, $test) {
 }
 
 function run_test($options, $test) {
-  list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
-  $hhvm = __DIR__."/../tools/timeout.sh -t 300 $hhvm";
-  $output = "";
 
   if (skip_test($options, $test)) {
     return 'skip';
   }
+  if ('hhas' === pathinfo($test, PATHINFO_EXTENSION)
+      && idx($options, 'mode') === 'interp') {
+    return 'skip';
+  }
+  list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
+
+  $hhvm = __DIR__.'/../tools/timeout.sh -t 300 '.$hhvm;
+  $output = '';
 
   if (isset($options['repo'])) {
-    if (strpos($test, '.hhas') !== false ||
-        strpos($hhvm, '-m debug') != false ||
+    if ($test_ext === 'hhas' ||
+        strpos($hhvm, '-m debug') !== false ||
         file_exists($test.'.norepo')) {
       return 'skip';
     } else {
@@ -503,6 +515,7 @@ function run_test($options, $test) {
     $hhvm_env['TRACE'] = 'printir:1';
     $hhvm_env['HPHP_TRACE_FILE'] = $test . '.log';
   }
+  $pipes = null;
   $process = proc_open("$hhvm 2>&1", $descriptorspec, $pipes, null, $hhvm_env);
   if (!is_resource($process)) {
     file_put_contents("$test.diff", "Couldn't invoke $hhvm");
@@ -661,8 +674,8 @@ function main($argv) {
     print "Running ".count($tests)." tests in $threads threads\n";
   }
 
-  # Try to construct the buckets so the test results are ready in approximately
-  # alphabetical order
+  // Try to construct the buckets so the test results are ready in
+  // approximately alphabetical order
   $test_buckets = array();
   $i = 0;
   foreach ($tests as $test) {
@@ -670,9 +683,9 @@ function main($argv) {
     $i = ($i + 1) % $threads;
   }
 
-  # Spawn off worker threads
+  // Spawn off worker threads
   $children = array();
-  # A poor man's shared memory
+  // A poor man's shared memory
   $bad_test_files = array();
   for ($i = 0; $i < $threads; $i++) {
     $bad_test_file = tempnam('/tmp', 'test-run-');
@@ -687,7 +700,7 @@ function main($argv) {
     }
   }
 
-  # Wait for the kids
+  // Wait for the kids
   $return_value = 0;
   foreach ($children as $child) {
     pcntl_waitpid($child, $status);
@@ -752,7 +765,18 @@ SHIP
       }
 
       print $header_start."Re-run just the failing tests:".$header_end.
-            "$argv[0] ".implode(' ', $failed)."\n";
+            $argv[0].' '.implode(' ', $failed)."\n";
+
+      if (idx($options, 'mode') == 'automain') {
+        print $header_start
+          .'Automain caveat: wrapper script may change semantics'
+          .$header_end;
+        print 'The automain wrapper script ('.__DIR__.'/pseudomain_wrapper.php)'
+          .' may have changed behavior'."\n"
+          .'(e.g. extra frames in backtraces) by moving code from '
+          .'pseudo-main to file top-level and adding a wrapper function.'
+          ."\n";
+      }
     }
   }
 

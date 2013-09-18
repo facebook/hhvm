@@ -1,3 +1,4 @@
+<?php
 class ArrayWrap implements arrayaccess {
   private $x;
   public function __construct($x) {

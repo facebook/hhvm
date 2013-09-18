@@ -49,7 +49,7 @@ class TypedValuePrinter:
         elif v == 0x30:
             return "Tv: %s" % self.val['m_data']['pobj'].dereference()
         elif v == 0x50:
-            return "Ref: %s" % self.val['m_data']['pref'].dereference()
+            return "Tv: %s" % self.val['m_data']['pref'].dereference()
         else:
             return "Type %d" % v
 
@@ -181,21 +181,32 @@ class SmartPtrPrinter:
         self.val = val
 
     def children(self):
-        if self.val['m_px']:
-            return self._iterator(self.val['m_px'],
-                                  self.val['m_px'] + 1)
+        if self._pointer():
+            return self._iterator(self._pointer(), self._pointer() + 1)
         return self._iterator(0, 0)
 
+    def _pointer(self):
+        return self.val['m_px']
+
     def to_string(self):
-        if self.val['m_px']:
-            return "SmartPtr<%s>" % self.val['m_px'].dereference().type.tag
-        return "SmartPtr<%s>(Null)" % self.val['m_px'].dereference().type.tag
+        tag = self._pointer().dereference().type.tag
+        if self._pointer():
+            return "SmartPtr<%s>" % tag
+        return "SmartPtr<%s>(Null)" % tag
+
+class RefDataPrinter:
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        return "Ref: %s" % self.val['m_tv']
 
 dict = {}
 dict[re.compile('^HPHP::TypedValue|HPHP::VM::Cell|HPHP::Variant|HPHP::VarNR$')] = lambda val: TypedValuePrinter(val)
 dict[re.compile('^HPHP::StringData$')] = lambda val: StringDataPrinter(val)
 dict[re.compile('^HPHP::(ArrayData|HphpArray)$')] = lambda val: ArrayDataPrinter(val)
 dict[re.compile('^HPHP::(ObjectData|Instance)$')] = lambda val: ObjectDataPrinter(val)
+dict[re.compile('^HPHP::RefData$')] = lambda val: RefDataPrinter(val)
 dict[re.compile('^HPHP::((Static)?String|Array|Object|SmartPtr<.*>)$')] = lambda val: SmartPtrPrinter(val)
 
 def lookup_function(val):

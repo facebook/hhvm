@@ -1329,15 +1329,6 @@ Array VMExecutionContext::getLocalDefinedVariables(int frame) {
   return ret.toArray();
 }
 
-static Array pack_magic_args(ActRec* ar, int nargs) {
-  PackedArrayInit argInit(nargs);
-  for (int i = 0; i < nargs; ++i) {
-    TypedValue* tv = (TypedValue*)(ar) - (i+1);
-    argInit.append(tvAsCVarRef(tv));
-  }
-  return argInit.toArray();
-}
-
 void VMExecutionContext::shuffleMagicArgs(ActRec* ar) {
   // We need to put this where the first argument is
   StringData* invName = ar->getInvName();
@@ -1347,12 +1338,15 @@ void VMExecutionContext::shuffleMagicArgs(ActRec* ar) {
 
   // We need to make an array containing all the arguments passed by
   // the caller and put it where the second argument is.
-  Array argArray = pack_magic_args(ar, nargs);
+  auto argArray = Array::attach(
+    nargs ? HphpArray::MakePacked(
+              nargs, reinterpret_cast<TypedValue*>(ar) - nargs)
+          : HphpArray::MakeReserve(0)
+  );
 
-  // Remove the arguments from the stack
-  for (int i = 0; i < nargs; ++i) {
-    m_stack.popC();
-  }
+  // Remove the arguments from the stack; they were moved into the
+  // array so we don't need to decref.
+  m_stack.ndiscard(nargs);
 
   // Move invName to where the first argument belongs, no need
   // to incRef/decRef since we are transferring ownership

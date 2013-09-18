@@ -48,6 +48,9 @@ fi
 if [ "$1" = "parser" -o "$1" = "all" ]; then
   [ $VERBOSE -eq 1 ] && echo "Generating parser"
   $HPHP_HOME/hphp/parser/make-parser.sh || exit 1
+  sed -e 's@^#line \([0-9]*\) ".*/\([^/]*\)"$@#line \1 "\2"@' \
+    $HPHP_HOME/hphp/parser/hphp.tab.cpp > \
+    $HPHP_HOME/hphp/compiler/parser/hphp.tab.cpp
 fi
 
 if [ "$1" = "license" -o "$1" = "all" ]; then

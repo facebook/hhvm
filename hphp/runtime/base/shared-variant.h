@@ -168,15 +168,14 @@ private:
   };
 
 #if PACKED_TV
-  uint8_t _typePad;
-  DataType m_type;
   bool m_shouldCache;
+  DataType m_type;
   uint8_t m_flags;
   std::atomic<uint32_t> m_count;
   SharedData m_data;
 #else
   SharedData m_data;
-  uint16_t m_type;
+  DataType m_type;
   bool m_shouldCache;
   uint8_t m_flags;
   std::atomic<uint32_t> m_count;

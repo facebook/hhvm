@@ -25,8 +25,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // definitions
 
-typedef std::conditional<packed_tv, int8_t, int32_t>::type DataTypeInt;
-enum DataType: DataTypeInt {
+enum DataType: int8_t {
   KindOfClass            = -13,
   MinDataType            = -13,
 

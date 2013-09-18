@@ -136,6 +136,7 @@ function get_options($argv) {
     'threads:' => '',
     'args:' => 'a:',
     'log' => 'l',
+    'failure-file:' => '',
   );
   $options = array();
   $files = array();
@@ -750,6 +751,13 @@ SHIP
         implode("\n", array_map(
           function($test) { return 'cat '.$test.'.diff'; },
         $failed))."\n";
+
+      $failing_tests_file = !empty($options['failure-file'])
+        ? $options['failure-file']
+        : tempnam('/tmp', 'test-failures');
+      file_put_contents($failing_tests_file, implode("\n", $failed)."\n");
+      print $header_start.'For xargs, list of failures is available using:'.
+        $header_end.'cat '.$failing_tests_file."\n";
 
       print $header_start."Run these by hand:".$header_end;
 

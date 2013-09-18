@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_IMMUTABLE_MAP_H_
-#define incl_HPHP_IMMUTABLE_MAP_H_
+#ifndef incl_HPHP_IMMUTABLE_ARRAY_H_
+#define incl_HPHP_IMMUTABLE_ARRAY_H_
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/util/lock.h"
@@ -26,14 +26,14 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class SharedVariant;
+
 /**
- * an immutable map is a php-style array that can take strings and
- * ints as keys. the map also stores the order in which the elements
- * are inserted. once an element is added to the map, it can not be
+ * ImmutableArray is a php-style array that can take strings and
+ * ints as keys. We also store the order in which the elements
+ * are inserted. Once an element is added, it can not be
  * removed.
  */
-class ImmutableMap {
-public:
+struct ImmutableArray {
   int indexOf(const StringData* key);
   int indexOf(int64_t key);
 
@@ -56,21 +56,17 @@ public:
   }
 
   size_t getStructSize() {
-    size_t size = sizeof(ImmutableMap) +
+    size_t size = sizeof(ImmutableArray) +
                   sizeof(Bucket) * m.m_num +
                   sizeof(int) * (m.m_capacity_mask + 1);
     return size;
   }
 
-  static ImmutableMap* Create(ArrayData* arr,
-                              bool unserializeObj,
-                              bool& shouldCache);
-  static void Destroy(ImmutableMap* im);
-private:
-  ImmutableMap() {}
-  ~ImmutableMap() {}
-  void add(int pos, SharedVariant *key, SharedVariant *val);
+  static ImmutableArray* Create(ArrayData* arr, bool unserializeObj,
+                                bool& shouldCache);
+  static void Destroy(ImmutableArray* im);
 
+private:
   struct Bucket {
     /** index of the next bucket, or -1 if the end of a chain */
     int next;
@@ -78,10 +74,18 @@ private:
     SharedVariant *key;
     SharedVariant *val;
   };
+
+private:
+  ImmutableArray() {}
+  ~ImmutableArray() {}
+  void add(int pos, SharedVariant *key, SharedVariant *val);
+
   /** index of the beginning of each hash chain */
   int *hash() const { return (int*)(this + 1); }
   /** buckets, stored in index order */
   Bucket* buckets() const { return (Bucket*)(hash() + m.m_capacity_mask + 1); }
+
+private:
   union {
     struct {
       unsigned int m_capacity_mask;
@@ -91,7 +95,29 @@ private:
   };
 };
 
+/*
+ * ImmutablePackedArray is the immutable version of a PackedArray,
+ * i.e. an array with int keys in order 0..size-1.  We only store
+ * the values.
+ */
+struct ImmutablePackedArray {
+  explicit ImmutablePackedArray(size_t size) : m_size(size) {}
+  ~ImmutablePackedArray();
+  SharedVariant** vals() { return (SharedVariant**)(this + 1); }
+  void *operator new(size_t sz, int num) {
+    assert(sz == sizeof(ImmutablePackedArray));
+    return malloc(sizeof(ImmutablePackedArray) + num * sizeof(SharedVariant*));
+  }
+  void operator delete(void* ptr) { free(ptr); }
+  // just to keep the compiler happy; used if the constructor throws
+  void operator delete(void* ptr, int num) { free(ptr); }
+  size_t size() const { return m_size; }
+
+private:
+  size_t const m_size;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif /* incl_HPHP_IMMUTABLE_MAP_H_ */
+#endif /* incl_HPHP_IMMUTABLE_ARRAY_H_ */

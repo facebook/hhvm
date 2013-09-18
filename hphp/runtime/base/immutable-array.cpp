@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/immutable-map.h"
+#include "hphp/runtime/base/immutable-array.h"
 #include "hphp/runtime/base/shared-variant.h"
 #include "hphp/runtime/base/array-iterator.h"
 
@@ -23,15 +23,15 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 HOT_FUNC
-ImmutableMap* ImmutableMap::Create(ArrayData* arr,
-                                   bool unserializeObj,
-                                   bool &shouldCache) {
+ImmutableArray* ImmutableArray::Create(ArrayData* arr,
+                                       bool unserializeObj,
+                                       bool &shouldCache) {
   int num = arr->size();
   int cap = num > 2 ? Util::roundUpToPowerOfTwo(num) : 2;
 
-  ImmutableMap* ret = (ImmutableMap*)malloc(sizeof(ImmutableMap) +
-                                            sizeof(int) * cap +
-                                            sizeof(Bucket) * num);
+  ImmutableArray* ret = (ImmutableArray*)malloc(sizeof(ImmutableArray) +
+                                                sizeof(int) * cap +
+                                                sizeof(Bucket) * num);
 
   ret->m.m_capacity_mask = cap - 1;
   ret->m.m_num = 0;
@@ -56,7 +56,7 @@ ImmutableMap* ImmutableMap::Create(ArrayData* arr,
 }
 
 HOT_FUNC
-void ImmutableMap::Destroy(ImmutableMap* map) {
+void ImmutableArray::Destroy(ImmutableArray* map) {
   Bucket* buckets = map->buckets();
   for (int i = 0; i < map->m.m_num; i++) {
     buckets[i].key->decRef();
@@ -66,7 +66,7 @@ void ImmutableMap::Destroy(ImmutableMap* map) {
 }
 
 HOT_FUNC
-void ImmutableMap::add(int pos, SharedVariant *key, SharedVariant *val) {
+void ImmutableArray::add(int pos, SharedVariant *key, SharedVariant *val) {
   // NOTE: no check on duplication because we assume the original array has no
   // duplication
   Bucket* bucket = buckets() + pos;
@@ -82,7 +82,7 @@ void ImmutableMap::add(int pos, SharedVariant *key, SharedVariant *val) {
 }
 
 HOT_FUNC
-int ImmutableMap::indexOf(const StringData* key) {
+int ImmutableArray::indexOf(const StringData* key) {
   strhash_t h = key->hash();
   int bucket = hash()[h & m.m_capacity_mask];
   Bucket* b = buckets();
@@ -97,7 +97,7 @@ int ImmutableMap::indexOf(const StringData* key) {
 }
 
 HOT_FUNC
-int ImmutableMap::indexOf(int64_t key) {
+int ImmutableArray::indexOf(int64_t key) {
   int bucket = hash()[key & m.m_capacity_mask];
   Bucket* b = buckets();
   while (bucket != -1) {

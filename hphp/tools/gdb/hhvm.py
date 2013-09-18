@@ -26,27 +26,29 @@ class TypedValuePrinter:
     def to_string(self):
         itype = gdb.lookup_type('int')
         v = self.val['m_type'].cast(itype)
-        if v == 0:
+
+        # values from runtime/base/datatype.h
+        if v == 0x00:
             return "Uninit"
-        elif v == 8:
+        elif v == 0x08:
             return "Null"
-        elif v == 9:
+        elif v == 0x09:
             if self.val['m_data']['num'] == 0:
                 return "Tv: false"
             else:
                 return "Tv: true"
-        elif v == 10:
+        elif v == 0x0a:
             return "Tv: %d" % self.val['m_data']['num']
-        elif v == 11:
+        elif v == 0x0b:
             return "Tv: %g" % self.val['m_data']['dbl']
-        elif v == 12 or v == 20:
+        elif v == 0x0c or v == 0x14:
             return "Tv: '%s'" % StringDataVal(self.val['m_data']['pstr'].
                                             dereference())
-        elif v == 32:
+        elif v == 0x20:
             return "Tv: %s" % self.val['m_data']['parr'].dereference()
-        elif v == 64:
+        elif v == 0x30:
             return "Tv: %s" % self.val['m_data']['pobj'].dereference()
-        elif v == 96:
+        elif v == 0x50:
             return "Ref: %s" % self.val['m_data']['pref'].dereference()
         else:
             return "Type %d" % v

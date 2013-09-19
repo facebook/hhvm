@@ -70,6 +70,10 @@ ZEND_API inline void zval_add_ref(zval **p) {
   (*p)->zAddRef();
 }
 
+#define zval_ptr_dtor_wrapper _zval_ptr_dtor
+
 END_EXTERN_C()
+
+#define ZVAL_PTR_DTOR (void (*)(void *)) zval_ptr_dtor_wrapper
 
 #endif

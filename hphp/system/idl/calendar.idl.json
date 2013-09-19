@@ -237,7 +237,7 @@
             ]
         },
         {
-            "name": "FrenchToJD",
+            "name": "frenchtojd",
             "desc": "Converts a date from the French Republican Calendar to a Julian Day Count.\n\nThese routines only convert dates in years 1 through 14 (Gregorian dates 22 September 1792 through 22 September 1806). This more than covers the period when the calendar was in use.",
             "flags": [
                 "ZendCompat",
@@ -266,7 +266,7 @@
             ]
         },
         {
-            "name": "GregorianToJD",
+            "name": "gregoriantojd",
             "desc": "Valid Range for Gregorian Calendar 4714 B.C. to 9999 A.D.\n\nAlthough this function can handle dates all the way back to 4714 B.C., such use may not be meaningful. The Gregorian calendar was not instituted until October 15, 1582 (or October 5, 1582 in the Julian calendar). Some countries did not accept it until much later. For example, Britain converted in 1752, The USSR in 1918 and Greece in 1923. Most European countries used the Julian calendar prior to the Gregorian.",
             "flags": [
                 "ZendCompat",
@@ -295,7 +295,7 @@
             ]
         },
         {
-            "name": "JDDayOfWeek",
+            "name": "jddayofweek",
             "desc": "Returns the day of the week. Can return a string or an integer depending on the mode.",
             "flags": [
                 "ZendCompat",
@@ -319,7 +319,7 @@
             ]
         },
         {
-            "name": "JDMonthName",
+            "name": "jdmonthname",
             "desc": "Returns a string containing a month name. mode tells this function which calendar to convert the Julian Day Count to, and what type of month names are to be returned. Calendar modes Mode Meaning Values 0 Gregorian - abbreviated Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec 1 Gregorian January, February, March, April, May, June, July, August, September, October, November, December 2 Julian - abbreviated Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec 3 Julian January, February, March, April, May, June, July, August, September, October, November, December 4 Jewish Tishri, Heshvan, Kislev, Tevet, Shevat, AdarI, AdarII, Nisan, Iyyar, Sivan, Tammuz, Av, Elul 5 French Republican Vendemiaire, Brumaire, Frimaire, Nivose, Pluviose, Ventose, Germinal, Floreal, Prairial, Messidor, Thermidor, Fructidor, Extra",
             "flags": [
                 "ZendCompat",
@@ -343,7 +343,7 @@
             ]
         },
         {
-            "name": "JDToFrench",
+            "name": "jdtofrench",
             "desc": "Converts a Julian Day Count to the French Republican Calendar.",
             "flags": [
                 "ZendCompat",
@@ -362,7 +362,7 @@
             ]
         },
         {
-            "name": "JDToGregorian",
+            "name": "jdtogregorian",
             "desc": "Converts Julian Day Count to a string containing the Gregorian date in the format of \"month\/day\/year\".",
             "flags": [
                 "ZendCompat",
@@ -410,7 +410,7 @@
             ]
         },
         {
-            "name": "JDToJulian",
+            "name": "jdtojulian",
             "desc": "Converts Julian Day Count to a string containing the Julian Calendar Date in the format of \"month\/day\/year\".",
             "flags": [
                 "ZendCompat",
@@ -448,7 +448,7 @@
             ]
         },
         {
-            "name": "JewishToJD",
+            "name": "jewishtojd",
             "desc": "Although this function can handle dates all the way back to the year 1 (3761 B.C.), such use may not be meaningful. The Jewish calendar has been in use for several thousand years, but in the early days there was no formula to determine the start of a month. A new month was started when the new moon was first observed.",
             "flags": [
                 "ZendCompat",
@@ -477,7 +477,7 @@
             ]
         },
         {
-            "name": "JulianToJD",
+            "name": "juliantojd",
             "desc": "Valid Range for Julian Calendar 4713 B.C. to 9999 A.D.\n\nAlthough this function can handle dates all the way back to 4713 B.C., such use may not be meaningful. The calendar was created in 46 B.C., but the details did not stabilize until at least 8 A.D., and perhaps as late at the 4th century. Also, the beginning of a year varied from one culture to another - not all accepted January as the first month. Caution\n\nRemember, the current calendar system being used worldwide is the Gregorian calendar. gregoriantojd() can be used to convert such dates to their Julian Day count.",
             "flags": [
                 "ZendCompat",

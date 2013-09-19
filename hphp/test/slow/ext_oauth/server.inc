@@ -18,7 +18,7 @@ function http_server_skipif($socket_string) {
 function http_server($socket_string, array $files, &$output = null)
 {
 	ini_set('default_socket_timeout', 5);
-	pcntl_alarm(5);
+	pcntl_alarm(10);
 
 	$server = stream_socket_server($socket_string, $errno, $errstr);
 	if (!$server) {
@@ -49,8 +49,8 @@ function http_server($socket_string, array $files, &$output = null)
 		$content_length = 0;
 
 		while (false!==($line=trim(fgets($sock)))) {
-			fwrite($output, b"$line\r\n");
-			if (b''===$line) {
+			fwrite($output, "$line\r\n");
+			if (''===$line) {
 				break;
 			} else {
 				if (preg_match('#^Content-Length:\s*([[:digit:]]+)\s*$#i', $line, $matches)) {
@@ -62,7 +62,7 @@ function http_server($socket_string, array $files, &$output = null)
 		// read content
 		if ($content_length > 0) {
 			$line = fread($sock, $content_length);
-			fwrite($output, b"$line\r\n");
+			fwrite($output, "$line\r\n");
 		}
 
 		// send response

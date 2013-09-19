@@ -812,21 +812,6 @@ void LinearScan::computePreColoringHint() {
     case NativeImpl:
       m_preColoringHint.add(inst->src(1), 0, 0);
       break;
-    case Concat:
-      {
-        Type lType = inst->src(0)->type();
-        Type rType = inst->src(1)->type();
-        if ((lType.isString() && rType.isString()) ||
-            (lType.isString() && rType == Type::Int) ||
-            (lType == Type::Int && rType.isString())) {
-          m_preColoringHint.add(inst->src(0), 0, 0);
-          m_preColoringHint.add(inst->src(1), 0, 1);
-        } else {
-          m_preColoringHint.add(inst->src(0), 0, 1);
-          m_preColoringHint.add(inst->src(1), 0, 3);
-        }
-      }
-      break;
     case AKExists:
       normalHint(2, 0, 0);
       break;

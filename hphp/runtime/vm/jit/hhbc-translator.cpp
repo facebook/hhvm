@@ -671,10 +671,13 @@ void HhbcTranslator::emitDefCns(uint32_t id) {
 }
 
 void HhbcTranslator::emitConcat() {
+  auto const catchTrace = getCatchTrace();
   SSATmp* tr = popC();
   SSATmp* tl = popC();
-  // the concat helpers decref their args, so don't decref pop'ed values
-  push(gen(Concat, tl, tr));
+  // Concat consumes only first ref, never second
+  push(gen(ConcatCellCell, catchTrace, tl, tr));
+  // so we need to consume second ref ourselves
+  gen(DecRef, tr);
 }
 
 void HhbcTranslator::emitDefCls(int cid, Offset after) {
@@ -887,19 +890,22 @@ static bool areBinaryArithTypesSupported(Opcode opc, Type t1, Type t2) {
 }
 
 void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
-  auto const exitTrace = getExitTrace();
-  auto const loc       = ldLocInnerWarn(id, exitTrace, DataTypeSpecific);
+  auto const exitTrace  = getExitTrace();
+  auto const catchTrace = getCatchTrace();
+  auto const loc        = ldLocInnerWarn(id, exitTrace, DataTypeSpecific,
+                                         catchTrace);
 
-  if (subOpc == Concat) {
+  if (subOpc == ConcatCellCell) {
     /*
-     * The concat helpers decref their args, so don't decref pop'ed values
-     * and don't decref the old value held in the local. The concat helpers
-     * also incref their results, which will be consumed by the stloc. We
-     * need an extra incref for the push onto the stack.
+     * The concat helpers incref their results, which will be consumed by
+     * the stloc. We need an extra incref for the push onto the stack.
      */
     auto const val    = popC();
-    auto const result = gen(Concat, loc, val);
+    auto const result = gen(ConcatCellCell, catchTrace, loc, val);
     pushIncRef(stLocNRC(id, exitTrace, result));
+    // ConcatCellCell does not DecRef its second argument,
+    // so we need to do it here
+    gen(DecRef, val);
     return;
   }
 

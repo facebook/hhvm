@@ -111,15 +111,14 @@ tvPairToCString(DataType t, uint64_t v,
 }
 
 /**
- * concat_ss will decRef the values passed in as appropriate, and it will
- * incRef the output string
+ * concat_ss will will incRef the output string
+ * and decref its first argument
  */
 StringData*
 concat_ss(StringData* v1, StringData* v2) {
   if (v1->getCount() > 1) {
     StringData* ret = StringData::Make(v1, v2);
     ret->setRefCount(1);
-    decRefStr(v2);
     // Because v1->getCount() is greater than 1, we know we will never
     // have to release the string here
     v1->decRefCount();
@@ -127,7 +126,6 @@ concat_ss(StringData* v1, StringData* v2) {
   }
 
   auto const newV1 = v1->append(v2->slice());
-  decRefStr(v2);
   if (UNLIKELY(newV1 != v1)) {
     assert(v1->getCount() == 1);
     v1->release();
@@ -138,8 +136,7 @@ concat_ss(StringData* v1, StringData* v2) {
 }
 
 /**
- * concat_is will decRef the string passed in as appropriate, and it will
- * incRef the output string
+ * concat_is will incRef the output string
  */
 StringData*
 concat_is(int64_t v1, StringData* v2) {
@@ -155,13 +152,12 @@ concat_is(int64_t v1, StringData* v2) {
   StringSlice s2 = v2->slice();
   StringData* ret = StringData::Make(s1, s2);
   ret->incRefCount();
-  decRefStr(v2);
   return ret;
 }
 
 /**
- * concat_si will decRef the string passed in as appropriate, and it will
- * incRef the output string
+ * concat_si will incRef the output string
+ * and decref its first argument
  */
 StringData*
 concat_si(StringData* v1, int64_t v2) {
@@ -179,31 +175,6 @@ concat_si(StringData* v1, int64_t v2) {
   ret->incRefCount();
   decRefStr(v1);
   return ret;
-}
-
-/**
- * concat will decRef the values passed in as appropriate, and it will
- * incRef the output string
- */
-StringData*
-concat_tv(DataType t1, uint64_t v1, DataType t2, uint64_t v2) {
-  const char *s1, *s2;
-  size_t s1len, s2len;
-  bool free1, free2;
-  tvPairToCString(t1, v1, &s1, &s1len, &free1);
-  tvPairToCString(t2, v2, &s2, &s2len, &free2);
-  StringSlice r1(s1, s1len);
-  StringSlice r2(s2, s2len);
-  StringData* retval = StringData::Make(r1, r2);
-  retval->incRefCount();
-  // If tvPairToCString allocated temporary buffers, free them now
-  if (free1) free((void*)s1);
-  if (free2) free((void*)s2);
-  // decRef the parameters as appropriate
-  tvRefcountedDecRefHelper(t2, v2);
-  tvRefcountedDecRefHelper(t1, v1);
-
-  return retval;
 }
 
 int64_t eq_null_str(StringData* v1) {

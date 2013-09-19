@@ -340,7 +340,8 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case NSame:
     return simplifyCmp(opc, inst, src1, src2);
 
-  case Concat:        return simplifyConcat(src1, src2);
+  case ConcatCellCell: return simplifyConcatCellCell(inst);
+  case ConcatStrStr:  return simplifyConcatStrStr(src1, src2);
   case Mov:           return simplifyMov(src1);
   case Not:           return simplifyNot(src1);
   case LdClsPropAddr: return simplifyLdClsPropAddr(inst);
@@ -1432,7 +1433,44 @@ SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConcat(SSATmp* src1, SSATmp* src2) {
+SSATmp* Simplifier::simplifyConcatCellCell(IRInstruction* inst) {
+  SSATmp* src1 = inst->src(0);
+  SSATmp* src2 = inst->src(1);
+
+  if (src1->isA(Type::Str) && src2->isA(Type::Str)) { // StrStr
+    return gen(ConcatStrStr, src1, src2);
+  }
+  if (src1->isA(Type::Int) && src2->isA(Type::Str)) { // IntStr
+    return gen(ConcatIntStr, src1, src2);
+  }
+  if (src1->isA(Type::Str) && src2->isA(Type::Int)) { // StrInt
+    return gen(ConcatStrInt, src1, src2);
+  }
+  if (src1->isA(Type::Int)) { // IntCell
+    auto const asStr = gen(ConvCellToStr, inst->taken(), src2);
+    return gen(ConcatIntStr, src1, asStr);
+  }
+  if (src2->isA(Type::Int)) { // CellInt
+    auto const asStr = gen(ConvCellToStr, inst->taken(), src1);
+    // concat promises to decref its first argument. we need to do it here
+    gen(DecRef, src1);
+    return gen(ConcatStrInt, asStr, src2);
+  }
+  if (src1->isA(Type::Str)) { // StrCell
+    auto const asStr = gen(ConvCellToStr, inst->taken(), src2);
+    return gen(ConcatStrStr, src1, asStr);
+  }
+  if (src2->isA(Type::Str)) { // CellStr
+    auto const asStr = gen(ConvCellToStr, inst->taken(), src1);
+    // concat promises to decref its first argument. we need to do it here
+    gen(DecRef, src1);
+    return gen(ConcatStrStr, asStr, src2);
+  }
+
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyConcatStrStr(SSATmp* src1, SSATmp* src2) {
   if (src1->isConst() && src1->isA(Type::StaticStr) &&
       src2->isConst() && src2->isA(Type::StaticStr)) {
     StringData* str1 = const_cast<StringData *>(src1->getValStr());
@@ -1440,6 +1478,7 @@ SSATmp* Simplifier::simplifyConcat(SSATmp* src1, SSATmp* src2) {
     StringData* merge = makeStaticString(concat_ss(str1, str2));
     return cns(merge);
   }
+
   return nullptr;
 }
 

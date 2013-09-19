@@ -271,6 +271,10 @@ CALL_OPCODE(ConvObjToStr);
 CALL_OPCODE(ConvResToStr);
 CALL_OPCODE(ConvCellToStr);
 
+CALL_OPCODE(ConcatStrStr);
+CALL_OPCODE(ConcatStrInt);
+CALL_OPCODE(ConcatIntStr);
+
 CALL_OPCODE(TypeProfileFunc)
 CALL_OPCODE(CreateContFunc)
 CALL_OPCODE(CreateContMeth)
@@ -5494,41 +5498,9 @@ void CodeGenerator::cgBoxPtr(IRInstruction* inst) {
     });
 }
 
-// TODO: Kill this #2031980
-static StringData* concat_value(TypedValue tv1, TypedValue tv2) {
-  return concat_tv(tv1.m_type, tv1.m_data.num, tv2.m_type, tv2.m_data.num);
-}
-
-void CodeGenerator::cgConcat(IRInstruction* inst) {
-  SSATmp* dst   = inst->dst();
-  SSATmp* tl    = inst->src(0);
-  SSATmp* tr    = inst->src(1);
-
-  Type lType = tl->type();
-  Type rType = tr->type();
-  // We have specialized helpers for concatenating two strings, a
-  // string and an int, and an int and a string.
-  void* fptr = nullptr;
-  if (lType.isString() && rType.isString()) {
-    fptr = (void*)concat_ss;
-  } else if (lType.isString() && rType == Type::Int) {
-    fptr = (void*)concat_si;
-  } else if (lType == Type::Int && rType.isString()) {
-    fptr = (void*)concat_is;
-  }
-  if (fptr) {
-    cgCallHelper(m_as, CppCall(fptr), callDest(dst), SyncOptions::kNoSyncPoint,
-                 ArgGroup(m_regs).ssa(tl).ssa(tr));
-  } else {
-    if (lType.subtypeOf(Type::Obj) || lType.subtypeOf(Type::Res) ||
-        lType.needsReg() || rType.subtypeOf(Type::Obj) ||
-        rType.subtypeOf(Type::Res) || rType.needsReg()) {
-      CG_PUNT(cgConcat);
-    }
-    cgCallHelper(m_as, CppCall(concat_value), callDest(dst),
-                 SyncOptions::kNoSyncPoint,
-                 ArgGroup(m_regs).typedValue(tl).typedValue(tr));
-  }
+void CodeGenerator::cgConcatCellCell(IRInstruction* inst) {
+  // Supported cases are all simplified into other instructions
+  CG_PUNT(cgConcatCellCell);
 }
 
 void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {

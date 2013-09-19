@@ -165,6 +165,10 @@ static CallMap s_callMap {
     {ConvCellToStr,      convCellToStrHelper, DSSA, SSync,
                            {{TV, 0}}},
 
+    {ConcatStrStr,       concat_ss, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
+    {ConcatStrInt,       concat_si, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
+    {ConcatIntStr,       concat_is, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
+
     {AddElemStrKey,      addElemStringKeyHelper, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {TV, 2}}},
     {AddElemIntKey,      addElemIntKeyHelper, DSSA, SNone,

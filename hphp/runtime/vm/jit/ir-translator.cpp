@@ -873,7 +873,7 @@ IRTranslator::translateSetOpL(const NormalizedInstruction& i) {
     case SetOpMinusEqual:  opc = Sub;    break;
     case SetOpMulEqual:    opc = Mul;    break;
     case SetOpDivEqual:    HHIR_UNIMPLEMENTED(SetOpL_Div);
-    case SetOpConcatEqual: opc = Concat; break;
+    case SetOpConcatEqual: opc = ConcatCellCell; break;
     case SetOpModEqual:    HHIR_UNIMPLEMENTED(SetOpL_Mod);
     case SetOpAndEqual:    opc = BitAnd; break;
     case SetOpOrEqual:     opc = BitOr;  break;

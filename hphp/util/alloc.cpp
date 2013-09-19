@@ -77,7 +77,7 @@ void init_stack_limits(pthread_attr_t* attr) {
   assert(stackaddr != nullptr);
   assert(stacksize >= PTHREAD_STACK_MIN);
   Util::s_stackLimit = uintptr_t(stackaddr) + guardsize;
-  Util::s_stackSize = stacksize;
+  Util::s_stackSize = stacksize - guardsize;
 }
 
 void flush_thread_stack() {

@@ -106,7 +106,7 @@ Array f_get_class_methods(CVarRef class_or_object) {
   return arrayHolder.keys();
 }
 
-Array vm_get_class_constants(CStrRef className) {
+Array f_get_class_constants(CStrRef className) {
   auto const cls = Unit::loadClass(className.get());
   if (cls == NULL) {
     return Array::attach(HphpArray::MakeReserve(0));
@@ -133,14 +133,10 @@ Array vm_get_class_constants(CStrRef className) {
   return arrayInit.toArray();
 }
 
-Array f_get_class_constants(CStrRef class_name) {
-  return vm_get_class_constants(class_name.get());
-}
-
-Array vm_get_class_vars(CStrRef className) {
-  const Class* cls = lookup_class(className.get());
+Variant f_get_class_vars(CStrRef className) {
+  const Class* cls = Unit::loadClass(className.get());
   if (!cls) {
-    raise_error("Unknown class %s", className->data());
+    return false;
   }
   cls->initialize();
 
@@ -184,10 +180,6 @@ Array vm_get_class_vars(CStrRef className) {
   }
 
   return arr.toArray();
-}
-
-Array f_get_class_vars(CStrRef class_name) {
-  return vm_get_class_vars(class_name.get());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

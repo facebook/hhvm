@@ -159,8 +159,8 @@
             "flags": [
             ],
             "return": {
-                "type": "VariantMap",
-                "desc": "Returns an associative array of declared properties visible from the current scope, with their default value. The resulting array elements are in the form of varname => value."
+                "type": "Variant",
+                "desc": "Returns an associative array of declared properties visible from the current scope, with their default value. The resulting array elements are in the form of varname => value. In case of an error, it returns false."
             },
             "args": [
                 {

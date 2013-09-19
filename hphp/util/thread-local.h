@@ -341,7 +341,7 @@ struct ThreadLocalProxy {
 #define DECLARE_THREAD_LOCAL(T, f) \
   __thread ThreadLocal<T> f
 #define IMPLEMENT_THREAD_LOCAL(T, f) \
-  __thread HPHP::ThreadLocal<T> f
+  __thread ThreadLocal<T> f
 
 #define DECLARE_THREAD_LOCAL_NO_CHECK(T, f) \
   __thread ThreadLocalNoCheck<T> f

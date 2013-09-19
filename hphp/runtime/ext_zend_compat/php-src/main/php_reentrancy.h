@@ -25,6 +25,5 @@
 
 #define php_localtime_r localtime_r
 #define php_gmtime_r gmtime_r
-#define php_strtok_r strtok_r
 
 #endif

@@ -23,8 +23,14 @@
 
 #include "hphp/runtime/ext/ext_url.h"
 
-PHPAPI extern unsigned char *php_base64_encode(const unsigned char *, int, int *);
-PHPAPI extern unsigned char *php_base64_decode_ex(const unsigned char *, int, int *, zend_bool);
-PHPAPI extern unsigned char *php_base64_decode(const unsigned char *, int, int *);
+PHPAPI inline unsigned char *php_base64_decode_ex(const unsigned char *str, int length, int *ret_length, zend_bool strict) {
+  HPHP::Variant ret = f_base64_decode(HPHP::String(str, length, HPHP::CopyString), strict);
+  HPHP::String stringRet = ret.toString();
+  *ret_length = stringRet.size();
+  return stringRet.data();
+}
+PHPAPI inline unsigned char *php_base64_decode(const unsigned char *str, int length, int *ret_length) {
+  return php_base64_decode_ex(str, length, ret_length, 0);
+}
 
 #endif /* BASE64_H */

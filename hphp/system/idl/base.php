@@ -1134,7 +1134,7 @@ function phpnet_clean($text) {
                        '<>', $text);
   $text = preg_replace('#<p class="para">#', '<>', $text);
   $text = preg_replace('#<strong class="note">Note</strong>:#', '', $text);
-  $text = preg_replace('#<.+?'.'>#', '', $text);
+  $text = preg_replace('#<.+?>#', '', $text);
   $text = preg_replace('#[ \t\n]+#s', ' ', $text);
   $text = preg_replace('# ?<> ?#', "\n\n", $text);
   $text = preg_replace('/&#039;/', "'", $text);
@@ -1193,40 +1193,6 @@ function phpnet_get_function_info($name, $clsname = 'function') {
   return $ret;
 }
 
-function phpnet_get_class_info($name) {
-  $name = preg_replace('#_#', '-', strtolower($name));
-  $doc = @file_get_contents("http://php.net/manual/en/class.$name.php");
-  if ($doc === false) {
-    return array();
-  }
-
-  $ret = array(
-    'desc' => '',
-    'props' => array(),
-    'funcs' => array()
-  );
-  if (preg_match('#<h2 class="title">Introduction</h2>(.*?)'.
-                              '<div class="section"#s', $doc, $m)) {
-    $ret['desc'] = phpnet_clean($m[1]);
-  }
-
-  if (preg_match_all('#<var class="varname">(.*?)</var>#s', $doc, $m)) {
-    foreach ($m[1] as $prop) {
-      $ret['props'][]  = phpnet_clean($prop);
-    }
-  }
-
-  if (preg_match_all(
-      '#<a href="'.$name.'\..*?.php">'.$name.'::(.*?)</a>#si',
-      $doc, $m)) {
-    foreach ($m[1] as $prop) {
-      $ret['funcs'][]  = phpnet_clean($prop);
-    }
-  }
-
-  return $ret;
-}
-
 function phpnet_get_class_desc($name) {
   $name = preg_replace('#_#', '-', strtolower($name));
   $doc = @file_get_contents("http://php.net/manual/en/class.$name.php");
@@ -1256,15 +1222,5 @@ function phpnet_get_extension_constants($name) {
   }
 
   preg_match_all('#<code>(.*?)</code>#', $doc, $m);
-  return $m[1];
-}
-
-function phpnet_get_extension_classes($name) {
-  $doc = @file_get_contents("http://www.php.net/manual/en/book.$name.php");
-  if ($doc === false) {
-    return false;
-  }
-
-  preg_match_all('#<a href="class.[^"]*.php">(.*?)</a>#', $doc, $m);
   return $m[1];
 }

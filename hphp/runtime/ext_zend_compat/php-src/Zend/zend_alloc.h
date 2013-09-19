@@ -44,16 +44,33 @@ inline void _efree(const HPHP::RefData* ptr) {
 
 BEGIN_EXTERN_C()
 
-ZEND_API char *zend_strndup(const char *s, unsigned int length) ZEND_ATTRIBUTE_MALLOC;
-
-ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-ZEND_API void *_safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-ZEND_API void *_safe_malloc(size_t nmemb, size_t size, size_t offset);
-ZEND_API void _efree(const void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-ZEND_API char *_estrndup(const char *s, unsigned int length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+ZEND_API inline void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
+  return HPHP::smart_malloc(size);
+}
+ZEND_API inline void *_safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
+  return _emalloc(nmemb);
+}
+ZEND_API inline void *_safe_malloc(size_t nmemb, size_t size, size_t offset) {
+  return _emalloc(nmemb);
+}
+ZEND_API inline void _efree(const void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
+  HPHP::smart_free(const_cast<void*>(ptr));
+}
+ZEND_API inline void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
+  return HPHP::smart_calloc(nmemb, size);
+}
+ZEND_API inline void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
+  return HPHP::smart_realloc(ptr, size);
+}
+ZEND_API inline char *_estrndup(const char *s, unsigned int length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
+  char* ret = (char*) _emalloc(length + 1);
+  memcpy(ret, s, length);
+  ret[length] = '\0';
+  return ret;
+}
+ZEND_API inline char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
+  return _estrndup(s, strlen(s));
+}
 
 /* Standard wrapper macros */
 #define emalloc(size)            _emalloc((size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
@@ -136,7 +153,7 @@ END_EXTERN_C()
 
 #define FREE_ZVAL(z)  \
   do { \
-    (z)->tv()->m_type = HPHP::KindOfNull; \
+    (z)->tv()->m_type = KindOfNull; \
     (z)->release(); \
   } while (0)
 
@@ -145,7 +162,7 @@ END_EXTERN_C()
 
 #define FREE_ZVAL_REL(z)  \
   do { \
-    (z)->tv()->m_type = HPHP::KindOfNull; \
+    (z)->tv()->m_type = KindOfNull; \
     (z)->release(); \
   } while (0)
 

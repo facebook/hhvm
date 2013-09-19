@@ -336,13 +336,6 @@ class PhpClass {
   explicit PhpClass(const folly::dynamic &c);
 
   fbstring name() const { return m_name; }
-  fbstring lowerName() const {
-    fbstring name = m_name;
-    for (char& c : name) {
-      c = tolower(c);
-    }
-    return name;
-  }
   fbstring parent() const {
     auto p = m_class.find("parent");
     if (p == m_class.items().end()) {

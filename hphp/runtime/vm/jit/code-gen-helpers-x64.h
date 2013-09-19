@@ -66,7 +66,6 @@ void emitAssertFlagsNonNegative(Asm& as);
 void emitAssertRefCount(Asm& as, PhysReg base);
 
 void emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg);
-void emitLea(Asm& as, PhysReg base, int disp, PhysReg dest);
 void emitLea(Asm& as, MemoryRef mr, PhysReg dst);
 
 void emitLdObjClass(Asm& as, PhysReg objReg, PhysReg dstReg);

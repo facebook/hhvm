@@ -63,7 +63,7 @@ inline Offset liveSpOff() {
 
 namespace Transl {
 
-static inline uintptr_t tlsBase() {
+inline uintptr_t tlsBase() {
   uintptr_t retval;
 #if defined(__x86_64__)
   asm ("movq %%fs:0, %0" : "=r" (retval));
@@ -77,13 +77,8 @@ static inline uintptr_t tlsBase() {
   return retval;
 }
 
-static inline int cellsToBytes(int nCells) {
+inline ptrdiff_t cellsToBytes(int nCells) {
   return nCells * sizeof(Cell);
-}
-
-static inline size_t bytesToCells(int nBytes) {
-  assert(nBytes % sizeof(Cell) == 0);
-  return nBytes / sizeof(Cell);
 }
 
 struct VMRegAnchor : private boost::noncopyable {

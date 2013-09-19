@@ -287,14 +287,6 @@ void emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg) {
   }
 }
 
-void emitLea(Asm& as, PhysReg base, int disp, PhysReg dest) {
-  if (disp == 0) {
-    emitMovRegReg(as, base, dest);
-  } else {
-    as. lea(base[disp], dest);
-  }
-}
-
 void emitLea(Asm& as, MemoryRef mr, PhysReg dst) {
   if (dst == InvalidReg) return;
   if (mr.r.disp == 0) {

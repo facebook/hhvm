@@ -986,7 +986,7 @@ TranslatorX64::funcPrologue(Func* func, int nPassed, ActRec* ar) {
       // nPassed == 2
       // Fix up hardware stack pointer
       nPassed = 2;
-      emitLea(a, rStashedAR, -cellsToBytes(nPassed), rVmSp);
+      emitLea(a, rStashedAR[-cellsToBytes(nPassed)], rVmSp);
       // Optimization TODO: Reuse the prologue for args == 2
       emitPrologue(func, nPassed);
     }
@@ -1081,7 +1081,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
   if (func->isClosureBody()) {
     int numUseVars = func->cls()->numDeclProperties();
 
-    emitLea(a, rVmFp, -cellsToBytes(numParams), rVmSp);
+    emitLea(a, rVmFp[-cellsToBytes(numParams)], rVmSp);
 
     PhysReg rClosure = rcx;
     a.  loadq(rVmFp[AROFF(m_this)], rClosure);
@@ -1180,7 +1180,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
   if (func->isGenerator()) {
     frameCells = 1;
   } else {
-    emitLea(a, rVmFp, -cellsToBytes(frameCells), rVmSp);
+    emitLea(a, rVmFp[-cellsToBytes(frameCells)], rVmSp);
   }
 
   Fixup fixup(funcBody.offset() - func->base(), frameCells);

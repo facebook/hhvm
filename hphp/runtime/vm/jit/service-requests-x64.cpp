@@ -288,7 +288,7 @@ int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& stubsCode,
     assert(funcd->numLocals() == funcd->numParams());
     assert(funcd->numIterators() == 0);
     Asm a { mainCode };
-    emitLea(a, rVmSp, cellsToBytes(numArgs), rVmFp);
+    emitLea(a, rVmSp[cellsToBytes(numArgs)], rVmFp);
     emitCheckSurpriseFlagsEnter(mainCode, stubsCode, true, tx64->fixupMap(),
                                 Fixup(0, numArgs));
     // rVmSp is already correctly adjusted, because there's no locals
@@ -305,7 +305,7 @@ int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& stubsCode,
                   rVmSp[cellsToBytes(numArgs) + AROFF(m_savedRip)]);
   }
   // Stash callee's rVmFp into rStashedAR for the callee's prologue
-  emitLea(a, rVmSp, cellsToBytes(numArgs), rStashedAR);
+  emitLea(a, rVmSp[cellsToBytes(numArgs)], rStashedAR);
   emitBindCallHelper(mainCode, stubsCode, srcKey, funcd, numArgs);
   return 0;
 }

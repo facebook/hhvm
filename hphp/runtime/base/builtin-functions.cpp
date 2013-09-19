@@ -1015,7 +1015,6 @@ Variant require(CStrRef file, bool once /* = false */,
 IMPLEMENT_REQUEST_LOCAL(AutoloadHandler, AutoloadHandler::s_instance);
 
 void AutoloadHandler::requestInit() {
-  m_running = false;
   m_handlers.reset();
   m_map.reset();
   m_map_root.reset();
@@ -1139,32 +1138,25 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
       if (res != Failure) return res == Success;
     }
   }
-  if (m_loading.valueExists(className))
+  if (m_loading.valueExists(className)) {
     return false;
-  else
-    m_loading.append(className);
+  }
+
+  m_loading.append(className);
+  SCOPE_EXIT {
+    String l_className = m_loading.pop();
+    assert(l_className == className);
+  };
 
   Array params = PackedArrayInit(1).add(className).toArray();
-  bool l_running = m_running;
-  String l_className;
-  m_running = true;
   if (m_handlers.isNull() && !forceSplStack) {
     if (function_exists(s___autoload)) {
       invoke(s___autoload, params, -1, true, false);
-      m_running = l_running;
-      l_className = m_loading.pop();
-      assert(l_className == className);
       return true;
     }
-    m_running = l_running;
-    l_className = m_loading.pop();
-    assert(l_className == className);
     return false;
   }
   if (m_handlers.isNull() || m_handlers->empty()) {
-    m_running = l_running;
-    l_className = m_loading.pop();
-    assert(l_className == className);
     return false;
   }
   Object autoloadException;
@@ -1190,9 +1182,6 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
       break;
     }
   }
-  m_running = l_running;
-  l_className = m_loading.pop();
-  assert(l_className == className);
   if (!autoloadException.isNull()) {
     throw autoloadException;
   }
@@ -1219,7 +1208,7 @@ bool AutoloadHandler::addHandler(CVarRef handler, bool prepend) {
 }
 
 bool AutoloadHandler::isRunning() {
-  return m_running;
+  return !m_loading.empty();
 }
 
 void AutoloadHandler::removeHandler(CVarRef handler) {

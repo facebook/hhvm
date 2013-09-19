@@ -328,7 +328,6 @@ private:
   String m_map_root;
   Array m_handlers;
   Array m_loading;
-  bool m_running;
 };
 
 #define CALL_USER_FUNC_FEW_ARGS_COUNT 6

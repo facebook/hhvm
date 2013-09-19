@@ -53,17 +53,18 @@ const void* ReadOnlyArena::allocate(const void* data, size_t dataLen) {
   guard g(m_mutex);
 
   // Round up to the minimal alignment.
-  dataLen = (dataLen + (kMinimalAlignment - 1)) & ~(kMinimalAlignment - 1);
+  auto alignedLen =
+    (dataLen + (kMinimalAlignment - 1)) & ~(kMinimalAlignment - 1);
 
-  if (m_frontier + dataLen > m_end) {
+  if (m_frontier + alignedLen > m_end) {
     grow();
   }
-  always_assert(m_frontier + dataLen <= m_end);
+  always_assert(m_frontier + alignedLen <= m_end);
 
   auto const ret = m_frontier;
   assert((uintptr_t(ret) & (kMinimalAlignment - 1)) == 0);
 
-  m_frontier += dataLen;
+  m_frontier += alignedLen;
 
   auto pageAddr = reinterpret_cast<unsigned char*>(
     uintptr_t(ret) & ~(Util::s_pageSize - 1)

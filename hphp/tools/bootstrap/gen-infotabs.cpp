@@ -70,7 +70,9 @@ int main(int argc, const char* argv[]) {
     if (func.flags() & ZendCompat) {
       cpp << "} // End namespace\n"
           << "void zif_" << name
-          << "(HPHP::ActRec* ar, HPHP::RefData* return_value);\n"
+          << "(HPHP::ActRec* ar,"
+          << " HPHP::RefData* return_value,"
+          << " HPHP::RefData* this_ptr);\n"
           << "HPHP::TypedValue* fg_" << name << "(HPHP::ActRec* ar){\n"
           << "  return zend_wrap_func(ar, zif_" << name << ", "
           << func.numParams() << ", " << func.isReturnRef() << ");\n"

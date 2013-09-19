@@ -206,6 +206,8 @@ ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, char **cal
 ZEND_API zend_class_entry *zend_get_class_entry(const zval *zobject TSRMLS_DC);
 ZEND_API int zend_get_object_classname(const zval *object, const char **class_name, zend_uint *class_name_len TSRMLS_DC);
 
+#define getThis() (this_ptr)
+
 #define ZEND_NUM_ARGS()    (ar->numArgs())
 
 #define array_init(arg)      _array_init((arg), 0 ZEND_FILE_LINE_CC)

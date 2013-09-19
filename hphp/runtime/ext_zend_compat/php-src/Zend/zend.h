@@ -240,8 +240,8 @@ typedef enum {
 
 #include "zend_hash.h"
 
-#define INTERNAL_FUNCTION_PARAMETERS HPHP::ActRec* ar, HPHP::RefData* return_value
-#define INTERNAL_FUNCTION_PARAM_PASSTHRU ar, return_value
+#define INTERNAL_FUNCTION_PARAMETERS HPHP::ActRec* ar, zval* return_value, zval* this_ptr
+#define INTERNAL_FUNCTION_PARAM_PASSTHRU ar, return_value, this_ptr
 
 #if defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)
 void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((noreturn));

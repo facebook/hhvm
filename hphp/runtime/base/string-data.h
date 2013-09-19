@@ -423,7 +423,6 @@ private:
 
 private:
   static StringData* MakeSVSlowPath(SharedVariant*, uint32_t len);
-  static StringData* InsertStaticString(StringSlice);
 
   StringData(const StringData&) = delete;
   StringData& operator=(const StringData&) = delete;

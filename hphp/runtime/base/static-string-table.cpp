@@ -124,16 +124,7 @@ StringData** precompute_chars() {
 
 StringData** precomputed_chars = precompute_chars();
 
-}
-
-//////////////////////////////////////////////////////////////////////
-
-size_t makeStaticStringCount() {
-  if (!s_stringDataMap) return 0;
-  return s_stringDataMap->size();
-}
-
-StringData* InsertStaticString(StringSlice slice) {
+StringData* insertStaticString(StringSlice slice) {
   auto const sd = StringData::MakeStatic(slice);
   auto pair = s_stringDataMap->insert(make_intern_key(sd), 0);
   if (!pair.second) {
@@ -141,6 +132,15 @@ StringData* InsertStaticString(StringSlice slice) {
   }
   assert(to_sdata(pair.first->first) != nullptr);
   return const_cast<StringData*>(to_sdata(pair.first->first));
+}
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+size_t makeStaticStringCount() {
+  if (!s_stringDataMap) return 0;
+  return s_stringDataMap->size();
 }
 
 StringData* makeStaticString(const StringData* str) {
@@ -155,7 +155,7 @@ StringData* makeStaticString(const StringData* str) {
   if (it != s_stringDataMap->end()) {
     return const_cast<StringData*>(to_sdata(it->first));
   }
-  return InsertStaticString(str->slice());
+  return insertStaticString(str->slice());
 }
 
 StringData* makeStaticString(StringSlice slice) {
@@ -166,7 +166,7 @@ StringData* makeStaticString(StringSlice slice) {
   if (it != s_stringDataMap->end()) {
     return const_cast<StringData*>(to_sdata(it->first));
   }
-  return InsertStaticString(slice);
+  return insertStaticString(slice);
 }
 
 StringData* lookupStaticString(const StringData *str) {

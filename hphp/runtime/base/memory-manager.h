@@ -405,10 +405,14 @@ private:
   /*
    * Debug mode header.
    *
-   * This sits in front of the user payload for small allocations, and
-   * in front of the SweepNode in big allocations.  The allocatedMagic
-   * aliases the space for the GarbageList pointers, but should catch
-   * double frees due to kAllocatedMagic.
+   * For size-untracked allocations, this sits in front of the user
+   * payload for small allocations, and in front of the SweepNode in
+   * big allocations.  The allocatedMagic aliases the space for the
+   * GarbageList pointers, but should catch double frees due to
+   * kAllocatedMagic.
+   *
+   * For size-tracked allocations, this always sits in front of
+   * whatever header we're using (SmallNode or SweepNode).
    *
    * We set requestedSize to kFreedMagic when a block is not
    * allocated.
@@ -419,7 +423,7 @@ private:
     static constexpr size_t kFreedMagic = static_cast<size_t>(-1);
 
     uintptr_t allocatedMagic;
-    size_t requestedSize;
+    size_t requestedSize;     // zero for size-untracked allocator
     size_t returnedCap;
     size_t padding;
   };
@@ -443,7 +447,7 @@ private:
   void refreshStatsHelperStop();
   void* smartMallocSizeBigHelper(void*&, size_t&, size_t);
 #endif
-  bool checkPreFree(DebugHeader*, size_t, size_t);
+  bool checkPreFree(DebugHeader*, size_t, size_t) const;
   template<class SizeT> static SizeT debugAddExtra(SizeT);
   template<class SizeT> static SizeT debugRemoveExtra(SizeT);
   void* debugPostAllocate(void*, size_t, size_t);

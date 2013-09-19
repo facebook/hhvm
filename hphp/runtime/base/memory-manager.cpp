@@ -335,31 +335,39 @@ inline void MemoryManager::smartFree(void* ptr) {
   smartFreeBig(n);
 }
 
-// quick-and-dirty realloc implementation.  We could do better if the block
-// is malloc'd, by deferring to the underlying realloc.
-inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
-  FTRACE(1, "smartRealloc: {} to {}\n", ptr, nbytes);
+inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
+  FTRACE(1, "smartRealloc: {} to {}\n", inputPtr, nbytes);
+  assert(nbytes > 0);
 
-  assert(ptr != 0 && nbytes > 0);
-  SweepNode* n = ((SweepNode*)ptr) - 1;
-  size_t old_padbytes = n->padbytes;
-  if (LIKELY(old_padbytes <= kMaxSmartSize)) {
-    void* newmem = smartMalloc(nbytes);
-    memcpy(newmem, ptr, std::min(old_padbytes - sizeof(SmallNode), nbytes));
-    smartFree(ptr);
+  void* ptr = debug ? static_cast<DebugHeader*>(inputPtr) - 1 : inputPtr;
+
+  auto const n = static_cast<SweepNode*>(ptr) - 1;
+  if (LIKELY(n->padbytes <= MemoryManager::kMaxSmartSize)) {
+    void* newmem = smart_malloc(nbytes);
+    auto const copySize = std::min(
+      n->padbytes - sizeof(SmallNode) - (debug ? sizeof(DebugHeader) : 0),
+      nbytes
+    );
+    newmem = memcpy(newmem, inputPtr, copySize);
+    smart_free(inputPtr);
     return newmem;
   }
-  SweepNode* next = n->next;
-  SweepNode* prev = n->prev;
-  SweepNode* n2 = (SweepNode*) realloc(n, nbytes + sizeof(SweepNode));
 
-  // ensure that we have not exceeded the per request memory limit (#2529805)
+  // Ok, it's a big allocation.  Since we don't know how big it is
+  // (i.e. how much data we should memcpy), we have no choice but to
+  // ask malloc to realloc for us.
+  auto const oldNext = n->next;
+  auto const oldPrev = n->prev;
+
+  auto const newNode = static_cast<SweepNode*>(
+    realloc(n, debugAddExtra(nbytes + sizeof(SweepNode)))
+  );
+
   refreshStatsHelper();
-  if (n2 != n) {
-    // block moved; must re-link to sweeplist
-    next->prev = prev->next = n2;
+  if (newNode != n) {
+    oldNext->prev = oldPrev->next = newNode;
   }
-  return n2 + 1;
+  return debugPostAllocate(newNode + 1, 0, 0);
 }
 
 /*
@@ -467,28 +475,40 @@ void MemoryManager::smartFreeBig(SweepNode* n) {
 
 HOT_FUNC
 void* smart_malloc(size_t nbytes) {
-  return MM().smartMalloc(std::max(nbytes, size_t(1)));
+  auto& mm = MM();
+  auto const size = mm.debugAddExtra(std::max(nbytes, size_t(1)));
+  return mm.debugPostAllocate(mm.smartMalloc(size), 0, 0);
 }
 
 HOT_FUNC
 void* smart_calloc(size_t count, size_t nbytes) {
+  auto& mm = MM();
   auto const totalBytes = std::max<size_t>(count * nbytes, 1);
   if (totalBytes <= MemoryManager::kMaxSmartSize) {
-    return memset(MM().smartMalloc(totalBytes), 0, totalBytes);
+    return memset(smart_malloc(totalBytes), 0, totalBytes);
   }
-  return MM().smartCallocBig(totalBytes);
+  auto const withExtra = mm.debugAddExtra(totalBytes);
+  return mm.debugPostAllocate(
+    mm.smartCallocBig(withExtra), 0, 0
+  );
 }
 
 HOT_FUNC
 void* smart_realloc(void* ptr, size_t nbytes) {
-  if (!ptr) return MM().smartMalloc(std::max(nbytes, size_t(1)));
-  if (!nbytes) return ptr ? MM().smartFree(ptr), (void*)0 : (void*)0;
-  return MM().smartRealloc(ptr, nbytes);
+  auto& mm = MM();
+  if (!ptr) return smart_malloc(nbytes);
+  if (!nbytes) {
+    smart_free(ptr);
+    return nullptr;
+  }
+  return mm.smartRealloc(ptr, nbytes);
 }
 
 HOT_FUNC
 void smart_free(void* ptr) {
-  if (ptr) MM().smartFree(ptr);
+  if (!ptr) return;
+  auto& mm = MM();
+  mm.smartFree(mm.debugPreFree(ptr, 0, 0));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -521,7 +541,7 @@ void* MemoryManager::debugPreFree(void* p,
 
 bool MemoryManager::checkPreFree(DebugHeader* p,
                                  size_t bytes,
-                                 size_t userSpecifiedBytes) {
+                                 size_t userSpecifiedBytes) const {
   assert(debug);
 
   assert(p->allocatedMagic == DebugHeader::kAllocatedMagic);
@@ -533,8 +553,7 @@ bool MemoryManager::checkPreFree(DebugHeader* p,
     assert(userSpecifiedBytes == p->requestedSize ||
            userSpecifiedBytes == p->returnedCap);
   }
-
-  if (p->requestedSize <= MemoryManager::kMaxSmartSize) {
+  if (bytes != 0 && bytes <= MemoryManager::kMaxSmartSize) {
     auto const ptrInt = reinterpret_cast<uintptr_t>(p);
     DEBUG_ONLY auto it = std::find_if(
       begin(m_slabs), end(m_slabs),

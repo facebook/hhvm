@@ -49,13 +49,15 @@ struct FixedVector {
    * point.  Throws if the sourceVec is too large.
    */
   explicit FixedVector(const std::vector<T>& sourceVec) {
-    const size_t neededSize = sourceVec.size();
+    auto const neededSize = sourceVec.size();
 
     if (neededSize >> 16) {
       throw std::runtime_error("FixedVector maximum size exceeded");
     }
 
-    T* ptr = static_cast<T*>(malloc(neededSize * sizeof(T)));
+    auto const ptr = neededSize > 0
+      ? static_cast<T*>(malloc(neededSize * sizeof(T)))
+      : nullptr;
 
     size_t i = 0;
     try {

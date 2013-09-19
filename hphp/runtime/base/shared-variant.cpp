@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_apc.h"
-#include "hphp/runtime/base/shared-map.h"
+#include "hphp/runtime/base/shared-array.h"
 #include "hphp/runtime/base/immutable-obj.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
@@ -260,7 +260,7 @@ Variant SharedVariant::toLocal() {
       if (getSerializedArray()) {
         return apc_unserialize(m_data.str->data(), m_data.str->size());
       }
-      return SharedMap::Make(this);
+      return SharedArray::Make(this);
     }
   case KindOfUninit:
   case KindOfNull:
@@ -307,7 +307,7 @@ void SharedVariant::dump(std::string &out) {
       out += "array: ";
       out += m_data.str->data();
     } else {
-      auto sm = SharedMap::Make(this);
+      auto sm = SharedArray::Make(this);
       SCOPE_EXIT { sm->release(); };
       sm->dump(out);
     }
@@ -391,20 +391,20 @@ SharedVariant* SharedVariant::getValue(ssize_t pos) const {
   return m_data.array->getValIndex(pos);
 }
 
-ArrayData* SharedVariant::loadElems(const SharedMap &sharedMap) {
+ArrayData* SharedVariant::loadElems(const SharedArray &array) {
   assert(is(KindOfArray));
   auto count = arrSize();
   ArrayData* elems;
   if (isPacked()) {
     PackedArrayInit ai(count);
     for (uint i = 0; i < count; i++) {
-      ai.append(sharedMap.getValueRef(i));
+      ai.append(array.getValueRef(i));
     }
     elems = ai.create();
   } else {
     ArrayInit ai(count);
     for (uint i = 0; i < count; i++) {
-      ai.add(m_data.array->getKeyIndex(i)->toLocal(), sharedMap.getValueRef(i),
+      ai.add(m_data.array->getKeyIndex(i)->toLocal(), array.getValueRef(i),
              true);
     }
     elems = ai.create();

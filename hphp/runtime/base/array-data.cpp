@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/macros.h"
-#include "hphp/runtime/base/shared-map.h"
+#include "hphp/runtime/base/shared-array.h"
 #include "hphp/runtime/base/policy-array.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/vm/name-value-table-wrapper.h"
@@ -72,32 +72,32 @@ static size_t VsizeNop(const ArrayData* ad) {
 extern const ArrayFunctions g_array_funcs = {
   // release
   { &HphpArray::ReleasePacked, &HphpArray::Release,
-    &SharedMap::Release,
+    &SharedArray::Release,
     &NameValueTableWrapper::Release,
     &PolicyArray::Release },
   // nvGetInt
   { &HphpArray::NvGetIntPacked, &HphpArray::NvGetInt,
-    &SharedMap::NvGetInt,
+    &SharedArray::NvGetInt,
     &NameValueTableWrapper::NvGetInt,
     &PolicyArray::NvGetInt },
   // nvGetStr
   { &HphpArray::NvGetStrPacked, &HphpArray::NvGetStr,
-    &SharedMap::NvGetStr,
+    &SharedArray::NvGetStr,
     &NameValueTableWrapper::NvGetStr,
     &PolicyArray::NvGetStr },
   // nvGetKey
   { &HphpArray::NvGetKeyPacked, &HphpArray::NvGetKey,
-    &SharedMap::NvGetKey,
+    &SharedArray::NvGetKey,
     &NameValueTableWrapper::NvGetKey,
     &PolicyArray::NvGetKey },
   // setInt
   { &HphpArray::SetIntPacked, &HphpArray::SetInt,
-    &SharedMap::SetInt,
+    &SharedArray::SetInt,
     &NameValueTableWrapper::SetInt,
     &PolicyArray::SetInt },
   // setStr
   { &HphpArray::SetStrPacked, &HphpArray::SetStr,
-    &SharedMap::SetStr,
+    &SharedArray::SetStr,
     &NameValueTableWrapper::SetStr,
     &PolicyArray::SetStr },
   // vsize
@@ -107,7 +107,7 @@ extern const ArrayFunctions g_array_funcs = {
     &VsizeNop },
   // getValueRef
   { &HphpArray::GetValueRef, &HphpArray::GetValueRef,
-    &SharedMap::GetValueRef,
+    &SharedArray::GetValueRef,
     &NameValueTableWrapper::GetValueRef,
     &PolicyArray::GetValueRef },
   // noCopyOnWrite
@@ -117,98 +117,98 @@ extern const ArrayFunctions g_array_funcs = {
     false },
   // isVectorData
   { &HphpArray::IsVectorDataPacked, &HphpArray::IsVectorData,
-    &SharedMap::IsVectorData,
+    &SharedArray::IsVectorData,
     &NameValueTableWrapper::IsVectorData,
     &PolicyArray::IsVectorData },
   // existsInt
   { &HphpArray::ExistsIntPacked, &HphpArray::ExistsInt,
-    &SharedMap::ExistsInt,
+    &SharedArray::ExistsInt,
     &NameValueTableWrapper::ExistsInt,
     &PolicyArray::ExistsInt },
   // existsStr
   { &HphpArray::ExistsStrPacked, &HphpArray::ExistsStr,
-    &SharedMap::ExistsStr,
+    &SharedArray::ExistsStr,
     &NameValueTableWrapper::ExistsStr,
     &PolicyArray::ExistsStr },
   // lvalInt
   { &HphpArray::LvalIntPacked, &HphpArray::LvalInt,
-    &SharedMap::LvalInt,
+    &SharedArray::LvalInt,
     &NameValueTableWrapper::LvalInt,
     &PolicyArray::LvalInt },
   // lvalStr
   { &HphpArray::LvalStrPacked, &HphpArray::LvalStr,
-    &SharedMap::LvalStr,
+    &SharedArray::LvalStr,
     &NameValueTableWrapper::LvalStr,
     &PolicyArray::LvalStr },
   // lvalNew
   { &HphpArray::LvalNewPacked, &HphpArray::LvalNew,
-    &SharedMap::LvalNew,
+    &SharedArray::LvalNew,
     &NameValueTableWrapper::LvalNew,
     &PolicyArray::LvalNew },
   // setRefInt
   { &HphpArray::SetRefIntPacked, &HphpArray::SetRefInt,
-    &SharedMap::SetRefInt,
+    &SharedArray::SetRefInt,
     &NameValueTableWrapper::SetRefInt,
     &PolicyArray::SetRefInt },
   // setRefStr
   { &HphpArray::SetRefStrPacked, &HphpArray::SetRefStr,
-    &SharedMap::SetRefStr,
+    &SharedArray::SetRefStr,
     &NameValueTableWrapper::SetRefStr,
     &PolicyArray::SetRefStr },
   // addInt
   { &HphpArray::AddIntPacked, &HphpArray::AddInt,
-    &SharedMap::SetInt, // reuse set
+    &SharedArray::SetInt, // reuse set
     &NameValueTableWrapper::SetInt, // reuse set
     &PolicyArray::AddInt },
   // addStr
   { &HphpArray::SetStrPacked, // reuse set
     &HphpArray::AddStr,
-    &SharedMap::SetStr, // reuse set
+    &SharedArray::SetStr, // reuse set
     &NameValueTableWrapper::SetStr, // reuse set
     &PolicyArray::AddStr },
   // removeInt
   { &HphpArray::RemoveIntPacked, &HphpArray::RemoveInt,
-    &SharedMap::RemoveInt,
+    &SharedArray::RemoveInt,
     &NameValueTableWrapper::RemoveInt,
     &PolicyArray::RemoveInt },
   // removeStr
   { &HphpArray::RemoveStrPacked, &HphpArray::RemoveStr,
-    &SharedMap::RemoveStr,
+    &SharedArray::RemoveStr,
     &NameValueTableWrapper::RemoveStr,
     &PolicyArray::RemoveStr },
   // iterBegin
   { &HphpArray::IterBegin, &HphpArray::IterBegin,
-    &SharedMap::IterBegin,
+    &SharedArray::IterBegin,
     &NameValueTableWrapper::IterBegin,
     &PolicyArray::IterBegin },
   // iterEnd
   { &HphpArray::IterEnd, &HphpArray::IterEnd,
-    &SharedMap::IterEnd,
+    &SharedArray::IterEnd,
     &NameValueTableWrapper::IterEnd,
     &PolicyArray::IterEnd },
   // iterAdvance
   { &HphpArray::IterAdvance, &HphpArray::IterAdvance,
-    &SharedMap::IterAdvance,
+    &SharedArray::IterAdvance,
     &NameValueTableWrapper::IterAdvance,
     &PolicyArray::IterAdvance },
   // iterRewind
   { &HphpArray::IterRewind, &HphpArray::IterRewind,
-    &SharedMap::IterRewind,
+    &SharedArray::IterRewind,
     &NameValueTableWrapper::IterRewind,
     &PolicyArray::IterRewind },
   // validFullPos
   { &HphpArray::ValidFullPos, &HphpArray::ValidFullPos,
-    &SharedMap::ValidFullPos,
+    &SharedArray::ValidFullPos,
     &NameValueTableWrapper::ValidFullPos,
     &PolicyArray::ValidFullPos },
   // advanceFullPos
   { &HphpArray::AdvanceFullPos, &HphpArray::AdvanceFullPos,
-    &SharedMap::AdvanceFullPos,
+    &SharedArray::AdvanceFullPos,
     &NameValueTableWrapper::AdvanceFullPos,
     &PolicyArray::AdvanceFullPos },
   // escalateForSort
   { &HphpArray::EscalateForSort, &HphpArray::EscalateForSort,
-    &SharedMap::EscalateForSort,
+    &SharedArray::EscalateForSort,
     &NameValueTableWrapper::EscalateForSort,
     &PolicyArray::EscalateForSort },
   // ksort
@@ -243,12 +243,12 @@ extern const ArrayFunctions g_array_funcs = {
     &ArrayData::Uasort },
   // copy
   { &HphpArray::CopyPacked, &HphpArray::Copy,
-    &SharedMap::Copy,
+    &SharedArray::Copy,
     &NameValueTableWrapper::Copy,
     &PolicyArray::Copy },
   // copyWithStrongIterators
   { &HphpArray::CopyWithStrongIterators, &HphpArray::CopyWithStrongIterators,
-    &SharedMap::CopyWithStrongIterators,
+    &SharedArray::CopyWithStrongIterators,
     &NameValueTableWrapper::CopyWithStrongIterators,
     &PolicyArray::CopyWithStrongIterators },
   // nonSmartCopy
@@ -258,62 +258,62 @@ extern const ArrayFunctions g_array_funcs = {
     &PolicyArray::NonSmartCopy },
   // append
   { &HphpArray::AppendPacked, &HphpArray::Append,
-    &SharedMap::Append,
+    &SharedArray::Append,
     &NameValueTableWrapper::Append,
     &PolicyArray::Append },
   // appendRef
   { &HphpArray::AppendRefPacked, &HphpArray::AppendRef,
-    &SharedMap::AppendRef,
+    &SharedArray::AppendRef,
     &NameValueTableWrapper::AppendRef,
     &PolicyArray::AppendRef },
   // appendWithRef
   { &HphpArray::AppendWithRefPacked, &HphpArray::AppendWithRef,
-    &SharedMap::AppendRef,
+    &SharedArray::AppendRef,
     &NameValueTableWrapper::AppendRef,
     &PolicyArray::AppendRef },
   // plus
   { &HphpArray::Plus, &HphpArray::Plus,
-    &SharedMap::Plus,
+    &SharedArray::Plus,
     &NameValueTableWrapper::Plus,
     &PolicyArray::Plus },
   // merge
   { &HphpArray::Merge, &HphpArray::Merge,
-    &SharedMap::Merge,
+    &SharedArray::Merge,
     &NameValueTableWrapper::Merge,
     &PolicyArray::Merge },
   // pop
   { &HphpArray::PopPacked, &HphpArray::Pop,
-    &SharedMap::Pop,
+    &SharedArray::Pop,
     &NameValueTableWrapper::Pop,
     &PolicyArray::Pop },
   // dequeue
   { &HphpArray::DequeuePacked, &HphpArray::Dequeue,
-    &SharedMap::Dequeue,
+    &SharedArray::Dequeue,
     &NameValueTableWrapper::Dequeue,
     &PolicyArray::Dequeue },
   // prepend
   { &HphpArray::PrependPacked, &HphpArray::Prepend,
-    &SharedMap::Prepend,
+    &SharedArray::Prepend,
     &NameValueTableWrapper::Prepend,
     &PolicyArray::Prepend },
   // renumber
   { &HphpArray::RenumberPacked, &HphpArray::Renumber,
-    &SharedMap::Renumber,
+    &SharedArray::Renumber,
     &NameValueTableWrapper::Renumber,
     &PolicyArray::Renumber },
   // onSetEvalScalar
   { &HphpArray::OnSetEvalScalarPacked, &HphpArray::OnSetEvalScalar,
-    &SharedMap::OnSetEvalScalar,
+    &SharedArray::OnSetEvalScalar,
     &NameValueTableWrapper::OnSetEvalScalar,
     &PolicyArray::OnSetEvalScalar },
   // escalate
   { &ArrayData::Escalate, &ArrayData::Escalate,
-    &SharedMap::Escalate,
+    &SharedArray::Escalate,
     &ArrayData::Escalate,
     &PolicyArray::Escalate },
   // getSharedVariant
   { &ArrayData::GetSharedVariant, &ArrayData::GetSharedVariant,
-    &SharedMap::GetSharedVariant,
+    &SharedArray::GetSharedVariant,
     &ArrayData::GetSharedVariant,
     &ArrayData::GetSharedVariant },
   // zSetInt
@@ -669,7 +669,7 @@ void ArrayData::serialize(VariableSerializer *serializer,
 
 bool ArrayData::hasInternalReference(PointerSet &vars,
                                      bool ds /* = false */) const {
-  if (isSharedMap()) return false;
+  if (isSharedArray()) return false;
   for (ArrayIter iter(this); iter; ++iter) {
     CVarRef var = iter.secondRef();
     if (var.isReferenced()) {
@@ -789,8 +789,8 @@ void ArrayData::dump(std::ostream &out) {
 }
 
 void ArrayData::getChildren(std::vector<TypedValue *> &out) {
-  if (isSharedMap()) {
-    SharedMap *sm = static_cast<SharedMap *>(this);
+  if (isSharedArray()) {
+    SharedArray *sm = static_cast<SharedArray *>(this);
     sm->getChildren(out);
     return;
   }

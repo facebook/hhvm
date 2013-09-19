@@ -29,8 +29,8 @@ namespace HPHP {
 /**
  * Wrapper for a shared memory map.
  */
-class SharedMap : public ArrayData, Sweepable {
-  explicit SharedMap(SharedVariant* source)
+class SharedArray : public ArrayData, Sweepable {
+  explicit SharedArray(SharedVariant* source)
     : ArrayData(kSharedKind)
     , m_arr(source)
     , m_localCache(nullptr) {
@@ -38,13 +38,13 @@ class SharedMap : public ArrayData, Sweepable {
     source->incRef();
   }
 
-  ~SharedMap();
+  ~SharedArray();
 
 public:
   template<class... Args>
-  static SharedMap* Make(Args&&... args) {
-    return new (MM().smartMallocSize(sizeof(SharedMap)))
-      SharedMap(std::forward<Args>(args)...);
+  static SharedArray* Make(Args&&... args) {
+    return new (MM().smartMallocSize(sizeof(SharedArray)))
+      SharedArray(std::forward<Args>(args)...);
   }
 
   static SharedVariant *GetSharedVariant(const ArrayData* ad);
@@ -86,7 +86,7 @@ public:
 
   static ArrayData* Copy(const ArrayData*);
   /**
-   * Copy (escalate) the SharedMap without triggering local cache.
+   * Copy (escalate) the SharedArray without triggering local cache.
    */
   static ArrayData* Append(ArrayData* a, CVarRef v, bool copy);
   static ArrayData* AppendRef(ArrayData*, CVarRef v, bool copy);
@@ -123,8 +123,8 @@ public:
 private:
   ssize_t getIndex(int64_t k) const;
   ssize_t getIndex(const StringData* k) const;
-  static SharedMap* asSharedMap(ArrayData* ad);
-  static const SharedMap* asSharedMap(const ArrayData* ad);
+  static SharedArray* asSharedArray(ArrayData* ad);
+  static const SharedArray* asSharedArray(const ArrayData* ad);
 
 public:
   void getChildren(std::vector<TypedValue *> &out);

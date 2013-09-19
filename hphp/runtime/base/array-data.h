@@ -45,7 +45,7 @@ class ArrayData {
   enum ArrayKind : uint8_t {
     kPackedKind,  // HphpArray with keys in range [0..size)
     kMixedKind,   // HphpArray arbitrary int or string keys, maybe holes
-    kSharedKind,  // SharedMap
+    kSharedKind,  // SharedArray
     kNvtwKind,    // NameValueTableWrapper
     kPolicyKind,  // PolicyArray
     kNumKinds // insert new values before kNumKinds.
@@ -192,7 +192,7 @@ public:
     return m_kind <= kMixedKind;
     static_assert(kPackedKind < kMixedKind, "");
   }
-  bool isSharedMap() const { return m_kind == kSharedKind; }
+  bool isSharedArray() const { return m_kind == kSharedKind; }
   bool isNameValueTableWrapper() const {
     return m_kind == kNvtwKind;
   }

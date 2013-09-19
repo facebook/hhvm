@@ -37,7 +37,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class SharedMap;
+class SharedArray;
 class SharedVariantStats;
 class ImmutablePackedArray;
 class ImmutableArray;
@@ -125,7 +125,7 @@ public:
   int getIndex(int64_t key);
   int getIndex(const StringData* key);
 
-  ArrayData* loadElems(const SharedMap &sharedMap);
+  ArrayData* loadElems(const SharedArray&);
 
   Variant getKey(ssize_t pos) const;
 

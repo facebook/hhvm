@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/util/exception.h"
-#include "hphp/runtime/base/shared-map.h"
+#include "hphp/runtime/base/shared-array.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/comparisons.h"

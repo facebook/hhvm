@@ -794,8 +794,6 @@ function verbose(string $msg, bool $verbose): void {
   }
 }
 
-// For the Hack type checker
-// See www/flib/core/hack/fun.php
 function fun(string $s): string {
   return $s;
 }

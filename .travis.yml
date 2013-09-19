@@ -9,13 +9,18 @@ before_script:
   - sudo locale-gen de_DE && sudo locale-gen zh_CN.utf8 && sudo locale-gen fr_FR
   - HPHP_HOME=`pwd` make -j 6
 
+# Test suites take longer to run in RepoAuthoritative mode (-r) than normal so
+# split out the -r from normal runs and further split the -r runs by suite to
+# avoid the possibility of slower machines exceeding the 50 minute test timeout
 env:
-  - TEST_RUN_MODE="-m jit"
-  - TEST_RUN_MODE="-m jit -r"
-  - TEST_RUN_MODE="-m interp"
-  - TEST_RUN_MODE="-m interp -r"
+  - TEST_RUN_MODE="-m jit all"
+  - TEST_RUN_MODE="-m interp all"
+  - TEST_RUN_MODE="-m jit -r quick slow"
+  - TEST_RUN_MODE="-m interp -r quick slow"
+  - TEST_RUN_MODE="-m jit -r zend"
+  - TEST_RUN_MODE="-m interp -r zend"
 
-script: hphp/hhvm/hhvm hphp/test/run $TEST_RUN_MODE all
+script: hphp/hhvm/hhvm hphp/test/run $TEST_RUN_MODE
 
 notifications:
   irc: "chat.freenode.net#hhvm"

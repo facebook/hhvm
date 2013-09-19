@@ -179,42 +179,6 @@ void emitIncRefGenericRegSafe(Asm& a, PhysReg base,
 void emitAssertFlagsNonNegative(Asm& as);
 void emitAssertRefCount(Asm& as, PhysReg base);
 
-/*
- * Use the function templates below to conveniently build the arg vector.
- */
-TCA emitServiceReqWork(Asm& as, TCA start, bool persist, SRFlags flags,
-                       ServiceRequest req, const ServiceReqArgVec& argInfo);
-
-template<typename... Arg>
-TCA emitServiceReq(Asm& as, SRFlags flags, ServiceRequest sr, Arg... a) {
-  // These should reuse stubs. Use emitEphemeralServiceReq.
-  assert(sr != REQ_BIND_JMPCC_FIRST &&
-         sr != REQ_BIND_JMPCC_SECOND &&
-         sr != REQ_BIND_JMP);
-
-  ServiceReqArgVec argv;
-  packServiceReqArgs(argv, a...);
-  return emitServiceReqWork(as, as.frontier(), true, flags, sr, argv);
-}
-
-template<typename... Arg>
-TCA emitServiceReq(Asm& as, ServiceRequest sr, Arg... a) {
-  return emitServiceReq(as, SRFlags::None, sr, a...);
-}
-
-template<typename... Arg>
-TCA emitEphemeralServiceReq(Asm& as, TCA start, ServiceRequest sr,
-                            Arg... a) {
-  assert(sr == REQ_BIND_JMPCC_FIRST ||
-         sr == REQ_BIND_JMPCC_SECOND ||
-         sr == REQ_BIND_JMP);
-  assert(as.contains(start));
-
-  ServiceReqArgVec argv;
-  packServiceReqArgs(argv, a...);
-  return emitServiceReqWork(as, start, false, SRFlags::None, sr, argv);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }}}

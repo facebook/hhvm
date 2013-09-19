@@ -82,7 +82,8 @@ TCA emitRetFromInterpretedFrame() {
   auto const arBase = static_cast<int32_t>(sizeof(ActRec) - sizeof(Cell));
   a.   lea  (rVmSp[-arBase], serviceReqArgRegs[0]);
   a.   movq (rVmFp, serviceReqArgRegs[1]);
-  emitServiceReq(a, SRFlags::JmpInsteadOfRet, REQ_POST_INTERP_RET);
+  emitServiceReq(tx64->stubsCode, SRFlags::JmpInsteadOfRet,
+                 REQ_POST_INTERP_RET);
   return ret;
 }
 
@@ -97,7 +98,8 @@ TCA emitRetFromInterpretedGeneratorFrame() {
   a.    loadq  (rVmFp[AROFF(m_this)], rContAR);
   a.    loadq  (rContAR[CONTOFF(m_arPtr)], rContAR);
   a.    movq   (rVmFp, serviceReqArgRegs[1]);
-  emitServiceReq(a, SRFlags::JmpInsteadOfRet, REQ_POST_INTERP_RET);
+  emitServiceReq(tx64->stubsCode, SRFlags::JmpInsteadOfRet,
+                 REQ_POST_INTERP_RET);
   return ret;
 }
 
@@ -164,7 +166,7 @@ void emitCallToExit(UniqueStubs& uniqueStubs) {
   // as the start address.
   a.emitNop(1);
   auto const stub = emitServiceReq(
-    a,
+    tx64->stubsCode,
     SRFlags::Align | SRFlags::JmpInsteadOfRet,
     REQ_EXIT
   );
@@ -198,7 +200,7 @@ void emitResumeHelpers(UniqueStubs& uniqueStubs) {
   emitGetGContext(a, rax);
   a.   loadq  (rax[fpOff], rVmFp);
   a.   loadq  (rax[spOff], rVmSp);
-  emitServiceReq(a, REQ_RESUME);
+  emitServiceReq(tx64->stubsCode, REQ_RESUME);
 
   add("resumeHelpers", uniqueStubs.resumeHelper);
 }
@@ -234,7 +236,7 @@ void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
   a.    loadl  (rax[Func::sharedBaseOffset()], eax);
   a.    addl   (eax, edi);
   emitEagerVMRegSave(a, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
-  emitServiceReq(a, REQ_STACK_OVERFLOW);
+  emitServiceReq(tx64->stubsCode, REQ_STACK_OVERFLOW);
 
   add("stackOverflowHelper", uniqueStubs.stackOverflowHelper);
 }

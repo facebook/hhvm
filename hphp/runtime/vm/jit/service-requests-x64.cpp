@@ -51,9 +51,9 @@ void emitBindJ(Asm& a, Asm& astubs,
   tx64->setJmpTransID(toSmash);
 
   TCA sr = (req == JIT::REQ_BIND_JMP
-            ? emitEphemeralServiceReq(astubs, tx64->getFreeStub(), req, toSmash,
-                                      dest.offset())
-            : emitServiceReq(astubs, req, toSmash, dest.offset()));
+            ? emitEphemeralServiceReq(tx64->stubsCode, tx64->getFreeStub(), req,
+                                      toSmash, dest.offset())
+            : emitServiceReq(tx64->stubsCode, req, toSmash, dest.offset()));
 
   if (a.base() == astubs.base()) {
     CodeCursor cursor(a, toSmash);
@@ -160,7 +160,7 @@ void emitBindCallHelper(CodeBlock& mainCode, CodeBlock& stubsCode,
   Asm astubs { stubsCode };
   astubs.    mov_reg64_reg64(rStashedAR, serviceReqArgRegs[1]);
   emitPopRetIntoActRec(astubs);
-  emitServiceReq(astubs, JIT::REQ_BIND_CALL, req);
+  emitServiceReq(stubsCode, JIT::REQ_BIND_CALL, req);
 
   TRACE(1, "will bind static call: tca %p, funcd %p, astubs %p\n",
         toSmash, funcd, stubsCode.frontier());
@@ -175,6 +175,97 @@ bool isNativeImplCall(const Func* funcd, int numArgs) {
 }
 
 } // anonymous namespace
+
+//////////////////////////////////////////////////////////////////////
+
+TCA
+emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
+                   ServiceRequest req, const ServiceReqArgVec& argv) {
+  assert(start);
+  const bool align = flags & SRFlags::Align;
+  Asm as { cb };
+
+  /*
+   * Remember previous state of the code cache.
+   */
+  boost::optional<CodeCursor> maybeCc = boost::none;
+  if (start != as.frontier()) {
+    maybeCc = boost::in_place<CodeCursor>(boost::ref(as), start);
+  }
+
+  /* max space for moving to align, saving VM regs plus emitting args */
+  static const int
+    kVMRegSpace = 0x14,
+    kMovSize = 0xa,
+    kNumServiceRegs = sizeof(serviceReqArgRegs) / sizeof(PhysReg),
+    kMaxStubSpace = kJmpTargetAlign - 1 + kVMRegSpace +
+      kNumServiceRegs * kMovSize;
+  if (align) {
+    moveToAlign(as);
+  }
+  TCA retval = as.frontier();
+  TRACE(3, "Emit Service Req @%p %s(", start, serviceReqName(req));
+  /*
+   * Move args into appropriate regs. Eager VMReg save may bash flags,
+   * so set the CondCode arguments first.
+   */
+  for (int i = 0; i < argv.size(); ++i) {
+    assert(i < kNumServiceReqArgRegs);
+    auto reg = serviceReqArgRegs[i];
+    const auto& argInfo = argv[i];
+    switch(argv[i].m_kind) {
+      case ServiceReqArgInfo::Immediate: {
+        TRACE(3, "%" PRIx64 ", ", argInfo.m_imm);
+        as.    emitImmReg(argInfo.m_imm, reg);
+      } break;
+      case ServiceReqArgInfo::CondCode: {
+        // Already set before VM reg save.
+        DEBUG_ONLY TCA start = as.frontier();
+        as.    setcc(argInfo.m_cc, rbyte(reg));
+        assert(start - as.frontier() <= kMovSize);
+        TRACE(3, "cc(%x), ", argInfo.m_cc);
+      } break;
+      default: not_reached();
+    }
+  }
+  emitEagerVMRegSave(as, RegSaveFlags::SaveFP);
+  if (persist) {
+    as.  emitImmReg(0, Transl::reg::rAsm);
+  } else {
+    as.  emitImmReg((uint64_t)start, Transl::reg::rAsm);
+  }
+  TRACE(3, ")\n");
+  as.    emitImmReg(req, Transl::reg::rdi);
+
+  /*
+   * Weird hand-shaking with enterTC: reverse-call a service routine.
+   *
+   * In the case of some special stubs (m_callToExit, m_retHelper), we
+   * have already unbalanced the return stack by doing a ret to
+   * something other than enterTCHelper.  In that case
+   * SRJmpInsteadOfRet indicates to fake the return.
+   */
+  if (flags & SRFlags::JmpInsteadOfRet) {
+    as.  pop(Transl::reg::rax);
+    as.  jmp(Transl::reg::rax);
+  } else {
+    as.  ret();
+  }
+
+  // TODO(2796856): we should record an OpServiceRequest pseudo-bytecode here.
+
+  translator_not_reached(as);
+  if (!persist) {
+    /*
+     * Recycled stubs need to be uniformly sized. Make space for the
+     * maximal possible service requests.
+     */
+    assert(as.frontier() - start <= kMaxStubSpace);
+    as.emitNop(start + kMaxStubSpace - as.frontier());
+    assert(as.frontier() - start == kMaxStubSpace);
+  }
+  return retval;
+}
 
 void emitBindJcc(Asm& a, Asm& astubs, Transl::ConditionCode cc,
                  SrcKey dest, ServiceRequest req /* = REQ_BIND_JCC */) {

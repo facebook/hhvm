@@ -385,7 +385,7 @@ TranslatorX64::createTranslation(const TranslArgs& args) {
   TCA astart = mainCode.frontier();
   TCA stubstart = stubsCode.frontier();
   Asm astubs { stubsCode };
-  TCA req = emitServiceReq(astubs, JIT::REQ_RETRANSLATE, sk.offset());
+  TCA req = emitServiceReq(stubsCode, JIT::REQ_RETRANSLATE, sk.offset());
   SKTRACE(1, sk, "inserting anchor translation for (%p,%d) at %p\n",
           sk.unit(), sk.offset(), req);
   SrcRec* sr = m_srcDB.insert(sk);
@@ -1286,8 +1286,8 @@ TranslatorX64::bindJmpccFirst(TCA toSmash,
   if (taken) {
     cc = ccNegate(cc);
   }
-  Asm astubs { stubsCode };
-  TCA stub = emitEphemeralServiceReq(astubs, getFreeStub(),
+
+  TCA stub = emitEphemeralServiceReq(stubsCode, getFreeStub(),
                                      JIT::REQ_BIND_JMPCC_SECOND, toSmash,
                                      offWillDefer, cc);
 
@@ -2252,7 +2252,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
     if (RuntimeOption::EvalJitTransCounters) {
       emitTransCounterInc(a);
     }
-    a.    jmp(emitServiceReq(astubs, JIT::REQ_INTERPRET,
+    a.    jmp(emitServiceReq(stubsCode, JIT::REQ_INTERPRET,
                              t.m_sk.offset(), t.m_numOpcodes));
     // Fall through.
   }
@@ -2851,8 +2851,7 @@ void TranslatorX64::addDbgGuardImpl(SrcKey sk, SrcRec& srcRec) {
 
   // Branch to a special REQ_INTERPRET if attached
   {
-    Asm astubs { stubsCode };
-    TCA fallback = emitServiceReq(astubs, JIT::REQ_INTERPRET, sk.offset(), 0);
+    TCA fallback = emitServiceReq(stubsCode, JIT::REQ_INTERPRET, sk.offset(), 0);
     a. jnz(fallback);
   }
 

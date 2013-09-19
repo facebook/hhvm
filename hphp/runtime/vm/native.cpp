@@ -176,6 +176,9 @@ void callFunc(const Func* func, TypedValue *ctx,
   case KindOfInt64:
     ret.m_data.num = makeNativeCall<int64_t>(func, args, numArgs, ctx);
     break;
+  case KindOfDouble:
+    ret.m_data.dbl = makeNativeCall<double>(func, args, numArgs, ctx);
+    break;
   case KindOfString:
   case KindOfStaticString:
   case KindOfArray:

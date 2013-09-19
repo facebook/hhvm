@@ -8,7 +8,7 @@ function test(){
         public function __construct() {
             spl_autoload_register(array($this, 'loader'));
         }
-        private function loader($className) {
+        private function loader($className) {echo 'Trying to load ', $className, ' via ', __METHOD__, "()\n";
 		if($className == "testCore"){var_dump("myClass expect"); test();}
         }
     }

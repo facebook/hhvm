@@ -58,6 +58,7 @@ class CacheData : private boost::noncopyable {
   bool isRegularFile() const;
   bool isDirectory() const;
   bool isCompressed() const;
+  bool isEmpty() const;
 
   uint64_t fileSize() const;
 

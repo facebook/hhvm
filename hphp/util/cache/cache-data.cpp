@@ -213,6 +213,10 @@ bool CacheData::isCompressed() const {
   return (flags_ & kFlag_Compressed) == kFlag_Compressed;
 }
 
+bool CacheData::isEmpty() const {
+  return (flags_ & kFlag_EmptyEntry) == kFlag_EmptyEntry;
+}
+
 uint64_t CacheData::fileSize() const {
   return file_data_length_;
 }

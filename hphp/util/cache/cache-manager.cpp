@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -40,6 +41,7 @@ namespace HPHP {
 
 using folly::format;
 using std::move;
+using std::set;
 using std::string;
 using std::unique_ptr;
 using std::vector;
@@ -62,8 +64,7 @@ bool CacheManager::getFileContents(const string& name, const char** data,
   return cd.getDataPointer(data, data_len, compressed);
 }
 
-bool CacheManager::getDecompressed(const std::string& name,
-                                  string* data) const {
+bool CacheManager::getDecompressed(const string& name, string* data) const {
   const auto it = cache_map_.find(name);
 
   if (it == cache_map_.end()) {
@@ -74,7 +75,7 @@ bool CacheManager::getDecompressed(const std::string& name,
   return cd.getDecompressedData(data);
 }
 
-bool CacheManager::isCompressed(const std::string& name) const {
+bool CacheManager::isCompressed(const string& name) const {
   const auto it = cache_map_.find(name);
 
   if (it == cache_map_.end()) {
@@ -112,6 +113,9 @@ bool CacheManager::addEmptyEntry(const string& name) {
   cd->createEmpty(name, entry_counter_++);
 
   cache_map_[name] = move(cd);
+
+  addDirectories(name);
+
   return true;
 }
 
@@ -138,6 +142,17 @@ bool CacheManager::dirExists(const string& name) const {
 
   return it->second->isDirectory();
 }
+
+bool CacheManager::emptyEntryExists(const string& name) const {
+  const auto it = cache_map_.find(name);
+
+  if (it == cache_map_.end()) {
+    return false;
+  }
+
+  return it->second->isEmpty();
+}
+
 
 bool CacheManager::getUncompressedFileSize(const string& name,
                                            uint64_t* size) const {
@@ -255,6 +270,16 @@ bool CacheManager::saveCache(const string& path) const {
   }
 
   return true;
+}
+
+void CacheManager::getEntryNames(set<string>* names) const {
+  set<string> temp;
+
+  for (const auto& it : cache_map_) {
+    temp.insert(it.first);
+  }
+
+  *names = temp;
 }
 
 // --- Private functions.

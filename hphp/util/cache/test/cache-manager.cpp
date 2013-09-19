@@ -247,8 +247,8 @@ TEST_F(TestCacheManager, SaveAndLoad) {
   EXPECT_TRUE(cm.dirExists("/test"));
   EXPECT_TRUE(cm.dirExists("/test/name"));
 
-  // Empty entries don't get their parent directories added.
-  EXPECT_FALSE(cm.dirExists("/test/with"));
+  // Empty entries also get their parent directories added.
+  EXPECT_TRUE(cm.dirExists("/test/with"));
 
   const char* compare_1;
   uint64_t compare_len_1;

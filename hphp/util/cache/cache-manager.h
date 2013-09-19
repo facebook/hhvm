@@ -32,6 +32,7 @@
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
 
 #include <boost/utility.hpp>
@@ -54,15 +55,14 @@ class CacheManager : private boost::noncopyable {
   //
   // Caller is responsible for decompressing data if desired.
   bool getFileContents(const std::string& name, const char** data,
-                               uint64_t* data_len, bool* compressed) const;
+                       uint64_t* data_len, bool* compressed) const;
 
   // Like getFileContents, but this code does the decompression for you.
   //
   // Only works for files which are compressed (returns false otherwise).
   //
   // Returns true on success and populates data.
-  bool getDecompressed(const std::string& name,
-                               std::string* data) const;
+  bool getDecompressed(const std::string& name, std::string* data) const;
 
   // Find out if a named file is actually compressed without fetching it.
   bool isCompressed(const std::string& name) const;
@@ -75,8 +75,7 @@ class CacheManager : private boost::noncopyable {
   // (see CacheData::sufficientlyCompressed for adjustments)
   //
   // Returns true on success.
-  bool addFileContents(const std::string& name,
-                               const std::string& path);
+  bool addFileContents(const std::string& name, const std::string& path);
 
   // Create a named entry with no contents.
   bool addEmptyEntry(const std::string& name);
@@ -91,17 +90,21 @@ class CacheManager : private boost::noncopyable {
   // Like entryExists, but only for directories.
   bool dirExists(const std::string& name) const;
 
+  // Yep, you guessed it.
+  bool emptyEntryExists(const std::string& name) const;
+
   // Get the size of a named entry after decompression.
   // Decompresses the data on the fly if necessary - use with care!
   // Returns true on success and populates size.
-  bool getUncompressedFileSize(const std::string& name,
-                                       uint64_t* size) const;
+  bool getUncompressedFileSize(const std::string& name, uint64_t* size) const;
 
   // Load a serialized instance of the cache from disk.
   bool loadCache(const std::string& path);
 
   // Write a serialized copy of the cache to disk.
   bool saveCache(const std::string& path) const;
+
+  void getEntryNames(std::set<std::string>* names) const;
 
  private:
   void addDirectories(const std::string& name);

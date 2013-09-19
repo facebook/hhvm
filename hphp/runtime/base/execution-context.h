@@ -781,12 +781,12 @@ public:
 class ExecutionContext : public VMExecutionContext {};
 
 #if DEBUG
-#define g_vmContext (&dynamic_cast<VMExecutionContext&>( \
-                       *g_context.getNoCheck()))
+#define g_vmContext (&dynamic_cast<HPHP::VMExecutionContext&>( \
+                       *HPHP::g_context.getNoCheck()))
 #else
-#define g_vmContext (static_cast<VMExecutionContext*>( \
-                                   static_cast<BaseExecutionContext*>( \
-                                     g_context.getNoCheck())))
+#define g_vmContext (static_cast<HPHP::VMExecutionContext*>( \
+                                   static_cast<HPHP::BaseExecutionContext*>( \
+                                     HPHP::g_context.getNoCheck())))
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////

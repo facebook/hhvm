@@ -484,10 +484,7 @@ function run_test($options, $test) {
   if (skip_test($options, $test)) {
     return 'skip';
   }
-  if ('hhas' === pathinfo($test, PATHINFO_EXTENSION)
-      && idx($options, 'mode') === 'interp') {
-    return 'skip';
-  }
+  $test_ext = pathinfo($test, PATHINFO_EXTENSION);
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
 
   $hhvm = __DIR__.'/../tools/timeout.sh -t 300 '.$hhvm;

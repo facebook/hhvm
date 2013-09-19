@@ -130,7 +130,7 @@ bool ObjectData::o_toBooleanImpl() const noexcept {
   } else if (instanceof(c_SimpleXMLElement::classof())) {
     // SimpleXMLElement is the only non-collection class that has custom
     // bool casting.
-    return c_SimpleXMLElement::ToBoolean(this);
+    return c_SimpleXMLElement::ToBool(this);
   }
   always_assert(false);
   return false;

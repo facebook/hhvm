@@ -80,7 +80,7 @@ class c_SimpleXMLElement :
 
  public:
   static c_SimpleXMLElement* Clone(ObjectData* obj);
-  static bool    ToBoolean(const ObjectData* obj) noexcept;
+  static bool    ToBool(const ObjectData* obj) noexcept;
   static int64_t ToInt64(const ObjectData* obj) noexcept;
   static double  ToDouble(const ObjectData* obj) noexcept;
   static Array   ToArray(const ObjectData* obj);

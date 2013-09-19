@@ -947,7 +947,7 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
   return uninit_null();
 }
 
-bool c_SimpleXMLElement::ToBoolean(const ObjectData* obj) noexcept {
+bool c_SimpleXMLElement::ToBool(const ObjectData* obj) noexcept {
   auto thiz = static_cast<const c_SimpleXMLElement*>(obj);
   if (thiz->m_node || thiz->hasDynProps()) {
     if (thiz->m_is_array || thiz->m_is_children ||

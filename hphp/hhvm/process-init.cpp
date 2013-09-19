@@ -169,6 +169,15 @@ void ProcessInit() {
   for (long long i = 0; i < hhbc_ext_class_count; ++i) {
     const HhbcExtClassInfo* info = hhbc_ext_classes + i;
     const StringData* name = makeStaticString(info->m_name);
+
+    const String strName(info->m_name, CopyString);
+    const auto& ci = ClassInfo::FindSystemClassInterfaceOrTrait(strName);
+    if (ci &&
+        (ci->getAttribute() & ClassInfo::ZendCompat) &&
+        !RuntimeOption::EnableZendCompat) {
+      continue;
+    }
+
     const NamedEntity* ne = Unit::GetNamedEntity(name);
     Class* cls = Unit::lookupClass(ne);
     assert(cls);

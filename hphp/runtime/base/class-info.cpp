@@ -162,6 +162,12 @@ Array ClassInfo::GetClassLike(unsigned mask, unsigned value) {
   for (ClassMap::const_iterator iter = s_class_like.begin();
        iter != s_class_like.end(); ++iter) {
     const ClassInfo *info = iter->second->getDeclared();
+
+    if ((info->getAttribute() & ClassInfo::ZendCompat) &&
+        !RuntimeOption::EnableZendCompat) {
+      continue;
+    }
+
     if (!info || (info->m_attribute & mask) != value) continue;
     ret.append(info->m_name);
   }

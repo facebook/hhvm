@@ -7610,11 +7610,21 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       e.info = it->second;
       e.ci = ClassInfo::FindSystemClassInterfaceOrTrait(e.name);
       assert(e.ci);
+      if ((e.ci->getAttribute() & ClassInfo::ZendCompat) &&
+          !RuntimeOption::EnableZendCompat) {
+        continue;
+      }
       StringData* parentName
         = makeStaticString(e.ci->getParentClass().get());
       if (parentName->empty()) {
         // If this class doesn't have a base class, it's eligible to be
         // loaded now
+        classEntries.push_back(e);
+      } else if ((e.ci->getAttribute() & ClassInfo::ZendCompat) &&
+                 Unit::loadClass(parentName)) {
+        // You can really hurt yourself trying to extend a systemlib class from
+        // a normal IDL (like overriding the property vector with your own C++
+        // properties). ZendCompat things don't do any of that so they are cool.
         classEntries.push_back(e);
       } else {
         // If this class has a base class, we can't load it until its

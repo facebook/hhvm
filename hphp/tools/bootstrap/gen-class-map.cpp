@@ -280,7 +280,7 @@ static void writeConstant(std::ostream& out, const PhpConst& cns) {
 }
 
 #define CLASS_FLAG_MASK (IsAbstract|IsFinal|NoDefaultSweep|\
-                         HipHopSpecific|IsCppSerializable)
+                         HipHopSpecific|IsCppSerializable|ZendCompat)
 #define PROP_FLAG_MASK  (IsProtected|IsPrivate|IsPublic|IsStatic)
 
 static void writeClass(std::ostream& out, const PhpClass& cls) {

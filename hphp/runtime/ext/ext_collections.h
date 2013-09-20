@@ -66,6 +66,10 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   bool t_containskey(CVarRef key);
   Object t_removekey(CVarRef key);
   Array t_toarray();
+  Object t_tovector();
+  Object t_tomap();
+  Object t_tostablemap();
+  Object t_toset();
   void t_sort(CVarRef col = uninit_null()); // deprecated
   void t_reverse();
   void t_splice(CVarRef offset, CVarRef len = uninit_null(),
@@ -93,6 +97,8 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   }
 
   static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+
+  void init(CVarRef t);
 
   TypedValue* at(int64_t key) {
     if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
@@ -257,6 +263,10 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   Object t_remove(CVarRef key);
   Object t_removekey(CVarRef key);
   Array t_toarray();
+  Object t_tovector();
+  Object t_tomap();
+  Object t_tostablemap();
+  Object t_toset();
   Array t_copyasarray(); // deprecated
   Array t_tokeysarray(); // deprecated
   Object t_values(); // deprecated
@@ -278,6 +288,8 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
 
   static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
   static void throwOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+
+  void init(CVarRef t);
 
   TypedValue* at(int64_t key) const {
     Bucket* p = find(key);
@@ -568,6 +580,10 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   Object t_remove(CVarRef key);
   Object t_removekey(CVarRef key);
   Array t_toarray();
+  Object t_tovector();
+  Object t_tomap();
+  Object t_tostablemap();
+  Object t_toset();
   Array t_copyasarray(); // deprecated
   Array t_tokeysarray(); // deprecated
   Object t_values(); // deprecated
@@ -589,6 +605,8 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
 
   static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
   static void throwOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+
+  void init(CVarRef t);
 
   TypedValue* at(int64_t key) {
     Bucket* p = find(key);
@@ -837,6 +855,8 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   bool t_contains(CVarRef key);
   Object t_remove(CVarRef key);
   Array t_toarray();
+  Object t_tovector();
+  Object t_toset();
   Object t_getiterator();
   Object t_map(CVarRef callback);
   Object t_filter(CVarRef callback);
@@ -855,6 +875,8 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
   static void throwOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
   static void throwNoIndexAccess() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+
+  void init(CVarRef t);
 
   void add(TypedValue* val);
   void remove(int64_t key) {
@@ -1064,6 +1086,10 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   Variant t_get(CVarRef key);
   bool t_containskey(CVarRef key);
   Array t_toarray();
+  Object t_tovector();
+  Object t_tomap();
+  Object t_tostablemap();
+  Object t_toset();
   Object t_getiterator();
   Object t_map(CVarRef callback);
   Object t_mapwithkey(CVarRef callback);

@@ -348,6 +348,50 @@
                     ]
                 },
                 {
+                    "name": "toVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a copy of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Map built from the keys and values of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toStableMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a StableMap built from the keys and values of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toSet",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set built from the values of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "getIterator",
                     "flags": [
                     ],
@@ -1023,6 +1067,50 @@
                     ]
                 },
                 {
+                    "name": "toVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the values of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a copy of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toStableMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a StableMap built from the keys and values of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toSet",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set built from the values of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "copyAsArray",
                     "flags": [
                     ],
@@ -1653,6 +1741,50 @@
                     ]
                 },
                 {
+                    "name": "toVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the values of this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Map built from the keys and values of this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toStableMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a copy of this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toSet",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set built from the values of this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "copyAsArray",
                     "flags": [
                     ],
@@ -2148,6 +2280,28 @@
                     ]
                 },
                 {
+                    "name": "toVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the values of this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toSet",
+                    "flags": [
+                    ],
+                    "desc": "Returns a copy of this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "getIterator",
                     "flags": [
                     ],
@@ -2522,6 +2676,50 @@
                     "desc": "Returns an array built from the values from this Pair.",
                     "return": {
                         "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector build from the values from this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Map built from the keys and values of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toStableMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a StableMap built from the keys and values of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toSet",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set built from the values of this Pair.",
+                    "return": {
+                        "type": "Object"
                     },
                     "args": [
                     ]

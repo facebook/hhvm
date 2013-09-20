@@ -120,16 +120,7 @@ void c_Vector::freeData() {
 
 void c_Vector::t___construct(CVarRef iterable /* = null_variant */) {
   if (iterable.isNull()) return;
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  if (sz) {
-    reserve(sz);
-  }
-  for (; iter; ++iter) {
-    Variant v = iter.second();
-    TypedValue* tv = cvarToCell(&v);
-    add(tv);
-  }
+  init(iterable);
 }
 
 void c_Vector::grow() {
@@ -193,6 +184,19 @@ c_Vector* c_Vector::Clone(ObjectData* obj) {
     cellDup(thiz->m_data[i], data[i]);
   }
   return target;
+}
+
+void c_Vector::init(CVarRef t) {
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(t, sz);
+  if (sz) {
+    reserve(sz);
+  }
+  for (; iter; ++iter) {
+    Variant v = iter.second();
+    TypedValue* tv = cvarToCell(&v);
+    add(tv);
+  }
 }
 
 Object c_Vector::t_add(CVarRef val) {
@@ -1082,23 +1086,7 @@ void c_Map::deleteBuckets() {
 
 void c_Map::t___construct(CVarRef iterable /* = null_variant */) {
   if (iterable.isNull()) return;
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  if (sz) {
-    reserve(sz);
-  }
-  for (; iter; ++iter) {
-    Variant k = iter.first();
-    Variant v = iter.second();
-    TypedValue* tv = v.asCell();
-    if (k.isInteger()) {
-      update(k.toInt64(), tv);
-    } else if (k.isString()) {
-      update(k.getStringData(), tv);
-    } else {
-      throwBadKeyType();
-    }
-  }
+  init(iterable);
 }
 
 Array c_Map::toArrayImpl() const {
@@ -1140,6 +1128,26 @@ c_Map* c_Map::Clone(ObjectData* obj) {
   }
 
   return target;
+}
+
+void c_Map::init(CVarRef t) {
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(t, sz);
+  if (sz) {
+    reserve(sz);
+  }
+  for (; iter; ++iter) {
+    Variant k = iter.first();
+    Variant v = iter.second();
+    TypedValue* tv = v.asCell();
+    if (k.isInteger()) {
+      update(k.toInt64(), tv);
+    } else if (k.isString()) {
+      update(k.getStringData(), tv);
+    } else {
+      throwBadKeyType();
+    }
+  }
 }
 
 Object c_Map::t_add(CVarRef val) {
@@ -2260,23 +2268,7 @@ void c_StableMap::deleteBuckets() {
 
 void c_StableMap::t___construct(CVarRef iterable /* = null_variant */) {
   if (iterable.isNull()) return;
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  if (sz) {
-    reserve(sz);
-  }
-  for (; iter; ++iter) {
-    Variant k = iter.first();
-    Variant v = iter.second();
-    TypedValue* tv = cvarToCell(&v);
-    if (k.isInteger()) {
-      update(k.toInt64(), tv);
-    } else if (k.isString()) {
-      update(k.getStringData(), tv);
-    } else {
-      throwBadKeyType();
-    }
-  }
+  init(iterable);
 }
 
 Array c_StableMap::toArrayImpl() const {
@@ -2332,6 +2324,26 @@ c_StableMap* c_StableMap::Clone(ObjectData* obj) {
   target->m_pListTail = last;
 
   return target;
+}
+
+void c_StableMap::init(CVarRef t) {
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(t, sz);
+  if (sz) {
+    reserve(sz);
+  }
+  for (; iter; ++iter) {
+    Variant k = iter.first();
+    Variant v = iter.second();
+    TypedValue* tv = cvarToCell(&v);
+    if (k.isInteger()) {
+      update(k.toInt64(), tv);
+    } else if (k.isString()) {
+      update(k.getStringData(), tv);
+    } else {
+      throwBadKeyType();
+    }
+  }
 }
 
 Object c_StableMap::t_add(CVarRef val) {
@@ -3536,18 +3548,7 @@ void c_Set::deleteBuckets() {
 
 void c_Set::t___construct(CVarRef iterable /* = null_variant */) {
   if (iterable.isNull()) return;
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  for (; iter; ++iter) {
-    Variant v = iter.second();
-    if (v.isInteger()) {
-      update(v.toInt64());
-    } else if (v.isString()) {
-      update(v.getStringData());
-    } else {
-      throwBadValueType();
-    }
-  }
+  init(iterable);
 }
 
 Array c_Set::toArrayImpl() const {
@@ -3582,6 +3583,21 @@ c_Set* c_Set::Clone(ObjectData* obj) {
   }
 
   return target;
+}
+
+void c_Set::init(CVarRef t) {
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(t, sz);
+  for (; iter; ++iter) {
+    Variant v = iter.second();
+    if (v.isInteger()) {
+      update(v.toInt64());
+    } else if (v.isString()) {
+      update(v.getStringData());
+    } else {
+      throwBadValueType();
+    }
+  }
 }
 
 Object c_Set::t_add(CVarRef val) {
@@ -4649,6 +4665,44 @@ COLLECTION_MAGIC_METHODS(Set)
 COLLECTION_MAGIC_METHODS(Pair)
 
 #undef COLLECTION_MAGIC_METHODS
+
+#define ITERABLE_MATERIALIZE_METHODS(cls) \
+  Object c_##cls::t_tovector() { \
+    c_Vector* vec; \
+    Object o = vec = NEWOBJ(c_Vector)(); \
+    vec->init(VarNR(this)); \
+    return o; \
+  } \
+  Object c_##cls::t_toset() { \
+    c_Set* st; \
+    Object o = st = NEWOBJ(c_Set)(); \
+    st->init(VarNR(this)); \
+    return o; \
+  }
+
+#define KEYEDITERABLE_MATERIALIZE_METHODS(cls) \
+  ITERABLE_MATERIALIZE_METHODS(cls) \
+  Object c_##cls::t_tomap() { \
+    c_Map* mp; \
+    Object o = mp = NEWOBJ(c_Map)(); \
+    mp->init(VarNR(this)); \
+    return o; \
+  } \
+  Object c_##cls::t_tostablemap() { \
+    c_StableMap* smp; \
+    Object o = smp = NEWOBJ(c_StableMap)(); \
+    smp->init(VarNR(this)); \
+    return o; \
+  }
+
+KEYEDITERABLE_MATERIALIZE_METHODS(Vector)
+KEYEDITERABLE_MATERIALIZE_METHODS(Map)
+KEYEDITERABLE_MATERIALIZE_METHODS(StableMap)
+ITERABLE_MATERIALIZE_METHODS(Set)
+KEYEDITERABLE_MATERIALIZE_METHODS(Pair)
+
+#undef ITERABLE_MATERIALIZE_METHODS
+#undef KEYEDITERABLE_MATERIALIZE_METHODS
 
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
   assert(obj->isCollection());

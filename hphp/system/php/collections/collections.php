@@ -91,6 +91,12 @@ trait StrictIterable {
     }
     return $arr;
   }
+  public function toVector() {
+    return new Vector($this);
+  }
+  public function toSet() {
+    return new Set($this);
+  }
   public function lazy() {
     return new LazyIterableView($this);
   }
@@ -131,6 +137,18 @@ trait StrictKeyedIterable {
       $arr[$k] = $v;
     }
     return $arr;
+  }
+  public function toVector() {
+    return new Vector($this);
+  }
+  public function toMap() {
+    return new Map($this);
+  }
+  public function toStableMap() {
+    return new StableMap($this);
+  }
+  public function toSet() {
+    return new Set($this);
   }
   public function lazy() {
     return new LazyKeyedIterableView($this);
@@ -201,6 +219,12 @@ trait LazyIterable {
     }
     return $arr;
   }
+  public function toVector() {
+    return new Vector($this);
+  }
+  public function toSet() {
+    return new Set($this);
+  }
   public function lazy() {
     return $this;
   }
@@ -226,6 +250,18 @@ trait LazyKeyedIterable {
       $arr[$k] = $v;
     }
     return $arr;
+  }
+  public function toVector() {
+    return new Vector($this);
+  }
+  public function toMap() {
+    return new Map($this);
+  }
+  public function toStableMap() {
+    return new StableMap($this);
+  }
+  public function toSet() {
+    return new Set($this);
   }
   public function lazy() {
     return $this;

@@ -946,8 +946,8 @@ Cell* Unit::lookupCns(const StringData* cnsName) {
       }
     }
   }
-  if (UNLIKELY(TargetCache::s_constants != nullptr)) {
-    return TargetCache::s_constants->HphpArray::nvGet(cnsName);
+  if (UNLIKELY(TargetCache::s_constants().get() != nullptr)) {
+    return TargetCache::s_constants()->nvGet(cnsName);
   }
   return nullptr;
 }
@@ -983,17 +983,19 @@ bool Unit::defCns(const StringData* cnsName, const TypedValue* value,
   auto const handle = makeCnsHandle(cnsName, persistent);
 
   if (UNLIKELY(handle == 0)) {
-    if (UNLIKELY(!TargetCache::s_constants)) {
+    if (UNLIKELY(!TargetCache::s_constants().get())) {
       /*
        * This only happens when we call define on a non
        * static string. Not worth presizing or otherwise
        * optimizing for.
        */
-      TargetCache::s_constants = HphpArray::MakeReserve(1);
+      TargetCache::s_constants() =
+        Array::attach(HphpArray::MakeReserve(1));
     }
-    // TODO(#2887942): unchecked insert
-    if (TargetCache::s_constants->nvInsert(
-          const_cast<StringData*>(cnsName), const_cast<TypedValue*>(value))) {
+    auto const existed = !!TargetCache::s_constants()->nvGet(cnsName);
+    if (!existed) {
+      TargetCache::s_constants().set(StrNR(cnsName),
+        tvAsCVarRef(value), true /* isKey */);
       return true;
     }
     raise_warning(Strings::CONSTANT_ALREADY_DEFINED, cnsName->data());

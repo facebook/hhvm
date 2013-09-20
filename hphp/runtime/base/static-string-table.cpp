@@ -239,7 +239,7 @@ const StaticString s_user("user");
 const StaticString s_Core("Core");
 Array lookupDefinedConstants(bool categorize /*= false */) {
   assert(s_stringDataMap);
-  Array usr(Transl::TargetCache::s_constants);
+  Array usr(Transl::TargetCache::s_constants());
   Array sys;
 
   for (StringDataMap::const_iterator it = s_stringDataMap->begin();

@@ -46,7 +46,13 @@ extern size_t s_persistent_start;
 /*
  * Array of dynamically defined constants
  */
-extern __thread HphpArray* s_constants;
+extern __thread std::aligned_storage<sizeof(Array),alignof(Array)>::type
+  s_constantsStorage;
+
+ALWAYS_INLINE Array& s_constants() {
+  void* vp = &s_constantsStorage;
+  return *static_cast<Array*>(vp);
+}
 
 /*
  * The fields in TargetCacheHeader are pre-allocated at process

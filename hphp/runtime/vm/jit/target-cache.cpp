@@ -94,7 +94,8 @@ undefinedError(const char* msg, const char* name) {
 
 // Targetcache memory. See the comment in target-cache.h
 __thread void* tl_targetCaches = nullptr;
-__thread HphpArray* s_constants = nullptr;
+__thread std::aligned_storage<sizeof(Array),alignof(Array)>::type
+  s_constantsStorage;
 
 static const size_t kPreAllocatedBytes = 64;
 size_t s_frontier = kPreAllocatedBytes;
@@ -358,7 +359,8 @@ static const bool zeroViaMemset = true;
 void
 requestInit() {
   assert(tl_targetCaches);
-  assert(!s_constants);
+  new (&s_constantsStorage) Array();
+  assert(!s_constants().get());
   TRACE(1, "TargetCache: @%p\n", tl_targetCaches);
   if (zeroViaMemset) {
     TRACE(1, "TargetCache: bzeroing %zd bytes: %p\n", s_frontier,
@@ -372,7 +374,8 @@ requestExit() {
   if (!zeroViaMemset) {
     flush();
   }
-  s_constants = nullptr; // it will be swept
+  s_constants().detach(); // it will be swept
+  // Don't bother running the dtor ...
 }
 
 void

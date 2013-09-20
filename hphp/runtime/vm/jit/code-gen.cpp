@@ -5184,8 +5184,8 @@ static Cell lookupCnsHelper(const TypedValue* tv,
   }
 
   Cell *cns = nullptr;
-  if (UNLIKELY(TargetCache::s_constants != nullptr)) {
-    cns = TargetCache::s_constants->HphpArray::nvGet(nm);
+  if (UNLIKELY(TargetCache::s_constants().get() != nullptr)) {
+    cns = TargetCache::s_constants()->nvGet(nm);
   }
   if (!cns) {
     cns = Unit::loadCns(const_cast<StringData*>(nm));
@@ -5244,9 +5244,9 @@ static Cell lookupCnsUHelper(const TypedValue* tv,
   Cell c1;
 
   // lookup qualified name in thread-local constants
-  bool cacheConsts = TargetCache::s_constants != nullptr;
+  bool cacheConsts = TargetCache::s_constants().get() != nullptr;
   if (UNLIKELY(cacheConsts)) {
-    cns = TargetCache::s_constants->HphpArray::nvGet(nm);
+    cns = TargetCache::s_constants()->nvGet(nm);
   }
   if (!cns) {
     cns = Unit::loadCns(const_cast<StringData*>(nm));
@@ -5260,7 +5260,7 @@ static Cell lookupCnsUHelper(const TypedValue* tv,
   // lookup unqualified name in thread-local constants
   if (UNLIKELY(!cns)) {
     if (UNLIKELY(cacheConsts)) {
-      cns = TargetCache::s_constants->HphpArray::nvGet(fallback);
+      cns = TargetCache::s_constants()->nvGet(fallback);
     }
     if (!cns) {
       cns = Unit::loadCns(const_cast<StringData*>(fallback));

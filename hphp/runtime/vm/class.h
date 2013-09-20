@@ -608,8 +608,6 @@ struct Class : AtomicCountable {
   // uses/imports the trait.
   Class* findMethodBaseClass(const StringData* methName);
 
-  void getMethodNames(const Class* ctx, HphpArray* methods) const;
-
   // Returns true iff this class declared the given method.
   // For trait methods, the class declaring them is the one that uses/imports
   // the trait.

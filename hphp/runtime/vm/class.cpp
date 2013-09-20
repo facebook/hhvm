@@ -2098,53 +2098,6 @@ Class* Class::findMethodBaseClass(const StringData* methName) {
   return f->baseCls();
 }
 
-void Class::getMethodNames(const Class* ctx, HphpArray* methods) const {
-  for (Slot i = 0; i < m_methods.size(); i++) {
-    Func* meth = m_methods[i];
-    StringData* methName = const_cast<StringData*>(meth->name());
-    Class* declCls = meth->cls();
-
-    // Only pick methods declared in this class, in order to match Zend's order.
-    // Inherited methods will be inserted in the recursive call later.
-    if (declCls != this) continue;
-
-    // Skip generated, internal methods.
-    if (meth->isGenerated()) continue;
-
-    // Public methods are always visible.
-    if ((meth->attrs() & AttrPublic)) {
-      /*
-       * TODO(#2887942): unchecked mutation
-       */
-      methods->set(methName, true_varNR, false);
-      continue;
-    }
-
-    // In anonymous contexts, only public methods are visible.
-    if (!ctx) continue;
-
-    // All methods are visible if the context is the class that declared them.
-    // If the context is not the declCls, protected methods are visible in
-    // context classes related the declCls.
-    if (declCls == ctx ||
-        ((meth->attrs() & AttrProtected) &&
-         (ctx->classof(declCls) || declCls->classof(ctx)))) {
-      /*
-       * TODO(#2887942): unchecked mutation
-       */
-      methods->set(methName, true_varNR, false);
-    }
-  }
-
-  // Now add the inherited methods.
-  if (m_parent.get()) m_parent->getMethodNames(ctx, methods);
-
-  // Add interface methods that the class may not have implemented yet.
-  for (int i = 0, sz = m_declInterfaces.size(); i < sz; i++) {
-    m_declInterfaces[i]->getMethodNames(ctx, methods);
-  }
-}
-
 // Returns true iff this class declared the given method.
 // For trait methods, the class declaring them is the one that uses/imports
 // the trait.

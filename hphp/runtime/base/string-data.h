@@ -63,7 +63,7 @@ enum CopyStringMode { CopyString };
  * allowed in which allocation mode:
  *
  *          | Static | Malloced | Normal (request local)
- *          +-------------+----------+-------------------
+ *          +--------+----------+-----------------------
  *   Flat   |   X    |     X    |    X
  *   Shared |        |          |    X
  */

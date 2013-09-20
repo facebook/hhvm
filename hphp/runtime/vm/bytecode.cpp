@@ -7242,7 +7242,6 @@ void VMExecutionContext::requestInit() {
 void VMExecutionContext::requestExit() {
   MemoryProfile::finishProfiling();
 
-  destructObjects();
   syncGdbState();
   tx()->requestExit();
   Transl::Translator::clearTranslator();

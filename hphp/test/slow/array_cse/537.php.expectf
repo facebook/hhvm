@@ -27,8 +27,7 @@ array(1) {
   }
 }
 object(stdClass)#2 (0) {
-}
-HipHop Notice: Undefined index: 1 in %s/test/slow/array_cse/537.php on line 53
+}%A
 NULL
 string(32) "8fa14cdd754f91cc6554c9e71929cce7"
 string(1) "f"

@@ -312,10 +312,6 @@ Object c_Vector::t_lazy() {
   return SystemLib::AllocLazyKeyedIterableViewObject(this);
 }
 
-Object c_Vector::t_view() {
-  return SystemLib::AllocLazyKeyedIterableViewObject(this);
-}
-
 Object c_Vector::t_kvzip() {
   c_Vector* vec;
   Object obj = vec = NEWOBJ(c_Vector)();
@@ -388,43 +384,6 @@ Object c_Vector::t_removekey(CVarRef key) {
 
 Array c_Vector::t_toarray() {
   return toArrayImpl();
-}
-
-void c_Vector::t_sort(CVarRef col /* = null */) {
-  raise_warning("Vector::sort() is deprecated, please use the builtin sort() "
-                "function or usort() function instead");
-  // Terribly inefficient, but produces correct results for now
-  Variant arr = t_toarray();
-  if (col.isNull()) {
-    f_sort(ref(arr));
-  } else {
-    if (!col.isObject()) {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Expected col to be an instance of Collator"));
-      throw e;
-    }
-    ObjectData* obj = col.getObjectData();
-    if (!obj->instanceof(c_Collator::classof())) {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Expected col to be an instance of Collator"));
-      throw e;
-    }
-    auto collator = static_cast<c_Collator*>(obj);
-    // TODO Task #1429976: What do we do if the Collator encountered errors
-    // while sorting? How is this reported to the user?
-    collator->t_sort(ref(arr));
-  }
-  if (!arr.isArray()) {
-    assert(false);
-    return;
-  }
-  ArrayData* ad = arr.getArrayData();
-  int sz = ad->size();
-  ssize_t pos = ad->iter_begin();
-  for (int i = 0; i < sz; ++i, pos = ad->iter_advance(pos)) {
-    assert(pos != ArrayData::invalid_index);
-    tvAsVariant(&m_data[i]) = ad->getValue(pos);
-  }
 }
 
 void c_Vector::t_reverse() {
@@ -1213,10 +1172,6 @@ Object c_Map::t_keys() {
 }
 
 Object c_Map::t_lazy() {
-  return SystemLib::AllocLazyKeyedIterableViewObject(this);
-}
-
-Object c_Map::t_view() {
   return SystemLib::AllocLazyKeyedIterableViewObject(this);
 }
 
@@ -2410,10 +2365,6 @@ Object c_StableMap::t_keys() {
 }
 
 Object c_StableMap::t_lazy() {
-  return SystemLib::AllocLazyKeyedIterableViewObject(this);
-}
-
-Object c_StableMap::t_view() {
   return SystemLib::AllocLazyKeyedIterableViewObject(this);
 }
 
@@ -3644,10 +3595,6 @@ Object c_Set::t_lazy() {
   return SystemLib::AllocLazyIterableViewObject(this);
 }
 
-Object c_Set::t_view() {
-  return SystemLib::AllocLazyIterableViewObject(this);
-}
-
 bool c_Set::t_contains(CVarRef key) {
   DataType t = key.getType();
   if (t == KindOfInt64) {
@@ -4330,10 +4277,6 @@ Object c_Pair::t_keys() {
 }
 
 Object c_Pair::t_lazy() {
-  return SystemLib::AllocLazyKeyedIterableViewObject(this);
-}
-
-Object c_Pair::t_view() {
   return SystemLib::AllocLazyKeyedIterableViewObject(this);
 }
 

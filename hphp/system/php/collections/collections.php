@@ -100,10 +100,6 @@ trait StrictIterable {
   public function lazy() {
     return new LazyIterableView($this);
   }
-  // deprecated
-  public function view() {
-    return new LazyIterableView($this);
-  }
   public function map($callback) {
     $res = Vector {};
     foreach ($this as $v) {
@@ -151,10 +147,6 @@ trait StrictKeyedIterable {
     return new Set($this);
   }
   public function lazy() {
-    return new LazyKeyedIterableView($this);
-  }
-  // deprecated
-  public function view() {
     return new LazyKeyedIterableView($this);
   }
   public function map($callback) {
@@ -228,10 +220,6 @@ trait LazyIterable {
   public function lazy() {
     return $this;
   }
-  // deprecated
-  public function view() {
-    return $this;
-  }
   public function map($callback) {
     return new LazyMapIterable($this, $callback);
   }
@@ -264,10 +252,6 @@ trait LazyKeyedIterable {
     return new Set($this);
   }
   public function lazy() {
-    return $this;
-  }
-  // deprecated
-  public function view() {
     return $this;
   }
   public function map($callback) {

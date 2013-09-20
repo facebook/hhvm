@@ -90,17 +90,6 @@
                     ]
                 },
                 {
-                    "name": "view",
-                    "flags": [
-                    ],
-                    "desc": "Returns a lazy iterable view of this Vector.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "kvzip",
                     "flags": [
                     ],
@@ -478,22 +467,6 @@
                     ]
                 },
                 {
-                    "name": "sort",
-                    "flags": [
-                    ],
-                    "desc": "Uses the specified Collator to sort the Vector in place.",
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                        {
-                            "name": "col",
-                            "type": "Variant",
-                            "value": "null"
-                        }
-                    ]
-                },
-                {
                     "name": "reverse",
                     "flags": [
                     ],
@@ -840,17 +813,6 @@
                 },
                 {
                     "name": "lazy",
-                    "flags": [
-                    ],
-                    "desc": "Returns a lazy iterable view of this Map.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "view",
                     "flags": [
                     ],
                     "desc": "Returns a lazy iterable view of this Map.",
@@ -1524,17 +1486,6 @@
                     ]
                 },
                 {
-                    "name": "view",
-                    "flags": [
-                    ],
-                    "desc": "Returns a lazy iterable view of this StableMap.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "kvzip",
                     "flags": [
                     ],
@@ -2187,17 +2138,6 @@
                     ]
                 },
                 {
-                    "name": "view",
-                    "flags": [
-                    ],
-                    "desc": "Returns a lazy iterable view of this Set.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "clear",
                     "flags": [
                     ],
@@ -2638,17 +2578,6 @@
                 },
                 {
                     "name": "lazy",
-                    "flags": [
-                    ],
-                    "desc": "Returns a lazy iterable view of this Pair.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "view",
                     "flags": [
                     ],
                     "desc": "Returns a lazy iterable view of this Pair.",

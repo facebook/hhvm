@@ -529,7 +529,7 @@ void CodeGenerator::emitCompare(SSATmp* src1, SSATmp* src2) {
 void CodeGenerator::emitReqBindJcc(ConditionCode cc,
                                    const ReqBindJccData* extra) {
   auto& a = m_as;
-  assert(&m_as != &m_astubs &&
+  assert(m_as.base() != m_astubs.base() &&
          "ReqBindJcc only makes sense outside of astubs");
 
   prepareForTestAndSmash(a, 0, TestAndSmashFlags::kAlignJccAndJmp);
@@ -1874,7 +1874,7 @@ void CodeGenerator::emitTypeGuard(Type type, Loc typeSrc, Loc dataSrc) {
     [&](ConditionCode cc) {
       auto const destSK = SrcKey(curFunc(), m_curTrace->bcOff());
       auto const destSR = m_tx64->getSrcRec(destSK);
-      m_tx64->emitFallbackCondJmp(m_as, *destSR, ccNegate(cc));
+      m_tx64->emitFallbackCondJmp(this->m_as, *destSR, ccNegate(cc));
     });
 }
 
@@ -4576,7 +4576,8 @@ void CodeGenerator::emitSideExitGuard(Type type,
   emitTypeTest(type, typeSrc, dataSrc,
     [&](ConditionCode cc) {
       auto const sk = SrcKey(curFunc(), taken);
-      emitBindJcc(m_as, m_astubs, ccNegate(cc), sk, REQ_BIND_SIDE_EXIT);
+      emitBindJcc(this->m_as, this->m_astubs, ccNegate(cc), sk,
+                  REQ_BIND_SIDE_EXIT);
   });
 }
 
@@ -6044,9 +6045,9 @@ void CodeGenerator::print() const {
              m_state.asmInfo);
 }
 
-static void patchJumps(Asm& as, CodegenState& state, Block* block) {
+static void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) {
   void* list = state.patches[block];
-  Address labelAddr = as.frontier();
+  Address labelAddr = cb.frontier();
   while (list) {
     int32_t* toPatch = (int32_t*)list;
     int32_t diffToNext = *toPatch;
@@ -6127,9 +6128,6 @@ void genCodeForTrace(IRTrace* trace,
   LiveRegs live_regs = computeLiveRegs(irFactory, regs, trace->front());
   CodegenState state(irFactory, regs, live_regs, lifetime, asmInfo);
 
-  Asm as { mainCode };
-  Asm astubs { stubsCode };
-
   // Returns: whether a block has already been emitted.
   DEBUG_ONLY auto isEmitted = [&](Block* block) {
     return state.addresses[block];
@@ -6141,15 +6139,15 @@ void genCodeForTrace(IRTrace* trace,
    * not the fallthrough block, emit a patchable jump to the
    * fallthrough block.
    */
-  auto emitBlock = [&](Asm& a, Block* block, Block* nextBlock) {
+  auto emitBlock = [&](CodeBlock& cb, Block* block, Block* nextBlock) {
     assert(!isEmitted(block));
 
     FTRACE(6, "cgBlock {} on {}\n", block->id(),
-           a.base() == astubs.base() ? "astubs" : "a");
+           cb.base() == stubsCode.base() ? "astubs" : "a");
 
-    auto const aStart      = a.frontier();
-    auto const astubsStart = astubs.frontier();
-    patchJumps(a, state, block);
+    auto const aStart      = cb.frontier();
+    auto const astubsStart = stubsCode.frontier();
+    patchJumps(cb, state, block);
     state.addresses[block] = aStart;
 
     // If the block ends with a Jmp_ and the next block is going to be
@@ -6157,9 +6155,9 @@ void genCodeForTrace(IRTrace* trace,
     IRInstruction* last = block->back();
     state.noTerminalJmp_ = last->op() == Jmp_ && nextBlock == last->taken();
 
-    CodeGenerator cg(trace, a, astubs, tx64, state);
+    CodeGenerator cg(trace, cb, stubsCode, tx64, state);
     if (state.asmInfo) {
-      state.asmInfo->asmRanges[block] = TcaRange(aStart, a.frontier());
+      state.asmInfo->asmRanges[block] = TcaRange(aStart, cb.frontier());
     }
 
     cg.cgBlock(block, bcMap);
@@ -6167,20 +6165,22 @@ void genCodeForTrace(IRTrace* trace,
       if (next != nextBlock) {
         // If there's a fallthrough block and it's not the next thing
         // going into this assembler, then emit a jump to it.
+        Asm a { cb };
         emitFwdJmp(a, next, state);
       }
     }
 
     if (state.asmInfo) {
-      state.asmInfo->asmRanges[block] = TcaRange(aStart, a.frontier());
-      if (a.base() != astubs.base()) {
+      state.asmInfo->asmRanges[block] = TcaRange(aStart, cb.frontier());
+      if (cb.base() != stubsCode.base()) {
         state.asmInfo->astubRanges[block] = TcaRange(astubsStart,
-                                                     astubs.frontier());
+                                                     stubsCode.frontier());
       }
     }
   };
 
   if (RuntimeOption::EvalHHIRGenerateAsserts && trace->isMain()) {
+    Asm as { mainCode };
     emitTraceCall(as, trace->bcOff(), tx64);
   }
 
@@ -6189,12 +6189,12 @@ void genCodeForTrace(IRTrace* trace,
   for (auto it = linfo.blocks.begin(); it != linfo.astubsIt; ++it) {
     Block* nextBlock = boost::next(it) != linfo.astubsIt
       ? *boost::next(it) : nullptr;
-    emitBlock(as, *it, nextBlock);
+    emitBlock(mainCode, *it, nextBlock);
   }
   for (auto it = linfo.astubsIt; it != linfo.blocks.end(); ++it) {
     Block* nextBlock = boost::next(it) != linfo.blocks.end()
       ? *boost::next(it) : nullptr;
-    emitBlock(astubs, *it, nextBlock);
+    emitBlock(stubsCode, *it, nextBlock);
   }
 
   if (debug) {

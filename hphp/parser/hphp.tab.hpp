@@ -1,10 +1,8 @@
+/* A Bison parser, made by GNU Bison 2.5.  */
 
-/* A Bison parser, made by GNU Bison 2.4.1.  */
-
-/* Skeleton interface for Bison's Yacc-like parsers in C
+/* Bison interface for Yacc-like parsers in C
    
-      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
-   Free Software Foundation, Inc.
+      Copyright (C) 1984, 1989-1990, 2000-2011 Free Software Foundation, Inc.
    
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -161,7 +159,7 @@
      YYTOKEN(373, T_END_HEREDOC)
      YYTOKEN(374, T_DOLLAR_OPEN_CURLY_BRACES)
      YYTOKEN(375, T_CURLY_OPEN)
-     YYTOKEN(376, T_PAAMAYIM_NEKUDOTAYIM)
+     YYTOKEN(376, T_DOUBLE_COLON)
      YYTOKEN(377, T_NAMESPACE)
      YYTOKEN(378, T_NS_C)
      YYTOKEN(379, T_DIR)

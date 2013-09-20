@@ -1,10 +1,8 @@
+/* A Bison parser, made by GNU Bison 2.5.  */
 
-/* A Bison parser, made by GNU Bison 2.4.1.  */
-
-/* Skeleton implementation for Bison's Yacc-like parsers in C
+/* Bison implementation for Yacc-like parsers in C
    
-      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
-   Free Software Foundation, Inc.
+      Copyright (C) 1984, 1989-1990, 2000-2011 Free Software Foundation, Inc.
    
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -46,7 +44,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "2.4.1"
+#define YYBISON_VERSION "2.5"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -75,7 +73,7 @@
 
 /* Copy the first part of user declarations.  */
 
-/* Line 189 of yacc.c  */
+/* Line 268 of yacc.c  */
 #line 1 "hphp.y"
 
 #ifdef XHPAST2_PARSER
@@ -638,8 +636,8 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 }
 
 
-/* Line 189 of yacc.c  */
-#line 643 "hphp.tab.cpp"
+/* Line 268 of yacc.c  */
+#line 641 "hphp.tab.cpp"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -784,7 +782,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
      T_END_HEREDOC = 373,
      T_DOLLAR_OPEN_CURLY_BRACES = 374,
      T_CURLY_OPEN = 375,
-     T_PAAMAYIM_NEKUDOTAYIM = 376,
+     T_DOUBLE_COLON = 376,
      T_NAMESPACE = 377,
      T_NS_C = 378,
      T_DIR = 379,
@@ -848,8 +846,8 @@ typedef struct YYLTYPE
 /* Copy the second part of user declarations.  */
 
 
-/* Line 264 of yacc.c  */
-#line 853 "hphp.tab.cpp"
+/* Line 343 of yacc.c  */
+#line 851 "hphp.tab.cpp"
 
 #ifdef short
 # undef short
@@ -899,7 +897,7 @@ typedef short int yytype_int16;
 #define YYSIZE_MAXIMUM ((YYSIZE_T) -1)
 
 #ifndef YY_
-# if YYENABLE_NLS
+# if defined YYENABLE_NLS && YYENABLE_NLS
 #  if ENABLE_NLS
 #   include <libintl.h> /* INFRINGES ON USER NAME SPACE */
 #   define YY_(msgid) dgettext ("bison-runtime", msgid)
@@ -952,11 +950,11 @@ YYID (yyi)
 #    define alloca _alloca
 #   else
 #    define YYSTACK_ALLOC alloca
-#    if ! defined _ALLOCA_H && ! defined _STDLIB_H && (defined __STDC__ || defined __C99__FUNC__ \
+#    if ! defined _ALLOCA_H && ! defined EXIT_SUCCESS && (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 #     include <stdlib.h> /* INFRINGES ON USER NAME SPACE */
-#     ifndef _STDLIB_H
-#      define _STDLIB_H 1
+#     ifndef EXIT_SUCCESS
+#      define EXIT_SUCCESS 0
 #     endif
 #    endif
 #   endif
@@ -979,24 +977,24 @@ YYID (yyi)
 #  ifndef YYSTACK_ALLOC_MAXIMUM
 #   define YYSTACK_ALLOC_MAXIMUM YYSIZE_MAXIMUM
 #  endif
-#  if (defined __cplusplus && ! defined _STDLIB_H \
+#  if (defined __cplusplus && ! defined EXIT_SUCCESS \
        && ! ((defined YYMALLOC || defined malloc) \
 	     && (defined YYFREE || defined free)))
 #   include <stdlib.h> /* INFRINGES ON USER NAME SPACE */
-#   ifndef _STDLIB_H
-#    define _STDLIB_H 1
+#   ifndef EXIT_SUCCESS
+#    define EXIT_SUCCESS 0
 #   endif
 #  endif
 #  ifndef YYMALLOC
 #   define YYMALLOC malloc
-#   if ! defined malloc && ! defined _STDLIB_H && (defined __STDC__ || defined __C99__FUNC__ \
+#   if ! defined malloc && ! defined EXIT_SUCCESS && (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 void *malloc (YYSIZE_T); /* INFRINGES ON USER NAME SPACE */
 #   endif
 #  endif
 #  ifndef YYFREE
 #   define YYFREE free
-#   if ! defined free && ! defined _STDLIB_H && (defined __STDC__ || defined __C99__FUNC__ \
+#   if ! defined free && ! defined EXIT_SUCCESS && (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 void free (void *); /* INFRINGES ON USER NAME SPACE */
 #   endif
@@ -1027,23 +1025,7 @@ struct yyalloc
      ((N) * (sizeof (yytype_int16) + sizeof (YYSTYPE) + sizeof (YYLTYPE)) \
       + 2 * YYSTACK_GAP_MAXIMUM)
 
-/* Copy COUNT objects from FROM to TO.  The source and destination do
-   not overlap.  */
-# ifndef YYCOPY
-#  if defined __GNUC__ && 1 < __GNUC__
-#   define YYCOPY(To, From, Count) \
-      __builtin_memcpy (To, From, (Count) * sizeof (*(From)))
-#  else
-#   define YYCOPY(To, From, Count)		\
-      do					\
-	{					\
-	  YYSIZE_T yyi;				\
-	  for (yyi = 0; yyi < (Count); yyi++)	\
-	    (To)[yyi] = (From)[yyi];		\
-	}					\
-      while (YYID (0))
-#  endif
-# endif
+# define YYCOPY_NEEDED 1
 
 /* Relocate STACK from its old location to the new one.  The
    local variables YYSIZE and YYSTACKSIZE give the old and new number of
@@ -1062,6 +1044,26 @@ struct yyalloc
     while (YYID (0))
 
 #endif
+
+#if defined YYCOPY_NEEDED && YYCOPY_NEEDED
+/* Copy COUNT objects from FROM to TO.  The source and destination do
+   not overlap.  */
+# ifndef YYCOPY
+#  if defined __GNUC__ && 1 < __GNUC__
+#   define YYCOPY(To, From, Count) \
+      __builtin_memcpy (To, From, (Count) * sizeof (*(From)))
+#  else
+#   define YYCOPY(To, From, Count)		\
+      do					\
+	{					\
+	  YYSIZE_T yyi;				\
+	  for (yyi = 0; yyi < (Count); yyi++)	\
+	    (To)[yyi] = (From)[yyi];		\
+	}					\
+      while (YYID (0))
+#  endif
+# endif
+#endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  3
@@ -1585,7 +1587,7 @@ static const char *const yytname[] =
   "T_METHOD_C", "T_FUNC_C", "T_LINE", "T_FILE", "T_COMMENT",
   "T_DOC_COMMENT", "T_OPEN_TAG", "T_OPEN_TAG_WITH_ECHO", "T_CLOSE_TAG",
   "T_WHITESPACE", "T_START_HEREDOC", "T_END_HEREDOC",
-  "T_DOLLAR_OPEN_CURLY_BRACES", "T_CURLY_OPEN", "T_PAAMAYIM_NEKUDOTAYIM",
+  "T_DOLLAR_OPEN_CURLY_BRACES", "T_CURLY_OPEN", "T_DOUBLE_COLON",
   "T_NAMESPACE", "T_NS_C", "T_DIR", "T_NS_SEPARATOR", "T_YIELD",
   "T_XHP_LABEL", "T_XHP_TEXT", "T_XHP_ATTRIBUTE", "T_XHP_CATEGORY",
   "T_XHP_CATEGORY_LABEL", "T_XHP_CHILDREN", "T_XHP_ENUM", "T_XHP_REQUIRED",
@@ -1858,8 +1860,8 @@ static const yytype_uint8 yyr2[] =
        6,     1,     8,     5,     1,     0
 };
 
-/* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
-   STATE-NUM when YYTABLE doesn't specify something else to do.  Zero
+/* YYDEFACT[STATE-NAME] -- Default reduction number in state STATE-NUM.
+   Performed when YYTABLE doesn't specify something else to do.  Zero
    means the default is an error.  */
 static const yytype_uint16 yydefact[] =
 {
@@ -2212,8 +2214,7 @@ static const yytype_int16 yypgoto[] =
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
    positive, shift that token.  If negative, reduce the rule which
-   number is the opposite.  If zero, do what YYDEFACT says.
-   If YYTABLE_NINF, syntax error.  */
+   number is the opposite.  If YYTABLE_NINF, syntax error.  */
 #define YYTABLE_NINF -726
 static const yytype_int16 yytable[] =
 {
@@ -3327,6 +3328,12 @@ static const yytype_int16 yytable[] =
      324,   325,   326,   327,   328,   329,   330,   331,   332,   333,
      334,   335,   336,     0,   337
 };
+
+#define yypact_value_is_default(yystate) \
+  ((yystate) == (-1104))
+
+#define yytable_value_is_error(yytable_value) \
+  ((yytable_value) == (-726))
 
 static const yytype_int16 yycheck[] =
 {
@@ -4601,9 +4608,18 @@ static const yytype_uint16 yystos[] =
 
 /* Like YYERROR except do call yyerror.  This remains here temporarily
    to ease the transition to the new meaning of YYERROR, for GCC.
-   Once GCC version 2 has supplanted version 1, this can go.  */
+   Once GCC version 2 has supplanted version 1, this can go.  However,
+   YYFAIL appears to be in use.  Nevertheless, it is formally deprecated
+   in Bison 2.4.2's NEWS entry, where a plan to phase it out is
+   discussed.  */
 
 #define YYFAIL		goto yyerrlab
+#if defined YYFAIL
+  /* This is here to suppress warnings from the GCC cpp's
+     -Wunused-macros.  Normally we don't worry about that warning, but
+     some users do, and we want to make it easy for users to remove
+     YYFAIL uses, which will produce warnings from Bison 2.5.  */
+#endif
 
 #define YYRECOVERING()  (!!yyerrstatus)
 
@@ -4613,7 +4629,6 @@ do								\
     {								\
       yychar = (Token);						\
       yylval = (Value);						\
-      yytoken = YYTRANSLATE (yychar);				\
       YYPOPSTACK (1);						\
       goto yybackup;						\
     }								\
@@ -4660,7 +4675,7 @@ while (YYID (0))
    we won't break user code: when these are the locations we know.  */
 
 #ifndef YY_LOCATION_PRINT
-# if YYLTYPE_IS_TRIVIAL
+# if defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL
 #  define YY_LOCATION_PRINT(File, Loc)			\
      fprintf (File, "%d.%d-%d.%d",			\
 	      (Loc).line0, (Loc).char0,	\
@@ -4869,7 +4884,6 @@ int yydebug;
 # define YYMAXDEPTH 10000
 #endif
 
-
 
 #if YYERROR_VERBOSE
 
@@ -4972,115 +4986,142 @@ yytnamerr (char *yyres, const char *yystr)
 }
 # endif
 
-/* Copy into YYRESULT an error message about the unexpected token
-   YYCHAR while in state YYSTATE.  Return the number of bytes copied,
-   including the terminating null byte.  If YYRESULT is null, do not
-   copy anything; just return the number of bytes that would be
-   copied.  As a special case, return 0 if an ordinary "syntax error"
-   message will do.  Return YYSIZE_MAXIMUM if overflow occurs during
-   size calculation.  */
-static YYSIZE_T
-yysyntax_error (char *yyresult, int yystate, int yychar)
+/* Copy into *YYMSG, which is of size *YYMSG_ALLOC, an error message
+   about the unexpected token YYTOKEN for the state stack whose top is
+   YYSSP.
+
+   Return 0 if *YYMSG was successfully written.  Return 1 if *YYMSG is
+   not large enough to hold the message.  In that case, also set
+   *YYMSG_ALLOC to the required number of bytes.  Return 2 if the
+   required number of bytes is too large to store.  */
+static int
+yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
+                yytype_int16 *yyssp, int yytoken)
 {
-  int yyn = yypact[yystate];
+  YYSIZE_T yysize0 = yytnamerr (0, yytname[yytoken]);
+  YYSIZE_T yysize = yysize0;
+  YYSIZE_T yysize1;
+  enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
+  /* Internationalized format string. */
+  const char *yyformat = 0;
+  /* Arguments of yyformat. */
+  char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
+  /* Number of reported tokens (one for the "unexpected", one per
+     "expected"). */
+  int yycount = 0;
 
-  if (! (YYPACT_NINF < yyn && yyn <= YYLAST))
-    return 0;
-  else
+  /* There are many possibilities here to consider:
+     - Assume YYFAIL is not used.  It's too flawed to consider.  See
+       <http://lists.gnu.org/archive/html/bison-patches/2009-12/msg00024.html>
+       for details.  YYERROR is fine as it does not invoke this
+       function.
+     - If this state is a consistent state with a default action, then
+       the only way this function was invoked is if the default action
+       is an error action.  In that case, don't check for expected
+       tokens because there are none.
+     - The only way there can be no lookahead present (in yychar) is if
+       this state is a consistent state with a default action.  Thus,
+       detecting the absence of a lookahead is sufficient to determine
+       that there is no unexpected or expected token to report.  In that
+       case, just report a simple "syntax error".
+     - Don't assume there isn't a lookahead just because this state is a
+       consistent state with a default action.  There might have been a
+       previous inconsistent state, consistent state with a non-default
+       action, or user semantic action that manipulated yychar.
+     - Of course, the expected token list depends on states to have
+       correct lookahead information, and it depends on the parser not
+       to perform extra reductions after fetching a lookahead from the
+       scanner and before detecting a syntax error.  Thus, state merging
+       (from LALR or IELR) and default reductions corrupt the expected
+       token list.  However, the list is correct for canonical LR with
+       one exception: it will still contain any token that will not be
+       accepted due to an error action in a later state.
+  */
+  if (yytoken != YYEMPTY)
     {
-      int yytype = YYTRANSLATE (yychar);
-      YYSIZE_T yysize0 = yytnamerr (0, yytname[yytype]);
-      YYSIZE_T yysize = yysize0;
-      YYSIZE_T yysize1;
-      int yysize_overflow = 0;
-      enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
-      char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
-      int yyx;
+      int yyn = yypact[*yyssp];
+      yyarg[yycount++] = yytname[yytoken];
+      if (!yypact_value_is_default (yyn))
+        {
+          /* Start YYX at -YYN if negative to avoid negative indexes in
+             YYCHECK.  In other words, skip the first -YYN actions for
+             this state because they are default actions.  */
+          int yyxbegin = yyn < 0 ? -yyn : 0;
+          /* Stay within bounds of both yycheck and yytname.  */
+          int yychecklim = YYLAST - yyn + 1;
+          int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
+          int yyx;
 
-# if 0
-      /* This is so xgettext sees the translatable formats that are
-	 constructed on the fly.  */
-      YY_("syntax error, unexpected %s");
-      YY_("syntax error, unexpected %s, expecting %s");
-      YY_("syntax error, unexpected %s, expecting %s or %s");
-      YY_("syntax error, unexpected %s, expecting %s or %s or %s");
-      YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s");
-# endif
-      char *yyfmt;
-      char const *yyf;
-      static char const yyunexpected[] = "syntax error, unexpected %s";
-      static char const yyexpecting[] = ", expecting %s";
-      static char const yyor[] = " or %s";
-      char yyformat[sizeof yyunexpected
-		    + sizeof yyexpecting - 1
-		    + ((YYERROR_VERBOSE_ARGS_MAXIMUM - 2)
-		       * (sizeof yyor - 1))];
-      char const *yyprefix = yyexpecting;
-
-      /* Start YYX at -YYN if negative to avoid negative indexes in
-	 YYCHECK.  */
-      int yyxbegin = yyn < 0 ? -yyn : 0;
-
-      /* Stay within bounds of both yycheck and yytname.  */
-      int yychecklim = YYLAST - yyn + 1;
-      int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
-      int yycount = 1;
-
-      yyarg[0] = yytname[yytype];
-      yyfmt = yystpcpy (yyformat, yyunexpected);
-
-      for (yyx = yyxbegin; yyx < yyxend; ++yyx)
-	if (yycheck[yyx + yyn] == yyx && yyx != YYTERROR)
-	  {
-	    if (yycount == YYERROR_VERBOSE_ARGS_MAXIMUM)
-	      {
-		yycount = 1;
-		yysize = yysize0;
-		yyformat[sizeof yyunexpected - 1] = '\0';
-		break;
-	      }
-	    yyarg[yycount++] = yytname[yyx];
-	    yysize1 = yysize + yytnamerr (0, yytname[yyx]);
-	    yysize_overflow |= (yysize1 < yysize);
-	    yysize = yysize1;
-	    yyfmt = yystpcpy (yyfmt, yyprefix);
-	    yyprefix = yyor;
-	  }
-
-      yyf = YY_(yyformat);
-      yysize1 = yysize + yystrlen (yyf);
-      yysize_overflow |= (yysize1 < yysize);
-      yysize = yysize1;
-
-      if (yysize_overflow)
-	return YYSIZE_MAXIMUM;
-
-      if (yyresult)
-	{
-	  /* Avoid sprintf, as that infringes on the user's name space.
-	     Don't have undefined behavior even if the translation
-	     produced a string with the wrong number of "%s"s.  */
-	  char *yyp = yyresult;
-	  int yyi = 0;
-	  while ((*yyp = *yyf) != '\0')
-	    {
-	      if (*yyp == '%' && yyf[1] == 's' && yyi < yycount)
-		{
-		  yyp += yytnamerr (yyp, yyarg[yyi++]);
-		  yyf += 2;
-		}
-	      else
-		{
-		  yyp++;
-		  yyf++;
-		}
-	    }
-	}
-      return yysize;
+          for (yyx = yyxbegin; yyx < yyxend; ++yyx)
+            if (yycheck[yyx + yyn] == yyx && yyx != YYTERROR
+                && !yytable_value_is_error (yytable[yyx + yyn]))
+              {
+                if (yycount == YYERROR_VERBOSE_ARGS_MAXIMUM)
+                  {
+                    yycount = 1;
+                    yysize = yysize0;
+                    break;
+                  }
+                yyarg[yycount++] = yytname[yyx];
+                yysize1 = yysize + yytnamerr (0, yytname[yyx]);
+                if (! (yysize <= yysize1
+                       && yysize1 <= YYSTACK_ALLOC_MAXIMUM))
+                  return 2;
+                yysize = yysize1;
+              }
+        }
     }
+
+  switch (yycount)
+    {
+# define YYCASE_(N, S)                      \
+      case N:                               \
+        yyformat = S;                       \
+      break
+      YYCASE_(0, YY_("syntax error"));
+      YYCASE_(1, YY_("syntax error, unexpected %s"));
+      YYCASE_(2, YY_("syntax error, unexpected %s, expecting %s"));
+      YYCASE_(3, YY_("syntax error, unexpected %s, expecting %s or %s"));
+      YYCASE_(4, YY_("syntax error, unexpected %s, expecting %s or %s or %s"));
+      YYCASE_(5, YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s"));
+# undef YYCASE_
+    }
+
+  yysize1 = yysize + yystrlen (yyformat);
+  if (! (yysize <= yysize1 && yysize1 <= YYSTACK_ALLOC_MAXIMUM))
+    return 2;
+  yysize = yysize1;
+
+  if (*yymsg_alloc < yysize)
+    {
+      *yymsg_alloc = 2 * yysize;
+      if (! (yysize <= *yymsg_alloc
+             && *yymsg_alloc <= YYSTACK_ALLOC_MAXIMUM))
+        *yymsg_alloc = YYSTACK_ALLOC_MAXIMUM;
+      return 1;
+    }
+
+  /* Avoid sprintf, as that infringes on the user's name space.
+     Don't have undefined behavior even if the translation
+     produced a string with the wrong number of "%s"s.  */
+  {
+    char *yyp = *yymsg;
+    int yyi = 0;
+    while ((*yyp = *yyformat) != '\0')
+      if (*yyp == '%' && yyformat[1] == 's' && yyi < yycount)
+        {
+          yyp += yytnamerr (yyp, yyarg[yyi++]);
+          yyformat += 2;
+        }
+      else
+        {
+          yyp++;
+          yyformat++;
+        }
+  }
+  return 0;
 }
 #endif /* YYERROR_VERBOSE */
-
 
 /*-----------------------------------------------.
 | Release the memory associated to this symbol.  |
@@ -5117,6 +5158,7 @@ yydestruct (yymsg, yytype, yyvaluep, yylocationp, _p)
     }
 }
 
+
 /* Prevent warnings from -Wmissing-prototypes.  */
 #ifdef YYPARSE_PARAM
 #if defined __STDC__ || defined __cplusplus
@@ -5133,12 +5175,9 @@ int yyparse ();
 #endif /* ! YYPARSE_PARAM */
 
 
-
-
-
-/*-------------------------.
-| yyparse or yypush_parse.  |
-`-------------------------*/
+/*----------.
+| yyparse.  |
+`----------*/
 
 #ifdef YYPARSE_PARAM
 #if (defined __STDC__ || defined __C99__FUNC__ \
@@ -5202,7 +5241,7 @@ YYLTYPE yylloc;
     YYLTYPE *yylsp;
 
     /* The locations where the error started and ended.  */
-    YYLTYPE yyerror_range[2];
+    YYLTYPE yyerror_range[3];
 
     YYSIZE_T yystacksize;
 
@@ -5249,7 +5288,7 @@ YYLTYPE yylloc;
   yyvsp = yyvs;
   yylsp = yyls;
 
-#if YYLTYPE_IS_TRIVIAL
+#if defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL
   /* Initialize the default location before parsing starts.  */
   yylloc.line0   = yylloc.line1   = 1;
   yylloc.char0 = yylloc.char1 = 1;
@@ -5352,7 +5391,7 @@ yybackup:
 
   /* First try to decide what to do without reference to lookahead token.  */
   yyn = yypact[yystate];
-  if (yyn == YYPACT_NINF)
+  if (yypact_value_is_default (yyn))
     goto yydefault;
 
   /* Not known => get a lookahead token if don't already have one.  */
@@ -5383,8 +5422,8 @@ yybackup:
   yyn = yytable[yyn];
   if (yyn <= 0)
     {
-      if (yyn == 0 || yyn == YYTABLE_NINF)
-	goto yyerrlab;
+      if (yytable_value_is_error (yyn))
+        goto yyerrlab;
       yyn = -yyn;
       goto yyreduce;
     }
@@ -5440,754 +5479,754 @@ yyreduce:
     {
         case 2:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 707 "hphp.y"
-    { _p->initParseTree(); ;}
+    { _p->initParseTree(); }
     break;
 
   case 3:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 707 "hphp.y"
     { _p->popLabelInfo();
-                                                  _p->finiParseTree();;}
+                                                  _p->finiParseTree();}
     break;
 
   case 4:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 713 "hphp.y"
-    { _p->addTopStatement((yyvsp[(2) - (2)]));;}
+    { _p->addTopStatement((yyvsp[(2) - (2)]));}
     break;
 
   case 5:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 714 "hphp.y"
-    { ;}
+    { }
     break;
 
   case 6:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 717 "hphp.y"
-    { _p->nns((yyvsp[(1) - (1)]).num()); (yyval) = (yyvsp[(1) - (1)]);;}
+    { _p->nns((yyvsp[(1) - (1)]).num()); (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 7:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 718 "hphp.y"
-    { _p->nns(); (yyval) = (yyvsp[(1) - (1)]);;}
+    { _p->nns(); (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 8:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 719 "hphp.y"
-    { _p->nns(); (yyval) = (yyvsp[(1) - (1)]);;}
+    { _p->nns(); (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 9:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 720 "hphp.y"
-    { _p->nns(); (yyval) = (yyvsp[(1) - (1)]);;}
+    { _p->nns(); (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 10:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 721 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]); ;}
+    { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 11:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 722 "hphp.y"
     { _p->onHaltCompiler();
                                          _p->finiParseTree();
-                                         YYACCEPT;;}
+                                         YYACCEPT;}
     break;
 
   case 12:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 725 "hphp.y"
     { _p->onNamespaceStart((yyvsp[(2) - (3)]).text(), true);
-                                         (yyval).reset();;}
+                                         (yyval).reset();}
     break;
 
   case 13:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 727 "hphp.y"
-    { _p->onNamespaceStart((yyvsp[(2) - (3)]).text());;}
+    { _p->onNamespaceStart((yyvsp[(2) - (3)]).text());}
     break;
 
   case 14:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 728 "hphp.y"
-    { _p->onNamespaceEnd(); (yyval) = (yyvsp[(5) - (6)]);;}
+    { _p->onNamespaceEnd(); (yyval) = (yyvsp[(5) - (6)]);}
     break;
 
   case 15:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 729 "hphp.y"
-    { _p->onNamespaceStart("");;}
+    { _p->onNamespaceStart("");}
     break;
 
   case 16:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 730 "hphp.y"
-    { _p->onNamespaceEnd(); (yyval) = (yyvsp[(4) - (5)]);;}
+    { _p->onNamespaceEnd(); (yyval) = (yyvsp[(4) - (5)]);}
     break;
 
   case 17:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 731 "hphp.y"
-    { _p->nns(); (yyval).reset();;}
+    { _p->nns(); (yyval).reset();}
     break;
 
   case 18:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 732 "hphp.y"
     { _p->nns();
-                                         _p->finishStatement((yyval), (yyvsp[(1) - (2)])); (yyval) = 1;;}
+                                         _p->finishStatement((yyval), (yyvsp[(1) - (2)])); (yyval) = 1;}
     break;
 
   case 19:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 737 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 20:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 738 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 21:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 739 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 22:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 740 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 23:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 741 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 24:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 742 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 25:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 743 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 26:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 748 "hphp.y"
-    { ;}
+    { }
     break;
 
   case 27:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 749 "hphp.y"
-    { ;}
+    { }
     break;
 
   case 28:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 752 "hphp.y"
-    { _p->onUse((yyvsp[(1) - (1)]).text(),"");;}
+    { _p->onUse((yyvsp[(1) - (1)]).text(),"");}
     break;
 
   case 29:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 753 "hphp.y"
-    { _p->onUse((yyvsp[(2) - (2)]).text(),"");;}
+    { _p->onUse((yyvsp[(2) - (2)]).text(),"");}
     break;
 
   case 30:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 754 "hphp.y"
-    { _p->onUse((yyvsp[(1) - (3)]).text(),(yyvsp[(3) - (3)]).text());;}
+    { _p->onUse((yyvsp[(1) - (3)]).text(),(yyvsp[(3) - (3)]).text());}
     break;
 
   case 31:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 756 "hphp.y"
-    { _p->onUse((yyvsp[(2) - (4)]).text(),(yyvsp[(4) - (4)]).text());;}
+    { _p->onUse((yyvsp[(2) - (4)]).text(),(yyvsp[(4) - (4)]).text());}
     break;
 
   case 32:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 760 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 33:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 762 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (3)]) + (yyvsp[(2) - (3)]) + (yyvsp[(3) - (3)]); (yyval) = (yyvsp[(1) - (3)]).num() | 2;;}
+    { (yyval) = (yyvsp[(1) - (3)]) + (yyvsp[(2) - (3)]) + (yyvsp[(3) - (3)]); (yyval) = (yyvsp[(1) - (3)]).num() | 2;}
     break;
 
   case 34:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 765 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]); (yyval) = (yyval).num() | 1;;}
+    { (yyval) = (yyvsp[(1) - (1)]); (yyval) = (yyval).num() | 1;}
     break;
 
   case 35:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 767 "hphp.y"
-    { (yyval).set((yyvsp[(3) - (3)]).num() | 2, _p->nsDecl((yyvsp[(3) - (3)]).text()));;}
+    { (yyval).set((yyvsp[(3) - (3)]).num() | 2, _p->nsDecl((yyvsp[(3) - (3)]).text()));}
     break;
 
   case 36:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 768 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (2)]); (yyval) = (yyval).num() | 2;;}
+    { (yyval) = (yyvsp[(2) - (2)]); (yyval) = (yyval).num() | 2;}
     break;
 
   case 37:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 771 "hphp.y"
     { if ((yyvsp[(1) - (1)]).num() & 1) {
                                            (yyvsp[(1) - (1)]).setText(_p->resolve((yyvsp[(1) - (1)]).text(),0));
                                          }
-                                         (yyval) = (yyvsp[(1) - (1)]);;}
+                                         (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 38:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 778 "hphp.y"
     { if ((yyvsp[(1) - (2)]).num() & 1) {
                                            (yyvsp[(1) - (2)]).setText(_p->resolve((yyvsp[(1) - (2)]).text(),0));
                                          }
-                                         (yyval) = (yyvsp[(1) - (2)]);;}
+                                         (yyval) = (yyvsp[(1) - (2)]);}
     break;
 
   case 39:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 785 "hphp.y"
     { if ((yyvsp[(1) - (2)]).num() & 1) {
                                            (yyvsp[(1) - (2)]).setText(_p->resolve((yyvsp[(1) - (2)]).text(),1));
                                          }
-                                         _p->onTypeAnnotation((yyval), (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]));;}
+                                         _p->onTypeAnnotation((yyval), (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]));}
     break;
 
   case 40:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 793 "hphp.y"
     { (yyvsp[(3) - (5)]).setText(_p->nsDecl((yyvsp[(3) - (5)]).text()));
-                                         on_constant(_p,(yyval),(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]));;}
+                                         on_constant(_p,(yyval),(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]));}
     break;
 
   case 41:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 796 "hphp.y"
     { (yyvsp[(2) - (4)]).setText(_p->nsDecl((yyvsp[(2) - (4)]).text()));
-                                         on_constant(_p,(yyval),(yyvsp[(2) - (4)]),(yyvsp[(4) - (4)]));;}
+                                         on_constant(_p,(yyval),(yyvsp[(2) - (4)]),(yyvsp[(4) - (4)]));}
     break;
 
   case 42:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 802 "hphp.y"
-    { _p->addStatement((yyval),(yyvsp[(1) - (2)]),(yyvsp[(2) - (2)]));;}
+    { _p->addStatement((yyval),(yyvsp[(1) - (2)]),(yyvsp[(2) - (2)]));}
     break;
 
   case 43:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 803 "hphp.y"
-    { _p->onStatementListStart((yyval));;}
+    { _p->onStatementListStart((yyval));}
     break;
 
   case 44:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 806 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 45:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 807 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 46:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 808 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 47:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 809 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 48:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 812 "hphp.y"
-    { _p->onBlock((yyval), (yyvsp[(2) - (3)]));;}
+    { _p->onBlock((yyval), (yyvsp[(2) - (3)]));}
     break;
 
   case 49:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 816 "hphp.y"
-    { _p->onIf((yyval),(yyvsp[(2) - (5)]),(yyvsp[(3) - (5)]),(yyvsp[(4) - (5)]),(yyvsp[(5) - (5)]));;}
+    { _p->onIf((yyval),(yyvsp[(2) - (5)]),(yyvsp[(3) - (5)]),(yyvsp[(4) - (5)]),(yyvsp[(5) - (5)]));}
     break;
 
   case 50:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 821 "hphp.y"
-    { _p->onIf((yyval),(yyvsp[(2) - (8)]),(yyvsp[(4) - (8)]),(yyvsp[(5) - (8)]),(yyvsp[(6) - (8)]));;}
+    { _p->onIf((yyval),(yyvsp[(2) - (8)]),(yyvsp[(4) - (8)]),(yyvsp[(5) - (8)]),(yyvsp[(6) - (8)]));}
     break;
 
   case 51:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 822 "hphp.y"
-    { _p->pushLabelScope();;}
+    { _p->pushLabelScope();}
     break;
 
   case 52:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 823 "hphp.y"
     { _p->popLabelScope();
-                                         _p->onWhile((yyval),(yyvsp[(2) - (4)]),(yyvsp[(4) - (4)]));;}
+                                         _p->onWhile((yyval),(yyvsp[(2) - (4)]),(yyvsp[(4) - (4)]));}
     break;
 
   case 53:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 826 "hphp.y"
-    { _p->pushLabelScope();;}
+    { _p->pushLabelScope();}
     break;
 
   case 54:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 828 "hphp.y"
     { _p->popLabelScope();
-                                         _p->onDo((yyval),(yyvsp[(3) - (6)]),(yyvsp[(5) - (6)]));;}
+                                         _p->onDo((yyval),(yyvsp[(3) - (6)]),(yyvsp[(5) - (6)]));}
     break;
 
   case 55:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 831 "hphp.y"
-    { _p->pushLabelScope();;}
+    { _p->pushLabelScope();}
     break;
 
   case 56:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 832 "hphp.y"
     { _p->popLabelScope();
-                                         _p->onFor((yyval),(yyvsp[(3) - (10)]),(yyvsp[(5) - (10)]),(yyvsp[(7) - (10)]),(yyvsp[(10) - (10)]));;}
+                                         _p->onFor((yyval),(yyvsp[(3) - (10)]),(yyvsp[(5) - (10)]),(yyvsp[(7) - (10)]),(yyvsp[(10) - (10)]));}
     break;
 
   case 57:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 834 "hphp.y"
-    { _p->pushLabelScope();;}
+    { _p->pushLabelScope();}
     break;
 
   case 58:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 835 "hphp.y"
     { _p->popLabelScope();
-                                         _p->onSwitch((yyval),(yyvsp[(2) - (4)]),(yyvsp[(4) - (4)]));;}
+                                         _p->onSwitch((yyval),(yyvsp[(2) - (4)]),(yyvsp[(4) - (4)]));}
     break;
 
   case 59:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 837 "hphp.y"
-    { _p->onBreakContinue((yyval), true, NULL);;}
+    { _p->onBreakContinue((yyval), true, NULL);}
     break;
 
   case 60:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 838 "hphp.y"
-    { _p->onBreakContinue((yyval), true, &(yyvsp[(2) - (3)]));;}
+    { _p->onBreakContinue((yyval), true, &(yyvsp[(2) - (3)]));}
     break;
 
   case 61:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 839 "hphp.y"
-    { _p->onBreakContinue((yyval), false, NULL);;}
+    { _p->onBreakContinue((yyval), false, NULL);}
     break;
 
   case 62:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 840 "hphp.y"
-    { _p->onBreakContinue((yyval), false, &(yyvsp[(2) - (3)]));;}
+    { _p->onBreakContinue((yyval), false, &(yyvsp[(2) - (3)]));}
     break;
 
   case 63:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 841 "hphp.y"
-    { _p->onReturn((yyval), NULL);;}
+    { _p->onReturn((yyval), NULL);}
     break;
 
   case 64:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 842 "hphp.y"
-    { _p->onReturn((yyval), &(yyvsp[(2) - (3)]));;}
+    { _p->onReturn((yyval), &(yyvsp[(2) - (3)]));}
     break;
 
   case 65:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 843 "hphp.y"
-    { _p->onYieldBreak((yyval));;}
+    { _p->onYieldBreak((yyval));}
     break;
 
   case 66:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 844 "hphp.y"
-    { _p->onGlobal((yyval), (yyvsp[(2) - (3)]));;}
+    { _p->onGlobal((yyval), (yyvsp[(2) - (3)]));}
     break;
 
   case 67:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 845 "hphp.y"
-    { _p->onStatic((yyval), (yyvsp[(2) - (3)]));;}
+    { _p->onStatic((yyval), (yyvsp[(2) - (3)]));}
     break;
 
   case 68:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 846 "hphp.y"
-    { _p->onEcho((yyval), (yyvsp[(2) - (3)]), 0);;}
+    { _p->onEcho((yyval), (yyvsp[(2) - (3)]), 0);}
     break;
 
   case 69:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 847 "hphp.y"
-    { _p->onUnset((yyval), (yyvsp[(3) - (5)]));;}
+    { _p->onUnset((yyval), (yyvsp[(3) - (5)]));}
     break;
 
   case 70:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 848 "hphp.y"
     { (yyval).reset(); (yyval) = ';';}
     break;
 
   case 71:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 849 "hphp.y"
-    { _p->onEcho((yyval), (yyvsp[(1) - (1)]), 1);;}
+    { _p->onEcho((yyval), (yyvsp[(1) - (1)]), 1);}
     break;
 
   case 72:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 852 "hphp.y"
-    { _p->pushLabelScope();;}
+    { _p->pushLabelScope();}
     break;
 
   case 73:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 853 "hphp.y"
     { _p->popLabelScope();
-                                         _p->onForEach((yyval),(yyvsp[(3) - (9)]),(yyvsp[(5) - (9)]),(yyvsp[(6) - (9)]),(yyvsp[(9) - (9)]));;}
+                                         _p->onForEach((yyval),(yyvsp[(3) - (9)]),(yyvsp[(5) - (9)]),(yyvsp[(6) - (9)]),(yyvsp[(9) - (9)]));}
     break;
 
   case 74:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 856 "hphp.y"
-    { _p->onBlock((yyval), (yyvsp[(5) - (5)])); (yyval) = T_DECLARE;;}
+    { _p->onBlock((yyval), (yyvsp[(5) - (5)])); (yyval) = T_DECLARE;}
     break;
 
   case 75:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 864 "hphp.y"
-    { _p->onTry((yyval),(yyvsp[(3) - (14)]),(yyvsp[(7) - (14)]),(yyvsp[(8) - (14)]),(yyvsp[(11) - (14)]),(yyvsp[(13) - (14)]),(yyvsp[(14) - (14)]));;}
+    { _p->onTry((yyval),(yyvsp[(3) - (14)]),(yyvsp[(7) - (14)]),(yyvsp[(8) - (14)]),(yyvsp[(11) - (14)]),(yyvsp[(13) - (14)]),(yyvsp[(14) - (14)]));}
     break;
 
   case 76:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 867 "hphp.y"
-    { _p->onTry((yyval), (yyvsp[(3) - (5)]), (yyvsp[(5) - (5)]));;}
+    { _p->onTry((yyval), (yyvsp[(3) - (5)]), (yyvsp[(5) - (5)]));}
     break;
 
   case 77:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 868 "hphp.y"
-    { _p->onThrow((yyval), (yyvsp[(2) - (3)]));;}
+    { _p->onThrow((yyval), (yyvsp[(2) - (3)]));}
     break;
 
   case 78:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 869 "hphp.y"
     { _p->onGoto((yyval), (yyvsp[(2) - (3)]), true);
                                          _p->addGoto((yyvsp[(2) - (3)]).text(),
                                                      _p->getLocation(),
-                                                     &(yyval)); ;}
+                                                     &(yyval)); }
     break;
 
   case 79:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 873 "hphp.y"
-    { _p->onExpStatement((yyval), (yyvsp[(1) - (2)]));;}
+    { _p->onExpStatement((yyval), (yyvsp[(1) - (2)]));}
     break;
 
   case 80:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 874 "hphp.y"
-    { _p->onExpStatement((yyval), (yyvsp[(1) - (2)]));;}
+    { _p->onExpStatement((yyval), (yyvsp[(1) - (2)]));}
     break;
 
   case 81:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 875 "hphp.y"
-    { _p->onExpStatement((yyval), (yyvsp[(1) - (2)]));;}
+    { _p->onExpStatement((yyval), (yyvsp[(1) - (2)]));}
     break;
 
   case 82:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 876 "hphp.y"
-    { _p->onExpStatement((yyval), (yyvsp[(1) - (2)]));;}
+    { _p->onExpStatement((yyval), (yyvsp[(1) - (2)]));}
     break;
 
   case 83:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 877 "hphp.y"
-    { _p->onExpStatement((yyval), (yyvsp[(1) - (2)]));;}
+    { _p->onExpStatement((yyval), (yyvsp[(1) - (2)]));}
     break;
 
   case 84:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 878 "hphp.y"
-    { _p->onExpStatement((yyval), (yyvsp[(1) - (2)]));;}
+    { _p->onExpStatement((yyval), (yyvsp[(1) - (2)]));}
     break;
 
   case 85:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 879 "hphp.y"
-    { _p->onReturn((yyval), &(yyvsp[(2) - (3)])); ;}
+    { _p->onReturn((yyval), &(yyvsp[(2) - (3)])); }
     break;
 
   case 86:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 880 "hphp.y"
-    { _p->onExpStatement((yyval), (yyvsp[(1) - (2)]));;}
+    { _p->onExpStatement((yyval), (yyvsp[(1) - (2)]));}
     break;
 
   case 87:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 881 "hphp.y"
     { _p->onLabel((yyval), (yyvsp[(1) - (2)]));
                                          _p->addLabel((yyvsp[(1) - (2)]).text(),
                                                       _p->getLocation(),
-                                                      &(yyval)); ;}
+                                                      &(yyval)); }
     break;
 
   case 88:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 893 "hphp.y"
-    { _p->onCatch((yyval), (yyvsp[(1) - (9)]), (yyvsp[(4) - (9)]), (yyvsp[(5) - (9)]), (yyvsp[(8) - (9)]));;}
+    { _p->onCatch((yyval), (yyvsp[(1) - (9)]), (yyvsp[(4) - (9)]), (yyvsp[(5) - (9)]), (yyvsp[(8) - (9)]));}
     break;
 
   case 89:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 894 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 90:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 899 "hphp.y"
-    { _p->onFinally((yyval), (yyvsp[(4) - (4)]));;}
+    { _p->onFinally((yyval), (yyvsp[(4) - (4)]));}
     break;
 
   case 91:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 900 "hphp.y"
-    { finally_statement(_p);;}
+    { finally_statement(_p);}
     break;
 
   case 93:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 905 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 94:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 909 "hphp.y"
-    { (yyval) = 1;;}
+    { (yyval) = 1;}
     break;
 
   case 95:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 910 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 96:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 914 "hphp.y"
-    { _p->pushFuncLocation();;}
+    { _p->pushFuncLocation();}
     break;
 
   case 97:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 919 "hphp.y"
     { (yyvsp[(3) - (3)]).setText(_p->nsDecl((yyvsp[(3) - (3)]).text()));
                                          _p->onFunctionStart((yyvsp[(3) - (3)]));
-                                         _p->pushLabelInfo();;}
+                                         _p->pushLabelInfo();}
     break;
 
   case 98:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 924 "hphp.y"
     { _p->onFunction((yyval),nullptr,(yyvsp[(8) - (9)]),(yyvsp[(2) - (9)]),(yyvsp[(3) - (9)]),(yyvsp[(6) - (9)]),(yyvsp[(9) - (9)]),nullptr);
                                          _p->popLabelInfo();
-                                         _p->popTypeScope();;}
+                                         _p->popTypeScope();}
     break;
 
   case 99:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 929 "hphp.y"
     { (yyvsp[(4) - (4)]).setText(_p->nsDecl((yyvsp[(4) - (4)]).text()));
                                          _p->onFunctionStart((yyvsp[(4) - (4)]));
-                                         _p->pushLabelInfo();;}
+                                         _p->pushLabelInfo();}
     break;
 
   case 100:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 934 "hphp.y"
     { _p->onFunction((yyval),&(yyvsp[(1) - (10)]),(yyvsp[(9) - (10)]),(yyvsp[(3) - (10)]),(yyvsp[(4) - (10)]),(yyvsp[(7) - (10)]),(yyvsp[(10) - (10)]),nullptr);
                                          _p->popLabelInfo();
-                                         _p->popTypeScope();;}
+                                         _p->popTypeScope();}
     break;
 
   case 101:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 939 "hphp.y"
     { (yyvsp[(5) - (5)]).setText(_p->nsDecl((yyvsp[(5) - (5)]).text()));
                                          _p->onFunctionStart((yyvsp[(5) - (5)]));
-                                         _p->pushLabelInfo();;}
+                                         _p->pushLabelInfo();}
     break;
 
   case 102:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 944 "hphp.y"
     { _p->onFunction((yyval),&(yyvsp[(2) - (11)]),(yyvsp[(10) - (11)]),(yyvsp[(4) - (11)]),(yyvsp[(5) - (11)]),(yyvsp[(8) - (11)]),(yyvsp[(11) - (11)]),&(yyvsp[(1) - (11)]));
                                          _p->popLabelInfo();
-                                         _p->popTypeScope();;}
+                                         _p->popTypeScope();}
     break;
 
   case 103:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 951 "hphp.y"
     { (yyvsp[(2) - (2)]).setText(_p->nsDecl((yyvsp[(2) - (2)]).text()));
-                                         _p->onClassStart((yyvsp[(1) - (2)]).num(),(yyvsp[(2) - (2)]));;}
+                                         _p->onClassStart((yyvsp[(1) - (2)]).num(),(yyvsp[(2) - (2)]));}
     break;
 
   case 104:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 954 "hphp.y"
     { Token stmts;
                                          if (_p->peekClass()) {
@@ -6201,20 +6240,20 @@ yyreduce:
                                            _p->xhpResetAttributes();
                                          }
                                          _p->popClass();
-                                         _p->popTypeScope();;}
+                                         _p->popTypeScope();}
     break;
 
   case 105:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 969 "hphp.y"
     { (yyvsp[(3) - (3)]).setText(_p->nsDecl((yyvsp[(3) - (3)]).text()));
-                                         _p->onClassStart((yyvsp[(2) - (3)]).num(),(yyvsp[(3) - (3)]));;}
+                                         _p->onClassStart((yyvsp[(2) - (3)]).num(),(yyvsp[(3) - (3)]));}
     break;
 
   case 106:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 972 "hphp.y"
     { Token stmts;
                                          if (_p->peekClass()) {
@@ -6228,2168 +6267,2168 @@ yyreduce:
                                            _p->xhpResetAttributes();
                                          }
                                          _p->popClass();
-                                         _p->popTypeScope();;}
+                                         _p->popTypeScope();}
     break;
 
   case 107:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 986 "hphp.y"
     { (yyvsp[(2) - (2)]).setText(_p->nsDecl((yyvsp[(2) - (2)]).text()));
-                                         _p->onClassStart(T_INTERFACE,(yyvsp[(2) - (2)]));;}
+                                         _p->onClassStart(T_INTERFACE,(yyvsp[(2) - (2)]));}
     break;
 
   case 108:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 989 "hphp.y"
     { _p->onInterface((yyval),(yyvsp[(2) - (7)]),(yyvsp[(4) - (7)]),(yyvsp[(6) - (7)]),0);
                                          _p->popClass();
-                                         _p->popTypeScope();;}
+                                         _p->popTypeScope();}
     break;
 
   case 109:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 994 "hphp.y"
     { (yyvsp[(3) - (3)]).setText(_p->nsDecl((yyvsp[(3) - (3)]).text()));
-                                         _p->onClassStart(T_INTERFACE,(yyvsp[(3) - (3)]));;}
+                                         _p->onClassStart(T_INTERFACE,(yyvsp[(3) - (3)]));}
     break;
 
   case 110:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 997 "hphp.y"
     { _p->onInterface((yyval),(yyvsp[(3) - (8)]),(yyvsp[(5) - (8)]),(yyvsp[(7) - (8)]),&(yyvsp[(1) - (8)]));
                                          _p->popClass();
-                                         _p->popTypeScope();;}
+                                         _p->popTypeScope();}
     break;
 
   case 111:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1004 "hphp.y"
     { (yyvsp[(2) - (2)]).setText(_p->nsDecl((yyvsp[(2) - (2)]).text()));
-                                         _p->onClassStart(T_TRAIT, (yyvsp[(2) - (2)]));;}
+                                         _p->onClassStart(T_TRAIT, (yyvsp[(2) - (2)]));}
     break;
 
   case 112:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1007 "hphp.y"
     { Token t_ext;
-                                         t_ext.reset(); 
+                                         t_ext.reset();
                                          _p->onClass((yyval),T_TRAIT,(yyvsp[(2) - (7)]),t_ext,(yyvsp[(4) - (7)]),
                                                      (yyvsp[(6) - (7)]), 0);
                                          _p->popClass();
-                                         _p->popTypeScope();;}
+                                         _p->popTypeScope();}
     break;
 
   case 113:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1015 "hphp.y"
     { (yyvsp[(3) - (3)]).setText(_p->nsDecl((yyvsp[(3) - (3)]).text()));
-                                         _p->onClassStart(T_TRAIT, (yyvsp[(3) - (3)]));;}
+                                         _p->onClassStart(T_TRAIT, (yyvsp[(3) - (3)]));}
     break;
 
   case 114:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1018 "hphp.y"
     { Token t_ext;
-                                         t_ext.reset(); 
+                                         t_ext.reset();
                                          _p->onClass((yyval),T_TRAIT,(yyvsp[(3) - (8)]),t_ext,(yyvsp[(5) - (8)]),
                                                      (yyvsp[(7) - (8)]), &(yyvsp[(1) - (8)]));
                                          _p->popClass();
-                                         _p->popTypeScope();;}
+                                         _p->popTypeScope();}
     break;
 
   case 115:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1026 "hphp.y"
-    { _p->pushClass(false); (yyval) = (yyvsp[(1) - (1)]);;}
+    { _p->pushClass(false); (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 116:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1027 "hphp.y"
     { (yyvsp[(1) - (1)]).xhpLabel(); _p->pushTypeScope();
-                                         _p->pushClass(true); (yyval) = (yyvsp[(1) - (1)]);;}
+                                         _p->pushClass(true); (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 117:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1031 "hphp.y"
-    { _p->pushClass(false); (yyval) = (yyvsp[(1) - (1)]);;}
+    { _p->pushClass(false); (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 118:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1034 "hphp.y"
-    { _p->pushClass(false); (yyval) = (yyvsp[(1) - (1)]);;}
+    { _p->pushClass(false); (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 119:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1037 "hphp.y"
-    { (yyval) = T_CLASS;;}
+    { (yyval) = T_CLASS;}
     break;
 
   case 120:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1038 "hphp.y"
-    { (yyval) = T_ABSTRACT;;}
+    { (yyval) = T_ABSTRACT;}
     break;
 
   case 121:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1039 "hphp.y"
-    { (yyval) = T_FINAL;;}
+    { (yyval) = T_FINAL;}
     break;
 
   case 122:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1043 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (2)]);;}
+    { (yyval) = (yyvsp[(2) - (2)]);}
     break;
 
   case 123:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1044 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 124:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1047 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (2)]);;}
+    { (yyval) = (yyvsp[(2) - (2)]);}
     break;
 
   case 125:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1048 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 126:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1051 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (2)]);;}
+    { (yyval) = (yyvsp[(2) - (2)]);}
     break;
 
   case 127:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1052 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 128:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1055 "hphp.y"
-    { _p->onInterfaceName((yyval), NULL, (yyvsp[(1) - (1)]));;}
+    { _p->onInterfaceName((yyval), NULL, (yyvsp[(1) - (1)]));}
     break;
 
   case 129:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1057 "hphp.y"
-    { _p->onInterfaceName((yyval), &(yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));;}
+    { _p->onInterfaceName((yyval), &(yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));}
     break;
 
   case 130:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1060 "hphp.y"
-    { _p->onTraitName((yyval), NULL, (yyvsp[(1) - (1)]));;}
+    { _p->onTraitName((yyval), NULL, (yyvsp[(1) - (1)]));}
     break;
 
   case 131:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1062 "hphp.y"
-    { _p->onTraitName((yyval), &(yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));;}
+    { _p->onTraitName((yyval), &(yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));}
     break;
 
   case 132:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1066 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (2)]);;}
+    { (yyval) = (yyvsp[(2) - (2)]);}
     break;
 
   case 133:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1067 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 134:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1070 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 135:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1071 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (2)]); (yyval) = 1;;}
+    { (yyval) = (yyvsp[(2) - (2)]); (yyval) = 1;}
     break;
 
   case 136:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1072 "hphp.y"
-    { _p->onListAssignment((yyval), (yyvsp[(3) - (4)]), NULL);;}
+    { _p->onListAssignment((yyval), (yyvsp[(3) - (4)]), NULL);}
     break;
 
   case 137:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1076 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 138:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1078 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (4)]);;}
+    { (yyval) = (yyvsp[(2) - (4)]);}
     break;
 
   case 139:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1081 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 140:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1083 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (4)]);;}
+    { (yyval) = (yyvsp[(2) - (4)]);}
     break;
 
   case 141:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1086 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 142:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1088 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (4)]);;}
+    { (yyval) = (yyvsp[(2) - (4)]);}
     break;
 
   case 143:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1091 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 144:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1093 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (4)]);;}
+    { (yyval) = (yyvsp[(2) - (4)]);}
     break;
 
   case 147:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1103 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (3)]);;}
+    { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 148:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1104 "hphp.y"
-    { (yyval) = (yyvsp[(3) - (4)]);;}
+    { (yyval) = (yyvsp[(3) - (4)]);}
     break;
 
   case 149:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1105 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (4)]);;}
+    { (yyval) = (yyvsp[(2) - (4)]);}
     break;
 
   case 150:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1106 "hphp.y"
-    { (yyval) = (yyvsp[(3) - (5)]);;}
+    { (yyval) = (yyvsp[(3) - (5)]);}
     break;
 
   case 151:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1111 "hphp.y"
-    { _p->onCase((yyval),(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]));;}
+    { _p->onCase((yyval),(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]));}
     break;
 
   case 152:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1113 "hphp.y"
-    { _p->onCase((yyval),(yyvsp[(1) - (4)]),NULL,(yyvsp[(4) - (4)]));;}
+    { _p->onCase((yyval),(yyvsp[(1) - (4)]),NULL,(yyvsp[(4) - (4)]));}
     break;
 
   case 153:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1114 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 154:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1117 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 155:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1118 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 156:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1123 "hphp.y"
-    { _p->onElseIf((yyval),(yyvsp[(1) - (4)]),(yyvsp[(3) - (4)]),(yyvsp[(4) - (4)]));;}
+    { _p->onElseIf((yyval),(yyvsp[(1) - (4)]),(yyvsp[(3) - (4)]),(yyvsp[(4) - (4)]));}
     break;
 
   case 157:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1124 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 158:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1129 "hphp.y"
-    { _p->onElseIf((yyval),(yyvsp[(1) - (5)]),(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]));;}
+    { _p->onElseIf((yyval),(yyvsp[(1) - (5)]),(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]));}
     break;
 
   case 159:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1130 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 160:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1133 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (2)]);;}
+    { (yyval) = (yyvsp[(2) - (2)]);}
     break;
 
   case 161:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1134 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 162:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1137 "hphp.y"
-    { (yyval) = (yyvsp[(3) - (3)]);;}
+    { (yyval) = (yyvsp[(3) - (3)]);}
     break;
 
   case 163:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1138 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 164:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1143 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (3)]);;}
+    { (yyval) = (yyvsp[(1) - (3)]);}
     break;
 
   case 165:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1145 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (2)]);;}
+    { (yyval) = (yyvsp[(1) - (2)]);}
     break;
 
   case 166:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1146 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 167:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1147 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 168:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1153 "hphp.y"
     { _p->onParam((yyval),NULL,(yyvsp[(3) - (4)]),(yyvsp[(4) - (4)]),0,
-                                                     NULL,&(yyvsp[(1) - (4)]),&(yyvsp[(2) - (4)]));;}
+                                                     NULL,&(yyvsp[(1) - (4)]),&(yyvsp[(2) - (4)]));}
     break;
 
   case 169:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1157 "hphp.y"
     { _p->onParam((yyval),NULL,(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]),1,
-                                                     NULL,&(yyvsp[(1) - (5)]),&(yyvsp[(2) - (5)]));;}
+                                                     NULL,&(yyvsp[(1) - (5)]),&(yyvsp[(2) - (5)]));}
     break;
 
   case 170:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1162 "hphp.y"
     { _p->onParam((yyval),NULL,(yyvsp[(3) - (7)]),(yyvsp[(5) - (7)]),1,
-                                                     &(yyvsp[(7) - (7)]),&(yyvsp[(1) - (7)]),&(yyvsp[(2) - (7)]));;}
+                                                     &(yyvsp[(7) - (7)]),&(yyvsp[(1) - (7)]),&(yyvsp[(2) - (7)]));}
     break;
 
   case 171:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1167 "hphp.y"
     { _p->onParam((yyval),NULL,(yyvsp[(3) - (6)]),(yyvsp[(4) - (6)]),0,
-                                                     &(yyvsp[(6) - (6)]),&(yyvsp[(1) - (6)]),&(yyvsp[(2) - (6)]));;}
+                                                     &(yyvsp[(6) - (6)]),&(yyvsp[(1) - (6)]),&(yyvsp[(2) - (6)]));}
     break;
 
   case 172:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1172 "hphp.y"
     { _p->onParam((yyval),&(yyvsp[(1) - (6)]),(yyvsp[(5) - (6)]),(yyvsp[(6) - (6)]),0,
-                                                     NULL,&(yyvsp[(3) - (6)]),&(yyvsp[(4) - (6)]));;}
+                                                     NULL,&(yyvsp[(3) - (6)]),&(yyvsp[(4) - (6)]));}
     break;
 
   case 173:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1177 "hphp.y"
     { _p->onParam((yyval),&(yyvsp[(1) - (7)]),(yyvsp[(5) - (7)]),(yyvsp[(7) - (7)]),1,
-                                                     NULL,&(yyvsp[(3) - (7)]),&(yyvsp[(4) - (7)]));;}
+                                                     NULL,&(yyvsp[(3) - (7)]),&(yyvsp[(4) - (7)]));}
     break;
 
   case 174:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1183 "hphp.y"
     { _p->onParam((yyval),&(yyvsp[(1) - (9)]),(yyvsp[(5) - (9)]),(yyvsp[(7) - (9)]),1,
-                                                     &(yyvsp[(9) - (9)]),&(yyvsp[(3) - (9)]),&(yyvsp[(4) - (9)]));;}
+                                                     &(yyvsp[(9) - (9)]),&(yyvsp[(3) - (9)]),&(yyvsp[(4) - (9)]));}
     break;
 
   case 175:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1189 "hphp.y"
     { _p->onParam((yyval),&(yyvsp[(1) - (8)]),(yyvsp[(5) - (8)]),(yyvsp[(6) - (8)]),0,
-                                                     &(yyvsp[(8) - (8)]),&(yyvsp[(3) - (8)]),&(yyvsp[(4) - (8)]));;}
+                                                     &(yyvsp[(8) - (8)]),&(yyvsp[(3) - (8)]),&(yyvsp[(4) - (8)]));}
     break;
 
   case 176:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1195 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (3)]);;}
+    { (yyval) = (yyvsp[(1) - (3)]);}
     break;
 
   case 177:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1197 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (2)]);;}
+    { (yyval) = (yyvsp[(1) - (2)]);}
     break;
 
   case 178:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1198 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 179:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1199 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 180:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1204 "hphp.y"
     { _p->onParam((yyval),NULL,(yyvsp[(2) - (3)]),(yyvsp[(3) - (3)]),0,
-                                                     NULL,&(yyvsp[(1) - (3)]),NULL);;}
+                                                     NULL,&(yyvsp[(1) - (3)]),NULL);}
     break;
 
   case 181:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1207 "hphp.y"
     { _p->onParam((yyval),NULL,(yyvsp[(2) - (4)]),(yyvsp[(4) - (4)]),1,
-                                                     NULL,&(yyvsp[(1) - (4)]),NULL);;}
+                                                     NULL,&(yyvsp[(1) - (4)]),NULL);}
     break;
 
   case 182:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1211 "hphp.y"
     { _p->onParam((yyval),NULL,(yyvsp[(2) - (6)]),(yyvsp[(4) - (6)]),1,
-                                                     &(yyvsp[(6) - (6)]),&(yyvsp[(1) - (6)]),NULL);;}
+                                                     &(yyvsp[(6) - (6)]),&(yyvsp[(1) - (6)]),NULL);}
     break;
 
   case 183:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1215 "hphp.y"
     { _p->onParam((yyval),NULL,(yyvsp[(2) - (5)]),(yyvsp[(3) - (5)]),0,
-                                                     &(yyvsp[(5) - (5)]),&(yyvsp[(1) - (5)]),NULL);;}
+                                                     &(yyvsp[(5) - (5)]),&(yyvsp[(1) - (5)]),NULL);}
     break;
 
   case 184:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1219 "hphp.y"
     { _p->onParam((yyval),&(yyvsp[(1) - (5)]),(yyvsp[(4) - (5)]),(yyvsp[(5) - (5)]),0,
-                                                     NULL,&(yyvsp[(3) - (5)]),NULL);;}
+                                                     NULL,&(yyvsp[(3) - (5)]),NULL);}
     break;
 
   case 185:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1223 "hphp.y"
     { _p->onParam((yyval),&(yyvsp[(1) - (6)]),(yyvsp[(4) - (6)]),(yyvsp[(6) - (6)]),1,
-                                                     NULL,&(yyvsp[(3) - (6)]),NULL);;}
+                                                     NULL,&(yyvsp[(3) - (6)]),NULL);}
     break;
 
   case 186:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1228 "hphp.y"
     { _p->onParam((yyval),&(yyvsp[(1) - (8)]),(yyvsp[(4) - (8)]),(yyvsp[(6) - (8)]),1,
-                                                     &(yyvsp[(8) - (8)]),&(yyvsp[(3) - (8)]),NULL);;}
+                                                     &(yyvsp[(8) - (8)]),&(yyvsp[(3) - (8)]),NULL);}
     break;
 
   case 187:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1233 "hphp.y"
     { _p->onParam((yyval),&(yyvsp[(1) - (7)]),(yyvsp[(4) - (7)]),(yyvsp[(5) - (7)]),0,
-                                                     &(yyvsp[(7) - (7)]),&(yyvsp[(3) - (7)]),NULL);;}
+                                                     &(yyvsp[(7) - (7)]),&(yyvsp[(3) - (7)]),NULL);}
     break;
 
   case 188:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1239 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (2)]);;}
+    { (yyval) = (yyvsp[(1) - (2)]);}
     break;
 
   case 189:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1240 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 190:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1243 "hphp.y"
-    { _p->onCallParam((yyval),NULL,(yyvsp[(1) - (1)]),0);;}
+    { _p->onCallParam((yyval),NULL,(yyvsp[(1) - (1)]),0);}
     break;
 
   case 191:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1244 "hphp.y"
-    { _p->onCallParam((yyval),NULL,(yyvsp[(2) - (2)]),1);;}
+    { _p->onCallParam((yyval),NULL,(yyvsp[(2) - (2)]),1);}
     break;
 
   case 192:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1246 "hphp.y"
-    { _p->onCallParam((yyval),&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),0);;}
+    { _p->onCallParam((yyval),&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),0);}
     break;
 
   case 193:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1248 "hphp.y"
-    { _p->onCallParam((yyval),&(yyvsp[(1) - (4)]),(yyvsp[(4) - (4)]),1);;}
+    { _p->onCallParam((yyval),&(yyvsp[(1) - (4)]),(yyvsp[(4) - (4)]),1);}
     break;
 
   case 194:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1252 "hphp.y"
-    { _p->onGlobalVar((yyval), &(yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));;}
+    { _p->onGlobalVar((yyval), &(yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));}
     break;
 
   case 195:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1253 "hphp.y"
-    { _p->onGlobalVar((yyval), NULL, (yyvsp[(1) - (1)]));;}
+    { _p->onGlobalVar((yyval), NULL, (yyvsp[(1) - (1)]));}
     break;
 
   case 196:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1256 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 197:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1257 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (2)]); (yyval) = 1;;}
+    { (yyval) = (yyvsp[(2) - (2)]); (yyval) = 1;}
     break;
 
   case 198:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1258 "hphp.y"
-    { (yyval) = (yyvsp[(3) - (4)]); (yyval) = 1;;}
+    { (yyval) = (yyvsp[(3) - (4)]); (yyval) = 1;}
     break;
 
   case 199:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1262 "hphp.y"
-    { _p->onStaticVariable((yyval),&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),0);;}
+    { _p->onStaticVariable((yyval),&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),0);}
     break;
 
   case 200:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1264 "hphp.y"
-    { _p->onStaticVariable((yyval),&(yyvsp[(1) - (5)]),(yyvsp[(3) - (5)]),&(yyvsp[(5) - (5)]));;}
+    { _p->onStaticVariable((yyval),&(yyvsp[(1) - (5)]),(yyvsp[(3) - (5)]),&(yyvsp[(5) - (5)]));}
     break;
 
   case 201:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1265 "hphp.y"
-    { _p->onStaticVariable((yyval),0,(yyvsp[(1) - (1)]),0);;}
+    { _p->onStaticVariable((yyval),0,(yyvsp[(1) - (1)]),0);}
     break;
 
   case 202:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1266 "hphp.y"
-    { _p->onStaticVariable((yyval),0,(yyvsp[(1) - (3)]),&(yyvsp[(3) - (3)]));;}
+    { _p->onStaticVariable((yyval),0,(yyvsp[(1) - (3)]),&(yyvsp[(3) - (3)]));}
     break;
 
   case 203:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1271 "hphp.y"
-    { _p->onClassStatement((yyval), (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]));;}
+    { _p->onClassStatement((yyval), (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]));}
     break;
 
   case 204:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1272 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 205:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1275 "hphp.y"
-    { _p->onClassVariableModifer((yyvsp[(1) - (1)]));;}
+    { _p->onClassVariableModifer((yyvsp[(1) - (1)]));}
     break;
 
   case 206:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1276 "hphp.y"
     { _p->onClassVariableStart
-                                         ((yyval),&(yyvsp[(1) - (4)]),(yyvsp[(3) - (4)]),NULL);;}
+                                         ((yyval),&(yyvsp[(1) - (4)]),(yyvsp[(3) - (4)]),NULL);}
     break;
 
   case 207:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1279 "hphp.y"
-    { _p->onClassVariableModifer((yyvsp[(1) - (2)]));;}
+    { _p->onClassVariableModifer((yyvsp[(1) - (2)]));}
     break;
 
   case 208:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1280 "hphp.y"
     { _p->onClassVariableStart
-                                         ((yyval),&(yyvsp[(1) - (5)]),(yyvsp[(4) - (5)]),&(yyvsp[(2) - (5)]));;}
+                                         ((yyval),&(yyvsp[(1) - (5)]),(yyvsp[(4) - (5)]),&(yyvsp[(2) - (5)]));}
     break;
 
   case 209:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1282 "hphp.y"
     { _p->onClassVariableStart
-                                         ((yyval),NULL,(yyvsp[(1) - (2)]),NULL);;}
+                                         ((yyval),NULL,(yyvsp[(1) - (2)]),NULL);}
     break;
 
   case 210:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1286 "hphp.y"
     { _p->onMethodStart((yyvsp[(4) - (5)]), (yyvsp[(1) - (5)]));
-                                         _p->pushLabelInfo();;}
+                                         _p->pushLabelInfo();}
     break;
 
   case 211:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1291 "hphp.y"
     { _p->onMethod((yyval),(yyvsp[(1) - (10)]),(yyvsp[(9) - (10)]),(yyvsp[(3) - (10)]),(yyvsp[(4) - (10)]),(yyvsp[(7) - (10)]),(yyvsp[(10) - (10)]),nullptr);
                                          _p->popLabelInfo();
-                                         _p->popTypeScope();;}
+                                         _p->popTypeScope();}
     break;
 
   case 212:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1297 "hphp.y"
     { _p->onMethodStart((yyvsp[(5) - (6)]), (yyvsp[(2) - (6)]));
-                                         _p->pushLabelInfo();;}
+                                         _p->pushLabelInfo();}
     break;
 
   case 213:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1302 "hphp.y"
     { _p->onMethod((yyval),(yyvsp[(2) - (11)]),(yyvsp[(10) - (11)]),(yyvsp[(4) - (11)]),(yyvsp[(5) - (11)]),(yyvsp[(8) - (11)]),(yyvsp[(11) - (11)]),&(yyvsp[(1) - (11)]));
                                          _p->popLabelInfo();
-                                         _p->popTypeScope();;}
+                                         _p->popTypeScope();}
     break;
 
   case 214:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1306 "hphp.y"
-    { _p->xhpSetAttributes((yyvsp[(2) - (3)]));;}
+    { _p->xhpSetAttributes((yyvsp[(2) - (3)]));}
     break;
 
   case 215:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1308 "hphp.y"
-    { xhp_category_stmt(_p,(yyval),(yyvsp[(2) - (3)]));;}
+    { xhp_category_stmt(_p,(yyval),(yyvsp[(2) - (3)]));}
     break;
 
   case 216:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1310 "hphp.y"
-    { xhp_children_stmt(_p,(yyval),(yyvsp[(2) - (3)]));;}
+    { xhp_children_stmt(_p,(yyval),(yyvsp[(2) - (3)]));}
     break;
 
   case 217:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1311 "hphp.y"
     { Token t; t.reset();
-                                         _p->onTraitUse((yyval),(yyvsp[(2) - (3)]),t); ;}
+                                         _p->onTraitUse((yyval),(yyvsp[(2) - (3)]),t); }
     break;
 
   case 218:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1314 "hphp.y"
-    { _p->onTraitUse((yyval),(yyvsp[(2) - (5)]),(yyvsp[(4) - (5)])); ;}
+    { _p->onTraitUse((yyval),(yyvsp[(2) - (5)]),(yyvsp[(4) - (5)])); }
     break;
 
   case 219:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1317 "hphp.y"
-    { _p->onTraitRule((yyval),(yyvsp[(1) - (2)]),(yyvsp[(2) - (2)])); ;}
+    { _p->onTraitRule((yyval),(yyvsp[(1) - (2)]),(yyvsp[(2) - (2)])); }
     break;
 
   case 220:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1318 "hphp.y"
-    { _p->onTraitRule((yyval),(yyvsp[(1) - (2)]),(yyvsp[(2) - (2)])); ;}
+    { _p->onTraitRule((yyval),(yyvsp[(1) - (2)]),(yyvsp[(2) - (2)])); }
     break;
 
   case 221:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1319 "hphp.y"
-    { (yyval).reset(); ;}
+    { (yyval).reset(); }
     break;
 
   case 222:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1325 "hphp.y"
-    { _p->onTraitPrecRule((yyval),(yyvsp[(1) - (6)]),(yyvsp[(3) - (6)]),(yyvsp[(5) - (6)]));;}
+    { _p->onTraitPrecRule((yyval),(yyvsp[(1) - (6)]),(yyvsp[(3) - (6)]),(yyvsp[(5) - (6)]));}
     break;
 
   case 223:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1329 "hphp.y"
     { _p->onTraitAliasRuleModify((yyval),(yyvsp[(1) - (5)]),(yyvsp[(3) - (5)]),
-                                                                    (yyvsp[(4) - (5)]));;}
+                                                                    (yyvsp[(4) - (5)]));}
     break;
 
   case 224:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1332 "hphp.y"
     { Token t; t.reset();
                                          _p->onTraitAliasRuleModify((yyval),(yyvsp[(1) - (4)]),(yyvsp[(3) - (4)]),
-                                                                    t);;}
+                                                                    t);}
     break;
 
   case 225:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1339 "hphp.y"
-    { _p->onTraitAliasRuleStart((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]));;}
+    { _p->onTraitAliasRuleStart((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]));}
     break;
 
   case 226:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1340 "hphp.y"
     { Token t; t.reset();
-                                         _p->onTraitAliasRuleStart((yyval),t,(yyvsp[(1) - (1)]));;}
+                                         _p->onTraitAliasRuleStart((yyval),t,(yyvsp[(1) - (1)]));}
     break;
 
   case 227:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1345 "hphp.y"
     { xhp_attribute_list(_p,(yyval),
-                                         _p->xhpGetAttributes(),(yyvsp[(1) - (1)]));;}
+                                         _p->xhpGetAttributes(),(yyvsp[(1) - (1)]));}
     break;
 
   case 228:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1348 "hphp.y"
-    { xhp_attribute_list(_p,(yyval), &(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]));;}
+    { xhp_attribute_list(_p,(yyval), &(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]));}
     break;
 
   case 229:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1355 "hphp.y"
     { xhp_attribute(_p,(yyval),(yyvsp[(1) - (4)]),(yyvsp[(2) - (4)]),(yyvsp[(3) - (4)]),(yyvsp[(4) - (4)]));
-                                         (yyval) = 1;;}
+                                         (yyval) = 1;}
     break;
 
   case 230:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1357 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]); (yyval) = 0;;}
+    { (yyval) = (yyvsp[(1) - (1)]); (yyval) = 0;}
     break;
 
   case 231:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1361 "hphp.y"
-    { (yyval) = 4;;}
+    { (yyval) = 4;}
     break;
 
   case 232:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1362 "hphp.y"
     { /* This case handles all types other
                                             than "array", "var" and "enum".
                                             For now we just use type code 5;
                                             later xhp_attribute() will fix up
                                             the type code as appropriate. */
-                                         (yyval) = 5; (yyval).setText((yyvsp[(1) - (1)]));;}
+                                         (yyval) = 5; (yyval).setText((yyvsp[(1) - (1)]));}
     break;
 
   case 233:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1368 "hphp.y"
-    { (yyval) = 6;;}
+    { (yyval) = 6;}
     break;
 
   case 234:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1370 "hphp.y"
-    { (yyval) = (yyvsp[(3) - (4)]); (yyval) = 7;;}
+    { (yyval) = (yyvsp[(3) - (4)]); (yyval) = 7;}
     break;
 
   case 235:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1374 "hphp.y"
-    { _p->onArrayPair((yyval),  0,0,(yyvsp[(1) - (1)]),0);;}
+    { _p->onArrayPair((yyval),  0,0,(yyvsp[(1) - (1)]),0);}
     break;
 
   case 236:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1376 "hphp.y"
-    { _p->onArrayPair((yyval),&(yyvsp[(1) - (3)]),0,(yyvsp[(3) - (3)]),0);;}
+    { _p->onArrayPair((yyval),&(yyvsp[(1) - (3)]),0,(yyvsp[(3) - (3)]),0);}
     break;
 
   case 237:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1380 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (2)]);;}
+    { (yyval) = (yyvsp[(2) - (2)]);}
     break;
 
   case 238:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1381 "hphp.y"
-    { scalar_null(_p, (yyval));;}
+    { scalar_null(_p, (yyval));}
     break;
 
   case 239:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1385 "hphp.y"
-    { scalar_num(_p, (yyval), "1");;}
+    { scalar_num(_p, (yyval), "1");}
     break;
 
   case 240:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1386 "hphp.y"
-    { scalar_num(_p, (yyval), "0");;}
+    { scalar_num(_p, (yyval), "0");}
     break;
 
   case 241:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1390 "hphp.y"
     { Token t; scalar_num(_p, t, "1");
-                                         _p->onArrayPair((yyval),0,&(yyvsp[(1) - (1)]),t,0);;}
+                                         _p->onArrayPair((yyval),0,&(yyvsp[(1) - (1)]),t,0);}
     break;
 
   case 242:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1393 "hphp.y"
     { Token t; scalar_num(_p, t, "1");
-                                         _p->onArrayPair((yyval),&(yyvsp[(1) - (3)]),&(yyvsp[(3) - (3)]),t,0);;}
+                                         _p->onArrayPair((yyval),&(yyvsp[(1) - (3)]),&(yyvsp[(3) - (3)]),t,0);}
     break;
 
   case 243:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1398 "hphp.y"
     { _p->onScalar((yyval),
-                                         T_CONSTANT_ENCAPSED_STRING, (yyvsp[(1) - (1)]));;}
+                                         T_CONSTANT_ENCAPSED_STRING, (yyvsp[(1) - (1)]));}
     break;
 
   case 244:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1403 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]); (yyval) = 2;;}
+    { (yyval) = (yyvsp[(1) - (1)]); (yyval) = 2;}
     break;
 
   case 245:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1404 "hphp.y"
     { (yyval) = -1;
-                                         if ((yyvsp[(1) - (1)]).same("any")) (yyval) = 1;;}
+                                         if ((yyvsp[(1) - (1)]).same("any")) (yyval) = 1;}
     break;
 
   case 246:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1406 "hphp.y"
-    { (yyval) = 0;;}
+    { (yyval) = 0;}
     break;
 
   case 247:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1410 "hphp.y"
-    { xhp_children_paren(_p, (yyval), (yyvsp[(2) - (3)]), 0);;}
+    { xhp_children_paren(_p, (yyval), (yyvsp[(2) - (3)]), 0);}
     break;
 
   case 248:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1411 "hphp.y"
-    { xhp_children_paren(_p, (yyval), (yyvsp[(2) - (4)]), 1);;}
+    { xhp_children_paren(_p, (yyval), (yyvsp[(2) - (4)]), 1);}
     break;
 
   case 249:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1412 "hphp.y"
-    { xhp_children_paren(_p, (yyval), (yyvsp[(2) - (4)]), 2);;}
+    { xhp_children_paren(_p, (yyval), (yyvsp[(2) - (4)]), 2);}
     break;
 
   case 250:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1413 "hphp.y"
-    { xhp_children_paren(_p, (yyval), (yyvsp[(2) - (4)]), 3);;}
+    { xhp_children_paren(_p, (yyval), (yyvsp[(2) - (4)]), 3);}
     break;
 
   case 251:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1417 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 252:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1418 "hphp.y"
-    { xhp_children_decl(_p,(yyval),(yyvsp[(1) - (1)]),0,  0);;}
+    { xhp_children_decl(_p,(yyval),(yyvsp[(1) - (1)]),0,  0);}
     break;
 
   case 253:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1419 "hphp.y"
-    { xhp_children_decl(_p,(yyval),(yyvsp[(1) - (2)]),1,  0);;}
+    { xhp_children_decl(_p,(yyval),(yyvsp[(1) - (2)]),1,  0);}
     break;
 
   case 254:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1420 "hphp.y"
-    { xhp_children_decl(_p,(yyval),(yyvsp[(1) - (2)]),2,  0);;}
+    { xhp_children_decl(_p,(yyval),(yyvsp[(1) - (2)]),2,  0);}
     break;
 
   case 255:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1421 "hphp.y"
-    { xhp_children_decl(_p,(yyval),(yyvsp[(1) - (2)]),3,  0);;}
+    { xhp_children_decl(_p,(yyval),(yyvsp[(1) - (2)]),3,  0);}
     break;
 
   case 256:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1423 "hphp.y"
-    { xhp_children_decl(_p,(yyval),(yyvsp[(1) - (3)]),4,&(yyvsp[(3) - (3)]));;}
+    { xhp_children_decl(_p,(yyval),(yyvsp[(1) - (3)]),4,&(yyvsp[(3) - (3)]));}
     break;
 
   case 257:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1425 "hphp.y"
-    { xhp_children_decl(_p,(yyval),(yyvsp[(1) - (3)]),5,&(yyvsp[(3) - (3)]));;}
+    { xhp_children_decl(_p,(yyval),(yyvsp[(1) - (3)]),5,&(yyvsp[(3) - (3)]));}
     break;
 
   case 258:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1429 "hphp.y"
     { (yyval) = -1;
                                          if ((yyvsp[(1) - (1)]).same("any")) (yyval) = 1; else
-                                         if ((yyvsp[(1) - (1)]).same("pcdata")) (yyval) = 2;;}
+                                         if ((yyvsp[(1) - (1)]).same("pcdata")) (yyval) = 2;}
     break;
 
   case 259:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1432 "hphp.y"
-    { (yyvsp[(1) - (1)]).xhpLabel();  (yyval) = (yyvsp[(1) - (1)]); (yyval) = 3;;}
+    { (yyvsp[(1) - (1)]).xhpLabel();  (yyval) = (yyvsp[(1) - (1)]); (yyval) = 3;}
     break;
 
   case 260:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1433 "hphp.y"
-    { (yyvsp[(1) - (1)]).xhpLabel(0); (yyval) = (yyvsp[(1) - (1)]); (yyval) = 4;;}
+    { (yyvsp[(1) - (1)]).xhpLabel(0); (yyval) = (yyvsp[(1) - (1)]); (yyval) = 4;}
     break;
 
   case 261:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1437 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 262:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1438 "hphp.y"
-    { _p->finishStatement((yyval), (yyvsp[(2) - (3)])); (yyval) = 1;;}
+    { _p->finishStatement((yyval), (yyvsp[(2) - (3)])); (yyval) = 1;}
     break;
 
   case 263:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1442 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 264:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1443 "hphp.y"
-    { _p->finishStatement((yyval), (yyvsp[(2) - (3)])); (yyval) = 1;;}
+    { _p->finishStatement((yyval), (yyvsp[(2) - (3)])); (yyval) = 1;}
     break;
 
   case 265:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1446 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 266:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1447 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 267:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1450 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 268:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1451 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 269:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1454 "hphp.y"
-    { _p->onMemberModifier((yyval),NULL,(yyvsp[(1) - (1)]));;}
+    { _p->onMemberModifier((yyval),NULL,(yyvsp[(1) - (1)]));}
     break;
 
   case 270:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1456 "hphp.y"
-    { _p->onMemberModifier((yyval),&(yyvsp[(1) - (2)]),(yyvsp[(2) - (2)]));;}
+    { _p->onMemberModifier((yyval),&(yyvsp[(1) - (2)]),(yyvsp[(2) - (2)]));}
     break;
 
   case 271:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1459 "hphp.y"
-    { (yyval) = T_PUBLIC;;}
+    { (yyval) = T_PUBLIC;}
     break;
 
   case 272:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1460 "hphp.y"
-    { (yyval) = T_PROTECTED;;}
+    { (yyval) = T_PROTECTED;}
     break;
 
   case 273:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1461 "hphp.y"
-    { (yyval) = T_PRIVATE;;}
+    { (yyval) = T_PRIVATE;}
     break;
 
   case 274:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1462 "hphp.y"
-    { (yyval) = T_STATIC;;}
+    { (yyval) = T_STATIC;}
     break;
 
   case 275:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1463 "hphp.y"
-    { (yyval) = T_ABSTRACT;;}
+    { (yyval) = T_ABSTRACT;}
     break;
 
   case 276:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1464 "hphp.y"
-    { (yyval) = T_FINAL;;}
+    { (yyval) = T_FINAL;}
     break;
 
   case 277:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1465 "hphp.y"
-    { (yyval) = T_ASYNC;;}
+    { (yyval) = T_ASYNC;}
     break;
 
   case 278:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1469 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 279:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1470 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 280:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1473 "hphp.y"
-    { (yyval) = T_PUBLIC;;}
+    { (yyval) = T_PUBLIC;}
     break;
 
   case 281:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1474 "hphp.y"
-    { (yyval) = T_PROTECTED;;}
+    { (yyval) = T_PROTECTED;}
     break;
 
   case 282:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1475 "hphp.y"
-    { (yyval) = T_PRIVATE;;}
+    { (yyval) = T_PRIVATE;}
     break;
 
   case 283:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1479 "hphp.y"
-    { _p->onClassVariable((yyval),&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),0);;}
+    { _p->onClassVariable((yyval),&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),0);}
     break;
 
   case 284:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1481 "hphp.y"
-    { _p->onClassVariable((yyval),&(yyvsp[(1) - (5)]),(yyvsp[(3) - (5)]),&(yyvsp[(5) - (5)]));;}
+    { _p->onClassVariable((yyval),&(yyvsp[(1) - (5)]),(yyvsp[(3) - (5)]),&(yyvsp[(5) - (5)]));}
     break;
 
   case 285:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1482 "hphp.y"
-    { _p->onClassVariable((yyval),0,(yyvsp[(1) - (1)]),0);;}
+    { _p->onClassVariable((yyval),0,(yyvsp[(1) - (1)]),0);}
     break;
 
   case 286:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1483 "hphp.y"
-    { _p->onClassVariable((yyval),0,(yyvsp[(1) - (3)]),&(yyvsp[(3) - (3)]));;}
+    { _p->onClassVariable((yyval),0,(yyvsp[(1) - (3)]),&(yyvsp[(3) - (3)]));}
     break;
 
   case 287:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1487 "hphp.y"
-    { _p->onClassConstant((yyval),&(yyvsp[(1) - (5)]),(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]));;}
+    { _p->onClassConstant((yyval),&(yyvsp[(1) - (5)]),(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]));}
     break;
 
   case 288:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1488 "hphp.y"
-    { _p->onClassConstant((yyval),0,(yyvsp[(2) - (4)]),(yyvsp[(4) - (4)]));;}
+    { _p->onClassConstant((yyval),0,(yyvsp[(2) - (4)]),(yyvsp[(4) - (4)]));}
     break;
 
   case 289:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1492 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (3)]);;}
+    { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 290:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1494 "hphp.y"
-    { _p->onNewObject((yyval), (yyvsp[(2) - (3)]), (yyvsp[(3) - (3)]));;}
+    { _p->onNewObject((yyval), (yyvsp[(2) - (3)]), (yyvsp[(3) - (3)]));}
     break;
 
   case 291:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1495 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),T_CLONE,1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),T_CLONE,1);}
     break;
 
   case 292:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1496 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 293:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1497 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 294:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1500 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (3)]);;}
+    { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 295:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1504 "hphp.y"
-    { _p->onExprListElem((yyval), &(yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));;}
+    { _p->onExprListElem((yyval), &(yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));}
     break;
 
   case 296:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1505 "hphp.y"
-    { _p->onExprListElem((yyval), NULL, (yyvsp[(1) - (1)]));;}
+    { _p->onExprListElem((yyval), NULL, (yyvsp[(1) - (1)]));}
     break;
 
   case 297:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1509 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 298:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1510 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 299:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1514 "hphp.y"
-    { _p->onYield((yyval), (yyvsp[(2) - (2)]));;}
+    { _p->onYield((yyval), (yyvsp[(2) - (2)]));}
     break;
 
   case 300:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1515 "hphp.y"
-    { _p->onYieldPair((yyval), (yyvsp[(2) - (4)]), (yyvsp[(4) - (4)]));;}
+    { _p->onYieldPair((yyval), (yyvsp[(2) - (4)]), (yyvsp[(4) - (4)]));}
     break;
 
   case 301:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1519 "hphp.y"
-    { _p->onAssign((yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), 0, true);;}
+    { _p->onAssign((yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), 0, true);}
     break;
 
   case 302:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1524 "hphp.y"
-    { _p->onListAssignment((yyval), (yyvsp[(3) - (6)]), &(yyvsp[(6) - (6)]), true);;}
+    { _p->onListAssignment((yyval), (yyvsp[(3) - (6)]), &(yyvsp[(6) - (6)]), true);}
     break;
 
   case 303:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1528 "hphp.y"
-    { _p->onAwait((yyval), (yyvsp[(2) - (2)])); ;}
+    { _p->onAwait((yyval), (yyvsp[(2) - (2)])); }
     break;
 
   case 304:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1532 "hphp.y"
-    { _p->onAssign((yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), 0, true);;}
+    { _p->onAssign((yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), 0, true);}
     break;
 
   case 305:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1537 "hphp.y"
-    { _p->onListAssignment((yyval), (yyvsp[(3) - (6)]), &(yyvsp[(6) - (6)]), true);;}
+    { _p->onListAssignment((yyval), (yyvsp[(3) - (6)]), &(yyvsp[(6) - (6)]), true);}
     break;
 
   case 306:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1541 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 307:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1542 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 308:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1543 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 309:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1547 "hphp.y"
-    { _p->onListAssignment((yyval), (yyvsp[(3) - (6)]), &(yyvsp[(6) - (6)]));;}
+    { _p->onListAssignment((yyval), (yyvsp[(3) - (6)]), &(yyvsp[(6) - (6)]));}
     break;
 
   case 310:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1548 "hphp.y"
-    { _p->onAssign((yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), 0);;}
+    { _p->onAssign((yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), 0);}
     break;
 
   case 311:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1549 "hphp.y"
-    { _p->onAssign((yyval), (yyvsp[(1) - (4)]), (yyvsp[(4) - (4)]), 1);;}
+    { _p->onAssign((yyval), (yyvsp[(1) - (4)]), (yyvsp[(4) - (4)]), 1);}
     break;
 
   case 312:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1552 "hphp.y"
-    { _p->onAssignNew((yyval),(yyvsp[(1) - (6)]),(yyvsp[(5) - (6)]),(yyvsp[(6) - (6)]));;}
+    { _p->onAssignNew((yyval),(yyvsp[(1) - (6)]),(yyvsp[(5) - (6)]),(yyvsp[(6) - (6)]));}
     break;
 
   case 313:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1553 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_PLUS_EQUAL);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_PLUS_EQUAL);}
     break;
 
   case 314:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1554 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_MINUS_EQUAL);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_MINUS_EQUAL);}
     break;
 
   case 315:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1555 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_MUL_EQUAL);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_MUL_EQUAL);}
     break;
 
   case 316:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1556 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_DIV_EQUAL);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_DIV_EQUAL);}
     break;
 
   case 317:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1557 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_CONCAT_EQUAL);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_CONCAT_EQUAL);}
     break;
 
   case 318:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1558 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_MOD_EQUAL);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_MOD_EQUAL);}
     break;
 
   case 319:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1559 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_AND_EQUAL);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_AND_EQUAL);}
     break;
 
   case 320:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1560 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_OR_EQUAL);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_OR_EQUAL);}
     break;
 
   case 321:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1561 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_XOR_EQUAL);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_XOR_EQUAL);}
     break;
 
   case 322:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1562 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_SL_EQUAL);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_SL_EQUAL);}
     break;
 
   case 323:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1563 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_SR_EQUAL);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_SR_EQUAL);}
     break;
 
   case 324:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1564 "hphp.y"
-    { UEXP((yyval),(yyvsp[(1) - (2)]),T_INC,0);;}
+    { UEXP((yyval),(yyvsp[(1) - (2)]),T_INC,0);}
     break;
 
   case 325:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1565 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),T_INC,1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),T_INC,1);}
     break;
 
   case 326:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1566 "hphp.y"
-    { UEXP((yyval),(yyvsp[(1) - (2)]),T_DEC,0);;}
+    { UEXP((yyval),(yyvsp[(1) - (2)]),T_DEC,0);}
     break;
 
   case 327:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1567 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),T_DEC,1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),T_DEC,1);}
     break;
 
   case 328:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1568 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_BOOLEAN_OR);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_BOOLEAN_OR);}
     break;
 
   case 329:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1569 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_BOOLEAN_AND);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_BOOLEAN_AND);}
     break;
 
   case 330:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1570 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_LOGICAL_OR);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_LOGICAL_OR);}
     break;
 
   case 331:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1571 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_LOGICAL_AND);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_LOGICAL_AND);}
     break;
 
   case 332:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1572 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_LOGICAL_XOR);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_LOGICAL_XOR);}
     break;
 
   case 333:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1573 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),'|');;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),'|');}
     break;
 
   case 334:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1574 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),'&');;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),'&');}
     break;
 
   case 335:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1575 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),'^');;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),'^');}
     break;
 
   case 336:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1576 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),'.');;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),'.');}
     break;
 
   case 337:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1577 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),'+');;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),'+');}
     break;
 
   case 338:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1578 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),'-');;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),'-');}
     break;
 
   case 339:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1579 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),'*');;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),'*');}
     break;
 
   case 340:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1580 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),'/');;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),'/');}
     break;
 
   case 341:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1581 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),'%');;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),'%');}
     break;
 
   case 342:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1582 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_SL);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_SL);}
     break;
 
   case 343:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1583 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_SR);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_SR);}
     break;
 
   case 344:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1584 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),'+',1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),'+',1);}
     break;
 
   case 345:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1585 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),'-',1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),'-',1);}
     break;
 
   case 346:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1586 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),'!',1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),'!',1);}
     break;
 
   case 347:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1587 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),'~',1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),'~',1);}
     break;
 
   case 348:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1588 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_IS_IDENTICAL);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_IS_IDENTICAL);}
     break;
 
   case 349:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1589 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_IS_NOT_IDENTICAL);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_IS_NOT_IDENTICAL);}
     break;
 
   case 350:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1590 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_IS_EQUAL);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_IS_EQUAL);}
     break;
 
   case 351:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1591 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_IS_NOT_EQUAL);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_IS_NOT_EQUAL);}
     break;
 
   case 352:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1592 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),'<');;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),'<');}
     break;
 
   case 353:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1593 "hphp.y"
     { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),
-                                              T_IS_SMALLER_OR_EQUAL);;}
+                                              T_IS_SMALLER_OR_EQUAL);}
     break;
 
   case 354:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1595 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),'>');;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),'>');}
     break;
 
   case 355:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1596 "hphp.y"
     { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),
-                                              T_IS_GREATER_OR_EQUAL);;}
+                                              T_IS_GREATER_OR_EQUAL);}
     break;
 
   case 356:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1599 "hphp.y"
-    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_INSTANCEOF);;}
+    { BEXP((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),T_INSTANCEOF);}
     break;
 
   case 357:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1600 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (3)]);;}
+    { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 358:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1601 "hphp.y"
-    { _p->onQOp((yyval), (yyvsp[(1) - (5)]), &(yyvsp[(3) - (5)]), (yyvsp[(5) - (5)]));;}
+    { _p->onQOp((yyval), (yyvsp[(1) - (5)]), &(yyvsp[(3) - (5)]), (yyvsp[(5) - (5)]));}
     break;
 
   case 359:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1602 "hphp.y"
-    { _p->onQOp((yyval), (yyvsp[(1) - (4)]),   0, (yyvsp[(4) - (4)]));;}
+    { _p->onQOp((yyval), (yyvsp[(1) - (4)]),   0, (yyvsp[(4) - (4)]));}
     break;
 
   case 360:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1603 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 361:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1604 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),T_INT_CAST,1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),T_INT_CAST,1);}
     break;
 
   case 362:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1605 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),T_DOUBLE_CAST,1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),T_DOUBLE_CAST,1);}
     break;
 
   case 363:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1606 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),T_STRING_CAST,1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),T_STRING_CAST,1);}
     break;
 
   case 364:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1607 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),T_ARRAY_CAST,1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),T_ARRAY_CAST,1);}
     break;
 
   case 365:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1608 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),T_OBJECT_CAST,1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),T_OBJECT_CAST,1);}
     break;
 
   case 366:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1609 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),T_BOOL_CAST,1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),T_BOOL_CAST,1);}
     break;
 
   case 367:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1610 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),T_UNSET_CAST,1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),T_UNSET_CAST,1);}
     break;
 
   case 368:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1611 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),T_EXIT,1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),T_EXIT,1);}
     break;
 
   case 369:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1612 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),'@',1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),'@',1);}
     break;
 
   case 370:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1613 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]); ;}
+    { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 371:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1614 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]); ;}
+    { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 372:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1615 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]); ;}
+    { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 373:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1616 "hphp.y"
-    { _p->onEncapsList((yyval),'`',(yyvsp[(2) - (3)]));;}
+    { _p->onEncapsList((yyval),'`',(yyvsp[(2) - (3)]));}
     break;
 
   case 374:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1617 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),T_PRINT,1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),T_PRINT,1);}
     break;
 
   case 375:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1619 "hphp.y"
     { Token t; _p->onClosureStart(t);
-                                         _p->pushLabelInfo();;}
+                                         _p->pushLabelInfo();}
     break;
 
   case 376:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1623 "hphp.y"
     { Token u; u.reset();
                                          _p->finishStatement((yyvsp[(10) - (11)]), (yyvsp[(10) - (11)])); (yyvsp[(10) - (11)]) = 1;
                                          _p->onClosure((yyval),0,u,(yyvsp[(2) - (11)]),(yyvsp[(5) - (11)]),(yyvsp[(8) - (11)]),(yyvsp[(10) - (11)]));
-                                         _p->popLabelInfo();;}
+                                         _p->popLabelInfo();}
     break;
 
   case 377:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1628 "hphp.y"
     { Token t; _p->onClosureStart(t);
-                                         _p->pushLabelInfo();;}
+                                         _p->pushLabelInfo();}
     break;
 
   case 378:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1632 "hphp.y"
     { Token u; u.reset();
                                          _p->finishStatement((yyvsp[(11) - (12)]), (yyvsp[(11) - (12)])); (yyvsp[(11) - (12)]) = 1;
                                          _p->onClosure((yyval),&(yyvsp[(1) - (12)]),u,(yyvsp[(3) - (12)]),(yyvsp[(6) - (12)]),(yyvsp[(9) - (12)]),(yyvsp[(11) - (12)]));
-                                         _p->popLabelInfo();;}
+                                         _p->popLabelInfo();}
     break;
 
   case 379:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1636 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 380:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1640 "hphp.y"
     { validate_shape_keyname((yyvsp[(1) - (1)]), _p);
-                                        _p->onScalar((yyval), T_CONSTANT_ENCAPSED_STRING, (yyvsp[(1) - (1)])); ;}
+                                        _p->onScalar((yyval), T_CONSTANT_ENCAPSED_STRING, (yyvsp[(1) - (1)])); }
     break;
 
   case 381:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1647 "hphp.y"
-    { _p->onArrayPair((yyval),&(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]),0); ;}
+    { _p->onArrayPair((yyval),&(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]),0); }
     break;
 
   case 382:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1650 "hphp.y"
-    { _p->onArrayPair((yyval),  0,&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),0); ;}
+    { _p->onArrayPair((yyval),  0,&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),0); }
     break;
 
   case 383:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1657 "hphp.y"
-    { _p->onArrayPair((yyval),&(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]),0); ;}
+    { _p->onArrayPair((yyval),&(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]),0); }
     break;
 
   case 384:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1660 "hphp.y"
-    { _p->onArrayPair((yyval),  0,&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),0); ;}
+    { _p->onArrayPair((yyval),  0,&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),0); }
     break;
 
   case 385:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1665 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (2)]); ;}
+    { (yyval) = (yyvsp[(1) - (2)]); }
     break;
 
   case 386:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1666 "hphp.y"
-    { (yyval).reset(); ;}
+    { (yyval).reset(); }
     break;
 
   case 387:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1671 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (2)]); ;}
+    { (yyval) = (yyvsp[(1) - (2)]); }
     break;
 
   case 388:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1672 "hphp.y"
-    { (yyval).reset(); ;}
+    { (yyval).reset(); }
     break;
 
   case 389:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1676 "hphp.y"
-    { _p->onArray((yyval), (yyvsp[(3) - (4)]), T_ARRAY);;}
+    { _p->onArray((yyval), (yyvsp[(3) - (4)]), T_ARRAY);}
     break;
 
   case 390:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1680 "hphp.y"
-    { _p->onArray((yyval),(yyvsp[(3) - (4)]),T_ARRAY);;}
+    { _p->onArray((yyval),(yyvsp[(3) - (4)]),T_ARRAY);}
     break;
 
   case 391:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1681 "hphp.y"
-    { _p->onArray((yyval),(yyvsp[(2) - (3)]),T_ARRAY);;}
+    { _p->onArray((yyval),(yyvsp[(2) - (3)]),T_ARRAY);}
     break;
 
   case 392:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1686 "hphp.y"
     { Token t;
                                          _p->onName(t,(yyvsp[(1) - (4)]),Parser::StringName);
-                                         BEXP((yyval),t,(yyvsp[(3) - (4)]),T_COLLECTION);;}
+                                         BEXP((yyval),t,(yyvsp[(3) - (4)]),T_COLLECTION);}
     break;
 
   case 393:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1693 "hphp.y"
     { Token t;
                                          _p->onName(t,(yyvsp[(1) - (4)]),Parser::StringName);
-                                         BEXP((yyval),t,(yyvsp[(3) - (4)]),T_COLLECTION);;}
+                                         BEXP((yyval),t,(yyvsp[(3) - (4)]),T_COLLECTION);}
     break;
 
   case 394:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1700 "hphp.y"
-    { _p->onRefDim((yyval), (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)]));;}
+    { _p->onRefDim((yyval), (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)]));}
     break;
 
   case 395:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1702 "hphp.y"
-    { _p->onRefDim((yyval), (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)]));;}
+    { _p->onRefDim((yyval), (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)]));}
     break;
 
   case 396:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1706 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 397:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1707 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 398:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1708 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (3)]);;}
+    { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 399:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1713 "hphp.y"
-    { (yyval) = (yyvsp[(3) - (5)]);;}
+    { (yyval) = (yyvsp[(3) - (5)]);}
     break;
 
   case 400:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1714 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 401:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1718 "hphp.y"
-    { _p->onClosureParam((yyval),&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),0);;}
+    { _p->onClosureParam((yyval),&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),0);}
     break;
 
   case 402:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1719 "hphp.y"
-    { _p->onClosureParam((yyval),&(yyvsp[(1) - (4)]),(yyvsp[(4) - (4)]),1);;}
+    { _p->onClosureParam((yyval),&(yyvsp[(1) - (4)]),(yyvsp[(4) - (4)]),1);}
     break;
 
   case 403:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1720 "hphp.y"
-    { _p->onClosureParam((yyval),  0,(yyvsp[(1) - (1)]),0);;}
+    { _p->onClosureParam((yyval),  0,(yyvsp[(1) - (1)]),0);}
     break;
 
   case 404:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1721 "hphp.y"
-    { _p->onClosureParam((yyval),  0,(yyvsp[(2) - (2)]),1);;}
+    { _p->onClosureParam((yyval),  0,(yyvsp[(2) - (2)]),1);}
     break;
 
   case 405:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1728 "hphp.y"
-    { xhp_tag(_p,(yyval),(yyvsp[(2) - (4)]),(yyvsp[(3) - (4)]));;}
+    { xhp_tag(_p,(yyval),(yyvsp[(2) - (4)]),(yyvsp[(3) - (4)]));}
     break;
 
   case 406:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1731 "hphp.y"
     { Token t1; _p->onArray(t1,(yyvsp[(1) - (2)]));
                                          Token t2; _p->onArray(t2,(yyvsp[(2) - (2)]));
@@ -8399,12 +8438,12 @@ yyreduce:
                                          _p->onCallParam((yyval), &(yyvsp[(1) - (2)]),t2,0);
                                          _p->onCallParam((yyvsp[(1) - (2)]), &(yyvsp[(1) - (2)]),file,0);
                                          _p->onCallParam((yyvsp[(1) - (2)]), &(yyvsp[(1) - (2)]),line,0);
-                                         (yyval).setText("");;}
+                                         (yyval).setText("");}
     break;
 
   case 407:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1742 "hphp.y"
     { Token file; scalar_file(_p, file);
                                          Token line; scalar_line(_p, line);
@@ -8414,78 +8453,78 @@ yyreduce:
                                          _p->onCallParam((yyval), &(yyvsp[(2) - (6)]),(yyvsp[(5) - (6)]),0);
                                          _p->onCallParam((yyvsp[(2) - (6)]), &(yyvsp[(2) - (6)]),file,0);
                                          _p->onCallParam((yyvsp[(2) - (6)]), &(yyvsp[(2) - (6)]),line,0);
-                                         (yyval).setText((yyvsp[(6) - (6)]).text());;}
+                                         (yyval).setText((yyvsp[(6) - (6)]).text());}
     break;
 
   case 408:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1753 "hphp.y"
-    { (yyval).reset(); (yyval).setText("");;}
+    { (yyval).reset(); (yyval).setText("");}
     break;
 
   case 409:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1754 "hphp.y"
-    { (yyval).reset(); (yyval).setText((yyvsp[(1) - (1)]));;}
+    { (yyval).reset(); (yyval).setText((yyvsp[(1) - (1)]));}
     break;
 
   case 410:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1759 "hphp.y"
-    { _p->onArrayPair((yyval),&(yyvsp[(1) - (4)]),&(yyvsp[(2) - (4)]),(yyvsp[(4) - (4)]),0);;}
+    { _p->onArrayPair((yyval),&(yyvsp[(1) - (4)]),&(yyvsp[(2) - (4)]),(yyvsp[(4) - (4)]),0);}
     break;
 
   case 411:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1760 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 412:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1763 "hphp.y"
-    { _p->onArrayPair((yyval),&(yyvsp[(1) - (2)]),0,(yyvsp[(2) - (2)]),0);;}
+    { _p->onArrayPair((yyval),&(yyvsp[(1) - (2)]),0,(yyvsp[(2) - (2)]),0);}
     break;
 
   case 413:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1764 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 414:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1767 "hphp.y"
     { _p->onScalar((yyval),
-                                         T_CONSTANT_ENCAPSED_STRING, (yyvsp[(1) - (1)]));;}
+                                         T_CONSTANT_ENCAPSED_STRING, (yyvsp[(1) - (1)]));}
     break;
 
   case 415:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1771 "hphp.y"
     { (yyvsp[(1) - (1)]).xhpDecode();
                                          _p->onScalar((yyval),
-                                         T_CONSTANT_ENCAPSED_STRING, (yyvsp[(1) - (1)]));;}
+                                         T_CONSTANT_ENCAPSED_STRING, (yyvsp[(1) - (1)]));}
     break;
 
   case 416:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1774 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (3)]);;}
+    { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 417:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1777 "hphp.y"
     { (yyval).reset();
                                          if ((yyvsp[(1) - (1)]).htmlTrim()) {
@@ -8493,2377 +8532,2388 @@ yyreduce:
                                            _p->onScalar((yyval),
                                            T_CONSTANT_ENCAPSED_STRING, (yyvsp[(1) - (1)]));
                                          }
-                                       ;}
+                                       }
     break;
 
   case 418:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1784 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (3)]); ;}
+    { (yyval) = (yyvsp[(2) - (3)]); }
     break;
 
   case 419:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1785 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]); ;}
+    { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 420:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1789 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 421:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1791 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (3)]) + ":" + (yyvsp[(3) - (3)]);;}
+    { (yyval) = (yyvsp[(1) - (3)]) + ":" + (yyvsp[(3) - (3)]);}
     break;
 
   case 422:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1793 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (3)]) + "-" + (yyvsp[(3) - (3)]);;}
+    { (yyval) = (yyvsp[(1) - (3)]) + "-" + (yyvsp[(3) - (3)]);}
     break;
 
   case 423:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1796 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 424:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1797 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 425:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1798 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 426:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1799 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 427:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1800 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 428:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1801 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 429:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1802 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 430:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1803 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 431:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1804 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 432:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1805 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 433:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1806 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 434:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1807 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 435:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1808 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 436:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1809 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 437:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1810 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 438:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1811 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 439:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1812 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 440:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1813 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 441:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1814 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 442:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1815 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 443:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1816 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 444:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1817 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 445:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1818 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 446:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1819 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 447:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1820 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 448:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1821 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 449:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1822 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 450:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1823 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 451:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1824 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 452:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1825 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 453:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1826 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 454:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1827 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 455:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1828 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 456:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1829 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 457:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1830 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 458:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1831 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 459:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1832 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 460:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1833 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 461:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1834 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 462:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1835 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 463:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1836 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 464:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1837 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 465:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1838 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 466:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1839 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 467:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1840 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 468:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1841 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 469:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1842 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 470:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1843 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 471:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1844 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 472:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1845 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 473:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1846 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 474:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1847 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 475:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1848 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 476:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1849 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 477:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1850 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 478:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1851 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 479:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1852 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 480:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1853 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 481:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1854 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 482:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1855 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 483:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1856 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 484:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1857 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 485:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1858 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 486:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1859 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 487:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1860 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 488:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1861 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 489:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1862 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 490:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1863 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 491:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1864 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 492:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1865 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 493:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1866 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 494:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1867 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 495:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1868 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 496:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1869 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 497:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1870 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 498:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1871 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 499:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1872 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 500:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1873 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 501:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1874 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 502:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1875 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 503:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1880 "hphp.y"
-    { _p->onCall((yyval),0,(yyvsp[(1) - (4)]),(yyvsp[(3) - (4)]),NULL);;}
+    { _p->onCall((yyval),0,(yyvsp[(1) - (4)]),(yyvsp[(3) - (4)]),NULL);}
     break;
 
   case 504:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1884 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 505:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1885 "hphp.y"
-    { (yyvsp[(1) - (1)]).xhpLabel(); (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyvsp[(1) - (1)]).xhpLabel(); (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 506:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1888 "hphp.y"
-    { _p->onName((yyval),(yyvsp[(1) - (1)]),Parser::StringName);;}
+    { _p->onName((yyval),(yyvsp[(1) - (1)]),Parser::StringName);}
     break;
 
   case 507:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1889 "hphp.y"
-    { _p->onName((yyval),(yyvsp[(1) - (1)]),Parser::StaticName);;}
+    { _p->onName((yyval),(yyvsp[(1) - (1)]),Parser::StaticName);}
     break;
 
   case 508:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1890 "hphp.y"
     { _p->onName((yyval),(yyvsp[(1) - (1)]),
-                                         Parser::StaticClassExprName);;}
+                                         Parser::StaticClassExprName);}
     break;
 
   case 509:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1894 "hphp.y"
-    { _p->onName((yyval),(yyvsp[(1) - (1)]),Parser::StringName);;}
+    { _p->onName((yyval),(yyvsp[(1) - (1)]),Parser::StringName);}
     break;
 
   case 510:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1895 "hphp.y"
-    { _p->onName((yyval),(yyvsp[(1) - (1)]),Parser::StaticName);;}
+    { _p->onName((yyval),(yyvsp[(1) - (1)]),Parser::StaticName);}
     break;
 
   case 511:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1896 "hphp.y"
-    { _p->onName((yyval),(yyvsp[(1) - (1)]),Parser::ExprName);;}
+    { _p->onName((yyval),(yyvsp[(1) - (1)]),Parser::ExprName);}
     break;
 
   case 512:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1900 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 513:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1901 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 514:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1902 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 515:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1906 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 516:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1907 "hphp.y"
-    { _p->addEncap((yyval), NULL, (yyvsp[(1) - (1)]), 0);;}
+    { _p->addEncap((yyval), NULL, (yyvsp[(1) - (1)]), 0);}
     break;
 
   case 517:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1908 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 518:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1912 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (3)]);;}
+    { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 519:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1913 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 520:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1917 "hphp.y"
-    { _p->onScalar((yyval), T_LNUMBER,  (yyvsp[(1) - (1)]));;}
+    { _p->onScalar((yyval), T_LNUMBER,  (yyvsp[(1) - (1)]));}
     break;
 
   case 521:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1918 "hphp.y"
-    { _p->onScalar((yyval), T_DNUMBER,  (yyvsp[(1) - (1)]));;}
+    { _p->onScalar((yyval), T_DNUMBER,  (yyvsp[(1) - (1)]));}
     break;
 
   case 522:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1919 "hphp.y"
     { _p->onScalar((yyval),
-                                         T_CONSTANT_ENCAPSED_STRING,  (yyvsp[(1) - (1)]));;}
+                                         T_CONSTANT_ENCAPSED_STRING,  (yyvsp[(1) - (1)]));}
     break;
 
   case 523:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1921 "hphp.y"
-    { _p->onScalar((yyval), T_LINE,     (yyvsp[(1) - (1)]));;}
+    { _p->onScalar((yyval), T_LINE,     (yyvsp[(1) - (1)]));}
     break;
 
   case 524:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1922 "hphp.y"
-    { _p->onScalar((yyval), T_FILE,     (yyvsp[(1) - (1)]));;}
+    { _p->onScalar((yyval), T_FILE,     (yyvsp[(1) - (1)]));}
     break;
 
   case 525:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1923 "hphp.y"
-    { _p->onScalar((yyval), T_DIR,      (yyvsp[(1) - (1)]));;}
+    { _p->onScalar((yyval), T_DIR,      (yyvsp[(1) - (1)]));}
     break;
 
   case 526:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1924 "hphp.y"
-    { _p->onScalar((yyval), T_CLASS_C,  (yyvsp[(1) - (1)]));;}
+    { _p->onScalar((yyval), T_CLASS_C,  (yyvsp[(1) - (1)]));}
     break;
 
   case 527:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1925 "hphp.y"
-    { _p->onScalar((yyval), T_TRAIT_C,  (yyvsp[(1) - (1)]));;}
+    { _p->onScalar((yyval), T_TRAIT_C,  (yyvsp[(1) - (1)]));}
     break;
 
   case 528:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1926 "hphp.y"
-    { _p->onScalar((yyval), T_METHOD_C, (yyvsp[(1) - (1)]));;}
+    { _p->onScalar((yyval), T_METHOD_C, (yyvsp[(1) - (1)]));}
     break;
 
   case 529:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1927 "hphp.y"
-    { _p->onScalar((yyval), T_FUNC_C,   (yyvsp[(1) - (1)]));;}
+    { _p->onScalar((yyval), T_FUNC_C,   (yyvsp[(1) - (1)]));}
     break;
 
   case 530:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1928 "hphp.y"
-    { _p->onScalar((yyval), T_NS_C,  (yyvsp[(1) - (1)]));;}
+    { _p->onScalar((yyval), T_NS_C,  (yyvsp[(1) - (1)]));}
     break;
 
   case 531:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1929 "hphp.y"
-    { _p->onScalar((yyval), T_COMPILER_HALT_OFFSET, (yyvsp[(1) - (1)]));;}
+    { _p->onScalar((yyval), T_COMPILER_HALT_OFFSET, (yyvsp[(1) - (1)]));}
     break;
 
   case 532:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1932 "hphp.y"
-    { _p->onScalar((yyval), T_CONSTANT_ENCAPSED_STRING, (yyvsp[(2) - (3)]));;}
+    { _p->onScalar((yyval), T_CONSTANT_ENCAPSED_STRING, (yyvsp[(2) - (3)]));}
     break;
 
   case 533:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1934 "hphp.y"
-    { (yyval).setText(""); _p->onScalar((yyval), T_CONSTANT_ENCAPSED_STRING, (yyval));;}
+    { (yyval).setText(""); _p->onScalar((yyval), T_CONSTANT_ENCAPSED_STRING, (yyval));}
     break;
 
   case 534:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1938 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 535:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1939 "hphp.y"
-    { _p->onConstantValue((yyval), (yyvsp[(1) - (1)]));;}
+    { _p->onConstantValue((yyval), (yyvsp[(1) - (1)]));}
     break;
 
   case 536:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1940 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),'+',1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),'+',1);}
     break;
 
   case 537:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1941 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),'-',1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),'-',1);}
     break;
 
   case 538:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1943 "hphp.y"
-    { _p->onArray((yyval),(yyvsp[(3) - (4)]),T_ARRAY); ;}
+    { _p->onArray((yyval),(yyvsp[(3) - (4)]),T_ARRAY); }
     break;
 
   case 539:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1945 "hphp.y"
-    { _p->onArray((yyval),(yyvsp[(3) - (4)]),T_ARRAY); ;}
+    { _p->onArray((yyval),(yyvsp[(3) - (4)]),T_ARRAY); }
     break;
 
   case 540:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1946 "hphp.y"
-    { _p->onArray((yyval),(yyvsp[(2) - (3)]),T_ARRAY); ;}
+    { _p->onArray((yyval),(yyvsp[(2) - (3)]),T_ARRAY); }
     break;
 
   case 541:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1948 "hphp.y"
-    { _p->onArray((yyval),(yyvsp[(3) - (4)]),T_ARRAY); ;}
+    { _p->onArray((yyval),(yyvsp[(3) - (4)]),T_ARRAY); }
     break;
 
   case 542:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1949 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 543:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1950 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 544:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1956 "hphp.y"
-    { _p->onClassConst((yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), 1);;}
+    { _p->onClassConst((yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), 1);}
     break;
 
   case 545:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1958 "hphp.y"
     { (yyvsp[(1) - (3)]).xhpLabel();
-                                         _p->onClassConst((yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), 1);;}
+                                         _p->onClassConst((yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), 1);}
     break;
 
   case 546:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1963 "hphp.y"
-    { _p->onConstantValue((yyval), (yyvsp[(1) - (1)]));;}
+    { _p->onConstantValue((yyval), (yyvsp[(1) - (1)]));}
     break;
 
   case 547:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1964 "hphp.y"
-    { _p->onConstantValue((yyval), (yyvsp[(1) - (1)]));;}
+    { _p->onConstantValue((yyval), (yyvsp[(1) - (1)]));}
     break;
 
   case 548:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1965 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 549:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1966 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 550:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1967 "hphp.y"
-    { _p->onEncapsList((yyval),'"',(yyvsp[(2) - (3)]));;}
+    { _p->onEncapsList((yyval),'"',(yyvsp[(2) - (3)]));}
     break;
 
   case 551:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1968 "hphp.y"
-    { _p->onEncapsList((yyval),'\'',(yyvsp[(2) - (3)]));;}
+    { _p->onEncapsList((yyval),'\'',(yyvsp[(2) - (3)]));}
     break;
 
   case 552:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1970 "hphp.y"
     { _p->onEncapsList((yyval),T_START_HEREDOC,
-                                                          (yyvsp[(2) - (3)]));;}
+                                                          (yyvsp[(2) - (3)]));}
     break;
 
   case 553:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1975 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (2)]);;}
+    { (yyval) = (yyvsp[(1) - (2)]);}
     break;
 
   case 554:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1976 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 555:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1980 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 556:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1981 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 557:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1984 "hphp.y"
-    { only_in_hh_syntax(_p); (yyval).reset();;}
+    { only_in_hh_syntax(_p); (yyval).reset();}
     break;
 
   case 558:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1985 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 559:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1991 "hphp.y"
-    { _p->onArrayPair((yyval),&(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]),0);;}
+    { _p->onArrayPair((yyval),&(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]),0);}
     break;
 
   case 560:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1993 "hphp.y"
-    { _p->onArrayPair((yyval),&(yyvsp[(1) - (3)]),  0,(yyvsp[(3) - (3)]),0);;}
+    { _p->onArrayPair((yyval),&(yyvsp[(1) - (3)]),  0,(yyvsp[(3) - (3)]),0);}
     break;
 
   case 561:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1995 "hphp.y"
-    { _p->onArrayPair((yyval),  0,&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),0);;}
+    { _p->onArrayPair((yyval),  0,&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),0);}
     break;
 
   case 562:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 1996 "hphp.y"
-    { _p->onArrayPair((yyval),  0,  0,(yyvsp[(1) - (1)]),0);;}
+    { _p->onArrayPair((yyval),  0,  0,(yyvsp[(1) - (1)]),0);}
     break;
 
   case 563:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2000 "hphp.y"
-    { _p->onScalar((yyval), T_LNUMBER,  (yyvsp[(1) - (1)]));;}
+    { _p->onScalar((yyval), T_LNUMBER,  (yyvsp[(1) - (1)]));}
     break;
 
   case 564:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2001 "hphp.y"
-    { _p->onScalar((yyval), T_DNUMBER,  (yyvsp[(1) - (1)]));;}
+    { _p->onScalar((yyval), T_DNUMBER,  (yyvsp[(1) - (1)]));}
     break;
 
   case 565:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2002 "hphp.y"
     { _p->onScalar((yyval),
-                                         T_CONSTANT_ENCAPSED_STRING,  (yyvsp[(1) - (1)]));;}
+                                         T_CONSTANT_ENCAPSED_STRING,  (yyvsp[(1) - (1)]));}
     break;
 
   case 566:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2006 "hphp.y"
-    { _p->onScalar((yyval), T_CONSTANT_ENCAPSED_STRING, (yyvsp[(2) - (3)]));;}
+    { _p->onScalar((yyval), T_CONSTANT_ENCAPSED_STRING, (yyvsp[(2) - (3)]));}
     break;
 
   case 567:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2008 "hphp.y"
-    { (yyval).setText(""); _p->onScalar((yyval), T_CONSTANT_ENCAPSED_STRING, (yyval));;}
+    { (yyval).setText(""); _p->onScalar((yyval), T_CONSTANT_ENCAPSED_STRING, (yyval));}
     break;
 
   case 568:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2011 "hphp.y"
-    { _p->onScalar((yyval),T_LNUMBER,(yyvsp[(1) - (1)]));;}
+    { _p->onScalar((yyval),T_LNUMBER,(yyvsp[(1) - (1)]));}
     break;
 
   case 569:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2012 "hphp.y"
-    { _p->onScalar((yyval),T_DNUMBER,(yyvsp[(1) - (1)]));;}
+    { _p->onScalar((yyval),T_DNUMBER,(yyvsp[(1) - (1)]));}
     break;
 
   case 570:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2013 "hphp.y"
-    { constant_ae(_p,(yyval),(yyvsp[(1) - (1)]));;}
+    { constant_ae(_p,(yyval),(yyvsp[(1) - (1)]));}
     break;
 
   case 571:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2016 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 572:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2017 "hphp.y"
-    { constant_ae(_p,(yyval),(yyvsp[(1) - (1)]));;}
+    { constant_ae(_p,(yyval),(yyvsp[(1) - (1)]));}
     break;
 
   case 573:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2018 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),'+',1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),'+',1);}
     break;
 
   case 574:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2019 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),'-',1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),'-',1);}
     break;
 
   case 575:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2021 "hphp.y"
-    { _p->onArray((yyval),(yyvsp[(3) - (4)]),T_ARRAY);;}
+    { _p->onArray((yyval),(yyvsp[(3) - (4)]),T_ARRAY);}
     break;
 
   case 576:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2023 "hphp.y"
-    { _p->onArray((yyval),(yyvsp[(3) - (4)]),T_ARRAY);;}
+    { _p->onArray((yyval),(yyvsp[(3) - (4)]),T_ARRAY);}
     break;
 
   case 577:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2024 "hphp.y"
-    { _p->onArray((yyval),(yyvsp[(2) - (3)]),T_ARRAY);;}
+    { _p->onArray((yyval),(yyvsp[(2) - (3)]),T_ARRAY);}
     break;
 
   case 578:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2026 "hphp.y"
-    { _p->onArray((yyval),(yyvsp[(3) - (4)]),T_ARRAY); ;}
+    { _p->onArray((yyval),(yyvsp[(3) - (4)]),T_ARRAY); }
     break;
 
   case 579:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2031 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (2)]);;}
+    { (yyval) = (yyvsp[(1) - (2)]);}
     break;
 
   case 580:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2032 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 581:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2037 "hphp.y"
-    { _p->onArrayPair((yyval),&(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]),0);;}
+    { _p->onArrayPair((yyval),&(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]),0);}
     break;
 
   case 582:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2039 "hphp.y"
-    { _p->onArrayPair((yyval),&(yyvsp[(1) - (3)]),  0,(yyvsp[(3) - (3)]),0);;}
+    { _p->onArrayPair((yyval),&(yyvsp[(1) - (3)]),  0,(yyvsp[(3) - (3)]),0);}
     break;
 
   case 583:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2041 "hphp.y"
-    { _p->onArrayPair((yyval),  0,&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),0);;}
+    { _p->onArrayPair((yyval),  0,&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),0);}
     break;
 
   case 584:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2042 "hphp.y"
-    { _p->onArrayPair((yyval),  0,  0,(yyvsp[(1) - (1)]),0);;}
+    { _p->onArrayPair((yyval),  0,  0,(yyvsp[(1) - (1)]),0);}
     break;
 
   case 585:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2046 "hphp.y"
-    { _p->onArrayPair((yyval),&(yyvsp[(1) - (3)]),  0,(yyvsp[(3) - (3)]),0);;}
+    { _p->onArrayPair((yyval),&(yyvsp[(1) - (3)]),  0,(yyvsp[(3) - (3)]),0);}
     break;
 
   case 586:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2047 "hphp.y"
-    { _p->onArrayPair((yyval),  0,  0,(yyvsp[(1) - (1)]),0);;}
+    { _p->onArrayPair((yyval),  0,  0,(yyvsp[(1) - (1)]),0);}
     break;
 
   case 587:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2052 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (2)]); ;}
+    { (yyval) = (yyvsp[(1) - (2)]); }
     break;
 
   case 588:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2053 "hphp.y"
-    { (yyval).reset(); ;}
+    { (yyval).reset(); }
     break;
 
   case 589:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2058 "hphp.y"
-    {  _p->onArrayPair((yyval),&(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]),0); ;}
+    {  _p->onArrayPair((yyval),&(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]),0); }
     break;
 
   case 590:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2061 "hphp.y"
-    { _p->onArrayPair((yyval),  0,&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),0); ;}
+    { _p->onArrayPair((yyval),  0,&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),0); }
     break;
 
   case 591:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2066 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (2)]);;}
+    { (yyval) = (yyvsp[(1) - (2)]);}
     break;
 
   case 592:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2067 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 593:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2070 "hphp.y"
-    { _p->onArray((yyval),(yyvsp[(2) - (3)]),T_ARRAY);;}
+    { _p->onArray((yyval),(yyvsp[(2) - (3)]),T_ARRAY);}
     break;
 
   case 594:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2071 "hphp.y"
     { Token t; t.reset();
-                                         _p->onArray((yyval),t,T_ARRAY);;}
+                                         _p->onArray((yyval),t,T_ARRAY);}
     break;
 
   case 595:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2078 "hphp.y"
-    { _p->onUserAttribute((yyval),&(yyvsp[(1) - (4)]),(yyvsp[(3) - (4)]),(yyvsp[(4) - (4)]));;}
+    { _p->onUserAttribute((yyval),&(yyvsp[(1) - (4)]),(yyvsp[(3) - (4)]),(yyvsp[(4) - (4)]));}
     break;
 
   case 596:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2080 "hphp.y"
-    { _p->onUserAttribute((yyval),  0,(yyvsp[(1) - (2)]),(yyvsp[(2) - (2)]));;}
+    { _p->onUserAttribute((yyval),  0,(yyvsp[(1) - (2)]),(yyvsp[(2) - (2)]));}
     break;
 
   case 597:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2083 "hphp.y"
-    { only_in_hh_syntax(_p);;}
+    { only_in_hh_syntax(_p);}
     break;
 
   case 598:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2085 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (3)]);;}
+    { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 599:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2088 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (3)]);;}
+    { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 600:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2091 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 601:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2092 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 602:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2096 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 603:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2098 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (2)]);;}
+    { (yyval) = (yyvsp[(2) - (2)]);}
     break;
 
   case 604:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2102 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (2)]);;}
+    { (yyval) = (yyvsp[(2) - (2)]);}
     break;
 
   case 605:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2103 "hphp.y"
-    { (yyval) = (yyvsp[(3) - (4)]);;}
+    { (yyval) = (yyvsp[(3) - (4)]);}
     break;
 
   case 606:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2107 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (3)]);;}
+    { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 607:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2108 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (3)]);;}
+    { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 608:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2112 "hphp.y"
-    { _p->onRefDim((yyval), (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]));;}
+    { _p->onRefDim((yyval), (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]));}
     break;
 
   case 609:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2114 "hphp.y"
-    { _p->onRefDim((yyval), (yyvsp[(2) - (4)]), (yyvsp[(4) - (4)]));;}
+    { _p->onRefDim((yyval), (yyvsp[(2) - (4)]), (yyvsp[(4) - (4)]));}
     break;
 
   case 610:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2119 "hphp.y"
-    { _p->onRefDim((yyval), (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]));;}
+    { _p->onRefDim((yyval), (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]));}
     break;
 
   case 611:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2121 "hphp.y"
-    { _p->onRefDim((yyval), (yyvsp[(2) - (4)]), (yyvsp[(4) - (4)]));;}
+    { _p->onRefDim((yyval), (yyvsp[(2) - (4)]), (yyvsp[(4) - (4)]));}
     break;
 
   case 612:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2125 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 613:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2126 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 614:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2127 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 615:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2128 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 616:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2129 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 617:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2130 "hphp.y"
-    { _p->onObjectProperty((yyval),(yyvsp[(1) - (2)]),(yyvsp[(2) - (2)]));;}
+    { _p->onObjectProperty((yyval),(yyvsp[(1) - (2)]),(yyvsp[(2) - (2)]));}
     break;
 
   case 618:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2132 "hphp.y"
-    { _p->onObjectProperty((yyval),(yyvsp[(2) - (4)]),(yyvsp[(4) - (4)]));;}
+    { _p->onObjectProperty((yyval),(yyvsp[(2) - (4)]),(yyvsp[(4) - (4)]));}
     break;
 
   case 619:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2135 "hphp.y"
-    { _p->onStaticMember((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]));;}
+    { _p->onStaticMember((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]));}
     break;
 
   case 620:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2137 "hphp.y"
-    { _p->onCall((yyval),1,(yyvsp[(1) - (4)]),(yyvsp[(3) - (4)]),NULL);;}
+    { _p->onCall((yyval),1,(yyvsp[(1) - (4)]),(yyvsp[(3) - (4)]),NULL);}
     break;
 
   case 621:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2138 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (3)]);;}
+    { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 622:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2142 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 623:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2143 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 624:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2144 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 625:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2145 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 626:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2147 "hphp.y"
-    { _p->onObjectProperty((yyval),(yyvsp[(1) - (2)]),(yyvsp[(2) - (2)]));;}
+    { _p->onObjectProperty((yyval),(yyvsp[(1) - (2)]),(yyvsp[(2) - (2)]));}
     break;
 
   case 627:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2149 "hphp.y"
-    { _p->onObjectProperty((yyval),(yyvsp[(2) - (4)]),(yyvsp[(4) - (4)]));;}
+    { _p->onObjectProperty((yyval),(yyvsp[(2) - (4)]),(yyvsp[(4) - (4)]));}
     break;
 
   case 628:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2151 "hphp.y"
-    { _p->onCall((yyval),1,(yyvsp[(1) - (4)]),(yyvsp[(3) - (4)]),NULL);;}
+    { _p->onCall((yyval),1,(yyvsp[(1) - (4)]),(yyvsp[(3) - (4)]),NULL);}
     break;
 
   case 629:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2152 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (3)]);;}
+    { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 630:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2156 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 631:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2157 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 632:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2158 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (3)]);;}
+    { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 633:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2164 "hphp.y"
-    { _p->onObjectMethodCall((yyval),(yyvsp[(1) - (7)]),(yyvsp[(3) - (7)]),(yyvsp[(6) - (7)]));;}
+    { _p->onObjectMethodCall((yyval),(yyvsp[(1) - (7)]),(yyvsp[(3) - (7)]),(yyvsp[(6) - (7)]));}
     break;
 
   case 634:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2167 "hphp.y"
-    { _p->onObjectMethodCall((yyval),(yyvsp[(1) - (6)]),(yyvsp[(3) - (6)]),(yyvsp[(5) - (6)]));;}
+    { _p->onObjectMethodCall((yyval),(yyvsp[(1) - (6)]),(yyvsp[(3) - (6)]),(yyvsp[(5) - (6)]));}
     break;
 
   case 635:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2170 "hphp.y"
-    { _p->onObjectMethodCall((yyval),(yyvsp[(1) - (8)]),(yyvsp[(4) - (8)]),(yyvsp[(7) - (8)]));;}
+    { _p->onObjectMethodCall((yyval),(yyvsp[(1) - (8)]),(yyvsp[(4) - (8)]),(yyvsp[(7) - (8)]));}
     break;
 
   case 636:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2174 "hphp.y"
-    { _p->onObjectMethodCall((yyval),(yyvsp[(2) - (9)]),(yyvsp[(5) - (9)]),(yyvsp[(8) - (9)]));;}
+    { _p->onObjectMethodCall((yyval),(yyvsp[(2) - (9)]),(yyvsp[(5) - (9)]),(yyvsp[(8) - (9)]));}
     break;
 
   case 637:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2178 "hphp.y"
-    { _p->onObjectMethodCall((yyval),(yyvsp[(2) - (8)]),(yyvsp[(5) - (8)]),(yyvsp[(7) - (8)]));;}
+    { _p->onObjectMethodCall((yyval),(yyvsp[(2) - (8)]),(yyvsp[(5) - (8)]),(yyvsp[(7) - (8)]));}
     break;
 
   case 638:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2182 "hphp.y"
-    { _p->onObjectMethodCall((yyval),(yyvsp[(2) - (10)]),(yyvsp[(6) - (10)]),(yyvsp[(9) - (10)]));;}
+    { _p->onObjectMethodCall((yyval),(yyvsp[(2) - (10)]),(yyvsp[(6) - (10)]),(yyvsp[(9) - (10)]));}
     break;
 
   case 639:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2189 "hphp.y"
-    { _p->onCall((yyval),0,(yyvsp[(3) - (7)]),(yyvsp[(6) - (7)]),&(yyvsp[(1) - (7)]));;}
+    { _p->onCall((yyval),0,(yyvsp[(3) - (7)]),(yyvsp[(6) - (7)]),&(yyvsp[(1) - (7)]));}
     break;
 
   case 640:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2193 "hphp.y"
-    { _p->onCall((yyval),1,(yyvsp[(3) - (6)]),(yyvsp[(5) - (6)]),&(yyvsp[(1) - (6)]));;}
+    { _p->onCall((yyval),1,(yyvsp[(3) - (6)]),(yyvsp[(5) - (6)]),&(yyvsp[(1) - (6)]));}
     break;
 
   case 641:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2197 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 642:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2199 "hphp.y"
-    { _p->onIndirectRef((yyval),(yyvsp[(1) - (2)]),(yyvsp[(2) - (2)]));;}
+    { _p->onIndirectRef((yyval),(yyvsp[(1) - (2)]),(yyvsp[(2) - (2)]));}
     break;
 
   case 643:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2204 "hphp.y"
-    { _p->onRefDim((yyval), (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)]));;}
+    { _p->onRefDim((yyval), (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)]));}
     break;
 
   case 644:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2205 "hphp.y"
-    { _p->onRefDim((yyval), (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)]));;}
+    { _p->onRefDim((yyval), (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)]));}
     break;
 
   case 645:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2206 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 646:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2209 "hphp.y"
-    { _p->onSimpleVariable((yyval), (yyvsp[(1) - (1)]));;}
+    { _p->onSimpleVariable((yyval), (yyvsp[(1) - (1)]));}
     break;
 
   case 647:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2210 "hphp.y"
-    { _p->onDynamicVariable((yyval), (yyvsp[(3) - (4)]), 0);;}
+    { _p->onDynamicVariable((yyval), (yyvsp[(3) - (4)]), 0);}
     break;
 
   case 648:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2213 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 649:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2214 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 650:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2218 "hphp.y"
-    { (yyval) = 1;;}
+    { (yyval) = 1;}
     break;
 
   case 651:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2219 "hphp.y"
-    { (yyval)++;;}
+    { (yyval)++;}
     break;
 
   case 652:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2223 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 653:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2224 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 654:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2225 "hphp.y"
-    { _p->onObjectProperty((yyval),(yyvsp[(1) - (2)]),(yyvsp[(2) - (2)]));;}
+    { _p->onObjectProperty((yyval),(yyvsp[(1) - (2)]),(yyvsp[(2) - (2)]));}
     break;
 
   case 655:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2227 "hphp.y"
-    { _p->onObjectProperty((yyval),(yyvsp[(2) - (4)]),(yyvsp[(4) - (4)]));;}
+    { _p->onObjectProperty((yyval),(yyvsp[(2) - (4)]),(yyvsp[(4) - (4)]));}
     break;
 
   case 656:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2230 "hphp.y"
-    { _p->onStaticMember((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]));;}
+    { _p->onStaticMember((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]));}
     break;
 
   case 657:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2231 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (3)]);;}
+    { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 659:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2235 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 660:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2237 "hphp.y"
-    { _p->onObjectProperty((yyval),(yyvsp[(1) - (2)]),(yyvsp[(2) - (2)]));;}
+    { _p->onObjectProperty((yyval),(yyvsp[(1) - (2)]),(yyvsp[(2) - (2)]));}
     break;
 
   case 661:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2239 "hphp.y"
-    { _p->onObjectProperty((yyval),(yyvsp[(2) - (4)]),(yyvsp[(4) - (4)]));;}
+    { _p->onObjectProperty((yyval),(yyvsp[(2) - (4)]),(yyvsp[(4) - (4)]));}
     break;
 
   case 662:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2240 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (3)]);;}
+    { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 663:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2244 "hphp.y"
-    { _p->onAListVar((yyval),&(yyvsp[(1) - (2)]),NULL);;}
+    { _p->onAListVar((yyval),&(yyvsp[(1) - (2)]),NULL);}
     break;
 
   case 664:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2245 "hphp.y"
-    { _p->onAListVar((yyval),&(yyvsp[(1) - (3)]),&(yyvsp[(3) - (3)]));;}
+    { _p->onAListVar((yyval),&(yyvsp[(1) - (3)]),&(yyvsp[(3) - (3)]));}
     break;
 
   case 665:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2247 "hphp.y"
-    { _p->onAListSub((yyval),&(yyvsp[(1) - (6)]),(yyvsp[(5) - (6)]));;}
+    { _p->onAListSub((yyval),&(yyvsp[(1) - (6)]),(yyvsp[(5) - (6)]));}
     break;
 
   case 666:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2248 "hphp.y"
-    { _p->onAListVar((yyval),NULL,NULL);;}
+    { _p->onAListVar((yyval),NULL,NULL);}
     break;
 
   case 667:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2249 "hphp.y"
-    { _p->onAListVar((yyval),NULL,&(yyvsp[(1) - (1)]));;}
+    { _p->onAListVar((yyval),NULL,&(yyvsp[(1) - (1)]));}
     break;
 
   case 668:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2250 "hphp.y"
-    { _p->onAListSub((yyval),NULL,(yyvsp[(3) - (4)]));;}
+    { _p->onAListSub((yyval),NULL,(yyvsp[(3) - (4)]));}
     break;
 
   case 669:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2255 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (2)]);;}
+    { (yyval) = (yyvsp[(1) - (2)]);}
     break;
 
   case 670:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2256 "hphp.y"
-    { (yyval).reset();;}
+    { (yyval).reset();}
     break;
 
   case 671:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2260 "hphp.y"
-    { _p->onArrayPair((yyval),&(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]),0);;}
+    { _p->onArrayPair((yyval),&(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]),0);}
     break;
 
   case 672:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2261 "hphp.y"
-    { _p->onArrayPair((yyval),&(yyvsp[(1) - (3)]),  0,(yyvsp[(3) - (3)]),0);;}
+    { _p->onArrayPair((yyval),&(yyvsp[(1) - (3)]),  0,(yyvsp[(3) - (3)]),0);}
     break;
 
   case 673:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2262 "hphp.y"
-    { _p->onArrayPair((yyval),  0,&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),0);;}
+    { _p->onArrayPair((yyval),  0,&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),0);}
     break;
 
   case 674:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2263 "hphp.y"
-    { _p->onArrayPair((yyval),  0,  0,(yyvsp[(1) - (1)]),0);;}
+    { _p->onArrayPair((yyval),  0,  0,(yyvsp[(1) - (1)]),0);}
     break;
 
   case 675:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2266 "hphp.y"
-    { _p->onArrayPair((yyval),&(yyvsp[(1) - (6)]),&(yyvsp[(3) - (6)]),(yyvsp[(6) - (6)]),1);;}
+    { _p->onArrayPair((yyval),&(yyvsp[(1) - (6)]),&(yyvsp[(3) - (6)]),(yyvsp[(6) - (6)]),1);}
     break;
 
   case 676:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2268 "hphp.y"
-    { _p->onArrayPair((yyval),&(yyvsp[(1) - (4)]),  0,(yyvsp[(4) - (4)]),1);;}
+    { _p->onArrayPair((yyval),&(yyvsp[(1) - (4)]),  0,(yyvsp[(4) - (4)]),1);}
     break;
 
   case 677:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2269 "hphp.y"
-    { _p->onArrayPair((yyval),  0,&(yyvsp[(1) - (4)]),(yyvsp[(4) - (4)]),1);;}
+    { _p->onArrayPair((yyval),  0,&(yyvsp[(1) - (4)]),(yyvsp[(4) - (4)]),1);}
     break;
 
   case 678:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2270 "hphp.y"
-    { _p->onArrayPair((yyval),  0,  0,(yyvsp[(2) - (2)]),1);;}
+    { _p->onArrayPair((yyval),  0,  0,(yyvsp[(2) - (2)]),1);}
     break;
 
   case 679:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2275 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (2)]);;}
+    { (yyval) = (yyvsp[(1) - (2)]);}
     break;
 
   case 680:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2276 "hphp.y"
-    { _p->onEmptyCollection((yyval));;}
+    { _p->onEmptyCollection((yyval));}
     break;
 
   case 681:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2280 "hphp.y"
-    { _p->onCollectionPair((yyval),&(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]));;}
+    { _p->onCollectionPair((yyval),&(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]));}
     break;
 
   case 682:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2281 "hphp.y"
-    { _p->onCollectionPair((yyval),&(yyvsp[(1) - (3)]),  0,(yyvsp[(3) - (3)]));;}
+    { _p->onCollectionPair((yyval),&(yyvsp[(1) - (3)]),  0,(yyvsp[(3) - (3)]));}
     break;
 
   case 683:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2282 "hphp.y"
-    { _p->onCollectionPair((yyval),  0,&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]));;}
+    { _p->onCollectionPair((yyval),  0,&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]));}
     break;
 
   case 684:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2283 "hphp.y"
-    { _p->onCollectionPair((yyval),  0,  0,(yyvsp[(1) - (1)]));;}
+    { _p->onCollectionPair((yyval),  0,  0,(yyvsp[(1) - (1)]));}
     break;
 
   case 685:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2288 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (2)]);;}
+    { (yyval) = (yyvsp[(1) - (2)]);}
     break;
 
   case 686:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2289 "hphp.y"
-    { _p->onEmptyCollection((yyval));;}
+    { _p->onEmptyCollection((yyval));}
     break;
 
   case 687:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2294 "hphp.y"
-    { _p->onCollectionPair((yyval),&(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]));;}
+    { _p->onCollectionPair((yyval),&(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]));}
     break;
 
   case 688:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2296 "hphp.y"
-    { _p->onCollectionPair((yyval),&(yyvsp[(1) - (3)]),  0,(yyvsp[(3) - (3)]));;}
+    { _p->onCollectionPair((yyval),&(yyvsp[(1) - (3)]),  0,(yyvsp[(3) - (3)]));}
     break;
 
   case 689:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2298 "hphp.y"
-    { _p->onCollectionPair((yyval),  0,&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]));;}
+    { _p->onCollectionPair((yyval),  0,&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]));}
     break;
 
   case 690:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2299 "hphp.y"
-    { _p->onCollectionPair((yyval),  0,  0,(yyvsp[(1) - (1)]));;}
+    { _p->onCollectionPair((yyval),  0,  0,(yyvsp[(1) - (1)]));}
     break;
 
   case 691:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2303 "hphp.y"
-    { _p->addEncap((yyval), &(yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]), -1);;}
+    { _p->addEncap((yyval), &(yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]), -1);}
     break;
 
   case 692:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2305 "hphp.y"
-    { _p->addEncap((yyval), &(yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]), 0);;}
+    { _p->addEncap((yyval), &(yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]), 0);}
     break;
 
   case 693:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2306 "hphp.y"
-    { _p->addEncap((yyval), NULL, (yyvsp[(1) - (1)]), -1);;}
+    { _p->addEncap((yyval), NULL, (yyvsp[(1) - (1)]), -1);}
     break;
 
   case 694:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2308 "hphp.y"
     { _p->addEncap((yyval), NULL, (yyvsp[(1) - (2)]), 0);
-                                         _p->addEncap((yyval), &(yyval), (yyvsp[(2) - (2)]), -1); ;}
+                                         _p->addEncap((yyval), &(yyval), (yyvsp[(2) - (2)]), -1); }
     break;
 
   case 695:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2313 "hphp.y"
-    { _p->onSimpleVariable((yyval), (yyvsp[(1) - (1)]));;}
+    { _p->onSimpleVariable((yyval), (yyvsp[(1) - (1)]));}
     break;
 
   case 696:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2315 "hphp.y"
-    { _p->encapRefDim((yyval), (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)]));;}
+    { _p->encapRefDim((yyval), (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)]));}
     break;
 
   case 697:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2317 "hphp.y"
-    { _p->encapObjProp((yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));;}
+    { _p->encapObjProp((yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));}
     break;
 
   case 698:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2319 "hphp.y"
-    { _p->onDynamicVariable((yyval), (yyvsp[(2) - (3)]), 1);;}
+    { _p->onDynamicVariable((yyval), (yyvsp[(2) - (3)]), 1);}
     break;
 
   case 699:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2321 "hphp.y"
-    { _p->encapArray((yyval), (yyvsp[(2) - (6)]), (yyvsp[(4) - (6)]));;}
+    { _p->encapArray((yyval), (yyvsp[(2) - (6)]), (yyvsp[(4) - (6)]));}
     break;
 
   case 700:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2322 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (3)]);;}
+    { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 701:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2325 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]); (yyval) = T_STRING;;}
+    { (yyval) = (yyvsp[(1) - (1)]); (yyval) = T_STRING;}
     break;
 
   case 702:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2326 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]); (yyval) = T_NUM_STRING;;}
+    { (yyval) = (yyvsp[(1) - (1)]); (yyval) = T_NUM_STRING;}
     break;
 
   case 703:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2327 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]); (yyval) = T_VARIABLE;;}
+    { (yyval) = (yyvsp[(1) - (1)]); (yyval) = T_VARIABLE;}
     break;
 
   case 704:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2331 "hphp.y"
-    { UEXP((yyval),(yyvsp[(3) - (4)]),T_ISSET,1);;}
+    { UEXP((yyval),(yyvsp[(3) - (4)]),T_ISSET,1);}
     break;
 
   case 705:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2332 "hphp.y"
-    { UEXP((yyval),(yyvsp[(3) - (4)]),T_EMPTY,1);;}
+    { UEXP((yyval),(yyvsp[(3) - (4)]),T_EMPTY,1);}
     break;
 
   case 706:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2333 "hphp.y"
-    { UEXP((yyval),(yyvsp[(3) - (4)]),'!',1);;}
+    { UEXP((yyval),(yyvsp[(3) - (4)]),'!',1);}
     break;
 
   case 707:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2334 "hphp.y"
-    { UEXP((yyval),(yyvsp[(3) - (4)]),'!',1);;}
+    { UEXP((yyval),(yyvsp[(3) - (4)]),'!',1);}
     break;
 
   case 708:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2335 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),T_INCLUDE,1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),T_INCLUDE,1);}
     break;
 
   case 709:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2336 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),T_INCLUDE_ONCE,1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),T_INCLUDE_ONCE,1);}
     break;
 
   case 710:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2337 "hphp.y"
-    { UEXP((yyval),(yyvsp[(3) - (4)]),T_EVAL,1);;}
+    { UEXP((yyval),(yyvsp[(3) - (4)]),T_EVAL,1);}
     break;
 
   case 711:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2338 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),T_REQUIRE,1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),T_REQUIRE,1);}
     break;
 
   case 712:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2339 "hphp.y"
-    { UEXP((yyval),(yyvsp[(2) - (2)]),T_REQUIRE_ONCE,1);;}
+    { UEXP((yyval),(yyvsp[(2) - (2)]),T_REQUIRE_ONCE,1);}
     break;
 
   case 713:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2343 "hphp.y"
-    { _p->onExprListElem((yyval), NULL, (yyvsp[(1) - (1)]));;}
+    { _p->onExprListElem((yyval), NULL, (yyvsp[(1) - (1)]));}
     break;
 
   case 714:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2344 "hphp.y"
-    { _p->onExprListElem((yyval), &(yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));;}
+    { _p->onExprListElem((yyval), &(yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));}
     break;
 
   case 715:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2349 "hphp.y"
-    { _p->onClassConst((yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), 0);;}
+    { _p->onClassConst((yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), 0);}
     break;
 
   case 718:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2363 "hphp.y"
     { _p->onTypedef((yyval), (yyvsp[(2) - (5)]), (yyvsp[(4) - (5)]));
-                                         _p->popTypeScope(); ;}
+                                         _p->popTypeScope(); }
     break;
 
   case 719:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2366 "hphp.y"
     { _p->onTypedef((yyval), (yyvsp[(2) - (6)]), (yyvsp[(5) - (6)]));
-                                         _p->popTypeScope(); ;}
+                                         _p->popTypeScope(); }
     break;
 
   case 720:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2371 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]); ;}
+    { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 721:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2372 "hphp.y"
-    { only_in_hh_syntax(_p); (yyval) = (yyvsp[(2) - (2)]); ;}
+    { only_in_hh_syntax(_p); (yyval) = (yyvsp[(2) - (2)]); }
     break;
 
   case 722:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2378 "hphp.y"
-    { _p->pushTypeScope(); (yyval) = (yyvsp[(1) - (1)]); ;}
+    { _p->pushTypeScope(); (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 723:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2382 "hphp.y"
-    { _p->pushTypeScope(); (yyval) = (yyvsp[(1) - (4)]); ;}
+    { _p->pushTypeScope(); (yyval) = (yyvsp[(1) - (4)]); }
     break;
 
   case 724:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2388 "hphp.y"
-    { (yyval) = (yyvsp[(2) - (3)]); ;}
+    { (yyval) = (yyvsp[(2) - (3)]); }
     break;
 
   case 725:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2389 "hphp.y"
-    { (yyval).reset(); ;}
+    { (yyval).reset(); }
     break;
 
   case 726:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2393 "hphp.y"
     { Token t; t.reset();
                                          _p->onTypeList((yyvsp[(1) - (1)]), t);
-                                         (yyval) = (yyvsp[(1) - (1)]); ;}
+                                         (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 727:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2396 "hphp.y"
     { _p->onTypeList((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));
-                                         (yyval) = (yyvsp[(1) - (3)]); ;}
+                                         (yyval) = (yyvsp[(1) - (3)]); }
     break;
 
   case 728:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2401 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (3)]); ;}
+    { (yyval) = (yyvsp[(1) - (3)]); }
     break;
 
   case 729:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2402 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]); ;}
+    { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 730:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2403 "hphp.y"
-    { (yyval).reset(); ;}
+    { (yyval).reset(); }
     break;
 
   case 731:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2404 "hphp.y"
-    { (yyval).reset(); ;}
+    { (yyval).reset(); }
     break;
 
   case 732:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2408 "hphp.y"
-    { (yyval).reset(); ;}
+    { (yyval).reset(); }
     break;
 
   case 733:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2409 "hphp.y"
-    { only_in_hh_syntax(_p); (yyval) = (yyvsp[(2) - (2)]); ;}
+    { only_in_hh_syntax(_p); (yyval) = (yyvsp[(2) - (2)]); }
     break;
 
   case 734:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2414 "hphp.y"
-    { _p->addTypeVar((yyvsp[(3) - (3)]).text()); ;}
+    { _p->addTypeVar((yyvsp[(3) - (3)]).text()); }
     break;
 
   case 735:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2415 "hphp.y"
-    { _p->addTypeVar((yyvsp[(1) - (1)]).text()); ;}
+    { _p->addTypeVar((yyvsp[(1) - (1)]).text()); }
     break;
 
   case 736:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2417 "hphp.y"
-    { _p->addTypeVar((yyvsp[(3) - (5)]).text()); ;}
+    { _p->addTypeVar((yyvsp[(3) - (5)]).text()); }
     break;
 
   case 737:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2418 "hphp.y"
-    { _p->addTypeVar((yyvsp[(1) - (3)]).text()); ;}
+    { _p->addTypeVar((yyvsp[(1) - (3)]).text()); }
     break;
 
   case 738:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2424 "hphp.y"
-    { validate_shape_keyname((yyvsp[(1) - (3)]), _p); ;}
+    { validate_shape_keyname((yyvsp[(1) - (3)]), _p); }
     break;
 
   case 741:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2435 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (2)]); ;}
+    { (yyval) = (yyvsp[(1) - (2)]); }
     break;
 
   case 742:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2437 "hphp.y"
-    {;}
+    {}
     break;
 
   case 743:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2441 "hphp.y"
-    { (yyval).setText("array"); ;}
+    { (yyval).setText("array"); }
     break;
 
   case 744:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2448 "hphp.y"
     { only_in_hh_syntax(_p);
                                          _p->onTypeSpecialization((yyvsp[(2) - (2)]), '?');
-                                         (yyval) = (yyvsp[(2) - (2)]); ;}
+                                         (yyval) = (yyvsp[(2) - (2)]); }
     break;
 
   case 745:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2451 "hphp.y"
     { only_in_hh_syntax(_p);
                                          _p->onTypeSpecialization((yyvsp[(2) - (2)]), '@');
-                                         (yyval) = (yyvsp[(2) - (2)]); ;}
+                                         (yyval) = (yyvsp[(2) - (2)]); }
     break;
 
   case 746:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2454 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]); ;}
+    { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 747:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2455 "hphp.y"
     { Token t; t.reset();
                                          (yyvsp[(1) - (1)]).setText("array");
-                                         _p->onTypeAnnotation((yyval), (yyvsp[(1) - (1)]), t); ;}
+                                         _p->onTypeAnnotation((yyval), (yyvsp[(1) - (1)]), t); }
     break;
 
   case 748:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2458 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]); ;}
+    { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 749:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2460 "hphp.y"
     { (yyvsp[(1) - (4)]).setText("array");
-                                         _p->onTypeAnnotation((yyval), (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)])); ;}
+                                         _p->onTypeAnnotation((yyval), (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)])); }
     break;
 
   case 750:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2463 "hphp.y"
     { _p->onTypeList((yyvsp[(3) - (6)]), (yyvsp[(5) - (6)]));
                                          (yyvsp[(1) - (6)]).setText("array");
-                                         _p->onTypeAnnotation((yyval), (yyvsp[(1) - (6)]), (yyvsp[(3) - (6)])); ;}
+                                         _p->onTypeAnnotation((yyval), (yyvsp[(1) - (6)]), (yyvsp[(3) - (6)])); }
     break;
 
   case 751:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2466 "hphp.y"
     { (yyvsp[(1) - (1)]).xhpLabel();
                                          Token t; t.reset();
                                          _p->onTypeAnnotation((yyval), (yyvsp[(1) - (1)]), t);
-                                         _p->onTypeSpecialization((yyval), 'x'); ;}
+                                         _p->onTypeSpecialization((yyval), 'x'); }
     break;
 
   case 752:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2472 "hphp.y"
     { only_in_hh_syntax(_p);
                                         _p->onTypeList((yyvsp[(7) - (8)]), (yyvsp[(4) - (8)]));
                                         _p->onTypeAnnotation((yyval), (yyvsp[(2) - (8)]), (yyvsp[(7) - (8)]));
-                                        _p->onTypeSpecialization((yyval), 'f'); ;}
+                                        _p->onTypeSpecialization((yyval), 'f'); }
     break;
 
   case 753:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2476 "hphp.y"
     { only_in_hh_syntax(_p);
                                         _p->onTypeList((yyvsp[(2) - (5)]), (yyvsp[(4) - (5)]));
                                         Token t; t.reset(); t.setText("array");
                                         _p->onTypeAnnotation((yyval), t, (yyvsp[(2) - (5)]));
-                                        _p->onTypeSpecialization((yyval), 't'); ;}
+                                        _p->onTypeSpecialization((yyval), 't'); }
     break;
 
   case 754:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2484 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]); ;}
+    { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 755:
 
-/* Line 1455 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 2485 "hphp.y"
-    { (yyval).reset(); ;}
+    { (yyval).reset(); }
     break;
 
 
 
-/* Line 1455 of yacc.c  */
-#line 10864 "hphp.tab.cpp"
+/* Line 1806 of yacc.c  */
+#line 10903 "hphp.tab.cpp"
       default: break;
     }
+  /* User semantic actions sometimes alter yychar, and that requires
+     that yytoken be updated with the new translation.  We take the
+     approach of translating immediately before every use of yytoken.
+     One alternative is translating here after every semantic action,
+     but that translation would be missed if the semantic action invokes
+     YYABORT, YYACCEPT, or YYERROR immediately after altering yychar or
+     if it invokes YYBACKUP.  In the case of YYABORT or YYACCEPT, an
+     incorrect destructor might then be invoked immediately.  In the
+     case of YYERROR or YYBACKUP, subsequent parser actions might lead
+     to an incorrect destructor call or verbose syntax error message
+     before the lookahead is translated.  */
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
 
   YYPOPSTACK (yylen);
@@ -10892,6 +10942,10 @@ yyreduce:
 | yyerrlab -- here on detecting error |
 `------------------------------------*/
 yyerrlab:
+  /* Make sure we have latest lookahead translation.  See comments at
+     user semantic actions for why this is necessary.  */
+  yytoken = yychar == YYEMPTY ? YYEMPTY : YYTRANSLATE (yychar);
+
   /* If not already recovering from an error, report this error.  */
   if (!yyerrstatus)
     {
@@ -10899,41 +10953,40 @@ yyerrlab:
 #if ! YYERROR_VERBOSE
       yyerror (&yylloc, _p, YY_("syntax error"));
 #else
+# define YYSYNTAX_ERROR yysyntax_error (&yymsg_alloc, &yymsg, \
+                                        yyssp, yytoken)
       {
-	YYSIZE_T yysize = yysyntax_error (0, yystate, yychar);
-	if (yymsg_alloc < yysize && yymsg_alloc < YYSTACK_ALLOC_MAXIMUM)
-	  {
-	    YYSIZE_T yyalloc = 2 * yysize;
-	    if (! (yysize <= yyalloc && yyalloc <= YYSTACK_ALLOC_MAXIMUM))
-	      yyalloc = YYSTACK_ALLOC_MAXIMUM;
-	    if (yymsg != yymsgbuf)
-	      YYSTACK_FREE (yymsg);
-	    yymsg = (char *) YYSTACK_ALLOC (yyalloc);
-	    if (yymsg)
-	      yymsg_alloc = yyalloc;
-	    else
-	      {
-		yymsg = yymsgbuf;
-		yymsg_alloc = sizeof yymsgbuf;
-	      }
-	  }
-
-	if (0 < yysize && yysize <= yymsg_alloc)
-	  {
-	    (void) yysyntax_error (yymsg, yystate, yychar);
-	    yyerror (&yylloc, _p, yymsg);
-	  }
-	else
-	  {
-	    yyerror (&yylloc, _p, YY_("syntax error"));
-	    if (yysize != 0)
-	      goto yyexhaustedlab;
-	  }
+        char const *yymsgp = YY_("syntax error");
+        int yysyntax_error_status;
+        yysyntax_error_status = YYSYNTAX_ERROR;
+        if (yysyntax_error_status == 0)
+          yymsgp = yymsg;
+        else if (yysyntax_error_status == 1)
+          {
+            if (yymsg != yymsgbuf)
+              YYSTACK_FREE (yymsg);
+            yymsg = (char *) YYSTACK_ALLOC (yymsg_alloc);
+            if (!yymsg)
+              {
+                yymsg = yymsgbuf;
+                yymsg_alloc = sizeof yymsgbuf;
+                yysyntax_error_status = 2;
+              }
+            else
+              {
+                yysyntax_error_status = YYSYNTAX_ERROR;
+                yymsgp = yymsg;
+              }
+          }
+        yyerror (&yylloc, _p, yymsgp);
+        if (yysyntax_error_status == 2)
+          goto yyexhaustedlab;
       }
+# undef YYSYNTAX_ERROR
 #endif
     }
 
-  yyerror_range[0] = yylloc;
+  yyerror_range[1] = yylloc;
 
   if (yyerrstatus == 3)
     {
@@ -10970,7 +11023,7 @@ yyerrorlab:
   if (/*CONSTCOND*/ 0)
      goto yyerrorlab;
 
-  yyerror_range[0] = yylsp[1-yylen];
+  yyerror_range[1] = yylsp[1-yylen];
   /* Do not reclaim the symbols of the rule which action triggered
      this YYERROR.  */
   YYPOPSTACK (yylen);
@@ -10989,7 +11042,7 @@ yyerrlab1:
   for (;;)
     {
       yyn = yypact[yystate];
-      if (yyn != YYPACT_NINF)
+      if (!yypact_value_is_default (yyn))
 	{
 	  yyn += YYTERROR;
 	  if (0 <= yyn && yyn <= YYLAST && yycheck[yyn] == YYTERROR)
@@ -11004,7 +11057,7 @@ yyerrlab1:
       if (yyssp == yyss)
 	YYABORT;
 
-      yyerror_range[0] = *yylsp;
+      yyerror_range[1] = *yylsp;
       yydestruct ("Error: popping",
 		  yystos[yystate], yyvsp, yylsp, _p);
       YYPOPSTACK (1);
@@ -11014,10 +11067,10 @@ yyerrlab1:
 
   *++yyvsp = yylval;
 
-  yyerror_range[1] = yylloc;
+  yyerror_range[2] = yylloc;
   /* Using YYLLOC is tempting, but would change the location of
      the lookahead.  YYLOC is available though.  */
-  YYLLOC_DEFAULT (yyloc, (yyerror_range - 1), 2);
+  YYLLOC_DEFAULT (yyloc, yyerror_range, 2);
   *++yylsp = yyloc;
 
   /* Shift the error token.  */
@@ -11053,8 +11106,13 @@ yyexhaustedlab:
 
 yyreturn:
   if (yychar != YYEMPTY)
-     yydestruct ("Cleanup: discarding lookahead",
-		 yytoken, &yylval, &yylloc, _p);
+    {
+      /* Make sure we have latest lookahead translation.  See comments at
+         user semantic actions for why this is necessary.  */
+      yytoken = YYTRANSLATE (yychar);
+      yydestruct ("Cleanup: discarding lookahead",
+                  yytoken, &yylval, &yylloc, _p);
+    }
   /* Do not reclaim the symbols of the rule which action triggered
      this YYABORT or YYACCEPT.  */
   YYPOPSTACK (yylen);
@@ -11080,7 +11138,7 @@ yyreturn:
 
 
 
-/* Line 1675 of yacc.c  */
+/* Line 2067 of yacc.c  */
 #line 2488 "hphp.y"
 
 bool Parser::parseImpl() {

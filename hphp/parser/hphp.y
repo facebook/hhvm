@@ -658,7 +658,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_END_HEREDOC
 %token T_DOLLAR_OPEN_CURLY_BRACES
 %token T_CURLY_OPEN
-%token T_PAAMAYIM_NEKUDOTAYIM
+%token T_DOUBLE_COLON
 %token T_NAMESPACE
 %token T_NS_C
 %token T_DIR
@@ -845,7 +845,7 @@ statement:
   | T_STATIC static_var_list ';'       { _p->onStatic($$, $2);}
   | T_ECHO expr_list ';'               { _p->onEcho($$, $2, 0);}
   | T_UNSET '(' variable_list ')' ';'  { _p->onUnset($$, $3);}
-  | ';'                                { $$.reset(); $$ = ';'}
+  | ';'                                { $$.reset(); $$ = ';';}
   | T_INLINE_HTML                      { _p->onEcho($$, $1, 1);}
   | T_FOREACH '(' expr
     T_AS foreach_variable
@@ -1005,7 +1005,7 @@ trait_declaration_statement:
                                          _p->onClassStart(T_TRAIT, $2);}
     implements_list
     '{' class_statement_list '}'       { Token t_ext;
-                                         t_ext.reset(); 
+                                         t_ext.reset();
                                          _p->onClass($$,T_TRAIT,$2,t_ext,$4,
                                                      $6, 0);
                                          _p->popClass();
@@ -1016,7 +1016,7 @@ trait_declaration_statement:
                                          _p->onClassStart(T_TRAIT, $3);}
     implements_list
     '{' class_statement_list '}'       { Token t_ext;
-                                         t_ext.reset(); 
+                                         t_ext.reset();
                                          _p->onClass($$,T_TRAIT,$3,t_ext,$5,
                                                      $7, &$1);
                                          _p->popClass();
@@ -1320,7 +1320,7 @@ trait_rules:
 ;
 trait_precedence_rule:
     class_namespace_string_typeargs
-    T_PAAMAYIM_NEKUDOTAYIM
+    T_DOUBLE_COLON
     ident
     T_INSTEADOF trait_list ';'         { _p->onTraitPrecRule($$,$1,$3,$5);}
 ;
@@ -1335,7 +1335,7 @@ trait_alias_rule:
 ;
 trait_alias_rule_method:
     class_namespace_string_typeargs
-    T_PAAMAYIM_NEKUDOTAYIM
+    T_DOUBLE_COLON
     ident                              { _p->onTraitAliasRuleStart($$,$1,$3);}
   | ident                              { Token t; t.reset();
                                          _p->onTraitAliasRuleStart($$,t,$1);}
@@ -1952,9 +1952,9 @@ static_scalar:
 
 static_class_constant:
     class_namespace_string_typeargs
-    T_PAAMAYIM_NEKUDOTAYIM
+    T_DOUBLE_COLON
     ident                              { _p->onClassConst($$, $1, $3, 1);}
-  | T_XHP_LABEL T_PAAMAYIM_NEKUDOTAYIM
+  | T_XHP_LABEL T_DOUBLE_COLON
     ident                              { $1.xhpLabel();
                                          _p->onClassConst($$, $1, $3, 1);}
 ;
@@ -2131,7 +2131,7 @@ variable:
   | '(' expr_with_parens ')'
     property_access                    { _p->onObjectProperty($$,$2,$4);}
   | static_class_name
-    T_PAAMAYIM_NEKUDOTAYIM
+    T_DOUBLE_COLON
     variable_without_objects           { _p->onStaticMember($$,$1,$3);}
   | callable_variable '('
     function_call_parameter_list ')'   { _p->onCall($$,1,$1,$3,NULL);}
@@ -2184,11 +2184,11 @@ object_method_call:
 
 class_method_call:
     static_class_name
-    T_PAAMAYIM_NEKUDOTAYIM
+    T_DOUBLE_COLON
     ident hh_typeargs_opt '('
     function_call_parameter_list ')'   { _p->onCall($$,0,$3,$6,&$1);}
   | static_class_name
-    T_PAAMAYIM_NEKUDOTAYIM
+    T_DOUBLE_COLON
     variable_without_objects '('
     function_call_parameter_list ')'   { _p->onCall($$,1,$3,$5,&$1);}
 ;
@@ -2226,7 +2226,7 @@ variable_no_calls:
   | '(' expr_with_parens ')'
     property_access                    { _p->onObjectProperty($$,$2,$4);}
   | static_class_name
-    T_PAAMAYIM_NEKUDOTAYIM
+    T_DOUBLE_COLON
     variable_without_objects           { _p->onStaticMember($$,$1,$3);}
   | '(' variable ')'                   { $$ = $2;}
 ;
@@ -2346,7 +2346,7 @@ variable_list:
 
 class_constant:
   static_class_name
-  T_PAAMAYIM_NEKUDOTAYIM ident         { _p->onClassConst($$, $1, $3, 0);}
+  T_DOUBLE_COLON ident                 { _p->onClassConst($$, $1, $3, 0);}
 ;
 
 /* hack productions -- these allow some extra stuff in hack

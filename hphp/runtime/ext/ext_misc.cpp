@@ -338,6 +338,12 @@ Array f_token_get_all(CStrRef source) {
 
 String f_token_name(int64_t token) {
 
+  // For compatibility with parser packages expecting veneration of the
+  // lexer's Hebrew roots.
+  if (token == k_T_DOUBLE_COLON) {
+    return "T_PAAMAYIM_NEKUDOTAYIM";
+  }
+
 #undef YYTOKENTYPE
 #undef YYTOKEN_MAP
 #undef YYTOKEN
@@ -373,9 +379,8 @@ String f_hphp_to_string(CVarRef v) {
 #include "hphp/parser/hphp.tab.hpp"
 
 namespace HPHP {
-extern const int64_t k_T_DOUBLE_COLON = k_T_PAAMAYIM_NEKUDOTAYIM;
+extern const int64_t k_T_PAAMAYIM_NEKUDOTAYIM = k_T_DOUBLE_COLON;
 }
 
 #undef YYTOKEN_MAP
 #undef YYTOKEN
-

@@ -358,7 +358,7 @@ static void get_color(int tokid, int prev, int next,
     COLOR_ENTRY(T_WHITESPACE,               None        );
     COLOR_ENTRY(T_DOLLAR_OPEN_CURLY_BRACES, None        );
     COLOR_ENTRY(T_CURLY_OPEN,               None        );
-    COLOR_ENTRY(T_PAAMAYIM_NEKUDOTAYIM,     None        );
+    COLOR_ENTRY(T_DOUBLE_COLON,             None        );
   }
 
   if (tokid == T_STRING) {

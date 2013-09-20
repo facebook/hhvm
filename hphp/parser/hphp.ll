@@ -292,7 +292,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         yy_pop_state(yyscanner);
 }
 
-<ST_IN_SCRIPTING>"::"                { RETSTEP(T_PAAMAYIM_NEKUDOTAYIM);}
+<ST_IN_SCRIPTING>"::"                { RETSTEP(T_DOUBLE_COLON);}
 <ST_IN_SCRIPTING>"\\"                { RETTOKEN(T_NS_SEPARATOR);}
 <ST_IN_SCRIPTING>"new"               { RETTOKEN(T_NEW);}
 <ST_IN_SCRIPTING>"clone"             { RETTOKEN(T_CLONE);}

@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/satellite-server.h"
+#include "hphp/runtime/server/server-task-event.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,6 +28,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(XboxServerInfo);
 
 class RPCRequestHandler;
+class XboxTransport;
 
 class XboxServer {
 public:
@@ -47,9 +49,11 @@ public:
   /**
    * Local tasklet for parallel processing.
    */
-  static Resource TaskStart(CStrRef msg, CStrRef reqInitDoc = "");
+  static Resource TaskStart(CStrRef msg, CStrRef reqInitDoc = "",
+      ServerTaskEvent<XboxServer, XboxTransport> *event = nullptr);
   static bool TaskStatus(CResRef task);
   static int TaskResult(CResRef task, int timeout_ms, Variant &ret);
+  static int TaskResult(XboxTransport* const job, int timeout_ms, Variant &ret);
 
   /**
    * Gets the ServerInfo and RequestHandler for the current xbox worker thread.
@@ -80,6 +84,77 @@ public:
   }
 
   void setMaxDuration(int duration) { m_maxDuration = duration; }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class XboxTransport : public Transport, public Synchronizable {
+public:
+  explicit XboxTransport(CStrRef message, CStrRef reqInitDoc = "");
+
+  timespec getStartTimer() const { return m_queueTime; }
+
+  /**
+   * Request URI.
+   */
+  virtual const char *getUrl();
+  virtual const char *getRemoteHost() { return "127.0.0.1"; }
+  virtual uint16_t getRemotePort() { return 0; }
+
+  /**
+   * Request data.
+   */
+  virtual Method getMethod() { return Transport::Method::POST; }
+  virtual const void *getPostData(int &size) {
+    size = m_message.size();
+    return m_message.data();
+  }
+
+  /**
+   * Manage headers.
+   */
+  virtual std::string getHeader(const char *name);
+  virtual void getHeaders(HeaderMap &headers) {}
+  virtual void addHeaderImpl(const char *name, const char *value) {}
+  virtual void removeHeaderImpl(const char *name) {}
+
+  virtual void sendImpl(const void *data, int size, int code, bool chunked);
+  virtual void onSendEndImpl();
+
+  /**
+   * Task interface.
+   */
+  bool isDone() { return m_done; }
+  String getResults(int &code, int timeout_ms = 0);
+
+  void setHost(const std::string &host) { m_host = host;}
+  void setAsioEvent(ServerTaskEvent<XboxServer, XboxTransport> *event) {
+    m_event = event;
+  }
+
+  // Refcounting.
+  void incRefCount() {
+    ++m_refCount;
+  }
+  void decRefCount() {
+    assert(m_refCount.load());
+    if (--m_refCount == 0) {
+      delete this;
+    }
+  }
+
+private:
+  std::atomic<int> m_refCount;
+
+  string m_message;
+
+  bool m_done;
+  string m_response;
+  int m_code;
+  string m_host;
+  string m_reqInitDoc;
+
+  ServerTaskEvent<XboxServer, XboxTransport> *m_event;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

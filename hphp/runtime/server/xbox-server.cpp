@@ -20,6 +20,7 @@
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/base/libevent-http-client.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
+#include "hphp/runtime/server/server-task-event.h"
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/lock.h"
@@ -30,118 +31,68 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class XboxTransport : public Transport, public Synchronizable {
-public:
-  explicit XboxTransport(CStrRef message, CStrRef reqInitDoc = "")
-      : m_refCount(0), m_done(false), m_code(0) {
-    Timer::GetMonotonicTime(m_queueTime);
+XboxTransport::XboxTransport(CStrRef message, CStrRef reqInitDoc /* = "" */)
+    : m_refCount(0), m_done(false), m_code(0), m_event(nullptr) {
+  Timer::GetMonotonicTime(m_queueTime);
 
-    m_message.append(message.data(), message.size());
-    m_reqInitDoc.append(reqInitDoc.data(), reqInitDoc.size());
-    disableCompression(); // so we don't have to decompress during sendImpl()
-  }
+  m_message.append(message.data(), message.size());
+  m_reqInitDoc.append(reqInitDoc.data(), reqInitDoc.size());
+  disableCompression(); // so we don't have to decompress during sendImpl()
+}
 
-  timespec getStartTimer() const { return m_queueTime; }
+const char *XboxTransport::getUrl() {
+  if (!m_reqInitDoc.empty()) {
+    return "xbox_process_call_message";
+  }
+  return RuntimeOption::XboxProcessMessageFunc.c_str();
+}
 
-  /**
-   * Implementing Transport...
-   */
-  virtual const char *getUrl() {
-    if (!m_reqInitDoc.empty()) {
-      return "xbox_process_call_message";
-    }
-    return RuntimeOption::XboxProcessMessageFunc.c_str();
+std::string XboxTransport::getHeader(const char *name) {
+  if (!strcasecmp(name, "Host")) return m_host;
+  if (!strcasecmp(name, "ReqInitDoc")) return m_reqInitDoc;
+  return "";
+}
+
+void XboxTransport::sendImpl(const void *data, int size, int code,
+                             bool chunked) {
+  m_response.append((const char*)data, size);
+  if (code) {
+    m_code = code;
   }
-  virtual const char *getRemoteHost() {
-    return "127.0.0.1";
+}
+
+void XboxTransport::onSendEndImpl() {
+  Lock lock(this);
+
+  m_done = true;
+  if (m_event) {
+    m_event->finish();
   }
-  virtual uint16_t getRemotePort() {
-    return 0;
-  }
-  virtual const void *getPostData(int &size) {
-    size = m_message.size();
-    return m_message.data();
-  }
-  virtual Method getMethod() {
-    return Transport::Method::POST;
-  }
-  virtual std::string getHeader(const char *name) {
-    if (!strcasecmp(name, "Host")) return m_host;
-    if (!strcasecmp(name, "ReqInitDoc")) return m_reqInitDoc;
-    return "";
-  }
-  virtual void getHeaders(HeaderMap &headers) {
-    // do nothing
-  }
-  virtual void addHeaderImpl(const char *name, const char *value) {
-    // do nothing
-  }
-  virtual void removeHeaderImpl(const char *name) {
-    // do nothing
-  }
-  virtual void sendImpl(const void *data, int size, int code,
-                        bool chunked) {
-    m_response.append((const char*)data, size);
-    if (code) {
-      m_code = code;
-    }
-  }
-  virtual void onSendEndImpl() {
+  notify();
+}
+
+String XboxTransport::getResults(int &code, int timeout_ms /* = 0 */) {
+  {
     Lock lock(this);
-    m_done = true;
-    notify();
-  }
-
-  // task interface
-  bool isDone() {
-    return m_done;
-  }
-
-  String getResults(int &code, int timeout_ms = 0) {
-    {
-      Lock lock(this);
-      while (!m_done) {
-        if (timeout_ms > 0) {
-          long long seconds = timeout_ms / 1000;
-          long long nanosecs = (timeout_ms - seconds * 1000) * 1000;
-          if (!wait(seconds, nanosecs)) {
-            code = -1;
-            return "";
-          }
-        } else {
-          wait();
+    while (!m_done) {
+      if (timeout_ms > 0) {
+        long long seconds = timeout_ms / 1000;
+        long long nanosecs = (timeout_ms - seconds * 1000) * 1000;
+        if (!wait(seconds, nanosecs)) {
+          code = -1;
+          return "";
         }
+      } else {
+        wait();
       }
     }
-
-    String response(m_response.c_str(), m_response.size(), CopyString);
-    code = m_code;
-    return response;
   }
 
-  // ref counting
-  void incRefCount() {
-    ++m_refCount;
-  }
-  void decRefCount() {
-    assert(m_refCount.load());
-    if (--m_refCount == 0) {
-      delete this;
-    }
-  }
+  String response(m_response.c_str(), m_response.size(), CopyString);
+  code = m_code;
 
-  void setHost(const std::string &host) { m_host = host;}
-private:
-  std::atomic<int> m_refCount;
-
-  string m_message;
-
-  bool m_done;
-  string m_response;
-  int m_code;
-  string m_host;
-  string m_reqInitDoc;
-};
+  return response;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -395,7 +346,8 @@ IMPLEMENT_OBJECT_ALLOCATION(XboxTask)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Resource XboxServer::TaskStart(CStrRef msg, CStrRef reqInitDoc /* = "" */) {
+Resource XboxServer::TaskStart(CStrRef msg, CStrRef reqInitDoc /* = "" */,
+    ServerTaskEvent<XboxServer, XboxTransport> *event /* = nullptr */) {
   {
     Lock l(s_dispatchMutex);
     if (s_dispatcher &&
@@ -407,10 +359,17 @@ Resource XboxServer::TaskStart(CStrRef msg, CStrRef reqInitDoc /* = "" */) {
       Resource ret(task);
       XboxTransport *job = task->getJob();
       job->incRefCount(); // paired with worker's decRefCount()
+
       Transport *transport = g_context->getTransport();
       if (transport) {
         job->setHost(transport->getHeader("Host"));
       }
+
+      if (event) {
+        job->setAsioEvent(event);
+        event->setJob(job);
+      }
+
       assert(s_dispatcher);
       s_dispatcher->enqueue(job);
 
@@ -435,9 +394,12 @@ bool XboxServer::TaskStatus(CResRef task) {
 
 int XboxServer::TaskResult(CResRef task, int timeout_ms, Variant &ret) {
   XboxTask *ptask = task.getTyped<XboxTask>();
+  return TaskResult(ptask->getJob(), timeout_ms, ret);
+}
 
+int XboxServer::TaskResult(XboxTransport *job, int timeout_ms, Variant &ret) {
   int code = 0;
-  String response = ptask->getJob()->getResults(code, timeout_ms);
+  String response = job->getResults(code, timeout_ms);
   if (code == 200) {
     ret = unserialize_from_string(response);
   } else {

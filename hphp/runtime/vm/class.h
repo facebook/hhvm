@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_VM_CLASS_H_
 #define incl_HPHP_VM_CLASS_H_
 
+#include <boost/range/iterator_range.hpp>
+
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/range.h"
 #include "hphp/runtime/base/types.h"
@@ -143,7 +145,7 @@ class PreClass : public AtomicCountable {
     Const() {}
     Const(PreClass* preClass, const StringData* n,
           const StringData* typeConstraint, const TypedValue& val,
-      const StringData* phpCode);
+          const StringData* phpCode);
 
     void prettyPrint(std::ostream& out) const;
 
@@ -578,8 +580,11 @@ struct Class : AtomicCountable {
   bool isCppSerializable() const;
 
   // Interfaces this class declares in its "implements" clause.
-  const std::vector<ClassPtr>& declInterfaces() const {
-    return m_declInterfaces;
+  boost::iterator_range<const ClassPtr*> declInterfaces() const {
+    return boost::make_iterator_range(
+      m_declInterfaces.get(),
+      m_declInterfaces.get() + m_numDeclInterfaces
+    );
   }
 
   // These two fields are used by getClassInfo to locate all trait
@@ -618,11 +623,15 @@ struct Class : AtomicCountable {
   }
 
   /*
-   * Look up the actual value of a class constant.
+   * Look up the actual value of a class constant.  Performs dynamic
+   * initialization if necessary.
    *
-   * Performs dynamic initialization if necessary.
+   * The returned Cell is guaranteed not to hold a reference counted
+   * object (may however be KindOfString for a static string).
+   * Returns a Cell containing KindOfUninit if this class has no
+   * constant with the given name.
    */
-  Cell* clsCnsGet(const StringData* clsCnsName) const;
+  Cell clsCnsGet(const StringData* clsCnsName) const;
 
   /*
    * Look up a class constant's TypedValue if it doesn't require
@@ -632,6 +641,8 @@ struct Class : AtomicCountable {
    * scalar, otherwise it has m_type set to KindOfUninit.  (Non-scalar
    * class constants need to run 86cinit code to determine their value
    * at runtime.)
+   *
+   * Returns nullptr if this class has no constant of the given name.
    */
   Cell* cnsNameToTV(const StringData* name, Slot& slot) const;
 
@@ -728,7 +739,6 @@ private:
 
 private:
   void initialize(TypedValue*& sPropData) const;
-  HphpArray* initClsCnsData() const;
   PropInitVec* initPropsImpl() const;
   TypedValue* initSPropsImpl() const;
   void setPropData(PropInitVec* propData) const;
@@ -786,8 +796,8 @@ private:
 private:
   PreClassPtr m_preClass;
   ClassPtr m_parent;
-  std::vector<ClassPtr> m_declInterfaces; // interfaces this class declares in
-                                          // its "implements" clause
+  std::unique_ptr<ClassPtr[]> m_declInterfaces;
+  size_t m_numDeclInterfaces;
   InterfaceMap m_interfaces;
 
   std::vector<ClassPtr> m_usedTraits;
@@ -833,6 +843,7 @@ public:
 private:
   unsigned m_propDataCache;
   unsigned m_propSDataCache;
+  unsigned m_nonScalarConstantCache;
   BuiltinCtorFunction m_instanceCtor;
   ConstMap m_constants;
 

@@ -614,10 +614,10 @@ Array f_hphp_get_closure_info(CVarRef closure) {
 }
 
 Variant f_hphp_get_class_constant(CVarRef cls, CVarRef name) {
-  TypedValue *res = g_vmContext->lookupClsCns(cls.toString().get(),
-                                              name.toString().get());
-  if (res) return tvAsCVarRef(res);
-  return uninit_null();
+  return cellAsCVarRef(
+    g_vmContext->lookupClsCns(cls.toString().get(),
+                              name.toString().get())
+  );
 }
 
 static Array get_class_info(const ClassInfo *cls) {
@@ -900,8 +900,9 @@ Array f_hphp_get_class_info(CVarRef name) {
       // Note: hphpc doesn't include inherited constants in
       // get_class_constants(), so mimic that behavior
       if (consts[i].m_class == cls) {
-        TypedValue* value = cls->clsCnsGet(consts[i].m_name);
-        arr.set(consts[i].nameRef(), tvAsVariant(value));
+        Cell value = cls->clsCnsGet(consts[i].m_name);
+        assert(value.m_type != KindOfUninit);
+        arr.set(consts[i].nameRef(), cellAsCVarRef(value));
       }
     }
 

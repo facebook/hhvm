@@ -921,13 +921,13 @@ CnsU <litstr id> <litstr fallback>  []  ->  [C:Null|Bool|Int|Dbl|Str]
   Get constant. Identical to Cns except returns constant named %2 if the
   constant named %1 is undefined.
 
-ClsCns <litstr id>    [A]  ->  [C:Null|Bool|Int|Dbl|Str]
+ClsCns <litstr id>    [A]  ->  [C:Null|Bool|Int|Dbl|Static Str]
 
   Get class constant. This instruction pushes the value of the class constant
   named %1 from class $1 onto the stack. If there is no class constant named %1
   in class $1, this instruction throws a fatal error.
 
-ClsCnsD <litstr id> <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Str]
+ClsCnsD <litstr id> <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Static Str]
 
   Get class constant (direct). This instruction first checks if %2 matches the
   name of a defined class. If %2 does not match the name of a defined class,

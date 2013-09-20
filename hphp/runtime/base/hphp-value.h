@@ -179,6 +179,7 @@ namespace detail {
 #define X(dt, cpp) \
   template<> struct DataTypeCPPType<dt> { typedef cpp type; }
 
+  X(KindOfUninit,       void);
   X(KindOfNull,         void);
   X(KindOfBoolean,      bool);
   X(KindOfInt64,        int64_t);

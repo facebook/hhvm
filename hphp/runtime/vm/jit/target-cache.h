@@ -310,14 +310,16 @@ CacheHandle allocTypedef(const NamedEntity* name);
 CacheHandle allocConstant(uint32_t* handlep, bool persistent);
 
 CacheHandle allocClassConstant(StringData* name);
-TypedValue* lookupClassConstant(TypedValue* cache,
-                                const NamedEntity* ne,
-                                const StringData* cls,
-                                const StringData* cns);
 TypedValue lookupClassConstantTv(TypedValue* cache,
                                  const NamedEntity* ne,
                                  const StringData* cls,
                                  const StringData* cns);
+
+/*
+ * Non-scalar class constants are stored in TargetCache slots as
+ * Arrays.
+ */
+CacheHandle allocNonScalarClassConstantMap(unsigned* handleOut);
 
 /*
  * Static locals.

@@ -797,27 +797,18 @@ CacheHandle allocClassConstant(StringData* name) {
                                      sizeof(TypedValue), sizeof(TypedValue));
 }
 
-Cell*
-lookupClassConstant(TypedValue* cache,
-                    const NamedEntity* ne,
-                    const StringData* cls,
-                    const StringData* cns) {
-  Stats::inc(Stats::TgtCache_ClsCnsHit, -1);
-  Stats::inc(Stats::TgtCache_ClsCnsMiss, 1);
-
-  Cell* clsCns;
-  clsCns = g_vmContext->lookupClsCns(ne, cls, cns);
-  *cache = *clsCns;
-
-  return cache;
+Cell lookupClassConstantTv(TypedValue* cache,
+                           const NamedEntity* ne,
+                           const StringData* cls,
+                           const StringData* cns) {
+  Cell clsCns = g_vmContext->lookupClsCns(ne, cls, cns);
+  assert(isUncounted(clsCns));
+  cellDup(clsCns, *cache);
+  return clsCns;
 }
 
-Cell
-lookupClassConstantTv(TypedValue* cache,
-                      const NamedEntity* ne,
-                      const StringData* cls,
-                      const StringData* cns) {
-  return *lookupClassConstant(cache, ne, cls, cns);
+CacheHandle allocNonScalarClassConstantMap(unsigned* handleOut) {
+  return allocFuncOrClass(handleOut, false /* isPersistent */);
 }
 
 //=============================================================================

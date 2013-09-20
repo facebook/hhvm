@@ -497,9 +497,6 @@ public:
   typedef hphp_hash_map<const StringData*, ClassInfo::ConstantInfo*,
                         string_data_hash, string_data_same> ConstInfoMap;
   ConstInfoMap m_constInfo;
-  typedef hphp_hash_map<const HPHP::Class*, HphpArray*,
-                        pointer_hash<HPHP::Class> > ClsCnsDataMap;
-  ClsCnsDataMap m_clsCnsData;
   typedef hphp_hash_map<const HPHP::Class*, HPHP::Class::PropInitVec*,
                         pointer_hash<HPHP::Class> > PropDataMap;
   PropDataMap m_propData;
@@ -531,24 +528,18 @@ public:
                            bool init = true);
   ObjectData* createObjectOnly(StringData* clsName);
 
-  HphpArray* getClsCnsData(const HPHP::Class* class_) const {
-    ClsCnsDataMap::const_iterator it = m_clsCnsData.find(class_);
-    if (it == m_clsCnsData.end()) {
-      return nullptr;
-    }
-    return it->second;
-  }
-  void setClsCnsData(const HPHP::Class* class_, HphpArray* clsCnsData) {
-    assert(getClsCnsData(class_) == nullptr);
-    m_clsCnsData[class_] = clsCnsData;
-  }
-
-  Cell* lookupClsCns(const HPHP::NamedEntity* ne,
-                     const StringData* cls,
-                     const StringData* cns);
-
-  Cell* lookupClsCns(const StringData* cls,
-                     const StringData* cns);
+  /*
+   * Look up a class constant.
+   *
+   * The returned Cell is guaranteed not to hold a reference counted
+   * type.  Raises an error if the class has no constant with that
+   * name, or if the class is not defined.
+   */
+  Cell lookupClsCns(const HPHP::NamedEntity* ne,
+                    const StringData* cls,
+                    const StringData* cns);
+  Cell lookupClsCns(const StringData* cls,
+                    const StringData* cns);
 
   // Get the next outermost VM frame, even accross re-entry
   ActRec* getOuterVMFrame(const ActRec* ar);

@@ -173,12 +173,13 @@ Array f_get_class_constants(CStrRef className) {
     // get_class_constants(), so mimic that behavior
     if (consts[i].m_class == cls) {
       auto const name  = const_cast<StringData*>(consts[i].m_name);
-      auto value = &consts[i].m_val;
+      Cell value = consts[i].m_val;
       // Handle dynamically set constants
-      if (value->m_type == KindOfUninit) {
+      if (value.m_type == KindOfUninit) {
         value = cls->clsCnsGet(consts[i].m_name);
       }
-      arrayInit.set(name, tvAsCVarRef(value), true /* isKey */);
+      assert(value.m_type != KindOfUninit);
+      arrayInit.set(name, cellAsCVarRef(value), true /* isKey */);
     }
   }
 

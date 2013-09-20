@@ -892,23 +892,23 @@ ActRec* VMExecutionContext::getOuterVMFrame(const ActRec* ar) {
   return nullptr;
 }
 
-Cell* VMExecutionContext::lookupClsCns(const NamedEntity* ne,
-                                             const StringData* cls,
-                                             const StringData* cns) {
+Cell VMExecutionContext::lookupClsCns(const NamedEntity* ne,
+                                      const StringData* cls,
+                                      const StringData* cns) {
   Class* class_ = Unit::loadClass(ne, cls);
   if (class_ == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS, cls->data());
   }
-  Cell* clsCns = class_->clsCnsGet(cns);
-  if (clsCns == nullptr) {
+  Cell clsCns = class_->clsCnsGet(cns);
+  if (clsCns.m_type == KindOfUninit) {
     raise_error("Couldn't find constant %s::%s",
                 cls->data(), cns->data());
   }
   return clsCns;
 }
 
-TypedValue* VMExecutionContext::lookupClsCns(const StringData* cls,
-                                             const StringData* cns) {
+Cell VMExecutionContext::lookupClsCns(const StringData* cls,
+                                      const StringData* cns) {
   return lookupClsCns(Unit::GetNamedEntity(cls), cls, cns);
 }
 
@@ -3606,11 +3606,11 @@ OPTBLD_INLINE void VMExecutionContext::iopClsCns(PC& pc) {
   Class* class_ = tv->m_data.pcls;
   assert(class_ != nullptr);
   auto const clsCns = class_->clsCnsGet(clsCnsName);
-  if (clsCns == nullptr) {
+  if (clsCns.m_type == KindOfUninit) {
     raise_error("Couldn't find constant %s::%s",
                 class_->name()->data(), clsCnsName->data());
   }
-  cellDup(*clsCns, *tv);
+  cellDup(clsCns, *tv);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopClsCnsD(PC& pc) {
@@ -3622,9 +3622,8 @@ OPTBLD_INLINE void VMExecutionContext::iopClsCnsD(PC& pc) {
 
   auto const clsCns = lookupClsCns(classNamedEntity.second,
                                    classNamedEntity.first, clsCnsName);
-  assert(clsCns != nullptr);
   auto const c1 = m_stack.allocC();
-  cellDup(*clsCns, *c1);
+  cellDup(clsCns, *c1);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopConcat(PC& pc) {

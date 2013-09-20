@@ -118,9 +118,9 @@ Variant f_constant(CStrRef name) {
     Class* cls = getClassByName(data, classNameLen);
     if (cls) {
       String cnsName(constantName, data + len - constantName, CopyString);
-      TypedValue* tv = cls->clsCnsGet(cnsName.get());
-      if (tv) {
-        return tvAsCVarRef(tv);
+      Cell cns = cls->clsCnsGet(cnsName.get());
+      if (cns.m_type != KindOfUninit) {
+        return cellAsCVarRef(cns);
       }
     }
     raise_warning("Couldn't find constant %s", data);
@@ -167,7 +167,7 @@ bool f_defined(CStrRef name, bool autoload /* = true */) {
     Class* cls = getClassByName(data, classNameLen);
     if (cls) {
       String cnsName(constantName, data + len - constantName, CopyString);
-      return cls->clsCnsGet(cnsName.get());
+      return cls->clsCnsGet(cnsName.get()).m_type != KindOfUninit;
     }
     return false;
   } else {

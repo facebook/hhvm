@@ -53,6 +53,18 @@ inline bool isTypedNum(const TypedValue& tv) {
   return tv.m_type == KindOfInt64 || tv.m_type == KindOfDouble;
 }
 
+/*
+ * Returns: true if the supplied TypedValue is a Cell, and either has
+ * a non-reference counted type, or is a KindOfString that points to a
+ * static string.
+ */
+inline bool isUncounted(const TypedValue& tv) {
+  auto const uncounted = !IS_REFCOUNTED_TYPE(tv.m_type) ||
+    (tv.m_type == KindOfString && tv.m_data.pstr->isStatic());
+  if (uncounted) assert(cellIsPlausible(tv));
+  return uncounted;
+}
+
 // Assumes 'data' is live
 // Assumes 'IS_REFCOUNTED_TYPE(type)'
 void tvDecRefHelper(DataType type, uint64_t datum);

@@ -32,6 +32,8 @@
 
 namespace HPHP {
 
+namespace TargetCache = Transl::TargetCache;
+
 static StringData* sd86ctor = makeStaticString("86ctor");
 static StringData* sd86pinit = makeStaticString("86pinit");
 static StringData* sd86sinit = makeStaticString("86sinit");
@@ -186,6 +188,8 @@ void PreClass::prettyPrint(std::ostream &out) const {
 //=============================================================================
 // Class.
 
+static_assert(sizeof(Class) == 400, "Change this only on purpose");
+
 Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const classVecLen = parent != nullptr ? parent->m_classVecLen + 1 : 1;
   auto const size = offsetof(Class, m_classVec) + sizeof(Class*) * classVecLen;
@@ -199,11 +203,21 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
 }
 
 Class::Class(PreClass* preClass, Class* parent, unsigned classVecLen)
-  : m_preClass(PreClassPtr(preClass)), m_parent(parent),
-    m_traitsBeginIdx(0), m_traitsEndIdx(0), m_clsInfo(nullptr),
-    m_builtinPropSize(0), m_classVecLen(classVecLen), m_cachedOffset(0),
-    m_propDataCache(-1), m_propSDataCache(-1), m_instanceCtor(nullptr),
-    m_nextClass(nullptr) {
+  : m_preClass(PreClassPtr(preClass))
+  , m_parent(parent)
+  , m_numDeclInterfaces(0)
+  , m_traitsBeginIdx(0)
+  , m_traitsEndIdx(0)
+  , m_clsInfo(nullptr)
+  , m_builtinPropSize(0)
+  , m_classVecLen(classVecLen)
+  , m_cachedOffset(0)
+  , m_propDataCache(-1)
+  , m_propSDataCache(-1)
+  , m_nonScalarConstantCache(0)
+  , m_instanceCtor(nullptr)
+  , m_nextClass(nullptr)
+{
   setParent();
   setUsedTraits();
   setMethods();
@@ -257,7 +271,7 @@ void Class::releaseRefs() {
   if (okToReleaseParent) {
     m_parent.reset();
   }
-  m_declInterfaces.clear();
+  m_declInterfaces.reset();
   m_usedTraits.clear();
 }
 
@@ -314,27 +328,27 @@ void Class::atomicRelease() {
 }
 
 Class *Class::getCached() const {
-  return *(Class**)Transl::TargetCache::handleToPtr(m_cachedOffset);
+  return *(Class**)TargetCache::handleToPtr(m_cachedOffset);
 }
 
 void Class::setCached() {
-  *(Class**)Transl::TargetCache::handleToPtr(m_cachedOffset) = this;
+  *(Class**)TargetCache::handleToPtr(m_cachedOffset) = this;
 }
 
 bool Class::verifyPersistent() const {
   if (!(attrs() & AttrPersistent)) return false;
   if (m_parent.get() &&
-      !Transl::TargetCache::isPersistentHandle(m_parent->m_cachedOffset)) {
+      !TargetCache::isPersistentHandle(m_parent->m_cachedOffset)) {
     return false;
   }
-  for (auto const& declInterface : m_declInterfaces) {
-    if (!Transl::TargetCache::isPersistentHandle(
+  for (auto const& declInterface : declInterfaces()) {
+    if (!TargetCache::isPersistentHandle(
           declInterface->m_cachedOffset)) {
       return false;
     }
   }
   for (auto const& usedTrait : m_usedTraits) {
-    if (!Transl::TargetCache::isPersistentHandle(
+    if (!TargetCache::isPersistentHandle(
           usedTrait->m_cachedOffset)) {
       return false;
     }
@@ -383,7 +397,7 @@ Class::Avail Class::avail(Class*& parent, bool tryAutoload /*=false*/) const {
       return Avail::False;
     }
   }
-  for (auto const& di : m_declInterfaces) {
+  for (auto const& di : declInterfaces()) {
     Class* declInterface = di.get();
     PreClass *pint = declInterface->m_preClass.get();
     Class* interface = Unit::getClass(pint->namedEntity(), pint->name(),
@@ -827,37 +841,6 @@ TypedValue Class::getStaticPropInitVal(const SProp& prop) {
   return declCls->m_staticProperties[s].m_val;
 }
 
-HphpArray* Class::initClsCnsData() const {
-  Slot nConstants = m_constants.size();
-  /*
-   * TODO(#2887942): this array has unchecked mutations
-   */
-  HphpArray* constants = HphpArray::MakeReserve(nConstants);
-
-  if (m_parent.get() != nullptr) {
-    if (g_vmContext->getClsCnsData(m_parent.get()) == nullptr) {
-      // Initialize recursively up the inheritance chain.
-      m_parent->initClsCnsData();
-    }
-  }
-
-  for (Slot i = 0; i < nConstants; ++i) {
-    const Const& constant = m_constants[i];
-    const TypedValue* tv = &constant.m_val;
-    constants->set((StringData*)constant.m_name, tvAsCVarRef(tv), false);
-    // XXX: set() converts KindOfUninit to KindOfNull, but our class
-    // constant logic needs to store KindOfUninit to indicate the the
-    // constant's value has not been computed yet. We should find a better
-    // way to deal with this.
-    if (tv->m_type == KindOfUninit) {
-      constants->nvGetValueRef(i)->m_type = KindOfUninit;
-    }
-  }
-
-  g_vmContext->setClsCnsData(this, constants);
-  return constants;
-}
-
 Cell* Class::cnsNameToTV(const StringData* clsCnsName,
                          Slot& clsCnsInd) const {
   clsCnsInd = m_constants.findIndex(clsCnsName);
@@ -869,41 +852,63 @@ Cell* Class::cnsNameToTV(const StringData* clsCnsName,
   return ret;
 }
 
-Cell* Class::clsCnsGet(const StringData* clsCnsName) const {
+Cell Class::clsCnsGet(const StringData* clsCnsName) const {
   Slot clsCnsInd;
   Cell* clsCns = cnsNameToTV(clsCnsName, clsCnsInd);
-  if (!clsCns || clsCns->m_type != KindOfUninit) {
-    return clsCns;
+  if (!clsCns) return make_tv<KindOfUninit>();
+  if (clsCns->m_type != KindOfUninit) {
+    return *clsCns;
   }
 
-  // This constant has a non-scalar initializer, so look in g_vmContext for
-  // an entry associated with this class.
-  HphpArray* clsCnsData = g_vmContext->getClsCnsData(this);
-  if (clsCnsData == nullptr) {
-    clsCnsData = initClsCnsData();
+  // This constant has a non-scalar initializer, meaning it will be
+  // potentially different in different requests, which we store
+  // separately in an array living off target cache.
+  if (UNLIKELY(!m_nonScalarConstantCache)) {
+    TargetCache::allocNonScalarClassConstantMap(
+      const_cast<unsigned*>(&m_nonScalarConstantCache));
   }
 
-  clsCns = clsCnsData->nvGetValueRef(clsCnsInd);
-  if (clsCns->m_type == KindOfUninit) {
-    // The class constant has not been initialized yet; do so.
-    static StringData* sd86cinit = makeStaticString("86cinit");
-    const Func* meth86cinit =
-      m_constants[clsCnsInd].m_class->lookupMethod(sd86cinit);
-    TypedValue args[1] = {
-      make_tv<KindOfString>(const_cast<StringData*>(clsCnsName))
-    };
-    g_vmContext->invokeFuncFew(clsCns, meth86cinit, ActRec::encodeClass(this),
-                               nullptr, 1, args);
+  auto& clsCnsData = TargetCache::handleToRef<Array>(
+    m_nonScalarConstantCache
+  );
+  if (clsCnsData.get() == nullptr) {
+    clsCnsData = Array::attach(HphpArray::MakeReserve(m_constants.size()));
+  } else {
+    clsCns = clsCnsData->nvGet(clsCnsName);
+    if (clsCns) return *clsCns;
   }
-  assert(cellIsPlausible(*clsCns));
-  return clsCns;
+
+  // The class constant has not been initialized yet; do so.
+  static auto const sd86cinit = makeStaticString("86cinit");
+  auto const meth86cinit =
+    m_constants[clsCnsInd].m_class->lookupMethod(sd86cinit);
+  TypedValue args[1] = {
+    make_tv<KindOfStaticString>(
+      const_cast<StringData*>(m_constants[clsCnsInd].m_name))
+  };
+
+  Cell ret;
+  g_vmContext->invokeFuncFew(
+    &ret,
+    meth86cinit,
+    ActRec::encodeClass(this),
+    nullptr,
+    1,
+    args
+  );
+  assert(isUncounted(ret));
+
+  clsCnsData.set(StrNR(clsCnsName), cellAsCVarRef(ret), true /* isKey */);
+
+  assert(cellIsPlausible(ret));
+  return ret;
 }
 
 DataType Class::clsCnsType(const StringData* cnsName) const {
   Slot slot;
   auto const cns = cnsNameToTV(cnsName, slot);
-  // TODO: lookup the constant in target cache in case it's dynamic
-  // and already initialized.
+  // TODO(#2913342): lookup the constant in target cache in case it's
+  // dynamic and already initialized.
   if (!cns) return KindOfUninit;
   return cns->m_type;
 }
@@ -1487,13 +1492,13 @@ void Class::setConstants() {
   }
 
   // Copy in interface constants.
-  for (auto it = m_declInterfaces.begin(); it != m_declInterfaces.end(); ++it) {
-    for (Slot slot = 0; slot < (*it)->m_constants.size(); ++slot) {
-      const Const& iConst = (*it)->m_constants[slot];
+  for (auto& di : declInterfaces()) {
+    for (Slot slot = 0; slot < di->m_constants.size(); ++slot) {
+      auto const iConst = di->m_constants[slot];
 
       // If you're inheriting a constant with the same name as an
       // existing one, they must originate from the same place.
-      ConstMap::Builder::iterator existing = builder.find(iConst.m_name);
+      auto const existing = builder.find(iConst.m_name);
       if (existing != builder.end() &&
           builder[existing->second].m_class != iConst.m_class) {
         raise_error("Cannot inherit previously-inherited constant %s",
@@ -2018,6 +2023,9 @@ void Class::setInterfaces() {
       interfacesBuilder.add(interface->name(), interface);
     }
   }
+
+  std::vector<ClassPtr> declInterfaces;
+
   for (PreClass::InterfaceVec::const_iterator it =
          m_preClass->interfaces().begin();
        it != m_preClass->interfaces().end(); ++it) {
@@ -2029,7 +2037,7 @@ void Class::setInterfaces() {
       raise_error("%s cannot implement %s - it is not an interface",
                   m_preClass->name()->data(), cp->name()->data());
     }
-    m_declInterfaces.push_back(ClassPtr(cp));
+    declInterfaces.push_back(ClassPtr(cp));
     if (interfacesBuilder.find(cp->name()) == interfacesBuilder.end()) {
       interfacesBuilder.add(cp->name(), cp);
     }
@@ -2043,6 +2051,11 @@ void Class::setInterfaces() {
       }
     }
   }
+
+  m_numDeclInterfaces = declInterfaces.size();
+  m_declInterfaces.reset(new ClassPtr[declInterfaces.size()]);
+  std::copy(begin(declInterfaces), end(declInterfaces),
+    m_declInterfaces.get());
 
   addInterfacesFromUsedTraits(interfacesBuilder);
 
@@ -2096,7 +2109,7 @@ void Class::setInstanceBitsImpl() {
     bits |= c->m_instanceBits;
   };
   if (m_parent.get()) setBits(m_parent.get());
-  for (auto& di : m_declInterfaces) setBits(di.get());
+  for (auto& di : declInterfaces()) setBits(di.get());
 
   // XXX: this assert fails on the initFlag; oops.
   if (unsigned bit = InstanceBits::lookup(m_preClass->name())) {
@@ -2153,11 +2166,9 @@ void Class::getClassInfo(ClassInfoVM* ci) {
   }
 
   // Interfaces.
-  for (unsigned i = 0; i < m_declInterfaces.size(); i++) {
-    ci->m_interfacesVec.push_back(
-        m_declInterfaces[i]->name()->data());
-    ci->m_interfaces.insert(
-        m_declInterfaces[i]->name()->data());
+  for (auto& di : declInterfaces()) {
+    ci->m_interfacesVec.push_back(di->name()->data());
+    ci->m_interfaces.insert(di->name()->data());
   }
 
   // Used traits.
@@ -2252,7 +2263,9 @@ void Class::getClassInfo(ClassInfoVM* ci) {
     ki->name = m_constants[i].m_name->data();
     ki->valueLen = m_constants[i].m_phpCode->size();
     ki->valueText = m_constants[i].m_phpCode->data();
-    ki->setValue(tvAsCVarRef(clsCnsGet(m_constants[i].m_name)));
+    auto const cell = clsCnsGet(m_constants[i].m_name);
+    assert(cell.m_type != KindOfUninit);
+    ki->setValue(cellAsCVarRef(cell));
 
     ci->m_constants[ki->name] = ki;
     ci->m_constantsVec.push_back(ki);
@@ -2320,7 +2333,7 @@ const Class::PropInitVec* Class::getPropData() const {
 void Class::initPropHandle() const {
   if (UNLIKELY(m_propDataCache == (unsigned)-1)) {
     const_cast<unsigned&>(m_propDataCache) =
-      Transl::TargetCache::allocClassInitProp(name());
+      TargetCache::allocClassInitProp(name());
   }
 }
 
@@ -2342,7 +2355,7 @@ TypedValue* Class::getSPropData() const {
 void Class::initSPropHandle() const {
   if (UNLIKELY(m_propSDataCache == (unsigned)-1)) {
     const_cast<unsigned&>(m_propSDataCache) =
-      Transl::TargetCache::allocClassInitSProp(name());
+      TargetCache::allocClassInitSProp(name());
   }
 }
 

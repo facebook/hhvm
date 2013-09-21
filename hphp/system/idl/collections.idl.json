@@ -381,6 +381,28 @@
                     ]
                 },
                 {
+                    "name": "toKeysArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the keys from this Vector.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toValuesArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this Vector.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "getIterator",
                     "flags": [
                     ],
@@ -1084,23 +1106,23 @@
                     ]
                 },
                 {
-                    "name": "toKeysArray",
-                    "flags": [
-                    ],
-                    "desc": "Returns an array built from the keys from this Map.",
-                    "return": {
-                        "type": "VariantMap"
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "values",
                     "flags": [
                     ],
                     "desc": "Returns a Vector built from the values from this Map.",
                     "return": {
                         "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toKeysArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the keys from this Map.",
+                    "return": {
+                        "type": "VariantMap"
                     },
                     "args": [
                     ]
@@ -1747,23 +1769,23 @@
                     ]
                 },
                 {
-                    "name": "toKeysArray",
-                    "flags": [
-                    ],
-                    "desc": "Returns an array built from the keys from this StableMap.",
-                    "return": {
-                        "type": "VariantMap"
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "values",
                     "flags": [
                     ],
                     "desc": "Returns a Vector built from the values from this StableMap.",
                     "return": {
                         "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toKeysArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the keys from this StableMap.",
+                    "return": {
+                        "type": "VariantMap"
                     },
                     "args": [
                     ]
@@ -2242,6 +2264,28 @@
                     ]
                 },
                 {
+                    "name": "toKeysArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this Set.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toValuesArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this Set.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "getIterator",
                     "flags": [
                     ],
@@ -2649,6 +2693,28 @@
                     "desc": "Returns a Set built from the values of this Pair.",
                     "return": {
                         "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toKeysArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the keys from this Pair.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toValuesArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this Pair.",
+                    "return": {
+                        "type": "VariantMap"
                     },
                     "args": [
                     ]

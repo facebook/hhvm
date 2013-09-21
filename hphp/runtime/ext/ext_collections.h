@@ -69,6 +69,8 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   Object t_tomap();
   Object t_tostablemap();
   Object t_toset();
+  Array t_tokeysarray();
+  Array t_tovaluesarray();
   void t_reverse();
   void t_splice(CVarRef offset, CVarRef len = uninit_null(),
                 CVarRef replacement = uninit_null());
@@ -265,9 +267,9 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   Object t_tostablemap();
   Object t_toset();
   Array t_copyasarray(); // deprecated
-  Array t_tokeysarray(); // deprecated
+  Array t_tokeysarray();
+  Array t_tovaluesarray();
   Object t_values(); // deprecated
-  Array t_tovaluesarray(); // deprecated
   Object t_differencebykey(CVarRef it);
   Object t_getiterator();
   Object t_map(CVarRef callback);
@@ -581,9 +583,9 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   Object t_tostablemap();
   Object t_toset();
   Array t_copyasarray(); // deprecated
-  Array t_tokeysarray(); // deprecated
+  Array t_tokeysarray();
+  Array t_tovaluesarray();
   Object t_values(); // deprecated
-  Array t_tovaluesarray(); // deprecated
   Object t_differencebykey(CVarRef it);
   Object t_getiterator();
   Object t_map(CVarRef callback);
@@ -852,6 +854,8 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   Array t_toarray();
   Object t_tovector();
   Object t_toset();
+  Array t_tokeysarray();
+  Array t_tovaluesarray();
   Object t_getiterator();
   Object t_map(CVarRef callback);
   Object t_filter(CVarRef callback);
@@ -1084,6 +1088,8 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   Object t_tomap();
   Object t_tostablemap();
   Object t_toset();
+  Array t_tokeysarray();
+  Array t_tovaluesarray();
   Object t_getiterator();
   Object t_map(CVarRef callback);
   Object t_mapwithkey(CVarRef callback);

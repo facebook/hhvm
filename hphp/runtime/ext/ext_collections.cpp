@@ -386,6 +386,19 @@ Array c_Vector::t_toarray() {
   return toArrayImpl();
 }
 
+Array c_Vector::t_tokeysarray() {
+  PackedArrayInit ai(m_size);
+  uint sz = m_size;
+  for (uint i = 0; i < sz; ++i) {
+    ai.append((int64_t)i);
+  }
+  return ai.toArray();
+}
+
+Array c_Vector::t_tovaluesarray() {
+  return toArrayImpl();
+}
+
 void c_Vector::t_reverse() {
   if (m_size <= 1) return;
   TypedValue* start = m_data;
@@ -1308,20 +1321,6 @@ Array c_Map::t_copyasarray() {
   return toArrayImpl();
 }
 
-Array c_Map::t_tokeysarray() {
-  PackedArrayInit ai(m_size);
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (!p.validValue()) continue;
-    if (p.hasIntKey()) {
-      ai.append(int64_t{p.ikey});
-    } else {
-      ai.append(*(const String*)(&p.skey));
-    }
-  }
-  return ai.toArray();
-}
-
 Object c_Map::t_values() {
   c_Vector* target;
   Object ret = target = NEWOBJ(c_Vector)();
@@ -1344,6 +1343,20 @@ Object c_Map::t_values() {
     ++j;
   }
   return ret;
+}
+
+Array c_Map::t_tokeysarray() {
+  PackedArrayInit ai(m_size);
+  for (uint i = 0; i <= m_nLastSlot; ++i) {
+    Bucket& p = m_data[i];
+    if (!p.validValue()) continue;
+    if (p.hasIntKey()) {
+      ai.append(int64_t{p.ikey});
+    } else {
+      ai.append(*(const String*)(&p.skey));
+    }
+  }
+  return ai.toArray();
 }
 
 Array c_Map::t_tovaluesarray() {
@@ -2500,20 +2513,6 @@ Array c_StableMap::t_copyasarray() {
   return toArrayImpl();
 }
 
-Array c_StableMap::t_tokeysarray() {
-  PackedArrayInit ai(m_size);
-  Bucket* p = m_pListHead;
-  while (p) {
-    if (p->hasIntKey()) {
-      ai.append(int64_t{p->ikey});
-    } else {
-      ai.append(*(const String*)(&p->skey));
-    }
-    p = p->pListNext;
-  }
-  return ai.toArray();
-}
-
 Object c_StableMap::t_values() {
   c_Vector* target;
   Object ret = target = NEWOBJ(c_Vector)();
@@ -2531,6 +2530,20 @@ Object c_StableMap::t_values() {
     p = p->pListNext;
   }
   return ret;
+}
+
+Array c_StableMap::t_tokeysarray() {
+  PackedArrayInit ai(m_size);
+  Bucket* p = m_pListHead;
+  while (p) {
+    if (p->hasIntKey()) {
+      ai.append(int64_t{p->ikey});
+    } else {
+      ai.append(*(const String*)(&p->skey));
+    }
+    p = p->pListNext;
+  }
+  return ai.toArray();
 }
 
 Array c_StableMap::t_tovaluesarray() {
@@ -3623,6 +3636,14 @@ Array c_Set::t_toarray() {
   return toArrayImpl();
 }
 
+Array c_Set::t_tokeysarray() {
+  return toArrayImpl();
+}
+
+Array c_Set::t_tovaluesarray() {
+  return toArrayImpl();
+}
+
 Object c_Set::t_getiterator() {
   c_SetIterator* it = NEWOBJ(c_SetIterator)();
   it->m_obj = this;
@@ -4328,6 +4349,17 @@ bool c_Pair::t_containskey(CVarRef key) {
 }
 
 Array c_Pair::t_toarray() {
+  return toArrayImpl();
+}
+
+Array c_Pair::t_tokeysarray() {
+  PackedArrayInit ai(2);
+  ai.append((int64_t)0);
+  ai.append((int64_t)1);
+  return ai.toArray();
+}
+
+Array c_Pair::t_tovaluesarray() {
   return toArrayImpl();
 }
 

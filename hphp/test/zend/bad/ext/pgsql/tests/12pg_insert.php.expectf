@@ -1,0 +1,2 @@
+INSERT INTO "php_pgsql_test" ("num","str","bin") VALUES (1234,E'AAA',E'BBB');
+Ok

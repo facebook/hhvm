@@ -1,0 +1,7 @@
+bject(bad)#%d (1) {
+  ["_private":"bad":private]=>
+  array(1) {
+    [0]=>
+    string(3) "php"
+  }
+}

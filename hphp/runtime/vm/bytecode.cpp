@@ -988,7 +988,9 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
     // The anonymous context cannot access protected or private methods,
     // so we can fail fast here.
     if (ctx == nullptr) {
-      if(spl_override(method)) return method;
+      if(AutoloadHandler::s_instance->isRunning()){ 
+        if(spl_override(method))return method;
+      }
       if (raise) {
         raise_error("Call to %s method %s::%s from anonymous context",
                     (method->attrs() & AttrPrivate) ? "private" : "protected",
@@ -1003,7 +1005,9 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
       // this private method, so this private method is not accessible.
       // We need to keep going because the context class may define a
       // private method with this name.
-      spl_override(method) ? accessible = true : accessible = false;
+      if(AutoloadHandler::s_instance->isRunning()){ 
+        spl_override(method) ? accessible = true : accessible = false;
+      }else{accessible=false;}
     } else {
       // If the context class is derived from the class that first
       // declared this protected method, then we know this method is

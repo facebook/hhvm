@@ -302,6 +302,13 @@ class AutoloadHandler : public RequestEventHandler {
   };
 
 public:
+  ~AutoloadHandler() {
+    m_map.detach();
+    m_map_root.detach();
+    m_handlers.detach();
+    m_loading.detach();
+  }
+
   virtual void requestInit();
   virtual void requestShutdown();
 

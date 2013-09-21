@@ -442,6 +442,23 @@ Variant invoke_static_method(const String& s, const String& method,
   return ret;
 }
 
+Variant invoke_ancestor_method(CStrRef s, CStrRef method, CArrRef params,
+                               ObjectData *cls, bool fatal /* = true */) {
+  HPHP::Class* class_ = Unit::lookupClass(s.get());
+  if (class_ == nullptr) {
+    o_invoke_failed(s.data(), method.data(), fatal);
+    return uninit_null();
+  }
+  const HPHP::Func* f = class_->lookupMethod(method.get());
+  if (f == nullptr) {
+    o_invoke_failed(s.data(), method.data(), fatal);
+    return uninit_null();
+  }
+  Variant ret;
+  g_vmContext->invokeFunc((TypedValue*)&ret, f, params, cls, class_);
+  return ret;
+}
+
 Variant invoke_failed(CVarRef func, CArrRef params,
                       bool fatal /* = true */) {
   if (func.isObject()) {

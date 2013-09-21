@@ -496,11 +496,12 @@ function run_test($options, $test) {
         file_exists($test.'.norepo')) {
       return 'skip';
     } else {
-      unlink("$test.repo/hhvm.hhbc");
+      $repodb = "$test.repo/hhvm.hhbc";
+      if (file_exists($repodb)) unlink($repodb);
       $hphp = hphp_cmd($options, $test);
       $output .= shell_exec("$hphp 2>&1");
       $hhvm .= " -vRepo.Authoritative=true ".
-               "-vRepo.Central.Path=$test.repo/hhvm.hhbc";
+               "-vRepo.Central.Path=$repodb";
     }
   }
 

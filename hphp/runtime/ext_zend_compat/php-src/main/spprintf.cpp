@@ -5,18 +5,17 @@ PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap
   int ret = HPHP::vspprintf(pbuf, max_len, format, ap);
 
   // *pbuf is a malloc()ed buf, but we need it emalloc()ed, *sigh*
-  char* emalloced_buf = (char*) emalloc(ret);
-  memcpy(emalloced_buf, *pbuf, ret);
+  char* emalloced_buf = (char*) emalloc(ret + 1);
+  memcpy(emalloced_buf, *pbuf, ret + 1); // copy the null terminator
   free(*pbuf);
   *pbuf = emalloced_buf;
   return ret;
 }
 
-PHPAPI int spprintf( char **pbuf, size_t max_len, const char *format, ...) {
-  int cc;
+PHPAPI int spprintf(char **pbuf, size_t max_len, const char *format, ...) {
   va_list ap;
   va_start(ap, format);
-  cc = vspprintf(pbuf, max_len, format, ap);
+  int cc = vspprintf(pbuf, max_len, format, ap);
   va_end(ap);
-  return (cc);
+  return cc;
 }

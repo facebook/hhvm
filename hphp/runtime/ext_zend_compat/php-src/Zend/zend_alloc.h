@@ -48,10 +48,10 @@ ZEND_API inline void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG
   return HPHP::smart_malloc(size);
 }
 ZEND_API inline void *_safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
-  return _emalloc(nmemb);
+  return _emalloc(nmemb * size + offset);
 }
 ZEND_API inline void *_safe_malloc(size_t nmemb, size_t size, size_t offset) {
-  return _emalloc(nmemb);
+  return _emalloc(nmemb * size + offset);
 }
 ZEND_API inline void _efree(const void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
   HPHP::smart_free(const_cast<void*>(ptr));

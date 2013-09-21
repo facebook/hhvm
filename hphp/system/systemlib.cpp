@@ -124,6 +124,10 @@ ObjectData* SystemLib::AllocLazyKeyedIterableViewObject(CVarRef iterable) {
   CREATE_AND_CONSTRUCT(LazyKeyedIterableView, make_packed_array(iterable));
 }
 
+ObjectData* SystemLib::AllocReflectionExceptionObject(CVarRef message) {
+  CREATE_AND_CONSTRUCT(ReflectionException, make_packed_array(message));
+}
+
 #undef CREATE_AND_CONSTRUCT
 
 ALLOC_OBJECT_STUB(Directory);

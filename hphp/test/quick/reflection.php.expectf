@@ -138,9 +138,9 @@ array(4) {
 --- getStaticVariables("f") ---
 array(2) {
   ["staticX"]=>
-  string(1) "4"
+  int(4)
   ["staticY"]=>
-  string(4) "null"
+  NULL
 }
 
 --- isInternal("f") ---
@@ -171,7 +171,50 @@ NULL
 string(0) ""
 
 --- export() ---
-string(0) ""
+string(%d) "Class [ <user> class B ] {
+  @@ %s/hphp/test/quick/reflection.php 126-142
+
+  - Constants [2] {
+    Constant [ string C0 ] { B::C0 }
+    Constant [ string C1 ] { B::C1 }
+  }
+
+  - Static properties [0] {
+  }
+
+  - Static methods [0] {
+  }
+
+  - Properties [0] {
+  }
+
+  - Methods [6] {
+    Method [ <user> public method methI ] {
+      @@ %s/hphp/test/quick/reflection.php 138 - 138
+    }
+
+    Method [ <user> public method methJ ] {
+      @@ %s/hphp/test/quick/reflection.php 139 - 139
+    }
+
+    Method [ <user> public method methK ] {
+      @@ %s/hphp/test/quick/reflection.php 140 - 140
+    }
+
+    Method [ <user> private method methB ] {
+      @@ %s/hphp/test/quick/reflection.php 141 - 141
+    }
+
+    Method [ <user, prototype A> public method methH ] {
+      @@ %s/hphp/test/quick/reflection.php 120 - 120
+    }
+
+    Method [ <user, prototype A> protected method methA ] {
+      @@ %s/hphp/test/quick/reflection.php 121 - 121
+    }
+  }
+}
+"
 
 --- getConstant() ---
 string(5) "B::C0"
@@ -227,7 +270,7 @@ int(0)
 string(1) "B"
 
 --- getParentClass() ---
-object(ReflectionClass)#23 (2) {
+object(ReflectionClass)#%d (2) {
   ["name"]=>
   string(1) "A"
   ["info":"ReflectionClass":private]=>
@@ -293,7 +336,7 @@ bool(false)
 bool(true)
 
 --- newInstance() ---
-object(B)#51 (4) {
+object(B)#%d (4) {
   ["p0":"B":private]=>
   int(1)
   ["p1":protected]=>
@@ -305,7 +348,7 @@ object(B)#51 (4) {
 }
 
 --- newInstanceArgs() ---
-object(B)#51 (4) {
+object(B)#%d (4) {
   ["p0":"B":private]=>
   int(1)
   ["p1":protected]=>

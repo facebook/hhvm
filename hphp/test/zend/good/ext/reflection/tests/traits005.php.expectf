@@ -1,0 +1,21 @@
+class C1:
+array(0) {
+}
+
+class C2:
+array(0) {
+}
+
+class C3:
+array(1) {
+  ["a1"]=>
+  string(6) "T1::m1"
+}
+
+class C4:
+array(2) {
+  ["a1"]=>
+  string(6) "T1::m1"
+  ["a2"]=>
+  string(6) "T1::m2"
+}

@@ -1,0 +1,15 @@
+array(2) {
+  ["bar"]=>
+  string(3) "baz"
+  ["a"]=>
+  string(1) "a"
+}
+array(2) {
+  [0]=>
+  string(3) "bar"
+  [1]=>
+  string(1) "a"
+}
+bool(false)
+bool(false)
+bool(true)

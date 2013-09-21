@@ -442,7 +442,7 @@ Variant invoke_static_method(const String& s, const String& method,
   return ret;
 }
 
-Variant invoke_ancestor_method(CStrRef s, CStrRef method, CArrRef params,
+Variant invoke_ancestor_method(const String& s, const String& method, CArrRef params,
                                ObjectData *cls, bool fatal /* = true */) {
   HPHP::Class* class_ = Unit::lookupClass(s.get());
   if (class_ == nullptr) {

@@ -1,6 +1,6 @@
 bool(true)
-ReflectionException: Method ::noSuchMethod does not exist
-ReflectionException: Method Foo::noSuchMethod does not exist
-ReflectionException: Method Foo::noSuchMethod does not exist
+ReflectionException: The parameter class is expected to be either a string or an object
+ReflectionException: Method Foo::noSuchMethod() does not exist
+ReflectionException: Method Foo::noSuchMethod() does not exist
 bool(true)
 bool(true)

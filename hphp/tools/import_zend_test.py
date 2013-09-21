@@ -101,7 +101,6 @@ no_import = (
     '/ext/pspell',
     '/ext/readline',
     '/ext/recode',
-    '/ext/reflection',
     '/ext/shmop',
     '/ext/skeleton',
     '/ext/snmp',

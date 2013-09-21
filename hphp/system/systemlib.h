@@ -62,6 +62,7 @@ namespace Eval {
   x(Phar)                                       \
   x(__PHP_Incomplete_Class)                     \
   x(__PHP_Unserializable_Class)                 \
+  x(ReflectionException)                        \
 
 class SystemLib {
  public:
@@ -104,6 +105,7 @@ class SystemLib {
 
   static ObjectData* AllocLazyIterableViewObject(CVarRef iterable);
   static ObjectData* AllocLazyKeyedIterableViewObject(CVarRef iterable);
+  static ObjectData* AllocReflectionExceptionObject(CVarRef message);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -156,7 +156,7 @@ Variant invoke_static_method(const String& s, const String& method,
 /**
  * Invoking an arbitrary ancestor's method
  */
-Variant invoke_ancestor_method(CStrRef s, CStrRef method, CArrRef params,
+Variant invoke_ancestor_method(const String& s, const String& method, CArrRef params,
                                ObjectData *cls, bool fatal = true);
 
 /**

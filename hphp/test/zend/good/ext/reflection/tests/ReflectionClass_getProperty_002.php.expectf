@@ -1,0 +1,13 @@
+Check invalid params:
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+Property  does not exist
+Property 1 does not exist
+Property 1.5 does not exist
+Property 1 does not exist
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL

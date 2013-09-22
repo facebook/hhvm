@@ -1773,6 +1773,9 @@ void Class::importTraitInstanceProp(Class*      trait,
                                                     prop.m_name,
                                                     prop.m_attrs);
     }
+    if (prop.m_attrs & AttrDeepInit) {
+      m_hasDeepInitProps = true;
+    }
     curPropMap.add(prop.m_name, prop);
     m_declPropInit.push_back(traitPropVal);
   } else {

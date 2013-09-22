@@ -16,6 +16,7 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/util/util.h"
 #include "hphp/util/debug.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
@@ -469,73 +470,92 @@ Class::PropInitVec* Class::initPropsImpl() const {
   PropInitVec* propVec = PropInitVec::allocInRequestArena(m_declPropInit);
   size_t nProps = numDeclProperties();
 
+  Array args;
+  Variant arg0;
   {
-    Array args;
+    ArrayInit ainit(nProps);
 
-    HphpArray* propArr = HphpArray::MakeReserve(nProps);
-    Variant arg0(Array::attach(propArr));
+    Object sentinel(SystemLib::AllocPinitSentinel());
 
-    args.appendRef(arg0);
-    assert(propArr->getCount() == 1);  // Don't want to trigger COW
-    {
-      // Create a sentinel that uniquely identifies uninitialized properties.
-      ObjectData* sentinel = SystemLib::AllocPinitSentinel();
-      sentinel->incRefCount();
-      TypedValue tv;
-      tv.m_data.pobj = sentinel;
-      tv.m_type = KindOfObject;
-      args.append(tvAsCVarRef(&tv));
-      sentinel->decRefCount();
-    }
-
-    TypedValue* tvSentinel = args->nvGetValueRef(1);
+    auto const tvSentinel = make_tv<KindOfObject>(sentinel.get());
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue& prop = (*propVec)[i];
-      // We have to use m_originalMangledName here because the
-      // 86pinit methods for traits depend on it
+
+      // We have to use m_originalMangledName here because the 86pinit
+      // methods for traits look up the properties with that name.
       auto const* k = (m_declProperties[i].m_attrs & AttrPrivate)
         ? m_declProperties[i].m_originalMangledName
         : m_declProperties[i].m_name;
 
+      /*
+       * Note: initializing this array must use set() instead of add()
+       * because we can have duplicate names.  The reason for this is
+       * that we're using the m_originalMangledName (per the
+       * above)---if you get the same trait from multiple paths in the
+       * inheritance tree, whether it has a non-scalar initializer or
+       * not, we'll potentially see that name twice here.
+       *
+       * It's harmless to initialize it in the array more than once:
+       * if it's non-scalar, both attempts will be to set it to
+       * tvSentinel.  If it's scalar, both attempts will be to set it
+       * to the same value.
+       */
+
       // Replace undefined values with tvSentinel, which acts as a
       // unique sentinel for undefined properties in 86pinit().
       if (prop.m_type == KindOfUninit) {
-        // TODO(#2887942): unchecked insert
-        propArr->nvInsert(const_cast<StringData*>(k), tvSentinel);
+        ainit.set(StrNR(k), tvAsCVarRef(&tvSentinel), true /* isKey */);
       } else {
-        // This may seem pointless, but if you don't populate all the keys,
-        // you'll get "undefined index" notices in the case where a
-        // scalar-initialized property overrides a parent's
-        // non-scalar-initialized property of the same name.
-        // TODO(#2887942): unchecked insert
-        propArr->nvInsert(const_cast<StringData*>(k), &prop);
+        /*
+         * This may seem pointless, but if you don't populate all the keys,
+         * you'll get "undefined index" notices in the case where a
+         * scalar-initialized property overrides a parent's
+         * non-scalar-initialized property of the same name.
+         *
+         * TODO(#2923541): there's probably no reason to store the
+         * actual property value in here.  Why not just store null?
+         */
+        ainit.set(StrNR(k), tvAsCVarRef(&prop), true /* isKey */);
       }
     }
 
-    try {
-      // Iteratively invoke 86pinit() methods upward
-      // through the inheritance chain.
-      for (Class::InitVec::const_reverse_iterator it = m_pinitVec.rbegin();
-           it != m_pinitVec.rend(); ++it) {
-        TypedValue retval;
-        g_vmContext->invokeFunc(&retval, *it, args, nullptr,
-                                const_cast<Class*>(this));
-        assert(retval.m_type == KindOfNull);
-      }
-    } catch (...) {
-      // Undo the allocation of propVec
-      request_arena().endFrame();
-      throw;
-    }
+    arg0 = ainit.toArray();
+    args = PackedArrayInit(2)
+             .appendRef(arg0)
+             .append(tvAsCVarRef(&tvSentinel))
+             .toArray();
+  }
 
-    // Pull the values out of the populated array and put them in propVec
+  try {
+    // Iteratively invoke 86pinit() methods upward
+    // through the inheritance chain.
+    for (auto it = m_pinitVec.rbegin(); it != m_pinitVec.rend(); ++it) {
+      TypedValue retval;
+      g_vmContext->invokeFunc(&retval, *it, args, nullptr,
+                              const_cast<Class*>(this));
+      assert(retval.m_type == KindOfNull);
+    }
+  } catch (...) {
+    // Undo the allocation of propVec
+    request_arena().endFrame();
+    throw;
+  }
+
+  // Pull the values out of the populated array and put them in propVec
+  {
+    // It's safe to avoid reloading this ArrayData pointer, since
+    // we're only going reads from the array, nothing that can modify
+    // it.
+    auto const propArr = arg0.toArrRef().get();
+
     for (size_t i = 0; i < nProps; ++i) {
-      TypedValue& prop = (*propVec)[i];
+      auto& prop = (*propVec)[i];
       if (prop.m_type == KindOfUninit) {
         auto const* k = (m_declProperties[i].m_attrs & AttrPrivate)
           ? m_declProperties[i].m_originalMangledName
           : m_declProperties[i].m_name;
 
+        assert(arg0.toArrRef().get() == propArr);
         auto const* value = propArr->nvGet(k);
         assert(value);
         cellDup(*value, prop);
@@ -550,8 +570,7 @@ Class::PropInitVec* Class::initPropsImpl() const {
   // For properties that require "deep" initialization, we have to do a little
   // more work at object creation time.
   Slot slot = 0;
-  for (PropInitVec::iterator it = propVec->begin();
-       it != propVec->end(); ++it, ++slot) {
+  for (auto it = propVec->begin(); it != propVec->end(); ++it, ++slot) {
     TypedValueAux* tv = &(*it);
     // Set deepInit if the property requires "deep" initialization.
     if (m_declProperties[slot].m_attrs & AttrDeepInit) {
@@ -659,22 +678,16 @@ TypedValue* Class::initSPropsImpl() const {
 
   const bool hasNonscalarInit = !m_sinitVec.empty();
   Array propArr;
+
   TypedValue tvSentinel;
   tvWriteUninit(&tvSentinel);
-
-  SCOPE_EXIT {
-    tvRefcountedDecRef(&tvSentinel);
-  };
+  SCOPE_EXIT { tvRefcountedDecRef(&tvSentinel); };
 
   // If there are non-scalar initializers (i.e. 86sinit methods), run them now.
   // They'll put their initialized values into an array, and we'll read any
   // values we need out of the array later.
   if (hasNonscalarInit) {
-    /*
-     * TODO(#2887942): this array has unchecked mutations.
-     */
-    HphpArray* propData = HphpArray::MakeReserve(m_staticProperties.size());
-    Variant arg0(Array::attach(propData));
+    ArrayInit propDataInit(m_staticProperties.size());
 
     // The 86sinit functions will initialize some subset of the static props.
     // Set all of them to a sentinel object so we can distinguish these.
@@ -684,26 +697,29 @@ TypedValue* Class::initSPropsImpl() const {
 
     for (Slot slot = 0; slot < m_staticProperties.size(); ++slot) {
       auto const& sProp = m_staticProperties[slot];
-      propData->set(const_cast<StringData*>(sProp.m_name),
-                    tvAsCVarRef(&tvSentinel),
-                    false);
+      propDataInit.set(StrNR(sProp.m_name),
+        tvAsCVarRef(&tvSentinel), true /* isKey */);
     }
 
     // Run the 86sinit functions, going up the inheritance chain.
-    Array args;
+    Variant arg0(propDataInit.toArray());
+    PackedArrayInit args(1);
     args.appendRef(arg0);
-    assert(propData->getCount() == 1);  // don't want to trigger COW
+    assert(arg0.toArrRef()->getCount() == 1);  // don't want to trigger COW
 
+    auto const argsArray = args.toArray();
     for (unsigned i = 0; i < m_sinitVec.size(); i++) {
       TypedValue retval;
-      g_vmContext->invokeFunc(&retval, m_sinitVec[i], args, nullptr,
+      g_vmContext->invokeFunc(&retval, m_sinitVec[i], argsArray, nullptr,
                               const_cast<Class*>(this));
       assert(retval.m_type == KindOfNull);
     }
 
     // Transfer ownership of the reference to the outer scope.
-    propArr = propData;
+    propArr = arg0.toArrRef();
   }
+
+  assert(propArr.isNull() || propArr->getCount() == 1);
 
   // A helper to look up values produced by 86sinit.
   auto getValueFromArr = [&](const StringData* name) -> const TypedValue* {

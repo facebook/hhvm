@@ -37,27 +37,40 @@ template<class Ret, class... Args> struct NativeFunction {
 };
 
 // Recursively pack all parameters up to call a native builtin.
-template<class Ret, size_t NArgs, size_t CurArg> struct NativeFuncCaller;
 template<class Ret, size_t NArgs, size_t CurArg> struct NativeFuncCaller {
   template<class... Args>
   static Ret call(const Func* func, TypedValue* tvs, Args... args) {
     typedef NativeFuncCaller<Ret,NArgs - 1,CurArg + 1> NextArgT;
-    DataType type = func->params()[CurArg].builtinType();
+
+    /* In order to avoid a combinatorial explosion of generated
+     * function types, we bitwise-cast pointer types to uint64_t when
+     * passing into the native function. The double parameter stays
+     * put because it has a different ABI than uint64_t.
+     */
+
+    const DataType type = func->params()[CurArg].builtinType();
     if (type == KindOfDouble) {
       // pass TV.m_data.dbl by value with C++ calling convention for doubles
       return NextArgT::call(func, tvs - 1, args..., tvs->m_data.dbl);
     }
+    uint64_t bitwiseArg /* = void */;
     if (type == KindOfInt64 || type == KindOfBoolean) {
-      // pass TV.m_data.num by value
-      return NextArgT::call(func, tvs - 1, args..., tvs->m_data.num);
-    }
-    if (IS_STRING_TYPE(type) || type == KindOfArray || type == KindOfObject ||
-        type == KindOfResource) {
+      // pass TV.m_data.num of type int64_t by value
+      bitwiseArg = tvs->m_data.num; // rely on implicit cast
+    } else if (IS_STRING_TYPE(type) || type == KindOfArray
+               || type == KindOfObject || type == KindOfResource) {
       // pass ptr to TV.m_data for String&, Array&, or Object&
-      return NextArgT::call(func, tvs - 1, args..., &tvs->m_data);
+      static_assert(sizeof(&tvs->m_data) == sizeof(uint64_t),
+                    "This code assumes 64-bit pointers.");
+      bitwiseArg = reinterpret_cast<uint64_t>(&tvs->m_data);
+    } else {
+      // final case is for passing full value as Variant&
+      static_assert(sizeof(tvs) == sizeof(uint64_t),
+                    "This code assumes 64-bit pointers.");
+      bitwiseArg = reinterpret_cast<uint64_t>(tvs);
     }
-    // final case is for passing full value as Variant&
-    return NextArgT::call(func, tvs - 1, args..., tvs);
+    // Make the recursive call
+    return NextArgT::call(func, tvs - 1, args..., bitwiseArg);
   }
 };
 

@@ -2908,22 +2908,13 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           }
           const std::string* clsName = nullptr;
           cls->getString(clsName);
-          int cType = 0;
-          if (!strcasecmp(clsName->c_str(), "vector")) {
-            cType = Collection::VectorType;
-          } else if (!strcasecmp(clsName->c_str(), "map")) {
-            cType = Collection::MapType;
-          } else if (!strcasecmp(clsName->c_str(), "stablemap")) {
-            cType = Collection::StableMapType;
-          } else if (!strcasecmp(clsName->c_str(), "set")) {
-            cType = Collection::SetType;
-          } else if (!strcasecmp(clsName->c_str(), "pair")) {
-            cType = Collection::PairType;
+          int cType = Collection::stringToType(*clsName);
+          if (cType == Collection::PairType) {
             if (nElms != 2) {
               throw IncludeTimeFatalException(b,
                 "Pair objects must have exactly 2 elements");
             }
-          } else {
+          } else if (cType == Collection::InvalidType) {
             throw IncludeTimeFatalException(b,
               "Cannot use collection initialization for non-collection class");
           }

@@ -112,13 +112,13 @@ bool ObjectData::o_instanceof(CStrRef s) const {
 
 bool ObjectData::o_toBooleanImpl() const noexcept {
   if (isCollection()) {
-    if (instanceof(c_Vector::classof())) {
+    if (m_cls == c_Vector::classof()) {
       return c_Vector::ToBool(this);
-    } else if (instanceof(c_Map::classof())) {
+    } else if (m_cls == c_Map::classof()) {
       return c_Map::ToBool(this);
-    } else if (instanceof(c_StableMap::classof())) {
+    } else if (m_cls == c_StableMap::classof()) {
       return c_StableMap::ToBool(this);
-    } else if (instanceof(c_Set::classof())) {
+    } else if (m_cls == c_Set::classof()) {
       return c_Set::ToBool(this);
     } else {
       always_assert(false);
@@ -383,15 +383,15 @@ Array ObjectData::o_toArray() const {
   // We can quickly tell if this object is a collection, which lets us avoid
   // checking for each class in turn if it's not one.
   if (isCollection()) {
-    if (instanceof(c_Vector::classof())) {
+    if (m_cls == c_Vector::classof()) {
       return c_Vector::ToArray(this);
-    } else if (instanceof(c_Map::classof())) {
+    } else if (m_cls == c_Map::classof()) {
       return c_Map::ToArray(this);
-    } else if (instanceof(c_StableMap::classof())) {
+    } else if (m_cls == c_StableMap::classof()) {
       return c_StableMap::ToArray(this);
-    } else if (instanceof(c_Set::classof())) {
+    } else if (m_cls == c_Set::classof()) {
       return c_Set::ToArray(this);
-    } else if (instanceof(c_Pair::classof())) {
+    } else if (m_cls == c_Pair::classof()) {
       return c_Pair::ToArray(this);
     }
     // It's undefined what happens if you reach not_reached. We want to be sure
@@ -744,15 +744,15 @@ void ObjectData::dump() const {
 ObjectData* ObjectData::clone() {
   if (getAttribute(HasClone)) {
     if (isCollection()) {
-      if (instanceof(c_Vector::classof())) {
+      if (m_cls == c_Vector::classof()) {
         return c_Vector::Clone(this);
-      } else if (instanceof(c_Map::classof())) {
+      } else if (m_cls == c_Map::classof()) {
         return c_Map::Clone(this);
-      } else if (instanceof(c_StableMap::classof())) {
+      } else if (m_cls == c_StableMap::classof()) {
         return c_StableMap::Clone(this);
-      } else if (instanceof(c_Set::classof())) {
+      } else if (m_cls == c_Set::classof()) {
         return c_Set::Clone(this);
-      } else if (instanceof(c_Pair::classof())) {
+      } else if (m_cls == c_Pair::classof()) {
         return c_Pair::Clone(this);
       }
     } else if (instanceof(c_Closure::classof())) {

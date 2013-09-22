@@ -578,6 +578,7 @@ struct Class : AtomicCountable {
   int builtinPropSize() const { return m_builtinPropSize; }
   BuiltinCtorFunction instanceCtor() const { return m_instanceCtor; }
   bool isCppSerializable() const;
+  bool isCollectionClass() const;
 
   // Interfaces this class declares in its "implements" clause.
   boost::iterator_range<const ClassPtr*> declInterfaces() const {

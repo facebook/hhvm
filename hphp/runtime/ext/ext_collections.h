@@ -122,8 +122,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
     tvRefcountedIncRef(val);
     TypedValue* tv = &m_data[key];
     tvRefcountedDecRef(tv);
-    tv->m_data.num = val->m_data.num;
-    tv->m_type = val->m_type;
+    tvCopy(*val, *tv);
   }
   void add(TypedValue* val) {
     assert(val->m_type != KindOfRef);
@@ -131,10 +130,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
     if (m_capacity <= m_size) {
       grow();
     }
-    tvRefcountedIncRef(val);
-    TypedValue* tv = &m_data[m_size];
-    tv->m_data.num = val->m_data.num;
-    tv->m_type = val->m_type;
+    cellDup(*val, m_data[m_size]);
     ++m_size;
   }
   void resize(int64_t sz, TypedValue* val);
@@ -173,7 +169,6 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
   static void OffsetUnset(ObjectData* obj, TypedValue* key);
-  static void OffsetAppend(ObjectData* obj, TypedValue* val);
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
@@ -367,7 +362,6 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
   static void OffsetUnset(ObjectData* obj, TypedValue* key);
-  static void OffsetAppend(ObjectData* obj, TypedValue* val);
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
@@ -696,7 +690,6 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
   static void OffsetUnset(ObjectData* obj, TypedValue* key);
-  static void OffsetAppend(ObjectData* obj, TypedValue* val);
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
@@ -949,7 +942,6 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
   static void OffsetUnset(ObjectData* obj, TypedValue* key);
-  static void OffsetAppend(ObjectData* obj, TypedValue* val);
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
@@ -1151,7 +1143,18 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
 
   static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
+  /**
+   * Most methods that operate on Pairs can safely assume that all Pairs have
+   * two elements that have been initialized. However, methods that deal with
+   * initializing and destructing Pairs needs to handle intermediate states
+   * where one or both of the elements is uninitialized.
+   */
+  bool isFullyConstructed() const {
+    return m_size == 2;
+  }
+
   TypedValue* at(int64_t key) {
+    assert(isFullyConstructed());
     if (UNLIKELY(uint64_t(key) >= uint64_t(2))) {
       throwOOB(key);
       return NULL;
@@ -1159,36 +1162,20 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
     return &getElms()[key];
   }
   TypedValue* get(int64_t key) {
+    assert(isFullyConstructed());
     if (uint64_t(key) >= uint64_t(2)) {
       return NULL;
     }
     return &getElms()[key];
   }
-  void add(TypedValue* val) {
+  void initAdd(TypedValue* val) {
+    assert(!isFullyConstructed());
     assert(val->m_type != KindOfRef);
-    if (m_size == 2) {
-      Object e(SystemLib::AllocRuntimeExceptionObject(
-        "Cannot add a new element to a Pair"));
-      throw e;
-    }
-    tvRefcountedIncRef(val);
-    TypedValue* tv = &getElms()[m_size];
-    tv->m_data.num = val->m_data.num;
-    tv->m_type = val->m_type;
-    ++m_size;
-  }
-  void addInt(int64_t val) {
-    if (m_size == 2) {
-      Object e(SystemLib::AllocRuntimeExceptionObject(
-        "Cannot add a new element to a Pair"));
-      throw e;
-    }
-    TypedValue* tv = &getElms()[m_size];
-    tv->m_data.num = val;
-    tv->m_type = KindOfInt64;
+    cellDup(*val, getElms()[m_size]);
     ++m_size;
   }
   bool contains(int64_t key) {
+    assert(isFullyConstructed());
     return (uint64_t(key) < uint64_t(2));
   }
 
@@ -1202,12 +1189,13 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
   static void OffsetUnset(ObjectData* obj, TypedValue* key);
-  static void OffsetAppend(ObjectData* obj, TypedValue* val);
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
+
   int64_t size() const {
-    return m_size;
+    assert(isFullyConstructed());
+    return 2;
   }
 
   static uint dataOffset() { return offsetof(c_Pair, elm0); }
@@ -1270,6 +1258,7 @@ bool collectionIsset(ObjectData* obj, TypedValue* key);
 bool collectionEmpty(ObjectData* obj, TypedValue* key);
 void collectionUnset(ObjectData* obj, TypedValue* key);
 void collectionAppend(ObjectData* obj, TypedValue* val);
+void collectionInitAppend(ObjectData* obj, TypedValue* val);
 Variant& collectionOffsetGet(ObjectData* obj, int64_t offset);
 Variant& collectionOffsetGet(ObjectData* obj, CStrRef offset);
 Variant& collectionOffsetGet(ObjectData* obj, CVarRef offset);
@@ -1277,8 +1266,6 @@ void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val);
 void collectionOffsetSet(ObjectData* obj, CStrRef offset, CVarRef val);
 void collectionOffsetSet(ObjectData* obj, CVarRef offset, CVarRef val);
 bool collectionOffsetContains(ObjectData* obj, CVarRef offset);
-bool collectionOffsetIsset(ObjectData* obj, CVarRef offset);
-bool collectionOffsetEmpty(ObjectData* obj, CVarRef offset);
 void collectionReserve(ObjectData* obj, int64_t sz);
 void collectionUnserialize(ObjectData* obj, VariableUnserializer* uns,
                            int64_t sz, char type);
@@ -1321,21 +1308,10 @@ inline void collectionOffsetSet(ObjectData* obj, litstr offset, CVarRef val) {
   collectionOffsetSet(obj, Variant(offset), val);
 }
 
-inline void collectionOffsetUnset(ObjectData* obj, CVarRef offset) {
-  TypedValue* key = cvarToCell(&offset);
-  collectionUnset(obj, key);
-}
-
-inline void collectionOffsetAppend(ObjectData* obj, CVarRef val) {
-  TypedValue* tv = cvarToCell(&val);
-  collectionAppend(obj, tv);
-}
-
 inline bool isOptimizableCollectionClass(const Class* klass) {
   return klass == c_Vector::classof() || klass == c_Map::classof() ||
          klass == c_StableMap::classof() || klass == c_Pair::classof();
 }
-
 
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer);
 

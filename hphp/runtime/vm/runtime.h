@@ -213,11 +213,6 @@ extern CompileStringFn g_hphp_compiler_parse;
 extern BuildNativeFuncUnitFn g_hphp_build_native_func_unit;
 extern BuildNativeClassUnitFn g_hphp_build_native_class_unit;
 
-void collection_setm_wk1_v0(ObjectData* obj, TypedValue* value);
-void collection_setm_ik1_v0(ObjectData* obj, int64_t key, TypedValue* value);
-void collection_setm_sk1_v0(ObjectData* obj, StringData* key,
-                            TypedValue* value);
-
 // always_assert tv is a plausible TypedValue*
 void assertTv(const TypedValue* tv);
 

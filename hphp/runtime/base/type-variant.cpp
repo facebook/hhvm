@@ -762,7 +762,7 @@ void Variant::callOffsetUnset(CVarRef key) {
   assert(getType() == KindOfObject);
   ObjectData* obj = getObjectData();
   if (LIKELY(obj->isCollection())) {
-    collectionOffsetUnset(obj, key);
+    collectionUnset(obj, cvarToCell(&key));
   } else {
     getArrayAccess()->o_invoke_few_args(s_offsetUnset, 1, key);
   }
@@ -1355,7 +1355,7 @@ CVarRef Variant::append(CVarRef v) {
     {
       ObjectData* obj = m_data.pobj;
       if (LIKELY(obj->isCollection())) {
-        collectionOffsetAppend(obj, v);
+        collectionAppend(obj, cvarToCell(&v));
       } else {
         obj->o_invoke_few_args(s_offsetSet, 2, init_null_variant, v);
       }

@@ -922,7 +922,8 @@ void Class::setParent() {
         makeStaticString("__MockClass");
       if (!(attrs & AttrFinal) ||
           m_preClass->userAttributes().find(sd___MockClass) ==
-          m_preClass->userAttributes().end()) {
+          m_preClass->userAttributes().end() ||
+          m_parent->isCollectionClass()) {
         raise_error("Class %s may not inherit from %s (%s)",
                     m_preClass->name()->data(),
                     ((attrs & AttrFinal)     ? "final class" :
@@ -2383,6 +2384,12 @@ bool Class::isCppSerializable() const {
   assert(builtinPropSize() > 0); // Only call this on CPP classes
   return clsInfo() &&
     (clsInfo()->getAttribute() & ClassInfo::IsCppSerializable);
+}
+
+bool Class::isCollectionClass() const {
+  auto s = name();
+  return Collection::stringToType(s->data(), s->size()) !=
+         Collection::InvalidType;
 }
 
 } // HPHP::VM

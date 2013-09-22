@@ -146,6 +146,29 @@ enum Type {
   PairType = 5,
   MaxNumTypes = 6
 };
+inline Type stringToType(const char* str, size_t len) {
+  switch (len) {
+    case 3:
+      if (!strcasecmp(str, "map")) return MapType;
+      if (!strcasecmp(str, "set")) return SetType;
+      break;
+    case 4:
+      if (!strcasecmp(str, "pair")) return PairType;
+      break;
+    case 6:
+      if (!strcasecmp(str, "vector")) return VectorType;
+      break;
+    case 9:
+      if (!strcasecmp(str, "stablemap")) return StableMapType;
+      break;
+    default:
+      break;
+  }
+  return InvalidType;
+}
+inline Type stringToType(const std::string& s) {
+  return stringToType(s.c_str(), s.size());
+}
 }
 
 /**

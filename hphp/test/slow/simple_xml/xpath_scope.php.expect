@@ -1,0 +1,10 @@
+array(1) {
+  [0]=>
+  object(SimpleXMLElement)#4 (1) {
+    ["@attributes"]=>
+    array(1) {
+      ["type"]=>
+      string(5) "group"
+    }
+  }
+}

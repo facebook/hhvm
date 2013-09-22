@@ -259,14 +259,15 @@ arrayKeysSetHelper(const Cell& cell_input, CVarRef search_value, bool strict) {
     }
     return ai.toArray();
   }
-  PackedArrayInit ai(0);
+
+  Array ai = HphpArray::MakeReserve(0);
   for (; iter; ++iter) {
     if ((strict && HPHP::same(iter.secondRefPlus(), search_value)) ||
         (!strict && HPHP::equal(iter.secondRefPlus(), search_value))) {
       ai.append(iter.second());
     }
   }
-  return ai.toArray();
+  return ai;
 }
 
 Variant f_array_keys(CVarRef input, CVarRef search_value /* = null_variant */,
@@ -292,14 +293,15 @@ Variant f_array_keys(CVarRef input, CVarRef search_value /* = null_variant */,
       }
       return ai.toArray();
     }
-    PackedArrayInit ai(0);
+
+    Array ai = Array::attach(HphpArray::MakeReserve(0));
     for (; iter; ++iter) {
       if ((strict && HPHP::same(iter.secondRefPlus(), search_value)) ||
           (!strict && HPHP::equal(iter.secondRefPlus(), search_value))) {
         ai.append(iter.first());
       }
     }
-    return ai.toArray();
+    return ai;
   }
 warn:
   raise_warning("array_keys() expects parameter 1 to be an array "

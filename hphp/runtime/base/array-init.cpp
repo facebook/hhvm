@@ -22,7 +22,12 @@ namespace HPHP {
 // ArrayInit
 
 HOT_FUNC
-ArrayInit::ArrayInit(ssize_t n) {
+ArrayInit::ArrayInit(ssize_t n)
+#ifdef DEBUG
+  : m_addCount(0)
+  , m_expectedCount(n)
+#endif
+{
   if (!n) {
     m_data = HphpArray::GetStaticEmptyArray();
   } else {
@@ -33,7 +38,12 @@ ArrayInit::ArrayInit(ssize_t n) {
 
 HOT_FUNC
 ArrayInit::ArrayInit(ssize_t n, MapInit)
-  : m_data(HphpArray::MakeReserve(n)) {
+  : m_data(HphpArray::MakeReserve(n))
+#ifdef DEBUG
+  , m_addCount(0)
+  , m_expectedCount(n)
+#endif
+{
   m_data->setRefCount(0);
 }
 

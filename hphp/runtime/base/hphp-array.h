@@ -232,11 +232,6 @@ public:
   static void NvGetKeyPacked(const ArrayData*, TypedValue* out, ssize_t pos);
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
 
-  void nvAppend(const TypedValue* v) {
-    nextInsertPacked(tvAsCVarRef(v));
-  }
-  bool nvInsert(StringData* k, TypedValue *v);
-
   /**
    * Main helper for AddNewElemC.  The semantics are slightly different from
    * other helpers, but tuned for the opcode.  The value to set is passed by
@@ -339,7 +334,6 @@ private:
 
 private:
   void initHash(size_t tableSize);
-  void initNonEmpty(const HphpArray& other);
 
   PromotedPayload& promotedPayload() {
     return *reinterpret_cast<PromotedPayload*>(this + 1);

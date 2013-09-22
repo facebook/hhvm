@@ -24,16 +24,24 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-class ArrayInit {
-public:
+struct ArrayInit {
   enum MapInit { mapInit };
 
   explicit ArrayInit(ssize_t n);
 
   ArrayInit(ssize_t n, MapInit);
 
-  ArrayInit(ArrayInit&& other) : m_data(other.m_data) {
+  ArrayInit(ArrayInit&& other)
+    : m_data(other.m_data)
+#ifdef DEBUG
+    , m_addCount(other.m_addCount)
+    , m_expectedCount(other.m_expectedCount)
+#endif
+  {
     other.m_data = nullptr;
+#ifdef DEBUG
+    other.m_expectedCount = 0;
+#endif
   }
 
   ArrayInit(const ArrayInit&) = delete;
@@ -44,176 +52,175 @@ public:
     if (m_data) m_data->release();
   }
 
-  ArrayInit &set(CVarRef v) {
-    m_data->append(v, false);
+  ArrayInit& set(CVarRef v) {
+    performOp([&]{ return m_data->append(v, false); });
     return *this;
   }
 
-  ArrayInit &set(RefResult v) {
-    setRef(variant(v));
+  ArrayInit& set(RefResult v) { return setRef(variant(v)); }
+
+  ArrayInit& set(CVarWithRefBind v) {
+    performOp([&]{ return m_data->appendWithRef(variant(v), false); });
     return *this;
   }
 
-  ArrayInit &set(CVarWithRefBind v) {
-    m_data->appendWithRef(variant(v), false);
+  ArrayInit& setRef(CVarRef v) {
+    performOp([&]{ return m_data->appendRef(v, false); });
     return *this;
   }
 
-  ArrayInit &setRef(CVarRef v) {
-    m_data->appendRef(v, false);
-    return *this;
-  }
-
-  ArrayInit &set(int64_t name, CVarRef v, bool keyConverted = false) {
-    m_data->set(name, v, false);
+  ArrayInit& set(int64_t name, CVarRef v, bool keyConverted = false) {
+    performOp([&]{ return m_data->set(name, v, false); });
     return *this;
   }
 
   // set(const char*) deprecated.  Use set(CStrRef) with a StaticString,
   // if you have a literal, or String otherwise.
-  ArrayInit &set(const char*, CVarRef v, bool keyConverted = false) = delete;
+  ArrayInit& set(const char*, CVarRef v, bool keyConverted = false) = delete;
 
-  ArrayInit &set(CStrRef name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& set(CStrRef name, CVarRef v, bool keyConverted = false) {
     if (keyConverted) {
-      m_data->set(name, v, false);
+      performOp([&]{ return m_data->set(name, v, false); });
     } else if (!name.isNull()) {
-      m_data->set(name.toKey(), v, false);
+      performOp([&]{ return m_data->set(name.toKey(), v, false); });
     }
     return *this;
   }
 
-  ArrayInit &set(CVarRef name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& set(CVarRef name, CVarRef v, bool keyConverted = false) {
     if (keyConverted) {
-      m_data->set(name, v, false);
+      performOp([&]{ return m_data->set(name, v, false); });
     } else {
       VarNR k(name.toKey());
       if (!k.isNull()) {
-        m_data->set(k, v, false);
+        performOp([&]{ return m_data->set(k, v, false); });
       }
     }
     return *this;
   }
 
   template<typename T>
-  ArrayInit &set(const T &name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& set(const T &name, CVarRef v, bool keyConverted = false) {
     if (keyConverted) {
-      m_data->set(name, v, false);
+      performOp([&]{ return m_data->set(name, v, false); });
     } else {
       VarNR k(Variant(name).toKey());
       if (!k.isNull()) {
-        m_data->set(k, v, false);
+        performOp([&]{ return m_data->set(k, v, false); });
       }
     }
     return *this;
   }
 
-  ArrayInit &set(CStrRef name, RefResult v, bool keyConverted = false) {
+  ArrayInit& set(CStrRef name, RefResult v, bool keyConverted = false) {
     if (keyConverted) {
-      m_data->setRef(name, variant(v), false);
+      performOp([&]{ return m_data->setRef(name, variant(v), false); });
     } else if (!name.isNull()) {
-      m_data->setRef(name.toKey(), variant(v), false);
+      performOp([&]{
+        return m_data->setRef(name.toKey(), variant(v), false);
+      });
     }
     return *this;
   }
 
-  ArrayInit &set(CVarRef name, RefResult v, bool keyConverted = false) {
+  ArrayInit& set(CVarRef name, RefResult v, bool keyConverted = false) {
     if (keyConverted) {
-      m_data->setRef(name, variant(v), false);
+      performOp([&]{ return m_data->setRef(name, variant(v), false); });
     } else {
       VarNR k(name.toKey());
       if (!k.isNull()) {
-        m_data->setRef(k, variant(v), false);
+        performOp([&]{ return m_data->setRef(k, variant(v), false); });
       }
     }
     return *this;
   }
 
   template<typename T>
-  ArrayInit &set(const T &name, RefResult v, bool keyConverted = false) {
+  ArrayInit& set(const T &name, RefResult v, bool keyConverted = false) {
     if (keyConverted) {
-      m_data->setRef(name, variant(v), false);
+      performOp([&]{ return m_data->setRef(name, variant(v), false); });
     } else {
       VarNR k(Variant(name).toKey());
       if (!k.isNull()) {
-        m_data->setRef(k, variant(v), false);
+        performOp([&]{ return m_data->setRef(k, variant(v), false); });
       }
     }
     return *this;
   }
 
-  ArrayInit &add(int64_t name, CVarRef v, bool keyConverted = false) {
-    m_data->add(name, v, false);
+  ArrayInit& add(int64_t name, CVarRef v, bool keyConverted = false) {
+    performOp([&]{ return m_data->add(name, v, false); });
     return *this;
   }
 
-  ArrayInit &add(CStrRef name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& add(CStrRef name, CVarRef v, bool keyConverted = false) {
     if (keyConverted) {
-      m_data->add(name, v, false);
+      performOp([&]{ return m_data->add(name, v, false); });
     } else if (!name.isNull()) {
-      m_data->add(name.toKey(), v, false);
+      performOp([&]{ return m_data->add(name.toKey(), v, false); });
     }
     return *this;
   }
 
-  ArrayInit &add(CVarRef name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& add(CVarRef name, CVarRef v, bool keyConverted = false) {
     if (keyConverted) {
-      m_data->add(name, v, false);
+      performOp([&]{ return m_data->add(name, v, false); });
     } else {
       VarNR k(name.toKey());
       if (!k.isNull()) {
-        m_data->add(k, v, false);
+        performOp([&]{ return m_data->add(k, v, false); });
       }
     }
     return *this;
   }
 
   template<typename T>
-  ArrayInit &add(const T &name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& add(const T &name, CVarRef v, bool keyConverted = false) {
     if (keyConverted) {
-      m_data->add(name, v, false);
+      performOp([&]{ return m_data->add(name, v, false); });
     } else {
       VarNR k(Variant(name).toKey());
       if (!k.isNull()) {
-        m_data->add(k, v, false);
+        performOp([&]{ return m_data->add(k, v, false); });
       }
     }
     return *this;
   }
 
-  ArrayInit &setRef(int64_t name, CVarRef v, bool keyConverted = false) {
-    m_data->setRef(name, v, false);
+  ArrayInit& setRef(int64_t name, CVarRef v, bool keyConverted = false) {
+    performOp([&]{ return m_data->setRef(name, v, false); });
     return *this;
   }
 
-  ArrayInit &setRef(CStrRef name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& setRef(CStrRef name, CVarRef v, bool keyConverted = false) {
     if (keyConverted) {
-      m_data->setRef(name, v, false);
+      performOp([&]{ return m_data->setRef(name, v, false); });
     } else {
-      m_data->setRef(name.toKey(), v, false);
+      performOp([&]{ return m_data->setRef(name.toKey(), v, false); });
     }
     return *this;
   }
 
-  ArrayInit &setRef(CVarRef name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& setRef(CVarRef name, CVarRef v, bool keyConverted = false) {
     if (keyConverted) {
-      m_data->setRef(name, v, false);
+      performOp([&]{ return m_data->setRef(name, v, false); });
     } else {
       Variant key(name.toKey());
       if (!key.isNull()) {
-        m_data->setRef(key, v, false);
+        performOp([&]{ return m_data->setRef(key, v, false); });
       }
     }
     return *this;
   }
 
   template<typename T>
-  ArrayInit &setRef(const T &name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& setRef(const T &name, CVarRef v, bool keyConverted = false) {
     if (keyConverted) {
-      m_data->setRef(name, v, false);
+      performOp([&]{ return m_data->setRef(name, v, false); });
     } else {
       VarNR key(Variant(name).toKey());
       if (!key.isNull()) {
-        m_data->setRef(key, v, false);
+        performOp([&]{ return m_data->setRef(key, v, false); });
       }
     }
     return *this;
@@ -224,23 +231,41 @@ public:
   ArrayData *create() {
     ArrayData *ret = m_data;
     m_data = nullptr;
+    assert(true || (m_expectedCount = 0)); // reset; no more adds allowed
     return ret;
   }
 
   Array toArray() {
     auto ptr = m_data;
     m_data = nullptr;
+    assert(true || (m_expectedCount = 0)); // reset; no more adds allowed
     return Array(ptr, Array::ArrayInitCtor::Tag);
   }
 
   Variant toVariant() {
     auto ptr = m_data;
     m_data = nullptr;
+    assert(true || (m_expectedCount = 0)); // reset; no more adds allowed
     return Variant(ptr, Variant::ArrayInitCtor::Tag);
   }
 
 private:
+  template<class Operation>
+  ALWAYS_INLINE void performOp(Operation oper) {
+    DEBUG_ONLY auto newp = oper();
+    // Array escalation must not happen during these reserved
+    // initializations.
+    assert(newp == m_data);
+    // You cannot add/set more times than you reserved with ArrayInit.
+    assert(++m_addCount <= m_expectedCount);
+  }
+
+private:
   ArrayData* m_data;
+#ifdef DEBUG
+  size_t m_addCount;
+  size_t m_expectedCount;
+#endif
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -250,12 +275,27 @@ private:
  */
 class PackedArrayInit {
 public:
-  explicit PackedArrayInit(size_t n) : m_vec(HphpArray::MakeReserve(n)) {
+  explicit PackedArrayInit(size_t n)
+    : m_vec(HphpArray::MakeReserve(n))
+#ifdef DEBUG
+    , m_addCount(0)
+    , m_expectedCount(n)
+#endif
+  {
     m_vec->setRefCount(0);
   }
 
-  PackedArrayInit(PackedArrayInit&& other) : m_vec(other.m_vec) {
+  PackedArrayInit(PackedArrayInit&& other)
+    : m_vec(other.m_vec)
+#ifdef DEBUG
+    , m_addCount(other.m_addCount)
+    , m_expectedCount(other.m_expectedCount)
+#endif
+  {
     other.m_vec = nullptr;
+#ifdef DEBUG
+    other.m_expectedCount = 0;
+#endif
   }
 
   PackedArrayInit(const PackedArrayInit&) = delete;
@@ -270,7 +310,7 @@ public:
    * Append a new element to the packed array.
    */
   PackedArrayInit& append(CVarRef v) {
-    m_vec->nvAppend(v.asTypedValue());
+    performOp([&]{ return HphpArray::AppendPacked(m_vec, v, false); });
     return *this;
   }
 
@@ -281,7 +321,7 @@ public:
    * Post: v.getRawType() == KindOfRef
    */
   PackedArrayInit& appendRef(CVarRef v) {
-    HphpArray::AppendRefPacked(m_vec, v, false);
+    performOp([&]{ return HphpArray::AppendRefPacked(m_vec, v, false); });
     return *this;
   }
 
@@ -292,30 +332,48 @@ public:
    * element is split.
    */
   PackedArrayInit& appendWithRef(CVarRef v) {
-    HphpArray::AppendWithRefPacked(m_vec, v, false);
+    performOp([&]{ return HphpArray::AppendWithRefPacked(m_vec, v, false); });
     return *this;
   }
 
   Variant toVariant() {
     auto ptr = m_vec;
     m_vec = nullptr;
+    assert(true || (m_expectedCount = 0)); // reset; no more adds allowed
     return Variant(ptr, Variant::ArrayInitCtor::Tag);
   }
 
   Array toArray() {
     ArrayData* ptr = m_vec;
     m_vec = nullptr;
+    assert(true || (m_expectedCount = 0)); // reset; no more adds allowed
     return Array(ptr, Array::ArrayInitCtor::Tag);
   }
 
   ArrayData *create() {
     auto ptr = m_vec;
     m_vec = nullptr;
+    assert(true || (m_expectedCount = 0)); // reset; no more adds allowed
     return ptr;
   }
 
 private:
+  template<class Operation>
+  ALWAYS_INLINE void performOp(Operation oper) {
+    DEBUG_ONLY auto newp = oper();
+    // Array escalation must not happen during these reserved
+    // initializations.
+    assert(newp == m_vec);
+    // You cannot add/set more times than you reserved with ArrayInit.
+    assert(++m_addCount <= m_expectedCount);
+  }
+
+private:
   HphpArray* m_vec;
+#ifdef DEBUG
+  size_t m_addCount;
+  size_t m_expectedCount;
+#endif
 };
 
 //////////////////////////////////////////////////////////////////////

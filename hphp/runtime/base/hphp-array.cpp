@@ -1652,23 +1652,6 @@ void HphpArray::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
   getElmKey(a->m_data[pos], out);
 }
 
-/*
- * Insert a new element with index k in to the array,
- * doing nothing and returning false if the element
- * already exists.
- */
-bool HphpArray::nvInsert(StringData *k, TypedValue *data) {
-  assert(checkInvariants());
-  if (isPacked()) {
-    packedToMixed();
-    // todo t2606310: we know key doesn't exist.
-  }
-  auto p = insert(k);
-  if (p.found) return false;
-  initVal(p.tv, tvAsVariant(data));
-  return true;
-}
-
 HphpArray* HphpArray::nextInsertPacked(CVarRef v) {
   assert(isPacked());
   auto& tv = allocNextElm(m_size);

@@ -297,7 +297,7 @@ template <class Dest, class Source>
 inline Dest BitCast(const Source& source) {
   // Compile time assertion: sizeof(Dest) == sizeof(Source)
   // A compile error here means your Dest and Source have different sizes.
-  typedef char VerifySizesAreEqual[sizeof(Dest) == sizeof(Source) ? 1 : -1];
+  static_assert(sizeof(Dest) == sizeof(Source), "Dest and Source are different sizes");
 
   Dest dest;
   memmove(&dest, &source, sizeof(dest));

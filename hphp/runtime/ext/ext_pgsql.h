@@ -3,6 +3,8 @@
 #define incl_EXT_PGSQL_H_
 
 #include "hphp/runtime/base/base-includes.h"
+
+#ifdef HAVE_PGSQL
 #include <libpq-fe.h>
 
 #define PGSQL_ASSOC 1
@@ -174,4 +176,5 @@ Variant HHVM_FUNCTION(pg_version, CResRef connection);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
+#endif
 #endif // incl_EXT_PGSQL_H_

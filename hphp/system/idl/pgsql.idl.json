@@ -168,7 +168,7 @@
                     "name": "result_type",
                     "type": "Int64",
                     "desc": "An optional parameter that controls how the returned array is indexed. result_type is a constant and can take the following values: PGSQL_ASSOC, PGSQL_NUM and PGSQL_BOTH. Using PGSQL_NUM, pg_get_notify() will return an array with numerical indices, using PGSQL_ASSOC it will return only associative indices while PGSQL_BOTH, the default, will return both numerical and associative indices.",
-                    "value": "k_PGSQL_BOTH"
+                    "value": "3"
                 }
             ]
         },

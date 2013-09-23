@@ -2234,7 +2234,7 @@
                     "name": "toArray",
                     "flags": [
                     ],
-                    "desc": "Returns an array built from the values from this Set.",
+                    "desc": "Returns an array built from the values from this Set, array(val1 => val1, val2 => val2, ...). This maintains set-like semantics in array() land: O(1) membership test with `array_has_key($a['key'])` and iteration with `foreach($a as $member)`. Int-like strings end up with numerical array keys.",
                     "return": {
                         "type": "VariantMap"
                     },

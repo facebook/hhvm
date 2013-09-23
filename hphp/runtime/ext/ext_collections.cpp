@@ -3516,14 +3516,28 @@ void c_Set::t___construct(CVarRef iterable /* = null_variant */) {
 }
 
 Array c_Set::toArrayImpl() const {
-  PackedArrayInit ai(m_size);
+  ArrayInit ai(m_size);
   for (uint i = 0; i <= m_nLastSlot; ++i) {
     Bucket& p = m_data[i];
     if (p.validValue()) {
-      ai.append(tvAsCVarRef(&p.data));
+      if (p.hasInt()) {
+        ai.set(p.data.m_data.num, tvAsCVarRef(&p.data));
+      } else {
+        assert(p.hasStr());
+        ai.set(p.data.m_data.pstr, tvAsCVarRef(&p.data));
+      }
     }
   }
-  return ai.toArray();
+
+  // If both '123' and 123 are present in the set, we better warn the user.
+  Array arr = ai.create();
+
+  if (UNLIKELY(arr.length() < m_size)) {
+    // TODO (t2898471): walk the buckets again and report the offending item
+    raise_warning(
+      "Set::toArray() for a set containing both int(<n>) and string('<n>')");
+  }
+  return arr;
 }
 
 c_Set* c_Set::Clone(ObjectData* obj) {

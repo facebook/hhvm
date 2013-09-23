@@ -8,13 +8,8 @@ array(0) {
 }
 array(0) {
 }
-HipHop Notice: Undefined index: 0 in %s/test/slow/array_cse/537.php on line 33
-HipHop Notice: Undefined index: 0 in %s/test/slow/array_cse/537.php on line 34
 NULL
-HipHop Warning: Out of bounds in %s/test/slow/array_cse/537.php on line 33
-HipHop Warning: Out of bounds in %s/test/slow/array_cse/537.php on line 33
 string(0) ""
-HipHop Warning: Out of bounds in %s/test/slow/array_cse/537.php on line 34
 string(0) ""
 int(0)
 int(0)
@@ -27,7 +22,7 @@ array(1) {
   }
 }
 object(stdClass)#2 (0) {
-}%A
+}
 NULL
 string(32) "8fa14cdd754f91cc6554c9e71929cce7"
 string(1) "f"

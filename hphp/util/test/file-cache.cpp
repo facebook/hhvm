@@ -15,6 +15,10 @@
 */
 
 #include "hphp/util/file-cache.h"
+
+// to be removed when the old cache compatibility code goes away.
+#include "hphp/util/cache/cache-manager.h"
+
 #include "gtest/gtest.h"
 
 namespace HPHP {
@@ -456,6 +460,27 @@ TEST_F(TestFileCache, HighlyCompressibleDataMmapOLD) {
 
   ASSERT_EQ(unlink(cache_fn), 0);
   ASSERT_EQ(unlink(data_fn), 0);
+}
+
+TEST_F(TestFileCache, AutodetectNewCache) {
+  // Make a quick new cache file on disk.
+  CacheManager cm;
+  ASSERT_TRUE(cm.addEmptyEntry("test_entry"));
+
+  string temp_dir;
+  ASSERT_TRUE(makeTempDir(&temp_dir));
+
+  string cache_fn(temp_dir);
+  cache_fn.append("/cache.dump");
+
+  ASSERT_TRUE(cm.saveCache(cache_fn));
+
+  // Now make sure this file-cache is in default mode.
+  FileCache fc;
+  FileCache::UseNewCache = false;
+
+  fc.loadMmap(cache_fn.c_str(), 1);
+  ASSERT_TRUE(fc.exists("test_entry"));
 }
 
 }  // namespace HPHP

@@ -23,6 +23,7 @@
 
 #include "folly/String.h"
 #include "hphp/util/cache/cache-manager.h"
+#include "hphp/util/cache/cache-type.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/compression.h"
 #include "hphp/util/logger.h"
@@ -370,6 +371,13 @@ void FileCache::adviseOutMemory() {
 
 void FileCache::loadMmap(const char *filename, short version) {
   assert(filename && *filename);
+
+  // Provided during the migration from the old cache to the new.
+  CacheType ct;
+  if (ct.isNewCache(filename)) {
+    Logger::Info("Autodetected new cache format: %s", filename);
+    UseNewCache = true;
+  }
 
   if (UseNewCache) {
     if (!cache_manager_->loadCache(filename)) {

@@ -297,6 +297,7 @@ endif()
 
 if (LINK_PAM)
 	find_package(Libpam REQUIRED)
+	include_directories(${PAM_INCLUDE_PATH})
 endif()
 
 if (NOT CCLIENT_HAS_SSL)

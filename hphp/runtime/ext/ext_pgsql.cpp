@@ -282,7 +282,8 @@ PGresult *PGSQLResult::GetResult(CVarRef result, PGSQLResult **rres) {
 }
 
 PGSQLResult::PGSQLResult(PGSQL * conn, PGresult * res)
-    : m_res(res), m_conn(conn) {
+    : m_current_row(0), m_res(res),
+      m_num_fields(-1), m_num_rows(-1), m_conn(conn) {
     m_conn->incRefCount();
 }
 

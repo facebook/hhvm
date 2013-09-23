@@ -95,11 +95,11 @@ public:
     PGSQL * getConn() { return m_conn; }
 
 public:
-    int m_current_row = 0;
+    int m_current_row;
 private:
     PGresult *m_res;
-    int m_num_fields = -1;
-    int m_num_rows   = -1;
+    int m_num_fields;
+    int m_num_rows;
     PGSQL * m_conn;
 };
 

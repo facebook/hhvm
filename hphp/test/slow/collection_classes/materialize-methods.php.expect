@@ -33,9 +33,9 @@ array(2) {
 }
 string(3) "Set"
 array(2) {
-  [0]=>
+  ["a"]=>
   string(1) "a"
-  [1]=>
+  [2]=>
   int(2)
 }
 string(6) "Vector"
@@ -73,9 +73,9 @@ array(2) {
 }
 string(3) "Set"
 array(2) {
-  [0]=>
+  ["a"]=>
   string(1) "a"
-  [1]=>
+  [2]=>
   int(2)
 }
 string(6) "Vector"
@@ -113,9 +113,9 @@ array(2) {
 }
 string(3) "Set"
 array(2) {
-  [0]=>
+  ["a"]=>
   string(1) "a"
-  [1]=>
+  [2]=>
   int(2)
 }
 string(6) "Vector"
@@ -159,9 +159,9 @@ array(2) {
 }
 string(3) "Set"
 array(2) {
-  [0]=>
+  [2]=>
   int(2)
-  [1]=>
+  ["a"]=>
   string(1) "a"
 }
 array(2) {
@@ -185,10 +185,10 @@ array(2) {
 }
 string(3) "Set"
 array(2) {
-  [0]=>
-  string(1) "a"
-  [1]=>
+  [2]=>
   int(2)
+  ["a"]=>
+  string(1) "a"
 }
 array(2) {
   [0]=>

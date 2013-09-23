@@ -1015,10 +1015,10 @@ Variant require(CStrRef file, bool once /* = false */,
 IMPLEMENT_REQUEST_LOCAL(AutoloadHandler, AutoloadHandler::s_instance);
 
 void AutoloadHandler::requestInit() {
-  m_handlers.reset();
-  m_loading.reset();
-  m_map.reset();
-  m_map_root.reset();
+  assert(m_handlers.get() == nullptr);
+  assert(m_loading.get() == nullptr);
+  assert(m_map.get() == nullptr);
+  assert(m_map_root.get() == nullptr);
 }
 
 void AutoloadHandler::requestShutdown() {

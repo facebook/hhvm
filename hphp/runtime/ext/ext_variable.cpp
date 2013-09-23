@@ -51,6 +51,7 @@ int64_t f_intval(CVarRef v, int64_t base /* = 10 */) { return v.toInt64(base);}
 double f_doubleval(CVarRef v) { return v.toDouble();}
 double f_floatval(CVarRef v) { return v.toDouble();}
 String f_strval(CVarRef v) { return v.toString();}
+bool f_boolval(CVarRef v) { return v.toBoolean();}
 
 bool f_settype(VRefParam var, CStrRef type) {
   if      (type == s_boolean) var = var.toBoolean();

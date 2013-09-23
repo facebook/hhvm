@@ -45,6 +45,7 @@ String f_get_resource_type(CResRef handle);
 ///////////////////////////////////////////////////////////////////////////////
 // type conversion
 
+bool f_boolval(CVarRef v);
 int64_t f_intval(CVarRef v, int64_t base = 10);
 double f_doubleval(CVarRef v);
 double f_floatval(CVarRef v);

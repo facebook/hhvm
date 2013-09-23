@@ -306,6 +306,23 @@
             ]
         },
         {
+            "name": "boolval",
+            "flags": [
+                "FunctionIsFoldable",
+                "NoInjection"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "The boolean value of var."
+            },
+            "args": [
+                {
+                    "name": "var",
+                    "type": "Any"
+                }
+            ]
+        },
+        {
             "name": "intval",
             "desc": "Returns the integer value of var, using the specified base for the conversion (the default is base 10). intval() should not be used on objects, as doing so will emit an E_NOTICE level error and return 1.",
             "flags": [
@@ -318,7 +335,7 @@
             },
             "args": [
                 {
-                    "name": "v",
+                    "name": "var",
                     "type": "Any",
                     "desc": "The scalar value being converted to an integer"
                 },
@@ -341,7 +358,7 @@
             },
             "args": [
                 {
-                    "name": "v",
+                    "name": "var",
                     "type": "Any"
                 }
             ]
@@ -359,7 +376,7 @@
             },
             "args": [
                 {
-                    "name": "v",
+                    "name": "var",
                     "type": "Any",
                     "desc": "May be any scalar type. floatval() should not be used on objects, as doing so will emit an E_NOTICE level error and return 1."
                 }
@@ -377,7 +394,7 @@
             },
             "args": [
                 {
-                    "name": "v",
+                    "name": "var",
                     "type": "Any",
                     "desc": "The variable that is being converted to a string.\n\nvar may be any scalar type or an object that implements the __toString method. You cannot use strval() on arrays or on objects that do not implement the __toString method."
                 }

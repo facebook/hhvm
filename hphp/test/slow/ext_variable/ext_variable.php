@@ -95,6 +95,18 @@ VS(floatval("12.3"), 12.3);
 
 VS(strval(123), "123");
 
+VS(boolval(0), false);
+VS(boolval(42), true);
+VS(boolval(0.0), false);
+VS(boolval(4.2), true);
+VS(boolval(""), false);
+VS(boolval("string"), true);
+VS(boolval("0"), false);
+VS(boolval("1"), true);
+VS(boolval(array(1, 2)), true);
+VS(boolval(array()), false);
+VS(boolval(new stdClass), true);
+
 {
   $v = "5bar";
   VERIFY(settype($v, "integer"));

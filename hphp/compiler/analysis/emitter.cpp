@@ -3297,6 +3297,21 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           }
           return true;
         }
+#define TYPE_CONVERT_INSTR(what, What)                                 \
+        else if (call->isCallToFunction(#what"val") &&                 \
+                 params && params->getCount() == 1) {                  \
+          visit((*params)[0]);                                         \
+          emitConvertToCell(e);                                        \
+          e.Cast ## What();                                            \
+          return true;                                                 \
+        }
+      TYPE_CONVERT_INSTR(bool, Bool)
+      TYPE_CONVERT_INSTR(int, Int)
+      TYPE_CONVERT_INSTR(double, Double)
+      TYPE_CONVERT_INSTR(float, Double)
+      TYPE_CONVERT_INSTR(str, String)
+#undef TYPE_CONVERT_INSTR
+
 #define TYPE_CHECK_INSTR(what, What)                                  \
         else if (call->isCallToFunction("is_"#what) &&                \
                  params && params->getCount() == 1) {                 \

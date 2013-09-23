@@ -1255,7 +1255,9 @@ String AutoloadHandler::getSignature(CVarRef handler) {
 }
 
 bool function_exists(CStrRef function_name) {
-  return HPHP::Unit::lookupFunc(function_name.get()) != nullptr;
+  auto f = HPHP::Unit::lookupFunc(function_name.get());
+  return (f != nullptr) &&
+         (f->builtinFuncPtr() != Native::unimplementedWrapper);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -569,6 +569,7 @@ public:
   void popX() {
     assert(m_top != m_base);
     assert(!IS_REFCOUNTED_TYPE(m_top->m_type));
+    tvDebugTrash(m_top);
     m_top++;
   }
 
@@ -577,6 +578,7 @@ public:
     assert(m_top != m_base);
     assert(cellIsPlausible(*m_top));
     tvRefcountedDecRefCell(m_top);
+    tvDebugTrash(m_top);
     m_top++;
   }
 
@@ -584,6 +586,7 @@ public:
   void popA() {
     assert(m_top != m_base);
     assert(m_top->m_type == KindOfClass);
+    tvDebugTrash(m_top);
     m_top++;
   }
 
@@ -592,6 +595,7 @@ public:
     assert(m_top != m_base);
     assert(refIsPlausible(*m_top));
     tvDecRefRef(m_top);
+    tvDebugTrash(m_top);
     m_top++;
   }
 
@@ -600,6 +604,7 @@ public:
     assert(m_top != m_base);
     assert(m_top->m_type == KindOfClass || tvIsPlausible(*m_top));
     tvRefcountedDecRef(m_top);
+    tvDebugTrash(m_top);
     m_top++;
   }
 
@@ -616,14 +621,17 @@ public:
     // This should only be used on a pre-live ActRec.
     assert(!ar->hasVarEnv());
     assert(!ar->hasExtraArgs());
-
-    m_top += kNumActRecCells;
-    assert((uintptr_t)m_top <= (uintptr_t)m_base);
+    discardAR();
   }
 
   ALWAYS_INLINE
   void discardAR() {
     assert(m_top != m_base);
+    if (debug) {
+      for (int i = 0; i < kNumActRecCells; ++i) {
+        tvDebugTrash(m_top + i);
+      }
+    }
     m_top += kNumActRecCells;
     assert((uintptr_t)m_top <= (uintptr_t)m_base);
   }
@@ -632,6 +640,11 @@ public:
   void ret() {
     // Leave part of the activation on the stack, since the return value now
     // resides there.
+    if (debug) {
+      for (int i = 0; i < kNumActRecCells - 1; ++i) {
+        tvDebugTrash(m_top + i);
+      }
+    }
     m_top += kNumActRecCells - 1;
     assert((uintptr_t)m_top <= (uintptr_t)m_base);
   }
@@ -639,12 +652,18 @@ public:
   ALWAYS_INLINE
   void discard() {
     assert(m_top != m_base);
+    tvDebugTrash(m_top);
     m_top++;
   }
 
   ALWAYS_INLINE
   void ndiscard(size_t n) {
     assert((uintptr_t)&m_top[n] <= (uintptr_t)m_base);
+    if (debug) {
+      for (int i = 0; i < n; ++i) {
+        tvDebugTrash(m_top + i);
+      }
+    }
     m_top += n;
   }
 

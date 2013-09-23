@@ -30,7 +30,6 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-array.h"
-#include "hphp/runtime/base/smart-allocator.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/macros.h"
 
@@ -521,7 +520,7 @@ class Variant : private TypedValue {
    * Whether or not there are at least two variables that are strongly bound.
    */
   bool isReferenced() const {
-    return m_type == KindOfRef && m_data.pref->getCount() > 1;
+    return m_type == KindOfRef && m_data.pref->isReferenced();
   }
 
   /**
@@ -1051,7 +1050,7 @@ public:
   static ALWAYS_INLINE void PromoteToRef(CVarRef v) {
     assert(&v != &null_variant);
     if (v.m_type != KindOfRef) {
-      RefData *ref = NEW(RefData)(v.m_type, v.m_data.num);
+      auto const ref = RefData::Make(v.m_type, v.m_data.num);
       const_cast<Variant&>(v).m_type = KindOfRef;
       const_cast<Variant&>(v).m_data.pref = ref;
     }
@@ -1065,7 +1064,6 @@ public:
     PromoteToRef(v);
     RefData* r = v.m_data.pref;
     r->incRefCount(); // in case destruct() triggers deletion of v
-
     RefData* d = m_data.pref;
     DataType t = m_type;
     m_type = KindOfRef;
@@ -1107,7 +1105,7 @@ public:
   void setWithRefHelper(CVarRef v, bool destroy) {
     assert(this != &v);
 
-    CVarRef rhs = v.m_type == KindOfRef && v.m_data.pref->getCount() <= 1
+    CVarRef rhs = v.m_type == KindOfRef && !v.m_data.pref->isReferenced()
       ? *v.m_data.pref->var() : v;
     if (IS_REFCOUNTED_TYPE(rhs.m_type)) {
       assert(rhs.m_data.pstr);
@@ -1389,7 +1387,16 @@ inline Variant &concat_assign(Variant &v1, CStrRef s2) {
   return v1;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+// Defined here for include order reasons.
+inline RefData::~RefData() {
+  assert(m_magic == Magic::kMagic);
+  tvAsVariant(&m_tv).~Variant();
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 #endif // incl_HPHP_VARIANT_H_

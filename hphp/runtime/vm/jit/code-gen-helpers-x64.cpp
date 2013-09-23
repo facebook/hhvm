@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/ringbuffer.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/base/runtime-option.h"
@@ -73,6 +74,54 @@ void moveToAlign(Asm& aa,
     return;
   }
   aa.emitNop(leftInBlock);
+}
+
+/*
+ * Returns true if the given current frontier can have an nBytes-long
+ * instruction written without any risk of cache-tearing.
+ */
+bool isSmashable(Address frontier, int nBytes, int offset /* = 0 */) {
+  assert(nBytes <= int(kX64CacheLineSize));
+  uintptr_t iFrontier = uintptr_t(frontier) + offset;
+  uintptr_t lastByte = uintptr_t(frontier) + nBytes - 1;
+  return (iFrontier & ~kX64CacheLineMask) == (lastByte & ~kX64CacheLineMask);
+}
+
+void prepareForSmash(X64Assembler& a, int nBytes, int offset /* = 0 */) {
+  if (!isSmashable(a.frontier(), nBytes, offset)) {
+    int gapSize = (~(uintptr_t(a.frontier()) + offset) &
+                   kX64CacheLineMask) + 1;
+    a.emitNop(gapSize);
+    assert(isSmashable(a.frontier(), nBytes, offset));
+  }
+}
+
+/*
+ * Call before emitting a test-jcc sequence. Inserts a nop gap such that after
+ * writing a testBytes-long instruction, the frontier will be smashable.
+ */
+void prepareForTestAndSmash(Asm& a, int testBytes, TestAndSmashFlags flags) {
+  switch (flags) {
+  case TestAndSmashFlags::kAlignJcc:
+    prepareForSmash(a, testBytes + kJmpccLen, testBytes);
+    assert(isSmashable(a.frontier() + testBytes, kJmpccLen));
+    break;
+  case TestAndSmashFlags::kAlignJccImmediate:
+    prepareForSmash(a,
+                    testBytes + kJmpccLen,
+                    testBytes + kJmpccLen - kJmpImmBytes);
+    assert(isSmashable(a.frontier() + testBytes, kJmpccLen,
+                       kJmpccLen - kJmpImmBytes));
+    break;
+  case TestAndSmashFlags::kAlignJccAndJmp:
+    // Ensure that the entire jcc, and the entire jmp are smashable
+    // (but we dont need them both to be in the same cache line)
+    prepareForSmash(a, testBytes + kJmpccLen, testBytes);
+    prepareForSmash(a, testBytes + kJmpccLen + kJmpLen, testBytes + kJmpccLen);
+    assert(isSmashable(a.frontier() + testBytes, kJmpccLen));
+    assert(isSmashable(a.frontier() + testBytes + kJmpccLen, kJmpLen));
+    break;
+  }
 }
 
 void emitEagerSyncPoint(Asm& as, const HPHP::Opcode* pc, const Offset spDiff) {
@@ -238,14 +287,6 @@ void emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg) {
   }
 }
 
-void emitLea(Asm& as, PhysReg base, int disp, PhysReg dest) {
-  if (disp == 0) {
-    emitMovRegReg(as, base, dest);
-  } else {
-    as. lea(base[disp], dest);
-  }
-}
-
 void emitLea(Asm& as, MemoryRef mr, PhysReg dst) {
   if (dst == InvalidReg) return;
   if (mr.r.disp == 0) {
@@ -293,6 +334,43 @@ void emitCall(Asm& a, CppCall call) {
   // using rax as scratch.
   a.  loadq  (*rdi, rax);
   a.  call   (rax[call.getOffset()]);
+}
+
+void emitJmpOrJcc(Asm& a, ConditionCode cc, TCA dest) {
+  if (cc == CC_None) {
+    a.   jmp(dest);
+  } else {
+    a.   jcc((ConditionCode)cc, dest);
+  }
+}
+
+void emitRB(X64Assembler& a,
+            Trace::RingBufferType t,
+            SrcKey sk, RegSet toSave) {
+  if (!Trace::moduleEnabledRelease(Trace::tx64, 3)) {
+    return;
+  }
+  PhysRegSaver rs(a, toSave | kSpecialCrossTraceRegs);
+  int arg = 0;
+  a.    emitImmReg(t, argNumToRegName[arg++]);
+  a.    emitImmReg(sk.getFuncId(), argNumToRegName[arg++]);
+  a.    emitImmReg(sk.offset(), argNumToRegName[arg++]);
+  a.    call((TCA)Trace::ringbufferEntry);
+}
+
+void emitRB(X64Assembler& a,
+            Trace::RingBufferType t,
+            const char* msg,
+            RegSet toSave) {
+  if (!Trace::moduleEnabledRelease(Trace::tx64, 3)) {
+    return;
+  }
+  PhysRegSaver save(a, toSave | kSpecialCrossTraceRegs);
+  int arg = 0;
+  a.    emitImmReg((uintptr_t)msg, argNumToRegName[arg++]);
+  a.    emitImmReg(strlen(msg), argNumToRegName[arg++]);
+  a.    emitImmReg(t, argNumToRegName[arg++]);
+  a.    call((TCA)Trace::ringbufferMsg);
 }
 
 void emitTestSurpriseFlags(Asm& a) {
@@ -385,109 +463,6 @@ ConditionCode opToConditionCode(Opcode opc) {
   default:
     always_assert(0);
   }
-}
-
-/*
- * emitServiceReqWork --
- *
- *   Call a translator service co-routine. The code emitted here
- *   reenters the enterTC loop, invoking the requested service. Control
- *   will be returned non-locally to the next logical instruction in
- *   the TC.
- *
- *   Return value is a destination; we emit the bulky service
- *   request code into astubs.
- *
- *   Returns a continuation that will run after the arguments have been
- *   emitted. This is gross, but is a partial workaround for the inability
- *   to capture argument packs in the version of gcc we're using.
- */
-TCA
-emitServiceReqWork(Asm& as, TCA start, bool persist, SRFlags flags,
-                   ServiceRequest req, const ServiceReqArgVec& argv) {
-  assert(start);
-  const bool align = flags & SRFlags::Align;
-
-  /*
-   * Remember previous state of the code cache.
-   */
-  boost::optional<CodeCursor> maybeCc = boost::none;
-  if (start != as.frontier()) {
-    maybeCc = boost::in_place<CodeCursor>(boost::ref(as), start);
-  }
-
-  /* max space for moving to align, saving VM regs plus emitting args */
-  static const int
-    kVMRegSpace = 0x14,
-    kMovSize = 0xa,
-    kNumServiceRegs = sizeof(serviceReqArgRegs) / sizeof(PhysReg),
-    kMaxStubSpace = kJmpTargetAlign - 1 + kVMRegSpace +
-      kNumServiceRegs * kMovSize;
-  if (align) {
-    moveToAlign(as);
-  }
-  TCA retval = as.frontier();
-  TRACE(3, "Emit Service Req @%p %s(", start, serviceReqName(req));
-  /*
-   * Move args into appropriate regs. Eager VMReg save may bash flags,
-   * so set the CondCode arguments first.
-   */
-  for (int i = 0; i < argv.size(); ++i) {
-    assert(i < kNumServiceReqArgRegs);
-    auto reg = serviceReqArgRegs[i];
-    const auto& argInfo = argv[i];
-    switch(argv[i].m_kind) {
-      case ServiceReqArgInfo::Immediate: {
-        TRACE(3, "%" PRIx64 ", ", argInfo.m_imm);
-        as.    emitImmReg(argInfo.m_imm, reg);
-      } break;
-      case ServiceReqArgInfo::CondCode: {
-        // Already set before VM reg save.
-        DEBUG_ONLY TCA start = as.frontier();
-        as.    setcc(argInfo.m_cc, rbyte(reg));
-        assert(start - as.frontier() <= kMovSize);
-        TRACE(3, "cc(%x), ", argInfo.m_cc);
-      } break;
-      default: not_reached();
-    }
-  }
-  emitEagerVMRegSave(as, JIT::RegSaveFlags::SaveFP);
-  if (persist) {
-    as.  emitImmReg(0, rAsm);
-  } else {
-    as.  emitImmReg((uint64_t)start, rAsm);
-  }
-  TRACE(3, ")\n");
-  as.    emitImmReg(req, rdi);
-
-  /*
-   * Weird hand-shaking with enterTC: reverse-call a service routine.
-   *
-   * In the case of some special stubs (m_callToExit, m_retHelper), we
-   * have already unbalanced the return stack by doing a ret to
-   * something other than enterTCHelper.  In that case
-   * SRJmpInsteadOfRet indicates to fake the return.
-   */
-  if (flags & SRFlags::JmpInsteadOfRet) {
-    as.  pop(rax);
-    as.  jmp(rax);
-  } else {
-    as.  ret();
-  }
-
-  // TODO(2796856): we should record an OpServiceRequest pseudo-bytecode here.
-
-  translator_not_reached(as);
-  if (!persist) {
-    /*
-     * Recycled stubs need to be uniformly sized. Make space for the
-     * maximal possible service requests.
-     */
-    assert(as.frontier() - start <= kMaxStubSpace);
-    as.emitNop(start + kMaxStubSpace - as.frontier());
-    assert(as.frontier() - start == kMaxStubSpace);
-  }
-  return retval;
 }
 
 }}}

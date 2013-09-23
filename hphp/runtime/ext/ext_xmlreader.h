@@ -59,13 +59,13 @@ extern const int64_t q_XMLReader$$SUBST_ENTITIES;
 ///////////////////////////////////////////////////////////////////////////////
 // class XMLReader
 
-FORWARD_DECLARE_CLASS_BUILTIN(XMLReader);
+FORWARD_DECLARE_CLASS(XMLReader);
 class c_XMLReader : public ExtObjectDataFlags<ObjectData::UseGet>, public Sweepable {
  public:
-  DECLARE_CLASS(XMLReader, XMLReader, ObjectData)
+  DECLARE_CLASS(XMLReader)
 
   // need to implement
-  public: c_XMLReader(Class* cls = c_XMLReader::s_cls);
+  public: c_XMLReader(Class* cls = c_XMLReader::classof());
   public: ~c_XMLReader();
   public: void t___construct();
   public: bool t_open(CStrRef uri, CStrRef encoding = null_string, int64_t options = 0);

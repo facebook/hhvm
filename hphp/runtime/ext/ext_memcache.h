@@ -49,13 +49,13 @@ bool f_memcache_add_server(CObjRef memcache, CStrRef host, int port = 11211, boo
 ///////////////////////////////////////////////////////////////////////////////
 // class Memcache
 
-FORWARD_DECLARE_CLASS_BUILTIN(Memcache);
+FORWARD_DECLARE_CLASS(Memcache);
 class c_Memcache : public ExtObjectData, public Sweepable {
  public:
-  DECLARE_CLASS(Memcache, Memcache, ObjectData)
+  DECLARE_CLASS(Memcache)
 
   // need to implement
-  public: c_Memcache(Class* cls = c_Memcache::s_cls);
+  public: c_Memcache(Class* cls = c_Memcache::classof());
   public: ~c_Memcache();
   public: void t___construct();
   public: bool t_connect(CStrRef host, int port = 0, int timeout = 0, int timeoutms = 0);

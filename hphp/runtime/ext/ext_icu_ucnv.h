@@ -79,13 +79,13 @@ extern const int64_t q_UConverter$$IMAP_MAILBOX;
 ///////////////////////////////////////////////////////////////////////////////
 // class UConverter
 
-FORWARD_DECLARE_CLASS_BUILTIN(UConverter);
+FORWARD_DECLARE_CLASS(UConverter);
 class c_UConverter : public ExtObjectData {
  public:
-  DECLARE_CLASS(UConverter, UConverter, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(UConverter)
 
   // need to implement
-  public: c_UConverter(Class* cls = c_UConverter::s_cls);
+  public: c_UConverter(Class* cls = c_UConverter::classof());
   public: ~c_UConverter();
   public: void t___construct(CStrRef toEncoding = "utf-8",
                              CStrRef fromEncoding = "utf-8");

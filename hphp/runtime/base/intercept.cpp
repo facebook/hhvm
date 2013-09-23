@@ -98,7 +98,7 @@ bool register_intercept(CStrRef name, CVarRef callback, CVarRef data) {
 
   EventHook::EnableIntercept();
 
-  Array handler = CREATE_VECTOR2(callback, data);
+  Array handler = make_packed_array(callback, data);
 
   if (name.empty()) {
     s_intercept_data->m_global_handler = handler;
@@ -148,7 +148,7 @@ Variant *get_intercept_handler(CStrRef name, char* flag) {
     if (*flag == -1) {
       StringData *sd = name.get();
       if (!sd->isStatic()) {
-        sd = StringData::GetStaticString(sd);
+        sd = makeStaticString(sd);
       }
       s_registered_flags[StrNR(sd)].push_back(flag);
       *flag = 0;

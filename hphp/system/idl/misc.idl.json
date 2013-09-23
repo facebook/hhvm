@@ -152,23 +152,6 @@
             ]
         },
         {
-            "name": "eval",
-            "desc": "Evaluates the string given in code_str as PHP code. Among other things, this can be useful for storing code in a database text field for later execution.\n\nThere are some factors to keep in mind when using eval(). Remember that the string passed must be valid PHP code, including things like terminating statements with a semicolon so the parser doesn't die on the line after the eval(), and properly escaping things in code_str. To mix HTML output and PHP code you can use a closing PHP tag to leave PHP mode.\n\nAlso remember that variables given values under eval() will retain these values in the main script afterwards.",
-            "flags": [
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "eval() returns NULL unless return is called in the evaluated code, in which case the value passed to return is returned. If there is a parse error in the evaluated code, eval() returns FALSE and execution of the following code continues normally. It is not possible to catch a parse error in eval() using set_error_handler()."
-            },
-            "args": [
-                {
-                    "name": "code_str",
-                    "type": "String",
-                    "desc": "The code string to be evaluated. code_str does not have to contain PHP Opening tags.\n\nA return statement will immediately terminate the evaluation of the string ."
-                }
-            ]
-        },
-        {
             "name": "get_browser",
             "desc": "Attempts to determine the capabilities of the user's browser, by looking up the browser's information in the browscap.ini file.",
             "flags": [

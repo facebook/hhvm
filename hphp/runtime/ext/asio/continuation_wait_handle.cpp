@@ -49,7 +49,7 @@ void c_ContinuationWaitHandle::t___construct() {
 }
 
 void c_ContinuationWaitHandle::ti_setoncreatecallback(CVarRef callback) {
-  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set ContinuationWaitHandle::onStart: on_start_cb not a closure"));
     throw e;
@@ -58,7 +58,7 @@ void c_ContinuationWaitHandle::ti_setoncreatecallback(CVarRef callback) {
 }
 
 void c_ContinuationWaitHandle::ti_setonyieldcallback(CVarRef callback) {
-  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set ContinuationWaitHandle::onYield: on_yield_cb not a closure"));
     throw e;
@@ -67,7 +67,7 @@ void c_ContinuationWaitHandle::ti_setonyieldcallback(CVarRef callback) {
 }
 
 void c_ContinuationWaitHandle::ti_setonsuccesscallback(CVarRef callback) {
-  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set ContinuationWaitHandle::onSuccess: on_success_cb not a closure"));
     throw e;
@@ -76,7 +76,7 @@ void c_ContinuationWaitHandle::ti_setonsuccesscallback(CVarRef callback) {
 }
 
 void c_ContinuationWaitHandle::ti_setonfailcallback(CVarRef callback) {
-  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set ContinuationWaitHandle::onFail: on_fail_cb not a closure"));
     throw e;

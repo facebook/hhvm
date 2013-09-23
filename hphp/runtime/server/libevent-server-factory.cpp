@@ -18,8 +18,6 @@
 #include "hphp/runtime/server/libevent-server-with-fd.h"
 #include "hphp/runtime/server/libevent-server-with-takeover.h"
 
-#include <boost/make_shared.hpp>
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -32,7 +30,7 @@ public:
 
 ServerPtr LibEventServerFactory::createServer(const ServerOptions& options) {
   if (options.m_serverFD != -1 || options.m_sslFD != -1) {
-    auto const server = boost::make_shared<LibEventServerWithFd>
+    auto const server = std::make_shared<LibEventServerWithFd>
       (options.m_address, options.m_port, options.m_numThreads);
     server->setServerSocketFd(options.m_serverFD);
     server->setSSLSocketFd(options.m_sslFD);
@@ -40,13 +38,13 @@ ServerPtr LibEventServerFactory::createServer(const ServerOptions& options) {
   }
 
   if (!options.m_takeoverFilename.empty()) {
-    auto const server = boost::make_shared<LibEventServerWithTakeover>
+    auto const server = std::make_shared<LibEventServerWithTakeover>
       (options.m_address, options.m_port, options.m_numThreads);
     server->setTransferFilename(options.m_takeoverFilename);
     return server;
   }
 
-  return boost::make_shared<LibEventServer>(options.m_address, options.m_port,
+  return std::make_shared<LibEventServer>(options.m_address, options.m_port,
                                             options.m_numThreads);
 }
 
@@ -61,7 +59,7 @@ extern "C" {
 void register_libevent_server() __attribute__((constructor));
 void register_libevent_server() {
   auto registry = HPHP::ServerFactoryRegistry::getInstance();
-  auto factory = boost::make_shared<HPHP::LibEventServerFactory>();
+  auto factory = std::make_shared<HPHP::LibEventServerFactory>();
   registry->registerFactory("libevent", factory);
 }
 

@@ -15,11 +15,13 @@
 */
 
 #include "hphp/runtime/base/string-data.h"
+
+#include <cmath>
+
 #include "hphp/runtime/base/shared-variant.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/util/alloc.h"
-#include <math.h>
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-strtod.h"
@@ -28,8 +30,6 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/vm/jit/target-cache.h"
-#include "tbb/concurrent_hash_map.h"
 #include "hphp/util/stacktrace-profiler.h"
 
 namespace HPHP {
@@ -37,96 +37,6 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 namespace {
-
-//////////////////////////////////////////////////////////////////////
-
-// Pointer to StringData, or pointer to StringSlice.
-typedef intptr_t StrInternKey;
-
-constexpr intptr_t kAhmMagicThreshold = -3;
-
-StrInternKey make_intern_key(const StringData* sd) {
-  auto const ret = reinterpret_cast<StrInternKey>(sd);
-  assert(ret > 0);
-  return ret;
-}
-
-StrInternKey make_intern_key(const StringSlice* sl) {
-  auto const ret = -reinterpret_cast<StrInternKey>(sl);
-  assert(ret < 0 && ret < kAhmMagicThreshold);
-  return ret;
-}
-
-const StringData* to_sdata(StrInternKey key) {
-  assert(key > 0);
-  return reinterpret_cast<const StringData*>(key);
-}
-
-const StringSlice* to_sslice(StrInternKey key) {
-  assert(key < 0 && key < kAhmMagicThreshold);
-  return reinterpret_cast<const StringSlice*>(-key);
-}
-
-// To avoid extra instructions in strintern_eq, we currently are
-// making use of the fact that StringSlice and StringData have the
-// same initial layout.  See the static_asserts in checkSane.
-const StringSlice* to_sslice_punned(StrInternKey key) {
-  if (UNLIKELY(key < 0)) {
-    return reinterpret_cast<const StringSlice*>(-key);
-  }
-  // Actually a StringData*, but same layout.
-  return reinterpret_cast<const StringSlice*>(key);
-}
-
-struct strintern_eq {
-  bool operator()(StrInternKey k1, StrInternKey k2) const {
-    if (k1 < 0) {
-      // AHM only gives lookup keys on the rhs of the equal operator
-      assert(k1 >= kAhmMagicThreshold);
-      return false;
-    }
-    assert(k2 >= 0 || k2 < kAhmMagicThreshold);
-    auto const sd1 = to_sdata(k1);
-    auto const s2 = to_sslice_punned(k2);
-    return sd1->size() == s2->len &&
-           wordsame(sd1->data(), s2->ptr, s2->len);
-  }
-};
-
-struct strintern_hash {
-  size_t operator()(StrInternKey k) const {
-    assert(k > 0 || k < kAhmMagicThreshold);
-    if (LIKELY(k > 0)) {
-      return to_sdata(k)->hash();
-    }
-    auto const slice = *to_sslice(k);
-    return hash_string_inline(slice.ptr, slice.len);
-  }
-};
-
-// The uint32_t is used to hold TargetCache offsets for constants
-typedef folly::AtomicHashMap<StrInternKey,uint32_t,strintern_hash,strintern_eq>
-        StringDataMap;
-StringDataMap* s_stringDataMap;
-
-// If a string is static it better be the one in the table.
-DEBUG_ONLY bool checkStaticStr(const StringData* s) {
-  assert(s->isStatic());
-  auto DEBUG_ONLY const it = s_stringDataMap->find(make_intern_key(s));
-  assert(it != s_stringDataMap->end());
-  assert(to_sdata(it->first) == s);
-  return true;
-}
-
-void create_string_data_map() {
-  StringDataMap::Config config;
-  config.growthFactor = 1;
-  s_stringDataMap =
-    new StringDataMap(RuntimeOption::EvalInitialStaticStringTableSize,
-                      config);
-}
-
-//////////////////////////////////////////////////////////////////////
 
 NEVER_INLINE void throw_string_too_large(uint32_t len) ATTRIBUTE_COLD;
 NEVER_INLINE void throw_string_too_large(uint32_t len) {
@@ -152,8 +62,9 @@ std::pair<StringData*,uint32_t> allocFlatForLen(uint32_t len) {
   }
 
   auto const cap = needed;
-  auto const sd = static_cast<StringData*>(MM().smartMallocSizeBig(cap));
-  return std::make_pair(sd, cap);
+  auto const ret = MM().smartMallocSizeBig(cap);
+  return std::make_pair(static_cast<StringData*>(ret.first),
+                        static_cast<uint32_t>(ret.second));
 }
 
 ALWAYS_INLINE
@@ -164,141 +75,11 @@ void freeForSize(void* vp, uint32_t size) {
   return MM().smartFreeSizeBig(vp, size);
 }
 
+}
+
 //////////////////////////////////////////////////////////////////////
 
-}
-
-size_t StringData::GetStaticStringCount() {
-  if (!s_stringDataMap) return 0;
-  return s_stringDataMap->size();
-}
-
-StringData* StringData::InsertStaticString(StringSlice slice) {
-  auto const sd = MakeLowMalloced(slice);
-  sd->setStatic();
-  auto pair = s_stringDataMap->insert(make_intern_key(sd), 0);
-  if (!pair.second) {
-    sd->destructLowMalloc();
-  }
-  assert(to_sdata(pair.first->first) != nullptr);
-  return const_cast<StringData*>(to_sdata(pair.first->first));
-}
-
-StringData* StringData::GetStaticString(const StringData* str) {
-  if (UNLIKELY(!s_stringDataMap)) {
-    create_string_data_map();
-  }
-  if (str->isStatic()) {
-    assert(checkStaticStr(str));
-    return const_cast<StringData*>(str);
-  }
-  auto const it = s_stringDataMap->find(make_intern_key(str));
-  if (it != s_stringDataMap->end()) {
-    return const_cast<StringData*>(to_sdata(it->first));
-  }
-  return InsertStaticString(str->slice());
-}
-
-StringData* StringData::GetStaticString(StringSlice slice) {
-  if (UNLIKELY(!s_stringDataMap)) {
-    create_string_data_map();
-  }
-  auto const it = s_stringDataMap->find(make_intern_key(&slice));
-  if (it != s_stringDataMap->end()) {
-    return const_cast<StringData*>(to_sdata(it->first));
-  }
-  return InsertStaticString(slice);
-}
-
-StringData* StringData::LookupStaticString(const StringData *str) {
-  if (UNLIKELY(!s_stringDataMap)) return nullptr;
-  if (str->isStatic()) {
-    assert(checkStaticStr(str));
-    return const_cast<StringData*>(str);
-  }
-  auto const it = s_stringDataMap->find(make_intern_key(str));
-  if (it != s_stringDataMap->end()) {
-    return const_cast<StringData*>(to_sdata(it->first));
-  }
-  return nullptr;
-}
-
-StringData* StringData::GetStaticString(const String& str) {
-  assert(!str.isNull());
-  return GetStaticString(str.get());
-}
-
-StringData* StringData::GetStaticString(const char* str, size_t len) {
-  assert(len <= MaxSize);
-  return GetStaticString(StringSlice{str, static_cast<uint32_t>(len)});
-}
-
-StringData* StringData::GetStaticString(const std::string& str) {
-  assert(str.size() <= MaxSize);
-  return GetStaticString(
-    StringSlice{str.c_str(), static_cast<uint32_t>(str.size())}
-  );
-}
-
-StringData* StringData::GetStaticString(const char* str) {
-  return GetStaticString(str, strlen(str));
-}
-
-uint32_t StringData::GetCnsHandle(const StringData* cnsName) {
-  assert(s_stringDataMap);
-  auto const it = s_stringDataMap->find(make_intern_key(cnsName));
-  if (it != s_stringDataMap->end()) {
-    return it->second;
-  }
-  return 0;
-}
-
-uint32_t StringData::DefCnsHandle(const StringData* cnsName, bool persistent) {
-  uint32_t val = GetCnsHandle(cnsName);
-  if (val) return val;
-  if (!cnsName->isStatic()) {
-    // Its a dynamic constant, that doesn't correspond to
-    // an already allocated handle. We'll allocate it in
-    // the request local TargetCache::s_constants instead.
-    return 0;
-  }
-  auto const it = s_stringDataMap->find(make_intern_key(cnsName));
-  assert(it != s_stringDataMap->end());
-  if (!it->second) {
-    Transl::TargetCache::allocConstant(&it->second, persistent);
-  }
-  return it->second;
-}
-
-Array StringData::GetConstants() {
-  // Return an array of all defined constants.
-  assert(s_stringDataMap);
-  Array a(Transl::TargetCache::s_constants);
-
-  for (StringDataMap::const_iterator it = s_stringDataMap->begin();
-       it != s_stringDataMap->end(); ++it) {
-    if (it->second) {
-      auto& tv =
-        Transl::TargetCache::handleToRef<TypedValue>(it->second);
-      if (tv.m_type != KindOfUninit) {
-        StrNR key(const_cast<StringData*>(to_sdata(it->first)));
-        a.set(key, tvAsVariant(&tv), true);
-      } else if (tv.m_data.pref) {
-        StrNR key(const_cast<StringData*>(to_sdata(it->first)));
-        ClassInfo::ConstantInfo* ci =
-          (ClassInfo::ConstantInfo*)(void*)tv.m_data.pref;
-        auto cns = ci->getDeferredValue();
-        if (cns.isInitialized()) {
-          a.set(key, cns, true);
-        }
-      }
-    }
-  }
-
-  return a;
-}
-
-StringData* StringData::MakeLowMalloced(StringSlice sl) {
+StringData* StringData::MakeStatic(StringSlice sl) {
   if (UNLIKELY(sl.len > MaxSize)) {
     throw_string_too_large(sl.len);
   }
@@ -315,16 +96,20 @@ StringData* StringData::MakeLowMalloced(StringSlice sl) {
   data[sl.len] = 0;
   auto const mcret = memcpy(data, sl.ptr, sl.len);
   auto const ret   = reinterpret_cast<StringData*>(mcret) - 1;
+  // Recalculating ret from mcret avoids a spill.
 
-  assert(ret == sd);
   assert(ret->m_hash == 0);
   assert(ret->m_count == 0);
+  ret->setStatic();
+
+  assert(ret == sd);
   assert(ret->isFlat());
+  assert(ret->isStatic());
   assert(ret->checkSane());
   return ret;
 }
 
-void StringData::destructLowMalloc() {
+void StringData::destructStatic() {
   assert(checkSane());
   assert(isFlat());
   Util::low_free(this);
@@ -375,6 +160,7 @@ StringData* StringData::Make(StringSlice sl, CopyStringMode) {
   data[sl.len] = 0;
   auto const mcret = memcpy(data, sl.ptr, sl.len);
   auto const ret   = reinterpret_cast<StringData*>(mcret) - 1;
+  // Recalculating ret from mcret avoids a spill.
 
   assert(ret == sd);
   assert(ret->m_len == sl.len);
@@ -403,15 +189,18 @@ StringData* StringData::MakeMalloced(const char* data, int len) {
   );
 
   sd->m_lenAndCount = len;
-  sd->m_capAndHash  = cap;
+  sd->m_cap         = cap;
   sd->m_data        = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data[len] = 0;
   auto const mcret = memcpy(sd->m_data, data, len);
   auto const ret   = reinterpret_cast<StringData*>(mcret) - 1;
+  // Recalculating ret from mcret avoids a spill.
+
+  ret->preCompute();
 
   assert(ret == sd);
-  assert(ret->m_hash == 0);
+  assert(ret->m_hash != 0);
   assert(ret->m_count == 0);
   assert(ret->isFlat());
   assert(ret->checkSane());
@@ -503,13 +292,13 @@ StringData* StringData::append(StringSlice range) {
    * interior pointer, although we may be asked to append less than
    * the whole string in an aliasing situation.
    */
-  assert(uintptr_t(s) <= uintptr_t(rawdata()) ||
-         uintptr_t(s) >= uintptr_t(rawdata() + capacity()));
-  assert(s != rawdata() || len <= m_len);
+  assert(uintptr_t(s) <= uintptr_t(data()) ||
+         uintptr_t(s) >= uintptr_t(data() + capacity()));
+  assert(s != data() || len <= m_len);
 
   auto const target = UNLIKELY(isShared()) ? escalate(newLen)
                                            : reserve(newLen);
-  auto const mslice = target->mutableSlice();
+  auto const mslice = target->bufferSlice();
 
   /*
    * memcpy is safe even if it's a self append---the regions will be
@@ -532,12 +321,16 @@ StringData* StringData::reserve(int cap) {
 
   cap += cap >> 2;
   if (cap > MaxCap) cap = MaxCap;
+
   auto const sd = Make(cap);
   auto const src = slice();
   auto const dst = sd->mutableData();
   sd->setSize(src.len);
+
   auto const mcret = memcpy(dst, src.ptr, src.len);
   auto const ret = static_cast<StringData*>(mcret) - 1;
+  // Recalculating ret from mcret avoids a spill.
+
   assert(ret == sd);
   assert(ret->checkSane());
   return ret;
@@ -551,8 +344,11 @@ StringData* StringData::escalate(uint32_t cap) {
   auto const src = slice();
   auto const dst = sd->mutableData();
   sd->setSize(src.len);
+
   auto const mcret = memcpy(dst, src.ptr, src.len);
   auto const ret = static_cast<StringData*>(mcret) - 1;
+  // Recalculating ret from mcret avoids a spill.
+
   assert(ret == sd);
   assert(ret->checkSane());
   return ret;
@@ -576,30 +372,13 @@ void StringData::dump() const {
   printf("]\n");
 }
 
-static StringData** precompute_chars() ATTRIBUTE_COLD;
-static StringData** precompute_chars() {
-  StringData** raw = new StringData*[256];
-  for (int i = 0; i < 256; i++) {
-    char s[2] = { (char)i, 0 };
-    raw[i] = StringData::GetStaticString(&s[0], 1);
-  }
-  return raw;
-}
-
-static StringData** precomputed_chars = precompute_chars();
-
-HOT_FUNC
-StringData* StringData::GetStaticString(char c) {
-  return precomputed_chars[(uint8_t)c];
-}
-
 HOT_FUNC
 StringData *StringData::getChar(int offset) const {
   if (offset >= 0 && offset < size()) {
-    return GetStaticString(m_data[offset]);
+    return makeStaticString(m_data[offset]);
   }
   raise_notice("Uninitialized string offset: %d", offset);
-  return GetStaticString("");
+  return makeStaticString("");
 }
 
 StringData* StringData::increment() {
@@ -696,7 +475,6 @@ void StringData::incrementHelper() {
 }
 
 void StringData::preCompute() const {
-  assert(!isShared()); // because we are gonna reuse the space!
   StringSlice s = slice();
   m_hash = hash_string(s.ptr, s.len);
   assert(m_hash >= 0);
@@ -763,7 +541,7 @@ bool StringData::toBoolean() const {
 }
 
 int64_t StringData::toInt64(int base /* = 10 */) const {
-  return strtoll(rawdata(), nullptr, base);
+  return strtoll(data(), nullptr, base);
 }
 
 double StringData::toDouble() const {
@@ -845,7 +623,7 @@ int StringData::compare(const StringData *v2) const {
     int len1 = size();
     int len2 = v2->size();
     int len = len1 < len2 ? len1 : len2;
-    ret = memcmp(rawdata(), v2->rawdata(), len);
+    ret = memcmp(data(), v2->data(), len);
     if (ret) return ret;
     if (len1 == len2) return 0;
     return len < len1 ? 1 : -1;
@@ -855,8 +633,8 @@ int StringData::compare(const StringData *v2) const {
 
 HOT_FUNC
 strhash_t StringData::hashHelper() const {
-  strhash_t h = isShared() ? sharedPayload()->shared->stringHash()
-                           : hash_string_inline(m_data, m_len);
+  assert(!isShared());
+  strhash_t h = hash_string_inline(m_data, m_len);
   assert(h >= 0);
   m_hash |= h;
   return h;

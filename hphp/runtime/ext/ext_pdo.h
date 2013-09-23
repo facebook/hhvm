@@ -111,13 +111,13 @@ extern const int64_t q_PDO$$MYSQL_ATTR_IGNORE_SPACE;
 ///////////////////////////////////////////////////////////////////////////////
 // class PDO
 
-FORWARD_DECLARE_CLASS_BUILTIN(PDO);
+FORWARD_DECLARE_CLASS(PDO);
 class c_PDO : public ExtObjectData, public Sweepable {
  public:
-  DECLARE_CLASS(PDO, PDO, ObjectData)
+  DECLARE_CLASS(PDO)
 
   // need to implement
-  public: c_PDO(Class* cls = c_PDO::s_cls);
+  public: c_PDO(Class* cls = c_PDO::classof());
   public: ~c_PDO();
   public: void t___construct(CStrRef dsn, CStrRef username = null_string, CStrRef password = null_string, CArrRef options = null_array);
   public: Variant t_prepare(CStrRef statement, CArrRef options = null_array);
@@ -142,13 +142,13 @@ class c_PDO : public ExtObjectData, public Sweepable {
 ///////////////////////////////////////////////////////////////////////////////
 // class PDOStatement
 
-FORWARD_DECLARE_CLASS_BUILTIN(PDOStatement);
+FORWARD_DECLARE_CLASS(PDOStatement);
 class c_PDOStatement : public ExtObjectData, public Sweepable {
  public:
-  DECLARE_CLASS(PDOStatement, PDOStatement, ObjectData)
+  DECLARE_CLASS(PDOStatement)
 
   // need to implement
-  public: c_PDOStatement(Class* cls = c_PDOStatement::s_cls);
+  public: c_PDOStatement(Class* cls = c_PDOStatement::classof());
   public: ~c_PDOStatement();
   public: void t___construct();
   public: Variant t_execute(CArrRef params = null_array);

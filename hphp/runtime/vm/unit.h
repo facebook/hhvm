@@ -236,6 +236,8 @@ class TableEntry {
 
 typedef TableEntry<int> LineEntry;
 typedef std::vector<LineEntry> LineTable;
+typedef TableEntry<SourceLoc> SourceLocEntry;
+typedef std::vector<SourceLocEntry> SourceLocTable;
 typedef TableEntry<const Func*> FuncEntry;
 typedef std::vector<FuncEntry> FuncTable;
 
@@ -281,7 +283,7 @@ struct TypedefReq {
 // (const StringData*) versus (StringData*)
 //
 // All (const StringData*) values are static strings that came from e.g.
-// StringData::GetStaticString().  Therefore no reference counting is required.
+// makeStaticString().  Therefore no reference counting is required.
 //
 //==============================================================================
 
@@ -700,6 +702,11 @@ public: // Translator field access
   static size_t bcOff() { return offsetof(Unit, m_bc); }
 
 private:
+  // List of (offset, sourceLoc) where offset is the offset of the first byte
+  // code of the next source location if there is one, m_bclen otherwise.
+  // Sorted by offset. sourceLocs are not assumed to be unique.
+  SourceLocTable getSourceLocTable() const;
+
   // pseudoMain's return value, or KindOfUninit if its not known.
   TypedValue m_mainReturn;
   int64_t m_sn;
@@ -721,10 +728,11 @@ private:
   uint8_t m_cacheMask;
   bool m_mergeOnly;
   bool m_interpretOnly;
-  // list of (line, offset) where offset is the offset of the first byte code
+  // List of (line, offset) where offset is the offset of the first byte code
   // of the next line if there is one, m_bclen otherwise.
-  // sorted by offset. line values are not assumed to be unique.
+  // Sorted by offset. line values are not assumed to be unique.
   LineTable m_lineTable;
+  SourceLocTable m_sourceLocTable;
   FuncTable m_funcTable;
   mutable PseudoMainCacheMap *m_pseudoMainCache;
 };
@@ -888,6 +896,7 @@ class UnitEmitter {
    */
   std::vector<std::pair<Offset,SourceLoc> > m_sourceLocTab;
   std::vector<std::pair<Offset,const FuncEmitter*> > m_feTab;
+  LineTable m_lineTable;
   std::vector<Typedef> m_typedefs;
 };
 
@@ -915,6 +924,7 @@ class UnitRepoProxy : public RepoProxy {
   URP_GOP(UnitMergeables) \
   URP_IOP(UnitSourceLoc) \
   URP_GOP(SourceLoc) \
+  URP_GOP(SourceLocTab) \
   URP_GOP(SourceLocPastOffsets) \
   URP_GOP(SourceLocBaseOffset) \
   URP_GOP(BaseOffsetAtPCLoc) \
@@ -977,6 +987,11 @@ class UnitRepoProxy : public RepoProxy {
    public:
     GetSourceLocStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     bool get(int64_t unitSn, Offset pc, SourceLoc& sLoc);
+  };
+  class GetSourceLocTabStmt : public RepoProxy::Stmt {
+   public:
+    GetSourceLocTabStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    bool get(int64_t unitSn, SourceLocTable& sourceLocTab);
   };
   class GetSourceLocPastOffsetsStmt : public RepoProxy::Stmt {
    public:

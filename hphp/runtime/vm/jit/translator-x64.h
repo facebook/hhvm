@@ -95,15 +95,6 @@ constexpr int kTestImmRegLen = 5;  // only for rax -- special encoding
 constexpr size_t kX64CacheLineSize = 64;
 constexpr size_t kX64CacheLineMask = kX64CacheLineSize - 1;
 
-enum class TestAndSmashFlags {
-  kAlignJccImmediate,
-  kAlignJcc,
-  kAlignJccAndJmp
-};
-void prepareForTestAndSmash(Asm&, int testBytes, TestAndSmashFlags flags);
-void prepareForSmash(Asm&, int nBytes, int offset = 0);
-bool isSmashable(Address frontier, int nBytes, int offset = 0);
-
 
 class TranslatorX64 : public Translator
                     , private boost::noncopyable {
@@ -204,40 +195,11 @@ private:
   void emitStackCheck(int funcDepth, Offset pc);
   TCA  emitTransCounterInc(Asm& a);
 
-  void emitRB(Asm& a, Trace::RingBufferType t, SrcKey sk,
-              RegSet toSave = RegSet());
-  void emitRB(Asm& a, Trace::RingBufferType t, const char* msgm,
-              RegSet toSave = RegSet());
-
   // Called at runtime, from prologues.
   static void trimExtraArgs(ActRec* ar);
   static int  shuffleArgsForMagicCall(ActRec* ar);
   static void setArgInActRec(ActRec* ar, int argNum, uint64_t datum,
                              DataType t);
-
-
-  ////////////////////////////////////////
-  //
-  // Service request emission
-  //
-  ////////////////////////////////////////
-public:
-
-  bool freeRequestStub(TCA stub);
-  TCA getFreeStub();
-
-private:
-  void emitBindJ(Asm& a, ConditionCode cc, SrcKey dest,
-                 JIT::ServiceRequest req);
-  void emitBindJmp(Asm& a, SrcKey dest,
-                   JIT::ServiceRequest req = JIT::REQ_BIND_JMP);
-  void emitBindJcc(Asm& a, ConditionCode cc, SrcKey dest,
-                   JIT::ServiceRequest req = JIT::REQ_BIND_JCC);
-  int32_t emitBindCall(SrcKey srcKey, const Func* funcd, int numArgs);
-  void emitBindCallHelper(SrcKey srcKey,
-                          const Func* funcd,
-                          int numArgs);
-  int32_t emitNativeImpl(const Func*, bool emitSavedRIPReturn);
 
   ////////////////////////////////////////
   //
@@ -293,6 +255,7 @@ private:
 private:
   void drawCFG(std::ofstream& out) const;
 
+public:
   CodeBlock& codeBlockFor(TCA addr) {
     assert(mainCode.base() != hotCode.base()   &&
            mainCode.base() != stubsCode.base() &&
@@ -300,6 +263,7 @@ private:
     return codeBlockChoose(addr, mainCode, hotCode, profCode, stubsCode,
                            trampolinesCode);
   }
+private:
 
   static JIT::CppCall getDtorCall(DataType type);
 
@@ -308,6 +272,11 @@ private:
 
 public:
   FixupMap& fixupMap() { return m_fixupMap; }
+
+  DataBlock& globalData() { return m_globalData; }
+
+  bool freeRequestStub(TCA stub);
+  TCA getFreeStub();
 
   void registerCatchTrace(CTCA ip, TCA trace);
   TCA getCatchTrace(CTCA ip) const;
@@ -362,7 +331,9 @@ private:
                             const CodeBlock& cb,
                             const TCA start,
                             bool exit, bool inPrologue);
+public:
   void recordGdbStub(const CodeBlock& cb, TCA start, const char* name);
+private:
   void recordBCInstr(uint32_t op, const CodeBlock& cb, const TCA addr);
 
 
@@ -394,7 +365,7 @@ public:
   TranslatorX64();
   virtual ~TranslatorX64();
 
-  void initGdb();
+  void initUniqueStubs();
   static TranslatorX64* Get();
 
   // Called before entering a new PHP "world."

@@ -1,0 +1,2 @@
+autoload nope
+bool(false)

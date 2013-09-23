@@ -265,7 +265,7 @@ inline TypedValue* ElemString(TypedValue& tvScratch, TypedValue* base,
     if (warn) {
       raise_warning("Out of bounds");
     }
-    static StringData* sd = StringData::GetStaticString("");
+    static StringData* sd = makeStaticString("");
     tvScratch.m_data.pstr = sd;
     tvScratch.m_type = KindOfString;
   } else {
@@ -746,7 +746,7 @@ inline StringData* SetElemString(TypedValue* base, TypedValue* key,
     }
   } else {
     StringData* sd = StringData::Make(slen);
-    char* s = sd->mutableSlice().ptr;
+    char* s = sd->bufferSlice().ptr;
     memcpy(s, base->m_data.pstr->data(), baseLen);
     if (x > baseLen) {
       memset(&s[baseLen], ' ', slen - baseLen - 1);

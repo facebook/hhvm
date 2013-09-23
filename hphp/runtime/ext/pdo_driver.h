@@ -260,9 +260,9 @@ public:
   virtual ~PDOConnection();
   virtual bool create(CArrRef options) = 0;
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("PDOConnection")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   // alloc/release persistent storage.
   virtual void persistentSave();
@@ -393,9 +393,9 @@ public:
   PDOColumn();
   ~PDOColumn();
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("PDOColumn")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
 public:
   String name;
@@ -412,9 +412,9 @@ public:
   PDOBoundParam();
   ~PDOBoundParam();
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("PDOBoundParam")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
 public:
   int64_t paramno;           /* if -1, then it has a name, and we don't
@@ -459,9 +459,9 @@ public:
   PDOStatement();
   virtual ~PDOStatement();
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("PDOStatement")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   virtual bool support(SupportedMethod method);
 

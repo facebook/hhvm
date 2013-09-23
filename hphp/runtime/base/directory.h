@@ -30,13 +30,13 @@ public:
   virtual void close() = 0;
   virtual String read() = 0;
   virtual void rewind() = 0;
-  void sweep() {
+  void sweep() FOLLY_OVERRIDE {
     close();
   }
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("Directory")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   String getLastError() {
     return String(folly::errnoStr(errno).toStdString());
@@ -61,13 +61,18 @@ private:
 
 class ArrayDirectory : public Directory {
 public:
-  DECLARE_RESOURCE_ALLOCATION(ArrayDirectory);
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(ArrayDirectory);
 
   explicit ArrayDirectory(CArrRef a) : m_it(a) {}
 
   virtual void close() {}
   virtual String read();
   virtual void rewind();
+
+  void sweep() FOLLY_OVERRIDE {
+    // Leave m_it alone
+    Directory::sweep();
+  }
 
 private:
   ArrayIter m_it;

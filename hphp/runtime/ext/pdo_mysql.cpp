@@ -512,7 +512,7 @@ int64_t PDOMySqlConnection::doer(CStrRef sql) {
 bool PDOMySqlConnection::quoter(CStrRef input, String &quoted,
                                 PDOParamType paramtype) {
   String s(2 * input.size() + 3, ReserveString);
-  char *buf = s.mutableSlice().ptr;
+  char *buf = s.bufferSlice().ptr;
   int len = mysql_real_escape_string(m_server, buf + 1,
                                      input.data(), input.size());
   len++;

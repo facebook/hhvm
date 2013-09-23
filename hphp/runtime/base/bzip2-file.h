@@ -30,9 +30,8 @@ class BZ2File : public File {
 public:
   DECLARE_RESOURCE_ALLOCATION(BZ2File);
 
-  static StaticString s_class_name;
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return s_class_name; }
+  CStrRef o_getClassNameHook() const { return classnameof(); }
 
   BZ2File();
   explicit BZ2File(PlainFile* innerFile);

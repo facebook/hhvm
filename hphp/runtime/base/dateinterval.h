@@ -56,7 +56,7 @@ inline void timelib_rel_time_dtor(timelib_rel_time *t) {
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
-typedef boost::shared_ptr<timelib_rel_time> DateIntervalPtr;
+typedef std::shared_ptr<timelib_rel_time> DateIntervalPtr;
 
 /**
  * Handles all date interal related functions.
@@ -64,8 +64,11 @@ typedef boost::shared_ptr<timelib_rel_time> DateIntervalPtr;
 class DateInterval : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(DateInterval);
-  static StaticString s_class_name;
-  CStrRef o_getClassNameHook() const { return s_class_name; }
+  static const StaticString& classnameof() {
+    static const StaticString result("DateInterval");
+    return result;
+  }
+  CStrRef o_getClassNameHook() const { return classnameof(); }
 
   DateInterval();
   explicit DateInterval(CStrRef date_interval, bool date_string = false);

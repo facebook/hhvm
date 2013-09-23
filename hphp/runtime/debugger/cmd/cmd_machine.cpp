@@ -196,7 +196,7 @@ void CmdMachine::UpdateIntercept(DebuggerClient &client,
                                  const std::string &host, int port) {
   CmdMachine cmd;
   cmd.m_body = "rpc";
-  cmd.m_rpcConfig = CREATE_MAP4
+  cmd.m_rpcConfig = make_map_array
     (s_host, String(host),
      s_port, port ? port : RuntimeOption::DebuggerDefaultRpcPort,
      s_auth, String(RuntimeOption::DebuggerDefaultRpcAuth),

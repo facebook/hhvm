@@ -21,10 +21,8 @@
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(UserFile)
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString UserFile::s_class_name("UserFile");
 StaticString s_stream_open("stream_open");
 StaticString s_stream_close("stream_close");
 StaticString s_stream_read("stream_read");
@@ -69,6 +67,12 @@ UserFile::UserFile(Class *cls, int options /*= 0 */,
 }
 
 UserFile::~UserFile() {
+}
+
+void UserFile::sweep() {
+  // Just sweep the base, then nothing to do because `this` is
+  // smart-allocated and so is m_obj.
+  File::sweep();
 }
 
 const Func* UserFile::lookupMethod(const StringData* name) {
@@ -121,7 +125,7 @@ Variant UserFile::invoke(const Func *func, CStrRef name,
     {
       Variant ret;
       g_vmContext->invokeFunc(ret.asTypedValue(), func,
-                              CREATE_VECTOR2(name, args), m_obj.get());
+                              make_packed_array(name, args), m_obj.get());
       success = true;
       return ret;
     }
@@ -154,8 +158,17 @@ bool UserFile::open(CStrRef filename, CStrRef mode) {
   // bool stream_open($path, $mode, $options, &$opened_path)
   bool success = false;
   Variant opened_path;
-  Variant ret = invoke(m_StreamOpen, s_stream_open, CREATE_VECTOR4(
-                       filename, mode, m_options, ref(opened_path)), success);
+  Variant ret = invoke(
+    m_StreamOpen,
+    s_stream_open,
+    PackedArrayInit(4)
+      .append(filename)
+      .append(mode)
+      .append(m_options)
+      .appendRef(opened_path)
+      .toArray(),
+    success
+  );
   if (success && (ret.toBoolean() == true)) {
     return true;
   }
@@ -181,7 +194,7 @@ int64_t UserFile::readImpl(char *buffer, int64_t length) {
   // String stread_read($count)
   bool success = false;
   String str = invoke(m_StreamRead, s_stream_read,
-                      CREATE_VECTOR1(length), success);
+                      make_packed_array(length), success);
   if (!success) {
     raise_warning("%s::stream_read is not implemented",
                   m_cls->name()->data());
@@ -205,7 +218,7 @@ int64_t UserFile::writeImpl(const char *buffer, int64_t length) {
   // stream_write($data)
   bool success = false;
   int64_t didWrite = invoke(m_StreamWrite, s_stream_write,
-                          CREATE_VECTOR1(String(buffer, length, CopyString)),
+                          make_packed_array(String(buffer, length, CopyString)),
                           success).toInt64();
   if (!success) {
     raise_warning("%s::stream_write is not implemented",
@@ -230,7 +243,7 @@ bool UserFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   // bool stream_seek($offset, $whence)
   bool success = false;
   bool sought  = invoke(m_StreamSeek, s_stream_seek,
-                        CREATE_VECTOR2(offset, whence), success).toBoolean();
+                        make_packed_array(offset, whence), success).toBoolean();
   return success ? sought : false;
 }
 
@@ -285,7 +298,7 @@ bool UserFile::lock(int operation, bool &wouldBlock) {
   // bool stream_lock(int $operation)
   bool success = false;
   Variant ret = invoke(m_StreamLock, s_stream_lock,
-                       CREATE_VECTOR1(op), success);
+                       make_packed_array(op), success);
   if (!success) {
     if (operation) {
       raise_warning("%s::stream_lock is not implemented!",

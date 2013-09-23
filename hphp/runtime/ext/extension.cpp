@@ -38,7 +38,7 @@ static ExtensionUninitializer s_extension_uninitializer;
 ///////////////////////////////////////////////////////////////////////////////
 
 Extension::Extension(litstr name, const char *version /* = "" */)
-    : m_name(StringData::GetStaticString(name))
+    : m_name(makeStaticString(name))
     , m_version(version ? version : "") {
   if (s_registered_extensions == NULL) {
     s_registered_extensions = new ExtensionMap();

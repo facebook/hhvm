@@ -546,7 +546,7 @@ private:
   std::deque<ExnHandlerRegion*> m_exnHandlers;
   std::deque<FaultRegion*> m_faultRegions;
   std::deque<FPIRegion*> m_fpiRegions;
-  std::vector<HphpArray*> m_staticArrays;
+  std::vector<Array> m_staticArrays;
   std::set<std::string,stdltistr> m_hoistables;
   LocationPtr m_tempLoc;
   std::map<StringData*, Label, string_data_lt> m_gotoLabels;

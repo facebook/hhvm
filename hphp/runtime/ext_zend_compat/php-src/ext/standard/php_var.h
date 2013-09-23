@@ -21,6 +21,7 @@
 #ifndef PHP_VAR_H
 #define PHP_VAR_H
 
+#include "hphp/runtime/base/complex-types.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/php_smart_str.h"
 #include "hphp/runtime/ext/ext_variable.h"
@@ -29,13 +30,13 @@ typedef HashTable* php_serialize_data_t;
 typedef void* php_unserialize_data_t;
 
 PHPAPI inline void php_var_serialize(smart_str *buf, zval **struc, php_serialize_data_t *var_hash TSRMLS_DC) {
-  HPHP::String s = HPHP::f_serialize(tvAsVariant(*struc));
+  HPHP::String s = HPHP::f_serialize(HPHP::tvAsVariant((*struc)->tv()));
   smart_str_appendl(buf, s->data(), s->size());
 }
 PHPAPI inline int php_var_unserialize(zval **rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC) {
   HPHP::Variant ret = HPHP::f_unserialize(HPHP::String(*p, max - *p, HPHP::CopyString));
   MAKE_STD_ZVAL(*rval);
-  tvDup(*ret.asTypedValue(), **rval);
+  HPHP::cellDup(*ret.asCell(), *(*rval)->tv());
   return !ret.isBoolean() || ret.toBoolean();
 }
 

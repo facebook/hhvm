@@ -20,8 +20,6 @@
 #include "hphp/runtime/ext/ext_zlib.h"
 #include "hphp/runtime/server/libevent-server.h"
 
-#include <boost/make_shared.hpp>
-
 #define PORT_MIN 7100
 #define PORT_MAX 7120
 
@@ -56,7 +54,7 @@ static std::string get_request_uri() {
 static ServerPtr runServer() {
   for (s_server_port = PORT_MIN; s_server_port <= PORT_MAX; s_server_port++) {
     try {
-      ServerPtr server = boost::make_shared<LibEventServer>(
+      ServerPtr server = std::make_shared<LibEventServer>(
           "127.0.0.1", s_server_port, 4);
       server->setRequestHandlerFactory<TestCurlRequestHandler>(0);
       server->start();
@@ -165,7 +163,7 @@ bool TestExtCurl::test_curl_setopt_array() {
   Variant c = f_curl_init();
   f_curl_setopt_array
     (c.toResource(),
-     CREATE_MAP2(k_CURLOPT_URL, String(get_request_uri()),
+     make_map_array(k_CURLOPT_URL, String(get_request_uri()),
                  k_CURLOPT_RETURNTRANSFER, true));
   Variant res = f_curl_exec(c.toResource());
   VS(res, "OK");
@@ -343,7 +341,7 @@ bool TestExtCurl::test_evhttp_set_cache() {
   f_evhttp_set_cache("localhost", 4, s_server_port);
   for (int i = 0; i < 10; i++) {
     Variant ret = f_evhttp_get(String(get_request_uri()),
-                               CREATE_VECTOR1("ECHO: foo"));
+                               make_packed_array("ECHO: foo"));
     VS(ret[s_code], 200);
     VS(ret[s_response], "OK");
     VS(ret[s_headers][0], "ECHOED: foo");
@@ -355,7 +353,7 @@ bool TestExtCurl::test_evhttp_set_cache() {
 
 bool TestExtCurl::test_evhttp_get() {
   Variant ret = f_evhttp_get(String(get_request_uri()),
-                             CREATE_VECTOR1("ECHO: foo"));
+                             make_packed_array("ECHO: foo"));
   VS(ret[s_code], 200);
   VS(ret[s_response], "OK");
   VS(ret[s_headers][0], "ECHOED: foo");
@@ -365,7 +363,7 @@ bool TestExtCurl::test_evhttp_get() {
 
 bool TestExtCurl::test_evhttp_post() {
   Variant ret = f_evhttp_post(String(get_request_uri()), "echo",
-                              CREATE_VECTOR1("ECHO: foo"));
+                              make_packed_array("ECHO: foo"));
   VS(ret[s_code], 200);
   VS(ret[s_response], "POST: echo");
   VS(ret[s_headers][0], "ECHOED: foo");
@@ -382,7 +380,7 @@ bool TestExtCurl::test_evhttp_post_gzip() {
   memset(postBody, 'a', sizeof(fullPostBody) - 7);
   fullPostBody[sizeof(fullPostBody) - 1] = '\0';
   Variant ret = f_evhttp_post(String(get_request_uri()), postBody,
-                              CREATE_VECTOR2("ECHO: foo",
+                              make_packed_array("ECHO: foo",
                                              "Accept-Encoding: gzip"));
   VS(ret[s_code], 200);
   VS(ret[s_response], fullPostBody);
@@ -393,7 +391,7 @@ bool TestExtCurl::test_evhttp_post_gzip() {
 
 bool TestExtCurl::test_evhttp_async_get() {
   Variant ret = f_evhttp_async_get(String(get_request_uri()),
-                                   CREATE_VECTOR1("ECHO: foo"));
+                                   make_packed_array("ECHO: foo"));
   ret = f_evhttp_recv(ret.toResource());
   VS(ret[s_code], 200);
   VS(ret[s_response], "OK");
@@ -404,7 +402,7 @@ bool TestExtCurl::test_evhttp_async_get() {
 
 bool TestExtCurl::test_evhttp_async_post() {
   Variant ret = f_evhttp_async_post(String(get_request_uri()), "echo",
-                                    CREATE_VECTOR1("ECHO: foo"));
+                                    make_packed_array("ECHO: foo"));
   ret = f_evhttp_recv(ret.toResource());
   VS(ret[s_code], 200);
   VS(ret[s_response], "POST: echo");

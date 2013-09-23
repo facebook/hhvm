@@ -16,6 +16,9 @@
 #ifndef incl_HPHP_RUNTIME_VM_SERVICE_REQUESTS_H_
 #define incl_HPHP_RUNTIME_VM_SERVICE_REQUESTS_H_
 
+#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/srckey.h"
 #include "hphp/util/asm-x64.h"
 
 namespace HPHP { namespace JIT {
@@ -185,6 +188,62 @@ void packServiceReqArgs(ServiceReqArgVec& argv, T arg, Arg... args) {
 inline void packServiceReqArgs(ServiceReqArgVec& argv) {
   // Recursive base case.
 }
+
+//////////////////////////////////////////////////////////////////////
+
+using Transl::TCA;
+
+/*
+ * emitServiceReqWork --
+ *
+ *   Call a translator service co-routine. The code emitted here
+ *   reenters the enterTC loop, invoking the requested service. Control
+ *   will be returned non-locally to the next logical instruction in
+ *   the TC.
+ *
+ *   Return value is a destination; we emit the bulky service
+ *   request code into astubs.
+ *
+ *   Returns a continuation that will run after the arguments have been
+ *   emitted. This is gross, but is a partial workaround for the inability
+ *   to capture argument packs in the version of gcc we're using.
+ */
+namespace X64 {
+TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
+                       ServiceRequest req, const ServiceReqArgVec& argInfo);
+}
+
+template<typename... Arg>
+TCA emitServiceReq(CodeBlock& cb, SRFlags flags, ServiceRequest sr, Arg... a) {
+  // These should reuse stubs. Use emitEphemeralServiceReq.
+  assert(sr != REQ_BIND_JMPCC_FIRST &&
+         sr != REQ_BIND_JMPCC_SECOND &&
+         sr != REQ_BIND_JMP);
+
+  ServiceReqArgVec argv;
+  packServiceReqArgs(argv, a...);
+  return X64::emitServiceReqWork(cb, cb.frontier(), true, flags, sr, argv);
+}
+
+template<typename... Arg>
+TCA emitServiceReq(CodeBlock& cb, ServiceRequest sr, Arg... a) {
+  return emitServiceReq(cb, SRFlags::None, sr, a...);
+}
+
+template<typename... Arg>
+TCA emitEphemeralServiceReq(CodeBlock& cb, TCA start, ServiceRequest sr,
+                            Arg... a) {
+  assert(sr == REQ_BIND_JMPCC_FIRST ||
+         sr == REQ_BIND_JMPCC_SECOND ||
+         sr == REQ_BIND_JMP);
+  assert(cb.contains(start));
+
+  ServiceReqArgVec argv;
+  packServiceReqArgs(argv, a...);
+  return X64::emitServiceReqWork(cb, start, false, SRFlags::None, sr, argv);
+}
+
+//////////////////////////////////////////////////////////////////////
 
 }}
 

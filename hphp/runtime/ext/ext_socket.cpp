@@ -643,6 +643,30 @@ Variant f_socket_select(VRefParam read, VRefParam write, VRefParam except,
   if (!vtv_sec.isNull()) {
     timeout_ms = vtv_sec.toInt32() * 1000 + tv_usec / 1000;
   }
+
+  /* slight hack to support buffered data; if there is data sitting in the
+   * read buffer of any of the streams in the read array, let's pretend
+   * that we selected, but return only the readable sockets */
+  if (!read.isNull()) {
+    auto hasData = Array::Create();
+    for (ArrayIter iter(read); iter; ++iter) {
+      File *file = iter.second().toResource().getTyped<File>();
+      if (file->bufferedLen() > 0) {
+        hasData.append(iter.second());
+      }
+    }
+    if (hasData.size() > 0) {
+      if (!write.isNull()) {
+        write = Array::Create();
+      }
+      if (!except.isNull()) {
+        except = Array::Create();
+      }
+      read = hasData;
+      return hasData.size();
+    }
+  }
+
   int retval = poll(fds, count, timeout_ms);
   if (retval == -1) {
     raise_warning("unable to select [%d]: %s", errno,

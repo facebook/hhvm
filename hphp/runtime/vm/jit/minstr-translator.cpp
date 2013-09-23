@@ -440,8 +440,8 @@ void HhbcTranslator::MInstrTranslator::emitMTrace() {
   }
   shape << '>';
   gen(IncStatGrouped,
-           cns(StringData::GetStaticString("vector instructions")),
-           cns(StringData::GetStaticString(shape.str())),
+           cns(makeStaticString("vector instructions")),
+           cns(makeStaticString(shape.str())),
            cns(1));
 }
 
@@ -644,21 +644,21 @@ HhbcTranslator::MInstrTranslator::simpleCollectionOp() {
       }
     } else if (baseType.strictSubtypeOf(Type::Obj)) {
       const Class* klass = baseType.getClass();
-      if (klass == c_Vector::s_cls ||
-          klass == c_Pair::s_cls) {
+      if (klass == c_Vector::classof() ||
+          klass == c_Pair::classof()) {
         if (mcodeMaybeVectorKey(m_ni.immVecM[0])) {
           SSATmp* key = getInput(m_mii.valCount() + 1);
           if (key->isA(Type::Int)) {
-            return (klass == c_Vector::s_cls) ?
+            return (klass == c_Vector::classof()) ?
                 SimpleOp::Vector : SimpleOp::Pair;
           }
         }
-      } else if (klass == c_Map::s_cls ||
-                 klass == c_StableMap::s_cls) {
+      } else if (klass == c_Map::classof() ||
+                 klass == c_StableMap::classof()) {
         if (mcodeMaybeArrayOrMapKey(m_ni.immVecM[0])) {
           SSATmp* key = getInput(m_mii.valCount() + 1);
           if (key->isA(Type::Int) || key->isA(Type::Str)) {
-            return (klass == c_Map::s_cls) ?
+            return (klass == c_Map::classof()) ?
                 SimpleOp::Map : SimpleOp::StableMap;
           }
         }
@@ -1083,7 +1083,7 @@ void HhbcTranslator::MInstrTranslator::emitElem() {
       m_ht.exceptionBarrier();
       gen(
         RaiseError,
-        cns(StringData::GetStaticString(Strings::OP_NOT_SUPPORTED_STRING))
+        cns(makeStaticString(Strings::OP_NOT_SUPPORTED_STRING))
       );
       m_base = uninit;
       return;
@@ -1664,7 +1664,7 @@ StringData* stringGetI(StringData* str, uint64_t x) {
     return str->getChar(x);
   }
   raise_warning("Out of bounds");
-  return StringData::GetStaticString("");
+  return makeStaticString("");
 }
 }
 
@@ -2545,7 +2545,7 @@ void HhbcTranslator::MInstrTranslator::emitUnsetElem() {
   if (baseType.subtypeOf(Type::Str)) {
     m_ht.exceptionBarrier();
     gen(RaiseError,
-             cns(StringData::GetStaticString(Strings::CANT_UNSET_STRING)));
+             cns(makeStaticString(Strings::CANT_UNSET_STRING)));
     return;
   }
   if (baseType.not(Type::Arr | Type::Obj)) {

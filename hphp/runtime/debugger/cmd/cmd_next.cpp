@@ -259,7 +259,7 @@ void CmdNext::setupStepCont(ActRec* fp, PC pc) {
 // resume.
 void CmdNext::stepAfterCreateAsync() {
   auto topObj = g_vmContext->getStack().topTV()->m_data.pobj;
-  assert(topObj->instanceof(c_Continuation::s_cls));
+  assert(topObj->instanceof(c_Continuation::classof()));
   auto cont = static_cast<c_Continuation*>(topObj);
   auto func = cont->actRec()->m_func;
   Offset nextInst = cont->getNextExecutionOffset();

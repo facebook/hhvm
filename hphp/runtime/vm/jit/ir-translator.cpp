@@ -873,7 +873,7 @@ IRTranslator::translateSetOpL(const NormalizedInstruction& i) {
     case SetOpMinusEqual:  opc = Sub;    break;
     case SetOpMulEqual:    opc = Mul;    break;
     case SetOpDivEqual:    HHIR_UNIMPLEMENTED(SetOpL_Div);
-    case SetOpConcatEqual: opc = Concat; break;
+    case SetOpConcatEqual: opc = ConcatCellCell; break;
     case SetOpModEqual:    HHIR_UNIMPLEMENTED(SetOpL_Mod);
     case SetOpAndEqual:    opc = BitAnd; break;
     case SetOpOrEqual:     opc = BitOr;  break;
@@ -1065,8 +1065,8 @@ findCuf(const NormalizedInstruction& ni,
         name.find("::", pos + 2) != String::npos) {
       return nullptr;
     }
-    sclass = StringData::GetStaticString(name.substr(0, pos).get());
-    sname = StringData::GetStaticString(name.substr(pos + 2).get());
+    sclass = makeStaticString(name.substr(0, pos).get());
+    sname = makeStaticString(name.substr(pos + 2).get());
   } else if (arr) {
     if (arr->size() != 2) return nullptr;
     CVarRef e0 = arr->get(int64_t(0), false);
@@ -1313,9 +1313,9 @@ IRTranslator::translateFCallArray(const NormalizedInstruction& i) {
 }
 
 void
-IRTranslator::translateNewTuple(const NormalizedInstruction& i) {
+IRTranslator::translateNewPackedArray(const NormalizedInstruction& i) {
   int numArgs = i.imm[0].u_IVA;
-  HHIR_EMIT(NewTuple, numArgs);
+  HHIR_EMIT(NewPackedArray, numArgs);
 }
 
 void

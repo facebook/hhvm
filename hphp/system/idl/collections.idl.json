@@ -13,7 +13,8 @@
             "desc": "An ordered collection where values are keyed using integers 0 thru n-1 in order.",
             "flags": [
                 "IsFinal",
-                "IsCppSerializable"
+                "IsCppSerializable",
+                "NoDefaultSweep"
             ],
             "footer": "\n private:\n  TypedValue* m_data;\n  int size;\n  int capacity;",
             "funcs": [
@@ -79,17 +80,6 @@
                 },
                 {
                     "name": "lazy",
-                    "flags": [
-                    ],
-                    "desc": "Returns a lazy iterable view of this Vector.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "view",
                     "flags": [
                     ],
                     "desc": "Returns a lazy iterable view of this Vector.",
@@ -347,6 +337,72 @@
                     ]
                 },
                 {
+                    "name": "toVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a copy of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Map built from the keys and values of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toStableMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a StableMap built from the keys and values of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toSet",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set built from the values of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toKeysArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the keys from this Vector.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toValuesArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this Vector.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "getIterator",
                     "flags": [
                     ],
@@ -429,22 +485,6 @@
                         {
                             "name": "iterable",
                             "type": "Variant"
-                        }
-                    ]
-                },
-                {
-                    "name": "sort",
-                    "flags": [
-                    ],
-                    "desc": "Uses the specified Collator to sort the Vector in place.",
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                        {
-                            "name": "col",
-                            "type": "Variant",
-                            "value": "null"
                         }
                     ]
                 },
@@ -648,7 +688,8 @@
             ],
             "desc": "An iterator implementation for iterating over a Vector.",
             "flags": [
-                "IsFinal"
+                "IsFinal",
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -728,7 +769,8 @@
             "desc": "An unordered dictionary-style collection.",
             "flags": [
                 "IsFinal",
-                "IsCppSerializable"
+                "IsCppSerializable",
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -793,17 +835,6 @@
                 },
                 {
                     "name": "lazy",
-                    "flags": [
-                    ],
-                    "desc": "Returns a lazy iterable view of this Map.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "view",
                     "flags": [
                     ],
                     "desc": "Returns a lazy iterable view of this Map.",
@@ -1020,21 +1051,54 @@
                     ]
                 },
                 {
-                    "name": "copyAsArray",
+                    "name": "toVector",
                     "flags": [
                     ],
-                    "desc": "Returns an array built from the keys and values from this Map.",
+                    "desc": "Returns a Vector built from the values of this Map.",
                     "return": {
-                        "type": "VariantMap"
+                        "type": "Object"
                     },
                     "args": [
                     ]
                 },
                 {
-                    "name": "toKeysArray",
+                    "name": "toMap",
                     "flags": [
                     ],
-                    "desc": "Returns an array built from the keys from this Map.",
+                    "desc": "Returns a copy of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toStableMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a StableMap built from the keys and values of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toSet",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set built from the values of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "copyAsArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the keys and values from this Map.",
                     "return": {
                         "type": "VariantMap"
                     },
@@ -1048,6 +1112,17 @@
                     "desc": "Returns a Vector built from the values from this Map.",
                     "return": {
                         "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toKeysArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the keys from this Map.",
+                    "return": {
+                        "type": "VariantMap"
                     },
                     "args": [
                     ]
@@ -1276,7 +1351,8 @@
             ],
             "desc": "An iterator implementation for iterating over a Map.",
             "flags": [
-                "IsFinal"
+                "IsFinal",
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -1356,7 +1432,8 @@
             "desc": "An ordered dictionary-style collection.",
             "flags": [
                 "IsFinal",
-                "IsCppSerializable"
+                "IsCppSerializable",
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -1421,17 +1498,6 @@
                 },
                 {
                     "name": "lazy",
-                    "flags": [
-                    ],
-                    "desc": "Returns a lazy iterable view of this StableMap.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "view",
                     "flags": [
                     ],
                     "desc": "Returns a lazy iterable view of this StableMap.",
@@ -1648,21 +1714,54 @@
                     ]
                 },
                 {
-                    "name": "copyAsArray",
+                    "name": "toVector",
                     "flags": [
                     ],
-                    "desc": "Returns an array built from the keys and values from this StableMap.",
+                    "desc": "Returns a Vector built from the values of this StableMap.",
                     "return": {
-                        "type": "VariantMap"
+                        "type": "Object"
                     },
                     "args": [
                     ]
                 },
                 {
-                    "name": "toKeysArray",
+                    "name": "toMap",
                     "flags": [
                     ],
-                    "desc": "Returns an array built from the keys from this StableMap.",
+                    "desc": "Returns a Map built from the keys and values of this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toStableMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a copy of this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toSet",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set built from the values of this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "copyAsArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the keys and values from this StableMap.",
                     "return": {
                         "type": "VariantMap"
                     },
@@ -1676,6 +1775,17 @@
                     "desc": "Returns a Vector built from the values from this StableMap.",
                     "return": {
                         "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toKeysArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the keys from this StableMap.",
+                    "return": {
+                        "type": "VariantMap"
                     },
                     "args": [
                     ]
@@ -1904,7 +2014,8 @@
             ],
             "desc": "An iterator implementation for iterating over a StableMap.",
             "flags": [
-                "IsFinal"
+                "IsFinal",
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -1984,7 +2095,8 @@
             "desc": "An unordered set-style collection.",
             "flags": [
                 "IsFinal",
-                "IsCppSerializable"
+                "IsCppSerializable",
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -2038,17 +2150,6 @@
                 },
                 {
                     "name": "lazy",
-                    "flags": [
-                    ],
-                    "desc": "Returns a lazy iterable view of this Set.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "view",
                     "flags": [
                     ],
                     "desc": "Returns a lazy iterable view of this Set.",
@@ -2131,6 +2232,50 @@
                 },
                 {
                     "name": "toArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this Set.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the values of this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toSet",
+                    "flags": [
+                    ],
+                    "desc": "Returns a copy of this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toKeysArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this Set.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toValuesArray",
                     "flags": [
                     ],
                     "desc": "Returns an array built from the values from this Set.",
@@ -2336,7 +2481,8 @@
             ],
             "desc": "An iterator implementation for iterating over a Set.",
             "flags": [
-                "IsFinal"
+                "IsFinal",
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -2415,7 +2561,8 @@
             "desc": "An ordered fixed-sized container.",
             "flags": [
                 "IsFinal",
-                "IsCppSerializable"
+                "IsCppSerializable",
+                "NoDefaultSweep"
             ],
             "footer": "\n private:\n  int size;\n  int capacity;",
             "funcs": [
@@ -2485,17 +2632,6 @@
                     ]
                 },
                 {
-                    "name": "view",
-                    "flags": [
-                    ],
-                    "desc": "Returns a lazy iterable view of this Pair.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "kvzip",
                     "flags": [
                     ],
@@ -2508,6 +2644,72 @@
                 },
                 {
                     "name": "toArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this Pair.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector build from the values from this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Map built from the keys and values of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toStableMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a StableMap built from the keys and values of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toSet",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set built from the values of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toKeysArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the keys from this Pair.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toValuesArray",
                     "flags": [
                     ],
                     "desc": "Returns an array built from the values from this Pair.",
@@ -2659,7 +2861,8 @@
             ],
             "desc": "An iterator implementation for iterating over a Pair.",
             "flags": [
-                "IsFinal"
+                "IsFinal",
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {

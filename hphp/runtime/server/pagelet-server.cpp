@@ -291,16 +291,14 @@ public:
 
   PageletTransport *getJob() { return m_job;}
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("PageletTask");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
 private:
   PageletTransport *m_job;
 };
 IMPLEMENT_OBJECT_ALLOCATION(PageletTask)
-
-StaticString PageletTask::s_class_name("PageletTask");
 
 ///////////////////////////////////////////////////////////////////////////////
 // implementing PageletServer

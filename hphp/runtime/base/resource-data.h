@@ -108,9 +108,6 @@ class ResourceData {
   // that walk the SmartAllocator heaps can distinguish between objects and
   // resources
   Class* m_cls;
-  // Storage for dynamic properties
-  ArrNR o_properties;
-
 } __attribute__((aligned(16)));
 
 /**
@@ -178,7 +175,6 @@ class ResourceData {
  *
  *       DECLARE_OBJECT_ALLOCATION(T);
  *    };
- *    IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(T);
  *    void MixedSmartAllocated::sweep() {
  *       delete stdstr;
  *       delete vec;
@@ -191,7 +187,15 @@ class ResourceData {
  *    can only be collected/deleted by sweep().
  *
  */
-class SweepableResourceData : public ResourceData, public Sweepable {};
+class SweepableResourceData : public ResourceData, public Sweepable {
+protected:
+  void sweep() FOLLY_OVERRIDE {
+    // ResourceData objects are non-smart allocated by default (see
+    // operator delete in ResourceData), so sweeping will destroy the
+    // object and deallocate its seat as well.
+    delete this;
+  }
+};
 
 typedef std::map<std::string, ResourceData*> ResourceMap;
 typedef std::map<std::string, ResourceMap> ResourceMapMap;

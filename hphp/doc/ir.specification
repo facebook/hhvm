@@ -1038,7 +1038,7 @@ D:Arr = NewArray S0:ConstInt
 
   Allocate a new array with the expected capacity S0.
 
-D:Arr = NewTuple S0:ConstInt S1:StkPtr
+D:Arr = NewPackedArray S0:ConstInt S1:StkPtr
 
   Allocate a new array by taking the top S0 elements off the stack
   given by S1.  Note that this instruction assumes it can take the
@@ -1548,11 +1548,22 @@ PrintBool S1:Bool
 
   Print for various types.
 
-D:Str = Concat S0:Gen S1:Gen
+D:Str = ConcatIntStr S0:Int S1:Str
+
+  Concatenate S0 and S1 after converting S0 to String.
+
+D:Str = ConcatStrInt S0:Str S1:Int
+
+  Concatenate S0 and S1 after converting S1 to String.
+
+D:Str = ConcatStrStr S0:Str S1:Str
+
+  Concatenate S0 and S1.
+
+D:Str = ConcatCellCell S0:Cell S1:Cell
 
   Concatenate S0 and S1 after converting them to strings in a way that
   obeys php semantics.  (Calling object __toString methods, etc.)
-  TODO(#2438120): split this opcode up.
 
 D:Arr = AddElemStrKey S0:Arr S1:Str S2:Cell
 

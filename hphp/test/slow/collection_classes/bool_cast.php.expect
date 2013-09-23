@@ -1,0 +1,29 @@
+=== Falsy ===
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+else
+else
+else
+else
+=== Reflection on Falsy ===
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+=== Truthy ===
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+if
+if
+if
+if
+if

@@ -139,7 +139,7 @@ public:
    * To enable SSL of the current server, it will listen to an additional
    * port as specified in parameter.
    */
-  virtual bool enableSSL(void *sslCTX, int port);
+  virtual bool enableSSL(int port);
 
 protected:
   virtual int getAcceptSocket();
@@ -165,6 +165,10 @@ private:
     kNumPriorities
   };
   RequestPriority getRequestPriority(struct evhttp_request* request);
+
+  static bool certHandler(const std::string &server_name,
+                          const std::string& key_file,
+                          const std::string& cert_file);
 
   JobQueueDispatcher<LibEventJobPtr, LibEventWorker> m_dispatcher;
   AsyncFunc<LibEventServer> m_dispatcherThread;

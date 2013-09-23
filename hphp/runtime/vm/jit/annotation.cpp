@@ -49,7 +49,7 @@ encodeCallAndArgs(const StringData* name, int numArgs) {
   char numArgsBuf[16];
   snprintf(numArgsBuf, 15, "@%d@", numArgs);
   String s = String(numArgsBuf) + String(name->data());
-  return StringData::GetStaticString(s.get());
+  return makeStaticString(s.get());
 }
 
 static void
@@ -209,7 +209,7 @@ fcallToFuncName(const NormalizedInstruction* i) {
     string name;
     int numArgs;
     decodeNameAndArgs(callRec.m_encodedName, name, numArgs);
-    return StringData::GetStaticString(name.c_str());
+    return makeStaticString(name.c_str());
   }
   return nullptr;
 }

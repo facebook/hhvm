@@ -33,7 +33,7 @@ static void throwIntOOB(int64_t key, bool isVector = false) ATTRIBUTE_COLD
 void throwIntOOB(int64_t key, bool isVector /* = false */) {
   static const size_t reserveSize = 50;
   String msg(reserveSize, ReserveString);
-  char* buf = msg.mutableSlice().ptr;
+  char* buf = msg.bufferSlice().ptr;
   int sz = sprintf(buf, "Integer key %" PRId64 " is %s", key,
                    isVector ? "out of bounds" : "not defined");
   assert(sz <= reserveSize);
@@ -98,6 +98,7 @@ c_Vector::c_Vector(Class* cb) :
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
                        ObjectData::UseUnset|
+                       ObjectData::CallToImpl|
                        ObjectData::HasClone>(cb),
     m_data(nullptr), m_size(0), m_capacity(0), m_version(0) {
 }
@@ -119,16 +120,7 @@ void c_Vector::freeData() {
 
 void c_Vector::t___construct(CVarRef iterable /* = null_variant */) {
   if (iterable.isNull()) return;
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  if (sz) {
-    reserve(sz);
-  }
-  for (; iter; ++iter) {
-    Variant v = iter.second();
-    TypedValue* tv = cvarToCell(&v);
-    add(tv);
-  }
+  init(iterable);
 }
 
 void c_Vector::grow() {
@@ -176,7 +168,7 @@ Array c_Vector::toArrayImpl() const {
   PackedArrayInit ai(m_size);
   uint sz = m_size;
   for (uint i = 0; i < sz; ++i) {
-    ai.add(tvAsCVarRef(&m_data[i]));
+    ai.append(tvAsCVarRef(&m_data[i]));
   }
   return ai.toArray();
 }
@@ -192,6 +184,19 @@ c_Vector* c_Vector::Clone(ObjectData* obj) {
     cellDup(thiz->m_data[i], data[i]);
   }
   return target;
+}
+
+void c_Vector::init(CVarRef t) {
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(t, sz);
+  if (sz) {
+    reserve(sz);
+  }
+  for (; iter; ++iter) {
+    Variant v = iter.second();
+    TypedValue* tv = cvarToCell(&v);
+    add(tv);
+  }
 }
 
 Object c_Vector::t_add(CVarRef val) {
@@ -280,7 +285,7 @@ Object c_Vector::t_clear() {
 }
 
 bool c_Vector::t_isempty() {
-  return (m_size == 0);
+  return !toBoolImpl();
 }
 
 int64_t c_Vector::t_count() {
@@ -304,10 +309,6 @@ Object c_Vector::t_keys() {
 }
 
 Object c_Vector::t_lazy() {
-  return SystemLib::AllocLazyKeyedIterableViewObject(this);
-}
-
-Object c_Vector::t_view() {
   return SystemLib::AllocLazyKeyedIterableViewObject(this);
 }
 
@@ -385,41 +386,17 @@ Array c_Vector::t_toarray() {
   return toArrayImpl();
 }
 
-void c_Vector::t_sort(CVarRef col /* = null */) {
-  raise_warning("Vector::sort() is deprecated, please use the builtin sort() "
-                "function or usort() function instead");
-  // Terribly inefficient, but produces correct results for now
-  Variant arr = t_toarray();
-  if (col.isNull()) {
-    f_sort(ref(arr));
-  } else {
-    if (!col.isObject()) {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Expected col to be an instance of Collator"));
-      throw e;
-    }
-    ObjectData* obj = col.getObjectData();
-    if (!obj->instanceof(c_Collator::s_cls)) {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Expected col to be an instance of Collator"));
-      throw e;
-    }
-    auto collator = static_cast<c_Collator*>(obj);
-    // TODO Task #1429976: What do we do if the Collator encountered errors
-    // while sorting? How is this reported to the user?
-    collator->t_sort(ref(arr));
+Array c_Vector::t_tokeysarray() {
+  PackedArrayInit ai(m_size);
+  uint sz = m_size;
+  for (uint i = 0; i < sz; ++i) {
+    ai.append((int64_t)i);
   }
-  if (!arr.isArray()) {
-    assert(false);
-    return;
-  }
-  ArrayData* ad = arr.getArrayData();
-  int sz = ad->size();
-  ssize_t pos = ad->iter_begin();
-  for (int i = 0; i < sz; ++i, pos = ad->iter_advance(pos)) {
-    assert(pos != ArrayData::invalid_index);
-    tvAsVariant(&m_data[i]) = ad->getValue(pos);
-  }
+  return ai.toArray();
+}
+
+Array c_Vector::t_tovaluesarray() {
+  return toArrayImpl();
 }
 
 void c_Vector::t_reverse() {
@@ -729,7 +706,7 @@ Variant c_Vector::ti_slice(CVarRef vec, CVarRef offset,
     throw e;
   }
   ObjectData* obj = vec.getObjectData();
-  if (!obj->instanceof(c_Vector::s_cls)) {
+  if (!obj->instanceof(c_Vector::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "vec must be an instance of Vector"));
     throw e;
@@ -886,6 +863,9 @@ void c_Vector::throwBadKeyType() {
 Array c_Vector::ToArray(const ObjectData* obj) {
   check_collection_cast_to_array();
   return static_cast<const c_Vector*>(obj)->toArrayImpl();
+}
+bool c_Vector::ToBool(const ObjectData* obj) {
+  return static_cast<const c_Vector*>(obj)->toBoolImpl();
 }
 
 TypedValue* c_Vector::OffsetGet(ObjectData* obj, TypedValue* key) {
@@ -1045,6 +1025,7 @@ c_Map::c_Map(Class* cb) :
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
                        ObjectData::UseUnset|
+                       ObjectData::CallToImpl|
                        ObjectData::HasClone>(cb),
     m_size(0), m_load(0), m_nLastSlot(0), m_version(0) {
   m_data = (Bucket*)emptyMapSlot;
@@ -1077,23 +1058,7 @@ void c_Map::deleteBuckets() {
 
 void c_Map::t___construct(CVarRef iterable /* = null_variant */) {
   if (iterable.isNull()) return;
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  if (sz) {
-    reserve(sz);
-  }
-  for (; iter; ++iter) {
-    Variant k = iter.first();
-    Variant v = iter.second();
-    TypedValue* tv = v.asCell();
-    if (k.isInteger()) {
-      update(k.toInt64(), tv);
-    } else if (k.isString()) {
-      update(k.getStringData(), tv);
-    } else {
-      throwBadKeyType();
-    }
-  }
+  init(iterable);
 }
 
 Array c_Map::toArrayImpl() const {
@@ -1137,6 +1102,26 @@ c_Map* c_Map::Clone(ObjectData* obj) {
   return target;
 }
 
+void c_Map::init(CVarRef t) {
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(t, sz);
+  if (sz) {
+    reserve(sz);
+  }
+  for (; iter; ++iter) {
+    Variant k = iter.first();
+    Variant v = iter.second();
+    TypedValue* tv = v.asCell();
+    if (k.isInteger()) {
+      update(k.toInt64(), tv);
+    } else if (k.isString()) {
+      update(k.getStringData(), tv);
+    } else {
+      throwBadKeyType();
+    }
+  }
+}
+
 Object c_Map::t_add(CVarRef val) {
   TypedValue* tv = cvarToCell(&val);
   add(tv);
@@ -1167,7 +1152,7 @@ Object c_Map::t_clear() {
 }
 
 bool c_Map::t_isempty() {
-  return (m_size == 0);
+  return !toBoolImpl();
 }
 
 int64_t c_Map::t_count() {
@@ -1200,10 +1185,6 @@ Object c_Map::t_keys() {
 }
 
 Object c_Map::t_lazy() {
-  return SystemLib::AllocLazyKeyedIterableViewObject(this);
-}
-
-Object c_Map::t_view() {
   return SystemLib::AllocLazyKeyedIterableViewObject(this);
 }
 
@@ -1340,20 +1321,6 @@ Array c_Map::t_copyasarray() {
   return toArrayImpl();
 }
 
-Array c_Map::t_tokeysarray() {
-  PackedArrayInit ai(m_size);
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (!p.validValue()) continue;
-    if (p.hasIntKey()) {
-      ai.add((int64_t)p.ikey);
-    } else {
-      ai.add(*(const String*)(&p.skey));
-    }
-  }
-  return ai.toArray();
-}
-
 Object c_Map::t_values() {
   c_Vector* target;
   Object ret = target = NEWOBJ(c_Vector)();
@@ -1378,12 +1345,26 @@ Object c_Map::t_values() {
   return ret;
 }
 
+Array c_Map::t_tokeysarray() {
+  PackedArrayInit ai(m_size);
+  for (uint i = 0; i <= m_nLastSlot; ++i) {
+    Bucket& p = m_data[i];
+    if (!p.validValue()) continue;
+    if (p.hasIntKey()) {
+      ai.append(int64_t{p.ikey});
+    } else {
+      ai.append(*(const String*)(&p.skey));
+    }
+  }
+  return ai.toArray();
+}
+
 Array c_Map::t_tovaluesarray() {
   PackedArrayInit ai(m_size);
   for (uint i = 0; i <= m_nLastSlot; ++i) {
     Bucket& p = m_data[i];
     if (!p.validValue()) continue;
-    ai.add(tvAsCVarRef(&p.data));
+    ai.append(tvAsCVarRef(&p.data));
   }
   return ai.toArray();
 }
@@ -1631,7 +1612,7 @@ Object c_Map::ti_fromitems(CVarRef iterable) {
     Variant v = iter.second();
     TypedValue* tv = v.asCell();
     if (UNLIKELY(tv->m_type != KindOfObject ||
-                 !tv->m_data.pobj->instanceof(c_Pair::s_cls))) {
+                 !tv->m_data.pobj->instanceof(c_Pair::classof()))) {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Parameter must be an instance of Iterable<Pair>"));
       throw e;
@@ -1685,7 +1666,7 @@ void c_Map::throwOOB(StringData* key) {
 
 void c_Map::add(TypedValue* val) {
   if (UNLIKELY(val->m_type != KindOfObject ||
-               !val->m_data.pobj->instanceof(c_Pair::s_cls))) {
+               !val->m_data.pobj->instanceof(c_Pair::classof()))) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter must be an instance of Pair"));
     throw e;
@@ -1996,6 +1977,10 @@ Array c_Map::ToArray(const ObjectData* obj) {
   return static_cast<const c_Map*>(obj)->toArrayImpl();
 }
 
+bool c_Map::ToBool(const ObjectData* obj) {
+  return static_cast<const c_Map*>(obj)->toBoolImpl();
+}
+
 TypedValue* c_Map::OffsetGet(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
   auto mp = static_cast<c_Map*>(obj);
@@ -2198,8 +2183,6 @@ void c_MapIterator::t_rewind() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_SMART_ALLOCATION_CLS(c_StableMap, Bucket);
-
 #define CONNECT_TO_GLOBAL_DLLIST(mapobj, element)                       \
 do {                                                                    \
   (element)->pListLast = (mapobj)->m_pListTail;                         \
@@ -2221,6 +2204,7 @@ c_StableMap::c_StableMap(Class* cb) :
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
                        ObjectData::UseUnset|
+                       ObjectData::CallToImpl|
                        ObjectData::HasClone>(cb),
     m_version(0), m_pListHead(nullptr), m_pListTail(nullptr) {
   m_size = 0;
@@ -2246,29 +2230,13 @@ void c_StableMap::deleteBuckets() {
   while (p) {
     Bucket* q = p;
     p = p->pListNext;
-    DELETE(Bucket)(q);
+    q->release();
   }
 }
 
 void c_StableMap::t___construct(CVarRef iterable /* = null_variant */) {
   if (iterable.isNull()) return;
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  if (sz) {
-    reserve(sz);
-  }
-  for (; iter; ++iter) {
-    Variant k = iter.first();
-    Variant v = iter.second();
-    TypedValue* tv = cvarToCell(&v);
-    if (k.isInteger()) {
-      update(k.toInt64(), tv);
-    } else if (k.isString()) {
-      update(k.getStringData(), tv);
-    } else {
-      throwBadKeyType();
-    }
-  }
+  init(iterable);
 }
 
 Array c_StableMap::toArrayImpl() const {
@@ -2299,7 +2267,7 @@ c_StableMap* c_StableMap::Clone(ObjectData* obj) {
 
   Bucket *last = nullptr;
   for (Bucket* p = thiz->m_pListHead; p; p = p->pListNext) {
-    Bucket *np = NEW(c_StableMap::Bucket)();
+    Bucket *np = Bucket::Make();
     cellDup(p->data, np->data);
     uint nIndex;
     if (p->hasIntKey()) {
@@ -2324,6 +2292,26 @@ c_StableMap* c_StableMap::Clone(ObjectData* obj) {
   target->m_pListTail = last;
 
   return target;
+}
+
+void c_StableMap::init(CVarRef t) {
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(t, sz);
+  if (sz) {
+    reserve(sz);
+  }
+  for (; iter; ++iter) {
+    Variant k = iter.first();
+    Variant v = iter.second();
+    TypedValue* tv = cvarToCell(&v);
+    if (k.isInteger()) {
+      update(k.toInt64(), tv);
+    } else if (k.isString()) {
+      update(k.getStringData(), tv);
+    } else {
+      throwBadKeyType();
+    }
+  }
 }
 
 Object c_StableMap::t_add(CVarRef val) {
@@ -2358,7 +2346,7 @@ Object c_StableMap::t_clear() {
 }
 
 bool c_StableMap::t_isempty() {
-  return (m_size == 0);
+  return !toBoolImpl();
 }
 
 int64_t c_StableMap::t_count() {
@@ -2390,10 +2378,6 @@ Object c_StableMap::t_keys() {
 }
 
 Object c_StableMap::t_lazy() {
-  return SystemLib::AllocLazyKeyedIterableViewObject(this);
-}
-
-Object c_StableMap::t_view() {
   return SystemLib::AllocLazyKeyedIterableViewObject(this);
 }
 
@@ -2529,20 +2513,6 @@ Array c_StableMap::t_copyasarray() {
   return toArrayImpl();
 }
 
-Array c_StableMap::t_tokeysarray() {
-  PackedArrayInit ai(m_size);
-  Bucket* p = m_pListHead;
-  while (p) {
-    if (p->hasIntKey()) {
-      ai.add((int64_t)p->ikey);
-    } else {
-      ai.add(*(const String*)(&p->skey));
-    }
-    p = p->pListNext;
-  }
-  return ai.toArray();
-}
-
 Object c_StableMap::t_values() {
   c_Vector* target;
   Object ret = target = NEWOBJ(c_Vector)();
@@ -2562,11 +2532,25 @@ Object c_StableMap::t_values() {
   return ret;
 }
 
+Array c_StableMap::t_tokeysarray() {
+  PackedArrayInit ai(m_size);
+  Bucket* p = m_pListHead;
+  while (p) {
+    if (p->hasIntKey()) {
+      ai.append(int64_t{p->ikey});
+    } else {
+      ai.append(*(const String*)(&p->skey));
+    }
+    p = p->pListNext;
+  }
+  return ai.toArray();
+}
+
 Array c_StableMap::t_tovaluesarray() {
   PackedArrayInit ai(m_size);
   Bucket* p = m_pListHead;
   while (p) {
-    ai.add(tvAsCVarRef(&p->data));
+    ai.append(tvAsCVarRef(&p->data));
     p = p->pListNext;
   }
   return ai.toArray();
@@ -2636,7 +2620,7 @@ Object c_StableMap::t_map(CVarRef callback) {
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
-    Bucket *np = NEW(c_StableMap::Bucket)(ret.asCell());
+    Bucket *np = Bucket::Make(ret.asCell());
     uint nIndex;
     if (p->hasIntKey()) {
       np->setIntKey(p->ikey);
@@ -2687,7 +2671,7 @@ Object c_StableMap::t_mapwithkey(CVarRef callback) {
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
-    Bucket *np = NEW(c_StableMap::Bucket)(ret.asTypedValue());
+    Bucket *np = Bucket::Make(ret.asTypedValue());
     uint nIndex;
     if (p->hasIntKey()) {
       np->setIntKey(p->ikey);
@@ -2808,7 +2792,7 @@ Object c_StableMap::ti_fromitems(CVarRef iterable) {
     Variant v = iter.second();
     TypedValue* tv = cvarToCell(&v);
     if (UNLIKELY(tv->m_type != KindOfObject ||
-                 !tv->m_data.pobj->instanceof(c_Pair::s_cls))) {
+                 !tv->m_data.pobj->instanceof(c_Pair::classof()))) {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Parameter must be an instance of Iterable<Pair>"));
       throw e;
@@ -2863,7 +2847,7 @@ void c_StableMap::throwOOB(StringData* key) {
 
 void c_StableMap::add(TypedValue* val) {
   if (UNLIKELY(val->m_type != KindOfObject ||
-               !val->m_data.pobj->instanceof(c_Pair::s_cls))) {
+               !val->m_data.pobj->instanceof(c_Pair::classof()))) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter must be an instance of Pair"));
     throw e;
@@ -2950,7 +2934,7 @@ bool c_StableMap::update(int64_t h, TypedValue* data) {
   if (++m_size > m_nTableSize) {
     adjustCapacity();
   }
-  p = NEW(c_StableMap::Bucket)(data);
+  p = Bucket::Make(data);
   p->setIntKey(h);
   uint nIndex = (h & m_nTableMask);
   p->pNext = m_arBuckets[nIndex];
@@ -2974,7 +2958,7 @@ bool c_StableMap::update(StringData *key, TypedValue* data) {
   if (++m_size > m_nTableSize) {
     adjustCapacity();
   }
-  p = NEW(c_StableMap::Bucket)(data);
+  p = Bucket::Make(data);
   p->setStrKey(key, h);
   uint nIndex = (h & m_nTableMask);
   p->pNext = m_arBuckets[nIndex];
@@ -3004,7 +2988,7 @@ void c_StableMap::erase(Bucket** prev) {
       m_pListTail = p->pListLast;
     }
     m_size--;
-    DELETE(Bucket)(p);
+    p->release();
   }
 }
 
@@ -3252,6 +3236,11 @@ c_StableMap::Bucket::~Bucket() {
   tvRefcountedDecRef(&data);
 }
 
+void c_StableMap::Bucket::release() {
+  this->~Bucket();
+  MM().smartFreeSize(this, sizeof(Bucket));
+}
+
 void c_StableMap::Bucket::dump() {
   printf("c_StableMap::Bucket: %" PRIx64 ", %p, %p, %p\n",
          hashKey(), pListNext, pListLast, pNext);
@@ -3264,6 +3253,10 @@ void c_StableMap::Bucket::dump() {
 Array c_StableMap::ToArray(const ObjectData* obj) {
   check_collection_cast_to_array();
   return static_cast<const c_StableMap*>(obj)->toArrayImpl();
+}
+
+bool c_StableMap::ToBool(const ObjectData* obj) {
+  return static_cast<const c_StableMap*>(obj)->toBoolImpl();
 }
 
 TypedValue* c_StableMap::OffsetGet(ObjectData* obj, TypedValue* key) {
@@ -3401,7 +3394,7 @@ void c_StableMap::Unserialize(ObjectData* obj,
       auto h = k.toInt64();
       p = smp->find(h);
       if (UNLIKELY(p != nullptr)) goto do_unserialize;
-      p = NEW(c_StableMap::Bucket)();
+      p = Bucket::Make();
       p->setIntKey(h);
       nIndex = (h & smp->m_nTableMask);
     } else if (k.isString()) {
@@ -3409,7 +3402,7 @@ void c_StableMap::Unserialize(ObjectData* obj,
       auto h = key->hash();
       p = smp->find(key->data(), key->size(), h);
       if (UNLIKELY(p != nullptr)) goto do_unserialize;
-      p = NEW(c_StableMap::Bucket)();
+      p = Bucket::Make();
       p->setStrKey(key, h);
       nIndex = (h & smp->m_nTableMask);
     } else {
@@ -3489,6 +3482,7 @@ c_Set::c_Set(Class* cb) :
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
                        ObjectData::UseUnset|
+                       ObjectData::CallToImpl|
                        ObjectData::HasClone>(cb),
     m_size(0), m_load(0), m_nLastSlot(0), m_version(0) {
   m_data = (Bucket*)emptySetSlot;
@@ -3518,18 +3512,7 @@ void c_Set::deleteBuckets() {
 
 void c_Set::t___construct(CVarRef iterable /* = null_variant */) {
   if (iterable.isNull()) return;
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  for (; iter; ++iter) {
-    Variant v = iter.second();
-    if (v.isInteger()) {
-      update(v.toInt64());
-    } else if (v.isString()) {
-      update(v.getStringData());
-    } else {
-      throwBadValueType();
-    }
-  }
+  init(iterable);
 }
 
 Array c_Set::toArrayImpl() const {
@@ -3537,7 +3520,7 @@ Array c_Set::toArrayImpl() const {
   for (uint i = 0; i <= m_nLastSlot; ++i) {
     Bucket& p = m_data[i];
     if (p.validValue()) {
-      ai.add(tvAsCVarRef(&p.data));
+      ai.append(tvAsCVarRef(&p.data));
     }
   }
   return ai.toArray();
@@ -3564,6 +3547,21 @@ c_Set* c_Set::Clone(ObjectData* obj) {
   }
 
   return target;
+}
+
+void c_Set::init(CVarRef t) {
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(t, sz);
+  for (; iter; ++iter) {
+    Variant v = iter.second();
+    if (v.isInteger()) {
+      update(v.toInt64());
+    } else if (v.isString()) {
+      update(v.getStringData());
+    } else {
+      throwBadValueType();
+    }
+  }
 }
 
 Object c_Set::t_add(CVarRef val) {
@@ -3595,7 +3593,7 @@ Object c_Set::t_clear() {
 }
 
 bool c_Set::t_isempty() {
-  return (m_size == 0);
+  return !toBoolImpl();
 }
 
 int64_t c_Set::t_count() {
@@ -3607,10 +3605,6 @@ Object c_Set::t_items() {
 }
 
 Object c_Set::t_lazy() {
-  return SystemLib::AllocLazyIterableViewObject(this);
-}
-
-Object c_Set::t_view() {
   return SystemLib::AllocLazyIterableViewObject(this);
 }
 
@@ -3639,6 +3633,14 @@ Object c_Set::t_remove(CVarRef key) {
 }
 
 Array c_Set::t_toarray() {
+  return toArrayImpl();
+}
+
+Array c_Set::t_tokeysarray() {
+  return toArrayImpl();
+}
+
+Array c_Set::t_tovaluesarray() {
   return toArrayImpl();
 }
 
@@ -4091,6 +4093,10 @@ Array c_Set::ToArray(const ObjectData* obj) {
   return static_cast<const c_Set*>(obj)->toArrayImpl();
 }
 
+bool c_Set::ToBool(const ObjectData* obj) {
+  return static_cast<const c_Set*>(obj)->toBoolImpl();
+}
+
 TypedValue* c_Set::OffsetGet(ObjectData* obj, TypedValue* key) {
   c_Set::throwNoIndexAccess();
 }
@@ -4254,10 +4260,7 @@ void c_Pair::t___construct() {
 }
 
 Array c_Pair::toArrayImpl() const {
-  PackedArrayInit ai(2);
-  ai.add(tvAsCVarRef(&elm0));
-  ai.add(tvAsCVarRef(&elm1));
-  return ai.toArray();
+  return make_packed_array(tvAsCVarRef(&elm0), tvAsCVarRef(&elm1));
 }
 
 c_Pair* c_Pair::Clone(ObjectData* obj) {
@@ -4295,10 +4298,6 @@ Object c_Pair::t_keys() {
 }
 
 Object c_Pair::t_lazy() {
-  return SystemLib::AllocLazyKeyedIterableViewObject(this);
-}
-
-Object c_Pair::t_view() {
   return SystemLib::AllocLazyKeyedIterableViewObject(this);
 }
 
@@ -4350,6 +4349,17 @@ bool c_Pair::t_containskey(CVarRef key) {
 }
 
 Array c_Pair::t_toarray() {
+  return toArrayImpl();
+}
+
+Array c_Pair::t_tokeysarray() {
+  PackedArrayInit ai(2);
+  ai.append((int64_t)0);
+  ai.append((int64_t)1);
+  return ai.toArray();
+}
+
+Array c_Pair::t_tovaluesarray() {
   return toArrayImpl();
 }
 
@@ -4630,6 +4640,44 @@ COLLECTION_MAGIC_METHODS(Set)
 COLLECTION_MAGIC_METHODS(Pair)
 
 #undef COLLECTION_MAGIC_METHODS
+
+#define ITERABLE_MATERIALIZE_METHODS(cls) \
+  Object c_##cls::t_tovector() { \
+    c_Vector* vec; \
+    Object o = vec = NEWOBJ(c_Vector)(); \
+    vec->init(VarNR(this)); \
+    return o; \
+  } \
+  Object c_##cls::t_toset() { \
+    c_Set* st; \
+    Object o = st = NEWOBJ(c_Set)(); \
+    st->init(VarNR(this)); \
+    return o; \
+  }
+
+#define KEYEDITERABLE_MATERIALIZE_METHODS(cls) \
+  ITERABLE_MATERIALIZE_METHODS(cls) \
+  Object c_##cls::t_tomap() { \
+    c_Map* mp; \
+    Object o = mp = NEWOBJ(c_Map)(); \
+    mp->init(VarNR(this)); \
+    return o; \
+  } \
+  Object c_##cls::t_tostablemap() { \
+    c_StableMap* smp; \
+    Object o = smp = NEWOBJ(c_StableMap)(); \
+    smp->init(VarNR(this)); \
+    return o; \
+  }
+
+KEYEDITERABLE_MATERIALIZE_METHODS(Vector)
+KEYEDITERABLE_MATERIALIZE_METHODS(Map)
+KEYEDITERABLE_MATERIALIZE_METHODS(StableMap)
+ITERABLE_MATERIALIZE_METHODS(Set)
+KEYEDITERABLE_MATERIALIZE_METHODS(Pair)
+
+#undef ITERABLE_MATERIALIZE_METHODS
+#undef KEYEDITERABLE_MATERIALIZE_METHODS
 
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
   assert(obj->isCollection());

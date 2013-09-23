@@ -379,9 +379,9 @@ O(LdObjInvoke,                 D(Func), S(Cls),                           NF) \
 O(LdGblAddrDef,            D(PtrToGen), S(Str),                      E|N|CRc) \
 O(LdGblAddr,               D(PtrToGen), S(Str),                            N) \
 O(LdObjClass,                   D(Cls), S(Obj),                            C) \
-O(LdFunc,                      D(Func), S(Str),                   E|N|CRc|Er) \
-O(LdFuncCached,                D(Func), CStr,                       N|C|E|Er) \
-O(LdFuncCachedU,               D(Func), CStr CStr,                  N|C|E|Er) \
+O(LdFunc,                      D(Func), S(Str),              E|N|CRc|Refs|Er) \
+O(LdFuncCached,                D(Func), CStr,                  N|C|E|Refs|Er) \
+O(LdFuncCachedU,               D(Func), CStr CStr,             N|C|E|Refs|Er) \
 O(LdFuncCachedSafe,            D(Func), CStr,                              C) \
 O(LdARFuncPtr,                 D(Func), S(StkPtr,FramePtr) C(Int),         C) \
 O(LdSSwitchDestFast,            D(TCA), S(Gen),                            N) \
@@ -397,7 +397,7 @@ O(StClosureFunc,                    ND, S(Obj),                            E) \
 O(StClosureArg,                     ND, S(Obj) S(Gen),                 CRc|E) \
 O(StClosureCtx,                     ND, S(Obj) S(Ctx,Nullptr),         CRc|E) \
 O(NewArray,                     D(Arr), C(Int),                        N|PRc) \
-O(NewTuple,                     D(Arr), C(Int) S(StkPtr),    E|Mem|N|PRc|CRc) \
+O(NewPackedArray,               D(Arr), C(Int) S(StkPtr),    E|Mem|N|PRc|CRc) \
 O(LdRaw,                        DParam, SUnk,                             NF) \
 O(FreeActRec,              D(FramePtr), S(FramePtr),                     Mem) \
 /*    name                      dstinfo srcinfo                      flags */ \
@@ -493,7 +493,10 @@ O(AddElemIntKey,                D(Arr), S(Arr)                                \
                                           S(Cell),        N|Mem|CRc|PRc|Refs) \
 O(AddNewElem,                   D(Arr), SUnk,                  N|Mem|CRc|PRc) \
 /*    name                      dstinfo srcinfo                      flags */ \
-O(Concat,                       D(Str), S(Gen) S(Gen),    N|Mem|CRc|PRc|Refs) \
+O(ConcatStrStr,                 D(Str), S(Str) S(Str),             N|CRc|PRc) \
+O(ConcatIntStr,                 D(Str), S(Int) S(Str),                 N|PRc) \
+O(ConcatStrInt,                 D(Str), S(Str) S(Int),             N|CRc|PRc) \
+O(ConcatCellCell,               D(Str), S(Cell) S(Cell),      N|CRc|PRc|Refs) \
 O(ArrayAdd,                     D(Arr), S(Arr) S(Arr),         N|Mem|CRc|PRc) \
 O(AKExists,                    D(Bool), S(Cell) S(Cell),                 C|N) \
 O(InterpOne,                 D(StkPtr), S(FramePtr) S(StkPtr),                \
@@ -966,39 +969,39 @@ class RawMemSlot {
     : m_offset(offset), m_size(size), m_type(type), m_allowExtra(allowExtra) { }
 
   static RawMemSlot& GetContLabel() {
-    static RawMemSlot m(CONTOFF(m_label), Transl::sz::dword, Type::Int);
+    static RawMemSlot m(CONTOFF(m_label), sz::dword, Type::Int);
     return m;
   }
   static RawMemSlot& GetContIndex() {
-    static RawMemSlot m(CONTOFF(m_index), Transl::sz::qword, Type::Int);
+    static RawMemSlot m(CONTOFF(m_index), sz::qword, Type::Int);
     return m;
   }
   static RawMemSlot& GetContARPtr() {
-    static RawMemSlot m(CONTOFF(m_arPtr), Transl::sz::qword, Type::StkPtr);
+    static RawMemSlot m(CONTOFF(m_arPtr), sz::qword, Type::StkPtr);
     return m;
   }
   static RawMemSlot& GetContState() {
     static RawMemSlot m(c_Continuation::stateOffset(),
-      Transl::sz::byte, Type::Int);
+      sz::byte, Type::Int);
     return m;
   }
   static RawMemSlot& GetStrLen() {
-    static RawMemSlot m(StringData::sizeOffset(), Transl::sz::dword, Type::Int);
+    static RawMemSlot m(StringData::sizeOffset(), sz::dword, Type::Int);
     return m;
   }
   static RawMemSlot& GetFuncNumParams() {
-    static RawMemSlot m(Func::numParamsOff(), Transl::sz::dword, Type::Int);
+    static RawMemSlot m(Func::numParamsOff(), sz::dword, Type::Int);
     return m;
   }
   static RawMemSlot& GetContEntry() {
     static RawMemSlot m(
       Func::prologueTableOff(),
-      Transl::sz::qword, Type::TCA);
+      sz::qword, Type::TCA);
     return m;
   }
   static RawMemSlot& GetMisCtx() {
     using namespace HPHP::Transl;
-    static RawMemSlot m(HHIR_MISOFF(ctx), Transl::sz::qword, Type::Cls);
+    static RawMemSlot m(HHIR_MISOFF(ctx), sz::qword, Type::Cls);
     return m;
   }
 

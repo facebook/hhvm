@@ -75,7 +75,10 @@ c_Closure* c_Closure::Clone(ObjectData* obj) {
 
 HphpArray* c_Closure::getStaticLocals() {
   if (m_VMStatics.get() == NULL) {
-    m_VMStatics = ArrayData::Make(1);
+    m_VMStatics = SmartPtr<HphpArray>(
+      HphpArray::MakeReserve(1),
+      SmartPtr<HphpArray>::NoIncRef{}
+    );
   }
   return m_VMStatics.get();
 }

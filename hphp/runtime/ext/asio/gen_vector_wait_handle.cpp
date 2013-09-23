@@ -52,7 +52,7 @@ void c_GenVectorWaitHandle::t___construct() {
 }
 
 void c_GenVectorWaitHandle::ti_setoncreatecallback(CVarRef callback) {
-  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set GenVectorWaitHandle::onCreate: on_create_cb not a closure"));
     throw e;
@@ -61,12 +61,12 @@ void c_GenVectorWaitHandle::ti_setoncreatecallback(CVarRef callback) {
 }
 
 Object c_GenVectorWaitHandle::ti_create(CVarRef dependencies) {
-  if (UNLIKELY(!dependencies.instanceof(c_Vector::s_cls))) {
+  if (UNLIKELY(!dependencies.instanceof(c_Vector::classof()))) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Expected dependencies to be an instance of Vector"));
     throw e;
   }
-  assert(dependencies.getObjectData()->instanceof(c_Vector::s_cls));
+  assert(dependencies.getObjectData()->instanceof(c_Vector::classof()));
   p_Vector deps = static_cast<c_Vector*>(dependencies.getObjectData())->clone();
   for (int64_t iter_pos = 0; iter_pos < deps->size(); ++iter_pos) {
     Cell* current = deps->at(iter_pos);
@@ -83,7 +83,7 @@ Object c_GenVectorWaitHandle::ti_create(CVarRef dependencies) {
 
     Cell* current = tvAssertCell(deps->at(iter_pos));
     assert(current->m_type == KindOfObject);
-    assert(current->m_data.pobj->instanceof(c_WaitHandle::s_cls));
+    assert(current->m_data.pobj->instanceof(c_WaitHandle::classof()));
     auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
     if (child->isSucceeded()) {
@@ -129,7 +129,7 @@ void c_GenVectorWaitHandle::onUnblocked() {
 
     Cell* current = tvAssertCell(m_deps->at(m_iterPos));
     assert(current->m_type == KindOfObject);
-    assert(current->m_data.pobj->instanceof(c_WaitHandle::s_cls));
+    assert(current->m_data.pobj->instanceof(c_WaitHandle::classof()));
     auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
     if (child->isSucceeded()) {
@@ -189,7 +189,7 @@ void c_GenVectorWaitHandle::enterContext(context_idx_t ctx_idx) {
     Cell* current = tvAssertCell(m_deps->at(m_iterPos));
 
     assert(current->m_type == KindOfObject);
-    assert(current->m_data.pobj->instanceof(c_WaitableWaitHandle::s_cls));
+    assert(current->m_data.pobj->instanceof(c_WaitableWaitHandle::classof()));
     auto child_wh = static_cast<c_WaitableWaitHandle*>(current->m_data.pobj);
     child_wh->enterContext(ctx_idx);
   }
@@ -205,14 +205,14 @@ void c_GenVectorWaitHandle::enterContext(context_idx_t ctx_idx) {
 
       Cell* current = tvAssertCell(m_deps->at(iter_pos));
       assert(current->m_type == KindOfObject);
-      assert(current->m_data.pobj->instanceof(c_WaitHandle::s_cls));
+      assert(current->m_data.pobj->instanceof(c_WaitHandle::classof()));
       auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
       if (child->isFinished()) {
         continue;
       }
 
-      assert(child->instanceof(c_WaitableWaitHandle::s_cls));
+      assert(child->instanceof(c_WaitableWaitHandle::classof()));
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
       child_wh->enterContext(ctx_idx);
     }

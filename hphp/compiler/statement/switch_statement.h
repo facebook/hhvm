@@ -41,7 +41,7 @@ public:
 private:
   typedef std::pair<int, CaseStatementPtr> StatementPtrWithPos;
   typedef std::vector<StatementPtrWithPos> StatementPtrWithPosVec;
-  typedef boost::shared_ptr<StatementPtrWithPosVec> 
+  typedef std::shared_ptr<StatementPtrWithPosVec> 
     StatementPtrWithPosVecPtr;
 	typedef std::map<uint64_t, StatementPtrWithPosVecPtr> 
     MapIntToStatementPtrWithPosVec; 

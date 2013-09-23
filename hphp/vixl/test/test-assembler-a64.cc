@@ -99,7 +99,9 @@ namespace vixl {
 // Run tests with the simulator.
 #define SETUP_SIZE(buf_size)                                                   \
   byte* buf = new byte[buf_size];                                              \
-  MacroAssembler masm(buf, buf_size);                                          \
+  HPHP::CodeBlock cb;                                                          \
+  cb.init(buf, buf_size);                                                      \
+  MacroAssembler masm(cb);                                                     \
   Decoder decoder;                                                             \
   Simulator* simulator = nullptr;                                              \
   simulator = new Simulator(&decoder);                                         \
@@ -127,7 +129,9 @@ namespace vixl {
 // Run the test on real hardware or models.
 #define SETUP_SIZE(buf_size)                                                   \
   byte* buf = new byte[buf_size];                                              \
-  MacroAssembler masm(buf, buf_size);                                          \
+  HPHP::CodeBlock cb;                                                          \
+  cb.init(buf, buf_size);                                                      \
+  MacroAssembler masm(cb);                                                     \
   RegisterDump core;                                                           \
   CPU::SetUp()
 

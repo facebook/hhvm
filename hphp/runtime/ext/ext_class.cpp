@@ -99,46 +99,44 @@ Array f_get_class_methods(CVarRef class_or_object) {
   if (!cls) return Array();
   VMRegAnchor _;
 
-  auto retVal = ArrayData::Make(cls->numMethods());
+  auto retVal      = HphpArray::MakeReserve(cls->numMethods());
+  auto arrayHolder = Array::attach(retVal);
   cls->getMethodNames(arGetContextClassFromBuiltin(g_vmContext->getFP()),
                       retVal);
-  return Array(retVal).keys();
+  return arrayHolder.keys();
 }
 
-Array vm_get_class_constants(CStrRef className) {
-  Class* cls = Unit::loadClass(className.get());
+Array f_get_class_constants(CStrRef className) {
+  auto const cls = Unit::loadClass(className.get());
   if (cls == NULL) {
-    return ArrayData::Make(0);
+    return Array::attach(HphpArray::MakeReserve(0));
   }
 
-  size_t numConstants = cls->numConstants();
-  auto retVal = ArrayData::Make(numConstants);
-  const Class::Const* consts = cls->constants();
+  auto const numConstants = cls->numConstants();
+  ArrayInit arrayInit(numConstants);
+
+  auto const consts = cls->constants();
   for (size_t i = 0; i < numConstants; i++) {
     // Note: hphpc doesn't include inherited constants in
     // get_class_constants(), so mimic that behavior
     if (consts[i].m_class == cls) {
-      StringData* name  = const_cast<StringData*>(consts[i].m_name);
-      const TypedValue* value = &consts[i].m_val;
+      auto const name  = const_cast<StringData*>(consts[i].m_name);
+      auto value = &consts[i].m_val;
       // Handle dynamically set constants
       if (value->m_type == KindOfUninit) {
         value = cls->clsCnsGet(consts[i].m_name);
       }
-      retVal->set(name, tvAsCVarRef(value), false);
+      arrayInit.set(name, tvAsCVarRef(value), true /* isKey */);
     }
   }
 
-  return retVal;
+  return arrayInit.toArray();
 }
 
-Array f_get_class_constants(CStrRef class_name) {
-  return vm_get_class_constants(class_name.get());
-}
-
-Array vm_get_class_vars(CStrRef className) {
-  const Class* cls = lookup_class(className.get());
+Variant f_get_class_vars(CStrRef className) {
+  const Class* cls = Unit::loadClass(className.get());
   if (!cls) {
-    raise_error("Unknown class %s", className->data());
+    return false;
   }
   cls->initialize();
 
@@ -160,7 +158,7 @@ Array vm_get_class_vars(CStrRef className) {
   CallerFrame cf;
   Class* ctx = arGetContextClass(cf());
 
-  auto ret = ArrayData::Make(numDeclProps + numSProps);
+  ArrayInit arr(numDeclProps + numSProps);
 
   for (size_t i = 0; i < numDeclProps; ++i) {
     StringData* name = const_cast<StringData*>(propInfo[i].m_name);
@@ -168,7 +166,7 @@ Array vm_get_class_vars(CStrRef className) {
     assert(name->size() != 0);
     if (Class::IsPropAccessible(propInfo[i], ctx)) {
       const TypedValue* value = &((*propVals)[i]);
-      ret->set(name, tvAsCVarRef(value), false);
+      arr.set(name, tvAsCVarRef(value), true /* isKey */);
     }
   }
 
@@ -176,16 +174,12 @@ Array vm_get_class_vars(CStrRef className) {
     bool vis, access;
     TypedValue* value = cls->getSProp(ctx, sPropInfo[i].m_name, vis, access);
     if (access) {
-      ret->set(const_cast<StringData*>(sPropInfo[i].m_name),
-               tvAsCVarRef(value), false);
+      arr.set(const_cast<StringData*>(sPropInfo[i].m_name),
+        tvAsCVarRef(value), true /* isKey */);
     }
   }
 
-  return ret;
-}
-
-Array f_get_class_vars(CStrRef class_name) {
-  return vm_get_class_vars(class_name.get());
+  return arr.toArray();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

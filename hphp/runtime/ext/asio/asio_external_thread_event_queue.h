@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-FORWARD_DECLARE_CLASS_BUILTIN(ExternalThreadEventWaitHandle);
+FORWARD_DECLARE_CLASS(ExternalThreadEventWaitHandle);
 
 /* This is not an optimal solution
  * This value is in principle a constexp, but the integer-to-pointer cast would

@@ -11,6 +11,14 @@ if [ "$0" != "$SCRIPT_NAME" ]; then
   exit 1
 fi
 
+if [ "x${TRAVIS}" != "x" ]; then
+  # Collect some stats for use in tuning build later on
+  free
+  CPUS=`cat /proc/cpuinfo | grep -E '^processor' | tail -1 | cut -d : -f 2`
+  CPUS=`expr ${CPUS} + 1`
+  echo "CPUs: ${CPUS}"
+fi
+
 export CMAKE_PREFIX_PATH=`/bin/pwd`/..
 export HPHP_HOME=`/bin/pwd`
 

@@ -787,6 +787,11 @@ void LinearScan::computePreColoringHint() {
         case ArgType::Imm:
           break;
       }
+      // Some opcodes (ex. SetM) can have more arguments than there are argument
+      // registers. These will always spill so don't do any coloring for them.
+      if (reg >= kNumRegisterArgs) {
+        break;
+      }
     }
     return;
   }
@@ -806,21 +811,6 @@ void LinearScan::computePreColoringHint() {
       break;
     case NativeImpl:
       m_preColoringHint.add(inst->src(1), 0, 0);
-      break;
-    case Concat:
-      {
-        Type lType = inst->src(0)->type();
-        Type rType = inst->src(1)->type();
-        if ((lType.isString() && rType.isString()) ||
-            (lType.isString() && rType == Type::Int) ||
-            (lType == Type::Int && rType.isString())) {
-          m_preColoringHint.add(inst->src(0), 0, 0);
-          m_preColoringHint.add(inst->src(1), 0, 1);
-        } else {
-          m_preColoringHint.add(inst->src(0), 0, 1);
-          m_preColoringHint.add(inst->src(1), 0, 3);
-        }
-      }
       break;
     case AKExists:
       normalHint(2, 0, 0);
@@ -1026,12 +1016,12 @@ void LinearScan::genSpillStats(IRTrace* trace, int numSpillLocs) {
     }
   );
 
-  static StringData* spillStats = StringData::GetStaticString("SpillStats");
-  static StringData* mainSpills = StringData::GetStaticString("MainSpills");
-  static StringData* mainReloads = StringData::GetStaticString("MainReloads");
-  static StringData* exitSpills = StringData::GetStaticString("ExitSpills");
-  static StringData* exitReloads = StringData::GetStaticString("ExitReloads");
-  static StringData* spillSpace = StringData::GetStaticString("SpillSpace");
+  static StringData* spillStats = makeStaticString("SpillStats");
+  static StringData* mainSpills = makeStaticString("MainSpills");
+  static StringData* mainReloads = makeStaticString("MainReloads");
+  static StringData* exitSpills = makeStaticString("ExitSpills");
+  static StringData* exitReloads = makeStaticString("ExitReloads");
+  static StringData* spillSpace = makeStaticString("SpillSpace");
 
   auto const marker = trace->front()->front()->marker();
   auto addStat = [&](const StringData* key, int value) {
@@ -1446,6 +1436,7 @@ void LinearScan::PreColoringHint::clear() {
 // Provide a hint that (<tmp>, <index>) is used as the <argNum>-th arg
 // in next native.
 void LinearScan::PreColoringHint::add(SSATmp* tmp, uint32_t index, int argNum) {
+  assert(argNum < kNumRegisterArgs);
   int reg = int(argNumToRegName[argNum]);
   assert(reg >= 0 && reg < kNumGPRegs);
   m_preColoredTmps[reg].first  = tmp;

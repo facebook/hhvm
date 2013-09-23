@@ -38,9 +38,9 @@ class XmlDocWrapper : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(XmlDocWrapper)
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("xmlDoc");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   XmlDocWrapper(xmlDocPtr doc, CStrRef cls, Object domNode = nullptr)
     : m_doc(doc), m_cls(cls), m_domNode(domNode) {
@@ -52,7 +52,7 @@ public:
 
   CStrRef getClass() { return m_cls; }
 
-  void sweep() {
+  void sweep() FOLLY_OVERRIDE {
     // if m_domNode isn't null, then he owns the m_doc. Otherwise, I own it
     if (m_doc && m_domNode.isNull()) {
       xmlFreeDoc(m_doc);
@@ -65,9 +65,6 @@ private:
   // Hold onto the original owner of the doc so it doesn't get free()d.
   Object m_domNode;
 };
-IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(XmlDocWrapper)
-
-StaticString XmlDocWrapper::s_class_name("xmlDoc");
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
@@ -309,7 +306,7 @@ Variant f_simplexml_load_string(CStrRef data,
       throw_invalid_argument("class not found: %s", class_name.data());
       return uninit_null();
     }
-    if (!cls->classof(c_SimpleXMLElement::s_cls)) {
+    if (!cls->classof(c_SimpleXMLElement::classof())) {
       throw_invalid_argument(
         "simplexml_load_string() expects parameter 2 to be a class name "
         "derived from SimpleXMLElement, '%s' given",
@@ -317,7 +314,7 @@ Variant f_simplexml_load_string(CStrRef data,
       return uninit_null();
     }
   } else {
-    cls = c_SimpleXMLElement::s_cls;
+    cls = c_SimpleXMLElement::classof();
   }
 
   xmlDocPtr doc = xmlReadMemory(data.data(), data.size(),
@@ -370,6 +367,7 @@ c_SimpleXMLElement* c_SimpleXMLElement::Clone(ObjectData* obj) {
   auto thiz = static_cast<c_SimpleXMLElement*>(obj);
   c_SimpleXMLElement *node =
     static_cast<c_SimpleXMLElement*>(obj->cloneImpl());
+  node->m_root = node; // raw pointer, must be to the *new* element
   node->m_doc = thiz->m_doc;
   node->m_node = thiz->m_node;
   node->m_is_text = thiz->m_is_text;
@@ -379,7 +377,7 @@ c_SimpleXMLElement* c_SimpleXMLElement::Clone(ObjectData* obj) {
   node->m_is_property = thiz->m_is_property;
   node->m_is_array = thiz->m_is_array;
   node->m_children =
-    create_children(nullptr, thiz->m_doc, thiz->m_node, String(), false);
+    create_children(node->m_root, thiz->m_doc, thiz->m_node, String(), false);
   node->m_attributes = collect_attributes(thiz->m_node, String(), false);
   return node;
 }
@@ -401,11 +399,12 @@ void c_SimpleXMLElement::t___construct(CStrRef data, int64_t options /* = 0 */,
   xmlDocPtr doc = xmlReadMemory(xml.data(), xml.size(),
                                 nullptr, nullptr, options);
   if (doc) {
+    m_root = this;
     m_doc =
       Resource(NEWOBJ(XmlDocWrapper)(doc, o_getClassName()));
     m_node = xmlDocGetRootElement(doc);
     if (m_node) {
-      m_children = create_children(nullptr, m_doc, m_node, ns, is_prefix);
+      m_children = create_children(m_root, m_doc, m_node, ns, is_prefix);
       m_attributes = collect_attributes(m_node, ns, is_prefix);
     }
   } else {
@@ -948,9 +947,9 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
   return uninit_null();
 }
 
-bool c_SimpleXMLElement::ToBoolean(const ObjectData* obj) noexcept {
+bool c_SimpleXMLElement::ToBool(const ObjectData* obj) noexcept {
   auto thiz = static_cast<const c_SimpleXMLElement*>(obj);
-  if (thiz->m_node || thiz->getDynProps().size()) {
+  if (thiz->m_node || thiz->hasDynProps()) {
     if (thiz->m_is_array || thiz->m_is_children ||
        (thiz->m_node->parent &&
         thiz->m_node->parent->type == XML_DOCUMENT_NODE)) {
@@ -1072,7 +1071,7 @@ void c_SimpleXMLElement::t_offsetset(CVarRef index, CVarRef newvalue) {
     t_offsetunset(index);
   }
 
-  if (m_node == nullptr || m_is_text) {
+  if (m_node == nullptr) {
     raise_error("cannot create attribute on this node");
     return;
   }
@@ -1147,7 +1146,7 @@ void c_SimpleXMLElementIterator::reset_iterator() {
                                 "", false);
     m_parent = obj.getTyped<c_SimpleXMLElement>();
     Variant children = m_parent->m_children[name];
-    m_parent->m_children = CREATE_MAP1(name, children);
+    m_parent->m_children = make_map_array(name, children);
     // fall through
   }
 

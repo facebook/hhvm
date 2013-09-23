@@ -32,7 +32,7 @@ BEGIN_EXTERN_C()
 namespace HPHP {
   class ZendResourceData : public SweepableResourceData {
     public:
-      virtual void sweep();
+      DECLARE_RESOURCE_ALLOCATION(ZendResourceData);
       ZendResourceData(void* ptr, int type) : ptr(ptr), type(type) {}
       ~ZendResourceData() {}
       void* ptr;
@@ -41,7 +41,7 @@ namespace HPHP {
   };
   class ZendNormalResourceDataHolder : public ZendResourceData {
     public:
-      ZendNormalResourceDataHolder(ResourceData* rd) :
+      explicit ZendNormalResourceDataHolder(ResourceData* rd) :
           ZendResourceData(nullptr, -1), m_rd(rd) {}
       ~ZendNormalResourceDataHolder() {}
       ResourceData* getResourceData() { return m_rd; }

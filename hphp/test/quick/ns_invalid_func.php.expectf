@@ -1,1 +1,1 @@
-HipHop Fatal error: Call to undefined function b() in %s on line 4
+HipHop Fatal error: Undefined function: b in %s on line 4

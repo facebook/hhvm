@@ -2189,7 +2189,7 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
       try {
         if (m_type == SOAP_CLASS || m_type == SOAP_OBJECT) {
           h->retval = vm_call_user_func
-            (CREATE_VECTOR2(soap_obj, fn_name), h->parameters);
+            (make_packed_array(soap_obj, fn_name), h->parameters);
         } else {
           h->retval = vm_call_user_func(fn_name, h->parameters);
         }
@@ -2214,7 +2214,7 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
     try {
       if (m_type == SOAP_CLASS || m_type == SOAP_OBJECT) {
         retval = vm_call_user_func
-          (CREATE_VECTOR2(soap_obj, fn_name), params);
+          (make_packed_array(soap_obj, fn_name), params);
       } else {
         retval = vm_call_user_func(fn_name, params);
       }
@@ -2372,7 +2372,7 @@ void c_SoapClient::t___construct(CVarRef wsdl,
       if (!sc) {
         throw SoapException("'stream_context' is not a StreamContext");
       }
-      m_stream_context_options = sc->m_options;
+      m_stream_context_options = sc->getOptions();
     }
 
     if (options.exists(s_soap_version)) {
@@ -2487,7 +2487,7 @@ Variant c_SoapClient::t___soapcall(CStrRef name, CArrRef args,
     soap_headers = input_headers;
   } else if (input_headers.isObject() &&
              input_headers.toObject().is<c_SoapHeader>()) {
-    soap_headers = CREATE_VECTOR1(input_headers);
+    soap_headers = make_packed_array(input_headers);
   } else{
     raise_warning("Invalid SOAP header");
     return uninit_null();
@@ -2754,7 +2754,7 @@ Variant c_SoapClient::t___dorequest(CStrRef buf, CStrRef location, CStrRef actio
 Variant c_SoapClient::t___setcookie(CStrRef name,
                                     CStrRef value /* = null_string */) {
   if (!value.isNull()) {
-    m_cookies.set(name, CREATE_VECTOR1(value));
+    m_cookies.set(name, make_packed_array(value));
   } else {
     const Variant* t = o_realProp("_cookies", RealPropUnchecked);
     if (t && t->isInitialized()) {
@@ -2778,7 +2778,7 @@ bool c_SoapClient::t___setsoapheaders(CVarRef headers /* = null_variant */) {
     verify_soap_headers_array(arr);
     m_default_headers = arr;
   } else if (headers.isObject() && headers.toObject().is<c_SoapHeader>()) {
-    m_default_headers = CREATE_VECTOR1(headers);
+    m_default_headers = make_packed_array(headers);
   } else {
     raise_warning("Invalid SOAP header");
   }

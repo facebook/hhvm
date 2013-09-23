@@ -249,7 +249,7 @@ const RawDestructor g_destructors[] = {
   (RawDestructor)getMethodPtr(&ArrayData::release),
   (RawDestructor)getMethodPtr(&ObjectData::release),
   (RawDestructor)getMethodPtr(&ResourceData::release),
-  (RawDestructor)getMethodPtr(&RefData::release),
+  (RawDestructor)(&refdata_after_decref_helper),
 };
 
 ALWAYS_INLINE
@@ -1289,7 +1289,7 @@ CVarRef Variant::SetImpl(Variant *self, T key, CVarRef v, bool isKey) {
       }
       uint32_t newlen = offset + 1;
       auto const sd = StringData::Make(newlen);
-      auto const mslice = sd->mutableSlice();
+      auto const mslice = sd->bufferSlice();
       memcpy(mslice.ptr, r.ptr, r.len);
       memset(mslice.ptr + r.len, ' ', newlen - r.len);
       mslice.ptr[offset] = ch;
@@ -1601,7 +1601,7 @@ void Variant::setEvalScalar() {
   case KindOfString: {
     StringData *pstr = m_data.pstr;
     if (!pstr->isStatic()) {
-      StringData *sd = StringData::GetStaticString(pstr);
+      StringData *sd = makeStaticString(pstr);
       decRefStr(pstr);
       m_data.pstr = sd;
       assert(m_data.pstr->isStatic());
@@ -1704,7 +1704,10 @@ static void unserializeProp(VariableUnserializer *uns,
     // Dynamic property. If this is the first, and we're using HphpArray,
     // we need to pre-allocate space in the array to ensure the elements
     // dont move during unserialization.
-    obj->initProperties(nProp);
+    //
+    // TODO(#2881866): this assumption means we can't do reallocations
+    // when promoting kPackedKind -> kMixedKind.
+    obj->reserveProperties(nProp);
     t = obj->o_realProp(realKey, ObjectData::RealPropCreate, context);
     if (!t) {
       // When accessing protected/private property from wrong context,
@@ -1883,7 +1886,7 @@ void Variant::unserialize(VariableUnserializer *uns,
           obj->o_set(s_PHP_Unserializable_Class_Name, clsName);
         } else {
           obj = ObjectData::newInstance(cls);
-          if (UNLIKELY(cls == c_Pair::s_cls && size != 2)) {
+          if (UNLIKELY(cls == c_Pair::classof() && size != 2)) {
             throw Exception("Pair objects must have exactly 2 elements");
           }
         }

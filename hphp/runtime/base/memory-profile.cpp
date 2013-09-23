@@ -20,8 +20,6 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/hphp-array-defs.h"
 
-#include <boost/make_shared.hpp>
-
 namespace HPHP {
 
 TRACE_SET_MOD(heap);
@@ -54,7 +52,7 @@ void MemoryProfile::startProfilingImpl() {
   TRACE(1, "request started: initializing memory profile\n");
   if (RuntimeOption::ClientExecutionMode() &&
       RuntimeOption::HHProfServerProfileClientMode) {
-    HeapProfileServer::Server = boost::make_shared<HeapProfileServer>();
+    HeapProfileServer::Server = std::make_shared<HeapProfileServer>();
     ProfileController::requestNext();
   }
   m_livePointers.clear();
@@ -134,9 +132,7 @@ size_t MemoryProfile::getSizeOfArray(ArrayData *arr) {
     if (maxElms > HphpArray::SmallSize) {
       size_t hashSize = tableSize * sizeof(int32_t);
       size_t dataSize = maxElms * sizeof(HphpArray::Elm);
-      size += (hashSize <= sizeof(ha->m_inline_hash))
-        ? dataSize
-        : dataSize + hashSize;
+      size += dataSize + hashSize;
     }
   }
   return size;
@@ -144,7 +140,7 @@ size_t MemoryProfile::getSizeOfArray(ArrayData *arr) {
 
 // static
 size_t MemoryProfile::getSizeOfObject(ObjectData *obj) {
-  ArrayData* props = obj->o_properties.get();
+  auto const props = obj->o_properties.get();
   return getSizeOfPtr(obj) + (props ? getSizeOfArray(props) : 0);
 }
 

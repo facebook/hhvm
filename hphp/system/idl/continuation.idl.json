@@ -35,7 +35,8 @@
         {
             "name": "Continuation",
             "flags": [
-                "IsFinal"
+                "IsFinal",
+                "NoDefaultSweep"
             ],
             "ifaces": [
                 "Iterator",

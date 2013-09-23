@@ -193,7 +193,7 @@ public:
     read(size);
     if (size > 0 && size + 1 > 0) {
       data = String(size, ReserveString);
-      char *buf = data.mutableSlice().ptr;
+      char *buf = data.bufferSlice().ptr;
       read(buf, size);
       data.setSize(size);
     } else if (size) {
@@ -254,16 +254,16 @@ public:
     }
   }
   template<typename T>
-  void read(boost::shared_ptr<T> &data) {
+  void read(std::shared_ptr<T> &data) {
     bool has;
     read(has);
     if (has) {
-      data = boost::shared_ptr<T>(new T());
+      data = std::shared_ptr<T>(new T());
       data->recvImpl(*this);
     }
   }
   template<typename T>
-  void write(const boost::shared_ptr<T> &data) {
+  void write(const std::shared_ptr<T> &data) {
     write((bool)data);
     if (data) {
       data->sendImpl(*this);

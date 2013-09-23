@@ -183,12 +183,12 @@ public:
    * server to run PHP on send when we want to be able to debug that PHP before
    * completing the command.
    */
-  template<typename T> boost::shared_ptr<T> xend(DebuggerCommand *cmd) {
-    return boost::static_pointer_cast<T>(xend(cmd, Nested));
+  template<typename T> std::shared_ptr<T> xend(DebuggerCommand *cmd) {
+    return std::static_pointer_cast<T>(xend(cmd, Nested));
   }
-  template<typename T> boost::shared_ptr<T>
+  template<typename T> std::shared_ptr<T>
   xendWithNestedExecution(DebuggerCommand *cmd) {
-    return boost::static_pointer_cast<T>(xend(cmd, NestedWithExecution));
+    return std::static_pointer_cast<T>(xend(cmd, NestedWithExecution));
   }
 
   void sendToServer(DebuggerCommand *cmd);
@@ -248,7 +248,7 @@ public:
    * Watch expressions.
    */
   typedef std::pair<const char *, std::string> Watch;
-  typedef boost::shared_ptr<Watch> WatchPtr;
+  typedef std::shared_ptr<Watch> WatchPtr;
   typedef std::vector<WatchPtr> WatchPtrVec;
   WatchPtrVec &getWatches() { return m_watches;}
   void addWatch(const char *fmt, const std::string &php);

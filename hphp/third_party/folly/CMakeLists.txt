@@ -52,9 +52,6 @@ include_directories(${LIBGLOG_INCLUDE_DIR})
 find_package(PThread REQUIRED)
 include_directories(${LIBPTHREAD_INCLUDE_DIRS})
 
-find_package(Libunwind REQUIRED)
-include_directories(${LIBUNWIND_INCLUDE_DIR})
-
 INCLUDE(CheckCXXSourceCompiles)
 CHECK_CXX_SOURCE_COMPILES("
 extern \"C\" void (*test_ifunc(void))() { return 0; }
@@ -64,7 +61,9 @@ if (FOLLY_IFUNC)
 	add_definitions("-DHAVE_IFUNC=1")
 endif()
 
-target_link_libraries(folly ${Boost_LIBRARIES} ${LIBGLOG_LIBRARY} ${LIBPTHREAD_LIBRARIES} ${LIBUNWIND_LIBRARY})
+target_link_libraries(folly ${Boost_LIBRARIES}
+                            ${LIBGLOG_LIBRARY}
+                            ${LIBPTHREAD_LIBRARIES})
 
 if (JEMALLOC_ENABLED)
 	target_link_libraries(folly ${JEMALLOC_LIB})

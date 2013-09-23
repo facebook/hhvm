@@ -16,6 +16,8 @@
 
 #include "hphp/util/async-func.h"
 
+#include <sys/mman.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -58,6 +60,10 @@ void AsyncFuncImpl::start() {
 
   // On Success use the allocated memory for the thread's stack
   if (posix_memalign(&m_threadStack, Util::s_pageSize, rlim.rlim_cur) == 0) {
+    size_t guardsize;
+    if (pthread_attr_getguardsize(&m_attr, &guardsize) == 0 && guardsize) {
+      mprotect(m_threadStack, guardsize, PROT_NONE);
+    }
     pthread_attr_setstack(&m_attr, m_threadStack, rlim.rlim_cur);
   }
 
@@ -91,6 +97,10 @@ bool AsyncFuncImpl::waitForEnd(int seconds /* = 0 */) {
   m_threadId = 0;
 
   if (m_threadStack != nullptr) {
+    size_t guardsize;
+    if (pthread_attr_getguardsize(&m_attr, &guardsize) == 0 && guardsize) {
+      mprotect(m_threadStack, guardsize, PROT_READ | PROT_WRITE);
+    }
     free(m_threadStack);
     m_threadStack = nullptr;
   }

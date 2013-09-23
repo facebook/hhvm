@@ -116,7 +116,7 @@ public:
       }
       return nullptr;
     }
-    if (!cur->instanceof(T::s_cls)) {
+    if (!cur->instanceof(T::classof())) {
       if (!badTypeOkay) {
         throw InvalidObjectTypeException(m_px->o_getClassName().c_str());
       }

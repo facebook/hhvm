@@ -70,6 +70,7 @@ static zend_rsrc_list_entry *zend_list_id_to_entry(int id TSRMLS_DC) {
 
 ZEND_API int zend_list_insert(void *ptr, int type TSRMLS_DC) {
   zend_rsrc_list_entry* le = NEWOBJ(zend_rsrc_list_entry)(ptr, type);
+  le->incRefCount();
   RL().push_back(le);
   int id = RL().size() - 1;
   le->id = id;
@@ -199,14 +200,15 @@ ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_fu
   return 0;
 }
 
- int zval_get_resource_id(const zval &z) {
-  zend_rsrc_list_entry* le = dynamic_cast<zend_rsrc_list_entry*>(z.m_data.pres);
+int zval_get_resource_id(const zval &z) {
+  zend_rsrc_list_entry* le =
+    dynamic_cast<zend_rsrc_list_entry*>(z.tv()->m_data.pres);
   if (le) {
     return le->id;
   }
 
   // Make a zend_rsrc_list_entry and return that
-  le = NEWOBJ(HPHP::ZendNormalResourceDataHolder)(z.m_data.pres);
+  le = NEWOBJ(HPHP::ZendNormalResourceDataHolder)(z.tv()->m_data.pres);
   RL().push_back(le);
   int id = RL().size() - 1;
   le->id = id;

@@ -785,7 +785,7 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 						zvp = &zcopy;
 					}
 					s_len = Z_STRLEN_P(zvp);
-					s = const_cast<char*>(Z_STRVAL_P(zvp));
+					s = Z_STRVAL_P(zvp);
 					if (adjust_precision && precision < s_len) {
 						s_len = precision;
 					}

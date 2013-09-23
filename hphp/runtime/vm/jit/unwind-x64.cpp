@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 
-#include <libunwind.h>
 #include <vector>
 #include <memory>
 #include <cxxabi.h>
@@ -274,7 +273,7 @@ register_unwind_region(unsigned char* startAddr, size_t size) {
 
   __register_frame(&buffer[0]);
 
-  return boost::shared_ptr<std::vector<char> >(
+  return std::shared_ptr<std::vector<char> >(
     bufferMem.release(),
     deregister_unwind_region
   );

@@ -157,11 +157,11 @@ struct soapClass {
 
 class soapHeader : public ResourceData {
 public:
-  DECLARE_RESOURCE_ALLOCATION(soapHeader);
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(soapHeader);
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("soapHeader")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   sdlFunction                      *function;
   String                            function_name;

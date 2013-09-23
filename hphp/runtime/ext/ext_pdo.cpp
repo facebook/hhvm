@@ -922,7 +922,13 @@ c_PDO::c_PDO(Class* cb) : ExtObjectData(cb) {
 }
 
 c_PDO::~c_PDO() {
-  m_dbh.reset(); // needed for sweeping
+}
+
+void c_PDO::sweep() {
+  // PDOConnection is not sweepable, so clean it up manually.
+  static_assert(!std::is_base_of<Sweepable, PDOConnection>::value,
+                "Remove the call to reset() below.");
+  m_dbh.reset();
 }
 
 void c_PDO::t___construct(CStrRef dsn, CStrRef username /* = null_string */,
@@ -2510,7 +2516,7 @@ safe:
 rewrite:
     /* allocate output buffer */
     out = String(newbuffer_len, ReserveString);
-    newbuffer = out.mutableSlice().ptr;
+    newbuffer = out.bufferSlice().ptr;
     out.setSize(newbuffer_len);
 
     /* and build the query */
@@ -2611,9 +2617,12 @@ c_PDOStatement::c_PDOStatement(Class* cb) :
 }
 
 c_PDOStatement::~c_PDOStatement() {
-  // needed for sweeping
   m_stmt.reset();
   m_row.reset();
+}
+
+void c_PDOStatement::sweep() {
+  // No resources allocated outside HHVM's control
 }
 
 void c_PDOStatement::t___construct() {
@@ -3089,15 +3098,15 @@ Variant c_PDOStatement::t_debugdumpparams() {
   params.append(m_stmt->query_string.data());
   f->printf("SQL: [%d] %.*s\n", params);
 
-  f->printf("Params:  %d\n", CREATE_VECTOR1(m_stmt->bound_params.size()));
+  f->printf("Params:  %d\n", make_packed_array(m_stmt->bound_params.size()));
   for (ArrayIter iter(m_stmt->bound_params); iter; ++iter) {
     if (iter.first().isString()) {
       String key = iter.first().toString();
-      params = CREATE_VECTOR3(key.size(), key.size(), key.data());
+      params = make_packed_array(key.size(), key.size(), key.data());
       f->printf("Key: Name: [%d] %.*s\n", params);
     } else {
       f->printf("Key: Position #%ld:\n",
-                CREATE_VECTOR1(iter.first().toInt64()));
+                make_packed_array(iter.first().toInt64()));
     }
 
     PDOBoundParam *param = iter.second().toResource().getTyped<PDOBoundParam>();

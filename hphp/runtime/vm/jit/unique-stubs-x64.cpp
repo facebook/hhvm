@@ -42,9 +42,10 @@ TRACE_SET_MOD(ustubs);
 
 namespace {
 
-// Utility for logging stubs addresses during startup.  It's often
-// useful to know where they were when debugging.
-TCA log(const char* name, TCA start) {
+// Utility for logging stubs addresses during startup and registering
+// the gdb symbols.  It's often useful to know where they were when
+// debugging.
+TCA add(const char* name, TCA start) {
   auto const inAStubs = start > tx64->stubsCode.base();
   UNUSED auto const stop = inAStubs ? tx64->stubsCode.frontier()
                                     : tx64->mainCode.frontier();
@@ -65,6 +66,11 @@ TCA log(const char* name, TCA start) {
     }()
   );
 
+  tx64->recordGdbStub(
+    tx64->codeBlockFor(start),
+    start,
+    strdup(folly::format("HHVM::{}", name).str().c_str())
+  );
   return start;
 }
 
@@ -76,7 +82,8 @@ TCA emitRetFromInterpretedFrame() {
   auto const arBase = static_cast<int32_t>(sizeof(ActRec) - sizeof(Cell));
   a.   lea  (rVmSp[-arBase], serviceReqArgRegs[0]);
   a.   movq (rVmFp, serviceReqArgRegs[1]);
-  emitServiceReq(a, SRFlags::JmpInsteadOfRet, REQ_POST_INTERP_RET);
+  emitServiceReq(tx64->stubsCode, SRFlags::JmpInsteadOfRet,
+                 REQ_POST_INTERP_RET);
   return ret;
 }
 
@@ -91,7 +98,8 @@ TCA emitRetFromInterpretedGeneratorFrame() {
   a.    loadq  (rVmFp[AROFF(m_this)], rContAR);
   a.    loadq  (rContAR[CONTOFF(m_arPtr)], rContAR);
   a.    movq   (rVmFp, serviceReqArgRegs[1]);
-  emitServiceReq(a, SRFlags::JmpInsteadOfRet, REQ_POST_INTERP_RET);
+  emitServiceReq(tx64->stubsCode, SRFlags::JmpInsteadOfRet,
+                 REQ_POST_INTERP_RET);
   return ret;
 }
 
@@ -152,20 +160,30 @@ TCA emitUnaryStub(Asm& a, CppCall c) {
 
 void emitCallToExit(UniqueStubs& uniqueStubs) {
   Asm a { tx64->stubsCode };
+
+  // Emit a byte of padding. This is a kind of hacky way to avoid
+  // hitting an assert in recordGdbStub when we call it with stub - 1
+  // as the start address.
+  a.emitNop(1);
   auto const stub = emitServiceReq(
-    a,
+    tx64->stubsCode,
     SRFlags::Align | SRFlags::JmpInsteadOfRet,
     REQ_EXIT
   );
 
-  uniqueStubs.callToExit = log("callToExit", stub);
+  // On a backtrace, gdb tries to locate the calling frame at address
+  // returnRIP-1. However, for the first VM frame, there is no code at
+  // returnRIP-1, since the AR was set up manually. For this frame,
+  // record the tracelet address as starting from this callToExit-1,
+  // so gdb does not barf.
+  uniqueStubs.callToExit = add("callToExit", stub);
 }
 
 void emitReturnHelpers(UniqueStubs& us) {
-  us.retHelper    = log("retHelper", emitRetFromInterpretedFrame());
-  us.genRetHelper = log("genRetHelper",
+  us.retHelper    = add("retHelper", emitRetFromInterpretedFrame());
+  us.genRetHelper = add("genRetHelper",
                         emitRetFromInterpretedGeneratorFrame());
-  us.retInlHelper = log("retInlHelper", emitRetFromInterpretedFrame());
+  us.retInlHelper = add("retInlHelper", emitRetFromInterpretedFrame());
 }
 
 void emitResumeHelpers(UniqueStubs& uniqueStubs) {
@@ -182,9 +200,9 @@ void emitResumeHelpers(UniqueStubs& uniqueStubs) {
   emitGetGContext(a, rax);
   a.   loadq  (rax[fpOff], rVmFp);
   a.   loadq  (rax[spOff], rVmSp);
-  emitServiceReq(a, REQ_RESUME);
+  emitServiceReq(tx64->stubsCode, REQ_RESUME);
 
-  log("resumeHelpers", uniqueStubs.resumeHelper);
+  add("resumeHelpers", uniqueStubs.resumeHelper);
 }
 
 void emitDefClsHelper(UniqueStubs& uniqueStubs) {
@@ -201,7 +219,7 @@ void emitDefClsHelper(UniqueStubs& uniqueStubs) {
                     Stack::topOfStackOffset()]);
   a.   jmp    (TCA(helper));
 
-  log("defClsHelper", uniqueStubs.defClsHelper);
+  add("defClsHelper", uniqueStubs.defClsHelper);
 }
 
 void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
@@ -218,28 +236,28 @@ void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
   a.    loadl  (rax[Func::sharedBaseOffset()], eax);
   a.    addl   (eax, edi);
   emitEagerVMRegSave(a, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
-  emitServiceReq(a, REQ_STACK_OVERFLOW);
+  emitServiceReq(tx64->stubsCode, REQ_STACK_OVERFLOW);
 
-  log("stackOverflowHelper", uniqueStubs.stackOverflowHelper);
+  add("stackOverflowHelper", uniqueStubs.stackOverflowHelper);
 }
 
 void emitDtorStubs(UniqueStubs& uniqueStubs) {
   Asm a { tx64->stubsCode };
 
-  auto const strDtor = log("dtorStr", emitUnaryStub(
+  auto const strDtor = add("dtorStr", emitUnaryStub(
     a, CppCall(getMethodPtr(&StringData::release))
   ));
-  auto const arrDtor = log("dtorArr", emitUnaryStub(
+  auto const arrDtor = add("dtorArr", emitUnaryStub(
     a, CppCall(getVTableOffset(&HphpArray::release))
   ));
-  auto const objDtor = log("dtorObj", emitUnaryStub(
+  auto const objDtor = add("dtorObj", emitUnaryStub(
     a, CppCall(getMethodPtr(&ObjectData::release))
   ));
-  auto const resDtor = log("dtorRes", emitUnaryStub(
+  auto const resDtor = add("dtorRes", emitUnaryStub(
     a, CppCall(getMethodPtr(&ResourceData::release))
   ));
-  auto const refDtor = log("dtorRef", emitUnaryStub(
-    a, CppCall(implicit_cast<void*>(getMethodPtr(&RefData::release)))
+  auto const refDtor = add("dtorRef", emitUnaryStub(
+    a, CppCall((void*)(&refdata_after_decref_helper))
   ));
 
   uniqueStubs.dtorStubs[0] = nullptr;
@@ -292,7 +310,7 @@ asm_label(a, release);
   }
   a.    ret    ();
 
-  log("genericDtors", uniqueStubs.irPopRHelper);
+  add("genericDtors", uniqueStubs.irPopRHelper);
 }
 
 void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
@@ -359,7 +377,7 @@ asm_label(a, loopHead);
   a.    addq   (AROFF(m_r) + sizeof(TypedValue), rVmSp);
   a.    ret    (8);
 
-  log("freeLocalsHelpers", uniqueStubs.freeManyLocalsHelper);
+  add("freeLocalsHelpers", uniqueStubs.freeManyLocalsHelper);
 }
 
 void emitFuncPrologueRedispatch(UniqueStubs& uniqueStubs) {
@@ -405,7 +423,7 @@ asm_label(a, numParamsCheck);
   a.    jmp    (rax);
   a.    ud2    ();
 
-  log("funcPrologueRedispatch", uniqueStubs.funcPrologueRedispatch);
+  add("funcPrologueRedispatch", uniqueStubs.funcPrologueRedispatch);
 }
 
 void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
@@ -482,7 +500,7 @@ asm_label(a, noCallee);
   a.    addq   (8, rsp);
   a.    ret    ();
 
-  log("fcallArrayHelper", uniqueStubs.fcallArrayHelper);
+  add("fcallArrayHelper", uniqueStubs.fcallArrayHelper);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -529,7 +547,7 @@ asm_label(a, popAndXchg);
   a.    jmp    (rax);
   a.    ud2    ();
 
-  log("fcallHelperThunk", uniqueStubs.fcallHelperThunk);
+  add("fcallHelperThunk", uniqueStubs.fcallHelperThunk);
 }
 
 void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
@@ -546,7 +564,7 @@ void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
   a.    jmp    (rax);
   a.    ud2    ();
 
-  log("funcBodyHelperThunk", uniqueStubs.funcBodyHelperThunk);
+  add("funcBodyHelperThunk", uniqueStubs.funcBodyHelperThunk);
 }
 
 }

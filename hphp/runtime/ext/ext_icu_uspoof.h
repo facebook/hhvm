@@ -43,13 +43,13 @@ extern const int64_t q_SpoofChecker$$CHAR_LIMIT;
 ///////////////////////////////////////////////////////////////////////////////
 // class SpoofChecker
 
-FORWARD_DECLARE_CLASS_BUILTIN(SpoofChecker);
+FORWARD_DECLARE_CLASS(SpoofChecker);
 class c_SpoofChecker : public ExtObjectData {
  public:
-  DECLARE_CLASS(SpoofChecker, SpoofChecker, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(SpoofChecker)
 
   // need to implement
-  public: c_SpoofChecker(Class* cls = c_SpoofChecker::s_cls);
+  public: c_SpoofChecker(Class* cls = c_SpoofChecker::classof());
   public: ~c_SpoofChecker();
   public: void t___construct();
   public: bool t_issuspicious(CStrRef text, VRefParam issuesFound = uninit_null());

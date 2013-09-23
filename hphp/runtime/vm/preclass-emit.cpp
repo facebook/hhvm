@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/blob-helper.h"
+#include "hphp/runtime/vm/native.h"
 
 namespace HPHP {
 
@@ -226,6 +227,17 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
                                                   const_.val(),
                                                   const_.phpCode()));
   }
+  if (auto nativeConsts = Native::getClassConstants(m_name)) {
+    for (auto cnsMap : *nativeConsts) {
+      auto tv = cnsMap.second;
+      constBuild.add(cnsMap.first, PreClass::Const(pc.get(),
+                                                   cnsMap.first,
+                                                   empty_string.get(),
+                                                   tv,
+                                                   empty_string.get()));
+    }
+  }
+
   pc->m_constants.create(constBuild);
   return pc.release();
 }

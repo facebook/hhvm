@@ -39,7 +39,6 @@ TestCppBase::TestCppBase() {
 
 bool TestCppBase::RunTests(const std::string &which) {
   bool ret = true;
-  RUN_TEST(TestSmartAllocator);
   RUN_TEST(TestString);
   RUN_TEST(TestArray);
   RUN_TEST(TestObject);
@@ -73,51 +72,9 @@ private:
 class SomeClass {
 public:
   SomeClass() : m_data(0) {}
-  void sweep() {}
   void dump() { printf("data: %d\n", m_data);}
   int m_data;
 };
-
-static StaticString s_TestResource("TestResource");
-
-class TestResource : public ResourceData {
-public:
-  // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return s_TestResource; }
-};
-
-typedef SmartAllocator<SomeClass>
-        SomeClassAlloc;
-
-bool TestCppBase::TestSmartAllocator() {
-  int iMax = 1000000;
-  int64_t time1, time2;
-  {
-    static IMPLEMENT_THREAD_LOCAL(SomeClassAlloc, allocator);
-
-    Timer t;
-    for (int i = 0; i < iMax; i++) {
-      SomeClass *obj = new (allocator.get()) SomeClass();
-      allocator.get()->dealloc(obj);
-    }
-    time1 = t.getMicroSeconds();
-    if (!Test::s_quiet) {
-      printf("SmartAlloctor: %" PRId64 " us\n", time1);
-    }
-  }
-  {
-    Timer t;
-    for (int i = 0; i < iMax; i++) {
-      SomeClass *obj = new SomeClass();
-      delete obj;
-    }
-    time2 = t.getMicroSeconds();
-    if (!Test::s_quiet) {
-      printf("malloc/free: %" PRId64 " us\n", time2);
-    }
-  }
-  return Count(true);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // data types
@@ -250,7 +207,7 @@ bool TestCppBase::TestArray() {
 
   // iteration
   {
-    Array arr = CREATE_MAP2("n1", "v1", "n2", "v2");
+    Array arr = make_map_array("n1", "v1", "n2", "v2");
     int i = 0;
     for (ArrayIter iter = arr.begin(); iter; ++iter, ++i) {
       if (i == 0) {
@@ -265,7 +222,7 @@ bool TestCppBase::TestArray() {
   }
   /* TODO: fix this
   {
-    Variant arr = CREATE_MAP2("n1", "v1", "n2", "v2");
+    Variant arr = make_map_array("n1", "v1", "n2", "v2");
     arr.escalate();
     for (ArrayIter iter = arr.begin(arr, true); !iter->end(); iter->next()){
       arr.lvalAt(iter->first()).reset();
@@ -302,31 +259,31 @@ bool TestCppBase::TestArray() {
     Array arr;
     arr.set(0, "v1");
     arr.set(1, "v2");
-    VS(arr, CREATE_VECTOR2("v1", "v2"));
+    VS(arr, make_packed_array("v1", "v2"));
   }
   {
     Array arr;
     arr.set(s_n1, "v1");
     arr.set(s_n2, "v2");
-    VS(arr, CREATE_MAP2("n1", "v1", "n2", "v2"));
+    VS(arr, make_map_array("n1", "v1", "n2", "v2"));
   }
   {
     Array arr;
     arr.lvalAt(0) = String("v1");
     arr.lvalAt(1) = String("v2");
-    VS(arr, CREATE_VECTOR2("v1", "v2"));
+    VS(arr, make_packed_array("v1", "v2"));
   }
   {
     Array arr;
     arr.lvalAt(s_n1) = String("v1");
     arr.lvalAt(s_n2) = String("v2");
-    VS(arr, CREATE_MAP2("n1", "v1", "n2", "v2"));
+    VS(arr, make_map_array("n1", "v1", "n2", "v2"));
   }
   {
     Array arr;
     Variant name = "name";
     arr.lvalAt(name) = String("value");
-    VS(arr, CREATE_MAP1("name", "value"));
+    VS(arr, make_map_array("name", "value"));
   }
 
   {
@@ -372,7 +329,7 @@ bool TestCppBase::TestArray() {
     VERIFY(!arr.exists(0));
     VS(arr, Array::Create(1, "v2"));
     arr.append("v3");
-    VS(arr, CREATE_MAP2(1, "v2", 2, "v3"));
+    VS(arr, make_map_array(1, "v2", 2, "v3"));
   }
   {
     static const StaticString s_0("0");
@@ -419,12 +376,12 @@ bool TestCppBase::TestArray() {
     VERIFY(!arr.exists(s_n1));
     VS(arr, Array::Create(s_n2, "v2"));
     arr.append("v3");
-    VS(arr, CREATE_MAP2("n2", "v2", 0, "v3"));
+    VS(arr, make_map_array("n2", "v2", 0, "v3"));
   }
   {
     Array arr;
     arr.lvalAt() = String("test");
-    VS(arr, CREATE_VECTOR1("test"));
+    VS(arr, make_packed_array("test"));
   }
   {
     Array arr;
@@ -472,81 +429,81 @@ bool TestCppBase::TestArray() {
   {
     Array arr = Array::Create(0) + Array::Create(1);
     VS(arr, Array::Create(0));
-    arr += CREATE_VECTOR2(0, 1);
-    VS(arr, CREATE_VECTOR2(0, 1));
+    arr += make_packed_array(0, 1);
+    VS(arr, make_packed_array(0, 1));
 
     arr = Array::Create(0).merge(Array::Create(1));
-    VS(arr, CREATE_VECTOR2(0, 1));
-    arr = arr.merge(CREATE_VECTOR2(0, 1));
-    VS(arr, CREATE_VECTOR4(0, 1, 0, 1));
+    VS(arr, make_packed_array(0, 1));
+    arr = arr.merge(make_packed_array(0, 1));
+    VS(arr, make_packed_array(0, 1, 0, 1));
 
     arr = Array::Create("s0").merge(Array::Create("s1"));
-    VS(arr, CREATE_VECTOR2("s0", "s1"));
+    VS(arr, make_packed_array("s0", "s1"));
 
     arr = Array::Create("n0", "s0") + Array::Create("n1", "s1");
-    VS(arr, CREATE_MAP2("n0", "s0", "n1", "s1"));
-    arr += CREATE_MAP2("n0", "s0", "n1", "s1");
-    VS(arr, CREATE_MAP2("n0", "s0", "n1", "s1"));
+    VS(arr, make_map_array("n0", "s0", "n1", "s1"));
+    arr += make_map_array("n0", "s0", "n1", "s1");
+    VS(arr, make_map_array("n0", "s0", "n1", "s1"));
 
     arr = Array::Create("n0", "s0").merge(Array::Create("n1", "s1"));
-    VS(arr, CREATE_MAP2("n0", "s0", "n1", "s1"));
-    Array arrX = CREATE_MAP2("n0", "s2", "n1", "s3");
+    VS(arr, make_map_array("n0", "s0", "n1", "s1"));
+    Array arrX = make_map_array("n0", "s2", "n1", "s3");
     arr = arr.merge(arrX);
-    VS(arr, CREATE_MAP2("n0", "s2", "n1", "s3"));
+    VS(arr, make_map_array("n0", "s2", "n1", "s3"));
   }
 
   // slice
   {
-    Array arr = CREATE_VECTOR2("test1", "test2");
+    Array arr = make_packed_array("test1", "test2");
     Array sub = arr.slice(1, 1, true);
-    VS(sub, CREATE_MAP1(1, "test2"));
+    VS(sub, make_map_array(1, "test2"));
   }
   {
-    Array arr = CREATE_VECTOR2("test1", "test2");
+    Array arr = make_packed_array("test1", "test2");
     Array sub = arr.slice(1, 1, false);
-    VS(sub, CREATE_VECTOR1("test2"));
+    VS(sub, make_packed_array("test2"));
   }
   {
-    Array arr = CREATE_MAP2("n1", "test1", "n2", "test2");
+    Array arr = make_map_array("n1", "test1", "n2", "test2");
     Array sub = arr.slice(1, 1, true);
-    VS(sub, CREATE_MAP1("n2", "test2"));
+    VS(sub, make_map_array("n2", "test2"));
   }
   {
-    Array arr = CREATE_MAP2("n1", "test1", "n2", "test2");
+    Array arr = make_map_array("n1", "test1", "n2", "test2");
     Array sub = arr.slice(1, 1, false);
-    VS(sub, CREATE_MAP1("n2", "test2"));
+    VS(sub, make_map_array("n2", "test2"));
   }
 
   // escalation
   {
     Array arr;
     arr.lvalAt(0).lvalAt(0) = 1.2;
-    VS(arr, CREATE_VECTOR1(CREATE_VECTOR1(1.2)));
+    VS(arr, make_packed_array(make_packed_array(1.2)));
   }
   {
     Array arr;
     arr.lvalAt(s_name).lvalAt(0) = 1.2;
-    VS(arr, CREATE_MAP1(s_name, CREATE_VECTOR1(1.2)));
+    VS(arr, make_map_array(s_name, make_packed_array(1.2)));
   }
   {
     Array arr = Array::Create();
     arr.lvalAt(0).lvalAt(0) = 1.2;
-    VS(arr, CREATE_VECTOR1(CREATE_VECTOR1(1.2)));
+    VS(arr, make_packed_array(make_packed_array(1.2)));
   }
   {
     Array arr = Array::Create();
     arr.lvalAt(s_name).lvalAt(0) = 1.2;
-    VS(arr, CREATE_MAP1(s_name, CREATE_VECTOR1(1.2)));
+    VS(arr, make_map_array(s_name, make_packed_array(1.2)));
   }
   {
     Array arr = Array::Create("test");
-    arr.lvalAt(0) = CREATE_VECTOR1(1.2);
-    VS(arr, CREATE_VECTOR1(CREATE_VECTOR1(1.2)));
+    arr.lvalAt(0) = make_packed_array(1.2);
+    VS(arr, make_packed_array(make_packed_array(1.2)));
   }
   {
     Array arr = Array::Create("test");
     arr.lvalAt(s_name).lvalAt(0) = 1.2;
-    VS(arr, CREATE_MAP2(0, "test", s_name, CREATE_VECTOR1(1.2)));
+    VS(arr, make_map_array(0, "test", s_name, make_packed_array(1.2)));
   }
   {
     Array arr = Array::Create();
@@ -556,19 +513,19 @@ bool TestCppBase::TestArray() {
   }
 
   {
-    Array arr = CREATE_MAP2(0, "a", 1, "b");
+    Array arr = make_map_array(0, "a", 1, "b");
     VERIFY(arr->isVectorData());
   }
   {
-    Array arr = CREATE_MAP2(1, "a", 0, "b");
+    Array arr = make_map_array(1, "a", 0, "b");
     VERIFY(!arr->isVectorData());
   }
   {
-    Array arr = CREATE_MAP2(1, "a", 2, "b");
+    Array arr = make_map_array(1, "a", 2, "b");
     VERIFY(!arr->isVectorData());
   }
   {
-    Array arr = CREATE_MAP1(1, "a");
+    Array arr = make_map_array(1, "a");
     arr.set(0, "b");
     VERIFY(!arr->isVectorData());
   }
@@ -586,7 +543,6 @@ bool TestCppBase::TestObject() {
     auto os = f_serialize(o);
     VS(os, "O:1:\"B\":1:{s:3:\"obj\";O:1:\"A\":1:{s:1:\"a\";i:10;}}");
   }
-  VERIFY(!equal(Resource(new TestResource()), Resource(new TestResource()) ));
   return Count(true);
 }
 
@@ -612,7 +568,7 @@ bool TestCppBase::TestVariant() {
   {
     Variant v;
     v.lvalAt() = String("test");
-    VS(v, CREATE_VECTOR1("test"));
+    VS(v, make_packed_array("test"));
   }
   {
     Variant v;
@@ -660,37 +616,37 @@ bool TestCppBase::TestVariant() {
     v.lvalAt(s_n0) = String("v0");
     v.lvalAt(s_n1) = String("v1");
     v.remove(s_n1);
-    VS(v, CREATE_MAP1(s_n0, "v0"));
+    VS(v, make_map_array(s_n0, "v0"));
     v.append("v2");
-    VS(v, CREATE_MAP2(s_n0, "v0", 0, "v2"));
+    VS(v, make_map_array(s_n0, "v0", 0, "v2"));
   }
   {
     Variant v;
     v.lvalAt(s_n0) = String("v0");
     v.lvalAt(1) = String("v1");
     v.remove(Variant(1.5));
-    VS(v, CREATE_MAP1("n0", "v0"));
+    VS(v, make_map_array("n0", "v0"));
   }
   {
     Variant v;
     v.lvalAt(s_n0) = String("v0");
     v.lvalAt(1) = String("v1");
     v.remove(Variant("1"));
-    VS(v, CREATE_MAP1("n0", "v0"));
+    VS(v, make_map_array("n0", "v0"));
   }
   {
     Variant v;
     v.lvalAt(s_n0) = String("v0");
     v.lvalAt(1) = String("v1");
     v.remove(String("1"));
-    VS(v, CREATE_MAP1("n0", "v0"));
+    VS(v, make_map_array("n0", "v0"));
   }
   {
     Variant v;
     v.lvalAt(s_n0) = String("v0");
     v.lvalAt(empty_string) = String("v1");
     v.remove(Variant());
-    VS(v, CREATE_MAP1("n0", "v0"));
+    VS(v, make_map_array("n0", "v0"));
   }
 
   // references
@@ -721,7 +677,7 @@ bool TestCppBase::TestVariant() {
   }
   {
     Variant v1 = 10;
-    Variant v2 = CREATE_VECTOR1(5);
+    Variant v2 = make_packed_array(5);
     v2.lvalAt() = ref(v1);
     v1 = 20;
     VS(v2[1], 20);
@@ -731,61 +687,38 @@ bool TestCppBase::TestVariant() {
   {
     Variant arr;
     arr.lvalAt(0).lvalAt(0) = 1.2;
-    VS(arr, CREATE_VECTOR1(CREATE_VECTOR1(1.2)));
+    VS(arr, make_packed_array(make_packed_array(1.2)));
   }
   {
     Variant arr;
     arr.lvalAt(s_name).lvalAt(0) = 1.2;
-    VS(arr, CREATE_MAP1(s_name, CREATE_VECTOR1(1.2)));
+    VS(arr, make_map_array(s_name, make_packed_array(1.2)));
   }
   {
     Variant arr = Array::Create();
     arr.lvalAt(0).lvalAt(0) = 1.2;
-    VS(arr, CREATE_VECTOR1(CREATE_VECTOR1(1.2)));
+    VS(arr, make_packed_array(make_packed_array(1.2)));
   }
   {
     Variant arr = Array::Create();
     arr.lvalAt(s_name).lvalAt(0) = 1.2;
-    VS(arr, CREATE_MAP1(s_name, CREATE_VECTOR1(1.2)));
+    VS(arr, make_map_array(s_name, make_packed_array(1.2)));
   }
   {
     Variant arr = Array::Create("test");
-    arr.lvalAt(0) = CREATE_VECTOR1(1.2);
-    VS(arr, CREATE_VECTOR1(CREATE_VECTOR1(1.2)));
+    arr.lvalAt(0) = make_packed_array(1.2);
+    VS(arr, make_packed_array(make_packed_array(1.2)));
   }
   {
     Variant arr = Array::Create("test");
     arr.lvalAt(s_name).lvalAt(0) = 1.2;
-    VS(arr, CREATE_MAP2(0, "test", s_name, CREATE_VECTOR1(1.2)));
+    VS(arr, make_map_array(0, "test", s_name, make_packed_array(1.2)));
   }
 
   return Count(true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-class TestGlobals {
-public:
-  TestGlobals() {
-    String a = "apple";
-    m_string = a + "orange"; // so mallocing m_data internally
-
-    m_array = CREATE_MAP2("a", "apple", "b", "orange");
-  }
-
-  Variant m_string;
-  Array m_array;
-  Variant m_string2;
-  Array m_array2;
-  Variant m_conn;
-  Variant m_curlconn;
-  Variant m_curlMultiConn;
-  String key;
-  String value;
-  DECLARE_SMART_ALLOCATION(TestGlobals);
-  void dump() {}
-};
-IMPLEMENT_SMART_ALLOCATION(TestGlobals);
 
 /* Pull 32bit Big Endian words from an in6_addr */
 static inline long in6addrWord(struct in6_addr addr, char wordNo) {

@@ -20,27 +20,22 @@
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(ZipFile);
-///////////////////////////////////////////////////////////////////////////////
-
-StaticString ZipFile::s_class_name("ZipFile");
-
 ///////////////////////////////////////////////////////////////////////////////
 
 ZipFile::ZipFile() : m_gzFile(nullptr) {
   m_innerFile = NEWOBJ(PlainFile)();
-  m_innerFile->unregister(); // so Sweepable won't touch my child
   m_isLocal = true;
 }
 
 ZipFile::~ZipFile() {
-  closeImpl();
-  DELETEOBJ(HPHP, PlainFile, m_innerFile);
+  ZipFile::closeImpl();
+  delete m_innerFile;
 }
 
 void ZipFile::sweep() {
   closeImpl();
-  File::closeImpl();
+  m_innerFile = nullptr; // it'll get swept elsewhere
+  File::sweep();
 }
 
 bool ZipFile::open(CStrRef filename, CStrRef mode) {

@@ -9,6 +9,7 @@
             "name": "EncodingDetector",
             "desc": "Guesses the encoding of an array of bytes in an unknown encoding (see http:\/\/icu-project.org\/apiref\/icu4c\/ucsdet_8h.html)",
             "flags": [
+                "NoDefaultSweep"
             ],
             "footer": "\n  private: UCharsetDetector *m_encoding_detector;",
             "funcs": [
@@ -87,6 +88,7 @@
             "name": "EncodingMatch",
             "desc": "Result of detecting the encoding of an array of bytes",
             "flags": [
+                "NoDefaultSweep"
             ],
             "footer": "\n  public: const UCharsetMatch *m_encoding_match;\n  private: void validate();",
             "funcs": [

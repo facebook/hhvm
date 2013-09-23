@@ -27,20 +27,33 @@ namespace HPHP {
 
 class StreamContext : public ResourceData {
 public:
-  DECLARE_RESOURCE_ALLOCATION(StreamContext);
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(StreamContext);
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("StreamContext")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   StreamContext(CArrRef options, CArrRef params)
     : m_options(options), m_params(params) {
   }
+
+  static bool validateOptions(CVarRef options);
+  void setOption(CStrRef wrapper, CStrRef option, CVarRef value);
+  void mergeOptions(CArrRef options);
+  Array getOptions() const;
+  static bool validateParams(CVarRef params);
+  void mergeParams(CArrRef params);
+  Array getParams() const;
+
+private:
+  static StaticString s_options_key;
+  static StaticString s_notification_key;
+
   Array m_options;
   Array m_params;
 };
 
-Resource f_stream_context_create(CArrRef options = null_array,
+Variant f_stream_context_create(CArrRef options = null_array,
                                  CArrRef params = null_array);
 
 Resource f_stream_context_get_default(CArrRef options = null_array);
@@ -52,8 +65,10 @@ bool f_stream_context_set_option(CResRef stream_or_context,
                                  CStrRef option = null_string,
                                  CVarRef value = null_variant);
 
-bool f_stream_context_set_param(CResRef stream_or_context,
-                                CArrRef params);
+Variant f_stream_context_get_params(CResRef stream_or_context);
+
+bool f_stream_context_set_params(CResRef stream_or_context,
+                                 CArrRef params);
 
 ///////////////////////////////////////////////////////////////////////////////
 

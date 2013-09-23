@@ -28,8 +28,6 @@
 #include <stdarg.h>
 #include "arpa/inet.h" // For htonl().
 
-#include <boost/utility.hpp>
-
 #include "folly/Likely.h"
 
 /**
@@ -41,52 +39,63 @@ namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
 // Non-gcc compat
 #ifndef __GNUC__
-#define __attribute__(x)
+# define __attribute__(x)
 #endif
 
-#define ATTRIBUTE_UNUSED __attribute__((unused))
-#define ATTRIBUTE_NORETURN __attribute__((noreturn))
+#define ATTRIBUTE_UNUSED   __attribute__((__unused__))
+#define ATTRIBUTE_NORETURN __attribute__((__noreturn__))
 #ifndef ATTRIBUTE_PRINTF
-#if __GNUC__ > 2 || __GNUC__ == 2 && __GNUC_MINOR__ > 6
-#define ATTRIBUTE_PRINTF(a1,a2) __attribute__((__format__ (__printf__, a1, a2)))
-#else
-#define ATTRIBUTE_PRINTF(a1,a2)
-#endif
+# if __GNUC__ > 2 || __GNUC__ == 2 && __GNUC_MINOR__ > 6
+#  define ATTRIBUTE_PRINTF(a1,a2) \
+     __attribute__((__format__ (__printf__, a1, a2)))
+# else
+#  define ATTRIBUTE_PRINTF(a1,a2)
+# endif
 #endif
 #if (__GNUC__ == 4 && __GNUC_MINOR__ >= 3) || __ICC >= 1200 || __GNUC__ > 4
-#define ATTRIBUTE_COLD __attribute__((cold))
+# define ATTRIBUTE_COLD    __attribute__((__cold__))
 #else
-#define ATTRIBUTE_COLD
+# define ATTRIBUTE_COLD
 #endif
 
 // TODO (#2632955): Remove once 4.7.x+ is the minimum GCC supported
 #if defined(__linux__) && !defined(__clang__) && \
     (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7))
 // broken until gcc 4.9 (gcc #384078)
-// #pragma GCC diagnostic error "-Wmaybe-uninitialized"
-#pragma GCC diagnostic error "-Wunused-variable"
+// # pragma GCC diagnostic error "-Wmaybe-uninitialized"
+# pragma GCC diagnostic error "-Wunused-variable"
 #endif
 
-#define ALWAYS_INLINE      inline __attribute__((always_inline))
-#define NEVER_INLINE       __attribute__((noinline))
+#define ALWAYS_INLINE      inline __attribute__((__always_inline__))
+#define NEVER_INLINE       __attribute__((__noinline__))
 #define INLINE_SINGLE_CALLER ALWAYS_INLINE
-#define UNUSED             __attribute__((unused))
-#define FLATTEN            __attribute__((flatten))
+#define UNUSED             __attribute__((__unused__))
+#define FLATTEN            __attribute__((__flatten__))
 #ifndef __APPLE__
-#define HOT_FUNC           __attribute__((section(".text.hot.builtin")))
+# define HOT_FUNC          __attribute__((__section__(".text.hot.builtin")))
 #else
 // TODO: Figure out a way to link hot functions first on OSX with gobjdump
-#define HOT_FUNC
+# define HOT_FUNC
 #endif
-#define EXTERNALLY_VISIBLE __attribute__((externally_visible))
+#define EXTERNALLY_VISIBLE __attribute__((__externally_visible__))
 
 #ifdef DEBUG
-#define DEBUG_ONLY /* nop */
+# define DEBUG_ONLY /* nop */
 #else
-#define DEBUG_ONLY UNUSED
+# define DEBUG_ONLY UNUSED
 #endif
 
 #define HOT_FUNC_VM HOT_FUNC
+
+/*
+ * Custom unwinder logic doesn't play well with ASan when throwing exceptions.
+ */
+#if defined(__clang__) || defined(__GNUC__)
+# define ATTRIBUTE_NO_ADDRESS_SAFETY_ANALYSIS \
+    __attribute__((__no_address_safety_analysis__))
+#else
+# define ATTRIBUTE_NO_ADDRESS_SAFETY_ANALYSIS
+#endif
 
 /*
  * We need to keep some unreferenced functions from being removed by
@@ -102,11 +111,11 @@ namespace HPHP { namespace Util {
  * move to it.
  */
 #ifndef __APPLE__
-#define KEEP_SECTION \
-  __attribute__((section(".text.keep")))
+# define KEEP_SECTION \
+    __attribute__((__section__(".text.keep")))
 #else
-#define KEEP_SECTION \
-  __attribute__((section(".text.keep,")))
+# define KEEP_SECTION \
+    __attribute__((__section__(".text.keep,")))
 #endif
 
 /**
@@ -187,9 +196,9 @@ std::string relativePath(const std::string fromDir, const std::string toFile);
 /**
  * Canonicalize path to remove "..", "." and "\/", etc..
  */
-std::string canonicalize(const std::string &path);
-const char *canonicalize(const char *path, size_t len,
-                         bool collapse_slashes = true);
+std::string canonicalize(const std::string& path);
+char* canonicalize(const char* path, size_t len,
+                   bool collapse_slashes = true);
 
 /**
  * Makes sure there is ending slash by changing "path/name" to "path/name/".
@@ -367,13 +376,6 @@ template <class T>
 T& getDataRef(void* base, unsigned offset) {
   return *(T*)((char*)base + offset);
 }
-
-template<class T>
-struct Nuller : private boost::noncopyable {
-  explicit Nuller(const T** p) : p(p) {}
-  ~Nuller() { *p = 0; }
-  T const** const p;
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

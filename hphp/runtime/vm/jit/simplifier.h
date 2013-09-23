@@ -87,7 +87,8 @@ private:
   SSATmp* simplifyNSame(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyIsType(IRInstruction*);
   SSATmp* simplifyJmpIsType(IRInstruction*);
-  SSATmp* simplifyConcat(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyConcatCellCell(IRInstruction*);
+  SSATmp* simplifyConcatStrStr(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyConvToArr(IRInstruction*);
   SSATmp* simplifyConvArrToBool(IRInstruction*);
   SSATmp* simplifyConvDblToBool(IRInstruction*);

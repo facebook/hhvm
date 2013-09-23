@@ -588,6 +588,7 @@
             "name": "LibXMLError",
             "desc": null,
             "flags": [
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {

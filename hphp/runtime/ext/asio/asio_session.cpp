@@ -100,7 +100,7 @@ void AsioSession::onContinuationYield(c_ContinuationWaitHandle* cont, c_WaitHand
   try {
     vm_call_user_func(
       m_onContinuationYieldCallback,
-      CREATE_VECTOR2(cont, child));
+      make_packed_array(cont, child));
   } catch (const Object& callback_exception) {
     raise_warning("[asio] Ignoring exception thrown by ContinuationWaitHandle::onYield callback");
   }
@@ -111,7 +111,7 @@ void AsioSession::onContinuationSuccess(c_ContinuationWaitHandle* cont, CVarRef 
   try {
     vm_call_user_func(
       m_onContinuationSuccessCallback,
-      CREATE_VECTOR2(cont, result));
+      make_packed_array(cont, result));
   } catch (const Object& callback_exception) {
     raise_warning("[asio] Ignoring exception thrown by ContinuationWaitHandle::onSuccess callback");
   }
@@ -122,7 +122,7 @@ void AsioSession::onContinuationFail(c_ContinuationWaitHandle* cont, CObjRef exc
   try {
     vm_call_user_func(
       m_onContinuationFailCallback,
-      CREATE_VECTOR2(cont, exception));
+      make_packed_array(cont, exception));
   } catch (const Object& callback_exception) {
     raise_warning("[asio] Ignoring exception thrown by ContinuationWaitHandle::onFail callback");
   }
@@ -142,7 +142,7 @@ void AsioSession::onGenArrayCreate(c_GenArrayWaitHandle* wait_handle, CVarRef de
   try {
     vm_call_user_func(
       m_onGenArrayCreateCallback,
-      CREATE_VECTOR2(wait_handle, dependencies));
+      make_packed_array(wait_handle, dependencies));
   } catch (const Object& callback_exception) {
     raise_warning("[asio] Ignoring exception thrown by GenArrayWaitHandle::onCreate callback");
   }
@@ -153,7 +153,7 @@ void AsioSession::onGenMapCreate(c_GenMapWaitHandle* wait_handle, CVarRef depend
   try {
     vm_call_user_func(
       m_onGenMapCreateCallback,
-      CREATE_VECTOR2(wait_handle, dependencies));
+      make_packed_array(wait_handle, dependencies));
   } catch (const Object& callback_exception) {
     raise_warning("[asio] Ignoring exception thrown by GenMapWaitHandle::onCreate callback");
   }
@@ -164,7 +164,7 @@ void AsioSession::onGenVectorCreate(c_GenVectorWaitHandle* wait_handle, CVarRef 
   try {
     vm_call_user_func(
       m_onGenVectorCreateCallback,
-      CREATE_VECTOR2(wait_handle, dependencies));
+      make_packed_array(wait_handle, dependencies));
   } catch (const Object& callback_exception) {
     raise_warning("[asio] Ignoring exception thrown by GenVectorWaitHandle::onCreate callback");
   }
@@ -175,7 +175,7 @@ void AsioSession::onSetResultToRefCreate(c_SetResultToRefWaitHandle* wait_handle
   try {
     vm_call_user_func(
       m_onSetResultToRefCreateCallback,
-      CREATE_VECTOR2(wait_handle, child));
+      make_packed_array(wait_handle, child));
   } catch (const Object& callback_exception) {
     raise_warning("[asio] Ignoring exception thrown by SetResultToRefWaitHandle::onCreate callback");
   }

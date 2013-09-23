@@ -91,11 +91,13 @@ trait StrictIterable {
     }
     return $arr;
   }
-  public function lazy() {
-    return new LazyIterableView($this);
+  public function toVector() {
+    return new Vector($this);
   }
-  // deprecated
-  public function view() {
+  public function toSet() {
+    return new Set($this);
+  }
+  public function lazy() {
     return new LazyIterableView($this);
   }
   public function map($callback) {
@@ -132,11 +134,19 @@ trait StrictKeyedIterable {
     }
     return $arr;
   }
-  public function lazy() {
-    return new LazyKeyedIterableView($this);
+  public function toVector() {
+    return new Vector($this);
   }
-  // deprecated
-  public function view() {
+  public function toMap() {
+    return new Map($this);
+  }
+  public function toStableMap() {
+    return new StableMap($this);
+  }
+  public function toSet() {
+    return new Set($this);
+  }
+  public function lazy() {
     return new LazyKeyedIterableView($this);
   }
   public function map($callback) {
@@ -201,11 +211,13 @@ trait LazyIterable {
     }
     return $arr;
   }
-  public function lazy() {
-    return $this;
+  public function toVector() {
+    return new Vector($this);
   }
-  // deprecated
-  public function view() {
+  public function toSet() {
+    return new Set($this);
+  }
+  public function lazy() {
     return $this;
   }
   public function map($callback) {
@@ -227,11 +239,19 @@ trait LazyKeyedIterable {
     }
     return $arr;
   }
-  public function lazy() {
-    return $this;
+  public function toVector() {
+    return new Vector($this);
   }
-  // deprecated
-  public function view() {
+  public function toMap() {
+    return new Map($this);
+  }
+  public function toStableMap() {
+    return new StableMap($this);
+  }
+  public function toSet() {
+    return new Set($this);
+  }
+  public function lazy() {
     return $this;
   }
   public function map($callback) {

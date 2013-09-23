@@ -72,9 +72,9 @@ Object createObject(CStrRef obj_typename, int nargs = 0,
   }
   Array args;
   if (nargs == 1) {
-    args = CREATE_VECTOR1(arg1);
+    args = make_packed_array(arg1);
   } else if (nargs == 2 ) {
-    args = CREATE_VECTOR2(arg1, arg2);
+    args = make_packed_array(arg1, arg2);
   }
   return create_object(obj_typename, args);
 }
@@ -170,7 +170,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       uint32_t size = transport.readU32();
       if (size && (size + 1)) {
         String s = String(size, ReserveString);
-        char* strbuf = s.mutableSlice().ptr;
+        char* strbuf = s.bufferSlice().ptr;
         transport.readBytes(strbuf, size);
         return s.setSize(size);
       } else {

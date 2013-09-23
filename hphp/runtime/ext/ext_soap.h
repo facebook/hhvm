@@ -32,13 +32,13 @@ int64_t f__soap_active_version();
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapServer
 
-FORWARD_DECLARE_CLASS_BUILTIN(SoapServer);
+FORWARD_DECLARE_CLASS(SoapServer);
 class c_SoapServer : public ExtObjectData {
  public:
-  DECLARE_CLASS(SoapServer, SoapServer, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(SoapServer)
 
   // need to implement
-  public: c_SoapServer(Class* cls = c_SoapServer::s_cls);
+  public: c_SoapServer(Class* cls = c_SoapServer::classof());
   public: ~c_SoapServer();
   public: void t___construct(CVarRef wsdl, CArrRef options = null_array);
   public: void t_setclass(int _argc, CStrRef name, CArrRef _argv = null_array);
@@ -71,13 +71,13 @@ class c_SoapServer : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapClient
 
-FORWARD_DECLARE_CLASS_BUILTIN(SoapClient);
+FORWARD_DECLARE_CLASS(SoapClient);
 class c_SoapClient : public ExtObjectDataFlags<ObjectData::HasCall> {
  public:
-  DECLARE_CLASS(SoapClient, SoapClient, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(SoapClient)
 
   // need to implement
-  public: c_SoapClient(Class* cls = c_SoapClient::s_cls);
+  public: c_SoapClient(Class* cls = c_SoapClient::classof());
   public: ~c_SoapClient();
   public: void t___construct(CVarRef wsdl, CArrRef options = null_array);
   public: Variant t___call(Variant name, Variant args);
@@ -134,13 +134,13 @@ class c_SoapClient : public ExtObjectDataFlags<ObjectData::HasCall> {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapVar
 
-FORWARD_DECLARE_CLASS_BUILTIN(SoapVar);
+FORWARD_DECLARE_CLASS(SoapVar);
 class c_SoapVar : public ExtObjectData {
  public:
-  DECLARE_CLASS(SoapVar, SoapVar, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(SoapVar)
 
   // need to implement
-  public: c_SoapVar(Class* cls = c_SoapVar::s_cls);
+  public: c_SoapVar(Class* cls = c_SoapVar::classof());
   public: ~c_SoapVar();
   public: void t___construct(CVarRef data, CVarRef type, CStrRef type_name = null_string, CStrRef type_namespace = null_string, CStrRef node_name = null_string, CStrRef node_namespace = null_string);
 
@@ -157,13 +157,13 @@ class c_SoapVar : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapParam
 
-FORWARD_DECLARE_CLASS_BUILTIN(SoapParam);
+FORWARD_DECLARE_CLASS(SoapParam);
 class c_SoapParam : public ExtObjectData {
  public:
-  DECLARE_CLASS(SoapParam, SoapParam, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(SoapParam)
 
   // need to implement
-  public: c_SoapParam(Class* cls = c_SoapParam::s_cls);
+  public: c_SoapParam(Class* cls = c_SoapParam::classof());
   public: ~c_SoapParam();
   public: void t___construct(CVarRef data, CStrRef name);
 
@@ -176,13 +176,13 @@ class c_SoapParam : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapHeader
 
-FORWARD_DECLARE_CLASS_BUILTIN(SoapHeader);
+FORWARD_DECLARE_CLASS(SoapHeader);
 class c_SoapHeader : public ExtObjectData {
  public:
-  DECLARE_CLASS(SoapHeader, SoapHeader, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(SoapHeader)
 
   // need to implement
-  public: c_SoapHeader(Class* cls = c_SoapHeader::s_cls);
+  public: c_SoapHeader(Class* cls = c_SoapHeader::classof());
   public: ~c_SoapHeader();
   public: void t___construct(CStrRef ns, CStrRef name, CVarRef data = uninit_null(), bool mustunderstand = false, CVarRef actor = uninit_null());
 

@@ -3326,7 +3326,7 @@ Variant c_DOMDocument::t_getelementbyid(CStrRef elementid) {
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlAttrPtr attrp = xmlGetID(docp, (xmlChar*)elementid.data());
   if (attrp && attrp->parent) {
-    c_DOMText *ret = NEWOBJ(c_DOMText)();
+    c_DOMElement *ret = NEWOBJ(c_DOMElement)();
     ret->m_doc = this;
     ret->m_node = attrp->parent;
     return ret;
@@ -5180,7 +5180,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
     raise_warning("Not allowed to call handler '%s()'.", handler.data());
   } else {
     Variant retval = vm_call_user_func(handler, args);
-    if (retval.instanceof(c_DOMNode::s_cls)) {
+    if (retval.instanceof(c_DOMNode::classof())) {
       if (intern->m_node_list.empty()) {
         intern->m_node_list = Array::Create();
       }

@@ -52,7 +52,7 @@ Object f_asio_get_running() {
 }
 
 void f_asio_set_on_failed_callback(CVarRef on_failed_cb) {
-  if (!on_failed_cb.isNull() && !on_failed_cb.instanceof(c_Closure::s_cls)) {
+  if (!on_failed_cb.isNull() && !on_failed_cb.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set asio on failed callback: on_failed_cb not a closure"));
     throw e;

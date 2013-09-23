@@ -458,7 +458,7 @@ static bool translate_addresses(bfd *abfd, const char *addr,
 // tables.
 
 
-typedef boost::shared_ptr<bfd_cache> bfd_cache_ptr;
+typedef std::shared_ptr<bfd_cache> bfd_cache_ptr;
 typedef hphp_hash_map<std::string, bfd_cache_ptr, string_hash> bfdMap;
 static Mutex s_bfdMutex;
 static bfdMap s_bfds;

@@ -31,7 +31,6 @@
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/admin-request-handler.h"
 #include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/server/server-name-indication.h"
 #include "hphp/runtime/server/server-note.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/util/process.h"
@@ -61,7 +60,6 @@
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/parsers.hpp>
-#include <boost/make_shared.hpp>
 #include <libgen.h>
 #include <oniguruma.h>
 #include <signal.h>
@@ -336,7 +334,7 @@ static void handle_exception_helper(bool& ret,
         !context->getExitCallback().isNull() &&
         f_is_callable(context->getExitCallback())) {
       Array stack = e.getBackTrace();
-      Array argv = CREATE_VECTOR2(e.ExitCode, stack);
+      Array argv = make_packed_array(e.ExitCode, stack);
       vm_call_user_func(context->getExitCallback(), argv);
     }
   } catch (const PhpFileDoesNotExistException &e) {
@@ -655,27 +653,6 @@ static int start_server(const std::string &username) {
      RuntimeOption::AdminLogFile,
      username);
 
-  void *sslCTX = nullptr;
-  if (RuntimeOption::EnableSSL) {
-#ifdef _EVENT_USE_OPENSSL
-    struct ssl_config config;
-    if (RuntimeOption::SSLCertificateFile != "" &&
-        RuntimeOption::SSLCertificateKeyFile != "") {
-      config.cert_file = (char*)RuntimeOption::SSLCertificateFile.c_str();
-      config.pk_file = (char*)RuntimeOption::SSLCertificateKeyFile.c_str();
-      sslCTX = evhttp_init_openssl(&config);
-      if (!RuntimeOption::SSLCertificateDir.empty()) {
-        ServerNameIndication::load(sslCTX, config,
-                                   RuntimeOption::SSLCertificateDir);
-      }
-    } else {
-      Logger::Error("Invalid certificate file or key file");
-    }
-#else
-    Logger::Error("A SSL enabled libevent is required");
-#endif
-  }
-
 #if !defined(SKIP_USER_CHANGE)
   if (!username.empty()) {
     if (Logger::UseCronolog) {
@@ -689,11 +666,11 @@ static int start_server(const std::string &username) {
 
   // Create the HttpServer before any warmup requests to properly
   // initialize the process
-  HttpServer::Server = HttpServerPtr(new HttpServer(sslCTX));
+  HttpServer::Server = HttpServerPtr(new HttpServer());
 
   if (memory_profiling) {
     Logger::Info("Starting up profiling server");
-    HeapProfileServer::Server = boost::make_shared<HeapProfileServer>();
+    HeapProfileServer::Server = std::make_shared<HeapProfileServer>();
   }
 
   // If we have any warmup requests, replay them before listening for
@@ -1168,7 +1145,7 @@ static int execute_program_impl(int argc, char** argv) {
     hphp_process_init();
     try {
       HPHP::Eval::PhpFile* phpFile = g_vmContext->lookupPhpFile(
-        StringData::GetStaticString(po.lint.c_str()), "", nullptr);
+        makeStaticString(po.lint.c_str()), "", nullptr);
       if (phpFile == nullptr) {
         throw FileOpenException(po.lint.c_str());
       }
@@ -1402,10 +1379,10 @@ void hphp_process_init() {
   init_thread_locals();
 
   // Initialize per-process dynamic PHP-visible consts before ClassInfo::Load()
-  k_PHP_BINARY = StringData::GetStaticString(current_executable_path());
-  k_PHP_BINDIR = StringData::GetStaticString(current_executable_directory());
-  k_PHP_OS = StringData::GetStaticString(f_php_uname("s"));
-  k_PHP_SAPI = StringData::GetStaticString(RuntimeOption::ExecutionMode);
+  k_PHP_BINARY = makeStaticString(current_executable_path());
+  k_PHP_BINDIR = makeStaticString(current_executable_directory());
+  k_PHP_OS = makeStaticString(f_php_uname("s"));
+  k_PHP_SAPI = makeStaticString(RuntimeOption::ExecutionMode);
 
   ClassInfo::Load();
   Process::InitProcessStatics();

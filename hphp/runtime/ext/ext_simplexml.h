@@ -39,7 +39,7 @@ bool f_libxml_disable_entity_loader(bool disable = true);
 ///////////////////////////////////////////////////////////////////////////////
 // class SimpleXMLElement
 
-FORWARD_DECLARE_CLASS_BUILTIN(SimpleXMLElement);
+FORWARD_DECLARE_CLASS(SimpleXMLElement);
 class c_SimpleXMLElement :
       public ExtObjectDataFlags<ObjectData::UseGet|
                                 ObjectData::UseSet|
@@ -49,10 +49,10 @@ class c_SimpleXMLElement :
                                 ObjectData::HasClone>,
       public Sweepable {
  public:
-  DECLARE_CLASS(SimpleXMLElement, SimpleXMLElement, ObjectData)
+  DECLARE_CLASS(SimpleXMLElement)
 
   // need to implement
-  public: c_SimpleXMLElement(Class* cls = c_SimpleXMLElement::s_cls);
+  public: c_SimpleXMLElement(Class* cls = c_SimpleXMLElement::classof());
   public: ~c_SimpleXMLElement();
   public: void t___construct(CStrRef data, int64_t options = 0, bool data_is_url = false, CStrRef ns = "", bool is_prefix = false);
   public: bool t_offsetexists(CVarRef index);
@@ -80,7 +80,7 @@ class c_SimpleXMLElement :
 
  public:
   static c_SimpleXMLElement* Clone(ObjectData* obj);
-  static bool    ToBoolean(const ObjectData* obj) noexcept;
+  static bool    ToBool(const ObjectData* obj) noexcept;
   static int64_t ToInt64(const ObjectData* obj) noexcept;
   static double  ToDouble(const ObjectData* obj) noexcept;
   static Array   ToArray(const ObjectData* obj);
@@ -103,13 +103,13 @@ class c_SimpleXMLElement :
 ///////////////////////////////////////////////////////////////////////////////
 // class LibXMLError
 
-FORWARD_DECLARE_CLASS_BUILTIN(LibXMLError);
+FORWARD_DECLARE_CLASS(LibXMLError);
 class c_LibXMLError : public ExtObjectData {
  public:
-  DECLARE_CLASS(LibXMLError, LibXMLError, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(LibXMLError)
 
   // need to implement
-  public: c_LibXMLError(Class* cls = c_LibXMLError::s_cls);
+  public: c_LibXMLError(Class* cls = c_LibXMLError::classof());
   public: ~c_LibXMLError();
   public: void t___construct();
 
@@ -119,13 +119,13 @@ class c_LibXMLError : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class SimpleXMLElementIterator
 
-FORWARD_DECLARE_CLASS_BUILTIN(SimpleXMLElementIterator);
+FORWARD_DECLARE_CLASS(SimpleXMLElementIterator);
 class c_SimpleXMLElementIterator : public ExtObjectData, public Sweepable {
  public:
-  DECLARE_CLASS(SimpleXMLElementIterator, SimpleXMLElementIterator, ObjectData)
+  DECLARE_CLASS(SimpleXMLElementIterator)
 
   // need to implement
-  public: c_SimpleXMLElementIterator(Class* cls = c_SimpleXMLElementIterator::s_cls);
+  public: c_SimpleXMLElementIterator(Class* cls = c_SimpleXMLElementIterator::classof());
   public: ~c_SimpleXMLElementIterator();
   public: void t___construct();
   public: Variant t_current();

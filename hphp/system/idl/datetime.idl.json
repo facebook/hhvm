@@ -1008,6 +1008,7 @@
             "name": "DateTime",
             "desc": "Representation of date and time.",
             "flags": [
+                "NoDefaultSweep"
             ],
             "footer": "\n private:\n  SmartObject<DateTime> m_dt;\n public:\n  virtual ObjectData *clone();",
             "funcs": [
@@ -1369,6 +1370,7 @@
             "name": "DateTimeZone",
             "desc": "Representation of time zone.",
             "flags": [
+                "NoDefaultSweep"
             ],
             "footer": "\n  \/\/ Helper for TimeZone -> c_DateTimeZone conversion\n  public: static Object wrap(SmartObject<TimeZone> tz) {\n    c_DateTimeZone *ctz = NEWOBJ(c_DateTimeZone)();\n    Object ret(ctz);\n    ctz->m_tz = tz;\n    return ret;\n  }\n\n  \/\/ Helper for c_DateTimeZone -> TimeZone conversion\n  public: static SmartObject<TimeZone> unwrap(CObjRef timezone) {\n    SmartObject<c_DateTimeZone> ctz = timezone.getTyped<c_DateTimeZone>(true);\n    if (ctz.get() == NULL)\n      return SmartObject<TimeZone>();\n    return ctz->m_tz;\n  }\n\n private:\n  SmartObject<TimeZone> m_tz;\n public:\n  virtual ObjectData *clone();",
             "funcs": [
@@ -1529,6 +1531,7 @@
             "name": "DateInterval",
             "desc": "Represents a date interval.",
             "flags": [
+                "NoDefaultSweep"
             ],
             "footer": "\n  public: static Object wrap(SmartObject<DateInterval> di) {\n    c_DateInterval *cdi = NEWOBJ(c_DateInterval)();\n    Object ret(cdi);\n    cdi->m_di = di;\n    return ret;\n  }\n\n  public: static SmartObject<DateInterval> unwrap(CObjRef dateinterval) {\n    SmartObject<c_DateInterval> cdi = dateinterval.getTyped<c_DateInterval>(true);\n    if (cdi.get() == NULL)\n      return SmartObject<DateInterval>();\n    return cdi->m_di;\n  }\n\n private:\n  SmartObject<DateInterval> m_di;\n public:\n  virtual ObjectData *clone();",
             "funcs": [

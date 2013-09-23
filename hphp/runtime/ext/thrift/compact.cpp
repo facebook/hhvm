@@ -164,7 +164,7 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(CompactRequestData, s_compact_request_data);
 
 static void thrift_error(CStrRef what, TError why) ATTRIBUTE_NORETURN;
 static void thrift_error(CStrRef what, TError why) {
-  throw create_object("TProtocolException", CREATE_VECTOR2(what, why));
+  throw create_object("TProtocolException", make_packed_array(what, why));
 }
 
 class CompactWriter {
@@ -924,7 +924,7 @@ class CompactReader {
 
       if (size && (size + 1)) {
         String s = String(size, ReserveString);
-        char* buf = s.mutableSlice().ptr;
+        char* buf = s.bufferSlice().ptr;
 
         transport.readBytes(buf, size);
         return s.setSize(size);

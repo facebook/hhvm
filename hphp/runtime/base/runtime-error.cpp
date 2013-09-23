@@ -240,7 +240,7 @@ void raise_message(ErrorConstants::ErrorModes mode, std::string &msg) {
       raise_notice(msg);
       break;
     default:
-      always_assert("Unhandled type of error");
+      always_assert(!"Unhandled type of error");
   }
 }
 

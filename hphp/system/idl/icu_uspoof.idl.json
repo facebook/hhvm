@@ -9,6 +9,7 @@
             "name": "SpoofChecker",
             "desc": "Unicode Security and Spoofing Detection (see http:\/\/icu-project.org\/apiref\/icu4c\/uspoof_8h.html for details)",
             "flags": [
+                "NoDefaultSweep"
             ],
             "footer": "\n  private: USpoofChecker *m_spoof_checker;",
             "funcs": [

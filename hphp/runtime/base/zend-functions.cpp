@@ -74,7 +74,7 @@ conv_10(register int64_t num, register int *is_negative, char *buf_end,
 }
 
 DataType is_numeric_string(const char *str, int length, int64_t *lval,
-                           double *dval, int allow_errors /* = 1 */) {
+                           double *dval, int allow_errors /* = 0 */) {
   DataType type;
   const char *ptr;
   int base = 10, digits = 0, dp_or_e = 0;

@@ -70,7 +70,7 @@ bool f_posix_access(CStrRef file, int mode /* = 0 */) {
 
 String f_posix_ctermid() {
   String s = String(L_ctermid, ReserveString);
-  char *buffer = s.mutableSlice().ptr;
+  char *buffer = s.bufferSlice().ptr;
   ctermid(buffer);
   return s.setSize(strlen(buffer));
 }
@@ -81,7 +81,7 @@ int64_t f_posix_get_last_error() {
 
 String f_posix_getcwd() {
   String s = String(PATH_MAX, ReserveString);
-  char *buffer = s.mutableSlice().ptr;
+  char *buffer = s.bufferSlice().ptr;
   if (getcwd(buffer, PATH_MAX) == NULL) {
     return "/";
   }
@@ -429,7 +429,7 @@ Variant f_posix_ttyname(CVarRef fd) {
   }
 
   String ttyname(ttyname_maxlen, ReserveString);
-  char *p = ttyname.mutableSlice().ptr;
+  char *p = ttyname.bufferSlice().ptr;
   if (ttyname_r(php_posix_get_fd(fd), p, ttyname_maxlen)) {
     return false;
   }

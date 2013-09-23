@@ -25,8 +25,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-FORWARD_DECLARE_CLASS_BUILTIN(Continuation);
-FORWARD_DECLARE_CLASS_BUILTIN(ContinuationWaitHandle);
+FORWARD_DECLARE_CLASS(Continuation);
+FORWARD_DECLARE_CLASS(ContinuationWaitHandle);
 Object f_hphp_create_continuation(CStrRef clsname, CStrRef funcname, CStrRef origFuncName, CArrRef args = null_array);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,8 +34,7 @@ Object f_hphp_create_continuation(CStrRef clsname, CStrRef funcname, CStrRef ori
 
 class c_Continuation : public ExtObjectDataFlags<ObjectData::HasClone> {
  public:
-  DECLARE_CLASS_NO_ALLOCATION(Continuation, Continuation, ObjectData)
-  virtual void sweep();
+  DECLARE_CLASS_NO_ALLOCATION(Continuation)
   void operator delete(void* p) {
     c_Continuation* this_ = (c_Continuation*)p;
     auto const size = this_->getObjectSize();
@@ -46,7 +45,7 @@ class c_Continuation : public ExtObjectDataFlags<ObjectData::HasClone> {
     MM().smartFreeSizeBig(this_, size);
   }
 
-  explicit c_Continuation(Class* cls = c_Continuation::s_cls);
+  explicit c_Continuation(Class* cls = c_Continuation::classof());
   ~c_Continuation();
 
 public:

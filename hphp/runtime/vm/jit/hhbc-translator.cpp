@@ -394,8 +394,8 @@ void HhbcTranslator::profileFunctionEntry(const char* category) {
 
   gen(
     IncStatGrouped,
-    cns(StringData::GetStaticString("FunctionEntry")),
-    cns(StringData::GetStaticString(category)),
+    cns(makeStaticString("FunctionEntry")),
+    cns(makeStaticString(category)),
     cns(1)
   );
 }
@@ -403,8 +403,8 @@ void HhbcTranslator::profileFunctionEntry(const char* category) {
 void HhbcTranslator::profileInlineFunctionShape(const std::string& str) {
   gen(
     IncStatGrouped,
-    cns(StringData::GetStaticString("InlineShape")),
-    cns(StringData::GetStaticString(str)),
+    cns(makeStaticString("InlineShape")),
+    cns(makeStaticString(str)),
     cns(1)
   );
 }
@@ -412,8 +412,8 @@ void HhbcTranslator::profileInlineFunctionShape(const std::string& str) {
 void HhbcTranslator::profileSmallFunctionShape(const std::string& str) {
   gen(
     IncStatGrouped,
-    cns(StringData::GetStaticString("SmallFunctions")),
-    cns(StringData::GetStaticString(str)),
+    cns(makeStaticString("SmallFunctions")),
+    cns(makeStaticString(str)),
     cns(1)
   );
 }
@@ -421,8 +421,8 @@ void HhbcTranslator::profileSmallFunctionShape(const std::string& str) {
 void HhbcTranslator::profileFailedInlShape(const std::string& str) {
   gen(
     IncStatGrouped,
-    cns(StringData::GetStaticString("FailedInl")),
-    cns(StringData::GetStaticString(str)),
+    cns(makeStaticString("FailedInl")),
+    cns(makeStaticString(str)),
     cns(1)
   );
 }
@@ -522,15 +522,15 @@ void HhbcTranslator::emitNewArray(int capacity) {
   }
 }
 
-void HhbcTranslator::emitNewTuple(int numArgs) {
-  // The NewTuple opcode's helper needs array values passed to it
+void HhbcTranslator::emitNewPackedArray(int numArgs) {
+  // The NewPackedArray opcode's helper needs array values passed to it
   // via the stack.  We use spillStack() to flush the eval stack and
   // obtain a pointer to the topmost item; if over-flushing becomes
-  // a problem then we should refactor the NewTuple opcode to take
-  // its values directly as SSA operands.
+  // a problem then we should refactor the NewPackedArray opcode to
+  // take its values directly as SSA operands.
   SSATmp* sp = spillStack();
   for (int i = 0; i < numArgs; i++) popC();
-  push(gen(NewTuple, cns(numArgs), sp));
+  push(gen(NewPackedArray, cns(numArgs), sp));
 }
 
 void HhbcTranslator::emitArrayAdd() {
@@ -671,10 +671,13 @@ void HhbcTranslator::emitDefCns(uint32_t id) {
 }
 
 void HhbcTranslator::emitConcat() {
+  auto const catchTrace = getCatchTrace();
   SSATmp* tr = popC();
   SSATmp* tl = popC();
-  // the concat helpers decref their args, so don't decref pop'ed values
-  push(gen(Concat, tl, tr));
+  // Concat consumes only first ref, never second
+  push(gen(ConcatCellCell, catchTrace, tl, tr));
+  // so we need to consume second ref ourselves
+  gen(DecRef, tr);
 }
 
 void HhbcTranslator::emitDefCls(int cid, Offset after) {
@@ -887,19 +890,22 @@ static bool areBinaryArithTypesSupported(Opcode opc, Type t1, Type t2) {
 }
 
 void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
-  auto const exitTrace = getExitTrace();
-  auto const loc       = ldLocInnerWarn(id, exitTrace, DataTypeSpecific);
+  auto const exitTrace  = getExitTrace();
+  auto const catchTrace = getCatchTrace();
+  auto const loc        = ldLocInnerWarn(id, exitTrace, DataTypeSpecific,
+                                         catchTrace);
 
-  if (subOpc == Concat) {
+  if (subOpc == ConcatCellCell) {
     /*
-     * The concat helpers decref their args, so don't decref pop'ed values
-     * and don't decref the old value held in the local. The concat helpers
-     * also incref their results, which will be consumed by the stloc. We
-     * need an extra incref for the push onto the stack.
+     * The concat helpers incref their results, which will be consumed by
+     * the stloc. We need an extra incref for the push onto the stack.
      */
     auto const val    = popC();
-    auto const result = gen(Concat, loc, val);
+    auto const result = gen(ConcatCellCell, catchTrace, loc, val);
     pushIncRef(stLocNRC(id, exitTrace, result));
+    // ConcatCellCell does not DecRef its second argument,
+    // so we need to do it here
+    gen(DecRef, val);
     return;
   }
 
@@ -1279,7 +1285,7 @@ void HhbcTranslator::emitCreateCont(Id funNameStrId) {
         CreateContData { origFunc, genFunc }
       );
 
-  static auto const thisStr = StringData::GetStaticString("this");
+  static auto const thisStr = makeStaticString("this");
   Id thisId = kInvalidId;
   const bool fillThis = origFunc->isMethod() &&
     !origFunc->isStatic() &&
@@ -1340,7 +1346,7 @@ void HhbcTranslator::emitCreateAsync(Id funNameStrId,
   gen(StRaw, cont, cns(RawMemSlot::ContLabel), cns(label));
   gen(StProp, cont, cns(CONTOFF(m_value)), popC());
 
-  static auto const thisStr = StringData::GetStaticString("this");
+  static auto const thisStr = makeStaticString("this");
   Id thisId = kInvalidId;
   const bool fillThis = origFunc->isMethod() &&
     !origFunc->isStatic() &&
@@ -1962,7 +1968,7 @@ void HhbcTranslator::emitFPushCufOp(Op op, Class* cls, StringData* invName,
     SSATmp* callable = topC(safe ? 1 : 0);
     // The most common type for the callable in this case is Arr. We
     // can't really do better than the interpreter here, so punt.
-    SPUNT(StringData::GetStaticString(
+    SPUNT(makeStaticString(
             folly::format("FPushCuf-{}",
                           callable->type().toString()).str())
           ->data());
@@ -2216,8 +2222,10 @@ void HhbcTranslator::emitFPushFunc(int32_t numParams) {
   if (!topC()->isA(Type::Str)) {
     PUNT(FPushFunc_not_Str);
   }
+
+  auto const catchTrace = getCatchTrace();
   auto const funcName = popC();
-  emitFPushActRec(gen(LdFunc, getCatchTrace(), funcName),
+  emitFPushActRec(gen(LdFunc, catchTrace, funcName),
                   m_tb->genDefInitNull(),
                   numParams,
                   nullptr);
@@ -3648,7 +3656,7 @@ void HhbcTranslator::emitDiv() {
         popC();
         popC();
         gen(RaiseWarning,
-            cns(StringData::GetStaticString(Strings::DIVISION_BY_ZERO)));
+            cns(makeStaticString(Strings::DIVISION_BY_ZERO)));
         push(cns(false));
         return;
       }
@@ -3696,7 +3704,7 @@ void HhbcTranslator::emitDiv() {
   auto const exit = getExitTraceWarn(
     nextBcOff(),
     exitSpillValues,
-    StringData::GetStaticString(Strings::DIVISION_BY_ZERO)
+    makeStaticString(Strings::DIVISION_BY_ZERO)
   );
 
   assert(divisor->isA(Type::Dbl) && dividend->isA(Type::Dbl));
@@ -3721,7 +3729,7 @@ void HhbcTranslator::emitMod() {
   auto const exit = getExitTraceWarn(
     nextBcOff(),
     exitSpillValues,
-    StringData::GetStaticString(Strings::DIVISION_BY_ZERO)
+    makeStaticString(Strings::DIVISION_BY_ZERO)
   );
   gen(JmpZero, exit, tr);
 

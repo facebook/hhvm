@@ -131,10 +131,10 @@ constexpr RegXMM rCgXMM1(reg::xmm1);
 struct CodeGenerator {
   typedef Transl::X64Assembler Asm;
 
-  CodeGenerator(IRTrace* trace, Asm& as, Asm& astubs,
+  CodeGenerator(IRTrace* trace, CodeBlock& mainCode, CodeBlock& stubsCode,
                 Transl::TranslatorX64* tx64, CodegenState& state)
-    : m_as(as)
-    , m_astubs(astubs)
+    : m_as(mainCode)
+    , m_astubs(stubsCode)
     , m_tx64(tx64)
     , m_state(state)
     , m_regs(state.regs)
@@ -348,7 +348,7 @@ private:
    */
   template <class Block>
   void unlikelyIfBlock(ConditionCode cc, Block unlikely) {
-    if (&m_as == &m_astubs) {
+    if (m_as.base() == m_astubs.base()) {
       Label done;
       m_as.jcc(ccNegate(cc), done);
       unlikely(m_as);
@@ -386,7 +386,7 @@ private:
    */
   template <class Then, class Else>
   void unlikelyIfThenElse(ConditionCode cc, Then unlikely, Else elseBlock) {
-    if (&m_as == &m_astubs) {
+    if (m_as.base() == m_astubs.base()) {
       Label elseLabel, done;
       m_as.jcc8(ccNegate(cc), elseLabel);
       unlikely(m_as);
@@ -409,8 +409,8 @@ private:
   void print() const;
 
 private:
-  Asm&                m_as;  // current "main" assembler
-  Asm&                m_astubs; // for stubs and other cold code
+  Asm                 m_as;  // current "main" assembler
+  Asm                 m_astubs; // for stubs and other cold code
   TranslatorX64*      m_tx64;
   CodegenState&       m_state;
   const RegAllocInfo& m_regs;
@@ -470,7 +470,7 @@ private:
  *   ArgGroup args;
  *   args.imm(0)
  *       .reg(rax)
- *       .immPtr(StringData::GetStaticString("Yo"))
+ *       .immPtr(makeStaticString("Yo"))
  *       ;
  *   assert(args.size() == 3);
  */

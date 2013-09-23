@@ -20,21 +20,14 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString DummyResource::s_class_name("Unknown");
-
-///////////////////////////////////////////////////////////////////////////////
-
-IMPLEMENT_OBJECT_ALLOCATION(DummyResource);
-
 DummyResource::DummyResource() {
 }
 
 CStrRef DummyResource::o_getClassNameHook() const {
   if (m_class_name.empty()) {
-    return s_class_name;
-  } else {
-    return m_class_name;
+    return classnameof();
   }
+  return m_class_name;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

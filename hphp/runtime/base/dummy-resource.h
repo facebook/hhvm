@@ -32,9 +32,9 @@ namespace HPHP {
  */
 class DummyResource : public ResourceData {
 public:
-  DECLARE_RESOURCE_ALLOCATION(DummyResource);
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(DummyResource);
+  CLASSNAME_IS("Unknown");
   DummyResource();
-  static StaticString s_class_name;
   String m_class_name;
   virtual CStrRef o_getClassNameHook() const;
   virtual bool isInvalid() const { return m_class_name.empty(); }

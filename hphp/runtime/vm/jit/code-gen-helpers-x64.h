@@ -18,6 +18,8 @@
 #define incl_HPHP_VM_CODEGENHELPERS_X64_H_
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/ringbuffer.h"
+
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -42,6 +44,15 @@ constexpr size_t kJmpTargetAlign = 16;
 void moveToAlign(Asm &aa, const size_t alignment = kJmpTargetAlign,
                  const bool unreachable = true);
 
+enum class TestAndSmashFlags {
+  kAlignJccImmediate,
+  kAlignJcc,
+  kAlignJccAndJmp
+};
+void prepareForTestAndSmash(Asm&, int testBytes, TestAndSmashFlags flags);
+void prepareForSmash(Asm&, int nBytes, int offset = 0);
+bool isSmashable(Address frontier, int nBytes, int offset = 0);
+
 void emitEagerSyncPoint(Asm& as, const HPHP::Opcode* pc,
                                  const Offset spDiff);
 void emitEagerVMRegSave(Asm& as, RegSaveFlags flags);
@@ -55,7 +66,6 @@ void emitAssertFlagsNonNegative(Asm& as);
 void emitAssertRefCount(Asm& as, PhysReg base);
 
 void emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg);
-void emitLea(Asm& as, PhysReg base, int disp, PhysReg dest);
 void emitLea(Asm& as, MemoryRef mr, PhysReg dst);
 
 void emitLdObjClass(Asm& as, PhysReg objReg, PhysReg dstReg);
@@ -65,6 +75,14 @@ void emitExitSlowStats(Asm& as, const Func* func, SrcKey dest);
 
 void emitCall(Asm& as, TCA dest);
 void emitCall(Asm& as, CppCall call);
+
+void emitJmpOrJcc(Asm& as, ConditionCode cc, TCA dest);
+
+void emitRB(Asm& a, Trace::RingBufferType t, SrcKey sk,
+            RegSet toSave = RegSet());
+void emitRB(Asm& a, Trace::RingBufferType t, const char* msgm,
+            RegSet toSave = RegSet());
+
 
 /*
  * Tests the surprise flags for the current thread. Should be used
@@ -159,42 +177,6 @@ void emitIncRefGenericRegSafe(Asm& a, PhysReg base,
 
 void emitAssertFlagsNonNegative(Asm& as);
 void emitAssertRefCount(Asm& as, PhysReg base);
-
-/*
- * Use the function templates below to conveniently build the arg vector.
- */
-TCA emitServiceReqWork(Asm& as, TCA start, bool persist, SRFlags flags,
-                       ServiceRequest req, const ServiceReqArgVec& argInfo);
-
-template<typename... Arg>
-TCA emitServiceReq(Asm& as, SRFlags flags, ServiceRequest sr, Arg... a) {
-  // These should reuse stubs. Use emitEphemeralServiceReq.
-  assert(sr != REQ_BIND_JMPCC_FIRST &&
-         sr != REQ_BIND_JMPCC_SECOND &&
-         sr != REQ_BIND_JMP);
-
-  ServiceReqArgVec argv;
-  packServiceReqArgs(argv, a...);
-  return emitServiceReqWork(as, as.frontier(), true, flags, sr, argv);
-}
-
-template<typename... Arg>
-TCA emitServiceReq(Asm& as, ServiceRequest sr, Arg... a) {
-  return emitServiceReq(as, SRFlags::None, sr, a...);
-}
-
-template<typename... Arg>
-TCA emitEphemeralServiceReq(Asm& as, TCA start, ServiceRequest sr,
-                            Arg... a) {
-  assert(sr == REQ_BIND_JMPCC_FIRST ||
-         sr == REQ_BIND_JMPCC_SECOND ||
-         sr == REQ_BIND_JMP);
-  assert(as.contains(start));
-
-  ServiceReqArgVec argv;
-  packServiceReqArgs(argv, a...);
-  return emitServiceReqWork(as, start, false, SRFlags::None, sr, argv);
-}
 
 //////////////////////////////////////////////////////////////////////
 

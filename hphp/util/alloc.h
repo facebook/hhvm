@@ -21,6 +21,15 @@
 
 #include "hphp/util/exception.h"
 
+#ifdef ENABLE_ASAN
+// ASan is less precise than valgrind so we'll need a superset of those tweaks
+# define VALGRIND
+// TODO: (t2869817) ASan doesn't play well with jemalloc
+# ifdef USE_JEMALLOC
+#  undef USE_JEMALLOC
+# endif
+#endif
+
 #ifdef USE_TCMALLOC
 #include "google/malloc_extension.h"
 #endif
@@ -50,6 +59,7 @@ extern "C" {
 #endif
 
 #ifdef USE_JEMALLOC
+
   int mallctl(const char *name, void *oldp, size_t *oldlenp, void *newp,
               size_t newlen) __attribute__((weak));
   int mallctlnametomib(const char *name, size_t* mibp, size_t*miblenp)
@@ -64,6 +74,14 @@ extern "C" {
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+const bool use_jemalloc =
+#ifdef USE_JEMALLOC
+  true
+#else
+  false
+#endif
+  ;
 
 class OutOfMemoryException : public Exception {
 public:

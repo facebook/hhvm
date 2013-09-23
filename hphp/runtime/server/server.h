@@ -242,7 +242,7 @@ public:
    * To enable SSL of the current server, it will listen to an additional
    * port as specified in parameter.
    */
-  virtual bool enableSSL(void *sslCTX, int port) = 0;
+  virtual bool enableSSL(int port) = 0;
 
 protected:
   std::string m_address;

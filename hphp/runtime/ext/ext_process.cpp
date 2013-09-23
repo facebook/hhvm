@@ -320,7 +320,7 @@ bool f_pcntl_signal_dispatch() {
       signaled[i] = 0;
       if (s_signal_handlers->handlers.exists(i)) {
         vm_call_user_func(s_signal_handlers->handlers[i],
-                               CREATE_VECTOR1(i));
+                               make_packed_array(i));
       }
     }
   }
@@ -529,9 +529,9 @@ public:
   String command;
   Variant env;
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("Process");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   int close() {
     // Although the PHP doc about proc_close() says that the pipes need to be
@@ -559,12 +559,10 @@ public:
     return wstatus;
   }
 };
-IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(ChildProcess);
+
 void ChildProcess::sweep() {
   // do nothing here, as everything will be collected by SmartAllocator
 }
-
-StaticString ChildProcess::s_class_name("Process");
 
 #define DESC_PIPE       1
 #define DESC_FILE       2

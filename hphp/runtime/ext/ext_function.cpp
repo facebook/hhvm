@@ -39,7 +39,7 @@ const StaticString
   s_user("user");
 
 Array f_get_defined_functions() {
-  return CREATE_MAP2(s_internal, ClassInfo::GetSystemFunctions(),
+  return make_map_array(s_internal, ClassInfo::GetSystemFunctions(),
                      s_user, ClassInfo::GetUserFunctions());
 }
 
@@ -116,7 +116,7 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
     ObjectData *d = tv_func->m_data.pobj;
     const Func* invoke = d->getVMClass()->lookupMethod(s__invoke.get());
     if (name.isReferenced()) {
-      if (d->instanceof(c_Closure::s_cls)) {
+      if (d->instanceof(c_Closure::classof())) {
         // Hack to stop the mangled name from showing up
         name = s_Closure__invoke;
       } else {
@@ -191,7 +191,7 @@ Variant f_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth,
   url += "/call_user_func_serialized?auth=";
   url += auth.data();
 
-  Array blob = CREATE_MAP2(s_func, function, s_args, _argv);
+  Array blob = make_map_array(s_func, function, s_args, _argv);
   String message = f_serialize(blob);
 
   vector<string> headers;
@@ -332,22 +332,24 @@ Array hhvm_get_frame_args(const ActRec* ar) {
   }
   int numParams = ar->m_func->numParams();
   int numArgs = ar->numArgs();
-  auto retval = ArrayData::Make(numArgs);
 
-  TypedValue* local = (TypedValue*)(uintptr_t(ar) - sizeof(TypedValue));
+  PackedArrayInit retInit(numArgs);
+  auto local = reinterpret_cast<TypedValue*>(
+    uintptr_t(ar) - sizeof(TypedValue)
+  );
   for (int i = 0; i < numArgs; ++i) {
     if (i < numParams) {
       // This corresponds to one of the function's formal parameters, so it's
       // on the stack.
-      retval->nvAppend(local);
+      retInit.append(tvAsCVarRef(local));
       --local;
     } else {
       // This is not a formal parameter, so it's in the ExtraArgs.
-      retval->nvAppend(ar->getExtraArg(i - numParams));
+      retInit.append(tvAsCVarRef(ar->getExtraArg(i - numParams)));
     }
   }
 
-  return Array(retval);
+  return retInit.toArray();
 }
 
 Variant f_func_get_args() {

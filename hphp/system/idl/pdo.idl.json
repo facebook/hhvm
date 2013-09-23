@@ -22,6 +22,7 @@
             ],
             "desc": "Represents a connection between PHP and a database server.",
             "flags": [
+                "NoDefaultSweep"
             ],
             "footer": "\n  public: sp_PDOConnection m_dbh;",
             "funcs": [
@@ -618,6 +619,7 @@
             ],
             "desc": "Represents a prepared statement and, after the statement is executed, an associated result set.",
             "flags": [
+                "NoDefaultSweep"
             ],
             "footer": "\n  public: sp_PDOStatement m_stmt;\n  public: Variant m_row;\n  public: int m_rowIndex;",
             "funcs": [

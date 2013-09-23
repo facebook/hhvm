@@ -42,6 +42,9 @@ public:
     if (m_px) m_px->incRefCount();
   }
 
+  enum class NoIncRef {};
+  explicit SmartPtr(T* px, NoIncRef) : m_px(px) {}
+
   enum class NonNull { Tag };
   explicit SmartPtr(T* px, NonNull) : m_px(px) {
     assert(px);

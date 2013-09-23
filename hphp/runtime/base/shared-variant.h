@@ -22,7 +22,7 @@
 #include "hphp/util/hash.h"
 #include "hphp/util/atomic.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/immutable-map.h"
+#include "hphp/runtime/base/immutable-array.h"
 
 #if (defined(__APPLE__) || defined(__APPLE_CC__)) && (defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__))
 # if defined(__LITTLE_ENDIAN__)
@@ -37,10 +37,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class SharedMap;
+class SharedArray;
 class SharedVariantStats;
-class VectorData;
-class ImmutableMap;
+class ImmutablePackedArray;
+class ImmutableArray;
 struct ImmutableObj;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -105,27 +105,22 @@ public:
     return m_data.str;
   }
 
-  strhash_t stringHash() const {
-    assert(is(KindOfString) || is(KindOfStaticString));
-    return m_data.str->hash(); // XXX technically a data race
-  }
-
   size_t arrSize() const {
     assert(is(KindOfArray));
-    if (getIsVector()) return m_data.vec->m_size;
-    return m_data.map->size();
+    if (isPacked()) return m_data.packed->size();
+    return m_data.array->size();
   }
 
   size_t arrCap() const {
     assert(is(KindOfArray));
-    if (getIsVector()) return m_data.vec->m_size;
-    return m_data.map->capacity();
+    if (isPacked()) return m_data.packed->size();
+    return m_data.array->capacity();
   }
 
   int getIndex(int64_t key);
   int getIndex(const StringData* key);
 
-  ArrayData* loadElems(const SharedMap &sharedMap);
+  ArrayData* loadElems(const SharedArray&);
 
   Variant getKey(ssize_t pos) const;
 
@@ -148,30 +143,6 @@ public:
   int countReachable() const;
 
 private:
-  class VectorData {
-  public:
-    union {
-      size_t m_size;
-      SharedVariant* m_align_dummy;
-    };
-
-    VectorData() : m_size(0) {}
-
-    ~VectorData() {
-      SharedVariant** v = vals();
-      for (size_t i = 0; i < m_size; i++) {
-        v[i]->decRef();
-      }
-    }
-    SharedVariant** vals() { return (SharedVariant**)(this + 1); }
-    void *operator new(size_t sz, int num) {
-      assert(sz == sizeof(VectorData));
-      return malloc(sizeof(VectorData) + num * sizeof(SharedVariant*));
-    }
-    void operator delete(void* ptr) { free(ptr); }
-    // just to keep the compiler happy; used if the constructor throws
-    void operator delete(void* ptr, int num) { free(ptr); }
-  };
 
   /*
    * Keep the object layout binary compatible with Variant for primitive types.
@@ -186,21 +157,20 @@ private:
     int64_t num;
     double dbl;
     StringData *str;
-    ImmutableMap* map;
-    VectorData* vec;
+    ImmutableArray* array;
+    ImmutablePackedArray* packed;
     ImmutableObj* obj;
   };
 
 #if PACKED_TV
-  uint8_t _typePad;
-  DataType m_type;
   bool m_shouldCache;
+  DataType m_type;
   uint8_t m_flags;
   std::atomic<uint32_t> m_count;
   SharedData m_data;
 #else
   SharedData m_data;
-  uint16_t m_type;
+  DataType m_type;
   bool m_shouldCache;
   uint8_t m_flags;
   std::atomic<uint32_t> m_count;
@@ -218,25 +188,21 @@ private:
   }
 
   const static uint8_t SerializedArray = (1<<0);
-  const static uint8_t IsVector = (1<<1);
+  const static uint8_t IsPacked = (1<<1);
   const static uint8_t IsObj = (1<<2);
   const static uint8_t ObjAttempted = (1<<3);
 
-  bool getSerializedArray() const { return (bool)(m_flags & SerializedArray);}
-  void setSerializedArray() { m_flags |= SerializedArray;}
-  void clearSerializedArray() { m_flags &= ~SerializedArray;}
+  bool getSerializedArray() const { return (bool)(m_flags & SerializedArray); }
+  void setSerializedArray() { m_flags |= SerializedArray; }
 
-  bool getIsVector() const { return (bool)(m_flags & IsVector);}
-  void setIsVector() { m_flags |= IsVector;}
-  void clearIsVector() { m_flags &= ~IsVector;}
+  bool isPacked() const { return (bool)(m_flags & IsPacked); }
+  void setPacked() { m_flags |= IsPacked; }
 
-  bool getIsObj() const { return (bool)(m_flags & IsObj);}
-  void setIsObj() { m_flags |= IsObj;}
-  void clearIsObj() { m_flags &= ~IsObj;}
+  bool getIsObj() const { return (bool)(m_flags & IsObj); }
+  void setIsObj() { m_flags |= IsObj; }
 
-  bool getObjAttempted() const { return (bool)(m_flags & ObjAttempted);}
-  void setObjAttempted() { m_flags |= ObjAttempted;}
-  void clearObjAttempted() { m_flags &= ~ObjAttempted;}
+  bool getObjAttempted() const { return (bool)(m_flags & ObjAttempted); }
+  void setObjAttempted() { m_flags |= ObjAttempted; }
 };
 
 class SharedVariantStats {
@@ -267,6 +233,13 @@ class SharedVariantStats {
     variantCount -= childStats->variantCount;
   }
 };
+
+inline ImmutablePackedArray::~ImmutablePackedArray() {
+  SharedVariant** v = vals();
+  for (size_t i = 0, n = m_size; i < n; i++) {
+    v[i]->decRef();
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

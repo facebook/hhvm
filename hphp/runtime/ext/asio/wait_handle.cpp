@@ -34,7 +34,7 @@ void c_WaitHandle::t___construct() {
 }
 
 void c_WaitHandle::ti_setonjoincallback(CVarRef callback) {
-  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set WaitHandle::onJoin: on_join_cb not a closure"));
     throw e;

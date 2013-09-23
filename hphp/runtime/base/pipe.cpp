@@ -23,8 +23,6 @@ namespace HPHP {
 IMPLEMENT_OBJECT_ALLOCATION(Pipe)
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString Pipe::s_class_name("Pipe");
-
 Pipe::Pipe() {
 }
 

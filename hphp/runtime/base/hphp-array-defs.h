@@ -23,21 +23,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline void* ArrayData::modeAlloc(size_t nbytes) const {
-  return m_allocMode == AllocationMode::smart ? smart_malloc(nbytes) :
-         Util::safe_malloc(nbytes);
-}
-
-inline void* ArrayData::modeRealloc(void* ptr, size_t nbytes) const {
-  return m_allocMode == AllocationMode::smart ? smart_realloc(ptr, nbytes) :
-         Util::safe_realloc(ptr, nbytes);
-}
-
-inline void ArrayData::modeFree(void* ptr) const {
-  return LIKELY(m_allocMode == AllocationMode::smart) ? smart_free(ptr) :
-         free(ptr);
-}
-
 inline void HphpArray::initHash(size_t tableSize) {
   assert(HphpArray::Empty == -1);
   memset(m_hash, 0xffU, tableSize * sizeof(*m_hash));

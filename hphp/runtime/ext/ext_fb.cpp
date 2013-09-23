@@ -198,7 +198,7 @@ Variant f_fb_serialize(CVarRef thing) {
       HPHP::serialize::FBSerializer<HphpVariant>::serializedSize(thing);
     String s(len, ReserveString);
     HPHP::serialize::FBSerializer<HphpVariant>::serialize(
-      thing, s.mutableSlice().ptr);
+      thing, s.bufferSlice().ptr);
     return s.setSize(len);
   } catch (const HPHP::serialize::SerializeError&) {
     return null_variant;
@@ -530,7 +530,7 @@ Variant f_fb_compact_serialize(CVarRef thing) {
     int64_t val = thing.toInt64();
     if (val >= 0 && (uint64_t)val <= kInt7Mask) {
       String s(2, ReserveString);
-      *(uint16_t*)(s.mutableSlice().ptr) = (uint16_t)htons(kInt13Prefix | val);
+      *(uint16_t*)(s.bufferSlice().ptr) = (uint16_t)htons(kInt13Prefix | val);
       return s.setSize(2);
     }
   }
@@ -943,7 +943,7 @@ bool f_fb_utf8ize(VRefParam input) {
     return false; // Too long.
   }
   String dstStr(dstMaxLenBytes, ReserveString);
-  char *dstBuf = dstStr.mutableSlice().ptr;
+  char *dstBuf = dstStr.bufferSlice().ptr;
 
   // Copy valid bytes found so far as one solid block.
   memcpy(dstBuf, srcBuf, srcPosBytes);
@@ -1045,7 +1045,7 @@ static Variant fb_utf8_substr_simple(CStrRef str, int32_t firstCodePoint,
     return false; // Too long.
   }
   String dstStr(dstMaxLenBytes, ReserveString);
-  char* dstBuf = dstStr.mutableSlice().ptr;
+  char* dstBuf = dstStr.bufferSlice().ptr;
   int32_t dstPosBytes = 0;
 
   // Iterate through src's codepoints; srcPosBytes is incremented by U8_NEXT.
@@ -1196,9 +1196,9 @@ Variant f_fb_call_user_func_safe_return(int _argc, CVarRef function,
 
 Array f_fb_call_user_func_array_safe(CVarRef function, CArrRef params) {
   if (f_is_callable(function)) {
-    return CREATE_VECTOR2(true, vm_call_user_func(function, params));
+    return make_packed_array(true, vm_call_user_func(function, params));
   }
-  return CREATE_VECTOR2(false, uninit_null());
+  return make_packed_array(false, uninit_null());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

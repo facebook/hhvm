@@ -531,7 +531,7 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, CVarRef data, int style,
   bool add_type = false;
 
   /* Special handling of class SoapVar */
-  if (data.isObject() && data.toObject().instanceof(c_SoapVar::s_cls)) {
+  if (data.isObject() && data.toObject().instanceof(c_SoapVar::classof())) {
     encodePtr enc;
     c_SoapVar *p = data.toObject().getTyped<c_SoapVar>();
     if (!p->m_ns.empty()) {
@@ -687,7 +687,7 @@ xmlNodePtr to_xml_user(encodeTypePtr type, CVarRef data, int style,
   xmlNodePtr ret = NULL;
   if (type && type->map && !type->map->to_xml.isNull()) {
     Variant return_value = vm_call_user_func(type->map->to_xml,
-                                                  CREATE_VECTOR1(data));
+                                                  make_packed_array(data));
     if (return_value.isString()) {
       String sdoc = return_value.toString();
       xmlDocPtr doc = soap_xmlParseMemory(sdoc.data(), sdoc.size());
@@ -718,7 +718,7 @@ Variant to_zval_user(encodeTypePtr type, xmlNodePtr node) {
     xmlFreeNode(copy);
 
     return_value = vm_call_user_func(type->map->to_zval,
-                                          CREATE_VECTOR1(data));
+                                          make_packed_array(data));
   }
   return return_value;
 }
@@ -3223,7 +3223,7 @@ static encodePtr get_array_type(xmlNodePtr node, CVarRef array,
   for (i = 0;i < count;i++) {
     Variant tmp = iter.second();
 
-    if (tmp.isObject() && tmp.toObject().instanceof(c_SoapVar::s_cls)) {
+    if (tmp.isObject() && tmp.toObject().instanceof(c_SoapVar::classof())) {
       c_SoapVar *var = tmp.toObject().getTyped<c_SoapVar>();
       cur_type = var->m_type;
       if (!var->m_stype.empty()) {

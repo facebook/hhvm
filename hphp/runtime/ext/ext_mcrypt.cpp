@@ -35,6 +35,10 @@ public:
   }
 
   ~MCrypt() {
+    MCrypt::close();
+  }
+
+  void sweep() FOLLY_OVERRIDE {
     close();
   }
 
@@ -46,15 +50,13 @@ public:
     }
   }
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("MCrypt");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   MCRYPT m_td;
   bool m_init;
 };
-
-StaticString MCrypt::s_class_name("MCrypt");
 
 typedef enum {
   RANDOM = 0,
@@ -146,13 +148,13 @@ static Variant php_mcrypt_do_crypt(CStrRef cipher, CStrRef key, CStrRef data,
     block_size = mcrypt_enc_get_block_size(td);
     data_size = (((data.size() - 1) / block_size) + 1) * block_size;
     s = String(data_size, ReserveString);
-    data_s = (char*)s.mutableSlice().ptr;
+    data_s = (char*)s.bufferSlice().ptr;
     memset(data_s, 0, data_size);
     memcpy(data_s, data.data(), data.size());
   } else { /* It's not a block algorithm */
     data_size = data.size();
     s = String(data_size, ReserveString);
-    data_s = (char*)s.mutableSlice().ptr;
+    data_s = (char*)s.bufferSlice().ptr;
     memcpy(data_s, data.data(), data.size());
   }
 
@@ -197,13 +199,13 @@ static Variant mcrypt_generic(CResRef td, CStrRef data, bool dencrypt) {
     block_size = mcrypt_enc_get_block_size(pm->m_td);
     data_size = (((data.size() - 1) / block_size) + 1) * block_size;
     s = String(data_size, ReserveString);
-    data_s = (unsigned char *)s.mutableSlice().ptr;
+    data_s = (unsigned char *)s.bufferSlice().ptr;
     memset(data_s, 0, data_size);
     memcpy(data_s, data.data(), data.size());
   } else { /* It's not a block algorithm */
     data_size = data.size();
     s = String(data_size, ReserveString);
-    data_s = (unsigned char *)s.mutableSlice().ptr;
+    data_s = (unsigned char *)s.bufferSlice().ptr;
     memcpy(data_s, data.data(), data.size());
   }
 

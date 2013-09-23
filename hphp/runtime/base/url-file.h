@@ -34,9 +34,8 @@ public:
                    CStrRef postData = null_string, int maxRedirect = 20,
                    int timeout = -1);
 
-  static StaticString s_class_name;
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return s_class_name; }
+  CStrRef o_getClassNameHook() const { return classnameof(); }
 
   virtual bool open(CStrRef filename, CStrRef mode);
   virtual int64_t writeImpl(const char *buffer, int64_t length);

@@ -26,10 +26,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString MimePart::s_class_name("mailparse_mail_structure");
-
-///////////////////////////////////////////////////////////////////////////////
-
 MimePart::MimeHeader::MimeHeader()
   : m_empty(true) {
 }
@@ -299,8 +295,6 @@ void MimePart::MimeHeader::rfc2231_to_mime(StringBuffer &value_buf,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-IMPLEMENT_OBJECT_ALLOCATION(MimePart);
 
 MimePart::MimePart()
   : m_startpos(0), m_endpos(0), m_bodystart(0), m_bodyend(0),
@@ -988,7 +982,7 @@ int MimePart::extractImpl(int decode, File *src) {
 }
 
 void MimePart::callUserFunc(CStrRef s) {
-  vm_call_user_func(m_extract_context, CREATE_VECTOR1(s));
+  vm_call_user_func(m_extract_context, make_packed_array(s));
 }
 
 void MimePart::outputToStdout(CStrRef s) {

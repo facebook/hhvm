@@ -754,7 +754,7 @@ String concat3(CStrRef s1, CStrRef s2, CStrRef s3) {
   StringSlice r3 = s3.slice();
   int len = r1.len + r2.len + r3.len;
   StringData* str = StringData::Make(len);
-  MutableSlice r = str->mutableSlice();
+  auto const r = str->bufferSlice();
   memcpy(r.ptr,                   r1.ptr, r1.len);
   memcpy(r.ptr + r1.len,          r2.ptr, r2.len);
   memcpy(r.ptr + r1.len + r2.len, r3.ptr, r3.len);
@@ -769,7 +769,7 @@ String concat4(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4) {
   StringSlice r4 = s4.slice();
   int len = r1.len + r2.len + r3.len + r4.len;
   StringData* str = StringData::Make(len);
-  MutableSlice r = str->mutableSlice();
+  auto const r = str->bufferSlice();
   memcpy(r.ptr,                            r1.ptr, r1.len);
   memcpy(r.ptr + r1.len,                   r2.ptr, r2.len);
   memcpy(r.ptr + r1.len + r2.len,          r3.ptr, r3.len);
@@ -1015,14 +1015,15 @@ Variant require(CStrRef file, bool once /* = false */,
 IMPLEMENT_REQUEST_LOCAL(AutoloadHandler, AutoloadHandler::s_instance);
 
 void AutoloadHandler::requestInit() {
-  m_running = false;
-  m_handlers.reset();
-  m_map.reset();
-  m_map_root.reset();
+  assert(m_handlers.get() == nullptr);
+  assert(m_loading.get() == nullptr);
+  assert(m_map.get() == nullptr);
+  assert(m_map_root.get() == nullptr);
 }
 
 void AutoloadHandler::requestShutdown() {
   m_handlers.reset();
+  m_loading.reset();
   m_map.reset();
   m_map_root.reset();
 }
@@ -1094,7 +1095,7 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(CStrRef name,
     //  - true means the map was updated. try again
     //  - false means we should stop applying autoloaders (only affects classes)
     //  - anything else means keep going
-    Variant action = vm_call_user_func(func, CREATE_VECTOR2(kind, name));
+    Variant action = vm_call_user_func(func, make_packed_array(kind, name));
     auto const actionCell = action.asCell();
     if (actionCell->m_type == KindOfBoolean) {
       if (actionCell->m_data.num) continue;
@@ -1139,20 +1140,29 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
       if (res != Failure) return res == Success;
     }
   }
-  Array params = PackedArrayInit(1).add(className).toArray();
-  bool l_running = m_running;
-  m_running = true;
+  // If we end up in a recursive autoload loop where we try to load the same
+  // class twice, just fail the load to mimic PHP as many frameworks rely on it
+  if (m_loading.valueExists(className)) {
+    return false;
+  }
+
+  m_loading.append(className);
+
+  // The below code can throw so make sure we clean up the state from this load
+  SCOPE_EXIT {
+    String l_className = m_loading.pop();
+    assert(l_className == className);
+  };
+
+  Array params = PackedArrayInit(1).append(className).toArray();
   if (m_handlers.isNull() && !forceSplStack) {
     if (function_exists(s___autoload)) {
       invoke(s___autoload, params, -1, true, false);
-      m_running = l_running;
       return true;
     }
-    m_running = l_running;
     return false;
   }
   if (m_handlers.isNull() || m_handlers->empty()) {
-    m_running = l_running;
     return false;
   }
   Object autoloadException;
@@ -1178,7 +1188,6 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
       break;
     }
   }
-  m_running = l_running;
   if (!autoloadException.isNull()) {
     throw autoloadException;
   }
@@ -1199,13 +1208,13 @@ bool AutoloadHandler::addHandler(CVarRef handler, bool prepend) {
     m_handlers.add(name, handler, true);
   } else {
     // This adds the handler at the beginning
-    m_handlers = CREATE_MAP1(name, handler) + m_handlers;
+    m_handlers = make_map_array(name, handler) + m_handlers;
   }
   return true;
 }
 
 bool AutoloadHandler::isRunning() {
-  return m_running;
+  return !m_loading.empty();
 }
 
 void AutoloadHandler::removeHandler(CVarRef handler) {

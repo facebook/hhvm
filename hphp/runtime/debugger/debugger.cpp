@@ -156,7 +156,7 @@ void Debugger::LogShutdown(ShutdownKind shutdownKind) {
     for (const auto& proxyEntry: s_debugger.m_proxyMap) {
       auto sid = proxyEntry.first;
       auto proxy = proxyEntry.second;
-      auto dummySid = StringData::GetStaticString(proxy->getDummyInfo().id());
+      auto dummySid = makeStaticString(proxy->getDummyInfo().id());
       if (sid != dummySid) {
         auto sandbox = proxy->getSandbox();
         if (sandbox.valid()) {
@@ -341,7 +341,7 @@ void Debugger::registerThread() {
 
 void Debugger::addOrUpdateSandbox(const DSandboxInfo &sandbox) {
   TRACE(2, "Debugger::addOrUpdateSandbox\n");
-  const StringData* sd = StringData::GetStaticString(sandbox.id());
+  const StringData* sd = makeStaticString(sandbox.id());
   SandboxMap::accessor acc;
   if (m_sandboxMap.insert(acc, sd)) {
     DSandboxInfoPtr sb(new DSandboxInfo());
@@ -374,7 +374,7 @@ void Debugger::registerSandbox(const DSandboxInfo &sandbox) {
   addOrUpdateSandbox(sandbox);
 
   // add thread to m_sandboxThreadInfoMap
-  const StringData* sid = StringData::GetStaticString(sandbox.id());
+  const StringData* sid = makeStaticString(sandbox.id());
   ThreadInfo* ti = ThreadInfo::s_threadInfo.getNoCheck();
   {
     SandboxThreadInfoMap::accessor acc;
@@ -420,13 +420,13 @@ void Debugger::unregisterSandbox(const StringData* sandboxId) {
 // signal" surprise flag to pop out of loops in translated code.
 void Debugger::requestInterrupt(DebuggerProxyPtr proxy) {
   TRACE(2, "Debugger::requestInterrupt\n");
-  const StringData* sid = StringData::GetStaticString(proxy->getSandboxId());
+  const StringData* sid = makeStaticString(proxy->getSandboxId());
   FOREACH_SANDBOX_THREAD_BEGIN(sid, ti)
     ti->m_reqInjectionData.setDebuggerIntr(true);
     ti->m_reqInjectionData.setDebuggerSignalFlag();
   FOREACH_SANDBOX_THREAD_END()
 
-  sid = StringData::GetStaticString(proxy->getDummyInfo().id());
+  sid = makeStaticString(proxy->getDummyInfo().id());
   FOREACH_SANDBOX_THREAD_BEGIN(sid, ti)
     ti->m_reqInjectionData.setDebuggerIntr(true);
     ti->m_reqInjectionData.setDebuggerSignalFlag();
@@ -454,7 +454,7 @@ DebuggerProxyPtr Debugger::createProxy(SmartPtr<Socket> socket, bool local) {
     // this function on the floor. It also makes the proxy findable when we a
     // dummy sandbox thread needs to interrupt.
     const StringData* sid =
-      StringData::GetStaticString(proxy->getDummyInfo().id());
+      makeStaticString(proxy->getDummyInfo().id());
     assert(sid);
     ProxyMap::accessor acc;
     m_proxyMap.insert(acc, sid);
@@ -506,12 +506,12 @@ void Debugger::cleanupRetiredProxies() {
 void Debugger::removeProxy(DebuggerProxyPtr proxy) {
   TRACE(2, "Debugger::removeProxy\n");
   if (proxy->getSandbox().valid()) {
-    const StringData* sid = StringData::GetStaticString(proxy->getSandboxId());
+    const StringData* sid = makeStaticString(proxy->getSandboxId());
     setDebuggerFlag(sid, false);
     m_proxyMap.erase(sid);
   }
   const StringData* dummySid =
-    StringData::GetStaticString(proxy->getDummyInfo().id());
+    makeStaticString(proxy->getDummyInfo().id());
   m_proxyMap.erase(dummySid);
   // Clear the debugger blacklist PC upon last detach if JIT is used
   if (RuntimeOption::EvalJit && countConnectedProxy() == 0) {
@@ -534,7 +534,7 @@ bool Debugger::switchSandbox(DebuggerProxyPtr proxy,
                              const std::string &newId,
                              bool force) {
   TRACE(2, "Debugger::switchSandbox\n");
-  const StringData* newSid = StringData::GetStaticString(newId);
+  const StringData* newSid = makeStaticString(newId);
   // Lock the proxy during the switch
   Lock l(proxy.get());
   if (proxy->getSandboxId() != newId) {
@@ -574,7 +574,7 @@ bool Debugger::switchSandboxImpl(DebuggerProxyPtr proxy,
   if (proxy->getSandbox().valid()) {
     // Detach from the old sandbox
     const StringData* oldSid =
-      StringData::GetStaticString(proxy->getSandboxId());
+      makeStaticString(proxy->getSandboxId());
     setDebuggerFlag(oldSid, false);
     m_proxyMap.erase(oldSid);
   }

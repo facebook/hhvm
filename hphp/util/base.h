@@ -51,12 +51,11 @@
 #include <map>
 #include <list>
 #include <set>
+#include <memory>
 #include <deque>
 #include <exception>
 #include <tr1/functional>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/interprocess/sync/interprocess_upgradable_mutex.hpp>
 #include <boost/foreach.hpp>
@@ -121,14 +120,6 @@ namespace HPHP {
 
 const bool debug =
 #ifdef DEBUG
-  true
-#else
-  false
-#endif
-  ;
-
-const bool use_jemalloc =
-#ifdef USE_JEMALLOC
   true
 #else
   false
@@ -262,32 +253,32 @@ public:
   hphp_raw_ptr() : px(0) {}
   explicit hphp_raw_ptr(T *p) : px(p) {}
 
-  /* implicit */ hphp_raw_ptr(const boost::weak_ptr<T> &p)
+  /* implicit */ hphp_raw_ptr(const std::weak_ptr<T> &p)
     : px(p.lock().get())
   {}
 
   template <class S>
-  /* implicit */ hphp_raw_ptr(const boost::shared_ptr<S> &p) : px(p.get()) {}
+  /* implicit */ hphp_raw_ptr(const std::shared_ptr<S> &p) : px(p.get()) {}
   template <class S>
-  /* implicit */ hphp_raw_ptr(const boost::weak_ptr<S> &p)
+  /* implicit */ hphp_raw_ptr(const std::weak_ptr<S> &p)
     : px(p.lock().get())
   {}
   template <class S>
   /* implicit */ hphp_raw_ptr(const hphp_raw_ptr<S> &p) : px(p.get()) {}
 
-  boost::shared_ptr<T> lock() const {
-    return px ? boost::static_pointer_cast<T>(px->shared_from_this()) :
-      boost::shared_ptr<T>();
+  std::shared_ptr<T> lock() const {
+    return px ? std::static_pointer_cast<T>(px->shared_from_this()) :
+      std::shared_ptr<T>();
   }
   bool expired() const {
     return !px;
   }
 
   template <class S>
-  /* implicit */ operator boost::shared_ptr<S>() const {
+  /* implicit */ operator std::shared_ptr<S>() const {
     S *s = px; // just to verify the implicit conversion T->S
-    return s ? boost::static_pointer_cast<S>(px->shared_from_this()) :
-      boost::shared_ptr<S>();
+    return s ? std::static_pointer_cast<S>(px->shared_from_this()) :
+      std::shared_ptr<S>();
   }
 
   T *operator->() const { assert(px); return px; }
@@ -313,8 +304,8 @@ private:
   }
 
 IMPLEMENT_PTR_OPERATORS(hphp_raw_ptr, hphp_raw_ptr);
-IMPLEMENT_PTR_OPERATORS(hphp_raw_ptr, boost::shared_ptr);
-IMPLEMENT_PTR_OPERATORS(boost::shared_ptr, hphp_raw_ptr);
+IMPLEMENT_PTR_OPERATORS(hphp_raw_ptr, std::shared_ptr);
+IMPLEMENT_PTR_OPERATORS(std::shared_ptr, hphp_raw_ptr);
 
 template<typename T>
 class hphp_const_char_map :
@@ -335,7 +326,7 @@ typedef hphp_hash_map<void*, int, pointer_hash<void> > PointerCounterMap;
 typedef hphp_hash_set<void*, pointer_hash<void> > PointerSet;
 
 typedef std::vector<std::string> StringVec;
-typedef boost::shared_ptr<std::vector<std::string> > StringVecPtr;
+typedef std::shared_ptr<std::vector<std::string> > StringVecPtr;
 typedef std::pair<std::string, std::string> StringPair;
 typedef std::set<std::pair<std::string, std::string> > StringPairSet;
 typedef std::vector<StringPairSet> StringPairSetVec;
@@ -463,10 +454,10 @@ destroyMapValues(Container& c) {
 
 #define DECLARE_BOOST_TYPES(classname)                                  \
   class classname;                                                      \
-  typedef boost::shared_ptr<classname> classname ## Ptr;                \
+  typedef std::shared_ptr<classname> classname ## Ptr;                \
   typedef hphp_raw_ptr<classname> classname ## RawPtr;                  \
-  typedef boost::weak_ptr<classname> classname ## WeakPtr;              \
-  typedef boost::shared_ptr<const classname> classname ## ConstPtr;     \
+  typedef std::weak_ptr<classname> classname ## WeakPtr;              \
+  typedef std::shared_ptr<const classname> classname ## ConstPtr;     \
   typedef std::vector<classname ## Ptr> classname ## PtrVec;            \
   typedef std::set<classname ## Ptr> classname ## PtrSet;               \
   typedef std::list<classname ## Ptr> classname ## PtrList;             \
@@ -477,7 +468,7 @@ destroyMapValues(Container& c) {
   typedef hphp_string_hash_map<classname ## PtrSet, classname>          \
       StringTo ## classname ## PtrSetMap;                               \
 
-typedef boost::shared_ptr<FILE> FilePtr;
+typedef std::shared_ptr<FILE> FilePtr;
 
 struct null_deleter {
   void operator()(void const *) const {
@@ -534,8 +525,8 @@ namespace HPHP {
   using std::string;
   using std::vector;
   using boost::lexical_cast;
-  using boost::dynamic_pointer_cast;
-  using boost::static_pointer_cast;
+  using std::dynamic_pointer_cast;
+  using std::static_pointer_cast;
 
   template <typename T, typename U>
   HPHP::hphp_raw_ptr<T> dynamic_pointer_cast(HPHP::hphp_raw_ptr<U> p) {

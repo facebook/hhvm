@@ -24,6 +24,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+class StreamContext;
+
 class FileData : public RequestEventHandler {
 public:
   FileData() : m_pcloseRet(0) {}
@@ -65,11 +67,14 @@ public:
   explicit File(bool nonblocking = true);
   virtual ~File();
 
-  static StaticString s_class_name;
+  static StaticString& classnameof() {
+    static StaticString result("File");
+    return result;
+  }
   static StaticString s_resource_name;
 
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return s_class_name; }
+  CStrRef o_getClassNameHook() const { return classnameof(); }
   CStrRef o_getResourceName() const { return s_resource_name; }
   virtual bool isInvalid() const { return m_closed; }
 
@@ -118,6 +123,9 @@ public:
   virtual Array getMetaData();
   virtual Array getWrapperMetaData() { return null_array; }
   virtual const char *getStreamType() const { return "";}
+  virtual StreamContext *getStreamContext() { return m_stream_context; }
+
+  int64_t bufferedLen() { return m_writepos - m_readpos; }
 
   std::string getMode() { return m_mode; }
 
@@ -177,7 +185,10 @@ protected:
   std::string m_name;
   std::string m_mode;
 
+  StreamContext *m_stream_context;
+
   void closeImpl();
+  virtual void sweep() FOLLY_OVERRIDE;
 
 private:
   static const int CHUNK_SIZE = 8192;

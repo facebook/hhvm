@@ -112,14 +112,39 @@ struct ConcurrentTableSharedStore {
   void dump(std::ostream & out, bool keyOnly, int waitSeconds);
 
 private:
+
+  // Fake a StringData as a char* with the high bit set.
+  // charHashCompare below will properly handle the value and reuse the
+  // hash value of the StringData
+
+  inline static char* tagStringData(StringData* s) {
+    return reinterpret_cast<char*>(-reinterpret_cast<intptr_t>(s));
+  }
+
+  inline static StringData* getStringData(const char* s) {
+    assert(reinterpret_cast<intptr_t>(s) < 0);
+    return reinterpret_cast<StringData*>(-reinterpret_cast<intptr_t>(s));
+  }
+
+  inline static bool isTaggedStringData(const char* s) {
+    return reinterpret_cast<intptr_t>(s) < 0;
+  }
+
   struct charHashCompare {
     bool equal(const char *s1, const char *s2) const {
       assert(s1 && s2);
+      // tbb implementation call equal with the second pointer being the
+      // value in the table and thus not a StringData*. We are asserting
+      // to make sure that is the case
+      assert(!isTaggedStringData(s2));
+      if (isTaggedStringData(s1)) {
+        s1 = getStringData(s1)->data();
+      }
       return strcmp(s1, s2) == 0;
     }
     size_t hash(const char *s) const {
       assert(s);
-      return hash_string(s);
+      return isTaggedStringData(s) ? getStringData(s)->hash() : hash_string(s);
     }
   };
 

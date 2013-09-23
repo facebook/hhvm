@@ -388,7 +388,7 @@ int instrNumPops(const Op* opcode) {
   // For most instructions, we know how many values are popped based
   // solely on the opcode
   if (n >= 0) return n;
-  // FCall and NewTuple specify how many values are popped in their
+  // FCall and NewPackedArray specify how many values are popped in their
   // first immediate
   if (n == -3) return getImm(opcode, 0).u_IVA;
   // For instructions with vector immediates, we have to scan the

@@ -48,7 +48,7 @@ DECLARE_BOOST_TYPES(DebuggerCommand);
 DECLARE_BOOST_TYPES(CmdFlowControl);
 
 class DebuggerProxy : public Synchronizable,
-                      public boost::enable_shared_from_this<DebuggerProxy> {
+                      public std::enable_shared_from_this<DebuggerProxy> {
 public:
   enum ThreadMode {
     Normal,

@@ -165,6 +165,10 @@ static CallMap s_callMap {
     {ConvCellToStr,      convCellToStrHelper, DSSA, SSync,
                            {{TV, 0}}},
 
+    {ConcatStrStr,       concat_ss, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
+    {ConcatStrInt,       concat_si, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
+    {ConcatIntStr,       concat_is, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
+
     {AddElemStrKey,      addElemStringKeyHelper, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {TV, 2}}},
     {AddElemIntKey,      addElemIntKeyHelper, DSSA, SNone,
@@ -173,8 +177,8 @@ static CallMap s_callMap {
                            {{SSA, 0}, {TV, 1}}},
     {ArrayAdd,           array_add, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
     {Box,                box_value, DSSA, SNone, {{TV, 0}}},
-    {NewArray,           ArrayData::MakeReserve, DSSA, SNone, {{SSA, 0}}},
-    {NewTuple,           ArrayData::MakeTuple, DSSA, SNone,
+    {NewArray,           HphpArray::MakeReserve, DSSA, SNone, {{SSA, 0}}},
+    {NewPackedArray,     HphpArray::MakePacked, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}}},
     {AllocObj,           newInstance, DSSA, SSync,
                            {{SSA, 0}}},

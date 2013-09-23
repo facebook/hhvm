@@ -853,7 +853,7 @@ bool AdminRequestHandler::handleConstSizeRequest (const std::string &cmd,
 bool AdminRequestHandler::handleStaticStringsRequest(const std::string& cmd,
                                                      Transport* transport) {
   std::ostringstream result;
-  result << StringData::GetStaticStringCount();
+  result << makeStaticStringCount();
   transport->sendString(result.str());
   return true;
 }

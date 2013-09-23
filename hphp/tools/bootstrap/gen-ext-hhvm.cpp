@@ -536,7 +536,7 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
       emitCtorHelper(klass.name(), cpp);
     }
     if (klass.flags() & NoDefaultSweep) {
-      cpp << "IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(" << klass.name() << ");\n";
+      cpp << "IMPLEMENT_CLASS_NO_SWEEP(" << klass.name() << ");\n";
     } else {
       cpp << "IMPLEMENT_CLASS(" << klass.name() << ");\n";
     }

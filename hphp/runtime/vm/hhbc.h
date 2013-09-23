@@ -355,7 +355,7 @@ enum SetOpOp {
   O(String,          ONE(SA),          NOV,             ONE(CV),    NF) \
   O(Array,           ONE(AA),          NOV,             ONE(CV),    NF) \
   O(NewArray,        NA,               NOV,             ONE(CV),    NF) \
-  O(NewTuple,        ONE(IVA),         CMANY,           ONE(CV),    NF) \
+  O(NewPackedArray,  ONE(IVA),         CMANY,           ONE(CV),    NF) \
   O(AddElemC,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(AddElemV,        NA,               THREE(VV,CV,CV), ONE(CV),    NF) \
   O(AddNewElemC,     NA,               TWO(CV,CV),      ONE(CV),    NF) \
@@ -621,14 +621,7 @@ enum AstubsOp {
 #define HIGH_OPCODES \
   O(FuncPrologue) \
   O(TraceletGuard) \
-  O(NativeTrampoline) \
-  O(ServiceRequest) \
-  O(DtorStub) \
-  O(SyncOutputs) \
-  O(RetFromInterp) \
-  O(ResumeHelper) \
-  O(RequireHelper) \
-  O(DefClsHelper) \
+  O(NativeTrampoline)
 
 enum HighOp {
   OpHighStart = OpAstubCount-1,
@@ -765,7 +758,8 @@ ArgUnion* getImmPtr(const Op* opcode, int idx);
 
 // Pass a pointer to the pointer to the immediate; this function will advance
 // the pointer past the immediate
-inline int32_t decodeVariableSizeImm(const unsigned char** immPtr) {
+ALWAYS_INLINE
+int32_t decodeVariableSizeImm(const unsigned char** immPtr) {
   const unsigned char small = **immPtr;
   if (UNLIKELY(small & 0x1)) {
     const unsigned int large = *((const unsigned int*)*immPtr);

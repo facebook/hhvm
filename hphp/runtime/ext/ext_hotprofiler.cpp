@@ -325,56 +325,12 @@ static inline uint64_t vtsc(int64_t MHz) {
     tv_to_cycles(usage.ru_utime, MHz) + tv_to_cycles(usage.ru_stime, MHz);
 }
 
-#ifdef USE_JEMALLOC
-
-#define JEMALLOC_STAT_MIB_LEN 2
-size_t mallctl_mib_len = JEMALLOC_STAT_MIB_LEN;
-size_t *mallctl_alloc_mib;
-size_t *mallctl_free_mib;
-bool mallctl_init = false;
-
-bool
-mallctl_mib_init()
-{
-  if (mallctl_init) {
-    return false;
-  }
-  mallctl_init = true;
-  mallctl_alloc_mib = new size_t[mallctl_mib_len];
-  if (mallctlnametomib("thread.allocated",
-                       mallctl_alloc_mib, &mallctl_mib_len))
-  {
-    return false;
-  }
-  mallctl_free_mib = new size_t[mallctl_mib_len];
-  if (mallctlnametomib("thread.deallocated",
-                       mallctl_free_mib, &mallctl_mib_len))
-  {
-    return false;
-  }
-  return true;
-}
-#endif
-
 uint64_t
 get_allocs()
 {
 #ifdef USE_JEMALLOC
-  if (mallctl) {
-    if (!mallctl_alloc_mib) {
-      if (!mallctl_mib_init()) {
-        return 0;
-      }
-    }
-    uint64_t stat;
-    size_t size = sizeof(stat);
-    if (mallctlbymib(mallctl_alloc_mib, mallctl_mib_len, &stat, &size,
-                     nullptr, 0))
-    {
-      return 0;
-    }
-    return stat;
-  }
+  MemoryManager *mm = MemoryManager::TheMemoryManager();
+  return mm->getAllocated();
 #endif
 #ifdef USE_TCMALLOC
   if (MallocExtensionInstance) {
@@ -391,21 +347,8 @@ uint64_t
 get_frees()
 {
 #ifdef USE_JEMALLOC
-  if (mallctl) {
-    if (!mallctl_free_mib) {
-      if (!mallctl_mib_init()) {
-        return 0;
-      }
-    }
-    uint64_t stat;
-    size_t size = sizeof(stat);
-    if (mallctlbymib(mallctl_free_mib, mallctl_mib_len, &stat, &size,
-                     nullptr, 0))
-    {
-      return 0;
-    }
-    return stat;
-  }
+  MemoryManager *mm = MemoryManager::TheMemoryManager();
+  return mm->getDeallocated();
 #endif
 #ifdef USE_TCMALLOC
   if (MallocExtensionInstance) {

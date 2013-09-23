@@ -21,6 +21,7 @@ namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
 
 BuiltinFunctionMap s_builtinFunctions;
+ClassConstantMapMap s_class_constant_map;
 
 /**
  * Native function caller
@@ -175,6 +176,9 @@ void callFunc(const Func* func, TypedValue *ctx,
   case KindOfInt64:
     ret.m_data.num = makeNativeCall<int64_t>(func, args, numArgs, ctx);
     break;
+  case KindOfDouble:
+    ret.m_data.dbl = makeNativeCall<double>(func, args, numArgs, ctx);
+    break;
   case KindOfString:
   case KindOfStaticString:
   case KindOfArray:
@@ -219,7 +223,7 @@ static const StringData* getInvokeName(ActRec *ar) {
   }
   String clsname(cls->name());
   String funcname(func->name());
-  return StringData::GetStaticString(clsname + "::" + funcname);
+  return makeStaticString(clsname + "::" + funcname);
 }
 
 static inline bool nativeWrapperCheckArgs(ActRec* ar) {

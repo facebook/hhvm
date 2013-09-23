@@ -32,9 +32,8 @@ public:
   Pipe();
   virtual ~Pipe();
 
-  static StaticString s_class_name;
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return s_class_name; }
+  CStrRef o_getClassNameHook() const { return classnameof(); }
 
   // implementing File
   virtual bool open(CStrRef filename, CStrRef mode);

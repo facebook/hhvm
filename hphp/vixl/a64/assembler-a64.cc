@@ -345,8 +345,8 @@ bool MemOperand::IsPostIndex() const {
 
 
 // Assembler
-Assembler::Assembler(byte* buffer, unsigned buffer_size)
-    : buffer_size_(buffer_size), literal_pool_monitor_(0) {
+Assembler::Assembler(HPHP::CodeBlock& cb)
+    : cb_(cb), literal_pool_monitor_(0) {
   // Assert that this is an LP64 system.
   assert(sizeof(int) == sizeof(int32_t));     // NOLINT(runtime/sizeof)
   assert(sizeof(long) == sizeof(int64_t));    // NOLINT(runtime/int)
@@ -354,28 +354,25 @@ Assembler::Assembler(byte* buffer, unsigned buffer_size)
   assert(sizeof(1) == sizeof(int32_t));       // NOLINT(runtime/sizeof)
   assert(sizeof(1L) == sizeof(int64_t));      // NOLINT(runtime/sizeof)
 
-  buffer_ = reinterpret_cast<Instruction*>(buffer);
-  pc_ = buffer_;
   Reset();
 }
 
 
 Assembler::~Assembler() {
-  assert(finalized_ || (pc_ == buffer_));
+  assert(finalized_ || (cb_.used() == 0));
   assert(literals_.empty());
 }
 
 
 void Assembler::Reset() {
 #ifdef DEBUG
-  assert((pc_ >= buffer_) && (pc_ < buffer_ + buffer_size_));
   assert(literal_pool_monitor_ == 0);
-  memset(buffer_, 0, pc_ - buffer_);
+  cb_.zero();
   finalized_ = false;
 #endif
-  pc_ = buffer_;
+  cb_.clear();
   literals_.clear();
-  next_literal_pool_check_ = pc_ + kLiteralPoolCheckInterval;
+  next_literal_pool_check_ = cb_.frontier() + kLiteralPoolCheckInterval;
 }
 
 
@@ -389,31 +386,33 @@ void Assembler::FinalizeCode() {
 
 void Assembler::bind(Label* label) {
   label->is_bound_ = true;
-  label->target_ = pc_;
+  label->target_ = cb_.frontier();
   while (label->IsLinked()) {
     // Get the address of the following instruction in the chain.
-    Instruction* next_link = label->link_->ImmPCOffsetTarget();
+    auto link = Instruction::Cast(label->link_);
+    Instruction* next_link = link->ImmPCOffsetTarget();
     // Update the instruction target.
-    label->link_->SetImmPCOffsetTarget(label->target_);
+    link->SetImmPCOffsetTarget(Instruction::Cast(label->target_));
     // Update the label's link.
     // If the offset of the branch we just updated was 0 (kEndOfChain) we are
     // done.
-    label->link_ = (label->link_ != next_link) ? next_link : nullptr;
+    label->link_ = (link != next_link
+                    ? reinterpret_cast<HPHP::CodeAddress>(next_link)
+                    : nullptr);
   }
 }
 
 
 int Assembler::UpdateAndGetByteOffsetTo(Label* label) {
   int offset;
-  assert(sizeof(*pc_) == 1);
   if (label->IsBound()) {
-    offset = label->target() - pc_;
+    offset = label->target() - cb_.frontier();
   } else if (label->IsLinked()) {
-    offset = label->link() - pc_;
+    offset = label->link() - cb_.frontier();
   } else {
     offset = Label::kEndOfChain;
   }
-  label->set_link(pc_);
+  label->set_link(cb_.frontier());
   return offset;
 }
 
@@ -2013,7 +2012,7 @@ LoadStorePairNonTemporalOp Assembler::StorePairNonTemporalOpFor(
 
 
 void Assembler::RecordLiteral(int64_t imm, unsigned size) {
-  literals_.push_front(new Literal(pc_, imm, size));
+  literals_.push_front(new Literal(cb_.frontier(), imm, size));
 }
 
 
@@ -2037,7 +2036,7 @@ void Assembler::CheckLiteralPool(LiteralPoolEmitOption option) {
     return;
   }
 
-  intptr_t distance = pc_ - literals_.back()->pc_;
+  intptr_t distance = cb_.frontier() - literals_.back()->pc_;
   if ((distance < kRecommendedLiteralPoolRange) ||
       ((option == JumpRequired) &&
        (distance < (2 * kRecommendedLiteralPoolRange)))) {
@@ -2072,15 +2071,14 @@ void Assembler::EmitLiteralPool(LiteralPoolEmitOption option) {
   std::list<Literal*>::iterator it;
   for (it = literals_.begin(); it != literals_.end(); it++) {
     // Update the load-literal instruction to point to this pool entry.
-    Instruction* load_literal = (*it)->pc_;
-    load_literal->SetImmLLiteral(pc_);
+    auto load_literal = Instruction::Cast((*it)->pc_);
+    load_literal->SetImmLLiteral(Instruction::Cast(cb_.frontier()));
     // Copy the data into the pool.
     uint64_t value= (*it)->value_;
     unsigned size = (*it)->size_;
     assert((size == kXRegSizeInBytes) || (size == kWRegSizeInBytes));
-    assert((pc_ + size) <= (buffer_ + buffer_size_));
-    memcpy(pc_, &value, size);
-    pc_ += size;
+    assert(cb_.canEmit(size));
+    cb_.bytes(size, reinterpret_cast<const uint8_t*>(&value));
     delete *it;
   }
   literals_.clear();
@@ -2098,7 +2096,7 @@ void Assembler::EmitLiteralPool(LiteralPoolEmitOption option) {
   Instr marker_instruction = LDR_x_lit | ImmLLiteral(pool_size) | Rt(xzr);
   memcpy(marker.target(), &marker_instruction, kInstructionSize);
 
-  next_literal_pool_check_ = pc_ + kLiteralPoolCheckInterval;
+  next_literal_pool_check_ = cb_.frontier() + kLiteralPoolCheckInterval;
 }
 
 

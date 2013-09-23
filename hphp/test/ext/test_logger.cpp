@@ -51,11 +51,11 @@ bool TestLogger::initializeRun() {
   data.set(String("repository"),   getRepoRoot());
   data.set(String("svnRevision"),  getSVNRevision());
   data.set(String("gitRevision"),  getGitRevision());
-  data.set(String("tags"),         CREATE_VECTOR2("hphp", "c++"));
+  data.set(String("tags"),         make_packed_array("hphp", "c++"));
 
   Array dataArr(data.create());
 
-  Array response = postData(CREATE_MAP1("runData", dataArr));
+  Array response = postData(make_map_array("runData", dataArr));
 
   if (!response[s_result].toBoolean()) {
     return false;
@@ -72,8 +72,8 @@ bool TestLogger::finishRun() {
   if (run_id <= 0)
     return false;
 
-  Array data = CREATE_MAP2("runId",   run_id,
-                           "runData", CREATE_MAP1("stillRunning", false));
+  Array data = make_map_array("runId",   run_id,
+                           "runData", make_map_array("stillRunning", false));
 
   Array response = postData(data);
   if (response[s_result].toBoolean()) {
@@ -88,9 +88,9 @@ bool TestLogger::logTest(Array test) {
   if (run_id <= 0)
     return false;
 
-  Array data = CREATE_MAP3("runId",   run_id,
-                           "runData", CREATE_MAP1("stillRunning", true),
-                           "tests",   CREATE_VECTOR1(test));
+  Array data = make_map_array("runId",   run_id,
+                           "runData", make_map_array("stillRunning", true),
+                           "tests",   make_packed_array(test));
 
   Array response = postData(data);
   if (response[s_result].toBoolean()) {
@@ -107,8 +107,8 @@ Array TestLogger::postData(Array arr) {
   HttpClient client;
   StringBuffer response;
 
-  Array data = CREATE_MAP2("method", "recordTestResults",
-                           "args", f_json_encode(CREATE_VECTOR1(arr)));
+  Array data = make_map_array("method", "recordTestResults",
+                           "args", f_json_encode(make_packed_array(arr)));
 
   String str = f_http_build_query(data);
 

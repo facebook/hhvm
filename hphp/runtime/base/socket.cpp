@@ -27,8 +27,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString Socket::s_class_name("Socket");
-
 class SocketData : public RequestEventHandler {
 public:
   SocketData() : m_lastErrno(0) {}
@@ -79,6 +77,11 @@ Socket::~Socket() {
   closeImpl();
 }
 
+void Socket::sweep() {
+  Socket::closeImpl();
+  File::sweep();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void Socket::setError(int err) {
@@ -102,6 +105,7 @@ bool Socket::closeImpl() {
   if (valid() && !m_closed) {
     s_file_data->m_pcloseRet = ::close(m_fd);
     m_closed = true;
+    m_fd = -1;
   }
   File::closeImpl();
   return true;

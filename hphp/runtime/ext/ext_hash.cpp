@@ -126,27 +126,28 @@ static HashEngineMapInitializer s_engine_initializer;
 
 class HashContext : public SweepableResourceData {
 public:
-  static StaticString s_class_name;
+  CLASSNAME_IS("Hash Context")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   HashContext(HashEnginePtr ops_, void *context_, int options_)
-    : ops(ops_), context(context_), options(options_), key(NULL) {
+    : ops(ops_), context(context_), options(options_), key(nullptr) {
   }
 
   ~HashContext() {
+    HashContext::sweep();
+  }
+
+  void sweep() FOLLY_OVERRIDE {
     /* Just in case the algo has internally allocated resources */
     if (context) {
-      unsigned char *dummy = (unsigned char *)malloc(ops->digest_size);
+      assert(ops->digest_size >= 0);
+      unsigned char dummy[ops->digest_size];
       ops->hash_final(dummy, context);
-      free(dummy);
       free(context);
     }
 
-    if (key) {
-      memset(key, 0, ops->block_size);
-      free(key);
-    }
+    free(key);
   }
 
   HashEnginePtr ops;
@@ -154,8 +155,6 @@ public:
   int options;
   char *key;
 };
-
-StaticString HashContext::s_class_name("Hash Context");
 
 ///////////////////////////////////////////////////////////////////////////////
 // hash functions
@@ -208,7 +207,7 @@ static Variant php_hash_do_hash(CStrRef algo, CStrRef data, bool isfilename,
   }
 
   String raw = String(ops->digest_size, ReserveString);
-  char *digest = raw.mutableSlice().ptr;
+  char *digest = raw.bufferSlice().ptr;
   ops->hash_final((unsigned char *)digest, context);
   free(context);
 
@@ -285,7 +284,7 @@ Variant HHVM_FUNCTION(hash_init, CStrRef algo,
   void *context = malloc(ops->context_size);
   ops->hash_init(context);
 
-  HashContext *hash = new HashContext(ops, context, options);
+  const auto hash = new HashContext(ops, context, options);
   if (options & k_HASH_HMAC) {
     hash->key = prepare_hmac_key(ops, context, key);
   }
@@ -304,7 +303,7 @@ String HHVM_FUNCTION(hash_final, CResRef context,
   HashContext *hash = context.getTyped<HashContext>();
 
   String raw = String(hash->ops->digest_size, ReserveString);
-  char *digest = raw.mutableSlice().ptr;
+  char *digest = raw.bufferSlice().ptr;
   hash->ops->hash_final((unsigned char *)digest, hash->context);
   if (hash->options & k_HASH_HMAC) {
     finalize_hmac_key(hash->key, hash->ops, hash->context, digest);

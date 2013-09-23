@@ -43,7 +43,7 @@ TypedValue* objOffsetGet(TypedValue& tvRef, ObjectData* base,
   }
   TypedValue* result;
   assert(!base->isCollection());
-  static StringData* sd__offsetGet = StringData::GetStaticString("offsetGet");
+  static StringData* sd__offsetGet = makeStaticString("offsetGet");
   const Func* method = base->methodNamed(sd__offsetGet);
   assert(method != nullptr);
   g_vmContext->invokeFuncFew(&tvRef, method, base, nullptr, 1, offset.asCell());
@@ -56,7 +56,7 @@ static bool objOffsetExists(ObjectData* base, CVarRef offset) {
   TypedValue tvResult;
   tvWriteUninit(&tvResult);
   static StringData* sd__offsetExists
-    = StringData::GetStaticString("offsetExists");
+    = makeStaticString("offsetExists");
   assert(!base->isCollection());
   const Func* method = base->methodNamed(sd__offsetExists);
   assert(method != nullptr);
@@ -95,7 +95,7 @@ void objOffsetSet(ObjectData* base, CVarRef offset, TypedValue* val,
   if (validate) {
     objArrayAccess(base);
   }
-  static StringData* sd__offsetSet = StringData::GetStaticString("offsetSet");
+  static StringData* sd__offsetSet = makeStaticString("offsetSet");
   assert(!base->isCollection());
   const Func* method = base->methodNamed(sd__offsetSet);
   assert(method != nullptr);
@@ -109,7 +109,7 @@ void objOffsetSet(ObjectData* base, CVarRef offset, TypedValue* val,
 void objOffsetUnset(ObjectData* base, CVarRef offset) {
   objArrayAccess(base);
   static StringData* sd__offsetUnset
-    = StringData::GetStaticString("offsetUnset");
+    = makeStaticString("offsetUnset");
   assert(!base->isCollection());
   const Func* method = base->methodNamed(sd__offsetUnset);
   assert(method != nullptr);

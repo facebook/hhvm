@@ -25,11 +25,9 @@
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(DateTime);
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
-StaticString DateTime::s_class_name("DateTime");
 IMPLEMENT_REQUEST_LOCAL(DateTime::LastErrors, DateTime::s_lastErrors);
 
 const char *DateTime::DateFormatRFC822     = "D, d M y H:i:s O";

@@ -74,7 +74,7 @@ function idx($array, $key, $default = null) {
 function idx_file($array, $key, $default = null) {
   $file = is_file(idx($array, $key)) ? realpath($array[$key]) : $default;
   if (!is_file($file)) {
-    error("$file doesn't exist");
+    error("$file doesn't exist. Did you forget to build first?");
   }
   return rel_path($file);
 }
@@ -136,6 +136,7 @@ function get_options($argv) {
     'threads:' => '',
     'args:' => 'a:',
     'log' => 'l',
+    'failure-file:' => '',
   );
   $options = array();
   $files = array();
@@ -235,7 +236,7 @@ function find_file($test, $name) {
 }
 
 function find_file_for_dir($dir, $name) {
-  while (($dir !== '.') && is_dir($dir)) {
+  while (($dir !== '.' && $dir !== '/') && is_dir($dir)) {
     $file = "$dir/$name";
     if (is_file($file)) {
       return $file;
@@ -260,15 +261,16 @@ function find_debug_config($test, $name) {
 function mode_cmd($options) {
   $repo_args = "-vRepo.Local.Mode=-- -vRepo.Central.Path=".verify_hhbc();
   $jit_args = "$repo_args -vEval.Jit=true";
-  $mode = idx($options, 'mode');
+  $mode = idx($options, 'mode', '');
   switch ($mode) {
     case '':
     case 'jit':
+    case 'automain':
       return "$jit_args";
     case 'interp':
       return "$repo_args -vEval.Jit=0";
     default:
-      error("-m must be one of jit | interp. Got: '$mode'");
+      error("-m must be one of jit | interp | automain. Got: '$mode'");
   }
 }
 
@@ -276,13 +278,22 @@ function extra_args($options) {
   return idx($options, 'args', '');
 }
 
+function hhvm_path() {
+  return idx_file($_ENV, 'HHVM_BIN', bin_root().'/hphp/hhvm/hhvm');
+}
+
 // Return the command and the env to run it in.
 function hhvm_cmd($options, $test, $test_run = null) {
+  $use_automain = false;
   if ($test_run === null) {
-    $test_run = $test;
+    $use_automain = 'automain' === idx($options, 'mode')
+      && 'php' === pathinfo($test, PATHINFO_EXTENSION);
+    $test_run = $use_automain
+      ? __DIR__.'/pseudomain_wrapper.php'
+      : $test;
   }
-  $cmd = implode(" ", array(
-    idx_file($_ENV, 'HHVM_BIN', bin_root().'/hphp/hhvm/hhvm'),
+  $cmd = implode(' ', array(
+    hhvm_path(),
     '--config',
     find_test_ext($test, 'hdf'),
     find_debug_config($test, 'hphpd.hdf'),
@@ -292,7 +303,8 @@ function hhvm_cmd($options, $test, $test_run = null) {
     extra_args($options),
     '-vResourceLimit.CoreFileSize=0',
     '--file',
-    escapeshellarg($test_run)
+    escapeshellarg($test_run),
+    $use_automain ? escapeshellarg($test) : ''
   ));
   $env = $_ENV;
   $in = find_test_ext($test, 'in');
@@ -309,7 +321,7 @@ function hhvm_cmd($options, $test, $test_run = null) {
 
 function hphp_cmd($options, $test) {
   return implode(" ", array(
-    idx_file($_ENV, 'HPHP_BIN', bin_root().'/hphp/hhvm/hhvm'),
+    hhvm_path(),
     '--hphp',
     '--config',
     find_file($test, 'hphp_config.hdf'),
@@ -468,25 +480,28 @@ function skip_test($options, $test) {
 }
 
 function run_test($options, $test) {
-  list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
-  $hhvm = __DIR__."/../tools/timeout.sh -t 300 $hhvm";
-  $output = "";
 
   if (skip_test($options, $test)) {
     return 'skip';
   }
+  $test_ext = pathinfo($test, PATHINFO_EXTENSION);
+  list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
+
+  $hhvm = __DIR__.'/../tools/timeout.sh -t 300 '.$hhvm;
+  $output = '';
 
   if (isset($options['repo'])) {
-    if (strpos($test, '.hhas') !== false ||
-        strpos($hhvm, '-m debug') != false ||
+    if ($test_ext === 'hhas' ||
+        strpos($hhvm, '-m debug') !== false ||
         file_exists($test.'.norepo')) {
       return 'skip';
     } else {
-      unlink("$test.repo/hhvm.hhbc");
+      $repodb = "$test.repo/hhvm.hhbc";
+      if (file_exists($repodb)) unlink($repodb);
       $hphp = hphp_cmd($options, $test);
       $output .= shell_exec("$hphp 2>&1");
       $hhvm .= " -vRepo.Authoritative=true ".
-               "-vRepo.Central.Path=$test.repo/hhvm.hhbc";
+               "-vRepo.Central.Path=$repodb";
     }
   }
 
@@ -499,6 +514,7 @@ function run_test($options, $test) {
     $hhvm_env['TRACE'] = 'printir:1';
     $hhvm_env['HPHP_TRACE_FILE'] = $test . '.log';
   }
+  $pipes = null;
   $process = proc_open("$hhvm 2>&1", $descriptorspec, $pipes, null, $hhvm_env);
   if (!is_resource($process)) {
     file_put_contents("$test.diff", "Couldn't invoke $hhvm");
@@ -649,14 +665,16 @@ function main($argv) {
   }
   $tests = find_tests($files, $options);
 
+  hhvm_path(); // check that binary exists
+
   $threads = min(count($tests), idx($options, 'threads', num_cpus() + 1));
 
   if (!isset($options['fbmake'])) {
     print "Running ".count($tests)." tests in $threads threads\n";
   }
 
-  # Try to construct the buckets so the test results are ready in approximately
-  # alphabetical order
+  // Try to construct the buckets so the test results are ready in
+  // approximately alphabetical order
   $test_buckets = array();
   $i = 0;
   foreach ($tests as $test) {
@@ -664,9 +682,9 @@ function main($argv) {
     $i = ($i + 1) % $threads;
   }
 
-  # Spawn off worker threads
+  // Spawn off worker threads
   $children = array();
-  # A poor man's shared memory
+  // A poor man's shared memory
   $bad_test_files = array();
   for ($i = 0; $i < $threads; $i++) {
     $bad_test_file = tempnam('/tmp', 'test-run-');
@@ -681,7 +699,7 @@ function main($argv) {
     }
   }
 
-  # Wait for the kids
+  // Wait for the kids
   $return_value = 0;
   foreach ($children as $child) {
     pcntl_waitpid($child, $status);
@@ -693,8 +711,8 @@ function main($argv) {
     $json = json_decode(file_get_contents($bad_test_file), true);
     if (!is_array($json)) {
       error(
-        "A test thread didn't send json to the controller. WTF. ".
-        "If your code isn't horribly broken, please complain loudly"
+        "No JSON output was received from a test thread. ".
+        "This might be a bug in the test script."
       );
     }
     $results = array_merge($results, $json);
@@ -732,6 +750,13 @@ SHIP
           function($test) { return 'cat '.$test.'.diff'; },
         $failed))."\n";
 
+      $failing_tests_file = !empty($options['failure-file'])
+        ? $options['failure-file']
+        : tempnam('/tmp', 'test-failures');
+      file_put_contents($failing_tests_file, implode("\n", $failed)."\n");
+      print $header_start.'For xargs, list of failures is available using:'.
+        $header_end.'cat '.$failing_tests_file."\n";
+
       print $header_start."Run these by hand:".$header_end;
 
       foreach ($failed as $test) {
@@ -746,7 +771,18 @@ SHIP
       }
 
       print $header_start."Re-run just the failing tests:".$header_end.
-            "$argv[0] ".implode(' ', $failed)."\n";
+            $argv[0].' '.implode(' ', $failed)."\n";
+
+      if (idx($options, 'mode') == 'automain') {
+        print $header_start
+          .'Automain caveat: wrapper script may change semantics'
+          .$header_end;
+        print 'The automain wrapper script ('.__DIR__.'/pseudomain_wrapper.php)'
+          .' may have changed behavior'."\n"
+          .'(e.g. extra frames in backtraces) by moving code from '
+          .'pseudo-main to file top-level and adding a wrapper function.'
+          ."\n";
+      }
     }
   }
 

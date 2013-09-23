@@ -302,6 +302,13 @@ class AutoloadHandler : public RequestEventHandler {
   };
 
 public:
+  ~AutoloadHandler() {
+    m_map.detach();
+    m_map_root.detach();
+    m_handlers.detach();
+    m_loading.detach();
+  }
+
   virtual void requestInit();
   virtual void requestShutdown();
 
@@ -327,7 +334,7 @@ private:
   Array m_map;
   String m_map_root;
   Array m_handlers;
-  bool m_running;
+  Array m_loading;
 };
 
 #define CALL_USER_FUNC_FEW_ARGS_COUNT 6

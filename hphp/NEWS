@@ -1,4 +1,11 @@
-future
+"Bobotie" 16-Sep-2013
+  - HNI (HipHop Native Interface) for calling C++ functions from Php
+  - Fix PropertyAccessorMap::isset
+  - Expose more POSIX constants
+  - Fixed behavior of stream_get_contents when default args are used.
+  - Implement str_getcsv, and fix some fgetcsv related issues.
+  - [IPv6] Fix stream_socket_recvfrom & stream_socket_sendto.
+  - [IPv6] Fix socket_sentto_recvfrom_ipv6_udp Zend compatibility.
   - Optimize closure invocation and __invoke (~3x faster to invoke)
   - Import gettext extension
   - string and object allocation optimizations (reduced memory usage for both)

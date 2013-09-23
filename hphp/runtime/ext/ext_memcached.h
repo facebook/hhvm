@@ -85,13 +85,13 @@ extern const int64_t q_Memcached$$RES_PAYLOAD_FAILURE;
 ///////////////////////////////////////////////////////////////////////////////
 // class Memcached
 
-FORWARD_DECLARE_CLASS_BUILTIN(Memcached);
+FORWARD_DECLARE_CLASS(Memcached);
 class c_Memcached : public ExtObjectData, public Sweepable {
  public:
-  DECLARE_CLASS(Memcached, Memcached, ObjectData)
+  DECLARE_CLASS(Memcached)
 
   // need to implement
-  public: c_Memcached(Class* cls = c_Memcached::s_cls);
+  public: c_Memcached(Class* cls = c_Memcached::classof());
   public: ~c_Memcached();
   public: void t___construct(CStrRef persistent_id = null_string);
   public: bool t_add(CStrRef key, CVarRef value, int expiration = 0);
@@ -142,7 +142,7 @@ class c_Memcached : public ExtObjectData, public Sweepable {
     int serializer;
     int rescode;
   };
-  typedef boost::shared_ptr<Impl> ImplPtr;
+  typedef std::shared_ptr<Impl> ImplPtr;
   ImplPtr m_impl;
 
   bool handleError(memcached_return status);

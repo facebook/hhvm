@@ -37,7 +37,6 @@
 #include "hphp/util/process.h"
 #include "hphp/util/ssl-init.h"
 
-#include <boost/make_shared.hpp>
 #include <sys/types.h>
 #include <signal.h>
 
@@ -54,8 +53,8 @@ const int kNumProcessors = sysconf(_SC_NPROCESSORS_ONLN);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-HttpServer::HttpServer(void *sslCTX /* = NULL */)
-  : m_stopped(false), m_stopReason(nullptr), m_sslCTX(sslCTX),
+HttpServer::HttpServer()
+  : m_stopped(false), m_stopReason(nullptr),
     m_watchDog(this, &HttpServer::watchDog) {
 
   // enabling mutex profiling, but it's not turned on
@@ -81,7 +80,7 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
   m_pageServer->addTakeoverListener(this);
 
   if (additionalThreads) {
-    auto handlerFactory = boost::make_shared<WarmupRequestHandlerFactory>(
+    auto handlerFactory = std::make_shared<WarmupRequestHandlerFactory>(
         m_pageServer, additionalThreads,
         RuntimeOption::ServerWarmupThrottleRequestCount,
         RuntimeOption::RequestTimeoutSeconds);
@@ -93,9 +92,9 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
       RuntimeOption::RequestTimeoutSeconds);
   }
 
-  if (RuntimeOption::EnableSSL && m_sslCTX) {
+  if (RuntimeOption::EnableSSL) {
     assert(SSLInit::IsInited());
-    m_pageServer->enableSSL(m_sslCTX, RuntimeOption::SSLPort);
+    m_pageServer->enableSSL(RuntimeOption::SSLPort);
   }
 
   m_adminServer = ServerFactoryRegistry::createServer

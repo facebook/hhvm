@@ -36,7 +36,6 @@ ObjectData* newPairHelper();
 StringData* concat_is(int64_t v1, StringData* v2);
 StringData* concat_si(StringData* v1, int64_t v2);
 StringData* concat_ss(StringData* v1, StringData* v2);
-StringData* concat_tv(DataType t1, uint64_t v1, DataType t2, uint64_t v2);
 
 int64_t eq_null_str(StringData* v1);
 int64_t eq_bool_str(int64_t v1, StringData* v2);
@@ -80,7 +79,7 @@ inline c_Continuation*
 frame_continuation(const ActRec* fp) {
   size_t arOffset = c_Continuation::getArOffset(fp->m_func);
   ObjectData* obj = (ObjectData*)((char*)fp - arOffset);
-  assert(obj->getVMClass() == c_Continuation::s_cls);
+  assert(obj->getVMClass() == c_Continuation::classof());
   return static_cast<c_Continuation*>(obj);
 }
 
@@ -182,8 +181,6 @@ Unit* build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
                                  ssize_t numBuiltinFuncs);
 Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
                                   ssize_t numBuiltinClasses);
-
-HphpArray* pack_args_into_array(ActRec* ar, int nargs);
 
 inline ObjectData*
 newInstance(Class* cls) {

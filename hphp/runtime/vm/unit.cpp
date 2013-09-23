@@ -92,7 +92,7 @@ static NamedEntityMap *s_namedDataMap;
 static NEVER_INLINE
 NamedEntity* getNamedEntityHelper(const StringData* str) {
   if (!str->isStatic()) {
-    str = StringData::GetStaticString(str);
+    str = makeStaticString(str);
   }
 
   auto res = s_namedDataMap->insert(str, NamedEntity());
@@ -905,7 +905,7 @@ void Unit::initialMerge() {
               StringData* s = (StringData*)((char*)obj - (int)k);
               auto* v = (TypedValueAux*) m_mergeInfo->mergeableData(ix + 1);
               ix += sizeof(*v) / sizeof(void*);
-              v->cacheHandle() = StringData::DefCnsHandle(
+              v->cacheHandle() = makeCnsHandle(
                 s, k == UnitMergeKindPersistentDefine);
               if (k == UnitMergeKindPersistentDefine) {
                 mergeCns(TargetCache::handleToRef<TypedValue>(v->cacheHandle()),
@@ -928,7 +928,7 @@ void Unit::initialMerge() {
 }
 
 Cell* Unit::lookupCns(const StringData* cnsName) {
-  TargetCache::CacheHandle handle = StringData::GetCnsHandle(cnsName);
+  auto const handle = lookupCnsHandle(cnsName);
   if (LIKELY(handle != 0)) {
     TypedValue& tv = TargetCache::handleToRef<TypedValue>(handle);
     if (LIKELY(tv.m_type != KindOfUninit)) {
@@ -953,7 +953,7 @@ Cell* Unit::lookupCns(const StringData* cnsName) {
 }
 
 Cell* Unit::lookupPersistentCns(const StringData* cnsName) {
-  TargetCache::CacheHandle handle = StringData::GetCnsHandle(cnsName);
+  auto const handle = lookupCnsHandle(cnsName);
   if (!TargetCache::isPersistentHandle(handle)) return nullptr;
   auto const ret = &TargetCache::handleToRef<TypedValue>(handle);
   assert(cellIsPlausible(*ret));
@@ -980,8 +980,7 @@ TypedValue* Unit::loadCns(const StringData* cnsName) {
 
 bool Unit::defCns(const StringData* cnsName, const TypedValue* value,
                   bool persistent /* = false */) {
-  TargetCache::CacheHandle handle =
-    StringData::DefCnsHandle(cnsName, persistent);
+  auto const handle = makeCnsHandle(cnsName, persistent);
 
   if (UNLIKELY(handle == 0)) {
     if (UNLIKELY(!TargetCache::s_constants)) {
@@ -990,9 +989,9 @@ bool Unit::defCns(const StringData* cnsName, const TypedValue* value,
        * static string. Not worth presizing or otherwise
        * optimizing for.
        */
-      TargetCache::s_constants = ArrayData::Make(1);
-      TargetCache::s_constants->incRefCount();
+      TargetCache::s_constants = HphpArray::MakeReserve(1);
     }
+    // TODO(#2887942): unchecked insert
     if (TargetCache::s_constants->nvInsert(
           const_cast<StringData*>(cnsName), const_cast<TypedValue*>(value))) {
       return true;
@@ -1032,8 +1031,7 @@ void Unit::defDynamicSystemConstant(const StringData* cnsName,
         s_stderr.equal(cnsName)))) {
     return;
   }
-  TargetCache::CacheHandle handle =
-    StringData::DefCnsHandle(cnsName, true);
+  auto const handle = makeCnsHandle(cnsName, true);
   assert(handle);
   TypedValue* cns = &TargetCache::handleToRef<TypedValue>(handle);
   assert(cns->m_type == KindOfUninit);
@@ -1479,12 +1477,21 @@ Func* Unit::getMain(Class* cls /*= NULL*/) const {
   return f;
 }
 
+SourceLocTable Unit::getSourceLocTable() const {
+  if (m_sourceLocTable.size() > 0 || m_repoId == RepoIdInvalid) {
+    return m_sourceLocTable;
+  }
+  Lock lock(s_classesMutex);
+  UnitRepoProxy& urp = Repo::get().urp();
+  urp.getSourceLocTab(m_repoId).get(m_sn, ((Unit*)this)->m_sourceLocTable);
+  return m_sourceLocTable;
+}
+
 // This uses range lookups so offsets in the middle of instructions are
 // supported.
 int Unit::getLineNumber(Offset pc) const {
   LineEntry key = LineEntry(pc, -1);
-  std::vector<LineEntry>::const_iterator it =
-    upper_bound(m_lineTable.begin(), m_lineTable.end(), key);
+  auto it = upper_bound(m_lineTable.begin(), m_lineTable.end(), key);
   if (it != m_lineTable.end()) {
     assert(pc < it->pastOffset());
     return it->val();
@@ -1492,11 +1499,19 @@ int Unit::getLineNumber(Offset pc) const {
   return -1;
 }
 
+// Sets sLoc to the source location of the first source location
+// entry that contains pc in its range of source locations.
+// Returns
 bool Unit::getSourceLoc(Offset pc, SourceLoc& sLoc) const {
-  if (m_repoId == RepoIdInvalid) {
-    return false;
+  auto sourceLocTable = this->getSourceLocTable();
+  SourceLocEntry key(pc, sLoc);
+  auto it = upper_bound(sourceLocTable.begin(), sourceLocTable.end(), key);
+  if (it != sourceLocTable.end()) {
+    assert(pc < it->pastOffset());
+    sLoc = it->val();
+    return true;
   }
-  return !Repo::get().urp().getSourceLoc(m_repoId).get(m_sn, pc, sLoc);
+  return false;
 }
 
 bool Unit::getOffsetRanges(int line, OffsetRangeVec& offsets) const {
@@ -1756,7 +1771,7 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
 
 Unit* UnitRepoProxy::load(const std::string& name, const MD5& md5) {
   UnitEmitter ue(md5);
-  ue.setFilepath(StringData::GetStaticString(name));
+  ue.setFilepath(makeStaticString(name));
   // Look for a repo that contains a unit with matching MD5.
   int repoId;
   for (repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
@@ -2080,6 +2095,42 @@ bool UnitRepoProxy::GetSourceLocStmt
   return false;
 }
 
+bool UnitRepoProxy::GetSourceLocTabStmt
+     ::get(int64_t unitSn, SourceLocTable& sourceLocTab) {
+  try {
+    RepoTxn txn(m_repo);
+    if (!prepared()) {
+      std::stringstream ssSelect;
+      ssSelect << "SELECT pastOffset,line0,char0,line1,char1 FROM "
+               << m_repo.table(m_repoId, "UnitSourceLoc")
+               << " WHERE unitSn == @unitSn"
+                  " ORDER BY pastOffset ASC;";
+      txn.prepare(*this, ssSelect.str());
+    }
+    RepoTxnQuery query(txn, *this);
+    query.bindInt64("@unitSn", unitSn);
+    do {
+      query.step();
+      if (!query.row()) {
+        return true;
+      }
+      Offset pastOffset;
+      query.getOffset(0, pastOffset);
+      SourceLoc sLoc;
+      query.getInt(1, sLoc.line0);
+      query.getInt(2, sLoc.char0);
+      query.getInt(3, sLoc.line1);
+      query.getInt(4, sLoc.char1);
+      SourceLocEntry entry(pastOffset, sLoc);
+      sourceLocTab.push_back(entry);
+    } while (!query.done());
+    txn.commit();
+  } catch (RepoExc& re) {
+    return true;
+  }
+  return false;
+}
+
 bool UnitRepoProxy::GetSourceLocPastOffsetsStmt
                   ::get(int64_t unitSn, int line, OffsetRangeVec& ranges) {
   try {
@@ -2256,21 +2307,13 @@ void UnitEmitter::setBcMeta(const uchar* bc_meta, size_t bc_meta_len) {
 }
 
 void UnitEmitter::setLines(const LineTable& lines) {
-  Offset prevPastOffset = 0;
-  for (size_t i = 0; i < lines.size(); ++i) {
-    const LineEntry* line = &lines[i];
-    Location sLoc;
-    sLoc.line0 = sLoc.line1 = line->val();
-    Offset pastOffset = line->pastOffset();
-    recordSourceLocation(&sLoc, prevPastOffset);
-    prevPastOffset = pastOffset;
-  }
+  this->m_lineTable = lines;
 }
 
 Id UnitEmitter::mergeLitstr(const StringData* litstr) {
   LitstrMap::const_iterator it = m_litstr2id.find(litstr);
   if (it == m_litstr2id.end()) {
-    const StringData* str = StringData::GetStaticString(litstr);
+    const StringData* str = makeStaticString(litstr);
     Id id = m_litstrs.size();
     m_litstrs.push_back(str);
     m_litstr2id[str] = id;
@@ -2283,7 +2326,7 @@ Id UnitEmitter::mergeLitstr(const StringData* litstr) {
 Id UnitEmitter::mergeArray(ArrayData* a, const StringData* key /* = NULL */) {
   if (key == nullptr) {
     String s = f_serialize(a);
-    key = StringData::GetStaticString(s.get());
+    key = makeStaticString(s.get());
   }
 
   ArrayIdMap::const_iterator it = m_array2id.find(key);
@@ -2306,7 +2349,7 @@ FuncEmitter* UnitEmitter::getMain() {
 
 void UnitEmitter::initMain(int line1, int line2) {
   assert(m_fes.size() == 0);
-  StringData* name = StringData::GetStaticString("");
+  StringData* name = makeStaticString("");
   FuncEmitter* pseudomain = newFuncEmitter(name);
   Attr attrs = AttrMayUseVV;
   pseudomain->init(line1, line2, 0, attrs, false, name);
@@ -2436,14 +2479,26 @@ Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
   return f;
 }
 
-template<class SourceLocTable>
-static LineTable createLineTable(SourceLocTable& srcLoc, Offset bclen) {
+static LineTable createLineTable(
+    std::vector<std::pair<Offset,SourceLoc> >& srcLoc,
+    Offset bclen) {
   LineTable lines;
   for (size_t i = 0; i < srcLoc.size(); ++i) {
     Offset endOff = i < srcLoc.size() - 1 ? srcLoc[i + 1].first : bclen;
     lines.push_back(LineEntry(endOff, srcLoc[i].second.line1));
   }
   return lines;
+}
+
+static SourceLocTable createSourceLocTable(
+    std::vector<std::pair<Offset,SourceLoc> >& srcLoc,
+    Offset bclen) {
+  SourceLocTable locations;
+  for (size_t i = 0; i < srcLoc.size(); ++i) {
+    Offset endOff = i < srcLoc.size() - 1 ? srcLoc[i + 1].first : bclen;
+    locations.push_back(SourceLocEntry(endOff, srcLoc[i].second));
+  }
+  return locations;
 }
 
 bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
@@ -2457,7 +2512,7 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
 
   try {
     {
-      LineTable lines = createLineTable(m_sourceLocTab, m_bclen);
+      auto lines = createLineTable(m_sourceLocTab, m_bclen);
       urp.insertUnit(repoId).insert(txn, m_sn, m_md5, m_bc, m_bclen,
                                     m_bc_meta, m_bc_meta_len,
                                     &m_mainReturn, m_mergeOnly, lines,
@@ -2556,7 +2611,7 @@ Unit* UnitEmitter::create() {
   {
     const std::string& dirname = Util::safe_dirname(m_filepath->data(),
                                                     m_filepath->size());
-    u->m_dirpath = StringData::GetStaticString(dirname);
+    u->m_dirpath = makeStaticString(dirname);
   }
   u->m_md5 = m_md5;
   for (unsigned i = 0; i < m_litstrs.size(); ++i) {
@@ -2659,7 +2714,12 @@ Unit* UnitEmitter::create() {
   }
   assert(ix == mi->m_mergeablesSize);
   mi->mergeableObj(ix) = (void*)UnitMergeKindDone;
-  u->m_lineTable = createLineTable(m_sourceLocTab, m_bclen);
+  u->m_sourceLocTable = createSourceLocTable(m_sourceLocTab, m_bclen);
+  if (m_lineTable.size() == 0) {
+    u->m_lineTable = createLineTable(m_sourceLocTab, m_bclen);
+  } else {
+    u->m_lineTable = m_lineTable;
+  }
   for (size_t i = 0; i < m_feTab.size(); ++i) {
     assert(m_feTab[i].second->past() == m_feTab[i].first);
     assert(m_fMap.find(m_feTab[i].second) != m_fMap.end());

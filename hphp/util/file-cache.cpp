@@ -22,6 +22,7 @@
 #include <string>
 
 #include "folly/String.h"
+#include "hphp/util/cache/cache-manager.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/compression.h"
 #include "hphp/util/logger.h"
@@ -38,6 +39,7 @@ static const short kCurrentFileCacheVersion = kFileCacheVersion_1;
 ///////////////////////////////////////////////////////////////////////////////
 
 string FileCache::SourceRoot;
+bool FileCache::UseNewCache;
 
 ///////////////////////////////////////////////////////////////////////////////
 // helper
@@ -65,10 +67,15 @@ static bool read_bytes(char *&ptr, char *end, char *buf, int len) {
 FileCache::FileCache()
     : m_fd(-1),
       m_size(0),
-      m_addr(nullptr) {
+      m_addr(nullptr),
+      cache_manager_(new CacheManager) {
 }
 
 FileCache::~FileCache() {
+  if (UseNewCache) {
+    return;
+  }
+
   for (FileMap::iterator iter = m_files.begin(); iter != m_files.end();
        ++iter) {
     Buffer &buffer = iter->second;
@@ -110,6 +117,14 @@ void FileCache::write(const char *name, bool addDirectories /* = true */) {
   assert(name && *name);
   assert(!exists(name));
 
+  if (UseNewCache) {
+    if (!cache_manager_->addEmptyEntry(name)) {
+      throw Exception("Unable to add entry for %s", name);
+    }
+
+    return;
+  }
+
   Buffer &buffer = m_files[name];
   buffer.len = -1; // PHP file
   buffer.data = nullptr;
@@ -125,6 +140,14 @@ void FileCache::write(const char *name, const char *fullpath) {
   assert(name && *name);
   assert(fullpath && *fullpath);
   assert(!exists(name));
+
+  if (UseNewCache) {
+    if (!cache_manager_->addFileContents(name, fullpath)) {
+      throw Exception("Unable to add entry for %s (%s)", name, fullpath);
+    }
+
+    return;
+  }
 
   struct stat sb;
   if (stat(fullpath, &sb) != 0) {
@@ -168,6 +191,14 @@ void FileCache::write(const char *name, const char *fullpath) {
 
 void FileCache::save(const char *filename) {
   assert(filename && *filename);
+
+  if (UseNewCache) {
+    if (!cache_manager_->saveCache(filename)) {
+      throw Exception("Unable to save cache to %s", filename);
+    }
+
+    return;
+  }
 
   FILE *f = fopen(filename, "w");
   if (f == nullptr) {
@@ -217,6 +248,11 @@ void FileCache::save(const char *filename) {
 short FileCache::getVersion(const char *filename) {
   assert(filename && *filename);
 
+  // This has no meaning in the new cache regime.
+  if (UseNewCache) {
+    return 1;
+  }
+
   FILE *f = fopen(filename, "r");
   if (f == nullptr) {
     throw Exception("Unable to open %s: %s", filename,
@@ -234,6 +270,10 @@ short FileCache::getVersion(const char *filename) {
 void FileCache::load(const char *filename, bool onDemandUncompress,
                      short version) {
   assert(filename && *filename);
+
+  if (UseNewCache) {
+    throw Exception("Non-mmap load not supported with UseNewCache enabled");
+  }
 
   FILE *f = fopen(filename, "r");
   if (f == nullptr) {
@@ -317,6 +357,11 @@ void FileCache::load(const char *filename, bool onDemandUncompress,
 }
 
 void FileCache::adviseOutMemory() {
+  // Not supported with the new cache.
+  if (UseNewCache) {
+    return;
+  }
+
   if (posix_madvise(m_addr, m_size, POSIX_MADV_DONTNEED)) {
     Logger::Error("posix_madvise failed: %s",
                   folly::errnoStr(errno).c_str());
@@ -325,6 +370,15 @@ void FileCache::adviseOutMemory() {
 
 void FileCache::loadMmap(const char *filename, short version) {
   assert(filename && *filename);
+
+  if (UseNewCache) {
+    if (!cache_manager_->loadCache(filename)) {
+      throw Exception("Unable to load cache from %s", filename);
+    }
+
+    return;
+  }
+
   always_assert(version > 0);
 
   struct stat sbuf;
@@ -404,6 +458,12 @@ void FileCache::loadMmap(const char *filename, short version) {
 bool FileCache::fileExists(const char *name,
                            bool isRelative /* = true */) const {
   if (isRelative) {
+    if (UseNewCache) {
+      // Original cache behavior: an empty entry is also a "file".
+      return cache_manager_->fileExists(name) ||
+             cache_manager_->emptyEntryExists(name);
+    }
+
     if (name && *name) {
       FileMap::const_iterator iter = m_files.find(name);
       if (iter != m_files.end() && iter->second.len >= -1) {
@@ -418,6 +478,10 @@ bool FileCache::fileExists(const char *name,
 bool FileCache::dirExists(const char *name,
                           bool isRelative /* = true */) const {
   if (isRelative) {
+    if (UseNewCache) {
+      return cache_manager_->dirExists(name);
+    }
+
     if (name && *name) {
       FileMap::const_iterator iter = m_files.find(name);
       if (iter != m_files.end() && iter->second.len == -2) {
@@ -432,6 +496,10 @@ bool FileCache::dirExists(const char *name,
 bool FileCache::exists(const char *name,
                        bool isRelative /* = true */) const {
   if (isRelative) {
+    if (UseNewCache) {
+      return cache_manager_->entryExists(name);
+    }
+
     if (name && *name) {
       return m_files.find(name) != m_files.end();
     }
@@ -442,6 +510,23 @@ bool FileCache::exists(const char *name,
 
 char *FileCache::read(const char *name, int &len, bool &compressed) const {
   if (name && *name) {
+    if (UseNewCache) {
+      const char* data;
+      uint64_t data_len;
+      bool data_compressed;
+
+      if (!cache_manager_->getFileContents(name, &data, &data_len,
+                                           &data_compressed)) {
+        return nullptr;
+      }
+
+      compressed = data_compressed;
+      len = data_len;
+
+      // Yep, throwing away const here (for now) for API compatibility.
+      return (char*) data;
+    }
+
     FileMap::const_iterator iter = m_files.find(name);
     if (iter != m_files.end()) {
       const Buffer &buf = iter->second;
@@ -470,8 +555,20 @@ char *FileCache::read(const char *name, int &len, bool &compressed) const {
 }
 
 int64_t FileCache::fileSize(const char *name, bool isRelative) const {
-  if (!name || !*name) return -1;
+  if (!name || !*name) {
+    return -1;
+  }
+
   if (isRelative) {
+    if (UseNewCache) {
+      uint64_t size;
+      if (!cache_manager_->getUncompressedFileSize(name, &size)) {
+        return -1;
+      }
+
+      return size;
+    }
+
     FileMap::const_iterator iter = m_files.find(name);
     if (iter != m_files.end()) {
       const Buffer &buf = iter->second;
@@ -495,9 +592,13 @@ int64_t FileCache::fileSize(const char *name, bool isRelative) const {
 void FileCache::dump() const {
   set<string> files;
 
-  // For sorting purposes.
-  for (auto& file: m_files) {
-    files.insert(file.first);
+  if (UseNewCache) {
+    cache_manager_->getEntryNames(&files);
+  } else {
+    // For sorting purposes.
+    for (auto& file: m_files) {
+      files.insert(file.first);
+    }
   }
 
   for (auto& name: files) {

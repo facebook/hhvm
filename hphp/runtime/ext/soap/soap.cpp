@@ -21,10 +21,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString soapHeader::s_class_name("soapHeader");
-
-///////////////////////////////////////////////////////////////////////////////
-
 SoapData::SoapData() : m_cache(WSDL_CACHE_MEMORY), m_cache_ttl(86400) {
   for (int i = 0; s_defaultEncoding[i].type != END_KNOWN_TYPES; ++i){
     encodeStatic &e = s_defaultEncoding[i];
@@ -141,7 +137,6 @@ void SoapData::reset() {
 }
 
 IMPLEMENT_REQUEST_LOCAL(SoapData, s_soap_data);
-IMPLEMENT_OBJECT_ALLOCATION(soapHeader);
 ///////////////////////////////////////////////////////////////////////////////
 
 SoapException::SoapException(const char *fmt, ...) {

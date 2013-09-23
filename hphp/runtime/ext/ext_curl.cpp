@@ -93,9 +93,9 @@ private:
   };
 
 public:
-  static StaticString s_class_name;
+  CLASSNAME_IS("cURL handle")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   explicit CurlResource(CStrRef url)
     : m_exception(nullptr), m_phpException(false), m_emptyPost(true) {
@@ -655,7 +655,7 @@ public:
       {
         int data_size = size * nmemb;
         Variant ret = ch->do_callback(
-          t->callback, CREATE_VECTOR3(Resource(ch), t->fp->fd(), data_size));
+          t->callback, make_packed_array(Resource(ch), t->fp->fd(), data_size));
         if (ret.isString()) {
           String sret = ret.toString();
           length = data_size < sret.size() ? data_size : sret.size();
@@ -687,7 +687,7 @@ public:
       {
         Variant ret = ch->do_callback(
           t->callback,
-          CREATE_VECTOR2(Resource(ch), String(data, length, CopyString)));
+          make_packed_array(Resource(ch), String(data, length, CopyString)));
         length = ret.toInt64();
       }
       break;
@@ -717,7 +717,7 @@ public:
       {
         Variant ret = ch->do_callback(
           t->callback,
-          CREATE_VECTOR2(Resource(ch), String(data, length, CopyString)));
+          make_packed_array(Resource(ch), String(data, length, CopyString)));
         length = ret.toInt64();
       }
       break;
@@ -774,14 +774,12 @@ private:
     CURLOPT_FB_TLS_CIPHER_SPEC = 2147482628
   } fb_specific_options;
 };
-IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(CurlResource);
+
 void CurlResource::sweep() {
   m_write.buf.release();
   m_write_header.buf.release();
   closeForSweep();
 }
-
-StaticString CurlResource::s_class_name("cURL handle");
 
 CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
   // Set defaults from config.hdf
@@ -1120,9 +1118,9 @@ class CurlMultiResource : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(CurlMultiResource)
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("cURL Multi Handle")
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return s_class_name; }
+  CStrRef o_getClassNameHook() const { return classnameof(); }
 
   CurlMultiResource() {
     m_multi = curl_multi_init();
@@ -1202,14 +1200,12 @@ private:
   CURLM *m_multi;
   Array m_easyh;
 };
-IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(CurlMultiResource);
+
 void CurlMultiResource::sweep() {
   if (m_multi) {
     curl_multi_cleanup(m_multi);
   }
 }
-
-StaticString CurlMultiResource::s_class_name("cURL Multi Handle");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1385,9 +1381,9 @@ class LibEventHttpHandle : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(LibEventHttpHandle)
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("LibEventHttp");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   explicit LibEventHttpHandle(LibEventHttpClientPtr client) : m_client(client) {
   }
@@ -1401,8 +1397,6 @@ public:
   LibEventHttpClientPtr m_client;
 };
 IMPLEMENT_OBJECT_ALLOCATION(LibEventHttpHandle)
-
-StaticString LibEventHttpHandle::s_class_name("LibEventHttp");
 
 static LibEventHttpClientPtr prepare_client
 (CStrRef url, CStrRef data, CArrRef headers, int timeout,

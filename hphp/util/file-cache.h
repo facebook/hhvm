@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_FILE_CACHE_H_
 #define incl_HPHP_FILE_CACHE_H_
 
+#include <memory>
 #include <string>
 
 #include "hphp/util/base.h"
@@ -29,9 +30,12 @@ namespace HPHP {
  */
 DECLARE_BOOST_TYPES(FileCache);
 
+class CacheManager;
+
 class FileCache {
  public:
   static std::string SourceRoot;
+  static bool UseNewCache;
 
  public:
   FileCache();
@@ -76,6 +80,7 @@ class FileCache {
   int m_fd;
   int m_size;
   void *m_addr;
+  std::unique_ptr<CacheManager> cache_manager_;
 
   void writeDirectories(const char *name);
 };

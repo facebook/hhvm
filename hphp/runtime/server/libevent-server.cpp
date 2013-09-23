@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/crash-reporter.h"
 #include "hphp/runtime/base/url.h"
 #include "hphp/runtime/server/http-protocol.h"
+#include "hphp/runtime/server/server-name-indication.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/logger.h"
@@ -256,8 +257,47 @@ void LibEventServer::stop() {
 ///////////////////////////////////////////////////////////////////////////////
 // SSL handling
 
-bool LibEventServer::enableSSL(void *sslCTX, int port) {
+bool LibEventServer::certHandler(const std::string &server_name,
+                                 const std::string &key_file,
+                                 const std::string &crt_file) {
 #ifdef _EVENT_USE_OPENSSL
+  // Create an SSL_CTX for this cert pair.
+  struct ssl_config tmp_config;
+  tmp_config.cert_file = (char *)(crt_file.c_str());
+  tmp_config.pk_file = (char *)(key_file.c_str());
+  SSL_CTX *tmp_ctx = (SSL_CTX*)evhttp_init_openssl(&tmp_config);
+  if (tmp_ctx) {
+    ServerNameIndication::insertSNICtx(server_name, tmp_ctx);
+    return true;
+  }
+#endif
+  return false;
+}
+
+bool LibEventServer::enableSSL(int port) {
+#ifdef _EVENT_USE_OPENSSL
+  SSL_CTX *sslCTX = nullptr;
+  struct ssl_config config;
+  if (RuntimeOption::SSLCertificateFile != "" &&
+      RuntimeOption::SSLCertificateKeyFile != "") {
+    config.cert_file = (char*)RuntimeOption::SSLCertificateFile.c_str();
+    config.pk_file = (char*)RuntimeOption::SSLCertificateKeyFile.c_str();
+    sslCTX = (SSL_CTX *)evhttp_init_openssl(&config);
+    if (sslCTX && !RuntimeOption::SSLCertificateDir.empty()) {
+      ServerNameIndication::load(RuntimeOption::SSLCertificateDir,
+                                 LibEventServer::certHandler);
+
+      // Register our per-request server name indication callback.
+      // We register our callback even if there's no additional certs so that
+      // a cert added in the future will get picked up without a restart.
+      SSL_CTX_set_tlsext_servername_callback(
+        sslCTX,
+        ServerNameIndication::callback);
+    }
+  } else {
+    Logger::Error("Invalid certificate file or key file");
+  }
+
   m_server_ssl = evhttp_new_openssl_ctx(m_eventBase, sslCTX);
   if (m_server_ssl == nullptr) {
     Logger::Error("evhttp_new_openssl_ctx failed");

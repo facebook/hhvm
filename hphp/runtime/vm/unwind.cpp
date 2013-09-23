@@ -65,10 +65,14 @@ void discardStackTemps(const ActRec* const fp,
         assert(ar->hasThis());
         ar->getThis()->setNoDestruct();
       }
+      FTRACE(2, "  unwind pop AR : {}\n",
+             implicit_cast<void*>(stack.top()));
       stack.popAR();
     },
     [&] (TypedValue* tv) {
       assert(tv == stack.top());
+      FTRACE(2, "  unwind pop TV : {}\n",
+             implicit_cast<void*>(stack.top()));
       stack.popTV();
     }
   );
@@ -150,6 +154,7 @@ void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc, Offset& faultOffset) {
   auto const unwindingGeneratorFrame = func->isGenerator();
   auto const unwindingReturningFrame = curOp == OpRetC || curOp == OpRetV;
   auto const prevFp = fp->arGetSfp();
+  auto const soff = fp->m_soff;
 
   FTRACE(1, "tearDownFrame: {} ({})\n  fp {} prevFp {}\n",
          func->fullName()->data(),
@@ -205,9 +210,16 @@ void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc, Offset& faultOffset) {
     } catch (...) {} // As above, don't let new exceptions out of unwind.
   }
 
+  /*
+   * At the final ActRec in this nesting level.  We don't need to set
+   * pc and fp since we're about to re-throw the exception.  And we
+   * don't want to dereference prefFp since we just popped it.
+   */
+  if (prevFp == fp) return;
+
   assert(stack.isValidAddress(reinterpret_cast<uintptr_t>(prevFp)) ||
          prevFp->m_func->isGenerator());
-  auto const prevOff = fp->m_soff + prevFp->m_func->base();
+  auto const prevOff = soff + prevFp->m_func->base();
   pc = prevFp->m_func->unit()->at(prevOff);
   fp = prevFp;
   faultOffset = prevOff;

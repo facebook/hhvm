@@ -1463,7 +1463,7 @@ Variant f_strtr(CStrRef str, CVarRef from, CVarRef to /* = null_variant */) {
 
 void f_parse_str(CStrRef str, VRefParam arr /* = null */) {
   Variant result;
-  
+
   HttpProtocol::DecodeParameters(result, str.data(), str.size());
 
   if(!arr.isReferenced()) {

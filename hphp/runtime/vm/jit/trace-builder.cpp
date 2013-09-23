@@ -992,12 +992,6 @@ void TraceBuilder::reoptimize() {
   m_enableCse = RuntimeOption::EvalHHIRCse;
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   if (!m_enableCse && !m_enableSimplification) return;
-  if (m_mainTrace->blocks().size() >
-      RuntimeOption::EvalHHIRSimplificationMaxBlocks) {
-    // TODO CSEHash::filter is very slow for large block sizes
-    // t2135219 should address that
-    return;
-  }
 
   BlockList sortedBlocks = rpoSortCfg(m_mainTrace.get(), m_irFactory);
   auto const idoms = findDominators(sortedBlocks);

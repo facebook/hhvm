@@ -391,7 +391,6 @@ public:
   F(bool, HHIRGenericDtorHelper,       true)                            \
   F(bool, HHIRCse,                     true)                            \
   F(bool, HHIRSimplification,          true)                            \
-  F(uint32_t, HHIRSimplificationMaxBlocks,1000)                         \
   F(bool, HHIRGenOpts,                 true)                            \
   F(bool, HHIRJumpOpts,                true)                            \
   F(bool, HHIRExtraOptPass,            true)                            \

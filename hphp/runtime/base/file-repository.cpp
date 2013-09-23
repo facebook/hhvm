@@ -373,7 +373,6 @@ bool FileRepository::readActualFile(const StringData *name,
     throw FatalErrorException(0, "file %s is too big", name->data());
   }
   int fileSize = s.st_size;
-  if (!fileSize) return false;
   int fd = open(name->data(), O_RDONLY);
   if (!fd) return false; // ignore file open exception
   String str = String(fileSize, ReserveString);

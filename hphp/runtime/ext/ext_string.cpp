@@ -300,10 +300,12 @@ String f_str_shuffle(CStrRef str) {
   int left   = ret->size();
 
   while (--left) {
-    int idx = rand() % left;
-    char temp = buf[left];
-    buf[left] = buf[idx];
-    buf[idx] = temp;
+    int idx = f_rand(0, left);
+    if (idx != left) {
+      char temp = buf[left];
+      buf[left] = buf[idx];
+      buf[idx] = temp;
+    }
   }
 
   return ret;

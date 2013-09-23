@@ -93,17 +93,17 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
 ArrayData* array_add(ArrayData* a1, ArrayData* a2) {
   if (!a2->empty()) {
     if (a1->empty()) {
+      // We consume refs on a2 and also produce references, so there's
+      // no need to inc/dec a2.
       decRefArr(a1);
       return a2;
     }
     if (a1 != a2) {
-      ArrayData *escalated = a1->plus(a2, a1->getCount() > 1);
-      if (escalated != a1) {
-        escalated->incRefCount();
-        decRefArr(a2);
-        decRefArr(a1);
-        return escalated;
-      }
+      auto const escalated = a1->plus(a2);
+      assert(escalated != a1 && escalated != a2);
+      decRefArr(a2);
+      decRefArr(a1);
+      return escalated;
     }
   }
   decRefArr(a2);

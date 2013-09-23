@@ -110,7 +110,7 @@ ssize_t SharedArray::getIndex(const StringData* k) const {
 }
 
 /* if a2 is modified copy of a1 (i.e. != a1), then release a1 and return a2 */
-inline ArrayData* releaseIfCopied(ArrayData* a1, ArrayData* a2) {
+static inline ArrayData* releaseIfCopied(ArrayData* a1, ArrayData* a2) {
   if (a1 != a2) a1->release();
   return a2;
 }
@@ -188,16 +188,16 @@ SharedArray::AppendWithRef(ArrayData* ad, CVarRef v, bool copy) {
   return releaseIfCopied(escalated, escalated->appendWithRef(v, false));
 }
 
-ArrayData*
-SharedArray::Plus(ArrayData* ad, const ArrayData *elems, bool copy) {
-  ArrayData *escalated = Escalate(ad);
-  return releaseIfCopied(escalated, escalated->plus(elems, false));
+ArrayData* SharedArray::Plus(ArrayData* ad, const ArrayData *elems) {
+  // XXX: this could be more efficient.
+  Array escalated = Escalate(ad);
+  return escalated->plus(elems);
 }
 
-ArrayData*
-SharedArray::Merge(ArrayData* ad, const ArrayData *elems, bool copy) {
-  ArrayData *escalated = Escalate(ad);
-  return releaseIfCopied(escalated, escalated->merge(elems, false));
+ArrayData* SharedArray::Merge(ArrayData* ad, const ArrayData *elems) {
+  // XXX: this could be more efficient.
+  Array escalated = Escalate(ad);
+  return escalated->merge(elems);
 }
 
 ArrayData *SharedArray::Prepend(ArrayData* ad, CVarRef v, bool copy) {

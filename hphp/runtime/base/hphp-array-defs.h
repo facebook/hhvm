@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/hphp-array.h"
 #include "hphp/util/stacktrace-profiler.h"
+#include "hphp/runtime/base/array-iterator.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,7 +42,7 @@ int32_t* HphpArray::findForNewInsert(size_t h0) const {
 
 inline bool HphpArray::isTombstone(ssize_t pos) const {
   assert(size_t(pos) <= m_used);
-  return isTombstone(m_data[pos].data.m_type);
+  return isTombstone(data()[pos].data.m_type);
 }
 
 inline void HphpArray::getElmKey(const Elm& e, TypedValue* out) {
@@ -60,7 +61,7 @@ template <bool withRef> ALWAYS_INLINE
 void HphpArray::getArrayElm(ssize_t pos, TypedValue* valOut,
                             TypedValue* keyOut) const {
   assert(size_t(pos) < m_used);
-  auto& elm = m_data[pos];
+  auto& elm = data()[pos];
   if (withRef) {
     tvAsVariant(valOut) = withRefBind(tvAsVariant(&elm.data));
     if (LIKELY(keyOut != nullptr)) {
@@ -138,7 +139,7 @@ inline TypedValue
 HphpArray::GetCellIntPacked(const ArrayData* ad, int64_t ki) {
   auto a = asPacked(ad);
   if (LIKELY(size_t(ki) < a->m_size)) {
-    TypedValue* ret = &a->m_data[ki].data;
+    TypedValue* ret = &a->data()[ki].data;
     ret = tvToCell(ret);
     tvRefcountedIncRef(ret);
     return *ret;
@@ -151,7 +152,7 @@ inline uint64_t
 HphpArray::IssetIntPacked(const ArrayData* ad, int64_t ki) {
   auto a = asPacked(ad);
   return (size_t(ki) < a->m_size) &&
-         (a->m_data[ki].data.m_type != KindOfNull);
+         (a->data()[ki].data.m_type != KindOfNull);
 }
 
 inline bool HphpArray::validPos(ssize_t pos) {
@@ -175,6 +176,14 @@ inline size_t HphpArray::computeMaxElms(uint32_t tableMask) {
 inline size_t HphpArray::computeDataSize(uint32_t tableMask) {
   return computeTableSize(tableMask) * sizeof(int32_t) +
     computeMaxElms(tableMask) * sizeof(Elm);
+}
+
+inline void ArrayData::moveStrongIterators(ArrayData* dest, ArrayData* src) {
+  for (FullPosRange r(src->strongIterators()); !r.empty(); r.popFront()) {
+    r.front()->setContainer(dest);
+  }
+  dest->m_strongIterators = src->m_strongIterators;
+  src->m_strongIterators = 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

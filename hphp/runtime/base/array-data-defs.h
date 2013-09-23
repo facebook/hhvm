@@ -338,12 +338,12 @@ inline ArrayData* ArrayData::escalate() const {
   return g_array_funcs.escalate[m_kind](this);
 }
 
-inline ArrayData* ArrayData::plus(const ArrayData* elms, bool copy) {
-  return g_array_funcs.plus[m_kind](this, elms, copy);
+inline ArrayData* ArrayData::plus(const ArrayData* elms) {
+  return g_array_funcs.plus[m_kind](this, elms);
 }
 
-inline ArrayData* ArrayData::merge(const ArrayData* elms, bool copy) {
-  return g_array_funcs.merge[m_kind](this, elms, copy);
+inline ArrayData* ArrayData::merge(const ArrayData* elms) {
+  return g_array_funcs.merge[m_kind](this, elms);
 }
 
 inline SharedVariant* ArrayData::getSharedVariant() {

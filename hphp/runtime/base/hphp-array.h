@@ -103,10 +103,10 @@ public:
   // this array is not empty and its not virtual.
   ssize_t getIterBegin() const {
     assert(!empty());
-    if (LIKELY(!isTombstone(m_data[0].data.m_type))) {
+    if (LIKELY(!isTombstone(data()[0].data.m_type))) {
       return 0;
     }
-    return nextElm(m_data, 0);
+    return nextElm(data(), 0);
   }
 
   // These using directives ensure the full set of overloaded functions
@@ -158,10 +158,6 @@ public:
   static ArrayData* SetInt(ArrayData*, int64_t k, CVarRef v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, CVarRef v, bool copy);
 
-  static void ZSetInt(ArrayData*, int64_t k, RefData* v);
-  static void ZSetStr(ArrayData*, StringData* k, RefData* v);
-  static void ZAppend(ArrayData* ad, RefData* v);
-
   // implements ArrayData
   static ArrayData* SetRefInt(ArrayData* ad, int64_t k, CVarRef v,
                               bool copy);
@@ -195,8 +191,8 @@ public:
   static ArrayData* AppendRefPacked(ArrayData*, CVarRef v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, CVarRef v, bool copy);
   static ArrayData* AppendWithRefPacked(ArrayData*, CVarRef v, bool copy);
-  static ArrayData* Plus(ArrayData*, const ArrayData* elems, bool copy);
-  static ArrayData* Merge(ArrayData*, const ArrayData* elems, bool copy);
+  static ArrayData* Plus(ArrayData*, const ArrayData* elems);
+  static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* PopPacked(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
@@ -217,6 +213,10 @@ public:
   HphpArray* copyImpl() const;
   HphpArray* copyPacked() const;
   HphpArray* copyMixed() const;
+  HphpArray* copyPackedAndResizeIfNeeded() const;
+  HphpArray* copyMixedAndResizeIfNeeded() const;
+  HphpArray* copyPackedAndResizeIfNeededSlow() const;
+  HphpArray* copyMixedAndResizeIfNeededSlow() const;
 
   // nvGet and friends.
   // "nv" stands for non-variant. If we know the types of keys and values
@@ -300,13 +300,7 @@ private:
   struct EmptyArrayInitializer;
   enum class ClonePacked {};
   enum class CloneMixed {};
-  enum EmptyMode { StaticEmptyArray };
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
-
-  struct PromotedPayload {
-    uint32_t oldCap;
-    uint32_t oldMask;
-  };
 
 private:
   static EmptyArrayInitializer s_arrayInitializer;
@@ -320,12 +314,12 @@ private:
   static HphpArray* asHphpArray(ArrayData* ad);
   static const HphpArray* asHphpArray(const ArrayData* ad);
 
-  static HphpArray* Make(EmptyMode);
   static void getElmKey(const Elm& e, TypedValue* out);
 
 private:
   static HphpArray* CopyPacked(const HphpArray& other, AllocationMode);
   static HphpArray* CopyMixed(const HphpArray& other, AllocationMode);
+  static HphpArray* CopyReserve(const HphpArray* src, size_t expectedSize);
 
   HphpArray() = delete;
   HphpArray(const HphpArray&) = delete;
@@ -334,10 +328,6 @@ private:
 
 private:
   void initHash(size_t tableSize);
-
-  PromotedPayload& promotedPayload() {
-    return *reinterpret_cast<PromotedPayload*>(this + 1);
-  }
 
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
@@ -366,6 +356,8 @@ private:
   ssize_t find(int64_t ki) const;
   ssize_t find(const StringData* s, strhash_t prehash) const;
 
+  // The array should already be sized for the new insertion before
+  // calling these methods.
   template <class Hit>
   int32_t* findForInsertImpl(size_t h0, Hit) const;
   int32_t* findForInsert(int64_t ki) const;
@@ -396,7 +388,6 @@ private:
                                        size_t mask);
 
   bool nextInsert(CVarRef data);
-  HphpArray* nextInsertPacked(CVarRef data);
   ArrayData* nextInsertRef(CVarRef data);
   ArrayData* nextInsertWithRef(CVarRef data);
   ArrayData* addVal(int64_t ki, CVarRef data);
@@ -405,8 +396,6 @@ private:
   template <class K> ArrayData* addLvalImpl(K k, Variant*& ret);
   template <class K> ArrayData* update(K k, CVarRef data);
   template <class K> ArrayData* updateRef(K k, CVarRef data);
-  template <class K> void zSetImpl(K k, RefData* data);
-  void zAppendImpl(RefData* data);
 
   void adjustFullPos(ssize_t pos);
   void erase(ssize_t pos);
@@ -414,10 +403,12 @@ private:
   HphpArray* copyImpl(HphpArray* target) const;
 
   bool isFull() const;
-  Elm& newElm(int32_t* ei, size_t h0);
-  Elm& newElmGrow(size_t h0);
-  Elm& allocElm(int32_t* ei);
+  bool isFullPacked() const;
+
+  // Pre: !isFullPacked()
   TypedValue& allocNextElm(uint32_t i);
+
+  Elm& allocElm(int32_t* ei);
 
   HphpArray* setVal(TypedValue& tv, CVarRef v);
   HphpArray* setRef(TypedValue& tv, CVarRef v);
@@ -428,16 +419,13 @@ private:
   HphpArray* initWithRef(TypedValue& tv, CVarRef v);
   HphpArray* moveVal(TypedValue& tv, TypedValue v);
 
-  void zInitVal(TypedValue& tv, RefData* v);
-  void zSetVal(TypedValue& tv, RefData* v);
-
   /*
    * grow() increases the hash table size and the number of slots for
    * elements by a factor of 2. grow() rebuilds the hash table, but it
    * does not compact the elements.
    */
-  void grow() ATTRIBUTE_COLD;
-  void growPacked() ATTRIBUTE_COLD;
+  static HphpArray* Grow(HphpArray* old) ATTRIBUTE_COLD;
+  static HphpArray* GrowPacked(HphpArray* old) ATTRIBUTE_COLD;
 
   /**
    * compact() does not change the hash table size or the number of slots
@@ -446,60 +434,31 @@ private:
    */
   void compact(bool renumber) ATTRIBUTE_COLD;
 
-  /**
+  /*
    * resize() and resizeIfNeeded() will grow or compact the array as
    * necessary to ensure that there is room for a new element and a
    * new hash entry.
    *
-   * resize() assumes that the array does not have room for a new element
-   * or a new hash entry. resizeIfNeeded() will first check if there is room
-   * for a new element and hash entry before growing or compacting the array.
+   * resize() assumes isFull().  resizeIfNeeded() will first check if
+   * there is room for a new element and hash entry before growing or
+   * compacting the array.
+   *
+   * Both functions return the new HphpArray* to use (or the old one
+   * if they didn't need to grow).  The old HphpArray is left in a
+   * zombie state where the only legal action is to decref and then
+   * throw it away.
    */
-  void resize();
-  void resizeIfNeeded();
+  HphpArray* resize();
+  HphpArray* resizeIfNeeded();
+  HphpArray* resizePackedIfNeeded();
 
-  bool isFlat() const {
-    return m_data == static_cast<const void*>(this + 1);
+  Elm* data() const {
+    return const_cast<Elm*>(reinterpret_cast<Elm const*>(this + 1));
   }
 
-private:
-  // Small: Array elements and the hash table are allocated inline.
-  //
-  //            +--------------------+
-  // this -->   | HphpArray fields   |
-  //            +--------------------+
-  // m_data --> | slot 0 ...         | SmallSize slots for elements.
-  //            | slot SmallSize-1   |
-  //            +--------------------+
-  // m_hash --> |                    | 2^MinLgTableSize hash table entries.
-  //            +--------------------+
-  //
-  // Medium: Just the hash table is allocated inline, array elements
-  // are allocated from malloc.
-  //
-  //            +--------------------+
-  // this -->   | HphpArray fields   |
-  //            +--------------------+
-  // m_hash --> |                    | 2^K hash table entries
-  //            +--------------------+
-  //
-  //            +--------------------+
-  // m_data --> | slot 0             | 0.75 * 2^K slots for elements.
-  //            | slot 1             |
-  //            | ...                |
-  //            +--------------------+
-  //
-  // Big: Array elements and the hash table are contiguously allocated, and
-  // elements are pointer aligned.
-  //
-  //            +--------------------+
-  // m_data --> | slot 0             | 0.75 * 2^K slots for elements.
-  //            | slot 1             |
-  //            | ...                |
-  //            +--------------------+
-  // m_hash --> |                    | 2^K hash table entries.
-  //            +--------------------+
+  bool isZombie() const { return m_used + 1 == 0; }
 
+private:
   // Some of these are packed into qword-sized unions so we can
   // combine stores during initialization.  (gcc won't do it on its
   // own.)
@@ -518,7 +477,6 @@ private:
     uint64_t m_maskAndLoad;
   };
   int64_t  m_nextKI;        // Next integer key to use for append.
-  Elm*     m_data;          // Contains elements and hash table.
   int32_t* m_hash;          // Hash table.
 };
 

@@ -267,15 +267,15 @@ extern const ArrayFunctions g_array_funcs = {
     &SharedArray::GetSharedVariant,
     &ArrayData::GetSharedVariant },
   // zSetInt
-  { &HphpArray::ZSetInt, &HphpArray::ZSetInt,
+  { &ArrayData::ZSetInt, &ArrayData::ZSetInt,
     &ArrayData::ZSetInt,
     &ArrayData::ZSetInt },
   // zSetStr
-  { &HphpArray::ZSetStr, &HphpArray::ZSetStr,
+  { &ArrayData::ZSetStr, &ArrayData::ZSetStr,
     &ArrayData::ZSetStr,
     &ArrayData::ZSetStr },
   // zAppend
-  { &HphpArray::ZAppend, &HphpArray::ZAppend,
+  { &ArrayData::ZAppend, &ArrayData::ZAppend,
     &ArrayData::ZAppend,
     &ArrayData::ZAppend },
 };
@@ -459,15 +459,6 @@ void ArrayData::freeStrongIterators() {
     r.front()->setContainer(nullptr);
   }
   setStrongIterators(nullptr);
-}
-
-void ArrayData::moveStrongIterators(ArrayData* dest, ArrayData* src) {
-  for (FullPosRange r(src->strongIterators()); !r.empty(); r.popFront()) {
-    r.front()->setContainer(dest);
-  }
-  // move pointer to list and flag in one copy
-  dest->m_strongIterators = src->m_strongIterators;
-  src->m_strongIterators = 0;
 }
 
 CVarRef ArrayData::endRef() {

@@ -56,7 +56,7 @@ struct NameValueTableWrapper : public ArrayData {
   explicit NameValueTableWrapper(NameValueTable* tab)
     : ArrayData(kNvtwKind)
     , m_tab(tab)
-  { }
+  {}
 
 public: // ArrayData implementation
   static void Release(ArrayData*) {}
@@ -106,8 +106,8 @@ public: // ArrayData implementation
   static ArrayData* AppendRef(ArrayData*, CVarRef v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, CVarRef v, bool copy);
 
-  static ArrayData* Plus(ArrayData*, const ArrayData* elems, bool copy);
-  static ArrayData* Merge(ArrayData*, const ArrayData* elems, bool copy);
+  static ArrayData* Plus(ArrayData*, const ArrayData* elems);
+  static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Prepend(ArrayData*, CVarRef v, bool copy);
 
   static ssize_t IterBegin(const ArrayData*);

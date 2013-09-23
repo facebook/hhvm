@@ -89,9 +89,7 @@ struct Add {
   Cell operator()(int64_t a, int64_t b) const { return num(a + b); }
 
   ArrayData* operator()(ArrayData* a1, ArrayData* a2) const {
-    auto const newArr = a1->plus(a2, true /* copy */);
-    newArr->incRefCount();
-    return newArr;
+    return a1->plus(a2);
   }
 };
 
@@ -193,7 +191,6 @@ again:
     auto const ad1    = c1.m_data.parr;
     auto const newArr = op(ad1, c2.m_data.parr);
     if (newArr != ad1) {
-      newArr->incRefCount();
       c1.m_data.parr = newArr;
       decRefArr(ad1);
     }
@@ -213,8 +210,11 @@ struct AddEq {
 
   ArrayData* operator()(ArrayData* ad1, ArrayData* ad2) const {
     if (ad2->empty() || ad1 == ad2) return ad1;
-    if (ad1->empty()) return ad2;
-    return ad1->plus(ad2, ad1->getCount() > 1 /* copy */);
+    if (ad1->empty()) {
+      ad2->incRefCount();
+      return ad2;
+    }
+    return ad1->plus(ad2);
   }
 };
 

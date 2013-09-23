@@ -278,8 +278,7 @@ Array &Array::plusImpl(ArrayData *data) {
     if (m_px->empty()) {
       ArrayBase::operator=(data);
     } else if (m_px != data) {
-      ArrayData *escalated = m_px->plus(data, m_px->getCount() > 1);
-      if (escalated != m_px) ArrayBase::operator=(escalated);
+      ArrayBase::operator=(Array::attach(m_px->plus(data)));
     }
   }
   return *this;
@@ -291,8 +290,7 @@ Array &Array::mergeImpl(ArrayData *data) {
     throw BadArrayMergeException();
   }
   if (!data->empty()) {
-    ArrayData *escalated = m_px->merge(data, m_px->getCount() > 1);
-    if (escalated != m_px) ArrayBase::operator=(escalated);
+    ArrayBase::operator=(Array::attach(m_px->merge(data)));
   } else {
     m_px->renumber();
   }

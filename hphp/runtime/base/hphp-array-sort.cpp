@@ -71,8 +71,8 @@ HphpArray::preSort(const AccessorT& acc, bool checkTypes) {
     // No need to loop over the elements, we're done
     return GenericSort;
   }
-  Elm* start = m_data;
-  Elm* end = m_data + m_used;
+  Elm* start = data();
+  Elm* end = data() + m_used;
   bool allInts UNUSED = true;
   bool allStrs UNUSED = true;
   for (;;) {
@@ -106,7 +106,7 @@ HphpArray::preSort(const AccessorT& acc, bool checkTypes) {
     memcpy(start, end, sizeof(Elm));
   }
 done:
-  m_used = start - m_data;
+  m_used = start - data();
   assert(m_size == m_used);
   if (checkTypes) {
     return allStrs ? StringSort : allInts ? IntegerSort : GenericSort;
@@ -126,7 +126,7 @@ void HphpArray::postSort(bool resetKeys) {
   initHash(tableSize);
   if (resetKeys) {
     for (uint32_t pos = 0; pos < m_used; ++pos) {
-      auto& e = m_data[pos];
+      auto& e = data()[pos];
       if (e.hasStrKey()) decRefStr(e.key);
       e.setIntKey(pos);
       m_hash[pos] = pos;
@@ -134,7 +134,7 @@ void HphpArray::postSort(bool resetKeys) {
     m_nextKI = m_size;
   } else {
     for (uint32_t pos = 0; pos < m_used; ++pos) {
-      auto& e = m_data[pos];
+      auto& e = data()[pos];
       auto ei = findForNewInsert(e.hasIntKey() ? e.ikey : e.hash());
       *ei = pos;
     }
@@ -151,10 +151,10 @@ ArrayData* HphpArray::EscalateForSort(ArrayData* ad) {
   case flag: { \
     if (ascending) { \
       cmp_type##Compare<acc_type, flag, true> comp; \
-      HPHP::Sort::sort(a->m_data, a->m_data + a->m_size, comp); \
+      HPHP::Sort::sort(a->data(), a->data() + a->m_size, comp); \
     } else { \
       cmp_type##Compare<acc_type, flag, false> comp; \
-      HPHP::Sort::sort(a->m_data, a->m_data + a->m_size, comp); \
+      HPHP::Sort::sort(a->data(), a->data() + a->m_size, comp); \
     } \
     break; \
   }
@@ -234,7 +234,7 @@ void HphpArray::Asort(ArrayData* ad, int sort_flags, bool ascending) {
       CallCtx ctx;                                              \
       vm_decode_function(cmp_function, cf(), false, ctx);       \
       comp.ctx = &ctx;                                          \
-      HPHP::Sort::sort(a->m_data, a->m_data + a->m_size, comp); \
+      HPHP::Sort::sort(a->data(), a->data() + a->m_size, comp); \
     } catch (...) {                                             \
       /* Make sure we leave the array in a consistent state */  \
       a->postSort(resetKeys);                                   \

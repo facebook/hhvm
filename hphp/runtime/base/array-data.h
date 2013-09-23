@@ -95,6 +95,11 @@ class ArrayData {
     , m_strongIterators(nullptr)
   {}
 
+  /*
+   * NOTE: HphpArray no longer calls the destructor or destroy() here.
+   * If you need to add logic, revisit HphpArray::Release{,Packed}.
+   */
+
   void destroy() {
     // If there are any strong iterators pointing to this array, they need
     // to be invalidated.
@@ -389,6 +394,7 @@ public:
   static void Usort(ArrayData*, CVarRef cmp_function);
   static void Uasort(ArrayData*, CVarRef cmp_function);
 
+  // TODO(#2941952)
   static void ZSetInt(ArrayData* ad, int64_t k, RefData* v);
   static void ZSetStr(ArrayData* ad, StringData* k, RefData* v);
   static void ZAppend(ArrayData* ad, RefData* v);
@@ -419,13 +425,21 @@ public:
    */
   ArrayData* appendWithRef(CVarRef v, bool copy);
 
-  /**
-   * Implementing array appending and merging. If "copy" is true, make a copy
-   * first then append/merge arrays. Return NULL if escalation is not needed,
-   * or an escalated array data.
+  /*
+   * Implements array appending and merging.
+   *
+   * Returns a new array that is a copy of this combined with elems in
+   * the appropriate manner.  Copies the array even if *this has
+   * enough space.
+   *
+   * The returned array has already been incref'd.
+   *
+   * NB. the merge() function does *not* exactly implement
+   * array_merge.  The key renumbering step currently must be
+   * performed by the caller.
    */
-  ArrayData* plus(const ArrayData *elems, bool copy);
-  ArrayData* merge(const ArrayData *elems, bool copy);
+  ArrayData* plus(const ArrayData* elems);
+  ArrayData* merge(const ArrayData* elems);
 
   /**
    * Stack function: pop the last item and return it.
@@ -603,8 +617,8 @@ struct ArrayFunctions {
   ArrayData* (*append[NK])(ArrayData*, CVarRef v, bool copy);
   ArrayData* (*appendRef[NK])(ArrayData*, CVarRef v, bool copy);
   ArrayData* (*appendWithRef[NK])(ArrayData*, CVarRef v, bool copy);
-  ArrayData* (*plus[NK])(ArrayData*, const ArrayData* elems, bool copy);
-  ArrayData* (*merge[NK])(ArrayData*, const ArrayData* elems, bool copy);
+  ArrayData* (*plus[NK])(ArrayData*, const ArrayData* elems);
+  ArrayData* (*merge[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*pop[NK])(ArrayData*, Variant& value);
   ArrayData* (*dequeue[NK])(ArrayData*, Variant& value);
   ArrayData* (*prepend[NK])(ArrayData*, CVarRef value, bool copy);

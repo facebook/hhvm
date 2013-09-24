@@ -3635,11 +3635,18 @@ Array c_Set::t_toarray() {
 }
 
 Array c_Set::t_tokeysarray() {
-  return toArrayImpl();
+  return t_tovaluesarray();
 }
 
 Array c_Set::t_tovaluesarray() {
-  return toArrayImpl();
+  PackedArrayInit ai(m_size);
+  for (uint i = 0; i <= m_nLastSlot; ++i) {
+    Bucket& p = m_data[i];
+    if (p.validValue()) {
+      ai.append(tvAsCVarRef(&p.data));
+    }
+  }
+  return ai.create();
 }
 
 Object c_Set::t_getiterator() {

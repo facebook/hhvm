@@ -14,35 +14,36 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_YIELD_EXPRESSION_H_
-#define incl_HPHP_YIELD_EXPRESSION_H_
-
-#include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/expression/generation_label.h"
 
+#include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/expression/expression.h"
+
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(YieldExpression);
+GenerationLabel::GenerationLabel(Expression* e)
+  : m_id(-1)
+  , m_generation(-1)
+  , m_owner(e)
+{}
 
-class YieldExpression : public Expression {
-public:
-  YieldExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
-                  ExpressionPtr keyExp, ExpressionPtr valExp);
-
-  DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-
-  ExpressionPtr getKeyExpression() { return m_keyExp; }
-  ExpressionPtr getValueExpression() { return m_valExp; }
-  GenerationLabel& label() { return m_label; }
-
-private:
-  ExpressionPtr m_keyExp;
-  ExpressionPtr m_valExp;
-  GenerationLabel m_label;
-};
-
-///////////////////////////////////////////////////////////////////////////////
+int GenerationLabel::id() const {
+  assert(m_id >= 1);
+  assert(m_generation ==
+         m_owner->getFunctionScope()->getYieldLabelGeneration());
+  return m_id;
 }
 
-#endif // incl_HPHP_YIELD_EXPRESSION_H_
+void GenerationLabel::setNew() {
+  auto func = m_owner->getFunctionScope();
+  auto newGen = func->getYieldLabelGeneration();
+  assert(m_generation < newGen);
+  m_generation = newGen;
+  m_id = func->allocYieldLabel();
+}
+
+void GenerationLabel::setExpression(Expression* e) {
+  m_owner = e;
+}
+
+}

@@ -25,14 +25,14 @@ using namespace HPHP;
 AwaitExpression::AwaitExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr exp)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(AwaitExpression)),
-    m_exp(exp), m_label(-1) {
+    m_exp(exp), m_label(this) {
 }
 
 ExpressionPtr AwaitExpression::clone() {
   AwaitExpressionPtr exp(new AwaitExpression(*this));
   Expression::deepCopy(exp);
   exp->m_exp = Clone(m_exp);
-  exp->m_label = m_label;
+  exp->m_label.setExpression(exp.get());
   return exp;
 }
 
@@ -46,9 +46,8 @@ ExpressionPtr AwaitExpression::clone() {
 void AwaitExpression::analyzeProgram(AnalysisResultPtr ar) {
   assert(getFunctionScope() && getFunctionScope()->isAsync());
   m_exp->analyzeProgram(ar);
-  if (m_label == -1) {
-    setLabel(getFunctionScope()->allocYieldLabel());
-  }
+
+  m_label.setNew();
 }
 
 ConstructPtr AwaitExpression::getNthKid(int n) const {

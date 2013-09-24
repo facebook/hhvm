@@ -378,6 +378,8 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
   if (m_params) {
     m_params->analyzeProgram(ar);
   }
+
+  funcScope->resetYieldLabelCount();
   if (m_stmt) m_stmt->analyzeProgram(ar);
 
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {

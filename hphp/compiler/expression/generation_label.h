@@ -14,35 +14,27 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_YIELD_EXPRESSION_H_
-#define incl_HPHP_YIELD_EXPRESSION_H_
-
-#include "hphp/compiler/expression/expression.h"
-#include "hphp/compiler/expression/generation_label.h"
+#ifndef incl_HPHP_COMPILER_GENERATION_LABEL_H
+#define incl_HPHP_COMPILER_GENERATION_LABEL_H
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(YieldExpression);
+class Expression;
 
-class YieldExpression : public Expression {
-public:
-  YieldExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
-                  ExpressionPtr keyExp, ExpressionPtr valExp);
+class GenerationLabel {
+ public:
+  explicit GenerationLabel(Expression* e);
 
-  DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  int id() const;
+  void setNew();
+  void setExpression(Expression* e);
 
-  ExpressionPtr getKeyExpression() { return m_keyExp; }
-  ExpressionPtr getValueExpression() { return m_valExp; }
-  GenerationLabel& label() { return m_label; }
-
-private:
-  ExpressionPtr m_keyExp;
-  ExpressionPtr m_valExp;
-  GenerationLabel m_label;
+ private:
+  int m_id;
+  int m_generation;
+  Expression* m_owner;
 };
 
-///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_YIELD_EXPRESSION_H_
+#endif

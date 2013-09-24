@@ -3992,7 +3992,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         // one for exception handling and one for normal
         // control flow. both labels are encoded in the
         // label number stored in the expression.
-        int64_t normalLabel = 2 * y->getLabel();
+        int64_t normalLabel = 2 * y->label().id();
         int64_t exceptLabel = normalLabel - 1;
 
         // suspend continuation and set the return label
@@ -4053,7 +4053,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         e.JmpNZ(finished);
 
         // the work is not yet finished, we had to suspend
-        int64_t normalLabel = 2 * await->getLabel();
+        int64_t normalLabel = 2 * await->label().id();
         int64_t exceptLabel = normalLabel - 1;
         if (m_curFunc->isGenerator()) {
           // suspend continuation
@@ -4063,7 +4063,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           e.Throw();
           e.Null();
         } else {
-          // create new continuation and return it's wait handle
+          // create new continuation and return its wait handle
           auto meth = static_pointer_cast<MethodStatement>(
                         node->getFunctionScope()->getStmt());
           const StringData* nameStr =

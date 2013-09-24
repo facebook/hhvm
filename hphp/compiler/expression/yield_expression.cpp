@@ -26,7 +26,7 @@ YieldExpression::YieldExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr keyExp, ExpressionPtr valExp)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(YieldExpression)),
-    m_keyExp(keyExp), m_valExp(valExp), m_label(-1) {
+    m_keyExp(keyExp), m_valExp(valExp), m_label(this) {
 }
 
 ExpressionPtr YieldExpression::clone() {
@@ -34,7 +34,7 @@ ExpressionPtr YieldExpression::clone() {
   Expression::deepCopy(exp);
   exp->m_keyExp = Clone(m_keyExp);
   exp->m_valExp = Clone(m_valExp);
-  exp->m_label = m_label;
+  exp->m_label.setExpression(exp.get());
   return exp;
 }
 
@@ -52,9 +52,8 @@ void YieldExpression::analyzeProgram(AnalysisResultPtr ar) {
   }
   m_valExp->setChildOfYield();
   m_valExp->analyzeProgram(ar);
-  if (m_label == -1) {
-    setLabel(getFunctionScope()->allocYieldLabel());
-  }
+
+  m_label.setNew();
 }
 
 ConstructPtr YieldExpression::getNthKid(int n) const {

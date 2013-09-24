@@ -382,7 +382,7 @@ extern ssize_t check_request_surprise(ThreadInfo *info) ATTRIBUTE_COLD;
 
 // implemented in runtime/ext/ext_hotprofiler.cpp
 extern void begin_profiler_frame(Profiler *p, const char *symbol);
-extern void end_profiler_frame(Profiler *p);
+extern void end_profiler_frame(Profiler *p, const char *symbol);
 
 ///////////////////////////////////////////////////////////////////////////////
 

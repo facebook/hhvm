@@ -181,6 +181,32 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   return true;
 }
 
+const char* EventHook::GetFunctionNameForProfiler(const ActRec* ar,
+                                                  int funcType) {
+  const char* name;
+  switch (funcType) {
+    case EventHook::NormalFunc:
+      name = ar->m_func->fullName()->data();
+      if (name[0] == '\0') {
+        // We're evaling some code for internal purposes, most
+        // likely getting the default value for a function parameter
+        name = "{internal}";
+      }
+      break;
+    case EventHook::PseudoMain:
+      name = makeStaticString(
+        std::string("run_init::") + ar->m_func->unit()->filepath()->data())
+        ->data();
+      break;
+    case EventHook::Eval:
+      name = "_";
+      break;
+    default:
+      not_reached();
+  }
+  return name;
+}
+
 bool EventHook::onFunctionEnter(const ActRec* ar, int funcType) {
   ssize_t flags = CheckSurprise();
   if (flags & RequestInjectionData::InterceptFlag &&
@@ -192,28 +218,7 @@ bool EventHook::onFunctionEnter(const ActRec* ar, int funcType) {
 #ifdef HOTPROFILER
     Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
     if (profiler != nullptr) {
-      const char* name;
-      switch (funcType) {
-        case NormalFunc:
-          name = ar->m_func->fullName()->data();
-          if (name[0] == '\0') {
-            // We're evaling some code for internal purposes, most
-            // likely getting the default value for a function parameter
-            name = "{internal}";
-          }
-          break;
-        case PseudoMain:
-          name = makeStaticString(
-            std::string("run_init::") + ar->m_func->unit()->filepath()->data())
-            ->data();
-          break;
-        case Eval:
-          name = "_";
-          break;
-        default:
-          not_reached();
-      }
-      begin_profiler_frame(profiler, name);
+      begin_profiler_frame(profiler, GetFunctionNameForProfiler(ar, funcType));
     }
 #endif
   }
@@ -224,7 +229,10 @@ void EventHook::onFunctionExit(const ActRec* ar) {
 #ifdef HOTPROFILER
   Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
   if (profiler != nullptr) {
-    end_profiler_frame(profiler);
+    // NB: we don't have a function type flag to match what we got in
+    // onFunctionEnter. That's okay, though... we tolerate this in
+    // TraceProfiler.
+    end_profiler_frame(profiler, GetFunctionNameForProfiler(ar, NormalFunc));
   }
 #endif
 

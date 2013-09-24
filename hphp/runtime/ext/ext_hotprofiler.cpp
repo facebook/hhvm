@@ -513,11 +513,12 @@ public:
   /**
    * End top of the stack.
    */
-  virtual void endFrame(bool endMain = false) __attribute__ ((noinline)) ;
+  virtual void endFrame(const char *symbol,
+                        bool endMain = false) __attribute__ ((noinline)) ;
 
   virtual void endAllFrames() {
     while (m_stack) {
-      endFrame(true);
+      endFrame(nullptr, true);
     }
   }
 
@@ -618,7 +619,7 @@ void Profiler::beginFrame(const char *symbol) {
 /**
  * End top of the stack.
  */
-void Profiler::endFrame(bool endMain) {
+void Profiler::endFrame(const char *symbol, bool endMain) {
   if (m_stack) {
     // special case for main() frame that's only ended by endAllFrames()
     if (!endMain && m_stack->m_parent == nullptr) {
@@ -809,7 +810,11 @@ class TraceWalker {
     int len; // Length of the function name
   };
 
-  TraceWalker() : m_arcBuffLen(200), m_arcBuff((char*)malloc(200)) {};
+  TraceWalker()
+    : m_arcBuffLen(200)
+    , m_arcBuff((char*)malloc(200))
+    , m_badArcCount(0)
+  {};
 
   ~TraceWalker() {
     free(m_arcBuff);
@@ -825,7 +830,7 @@ class TraceWalker {
     auto current = begin;
     while (current != end && !current->symbol) ++current;
     while (current != end) {
-      if (current->symbol) {
+      if (!current->is_func_exit) {
         unsigned level = ++functionLevel[current->symbol];
         if (level >= m_recursion.size()) {
           char *level_string = new char[8];
@@ -840,6 +845,7 @@ class TraceWalker {
         checkArcBuff(fr.len);
         m_stack.push_back(fr);
       } else if (m_stack.size() > 1) {
+        validateStack(current, stats); // NB: may update m_stack.
         --functionLevel[m_stack.back().trace->symbol];
         popFrame(current, stats);
       }
@@ -851,6 +857,9 @@ class TraceWalker {
     }
     if (!m_stack.empty()) {
       incStats(m_stack.back().trace->symbol, current, m_stack.back(), stats);
+    }
+    if (m_badArcCount > 0) {
+      stats["(trace has mismatched calls and returns)"].count = m_badArcCount;
     }
   }
 
@@ -874,6 +883,53 @@ class TraceWalker {
     st.cpu += tr->cpu - fr.trace->cpu;
     st.memory += tr->memory - fr.trace->memory;
     st.peak_memory += tr->peak_memory - fr.trace->peak_memory;
+  }
+
+  // Look for mismatched enter and exit events, and try to correct if
+  // we can. Only try to correct very simple imbalances... we could go
+  // nuts here, but it's likely not worth it.
+  void validateStack(TraceIterator tIt, Stats& stats) {
+    auto enteredName = m_stack.back().trace->symbol;
+    auto exitedName = tIt->symbol;
+    if ((exitedName != nullptr) &&
+        ((enteredName == nullptr) || (strcmp(enteredName, exitedName) != 0))) {
+      // We have a few special names that we form on entry. We don't
+      // have the information to form them again on exit, so tolerate
+      // them here. See EventHook::GetFunctionNameForProfiler().
+      if ((enteredName != nullptr) &&
+          ((strncmp(enteredName, "run_init::", 10) == 0) ||
+           (strcmp(enteredName, "_") == 0))) return;
+      bool fixed = false;
+      if (m_stack.size() > 1) {
+        auto callerName = (m_stack.end() - 2)->trace->symbol;
+        if ((callerName != nullptr) && (strcmp(callerName, exitedName) == 0)) {
+          // We have an exit for Foo(), but we were in Bar(). However,
+          // it appears that Foo() was the caller of Bar(). This
+          // suggests we've missed the exit event for Bar() and have
+          // the exit event for Foo() in hand. So remove Bar() to
+          // re-balance the stack.
+          m_stack.pop_back();
+          fixed = true;
+        }
+      }
+      // The first few bad arcs typically point at the problem, so
+      // report them. The rest we'll just count.
+      if (++m_badArcCount < 20) {
+        std::string badArc;
+        if (fixed) {
+          badArc = folly::format("(warning: corrected bad arc #{}: "
+                                 "enter '{}', exit '{}')",
+                                 m_badArcCount,
+                                 enteredName, exitedName).str();
+        } else {
+          badArc = folly::format("(error: bad arc #{}: "
+                                 "enter '{}', exit '{}')",
+                                 m_badArcCount,
+                                 enteredName, exitedName).str();
+        }
+        ++stats[badArc.data()].count;
+      }
+    }
   }
 
   void popFrame(TraceIterator tIt, Stats& stats) {
@@ -905,6 +961,7 @@ class TraceWalker {
   vector<Frame> m_stack;
   int m_arcBuffLen;
   char *m_arcBuff;
+  int m_badArcCount;
 };
 
 // Profiler which makes a log of all function enter and exit events,
@@ -947,17 +1004,28 @@ class TraceProfiler : public Profiler {
   struct TraceData {
     int64_t wall_time;
     int64_t cpu;
-    int64_t memory; // Total memory, or memory allocated, depending on flags
-    int64_t peak_memory; // Peak memory, or memory freed, depending on flags
+
+    // It's not plausible that we need a full 64bits to hold memory
+    // stats, no matter what the collection mode. So we steal one bit
+    // from the memory field to use as a flag. We want to keep this
+    // data structure small since we need a huge number of them during
+    // a profiled run.
+    int64_t memory : 63; // Total memory, or memory allocated depending on flags
+    bool is_func_exit : 1; // Is the entry for a function exit?
+    int64_t peak_memory : 63; // Peak memory, or memory freed depending on flags
+    uint64_t unused : 1; // Unused, to keep memory and peak_memory the same size
 
     void clear() {
       wall_time = cpu = memory = peak_memory = 0;
+    }
+    static void compileTimeAssertions() {
+      static_assert(sizeof(TraceData) == (sizeof(uint64_t) * 4), "");
     }
   };
 
   // One entry in the log, representing a function enter or exit event
   struct TraceEntry : TraceData {
-    const char *symbol; // Function name, only for function entry events
+    const char *symbol; // Function name
   };
 
   bool isTraceSpaceAvailable() {
@@ -986,11 +1054,15 @@ class TraceProfiler : public Profiler {
         // adding, two realloc entries, and two entries to mark the end of
         // the trace.
         m_traceBufferFilled = true;
-        collectStats("(trace buffer terminated)",
+        collectStats("(trace buffer terminated)", false,
                      m_traceBuffer[m_nextTraceEntry++]);
         return false;
       }
       track_realloc = TRUE;
+    }
+    if (track_realloc) {
+      collectStats("(trace buffer realloc)", false,
+                   m_traceBuffer[m_nextTraceEntry++]);
     }
     {
       DECLARE_THREAD_INFO
@@ -1001,7 +1073,7 @@ class TraceProfiler : public Profiler {
       if (!r) {
         m_traceBufferFilled = true;
         if (m_traceBuffer) {
-          collectStats("(trace buffer terminated)",
+          collectStats("(trace buffer terminated)", false,
                        m_traceBuffer[m_nextTraceEntry++]);
         }
         return false;
@@ -1010,29 +1082,30 @@ class TraceProfiler : public Profiler {
       m_traceBuffer = r;
     }
     if (track_realloc) {
-      collectStats("(trace buffer realloc)", m_traceBuffer[m_nextTraceEntry++]);
-      collectStats(nullptr, m_traceBuffer[m_nextTraceEntry++]);
+      collectStats("(trace buffer realloc)", true,
+                   m_traceBuffer[m_nextTraceEntry++]);
     }
     return true;
   }
 
   virtual void beginFrame(const char *symbol) {
-    doTrace(symbol);
+    doTrace(symbol, false);
   }
 
-  virtual void endFrame(bool endMain = false) {
-    doTrace(nullptr);
+  virtual void endFrame(const char *symbol, bool endMain = false) {
+    doTrace(symbol, true);
   }
 
   virtual void endAllFrames() {
     if (m_traceBuffer && m_nextTraceEntry < m_traceBufferSize - 1) {
-      collectStats(nullptr, m_traceBuffer[m_nextTraceEntry++]);
+      endFrame(nullptr);
       m_traceBufferFilled = true;
     }
   }
 
-  void collectStats(const char *symbol, TraceEntry& te) {
+  void collectStats(const char *symbol, bool isFuncExit, TraceEntry& te) {
     te.symbol = symbol;
+    te.is_func_exit = isFuncExit;
     collectStats(te);
   }
 
@@ -1063,10 +1136,10 @@ class TraceProfiler : public Profiler {
     return &m_traceBuffer[m_nextTraceEntry++];
   }
 
-  void doTrace(const char *symbol) {
+  void doTrace(const char *symbol, bool isFuncExit) {
     TraceEntry *te = nextTraceEntry();
     if (te != nullptr) {
-      collectStats(symbol, *te);
+      collectStats(symbol, isFuncExit, *te);
     }
   }
 
@@ -1402,7 +1475,7 @@ void f_xhprof_frame_end() {
 #ifdef HOTPROFILER
   Profiler *prof = ThreadInfo::s_threadInfo->m_profiler;
   if (prof) {
-    prof->endFrame();
+    prof->endFrame(nullptr);
   }
 #endif
 }
@@ -1477,8 +1550,8 @@ void begin_profiler_frame(Profiler *p, const char *symbol) {
   p->beginFrame(symbol);
 }
 
-void end_profiler_frame(Profiler *p) {
-  p->endFrame();
+void end_profiler_frame(Profiler *p, const char *symbol) {
+  p->endFrame(symbol);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

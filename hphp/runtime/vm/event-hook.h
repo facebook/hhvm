@@ -71,6 +71,8 @@ private:
 
   static void RunUserProfiler(const ActRec* ar, int mode);
   static bool RunInterceptHandler(ActRec* ar);
+  static const char* GetFunctionNameForProfiler(const ActRec* ar,
+                                                int funcType);
 };
 
 #undef DECLARE_HOOK

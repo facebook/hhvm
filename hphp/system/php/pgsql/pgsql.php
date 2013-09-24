@@ -64,16 +64,16 @@ function pg_fetch_all_columns(resource $result, int $column=0): mixed;
 function pg_fetch_all(resource $result): mixed;
 
 <<__Native>>
-function pg_fetch_array(resource $result, int $row = null, int $result_type = 3): mixed;
+function pg_fetch_array(resource $result, ?int $row = null, int $result_type = 3): mixed;
 
 <<__Native>>
-function pg_fetch_assoc(resource $result, int $row = null): mixed;
+function pg_fetch_assoc(resource $result, ?int $row = null): mixed;
 
 <<__Native>>
-function pg_fetch_result(resource $result, int $row = null, mixed $field = null): mixed;
+function pg_fetch_result(resource $result, ?int $row = null, mixed $field = null): mixed;
 
 <<__Native>>
-function pg_fetch_row(resource $result, int $row = null): mixed;
+function pg_fetch_row(resource $result, ?int $row = null): mixed;
 
 <<__Native>>
 function pg_field_is_null(resource $result, mixed $row, mixed $field = null): mixed;
@@ -91,7 +91,7 @@ function pg_field_prtlen(resource $result, mixed $row_number, mixed $field = nul
 function pg_field_size(resource $result, int $field_number): mixed;
 
 <<__Native>>
-function pg_field_table(resource $result, int $field_numver, bool $oid_only = false): mixed;
+function pg_field_table(resource $result, int $field_number, bool $oid_only = false): mixed;
 
 <<__Native>>
 function pg_field_type_oid(resource $result, int $field_number): mixed;

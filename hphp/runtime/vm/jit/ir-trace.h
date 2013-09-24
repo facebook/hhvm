@@ -22,7 +22,7 @@
 
 namespace HPHP { namespace JIT {
 
-struct IRFactory;
+struct IRUnit;
 
 /*
  * An IRTrace is a single-entry, multi-exit, sequence of blocks. Typically
@@ -33,7 +33,7 @@ struct IRTrace : private boost::noncopyable {
   typedef std::list<Block*>::const_iterator const_iterator;
   typedef std::list<Block*>::iterator iterator;
 
-  explicit IRTrace(IRFactory& factory, Block* first, uint32_t bcOff);
+  explicit IRTrace(IRUnit& unit, Block* first, uint32_t bcOff);
 
   std::list<Block*>& blocks() { return m_blocks; }
   const std::list<Block*>& blocks() const { return m_blocks; }
@@ -77,7 +77,7 @@ struct IRTrace : private boost::noncopyable {
   std::string toString() const;
 
 private:
-  IRFactory& m_factory;
+  IRUnit& m_unit;
   // offset of the first bytecode in this trace; 0 if this trace doesn't
   // represent a bytecode boundary.
   uint32_t m_bcOff;
@@ -85,8 +85,8 @@ private:
   std::list<Block*> m_blocks; // Blocks in main trace starting with entry block
 };
 
-inline IRTrace::IRTrace(IRFactory& factory, Block* first, uint32_t bcOff)
-  : m_factory(factory)
+inline IRTrace::IRTrace(IRUnit& unit, Block* first, uint32_t bcOff)
+  : m_unit(unit)
   , m_bcOff(bcOff)
 {
   push_back(first);

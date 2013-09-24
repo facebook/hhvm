@@ -152,7 +152,7 @@ struct Block : boost::noncopyable {
   IRTrace* m_trace;         // owner of this block.
   const Func* m_func;       // which func are we in
   Edge m_next;              // fall-through path; null if back()->isTerminal().
-  const unsigned m_id;      // factory-assigned unique id of this block
+  const unsigned m_id;      // unit-assigned unique id of this block
   unsigned m_postid;        // postorder number of this block
   EdgeList m_preds;         // Edges that point to this block
   Hint m_hint;              // execution frequency hint

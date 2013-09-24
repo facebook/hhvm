@@ -6128,10 +6128,10 @@ void CodeGenerator::cgBlock(Block* block, vector<TransBCMapping>* bcMap) {
  * Compute and save registers that are live *across* each inst, not including
  * registers whose lifetimes end at inst, nor registers defined by inst.
  */
-LiveRegs computeLiveRegs(const IRFactory& factory, const RegAllocInfo& regs,
+LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs,
                          Block* start_block) {
-  StateVector<Block, RegSet> liveMap(factory, RegSet());
-  LiveRegs live_regs(factory, RegSet());
+  StateVector<Block, RegSet> liveMap(unit, RegSet());
+  LiveRegs live_regs(unit, RegSet());
   postorderWalk(
     [&](Block* block) {
       RegSet& live = liveMap[block];
@@ -6148,7 +6148,7 @@ LiveRegs computeLiveRegs(const IRFactory& factory, const RegAllocInfo& regs,
         }
       }
     },
-    factory.numBlocks(),
+    unit.numBlocks(),
     start_block
   );
   return live_regs;
@@ -6157,15 +6157,15 @@ LiveRegs computeLiveRegs(const IRFactory& factory, const RegAllocInfo& regs,
 void genCodeForTrace(IRTrace* trace,
                      CodeBlock& mainCode,
                      CodeBlock& stubsCode,
-                     IRFactory& irFactory,
+                     IRUnit& unit,
                      vector<TransBCMapping>* bcMap,
                      Transl::TranslatorX64* tx64,
                      const RegAllocInfo& regs,
                      const LifetimeInfo* lifetime,
                      AsmInfo* asmInfo) {
   assert(trace->isMain());
-  LiveRegs live_regs = computeLiveRegs(irFactory, regs, trace->front());
-  CodegenState state(irFactory, regs, live_regs, lifetime, asmInfo);
+  LiveRegs live_regs = computeLiveRegs(unit, regs, trace->front());
+  CodegenState state(unit, regs, live_regs, lifetime, asmInfo);
 
   // Returns: whether a block has already been emitted.
   DEBUG_ONLY auto isEmitted = [&](Block* block) {
@@ -6223,7 +6223,7 @@ void genCodeForTrace(IRTrace* trace,
     emitTraceCall(as, trace->bcOff(), tx64);
   }
 
-  auto const linfo = layoutBlocks(trace, irFactory);
+  auto const linfo = layoutBlocks(trace, unit);
 
   for (auto it = linfo.blocks.begin(); it != linfo.astubsIt; ++it) {
     Block* nextBlock = boost::next(it) != linfo.astubsIt

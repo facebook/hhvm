@@ -120,7 +120,7 @@ struct HhbcTranslator {
   // Accessors.
   IRTrace* trace() const { return m_tb->trace(); }
   TraceBuilder& traceBuilder() const { return *m_tb.get(); }
-  IRFactory& irFactory() { return m_irFactory; }
+  IRUnit& unit() { return m_unit; }
 
   // In between each emit* call, irtranslator indicates the new
   // bytecode offset (or whether we're finished) using this API.
@@ -611,7 +611,7 @@ private:
     const NormalizedInstruction& m_ni;
     HhbcTranslator& m_ht;
     TraceBuilder& m_tb;
-    IRFactory& m_irf;
+    IRUnit& m_irf;
     const MInstrInfo& m_mii;
     const BCMarker m_marker;
     hphp_hash_map<unsigned, unsigned> m_stackInputs;
@@ -655,7 +655,7 @@ private:
 private: // tracebuilder forwarding utilities
   template<class... Args>
   SSATmp* cns(Args&&... args) {
-    return m_irFactory.cns(std::forward<Args>(args)...);
+    return m_unit.cns(std::forward<Args>(args)...);
   }
 
   template<class... Args>
@@ -894,7 +894,7 @@ private:
   };
 
 private:
-  IRFactory m_irFactory;
+  IRUnit m_unit;
   std::unique_ptr<TraceBuilder> const m_tb;
 
   std::vector<BcState> m_bcStateStack;

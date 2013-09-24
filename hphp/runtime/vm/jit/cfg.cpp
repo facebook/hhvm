@@ -15,27 +15,27 @@
 */
 
 #include "hphp/runtime/vm/jit/cfg.h"
-#include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/block.h"
 
 namespace HPHP {  namespace JIT {
 
-BlockList rpoSortCfg(IRTrace* trace, const IRFactory& factory) {
+BlockList rpoSortCfg(IRTrace* trace, const IRUnit& unit) {
   assert(trace->isMain());
   BlockList blocks;
-  blocks.reserve(factory.numBlocks());
+  blocks.reserve(unit.numBlocks());
   unsigned next_id = 0;
   postorderWalk(
     [&](Block* block) {
       block->setPostId(next_id++);
       blocks.push_back(block);
     },
-    factory.numBlocks(),
+    unit.numBlocks(),
     trace->front()
   );
   std::reverse(blocks.begin(), blocks.end());
-  assert(blocks.size() <= factory.numBlocks());
-  assert(next_id <= factory.numBlocks());
+  assert(blocks.size() <= unit.numBlocks());
+  assert(next_id <= unit.numBlocks());
   return blocks;
 }
 

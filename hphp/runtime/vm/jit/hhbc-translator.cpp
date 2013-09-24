@@ -25,7 +25,7 @@
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
-#include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
@@ -76,7 +76,7 @@ HhbcTranslator::HhbcTranslator(Offset startOffset,
                                const Func* func)
   : m_tb(new TraceBuilder(startOffset,
                           initialSpOffsetFromFp,
-                          m_irFactory,
+                          m_unit,
                           func))
   , m_bcStateStack {BcState(startOffset, func)}
   , m_startBcOff(startOffset)
@@ -3419,8 +3419,7 @@ void HhbcTranslator::emitBindMem(SSATmp* ptr, SSATmp* src) {
   gen(StMem, ptr, cns(0), src);
   if (isRefCounted(src) && src->type().canRunDtor()) {
     Block* exitBlock = makeExit(nextBcOff());
-    exitBlock->prepend(m_irFactory.gen(DecRef, makeMarker(nextBcOff()),
-                                       prevValue));
+    exitBlock->prepend(m_unit.gen(DecRef, makeMarker(nextBcOff()), prevValue));
     gen(DecRefNZOrBranch, exitBlock, prevValue);
   } else {
     gen(DecRef, prevValue);

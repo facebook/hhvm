@@ -24,7 +24,7 @@ namespace HPHP { namespace JIT {
 
 using Transl::TCA;
 class IRInstruction;
-class IRFactory;
+class IRUnit;
 class TraceBuilder;
 
 class SSATmp {
@@ -83,10 +83,10 @@ public:
   int               numNeededRegs() const;
 
 private:
-  friend class IRFactory;
+  friend class IRUnit;
   friend class TraceBuilder;
 
-  // May only be created via IRFactory.  Note that this class is never
+  // May only be created via IRUnit.  Note that this class is never
   // destructed, so don't add complex members.
   SSATmp(uint32_t opndId, IRInstruction* i, int dstId = 0);
   SSATmp(const SSATmp&) = delete;

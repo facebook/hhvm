@@ -37,7 +37,7 @@ namespace HPHP { class ExecutionContext; }
 
 namespace HPHP { namespace JIT {
 class HhbcTranslator;
-class IRFactory;
+class IRUnit;
 class CSEHash;
 class TraceBuilder;
 class CodeGenerator;

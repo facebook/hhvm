@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_IRFACTORY_H_
-#define incl_HPHP_VM_IRFACTORY_H_
+#ifndef incl_HPHP_VM_IRUNIT_H_
+#define incl_HPHP_VM_IRUNIT_H_
 
 #include <type_traits>
 #include <vector>
@@ -37,7 +37,7 @@ namespace HPHP {  namespace JIT {
  *   with a pointer to it, returning the result.
  *
  *   Normally IRInstruction creation should go through either
- *   IRFactory::gen or TraceBuilder::gen.  This utility is used to
+ *   IRUnit::gen or TraceBuilder::gen.  This utility is used to
  *   implement those.  The lambda must not escape the IRInstruction*.
  */
 
@@ -155,12 +155,18 @@ makeInstruction(Func func, Args&&... args) {
 struct IRTrace;
 
 /*
- * IRFactory is used for allocating and controlling the lifetime of IR
- * objects.  This acts as the JIT's compilation unit.
+ * IRUnit is the compilation unit for the JIT.  It owns an Arena used
+ * for allocating and controlling the lifetime of Block, IRInstruction,
+ * ExtraData, SSATmp, and IRTrace objects, as well as a constant table
+ * containing all DefConst instructions, which don't live in Blocks.
+ *
+ * IRUnit also assigns unique ids to each block, instruction, and tmp,
+ * which are useful for StateVector or sparse maps of pass specific
+ * information.
  */
-class IRFactory {
+class IRUnit {
 public:
-  IRFactory()
+  IRUnit()
     : m_nextBlockId(0)
     , m_nextOpndId(0)
     , m_nextInstId(0)
@@ -168,7 +174,7 @@ public:
   {}
 
   /*
-   * Create an IRInstruction with lifetime equivalent to this IRFactory.
+   * Create an IRInstruction with lifetime equivalent to this IRUnit.
    *
    * Arguments are passed in the following format:
    *

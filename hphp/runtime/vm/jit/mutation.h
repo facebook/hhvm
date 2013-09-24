@@ -46,7 +46,7 @@ namespace HPHP { namespace JIT {
  * Pre: isRPOSorted(blocks)
  */
 void cloneToBlock(const BlockList& blocks,
-                  IRFactory& irFactory,
+                  IRUnit& unit,
                   Block::iterator first,
                   Block::iterator last,
                   Block* dst);

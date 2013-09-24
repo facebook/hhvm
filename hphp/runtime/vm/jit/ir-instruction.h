@@ -61,7 +61,7 @@ struct BCMarker {
 
 /*
  * IRInstructions must be arena-allocatable.
- * (Destructors are not called when they come from IRFactory.)
+ * (Destructors are not called when they come from IRUnit.)
  */
 struct IRInstruction {
   enum Id { kTransient = 0xffffffff };
@@ -69,7 +69,7 @@ struct IRInstruction {
   /*
    * Create an IRInstruction for the opcode `op'.
    *
-   * IRInstruction creation is usually done through IRFactory or
+   * IRInstruction creation is usually done through IRUnit or
    * TraceBuilder rather than directly.
    */
   explicit IRInstruction(Opcode op,
@@ -168,7 +168,7 @@ struct IRInstruction {
 
    /*
     * Clear the extra data pointer in a IRInstruction.  Used during
-    * IRFactory::gen to avoid having dangling IRExtraData*'s into stack
+    * IRUnit::gen to avoid having dangling IRExtraData*'s into stack
     * memory.
     */
   void clearExtra() { m_extra = nullptr; }
@@ -200,11 +200,11 @@ struct IRInstruction {
    * from this instruction.
    *
    * The target instruction may be transient---we'll clone anything we
-   * need to keep, using factory for any needed memory.
+   * need to keep, using IRUnit for any needed memory.
    *
    * Pre: other->isTransient() || numDsts() == other->numDsts()
    */
-  void become(IRFactory&, IRInstruction* other);
+  void become(IRUnit&, IRInstruction* other);
 
   bool       is() const { return false; }
   template<typename... Args>

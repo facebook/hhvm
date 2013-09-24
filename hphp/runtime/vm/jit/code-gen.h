@@ -19,7 +19,7 @@
 
 #include <vector>
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/linear-scan.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
@@ -61,10 +61,10 @@ enum class SyncOptions {
 
 // Information about where code was generated, for pretty-printing.
 struct AsmInfo {
-  explicit AsmInfo(const IRFactory& factory)
-    : instRanges(factory, TcaRange(nullptr, nullptr))
-    , asmRanges(factory, TcaRange(nullptr, nullptr))
-    , astubRanges(factory, TcaRange(nullptr, nullptr))
+  explicit AsmInfo(const IRUnit& unit)
+    : instRanges(unit, TcaRange(nullptr, nullptr))
+    , asmRanges(unit, TcaRange(nullptr, nullptr))
+    , astubRanges(unit, TcaRange(nullptr, nullptr))
   {}
 
   // Asm address info for each instruction and block
@@ -78,16 +78,16 @@ typedef StateVector<IRInstruction, RegSet> LiveRegs;
 // Stuff we need to preserve between blocks while generating code,
 // and address information produced during codegen.
 struct CodegenState {
-  CodegenState(const IRFactory& factory, const RegAllocInfo& regs,
+  CodegenState(const IRUnit& unit, const RegAllocInfo& regs,
                const LiveRegs& liveRegs, const LifetimeInfo* lifetime,
                AsmInfo* asmInfo)
-    : patches(factory, nullptr)
-    , addresses(factory, nullptr)
+    : patches(unit, nullptr)
+    , addresses(unit, nullptr)
     , regs(regs)
     , liveRegs(liveRegs)
     , lifetime(lifetime)
     , asmInfo(asmInfo)
-    , catches(factory, CatchInfo())
+    , catches(unit, CatchInfo())
     , catchTrace(nullptr)
   {}
 
@@ -596,7 +596,7 @@ ObjectData* createClHelper(Class*, int, ActRec*, TypedValue*);
 void genCodeForTrace(IRTrace*                trace,
                      CodeBlock&              mainCode,
                      CodeBlock&              stubsCode,
-                     IRFactory&              irFactory,
+                     IRUnit&                 unit,
                      vector<TransBCMapping>* bcMap,
                      TranslatorX64*          tx64,
                      const RegAllocInfo&     regs,

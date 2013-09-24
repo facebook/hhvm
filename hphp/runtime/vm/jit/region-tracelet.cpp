@@ -495,7 +495,7 @@ void RegionFormer::recordDependencies() {
   auto blockStart = firstBlock.start();
   auto const doRelax = RuntimeOption::EvalHHIRRelaxGuards;
 
-  auto changed =  doRelax ? relaxGuards(trace, m_ht.irFactory(),
+  auto changed =  doRelax ? relaxGuards(trace, m_ht.unit(),
                                         *m_ht.traceBuilder().guards())
                           : false;
   visitGuards(trace, [&](const RegionDesc::Location& loc, Type type) {

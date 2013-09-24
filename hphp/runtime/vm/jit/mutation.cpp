@@ -27,13 +27,13 @@ TRACE_SET_MOD(hhir);
 //////////////////////////////////////////////////////////////////////
 
 void cloneToBlock(const BlockList& rpoBlocks,
-                  IRFactory& irFactory,
+                  IRUnit& unit,
                   Block::iterator const first,
                   Block::iterator const last,
                   Block* const target) {
   assert(isRPOSorted(rpoBlocks));
 
-  StateVector<SSATmp,SSATmp*> rewriteMap(irFactory, nullptr);
+  StateVector<SSATmp,SSATmp*> rewriteMap(unit, nullptr);
 
   auto rewriteSources = [&] (IRInstruction* inst) {
     for (int i = 0; i < inst->numSrcs(); ++i) {
@@ -51,7 +51,7 @@ void cloneToBlock(const BlockList& rpoBlocks,
     assert(!it->isControlFlow());
 
     FTRACE(5, "cloneToBlock({}): {}\n", target->id(), it->toString());
-    auto const newInst = irFactory.cloneInstruction(&*it);
+    auto const newInst = unit.cloneInstruction(&*it);
 
     if (auto const numDests = newInst->numDsts()) {
       for (int i = 0; i < numDests; ++i) {

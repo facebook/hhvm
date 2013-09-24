@@ -68,10 +68,10 @@ IRInstruction* guardForLocal(uint32_t locId, SSATmp* fp) {
  * contains information about what properties of the guarded type matter for
  * each instruction. Returns true iff any changes were made to the trace.
  */
-bool relaxGuards(IRTrace* trace, const IRFactory& factory,
+bool relaxGuards(IRTrace* trace, const IRUnit& unit,
                  const GuardConstraints& guards) {
   FTRACE(1, "relaxing guards for trace {}\n", trace);
-  auto blocks = rpoSortCfg(trace, factory);
+  auto blocks = rpoSortCfg(trace, unit);
   Block* reflowBlock = nullptr;
 
   for (auto* block : blocks) {

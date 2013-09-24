@@ -26,10 +26,10 @@ namespace HPHP { namespace JIT {
 
 struct SSATmp;
 struct IRTrace;
-struct IRFactory;
+struct IRUnit;
 
 IRInstruction* guardForLocal(uint32_t locId, SSATmp* fp);
-bool relaxGuards(IRTrace* trace, const IRFactory& factory,
+bool relaxGuards(IRTrace* trace, const IRUnit& unit,
                  const GuardConstraints& guards);
 
 typedef std::function<void(const RegionDesc::Location&, Type)> VisitGuardFn;

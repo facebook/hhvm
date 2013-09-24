@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/opt.h"
-#include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/ir-trace.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 
@@ -32,7 +32,7 @@ TRACE_SET_MOD(hhir);
 
 namespace {
 
-Block* findMainExitBlock(IRTrace* trace, IRFactory& irFactory) {
+Block* findMainExitBlock(IRTrace* trace, IRUnit& unit) {
   assert(trace->isMain());
   auto const back = trace->back();
 
@@ -44,7 +44,7 @@ Block* findMainExitBlock(IRTrace* trace, IRFactory& irFactory) {
    * something like the assert below to find the main exit.)
    */
   if (debug) {
-    auto const sorted = rpoSortCfg(trace, irFactory);
+    auto const sorted = rpoSortCfg(trace, unit);
     auto it = sorted.rbegin();
     while (it != sorted.rend() && !(*it)->isMain()) {
       ++it;
@@ -109,11 +109,11 @@ bool jccCanBeDirectExit(Opcode opc) {
  * This leads to more efficient code because the service request stubs
  * will patch jumps in the main trace instead of off-trace.
  */
-void optimizeCondTraceExit(IRTrace* trace, IRFactory& irFactory) {
+void optimizeCondTraceExit(IRTrace* trace, IRUnit& unit) {
   FTRACE(5, "CondExit:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "CondExit:^^^^^^^^^^^^^^^^^^^^^\n"); };
 
-  auto const mainExit     = findMainExitBlock(trace, irFactory);
+  auto const mainExit     = findMainExitBlock(trace, unit);
   if (!isNormalExit(mainExit)) return;
 
   auto const& mainPreds = mainExit->preds();
@@ -140,7 +140,7 @@ void optimizeCondTraceExit(IRTrace* trace, IRFactory& irFactory) {
   data.notTaken = reqBindJmp.extra<ReqBindJmp>()->offset;
 
   FTRACE(5, "replacing {} with {}\n", jccInst->id(), opcodeName(newOpcode));
-  irFactory.replace(
+  unit.replace(
     &reqBindJmp,
     newOpcode,
     data,
@@ -157,7 +157,7 @@ void optimizeCondTraceExit(IRTrace* trace, IRFactory& irFactory) {
  * branch to "normal exits".  We can optimize these into the
  * SideExitGuard* instructions that can be patched in place.
  */
-void optimizeSideExits(IRTrace* trace, IRFactory& irFactory) {
+void optimizeSideExits(IRTrace* trace, IRUnit& unit) {
   FTRACE(5, "SideExit:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "SideExit:^^^^^^^^^^^^^^^^^^^^^\n"); };
 
@@ -184,9 +184,9 @@ void optimizeSideExits(IRTrace* trace, IRFactory& irFactory) {
 
     auto const block = inst->block();
     block->insert(block->iteratorTo(inst),
-                  irFactory.cloneInstruction(syncABI));
+                  unit.cloneInstruction(syncABI));
 
-    irFactory.replace(
+    unit.replace(
       inst,
       isStack ? SideExitGuardStk : SideExitGuardLoc,
       inst->typeParam(),
@@ -216,12 +216,12 @@ void eliminateUnconditionalJump(IRTrace* trace) {
   }
 }
 
-void optimizeJumps(IRTrace* trace, IRFactory& irFactory) {
+void optimizeJumps(IRTrace* trace, IRUnit& unit) {
   eliminateUnconditionalJump(trace);
 
   if (RuntimeOption::EvalHHIRDirectExit) {
-    optimizeCondTraceExit(trace, irFactory);
-    optimizeSideExits(trace, irFactory);
+    optimizeCondTraceExit(trace, unit);
+    optimizeSideExits(trace, unit);
   }
 }
 

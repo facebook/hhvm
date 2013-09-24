@@ -21,14 +21,14 @@ namespace HPHP {
 namespace JIT {
 
 class IRTrace;
-class IRFactory;
+class IRUnit;
 struct RegAllocInfo;
 
 /*
  * Ensure valid SSA properties; each SSATmp must be defined exactly once,
  * only used in positions dominated by the definition.
  */
-bool checkCfg(IRTrace*, const IRFactory&);
+bool checkCfg(IRTrace*, const IRUnit&);
 
 /*
  * We can't have SSATmps spanning php-level calls, except for frame
@@ -37,13 +37,13 @@ bool checkCfg(IRTrace*, const IRFactory&);
  * We have no callee-saved registers in php, and there'd be nowhere to
  * spill these because all translations share the spill space.
  */
-bool checkTmpsSpanningCalls(IRTrace*, const IRFactory&);
+bool checkTmpsSpanningCalls(IRTrace*, const IRUnit&);
 
 /*
  * Check register and spill slot assignments; registers and spill slots must
  * contain the correct SSATmp value at every point of use.
  */
-bool checkRegisters(IRTrace*, const IRFactory&, const RegAllocInfo&);
+bool checkRegisters(IRTrace*, const IRUnit&, const RegAllocInfo&);
 
 }}
 

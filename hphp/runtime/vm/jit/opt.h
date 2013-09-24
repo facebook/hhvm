@@ -22,7 +22,7 @@ namespace HPHP {  namespace JIT {
 
 class IRTrace;
 class TraceBuilder;
-class IRFactory;
+class IRUnit;
 class IRInstruction;
 
 //////////////////////////////////////////////////////////////////////
@@ -30,11 +30,11 @@ class IRInstruction;
 /*
  * The main optimization passes, in the order they run.
  */
-void optimizeMemoryAccesses(IRTrace*, IRFactory&);
-void optimizePredictions(IRTrace*, IRFactory&);
-void optimizeJumps(IRTrace*, IRFactory&);
+void optimizeMemoryAccesses(IRTrace*, IRUnit&);
+void optimizePredictions(IRTrace*, IRUnit&);
+void optimizeJumps(IRTrace*, IRUnit&);
 void eliminateUnconditionalJump(IRTrace*);
-void eliminateDeadCode(IRTrace*, IRFactory&);
+void eliminateDeadCode(IRTrace*, IRUnit&);
 
 /*
  * Run all the optimization passes.

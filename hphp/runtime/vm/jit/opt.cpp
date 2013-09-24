@@ -19,7 +19,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
-#include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/trace-builder.h"
 
@@ -42,11 +42,11 @@ static void insertAfter(IRInstruction* definer, IRInstruction* inst) {
  * a refcounted value.  The value must be something we can safely dereference
  * to check the _count field.
  */
-static void insertRefCountAsserts(IRInstruction& inst, IRFactory& factory) {
+static void insertRefCountAsserts(IRInstruction& inst, IRUnit& unit) {
   for (SSATmp& dst : inst.dsts()) {
     Type t = dst.type();
     if (t.subtypeOf(Type::Counted | Type::StaticStr | Type::StaticArr)) {
-      insertAfter(&inst, factory.gen(DbgAssertRefCount, inst.marker(), &dst));
+      insertAfter(&inst, unit.gen(DbgAssertRefCount, inst.marker(), &dst));
     }
   }
 }
@@ -55,7 +55,7 @@ static void insertRefCountAsserts(IRInstruction& inst, IRFactory& factory) {
  * Insert a DbgAssertTv instruction for each stack location stored to by
  * a SpillStack instruction.
  */
-static void insertSpillStackAsserts(IRInstruction& inst, IRFactory& factory) {
+static void insertSpillStackAsserts(IRInstruction& inst, IRUnit& unit) {
   SSATmp* sp = inst.dst();
   auto const vals = inst.srcs().subpiece(2);
   auto* block = inst.block();
@@ -63,14 +63,13 @@ static void insertSpillStackAsserts(IRInstruction& inst, IRFactory& factory) {
   for (unsigned i = 0, n = vals.size(); i < n; ++i) {
     Type t = vals[i]->type();
     if (t.subtypeOf(Type::Gen)) {
-      IRInstruction* addr = factory.gen(LdStackAddr,
-                                        inst.marker(),
-                                        Type::PtrToGen,
-                                        StackOffset(i),
-                                        sp);
+      IRInstruction* addr = unit.gen(LdStackAddr,
+                                     inst.marker(),
+                                     Type::PtrToGen,
+                                     StackOffset(i),
+                                     sp);
       block->insert(pos, addr);
-      IRInstruction* check = factory.gen(DbgAssertPtr, inst.marker(),
-                                         addr->dst());
+      IRInstruction* check = unit.gen(DbgAssertPtr, inst.marker(), addr->dst());
       block->insert(pos, check);
     }
   }
@@ -80,56 +79,55 @@ static void insertSpillStackAsserts(IRInstruction& inst, IRFactory& factory) {
  * Insert asserts at various points in the IR.
  * TODO: t2137231 Insert DbgAssertPtr at points that use or produces a GenPtr
  */
-static void insertAsserts(IRTrace* trace, IRFactory& factory) {
+static void insertAsserts(IRTrace* trace, IRUnit& unit) {
   forEachTraceBlock(trace, [&](Block* block) {
     for (auto it = block->begin(), end = block->end(); it != end; ) {
       IRInstruction& inst = *it;
       ++it;
       if (inst.op() == SpillStack) {
-        insertSpillStackAsserts(inst, factory);
+        insertSpillStackAsserts(inst, unit);
         continue;
       }
       if (inst.op() == Call) {
         SSATmp* sp = inst.dst();
-        IRInstruction* addr = factory.gen(LdStackAddr,
-                                          inst.marker(),
-                                          Type::PtrToGen,
-                                          StackOffset(0),
-                                          sp);
+        IRInstruction* addr = unit.gen(LdStackAddr,
+                                       inst.marker(),
+                                       Type::PtrToGen,
+                                       StackOffset(0),
+                                       sp);
         insertAfter(&inst, addr);
-        insertAfter(addr, factory.gen(DbgAssertPtr, inst.marker(),
-                                      addr->dst()));
+        insertAfter(addr, unit.gen(DbgAssertPtr, inst.marker(), addr->dst()));
         continue;
       }
-      if (!inst.isBlockEnd()) insertRefCountAsserts(inst, factory);
+      if (!inst.isBlockEnd()) insertRefCountAsserts(inst, unit);
     }
   });
 }
 
 void optimizeTrace(IRTrace* trace, TraceBuilder& traceBuilder) {
-  auto& irFactory = traceBuilder.factory();
+  auto& unit = traceBuilder.unit();
 
   auto finishPass = [&](const char* msg) {
     dumpTrace(6, trace, folly::format("after {}", msg).str().c_str());
-    assert(checkCfg(trace, irFactory));
-    assert(checkTmpsSpanningCalls(trace, irFactory));
+    assert(checkCfg(trace, unit));
+    assert(checkTmpsSpanningCalls(trace, unit));
     if (debug) forEachTraceInst(trace, assertOperandTypes);
   };
 
-  auto doPass = [&](void (*fn)(IRTrace*, IRFactory&),
+  auto doPass = [&](void (*fn)(IRTrace*, IRUnit&),
                     const char* msg) {
-    fn(trace, irFactory);
+    fn(trace, unit);
     finishPass(msg);
   };
 
   auto dce = [&](const char* which) {
     if (!RuntimeOption::EvalHHIRDeadCodeElim) return;
-    eliminateDeadCode(trace, irFactory);
+    eliminateDeadCode(trace, unit);
     finishPass(folly::format("{} DCE", which).str().c_str());
   };
 
   if (RuntimeOption::EvalHHIRRelaxGuards) {
-    auto changed = relaxGuards(trace, irFactory, *traceBuilder.guards());
+    auto changed = relaxGuards(trace, unit, *traceBuilder.guards());
     if (changed) finishPass("guard relaxation");
   }
 

@@ -24,7 +24,7 @@
 namespace HPHP {  namespace JIT {
 
 class IRTrace;
-class IRFactory;
+class IRUnit;
 
 // This value must be consistent with the number of pre-allocated
 // bytes for spill locations in __enterTCHelper in translator-x64.cpp.
@@ -41,8 +41,8 @@ typedef StateVector<IRInstruction, uint32_t> LinearIdVector;
 typedef StateVector<SSATmp, UseInfo> UsesVector;
 
 struct LifetimeInfo {
-  explicit LifetimeInfo(const IRFactory& factory)
-    : linear(factory, 0), uses(factory, UseInfo()) {
+  explicit LifetimeInfo(const IRUnit& unit)
+    : linear(unit, 0), uses(unit, UseInfo()) {
   }
   explicit LifetimeInfo(const LinearIdVector& linear,
                         const UsesVector& uses)
@@ -185,8 +185,8 @@ private:
 };
 
 struct RegAllocInfo {
-  explicit RegAllocInfo(const IRFactory& factory)
-    : m_regs(factory, RegisterInfo()) {}
+  explicit RegAllocInfo(const IRUnit& unit)
+    : m_regs(unit, RegisterInfo()) {}
   RegAllocInfo(const RegAllocInfo& other) : m_regs(other.m_regs) {}
   RegAllocInfo(RegAllocInfo&& other) : m_regs(other.m_regs) {}
   RegisterInfo& operator[](const SSATmp* k) { return m_regs[k]; }
@@ -206,7 +206,7 @@ inline std::ostream& operator<<(std::ostream& os, SpillInfo si) {
  * The main entry point for register allocation.  Called prior to code
  * generation.
  */
-RegAllocInfo allocRegsForTrace(IRTrace*, IRFactory&, LifetimeInfo* = nullptr);
+RegAllocInfo allocRegsForTrace(IRTrace*, IRUnit&, LifetimeInfo* = nullptr);
 
 // Native stack layout:
 // |               |

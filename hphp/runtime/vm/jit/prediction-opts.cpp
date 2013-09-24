@@ -19,7 +19,7 @@
 #include "folly/Optional.h"
 #include "folly/Lazy.h"
 
-#include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -60,12 +60,12 @@ bool instructionsAreSinkable(InputIterator first, InputIterator last) {
  * Optimizations that try to hoist CheckType instructions so that we
  * can specialize code earlier and avoid generic operations.
  */
-void optimizePredictions(IRTrace* const trace, IRFactory& irFactory) {
+void optimizePredictions(IRTrace* const trace, IRUnit& unit) {
   FTRACE(5, "PredOpts:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "PredOpts:^^^^^^^^^^^^^^^^^^^^^\n"); };
 
   auto const sortedBlocks = folly::lazy([&]{
-    return rpoSortCfg(trace, irFactory);
+    return rpoSortCfg(trace, unit);
   });
 
   /*
@@ -112,7 +112,7 @@ void optimizePredictions(IRTrace* const trace, IRFactory& irFactory) {
      * to either the taken block (exit) or the fallthrough block
      * (specialized).
      */
-    auto const newCheckType = irFactory.gen(
+    auto const newCheckType = unit.gen(
       CheckTypeMem,
       checkType->marker(),
       checkType->typeParam(),
@@ -122,7 +122,7 @@ void optimizePredictions(IRTrace* const trace, IRFactory& irFactory) {
     mainBlock->insert(mainBlock->iteratorTo(ldMem), newCheckType);
 
     // Clone the instructions to the exit before specializing.
-    cloneToBlock(rpoSort, irFactory, sinkFirst, sinkLast, exit);
+    cloneToBlock(rpoSort, unit, sinkFirst, sinkLast, exit);
 
     /*
      * Specialize the LdMem left on the main trace after cloning the
@@ -136,7 +136,7 @@ void optimizePredictions(IRTrace* const trace, IRFactory& irFactory) {
      * IncRef so that any uses of its dest point to the correct new
      * value.  We'll copyProp and get rid of this in a later pass.
      */
-    irFactory.replace(
+    unit.replace(
       checkType,
       Mov,
       incRef->dst()

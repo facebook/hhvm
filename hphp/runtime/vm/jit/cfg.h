@@ -45,7 +45,7 @@ BlockList::const_iterator rpoIteratorTo(const BlockList& cfg, Block* b);
  *
  * Post: isRPOSorted(return value)
  */
-BlockList rpoSortCfg(IRTrace*, const IRFactory&);
+BlockList rpoSortCfg(IRTrace*, const IRUnit&);
 
 /*
  * Returns: true if the supplied block list is sorted in reverse post

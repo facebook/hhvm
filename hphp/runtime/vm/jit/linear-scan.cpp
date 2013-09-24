@@ -17,7 +17,7 @@
 #include "hphp/runtime/vm/jit/linear-scan.h"
 
 #include "hphp/runtime/base/smart-containers.h"
-#include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/ir.h"
@@ -59,7 +59,7 @@ RegSet RegisterInfo::regs() const {
 struct LinearScan : private boost::noncopyable {
   static const int NumRegs = kNumRegs;
 
-  explicit LinearScan(IRFactory&);
+  explicit LinearScan(IRUnit&);
   RegAllocInfo allocRegs(IRTrace*, LifetimeInfo*);
 
 private:
@@ -138,7 +138,7 @@ private:
   void numberInstructions(const BlockList& blocks);
 
   template<typename T> SSATmp* cns(T val) {
-    return m_irFactory.cns(val);
+    return m_unit.cns(val);
   }
   void initFreeList();
   void coalesce(IRTrace* trace);
@@ -176,7 +176,7 @@ private:
 
 private:
   // Register allocation may generate Spill/Reload.
-  IRFactory& m_irFactory;
+  IRUnit& m_unit;
   RegState   m_regs[NumRegs];
   // Lists of free caller and callee-saved registers, respectively.
   smart::list<RegState*> m_freeCallerSaved[PhysReg::kNumTypes];
@@ -274,15 +274,15 @@ void LinearScan::StateSave::restore(LinearScan* ls) {
   }
 }
 
-LinearScan::LinearScan(IRFactory& irFactory)
-  : m_irFactory(irFactory)
-  , m_spillSlots(irFactory, -1)
-  , m_lifetime(irFactory)
+LinearScan::LinearScan(IRUnit& unit)
+  : m_unit(unit)
+  , m_spillSlots(unit, -1)
+  , m_lifetime(unit)
   , m_linear(m_lifetime.linear)
   , m_uses(m_lifetime.uses)
-  , m_jmps(irFactory, JmpList())
-  , m_allocInfo(irFactory)
-  , m_fullXMMCandidates(irFactory.numTmps())
+  , m_jmps(unit, JmpList())
+  , m_allocInfo(unit)
+  , m_fullXMMCandidates(unit.numTmps())
 {
   for (int i = 0; i < kNumRegs; i++) {
     m_regs[i].m_ssaTmp = nullptr;
@@ -396,7 +396,7 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
 
       // Insert the Reload instruction.
       SSATmp* spillTmp = m_slots[slotId].spillTmp;
-      IRInstruction* reload = m_irFactory.gen(Reload, inst->marker(),
+      IRInstruction* reload = m_unit.gen(Reload, inst->marker(),
                                               spillTmp);
       inst->block()->insert(it, reload);
 
@@ -1025,7 +1025,7 @@ void LinearScan::genSpillStats(IRTrace* trace, int numSpillLocs) {
 
   auto const marker = trace->front()->front()->marker();
   auto addStat = [&](const StringData* key, int value) {
-    trace->front()->prepend(m_irFactory.gen(IncStatGrouped, marker,
+    trace->front()->prepend(m_unit.gen(IncStatGrouped, marker,
                                             cns(spillStats), cns(key),
                                             cns(value)));
   };
@@ -1047,7 +1047,7 @@ void LinearScan::genSpillStats(IRTrace* trace, int numSpillLocs) {
  * The computed set of SSATmps is stored in m_fullXMMCandidates.
  */
 void LinearScan::findFullXMMCandidates() {
-  boost::dynamic_bitset<> notCandidates(m_irFactory.numTmps());
+  boost::dynamic_bitset<> notCandidates(m_unit.numTmps());
   m_fullXMMCandidates.reset();
   for (auto* block : m_blocks) {
     for (auto& inst : *block) {
@@ -1075,7 +1075,7 @@ RegAllocInfo LinearScan::allocRegs(IRTrace* trace, LifetimeInfo* lifetime) {
     coalesce(trace);
   }
 
-  m_blocks = rpoSortCfg(trace, m_irFactory);
+  m_blocks = rpoSortCfg(trace, m_unit);
   m_idoms = findDominators(m_blocks);
 
   if (!packed_tv) {
@@ -1183,7 +1183,7 @@ void LinearScan::allocRegsOneTrace(BlockList::iterator& blockIt,
       if (spill->block()) {
         // its already been inserted in another exit trace
         assert(!spill->block()->trace()->isMain());
-        spill = m_irFactory.cloneInstruction(spill);
+        spill = m_unit.cloneInstruction(spill);
       }
       trace->front()->prepend(spill);
     } else if (inst->isBlockEnd()) {
@@ -1371,7 +1371,7 @@ void LinearScan::spill(SSATmp* tmp) {
 uint32_t LinearScan::createSpillSlot(SSATmp* tmp) {
   uint32_t slotId = m_slots.size();
   m_spillSlots[tmp] = slotId;
-  auto* spillInst = m_irFactory.gen(Spill, tmp->inst()->marker(), tmp);
+  auto* spillInst = m_unit.gen(Spill, tmp->inst()->marker(), tmp);
   SSATmp* spillTmp = spillInst->dst();
   SlotInfo si;
   si.spillTmp = spillTmp;
@@ -1445,9 +1445,9 @@ void LinearScan::PreColoringHint::add(SSATmp* tmp, uint32_t index, int argNum) {
 
 //////////////////////////////////////////////////////////////////////
 
-RegAllocInfo allocRegsForTrace(IRTrace* trace, IRFactory& irFactory,
+RegAllocInfo allocRegsForTrace(IRTrace* trace, IRUnit& unit,
                                LifetimeInfo* lifetime) {
-  return LinearScan(irFactory).allocRegs(trace, lifetime);
+  return LinearScan(unit).allocRegs(trace, lifetime);
 }
 
 }} // HPHP::JIT

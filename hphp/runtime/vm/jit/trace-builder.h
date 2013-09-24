@@ -23,7 +23,7 @@
 #include "folly/Optional.h"
 
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/cse.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
@@ -94,7 +94,7 @@ namespace HPHP {  namespace JIT {
 struct TraceBuilder {
   TraceBuilder(Offset initialBcOffset,
                Offset initialSpOffsetFromFp,
-               IRFactory&,
+               IRUnit&,
                const Func* func);
   ~TraceBuilder();
 
@@ -102,7 +102,7 @@ struct TraceBuilder {
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
 
   IRTrace* trace() const { return m_curTrace; }
-  IRFactory& factory() { return m_irFactory; }
+  IRUnit& unit() { return m_unit; }
   int32_t spOffset() { return m_spOffset; }
   SSATmp* sp() const { return m_spValue; }
   SSATmp* fp() const { return m_fpValue; }
@@ -168,7 +168,7 @@ struct TraceBuilder {
   /*
    * Create an IRInstruction attached to the current IRTrace, and
    * allocate a destination SSATmp for it.  Uses the same argument
-   * list format as IRFactory::gen.
+   * list format as IRUnit::gen.
    */
   template<class... Args>
   SSATmp* gen(Opcode op, Args&&... args) {
@@ -207,7 +207,7 @@ struct TraceBuilder {
 
   template<class... Args>
   SSATmp* cns(Args&&... args) {
-    return m_irFactory.cns(std::forward<Args>(args)...);
+    return m_unit.cns(std::forward<Args>(args)...);
   }
 
   template<typename T>
@@ -231,9 +231,9 @@ struct TraceBuilder {
    */
   template <class Branch, class Next, class Taken>
   SSATmp* cond(const Func* func, Branch branch, Next next, Taken taken) {
-    Block* taken_block = m_irFactory.defBlock(func);
-    Block* done_block = m_irFactory.defBlock(func);
-    IRInstruction* label = m_irFactory.defLabel(1, m_curMarker);
+    Block* taken_block = m_unit.defBlock(func);
+    Block* done_block = m_unit.defBlock(func);
+    IRInstruction* label = m_unit.defLabel(1, m_curMarker);
     done_block->push_back(label);
     DisableCseGuard guard(*this);
     branch(taken_block);
@@ -255,8 +255,8 @@ struct TraceBuilder {
    */
   template <class Branch, class Taken>
   void ifThen(const Func* func, Branch branch, Taken taken) {
-    Block* taken_block = m_irFactory.defBlock(func);
-    Block* done_block = m_irFactory.defBlock(func);
+    Block* taken_block = m_unit.defBlock(func);
+    Block* done_block = m_unit.defBlock(func);
     DisableCseGuard guard(*this);
     branch(taken_block);
     assert(!m_curTrace->back()->next());
@@ -275,7 +275,7 @@ struct TraceBuilder {
    */
   template <class Branch, class Next>
   void ifElse(const Func* func, Branch branch, Next next) {
-    Block* done_block = m_irFactory.defBlock(func);
+    Block* done_block = m_unit.defBlock(func);
     DisableCseGuard guard(*this);
     branch(done_block);
     next();
@@ -289,7 +289,7 @@ struct TraceBuilder {
    * rejoining the main line.
    */
   Block* makeExit(uint32_t bcOff) {
-    auto t = m_irFactory.addExit(m_curFunc->getValFunc(), bcOff);
+    auto t = m_unit.addExit(m_curFunc->getValFunc(), bcOff);
     return t->front();
   }
 
@@ -400,7 +400,7 @@ private:
   void useState(Block*);
 
 private:
-  IRFactory& m_irFactory;
+  IRUnit& m_unit;
   Simplifier m_simplifier;
 
   IRTrace* const m_mainTrace; // generated trace
@@ -444,7 +444,7 @@ private:
    *       generated code.
    *
    *   (4) m_cseHash is for common sub-expression elimination of non-constants.
-   *       constants are globally available and managed by IRFactory.
+   *       constants are globally available and managed by IRUnit.
    *
    *   (5) m_thisIsAvailable tracks whether the current ActRec has a
    *       non-null this pointer.

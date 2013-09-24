@@ -14,14 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
 
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/ir-trace.h"
 
 namespace HPHP {  namespace JIT {
 
-IRInstruction* IRFactory::defLabel(unsigned numDst, BCMarker marker) {
+IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker) {
   IRInstruction inst(DefLabel, marker);
   IRInstruction* label = cloneInstruction(&inst);
   if (numDst > 0) {
@@ -34,18 +34,18 @@ IRInstruction* IRFactory::defLabel(unsigned numDst, BCMarker marker) {
   return label;
 }
 
-Block* IRFactory::defBlock(const Func* func) {
+Block* IRUnit::defBlock(const Func* func) {
   return new (m_arena) Block(m_nextBlockId++, func);
 }
 
-IRInstruction* IRFactory::mov(SSATmp* dst, SSATmp* src, BCMarker marker) {
+IRInstruction* IRUnit::mov(SSATmp* dst, SSATmp* src, BCMarker marker) {
   IRInstruction* inst = gen(Mov, marker, dst->type(), src);
   dst->setInstruction(inst);
   inst->setDst(dst);
   return inst;
 }
 
-SSATmp* IRFactory::findConst(ConstData& cdata, Type ctype) {
+SSATmp* IRUnit::findConst(ConstData& cdata, Type ctype) {
   IRInstruction inst(DefConst, BCMarker());
   inst.setExtra(&cdata);
   inst.setTypeParam(ctype);
@@ -56,33 +56,33 @@ SSATmp* IRFactory::findConst(ConstData& cdata, Type ctype) {
   return m_constTable.insert(cloneInstruction(&inst)->dst());
 }
 
-IRTrace* IRFactory::makeTrace(const Func* func, uint32_t bcOff) {
+IRTrace* IRUnit::makeTrace(const Func* func, uint32_t bcOff) {
   return new (m_arena) IRTrace(*this, defBlock(func), bcOff);
 }
 
-IRTrace* IRFactory::makeMain(const Func* func, uint32_t bcOff) {
+IRTrace* IRUnit::makeMain(const Func* func, uint32_t bcOff) {
   assert(!m_main);
   return m_main = makeTrace(func, bcOff);
 }
 
-IRTrace* IRFactory::addExit(const Func* func, uint32_t bcOff) {
+IRTrace* IRUnit::addExit(const Func* func, uint32_t bcOff) {
   auto exit = makeTrace(func, bcOff);
   m_exits.push_back(exit);
   return exit;
 }
 
 bool IRTrace::isMain() const {
-  return this == m_factory.main();
+  return this == m_unit.main();
 }
 
-IRFactory::ExitList& IRTrace::exitTraces() {
+IRUnit::ExitList& IRTrace::exitTraces() {
   assert(isMain());
-  return m_factory.exits();
+  return m_unit.exits();
 }
 
-const IRFactory::ExitList& IRTrace::exitTraces() const {
+const IRUnit::ExitList& IRTrace::exitTraces() const {
   assert(isMain());
-  return m_factory.exits();
+  return m_unit.exits();
 }
 
 }}

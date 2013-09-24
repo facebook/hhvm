@@ -41,7 +41,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/annotation.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
-#include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/ir-translator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
@@ -3726,7 +3726,7 @@ void Translator::traceEnd() {
 
 void Translator::traceFree() {
   FTRACE(1, "HHIR free: arena size: {}\n",
-         m_irTrans->hhbcTrans().irFactory().arena().size());
+         m_irTrans->hhbcTrans().unit().arena().size());
   m_irTrans.reset();
 }
 

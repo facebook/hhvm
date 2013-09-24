@@ -19,7 +19,7 @@
 #include <unordered_set>
 
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/linear-scan.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/block.h"
@@ -151,7 +151,7 @@ bool checkBlock(Block* b) {
  * Check that every catch trace has at most one incoming branch and a single
  * block.
  */
-bool checkCatchTraces(IRTrace* trace, const IRFactory& irFactory) {
+bool checkCatchTraces(IRTrace* trace, const IRUnit& unit) {
   forEachTraceBlock(trace, [&](Block* b) {
     auto trace = b->trace();
     if (trace->isCatch()) {
@@ -188,11 +188,11 @@ const Edge* nextEdge(Block* b) {
  * 5. Each predecessor of a reachable block must be reachable (deleted
  *    blocks must not have out-edges to reachable blocks).
  */
-bool checkCfg(IRTrace* trace, const IRFactory& factory) {
+bool checkCfg(IRTrace* trace, const IRUnit& unit) {
   forEachTraceBlock(trace, checkBlock);
 
   // Check valid successor/predecessor edges.
-  auto const blocks = rpoSortCfg(trace, factory);
+  auto const blocks = rpoSortCfg(trace, unit);
   std::unordered_set<const Edge*> edges;
   for (Block* b : blocks) {
     auto checkEdge = [&] (const Edge* e) {
@@ -211,11 +211,11 @@ bool checkCfg(IRTrace* trace, const IRFactory& factory) {
     }
   }
 
-  checkCatchTraces(trace, factory);
+  checkCatchTraces(trace, unit);
 
   // visit dom tree in preorder, checking all tmps
   auto const children = findDomChildren(blocks);
-  StateVector<SSATmp, bool> defined0(factory, false);
+  StateVector<SSATmp, bool> defined0(unit, false);
   forPreorderDoms(blocks.front(), children, defined0,
                   [] (Block* block, StateVector<SSATmp, bool>& defined) {
     for (IRInstruction& inst : *block) {
@@ -240,8 +240,8 @@ bool checkCfg(IRTrace* trace, const IRFactory& factory) {
   return true;
 }
 
-bool checkTmpsSpanningCalls(IRTrace* trace, const IRFactory& irFactory) {
-  auto const blocks   = rpoSortCfg(trace, irFactory);
+bool checkTmpsSpanningCalls(IRTrace* trace, const IRUnit& unit) {
+  auto const blocks   = rpoSortCfg(trace, unit);
   auto const children = findDomChildren(blocks);
 
   // CallBuiltin is ok because it is not a php-level call.  (It will
@@ -254,7 +254,7 @@ bool checkTmpsSpanningCalls(IRTrace* trace, const IRFactory& irFactory) {
 
   bool isValid = true;
   forPreorderDoms(
-    blocks.front(), children, State(irFactory, false),
+    blocks.front(), children, State(unit, false),
     [&] (Block* b, State& state) {
       for (auto& inst : *b) {
         for (auto& src : inst.srcs()) {
@@ -303,13 +303,13 @@ bool checkTmpsSpanningCalls(IRTrace* trace, const IRFactory& irFactory) {
   return isValid;
 }
 
-bool checkRegisters(IRTrace* trace, const IRFactory& factory,
+bool checkRegisters(IRTrace* trace, const IRUnit& unit,
                     const RegAllocInfo& regs) {
-  assert(checkCfg(trace, factory));
+  assert(checkCfg(trace, unit));
 
-  auto blocks = rpoSortCfg(trace, factory);
-  StateVector<Block, RegState> states(factory, RegState());
-  StateVector<Block, bool> reached(factory, false);
+  auto blocks = rpoSortCfg(trace, unit);
+  StateVector<Block, RegState> states(unit, RegState());
+  StateVector<Block, bool> reached(unit, false);
   for (auto* block : blocks) {
     RegState state = states[block];
     for (IRInstruction& inst : *block) {

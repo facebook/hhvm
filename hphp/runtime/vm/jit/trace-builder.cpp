@@ -19,7 +19,7 @@
 #include "folly/ScopeGuard.h"
 
 #include "hphp/util/trace.h"
-#include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/util/assertions.h"
@@ -30,16 +30,16 @@ TRACE_SET_MOD(hhir);
 
 TraceBuilder::TraceBuilder(Offset initialBcOffset,
                            Offset initialSpOffsetFromFp,
-                           IRFactory& irFactory,
+                           IRUnit& unit,
                            const Func* func)
-  : m_irFactory(irFactory)
+  : m_unit(unit)
   , m_simplifier(*this)
-  , m_mainTrace(m_irFactory.makeMain(func, initialBcOffset))
+  , m_mainTrace(m_unit.makeMain(func, initialBcOffset))
   , m_curTrace(m_mainTrace)
   , m_curBlock(nullptr)
   , m_enableCse(false)
   , m_enableSimplification(false)
-  , m_snapshots(irFactory, nullptr)
+  , m_snapshots(unit, nullptr)
   , m_spValue(nullptr)
   , m_fpValue(nullptr)
   , m_spOffset(initialSpOffsetFromFp)
@@ -49,7 +49,7 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   , m_refCountedMemValue(nullptr)
   , m_locals(func->numLocals())
 {
-  m_curFunc = m_irFactory.cns(func);
+  m_curFunc = m_unit.cns(func);
   if (RuntimeOption::EvalHHIRGenOpts) {
     m_enableCse = RuntimeOption::EvalHHIRCse;
     m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
@@ -547,7 +547,7 @@ void TraceBuilder::appendInstruction(IRInstruction* inst) {
     IRInstruction* prev = block->back();
     if (prev->isBlockEnd()) {
       // start a new block
-      Block* next = m_irFactory.defBlock(m_curFunc->getValFunc());
+      Block* next = m_unit.defBlock(m_curFunc->getValFunc());
       m_curTrace->push_back(next);
       if (!prev->isTerminal()) {
         // new block is reachable from old block so link it.
@@ -570,7 +570,7 @@ void TraceBuilder::appendBlock(Block* block) {
 }
 
 CSEHash* TraceBuilder::cseHashTable(IRInstruction* inst) {
-  return inst->op() == DefConst ? &m_irFactory.constTable() :
+  return inst->op() == DefConst ? &m_unit.constTable() :
          &m_cseHash;
 }
 
@@ -675,8 +675,8 @@ SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
       static auto const error =
         makeStaticString("Internal error: static analysis was "
                                     "wrong about a local variable's type.");
-      auto* errorInst = m_irFactory.gen(RaiseError, inst->marker(), cns(error));
-      inst->become(m_irFactory, errorInst);
+      auto* errorInst = m_unit.gen(RaiseError, inst->marker(), cns(error));
+      inst->become(m_unit, errorInst);
 
       // It's not a disaster to generate this in unreachable code for
       // now. t2590033.
@@ -951,7 +951,7 @@ SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst, CloneFlag doClone) {
   }
   // Couldn't CSE or simplify the instruction; clone it and append.
   if (inst->op() != Nop) {
-    if (doClone == CloneFlag::Yes) inst = m_irFactory.cloneInstruction(inst);
+    if (doClone == CloneFlag::Yes) inst = m_unit.cloneInstruction(inst);
     appendInstruction(inst);
     // returns nullptr if instruction has no dest, returns the first
     // (possibly only) dest otherwise
@@ -993,7 +993,7 @@ void TraceBuilder::reoptimize() {
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   if (!m_enableCse && !m_enableSimplification) return;
 
-  BlockList sortedBlocks = rpoSortCfg(m_mainTrace, m_irFactory);
+  BlockList sortedBlocks = rpoSortCfg(m_mainTrace, m_unit);
   auto const idoms = findDominators(sortedBlocks);
   clearTrackedState();
 
@@ -1043,7 +1043,7 @@ void TraceBuilder::reoptimize() {
         // assume the last instruction in the block isn't a guard. If it was,
         // we would have to insert the mov on the fall-through edge.
         assert(block->empty() || !block->back()->isBlockEnd());
-        IRInstruction* mov = m_irFactory.mov(dst, tmp, inst->marker());
+        IRInstruction* mov = m_unit.mov(dst, tmp, inst->marker());
         appendInstruction(mov, block);
         updateTrackedState(mov);
       }
@@ -1379,7 +1379,7 @@ void TraceBuilder::killLocalsForCall() {
 
       if (t->inst()->op() == LdConst) {
         // make the new DefConst instruction
-        IRInstruction* clone = m_irFactory.cloneInstruction(t->inst());
+        IRInstruction* clone = m_unit.cloneInstruction(t->inst());
         clone->setOpcode(DefConst);
         loc.value = clone->dst();
         continue;

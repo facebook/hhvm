@@ -19,7 +19,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/opt.h"
-#include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/mutation.h"
@@ -154,7 +154,7 @@ bool isUnguardedLoad(IRInstruction* inst) {
 
 // removeUnreachable erases unreachable blocks from trace, and returns
 // a sorted list of the remaining blocks.
-BlockList removeUnreachable(IRTrace* trace, IRFactory& factory) {
+BlockList removeUnreachable(IRTrace* trace, IRUnit& unit) {
   FTRACE(5, "RemoveUnreachable:vvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "RemoveUnreachable:^^^^^^^^^^^^^^^^^^^^\n"); };
 
@@ -178,8 +178,8 @@ BlockList removeUnreachable(IRTrace* trace, IRFactory& factory) {
   // 2. get a list of reachable blocks by sorting them, and erase any
   //    blocks that are unreachable.
   bool needsReflow = false;
-  BlockList blocks = rpoSortCfg(trace, factory);
-  StateVector<Block, bool> reachable(factory, false);
+  BlockList blocks = rpoSortCfg(trace, unit);
+  StateVector<Block, bool> reachable(unit, false);
   for (Block* b : blocks) reachable[b] = true;
   for (Block* b : blocks) {
     b->forEachPred([&](Block *p) {
@@ -318,7 +318,7 @@ void optimizeRefCount(IRTrace* trace, IRTrace* main, DceState& state,
  *    * replace each use of the original incref's result with the new
  *      incref's result.
  */
-void sinkIncRefs(IRTrace* trace, IRFactory& irFactory, DceState& state) {
+void sinkIncRefs(IRTrace* trace, IRUnit& unit, DceState& state) {
   assert(trace->isMain());
 
   assert(trace->back()->back()->op() != Jmp_);
@@ -340,7 +340,7 @@ void sinkIncRefs(IRTrace* trace, IRFactory& irFactory, DceState& state) {
     for (auto* inst : boost::adaptors::reverse(toSink)) {
       // prepend inserts an instruction to the beginning of a block, after
       // the label. Therefore, we iterate through toSink in the reversed order.
-      auto* sunkInst = irFactory.gen(IncRef, inst->marker(), inst->src(0));
+      auto* sunkInst = unit.gen(IncRef, inst->marker(), inst->src(0));
       state[sunkInst].setLive();
       exit->front()->prepend(sunkInst);
 
@@ -365,7 +365,7 @@ void sinkIncRefs(IRTrace* trace, IRFactory& irFactory, DceState& state) {
   // An exit trace may be entered from multiple exit points. We keep track of
   // which exit traces we already pushed sunk IncRefs to, so that we won't push
   // them multiple times.
-  boost::dynamic_bitset<> pushedTo(irFactory.numBlocks());
+  boost::dynamic_bitset<> pushedTo(unit.numBlocks());
   forEachInst(trace, [&](IRInstruction* inst) {
     if (inst->op() == IncRef) {
       // Must be REFCOUNT_CONSUMED or REFCOUNT_CONSUMED_OFF_TRACE;
@@ -408,7 +408,7 @@ void sinkIncRefs(IRTrace* trace, IRFactory& irFactory, DceState& state) {
  * of a DefInlineFP.  In this case we can kill both, which may allow
  * removing a SpillFrame as well.
  */
-void optimizeActRecs(IRTrace* trace, DceState& state, IRFactory& factory,
+void optimizeActRecs(IRTrace* trace, DceState& state, IRUnit& unit,
                      UseCounts& uses) {
   FTRACE(5, "AR:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "AR:^^^^^^^^^^^^^^^^^^^^^\n"); };
@@ -469,9 +469,9 @@ void optimizeActRecs(IRTrace* trace, DceState& state, IRFactory& factory,
 
             Offset retBCOff = srcInst->extra<DefInlineFP>()->retBCOff;
             retFixupMap[srcInst->dst()] = retBCOff;
-            factory.replace(srcInst, PassFP, srcInst->src(2));
+            unit.replace(srcInst, PassFP, srcInst->src(2));
             if (stkInst->op() == SpillFrame) {
-              factory.replace(stkInst, PassSP, stkInst->src(0));
+              unit.replace(stkInst, PassSP, stkInst->src(0));
             }
           }
         }
@@ -529,7 +529,7 @@ void optimizeActRecs(IRTrace* trace, DceState& state, IRFactory& factory,
           FTRACE(5, "{} ({}) masking\n",
                  opcodeName(inst->op()),
                  inst->id());
-          factory.replace(inst, PassSP, inst->src(1));
+          unit.replace(inst, PassSP, inst->src(1));
           break;
         }
       }
@@ -569,7 +569,7 @@ void optimizeActRecs(IRTrace* trace, DceState& state, IRFactory& factory,
                      opcodeName(inst->op()),
                      inst->id());
               Offset retBCOff = retFixupMap[fpInst->dst()];
-              inst->setSrc(1, factory.cns(retBCOff));
+              inst->setSrc(1, unit.cns(retBCOff));
             }
           }
         }
@@ -641,7 +641,7 @@ void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
 
 // Publicly exported functions:
 
-void eliminateDeadCode(IRTrace* trace, IRFactory& irFactory) {
+void eliminateDeadCode(IRTrace* trace, IRUnit& unit) {
   auto removeEmptyExitTraces = [&] {
     trace->exitTraces().remove_if([](IRTrace* exit) {
       return exit->blocks().empty();
@@ -649,7 +649,7 @@ void eliminateDeadCode(IRTrace* trace, IRFactory& irFactory) {
   };
 
   // kill unreachable code and remove any traces that are now empty
-  BlockList blocks = removeUnreachable(trace, irFactory);
+  BlockList blocks = removeUnreachable(trace, unit);
   removeEmptyExitTraces();
 
   // Ensure that main trace doesn't unconditionally jump to an exit
@@ -659,8 +659,8 @@ void eliminateDeadCode(IRTrace* trace, IRFactory& irFactory) {
   // mark the essential instructions and add them to the initial
   // work list; this will also mark reachable exit traces. All
   // other instructions marked dead.
-  DceState state(irFactory, DceFlags());
-  UseCounts uses(irFactory, 0);
+  DceState state(unit, DceFlags());
+  UseCounts uses(unit, 0);
   WorkList wl = initInstructions(blocks, state);
 
   // process the worklist
@@ -695,17 +695,17 @@ void eliminateDeadCode(IRTrace* trace, IRFactory& irFactory) {
 
   // Optimize IncRefs and DecRefs.
   forEachTrace(trace, [&](IRTrace* t) {
-    optimizeRefCount(t, irFactory.main(), state, uses);
+    optimizeRefCount(t, unit.main(), state, uses);
   });
 
   if (RuntimeOption::EvalHHIREnableSinking) {
     // Sink IncRefs consumed off trace.
-    sinkIncRefs(trace, irFactory, state);
+    sinkIncRefs(trace, unit, state);
   }
 
   // Optimize unused inlined activation records.  It's not necessary
   // to look at non-main traces for this.
-  optimizeActRecs(trace, state, irFactory, uses);
+  optimizeActRecs(trace, state, unit, uses);
 
   // now remove instructions whose id == DEAD
   removeDeadInstructions(trace, state);

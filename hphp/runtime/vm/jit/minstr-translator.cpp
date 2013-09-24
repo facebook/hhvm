@@ -248,7 +248,7 @@ HhbcTranslator::MInstrTranslator::MInstrTranslator(
     : m_ni(ni)
     , m_ht(ht)
     , m_tb(*m_ht.m_tb)
-    , m_irf(m_ht.m_irFactory)
+    , m_irf(m_ht.m_unit)
     , m_mii(getMInstrInfo(ni.mInstrOp()))
     , m_marker(ht.makeMarker(ht.bcOff()))
     , m_needMIS(true)

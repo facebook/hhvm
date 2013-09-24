@@ -356,9 +356,9 @@ void IRInstruction::convertToMov() {
   assert((m_numDsts == 1) != isTransient());
 }
 
-void IRInstruction::become(IRFactory& factory, IRInstruction* other) {
+void IRInstruction::become(IRUnit& unit, IRInstruction* other) {
   assert(other->isTransient() || m_numDsts == other->m_numDsts);
-  auto& arena = factory.arena();
+  auto& arena = unit.arena();
 
   // Copy all but m_id, m_taken.from, m_listNode, m_marker, and don't clone
   // dests---the whole point of become() is things still point to us.

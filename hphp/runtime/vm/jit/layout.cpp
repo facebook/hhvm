@@ -40,10 +40,10 @@ void postorderWalk(smart::vector<Block*>& out,
   out.push_back(block);
 }
 
-smart::vector<Block*> rpoForCodegen(const IRFactory& factory, Block* head) {
-  StateVector<Block,bool> visited(factory, false);
+smart::vector<Block*> rpoForCodegen(const IRUnit& unit, Block* head) {
+  StateVector<Block,bool> visited(unit, false);
   smart::vector<Block*> ret;
-  ret.reserve(factory.numBlocks());
+  ret.reserve(unit.numBlocks());
   postorderWalk(ret, visited, head);
   std::reverse(ret.begin(), ret.end());
   return ret;
@@ -58,9 +58,9 @@ smart::vector<Block*> rpoForCodegen(const IRFactory& factory, Block* head) {
  * so this just selects an appropriate reverse post order on the
  * blocks, and partitions the unlikely ones to astubs.
  */
-LayoutInfo layoutBlocks(IRTrace* trace, const IRFactory& irFactory) {
+LayoutInfo layoutBlocks(IRTrace* trace, const IRUnit& unit) {
   LayoutInfo ret;
-  ret.blocks = rpoForCodegen(irFactory, trace->front());
+  ret.blocks = rpoForCodegen(unit, trace->front());
 
   // Optionally stress test by randomizing the positions.
   if (RuntimeOption::EvalHHIRStressCodegenBlocks) {

@@ -2574,31 +2574,31 @@ void TranslatorX64::traceCodeGen() {
                         const LifetimeInfo* lifetime) {
     dumpTrace(level, trace, msg, regs, lifetime, nullptr,
               ht.traceBuilder().guards());
-    assert(checkCfg(trace, ht.irFactory()));
+    assert(checkCfg(trace, ht.unit()));
   };
 
   finishPass(" after initial translation ", kIRLevel, nullptr, nullptr);
   optimizeTrace(trace, ht.traceBuilder());
   finishPass(" after optimizing ", kOptLevel, nullptr, nullptr);
 
-  auto& factory = ht.irFactory();
+  auto& unit = ht.unit();
   recordBCInstr(OpTraceletGuard, mainCode, mainCode.frontier());
 
   if (dumpIREnabled()) {
-    LifetimeInfo lifetime(factory);
-    RegAllocInfo regs = allocRegsForTrace(trace, factory, &lifetime);
+    LifetimeInfo lifetime(unit);
+    RegAllocInfo regs = allocRegsForTrace(trace, unit, &lifetime);
     finishPass(" after reg alloc ", kRegAllocLevel, &regs, &lifetime);
-    assert(checkRegisters(trace, factory, regs));
-    AsmInfo ai(factory);
-    genCodeForTrace(trace, mainCode, stubsCode, factory, &m_bcMap, this, regs,
+    assert(checkRegisters(trace, unit, regs));
+    AsmInfo ai(unit);
+    genCodeForTrace(trace, mainCode, stubsCode, unit, &m_bcMap, this, regs,
                     &lifetime, &ai);
     dumpTrace(kCodeGenLevel, trace, " after code gen ", &regs,
               &lifetime, &ai);
   } else {
-    RegAllocInfo regs = allocRegsForTrace(trace, factory);
+    RegAllocInfo regs = allocRegsForTrace(trace, unit);
     finishPass(" after reg alloc ", kRegAllocLevel, nullptr, nullptr);
-    assert(checkRegisters(trace, factory, regs));
-    genCodeForTrace(trace, mainCode, stubsCode, factory, &m_bcMap, this, regs);
+    assert(checkRegisters(trace, unit, regs));
+    genCodeForTrace(trace, mainCode, stubsCode, unit, &m_bcMap, this, regs);
   }
 
   m_numHHIRTrans++;

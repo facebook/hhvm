@@ -61,7 +61,7 @@ using HPHP::Transl::RegSet;
 using HPHP::Transl::PhysReg;
 using HPHP::Transl::ConditionCode;
 
-class IRFactory;
+class IRUnit;
 struct IRInstruction;
 struct IRTrace;
 class SSATmp;

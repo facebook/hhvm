@@ -88,16 +88,6 @@ namespace HPHP { namespace Util {
 #define HOT_FUNC_VM HOT_FUNC
 
 /*
- * Custom unwinder logic doesn't play well with ASan when throwing exceptions.
- */
-#if defined(__clang__) || defined(__GNUC__)
-# define ATTRIBUTE_NO_ADDRESS_SAFETY_ANALYSIS \
-    __attribute__((__no_address_safety_analysis__))
-#else
-# define ATTRIBUTE_NO_ADDRESS_SAFETY_ANALYSIS
-#endif
-
-/*
  * We need to keep some unreferenced functions from being removed by
  * the linker. There is no compile time mechanism for doing this, but
  * by putting them in the same section as some other, referenced function

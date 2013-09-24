@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_WORD_SAME_H_
 #define incl_HPHP_WORD_SAME_H_
 
+#include "folly/Portability.h"
+
 #include "hphp/util/util.h"
 
 namespace HPHP {
@@ -23,7 +25,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 // ASan is less precise than valgrind and believes this function overruns reads
-#ifndef ENABLE_ASAN
+#ifndef FOLLY_SANITIZE_ADDRESS
 
 /*
  * Word at a time comparison for two memory regions of length
@@ -51,7 +53,7 @@ bool wordsame(const void* mem1, const void* mem2, size_t lenBytes) {
   return (*p1 << shift) == (*p2 << shift);
 }
 
-#else // ENABLE_ASAN
+#else // FOLLY_SANITIZE_ADDRESS
 
 ALWAYS_INLINE
 bool wordsame(const void* mem1, const void* mem2, size_t lenBytes) {

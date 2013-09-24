@@ -19,9 +19,11 @@
 
 #include <stdint.h>
 
+#include "folly/Portability.h"
+
 #include "hphp/util/exception.h"
 
-#ifdef ENABLE_ASAN
+#ifdef FOLLY_SANITIZE_ADDRESS
 // ASan is less precise than valgrind so we'll need a superset of those tweaks
 # define VALGRIND
 // TODO: (t2869817) ASan doesn't play well with jemalloc

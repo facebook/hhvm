@@ -14,8 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
+#include "folly/Portability.h"
+
 // ASan is less precise than valgrind and believes this function overruns reads
-#if defined(__x86_64__) && !defined(ENABLE_ASAN)
+#if defined(__x86_64__) && !defined(FOLLY_SANITIZE_ADDRESS)
 
 #include <emmintrin.h>
 #include <stdint.h>

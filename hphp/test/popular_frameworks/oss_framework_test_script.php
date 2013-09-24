@@ -30,6 +30,9 @@
  *   - Raw statistics for each test run are put in a temporary file for
  *     examination.
  *
+ *   - Raw PHPUnit results for all tests run during a given execution of the
+ *     script are appnended to one big file for easier viewing.
+ *
  *   - Timeout option for running tests. Thre is a default of 30 minutes to
  *     run each test, but this can be shortened or lengthened as desired.
  *
@@ -87,11 +90,40 @@ class TestResult {
   const Result ERRORS = 1;
 }
 
+// Put the proxy information in its own "struct-like" class for easy access
+// in case folks outside this proxy wall need to change them.
+class ProxyInformation {
+
+  public static Map $proxies = null;
+
+  // Determine through a poor man's method whether a proxy will be required to
+  // get out to the internet. If we get headers back, then a proxy is not
+  // required. If we get false back, then a header is required.
+  public static function is_proxy_required(
+                             string $test_url = 'http://www.google.com'): bool {
+    if (strpos(gethostname(), "facebook.com") || !(get_headers($test_url))) {
+      self::$proxies =
+        Map {
+          "HOME" => getenv("HOME"),
+          "http_proxy" => "http://fwdproxy.any.facebook.com:8080",
+          "https_proxy" => "http://fwdproxy.any.facebook.com:8080",
+          "HTTPS_PROXY" => "http://fwdproxy.any.facebook.com:8080",
+          "HTTP_PROXY" => "http://fwdproxy.any.facebook.com:8080",
+          "HTTP_PROXY_REQUEST_FULLURI" => "true",
+        };
+        return true;
+    } else {
+        self::$proxies = Map { "HOME" => getenv("HOME") };
+        return false;
+    }
+  }
+}
+
 class Tests {
 
   public static Map $framework_info = null;
 
-  public static function init() {
+  public static function init(): void {
     // HERE ARE THE CURRENTLY AVAILABLE TESTS.
     // Some are commented out because they may need to be special cased as
     // they require special testing commands, mock databases, etc.
@@ -146,23 +178,24 @@ class Tests {
             'install_root' => __DIR__."/frameworks/zf2",
             'git_path' => "git@github.com:zendframework/zf2.git",
           },
-        /* Requires Selenium which phpunit.phar does not have
         'yii' =>
           Map {
             'install_root' => __DIR__."/frameworks/yii",
             'git_path' => "git@github.com:yiisoft/yii.git",
-          },*/
+            'test_path' => __DIR__."/frameworks/yii/tests",
+            'test_run_command' => get_hhvm_build()." ".__DIR__.
+                                  "/vendor/bin/phpunit --debug .",
+          },
         'slim' =>
           Map {
             'install_root' => __DIR__."/frameworks/Slim",
             'git_path' => "git@github.com:codeguy/Slim.git",
           },
-        /* A path problem currently exists. Need to examine
         'wordpress' =>
           Map {
             'install_root' => __DIR__."/frameworks/wordpress-unit-tests",
             'git_path' => "git@github.com:kurtpayne/wordpress-unit-tests.git",
-          },*/
+          },
         'composer' =>
           Map {
             'install_root' => __DIR__."/frameworks/composer",
@@ -199,73 +232,93 @@ class Tests {
             'install_root' => __DIR__."/frameworks/phpbb3",
             'git_path' => "git@github.com:phpbb/phpbb3.git",
           },
-        /* A bit different of a test running command. Need to special case
         'pear' =>
           Map {
             'install_root' => __DIR__."/frameworks/pear-core",
             'git_path' => "git@github.com:pear/pear-core.git",
+            'test_path' => __DIR__."/frameworks/pear-core",
+            'test_run_command' => get_hhvm_build()." ".__DIR__.
+                                  "/vendor/bin/phpunit --debug tests",
           },
         /* Requires a mediawiki install to run tests :(
         'mediawiki' =>
           Map {
             'install_root' => __DIR__."/frameworks/mediawiki-core",
             'git_path' => "git@github.com:wikimedia/mediawiki-core.git",
-          },
-        /* Still need to figure out how to run the tests
+          },*/
         'typo3' =>
           Map {
             'install_root' => __DIR__."/frameworks/typo3",
             'git_path' => "git@github.com:TYPO3/TYPO3.CMS.git",
+            'test_path' => __DIR__."/frameworks/typo3",
+            'test_run_command' => get_hhvm_build()." cli_dispatch.phpsh ".
+                                  __DIR__."/vendor/bin/phpunit --debug",
           },
-        /* Going to need change to branch 8.x or higher to get to the
-           'core' tests
         'drupal' =>
           Map {
             'install_root' => __DIR__."/frameworks/drupal",
             'git_path' => "git@github.com:drupal/drupal.git",
-          },*/
+            // For when we want something other than the deafuly
+            'git_branch' => "8.x",
+          },
         /*
         'twitteroauth' =>
           Map {
             'install_root' => __DIR__."/frameworks/twitteroauth",
             'git_path' => "git@github.com:abraham/twitteroauth.git",
           },*/
-        /* Doesn't even use PHPUnit
         'thinkup' =>
           Map {
             'install_root' => __DIR__."/frameworks/thinkup",
             'git_path' => "git@github.com:ginatrapani/ThinkUp.git",
-          },*/
-        /*
+            'test_path' => __DIR__."/frameworks/thinkup/tests",
+            'test_run_command' => get_hhvm_build()." all_tests.php",
+          },
         'cakephp' =>
           Map {
             'install_root' => __DIR__."/frameworks/cakephp",
             'git_path' => "git@github.com:cakephp/cakephp.git",
-          },*/
-        /*
+            'test_path' => __DIR__."/frameworks/cakephp",
+            // FIX: May have to update "cake" script to call "hhvm"
+            'test_run_command' => "lib/Cake/Console/cake test core AllTests",
+          },
         'facebook-php-sdk' =>
           Map {
             'install_root' => __DIR__."/frameworks/facebook-php-sdk",
             'git_path' => "git@github.com:facebook/facebook-php-sdk.git",
-          },*/
-        /*
+            'test_path' => __DIR__."/frameworks/facebook-php-sdk",
+            'test_run_command' => get_hhvm_build()." ".__DIR__.
+                                  "/vendor/bin/phpunit --debug --stderr ".
+                                  "--bootstrap tests/bootstrap.php ".
+                                  "tests/tests.php",
+          },
         'phpunit' =>
           Map {
             'install_root' => __DIR__."/frameworks/phpunit",
             'git_path' => "git@github.com:sebastianbergmann/phpunit.git",
-          },*/
+            'test_path' => __DIR__."/frameworks/phpunit",
+            'test_run_command' => get_hhvm_build()." ".__DIR__.
+                                  "/frameworks/phpunit/phpunit.php --debug",
+          },
       };
   }
 }
 
 function run(OptionInfoMap $options, Vector $tests): void {
+  // HACK: Yes, this next bit of "removeKey" code is hacky, maybe even clowny.
+  // We can fix the command_line_lib.php to maybe make things a bit better.
+
   // It is possible that the $tests vector came in here with a combiniation
   // of command line options (e.g., verbose and timeout) that should be
-  // removed before running the tests. Although, there is a failsafe when
-  // checking if the test exists that would weed them out too.
+  // removed before running the tests. Remeber all these option values are
+  // already set in $options. They are just artificats of $argv right now.
+  // Although, there is a failsafe when checking if the test exists that would
+  // weed command line opts out too.
   $verbose = false;
   if($options->containsKey('verbose')) {
     $verbose = true;
+    // $tests[0] may not even be "verbose", but it doesn't matter, we are
+    // just trying to make the count right for $tests
     $tests->removeKey(0);
   }
 
@@ -277,26 +330,35 @@ function run(OptionInfoMap $options, Vector $tests): void {
     $tests->removeKey(0);
   }
 
-  $zend = false;
+  $zend_path = null;
   if ($options->containsKey('zend')) {
-    echo "Zend option is not 100% supported since we have not determined how ".
-         "to bundle or use zend. Script will continue though.\n";
-    $zend = true;
+    echo "Will try Zend if necessary. If Zend doesn't work, the script will ".
+         "still continue running; the particular framework on which Zend was ".
+         "attempted may not be available though.\n";
+    $zend_path = $options['zend'];
+    $tests->removeKey(0);
     $tests->removeKey(0);
   }
 
-  // At this point, $tests should only have tests to run or be empty if we in
-  // --all mode.
-  if ($options->containsKey('all') && !($tests->isEmpty())) {
-    error("Do not specify both --all and tests to run at the same time.\n");
+  $force_redownload = false;
+  if ($options->containsKey('redownload')) {
+    $force_redownload = true;
+    $tests->removeKey(0);
   }
 
   if ($options->containsKey('all')) {
+    $tests->removeKey(0);
+    // At this point, $tests should be empty if we are in --all mode.
+    if (!($tests->isEmpty())) {
+      error("Do not specify both --all and tests to run at the same time.\n");
+    }
     // Running all tests
-    run_tests(Tests::$framework_info->keys(), $timeout, $verbose, $zend);
+    run_tests(Tests::$framework_info->keys(), $timeout, $verbose,
+              $force_redownload, $zend_path);
   } else if (count($tests) > 0) {
-    // Tests specified at the command line
-    run_tests($tests, $timeout, $verbose, $zend);
+    // Tests specified at the command line. At this point, $tests should only
+    // have tests to be run
+    run_tests($tests, $timeout, $verbose, $force_redownload, $zend_path);
   } else {
     error("Specify tests to run or use --all");
   }
@@ -307,7 +369,7 @@ function run(OptionInfoMap $options, Vector $tests): void {
 // adventurous, so we will see how this works out after some time to test it
 // out
 function install_framework(string $name, string $install_root,
-                           bool $verbose, bool $zend): void {
+                           bool $verbose, ?string $zend_path): void {
   $frameworks_root_dir = __DIR__."/frameworks";
   if (!(file_exists($frameworks_root_dir))) {
     mkdir($frameworks_root_dir, 0755, true);
@@ -316,11 +378,14 @@ function install_framework(string $name, string $install_root,
   // Get the source from GitHub
   verbose("Retrieving framework $name.....\n", $verbose);
   $git_command = $verbose ? "git clone" : "git clone --quiet";
+  if (Tests::$framework_info[$name]->contains('git_branch')) {
+    $git_command .= " -b ".Tests::$framework_info[$name]['git_branch'];
+  }
   $git_command .= " ".Tests::$framework_info[$name]['git_path'];
   $git_command .= " ".Tests::$framework_info[$name]['install_root'];
-  $git_ret_val = run_install_via_process($git_command, "",
-                                         $frameworks_root_dir, null, $verbose);
-  if ($git_ret_val !== 0) {
+  $git_ret = run_install_via_process($git_command, "",
+                                     $frameworks_root_dir, null, $verbose);
+  if ($git_ret !== 0) {
     error("Could not download framework $name!\n");
   }
 
@@ -330,63 +395,49 @@ function install_framework(string $name, string $install_root,
   // Check to see if composer dependencies are necessary to run the test
   if ($composer_json_path !== null) {
     verbose("Retrieving dependencies for framework $name......\n", $verbose);
-    // Used for composer-based dependency installs
-    $proxy_information =
-      Map {
-        "HOME" => getenv("HOME"),
-        "http_proxy" => "http://fwdproxy.any.facebook.com:8080",
-        "https_proxy" => "http://fwdproxy.any.facebook.com:8080",
-        "HTTPS_PROXY" => "http://fwdproxy.any.facebook.com:8080",
-        "HTTP_PROXY" => "http://fwdproxy.any.facebook.com:8080",
-        "HTTP_PROXY_REQUEST_FULLURI" => "true",
-      };
-
     $framework_dependencies_install = get_hhvm_build()." ".__DIR__.
                                       "/composer.phar install --dev";
-    $comp_command = $verbose
-                    ? $framework_dependencies_install." --verbose"
-                    : $framework_dependencies_install." --quiet";
-    $comp_ret_val = run_install_via_process($comp_command, "",
-                                            $composer_json_path,
-                                            $proxy_information, $verbose);
-
+    $framework_dependencies_install .= $verbose ? " --verbose" : " --quiet";
+    $install_ret = run_install_via_process($framework_dependencies_install, "",
+                                           $composer_json_path,
+                                           ProxyInformation::$proxies,
+                                           $verbose);
     // If provided the option at the command line, try Zend if we are not
     // successful with hhvm. For example, I know hhvm had trouble
     // downloading dependencies for Symfony, but Zend worked.
     //
-    // FIX: If we end up using this, we wil have to come up with a good way
-    // to use zend. Either bundle a vanilla, statically compiled zend binary
-    // in this script directory or be clever in figuring out if zend is already
-    // installed on the machine somewhere else.
-    if ($zend && $comp_ret_val !== 0 && file_exists(__DIR__."/zend55")) {
-      echo "HHVM didn't work for downloading dependencies. Trying Zend.\n";
-      $framework_dependencies_install = __DIR__."/zend55 ".__DIR__.
-                                      "/composer.phar install --dev";
-      $comp_command = $verbose
-                    ? $framework_dependencies_install
-                    : $framework_dependencies_install." --quiet";
-      $comp_ret_val = run_install_via_process($comp_command, "",
-                                            $composer_json_path,
-                                            $proxy_information, $verbose);
+    // FIX: Should we try to install a vanilla zend binary here instead of
+    // relying on user to specify a path? Should we try to determine if zend
+    // is already installed via a $PATH variable?
+    if ($zend_path !== null && $install_ret !== 0) {
+      echo "HHVM didn't work for downloading dependencies for $name. ".
+           "Trying Zend.\n";
+      $framework_dependencies_install = $zend_path." ".__DIR__.
+                                        "/composer.phar install --dev";
+      $framework_dependencies_install .= $verbose ? " --verbose" : " --quiet";
+      $install_ret = run_install_via_process($framework_dependencies_install,
+                                             "", $composer_json_path,
+                                             ProxyInformation::$proxies,
+                                             $verbose);
     }
 
-    if ($comp_ret_val !== 0) {
+    if ($install_ret !== 0) {
       // Let's just really make sure the dependencies didn't get installed
       // by checking the vendor directories to see if they are empty.
-      $vendor_dir = find_any_file_recursive(Set {"vendor"}, $install_root,
-                                            false);
-      if ($vendor_dir !== null) {
+      $fw_vendor_dir = find_any_file_recursive(Set {"vendor"}, $install_root,
+                                               false);
+      if ($fw_vendor_dir !== null) {
         // If there is no content in the directories under vendor, then we
         // did not get the dependencies.
-        if (any_dir_empty_one_level($vendor_dir)) {
-          //remove_dir_recursive($install_root);
+        if (any_dir_empty_one_level($fw_vendor_dir)) {
+          remove_dir_recursive($install_root);
           error("Couldn't download dependencies for $name!".
-                "Removing framework\n");
+                " Removing framework\n");
         }
       } else { // No vendor directory. Dependencies could not have been gotten.
-        //remove_dir_recursive($install_root);
+        remove_dir_recursive($install_root);
         error("Couldn't download dependencies for $name!".
-              "Removing framework\n");
+              " Removing framework\n");
       }
     }
   }
@@ -395,7 +446,7 @@ function install_framework(string $name, string $install_root,
 // This will run processes that will get the frameworks and its
 // dependencies. Use the default environment if none specified.
 function run_install_via_process(string $proc, string $args,
-                                 string $path, ?Map $env= null,
+                                 string $path, ?Map $env,
                                  bool $verbose): ?int
 {
   $descriptorspec = array(
@@ -431,14 +482,21 @@ function run_install_via_process(string $proc, string $args,
 // make the return more granular and this function may need to
 // be reworked a bit.
 function run_single_test(string $test_name, string $summary_results_file,
-                         int $timeout, bool $verbose, bool $zend): int {
+                         string $appended_raw_results_file, int $timeout,
+                         bool $verbose, bool $force_redownload,
+                         ?string $zend_path): int {
   $fbcode_root_dir = __DIR__.'/../../..';
 
   $test_raw_results_file = tempnam("/tmp", $test_name.'-raw-results');
 
   // Remember, timeouts are in minutes.
   $run_command = __DIR__."/../../tools/timeout.sh -t $timeout";
-  $run_command .= " ".get_hhvm_build()." ".__DIR__."/phpunit.phar";
+  if (Tests::$framework_info[$test_name]->contains('test_run_command')) {
+    $run_command .= " ".Tests::$framework_info[$test_name]['test_run_command'];
+  } else {
+    $run_command .= " ".get_hhvm_build()." ".__DIR__.
+                    "/vendor/bin/phpunit --debug";
+  }
   $run_command .= " &> $test_raw_results_file";
 
   // 2 possibilities, phpunit.xml and phpunit.xml.dist for configuration
@@ -448,19 +506,29 @@ function run_single_test(string $test_name, string $summary_results_file,
   verbose("Command: $run_command\n", $verbose);
 
   $install_root = Tests::$framework_info[$test_name]['install_root'];
+
   if (!(file_exists($install_root))) {
-    install_framework($test_name, $install_root, $verbose, $zend);
+    install_framework($test_name, $install_root, $verbose, $zend_path);
+  } else if ($force_redownload) {
+    remove_dir_recursive($install_root);
+    install_framework($test_name, $install_root, $verbose, $zend_path);
   }
 
-  $phpunit_config_file_loc = null;
-  $phpunit_config_file_loc = find_any_file_recursive($phpunit_config_files,
-                                                     $install_root, true);
-  // The test path will be where the phpunit config file is located since
-  // that file contains the test directory name. If no config file, error.
-  $test_path = $phpunit_config_file_loc !== null
+  $test_path = null;
+  if (Tests::$framework_info[$test_name]->contains('test_path')) {
+    $test_path = Tests::$framework_info[$test_name]['test_path'];
+  } else {
+    $phpunit_config_file_loc = null;
+    $phpunit_config_file_loc = find_any_file_recursive($phpunit_config_files,
+                                                       $install_root, true);
+    // The test path will be where the phpunit config file is located since
+    // that file contains the test directory name. If no config file, error.
+    $test_path = $phpunit_config_file_loc !== null
                ? $phpunit_config_file_loc
                : error("No phpunit test directory found for $test_name");
-  verbose("Using phpunit xml file in: $phpunit_config_file_loc\n", $verbose);
+    verbose("Using phpunit xml file in: $phpunit_config_file_loc\n", $verbose);
+  }
+
   verbose("Test Path: $test_path\n", $verbose);
   chdir($test_path);
   $retval = -1;
@@ -482,7 +550,8 @@ function run_single_test(string $test_name, string $summary_results_file,
   // We may not get to the summary file creation if we timed out or some other
   // horrible fatal.
   $pct_str = create_summary_for_test($test_name, $test_raw_results_file,
-                                     $summary_results_file);
+                                     $summary_results_file,
+                                     $appended_raw_results_file);
   echo strtoupper($test_name).
        " TEST COMPLETE with pass percentage of: $pct_str\n\n";
   echo "Results File: $test_raw_results_file\n";
@@ -492,8 +561,11 @@ function run_single_test(string $test_name, string $summary_results_file,
 }
 
 function run_tests_in_processes(Vector $tests_to_run,
-                                string $summary_results_file, int $timeout,
-                                bool $verbose, bool $zend): void {
+                                string $summary_results_file,
+                                string $appended_raw_results_file,
+                                int $timeout, bool $verbose,
+                                bool $force_redownload,
+                                ?string $zend_path): void {
   $num_processes = min(count($tests_to_run), num_cpus() + 1);
 
   $children = Vector {};
@@ -505,7 +577,8 @@ function run_tests_in_processes(Vector $tests_to_run,
       $children[] = $pid;
     } else {
       exit(run_single_test($tests_to_run[$i], $summary_results_file,
-                           $timeout, $verbose, $zend));
+                           $appended_raw_results_file, $timeout, $verbose,
+                           $force_redownload, $zend_path));
     }
   }
 
@@ -520,8 +593,40 @@ function run_tests_in_processes(Vector $tests_to_run,
 }
 
 function run_tests(Vector $tests, int $timeout,
-                  bool $verbose, bool $zend): void {
+                  bool $verbose, bool $force_redownload,
+                  ?string $zend_path): void {
+  // Install composer.phar
+  if (!(file_exists(__DIR__."/composer.phar"))) {
+    verbose("Getting composer.phar....\n", $verbose);
+    $comp_url = "http://getcomposer.org/composer.phar";
+    $get_composer_command = $verbose
+                            ? "wget --verbose"
+                            : "wget --quiet";
+    $get_composer_command .= " ".$comp_url." -P ".__DIR__;
+    system($get_composer_command, $ret);
+    if ($ret !== 0) {
+      error("Could not download composer. Script stopping\n");
+    }
+  }
+
+  // Install phpunit from composer.json located in __DIR__
+  $phpunit_binary = __DIR__."/vendor/bin/phpunit";
+  if (!(file_exists($phpunit_binary))) {
+    verbose("Donwloading PHPUnit in order to run tests...\n", $verbose);
+    $phpunit_install_command = get_hhvm_build()." ".__DIR__.
+                               "/composer.phar install --dev";
+    $phpunit_install_command .= $verbose ? " --verbose" : " --quiet";
+    run_install_via_process($phpunit_install_command, "", __DIR__,
+                            ProxyInformation::$proxies, $verbose);
+    system($phpunit_install_command, $ret);
+    if ($ret !== 0) {
+      error("Could not install PHPUnit. Script stopping\n");
+    }
+  }
+
+
   $summary_results_file = "/tmp/pop_framework_tests_summary";
+  $appended_raw_results_file = tempnam("/tmp", 'appended-raw-results');
   $tests_to_run = Vector {};
   foreach ($tests as $test) {
     $test_name = trim(strtolower($test));
@@ -532,8 +637,10 @@ function run_tests(Vector $tests, int $timeout,
 
   if (count($tests_to_run) > 0) {
     run_tests_in_processes($tests_to_run, $summary_results_file,
-                           $timeout, $verbose, $zend);
+                           $appended_raw_results_file, $timeout, $verbose,
+                           $force_redownload, $zend_path);
     echo "ALL TESTS COMPLETE!\n";
+    echo "ALL TEST RESULTS FOUND IN: ".$appended_raw_results_file."\n";
     echo "SUMMARY:\n";
     $summary = file_get_contents($summary_results_file);
     print $summary;
@@ -565,8 +672,12 @@ function remove_escape_characters(string $results_file): void {
 // phpunit for their testing (e.g. ThinkUp)
 function create_summary_for_test(string $test_name,
                                  string $raw_results_file,
-                                 string $summary_file): string {
-  if (($file_contents = file_get_contents($raw_results_file)) === FALSE) {
+                                 string $summary_file,
+                                 string $appended_raw_results_file): string {
+  // Get the last 4 lines of the results file which will give us the surface
+  // area necessary to get the final stats.
+  $file = escapeshellarg($raw_results_file);
+  if (($lines = `tail -n 4 $file`) === "") {
     error("Error occured. Probably could not open final ".
           "pass/fail file: $raw_results_file");
   }
@@ -580,7 +691,7 @@ function create_summary_for_test(string $test_name,
   $test_result = TestResult::FATAL;
   $match = array();
   foreach ($possible_patterns as $result => $pattern) {
-    preg_match($pattern, $file_contents, $match);
+    preg_match($pattern, $lines, $match);
     if (!empty($match)) {
       $test_result = $result;
     }
@@ -627,18 +738,26 @@ function create_summary_for_test(string $test_name,
       break;
   }
 
+  // Append the raw results to the big raw results file
+  file_put_contents($appended_raw_results_file,
+                    strtoupper($test_name)."\n\n".
+                    file_get_contents($raw_results_file).
+                    "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n",
+                    FILE_APPEND);
+
   // Make sure we are overwriting test results if they exit already,
   // as opposed to having duplicate test names
+  $summary_line = "$test_name=$pct_str ($raw_results_file)".PHP_EOL;
   if (!(file_exists($summary_file))) {
-    file_put_contents($summary_file, "$test_name=$pct_str".PHP_EOL);
+    file_put_contents($summary_file, $summary_line);
   } else {
     $file_data = file($summary_file);
     $duplicate_match = preg_grep("/$test_name/", $file_data);
     if (!empty($duplicate_match)) {
       $file_data = preg_replace("/$test_name=.*".PHP_EOL."/",
-                   "$test_name=$pct_str".PHP_EOL, $file_data);
+                   $summary_line, $file_data);
     } else {
-      $file_data[] = "$test_name=$pct_str".PHP_EOL;
+      $file_data[] = $summary_line;
     }
     file_put_contents($summary_file, $file_data);
   }
@@ -659,28 +778,34 @@ INTRO;
   $examples = <<<EXAMPLES
   Usage:
 
-    # Run all framework tests
-    % oss_framework_test_script --all
+    # Run all framework tests.
+    % hhvm oss_framework_test_script --all
 
-    # Run all framework tests with a timeout per test (in secs)
-    % oss_framework_test_script --all --timeout 600
+    # Run all framework tests using zend for alternative options for downloads.
+    % hhvm oss_framework_test_script --all --zend ~/zend55/bin/php
 
-    # Run one test
-    % oss_framework_test_script composer
+    # Run all framework tests forcing the download of all the tests again.
+    % hhvm oss_framework_test_script --all --redownload
 
-    # Run multiple tests
-    % oss_framework_test_script composer assetic paris
+    # Run all framework tests with a timeout per test (in secs).
+    % hhvm oss_framework_test_script --all --timeout 600
 
-    # Run multiple tests with timeout for each test (in seconds)
+    # Run one test.
+    % hhvm oss_framework_test_script composer
+
+    # Run multiple tests.
+    % hhvm oss_framework_test_script composer assetic paris
+
+    # Run multiple tests with timeout for each test (in seconds).
     # Tests must come after the -- options
-    % oss_framework_test_script --timeout 600 composer assetic
+    % hhvm oss_framework_test_script --timeout 600 composer assetic
 
     # Run multiple tests with timeout for each test (in seconds) and
-    # with verbose messages. Tests must come after the -- options
-    % oss_framework_test_script --timeout 600 --verbose composer assetic
+    # with verbose messages. Tests must come after the -- options.
+    % hhvm oss_framework_test_script --timeout 600 --verbose composer assetic
 
-    # Display help
-    % oss_framework_test_script --help
+    # Display help.
+    % hhvm oss_framework_test_script --help
 
 EXAMPLES;
 
@@ -700,9 +825,13 @@ function oss_test_option_map(): OptionInfoMap {
                                         "run."},
     'verbose'             => Pair {'v', "Optional - For a lot of messages ".
                                         "about what is going on."},
-    'zend'               => Pair {'z', "Optional - Try to use zend if ".
+    'zend:'               => Pair {'z', "Optional - Try to use zend if ".
                                         "retrieving dependencies with hhvm ".
-                                        "fails."}
+                                        "fails. Currently, zend must be ".
+                                        "installed and the path to the zend ".
+                                        "binary specified."},
+    'redownload'          => Pair {'r', "Forces a redownload of the framework ".
+                                        "code and dependencies."}
   };
 }
 
@@ -806,6 +935,11 @@ function main(array $argv): void {
   echo "Script running....Be patient as some tests take a while with a debug ".
        "build of HHVM\n";
   Tests::init();
+  if (ProxyInformation::is_proxy_required()) {
+    echo "Looks like proxy may be required. Setting to default FB proxy ".
+         "values. Please change Map in ProxyInformation to correct values, ".
+         "if necessary.\n";
+  }
   // Don't send $argv[0] which just contains the program to run
   // Parse other possible options out in run()
   run($options, Vector::fromArray(array_slice($argv, 1)));

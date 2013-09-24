@@ -22,6 +22,8 @@
 #include "hphp/runtime/vm/jit/ir-factory.h"
 #include "hphp/runtime/vm/jit/linear-scan.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/block.h"
+#include "hphp/runtime/vm/jit/cfg.h"
 
 namespace HPHP {  namespace JIT {
 

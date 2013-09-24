@@ -19,10 +19,12 @@
 #include "hphp/util/text-color.h"
 #include "hphp/util/abi-cxx.h"
 #include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/linear-scan.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
-#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/jit/block.h"
+#include "hphp/runtime/vm/jit/ir-trace.h"
 
 namespace HPHP {  namespace JIT {
 

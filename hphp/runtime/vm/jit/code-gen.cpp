@@ -52,6 +52,8 @@
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
+#include "hphp/runtime/vm/jit/ir-trace.h"
+#include "hphp/runtime/vm/jit/cfg.h"
 
 using HPHP::Transl::TCA;
 using namespace HPHP::Transl::TargetCache;

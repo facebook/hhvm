@@ -31,22 +31,13 @@ struct IRTrace : private boost::noncopyable {
   typedef std::list<Block*>::const_iterator const_iterator;
   typedef std::list<Block*>::iterator iterator;
 
-  explicit IRTrace(Block* first, uint32_t bcOff)
-    : m_bcOff(bcOff)
-    , m_main(nullptr)
-  {
-    push_back(first);
-  }
-
-  ~IRTrace() {
-    std::for_each(m_exitTraces.begin(), m_exitTraces.end(),
-                  boost::checked_deleter<IRTrace>());
-  }
+  explicit IRTrace(Block* first, uint32_t bcOff);
+  ~IRTrace();
 
   std::list<Block*>& blocks() { return m_blocks; }
   const std::list<Block*>& blocks() const { return m_blocks; }
 
-  Block* front() { return *m_blocks.begin(); }
+  Block* front() { return m_blocks.front(); }
   Block* back() { auto it = m_blocks.end(); return *(--it); }
   const Block* front() const { return *m_blocks.begin(); }
   const Block* back()  const { auto it = m_blocks.end(); return *(--it); }
@@ -58,28 +49,12 @@ struct IRTrace : private boost::noncopyable {
         iterator begin()        { return blocks().begin(); }
         iterator end()          { return blocks().end(); }
 
-  /*
-   * Unlink a block from a trace. Updates any successor blocks that
-   * have a DefLabel with a dest depending on this block.
-   */
-  iterator erase(iterator it) {
-    Block* b = *it;
-    assert(b->preds().empty());
-    it = m_blocks.erase(it);
-    b->setTrace(nullptr);
-    if (!b->empty()) b->back()->setTaken(nullptr);
-    b->setNext(nullptr);
-    return it;
-  }
+  // Unlink a block from a trace. Updates any successor blocks that
+  // have a DefLabel with a dest depending on this block.
+  iterator erase(iterator it);
 
-  /*
-   * Add a block to the back of this trace's block list.
-   */
-  Block* push_back(Block* b) {
-    b->setTrace(this);
-    m_blocks.push_back(b);
-    return b;
-  }
+  // Add a block to the back of this trace's block list.
+  Block* push_back(Block* b);
 
   // temporary data field for use by individual passes
   //
@@ -90,30 +65,12 @@ struct IRTrace : private boost::noncopyable {
   void setData(uint32_t d) { m_data = d; }
 
   uint32_t bcOff() const { return m_bcOff; }
-  IRTrace* addExitTrace(IRTrace* exit) {
-    m_exitTraces.push_back(exit);
-    exit->setMain(this);
-    return exit;
-  }
+  IRTrace* addExitTrace(IRTrace* exit);
   bool isMain() const { return m_main == nullptr; }
-  /*
-   * Catch traces always start with DefLabel; BeginCatch.
-   */
-  bool isCatch() const {
-    if (front()->empty()) return false;
+  IRTrace* main() const { return m_main; }
 
-    auto it = front()->skipHeader();
-    if (it == front()->begin()) return false;
-
-    return (--it)->op() == BeginCatch;
-  }
-  void setMain(IRTrace* t) {
-    assert(m_main == nullptr);
-    m_main = t;
-  }
-  IRTrace* main() {
-    return m_main;
-  }
+  // return true if this trace's first block starts with BeginCatch
+  bool isCatch() const;
 
   typedef std::list<IRTrace*> ExitList;
   typedef std::list<IRTrace*>::iterator ExitIterator;
@@ -131,6 +88,49 @@ private:
   ExitList m_exitTraces;      // traces to which this trace exits
   IRTrace* m_main;            // ptr to parent trace if this is an exit trace
 };
+
+inline IRTrace::IRTrace(Block* first, uint32_t bcOff)
+  : m_bcOff(bcOff)
+  , m_main(nullptr)
+{
+  push_back(first);
+}
+
+inline IRTrace::~IRTrace() {
+  std::for_each(m_exitTraces.begin(), m_exitTraces.end(),
+                boost::checked_deleter<IRTrace>());
+}
+
+inline IRTrace::iterator IRTrace::erase(iterator it) {
+  Block* b = *it;
+  assert(b->preds().empty());
+  it = m_blocks.erase(it);
+  b->setTrace(nullptr);
+  if (!b->empty()) b->back()->setTaken(nullptr);
+  b->setNext(nullptr);
+  return it;
+}
+
+inline Block* IRTrace::push_back(Block* b) {
+  b->setTrace(this);
+  m_blocks.push_back(b);
+  return b;
+}
+
+inline IRTrace* IRTrace::addExitTrace(IRTrace* exit) {
+  assert(!exit->m_main);
+  exit->m_main = this;
+  m_exitTraces.push_back(exit);
+  return exit;
+}
+
+// Catch traces always start with DefLabel; BeginCatch.
+inline bool IRTrace::isCatch() const {
+  if (front()->empty()) return false;
+  auto it = front()->skipHeader();
+  if (it == front()->begin()) return false;
+  return (--it)->op() == BeginCatch;
+}
 
 // defined here to avoid circular dependency
 inline bool Block::isMain() const {

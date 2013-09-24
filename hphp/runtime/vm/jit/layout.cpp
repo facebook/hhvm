@@ -60,7 +60,7 @@ smart::vector<Block*> rpoForCodegen(const IRFactory& factory, Block* head) {
  */
 LayoutInfo layoutBlocks(IRTrace* trace, const IRFactory& irFactory) {
   LayoutInfo ret;
-  ret.blocks = rpoForCodegen(irFactory, trace->blocks().front());
+  ret.blocks = rpoForCodegen(irFactory, trace->front());
 
   // Optionally stress test by randomizing the positions.
   if (RuntimeOption::EvalHHIRStressCodegenBlocks) {

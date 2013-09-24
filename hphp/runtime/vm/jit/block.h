@@ -49,12 +49,7 @@ struct Block : boost::noncopyable {
     , m_hint(Hint::Neither)
   {}
 
-  const IRInstruction* beginCatch() const {
-    auto it = begin();
-    ++it;
-    assert(it->op() == BeginCatch);
-    return &*it;
-  }
+  const IRInstruction* beginCatch() const;
 
   uint32_t    id() const           { return m_id; }
   IRTrace*    trace() const        { return m_trace; }
@@ -65,47 +60,26 @@ struct Block : boost::noncopyable {
   void        addEdge(IRInstruction* jmp);
   void        removeEdge(IRInstruction* jmp);
 
-  /*
-   * Returns true if this block is the main trace exit.  This block
-   * post-dominates all main trace blocks.
-   *
-   * Currently there is only ever a single main trace exit.
-   */
-  bool isMainExit() const {
-    return isMain() && isExit();
-  }
+  // Returns true if this block is the main trace exit.  This block
+  // post-dominates all main trace blocks.  Currently there is only
+  // ever a single main trace exit.
+  bool isMainExit() const { return isMain() && isExit(); }
 
-  /*
-   * Returns true if this block is part of the main trace.  I.e. it is
-   * post-dominated by a block with isMainExit() == true.
-   */
+  // Returns true if this block is part of the main trace.  I.e. it is
+  // post-dominated by a block with isMainExit() == true.
   bool isMain() const;
 
-  /*
-   * Returns true if this block has no successors.
-   */
-  bool isExit() const {
-    return !taken() && !next();
-  }
+  // Returns true if this block has no successors.
+  bool isExit() const { return !taken() && !next(); }
 
-  /*
-   * Returns whether this block is the initial entry block for the
-   * tracelet.
-   */
+  // Returns whether this block is the initial entry block for the tracelet.
   bool isEntry() const { return id() == 0; }
 
   // return the last instruction in the block
-  IRInstruction* back() const {
-    assert(!m_instrs.empty());
-    auto it = m_instrs.end();
-    return const_cast<IRInstruction*>(&*(--it));
-  }
+  IRInstruction* back() const;
 
   // return the first instruction in the block.
-  IRInstruction* front() const {
-    assert(!m_instrs.empty());
-    return const_cast<IRInstruction*>(&*m_instrs.begin());
-  }
+  IRInstruction* front() const;
 
   // return the fallthrough block.  Should be nullptr if the last
   // instruction is a Terminal.
@@ -113,51 +87,27 @@ struct Block : boost::noncopyable {
   void setNext(Block* b) { m_next.setTo(b); }
 
   // return the target block if the last instruction is a branch.
-  Block* taken() const {
-    return empty() ? nullptr : back()->taken();
-  }
+  Block* taken() const { return empty() ? nullptr : back()->taken(); }
 
   // return the postorder number of this block. (updated each time
   // sortBlocks() is called.
   unsigned postId() const { return m_postid; }
   void setPostId(unsigned id) { m_postid = id; }
 
-  /*
-   * Insert inst after this block's optional DefLabel and BeginCatch,
-   * then return an iterator to the newly inserted instruction.
-   */
-  iterator prepend(IRInstruction* inst) {
-    assert(inst->marker().valid());
-    auto it = skipHeader();
-    return insert(it, inst);
-  }
+  // Insert inst after this block's optional DefLabel and BeginCatch,
+  // then return an iterator to the newly inserted instruction.
+  iterator prepend(IRInstruction* inst);
 
   // return iterator to first instruction after the DefLabel (if
   // present) and BeginCatch (if present).
-  iterator skipHeader() {
-    auto it = begin();
-    auto e = end();
-    if (it != e && it->op() == DefLabel) ++it;
-    if (it != e && it->op() == BeginCatch) ++it;
-    return it;
-  }
-
-  const_iterator skipHeader() const {
-    return const_cast<Block*>(this)->skipHeader();
-  }
+  iterator skipHeader();
+  const_iterator skipHeader() const;
 
   // return iterator to last instruction
-  iterator backIter() {
-    assert(!empty());
-    auto it = end();
-    return --it;
-  }
+  iterator backIter();
 
   // return an iterator to a specific instruction
-  iterator iteratorTo(IRInstruction* inst) {
-    assert(inst->block() == this);
-    return m_instrs.iterator_to(*inst);
-  }
+  iterator iteratorTo(IRInstruction* inst);
 
   // Accessors of list of predecessor edges.  Each edge has a from() property
   // which is the predecessor block.
@@ -167,47 +117,18 @@ struct Block : boost::noncopyable {
 
   // Remove edge from its destination's predecessor list and insert it in
   // new_to's predecessor list.
-  static Block* updatePreds(Edge* edge, Block* new_to) {
-    if (Block* old_to = edge->to()) {
-      auto &preds = old_to->m_preds;
-      preds.erase(preds.iterator_to(*edge));
-    }
-    if (new_to) {
-      new_to->m_preds.push_front(*edge);
-    }
-    return new_to;
-  }
+  static Block* updatePreds(Edge* edge, Block* new_to);
 
   // visit each src that provides a value to label->dsts[i]. body
   // should take an IRInstruction* and an SSATmp*.
-  template<typename L>
-  void forEachSrc(unsigned i, L body) {
-    for (Edge& e : m_preds) {
-      IRInstruction* jmp = e.from()->back();
-      assert(jmp->op() == Jmp_ && jmp->taken() == this);
-      body(jmp, jmp->src(i));
-    }
-  }
+  template<typename L> void forEachSrc(unsigned i, L body);
 
   // return the first src providing a value to label->dsts[i] for
   // which body(src) returns true, or nullptr if none are found.
-  template<typename L>
-  SSATmp* findSrc(unsigned i, L body) {
-    for (Edge& e : m_preds) {
-      SSATmp* src = e.from()->back()->src(i);
-      if (body(src)) return src;
-    }
-    return nullptr;
-  }
+  template<typename L> SSATmp* findSrc(unsigned i, L body);
 
-  template <typename L>
-  void forEachPred(L body) {
-    for (auto i = m_preds.begin(), e = m_preds.end(); i != e;) {
-      Block* from = i->from();
-      ++i;
-      body(from);
-    }
-  }
+  // execute body(P) for each predecessor block P of this block
+  template <typename L> void forEachPred(L body);
 
   // list-compatible interface; these delegate to m_instrs but also update
   // inst.m_block
@@ -217,32 +138,12 @@ struct Block : boost::noncopyable {
   iterator         end()         { return m_instrs.end(); }
   const_iterator   begin() const { return m_instrs.begin(); }
   const_iterator   end()   const { return m_instrs.end(); }
-
-  iterator insert(iterator pos, IRInstruction* inst) {
-    assert(inst->marker().valid());
-    inst->setBlock(this);
-    return m_instrs.insert(pos, *inst);
-  }
+  iterator erase(iterator pos)   { return m_instrs.erase(pos); }
+  iterator insert(iterator pos, IRInstruction* inst);
   void splice(iterator pos, Block* from, iterator begin, iterator end,
-              BCMarker newMarker) {
-    assert(from != this);
-    for (auto i = begin; i != end; ++i) {
-      i->setBlock(this);
-      i->setMarker(newMarker);
-    }
-    m_instrs.splice(pos, from->instrs(), begin, end);
-  }
-  void push_back(IRInstruction* inst) {
-    assert(inst->marker().valid());
-    inst->setBlock(this);
-    return m_instrs.push_back(*inst);
-  }
-  template <class Predicate> void remove_if(Predicate p) {
-    m_instrs.remove_if(p);
-  }
-  iterator erase(iterator pos) {
-    return m_instrs.erase(pos);
-  }
+              BCMarker newMarker);
+  void push_back(IRInstruction* inst);
+  template <class Predicate> void remove_if(Predicate p);
 
   friend const Edge* nextEdge(Block*); // only for validation
 
@@ -259,6 +160,120 @@ struct Block : boost::noncopyable {
 
 typedef smart::vector<Block*> BlockList;
 
+inline const IRInstruction* Block::beginCatch() const {
+  auto it = begin();
+  ++it;
+  assert(it->op() == BeginCatch);
+  return &*it;
+}
+
+inline IRInstruction* Block::back() const {
+  assert(!m_instrs.empty());
+  auto it = m_instrs.end();
+  return const_cast<IRInstruction*>(&*(--it));
+}
+
+inline IRInstruction* Block::front() const {
+  assert(!m_instrs.empty());
+  return const_cast<IRInstruction*>(&*m_instrs.begin());
+}
+
+inline Block::iterator Block::prepend(IRInstruction* inst) {
+  assert(inst->marker().valid());
+  auto it = skipHeader();
+  return insert(it, inst);
+}
+
+inline Block::iterator Block::skipHeader() {
+  auto it = begin();
+  auto e = end();
+  if (it != e && it->op() == DefLabel) ++it;
+  if (it != e && it->op() == BeginCatch) ++it;
+  return it;
+}
+
+inline Block::const_iterator Block::skipHeader() const {
+  return const_cast<Block*>(this)->skipHeader();
+}
+
+inline Block::iterator Block::backIter() {
+  assert(!empty());
+  auto it = end();
+  return --it;
+}
+
+inline Block::iterator Block::iteratorTo(IRInstruction* inst) {
+  assert(inst->block() == this);
+  return m_instrs.iterator_to(*inst);
+}
+
+inline Block* Block::updatePreds(Edge* edge, Block* new_to) {
+  if (Block* old_to = edge->to()) {
+    auto &preds = old_to->m_preds;
+    preds.erase(preds.iterator_to(*edge));
+  }
+  if (new_to) {
+    new_to->m_preds.push_front(*edge);
+  }
+  return new_to;
+}
+
+template<typename L> inline
+void Block::forEachSrc(unsigned i, L body) {
+  for (Edge& e : m_preds) {
+    IRInstruction* jmp = e.from()->back();
+    assert(jmp->op() == Jmp_ && jmp->taken() == this);
+    body(jmp, jmp->src(i));
+  }
+}
+
+template<typename L> inline
+SSATmp* Block::findSrc(unsigned i, L body) {
+  for (Edge& e : m_preds) {
+    SSATmp* src = e.from()->back()->src(i);
+    if (body(src)) return src;
+  }
+  return nullptr;
+}
+
+template <typename L> inline
+void Block::forEachPred(L body) {
+  for (auto i = m_preds.begin(), e = m_preds.end(); i != e;) {
+    Block* from = i->from();
+    ++i;
+    body(from);
+  }
+}
+
+inline Block::iterator Block::insert(iterator pos, IRInstruction* inst) {
+  assert(inst->marker().valid());
+  inst->setBlock(this);
+  return m_instrs.insert(pos, *inst);
+}
+
+inline
+void Block::splice(iterator pos, Block* from, iterator begin, iterator end,
+                   BCMarker newMarker) {
+  assert(from != this);
+  for (auto i = begin; i != end; ++i) {
+    i->setBlock(this);
+    i->setMarker(newMarker);
+  }
+  m_instrs.splice(pos, from->instrs(), begin, end);
+}
+
+inline void Block::push_back(IRInstruction* inst) {
+  assert(inst->marker().valid());
+  inst->setBlock(this);
+  return m_instrs.push_back(*inst);
+}
+
+template <class Predicate> inline
+void Block::remove_if(Predicate p) {
+  m_instrs.remove_if(p);
+}
+
+// defined here to avoid circular dependencies
 inline void Edge::setTo(Block* to) {
   m_to = Block::updatePreds(this, to);
 }

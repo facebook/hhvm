@@ -21,6 +21,8 @@
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/ir-factory.h"
+#include "hphp/runtime/vm/jit/ir-trace.h"
+#include "hphp/runtime/vm/jit/cfg.h"
 
 namespace HPHP { namespace JIT {
 

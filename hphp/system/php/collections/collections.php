@@ -762,6 +762,12 @@ class LazyIterableView implements Iterable {
     }
     return $arr;
   }
+  public function toVector() {
+    return $this->iterable->toVector();
+  }
+  public function toSet() {
+    return $this->iterable->toSet();
+  }
   public function lazy() {
     return $this;
   }
@@ -787,6 +793,18 @@ class LazyKeyedIterableView implements KeyedIterable {
       $arr[$k] = $v;
     }
     return $arr;
+  }
+  public function toVector() {
+    return $this->iterable->toVector();
+  }
+  public function toMap() {
+    return $this->iterable->toMap();
+  }
+  public function toStableMap() {
+    return $this->iterable->toStableMap();
+  }
+  public function toSet() {
+    return $this->iterable->toSet();
   }
   public function lazy() {
     return $this;

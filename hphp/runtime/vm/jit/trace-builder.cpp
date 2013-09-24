@@ -34,8 +34,8 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
                            const Func* func)
   : m_irFactory(irFactory)
   , m_simplifier(*this)
-  , m_mainTrace(makeTrace(func, initialBcOffset))
-  , m_curTrace(m_mainTrace.get())
+  , m_mainTrace(m_irFactory.makeMain(func, initialBcOffset))
+  , m_curTrace(m_mainTrace)
   , m_curBlock(nullptr)
   , m_enableCse(false)
   , m_enableSimplification(false)
@@ -682,12 +682,12 @@ SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
       // now. t2590033.
       if (false) {
         assert_log(false,  [&]{
-            IRTrace& mainTrace = trace()->isMain() ? *trace()
-                                                   : *(trace()->main());
             return folly::format("\npreOptimizeAssertLoc: prevType: {} "
                                  "typeParam: {}\nin instr: {}\nin trace: {}\n",
-                                 prevType.toString(), typeParam.toString(),
-                                 inst->toString(), mainTrace.toString()).str();
+                                 prevType.toString(),
+                                 typeParam.toString(),
+                                 inst->toString(),
+                                 m_mainTrace->toString()).str();
           });
       }
     } else {
@@ -985,7 +985,7 @@ SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst, CloneFlag doClone) {
 void TraceBuilder::reoptimize() {
   FTRACE(5, "ReOptimize:vvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "ReOptimize:^^^^^^^^^^^^^^^^^^^^\n"); };
-  assert(m_curTrace == m_mainTrace.get());
+  assert(m_curTrace == m_mainTrace);
   assert(m_savedTraces.empty());
   assert(m_inlineSavedStates.empty());
 
@@ -993,7 +993,7 @@ void TraceBuilder::reoptimize() {
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   if (!m_enableCse && !m_enableSimplification) return;
 
-  BlockList sortedBlocks = rpoSortCfg(m_mainTrace.get(), m_irFactory);
+  BlockList sortedBlocks = rpoSortCfg(m_mainTrace, m_irFactory);
   auto const idoms = findDominators(sortedBlocks);
   clearTrackedState();
 
@@ -1002,7 +1002,7 @@ void TraceBuilder::reoptimize() {
   while (!blocks.empty()) {
     Block* block = blocks.front();
     blocks.pop_front();
-    assert(block->trace() == m_mainTrace.get());
+    assert(block->trace() == m_mainTrace);
     FTRACE(5, "Block: {}\n", block->id());
 
     m_mainTrace->push_back(block);

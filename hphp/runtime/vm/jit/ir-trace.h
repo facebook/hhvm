@@ -22,6 +22,8 @@
 
 namespace HPHP { namespace JIT {
 
+struct IRFactory;
+
 /*
  * An IRTrace is a single-entry, multi-exit, sequence of blocks. Typically
  * each block falls through to the next block but this is not guaranteed;
@@ -31,8 +33,7 @@ struct IRTrace : private boost::noncopyable {
   typedef std::list<Block*>::const_iterator const_iterator;
   typedef std::list<Block*>::iterator iterator;
 
-  explicit IRTrace(Block* first, uint32_t bcOff);
-  ~IRTrace();
+  explicit IRTrace(IRFactory& factory, Block* first, uint32_t bcOff);
 
   std::list<Block*>& blocks() { return m_blocks; }
   const std::list<Block*>& blocks() const { return m_blocks; }
@@ -65,40 +66,30 @@ struct IRTrace : private boost::noncopyable {
   void setData(uint32_t d) { m_data = d; }
 
   uint32_t bcOff() const { return m_bcOff; }
-  IRTrace* addExitTrace(IRTrace* exit);
-  bool isMain() const { return m_main == nullptr; }
-  IRTrace* main() const { return m_main; }
+  bool isMain() const;
 
   // return true if this trace's first block starts with BeginCatch
   bool isCatch() const;
 
-  typedef std::list<IRTrace*> ExitList;
-  typedef std::list<IRTrace*>::iterator ExitIterator;
+  std::list<IRTrace*>& exitTraces();
+  const std::list<IRTrace*>& exitTraces() const;
 
-  ExitList& exitTraces() { return m_exitTraces; }
-  const ExitList& exitTraces() const { return m_exitTraces; }
   std::string toString() const;
 
 private:
+  IRFactory& m_factory;
   // offset of the first bytecode in this trace; 0 if this trace doesn't
   // represent a bytecode boundary.
   uint32_t m_bcOff;
   uint32_t m_data;
   std::list<Block*> m_blocks; // Blocks in main trace starting with entry block
-  ExitList m_exitTraces;      // traces to which this trace exits
-  IRTrace* m_main;            // ptr to parent trace if this is an exit trace
 };
 
-inline IRTrace::IRTrace(Block* first, uint32_t bcOff)
-  : m_bcOff(bcOff)
-  , m_main(nullptr)
+inline IRTrace::IRTrace(IRFactory& factory, Block* first, uint32_t bcOff)
+  : m_factory(factory)
+  , m_bcOff(bcOff)
 {
   push_back(first);
-}
-
-inline IRTrace::~IRTrace() {
-  std::for_each(m_exitTraces.begin(), m_exitTraces.end(),
-                boost::checked_deleter<IRTrace>());
 }
 
 inline IRTrace::iterator IRTrace::erase(iterator it) {
@@ -115,13 +106,6 @@ inline Block* IRTrace::push_back(Block* b) {
   b->setTrace(this);
   m_blocks.push_back(b);
   return b;
-}
-
-inline IRTrace* IRTrace::addExitTrace(IRTrace* exit) {
-  assert(!exit->m_main);
-  exit->m_main = this;
-  m_exitTraces.push_back(exit);
-  return exit;
 }
 
 // Catch traces always start with DefLabel; BeginCatch.

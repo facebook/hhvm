@@ -289,8 +289,7 @@ struct TraceBuilder {
    * rejoining the main line.
    */
   Block* makeExit(uint32_t bcOff) {
-    auto t = makeTrace(m_curFunc->getValFunc(), bcOff);
-    m_mainTrace->addExitTrace(t);
+    auto t = m_irFactory.addExit(m_curFunc->getValFunc(), bcOff);
     return t->front();
   }
 
@@ -393,10 +392,6 @@ private:
   void      clearTrackedState();
   void      dropLocalRefsInnerTypes();
 
-  IRTrace* makeTrace(const Func* func, uint32_t bcOff) {
-    return new IRTrace(m_irFactory.defBlock(func), bcOff);
-  }
-
 private:
   std::unique_ptr<State> createState() const;
   void saveState(Block*);
@@ -408,7 +403,7 @@ private:
   IRFactory& m_irFactory;
   Simplifier m_simplifier;
 
-  boost::scoped_ptr<IRTrace> const m_mainTrace; // generated trace
+  IRTrace* const m_mainTrace; // generated trace
 
   /*
    * m_savedTraces will be nonempty iff we're emitting code to a trace other

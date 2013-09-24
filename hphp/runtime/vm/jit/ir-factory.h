@@ -152,9 +152,11 @@ makeInstruction(Func func, Args&&... args) {
 
 //////////////////////////////////////////////////////////////////////
 
+struct IRTrace;
+
 /*
  * IRFactory is used for allocating and controlling the lifetime of IR
- * objects.
+ * objects.  This acts as the JIT's compilation unit.
  */
 class IRFactory {
 public:
@@ -162,6 +164,7 @@ public:
     : m_nextBlockId(0)
     , m_nextOpndId(0)
     , m_nextInstId(0)
+    , m_main(nullptr)
   {}
 
   /*
@@ -250,13 +253,25 @@ public:
    */
   IRInstruction* mov(SSATmp* dst, SSATmp* src, BCMarker marker);
 
+  /*
+   * Create a new trace
+   */
+  IRTrace* makeMain(const Func* func, uint32_t bcOff);
+  IRTrace* addExit(const Func* func, uint32_t bcOff);
+
   Arena&   arena()               { return m_arena; }
   uint32_t numTmps() const       { return m_nextOpndId; }
   uint32_t numBlocks() const     { return m_nextBlockId; }
   uint32_t numInsts() const      { return m_nextInstId; }
   CSEHash& constTable()          { return m_constTable; }
+  IRTrace* main() const          { return m_main; }
+
+  typedef std::list<IRTrace*> ExitList;
+  ExitList& exits() { return m_exits; }
+  const ExitList& exits() const { return m_exits; }
 
 private:
+  IRTrace* makeTrace(const Func* func, uint32_t bcOff);
   SSATmp* findConst(ConstData& cdata, Type t);
   void newSSATmp(IRInstruction* inst) {
     if (!inst->hasDst()) return;
@@ -270,8 +285,11 @@ private:
   uint32_t m_nextOpndId;
   uint32_t m_nextInstId;
 
-  // SSATmp and IRInstruction objects are allocated here.
+  // IRTrace, Block, IRInstruction, and SSATmp objects are allocated here.
   Arena m_arena;
+
+  IRTrace* m_main;
+  std::list<IRTrace*> m_exits;
 };
 
 //////////////////////////////////////////////////////////////////////

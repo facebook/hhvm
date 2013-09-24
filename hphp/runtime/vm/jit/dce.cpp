@@ -245,7 +245,9 @@ initInstructions(const BlockList& blocks, DceState& state) {
 //    cannot be eliminated.
 // 3) Eliminates IncRef-DecRef pairs who value is used only by the DecRef and
 //    whose type does not run a destructor with side effects.
-void optimizeRefCount(IRTrace* trace, DceState& state, UseCounts& uses) {
+void optimizeRefCount(IRTrace* trace, IRTrace* main, DceState& state,
+                      UseCounts& uses) {
+  assert(trace && main->isMain());
   WorkList decrefs;
   forEachInst(trace, [&](IRInstruction* inst) {
     if (inst->op() == IncRef && !state[inst].countConsumedAny()) {
@@ -253,10 +255,9 @@ void optimizeRefCount(IRTrace* trace, DceState& state, UseCounts& uses) {
       // consumesReferences flag but doesn't.
       auto& s = state[inst];
       always_assert_log(s.decRefNZed(), [&]{
-        IRTrace* mainTrace = trace->isMain() ? trace : trace->main();
         return folly::format("\n{} has state {} in trace:\n{}{}\n",
-               inst->toString(), s.toString(), mainTrace->toString(),
-               trace == mainTrace ? "" : trace->toString()).str();
+               inst->toString(), s.toString(), main->toString(),
+               trace == main ? "" : trace->toString()).str();
       });
       inst->setOpcode(Mov);
       s.setDead();
@@ -693,7 +694,9 @@ void eliminateDeadCode(IRTrace* trace, IRFactory& irFactory) {
   }
 
   // Optimize IncRefs and DecRefs.
-  forEachTrace(trace, [&](IRTrace* t) { optimizeRefCount(t, state, uses); });
+  forEachTrace(trace, [&](IRTrace* t) {
+    optimizeRefCount(t, irFactory.main(), state, uses);
+  });
 
   if (RuntimeOption::EvalHHIREnableSinking) {
     // Sink IncRefs consumed off trace.

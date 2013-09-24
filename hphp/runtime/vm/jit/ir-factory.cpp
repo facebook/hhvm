@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/ir-factory.h"
 
 #include "hphp/runtime/vm/jit/block.h"
+#include "hphp/runtime/vm/jit/ir-trace.h"
 
 namespace HPHP {  namespace JIT {
 
@@ -53,6 +54,35 @@ SSATmp* IRFactory::findConst(ConstData& cdata, Type ctype) {
     return tmp;
   }
   return m_constTable.insert(cloneInstruction(&inst)->dst());
+}
+
+IRTrace* IRFactory::makeTrace(const Func* func, uint32_t bcOff) {
+  return new (m_arena) IRTrace(*this, defBlock(func), bcOff);
+}
+
+IRTrace* IRFactory::makeMain(const Func* func, uint32_t bcOff) {
+  assert(!m_main);
+  return m_main = makeTrace(func, bcOff);
+}
+
+IRTrace* IRFactory::addExit(const Func* func, uint32_t bcOff) {
+  auto exit = makeTrace(func, bcOff);
+  m_exits.push_back(exit);
+  return exit;
+}
+
+bool IRTrace::isMain() const {
+  return this == m_factory.main();
+}
+
+IRFactory::ExitList& IRTrace::exitTraces() {
+  assert(isMain());
+  return m_factory.exits();
+}
+
+const IRFactory::ExitList& IRTrace::exitTraces() const {
+  assert(isMain());
+  return m_factory.exits();
 }
 
 }}

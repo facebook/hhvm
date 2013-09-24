@@ -25,6 +25,8 @@
 #include "hphp/runtime/base/bstring.h"
 #include <langinfo.h>
 #include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/ext/ext_math.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

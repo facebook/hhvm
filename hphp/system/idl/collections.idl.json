@@ -71,7 +71,18 @@
                     "name": "keys",
                     "flags": [
                     ],
-                    "desc": "Returns an Iterable that produces the keys from this Vector.",
+                    "desc": "Returns a Vector built from the keys of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "values",
+                    "flags": [
+                    ],
+                    "desc": "Returns a clone of this Vector.",
                     "return": {
                         "type": "Object"
                     },
@@ -826,7 +837,7 @@
                     "name": "keys",
                     "flags": [
                     ],
-                    "desc": "Returns an Iterable that produces the keys from this Map.",
+                    "desc": "Returns a Vector built from the keys of this Map.",
                     "return": {
                         "type": "Object"
                     },
@@ -1095,21 +1106,10 @@
                     ]
                 },
                 {
-                    "name": "copyAsArray",
-                    "flags": [
-                    ],
-                    "desc": "Returns an array built from the keys and values from this Map.",
-                    "return": {
-                        "type": "VariantMap"
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "values",
                     "flags": [
                     ],
-                    "desc": "Returns a Vector built from the values from this Map.",
+                    "desc": "Returns a Vector built from the values of this Map.",
                     "return": {
                         "type": "Object"
                     },
@@ -1489,7 +1489,7 @@
                     "name": "keys",
                     "flags": [
                     ],
-                    "desc": "Returns an Iterable that produces the keys from this StableMap.",
+                    "desc": "Returns a Vector built from the keys of this StableMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -1758,21 +1758,10 @@
                     ]
                 },
                 {
-                    "name": "copyAsArray",
-                    "flags": [
-                    ],
-                    "desc": "Returns an array built from the keys and values from this StableMap.",
-                    "return": {
-                        "type": "VariantMap"
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "values",
                     "flags": [
                     ],
-                    "desc": "Returns a Vector built from the values from this StableMap.",
+                    "desc": "Returns a Vector built from the values of this StableMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -2142,6 +2131,17 @@
                     "flags": [
                     ],
                     "desc": "Returns an Iterable that produces the values from this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "values",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the values of this Set.",
                     "return": {
                         "type": "Object"
                     },
@@ -2613,7 +2613,18 @@
                     "name": "keys",
                     "flags": [
                     ],
-                    "desc": "Returns an Iterable that produces the keys from this Pair.",
+                    "desc": "Returns a Vector built from the keys of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "values",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the values of this Pair.",
                     "return": {
                         "type": "Object"
                     },

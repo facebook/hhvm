@@ -97,6 +97,9 @@ trait StrictIterable {
   public function toSet() {
     return new Set($this);
   }
+  public function values() {
+    return new Vector($this);
+  }
   public function lazy() {
     return new LazyIterableView($this);
   }
@@ -220,6 +223,9 @@ trait LazyIterable {
   public function lazy() {
     return $this;
   }
+  public function values() {
+    return new LazyValuesIterable($this);
+  }
   public function map($callback) {
     return new LazyMapIterable($this, $callback);
   }
@@ -254,6 +260,9 @@ trait LazyKeyedIterable {
   public function lazy() {
     return $this;
   }
+  public function values() {
+    return new LazyValuesIterable($this);
+  }
   public function map($callback) {
     return new LazyMapKeyedIterable($this, $callback);
   }
@@ -275,16 +284,6 @@ trait LazyKeyedIterable {
   public function kvzip() {
     return new LazyKVZipIterable($this);
   }
-}
-
-// deprecated
-trait IterableTrait {
-  use LazyIterable;
-}
-
-// deprecated
-trait KeyedIterableTrait {
-  use LazyKeyedIterable;
 }
 
 class LazyMapIterator implements Iterator {
@@ -711,6 +710,45 @@ class LazyKeysIterable implements Iterable {
   }
 }
 
+class LazyValuesIterator implements Iterator {
+  private $it;
+
+  public function __construct($it) {
+    $this->it = $it;
+  }
+  public function __clone() {
+    $this->it = clone $this->it;
+  }
+  public function rewind() {
+    $this->it->rewind();
+  }
+  public function valid() {
+    return $this->it->valid();
+  }
+  public function next() {
+    $this->it->next();
+  }
+  public function key() {
+    return null;
+  }
+  public function current() {
+    return $this->it->current();
+  }
+}
+
+class LazyValuesIterable implements Iterable {
+  use LazyIterable;
+
+  private $iterable;
+
+  public function __construct($iterable) {
+    $this->iterable = $iterable;
+  }
+  public function getIterator() {
+    return new LazyValuesIterator($this->iterable->getIterator());
+  }
+}
+
 class LazyKVZipIterator implements Iterator {
   private $it;
 
@@ -771,6 +809,9 @@ class LazyIterableView implements Iterable {
   public function lazy() {
     return $this;
   }
+  public function values() {
+    return new LazyValuesIterable($this->iterable);
+  }
   public function map($callback) {
     return new LazyMapIterable($this->iterable, $callback);
   }
@@ -823,6 +864,9 @@ class LazyKeyedIterableView implements KeyedIterable {
   }
   public function zip($iterable) {
     return new LazyZipKeyedIterable($this->iterable, $iterable);
+  }
+  public function values() {
+    return new LazyValuesIterable($this->iterable);
   }
   public function keys() {
     return new LazyKeysIterable($this->iterable);

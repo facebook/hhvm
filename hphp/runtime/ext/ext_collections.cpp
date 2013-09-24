@@ -308,6 +308,10 @@ Object c_Vector::t_keys() {
   return obj;
 }
 
+Object c_Vector::t_values() {
+  return Object::attach(c_Vector::Clone(this));
+}
+
 Object c_Vector::t_lazy() {
   return SystemLib::AllocLazyKeyedIterableViewObject(this);
 }
@@ -1305,10 +1309,6 @@ Object c_Map::t_removekey(CVarRef key) {
 }
 
 Array c_Map::t_toarray() {
-  return toArrayImpl();
-}
-
-Array c_Map::t_copyasarray() {
   return toArrayImpl();
 }
 
@@ -2474,10 +2474,6 @@ Array c_StableMap::t_toarray() {
   return toArrayImpl();
 }
 
-Array c_StableMap::t_copyasarray() {
-  return toArrayImpl();
-}
-
 Object c_StableMap::t_values() {
   c_Vector* target;
   Object ret = target = NEWOBJ(c_Vector)();
@@ -3570,6 +3566,13 @@ Object c_Set::t_items() {
   return SystemLib::AllocLazyIterableViewObject(this);
 }
 
+Object c_Set::t_values() {
+  c_Vector* vec;
+  Object o = vec = NEWOBJ(c_Vector)();
+  vec->init(VarNR(this));
+  return o;
+}
+
 Object c_Set::t_lazy() {
   return SystemLib::AllocLazyIterableViewObject(this);
 }
@@ -4255,6 +4258,13 @@ Object c_Pair::t_keys() {
   vec->m_data[1].m_data.num = 1;
   vec->m_data[1].m_type = KindOfInt64;
   return obj;
+}
+
+Object c_Pair::t_values() {
+  c_Vector* vec;
+  Object o = vec = NEWOBJ(c_Vector)();
+  vec->init(VarNR(this));
+  return o;
 }
 
 Object c_Pair::t_lazy() {

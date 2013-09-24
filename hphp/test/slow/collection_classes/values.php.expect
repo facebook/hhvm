@@ -1,0 +1,24 @@
+object(Vector)#3 (1) {
+  [0]=>
+  string(3) "abc"
+}
+string(18) "LazyValuesIterable"
+string(18) "LazyValuesIterable"
+object(Vector)#6 (1) {
+  [0]=>
+  string(3) "abc"
+}
+string(18) "LazyValuesIterable"
+string(18) "LazyValuesIterable"
+object(Vector)#9 (1) {
+  [0]=>
+  string(3) "abc"
+}
+string(18) "LazyValuesIterable"
+string(18) "LazyValuesIterable"
+object(Vector)#12 (1) {
+  [0]=>
+  string(3) "abc"
+}
+string(18) "LazyValuesIterable"
+string(18) "LazyValuesIterable"

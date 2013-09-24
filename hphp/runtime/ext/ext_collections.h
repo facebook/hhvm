@@ -54,6 +54,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   int64_t t_count();
   Object t_items();
   Object t_keys();
+  Object t_values();
   Object t_lazy();
   Object t_kvzip();
   Variant t_at(CVarRef key);
@@ -268,10 +269,9 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   Object t_tomap();
   Object t_tostablemap();
   Object t_toset();
-  Array t_copyasarray(); // deprecated
   Array t_tokeysarray();
   Array t_tovaluesarray();
-  Object t_values(); // deprecated
+  Object t_values();
   Object t_differencebykey(CVarRef it);
   Object t_getiterator();
   Object t_map(CVarRef callback);
@@ -598,10 +598,9 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   Object t_tomap();
   Object t_tostablemap();
   Object t_toset();
-  Array t_copyasarray(); // deprecated
   Array t_tokeysarray();
   Array t_tovaluesarray();
-  Object t_values(); // deprecated
+  Object t_values();
   Object t_differencebykey(CVarRef it);
   Object t_getiterator();
   Object t_map(CVarRef callback);
@@ -873,6 +872,7 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   bool t_isempty();
   int64_t t_count();
   Object t_items();
+  Object t_values();
   Object t_lazy();
   bool t_contains(CVarRef key);
   Object t_remove(CVarRef key);
@@ -892,7 +892,7 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   bool t___isset(Variant name);
   Variant t___unset(Variant name);
   static Object ti_fromitems(CVarRef iterable);
-  static Object ti_fromarray(CVarRef arr);
+  static Object ti_fromarray(CVarRef arr); // deprecated
   static Object ti_fromarrays(int _argc,
                               CArrRef _argv = null_array);
 
@@ -1117,6 +1117,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   int64_t t_count();
   Object t_items();
   Object t_keys();
+  Object t_values();
   Object t_lazy();
   Object t_kvzip();
   Variant t_at(CVarRef key);

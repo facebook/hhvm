@@ -238,6 +238,7 @@ typedef TableEntry<int> LineEntry;
 typedef std::vector<LineEntry> LineTable;
 typedef TableEntry<SourceLoc> SourceLocEntry;
 typedef std::vector<SourceLocEntry> SourceLocTable;
+typedef std::map<int, OffsetRangeVec> LineToOffsetRangeVecMap;
 typedef TableEntry<const Func*> FuncEntry;
 typedef std::vector<FuncEntry> FuncTable;
 
@@ -706,6 +707,11 @@ private:
   // code of the next source location if there is one, m_bclen otherwise.
   // Sorted by offset. sourceLocs are not assumed to be unique.
   SourceLocTable getSourceLocTable() const;
+  // A map from all source lines that correspond to one or more byte codes.
+  // The result from the map is a list of offset ranges, so a single line
+  // with several sub-statements may correspond to the byte codes of all
+  // of the sub-statements.
+  LineToOffsetRangeVecMap getLineToOffsetRangeVecMap() const;
 
   // pseudoMain's return value, or KindOfUninit if its not known.
   TypedValue m_mainReturn;
@@ -733,6 +739,7 @@ private:
   // Sorted by offset. line values are not assumed to be unique.
   LineTable m_lineTable;
   SourceLocTable m_sourceLocTable;
+  LineToOffsetRangeVecMap m_lineToOffsetRangeVecMap;
   FuncTable m_funcTable;
   mutable PseudoMainCacheMap *m_pseudoMainCache;
 };

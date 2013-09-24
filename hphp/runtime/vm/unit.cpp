@@ -1487,6 +1487,34 @@ SourceLocTable Unit::getSourceLocTable() const {
   return m_sourceLocTable;
 }
 
+LineToOffsetRangeVecMap Unit::getLineToOffsetRangeVecMap() const {
+  if (m_lineToOffsetRangeVecMap.size() > 0) {
+    return m_lineToOffsetRangeVecMap;
+  }
+  auto srcLoc = this->getSourceLocTable();
+  LineToOffsetRangeVecMap map;
+  Offset baseOff = 0;
+  for (size_t i = 0; i < srcLoc.size(); ++i) {
+    Offset pastOff = srcLoc[i].pastOffset();
+    OffsetRange range(baseOff, pastOff);
+    auto line0 = srcLoc[i].val().line0;
+    auto line1 = srcLoc[i].val().line1;
+    for (int line = line0; line <= line1; line++) {
+      auto it = map.find(line);
+      if (it != map.end()) {
+        it->second.push_back(range);
+      } else {
+        OffsetRangeVec v(1);
+        v.push_back(range);
+        map[line] = v;
+      }
+    }
+    baseOff = pastOff;
+  }
+  ((Unit*)this)->m_lineToOffsetRangeVecMap = map;
+  return m_lineToOffsetRangeVecMap;
+}
+
 // This uses range lookups so offsets in the middle of instructions are
 // supported.
 int Unit::getLineNumber(Offset pc) const {
@@ -1516,19 +1544,10 @@ bool Unit::getSourceLoc(Offset pc, SourceLoc& sLoc) const {
 
 bool Unit::getOffsetRanges(int line, OffsetRangeVec& offsets) const {
   assert(offsets.size() == 0);
-  if (m_repoId == RepoIdInvalid) {
-    return false;
-  }
-  UnitRepoProxy& urp = Repo::get().urp();
-  if (urp.getSourceLocPastOffsets(m_repoId).get(m_sn, line, offsets)) {
-    return false;
-  }
-  for (OffsetRangeVec::iterator it = offsets.begin(); it != offsets.end();
-       ++it) {
-    if (urp.getSourceLocBaseOffset(m_repoId).get(m_sn, *it)) {
-      return false;
-    }
-  }
+  auto map = this->getLineToOffsetRangeVecMap();
+  auto it = map.find(line);
+  if (it == map.end()) return false;
+  offsets = it->second;
   return true;
 }
 
@@ -2065,36 +2084,6 @@ void UnitRepoProxy::InsertUnitSourceLocStmt
   query.exec();
 }
 
-bool UnitRepoProxy::GetSourceLocStmt
-                  ::get(int64_t unitSn, Offset pc, SourceLoc& sLoc) {
-  try {
-    RepoTxn txn(m_repo);
-    if (!prepared()) {
-      std::stringstream ssSelect;
-      ssSelect << "SELECT line0,char0,line1,char1 FROM "
-               << m_repo.table(m_repoId, "UnitSourceLoc")
-               << " WHERE unitSn == @unitSn AND pastOffset > @pc"
-                  " ORDER BY pastOffset ASC LIMIT 1;";
-      txn.prepare(*this, ssSelect.str());
-    }
-    RepoTxnQuery query(txn, *this);
-    query.bindInt64("@unitSn", unitSn);
-    query.bindOffset("@pc", pc);
-    query.step();
-    if (!query.row()) {
-      return true;
-    }
-    query.getInt(0, sLoc.line0);
-    query.getInt(1, sLoc.char0);
-    query.getInt(2, sLoc.line1);
-    query.getInt(3, sLoc.char1);
-    txn.commit();
-  } catch (RepoExc& re) {
-    return true;
-  }
-  return false;
-}
-
 bool UnitRepoProxy::GetSourceLocTabStmt
      ::get(int64_t unitSn, SourceLocTable& sourceLocTab) {
   try {
@@ -2124,118 +2113,6 @@ bool UnitRepoProxy::GetSourceLocTabStmt
       SourceLocEntry entry(pastOffset, sLoc);
       sourceLocTab.push_back(entry);
     } while (!query.done());
-    txn.commit();
-  } catch (RepoExc& re) {
-    return true;
-  }
-  return false;
-}
-
-bool UnitRepoProxy::GetSourceLocPastOffsetsStmt
-                  ::get(int64_t unitSn, int line, OffsetRangeVec& ranges) {
-  try {
-    RepoTxn txn(m_repo);
-    if (!prepared()) {
-      std::stringstream ssSelect;
-      ssSelect << "SELECT pastOffset FROM "
-               << m_repo.table(m_repoId, "UnitSourceLoc")
-               << " WHERE unitSn == @unitSn AND line0 <= @line"
-                  " AND line1 >= @line;";
-      txn.prepare(*this, ssSelect.str());
-    }
-    RepoTxnQuery query(txn, *this);
-    query.bindInt64("@unitSn", unitSn);
-    query.bindInt("@line", line);
-    do {
-      query.step();
-      if (query.row()) {
-        Offset pastOffset; /**/ query.getOffset(0, pastOffset);
-        ranges.push_back(OffsetRange(pastOffset, pastOffset));
-      }
-    } while (!query.done());
-    txn.commit();
-  } catch (RepoExc& re) {
-    return true;
-  }
-  return false;
-}
-
-bool UnitRepoProxy::GetSourceLocBaseOffsetStmt
-                  ::get(int64_t unitSn, OffsetRange& range) {
-  try {
-    RepoTxn txn(m_repo);
-    if (!prepared()) {
-      std::stringstream ssSelect;
-      ssSelect << "SELECT pastOffset FROM "
-               << m_repo.table(m_repoId, "UnitSourceLoc")
-               << " WHERE unitSn == @unitSn AND pastOffset < @pastOffset"
-                  " ORDER BY pastOffset DESC LIMIT 1;";
-      txn.prepare(*this, ssSelect.str());
-    }
-    RepoTxnQuery query(txn, *this);
-    query.bindInt64("@unitSn", unitSn);
-    query.bindOffset("@pastOffset", range.m_past);
-    query.step();
-    if (!query.row()) {
-      // This is the first bytecode range within the unit.
-      range.m_base = 0;
-    } else {
-      query.getOffset(0, range.m_base);
-    }
-    txn.commit();
-  } catch (RepoExc& re) {
-    return true;
-  }
-  return false;
-}
-
-bool UnitRepoProxy::GetBaseOffsetAtPCLocStmt
-                  ::get(int64_t unitSn, Offset pc, Offset& offset) {
-  try {
-    RepoTxn txn(m_repo);
-    if (!prepared()) {
-      std::stringstream ssSelect;
-      ssSelect << "SELECT pastOffset FROM "
-               << m_repo.table(m_repoId, "UnitSourceLoc")
-               << " WHERE unitSn == @unitSn AND pastOffset <= @pc"
-                  " ORDER BY pastOffset DESC LIMIT 1;";
-      txn.prepare(*this, ssSelect.str());
-    }
-    RepoTxnQuery query(txn, *this);
-    query.bindInt64("@unitSn", unitSn);
-    query.bindOffset("@pc", pc);
-    query.step();
-    if (!query.row()) {
-      return true;
-    }
-    query.getOffset(0, offset);
-    txn.commit();
-  } catch (RepoExc& re) {
-    return true;
-  }
-  return false;
-}
-
-bool UnitRepoProxy::GetBaseOffsetAfterPCLocStmt
-                  ::get(int64_t unitSn, Offset pc, Offset& offset) {
-  try {
-    RepoTxn txn(m_repo);
-    if (!prepared()) {
-      std::stringstream ssSelect;
-      ssSelect << "SELECT pastOffset FROM "
-               << m_repo.table(m_repoId, "UnitSourceLoc")
-               << " WHERE unitSn == @unitSn AND pastOffset > @pc"
-                  " ORDER BY pastOffset ASC LIMIT 1;";
-      txn.prepare(*this, ssSelect.str());
-    }
-    RepoTxnQuery query(txn, *this);
-    query.bindInt64("@unitSn", unitSn);
-    query.bindOffset("@pc", pc);
-    query.step();
-    if (!query.row()) {
-      return true;
-    }
-    query.getOffset(0, offset);
     txn.commit();
   } catch (RepoExc& re) {
     return true;
@@ -2501,6 +2378,30 @@ static SourceLocTable createSourceLocTable(
   return locations;
 }
 
+static LineToOffsetRangeVecMap createLineToOffsetMap(
+    std::vector<std::pair<Offset,SourceLoc> >& srcLoc,
+    Offset bclen) {
+  LineToOffsetRangeVecMap map;
+  for (size_t i = 0; i < srcLoc.size(); ++i) {
+    Offset baseOff = srcLoc[i].first;
+    Offset endOff = i < srcLoc.size() - 1 ? srcLoc[i + 1].first : bclen;
+    OffsetRange range(baseOff, endOff);
+    auto line0 = srcLoc[i].second.line0;
+    auto line1 = srcLoc[i].second.line1;
+    for (int line = line0; line <= line1; line++) {
+      auto it = map.find(line);
+      if (it != map.end()) {
+        it->second.push_back(range);
+      } else {
+        OffsetRangeVec v(1);
+        v.push_back(range);
+        map[line] = v;
+      }
+    }
+  }
+  return map;
+}
+
 bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
   Repo& repo = Repo::get();
   UnitRepoProxy& urp = repo.urp();
@@ -2720,6 +2621,7 @@ Unit* UnitEmitter::create() {
   } else {
     u->m_lineTable = m_lineTable;
   }
+  u->m_lineToOffsetRangeVecMap = createLineToOffsetMap(m_sourceLocTab, m_bclen);
   for (size_t i = 0; i < m_feTab.size(); ++i) {
     assert(m_feTab[i].second->past() == m_feTab[i].first);
     assert(m_fMap.find(m_feTab[i].second) != m_fMap.end());

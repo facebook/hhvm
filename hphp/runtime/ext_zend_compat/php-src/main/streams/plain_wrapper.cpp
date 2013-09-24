@@ -19,6 +19,8 @@
 /* $Id$ */
 
 #include "php.h"
+#include "hphp/runtime/base/plain-file.h"
+#include "hphp/runtime/vm/request-arena.h"
 
 PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC) {
   FILE *f = tmpfile();

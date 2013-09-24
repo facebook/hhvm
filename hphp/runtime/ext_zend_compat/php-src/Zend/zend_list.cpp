@@ -23,9 +23,11 @@
 
 #include "zend.h"
 #include "zend_list.h"
-#include "zend_API.h"
-#include "php_streams.h"
+// has to be before zend_API since that defines getThis()
 #include "hphp/runtime/ext_zend_compat/hhvm/ZendRequestLocal.h"
+#include "zend_API.h"
+#include "php.h"
+#include "php_streams.h"
 
 ZEND_API int le_index_ptr;
 

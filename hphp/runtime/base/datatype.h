@@ -245,7 +245,7 @@ ALWAYS_INLINE unsigned typeToDestrIndex(DataType t) {
 
 // Helper macro for checking if a given type is refcounted
 #define IS_REFCOUNTED_TYPE(t)                                   \
-  (assert(IS_REAL_TYPE(t)), (t) > KindOfRefCountThreshold)
+  (assert(IS_REAL_TYPE(t)), (t) > HPHP::KindOfRefCountThreshold)
 
 // Helper function for checking if a type is KindOfString or KindOfStaticString.
 static_assert(KindOfStaticString == 0x0C, "");

@@ -43,3 +43,10 @@ PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap
 END_EXTERN_C()
 
 #endif /* SNPRINTF_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ */

@@ -26,6 +26,8 @@
 #include "zend_operators.h"
 #include "zend_strtod.h"
 
+#include "hphp/runtime/base/ini-setting.h"
+
 #define NO_VALUE_PLAINTEXT		"no value"
 #define NO_VALUE_HTML			"<i>no value</i>"
 
@@ -180,4 +182,7 @@ ZEND_API ZEND_INI_MH(OnUpdateStringUnempty) /* {{{ */
 
 	*p = new_value;
 	return SUCCESS;
+}
+
+ZEND_API void display_ini_entries(zend_module_entry *module) {
 }

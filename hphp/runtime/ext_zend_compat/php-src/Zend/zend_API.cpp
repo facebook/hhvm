@@ -20,12 +20,18 @@
 
 /* $Id$ */
 
-#include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_API.h"
+// has to be before zend_API since that defines getThis()
+#include "hphp/runtime/ext/ext_function.h"
+#include "zend_API.h"
 #include "zend_constants.h"
 
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend_hphp_class_to_class_entry.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/ZendExecutionStack.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/ZendObjectData.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zval-helpers.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 ZEND_API const char *zend_get_type_by_const(int type) {
   return HPHP::getDataTypeString((HPHP::DataType)type)->data();

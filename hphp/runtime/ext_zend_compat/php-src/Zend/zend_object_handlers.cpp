@@ -99,6 +99,9 @@ ZEND_API HashTable *zend_std_get_gc(zval *object, zval ***table, int *n TSRMLS_D
   not_implemented();
   return nullptr;
 }
+ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type TSRMLS_DC) {
+  return FAILURE;
+}
 
 ZEND_API zend_object_handlers std_object_handlers = {
   zend_objects_store_add_ref,        /* add_ref */

@@ -25,6 +25,8 @@
 #include "zend.h"
 #include "zend_compile.h"
 #include "zend_execute.h"
+// builtin-functions has to happen before zend_API since that defines getThis()
+#include "hphp/runtime/base/builtin-functions.h"
 #include "zend_API.h"
 #include "zend_constants.h"
 #include "zend_extensions.h"
@@ -32,6 +34,9 @@
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
+
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 /* true globals */
 ZEND_API const zend_fcall_info empty_fcall_info = { 0, NULL, NULL, NULL, NULL, 0, NULL, NULL, 0 };
@@ -41,6 +46,11 @@ ZEND_API int zend_lookup_class(const char *name, int name_length, zend_class_ent
   HPHP::StringData *class_name = HPHP::makeStaticString(name, name_length);
   (**ce)->hphp_class = HPHP::Unit::loadClass(class_name);
   return (**ce)->hphp_class == nullptr ? FAILURE : SUCCESS;
+}
+
+ZEND_API const char *get_active_function_name(TSRMLS_D) {
+  HPHP::Transl::VMRegAnchor _;
+  return HPHP::liveFunc()->name()->data();
 }
 
 ZEND_API const char *get_active_class_name(const char **space TSRMLS_DC) {
@@ -116,7 +126,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
   HPHP::Class* cls = nullptr;
   HPHP::Transl::CallerFrame cf;
   HPHP::StringData* invName = nullptr;
-  const HPHP::Func* f = vm_decode_function(
+  const HPHP::Func* f = HPHP::vm_decode_function(
     HPHP::tvAsCVarRef(fci->function_name->tv()), cf(), false, obj, cls, invName
   );
   if (f == nullptr) {

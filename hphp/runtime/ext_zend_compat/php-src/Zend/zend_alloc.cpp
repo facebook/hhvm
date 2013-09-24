@@ -199,27 +199,38 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
   return HPHP::smart_malloc(size);
 }
+
 ZEND_API void *_safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
- return _emalloc(safe_address(nmemb, size, offset));
+ return _emalloc(safe_address(nmemb, size, offset) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC);
 }
+
 ZEND_API void *_safe_malloc(size_t nmemb, size_t size, size_t offset) {
   return pemalloc(safe_address(nmemb, size, offset), 1);
 }
-ZEND_API void _efree(const void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
-  HPHP::smart_free(const_cast<void*>(ptr));
+
+ZEND_API void _efree(const zval* ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
+  ptr->releaseMem();
 }
+
+ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
+  return HPHP::smart_free(ptr);
+}
+
 ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
   return HPHP::smart_calloc(nmemb, size);
 }
+
 ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
   return HPHP::smart_realloc(ptr, size);
 }
+
 ZEND_API char *_estrndup(const char *s, unsigned int length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
-  char* ret = (char*) _emalloc(length + 1);
+  char* ret = (char*) _emalloc(length + 1 ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC);
   memcpy(ret, s, length);
   ret[length] = '\0';
   return ret;
 }
+
 ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
-  return _estrndup(s, strlen(s));
+  return _estrndup(s, strlen(s) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC);
 }

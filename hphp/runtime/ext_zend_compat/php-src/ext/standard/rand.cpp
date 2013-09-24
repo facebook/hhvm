@@ -27,12 +27,12 @@
 
 #include <stdlib.h>
 
+// has to be before zend_API since that defines getThis()
+#include "hphp/runtime/ext/ext_math.h"
 #include "php.h"
 #include "php_rand.h"
 
 #include "basic_functions.h"
-
-#include "hphp/runtime/ext/ext_math.h"
 
 PHPAPI long php_rand(TSRMLS_D) {
   return HPHP::f_rand();

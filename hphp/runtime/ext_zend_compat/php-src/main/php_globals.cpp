@@ -1,11 +1,10 @@
-#include "main/php_globals.h"
-
-struct _php_core_globals {
-  const zval *http_globals[6];
-};
+#include "hphp/runtime/ext_zend_compat/php-src/Zend/zend.h"
+BEGIN_EXTERN_C()
+#include "hphp/runtime/ext_zend_compat/php-src/main/php_globals.h"
+END_EXTERN_C()
 
 static IMPLEMENT_THREAD_LOCAL(_php_core_globals, s_php_core_globals);
-const zval** PG_http_globals() {
+zval** PG_http_globals() {
   auto* globals = HPHP::get_global_variables();
   auto* tl_globals = s_php_core_globals.get()->http_globals;
   tl_globals[TRACK_VARS_POST] = globals->get(s__POST).asRef()->m_data.pref;

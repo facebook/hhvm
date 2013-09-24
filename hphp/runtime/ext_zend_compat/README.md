@@ -24,3 +24,19 @@ to our data structures and it mostly works.
 * Use `Z_RESVAL` instead of `Z_LVAL` for resource access
 * Don't use PHP_MALIAS. Define the other function.
 * Change any ZVAL_STRING(foo, "literal string", 0) to ZVAL_STRING(foo, "literal string", 2) 
+
+## File structure
+
+The `php-src` directory should exactly mirror Zend's directory layout. 
+The `.h` files are exact copies from there with minor edits wrapped in 
+`#define HHVM`. The `.cpp` files are inspired by the `.c` file with the same 
+name but will devaiate wildly.
+
+The `hhvm` directory contains various glue code that is needed to be written but
+doesn't have a Zend function with the same name.
+
+Extensions are stored under their pecl name and are unmodified except for the 
+changes required above.
+
+Tests go in either `test/zend` if they are bundled extensions or 
+`test/slow/ext-` for all other pecl ones.

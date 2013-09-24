@@ -79,6 +79,8 @@
 
 #include "hphp/util/util.h"
 
+#include "hphp/runtime/base/runtime-error.h"
+
 PHPAPI void php_error_docref0(const char *docref TSRMLS_DC, int type, const char *format, ...)
 {
 	va_list args;

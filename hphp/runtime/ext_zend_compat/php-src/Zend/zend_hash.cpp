@@ -21,9 +21,12 @@
 
 #include "zend.h"
 #include "zend_hash.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_qsort.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zval-helpers.h"
 #include "hphp/util/safesort.h"
+#include "hphp/util/assertions.h"
 
 ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) {
   if (nKeyLength <= 0) {
@@ -45,7 +48,7 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKe
 }
 
 ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) {
-  return _zend_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, flag);
+  return _zend_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
 }
 
 ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) {
@@ -98,7 +101,7 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht TSRMLS_DC, apply_func
 }
 
 ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, int flag) {
-  HPHP::raise_error("zend_hash_del_key_or_index unimplemented");
+  not_implemented();
 #if 0
   if (nKeyLength == 0) {
     // TODO(#2941952)
@@ -274,7 +277,7 @@ ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *p
 ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size, int overwrite ZEND_FILE_LINE_DC) {
   // TODO(#2941952): We can't really implement this correctly right
   // now.
-  HPHP::raise_error("_zend_hash_merge unimplemented");
+  not_implemented();
 #if 0
   auto const newArray = target->plus(source);
   decRefArr(newArray);
@@ -297,7 +300,7 @@ ZEND_API int zend_hash_num_elements(const HashTable *ht) {
 }
 
 ZEND_API void zend_hash_clean(HashTable *ht) {
-  HPHP::raise_error("zend_hash_clean unimplemented");
+  not_implemented();
 #if 0
   for (HPHP::ArrayIter it(ht); !it.end(); it.next()) {
     // TODO(#2941952)
@@ -308,7 +311,7 @@ ZEND_API void zend_hash_clean(HashTable *ht) {
 }
 
 ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size) {
-  HPHP::raise_error("zend_hash_copy unimplemented");
+  not_implemented();
 #if 0
   target->merge(source, false);
   for (HPHP::ArrayIter it(source); !it.end(); it.next()) {
@@ -329,4 +332,13 @@ ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
   // TODO figure out how to use compar
   ht->ksort(0, true);
   return SUCCESS;
+}
+
+ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC) {
+  ht->incRefCount();
+  return SUCCESS;
+}
+
+ZEND_API void zend_hash_destroy(HashTable *ht) {
+  decRefArr(ht);
 }

@@ -19,11 +19,13 @@
 /* $Id$ */
 
 #include "zend.h"
+// builtin-functions has to happen before zend_API since that defines getThis()
+#include "hphp/runtime/base/builtin-functions.h"
 #include "zend_API.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 
-#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/array-init.h"
 
 ZEND_API zend_class_entry *zend_ce_traversable;
 ZEND_API zend_class_entry *zend_ce_aggregate;

@@ -228,7 +228,9 @@ inline TypedValue* ElemEmptyish() {
  * Elem when base is an Int64 or Double
  */
 inline TypedValue* ElemNumberish() {
-  raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
+  if (RuntimeOption::EnableHipHopSyntax) {
+    raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
+  }
   return ElemEmptyish();
 }
 

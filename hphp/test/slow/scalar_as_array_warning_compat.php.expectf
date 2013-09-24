@@ -1,0 +1,43 @@
+--Start--
+NULL
+--End--
+
+--Start--
+int(0)
+HipHop Warning: Cannot use a scalar value as an array in %s
+HipHop Warning: Cannot use a scalar value as an array in %s
+HipHop Warning: Cannot use a scalar value as an array in %s
+--End--
+
+--Start--
+int(1)
+HipHop Warning: Cannot use a scalar value as an array in %s
+HipHop Warning: Cannot use a scalar value as an array in %s
+HipHop Warning: Cannot use a scalar value as an array in %s
+--End--
+
+--Start--
+float(0)
+HipHop Warning: Cannot use a scalar value as an array in %s
+HipHop Warning: Cannot use a scalar value as an array in %s
+HipHop Warning: Cannot use a scalar value as an array in %s
+--End--
+
+--Start--
+float(1)
+HipHop Warning: Cannot use a scalar value as an array in %s
+HipHop Warning: Cannot use a scalar value as an array in %s
+HipHop Warning: Cannot use a scalar value as an array in %s
+--End--
+
+--Start--
+bool(false)
+--End--
+
+--Start--
+bool(true)
+HipHop Warning: Cannot use a scalar value as an array in %s
+HipHop Warning: Cannot use a scalar value as an array in %s
+HipHop Warning: Cannot use a scalar value as an array in %s
+--End--
+

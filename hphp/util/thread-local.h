@@ -490,9 +490,9 @@ public:
     return obj;
   }
 
-  bool isNull() const { return pthread_getspecific(s_key) == nullptr; }
+  static bool isNull() { return pthread_getspecific(s_key) == nullptr; }
 
-  void destroy() {
+  static void destroy() {
     void* p = pthread_getspecific(s_key);
     T::Delete((T*)p);
     free(p);

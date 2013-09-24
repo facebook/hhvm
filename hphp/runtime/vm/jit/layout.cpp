@@ -58,9 +58,9 @@ smart::vector<Block*> rpoForCodegen(const IRUnit& unit, Block* head) {
  * so this just selects an appropriate reverse post order on the
  * blocks, and partitions the unlikely ones to astubs.
  */
-LayoutInfo layoutBlocks(IRTrace* trace, const IRUnit& unit) {
+LayoutInfo layoutBlocks(const IRUnit& unit) {
   LayoutInfo ret;
-  ret.blocks = rpoForCodegen(unit, trace->front());
+  ret.blocks = rpoForCodegen(unit, unit.entry());
 
   // Optionally stress test by randomizing the positions.
   if (RuntimeOption::EvalHHIRStressCodegenBlocks) {

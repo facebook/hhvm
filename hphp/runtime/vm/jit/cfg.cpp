@@ -20,8 +20,7 @@
 
 namespace HPHP {  namespace JIT {
 
-BlockList rpoSortCfg(IRTrace* trace, const IRUnit& unit) {
-  assert(trace->isMain());
+BlockList rpoSortCfg(const IRUnit& unit) {
   BlockList blocks;
   blocks.reserve(unit.numBlocks());
   unsigned next_id = 0;
@@ -31,7 +30,7 @@ BlockList rpoSortCfg(IRTrace* trace, const IRUnit& unit) {
       blocks.push_back(block);
     },
     unit.numBlocks(),
-    trace->front()
+    unit.entry()
   );
   std::reverse(blocks.begin(), blocks.end());
   assert(blocks.size() <= unit.numBlocks());

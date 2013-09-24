@@ -6104,8 +6104,8 @@ static void emitTraceCall(CodeGenerator::Asm& as,
 }
 
 void CodeGenerator::print() const {
-  JIT::print(std::cout, m_curTrace, &m_state.regs, m_state.lifetime,
-             m_state.asmInfo);
+  JIT::print(std::cout, m_curTrace->unit(), m_curTrace,
+             &m_state.regs, m_state.lifetime, m_state.asmInfo);
 }
 
 static void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) {
@@ -6178,17 +6178,15 @@ LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs,
   return live_regs;
 }
 
-void genCodeForTrace(IRTrace* trace,
-                     CodeBlock& mainCode,
-                     CodeBlock& stubsCode,
-                     IRUnit& unit,
-                     vector<TransBCMapping>* bcMap,
-                     Transl::TranslatorX64* tx64,
-                     const RegAllocInfo& regs,
-                     const LifetimeInfo* lifetime,
-                     AsmInfo* asmInfo) {
-  assert(trace->isMain());
-  LiveRegs live_regs = computeLiveRegs(unit, regs, trace->front());
+void genCode(CodeBlock& mainCode,
+             CodeBlock& stubsCode,
+             IRUnit& unit,
+             vector<TransBCMapping>* bcMap,
+             Transl::TranslatorX64* tx64,
+             const RegAllocInfo& regs,
+             const LifetimeInfo* lifetime,
+             AsmInfo* asmInfo) {
+  LiveRegs live_regs = computeLiveRegs(unit, regs, unit.entry());
   CodegenState state(unit, regs, live_regs, lifetime, asmInfo);
 
   // Returns: whether a block has already been emitted.
@@ -6218,7 +6216,7 @@ void genCodeForTrace(IRTrace* trace,
     IRInstruction* last = block->back();
     state.noTerminalJmp_ = last->op() == Jmp_ && nextBlock == last->taken();
 
-    CodeGenerator cg(trace, cb, stubsCode, tx64, state);
+    CodeGenerator cg(unit.main(), cb, stubsCode, tx64, state);
     if (state.asmInfo) {
       state.asmInfo->asmRanges[block] = TcaRange(aStart, cb.frontier());
     }
@@ -6242,12 +6240,12 @@ void genCodeForTrace(IRTrace* trace,
     }
   };
 
-  if (RuntimeOption::EvalHHIRGenerateAsserts && trace->isMain()) {
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
     Asm as { mainCode };
-    emitTraceCall(as, trace->bcOff(), tx64);
+    emitTraceCall(as, unit.main()->bcOff(), tx64);
   }
 
-  auto const linfo = layoutBlocks(trace, unit);
+  auto const linfo = layoutBlocks(unit);
 
   for (auto it = linfo.blocks.begin(); it != linfo.astubsIt; ++it) {
     Block* nextBlock = boost::next(it) != linfo.astubsIt

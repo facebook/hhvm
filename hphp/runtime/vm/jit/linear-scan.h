@@ -206,7 +206,7 @@ inline std::ostream& operator<<(std::ostream& os, SpillInfo si) {
  * The main entry point for register allocation.  Called prior to code
  * generation.
  */
-RegAllocInfo allocRegsForTrace(IRTrace*, IRUnit&, LifetimeInfo* = nullptr);
+RegAllocInfo allocRegsForUnit(IRUnit&, LifetimeInfo* = nullptr);
 
 // Native stack layout:
 // |               |

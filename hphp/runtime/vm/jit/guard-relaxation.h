@@ -22,18 +22,18 @@
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/type.h"
 
+#include "hphp/runtime/vm/jit/block.h"
+
 namespace HPHP { namespace JIT {
 
 struct SSATmp;
-struct IRTrace;
 struct IRUnit;
 
 IRInstruction* guardForLocal(uint32_t locId, SSATmp* fp);
-bool relaxGuards(IRTrace* trace, const IRUnit& unit,
-                 const GuardConstraints& guards);
+bool relaxGuards(const IRUnit&, const GuardConstraints& guards);
 
 typedef std::function<void(const RegionDesc::Location&, Type)> VisitGuardFn;
-void visitGuards(IRTrace* trace, const VisitGuardFn& func);
+void visitGuards(IRUnit&, const VisitGuardFn& func);
 
 bool typeFitsConstraint(Type t, DataTypeCategory cat);
 DataTypeCategory categoryForType(Type t);

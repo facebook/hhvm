@@ -68,10 +68,9 @@ IRInstruction* guardForLocal(uint32_t locId, SSATmp* fp) {
  * contains information about what properties of the guarded type matter for
  * each instruction. Returns true iff any changes were made to the trace.
  */
-bool relaxGuards(IRTrace* trace, const IRUnit& unit,
-                 const GuardConstraints& guards) {
-  FTRACE(1, "relaxing guards for trace {}\n", trace);
-  auto blocks = rpoSortCfg(trace, unit);
+bool relaxGuards(const IRUnit& unit, const GuardConstraints& guards) {
+  FTRACE(1, "relaxing guards for trace {}\n", unit.main());
+  auto blocks = rpoSortCfg(unit);
   Block* reflowBlock = nullptr;
 
   for (auto* block : blocks) {
@@ -114,10 +113,10 @@ bool relaxGuards(IRTrace* trace, const IRUnit& unit,
  * For every instruction in trace representing a tracelet guard, call func with
  * its location and type.
  */
-void visitGuards(IRTrace* trace, const VisitGuardFn& func) {
+void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
   typedef RegionDesc::Location L;
 
-  for (auto const& inst : *trace->front()) {
+  for (auto const& inst : *unit.entry()) {
     if (inst.typeParam().equals(Type::Gen)) continue;
 
     if (inst.op() == GuardLoc) {

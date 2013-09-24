@@ -403,8 +403,6 @@ private:
   IRUnit& m_unit;
   Simplifier m_simplifier;
 
-  IRTrace* const m_mainTrace; // generated trace
-
   /*
    * m_savedTraces will be nonempty iff we're emitting code to a trace other
    * than the main trace. m_curTrace, m_curMarker, m_curBlock, m_curWhere are

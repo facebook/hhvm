@@ -151,8 +151,8 @@ bool checkBlock(Block* b) {
  * Check that every catch trace has at most one incoming branch and a single
  * block.
  */
-bool checkCatchTraces(IRTrace* trace, const IRUnit& unit) {
-  forEachTraceBlock(trace, [&](Block* b) {
+bool checkCatchTraces(const IRUnit& unit) {
+  forEachTraceBlock(unit, [&](Block* b) {
     auto trace = b->trace();
     if (trace->isCatch()) {
       assert(trace->blocks().size() == 1);
@@ -188,11 +188,11 @@ const Edge* nextEdge(Block* b) {
  * 5. Each predecessor of a reachable block must be reachable (deleted
  *    blocks must not have out-edges to reachable blocks).
  */
-bool checkCfg(IRTrace* trace, const IRUnit& unit) {
-  forEachTraceBlock(trace, checkBlock);
+bool checkCfg(const IRUnit& unit) {
+  forEachTraceBlock(unit, checkBlock);
 
   // Check valid successor/predecessor edges.
-  auto const blocks = rpoSortCfg(trace, unit);
+  auto const blocks = rpoSortCfg(unit);
   std::unordered_set<const Edge*> edges;
   for (Block* b : blocks) {
     auto checkEdge = [&] (const Edge* e) {
@@ -211,7 +211,7 @@ bool checkCfg(IRTrace* trace, const IRUnit& unit) {
     }
   }
 
-  checkCatchTraces(trace, unit);
+  checkCatchTraces(unit);
 
   // visit dom tree in preorder, checking all tmps
   auto const children = findDomChildren(blocks);
@@ -240,8 +240,8 @@ bool checkCfg(IRTrace* trace, const IRUnit& unit) {
   return true;
 }
 
-bool checkTmpsSpanningCalls(IRTrace* trace, const IRUnit& unit) {
-  auto const blocks   = rpoSortCfg(trace, unit);
+bool checkTmpsSpanningCalls(const IRUnit& unit) {
+  auto const blocks = rpoSortCfg(unit);
   auto const children = findDomChildren(blocks);
 
   // CallBuiltin is ok because it is not a php-level call.  (It will
@@ -303,11 +303,9 @@ bool checkTmpsSpanningCalls(IRTrace* trace, const IRUnit& unit) {
   return isValid;
 }
 
-bool checkRegisters(IRTrace* trace, const IRUnit& unit,
-                    const RegAllocInfo& regs) {
-  assert(checkCfg(trace, unit));
-
-  auto blocks = rpoSortCfg(trace, unit);
+bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
+  assert(checkCfg(unit));
+  auto blocks = rpoSortCfg(unit);
   StateVector<Block, RegState> states(unit, RegState());
   StateVector<Block, bool> reached(unit, false);
   for (auto* block : blocks) {

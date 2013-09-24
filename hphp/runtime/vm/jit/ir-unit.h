@@ -275,6 +275,7 @@ public:
   typedef std::list<IRTrace*> ExitList;
   ExitList& exits() { return m_exits; }
   const ExitList& exits() const { return m_exits; }
+  Block* entry() const;
 
 private:
   IRTrace* makeTrace(const Func* func, uint32_t bcOff);
@@ -286,16 +287,13 @@ private:
   }
 
 private:
-  CSEHash  m_constTable;
+  Arena m_arena; // contains IRTrace, Block, IRInstruction, and SSATmp objects
+  CSEHash m_constTable; // DefConst's for each unique constant in this IR
   uint32_t m_nextBlockId;
   uint32_t m_nextOpndId;
   uint32_t m_nextInstId;
-
-  // IRTrace, Block, IRInstruction, and SSATmp objects are allocated here.
-  Arena m_arena;
-
-  IRTrace* m_main;
-  std::list<IRTrace*> m_exits;
+  IRTrace* m_main; // main entry point trace
+  ExitList m_exits; // exit traces
 };
 
 //////////////////////////////////////////////////////////////////////

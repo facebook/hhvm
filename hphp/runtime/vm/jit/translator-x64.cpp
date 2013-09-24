@@ -298,7 +298,6 @@ TCA TranslatorX64::retranslateOpt(TransID transId, bool align) {
   return retranslate(translArgs);
 }
 
-
 /*
  * Find or create a translation for sk. Returns TCA of "best" current
  * translation. May return NULL if it is currently impossible to create
@@ -2573,37 +2572,35 @@ void TranslatorX64::traceCodeGen() {
   using namespace JIT;
 
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
-  HPHP::JIT::IRTrace* trace = ht.trace();
+  auto& unit = ht.unit();
   auto finishPass = [&](const char* msg, int level,
                         const RegAllocInfo* regs,
                         const LifetimeInfo* lifetime) {
-    dumpTrace(level, trace, msg, regs, lifetime, nullptr,
+    dumpTrace(level, unit, msg, regs, lifetime, nullptr,
               ht.traceBuilder().guards());
-    assert(checkCfg(trace, ht.unit()));
+    assert(checkCfg(ht.unit()));
   };
 
   finishPass(" after initial translation ", kIRLevel, nullptr, nullptr);
-  optimizeTrace(trace, ht.traceBuilder());
+  optimize(unit, ht.traceBuilder());
   finishPass(" after optimizing ", kOptLevel, nullptr, nullptr);
 
-  auto& unit = ht.unit();
   recordBCInstr(OpTraceletGuard, mainCode, mainCode.frontier());
 
   if (dumpIREnabled()) {
     LifetimeInfo lifetime(unit);
-    RegAllocInfo regs = allocRegsForTrace(trace, unit, &lifetime);
+    RegAllocInfo regs = allocRegsForUnit(unit, &lifetime);
     finishPass(" after reg alloc ", kRegAllocLevel, &regs, &lifetime);
-    assert(checkRegisters(trace, unit, regs));
+    assert(checkRegisters(unit, regs));
     AsmInfo ai(unit);
-    genCodeForTrace(trace, mainCode, stubsCode, unit, &m_bcMap, this, regs,
-                    &lifetime, &ai);
-    dumpTrace(kCodeGenLevel, trace, " after code gen ", &regs,
+    genCode(mainCode, stubsCode, unit, &m_bcMap, this, regs, &lifetime, &ai);
+    dumpTrace(kCodeGenLevel, unit, " after code gen ", &regs,
               &lifetime, &ai);
   } else {
-    RegAllocInfo regs = allocRegsForTrace(trace, unit);
+    RegAllocInfo regs = allocRegsForUnit(unit);
     finishPass(" after reg alloc ", kRegAllocLevel, nullptr, nullptr);
-    assert(checkRegisters(trace, unit, regs));
-    genCodeForTrace(trace, mainCode, stubsCode, unit, &m_bcMap, this, regs);
+    assert(checkRegisters(unit, regs));
+    genCode(mainCode, stubsCode, unit, &m_bcMap, this, regs);
   }
 
   m_numHHIRTrans++;

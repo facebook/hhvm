@@ -34,8 +34,7 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
                            const Func* func)
   : m_unit(unit)
   , m_simplifier(*this)
-  , m_mainTrace(m_unit.makeMain(func, initialBcOffset))
-  , m_curTrace(m_mainTrace)
+  , m_curTrace(m_unit.makeMain(func, initialBcOffset))
   , m_curBlock(nullptr)
   , m_enableCse(false)
   , m_enableSimplification(false)
@@ -687,7 +686,7 @@ SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
                                  prevType.toString(),
                                  typeParam.toString(),
                                  inst->toString(),
-                                 m_mainTrace->toString()).str();
+                                 m_unit.main()->toString()).str();
           });
       }
     } else {
@@ -985,7 +984,7 @@ SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst, CloneFlag doClone) {
 void TraceBuilder::reoptimize() {
   FTRACE(5, "ReOptimize:vvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "ReOptimize:^^^^^^^^^^^^^^^^^^^^\n"); };
-  assert(m_curTrace == m_mainTrace);
+  assert(m_curTrace->isMain());
   assert(m_savedTraces.empty());
   assert(m_inlineSavedStates.empty());
 
@@ -993,19 +992,20 @@ void TraceBuilder::reoptimize() {
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   if (!m_enableCse && !m_enableSimplification) return;
 
-  BlockList sortedBlocks = rpoSortCfg(m_mainTrace, m_unit);
+  BlockList sortedBlocks = rpoSortCfg(m_unit);
   auto const idoms = findDominators(sortedBlocks);
   clearTrackedState();
 
-  auto blocks = std::move(m_mainTrace->blocks());
-  assert(m_mainTrace->blocks().empty());
+  auto blocks = std::move(m_curTrace->blocks());
+  assert(m_curTrace->blocks().empty());
   while (!blocks.empty()) {
     Block* block = blocks.front();
     blocks.pop_front();
-    assert(block->trace() == m_mainTrace);
+    assert(block->trace() == m_curTrace);
     FTRACE(5, "Block: {}\n", block->id());
 
-    m_mainTrace->push_back(block);
+    assert(m_curTrace->isMain());
+    m_curTrace->push_back(block);
     if (m_snapshots[block]) {
       useState(block);
     }

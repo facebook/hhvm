@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/vm/jit/block.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/ir-trace.h"
 
 namespace HPHP { namespace JIT {
@@ -41,11 +42,11 @@ BlockList::const_iterator rpoIteratorTo(const BlockList& cfg, Block* b);
 
 /*
  * Compute a reverse postorder list of the basic blocks reachable from
- * the first block in trace.
+ * the IR's entry block.
  *
  * Post: isRPOSorted(return value)
  */
-BlockList rpoSortCfg(IRTrace*, const IRUnit&);
+BlockList rpoSortCfg(const IRUnit&);
 
 /*
  * Returns: true if the supplied block list is sorted in reverse post
@@ -93,24 +94,23 @@ void forPreorderDoms(Block* block, const DomChildren& children,
 /*
  * Visit the main trace followed by exit traces.
  */
-template <class Body> void forEachTrace(IRTrace* main, Body body);
+template <class Body> void forEachTrace(const IRUnit&, Body body);
 
 /*
  * Visit the blocks in the main trace followed by exit trace blocks.
  */
-template <class Body> void forEachTraceBlock(IRTrace* main, Body body);
+template <class Body> void forEachTraceBlock(const IRUnit&, Body body);
 
 /*
- * Visit the instructions in this trace, in block order.
+ * Visit the instructions in this blocklist, in block order.
  */
 template <class BlockList, class Body>
 void forEachInst(const BlockList& blocks, Body body);
-template <class Body> void forEachInst(IRTrace* trace, Body body);
 
 /*
  * Visit each instruction in the main trace, then the exit traces
  */
-template <class Body> void forEachTraceInst(IRTrace* main, Body body);
+template <class Body> void forEachTraceInst(const IRUnit&, Body body);
 
 namespace detail {
    // PostorderSort encapsulates a depth-first postorder walk
@@ -164,20 +164,20 @@ void forPreorderDoms(Block* block, const DomChildren& children,
 }
 
 template <class Body>
-void forEachTrace(IRTrace* main, Body body) {
-  body(main);
-  for (IRTrace* exit : main->exitTraces()) {
+void forEachTrace(const IRUnit& unit, Body body) {
+  body(unit.main());
+  for (auto exit : unit.exits()) {
     body(exit);
   }
 }
 
 template <class Body>
-void forEachTraceBlock(IRTrace* main, Body body) {
-  for (Block* block : main->blocks()) {
+void forEachTraceBlock(const IRUnit& unit, Body body) {
+  for (auto block : unit.main()->blocks()) {
     body(block);
   }
-  for (IRTrace* exit : main->exitTraces()) {
-    for (Block* block : exit->blocks()) {
+  for (auto exit : unit.exits()) {
+    for (auto block : exit->blocks()) {
       body(block);
     }
   }
@@ -193,14 +193,9 @@ void forEachInst(const BlockList& blocks, Body body) {
 }
 
 template <class Body>
-void forEachInst(IRTrace* trace, Body body) {
-  forEachInst(trace->blocks(), body);
-}
-
-template <class Body>
-void forEachTraceInst(IRTrace* main, Body body) {
-  forEachTrace(main, [=](IRTrace* t) {
-    forEachInst(t, body);
+void forEachTraceInst(const IRUnit& unit, Body body) {
+  forEachTrace(unit, [=](IRTrace* t) {
+    forEachInst(t->blocks(), body);
   });
 }
 

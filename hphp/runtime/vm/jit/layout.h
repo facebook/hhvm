@@ -17,12 +17,13 @@
 #define incl_HPHP_JIT_LAYOUT_H_
 
 #include "hphp/runtime/base/smart-containers.h"
-#include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/block.h"
 
 namespace HPHP { namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
+
+struct Block;
+class IRUnit;
 
 /*
  * Information about where to position the blocks in a trace.
@@ -41,7 +42,7 @@ struct LayoutInfo {
  * goal is to minimize branching and put related blocks close to each
  * other.
  */
-LayoutInfo layoutBlocks(IRTrace*, const IRUnit&);
+LayoutInfo layoutBlocks(const IRUnit&);
 
 //////////////////////////////////////////////////////////////////////
 

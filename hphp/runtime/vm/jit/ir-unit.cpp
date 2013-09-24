@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/vm/jit/ir-unit.h"
-
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/ir-trace.h"
 
@@ -71,18 +70,14 @@ IRTrace* IRUnit::addExit(const Func* func, uint32_t bcOff) {
   return exit;
 }
 
+Block* IRUnit::entry() const {
+  return m_main->front();
+}
+
+// IRTrace methods declared here because of circular dependencies.
+
 bool IRTrace::isMain() const {
   return this == m_unit.main();
-}
-
-IRUnit::ExitList& IRTrace::exitTraces() {
-  assert(isMain());
-  return m_unit.exits();
-}
-
-const IRUnit::ExitList& IRTrace::exitTraces() const {
-  assert(isMain());
-  return m_unit.exits();
 }
 
 }}

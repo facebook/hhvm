@@ -18,7 +18,6 @@
 #define incl_HPHP_VM_TRACE_H_
 
 #include "hphp/runtime/vm/jit/block.h"
-#include "hphp/runtime/vm/jit/ir.h"
 
 namespace HPHP { namespace JIT {
 
@@ -71,10 +70,8 @@ struct IRTrace : private boost::noncopyable {
   // return true if this trace's first block starts with BeginCatch
   bool isCatch() const;
 
-  std::list<IRTrace*>& exitTraces();
-  const std::list<IRTrace*>& exitTraces() const;
-
   std::string toString() const;
+  const IRUnit& unit() const { return m_unit; }
 
 private:
   IRUnit& m_unit;

@@ -593,15 +593,14 @@ const Func* loadClassCtor(Class* cls);
 
 ObjectData* createClHelper(Class*, int, ActRec*, TypedValue*);
 
-void genCodeForTrace(IRTrace*                trace,
-                     CodeBlock&              mainCode,
-                     CodeBlock&              stubsCode,
-                     IRUnit&                 unit,
-                     vector<TransBCMapping>* bcMap,
-                     TranslatorX64*          tx64,
-                     const RegAllocInfo&     regs,
-                     const LifetimeInfo*     lifetime = nullptr,
-                     AsmInfo*                asmInfo = nullptr);
+void genCode(CodeBlock&              mainCode,
+             CodeBlock&              stubsCode,
+             IRUnit&                 unit,
+             vector<TransBCMapping>* bcMap,
+             TranslatorX64*          tx64,
+             const RegAllocInfo&     regs,
+             const LifetimeInfo*     lifetime = nullptr,
+             AsmInfo*                asmInfo = nullptr);
 
 }}
 

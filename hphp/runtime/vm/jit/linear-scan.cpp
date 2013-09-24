@@ -60,7 +60,7 @@ struct LinearScan : private boost::noncopyable {
   static const int NumRegs = kNumRegs;
 
   explicit LinearScan(IRUnit&);
-  RegAllocInfo allocRegs(IRTrace*, LifetimeInfo*);
+  RegAllocInfo allocRegs(LifetimeInfo*);
 
 private:
   class RegState {
@@ -141,8 +141,8 @@ private:
     return m_unit.cns(val);
   }
   void initFreeList();
-  void coalesce(IRTrace* trace);
-  void genSpillStats(IRTrace* trace, int numSpillLocs);
+  void coalesce();
+  void genSpillStats(int numSpillLocs);
   void allocRegsOneTrace(BlockList::iterator& blockIt,
                          ExitTraceMap& etm);
   void allocRegsToTrace();
@@ -953,8 +953,8 @@ void LinearScan::initFreeList() {
   }
 }
 
-void LinearScan::coalesce(IRTrace* trace) {
-  forEachTraceInst(trace, [](IRInstruction* inst) {
+void LinearScan::coalesce() {
+  forEachTraceInst(m_unit, [](IRInstruction* inst) {
     for (uint32_t i = 0; i < inst->numSrcs(); ++i) {
       SSATmp* src = inst->src(i);
       SSATmp* origSrc = canonicalize(src);
@@ -988,7 +988,7 @@ void LinearScan::numberInstructions(const BlockList& blocks) {
   }
 }
 
-void LinearScan::genSpillStats(IRTrace* trace, int numSpillLocs) {
+void LinearScan::genSpillStats(int numSpillLocs) {
   if (!moduleEnabled(HPHP::Trace::statgroups, 1)) return;
   static bool enabled = getenv("HHVM_STATS_SPILLS");
   if (!enabled) return;
@@ -1023,11 +1023,11 @@ void LinearScan::genSpillStats(IRTrace* trace, int numSpillLocs) {
   static StringData* exitReloads = makeStaticString("ExitReloads");
   static StringData* spillSpace = makeStaticString("SpillSpace");
 
-  auto const marker = trace->front()->front()->marker();
+  auto entry = m_unit.entry(); // entry block
+  auto const marker = entry->front()->marker();
   auto addStat = [&](const StringData* key, int value) {
-    trace->front()->prepend(m_unit.gen(IncStatGrouped, marker,
-                                            cns(spillStats), cns(key),
-                                            cns(value)));
+    entry->prepend(m_unit.gen(IncStatGrouped, marker,
+                              cns(spillStats), cns(key), cns(value)));
   };
   addStat(mainSpills, numMainSpills);
   addStat(mainReloads, numMainReloads);
@@ -1069,13 +1069,13 @@ void LinearScan::findFullXMMCandidates() {
   m_fullXMMCandidates -= notCandidates;
 }
 
-RegAllocInfo LinearScan::allocRegs(IRTrace* trace, LifetimeInfo* lifetime) {
+RegAllocInfo LinearScan::allocRegs(LifetimeInfo* lifetime) {
   if (RuntimeOption::EvalHHIREnableCoalescing) {
     // <coalesce> doesn't need instruction numbering.
-    coalesce(trace);
+    coalesce();
   }
 
-  m_blocks = rpoSortCfg(trace, m_unit);
+  m_blocks = rpoSortCfg(m_unit);
   m_idoms = findDominators(m_blocks);
 
   if (!packed_tv) {
@@ -1096,7 +1096,7 @@ RegAllocInfo LinearScan::allocRegs(IRTrace* trace, LifetimeInfo* lifetime) {
     PUNT(LinearScan_TooManySpills);
   }
 
-  if (m_slots.size()) genSpillStats(trace, numSpillLocs);
+  if (m_slots.size()) genSpillStats(numSpillLocs);
 
   if (lifetime) {
     lifetime->linear = std::move(m_linear);
@@ -1445,9 +1445,8 @@ void LinearScan::PreColoringHint::add(SSATmp* tmp, uint32_t index, int argNum) {
 
 //////////////////////////////////////////////////////////////////////
 
-RegAllocInfo allocRegsForTrace(IRTrace* trace, IRUnit& unit,
-                               LifetimeInfo* lifetime) {
-  return LinearScan(unit).allocRegs(trace, lifetime);
+RegAllocInfo allocRegsForUnit(IRUnit& unit, LifetimeInfo* lifetime) {
+  return LinearScan(unit).allocRegs(lifetime);
 }
 
 }} // HPHP::JIT

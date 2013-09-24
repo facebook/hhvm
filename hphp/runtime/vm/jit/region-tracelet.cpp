@@ -227,7 +227,7 @@ RegionDescPtr RegionFormer::go() {
     }
   }
 
-  dumpTrace(2, m_ht.traceBuilder().trace(), " after tracelet formation ",
+  dumpTrace(2, m_ht.unit(), " after tracelet formation ",
             nullptr, nullptr, nullptr, m_ht.traceBuilder().guards());
 
   if (m_region && !m_region->blocks.empty()) recordDependencies();
@@ -490,21 +490,19 @@ void RegionFormer::recordDependencies() {
   }
 
   // Relax guards and record the ones that survived.
-  auto trace = m_ht.traceBuilder().trace();
   auto& firstBlock = *m_region->blocks.front();
   auto blockStart = firstBlock.start();
+  auto& unit = m_ht.unit();
   auto const doRelax = RuntimeOption::EvalHHIRRelaxGuards;
-
-  auto changed =  doRelax ? relaxGuards(trace, m_ht.unit(),
-                                        *m_ht.traceBuilder().guards())
-                          : false;
-  visitGuards(trace, [&](const RegionDesc::Location& loc, Type type) {
+  auto changed = doRelax ? relaxGuards(unit, *m_ht.traceBuilder().guards())
+                         : false;
+  visitGuards(unit, [&](const RegionDesc::Location& loc, Type type) {
     RegionDesc::TypePred pred{loc, type};
     FTRACE(1, "selectTracelet adding guard {}\n", show(pred));
     firstBlock.addPredicted(blockStart, pred);
   });
   if (changed) {
-    dumpTrace(3, m_ht.traceBuilder().trace(), " after guard relaxation ",
+    dumpTrace(3, unit, " after guard relaxation ",
               nullptr, nullptr, nullptr, m_ht.traceBuilder().guards());
   }
 

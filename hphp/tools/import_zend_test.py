@@ -152,7 +152,7 @@ bad_tests = (
     '/Zend/tests/bug54265.php',
 
     # broken in contbuild
-    '/ext/standard/tests/strings/bug51059.php'
+    '/ext/standard/tests/strings/bug51059.php',
     '/ext/standard/tests/strings/setlocale_variation1.php',
     '/ext/standard/tests/strings/setlocale_basic1.php',
     '/ext/standard/tests/strings/setlocale_basic2.php',
@@ -161,7 +161,7 @@ bad_tests = (
     '/ext/standard/tests/file/filetype_variation3.php',
     '/ext/sockets/tests/ipv4loop.php',
     '/ext/posix/tests/posix_kill_basic.php',
-    '/ext/standard/tests/file/005_variation/win32.php',
+    '/ext/standard/tests/file/005_variation-win32.php',
     '/ext/json/tests/fail001.php',
     '/ext/standard/network/tests/getmxrr.php',
     '/ext/standard/network/tests/gethostbyname_error004.php',
@@ -221,6 +221,7 @@ norepo_tests = (
     '/Zend/tests/bug30519.php',
     '/Zend/tests/bug30922.php',
     '/Zend/tests/bug36006.php',
+    '/Zend/tests/bug36759.php',
     '/Zend/tests/bug39542.php',
     '/Zend/tests/bug43651.php',
     '/Zend/tests/bug44141.php',

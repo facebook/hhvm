@@ -218,6 +218,7 @@ String f_get_include_path() {
 }
 
 void f_restore_include_path() {
+  g_context->restoreIncludePath();
 }
 
 String f_set_include_path(CStrRef new_include_path) {

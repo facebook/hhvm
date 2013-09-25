@@ -1,0 +1,26 @@
+string(2) "./"
+HipHop Warning: Too many arguments for get_include_path(), expected 0 in %s/test/zend/good/ext/standard/tests/general_functions/include_path.php on line 4
+NULL
+NULL
+HipHop Warning: Too many arguments for restore_include_path(), expected 0 in %s/test/zend/good/ext/standard/tests/general_functions/include_path.php on line 7
+NULL
+HipHop Warning: set_include_path() expects exactly 1 parameter, 0 given in %s/test/zend/good/ext/standard/tests/general_functions/include_path.php on line 10
+NULL
+string(2) "./"
+string(2) "./"
+string(3) "var"
+NULL
+string(2) "./"
+string(2) "./"
+string(14) ".:/path/to/dir"
+NULL
+string(2) "./"
+string(2) "./"
+string(0) ""
+NULL
+string(2) "./"
+string(2) "./"
+string(5) "Array"
+NULL
+string(2) "./"
+Done

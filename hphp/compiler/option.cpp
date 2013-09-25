@@ -302,6 +302,9 @@ void Option::Load(Hdf &config) {
   DumpAst                  = config["DumpAst"].getBool(false);
   WholeProgram             = config["WholeProgram"].getBool(true);
 
+  // Temporary, during file-cache migration.
+  FileCache::UseNewCache   = config["UseNewCache"].getBool(false);
+
   if (m_hookHandler) m_hookHandler(config);
 
   OnLoad();

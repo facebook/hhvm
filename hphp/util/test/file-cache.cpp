@@ -97,7 +97,7 @@ TEST_F(TestFileCache, WriteAndReadBack) {
   // Sniff around the on-disk temp file.
 
   FileCache ondisk;
-  EXPECT_EQ(ondisk.getVersion(cache_fn.c_str()), 1);
+  EXPECT_EQ(ondisk.getVersion(cache_fn.c_str()), 2);
 
   // Read back into another cache.
 

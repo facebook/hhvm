@@ -249,9 +249,12 @@ void FileCache::save(const char *filename) {
 short FileCache::getVersion(const char *filename) {
   assert(filename && *filename);
 
-  // This has no meaning in the new cache regime.
-  if (UseNewCache) {
-    return 1;
+  // Provided during the migration from the old cache to the new.
+  CacheType ct;
+  if (ct.isNewCache(filename)) {
+    Logger::Info("Autodetected new cache format: %s", filename);
+    UseNewCache = true;
+    return 2;
   }
 
   FILE *f = fopen(filename, "r");

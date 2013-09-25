@@ -779,8 +779,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     if (!srcRoot.empty()) SourceRoot = srcRoot;
     FileCache::SourceRoot = SourceRoot;
 
-    FileCache::UseNewCache = server["UseNewCache"].getBool(false);
-
     server["IncludeSearchPaths"].get(IncludeSearchPaths);
     for (unsigned int i = 0; i < IncludeSearchPaths.size(); i++) {
       IncludeSearchPaths[i] = Util::normalizeDir(IncludeSearchPaths[i]);

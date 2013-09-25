@@ -21,7 +21,6 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/ext_zend_compat/hhvm/ZendObjectData.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

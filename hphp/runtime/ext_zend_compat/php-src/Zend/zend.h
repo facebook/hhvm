@@ -208,7 +208,6 @@ char *alloca ();
 #include "zend_alloc.h"
 
 #include "zend_types.h"
-#include "zend_string.h"
 
 #ifdef HAVE_LIMITS_H
 # include <limits.h>
@@ -253,25 +252,7 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 /*
  * zval
  */
-
-#include "hphp/runtime/ext_zend_compat/hhvm/ZendObjectData.h"
-
-typedef struct _zend_class_entry zend_class_entry;
-
-struct _zend_class_entry {
-  const char *name;
-  zend_uint name_length;
-  HPHP::Class *hphp_class;
-  zend_object_value (*create_object)(zend_class_entry *class_type);
-};
-
-// typedef struct HPHP::ObjectData zend_object;
-typedef struct _zend_object {
-  zend_class_entry *ce;
-  HashTable *properties;
-  zval **properties_table;
-  HashTable *guards; /* protects from __get/__set ... recursion */
-} zend_object;
+typedef struct HPHP::Class zend_class_entry;
 
 #include "zend_object_handlers.h"
 
@@ -410,15 +391,20 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 
 BEGIN_EXTERN_C()
 
-ZEND_API void zend_error(int type, const char *format, ...);
+ZEND_API inline void zend_error(int type, const char *format, ...) {
+  va_list ap;
+  va_start(ap, format);
+  HPHP::raise_message(static_cast<HPHP::ErrorConstants::ErrorModes>(type), format, ap);
+  va_end(ap);
+}
 
 extern ZEND_API zend_class_entry *zend_standard_class_def;
 
 END_EXTERN_C()
 
-#define INIT_PZVAL(z)     \
-  Z_SET_REFCOUNT_P(z, 1); \
-  Z_UNSET_ISREF_P(z);
+#define INIT_PZVAL(z) \
+  Z_SET_REFCOUNT_P((z), 1); \
+  Z_UNSET_ISREF_P((z));
 
 #define INIT_ZVAL(z) ((z).zInit());
 

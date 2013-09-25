@@ -22,5 +22,3 @@ to our data structures and it mostly works.
 
 * C++ compile errors
 * Use `Z_RESVAL` instead of `Z_LVAL` for resource access
-* Don't use PHP_MALIAS. Define the other function.
-* Change any ZVAL_STRING(foo, "literal string", 0) to ZVAL_STRING(foo, "literal string", 2) 

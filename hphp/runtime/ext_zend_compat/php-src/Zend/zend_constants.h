@@ -22,8 +22,6 @@
 #ifndef ZEND_CONSTANTS_H
 #define ZEND_CONSTANTS_H
 
-#include "zend_globals.h"
-
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/ext_misc.h"
 

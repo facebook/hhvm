@@ -32,7 +32,7 @@
 
 #ifndef HAVE_SHUTDOWN
 #undef shutdown
-#define shutdown(s,n)  /* nothing */
+#define shutdown(s,n)	/* nothing */
 #endif
 
 #ifdef PHP_WIN32
@@ -43,7 +43,7 @@
 #  undef EINPROGRESS
 # endif
 # define EWOULDBLOCK WSAEWOULDBLOCK
-# define EINPROGRESS  WSAEWOULDBLOCK
+# define EINPROGRESS	WSAEWOULDBLOCK
 # define fsync _commit
 # define ftruncate(a, b) chsize(a, b)
 #endif /* defined(PHP_WIN32) */
@@ -113,9 +113,9 @@ typedef int php_socket_t;
 typedef struct pollfd php_pollfd;
 #else
 typedef struct _php_pollfd {
-  php_socket_t fd;
-  short events;
-  short revents;
+	php_socket_t fd;
+	short events;
+	short revents;
 } php_pollfd;
 
 PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout);
@@ -134,19 +134,19 @@ PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout);
 # endif
 #endif
 
-#define PHP_POLLREADABLE  (POLLIN|POLLERR|POLLHUP)
+#define PHP_POLLREADABLE	(POLLIN|POLLERR|POLLHUP)
 
 #ifndef PHP_USE_POLL_2_EMULATION
-# define php_poll2(ufds, nfds, timeout)    poll(ufds, nfds, timeout)
+# define php_poll2(ufds, nfds, timeout)		poll(ufds, nfds, timeout)
 #endif
 
 /* timeval-to-timeout (for poll(2)) */
 static inline int php_tvtoto(struct timeval *timeouttv)
 {
-  if (timeouttv) {
-    return (timeouttv->tv_sec * 1000) + (timeouttv->tv_usec / 1000);
-  }
-  return -1;
+	if (timeouttv) {
+		return (timeouttv->tv_sec * 1000) + (timeouttv->tv_usec / 1000);
+	}
+	return -1;
 }
 
 /* hybrid select(2)/poll(2) for a single descriptor.
@@ -155,38 +155,38 @@ static inline int php_tvtoto(struct timeval *timeouttv)
  */
 static inline int php_pollfd_for(php_socket_t fd, int events, struct timeval *timeouttv)
 {
-  php_pollfd p;
-  int n;
+	php_pollfd p;
+	int n;
 
-  p.fd = fd;
-  p.events = events;
-  p.revents = 0;
+	p.fd = fd;
+	p.events = events;
+	p.revents = 0;
 
-  n = php_poll2(&p, 1, php_tvtoto(timeouttv));
+	n = php_poll2(&p, 1, php_tvtoto(timeouttv));
 
-  if (n > 0) {
-    return p.revents;
-  }
+	if (n > 0) {
+		return p.revents;
+	}
 
-  return n;
+	return n;
 }
 
 static inline int php_pollfd_for_ms(php_socket_t fd, int events, int timeout)
 {
-  php_pollfd p;
-  int n;
+	php_pollfd p;
+	int n;
 
-  p.fd = fd;
-  p.events = events;
-  p.revents = 0;
+	p.fd = fd;
+	p.events = events;
+	p.revents = 0;
 
-  n = php_poll2(&p, 1, timeout);
+	n = php_poll2(&p, 1, timeout);
 
-  if (n > 0) {
-    return p.revents;
-  }
+	if (n > 0) {
+		return p.revents;
+	}
 
-  return n;
+	return n;
 }
 
 /* emit warning and suggestion for unsafe select(2) usage */
@@ -195,27 +195,27 @@ PHPAPI void _php_emit_fd_setsize_warning(int max_fd);
 #ifdef PHP_WIN32
 /* it is safe to FD_SET too many fd's under win32; the macro will simply ignore
  * descriptors that go beyond the default FD_SETSIZE */
-# define PHP_SAFE_FD_SET(fd, set)  FD_SET(fd, set)
-# define PHP_SAFE_FD_CLR(fd, set)  FD_CLR(fd, set)
-# define PHP_SAFE_FD_ISSET(fd, set)  FD_ISSET(fd, set)
-# define PHP_SAFE_MAX_FD(m, n)    do { if (n + 1 >= FD_SETSIZE) { _php_emit_fd_setsize_warning(n); }} while(0)
+# define PHP_SAFE_FD_SET(fd, set)	FD_SET(fd, set)
+# define PHP_SAFE_FD_CLR(fd, set)	FD_CLR(fd, set)
+# define PHP_SAFE_FD_ISSET(fd, set)	FD_ISSET(fd, set)
+# define PHP_SAFE_MAX_FD(m, n)		do { if (n + 1 >= FD_SETSIZE) { _php_emit_fd_setsize_warning(n); }} while(0)
 #else
-# define PHP_SAFE_FD_SET(fd, set)  do { if (fd < FD_SETSIZE) FD_SET(fd, set); } while(0)
-# define PHP_SAFE_FD_CLR(fd, set)  do { if (fd < FD_SETSIZE) FD_CLR(fd, set); } while(0)
-# define PHP_SAFE_FD_ISSET(fd, set)  ((fd < FD_SETSIZE) && FD_ISSET(fd, set))
-# define PHP_SAFE_MAX_FD(m, n)    do { if (m >= FD_SETSIZE) { _php_emit_fd_setsize_warning(m); m = FD_SETSIZE - 1; }} while(0)
+# define PHP_SAFE_FD_SET(fd, set)	do { if (fd < FD_SETSIZE) FD_SET(fd, set); } while(0)
+# define PHP_SAFE_FD_CLR(fd, set)	do { if (fd < FD_SETSIZE) FD_CLR(fd, set); } while(0)
+# define PHP_SAFE_FD_ISSET(fd, set)	((fd < FD_SETSIZE) && FD_ISSET(fd, set))
+# define PHP_SAFE_MAX_FD(m, n)		do { if (m >= FD_SETSIZE) { _php_emit_fd_setsize_warning(m); m = FD_SETSIZE - 1; }} while(0)
 #endif
 
 
-#define PHP_SOCK_CHUNK_SIZE  8192
+#define PHP_SOCK_CHUNK_SIZE	8192
 
 #ifdef HAVE_SOCKADDR_STORAGE
 typedef struct sockaddr_storage php_sockaddr_storage;
 #else
 typedef struct {
 #ifdef HAVE_SOCKADDR_SA_LEN
-    unsigned char ss_len;
-    unsigned char ss_family;
+		unsigned char ss_len;
+		unsigned char ss_family;
 #else
         unsigned short ss_family;
 #endif
@@ -227,72 +227,72 @@ BEGIN_EXTERN_C()
 PHPAPI void php_network_freeaddresses(struct sockaddr **sal);
 
 PHPAPI php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
-    int socktype, int asynchronous, struct timeval *timeout, char **error_string,
-    int *error_code, char *bindto, unsigned short bindport
-    TSRMLS_DC);
+		int socktype, int asynchronous, struct timeval *timeout, char **error_string,
+		int *error_code, char *bindto, unsigned short bindport
+		TSRMLS_DC);
 
 PHPAPI int php_network_connect_socket(php_socket_t sockfd,
-    const struct sockaddr *addr,
-    socklen_t addrlen,
-    int asynchronous,
-    struct timeval *timeout,
-    char **error_string,
-    int *error_code);
+		const struct sockaddr *addr,
+		socklen_t addrlen,
+		int asynchronous,
+		struct timeval *timeout,
+		char **error_string,
+		int *error_code);
 
 #define php_connect_nonb(sock, addr, addrlen, timeout) \
-  php_network_connect_socket((sock), (addr), (addrlen), 0, (timeout), NULL, NULL)
+	php_network_connect_socket((sock), (addr), (addrlen), 0, (timeout), NULL, NULL)
 
 PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
-    char **textaddr, long *textaddrlen,
-    struct sockaddr **addr,
-    socklen_t *addrlen,
-    struct timeval *timeout,
-    char **error_string,
-    int *error_code
-    TSRMLS_DC);
+		char **textaddr, long *textaddrlen,
+		struct sockaddr **addr,
+		socklen_t *addrlen,
+		struct timeval *timeout,
+		char **error_string,
+		int *error_code
+		TSRMLS_DC);
 
 PHPAPI int php_network_get_sock_name(php_socket_t sock,
-    char **textaddr, long *textaddrlen,
-    struct sockaddr **addr,
-    socklen_t *addrlen
-    TSRMLS_DC);
-
+		char **textaddr, long *textaddrlen,
+		struct sockaddr **addr,
+		socklen_t *addrlen
+		TSRMLS_DC);
+	
 PHPAPI int php_network_get_peer_name(php_socket_t sock,
-    char **textaddr, long *textaddrlen,
-    struct sockaddr **addr,
-    socklen_t *addrlen
-    TSRMLS_DC);
+		char **textaddr, long *textaddrlen,
+		struct sockaddr **addr,
+		socklen_t *addrlen
+		TSRMLS_DC);
 
 PHPAPI void php_any_addr(int family, php_sockaddr_storage *addr, unsigned short port);
 PHPAPI int php_sockaddr_size(php_sockaddr_storage *addr);
 END_EXTERN_C()
 
-struct _php_netstream_data_t  {
-  php_socket_t socket;
-  char is_blocked;
-  struct timeval timeout;
-  char timeout_event;
-  size_t ownsize;
+struct _php_netstream_data_t	{
+	php_socket_t socket;
+	char is_blocked;
+	struct timeval timeout;
+	char timeout_event;
+	size_t ownsize;
 };
 typedef struct _php_netstream_data_t php_netstream_data_t;
-#define PHP_STREAM_IS_SOCKET  (&php_stream_socket_ops)
+#define PHP_STREAM_IS_SOCKET	(&php_stream_socket_ops)
 
 BEGIN_EXTERN_C()
 /* open a connection to a host using php_hostconnect and return a stream */
 PHPAPI void php_network_populate_name_from_sockaddr(
-    /* input address */
-    struct sockaddr *sa, socklen_t sl,
-    /* output readable address */
-    char **textaddr, long *textaddrlen,
-    /* output address */
-    struct sockaddr **addr,
-    socklen_t *addrlen
-    TSRMLS_DC);
+		/* input address */
+		struct sockaddr *sa, socklen_t sl,
+		/* output readable address */
+		char **textaddr, long *textaddrlen,
+		/* output address */
+		struct sockaddr **addr,
+		socklen_t *addrlen
+		TSRMLS_DC);
 
 END_EXTERN_C()
 
 /* {{{ memory debug */
-#define php_stream_sock_open_unix_rel(path, pathlen, persistent, timeval)  _php_stream_sock_open_unix((path), (pathlen), (persistent), (timeval) STREAMS_REL_CC TSRMLS_CC)
+#define php_stream_sock_open_unix_rel(path, pathlen, persistent, timeval)	_php_stream_sock_open_unix((path), (pathlen), (persistent), (timeval) STREAMS_REL_CC TSRMLS_CC)
 
 /* }}} */
 

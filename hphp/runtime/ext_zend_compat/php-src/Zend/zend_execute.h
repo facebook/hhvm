@@ -38,8 +38,6 @@ ZEND_API inline const char *get_active_function_name(TSRMLS_D) {
   HPHP::Transl::VMRegAnchor _;
   return HPHP::liveFunc()->name()->data();
 }
-ZEND_API const char *zend_get_executed_filename(TSRMLS_D);
-ZEND_API uint zend_get_executed_lineno(TSRMLS_D);
 
 END_EXTERN_C()
 

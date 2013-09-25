@@ -91,42 +91,42 @@ PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char en
 #define PHP_FILE_NO_DEFAULT_CONTEXT 16
 
 typedef enum _php_meta_tags_token {
-  TOK_EOF = 0,
-  TOK_OPENTAG,
-  TOK_CLOSETAG,
-  TOK_SLASH,
-  TOK_EQUAL,
-  TOK_SPACE,
-  TOK_ID,
-  TOK_STRING,
-  TOK_OTHER
+	TOK_EOF = 0,
+	TOK_OPENTAG,
+	TOK_CLOSETAG,
+	TOK_SLASH,
+	TOK_EQUAL,
+	TOK_SPACE,
+	TOK_ID,
+	TOK_STRING,
+	TOK_OTHER
 } php_meta_tags_token;
 
 typedef struct _php_meta_tags_data {
-  php_stream *stream;
-  int ulc;
-  int lc;
-  char *input_buffer;
-  char *token_data;
-  int token_len;
-  int in_meta;
+	php_stream *stream;
+	int ulc;
+	int lc;
+	char *input_buffer;
+	char *token_data;
+	int token_len;
+	int in_meta;
 } php_meta_tags_data;
 
 php_meta_tags_token php_next_meta_token(php_meta_tags_data * TSRMLS_DC);
 
 typedef struct {
-  int pclose_ret;
-  size_t def_chunk_size;
-  long auto_detect_line_endings;
-  long default_socket_timeout;
-  char *user_agent; /* for the http wrapper */
-  char *from_address; /* for the ftp and http wrappers */
-  char *user_stream_current_filename; /* for simple recursion protection */
-  php_stream_context *default_context;
-  HashTable *stream_wrappers;      /* per-request copy of url_stream_wrappers_hash */
-  HashTable *stream_filters;      /* per-request copy of stream_filters_hash */
-  HashTable *wrapper_errors;      /* key: wrapper address; value: linked list of char* */
-  int pclose_wait;
+	int pclose_ret;
+	size_t def_chunk_size;
+	long auto_detect_line_endings;
+	long default_socket_timeout;
+	char *user_agent; /* for the http wrapper */
+	char *from_address; /* for the ftp and http wrappers */
+	char *user_stream_current_filename; /* for simple recursion protection */
+	php_stream_context *default_context;
+	HashTable *stream_wrappers;			/* per-request copy of url_stream_wrappers_hash */
+	HashTable *stream_filters;			/* per-request copy of stream_filters_hash */
+	HashTable *wrapper_errors;			/* key: wrapper address; value: linked list of char* */
+	int pclose_wait;
 } php_file_globals;
 
 #ifdef ZTS

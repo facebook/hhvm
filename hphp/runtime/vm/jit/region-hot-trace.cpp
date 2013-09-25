@@ -86,6 +86,21 @@ static OffsetSet findSuccOffsets(Op* opc, const Unit* unit) {
   return succBcOffs;
 }
 
+/**
+ * Remove from pConds the elements that correspond to stack positions
+ * that have been popped given the current SP offset from FP.
+ */
+static void discardPoppedTypes(PostConditions& pConds, int curSpOffset) {
+  for (auto it = pConds.begin(); it != pConds.end(); ) {
+    if (it->location.tag() == RegionDesc::Location::Tag::Stack &&
+        it->location.stackOffsetFromFp() > curSpOffset) {
+      it = pConds.erase(it);
+    } else {
+      it++;
+    }
+  }
+}
+
 static void mergePostConds(PostConditions& dst,
                            const PostConditions& src) {
   for (const auto &post : src) {
@@ -113,10 +128,11 @@ static bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
   const auto& preConds = block->typePreds();
   for (const auto& it : preConds) {
     for (const auto& post : prevPostConds) {
-      if (postCondMismatch(post, it.second)) {
+      const RegionDesc::TypePred& preCond = it.second;
+      if (postCondMismatch(post, preCond)) {
         FTRACE(6, "preCondsAreSatisfied: postcondition check failed!\n"
                "  postcondition was {}, precondition was {}\n",
-               show(post), show(it.second));
+               show(post), show(preCond));
         return false;
       }
     }
@@ -200,6 +216,8 @@ RegionDescPtr selectHotTrace(TransID triggerId,
     }
 
     auto lastNewBlock = blockRegion->blocks.back();
+    discardPoppedTypes(accumPostConds,
+                       blockRegion->blocks[0]->initialSpOffset());
     mergePostConds(accumPostConds, lastNewBlock->postConds());
 
     TransCFG::ArcPtrVec possibleOutArcs;

@@ -27,7 +27,8 @@ namespace HPHP { namespace JIT {
  */
 RegionDescPtr selectOneBC(const RegionContext& ctx) {
   auto ret = std::make_shared<RegionDesc>();
-  auto blk = std::make_shared<RegionDesc::Block>(ctx.func, ctx.bcOffset, 1);
+  auto blk = std::make_shared<RegionDesc::Block>(ctx.func, ctx.bcOffset, 1,
+                                                 ctx.spOffset);
 
   for (auto& live : ctx.liveTypes) {
     blk->addPredicted(SrcKey{ctx.func, ctx.bcOffset},

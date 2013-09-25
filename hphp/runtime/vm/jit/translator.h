@@ -409,7 +409,7 @@ protected:
     Success
   };
   static const char* translateResultName(TranslateResult r);
-  void traceStart(Offset bcStartOffset);
+  void traceStart(Offset initBcOffset, Offset initSpOffset);
   virtual void traceCodeGen() = 0;
   void traceEnd();
   void traceFree();

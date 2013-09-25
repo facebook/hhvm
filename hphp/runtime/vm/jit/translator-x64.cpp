@@ -343,8 +343,9 @@ static void populateLiveContext(JIT::RegionContext& ctx) {
     },
     [&](const TypedValue* tv) {
       ctx.liveTypes.push_back(
-        { L::Stack{stackOff++}, JIT::liveTVType(tv) }
+        { L::Stack{stackOff, ctx.spOffset - stackOff}, JIT::liveTVType(tv) }
       );
+      stackOff++;
       FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));
     }
   );
@@ -2185,8 +2186,10 @@ TranslatorX64::translateWork(const TranslArgs& args) {
 
     TranslateResult result = Retry;
     RegionBlacklist regionInterps;
+    Offset initSpOffset = region ? region->blocks[0]->initialSpOffset()
+                                 : liveSpOff();
     while (result == Retry) {
-      traceStart(sk.offset());
+      traceStart(sk.offset(), initSpOffset);
 
       // Try translating a region if we have one, then fall back to using the
       // Tracelet.
@@ -2202,7 +2205,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
         }
         if (result == Failure) {
           traceFree();
-          traceStart(sk.offset());
+          traceStart(sk.offset(), liveSpOff());
           resetState();
         }
       }
@@ -2271,7 +2274,9 @@ TranslatorX64::translateWork(const TranslArgs& args) {
   recordGdbTranslation(sk, sk.func(), stubsCode, stubStart,
                        false, false);
   if (RuntimeOption::EvalJitPGO) {
-    m_profData->addTrans(t, transKind, pconds);
+    JIT::RegionContext rContext { sk.func(), sk.offset(), liveSpOff() };
+    populateLiveContext(rContext);
+    m_profData->addTrans(t, rContext, transKind, pconds);
   }
   // SrcRec::newTranslation() makes this code reachable. Do this last;
   // otherwise there's some chance of hitting in the reader threads whose

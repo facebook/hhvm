@@ -175,7 +175,7 @@ struct StackValueInfo {
     TRACE(5, "%s created\n", show().c_str());
   }
 
-  explicit StackValueInfo(IRInstruction* inst, Type type = Type::None)
+  explicit StackValueInfo(IRInstruction* inst, Type type)
     : value(nullptr)
     , knownType(type)
     , spansCall(false)

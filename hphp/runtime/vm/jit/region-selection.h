@@ -85,7 +85,10 @@ struct RegionDesc::Location {
     Stack,
   };
   struct Local { uint32_t locId;  };
-  struct Stack { uint32_t offset; };
+  struct Stack {
+    uint32_t offset;   // offset from SP
+    uint32_t fpOffset; // offset from FP
+  };
 
   /* implicit */ Location(Local l) : m_tag{Tag::Local}, m_local(l) {}
   /* implicit */ Location(Stack s) : m_tag{Tag::Stack}, m_stack(s) {}
@@ -102,10 +105,16 @@ struct RegionDesc::Location {
     return m_stack.offset;
   }
 
+  uint32_t stackOffsetFromFp() const {
+    assert(m_tag == Tag::Stack);
+    return m_stack.fpOffset;
+  }
+
   bool operator==(const Location& other) const {
     return (m_tag == other.m_tag) &&
       ((m_tag == Tag::Local && localId() == other.localId()) ||
-       (m_tag == Tag::Stack && stackOffset() == other.stackOffset()));
+       (m_tag == Tag::Stack &&
+        stackOffsetFromFp() == other.stackOffsetFromFp()));
   }
 
   bool operator!=(const Location& other) const {
@@ -168,7 +177,7 @@ class RegionDesc::Block {
   typedef flat_map<SrcKey, const Func*> KnownFuncMap;
 
 public:
-  explicit Block(const Func* func, Offset start, int length);
+  explicit Block(const Func* func, Offset start, int length, Offset initSpOff);
 
   Block& operator=(const Block&) = delete;
 
@@ -183,6 +192,7 @@ public:
   int length() const { return m_length; }
   bool empty() const { return length() == 0; }
   bool contains(SrcKey sk) const;
+  Offset initialSpOffset() const { return m_initialSpOffset; }
 
   /*
    * Set and get whether or not this block ends with an inlined FCall. Inlined
@@ -258,6 +268,7 @@ private:
   const Offset   m_start;
   Offset         m_last;
   int            m_length;
+  Offset         m_initialSpOffset;
   const Func*    m_inlinedCallee;
 
   TypePredMap    m_typePreds;
@@ -338,7 +349,8 @@ RegionDescPtr selectHotRegion(Transl::TransID transId,
  * Create a compilation region corresponding to a tracelet, using
  * the old analyze() framework.
  */
-RegionDescPtr selectTraceletLegacy(const Transl::Tracelet& tlet);
+RegionDescPtr selectTraceletLegacy(const RegionContext&    rCtx,
+                                   const Transl::Tracelet& tlet);
 
 /*
  * Debug stringification for various things.

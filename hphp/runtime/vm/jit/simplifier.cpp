@@ -41,7 +41,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   switch (inst->op()) {
   case DefInlineSP:
   case DefSP:
-    return StackValueInfo { inst };
+    return StackValueInfo { inst, Type::None };
 
   case ReDefGeneratorSP: {
     auto const extra = inst->extra<ReDefGeneratorSP>();
@@ -95,7 +95,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   case CallArray: {
     if (index == 0) {
       // return value from call
-      return StackValueInfo { inst };
+      return StackValueInfo { inst, Type::Gen };
     }
     auto info =
       getStackValue(inst->src(0),
@@ -109,7 +109,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   case Call: {
     if (index == 0) {
       // return value from call
-      return StackValueInfo { inst };
+      return StackValueInfo { inst, Type::Gen };
     }
     auto info =
       getStackValue(inst->src(0),
@@ -180,15 +180,16 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
 
     // If the index we're looking for is a cell pushed by the InterpOne (other
     // than top of stack), we know nothing about its type.
-    if (index < extra.cellsPushed) return StackValueInfo{ inst };
-
+    if (index < extra.cellsPushed) {
+      return StackValueInfo{ inst, Type::StackElem };
+    }
     return getStackValue(prevSp, index + spAdjustment);
   }
 
   case SpillFrame:
   case CufIterSpillFrame:
     // pushes an ActRec
-    if (index < kNumActRecCells) return StackValueInfo { inst };
+    if (index < kNumActRecCells) return StackValueInfo { inst, Type::None };
     return getStackValue(inst->src(0), index - kNumActRecCells);
 
   default:

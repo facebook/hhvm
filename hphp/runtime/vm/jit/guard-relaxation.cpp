@@ -123,7 +123,10 @@ void visitGuards(IRTrace* trace, const VisitGuardFn& func) {
     if (inst.op() == GuardLoc) {
       func(L::Local{inst.extra<LocalId>()->locId}, inst.typeParam());
     } else if (inst.op() == GuardStk) {
-      func(L::Stack{safe_cast<uint32_t>(inst.extra<StackOffset>()->offset)},
+      uint32_t offsetFromSp =
+        safe_cast<uint32_t>(inst.extra<StackOffset>()->offset);
+      uint32_t offsetFromFp = inst.marker().spOff - offsetFromSp;
+      func(L::Stack{offsetFromSp, offsetFromFp},
            inst.typeParam());
     }
   }

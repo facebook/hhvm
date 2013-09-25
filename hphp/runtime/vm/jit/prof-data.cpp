@@ -195,11 +195,14 @@ RegionDescPtr ProfData::transRegion(TransID id) const {
   return pTransRec.region();
 }
 
-TransID ProfData::addTrans(const Tracelet& tracelet, TransKind kind,
+TransID ProfData::addTrans(const Tracelet&       tracelet,
+                           const RegionContext&  rCtx,
+                           TransKind             kind,
                            const PostConditions& pconds) {
   TransID transId   = m_numTrans++;
   Offset  lastBcOff = tracelet.m_instrStream.last->source.offset();
-  auto region = kind == TransProfile ? selectTraceletLegacy(tracelet) : nullptr;
+  auto region = kind == TransProfile ? selectTraceletLegacy(rCtx, tracelet)
+                                     : nullptr;
   if (region) {
     DEBUG_ONLY size_t nBlocks = region->blocks.size();
     assert(nBlocks == 1 || (nBlocks > 1 && region->blocks[0]->inlinedCallee()));

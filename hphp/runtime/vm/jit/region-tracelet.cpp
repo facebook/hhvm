@@ -92,6 +92,7 @@ private:
 
   const Func* curFunc() const;
   const Unit* curUnit() const;
+  Offset curSpOffset() const;
   int inliningDepth() const;
 
   bool prepareInstruction();
@@ -109,7 +110,7 @@ RegionFormer::RegionFormer(const RegionContext& ctx, InterpSet& interp,
   , m_sk(ctx.func, ctx.bcOffset)
   , m_startSk(m_sk)
   , m_region(std::make_shared<RegionDesc>())
-  , m_curBlock(m_region->addBlock(ctx.func, m_sk.offset(), 0))
+  , m_curBlock(m_region->addBlock(ctx.func, m_sk.offset(), 0, ctx.spOffset))
   , m_blockFinished(false)
   , m_irTrans(ctx.bcOffset, ctx.spOffset, ctx.func)
   , m_ht(m_irTrans.hhbcTrans())
@@ -124,6 +125,10 @@ const Func* RegionFormer::curFunc() const {
 
 const Unit* RegionFormer::curUnit() const {
   return m_ht.curUnit();
+}
+
+Offset RegionFormer::curSpOffset() const {
+  return m_ht.spOffset();
 }
 
 int RegionFormer::inliningDepth() const {
@@ -307,7 +312,7 @@ void RegionFormer::addInstruction() {
   if (m_blockFinished) {
     FTRACE(2, "selectTracelet adding new block at {} after:\n{}\n",
            showShort(m_sk), show(*m_curBlock));
-    m_curBlock = m_region->addBlock(curFunc(), m_sk.offset(), 0);
+    m_curBlock = m_region->addBlock(curFunc(), m_sk.offset(), 0, curSpOffset());
     m_blockFinished = false;
   }
 

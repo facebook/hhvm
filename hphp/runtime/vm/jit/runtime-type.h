@@ -121,10 +121,13 @@ struct Location {
     return space == Iter;
   }
 
-  JIT::RegionDesc::Location toLocation() const {
+  JIT::RegionDesc::Location toLocation(Offset spOffsetFromFp) const {
     typedef JIT::RegionDesc::Location L;
     switch (space) {
-      case Stack: return L::Stack{safe_cast<uint32_t>(offset)};
+      case Stack: {
+        auto offsetFromSp = safe_cast<uint32_t>(offset);
+        return L::Stack{offsetFromSp, spOffsetFromFp - offsetFromSp};
+      }
       case Local: return L::Local{safe_cast<uint32_t>(offset)};
       default:    not_reached();
     }

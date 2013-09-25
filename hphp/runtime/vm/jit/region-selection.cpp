@@ -91,11 +91,13 @@ void truncateMap(Container& c, SrcKey final) {
 
 //////////////////////////////////////////////////////////////////////
 
-RegionDesc::Block::Block(const Func* func, Offset start, int length)
+RegionDesc::Block::Block(const Func* func, Offset start, int length,
+                         Offset initSpOff)
   : m_func(func)
   , m_start(start)
   , m_last(kInvalidOffset)
   , m_length(length)
+  , m_initialSpOffset(initSpOff)
   , m_inlinedCallee(nullptr)
 {
   assert(length >= 0);
@@ -265,7 +267,8 @@ void RegionDesc::Block::checkMetadata() const {
 
 //////////////////////////////////////////////////////////////////////
 
-RegionDescPtr selectTraceletLegacy(const Transl::Tracelet& tlet) {
+RegionDescPtr selectTraceletLegacy(const RegionContext&    rCtx,
+                                   const Transl::Tracelet& tlet) {
   typedef RegionDesc::Block Block;
 
   auto region = std::make_shared<RegionDesc>();
@@ -274,17 +277,19 @@ RegionDescPtr selectTraceletLegacy(const Transl::Tracelet& tlet) {
 
   const Func* topFunc = nullptr;
   Block* curBlock = nullptr;
-  auto newBlock = [&](const Func* func, SrcKey start) {
+  auto newBlock = [&](const Func* func, SrcKey start, Offset spOff) {
     assert(curBlock == nullptr || curBlock->length() > 0);
     region->blocks.push_back(
-      std::make_shared<Block>(func, start.offset(), 0));
+      std::make_shared<Block>(func, start.offset(), 0, spOff));
     curBlock = region->blocks.back().get();
   };
-  newBlock(tlet.func(), sk);
+  newBlock(tlet.func(), sk, rCtx.spOffset);
 
   for (auto ni = tlet.m_instrStream.first; ni; ni = ni->next) {
     assert(sk == ni->source);
     assert(ni->unit() == unit);
+
+    Offset curSpOffset = rCtx.spOffset + ni->stackOffset;
 
     curBlock->addInstruction();
     if ((curBlock->length() == 1 && ni->funcd != nullptr) ||
@@ -303,7 +308,7 @@ RegionDescPtr selectTraceletLegacy(const Transl::Tracelet& tlet) {
       SrcKey cSk = callee.m_sk;
       Unit* cUnit = callee.func()->unit();
 
-      newBlock(callee.func(), cSk);
+      newBlock(callee.func(), cSk, curSpOffset);
 
       for (auto cni = callee.m_instrStream.first; cni; cni = cni->next) {
         assert(cSk == cni->source);
@@ -318,7 +323,7 @@ RegionDescPtr selectTraceletLegacy(const Transl::Tracelet& tlet) {
 
       if (ni->next) {
         sk.advance(unit);
-        newBlock(tlet.func(), sk);
+        newBlock(tlet.func(), sk, curSpOffset);
       }
       continue;
     }
@@ -336,7 +341,7 @@ RegionDescPtr selectTraceletLegacy(const Transl::Tracelet& tlet) {
       sk.setOffset(dest);
 
       // The Jmp terminates this block.
-      newBlock(tlet.func(), sk);
+      newBlock(tlet.func(), sk, curSpOffset);
     } else {
       sk.advance(unit);
     }
@@ -358,10 +363,12 @@ RegionDescPtr selectTraceletLegacy(const Transl::Tracelet& tlet) {
     };
 
     switch (dep.first.space) {
-      case Transl::Location::Stack:
-        addPred(R::Location::Stack{uint32_t(-dep.first.offset - 1)});
+      case Transl::Location::Stack: {
+        uint32_t offsetFromSp = uint32_t(-dep.first.offset - 1);
+        uint32_t offsetFromFp = rCtx.spOffset - offsetFromSp;
+        addPred(R::Location::Stack{offsetFromSp, offsetFromFp});
         break;
-
+      }
       case Transl::Location::Local:
         addPred(R::Location::Local{uint32_t(dep.first.offset)});
         break;
@@ -400,7 +407,7 @@ RegionDescPtr selectRegion(const RegionContext& context,
         case RegionMode::Method:   return selectMethod(context);
         case RegionMode::Tracelet: return selectTracelet(context, 0);
         case RegionMode::Legacy:
-                 always_assert(t); return selectTraceletLegacy(*t);
+                 always_assert(t); return selectTraceletLegacy(context, *t);
         case RegionMode::HotBlock:
         case RegionMode::HotTrace: always_assert(0 &&
                                                  "unsupported region mode");
@@ -470,7 +477,8 @@ std::string show(RegionDesc::Location l) {
   case RegionDesc::Location::Tag::Local:
     return folly::format("Local{{{}}}", l.localId()).str();
   case RegionDesc::Location::Tag::Stack:
-    return folly::format("Stack{{{}}}", l.stackOffset()).str();
+    return folly::format("Stack{{{}, {}}}",
+                         l.stackOffset(), l.stackOffsetFromFp()).str();
   }
   not_reached();
 }
@@ -522,7 +530,7 @@ std::string show(const RegionDesc::Block& b) {
   std::string ret{"Block "};
   folly::toAppend(
     b.func()->fullName()->data(), '@', b.start().offset(),
-    " length ", b.length(), '\n',
+    " length ", b.length(), " initSpOff ", b.initialSpOffset(), '\n',
     &ret
   );
 

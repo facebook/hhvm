@@ -604,8 +604,8 @@ std::vector<RegionDesc::TypePred> TraceBuilder::getKnownTypes() const {
 
   for (unsigned i = 0; i < curFunc->maxStackCells(); ++i) {
     auto t = getStackValue(m_spValue, i).knownType;
-    if (!t.equals(Type::None) && !t.equals(Type::Gen)) {
-      result.push_back({ RegionDesc::Location::Stack{i}, t });
+    if (!t.equals(Type::None)) {
+      result.push_back({ RegionDesc::Location::Stack{i, m_spOffset - i}, t });
     }
   }
 
@@ -613,7 +613,7 @@ std::vector<RegionDesc::TypePred> TraceBuilder::getKnownTypes() const {
   // trace with relaxed guards.
   for (unsigned i = 0; i < curFunc->numLocals(); ++i) {
     auto t = m_locals[i].type;
-    if (!t.equals(Type::None) && !t.equals(Type::Gen)) {
+    if (!t.equals(Type::None)) {
       result.push_back({ RegionDesc::Location::Local{i}, t });
     }
   }

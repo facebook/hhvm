@@ -3606,7 +3606,8 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
         break;
       case Unit::MetaInfo::Kind::DataTypePredicted: {
         if (metaMode == MetaMode::Legacy) break;
-        auto const loc = stackFilter(inst.inputs[arg]->location).toLocation();
+        auto const loc = stackFilter(inst.inputs[arg]->location).
+                         toLocation(inst.stackOffset);
         auto const t = Type(DataType(info.m_data));
         auto const offset = inst.source.offset();
 
@@ -3620,14 +3621,14 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
       }
       case Unit::MetaInfo::Kind::DataTypeInferred: {
         hhbcTrans.assertTypeLocation(
-          stackFilter(inst.inputs[arg]->location).toLocation(),
+          stackFilter(inst.inputs[arg]->location).toLocation(inst.stackOffset),
           Type(DataType(info.m_data)));
         updateType();
         break;
       }
       case Unit::MetaInfo::Kind::String: {
         hhbcTrans.assertString(
-          stackFilter(inst.inputs[arg]->location).toLocation(),
+          stackFilter(inst.inputs[arg]->location).toLocation(inst.stackOffset),
           inst.unit()->lookupLitstrId(info.m_data));
         updateType();
         break;
@@ -3702,7 +3703,7 @@ bool instrMustInterp(const NormalizedInstruction& inst) {
   }
 }
 
-void Translator::traceStart(Offset bcStartOffset) {
+void Translator::traceStart(Offset initBcOffset, Offset initSpOffset) {
   assert(!m_irTrans);
 
   FTRACE(1, "{}{:-^40}{}\n",
@@ -3710,8 +3711,8 @@ void Translator::traceStart(Offset bcStartOffset) {
          " HHIR during translation ",
          color(ANSI_COLOR_END));
 
-  m_irTrans.reset(new JIT::IRTranslator(
-    bcStartOffset, liveSpOff(), liveFunc()));
+  m_irTrans.reset(new JIT::IRTranslator(initBcOffset, initSpOffset,
+                                        liveFunc()));
 }
 
 void Translator::traceEnd() {

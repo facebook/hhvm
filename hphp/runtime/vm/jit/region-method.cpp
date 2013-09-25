@@ -75,12 +75,15 @@ RegionDescPtr selectMethod(const RegionContext& context) {
    * compiler and then may branch to the main entry point.
    */
   sortRpo(graph);
+  Offset spOffset = context.spOffset;
   for (Block* b = graph->first_linear; b != nullptr; b = b->next_rpo) {
     auto const start  = unit->offsetOf(b->start);
     auto const length = numInstrs(b->start, b->end);
     ret->blocks.emplace_back(
-      std::make_shared<RegionDesc::Block>(context.func, start, length)
+      std::make_shared<RegionDesc::Block>(context.func, start, length,
+                                          spOffset)
     );
+    spOffset = -1; // flag SP offset as unknown for all but the first block
   }
 
   assert(!ret->blocks.empty());

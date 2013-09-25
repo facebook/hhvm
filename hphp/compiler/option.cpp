@@ -112,6 +112,7 @@ std::string Option::ProgramName;
 
 bool Option::ParseTimeOpts = true;
 bool Option::EnableHipHopSyntax = false;
+bool Option::EnableZendCompat = false;
 bool Option::JitEnableRenameFunction = false;
 bool Option::EnableHipHopExperimentalSyntax = false;
 bool Option::EnableShortTags = true;
@@ -261,6 +262,7 @@ void Option::Load(Hdf &config) {
   HardTypeHints = config["HardTypeHints"].getBool(true);
 
   EnableHipHopSyntax = config["EnableHipHopSyntax"].getBool();
+  EnableZendCompat = config["EnableZendCompat"].getBool();
   JitEnableRenameFunction = config["JitEnableRenameFunction"].getBool();
   EnableHipHopExperimentalSyntax =
     config["EnableHipHopExperimentalSyntax"].getBool();

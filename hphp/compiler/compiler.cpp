@@ -804,6 +804,7 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
   RuntimeOption::RepoDebugInfo = Option::RepoDebugInfo;
   RuntimeOption::RepoJournal = "memory";
   RuntimeOption::EnableHipHopSyntax = Option::EnableHipHopSyntax;
+  RuntimeOption::EnableZendCompat = Option::EnableZendCompat;
   RuntimeOption::EvalJitEnableRenameFunction = Option::JitEnableRenameFunction;
 
   // Turn off commits, because we don't want systemlib to get included

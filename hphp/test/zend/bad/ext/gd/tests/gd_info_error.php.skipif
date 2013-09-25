@@ -1,0 +1,8 @@
+<?php
+if(!extension_loaded('gd')) {
+    die('skip gd extension is not loaded');
+}
+if(!function_exists('gd_info')) {
+    die('skip gd_info function is not available');
+}
+?>

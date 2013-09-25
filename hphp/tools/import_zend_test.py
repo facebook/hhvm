@@ -770,6 +770,9 @@ def walk(filename, source_dir):
         exp = sections['INI']
         file(full_dest_filename+'.ini', 'w').write(exp)
 
+    if sections.has_key('SKIPIF'):
+        file(full_dest_filename + '.skipif', 'w').write(sections['SKIPIF'])
+
     test = sections['FILE']
 
     if sections.has_key('POST'):

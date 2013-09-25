@@ -1,0 +1,3 @@
+<?php
+        if (!function_exists('imagecolorclosest')) die("skip gd extension not available\n");
+?>

@@ -1,0 +1,1 @@
+<?php if (!function_exists('date_create')) echo "SKIP"; ?>

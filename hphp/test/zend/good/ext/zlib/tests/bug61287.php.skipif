@@ -1,0 +1,1 @@
+<?php extension_loaded("zlib") or die("SKIP need zlib");

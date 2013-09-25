@@ -1,0 +1,4 @@
+<?php
+if( (stristr(PHP_OS, "Darwin")) || (stristr(PHP_OS, "Win")) )
+  die("skip do not run on MacOS/Windows");
+?>

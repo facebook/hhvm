@@ -1,0 +1,2 @@
+<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php if (!extension_loaded('zip')) { die("skip"); } ?>

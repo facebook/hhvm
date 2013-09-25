@@ -1,0 +1,5 @@
+<?php
+require_once('skipif.inc');
+if (!function_exists('mysql_create_db'))
+	die("Skip mysql_create_db() exists only in old versions of the libmysql.");
+?>

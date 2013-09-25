@@ -1,0 +1,2 @@
+<?php if (!extension_loaded("mcrypt")) print "skip"; 
+if (!extension_loaded("hash")) print "skip"; ?>

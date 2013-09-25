@@ -1,0 +1,2 @@
+<?php # vim600:syn=php:
+if (!extension_loaded("zlib")) print "skip"; ?>

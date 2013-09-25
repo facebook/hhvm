@@ -1,0 +1,4 @@
+<?php
+/* unfortunately no standard function does a cast to FILE*, so we need
+ * curl to test this */
+if (!extension_loaded("curl")) exit("skip curl extension not loaded");

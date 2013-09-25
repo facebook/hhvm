@@ -27,6 +27,8 @@
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/util/process.h"
 
+#include "folly/ScopeGuard.h"
+
 using std::set;
 
 namespace HPHP {
@@ -146,8 +148,13 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
     HttpRequestHandler::GetAccessLog().log(transport, vhost);
     return;
   }
-  ThreadInfo::s_threadInfo->m_reqInjectionData.
-    setTimeout(vhost->getRequestTimeoutSeconds(getDefaultTimeout()));
+
+  auto& reqData = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  reqData.setTimeout(vhost->getRequestTimeoutSeconds(getDefaultTimeout()));
+  SCOPE_EXIT {
+    reqData.setTimeout(0);
+    reqData.reset();
+  };
 
   // resolve source root
   string host = transport->getHeader("Host");

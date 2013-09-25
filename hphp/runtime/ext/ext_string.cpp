@@ -27,6 +27,7 @@
 #include <locale.h>
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/http-protocol.h"
+#include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_variable.h"
 
 namespace HPHP {
@@ -301,12 +302,13 @@ String f_str_shuffle(CStrRef str) {
   int left   = ret->size();
 
   while (--left) {
-    int idx = rand() % left;
-    char temp = buf[left];
-    buf[left] = buf[idx];
-    buf[idx] = temp;
+    int idx = f_rand(0, left);
+    if (idx != left) {
+      char temp = buf[left];
+      buf[left] = buf[idx];
+      buf[idx] = temp;
+    }
   }
-
   return ret;
 }
 

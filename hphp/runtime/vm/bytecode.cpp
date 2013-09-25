@@ -5186,33 +5186,36 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushFunc(PC& pc) {
   DECODE_IVA(numArgs);
   Cell* c1 = m_stack.topC();
   const Func* func = nullptr;
-  ObjectData* origObj = nullptr;
-  StringData* origSd = nullptr;
+
+  // Throughout this function, we save obj/string/array and defer
+  // refcounting them until after the stack has been discarded.
+
   if (IS_STRING_TYPE(c1->m_type)) {
-    origSd = c1->m_data.pstr;
+    StringData* origSd = c1->m_data.pstr;
     func = Unit::loadFunc(origSd);
-  } else if (c1->m_type == KindOfObject) {
+    if (func == nullptr) {
+      raise_error("Undefined function: %s", c1->m_data.pstr->data());
+    }
+
+    m_stack.discard();
+    ActRec* ar = fPushFuncImpl(func, numArgs);
+    ar->setThis(nullptr);
+    decRefStr(origSd);
+    return;
+  }
+
+  if (c1->m_type == KindOfObject) {
+    // this covers both closures and functors
     static StringData* invokeName = makeStaticString("__invoke");
-    origObj = c1->m_data.pobj;
+    ObjectData* origObj = c1->m_data.pobj;
     const Class* cls = origObj->getVMClass();
     func = cls->lookupMethod(invokeName);
     if (func == nullptr) {
       raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
     }
-  } else {
-    raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
-  }
-  if (func == nullptr) {
-    raise_error("Undefined function: %s", c1->m_data.pstr->data());
-  }
-  assert(!origObj || !origSd);
-  assert(origObj || origSd);
-  // We've already saved origObj or origSd; we'll use them after
-  // overwriting the pointer on the stack.  Don't refcount it now; defer
-  // till after we're done with it.
-  m_stack.discard();
-  ActRec* ar = fPushFuncImpl(func, numArgs);
-  if (origObj) {
+
+    m_stack.discard();
+    ActRec* ar = fPushFuncImpl(func, numArgs);
     if (func->attrs() & AttrStatic && !func->isClosureBody()) {
       ar->setClass(origObj->getVMClass());
       decRefObj(origObj);
@@ -5221,10 +5224,47 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushFunc(PC& pc) {
       // Teleport the reference from the destroyed stack cell to the
       // ActRec. Don't try this at home.
     }
-  } else {
-    ar->setThis(nullptr);
-    decRefStr(origSd);
+    return;
   }
+
+  if (c1->m_type == KindOfArray) {
+    // support: array($instance, 'method') and array('Class', 'method')
+    // which are both valid callables
+    ArrayData* origArr = c1->m_data.parr;
+    ObjectData* arrThis = nullptr;
+    HPHP::Class* arrCls = nullptr;
+    StringData* invName = nullptr;
+
+    func = vm_decode_function(
+      tvAsCVarRef(c1),
+      getFP(),
+      /* forwarding */ false,
+      arrThis,
+      arrCls,
+      invName,
+      /* warn */ false
+    );
+    if (func == nullptr) {
+      raise_error("Invalid callable (array)");
+    }
+    assert(arrCls != nullptr);
+
+    m_stack.discard();
+    ActRec* ar = fPushFuncImpl(func, numArgs);
+    if (arrThis) {
+      arrThis->incRefCount();
+      ar->setThis(arrThis);
+    } else {
+      ar->setClass(arrCls);
+    }
+    if (UNLIKELY(invName != nullptr)) {
+      ar->setInvName(invName);
+    }
+    decRefArr(origArr);
+    return;
+  }
+
+  raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopFPushFuncD(PC& pc) {

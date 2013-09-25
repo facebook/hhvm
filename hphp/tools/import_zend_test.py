@@ -474,7 +474,7 @@ def mkdir_p(path):
         pass
 
 def walk(filename, source):
-    if not '/tests' in source:
+    if not '/tests' in source and not source.startswith('tests'):
         return
 
     dest_filename = os.path.basename(filename)

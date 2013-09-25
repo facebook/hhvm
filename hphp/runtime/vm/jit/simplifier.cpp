@@ -1771,7 +1771,7 @@ SSATmp* Simplifier::simplifyUnbox(IRInstruction* inst) {
   if (srcType.isBoxed()) {
     srcType = srcType.innerType();
     assert(type.equals(srcType));
-    return gen(LdRef, type, inst->taken()->trace(), src);
+    return gen(LdRef, type, inst->taken(), src);
   }
   return nullptr;
 }

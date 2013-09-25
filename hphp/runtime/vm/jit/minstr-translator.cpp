@@ -256,12 +256,12 @@ HhbcTranslator::MInstrTranslator::MInstrTranslator(
     , m_base(nullptr)
     , m_result(nullptr)
     , m_strTestResult(nullptr)
-    , m_failedSetTrace(nullptr)
+    , m_failedSetBlock(nullptr)
 {
 }
 
 template<typename... Srcs>
-SSATmp* HhbcTranslator::MInstrTranslator::genStk(Opcode opc, IRTrace* taken,
+SSATmp* HhbcTranslator::MInstrTranslator::genStk(Opcode opc, Block* taken,
                                                  Srcs... srcs) {
   assert(opcodeHasFlags(opc, HasStackVersion));
   assert(!opcodeHasFlags(opc, ModifiesStack));
@@ -551,7 +551,7 @@ void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
     // Check for Uninit and warn/promote to InitNull as appropriate
     if (baseType.subtypeOf(Type::Uninit)) {
       if (mia & MIA_warn) {
-        gen(RaiseUninitLoc, getEmptyCatchTrace(),
+        gen(RaiseUninitLoc, makeEmptyCatch(),
             cns(m_ht.curFunc()->localVarName(base.location.offset)));
       }
       if (mia & MIA_define) {
@@ -576,7 +576,7 @@ void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
   // the MInstrState. These particular stores are harmless though, and the
   // worst outcome here is that we'll end up doing the stores twice, once for
   // this instruction and once at the beginning of the retranslation.
-  IRTrace* failedRef = baseType.isBoxed() ? m_ht.getExitTrace() : nullptr;
+  Block* failedRef = baseType.isBoxed() ? m_ht.makeExit() : nullptr;
   if ((baseType.subtypeOfAny(Type::Obj, Type::BoxedObj) &&
        mcodeMaybePropName(m_ni.immVecM[0])) ||
       simpleCollectionOp() != SimpleOp::None) {
@@ -761,7 +761,7 @@ void HhbcTranslator::MInstrTranslator::emitBaseG() {
   if (!gblName->isA(Type::Str)) PUNT(BaseG-non-string-name);
 
   m_base = gen(BaseG,
-               getEmptyCatchTrace(),
+               makeEmptyCatch(),
                cns(reinterpret_cast<TCA>(opFunc)),
                gblName,
                genMisPtr());
@@ -865,10 +865,10 @@ void HhbcTranslator::MInstrTranslator::emitPropGeneric() {
   SSATmp* key = getKey();
   BUILD_OPTAB(mia, m_base->isA(Type::Obj));
   if (mia & Define) {
-    m_base = genStk(PropDX, getCatchTrace(), cns((TCA)opFunc), CTX(),
+    m_base = genStk(PropDX, makeCatch(), cns((TCA)opFunc), CTX(),
                     m_base, key, genMisPtr());
   } else {
-    m_base = gen(PropX, getCatchTrace(),
+    m_base = gen(PropX, makeCatch(),
                  cns((TCA)opFunc), CTX(), m_base, key, genMisPtr());
   }
 }
@@ -913,7 +913,7 @@ SSATmp* HhbcTranslator::MInstrTranslator::checkInitProp(
           // init_null_variant.
       m_tb.hint(Block::Hint::Unlikely);
       if (doWarn && wantPropSpecializedWarnings()) {
-        gen(RaiseUndefProp, m_ht.getCatchTrace(), baseAsObj, key);
+        gen(RaiseUndefProp, m_ht.makeCatch(), baseAsObj, key);
       }
       if (doDefine) {
         gen(
@@ -1097,10 +1097,10 @@ void HhbcTranslator::MInstrTranslator::emitElem() {
   typedef TypedValue* (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
   BUILD_OPTAB_HOT(getKeyType(key), mia);
   if (define || unset) {
-    m_base = genStk(define ? ElemDX : ElemUX, getCatchTrace(),
+    m_base = genStk(define ? ElemDX : ElemUX, makeCatch(),
                     cns((TCA)opFunc), m_base, key, genMisPtr());
   } else {
-    m_base = gen(ElemX, getCatchTrace(),
+    m_base = gen(ElemX, makeCatch(),
                  cns((TCA)opFunc), m_base, key, genMisPtr());
   }
 }
@@ -1297,7 +1297,7 @@ void HhbcTranslator::MInstrTranslator::emitCGetProp() {
   SSATmp* key = getKey();
   auto keyType = getKeyTypeNoInt(key);
   BUILD_OPTAB_HOT(keyType, m_base->isA(Type::Obj));
-  m_result = gen(CGetProp, getCatchTrace(),
+  m_result = gen(CGetProp, makeCatch(),
                  cns((TCA)opFunc), CTX(), m_base, key, genMisPtr());
 }
 #undef HELPER_TABLE
@@ -1339,7 +1339,7 @@ void HhbcTranslator::MInstrTranslator::emitVGetProp() {
   SSATmp* key = getKey();
   typedef RefData* (*OpFunc)(Class*, TypedValue*, TypedValue, MInstrState*);
   BUILD_OPTAB_HOT(getKeyTypeNoInt(key), m_base->isA(Type::Obj));
-  m_result = genStk(VGetProp, getCatchTrace(), cns((TCA)opFunc), CTX(),
+  m_result = genStk(VGetProp, makeCatch(), cns((TCA)opFunc), CTX(),
                     m_base, key, genMisPtr());
 }
 #undef HELPER_TABLE
@@ -1371,7 +1371,7 @@ void HhbcTranslator::MInstrTranslator::emitIssetEmptyProp(bool isEmpty) {
   SSATmp* key = getKey();
   typedef uint64_t (*OpFunc)(Class*, TypedValue*, TypedValue);
   BUILD_OPTAB(isEmpty, m_base->isA(Type::Obj));
-  m_result = gen(isEmpty ? EmptyProp : IssetProp, getCatchTrace(),
+  m_result = gen(isEmpty ? EmptyProp : IssetProp, makeCatch(),
                  cns((TCA)opFunc), CTX(), m_base, key);
 }
 #undef HELPER_TABLE
@@ -1427,7 +1427,7 @@ void HhbcTranslator::MInstrTranslator::emitSetProp() {
   typedef void (*OpFunc)(Class*, TypedValue*, TypedValue, Cell);
   SSATmp* key = getKey();
   BUILD_OPTAB(m_base->isA(Type::Obj));
-  genStk(SetProp, getCatchSetTrace(), cns((TCA)opFunc), CTX(),
+  genStk(SetProp, makeCatchSet(), cns((TCA)opFunc), CTX(),
          m_base, key, value);
   m_result = value;
 }
@@ -1467,9 +1467,8 @@ void HhbcTranslator::MInstrTranslator::emitSetOpProp() {
                                Cell, MInstrState*, SetOpOp);
   BUILD_OPTAB(m_base->isA(Type::Obj));
   m_tb.gen(StRaw, m_misBase, cns(RawMemSlot::MisCtx), CTX());
-  m_result =
-    genStk(SetOpProp, getCatchTrace(), cns((TCA)opFunc),
-           m_base, key, value, genMisPtr(), cns(op));
+  m_result = genStk(SetOpProp, makeCatch(), cns((TCA)opFunc),
+                    m_base, key, value, genMisPtr(), cns(op));
 }
 #undef HELPER_TABLE
 
@@ -1507,9 +1506,8 @@ void HhbcTranslator::MInstrTranslator::emitIncDecProp() {
                                MInstrState*, IncDecOp);
   BUILD_OPTAB(m_base->isA(Type::Obj));
   m_tb.gen(StRaw, m_misBase, cns(RawMemSlot::MisCtx), CTX());
-  m_result =
-    genStk(IncDecProp, getCatchTrace(), cns((TCA)opFunc),
-           m_base, key, genMisPtr(), cns(op));
+  m_result = genStk(IncDecProp, makeCatch(), cns((TCA)opFunc),
+                    m_base, key, genMisPtr(), cns(op));
 }
 #undef HELPER_TABLE
 
@@ -1544,7 +1542,7 @@ void HhbcTranslator::MInstrTranslator::emitBindProp() {
   typedef void (*OpFunc)(Class*, TypedValue*, TypedValue, RefData*,
                          MInstrState*);
   BUILD_OPTAB(m_base->isA(Type::Obj));
-  genStk(BindProp, getCatchTrace(), cns((TCA)opFunc), CTX(),
+  genStk(BindProp, makeCatch(), cns((TCA)opFunc), CTX(),
          m_base, key, box, genMisPtr());
   m_result = box;
 }
@@ -1739,7 +1737,7 @@ void HhbcTranslator::MInstrTranslator::emitMapGet(SSATmp* key) {
 
   typedef TypedValue (*OpFunc)(c_Map*, TypedValue*);
   BUILD_OPTAB_HOT(keyType);
-  SSATmp* value = gen(MapGet, getCatchTrace(),
+  SSATmp* value = gen(MapGet, makeCatch(),
                       cns((TCA)opFunc), m_base, key);
   m_result = gen(IncRef, value);
 }
@@ -1773,7 +1771,7 @@ void HhbcTranslator::MInstrTranslator::emitStableMapGet(SSATmp* key) {
 
   typedef TypedValue (*OpFunc)(c_StableMap*, TypedValue*);
   BUILD_OPTAB_HOT(keyType);
-  SSATmp* value = gen(StableMapGet, getCatchTrace(),
+  SSATmp* value = gen(StableMapGet, makeCatch(),
                       cns((TCA)opFunc), m_base, key);
   m_result = gen(IncRef, value);
 }
@@ -1835,7 +1833,7 @@ void HhbcTranslator::MInstrTranslator::emitCGetElem() {
   case SimpleOp::None:
     typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
     BUILD_OPTAB_HOT(getKeyType(key));
-    m_result = gen(CGetElem, getCatchTrace(), cns((TCA)opFunc),
+    m_result = gen(CGetElem, makeCatch(), cns((TCA)opFunc),
                    m_base, key, genMisPtr());
     break;
   }
@@ -1876,7 +1874,7 @@ void HhbcTranslator::MInstrTranslator::emitVGetElem() {
   SSATmp* key = getKey();
   typedef RefData* (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
   BUILD_OPTAB(getKeyType(key));
-  m_result = genStk(VGetElem, getCatchTrace(), cns((TCA)opFunc),
+  m_result = genStk(VGetElem, makeCatch(), cns((TCA)opFunc),
                     m_base, key, genMisPtr());
 }
 #undef HELPER_TABLE
@@ -1916,7 +1914,7 @@ void HhbcTranslator::MInstrTranslator::emitIssetEmptyElem(bool isEmpty) {
 
   typedef uint64_t (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
   BUILD_OPTAB_HOT(getKeyType(key), isEmpty);
-  m_result = gen(isEmpty ? EmptyElem : IssetElem, getCatchTrace(),
+  m_result = gen(isEmpty ? EmptyElem : IssetElem, makeCatch(),
                  cns((TCA)opFunc), m_base, key, genMisPtr());
 }
 #undef HELPER_TABLE
@@ -1967,8 +1965,7 @@ void HhbcTranslator::MInstrTranslator::emitArrayIsset() {
     m_tb.constrainValue(m_base, DataTypeSpecialized);
     opFunc = packedArrayIssetI;
   }
-  m_result = gen(ArrayIsset, getCatchTrace(),
-                 cns((TCA)opFunc), m_base, key);
+  m_result = gen(ArrayIsset, makeCatch(), cns((TCA)opFunc), m_base, key);
 }
 #undef HELPER_TABLE
 
@@ -2225,7 +2222,7 @@ void HhbcTranslator::MInstrTranslator::emitSetWithRefLElem() {
     emitSetElem();
     assert(m_strTestResult == nullptr);
   } else {
-    genStk(SetWithRefElem, getCatchTrace(),
+    genStk(SetWithRefElem, makeCatch(),
            cns((TCA)MInstrHelpers::setWithRefElemC),
            m_base, key, locAddr, genMisPtr());
   }
@@ -2249,7 +2246,7 @@ void HhbcTranslator::MInstrTranslator::emitSetWithRefNewElem() {
       getValue()->type().notBoxed()) {
     emitSetNewElem();
   } else {
-    genStk(SetWithRefNewElem, getCatchTrace(),
+    genStk(SetWithRefNewElem, makeCatch(),
            cns((TCA)MInstrHelpers::setWithRefNewElem),
            m_base, getValAddr(), genMisPtr());
   }
@@ -2308,8 +2305,7 @@ void HhbcTranslator::MInstrTranslator::emitMapSet(
 
   typedef TypedValue (*OpFunc)(c_Map*, TypedValue*, TypedValue*);
   BUILD_OPTAB_HOT(keyType);
-  gen(MapSet, getCatchTrace(),
-      cns((TCA)opFunc), m_base, key, value);
+  gen(MapSet, makeCatch(), cns((TCA)opFunc), m_base, key, value);
   m_result = value;
 }
 #undef HELPER_TABLE
@@ -2344,8 +2340,7 @@ void HhbcTranslator::MInstrTranslator::emitStableMapSet(
 
   typedef TypedValue (*OpFunc)(c_StableMap*, TypedValue*, TypedValue*);
   BUILD_OPTAB_HOT(keyType);
-  gen(StableMapSet, getCatchTrace(),
-      cns((TCA)opFunc), m_base, key, value);
+  gen(StableMapSet, makeCatch(), cns((TCA)opFunc), m_base, key, value);
   m_result = value;
 }
 #undef HELPER_TABLE
@@ -2399,9 +2394,9 @@ void HhbcTranslator::MInstrTranslator::emitSetElem() {
     // Emit the appropriate helper call.
     typedef StringData* (*OpFunc)(TypedValue*, TypedValue, Cell);
     BUILD_OPTAB_HOT(getKeyType(key));
-    m_failedSetTrace = getCatchSetTrace();
-    SSATmp* result = genStk(SetElem, m_failedSetTrace, cns((TCA)opFunc),
-                            m_base, key, value);
+    m_failedSetBlock = makeCatchSet();
+    SSATmp* result = genStk(SetElem, m_failedSetBlock,
+                            cns((TCA)opFunc), m_base, key, value);
     auto t = result->type();
     if (t.equals(Type::Nullptr)) {
       // Base is not a string. Result is always value.
@@ -2458,9 +2453,8 @@ void HhbcTranslator::MInstrTranslator::emitSetOpElem() {
 # define SETOP_OP(op, bcOp) HELPER_TABLE(FILL_ROW, op)
   BUILD_OPTAB_ARG(SETOP_OPS, op);
 # undef SETOP_OP
-  m_result =
-    genStk(SetOpElem, getCatchTrace(), cns((TCA)opFunc),
-           m_base, key, getValue(), genMisPtr());
+  m_result = genStk(SetOpElem, makeCatch(), cns((TCA)opFunc),
+                    m_base, key, getValue(), genMisPtr());
 }
 #undef HELPER_TABLE
 
@@ -2493,7 +2487,7 @@ void HhbcTranslator::MInstrTranslator::emitIncDecElem() {
 # define INCDEC_OP(op) HELPER_TABLE(FILL_ROW, op)
   BUILD_OPTAB_ARG(INCDEC_OPS, op);
 # undef INCDEC_OP
-  m_result = genStk(IncDecElem, getCatchTrace(), cns((TCA)opFunc),
+  m_result = genStk(IncDecElem, makeCatch(), cns((TCA)opFunc),
                     m_base, key, genMisPtr());
 }
 #undef HELPER_TABLE
@@ -2511,7 +2505,7 @@ void bindElemC(TypedValue* base, TypedValue keyVal, RefData* val,
 void HhbcTranslator::MInstrTranslator::emitBindElem() {
   SSATmp* key = getKey();
   SSATmp* box = getValue();
-  genStk(BindElem, getCatchTrace(), cns((TCA)MInstrHelpers::bindElemC),
+  genStk(BindElem, makeCatch(), cns((TCA)MInstrHelpers::bindElemC),
          m_base, key, box, genMisPtr());
   m_result = box;
 }
@@ -2555,7 +2549,7 @@ void HhbcTranslator::MInstrTranslator::emitUnsetElem() {
 
   typedef void (*OpFunc)(TypedValue*, TypedValue);
   BUILD_OPTAB_HOT(getKeyType(key));
-  genStk(UnsetElem, getCatchTrace(), cns((TCA)opFunc), m_base, key);
+  genStk(UnsetElem, makeCatch(), cns((TCA)opFunc), m_base, key);
 }
 #undef HELPER_TABLE
 
@@ -2570,9 +2564,9 @@ void HhbcTranslator::MInstrTranslator::emitVGetNewElem() {
 void HhbcTranslator::MInstrTranslator::emitSetNewElem() {
   SSATmp* value = getValue();
   if (m_base->type().subtypeOf(Type::PtrToArr)) {
-    gen(SetNewElemArray, getCatchSetTrace(), m_base, value);
+    gen(SetNewElemArray, makeCatchSet(), m_base, value);
   } else {
-    gen(SetNewElem, getCatchSetTrace(), m_base, value);
+    gen(SetNewElem, makeCatchSet(), m_base, value);
   }
   m_result = value;
 }
@@ -2587,23 +2581,23 @@ void HhbcTranslator::MInstrTranslator::emitIncDecNewElem() {
 
 void HhbcTranslator::MInstrTranslator::emitBindNewElem() {
   SSATmp* box = getValue();
-  genStk(BindNewElem, getCatchTrace(), m_base, box, genMisPtr());
+  genStk(BindNewElem, makeCatch(), m_base, box, genMisPtr());
   m_result = box;
 }
 
 void HhbcTranslator::MInstrTranslator::emitMPost() {
   SSATmp* catchSp = nullptr;
-  if (m_failedSetTrace) {
-    catchSp = m_failedSetTrace->back()->back()->src(0);
+  if (m_failedSetBlock) {
+    catchSp = m_failedSetBlock->trace()->back()->back()->src(0);
     assert(catchSp->isA(Type::StkPtr));
   }
 
   // Decref stack inputs. If we're translating a SetM or BindM, then input 0 is
-  // both our input and output so leave its refcount alone. If m_failedSetTrace
+  // both our input and output so leave its refcount alone. If m_failedSetBlock
   // is non-null, the final helper call may throw an InvalidSetMException. We
-  // need to add instructions to m_failedSetTrace to finish the vector
+  // need to add instructions to m_failedSetBlock to finish the vector
   // instruction in case this happens, so any DecRefs emitted here are also
-  // added to m_failedSetTrace.
+  // added to m_failedSetBlock.
   unsigned nStack =
     (m_ni.mInstrOp() == OpSetM || m_ni.mInstrOp() == OpBindM) ? 1 : 0;
   for (unsigned i = nStack; i < m_ni.inputs.size(); ++i) {
@@ -2614,8 +2608,8 @@ void HhbcTranslator::MInstrTranslator::emitMPost() {
       auto input = getInput(i, DataTypeCountness); // just going to decref it
       if (input->isA(Type::Gen)) {
         gen(DecRef, input);
-        if (m_failedSetTrace) {
-          TracePusher tp(m_tb, m_failedSetTrace, m_marker);
+        if (m_failedSetBlock) {
+          TracePusher tp(m_tb, m_failedSetBlock->trace(), m_marker);
           gen(DecRefStack, StackOffset(m_stackInputs[i]), Type::Cell, catchSp);
         }
       }
@@ -2655,7 +2649,7 @@ void HhbcTranslator::MInstrTranslator::emitMPost() {
   static const size_t refOffs[] = { HHIR_MISOFF(tvRef), HHIR_MISOFF(tvRef2) };
   for (unsigned i = 0; i < std::min(nLogicalRatchets(), 2U); ++i) {
     IRInstruction* inst = m_irf.gen(DecRefMem, m_marker, Type::Gen, m_misBase,
-                                    cns(refOffs[m_failedSetTrace ? 1 - i : i]));
+                                    cns(refOffs[m_failedSetBlock ? 1 - i : i]));
     m_tb.add(inst);
     prependToTraces(inst);
   }
@@ -2669,7 +2663,7 @@ void HhbcTranslator::MInstrTranslator::emitSideExits(SSATmp* catchSp,
   auto const op = m_ni.mInstrOp();
   const bool isSetWithRef = op == OpSetWithRefLM || op == OpSetWithRefRM;
 
-  if (m_failedSetTrace) {
+  if (m_failedSetBlock) {
     assert(bool(m_result) ^ isSetWithRef);
     // This catch trace currently ends with an EndCatch that will fall through
     // if an InvalidSetMException was thrown. We need to emit code to clean up
@@ -2684,7 +2678,7 @@ void HhbcTranslator::MInstrTranslator::emitSideExits(SSATmp* catchSp,
         cns(nStack), // cells popped since the last SpillStack
     };
 
-    TracePusher tp(m_tb, m_failedSetTrace, m_marker);
+    TracePusher tp(m_tb, m_failedSetBlock->trace(), m_marker);
     if (!isSetWithRef) {
       gen(DecRefStack, StackOffset(0), Type::Cell, catchSp);
       args.push_back(m_ht.gen(LdUnwinderValue, Type::Cell));
@@ -2708,15 +2702,15 @@ void HhbcTranslator::MInstrTranslator::emitSideExits(SSATmp* catchSp,
     SSATmp* str = m_irf.gen(AssertNonNull, m_marker, m_strTestResult)->dst();
     toSpill[0] = str;
 
-    auto exitTrace = m_ht.getExitTrace(nextOff, toSpill);
+    auto exit = m_ht.makeExit(nextOff, toSpill);
     {
-      TracePusher tp(m_tb, exitTrace, m_marker, exitTrace->back(),
-                     exitTrace->back()->skipHeader());
+      TracePusher tp(m_tb, exit->trace(), m_marker, exit->trace()->back(),
+                     exit->trace()->back()->skipHeader());
       gen(IncStat, cns(Stats::TC_SetMStrGuess_Miss), cns(1), cns(false));
       gen(DecRef, m_result);
       m_tb.add(str->inst());
     }
-    gen(CheckNullptr, exitTrace, m_strTestResult);
+    gen(CheckNullptr, exit, m_strTestResult);
     gen(IncStat, cns(Stats::TC_SetMStrGuess_Hit), cns(1), cns(false));
   }
 }

@@ -293,7 +293,7 @@ struct HhbcTranslator {
                            SSATmp* obj,
                            const Func* func,
                            int32_t numParams,
-                           IRTrace* catchTrace);
+                           Block* catchBlock);
   void emitCreateCl(int32_t numParams, int32_t classNameStrId);
   void emitFCallArray(const Offset pcOffset, const Offset after);
   void emitFCall(uint32_t numParams,
@@ -517,29 +517,29 @@ private:
     void emitStableMapIsset();
 
     // Generate a catch trace that does not perform any final DecRef operations
-    // on scratch space
-    IRTrace* getEmptyCatchTrace() {
-      return m_ht.getCatchTrace();
+    // on scratch space, and return its first block.
+    Block* makeEmptyCatch() {
+      return m_ht.makeCatch();
     }
 
     // Generate a catch trace that will contain DecRef instructions for tvRef
-    // and/or tvRef2 as required
-    IRTrace* getCatchTrace() {
-      IRTrace* t = getEmptyCatchTrace();
-      m_failedTraceVec.push_back(t);
-      return t;
+    // and/or tvRef2 as required; return the first block.
+    Block* makeCatch() {
+      auto b = makeEmptyCatch();
+      m_failedVec.push_back(b);
+      return b;
     }
 
     // Generate a catch trace that will free any scratch space used and perform
-    // a side-exit from a failed set operation
-    IRTrace* getCatchSetTrace() {
-      assert(!m_failedSetTrace);
-      return m_failedSetTrace = getCatchTrace();
+    // a side-exit from a failed set operation, return the first block.
+    Block* makeCatchSet() {
+      assert(!m_failedSetBlock);
+      return m_failedSetBlock = makeCatch();
     }
 
     void prependToTraces(IRInstruction* inst) {
-      for (auto t : m_failedTraceVec) {
-        t->front()->prepend(m_irf.cloneInstruction(inst));
+      for (auto b : m_failedVec) {
+       b->prepend(m_irf.cloneInstruction(inst));
       }
     }
 
@@ -566,7 +566,7 @@ private:
      * if appropriate.
      */
     template<typename... Srcs>
-    SSATmp* genStk(Opcode op, IRTrace* taken, Srcs... srcs);
+    SSATmp* genStk(Opcode op, Block* taken, Srcs... srcs);
 
     /* Various predicates about the current instruction */
     bool isSimpleBase();
@@ -637,18 +637,18 @@ private:
      * output type of the instruction and must side exit. */
     SSATmp* m_strTestResult;
 
-    /* If set, contains the catch trace for the final set operation of this
+    /* If set, contains the catch target for the final set operation of this
      * instruction. The operations that set this member may need to return an
      * unexpected type, in which case they'll throw an InvalidSetMException. To
      * handle this, emitMPost adds code to the catch trace to fish the correct
      * value out of the exception and side exit. */
-    IRTrace*  m_failedSetTrace;
+    Block* m_failedSetBlock;
 
-    /* Contains a list of all catch traces created in building the vector.
-     * Each trace must be appended with cleanup tasks (generally just DecRef)
+    /* Contains a list of all catch blocks created in building the vector.
+     * Each block must be appended with cleanup tasks (generally just DecRef)
      * to be performed if an exception occurs during the course of the vector
      * operation */
-    std::vector<IRTrace*> m_failedTraceVec;
+    std::vector<Block*> m_failedVec;
   };
 
 private: // tracebuilder forwarding utilities
@@ -689,7 +689,7 @@ private:
   void emitEmpty(const StringData* name,
                  CheckSupportedFun checkSupported,
                  EmitLdAddrFun emitLdAddr);
-  void emitIncDecMem(bool pre, bool inc, SSATmp* ptr, IRTrace* exitTrace);
+  void emitIncDecMem(bool pre, bool inc, SSATmp* ptr, Block* exit);
   bool checkSupportedClsProp(const StringData* propName,
                              Type resultType,
                              int stkIndex);
@@ -731,12 +731,10 @@ private:
   void interpOutputLocals(const NormalizedInstruction&);
 
 private: // Exit trace creation routines.
-  IRTrace* getExitTrace(Offset targetBcOff = -1);
-  IRTrace* getExitTrace(Offset targetBcOff,
-                        std::vector<SSATmp*>& spillValues);
-  IRTrace* getExitTraceWarn(Offset targetBcOff,
-                            std::vector<SSATmp*>& spillValues,
-                            const StringData* warning);
+  Block* makeExit(Offset targetBcOff = -1);
+  Block* makeExit(Offset targetBcOff, std::vector<SSATmp*>& spillValues);
+  Block* makeExitWarn(Offset targetBcOff, std::vector<SSATmp*>& spillValues,
+                      const StringData* warning);
 
   /*
    * Create a custom side exit---that is, an exit that does some
@@ -753,16 +751,16 @@ private: // Exit trace creation routines.
    * using gen/push/spillStack/etc.
    */
   template<class ExitLambda>
-  IRTrace* makeSideExit(Offset targetBcOff, ExitLambda exit);
+  Block* makeSideExit(Offset targetBcOff, ExitLambda exit);
 
   /*
    * Generates an exit trace which will continue execution without HHIR.
    * This should be used in situations that HHIR cannot handle -- ideally
    * only in slow paths.
    */
-  IRTrace* getExitSlowTrace();
-  IRTrace* getCatchTrace();
-  IRTrace* getExitOptTrace(Transl::TransID transId);
+  Block* makeExitSlow();
+  Block* makeCatch();
+  Block* makeExitOpt(Transl::TransID transId);
 
   /*
    * Implementation for the above.  Takes spillValues, target offset,
@@ -780,10 +778,8 @@ private: // Exit trace creation routines.
     DelayedMarker,
   };
   typedef std::function<SSATmp* ()> CustomExit;
-  IRTrace* getExitTraceImpl(Offset targetBcOff,
-                            ExitFlag flag,
-                            std::vector<SSATmp*>& spillValues,
-                            const CustomExit&);
+  Block* makeExitImpl(Offset targetBcOff, ExitFlag flag,
+                      std::vector<SSATmp*>& spillValues, const CustomExit&);
 
 public:
   /*
@@ -871,15 +867,14 @@ private:
   SSATmp* ldLoc(uint32_t id, DataTypeCategory constraint);
   SSATmp* ldLocAddr(uint32_t id, DataTypeCategory constraint);
 private:
-  SSATmp* ldLocInner(uint32_t id, IRTrace* exitTrace,
-                     DataTypeCategory constraint);
-  SSATmp* ldLocInnerWarn(uint32_t id, IRTrace* target,
+  SSATmp* ldLocInner(uint32_t id, Block* exit, DataTypeCategory constraint);
+  SSATmp* ldLocInnerWarn(uint32_t id, Block* target,
                          DataTypeCategory constraint,
-                         IRTrace* catchTrace = nullptr);
+                         Block* catchBlock = nullptr);
 public:
-  SSATmp* stLoc(uint32_t id, IRTrace* exitTrace, SSATmp* newVal);
-  SSATmp* stLocNRC(uint32_t id, IRTrace* exitTrace, SSATmp* newVal);
-  SSATmp* stLocImpl(uint32_t id, IRTrace*, SSATmp* newVal, bool doRefCount);
+  SSATmp* stLoc(uint32_t id, Block* exit, SSATmp* newVal);
+  SSATmp* stLocNRC(uint32_t id, Block* exit, SSATmp* newVal);
+  SSATmp* stLocImpl(uint32_t id, Block*, SSATmp* newVal, bool doRefCount);
 
 private:
   // Tracks information about the current bytecode offset and which

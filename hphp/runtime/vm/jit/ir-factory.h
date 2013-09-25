@@ -106,10 +106,6 @@ private:
     inst->setTaken(target);
   }
 
-  void setter(IRInstruction* inst, IRTrace* trace) {
-    inst->setTaken(trace ? trace->front() : nullptr);
-  }
-
   void setter(IRInstruction* inst, Type t) {
     inst->setTypeParam(t);
   }

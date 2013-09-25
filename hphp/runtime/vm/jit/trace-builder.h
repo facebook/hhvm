@@ -286,9 +286,10 @@ struct TraceBuilder {
    * a cold path, which always exits the tracelet without control flow
    * rejoining the main line.
    */
-  IRTrace* makeExitTrace(uint32_t bcOff) {
-    return m_mainTrace->addExitTrace(makeTrace(m_curFunc->getValFunc(),
-                                               bcOff));
+  Block* makeExit(uint32_t bcOff) {
+    auto t = makeTrace(m_curFunc->getValFunc(), bcOff);
+    m_mainTrace->addExitTrace(t);
+    return t->front();
   }
 
   /*

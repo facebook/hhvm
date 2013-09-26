@@ -112,7 +112,8 @@ IRTranslator::IRTranslator(Offset bcOff, Offset spOff, const Func* curFunc)
 }
 
 void IRTranslator::checkType(const Transl::Location& l,
-                             const Transl::RuntimeType& rtt) {
+                             const Transl::RuntimeType& rtt,
+                             bool outerOnly) {
   // We can get invalid inputs as a side effect of reading invalid
   // items out of BBs we truncate; they don't need guards.
   if (rtt.isVagueValue() || l.isThis()) return;
@@ -125,12 +126,12 @@ void IRTranslator::checkType(const Transl::Location& l,
       if (type.subtypeOf(Type::Cls)) {
         m_hhbcTrans.assertTypeStack(stackOffset, type);
       } else {
-        m_hhbcTrans.guardTypeStack(stackOffset, type);
+        m_hhbcTrans.guardTypeStack(stackOffset, type, outerOnly);
       }
       break;
     }
     case Location::Local:
-      m_hhbcTrans.guardTypeLocal(l.offset, Type(rtt));
+      m_hhbcTrans.guardTypeLocal(l.offset, Type(rtt), outerOnly);
       break;
 
     case Location::Iter:

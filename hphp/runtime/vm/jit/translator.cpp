@@ -3766,7 +3766,8 @@ Translator::translateRegion(const RegionDesc& region,
           assert(loc.tag() == JIT::RegionDesc::Location::Tag::Stack);
           ht.assertTypeLocation(loc, type);
         } else if (isFirstRegionInstr) {
-          ht.guardTypeLocation(loc, type);
+          bool checkOuterTypeOnly = m_mode != TransProfile;
+          ht.guardTypeLocation(loc, type, checkOuterTypeOnly);
         } else {
           ht.checkTypeLocation(loc, type, sk.offset());
         }

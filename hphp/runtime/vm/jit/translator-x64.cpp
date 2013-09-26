@@ -2219,8 +2219,9 @@ TranslatorX64::emitGuardChecks(X64Assembler& a,
   }
 
   m_irTrans->hhbcTrans().emitRB(RBTypeTraceletGuards, sk);
+  bool checkOuterTypeOnly = m_mode != TransProfile;
   for (auto const& dep : dependencies) {
-    m_irTrans->checkType(dep.first, dep.second->rtt);
+    m_irTrans->checkType(dep.first, dep.second->rtt, checkOuterTypeOnly);
   }
 
   checkRefs(a, sk, refDeps, fail);

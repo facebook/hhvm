@@ -129,9 +129,10 @@ struct HhbcTranslator {
   void end();
 
   // Tracelet guards.
-  void guardTypeStack(uint32_t stackIndex, Type type);
-  void guardTypeLocal(uint32_t locId, Type type);
-  void guardTypeLocation(const RegionDesc::Location& loc, Type type);
+  void guardTypeStack(uint32_t stackIndex, Type type, bool outerOnly);
+  void guardTypeLocal(uint32_t locId,      Type type, bool outerOnly);
+  void guardTypeLocation(const RegionDesc::Location& loc, Type type,
+                         bool outerOnly);
   void guardRefs(int64_t entryArDelta,
                  const vector<bool>& mask,
                  const vector<bool>& vals);

@@ -2927,17 +2927,20 @@ void HhbcTranslator::setThisAvailable() {
   m_tb->setThisAvailable();
 }
 
-void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type) {
+void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type, bool outerOnly) {
   gen(GuardLoc, type, LocalId(locId), m_tb->fp());
+  if (!outerOnly && type.isBoxed() && type.unbox() < Type::Cell) {
+    gen(LdRef, type.unbox(), makeExit(), ldLoc(locId, DataTypeGeneric));
+  }
 }
 
 void HhbcTranslator::guardTypeLocation(const RegionDesc::Location& loc,
-                                       Type type) {
+                                       Type type, bool outerOnly) {
   assert(type.subtypeOf(Type::Gen));
   typedef RegionDesc::Location::Tag T;
   switch (loc.tag()) {
-    case T::Stack: guardTypeStack(loc.stackOffset(), type); break;
-    case T::Local: guardTypeLocal(loc.localId(), type);     break;
+    case T::Stack: guardTypeStack(loc.stackOffset(), type, outerOnly); break;
+    case T::Local: guardTypeLocal(loc.localId(),     type, outerOnly); break;
   }
 }
 
@@ -2974,12 +2977,18 @@ void HhbcTranslator::assertTypeLocation(const RegionDesc::Location& loc,
   }
 }
 
-void HhbcTranslator::guardTypeStack(uint32_t stackIndex, Type type) {
+void HhbcTranslator::guardTypeStack(uint32_t stackIndex, Type type,
+                                    bool outerOnly) {
   assert(type.subtypeOf(Type::Gen));
   assert(m_evalStack.size() == 0);
   assert(m_stackDeficit == 0); // This should only be called at the beginning
                                // of a trace, with a clean stack.
-  gen(GuardStk, type, StackOffset(stackIndex), m_tb->sp());
+  auto stackOff = StackOffset(stackIndex);
+  gen(GuardStk, type, stackOff, m_tb->sp());
+  if (!outerOnly && type.isBoxed() && type.unbox() < Type::Cell) {
+    auto stk = gen(LdStack, Type::BoxedCell, stackOff, m_tb->sp());
+    gen(LdRef, type.unbox(), makeExit(), stk);
+  }
 }
 
 void HhbcTranslator::checkTypeStack(uint32_t idx, Type type, Offset dest) {

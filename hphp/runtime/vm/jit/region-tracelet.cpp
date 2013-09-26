@@ -143,7 +143,7 @@ RegionDescPtr RegionFormer::go() {
       m_ht.assertTypeStack(lt.location.stackOffset(), t);
       m_curBlock->addPredicted(m_sk, RegionDesc::TypePred{lt.location, t});
     } else {
-      m_ht.guardTypeLocation(lt.location, t);
+      m_ht.guardTypeLocation(lt.location, t, true /* outerOnly */);
     }
   }
 

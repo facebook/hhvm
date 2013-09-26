@@ -874,7 +874,7 @@ void ObjectData::operator delete(void* p) {
   }
 
   auto const size = sizeForNProps(nProps) + builtinPropSize;
-  if (LIKELY(size <= MemoryManager::kMaxSmartSize)) {
+  if (LIKELY(size <= kMaxSmartSize)) {
     return MM().smartFreeSize(this_, size);
   }
   MM().smartFreeSizeBig(this_, size);

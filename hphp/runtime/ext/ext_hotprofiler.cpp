@@ -329,8 +329,8 @@ uint64_t
 get_allocs()
 {
 #ifdef USE_JEMALLOC
-  MemoryManager *mm = MemoryManager::TheMemoryManager();
-  return mm->getAllocated();
+  auto& mm = MM();
+  return mm.getAllocated();
 #endif
 #ifdef USE_TCMALLOC
   if (MallocExtensionInstance) {
@@ -347,8 +347,8 @@ uint64_t
 get_frees()
 {
 #ifdef USE_JEMALLOC
-  MemoryManager *mm = MemoryManager::TheMemoryManager();
-  return mm->getDeallocated();
+  auto& mm = MM();
+  return mm.getDeallocated();
 #endif
 #ifdef USE_TCMALLOC
   if (MallocExtensionInstance) {
@@ -754,8 +754,7 @@ public:
     }
 
     if (m_flags & TrackMemory) {
-      MemoryManager *mm = MemoryManager::TheMemoryManager();
-      const MemoryUsageStats &stats = mm->getStats(true);
+      auto const& stats = MM().getStats();
       m_stack->m_mu_start  = stats.usage;
       m_stack->m_pmu_start = stats.peakUsage;
     } else if (m_flags & TrackMalloc) {
@@ -776,8 +775,7 @@ public:
     }
 
     if (m_flags & TrackMemory) {
-      MemoryManager *mm = MemoryManager::TheMemoryManager();
-      const MemoryUsageStats &stats = mm->getStats(true);
+      auto const& stats = MM().getStats();
       int64_t mu_end = stats.usage;
       int64_t pmu_end = stats.peakUsage;
       counts.memory += mu_end - m_stack->m_mu_start;
@@ -1066,7 +1064,7 @@ class TraceProfiler : public Profiler {
     }
     {
       DECLARE_THREAD_INFO
-      MemoryManager::MaskAlloc masker(info->m_mm);
+      MemoryManager::MaskAlloc masker(*info->m_mm);
       TraceEntry *r = (TraceEntry*)realloc((void *)m_traceBuffer,
                                            new_array_size * sizeof(TraceEntry));
 
@@ -1116,8 +1114,7 @@ class TraceProfiler : public Profiler {
       te.cpu = vtsc(m_MHz);
     }
     if (m_flags & TrackMemory) {
-      MemoryManager *mm = MemoryManager::TheMemoryManager();
-      const MemoryUsageStats &stats = mm->getStats(true);
+      auto const& stats = MM().getStats();
       te.memory = stats.usage;
       te.peak_memory = stats.peakUsage;
     } else if (m_flags & TrackMalloc) {

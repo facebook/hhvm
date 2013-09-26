@@ -1475,7 +1475,7 @@ static bool hphp_warmup(ExecutionContext *context,
 void hphp_session_init() {
   init_thread_locals();
   ThreadInfo::s_threadInfo->onSessionInit();
-  MemoryManager::TheMemoryManager()->resetStats();
+  MM().resetStats();
 
 #ifdef ENABLE_SIMPLE_COUNTER
   SimpleCounter::Enabled = true;
@@ -1583,28 +1583,25 @@ void hphp_session_exit() {
 
   ThreadInfo::s_threadInfo->clearPendingException();
 
-  MemoryManager *mm = MemoryManager::TheMemoryManager();
-  if (RuntimeOption::CheckMemory) {
-    mm->checkMemory();
-  }
-  mm->resetStats();
+  auto& mm = MM();
+  mm.resetStats();
 
   {
     ServerStatsHelper ssh("rollback");
-    // sweep may call g_context->, which is a noCheck, so we need to
-    // reinitialize g_context here
+    // sweep functions are allowed to call g_context->, so we need to
+    // reinitialize g_context here.
     g_context.getCheck();
-    // MemoryManager::sweepAll() will handle sweeping for PHP objects and
-    // PHP resources (ex. File, Collator, XmlReader, etc.)
-    mm->sweepAll();
-    // Destroy g_context again because ExecutionContext has SmartAllocated
-    // data members. These members cannot survive over rollback(), so we need
-    // to destroy g_context before calling rollback().
+
+    mm.sweep();
+
+    // Destroy g_context again because ExecutionContext has
+    // SmartAllocated data members. These members cannot survive over
+    // resetAllocator(), so we need to destroy g_context before
+    // calling resetAllocator().
     g_context.destroy();
-    // MemoryManager::rollback() will handle sweeping for all types that have
-    // dedicated allocators (ex. StringData, HphpArray, etc.) and it reset all
-    // of the allocators in preparation for the next request.
-    mm->rollback();
+
+    mm.resetAllocator();
+
     // Do any post-sweep cleanup necessary for global variables
     free_global_variables_after_sweep();
     g_context.getCheck();

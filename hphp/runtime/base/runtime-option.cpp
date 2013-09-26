@@ -310,7 +310,6 @@ int64_t RuntimeOption::MaxSQLRowCount = 10000;
 int64_t RuntimeOption::MaxMemcacheKeyCount = 0;
 int RuntimeOption::SocketDefaultTimeout = 5;
 bool RuntimeOption::LockCodeMemory = false;
-bool RuntimeOption::CheckMemory = false;
 int RuntimeOption::MaxArrayChain = INT_MAX;
 bool RuntimeOption::WarnOnCollectionToArray = false;
 bool RuntimeOption::UseDirectCopy = false;
@@ -838,7 +837,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     server["ForbiddenFileExtensions"].get(ForbiddenFileExtensions);
 
     LockCodeMemory = server["LockCodeMemory"].getBool(false);
-    CheckMemory = server["CheckMemory"].getBool();
     MaxArrayChain = server["MaxArrayChain"].getInt32(INT_MAX);
     if (MaxArrayChain != INT_MAX) {
       // HphpArray needs a higher threshold to avoid false-positives.

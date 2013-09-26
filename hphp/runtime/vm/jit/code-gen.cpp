@@ -3640,7 +3640,7 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
   // Next, allocate the object
   size_t size = ObjectData::sizeForNProps(cls->numDeclProperties());
   cgCallHelper(m_as,
-               size <= MemoryManager::kMaxSmartSize
+               size <= kMaxSmartSize
                  ? CppCall(getMethodPtr(&ObjectData::newInstanceRaw))
                  : CppCall(getMethodPtr(&ObjectData::newInstanceRawBig)),
                callDest(dstReg),

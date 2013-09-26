@@ -51,7 +51,7 @@ NEVER_INLINE void throw_string_too_large2(size_t len) {
 ALWAYS_INLINE
 std::pair<StringData*,uint32_t> allocFlatForLen(uint32_t len) {
   auto const needed = static_cast<uint32_t>(sizeof(StringData) + len + 1);
-  if (LIKELY(needed <= MemoryManager::kMaxSmartSize)) {
+  if (LIKELY(needed <= kMaxSmartSize)) {
     auto const cap = MemoryManager::smartSizeClass(needed);
     auto const sd  = static_cast<StringData*>(MM().smartMallocSize(cap));
     return std::make_pair(sd, cap);
@@ -69,7 +69,7 @@ std::pair<StringData*,uint32_t> allocFlatForLen(uint32_t len) {
 
 ALWAYS_INLINE
 void freeForSize(void* vp, uint32_t size) {
-  if (LIKELY(size <= MemoryManager::kMaxSmartSize)) {
+  if (LIKELY(size <= kMaxSmartSize)) {
     return MM().smartFreeSize(vp, size);
   }
   return MM().smartFreeSizeBig(vp, size);
@@ -129,7 +129,7 @@ ALWAYS_INLINE void StringData::delist() {
 }
 
 void StringData::sweepAll() {
-  auto& head = MemoryManager::TheMemoryManager()->m_strings;
+  auto& head = MM().m_strings;
   for (SweepNode *next, *n = head.next; n != &head; n = next) {
     next = n->next;
     assert(next && uintptr_t(next) != kSmartFreeWord);

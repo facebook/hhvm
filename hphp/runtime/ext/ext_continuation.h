@@ -38,7 +38,7 @@ class c_Continuation : public ExtObjectDataFlags<ObjectData::HasClone> {
   void operator delete(void* p) {
     c_Continuation* this_ = (c_Continuation*)p;
     auto const size = this_->getObjectSize();
-    if (LIKELY(size <= MemoryManager::kMaxSmartSize)) {
+    if (LIKELY(size <= kMaxSmartSize)) {
       MM().smartFreeSize(this_, size);
       return;
     }

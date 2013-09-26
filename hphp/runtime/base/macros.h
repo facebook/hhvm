@@ -83,7 +83,7 @@ namespace HPHP {
   public:                                                               \
   ALWAYS_INLINE void operator delete(void* p) {                         \
     static_assert(std::is_base_of<ResourceData,T>::value, "");          \
-    assert(sizeof(T) <= MemoryManager::kMaxSmartSize);                  \
+    assert(sizeof(T) <= kMaxSmartSize);                                 \
     MM().smartFreeSize(p, sizeof(T));                                   \
   }
 

@@ -139,8 +139,8 @@ class ObjectData {
    * trait or interface), pure PHP class, and an allocation size,
    * return a new, uninitialized object of that class.
    *
-   * newInstanceRaw should be called only when size <=
-   * MemoryManager::kMaxSmartSize, otherwise use newInstanceRawBig.
+   * newInstanceRaw should be called only when size <= kMaxSmartSize,
+   * otherwise use newInstanceRawBig.
    */
   static ObjectData* newInstanceRaw(Class* cls, uint32_t size);
   static ObjectData* newInstanceRawBig(Class* cls, size_t size);

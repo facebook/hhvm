@@ -618,9 +618,6 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     transport->sendString(out.str());
     return true;
   }
-  if (cmd == "check-mem") {
-    return toggle_switch(transport, RuntimeOption::CheckMemory);
-  }
   if (cmd == "check-sql") {
     string stats = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
     stats += "<SQL>\n";

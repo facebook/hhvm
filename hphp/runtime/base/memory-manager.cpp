@@ -54,7 +54,8 @@ static size_t threadAllocatedpMib[2];
 static size_t threadDeallocatedpMib[2];
 static size_t statsCactiveMib[2];
 static pthread_once_t threadStatsOnce = PTHREAD_ONCE_INIT;
-static void threadStatsInit() {
+
+void MemoryManager::threadStatsInit() {
   if (!mallctlnametomib) return;
   size_t miblen = sizeof(threadAllocatedpMib) / sizeof(size_t);
   if (mallctlnametomib("thread.allocatedp", threadAllocatedpMib, &miblen)) {
@@ -100,8 +101,9 @@ static void threadStatsInit() {
   }
 }
 
-static inline void threadStats(uint64_t*& allocated, uint64_t*& deallocated,
-                               size_t*& cactive, size_t& cactiveLimit) {
+inline
+void MemoryManager::threadStats(uint64_t*& allocated, uint64_t*& deallocated,
+                                size_t*& cactive, size_t& cactiveLimit) {
   pthread_once(&threadStatsOnce, threadStatsInit);
   if (!MemoryManager::s_statsEnabled) return;
 
@@ -196,7 +198,7 @@ void MemoryManager::refreshStatsHelper() {
   refreshStats();
 }
 
-void MemoryManager::refreshStatsHelperExceeded() {
+void MemoryManager::refreshStatsHelperExceeded() const {
   ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
   info->m_reqInjectionData.setMemExceededFlag();
 }
@@ -210,13 +212,14 @@ void MemoryManager::refreshStatsHelperStop() {
 }
 #endif
 
-void MemoryManager::sweepAll() {
+void MemoryManager::sweep() {
+  assert(!sweeping());
   m_sweeping = true;
   SCOPE_EXIT { m_sweeping = false; };
   Sweepable::SweepAll();
 }
 
-void MemoryManager::rollback() {
+void MemoryManager::resetAllocator() {
   StringData::sweepAll();
 
   // free smart-malloc slabs
@@ -233,21 +236,9 @@ void MemoryManager::rollback() {
   m_sweep.next = m_sweep.prev = &m_sweep;
 
   // zero out freelists
-  for (auto& i : m_sizeUntrackedFree) i.clear();
-  for (auto& i : m_sizeTrackedFree)   i.clear();
+  for (auto& i : m_sizeUntrackedFree) i.head = nullptr;
+  for (auto& i : m_sizeTrackedFree)   i.head = nullptr;
   m_front = m_limit = 0;
-}
-
-void MemoryManager::checkMemory() {
-  printf("----- MemoryManager for Thread %ld -----\n", (long)pthread_self());
-
-  refreshStats();
-  printf("Current Usage: %" PRId64 " bytes\t", m_stats.usage);
-  printf("Current Alloc: %" PRId64 " bytes\n", m_stats.alloc);
-  printf("Peak Usage: %" PRId64 " bytes\t", m_stats.peakUsage);
-  printf("Peak Alloc: %" PRId64 " bytes\n", m_stats.peakAlloc);
-
-  printf("Slabs: %lu KiB\n", m_slabs.size() * SLAB_SIZE / 1024);
 }
 
 /*
@@ -342,7 +333,7 @@ inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
   void* ptr = debug ? static_cast<DebugHeader*>(inputPtr) - 1 : inputPtr;
 
   auto const n = static_cast<SweepNode*>(ptr) - 1;
-  if (LIKELY(n->padbytes <= MemoryManager::kMaxSmartSize)) {
+  if (LIKELY(n->padbytes <= kMaxSmartSize)) {
     void* newmem = smart_malloc(nbytes);
     auto const copySize = std::min(
       n->padbytes - sizeof(SmallNode) - (debug ? sizeof(DebugHeader) : 0),
@@ -484,7 +475,7 @@ HOT_FUNC
 void* smart_calloc(size_t count, size_t nbytes) {
   auto& mm = MM();
   auto const totalBytes = std::max<size_t>(count * nbytes, 1);
-  if (totalBytes <= MemoryManager::kMaxSmartSize) {
+  if (totalBytes <= kMaxSmartSize) {
     return memset(smart_malloc(totalBytes), 0, totalBytes);
   }
   auto const withExtra = mm.debugAddExtra(totalBytes);
@@ -553,7 +544,7 @@ bool MemoryManager::checkPreFree(DebugHeader* p,
     assert(userSpecifiedBytes == p->requestedSize ||
            userSpecifiedBytes == p->returnedCap);
   }
-  if (bytes != 0 && bytes <= MemoryManager::kMaxSmartSize) {
+  if (bytes != 0 && bytes <= kMaxSmartSize) {
     auto const ptrInt = reinterpret_cast<uintptr_t>(p);
     DEBUG_ONLY auto it = std::find_if(
       begin(m_slabs), end(m_slabs),

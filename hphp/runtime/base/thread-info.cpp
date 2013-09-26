@@ -40,7 +40,7 @@ ThreadInfo::ThreadInfo()
   assert(!t_stackbase);
   t_stackbase = static_cast<char*>(stack_top_ptr());
 
-  m_mm = MemoryManager::TheMemoryManager();
+  m_mm = &MM();
 
   m_profiler = nullptr;
   m_pendingException = nullptr;

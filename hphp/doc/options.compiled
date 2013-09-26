@@ -150,10 +150,6 @@ flood error logs.
     # maximum memory size for image processing
     ImageMemoryMaxBytes = Upload.UploadMaxFileSize * 2
 
-    # Only for debugging memory problems. When turned on, server will report
-    # SmartAllocator's usage for each thread to stdout.
-    CheckMemory = false
-
     # If ServerName is not specified for a virtual host, use prefix + this
     # suffix to compose one. If "Pattern" was specified, matched pattern,
     # either by parentheses for the first match or without parentheses for

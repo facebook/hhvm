@@ -183,7 +183,7 @@ void BaseExecutionContext::setRequestMemoryMaxBytes(int64_t max) {
     max = INT64_MAX;
   }
   m_maxMemory = max;
-  MemoryManager::TheMemoryManager()->getStats().maxBytes = m_maxMemory;
+  MM().getStatsNoRefresh().maxBytes = m_maxMemory;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

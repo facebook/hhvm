@@ -29,7 +29,7 @@ namespace HPHP {
  * clear out request-local allocations that are not smart-allocated.
  */
 class Sweepable {
-  /**
+  /*
    * Sweepable objects are not supposed to be copied or assigned
    * naively.
    */

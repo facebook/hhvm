@@ -153,7 +153,7 @@ StringCase:
 // Defined here for inlining into MakeSVSlowPath below.
 ALWAYS_INLINE void StringData::enlist() {
   assert(isShared());
-  auto& head = MemoryManager::TheMemoryManager()->m_strings;
+  auto& head = MM().m_strings;
   // insert after head
   auto const next = head.next;
   auto& payload = *sharedPayload();

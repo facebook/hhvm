@@ -301,7 +301,6 @@ public:
   static int64_t MaxMemcacheKeyCount;
   static int  SocketDefaultTimeout;
   static bool LockCodeMemory;
-  static bool CheckMemory;
   static int MaxArrayChain;
   static bool WarnOnCollectionToArray;
   static bool UseDirectCopy;

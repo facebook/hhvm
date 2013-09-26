@@ -746,8 +746,7 @@ String f_ini_set(CStrRef varname, CStrRef newvalue) {
 }
 
 int64_t f_memory_get_allocation() {
-  MemoryManager *mm = MemoryManager::TheMemoryManager();
-  const MemoryUsageStats &stats = mm->getStats(true);
+  auto const& stats = MM().getStats();
   int64_t ret = stats.totalAlloc;
   ret -= request_arena().slackEstimate() +
          varenv_arena().slackEstimate();
@@ -755,14 +754,12 @@ int64_t f_memory_get_allocation() {
 }
 
 int64_t f_memory_get_peak_usage(bool real_usage /* = false */) {
-  MemoryManager *mm = MemoryManager::TheMemoryManager();
-  const MemoryUsageStats &stats = mm->getStats(true);
+  auto const& stats = MM().getStats();
   return real_usage ? stats.peakUsage : stats.peakAlloc;
 }
 
 int64_t f_memory_get_usage(bool real_usage /* = false */) {
-  MemoryManager *mm = MemoryManager::TheMemoryManager();
-  const MemoryUsageStats &stats = mm->getStats(true);
+  auto const& stats = MM().getStats();
   int64_t ret = real_usage ? stats.usage : stats.alloc;
   ret -= request_arena().slackEstimate() +
          varenv_arena().slackEstimate();

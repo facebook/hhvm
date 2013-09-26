@@ -460,16 +460,6 @@ other_files = (
     '/tests/quicktester.inc',
 )
 
-# Map strings from one style to another
-errors = (
-    # generic inconsistencies
-    ('Variable passed to ([^\s]+)\(\) is not an array or object',
-        'Invalid operand type was used: expecting an array'),
-    ('bcdiv\(\): ', ''),
-    ('bcsqrt\(\): ', ''),
-    ('bcpowmod\(\): ', ''),
-)
-
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "-z",
@@ -588,9 +578,6 @@ def walk(filename, source_dir):
                     'HipHop Warning: '+match_rest_of_line, exp)
             exp = re.sub(r'Notice\\?:.*',
                     'HipHop Notice: '+match_rest_of_line, exp)
-
-            for error in errors:
-                exp = re.sub(error[0], error[1], exp)
 
             sections[key] = exp
 

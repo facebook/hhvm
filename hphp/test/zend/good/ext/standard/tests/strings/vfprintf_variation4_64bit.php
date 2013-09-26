@@ -55,7 +55,7 @@ $args_array = array(
 
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_variation4_64bit.phpt.txt';
+$data_file = dirname(__FILE__) . '/vfprintf_variation4_64bit.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 

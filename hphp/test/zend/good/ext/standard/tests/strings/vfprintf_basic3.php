@@ -21,7 +21,7 @@ $arg2 = array(11.11,22.22);
 $arg3 = array(11.11,22.22,33.33);
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_basic3.phpt.txt';
+$data_file = dirname(__FILE__) . '/vfprintf_basic3.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 

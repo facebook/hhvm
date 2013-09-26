@@ -5,7 +5,7 @@
 
 echo "*** Testing fputcsv() : with enclosure & delimiter of two chars and file opened in read mode ***\n";
 
-$fo = new SplFileObject(__DIR__ . '/SplFileObject_fputcsv.csv', 'w');
+$fo = new SplFileObject(__DIR__ . '/SplFileObject_fputcsv_variation14.csv', 'w');
 
 var_dump($fo->fputcsv(array('water', 'fruit'), ',,', '""'));
 
@@ -13,6 +13,6 @@ unset($fo);
 
 echo "Done\n";
 ?><?php
-$file = __DIR__ . '/SplFileObject_fputcsv.csv';
+$file = __DIR__ . '/SplFileObject_fputcsv_variation14.csv';
 unlink($file);
 ?>

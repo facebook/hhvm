@@ -16,7 +16,7 @@ $arg2 = array(021,0347);
 $arg3 = array(021,0347,05678);
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_basic8.phpt.txt';
+$data_file = dirname(__FILE__) . '/vfprintf_basic8.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
    

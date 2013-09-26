@@ -1,6 +1,6 @@
 <?php
 
-$filename = "gzwrite_error2.gz";
+$filename = "gzwrite_error2.txt.gz";
 $h = gzopen($filename, 'w');
 $str = "Here is the string to be written. ";
 var_dump(gzwrite( $h, $str, 0 ) );

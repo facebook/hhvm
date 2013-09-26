@@ -748,9 +748,17 @@ def walk(filename, source_dir):
     if '/ext/standard/tests/network/shutdown.php' in full_dest_filename:
         test = test.replace("<?php", "<?php\n$port = rand(50000, 65535);")
         test = test.replace("31337'", "'.$port")
+    if '/ext/standard/tests/file/fgets_socket_variation1.php' in full_dest_filename:
+        test = test.replace("<?php", "<?php\n$port = rand(50000, 65535);")
+        test = test.replace("31337'", "'.$port")
     if '/ext/standard/tests/file/fread_socket_variation1.php' in full_dest_filename:
         test = test.replace("<?php", "<?php\n$port = rand(50000, 65535);")
         test = test.replace("31337'", "'.$port")
+    if '/ext/standard/tests/file/fputcsv.php' in full_dest_filename:
+        test = test.replace("fgetcsv.csv", "fputcsv.csv")
+    if '/ext/spl/tests/SplFileObject_fputcsv_' in full_dest_filename:
+        test = test.replace('SplFileObject_fputcsv.csv',
+            os.path.basename(full_dest_filename).replace('.php', '.csv'))
     if '/ext/ftp/tests/ftp_' in full_dest_filename:
         test = test.replace('localfile.txt',
             os.path.basename(full_dest_filename).replace('.php', '.txt'))

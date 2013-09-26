@@ -158,7 +158,7 @@ Breakpoint 1 reached at main() on line 54 of %s/flow_multistep.php
 
 break clear all
 All breakpoints are cleared.
-step 10
+step 12
 C2 oh hai
 C2 destructor
 C1 oh hai
@@ -205,7 +205,7 @@ Breakpoint 1 reached at main() on line 54 of %s/flow_multistep.php
 
 break clear all
 All breakpoints are cleared.
-step 10
+step 12
 C2 oh hai
 C2 destructor
 C1 oh hai
@@ -214,7 +214,7 @@ Break at C1::__destruct() on line 30 of %s/flow_multistep.php
   30     echo "C1 destructor!\n";
   31   }
 
-next 3
+next 5
 C1 destructor!
 C2 destructor done
 Break at main() on line 54 of %s/flow_multistep.php

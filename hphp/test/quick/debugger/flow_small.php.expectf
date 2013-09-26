@@ -35,11 +35,7 @@ Break at cls::pub() on line 14 of %s/flow_small.php
 
 next
 out pub:1
-Break at cls::pub() on line 11 of %s/flow_small.php
-  10 class cls {
-  11   public function pub($x) {
-  12     error_log("in pub:".$x);
-  13     $this->pri($x);
+Break at cls::pub() on line 15 of %s/flow_small.php
   14     error_log("out pub:".$x);
   15   }
   16   private function pri($x) {
@@ -156,10 +152,7 @@ $b = 10
 $c = 5
 next
 foo:5
-Break at foo() on line 5 of %s/flow_small.php
-   4 
-   5 function foo($a, $b) {
-   6   $c = $b - $a;
+Break at foo() on line 8 of %s/flow_small.php
    7   error_log("foo:".$c);
    8 }
    9 

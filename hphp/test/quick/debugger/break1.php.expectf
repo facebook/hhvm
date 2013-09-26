@@ -18,6 +18,9 @@ break clear all
 All breakpoints are cleared.
 break break1.php:7
 Breakpoint 1 set on line 7 of break1.php
+break break1.php:3
+Breakpoint 2 not set on line 3 of break1.php
+Because the line does not exist or is not executable code.
 break break1.php:77
 Breakpoint 2 not set on line 77 of break1.php
 Because the line does not exist or is not executable code.

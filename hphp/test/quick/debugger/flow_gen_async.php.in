@@ -7,6 +7,7 @@ next
 next
 next
 next
+next
 continue
 @test(2)
 out
@@ -21,6 +22,7 @@ continue
 break clear all
 break flow_gen_async.php:15
 @test(4)
+next
 next
 next
 next

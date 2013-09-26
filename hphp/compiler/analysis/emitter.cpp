@@ -1799,8 +1799,11 @@ void EmitterVisitor::visit(FileScopePtr file) {
     // current position in the bytecode is reachable, emit code to
     // return 1.
     if (currentPositionIsReachable()) {
+      LocationPtr loc(new Location());
+      e.setTempLocation(loc);
       e.Int(1);
       e.RetC();
+      e.setTempLocation(LocationPtr());
     }
   }
 
@@ -5893,12 +5896,17 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
 
   // if the current position is reachable, emit code to return null
   if (currentPositionIsReachable()) {
+    LocationPtr loc(new Location(*meth->getLocation().get()));
+    loc->line0 = loc->line1;
+    loc->char0 = loc->char1-1;
+    e.setTempLocation(loc);
     e.Null();
     if ((meth->getStmts() && meth->getStmts()->isGuarded())) {
       m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::GuardedThis,
                      false, 0, 0);
     }
     e.RetC();
+    e.setTempLocation(LocationPtr());
   }
 
   FuncFinisher ff(this, e, m_curFunc);

@@ -88,6 +88,12 @@ Break at foo() on line 49 of %s/flow2.php
   50 } // Ret runs two destructors
 
 next
+Break at foo() on line 50 of %s/flow2.php
+  49   var_dump($d);
+  50 } // Ret runs two destructors
+  51 
+
+next
 Destructor
 Destructor
 Break at test() on line 53 of %s/flow2.php

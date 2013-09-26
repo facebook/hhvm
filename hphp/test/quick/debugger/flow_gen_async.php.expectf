@@ -43,6 +43,12 @@ Break at foo() on line 25 of %s/flow_gen_async.php
   26 }
 
 next
+Break at foo() on line 26 of %s/flow_gen_async.php
+  25   var_dump($result);
+  26 }
+  27 
+
+next
 Break at test() on line 29 of %s/flow_gen_async.php
   28 function test($a) {
   29   foo($a);
@@ -163,6 +169,12 @@ Break at foo() on line 25 of %s/flow_gen_async.php
   24   $result = genFoo($a)->join();
   25   var_dump($result);
   26 }
+
+next
+Break at foo() on line 26 of %s/flow_gen_async.php
+  25   var_dump($result);
+  26 }
+  27 
 
 next
 Break at test() on line 29 of %s/flow_gen_async.php

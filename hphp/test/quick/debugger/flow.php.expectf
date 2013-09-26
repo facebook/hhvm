@@ -32,6 +32,12 @@ Break at cls::pub() on line 14 of %s/flow.php
 
 next
 out pub:1
+Break at cls::pub() on line 15 of %s/flow.php
+  14     error_log("out pub:".$x);
+  15   }
+  16   private function pri($x) {
+
+next
 Break at test() on line 62 of %s/flow.php
   61   $obj = new cls();
   62   $obj->pub($x);
@@ -89,6 +95,12 @@ $b = 10
 $c = 5
 next
 foo:5
+Break at foo() on line 8 of %s/flow.php
+   7   error_log("foo:".$c);
+   8 }
+   9 
+
+next
 Break at cls::pri() on line 19 of %s/flow.php
   18     $y = $x + 3; $z = $x * 5;
   19     foo($y, $z);

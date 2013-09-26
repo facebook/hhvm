@@ -5,6 +5,7 @@ break list
 continue
 break clear all
 break break1.php:7
+break break1.php:3
 break break1.php:77
 break list
 @ foo('test_break1')

@@ -1005,7 +1005,7 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
       // this private method, so this private method is not accessible.
       // We need to keep going because the context class may define a
       // private method with this name.
-      if(AutoloadHandler::s_instance->isRunning()){ 
+      if(AutoloadHandler::s_instance->isRunning() && ctx->classof(baseClass)){ 
         spl_override(method) ? accessible = true : accessible = false;
       }else{accessible=false;}
     } else {

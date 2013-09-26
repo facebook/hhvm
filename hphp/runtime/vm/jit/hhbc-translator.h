@@ -726,6 +726,8 @@ private:
   template<class Lambda>
   SSATmp* emitMIterInitCommon(int offset, Lambda genFunc);
   SSATmp* staticTVCns(const TypedValue*);
+  void emitJmpSurpriseCheck();
+  void emitRetSurpriseCheck(SSATmp* retVal);
 
   Type interpOutputType(const NormalizedInstruction&,
                         folly::Optional<Type>&) const;
@@ -797,7 +799,7 @@ public:
 
 private:
   /*
-   * Predictates for testing information about the relationship of a
+   * Predicates for testing information about the relationship of a
    * class to the current context class.
    */
   bool classIsUniqueOrCtxParent(const Class*) const;

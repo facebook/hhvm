@@ -1023,6 +1023,8 @@ class Variant : private TypedValue {
 
   static ALWAYS_INLINE
   void AssignValHelper(Variant *self, const Variant *other) {
+    assert(tvIsPlausible(*self) && tvIsPlausible(*other));
+
     if (UNLIKELY(self->m_type == KindOfRef)) self = self->m_data.pref->var();
     if (UNLIKELY(other->m_type == KindOfRef)) other = other->m_data.pref->var();
     // An early check for self == other here would be faster in that case, but
@@ -1061,6 +1063,8 @@ public:
   }
 
   ALWAYS_INLINE void assignRefHelper(CVarRef v) {
+    assert(tvIsPlausible(*this) && tvIsPlausible(v));
+
     PromoteToRef(v);
     RefData* r = v.m_data.pref;
     r->incRefCount(); // in case destruct() triggers deletion of v
@@ -1073,6 +1077,7 @@ public:
 
 public:
   ALWAYS_INLINE void constructRefHelper(CVarRef v) {
+    assert(tvIsPlausible(v));
     PromoteToRef(v);
     v.m_data.pref->incRefCount();
     m_data.pref = v.m_data.pref;
@@ -1080,6 +1085,8 @@ public:
   }
 
   ALWAYS_INLINE void constructValHelper(CVarRef v) {
+    assert(tvIsPlausible(v));
+
     const Variant *other =
       UNLIKELY(v.m_type == KindOfRef) ? v.m_data.pref->var() : &v;
     assert(this != other);
@@ -1091,6 +1098,8 @@ public:
   }
 
   void moveRefHelper(Variant&& v) {
+    assert(tvIsPlausible(v));
+
     assert(v.m_type == KindOfRef);
     m_type = v.m_data.pref->tv()->m_type; // Can't be KindOfUninit.
     m_data = v.m_data.pref->tv()->m_data;
@@ -1103,6 +1112,8 @@ public:
 
   ALWAYS_INLINE
   void setWithRefHelper(CVarRef v, bool destroy) {
+    assert(tvIsPlausible(*this) && tvIsPlausible(v));
+
     assert(this != &v);
 
     CVarRef rhs = v.m_type == KindOfRef && !v.m_data.pref->isReferenced()

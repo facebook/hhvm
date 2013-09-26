@@ -316,7 +316,9 @@ O(SideExitGuardLoc,                 ND, S(FramePtr),                       E) \
 O(SideExitGuardStk,          D(StkPtr), S(StkPtr),                         E) \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(JmpIndirect,                      ND, S(TCA),                          T|E) \
-O(ExitWhenSurprised,                ND, NA,                                E) \
+O(CheckSurpriseFlags,               ND, NA,                                E) \
+O(SurpriseHook,                     ND, NA,                              N|E) \
+O(FunctionExitSurpriseHook,         ND, S(FramePtr) S(StkPtr) S(Gen),    N|E) \
 O(ExitOnVarEnv,                     ND, S(FramePtr),                       E) \
 O(ReleaseVVOrExit,                  ND, S(FramePtr),                     N|E) \
 O(RaiseError,                       ND, S(Str),            E|N|Mem|Refs|T|Er) \

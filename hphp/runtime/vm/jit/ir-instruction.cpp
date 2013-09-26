@@ -230,6 +230,9 @@ bool IRInstruction::storesCell(uint32_t srcIdx) const {
     case CallBuiltin:
       return srcIdx >= 1 && srcIdx < numSrcs();
 
+    case FunctionExitSurpriseHook:
+      return srcIdx == 2;
+
     default:
       return false;
   }

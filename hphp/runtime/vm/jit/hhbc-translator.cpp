@@ -1285,7 +1285,7 @@ void HhbcTranslator::emitIterBreak(const ImmVector& iv,
                                     bool             noSurprise) {
   bool backward = offset <= bcOff();
   if (backward && !noSurprise) {
-    gen(ExitWhenSurprised, makeExitSlow());
+    emitJmpSurpriseCheck();
   }
 
   int iterIndex;
@@ -1444,12 +1444,19 @@ void HhbcTranslator::emitContEnter(int32_t returnBcOffset) {
     m_tb->fp()
   );
   assert(m_stackDeficit == 0);
+
+  // The top of the stack was consumed by the callee, so discard it without
+  // decreffing.
+  popC(DataTypeGeneric);
 }
 
 void HhbcTranslator::emitContReturnControl() {
+  auto const sp = spillStack();
+  emitRetSurpriseCheck(m_tb->genDefNull());
+
   auto const retAddr = gen(LdRetAddr, m_tb->fp());
   auto const fp = gen(FreeActRec, m_tb->fp());
-  auto const sp = spillStack();
+
   gen(RetCtrl, sp, fp, retAddr);
   m_hasExit = true;
 }
@@ -1459,8 +1466,6 @@ void HhbcTranslator::emitUnpackCont() {
 }
 
 void HhbcTranslator::emitContSuspendImpl(int64_t labelId) {
-  gen(ExitWhenSurprised, makeExitSlow());
-
   // set m_value = popC();
   auto const oldValue = gen(LdContArValue, Type::Cell, m_tb->fp());
   gen(StContArValue, m_tb->fp(), popC(DataTypeGeneric)); // teleporting value
@@ -1511,8 +1516,6 @@ void HhbcTranslator::emitContSuspendK(int64_t labelId) {
 }
 
 void HhbcTranslator::emitContRetC() {
-  gen(ExitWhenSurprised, makeExitSlow());
-
   // set state to done
   gen(StContArRaw, m_tb->fp(), cns(RawMemSlot::ContState),
       cns(c_Continuation::Done));
@@ -1857,7 +1860,7 @@ void HhbcTranslator::emitJmp(int32_t offset,
   // If surprise flags are set, exit trace and handle surprise
   bool backward = (uint32_t)offset <= bcOff();
   if (backward && !noSurprise) {
-    gen(ExitWhenSurprised, makeExitSlow());
+    emitJmpSurpriseCheck();
   }
   if (!breakTracelet) return;
   gen(Jmp_, makeExit(offset));
@@ -2705,24 +2708,24 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
   const Func* curFunc = this->curFunc();
   bool mayUseVV = (curFunc->attrs() & AttrMayUseVV);
 
-  gen(ExitWhenSurprised, makeExitSlow());
   if (mayUseVV) {
     // Note: this has to be the first thing, because we cannot bail after
     //       we start decRefing locs because then there'll be no corresponding
     //       bytecode boundaries until the end of RetC
     gen(ReleaseVVOrExit, makeExitSlow(), m_tb->fp());
   }
+
   SSATmp* retVal = pop(type, DataTypeCountness);
   if (RuntimeOption::EvalRuntimeTypeProfile) {
-      gen(TypeProfileFunc, TypeProfileData(-1, curFunc), retVal);
+    gen(TypeProfileFunc, TypeProfileData(-1, curFunc), retVal);
   }
   SSATmp* sp;
   if (freeInline) {
-    SSATmp* useRet = emitDecRefLocalsInline(retVal);
+    retVal = emitDecRefLocalsInline(retVal);
     for (unsigned i = 0; i < curFunc->numLocals(); ++i) {
       m_tb->constrainLocal(i, DataTypeCountness, "inlined RetC/V");
     }
-    gen(StRetVal, m_tb->fp(), useRet);
+    gen(StRetVal, m_tb->fp(), retVal);
     sp = gen(RetAdjustStack, m_tb->fp());
   } else {
     if (curFunc->mayHaveThis()) {
@@ -2732,6 +2735,8 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     gen(StRetVal, m_tb->fp(), retVal);
   }
 
+  emitRetSurpriseCheck(retVal);
+
   // Free ActRec, and return control to caller.
   SSATmp* retAddr = gen(LdRetAddr, m_tb->fp());
   SSATmp* fp = gen(FreeActRec, m_tb->fp());
@@ -2739,6 +2744,32 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
 
   // Flag that this trace has a Ret instruction, so that no ExitTrace is needed
   m_hasExit = true;
+}
+
+void HhbcTranslator::emitJmpSurpriseCheck() {
+  auto catchTrace = makeCatch();
+
+  m_tb->ifThen(curFunc(),
+               [&](Block* taken) {
+                 gen(CheckSurpriseFlags, taken);
+               },
+               [&] {
+                 m_tb->hint(Block::Hint::Unlikely);
+                 gen(SurpriseHook, catchTrace);
+               });
+}
+
+void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal) {
+  m_tb->ifThen(curFunc(),
+               [&](Block* taken) {
+                 gen(CheckSurpriseFlags, taken);
+               },
+               [&] {
+                 m_tb->hint(Block::Hint::Unlikely);
+                 gen(FunctionExitSurpriseHook,
+                     m_tb->fp(), m_tb->sp(), retVal);
+               });
+
 }
 
 void HhbcTranslator::emitSwitch(const ImmVector& iv,

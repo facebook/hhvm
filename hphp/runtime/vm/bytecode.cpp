@@ -865,8 +865,9 @@ TypedValue* Stack::generatorStackBase(const ActRec* fp) {
     return context->m_nestedVMs.back().m_savedState.sp;
   }
   // In the non-reentrant case, we know generators are always called from a
-  // function with an empty stack. So we find the caller's FP, compensate
-  // for its locals, and then we've found the base of the generator's stack.
+  // function with an empty stack. So we find the caller's FP, compensate for
+  // its locals and iterators, and then we've found the base of the generator's
+  // stack.
   return (TypedValue*)sfp - sfp->m_func->numSlotsInFrame();
 }
 

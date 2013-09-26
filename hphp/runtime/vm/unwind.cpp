@@ -162,7 +162,14 @@ void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc, Offset& faultOffset) {
          implicit_cast<void*>(fp),
          implicit_cast<void*>(prevFp));
 
-  if (fp->isFromFPushCtor() && fp->hasThis()) {
+  // When throwing from a constructor, we normally want to avoid running the
+  // destructor on an object that hasn't been fully constructed yet. But if
+  // we're unwinding through the constructor's RetC, the constructor has
+  // logically finished and we're unwinding for some internal reason (timeout
+  // or user profiler, most likely). More importantly, fp->m_this may have
+  // already been destructed and/or overwritten due to sharing space with
+  // fp->m_r.
+  if (!unwindingReturningFrame && fp->isFromFPushCtor() && fp->hasThis()) {
     fp->getThis()->setNoDestruct();
   }
 

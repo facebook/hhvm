@@ -353,6 +353,8 @@ CALL_OPCODE(EmptyElem)
 CALL_OPCODE(InstanceOf)
 CALL_OPCODE(InstanceOfIface)
 
+CALL_OPCODE(SurpriseHook)
+
 #undef NOOP_OPCODE
 
 // Thread chain of patch locations using the 4 byte space in each jmp/jcc
@@ -5490,10 +5492,33 @@ void CodeGenerator::cgCheckInitMem(IRInstruction* inst) {
   emitFwdJcc(CC_Z, label);
 }
 
-void CodeGenerator::cgExitWhenSurprised(IRInstruction* inst) {
-  Block* label = inst->taken();
+void CodeGenerator::cgCheckSurpriseFlags(IRInstruction* inst) {
   emitTestSurpriseFlags(m_as);
-  emitFwdJcc(CC_NZ, label);
+  emitFwdJcc(CC_NZ, inst->taken());
+}
+
+void CodeGenerator::cgFunctionExitSurpriseHook(IRInstruction* inst) {
+  auto const sp     = m_regs[inst->src(1)].reg();
+  auto const retVal = inst->src(2);
+
+  // To keep things simple in both the unwinder and the user profiler, we put
+  // the return value onto the vm stack where it was coming into the RetC
+  // instruction.
+  if (curFunc()->isGenerator()) {
+    // sp points at the stack frame base, so there are no locals or iterators
+    // to skip.
+    cgStore(sp[-sizeof(TypedValue)], retVal, true);
+  } else {
+    // sp points at rVmFp->m_r, so we have to skip over the rest of the ActRec
+    // and anything else in the frame.
+    auto const offset = -AROFF(m_r) -
+      curFunc()->numSlotsInFrame() * sizeof(TypedValue) -
+      sizeof(TypedValue);
+
+    cgStore(sp[offset], retVal, true);
+  }
+
+  cgCallNative(m_as, inst);
 }
 
 void CodeGenerator::cgExitOnVarEnv(IRInstruction* inst) {

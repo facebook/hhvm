@@ -665,10 +665,20 @@ D:None JmpSwitchDest<JmpSwitchData> S0:Int
   Jump to the target of a switch stamement using table metadata
   <JmpSwitchData> and index S0.
 
-ExitWhenSurprised -> L
+CheckSurpriseFlags -> L
 
-  Tests the surprise flags and if they are set, jumps to the
-  exit-trace label L.
+  Tests the implementation-specific surprise flags. If they're true, branches
+  to L.
+
+SurpriseHook
+
+  Executes the implementation-specific surprise flag hook.
+
+FunctionExitSurpriseHook S0:FramePtr S1:StkPtr S2:Gen
+
+  Executes the implementation-specific surprise flag hook for function exit. S0
+  should be the current frame pointer, S1 should be the current stack pointer,
+  and S2 should be the return value of the function.
 
 ExitOnVarEnv S0:FramePtr -> L
 

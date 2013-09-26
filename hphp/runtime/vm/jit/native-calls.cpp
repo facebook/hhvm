@@ -323,6 +323,11 @@ static CallMap s_callMap {
 
     /* debug assert helpers */
     {DbgAssertPtr, assertTv, DNone, SNone, {{SSA, 0}}},
+
+    /* surprise flag support */
+    {SurpriseHook, &EventHook::CheckSurprise, DNone, SSync, {}},
+    {FunctionExitSurpriseHook, &EventHook::onFunctionExit, DNone, SSync,
+                               {{SSA, 0}}},
 };
 
 CallMap::CallMap(CallInfoList infos) {

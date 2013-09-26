@@ -346,23 +346,9 @@ void emitJmpOrJcc(Asm& a, ConditionCode cc, TCA dest) {
 
 void emitRB(X64Assembler& a,
             Trace::RingBufferType t,
-            SrcKey sk, RegSet toSave) {
-  if (!Trace::moduleEnabledRelease(Trace::tx64, 3)) {
-    return;
-  }
-  PhysRegSaver rs(a, toSave | kSpecialCrossTraceRegs);
-  int arg = 0;
-  a.    emitImmReg(t, argNumToRegName[arg++]);
-  a.    emitImmReg(sk.getFuncId(), argNumToRegName[arg++]);
-  a.    emitImmReg(sk.offset(), argNumToRegName[arg++]);
-  a.    call((TCA)Trace::ringbufferEntry);
-}
-
-void emitRB(X64Assembler& a,
-            Trace::RingBufferType t,
             const char* msg,
             RegSet toSave) {
-  if (!Trace::moduleEnabledRelease(Trace::tx64, 3)) {
+  if (!Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) {
     return;
   }
   PhysRegSaver save(a, toSave | kSpecialCrossTraceRegs);

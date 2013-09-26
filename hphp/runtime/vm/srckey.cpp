@@ -41,7 +41,8 @@ std::string show(SrcKey sk) {
 }
 
 std::string showShort(SrcKey sk) {
-  return folly::format("{}(id 0x{:#x})@{}",
+  if (!sk.valid()) return "<invalid SrcKey>";
+  return folly::format("{}(id {:#x})@{}",
                        sk.func()->fullName()->data(), sk.getFuncId(),
                        sk.offset()).str();
 }

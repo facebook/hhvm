@@ -496,6 +496,18 @@ void HhbcTranslator::emitCheckThis() {
   gen(LdThis, makeExitSlow(), m_tb->fp());
 }
 
+void HhbcTranslator::emitRB(Trace::RingBufferType t, SrcKey sk) {
+  if (!Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) return;
+
+  gen(RBTrace, RBTraceData(t, sk));
+}
+
+void HhbcTranslator::emitRB(Trace::RingBufferType t, const StringData* msg) {
+  if (!Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) return;
+
+  gen(RBTrace, RBTraceData(t, msg));
+}
+
 void HhbcTranslator::emitBareThis(int notice) {
   // We just exit the trace in the case $this is null. Before exiting
   // the trace, we could also push null onto the stack and raise a
@@ -2760,6 +2772,8 @@ void HhbcTranslator::emitJmpSurpriseCheck() {
 }
 
 void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal) {
+  emitRB(Trace::RBTypeFuncExit, curFunc()->fullName());
+
   m_tb->ifThen(curFunc(),
                [&](Block* taken) {
                  gen(CheckSurpriseFlags, taken);

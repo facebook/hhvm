@@ -1657,6 +1657,10 @@ TranslatorX64::enterTC(TCA start, void* data) {
           vmfp(), func->name()->data(), vmsp());
     tl_regState = VMRegState::DIRTY;
 
+    if (Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) {
+      auto skData = sk.valid() ? sk.toAtomicInt() : uint64_t(-1LL);
+      Trace::ringbufferEntry(RBTypeEnterTC, skData, (uint64_t)start);
+    }
     // We have to force C++ to spill anything that might be in a callee-saved
     // register (aside from rbp). enterTCHelper does not save them.
     CALLEE_SAVED_BARRIER();
@@ -2214,7 +2218,7 @@ TranslatorX64::emitGuardChecks(X64Assembler& a,
     Stats::emitInc(a, Stats::TraceletGuard_enter);
   }
 
-  emitRB(a, RBTypeTraceletGuards, sk);
+  m_irTrans->hhbcTrans().emitRB(RBTypeTraceletGuards, sk);
   for (auto const& dep : dependencies) {
     m_irTrans->checkType(dep.first, dep.second->rtt);
   }
@@ -2468,7 +2472,7 @@ TranslatorX64::translateTracelet(Tracelet& t) {
         ht.emitCheckCold(m_profData->curTransID());
       }
 
-      emitRB(a, RBTypeTraceletBody, t.m_sk);
+      m_irTrans->hhbcTrans().emitRB(RBTypeTraceletBody, t.m_sk);
       Stats::emitInc(a, Stats::Instr_TC, t.m_numOpcodes);
     }
 

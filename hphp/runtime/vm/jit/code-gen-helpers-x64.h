@@ -78,8 +78,6 @@ void emitCall(Asm& as, CppCall call);
 
 void emitJmpOrJcc(Asm& as, ConditionCode cc, TCA dest);
 
-void emitRB(Asm& a, Trace::RingBufferType t, SrcKey sk,
-            RegSet toSave = RegSet());
 void emitRB(Asm& a, Trace::RingBufferType t, const char* msgm,
             RegSet toSave = RegSet());
 

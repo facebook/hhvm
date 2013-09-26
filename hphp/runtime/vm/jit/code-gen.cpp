@@ -6067,6 +6067,30 @@ void CodeGenerator::cgVerifyParamCls(IRInstruction* inst) {
   ifThen(m_as, CC_NE, [&]{ cgCallNative(m_as, inst); });
 }
 
+void CodeGenerator::cgRBTrace(IRInstruction* inst) {
+  auto const& extra = *inst->extra<RBTrace>();
+
+  TCA helper;
+  ArgGroup args(m_regs);
+  if (extra.msg) {
+    auto const msg = extra.msg;
+    assert(msg->isStatic());
+    args.immPtr(msg->data());
+    args.imm(msg->size());
+    args.imm(extra.type);
+    helper = (TCA)Trace::ringbufferMsg;
+  } else {
+    auto const sk = extra.sk;
+    args.imm(extra.type);
+    args.imm(sk.toAtomicInt());
+    args.immPtr(m_as.frontier());
+    helper = (TCA)Trace::ringbufferEntry;
+  }
+
+  cgCallHelper(m_as, CppCall(helper), kVoidDest,
+               SyncOptions::kNoSyncPoint, args);
+}
+
 static void emitTraceCall(CodeGenerator::Asm& as,
                           int64_t pcOff,
                           Transl::TranslatorX64* tx64) {

@@ -362,6 +362,7 @@ public:
   F(bool, CheckExtendedTypeHints,      false)                           \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
+  F(uint32_t, DumpRingBufferOnCrash,   0)                               \
   F(bool, PerfPidMap,                  true)                            \
   F(bool, KeepPerfPidMap,              false)                           \
   F(uint32_t, RuntimeTypeProfileFreq,  1000)                            \

@@ -24,6 +24,7 @@
 #include "folly/Optional.h"
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
@@ -446,6 +447,11 @@ struct HhbcTranslator {
   void emitIncStat(int32_t counter, int32_t value, bool force = false);
   void emitIncTransCounter();
   void emitCheckCold(Transl::TransID transId);
+  void emitRB(Trace::RingBufferType t, SrcKey sk);
+  void emitRB(Trace::RingBufferType t, std::string msg) {
+    emitRB(t, makeStaticString(msg));
+  }
+  void emitRB(Trace::RingBufferType t, const StringData* msg);
   void emitArrayIdx();
 
 private:

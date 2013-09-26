@@ -16,6 +16,7 @@
 #ifndef incl_HPHP_VM_EVENT_HOOK_H_
 #define incl_HPHP_VM_EVENT_HOOK_H_
 
+#include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
@@ -42,6 +43,10 @@ class EventHook {
    */
   static bool onFunctionEnter(const ActRec* ar, int funcType);
   static inline bool FunctionEnter(const ActRec* ar, int funcType) {
+    if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
+      auto name = ar->m_func->fullName();
+      Trace::ringbufferMsg(name->data(), name->size(), Trace::RBTypeFuncEntry);
+    }
     if (UNLIKELY(Transl::TargetCache::loadConditionFlags())) {
       return onFunctionEnter(ar, funcType);
     }
@@ -58,6 +63,10 @@ class EventHook {
    */
   static void onFunctionExit(const ActRec* ar);
   static inline void FunctionExit(const ActRec* ar) {
+    if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
+      auto name = ar->m_func->fullName();
+      Trace::ringbufferMsg(name->data(), name->size(), Trace::RBTypeFuncExit);
+    }
     if (UNLIKELY(Transl::TargetCache::loadConditionFlags())) {
       onFunctionExit(ar);
     }

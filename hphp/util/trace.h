@@ -59,11 +59,11 @@ namespace Trace {
 
 #define TRACE_MODULES \
       TM(tprefix)     /* Meta: prefix with string */          \
-      TM(ringbuffer)  /* Meta: trace to ram */                \
       TM(traceAsync)  /* Meta: lazy writes to disk */ \
       TM(trans)       \
       TM(tx64)        \
       TM(tx64stats)   \
+      TM(ringbuffer)  \
       TM(ustubs)      \
       TM(unwind)      \
       TM(txlease)     \

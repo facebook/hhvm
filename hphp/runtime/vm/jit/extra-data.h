@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_VM_EXTRADATA_H_
 #define incl_HPHP_VM_EXTRADATA_H_
 
+#include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/types.h"
 
@@ -473,6 +474,31 @@ struct ReDefSPData : IRExtraData {
   bool spansCall;
 };
 
+struct RBTraceData : IRExtraData {
+  RBTraceData(Trace::RingBufferType t, SrcKey sk_)
+    : type(t)
+    , sk(sk_)
+    , msg(nullptr)
+  {}
+
+  RBTraceData(Trace::RingBufferType t, const StringData* msg_)
+    : type(t)
+    , sk()
+    , msg(msg_)
+  {
+    assert(msg->isStatic());
+  }
+
+  std::string show() const {
+    auto const data = msg ? msg->data() : showShort(sk);
+    return folly::format("{}: {}", ringbufferName(type), data).str();
+  }
+
+  Trace::RingBufferType type;
+  SrcKey sk;
+  const StringData* msg;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -547,6 +573,7 @@ X(CreateContFunc,               CreateContData);
 X(CreateContMeth,               CreateContData);
 X(StClosureFunc,                FuncData);
 X(StClosureArg,                 PropByteOffset);
+X(RBTrace,                      RBTraceData);
 
 #undef X
 

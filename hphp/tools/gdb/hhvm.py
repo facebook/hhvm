@@ -153,7 +153,7 @@ class ObjectDataPrinter:
         if not mv:
             return self._iterator(0,0,0,0)
 
-        return self._iterator(self.val, self.cls, mv, mv + dp['m_size'])
+        return self._iterator(self.val, self.cls, mv, mv + dp['m_map']['m_extra'])
 
     def to_string(self):
         return "%s of class %s" % (

@@ -921,7 +921,7 @@ bool spl_override(const Func* method, bool case_ctx){
 	  ActRec *fp = context->getFP();
 	  ActRec *ar= context->getPrevVMState(fp);
 	  if(ar){
-		if(a_c->data() != ar->m_func->cls()->name()->data())return false;
+		if(ar->m_func->cls()){if(a_c->data() != ar->m_func->cls()->name()->data())return false;}
 	  }
 	}
 	

@@ -1497,11 +1497,11 @@
         },
         {
             "name": "ENT_FB_UTF8",
-            "value": 4
+            "value": 32768
         },
         {
             "name": "ENT_FB_UTF8_ONLY",
-            "value": 8
+            "value": 65536
         },
         {
             "name": "ERA",

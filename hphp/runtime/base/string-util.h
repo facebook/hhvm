@@ -40,8 +40,10 @@ public:
     Double       = 2,  // k_ENT_COMPAT:   escape double quotes only
     Both         = 3,  // k_ENT_QUOTES:   escape both double and single quotes
     No           = 0,  // k_ENT_NOQUOTES: leave all quotes alone
-    FBUtf8       = 4,
-    FBUtf8Only   = 8
+    // Use high values to avoid conflicts with currently unimplemented PHP ENT_
+    // constants and for possible future new constants in PHP
+    FBUtf8       = 32768,
+    FBUtf8Only   = 65536
   };
 
 public:

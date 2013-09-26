@@ -1,1 +1,1 @@
-Call to private method B::priv from anonymous context
+Call to private method B::priv from context A

@@ -48,6 +48,8 @@ class TypedValuePrinter:
             return "Tv: %s" % self.val['m_data']['parr'].dereference()
         elif v == 0x30:
             return "Tv: %s" % self.val['m_data']['pobj'].dereference()
+        elif v == 0x40:
+            return "Tv: %s" % self.val['m_data']['pres'].dereference()
         elif v == 0x50:
             return "Tv: %s" % self.val['m_data']['pref'].dereference()
         else:
@@ -201,12 +203,20 @@ class RefDataPrinter:
     def to_string(self):
         return "Ref: %s" % self.val['m_tv']
 
+class ResourceDataPrinter:
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        return "Res #%d" % self.val['o_id']
+
 dict = {}
 dict[re.compile('^HPHP::TypedValue|HPHP::VM::Cell|HPHP::Variant|HPHP::VarNR$')] = lambda val: TypedValuePrinter(val)
 dict[re.compile('^HPHP::StringData$')] = lambda val: StringDataPrinter(val)
 dict[re.compile('^HPHP::(ArrayData|HphpArray)$')] = lambda val: ArrayDataPrinter(val)
 dict[re.compile('^HPHP::(ObjectData|Instance)$')] = lambda val: ObjectDataPrinter(val)
 dict[re.compile('^HPHP::RefData$')] = lambda val: RefDataPrinter(val)
+dict[re.compile('^HPHP::ResourceData$')] = lambda val: ResourceDataPrinter(val)
 dict[re.compile('^HPHP::((Static)?String|Array|Object|SmartPtr<.*>)$')] = lambda val: SmartPtrPrinter(val)
 
 def lookup_function(val):

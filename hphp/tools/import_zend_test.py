@@ -335,8 +335,8 @@ other_files = (
     '/Zend/tests/ns_069.inc',
     '/Zend/tests/unset.inc',
     '/ext/calendar/tests/skipif.inc',
-    '/ext/ctests/url/curl_testdata1.txt',
-    '/ext/ctests/url/curl_testdata2.txt',
+    '/ext/curl/tests/curl_testdata1.txt',
+    '/ext/curl/tests/curl_testdata2.txt',
     '/ext/date/tests/DateTime_data-absolute.inc',
     '/ext/date/tests/DateTime_data-dates.inc',
     '/ext/date/tests/DateTime_data-fall-type2-type2.inc',
@@ -763,6 +763,11 @@ def walk(filename, source_dir):
     if '/ext/ftp/tests/ftp_' in full_dest_filename:
         test = test.replace('localfile.txt',
             os.path.basename(full_dest_filename).replace('.php', '.txt'))
+    if '/Zend/tests/bug36759.php' in full_dest_filename:
+        pseudomain = '$y = new Bar();\n$x = new Foo($y);\n'
+        test = test.replace(pseudomain,
+                            'function main() {\n' + pseudomain + '}\nmain();\n')
+
 
     file(full_dest_filename, 'w').write(test)
 

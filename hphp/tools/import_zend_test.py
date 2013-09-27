@@ -466,7 +466,8 @@ parser.add_argument(
     "-z",
     "--zend_path",
     type=str,
-    help="zend path to import tests from."
+    required=True,
+    help="zend path to import tests from. git checkout https://github.com/php/php-src"
 )
 parser.add_argument(
     "-o",
@@ -771,44 +772,30 @@ def walk(filename, source_dir):
 
     file(full_dest_filename, 'w').write(test)
 
-if args.zend_path:
-    def should_import(filename):
-        for bad in no_import:
-            if bad in filename:
-                return False
-        return True
+def should_import(filename):
+    for bad in no_import:
+        if bad in filename:
+            return False
+    return True
 
-    for root, dirs, files in os.walk(args.zend_path):
-        for filename in files:
-            full_file = os.path.join(root, filename)
+for root, dirs, files in os.walk(args.zend_path):
+    for filename in files:
+        full_file = os.path.join(root, filename)
 
-            def matches(patterns):
-                if not patterns:
+        def matches(patterns):
+            if not patterns:
+                return True
+            for pattern in patterns:
+                if pattern in full_file:
                     return True
-                for pattern in patterns:
-                    if pattern in full_file:
-                        return True
-                return False
+            return False
 
-            if matches(args.only) and should_import(full_file):
-                walk(full_file, root.replace(args.zend_path, ''))
+        if matches(args.only) and should_import(full_file):
+            walk(full_file, root.replace(args.zend_path, ''))
 
 if not os.path.isdir('test/zend/all'):
-    if args.zend_path:
-        print "No test/zend/all. Maybe no tests were imported?"
-        sys.exit(0)
-    else:
-        print "Running all tests from test/zend/bad"
-        shutil.copytree('test/zend/bad', 'test/zend/all')
-
-        for filename in other_files:
-            dest_dir = os.path.dirname('test/zend/all/' + filename)
-            if not os.path.exists(dest_dir):
-                os.makedirs(dest_dir)
-            shutil.copyfile(
-                'test/zend/good/' + filename,
-                'test/zend/all/' + filename
-            )
+    print "No test/zend/all. Maybe no tests were imported?"
+    sys.exit(0)
 else:
     print "Running all tests from zend/all"
 

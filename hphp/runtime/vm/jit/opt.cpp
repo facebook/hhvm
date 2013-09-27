@@ -80,28 +80,30 @@ static void insertSpillStackAsserts(IRInstruction& inst, IRUnit& unit) {
  * TODO: t2137231 Insert DbgAssertPtr at points that use or produces a GenPtr
  */
 static void insertAsserts(IRUnit& unit) {
-  forEachTraceBlock(unit, [&](Block* block) {
-    for (auto it = block->begin(), end = block->end(); it != end; ) {
-      IRInstruction& inst = *it;
-      ++it;
-      if (inst.op() == SpillStack) {
-        insertSpillStackAsserts(inst, unit);
-        continue;
+  postorderWalk([&](Block* block) {
+      for (auto it = block->begin(), end = block->end(); it != end; ) {
+        IRInstruction& inst = *it;
+        ++it;
+        if (inst.op() == SpillStack) {
+          insertSpillStackAsserts(inst, unit);
+          continue;
+        }
+        if (inst.op() == Call) {
+          SSATmp* sp = inst.dst();
+          IRInstruction* addr = unit.gen(LdStackAddr,
+                                         inst.marker(),
+                                         Type::PtrToGen,
+                                         StackOffset(0),
+                                         sp);
+          insertAfter(&inst, addr);
+          insertAfter(addr, unit.gen(DbgAssertPtr, inst.marker(), addr->dst()));
+          continue;
+        }
+        if (!inst.isBlockEnd()) insertRefCountAsserts(inst, unit);
       }
-      if (inst.op() == Call) {
-        SSATmp* sp = inst.dst();
-        IRInstruction* addr = unit.gen(LdStackAddr,
-                                       inst.marker(),
-                                       Type::PtrToGen,
-                                       StackOffset(0),
-                                       sp);
-        insertAfter(&inst, addr);
-        insertAfter(addr, unit.gen(DbgAssertPtr, inst.marker(), addr->dst()));
-        continue;
-      }
-      if (!inst.isBlockEnd()) insertRefCountAsserts(inst, unit);
-    }
-  });
+    },
+    unit.numBlocks(),
+    unit.entry());
 }
 
 void optimize(IRUnit& unit, TraceBuilder& traceBuilder) {

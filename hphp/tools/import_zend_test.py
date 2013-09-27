@@ -165,6 +165,7 @@ bad_tests = (
     '/ext/json/tests/fail001.php',
     '/ext/standard/network/tests/getmxrr.php',
     '/ext/standard/network/tests/gethostbyname_error004.php',
+    '/ext/standard/tests/file/fgets_socket_variation1.php',
 
     # our build machines have no members in group 0...
     '/ext/posix/tests/posix_getgrgid.php',

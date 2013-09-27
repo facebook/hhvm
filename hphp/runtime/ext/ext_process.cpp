@@ -529,7 +529,7 @@ public:
   String command;
   Variant env;
 
-  CLASSNAME_IS("Process");
+  CLASSNAME_IS("process");
   // overriding ResourceData
   virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
@@ -753,12 +753,17 @@ static Variant post_proc_open(CStrRef cmd, Variant &pipes,
   proc->command = cmd;
   proc->child = child;
   proc->env = env;
+
+  // need to set pipes to a new empty array, ignoring whatever it was
+  // previously set to
+  pipes = Variant(Array::Create());
+
   for (int i = 0; i < (int)items.size(); i++) {
     Resource f = items[i].dupParent();
     if (!f.isNull()) {
       proc->pipes.append(f);
+      pipes.set(items[i].index, f);
     }
-    pipes.set(items[i].index, f);
   }
   return Resource(proc);
 }

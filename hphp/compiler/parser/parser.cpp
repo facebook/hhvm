@@ -1748,7 +1748,7 @@ void Parser::nns(int token) {
           getMessage().c_str());
     return;
   }
-  if (m_nsState == SeenNothing && token != T_DECLARE) {
+  if (m_nsState == SeenNothing && token != T_DECLARE && token != ';') {
     m_nsState = SeenNonNamespaceStatement;
   }
 }

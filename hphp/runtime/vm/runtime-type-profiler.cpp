@@ -27,7 +27,7 @@
 #include "folly/dynamic.h"
 #include "folly/json.h"
 
-#include "external/google_base/atomicops.h"
+#include <external/google_base/atomicops.h>
 
 
 namespace HPHP {

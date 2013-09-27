@@ -35,8 +35,8 @@
 
 #if HAVE_FTP
 
-#include "ext/standard/info.h"
-#include "ext/standard/file.h"
+#include <ext/standard/info.h>
+#include <ext/standard/file.h>
 
 #include "php_ftp.h"
 #include "ftp.h"

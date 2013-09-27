@@ -23,7 +23,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "folly/String.h"
-#include "netinet/in.h"
+#include <netinet/in.h>
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/string-buffer.h"
@@ -31,8 +31,8 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/vm/unwind.h"
-#include "unicode/uchar.h"
-#include "unicode/utf8.h"
+#include <unicode/uchar.h>
+#include <unicode/utf8.h>
 #include "hphp/runtime/base/file-repository.h"
 
 #include "hphp/parser/parser.h"

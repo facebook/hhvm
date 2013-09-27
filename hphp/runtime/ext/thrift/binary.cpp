@@ -23,7 +23,7 @@
 #include "hphp/util/logger.h"
 
 #include <sys/types.h>
-#include "netinet/in.h"
+#include <netinet/in.h>
 #include <unistd.h>
 #include <stdexcept>
 

@@ -17,7 +17,7 @@
 #include "hphp/util/ssl-init.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/process.h"
-#include "openssl/crypto.h"
+#include <openssl/crypto.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

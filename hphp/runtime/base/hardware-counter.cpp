@@ -32,9 +32,9 @@
 #include <assert.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
-#include "asm/unistd.h"
+#include <asm/unistd.h>
 #include <sys/prctl.h>
-#include "linux/perf_event.h"
+#include <linux/perf_event.h>
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/runtime-option.h"

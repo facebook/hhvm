@@ -27,7 +27,7 @@
 #if HAVE_LIBINTL
 
 #include <stdio.h>
-#include "ext/standard/info.h"
+#include <ext/standard/info.h>
 #include "php_gettext.h"
 
 /* {{{ arginfo */

@@ -23,8 +23,8 @@
 #include "hphp/runtime/base/string-buffer.h"
 
 extern "C" {
-#include "mbfl/mbfl_convert.h"
-#include "mbfl/mbfilter.h"
+#include <mbfl/mbfl_convert.h>
+#include <mbfl/mbfilter.h>
 }
 
 namespace HPHP {

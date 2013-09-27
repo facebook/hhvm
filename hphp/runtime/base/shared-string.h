@@ -19,8 +19,8 @@
 
 #include "hphp/util/base.h"
 #include "hphp/runtime/base/smart-ptr.h"
-#include "tbb/concurrent_hash_map.h"
-#include "tbb/atomic.h"
+#include <tbb/concurrent_hash_map.h>
+#include <tbb/atomic.h>
 #include "hphp/util/atomic.h"
 #include "hphp/util/hash.h"
 

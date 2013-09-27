@@ -22,7 +22,7 @@
 #include <vector>
 #include <boost/scoped_ptr.hpp>
 
-#include "unicode/rbbi.h" // icu
+#include <unicode/rbbi.h> // icu
 
 // Avoid dragging in the icu namespace.
 #ifndef U_USING_ICU_NAMESPACE

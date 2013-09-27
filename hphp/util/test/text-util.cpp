@@ -18,7 +18,7 @@
 #include <vector>
 
 #include "hphp/util/text-util.h"
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 namespace HPHP {
 

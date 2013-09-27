@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_SHARED_STORESTATS_H_
 #define incl_HPHP_SHARED_STORESTATS_H_
 
-#include "tbb/concurrent_hash_map.h"
+#include <tbb/concurrent_hash_map.h>
 
 #include "hphp/runtime/base/shared-variant.h"
 #include "hphp/runtime/base/complex-types.h"

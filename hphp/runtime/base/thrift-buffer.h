@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
-#include "arpa/inet.h"
+#include <arpa/inet.h>
 #if defined(__FreeBSD__)
 # include <sys/endian.h>
 # elif defined(__APPLE__)

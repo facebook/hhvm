@@ -20,7 +20,7 @@
 
 #include "hphp/util/cache/cache-manager.h"
 #include "hphp/util/file-cache.h"
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 namespace HPHP {
 

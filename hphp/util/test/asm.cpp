@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/util/asm-x64.h"
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 #include <vector>
 #include <cstdio>

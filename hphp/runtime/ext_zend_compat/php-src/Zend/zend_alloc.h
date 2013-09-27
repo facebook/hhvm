@@ -24,7 +24,7 @@
 
 #include <stdio.h>
 
-#include "../TSRM/TSRM.h"
+#include "../TSRM/TSRM.h" // nolint
 #include "zend.h"
 
 #include "hphp/runtime/base/memory-manager.h"

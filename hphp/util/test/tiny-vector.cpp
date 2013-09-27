@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/util/tiny-vector.h"
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 namespace HPHP {
 

@@ -15,7 +15,7 @@
 */
 #include "hphp/runtime/base/array-data.h"
 
-#include "tbb/concurrent_hash_map.h"
+#include <tbb/concurrent_hash_map.h>
 
 #include "hphp/util/exception.h"
 #include "hphp/runtime/base/array-init.h"

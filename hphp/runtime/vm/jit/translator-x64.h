@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
-#include "tbb/concurrent_hash_map.h"
+#include <tbb/concurrent_hash_map.h>
 #include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"

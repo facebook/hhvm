@@ -44,7 +44,7 @@
 #include <iomanip>
 
 #ifdef GOOGLE_CPU_PROFILER
-#include "google/profiler.h"
+#include <google/profiler.h>
 #endif
 
 using std::endl;

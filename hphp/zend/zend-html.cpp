@@ -17,8 +17,8 @@
 
 #include "hphp/zend/zend-html.h"
 #include "hphp/util/lock.h"
-#include "unicode/uchar.h"
-#include "unicode/utf8.h"
+#include <unicode/uchar.h>
+#include <unicode/utf8.h>
 
 namespace HPHP {
 

@@ -21,7 +21,7 @@
 #include <iostream>
 #ifdef __linux__
 #include <syscall.h>
-#include "linux/futex.h"
+#include <linux/futex.h>
 #include <sys/time.h>
 #endif
 

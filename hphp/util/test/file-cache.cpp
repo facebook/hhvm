@@ -19,7 +19,7 @@
 // to be removed when the old cache compatibility code goes away.
 #include "hphp/util/cache/cache-manager.h"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 namespace HPHP {
 

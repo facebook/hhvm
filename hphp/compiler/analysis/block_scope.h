@@ -23,7 +23,7 @@
 #include "hphp/util/lock.h"
 #include "hphp/runtime/base/macros.h"
 
-#include "tbb/concurrent_hash_map.h"
+#include <tbb/concurrent_hash_map.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

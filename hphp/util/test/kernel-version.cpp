@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/util/kernel-version.h"
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 namespace HPHP {
 

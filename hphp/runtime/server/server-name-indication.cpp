@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/util/util.h"
-#include "openssl/ssl.h"
+#include <openssl/ssl.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>

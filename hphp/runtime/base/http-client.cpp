@@ -19,8 +19,8 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/curl-tls-workarounds.h"
 #include "hphp/util/timer.h"
-#include "curl/curl.h"
-#include "curl/easy.h"
+#include <curl/curl.h>
+#include <curl/easy.h>
 #include "hphp/util/logger.h"
 #include "hphp/util/ssl-init.h"
 

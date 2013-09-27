@@ -27,8 +27,8 @@
 #include "hphp/runtime/base/strings.h"
 #include <unistd.h>
 #include <poll.h>
-#include "netinet/in.h"
-#include "arpa/inet.h"
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <netdb.h>
 #include <signal.h>
 #include <fcntl.h>

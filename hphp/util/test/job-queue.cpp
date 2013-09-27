@@ -16,7 +16,7 @@
 #include "hphp/util/job-queue.h"
 
 #include <thread>
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 namespace HPHP {
 

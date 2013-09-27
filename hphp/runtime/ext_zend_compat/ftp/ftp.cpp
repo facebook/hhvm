@@ -70,7 +70,7 @@
 #endif
 
 #include "ftp.h"
-#include "ext/standard/fsock.h"
+#include <ext/standard/fsock.h>
 
 /* Additional headers for NetWare */
 #if defined(NETWARE) && !defined(USE_WINSOCK)

@@ -25,10 +25,10 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
-#include "netinet/in.h"
-#include "netinet/tcp.h"
+#include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <sys/un.h>
-#include "arpa/inet.h"
+#include <arpa/inet.h>
 #include <sys/time.h>
 #include <unistd.h>
 #include <errno.h>

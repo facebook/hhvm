@@ -28,9 +28,9 @@
 #define U_USING_ICU_NAMESPACE 0
 #endif
 
-#include "unicode/utypes.h"
-#include "unicode/ucnv.h"
-#include "unicode/ustring.h"
+#include <unicode/utypes.h>
+#include <unicode/ucnv.h>
+#include <unicode/ustring.h>
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

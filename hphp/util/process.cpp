@@ -543,7 +543,7 @@ std::string Process::GetAppVersion() {
 #undefine HPHP_VERSION
 #endif
 #define HPHP_VERSION(v) return #v;
-#include "../version"
+#include "../version" // nolint
 }
 
 std::string Process::GetHostName() {

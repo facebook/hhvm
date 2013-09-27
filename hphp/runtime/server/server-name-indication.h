@@ -19,7 +19,7 @@
 
 #include "hphp/util/base.h"
 #include <evhttp.h>
-#include "openssl/ssl.h"
+#include <openssl/ssl.h>
 
 namespace HPHP {
 

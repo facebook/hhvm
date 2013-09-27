@@ -25,7 +25,7 @@ namespace HPHP {
 #endif
 #define HPHP_VERSION(v) return #v;
 const char* getHphpCompilerVersion() {
-#include "../../version"
+#include "../../version" // nolint
 }
 
 const char* getHphpCompilerId() {

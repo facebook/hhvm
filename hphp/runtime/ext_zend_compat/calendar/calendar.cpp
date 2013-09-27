@@ -29,7 +29,7 @@
 #endif
 
 #include "php.h"
-#include "ext/standard/info.h"
+#include <ext/standard/info.h>
 #include "php_calendar.h"
 #include "sdncal.h"
 

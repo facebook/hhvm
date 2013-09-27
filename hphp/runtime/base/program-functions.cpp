@@ -63,7 +63,7 @@
 #include <libgen.h>
 #include <oniguruma.h>
 #include <signal.h>
-#include "libxml/parser.h"
+#include <libxml/parser.h>
 
 #include "hphp/runtime/base/file-repository.h"
 
@@ -1022,7 +1022,7 @@ static int execute_program_impl(int argc, char** argv) {
 #undefine HPHP_VERSION
 #endif
 #define HPHP_VERSION(v) const char *version = #v;
-#include "../../version"
+#include "../../version" // nolint
 
     cout << "HipHop VM";
     cout << " v" << version << " (" << (debug ? "dbg" : "rel") << ")\n";

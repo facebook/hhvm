@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_icu_ucsdet.h"
-#include "unicode/unistr.h"
+#include <unicode/unistr.h>
 
 #include "hphp/system/systemlib.h"
 

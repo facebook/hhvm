@@ -19,7 +19,7 @@
 
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/base/types.h"
-#include "netinet/in.h"
+#include <netinet/in.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

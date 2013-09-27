@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/blob-helper.h"
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 #include <limits>
 #include <iostream>
 #include <utility>

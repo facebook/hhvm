@@ -22,7 +22,7 @@
 
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/zend-collator.h"
-#include "unicode/ucol.h" // icu
+#include <unicode/ucol.h> // icu
 namespace HPHP {
 extern const int64_t q_Collator$$SORT_REGULAR;
 }

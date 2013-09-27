@@ -19,7 +19,7 @@
 
 #include "hphp/util/lock.h"
 #include "hphp/util/thread-local.h"
-#include "curl/curl.h"
+#include <curl/curl.h>
 #include <time.h>
 #include "hphp/runtime/base/shared-string.h"
 #include "hphp/runtime/base/types.h"

@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/util/read-only-arena.h"
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 #include <vector>
 

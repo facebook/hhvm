@@ -20,7 +20,7 @@
 #define incl_HPHP_EXT_MEMCACHED_H_
 
 #include "hphp/runtime/base/base-includes.h"
-#include "libmemcached/memcached.h"
+#include <libmemcached/memcached.h>
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

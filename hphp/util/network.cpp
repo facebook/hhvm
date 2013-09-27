@@ -21,8 +21,8 @@
 
 #include "folly/String.h"
 
-#include "netinet/in.h"
-#include "arpa/nameser.h"
+#include <netinet/in.h>
+#include <arpa/nameser.h>
 #include <resolv.h>
 
 namespace HPHP {

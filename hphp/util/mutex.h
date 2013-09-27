@@ -21,7 +21,7 @@
 #include "hphp/util/util.h"
 #include <pthread.h>
 #include <time.h>
-#include "tbb/concurrent_hash_map.h"
+#include <tbb/concurrent_hash_map.h>
 #ifdef __APPLE__
 #include "pthread-spin-lock-shim.h"
 #endif

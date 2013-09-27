@@ -22,8 +22,8 @@
 #define PHP_VAR_H
 
 #include "hphp/runtime/base/complex-types.h"
-#include "ext/standard/basic_functions.h"
-#include "ext/standard/php_smart_str.h"
+#include <ext/standard/basic_functions.h>
+#include <ext/standard/php_smart_str.h>
 #include "hphp/runtime/ext/ext_variable.h"
 
 typedef HashTable* php_serialize_data_t;

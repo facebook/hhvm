@@ -18,7 +18,7 @@
 #define incl_HPHP_ICU_MATCHER_H_
 
 #include <boost/scoped_ptr.hpp>
-#include "unicode/regex.h"
+#include <unicode/regex.h>
 
 // Avoid dragging in the icu namespace.
 #ifndef U_USING_ICU_NAMESPACE

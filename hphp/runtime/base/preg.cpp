@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/thread-init-fini.h"
-#include "tbb/concurrent_hash_map.h"
+#include <tbb/concurrent_hash_map.h>
 
 #define PREG_PATTERN_ORDER          1
 #define PREG_SET_ORDER              2

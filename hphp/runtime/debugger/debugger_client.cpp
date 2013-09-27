@@ -34,8 +34,8 @@
 
 #define USE_VARARGS
 #define PREFER_STDARG
-#include "readline/readline.h"
-#include "readline/history.h"
+#include <readline/readline.h>
+#include <readline/history.h>
 
 using namespace HPHP::Util::TextArt;
 

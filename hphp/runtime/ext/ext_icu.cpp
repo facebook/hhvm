@@ -19,13 +19,13 @@
 #include <vector>
 #include <string>
 #include <boost/scoped_ptr.hpp>
-#include "unicode/rbbi.h"
-#include "unicode/translit.h"
-#include "unicode/uregex.h"
-#include "unicode/ustring.h"
-#include "icu/LifeEventTokenizer.h"
-#include "icu/ICUMatcher.h"
-#include "icu/ICUTransliterator.h"
+#include <unicode/rbbi.h>
+#include <unicode/translit.h>
+#include <unicode/uregex.h>
+#include <unicode/ustring.h>
+#include "icu/LifeEventTokenizer.h" // nolint
+#include "icu/ICUMatcher.h" // nolint
+#include "icu/ICUTransliterator.h" // nolint
 
 using namespace U_ICU_NAMESPACE;
 

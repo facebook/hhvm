@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/request-local.h"
-#include "unicode/coll.h" // icu
+#include <unicode/coll.h> // icu
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

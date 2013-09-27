@@ -21,13 +21,13 @@
 #include "hphp/runtime/base/intl-convert.h"
 #include "hphp/runtime/base/zend-collator.h"
 #include "hphp/runtime/base/zend-qsort.h"
-#include "unicode/uidna.h"
-#include "unicode/ustring.h"
-#include "unicode/ucol.h" // icu
-#include "unicode/uclean.h" // icu
-#include "unicode/putil.h" // icu
-#include "unicode/utypes.h"
-#include "unicode/unorm.h"
+#include <unicode/uidna.h>
+#include <unicode/ustring.h>
+#include <unicode/ucol.h> // icu
+#include <unicode/uclean.h> // icu
+#include <unicode/putil.h> // icu
+#include <unicode/utypes.h>
+#include <unicode/unorm.h>
 
 #include "hphp/system/systemlib.h"
 

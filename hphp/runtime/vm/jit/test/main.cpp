@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 #include "hphp/hhvm/process-init.h"
 #include "hphp/util/current-executable.h"
 

@@ -359,7 +359,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 #endif
 
 #define HPHP_VERSION(v) cout << HPHP_COMPILER_STR #v << "\n";
-#include "../version"
+#include "../version" // nolint
 
     cout << "Compiler: " << kCompilerId << "\n";
     cout << "Repo schema: " << kRepoSchemaId << "\n";

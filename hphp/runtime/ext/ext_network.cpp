@@ -22,11 +22,11 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/util/lock.h"
 #include "hphp/runtime/base/file.h"
-#include "netinet/in.h"
+#include <netinet/in.h>
 #include <netdb.h>
 #include <sys/socket.h>
-#include "arpa/inet.h"
-#include "arpa/nameser.h"
+#include <arpa/inet.h>
+#include <arpa/nameser.h>
 #include <resolv.h>
 #include "hphp/util/network.h"
 

@@ -29,7 +29,7 @@
 #include "hphp/util/timer.h"
 #include "hphp/util/db-mysql.h"
 #include "folly/String.h"
-#include "netinet/in.h"
+#include <netinet/in.h>
 #include <netdb.h>
 
 #include "hphp/system/systemlib.h"

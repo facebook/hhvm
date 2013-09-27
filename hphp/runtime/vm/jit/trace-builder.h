@@ -288,8 +288,8 @@ struct TraceBuilder {
    * a cold path, which always exits the tracelet without control flow
    * rejoining the main line.
    */
-  Block* makeExit(uint32_t bcOff) {
-    auto t = m_unit.addExit(m_curFunc->getValFunc(), bcOff);
+  Block* makeExit() {
+    auto t = m_unit.addExit(m_curFunc->getValFunc());
     return t->front();
   }
 

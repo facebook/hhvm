@@ -88,7 +88,6 @@ struct CodegenState {
     , lifetime(lifetime)
     , asmInfo(asmInfo)
     , catches(unit, CatchInfo())
-    , catchTrace(nullptr)
   {}
 
   // Each block has a list of addresses to patch, and an address if
@@ -118,10 +117,6 @@ struct CodegenState {
   // Used to pass information about the state of the world at native
   // calls between cgCallHelper and cgBeginCatch.
   StateVector<Block, CatchInfo> catches;
-
-  // If non-null, represents the catch trace for the current
-  // instruction, to be registered with the unwinder.
-  IRTrace* catchTrace;
 };
 
 constexpr Reg64  rCgGP  (reg::r11);
@@ -131,16 +126,16 @@ constexpr RegXMM rCgXMM1(reg::xmm1);
 struct CodeGenerator {
   typedef Transl::X64Assembler Asm;
 
-  CodeGenerator(IRTrace* trace, CodeBlock& mainCode, CodeBlock& stubsCode,
+  CodeGenerator(const IRUnit& unit, CodeBlock& mainCode, CodeBlock& stubsCode,
                 Transl::TranslatorX64* tx64, CodegenState& state)
-    : m_as(mainCode)
+    : m_unit(unit)
+    , m_as(mainCode)
     , m_astubs(stubsCode)
     , m_tx64(tx64)
     , m_state(state)
     , m_regs(state.regs)
     , m_rScratch(InvalidReg)
     , m_curInst(nullptr)
-    , m_curTrace(trace)
   {
   }
 
@@ -409,6 +404,7 @@ private:
   void print() const;
 
 private:
+  const IRUnit&       m_unit;
   Asm                 m_as;  // current "main" assembler
   Asm                 m_astubs; // for stubs and other cold code
   TranslatorX64*      m_tx64;
@@ -416,7 +412,6 @@ private:
   const RegAllocInfo& m_regs;
   Reg64               m_rScratch; // currently selected GP scratch reg
   IRInstruction*      m_curInst;  // current instruction being generated
-  IRTrace*            m_curTrace;
 };
 
 class ArgDesc {

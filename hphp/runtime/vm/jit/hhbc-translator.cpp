@@ -4371,7 +4371,7 @@ Block* HhbcTranslator::makeExitSlow() {
 Block* HhbcTranslator::makeExitOpt(TransID transId) {
   auto spillValues = peekSpillValues();
   Offset targetBcOff = bcOff();
-  auto const exit = m_tb->makeExit(targetBcOff);
+  auto const exit = m_tb->makeExit();
 
   BCMarker exitMarker;
   exitMarker.bcOff = targetBcOff;
@@ -4406,7 +4406,7 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
 
   BCMarker currentMarker = makeMarker(bcOff());
 
-  auto const exit = m_tb->makeExit(targetBcOff);
+  auto const exit = m_tb->makeExit();
   TracePusher tp(*m_tb, exit->trace(),
                  flag == ExitFlag::DelayedMarker ? currentMarker : exitMarker);
 
@@ -4463,7 +4463,7 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
  * registered with the unwinder automatically.
  */
 Block* HhbcTranslator::makeCatch() {
-  auto exit = m_tb->makeExit(bcOff());
+  auto exit = m_tb->makeExit();
   assert(exit->trace()->blocks().size() == 1);
 
   TracePusher tp(*m_tb, exit->trace(), makeMarker(bcOff()));

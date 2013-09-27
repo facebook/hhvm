@@ -263,7 +263,7 @@ public:
    * Create a new trace
    */
   IRTrace* makeMain(const Func* func, uint32_t bcOff);
-  IRTrace* addExit(const Func* func, uint32_t bcOff);
+  IRTrace* addExit(const Func* func);
 
   Arena&   arena()               { return m_arena; }
   uint32_t numTmps() const       { return m_nextOpndId; }
@@ -271,6 +271,7 @@ public:
   uint32_t numInsts() const      { return m_nextInstId; }
   CSEHash& constTable()          { return m_constTable; }
   IRTrace* main() const          { return m_main; }
+  uint32_t bcOff() const         { return m_bcOff; }
 
   typedef std::list<IRTrace*> ExitList;
   ExitList& exits() { return m_exits; }
@@ -278,7 +279,6 @@ public:
   Block* entry() const;
 
 private:
-  IRTrace* makeTrace(const Func* func, uint32_t bcOff);
   SSATmp* findConst(ConstData& cdata, Type t);
   void newSSATmp(IRInstruction* inst) {
     if (!inst->hasDst()) return;
@@ -292,6 +292,7 @@ private:
   uint32_t m_nextBlockId;
   uint32_t m_nextOpndId;
   uint32_t m_nextInstId;
+  uint32_t m_bcOff; // bytecode offset where this unit starts
   IRTrace* m_main; // main entry point trace
   ExitList m_exits; // exit traces
 };

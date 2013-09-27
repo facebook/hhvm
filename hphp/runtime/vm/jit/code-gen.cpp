@@ -194,11 +194,6 @@ Address CodeGenerator::cgInst(IRInstruction* inst) {
   Opcode opc = inst->op();
   auto const start = m_as.frontier();
   m_rScratch = selectScratchReg(inst);
-  if (inst->taken() && inst->taken()->trace()->isCatch()) {
-    m_state.catchTrace = inst->taken()->trace();
-  } else {
-    m_state.catchTrace = nullptr;
-  }
 
   switch (opc) {
 #define O(name, dsts, srcs, flags)                                \
@@ -920,12 +915,14 @@ void CodeGenerator::cgCallHelper(Asm& a,
     recordSyncPoint(a, sync);
   }
 
-  if (m_state.catchTrace) {
-    auto& info = m_state.catches[m_state.catchTrace->front()];
-    assert(!info.afterCall);
-    info.afterCall = a.frontier();
-    info.savedRegs = toSave;
-    info.rspOffset = regSaver.rspAdjustment();
+  if (Block* taken = m_curInst->taken()) {
+    if (taken->isCatch()) {
+      auto& info = m_state.catches[taken];
+      assert(!info.afterCall);
+      info.afterCall = a.frontier();
+      info.savedRegs = toSave;
+      info.rspOffset = regSaver.rspAdjustment();
+    }
   }
 
   // copy the call result to the destination register(s)
@@ -1875,7 +1872,7 @@ template<class Loc>
 void CodeGenerator::emitTypeGuard(Type type, Loc typeSrc, Loc dataSrc) {
   emitTypeTest(type, typeSrc, dataSrc,
     [&](ConditionCode cc) {
-      auto const destSK = SrcKey(curFunc(), m_curTrace->bcOff());
+      auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
       auto const destSR = m_tx64->getSrcRec(destSK);
       m_tx64->emitFallbackCondJmp(this->m_as, *destSR, ccNegate(cc));
     });
@@ -2902,7 +2899,7 @@ void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
-  auto const destSK = SrcKey(curFunc(), m_curTrace->bcOff());
+  auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
   auto const destSR = m_tx64->getSrcRec(destSK);
   m_tx64->emitFallbackUncondJmp(m_as, *destSR);
 }
@@ -4710,7 +4707,7 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   uint64_t vals64 = vals64Tmp->getValInt();
   assert((vals64 & mask64) == vals64);
 
-  auto const destSK = SrcKey(curFunc(), m_curTrace->bcOff());
+  auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
   auto const destSR = m_tx64->getSrcRec(destSK);
 
   auto thenBody = [&] {
@@ -5087,7 +5084,7 @@ void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
   Block*  target = inst->taken();
   // If our label is a catch trace we pretend we don't have one, to
   // avoid emitting a jmp to it or calling the wrong helper.
-  if (target && target->trace()->isCatch()) target = nullptr;
+  if (target && target->isCatch()) target = nullptr;
 
   auto dstReg = m_regs[dst].reg();
   if (dstReg == InvalidReg && target) {
@@ -6104,7 +6101,7 @@ static void emitTraceCall(CodeGenerator::Asm& as,
 }
 
 void CodeGenerator::print() const {
-  JIT::print(std::cout, m_curTrace->unit(), m_curTrace,
+  JIT::print(std::cout, m_unit,
              &m_state.regs, m_state.lifetime, m_state.asmInfo);
 }
 
@@ -6216,7 +6213,7 @@ void genCode(CodeBlock& mainCode,
     IRInstruction* last = block->back();
     state.noTerminalJmp_ = last->op() == Jmp_ && nextBlock == last->taken();
 
-    CodeGenerator cg(unit.main(), cb, stubsCode, tx64, state);
+    CodeGenerator cg(unit, cb, stubsCode, tx64, state);
     if (state.asmInfo) {
       state.asmInfo->asmRanges[block] = TcaRange(aStart, cb.frontier());
     }
@@ -6242,7 +6239,7 @@ void genCode(CodeBlock& mainCode,
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     Asm as { mainCode };
-    emitTraceCall(as, unit.main()->bcOff(), tx64);
+    emitTraceCall(as, unit.bcOff(), tx64);
   }
 
   auto const linfo = layoutBlocks(unit);

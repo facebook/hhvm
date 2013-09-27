@@ -52,6 +52,16 @@ void print(std::ostream& ostream, const IRUnit&, const IRTrace*,
            const LifetimeInfo* lifetime = nullptr,
            const AsmInfo* asmInfo = nullptr,
            const GuardConstraints* guards = nullptr);
+
+// Print the whole unit
+inline void print(std::ostream& ostream, const IRUnit& unit,
+                  const RegAllocInfo* regs = nullptr,
+                  const LifetimeInfo* lifetime = nullptr,
+                  const AsmInfo* asmInfo = nullptr,
+                  const GuardConstraints* guards = nullptr) {
+  print(ostream, unit, unit.main(), regs, lifetime, asmInfo, guards);
+}
+
 void print(const IRTrace*);
 
 /*

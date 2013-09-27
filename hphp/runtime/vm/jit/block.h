@@ -75,6 +75,9 @@ struct Block : boost::noncopyable {
   // Returns whether this block is the initial entry block for the tracelet.
   bool isEntry() const { return id() == 0; }
 
+  // Returns whether this block starts with BeginCatch
+  bool isCatch() const;
+
   // return the last instruction in the block
   IRInstruction* back() const;
 
@@ -271,6 +274,14 @@ inline void Block::push_back(IRInstruction* inst) {
 template <class Predicate> inline
 void Block::remove_if(Predicate p) {
   m_instrs.remove_if(p);
+}
+
+inline bool Block::isCatch() const {
+  // Catch blocks always start with DefLabel; BeginCatch.
+  if (empty()) return false;
+  auto it = skipHeader();
+  if (it == begin()) return false;
+  return (--it)->op() == BeginCatch;
 }
 
 // defined here to avoid circular dependencies

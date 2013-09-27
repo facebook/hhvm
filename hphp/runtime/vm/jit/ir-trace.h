@@ -32,7 +32,7 @@ struct IRTrace : private boost::noncopyable {
   typedef std::list<Block*>::const_iterator const_iterator;
   typedef std::list<Block*>::iterator iterator;
 
-  explicit IRTrace(IRUnit& unit, Block* first, uint32_t bcOff);
+  explicit IRTrace(IRUnit& unit, Block* first);
 
   std::list<Block*>& blocks() { return m_blocks; }
   const std::list<Block*>& blocks() const { return m_blocks; }
@@ -64,28 +64,19 @@ struct IRTrace : private boost::noncopyable {
   uint32_t data() const { return m_data; }
   void setData(uint32_t d) { m_data = d; }
 
-  uint32_t bcOff() const { return m_bcOff; }
   bool isMain() const;
-
-  // return true if this trace's first block starts with BeginCatch
-  bool isCatch() const;
 
   std::string toString() const;
   const IRUnit& unit() const { return m_unit; }
 
 private:
   IRUnit& m_unit;
-  // offset of the first bytecode in this trace; 0 if this trace doesn't
-  // represent a bytecode boundary.
-  uint32_t m_bcOff;
   uint32_t m_data;
   std::list<Block*> m_blocks; // Blocks in main trace starting with entry block
 };
 
-inline IRTrace::IRTrace(IRUnit& unit, Block* first, uint32_t bcOff)
-  : m_unit(unit)
-  , m_bcOff(bcOff)
-{
+inline IRTrace::IRTrace(IRUnit& unit, Block* first)
+  : m_unit(unit) {
   push_back(first);
 }
 
@@ -103,14 +94,6 @@ inline Block* IRTrace::push_back(Block* b) {
   b->setTrace(this);
   m_blocks.push_back(b);
   return b;
-}
-
-// Catch traces always start with DefLabel; BeginCatch.
-inline bool IRTrace::isCatch() const {
-  if (front()->empty()) return false;
-  auto it = front()->skipHeader();
-  if (it == front()->begin()) return false;
-  return (--it)->op() == BeginCatch;
 }
 
 // defined here to avoid circular dependency

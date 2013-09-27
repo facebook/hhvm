@@ -92,6 +92,8 @@ DEBUG_ONLY static int numBlockParams(Block* b) {
  * 7. Any path from this block to a Block that expects values must be
  *    from a Jmp_ instruciton.
  * 8. Every instruction's BCMarker must point to a valid bytecode instruction.
+ * 9. If this block is a catch block, it must have at most one predecessor
+ *    and the trace containing it must contain exactly this block.
  */
 bool checkBlock(Block* b) {
   auto it = b->begin();
@@ -144,24 +146,14 @@ bool checkBlock(Block* b) {
     }
   }
 
+  // Invariant #9
+  if (b->isCatch()) {
+    assert(b->trace()->blocks().size() == 1);
+    assert(b->preds().size() <= 1);
+  }
+
   return true;
 }
-
-/*
- * Check that every catch trace has at most one incoming branch and a single
- * block.
- */
-bool checkCatchTraces(const IRUnit& unit) {
-  forEachTraceBlock(unit, [&](Block* b) {
-    auto trace = b->trace();
-    if (trace->isCatch()) {
-      assert(trace->blocks().size() == 1);
-      assert(b->preds().size() <= 1);
-    }
-  });
-  return true;
-}
-
 }
 
 const Edge* takenEdge(IRInstruction* inst) {
@@ -210,8 +202,6 @@ bool checkCfg(const IRUnit& unit) {
       assert(e.to() == b);
     }
   }
-
-  checkCatchTraces(unit);
 
   // visit dom tree in preorder, checking all tmps
   auto const children = findDomChildren(blocks);

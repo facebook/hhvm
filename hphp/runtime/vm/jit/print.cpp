@@ -84,8 +84,8 @@ static std::string constToString(Type t, const ConstData* c) {
     os << "None:" << c->as<int64_t>();
   } else if (t.isPtr()) {
     os << folly::format("{}({:#x})", t.toString(), c->as<uint64_t>());
-  } else if (t.subtypeOf(Type::CacheHandle)) {
-    os << folly::format("CacheHandle({:#x})", c->as<int64_t>());
+  } else if (t.subtypeOf(Type::RDSHandle)) {
+    os << folly::format("RDS::Handle({:#x})", c->as<int64_t>());
   } else {
     not_reached();
   }

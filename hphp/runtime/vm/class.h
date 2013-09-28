@@ -28,15 +28,11 @@
 
 namespace HPHP {
 
-// Forward declaration.
 class ClassInfo;
 class ClassInfoVM;
 class HphpArray;
 class ObjectData;
 struct HhbcExtClassInfo;
-
-
-// Forward declarations.
 class Func;
 class FuncEmitter;
 class Unit;
@@ -599,16 +595,6 @@ struct Class : AtomicCountable {
 
   bool isPersistent() const { return m_attrCopy & AttrPersistent; }
 
-  /*
-   * We have a call site for an object method, which previously
-   * invoked func, but this call has a different Class (*this).  See
-   * if we can figure out the correct Func to call.
-   *
-   * Since this exists to be inlined into a single callsite in targetcache,
-   * and the dependencies are a bit hairy, it's defined in targetcache.cpp.
-   */
-  const Func* wouldCall(const Func* prev) const;
-
   // Finds the base class defining the given method (NULL if none).
   // Note: for methods imported via traits, the base class is the one that
   // uses/imports the trait.
@@ -839,6 +825,7 @@ private:
   int32_t m_builtinPropSize;
   int32_t m_declPropNumAccessible;
   unsigned m_classVecLen;
+  // TODO: use RDS::Handle for these.
 public:
   unsigned m_cachedOffset; // used by Unit
 private:

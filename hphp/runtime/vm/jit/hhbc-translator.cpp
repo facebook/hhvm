@@ -1934,8 +1934,8 @@ void HhbcTranslator::emitClsCnsD(int32_t cnsNameId, int32_t clsNameId,
   auto const cnsNameStr = lookupStringId(cnsNameId);
   auto const clsCnsName = ClsCnsName { clsNameStr, cnsNameStr };
 
-  // If we have to side exit, do the target cache lookup before
-  // chaining to another Tracelet so forward progress still happens.
+  // If we have to side exit, do the RDS lookup before chaining to
+  // another Tracelet so forward progress still happens.
   auto const sideExit = makeSideExit(
     nextBcOff(),
     [&] {
@@ -2439,7 +2439,7 @@ void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
                     numParams,
                     func && magicCall ? methodName : nullptr);
   } else {
-    // lookup static method & class in the target cache
+    // lookup static method & class in the RDS
     SSATmp* stack = spillStack();
     auto exit = makeExitSlow();
     SSATmp* funcClassTmp = gen(LdClsMethodCache, exit, cns(className),
@@ -3301,8 +3301,8 @@ void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
 
   /*
    * If the class is unique or a parent of the current context, we
-   * don't need to load it out of target cache because it must
-   * already exist and be defined.
+   * don't need to load it out of RDS because it must already exist
+   * and be defined.
    *
    * Otherwise, we only use LdClsCachedSafe---instanceof with an
    * undefined class doesn't invoke autoload.

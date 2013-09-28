@@ -58,9 +58,8 @@ struct RefData {
    * live until the end of the request.  In this case, we start with a
    * reference count to keep it alive.
    *
-   * Note that the JIT accesses target cache RefDatas directly---if
-   * you need to change how initialization works it keep that up to
-   * date.
+   * Note that the JIT accesses RDS RefDatas directly---if you need to
+   * change how initialization works it keep that up to date.
    */
   void initInRDS() {
     assert(isUninitializedInRDS());

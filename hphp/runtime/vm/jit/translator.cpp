@@ -3139,7 +3139,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
 static bool instrBreaksProfileBB(const NormalizedInstruction* instr) {
   return (instrIsNonCallControlFlow(instr->op()) ||
           instr->outputPredicted ||
-          instr->op() == OpClsCnsD); // side exits if misses in the target cache
+          instr->op() == OpClsCnsD); // side exits if misses in the RDS
 }
 
 /*

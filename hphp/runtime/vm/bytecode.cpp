@@ -605,11 +605,11 @@ Stack::requestExit() {
 
 void flush_evaluation_stack() {
   if (g_context.isNull()) {
-    // For RPCRequestHandler threads, the ExecutionContext can stay alive
-    // across requests, and hold references to the VM stack, and
-    // the RDS needs to keep track of which classes are live etc
-    // So only flush the VM stack and the target cache if the execution
-    // context is dead.
+    // For RPCRequestHandler threads, the ExecutionContext can stay
+    // alive across requests, and hold references to the VM stack, and
+    // the RDS needs to keep track of which classes are live etc So
+    // only flush the VM stack and the RDS if the execution context is
+    // dead.
 
     if (!t_se.isNull()) {
       t_se->flush();

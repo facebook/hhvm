@@ -86,12 +86,13 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
          "returning _URC_INSTALL_CONTEXT\n",
          catchTrace, rip, ism);
 
-  // In theory the unwind api will let us set registers in the frame before
-  // executing our landing pad. In practice, trying to use their recommended
-  // scratch registers results in a SEGV inside _Unwind_SetGR, so we pass
-  // things to the handler using the target cache. This also simplifies the
-  // handler code because it doesn't have to worry about saving its arguments
-  // somewhere while executing the exit trace.
+  // In theory the unwind api will let us set registers in the frame
+  // before executing our landing pad. In practice, trying to use
+  // their recommended scratch registers results in a SEGV inside
+  // _Unwind_SetGR, so we pass things to the handler using the
+  // RDS. This also simplifies the handler code because it doesn't
+  // have to worry about saving its arguments somewhere while
+  // executing the exit trace.
   RDS::header()->unwinderScratch = (int64_t)exn;
   RDS::header()->doSideExit = ism;
   if (ism) {

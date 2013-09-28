@@ -19,6 +19,7 @@
 #include <string>
 
 #include "hphp/util/slice.h"
+#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 
@@ -45,7 +46,7 @@ struct Array;
  *
  * Because all constants defined in hhvm programs create a
  * process-lifetime string for the constant name, this module also
- * manages a mapping from constant names to target cache offsets.
+ * manages a mapping from constant names to RDS::Handles.
  */
 
 //////////////////////////////////////////////////////////////////////
@@ -86,12 +87,11 @@ StringData* lookupStaticString(const StringData* str);
 size_t makeStaticStringCount();
 
 /*
- * Functions mapping constants to target cache offsets.
- *
- * TODO(#2879005): replace uint32_t with RDS::CacheHandle.
+ * Functions mapping constants to RDS handles to their values in a
+ * given request.
  */
-uint32_t lookupCnsHandle(const StringData* cnsName);
-uint32_t makeCnsHandle(const StringData* cnsName, bool persistent);
+RDS::Handle lookupCnsHandle(const StringData* cnsName);
+RDS::Handle makeCnsHandle(const StringData* cnsName, bool persistent);
 
 /*
  * Return an array of all the defined constants in the current

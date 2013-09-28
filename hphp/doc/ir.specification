@@ -478,7 +478,7 @@ D:CountedStr = AssertNonNull S0:{Nullptr|CountedStr}
 
 CheckStaticLocInit S0:BoxedCell -> L
 
-  Check if the static local target cache RefData represented by S0 is
+  Check if the static local (RDS) RefData represented by S0 is
   initialized, and if not branch to L.
 
 
@@ -870,19 +870,19 @@ D:Cls = LdCls S0:Str S1:ConstCls
 
 D:Cls = LdClsCached S0:ConstStr
 
-  Loads the class named S0 via the target cache. Invokes autoload and
-  may raise an error if the class is not defined.
+  Loads the class named S0 via the RDS. Invokes autoload and may raise
+  an error if the class is not defined.
 
 D:Cls = LdClsCachedSafe S0:ConstStr [ -> L ]
 
-  Loads the class whose name is S0 out of the target cache. If the class is not
+  Loads the class whose name is S0 out of the RDS. If the class is not
   defined, returns null and optionally branches to L.
 
 D:T = LdClsCns<T,className,constName> [ -> L ]
 
-  Loads the named class constant for a class via the target cache.
-  This instruction should generally be followed by CheckInit, unless
-  we know the class is already loaded.
+  Loads the named class constant for a class via the RDS.  This
+  instruction should generally be followed by CheckInit, unless we
+  know the class is already loaded.
 
   If the optional label L is specified and the loaded value's type
   does not match T, this instruction does not load into D and
@@ -895,21 +895,21 @@ D:T = LdClsCns<T,className,constName> [ -> L ]
 D:T = LookupCns<T,constName>
 D:T = LookupCnsE<T,constName>
 
-  Load a constant via the target cache. Raises an undefined constant
-  notice if the constant cannot be defined. The E variant will instead
-  throw a fatal error if it cannot define the constant.
+  Load a constant via the RDS.  Raises an undefined constant notice if
+  the constant cannot be defined.  The E variant will instead throw a
+  fatal error if it cannot define the constant.
 
 D:T = LookupCnsU<T,constName,fallbackName>
 
-  Load an unqualified constant via the target cache, first by trying
-  constName, then by trying fallbackName. Raises a notice if neither
-  can be found.
+  Load an unqualified constant via the RDS, first by trying constName,
+  then by trying fallbackName.  Raises a notice if neither can be
+  found.
 
 D:T = LookupClsCns<T,className,constName>
 
-  Load a class constant for a class via the target cache, invoking
-  autoload if it is not defined.  This instruction may raise an
-  undefined constant error if autoload cannot define the constant.
+  Load a class constant for a class via the RDS, invoking autoload if
+  it is not defined.  This instruction may raise an undefined constant
+  error if autoload cannot define the constant.
 
 D:FuncCtx = LdClsMethodFCache S0:ConstStr S1:ConstStr
                               S2:{Obj|Cls|Ctx} S3:FramePtr L:Label
@@ -972,7 +972,7 @@ D:PtrToGen = LdClsPropAddr S0:Cls S1:Str S2:ConstCls [ -> L ]
 D:PtrToGen = LdClsPropAddrCached S0:Cls S1:ConstStr S2:ConstStr
                                  S3:ConstCls [ -> L ]
 
-  Loads a pointer to a static class property via the target cache. S0
+  Loads a pointer to a static class property via the RDS. S0
   points to the class, S1 is the property name, S2 is the class name,
   and S3 is the class representing the context of the code accessing
   the property.  If class S0 does not have a visible and accessible
@@ -1004,13 +1004,13 @@ D:Func = LdFunc S0:Str
 
 D:Func = LdFuncCached S0:ConstStr
 
-  Loads the Func whose name is S0 from the target cache. Fatal if the
-  named function is not defined, and the function autoloader fails to
-  define it.
+  Loads the Func whose name is S0 from the RDS. Fatal if the named
+  function is not defined, and the function autoloader fails to define
+  it.
 
 D:Func = LdFuncCachedSafe S0:ConstStr [ -> L ]
 
-  Loads the Func named S0 from the target cache. If the function is not
+  Loads the Func named S0 from the RDS. If the function is not
   defined, returns null and optionally branches to L.
 
 D:Func& = LdARFuncPtr S0:{StkPtr|FramePtr} S1:ConstInt
@@ -1552,8 +1552,8 @@ D:BoxedCell = ClosureStaticLocInit S0:ConstStr S1:FramePtr S2:Cell
 
 StaticLocInitCached S0:BoxedCell S1:Cell
 
-  Assuming S0 is an uninitialized static local target cache slot,
-  initialize it by setting it to the value of S1.
+  Assuming S0 is an uninitialized static local RDS slot, initialize it
+  by setting it to the value of S1.
 
 PrintStr S0:Str
 PrintInt S1:Int

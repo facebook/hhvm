@@ -132,7 +132,7 @@ static_assert(!(KindOfClass      & KindOfUncountedInitBit), "");
 
 // assume KindOfUninit == 0 in ClsCns
 static_assert(KindOfUninit == 0,
-              "Several things assume this tag is 0, especially target cache");
+              "Several things assume this tag is 0, especially RDS");
 
 static_assert(MaxNumDataTypes - 1 <= kDataTypeMask, "");
 

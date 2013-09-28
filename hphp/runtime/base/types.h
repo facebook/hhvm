@@ -491,6 +491,11 @@ typedef uint32_t Slot;
 const Slot kInvalidSlot = Slot(-1);
 
 /*
+ * Handles into Request Data Segment.  See rds.h.
+ */
+namespace RDS { typedef uint32_t Handle; }
+
+/*
  * Special types that are not relevant to the runtime as a whole.
  * The order for public/protected/private matters in numerous places.
  *

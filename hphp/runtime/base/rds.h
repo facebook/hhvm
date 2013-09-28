@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_TARGETCACHE_H_
-#define incl_TARGETCACHE_H_
+#ifndef incl_HPHP_RUNTIME_RDS_H_
+#define incl_HPHP_RUNTIME_RDS_H_
 
 #include "hphp/runtime/vm/func.h"
 #include "hphp/util/util.h"
@@ -26,69 +26,115 @@ namespace HPHP { namespace RDS {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * The RDS (Request Data Segment) is a region of memory quickly
+ * accessible to each hhvm thread that is running a PHP request.
+ *
+ * Essentially this is a per-thread memory region, along with an
+ * internal dynamic link table to give the segment the same layout for
+ * each thread as new data is allocated.
+ *
+ * The RDS starts with a small header that is statically layed out,
+ * followed by the main segment, which is initialized to zero at the
+ * start of each request.  The next section, contains "persistent"
+ * data, which is data that retains the same values across requests.
+ *
+ * The persistent segment is implemented       RDS Layout:
+ * by mapping the same physical pages to
+ * different virtual addresses, so they          +------------+ <-- tl_base
+ * are all accessible from the                   |  Header    |
+ * per-thread RDS base.  The normal              +------------+
+ * region is perhaps analogous to .bss,          |            |
+ * while the persistent region is                |  Normal    |
+ * analagous to .rodata.                         |    region  |
+ *                                               |            |
+ * When we're running in C++, the base           +------------+
+ * of RDS is available via a thread              | Persistent | higher
+ * local exported from this module               |     region |   addresses
+ * (tl_base).  When running in                   +------------+
+ * JIT-compiled code, a machine register
+ * is reserved to always point at the base of RDS.
+ *
+ * There are several different types of data stored here; documented
+ * in line below on the various entry points (TODO).  A common theme
+ * is mapping some kind of PHP-level identifier to a runtime
+ * structure, where the identifier may mean different things in
+ * different requests, but once bound in any given request will retain
+ * meaning until the end.  (E.g. class names to Class*.)
+ *
+ * Side note: this module originally only contained caches for things
+ * like method call targets, so it was referred to as "target cache".
+ * There are probably still a few references to that name still
+ * around, so it seems worth mentioning ...
+ */
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Lifetime-related hooks, exported to be called at the appropriate
+ * times.
+ */
 void requestInit();
 void requestExit();
 void threadInit();
 void threadExit();
+
+/*
+ * Flushing RDS means to madvise the memory away.  Should only be done
+ * while a request is not in flight on this thread.
+ *
+ * This is done to conserve memory if a particular thread is unlikely
+ * to need to serve another PHP request for a while.
+ */
 void flush();
 
 /*
- * The targetCaches are physically thread-private, but they share their
- * layout. So the memory is in tl_targetCaches, but we allocate it via the
- * global s_frontier. This is protected by the translator's write-lease.
+ * Return the number of bytes that have been allocated from either
+ * persistent or non-persistent RDS.
  */
-extern __thread void* tl_targetCaches;
-extern size_t s_frontier;
-extern size_t s_persistent_frontier;
-extern size_t s_persistent_start;
+size_t usedBytes();
+size_t usedPersistentBytes();
 
 /*
- * Array of dynamically defined constants
+ * The thread-local pointer to the base of RDS.
  */
-extern __thread std::aligned_storage<sizeof(Array),alignof(Array)>::type
-  s_constantsStorage;
+extern __thread void* tl_base;
 
-ALWAYS_INLINE Array& s_constants() {
-  void* vp = &s_constantsStorage;
-  return *static_cast<Array*>(vp);
-}
+//////////////////////////////////////////////////////////////////////
 
 /*
- * The fields in RDSHeader are pre-allocated at process
- * startup and live at the beginning of the targetCache.
+ * Statically layed-out header that goes at the front of RDS.
  */
-struct RDSHeader {
+struct Header {
+  /*
+   * Surprise flags.  May be written by other threads.  At various
+   * points, the runtime will check whether this word is non-zero, and
+   * if so go to a slow path to handle unusual conditions (e.g. OOM).
+   */
   ssize_t conditionFlags;
 
-  // Used to pass values between unwinder code and catch traces:
+  /*
+   * Used to pass values between unwinder code and catch traces.
+   */
   int64_t unwinderScratch;
   TypedValue unwinderTv;
   bool doSideExit;
 };
 
-inline RDSHeader* header() {
-  return (RDSHeader*)tl_targetCaches;
-}
+Header* header();
 
-constexpr int kConditionFlagsOff =
-  offsetof(RDSHeader, conditionFlags);
-constexpr int kUnwinderScratchOff =
-  offsetof(RDSHeader, unwinderScratch);
-constexpr int kUnwinderSideExitOff =
-  offsetof(RDSHeader, doSideExit);
-constexpr int kUnwinderTvOff =
-  offsetof(RDSHeader, unwinderTv);
+constexpr ptrdiff_t kConditionFlagsOff   = offsetof(Header, conditionFlags);
+constexpr ptrdiff_t kUnwinderScratchOff  = offsetof(Header, unwinderScratch);
+constexpr ptrdiff_t kUnwinderSideExitOff = offsetof(Header, doSideExit);
+constexpr ptrdiff_t kUnwinderTvOff       = offsetof(Header, unwinderTv);
+
+//////////////////////////////////////////////////////////////////////
 
 /*
- * Some caches have different numbers of lines. This is our default.
+ * Values for dynamically defined constants are stored as key value
+ * pairs in an array, accessible here.
  */
-static const int kDefaultNumLines = 4;
-
-/*
- * The lookup functions are called into from generated assembly and passed an
- * opaque handle into the request-private targetcache.
- */
-typedef ptrdiff_t CacheHandle;
+Array& s_constants();
 
 enum PHPNameSpace {
   NSCtor,
@@ -118,35 +164,35 @@ enum PHPNameSpace {
 };
 
 template <bool sensitive>
-CacheHandle namedAlloc(PHPNameSpace where, const StringData* name,
-                       int numBytes, int align);
+Handle namedAlloc(PHPNameSpace where, const StringData* name,
+                  int numBytes, int align);
 
 template<PHPNameSpace where>
-CacheHandle namedAlloc(const StringData* name, int numBytes, int align) {
+Handle namedAlloc(const StringData* name, int numBytes, int align) {
   return namedAlloc<(where >= FirstCaseSensitive)>(where, name,
                                                    numBytes, align);
 }
 
 size_t allocBit();
-CacheHandle bitOffToHandleAndMask(size_t bit, uint8_t &mask);
-bool testBit(CacheHandle handle, uint32_t mask);
+Handle bitOffToHandleAndMask(size_t bit, uint8_t &mask);
+bool testBit(Handle handle, uint32_t mask);
 bool testBit(size_t bit);
-bool testAndSetBit(CacheHandle handle, uint32_t mask);
+bool testAndSetBit(Handle handle, uint32_t mask);
 bool testAndSetBit(size_t bit);
-bool isPersistentHandle(CacheHandle handle);
+bool isPersistentHandle(Handle handle);
 bool classIsPersistent(const Class* cls);
 
-CacheHandle ptrToHandle(const void*);
+Handle ptrToHandle(const void*);
 
 template<typename T = void>
 static inline T*
-handleToPtr(CacheHandle h) {
+handleToPtr(Handle h) {
   assert(h < RuntimeOption::EvalJitTargetCacheSize);
-  return (T*)((char*)tl_targetCaches + h);
+  return (T*)((char*)tl_base + h);
 }
 
 template<class T>
-T& handleToRef(CacheHandle h) {
+T& handleToRef(Handle h) {
   return *static_cast<T*>(handleToPtr(h));
 }
 
@@ -171,11 +217,10 @@ void invalidateForRename(const StringData* name);
  */
 template<typename Key, typename Value, class LookupKey,
   PHPNameSpace NameSpace = NSInvalid,
-  int KNLines = kDefaultNumLines,
+  int KNLines = 4,
   typename ReturnValue = Value>
 class Cache {
 public:
-  typedef Cache<Key, Value, LookupKey, NameSpace, KNLines, ReturnValue> Self;
   static const int kNumLines = KNLines;
 
   struct Pair {
@@ -183,8 +228,8 @@ public:
     Value m_value;
   } m_pairs[kNumLines];
 
-  static inline Self* cacheAtHandle(CacheHandle handle) {
-    return (Self*)handleToPtr(handle);
+  static inline Cache* cacheAtHandle(Handle handle) {
+    return (Cache*)handleToPtr(handle);
   }
 
   inline Pair* keyToPair(Key k) {
@@ -204,34 +249,34 @@ public:
   typedef LookupKey CacheLookupKey;
   typedef Value CacheValue;
 
-  static CacheHandle alloc(const StringData* name = nullptr) {
+  static Handle alloc(const StringData* name = nullptr) {
     // Each lookup should access exactly one Pair so there's no point
     // in making sure the entire cache fits on one cache line.
-    return namedAlloc<NameSpace>(name, sizeof(Self), sizeof(Pair));
+    return namedAlloc<NameSpace>(name, sizeof(Cache), sizeof(Pair));
   }
-  inline CacheHandle cacheHandle() const {
+  inline Handle handle() const {
     return ptrToHandle(this);
   }
-  static void invalidate(CacheHandle chand, Key lookup) {
+  static void invalidate(Handle chand, Key lookup) {
     Pair* pair = cacheAtHandle(chand)->keyToPair(lookup);
     memset(pair, 0, sizeof(Pair));
   }
-  static void invalidate(CacheHandle chand) {
-    Self *thiz = cacheAtHandle(chand);
-    memset(thiz, 0, sizeof(*thiz));
+  static void invalidate(Handle chand) {
+    auto const thiz = cacheAtHandle(chand);
+    memset(thiz, 0, sizeof *thiz);
   }
-  static ReturnValue lookup(CacheHandle chand, LookupKey lookup,
+  static ReturnValue lookup(Handle chand, LookupKey lookup,
                             const void* extraKey = nullptr);
 };
 
 struct FixedFuncCache {
   const Func* m_func;
 
-  static inline FixedFuncCache* cacheAtHandle(CacheHandle handle) {
+  static inline FixedFuncCache* cacheAtHandle(Handle handle) {
     return (FixedFuncCache*)handleToPtr(handle);
   }
 
-  static void invalidate(CacheHandle handle) {
+  static void invalidate(Handle handle) {
     FixedFuncCache* thiz = cacheAtHandle(handle);
     thiz->m_func = nullptr;
   }
@@ -242,13 +287,13 @@ struct FixedFuncCache {
 struct StaticMethodCache {
   const Func* m_func;
   const Class* m_cls;
-  static CacheHandle alloc(const StringData* cls, const StringData* meth,
+  static Handle alloc(const StringData* cls, const StringData* meth,
                            const char* ctxName);
-  static const Func* lookupIR(CacheHandle chand,
+  static const Func* lookupIR(Handle chand,
                               const NamedEntity* ne, const StringData* cls,
                               const StringData* meth, TypedValue* vmfp,
                               TypedValue* vmsp);
-  static const Func* lookup(CacheHandle chand,
+  static const Func* lookup(Handle chand,
                             const NamedEntity* ne, const StringData* cls,
                             const StringData* meth);
 };
@@ -257,9 +302,9 @@ struct StaticMethodFCache {
   const Func* m_func;
   int m_static;
 
-  static CacheHandle alloc(const StringData* cls, const StringData* meth,
+  static Handle alloc(const StringData* cls, const StringData* meth,
                            const char* ctxName);
-  static const Func* lookupIR(CacheHandle chand, const Class* cls,
+  static const Func* lookupIR(Handle chand, const Class* cls,
                               const StringData* meth, TypedValue* vmfp);
 };
 
@@ -275,23 +320,23 @@ typedef Cache<StringData*, const Class*, StringData*, NSClass> ClassCache;
  * The request-private Class* for a given class name. This is used when
  * the class name is known at translation time.
  */
-CacheHandle allocKnownClass(const Class* name);
-CacheHandle allocKnownClass(const NamedEntity* name, bool persistent);
-CacheHandle allocKnownClass(const StringData* name);
+Handle allocKnownClass(const Class* name);
+Handle allocKnownClass(const NamedEntity* name, bool persistent);
+Handle allocKnownClass(const StringData* name);
 typedef Class* (*lookupKnownClass_func_t)(Class** cache,
                                           const StringData* clsName,
                                           bool isClass);
 template<bool checkOnly>
 Class* lookupKnownClass(Class** cache, const StringData* clsName,
                         bool isClass);
-CacheHandle allocClassInitProp(const StringData* name);
-CacheHandle allocClassInitSProp(const StringData* name);
+Handle allocClassInitProp(const StringData* name);
+Handle allocClassInitSProp(const StringData* name);
 
 /*
  * Functions.
  */
-CacheHandle allocFixedFunction(const NamedEntity* ne, bool persistent);
-CacheHandle allocFixedFunction(const StringData* name);
+Handle allocFixedFunction(const NamedEntity* ne, bool persistent);
+Handle allocFixedFunction(const StringData* name);
 
 /*
  * Type aliases.
@@ -300,16 +345,16 @@ CacheHandle allocFixedFunction(const StringData* name);
  * is defined, the entry for it is cached.  This reserves enough space
  * for a TypedefReq struct.
  */
-CacheHandle allocTypedef(const NamedEntity* name);
+Handle allocTypedef(const NamedEntity* name);
 
 /*
  * Constants.
  *
  * The request-private value of a constant.
  */
-CacheHandle allocConstant(uint32_t* handlep, bool persistent);
+Handle allocConstant(uint32_t* handlep, bool persistent);
 
-CacheHandle allocClassConstant(StringData* name);
+Handle allocClassConstant(StringData* name);
 TypedValue lookupClassConstantTv(TypedValue* cache,
                                  const NamedEntity* ne,
                                  const StringData* cls,
@@ -319,7 +364,7 @@ TypedValue lookupClassConstantTv(TypedValue* cache,
  * Non-scalar class constants are stored in RDS slots as
  * Arrays.
  */
-CacheHandle allocNonScalarClassConstantMap(unsigned* handleOut);
+Handle allocNonScalarClassConstantMap(unsigned* handleOut);
 
 /*
  * Static locals.
@@ -328,7 +373,7 @@ CacheHandle allocNonScalarClassConstantMap(unsigned* handleOut);
  * live in RDS.  Note that we don't put closures or
  * generatorFromClosure locals here because they are per-instance.
  */
-CacheHandle allocStaticLocal(const Func*, const StringData*);
+Handle allocStaticLocal(const Func*, const StringData*);
 
 /*
  * Static properties.  We only cache statically known property name
@@ -337,17 +382,17 @@ CacheHandle allocStaticLocal(const Func*, const StringData*);
  */
 class SPropCache {
 private:
-  static inline SPropCache* cacheAtHandle(CacheHandle handle) {
-    return (SPropCache*)(uintptr_t(tl_targetCaches) + handle);
+  static inline SPropCache* cacheAtHandle(Handle handle) {
+    return (SPropCache*)(uintptr_t(tl_base) + handle);
   }
 public:
   TypedValue* m_tv;  // public; it is used from TC and we assert the offset
-  static CacheHandle alloc(const StringData* sd = nullptr) {
+  static Handle alloc(const StringData* sd = nullptr) {
     return namedAlloc<NSSProp>(sd, sizeof(SPropCache), sizeof(SPropCache));
   }
 
   template<bool raiseOnError>
-  static TypedValue* lookup(CacheHandle handle, const Class* cls,
+  static TypedValue* lookup(Handle handle, const Class* cls,
                             const StringData* nm, Class* ctx);
 
   template<bool raiseOnError>
@@ -363,5 +408,7 @@ void methodCacheSlowPath(MethodCache::Pair* mce,
 //////////////////////////////////////////////////////////////////////
 
 }}
+
+#include "hphp/runtime/base/rds-inl.h"
 
 #endif

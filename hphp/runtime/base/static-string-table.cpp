@@ -91,8 +91,12 @@ struct strintern_hash {
 };
 
 // The uint32_t is used to hold RDS offsets for constants
-typedef folly::AtomicHashMap<StrInternKey,uint32_t,strintern_hash,strintern_eq>
-        StringDataMap;
+typedef folly::AtomicHashMap<
+  StrInternKey,
+  RDS::Handle,
+  strintern_hash,
+  strintern_eq
+> StringDataMap;
 StringDataMap* s_stringDataMap;
 
 // If a string is static it better be the one in the table.
@@ -209,7 +213,7 @@ StringData* makeStaticString(char c) {
   return precomputed_chars[(uint8_t)c];
 }
 
-uint32_t lookupCnsHandle(const StringData* cnsName) {
+RDS::Handle lookupCnsHandle(const StringData* cnsName) {
   assert(s_stringDataMap);
   auto const it = s_stringDataMap->find(make_intern_key(cnsName));
   if (it != s_stringDataMap->end()) {
@@ -218,8 +222,8 @@ uint32_t lookupCnsHandle(const StringData* cnsName) {
   return 0;
 }
 
-uint32_t makeCnsHandle(const StringData* cnsName, bool persistent) {
-  uint32_t val = lookupCnsHandle(cnsName);
+RDS::Handle makeCnsHandle(const StringData* cnsName, bool persistent) {
+  auto const val = lookupCnsHandle(cnsName);
   if (val) return val;
   if (!cnsName->isStatic()) {
     // Its a dynamic constant, that doesn't correspond to

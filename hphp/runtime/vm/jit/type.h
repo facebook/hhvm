@@ -86,7 +86,7 @@ using Transl::DynLocation;
   IRT(TCA,         1ULL << 54)                                          \
   IRT(ActRec,      1ULL << 55)                                          \
   IRT(None,        1ULL << 56)                                          \
-  IRT(CacheHandle, 1ULL << 57) /* RDS::CacheHandle */           \
+  IRT(RDSHandle,   1ULL << 57) /* RDS::Handle */                        \
   IRT(Nullptr,     1ULL << 58)
 
 // The definitions for these are in ir.cpp

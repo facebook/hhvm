@@ -1674,7 +1674,7 @@ TranslatorX64::enterTC(TCA start, void* data) {
       sim.   set_xreg(JIT::ARM::rGContextReg.code(), g_vmContext);
       sim.   set_xreg(JIT::ARM::rVmFp.code(), vmfp());
       sim.   set_xreg(JIT::ARM::rVmSp.code(), vmsp());
-      sim.   set_xreg(JIT::ARM::rVmTl.code(), RDS::tl_targetCaches);
+      sim.   set_xreg(JIT::ARM::rVmTl.code(), RDS::tl_base);
 
       sim.RunFrom(vixl::Instruction::Cast(start));
 
@@ -1694,7 +1694,7 @@ TranslatorX64::enterTC(TCA start, void* data) {
       // register (aside from rbp). enterTCHelper does not save them.
       CALLEE_SAVED_BARRIER();
       enterTCHelper(vmsp(), vmfp(), start, &info, vmFirstAR(),
-                    RDS::tl_targetCaches);
+                    RDS::tl_base);
       CALLEE_SAVED_BARRIER();
     }
 
@@ -2933,10 +2933,6 @@ size_t TranslatorX64::getStubSize() {
   return stubsCode.used();
 }
 
-size_t TranslatorX64::getRDSSize() {
-  return RDS::s_frontier;
-}
-
 std::string TranslatorX64::getUsage() {
   std::string usage;
   size_t aHotUsage  = hotCode.used();
@@ -2944,9 +2940,15 @@ std::string TranslatorX64::getUsage() {
   size_t aUsage     = mainCode.used();
   size_t stubsUsage = stubsCode.used();
   size_t dataUsage  = m_globalData.used();
-  size_t tcUsage    = RDS::s_frontier;
-  size_t persistentUsage =
-    RDS::s_persistent_frontier - RDS::s_persistent_start;
+
+  size_t rdsUsage    = RDS::usedBytes();
+  size_t persistentUsage = RDS::usedPersistentBytes();
+
+  auto const rdsPct = 400 * rdsUsage /
+    RuntimeOption::EvalJitTargetCacheSize / 3;
+  auto const persistentPct = 400 * persistentUsage /
+    RuntimeOption::EvalJitTargetCacheSize;
+
   Util::string_printf(
     usage,
     "tx64: %9zd bytes (%zd%%) in ahot.code\n"
@@ -2955,17 +2957,20 @@ std::string TranslatorX64::getUsage() {
     "tx64: %9zd bytes (%zd%%) in astubs.code\n"
     "tx64: %9zd bytes (%zd%%) in m_globalData\n"
     "tx64: %9zd bytes (%zd%%) in targetCache\n"
-    "tx64: %9zd bytes (%zd%%) in persistentCache\n",
+    "tx64: %9zd bytes (%zd%%) in persistentCache\n"
+    "tx64: %9zd bytes (%zd%%) in RDS\n"
+    "tx64: %9zd bytes (%zd%%) in persistentRDS\n",
     aHotUsage,  100 * aHotUsage / hotCode.capacity(),
     aUsage,     100 * aUsage / mainCode.capacity(),
     aProfUsage, (profCode.capacity() != 0
                  ? 100 * aProfUsage / profCode.capacity() : 0),
     stubsUsage, 100 * stubsUsage / stubsCode.capacity(),
     dataUsage,  100 * dataUsage / m_globalData.capacity(),
-    tcUsage,
-    400 * tcUsage / RuntimeOption::EvalJitTargetCacheSize / 3,
-    persistentUsage,
-    400 * persistentUsage / RuntimeOption::EvalJitTargetCacheSize);
+    rdsUsage, rdsPct,
+    persistentUsage, persistentPct,
+    // TODO(#2966387): temporarily double logging targetcache under new names
+    rdsUsage, rdsPct,
+    persistentUsage, persistentPct);
   return usage;
 }
 

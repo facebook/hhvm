@@ -2414,7 +2414,7 @@ void CodeGenerator::cgLdFunc(IRInstruction* inst) {
   SSATmp*        dst = inst->dst();
   SSATmp* methodName = inst->src(0);
 
-  RDS::CacheHandle ch = RDS::FuncCache::alloc();
+  auto const ch = RDS::FuncCache::alloc();
   // raises an error if function not found
   cgCallHelper(m_as,
                CppCall(RDS::FuncCache::lookup),
@@ -4815,13 +4815,12 @@ void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
   Block*  label      = inst->taken();
 
   // Stats::emitInc(a, Stats::TgtCache_StaticMethodHit);
-  const StringData*  cls    = className->getValStr();
-  const StringData*  method = methodName->getValStr();
-  auto const ne             = baseClass->getValNamedEntity();
-  RDS::CacheHandle ch =
-    RDS::StaticMethodCache::alloc(cls,
-                                          method,
-                                          getContextName(curClass()));
+  auto const cls = className->getValStr();
+  auto const method = methodName->getValStr();
+  auto const ne = baseClass->getValNamedEntity();
+  auto const ch = RDS::StaticMethodCache::alloc(cls,
+                                                method,
+                                                getContextName(curClass()));
   auto funcDestReg  = m_regs[dst].reg(0);
   auto classDestReg = m_regs[dst].reg(1);
   auto offsetof_func = offsetof(RDS::StaticMethodCache, m_func);
@@ -4886,7 +4885,7 @@ void CodeGenerator::emitGetCtxFwdCallWithThis(PhysReg ctxReg,
  */
 void CodeGenerator::emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,
                                                  PhysReg      thisReg,
-                                                 RDS::CacheHandle& ch) {
+                                                 RDS::Handle& ch) {
   Label NonStaticCall, End;
 
   // thisReg is holding $this. Should we pass it to the callee?
@@ -4956,7 +4955,7 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
 
   // Handle case where method is not entered in the cache
   unlikelyIfBlock(CC_E, [&] (Asm& a) {
-    const Func* (*lookup)(RDS::CacheHandle, const Class*,
+    const Func* (*lookup)(RDS::Handle, const Class*,
       const StringData*, TypedValue*) =
         RDS::StaticMethodFCache::lookupIR;
     // preserve destCtxReg across the call since it wouldn't be otherwise
@@ -4971,8 +4970,8 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
                            .immPtr(methName)
                            .reg(m_regs[fp].reg()),
                  toSave);
-    // If entry found in target cache, jump back to m_as.
-    // Otherwise, bail to exit label
+    // If entry found in RDS, jump back to m_as.  Otherwise, bail to
+    // exit label
     a.testq(funcDestReg, funcDestReg);
     emitFwdJcc(a, CC_Z, exitLabel);
   });
@@ -5081,7 +5080,7 @@ void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
   }
 }
 
-RDS::CacheHandle CodeGenerator::cgLdClsCachedCommon(
+RDS::Handle CodeGenerator::cgLdClsCachedCommon(
   IRInstruction* inst) {
   SSATmp* dst = inst->dst();
   const StringData* className = inst->src(0)->getValStr();

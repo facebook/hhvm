@@ -52,8 +52,8 @@ constexpr PhysReg rVmFp      = reg::rbp;
 constexpr PhysReg rVmSp      = reg::rbx;
 
 /*
- * Target cache pointer.  Always points to the base of the target
- * cache block for the current request.
+ * RDS base pointer.  Always points to the base of the RDS block for
+ * the current request.
  */
 constexpr PhysReg rVmTl      = reg::r12;
 

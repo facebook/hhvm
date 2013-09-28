@@ -860,7 +860,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName) const {
 
   // This constant has a non-scalar initializer, meaning it will be
   // potentially different in different requests, which we store
-  // separately in an array living off target cache.
+  // separately in an array living off in RDS.
   if (UNLIKELY(!m_nonScalarConstantCache)) {
     RDS::allocNonScalarClassConstantMap(
       const_cast<unsigned*>(&m_nonScalarConstantCache));
@@ -905,8 +905,8 @@ Cell Class::clsCnsGet(const StringData* clsCnsName) const {
 DataType Class::clsCnsType(const StringData* cnsName) const {
   Slot slot;
   auto const cns = cnsNameToTV(cnsName, slot);
-  // TODO(#2913342): lookup the constant in target cache in case it's
-  // dynamic and already initialized.
+  // TODO(#2913342): lookup the constant in RDS in case it's dynamic
+  // and already initialized.
   if (!cns) return KindOfUninit;
   return cns->m_type;
 }

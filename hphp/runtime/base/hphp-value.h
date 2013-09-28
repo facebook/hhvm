@@ -55,7 +55,7 @@ union AuxUnion {
   int32_t u_hash;        // key type and hash for HphpArray and [Stable]Map
   VarNrFlag u_varNrFlag; // magic number for asserts in VarNR
   bool u_deepInit;       // used by Class::initPropsImpl for deep init
-  int32_t u_cacheHandle; // used by unit.cpp to squirrel away cache handles
+  int32_t u_rdsHandle;   // used by unit.cpp to squirrel away rds handles TODO type
 };
 
 /*
@@ -116,8 +116,8 @@ struct TypedValueAux : TypedValue {
   static const size_t auxSize = sizeof(m_aux);
   int32_t& hash() { return m_aux.u_hash; }
   const int32_t& hash() const { return m_aux.u_hash; }
-  int32_t& cacheHandle() { return m_aux.u_cacheHandle; }
-  const int32_t& cacheHandle() const { return m_aux.u_cacheHandle; }
+  int32_t& rdsHandle() { return m_aux.u_rdsHandle; }
+  const int32_t& rdsHandle() const { return m_aux.u_rdsHandle; }
   bool& deepInit() { return m_aux.u_deepInit; }
   const bool& deepInit() const { return m_aux.u_deepInit; }
   VarNrFlag& varNrFlag() { return m_aux.u_varNrFlag; }

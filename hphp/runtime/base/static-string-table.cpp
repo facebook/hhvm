@@ -18,7 +18,7 @@
 #include "folly/AtomicHashMap.h"
 
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/base/rds.h"
 
 namespace HPHP {
 

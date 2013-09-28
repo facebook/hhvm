@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/unit.h"
 
 #include "hphp/system/systemlib.h"

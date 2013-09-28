@@ -21,7 +21,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
-#include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/util/assertions.h"
 
 namespace HPHP { namespace JIT {

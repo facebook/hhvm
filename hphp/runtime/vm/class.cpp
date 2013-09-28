@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/util/util.h"
 #include "hphp/util/debug.h"
-#include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/request-arena.h"

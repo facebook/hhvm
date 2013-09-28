@@ -19,7 +19,7 @@
 #include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/base/rds.h"
 
 namespace HPHP {
 

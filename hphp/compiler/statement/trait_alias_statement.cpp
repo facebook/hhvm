@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -83,16 +83,16 @@ int TraitAliasStatement::getKidCount() const {
 void TraitAliasStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_traitName = boost::dynamic_pointer_cast<ScalarExpression>(cp);
+      m_traitName = dynamic_pointer_cast<ScalarExpression>(cp);
       break;
     case 1:
-      m_methodName = boost::dynamic_pointer_cast<ScalarExpression>(cp);
+      m_methodName = dynamic_pointer_cast<ScalarExpression>(cp);
       break;
     case 2:
-      m_modifiers = boost::dynamic_pointer_cast<ModifierExpression>(cp);
+      m_modifiers = dynamic_pointer_cast<ModifierExpression>(cp);
       break;
     case 3:
-      m_newMethodName = boost::dynamic_pointer_cast<ScalarExpression>(cp);
+      m_newMethodName = dynamic_pointer_cast<ScalarExpression>(cp);
       break;
     default:
       assert(false);
@@ -114,7 +114,6 @@ void TraitAliasStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_methodName->outputPHP(cg, ar);
   cg_printf(" as ");
   m_modifiers->outputPHP(cg, ar);
-  cg_printf(" ");
   m_newMethodName->outputPHP(cg, ar);
   cg_printf(";\n");
 }

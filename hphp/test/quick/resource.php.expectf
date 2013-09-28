@@ -1,0 +1,6 @@
+resource(1) of type (stream)
+bool(false)
+object(Foo)#1 (0) {
+}
+bool(false)
+HipHop Fatal error: Argument 1 passed to f() must be an instance of resource, Foo given in %s on line 6

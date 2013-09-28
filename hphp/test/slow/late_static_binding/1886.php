@@ -1,11 +1,11 @@
 <?php
 
-
 class X {
   function bar() {
     var_dump(get_called_class());
   }
-};
+}
+;
 class Y extends X {
   function foo() {
     call_user_func(array('SELF', 'bar'));

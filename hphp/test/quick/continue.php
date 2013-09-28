@@ -21,7 +21,7 @@ function test() {
   foreach ($three as $x) {
     foreach ($four as $y) {
       if ($y == 3) {
-        continue $y - 1;
+        continue 2;
       }
       echo $y;
     }
@@ -31,7 +31,7 @@ function test() {
   foreach ($three as $x) {
     foreach ($four as $y) {
       if ($y == 3) {
-        continue 2;
+        continue (100 - 98);
       }
       echo $y;
     }

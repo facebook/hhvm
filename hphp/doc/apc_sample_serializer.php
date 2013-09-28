@@ -134,7 +134,7 @@ class CacheArchiveHphpSerializer extends CacheArchiveSerializer {
     $i = 0;
     $kvs = "static const char *thrifts[] = {\n";
     foreach ($data as $k => $v) {
-      $sv = fb_thrift_serialize($v);
+      $sv = fb_serialize($v);
       if ($sv) {
         $kvs .= $this->s($k).','.$this->s($sv).',';
         if (++$i % 10 == 0) {

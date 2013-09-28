@@ -198,11 +198,7 @@ array(3) {
       [0]=>
       array(4) {
         [0]=>
-        array(6) {
-          ["file"]=>
-          string(%d) "%S"
-          ["line"]=>
-          int(42)
+        array(4) {
           ["function"]=>
           string(9) "initTrace"
           ["class"]=>
@@ -574,14 +570,11 @@ array(3) {
   [0]=>
   string(5) "enter"
   [1]=>
-  string(%d) "%s"
+  string(16) "gen$continuation"
   [2]=>
   array(1) {
     ["args"]=>
-    array(1) {
-      [0]=>
-      object(Continuation)#2 (0) {
-      }
+    array(0) {
     }
   }
 }
@@ -589,7 +582,7 @@ array(3) {
   [0]=>
   string(4) "exit"
   [1]=>
-  string(%d) "%s"
+  string(16) "gen$continuation"
   [2]=>
   NULL
 }
@@ -674,14 +667,11 @@ array(3) {
   [0]=>
   string(5) "enter"
   [1]=>
-  string(%d) "%s"
+  string(16) "gen$continuation"
   [2]=>
   array(1) {
     ["args"]=>
-    array(1) {
-      [0]=>
-      object(Continuation)#2 (0) {
-      }
+    array(0) {
     }
   }
 }
@@ -689,7 +679,7 @@ array(3) {
   [0]=>
   string(4) "exit"
   [1]=>
-  string(%d) "%s"
+  string(16) "gen$continuation"
   [2]=>
   NULL
 }
@@ -766,14 +756,11 @@ array(3) {
   [0]=>
   string(5) "enter"
   [1]=>
-  string(%d) "%s"
+  string(16) "gen$continuation"
   [2]=>
   array(1) {
     ["args"]=>
-    array(1) {
-      [0]=>
-      object(Continuation)#2 (0) {
-      }
+    array(0) {
     }
   }
 }
@@ -781,7 +768,7 @@ array(3) {
   [0]=>
   string(4) "exit"
   [1]=>
-  string(%d) "%s"
+  string(16) "gen$continuation"
   [2]=>
   NULL
 }
@@ -818,14 +805,6 @@ array(3) {
     ["return"]=>
     bool(false)
   }
-}
-array(3) {
-  [0]=>
-  string(4) "exit"
-  [1]=>
-  string(%d) "%s"
-  [2]=>
-  NULL
 }
 array(3) {
   [0]=>

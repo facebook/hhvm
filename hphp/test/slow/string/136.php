@@ -1,3 +1,4 @@
 <?php
 
- $a = 'test'; print '['.$a[-1].']';
+$a = 'test';
+ print '['.$a[-1].']';

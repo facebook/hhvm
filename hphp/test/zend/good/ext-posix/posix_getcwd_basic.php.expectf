@@ -1,5 +1,0 @@
-Basic test of POSIX posix_getcwd function
-string(%d) "%s"
-HipHop Warning: %a
-NULL
-===DONE===

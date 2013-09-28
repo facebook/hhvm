@@ -1,0 +1,7 @@
+HipHop Warning: Invalid operand type was used: Invalid type used as key in %s/test/slow/unset/1122.php on line 7
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}

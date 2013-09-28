@@ -1,3 +1,6 @@
 <?php
 
- function d() { return '2009';} $y = (d()) + 6;
+function d() {
+ return '2009';
+}
+ $y = (d()) + 6;

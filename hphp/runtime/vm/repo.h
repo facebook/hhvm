@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/preclass-emit.h"
 #include "hphp/runtime/vm/func.h"
 
 #include <sqlite3.h>
@@ -51,9 +52,9 @@ class Repo : public RepoProxy {
   sqlite3* dbc() const { return m_dbc; }
   int repoIdForNewUnit(UnitOrigin unitOrigin) const {
     switch (unitOrigin) {
-    case UnitOriginFile:
+    case UnitOrigin::File:
       return m_localWritable ? RepoIdLocal : RepoIdCentral;
-    case UnitOriginEval:
+    case UnitOrigin::Eval:
       return m_evalRepoId;
     default:
       assert(false);

@@ -1,3 +1,5 @@
 <?php
 
- $a = &$b; $a = 10; var_dump($b);
+$a = &$b;
+ $a = 10;
+ var_dump($b);

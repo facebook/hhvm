@@ -1,3 +1,4 @@
 <?php
 
- $a = false; $a['a'] = 10;
+$a = false;
+ $a['a'] = 10;

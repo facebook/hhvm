@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -15,16 +15,16 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/ext/asio/asio_external_thread_event.h"
 #include <thread>
 #include "hphp/runtime/ext/ext_asio.h"
-#include "hphp/runtime/ext/asio/asio_external_thread_event.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 AsioExternalThreadEvent::AsioExternalThreadEvent(ObjectData* priv_data)
-    : m_session(AsioSession::Get()),
+    : m_queue(AsioSession::Get()->getExternalThreadEventQueue()),
       m_state(Waiting) {
   m_waitHandle = c_ExternalThreadEventWaitHandle::Create(this, priv_data);
 }
@@ -32,6 +32,7 @@ AsioExternalThreadEvent::AsioExternalThreadEvent(ObjectData* priv_data)
 void AsioExternalThreadEvent::abandon() {
   assert(m_state.load() == Waiting);
   assert(m_waitHandle->getCount() == 1);
+  m_state.store(Abandoned);
   m_waitHandle->abandon(false);
 }
 
@@ -49,7 +50,7 @@ void AsioExternalThreadEvent::markAsFinished() {
   uint32_t/*state_t*/ expected(Waiting);
   if (m_state.compare_exchange_strong(expected, Finished)) {
     // transfer ownership
-    m_session->enqueueExternalThreadEvent(m_waitHandle);
+    m_queue->send(m_waitHandle);
   } else {
     // web request died, destroy object
     assert(expected == Canceled);

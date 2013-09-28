@@ -1,3 +1,5 @@
 <?php
 
- $a = ''; $a[] = 'test'; var_dump($a);
+$a = '';
+ $a[] = 'test';
+ var_dump($a);

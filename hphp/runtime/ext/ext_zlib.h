@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_ZLIB_H_
 #define incl_HPHP_EXT_ZLIB_H_
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/ext/ext_file.h"
 
 namespace HPHP {
@@ -48,21 +48,22 @@ Variant f_lz4uncompress(CStrRef compressed);
 ///////////////////////////////////////////////////////////////////////////////
 // stream functions
 
-Object f_gzopen(CStrRef filename, CStrRef mode, bool use_include_path = false);
+Resource f_gzopen(CStrRef filename, CStrRef mode,
+                  bool use_include_path = false);
 
-bool f_gzclose(CObjRef zp);
-Variant f_gzread(CObjRef zp, int64_t length = 0);
-Variant f_gzseek(CObjRef zp, int64_t offset, int64_t whence = k_SEEK_SET);
-Variant f_gztell(CObjRef zp);
-bool f_gzeof(CObjRef zp);
-bool f_gzrewind(CObjRef zp);
-Variant f_gzgetc(CObjRef zp);
-Variant f_gzgets(CObjRef zp, int64_t length = 1024);
-Variant f_gzgetss(CObjRef zp, int64_t length = 0,
+bool f_gzclose(CResRef zp);
+Variant f_gzread(CResRef zp, int64_t length = 0);
+Variant f_gzseek(CResRef zp, int64_t offset, int64_t whence = k_SEEK_SET);
+Variant f_gztell(CResRef zp);
+bool f_gzeof(CResRef zp);
+bool f_gzrewind(CResRef zp);
+Variant f_gzgetc(CResRef zp);
+Variant f_gzgets(CResRef zp, int64_t length = 1024);
+Variant f_gzgetss(CResRef zp, int64_t length = 0,
                   CStrRef allowable_tags = null_string);
-Variant f_gzpassthru(CObjRef zp);
-Variant f_gzputs(CObjRef zp, CStrRef str, int64_t length = 0);
-Variant f_gzwrite(CObjRef zp, CStrRef str, int64_t length = 0);
+Variant f_gzpassthru(CResRef zp);
+Variant f_gzputs(CResRef zp, CStrRef str, int64_t length = 0);
+Variant f_gzwrite(CResRef zp, CStrRef str, int64_t length = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -108,7 +108,7 @@ int ClassConstantExpression::getKidCount() const {
 void ClassConstantExpression::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_class = boost::dynamic_pointer_cast<Expression>(cp);
+      m_class = dynamic_pointer_cast<Expression>(cp);
       break;
     default:
       assert(false);
@@ -158,10 +158,7 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
     }
 
     ExpressionPtr rep = Clone(value, getScope());
-    bool annotate = Option::FlAnnotate;
-    Option::FlAnnotate = false; // avoid nested comments on getText
     rep->setComment(getText());
-    Option::FlAnnotate = annotate;
     rep->setLocation(getLocation());
     return replaceValue(rep);
   }

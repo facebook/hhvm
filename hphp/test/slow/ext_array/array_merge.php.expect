@@ -1,0 +1,59 @@
+array(4) {
+  ["color"]=>
+  string(3) "red"
+  [0]=>
+  int(2)
+  [1]=>
+  int(4)
+  [2]=>
+  array(5) {
+    [0]=>
+    string(1) "a"
+    [1]=>
+    string(1) "b"
+    ["color"]=>
+    string(5) "green"
+    ["shape"]=>
+    string(9) "trapezoid"
+    [2]=>
+    int(4)
+  }
+}
+array(1) {
+  [0]=>
+  array(1) {
+    [1]=>
+    string(4) "data"
+  }
+}
+array(1) {
+  [1]=>
+  string(4) "data"
+}
+array(2) {
+  [0]=>
+  string(3) "foo"
+  [1]=>
+  array(1) {
+    [1]=>
+    string(3) "bar"
+  }
+}
+array(2) {
+  ["one"]=>
+  int(1)
+  [0]=>
+  array(1) {
+    ["two"]=>
+    &int(2)
+  }
+}
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  array(1) {
+    [100000000000022]=>
+    int(2)
+  }
+}

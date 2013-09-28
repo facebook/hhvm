@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,9 +16,9 @@
 */
 
 #include "hphp/runtime/ext/ext_thread.h"
-#include "hphp/runtime/base/server/service_thread.h"
-#include "hphp/runtime/base/server/http_server.h"
-#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/server/service-thread.h"
+#include "hphp/runtime/server/http-server.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/util/process.h"
 
 namespace HPHP {
@@ -46,22 +46,19 @@ bool f_hphp_service_thread_stopped(int timeout) {
 }
 
 bool f_hphp_thread_is_warmup_enabled() {
-  return hphp_is_warmup_enabled();
+  return true;
 }
 
 void f_hphp_thread_set_warmup_enabled() {
-  raise_warning("hphp_thread_set_warmup_enabled is deprecated, to enable "
-                "the RequestInitFunction and RequestInitDocument features "
-                "please set Server.EnableMemoryManager=true in your HipHop "
-                "config");
+  raise_warning("hphp_thread_set_warmup_enabled is deprecated");
 }
 
 int64_t f_hphp_get_thread_id() {
   return  (unsigned long)Process::GetThreadId();
 }
 
-int32_t f_hphp_gettid() {
-    return (unsigned int)Process::GetThreadPid();
+int64_t f_hphp_gettid() {
+  return (unsigned int)Process::GetThreadPid();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,21 +18,20 @@
 #ifndef incl_HPHP_EXT_ASIO_SESSION_H_
 #define incl_HPHP_EXT_ASIO_SESSION_H_
 
-#include <atomic>
-#include <condition_variable>
-#include <mutex>
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/ext/asio/asio_context.h"
+#include "hphp/runtime/ext/asio/asio_external_thread_event_queue.h"
 #include "hphp/runtime/ext/ext_closure.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-FORWARD_DECLARE_CLASS_BUILTIN(WaitHandle);
-FORWARD_DECLARE_CLASS_BUILTIN(GenArrayWaitHandle);
-FORWARD_DECLARE_CLASS_BUILTIN(SetResultToRefWaitHandle);
-FORWARD_DECLARE_CLASS_BUILTIN(ContinuationWaitHandle);
-FORWARD_DECLARE_CLASS_BUILTIN(ExternalThreadEventWaitHandle);
+FORWARD_DECLARE_CLASS(WaitHandle);
+FORWARD_DECLARE_CLASS(GenArrayWaitHandle);
+FORWARD_DECLARE_CLASS(GenMapWaitHandle);
+FORWARD_DECLARE_CLASS(GenVectorWaitHandle);
+FORWARD_DECLARE_CLASS(SetResultToRefWaitHandle);
+FORWARD_DECLARE_CLASS(ContinuationWaitHandle);
 
 class AsioSession {
   public:
@@ -72,38 +71,44 @@ class AsioSession {
 
     uint16_t getCurrentWaitHandleDepth();
 
-    // external thread event
-    c_ExternalThreadEventWaitHandle* getReadyExternalThreadEvents() {
-      auto ready = m_readyExternalThreadEvents.exchange(nullptr);
-      assert(ready != k_waitingForExternalThreadEvents);
-      return ready;
+    // external thread events
+    AsioExternalThreadEventQueue* getExternalThreadEventQueue() {
+      return &m_externalThreadEventQueue;
     }
 
-    c_ExternalThreadEventWaitHandle* waitForExternalThreadEvents();
-    void enqueueExternalThreadEvent(c_ExternalThreadEventWaitHandle* wait_handle);
+    // abrupt interrupt exception
+    CObjRef getAbruptInterruptException() {
+      return m_abruptInterruptException;
+    }
+
+    bool hasAbruptInterruptException() {
+      return m_abruptInterruptException.get();
+    }
+
+    void initAbruptInterruptException();
 
     // callback: on failed
     void setOnFailedCallback(ObjectData* on_failed_callback) {
-      assert(!on_failed_callback || on_failed_callback->instanceof(c_Closure::s_cls));
+      assert(!on_failed_callback || on_failed_callback->instanceof(c_Closure::classof()));
       m_onFailedCallback = on_failed_callback;
     }
     void onFailed(CObjRef exception);
 
     // ContinuationWaitHandle callbacks:
     void setOnContinuationCreateCallback(ObjectData* on_start) {
-      assert(!on_start || on_start->instanceof(c_Closure::s_cls));
+      assert(!on_start || on_start->instanceof(c_Closure::classof()));
       m_onContinuationCreateCallback = on_start;
     }
     void setOnContinuationYieldCallback(ObjectData* on_yield) {
-      assert(!on_yield || on_yield->instanceof(c_Closure::s_cls));
+      assert(!on_yield || on_yield->instanceof(c_Closure::classof()));
       m_onContinuationYieldCallback = on_yield;
     }
     void setOnContinuationSuccessCallback(ObjectData* on_success) {
-      assert(!on_success || on_success->instanceof(c_Closure::s_cls));
+      assert(!on_success || on_success->instanceof(c_Closure::classof()));
       m_onContinuationSuccessCallback = on_success;
     }
     void setOnContinuationFailCallback(ObjectData* on_fail) {
-      assert(!on_fail || on_fail->instanceof(c_Closure::s_cls));
+      assert(!on_fail || on_fail->instanceof(c_Closure::classof()));
       m_onContinuationFailCallback = on_fail;
     }
     bool hasOnContinuationCreateCallback() { return m_onContinuationCreateCallback.get(); }
@@ -117,7 +122,7 @@ class AsioSession {
 
     // WaitHandle callbacks:
     void setOnJoinCallback(ObjectData* on_join) {
-      assert(!on_join || on_join->instanceof(c_Closure::s_cls));
+      assert(!on_join || on_join->instanceof(c_Closure::classof()));
       m_onJoinCallback = on_join;
     }
     bool hasOnJoinCallback() { return m_onJoinCallback.get(); }
@@ -125,15 +130,31 @@ class AsioSession {
 
     // GenArrayWaitHandle callbacks:
     void setOnGenArrayCreateCallback(ObjectData* on_create) {
-      assert(!on_create || on_create->instanceof(c_Closure::s_cls));
+      assert(!on_create || on_create->instanceof(c_Closure::classof()));
       m_onGenArrayCreateCallback = on_create;
     }
     bool hasOnGenArrayCreateCallback() { return m_onGenArrayCreateCallback.get(); }
     void onGenArrayCreate(c_GenArrayWaitHandle* wait_handle, CVarRef dependencies);
 
+    // GenMapWaitHandle callbacks:
+    void setOnGenMapCreateCallback(ObjectData* on_create) {
+      assert(!on_create || on_create->instanceof(c_Closure::classof()));
+      m_onGenMapCreateCallback = on_create;
+    }
+    bool hasOnGenMapCreateCallback() { return m_onGenMapCreateCallback.get(); }
+    void onGenMapCreate(c_GenMapWaitHandle* wait_handle, CVarRef dependencies);
+
+    // GenVectorWaitHandle callbacks:
+    void setOnGenVectorCreateCallback(ObjectData* on_create) {
+      assert(!on_create || on_create->instanceof(c_Closure::classof()));
+      m_onGenVectorCreateCallback = on_create;
+    }
+    bool hasOnGenVectorCreateCallback() { return m_onGenVectorCreateCallback.get(); }
+    void onGenVectorCreate(c_GenVectorWaitHandle* wait_handle, CVarRef dependencies);
+
     // SetResultToRefWaitHandle callbacks:
     void setOnSetResultToRefCreateCallback(ObjectData* on_create) {
-      assert(!on_create || on_create->instanceof(c_Closure::s_cls));
+      assert(!on_create || on_create->instanceof(c_Closure::classof()));
       m_onSetResultToRefCreateCallback = on_create;
     }
     bool hasOnSetResultToRefCreateCallback() { return m_onSetResultToRefCreateCallback.get(); }
@@ -143,21 +164,21 @@ class AsioSession {
   private:
     static DECLARE_THREAD_LOCAL_PROXY(AsioSession, false, s_current);
 
-    static constexpr c_ExternalThreadEventWaitHandle* k_waitingForExternalThreadEvents = static_cast<c_ExternalThreadEventWaitHandle*>((void*)1L);
-
     AsioSession();
 
     smart::vector<AsioContext*> m_contexts;
 
-    std::atomic<c_ExternalThreadEventWaitHandle*> m_readyExternalThreadEvents;
-    std::mutex m_readyExternalThreadEventsMutex;
-    std::condition_variable m_readyExternalThreadEventsCondition;
+    AsioExternalThreadEventQueue m_externalThreadEventQueue;
+
+    Object m_abruptInterruptException;
 
     Object m_onContinuationCreateCallback;
     Object m_onContinuationYieldCallback;
     Object m_onContinuationSuccessCallback;
     Object m_onContinuationFailCallback;
     Object m_onGenArrayCreateCallback;
+    Object m_onGenMapCreateCallback;
+    Object m_onGenVectorCreateCallback;
     Object m_onSetResultToRefCreateCallback;
     Object m_onJoinCallback;
 

@@ -1,0 +1,37 @@
+array(2) {
+  [0]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%Sdebug_backtrace_trait_helper.inc"
+    ["line"]=>
+    int(15)
+    ["function"]=>
+    string(15) "print_backtrace"
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [1]=>
+  array(7) {
+    ["file"]=>
+    string(%d) "%Sdebug_backtrace_trait.php"
+    ["line"]=>
+    int(7)
+    ["function"]=>
+    string(3) "bar"
+    ["class"]=>
+    string(1) "C"
+    ["object"]=>
+    object(C)#1 (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      object(stdClass)#2 (0) {
+      }
+    }
+  }
+}
+HipHop Fatal error: Argument 1 passed to C::bar() must be an instance of stdClass, int given in %Sdebug_backtrace_trait_helper.inc on line 16

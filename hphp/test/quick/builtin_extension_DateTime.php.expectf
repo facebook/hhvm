@@ -40,7 +40,6 @@ array(16) {
 }
 ================
 A_DateTime
-HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
 object(A_DateTime)#3 (1) {
   ["___x"]=>
   NULL
@@ -50,19 +49,54 @@ object(A_DateTime)#4 (1) {
   ["___x"]=>
   NULL
 }
-array(6) {
+array(17) {
   [0]=>
   string(7) "__clone"
   [1]=>
-  string(11) "__construct"
+  string(3) "add"
   [2]=>
-  string(5) "__get"
+  string(11) "__construct"
   [3]=>
-  string(5) "__set"
+  string(16) "createFromFormat"
   [4]=>
-  string(20) "createFromDateString"
+  string(4) "diff"
   [5]=>
   string(6) "format"
+  [6]=>
+  string(13) "getLastErrors"
+  [7]=>
+  string(9) "getOffset"
+  [8]=>
+  string(12) "getTimestamp"
+  [9]=>
+  string(11) "getTimezone"
+  [10]=>
+  string(6) "modify"
+  [11]=>
+  string(7) "setDate"
+  [12]=>
+  string(10) "setISODate"
+  [13]=>
+  string(7) "setTime"
+  [14]=>
+  string(12) "setTimestamp"
+  [15]=>
+  string(11) "setTimezone"
+  [16]=>
+  string(3) "sub"
 }
 ================
-HipHop Fatal error: timelib too old is not implemented yet. in %s on line 16
+object(A_DateTime)#3 (2) {
+  ["___x"]=>
+  NULL
+  ["___y"]=>
+  int(73)
+}
+string(10) "2012-06-23"
+object(A_DateTime)#4 (2) {
+  ["___x"]=>
+  int(1)
+  ["___y"]=>
+  int(74)
+}
+string(10) "2012-06-26"

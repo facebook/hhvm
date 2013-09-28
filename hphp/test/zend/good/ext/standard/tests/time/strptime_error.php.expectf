@@ -1,0 +1,14 @@
+*** Testing strptime() : error conditions ***
+
+-- Testing strptime() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing strptime() function with less than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing strptime() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

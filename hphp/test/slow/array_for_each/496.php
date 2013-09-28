@@ -1,6 +1,6 @@
 <?php
 
- function k2() {
+function k2() {
   $arr = array(0,1,2,3,4);
   reset($arr);
   $arr2 = $arr;

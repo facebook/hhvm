@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -14,88 +14,79 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/ext/ext_mysql.h"
 
 #include "folly/ScopeGuard.h"
 
-#include "hphp/runtime/ext/ext_mysql.h"
 #include "hphp/runtime/ext/ext_preg.h"
 #include "hphp/runtime/ext/ext_network.h"
 #include "hphp/runtime/ext/mysql_stats.h"
-#include "hphp/runtime/base/file/socket.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/server/server_stats.h"
-#include "hphp/runtime/base/util/request_local.h"
-#include "hphp/runtime/base/util/extended_logger.h"
+#include "hphp/runtime/base/socket.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/extended-logger.h"
 #include "hphp/util/timer.h"
-#include "hphp/util/db_mysql.h"
-#include "netinet/in.h"
+#include "hphp/util/db-mysql.h"
+#include "folly/String.h"
+#include <netinet/in.h>
 #include <netdb.h>
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString MySQL::s_class_name("mysql link");
-StaticString MySQLResult::s_class_name("mysql result");
+bool mysqlExtension::ReadOnly = false;
+#ifdef FACEBOOK
+bool mysqlExtension::Localize = false;
+#endif
+int mysqlExtension::ConnectTimeout = 1000;
+int mysqlExtension::ReadTimeout = 1000;
+int mysqlExtension::WaitTimeout = -1;
+int mysqlExtension::SlowQueryThreshold = 1000; // ms
+bool mysqlExtension::KillOnTimeout = false;
+int mysqlExtension::MaxRetryOpenOnFail = 1;
+int mysqlExtension::MaxRetryQueryOnFail = 1;
+std::string mysqlExtension::Socket = "";
+
+mysqlExtension s_mysql_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(MySQLResult);
-
 MySQLResult::MySQLResult(MYSQL_RES *res, bool localized /* = false */)
-    : m_res(res), m_current_async_row(NULL), m_localized(localized),
-      m_conn(NULL) {
-  m_fields = NULL;
-  m_field_count = 0;
-  m_current_field = -1;
+  : m_res(res)
+  , m_current_async_row(nullptr)
+  , m_localized(localized)
+  , m_fields(nullptr)
+  , m_current_field(-1)
+  , m_field_count(0)
+  , m_conn(nullptr)
+{
   if (localized) {
-    m_res = NULL; // ensure that localized results don't have another result
-    m_rows = new std::list<std::vector<Variant *> >(1); //sentinel
+    m_res = nullptr; // ensure that localized results don't have another result
+    m_rows = smart::list<smart::vector<Variant>>(1); // sentinel
     m_current_row = m_rows->begin();
     m_row_ready = false;
     m_row_count = 0;
-  } else {
-    m_rows = NULL;
   }
 }
 
 MySQLResult::~MySQLResult() {
   close();
   if (m_fields) {
-    for (int i = 0; i < m_field_count; i++) {
-      MySQLFieldInfo &info = m_fields[i];
-      if (info.name) {
-        DELETE(Variant)(info.name);
-        DELETE(Variant)(info.table);
-        DELETE(Variant)(info.def);
-      }
-    }
-    delete[] m_fields;
-    m_fields = NULL;
-  }
-  if (m_rows) {
-    for (std::list<vector<Variant *> >::const_iterator it = m_rows->begin();
-         it != m_rows->end(); it++) {
-      for (unsigned int i = 0; i < it->size(); i++) {
-        DELETE(Variant)((*it)[i]);
-      }
-    }
-    delete m_rows;
-    m_rows = NULL;
+    smart_delete_array(m_fields, m_field_count);
+    m_fields = nullptr;
   }
   if (m_conn) {
     m_conn->decRefCount();
-    m_conn = NULL;
+    m_conn = nullptr;
   }
 }
 
 void MySQLResult::sweep() {
   close();
-  // When a dangling MySQLResult is swept, there is no need to deallocate
-  // any Variant object.
-  delete[] m_fields;
-  delete m_rows;
+  // Note that ~MySQLResult is *not* going to run when we are swept.
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -112,7 +103,7 @@ class MySQLRequestData : public RequestEventHandler {
 public:
   virtual void requestInit() {
     defaultConn.reset();
-    readTimeout = RuntimeOption::MySQLReadTimeout;
+    readTimeout = mysqlExtension::ReadTimeout;
     totalRowCount = 0;
   }
 
@@ -121,7 +112,7 @@ public:
     totalRowCount = 0;
   }
 
-  Object defaultConn;
+  Resource defaultConn;
   int readTimeout;
   int totalRowCount; // from all queries in current request
 };
@@ -136,7 +127,7 @@ MySQL *MySQL::Get(CVarRef link_identifier) {
   if (link_identifier.isNull()) {
     return GetDefaultConn();
   }
-  MySQL *mysql = link_identifier.toObject().getTyped<MySQL>
+  MySQL *mysql = link_identifier.toResource().getTyped<MySQL>
     (!RuntimeOption::ThrowBadTypeExceptions,
      !RuntimeOption::ThrowBadTypeExceptions);
   return mysql;
@@ -144,14 +135,20 @@ MySQL *MySQL::Get(CVarRef link_identifier) {
 
 MYSQL *MySQL::GetConn(CVarRef link_identifier, MySQL **rconn /* = NULL */) {
   MySQL *mySQL = Get(link_identifier);
-  MYSQL *ret = NULL;
+  MYSQL *ret = nullptr;
   if (mySQL) {
     ret = mySQL->get();
   }
-  if (ret == NULL) {
+  if (ret == nullptr) {
     raise_warning("supplied argument is not a valid MySQL-Link resource");
   }
-  if (rconn) {
+  // Don't return a connection where mysql_real_connect() failed to most
+  // f_mysql_* APIs (the ones that deal with errno where we do want to do this
+  // anyway use MySQL::Get instead) as mysqlclient doesn't support passing
+  // connections in that state and it can crash.
+  if (mySQL && mySQL->m_last_error_set) {
+    ret = nullptr;
+  } else if (rconn) {
     *rconn = mySQL;
   }
   return ret;
@@ -182,8 +179,8 @@ int MySQL::GetDefaultPort() {
 }
 
 String MySQL::GetDefaultSocket() {
-  if (!RuntimeOption::MySQLSocket.empty()) {
-    return RuntimeOption::MySQLSocket;
+  if (!mysqlExtension::Socket.empty()) {
+    return mysqlExtension::Socket;
   }
   return MYSQL_UNIX_ADDR;
 }
@@ -221,23 +218,27 @@ void MySQL::SetDefaultConn(MySQL *conn) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // class MySQL
-static MYSQL *create_new_conn() {
-  MYSQL *ret = mysql_init(NULL);
-  mysql_options(ret, MYSQL_OPT_LOCAL_INFILE, 0);
-  if (RuntimeOption::MySQLConnectTimeout) {
-    MySQLUtil::set_mysql_timeout(ret, MySQLUtil::ConnectTimeout,
-                                 RuntimeOption::MySQLConnectTimeout);
+static MYSQL *configure_conn(MYSQL* conn) {
+  mysql_options(conn, MYSQL_OPT_LOCAL_INFILE, 0);
+  if (mysqlExtension::ConnectTimeout) {
+    MySQLUtil::set_mysql_timeout(conn, MySQLUtil::ConnectTimeout,
+                                 mysqlExtension::ConnectTimeout);
   }
   int readTimeout = s_mysql_data->readTimeout;
   if (readTimeout) {
-    MySQLUtil::set_mysql_timeout(ret, MySQLUtil::ReadTimeout, readTimeout);
-    MySQLUtil::set_mysql_timeout(ret, MySQLUtil::WriteTimeout, readTimeout);
+    MySQLUtil::set_mysql_timeout(conn, MySQLUtil::ReadTimeout, readTimeout);
+    MySQLUtil::set_mysql_timeout(conn, MySQLUtil::WriteTimeout, readTimeout);
   }
-  return ret;
+  return conn;
+}
+
+static MYSQL *create_new_conn() {
+  return configure_conn(mysql_init(nullptr));
 }
 
 MySQL::MySQL(const char *host, int port, const char *username,
-             const char *password, const char *database)
+             const char *password, const char *database,
+             MYSQL* raw_connection)
     : m_port(port), m_last_error_set(false), m_last_errno(0),
       m_xaction_count(0), m_multi_query(false) {
   if (host) m_host = host;
@@ -245,11 +246,20 @@ MySQL::MySQL(const char *host, int port, const char *username,
   if (password) m_password = password;
   if (database) m_database = database;
 
-  m_conn = create_new_conn();
+  if (raw_connection) {
+    m_conn = configure_conn(raw_connection);
+  } else {
+    m_conn = create_new_conn();
+  }
 }
 
 MySQL::~MySQL() {
   close();
+}
+
+void MySQL::sweep() {
+  // may or may not be smart allocated
+  delete this;
 }
 
 void MySQL::setLastError(const char *func) {
@@ -262,14 +272,15 @@ void MySQL::setLastError(const char *func) {
 }
 
 void MySQL::close() {
-  if (m_conn) {
-    m_last_error_set = false;
-    m_last_errno = 0;
-    m_xaction_count = 0;
-    m_last_error.clear();
-    mysql_close(m_conn);
-    m_conn = NULL;
+  if (!m_conn) {
+    return;
   }
+  m_last_error_set = false;
+  m_last_errno = 0;
+  m_xaction_count = 0;
+  m_last_error.clear();
+  mysql_close(m_conn);
+  m_conn = nullptr;
 }
 
 bool MySQL::connect(CStrRef host, int port, CStrRef socket, CStrRef username,
@@ -293,9 +304,9 @@ bool MySQL::connect(CStrRef host, int port, CStrRef socket, CStrRef username,
                             port,
                             socket.empty() ? NULL : socket.data(),
                             client_flags);
-  if (ret && RuntimeOption::MySQLWaitTimeout > 0) {
+  if (ret && mysqlExtension::WaitTimeout > 0) {
     String query("set session wait_timeout=");
-    query += String((int64_t)(RuntimeOption::MySQLWaitTimeout / 1000));
+    query += String((int64_t)(mysqlExtension::WaitTimeout / 1000));
     if (mysql_real_query(m_conn, query.data(), query.size())) {
       raise_notice("MySQL::connect: failed setting session wait timeout: %s",
                    mysql_error(m_conn));
@@ -352,7 +363,7 @@ bool MySQL::reconnect(CStrRef host, int port, CStrRef socket, CStrRef username,
 // helpers
 
 static MySQLResult *get_result(CVarRef result) {
-  MySQLResult *res = result.toObject().getTyped<MySQLResult>
+  MySQLResult *res = result.toResource().getTyped<MySQLResult>
     (!RuntimeOption::ThrowBadTypeExceptions,
      !RuntimeOption::ThrowBadTypeExceptions);
   if (res == NULL || (res->get() == NULL && !res->isLocalized())) {
@@ -425,9 +436,9 @@ static Variant php_mysql_field_info(CVarRef result, int field,
 
   switch (entry_type) {
   case PHP_MYSQL_FIELD_NAME:
-    return *(info->name);
+    return info->name;
   case PHP_MYSQL_FIELD_TABLE:
-    return *(info->table);
+    return info->table;
   case PHP_MYSQL_FIELD_LEN:
     return info->length;
   case PHP_MYSQL_FIELD_TYPE:
@@ -519,7 +530,7 @@ static Variant php_mysql_do_connect(String server, String username,
                                     int connect_timeout_ms,
                                     int query_timeout_ms) {
   if (connect_timeout_ms < 0) {
-    connect_timeout_ms = RuntimeOption::MySQLConnectTimeout;
+    connect_timeout_ms = mysqlExtension::ConnectTimeout;
   }
   if (query_timeout_ms < 0) {
     query_timeout_ms = s_mysql_data->readTimeout;
@@ -553,7 +564,7 @@ static Variant php_mysql_do_connect(String server, String username,
     socket = MySQL::GetDefaultSocket();
   }
 
-  Object ret;
+  Resource ret;
   MySQL *mySQL = NULL;
   if (persistent) {
     mySQL = MySQL::GetPersistent(host, port, socket, username, password,
@@ -654,7 +665,7 @@ Variant f_mysql_pconnect_with_db(CStrRef server /* = null_string */,
 bool f_mysql_set_timeout(int query_timeout_ms /* = -1 */,
                          CVarRef link_identifier /* = null */) {
   if (query_timeout_ms < 0) {
-    query_timeout_ms = RuntimeOption::MySQLReadTimeout;
+    query_timeout_ms = mysqlExtension::ReadTimeout;
   }
   s_mysql_data->readTimeout = query_timeout_ms;
   return true;
@@ -808,8 +819,15 @@ Variant f_mysql_affected_rows(CVarRef link_identifier /* = uninit_null() */) {
 ///////////////////////////////////////////////////////////////////////////////
 // query functions
 
+// Zend returns strings and NULL only, not integers or floats.  We
+// return ints (and, sometimes, actual doubles). TODO: make this
+// consistent or a runtime parameter or something.
 Variant mysql_makevalue(CStrRef data, MYSQL_FIELD *mysql_field) {
-  switch (mysql_field->type) {
+  return mysql_makevalue(data, mysql_field->type);
+}
+
+Variant mysql_makevalue(CStrRef data, enum_field_types field_type) {
+  switch (field_type) {
   case MYSQL_TYPE_DECIMAL:
   case MYSQL_TYPE_TINY:
   case MYSQL_TYPE_SHORT:
@@ -856,17 +874,17 @@ static bool php_mysql_read_rows(MYSQL *mysql, CVarRef result) {
     res->addRow();
     for (unsigned int i = 0; i < fields; i++) {
       unsigned long len = net_field_length(&cp);
-      Variant *data = NEW(Variant)();
+      Variant data;
       if (len != NULL_LENGTH) {
-        *data = mysql_makevalue(String((char *)cp, len, CopyString),
-                                mysql->fields + i);
+        data = mysql_makevalue(String((char *)cp, len, CopyString),
+                               mysql->fields + i);
         cp += len;
         if (mysql->fields) {
           if (mysql->fields[i].max_length < len)
             mysql->fields[i].max_length = len;
         }
       }
-      res->addField(data);
+      res->addField(std::move(data));
     }
     if ((pkt_len = cli_safe_read(mysql)) == packet_error) {
       return false;
@@ -892,7 +910,7 @@ static Variant php_mysql_localize_result(MYSQL *mysql) {
     return true;
   }
   mysql->status = MYSQL_STATUS_READY;
-  Variant result = Object(NEWOBJ(MySQLResult)(NULL, true));
+  Variant result = Resource(NEWOBJ(MySQLResult)(nullptr, true));
   if (!php_mysql_read_rows(mysql, result)) {
     return false;
   }
@@ -909,7 +927,7 @@ static Variant php_mysql_localize_result(MYSQL *mysql) {
 
 static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
                                           bool use_store, bool async_mode) {
-  if (RuntimeOption::MySQLReadOnly &&
+  if (mysqlExtension::ReadOnly &&
       same(f_preg_match("/^((\\/\\*.*?\\*\\/)|\\(|\\s)*select/i", query), 0)) {
     raise_notice("runtime/ext_mysql: write query not executed [%s]",
                     query.data());
@@ -977,7 +995,7 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
     }
   }
 
-  SlowTimer timer(RuntimeOption::MySQLSlowQueryThreshold,
+  SlowTimer timer(mysqlExtension::SlowQueryThreshold,
                   "runtime/ext_mysql: slow query", query.data());
   IOStatusHelper io("mysql::query", rconn->m_host.c_str(), rconn->m_port);
   unsigned long tid = mysql_thread_id(conn);
@@ -1010,7 +1028,7 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
     // running a long query on the server without waiting for any results
     // back, wasting server resource. So we're sending a KILL command
     // to see if we can stop the query execution.
-    if (tid && RuntimeOption::MySQLKillOnTimeout) {
+    if (tid && mysqlExtension::KillOnTimeout) {
       unsigned int errcode = mysql_errno(conn);
       if (errcode == 2058 /* CR_NET_READ_INTERRUPTED */ ||
           errcode == 2059 /* CR_NET_WRITE_INTERRUPTED */) {
@@ -1048,7 +1066,7 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
     //
     // If php_mysql_localize_result ever gets rewritten
     // to use standard APIs, this can be opened up to everyone.
-    if (RuntimeOption::MySQLLocalize) {
+    if (mysqlExtension::Localize) {
       return php_mysql_localize_result(conn);
     }
 #endif
@@ -1065,7 +1083,7 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
   }
 
   MySQLResult *r = NEWOBJ(MySQLResult)(mysql_result);
-  Object ret(r);
+  Resource ret(r);
 
   if (RuntimeOption::MaxSQLRowCount > 0 &&
       (s_mysql_data->totalRowCount += r->getRowCount())
@@ -1102,14 +1120,14 @@ Variant f_mysql_multi_query(CStrRef query, CVarRef link_identifier /* = null */)
   return true;
 }
 
-bool f_mysql_next_result(CVarRef link_identifier /* = null */) {
+int f_mysql_next_result(CVarRef link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!mysql_more_results(conn)) {
     raise_strict_warning("There is no next result set. "
       "Please, call mysql_more_results() to check "
       "whether to call this function/method");
   }
-  return !mysql_next_result(conn);
+  return mysql_next_result(conn);
 }
 
 bool f_mysql_more_results(CVarRef link_identifier /* = null */) {
@@ -1131,7 +1149,7 @@ Variant f_mysql_fetch_result(CVarRef link_identifier /* = null */) {
       return true;
     }
 
-    return Object(NEWOBJ(MySQLResult)(mysql_result));
+    return Resource(NEWOBJ(MySQLResult)(mysql_result));
 }
 
 Variant f_mysql_unbuffered_query(CStrRef query,
@@ -1153,7 +1171,7 @@ Variant f_mysql_list_dbs(CVarRef link_identifier /* = null */) {
     raise_warning("Unable to save MySQL query result");
     return false;
   }
-  return Object(NEWOBJ(MySQLResult)(res));
+  return Resource(NEWOBJ(MySQLResult)(res));
 }
 
 Variant f_mysql_list_tables(CStrRef database,
@@ -1168,7 +1186,7 @@ Variant f_mysql_list_tables(CStrRef database,
     raise_warning("Unable to save MySQL query result");
     return false;
   }
-  return Object(NEWOBJ(MySQLResult)(res));
+  return Resource(NEWOBJ(MySQLResult)(res));
 }
 
 Variant f_mysql_list_fields(CStrRef database_name, CStrRef table_name,
@@ -1186,7 +1204,7 @@ Variant f_mysql_list_processes(CVarRef link_identifier /* = null */) {
     raise_warning("Unable to save MySQL query result");
     return false;
   }
-  return Object(NEWOBJ(MySQLResult)(res));
+  return Resource(NEWOBJ(MySQLResult)(res));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1222,7 +1240,7 @@ static Variant php_mysql_fetch_hash(CVarRef result, int result_type) {
       }
       if (result_type & MYSQL_ASSOC) {
         MySQLFieldInfo *info = res->getFieldInfo(i);
-        ret.set(info->name->toString(), res->getField(i));
+        ret.set(info->name, res->getField(i));
       }
     }
     return ret;
@@ -1367,12 +1385,12 @@ Variant f_mysql_async_query_result(CVarRef link_identifier) {
   MYSQL_RES* mysql_result = mysql_use_result(conn);
   MySQLResult *r = NEWOBJ(MySQLResult)(mysql_result);
   r->setAsyncConnection(mySQL);
-  Object ret(r);
+  Resource ret(r);
   return ret;
 }
 
 bool f_mysql_async_query_completed(CVarRef result) {
-  MySQLResult *res = result.toObject().getTyped<MySQLResult>
+  MySQLResult *res = result.toResource().getTyped<MySQLResult>
     (!RuntimeOption::ThrowBadTypeExceptions,
      !RuntimeOption::ThrowBadTypeExceptions);
   return !res || res->get() == NULL;
@@ -1462,7 +1480,7 @@ Variant f_mysql_async_wait_actionable(CVarRef items, double timeout) {
   // necessary for the descriptor in question, and put an entry into
   // fds.
   int nfds = 0;
-  for (ArrayIter iter(items); iter; ++iter) {
+  for (ArrayIter iter(items.toArray()); iter; ++iter) {
     Array entry = iter.second().toArray();
     if (entry.size() < 1) {
       raise_warning("element %d did not have at least one entry",
@@ -1470,7 +1488,7 @@ Variant f_mysql_async_wait_actionable(CVarRef items, double timeout) {
       return Array::Create();
     }
 
-    MySQL* mySQL = entry.rvalAt(0).toObject().getTyped<MySQL>();
+    MySQL* mySQL = entry.rvalAt(0).toResource().getTyped<MySQL>();
     MYSQL* conn = mySQL->get();
     if (conn->async_op_status == ASYNC_OP_UNSET) {
       raise_warning("runtime/ext_mysql: no pending async operation in "
@@ -1494,7 +1512,7 @@ Variant f_mysql_async_wait_actionable(CVarRef items, double timeout) {
   int res = poll(fds, nfds, timeout_millis);
   if (res == -1) {
     raise_warning("unable to poll [%d]: %s", errno,
-                  Util::safe_strerror(errno).c_str());
+                  folly::errnoStr(errno).c_str());
     return Array::Create();
   }
 
@@ -1502,14 +1520,14 @@ Variant f_mysql_async_wait_actionable(CVarRef items, double timeout) {
   // arrays from our input array into our return value.
   Array ret = Array::Create();
   nfds = 0;
-  for (ArrayIter iter(items); iter; ++iter) {
+  for (ArrayIter iter(items.toArray()); iter; ++iter) {
     Array entry = iter.second().toArray();
     if (entry.size() < 1) {
       raise_warning("element %d did not have at least one entry",
                    nfds);
       return Array::Create();
     }
-    MySQL* mySQL = entry.rvalAt(0).toObject().getTyped<MySQL>();
+    MySQL* mySQL = entry.rvalAt(0).toResource().getTyped<MySQL>();
     MYSQL* conn = mySQL->get();
 
     pollfd* fd = &fds[nfds++];
@@ -1599,7 +1617,7 @@ Variant f_mysql_fetch_object(CVarRef result,
   Variant properties = php_mysql_fetch_hash(result, MYSQL_ASSOC);
   if (!same(properties, false)) {
     Object obj = create_object(class_name, params);
-    obj->o_setArray(properties);
+    obj->o_setArray(properties.toArray());
 
     return obj;
   }
@@ -1657,7 +1675,7 @@ Variant f_mysql_result(CVarRef result, int row,
     mysql_result = res->get();
     if (row < 0 || row >= (int)mysql_num_rows(mysql_result)) {
       raise_warning("Unable to jump to row %d on MySQL result index %d",
-                      row, result.toObject()->o_getId());
+                      row, result.toResource()->o_getId());
       return false;
     }
     mysql_data_seek(mysql_result, row);
@@ -1691,8 +1709,8 @@ Variant f_mysql_result(CVarRef result, int row,
       res->seekField(0);
       while (i < res->getFieldCount()) {
         MySQLFieldInfo *info = res->getFieldInfo(i);
-        if ((table_name.empty() || table_name.same(info->table->toString())) &&
-            field_name.same(info->name->toString())) {
+        if ((table_name.empty() || table_name.same(info->table)) &&
+            field_name.same(info->name)) {
           field_offset = i;
           found = true;
           break;
@@ -1702,7 +1720,7 @@ Variant f_mysql_result(CVarRef result, int row,
       if (!found) { /* no match found */
         raise_warning("%s%s%s not found in MySQL result index %d",
                         table_name.data(), (table_name.empty() ? "" : "."),
-                        field_name.data(), result.toObject()->o_getId());
+                        field_name.data(), result.toResource()->o_getId());
         return false;
       }
     } else {
@@ -1780,9 +1798,9 @@ Variant f_mysql_fetch_field(CVarRef result, int field /* = -1 */) {
   if (!(info = res->fetchFieldInfo())) return false;
 
   Object obj(SystemLib::AllocStdClassObject());
-  obj->o_set("name",         *(info->name));
-  obj->o_set("table",        *(info->table));
-  obj->o_set("def",          *(info->def));
+  obj->o_set("name",         info->name);
+  obj->o_set("table",        info->table);
+  obj->o_set("def",          info->def);
   obj->o_set("max_length",   (int)info->max_length);
   obj->o_set("not_null",     IS_NOT_NULL(info->flags)? 1 : 0);
   obj->o_set("primary_key",  IS_PRI_KEY(info->flags)? 1 : 0);
@@ -1824,24 +1842,25 @@ Variant f_mysql_field_flags(CVarRef result, int field /* = 0 */) {
 
 void MySQLResult::addRow() {
   m_row_count++;
-  m_rows->push_back(vector<Variant *>());
+  m_rows->push_back(smart::vector<Variant>());
   m_rows->back().reserve(getFieldCount());
 }
 
-void MySQLResult::addField(Variant *value) {
-  m_rows->back().push_back(value);
+void MySQLResult::addField(Variant&& value) {
+  m_rows->back().push_back(std::move(value));
 }
 
 void MySQLResult::setFieldCount(int64_t fields) {
   m_field_count = fields;
-  m_fields = new MySQLFieldInfo[fields];
+  assert(!m_fields);
+  m_fields = smart_new_array<MySQLFieldInfo>(fields);
 }
 
 void MySQLResult::setFieldInfo(int64_t f, MYSQL_FIELD *field) {
   MySQLFieldInfo &info = m_fields[f];
-  info.name = NEW(Variant)(String(field->name, CopyString));
-  info.table = NEW(Variant)(String(field->table, CopyString));
-  info.def = NEW(Variant)(String(field->def, CopyString));
+  info.name = String(field->name, CopyString);
+  info.table = String(field->table, CopyString);
+  info.def = String(field->def, CopyString);
   info.max_length = (int64_t)field->max_length;
   info.length = (int64_t)field->length;
   info.type = (int)field->type;
@@ -1868,7 +1887,7 @@ Variant MySQLResult::getField(int64_t field) const {
   if (!m_localized || field < 0 || field >= (int64_t)m_current_row->size()) {
     return uninit_null();
   }
-  return *(*m_current_row)[field];
+  return (*m_current_row)[field];
 }
 
 int64_t MySQLResult::getFieldCount() const {
@@ -1932,29 +1951,6 @@ MySQLFieldInfo *MySQLResult::fetchFieldInfo() {
   if (m_current_field < getFieldCount()) m_current_field++;
   return getFieldInfo(m_current_field);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-
-static class mysqlExtension : public Extension {
-public:
-  mysqlExtension() : Extension("mysql") {}
-
-  // implementing IDebuggable
-  virtual int  debuggerSupport() {
-    return SupportInfo;
-  }
-  virtual void debuggerInfo(InfoVec &info) {
-    int count = g_persistentObjects->getMap("mysql::persistent_conns").size();
-    Add(info, "Persistent", FormatNumber("%" PRId64, count));
-
-    AddServerStats(info, "sql.conn"       );
-    AddServerStats(info, "sql.reconn_new" );
-    AddServerStats(info, "sql.reconn_ok"  );
-    AddServerStats(info, "sql.reconn_old" );
-    AddServerStats(info, "sql.query"      );
-  }
-
-} s_mysql_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

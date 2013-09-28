@@ -1,0 +1,69 @@
+
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function main() {
+  .numiters 2;
+  NewArray
+
+  String "hello"
+  String "world"
+  AddElemC
+
+  String "this"
+  String "is"
+  AddElemC
+
+  String "a"
+  String "test"
+  AddElemC
+
+  SetL $0
+  PopC
+
+  CGetL $0
+  IterInitK 0 endOuter $1 $2
+startOuter:
+
+  String "\n"
+  CGetL2 $1
+  Concat
+  Print
+  PopC
+
+  String "\n"
+  CGetL2 $2
+  Concat
+  Print
+  PopC
+
+  CGetL $0
+  Box
+  MIterInitK 1 endInner $3 $4
+startInner:
+  String "\n"
+  CGetL2 $3
+  Concat
+  Print
+  PopC
+
+  String "\n"
+  CGetL2 $4
+  Concat
+  Print
+  PopC
+
+  IterBreak <(MIter) 1, (Iter) 0> endOuter
+  MIterNextK 1 startInner $3 $4
+endInner:
+  IterNextK 0 startOuter $1 $2
+endOuter:
+
+  Int 1
+  RetC
+}

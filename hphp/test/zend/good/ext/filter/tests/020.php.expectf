@@ -1,0 +1,5 @@
+string(36) "test\'asd\'asd\'\' asd\\\'\"asdfasdf"
+string(2) "\'"
+string(0) ""
+string(2) "-1"
+Done

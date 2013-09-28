@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +19,7 @@
 
 #include "hphp/compiler/hphp.h"
 #include "hphp/util/json.h"
-#include "hphp/util/case_insensitive.h"
+#include "hphp/util/case-insensitive.h"
 #include "hphp/runtime/base/types.h"
 
 
@@ -53,6 +53,7 @@ public:
   static const KindOf KindOfString     = 0x0080;
   static const KindOf KindOfArray      = 0x0100;
   static const KindOf KindOfObject     = 0x0200;   // with classname
+  static const KindOf KindOfResource   = 0x0400;
   static const KindOf KindOfVariant    = 0xFFFF;
 
   /* This bit tells coerce that if the other type
@@ -88,6 +89,7 @@ public:
   static TypePtr String;
   static TypePtr Array;
   static TypePtr Object;
+  static TypePtr Resource;
   static TypePtr Variant;
 
   static TypePtr Numeric;

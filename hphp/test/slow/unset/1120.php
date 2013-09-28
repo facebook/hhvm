@@ -1,6 +1,5 @@
 <?php
 
-
 class A {
   public function foo() {
     unset($this);
@@ -16,7 +15,8 @@ function goo() {
   var_dump($this);
 }
 $obj = new A;
-$obj->foo(); 
+$obj->foo();
+
 $obj->bar();
 A::bar();
 goo();

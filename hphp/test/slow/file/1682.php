@@ -1,6 +1,5 @@
 <?php
 
-
 function main() {
   file_put_contents("/tmp/temp.txt",
                     "put this in the txt file\n");

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,8 +17,8 @@
 
 #include "hphp/runtime/ext/ext_output.h"
 #include "hphp/runtime/ext/ext_json.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/hardware_counter.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/hardware-counter.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 
@@ -100,8 +100,8 @@ int64_t f_hphp_get_stats(CStrRef name) {
 }
 Array f_hphp_get_status() {
   std::string out;
-  ServerStats::ReportStatus(out, ServerStats::JSON);
-  return f_json_decode(String(out));
+  ServerStats::ReportStatus(out, ServerStats::Format::JSON);
+  return f_json_decode(String(out)).toArray();
 }
 Array f_hphp_get_iostatus() {
   return ServerStats::GetThreadIOStatuses();
@@ -123,10 +123,11 @@ static String ts_microtime(const timespec &ts) {
   return String(ret, CopyString);
 }
 
-static const StaticString s_queue("queue");
-static const StaticString s_process_wall("process-wall");
-static const StaticString s_process_cpu("process-cpu");
-static const StaticString s_process_inst("process-inst");
+const StaticString
+  s_queue("queue"),
+  s_process_wall("process-wall"),
+  s_process_cpu("process-cpu"),
+  s_process_inst("process-inst");
 
 Variant f_hphp_get_timers(bool get_as_float /* = true */) {
   Transport *transport = g_context->getTransport();

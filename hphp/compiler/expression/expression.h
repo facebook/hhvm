@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -76,6 +76,7 @@ class Variant;
     x(EncapsListExpression, None),              \
     x(ClosureExpression, None),                 \
     x(YieldExpression, None),                   \
+    x(AwaitExpression, None),                   \
     x(UserAttribute, None)
 
 class Expression : public Construct {
@@ -202,7 +203,7 @@ public:
     */
   virtual int getKidCount() const { return 0; }
   ExpressionPtr getNthExpr(int n) const { return
-      boost::static_pointer_cast<Expression>(getNthKid(n)); }
+      static_pointer_cast<Expression>(getNthKid(n)); }
 
   /**
    * For cse & canonicalization
@@ -232,6 +233,7 @@ public:
   virtual bool isTemporary() const { return false; }
   virtual bool isScalar() const { return false; }
   bool isArray() const;
+  bool isCollection() const;
   virtual bool isRefable(bool checkError = false) const { return false; }
   virtual bool getScalarValue(Variant &value) { return false; }
   FileScopeRawPtr getUsedScalarScope(CodeGenerator& cg);

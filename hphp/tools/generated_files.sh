@@ -25,9 +25,6 @@ fi
 HPHP_TOOLS=$HPHP_HOME/hphp/tools/
 
 if [ "$1" = "help" ]; then
-  echo "$0 systemlib  - Build bin/systemlib.php"
-  echo "$0 constants  - Build hphp/system/constants.h"
-  echo "$0 class_map  - Build hphp/system/class_map.cpp"
   echo "$0 lexer      - Regenerate the lexer"
   echo "$0 parser     - Regenerate the parser"
   echo "$0 license    - Add license headers to all files"
@@ -36,28 +33,8 @@ if [ "$1" = "help" ]; then
   exit 0
 fi
 
-if [ "$1" = "systemlib" -o "$1" = "all" ]; then
-  cd $HPHP_HOME
-  [ $VERBOSE -eq 1 ] && echo "Generating bin/systemlib.php"
-  $HHVM hphp/system/lib/gen_systemlib.php bin/
-  check_err $? "Failed generating bin/systemlib.php"
-fi
-
-if [ "$1" = "constants" -o "$1" = "all" ]; then
-  cd $HPHP_HOME
-  [ $VERBOSE -eq 1 ] && echo "Generating hphp/system/constants.h"
-  $HHVM hphp/idl/class_map.php hphp/system/constants.h hphp/system/globals/constdef.json
-fi
-
-if [ "$1" = "class_map" -o "$1" = "all" ]; then
-  cd $HPHP_HOME
-  [ $VERBOSE -eq 1 ] && echo "Generating hphp/system/class_map.h"
-  $HHVM hphp/idl/class_map.php hphp/system/class_map.cpp hphp/system/globals/constdef.json \
-	`find hphp/idl -name '*.idl.json'`
-fi
-
 if [ "$1" = "lexer" -o "$1" = "all" ]; then
-  cd $HPHP_HOME/hphp/util/parser
+  cd $HPHP_HOME/hphp/parser
   [ $VERBOSE -eq 1 ] && echo "Generating lexer"
   FLEX=`which flex`
   if [ -x "$FLEX" ]; then
@@ -69,47 +46,11 @@ if [ "$1" = "lexer" -o "$1" = "all" ]; then
 fi
 
 if [ "$1" = "parser" -o "$1" = "all" ]; then
-  cd $HPHP_HOME/hphp/util/parser
-  BISON=`which bison`
-  SED=`which sed`
-  if [ -x "$BISON" -a -x "$SED" ]; then
-    [ $VERBOSE -eq 1 ] && echo "Generating parser"
-    $BISON -pCompiler --verbose --locations -d -onew_hphp.tab.cpp hphp.y
-    rm -f new_hphp.output
-
-    # Header
-    cat new_hphp.tab.hpp | \
-      $SED -r -e 's/(T_\w+) = ([0-9]+)/YYTOKEN(\2, \1)/' | \
-      $SED -e "s/^\s*enum yytokentype/#ifndef YYTOKEN_MAP\n#define YYTOKEN_MAP enum yytokentype\n#define YYTOKEN(num, name) name = num\n#endif\n   YYTOKEN_MAP/" > new_hphp.tab.hpp.tmp
-    mv new_hphp.tab.hpp.tmp new_hphp.tab.hpp
-    cat new_hphp.tab.hpp | grep "     YYTOKEN(" | head -n 1 | \
-      $SED -r -e 's/     YYTOKEN.([0-9]+).*/#ifndef YYTOKEN_MIN\n#define YYTOKEN_MIN \1\n#endif/' \
-      >> new_hphp.tab.hpp
-    cat new_hphp.tab.hpp | grep "     YYTOKEN(" | tail -n 1 | \
-      $SED -r -e 's/     YYTOKEN.([0-9]+).*/#ifndef YYTOKEN_MAX\n#define YYTOKEN_MAX \1\n#endif/' \
-      >> new_hphp.tab.hpp
-    (diff -q hphp.tab.hpp new_hphp.tab.hpp >/dev/null ||
-      mv -f new_hphp.tab.hpp hphp.tab.hpp) &&
-      rm -f new_hphp.tab.hpp
-
-    # Implementation
-    cat new_hphp.tab.cpp | \
-      $SED -e "s/first_line/line0/g" \
-           -e "s/last_line/line1/g" \
-           -e "s/first_column/char0/g" \
-           -e "s/last_column/char1/g" \
-           -e "s/union/struct/g" \
-           -e "s/YYSTACK_ALLOC \(YYSTACK_BYTES \(yystacksize\)\);\n/YYSTACK_ALLOC \(YYSTACK_BYTES \(yystacksize\)\);\n        memset(yyptr, 0, YYSTACK_BYTES (yystacksize));\n/" \
-           -e "s/YYSTACK_RELOCATE \(yyvs_alloc, yyvs\)/YYSTACK_RELOCATE_RESET (yyvs_alloc, yyvs)/" \
-           -e "s/YYSTACK_FREE \(yyss\)/YYSTACK_FREE (yyss);\n  YYSTACK_CLEANUP/" \
-      > new_hphp.tab.cpp.tmp
-    mv new_hphp.tab.cpp.tmp new_hphp.tab.cpp
-    (diff -q new_hphp.tab.cpp ../../compiler/parser/hphp.tab.cpp >/dev/null ||
-      mv -f new_hphp.tab.cpp ../../compiler/parser/hphp.tab.cpp) &&
-      rm -f new_hphp.tab.cpp
-  else
-    [ $VERBOSE -eq 1 ] && echo "No bison/sed with which to generate parser"
-  fi
+  [ $VERBOSE -eq 1 ] && echo "Generating parser"
+  $HPHP_HOME/hphp/parser/make-parser.sh || exit 1
+  sed -e 's@^#line \([0-9]*\) ".*/\([^/]*\)"$@#line \1 "\2"@' \
+    $HPHP_HOME/hphp/parser/hphp.tab.cpp > \
+    $HPHP_HOME/hphp/compiler/parser/hphp.tab.cpp
 fi
 
 if [ "$1" = "license" -o "$1" = "all" ]; then

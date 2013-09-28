@@ -1,0 +1,12 @@
+*** Testing error conditions of in_array() ***
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+Done

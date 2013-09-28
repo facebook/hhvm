@@ -1,0 +1,7 @@
+HipHop Fatal error: %s
+Stack trace:
+#0 %sbug54911.php(4): XSoapClient::__doRequest()
+#1 [internal function]: XSoapClient->__doRequest('<?xml version="...', '', '#', 1, 0)
+#2 %sbug54911.php(8): SoapClient->__soapCall('', Array)
+#3 {main}
+  thrown in %sbug54911.php on line 4

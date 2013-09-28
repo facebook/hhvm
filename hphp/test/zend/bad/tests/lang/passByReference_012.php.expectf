@@ -1,0 +1,6 @@
+Strict Standards: Only variables should be passed by reference in %s on line %d
+string(3) "two"
+
+Strict Standards: Only variables should be passed by reference in %s on line %d
+string(3) "one"
+===DONE===

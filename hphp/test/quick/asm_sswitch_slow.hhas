@@ -89,15 +89,15 @@ fail:
 .function main() {
   FPushFuncD 0 "case_three"
   FCall 0
-  PopC
+  PopR
 
   FPushFuncD 0 "with_obj"
   FCall 0
-  PopC
+  PopR
 
   FPushFuncD 0 "case_default"
   FCall 0
-  PopC
+  PopR
 
   String "Done\n"
   Print

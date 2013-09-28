@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_OPTIONS_H_
 #define incl_HPHP_EXT_OPTIONS_H_
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/util/process.h"
 
 namespace HPHP {
@@ -30,9 +30,9 @@ int64_t f_dl(CStrRef library);
 bool f_extension_loaded(CStrRef name);
 Array f_get_loaded_extensions(bool zend_extensions = false);
 Array f_get_extension_funcs(CStrRef module_name);
-String f_get_cfg_var(CStrRef option);
+Variant f_get_cfg_var(CStrRef option);
 String f_get_current_user();
-Array f_get_defined_constants(CVarRef categorize = null_variant);
+Array f_get_defined_constants(bool categorize = false);
 String f_get_include_path();
 void f_restore_include_path();
 String f_set_include_path(CStrRef new_include_path);
@@ -62,6 +62,7 @@ String f_ini_set(CStrRef varname, CStrRef newvalue);
 int64_t f_memory_get_allocation();
 int64_t f_memory_get_peak_usage(bool real_usage = false);
 int64_t f_memory_get_usage(bool real_usage = false);
+Variant f_php_ini_loaded_file();
 String f_php_ini_scanned_files();
 String f_php_logo_guid();
 String f_php_sapi_name();

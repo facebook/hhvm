@@ -1,0 +1,22 @@
+int(1)
+array(1) {
+  [0]=>
+  string(0) ""
+}
+HipHop Warning: %s
+NULL
+array(1) {
+  [0]=>
+  string(0) ""
+}
+int(2)
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    string(0) ""
+  }
+  [1]=>
+  string(0) ""
+}
+Done

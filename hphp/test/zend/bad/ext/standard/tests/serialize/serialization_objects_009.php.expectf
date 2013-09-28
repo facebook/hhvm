@@ -1,0 +1,9 @@
+HipHop Warning: %s
+HipHop Warning: %s
+object(__PHP_Incomplete_Class)#%d (1) {
+  ["__PHP_Incomplete_Class_Name"]=>
+  string(1) "C"
+}
+object(C)#%d (0) {
+}
+Done

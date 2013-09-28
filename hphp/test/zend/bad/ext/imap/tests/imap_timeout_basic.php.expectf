@@ -1,0 +1,17 @@
+Checking with no parameters
+HipHop Warning: %s
+Checking with incorrect parameter type
+HipHop Warning: %s
+GET values:
+int(%d)
+int(%d)
+int(%d)
+int(%d)
+SET values:
+bool(true)
+bool(true)
+bool(true)
+CHECK values:
+int(10)
+int(10)
+int(10)

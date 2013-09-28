@@ -1,0 +1,40 @@
+Native...
+HipHop Warning: %s
+[003] Execute has failed, 'HY093' array (
+  0 => 'HY093',
+  1 => NULL,
+  2 => NULL,
+)
+array(0) {
+}
+Emulated...
+array(1) {
+  [0]=>
+  array(3) {
+    ["id"]=>
+    string(1) "2"
+    ["label1"]=>
+    string(4) "row2"
+    ["label2"]=>
+    string(4) "row2"
+  }
+}
+array(1) {
+  [0]=>
+  array(2) {
+    ["id"]=>
+    string(1) "1"
+    ["label1"]=>
+    string(4) "row1"
+  }
+}
+Native...
+HipHop Warning: %s
+[008] Execute has failed, 'HY093' array (
+  0 => 'HY093',
+  1 => NULL,
+  2 => NULL,
+)
+array(0) {
+}
+done!

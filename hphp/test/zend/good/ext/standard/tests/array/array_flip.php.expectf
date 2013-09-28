@@ -1,0 +1,17 @@
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+array(6) {
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [0]=>
+  string(1) "z"
+  ["G"]=>
+  int(0)
+  ["h"]=>
+  int(1)
+  ["i"]=>
+  int(2)
+}

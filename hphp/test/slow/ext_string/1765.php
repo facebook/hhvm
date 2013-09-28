@@ -1,6 +1,5 @@
 <?php
 
-
 var_dump(str_replace(array(65), array('a'), 'axAX'));
 var_dump(str_ireplace(array(65), array('a'), 'axAX'));
 echo "**************************\n";

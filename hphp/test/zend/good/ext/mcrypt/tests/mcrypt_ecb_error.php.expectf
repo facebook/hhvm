@@ -1,0 +1,10 @@
+*** Testing mcrypt_ecb() : error conditions ***
+
+-- Testing mcrypt_ecb() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing mcrypt_ecb() function with less than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

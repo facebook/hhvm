@@ -1,0 +1,12 @@
+*** Testing scandir() : error conditions ***
+
+-- Pass scandir() an absolute path that does not exist --
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+
+-- Pass scandir() a relative path that does not exist --
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+===DONE===

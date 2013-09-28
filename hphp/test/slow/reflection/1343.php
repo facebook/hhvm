@@ -1,7 +1,5 @@
 <?php
 
-
-
 /**
  * Doc comment on a function generator
  */

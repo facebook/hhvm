@@ -1,0 +1,26 @@
+*** Testing substr_replace() : error conditions ***
+
+-- Testing substr_replace() function with less than expected no. of arguments --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Testing substr_replace() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing substr_replace() function with start and length different types --
+HipHop Warning: %s
+string(12) "Good morning"
+HipHop Warning: %s
+string(12) "Good morning"
+
+-- Testing substr_replace() function with start and length with a different number of elements --
+HipHop Warning: %s
+string(12) "Good morning"
+
+-- Testing substr_replace() function with start and length as arrays but string not--
+HipHop Warning: %s
+string(12) "Good morning"
+===DONE===

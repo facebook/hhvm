@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,9 +16,8 @@
 
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debug/gdb-jit.h"
-#include "hphp/runtime/vm/debug/elfwriter.h"
 
-#include "hphp/runtime/base/execution_context.h"
+#include "hphp/runtime/base/execution-context.h"
 
 #include <sys/types.h>
 #include <stdio.h>
@@ -26,7 +25,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 
 using namespace HPHP::Transl;
 

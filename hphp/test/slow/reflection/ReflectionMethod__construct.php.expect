@@ -1,0 +1,6 @@
+bool(true)
+ReflectionException: Method ::noSuchMethod does not exist
+ReflectionException: Method Foo::noSuchMethod does not exist
+ReflectionException: Method Foo::noSuchMethod does not exist
+bool(true)
+bool(true)

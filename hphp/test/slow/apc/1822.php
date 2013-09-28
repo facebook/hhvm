@@ -1,7 +1,7 @@
 <?php
 
-
-class C {}
+class C {
+}
 class D {
   public function __construct($f) {
     $this->map = $f;

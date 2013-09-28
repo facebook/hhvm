@@ -1,0 +1,78 @@
+*** Testing iconv_strlen() : usage variations ***
+
+--int 0--
+int(1)
+
+--int 1--
+int(1)
+
+--int 12345--
+int(5)
+
+--int -12345--
+int(6)
+
+--float 10.5--
+int(4)
+
+--float -10.5--
+int(5)
+
+--float 12.3456789000e10--
+int(12)
+
+--float 12.3456789000e-10--
+int(13)
+
+--float .5--
+int(3)
+
+--uppercase NULL--
+int(0)
+
+--lowercase null--
+int(0)
+
+--lowercase true--
+int(1)
+
+--lowercase false--
+int(0)
+
+--uppercase TRUE--
+int(1)
+
+--uppercase FALSE--
+int(0)
+
+--empty string DQ--
+int(0)
+
+--empty string SQ--
+int(0)
+
+--string DQ--
+int(6)
+
+--string SQ--
+int(6)
+
+--mixed case string--
+int(6)
+
+--heredoc--
+int(11)
+
+--instance of class--
+int(14)
+
+--undefined var--
+int(0)
+
+--unset var--
+int(0)
+
+--resource--
+HipHop Warning: %s
+bool(false)
+===DONE===

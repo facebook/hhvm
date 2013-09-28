@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,7 +20,7 @@
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/include_expression.h"
 #include "hphp/compiler/option.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 #include "hphp/compiler/expression/function_call.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/file_scope.h"
@@ -73,7 +73,7 @@ int ExpStatement::getKidCount() const {
 void ExpStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_exp = boost::dynamic_pointer_cast<Expression>(cp);
+      m_exp = dynamic_pointer_cast<Expression>(cp);
       break;
     default:
       assert(false);

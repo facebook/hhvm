@@ -2,7 +2,11 @@
 
 //////////////////////////////////////////////////////////////////////
 
-class Dtor { public function __destruct() { echo "dtor\n"; } }
+class Dtor {
+ public function __destruct() {
+ echo "dtor\n";
+ }
+ }
 
 function id($x) {
   return $x;

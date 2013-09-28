@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -101,16 +101,16 @@ int ForEachStatement::getKidCount() const {
 void ForEachStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_array = boost::dynamic_pointer_cast<Expression>(cp);
+      m_array = dynamic_pointer_cast<Expression>(cp);
       break;
     case 1:
-      m_name = boost::dynamic_pointer_cast<Expression>(cp);
+      m_name = dynamic_pointer_cast<Expression>(cp);
       break;
     case 2:
-      m_value = boost::dynamic_pointer_cast<Expression>(cp);
+      m_value = dynamic_pointer_cast<Expression>(cp);
       break;
     case 3:
-      m_stmt = boost::dynamic_pointer_cast<Statement>(cp);
+      m_stmt = dynamic_pointer_cast<Statement>(cp);
       break;
     default:
       assert(false);
@@ -123,9 +123,19 @@ void ForEachStatement::inferTypes(AnalysisResultPtr ar) {
 
   m_array->inferAndCheck(ar, m_ref ? Type::Variant : Type::Array, m_ref);
   if (m_name) {
-    m_name->inferAndCheck(ar, Type::Primitive, true);
+    if (m_name->is(Expression::KindOfListAssignment)) {
+      m_name->inferTypes(ar, TypePtr(), false);
+    } else {
+      m_name->inferAndCheck(ar, Type::Primitive, true);
+    }
   }
-  m_value->inferAndCheck(ar, Type::Variant, true);
+
+  if (m_value->is(Expression::KindOfListAssignment)) {
+    m_value->inferTypes(ar, TypePtr(), false);
+  } else {
+    m_value->inferAndCheck(ar, Type::Variant, true);
+  }
+
   if (m_ref) {
     TypePtr actualType = m_array->getActualType();
     if (!actualType ||

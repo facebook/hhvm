@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,16 +16,23 @@
 */
 
 #include "hphp/runtime/ext/ext_error.h"
-#include "hphp/runtime/base/util/exceptions.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/ext/ext_file.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Array f_debug_backtrace(bool provide_object /* = true */) {
-  return g_vmContext->debugBacktrace(true, false, provide_object);
+const int DEBUG_BACKTRACE_PROVIDE_OBJECT = 1;
+const int DEBUG_BACKTRACE_IGNORE_ARGS = 2;
+
+Array f_debug_backtrace(int64_t options /* = 1 */, int64_t limit /* = 0 */) {
+  bool provide_object = options & DEBUG_BACKTRACE_PROVIDE_OBJECT;
+  bool ignore_args = options & DEBUG_BACKTRACE_IGNORE_ARGS;
+  return g_vmContext->debugBacktrace(
+    true, false, provide_object, nullptr, ignore_args, limit
+  );
 }
 
 /**
@@ -46,22 +53,28 @@ Array f_hphp_debug_caller_info() {
   return Array::Create();
 }
 
-void f_debug_print_backtrace() {
-  echo(debug_string_backtrace(true));
+void f_debug_print_backtrace(int64_t options /* = 0 */,
+                             int64_t limit /* = 0 */) {
+  bool ignore_args = options & DEBUG_BACKTRACE_IGNORE_ARGS;
+  echo(debug_string_backtrace(true, ignore_args, limit));
 }
 
-static const StaticString s_class("class");
-static const StaticString s_type("type");
-static const StaticString s_function("function");
-static const StaticString s_file("file");
-static const StaticString s_line("line");
-static const StaticString s_message("message");
+const StaticString
+  s_class("class"),
+  s_type("type"),
+  s_function("function"),
+  s_file("file"),
+  s_line("line"),
+  s_message("message"),
+  s_args("args");
 
-String debug_string_backtrace(bool skip) {
+String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
+                              int limit /* = 0 */) {
   if (RuntimeOption::InjectedStackTrace) {
     Array bt;
     StringBuffer buf;
-    bt = g_vmContext->debugBacktrace(skip);
+    bt = g_vmContext->debugBacktrace(skip, false, false, nullptr,
+                                     ignore_args, limit);
     int i = 0;
     for (ArrayIter it = bt.begin(); !it.end(); it.next(), i++) {
       Array frame = it.second().toArray();
@@ -74,7 +87,19 @@ String debug_string_backtrace(bool skip) {
         buf.append(frame->get(s_type).toString());
       }
       buf.append(frame->get(s_function).toString());
-      buf.append("()");
+      buf.append("(");
+      if (!ignore_args) {
+        bool first = true;
+        for (ArrayIter it = frame->get(s_args).begin(); !it.end(); it.next()) {
+          if (!first) {
+            buf.append(", ");
+          } else {
+            first = false;
+          }
+          buf.append(it.second().toString());
+        }
+      }
+      buf.append(")");
       if (frame.exists(s_file)) {
         buf.append(" called at [");
         buf.append(frame->get(s_file).toString());
@@ -96,7 +121,7 @@ Array f_error_get_last() {
   if (lastError.isNull()) {
     return (ArrayData *)NULL;
   }
-  return CREATE_MAP2(s_message, g_context->getLastError(),
+  return make_map_array(s_message, g_context->getLastError(),
                      s_type, g_context->getLastErrorNumber());
 }
 
@@ -104,22 +129,40 @@ bool f_error_log(CStrRef message, int message_type /* = 0 */,
                  CStrRef destination /* = null_string */,
                  CStrRef extra_headers /* = null_string */) {
   // error_log() should not invoke the user error handler,
-  // so we use Logger::Error() instead of raise_warning()
-  std::string line(message.data(),
-                   // Truncate to 512k
-                   message.size() > (1<<19) ? (1<<19) : message.size());
-  if (RuntimeOption::serverExecutionMode() ||
-      RuntimeOption::AlwaysEscapeLog) {
-    Logger::Error(line);
-  } else {
-    Logger::RawError(line);
+  // so we use Logger::Error() instead of raise_warning() or raise_error()
+  switch (message_type) {
+  case 0:
+  {
+    std::string line(message.data(),
+                     // Truncate to 512k
+                     message.size() > (1<<19) ? (1<<19) : message.size());
 
-    // otherwise errors will go to error log without displaying on screen
-    if (Logger::UseLogFile && Logger::Output) {
+    Logger::Error(line);
+
+    if (!RuntimeOption::ServerExecutionMode() &&
+        Logger::UseLogFile && Logger::Output) {
+      // otherwise errors will go to error log without displaying on screen
       std::cerr << line;
     }
+    return true;
   }
-  return true;
+  case 3:
+  {
+    Variant outfile = f_fopen(destination, "a"); // open for append only
+    if (outfile.isNull()) {
+      Logger::Error("can't open error_log file!\n");
+      return false;
+    }
+    f_fwrite(outfile.toResource(), message);
+    f_fclose(outfile.toResource());
+    return true;
+  }
+  case 2: // not used per PHP
+  default:
+    Logger::Error("error_log does not support message_type %d!", message_type);
+    break;
+  }
+  return false;
 }
 
 int64_t f_error_reporting(CVarRef level /* = null */) {
@@ -167,21 +210,22 @@ void f_hphp_clear_unflushed() {
 bool f_trigger_error(CStrRef error_msg,
                      int error_type /* = k_E_USER_NOTICE */) {
   std::string msg = error_msg.data();
+  if (g_context->getThrowAllErrors()) throw error_type;
   if (error_type == k_E_USER_ERROR) {
     g_context->handleError(msg, error_type, true,
-                       ExecutionContext::ThrowIfUnhandled,
+                       ExecutionContext::ErrorThrowMode::IfUnhandled,
                        "HipHop Recoverable error: ");
   } else if (error_type == k_E_USER_WARNING) {
     g_context->handleError(msg, error_type, true,
-                       ExecutionContext::NeverThrow,
+                       ExecutionContext::ErrorThrowMode::Never,
                        "HipHop Warning: ");
   } else if (error_type == k_E_USER_NOTICE) {
     g_context->handleError(msg, error_type, true,
-                       ExecutionContext::NeverThrow,
+                       ExecutionContext::ErrorThrowMode::Never,
                        "HipHop Notice: ");
   } else if (error_type == k_E_USER_DEPRECATED) {
     g_context->handleError(msg, error_type, true,
-                       ExecutionContext::NeverThrow,
+                       ExecutionContext::ErrorThrowMode::Never,
                        "HipHop Deprecated: ");
   } else {
     return false;
@@ -192,6 +236,9 @@ bool f_trigger_error(CStrRef error_msg,
 bool f_user_error(CStrRef error_msg, int error_type /* = k_E_USER_NOTICE */) {
   return f_trigger_error(error_msg, error_type);
 }
+
+const int64_t k_DEBUG_BACKTRACE_PROVIDE_OBJECT = 1;
+const int64_t k_DEBUG_BACKTRACE_IGNORE_ARGS = 2;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,11 +36,11 @@ using namespace HPHP;
 FunctionStatement::FunctionStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  ModifierExpressionPtr modifiers, bool ref, const std::string &name,
- ExpressionListPtr params, const std::string &retTypeConstraint,
+ ExpressionListPtr params, TypeAnnotationPtr retTypeAnnotation,
  StatementListPtr stmt, int attr, const std::string &docComment,
  ExpressionListPtr attrList)
   : MethodStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(FunctionStatement),
-                    modifiers, ref, name, params, retTypeConstraint, stmt,
+                    modifiers, ref, name, params, retTypeAnnotation, stmt,
                     attr, docComment, attrList, false), m_ignored(false) {
 }
 
@@ -66,6 +66,7 @@ void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
       }
     }
   }
+
   // note it's important to add to scope, not a pushed FunctionContainer,
   // as a function may be declared inside a class's method, yet this function
   // is a global function, not a class method.
@@ -78,6 +79,33 @@ void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
 
   if (Option::PersistenceHook) {
     fs->setPersistent(Option::PersistenceHook(fs, scope));
+  }
+
+  if (fs->isNative()) {
+    if (getStmts()) {
+      parseTimeFatal(Compiler::InvalidAttribute,
+                     "Native functions must not have an implementation body");
+    }
+    if (m_params) {
+      int nParams = m_params->getCount();
+      for (int i = 0; i < nParams; ++i) {
+        auto param = dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+        if (!param->hasUserType()) {
+          parseTimeFatal(Compiler::InvalidAttribute,
+                         "Native function calls must have type hints "
+                         "on all args");
+        }
+      }
+    }
+    if (getReturnTypeConstraint().empty()) {
+      parseTimeFatal(Compiler::InvalidAttribute,
+                     "Native function %s() must have a return type hint",
+                     getOriginalName().c_str());
+    }
+  } else if (!getStmts()) {
+    parseTimeFatal(Compiler::InvalidAttribute,
+                   "Global function %s() must contain a body",
+                    getOriginalName().c_str());
   }
 }
 
@@ -109,9 +137,10 @@ void FunctionStatement::inferTypes(AnalysisResultPtr ar) {
 
 void FunctionStatement::outputPHPHeader(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
+  m_modifiers->outputPHP(cg, ar);
   cg_printf("function ");
   if (m_ref) cg_printf("&");
-  if (!ParserBase::IsClosureOrContinuationName(m_name)) {
+  if (!ParserBase::IsClosureName(m_name)) {
     cg_printf("%s", m_name.c_str());
   }
   cg_printf("(");

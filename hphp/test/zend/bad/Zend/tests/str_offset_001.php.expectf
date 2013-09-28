@@ -1,0 +1,20 @@
+HipHop Notice: %s
+string(0) ""
+string(1) "a"
+string(1) "b"
+string(1) "c"
+HipHop Notice: %s
+string(0) ""
+string(1) "b"
+HipHop Notice: %s
+string(0) ""
+HipHop Notice: %s
+string(0) ""
+string(1) "a"
+string(1) "b"
+string(1) "c"
+HipHop Notice: %s
+string(0) ""
+string(1) "b"
+HipHop Notice: %s
+string(0) ""

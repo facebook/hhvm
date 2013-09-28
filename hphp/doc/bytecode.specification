@@ -100,26 +100,27 @@ Values
 
 HHBC instructions may push and pop values on the current frame's evaluation
 stack and they may read and write values to the current frame's local
-variables. Values come in three flavors: cells, vars, and classrefs.
+variables. Values come in three flavors: cells, refs, and classrefs.
 
 A "cell" is a structure that contains a type identifier and either data (for
-non-refcounted types) or a reference to data (for refcounted types). When a
-cell containing a reference is duplicated, the new cell will point to the same
-data as the original cell. When a cell containing a reference is duplicated or
+non-refcounted types) or a pointer to data (for refcounted types). When a
+cell containing a pointer is duplicated, the new cell will point to the same
+data as the original cell. When a cell containing a pointer is duplicated or
 discarded, the execution engine is responsible for honoring the data's refcount
 logic.
 
-A "var" is a structure that contains a reference to a cell. When a var is
-duplicated, the new var will point to the same cell as the original var. When
-a var is duplicated or destroyed, the execution engine is responsible for
-honoring the cell's refcount logic.
+A "ref" is a structure that contains a pointer to a cell container. When a
+ref is duplicated, the new ref will point to the same container as the
+original ref. When a ref is duplicated or destroyed, the execution engine is
+responsible for honoring the containers's refcount logic.  When the container
+is destroyed, the cell it contains is also destroyed.
 
 A "classref" is a structure that contains a reference to a class. When a
 classref is pushed onto the stack or popped of the stack, no refcounting is
 required.
 
 Values on the evaluation stack may be any of the three flavors listed above.
-Values stored in local variables may only be cells or vars.
+Values stored in local variables may only be cells or refs.
 
 
 Functions
@@ -320,8 +321,8 @@ dispatcher to call the function.
 
 Calls to builtin functions may be optimized to avoid pusing an entry on the FPI
 stack if it is known that the builtin function does not need access to the call
-stack. In this case, the arguments to the builtin are passed with the BPass*
-instructions, and the builtin can be invoked with the FCallBuiltin instruction.
+stack. In this case, the arguments to the builtin are pushed on stack as Cells
+and Vars, and the builtin can be invoked with the FCallBuiltin instruction.
 Unless otherwise noted, subsequent references to FCall* instructions should be
 meant to refer to non-optimized FCall instructions, i.e. all FCall instructions
 other than FCallBuiltin.
@@ -529,7 +530,7 @@ parameters being passed.
 Flavor descriptors
 ------------------
 
-Any given value on the stack must either be a cell, var, or classref at run
+Any given value on the stack must either be a cell, ref, or classref at run
 time. However, at bytecode generation time the specific flavor of a value on
 the stack is not always known. HipHop bytecode uses symbols called "flavor
 descriptors" to precisely describe what is known at bytecode generation about
@@ -542,12 +543,12 @@ for each of the instruction's inputs.
 Here is a description of each flavor descriptor:
 
   C - cell; specifies that the value must be a cell at run time
-  V - var; specifies that the value must be a var at run time
+  V - ref; specifies that the value must be a ref at run time
   A - classref; specifies that the value must be a classref at run time
-  R - return value; specifies that the value may be a cell or a var at run
+  R - return value; specifies that the value may be a cell or a ref at run
         time; this flavor descriptor is used for return values from function
         calls
-  F - function argument; specifies that the value may be a cell or a var at run
+  F - function argument; specifies that the value may be a cell or a ref at run
         time; this flavor descriptor is used for parameter values that are
         about to be passed into a function
 
@@ -600,7 +601,7 @@ instruction must be empty.
 exactly one value and the flavor descriptor of the value must be cell.
 Likewise, before executing the RetV instruction, the evaluation stack must
 contain exactly one value and the flavor descriptor of the value must be the
-var. Finally, before executing the Unwind instruction, the evaluation stack
+ref. Finally, before executing the Unwind instruction, the evaluation stack
 must be empty.
 
 6) The code for the primary function body and fault funclets must be laid out
@@ -650,13 +651,14 @@ protected by a fault funclet that unsets i by calling IterFree or MIterFree so
 that when the unwinder or dispatcher pops the current frame, each iterator
 variable is uninitialized.
 
-13) The iterator variable referenced by IterInit* or MIterInit* must be in
-the uninitialized state when the instruction executes. An iterator variable
-referenced by IterNext* and IterFree must be in the "iter-initialized" state,
-and an iterator variable referenced by MIterNext* or MIterFree must be in the
-"miter-initialized" state. Note that IterInit* and MIterInit* conditionally
-initializes the iterator variable, and IterNext* and MIterNext* conditionally
-frees the iterator variable.
+13) The iterator variable referenced by IterInit* or MIterInit* or
+DecodeCufIter must be in the uninitialized state when the instruction
+executes. An iterator variable referenced by IterNext* and IterFree must be
+in the "iter-initialized" state, an iterator variable referenced by MIterNext*
+or MIterFree must be in the "miter-initialized" state, and an iterator variable
+referenced by FPushCufIter or CIterFree must be in the citer-initialized state.
+Note that IterInit* and MIterInit* conditionally initialize the iterator variable,
+and IterNext* and MIterNext* conditionally free the iterator variable.
 
 
 Instruction set
@@ -717,7 +719,10 @@ location descriptors is given below:
   S - static property; location is the static property whose class is given by
       a classref and whose name is given by value of a cell.
   C - cell; location is a temporary value given by a cell.
-  R - return value; location is a temporary value given by a cell or a var
+  R - return value; location is a temporary value given by a cell or a ref
+  H - $this; location is the $this pointer in the current frame. Must
+      only be used in a frame that is known to have a non-null $this
+      pointer; CheckThis is most commonly used to ensure this.
 
 There are several groups of similarly named instructions where the name of each
 instruction ends with a different location descriptor (for example, Set*). Each
@@ -754,7 +759,8 @@ number of cells from the stack. In most cases the immediate vector arguments
 are ordered such that the loc-desc comes first (deepest in the stack), with the
 last M-vector element last (shallowest in the stack). However, classrefs that
 are part of the BaseSC and BaseSL loc-desc inputs always come last (the cell
-input to BaseSC comes first though).
+input to BaseSC comes first though).  Instuctions accepting an immediate vector
+containing a list of iterators and iterator types use the notation "<iter-vec>".
 
 In addition to describing each instruction, this instruction set documentation
 also describes several operations that encapsulate fundamental, but non-trivial
@@ -796,27 +802,27 @@ Dup    [C:<T>]  ->  [C:<T> C:<T>]
 
 Box    [C:<T>]  ->  [V:<T>]
 
-  Box. Creates a new var, sets the new var to point at a copy of cell $1, and
-  pushes the var onto the stack.
+  Box. Creates a new ref, sets the new ref to point at a copy of cell $1, and
+  pushes the ref onto the stack.
 
 Unbox    [V:<T>]  ->  [C:<T>]
 
-  Unbox. Creates a copy of the cell that var $1 points to, and pushes the cell
+  Unbox. Creates a copy of the cell that ref $1 points to, and pushes the cell
   onto the stack.
 
 BoxR    [R:<T>]  ->  [V:<T>]
 
-  Box. If $1 is a var at run time, this instruction does nothing.
+  Box. If $1 is a ref at run time, this instruction does nothing.
 
-  If $1 is a cell at run time, this instruction creates a new var, sets the new
-  var to point at a copy of cell $1, and pushes the var onto the stack.
+  If $1 is a cell at run time, this instruction creates a new ref, sets the new
+  ref to point at a copy of cell $1, and pushes the ref onto the stack.
 
 UnboxR    [R:<T>]  ->  [C:<T>]
 
   Unbox. If $1 is a cell at run time, this instruction does nothing.
 
-  If $1 is a var at run time, this instruction creates a copy of the cell that
-  var $1 points to, and pushes the cell onto the stack.
+  If $1 is a ref at run time, this instruction creates a copy of the cell that
+  ref $1 points to, and pushes the cell onto the stack.
 
 
 2. Literal and constant instructions
@@ -844,11 +850,12 @@ NewArray    []  ->  [C:Arr]
 
   New array. Creates a new empty array and pushes it onto the stack.
 
-NewTuple <num elems>    [C..C]  ->  [C]
+NewPackedArray <num elems>    [C..C]  ->  [C]
 
-  New array. Creates a new array from the top %1 cells on the stack, pops those
-  cells, then pushes the new array onto the stack. Elements are implicitly
-  numbered from 0 to num elems - 1; $1 is at index 0, $2 is at 1, and so on.
+  New array. Creates a new array from the top %1 cells on the stack,
+  pops those cells, then pushes the new array onto the stack. Elements
+  are implicitly numbered from 0 to num elems - 1; $1 is at index 0,
+  $2 is at 1, and so on.  %1 must be greater than zero.
 
 AddElemC    [C C C]  ->  [C:Arr]
 
@@ -914,13 +921,13 @@ CnsU <litstr id> <litstr fallback>  []  ->  [C:Null|Bool|Int|Dbl|Str]
   Get constant. Identical to Cns except returns constant named %2 if the
   constant named %1 is undefined.
 
-ClsCns <litstr id>    [A]  ->  [C:Null|Bool|Int|Dbl|Str]
+ClsCns <litstr id>    [A]  ->  [C:Null|Bool|Int|Dbl|Static Str]
 
   Get class constant. This instruction pushes the value of the class constant
   named %1 from class $1 onto the stack. If there is no class constant named %1
   in class $1, this instruction throws a fatal error.
 
-ClsCnsD <litstr id> <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Str]
+ClsCnsD <litstr id> <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Static Str]
 
   Get class constant (direct). This instruction first checks if %2 matches the
   name of a defined class. If %2 does not match the name of a defined class,
@@ -946,6 +953,11 @@ Dir     []  ->  [C:Str]
 Concat    [C C]  ->  [C:Str]
 
   Concatenation (.). Pushes ((string)$2 . (string)$1) on the stack.
+
+Abs    [C] -> [C]
+
+  Absolute value.  Computes the absolute value of $1 and pushes the result onto
+  the stack.
 
 Add    [C:Arr C:Arr]  ->  [C:Arr]
        [C:<T2> C:<T1>]  ->  [C:Dbl]    (where T1 == Dbl || T2 == Dbl)
@@ -980,6 +992,15 @@ Mod    [C C]  ->  [C:Bool|Int]
 
   Modulus (%). Pushes ((int)$2 % (int)$1) onto the stack. This instruction
   never throws a fatal error.
+
+Sqrt   [C]    ->  [C:Null|Dbl]
+
+  Square root. Computes the square root of $1 and pushes the result onto
+  the stack. If $1 is not null, a bool, an int, a double, or a numeric
+  string, it raises a warning and pushes null onto the stack.
+
+  If $1 is a negative number, this instruction pushes a floating-point
+  value representing NAN onto the stack.
 
 Xor    [C C]  ->  [C:Bool]
 
@@ -1054,6 +1075,16 @@ Shr    [C C]  ->  [C:Int]
 
   Shift right (>>). Pushes ((int)$2 >> (int)$1) onto the stack. This
   instruction never throws a fatal error.
+
+Floor    [C]  ->  [C:Dbl]
+
+  Round $1 to nearest integer value not greater than $1.  Converts $1 to 
+  numeric as appropriate and then takes floor of resulting numeric value.
+
+Ceil    [C]  ->  [C:Dbl]
+
+  Round $1 to nearest integer value not less than $1.  Converts $1 to numeric
+  as appropriate and then takes ceil of resulting numeric value.
 
 CastBool    [C]  ->  [C:Bool]
 
@@ -1245,35 +1276,35 @@ CGetS    [C A]  ->  [C]
 
 VGetL <local variable id>    []  ->  [V]
 
-  Get local as var. This instruction boxes the local variable given by %1 if
-  necessary and pushes it onto the stack as a var. If the given local variable
+  Get local as ref. This instruction boxes the local variable given by %1 if
+  necessary and pushes it onto the stack as a ref. If the given local variable
   is not defined, this instruction defines it, sets it to null, boxes it, and
-  pushes a the value of the local variable onto the stack as a var.
+  pushes a the value of the local variable onto the stack as a ref.
 
 VGetN    [C]  ->  [V]
 
-  Get local as var. This instruction first computes x = (string)$1. Next, this
+  Get local as ref. This instruction first computes x = (string)$1. Next, this
   instruction boxes the local variable named x (if the local is a cell) and
-  pushes its value onto the stack as a var. If there is no local variable
+  pushes its value onto the stack as a ref. If there is no local variable
   defined named x, this instruction defines a local variable named x, sets it
   to null, boxes it, and pushes the value of the local variable onto the stack
-  as a var.
+  as a ref.
 
 VGetG    [C]  ->  [V]
 
-  Get global as var. This instruction first computes x = (string)$1. Next, this
+  Get global as ref. This instruction first computes x = (string)$1. Next, this
   instruction boxes the global variable named x (if the local is a cell) and
-  pushes its value onto the stack as a var. If there is no global variable
+  pushes its value onto the stack as a ref. If there is no global variable
   defined named x, this instruction defines a global variable named x, sets it
   to null, boxes it, and pushes the value of the global variable onto the stack
-  as a var.
+  as a ref.
 
 VGetS    [C A]  ->  [V]
 
-  Get static property as var. This instruction first checks if class $1 has a
+  Get static property as ref. This instruction first checks if class $1 has a
   visible and accessible static property named (string)$2. If it doesn't, this
   instruction throws a fatal error. Otherwise, this instruction boxes the
-  static property and pushes it onto the stack as a var.
+  static property and pushes it onto the stack as a ref.
 
 AGetC                        [C]  ->  [A]
 AGetL <local variable id>    []  ->  [A]
@@ -1703,6 +1734,17 @@ FPushCtorD <num params> <litstr id>    []  ->  [C]
   passed (given by %1) and a reference to the FPI structure for the constructor
   for class x.
 
+DecodeCufIter <iterator id> [C] -> [C]
+  This instruction looks up $1 as a callable, and writes enough information
+  to iterator %1 for FPushDecoded to be able to push an actrec, as if it had
+  been given the callable.
+  If the function is successfully decoded, pushes true, otherwise, pushes
+  false, and sets up iter to call a function that does nothing, and returns
+  Null. No warning is raised.
+
+FPushCufIter <num params> <iterator id> [] -> []
+  FPI push the result of a previous DecodeCufIter. No warning is raised.
+
 FPushCuf <num params>     [C]   ->  []
 FPushCufF <num params>    [C]   ->  []
 
@@ -1723,12 +1765,12 @@ FPushCufSafe <num params> [C C] ->  [C C]
 CufSafeArray   [C C R] -> [C]
 
   Pops 3 elements from the stack, and pushes array($2, $1), preserving
-  references.
+  refs.
 
 CufSafeReturn  [C C R] -> [R]
 
   Pops 3 elements from the stack, and pushes $2 ? $1 : $3, preserving
-  references.
+  refs.
 
 FPassC <param id>     [C]  ->  [F]
 FPassCW <param id>    [C]  ->  [F]
@@ -1746,7 +1788,7 @@ FPassV <param id>    [V]  ->  [F]
 
   FPI pass parameter. If parameter %1 is pass by value, this instruction will
   unbox $1 and push it onto the stack as a cell. If parameter %1 is pass by
-  reference, this instruction will push $1 onto the stack as a var.
+  reference, this instruction will push $1 onto the stack as a ref.
 
 FPassR <param id>    [R]  ->  [F]
 
@@ -1794,19 +1836,7 @@ FCallArray    [F]  ->  [R]
   call the callee. When the callee returns, it will transfer the return value
   onto the caller's evaluation stack using the R flavor.
 
-BPassC <param id>    [C]  ->  [F]
-
-  Pass parameter to builtin call. This opcode is expected to be emitted
-  only when parameter %1 is pass by value. The instruction pushes $1
-  onto the stack as a cell.
-
-BPassV <param id>    [V]  ->  [F]
-
-  Pass parameter to builtin call. This opcode is expected to be emitted
-  only when parameter %1 is pass by reference. The instruction pushes $1
-  onto the stack as a var.
-
-FCallBuiltin  <total params> <passed params> <litstr id> [F..F]  -> [R]
+FCallBuiltin  <total params> <passed params> <litstr id> [C|V..C|V]  -> [R]
 
   Optimized builtin call without an ActRec. This instruction attempts to
   lookup a builtin function named %3. If no function named %3 is defined,
@@ -1826,32 +1856,32 @@ instructions. Operations are not considered instructions; they do not have
 opcodes associated with them.
 
 Operations can produce and consume intermediate values called "bases". A "base"
-is a structure that contains either a cell or a var or a reference to a memory
-location that is occupied by a cell or a var. Bases are never pushed onto the
+is a structure that contains either a cell or a ref or a reference to a memory
+location that is occupied by a cell or a ref. Bases are never pushed onto the
 evaluation stack.
 
 For operations that create a base, the operation descriptions specify whether
 the base created "contains" a value or "references" a location. In the former
-case, the base created contains a cell or a var. In the latter case, the base
-created contains a reference to a memory location occupied by a cell or a var.
+case, the base created contains a cell or a ref. In the latter case, the base
+created contains a reference to a memory location occupied by a cell or a ref.
 
-When a base that contains a cell is destroyed, if the cell references data then
+When a base that contains a cell is destroyed, if the cell points to data then
 the execution engine is responsible for honoring the data's refcount logic.
-Likewise when a base that contains a var is destroyed, the execution engine is
-responsible for honoring the refcount logic of the cell referenced by the var.
-When a base that contains a reference to a memory location occupied by a cell
-or a var is destroyed, no refcounting is required.
+Likewise when a base that contains a ref is destroyed, the execution engine is
+responsible for honoring the refcount logic of the cell container pointed to by
+the ref. When a base that contains a reference to a memory location occupied
+by a cell or a ref is destroyed, no refcounting is required.
 
 Some operations that take a base as input can modify that base as part of the
 work performed by the operation. Such operations are said to "set" the base to
 a new value. When a base that contains a cell or a reference to a memory
 location occupied by a cell is set to a new value, the new value overwrites the
 previous value contained in the cell (honoring the data refcount logic if the
-previous value was a refcounted type). When a base that contains a var or a
-reference to a memory location occupied by a var is set to the new value, the
-new value is written into the cell referenced by the var, overwriting the
-previous value contained in that cell (honoring the data refcount logic if the
-previous value was a refcounted type). Note that for bases that contain a
+previous value was a refcounted type). When a base that contains a ref or a
+reference to a memory location occupied by a ref is set to the new value, the
+new value is written into the cell container referenced by the ref, overwriting
+the previous cell in that container (honoring the data refcount logic if the
+previous cell was a refcounted type). Note that for bases that contain a
 reference to a memory location, "setting" the base does not change which memory
 location the base references.
 
@@ -1972,6 +2002,11 @@ BaseSL <local variable id>    [A]  ->  [B]
   class $1 has an accessible property named y. If it does, this operation
   outputs a base that references the static property. Otherwise, this operation
   throws a fatal error.
+
+BaseH     []  ->  [B]
+
+  Get base from $this. This operation assumes that the current frame contains a
+  valid $this pointer and outputs a base containing the object in $this.
 
 ElemC                        [C B]  ->  [B]
 ElemL <local variable id>    [B]  ->  [B]
@@ -2333,7 +2368,7 @@ CGetElemL <local variable id>    [B]  ->  [C]
 VGetElemC                        [C B]  ->  [V]
 VGetElemL <local variable id>    [B]  ->  [V]
 
-  Get element as var.
+  Get element as ref.
 
   These instructions first load a value into x and a base into y, as
   given by the following table:
@@ -2344,21 +2379,21 @@ VGetElemL <local variable id>    [B]  ->  [V]
         VGetElemL  | %1 | $1
 
   If y is an array, this operation retrieves the element at index x from
-  array y and pushes it onto the stack as a var. If there is no element at
+  array y and pushes it onto the stack as a ref. If there is no element at
   index x, this operation creates a new element at index x, and pushes it
-  onto the stack as a var.
+  onto the stack as a ref.
 
   If y is an object that implements the ArrayAccess interface, this operation
-  pushes y->offsetGet(x) onto the stack as a var.
+  pushes y->offsetGet(x) onto the stack as a ref.
 
   If y is a non-empty string or an object that does not implement the
   ArrayAccess interface, this operation throws a fatal error.
 
   If y is null, false, or the empty string, this operation sets y to a new
   empty array. Then this operation retrieves the element at index x from array
-  y and pushes it onto the stack as a var. If there is no element at index x,
+  y and pushes it onto the stack as a ref. If there is no element at index x,
   this operation creates a new element at index x, and pushes it onto the
-  stack as a var.
+  stack as a ref.
 
   If y is true, integer, or double, this operation raises a warning and
   pushes null onto the stack.
@@ -2567,12 +2602,12 @@ BindElemL <local variable id>    [V B]  ->  [V]
   referred to by %1.
 
   If $1 is an array, this operation executes $1[x] =& $2 and pushes $2
-  onto the stack as a var.
+  onto the stack as a ref.
 
   If $1 is an object, this operation throws a fatal error.
 
   If $1 is null, false, or the empty string, this operation sets $1 to a new
-  empty array, executes $1[x] =& $2, and pushes $2 onto the stack as a var.
+  empty array, executes $1[x] =& $2, and pushes $2 onto the stack as a ref.
 
   If $1 is a non-empty string, this operation throws a fatal error.
 
@@ -2606,20 +2641,20 @@ UnsetElemL <local variable id>    [B]  ->  []
 
 VGetNewElem    [B]  ->  [V]
 
-  Get new element as var.
+  Get new element as ref.
 
   If $1 is an array, this operation creates a new element with the next
-  available numeric key in array $1 and pushes it onto the stack as a var.
+  available numeric key in array $1 and pushes it onto the stack as a ref.
 
   If $1 is an object that implements the ArrayAccess interface, this operation
-  pushes $1->offsetGet($2) onto the stack as a var.
+  pushes $1->offsetGet($2) onto the stack as a ref.
 
   If $1 is a non-empty string or an object that does not implement the
   ArrayAccess interface, this operation throws a fatal error.
 
   If $1 is null, false, or the empty string, this operation first sets $1 to a
   new empty array. Then it creates a new element with the next available
-  numeric key in array $1 and pushes it onto the stack as a var.
+  numeric key in array $1 and pushes it onto the stack as a ref.
 
   If $1 is true, integer, or double, this operation raises a warning and
   pushes null onto the stack.
@@ -2730,7 +2765,7 @@ CGetPropL <local variable id>    [B]  ->  [C]
 VGetPropC                        [C B]  ->  [V]
 VGetPropL <local variable id>    [B]  ->  [V]
 
-  Get property as var.
+  Get property as ref.
 
   These instructions first load a value into x and a base into y, as
   given by the following table:
@@ -2743,10 +2778,10 @@ VGetPropL <local variable id>    [B]  ->  [V]
   If y is an object that does not have an eligible __get method, this
   operation first checks if y has a visible property named x. If it
   does not, this operation will create a new property named x and push
-  it onto the stack as a var. Otherwise this operation continues to
+  it onto the stack as a ref. Otherwise this operation continues to
   check if the property named x is accessible. If it the property
   named x is accessible this operation pushes it onto the stack as a
-  var, otherwise this operation throws a fatal error.
+  ref, otherwise this operation throws a fatal error.
 
   If y is an object has an eligible __get method, this operation
   checks if y has a visible and accessible property named x. If it
@@ -3075,10 +3110,11 @@ CGetM <loc-desc/M-vector>    [C..C]  ->  [C]
     GL         | BaseGLW
     SC         | BaseSC
     SL         | BaseSL
+    H          | BaseH
 
 VGetM <loc-desc/M-vector>    [C..C]  ->  [V]
 
-  Get member as var.
+  Get member as ref.
 
     location     Base*      member   intermediate   final
     descriptor   operation  code     operation      operation
@@ -3092,6 +3128,7 @@ VGetM <loc-desc/M-vector>    [C..C]  ->  [V]
     GL         | BaseGLD
     SC         | BaseSC
     SL         | BaseSL
+    H          | BaseH
 
 FPassM <param id> <loc-desc/M-vector>    [C..C]  ->  [F]
 
@@ -3115,6 +3152,7 @@ IssetM <loc-desc/M-vector>    [C..C]  ->  [C:Bool]
     GL         | BaseGL
     SC         | BaseSC
     SL         | BaseSL
+    H          | BaseH
 
 EmptyM <loc-desc/M-vector>    [C..C]  ->  [C:Bool]
 
@@ -3132,6 +3170,7 @@ EmptyM <loc-desc/M-vector>    [C..C]  ->  [C:Bool]
     GL         | BaseGL
     SC         | BaseSC
     SL         | BaseSL
+    H          | BaseH
 
 SetM <loc-desc/M-vector>    [C..C C]  ->  [C]
 
@@ -3149,6 +3188,43 @@ SetM <loc-desc/M-vector>    [C..C C]  ->  [C]
     GL         | BaseGLD
     SC         | BaseSC
     SL         | BaseSL
+    H          | BaseH
+
+SetWithRefLM <loc-desc/M-vector> <local variable id> [C..C] -> []
+
+  Set member preserving the reffiness of the local.
+
+    location     Base*      member   intermediate   final
+    descriptor   operation  code     operation      operation
+    -----------+----------  -------+--------------+-----------
+    C          | BaseC      EC     | ElemCD       | SetWithRefElemC
+    R          | BaseR      PC     | PropCD       | SetPropC
+    L          | BaseLD     EL     | ElemLD       | SetWithRefElemL
+    NC         | BaseNCD    PL     | PropLD       | SetPropL
+    NL         | BaseNLD    W      | NewElem      | SetWithRefNewElem
+    GC         | BaseGCD
+    GL         | BaseGLD
+    SC         | BaseSC
+    SL         | BaseSL
+    H          | BaseH
+
+SetWithRefRM <loc-desc/M-vector> [C..C R] -> []
+
+  Set member preserving the reffiness of the stack element.
+
+    location     Base*      member   intermediate   final
+    descriptor   operation  code     operation      operation
+    -----------+----------  -------+--------------+-----------
+    C          | BaseC      EC     | ElemCD       | SetWithRefElemC
+    R          | BaseR      PC     | PropCD       | SetPropC
+    L          | BaseLD     EL     | ElemLD       | SetWithRefElemL
+    NC         | BaseNCD    PL     | PropLD       | SetPropL
+    NL         | BaseNLD    W      | NewElem      | SetWithRefNewElem
+    GC         | BaseGCD
+    GL         | BaseGLD
+    SC         | BaseSC
+    SL         | BaseSL
+    H          | BaseH
 
 SetOpM <op> <loc-desc/M-vector>    [C..C C]  ->  [C]
 
@@ -3166,6 +3242,7 @@ SetOpM <op> <loc-desc/M-vector>    [C..C C]  ->  [C]
     GL         | BaseGLWD
     SC         | BaseSC
     SL         | BaseSL
+    H          | BaseH
 
 IncDecM <op> <loc-desc/M-vector>    [C..C]  ->  [C]
 
@@ -3183,6 +3260,7 @@ IncDecM <op> <loc-desc/M-vector>    [C..C]  ->  [C]
     GL         | BaseGLWD
     SC         | BaseSC
     SL         | BaseSL
+    H          | BaseH
 
 BindM <loc-desc/M-vector>    [C..C V]  ->  [V]
 
@@ -3200,6 +3278,7 @@ BindM <loc-desc/M-vector>    [C..C V]  ->  [V]
     GL         | BaseGLD
     SC         | BaseSC
     SL         | BaseSL
+    H          | BaseH
 
 UnsetM <loc-desc/M-vector>    [C..C]  ->  []
 
@@ -3217,6 +3296,7 @@ UnsetM <loc-desc/M-vector>    [C..C]  ->  []
     GL         | BaseGL
     SC         | BaseSC
     SL         | BaseSL
+    H          | BaseH
 
 
 11. Iterator instructions
@@ -3224,6 +3304,8 @@ UnsetM <loc-desc/M-vector>    [C..C]  ->  []
 
 IterInit  <iterator id> <rel offset> <local id>                [C]  ->  []
 IterInitK <iterator id> <rel offset> <local id> <local id>     [C]  ->  []
+WIterInit  <iterator id> <rel offset> <local id>               [C]  ->  []
+WIterInitK <iterator id> <rel offset> <local id> <local id>    [C]  ->  []
 
   Initialize iterator. If $1 is an array, these instructions create an array
   iterator, rewind the array iterator to point to the beginning of the array,
@@ -3264,8 +3346,9 @@ IterInitK <iterator id> <rel offset> <local id> <local id>     [C]  ->  []
   transfer control to the location specified by %2.
 
   If the iterator specified by %1 is a non-mutable array iterator or an
-  extension class iterator, these instructions store a copy of the current
-  value in %3 as a cell.
+  extension class iterator, IterInit and IterInitK store a copy of the current
+  value in %3 as a cell; WIterInit and WIterInitK will store a reference
+  if the current element is a reference, or a value otherwise in %3
 
   If the iterator specified by %1 is a user class iterator for object $x, these
   instructions store the return value of $x->current() in %3 as a cell.
@@ -3315,10 +3398,10 @@ MIterInitK <iterator id> <rel offset> <local id> <local id>    [V]  ->  []
   transfer control to the location specified by %2.
 
   If the iterator specified by %1 is a mutable array iterator, these
-  instructions store the current value in %3 as a var.
+  instructions store the current value in %3 as a ref.
 
   If the iterator specified by %1 is a mutable default class iterator, these
-  instructions store the current property in %3 as a var.
+  instructions store the current property in %3 as a ref.
 
   For the MIterInitK version, the following also happens:
 
@@ -3331,6 +3414,8 @@ MIterInitK <iterator id> <rel offset> <local id> <local id>    [V]  ->  []
 
 IterNext  <iterator id> <rel offset> <local id>               []  ->  []
 IterNextK <iterator id> <rel offset> <local id> <local id>    []  ->  []
+WIterNext  <iterator id> <rel offset> <local id>              []  ->  []
+WIterNextK <iterator id> <rel offset> <local id> <local id>   []  ->  []
 
   Iterator next. If the specified iterator is a non-mutable array iterator
   or an extension class iterator, advance the iterator to point to the next
@@ -3353,8 +3438,10 @@ IterNextK <iterator id> <rel offset> <local id> <local id>    []  ->  []
   If the specified iterator is not at the end, retrieve the key and value:
 
   If the iterator specified by %1 is a non-mutable array iterator or an
-  extension class iterator, these instructions store a copy of the new current
-  value in %3 as a cell.
+  extension class iterator, IterNext and IterNextK store a copy of the new current
+  value in %3 as a cell; WIterNext and WIterNextK store a reference to the
+  new current value in %3 if the current value is a reference, otherwise
+  they store the new current value in %3 as a cell.
 
   If the iterator specified by %1 is a user class iterator for object $x, these
   instructions store the return value of $x->current() in %3 as a cell.
@@ -3394,10 +3481,10 @@ MIterNextK <iterator id> <rel offset> <local id> <local id>    []  ->  []
   If the specified iterator is not at the end, retrieve the key and value:
 
   If the iterator specified by %1 is a mutable array iterator, these
-  instructions store the new current value in %3 as a var.
+  instructions store the new current value in %3 as a ref.
 
   If the iterator specified by %1 is a mutable default class iterator, these
-  instructions store the new current property in %3 as a var.
+  instructions store the new current property in %3 as a ref.
 
   For the MIterNextK version, the following also happens:
 
@@ -3421,6 +3508,19 @@ MIterFree <iterator id>    []  ->  []
   variable. Typically an iterator gets freed by MIterNext*, so MIterFree is
   only needed for guarding against exceptions and implementing break and
   return control flow statements inside iterator loops.
+
+CIterFree <iterator id>    []  ->  []
+
+  Cuf iterator free. This instruction frees the specified iterator
+  variable.
+
+IterBreak <iter-vec> <rel offset>   []  ->  []
+
+  Iterator break.  Frees vectors in %1 in left to right order then transfers 
+  control to the locaton specified by %2.  Surprise checks are performed 
+  before iterators are freed so that in the event of an exception iterators
+  are not double freed.  Note that as with normal jumps surprise checks will
+  only be performed if %2 is negative.
 
 
 12. Include, eval, and define instructions
@@ -3533,7 +3633,8 @@ InitThisLoc <local variable id>    []  ->  []
 
   Initialize this local variable. This instruction checks the current instance,
   and if it is not null this instruction stores it to the specified local
-  variable. If the current instance is null, this instruction does nothing.
+  variable. If the current instance is null, or if this bytecode appears in
+  a function body that is not a class method, this instruction does nothing.
 
 StaticLoc <local variable id> <litstr id>    []  ->  [C:Bool]
 
@@ -3552,6 +3653,8 @@ StaticLocInit <local variable id> <litstr id>    [C]  ->  []
   local variable %1. Otherwise, this instruction binds the static variable to
   the local variable, assigns $1 to the local variable, and marks the static
   variable as initialized.
+
+  The cell in $1 must not be a reference counted type.
 
 Catch    []  ->  [C:Obj]
 
@@ -3618,56 +3721,67 @@ AKExists    [C C] -> [C:Bool]
   or object, and raises a warning if $2 is not a string, integer, or
   null.
 
-CreateCl <num args> <class name>  [F..F]  ->  [C]
+CreateCl <num args> <class name>  [C|V..C|V]  ->  [C]
 
   Creates an instance of <class name> and pushes it on the stack.  The
   class named by %2 must be a subclass of "Closure", and must be
   defined at the point of the CreateCl opcode, or the behavior is
   undefined.
 
+ArrayIdx    [C C C] -> [C]
+
+  Checks if array in $3 contains key in $2 and pushes the result onto the stack
+  if found. Otherwise, $1 is pushed onto the stack. A fatal error will be
+  thrown if $3 is not an array.
 
 14. Continuation creation and execution
 ---------------------------------------
 
-CreateCont <getargs> <function name>    []  ->  [C]
+CreateCont <function name>    []  ->  [C]
 
-  Creates a GenericContinuation object and pushes it on the stack. The
-  Continuation will capture all defined local variables in the current
-  function, and if the <getargs> immediate is nonzero it will also store the
-  result of func_get_args(). The Continuation will store a reference to the
-  function named by the string immediate to be used as its body.
+  Creates a Continuation object and pushes it on the stack. The Continuation
+  will capture all defined local variables in the current function. The
+  Continuation will store a reference to the function named by the string
+  immediate to be used as its body.
 
-ContEnter []  ->  []
+CreateAsync <function name> <label id> <number of iterators>   [C]  ->  [C]
+
+  Analogy of CreateCont for async functions. Creates a Continuation object, 
+  updates its label with <label id> immediate and stores a value from the stack 
+  to its m_value field. Unlike CreateCont, it also copies the first 
+  <number of iterators> iterators into the continuation frame.
+
+ContEnter [C]  ->  []
 
   This instruction may only appear in non-static methods of the Continuation
   class. It transfers control flow to the beginning of the continuation body
-  associated with the $this object of the Continuation object.
+  associated with the $this object of the Continuation object. The value on the
+  stack is sent to the Continuation to be retrieved by UnpackCont.
 
-ContExit    []  ->  []
+ContSuspend  <label id>   [C]  ->  []
 
-  This instruction may only appear in continuation bodies. It transfers control
-  flow to the caller of the continuation body, which must be a non-static method
-  of the Continuation class.
+  Suspend continuation. This instruction may only appear in continuation bodies.
+  Packs all defined local variables into the Continuation object in local 0.
+  Store $1 in the continuation as the result of the current iteration and
+  set the continuation's label to <label id>. Transfer control flow to the
+  caller of the continuation body, which must be a non-static method of the
+  Continuation class.
 
-UnpackCont    []  ->  [C:Int]
+ContSuspendK  <label id>    [C C]  ->  []
+
+  Suspend continuation. This instruction may only appear in continuation bodies.
+  Packs all defined local variables into the Continuation object in local 0.
+  Store $1 in the continuation as the result of the current iteration,
+  store $2 as the key of the current iteration, and set the continuation's label
+  to <label id>. Transfer control flow to the caller of the continuation body,
+  which must be a non-static method of the Continuation class.
+
+UnpackCont    []  ->  [C:Int C]
 
   Unpack continuation. Unpacks variables from the Continuation object in local
-  0 into the containing environment. The current label of the continuation is
-  pushed on the stack.
-
-PackCont <label id>    [C]  ->  []
-
-  Pack continuation. Packs all defined local variables into the Continuation
-  object in local 0. The value on the top of the stack is stored in the
-  continuation as the result of the current iteration and the continuation's
-  label is set to <label id>.
-
-ContReceive    []  ->  [C]
-
-  Receive continuation value. If the continuation in local 0 has a pending
-  exception, this instruction will throw that exception. Otherwise, the value
-  sent to the continuation will be pushed on the stack. The value will be no
-  longer referenced by the Continuation object.
+  0 into the containing environment. The stack will contain the current label of
+  the continuation in $1 and the value sent to the continuation in $2. The value
+  will be no longer referenced by the Continuation object.
 
 ContRetC    [C]  ->  []
 
@@ -3676,33 +3790,30 @@ ContRetC    [C]  ->  []
   which must be a non-static method of the Continuation class. Further attempts
   to iterate it will fail.
 
-ContNext    []  ->  []
+ContCheck <check started>    []  ->  []
 
-  Prepare continuation for iteration. $this must be a Continuation
-  object. If the continuation is finished or already running, an exception
-  will be thrown.
-
-ContSend    []  ->  []
-
-  Prepare continuation to receive a value. $this must be a Continuation
-  object. If the continuation is finished or already running, an exception will
-  be thrown. Otherwise, the value in local 0 is stored in the continuation.
+  Check whether continuation can be iterated. $this must be a Continuation
+  object. If the continuation is finished, already running, or not yet started
+  and <check started> is enabled, an exception will be thrown.
 
 ContRaise    []  ->  []
 
   Prepare continuation to receive a thrown exception. $this must be a
-  Continuation object. If the continuation is finished or already running, an
-  exception will be thrown. Otherwise, the exception in local 0 is stored in
-  the continuation.
+  Continuation object that passed ContCheck<true> check.
 
 ContValid    []  ->  [C:Bool]
 
   Check continuation validity. $this must be a Continuation object. Pushes true
   onto the stack if the continuation can be iterated further, false otherwise.
 
+ContKey    []  ->  [C]
+
+  Get continuation key. $this must be a Continuation object. Pushes the most
+  recently yielded key from the continuation onto the stack.
+
 ContCurrent    []  ->  [C]
 
-  Get continuation value. $this must be a Contination object. Pushes the most
+  Get continuation value. $this must be a Continuation object. Pushes the most
   recently yielded value from the continuation onto the stack.
 
 ContStopped    []  ->  []
@@ -3714,7 +3825,6 @@ ContHandle    [C]  ->  []
   Handle exception from continuation body. $this must be a Continuation
   object. Marks the continuation as no longer running and finished and rethrows
   the exception on the top of the stack.
-
 
 Basic statement transformations
 -------------------------------
@@ -3736,8 +3846,8 @@ ensure that the iterator variable is freed when a foreach loop exits abnormally
 through an exception.
 
 Simple break statements and continue statements are implemented using the Jmp*,
-IterFree, and MIterFree instructions. Dynamic break is implemented using an
-unnamed local (to store the 'break count') and a chain of basic blocks, where
+IterFree, MIterFree and CIterFree instructions. Dynamic break is implemented using
+an unnamed local (to store the 'break count') and a chain of basic blocks, where
 each block decrements the unnamed local variable and compares it with 0, and
 then decides where to jump next.
 
@@ -4360,4 +4470,34 @@ class B extends A { public static function f() { return parent::x; } }
 
 ClsCnsD "x" "A"
 RetC
+
+foreach ($arr1 as $v1) {
+  foreach($arr2 as $v2) {
+    if ($v1 == $v2) {
+      break 2;
+    }
+  }
+}
+
+CGetL $arr1
+IterInit 0 endFor1 $v1
+startFor1:
+
+CGetL $arr2
+IterInit 1 endFor2 $v2
+startFor2:
+
+CGetL $v1
+CGetL $v2
+Eq
+
+JmpNZ notEqual
+IterBreak <(Iter) 1, (Iter) 2> endFor1
+notEqual:
+
+IterNext 1 startFor2 $v2
+endFor2:
+
+IterNext 1 startFor1 $v1
+endFor1:
 

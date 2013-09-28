@@ -1,0 +1,43 @@
+*** Testing tempnam() with obscure prefixes ***
+-- Iteration 0 --
+File name is => %s/%s
+File permissions are => 100600
+File created in => directory specified
+-- Iteration 1 --
+File name is => %s/%s
+File permissions are => 100600
+File created in => directory specified
+-- Iteration 2 --
+File name is => %s/%s
+File permissions are => 100600
+File created in => directory specified
+-- Iteration 3 --
+File name is => %s/%s
+File permissions are => 100600
+File created in => directory specified
+-- Iteration 4 --
+File name is => %s/%s
+File permissions are => 100600
+File created in => directory specified
+-- Iteration 5 --
+File name is => %s/%s
+File permissions are => 100600
+File created in => directory specified
+-- Iteration 6 --
+File name is => %s/%s
+File permissions are => 100600
+File created in => directory specified
+-- Iteration 7 --
+HipHop Warning: %s
+-- File is not created --
+HipHop Warning: %s
+-- Iteration 8 --
+File name is => %s/dir%s
+File permissions are => 100600
+File created in => directory specified
+-- Iteration 9 --
+File name is => %s/php%s
+File permissions are => 100600
+File created in => directory specified
+
+*** Done ***

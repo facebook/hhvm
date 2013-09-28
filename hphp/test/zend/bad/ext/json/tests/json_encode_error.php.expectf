@@ -1,0 +1,9 @@
+*** Testing json_encode() : error conditions ***
+
+-- Testing json_encode() function with no arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing json_encode() function with more than expected no. of arguments --
+string(5) ""abc""
+===Done===

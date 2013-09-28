@@ -1,7 +1,8 @@
 <?php
 
-
-function error_handler($errno, $errstr) { echo "Error\n"; }
+function error_handler($errno, $errstr) {
+ echo "Error\n";
+ }
 class f {
   public $bar = 'hi there';
 }

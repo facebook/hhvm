@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,9 +16,9 @@
 */
 
 #include "hphp/runtime/ext/ext_url.h"
-#include "hphp/runtime/base/string_util.h"
-#include "hphp/runtime/base/zend/zend_url.h"
-#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/zend-url.h"
+#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/ext/ext_curl.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_file.h"
@@ -46,10 +46,10 @@ String f_base64_encode(CStrRef data) {
 
 Variant f_get_headers(CStrRef url, int format /* = 0 */) {
   Variant c = f_curl_init();
-  f_curl_setopt(c, k_CURLOPT_URL, url);
-  f_curl_setopt(c, k_CURLOPT_RETURNTRANSFER, true);
-  f_curl_setopt(c, k_CURLOPT_HEADER, 1);
-  Variant res = f_curl_exec(c);
+  f_curl_setopt(c.toResource(), k_CURLOPT_URL, url);
+  f_curl_setopt(c.toResource(), k_CURLOPT_RETURNTRANSFER, true);
+  f_curl_setopt(c.toResource(), k_CURLOPT_HEADER, 1);
+  Variant res = f_curl_exec(c.toResource());
   if (same(res, false)) {
     return false;
   }
@@ -60,14 +60,14 @@ Variant f_get_headers(CStrRef url, int format /* = 0 */) {
     response = response.substr(0, pos);
   }
 
-  Array ret = f_explode("\r\n", response);
+  Array ret = f_explode("\r\n", response).toArray();
   if (!format) {
     return ret;
   }
 
   Array assoc;
   for (ArrayIter iter(ret); iter; ++iter) {
-    Array tokens = f_explode(": ", iter.second(), 2);
+    Array tokens = f_explode(": ", iter.second(), 2).toArray();
     if (tokens.size() == 2) {
       assoc.set(tokens[0], tokens[1]);
     } else {
@@ -102,8 +102,8 @@ Array f_get_meta_tags(CStrRef filename, bool use_include_path /* = false */) {
                    f, ref(matches), k_PREG_SET_ORDER);
 
   Array ret = Array::Create();
-  for (ArrayIter iter(matches); iter; ++iter) {
-    Array pair = iter.second();
+  for (ArrayIter iter(matches.toArray()); iter; ++iter) {
+    Array pair = iter.second().toArray();
     ret.set(normalize_variable_name(pair[1].toString()), pair[2]);
   }
   return ret;
@@ -121,7 +121,15 @@ static void url_encode_array(StringBuffer &ret, CVarRef varr,
     return; // recursive
   }
 
-  Array arr = varr.toArray();
+  Array arr;
+  if (varr.is(KindOfObject)) {
+    Object o = varr.toObject();
+    arr = (o.objectForCall()->isCollection()) ?
+      varr.toArray() :
+      f_get_object_vars(o).toArray();
+  } else {
+    arr = varr.toArray();
+  }
 
   for (ArrayIter iter(arr); iter; ++iter) {
     Variant data = iter.second();
@@ -139,37 +147,39 @@ static void url_encode_array(StringBuffer &ret, CVarRef varr,
       }
       StringBuffer new_prefix(key_prefix.size() + num_prefix.size() +
                               encoded.size() + key_suffix.size() + 4);
-      new_prefix += key_prefix;
-      if (numeric) new_prefix += num_prefix;
-      new_prefix += encoded;
-      new_prefix += key_suffix;
-      new_prefix += "%5B";
+      new_prefix.append(key_prefix);
+      if (numeric) new_prefix.append(num_prefix);
+      new_prefix.append(encoded);
+      new_prefix.append(key_suffix);
+      new_prefix.append("%5B");
       url_encode_array(ret, data, seen_arrs, String(),
-                       new_prefix.detach(), String("%5D", AttachLiteral),
+                       new_prefix.detach(), String("%5D", CopyString),
                        arg_sep);
     } else {
       if (!ret.empty()) {
-        ret += arg_sep;
+        ret.append(arg_sep);
       }
-      ret += key_prefix;
+      ret.append(key_prefix);
       if (numeric) {
-        ret += num_prefix;
-        ret += key;
+        ret.append(num_prefix);
+        ret.append(key);
       } else {
-        ret += StringUtil::UrlEncode(key);
+        ret.append(StringUtil::UrlEncode(key));
       }
-      ret += key_suffix;
-      ret += "=";
+      ret.append(key_suffix);
+      ret.append("=");
       if (data.isInteger() || data.is(KindOfBoolean)) {
-        ret += String(data.toInt64());
+        ret.append(String(data.toInt64()));
       } else if (data.is(KindOfDouble)) {
-        ret += String(data.toDouble());
+        ret.append(String(data.toDouble()));
       } else {
-        ret += StringUtil::UrlEncode(data.toString());
+        ret.append(StringUtil::UrlEncode(data.toString()));
       }
     }
   }
 }
+
+const StaticString s_arg_separator_output("arg_separator.output");
 
 Variant f_http_build_query(CVarRef formdata,
                            CStrRef numeric_prefix /* = null_string */,
@@ -181,7 +191,7 @@ Variant f_http_build_query(CVarRef formdata,
 
   String arg_sep;
   if (arg_separator.isNull()) {
-    arg_sep = f_ini_get("arg_separator.output");
+    arg_sep = f_ini_get(s_arg_separator_output);
   } else {
     arg_sep = arg_separator;
   }
@@ -195,14 +205,15 @@ Variant f_http_build_query(CVarRef formdata,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static const StaticString s_scheme("scheme");
-static const StaticString s_host("host");
-static const StaticString s_user("user");
-static const StaticString s_pass("pass");
-static const StaticString s_path("path");
-static const StaticString s_query("query");
-static const StaticString s_fragment("fragment");
-static const StaticString s_port("port");
+const StaticString
+  s_scheme("scheme"),
+  s_host("host"),
+  s_user("user"),
+  s_pass("pass"),
+  s_path("path"),
+  s_query("query"),
+  s_fragment("fragment"),
+  s_port("port");
 
 #define RETURN_COMPONENT(name)                          \
   if (resource.name != NULL) {                          \
@@ -229,7 +240,6 @@ static const StaticString s_port("port");
 Variant f_parse_url(CStrRef url, int component /* = -1 */) {
   Url resource;
   if (!url_parse(resource, url.data(), url.size())) {
-    raise_notice("invalid url: %s", url.data());
     return false;
   }
 
@@ -257,14 +267,14 @@ Variant f_parse_url(CStrRef url, int component /* = -1 */) {
   ArrayInit ret(8);
   SET_COMPONENT(scheme);
   SET_COMPONENT(host);
+  if (resource.port) {
+    ret.set(s_port, (int64_t)resource.port);
+  }
   SET_COMPONENT(user);
   SET_COMPONENT(pass);
   SET_COMPONENT(path);
   SET_COMPONENT(query);
   SET_COMPONENT(fragment);
-  if (resource.port) {
-    ret.set("port", (int64_t)resource.port);
-  }
   return ret.create();
 }
 

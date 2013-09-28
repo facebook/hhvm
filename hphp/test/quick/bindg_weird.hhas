@@ -1,0 +1,33 @@
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function tracelet_breaker() {
+  Int 1
+  RetC
+}
+
+.function main() {
+  String "global_var"
+
+  Null
+  Box
+
+  String "tracelet_breaker"
+  FPushFunc 0
+  FCall 0
+  UnboxR
+  SetL $foo
+  PopC
+
+  BindG
+  PopV
+
+  Int 1
+  RetC
+}
+

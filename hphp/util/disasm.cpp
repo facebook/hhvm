@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,7 +24,7 @@
 #include "folly/ScopeGuard.h"
 
 #include "hphp/util/base.h"
-#include "hphp/util/text_color.h"
+#include "hphp/util/text-color.h"
 
 namespace HPHP {
 
@@ -81,12 +81,22 @@ static char *getMethodName(char *demangledName) {
   return methodName;
 }
 
+static hphp_hash_map<xed_uint64_t,const char*> addressToSymbolMemo;
+
 // XED callback function to get a symbol from an address
 static int addressToSymbol(xed_uint64_t address,
                            char *symbol_buffer,
                            xed_uint32_t buffer_length,
                            xed_uint64_t *offset,
                            void *context) {
+  auto& memoVal = addressToSymbolMemo[address];
+  if (memoVal != nullptr) {
+    strncpy(symbol_buffer, memoVal, buffer_length - 1);
+    symbol_buffer[buffer_length - 1] = '\0';
+    *offset = 0;
+    return 1;
+  }
+
   char **symbolTable = backtrace_symbols((void **)&address, 1);
   if (!symbolTable) {
     return 0;
@@ -112,9 +122,9 @@ static int addressToSymbol(xed_uint64_t address,
   }
 
   if (methodName) {
-    strncpy(symbol_buffer, methodName, buffer_length);
-    symbol_buffer[buffer_length] = '\0';
-    free(methodName);
+    strncpy(symbol_buffer, methodName, buffer_length - 1);
+    symbol_buffer[buffer_length - 1] = '\0';
+    memoVal = methodName;
   } else {
     return 0;
   }
@@ -149,9 +159,9 @@ static const xed_syntax_enum_t s_xed_syntax =
 
 void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
                     uint8_t* codeEndAddr) {
-  auto const endClr = m_opts.m_color.empty() ? "" : ANSI_COLOR_END;
 
 #ifdef HAVE_LIBXED
+  auto const endClr = m_opts.m_color.empty() ? "" : ANSI_COLOR_END;
   char codeStr[MAX_INSTR_ASM_LEN];
   xed_uint8_t *frontier;
   xed_decoded_inst_t xedd;
@@ -167,7 +177,9 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
     if (xed_error != XED_ERROR_NONE) error("disasm error: xed_decode failed");
 
     // Get disassembled instruction in codeStr
-    if (!xed_format_context(s_xed_syntax, &xedd, codeStr,
+    auto const syntax = m_opts.m_forceAttSyntax ? XED_SYNTAX_ATT
+                                                : s_xed_syntax;
+    if (!xed_format_context(syntax, &xedd, codeStr,
                             MAX_INSTR_ASM_LEN, ip, nullptr)) {
       error("disasm error: xed_format_context failed");
     }
@@ -193,8 +205,10 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
       out << ' ';
     }
     out << m_opts.m_color;
-    const char* fmt = m_opts.m_relativeOffset ? "{:3x}: " : "{:#10x}: ";
-    out << folly::format(fmt, ip - (m_opts.m_relativeOffset ? codeBase : 0));
+    if (m_opts.m_addresses) {
+      const char* fmt = m_opts.m_relativeOffset ? "{:3x}: " : "{:#10x}: ";
+      out << folly::format(fmt, ip - (m_opts.m_relativeOffset ? codeBase : 0));
+    }
     if (m_opts.m_printEncoding) {
       // print encoding, like in objdump
       unsigned posi = 0;

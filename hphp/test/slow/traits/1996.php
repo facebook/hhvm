@@ -1,9 +1,11 @@
 <?php
 
-
-class MY_CLASS {}
-trait MY_TRAIT {}
-interface MY_INTERFACE {}
+class MY_CLASS {
+}
+trait MY_TRAIT {
+}
+interface MY_INTERFACE {
+}
 var_dump(trait_exists('MY_CLASS'));
 var_dump(trait_exists('MY_INTERFACE'));
 var_dump(trait_exists('MY_TRAIT'));

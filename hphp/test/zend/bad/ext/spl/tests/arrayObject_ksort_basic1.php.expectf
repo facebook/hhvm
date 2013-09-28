@@ -1,0 +1,43 @@
+*** Testing ArrayObject::ksort() : basic functionality ***
+bool(true)
+object(ArrayObject)#%d (1) {
+  ["storage":"ArrayObject":private]=>
+  array(3) {
+    [0]=>
+    int(4)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+}
+HipHop Warning: %s
+bool(false)
+object(ArrayObject)#2 (1) {
+  ["storage":"ArrayObject":private]=>
+  array(4) {
+    ["b"]=>
+    int(4)
+    ["a"]=>
+    int(2)
+    ["q"]=>
+    int(3)
+    [99]=>
+    string(1) "x"
+  }
+}
+bool(true)
+object(ArrayObject)#%d (1) {
+  ["storage":"ArrayObject":private]=>
+  array(4) {
+    [99]=>
+    string(1) "x"
+    ["a"]=>
+    int(2)
+    ["b"]=>
+    int(4)
+    ["q"]=>
+    int(3)
+  }
+}
+===DONE===

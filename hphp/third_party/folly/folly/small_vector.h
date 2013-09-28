@@ -64,6 +64,10 @@
 # endif
 #endif
 
+// Ignore shadowing warnings within this file, so includers can use -Wshadow.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
+
 namespace folly {
 
 //////////////////////////////////////////////////////////////////////
@@ -1010,7 +1014,7 @@ private:
       try {
         new (&newp[pos]) value_type(std::move(*v));
       } catch (...) {
-        std::free(newh);
+        free(newh);
         throw;
       }
 
@@ -1019,7 +1023,7 @@ private:
         detail::moveToUninitialized(begin(), begin() + pos, newp);
       } catch (...) {
         newp[pos].~value_type();
-        std::free(newh);
+        free(newh);
         throw;
       }
 
@@ -1032,7 +1036,7 @@ private:
         for (size_type i = 0; i <= pos; ++i) {
           newp[i].~value_type();
         }
-        std::free(newh);
+        free(newh);
         throw;
       }
     } else {
@@ -1040,7 +1044,7 @@ private:
       try {
         detail::moveToUninitialized(begin(), end(), newp);
       } catch (...) {
-        std::free(newh);
+        free(newh);
         throw;
       }
     }
@@ -1161,7 +1165,7 @@ private:
 
     void freeHeap() {
       auto vp = detail::pointerFlagClear(pdata_.heap_);
-      std::free(vp);
+      free(vp);
     }
   } FB_PACKED u;
 } FB_PACKED;
@@ -1179,6 +1183,8 @@ void swap(small_vector<T,MaxInline,A,B,C>& a,
 //////////////////////////////////////////////////////////////////////
 
 }
+
+#pragma GCC diagnostic pop
 
 #ifdef FB_PACKED
 # undef FB_PACKED

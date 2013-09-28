@@ -1,0 +1,9 @@
+Creating Table
+bool(true)
+Inserting data
+bool(true)
+Request last inserted id
+HipHop Warning: %s
+Closing database
+bool(true)
+Done

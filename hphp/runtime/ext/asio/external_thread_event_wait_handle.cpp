@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,8 +17,9 @@
 
 #include "hphp/runtime/ext/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio_external_thread_event.h"
+#include "hphp/runtime/ext/asio/asio_external_thread_event_queue.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,17 +44,12 @@ void c_ExternalThreadEventWaitHandle::sweep() {
   }
 
   // event has finished, but process() was not called yet
-  auto session = AsioSession::Get();
-  bool done = false;
-  do {
-    auto ete_wh = session->waitForExternalThreadEvents();
-    while (ete_wh) {
-      done |= ete_wh == this;
-      auto next_wh = ete_wh->getNextToProcess();
-      ete_wh->abandon(true);
-      ete_wh = next_wh;
-    }
-  } while (!done);
+  auto queue = AsioSession::Get()->getExternalThreadEventQueue();
+  bool done = queue->hasReceived() && queue->abandonAllReceived(this);
+  while (!done) {
+    queue->receiveSome();
+    done = queue->abandonAllReceived(this);
+  }
 }
 
 void c_ExternalThreadEventWaitHandle::t___construct() {
@@ -80,6 +76,19 @@ void c_ExternalThreadEventWaitHandle::initialize(AsioExternalThreadEvent* event,
   }
 }
 
+void c_ExternalThreadEventWaitHandle::destroyEvent() {
+  // destroy event and its private data
+  m_event->release();
+  m_event = nullptr;
+  m_privData = nullptr;
+
+  // unregister from sweep()
+  unregister();
+
+  // drop ownership by pending event (see initialize())
+  decRefObj(this);
+}
+
 void c_ExternalThreadEventWaitHandle::abandon(bool sweeping) {
   assert(getState() == STATE_WAITING);
   assert(getCount() == 1 || sweeping);
@@ -88,11 +97,8 @@ void c_ExternalThreadEventWaitHandle::abandon(bool sweeping) {
     getContext()->unregisterExternalThreadEvent(m_index);
   }
 
-  // event is abandoned, destroy it, unregister sweepable and decref ownership
-  m_event->release();
-  m_event = nullptr;
-  unregister();
-  decRefObj(this);
+  // clean up
+  destroyEvent();
 }
 
 void c_ExternalThreadEventWaitHandle::process() {
@@ -102,22 +108,23 @@ void c_ExternalThreadEventWaitHandle::process() {
     getContext()->unregisterExternalThreadEvent(m_index);
   }
 
+  // clean up once event is processed
+  auto exit_guard = folly::makeGuard([&] { destroyEvent(); });
+
+  Cell result;
   try {
-    TypedValue result;
-    m_event->unserialize(&result);
-    assert(tvIsPlausible(&result));
-    setResult(&result);
-    tvRefcountedDecRefCell(&result);
+    m_event->unserialize(result);
   } catch (const Object& exception) {
     setException(exception.get());
+    return;
+  } catch (...) {
+    setException(AsioSession::Get()->getAbruptInterruptException().get());
+    throw;
   }
 
-  // event is processed, destroy it, unregister sweepable and decref ownership
-  m_event->release();
-  m_event = nullptr;
-  m_privData = nullptr;
-  unregister();
-  decRefObj(this);
+  assert(cellIsPlausible(result));
+  setResult(result);
+  tvRefcountedDecRefCell(&result);
 }
 
 String c_ExternalThreadEventWaitHandle::getName() {

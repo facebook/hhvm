@@ -1,0 +1,25 @@
+1	YYYY	false < true	
+2	NNNN	false < false	
+3	YYYY	false < 1	
+4	NNNN	false < 0	
+5	YYYY	false < -1	
+6	YYYY	false < '1'	
+7	NNNN	false < '0'	
+8	YYYY	false < '-1'	
+9	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/960.php on line 126
+YHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/960.php on line 130
+YHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/960.php on line 133
+YY	false < nullptr	
+10	NNNN	false < array()	
+11	YYYY	false < array(1)	
+12	YYYY	false < array(2)	
+13	YYYY	false < array('1')	
+14	YYYY	false < array('0' => '1')	
+15	YYYY	false < array('a')	
+16	YYYY	false < array('a' => 1)	
+17	YYYY	false < array('b' => 1)	
+18	YYYY	false < array('a' => 1, 'b' => 2)	
+19	YYYY	false < array(array('a' => 1))	
+20	YYYY	false < array(array('b' => 1))	
+21	YYYY	false < 'php'	
+22	NNNN	false < ''	

@@ -1,0 +1,10 @@
+*** Testing preg_quote() : error conditions ***
+
+-- Testing preg_quote() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing preg_quote() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

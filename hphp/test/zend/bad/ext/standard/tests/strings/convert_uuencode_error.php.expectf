@@ -1,0 +1,11 @@
+*** Testing convert_uuencode() : error conditions ***
+
+-- Testing chconvert_uuencoder() function with no arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing convert_uuencode() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+ 
+===DONE===

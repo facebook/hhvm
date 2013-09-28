@@ -1,0 +1,27 @@
+*** Testing feof() : basic functionality ***
+
+*** testing reading complete file using feof to stop ***
+some data 10
+bool(false)
+*** writing 10 lines, testing feof ***
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+*** testing feof on unclosed file after a read ***
+bool(true)
+*** testing feof after a seek to near the beginning ***
+bool(false)
+*** testing feof after a seek to end ***
+bool(false)
+*** testing feof after a seek passed the end ***
+bool(false)
+*** closing file, testing eof ***
+HipHop Warning: %s
+Done

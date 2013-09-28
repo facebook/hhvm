@@ -1,0 +1,11 @@
+HipHop Warning: %s
+NULL
+array(3) {
+  [0]=>
+  float(%f)
+  [1]=>
+  float(%f)
+  [2]=>
+  float(%f)
+}
+Done

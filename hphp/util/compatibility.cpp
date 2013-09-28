@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,14 +17,10 @@
 #include "hphp/util/compatibility.h"
 #include "hphp/util/vdso.h"
 
-#if defined(__APPLE__)
-# include <mach/mach_time.h>
-#endif
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#if defined(__APPLE__)
+#if defined(__APPLE__) || defined(__FreeBSD__)
 char *strndup(const char* str, size_t len) {
   size_t str_len = strlen(str);
   if (len < str_len) {
@@ -58,12 +54,8 @@ int dprintf(int fd, const char *format, ...) {
 #endif
 
 int gettime(clockid_t which_clock, struct timespec *tp) {
-#if defined(__APPLE__)
-  if (which_clock == CLOCK_THREAD_CPUTIME_ID) {
-    tp->tv_sec = 0;
-    tp->tv_nsec = mach_absolute_time();
-    return 0;
-  }
+#if defined(__APPLE__) || defined(__FreeBSD__)
+  // XXX: OSX doesn't support realtime so we ignore which_clock
   struct timeval tv;
   int ret = gettimeofday(&tv, nullptr);
   tp->tv_sec = tv.tv_sec;

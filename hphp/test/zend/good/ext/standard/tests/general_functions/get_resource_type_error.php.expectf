@@ -1,0 +1,10 @@
+*** Testing get_resource_type() : error conditions ***
+
+-- Testing get_resource_type() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing get_resource_type() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

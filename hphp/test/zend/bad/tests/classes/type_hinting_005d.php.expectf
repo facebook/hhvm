@@ -1,0 +1,3 @@
+Strict Standards: Declaration of D::f() should be compatible with C::f($a) in %s on line 5
+Array hint, should be nothing.
+==DONE==

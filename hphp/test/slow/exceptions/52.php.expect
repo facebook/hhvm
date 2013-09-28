@@ -4,7 +4,7 @@ array(2) {
     ["file"]=>
     string(6) "string"
     ["line"]=>
-    int(23)
+    int(21)
     ["function"]=>
     string(3) "foo"
     ["args"]=>
@@ -24,4 +24,4 @@ array(2) {
     }
   }
 }
-int(18)
+int(16)

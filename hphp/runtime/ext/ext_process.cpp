@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,22 +18,26 @@
 #include "hphp/runtime/ext/ext_process.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/base/util/string_buffer.h"
-#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/thread-init-fini.h"
+#include "folly/String.h"
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>
 #include "hphp/util/lock.h"
-#include "hphp/runtime/base/file/plain_file.h"
-#include "hphp/util/light_process.h"
+#include "hphp/runtime/base/plain-file.h"
+#include "hphp/util/light-process.h"
 #include "hphp/util/logger.h"
-#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/vm/repo.h"
 
 #if !defined(_NSIG) && defined(NSIG)
 # define _NSIG NSIG
 #endif
 
+extern char **environ;
 
 namespace HPHP {
 
@@ -48,9 +52,9 @@ static char **build_envp(CArrRef envs, std::vector<String> &senvs) {
     int i = 0;
     for (ArrayIter iter(envs); iter; ++iter, ++i) {
       StringBuffer nvpair;
-      nvpair += iter.first().toString();
-      nvpair += '=';
-      nvpair += iter.second().toString();
+      nvpair.append(iter.first().toString());
+      nvpair.append('=');
+      nvpair.append(iter.second().toString());
 
       String env = nvpair.detach();
       senvs.push_back(env);
@@ -140,7 +144,7 @@ void f_pcntl_exec(CStrRef path, CArrRef args /* = null_array */,
   char **envp = build_envp(envs, senvs);
   if (execve(path.c_str(), argv, envp) == -1) {
     raise_warning("Error has occured: (errno %d) %s",
-                    errno, Util::safe_strerror(errno).c_str());
+                    errno, folly::errnoStr(errno).c_str());
   }
 
   free(envp);
@@ -148,7 +152,7 @@ void f_pcntl_exec(CStrRef path, CArrRef args /* = null_array */,
 }
 
 int64_t f_pcntl_fork() {
-  if (RuntimeOption::serverExecutionMode()) {
+  if (RuntimeOption::ServerExecutionMode()) {
     raise_error("forking is disallowed in server mode");
     return -1;
   }
@@ -280,6 +284,16 @@ public:
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(SignalHandlers, s_signal_handlers);
 
+// We must register the s_signal_handlers RequestEventHandler
+// immediately: otherwise, pcntl_signal_handler might try to register
+// it while processing a signal, which means calling malloc to insert
+// it into various vectors and sets, which is not ok from a signal
+// handler.
+static InitFiniNode initSignalHandler(
+  [] { s_signal_handlers.get(); },
+  InitFiniNode::When::ThreadInit
+);
+
 static void pcntl_signal_handler(int signo) {
   if (signo > 0 && signo < _NSIG && !g_context.isNull()) {
     s_signal_handlers->signaled[signo] = 1;
@@ -306,7 +320,7 @@ bool f_pcntl_signal_dispatch() {
       signaled[i] = 0;
       if (s_signal_handlers->handlers.exists(i)) {
         vm_call_user_func(s_signal_handlers->handlers[i],
-                               CREATE_VECTOR1(i));
+                               make_packed_array(i));
       }
     }
   }
@@ -433,7 +447,7 @@ String f_exec(CStrRef command, VRefParam output /* = null */,
   StringBuffer sbuf;
   sbuf.read(fp);
 
-  Array lines = StringUtil::Explode(sbuf.detach(), "\n");
+  Array lines = StringUtil::Explode(sbuf.detach(), "\n").toArray();
   int ret = ctx.exit();
   if (WIFEXITED(ret)) ret = WEXITSTATUS(ret);
   return_var = ret;
@@ -452,7 +466,8 @@ String f_exec(CStrRef command, VRefParam output /* = null */,
   if (!count || lines.empty()) {
     return String();
   }
-  return StringUtil::Trim(lines[count - 1], StringUtil::TrimRight);
+
+  return f_rtrim(lines[count - 1].toString());
 }
 
 void f_passthru(CStrRef command, VRefParam return_var /* = null */) {
@@ -466,7 +481,7 @@ void f_passthru(CStrRef command, VRefParam return_var /* = null */) {
     if (len == -1 && errno == EINTR) continue;
     if (len <= 0) break; // break on error or EOF
     buffer[len] = '\0';
-    echo(String(buffer, len, AttachLiteral));
+    echo(String(buffer, len, CopyString));
   }
   int ret = ctx.exit();
   if (WIFEXITED(ret)) ret = WEXITSTATUS(ret);
@@ -482,7 +497,7 @@ String f_system(CStrRef command, VRefParam return_var /* = null */) {
     sbuf.read(fp);
   }
 
-  Array lines = StringUtil::Explode(sbuf.detach(), "\n");
+  Array lines = StringUtil::Explode(sbuf.detach(), "\n").toArray();
   int ret = ctx.exit();
   if (WIFEXITED(ret)) ret = WEXITSTATUS(ret);
   return_var = ret;
@@ -492,13 +507,14 @@ String f_system(CStrRef command, VRefParam return_var /* = null */) {
   }
 
   for (int i = 0; i < count; i++) {
-    echo(lines[i]);
+    echo(lines[i].toString());
     echo("\n");
   }
   if (!count || lines.empty()) {
     return String();
   }
-  return StringUtil::Trim(lines[count - 1], StringUtil::TrimRight);
+
+  return f_rtrim(lines[count - 1].toString());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -506,23 +522,23 @@ String f_system(CStrRef command, VRefParam return_var /* = null */) {
 
 class ChildProcess : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(ChildProcess)
+  DECLARE_RESOURCE_ALLOCATION(ChildProcess)
 
   pid_t child;
   Array pipes;
   String command;
   Variant env;
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("Process");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   int close() {
     // Although the PHP doc about proc_close() says that the pipes need to be
     // explicitly pclose()'ed, it seems that Zend is implicitly closing the
     // pipes when proc_close() is called.
     for (ArrayIter iter(pipes); iter; ++iter) {
-      iter.second().toObject().getTyped<PlainFile>()->close();
+      iter.second().toResource().getTyped<PlainFile>()->close();
     }
     pipes.clear();
 
@@ -543,16 +559,16 @@ public:
     return wstatus;
   }
 };
-IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(ChildProcess);
+
 void ChildProcess::sweep() {
   // do nothing here, as everything will be collected by SmartAllocator
 }
 
-StaticString ChildProcess::s_class_name("Process");
-
 #define DESC_PIPE       1
 #define DESC_FILE       2
 #define DESC_PARENT_MODE_WRITE  8
+
+const StaticString s_w("w");
 
 class DescriptorItem {
 public:
@@ -582,7 +598,7 @@ public:
     childend = dup(file->fd());
     if (childend < 0) {
       raise_warning("unable to dup File-Handle for descriptor %d - %s",
-                      index, Util::safe_strerror(errno).c_str());
+                      index, folly::errnoStr(errno).c_str());
       return false;
     }
     return true;
@@ -593,11 +609,11 @@ public:
     int newpipe[2];
     if (0 != pipe(newpipe)) {
       raise_warning("unable to create pipe %s",
-                      Util::safe_strerror(errno).c_str());
+                      folly::errnoStr(errno).c_str());
       return false;
     }
 
-    if (zmode != "w") {
+    if (zmode != s_w) {
       parentend = newpipe[1];
       childend = newpipe[0];
       mode |= DESC_PARENT_MODE_WRITE;
@@ -636,17 +652,17 @@ public:
 
   /* clean up all the child ends and then open streams on the parent
    * ends, where appropriate */
-  Object dupParent() {
+  Resource dupParent() {
     close(childend); childend = -1;
 
     if ((mode & ~DESC_PARENT_MODE_WRITE) == DESC_PIPE) {
       /* mark the descriptor close-on-exec, so that it won't be inherited
          by potential other children */
       fcntl(parentend, F_SETFD, FD_CLOEXEC);
-      return Object(NEWOBJ(PlainFile)(parentend, true));
+      return Resource(NEWOBJ(PlainFile)(parentend, true));
     }
 
-    return Object();
+    return Resource();
   }
 };
 
@@ -655,6 +671,9 @@ public:
  * it after a fork(), the call to pthread_mutex_unlock() will succeed.
  */
 Mutex DescriptorItem::s_mutex(false);
+
+const StaticString s_pipe("pipe");
+const StaticString s_file("file");
 
 static bool pre_proc_open(CArrRef descriptorspec,
                           vector<DescriptorItem> &items) {
@@ -673,7 +692,7 @@ static bool pre_proc_open(CArrRef descriptorspec,
 
     Variant descitem = iter.second();
     if (descitem.isResource()) {
-      File *file = descitem.toObject().getTyped<File>();
+      File *file = descitem.toResource().getTyped<File>();
       if (!item.readFile(file)) break;
     } else if (!descitem.is(KindOfArray)) {
       raise_warning("Descriptor must be either an array or a File-Handle");
@@ -685,13 +704,13 @@ static bool pre_proc_open(CArrRef descriptorspec,
         break;
       }
       String ztype = descarr[int64_t(0)].toString();
-      if (ztype == "pipe") {
+      if (ztype == s_pipe) {
         if (!descarr.exists(int64_t(1))) {
           raise_warning("Missing mode parameter for 'pipe'");
           break;
         }
         if (!item.readPipe(descarr[int64_t(1)].toString())) break;
-      } else if (ztype == "file") {
+      } else if (ztype == s_file) {
         if (!descarr.exists(int64_t(1))) {
           raise_warning("Missing file name parameter for 'file'");
           break;
@@ -725,7 +744,7 @@ static Variant post_proc_open(CStrRef cmd, Variant &pipes,
     for (int i = 0; i < (int)items.size(); i++) {
       items[i].cleanup();
     }
-    raise_warning("fork failed - %s", Util::safe_strerror(errno).c_str());
+    raise_warning("fork failed - %s", folly::errnoStr(errno).c_str());
     return false;
   }
 
@@ -735,13 +754,13 @@ static Variant post_proc_open(CStrRef cmd, Variant &pipes,
   proc->child = child;
   proc->env = env;
   for (int i = 0; i < (int)items.size(); i++) {
-    Object f = items[i].dupParent();
+    Resource f = items[i].dupParent();
     if (!f.isNull()) {
       proc->pipes.append(f);
     }
     pipes.set(items[i].index, f);
   }
-  return Object(proc);
+  return Resource(proc);
 }
 
 Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
@@ -764,10 +783,31 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
   Array enva;
 
   if (env.isNull()) {
-    // Default to the current environment from the execution context
-    // rather than leaving it unspecified so that we pick up local
-    // changes made via putenv()
-    enva = g_context->getEnvs();
+    // Build out an environment that conceptually matches what we'd
+    // see if we were to iterate the environment and call getenv()
+    // for each name.
+
+    // Env vars defined in the hdf file go in first
+    for (std::map<string, string>::const_iterator iter =
+        RuntimeOption::EnvVariables.begin();
+        iter != RuntimeOption::EnvVariables.end(); ++iter) {
+      enva.set(String(iter->first), String(iter->second));
+    }
+
+    // global environment overrides the hdf
+    for (char **env = environ; env && *env; env++) {
+      char *p = strchr(*env, '=');
+      if (p) {
+        String name(*env, p - *env, CopyString);
+        String val(p + 1, CopyString);
+        enva.set(name, val);
+      }
+    }
+
+    // and then any putenv() changes take precedence
+    for (ArrayIter iter(g_context->getEnvs()); iter; ++iter) {
+      enva.set(iter.first(), iter.second());
+    }
   } else {
     enva = env.toArray();
   }
@@ -789,10 +829,13 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
     std::vector<std::string> envs;
     for (ArrayIter iter(enva); iter; ++iter) {
       StringBuffer nvpair;
-      nvpair += iter.first().toString();
-      nvpair += '=';
-      nvpair += iter.second().toString();
-      envs.push_back(nvpair.detach().c_str());
+      nvpair.append(iter.first().toString());
+      nvpair.append('=');
+      nvpair.append(iter.second().toString());
+      string tmp = nvpair.detach().c_str();
+      if (tmp.find('\n') == string::npos) {
+        envs.push_back(tmp);
+      }
     }
 
     child = LightProcess::proc_open(cmd.c_str(), created, intended,
@@ -829,25 +872,26 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
   _exit(127);
 }
 
-bool f_proc_terminate(CObjRef process, int signal /* = 0 */) {
+bool f_proc_terminate(CResRef process, int signal /* = 0 */) {
   ChildProcess *proc = process.getTyped<ChildProcess>();
   return kill(proc->child, signal <= 0 ? SIGTERM : signal) == 0;
 }
 
-int64_t f_proc_close(CObjRef process) {
+int64_t f_proc_close(CResRef process) {
   return process.getTyped<ChildProcess>()->close();
 }
 
-static const StaticString s_command("command");
-static const StaticString s_pid("pid");
-static const StaticString s_running("running");
-static const StaticString s_signaled("signaled");
-static const StaticString s_stopped("stopped");
-static const StaticString s_exitcode("exitcode");
-static const StaticString s_termsig("termsig");
-static const StaticString s_stopsig("stopsig");
+const StaticString
+  s_command("command"),
+  s_pid("pid"),
+  s_running("running"),
+  s_signaled("signaled"),
+  s_stopped("stopped"),
+  s_exitcode("exitcode"),
+  s_termsig("termsig"),
+  s_stopsig("stopsig");
 
-Array f_proc_get_status(CObjRef process) {
+Array f_proc_get_status(CResRef process) {
   ChildProcess *proc = process.getTyped<ChildProcess>();
 
   errno = 0;

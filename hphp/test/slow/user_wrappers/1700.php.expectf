@@ -1,0 +1,14 @@
+bool(true)
+Open
+HipHop Notice: Use of undefined constant USE_INCLUDE_PATH - assumed 'USE_INCLUDE_PATH' in %s/test/slow/user_wrappers/1700.php on line 7
+string(14) "fifo://testing"
+string(2) "w+"
+int(0)
+int(0)
+int(0)
+int(0)
+string(12) "Data two...
+"
+string(14) "Data three...
+"
+Close

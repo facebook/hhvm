@@ -1,0 +1,22 @@
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+bool(false)
+array(3) {
+  [5]=>
+  string(1) "a"
+  ["xyz"]=>
+  string(2) "q6"
+  [6]=>
+  string(3) "h20"
+}
+array(1) {
+  ["x"]=>
+  string(1) "1"
+}
+bool(true)
+array(0) {
+}
+bool(true)

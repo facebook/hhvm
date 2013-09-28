@@ -1,0 +1,591 @@
+{
+    "preamble": "#include <system\/gen\/php\/classes\/exception.h>\n#include <runtime\/ext\/soap\/soap.h>",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "use_soap_error_handler",
+            "desc": "This function sets whether or not to use the SOAP error handler in the SOAP server. It will return the previous value. If set to TRUE, details of errors in a SoapServer application will be sent to the clients. If FALSE, no information will be sent.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "handler",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "Set to TRUE to send error details to clients."
+                }
+            ]
+        },
+        {
+            "name": "is_soap_fault",
+            "desc": "This function is useful to check if the SOAP call failed, but without using exceptions. To use it, create a SoapClient object with the exceptions option set to zero or FALSE. In this case, the SOAP method will return a special SoapFault object which encapsulates the fault details (faultcode, faultstring, faultactor and faultdetails).\n\nIf exceptions is not set then SOAP call will throw an exception on error. is_soap_fault() checks if the given parameter is a SoapFault object.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "This will return TRUE on error, and FALSE otherwise."
+            },
+            "args": [
+                {
+                    "name": "fault",
+                    "type": "Variant",
+                    "desc": "The object to test."
+                }
+            ]
+        },
+        {
+            "name": "_soap_active_version",
+            "desc": "This function returns the soap version that is currently active.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "This will return the active soap version."
+            },
+            "args": [
+            ]
+        }
+    ],
+    "classes": [
+        {
+            "name": "SoapServer",
+            "desc": null,
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "footer": "\n  public: int                        m_type;\n  public: soapFunctions              m_soap_functions;\n  public: soapClass                  m_soap_class;\n  public: Object                     m_soap_object;\n  public: String                     m_actor;\n  public: String                     m_uri;\n  public: int                        m_version;\n  public: sdl                       *m_sdl;\n  public: xmlCharEncodingHandlerPtr  m_encoding;\n  public: Array                      m_classmap;\n  public: encodeMap                 *m_typemap;\n  public: int                        m_features;\n  public: Array                      m_soap_headers;\n  public: int                        m_send_errors;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "wsdl",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "options",
+                            "type": "VariantMap",
+                            "value": "null_array"
+                        }
+                    ]
+                },
+                {
+                    "name": "setclass",
+                    "desc": "Exports all methods from specified class.\n\nThe object can be made persistent across request for a given PHP session with the SoapServer::setPersistence() method.",
+                    "flags": [
+                        "VariableArguments"
+                    ],
+                    "return": {
+                        "type": null,
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String",
+                            "desc": "The name of the exported class."
+                        }
+                    ]
+                },
+                {
+                    "name": "setobject",
+                    "desc": "This sets a specific object as the handler for SOAP requests, rather than just a class as in SoapServer::setClass().",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null,
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "obj",
+                            "type": "Object",
+                            "desc": "The object to handle the requests."
+                        }
+                    ]
+                },
+                {
+                    "name": "addfunction",
+                    "desc": "Exports one or more functions for remote clients",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null,
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "func",
+                            "type": "Variant",
+                            "desc": "To export one function, pass the function name into this parameter as a string.\n\nTo export several functions, pass an array of function names.\n\nTo export all the functions, pass a special constant SOAP_FUNCTIONS_ALL.\n\nfunctions must receive all input arguments in the same order as defined in the WSDL file (They should not receive any output parameters as arguments) and return one or more values. To return several values they must return an array with named output parameters."
+                        }
+                    ]
+                },
+                {
+                    "name": "getfunctions",
+                    "desc": "Returns a list of the defined functions in the SoapServer object. This method returns the list of all functions added by SoapServer::addFunction() or SoapServer::setClass().",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "An array of the defined functions."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "handle",
+                    "desc": "Processes a SOAP request, calls necessary functions, and sends a response back.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null,
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "request",
+                            "type": "String",
+                            "value": "null_string",
+                            "desc": "The SOAP request. If this argument is omitted, the request is assumed to be in the raw POST data of the HTTP request."
+                        }
+                    ]
+                },
+                {
+                    "name": "setpersistence",
+                    "desc": "This function allows saving data between requests in a PHP session. It works only with a server that exports functions from a class with SoapServer::setClass() or SoapServer::setObject().\n\nThe persistence SOAP_PERSISTENCE_SESSION makes only objects of the given class persistent, but not the class static data. In this case, use $this->bar instead of self::$bar.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null,
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "mode",
+                            "type": "Int64",
+                            "desc": "One of the SOAP_PERSISTENCE_XXX constants.\n\nSOAP_PERSISTENCE_REQUEST - persist the object for the duration of a request.\n\nSOAP_PERSISTENCE_SESSION - persist the object for the duration of a session."
+                        }
+                    ]
+                },
+                {
+                    "name": "fault",
+                    "desc": "Sends a response to the client of the current request indicating an error.\n\nThis can only be called when handling a request.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null,
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "code",
+                            "type": "Variant",
+                            "desc": "The error code to return"
+                        },
+                        {
+                            "name": "fault",
+                            "type": "String",
+                            "desc": "A brief description of the error"
+                        },
+                        {
+                            "name": "actor",
+                            "type": "String",
+                            "value": "null_string",
+                            "desc": "A string identifying the actor that caused the fault."
+                        },
+                        {
+                            "name": "detail",
+                            "type": "Variant",
+                            "value": "null",
+                            "desc": "More details of the fault"
+                        },
+                        {
+                            "name": "name",
+                            "type": "String",
+                            "value": "null_string",
+                            "desc": "The name of the fault. This can be used to select a name from a WSDL file."
+                        }
+                    ]
+                },
+                {
+                    "name": "addsoapheader",
+                    "desc": "Adds a SOAP header to be returned with the response to the current request.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null,
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "fault",
+                            "type": "Object",
+                            "desc": "The header to be returned."
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "SoapClient",
+            "desc": null,
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "footer": "\n  public: int                         m_soap_version;\n  public: sdl                        *m_sdl;\n  public: xmlCharEncodingHandlerPtr   m_encoding;\n  public: encodeMap                  *m_typemap;\n  public: Array                       m_classmap;\n  public: int                         m_features;\n  public: String                      m_uri;\n  public: String                      m_location;\n  public: int                         m_style;\n  public: int                         m_use;\n  public: String                      m_login;\n  public: String                      m_password;\n  public: int                         m_authentication;\n  public: bool                        m_digest;\n  public: String                      m_proxy_host;\n  public: int                         m_proxy_port;\n  public: String                      m_proxy_login;\n  public: String                      m_proxy_password;\n  public: int                         m_connection_timeout;\n  public: int                         m_max_redirect;\n  public: bool                        m_use11;\n  public: String                      m_user_agent;\n  public: bool                        m_compression;\n  public: Variant                     m_default_headers;\n  public: Variant                     m_cookies;\n  public: bool                        m_exceptions;\n  public: Variant                     m_soap_fault;\n  public: bool                        m_trace;\n  public: Variant                     m_last_request;\n  public: Variant                     m_last_response;\n  public: Variant                     m_last_request_headers;\n  public: Variant                     m_last_response_headers;\n",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "wsdl",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "options",
+                            "type": "VariantMap",
+                            "value": "null_array"
+                        }
+                    ]
+                },
+                {
+                    "name": "__call",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "args",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__soapcall",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String"
+                        },
+                        {
+                            "name": "args",
+                            "type": "VariantMap"
+                        },
+                        {
+                            "name": "options",
+                            "type": "VariantMap",
+                            "value": "null_array"
+                        },
+                        {
+                            "name": "input_headers",
+                            "type": "Variant",
+                            "value": "null_variant"
+                        },
+                        {
+                            "name": "output_headers",
+                            "type": "Variant",
+                            "value": "null",
+                            "ref": true
+                        }
+                    ]
+                },
+                {
+                    "name": "__getlastrequest",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__getlastresponse",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__getlastrequestheaders",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__getlastresponseheaders",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__getfunctions",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__gettypes",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__dorequest",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "buf",
+                            "type": "String"
+                        },
+                        {
+                            "name": "location",
+                            "type": "String"
+                        },
+                        {
+                            "name": "action",
+                            "type": "String"
+                        },
+                        {
+                            "name": "version",
+                            "type": "Int64"
+                        },
+                        {
+                            "name": "oneway",
+                            "type": "Boolean",
+                            "value": "false"
+                        }
+                    ]
+                },
+                {
+                    "name": "__setcookie",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String"
+                        },
+                        {
+                            "name": "value",
+                            "type": "String",
+                            "value": "null_string"
+                        }
+                    ]
+                },
+                {
+                    "name": "__setlocation",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "new_location",
+                            "type": "String",
+                            "value": "null_string"
+                        }
+                    ]
+                },
+                {
+                    "name": "__setsoapheaders",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "headers",
+                            "type": "Variant",
+                            "value": "null_variant"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "SoapVar",
+            "desc": "A class representing a variable or object for use with SOAP services.",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "footer": "\n  public: Variant m_value;\n  public: int64_t m_type;\n  public: String  m_stype;\n  public: String  m_ns;\n  public: String  m_name;\n  public: String  m_namens;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "data",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "type",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "type_name",
+                            "type": "String",
+                            "value": "null_string"
+                        },
+                        {
+                            "name": "type_namespace",
+                            "type": "String",
+                            "value": "null_string"
+                        },
+                        {
+                            "name": "node_name",
+                            "type": "String",
+                            "value": "null_string"
+                        },
+                        {
+                            "name": "node_namespace",
+                            "type": "String",
+                            "value": "null_string"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "SoapParam",
+            "desc": "Represents parameter to a SOAP call.",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "footer": "\n  public: String  m_name;\n  public: String  m_data;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "data",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "name",
+                            "type": "String"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "SoapHeader",
+            "desc": "Represents a SOAP header.",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "footer": "\n  public: String  m_namespace;\n  public: String  m_name;\n  public: Variant m_data;\n  public: bool    m_mustUnderstand;\n  public: Variant m_actor;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "ns",
+                            "type": "String"
+                        },
+                        {
+                            "name": "name",
+                            "type": "String"
+                        },
+                        {
+                            "name": "data",
+                            "type": "Variant",
+                            "value": "null"
+                        },
+                        {
+                            "name": "mustunderstand",
+                            "type": "Boolean",
+                            "value": "false"
+                        },
+                        {
+                            "name": "actor",
+                            "type": "Variant",
+                            "value": "null"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        }
+    ]
+}

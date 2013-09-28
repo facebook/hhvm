@@ -1,15 +1,27 @@
 <?php
 
-
-trait T1 {}
-trait T2 {}
-trait T3 { use T2; }
-class C1 {}
-class C2 { use T1; }
-class C3 { use T1, T2; }
-class C4 { use T3; }
-class C5 extends C4 {}
-interface I1 {}
+trait T1 {
+}
+trait T2 {
+}
+trait T3 {
+ use T2;
+ }
+class C1 {
+}
+class C2 {
+ use T1;
+ }
+class C3 {
+ use T1, T2;
+ }
+class C4 {
+ use T3;
+ }
+class C5 extends C4 {
+}
+interface I1 {
+}
 echo "T1:\n";
 var_dump(class_uses('T1'));
 $rt1 = new ReflectionClass('T1');

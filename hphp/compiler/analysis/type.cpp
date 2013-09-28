@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,6 +20,7 @@
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/expression/expression.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include <boost/format.hpp>
 
 using namespace HPHP;
@@ -35,6 +36,7 @@ TypePtr Type::Double      (new Type(Type::KindOfDouble      ));
 TypePtr Type::String      (new Type(Type::KindOfString      ));
 TypePtr Type::Array       (new Type(Type::KindOfArray       ));
 TypePtr Type::Object      (new Type(Type::KindOfObject      ));
+TypePtr Type::Resource    (new Type(Type::KindOfResource    ));
 TypePtr Type::Variant     (new Type(Type::KindOfVariant     ));
 
 TypePtr Type::Numeric     (new Type(Type::KindOfNumeric     ));
@@ -56,6 +58,8 @@ void Type::InitTypeHintMap() {
   assert(s_HHTypeHintTypes.empty());
 
   s_TypeHintTypes["array"] = Type::Array;
+  s_TypeHintTypes["resource"] = Type::Resource;
+  s_TypeHintTypes["callable"] = Type::Variant;
 
   s_HHTypeHintTypes["array"] = Type::Array;
   s_HHTypeHintTypes["bool"]    = Type::Boolean;
@@ -66,6 +70,8 @@ void Type::InitTypeHintMap() {
   s_HHTypeHintTypes["double"]  = Type::Double;
   s_HHTypeHintTypes["float"]   = Type::Double;
   s_HHTypeHintTypes["string"]  = Type::String;
+  s_HHTypeHintTypes["resource"] = Type::Resource;
+  s_HHTypeHintTypes["callable"] = Type::Variant;
 }
 
 const Type::TypePtrMap &Type::GetTypeHintTypes(bool hhType) {
@@ -77,14 +83,31 @@ void Type::ResetTypeHintTypes() {
   s_HHTypeHintTypes.clear();
 }
 
-TypePtr Type::CreateObjectType(const std::string &classname) {
-  return TypePtr(new Type(KindOfObject, classname));
+TypePtr Type::CreateObjectType(const std::string &clsname) {
+  // For interfaces that support primitive types, we're pessimistic and
+  // we treat it as a Variant
+  if (interface_supports_array(clsname) ||
+      interface_supports_string(clsname) ||
+      interface_supports_int(clsname) ||
+      interface_supports_double(clsname)) {
+    return Type::Variant;
+  }
+  return TypePtr(new Type(KindOfObject, clsname));
 }
 
-TypePtr Type::GetType(KindOf kindOf,
-                      const std::string &clsname /* = "" */) {
+TypePtr Type::GetType(KindOf kindOf, const std::string &clsname /* = "" */) {
   assert(kindOf);
-  if (!clsname.empty()) return TypePtr(new Type(kindOf, clsname));
+  if (!clsname.empty()) {
+    // For interfaces that support primitive types we're pessimistic and
+    // we treat it as a Variant
+    if (interface_supports_array(clsname) ||
+        interface_supports_string(clsname) ||
+        interface_supports_int(clsname) ||
+        interface_supports_double(clsname)) {
+      return Type::Variant;
+    }
+    return TypePtr(new Type(kindOf, clsname));
+  }
 
   switch (kindOf) {
   case KindOfBoolean:     return Type::Boolean;
@@ -95,6 +118,7 @@ TypePtr Type::GetType(KindOf kindOf,
   case KindOfArray:       return Type::Array;
   case KindOfVariant:     return Type::Variant;
   case KindOfObject:      return Type::Object;
+  case KindOfResource:    return Type::Resource;
   case KindOfNumeric:     return Type::Numeric;
   case KindOfPrimitive:   return Type::Primitive;
   case KindOfPlusOperand: return Type::PlusOperand;
@@ -181,6 +205,7 @@ bool Type::IsMappedToVariant(TypePtr t) {
   case KindOfString :
   case KindOfArray  :
   case KindOfObject :
+  case KindOfResource:
     return false;
   default: break;
   }
@@ -249,7 +274,8 @@ TypePtr Type::Coerce(AnalysisResultConstPtr ar, TypePtr type1, TypePtr type2) {
   if (type1->m_kindOf == KindOfVoid &&
       (type2->m_kindOf == KindOfString ||
        type2->m_kindOf == KindOfArray ||
-       type2->m_kindOf == KindOfObject)) {
+       type2->m_kindOf == KindOfObject ||
+       type2->m_kindOf == KindOfResource)) {
     return type2;
   }
   if (type2->m_kindOf == KindOfSome ||
@@ -384,6 +410,7 @@ bool Type::HasFastCastMethod(TypePtr t) {
   case Type::KindOfString:
   case Type::KindOfArray:
   case Type::KindOfObject:
+  case Type::KindOfResource:
     return true;
   default: break;
   }
@@ -428,6 +455,9 @@ string Type::GetFastCastMethod(
     break;
   case Type::KindOfObject:
     type = "Obj";
+    break;
+  case Type::KindOfResource:
+    type = "Res";
     break;
   default:
     type = ""; // make the compiler happy
@@ -524,11 +554,13 @@ bool Type::isSpecificObject() const {
 }
 
 bool Type::isNonConvertibleType() const {
-  return m_kindOf == KindOfObject || m_kindOf == KindOfArray;
+  return m_kindOf == KindOfObject || m_kindOf == KindOfResource ||
+         m_kindOf == KindOfArray;
 }
 
 bool Type::isNoObjectInvolved() const {
   if (couldBe(KindOfObject)
+   || couldBe(KindOfResource)
    || couldBe(KindOfArray))
     return false;
   else
@@ -602,6 +634,7 @@ DataType Type::getDataType() const {
     case KindOfString:      return HPHP::KindOfString;
     case KindOfArray:       return HPHP::KindOfArray;
     case KindOfObject:      return HPHP::KindOfObject;
+    case KindOfResource:    return HPHP::KindOfResource;
     case KindOfNumeric:
     case KindOfPrimitive:
     case KindOfPlusOperand:
@@ -623,6 +656,7 @@ std::string Type::getPHPName() {
   switch (m_kindOf) {
   case KindOfArray:       return "array";
   case KindOfObject:      return m_name;
+  case KindOfResource:    return "resource";
   default: break;
   }
   return "";
@@ -640,6 +674,7 @@ std::string Type::toString() const {
   case KindOfSome:        return "Some";
   case KindOfAny:         return "Any";
   case KindOfObject:      return string("Object - ") + m_name;
+  case KindOfResource:    return "Resource";
   case KindOfNumeric:     return "Numeric";
   case KindOfPrimitive:   return "Primitive";
   case KindOfPlusOperand: return "PlusOperand";
@@ -688,6 +723,7 @@ void Type::serialize(JSON::DocTarget::OutputStream &out) const {
     }
     break;
   }
+  case KindOfResource:    s = "resource"; break;
   case KindOfNumeric:     s = "numeric"; break;
   case KindOfPrimitive:   s = "primitive"; break;
   case KindOfPlusOperand: s = "any"; break;

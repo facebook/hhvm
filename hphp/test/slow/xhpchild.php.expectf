@@ -1,0 +1,47 @@
+1, array(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+
+1, array(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+
+1, string(15) "a boring string"
+
+1, string(15) "a boring string"
+
+1, string(11) "hello world"
+
+1, string(11) "hello world"
+
+1, int(10)
+
+1, int(10)
+
+1, float(-4.2)
+
+1, float(-4.2)
+
+1, object(xhp_div)#1 (0) {
+}
+
+1, object(xhp_div)#1 (0) {
+}
+
+0, NULL
+
+HipHop Fatal error: Argument 1 passed to f2() must be an instance of XHPChild, null given in %s/test/slow/xhpchild.php on line 15

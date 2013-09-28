@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_asio.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,7 +31,7 @@ c_StaticExceptionWaitHandle::c_StaticExceptionWaitHandle(Class* cb)
 }
 
 c_StaticExceptionWaitHandle::~c_StaticExceptionWaitHandle() {
-  tvDecRefObj(&m_resultOrException);
+  tvRefcountedDecRefCell(&m_resultOrException);
 }
 
 void c_StaticExceptionWaitHandle::t___construct() {

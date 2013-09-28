@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,7 @@
 #include <stdarg.h>
 
 #include "folly/Format.h"
-#include "hphp/util/text_color.h"
+#include "hphp/util/text-color.h"
 
 /*
  * Runtime-selectable trace facility. A trace statement has both a module and a
@@ -64,7 +64,8 @@ namespace Trace {
       TM(trans)       \
       TM(tx64)        \
       TM(tx64stats)   \
-      TM(tunwind)     \
+      TM(ustubs)      \
+      TM(unwind)      \
       TM(txlease)     \
       TM(fixup)       \
       TM(tcspace)     \
@@ -72,10 +73,12 @@ namespace Trace {
       TM(treadmill)   \
       TM(regalloc)    \
       TM(bcinterp)    \
+      TM(interpOne)   \
       TM(refcount)    \
       TM(asmx64)      \
       TM(runtime)     \
       TM(debugger)    \
+      TM(debuggerflow) \
       TM(debuginfo)   \
       TM(stats)       \
       TM(emitter)     \
@@ -87,15 +90,16 @@ namespace Trace {
       TM(typeProfile) \
       TM(hhir)        \
       TM(printir)     \
+      TM(pgo)         \
       TM(hhirTracelets) \
       TM(gc)          \
-      TM(unlikely)    \
-      TM(jcc)         \
       TM(instancebits)\
       TM(hhas)        \
-      TM(punt)        \
       TM(statgroups)  \
       TM(minstr)      \
+      TM(region)      \
+      TM(atomicvector)\
+      TM(datablock)   \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)    \
       TM(stress_txInterpSeed)   \
@@ -104,6 +108,9 @@ namespace Trace {
       TM(txOpBisectHigh) \
       /* smart alloc */ \
       TM(smartalloc) \
+      /* Heap tracing */ \
+      TM(heap) \
+      TM(servicereq) \
       /* Temporary catetories, to save compilation time */ \
       TM(tmp0)  TM(tmp1)  TM(tmp2)  TM(tmp3)               \
       TM(tmp4)  TM(tmp5)  TM(tmp6)  TM(tmp7)               \
@@ -165,11 +172,19 @@ std::string prettyNode(const char* name, const P1& p1, const P2& p2) {
     string(")");
 }
 
-void traceRelease(const char*, ...);
+void traceRelease(const char*, ...) ATTRIBUTE_PRINTF(1,2);
 void traceRelease(const std::string& s);
+
+// Trace to the global ring buffer in all builds, and also trace normally
+// via the standard TRACE(n, ...) macro.
+#define TRACE_RB(n, ...)                            \
+  HPHP::Trace::traceRingBufferRelease(__VA_ARGS__); \
+  TRACE(n, __VA_ARGS__);
+void traceRingBufferRelease(const char* fmt, ...) ATTRIBUTE_PRINTF(1,2);
+
 extern int levels[NumModules];
 const char* moduleName(Module mod);
-static inline bool moduleEnabledRelease(Module tm, int level = 1) {
+inline bool moduleEnabledRelease(Module tm, int level = 1) {
   return levels[tm] >= level;
 }
 
@@ -177,15 +192,15 @@ static inline bool moduleEnabledRelease(Module tm, int level = 1) {
 #  ifndef USE_TRACE
 #    define USE_TRACE 1
 #  endif
-static inline bool moduleEnabled(Module tm, int level = 1) {
+inline bool moduleEnabled(Module tm, int level = 1) {
   return moduleEnabledRelease(tm, level);
 }
 
-static inline int moduleLevel(Module tm) { return levels[tm]; }
+inline int moduleLevel(Module tm) { return levels[tm]; }
 
 #define HPHP_TRACE
 
-static const bool enabled = true;
+const bool enabled = true;
 
 #define ONTRACE_MOD(module, n, x) do {    \
   if (HPHP::Trace::moduleEnabled(module, n)) {  \
@@ -206,14 +221,13 @@ static const bool enabled = true;
 #define TRACE_SET_MOD(name)  \
   static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::name;
 
-void trace(const char *, ...)
-  __attribute__((format(printf,1,2)));
+void trace(const char *, ...) ATTRIBUTE_PRINTF(1,2);
 void trace(const std::string&);
 
 template<typename Pretty>
-static inline void trace(Pretty p) { trace(p.pretty() + std::string("\n")); }
+inline void trace(Pretty p) { trace(p.pretty() + std::string("\n")); }
 
-void vtrace(const char *fmt, va_list args);
+void vtrace(const char *fmt, va_list args) ATTRIBUTE_PRINTF(1,0);
 void dumpRingbuffer();
 #else /* } (defined(DEBUG) || defined(USE_TRACE)) { */
 /*
@@ -225,14 +239,16 @@ void dumpRingbuffer();
 #define FTRACE(...)     do { } while (0)
 #define TRACE_MOD(...)  do { } while (0)
 #define FTRACE_MOD(...) do { } while (0)
-#define TRACE_SET_MOD(...) /* nil */
-static const bool enabled = false;
+#define TRACE_SET_MOD(name) \
+  DEBUG_ONLY static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::name;
 
-static inline void trace(const char*, ...)      { }
-static inline void trace(const std::string&)    { }
-static inline void vtrace(const char*, va_list) { }
-static inline bool moduleEnabled(Module t, int level = 1) { return false; }
-static inline int moduleLevel(Module tm) { return 0; }
+const bool enabled = false;
+
+inline void trace(const char*, ...)      { }
+inline void trace(const std::string&)    { }
+inline void vtrace(const char*, va_list) { }
+inline bool moduleEnabled(Module t, int level = 1) { return false; }
+inline int moduleLevel(Module tm) { return 0; }
 #endif /* } (defined(DEBUG) || defined(USE_TRACE)) */
 
 //////////////////////////////////////////////////////////////////////
@@ -262,6 +278,27 @@ inline std::string color(const char* fg, const char* bg) {
 
 //////////////////////////////////////////////////////////////////////
 
+FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_toString, toString);
+
 } // HPHP
+
+namespace folly {
+template<typename Val>
+struct FormatValue<Val,
+                   typename std::enable_if<
+                     HPHP::has_toString<Val, std::string() const>::value,
+                     void
+                   >::type> {
+  explicit FormatValue(const Val& val) : m_val(val) {}
+
+  template<typename Callback> void format(FormatArg& arg, Callback& cb) const {
+    format_value::formatString(m_val.toString(), arg, cb);
+  }
+
+ private:
+  const Val& m_val;
+};
+}
+
 #endif /* incl_HPHP_TRACE_H_ */
 

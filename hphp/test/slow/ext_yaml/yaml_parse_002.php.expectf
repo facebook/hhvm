@@ -1,0 +1,20 @@
+array(2) {
+  [0]=>
+  array(3) {
+    ["time"]=>
+    string(8) "20:03:20"
+    ["player"]=>
+    string(10) "Sammy Sosa"
+    ["action"]=>
+    string(13) "strike (miss)"
+  }
+  [1]=>
+  array(3) {
+    ["time"]=>
+    string(8) "20:03:47"
+    ["player"]=>
+    string(10) "Sammy Sosa"
+    ["action"]=>
+    string(10) "grand slam"
+  }
+}

@@ -1,0 +1,828 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "mcrypt_module_open",
+            "desc": "This function opens the module of the algorithm and the mode to be used. The name of the algorithm is specified in algorithm, e.g. \"twofish\" or is one of the MCRYPT_ciphername constants. The module is closed by calling mcrypt_module_close().",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Normally it returns an encryption descriptor, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "algorithm",
+                    "type": "String",
+                    "desc": "The algorithm to be used."
+                },
+                {
+                    "name": "algorithm_directory",
+                    "type": "String",
+                    "desc": "The algorithm_directory and mode_directory are used to locate the encryption modules. When you supply a directory name, it is used. When you set one of these to the empty string (\"\"), the value set by the mcrypt.algorithms_dir or mcrypt.modes_dir ini-directive is used. When these are not set, the default directories that are used are the ones that were compiled in into libmcrypt (usually \/usr\/local\/lib\/libmcrypt)."
+                },
+                {
+                    "name": "mode",
+                    "type": "String",
+                    "desc": "The mode to be used."
+                },
+                {
+                    "name": "mode_directory",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_module_close",
+            "desc": "Closes the specified encryption handle.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "td",
+                    "type": "Resource",
+                    "desc": "The encryption descriptor."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_list_algorithms",
+            "desc": "Gets the list of all supported algorithms in the lib_dir parameter.",
+            "flags": [
+            ],
+            "return": {
+                "type": "StringVec",
+                "desc": "Returns an array with all the supported algorithms."
+            },
+            "args": [
+                {
+                    "name": "lib_dir",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "Specifies the directory where all algorithms are located. If not specifies, the value of the mcrypt.algorithms_dir php.ini directive is used."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_list_modes",
+            "desc": "Gets the list of all supported modes in the lib_dir parameter.",
+            "flags": [
+            ],
+            "return": {
+                "type": "StringVec",
+                "desc": "Returns an array with all the supported modes."
+            },
+            "args": [
+                {
+                    "name": "lib_dir",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "Specifies the directory where all modes are located. If not specifies, the value of the mcrypt.modes_dir php.ini directive is used."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_module_get_algo_block_size",
+            "desc": "Gets the blocksize of the specified algorithm.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Returns the block size of the algorithm specified in bytes."
+            },
+            "args": [
+                {
+                    "name": "algorithm",
+                    "type": "String",
+                    "desc": "The algorithm name."
+                },
+                {
+                    "name": "lib_dir",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "This optional parameter can contain the location where the mode module is on the system."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_module_get_algo_key_size",
+            "desc": "Gets the maximum supported keysize of the opened mode.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "This function returns the maximum supported key size of the algorithm specified in bytes."
+            },
+            "args": [
+                {
+                    "name": "algorithm",
+                    "type": "String",
+                    "desc": "The algorithm name."
+                },
+                {
+                    "name": "lib_dir",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "This optional parameter can contain the location where the mode module is on the system."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_module_get_supported_key_sizes",
+            "desc": "Returns an array with the key sizes supported by the specified algorithm. If it returns an empty array then all key sizes between 1 and mcrypt_module_get_algo_key_size() are supported by the algorithm.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64Vec",
+                "desc": "Returns an array with the key sizes supported by the specified algorithm. If it returns an empty array then all key sizes between 1 and mcrypt_module_get_algo_key_size() are supported by the algorithm."
+            },
+            "args": [
+                {
+                    "name": "algorithm",
+                    "type": "String",
+                    "desc": "The algorithm to used."
+                },
+                {
+                    "name": "lib_dir",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "The optional lib_dir parameter can contain the location of where the algorithm module is on the system."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_module_is_block_algorithm_mode",
+            "desc": "This function returns TRUE if the mode is for use with block algorithms, otherwise it returns FALSE. (e.g. FALSE for stream, and TRUE for cbc, cfb, ofb).",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "This function returns TRUE if the mode is for use with block algorithms, otherwise it returns FALSE. (e.g. FALSE for stream, and TRUE for cbc, cfb, ofb)."
+            },
+            "args": [
+                {
+                    "name": "mode",
+                    "type": "String",
+                    "desc": "The mode to check."
+                },
+                {
+                    "name": "lib_dir",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "The optional lib_dir parameter can contain the location of where the algorithm module is on the system."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_module_is_block_algorithm",
+            "desc": "This function returns TRUE if the specified algorithm is a block algorithm, or FALSE is it is a stream algorithm.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "This function returns TRUE if the specified algorithm is a block algorithm, or FALSE is it is a stream algorithm."
+            },
+            "args": [
+                {
+                    "name": "algorithm",
+                    "type": "String",
+                    "desc": "The algorithm to check."
+                },
+                {
+                    "name": "lib_dir",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "The optional lib_dir parameter can contain the location of where the algorithm module is on the system."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_module_is_block_mode",
+            "desc": "This function returns TRUE if the mode outputs blocks of bytes or FALSE if it outputs just bytes. (e.g. TRUE for cbc and ecb, and FALSE for cfb and stream).",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "This function returns TRUE if the mode outputs blocks of bytes or FALSE if it outputs just bytes. (e.g. TRUE for cbc and ecb, and FALSE for cfb and stream)."
+            },
+            "args": [
+                {
+                    "name": "mode",
+                    "type": "String",
+                    "desc": "The mode to check."
+                },
+                {
+                    "name": "lib_dir",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "The optional lib_dir parameter can contain the location of where the algorithm module is on the system."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_module_self_test",
+            "desc": "This function runs the self test on the algorithm specified.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "The function returns TRUE if the self test succeeds, or FALSE when if fails."
+            },
+            "args": [
+                {
+                    "name": "algorithm",
+                    "type": "String",
+                    "desc": "The algorithm to test."
+                },
+                {
+                    "name": "lib_dir",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "The optional lib_dir parameter can contain the location of where the algorithm module is on the system."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_create_iv",
+            "desc": "Create an initialization vector (IV) from a random source.\n\nThe IV is only meant to give an alternative seed to the encryption routines. This IV does not need to be secret at all, though it can be desirable. You even can send it along with your ciphertext without losing security.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the initialization vector, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "size",
+                    "type": "Int32",
+                    "desc": "Determines the size of the IV, parameter source (defaults to random value) specifies the source of the IV."
+                },
+                {
+                    "name": "source",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "The source can be MCRYPT_RAND (system random number generator), MCRYPT_DEV_RANDOM (read data from \/dev\/random) and MCRYPT_DEV_URANDOM (read data from \/dev\/urandom). Prior to 5.3.0, MCRYPT_RAND was the only one supported on Windows."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_encrypt",
+            "desc": "Encrypts the data and returns it.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the encrypted data, as a string."
+            },
+            "args": [
+                {
+                    "name": "cipher",
+                    "type": "String",
+                    "desc": "One of the MCRYPT_ciphername constants of the name of the algorithm as string."
+                },
+                {
+                    "name": "key",
+                    "type": "String",
+                    "desc": "The key with which the data will be encrypted. If it's smaller that the required keysize, it is padded with '\\0'. It is better not to use ASCII strings for keys.\n\nIt is recommended to use the mhash functions to create a key from a string."
+                },
+                {
+                    "name": "data",
+                    "type": "String",
+                    "desc": "The data that will be encrypted with the given cipher and mode. If the size of the data is not n * blocksize, the data will be padded with '\\0'.\n\nThe returned crypttext can be larger that the size of the data that is given by data."
+                },
+                {
+                    "name": "mode",
+                    "type": "String",
+                    "desc": "One of the MCRYPT_MODE_modename constants of one of \"ecb\", \"cbc\", \"cfb\", \"ofb\", \"nofb\" or \"stream\"."
+                },
+                {
+                    "name": "iv",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "Used for the initialisation in CBC, CFB, OFB modes, and in some algorithms in STREAM mode. If you do not supply an IV, while it is needed for an algorithm, the function issues a warning and uses an IV with all bytes set to '\\0'."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_decrypt",
+            "desc": "Decrypts the data and returns the unencrypted data.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the decrypted data as a string."
+            },
+            "args": [
+                {
+                    "name": "cipher",
+                    "type": "String",
+                    "desc": "cipher is one of the MCRYPT_ciphername constants of the name of the algorithm as string."
+                },
+                {
+                    "name": "key",
+                    "type": "String",
+                    "desc": "key is the key with which the data is encrypted. If it's smaller that the required keysize, it is padded with '\\0'."
+                },
+                {
+                    "name": "data",
+                    "type": "String",
+                    "desc": "data is the data that will be decrypted with the given cipher and mode. If the size of the data is not n * blocksize, the data will be padded with '\\0'."
+                },
+                {
+                    "name": "mode",
+                    "type": "String",
+                    "desc": "mode is one of the MCRYPT_MODE_modename constants of one of \"ecb\", \"cbc\", \"cfb\", \"ofb\", \"nofb\" or \"stream\"."
+                },
+                {
+                    "name": "iv",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "The iv parameter is used for the initialisation in CBC, CFB, OFB modes, and in some algorithms in STREAM mode. If you do not supply an IV, while it is needed for an algorithm, the function issues a warning and uses an IV with all bytes set to '\\0'."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_cbc",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "cipher",
+                    "type": "String"
+                },
+                {
+                    "name": "key",
+                    "type": "String"
+                },
+                {
+                    "name": "data",
+                    "type": "String"
+                },
+                {
+                    "name": "mode",
+                    "type": "Int32"
+                },
+                {
+                    "name": "iv",
+                    "type": "String",
+                    "value": "null_string"
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_cfb",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "cipher",
+                    "type": "String"
+                },
+                {
+                    "name": "key",
+                    "type": "String"
+                },
+                {
+                    "name": "data",
+                    "type": "String"
+                },
+                {
+                    "name": "mode",
+                    "type": "Int32"
+                },
+                {
+                    "name": "iv",
+                    "type": "String",
+                    "value": "null_string"
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_ecb",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "cipher",
+                    "type": "String"
+                },
+                {
+                    "name": "key",
+                    "type": "String"
+                },
+                {
+                    "name": "data",
+                    "type": "String"
+                },
+                {
+                    "name": "mode",
+                    "type": "Int32"
+                },
+                {
+                    "name": "iv",
+                    "type": "String",
+                    "value": "null_string"
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_ofb",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "cipher",
+                    "type": "String"
+                },
+                {
+                    "name": "key",
+                    "type": "String"
+                },
+                {
+                    "name": "data",
+                    "type": "String"
+                },
+                {
+                    "name": "mode",
+                    "type": "Int32"
+                },
+                {
+                    "name": "iv",
+                    "type": "String",
+                    "value": "null_string"
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_get_block_size",
+            "desc": "The first prototype is when linked against libmcrypt 2.2.x, the second when linked against libmcrypt 2.4.x or 2.5.x.\n\nmcrypt_get_block_size() is used to get the size of a block of the specified cipher (in combination with an encryption mode).\n\nIt is more useful to use the mcrypt_enc_get_block_size() function as this uses the resource returned by mcrypt_module_open().",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Gets the block size, as an integer."
+            },
+            "args": [
+                {
+                    "name": "cipher",
+                    "type": "String",
+                    "desc": "One of the MCRYPT_ciphername constants or the name of the algorithm as string."
+                },
+                {
+                    "name": "module",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "The module."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_get_cipher_name",
+            "desc": "mcrypt_get_cipher_name() is used to get the name of the specified cipher.\n\nmcrypt_get_cipher_name() takes the cipher number as an argument (libmcrypt 2.2.x) or takes the cipher name as an argument (libmcrypt 2.4.x or higher) and returns the name of the cipher or FALSE, if the cipher does not exist.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "This function returns the name of the cipher or FALSE, if the cipher does not exist."
+            },
+            "args": [
+                {
+                    "name": "cipher",
+                    "type": "String",
+                    "desc": "One of the MCRYPT_ciphername constants or the name of the algorithm as string."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_get_iv_size",
+            "desc": "Gets the size of the IV belonging to a specific cipher\/mode combination.\n\nIt is more useful to use the mcrypt_enc_get_iv_size() function as this uses the resource returned by mcrypt_module_open().",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the size of the Initialisation Vector (IV) in bytes. On error the function returns FALSE. If the IV is ignored in the specified cipher\/mode combination zero is returned."
+            },
+            "args": [
+                {
+                    "name": "cipher",
+                    "type": "String",
+                    "desc": "One of the MCRYPT_ciphername constants of the name of the algorithm as string."
+                },
+                {
+                    "name": "mode",
+                    "type": "String",
+                    "desc": "mode is one of the MCRYPT_MODE_modename constants or one of \"ecb\", \"cbc\", \"cfb\", \"ofb\", \"nofb\" or \"stream\". The IV is ignored in ECB mode as this mode does not require it. You will need to have the same IV (think: starting point) both at encryption and decryption stages, otherwise your encryption will fail."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_get_key_size",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64"
+            },
+            "args": [
+                {
+                    "name": "cipher",
+                    "type": "String"
+                },
+                {
+                    "name": "module",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_enc_get_algorithms_name",
+            "desc": "This function returns the name of the algorithm.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the name of the opened algorithm as a string."
+            },
+            "args": [
+                {
+                    "name": "td",
+                    "type": "Resource",
+                    "desc": "The encryption descriptor."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_enc_get_block_size",
+            "desc": "Gets the blocksize of the opened algorithm.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Returns the block size of the specified algorithm in bytes."
+            },
+            "args": [
+                {
+                    "name": "td",
+                    "type": "Resource",
+                    "desc": "The encryption descriptor."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_enc_get_iv_size",
+            "desc": "This function returns the size of the IV of the algorithm specified by the encryption descriptor in bytes. An IV is used in cbc, cfb and ofb modes, and in some algorithms in stream mode.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Returns the size of the IV, or 0 if the IV is ignored in the algorithm."
+            },
+            "args": [
+                {
+                    "name": "td",
+                    "type": "Resource",
+                    "desc": "The encryption descriptor."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_enc_get_key_size",
+            "desc": "Gets the maximum supported key size of the algorithm in bytes.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Returns the maximum supported key size of the algorithm in bytes."
+            },
+            "args": [
+                {
+                    "name": "td",
+                    "type": "Resource",
+                    "desc": "The encryption descriptor."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_enc_get_modes_name",
+            "desc": "This function returns the name of the mode.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the name as a string."
+            },
+            "args": [
+                {
+                    "name": "td",
+                    "type": "Resource",
+                    "desc": "The encryption descriptor."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_enc_get_supported_key_sizes",
+            "desc": "Gets the supported key sizes of the opened algorithm.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64Vec",
+                "desc": "Returns an array with the key sizes supported by the algorithm specified by the encryption descriptor. If it returns an empty array then all key sizes between 1 and mcrypt_enc_get_key_size() are supported by the algorithm."
+            },
+            "args": [
+                {
+                    "name": "td",
+                    "type": "Resource",
+                    "desc": "The encryption descriptor."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_enc_is_block_algorithm_mode",
+            "desc": "Tells whether the algorithm of the opened mode works on blocks (e.g. FALSE for stream, and TRUE for cbc, cfb, ofb)..",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE if the mode is for use with block algorithms, otherwise it returns FALSE."
+            },
+            "args": [
+                {
+                    "name": "td",
+                    "type": "Resource",
+                    "desc": "The encryption descriptor."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_enc_is_block_algorithm",
+            "desc": "Tells whether the algorithm of the opened mode is a block algorithm.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE if the algorithm is a block algorithm or FALSE if it is a stream one."
+            },
+            "args": [
+                {
+                    "name": "td",
+                    "type": "Resource",
+                    "desc": "The encryption descriptor."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_enc_is_block_mode",
+            "desc": "Tells whether the opened mode outputs blocks (e.g. TRUE for cbc and ecb, and FALSE for cfb and stream).",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE if the mode outputs blocks of bytes or FALSE if it outputs bytes."
+            },
+            "args": [
+                {
+                    "name": "td",
+                    "type": "Resource",
+                    "desc": "The encryption descriptor."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_enc_self_test",
+            "desc": "This function runs the self test on the algorithm specified by the descriptor td.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "If the self test succeeds it returns FALSE. In case of an error, it returns TRUE."
+            },
+            "args": [
+                {
+                    "name": "td",
+                    "type": "Resource",
+                    "desc": "The encryption descriptor."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_generic",
+            "desc": "This function encrypts data. The data is padded with \"\\0\" to make sure the length of the data is n * blocksize. This function returns the encrypted data. Note that the length of the returned string can in fact be longer then the input, due to the padding of the data.\n\nIf you want to store the encrypted data in a database make sure to store the entire string as returned by mcrypt_generic, or the string will not entirely decrypt properly. If your original string is 10 characters long and the block size is 8 (use mcrypt_enc_get_block_size() to determine the blocksize), you would need at least 16 characters in your database field. Note the string returned by mdecrypt_generic() will be 16 characters as well...use rtrim($str, \"\\0\") to remove the padding.\n\nIf you are for example storing the data in a MySQL database remember that varchar fields automatically have trailing spaces removed during insertion. As encrypted data can end in a space (ASCII 32), the data will be damaged by this removal. Store data in a tinyblob\/tinytext (or larger) field instead.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the encrypted data."
+            },
+            "args": [
+                {
+                    "name": "td",
+                    "type": "Resource",
+                    "desc": "The encryption descriptor.\n\nThe encryption handle should always be initialized with mcrypt_generic_init() with a key and an IV before calling this function. Where the encryption is done, you should free the encryption buffers by calling mcrypt_generic_deinit(). See mcrypt_module_open() for an example."
+                },
+                {
+                    "name": "data",
+                    "type": "String",
+                    "desc": "The data to encrypt."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_generic_init",
+            "desc": "You need to call this function before every call to mcrypt_generic() or mdecrypt_generic().",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "The function returns a negative value on error, -3 when the key length was incorrect, -4 when there was a memory allocation problem and any other return value is an unknown error. If an error occurs a warning will be displayed accordingly. FALSE is returned if incorrect parameters were passed."
+            },
+            "args": [
+                {
+                    "name": "td",
+                    "type": "Resource",
+                    "desc": "The encryption descriptor."
+                },
+                {
+                    "name": "key",
+                    "type": "String",
+                    "desc": "The maximum length of the key should be the one obtained by calling mcrypt_enc_get_key_size() and every value smaller than this is legal."
+                },
+                {
+                    "name": "iv",
+                    "type": "String",
+                    "desc": "The IV should normally have the size of the algorithms block size, but you must obtain the size by calling mcrypt_enc_get_iv_size(). IV is ignored in ECB. IV MUST exist in CFB, CBC, STREAM, nOFB and OFB modes. It needs to be random and unique (but not secret). The same IV must be used for encryption\/decryption. If you do not want to use it you should set it to zeros, but this is not recommended."
+                }
+            ]
+        },
+        {
+            "name": "mdecrypt_generic",
+            "desc": "This function decrypts data. Note that the length of the returned string can in fact be longer then the unencrypted string, due to the padding of the data.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "td",
+                    "type": "Resource",
+                    "desc": "An encryption descriptor returned by mcrypt_module_open()"
+                },
+                {
+                    "name": "data",
+                    "type": "String",
+                    "desc": "Encrypted data."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_generic_deinit",
+            "desc": "This function terminates encryption specified by the encryption descriptor (td). It clears all buffers, but does not close the module. You need to call mcrypt_module_close() yourself. (But PHP does this for you at the end of the script.)",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "td",
+                    "type": "Resource",
+                    "desc": "The encryption descriptor."
+                }
+            ]
+        },
+        {
+            "name": "mcrypt_generic_end",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "td",
+                    "type": "Resource"
+                }
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

@@ -1,6 +1,0 @@
-*** Testing mb_strrchr() : error conditions ***
-
--- Testing mb_strrchr() with unknown encoding --
-HipHop Warning: %a
-bool(false)
-===DONE===

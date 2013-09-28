@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -19,161 +19,154 @@
 #define incl_HPHP_EXT_CONTINUATION_H_
 
 
-#include "hphp/runtime/base/base_includes.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/runtime/base/base-includes.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-FORWARD_DECLARE_CLASS_BUILTIN(Continuation);
-FORWARD_DECLARE_CLASS_BUILTIN(ContinuationWaitHandle);
-p_Continuation f_hphp_create_continuation(CStrRef clsname, CStrRef funcname, CStrRef origFuncName, CArrRef args = null_array);
+FORWARD_DECLARE_CLASS(Continuation);
+FORWARD_DECLARE_CLASS(ContinuationWaitHandle);
+Object f_hphp_create_continuation(CStrRef clsname, CStrRef funcname, CStrRef origFuncName, CArrRef args = null_array);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Continuation
 
-class c_Continuation : public ExtObjectData {
+class c_Continuation : public ExtObjectDataFlags<ObjectData::HasClone> {
  public:
-  DECLARE_CLASS_NO_ALLOCATION(Continuation, Continuation, ObjectData)
-  virtual void sweep();
+  DECLARE_CLASS_NO_ALLOCATION(Continuation)
   void operator delete(void* p) {
     c_Continuation* this_ = (c_Continuation*)p;
-    DELETEOBJSZ(sizeForLocalsAndIters(this_->m_vmFunc->numLocals(),
-                                      this_->m_vmFunc->numIterators()))(this_);
+    auto const size = this_->getObjectSize();
+    if (LIKELY(size <= MemoryManager::kMaxSmartSize)) {
+      MM().smartFreeSize(this_, size);
+      return;
+    }
+    MM().smartFreeSizeBig(this_, size);
   }
 
-  explicit c_Continuation(Class* cls = c_Continuation::s_cls);
+  explicit c_Continuation(Class* cls = c_Continuation::classof());
   ~c_Continuation();
 
 public:
-  void init(const Func* vmFunc,
-            const StringData* origFuncName,
-            ObjectData* thisPtr,
-            ArrayData* args) noexcept {
-    m_vmFunc = const_cast<Func*>(vmFunc);
-    assert(m_vmFunc);
-    m_origFuncName = origFuncName;
-    assert(m_origFuncName->isStatic());
-
-    if (thisPtr != nullptr) {
-      m_obj = thisPtr;
-    } else {
-      assert(m_obj.isNull());
-    }
-
-    m_args = args;
+  static constexpr uint startedOffset() {
+    return offsetof(c_Continuation, o_subclassData);
   }
+  bool started() const { return o_subclassData.u8[0]; }
+  void start() { o_subclassData.u8[0] = true; }
+
+  enum ContState : uint8_t {
+    Running = 1,
+    Done    = 2
+  };
+  static constexpr uint stateOffset() {
+    return offsetof(c_Continuation, o_subclassData) + 1;
+  }
+  bool done() const { return o_subclassData.u8[1] & ContState::Done; }
+  void setDone() { o_subclassData.u8[1]  =  ContState::Done; }
+
+  bool running() const { return o_subclassData.u8[1] & ContState::Running; }
+  void setRunning() { o_subclassData.u8[1]  =  ContState::Running; }
+  void setStopped() { o_subclassData.u8[1] &= ~ContState::Running; }
 
   void t___construct();
   void t_update(int64_t label, CVarRef value);
+  void t_update_key(int64_t label, CVarRef value, CVarRef key);
   Object t_getwaithandle();
   int64_t t_getlabel();
-  int64_t t_num_args();
-  Array t_get_args();
-  Variant t_get_arg(int64_t id);
   Variant t_current();
-  int64_t t_key();
+  Variant t_key();
   void t_next();
   void t_rewind();
   bool t_valid();
   void t_send(CVarRef v);
   void t_raise(CVarRef v);
-  void t_raised();
   String t_getorigfuncname();
   String t_getcalledclass();
-  Variant t___clone();
 
-  static c_Continuation* alloc(Class* cls, int nLocals, int nIters) {
-    c_Continuation* cont =
-      (c_Continuation*)ALLOCOBJSZ(sizeForLocalsAndIters(nLocals, nIters));
-    new ((void *)cont) c_Continuation(cls);
-    cont->m_localsOffset = sizeof(c_Continuation) + sizeof(Iter) * nIters;
-    cont->m_arPtr = (ActRec*)(cont->locals() + nLocals);
+  static c_Continuation* Clone(ObjectData* obj);
 
+  static c_Continuation* alloc(const Func* origFunc, const Func* genFunc) {
+    assert(origFunc);
+    assert(genFunc);
+
+    size_t arOffset = getArOffset(genFunc);
+    size_t objectSize = arOffset + sizeof(ActRec);
+    auto const cont = new (MM().objMalloc(objectSize)) c_Continuation();
+    cont->m_origFunc = const_cast<Func*>(origFunc);
+    cont->m_arPtr = (ActRec*)(uintptr_t(cont) + arOffset);
     memset((void*)((uintptr_t)cont + sizeof(c_Continuation)), 0,
-           sizeof(TypedValue) * nLocals + sizeof(Iter) * nIters);
+           arOffset - sizeof(c_Continuation));
+    assert(cont->getObjectSize() == objectSize);
     return cont;
   }
 
-protected: virtual bool php_sleep(Variant &ret);
+  static size_t getArOffset(const Func* genFunc) {
+    size_t arOffset =
+      sizeof(c_Continuation) +
+      sizeof(Iter) * genFunc->numIterators() +
+      sizeof(TypedValue) * genFunc->numLocals();
+    arOffset += sizeof(TypedValue) - 1;
+    arOffset &= ~(sizeof(TypedValue) - 1);
+    return arOffset;
+  }
+
 public:
   void call_next();
-  void call_send(TypedValue* v);
+  void call_send(Cell& v);
   void call_raise(ObjectData* e);
 
   inline void preNext() {
-    if (m_done) {
+    if (done()) {
       throw_exception(Object(SystemLib::AllocExceptionObject(
                                "Continuation is already finished")));
     }
-    if (m_running) {
+    if (running()) {
       throw_exception(Object(SystemLib::AllocExceptionObject(
                                "Continuation is already running")));
     }
-    m_running = true;
-    ++m_index;
+    setRunning();
+    start();
   }
 
   inline void startedCheck() {
-    if (m_index < 0LL) {
+    if (!started()) {
       throw_exception(
         Object(SystemLib::AllocExceptionObject("Need to call next() first")));
     }
   }
 
+  Offset getExecutionOffset(int32_t label) const;
+  Offset getNextExecutionOffset() const;
+
+private:
+  size_t getObjectSize() {
+    return (char*)(m_arPtr + 1) - (char*)this;
+  }
+
+  void dupContVar(const StringData *name, TypedValue *src);
+  void copyContinuationVars(ActRec *fp);
+
 public:
-  Object m_obj;
-  Array m_args;
+  /* 32-bit o_id from ObjectData */
+  int32_t m_label;
   int64_t m_index;
+  Variant m_key;
   Variant m_value;
-  Variant m_received;
-  const StringData* m_origFuncName;
-  bool m_done;
-  bool m_running;
-  bool m_should_throw;
+  Func* m_origFunc;
 
-  int m_localsOffset;
-  Func *m_vmFunc;
-  int64_t m_label;
+  /* ActRec for continuation (does not live on stack) */
   ActRec* m_arPtr;
-
   p_ContinuationWaitHandle m_waitHandle;
 
-  SmartPtr<HphpArray> m_VMStatics;
+  /* temporary storage used to save the SP when inlining into a continuation */
+  void* m_stashedSP;
 
   String& getCalledClass() { not_reached(); }
 
-  HphpArray* getStaticLocals();
-  static size_t sizeForLocalsAndIters(int nLocals, int nIters) {
-    return (sizeof(c_Continuation) + sizeof(TypedValue) * nLocals +
-            sizeof(Iter) * nIters + sizeof(ActRec));
-  }
   ActRec* actRec() {
     return m_arPtr;
   }
-  TypedValue* locals() {
-    return (TypedValue*)(uintptr_t(this) + m_localsOffset);
-  }
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class DummyContinuation
-
-FORWARD_DECLARE_CLASS_BUILTIN(DummyContinuation);
-class c_DummyContinuation : public ExtObjectData {
- public:
-  DECLARE_CLASS(DummyContinuation, DummyContinuation, ObjectData)
-
-  // need to implement
-  public: c_DummyContinuation(Class* cls = c_DummyContinuation::s_cls);
-  public: ~c_DummyContinuation();
-  public: void t___construct();
-  public: Variant t_current();
-  public: int64_t t_key();
-  public: void t_next();
-  public: void t_rewind();
-  public: bool t_valid();
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////

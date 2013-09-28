@@ -1,6 +1,5 @@
 <?php
 
-
 trait Hello1 {
   public function sayNum() {
     echo "1\n";

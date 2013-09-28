@@ -1,0 +1,6 @@
+UTF8 = 1
+Color = 0
+Tutorial = -1 
+MaxCodeLines = -1
+NeverSaveConfig = 1;
+PrintLevel = 3;

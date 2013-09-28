@@ -1,6 +1,5 @@
 <?php
 
-
 function f8() {
   $i = 0;
   $bar = array();

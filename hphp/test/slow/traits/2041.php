@@ -1,6 +1,5 @@
 <?php
 
-
 error_reporting(E_ALL);
 
 trait HelloWorld {
@@ -25,6 +24,7 @@ class TheWorldIsNotEnough {
 }
 
 $o = new TheWorldIsNotEnough();
-$o->sayHello(); // echos Hello Universe!
+$o->sayHello();
+ // echos Hello Universe!
 ?>
 

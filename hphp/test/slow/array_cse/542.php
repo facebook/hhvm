@@ -1,7 +1,8 @@
 <?php
 
-
-function blocker() { print 'block'; }
+function blocker() {
+ print 'block';
+ }
 function f($x) {
   $x = (string) $x;
   blocker();

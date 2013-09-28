@@ -1,0 +1,10 @@
+*** Testing ctype_cntrl() : error conditions ***
+
+-- Testing ctype_cntrl() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing ctype_cntrl() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

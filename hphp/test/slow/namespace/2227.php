@@ -1,6 +1,5 @@
 <?php
 
-
 namespace A\B;
 class Foo {
   static $baz = 32;
@@ -22,7 +21,8 @@ if (rand(0, 1)) {
       return Foo::NoSuchConstant;
     }
   }
-} else {
+}
+ else {
   class B {
     static $baz = 'baz';
     const FOO = 30;

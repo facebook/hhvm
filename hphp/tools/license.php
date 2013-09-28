@@ -1,29 +1,37 @@
 <?php
 
-chdir(preg_replace('#/hphp/tools/license.php$#', '/src', realpath(__FILE__)));
+error_reporting(E_ALL | E_STRICT | E_WARNING);
+
+$dir = preg_replace('#/hphp/tools/license.php$#', '/hphp', realpath(__FILE__));
+if (!chdir($dir)) {
+  print("Unable to chdir to $dir\n");
+  exit(1);
+}
 
 // parse all these files
-$inputs = 'find . -regex ".*\.cpp" -or -regex ".*\.c"   -or -regex ".*\.h"';
+$inputs = 'find . -name "*.cpp" -o -name "*.c" -o -name "*.h"';
 
 // do not touch these files
 $excluded = array(
   'runtime/base/compiler_id.h',
   'runtime/ext/bcmath/',
-  'util/neo/',
+  'runtime/ext_zend_compat/',
+  'neo/',
   'util/cronoutils.h',
   'util/cronoutils.cpp',
+  'vixl/',
   'runtime/ext/quicklz.h',
   'runtime/ext/quicklz.inc',
   'facebook',
 
   // non-PHP licenses
   'compiler/parser/hphp.tab.cpp',
-  'runtime/base/zend/utf8_decode.c',
-  'runtime/base/zend/utf8_to_utf16.c',
-  'runtime/base/zend/zend_strtod.cpp',
+  'runtime/base/utf8-decode.c',
+  'runtime/base/utf8-to-utf16.c',
+  'runtime/base/zend-strtod.cpp',
   'runtime/ext/JSON_parser.cpp',
   'runtime/ext/php_unicode.h',
-  'runtime/base/zend/zend_ini.tab.cpp',
+  'runtime/base/zend-ini.tab.cpp',
   'third_party/',
   'util/safesort.h',
 );
@@ -36,32 +44,54 @@ $files_external_party = array(
 );
 
 $files_zend = array(
-  'util/zend/',
-  'runtime/base/zend/',
+  'zend/',
+  'runtime/base/intl-convert.cpp',
+  'runtime/base/intl-convert.h',
+  'runtime/base/utf8-decode.h',
+  'runtime/base/zend-collator.h',
+  'runtime/base/zend-collator.cpp',
+  'runtime/base/zend-functions.h',
+  'runtime/base/zend-functions.cpp',
+  'runtime/base/zend-ini.lex.yy.cpp',
+  'runtime/base/zend-math.h',
+  'runtime/base/zend-multiply.h',
+  'runtime/base/zend-pack.h',
+  'runtime/base/zend-pack.cpp',
+  'runtime/base/zend-php-config.h',
+  'runtime/base/zend-printf.h',
+  'runtime/base/zend-printf.cpp',
+  'runtime/base/zend-qsort.h',
+  'runtime/base/zend-qsort.cpp',
+  'runtime/base/zend-rand.cpp',
+  'runtime/base/zend-scanf.h',
+  'runtime/base/zend-scanf.cpp',
+  'runtime/base/zend-string.h',
+  'runtime/base/zend-string.cpp',
+  'runtime/base/zend-strtod.h',
+  'runtime/base/zend-strtod.cpp',
+  'runtime/base/zend-url.h',
+  'runtime/base/zend-url.cpp',
 );
 $files_php = array(
   'runtime/ext/',
-  'runtime/base/server/upload.h',
-  'runtime/base/server/upload.cpp',
+  'runtime/base/dummy-resource.h',
+  'runtime/base/dummy-resource.cpp',
+  'runtime/server/upload.h',
+  'runtime/server/upload.cpp',
   'util/compression.cpp',
-);
-
-$generated_files = array(
-  'system/gen/',
-  'lex.yy.cpp',
-  'lex.eval_.cpp',
-  'hphp.tab.cpp',
 );
 
 $external_licenses = array();
 $external_licenses['hyves'] = 'Copyright (c) 2010 Hyves (http://www.hyves.nl)';
+
+$cyr = date_create()->format('Y');
 
 $license_zend = <<<LICENSE
 /*
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-$cyr Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
@@ -80,7 +110,7 @@ $license_hiphop = <<<LICENSE
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-$cyr Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -98,7 +128,7 @@ $license_php = <<<LICENSE
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-$cyr Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -118,7 +148,7 @@ $license_external = <<<LICENSE
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
 <external>
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-$cyr Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -173,24 +203,17 @@ function process_file_contents($file, $contents) {
     }
   }
 
-  // add zend licese
+  // add zend license
   foreach ($files_zend as $f) {
     if (preg_match('/'.preg_quote($f, '/').'/', $file)) {
       return $license_zend."\n".$contents;
     }
   }
 
-  // add php licese
+  // add php license
   foreach ($files_php as $f) {
     if (preg_match('/'.preg_quote($f, '/').'/', $file)) {
       return $license_php."\n".$contents;
-    }
-  }
-
-  // add the at-sign 'generated' flag for code review tools
-  foreach ($generated_files as $f) {
-    if (preg_match('/'.preg_quote($f, '/').'/', $file)) {
-      $contents = "// $generated by HipHop Compiler\n".$contents;
     }
   }
 

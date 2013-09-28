@@ -145,9 +145,14 @@ class ProcessReturnCode {
 };
 
 /**
+ * Base exception thrown by the Subprocess methods.
+ */
+class SubprocessError : public std::exception {};
+
+/**
  * Exception thrown by *Checked methods of Subprocess.
  */
-class CalledProcessError : public std::exception {
+class CalledProcessError : public SubprocessError {
  public:
   explicit CalledProcessError(ProcessReturnCode rc);
   ~CalledProcessError() throw() { }
@@ -155,6 +160,21 @@ class CalledProcessError : public std::exception {
   ProcessReturnCode returnCode() const { return returnCode_; }
  private:
   ProcessReturnCode returnCode_;
+  std::string what_;
+};
+
+/**
+ * Exception thrown if the subprocess cannot be started.
+ */
+class SubprocessSpawnError : public SubprocessError {
+ public:
+  SubprocessSpawnError(const char* executable, int errCode, int errnoValue);
+  ~SubprocessSpawnError() throw() {}
+  const char* what() const throw() FOLLY_OVERRIDE { return what_.c_str(); }
+  int errnoValue() const { return errnoValue_; }
+
+ private:
+  int errnoValue_;
   std::string what_;
 };
 
@@ -179,7 +199,11 @@ class Subprocess : private boost::noncopyable {
   class Options : private boost::orable<Options> {
     friend class Subprocess;
    public:
-    Options() : closeOtherFds_(false), usePath_(false) { }
+    Options()
+      : closeOtherFds_(false),
+        usePath_(false),
+        parentDeathSignal_(0) {
+    }
 
     /**
      * Change action for file descriptor fd.
@@ -200,19 +224,23 @@ class Subprocess : private boost::noncopyable {
     /**
      * Shortcut to change the action for standard input.
      */
-    Options& stdin(int action) { return fd(0, action); }
+    Options& stdin(int action) { return fd(STDIN_FILENO, action); }
 
     /**
      * Shortcut to change the action for standard output.
      */
-    Options& stdout(int action) { return fd(1, action); }
+    Options& stdout(int action) { return fd(STDOUT_FILENO, action); }
 
     /**
      * Shortcut to change the action for standard error.
      * Note that stderr(1) will redirect the standard error to the same
      * file descriptor as standard output; the equivalent of bash's "2>&1"
      */
-    Options& stderr(int action) { return fd(2, action); }
+    Options& stderr(int action) { return fd(STDERR_FILENO, action); }
+
+    Options& pipeStdin() { return fd(STDIN_FILENO, PIPE_IN); }
+    Options& pipeStdout() { return fd(STDOUT_FILENO, PIPE_OUT); }
+    Options& pipeStderr() { return fd(STDERR_FILENO, PIPE_OUT); }
 
     /**
      * Close all other fds (other than standard input, output, error,
@@ -234,6 +262,14 @@ class Subprocess : private boost::noncopyable {
     Options& usePath() { usePath_ = true; return *this; }
 
     /**
+     * Child will receive a signal when the parent exits.
+     */
+    Options& parentDeathSignal(int sig) {
+      parentDeathSignal_ = sig;
+      return *this;
+    }
+
+    /**
      * Helpful way to combine Options.
      */
     Options& operator|=(const Options& other);
@@ -243,6 +279,7 @@ class Subprocess : private boost::noncopyable {
     FdMap fdActions_;
     bool closeOtherFds_;
     bool usePath_;
+    int parentDeathSignal_;
   };
 
   static Options pipeStdin() { return Options().stdin(PIPE); }
@@ -277,19 +314,19 @@ class Subprocess : private boost::noncopyable {
       const std::vector<std::string>* env = nullptr);
 
   /**
-   * Append all data, close the stdin (to-child) fd, and read all data,
-   * except that this is done in a safe manner to prevent deadlocking.
+   * Communicate with the child until all pipes to/from the child are closed.
    *
-   * If writeStdin() is given in flags, the process must have been opened with
-   * stdinFd=PIPE.
+   * The input buffer is written to the process' stdin pipe, and data is read
+   * from the stdout and stderr pipes.  Non-blocking I/O is performed on all
+   * pipes simultaneously to avoid deadlocks.
    *
-   * If readStdout() is given in flags, the first returned value will be the
-   * value read from the child's stdout; the child must have been opened with
-   * stdoutFd=PIPE.
+   * The stdin pipe will be closed after the full input buffer has been written.
+   * An error will be thrown if a non-empty input buffer is supplied but stdin
+   * was not configured as a pipe.
    *
-   * If readStderr() is given in flags, the second returned value will be the
-   * value read from the child's stderr; the child must have been opened with
-   * stderrFd=PIPE.
+   * Returns a pair of buffers containing the data read from stdout and stderr.
+   * If stdout or stderr is not a pipe, an empty IOBuf queue will be returned
+   * for the respective buffer.
    *
    * Note that communicate() returns when all pipes to/from the child are
    * closed; the child might stay alive after that, so you must still wait().
@@ -298,39 +335,11 @@ class Subprocess : private boost::noncopyable {
    * that it won't try to allocate all data at once).  communicate
    * uses strings for simplicity.
    */
-  class CommunicateFlags : private boost::orable<CommunicateFlags> {
-    friend class Subprocess;
-   public:
-    CommunicateFlags()
-      : writeStdin_(false), readStdout_(false), readStderr_(false) { }
-    CommunicateFlags& writeStdin() { writeStdin_ = true; return *this; }
-    CommunicateFlags& readStdout() { readStdout_ = true; return *this; }
-    CommunicateFlags& readStderr() { readStderr_ = true; return *this; }
-
-    CommunicateFlags& operator|=(const CommunicateFlags& other);
-   private:
-    bool writeStdin_;
-    bool readStdout_;
-    bool readStderr_;
-  };
-
-  static CommunicateFlags writeStdin() {
-    return CommunicateFlags().writeStdin();
-  }
-  static CommunicateFlags readStdout() {
-    return CommunicateFlags().readStdout();
-  }
-  static CommunicateFlags readStderr() {
-    return CommunicateFlags().readStderr();
-  }
-
   std::pair<IOBufQueue, IOBufQueue> communicateIOBuf(
-      const CommunicateFlags& flags = readStdout(),
-      IOBufQueue data = IOBufQueue());
+      IOBufQueue input = IOBufQueue());
 
   std::pair<std::string, std::string> communicate(
-      const CommunicateFlags& flags = readStdout(),
-      StringPiece data = StringPiece());
+      StringPiece input = StringPiece());
 
   /**
    * Communicate with the child until all pipes to/from the child are closed.
@@ -444,16 +453,34 @@ class Subprocess : private boost::noncopyable {
   static const int RV_RUNNING = ProcessReturnCode::RV_RUNNING;
   static const int RV_NOT_STARTED = ProcessReturnCode::RV_NOT_STARTED;
 
+  // spawn() sets up a pipe to read errors from the child,
+  // then calls spawnInternal() to do the bulk of the work.  Once
+  // spawnInternal() returns it reads the error pipe to see if the child
+  // encountered any errors.
   void spawn(
       std::unique_ptr<const char*[]> argv,
       const char* executable,
       const Options& options,
       const std::vector<std::string>* env);
+  void spawnInternal(
+      std::unique_ptr<const char*[]> argv,
+      const char* executable,
+      Options& options,
+      const std::vector<std::string>* env,
+      int errFd);
 
-  // Action to run in child.
+  // Actions to run in child.
   // Note that this runs after vfork(), so tread lightly.
-  void runChild(const char* executable, char** argv, char** env,
-                const Options& options) const;
+  // Returns 0 on success, or an errno value on failure.
+  int prepareChild(const Options& options, const sigset_t* sigmask) const;
+  int runChild(const char* executable, char** argv, char** env,
+               const Options& options) const;
+
+  /**
+   * Read from the error pipe, and throw SubprocessSpawnError if the child
+   * failed before calling exec().
+   */
+  void readChildErrorPipe(int pfd, const char* executable);
 
   /**
    * Close all file descriptors.
@@ -492,15 +519,6 @@ inline Subprocess::Options& Subprocess::Options::operator|=(
   }
   closeOtherFds_ |= other.closeOtherFds_;
   usePath_ |= other.usePath_;
-  return *this;
-}
-
-inline Subprocess::CommunicateFlags& Subprocess::CommunicateFlags::operator|=(
-    const Subprocess::CommunicateFlags& other) {
-  if (this == &other) return *this;
-  writeStdin_ |= other.writeStdin_;
-  readStdout_ |= other.readStdout_;
-  readStderr_ |= other.readStderr_;
   return *this;
 }
 

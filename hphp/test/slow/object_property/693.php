@@ -1,7 +1,7 @@
 <?php
 
-
-$a = array(); $a[] = 1;
+$a = array();
+ $a[] = 1;
 $o = (object)$a;
 var_dump($o);
 $s = serialize($o);

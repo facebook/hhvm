@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -24,7 +24,7 @@
 
 namespace HPHP {
 
-static const uint64_t table[4*256] = {
+const uint64_t table[4*256] = {
 	L64(0x02AAB17CF7E90C5E)   /*    0 */,    L64(0xAC424B03E243A8EC)   /*    1 */,
 	L64(0x72CD5BE30DD5FCD3)   /*    2 */,    L64(0x6D019B93F6F97F3A)   /*    3 */,
 	L64(0xCD9978FFD21F9193)   /*    4 */,    L64(0x7573A1C9708029E2)   /*    5 */,

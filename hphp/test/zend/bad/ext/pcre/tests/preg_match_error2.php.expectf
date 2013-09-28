@@ -1,0 +1,11 @@
+*** Testing preg_match() : error conditions ***
+
+Arg value is: this is a string
+int(1)
+
+Arg value is: Array
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+Done

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,27 +17,31 @@
 #ifndef incl_HPHP_COMPILER_TYPEDEF_STATEMENT_H_
 #define incl_HPHP_COMPILER_TYPEDEF_STATEMENT_H_
 
-#include <boost/shared_ptr.hpp>
 #include <string>
 
 #include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/type_annotation.h"
 
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
-struct TypedefStatement : Statement {
+struct TypedefStatement : Statement, IParseHandler {
   explicit TypedefStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                             const std::string& name,
-                            const std::string& value);
+                            const TypeAnnotationPtr& typeAnnotation);
   ~TypedefStatement();
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
 
+public: // IParseHandler
+  void onParse(AnalysisResultConstPtr, FileScopePtr);
+
+public:
   const std::string name;
-  const std::string value;
+  const TypeAnnotationPtr annot;
 };
 
-typedef boost::shared_ptr<TypedefStatement> TypedefStatementPtr;
+typedef std::shared_ptr<TypedefStatement> TypedefStatementPtr;
 
 //////////////////////////////////////////////////////////////////////
 }

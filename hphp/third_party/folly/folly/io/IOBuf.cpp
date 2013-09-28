@@ -116,6 +116,22 @@ unique_ptr<IOBuf> IOBuf::create(uint32_t capacity) {
   }
 }
 
+unique_ptr<IOBuf> IOBuf::createChain(
+    size_t totalCapacity, uint32_t maxBufCapacity) {
+  unique_ptr<IOBuf> out = create(
+      std::min(totalCapacity, size_t(maxBufCapacity)));
+  size_t allocatedCapacity = out->capacity();
+
+  while (allocatedCapacity < totalCapacity) {
+    unique_ptr<IOBuf> newBuf = create(
+        std::min(totalCapacity - allocatedCapacity, size_t(maxBufCapacity)));
+    allocatedCapacity += newBuf->capacity();
+    out->prependChain(std::move(newBuf));
+  }
+
+  return out;
+}
+
 unique_ptr<IOBuf> IOBuf::takeOwnership(void* buf, uint32_t capacity,
                                        uint32_t length,
                                        FreeFunction freeFn,
@@ -264,6 +280,9 @@ unique_ptr<IOBuf> IOBuf::clone() const {
 
 unique_ptr<IOBuf> IOBuf::cloneOne() const {
   if (flags_ & kFlagExt) {
+    if (ext_.sharedInfo) {
+      flags_ |= kFlagMaybeShared;
+    }
     unique_ptr<IOBuf> iobuf(new IOBuf(static_cast<ExtBufTypeEnum>(ext_.type),
                                       flags_, ext_.buf, ext_.capacity,
                                       data_, length_,
@@ -464,7 +483,7 @@ void IOBuf::decrementRefcount() {
 
 void IOBuf::reserveSlow(uint32_t minHeadroom, uint32_t minTailroom) {
   size_t newCapacity = (size_t)length_ + minHeadroom + minTailroom;
-  CHECK_LT(newCapacity, UINT32_MAX);
+  DCHECK_LT(newCapacity, UINT32_MAX);
 
   // We'll need to reallocate the buffer.
   // There are a few options.

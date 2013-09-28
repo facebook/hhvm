@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_PROCESS_H_
 #define incl_HPHP_EXT_PROCESS_H_
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include <sys/wait.h>
 
 namespace HPHP {
@@ -63,9 +63,9 @@ String f_system(CStrRef command, VRefParam return_var = uninit_null());
 Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
                     CStrRef cwd = null_string, CVarRef env = null_variant,
                     CVarRef other_options = null_variant);
-bool f_proc_terminate(CObjRef process, int signal = 0);
-int64_t f_proc_close(CObjRef process);
-Array f_proc_get_status(CObjRef process);
+bool f_proc_terminate(CResRef process, int signal = 0);
+int64_t f_proc_close(CResRef process);
+Array f_proc_get_status(CResRef process);
 bool f_proc_nice(int increment);
 
 ///////////////////////////////////////////////////////////////////////////////

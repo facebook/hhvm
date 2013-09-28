@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -65,6 +65,8 @@ struct graph_traits<HPHP::ControlFlowGraph> {
   typedef int vertices_size_type;
   typedef int edges_size_type;
   typedef std::list<HPHP::ControlEdge*>::size_type degree_size_type;
+
+  static vertex_descriptor null_vertex() { return nullptr; }
 };
 
 template<>

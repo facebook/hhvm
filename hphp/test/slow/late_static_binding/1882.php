@@ -1,6 +1,5 @@
 <?php
 
-
 class TestA {
 protected static function doSomething() {
 echo "TestA::doSomething\n";
@@ -14,7 +13,8 @@ self::test();
 }
 }
 class Foo {
-public function bar() {}
+public function bar() {
+}
 }
 $obj = new Foo();
 TestA::nativeTest($obj);

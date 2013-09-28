@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,9 +18,9 @@
 #ifndef incl_HPHP_EXT_MATH_H_
 #define incl_HPHP_EXT_MATH_H_
 
-#include "hphp/runtime/base/base_includes.h"
-#include "hphp/runtime/base/zend/zend_string.h"
-#include "hphp/runtime/base/zend/zend_math.h"
+#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/zend-math.h"
 #include <math.h>
 
 #if defined(__APPLE__)
@@ -28,14 +28,14 @@
 #define isnan(x)  \
   ( sizeof (x) == sizeof(float )  ? __inline_isnanf((float)(x)) \
   : sizeof (x) == sizeof(double)  ? __inline_isnand((double)(x))  \
-  : __inline_isnan ((long double)(x)))
+  : __inline_isnanl ((long double)(x)))
 #endif
 
 #ifndef isinf
 #define isinf(x)  \
   ( sizeof (x) == sizeof(float )  ? __inline_isinff((float)(x)) \
   : sizeof (x) == sizeof(double)  ? __inline_isinfd((double)(x))  \
-  : __inline_isinf ((long double)(x)))
+  : __inline_isinfl ((long double)(x)))
 #endif
 #endif
 
@@ -57,10 +57,10 @@ bool f_is_finite(double val);
 bool f_is_infinite(double val);
 bool f_is_nan(double val);
 
-double f_ceil(double value);
-double f_floor(double value);
-double f_round(CVarRef val, int64_t precision = 0,
-               int64_t mode = PHP_ROUND_HALF_UP);
+Variant f_ceil(CVarRef number);
+Variant f_floor(CVarRef number);
+Variant f_round(CVarRef val, int64_t precision = 0,
+                int64_t mode = PHP_ROUND_HALF_UP);
 
 double f_deg2rad(double number);
 double f_rad2deg(double number);
@@ -73,7 +73,7 @@ Variant f_bindec(CStrRef binary_string);
 Variant f_hexdec(CStrRef hex_string);
 Variant f_octdec(CStrRef octal_string);
 Variant f_base_convert(CStrRef number, int64_t frombase, int64_t tobase);
-Numeric f_pow(CVarRef base, CVarRef exp);
+Variant f_pow(CVarRef base, CVarRef exp);
 double f_exp(double arg);
 double f_expm1(double arg);
 double f_log10(double arg);

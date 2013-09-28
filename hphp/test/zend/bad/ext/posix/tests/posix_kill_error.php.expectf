@@ -1,0 +1,16 @@
+*** Testing posix_kill() : error conditions ***
+
+-- Testing posix_kill() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing posix_kill() function with less than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing posix_kill() function with invalid signal --
+bool(false)
+
+-- Testing posix_kill() function with negative pid --
+bool(false)
+Done

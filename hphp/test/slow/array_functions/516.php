@@ -1,6 +1,5 @@
 <?php
 
-
 $a = array(
   array('a' => 'a'),
   array('b' => 'bb'),

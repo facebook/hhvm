@@ -428,7 +428,7 @@ private:
 
   void M_destroy(T* p) noexcept {
     if (usingStdAllocator::value) {
-      if (!std::has_trivial_destructor<T>::value) p->~T();
+      if (!boost::has_trivial_destructor<T>::value) p->~T();
     } else {
       folly::fbv_allocator_traits<Allocator>::destroy(impl_, p);
     }
@@ -466,7 +466,7 @@ private:
 
   // optimized
   static void S_destroy_range(T* first, T* last) noexcept {
-    if (!std::has_trivial_destructor<T>::value) {
+    if (!boost::has_trivial_destructor<T>::value) {
       // EXPERIMENTAL DATA on fbvector<vector<int>> (where each vector<int> has
       //  size 0).
       // The unrolled version seems to work faster for small to medium sized
@@ -1095,7 +1095,7 @@ public:
     if (impl_.b_)
       M_deallocate(impl_.b_, impl_.z_ - impl_.b_);
     impl_.z_ = newB + newCap;
-    impl_.e_ += newB - impl_.b_; // speed hax
+    impl_.e_ = newB + (impl_.e_ - impl_.b_);
     impl_.b_ = newB;
   }
 
@@ -1128,7 +1128,7 @@ public:
       if (impl_.b_)
         M_deallocate(impl_.b_, impl_.z_ - impl_.b_);
       impl_.z_ = newB + newCap;
-      impl_.e_ += newB - impl_.b_; // speed hax
+      impl_.e_ = newB + (impl_.e_ - impl_.b_);
       impl_.b_ = newB;
     }
   }
@@ -1761,4 +1761,3 @@ void attach(fbvector<T, A>& v, T* data, size_t sz, size_t cap) {
 } // namespace folly
 
 #endif // FOLLY_FBVECTOR_H
-

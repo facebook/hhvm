@@ -1,6 +1,5 @@
 <?php
 
-
 function f($x) {
   switch ($x) {
   default:
@@ -23,8 +22,10 @@ function f($x) {
 }
 function g($x) {
   switch ($x) {
-  case 'x': print 'x'; break;
-  case '0': print '0'; break;
+  case 'x': print 'x';
+ break;
+  case '0': print '0';
+ break;
   }
 }
 f("foo");

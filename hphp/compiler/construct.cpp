@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -44,7 +44,7 @@ void Construct::resetScope(BlockScopeRawPtr scope, bool resetOrigScope) {
   setBlockScope(scope);
   if (resetOrigScope) {
     ExpressionPtr expr =
-      boost::dynamic_pointer_cast<Expression>(shared_from_this());
+      dynamic_pointer_cast<Expression>(shared_from_this());
     if (expr) {
       expr->setOriginalScope(scope);
     }
@@ -439,7 +439,7 @@ public:
     // HACK: dump the closure function as a "child" of the
     // closure expression
     ClosureExpressionPtr c =
-      boost::dynamic_pointer_cast<ClosureExpression>(cp);
+      dynamic_pointer_cast<ClosureExpression>(cp);
     if (c) {
       c->getClosureFunction()->dump(m_spc, m_ar);
     }

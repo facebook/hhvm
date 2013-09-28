@@ -1,0 +1,78 @@
+*** Testing base_convert() : usage variations ***
+
+-- Iteration 1 --
+string(1) "0"
+
+-- Iteration 2 --
+string(1) "1"
+
+-- Iteration 3 --
+string(2) "14"
+
+-- Iteration 4 --
+string(2) "14"
+
+-- Iteration 5 --
+string(11) "17777777777"
+
+-- Iteration 6 --
+string(3) "151"
+
+-- Iteration 7 --
+string(3) "151"
+
+-- Iteration 8 --
+string(7) "4553207"
+
+-- Iteration 9 --
+string(7) "4553207"
+
+-- Iteration 10 --
+string(1) "5"
+
+-- Iteration 11 --
+string(1) "0"
+
+-- Iteration 12 --
+string(1) "0"
+
+-- Iteration 13 --
+string(1) "1"
+
+-- Iteration 14 --
+string(1) "0"
+
+-- Iteration 15 --
+string(1) "1"
+
+-- Iteration 16 --
+string(1) "0"
+
+-- Iteration 17 --
+string(1) "0"
+
+-- Iteration 18 --
+string(1) "0"
+
+-- Iteration 19 --
+HipHop Notice: %s
+string(1) "0"
+
+-- Iteration 20 --
+string(1) "0"
+
+-- Iteration 21 --
+string(1) "0"
+
+-- Iteration 22 --
+string(1) "0"
+
+-- Iteration 23 --
+string(1) "0"
+
+-- Iteration 24 --
+string(1) "0"
+
+-- Iteration 25 --
+string(%d) "%d"
+===Done===

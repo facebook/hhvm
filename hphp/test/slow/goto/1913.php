@@ -1,3 +1,7 @@
 <?php
 
- goto a; if (false) { a: print 'here';} 
+goto a;
+ if (false) {
+ a: print 'here';
+}
+

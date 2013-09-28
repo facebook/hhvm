@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +19,7 @@
 
 #include "hphp/util/mutex.h"
 #include "hphp/util/synchronizable.h"
-#include "hphp/util/synchronizable_multi.h"
+#include "hphp/util/synchronizable-multi.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,11 +39,7 @@ public:
 
 private:
   bool m_profiling;
-#if defined(__APPLE__)
-  timeval m_lockTime;
-#else
   timespec m_lockTime;
-#endif
 };
 
 ///////////////////////////////////////////////////////////////////////////////

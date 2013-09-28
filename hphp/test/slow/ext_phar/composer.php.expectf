@@ -1,0 +1,46 @@
+%A   ______
+  / ____/___  ____ ___  ____  ____  ________  _____
+ / /   / __ \/ __ `__ \/ __ \/ __ \/ ___/ _ \/ ___/
+/ /___/ /_/ / / / / / / /_/ / /_/ (__  )  __/ /
+\____/\____/_/ /_/ /_/ .___/\____/____/\___/_/
+                    /_/
+Composer version ef072ff8c008f35d90fe3460608bdb1365a8d7a7
+
+Usage:
+  [options] command [arguments]
+
+Options:
+  --help           -h Display this help message.
+  --quiet          -q Do not output any message.
+  --verbose        -v|vv|vvv Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
+  --version        -V Display this application version.
+  --ansi              Force ANSI output.
+  --no-ansi           Disable ANSI output.
+  --no-interaction -n Do not ask any interactive question.
+  --profile           Display timing and memory usage information
+  --working-dir    -d If specified, use the given directory as working directory.
+
+Available commands:
+  about            Short information about Composer
+  archive          Create an archive of this composer package
+  config           Set config options
+  create-project   Create new project from a package into given directory.
+  depends          Shows which packages depend on the given package
+  diagnose         Diagnoses the system to identify common errors.
+  dump-autoload    Dumps the autoloader
+  dumpautoload     Dumps the autoloader
+  global           Allows running commands in the global composer dir ($COMPOSER_HOME).
+  help             Displays help for a command
+  init             Creates a basic composer.json file in current directory.
+  install          Installs the project dependencies from the composer.lock file if present, or falls back on the composer.json.
+  licenses         Show information about licenses of dependencies
+  list             Lists commands
+  require          Adds required packages to your composer.json and installs them
+  run-script       Run the scripts defined in composer.json.
+  search           Search for packages
+  self-update      Updates composer.phar to the latest version.
+  selfupdate       Updates composer.phar to the latest version.
+  show             Show information about packages
+  status           Show a list of locally modified packages
+  update           Updates your dependencies to the latest version according to composer.json, and updates the composer.lock file.
+  validate         Validates a composer.json

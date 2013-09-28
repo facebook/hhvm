@@ -38,10 +38,6 @@ if (LIBINOTIFY_INCLUDE_DIR)
 	include_directories(${LIBINOTIFY_INCLUDE_DIR})
 endif()
 
-# unwind checks
-find_package(Libunwind REQUIRED)
-include_directories(${LIBUNWIND_INCLUDE_DIR})
-
 # iconv checks
 find_package(Libiconv REQUIRED)
 include_directories(${LIBICONV_INCLUDE_DIR})
@@ -90,13 +86,6 @@ set(CMAKE_REQUIRED_LIBRARIES)
 
 # GD checks
 find_package(GD REQUIRED)
-
-if (WANT_FB_LIBMCC)
-	add_definitions(-DHPHP_WITH_LIBMCC)
-	message(FATAL_ERROR Need to add libmcc and libch for linking)
-else ()
-	# nothing for now
-endif()
 
 find_package(LibXed)
 if (LibXed_INCLUDE_DIR AND LibXed_LIBRARY)
@@ -150,9 +139,6 @@ if (ICU_FOUND)
 	include_directories(${ICU_INCLUDE_DIRS})
 endif (ICU_FOUND)
 
-# (google heap OR cpu profiler) AND libunwind 
-FIND_LIBRARY(UNWIND_LIB unwind)
-
 # jemalloc/tmalloc and profiler
 if (USE_GOOGLE_HEAP_PROFILER OR USE_GOOGLE_CPU_PROFILER)
 	FIND_LIBRARY(GOOGLE_PROFILER_LIB profiler)
@@ -177,17 +163,18 @@ if (USE_GOOGLE_HEAP_PROFILER AND GOOGLE_PROFILER_LIB)
 	endif()
 endif()
 
-if (USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED
-		AND NOT CMAKE_BUILD_TYPE STREQUAL Debug)
+if (USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED)
 	FIND_LIBRARY(JEMALLOC_LIB jemalloc)
 	if (JEMALLOC_LIB)
 		message(STATUS "Found jemalloc: ${JEMALLOC_LIB}")
 		set(JEMALLOC_ENABLED 1)
 	endif()
+	if (JEMALLOC_INCLUDE_DIR)
+		include_directories(${JEMALLOC_INCLUDE_DIR})
+	endif()
 endif()
 
-if (USE_TCMALLOC AND NOT JEMALLOC_ENABLED AND NOT GOOGLE_TCMALLOC_ENABLED
-		AND NOT CMAKE_BUILD_TYPE STREQUAL Debug)
+if (USE_TCMALLOC AND NOT JEMALLOC_ENABLED AND NOT GOOGLE_TCMALLOC_ENABLED)
 	FIND_LIBRARY(GOOGLE_TCMALLOC_MIN_LIB tcmalloc_minimal)
 	if (GOOGLE_TCMALLOC_MIN_LIB)
 		message(STATUS "Found minimal tcmalloc: ${GOOGLE_TCMALLOC_MIN_LIB}")
@@ -296,12 +283,9 @@ if (NOT CCLIENT_HAS_SSL)
 	add_definitions(-DSKIP_IMAP_SSL=1)
 endif()
 
+FIND_LIBRARY(CRYPT_LIB NAMES xcrypt crypt crypto)
 if (LINUX OR FREEBSD)
-	FIND_LIBRARY (CRYPT_LIB NAMES xcrypt crypt)
 	FIND_LIBRARY (RT_LIB rt)
-elseif (APPLE)
-	FIND_LIBRARY (CRYPT_LIB crypto)
-	FIND_LIBRARY (ICONV_LIB iconv)
 endif()
 
 if (LINUX)
@@ -335,6 +319,14 @@ if (FREEBSD)
 	endif()
 endif()
 
+if (APPLE)
+	find_library(LIBINTL_LIBRARIES NAMES intl libintl)
+	if (LIBINTL_INCLUDE_DIR)
+		include_directories(${LIBINTL_INCLUDE_DIR})
+	endif()
+	find_library(KERBEROS_LIB NAMES gssapi_krb5)
+endif()
+
 #find_package(BISON REQUIRED)
 #find_package(FLEX REQUIRED)
 
@@ -361,10 +353,9 @@ macro(hphp_link target)
 	endif()
 
 	target_link_libraries(${target} ${Boost_LIBRARIES})
-	target_link_libraries(${target} ${LIBUNWIND_LIBRARY})
 	target_link_libraries(${target} ${MYSQL_CLIENT_LIBS})
 	target_link_libraries(${target} ${PCRE_LIBRARY})
-	target_link_libraries(${target} ${ICU_LIBRARIES} ${ICU_I18N_LIBRARIES})
+	target_link_libraries(${target} ${ICU_DATA_LIBRARIES} ${ICU_I18N_LIBRARIES} ${ICU_LIBRARIES})
 	target_link_libraries(${target} ${LIBEVENT_LIB})
 	target_link_libraries(${target} ${CURL_LIBRARIES})
 	target_link_libraries(${target} ${LIBGLOG_LIBRARY})
@@ -395,6 +386,11 @@ if (FREEBSD)
 	target_link_libraries(${target} ${EXECINFO_LIB})
 endif()
 
+if (APPLE)
+	target_link_libraries(${target} ${LIBINTL_LIBRARIES})
+	target_link_libraries(${target} ${KERBEROS_LIB})
+endif()
+
 	target_link_libraries(${target} ${BFD_LIB})
 	target_link_libraries(${target} ${BINUTIL_LIB})
 if (${LIBPTHREAD_LIBRARIES})
@@ -416,12 +412,9 @@ endif()
 
 	target_link_libraries(${target} ${LIBMEMCACHED_LIBRARY})
 
+	target_link_libraries(${target} ${CRYPT_LIB})
 	if (LINUX OR FREEBSD)
-		target_link_libraries(${target} ${CRYPT_LIB})
 		target_link_libraries(${target} ${RT_LIB})
-	elseif (APPLE)
-		target_link_libraries(${target} ${CRYPTO_LIB})
-		target_link_libraries(${target} ${ICONV_LIB})
 	endif()
 
 	target_link_libraries(${target} timelib)

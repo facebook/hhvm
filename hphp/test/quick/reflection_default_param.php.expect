@@ -1,0 +1,3 @@
+--SQLite3::open--
+int(6)
+string(42) "SQLITE3_OPEN_READWRITE|SQLITE3_OPEN_CREATE"

@@ -1,6 +1,5 @@
 <?php
 
-
 class A implements Serializable {
   public $__foo = true;
   public function serialize() {
@@ -11,4 +10,6 @@ class A implements Serializable {
     $this->a = $props['a'];
     $this->b = $props['b'];
   }
-} $obj = unserialize(serialize(new A())); var_dump($obj->b);
+}
+ $obj = unserialize(serialize(new A()));
+ var_dump($obj->b);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,11 +25,11 @@
 #include "hphp/compiler/analysis/function_container.h"
 #include "hphp/compiler/package.h"
 
-#include "hphp/util/string_bag.h"
-#include "hphp/util/thread_local.h"
+#include "hphp/util/string-bag.h"
+#include "hphp/util/thread-local.h"
 
 #include <boost/graph/adjacency_list.hpp>
-#include "tbb/concurrent_hash_map.h"
+#include <tbb/concurrent_hash_map.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -148,7 +148,8 @@ public:
   void addEntryPoint(const std::string &name);
   void addEntryPoints(const std::vector<std::string> &names);
 
-  void loadBuiltinFunctions();
+  void addNSFallbackFunc(ConstructPtr c, FileScopePtr fs);
+
   void loadBuiltins();
   void analyzeProgram(bool system = false);
   void analyzeIncludes();
@@ -236,12 +237,22 @@ public:
   ClassScopePtr findClass(const std::string &className) const;
   ClassScopePtr findClass(const std::string &className,
                           FindClassBy by);
+
+  /*
+   * Returns: whether the given name is the name of any type aliases
+   * in the whole program.
+   */
+  bool isTypeAliasName(const std::string& name) const {
+    return m_typeAliasNames.count(name);
+  }
+
   /**
    * Find all the redeclared classes by the name, excluding system classes.
    * Note that system classes cannot be redeclared.
    */
   const ClassScopePtrVec &findRedeclaredClasses(
     const std::string &className) const;
+
   /**
    * Find all the classes by the name, including system classes.
    */
@@ -296,10 +307,12 @@ public:
   void addNamedScalarVarArray(const std::string &s);
   StringToClassScopePtrVecMap getExtensionClasses();
   void addInteger(int64_t n);
+
 private:
   Package *m_package;
   bool m_parseOnDemand;
   std::vector<std::string> m_parseOnDemandDirs;
+  std::set<std::pair<ConstructPtr, FileScopePtr> > m_nsFallbackFuncs;
   Phase m_phase;
   StringToFileScopePtrMap m_files;
   FileScopePtrVec m_fileScopes;
@@ -315,6 +328,13 @@ private:
   StringToFileScopePtrMap m_constDecs;
   std::set<std::string> m_constRedeclared;
 
+  // Map names of class aliases to the class names they will alias.
+  // Only in WholeProgram mode.  See markRedeclaringClasses.
+  std::multimap<std::string,std::string> m_classAliases;
+
+  // Names of type aliases.
+  std::set<std::string> m_typeAliasNames;
+
   bool m_classForcedVariants[2];
 
   StatementPtrVec m_stmts;
@@ -323,12 +343,12 @@ private:
   std::string m_outputPath;
 public:
   AnalysisResultPtr shared_from_this() {
-    return boost::static_pointer_cast<AnalysisResult>
+    return static_pointer_cast<AnalysisResult>
       (BlockScope::shared_from_this());
   }
 
   AnalysisResultConstPtr shared_from_this() const {
-    return boost::static_pointer_cast<const AnalysisResult>
+    return static_pointer_cast<const AnalysisResult>
       (BlockScope::shared_from_this());
   }
 
@@ -348,6 +368,11 @@ private:
    */
   bool inParseOnDemandDirs(const std::string &filename) const;
 
+  /*
+   * Find the names of all functions and classes in the program; mark
+   * functions with duplicate names as redeclaring, but duplicate
+   * classes aren't yet marked.  See markRedeclaringClasses.
+   */
   void collectFunctionsAndClasses(FileScopePtr fs);
 
   /**
@@ -356,11 +381,20 @@ private:
    */
   void canonicalizeSymbolOrder();
 
+  /*
+   * After all the class names have been collected and symbol order is
+   * canonicalized, this passes through and marks duplicate class
+   * names as redeclaring.
+   */
+  void markRedeclaringClasses();
+
   /**
    * Checks circular class derivations that can cause stack overflows for
    * subsequent analysis. Also checks to make sure no two redundant parents.
    */
   void checkClassDerivations();
+
+  void resolveNSFallbackFuncs();
 
   int getFileSize(FileScopePtr fs);
 
@@ -370,12 +404,12 @@ public:
                               s_changedScopesMapThreadLocal);
 
 #ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
-  static int                                  s_NumDoJobCalls;
+  static std::atomic<int>                     s_NumDoJobCalls;
   static ConcurrentBlockScopeRawPtrIntHashMap s_DoJobUniqueScopes;
-  static int                                  s_NumForceRerunGlobal;
-  static int                                  s_NumReactivateGlobal;
-  static int                                  s_NumForceRerunUseKinds;
-  static int                                  s_NumReactivateUseKinds;
+  static std::atomic<int>                     s_NumForceRerunGlobal;
+  static std::atomic<int>                     s_NumReactivateGlobal;
+  static std::atomic<int>                     s_NumForceRerunUseKinds;
+  static std::atomic<int>                     s_NumReactivateUseKinds;
 #endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
 
 private:
@@ -403,9 +437,9 @@ public:
     Exception(), m_scope(scope) {}
   BlockScopeRawPtr &getScope() { return m_scope; }
 #ifdef HPHP_INSTRUMENT_TYPE_INF
-  static int s_NumReschedules;
-  static int s_NumForceRerunSelfCaller;
-  static int s_NumRetTypesChanged;
+  static std::atomic<int> s_NumReschedules;
+  static std::atomic<int> s_NumForceRerunSelfCaller;
+  static std::atomic<int> s_NumRetTypesChanged;
 #endif /* HPHP_INSTRUMENT_TYPE_INF */
 private:
   BlockScopeRawPtr m_scope;

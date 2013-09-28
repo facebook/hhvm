@@ -1,0 +1,9 @@
+string(23) "Legal encoded-word: * ."
+string(23) "Legal encoded-word: * ."
+string(24) "Illegal encoded-word:  ."
+string(23) "Illegal encoded-word: ."
+string(23) "Legal encoded-word: * ."
+string(23) "Legal encoded-word: * ."
+string(24) "Illegal encoded-word:  ."
+HipHop Notice: %s
+bool(false)

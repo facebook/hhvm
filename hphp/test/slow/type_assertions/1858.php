@@ -1,7 +1,7 @@
 <?php
 
-
-function block() {}
+function block() {
+}
 function f($x) {
   if (is_int($x) || is_array($x)) {
     var_dump($x[0]);

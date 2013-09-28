@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#define _GNU_SOURCE 1
 #include "hphp/util/vdso.h"
 
+#define _GNU_SOURCE 1
 #include <dlfcn.h>
 
 
@@ -51,13 +51,13 @@ int Vdso::ClockGetTime(int clk_id, timespec *ts) {
   return s_vdso.clockGetTime(clk_id, ts);
 }
 
-inline ALWAYS_INLINE int64_t Vdso::clockGetTimeNS(int clk_id) {
+ALWAYS_INLINE int64_t Vdso::clockGetTimeNS(int clk_id) {
   if (m_clock_gettime_ns)
     return m_clock_gettime_ns(clk_id);
   return -1;
 }
 
-inline ALWAYS_INLINE int Vdso::clockGetTime(int clk_id, timespec *ts) {
+ALWAYS_INLINE int Vdso::clockGetTime(int clk_id, timespec *ts) {
   if (m_clock_gettime) {
     memset(ts, 0, sizeof(*ts));
     return m_clock_gettime(clk_id, ts);

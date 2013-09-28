@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,12 +17,13 @@
 
 #include "hphp/runtime/ext/ext_curl.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/base/util/string_buffer.h"
-#include "hphp/runtime/base/util/libevent_http_client.h"
-#include "hphp/runtime/base/util/curl_tls_workarounds.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/server/server_stats.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/libevent-http-client.h"
+#include "hphp/runtime/base/curl-tls-workarounds.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include <openssl/ssl.h>
 
 #define CURLOPT_RETURNTRANSFER 19913
 #define CURLOPT_BINARYTRANSFER 19914
@@ -39,15 +40,16 @@
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(curl);
 
-static StaticString s_exception("exception");
-static StaticString s_previous("previous");
+const StaticString
+  s_exception("exception"),
+  s_previous("previous");
 
 ///////////////////////////////////////////////////////////////////////////////
 // helper data structure
 
 class CurlResource : public SweepableResourceData {
 private:
-  DECLARE_OBJECT_ALLOCATION(CurlResource)
+  DECLARE_RESOURCE_ALLOCATION(CurlResource)
 
   class WriteHandler {
   public:
@@ -55,7 +57,7 @@ private:
 
     int                method;
     Variant            callback;
-    SmartObject<File>  fp;
+    SmartResource<File> fp;
     StringBuffer       buf;
     String             content;
     int                type;
@@ -67,7 +69,7 @@ private:
 
     int                method;
     Variant            callback;
-    SmartObject<File>  fp;
+    SmartResource<File> fp;
   };
 
   DECLARE_BOOST_TYPES(ToFree);
@@ -91,9 +93,9 @@ private:
   };
 
 public:
-  static StaticString s_class_name;
+  CLASSNAME_IS("cURL handle")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   explicit CurlResource(CStrRef url)
     : m_exception(nullptr), m_phpException(false), m_emptyPost(true) {
@@ -122,7 +124,9 @@ public:
     curl_easy_setopt(m_cp, CURLOPT_DNS_CACHE_TIMEOUT, 120);
     curl_easy_setopt(m_cp, CURLOPT_MAXREDIRS, 20); // no infinite redirects
     curl_easy_setopt(m_cp, CURLOPT_NOSIGNAL, 1); // for multithreading mode
-    curl_easy_setopt(m_cp, CURLOPT_SSL_CTX_FUNCTION, curl_tls_workarounds_cb);
+    curl_easy_setopt(m_cp, CURLOPT_SSL_CTX_FUNCTION,
+                     CurlResource::ssl_ctx_callback);
+    curl_easy_setopt(m_cp, CURLOPT_SSL_CTX_DATA, (void*)this);
 
     curl_easy_setopt(m_cp, CURLOPT_TIMEOUT,
                      RuntimeOption::HttpDefaultTimeout);
@@ -236,7 +240,7 @@ public:
       // the reader function will be called
       curl_easy_setopt(m_cp, CURLOPT_POSTFIELDSIZE, 0);
     }
-    m_write.buf.reset();
+    m_write.buf.clear();
     m_write.content.clear();
     m_header.clear();
     memset(m_error_str, 0, sizeof(m_error_str));
@@ -251,7 +255,7 @@ public:
 
     /* CURLE_PARTIAL_FILE is returned by HEAD requests */
     if (m_error_no != CURLE_OK && m_error_no != CURLE_PARTIAL_FILE) {
-      m_write.buf.reset();
+      m_write.buf.clear();
       m_write.content.clear();
       return false;
     }
@@ -409,11 +413,11 @@ public:
     case CURLOPT_WRITEHEADER:
     case CURLOPT_STDERR:
       {
-        if (!value.is(KindOfObject)) {
+        if (!value.isResource()) {
           return false;
         }
 
-        Object obj = value.toObject();
+        Resource obj = value.toResource();
         if (obj.isNull() || obj.getTyped<File>(true) == NULL) {
           return false;
         }
@@ -559,9 +563,33 @@ public:
       }
       break;
 
+    case CURLOPT_FB_TLS_VER_MAX:
+      {
+        int64_t val = value.toInt64();
+        if (value.isInteger() &&
+            (val == CURLOPT_FB_TLS_VER_MAX_1_0 ||
+             val == CURLOPT_FB_TLS_VER_MAX_1_1 ||
+             val == CURLOPT_FB_TLS_VER_MAX_NONE)) {
+            m_opts.set(int64_t(option), value);
+        } else {
+          raise_warning("You must pass CURLOPT_FB_TLS_VER_MAX_1_0, "
+                        "CURLOPT_FB_TLS_VER_MAX_1_1 or "
+                        "CURLOPT_FB_TLS_VER_MAX_NONE with "
+                        "CURLOPT_FB_TLS_VER_MAX");
+        }
+      }
+      break;
+    case CURLOPT_FB_TLS_CIPHER_SPEC:
+      if (value.isString() && !value.toString().empty()) {
+        m_opts.set(int64_t(option), value);
+      } else {
+        raise_warning("CURLOPT_FB_TLS_CIPHER_SPEC requires a non-empty string");
+      }
+      break;
+
     default:
       m_error_no = CURLE_FAILED_INIT;
-      throw_invalid_argument("option: %d", option);
+      throw_invalid_argument("option: %ld", option);
       break;
     }
 
@@ -627,7 +655,7 @@ public:
       {
         int data_size = size * nmemb;
         Variant ret = ch->do_callback(
-          t->callback, CREATE_VECTOR3(Object(ch), t->fp->fd(), data_size));
+          t->callback, make_packed_array(Resource(ch), t->fp->fd(), data_size));
         if (ret.isString()) {
           String sret = ret.toString();
           length = data_size < sret.size() ? data_size : sret.size();
@@ -646,10 +674,10 @@ public:
 
     switch (t->method) {
     case PHP_CURL_STDOUT:
-      echo(String(data, length, AttachLiteral));
+      g_context->write(data, length);
       break;
     case PHP_CURL_FILE:
-      return t->fp->write(String(data, length, AttachLiteral), length);
+      return t->fp->write(String(data, length, CopyString), length);
     case PHP_CURL_RETURN:
       if (length > 0) {
         t->buf.append(data, (int)length);
@@ -659,7 +687,7 @@ public:
       {
         Variant ret = ch->do_callback(
           t->callback,
-          CREATE_VECTOR2(Object(ch), String(data, length, CopyString)));
+          make_packed_array(Resource(ch), String(data, length, CopyString)));
         length = ret.toInt64();
       }
       break;
@@ -680,16 +708,16 @@ public:
       if (ch->m_write.method == PHP_CURL_RETURN && length > 0) {
         ch->m_write.buf.append(data, (int)length);
       } else {
-        echo(String(data, length, AttachLiteral));
+        g_context->write(data, length);
       }
       break;
     case PHP_CURL_FILE:
-      return t->fp->write(String(data, length, AttachLiteral), length);
+      return t->fp->write(String(data, length, CopyString), length);
     case PHP_CURL_USER:
       {
         Variant ret = ch->do_callback(
           t->callback,
-          CREATE_VECTOR2(Object(ch), String(data, length, CopyString)));
+          make_packed_array(Resource(ch), String(data, length, CopyString)));
         length = ret.toInt64();
       }
       break;
@@ -736,15 +764,85 @@ private:
 
   bool m_phpException;
   bool m_emptyPost;
+
+  static CURLcode ssl_ctx_callback(CURL *curl, void *sslctx, void *parm);
+  typedef enum {
+    CURLOPT_FB_TLS_VER_MAX = 2147482624,
+    CURLOPT_FB_TLS_VER_MAX_NONE = 2147482625,
+    CURLOPT_FB_TLS_VER_MAX_1_1 = 2147482626,
+    CURLOPT_FB_TLS_VER_MAX_1_0 = 2147482627,
+    CURLOPT_FB_TLS_CIPHER_SPEC = 2147482628
+  } fb_specific_options;
 };
-IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(CurlResource);
+
 void CurlResource::sweep() {
   m_write.buf.release();
   m_write_header.buf.release();
   closeForSweep();
 }
 
-StaticString CurlResource::s_class_name("cURL handle");
+CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
+  // Set defaults from config.hdf
+  CURLcode r = curl_tls_workarounds_cb(curl, sslctx, parm);
+  if (r != CURLE_OK) {
+    return r;
+  }
+
+  // Convert params to proper types.
+  SSL_CTX* ctx = (SSL_CTX*)sslctx;
+  if (ctx == nullptr) {
+    raise_warning("supplied argument is not a valid SSL_CTX");
+    return CURLE_FAILED_INIT;
+  }
+  CurlResource* cp = (CurlResource*)parm;
+  if (cp == nullptr) {
+    raise_warning("supplied argument is not a valid cURL handle resource");
+    return CURLE_FAILED_INIT;
+  }
+
+  // Override cipher specs if necessary.
+  if (cp->m_opts.exists(int64_t(CURLOPT_FB_TLS_CIPHER_SPEC))) {
+    Variant untyped_value = cp->m_opts[int64_t(CURLOPT_FB_TLS_CIPHER_SPEC)];
+    if (untyped_value.isString() && !untyped_value.toString().empty()) {
+      SSL_CTX_set_cipher_list(ctx, untyped_value.toString().c_str());
+    } else {
+      raise_warning("CURLOPT_FB_TLS_CIPHER_SPEC requires a non-empty string");
+    }
+  }
+
+  // Override the maximum client TLS version if necessary.
+  if (cp->m_opts.exists(int64_t(CURLOPT_FB_TLS_VER_MAX))) {
+    // Get current options, unsetting the NO_TLSv1_* bits.
+    long cur_opts = SSL_CTX_get_options(ctx);
+#ifdef SSL_OP_NO_TLSv1_1
+    cur_opts &= ~SSL_OP_NO_TLSv1_1;
+#endif
+#ifdef SSL_OP_NO_TLSv1_2
+    cur_opts &= ~SSL_OP_NO_TLSv1_2;
+#endif
+    int64_t value = cp->m_opts[int64_t(CURLOPT_FB_TLS_VER_MAX)].toInt64();
+    if (value == CURLOPT_FB_TLS_VER_MAX_1_0) {
+#if defined (SSL_OP_NO_TLSv1_1) && defined (SSL_OP_NO_TLSv1_2)
+      cur_opts |= SSL_OP_NO_TLSv1_1 | SSL_OP_NO_TLSv1_2;
+#else
+      raise_notice("Requesting SSL_OP_NO_TLSv1_1, but this version of "
+                   "SSL does not support that option");
+#endif
+    } else if (value == CURLOPT_FB_TLS_VER_MAX_1_1) {
+#ifdef SSL_OP_NO_TLSv1_2
+      cur_opts |= SSL_OP_NO_TLSv1_2;
+#else
+      raise_notice("Requesting SSL_OP_NO_TLSv1_2, but this version of "
+                   "SSL does not support that option");
+#endif
+    } else if (value != CURLOPT_FB_TLS_VER_MAX_NONE) {
+      raise_notice("Invalid CURLOPT_FB_TLS_VER_MAX value");
+    }
+    SSL_CTX_set_options(ctx, cur_opts);
+  }
+
+  return CURLE_OK;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -759,20 +857,21 @@ Variant f_curl_init(CStrRef url /* = null_string */) {
   return NEWOBJ(CurlResource)(url);
 }
 
-Variant f_curl_copy_handle(CObjRef ch) {
+Variant f_curl_copy_handle(CResRef ch) {
   CHECK_RESOURCE(curl);
   return NEWOBJ(CurlResource)(curl);
 }
 
-static const StaticString s_version_number("version_number");
-static const StaticString s_age("age");
-static const StaticString s_features("features");
-static const StaticString s_ssl_version_number("ssl_version_number");
-static const StaticString s_version("version");
-static const StaticString s_host("host");
-static const StaticString s_ssl_version("ssl_version");
-static const StaticString s_libz_version("libz_version");
-static const StaticString s_protocols("protocols");
+const StaticString
+  s_version_number("version_number"),
+  s_age("age"),
+  s_features("features"),
+  s_ssl_version_number("ssl_version_number"),
+  s_version("version"),
+  s_host("host"),
+  s_ssl_version("ssl_version"),
+  s_libz_version("libz_version"),
+  s_protocols("protocols");
 
 Variant f_curl_version(int uversion /* = k_CURLVERSION_NOW */) {
   curl_version_info_data *d = curl_version_info((CURLversion)uversion);
@@ -800,12 +899,12 @@ Variant f_curl_version(int uversion /* = k_CURLVERSION_NOW */) {
   return ret.create();
 }
 
-bool f_curl_setopt(CObjRef ch, int option, CVarRef value) {
+bool f_curl_setopt(CResRef ch, int option, CVarRef value) {
   CHECK_RESOURCE(curl);
   return curl->setOption(option, value);
 }
 
-bool f_curl_setopt_array(CObjRef ch, CArrRef options) {
+bool f_curl_setopt_array(CResRef ch, CArrRef options) {
   CHECK_RESOURCE(curl);
   for (ArrayIter iter(options); iter; ++iter) {
     if (!curl->setOption(iter.first().toInt32(), iter.second())) {
@@ -815,40 +914,41 @@ bool f_curl_setopt_array(CObjRef ch, CArrRef options) {
   return true;
 }
 
-Variant f_fb_curl_getopt(CObjRef ch, int opt /* = 0 */) {
+Variant f_fb_curl_getopt(CResRef ch, int opt /* = 0 */) {
   CHECK_RESOURCE(curl);
   return curl->getOption(opt);
 }
 
-Variant f_curl_exec(CObjRef ch) {
+Variant f_curl_exec(CResRef ch) {
   CHECK_RESOURCE(curl);
   return curl->execute();
 }
 
-static const StaticString s_url("url");
-static const StaticString s_content_type("content_type");
-static const StaticString s_http_code("http_code");
-static const StaticString s_header_size("header_size");
-static const StaticString s_request_size("request_size");
-static const StaticString s_filetime("filetime");
-static const StaticString s_ssl_verify_result("ssl_verify_result");
-static const StaticString s_redirect_count("redirect_count");
-static const StaticString s_local_port("local_port");
-static const StaticString s_total_time("total_time");
-static const StaticString s_namelookup_time("namelookup_time");
-static const StaticString s_connect_time("connect_time");
-static const StaticString s_pretransfer_time("pretransfer_time");
-static const StaticString s_size_upload("size_upload");
-static const StaticString s_size_download("size_download");
-static const StaticString s_speed_download("speed_download");
-static const StaticString s_speed_upload("speed_upload");
-static const StaticString s_download_content_length("download_content_length");
-static const StaticString s_upload_content_length("upload_content_length");
-static const StaticString s_starttransfer_time("starttransfer_time");
-static const StaticString s_redirect_time("redirect_time");
-static const StaticString s_request_header("request_header");
+const StaticString
+  s_url("url"),
+  s_content_type("content_type"),
+  s_http_code("http_code"),
+  s_header_size("header_size"),
+  s_request_size("request_size"),
+  s_filetime("filetime"),
+  s_ssl_verify_result("ssl_verify_result"),
+  s_redirect_count("redirect_count"),
+  s_local_port("local_port"),
+  s_total_time("total_time"),
+  s_namelookup_time("namelookup_time"),
+  s_connect_time("connect_time"),
+  s_pretransfer_time("pretransfer_time"),
+  s_size_upload("size_upload"),
+  s_size_download("size_download"),
+  s_speed_download("speed_download"),
+  s_speed_upload("speed_upload"),
+  s_download_content_length("download_content_length"),
+  s_upload_content_length("upload_content_length"),
+  s_starttransfer_time("starttransfer_time"),
+  s_redirect_time("redirect_time"),
+  s_request_header("request_header");
 
-Variant f_curl_getinfo(CObjRef ch, int opt /* = 0 */) {
+Variant f_curl_getinfo(CResRef ch, int opt /* = 0 */) {
   CHECK_RESOURCE(curl);
   CURL *cp = curl->get();
 
@@ -996,17 +1096,17 @@ Variant f_curl_getinfo(CObjRef ch, int opt /* = 0 */) {
   return uninit_null();
 }
 
-Variant f_curl_errno(CObjRef ch) {
+Variant f_curl_errno(CResRef ch) {
   CHECK_RESOURCE(curl);
   return curl->getError();
 }
 
-Variant f_curl_error(CObjRef ch) {
+Variant f_curl_error(CResRef ch) {
   CHECK_RESOURCE(curl);
   return curl->getErrorString();
 }
 
-Variant f_curl_close(CObjRef ch) {
+Variant f_curl_close(CResRef ch) {
   CHECK_RESOURCE(curl);
   curl->close();
   return uninit_null();
@@ -1016,11 +1116,11 @@ Variant f_curl_close(CObjRef ch) {
 
 class CurlMultiResource : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(CurlMultiResource)
+  DECLARE_RESOURCE_ALLOCATION(CurlMultiResource)
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("cURL Multi Handle")
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return s_class_name; }
+  CStrRef o_getClassNameHook() const { return classnameof(); }
 
   CurlMultiResource() {
     m_multi = curl_multi_init();
@@ -1038,13 +1138,13 @@ public:
     }
   }
 
-  void add(CObjRef ch) {
+  void add(CResRef ch) {
     m_easyh.append(ch);
   }
 
   void remove(CurlResource *curle) {
     for (ArrayIter iter(m_easyh); iter; ++iter) {
-      if (toObject(iter.second()).getTyped<CurlResource>()->get(true) ==
+      if (iter.second().toResource().getTyped<CurlResource>()->get(true) ==
           curle->get()) {
         m_easyh.remove(iter.first());
         return;
@@ -1052,20 +1152,21 @@ public:
     }
   }
 
-  Object find(CURL *cp) {
+  Resource find(CURL *cp) {
     for (ArrayIter iter(m_easyh); iter; ++iter) {
-      if (toObject(iter.second()).getTyped<CurlResource>()->get(true) == cp) {
-        return iter.second();
+      if (iter.second().toResource().
+            getTyped<CurlResource>()->get(true) == cp) {
+        return iter.second().toResource();
       }
     }
-    return Object();
+    return Resource();
   }
 
   void check_exceptions() {
     ObjectData* phpException = 0;
     Exception* cppException = 0;
     for (ArrayIter iter(m_easyh); iter; ++iter) {
-      CurlResource* curl = iter.second().toCObjRef(). getTyped<CurlResource>();
+      CurlResource* curl = iter.second().toResource().getTyped<CurlResource>();
       if (ObjectData* e = curl->getAndClearPhpException()) {
         if (phpException) {
           e->o_set(s_previous, Variant(phpException), s_exception);
@@ -1096,18 +1197,15 @@ public:
   }
 
 private:
-  int m_still_running;
   CURLM *m_multi;
   Array m_easyh;
 };
-IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(CurlMultiResource);
+
 void CurlMultiResource::sweep() {
   if (m_multi) {
     curl_multi_cleanup(m_multi);
   }
 }
-
-StaticString CurlMultiResource::s_class_name("cURL Multi Handle");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1118,25 +1216,25 @@ StaticString CurlMultiResource::s_class_name("cURL Multi Handle");
     return uninit_null();                                                        \
   }                                                                     \
 
-Object f_curl_multi_init() {
+Resource f_curl_multi_init() {
   return NEWOBJ(CurlMultiResource)();
 }
 
-Variant f_curl_multi_add_handle(CObjRef mh, CObjRef ch) {
+Variant f_curl_multi_add_handle(CResRef mh, CResRef ch) {
   CHECK_MULTI_RESOURCE(curlm);
   CurlResource *curle = ch.getTyped<CurlResource>();
   curlm->add(ch);
   return curl_multi_add_handle(curlm->get(), curle->get());
 }
 
-Variant f_curl_multi_remove_handle(CObjRef mh, CObjRef ch) {
+Variant f_curl_multi_remove_handle(CResRef mh, CResRef ch) {
   CHECK_MULTI_RESOURCE(curlm);
   CurlResource *curle = ch.getTyped<CurlResource>();
   curlm->remove(curle);
   return curl_multi_remove_handle(curlm->get(), curle->get());
 }
 
-Variant f_curl_multi_exec(CObjRef mh, VRefParam still_running) {
+Variant f_curl_multi_exec(CResRef mh, VRefParam still_running) {
   CHECK_MULTI_RESOURCE(curlm);
   int running = still_running;
   IOStatusHelper io("curl_multi_exec");
@@ -1191,7 +1289,7 @@ static void hphp_curl_multi_select(CURLM *mh, int timeout_ms, int *ret) {
 # endif
 #endif
 
-Variant f_curl_multi_select(CObjRef mh, double timeout /* = 1.0 */) {
+Variant f_curl_multi_select(CResRef mh, double timeout /* = 1.0 */) {
   CHECK_MULTI_RESOURCE(curlm);
   int ret;
   unsigned long timeout_ms = (unsigned long)(timeout * 1000.0);
@@ -1200,7 +1298,7 @@ Variant f_curl_multi_select(CObjRef mh, double timeout /* = 1.0 */) {
   return ret;
 }
 
-Variant f_curl_multi_getcontent(CObjRef ch) {
+Variant f_curl_multi_getcontent(CResRef ch) {
   CHECK_RESOURCE(curl);
   return curl->getContents();
 }
@@ -1216,7 +1314,7 @@ Array f_curl_convert_fd_to_stream(fd_set *fd, int max_fd) {
   return ret;
 }
 
-Variant f_fb_curl_multi_fdset(CObjRef mh,
+Variant f_fb_curl_multi_fdset(CResRef mh,
                               VRefParam read_fd_set,
                               VRefParam write_fd_set,
                               VRefParam exc_fd_set,
@@ -1241,13 +1339,14 @@ Variant f_fb_curl_multi_fdset(CObjRef mh,
   return r;
 }
 
-static const StaticString s_msg("msg");
-static const StaticString s_result("result");
-static const StaticString s_handle("handle");
-static const StaticString s_headers("headers");
-static const StaticString s_requests("requests");
+const StaticString
+  s_msg("msg"),
+  s_result("result"),
+  s_handle("handle"),
+  s_headers("headers"),
+  s_requests("requests");
 
-Variant f_curl_multi_info_read(CObjRef mh,
+Variant f_curl_multi_info_read(CResRef mh,
                                VRefParam msgs_in_queue /* = null */) {
   CHECK_MULTI_RESOURCE(curlm);
 
@@ -1262,14 +1361,14 @@ Variant f_curl_multi_info_read(CObjRef mh,
   Array ret;
   ret.set(s_msg, tmp_msg->msg);
   ret.set(s_result, tmp_msg->data.result);
-  Object curle = curlm->find(tmp_msg->easy_handle);
+  Resource curle = curlm->find(tmp_msg->easy_handle);
   if (!curle.isNull()) {
     ret.set(s_handle, curle);
   }
   return ret;
 }
 
-Variant f_curl_multi_close(CObjRef mh) {
+Variant f_curl_multi_close(CResRef mh) {
   CHECK_MULTI_RESOURCE(curlm);
   curlm->close();
   return uninit_null();
@@ -1280,11 +1379,11 @@ Variant f_curl_multi_close(CObjRef mh) {
 
 class LibEventHttpHandle : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(LibEventHttpHandle)
+  DECLARE_RESOURCE_ALLOCATION(LibEventHttpHandle)
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("LibEventHttp");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   explicit LibEventHttpHandle(LibEventHttpClientPtr client) : m_client(client) {
   }
@@ -1298,8 +1397,6 @@ public:
   LibEventHttpClientPtr m_client;
 };
 IMPLEMENT_OBJECT_ALLOCATION(LibEventHttpHandle)
-
-StaticString LibEventHttpHandle::s_class_name("LibEventHttp");
 
 static LibEventHttpClientPtr prepare_client
 (CStrRef url, CStrRef data, CArrRef headers, int timeout,
@@ -1352,8 +1449,9 @@ static LibEventHttpClientPtr prepare_client
   return client;
 }
 
-static const StaticString s_code("code");
-static const StaticString s_response("response");
+const StaticString
+  s_code("code"),
+  s_response("response");
 
 static Array prepare_response(LibEventHttpClientPtr client) {
   int len = 0;
@@ -1421,7 +1519,7 @@ Variant f_evhttp_async_get(CStrRef url, CArrRef headers /* = null_array */,
   LibEventHttpClientPtr client = prepare_client(url, "", headers, timeout,
                                                 true, false);
   if (client) {
-    return Object(NEWOBJ(LibEventHttpHandle)(client));
+    return Resource(NEWOBJ(LibEventHttpHandle)(client));
   }
   return false;
 }
@@ -1435,12 +1533,12 @@ Variant f_evhttp_async_post(CStrRef url, CStrRef data,
   LibEventHttpClientPtr client = prepare_client(url, data, headers, timeout,
                                                 true, true);
   if (client) {
-    return Object(NEWOBJ(LibEventHttpHandle)(client));
+    return Resource(NEWOBJ(LibEventHttpHandle)(client));
   }
   return false;
 }
 
-Variant f_evhttp_recv(CObjRef handle) {
+Variant f_evhttp_recv(CResRef handle) {
   if (RuntimeOption::ServerHttpSafeMode) {
     throw_fatal("evhttp_recv is disabled");
   }

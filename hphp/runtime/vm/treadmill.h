@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,14 +59,7 @@ class WorkItem {
 class FreeMemoryTrigger : public WorkItem {
   void* m_ptr;
  public:
-  FreeMemoryTrigger(void* ptr);
-  virtual void operator()();
-};
-
-class FreeClassTrigger : public Treadmill::WorkItem {
-  Class* m_cls;
- public:
-  FreeClassTrigger(Class* cls);
+  explicit FreeMemoryTrigger(void* ptr);
   virtual void operator()();
 };
 

@@ -1,3 +1,6 @@
 <?php
 
- function test() { print 'test';} test();
+function test() {
+ print 'test';
+}
+ test();

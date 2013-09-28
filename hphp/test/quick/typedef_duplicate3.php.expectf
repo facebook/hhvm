@@ -1,1 +1,1 @@
-HipHop Fatal error: The type Existing is already defined to a different class (Existing) in %s on line 6
+HipHop Fatal error: The name Existing is already defined as a class in %s on line 6

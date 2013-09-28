@@ -29,7 +29,6 @@ TIME_CHECK_INCLUDE("limits.h")
 
 CHECK_TYPE_SIZE("int32_t" HAVE_INT32_T)
 CHECK_TYPE_SIZE("uint32_t" HAVE_UINT32_T)
-CHECK_TYPE_SIZE("int" SIZEOF_INT)
 
 CHECK_FUNCTION_EXISTS("strtoll" HAVE_STRTOLL)
 CHECK_FUNCTION_EXISTS("atoll" HAVE_ATOLL)
@@ -39,7 +38,7 @@ CHECK_FUNCTION_EXISTS("setlocale" HAVE_SETLOCALE)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/timelib_config.h.cmake ${CMAKE_CURRENT_SOURCE_DIR}/timelib_config.h)
 
 add_definitions(-DNDEBUG)
+set(TIMELIB_SOURCES astro.c dow.c interval.c parse_date.c parse_iso_intervals.c parse_tz.c timelib.c tm2unixtime.c unixtime2tm.c)
 
-add_library(timelib STATIC astro.c dow.c interval.c
-	parse_date.c parse_iso_intervals.c parse_tz.c
-	timelib.c tm2unixtime.c unixtime2tm.c)
+add_library(timelib STATIC ${TIMELIB_SOURCES})
+

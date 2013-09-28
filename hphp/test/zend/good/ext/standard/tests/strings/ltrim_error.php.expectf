@@ -1,0 +1,24 @@
+*** Testing ltrim() : error conditions ***
+
+-- Testing ltrim() function with no arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing ltrim() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Test ltrim function with various invalid charlists
+HipHop Warning: %s
+string(14) "  Hello World
+"
+HipHop Warning: %s
+string(14) "  Hello World
+"
+HipHop Warning: %s
+string(14) "  Hello World
+"
+HipHop Warning: %s
+string(14) "  Hello World
+"
+===DONE===

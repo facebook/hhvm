@@ -1,0 +1,12 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+    ],
+    "classes": [
+    ],
+    "extension": {
+        "symbol": "s_phar_extension"
+    }
+}

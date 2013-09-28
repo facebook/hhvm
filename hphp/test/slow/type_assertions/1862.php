@@ -1,6 +1,5 @@
 <?php
 
-
 class X {
   public $propX;
   function baz() {
@@ -35,13 +34,16 @@ class A1 {
     if ($this instanceof D1) {
       var_dump($this->d1prop);
       var_dump($this->d1method());
-    } else if ($this instanceof C1) {
+    }
+ else if ($this instanceof C1) {
       var_dump($this->c1prop);
       var_dump($this->c1method());
-    } else if ($this instanceof B1) {
+    }
+ else if ($this instanceof B1) {
       var_dump($this->b1prop);
       var_dump($this->b1method());
-    } else if ($this instanceof A1) {
+    }
+ else if ($this instanceof A1) {
       var_dump($this->a1prop);
       var_dump($this->a1method());
     }
@@ -60,7 +62,8 @@ if (rand(0, 1)) {
       return 2;
     }
   }
-} else {
+}
+ else {
   class C1 extends B1 {
     public $c1prop;
     function c1method() {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,19 +18,20 @@
 #include "hphp/compiler/expression/array_element_expression.h"
 #include "hphp/compiler/expression/object_property_expression.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/constant_expression.h"
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/type_conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/zend-string.h"
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/encaps_list_expression.h"
 #include "hphp/compiler/expression/simple_function_call.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/statement/loop_statement.h"
+#include "hphp/runtime/base/tv-arith.h"
 
 using namespace HPHP;
 
@@ -179,9 +180,6 @@ ExpressionPtr BinaryOpExpression::unneededHelper() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// parser functions
-
-///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
 int BinaryOpExpression::getLocalEffects() const {
@@ -193,7 +191,7 @@ int BinaryOpExpression::getLocalEffects() const {
   case T_DIV_EQUAL:
   case T_MOD_EQUAL: {
     Variant v2;
-    if (!m_exp2->getScalarValue(v2) || v2.equal(0)) {
+    if (!m_exp2->getScalarValue(v2) || equal(v2, 0)) {
       effect = CanThrow;
       m_canThrow = true;
     }
@@ -245,10 +243,10 @@ int BinaryOpExpression::getKidCount() const {
 void BinaryOpExpression::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
   case 0:
-    m_exp1 = boost::dynamic_pointer_cast<Expression>(cp);
+    m_exp1 = dynamic_pointer_cast<Expression>(cp);
     break;
   case 1:
-    m_exp2 = boost::dynamic_pointer_cast<Expression>(cp);
+    m_exp2 = dynamic_pointer_cast<Expression>(cp);
     break;
   default:
     assert(false);
@@ -526,61 +524,105 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
       Variant result;
       switch (m_op) {
         case T_LOGICAL_XOR:
-          result = logical_xor(v1, v2); break;
+          result = static_cast<bool>(v1.toBoolean() ^ v2.toBoolean());
+          break;
         case '|':
-          result = bitwise_or(v1, v2); break;
+          *result.asCell() = cellBitOr(*v1.asCell(), *v2.asCell());
+          break;
         case '&':
-          result = bitwise_and(v1, v2); break;
+          *result.asCell() = cellBitAnd(*v1.asCell(), *v2.asCell());
+          break;
         case '^':
-          result = bitwise_xor(v1, v2); break;
+          *result.asCell() = cellBitXor(*v1.asCell(), *v2.asCell());
+          break;
         case '.':
-          result = concat(v1, v2); break;
+          result = concat(v1.toString(), v2.toString());
+          break;
         case T_IS_IDENTICAL:
-          result = same(v1, v2); break;
+          result = same(v1, v2);
+          break;
         case T_IS_NOT_IDENTICAL:
-          result = !same(v1, v2); break;
+          result = !same(v1, v2);
+          break;
         case T_IS_EQUAL:
-          result = equal(v1, v2); break;
+          result = equal(v1, v2);
+          break;
         case T_IS_NOT_EQUAL:
-          result = !equal(v1, v2); break;
+          result = !equal(v1, v2);
+          break;
         case '<':
-          result = less(v1, v2); break;
+          result = less(v1, v2);
+          break;
         case T_IS_SMALLER_OR_EQUAL:
-          result = less_or_equal(v1, v2); break;
+          result = cellLessOrEqual(*v1.asCell(), *v2.asCell());
+          break;
         case '>':
-          result = more(v1, v2); break;
+          result = more(v1, v2);
+          break;
         case T_IS_GREATER_OR_EQUAL:
-          result = more_or_equal(v1, v2); break;
+          result = cellGreaterOrEqual(*v1.asCell(), *v2.asCell());
+          break;
         case '+':
-          result = plus(v1, v2); break;
+          *result.asCell() = cellAdd(*v1.asCell(), *v2.asCell());
+          break;
         case '-':
-          result = minus(v1, v2); break;
+          *result.asCell() = cellSub(*v1.asCell(), *v2.asCell());
+          break;
         case '*':
-          result = multiply(v1, v2); break;
+          *result.asCell() = cellMul(*v1.asCell(), *v2.asCell());
+          break;
         case '/':
           if ((v2.isIntVal() && v2.toInt64() == 0) || v2.toDouble() == 0.0) {
             return ExpressionPtr();
           }
-          result = divide(v1, v2); break;
+          *result.asCell() = cellDiv(*v1.asCell(), *v2.asCell());
+          break;
         case '%':
           if ((v2.isIntVal() && v2.toInt64() == 0) || v2.toDouble() == 0.0) {
             return ExpressionPtr();
           }
-          result = modulo(v1, v2); break;
+          *result.asCell() = cellMod(*v1.asCell(), *v2.asCell());
+          break;
         case T_SL:
-          result = shift_left(v1, v2); break;
+          result = v1.toInt64() << v2.toInt64();
+          break;
         case T_SR:
-          result = shift_right(v1, v2); break;
+          result = v1.toInt64() >> v2.toInt64();
+          break;
         case T_BOOLEAN_OR:
-          result = v1 || v2; break;
+          result = v1.toBoolean() || v2.toBoolean(); break;
         case T_BOOLEAN_AND:
-          result = v1 && v2; break;
+          result = v1.toBoolean() && v2.toBoolean(); break;
         case T_LOGICAL_OR:
-          result = v1 || v2; break;
+          result = v1.toBoolean() || v2.toBoolean(); break;
         case T_LOGICAL_AND:
-          result = v1 && v2; break;
-        case T_INSTANCEOF:
-          result = false; break;
+          result = v1.toBoolean() && v2.toBoolean(); break;
+        case T_INSTANCEOF: {
+          if (v2.isString()) {
+            if (v1.isArray() &&
+                interface_supports_array(v2.getStringData())) {
+              result = true;
+              break;
+            }
+            if (v1.isString() &&
+                interface_supports_string(v2.getStringData())) {
+              result = true;
+              break;
+            }
+            if (v1.isInteger() &&
+                interface_supports_int(v2.getStringData())) {
+              result = true;
+              break;
+            }
+            if (v1.isDouble() &&
+                interface_supports_double(v2.getStringData())) {
+              result = true;
+              break;
+            }
+          }
+          result = false;
+          break;
+        }
         default:
           return ExpressionPtr();
       }

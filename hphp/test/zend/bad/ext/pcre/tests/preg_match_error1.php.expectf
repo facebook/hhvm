@@ -1,0 +1,26 @@
+*** Testing preg_match() : error conditions ***
+
+Arg value is abcdef
+HipHop Warning: %s
+bool(false)
+
+Arg value is /[a-zA-Z]
+HipHop Warning: %s
+bool(false)
+
+Arg value is [a-zA-Z]/
+HipHop Warning: %s
+bool(false)
+
+Arg value is /[a-zA-Z]/F
+HipHop Warning: %s
+bool(false)
+
+Arg value is Array
+HipHop Warning: %s
+bool(false)
+
+Arg value is /[a-zA-Z]/
+int(1)
+HipHop Warning: %s
+bool(false)

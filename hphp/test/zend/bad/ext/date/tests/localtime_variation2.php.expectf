@@ -1,0 +1,532 @@
+*** Testing localtime() : usage variation ***
+
+--int 0--
+array(9) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(0)
+  [2]=>
+  int(0)
+  [3]=>
+  int(1)
+  [4]=>
+  int(0)
+  [5]=>
+  int(70)
+  [6]=>
+  int(4)
+  [7]=>
+  int(0)
+  [8]=>
+  int(0)
+}
+
+--int 1--
+array(9) {
+  ["tm_sec"]=>
+  int(10)
+  ["tm_min"]=>
+  int(0)
+  ["tm_hour"]=>
+  int(0)
+  ["tm_mday"]=>
+  int(1)
+  ["tm_mon"]=>
+  int(0)
+  ["tm_year"]=>
+  int(70)
+  ["tm_wday"]=>
+  int(4)
+  ["tm_yday"]=>
+  int(0)
+  ["tm_isdst"]=>
+  int(0)
+}
+
+--int 12345--
+array(9) {
+  ["tm_sec"]=>
+  int(10)
+  ["tm_min"]=>
+  int(0)
+  ["tm_hour"]=>
+  int(0)
+  ["tm_mday"]=>
+  int(1)
+  ["tm_mon"]=>
+  int(0)
+  ["tm_year"]=>
+  int(70)
+  ["tm_wday"]=>
+  int(4)
+  ["tm_yday"]=>
+  int(0)
+  ["tm_isdst"]=>
+  int(0)
+}
+
+--int -12345--
+array(9) {
+  ["tm_sec"]=>
+  int(10)
+  ["tm_min"]=>
+  int(0)
+  ["tm_hour"]=>
+  int(0)
+  ["tm_mday"]=>
+  int(1)
+  ["tm_mon"]=>
+  int(0)
+  ["tm_year"]=>
+  int(70)
+  ["tm_wday"]=>
+  int(4)
+  ["tm_yday"]=>
+  int(0)
+  ["tm_isdst"]=>
+  int(0)
+}
+
+--float 10.5--
+array(9) {
+  ["tm_sec"]=>
+  int(10)
+  ["tm_min"]=>
+  int(0)
+  ["tm_hour"]=>
+  int(0)
+  ["tm_mday"]=>
+  int(1)
+  ["tm_mon"]=>
+  int(0)
+  ["tm_year"]=>
+  int(70)
+  ["tm_wday"]=>
+  int(4)
+  ["tm_yday"]=>
+  int(0)
+  ["tm_isdst"]=>
+  int(0)
+}
+
+--float -10.5--
+array(9) {
+  ["tm_sec"]=>
+  int(10)
+  ["tm_min"]=>
+  int(0)
+  ["tm_hour"]=>
+  int(0)
+  ["tm_mday"]=>
+  int(1)
+  ["tm_mon"]=>
+  int(0)
+  ["tm_year"]=>
+  int(70)
+  ["tm_wday"]=>
+  int(4)
+  ["tm_yday"]=>
+  int(0)
+  ["tm_isdst"]=>
+  int(0)
+}
+
+--float 12.3456789000e10--
+array(9) {
+  ["tm_sec"]=>
+  int(10)
+  ["tm_min"]=>
+  int(0)
+  ["tm_hour"]=>
+  int(0)
+  ["tm_mday"]=>
+  int(1)
+  ["tm_mon"]=>
+  int(0)
+  ["tm_year"]=>
+  int(70)
+  ["tm_wday"]=>
+  int(4)
+  ["tm_yday"]=>
+  int(0)
+  ["tm_isdst"]=>
+  int(0)
+}
+
+--float -12.3456789000e10--
+array(9) {
+  ["tm_sec"]=>
+  int(10)
+  ["tm_min"]=>
+  int(0)
+  ["tm_hour"]=>
+  int(0)
+  ["tm_mday"]=>
+  int(1)
+  ["tm_mon"]=>
+  int(0)
+  ["tm_year"]=>
+  int(70)
+  ["tm_wday"]=>
+  int(4)
+  ["tm_yday"]=>
+  int(0)
+  ["tm_isdst"]=>
+  int(0)
+}
+
+--float .5--
+array(9) {
+  ["tm_sec"]=>
+  int(10)
+  ["tm_min"]=>
+  int(0)
+  ["tm_hour"]=>
+  int(0)
+  ["tm_mday"]=>
+  int(1)
+  ["tm_mon"]=>
+  int(0)
+  ["tm_year"]=>
+  int(70)
+  ["tm_wday"]=>
+  int(4)
+  ["tm_yday"]=>
+  int(0)
+  ["tm_isdst"]=>
+  int(0)
+}
+
+--empty array--
+HipHop Warning: %s
+bool(false)
+
+--int indexed array--
+HipHop Warning: %s
+bool(false)
+
+--associative array--
+HipHop Warning: %s
+bool(false)
+
+--nested arrays--
+HipHop Warning: %s
+bool(false)
+
+--uppercase NULL--
+array(9) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(0)
+  [2]=>
+  int(0)
+  [3]=>
+  int(1)
+  [4]=>
+  int(0)
+  [5]=>
+  int(70)
+  [6]=>
+  int(4)
+  [7]=>
+  int(0)
+  [8]=>
+  int(0)
+}
+
+--lowercase null--
+array(9) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(0)
+  [2]=>
+  int(0)
+  [3]=>
+  int(1)
+  [4]=>
+  int(0)
+  [5]=>
+  int(70)
+  [6]=>
+  int(4)
+  [7]=>
+  int(0)
+  [8]=>
+  int(0)
+}
+
+--lowercase true--
+array(9) {
+  ["tm_sec"]=>
+  int(10)
+  ["tm_min"]=>
+  int(0)
+  ["tm_hour"]=>
+  int(0)
+  ["tm_mday"]=>
+  int(1)
+  ["tm_mon"]=>
+  int(0)
+  ["tm_year"]=>
+  int(70)
+  ["tm_wday"]=>
+  int(4)
+  ["tm_yday"]=>
+  int(0)
+  ["tm_isdst"]=>
+  int(0)
+}
+
+--lowercase false--
+array(9) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(0)
+  [2]=>
+  int(0)
+  [3]=>
+  int(1)
+  [4]=>
+  int(0)
+  [5]=>
+  int(70)
+  [6]=>
+  int(4)
+  [7]=>
+  int(0)
+  [8]=>
+  int(0)
+}
+
+--uppercase TRUE--
+array(9) {
+  ["tm_sec"]=>
+  int(10)
+  ["tm_min"]=>
+  int(0)
+  ["tm_hour"]=>
+  int(0)
+  ["tm_mday"]=>
+  int(1)
+  ["tm_mon"]=>
+  int(0)
+  ["tm_year"]=>
+  int(70)
+  ["tm_wday"]=>
+  int(4)
+  ["tm_yday"]=>
+  int(0)
+  ["tm_isdst"]=>
+  int(0)
+}
+
+--uppercase FALSE--
+array(9) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(0)
+  [2]=>
+  int(0)
+  [3]=>
+  int(1)
+  [4]=>
+  int(0)
+  [5]=>
+  int(70)
+  [6]=>
+  int(4)
+  [7]=>
+  int(0)
+  [8]=>
+  int(0)
+}
+
+--empty string DQ--
+array(9) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(0)
+  [2]=>
+  int(0)
+  [3]=>
+  int(1)
+  [4]=>
+  int(0)
+  [5]=>
+  int(70)
+  [6]=>
+  int(4)
+  [7]=>
+  int(0)
+  [8]=>
+  int(0)
+}
+
+--empty string SQ--
+array(9) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(0)
+  [2]=>
+  int(0)
+  [3]=>
+  int(1)
+  [4]=>
+  int(0)
+  [5]=>
+  int(70)
+  [6]=>
+  int(4)
+  [7]=>
+  int(0)
+  [8]=>
+  int(0)
+}
+
+--string DQ--
+array(9) {
+  ["tm_sec"]=>
+  int(10)
+  ["tm_min"]=>
+  int(0)
+  ["tm_hour"]=>
+  int(0)
+  ["tm_mday"]=>
+  int(1)
+  ["tm_mon"]=>
+  int(0)
+  ["tm_year"]=>
+  int(70)
+  ["tm_wday"]=>
+  int(4)
+  ["tm_yday"]=>
+  int(0)
+  ["tm_isdst"]=>
+  int(0)
+}
+
+--string SQ--
+array(9) {
+  ["tm_sec"]=>
+  int(10)
+  ["tm_min"]=>
+  int(0)
+  ["tm_hour"]=>
+  int(0)
+  ["tm_mday"]=>
+  int(1)
+  ["tm_mon"]=>
+  int(0)
+  ["tm_year"]=>
+  int(70)
+  ["tm_wday"]=>
+  int(4)
+  ["tm_yday"]=>
+  int(0)
+  ["tm_isdst"]=>
+  int(0)
+}
+
+--mixed case string--
+array(9) {
+  ["tm_sec"]=>
+  int(10)
+  ["tm_min"]=>
+  int(0)
+  ["tm_hour"]=>
+  int(0)
+  ["tm_mday"]=>
+  int(1)
+  ["tm_mon"]=>
+  int(0)
+  ["tm_year"]=>
+  int(70)
+  ["tm_wday"]=>
+  int(4)
+  ["tm_yday"]=>
+  int(0)
+  ["tm_isdst"]=>
+  int(0)
+}
+
+--heredoc--
+array(9) {
+  ["tm_sec"]=>
+  int(10)
+  ["tm_min"]=>
+  int(0)
+  ["tm_hour"]=>
+  int(0)
+  ["tm_mday"]=>
+  int(1)
+  ["tm_mon"]=>
+  int(0)
+  ["tm_year"]=>
+  int(70)
+  ["tm_wday"]=>
+  int(4)
+  ["tm_yday"]=>
+  int(0)
+  ["tm_isdst"]=>
+  int(0)
+}
+
+--instance of classWithToString--
+HipHop Warning: %s
+bool(false)
+
+--instance of classWithoutToString--
+HipHop Warning: %s
+bool(false)
+
+--undefined var--
+array(9) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(0)
+  [2]=>
+  int(0)
+  [3]=>
+  int(1)
+  [4]=>
+  int(0)
+  [5]=>
+  int(70)
+  [6]=>
+  int(4)
+  [7]=>
+  int(0)
+  [8]=>
+  int(0)
+}
+
+--unset var--
+array(9) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(0)
+  [2]=>
+  int(0)
+  [3]=>
+  int(1)
+  [4]=>
+  int(0)
+  [5]=>
+  int(70)
+  [6]=>
+  int(4)
+  [7]=>
+  int(0)
+  [8]=>
+  int(0)
+}
+===DONE===

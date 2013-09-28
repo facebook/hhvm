@@ -1,0 +1,3 @@
+int(2)
+HipHop Warning: Constant Y already defined in %s/test/slow/intercept/1199.php on line 8
+int(3)

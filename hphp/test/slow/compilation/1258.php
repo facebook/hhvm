@@ -1,3 +1,7 @@
 <?php
 
- function test() {} function foo() { test($a = 1);}
+function test() {
+}
+ function foo() {
+ test($a = 1);
+}

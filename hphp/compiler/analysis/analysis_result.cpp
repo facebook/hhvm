@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,12 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/compiler/analysis/analysis_result.h"
+
 #include <iomanip>
 #include <algorithm>
 #include <sstream>
 #include <boost/format.hpp>
 #include <boost/bind.hpp>
-#include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/alias_manager.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
@@ -43,15 +44,16 @@
 #include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/array_pair_expression.h"
+#include "hphp/compiler/expression/simple_function_call.h"
 #include "hphp/runtime/ext/ext_json.h"
-#include "hphp/runtime/base/zend/zend_printf.h"
-#include "hphp/runtime/base/program_functions.h"
+#include "hphp/runtime/base/zend-printf.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/util/atomic.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/util.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/process.h"
-#include "hphp/util/job_queue.h"
+#include "hphp/util/job-queue.h"
 #include "hphp/util/timer.h"
 
 using namespace HPHP;
@@ -157,6 +159,10 @@ void AnalysisResult::parseOnDemandBy(const string &name,
   }
 }
 
+void AnalysisResult::addNSFallbackFunc(ConstructPtr c, FileScopePtr fs) {
+  m_nsFallbackFuncs.insert(std::make_pair(c, fs));
+}
+
 FileScopePtr AnalysisResult::findFileScope(const std::string &name) const {
   StringToFileScopePtrMap::const_iterator iter = m_files.find(name);
   if (iter != m_files.end()) {
@@ -169,7 +175,7 @@ FunctionScopePtr AnalysisResult::findFunction(
   const std::string &funcName) const {
   StringToFunctionScopePtrMap::const_iterator bit =
     m_functions.find(funcName);
-  if (bit != m_functions.end() && !bit->second->ignoreRedefinition()) {
+  if (bit != m_functions.end() && !bit->second->allowOverride()) {
     return bit->second;
   }
   StringToFunctionScopePtrMap::const_iterator iter =
@@ -235,8 +241,8 @@ ClassScopePtr AnalysisResult::findClass(const std::string &name,
   return ClassScopePtr();
 }
 
-const ClassScopePtrVec &AnalysisResult::findRedeclaredClasses
-(const std::string &name) const {
+const ClassScopePtrVec &
+AnalysisResult::findRedeclaredClasses(const std::string &name) const {
   StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.find(name);
   if (iter == m_classDecs.end()) {
     static ClassScopePtrVec empty;
@@ -345,7 +351,7 @@ bool AnalysisResult::declareFunction(FunctionScopePtr funcScope) const {
   // System functions override
   auto it = m_functions.find(fname);
   if (it != m_functions.end()) {
-    if (!it->second->ignoreRedefinition()) {
+    if (!it->second->allowOverride()) {
       // we need someone to hold on to a reference to it
       // even though we're not going to do anything with it
       this->lock()->m_ignoredScopes.push_back(funcScope);
@@ -402,7 +408,9 @@ static bool by_source(const BlockScopePtr &b1, const BlockScopePtr &b2) {
 void AnalysisResult::canonicalizeSymbolOrder() {
   getConstants()->canonicalizeSymbolOrder();
   getVariables()->canonicalizeSymbolOrder();
+}
 
+void AnalysisResult::markRedeclaringClasses() {
   AnalysisResultPtr ar = shared_from_this();
   for (StringToClassScopePtrVecMap::iterator iter = m_classDecs.begin();
        iter != m_classDecs.end(); ++iter) {
@@ -413,6 +421,56 @@ void AnalysisResult::canonicalizeSymbolOrder() {
         classes[i]->setRedeclaring(ar, i);
       }
     }
+  }
+
+  auto markRedeclaring = [&] (const std::string& name) {
+    auto it = m_classDecs.find(name);
+    if (it != m_classDecs.end()) {
+      auto& classes = it->second;
+      for (unsigned int i = 0; i < classes.size(); ++i) {
+        classes[i]->setRedeclaring(ar, i);
+      }
+    }
+  };
+
+  /*
+   * In WholeProgram mode, during parse time we collected all
+   * class_alias calls so we can mark the targets of such calls
+   * redeclaring if necessary.
+   *
+   * Two cases here that definitely require this:
+   *
+   *  - If an alias name has the same name as another class, we need
+   *    to mark *that* class as redeclaring, since it may mean
+   *    different things in different requests now.
+   *
+   *  - If an alias name can refer to more than one class, each of
+   *    those classes must be marked redeclaring.
+   *
+   * In the simple case of a unique alias name and a unique target
+   * name, we might be able to get away with manipulating the target
+   * classes' volatility.
+   *
+   * Rather than work through the various cases here, though, we've
+   * just decided to just play it safe and mark all the names involved
+   * as redeclaring for now.
+   */
+  for (auto& kv : m_classAliases) {
+    assert(kv.first == Util::toLower(kv.first));
+    assert(kv.second == Util::toLower(kv.second));
+    markRedeclaring(kv.first);
+    markRedeclaring(kv.second);
+  }
+
+  /*
+   * Similar to class_alias, when a type alias is declared with the
+   * same name as a class in the program, we need to make sure the
+   * class is marked redeclaring.  It is possible in some requests
+   * that things like 'instanceof Foo' will not mean the same thing.
+   */
+  for (auto& name : m_typeAliasNames) {
+    assert(Util::toLower(name) == name);
+    markRedeclaring(name);
   }
 }
 
@@ -512,11 +570,6 @@ bool AnalysisResult::isSystemConstant(const std::string &constName) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Program
 
-void AnalysisResult::loadBuiltinFunctions() {
-  AnalysisResultPtr ar = shared_from_this();
-  BuiltinSymbols::LoadFunctions(ar, m_functions);
-}
-
 void AnalysisResult::loadBuiltins() {
   AnalysisResultPtr ar = shared_from_this();
   BuiltinSymbols::LoadFunctions(ar, m_functions);
@@ -537,6 +590,17 @@ void AnalysisResult::checkClassDerivations() {
         cls->importUsedTraits(ar);
       }
     }
+  }
+}
+
+void AnalysisResult::resolveNSFallbackFuncs() {
+  for (auto &pair : m_nsFallbackFuncs) {
+    SimpleFunctionCallPtr sfc =
+      static_pointer_cast<SimpleFunctionCall>(pair.first);
+    sfc->resolveNSFallbackFunc(
+      shared_from_this(),
+      pair.second
+    );
   }
 }
 
@@ -589,6 +653,11 @@ void AnalysisResult::collectFunctionsAndClasses(FileScopePtr fs) {
     ClassScopePtrVec &clsVec = m_classDecs[iter->first];
     clsVec.insert(clsVec.end(), iter->second.begin(), iter->second.end());
   }
+
+  m_classAliases.insert(fs->getClassAliases().begin(),
+                        fs->getClassAliases().end());
+  m_typeAliasNames.insert(fs->getTypeAliasNames().begin(),
+                          fs->getTypeAliasNames().end());
 }
 
 static bool by_filename(const FileScopePtr &f1, const FileScopePtr &f2) {
@@ -614,6 +683,8 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
   // Keep generated code identical without randomness
   canonicalizeSymbolOrder();
 
+  markRedeclaringClasses();
+
   // Analyze some special cases
   for (set<string>::const_iterator it = Option::VolatileClasses.begin();
        it != Option::VolatileClasses.end(); ++it) {
@@ -624,6 +695,7 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
   }
 
   checkClassDerivations();
+  resolveNSFallbackFuncs();
 
   // Analyze All
   Logger::Verbose("Analyzing All");
@@ -782,8 +854,14 @@ void AnalysisResult::analyzeProgramFinal() {
   for (uint i = 0; i < m_fileScopes.size(); i++) {
     m_fileScopes[i]->analyzeProgram(ar);
   }
+
   // Keep generated code identical without randomness
   canonicalizeSymbolOrder();
+
+  // XXX: this is only here because canonicalizeSymbolOrder used to do
+  // it---is it necessary to repeat at this phase?  (Probably not ...)
+  markRedeclaringClasses();
+
   setPhase(AnalysisResult::CodeGen);
 }
 
@@ -905,7 +983,7 @@ public:
 
   virtual void doJob(BlockScope *scope) {
 #ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
-    atomic_inc(AnalysisResult::s_NumDoJobCalls);
+    ++AnalysisResult::s_NumDoJobCalls;
     ConcurrentBlockScopeRawPtrIntHashMap::accessor acc;
     AnalysisResult::s_DoJobUniqueScopes.insert(acc,
       BlockScopeRawPtr(scope));
@@ -965,13 +1043,13 @@ public:
                 break;
               case BlockScope::MarkProcessing:
 #ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
-                atomic_inc(AnalysisResult::s_NumForceRerunGlobal);
+                ++AnalysisResult::s_NumForceRerunGlobal;
 #endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
                 pf->first->setForceRerun(true);
                 break;
               case BlockScope::MarkProcessed:
 #ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
-                atomic_inc(AnalysisResult::s_NumReactivateGlobal);
+                ++AnalysisResult::s_NumReactivateGlobal;
 #endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
                 if (visitor->activateScope(pf->first)) {
                   visitor->enqueue(pf->first);
@@ -1007,7 +1085,7 @@ public:
               int m = pf->first->getMark();
               if (pf->second & useKinds && m == BlockScope::MarkProcessed) {
 #ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
-                atomic_inc(AnalysisResult::s_NumReactivateUseKinds);
+                ++AnalysisResult::s_NumReactivateUseKinds;
 #endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
                 bool ready = visitor->activateScope(pf->first);
                 always_assert(!ready);
@@ -1031,7 +1109,7 @@ public:
                 // in its entirety. Thus, we must force it to run again in
                 // order to be able to observe all the updates.
 #ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
-                atomic_inc(AnalysisResult::s_NumForceRerunUseKinds);
+                ++AnalysisResult::s_NumForceRerunUseKinds;
 #endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
                 always_assert(pf->first->getNumDepsToWaitFor() == 0);
                 pf->first->setForceRerun(true);
@@ -1162,11 +1240,11 @@ AnalysisResult::postWaitCallback(bool first,
 }
 
 #ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
-int AnalysisResult::s_NumDoJobCalls         = 0;
-int AnalysisResult::s_NumForceRerunGlobal   = 0;
-int AnalysisResult::s_NumReactivateGlobal   = 0;
-int AnalysisResult::s_NumForceRerunUseKinds = 0;
-int AnalysisResult::s_NumReactivateUseKinds = 0;
+std::atomic<int> AnalysisResult::s_NumDoJobCalls(0);
+std::atomic<int> AnalysisResult::s_NumForceRerunGlobal(0);
+std::atomic<int> AnalysisResult::s_NumReactivateGlobal(0);
+std::atomic<int> AnalysisResult::s_NumForceRerunUseKinds(0);
+std::atomic<int> AnalysisResult::s_NumReactivateUseKinds(0);
 
 ConcurrentBlockScopeRawPtrIntHashMap
   AnalysisResult::s_DoJobUniqueScopes;
@@ -1441,7 +1519,7 @@ DepthFirstVisitor<InferTypes, OptVisitor>::visitScope(BlockScopeRawPtr scope) {
         // there are potentially AST nodes which are interested in the updated
         // return type
 #ifdef HPHP_INSTRUMENT_TYPE_INF
-        atomic_inc(RescheduleException::s_NumForceRerunSelfCaller);
+        ++RescheduleException::s_NumForceRerunSelfCaller;
 #endif /* HPHP_INSTRUMENT_TYPE_INF */
         scope->setForceRerun(true);
       }
@@ -1458,7 +1536,7 @@ DepthFirstVisitor<InferTypes, OptVisitor>::visitScope(BlockScopeRawPtr scope) {
     // potential deadlock detected- reschedule
     // this scope to run at a later time
 #ifdef HPHP_INSTRUMENT_TYPE_INF
-    atomic_inc(RescheduleException::s_NumReschedules);
+    ++RescheduleException::s_NumReschedules;
 #endif /* HPHP_INSTRUMENT_TYPE_INF */
     ret |= scope->getUpdated();
     if (m) {
@@ -1515,9 +1593,9 @@ bool AnalysisResult::postWaitCallback<InferTypes>(
 }
 
 #ifdef HPHP_INSTRUMENT_TYPE_INF
-int RescheduleException::s_NumReschedules          = 0;
-int RescheduleException::s_NumForceRerunSelfCaller = 0;
-int RescheduleException::s_NumRetTypesChanged      = 0;
+std::atomic<int> RescheduleException::s_NumReschedules(0);
+std::atomic<int> RescheduleException::s_NumForceRerunSelfCaller(0);
+std::atomic<int> RescheduleException::s_NumRetTypesChanged(0);
 LProfileMap BaseTryLock::s_LockProfileMap;
 #endif /* HPHP_INSTRUMENT_TYPE_INF */
 

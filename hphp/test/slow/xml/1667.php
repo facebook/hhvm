@@ -1,6 +1,5 @@
 <?php
 
-
 class xml {
   var $parser;
   function xml() {
@@ -9,12 +8,18 @@ class xml {
     xml_set_element_handler($this->parser, 'tag_open', 'tag_close');
     xml_set_character_data_handler($this->parser, 'cdata');
   }
-  function parse($data) { xml_parse($this->parser, $data);}
+  function parse($data) {
+ xml_parse($this->parser, $data);
+}
   function tag_open($parser, $tag, $attributes) {
     var_dump($tag, $attributes);
   }
-  function cdata($parser, $cdata) { var_dump($cdata);}
-  function tag_close($parser, $tag){ var_dump($tag);}
+  function cdata($parser, $cdata) {
+ var_dump($cdata);
+}
+  function tag_close($parser, $tag){
+ var_dump($tag);
+}
 }
 
 $xml_parser = new xml();

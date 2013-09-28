@@ -1,0 +1,9 @@
+string(39) "---
+callback: !emit009
+- a
+- b
+- c
+...
+"
+bool(true)
+bool(true)

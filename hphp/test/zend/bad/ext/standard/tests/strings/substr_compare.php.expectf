@@ -1,0 +1,16 @@
+int(0)
+int(0)
+int(0)
+int(1)
+int(-1)
+HipHop Warning: %s
+bool(false)
+int(-1)
+HipHop Warning: %s
+bool(false)
+Test
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+Done

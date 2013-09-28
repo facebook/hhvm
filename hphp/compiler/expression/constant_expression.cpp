@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/expression/constant_expression.h"
+#include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
@@ -26,7 +26,7 @@
 #include "hphp/util/util.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/parser/parser.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/runtime/ext/ext_misc.h"
 
@@ -117,11 +117,9 @@ bool ConstantExpression::canonCompare(ExpressionPtr e) const {
 // static analysis functions
 
 Symbol *ConstantExpression::resolveNS(AnalysisResultConstPtr ar) {
-  bool ns = m_name[0] == '\\';
-  if (ns) m_name = m_name.substr(1);
   BlockScopeConstPtr block = ar->findConstantDeclarer(m_name);
   if (!block) {
-    if (ns) {
+    if (!hadBackslash() && Option::WholeProgram) {
       int pos = m_name.rfind('\\');
       m_name = m_name.substr(pos + 1);
       block = ar->findConstantDeclarer(m_name);
@@ -196,10 +194,7 @@ ExpressionPtr ConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
       }
     }
     ExpressionPtr rep = Clone(value, getScope());
-    bool annotate = Option::FlAnnotate;
-    Option::FlAnnotate = false; // avoid nested comments on getText
     rep->setComment(getText());
-    Option::FlAnnotate = annotate;
     rep->setLocation(getLocation());
     return replaceValue(rep);
   }
@@ -282,5 +277,5 @@ TypePtr ConstantExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 // code generation functions
 
 void ConstantExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  cg_printf("%s", m_name.c_str());
+  cg_printf("%s", getNonNSOriginalName().c_str());
 }

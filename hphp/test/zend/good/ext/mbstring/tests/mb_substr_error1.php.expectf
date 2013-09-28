@@ -1,0 +1,10 @@
+*** Testing mb_substr() : error conditions ***
+
+-- Testing mb_substr() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing mb_substr() function with less than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

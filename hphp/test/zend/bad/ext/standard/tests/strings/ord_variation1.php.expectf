@@ -1,0 +1,50 @@
+*** Testing ord() function: with unexpected inputs for 'string' argument ***
+-- Iteration 1 --
+int(48)
+-- Iteration 2 --
+int(49)
+-- Iteration 3 --
+int(50)
+-- Iteration 4 --
+int(50)
+-- Iteration 5 --
+int(50)
+-- Iteration 6 --
+int(45)
+-- Iteration 7 --
+int(49)
+-- Iteration 8 --
+int(45)
+-- Iteration 9 --
+int(49)
+-- Iteration 10 --
+HipHop Warning: %s
+NULL
+-- Iteration 11 --
+HipHop Warning: %s
+NULL
+-- Iteration 12 --
+HipHop Warning: %s
+NULL
+-- Iteration 13 --
+int(49)
+-- Iteration 14 --
+int(0)
+-- Iteration 15 --
+int(49)
+-- Iteration 16 --
+int(0)
+-- Iteration 17 --
+int(0)
+-- Iteration 18 --
+int(0)
+-- Iteration 19 --
+int(115)
+-- Iteration 20 --
+HipHop Warning: %s
+NULL
+-- Iteration 21 --
+int(0)
+-- Iteration 22 --
+int(0)
+===DONE===

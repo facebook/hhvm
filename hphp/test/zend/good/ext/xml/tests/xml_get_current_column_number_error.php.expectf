@@ -1,0 +1,10 @@
+*** Testing xml_get_current_column_number() : error conditions ***
+
+-- Testing xml_get_current_column_number() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing xml_get_current_column_number() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

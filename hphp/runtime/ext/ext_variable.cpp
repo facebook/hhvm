@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,54 +16,53 @@
 */
 
 #include "hphp/runtime/ext/ext_variable.h"
-#include "hphp/runtime/base/variable_serializer.h"
-#include "hphp/runtime/base/variable_unserializer.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/variable-unserializer.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+const StaticString
+  s_unknown_type("unknown type"),
+  s_boolean("boolean"),
+  s_bool("bool"),
+  s_integer("integer"),
+  s_int("int"),
+  s_float("float"),
+  s_string("string"),
+  s_object("object"),
+  s_array("array"),
+  s_null("null");
+
 String f_gettype(CVarRef v) {
-  switch (v.getType()) {
-  case KindOfUninit:
-  case KindOfNull:    return "NULL";
-  case KindOfBoolean: return "boolean";
-  case KindOfInt64:   return "integer";
-  case KindOfDouble:  return "double";
-  case KindOfStaticString:
-  case KindOfString:  return "string";
-  case KindOfArray:   return "array";
-  case KindOfObject:  return "object";
-  default:
-    assert(false);
-    break;
+  if (v.getType() == KindOfResource && v.getResourceData()->isInvalid()) {
+    return s_unknown_type;
   }
-  return "";
+  return getDataTypeString(v.getType());
 }
 
-String f_get_resource_type(CObjRef handle) {
-  if (handle.isResource()) {
-    return handle->o_getClassName();
-  }
-  return "";
+String f_get_resource_type(CResRef handle) {
+  return handle->o_getResourceName();
 }
 
 int64_t f_intval(CVarRef v, int64_t base /* = 10 */) { return v.toInt64(base);}
 double f_doubleval(CVarRef v) { return v.toDouble();}
 double f_floatval(CVarRef v) { return v.toDouble();}
 String f_strval(CVarRef v) { return v.toString();}
+bool f_boolval(CVarRef v) { return v.toBoolean();}
 
 bool f_settype(VRefParam var, CStrRef type) {
-  if      (type == "boolean") var = var.toBoolean();
-  else if (type == "bool"   ) var = var.toBoolean();
-  else if (type == "integer") var = var.toInt64();
-  else if (type == "int"    ) var = var.toInt64();
-  else if (type == "float"  ) var = var.toDouble();
-  else if (type == "string" ) var = var.toString();
-  else if (type == "array"  ) var = var.toArray();
-  else if (type == "object" ) var = var.toObject();
-  else if (type == "null"   ) var = uninit_null();
+  if      (type == s_boolean) var = var.toBoolean();
+  else if (type == s_bool   ) var = var.toBoolean();
+  else if (type == s_integer) var = var.toInt64();
+  else if (type == s_int    ) var = var.toInt64();
+  else if (type == s_float  ) var = var.toDouble();
+  else if (type == s_string ) var = var.toString();
+  else if (type == s_array  ) var = var.toArray();
+  else if (type == s_object ) var = var.toObject();
+  else if (type == s_null   ) var = uninit_null();
   else return false;
   return true;
 }
@@ -117,7 +116,7 @@ bool f_is_object(CVarRef v) {
 }
 
 bool f_is_resource(CVarRef v) {
-  return v.isResource();
+  return (v.getType() == KindOfResource && !v.getResourceData()->isInvalid());
 }
 
 bool f_is_null(CVarRef v) {
@@ -130,7 +129,7 @@ bool f_is_null(CVarRef v) {
 Variant f_print_r(CVarRef expression, bool ret /* = false */) {
   Variant res;
   try {
-    VariableSerializer vs(VariableSerializer::PrintR);
+    VariableSerializer vs(VariableSerializer::Type::PrintR);
     if (ret) {
       res = vs.serialize(expression, ret);
     } else {
@@ -147,7 +146,7 @@ Variant f_print_r(CVarRef expression, bool ret /* = false */) {
 Variant f_var_export(CVarRef expression, bool ret /* = false */) {
   Variant res;
   try {
-    VariableSerializer vs(VariableSerializer::VarExport);
+    VariableSerializer vs(VariableSerializer::Type::VarExport);
     if (ret) {
       res = vs.serialize(expression, ret);
     } else {
@@ -161,7 +160,7 @@ Variant f_var_export(CVarRef expression, bool ret /* = false */) {
 }
 
 void f_var_dump(CVarRef v) {
-  VariableSerializer vs(VariableSerializer::VarDump, 0, 2);
+  VariableSerializer vs(VariableSerializer::Type::VarDump, 0, 2);
   // manipulate maxCount to match PHP behavior
   if (!v.isObject()) {
     vs.incMaxCount();
@@ -178,7 +177,7 @@ void f_var_dump(int _argc, CVarRef expression,
 }
 
 void f_debug_zval_dump(CVarRef variable) {
-  VariableSerializer vs(VariableSerializer::DebugDump);
+  VariableSerializer vs(VariableSerializer::Type::DebugDump);
   vs.serialize(variable, false);
 }
 
@@ -240,7 +239,7 @@ int64_t f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
         name = prefix + "_" + name;
         break;
       case EXTR_PREFIX_INVALID:
-        if (!nameData->isValidVariableName()) {
+        if (!is_valid_var_name(nameData->data(), nameData->size())) {
           name = prefix + "_" + name;
         }
         break;
@@ -255,7 +254,7 @@ int64_t f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
     }
     nameData = name.get();
     // skip invalid variable names, as in PHP
-    if (!nameData->isValidVariableName()) {
+    if (!is_valid_var_name(nameData->data(), nameData->size())) {
       continue;
     }
     g_vmContext->setVar(nameData, iter.nvSecond(), reference);

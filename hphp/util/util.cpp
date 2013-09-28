@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,14 +20,13 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/network.h"
+#include "folly/String.h"
 
 #include <sys/types.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <libgen.h>
-#include <execinfo.h>
-#include <cxxabi.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -266,11 +265,11 @@ int Util::copy(const char *srcfile, const char *dstfile) {
     if (rbytes == 0) break;
     if (rbytes == -1) {
       err = true;
-      Logger::Error("read failed: %s", safe_strerror(errno).c_str());
+      Logger::Error("read failed: %s", folly::errnoStr(errno).c_str());
     } else if ((wbytes = write(dstFd, buf, rbytes)) != rbytes) {
       err = true;
-      Logger::Error("write failed: %d, %s", wbytes,
-                    safe_strerror(errno).c_str());
+      Logger::Error("write failed: %zd, %s", wbytes,
+                    folly::errnoStr(errno).c_str());
     }
     if (err) {
       close(srcFd);
@@ -303,6 +302,25 @@ int Util::drop_cache(FILE *f, off_t len /* = 0 */) {
   return drop_cache(fileno(f), len);
 }
 
+
+int LogFileFlusher::DropCacheChunkSize = (1 << 20);
+void LogFileFlusher::recordWriteAndMaybeDropCaches(int fd, int bytes) {
+  int oldBytesWritten = m_bytesWritten.fetch_add(bytes);
+  int newBytesWritten = oldBytesWritten + bytes;
+
+  if (!(newBytesWritten > DropCacheChunkSize &&
+        oldBytesWritten <= DropCacheChunkSize)) {
+    return;
+  }
+
+  off_t offset = lseek(fd, 0, SEEK_CUR);
+  if (offset > kDropCacheTail) {
+    dropCache(fd, offset - kDropCacheTail);
+  }
+
+  m_bytesWritten = 0;
+}
+
 int Util::directCopy(const char *srcfile, const char *dstfile) {
   int srcFd = open(srcfile, O_RDONLY);
   if (srcFd == -1) return -1;
@@ -323,27 +341,27 @@ int Util::directCopy(const char *srcfile, const char *dstfile) {
 
     if (rbytes == -1) {
       err = true;
-      Logger::Error("read failed: %s", safe_strerror(errno).c_str());
+      Logger::Error("read failed: %s", folly::errnoStr(errno).c_str());
     } else if (force_sync(srcFd) == -1) {
       err = true;
       Logger::Error("read sync failed: %s",
-                    safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     } else if (drop_cache(srcFd) == -1) {
       err = true;
       Logger::Error("read cache drop failed: %s",
-                    safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     } else if ((wbytes = write(dstFd, buf, rbytes)) != rbytes) {
       err = true;
-      Logger::Error("write failed: %d, %s", wbytes,
-                    safe_strerror(errno).c_str());
+      Logger::Error("write failed: %zd, %s", wbytes,
+                    folly::errnoStr(errno).c_str());
     } else if (force_sync(dstFd) == -1) {
       err = true;
       Logger::Error("write sync failed: %s",
-                    safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     } else if (drop_cache(dstFd) == -1) {
       err = true;
       Logger::Error("write cache drop failed: %s",
-                    safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     }
     if (err) {
       close(srcFd);
@@ -379,21 +397,12 @@ int Util::directRename(const char *oldname, const char *newname) {
 int Util::ssystem(const char* command) {
   int ret = system(command);
   if (ret == -1) {
-    Logger::Error("system(\"%s\"): %s", command, safe_strerror(errno).c_str());
+    Logger::Error("system(\"%s\"): %s", command,
+                  folly::errnoStr(errno).c_str());
   } else if (ret != 0) {
     Logger::Error("command failed: \"%s\"", command);
   }
   return ret;
-}
-
-std::string Util::safe_strerror(int errnum) {
-  char buf[1024];
-#ifdef __GLIBC__
-  return strerror_r(errnum, buf, sizeof(buf));
-#else
-  strerror_r(errnum, buf, sizeof(buf));
-  return buf;
-#endif
 }
 
 size_t Util::dirname_helper(char *path, int len) {
@@ -552,7 +561,9 @@ std::string Util::canonicalize(const std::string &path) {
  * limitations under the License.
  */
 
-const char *Util::canonicalize(const char *addpath, size_t addlen) {
+char* Util::canonicalize(const char *addpath, size_t addlen,
+                         bool collapse_slashes /* = true */) {
+  assert(strlen(addpath) == addlen);
   // 4 for slashes at start, after root, and at end, plus trailing
   // null
   size_t maxlen = addlen + 4;
@@ -566,7 +577,7 @@ const char *Util::canonicalize(const char *addpath, size_t addlen) {
 
   char *path = (char *)malloc(maxlen);
 
-  if (addpath[0] == '/') {
+  if (addpath[0] == '/' && collapse_slashes) {
     /* Ignore the given root path, strip off leading
      * '/'s to a single leading '/' from the addpath,
      * and leave addpath at the first non-'/' character.
@@ -586,9 +597,13 @@ const char *Util::canonicalize(const char *addpath, size_t addlen) {
     }
     seglen = next - addpath;
 
-    if (seglen == 0 || (seglen == 1 && addpath[0] == '.')) {
-      /* noop segment (/ or ./) so skip it
-       */
+    if (seglen == 0) {
+      /* / */
+      if (!collapse_slashes) {
+        path[pathlen++] = '/';
+      }
+    } else if (seglen == 1 && addpath[0] == '.') {
+      /* ./ */
     } else if (seglen == 2 && addpath[0] == '.' && addpath[1] == '.') {
       /* backpath (../) */
       if (pathlen == 1 && path[0] == '/') {
@@ -603,15 +618,13 @@ const char *Util::canonicalize(const char *addpath, size_t addlen) {
         memcpy(path + pathlen, "../", *next ? 3 : 2);
         pathlen += *next ? 3 : 2;
       } else {
-        /* otherwise crop the prior segment
-         */
+        /* otherwise crop the prior segment */
         do {
           --pathlen;
         } while (pathlen && path[pathlen - 1] != '/');
       }
     } else {
-      /* An actual segment, append it to the destination path
-       */
+      /* An actual segment, append it to the destination path */
       if (*next) {
         seglen++;
       }
@@ -619,8 +632,7 @@ const char *Util::canonicalize(const char *addpath, size_t addlen) {
       pathlen += seglen;
     }
 
-    /* Skip over trailing slash to the next segment
-     */
+    /* Skip over trailing slash to the next segment */
     if (*next) {
       ++next;
     }
@@ -852,53 +864,6 @@ std::string Util::format_pattern(const std::string &pattern,
   }
   ret += '#';
   return ret;
-}
-
-char* Util::getNativeFunctionName(void* codeAddr) {
-  void* buf[1] = {codeAddr};
-  char** symbols = backtrace_symbols(buf, 1);
-  char* functionName = nullptr;
-  if (symbols != nullptr) {
-    //
-    // the output from backtrace_symbols looks like this:
-    // ../path/hhvm/hhvm(_ZN4HPHP2VM6Transl17interpOneIterInitEv+0) [0x17cebe9]
-    //
-    // we first want to extract the mangled name from it to get this:
-    // _ZN4HPHP2VM6Transl17interpOneIterInitEv
-    //
-    // and then pass this to abi::__cxa_demangle to get the demanged name:
-    // HPHP::Transl::interpOneIterInit()
-    //
-    // Sometimes, though, backtrace_symbols can't find the function name
-    // and ends up giving us a blank managled name, like this:
-    // ../path/hhvm/hhvm() [0x17e4d01]
-    // or this: [0x7fffca800130]
-    //
-    char* start = strchr(*symbols, '(');
-    if (start) {
-      start++;
-      char* end = strchr(start, '+');
-      if (end != nullptr) {
-        size_t len = end-start;
-        functionName = new char[len+1];
-        strncpy(functionName, start, len);
-        functionName[len] = '\0';
-        int status;
-        char* demangledName = abi::__cxa_demangle(functionName, 0, 0, &status);
-        if (status == 0) {
-          delete []functionName;
-          functionName = demangledName;
-        }
-      }
-    }
-  }
-  free(symbols);
-  if (functionName == nullptr) {
-#define MAX_ADDR_HEX_LEN 40
-    functionName = new char[MAX_ADDR_HEX_LEN + 3];
-    sprintf(functionName, "%40p", codeAddr);
-  }
-  return functionName;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

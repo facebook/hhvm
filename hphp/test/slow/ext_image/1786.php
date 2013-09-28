@@ -1,3 +1,9 @@
 <?php
 
- // Create an image instance$im = imagecreatefromgif('test/images/php.gif');// Enable interlancingimageinterlace($im, true);// Save the interfaced imageimagegif($im, './php_interlaced.gif');imagedestroy($im);
+// Create an image instance
+$im = imagecreatefromgif(__DIR__.'/images/php.gif');
+// Enable interlancing
+imageinterlace($im, true);
+// Save the interfaced image
+imagegif($im);
+imagedestroy($im);

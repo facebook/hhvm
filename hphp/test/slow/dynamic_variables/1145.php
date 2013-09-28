@@ -1,3 +1,5 @@
 <?php
 
- extract(array('a' => 'ok')); $a = 1; var_dump($a);
+extract(array('a' => 'ok'));
+ $a = 1;
+ var_dump($a);

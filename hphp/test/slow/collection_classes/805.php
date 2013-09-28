@@ -1,6 +1,5 @@
 <?php
 
-
 $classes = array('Vector','Map','StableMap');
 $i = 0;
 try {
@@ -8,18 +7,33 @@ try {
     $obj = new $cls;
     try {
       $x = $obj->foo;
-    } catch (RuntimeException $e) {
-      echo $i;
+      echo "get: ";
+      var_dump($x);
     }
-    ++$i;
+ catch (RuntimeException $e) {
+      echo "get throws, i = ";
+      var_dump($i);
+    }
+    try {
+      $x = isset($obj->foo);
+      echo "isset: ";
+      var_dump($x);
+    }
+ catch (RuntimeException $e) {
+      echo "isset throws, i = ";
+      var_dump($i);
+    }
     try {
       $obj->foo = 123;
-    } catch (RuntimeException $e) {
-      echo $i;
+    }
+ catch (RuntimeException $e) {
+      echo "set throws, i = ";
+      var_dump($i);
     }
     ++$i;
   }
-} catch (Exception $e) {
+}
+ catch (Exception $e) {
   echo "Fail!\n";
 }
 echo "Done\n";

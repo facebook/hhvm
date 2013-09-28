@@ -1,0 +1,21 @@
+HipHop Warning: %s
+resource(%d) of type (ldap result)
+array(2) {
+  ["count"]=>
+  int(1)
+  [0]=>
+  array(4) {
+    ["sn"]=>
+    array(1) {
+      ["count"]=>
+      int(0)
+    }
+    [0]=>
+    string(2) "sn"
+    ["count"]=>
+    int(1)
+    ["dn"]=>
+    string(28) "cn=userA,dc=my-domain,dc=com"
+  }
+}
+===DONE===

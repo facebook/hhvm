@@ -1,0 +1,7 @@
+===BASE===
+string(4) "Base"
+HipHop Notice: %s
+NULL
+===CHILD===
+string(4) "Base"
+HipHop Fatal error: %s

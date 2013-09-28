@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,13 +16,14 @@
 
 #include "hphp/compiler/analysis/peephole.h"
 #include "hphp/compiler/analysis/emitter.h"
+#include "hphp/runtime/vm/preclass-emit.h"
 
 namespace HPHP { namespace Compiler {
 
 
-static void collapseJmp(Offset* offsetPtr, Opcode* instr, Opcode* start) {
+static void collapseJmp(Offset* offsetPtr, Op* instr, Op* start) {
   if (offsetPtr) {
-    Opcode* dest = instr + *offsetPtr;
+    Op* dest = instr + *offsetPtr;
     while (*dest == OpJmp && dest != instr) {
       dest = start + instrJumpTarget(start, dest - start);
     }
@@ -42,10 +43,10 @@ Peephole::Peephole(UnitEmitter &ue, MetaInfoBuilder& metaInfo)
   buildJumpTargets();
 
   // Scan the bytecode linearly.
-  Opcode* start = ue.m_bc;
-  Opcode* prev = start;
-  Opcode* cur = prev + instrLen(prev);
-  Opcode* end = start + ue.m_bclen;
+  Op* start = (Op*)ue.m_bc;
+  Op* prev = start;
+  Op* cur = prev + instrLen(prev);
+  Op* end = start + ue.m_bclen;
 
   /*
    * TODO(1086005): we should try to minimize use of CGetL2/CGetL3.
@@ -161,14 +162,19 @@ void Peephole::buildJumpTargets() {
   }
   // all jump targets are targets
   for (Offset pos = 0; pos < (Offset)m_ue.m_bclen;
-       pos += instrLen(&m_ue.m_bc[pos])) {
-    Opcode* instr = &m_ue.m_bc[pos];
+       pos += instrLen((Op*)&m_ue.m_bc[pos])) {
+    Op* instr = (Op*)&m_ue.m_bc[pos];
     if (isSwitch(*instr)) {
       foreachSwitchTarget(instr, [&](Offset& o) {
         m_jumpTargets.insert(pos + o);
       });
+    } else if (*instr == OpIterBreak) {
+      uint32_t veclen = *(uint32_t *)(instr + 1);
+      assert(veclen > 0);
+      Offset target = *(Offset *)((uint32_t *)(instr + 1) + 2 * veclen + 1);
+      m_jumpTargets.insert(pos + target);
     } else {
-      Offset target = instrJumpTarget(m_ue.m_bc, pos);
+      Offset target = instrJumpTarget((Op*)m_ue.m_bc, pos);
       if (target != InvalidAbsoluteOffset) {
         m_jumpTargets.insert(target);
       }

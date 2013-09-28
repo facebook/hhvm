@@ -1,6 +1,6 @@
 <?php
 
- function ut_run($mainFunc) {
+function ut_run($mainFunc) {
     $GLOBALS['oo-mode'] = true;
     $oo_result = $mainFunc();
     $GLOBALS['oo-mode'] = false;
@@ -28,37 +28,37 @@ function ut_coll_create( $locale )
 }
 function ut_coll_compare( $coll, $str1, $str2 )
 {
-    return $GLOBALS['oo-mode'] ? 
+    return $GLOBALS['oo-mode'] ?
       $coll->compare( $str1, $str2 ) : collator_compare( $coll, $str1, $str2 );
 }
 function ut_coll_sort_with_sort_keys( $coll, &$arr )
 {
-    return $GLOBALS['oo-mode'] ? 
+    return $GLOBALS['oo-mode'] ?
       $coll->sortWithSortKeys( $arr ) : collator_sort_with_sort_keys( $coll, $arr );
 }
 function ut_coll_sort( $coll, &$arr, $sort_flag = Collator::SORT_REGULAR )
 {
-    return $GLOBALS['oo-mode'] ? 
+    return $GLOBALS['oo-mode'] ?
       $coll->sort( $arr, $sort_flag ) : collator_sort( $coll, $arr, $sort_flag );
 }
 function ut_coll_asort( $coll, &$arr, $sort_flag = Collator::SORT_REGULAR )
 {
-    return $GLOBALS['oo-mode'] ? 
+    return $GLOBALS['oo-mode'] ?
       $coll->asort( $arr, $sort_flag ) : collator_asort( $coll, $arr, $sort_flag );
 }
 function ut_coll_get_locale( $coll, $type )
 {
-    return $GLOBALS['oo-mode'] ? 
+    return $GLOBALS['oo-mode'] ?
       $coll->getLocale( $type ) : collator_get_locale( $coll, $type );
 }
 function ut_coll_set_strength( $coll, $strength )
 {
-    return $GLOBALS['oo-mode'] ? 
+    return $GLOBALS['oo-mode'] ?
       $coll->setStrength( $strength ) : collator_set_strength( $coll, $strength );
 }
 function ut_coll_set_attribute( $coll, $attr, $val )
 {
-    return $GLOBALS['oo-mode'] ? 
+    return $GLOBALS['oo-mode'] ?
       $coll->setAttribute( $attr, $val ) : collator_set_attribute( $coll, $attr, $val );
 }
 function ut_coll_set_default( $coll )
@@ -81,7 +81,7 @@ function sort_arrays( $locale, $arrays, $sort_flag = Collator::SORT_REGULAR )
         // Preppend test signature to output string
         $md5 = md5( $res_dump );
         global $test_num;
-        
+
         $res_str .= "\n\n".
                     "Test $test_num.$md5:" .
                     $res_dump;
@@ -133,8 +133,10 @@ function ut_main1()
 ut_run('ut_main1');
 function ut_main2() {
   $obj = ut_coll_create('en_US');
-  $arr0 = array( 100, 25, 36, '30.2', '30.12' ); // test 6
-  $arr1 = array( '100', '25', '36'  ); // test 6
+  $arr0 = array( 100, 25, 36, '30.2', '30.12' );
+ // test 6
+  $arr1 = array( '100', '25', '36'  );
+ // test 6
   $arr2 = array( 11, 5, '2', 64, 17, '30', 10, 2, '54' );
   // strcmp 17 and 30, ret = 1
   // Comparing values 17 and 30, ret = 1
@@ -191,7 +193,7 @@ function ut_main3()
             continue;
         }
         // Get the requested, valid and actual locales.
-        $vloc = ut_coll_get_locale( $coll, Locale::VALID_LOCALE );
+        $vloc = ut_coll_get_locale( $coll, 1 ); // was Locale::VALID_LOCALE
         // Show them.
         $res_str .= "Locale: '$locale'\n" .
             "  ULOC_VALID_LOCALE     = '$vloc'\n";
@@ -277,8 +279,8 @@ function sort_arrays_with_sort_keys( $locale, $arrays )
         // with output string.
         $res_dump = "\n" . dump( $array ) .
                     "\n Result: " . dump( $res_val );
-        
-        
+
+
         // Preppend test signature to output string
         $md5 = md5( $res_dump );
         global $test_num;

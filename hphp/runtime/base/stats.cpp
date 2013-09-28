@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,10 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/util/base.h"
-#include "hphp/runtime/vm/translator/x64-util.h"
-#include "hphp/runtime/vm/translator/translator-x64.h"
+
 #include "hphp/runtime/base/stats.h"
+
+#include "hphp/util/base.h"
+#include "hphp/runtime/vm/jit/x64-util.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 
 namespace HPHP {
 namespace Stats {
@@ -38,11 +40,7 @@ __thread uint64_t tl_helper_counters[kMaxNumTrampolines];
 typedef hphp_const_char_map<hphp_const_char_map<uint64_t>> StatGroupMap;
 __thread StatGroupMap* tl_stat_groups = nullptr;
 
-// Only the thread holding the write lease will set the entries in the
-// helperNames array but other threads may concurrently read these
-// entries, so each entry is volatile (or an atomic type per the new
-// C++11 standard).
-const char* volatile helperNames[kMaxNumTrampolines];
+std::atomic<const char*> helperNames[kMaxNumTrampolines];
 
 void
 emitInc(X64Assembler& a, uint64_t* tl_table, uint index, int n,
@@ -53,22 +51,23 @@ emitInc(X64Assembler& a, uint64_t* tl_table, uint index, int n,
 
   TCA jcc = nullptr;
   if (havecc) {
-    jcc = a.code.frontier;
+    jcc = a.frontier();
     a.  jcc8  (ccNegate(cc), jcc);
   }
   a.    pushf ();
-  a.    push  (reg::rScratch);
-  a.    movq  (virtualAddress, reg::rScratch);
+  a.    push  (reg::rAsm);
+  a.    movq  (virtualAddress, reg::rAsm);
   a.    fs();
-  a.    addq  (n, *reg::rScratch);
-  a.    pop   (reg::rScratch);
+  a.    addq  (n, *reg::rAsm);
+  a.    pop   (reg::rAsm);
   a.    popf  ();
   if (havecc) {
-    a.  patchJcc8(jcc, a.code.frontier);
+    assert(jcc);
+    a.  patchJcc8(jcc, a.frontier());
   }
 }
 
-void emitIncTranslOp(X64Assembler& a, Opcode opc, bool force) {
+void emitIncTranslOp(X64Assembler& a, Op opc, bool force) {
   if (!force && !enableInstrCount()) return;
   emitInc(a, &tl_counters[0], opcodeToTranslStatCounter(opc), 1,
           CC_None, force);
@@ -83,8 +82,9 @@ void init() {
 static __thread int64_t epoch;
 void dump() {
   if (!enabledAny()) return;
+
   auto url = g_context->getRequestUrl(50);
-  TRACE(0, "STATS %ld %s\n", epoch, url.c_str());
+  TRACE(0, "STATS %" PRId64 " %s\n", epoch, url.c_str());
 #include "hphp/runtime/vm/stats-opcodeDef.h"
 #define STAT(s) \
   if (!tl_counters[s]) {} else                                  \
@@ -92,11 +92,12 @@ void dump() {
   STATS
 #undef STAT
 #undef O
-  for (int i=0; helperNames[i]; i++) {
+
+  for (int i = 0;; i++) {
+    auto const name = helperNames[i].load(std::memory_order_acquire);
+    if (!name) break;
     if (tl_helper_counters[i]) {
-      TRACE(0, "STAT %-50s %15ld\n",
-            helperNames[i],
-            tl_helper_counters[i]);
+      TRACE(0, "STAT %-50s %15" PRIu64 "\n", name, tl_helper_counters[i]);
     }
   }
 

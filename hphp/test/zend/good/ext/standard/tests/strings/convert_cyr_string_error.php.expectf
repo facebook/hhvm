@@ -1,0 +1,28 @@
+*** Testing convert_cyr_string() : error conditions ***
+
+-- Testing convert_cyr_string() function with no arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing convert_cyr_string() function with no 'to' character set --
+HipHop Warning: %s
+NULL
+
+-- Testing convert_cyr_string() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing convert_cyr_string() function with invalid 'from' character set --
+HipHop Warning: %s
+string(10) "68656c6c6f"
+
+-- Testing convert_cyr_string() function with invalid 'to' character set --
+HipHop Warning: %s
+string(10) "68656c6c6f"
+
+-- Testing convert_cyr_string() function with invalid 'from' and 'to' character set --
+HipHop Warning: %s
+HipHop Warning: %s
+string(10) "68656c6c6f"
+ 
+===DONE===

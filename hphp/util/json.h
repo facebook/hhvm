@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -68,8 +68,9 @@ private:
   std::string m_name;
 };
 
-struct _Null {};
-static _Null Null;
+// struct _Null {};
+// _Null Null;
+enum class Null {};
 
 template <typename Type>
 class _OutputStream {
@@ -101,7 +102,7 @@ public:
     return *this;
   }
 
-  _OutputStream &operator<< (const _Null &n) {
+  _OutputStream &operator<< (const Null &n) {
     m_out << "null";
     return *this;
   }
@@ -112,11 +113,11 @@ public:
   }
 
   template<typename T>
-  _OutputStream &operator<< (const boost::shared_ptr<T> &v) {
+  _OutputStream &operator<< (const std::shared_ptr<T> &v) {
     if (v) {
       *this << *v;
     } else {
-      *this << Null;
+      *this << Null();
     }
     return *this;
   }

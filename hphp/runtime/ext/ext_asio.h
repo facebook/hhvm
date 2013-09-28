@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_ASIO_H_
 #define incl_HPHP_EXT_ASIO_H_
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
 
 namespace HPHP {
@@ -46,6 +46,8 @@ void f_asio_set_on_started_callback(CVarRef on_started_cb);
  *     BlockableWaitHandle        - wait handle that can be blocked by other WH
  *       ContinuationWaitHandle   - Continuation-powered asynchronous execution
  *       GenArrayWaitHandle       - wait handle representing an array of WHs
+ *       GenMapWaitHandle         - wait handle representing an Map of WHs
+ *       GenVectorWaitHandle      - wait handle representing an Vector of WHs
  *       SetResultToRefWaitHandle - wait handle that sets result to reference
  *     RescheduleWaitHandle       - wait handle that reschedules execution
  *
@@ -54,13 +56,13 @@ void f_asio_set_on_started_callback(CVarRef on_started_cb);
  * asynchronously (such as using yield mechanism of ContinuationWaitHandle or
  * passed as an array member of GenArrayWaitHandle).
  */
-FORWARD_DECLARE_CLASS_BUILTIN(WaitHandle);
+FORWARD_DECLARE_CLASS(WaitHandle);
 class c_WaitHandle : public ExtObjectData {
  public:
-  DECLARE_CLASS(WaitHandle, WaitHandle, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(WaitHandle)
 
   // need to implement
-  public: c_WaitHandle(Class* cls = c_WaitHandle::s_cls);
+  public: c_WaitHandle(Class* cls = c_WaitHandle::classof());
   public: ~c_WaitHandle();
   public: void t___construct();
   public: static void ti_setonjoincallback(CVarRef callback);
@@ -76,17 +78,23 @@ class c_WaitHandle : public ExtObjectData {
 
 
  public:
-  static c_WaitHandle* fromTypedValue(TypedValue* tv) {
+  static c_WaitHandle* fromCell(Cell* cell) {
     return (
-        tv->m_type == KindOfObject &&
-        tv->m_data.pobj->instanceof(s_cls)
-      ) ? static_cast<c_WaitHandle*>(tv->m_data.pobj) : nullptr;
+        cell->m_type == KindOfObject &&
+        cell->m_data.pobj->instanceof(classof())
+      ) ? static_cast<c_WaitHandle*>(cell->m_data.pobj) : nullptr;
   }
   bool isFinished() { return getState() <= STATE_FAILED; }
   bool isSucceeded() { return getState() == STATE_SUCCEEDED; }
   bool isFailed() { return getState() == STATE_FAILED; }
-  TypedValue* getResult() { assert(isSucceeded()); return &m_resultOrException; }
-  ObjectData* getException() { assert(isFailed()); return m_resultOrException.m_data.pobj; }
+  Cell& getResult() {
+    assert(isSucceeded());
+    return m_resultOrException;
+  }
+  ObjectData* getException() {
+    assert(isFailed());
+    return m_resultOrException.m_data.pobj;
+  }
   virtual String getName() = 0;
 
  protected:
@@ -96,7 +104,7 @@ class c_WaitHandle : public ExtObjectData {
   static const int8_t STATE_SUCCEEDED = 0;
   static const int8_t STATE_FAILED    = 1;
 
-  TypedValue m_resultOrException;
+  Cell m_resultOrException;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -107,13 +115,13 @@ class c_WaitHandle : public ExtObjectData {
  * of the operation is always available and waiting for the wait handle finishes
  * immediately.
  */
-FORWARD_DECLARE_CLASS_BUILTIN(StaticWaitHandle);
+FORWARD_DECLARE_CLASS(StaticWaitHandle);
 class c_StaticWaitHandle : public c_WaitHandle {
  public:
-  DECLARE_CLASS(StaticWaitHandle, StaticWaitHandle, WaitHandle)
+  DECLARE_CLASS_NO_SWEEP(StaticWaitHandle)
 
   // need to implement
-  public: c_StaticWaitHandle(Class* cls = c_StaticWaitHandle::s_cls);
+  public: c_StaticWaitHandle(Class* cls = c_StaticWaitHandle::classof());
   public: ~c_StaticWaitHandle();
   public: void t___construct();
 
@@ -125,19 +133,19 @@ class c_StaticWaitHandle : public c_WaitHandle {
 /**
  * A wait handle that is statically succeeded with a result.
  */
-FORWARD_DECLARE_CLASS_BUILTIN(StaticResultWaitHandle);
+FORWARD_DECLARE_CLASS(StaticResultWaitHandle);
 class c_StaticResultWaitHandle : public c_StaticWaitHandle {
  public:
-  DECLARE_CLASS(StaticResultWaitHandle, StaticResultWaitHandle, StaticWaitHandle)
+  DECLARE_CLASS_NO_SWEEP(StaticResultWaitHandle)
 
   // need to implement
-  public: c_StaticResultWaitHandle(Class* cls = c_StaticResultWaitHandle::s_cls);
+  public: c_StaticResultWaitHandle(Class* cls = c_StaticResultWaitHandle::classof());
   public: ~c_StaticResultWaitHandle();
   public: void t___construct();
   public: static Object ti_create(CVarRef result);
 
  public:
-  static p_StaticResultWaitHandle Create(const TypedValue* result);
+  static p_StaticResultWaitHandle Create(const Cell& result);
   String getName();
 };
 
@@ -147,13 +155,13 @@ class c_StaticResultWaitHandle : public c_StaticWaitHandle {
 /**
  * A wait handle that is statically failed with an exception.
  */
-FORWARD_DECLARE_CLASS_BUILTIN(StaticExceptionWaitHandle);
+FORWARD_DECLARE_CLASS(StaticExceptionWaitHandle);
 class c_StaticExceptionWaitHandle : public c_StaticWaitHandle {
  public:
-  DECLARE_CLASS(StaticExceptionWaitHandle, StaticExceptionWaitHandle, StaticWaitHandle)
+  DECLARE_CLASS_NO_SWEEP(StaticExceptionWaitHandle)
 
   // need to implement
-  public: c_StaticExceptionWaitHandle(Class* cls = c_StaticExceptionWaitHandle::s_cls);
+  public: c_StaticExceptionWaitHandle(Class* cls = c_StaticExceptionWaitHandle::classof());
   public: ~c_StaticExceptionWaitHandle();
   public: void t___construct();
   public: static Object ti_create(CObjRef exception);
@@ -172,23 +180,27 @@ class c_StaticExceptionWaitHandle : public c_StaticWaitHandle {
  * all blocked wait handles are notified.
  */
 class AsioContext;
-FORWARD_DECLARE_CLASS_BUILTIN(BlockableWaitHandle);
-FORWARD_DECLARE_CLASS_BUILTIN(WaitableWaitHandle);
+FORWARD_DECLARE_CLASS(BlockableWaitHandle);
+FORWARD_DECLARE_CLASS(WaitableWaitHandle);
 class c_WaitableWaitHandle : public c_WaitHandle {
  public:
-  DECLARE_CLASS(WaitableWaitHandle, WaitableWaitHandle, WaitHandle)
+  DECLARE_CLASS_NO_SWEEP(WaitableWaitHandle)
 
   // need to implement
-  public: c_WaitableWaitHandle(Class* cls = c_WaitableWaitHandle::s_cls);
+  public: c_WaitableWaitHandle(Class* cls = c_WaitableWaitHandle::classof());
   public: ~c_WaitableWaitHandle();
   public: void t___construct();
   public: int t_getcontextidx();
   public: Object t_getcreator();
   public: Array t_getparents();
+  public: Array t_getdependencystack();
 
 
  public:
-  AsioContext* getContext() { assert(isInContext()); return AsioSession::Get()->getContext(getContextIdx()); }
+  AsioContext* getContext() {
+    assert(isInContext());
+    return AsioSession::Get()->getContext(getContextIdx());
+  }
 
   c_BlockableWaitHandle* addParent(c_BlockableWaitHandle* parent);
 
@@ -196,7 +208,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   void join();
 
  protected:
-  void setResult(const TypedValue* result);
+  void setResult(const Cell& result);
   void setException(ObjectData* exception);
 
   context_idx_t getContextIdx() { return o_subclassData.u8[1]; }
@@ -224,13 +236,13 @@ class c_WaitableWaitHandle : public c_WaitHandle {
  * wait handle it is waiting for. Once a wait handle blocking this wait handle
  * is finished, a notification is received and the operation can be resumed.
  */
-FORWARD_DECLARE_CLASS_BUILTIN(BlockableWaitHandle);
+FORWARD_DECLARE_CLASS(BlockableWaitHandle);
 class c_BlockableWaitHandle : public c_WaitableWaitHandle {
  public:
-  DECLARE_CLASS(BlockableWaitHandle, BlockableWaitHandle, WaitableWaitHandle)
+  DECLARE_CLASS_NO_SWEEP(BlockableWaitHandle)
 
   // need to implement
-  public: c_BlockableWaitHandle(Class* cls = c_BlockableWaitHandle::s_cls);
+  public: c_BlockableWaitHandle(Class* cls = c_BlockableWaitHandle::classof());
   public: ~c_BlockableWaitHandle();
   public: void t___construct();
 
@@ -263,14 +275,14 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
  * continuations; a dependency on another wait handle is set up by yielding such
  * wait handle, giving control of the execution back to the asio framework.
  */
-FORWARD_DECLARE_CLASS_BUILTIN(Continuation);
-FORWARD_DECLARE_CLASS_BUILTIN(ContinuationWaitHandle);
+FORWARD_DECLARE_CLASS(Continuation);
+FORWARD_DECLARE_CLASS(ContinuationWaitHandle);
 class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
  public:
-  DECLARE_CLASS(ContinuationWaitHandle, ContinuationWaitHandle, BlockableWaitHandle)
+  DECLARE_CLASS_NO_SWEEP(ContinuationWaitHandle)
 
   // need to implement
-  public: c_ContinuationWaitHandle(Class* cls = c_ContinuationWaitHandle::s_cls);
+  public: c_ContinuationWaitHandle(Class* cls = c_ContinuationWaitHandle::classof());
   public: ~c_ContinuationWaitHandle();
   public: void t___construct();
   public: static void ti_setoncreatecallback(CVarRef callback);
@@ -287,6 +299,9 @@ class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
   String getName();
   void enterContext(context_idx_t ctx_idx);
   void exitContext(context_idx_t ctx_idx);
+  bool isRunning() { return getState() == STATE_RUNNING; }
+  String getFileName();
+  int getLineNumber();
 
  protected:
   void onUnblocked();
@@ -294,7 +309,7 @@ class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
 
  private:
   void initialize(c_Continuation* continuation, uint16_t depth);
-  void markAsSucceeded(const TypedValue* result);
+  void markAsSucceeded(const Cell& result);
   void markAsFailed(CObjRef exception);
 
   p_Continuation m_continuation;
@@ -315,13 +330,13 @@ class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
  * preserves structure (order and keys) of the original array. If one of the
  * wait handles failed, the exception is propagated by failure.
  */
-FORWARD_DECLARE_CLASS_BUILTIN(GenArrayWaitHandle);
+FORWARD_DECLARE_CLASS(GenArrayWaitHandle);
 class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
  public:
-  DECLARE_CLASS(GenArrayWaitHandle, GenArrayWaitHandle, BlockableWaitHandle)
+  DECLARE_CLASS_NO_SWEEP(GenArrayWaitHandle)
 
   // need to implement
-  public: c_GenArrayWaitHandle(Class* cls = c_GenArrayWaitHandle::s_cls);
+  public: c_GenArrayWaitHandle(Class* cls = c_GenArrayWaitHandle::classof());
   public: ~c_GenArrayWaitHandle();
   public: void t___construct();
   public: static void ti_setoncreatecallback(CVarRef callback);
@@ -337,11 +352,90 @@ class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
   c_WaitableWaitHandle* getChild();
 
  private:
-  void initialize(CObjRef exception, CArrRef deps, ssize_t iter_pos, c_WaitableWaitHandle* child);
+  void initialize(CObjRef exception, CArrRef deps,
+                  ssize_t iter_pos, c_WaitableWaitHandle* child);
 
   Object m_exception;
   Array m_deps;
   ssize_t m_iterPos;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// class GenMapWaitHandle
+
+/**
+ * A wait handle that waits for a map of wait handles. The wait handle
+ * finishes once all wait handles in the map are finished. The result value
+ * preserves the keys of the original map. If one of the wait handles failed,
+ * the exception is propagated by failure.
+ */
+FORWARD_DECLARE_CLASS(GenMapWaitHandle);
+FORWARD_DECLARE_CLASS(Map);
+class c_GenMapWaitHandle : public c_BlockableWaitHandle {
+ public:
+  DECLARE_CLASS_NO_SWEEP(GenMapWaitHandle)
+
+  // need to implement
+  public: c_GenMapWaitHandle(Class* cls = c_GenMapWaitHandle::classof());
+  public: ~c_GenMapWaitHandle();
+  public: void t___construct();
+  public: static void ti_setoncreatecallback(CVarRef callback);
+  public: static Object ti_create(CVarRef dependencies);
+
+ public:
+  String getName();
+  void enterContext(context_idx_t ctx_idx);
+
+ protected:
+  void onUnblocked();
+  c_WaitableWaitHandle* getChild();
+
+ private:
+  void initialize(CObjRef exception, c_Map* deps,
+                  ssize_t iter_pos, c_WaitableWaitHandle* child);
+
+  Object m_exception;
+  p_Map m_deps;
+  ssize_t m_iterPos;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// class GenVectorWaitHandle
+
+/**
+ * A wait handle that waits for a vector of wait handles. The wait handle
+ * finishes once all wait handles in the vector are finished. The result value
+ * preserves order of the original vector. If one of the wait handles failed,
+ * the exception is propagated by failure.
+ */
+FORWARD_DECLARE_CLASS(GenVectorWaitHandle);
+FORWARD_DECLARE_CLASS(Vector);
+class c_GenVectorWaitHandle : public c_BlockableWaitHandle {
+ public:
+  DECLARE_CLASS_NO_SWEEP(GenVectorWaitHandle)
+
+  // need to implement
+  public: c_GenVectorWaitHandle(Class* cls = c_GenVectorWaitHandle::classof());
+  public: ~c_GenVectorWaitHandle();
+  public: void t___construct();
+  public: static void ti_setoncreatecallback(CVarRef callback);
+  public: static Object ti_create(CVarRef dependencies);
+
+ public:
+  String getName();
+  void enterContext(context_idx_t ctx_idx);
+
+ protected:
+  void onUnblocked();
+  c_WaitableWaitHandle* getChild();
+
+ private:
+  void initialize(CObjRef exception, c_Vector* deps,
+                  int64_t iter_pos, c_WaitableWaitHandle* child);
+
+  Object m_exception;
+  p_Vector m_deps;
+  int64_t m_iterPos;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -351,13 +445,13 @@ class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
  * A wait handle that waits for a given dependency and sets its result to
  * a given reference once completed.
  */
-FORWARD_DECLARE_CLASS_BUILTIN(SetResultToRefWaitHandle);
+FORWARD_DECLARE_CLASS(SetResultToRefWaitHandle);
 class c_SetResultToRefWaitHandle : public c_BlockableWaitHandle {
  public:
-  DECLARE_CLASS(SetResultToRefWaitHandle, SetResultToRefWaitHandle, BlockableWaitHandle)
+  DECLARE_CLASS_NO_SWEEP(SetResultToRefWaitHandle)
 
   // need to implement
-  public: c_SetResultToRefWaitHandle(Class* cls = c_SetResultToRefWaitHandle::s_cls);
+  public: c_SetResultToRefWaitHandle(Class* cls = c_SetResultToRefWaitHandle::classof());
   public: ~c_SetResultToRefWaitHandle();
   public: void t___construct();
   public: static void ti_setoncreatecallback(CVarRef callback);
@@ -374,7 +468,7 @@ class c_SetResultToRefWaitHandle : public c_BlockableWaitHandle {
 
  private:
   void initialize(c_WaitableWaitHandle* wait_handle, RefData* ref);
-  void markAsSucceeded(const TypedValue* result);
+  void markAsSucceeded(const Cell& result);
   void markAsFailed(CObjRef exception);
 
   p_WaitableWaitHandle m_child;
@@ -384,8 +478,8 @@ class c_SetResultToRefWaitHandle : public c_BlockableWaitHandle {
 ///////////////////////////////////////////////////////////////////////////////
 // class RescheduleWaitHandle
 
-extern const int q_RescheduleWaitHandle$$QUEUE_DEFAULT;
-extern const int q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO;
+extern const int64_t q_RescheduleWaitHandle$$QUEUE_DEFAULT;
+extern const int64_t q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO;
 
 /**
  * A wait handle that is enqueued into a given priority queue and once desired
@@ -393,16 +487,16 @@ extern const int q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO;
  *
  * RescheduleWaitHandle is guaranteed to never finish immediately.
  */
-FORWARD_DECLARE_CLASS_BUILTIN(RescheduleWaitHandle);
+FORWARD_DECLARE_CLASS(RescheduleWaitHandle);
 class c_RescheduleWaitHandle : public c_WaitableWaitHandle {
  public:
-  DECLARE_CLASS(RescheduleWaitHandle, RescheduleWaitHandle, WaitableWaitHandle)
+  DECLARE_CLASS_NO_SWEEP(RescheduleWaitHandle)
 
   // need to implement
-  public: c_RescheduleWaitHandle(Class* cls = c_RescheduleWaitHandle::s_cls);
+  public: c_RescheduleWaitHandle(Class* cls = c_RescheduleWaitHandle::classof());
   public: ~c_RescheduleWaitHandle();
   public: void t___construct();
-  public: static Object ti_create(int queue, int priority);
+  public: static Object ti_create(int64_t queue, int priority);
 
  public:
   void run();
@@ -428,23 +522,33 @@ class c_RescheduleWaitHandle : public c_WaitableWaitHandle {
  * See asio_external_thread_event.h for more details.
  */
 class AsioExternalThreadEvent;
-FORWARD_DECLARE_CLASS_BUILTIN(ExternalThreadEventWaitHandle);
+FORWARD_DECLARE_CLASS(ExternalThreadEventWaitHandle);
 class c_ExternalThreadEventWaitHandle : public c_WaitableWaitHandle, public Sweepable {
  public:
-  DECLARE_CLASS(ExternalThreadEventWaitHandle, ExternalThreadEventWaitHandle, WaitableWaitHandle)
+  DECLARE_CLASS(ExternalThreadEventWaitHandle)
 
   // need to implement
-  public: c_ExternalThreadEventWaitHandle(Class* cls = c_ExternalThreadEventWaitHandle::s_cls);
+  public: c_ExternalThreadEventWaitHandle(Class* cls = c_ExternalThreadEventWaitHandle::classof());
   public: ~c_ExternalThreadEventWaitHandle();
   public: void t___construct();
 
  public:
-  static c_ExternalThreadEventWaitHandle* Create(AsioExternalThreadEvent* event, ObjectData* priv_data);
+  static c_ExternalThreadEventWaitHandle* Create(AsioExternalThreadEvent* event,
+                                                 ObjectData* priv_data);
 
-  c_ExternalThreadEventWaitHandle* getNextToProcess() { assert(getState() == STATE_WAITING); return m_nextToProcess; }
-  void setNextToProcess(c_ExternalThreadEventWaitHandle* next) { assert(getState() == STATE_WAITING); m_nextToProcess = next; }
+  c_ExternalThreadEventWaitHandle* getNextToProcess() {
+    assert(getState() == STATE_WAITING);
+    return m_nextToProcess;
+  }
+  void setNextToProcess(c_ExternalThreadEventWaitHandle* next) {
+    assert(getState() == STATE_WAITING);
+    m_nextToProcess = next;
+  }
   ObjectData* getPrivData() { return m_privData.get(); }
-  void setIndex(uint32_t ete_idx) { assert(getState() == STATE_WAITING); m_index = ete_idx; }
+  void setIndex(uint32_t ete_idx) {
+    assert(getState() == STATE_WAITING);
+    m_index = ete_idx;
+  }
 
   void abandon(bool sweeping);
   void process();
@@ -454,6 +558,7 @@ class c_ExternalThreadEventWaitHandle : public c_WaitableWaitHandle, public Swee
 
  private:
   void initialize(AsioExternalThreadEvent* event, ObjectData* priv_data);
+  void destroyEvent();
 
   c_ExternalThreadEventWaitHandle* m_nextToProcess;
   AsioExternalThreadEvent* m_event;

@@ -1,0 +1,10 @@
+*** Testing ob_flush() : basic functionality ***
+
+-- Testing ob_flush() function with Zero arguments --
+HipHop Notice: %s
+bool(false)
+This should get flushed.
+bool(true)
+Ensure the buffer is still active after the flush.
+bool(true)
+Done

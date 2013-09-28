@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/base/debuggable.h"
-#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/server/server-stats.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

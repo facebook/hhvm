@@ -1,0 +1,88 @@
+*** Testing log() : usage variations ***
+
+-- Iteration 1 --
+float(-INF)
+
+-- Iteration 2 --
+float(0)
+
+-- Iteration 3 --
+float(4.091491094268)
+
+-- Iteration 4 --
+float(NAN)
+
+-- Iteration 5 --
+float(9.3319298653812)
+
+-- Iteration 6 --
+float(1.0211892990699)
+
+-- Iteration 7 --
+float(NAN)
+
+-- Iteration 8 --
+float(11.091514977169)
+
+-- Iteration 9 --
+float(-8.9084850228307)
+
+-- Iteration 10 --
+float(-0.30102999566398)
+
+-- Iteration 11 --
+float(-INF)
+
+-- Iteration 12 --
+float(-INF)
+
+-- Iteration 13 --
+float(0)
+
+-- Iteration 14 --
+float(-INF)
+
+-- Iteration 15 --
+float(0)
+
+-- Iteration 16 --
+float(-INF)
+
+-- Iteration 17 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 18 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 19 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 20 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 21 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 22 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 23 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 24 --
+float(-INF)
+
+-- Iteration 25 --
+float(-INF)
+
+-- Iteration 26 --
+HipHop Warning: %s
+NULL
+===Done===

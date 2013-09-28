@@ -1,3 +1,4 @@
 <?php
 
- $a = 'test'; var_dump(~$a);
+$a = 'test';
+ var_dump(~$a);

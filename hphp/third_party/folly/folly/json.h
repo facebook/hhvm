@@ -58,6 +58,7 @@ namespace json {
       , pretty_formatting(false)
       , encode_non_ascii(false)
       , validate_utf8(false)
+      , allow_trailing_comma(false)
     {}
 
     // If true, keys in an object can be non-strings.  (In strict
@@ -81,6 +82,9 @@ namespace json {
 
     // Check that strings are valid utf8
     bool validate_utf8;
+
+    // Allow trailing comma in lists of values / items
+    bool allow_trailing_comma;
   };
 
   /*
@@ -90,6 +94,14 @@ namespace json {
    */
   fbstring serialize(dynamic const&, serialization_opts const&);
 
+  /*
+   * Escape a string so that it is legal to print it in JSON text and
+   * append the result to out.
+   */
+
+  void escapeString(StringPiece input,
+                    fbstring& out,
+                    const serialization_opts& opts);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -98,6 +110,7 @@ namespace json {
  * Parse a json blob out of a range and produce a dynamic representing
  * it.
  */
+dynamic parseJson(StringPiece, json::serialization_opts const&);
 dynamic parseJson(StringPiece);
 
 /*

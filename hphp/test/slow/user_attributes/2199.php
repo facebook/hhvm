@@ -1,8 +1,8 @@
 <?php
 
-
 <<A(1)>>
-function f() {}
+function f() {
+}
 $rf = new ReflectionFunction('f');
 var_dump($rf->getAttribute('A'));
 var_dump($rf->getAttribute('B'));

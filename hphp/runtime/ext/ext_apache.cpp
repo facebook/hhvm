@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,10 +16,10 @@
 */
 
 #include "hphp/runtime/ext/ext_apache.h"
-#include "hphp/runtime/base/server/http_server.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/server/server_note.h"
-#include "hphp/runtime/base/server/transport.h"
+#include "hphp/runtime/server/http-server.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/server/server-note.h"
+#include "hphp/runtime/server/transport.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -81,11 +81,12 @@ bool f_virtual(CStrRef filename) {
   throw NotSupportedException(__func__, "apache is not in use");
 }
 
-static const StaticString s_restart_time("restart_time");
-static const StaticString s_max_clients("max_clients");
-static const StaticString s_active_clients("active_clients");
-static const StaticString s_queued_requests("queued_requests");
-static const StaticString s_child_status("child_status");
+const StaticString
+  s_restart_time("restart_time"),
+  s_max_clients("max_clients"),
+  s_active_clients("active_clients"),
+  s_queued_requests("queued_requests"),
+  s_child_status("child_status");
 
 Variant f_apache_get_config() {
   int workers = 0, queued = 0;

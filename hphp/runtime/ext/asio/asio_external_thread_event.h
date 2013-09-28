@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -19,14 +19,14 @@
 #define incl_EXT_ASIO_EXTERNAL_THREAD_EVENT_H_
 
 #include <atomic>
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/ext/ext_asio.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class AsioSession;
-FORWARD_DECLARE_CLASS_BUILTIN(ExternalThreadEventWaitHandle);
+FORWARD_DECLARE_CLASS(ExternalThreadEventWaitHandle);
 
 /**
  * An asynchronous external thread event.
@@ -58,7 +58,7 @@ FORWARD_DECLARE_CLASS_BUILTIN(ExternalThreadEventWaitHandle);
  *       markAsFinished();
  *     }
  *   protected:
- *     void unserialize(TypedValue* result) const {
+ *     void unserialize(Cell& result) const {
  *       if (UNLIKELY(m_failed)) {
  *         Object e(SystemLib::AllocInvalidOperationExceptionObject(
  *           "An error has occurred while scheduling the operation"));
@@ -71,8 +71,7 @@ FORWARD_DECLARE_CLASS_BUILTIN(ExternalThreadEventWaitHandle);
  *         throw e;
  *       }
  *
- *       result->m_type = KindOfInt64;
- *       result->m_data.num = m_value;
+ *       cellDup(make_tv<KindOfInt64>(m_value), result);
  *     }
  *   private:
  *     int m_value, m_maxValue;
@@ -193,7 +192,7 @@ class AsioExternalThreadEvent {
      * If a result was already initialized, it must be uninitialized (decref
      * if needed) prior to throwing an exception.
      */
-    virtual void unserialize(TypedValue* result) const = 0;
+    virtual void unserialize(Cell& result) const = 0;
 
   protected:
     /**
@@ -214,7 +213,11 @@ class AsioExternalThreadEvent {
      * is eventually called.
      */
     virtual ~AsioExternalThreadEvent() {
-      assert(m_state.load() == Finished || m_state.load() == Canceled);
+      assert(
+        m_state.load() == Finished ||
+        m_state.load() == Canceled ||
+        m_state.load() == Abandoned
+      );
     };
 
     /**
@@ -267,9 +270,17 @@ class AsioExternalThreadEvent {
        * eventually calling markAsFinished() that will destruct this object.
        */
       Canceled,
+
+      /**
+       * Web request thread abandoned event before passing to processing thread.
+       *
+       * This object is owned by web request thread, which is trying to abandon
+       * it prior to passing ownership to processing thread.
+       */
+      Abandoned,
     };
 
-    AsioSession* m_session;
+    AsioExternalThreadEventQueue* m_queue;
     c_ExternalThreadEventWaitHandle* m_waitHandle;
     std::atomic<uint32_t/*state_t*/> m_state;
 };

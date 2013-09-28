@@ -1,3 +1,7 @@
 <?php
 
- $a = function ($a) { return $a;}; var_dump($a(123));
+$a = function ($a) {
+ return $a;
+}
+;
+ var_dump($a(123));

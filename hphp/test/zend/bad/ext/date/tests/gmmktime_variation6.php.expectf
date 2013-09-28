@@ -1,0 +1,80 @@
+*** Testing gmmktime() : usage variation ***
+
+--float 10.5--
+int(1281254888)
+
+--float .5--
+int(965722088)
+
+--empty array--
+HipHop Warning: %s
+bool(false)
+
+--int indexed array--
+HipHop Warning: %s
+bool(false)
+
+--associative array--
+HipHop Warning: %s
+bool(false)
+
+--nested arrays--
+HipHop Warning: %s
+bool(false)
+
+--uppercase NULL--
+int(965722088)
+
+--lowercase null--
+int(965722088)
+
+--lowercase true--
+int(997258088)
+
+--lowercase false--
+int(965722088)
+
+--uppercase TRUE--
+int(997258088)
+
+--uppercase FALSE--
+int(965722088)
+
+--empty string DQ--
+HipHop Warning: %s
+bool(false)
+
+--empty string SQ--
+HipHop Warning: %s
+bool(false)
+
+--string DQ--
+HipHop Warning: %s
+bool(false)
+
+--string SQ--
+HipHop Warning: %s
+bool(false)
+
+--mixed case string--
+HipHop Warning: %s
+bool(false)
+
+--heredoc--
+HipHop Warning: %s
+bool(false)
+
+--instance of classWithToString--
+HipHop Warning: %s
+bool(false)
+
+--instance of classWithoutToString--
+HipHop Warning: %s
+bool(false)
+
+--undefined var--
+int(965722088)
+
+--unset var--
+int(965722088)
+===DONE===

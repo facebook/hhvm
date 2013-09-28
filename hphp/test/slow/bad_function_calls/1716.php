@@ -1,6 +1,5 @@
 <?php
 
-
 function f() {
   $arr = array();
   sort($arr[0]);

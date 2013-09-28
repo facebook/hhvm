@@ -1,0 +1,273 @@
+int(0)
+array(0) {
+}
+HipHop Warning: func_get_arg():  The argument number should be >= 0 in %s on line %d
+bool(false)
+int(0)
+HipHop Warning: func_get_arg():  Argument 1 not passed to function in %s on line %d
+bool(false)
+int(1)
+array(1) {
+  [0]=>
+  string(11) "defined_arg"
+}
+HipHop Warning: func_get_arg():  The argument number should be >= 0 in %s on line %d
+bool(false)
+string(11) "defined_arg"
+int(1)
+HipHop Warning: func_get_arg():  Argument 2 not passed to function in %s on line %d
+bool(false)
+int(2)
+array(2) {
+  [0]=>
+  string(11) "replacement"
+  [1]=>
+  string(11) "replacement"
+}
+HipHop Warning: func_get_arg():  The argument number should be >= 0 in %s on line %d
+bool(false)
+string(11) "replacement"
+string(11) "replacement"
+int(2)
+HipHop Warning: func_get_arg():  Argument 3 not passed to function in %s on line %d
+bool(false)
+int(2)
+array(2) {
+  [0]=>
+  string(3) "src"
+  [1]=>
+  string(11) "replacement"
+}
+HipHop Warning: func_get_arg():  The argument number should be >= 0 in %s on line %d
+bool(false)
+string(3) "src"
+string(11) "replacement"
+int(2)
+HipHop Warning: func_get_arg():  Argument 3 not passed to function in %s on line %d
+bool(false)
+int(2)
+array(2) {
+  [0]=>
+  string(3) "idx"
+  [1]=>
+  string(11) "replacement"
+}
+string(3) "idx"
+string(3) "idx"
+string(3) "idx"
+string(3) "idx"
+string(3) "idx"
+int(2)
+array(2) {
+  [0]=>
+  string(5) "undef"
+  [1]=>
+  string(11) "replacement"
+}
+HipHop Warning: func_get_arg():  The argument number should be >= 0 in %s on line %d
+bool(false)
+string(5) "undef"
+string(11) "replacement"
+int(2)
+HipHop Warning: func_get_arg():  Argument 3 not passed to function in %s on line %d
+bool(false)
+int(1)
+array(1) {
+  [0]=>
+  string(5) "hello"
+}
+HipHop Warning: func_get_arg():  The argument number should be >= 0 in %s on line %d
+bool(false)
+int(0)
+string(5) "hello"
+HipHop Warning: func_get_arg():  Argument 2 not passed to function in %s on line %d
+bool(false)
+int(2)
+array(2) {
+  [0]=>
+  string(11) "defined_arg"
+  [1]=>
+  string(5) "hello"
+}
+HipHop Warning: func_get_arg():  The argument number should be >= 0 in %s on line %d
+bool(false)
+string(11) "defined_arg"
+int(1)
+string(5) "hello"
+HipHop Warning: func_get_arg():  Argument 3 not passed to function in %s on line %d
+bool(false)
+int(3)
+array(3) {
+  [0]=>
+  string(11) "replacement"
+  [1]=>
+  string(11) "replacement"
+  [2]=>
+  string(5) "hello"
+}
+HipHop Warning: func_get_arg():  The argument number should be >= 0 in %s on line %d
+bool(false)
+string(11) "replacement"
+string(11) "replacement"
+int(2)
+string(5) "hello"
+HipHop Warning: func_get_arg():  Argument 4 not passed to function in %s on line %d
+bool(false)
+int(3)
+array(3) {
+  [0]=>
+  string(3) "src"
+  [1]=>
+  string(11) "replacement"
+  [2]=>
+  string(5) "hello"
+}
+HipHop Warning: func_get_arg():  The argument number should be >= 0 in %s on line %d
+bool(false)
+string(3) "src"
+string(11) "replacement"
+int(2)
+string(5) "hello"
+HipHop Warning: func_get_arg():  Argument 4 not passed to function in %s on line %d
+bool(false)
+int(3)
+array(3) {
+  [0]=>
+  string(3) "idx"
+  [1]=>
+  string(11) "replacement"
+  [2]=>
+  string(5) "hello"
+}
+string(3) "idx"
+string(3) "idx"
+string(3) "idx"
+string(3) "idx"
+string(3) "idx"
+string(3) "idx"
+int(3)
+array(3) {
+  [0]=>
+  string(5) "undef"
+  [1]=>
+  string(11) "replacement"
+  [2]=>
+  string(5) "hello"
+}
+HipHop Warning: func_get_arg():  The argument number should be >= 0 in %s on line %d
+bool(false)
+string(5) "undef"
+string(11) "replacement"
+int(2)
+string(5) "hello"
+HipHop Warning: func_get_arg():  Argument 4 not passed to function in %s on line %d
+bool(false)
+int(2)
+array(2) {
+  [0]=>
+  string(5) "hello"
+  [1]=>
+  int(47)
+}
+HipHop Warning: func_get_arg():  The argument number should be >= 0 in %s on line %d
+bool(false)
+int(0)
+string(5) "hello"
+int(47)
+HipHop Warning: func_get_arg():  Argument 3 not passed to function in %s on line %d
+bool(false)
+int(3)
+array(3) {
+  [0]=>
+  string(11) "defined_arg"
+  [1]=>
+  string(5) "hello"
+  [2]=>
+  int(47)
+}
+HipHop Warning: func_get_arg():  The argument number should be >= 0 in %s on line %d
+bool(false)
+string(11) "defined_arg"
+int(1)
+string(5) "hello"
+int(47)
+HipHop Warning: func_get_arg():  Argument 4 not passed to function in %s on line %d
+bool(false)
+int(4)
+array(4) {
+  [0]=>
+  string(11) "replacement"
+  [1]=>
+  string(11) "replacement"
+  [2]=>
+  string(5) "hello"
+  [3]=>
+  int(47)
+}
+HipHop Warning: func_get_arg():  The argument number should be >= 0 in %s on line %d
+bool(false)
+string(11) "replacement"
+string(11) "replacement"
+int(2)
+string(5) "hello"
+int(47)
+HipHop Warning: func_get_arg():  Argument 5 not passed to function in %s on line %d
+bool(false)
+int(4)
+array(4) {
+  [0]=>
+  string(3) "src"
+  [1]=>
+  string(11) "replacement"
+  [2]=>
+  string(5) "hello"
+  [3]=>
+  int(47)
+}
+HipHop Warning: func_get_arg():  The argument number should be >= 0 in %s on line %d
+bool(false)
+string(3) "src"
+string(11) "replacement"
+int(2)
+string(5) "hello"
+int(47)
+HipHop Warning: func_get_arg():  Argument 5 not passed to function in %s on line %d
+bool(false)
+int(4)
+array(4) {
+  [0]=>
+  string(3) "idx"
+  [1]=>
+  string(11) "replacement"
+  [2]=>
+  string(5) "hello"
+  [3]=>
+  int(47)
+}
+string(3) "idx"
+string(3) "idx"
+string(3) "idx"
+string(3) "idx"
+string(3) "idx"
+string(3) "idx"
+string(3) "idx"
+int(4)
+array(4) {
+  [0]=>
+  string(5) "undef"
+  [1]=>
+  string(11) "replacement"
+  [2]=>
+  string(5) "hello"
+  [3]=>
+  int(47)
+}
+HipHop Warning: func_get_arg():  The argument number should be >= 0 in %s on line %d
+bool(false)
+string(5) "undef"
+string(11) "replacement"
+int(2)
+string(5) "hello"
+int(47)
+HipHop Warning: func_get_arg():  Argument 5 not passed to function in %s on line %d
+bool(false)

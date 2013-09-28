@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -64,8 +64,8 @@ typedef hphp_hash_map<ConstructRawPtr, ControlBlock*,
 
 class ControlFlowBuilder : public FunctionWalker {
 public:
-  ControlFlowBuilder(ControlFlowGraph *g, bool isGenerator) :
-      m_graph(g), m_pass(0), m_isGenerator(isGenerator), m_cur(0), m_head(0) {}
+  explicit ControlFlowBuilder(ControlFlowGraph *g) :
+      m_graph(g), m_pass(0), m_cur(0), m_head(0) {}
 
   int before(ConstructRawPtr cp);
   int after(ConstructRawPtr cp);
@@ -161,7 +161,6 @@ private:
   ControlFlowGraph               *m_graph;
   AstWalkerStateVec              m_state;
   int                            m_pass;
-  bool                           m_isGenerator;
   ControlBlock                   *m_cur;
   ControlBlock                   *m_head;
 
@@ -417,7 +416,7 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
 
           case Statement::KindOfReturnStatement: {
             setEdge(s, AfterConstruct, root(), AfterConstruct);
-            if (!m_isGenerator) noFallThrough(s);
+            noFallThrough(s);
             /*
              * Since almost anything in php /might/ throw, we
              * approximate, and add edges from the beginning and
@@ -868,7 +867,7 @@ ControlFlowGraph *ControlFlowGraph::buildControlFlow(MethodStatementPtr m) {
   ControlFlowGraph *graph = new ControlFlowGraph;
 
   graph->m_stmt = m;
-  ControlFlowBuilder cfb(graph, !!m->getOrigGeneratorFunc());
+  ControlFlowBuilder cfb(graph);
   cfb.run(m->getStmts());
   graph->m_nextDfn = 1;
   depth_first_visit(*graph, cfb.head(),

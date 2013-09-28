@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +17,8 @@
 #define incl_HPHP_DEBUGGABLE_H_
 
 #include "hphp/util/base.h"
-#include "hphp/runtime/base/util/string_buffer.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -82,7 +82,6 @@ public:
 #define HPHPD_SETTINGS \
   HPHPD_SETTING(BypassCheck,         bool,  false)         \
   HPHPD_SETTING(PrintLevel,          int,   -1)            \
-  HPHPD_SETTING(SmallStep,           bool,  false)         \
   HPHPD_SETTING(StackArgs,           bool,  true)          \
 
 class DebuggerSettings {

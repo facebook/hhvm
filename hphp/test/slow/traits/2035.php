@@ -1,7 +1,5 @@
 <?php
 
-
-
 trait TestTrait {
 	public static function test() {
 		return __TRAIT__;

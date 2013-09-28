@@ -1,0 +1,23 @@
+In NS
+string(11) "Foo\Bar\Moo"
+Top
+string(11) "Foo\Bar\One"
+string(3) "Boo"
+string(7) "Bee\Bop"
+string(3) "Moo"
+object(Foo\Bar\One)#1 (0) {
+}
+string(11) "Foo\Bar\Two"
+string(11) "Foo\Bar\Two"
+string(11) "Foo\Bar\One"
+string(11) "Foo\Bar\Baz"
+Parent
+string(11) "Foo\Bar\Two"
+string(13) "Foo\Bar\Three"
+string(11) "Foo\Bar\One"
+string(11) "Foo\Bar\Baz"
+Compile Check
+string(13) "Foo\Bar\Three"
+string(11) "Foo\Bar\Baz"
+string(11) "Foo\Bar\One"
+string(11) "Foo\Bar\Two"

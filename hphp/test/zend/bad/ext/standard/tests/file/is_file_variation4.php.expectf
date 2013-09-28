@@ -1,0 +1,21 @@
+*** Testing is_file() with different notations of file names ***
+- Iteration 1 -
+bool(true)
+- Iteration 2 -
+bool(false)
+- Iteration 3 -
+bool(true)
+- Iteration 4 -
+bool(true)
+- Iteration 5 -
+bool(false)
+- Iteration 6 -
+bool(false)
+- Iteration 7 -
+HipHop Warning: %s
+NULL
+- Iteration 8 -
+HipHop Warning: %s
+NULL
+
+*** Done ***

@@ -1,6 +1,6 @@
 <?php
 
- function g6() {
+function g6() {
   $arr = array(0,'a'=>1,2,'b'=>3,4);
   $b = true;
   foreach ($arr as $k => &$v) {

@@ -1,8 +1,6 @@
 <?php
 
-
-
-	trait TestTrait {
+trait TestTrait {
 		public static function test() {
 			return 'Forwarded '.forward_static_call(array('A', 'test'));
 		}

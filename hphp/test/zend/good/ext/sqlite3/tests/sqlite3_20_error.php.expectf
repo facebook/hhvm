@@ -1,0 +1,7 @@
+SELECTING from invalid table
+HipHop Warning: %s
+Error Code: 1
+Error Msg: no such table: non_existent_table
+Closing database
+bool(true)
+Done

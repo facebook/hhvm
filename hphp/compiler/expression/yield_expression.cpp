@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,16 +24,17 @@ using namespace HPHP;
 
 YieldExpression::YieldExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
- ExpressionPtr exp)
+ ExpressionPtr keyExp, ExpressionPtr valExp)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(YieldExpression)),
-    m_exp(exp), m_label(-1) {
+    m_keyExp(keyExp), m_valExp(valExp), m_label(this) {
 }
 
 ExpressionPtr YieldExpression::clone() {
   YieldExpressionPtr exp(new YieldExpression(*this));
   Expression::deepCopy(exp);
-  exp->m_exp = Clone(m_exp);
-  exp->m_label = m_label;
+  exp->m_keyExp = Clone(m_keyExp);
+  exp->m_valExp = Clone(m_valExp);
+  exp->m_label.setExpression(exp.get());
   return exp;
 }
 
@@ -46,16 +47,21 @@ ExpressionPtr YieldExpression::clone() {
 
 void YieldExpression::analyzeProgram(AnalysisResultPtr ar) {
   assert(getFunctionScope() && getFunctionScope()->isGenerator());
-  m_exp->analyzeProgram(ar);
-  if (m_label == -1) {
-    setLabel(getFunctionScope()->allocYieldLabel());
+  if (m_keyExp) {
+    m_keyExp->analyzeProgram(ar);
   }
+  m_valExp->setChildOfYield();
+  m_valExp->analyzeProgram(ar);
+
+  m_label.setNew();
 }
 
 ConstructPtr YieldExpression::getNthKid(int n) const {
   switch (n) {
     case 0:
-      return m_exp;
+      return m_keyExp;
+    case 1:
+      return m_valExp;
     default:
       assert(false);
       break;
@@ -64,13 +70,16 @@ ConstructPtr YieldExpression::getNthKid(int n) const {
 }
 
 int YieldExpression::getKidCount() const {
-  return 1;
+  return 2;
 }
 
 void YieldExpression::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_exp = boost::dynamic_pointer_cast<Expression>(cp);
+      m_keyExp = dynamic_pointer_cast<Expression>(cp);
+      break;
+    case 1:
+      m_valExp = dynamic_pointer_cast<Expression>(cp);
       break;
     default:
       assert(false);
@@ -80,7 +89,10 @@ void YieldExpression::setNthKid(int n, ConstructPtr cp) {
 
 TypePtr YieldExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                     bool coerce) {
-  m_exp->inferAndCheck(ar, Type::Some, false);
+  if (m_keyExp) {
+    m_keyExp->inferAndCheck(ar, Type::Some, false);
+  }
+  m_valExp->inferAndCheck(ar, Type::Some, false);
   return Type::Variant;
 }
 
@@ -90,5 +102,9 @@ TypePtr YieldExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 
 void YieldExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_printf("yield ");
-  m_exp->outputPHP(cg, ar);
+  if (m_keyExp) {
+    m_keyExp->outputPHP(cg, ar);
+    cg_printf(" => ");
+  }
+  m_valExp->outputPHP(cg, ar);
 }

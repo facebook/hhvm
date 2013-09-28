@@ -1,6 +1,5 @@
 <?php
 
-
 trait T {
   private static function blarg() {
     echo "T::blarg\n";

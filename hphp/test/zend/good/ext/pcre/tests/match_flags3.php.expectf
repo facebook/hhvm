@@ -1,0 +1,24 @@
+HipHop Warning: %s
+bool(false)
+int(1)
+array(1) {
+  [0]=>
+  string(3) "789"
+}
+int(1)
+array(1) {
+  [0]=>
+  string(3) "123"
+}
+int(2)
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(3) "789"
+    [1]=>
+    string(3) "012"
+  }
+}
+HipHop Warning: %s
+bool(false)

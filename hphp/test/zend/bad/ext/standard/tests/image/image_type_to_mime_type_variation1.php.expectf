@@ -1,0 +1,69 @@
+*** Testing image_type_to_mime_type() : usage variations ***
+
+-- Iteration 1 --
+string(24) "application/octet-stream"
+
+-- Iteration 2 --
+string(24) "application/octet-stream"
+
+-- Iteration 3 --
+string(24) "application/octet-stream"
+
+-- Iteration 4 --
+string(24) "application/octet-stream"
+
+-- Iteration 5 --
+string(24) "application/octet-stream"
+
+-- Iteration 6 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 7 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 8 --
+string(24) "application/octet-stream"
+
+-- Iteration 9 --
+string(24) "application/octet-stream"
+
+-- Iteration 10 --
+string(9) "image/gif"
+
+-- Iteration 11 --
+string(24) "application/octet-stream"
+
+-- Iteration 12 --
+string(9) "image/gif"
+
+-- Iteration 13 --
+string(24) "application/octet-stream"
+
+-- Iteration 14 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 15 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 16 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 17 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 18 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 19 --
+string(24) "application/octet-stream"
+
+-- Iteration 20 --
+string(24) "application/octet-stream"
+===DONE===

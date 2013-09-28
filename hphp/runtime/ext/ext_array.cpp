@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,17 +16,16 @@
 */
 
 #include "hphp/runtime/ext/ext_array.h"
-#include "hphp/runtime/ext/ext_iterator.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/base/util/request_local.h"
-#include "hphp/runtime/base/zend/zend_collator.h"
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/sort_flags.h"
-#include "hphp/runtime/vm/translator/translator.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
-#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/zend-collator.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/sort-flags.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/base/hphp-array.h"
 #include "hphp/util/logger.h"
 
 #define SORT_DESC               3
@@ -34,7 +33,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-static StaticString s_count("count");
+const StaticString s_count("count");
 
 const int64_t k_UCOL_DEFAULT = UCOL_DEFAULT;
 
@@ -64,17 +63,17 @@ const int64_t k_UCOL_HIRAGANA_QUATERNARY_MODE = UCOL_HIRAGANA_QUATERNARY_MODE;
 const int64_t k_UCOL_NUMERIC_COLLATION = UCOL_NUMERIC_COLLATION;
 
 using HPHP::Transl::CallerFrame;
+using HPHP::Transl::EagerCallerFrame;
 
-#define getCheckedArrayRetType(input, fail, type)                       \
-  Variant::TypedValueAccessor tva_##input = input.getTypedAccessor();   \
-  if (UNLIKELY(Variant::GetAccessorType(tva_##input) != KindOfArray)) { \
-    throw_bad_array_exception();                                        \
-    return fail;                                                        \
-  }                                                                     \
-  type arr_##input = Variant::GetAsArray(tva_##input);
+#define getCheckedArrayRet(input, fail)                           \
+  auto const cell_##input = static_cast<CVarRef>(input).asCell(); \
+  if (UNLIKELY(cell_##input->m_type != KindOfArray)) {            \
+    throw_bad_array_exception();                                  \
+    return fail;                                                  \
+  }                                                               \
+  ArrNR arrNR_##input(cell_##input->m_data.parr);                 \
+  CArrRef arr_##input = arrNR_##input.asArray();
 
-#define getCheckedArrayRet(input, fail) \
-  getCheckedArrayRetType(input, fail, CArrRef)
 #define getCheckedArray(input) getCheckedArrayRet(input, uninit_null())
 
 Variant f_array_change_key_case(CVarRef input, bool upper /* = false */) {
@@ -144,18 +143,36 @@ Variant f_array_column(CVarRef input, CVarRef val_key,
 }
 
 Variant f_array_combine(CVarRef keys, CVarRef values) {
-  getCheckedArray(keys);
-  getCheckedArray(values);
-  return ArrayUtil::Combine(arr_keys, arr_values);
+  const auto& cell_keys = *keys.asCell();
+  const auto& cell_values = *values.asCell();
+  if (UNLIKELY(!isContainer(cell_keys) || !isContainer(cell_values))) {
+    raise_warning("Invalid operand type was used: array_combine expects "
+                  "arrays or collections");
+    return uninit_null();
+  }
+  if (UNLIKELY(getContainerSize(cell_keys) != getContainerSize(cell_values))) {
+    raise_warning("array_combine(): Both parameters should have an equal "
+                  "number of elements");
+    return false;
+  }
+  Array ret = ArrayData::Create();
+  for (ArrayIter iter1(cell_keys), iter2(cell_values);
+       iter1; ++iter1, ++iter2) {
+    ret.lvalAt(iter1.secondRefPlus()).setWithRef(iter2.secondRefPlus());
+  }
+  return ret;
 }
+
 Variant f_array_count_values(CVarRef input) {
   getCheckedArray(input);
   return ArrayUtil::CountValues(arr_input);
 }
+
 Variant f_array_fill_keys(CVarRef keys, CVarRef value) {
   getCheckedArray(keys);
   return ArrayUtil::CreateArray(arr_keys, value);
 }
+
 Variant f_array_fill(int start_index, int num, CVarRef value) {
   return ArrayUtil::CreateArray(start_index, num, value);
 }
@@ -163,9 +180,7 @@ Variant f_array_fill(int start_index, int num, CVarRef value) {
 static bool filter_func(CVarRef value, const void *data) {
   CallCtx* ctx = (CallCtx*)data;
   Variant ret;
-  TypedValue args[1];
-  tvDup(value.asTypedValue(), args + 0);
-  g_vmContext->invokeFuncFew((TypedValue*)&ret, *ctx, 1, args);
+  g_vmContext->invokeFuncFew((TypedValue*)&ret, *ctx, 1, value.asCell() );
   return ret.toBoolean();
 }
 Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
@@ -175,7 +190,7 @@ Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
     return ArrayUtil::Filter(arr_input);
   }
   CallCtx ctx;
-  CallerFrame cf;
+  EagerCallerFrame cf;
   vm_decode_function(callback, cf(), false, ctx);
   if (ctx.func == NULL) {
     return uninit_null();
@@ -191,12 +206,12 @@ Variant f_array_flip(CVarRef trans) {
 HOT_FUNC
 bool f_array_key_exists(CVarRef key, CVarRef search) {
   const ArrayData *ad;
-  Variant::TypedValueAccessor sacc = search.getTypedAccessor();
-  DataType saccType = Variant::GetAccessorType(sacc);
-  if (LIKELY(saccType == KindOfArray)) {
-    ad = Variant::GetArrayData(sacc);
-  } else if (saccType == KindOfObject) {
-    ObjectData* obj = Variant::GetObjectData(sacc);
+
+  auto const searchCell = search.asCell();
+  if (LIKELY(searchCell->m_type == KindOfArray)) {
+    ad = searchCell->m_data.parr;
+  } else if (searchCell->m_type == KindOfObject) {
+    ObjectData* obj = searchCell->m_data.pobj;
     if (obj->isCollection()) {
       return collectionOffsetContains(obj, key);
     }
@@ -206,19 +221,20 @@ bool f_array_key_exists(CVarRef key, CVarRef search) {
                              "false returned.");
     return false;
   }
-  Variant::TypedValueAccessor kacc = key.getTypedAccessor();
-  switch (Variant::GetAccessorType(kacc)) {
+
+  auto const cell = key.asCell();
+  switch (cell->m_type) {
   case KindOfString:
   case KindOfStaticString: {
     int64_t n = 0;
-    StringData *sd = Variant::GetStringData(kacc);
+    StringData *sd = cell->m_data.pstr;
     if (sd->isStrictlyInteger(n)) {
       return ad->exists(n);
     }
     return ad->exists(StrNR(sd));
   }
   case KindOfInt64:
-    return ad->exists(Variant::GetInt64(kacc));
+    return ad->exists(cell->m_data.num);
   case KindOfUninit:
   case KindOfNull:
     return ad->exists(empty_string);
@@ -228,14 +244,69 @@ bool f_array_key_exists(CVarRef key, CVarRef search) {
   raise_warning("Array key should be either a string or an integer");
   return false;
 }
+
 bool f_key_exists(CVarRef key, CVarRef search) {
   return f_array_key_exists(key, search);
 }
 
+static Variant
+arrayKeysSetHelper(const Cell& cell_input, CVarRef search_value, bool strict) {
+  ArrayIter iter(cell_input);
+  if (LIKELY(!search_value.isInitialized())) {
+    PackedArrayInit ai(getContainerSize(cell_input));
+    for (; iter; ++iter) {
+      ai.append(iter.second());
+    }
+    return ai.toArray();
+  }
+
+  Array ai = HphpArray::MakeReserve(0);
+  for (; iter; ++iter) {
+    if ((strict && HPHP::same(iter.secondRefPlus(), search_value)) ||
+        (!strict && HPHP::equal(iter.secondRefPlus(), search_value))) {
+      ai.append(iter.second());
+    }
+  }
+  return ai;
+}
+
 Variant f_array_keys(CVarRef input, CVarRef search_value /* = null_variant */,
                      bool strict /* = false */) {
-  getCheckedArray(input);
-  return arr_input.keys(search_value, strict);
+  const auto& cell_input = *input.asCell();
+  if (UNLIKELY(!isContainer(cell_input))) {
+    goto warn;
+  }
+  {
+    // We treat Sets differently. For Sets, we pretend the values are
+    // also the keys (similar to how Set::toArray() behaves).
+    bool isSetType =
+      cell_input.m_type == KindOfObject &&
+      cell_input.m_data.pobj->getCollectionType() == Collection::SetType;
+    if (UNLIKELY(isSetType)) {
+      return arrayKeysSetHelper(cell_input, search_value, strict);
+    }
+    ArrayIter iter(cell_input);
+    if (LIKELY(!search_value.isInitialized())) {
+      PackedArrayInit ai(getContainerSize(cell_input));
+      for (; iter; ++iter) {
+        ai.append(iter.first());
+      }
+      return ai.toArray();
+    }
+
+    Array ai = Array::attach(HphpArray::MakeReserve(0));
+    for (; iter; ++iter) {
+      if ((strict && HPHP::same(iter.secondRefPlus(), search_value)) ||
+          (!strict && HPHP::equal(iter.secondRefPlus(), search_value))) {
+        ai.append(iter.first());
+      }
+    }
+    return ai;
+  }
+warn:
+  raise_warning("array_keys() expects parameter 1 to be an array "
+                "or collection");
+  return uninit_null();
 }
 
 static Variant map_func(CArrRef params, const void *data) {
@@ -247,9 +318,11 @@ static Variant map_func(CArrRef params, const void *data) {
     return params;
   }
   Variant ret;
-  g_vmContext->invokeFunc((TypedValue*)&ret, *ctx, params);
+  g_vmContext->invokeFunc((TypedValue*)&ret, ctx->func, params, ctx->this_,
+                          ctx->cls, nullptr, ctx->invName);
   return ret;
 }
+
 Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* = null_array */) {
   Array inputs;
   if (!arr1.isArray()) {
@@ -263,7 +336,7 @@ Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* 
   CallCtx ctx;
   ctx.func = NULL;
   if (!callback.isNull()) {
-    CallerFrame cf;
+    EagerCallerFrame cf;
     vm_decode_function(callback, cf(), false, ctx);
   }
   if (ctx.func == NULL) {
@@ -301,7 +374,7 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
       v.unset(); // avoid contamination of the value that was strongly bound
       v = subarr1;
     } else {
-      arr1.addLval(key, true).setWithRef(value);
+      arr1.lvalAt(key, AccessFlags::Key).setWithRef(value);
     }
   }
 
@@ -445,7 +518,18 @@ Variant f_array_product(CVarRef array) {
 }
 
 Variant f_array_push(int _argc, VRefParam array, CVarRef var, CArrRef _argv /* = null_array */) {
-  getCheckedArrayRetType(array, uninit_null(), Array &);
+  auto const array_cell = array.wrapped().asCell();
+  if (UNLIKELY(array_cell->m_type != KindOfArray)) {
+    throw_bad_array_exception();
+    return uninit_null();
+  }
+
+  /*
+   * Important note: this *must* cast the parr in the inner cell to
+   * the Array&---we can't copy it to the stack or anything because we
+   * might escalate.
+   */
+  Array& arr_array = *reinterpret_cast<Array*>(&array_cell->m_data.parr);
   arr_array.append(var);
   for (ArrayIter iter(_argv); iter; ++iter) {
     arr_array.append(iter.second());
@@ -461,10 +545,8 @@ Variant f_array_rand(CVarRef input, int num_req /* = 1 */) {
 static Variant reduce_func(CVarRef result, CVarRef operand, const void *data) {
   CallCtx* ctx = (CallCtx*)data;
   Variant ret;
-  TypedValue args[2];
-  tvDup(result.asTypedValue(), args + 0);
-  tvDup(operand.asTypedValue(), args + 1);
-  g_vmContext->invokeFuncFew((TypedValue*)&ret, *ctx, 2, args);
+  TypedValue args[2] = { *result.asCell(), *operand.asCell() };
+  g_vmContext->invokeFuncFew(ret.asTypedValue(), *ctx, 2, args);
   return ret;
 }
 Variant f_array_reduce(CVarRef input, CVarRef callback,
@@ -541,7 +623,7 @@ int64_t f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv /
           newArray.append(_argv->getValueRef(pos));
         }
       }
-      for (ArrayIter iter(array); iter; ++iter) {
+      for (ArrayIter iter(array.toArray()); iter; ++iter) {
         Variant key(iter.first());
         CVarRef value(iter.secondRef());
         if (key.isInteger()) {
@@ -554,27 +636,34 @@ int64_t f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv /
     }
     // Reset the array's internal pointer
     if (array.is(KindOfArray)) {
-      array.array_iter_reset();
+      f_reset(array);
     }
   }
   return array.toArray().size();
 }
 
 Variant f_array_values(CVarRef input) {
-  getCheckedArray(input);
-  return arr_input.values();
+  const auto& cell_input = *input.asCell();
+  if (!isContainer(cell_input)) {
+    raise_warning("array_values() expects parameter 1 to be an array "
+                  "or collection");
+    return uninit_null();
+  }
+  PackedArrayInit ai(getContainerSize(cell_input));
+  for (ArrayIter iter(cell_input); iter; ++iter) {
+    ai.appendWithRef(iter.secondRefPlus());
+  }
+  return ai.toArray();
 }
 
 static void walk_func(VRefParam value, CVarRef key, CVarRef userdata,
                       const void *data) {
   CallCtx* ctx = (CallCtx*)data;
   Variant sink;
-  TypedValue args[3];
-  tvDup(value->asTypedValue(), args + 0);
-  tvDup(key.asTypedValue(), args + 1);
-  tvDup(userdata.asTypedValue(), args + 2);
-  g_vmContext->invokeFuncFew((TypedValue*)&sink, *ctx, 3, args);
+  TypedValue args[3] = { *value->asRef(), *key.asCell(), *userdata.asCell() };
+  g_vmContext->invokeFuncFew(sink.asTypedValue(), *ctx, 3, args);
 }
+
 bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
                             CVarRef userdata /* = null_variant */) {
   if (!input.isArray()) {
@@ -585,12 +674,13 @@ bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
   CallerFrame cf;
   vm_decode_function(funcname, cf(), false, ctx);
   if (ctx.func == NULL) {
-    return uninit_null();
+    return false;
   }
   PointerSet seen;
   ArrayUtil::Walk(input, walk_func, &ctx, true, &seen, userdata);
   return true;
 }
+
 bool f_array_walk(VRefParam input, CVarRef funcname,
                   CVarRef userdata /* = null_variant */) {
   if (!input.isArray()) {
@@ -601,7 +691,7 @@ bool f_array_walk(VRefParam input, CVarRef funcname,
   CallerFrame cf;
   vm_decode_function(funcname, cf(), false, ctx);
   if (ctx.func == NULL) {
-    return uninit_null();
+    return false;
   }
   ArrayUtil::Walk(input, walk_func, &ctx, false, NULL, userdata);
   return true;
@@ -659,8 +749,11 @@ int64_t f_count(CVarRef var, bool recursive /* = false */) {
   case KindOfObject:
     {
       Object obj = var.toObject();
+      if (obj->isCollection()) {
+        return obj->getCollectionSize();
+      }
       if (obj.instanceof(SystemLib::s_CountableClass)) {
-        return obj->o_invoke_few_args(s_count, 0);
+        return obj->o_invoke_few_args(s_count, 0).toInt64();
       }
     }
     break;
@@ -679,29 +772,92 @@ int64_t f_count(CVarRef var, bool recursive /* = false */) {
 int64_t f_sizeof(CVarRef var, bool recursive /* = false */) {
   return f_count(var, recursive);
 }
-Variant f_each(VRefParam array) {
-  return array.array_iter_each();
+
+namespace {
+
+enum class CowTag {
+  Yes,
+  No
+};
+
+template<CowTag Cow, class Op, class NonArrayRet>
+static Variant iter_op_impl(VRefParam refParam, Op op, NonArrayRet nonArray) {
+  auto& cell = *refParam.wrapped().asCell();
+  if (cell.m_type != KindOfArray) {
+    throw_bad_type_exception("expecting an array");
+    return Variant(nonArray);
+  }
+
+  auto ad = cell.m_data.parr;
+  if (Cow == CowTag::Yes) {
+    if (ad->getCount() > 1 && !ad->isInvalid() && !ad->noCopyOnWrite()) {
+      ad = ad->copy();
+      cellSet(make_tv<KindOfArray>(ad), cell);
+    }
+  }
+  return op(ad);
 }
-Variant f_current(VRefParam array) {
-  return array.array_iter_current();
+
 }
-Variant f_next(VRefParam array) {
-  return array.array_iter_next();
+
+Variant f_each(VRefParam refParam) {
+  return iter_op_impl<CowTag::Yes>(
+    refParam,
+    [] (ArrayData* ad) { return ad->each(); },
+    Variant::NullInit()
+  );
 }
-Variant f_pos(VRefParam array) {
-  return array.array_iter_current();
+
+Variant f_current(VRefParam refParam) {
+  return iter_op_impl<CowTag::No>(
+    refParam,
+    [] (ArrayData* ad) { return ad->current(); },
+    false
+  );
 }
-Variant f_prev(VRefParam array) {
-  return array.array_iter_prev();
+
+Variant f_pos(VRefParam refParam) {
+  return f_current(refParam);
 }
-Variant f_reset(VRefParam array) {
-  return array.array_iter_reset();
+
+Variant f_key(VRefParam refParam) {
+  return iter_op_impl<CowTag::No>(
+    refParam,
+    [] (ArrayData* ad) { return ad->key(); },
+    false
+  );
 }
-Variant f_end(VRefParam array) {
-  return array.array_iter_end();
+
+Variant f_next(VRefParam refParam) {
+  return iter_op_impl<CowTag::Yes>(
+    refParam,
+    [] (ArrayData* ad) { return ad->next(); },
+    false
+  );
 }
-Variant f_key(VRefParam array) {
-  return array.array_iter_key();
+
+Variant f_prev(VRefParam refParam) {
+  return iter_op_impl<CowTag::Yes>(
+    refParam,
+    [] (ArrayData* ad) { return ad->prev(); },
+    false
+  );
+}
+
+Variant f_reset(VRefParam refParam) {
+  return iter_op_impl<CowTag::No>(
+    refParam,
+    [] (ArrayData* ad) { return ad->reset(); },
+    false
+  );
+}
+
+Variant f_end(VRefParam refParam) {
+  return iter_op_impl<CowTag::No>(
+    refParam,
+    [] (ArrayData* ad) { return ad->end(); },
+    false
+  );
 }
 
 bool f_in_array(CVarRef needle, CVarRef haystack, bool strict /* = false */) {
@@ -770,7 +926,7 @@ Variant f_range(CVarRef low, CVarRef high, CVarRef step /* = 1 */) {
 
 static int cmp_func(CVarRef v1, CVarRef v2, const void *data) {
   Variant *callback = (Variant *)data;
-  return vm_call_user_func(*callback, CREATE_VECTOR2(v1, v2));
+  return vm_call_user_func(*callback, make_packed_array(v1, v2)).toInt32();
 }
 
 #define COMMA ,
@@ -1086,7 +1242,7 @@ class ArraySortTmp {
 static bool
 php_sort(VRefParam array, int sort_flags, bool ascending, bool use_collator) {
   if (array.isArray()) {
-    Array& arr_array = Variant::GetAsArray(array.getTypedAccessor());
+    Array& arr_array = array.wrapped().toArrRef();
     if (use_collator && sort_flags != SORT_LOCALE_STRING) {
       UCollator *coll = s_collator->getCollator();
       if (coll) {
@@ -1114,7 +1270,7 @@ php_sort(VRefParam array, int sort_flags, bool ascending, bool use_collator) {
 static bool
 php_asort(VRefParam array, int sort_flags, bool ascending, bool use_collator) {
   if (array.isArray()) {
-    Array& arr_array = Variant::GetAsArray(array.getTypedAccessor());
+    Array& arr_array = array.wrapped().toArrRef();
     if (use_collator && sort_flags != SORT_LOCALE_STRING) {
       UCollator *coll = s_collator->getCollator();
       if (coll) {
@@ -1142,7 +1298,7 @@ php_asort(VRefParam array, int sort_flags, bool ascending, bool use_collator) {
 static bool
 php_ksort(VRefParam array, int sort_flags, bool ascending) {
   if (array.isArray()) {
-    Array& arr_array = Variant::GetAsArray(array.getTypedAccessor());
+    Array& arr_array = array.wrapped().toArrRef();
     ArraySortTmp ast(arr_array);
     ast->ksort(sort_flags, ascending);
     return true;
@@ -1201,7 +1357,7 @@ Variant f_natcasesort(VRefParam array) {
 
 bool f_usort(VRefParam array, CVarRef cmp_function) {
   if (array.isArray()) {
-    Array& arr_array = Variant::GetAsArray(array.getTypedAccessor());
+    Array& arr_array = array.wrapped().toArrRef();
     ArraySortTmp ast(arr_array);
     ast->usort(cmp_function);
     return true;
@@ -1220,7 +1376,7 @@ bool f_usort(VRefParam array, CVarRef cmp_function) {
 
 bool f_uasort(VRefParam array, CVarRef cmp_function) {
   if (array.isArray()) {
-    Array& arr_array = Variant::GetAsArray(array.getTypedAccessor());
+    Array& arr_array = array.wrapped().toArrRef();
     ArraySortTmp ast(arr_array);
     ast->uasort(cmp_function);
     return true;
@@ -1239,7 +1395,7 @@ bool f_uasort(VRefParam array, CVarRef cmp_function) {
 
 bool f_uksort(VRefParam array, CVarRef cmp_function) {
   if (array.isArray()) {
-    Array& arr_array = Variant::GetAsArray(array.getTypedAccessor());
+    Array& arr_array = array.wrapped().toArrRef();
     ArraySortTmp ast(arr_array);
     ast->uksort(cmp_function);
     return true;
@@ -1273,8 +1429,8 @@ bool f_array_multisort(int _argc, VRefParam ar1,
   bool ascending = true;
   for (int i = 0; i < _argv.size(); i++) {
     Variant *v = &((Array&)_argv).lvalAt(i);
-    Variant::TypedValueAccessor tva = v->getTypedAccessor();
-    if (Variant::GetAccessorType(tva) == KindOfArray) {
+    auto const cell = v->asCell();
+    if (cell->m_type == KindOfArray) {
       sd.cmp_func = get_cmp_func(sort_flags, ascending);
       data.push_back(sd);
 
@@ -1282,7 +1438,7 @@ bool f_array_multisort(int _argc, VRefParam ar1,
       ascending = true;
 
       sd.original = v;
-      arrays.push_back(Variant::GetAsArray(tva));
+      arrays.push_back(Array(cell->m_data.parr));
       sd.array = &arrays.back();
     } else {
       int n = v->toInt32();
@@ -1337,6 +1493,23 @@ bool f_i18n_loc_set_strength(int64_t strength) {
 Variant f_i18n_loc_get_error_code() {
   return s_collator->getErrorCode();
 }
+
+Variant f_hphp_array_idx(CVarRef key, CVarRef search, CVarRef def) {
+  if (!key.isNull()) {
+    if (LIKELY(search.isArray())) {
+      ArrayData *arr = search.getArrayData();
+      VarNR index = key.toKey();
+      if (!index.isNull()) {
+        CVarRef ret = arr->get(index, false);
+        return (&ret != &null_variant) ? ret : def;
+      }
+    } else {
+      raise_error("hphp_array_idx: search must be an array");
+    }
+  }
+  return def;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

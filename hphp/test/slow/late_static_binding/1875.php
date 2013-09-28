@@ -1,6 +1,5 @@
 <?php
 
-
 class A {
     const NAME = 'A';
     public static function test() {

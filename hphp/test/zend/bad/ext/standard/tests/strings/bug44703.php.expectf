@@ -1,0 +1,17 @@
+HipHop Warning: %s
+string(35) "&lt;a href='test'&gt;Test&lt;/a&gt;"
+HipHop Warning: %s
+string(35) "&lt;a href='test'&gt;Test&lt;/a&gt;"
+HipHop Warning: %s
+string(35) "&lt;a href='test'&gt;Test&lt;/a&gt;"
+string(35) "&lt;a href='test'&gt;Test&lt;/a&gt;"
+HipHop Warning: %s
+string(35) "&lt;a href='test'&gt;Test&lt;/a&gt;"
+string(8) "&lt;&gt;"
+HipHop Warning: %s
+string(8) "&lt;&gt;"
+string(8) "&lt;&gt;"
+string(8) "&lt;&gt;"
+string(8) "&lt;&gt;"
+HipHop Warning: %s
+string(8) "&lt;&gt;"

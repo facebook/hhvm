@@ -1,6 +1,6 @@
 <?php
 
- echo <<<EOT
+echo <<<EOT
 \t
 \r
 \a

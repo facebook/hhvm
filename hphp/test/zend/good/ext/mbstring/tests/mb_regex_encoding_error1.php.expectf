@@ -1,0 +1,6 @@
+*** Testing mb_regex_encoding() : error conditions ***
+
+-- Testing mb_regex_encoding() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

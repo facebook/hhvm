@@ -1,7 +1,5 @@
 <?php
 
- 
-
 class C {
   public function loadAllWithIDs($ids) {
     if (!count($ids = array_filter($ids))) {

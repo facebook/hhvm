@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -165,10 +165,10 @@ bool is_compressible_file(const char *filename) {
 // StreamCompressor
 
 StreamCompressor::StreamCompressor(int level, int encoding_mode, bool header)
-  : m_level(level), m_encoding(encoding_mode), m_header(header),
+  : m_encoding(encoding_mode), m_header(header),
     m_ended(false) {
   if (level < -1 || level > 9) {
-    throw Exception("compression level(%ld) must be within -1..9", level);
+    throw Exception("compression level(%d) must be within -1..9", level);
   }
   if (encoding_mode != CODING_GZIP && encoding_mode != CODING_DEFLATE) {
     throw Exception("encoding mode must be FORCE_GZIP or FORCE_DEFLATE");
@@ -276,7 +276,7 @@ char *StreamCompressor::compress(const char *data, int &len, bool trailer) {
 
 char *gzencode(const char *data, int &len, int level, int encoding_mode) {
   if (level < -1 || level > 9) {
-    Logger::Warning("compression level(%ld) must be within -1..9", level);
+    Logger::Warning("compression level(%d) must be within -1..9", level);
     return nullptr;
   }
 

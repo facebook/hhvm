@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,20 +14,19 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/intercept.h"
-#include "hphp/runtime/base/util/request_local.h"
-#include "hphp/runtime/base/array/array_init.h"
-#include "hphp/runtime/base/array/array_iterator.h"
-#include "hphp/runtime/base/type_conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/vm/translator/targetcache.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/event_hook.h"
+#include "hphp/runtime/vm/event-hook.h"
 
-#include "hphp/util/parser/parser.h"
+#include "hphp/parser/parser.h"
 #include "hphp/util/lock.h"
 
-#include "hphp/runtime/eval/runtime/file_repository.h"
-#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/base/file-repository.h"
 #include "hphp/util/trace.h"
 
 using namespace HPHP::Trace;
@@ -36,7 +35,7 @@ using namespace HPHP::Trace;
 
 namespace HPHP {
 
-static const Trace::Module TRACEMOD = Trace::intercept;
+TRACE_SET_MOD(intercept);
 
 class InterceptRequestData : public RequestEventHandler {
 public:
@@ -99,7 +98,7 @@ bool register_intercept(CStrRef name, CVarRef callback, CVarRef data) {
 
   EventHook::EnableIntercept();
 
-  Array handler = CREATE_VECTOR2(callback, data);
+  Array handler = make_packed_array(callback, data);
 
   if (name.empty()) {
     s_intercept_data->m_global_handler = handler;
@@ -149,7 +148,7 @@ Variant *get_intercept_handler(CStrRef name, char* flag) {
     if (*flag == -1) {
       StringData *sd = name.get();
       if (!sd->isStatic()) {
-        sd = StringData::GetStaticString(sd);
+        sd = makeStaticString(sd);
       }
       s_registered_flags[StrNR(sd)].push_back(flag);
       *flag = 0;

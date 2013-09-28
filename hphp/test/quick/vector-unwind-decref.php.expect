@@ -1,0 +1,26 @@
+calling main
+in main
+creating new c
+c constructing
+calling c.__get() and logger.__set()
+returning new logger
+logger constructing
+set was called
+logger destructing
+calling c.__get() and logger.__get()
+returning new logger
+logger constructing
+get was called
+logger destructing
+got value 10
+creating new d
+d constructing
+calling d.__get() and logger2.__set()
+returning new logger2
+logger2 constructing
+set was called, throwing an exception
+logger2 destructing
+d destructing
+c destructing
+Caught exception
+last line

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,16 +29,23 @@ class UnitChecker {
   UnitChecker(const Unit*, bool verbose);
   ~UnitChecker() {}
   bool verify();
+
  private:
   template<class T> bool checkLiteral(size_t, const T*, const char*);
   bool checkStrings();
   bool checkArrays();
   bool checkSourceLocs();
-  bool checkPreConsts();
   bool checkPreClasses();
   bool checkFuncs();
   bool checkBytecode();
   bool checkMetadata();
+
+ private:
+  template<class... Args>
+  void error(const char* const fmt, Args&&... args) {
+    verify_error(m_unit, nullptr, fmt, std::forward<Args>(args)...);
+  }
+
  private:
   const Unit* m_unit;
   bool m_verbose;
@@ -46,7 +53,7 @@ class UnitChecker {
 
 bool checkUnit(const Unit* unit, bool verbose) {
   if (verbose) {
-    verify_error("verifying unit from %s\n", unit->filepath()->data());
+    printf("verifying unit from %s\n", unit->filepath()->data());
   }
   return UnitChecker(unit, verbose).verify();
 }
@@ -58,7 +65,6 @@ bool checkUnit(const Unit* unit, bool verbose) {
 // 4. UnitLitStr table
 // 5. UnitArray table
 // 6. UnitSourceLoc table
-// 7. UnitPreConst table
 // 8. Classes
 // 9. Functions
 
@@ -70,7 +76,6 @@ bool UnitChecker::verify() {
   return checkStrings() &&
          checkArrays() &&
          //checkSourceLocs() &&
-         //checkPreConsts() &&
          //checkPreClasses() &&
          checkBytecode() &&
          //checkMetadata() &&
@@ -83,12 +88,12 @@ bool UnitChecker::checkLiteral(size_t id,
                                const char* what) {
   bool ok = true;
   if (!lt) {
-    verify_error("null %s id %zu in unit %s\n", what, id,
+    error("null %s id %zu in unit %s\n", what, id,
                  m_unit->md5().toString().c_str());
     ok = false;
   }
   if (!lt->isStatic()) {
-    verify_error("non-static %s id %zu in unit %s\n", what, id,
+    error("non-static %s id %zu in unit %s\n", what, id,
                  m_unit->md5().toString().c_str());
     ok = false;
   }
@@ -136,21 +141,21 @@ bool UnitChecker::checkBytecode() {
     const Func* f = i.popFront();
     if (f->past() <= f->base()) {
       if (!f->isAbstract() || f->past() < f->base()) {
-        verify_error("func size <= 0 [%d:%d] in unit %s\n",
+        error("func size <= 0 [%d:%d] in unit %s\n",
              f->base(), f->past(), m_unit->md5().toString().c_str());
         ok = false;
         continue;
       }
     }
     if (f->base() < 0 || f->past() > m_unit->bclen()) {
-      verify_error("function region [%d:%d] out of unit %s bounds [%d:%d]\n",
+      error("function region [%d:%d] out of unit %s bounds [%d:%d]\n",
              f->base(), f->past(), m_unit->md5().toString().c_str(),
              0, m_unit->bclen());
       ok = false;
       continue;
     }
     if (funcs.find(f->base()) != funcs.end()) {
-      verify_error("duplicate function-base at %d in unit %s\n",
+      error("duplicate function-base at %d in unit %s\n",
              f->base(), m_unit->md5().toString().c_str());
       ok = false;
       continue;
@@ -159,7 +164,7 @@ bool UnitChecker::checkBytecode() {
   }
   // iterate funcs in offset order, checking for holes and overlap
   if (funcs.empty()) {
-    verify_error("unit %s must have at least one func\n",
+    error("unit %s must have at least one func\n",
            m_unit->md5().toString().c_str());
     return false;
   }
@@ -167,17 +172,17 @@ bool UnitChecker::checkBytecode() {
   for (FuncMap::iterator i = funcs.begin(), e = funcs.end(); i != e; ) {
     const Func* f = (*i).second; ++i;
     if (f->base() < last_past) {
-      verify_error("function overlap [%d:%d] in unit %s\n",
+      error("function overlap [%d:%d] in unit %s\n",
              f->base(), last_past, m_unit->md5().toString().c_str());
       ok = false;
     } else if (f->base() > last_past) {
-      verify_error("dead bytecode space [%d:%d] in unit %s\n",
+      error("dead bytecode space [%d:%d] in unit %s\n",
              last_past, f->base(), m_unit->md5().toString().c_str());
       ok = false;
     }
     last_past = f->past();
     if (i == e && last_past != m_unit->bclen()) {
-      verify_error("dead bytecode [%d:%d] at end of unit %s\n",
+      error("dead bytecode [%d:%d] at end of unit %s\n",
              last_past, m_unit->bclen(), m_unit->md5().toString().c_str());
       ok = false;
     }
@@ -198,7 +203,7 @@ bool UnitChecker::checkFuncs() {
     if (i.front()->isPseudoMain()) {
       if (pseudo) {
         multi = true;
-        verify_error("unit should have exactly one pseudo-main\n");
+        error("%s", "unit should have exactly one pseudo-main\n");
         ok = false;
       }
       pseudo = i.front();
@@ -207,7 +212,7 @@ bool UnitChecker::checkFuncs() {
   }
 
   if (!multi && m_unit->getMain() != pseudo) {
-    verify_error("funcs and unit disagree on what is the pseudo-main\n");
+    error("%s", "funcs and unit disagree on what is the pseudo-main\n");
     ok = false;
   }
 

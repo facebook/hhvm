@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,9 +16,9 @@
 */
 
 #include "hphp/runtime/ext/ext_icu_uspoof.h"
-#include "hphp/runtime/base/util/exceptions.h"
+#include "hphp/runtime/base/exceptions.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(icu_uspoof);

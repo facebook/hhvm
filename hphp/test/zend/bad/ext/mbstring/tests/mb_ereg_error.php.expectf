@@ -1,0 +1,10 @@
+*** Testing mb_ereg() : error conditions ***
+
+-- Testing mb_ereg() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing mb_ereg() function with less than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+Done

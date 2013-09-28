@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,9 +22,9 @@
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/static_member_expression.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/util/parser/hphp.tab.hpp"
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/parser/hphp.tab.hpp"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 using namespace HPHP;
 
@@ -217,10 +217,10 @@ int ArrayElementExpression::getKidCount() const {
 void ArrayElementExpression::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_variable = boost::dynamic_pointer_cast<Expression>(cp);
+      m_variable = dynamic_pointer_cast<Expression>(cp);
       break;
     case 1:
-      m_offset = boost::dynamic_pointer_cast<Expression>(cp);
+      m_offset = dynamic_pointer_cast<Expression>(cp);
       break;
     default:
       assert(false);

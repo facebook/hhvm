@@ -1,8 +1,11 @@
 <?php
 
-
-$f = function() { echo "in \$f\n"; };
-$g = function($a = 'default') { echo "in \$g; passed $a\n"; };
+$f = function() {
+  echo "in \$f\n";
+};
+$g = function($a = 'default') {
+  echo "in \$g; passed $a\n";
+};
 
 /** This doc comment is so helpful and descriptive. */
 $add = function($x, $y) {

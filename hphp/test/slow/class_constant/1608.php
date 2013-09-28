@@ -1,3 +1,6 @@
 <?php
 
- class c {  function foo($x = self::BLAH) {}}
+class c {
+  function foo($x = self::BLAH) {
+}
+}

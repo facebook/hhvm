@@ -1,0 +1,10 @@
+*** Testing gzopen() : error conditions ***
+
+-- Testing gzopen() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing gzopen() function with less than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

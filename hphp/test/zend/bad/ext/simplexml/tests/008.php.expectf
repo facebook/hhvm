@@ -1,0 +1,13 @@
+array(1) {
+  [0]=>
+  object(SimpleXMLElement)#%d (1) {
+    ["test"]=>
+    object(SimpleXMLElement)#%d (0) {
+    }
+  }
+}
+array(0) {
+}
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)

@@ -1,0 +1,1 @@
+HipHop Warning: Argument 1 to foo() must be of type ?array, stdClass given in %s on line 3

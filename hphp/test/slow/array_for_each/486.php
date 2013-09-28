@@ -1,6 +1,6 @@
 <?php
 
- function g11() {
+function g11() {
   $arr = array(0,1,2,3);
   reset($arr);
   var_dump(current($arr));
@@ -10,4 +10,5 @@
   }
   var_dump(current($arr));
 }
-foreach (g11() as $_) {}
+foreach (g11() as $_) {
+}

@@ -1,6 +1,5 @@
 <?php
 
-
 class A {
   static public $bp = "hello\n";
 }
@@ -9,6 +8,8 @@ trait T {
     echo A::$bp;
   }
 }
-class C { use T; }
+class C {
+ use T;
+ }
 $o = new C;
 $o->foo();

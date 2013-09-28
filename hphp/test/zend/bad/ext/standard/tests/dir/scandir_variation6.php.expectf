@@ -1,0 +1,18 @@
+*** Testing scandir() : usage variations ***
+
+-- Wildcard = '*' --
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+
+-- Wildcard = '?' --
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+===DONE===

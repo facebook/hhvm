@@ -1,0 +1,6 @@
+*** Testing get_declared_interfaces() : error conditions ***
+
+-- Testing get_declared_interfaces() function with one argument --
+HipHop Warning: %s
+NULL
+Done

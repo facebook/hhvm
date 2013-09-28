@@ -1,0 +1,1 @@
+HipHop Fatal error: syntax error, unexpected T_STATIC, expecting '&' or T_VARIABLE in %s/test/slow/ctor_param_promotion_bad_mod.php on line 7

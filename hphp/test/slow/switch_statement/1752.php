@@ -1,3 +1,7 @@
 <?php
 
- class A {};switch (new A()) { case 'foo': default:}
+class A {
+}
+;
+switch (new A()) {
+ case 'foo': default:}

@@ -1,8 +1,0 @@
-*** Testing stripos() function: with heredoc strings ***
--- With empty heredoc string --
-bool(false)
-HipHop Warning: %a
-bool(false)
-bool(false)
-bool(false)
-*** Done ***

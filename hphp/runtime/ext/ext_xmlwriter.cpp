@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/ext_xmlwriter.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(xmlwriter);
@@ -315,7 +315,7 @@ bool c_XMLWriter::t_openuri(CStrRef uri) {
   if (same(file, false)) {
     return false;
   }
-  m_uri = file.toObject().getTyped<File>();
+  m_uri = file.toResource().getTyped<File>();
 
   m_uri_output = xmlOutputBufferCreateIO(write_file, close_file, this, NULL);
   if (m_uri_output == NULL) {

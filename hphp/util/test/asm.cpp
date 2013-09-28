@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/util/asm-x64.h"
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 #include <vector>
 #include <cstdio>
@@ -24,8 +24,12 @@
 #include <cstring>
 
 #include <boost/regex.hpp>
-#include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
+
+#include "folly/Format.h"
+#include "folly/String.h"
+
+#include "hphp/util/disasm.h"
 
 namespace HPHP { namespace Transl {
 
@@ -33,6 +37,22 @@ typedef X64Assembler Asm;
 using namespace reg;
 
 namespace {
+
+struct TestDataBlock : public DataBlock {
+  explicit TestDataBlock(size_t sz) {
+    Address result = (Address)mmap(0, sz, PROT_READ | PROT_WRITE | PROT_EXEC,
+                                   MAP_ANON | MAP_PRIVATE, -1, 0);
+    always_assert(result != MAP_FAILED);
+    m_base = m_frontier = result;
+    m_size = sz;
+  }
+
+  ~TestDataBlock() {
+    munmap(m_base, m_size);
+    m_base = m_frontier = nullptr;
+    m_size = 0;
+  }
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -46,7 +66,7 @@ const bool testMax = getenv("ASM_TEST_MAX");
 bool match_opcode_line(const std::string& line,
                        std::string& opName,
                        std::string& opArgs) {
-  static boost::regex re { R"([^\t]*\t[^\t]*\t([a-zA-Z]+)\s+(.*))" };
+  static boost::regex re{ R"(([^\s]*)\s+(.*))" };
   boost::smatch cm;
   if (!regex_match(line, cm, re)) return false;
   opName = cm[1];
@@ -55,16 +75,21 @@ bool match_opcode_line(const std::string& line,
 }
 
 void compare(const char* expectedOpName,
-             std::istream& in,
+             const std::vector<std::string>& actuals,
              const std::vector<std::string>& expecteds) {
   auto expectIt = expecteds.begin();
 
-  std::string expect, real;
+  std::string expect;
   std::string opName, opArgs;
-  while (std::getline(in, real)) {
+  for (auto& real : actuals) {
     if (!match_opcode_line(real, opName, opArgs)) continue;
 
-    EXPECT_EQ(expectedOpName, opName);
+    // The xed library will add operand size suffixes on any opcode
+    // that affects memory.  We could figure this out and check for
+    // it, but it's good enough just to see that the opcode has the
+    // prefix we expect.
+    EXPECT_EQ(true, boost::starts_with(opName, expectedOpName))
+      << "expected " << expectedOpName << ", got " << opName;
 
     if (expectIt == expecteds.end()) {
       EXPECT_EQ(1, 0) << "Incorrect number of assembler lines";
@@ -80,39 +105,26 @@ void compare(const char* expectedOpName,
     << "More lines expected than read";
 }
 
-void dump_disasm(Asm& a, std::ifstream& dump) {
-  char filename[32];
-  char outfile[32];
-  std::strcpy(filename, "/tmp/asmtmXXXXXX");
-  std::strcpy(outfile, "/tmp/asmtmXXXXXX");
-  close(mkstemp(filename));
-  close(mkstemp(outfile));
+std::vector<std::string> dump_disasm(Asm& a) {
+  Disasm dis(Disasm::Options()
+               .addresses(false)
+               .forceAttSyntax(true));
+  std::ostringstream sstream;
+  dis.disasm(sstream, a.base(), a.base() + a.used());
 
-  std::FILE* fp = std::fopen(filename, "w");
-  std::fwrite(a.code.base, a.code.frontier - a.code.base, 1, fp);
-  std::fclose(fp);
-
-  system(str(boost::format(
-    "objdump -D -b binary -mi386 -M x86-64 %s > %s")
-      % filename
-      % outfile
-    ).c_str());
-
-  dump.open(outfile);
-  unlink(outfile);
-  if (!dump.is_open()) std::abort();
+  std::vector<std::string> ret;
+  folly::split('\n', sstream.str(), ret);
+  return ret;
 }
 
 void expect_asm(Asm& a, const std::string& str) {
-  std::ifstream dump;
-  dump_disasm(a, dump);
+  auto const dump = dump_disasm(a);
 
   std::ostringstream out;
   out << '\n';
 
-  std::string line;
   std::string opName, opArgs;
-  while (std::getline(dump, line)) {
+  for (auto& line : dump) {
     if (match_opcode_line(line, opName, opArgs)) {
       out << opName << ' ' << opArgs << '\n';
     }
@@ -239,19 +251,16 @@ const char* expected_str(Reg8 r)  { return regname(r); }
 #undef X
 
 void expected_disp_str(intptr_t disp, std::ostream& out) {
-  out << "0x" << std::hex << (uintptr_t)disp;
+  if (disp < 0) {
+    out << "-0x" << std::hex << -disp;
+  } else {
+    out << "0x" << std::hex << disp;
+  }
 }
 
 std::string expected_str(MemoryRef mr) {
   std::ostringstream out;
-  /*
-   * Operations with "rbp-like" registers still are encoded with a
-   * displacement byte, even if the displacement is zero.  This wouldn't
-   * matter, but objdump displays the zero displacements for these
-   * registers (presumably because of this), so we have to add it to our
-   * expected string in that case.
-   */
-  if (mr.r.base == rbp || mr.r.base == r13 || mr.r.disp != 0) {
+  if (mr.r.disp != 0) {
     expected_disp_str(mr.r.disp, out);
   }
   out << '(' << expected_str(mr.r.base) << ')';
@@ -260,8 +269,7 @@ std::string expected_str(MemoryRef mr) {
 
 std::string expected_str(IndexedMemoryRef imr) {
   std::ostringstream out;
-  // See above about the rbp/r13 thing.
-  if (imr.r.base == rbp || imr.r.base == r13 || imr.r.disp != 0) {
+  if (imr.r.disp != 0) {
     expected_disp_str(imr.r.disp, out);
   }
   out << '(' << expected_str(imr.r.base)
@@ -289,10 +297,9 @@ void dotest(const char* opName, Asm& a, void (Asm::*memFn)(Arg)) {
     (a.*memFn)(ar);
   }
 
-  std::ifstream dump;
-  dump_disasm(a, dump);
+  auto const dump = dump_disasm(a);
   compare(opName, dump, expecteds);
-  a.code.frontier = a.code.base;
+  a.clear();
 }
 
 template<class Arg1, class Arg2>
@@ -302,18 +309,16 @@ void dotest(const char* opName, Asm& a, void (Asm::*memFn)(Arg1, Arg2),
 
   for (auto& ar1 : args1) {
     for (auto& ar2 : args2) {
-      expecteds.push_back(str(
-        boost::format("%s,%s") % expected_str(ar1)
-                               % expected_str(ar2)
-      ));
+      expecteds.push_back(
+        folly::format("{}, {}", expected_str(ar1), expected_str(ar2)).str()
+      );
       (a.*memFn)(ar1, ar2);
     }
   }
 
-  std::ifstream dump;
-  dump_disasm(a, dump);
+  auto const dump = dump_disasm(a);
   compare(opName, dump, expecteds);
-  a.code.frontier = a.code.base;
+  a.clear();
 }
 
 template<class Arg1, class Arg2>
@@ -351,16 +356,18 @@ typedef void (Asm::*OpIR32)(Immed, Reg32);
 typedef void (Asm::*OpIR8)(Immed, Reg8);
 typedef void (Asm::*OpIM64)(Immed, MemoryRef);
 typedef void (Asm::*OpIM32)(Immed, MemoryRef);
+typedef void (Asm::*OpIM16)(Immed, MemoryRef);
 typedef void (Asm::*OpISM64)(Immed, IndexedMemoryRef);
 typedef void (Asm::*OpISM32)(Immed, IndexedMemoryRef);
+typedef void (Asm::*OpISM16)(Immed, IndexedMemoryRef);
 
 //////////////////////////////////////////////////////////////////////
 
 }
 
 TEST(Asm, General) {
-  Asm a;
-  a.init(10 << 24);
+  TestDataBlock db(10 << 24);
+  Asm a { db };
 
   /*
    * Test is a little different, so we have this BASIC_OP stuff.
@@ -429,13 +436,13 @@ TEST(Asm, General) {
   dotest("mov", a, OpRSM32(&Asm::storel));
   dotest("mov", a, OpRSM64(&Asm::storeq));
 
-  dotest("movzbl", a, OpMR32(&Asm::loadzbl));
-  dotest("movzbl", a, OpSMR32(&Asm::loadzbl));
-  dotest("movzbl", a, OpR8R32(&Asm::movzbl));
+  dotest("movzx", a, OpMR32(&Asm::loadzbl));
+  dotest("movzx", a, OpSMR32(&Asm::loadzbl));
+  dotest("movzx", a, OpR8R32(&Asm::movzbl));
 
-  dotest("movsbq", a, OpMR64(&Asm::loadsbq));
-  dotest("movsbq", a, OpSMR64(&Asm::loadsbq));
-  dotest("movsbq", a, OpR8R64(&Asm::movsbq));
+  dotest("movsx", a, OpMR64(&Asm::loadsbq));
+  dotest("movsx", a, OpSMR64(&Asm::loadsbq));
+  dotest("movsx", a, OpR8R64(&Asm::movsbq));
 
   FULL_OP(add);
   FULL_OP(xor);
@@ -458,30 +465,115 @@ TEST(Asm, General) {
   doingByteOpcodes = false;
 }
 
+TEST(Asm, WordSizeInstructions) {
+  TestDataBlock db(10 << 24);
+  Asm a { db };
+
+  // single register operations
+  a.    incw   (ax);
+  // single memory operations
+  a.    decw   (*r8);
+  // register-register operations
+  a.    addw   (ax, bx);
+  a.    xorw   (r10w, r11w);
+  a.    movw   (cx, si);
+  // register-memory operations
+  a.    storew (ax, *rbx);
+  a.    testw  (r10w, rsi[0x10]);
+  // memory-register operations
+  a.    subw   (*rcx, ax);
+  a.    orw    (r11[0x100], dx);
+  // immediate-register operations
+  a.    shlw   (0x3, di);
+  a.    andw   (0x5555, r12w);
+  // immediate-memory operations
+  a.    storew (0x1, *r9);
+  a.    storew (0x1, rax[0x100]);
+
+  expect_asm(a, R"(
+inc %ax
+decw (%r8)
+add %ax, %bx
+xor %r10w, %r11w
+mov %cx, %si
+movw %ax, (%rbx)
+testw %r10w, 0x10(%rsi)
+subw (%rcx), %ax
+orw 0x100(%r11), %dx
+shl $0x3, %di
+and $0x5555, %r12w
+movw $0x1, (%r9)
+movw $0x1, 0x100(%rax)
+)");
+}
+
+TEST(Asm, RetImmediate) {
+  TestDataBlock db(10 << 24);
+  Asm a { db };
+
+  a.ret(8);
+  ASSERT_FALSE(a.base()[0] == kOpsizePrefix);
+}
+
+TEST(Asm, IncDecRegs) {
+  TestDataBlock db(10 << 24);
+  Asm a { db };
+
+  // incq, incl, incw
+  a.    incq(rax);
+  a.    incl(eax);
+  a.    incw(ax);
+  a.    incq(r15);
+  a.    incl(r15d);
+  a.    incw(r15w);
+  // decq, decl, decw
+  a.    decq(rax);
+  a.    decl(eax);
+  a.    decw(ax);
+  a.    decq(r15);
+  a.    decl(r15d);
+  a.    decw(r15w);
+
+  expect_asm(a, R"(
+inc %rax
+inc %eax
+inc %ax
+inc %r15
+inc %r15d
+inc %r15w
+dec %rax
+dec %eax
+dec %ax
+dec %r15
+dec %r15d
+dec %r15w
+)");
+}
+
 TEST(Asm, HighByteReg) {
-  Asm a;
-  a.init(10 << 24);
+  TestDataBlock db(10 << 24);
+  Asm a { db };
 
   // Test movzbl with high byte regs, avoiding destination registers
   // that need a rex prefix
   std::vector<Reg8> hiregs = {ah, bh, ch, dh};
   std::vector<Reg32> reg32s = {eax, ecx, esi, ebp};
-  dotest("movzbl", a, OpR8R32(&Asm::movzbl), hiregs, reg32s);
+  dotest("movzx", a, OpR8R32(&Asm::movzbl), hiregs, reg32s);
 
   a.    movb   (al, ah);
   a.    testb  (0x1, ah);
   a.    cmpb   (ch, dh);
 
   expect_asm(a, R"(
-mov %al,%ah
-test $0x1,%ah
-cmp %ch,%dh
+mov %al, %ah
+test $0x1, %ah
+cmp %ch, %dh
 )");
 }
 
 TEST(Asm, RandomJunk) {
-  Asm a;
-  a.init(10 << 24);
+  TestDataBlock db(10 << 24);
+  Asm a { db };
 
   a.    push   (rbp);
   a.    movq   (rsp, rbp);
@@ -495,24 +587,21 @@ TEST(Asm, RandomJunk) {
   a.    pop    (rbp);
   a.    ret    ();
 
-// NB: There is a piece of trailing whitespace after retq that is needed for the
-// test to pass
   expect_asm(a, R"(
-push %rbp
-mov %rsp,%rbp
-sub $0x80,%rsp
-mov $0x0,%eax
+pushq %rbp
+mov %rsp, %rbp
+sub $0x80, %rsp
+mov $0x0, %eax
 inc %rax
-mov %rax,0x8(%rsp)
-mov 0x8(%rsp),%rdi
-pop %rbp
-retq 
-)");
+movq %rax, 0x8(%rsp)
+movq 0x8(%rsp), %rdi
+popq %rbp
+retq )" "\n"); // string concat to avoid space at end of line after retq
 }
 
 TEST(Asm, AluBytes) {
-  Asm a;
-  a.init(10 << 24);
+  TestDataBlock db(10 << 24);
+  Asm a { db };
 
 #define INSTRS \
  FROB(cmp)     \
@@ -534,13 +623,13 @@ TEST(Asm, AluBytes) {
 
 #undef FROB
 
-#define FROB(name) \
-#name " %sil,%al\n"          \
-#name " $0xf,%al\n"          \
-#name " %sil,0x10(%rcx)\n"   \
-#name " 0x10(%rsp),%sil\n"   \
-#name " (%rcx,%rsi,8),%al\n" \
-#name " %al,(%rcx,%rsi,8)\n"
+#define FROB(name)                              \
+#name " %sil, %al\n"                            \
+#name " $0xf, %al\n"                            \
+#name "b %sil, 0x10(%rcx)\n"                    \
+#name "b 0x10(%rsp), %sil\n"                    \
+#name "b (%rcx,%rsi,8), %al\n"                  \
+#name "b %al, (%rcx,%rsi,8)\n"
 
   expect_asm(a, "\n" INSTRS "");
 
@@ -548,47 +637,51 @@ TEST(Asm, AluBytes) {
 #undef INSTRS
 
   // test is asymmetric.
-  a.code.frontier = a.code.base;
+  a.clear();
   a.   testb(sil, al);
   a.   testb(0xf, al);
   a.   testb(sil, rcx[0x10]);
   a.   testb(sil, rcx[rsi * 8]);
 
   expect_asm(a, R"(
-test %sil,%al
-test $0xf,%al
-test %sil,0x10(%rcx)
-test %sil,(%rcx,%rsi,8)
+test %sil, %al
+test $0xf, %al
+testb %sil, 0x10(%rcx)
+testb %sil, (%rcx,%rsi,8)
 )");
 }
 
 TEST(Asm, CMov) {
-  Asm a;
-  a.init(10 << 24);
+  TestDataBlock db(10 << 24);
+  Asm a { db };
   a.   test_reg64_reg64(rax, rax);
   a.   cload_reg64_disp_reg64(CC_Z, rax, 0, rax);
   a.   cload_reg64_disp_reg32(CC_Z, rax, 0, rax);
   expect_asm(a, R"(
-test %rax,%rax
-cmove (%rax),%rax
-cmove (%rax),%eax
+test %rax, %rax
+cmovzq (%rax), %rax
+cmovzl (%rax), %eax
 )");
 }
 
 TEST(Asm, SimpleLabelTest) {
-  Asm a;
-  a.init(10 << 24);
+  TestDataBlock db(10 << 24);
+  Asm a { db };
 
   Label loop;
 
   auto loopCallee = [] (int* counter) { ++*counter; };
 
   // Function that calls loopCallee N times.
-  auto function = reinterpret_cast<int (*)(int, int*)>(a.code.frontier);
+  auto function = reinterpret_cast<int (*)(int, int*)>(a.frontier());
   a.    push   (rbp);
   a.    movq   (rsp, rbp);
+  a.    push   (r15);
+  a.    push   (r12);
+  a.    push   (r10);
+  a.    push   (rbx);
 
-  a.    movl   (edi, r11d);
+  a.    movl   (edi, r12d);
   a.    movq   (rsi, r15);
   a.    movl   (0, ebx);
 
@@ -596,9 +689,13 @@ asm_label(a, loop);
   a.    movq   (r15, rdi);
   a.    call   (CodeAddress(static_cast<void (*)(int*)>(loopCallee)));
   a.    incl   (ebx);
-  a.    cmpl   (ebx, r11d);
+  a.    cmpl   (ebx, r12d);
   a.    jne    (loop);
 
+  a.    pop    (rbx);
+  a.    pop    (r10);
+  a.    pop    (r12);
+  a.    pop    (r15);
   a.    pop    (rbp);
   a.    ret    ();
 
@@ -610,6 +707,96 @@ asm_label(a, loop);
   for (int i = 1; i < 15; ++i) test_case(i);
   test_case(51);
   test_case(127);
+}
+
+TEST(Asm, ShiftingWithCl) {
+  TestDataBlock db(10 << 24);
+  Asm a { db };
+
+  a.    shlq(rax);
+  a.    shlq(rdx);
+  a.    shlq(r8);
+  a.    sarq(rbx);
+  a.    sarq(rsi);
+  a.    sarq(r8);
+  expect_asm(a, R"(
+shl %cl, %rax
+shl %cl, %rdx
+shl %cl, %r8
+sar %cl, %rbx
+sar %cl, %rsi
+sar %cl, %r8
+)");
+}
+
+TEST(Asm, FloatRounding) {
+  if (folly::CpuId().sse41()) {
+    TestDataBlock db(10 << 24);
+    Asm a { db };
+
+    a.    roundsd(RoundDirection::nearest,  xmm1, xmm2);
+    a.    roundsd(RoundDirection::floor,    xmm2, xmm4);
+    a.    roundsd(RoundDirection::ceil,     xmm8, xmm7);
+    a.    roundsd(RoundDirection::truncate, xmm12, xmm9);
+
+    expect_asm(a, R"(
+roundsd $0x0, %xmm1, %xmm2
+roundsd $0x1, %xmm2, %xmm4
+roundsd $0x2, %xmm8, %xmm7
+roundsd $0x3, %xmm12, %xmm9
+)");
+  }
+}
+
+TEST(Asm, SSEDivision) {
+  TestDataBlock db(10 << 24);
+  Asm a { db };
+  a.    divsd(xmm0, xmm1);
+  a.    divsd(xmm1, xmm2);
+  a.    divsd(xmm2, xmm0);
+  a.    divsd(xmm15, xmm0);
+  a.    divsd(xmm12, xmm8);
+  expect_asm(a, R"(
+divsd %xmm0, %xmm1
+divsd %xmm1, %xmm2
+divsd %xmm2, %xmm0
+divsd %xmm15, %xmm0
+divsd %xmm12, %xmm8
+)");
+}
+
+TEST(Asm, SSESqrt) {
+  TestDataBlock db(10 << 24);
+  Asm a { db };
+  a.    sqrtsd(xmm0, xmm1);
+  a.    sqrtsd(xmm1, xmm2);
+  a.    sqrtsd(xmm2, xmm0);
+  a.    sqrtsd(xmm15, xmm0);
+  a.    sqrtsd(xmm12, xmm8);
+  expect_asm(a, R"(
+sqrtsd %xmm0, %xmm1
+sqrtsd %xmm1, %xmm2
+sqrtsd %xmm2, %xmm0
+sqrtsd %xmm15, %xmm0
+sqrtsd %xmm12, %xmm8
+)");
+}
+
+TEST(Asm, DoubleToIntConv) {
+  TestDataBlock db(10 << 24);
+  Asm a { db };
+  a.    cvttsd2siq(xmm0, rax);
+  a.    cvttsd2siq(xmm1, rbx);
+  a.    cvttsd2siq(xmm2, rcx);
+  a.    cvttsd2siq(xmm15, rdx);
+  a.    cvttsd2siq(xmm12, r12);
+  expect_asm(a, R"(
+cvttsd2si %xmm0, %rax
+cvttsd2si %xmm1, %rbx
+cvttsd2si %xmm2, %rcx
+cvttsd2si %xmm15, %rdx
+cvttsd2si %xmm12, %r12
+)");
 }
 
 }}

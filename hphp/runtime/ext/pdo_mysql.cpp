@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/pdo_mysql.h"
 #include "hphp/runtime/ext/ext_stream.h"
-#include "mysql/mysql.h"
+#include "mysql.h"
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
 #ifdef MYSQL_UNIX_ADDR
@@ -76,7 +76,6 @@ private:
   unsigned       m_buffered:1;
   unsigned       m_emulate_prepare:1;
   unsigned       m_fetch_table_names:1;
-  unsigned       m__reserved:31;
   unsigned long  m_max_buffer_size;
   PDOMySqlError  m_einfo;
 };
@@ -226,7 +225,7 @@ static String pdo_attr_strval(CArrRef options, int opt, const char *def) {
 
 PDOMySqlConnection::PDOMySqlConnection()
     : m_server(NULL), m_attached(0), m_buffered(0), m_emulate_prepare(0),
-      m_fetch_table_names(0), m__reserved(0), m_max_buffer_size(0) {
+      m_fetch_table_names(0), m_max_buffer_size(0) {
 }
 
 PDOMySqlConnection::~PDOMySqlConnection() {
@@ -475,7 +474,7 @@ bool PDOMySqlConnection::preparer(CStrRef sql, sp_PDOStatement *stmt,
     return true;
   }
 
-  if (s->create(sql, options)) {
+  if (s->create(sql, options.toArray())) {
     alloc_own_columns = 1;
     return true;
   }
@@ -513,7 +512,7 @@ int64_t PDOMySqlConnection::doer(CStrRef sql) {
 bool PDOMySqlConnection::quoter(CStrRef input, String &quoted,
                                 PDOParamType paramtype) {
   String s(2 * input.size() + 3, ReserveString);
-  char *buf = s.mutableSlice().ptr;
+  char *buf = s.bufferSlice().ptr;
   int len = mysql_real_escape_string(m_server, buf + 1,
                                      input.data(), input.size());
   len++;
@@ -899,9 +898,8 @@ bool PDOMySqlStatement::support(SupportedMethod method) {
 }
 
 int PDOMySqlStatement::handleError(const char *file, int line) {
-  PDOMySqlConnection *conn = dynamic_cast<PDOMySqlConnection*>(dbh.get());
-  assert(conn);
-  return conn->handleError(file, line, this);
+  assert(m_conn);
+  return m_conn->handleError(file, line, this);
 }
 
 bool PDOMySqlStatement::executer() {
@@ -939,9 +937,6 @@ bool PDOMySqlStatement::executer() {
     column_count = (int) mysql_num_fields(m_result);
     m_fields = mysql_fetch_fields(m_result);
 
-  } else {
-    /* this was a DML or DDL query (INSERT, UPDATE, DELETE, ... */
-    row_count = row_count;
   }
 
   return true;
@@ -991,17 +986,17 @@ bool PDOMySqlStatement::describer(int colno) {
 
   if (columns.empty()) {
     for (int i = 0; i < column_count; i++) {
-      columns.set(i, Object(new PDOColumn()));
+      columns.set(i, Resource(new PDOColumn()));
     }
   }
 
   // fetch all on demand, this seems easiest if we've been here before bail out
-  PDOColumn *col = columns[0].toObject().getTyped<PDOColumn>();
+  PDOColumn *col = columns[0].toResource().getTyped<PDOColumn>();
   if (!col->name.empty()) {
     return true;
   }
   for (int i = 0; i < column_count; i++) {
-    col = columns[i].toObject().getTyped<PDOColumn>();
+    col = columns[i].toResource().getTyped<PDOColumn>();
 
     if (m_conn->fetch_table_names()) {
       col->name = String(m_fields[i].table) + "." +
@@ -1100,11 +1095,11 @@ bool PDOMySqlStatement::paramHook(PDOBoundParam *param,
         return false;
       case PDO_PARAM_LOB:
         if (param->parameter.isResource()) {
-          Variant buf = f_stream_get_contents(param->parameter);
+          Variant buf = f_stream_get_contents(param->parameter.toResource());
           if (!same(buf, false)) {
             param->parameter = buf;
           } else {
-            pdo_raise_impl_error(dbh, this, "HY105",
+            pdo_raise_impl_error(m_conn, this, "HY105",
                                  "Expected a stream resource");
             return false;
           }
@@ -1147,17 +1142,18 @@ bool PDOMySqlStatement::paramHook(PDOBoundParam *param,
   return true;
 }
 
-static const StaticString s_mysql_def("mysql:def");
-static const StaticString s_not_null("not_null");
-static const StaticString s_primary_key("primary_key");
-static const StaticString s_multiple_key("multiple_key");
-static const StaticString s_unique_key("unique_key");
-static const StaticString s_blob("blob");
-static const StaticString s_native_type("native_type");
-static const StaticString s_flags("flags");
-static const StaticString s_table("table");
+const StaticString
+  s_mysql_def("mysql:def"),
+  s_not_null("not_null"),
+  s_primary_key("primary_key"),
+  s_multiple_key("multiple_key"),
+  s_unique_key("unique_key"),
+  s_blob("blob"),
+  s_native_type("native_type"),
+  s_flags("flags"),
+  s_table("table");
 
-bool PDOMySqlStatement::getColumnMeta(int64_t colno, Array &return_value) {
+bool PDOMySqlStatement::getColumnMeta(int64_t colno, Array &ret) {
   if (!m_result) {
     return false;
   }
@@ -1166,7 +1162,6 @@ bool PDOMySqlStatement::getColumnMeta(int64_t colno, Array &return_value) {
     return false;
   }
 
-  Array ret = Array::Create();
   Array flags = Array::Create();
 
   const MYSQL_FIELD *F = m_fields + colno;
@@ -1234,7 +1229,6 @@ bool PDOMySqlStatement::nextRowset() {
     return false;
   }
 
-  row_count = row_count;
   column_count = (int)mysql_num_fields(m_result);
   m_fields = mysql_fetch_fields(m_result);
   return true;

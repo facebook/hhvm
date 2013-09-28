@@ -1,0 +1,6 @@
+*** Testing get_parent_class() : error conditions ***
+
+-- Testing get_parent_class() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

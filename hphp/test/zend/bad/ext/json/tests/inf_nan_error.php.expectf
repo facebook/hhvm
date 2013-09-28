@@ -1,0 +1,15 @@
+float(INF)
+bool(false)
+int(7)
+string(34) "Inf and NaN cannot be JSON encoded"
+string(1) "0"
+int(7)
+string(34) "Inf and NaN cannot be JSON encoded"
+
+float(NAN)
+bool(false)
+int(7)
+string(34) "Inf and NaN cannot be JSON encoded"
+string(1) "0"
+int(7)
+string(34) "Inf and NaN cannot be JSON encoded"

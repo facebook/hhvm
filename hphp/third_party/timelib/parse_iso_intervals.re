@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id: parse_iso_intervals.re,v 1.3 2009-05-03 16:19:18 derick Exp $ */
+/* $Id$ */
 
 #include "timelib.h"
 
@@ -364,7 +364,7 @@ isoweek          = year4 "-"? "W" weekofyear;
 				break;
 			}
 
-			nr = timelib_get_unsigned_nr((char **) &ptr, 9);
+			nr = timelib_get_unsigned_nr((char **) &ptr, 12);
 			switch (*ptr) {
 				case 'Y': s->period->y = nr; break;
 				case 'W': s->period->d = nr * 7; break;

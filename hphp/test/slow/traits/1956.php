@@ -1,6 +1,5 @@
 <?php
 
-
 trait English {
   public function say() {
     echo "Banana\n";

@@ -1,0 +1,20 @@
+HipHop Warning: %s
+---> Invoke __call via simple method call.
+NULL
+Exception caught OK; continuing.
+
+
+---> Invoke __call via scope resolution operator within instance.
+NULL
+Exception caught OK; continuing.
+
+
+---> Invoke __call via scope resolution operator within child instance.
+NULL
+Exception caught OK; continuing.
+
+
+---> Invoke __call via callback.
+NULL
+Exception caught OK; continuing.
+==DONE==

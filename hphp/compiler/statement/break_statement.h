@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,17 +26,16 @@ DECLARE_BOOST_TYPES(BreakStatement);
 
 class BreakStatement : public Statement {
 protected:
-  BreakStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS, ExpressionPtr exp);
+  BreakStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS, uint64_t depth);
 public:
-  BreakStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp);
+  BreakStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, uint64_t depth);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   StatementPtr preOptimize(AnalysisResultConstPtr ar);
-  int64_t getDepth();
-  ExpressionPtr getExp();
+  uint64_t getDepth();
 protected:
   const char *m_name;
-  ExpressionPtr m_exp;
+  uint64_t m_depth;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

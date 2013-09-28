@@ -1,0 +1,12 @@
+*** Testing array_reverse() : error conditions ***
+
+-- Testing array_reverse() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing array_diff() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+Done

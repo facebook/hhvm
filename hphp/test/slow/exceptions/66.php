@@ -1,6 +1,5 @@
 <?php
 
-
 class C {
   function g() {
     $ex = new Exception();

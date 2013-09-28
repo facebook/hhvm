@@ -1,0 +1,10 @@
+*** Testing date_sunrise() : error conditions ***
+
+-- Testing date_sunrise() function with Zero arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing date_sunrise() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+===DONE===

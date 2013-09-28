@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,7 @@
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/runtime/base/array/array_init.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/compiler/parser/parser.h"
 
 using namespace HPHP;
@@ -210,7 +210,7 @@ bool ExpressionList::getScalarValue(Variant &value) {
           Variant v;
           bool ret1 = name->getScalarValue(n);
           bool ret2 = val->getScalarValue(v);
-          if (!(ret1 && ret2)) return ExpressionPtr();
+          if (!(ret1 && ret2)) return false;
           init.set(n, v);
         }
       }
@@ -231,14 +231,14 @@ void ExpressionList::stripConcat() {
   for (int i = 0; i < el.getCount(); ) {
     ExpressionPtr &e = el[i];
     if (e->is(Expression::KindOfUnaryOpExpression)) {
-      UnaryOpExpressionPtr u(boost::static_pointer_cast<UnaryOpExpression>(e));
+      UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(e));
       if (u->getOp() == '(') {
         e = u->getExpression();
       }
     }
     if (e->is(Expression::KindOfBinaryOpExpression)) {
       BinaryOpExpressionPtr b
-        (boost::static_pointer_cast<BinaryOpExpression>(e));
+        (static_pointer_cast<BinaryOpExpression>(e));
       if (b->getOp() == '.') {
         e = b->getExp1();
         el.insertElement(b->getExp2(), i + 1);
@@ -335,7 +335,7 @@ void ExpressionList::setNthKid(int n, ConstructPtr cp) {
   if (n >= m) {
     assert(false);
   } else {
-    m_exps[n] = boost::dynamic_pointer_cast<Expression>(cp);
+    m_exps[n] = dynamic_pointer_cast<Expression>(cp);
   }
 }
 

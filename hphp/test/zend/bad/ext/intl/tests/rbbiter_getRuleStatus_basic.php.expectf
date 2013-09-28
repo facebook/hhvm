@@ -1,0 +1,11 @@
+pos        : 0
+rule status: 0
+pos        : 12
+rule status: 1
+pos        : 16
+rule status: 42
+pos        : 17
+rule status: 0
+pos        : 19
+rule status: 42
+==DONE==

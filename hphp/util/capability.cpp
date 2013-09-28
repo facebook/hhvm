@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,7 +18,8 @@
 
 #include "hphp/util/capability.h"
 #include "hphp/util/logger.h"
-#include "linux/types.h"
+#include "folly/String.h"
+#include <linux/types.h>
 #include <sys/capability.h>
 #include <sys/prctl.h>
 #include <sys/types.h>
@@ -96,17 +97,20 @@ bool Capability::ChangeUnixUser(uid_t uid) {
     struct passwd *pw;
 
     if ((pw = getpwuid(uid)) == nullptr) {
-      Logger::Error("unable to getpwuid(%d): %s", uid, strerror(errno));
+      Logger::Error("unable to getpwuid(%d): %s", uid,
+                    folly::errnoStr(errno).c_str());
       return false;
     }
 
     if (pw->pw_gid == 0 || setgid(pw->pw_gid) < 0) {
-      Logger::Error("unable to drop gid privs: %s", strerror(errno));
+      Logger::Error("unable to drop gid privs: %s",
+                    folly::errnoStr(errno).c_str());
       return false;
     }
 
     if (uid == 0 || setuid(uid) < 0) {
-      Logger::Error("unable to drop uid privs: %s", strerror(errno));
+      Logger::Error("unable to drop uid privs: %s",
+                    folly::errnoStr(errno).c_str());
       return false;
     }
 
@@ -131,7 +135,8 @@ bool Capability::ChangeUnixUser(const std::string &username) {
 
 bool Capability::SetDumpable() {
   if (prctl(PR_SET_DUMPABLE, 1, 0, 0, 0)) {
-    Logger::Error("Unable to make process dumpable: %s", strerror(errno));
+    Logger::Error("Unable to make process dumpable: %s",
+                  folly::errnoStr(errno).c_str());
   }
 
   return true;

@@ -1,6 +1,5 @@
 <?php
 
-
 class B {
   function __call($name, $arguments) {
     echo "Calling B object method '$name' " . implode(', ', $arguments). "

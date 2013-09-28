@@ -1,6 +1,6 @@
 <?php
 
- class MySoap extends SoapClient {
+class MySoap extends SoapClient {
    public $pub = 1;
    public function __doRequest($request, $location, $action, $version, $one_way=0) {
      $rp = parent::__doRequest($request, $location, $action, $version, $one_way);

@@ -1,0 +1,10 @@
+*** Testing xml_parser_get_option() : error conditions ***
+
+-- Testing xml_parser_get_option() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing xml_parser_get_option() function with less than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

@@ -1,0 +1,24 @@
+*** Testing imap_close() : usage variations ***
+Create a temporary mailbox and add 3 msgs
+.. mailbox '{%s}%s' created
+
+-- Iteration 1 --
+bool(true)
+CL_EXPUNGE was not set, 3 msgs in mailbox
+
+-- Iteration 2 --
+bool(true)
+CL_EXPUNGE was set
+
+-- Iteration 3 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 4 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 5 --
+HipHop Warning: %s
+bool(false)
+===DONE===

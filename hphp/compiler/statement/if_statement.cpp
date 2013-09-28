@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,7 +20,7 @@
 #include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/compiler/statement/block_statement.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 
 using namespace HPHP;
 
@@ -79,7 +79,7 @@ int IfStatement::getKidCount() const {
 void IfStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_stmts = boost::dynamic_pointer_cast<StatementList>(cp);
+      m_stmts = dynamic_pointer_cast<StatementList>(cp);
       break;
     default:
       assert(false);

@@ -1,0 +1,20 @@
+array(6) {
+  ["product_id"]=>
+  string(17) "libgd%3Cscript%3E"
+  ["component"]=>
+  array(1) {
+    [0]=>
+    string(17) "10dhsajkkdhk <do>"
+  }
+  ["versions"]=>
+  string(6) "2.0.33"
+  ["doesnotexist"]=>
+  NULL
+  ["testscalar"]=>
+  bool(false)
+  ["testarray"]=>
+  array(1) {
+    [0]=>
+    int(2)
+  }
+}

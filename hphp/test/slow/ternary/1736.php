@@ -1,6 +1,5 @@
 <?php
 
-
 class X {
   public $exp_info;
   public function __construct(array $exp_info = null) {

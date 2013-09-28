@@ -1,9 +1,18 @@
 <?php
 
-
-trait T1 { function F() {} }
-trait T2 { function F() {} }
-trait T3 { use T2 { F as G; } }
+trait T1 {
+ function F() {
+}
+ }
+trait T2 {
+ function F() {
+}
+ }
+trait T3 {
+ use T2 {
+ F as G;
+ }
+ }
 class C1 {
   use T1, T2 {
     T1::F insteadof T2;

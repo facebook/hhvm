@@ -1,0 +1,7 @@
+string(22) "T_PAAMAYIM_NEKUDOTAYIM"
+Undefined but name unexpectedly returned by token_name:
+array(0) {
+}
+token_name result disagrees with constant value:
+array(0) {
+}

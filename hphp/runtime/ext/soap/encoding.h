@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -19,7 +19,7 @@
 #define PHP_ENCODING_H
 
 #include "hphp/runtime/ext/soap/xml.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // defines
@@ -201,7 +201,7 @@ typedef encodeType* encodeTypePtr;
 
 DECLARE_BOOST_TYPES(encode);
 typedef StringToencodePtrMap encodeMap;
-typedef boost::shared_ptr<encodeMap> encodeMapPtr;
+typedef std::shared_ptr<encodeMap> encodeMapPtr;
 struct encode {
   encodeType details;
   Variant (*to_zval)(encodeTypePtr type, xmlNodePtr data);

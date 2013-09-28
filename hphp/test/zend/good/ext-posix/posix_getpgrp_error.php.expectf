@@ -1,6 +1,0 @@
-*** Testing posix_getpgrp() : error conditions ***
-
--- Testing posix_getpgrp() function with one argument --
-HipHop Warning: %a
-NULL
-Done

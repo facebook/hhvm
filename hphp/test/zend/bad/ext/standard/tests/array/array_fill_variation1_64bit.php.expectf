@@ -1,0 +1,127 @@
+*** Testing array_fill() : usage variations ***
+--- Testing array_fill() with different values for 'start_key' arg ---
+-- Iteration 1 --
+array(2) {
+  [10]=>
+  int(100)
+  [11]=>
+  int(100)
+}
+-- Iteration 2 --
+array(2) {
+  [-10]=>
+  int(100)
+  [0]=>
+  int(100)
+}
+-- Iteration 3 --
+array(2) {
+  [123456789000]=>
+  int(100)
+  [123456789001]=>
+  int(100)
+}
+-- Iteration 4 --
+array(2) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(100)
+}
+-- Iteration 5 --
+array(2) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(100)
+}
+-- Iteration 6 --
+HipHop Warning: %s
+NULL
+-- Iteration 7 --
+HipHop Warning: %s
+NULL
+-- Iteration 8 --
+HipHop Warning: %s
+NULL
+-- Iteration 9 --
+HipHop Warning: %s
+NULL
+-- Iteration 10 --
+HipHop Warning: %s
+NULL
+-- Iteration 11 --
+array(2) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(100)
+}
+-- Iteration 12 --
+array(2) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(100)
+}
+-- Iteration 13 --
+array(2) {
+  [1]=>
+  int(100)
+  [2]=>
+  int(100)
+}
+-- Iteration 14 --
+array(2) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(100)
+}
+-- Iteration 15 --
+array(2) {
+  [1]=>
+  int(100)
+  [2]=>
+  int(100)
+}
+-- Iteration 16 --
+array(2) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(100)
+}
+-- Iteration 17 --
+HipHop Warning: %s
+NULL
+-- Iteration 18 --
+HipHop Warning: %s
+NULL
+-- Iteration 19 --
+HipHop Warning: %s
+NULL
+-- Iteration 20 --
+HipHop Warning: %s
+NULL
+-- Iteration 21 --
+HipHop Warning: %s
+NULL
+-- Iteration 22 --
+array(2) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(100)
+}
+-- Iteration 23 --
+array(2) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(100)
+}
+-- Iteration 24 --
+HipHop Warning: %s
+NULL
+Done

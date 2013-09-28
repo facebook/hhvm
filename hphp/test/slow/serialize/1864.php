@@ -1,6 +1,5 @@
 <?php
 
-
 function f() {
   $a = array(123);
   $b = $a;

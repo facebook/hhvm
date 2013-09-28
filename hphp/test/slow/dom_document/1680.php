@@ -1,6 +1,5 @@
 <?php
 
-
 function foo() {
   $html = '<b>Hello</b><i>World</i>';
   $doc = new DOMDocument();

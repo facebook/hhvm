@@ -1,21 +1,16 @@
 set(CXX_SOURCES)
 
-set(RECURSIVE_SOURCE_SUBDIRS vm)
+set(RECURSIVE_SOURCE_SUBDIRS ext)
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
 	auto_sources(files "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
 	list(APPEND CXX_SOURCES ${files})
 endforeach(dir ${RECURSIVE_SOURCE_SUBDIRS})
 
-auto_sources(files "*.cpp" "")
 list(APPEND CXX_SOURCES ${files})
-list(REMOVE_ITEM CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/genCmpTest.cpp")
-list(APPEND CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../hhvm/process_init.cpp")
-list(APPEND CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../hhvm/global_variables.cpp")
-
-add_definitions(-DHPHPI_PATH="hphpi/hphpi")
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_base_suite.inc ${CMAKE_CURRENT_SOURCE_DIR}/test_suite.inc COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/dummy_mysql_info.inc ${CMAKE_CURRENT_SOURCE_DIR}/test_mysql_info.inc COPYONLY)
+list(APPEND CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../hhvm/process-init.cpp")
+list(APPEND CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../hhvm/global-variables.cpp")
 
 add_executable(test ${CXX_SOURCES})
-target_link_libraries(test hphp_analysis hphp_runtime_static ext_hhvm_static)
+target_link_libraries(test ${HHVM_LINK_LIBRARIES})
+embed_systemlib(test "${CMAKE_CURRENT_SOURCE_DIR}/test" ${HPHP_HOME}/bin/systemlib.php)
+add_dependencies(test systemlib)

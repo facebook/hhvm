@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -19,24 +19,27 @@
 #include "hphp/runtime/ext/ext_options.h"
 #include "hphp/runtime/ext/ext_hash.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/zend/zend_math.h"
-#include "hphp/runtime/base/util/string_buffer.h"
-#include "hphp/runtime/base/util/request_local.h"
-#include "hphp/runtime/base/ini_setting.h"
-#include "hphp/runtime/base/time/datetime.h"
-#include "hphp/runtime/base/variable_unserializer.h"
-#include "hphp/runtime/base/array/array_iterator.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/zend-math.h"
+#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/datetime.h"
+#include "hphp/runtime/base/variable-unserializer.h"
+#include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/compatibility.h"
+#include "folly/String.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <dirent.h>
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(session);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool ini_on_update_save_handler(CStrRef value, void *p);
@@ -47,7 +50,6 @@ bool ini_on_update_save_dir(CStrRef value, void *p);
 ///////////////////////////////////////////////////////////////////////////////
 // global data
 
-class SessionModule;
 class SessionSerializer;
 class Session {
 public:
@@ -70,6 +72,7 @@ public:
   bool        m_cookie_httponly;
 
   SessionModule *m_mod;
+  SessionModule *m_default_mod;
 
   Status m_session_status;
   int64_t  m_gc_probability;
@@ -78,12 +81,7 @@ public:
   int    m_module_number;
   int64_t  m_cache_expire;
 
-  std::string m_ps_open;
-  std::string m_ps_close;
-  std::string m_ps_read;
-  std::string m_ps_write;
-  std::string m_ps_destroy;
-  std::string m_ps_gc;
+  ObjectData *m_ps_session_handler;
 
   SessionSerializer *m_serializer;
 
@@ -103,15 +101,20 @@ public:
 
   Session()
     : m_entropy_length(0), m_cookie_lifetime(0), m_cookie_secure(false),
-      m_cookie_httponly(false), m_mod(NULL), m_session_status(None),
-      m_gc_probability(0), m_gc_divisor(0), m_gc_maxlifetime(0),
-      m_module_number(0), m_cache_expire(0), m_serializer(NULL),
-      m_auto_start(false), m_use_cookies(false), m_use_only_cookies(false),
-      m_use_trans_sid(false), m_apply_trans_sid(false),
-      m_hash_bits_per_character(0), m_send_cookie(0), m_define_sid(0),
-      m_invalid_session_id(false) {
+      m_cookie_httponly(false), m_mod(nullptr), m_default_mod(nullptr),
+      m_session_status(None), m_gc_probability(0), m_gc_divisor(0),
+      m_gc_maxlifetime(0), m_module_number(0), m_cache_expire(0),
+      m_ps_session_handler(nullptr),
+      m_serializer(nullptr), m_auto_start(false), m_use_cookies(false),
+      m_use_only_cookies(false), m_use_trans_sid(false),
+      m_apply_trans_sid(false), m_hash_bits_per_character(0), m_send_cookie(0),
+      m_define_sid(0), m_invalid_session_id(false) {
   }
 };
+
+const int64_t k_PHP_SESSION_DISABLED = Session::Disabled;
+const int64_t k_PHP_SESSION_NONE     = Session::None;
+const int64_t k_PHP_SESSION_ACTIVE   = Session::Active;
 
 class SessionRequestData : public RequestEventHandler, public Session {
 public:
@@ -124,13 +127,16 @@ public:
     }
     m_id.reset();
     m_session_status = Session::None;
+    m_ps_session_handler = nullptr;
+  }
+
+  virtual void requestShutdown() {
+    // We don't actually want to do our requestShutdownImpl here---it
+    // is run explicitly from the execution context, because it could
+    // run user code.
   }
 
   void requestShutdownImpl();
-  virtual void requestShutdown() {
-    f_session_write_close();
-    requestShutdownImpl();
-  }
 
 public:
   bool m_threadInited;
@@ -188,58 +194,25 @@ public:
 IMPLEMENT_STATIC_REQUEST_LOCAL(SessionRequestData, s_session);
 #define PS(name) s_session->m_ ## name
 
-///////////////////////////////////////////////////////////////////////////////
-// SessionModule
-
-class SessionModule {
-public:
-  enum {
-    md5,
-    sha1,
-  };
-
-public:
-  SessionModule(const char *name) : m_name(name) {
-    RegisteredModules.push_back(this);
-  }
-  virtual ~SessionModule() {}
-
-  const char *getName() const { return m_name;}
-
-  virtual bool open(const char *save_path, const char *session_name) = 0;
-  virtual bool close() = 0;
-  virtual bool read(const char *key, String &value) = 0;
-  virtual bool write(const char *key, CStrRef value) = 0;
-  virtual bool destroy(const char *key) = 0;
-  virtual bool gc(int maxlifetime, int *nrdels) = 0;
-  virtual String create_sid();
-
-public:
-  static SessionModule *Find(const char *name) {
-    for (unsigned int i = 0; i < RegisteredModules.size(); i++) {
-      SessionModule *mod = RegisteredModules[i];
-      if (mod && strcasecmp(name, mod->m_name) == 0) {
-        return mod;
-      }
-    }
-    return NULL;
-  }
-
-private:
-  static std::vector<SessionModule*> RegisteredModules;
-
-  const char *m_name;
-};
-std::vector<SessionModule*> SessionModule::RegisteredModules;
-
 void SessionRequestData::requestShutdownImpl() {
   if (m_mod) {
     try {
       m_mod->close();
     } catch (...) {}
   }
+  if (ObjectData* obj = m_ps_session_handler) {
+    m_ps_session_handler = nullptr;
+    decRefObj(obj);
+  }
   m_id.reset();
 }
+
+void ext_session_request_shutdown() {
+  f_session_write_close();
+  s_session->requestShutdownImpl();
+}
+
+std::vector<SessionModule*> SessionModule::RegisteredModules;
 
 /*
  * Note that we cannot use the BASE64 alphabet here, because
@@ -277,11 +250,17 @@ static void bin_to_readable(CStrRef in, StringBuffer &out, char nbits) {
   }
 }
 
-static const StaticString s_REMOTE_ADDR("REMOTE_ADDR");
+const StaticString
+  s_REMOTE_ADDR("REMOTE_ADDR"),
+  s__SERVER("_SERVER"),
+  s__SESSION("_SESSION"),
+  s__COOKIE("_COOKIE"),
+  s__GET("_GET"),
+  s__POST("_POST");
 
 String SessionModule::create_sid() {
-  SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  String remote_addr = g->GV(_SERVER)[s_REMOTE_ADDR].toString();
+  GlobalVariables *g = get_global_variables();
+  String remote_addr = g->get(s__SERVER)[s_REMOTE_ADDR].toString();
 
   struct timeval tv;
   gettimeofday(&tv, NULL);
@@ -297,12 +276,12 @@ String SessionModule::create_sid() {
     }
   }
 
-  Variant context = f_hash_init(PS(hash_func));
+  Variant context = HHVM_FN(hash_init)(PS(hash_func));
   if (same(context, false)) {
     Logger::Error("Invalid session hash function: %s", PS(hash_func).c_str());
     return String();
   }
-  if (!f_hash_update(context, buf.detach())) {
+  if (!HHVM_FN(hash_update)(context.toResource(), buf.detach())) {
     Logger::Error("hash_update() failed");
     return String();
   }
@@ -317,8 +296,8 @@ String SessionModule::create_sid() {
         n = ::read(fd, rbuf, (to_read < (int)sizeof(rbuf) ?
                               to_read : (int)sizeof(buf)));
         if (n <= 0) break;
-        if (!f_hash_update(context,
-                           String((const char *)rbuf, n, AttachLiteral))) {
+        if (!HHVM_FN(hash_update)(context.toResource(),
+                           String((const char *)rbuf, n, CopyString))) {
           Logger::Error("hash_update() failed");
           ::close(fd);
           return String();
@@ -329,7 +308,7 @@ String SessionModule::create_sid() {
     }
   }
 
-  String hashed = f_hash_final(context);
+  String hashed = HHVM_FN(hash_final)(context.toResource());
 
   if (PS(hash_bits_per_character) < 4 || PS(hash_bits_per_character) > 6) {
     PS(hash_bits_per_character) = 4;
@@ -343,6 +322,223 @@ String SessionModule::create_sid() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// SystemlibSessionModule
+
+static StaticString s_SessionHandlerInterface("SessionHandlerInterface");
+
+static StaticString s_open("open");
+static StaticString s_close("close");
+static StaticString s_read("read");
+static StaticString s_write("write");
+static StaticString s_gc("gc");
+static StaticString s_destroy("destroy");
+
+Class *SystemlibSessionModule::s_SHIClass = nullptr;
+
+/**
+ * Relies on the fact that only one SessionModule will be active
+ * in a given thread at any one moment.
+ */
+IMPLEMENT_REQUEST_LOCAL(SystemlibSessionInstance, SystemlibSessionModule::s_obj);
+
+Func* SystemlibSessionModule::lookupFunc(Class *cls, StringData *fname) {
+  Func *f = cls->lookupMethod(fname);
+  if (!f) {
+    throw InvalidArgumentException(0, "class %s must declare method %s()",
+                                   m_classname, fname->data());
+  }
+
+  if (f->attrs() & AttrStatic) {
+    throw InvalidArgumentException(0, "%s::%s() must not be declared static",
+                                   m_classname, fname->data());
+  }
+
+  if (f->attrs() & (AttrPrivate|AttrProtected|AttrAbstract)) {
+    throw InvalidArgumentException(0, "%s::%s() must be declared public",
+                                   m_classname, fname->data());
+  }
+
+  return f;
+}
+
+void SystemlibSessionModule::lookupClass() {
+  Class *cls;
+  if (!(cls = Unit::loadClass(String(m_classname, CopyString).get()))) {
+    throw InvalidArgumentException(0, "Unable to locate systemlib class '%s'",
+                                   m_classname);
+  }
+
+  if (cls->attrs() & (AttrTrait|AttrInterface)) {
+    throw InvalidArgumentException(0, "'%s' must be a real class, "
+                                      "not an interface or trait", m_classname);
+  }
+
+  if (!s_SHIClass) {
+    s_SHIClass = Unit::lookupClass(s_SessionHandlerInterface.get());
+    if (!s_SHIClass) {
+      throw InvalidArgumentException(0, "Unable to locate '%s' interface",
+                                        s_SessionHandlerInterface.data());
+    }
+  }
+
+  if (!cls->classof(s_SHIClass)) {
+    throw InvalidArgumentException(0, "SystemLib session module '%s' "
+                                      "must implement '%s'",
+                                      m_classname,
+                                      s_SessionHandlerInterface.data());
+  }
+
+  if (MethodLookup::LookupResult::MethodFoundWithThis !=
+      g_vmContext->lookupCtorMethod(m_ctor, cls)) {
+    throw InvalidArgumentException(0, "Unable to call %s's constructor",
+                                   m_classname);
+  }
+
+  m_open    = lookupFunc(cls, s_open.get());
+  m_close   = lookupFunc(cls, s_close.get());
+  m_read    = lookupFunc(cls, s_read.get());
+  m_write   = lookupFunc(cls, s_write.get());
+  m_gc      = lookupFunc(cls, s_gc.get());
+  m_destroy = lookupFunc(cls, s_destroy.get());
+  m_cls = cls;
+}
+
+ObjectData* SystemlibSessionModule::getObject() {
+  if (auto o = s_obj->getObject()) {
+    return o;
+  }
+
+  Transl::VMRegAnchor _;
+  Variant ret;
+
+  if (!m_cls) {
+    lookupClass();
+  }
+  s_obj->setObject(ObjectData::newInstance(m_cls));
+  ObjectData *obj = s_obj->getObject();
+  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_ctor, obj);
+
+  return obj;
+}
+
+bool SystemlibSessionModule::open(const char *save_path,
+                                  const char *session_name) {
+  ObjectData *obj = getObject();
+
+  Variant savePath = String(save_path, CopyString);
+  Variant sessionName = String(session_name, CopyString);
+  Variant ret;
+  TypedValue args[2] = { *savePath.asCell(), *sessionName.asCell() };
+  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_open, obj,
+                             nullptr, 2, args);
+
+  if (ret.isBoolean() && ret.toBoolean()) {
+    return true;
+  }
+
+  raise_warning("Failed calling %s::open()", m_classname);
+  return false;
+}
+
+bool SystemlibSessionModule::close() {
+  auto obj = s_obj->getObject();
+  if (!obj) {
+    // close() can be called twice in some circumstances
+    return true;
+  }
+
+  Variant ret;
+  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_close, obj);
+  s_obj->destroy();
+
+  if (ret.isBoolean() && ret.toBoolean()) {
+    return true;
+  }
+
+  raise_warning("Failed calling %s::close()", m_classname);
+  return false;
+}
+
+bool SystemlibSessionModule::read(const char *key, String &value) {
+  ObjectData *obj = getObject();
+
+  Variant sessionKey = String(key, CopyString);
+  Variant ret;
+  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_read, obj,
+                             nullptr, 1, sessionKey.asCell());
+
+  if (ret.isString()) {
+    value = ret.toString();
+    return true;
+  }
+
+  raise_warning("Failed calling %s::read()", m_classname);
+  return false;
+}
+
+bool SystemlibSessionModule::write(const char *key, CStrRef value) {
+  ObjectData *obj = getObject();
+
+  Variant sessionKey = String(key, CopyString);
+  Variant sessionVal = value;
+  Variant ret;
+  TypedValue args[2] = { *sessionKey.asCell(), *sessionVal.asCell() };
+  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_write, obj,
+                             nullptr, 2, args);
+
+  if (ret.isBoolean() && ret.toBoolean()) {
+    return true;
+  }
+
+  raise_warning("Failed calling %s::write()", m_classname);
+  return false;
+}
+
+bool SystemlibSessionModule::destroy(const char *key) {
+  ObjectData *obj = getObject();
+
+  Variant sessionKey = String(key, CopyString);
+  Variant ret;
+  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_destroy, obj,
+                             nullptr, 1, sessionKey.asCell());
+
+  if (ret.isBoolean() && ret.toBoolean()) {
+    return true;
+  }
+
+  raise_warning("Failed calling %s::destroy()", m_classname);
+  return false;
+}
+
+bool SystemlibSessionModule::gc(int maxlifetime, int *nrdels) {
+  ObjectData *obj = getObject();
+
+  Variant maxLifeTime = maxlifetime;
+  Variant ret;
+  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_gc, obj,
+                             nullptr, 1, maxLifeTime.asCell());
+
+  if (ret.isInteger()) {
+    if (nrdels) {
+      *nrdels = ret.toInt64();
+    }
+    return true;
+  }
+
+  raise_warning("Failed calling %s::gc()", m_classname);
+  return false;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// SystemlibSessionModule implementations
+
+static class RedisSessionModule : public SystemlibSessionModule {
+ public:
+  RedisSessionModule() :
+    SystemlibSessionModule("redis", "RedisSessionModule") { }
+} s_redis_session_module;
+
+//////////////////////////////////////////////////////////////////////////////
 // FileSessionModule
 
 class FileSessionData {
@@ -421,7 +617,7 @@ public:
     }
 
     String s = String(m_st_size, ReserveString);
-    char *val = s.mutableSlice().ptr;
+    char *val = s.bufferSlice().ptr;
 
 #if defined(HAVE_PREAD)
     long n = pread(m_fd, val, m_st_size, 0);
@@ -432,7 +628,8 @@ public:
 
     if (n != (int)m_st_size) {
       if (n == -1) {
-        raise_warning("read failed: %s (%d)", strerror(errno), errno);
+        raise_warning("read failed: %s (%d)", folly::errnoStr(errno).c_str(),
+                      errno);
       } else {
         raise_warning("read returned less bytes than requested");
       }
@@ -461,7 +658,8 @@ public:
      */
     if (value.size() < (int)m_st_size) {
       if (ftruncate(m_fd, 0) < 0) {
-        raise_warning("truncate failed: %s (%d)", strerror(errno), errno);
+        raise_warning("truncate failed: %s (%d)",
+                      folly::errnoStr(errno).c_str(), errno);
         return false;
       }
     }
@@ -475,7 +673,8 @@ public:
 
     if (n != value.size()) {
       if (n == -1) {
-        raise_warning("write failed: %s (%d)", strerror(errno), errno);
+        raise_warning("write failed: %s (%d)",
+                      folly::errnoStr(errno).c_str(), errno);
       } else {
         raise_warning("write wrote less bytes than requested");
       }
@@ -618,12 +817,12 @@ private:
 # endif
         if (fcntl(m_fd, F_SETFD, FD_CLOEXEC)) {
           raise_warning("fcntl(%d, F_SETFD, FD_CLOEXEC) failed: %s (%d)",
-                        m_fd, strerror(errno), errno);
+                        m_fd, folly::errnoStr(errno).c_str(), errno);
         }
 #endif
       } else {
         raise_warning("open(%s, O_RDWR) failed: %s (%d)", buf,
-                      strerror(errno), errno);
+                      folly::errnoStr(errno).c_str(), errno);
       }
     }
   }
@@ -632,7 +831,7 @@ private:
     DIR *dir = opendir(dirname);
     if (!dir) {
       raise_notice("ps_files_cleanup_dir: opendir(%s) failed: %s (%d)",
-                   dirname, strerror(errno), errno);
+                   dirname, folly::errnoStr(errno).c_str(), errno);
       return 0;
     }
 
@@ -711,22 +910,25 @@ public:
   UserSessionModule() : SessionModule("user") {}
 
   virtual bool open(const char *save_path, const char *session_name) {
-    return vm_call_user_func
-      (String(PS(ps_open)),
-       CREATE_VECTOR2(String(save_path, CopyString),
-                      String(session_name, CopyString)));
+    return vm_call_user_func(
+       make_packed_array(Object(PS(ps_session_handler)),
+                      String("open")),
+       make_packed_array(String(save_path, CopyString),
+                      String(session_name, CopyString))).toBoolean();
   }
 
   virtual bool close() {
-    return vm_call_user_func
-      (String(PS(ps_close)),
-       Array::Create());
+    return vm_call_user_func(
+       make_packed_array(Object(PS(ps_session_handler)),
+                      String("close")),
+       Array::Create()).toBoolean();
   }
 
   virtual bool read(const char *key, String &value) {
-    Variant ret = vm_call_user_func
-      (String(PS(ps_read)),
-       CREATE_VECTOR1(String(key, CopyString)));
+    Variant ret = vm_call_user_func(
+       make_packed_array(Object(PS(ps_session_handler)),
+                      String("read")),
+       make_packed_array(String(key, CopyString)));
     if (ret.isString()) {
       value = ret.toString();
       return true;
@@ -735,21 +937,24 @@ public:
   }
 
   virtual bool write(const char *key, CStrRef value) {
-    return vm_call_user_func
-      (String(PS(ps_write)),
-       CREATE_VECTOR2(String(key, CopyString), value));
+    return vm_call_user_func(
+       make_packed_array(Object(PS(ps_session_handler)),
+                      String("write")),
+       make_packed_array(String(key, CopyString), value)).toBoolean();
   }
 
   virtual bool destroy(const char *key) {
-    return vm_call_user_func
-      (String(PS(ps_destroy)),
-       CREATE_VECTOR1(String(key, CopyString)));
+    return vm_call_user_func(
+       make_packed_array(Object(PS(ps_session_handler)),
+                      String("destroy")),
+       make_packed_array(String(key, CopyString))).toBoolean();
   }
 
   virtual bool gc(int maxlifetime, int *nrdels) {
-    return vm_call_user_func
-      (String(PS(ps_gc)),
-       CREATE_VECTOR1((int64_t)maxlifetime));
+    return vm_call_user_func(
+       make_packed_array(Object(PS(ps_session_handler)),
+                      String("gc")),
+       make_packed_array((int64_t)maxlifetime)).toBoolean();
   }
 };
 static UserSessionModule s_user_session_module;
@@ -794,8 +999,8 @@ public:
 
   virtual String encode() {
     StringBuffer buf;
-    SystemGlobals *g = (SystemGlobals*)get_global_variables();
-    for (ArrayIter iter(g->GV(_SESSION)); iter; ++iter) {
+    GlobalVariables *g = get_global_variables();
+    for (ArrayIter iter(g->get(s__SESSION).toArray()); iter; ++iter) {
       Variant key = iter.first();
       if (key.isString()) {
         String skey = key.toString();
@@ -813,7 +1018,7 @@ public:
 
   virtual bool decode(CStrRef value) {
     const char *endptr = value.data() + value.size();
-    SystemGlobals *g = (SystemGlobals*)get_global_variables();
+    GlobalVariables *g = get_global_variables();
     for (const char *p = value.data(); p < endptr; ) {
       int namelen = ((unsigned char)(*p)) & (~PS_BIN_UNDEF);
       if (namelen < 0 || namelen > PS_BIN_MAX || (p + namelen) >= endptr) {
@@ -824,9 +1029,10 @@ public:
       String key(p + 1, namelen, CopyString);
       p += namelen + 1;
       if (has_value) {
-        VariableUnserializer vu(p, endptr, VariableUnserializer::Serialize);
+        VariableUnserializer vu(p, endptr,
+                                VariableUnserializer::Type::Serialize);
         try {
-          g->GV(_SESSION).set(key, vu.unserialize());
+          g->getRef(s__SESSION).set(key, vu.unserialize());
           p = vu.head();
         } catch (Exception &e) {
         }
@@ -846,8 +1052,8 @@ public:
 
   virtual String encode() {
     StringBuffer buf;
-    SystemGlobals *g = (SystemGlobals*)get_global_variables();
-    for (ArrayIter iter(g->GV(_SESSION)); iter; ++iter) {
+    GlobalVariables *g = get_global_variables();
+    for (ArrayIter iter(g->get(s__SESSION).toArray()); iter; ++iter) {
       Variant key = iter.first();
       if (key.isString()) {
         String skey = key.toString();
@@ -867,7 +1073,7 @@ public:
   virtual bool decode(CStrRef value) {
     const char *p = value.data();
     const char *endptr = value.data() + value.size();
-    SystemGlobals *g = (SystemGlobals*)get_global_variables();
+    GlobalVariables *g = get_global_variables();
     while (p < endptr) {
       const char *q = p;
       while (*q != PS_DELIMITER) {
@@ -884,9 +1090,10 @@ public:
       String key(p, q - p, CopyString);
       q++;
       if (has_value) {
-        VariableUnserializer vu(q, endptr, VariableUnserializer::Serialize);
+        VariableUnserializer vu(q, endptr,
+                                VariableUnserializer::Type::Serialize);
         try {
-          g->GV(_SESSION).set(key, vu.unserialize());
+          g->getRef(s__SESSION).set(key, vu.unserialize());
           q = vu.head();
         } catch (Exception &e) {
         }
@@ -1023,8 +1230,8 @@ new_session:
    */
 
   /* Unconditionally destroy existing arrays -- possible dirty data */
-  SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  g->GV(_SESSION) = Array::Create();
+  GlobalVariables *g = get_global_variables();
+  g->add(s__SESSION, Array::Create(), false);
 
   PS(invalid_session_id) = false;
   String value;
@@ -1061,13 +1268,6 @@ static void php_session_save_current_state() {
 ///////////////////////////////////////////////////////////////////////////////
 // Cookie Management
 
-#define COOKIE_SET_COOKIE "Set-Cookie: "
-#define COOKIE_EXPIRES    "; expires="
-#define COOKIE_PATH       "; path="
-#define COOKIE_DOMAIN     "; domain="
-#define COOKIE_SECURE     "; secure"
-#define COOKIE_HTTPONLY   "; HttpOnly"
-
 static void php_session_send_cookie() {
   Transport *transport = g_context->getTransport();
   if (!transport) return;
@@ -1077,42 +1277,15 @@ static void php_session_send_cookie() {
     return;
   }
 
-  /* URL encode session_name and id because they might be user supplied */
-  String session_name =
-    StringUtil::UrlEncode(String(PS(session_name).c_str()));
-  String id = StringUtil::UrlEncode(PS(id));
-
-  StringBuffer ncookie;
-  ncookie.append(COOKIE_SET_COOKIE);
-  ncookie.append(session_name);
-  ncookie.append('=');
-  ncookie.append(id);
-
+  int64_t expire = 0;
   if (PS(cookie_lifetime) > 0) {
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    time_t t = tv.tv_sec + PS(cookie_lifetime);
-    if (t > 0) {
-      ncookie.append(COOKIE_EXPIRES);
-      ncookie.append(DateTime(t).toString(DateTime::Cookie));
-    }
+    expire = tv.tv_sec + PS(cookie_lifetime);
   }
-  if (!PS(cookie_path).empty()) {
-    ncookie.append(COOKIE_PATH);
-    ncookie.append(PS(cookie_path));
-  }
-  if (!PS(cookie_domain).empty()) {
-    ncookie.append(COOKIE_DOMAIN);
-    ncookie.append(PS(cookie_domain));
-  }
-  if (PS(cookie_secure)) {
-    ncookie.append(COOKIE_SECURE);
-  }
-  if (PS(cookie_httponly)) {
-    ncookie.append(COOKIE_HTTPONLY);
-  }
-
-  transport->addHeader(ncookie.detach());
+  transport->setCookie(PS(session_name), PS(id), expire, PS(cookie_path),
+                       PS(cookie_domain), PS(cookie_secure),
+                       PS(cookie_httponly), true);
 }
 
 static void php_session_reset_id() {
@@ -1121,7 +1294,7 @@ static void php_session_reset_id() {
     PS(send_cookie) = 0;
   }
 
-  GlobalVariables *g = get_global_variables();
+  EnvConstants *g = get_env_constants();
   if (PS(define_sid)) {
     StringBuffer var;
     var.append(String(PS(session_name)));
@@ -1189,11 +1362,11 @@ static inline void strcpy_gmt(char *ubuf, time_t *when) {
   ubuf[n] = '\0';
 }
 
-static const StaticString s_PATH_TRANSLATED("PATH_TRANSLATED");
+const StaticString s_PATH_TRANSLATED("PATH_TRANSLATED");
 
 static inline void last_modified() {
-  SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  String path = g->GV(_SERVER)[s_PATH_TRANSLATED].toString();
+  GlobalVariables *g = get_global_variables();
+  String path = g->get(s__SERVER)[s_PATH_TRANSLATED].toString();
   if (!path.empty()) {
     struct stat sb;
     if (stat(path.data(), &sb) == -1) {
@@ -1285,6 +1458,10 @@ static int php_session_cache_limiter() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+int64_t f_session_status() {
+  return PS(session_status);
+}
+
 void f_session_set_cookie_params(int64_t lifetime,
                                  CStrRef path /* = null_string */,
                                  CStrRef domain /* = null_string */,
@@ -1307,11 +1484,12 @@ void f_session_set_cookie_params(int64_t lifetime,
   }
 }
 
-static const StaticString s_lifetime("lifetime");
-static const StaticString s_path("path");
-static const StaticString s_domain("domain");
-static const StaticString s_secure("secure");
-static const StaticString s_httponly("httponly");
+const StaticString
+  s_lifetime("lifetime"),
+  s_path("path"),
+  s_domain("domain"),
+  s_secure("secure"),
+  s_httponly("httponly");
 
 Array f_session_get_cookie_params() {
   ArrayInit ret(5);
@@ -1354,27 +1532,27 @@ Variant f_session_module_name(CStrRef newname /* = null_string */) {
   return oldname;
 }
 
-static bool check_handler(const char *name, std::string &member) {
-  if (!f_is_callable(name)) {
-    raise_warning("Argument '%s' is not a valid callback", name);
-    return false;
-  }
-  member = name;
-  return true;
-}
+bool f_hphp_session_set_save_handler(CObjRef sessionhandler,
+    bool register_shutdown /* = true */) {
 
-bool f_session_set_save_handler(CStrRef open, CStrRef close, CStrRef read,
-                                CStrRef write, CStrRef destroy, CStrRef gc) {
-  if (PS(session_status) != Session::None) {
+  if (PS(mod) &&
+      PS(session_status) != Session::None &&
+      PS(mod) != &s_user_session_module) {
     return false;
   }
 
-  if (!check_handler(open.data(),    PS(ps_open)))    return false;
-  if (!check_handler(close.data(),   PS(ps_close)))   return false;
-  if (!check_handler(read.data(),    PS(ps_read)))    return false;
-  if (!check_handler(write.data(),   PS(ps_write)))   return false;
-  if (!check_handler(destroy.data(), PS(ps_destroy))) return false;
-  if (!check_handler(gc.data(),      PS(ps_gc)))      return false;
+  PS(default_mod) = PS(mod);
+
+  if (ObjectData* obj = PS(ps_session_handler)) {
+    PS(ps_session_handler) = nullptr;
+    decRefObj(obj);
+  }
+  PS(ps_session_handler) = sessionhandler.get();
+  PS(ps_session_handler)->incRefCount();
+
+  if (register_shutdown) {
+    f_register_shutdown_function(1, String("session_write_close"));
+  }
 
   IniSetting::Set("session.save_handler", "user");
   return true;
@@ -1455,7 +1633,7 @@ bool f_session_decode(CStrRef data) {
   return false;
 }
 
-static const StaticString
+const StaticString
   s_REQUEST_URI("REQUEST_URI"),
   s_HTTP_REFERER("HTTP_REFERER");
 
@@ -1500,25 +1678,25 @@ bool f_session_start() {
    * Cookies are preferred, because initially
    * cookie and get variables will be available.
    */
-  SystemGlobals *g = (SystemGlobals*)get_global_variables();
+  GlobalVariables *g = get_global_variables();
   if (PS(id).empty()) {
     if (PS(use_cookies) &&
-        g->GV(_COOKIE).toArray().exists(String(PS(session_name)))) {
-      PS(id) = g->GV(_COOKIE)[String(PS(session_name))].toString();
+        g->get(s__COOKIE).toArray().exists(String(PS(session_name)))) {
+      PS(id) = g->get(s__COOKIE)[String(PS(session_name))].toString();
       PS(apply_trans_sid) = 0;
       PS(send_cookie) = 0;
       PS(define_sid) = 0;
     }
 
     if (!PS(use_only_cookies) && !PS(id) &&
-        g->GV(_GET).toArray().exists(String(PS(session_name)))) {
-      PS(id) = g->GV(_GET)[String(PS(session_name))].toString();
+        g->get(s__GET).toArray().exists(String(PS(session_name)))) {
+      PS(id) = g->get(s__GET)[String(PS(session_name))].toString();
       PS(send_cookie) = 0;
     }
 
     if (!PS(use_only_cookies) && !PS(id) &&
-        g->GV(_POST).toArray().exists(String(PS(session_name)))) {
-      PS(id) = g->GV(_POST)[String(PS(session_name))].toString();
+        g->get(s__POST).toArray().exists(String(PS(session_name)))) {
+      PS(id) = g->get(s__POST)[String(PS(session_name))].toString();
       PS(send_cookie) = 0;
     }
   }
@@ -1529,7 +1707,7 @@ bool f_session_start() {
      '<session-name>=<session-id>' to allow URLs of the form
      http://yoursite/<session-name>=<session-id>/script.php */
   if (!PS(use_only_cookies) && PS(id).empty()) {
-    value = g->GV(_SERVER)[s_REQUEST_URI].toString();
+    value = g->get(s__SERVER)[s_REQUEST_URI].toString();
     const char *p = strstr(value.data(), PS(session_name).c_str());
     if (p && p[lensess] == '=') {
       p += lensess + 1;
@@ -1544,7 +1722,7 @@ bool f_session_start() {
   /* check whether the current request was referred to by
      an external site which invalidates the previously found id */
   if (!PS(id).empty() && PS(extern_referer_chk)[0] != '\0') {
-    value = g->GV(_SERVER)[s_HTTP_REFERER].toString();
+    value = g->get(s__SERVER)[s_HTTP_REFERER].toString();
     if (strstr(value.data(), PS(extern_referer_chk).c_str()) == NULL) {
       PS(id).reset();
       PS(send_cookie) = 1;
@@ -1607,8 +1785,8 @@ Variant f_session_unset() {
   if (PS(session_status) == Session::None) {
     return false;
   }
-  SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  g->GV(_SESSION).reset();
+  GlobalVariables *g = get_global_variables();
+  g->getRef(s__SESSION).reset();
   return uninit_null();
 }
 
@@ -1641,6 +1819,55 @@ bool f_session_is_registered(CStrRef varname) {
     (__func__, "Deprecated as of PHP 5.3.0 and REMOVED as of PHP 6.0.0. "
      "Relying on this feature is highly discouraged.");
 }
+
+static bool HHVM_METHOD(SessionHandler, hhopen,
+                        CStrRef save_path, CStrRef session_id) {
+  return PS(default_mod) &&
+    PS(default_mod)->open(save_path->data(), session_id->data());
+}
+
+static bool HHVM_METHOD(SessionHandler, hhclose) {
+  return PS(default_mod) && PS(default_mod)->close();
+}
+
+static String HHVM_METHOD(SessionHandler, hhread, CStrRef session_id) {
+  String value;
+  if (PS(default_mod) && PS(default_mod)->read(PS(id).data(), value)) {
+    php_session_decode(value);
+    return value;
+  }
+  return uninit_null();
+}
+
+static bool HHVM_METHOD(SessionHandler, hhwrite,
+                        CStrRef session_id, CStrRef session_data) {
+  return PS(default_mod) &&
+    PS(default_mod)->write(session_id->data(), session_data->data());
+}
+
+static bool HHVM_METHOD(SessionHandler, hhdestroy, CStrRef session_id) {
+  return PS(default_mod) && PS(default_mod)->destroy(session_id->data());
+}
+
+static bool HHVM_METHOD(SessionHandler, hhgc, int maxlifetime) {
+  int nrdels = -1;
+  return PS(default_mod) && PS(default_mod)->gc(maxlifetime, &nrdels);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+static class SessionExtension : public Extension {
+ public:
+  SessionExtension() : Extension("session") { }
+  virtual void moduleLoad(Hdf config) {
+    HHVM_ME(SessionHandler, hhopen);
+    HHVM_ME(SessionHandler, hhclose);
+    HHVM_ME(SessionHandler, hhread);
+    HHVM_ME(SessionHandler, hhwrite);
+    HHVM_ME(SessionHandler, hhdestroy);
+    HHVM_ME(SessionHandler, hhgc);
+  }
+} s_session_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

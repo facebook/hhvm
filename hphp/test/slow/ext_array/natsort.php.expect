@@ -1,0 +1,20 @@
+array(4) {
+  [0]=>
+  string(8) "img1.png"
+  [1]=>
+  string(9) "img10.png"
+  [2]=>
+  string(9) "img12.png"
+  [3]=>
+  string(8) "img2.png"
+}
+array(4) {
+  [3]=>
+  string(8) "img1.png"
+  [2]=>
+  string(8) "img2.png"
+  [1]=>
+  string(9) "img10.png"
+  [0]=>
+  string(9) "img12.png"
+}

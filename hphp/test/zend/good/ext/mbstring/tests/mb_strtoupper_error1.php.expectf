@@ -1,0 +1,10 @@
+*** Testing mb_strtoupper() : error conditions ***
+
+-- Testing mb_strtoupper() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing mb_strtoupper() function with zero arguments --
+HipHop Warning: %s
+NULL
+Done

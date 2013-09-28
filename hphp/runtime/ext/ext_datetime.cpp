@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/ext_datetime.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(date);
@@ -54,7 +54,8 @@ const int64_t q_DateTimeZone$$PER_COUNTRY = 4096;
 ///////////////////////////////////////////////////////////////////////////////
 // methods
 
-c_DateTime::c_DateTime(Class* cb) : ExtObjectData(cb) {
+c_DateTime::c_DateTime(Class* cb)
+  : ExtObjectDataFlags<ObjectData::HasClone>(cb) {
 }
 
 c_DateTime::~c_DateTime() {
@@ -89,10 +90,11 @@ String c_DateTime::t_format(CStrRef format) {
   return m_dt->toString(format, false);
 }
 
-static const StaticString s_warning_count("warning_count");
-static const StaticString s_warnings("warnings");
-static const StaticString s_error_count("error_count");
-static const StaticString s_errors("errors");
+const StaticString
+  s_warning_count("warning_count"),
+  s_warnings("warnings"),
+  s_error_count("error_count"),
+  s_errors("errors");
 
 Array c_DateTime::ti_getlasterrors() {
   Array errors = DateTime::getLastErrors();
@@ -117,7 +119,7 @@ int64_t c_DateTime::t_gettimestamp() {
 }
 
 Variant c_DateTime::t_gettimezone() {
-  SmartObject<TimeZone> tz = m_dt->timezone();
+  SmartResource<TimeZone> tz = m_dt->timezone();
   if (tz->isValid()) {
     return c_DateTimeZone::wrap(tz);
   }
@@ -159,15 +161,14 @@ Object c_DateTime::t_sub(CObjRef interval) {
   return this;
 }
 
-ObjectData *c_DateTime::clone() {
-  ObjectData *obj = ObjectData::clone();
-  c_DateTime *dt = static_cast<c_DateTime*>(obj);
-  dt->m_dt = m_dt->cloneDateTime();
-  return obj;
+c_DateTime* c_DateTime::Clone(ObjectData* obj) {
+  c_DateTime* dt = static_cast<c_DateTime*>(obj->cloneImpl());
+  dt->m_dt = static_cast<c_DateTime*>(obj)->m_dt->cloneDateTime();
+  return dt;
 }
 
 c_DateTimeZone::c_DateTimeZone(Class* cb) :
-    ExtObjectData(cb) {
+    ExtObjectDataFlags<ObjectData::HasClone>(cb) {
 }
 
 c_DateTimeZone::~c_DateTimeZone() {
@@ -209,15 +210,16 @@ Array c_DateTimeZone::ti_listidentifiers() {
   return TimeZone::GetNames();
 }
 
-ObjectData *c_DateTimeZone::clone() {
-  ObjectData *obj = ObjectData::clone();
-  c_DateTimeZone *dtz = static_cast<c_DateTimeZone*>(obj);
-  dtz->m_tz = m_tz->cloneTimeZone();
-  return obj;
+c_DateTimeZone* c_DateTimeZone::Clone(ObjectData* obj) {
+  c_DateTimeZone* dtz = static_cast<c_DateTimeZone*>(obj->cloneImpl());
+  dtz->m_tz = static_cast<c_DateTimeZone*>(obj)->m_tz->cloneTimeZone();
+  return dtz;
 }
 
-c_DateInterval::c_DateInterval(Class* cb) :
-    ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>(cb) {
+c_DateInterval::c_DateInterval(Class* cb)
+  : ExtObjectDataFlags<ObjectData::UseGet|
+                       ObjectData::UseSet|
+                       ObjectData::HasClone>(cb) {
 }
 
 c_DateInterval::~c_DateInterval() {
@@ -233,25 +235,26 @@ void c_DateInterval::t___construct(CStrRef interval_spec) {
   }
 }
 
-static const StaticString s_y("y");
-static const StaticString s_m("m");
-static const StaticString s_d("d");
-static const StaticString s_h("h");
-static const StaticString s_i("i");
-static const StaticString s_s("s");
-static const StaticString s_invert("invert");
-static const StaticString s_days("days");
+const StaticString
+  s_y("y"),
+  s_m("m"),
+  s_d("d"),
+  s_h("h"),
+  s_i("i"),
+  s_s("s"),
+  s_invert("invert"),
+  s_days("days");
 
 Variant c_DateInterval::t___get(Variant member) {
   if (member.isString()) {
-    if (member.same(s_y))      return m_di->getYears();
-    if (member.same(s_m))      return m_di->getMonths();
-    if (member.same(s_d))      return m_di->getDays();
-    if (member.same(s_h))      return m_di->getHours();
-    if (member.same(s_i))      return m_di->getMinutes();
-    if (member.same(s_s))      return m_di->getSeconds();
-    if (member.same(s_invert)) return m_di->isInverted();
-    if (member.same(s_days)) {
+    if (same(member, s_y))      return m_di->getYears();
+    if (same(member, s_m))      return m_di->getMonths();
+    if (same(member, s_d))      return m_di->getDays();
+    if (same(member, s_h))      return m_di->getHours();
+    if (same(member, s_i))      return m_di->getMinutes();
+    if (same(member, s_s))      return m_di->getSeconds();
+    if (same(member, s_invert)) return m_di->isInverted();
+    if (same(member, s_days)) {
       if (m_di->haveTotalDays()) {
         return m_di->getTotalDays();
       } else {
@@ -267,35 +270,35 @@ Variant c_DateInterval::t___get(Variant member) {
 
 Variant c_DateInterval::t___set(Variant member, Variant value) {
   if (member.isString()) {
-    if (member.same(s_y)) {
+    if (same(member, s_y)) {
       m_di->setYears(value.toInt64());
       return uninit_null();
     }
-    if (member.same(s_m)) {
+    if (same(member, s_m)) {
       m_di->setMonths(value.toInt64());
       return uninit_null();
     }
-    if (member.same(s_d)) {
+    if (same(member, s_d)) {
       m_di->setDays(value.toInt64());
       return uninit_null();
     }
-    if (member.same(s_h)) {
+    if (same(member, s_h)) {
       m_di->setHours(value.toInt64());
       return uninit_null();
     }
-    if (member.same(s_i)) {
+    if (same(member, s_i)) {
       m_di->setMinutes(value.toInt64());
       return uninit_null();
     }
-    if (member.same(s_s)) {
+    if (same(member, s_s)) {
       m_di->setSeconds(value.toInt64());
       return uninit_null();
     }
-    if (member.same(s_invert)) {
+    if (same(member, s_invert)) {
       m_di->setInverted(value.toBoolean());
       return uninit_null();
     }
-    if (member.same(s_days)) {
+    if (same(member, s_days)) {
       m_di->setTotalDays(value.toInt64());
       return uninit_null();
     }
@@ -308,7 +311,7 @@ Variant c_DateInterval::t___set(Variant member, Variant value) {
 }
 
 Object c_DateInterval::ti_createfromdatestring(CStrRef time) {
-  SmartObject<DateInterval> di(NEWOBJ(DateInterval)(time, true));
+  SmartResource<DateInterval> di(NEWOBJ(DateInterval)(time, true));
   return c_DateInterval::wrap(di);
 }
 
@@ -316,11 +319,10 @@ String c_DateInterval::t_format(CStrRef format) {
   return m_di->format(format);
 }
 
-ObjectData *c_DateInterval::clone() {
-  ObjectData *obj = ObjectData::clone();
-  c_DateInterval *di = static_cast<c_DateInterval*>(obj);
-  di->m_di = m_di->cloneDateInterval();
-  return obj;
+c_DateInterval* c_DateInterval::Clone(ObjectData* obj) {
+  c_DateInterval *di = static_cast<c_DateInterval*>(obj->cloneImpl());
+  di->m_di = static_cast<c_DateInterval*>(obj)->m_di->cloneDateInterval();
+  return di;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -404,13 +406,14 @@ String f_gmstrftime(CStrRef format,
 }
 
 Array f_getdate(int64_t timestamp /* = TimeStamp::Current() */) {
-  return DateTime(timestamp, false).toArray(DateTime::TimeMap);
+  return DateTime(timestamp, false).toArray(DateTime::ArrayFormat::TimeMap);
 }
 
 Array f_localtime(int64_t timestamp /* = TimeStamp::Current() */,
                   bool is_associative /* = false */) {
   DateTime::ArrayFormat format =
-    is_associative ? DateTime::TmMap : DateTime::TmVector;
+    is_associative ? DateTime::ArrayFormat::TmMap :
+                     DateTime::ArrayFormat::TmVector;
   return DateTime(timestamp, false).toArray(format);
 }
 
@@ -429,7 +432,7 @@ Variant f_strtotime(CStrRef input,
   }
 
   DateTime dt(timestamp);
-  if (!dt.fromString(input, SmartObject<TimeZone>())) {
+  if (!dt.fromString(input, SmartResource<TimeZone>())) {
     return false;
   }
   bool error;

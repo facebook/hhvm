@@ -1,0 +1,6 @@
+*** Testing array_merge() : error conditions ***
+
+-- Testing array_merge() function with less than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

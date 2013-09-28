@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,8 +27,8 @@
 #include "hphp/runtime/base/strings.h"
 #include <unistd.h>
 #include <poll.h>
-#include "netinet/in.h"
-#include "arpa/inet.h"
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <netdb.h>
 #include <signal.h>
 #include <fcntl.h>
@@ -51,12 +51,11 @@
 #include <map>
 #include <list>
 #include <set>
+#include <memory>
 #include <deque>
 #include <exception>
 #include <tr1/functional>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/interprocess/sync/interprocess_upgradable_mutex.hpp>
 #include <boost/foreach.hpp>
@@ -73,7 +72,7 @@
 #endif
 
 #if (__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 4)) || \
-  __INTEL_COMPILER
+  __INTEL_COMPILER || defined(__clang__)
 
 #include <tr1/unordered_map>
 #include <tr1/unordered_set>
@@ -119,7 +118,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // debugging
 
-static const bool debug =
+const bool debug =
 #ifdef DEBUG
   true
 #else
@@ -127,16 +126,16 @@ static const bool debug =
 #endif
   ;
 
-static const bool use_jemalloc =
-#ifdef USE_JEMALLOC
+const bool packed_tv =
+#ifdef PACKED_TV
   true
 #else
   false
 #endif
   ;
 
-static const bool packed_tv =
-#ifdef PACKED_TV
+const bool memory_profiling =
+#ifdef MEMORY_PROFILING
   true
 #else
   false
@@ -146,7 +145,7 @@ static const bool packed_tv =
 /**
  * Guard bug-for-bug hphpi compatibility code with this predicate.
  */
-static const bool hphpiCompat = true;
+const bool hphpiCompat = true;
 
 ///////////////////////////////////////////////////////////////////////////////
 // system includes
@@ -254,32 +253,32 @@ public:
   hphp_raw_ptr() : px(0) {}
   explicit hphp_raw_ptr(T *p) : px(p) {}
 
-  /* implicit */ hphp_raw_ptr(const boost::weak_ptr<T> &p)
+  /* implicit */ hphp_raw_ptr(const std::weak_ptr<T> &p)
     : px(p.lock().get())
   {}
 
   template <class S>
-  /* implicit */ hphp_raw_ptr(const boost::shared_ptr<S> &p) : px(p.get()) {}
+  /* implicit */ hphp_raw_ptr(const std::shared_ptr<S> &p) : px(p.get()) {}
   template <class S>
-  /* implicit */ hphp_raw_ptr(const boost::weak_ptr<S> &p)
+  /* implicit */ hphp_raw_ptr(const std::weak_ptr<S> &p)
     : px(p.lock().get())
   {}
   template <class S>
   /* implicit */ hphp_raw_ptr(const hphp_raw_ptr<S> &p) : px(p.get()) {}
 
-  boost::shared_ptr<T> lock() const {
-    return px ? boost::static_pointer_cast<T>(px->shared_from_this()) :
-      boost::shared_ptr<T>();
+  std::shared_ptr<T> lock() const {
+    return px ? std::static_pointer_cast<T>(px->shared_from_this()) :
+      std::shared_ptr<T>();
   }
   bool expired() const {
     return !px;
   }
 
   template <class S>
-  /* implicit */ operator boost::shared_ptr<S>() const {
+  /* implicit */ operator std::shared_ptr<S>() const {
     S *s = px; // just to verify the implicit conversion T->S
-    return s ? boost::static_pointer_cast<S>(px->shared_from_this()) :
-      boost::shared_ptr<S>();
+    return s ? std::static_pointer_cast<S>(px->shared_from_this()) :
+      std::shared_ptr<S>();
   }
 
   T *operator->() const { assert(px); return px; }
@@ -305,8 +304,8 @@ private:
   }
 
 IMPLEMENT_PTR_OPERATORS(hphp_raw_ptr, hphp_raw_ptr);
-IMPLEMENT_PTR_OPERATORS(hphp_raw_ptr, boost::shared_ptr);
-IMPLEMENT_PTR_OPERATORS(boost::shared_ptr, hphp_raw_ptr);
+IMPLEMENT_PTR_OPERATORS(hphp_raw_ptr, std::shared_ptr);
+IMPLEMENT_PTR_OPERATORS(std::shared_ptr, hphp_raw_ptr);
 
 template<typename T>
 class hphp_const_char_map :
@@ -327,7 +326,7 @@ typedef hphp_hash_map<void*, int, pointer_hash<void> > PointerCounterMap;
 typedef hphp_hash_set<void*, pointer_hash<void> > PointerSet;
 
 typedef std::vector<std::string> StringVec;
-typedef boost::shared_ptr<std::vector<std::string> > StringVecPtr;
+typedef std::shared_ptr<std::vector<std::string> > StringVecPtr;
 typedef std::pair<std::string, std::string> StringPair;
 typedef std::set<std::pair<std::string, std::string> > StringPairSet;
 typedef std::vector<StringPairSet> StringPairSetVec;
@@ -455,10 +454,10 @@ destroyMapValues(Container& c) {
 
 #define DECLARE_BOOST_TYPES(classname)                                  \
   class classname;                                                      \
-  typedef boost::shared_ptr<classname> classname ## Ptr;                \
+  typedef std::shared_ptr<classname> classname ## Ptr;                \
   typedef hphp_raw_ptr<classname> classname ## RawPtr;                  \
-  typedef boost::weak_ptr<classname> classname ## WeakPtr;              \
-  typedef boost::shared_ptr<const classname> classname ## ConstPtr;     \
+  typedef std::weak_ptr<classname> classname ## WeakPtr;              \
+  typedef std::shared_ptr<const classname> classname ## ConstPtr;     \
   typedef std::vector<classname ## Ptr> classname ## PtrVec;            \
   typedef std::set<classname ## Ptr> classname ## PtrSet;               \
   typedef std::list<classname ## Ptr> classname ## PtrList;             \
@@ -469,7 +468,7 @@ destroyMapValues(Container& c) {
   typedef hphp_string_hash_map<classname ## PtrSet, classname>          \
       StringTo ## classname ## PtrSetMap;                               \
 
-typedef boost::shared_ptr<FILE> FilePtr;
+typedef std::shared_ptr<FILE> FilePtr;
 
 struct null_deleter {
   void operator()(void const *) const {
@@ -517,19 +516,6 @@ Out& readData(In*& it) {
 }
 } // namespace HPHP
 
-namespace boost {
-
-template <typename T, typename U>
-HPHP::hphp_raw_ptr<T> dynamic_pointer_cast(HPHP::hphp_raw_ptr<U> p) {
-  return HPHP::hphp_raw_ptr<T>(dynamic_cast<T*>(p.get()));
-}
-
-template <typename T, typename U>
-HPHP::hphp_raw_ptr<T> static_pointer_cast(HPHP::hphp_raw_ptr<U> p) {
-  return HPHP::hphp_raw_ptr<T>(static_cast<T*>(p.get()));
-}
-}
-
 inline bool ptr_is_low_mem(void* ptr) {
   static_assert(sizeof(void*) == 8, "Unexpected pointer size");
   return !((uint64_t)ptr & 0xffffffff00000000ull);
@@ -539,8 +525,18 @@ namespace HPHP {
   using std::string;
   using std::vector;
   using boost::lexical_cast;
-  using boost::dynamic_pointer_cast;
-  using boost::static_pointer_cast;
+  using std::dynamic_pointer_cast;
+  using std::static_pointer_cast;
+
+  template <typename T, typename U>
+  HPHP::hphp_raw_ptr<T> dynamic_pointer_cast(HPHP::hphp_raw_ptr<U> p) {
+    return HPHP::hphp_raw_ptr<T>(dynamic_cast<T*>(p.get()));
+  }
+
+  template <typename T, typename U>
+  HPHP::hphp_raw_ptr<T> static_pointer_cast(HPHP::hphp_raw_ptr<U> p) {
+    return HPHP::hphp_raw_ptr<T>(static_cast<T*>(p.get()));
+  }
 }
 
 #endif

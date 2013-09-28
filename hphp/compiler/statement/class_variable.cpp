@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -214,10 +214,10 @@ int ClassVariable::getKidCount() const {
 void ClassVariable::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_modifiers = boost::dynamic_pointer_cast<ModifierExpression>(cp);
+      m_modifiers = dynamic_pointer_cast<ModifierExpression>(cp);
       break;
     case 1:
-      m_declaration = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      m_declaration = dynamic_pointer_cast<ExpressionList>(cp);
       break;
     default:
       assert(false);
@@ -273,7 +273,6 @@ void ClassVariable::inferTypes(AnalysisResultPtr ar) {
 
 void ClassVariable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_modifiers->outputPHP(cg, ar);
-  cg_printf(" ");
   m_declaration->outputPHP(cg, ar);
   cg_printf(";\n");
 }

@@ -1,0 +1,10 @@
+*** Testing array_diff_assoc() : error conditions ***
+
+-- Testing array_diff_assoc() function with zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing array_diff_assoc() function with less than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

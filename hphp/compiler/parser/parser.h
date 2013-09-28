@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,12 +17,15 @@
 #ifndef incl_HPHP_COMPILER_PARSER_H_
 #define incl_HPHP_COMPILER_PARSER_H_
 
-#include "hphp/runtime/base/util/exceptions.h"
-#include "hphp/util/parser/parser.h"
+#include "hphp/runtime/base/exceptions.h"
+#include "hphp/parser/parser.h"
 #include "hphp/compiler/construct.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/type_annotation.h"
+#include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/statement/statement_list.h"
 
 #ifdef HPHP_PARSER_NS
 #undef HPHP_PARSER_NS
@@ -67,29 +70,36 @@ public:
     m_text += str;
     return *this;
   }
+
   Token &operator+(const Token &token) {
     m_num += token.m_num;
     m_text += token.m_text;
     return *this;
   }
+
   Token *operator->() {
     return this;
   }
+
   void operator=(int num) {
     m_num = num;
   }
-  void operator=(Token &other) {
+
+  Token& operator=(const Token& other) {
     ScannerToken::operator=(other);
     exp = other.exp;
     stmt = other.stmt;
     typeAnnotation = other.typeAnnotation;
+    return *this;
   }
+
   void reset() {
     exp.reset();
     stmt.reset();
     typeAnnotation.reset();
     ScannerToken::reset();
   }
+
   const std::string typeAnnotationName() {
     return (typeAnnotation) ? typeAnnotation->fullName() : "";
   }
@@ -111,8 +121,7 @@ public:
   // implementing ParserBase
   virtual bool parseImpl();
   bool parse();
-  virtual void error(const char* fmt, ...);
-  virtual bool enableXHP();
+  virtual void error(const char* fmt, ...) ATTRIBUTE_PRINTF(2,3);
   virtual bool enableFinallyStatement();
   IMPLEMENT_XHP_ATTRIBUTES;
 
@@ -182,7 +191,7 @@ public:
   void onFunction(Token &out, Token *modifier, Token &ret, Token &ref,
                   Token &name, Token &params, Token &stmt, Token *attr);
   void onParam(Token &out, Token *params, Token &type, Token &var,
-               bool ref, Token *defValue, Token *attr);
+               bool ref, Token *defValue, Token *attr, Token *modifiers);
   void onClassStart(int type, Token &name);
   void onClass(Token &out, int type, Token &name, Token &base,
                Token &baseInterface, Token &stmt, Token *attr);
@@ -219,11 +228,12 @@ public:
              Token &stmt);
   void onSwitch(Token &out, Token &expr, Token &cases);
   void onCase(Token &out, Token &cases, Token *cond, Token &stmt);
-  void onBreak(Token &out, Token *expr);
-  void onContinue(Token &out, Token *expr);
+  void onBreakContinue(Token &out, bool isBreak, Token *expr);
   void onReturn(Token &out, Token *expr);
   void onYield(Token &out, Token &expr);
+  void onYieldPair(Token &out, Token &key, Token &val);
   void onYieldBreak(Token &out);
+  void onAwait(Token &out, Token &expr);
   void onGlobal(Token &out, Token &expr);
   void onGlobalVar(Token &out, Token *exprs, Token &expr);
   void onStatic(Token &out, Token &expr);
@@ -242,8 +252,8 @@ public:
   void onThrow(Token &out, Token &expr);
 
   void onClosureStart(Token &name);
-  void onClosure(Token &out, Token &ret, Token &ref, Token &params,
-                 Token &cparams, Token &stmts, bool is_static);
+  void onClosure(Token &out, Token *modifiers, Token &ret, Token &ref,
+                 Token &params, Token &cparams, Token &stmts);
   void onClosureParam(Token &out, Token *params, Token &param, bool ref);
   void onLabel(Token &out, Token &label);
   void onGoto(Token &out, Token &label, bool limited);
@@ -271,29 +281,25 @@ public:
 private:
   struct FunctionContext {
     FunctionContext()
-      : isNotGenerator(false)
+      : hasReturn(false)
       , isGenerator(false)
+      , isAsync(false)
     {}
 
-    // mark this function as generator; returns true on success
-    bool setIsGenerator() {
-      if (!isNotGenerator) isGenerator = true;
-      return !isNotGenerator;
-    }
-
-    // mark this function as non-generator; returns true on success
-    bool setIsNotGenerator() {
-      if (!isGenerator) isNotGenerator = true;
-      return !isGenerator;
-    }
-
     void checkFinalAssertions() {
-      assert(!isGenerator || !isNotGenerator);
+      assert((isGenerator && !isAsync && !hasReturn) || !isGenerator);
     }
 
-    bool isNotGenerator;  // function determined to not be a generator
+    bool hasReturn;       // function contains a return statement
     bool isGenerator;     // function determined to be a generator
- };
+    bool isAsync;         // function determined to be async
+  };
+
+  enum class FunctionType {
+    Function,
+    Method,
+    Closure,
+  };
 
   AnalysisResultPtr m_ar;
   FileScopePtr m_file;
@@ -304,6 +310,7 @@ private:
   std::vector<ScalarExpressionPtr> m_compilerHaltOffsetVec;
   std::string m_clsName; // for T_CLASS_C inside a closure
   std::string m_funcName;
+  std::string m_containingFuncName;
   bool m_inTrait;
 
   // parser output
@@ -322,7 +329,26 @@ private:
   void newScope();
   void completeScope(BlockScopePtr inner);
 
+  void invalidYield();
   bool setIsGenerator();
+
+  void invalidAwait();
+  bool setIsAsync();
+
+  static bool canBeAsyncOrGenerator(string funcName, string clsName);
+  void checkFunctionContext(string funcName,
+                            FunctionContext& funcContext,
+                            ModifierExpressionPtr modifiers,
+                            int returnsRef);
+
+  string getFunctionName(FunctionType type, Token* name);
+  void prepareConstructorParameters(StatementListPtr stmts,
+                                    ExpressionListPtr params,
+                                    bool isAbstract);
+  StatementPtr onFunctionHelper(FunctionType type,
+                        Token *modifiers, Token &ret,
+                        Token &ref, Token *name, Token &params,
+                        Token &stmt, Token *attr, bool reloc);
 
   ExpressionPtr getDynamicVariable(ExpressionPtr exp, bool encap);
   ExpressionPtr createDynamicVariable(ExpressionPtr exp);
@@ -344,6 +370,7 @@ private:
   bool m_nsFileScope;
   std::string m_namespace; // current namespace
   hphp_string_imap<std::string> m_aliases;
+  void registerAlias(std::string name);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

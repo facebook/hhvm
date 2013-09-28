@@ -1,7 +1,7 @@
 <?php
 
-
-class A { }
+class A {
+ }
 $a = new A();
 $f = 20;
 $a->$f = 100;

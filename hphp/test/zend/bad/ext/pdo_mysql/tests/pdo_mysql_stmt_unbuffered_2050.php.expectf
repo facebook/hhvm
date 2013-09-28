@@ -1,0 +1,64 @@
+Native PS...
+Buffered...
+array(1) {
+  [0]=>
+  array(2) {
+    [%u|b%"id"]=>
+    %unicode|string%(1) "1"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a"
+  }
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [%u|b%"id"]=>
+    %unicode|string%(1) "1"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a"
+  }
+}
+Unbuffered...
+HipHop Warning: %s
+array(0) {
+}
+HipHop Warning: %s
+array(0) {
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [%u|b%"id"]=>
+    %unicode|string%(1) "1"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a"
+  }
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [%u|b%"id"]=>
+    %unicode|string%(1) "1"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a"
+  }
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [%u|b%"id"]=>
+    %unicode|string%(1) "1"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a"
+  }
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [%u|b%"id"]=>
+    %unicode|string%(1) "1"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a"
+  }
+}
+done!

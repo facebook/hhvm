@@ -1,6 +1,5 @@
 <?php
 
-
 $GLOBALS['foo'] = 10;
 $GLOBALS['bar'] = 
   array(

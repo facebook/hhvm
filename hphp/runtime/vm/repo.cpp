@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,11 +17,11 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
-#include "hphp/util/repo_schema.h"
+#include "hphp/util/repo-schema.h"
 
 namespace HPHP {
 
-static const Trace::Module TRACEMOD = Trace::hhbc;
+TRACE_SET_MOD(hhbc);
 
 const char* Repo::kMagicProduct =
   "facebook.com HipHop Virtual Machine bytecode repository";
@@ -493,7 +493,7 @@ void Repo::initLocal() {
     if (!RuntimeOption::RepoLocalPath.empty()) {
       attachLocal(RuntimeOption::RepoLocalPath.c_str(), isWritable);
     } else {
-      if (RuntimeOption::clientExecutionMode()) {
+      if (RuntimeOption::ClientExecutionMode()) {
         std::string cliRepo = s_cliFile;
         if (!cliRepo.empty()) {
           cliRepo += ".hhbc";

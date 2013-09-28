@@ -1,0 +1,3 @@
+Call pass::show()
+Call fail::show()
+HipHop Fatal error: %s

@@ -1,0 +1,18 @@
+*** Testing shuffle() : error conditions ***
+
+-- Testing shuffle() function with Zero arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing shuffle() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+
+-- original input array --
+array(2) {
+  [0]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+Done

@@ -1,0 +1,19 @@
+===== createWordInstance =====
+bool(false)
+bool(true)
+
+===== createLineInstance =====
+bool(false)
+bool(true)
+
+===== createCharacterInstance =====
+bool(false)
+bool(true)
+
+===== createSentenceInstance =====
+bool(false)
+bool(true)
+
+===== createTitleInstance =====
+bool(false)
+bool(true)

@@ -1,0 +1,145 @@
+{
+    "preamble": "\n\/\/ Avoid dragging in the icu namespace.\n#ifndef U_USING_ICU_NAMESPACE\n#define U_USING_ICU_NAMESPACE 0\n#endif\n\n#include \"unicode\/uspoof.h\"\n#include \"unicode\/utypes.h\"",
+    "consts": [
+    ],
+    "funcs": [
+    ],
+    "classes": [
+        {
+            "name": "SpoofChecker",
+            "desc": "Unicode Security and Spoofing Detection (see http:\/\/icu-project.org\/apiref\/icu4c\/uspoof_8h.html for details)",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "footer": "\n  private: USpoofChecker *m_spoof_checker;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "desc": "Creates a spoof checker that checks for visually confusing characters in a string.  By default, runs the following tests: SINGLE_SCRIPT_CONFUSABLE, MIXED_SCRIPT_CONFUSABLE, WHOLE_SCRIPT_CONFUSABLE, ANY_CASE, INVISIBLE.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "isSuspicious",
+                    "desc": "Check the specified UTF-8 string for possible security or spoofing issues.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE if the string has possible security or spoofing issues, FALSE otherwise."
+                    },
+                    "args": [
+                        {
+                            "name": "text",
+                            "type": "String",
+                            "desc": "A UTF-8 string to be checked for possible security issues."
+                        },
+                        {
+                            "name": "issuesFound",
+                            "type": "Variant",
+                            "value": "null",
+                            "desc": "If passed, this will hold an integer value with bits set for any potential security or spoofing issues detected. Zero is returned if no issues are found with the input string.",
+                            "ref": true
+                        }
+                    ]
+                },
+                {
+                    "name": "areConfusable",
+                    "desc": "Check the whether two specified UTF-8 strings are visually confusable. The types of confusability to be tested - single script, mixed script, or whole script - are determined by the check options set for this instance.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE if the two strings are confusable, FALSE otherwise."
+                    },
+                    "args": [
+                        {
+                            "name": "s1",
+                            "type": "String",
+                            "desc": "The first of the two UTF-8 strings to be compared for confusability."
+                        },
+                        {
+                            "name": "s2",
+                            "type": "String",
+                            "desc": "The second of the two UTF-8 strings to be compared for confusability."
+                        },
+                        {
+                            "name": "issuesFound",
+                            "type": "Variant",
+                            "value": "null",
+                            "desc": "If passed, this will hold an integer value with bit(s) set corresponding to the type of confusability found, as defined by the constant values stored in this class. Zero is returned if the strings are not confusable.",
+                            "ref": true
+                        }
+                    ]
+                },
+                {
+                    "name": "setAllowedLocales",
+                    "desc": "Limit characters that are acceptable in identifiers being checked to those normally used with the languages associated with the specified locales.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "localesList",
+                            "type": "String",
+                            "desc": "A list of locales, from which the language and associated script are extracted. The locales are comma-separated if there is more than one. White space may not appear within an individual locale, but is ignored otherwise. The locales are syntactically like those from the HTTP Accept-Language header. If the localesList is empty, no restrictions will be placed on the allowed characters."
+                        }
+                    ]
+                },
+                {
+                    "name": "setChecks",
+                    "desc": "Specify the set of checks that will be performed by the check function",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "checks",
+                            "type": "Int32",
+                            "desc": "The set of checks that this spoof checker will perform. The value is a bit set, obtained by OR-ing together the constant values in this class."
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+                {
+                    "name": "SINGLE_SCRIPT_CONFUSABLE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "MIXED_SCRIPT_CONFUSABLE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "WHOLE_SCRIPT_CONFUSABLE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "ANY_CASE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "SINGLE_SCRIPT",
+                    "type": "Int64"
+                },
+                {
+                    "name": "INVISIBLE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "CHAR_LIMIT",
+                    "type": "Int64"
+                }
+            ]
+        }
+    ]
+}

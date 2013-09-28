@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,7 +45,7 @@ template <unsigned int i, bool p, unsigned int m>
 struct BitPhaseImpl {
   enum {
     value = ((i & m) ? (p ? 0 : 1) : (p ? 1 : 0)) +
-             BitPhaseImpl<i, i & m, (m >> 1)>::value
+            BitPhaseImpl<i, ((i & m) != 0), (m >> 1)>::value
   };
 };
 

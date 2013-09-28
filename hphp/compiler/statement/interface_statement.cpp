@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,7 @@
 #include "hphp/compiler/statement/interface_statement.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/analysis_result.h"
@@ -108,6 +109,38 @@ void InterfaceStatement::onParse(AnalysisResultConstPtr ar,
       IParseHandlerPtr ph = dynamic_pointer_cast<IParseHandler>((*m_stmt)[i]);
       ph->onParseRecur(ar, classScope);
     }
+    checkArgumentsToPromote(ExpressionListPtr(), T_INTERFACE);
+  }
+}
+
+void InterfaceStatement::checkArgumentsToPromote(
+    ExpressionListPtr promotedParams, int type) {
+  if (!m_stmt) {
+    return;
+  }
+  for (int i = 0; i < m_stmt->getCount(); i++) {
+    MethodStatementPtr meth =
+      dynamic_pointer_cast<MethodStatement>((*m_stmt)[i]);
+    if (meth && meth->getName() == "__construct") {
+      ExpressionListPtr params = meth->getParams();
+      if (params) {
+        for (int i = 0; i < params->getCount(); i++) {
+          ParameterExpressionPtr param =
+            dynamic_pointer_cast<ParameterExpression>((*params)[i]);
+          if (param->getModifier() != 0) {
+            if (type == T_TRAIT || type == T_INTERFACE) {
+              param->parseTimeFatal(Compiler::InvalidAttribute,
+                                    "Constructor parameter promotion "
+                                    "not allowed on traits or interfaces");
+            }
+            if (promotedParams) {
+              promotedParams->addElement(param);
+            }
+          }
+        }
+      }
+      return; // nothing else to look at
+    }
   }
 }
 
@@ -198,10 +231,10 @@ int InterfaceStatement::getKidCount() const {
 void InterfaceStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_stmt = boost::dynamic_pointer_cast<StatementList>(cp);
+      m_stmt = dynamic_pointer_cast<StatementList>(cp);
       break;
     case 1:
-      m_base = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      m_base = dynamic_pointer_cast<ExpressionList>(cp);
       break;
     default:
       assert(false);

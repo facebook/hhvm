@@ -1,6 +1,8 @@
 <?hh
 class C {
-  public $t = Pair {'foo', 42};
+  public $t = Pair {
+'foo', 42}
+;
 }
 function f() {
   $c = new C;

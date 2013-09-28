@@ -1,0 +1,14 @@
+array(1) {
+  [0]=>
+  object(SimpleXMLElement)#2 (1) {
+    [0]=>
+    string(7) "content"
+  }
+}
+array(1) {
+  [0]=>
+  object(SimpleXMLElement)#4 (1) {
+    [0]=>
+    string(7) "content"
+  }
+}

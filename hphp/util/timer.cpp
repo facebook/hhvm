@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,11 @@
 #include "hphp/util/timer.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
+
+#ifdef __APPLE__
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,6 +64,30 @@ void Timer::report() const {
   int seconds = ms / 1000000;
   PRINT_MSG("%s took %d'%02d\" (%" PRId64 " us) %s", m_name.c_str(),
             seconds / 60, seconds % 60, ms, getName());
+}
+
+void Timer::GetMonotonicTime(timespec &ts) {
+#ifndef __APPLE__
+  gettime(CLOCK_MONOTONIC, &ts);
+#else
+  struct timeval tv;
+  gettimeofday(&tv, nullptr);
+  TIMEVAL_TO_TIMESPEC(&tv, &ts);
+#endif
+}
+
+void Timer::GetRealtimeTime(timespec &ts) {
+#ifndef __APPLE__
+  clock_gettime(CLOCK_REALTIME, &ts);
+#else
+  clock_serv_t cclock;
+  mach_timespec_t mts;
+  host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+  clock_get_time(cclock, &mts);
+  mach_port_deallocate(mach_task_self(), cclock);
+  ts.tv_sec = mts.tv_sec;
+  ts.tv_nsec = mts.tv_nsec;
+#endif
 }
 
 static int64_t to_usec(const timeval& tv) {
@@ -110,8 +139,8 @@ SlowTimer::SlowTimer(int64_t msThreshold, const char *location, const char *info
 
 SlowTimer::~SlowTimer() {
   int64_t msec = getTime();
-  if (msec >= m_msThreshold) {
-    Logger::Error("SlowTimer [%dms] at %s: %s",
+  if (msec >= m_msThreshold && m_msThreshold != 0) {
+    Logger::Error("SlowTimer [%" PRId64 "ms] at %s: %s",
                   msec, m_location.c_str(), m_info.c_str());
   }
 }

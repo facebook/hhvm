@@ -1,0 +1,222 @@
+*** Testing mb_split() : usage variations ***
+
+-- Iteration 1 --
+array(1) {
+  [0]=>
+  string(10) "string_val"
+}
+
+-- Iteration 2 --
+array(1) {
+  [0]=>
+  string(10) "string_val"
+}
+
+-- Iteration 3 --
+array(10) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  string(0) ""
+  [2]=>
+  string(0) ""
+  [3]=>
+  string(0) ""
+  [4]=>
+  string(0) ""
+  [5]=>
+  string(0) ""
+  [6]=>
+  string(1) "_"
+  [7]=>
+  string(0) ""
+  [8]=>
+  string(0) ""
+  [9]=>
+  string(0) ""
+}
+
+-- Iteration 4 --
+array(10) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  string(0) ""
+  [2]=>
+  string(0) ""
+  [3]=>
+  string(0) ""
+  [4]=>
+  string(0) ""
+  [5]=>
+  string(0) ""
+  [6]=>
+  string(1) "_"
+  [7]=>
+  string(0) ""
+  [8]=>
+  string(0) ""
+  [9]=>
+  string(0) ""
+}
+
+-- Iteration 5 --
+array(10) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  string(0) ""
+  [2]=>
+  string(0) ""
+  [3]=>
+  string(0) ""
+  [4]=>
+  string(0) ""
+  [5]=>
+  string(0) ""
+  [6]=>
+  string(1) "_"
+  [7]=>
+  string(0) ""
+  [8]=>
+  string(0) ""
+  [9]=>
+  string(0) ""
+}
+
+-- Iteration 6 --
+array(10) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  string(0) ""
+  [2]=>
+  string(0) ""
+  [3]=>
+  string(0) ""
+  [4]=>
+  string(0) ""
+  [5]=>
+  string(0) ""
+  [6]=>
+  string(1) "_"
+  [7]=>
+  string(0) ""
+  [8]=>
+  string(0) ""
+  [9]=>
+  string(0) ""
+}
+
+-- Iteration 7 --
+array(10) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  string(0) ""
+  [2]=>
+  string(0) ""
+  [3]=>
+  string(0) ""
+  [4]=>
+  string(0) ""
+  [5]=>
+  string(0) ""
+  [6]=>
+  string(1) "_"
+  [7]=>
+  string(0) ""
+  [8]=>
+  string(0) ""
+  [9]=>
+  string(0) ""
+}
+
+-- Iteration 8 --
+array(1) {
+  [0]=>
+  string(10) "string_val"
+}
+
+-- Iteration 9 --
+array(1) {
+  [0]=>
+  string(10) "string_val"
+}
+
+-- Iteration 10 --
+array(1) {
+  [0]=>
+  string(10) "string_val"
+}
+
+-- Iteration 11 --
+array(1) {
+  [0]=>
+  string(10) "string_val"
+}
+
+-- Iteration 12 --
+array(1) {
+  [0]=>
+  string(10) "string_val"
+}
+
+-- Iteration 13 --
+array(1) {
+  [0]=>
+  string(10) "string_val"
+}
+
+-- Iteration 14 --
+array(1) {
+  [0]=>
+  string(10) "string_val"
+}
+
+-- Iteration 15 --
+array(1) {
+  [0]=>
+  string(10) "string_val"
+}
+
+-- Iteration 16 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 17 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 18 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 19 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 20 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 21 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 22 --
+array(1) {
+  [0]=>
+  string(10) "string_val"
+}
+
+-- Iteration 23 --
+array(1) {
+  [0]=>
+  string(10) "string_val"
+}
+
+-- Iteration 24 --
+HipHop Warning: %s
+bool(false)
+Done

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -221,16 +221,16 @@ void DataFlow::ComputePartialDying(const ControlFlowGraph &g) {
 // DataFlowWalker
 
 int DataFlowWalker::after(ConstructRawPtr cp) {
-  if (ExpressionRawPtr e = boost::dynamic_pointer_cast<Expression>(cp)) {
+  if (ExpressionRawPtr e = dynamic_pointer_cast<Expression>(cp)) {
     switch (e->getKindOf()) {
       case Expression::KindOfSimpleVariable:
-        if (!boost::static_pointer_cast<SimpleVariable>(
+        if (!static_pointer_cast<SimpleVariable>(
               e)->getAlwaysStash()) {
           return WalkContinue;
         }
         break;
       case Expression::KindOfBinaryOpExpression:
-        if (boost::static_pointer_cast<BinaryOpExpression>(
+        if (static_pointer_cast<BinaryOpExpression>(
               e)->isShortCircuitOperator()) {
           break;
         }
@@ -246,7 +246,7 @@ int DataFlowWalker::after(ConstructRawPtr cp) {
         for (int i = 0, nk = e->getKidCount(); i < nk; i++) {
           ExpressionPtr k = e->getNthExpr(i);
           if (k && k->is(Expression::KindOfSimpleVariable) &&
-              !boost::static_pointer_cast<SimpleVariable>(
+              !static_pointer_cast<SimpleVariable>(
                 k)->getAlwaysStash()) {
             process(k);
           }
@@ -260,13 +260,13 @@ int DataFlowWalker::after(ConstructRawPtr cp) {
 }
 
 int DataFlowWalker::afterEach(ConstructRawPtr cur, int i, ConstructRawPtr kid) {
-  if (ExpressionRawPtr k = boost::dynamic_pointer_cast<Expression>(kid)) {
+  if (ExpressionRawPtr k = dynamic_pointer_cast<Expression>(kid)) {
     if (k->is(Expression::KindOfSimpleVariable) &&
-        !boost::static_pointer_cast<SimpleVariable>(k)->getAlwaysStash()) {
-      if (ExpressionRawPtr e = boost::dynamic_pointer_cast<Expression>(cur)) {
+        !static_pointer_cast<SimpleVariable>(k)->getAlwaysStash()) {
+      if (ExpressionRawPtr e = dynamic_pointer_cast<Expression>(cur)) {
         switch (e->getKindOf()) {
           case Expression::KindOfBinaryOpExpression:
-            if (!boost::static_pointer_cast<BinaryOpExpression>(
+            if (!static_pointer_cast<BinaryOpExpression>(
                   e)->isShortCircuitOperator()) {
               return WalkContinue;
             }

@@ -1,0 +1,171 @@
+{
+    "preamble": "\n\/\/ Avoid dragging in the icu namespace.\n#ifndef U_USING_ICU_NAMESPACE\n#define U_USING_ICU_NAMESPACE 0\n#endif\n\n#include <unicode\/ucsdet.h>\n#include <unicode\/utypes.h>",
+    "consts": [
+    ],
+    "funcs": [
+    ],
+    "classes": [
+        {
+            "name": "EncodingDetector",
+            "desc": "Guesses the encoding of an array of bytes in an unknown encoding (see http:\/\/icu-project.org\/apiref\/icu4c\/ucsdet_8h.html)",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "footer": "\n  private: UCharsetDetector *m_encoding_detector;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "desc": "Creates an encoding detector.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "setText",
+                    "desc": "Sets the input byte array whose encoding is to be guessed.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "text",
+                            "type": "String",
+                            "desc": "A byte array whose encoding is to be guessed."
+                        }
+                    ]
+                },
+                {
+                    "name": "setDeclaredEncoding",
+                    "desc": "If the user provided an encoding in metadata (like an HTTP or XML declaration), this can be used as an additional hint to the detector.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "text",
+                            "type": "String",
+                            "desc": "Possible encoding for the byte array obtained from associated metadata"
+                        }
+                    ]
+                },
+                {
+                    "name": "detect",
+                    "desc": "Returns an EncodingMatch object containing the best guess for the encoding of the byte array",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "EncodingMatch object for the best guess of the encoding of the byte array"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "detectAll",
+                    "desc": "Returns an array of EncodingMatch objects containing all guesses for the encoding of the byte array",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "VariantVec",
+                        "desc": "Array of EncodingMatch objects for all guesses of the encoding of the byte array"
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "EncodingMatch",
+            "desc": "Result of detecting the encoding of an array of bytes",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "footer": "\n  public: const UCharsetMatch *m_encoding_match;\n  private: void validate();",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "desc": "Internal only: Creates an encoding match.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "isValid",
+                    "desc": "Checks if the encoding match succeeded.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "true if the match succeeded, false otherwise"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getEncoding",
+                    "desc": "Gets the name of the detected encoding",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "The name of the detected encoding"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getConfidence",
+                    "desc": "Gets the confidence number of the encoding match",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Confidence number from 0 (no confidence) to 100 (complete confidence)"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getLanguage",
+                    "desc": "Gets a rough guess at the language of the encoded bytes",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "A rough guess at the language of the encoded bytes"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getUTF8",
+                    "desc": "Gets the UTF-8 encoded version of the encoded byte array",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "The result of converting the bytes to UTF-8 with the detected encoding"
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        }
+    ]
+}

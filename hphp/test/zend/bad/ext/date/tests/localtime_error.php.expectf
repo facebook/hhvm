@@ -1,0 +1,6 @@
+*** Testing localtime() : error conditions ***
+
+-- Testing localtime() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+===DONE===

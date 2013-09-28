@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,11 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/vm/debug/elfwriter.h"
+#include "hphp/runtime/vm/debug/gdb-jit.h"
 #include <elf.h>
 #include <gelf.h>
 #include <elf.h>
-#include "hphp/runtime/vm/debug/elfwriter.h"
-#include "hphp/runtime/vm/debug/gdb-jit.h"
 #include <string>
 #include <vector>
 #include <stdio.h>
@@ -26,15 +26,15 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/asm-x64.h"
 
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 
 using namespace HPHP::Transl;
 
 namespace HPHP {
 namespace Debug {
 
-static const Trace::Module TRACEMOD = Trace::debuginfo;
+TRACE_SET_MOD(debuginfo);
 static const uint8_t CFA_OFFSET = 16;
 
 void ElfWriter::logError(const string& msg) {
@@ -532,14 +532,14 @@ int ElfWriter::writeStringSection() {
 
 int ElfWriter::writeTextSection() {
   int section = -1;
-  X64Assembler &a(TranslatorX64::Get()->getAsm());
+  CodeBlock& a = TranslatorX64::Get()->mainCode;
   if ((section = newSection(
-      ".text.tracelets", a.code.size, SHT_NOBITS, SHF_ALLOC | SHF_EXECINSTR,
-      reinterpret_cast<uint64_t>(a.code.base))) < 0) {
+      ".text.tracelets", a.capacity(), SHT_NOBITS, SHF_ALLOC | SHF_EXECINSTR,
+      reinterpret_cast<uint64_t>(a.base()))) < 0) {
     logError("unable to create text section");
     return -1;
   }
-  if (!addSectionData(section, nullptr, a.code.size)) {
+  if (!addSectionData(section, nullptr, a.capacity())) {
     logError("unable to add text data");
     return -1;
   }

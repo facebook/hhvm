@@ -1,6 +1,5 @@
 <?php
 
-
 trait T {
   abstract static function f();
 }

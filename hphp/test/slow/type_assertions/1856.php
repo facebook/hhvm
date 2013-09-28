@@ -1,6 +1,5 @@
 <?php
 
-
 class X {
   public $x = 'foo';
 }

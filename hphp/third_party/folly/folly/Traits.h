@@ -20,6 +20,7 @@
 #define FOLLY_BASE_TRAITS_H_
 
 #include <memory>
+#include <limits>
 #include <type_traits>
 
 #include <bits/c++config.h>
@@ -277,10 +278,42 @@ struct IsOneOf<T, T1, Ts...> {
   enum { value = std::is_same<T, T1>::value || IsOneOf<T, Ts...>::value };
 };
 
-/*
- * Complementary type traits to check for a negative/non-positive value.
+/**
+ * A traits class to check for incomplete types.
  *
- * `if(x < 0)` yields an error in clang for unsigned types when -Werror is used
+ * Example:
+ *
+ *  struct FullyDeclared {}; // complete type
+ *  struct ForwardDeclared; // incomplete type
+ *
+ *  is_complete<int>::value // evaluates to true
+ *  is_complete<FullyDeclared>::value // evaluates to true
+ *  is_complete<ForwardDeclared>::value // evaluates to false
+ *
+ *  struct ForwardDeclared {}; // declared, at last
+ *
+ *  is_complete<ForwardDeclared>::value // now it evaluates to true
+ *
+ * @author: Marcelo Juchem <marcelo@fb.com>
+ */
+template <typename T>
+class is_complete {
+  template <unsigned long long> struct sfinae {};
+  template <typename U>
+  constexpr static bool test(sfinae<sizeof(U)>*) { return true; }
+  template <typename> constexpr static bool test(...) { return false; }
+public:
+  constexpr static bool value = test<T>(nullptr);
+};
+
+/*
+ * Complementary type traits for integral comparisons.
+ *
+ * For instance, `if(x < 0)` yields an error in clang for unsigned types
+ *  when -Werror is used due to -Wtautological-compare
+ *
+ *
+ * @author: Marcelo Juchem <marcelo@fb.com>
  */
 
 namespace detail {
@@ -295,6 +328,68 @@ struct is_negative_impl<T, false> {
   constexpr static bool check(T x) { return false; }
 };
 
+template <typename RHS, RHS rhs, typename LHS>
+bool less_than_impl(
+  typename std::enable_if<
+    (rhs <= std::numeric_limits<LHS>::max()
+      && rhs > std::numeric_limits<LHS>::min()),
+    LHS
+  >::type const lhs
+) {
+  return lhs < rhs;
+}
+
+template <typename RHS, RHS rhs, typename LHS>
+bool less_than_impl(
+  typename std::enable_if<
+    (rhs > std::numeric_limits<LHS>::max()),
+    LHS
+  >::type const
+) {
+  return true;
+}
+
+template <typename RHS, RHS rhs, typename LHS>
+bool less_than_impl(
+  typename std::enable_if<
+    (rhs <= std::numeric_limits<LHS>::min()),
+    LHS
+  >::type const
+) {
+  return false;
+}
+
+template <typename RHS, RHS rhs, typename LHS>
+bool greater_than_impl(
+  typename std::enable_if<
+    (rhs <= std::numeric_limits<LHS>::max()
+      && rhs >= std::numeric_limits<LHS>::min()),
+    LHS
+  >::type const lhs
+) {
+  return lhs > rhs;
+}
+
+template <typename RHS, RHS rhs, typename LHS>
+bool greater_than_impl(
+  typename std::enable_if<
+    (rhs > std::numeric_limits<LHS>::max()),
+    LHS
+  >::type const
+) {
+  return false;
+}
+
+template <typename RHS, RHS rhs, typename LHS>
+bool greater_than_impl(
+  typename std::enable_if<
+    (rhs < std::numeric_limits<LHS>::min()),
+    LHS
+  >::type const
+) {
+  return true;
+}
+
 } // namespace detail {
 
 // same as `x < 0`
@@ -307,14 +402,26 @@ constexpr bool is_negative(T x) {
 template <typename T>
 constexpr bool is_non_positive(T x) { return !x || folly::is_negative(x); }
 
+template <typename RHS, RHS rhs, typename LHS>
+bool less_than(LHS const lhs) {
+  return detail::less_than_impl<
+    RHS, rhs, typename std::remove_reference<LHS>::type
+  >(lhs);
+}
+
+template <typename RHS, RHS rhs, typename LHS>
+bool greater_than(LHS const lhs) {
+  return detail::greater_than_impl<
+    RHS, rhs, typename std::remove_reference<LHS>::type
+  >(lhs);
+}
+
 } // namespace folly
 
 FOLLY_ASSUME_FBVECTOR_COMPATIBLE_3(std::basic_string);
 FOLLY_ASSUME_FBVECTOR_COMPATIBLE_2(std::vector);
 FOLLY_ASSUME_FBVECTOR_COMPATIBLE_2(std::list);
 FOLLY_ASSUME_FBVECTOR_COMPATIBLE_2(std::deque);
-FOLLY_ASSUME_FBVECTOR_COMPATIBLE_4(std::map);
-FOLLY_ASSUME_FBVECTOR_COMPATIBLE_3(std::set);
 FOLLY_ASSUME_FBVECTOR_COMPATIBLE_2(std::unique_ptr);
 FOLLY_ASSUME_FBVECTOR_COMPATIBLE_1(std::shared_ptr);
 FOLLY_ASSUME_FBVECTOR_COMPATIBLE_1(std::function);
@@ -382,6 +489,8 @@ FOLLY_ASSUME_FBVECTOR_COMPATIBLE_1(boost::shared_ptr);
  *   cout << "Does class Bar have a member double test(const string&, long)? "
  *     << boolalpha << has_test_traits<Bar, double(const string&, long)>::value;
  * }
+ *
+ * @author: Marcelo Juchem <marcelo@fb.com>
  */
 #define FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(classname, func_name) \
   template <typename, typename> class classname; \

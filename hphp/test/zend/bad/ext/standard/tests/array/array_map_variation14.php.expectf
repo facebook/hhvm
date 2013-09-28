@@ -1,0 +1,77 @@
+*** Testing array_map() : null value for 'callback' argument ***
+-- with null --
+array(2) {
+  [0]=>
+  array(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    string(3) "one"
+    [2]=>
+    float(1.1)
+  }
+  [1]=>
+  array(3) {
+    [0]=>
+    int(2)
+    [1]=>
+    string(3) "two"
+    [2]=>
+    float(2.2)
+  }
+}
+array(2) {
+  [0]=>
+  array(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    string(3) "one"
+    [2]=>
+    float(1.1)
+  }
+  [1]=>
+  array(3) {
+    [0]=>
+    int(2)
+    [1]=>
+    string(3) "two"
+    [2]=>
+    float(2.2)
+  }
+}
+-- with unset variable --
+array(2) {
+  [0]=>
+  array(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    string(3) "one"
+    [2]=>
+    float(1.1)
+  }
+  [1]=>
+  array(3) {
+    [0]=>
+    int(2)
+    [1]=>
+    string(3) "two"
+    [2]=>
+    float(2.2)
+  }
+}
+-- with undefined variable --
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+-- with empty string --
+HipHop Warning: %s
+NULL
+-- with empty array --
+HipHop Warning: %s
+NULL
+Done

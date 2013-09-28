@@ -1,0 +1,57 @@
+string(19) "2006-12-12 00:00:00"
+string(19) "2007-02-01 00:00:01"
+string(19) "2007-11-23 12:34:56"
+string(19) "2007-08-29 00:00:00"
+string(19) "2006-12-13 00:00:00"
+int(-28800)
+int(-25200)
+string(19) "2006-12-12 23:45:12"
+string(9) "Wednesday"
+string(44) "Wednesday 10th of September 2008 12:34:56 PM"
+string(8) "Saturday"
+string(29) "Wed, 10 Sep 08 12:34:56 -0700"
+string(25) "2000-07-01T00:00:00-07:00"
+string(18) "Wednesday the 10th"
+int(1221116400)
+int(1218351600)
+int(1252566000)
+string(23) "March 10, 2001, 5:16 am"
+string(8) "03.10.01"
+string(11) "10, 3, 2001"
+string(8) "20010310"
+string(43) "05-16-18, 10-03-01, 1631 1618 6 Satam01 68 "
+string(19) "it is the 10th day."
+string(27) "Sat Mar 10 5:16:18 PST 2001"
+string(19) "05:03:18 m is month"
+string(8) "05:16:18"
+string(8) "19550310"
+string(31) "Tue, 23 Jul 1811 07:06:40 -0800"
+int(1259308800)
+array(11) {
+  ["seconds"]=>
+  int(56)
+  ["minutes"]=>
+  int(34)
+  ["hours"]=>
+  int(12)
+  ["mday"]=>
+  int(10)
+  ["wday"]=>
+  int(3)
+  ["mon"]=>
+  int(9)
+  ["year"]=>
+  int(2008)
+  ["yday"]=>
+  int(253)
+  ["weekday"]=>
+  string(9) "Wednesday"
+  ["month"]=>
+  string(9) "September"
+  [0]=>
+  int(1221075296)
+}
+int(4)
+bool(true)
+bool(true)
+int(4)

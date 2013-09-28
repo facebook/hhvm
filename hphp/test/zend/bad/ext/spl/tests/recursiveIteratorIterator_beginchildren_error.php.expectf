@@ -1,0 +1,7 @@
+NULL
+HipHop Fatal error: %s
+Stack trace:
+#0 [internal function]: MyRecursiveIteratorIterator->beginchildren()
+#1 %s: RecursiveIteratorIterator->next()
+#2 {main}
+  thrown in %s on line %d

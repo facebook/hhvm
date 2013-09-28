@@ -1,0 +1,64 @@
+*** Testing strtok() : with different token strings ***
+HipHop Notice: %s
+HipHop Notice: %s
+
+--- Testing strtok() by supplying different values for 'token' argument ---
+-- Iteration 1 --
+string(37) "this testcase test strtok() function "
+-- Iteration 2 --
+string(37) "this testcase test strtok() function "
+-- Iteration 3 --
+string(37) "this testcase test strtok() function "
+-- Iteration 4 --
+string(37) "this testcase test strtok() function "
+-- Iteration 5 --
+string(37) "this testcase test strtok() function "
+-- Iteration 6 --
+string(37) "this testcase test strtok() function "
+-- Iteration 7 --
+string(37) "this testcase test strtok() function "
+-- Iteration 8 --
+string(37) "this testcase test strtok() function "
+-- Iteration 9 --
+string(37) "this testcase test strtok() function "
+-- Iteration 10 --
+HipHop Warning: %s
+NULL
+-- Iteration 11 --
+HipHop Warning: %s
+NULL
+-- Iteration 12 --
+HipHop Warning: %s
+NULL
+-- Iteration 13 --
+HipHop Warning: %s
+NULL
+-- Iteration 14 --
+HipHop Warning: %s
+NULL
+-- Iteration 15 --
+string(37) "this testcase test strtok() function "
+-- Iteration 16 --
+string(37) "this testcase test strtok() function "
+-- Iteration 17 --
+string(37) "this testcase test strtok() function "
+-- Iteration 18 --
+string(37) "this testcase test strtok() function "
+-- Iteration 19 --
+string(4) "his "
+-- Iteration 20 --
+string(37) "this testcase test strtok() function "
+-- Iteration 21 --
+string(37) "this testcase test strtok() function "
+-- Iteration 22 --
+string(37) "this testcase test strtok() function "
+-- Iteration 23 --
+string(37) "this testcase test strtok() function "
+-- Iteration 24 --
+string(37) "this testcase test strtok() function "
+-- Iteration 25 --
+string(37) "this testcase test strtok() function "
+-- Iteration 26 --
+HipHop Warning: %s
+NULL
+Done

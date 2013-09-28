@@ -1,0 +1,113 @@
+*** Testing strtr() function: with unexpected inputs for all arguments ***
+
+-- Iteration 1 --
+string(1) "0"
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 2 --
+string(1) "1"
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 3 --
+string(2) "-2"
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 4 --
+string(4) "10.5"
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 5 --
+string(5) "-20.5"
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 6 --
+string(12) "101234567000"
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 7 --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Iteration 8 --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Iteration 9 --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Iteration 10 --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Iteration 11 --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Iteration 12 --
+string(1) "1"
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 13 --
+string(0) ""
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 14 --
+string(1) "1"
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 15 --
+string(0) ""
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 16 --
+string(0) ""
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 17 --
+string(0) ""
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 18 --
+string(13) "sample object"
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 19 --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Iteration 20 --
+string(0) ""
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 21 --
+string(0) ""
+HipHop Warning: %s
+bool(false)
+===DONE===

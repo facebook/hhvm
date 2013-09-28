@@ -1,0 +1,219 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "bzclose",
+            "desc": "Closes the given bzip2 file pointer.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "bz",
+                    "type": "Resource",
+                    "desc": "The file pointer. It must be valid and must point to a file successfully opened by bzopen()."
+                }
+            ]
+        },
+        {
+            "name": "bzopen",
+            "desc": "bzopen() opens a bzip2 (.bz2) file for reading or writing.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "If the open fails, bzopen() returns FALSE, otherwise it returns a pointer to the newly opened file."
+            },
+            "args": [
+                {
+                    "name": "filename",
+                    "type": "Variant",
+                    "desc": "The name of the file to open."
+                },
+                {
+                    "name": "mode",
+                    "type": "String",
+                    "desc": "Similar to the fopen() function, only 'r' (read) and 'w' (write) are supported. Everything else will cause bzopen to return FALSE."
+                }
+            ]
+        },
+        {
+            "name": "bzread",
+            "desc": "bzread() reads from the given bzip2 file pointer.\n\nReading stops when length (uncompressed) bytes have been read or EOF is reached, whichever comes first.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the uncompressed data, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "bz",
+                    "type": "Resource",
+                    "desc": "The file pointer. It must be valid and must point to a file successfully opened by bzopen()."
+                },
+                {
+                    "name": "length",
+                    "type": "Int32",
+                    "value": "1024",
+                    "desc": "If not specified, bzread() will read 1024 (uncompressed) bytes at a time."
+                }
+            ]
+        },
+        {
+            "name": "bzwrite",
+            "desc": "bzwrite() writes a string into the given bzip2 file stream.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the number of bytes written, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "bz",
+                    "type": "Resource",
+                    "desc": "The file pointer. It must be valid and must point to a file successfully opened by bzopen()."
+                },
+                {
+                    "name": "data",
+                    "type": "String",
+                    "desc": "The written data."
+                },
+                {
+                    "name": "length",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "If supplied, writing will stop after length (uncompressed) bytes have been written or the end of data is reached, whichever comes first."
+                }
+            ]
+        },
+        {
+            "name": "bzflush",
+            "desc": "Forces a write of all buffered bzip2 data for the file pointer bz.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "bz",
+                    "type": "Resource",
+                    "desc": "The file pointer. It must be valid and must point to a file successfully opened by bzopen()."
+                }
+            ]
+        },
+        {
+            "name": "bzerrstr",
+            "desc": "Gets the error string of any bzip2 error returned by the given file pointer.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns a string containing the error message."
+            },
+            "args": [
+                {
+                    "name": "bz",
+                    "type": "Resource",
+                    "desc": "The file pointer. It must be valid and must point to a file successfully opened by bzopen()."
+                }
+            ]
+        },
+        {
+            "name": "bzerror",
+            "desc": "Returns the error number and error string of any bzip2 error returned by the given file pointer.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an associative array, with the error code in the errno entry, and the error message in the errstr entry."
+            },
+            "args": [
+                {
+                    "name": "bz",
+                    "type": "Resource",
+                    "desc": "The file pointer. It must be valid and must point to a file successfully opened by bzopen()."
+                }
+            ]
+        },
+        {
+            "name": "bzerrno",
+            "desc": "Returns the error number of any bzip2 error returned by the given file pointer.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Returns the error number as an integer."
+            },
+            "args": [
+                {
+                    "name": "bz",
+                    "type": "Resource",
+                    "desc": "The file pointer. It must be valid and must point to a file successfully opened by bzopen()."
+                }
+            ]
+        },
+        {
+            "name": "bzcompress",
+            "desc": "bzcompress() compresses the given string and returns it as bzip2 encoded data.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The compressed string or number of error in case of error."
+            },
+            "args": [
+                {
+                    "name": "source",
+                    "type": "String",
+                    "desc": "The string to compress."
+                },
+                {
+                    "name": "blocksize",
+                    "type": "Int32",
+                    "value": "4",
+                    "desc": "Specifies the blocksize used during compression and should be a number from 1 to 9 with 9 giving the best compression, but using more resources to do so."
+                },
+                {
+                    "name": "workfactor",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "Controls how the compression phase behaves when presented with worst case, highly repetitive, input data. The value can be between 0 and 250 with 0 being a special case.\n\nRegardless of the workfactor, the generated output is the same."
+                }
+            ]
+        },
+        {
+            "name": "bzdecompress",
+            "desc": "bzdecompress() decompresses the given string containing bzip2 encoded data.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The decompressed string or number of error in case of error."
+            },
+            "args": [
+                {
+                    "name": "source",
+                    "type": "String",
+                    "desc": "The string to decompress."
+                },
+                {
+                    "name": "small",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": null
+                }
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

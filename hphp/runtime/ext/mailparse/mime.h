@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,13 +18,13 @@
 #ifndef incl_HPHP_PHP_MAILPARSE_MIME_H_
 #define incl_HPHP_PHP_MAILPARSE_MIME_H_
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/ext/mailparse/rfc822.h"
-#include "hphp/runtime/base/util/string_buffer.h"
+#include "hphp/runtime/base/string-buffer.h"
 
 extern "C" {
-#include "mbfl/mbfl_convert.h"
-#include "mbfl/mbfilter.h"
+#include <mbfl/mbfl_convert.h>
+#include <mbfl/mbfilter.h>
 }
 
 namespace HPHP {
@@ -42,20 +42,20 @@ public:
   static bool ProcessLine(MimePart *workpart, CStrRef line);
 
 public:
-  DECLARE_OBJECT_ALLOCATION(MimePart);
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(MimePart);
 
   MimePart();
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("mailparse_mail_structure")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   bool parse(const char *buf, int bufsize);
   Variant extract(CVarRef filename, CVarRef callbackfunc, int decode,
                   bool isfile);
   Variant getPartData();
   Array getStructure();
-  Object findByName(const char *name);
+  Resource findByName(const char *name);
 
   bool isVersion1();
   int filter(int c);
@@ -65,7 +65,7 @@ private:
   public:
     MimeHeader();
     explicit MimeHeader(const char *value);
-    MimeHeader(php_rfc822_tokenized_t *toks);
+    explicit MimeHeader(php_rfc822_tokenized_t *toks);
 
     bool empty() const { return m_empty;}
     void clear();
@@ -86,7 +86,7 @@ private:
   static void UpdatePositions(MimePart *part, int newendpos,
                               int newbodyend, int deltanlines);
 
-  Object m_parent;
+  Resource m_parent;
   Array  m_children;   /* child parts */
 
   int m_startpos, m_endpos;   /* offsets of this part in the message */
@@ -119,7 +119,7 @@ private:
 
     String workbuf;
     String headerbuf;
-    Object lastpart;
+    Resource lastpart;
   } m_parsedata;
 
   int extractImpl(int decode, File *src);

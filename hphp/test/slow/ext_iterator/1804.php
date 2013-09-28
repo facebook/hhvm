@@ -2,7 +2,8 @@
 
 function getFiles(&$rdi,$depth=0) {
   if (!is_object($rdi)) return;
-  $files = array(); // order changes per machine
+  $files = array();
+  // order changes per machine
   for ($rdi->rewind(); $rdi->valid(); $rdi->next()) {
     if ($rdi->isDot()) continue;
     if ($rdi->isDir() || $rdi->isFile()) {

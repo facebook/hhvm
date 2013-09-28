@@ -1,7 +1,0 @@
-===BASE===
-string(4) "Base"
-HipHop Notice: %a
-NULL
-===CHILD===
-string(4) "Base"
-HipHop Fatal error: %a

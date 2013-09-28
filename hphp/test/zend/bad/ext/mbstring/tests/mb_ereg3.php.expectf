@@ -1,0 +1,20 @@
+int(-1)
+int(-1)
+array(1) {
+  [0]=>
+  string(2) "-1"
+}
+int(-1)
+int(-1)
+array(1) {
+  [0]=>
+  string(2) "-1"
+}
+HipHop Warning: %s
+int(-1)
+int(-1)
+array(1) {
+  [0]=>
+  string(2) "-1"
+}
+Done

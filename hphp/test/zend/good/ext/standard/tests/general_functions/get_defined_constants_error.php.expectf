@@ -1,0 +1,6 @@
+*** Testing get_defined_constants() : error conditions ***
+
+-- Testing get_defined_constants() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

@@ -1,3 +1,4 @@
 <?php
 
- if (defined('FOO')) echo 'defined'; else echo 'undefined';
+if (defined('FOO')) echo 'defined';
+ else echo 'undefined';

@@ -1,0 +1,6 @@
+*** Testing getcwd() : error conditions ***
+
+-- Testing getcwd() function with one argument --
+HipHop Warning: %s
+NULL
+===DONE===

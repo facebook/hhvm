@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/program_functions.h"
-#include "hphp/hhvm/process_init.h"
+#include "hphp/runtime/base/program-functions.h"
+#include "hphp/hhvm/process-init.h"
 #include "hphp/compiler/compiler.h"
 
-#include "hphp/util/embedded_data.h"
-#include "hphp/util/embedded_vfs.h"
+#include "hphp/util/embedded-data.h"
+#include "hphp/util/embedded-vfs.h"
 #include "hphp/util/util.h"
 
 int main(int argc, char** argv) {
@@ -50,3 +50,4 @@ int main(int argc, char** argv) {
   }
   return HPHP::execute_program(args.size(), &args[0]);
 }
+

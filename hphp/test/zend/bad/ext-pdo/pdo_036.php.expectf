@@ -1,6 +1,0 @@
-object(PDORow)#%d (0) {
-}
-object(PDOStatement)#%d (1) {
-  [%u|b%"queryString"]=>
-  NULL
-}

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,7 +18,9 @@
 #define incl_HPHP_PARAMETER_EXPRESSION_H_
 
 #include "hphp/compiler/expression/expression.h"
+#include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/util/json.h"
+#include "hphp/parser/scanner.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,26 +33,33 @@ DECLARE_BOOST_TYPES(TypeAnnotation);
 class ParameterExpression : public Expression {
 public:
   ParameterExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
-                      TypeAnnotationPtr type, bool hhType,
+                      TypeAnnotationPtr type,
+                      bool hhType,
                       const std::string &name,
-                      bool ref, ExpressionPtr defaultValue,
+                      bool ref,
+                      TokenID modifier,
+                      ExpressionPtr defaultValue,
                       ExpressionPtr attributeList);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
   bool isRef() const { return m_ref;}
-  bool isOptional() const { return m_defaultValue;}
+  bool isOptional() const { return m_defaultValue != nullptr;}
   const std::string &getName() const { return m_name; }
   int getLocalEffects() const { return NoEffect; }
   void rename(const std::string &name) { m_name = name;}
   ExpressionPtr defaultValue() { return m_defaultValue; }
   ExpressionPtr userAttributeList() { return m_attributeList; }
   TypePtr getTypeSpec(AnalysisResultPtr ar, bool forInference);
+
   bool hasTypeHint() const { return !m_type.empty(); }
   const std::string &getTypeHint() const {
     assert(hasTypeHint());
     return m_type;
   }
+
+  TypeAnnotationPtr annotation() const { return m_originalType; }
+
   bool hasUserType() const { return m_originalType != nullptr; }
   const std::string getOriginalTypeHint() const;
   const std::string getUserTypeHint() const;
@@ -58,6 +67,7 @@ public:
   void compatibleDefault();
   void fixupSelfAndParentTypehints(ClassScopePtr cls);
   bool hhType() { return m_hhType; }
+  TokenID getModifier() const { return m_modifier; }
 private:
   TypePtr getTypeSpecForClass(AnalysisResultPtr ar, bool forInference);
 
@@ -66,6 +76,7 @@ private:
   std::string m_name;
   bool m_hhType;
   bool m_ref;
+  TokenID m_modifier;
   ExpressionPtr m_defaultValue;
   ExpressionPtr m_attributeList;
 };

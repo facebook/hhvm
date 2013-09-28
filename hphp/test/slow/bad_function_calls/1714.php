@@ -1,6 +1,5 @@
 <?php
 
-
 function f() {
   $a = 0;
   array_chunk($a = 1);

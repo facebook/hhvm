@@ -1,0 +1,82 @@
+*** Testing get_class_vars() : usage variation ***
+
+--int 0--
+bool(false)
+
+--int 1--
+bool(false)
+
+--int 12345--
+bool(false)
+
+--int -12345--
+bool(false)
+
+--float 10.5--
+bool(false)
+
+--float -10.5--
+bool(false)
+
+--float 12.3456789000e10--
+bool(false)
+
+--float -12.3456789000e10--
+bool(false)
+
+--float .5--
+bool(false)
+
+--empty array--
+HipHop Warning: %s
+NULL
+
+--int indexed array--
+HipHop Warning: %s
+NULL
+
+--associative array--
+HipHop Warning: %s
+NULL
+
+--nested arrays--
+HipHop Warning: %s
+NULL
+
+--uppercase NULL--
+bool(false)
+
+--lowercase null--
+bool(false)
+
+--lowercase true--
+bool(false)
+
+--lowercase false--
+bool(false)
+
+--uppercase TRUE--
+bool(false)
+
+--uppercase FALSE--
+bool(false)
+
+--empty string DQ--
+bool(false)
+
+--empty string SQ--
+bool(false)
+
+--instance of classWithToString--
+bool(false)
+
+--instance of classWithoutToString--
+HipHop Warning: %s
+NULL
+
+--undefined var--
+bool(false)
+
+--unset var--
+bool(false)
+===DONE===

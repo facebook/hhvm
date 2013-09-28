@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -107,13 +107,13 @@ int CatchStatement::getKidCount() const {
 void CatchStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_variable = boost::dynamic_pointer_cast<SimpleVariable>(cp);
+      m_variable = dynamic_pointer_cast<SimpleVariable>(cp);
       break;
     case 1:
-      m_stmt = boost::dynamic_pointer_cast<Statement>(cp);
+      m_stmt = dynamic_pointer_cast<Statement>(cp);
       break;
     case 2:
-      m_finallyStmt = boost::dynamic_pointer_cast<Statement>(cp);
+      m_finallyStmt = dynamic_pointer_cast<Statement>(cp);
     default:
       assert(false);
       break;

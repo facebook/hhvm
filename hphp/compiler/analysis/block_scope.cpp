@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,10 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/compiler/expression/expression.h"
 
 #include "hphp/compiler/analysis/block_scope.h"
+
 #include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/statement/statement_list.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/constant_table.h"
@@ -94,7 +95,7 @@ FunctionScopeRawPtr BlockScope::getContainingNonClosureFunction() {
   // walk out through all the closures
   while (bs && bs->is(BlockScope::FunctionScope)) {
     HPHP::FunctionScope *fs = static_cast<HPHP::FunctionScope*>(bs);
-    if (!fs->isClosure() && !fs->isGeneratorFromClosure()) {
+    if (!fs->isClosure()) {
       return FunctionScopeRawPtr(fs);
     }
     bs = bs->m_outerScope.get();

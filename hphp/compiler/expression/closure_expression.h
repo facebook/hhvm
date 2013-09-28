@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,12 +40,16 @@ public:
   FunctionStatementPtr getClosureFunction() { return m_func; }
   ExpressionListPtr getClosureVariables() { return m_vars; }
   ExpressionListPtr getClosureValues() { return m_values; }
+  StringData* getClosureClassName() { return m_closureClassName; }
+  void setClosureClassName(StringData* value) { m_closureClassName = value; }
   bool hasStaticLocals();
+
 
 private:
   FunctionStatementPtr m_func;
   ExpressionListPtr m_vars;
   ExpressionListPtr m_values;
+  StringData* m_closureClassName;
 
   static TypePtr s_ClosureType;
 

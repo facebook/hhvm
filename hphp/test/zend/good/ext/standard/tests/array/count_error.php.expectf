@@ -1,0 +1,10 @@
+*** Testing count() : error conditions ***
+
+-- Testing count() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing count() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

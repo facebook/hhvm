@@ -1,0 +1,4 @@
+*** Testing mb_strripos() : error conditions ***
+HipHop Warning: %s
+bool(false)
+Done

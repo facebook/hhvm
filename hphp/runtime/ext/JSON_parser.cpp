@@ -28,18 +28,19 @@ SOFTWARE.
 
 
 #include "hphp/runtime/ext/JSON_parser.h"
-#include "hphp/runtime/base/util/string_buffer.h"
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/type_conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/zend/utf8_decode.h"
-
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/utf8-decode.h"
+#include "hphp/system/systemlib.h"
+#include "hphp/runtime/base/thread-init-fini.h"
+#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/ext_collections.h"
 
 #define MAX_LENGTH_OF_LONG 20
 static const char long_min_digits[] = "9223372036854775808";
 
-using namespace HPHP;
+namespace HPHP {
 
 #ifdef true
 # undef true
@@ -296,9 +297,48 @@ struct json_parser {
   String the_kstack[JSON_PARSER_MAX_DEPTH];
   int the_top;
   int the_mark; // the watermark
+  json_error_codes error_code;
 };
 
+
 IMPLEMENT_THREAD_LOCAL(json_parser, s_json_parser);
+
+// In Zend, the json_parser struct is publicly
+// accessible. Thus the fields could be accessed
+// directly. Just using setter/accessor functions
+// to get around that.
+json_error_codes json_get_last_error_code() {
+  return s_json_parser->error_code;
+}
+void json_set_last_error_code(json_error_codes ec) {
+  s_json_parser->error_code = ec;
+}
+
+const char *json_get_last_error_msg() {
+  switch (s_json_parser->error_code) {
+    case JSON_ERROR_NONE:
+      return "No error";
+    case JSON_ERROR_DEPTH:
+      return "Maximum stack depth exceeded";
+    case JSON_ERROR_STATE_MISMATCH:
+      return "State mismatch (invalid or malformed JSON)";
+    case JSON_ERROR_CTRL_CHAR:
+      return "Control character error, possibly incorrectly encoded";
+    case JSON_ERROR_SYNTAX:
+      return "Syntax error";
+    case JSON_ERROR_UTF8:
+      return "Malformed UTF-8 characters, possibly incorrectly encoded";
+    default:
+      return "Unknown error";
+  }
+}
+
+// For each request, make sure we start with the default error code.
+// Inline the function to do that reset.
+static InitFiniNode init(
+  []{ s_json_parser->error_code = JSON_ERROR_NONE; },
+  InitFiniNode::When::ThreadInit
+);
 
 class JsonParserCleaner {
 public:
@@ -325,10 +365,10 @@ private:
  * Push a mode onto the stack. Return false if there is overflow.
  */
 static int push(json_parser *json, int mode) {
-  json->the_top += 1;
-  if (json->the_top >= JSON_PARSER_MAX_DEPTH) {
+  if (json->the_top + 1 >= JSON_PARSER_MAX_DEPTH) {
     return false;
   }
+  json->the_top += 1;
   json->the_stack[json->the_top] = mode;
   if (json->the_top > json->the_mark) {
     json->the_mark = json->the_top;
@@ -368,7 +408,7 @@ static void json_create_zval(Variant &z, StringBuffer &buf, int type) {
         return;
       }
 
-      bool neg = (buf.charAt(0) == '-');
+      bool neg = *buf.data() == '-';
 
       int len = buf.size();
       if (neg) len--;
@@ -402,42 +442,44 @@ static void json_create_zval(Variant &z, StringBuffer &buf, int type) {
   }
 }
 
-static void utf16_to_utf8(StringBuffer &buf, unsigned short utf16) {
+void utf16_to_utf8(StringBuffer &buf, unsigned short utf16) {
   if (utf16 < 0x80) {
-    buf += (char)utf16;
+    buf.append((char)utf16);
   } else if (utf16 < 0x800) {
-    buf += (char)(0xc0 | (utf16 >> 6));
-    buf += (char)(0x80 | (utf16 & 0x3f));
+    buf.append((char)(0xc0 | (utf16 >> 6)));
+    buf.append((char)(0x80 | (utf16 & 0x3f)));
   } else if ((utf16 & 0xfc00) == 0xdc00
              && buf.size() >= 3
-             && ((unsigned char)buf.charAt(buf.size() - 3)) == 0xed
-             && ((unsigned char)buf.charAt(buf.size() - 2) & 0xf0) == 0xa0
-             && ((unsigned char)buf.charAt(buf.size() - 1) & 0xc0) == 0x80) {
+             && ((unsigned char)buf.data()[buf.size() - 3]) == 0xed
+             && ((unsigned char)buf.data()[buf.size() - 2] & 0xf0) == 0xa0
+             && ((unsigned char)buf.data()[buf.size() - 1] & 0xc0) == 0x80) {
     /* found surrogate pair */
     unsigned long utf32;
 
-    utf32 = (((buf.charAt(buf.size() - 2) & 0xf) << 16)
-             | ((buf.charAt(buf.size() - 1) & 0x3f) << 10)
+    utf32 = (((buf.data()[buf.size() - 2] & 0xf) << 16)
+             | ((buf.data()[buf.size() - 1] & 0x3f) << 10)
              | (utf16 & 0x3ff)) + 0x10000;
     buf.resize(buf.size() - 3);
 
-    buf += (char)(0xf0 | (utf32 >> 18));
-    buf += (char)(0x80 | ((utf32 >> 12) & 0x3f));
-    buf += (char)(0x80 | ((utf32 >> 6) & 0x3f));
-    buf += (char)(0x80 | (utf32 & 0x3f));
+    buf.append((char)(0xf0 | (utf32 >> 18)));
+    buf.append((char)(0x80 | ((utf32 >> 12) & 0x3f)));
+    buf.append((char)(0x80 | ((utf32 >> 6) & 0x3f)));
+    buf.append((char)(0x80 | (utf32 & 0x3f)));
   } else {
-    buf += (char)(0xe0 | (utf16 >> 12));
-    buf += (char)(0x80 | ((utf16 >> 6) & 0x3f));
-    buf += (char)(0x80 | (utf16 & 0x3f));
+    buf.append((char)(0xe0 | (utf16 >> 12)));
+    buf.append((char)(0x80 | ((utf16 >> 6) & 0x3f)));
+    buf.append((char)(0x80 | (utf16 & 0x3f)));
   }
 }
+
+StaticString s__empty_("_empty_");
 
 static void object_set(Variant &var, CStrRef key, CVarRef value,
                        int assoc) {
   if (!assoc) {
     // We know it is stdClass, and everything is public (and dynamic).
     if (key.empty()) {
-      var.getObjectData()->o_set("_empty_", value);
+      var.getObjectData()->o_set(s__empty_, value);
     } else {
       var.getObjectData()->o_set(key, value);
     }
@@ -475,7 +517,7 @@ static void attach_zval(json_parser *json, CStrRef key,
  * machine with a stack.
  */
 bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
-                 bool loose/*</fb>*/) {
+                 int64_t options/*</fb>*/) {
   int b;  /* the next character */
   int c;  /* the next character class */
   int s;  /* the next state */
@@ -484,6 +526,9 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
   int the_state = 0;
 
   /*<fb>*/
+  bool loose = options & k_JSON_FB_LOOSE;
+  bool stable_maps = options & k_JSON_FB_STABLE_MAPS;
+  bool collections = stable_maps || (options & k_JSON_FB_COLLECTIONS);
   int qchr = 0;
   int const *byte_class;
   if (loose) {
@@ -508,6 +553,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
     b = decoder.decode();
     if (b == UTF8_END) break; // UTF-8 decoding finishes successfully.
     if (b == UTF8_ERROR) {
+      s_json_parser->error_code = JSON_ERROR_UTF8;
       return false;
     }
     assert(b >= 0);
@@ -517,6 +563,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
       c = byte_class[b];
       /*</fb>*/
       if (c <= S_ERR) {
+       s_json_parser->error_code = JSON_ERROR_STATE_MISMATCH;
         return false;
       }
     } else {
@@ -551,6 +598,8 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
           empty }
         */
       case -9:
+        attach_zval(the_json, JSON(the_kstack)[JSON(the_top)], assoc);
+
         if (!pop(the_json, MODE_KEY)) {
           return false;
         }
@@ -572,11 +621,23 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
           } else {
             top.unset();
           }
-          if (!assoc) {
-            top = SystemLib::AllocStdClassObject();
+          /*<fb>*/
+          if (collections) {
+            if (stable_maps) {
+              top = NEWOBJ(c_StableMap)();
+            } else {
+              top = NEWOBJ(c_Map)();
+            }
           } else {
-            top = Array::Create();
+          /*</fb>*/
+            if (!assoc) {
+              top = SystemLib::AllocStdClassObject();
+            } else {
+              top = Array::Create();
+            }
+          /*<fb>*/
           }
+          /*</fb>*/
           JSON(the_kstack)[JSON(the_top)] = key->detach();
           JSON_RESET_TYPE();
         }
@@ -605,7 +666,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
           json_create_zval(mval, *buf, type);
           Variant &top = JSON(the_zstack)[JSON(the_top)];
           object_set(top, key->detach(), mval, assoc);
-          buf->reset();
+          buf->clear();
           JSON_RESET_TYPE();
         }
 
@@ -626,12 +687,19 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
         the_state = 2;
 
         if (JSON(the_top) > 0) {
+          Variant &top = JSON(the_zstack)[JSON(the_top)];
           if (JSON(the_top) == 1) {
-            JSON(the_zstack)[JSON(the_top)].assignRef(z);
+            top.assignRef(z);
           } else {
-            JSON(the_zstack)[JSON(the_top)].unset();
+            top.unset();
           }
-          JSON(the_zstack)[JSON(the_top)] = Array::Create();
+          /*<fb>*/
+          if (collections) {
+            top = NEWOBJ(c_Vector)();
+          } else {
+            top = Array::Create();
+          }
+          /*</fb>*/
           JSON(the_kstack)[JSON(the_top)] = key->detach();
           JSON_RESET_TYPE();
         }
@@ -646,7 +714,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
             Variant mval;
             json_create_zval(mval, *buf, type);
             JSON(the_zstack)[JSON(the_top)].append(mval);
-            buf->reset();
+            buf->clear();
             JSON_RESET_TYPE();
           }
 
@@ -680,6 +748,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
           }
           /* fall through if not KindOfString */
         default:
+          s_json_parser->error_code = JSON_ERROR_SYNTAX;
           return false;
         }
         break;
@@ -713,9 +782,10 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
             the_state = 28;
             break;
           default:
+            s_json_parser->error_code = JSON_ERROR_SYNTAX;
             return false;
           }
-          buf->reset();
+          buf->clear();
           JSON_RESET_TYPE();
         }
         break;
@@ -748,6 +818,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
           syntax error
         */
       case -1:
+        s_json_parser->error_code = JSON_ERROR_SYNTAX;
         return false;
       }
     } else {
@@ -810,5 +881,13 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
     }
   }
 
-  return the_state == 9 && pop(the_json, MODE_DONE);
+  if (the_state == 9 && pop(the_json, MODE_DONE)) {
+    s_json_parser->error_code = JSON_ERROR_NONE;
+    return true;
+  }
+
+  s_json_parser->error_code = JSON_ERROR_SYNTAX;
+  return false;
+}
+
 }

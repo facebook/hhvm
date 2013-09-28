@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,7 +25,7 @@
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/compiler/expression/user_attribute.h"
 #include "hphp/util/json.h"
-#include "hphp/util/case_insensitive.h"
+#include "hphp/util/case-insensitive.h"
 #include "hphp/compiler/option.h"
 
 namespace HPHP {
@@ -168,10 +168,6 @@ public:
   bool derivedByDynamic() const {
     return m_derivedByDynamic;
   }
-
-  /* Whether this class is brought in by a separable extension */
-  void setSepExtension() { m_sep = true;}
-  bool isSepExtension() const { return m_sep;}
 
   /**
    * Get/set attributes.
@@ -407,7 +403,6 @@ private:
 
   typedef std::list<TraitMethod> TraitMethodList;
   typedef std::map<std::string, TraitMethodList> MethodToTraitListMap;
-  typedef std::map<std::string, std::string> GeneratorRenameMap;
   MethodToTraitListMap m_importMethToTraitMap;
   typedef std::map<std::string, MethodStatementPtr> ImportedMethodMap;
 
@@ -424,7 +419,6 @@ private:
   unsigned m_volatile:1; // for class_exists
   unsigned m_persistent:1;
   unsigned m_derivedByDynamic:1;
-  unsigned m_sep:1;
   unsigned m_needsCppCtor:1;
   unsigned m_needsInit:1;
   // m_knownBases has a bit for each base class saying whether
@@ -446,14 +440,10 @@ private:
   MethodStatementPtr importTraitMethod(const TraitMethod&  traitMethod,
                                        AnalysisResultPtr   ar,
                                        std::string         methName,
-                                       GeneratorRenameMap& genRenameMap,
                                        const ImportedMethodMap &
                                        importedTraitMethods);
 
   void importTraitProperties(AnalysisResultPtr ar);
-
-  void relinkGeneratorMethods(AnalysisResultPtr ar,
-                              ImportedMethodMap& importedMethods);
 
   void findTraitMethodsToImport(AnalysisResultPtr ar, ClassScopePtr trait);
 
@@ -476,12 +466,6 @@ private:
   bool usesTrait(const std::string &traitName) const;
 
   bool hasMethod(const std::string &methodName) const;
-
-  const std::string& getNewGeneratorName(FunctionScopePtr    genFuncScope,
-                                         GeneratorRenameMap& genRenameMap);
-
-  void renameCreateContinuationCalls(AnalysisResultPtr ar, ConstructPtr c,
-                                     ImportedMethodMap &importedMethods);
 
 };
 

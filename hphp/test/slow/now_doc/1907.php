@@ -1,6 +1,5 @@
 <?php
 
-
 $a = <<<NOWDOC
 "'\t
 NOWDOC;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,8 +16,8 @@
 */
 
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,7 +38,7 @@ static ExtensionUninitializer s_extension_uninitializer;
 ///////////////////////////////////////////////////////////////////////////////
 
 Extension::Extension(litstr name, const char *version /* = "" */)
-    : m_name(StringData::GetStaticString(name))
+    : m_name(makeStaticString(name))
     , m_version(version ? version : "") {
   if (s_registered_extensions == NULL) {
     s_registered_extensions = new ExtensionMap();
@@ -52,7 +52,7 @@ void Extension::LoadModules(Hdf hdf) {
   assert(s_registered_extensions);
   for (ExtensionMap::const_iterator iter = s_registered_extensions->begin();
        iter != s_registered_extensions->end(); ++iter) {
-    iter->second->moduleLoad(hdf["Extensions"][iter->second->m_name.c_str()]);
+    iter->second->moduleLoad(hdf);
   }
 }
 
@@ -78,9 +78,11 @@ void Extension::ShutdownModules() {
   s_registered_extensions->clear();
 }
 
+const StaticString s_apc("apc");
+
 bool Extension::IsLoaded(CStrRef name) {
-  if (name == "apc") {
-    return RuntimeOption::EnableApc;
+  if (name == s_apc) {
+    return apcExtension::Enable;
   }
   assert(s_registered_extensions);
   return s_registered_extensions->find(name.data()) !=

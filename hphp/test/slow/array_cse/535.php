@@ -1,6 +1,5 @@
 <?php
 
-
 function f(array $a, $e) {
   $a[$e][$e] = 30;
   $x = new stdClass();

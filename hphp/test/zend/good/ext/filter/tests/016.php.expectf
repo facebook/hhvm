@@ -1,0 +1,16 @@
+string(5) "a@b.c"
+string(17) "abuse@example.com"
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+string(57) "QWERTYUIOPASDFGHJKLZXCVBNM@QWERTYUIOPASDFGHJKLZXCVBNM.NET"
+bool(false)
+string(42) "firstname.lastname@employee.2something.com"
+string(9) "-@foo.com"
+bool(false)
+bool(false)
+bool(false)
+Done

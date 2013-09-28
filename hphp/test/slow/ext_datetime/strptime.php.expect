@@ -1,0 +1,21 @@
+string(19) "03/10/2004 15:54:19"
+array(9) {
+  ["tm_sec"]=>
+  int(19)
+  ["tm_min"]=>
+  int(54)
+  ["tm_hour"]=>
+  int(15)
+  ["tm_mday"]=>
+  int(3)
+  ["tm_mon"]=>
+  int(9)
+  ["tm_year"]=>
+  int(104)
+  ["tm_wday"]=>
+  int(0)
+  ["tm_yday"]=>
+  int(276)
+  ["unparsed"]=>
+  string(0) ""
+}

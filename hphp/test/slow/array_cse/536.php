@@ -1,6 +1,5 @@
 <?php
 
-
 function f($x) {
   var_dump($x[0]);
   $x =& $x[0];

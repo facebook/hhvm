@@ -1,0 +1,3 @@
+<?php 
+gettext (array());
+?>

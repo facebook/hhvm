@@ -1,3 +1,4 @@
 <?php
 
- $x['1'] += 1;var_dump($x);
+$x['1'] += 1;
+var_dump($x);

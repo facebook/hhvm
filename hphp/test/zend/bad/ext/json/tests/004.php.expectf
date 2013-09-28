@@ -1,0 +1,13 @@
+object(stdClass)#%d (1) {
+  ["prop"]=>
+  *RECURSION*
+}
+
+bool(false)
+int(6)
+string(%d) "Recursion detected"
+
+string(22) "{"prop":{"prop":null}}"
+int(6)
+string(%d) "Recursion detected"
+Done

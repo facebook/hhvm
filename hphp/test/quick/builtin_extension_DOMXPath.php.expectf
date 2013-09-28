@@ -1,9 +1,11 @@
 DOMXPath
-HipHop Warning: DOMXPath::__construct() expects exactly 1 parameter, 0 given in %s on line 5
+HipHop Warning: DOMXPath::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
 object(DOMXPath)#1 (0) {
 }
-string(19) "O:8:"DOMXPath":0:{}"
-object(DOMXPath)#2 (0) {
+string(92) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:8:"DOMXPath";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(8) "DOMXPath"
 }
 array(8) {
   [0]=>
@@ -25,25 +27,31 @@ array(8) {
 }
 ================
 A_DOMXPath
-HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
+HipHop Warning: DOMXPath::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
 object(A_DOMXPath)#3 (1) {
   ["___x"]=>
   NULL
 }
-string(35) "O:10:"A_DOMXPath":1:{s:4:"___x";N;}"
-object(A_DOMXPath)#4 (1) {
-  ["___x"]=>
-  NULL
+string(95) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:10:"A_DOMXPath";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(10) "A_DOMXPath"
 }
-array(5) {
+array(8) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(5) "__get"
+  string(8) "evaluate"
   [2]=>
-  string(5) "__set"
+  string(5) "query"
   [3]=>
-  string(20) "createFromDateString"
+  string(17) "registerNamespace"
   [4]=>
-  string(6) "format"
+  string(20) "registerPHPFunctions"
+  [5]=>
+  string(5) "__get"
+  [6]=>
+  string(5) "__set"
+  [7]=>
+  string(7) "__isset"
 }

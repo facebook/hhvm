@@ -1,6 +1,5 @@
 <?php
 
-
 abstract class class1 {
   public function getConstViaThis() {
     return defined('static::SOME_CONST') ? static::SOME_CONST : false;

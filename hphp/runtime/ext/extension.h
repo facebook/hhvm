@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,9 +18,10 @@
 #ifndef incl_HPHP_EXTENSION_H_
 #define incl_HPHP_EXTENSION_H_
 
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/util/hdf.h"
+#include "hphp/runtime/vm/native.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

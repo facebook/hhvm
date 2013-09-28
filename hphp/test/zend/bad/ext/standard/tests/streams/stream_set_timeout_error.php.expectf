@@ -1,0 +1,21 @@
+*** Testing stream_set_timeout() : error conditions ***
+
+-- Testing stream_set_timeout() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing stream_set_timeout() function with less than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing stream_set_timeout() function with a closed socket --
+HipHop Warning: %s
+bool(false)
+
+-- Testing stream_set_timeout() function with an invalid stream --
+HipHop Warning: %s
+NULL
+
+-- Testing stream_set_timeout() function with a stream that does not support timeouts --
+bool(false)
+Done

@@ -1,0 +1,2 @@
+HipHop Warning: array_filter() expects parameter 2 to be a valid callback in %s/test/slow/array_functions/bad_array_filter.php on line 4
+NULL

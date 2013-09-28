@@ -1,0 +1,63 @@
+*** Testing parse_ini_file() : variation ***
+
+-- Iteration 1 --
+array(1) {
+  ["a"]=>
+  string(4) "test"
+}
+
+-- Iteration 2 --
+array(1) {
+  ["a"]=>
+  string(4) "test"
+}
+
+-- Iteration 3 --
+array(1) {
+  ["a"]=>
+  string(4) "test"
+}
+
+-- Iteration 4 --
+array(1) {
+  ["a"]=>
+  string(4) "test"
+}
+
+-- Iteration 5 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 6 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 7 --
+array(1) {
+  ["a"]=>
+  string(4) "test"
+}
+
+-- Iteration 8 --
+array(1) {
+  ["a"]=>
+  string(4) "test"
+}
+
+-- Iteration 9 --
+array(1) {
+  ["a"]=>
+  string(4) "test"
+}
+
+-- Iteration 10 --
+array(1) {
+  ["a"]=>
+  string(4) "test"
+}
+
+-- Iteration 11 --
+HipHop Warning: %s
+bool(false)
+
+*** Done ***

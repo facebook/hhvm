@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,9 +16,12 @@
 */
 
 #include "hphp/runtime/ext/ext_class.h"
-#include "hphp/runtime/base/class_info.h"
-#include "hphp/runtime/vm/translator/translator.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/ext/util.h"
+#include "hphp/runtime/ext/ext_array.h"
 #include "hphp/util/util.h"
 
 namespace HPHP {
@@ -66,6 +69,19 @@ Array f_get_declared_traits() {
   return ClassInfo::GetTraits();
 }
 
+bool f_class_alias(CStrRef original,
+                   CStrRef alias,
+                   bool autoload /* = true */) {
+  auto const origClass =
+    autoload ? Unit::loadClass(original.get())
+             : lookup_class(original.get());
+  if (!origClass) {
+    raise_warning("Class %s not found", original->data());
+    return false;
+  }
+  return Unit::aliasClass(origClass, alias.get());
+}
+
 bool f_class_exists(CStrRef class_name, bool autoload /* = true */) {
   return Unit::classExists(class_name.get(), autoload, AttrNone);
 }
@@ -79,51 +95,101 @@ bool f_trait_exists(CStrRef trait_name, bool autoload /* = true */) {
   return Unit::classExists(trait_name.get(), autoload, AttrTrait);
 }
 
-Array f_get_class_methods(CVarRef class_or_object) {
-  const Class* cls = get_cls(class_or_object);
+static void getMethodNamesImpl(const Class* cls,
+                               const Class* ctx,
+                               Array& out) {
+  auto const methods = cls->methods();
+  auto const numMethods = cls->numMethods();
+
+  for (Slot i = 0; i < numMethods; ++i) {
+    auto const meth = methods[i];
+    auto const methName = meth->name();
+    auto const declCls = meth->cls();
+
+    // Only pick methods declared in this class, in order to match
+    // Zend's order.  Inherited methods will be inserted in the
+    // recursive call later.
+    if (declCls != cls) continue;
+
+    // Skip generated, internal methods.
+    if (meth->isGenerated()) continue;
+
+    // Public methods are always visible.
+    if ((meth->attrs() & AttrPublic)) {
+      out.set(StrNR(methName), true_varNR, true /* isKey */);
+      continue;
+    }
+
+    // In anonymous contexts, only public methods are visible.
+    if (!ctx) continue;
+
+    // All methods are visible if the context is the class that
+    // declared them.  If the context is not the declCls, protected
+    // methods are visible in context classes related the declCls.
+    if (declCls == ctx ||
+        ((meth->attrs() & AttrProtected) &&
+         (ctx->classof(declCls) || declCls->classof(ctx)))) {
+      out.set(StrNR(methName), true_varNR, true /* isKey */);
+    }
+  }
+
+  // Now add the inherited methods.
+  if (auto const parent = cls->parent()) {
+    getMethodNamesImpl(parent, ctx, out);
+  }
+
+  // Add interface methods that the class may not have implemented yet.
+  for (auto& iface : cls->declInterfaces()) {
+    getMethodNamesImpl(iface.get(), ctx, out);
+  }
+}
+
+Array f_get_class_methods(const Variant& class_or_object) {
+  auto const cls = get_cls(class_or_object);
   if (!cls) return Array();
   VMRegAnchor _;
 
-  HphpArray* retVal = NEW(HphpArray)(cls->numMethods());
-  cls->getMethodNames(arGetContextClassFromBuiltin(g_vmContext->getFP()),
-                      retVal);
-  return Array(retVal).keys();
+  auto retVal = Array::attach(HphpArray::MakeReserve(cls->numMethods()));
+  getMethodNamesImpl(
+    cls,
+    arGetContextClassFromBuiltin(g_vmContext->getFP()),
+    retVal
+  );
+  return f_array_keys(retVal).toArray();
 }
 
-Array vm_get_class_constants(CStrRef className) {
-  HPHP::Class* cls = HPHP::Unit::loadClass(className.get());
+Array f_get_class_constants(CStrRef className) {
+  auto const cls = Unit::loadClass(className.get());
   if (cls == NULL) {
-    return NEW(HphpArray)(0);
+    return Array::attach(HphpArray::MakeReserve(0));
   }
 
-  size_t numConstants = cls->numConstants();
-  HphpArray* retVal = NEW(HphpArray)(numConstants);
-  const Class::Const* consts = cls->constants();
+  auto const numConstants = cls->numConstants();
+  ArrayInit arrayInit(numConstants);
+
+  auto const consts = cls->constants();
   for (size_t i = 0; i < numConstants; i++) {
     // Note: hphpc doesn't include inherited constants in
     // get_class_constants(), so mimic that behavior
     if (consts[i].m_class == cls) {
-      StringData* name  = const_cast<StringData*>(consts[i].m_name);
-      const TypedValue* value = &consts[i].m_val;
+      auto const name  = const_cast<StringData*>(consts[i].m_name);
+      Cell value = consts[i].m_val;
       // Handle dynamically set constants
-      if (value->m_type == KindOfUninit) {
+      if (value.m_type == KindOfUninit) {
         value = cls->clsCnsGet(consts[i].m_name);
       }
-      retVal->nvSet(name, value, false);
+      assert(value.m_type != KindOfUninit);
+      arrayInit.set(name, cellAsCVarRef(value), true /* isKey */);
     }
   }
 
-  return retVal;
+  return arrayInit.toArray();
 }
 
-Array f_get_class_constants(CStrRef class_name) {
-  return vm_get_class_constants(class_name.get());
-}
-
-Array vm_get_class_vars(CStrRef className) {
-  HPHP::Class* cls = HPHP::Unit::lookupClass(className.get());
-  if (cls == NULL) {
-    raise_error("Unknown class %s", className->data());
+Variant f_get_class_vars(CStrRef className) {
+  const Class* cls = Unit::loadClass(className.get());
+  if (!cls) {
+    return false;
   }
   cls->initialize();
 
@@ -143,9 +209,9 @@ Array vm_get_class_vars(CStrRef className) {
 
   // For visibility checks
   CallerFrame cf;
-  HPHP::Class* ctx = arGetContextClass(cf());
+  Class* ctx = arGetContextClass(cf());
 
-  HphpArray* ret = NEW(HphpArray)(numDeclProps + numSProps);
+  ArrayInit arr(numDeclProps + numSProps);
 
   for (size_t i = 0; i < numDeclProps; ++i) {
     StringData* name = const_cast<StringData*>(propInfo[i].m_name);
@@ -153,7 +219,7 @@ Array vm_get_class_vars(CStrRef className) {
     assert(name->size() != 0);
     if (Class::IsPropAccessible(propInfo[i], ctx)) {
       const TypedValue* value = &((*propVals)[i]);
-      ret->nvSet(name, value, false);
+      arr.set(name, tvAsCVarRef(value), true /* isKey */);
     }
   }
 
@@ -161,15 +227,12 @@ Array vm_get_class_vars(CStrRef className) {
     bool vis, access;
     TypedValue* value = cls->getSProp(ctx, sPropInfo[i].m_name, vis, access);
     if (access) {
-      ret->nvSet(const_cast<StringData*>(sPropInfo[i].m_name), value, false);
+      arr.set(const_cast<StringData*>(sPropInfo[i].m_name),
+        tvAsCVarRef(value), true /* isKey */);
     }
   }
 
-  return ret;
-}
-
-Array f_get_class_vars(CStrRef class_name) {
-  return vm_get_class_vars(class_name.get());
+  return arr.toArray();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -179,7 +242,7 @@ Variant f_get_class(CVarRef object /* = null_variant */) {
     // No arg passed.
     String ret;
     CallerFrame cf;
-    HPHP::Class* cls = arGetContextClassImpl<true>(cf());
+    Class* cls = arGetContextClassImpl<true>(cf());
     if (cls) {
       ret = CStrRef(cls->nameRef());
     }
@@ -197,7 +260,7 @@ Variant f_get_class(CVarRef object /* = null_variant */) {
 Variant f_get_parent_class(CVarRef object /* = null_variant */) {
   if (!object.isInitialized()) {
     CallerFrame cf;
-    HPHP::Class* cls = arGetContextClass(cf());
+    Class* cls = arGetContextClass(cf());
     if (cls && cls->parent()) {
       return CStrRef(cls->parentRef());
     }
@@ -213,9 +276,9 @@ Variant f_get_parent_class(CVarRef object /* = null_variant */) {
     return false;
   }
 
-  Class* cls = Unit::lookupClass(class_name.toString().get());
+  const Class* cls = lookup_class(class_name.toString().get());
   if (cls) {
-    CStrRef parentClass = *(const String*)(&cls->parentRef());
+    auto& parentClass = *(const String*)(&cls->parentRef());
     if (!parentClass.empty()) {
       return parentClass;
     }
@@ -232,7 +295,7 @@ static bool is_a_impl(CVarRef class_or_object, CStrRef class_name,
   const Class* cls = get_cls(class_or_object);
   if (!cls) return false;
   if (cls->attrs() & AttrTrait) return false;
-  const Class* other = Unit::lookupClass(class_name.get());
+  const Class* other = lookup_class(class_name.get());
   if (!other) return false;
   if (other->attrs() & AttrTrait) return false;
   if (other == cls) return !subclass_only;
@@ -270,10 +333,10 @@ Variant f_property_exists(CVarRef class_or_object, CStrRef property) {
     raise_warning(
       "First parameter must either be an object or the name of an existing class"
     );
-    return Variant(Variant::nullInit);
+    return Variant(Variant::NullInit());
   }
 
-  Class* cls = Unit::lookupClass(get_classname(class_or_object).get());
+  Class* cls = lookup_class(get_classname(class_or_object).get());
   if (!cls) {
     return false;
   }
@@ -286,12 +349,8 @@ Variant f_property_exists(CVarRef class_or_object, CStrRef property) {
   return (propInd != kInvalidSlot);
 }
 
-Variant f_get_object_vars(CVarRef object) {
-  if (object.isObject()) {
-    return object.toObject()->o_toIterArray(ctxClassName());
-  }
-  raise_warning("get_object_vars() expects parameter 1 to be object");
-  return Variant(Variant::nullInit);
+Variant f_get_object_vars(CObjRef object) {
+  return object->o_toIterArray(ctxClassName());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

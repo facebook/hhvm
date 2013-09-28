@@ -31,3 +31,6 @@ string(2) "yo"
 int(2)
 string(4) "blah"
 string(2) "yo"
+=========
+bool(true)
+bool(false)

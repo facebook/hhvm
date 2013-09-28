@@ -1,0 +1,8 @@
+*** Testing log1p() : error conditions ***
+
+-- Testing log1p() function with less than expected no. of arguments --
+HipHop Warning: %s
+
+-- Testing log1p() function with more than expected no. of arguments --
+HipHop Warning: %s
+===Done===

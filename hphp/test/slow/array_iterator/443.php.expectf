@@ -1,0 +1,9 @@
+NULL
+NULL
+HipHop Warning: seek() expects exactly 1 parameter, 0 given in %s/test/slow/array_iterator/443.php on line 7
+HipHop Notice: Undefined variable: position in %s/test/slow/array_iterator/443.php on line 7
+NULL
+bool(true)
+bool(true)
+bool(true)
+bool(true)

@@ -1,0 +1,3 @@
+%unicode|string%(27) "B::func2: This should work!"
+%unicode|string%(27) "B::func3: This should work!"
+HipHop Warning: %s

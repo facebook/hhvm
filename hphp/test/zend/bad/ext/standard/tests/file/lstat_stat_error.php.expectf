@@ -1,0 +1,28 @@
+*** Testing lstat() for error conditions ***
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+NULL
+
+*** Testing stat() for error conditions ***
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+NULL
+Done

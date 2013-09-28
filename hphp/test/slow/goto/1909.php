@@ -1,3 +1,5 @@
 <?php
 
- goto a; echo 'Foo'; a: echo 'Bar';
+goto a;
+ echo 'Foo';
+ a: echo 'Bar';

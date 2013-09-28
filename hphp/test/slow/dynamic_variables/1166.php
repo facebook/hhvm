@@ -1,6 +1,5 @@
 <?php
 
-
 $MY_VAR_a = 123;
 function foo() {
   global $MY_VAR_a;

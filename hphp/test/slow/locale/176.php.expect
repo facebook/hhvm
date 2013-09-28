@@ -1,24 +1,34 @@
-Array
-(
-    [0] => a bc
-    [2] => d ef
-    [1] => � bc
-)
-Array
-(
-    [0] => a bc
-    [2] => d ef
-    [1] => � bc
-)
-Array
-(
-    [0] => a bc
-    [2] => d ef
-    [1] => � bc
-)
-Array
-(
-    [0] => a bc
-    [1] => � bc
-    [2] => d ef
-)
+array(3) {
+  [1]=>
+  string(3) "比"
+  [2]=>
+  string(3) "西"
+  [0]=>
+  string(3) "诶"
+}
+array(3) {
+  [1]=>
+  string(3) "比"
+  [2]=>
+  string(3) "西"
+  [0]=>
+  string(3) "诶"
+}
+string(10) "zh_CN.utf8"
+array(3) {
+  [1]=>
+  string(3) "比"
+  [2]=>
+  string(3) "西"
+  [0]=>
+  string(3) "诶"
+}
+string(10) "zh_CN.utf8"
+array(3) {
+  [0]=>
+  string(3) "诶"
+  [1]=>
+  string(3) "比"
+  [2]=>
+  string(3) "西"
+}

@@ -17,6 +17,11 @@ class CGetM {
     yield $local;
     yield "c";
   }
+
+  public function genInts($x) {
+    yield $x;
+    yield $x + 1;
+  }
 }
 
 function foo() {
@@ -34,6 +39,11 @@ function main() {
   $blah = new CGetM;
   foreach ($blah->genVarious() as $x) {
     echo $x;
+  }
+
+  $blah = new CGetM;
+  foreach ($blah->genInts(666) as $y) {
+    echo $y;
   }
 }
 

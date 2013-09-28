@@ -1,0 +1,24 @@
+*** Testing imap_fetchheader() : usage variations ***
+Create a temporary mailbox and add 1 msgs
+.. mailbox '{%s}%s' created
+
+-- Iteration 1 --
+FT_UID valid
+
+-- Iteration 2 --
+FT_UID valid
+
+-- Iteration 3 --
+FT_UID valid
+
+-- Iteration 4 --
+FT_UID valid
+
+-- Iteration 5 --
+HipHop Warning: %s
+FT_UID not valid
+
+-- Iteration 6 --
+HipHop Warning: %s
+FT_UID not valid
+===DONE===

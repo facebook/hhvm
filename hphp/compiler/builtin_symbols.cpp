@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,12 +27,12 @@
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/constant_table.h"
-#include "hphp/util/parser/hphp.tab.hpp"
-#include "hphp/runtime/base/class_info.h"
-#include "hphp/runtime/base/program_functions.h"
-#include "hphp/runtime/base/array/array_iterator.h"
-#include "hphp/runtime/base/execution_context.h"
-#include "hphp/runtime/base/thread_init_fini.h"
+#include "hphp/parser/hphp.tab.hpp"
+#include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/util.h"
 #include <dlfcn.h>
@@ -49,7 +49,6 @@ using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
 
 bool BuiltinSymbols::Loaded = false;
-bool BuiltinSymbols::NoSuperGlobals = false;
 StringBag BuiltinSymbols::s_strings;
 
 StringToFunctionScopePtrMap BuiltinSymbols::s_functions;
@@ -91,6 +90,7 @@ StringToClassScopePtrMap BuiltinSymbols::s_classes;
 VariableTablePtr BuiltinSymbols::s_variables;
 ConstantTablePtr BuiltinSymbols::s_constants;
 StringToTypePtrMap BuiltinSymbols::s_superGlobals;
+AnalysisResultPtr BuiltinSymbols::s_systemAr;
 void *BuiltinSymbols::s_handle_main = nullptr;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -109,11 +109,19 @@ static TypePtr typePtrFromDataType(DataType dt, TypePtr unknown) {
     case KindOfString:  return Type::String;
     case KindOfArray:   return Type::Array;
     case KindOfObject:  return Type::Object;
+    case KindOfResource: return Type::Resource;
     case KindOfUnknown:
     default:
       return unknown;
   }
 }
+
+const StaticString
+  s_fb_call_user_func_safe("fb_call_user_func_safe"),
+  s_fb_call_user_func_safe_return("fb_call_user_func_safe_return"),
+  s_fb_call_user_func_array_safe("fb_call_user_func_array_safe"),
+  s_is_callable("is_callable"),
+  s_call_user_func_array("call_user_func_array");
 
 FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
                  ClassInfo *cls, ClassInfo::MethodInfo *method) {
@@ -155,19 +163,17 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
   }
 
   f->setClassInfoAttribute(attrs);
-  if (attrs & ClassInfo::HasDocComment) {
-    f->setDocComment(method->docComment);
-  }
+  f->setDocComment(method->docComment);
 
   if (!isMethod && (attrs & ClassInfo::HasOptFunction)) {
     // Legacy optimization functions
-    if (method->name.same("fb_call_user_func_safe") ||
-        method->name.same("fb_call_user_func_safe_return") ||
-        method->name.same("fb_call_user_func_array_safe")) {
+    if (method->name.same(s_fb_call_user_func_safe) ||
+        method->name.same(s_fb_call_user_func_safe_return) ||
+        method->name.same(s_fb_call_user_func_array_safe)) {
       f->setOptFunction(hphp_opt_fb_call_user_func);
-    } else if (method->name.same("is_callable")) {
+    } else if (method->name.same(s_is_callable)) {
       f->setOptFunction(hphp_opt_is_callable);
-    } else if (method->name.same("call_user_func_array")) {
+    } else if (method->name.same(s_call_user_func_array)) {
       f->setOptFunction(hphp_opt_call_user_func);
     }
   }
@@ -203,8 +209,8 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
   if (attrs & ClassInfo::NeedsActRec) {
     f->setNeedsActRec();
   }
-  if ((attrs & ClassInfo::IgnoreRedefinition) && !isMethod) {
-    f->setIgnoreRedefinition();
+  if ((attrs & ClassInfo::AllowOverride) && !isMethod) {
+    f->setAllowOverride();
   }
 
   FunctionScope::RecordFunctionInfo(f->getName(), f);
@@ -263,7 +269,7 @@ void BuiltinSymbols::ImportExtConstants(AnalysisResultPtr ar,
   for (auto it = src.begin(); it != src.end(); ++it) {
     // We make an assumption that if the constant is a callback type
     // (e.g. STDIN, STDOUT, STDERR) then it will return an Object.
-    // And that if it's deferred (SID) it'll be a String.
+    // And that if it's deferred (SID, PHP_SAPI, etc.) it'll be a String.
     ClassInfo::ConstantInfo *cinfo = *it;
     dest->add(cinfo->name.data(),
               cinfo->isDeferred() ?
@@ -298,9 +304,7 @@ ClassScopePtr BuiltinSymbols::ImportClassScopePtr(AnalysisResultPtr ar,
   ImportExtConstants(ar, cl->getConstants(), cls);
   int attrs = cls->getAttribute();
   cl->setClassInfoAttribute(attrs);
-  if (attrs & ClassInfo::HasDocComment) {
-    cl->setDocComment(cls->getDocComment());
-  }
+  cl->setDocComment(cls->getDocComment());
   cl->setSystem();
   return cl;
 }
@@ -314,85 +318,92 @@ void BuiltinSymbols::ImportExtClasses(AnalysisResultPtr ar) {
   }
 }
 
-bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
+bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
   if (Loaded) return true;
   Loaded = true;
 
   if (g_context.isNull()) init_thread_locals();
   ClassInfo::Load();
 
-  // load extension functions first, so system/classes may call them
+  // load extension functions first, so system/php may call them
   ImportExtFunctions(ar, s_functions, ClassInfo::GetSystem());
   AnalysisResultPtr ar2 = AnalysisResultPtr(new AnalysisResult());
   s_variables = VariableTablePtr(new VariableTable(*ar2.get()));
   s_constants = ConstantTablePtr(new ConstantTable(*ar2.get()));
 
-  // parse all PHP files under system/classes
-  if (!extOnly) {
-    ar = AnalysisResultPtr(new AnalysisResult());
-    ar->loadBuiltinFunctions();
-    string slib = get_systemlib();
-
-    Scanner scanner(slib.c_str(), slib.size(),
-                    Option::GetScannerType(), "systemlib.php");
-    Compiler::Parser parser(scanner, "systemlib.php", ar);
-    if (!parser.parse()) {
-      Logger::Error("Unable to parse systemlib.php: %s",
-                    parser.getMessage().c_str());
-      assert(false);
-    }
-
-    ar->analyzeProgram(true);
-    ar->inferTypes();
-    const StringToFileScopePtrMap &files = ar->getAllFiles();
-    for (StringToFileScopePtrMap::const_iterator iterFile = files.begin();
-         iterFile != files.end(); iterFile++) {
-      const StringToClassScopePtrVecMap &classes =
-        iterFile->second->getClasses();
-      for (StringToClassScopePtrVecMap::const_iterator iter = classes.begin();
-           iter != classes.end(); ++iter) {
-        assert(iter->second.size() == 1);
-        iter->second[0]->setSystem();
-        assert(!s_classes[iter->first]);
-        s_classes[iter->first] = iter->second[0];
-      }
-    }
-  } else {
-    NoSuperGlobals = true;
-  }
-
   // load extension constants, classes and dynamics
   ImportExtConstants(ar, s_constants, ClassInfo::GetSystem());
   ImportExtClasses(ar);
 
-  if (!extOnly) {
-    Array constants = ClassInfo::GetSystemConstants();
-    LocationPtr loc(new Location);
-    for (ArrayIter it = constants.begin(); it; ++it) {
-      CVarRef key = it.first();
-      if (!key.isString()) continue;
-      std::string name = key.toCStrRef().data();
-      if (s_constants->getSymbol(name)) continue;
-      if (name == "true" || name == "false" || name == "null") continue;
-      CVarRef value = it.secondRef();
-      if (!value.isInitialized() || value.isObject()) continue;
-      ExpressionPtr e = Expression::MakeScalarExpression(ar2, ar2, loc, value);
-      TypePtr t =
-        value.isNull()    ? Type::Null    :
-        value.isBoolean() ? Type::Boolean :
-        value.isInteger() ? Type::Int64   :
-        value.isDouble()  ? Type::Double  :
-        value.isArray()   ? Type::Array   : Type::Variant;
+  Array constants = ClassInfo::GetSystemConstants();
+  LocationPtr loc(new Location);
+  for (ArrayIter it = constants.begin(); it; ++it) {
+    CVarRef key = it.first();
+    if (!key.isString()) continue;
+    std::string name = key.toCStrRef().data();
+    if (s_constants->getSymbol(name)) continue;
+    if (name == "true" || name == "false" || name == "null") continue;
+    CVarRef value = it.secondRef();
+    if (!value.isInitialized() || value.isObject()) continue;
+    ExpressionPtr e = Expression::MakeScalarExpression(ar2, ar2, loc, value);
+    TypePtr t =
+      value.isNull()    ? Type::Null    :
+      value.isBoolean() ? Type::Boolean :
+      value.isInteger() ? Type::Int64   :
+      value.isDouble()  ? Type::Double  :
+      value.isArray()   ? Type::Array   : Type::Variant;
 
-      s_constants->add(key.toCStrRef().data(), t, e, ar2, e);
+    s_constants->add(key.toCStrRef().data(), t, e, ar2, e);
+  }
+  s_variables = ar2->getVariables();
+  for (int i = 0, n = NumGlobalNames(); i < n; ++i) {
+    s_variables->add(GlobalNames[i], Type::Variant, false, ar,
+                     ConstructPtr(), ModifierExpressionPtr());
+  }
+
+  s_constants->setDynamic(ar, "PHP_BINARY", true);
+  s_constants->setDynamic(ar, "PHP_BINDIR", true);
+  s_constants->setDynamic(ar, "PHP_OS", true);
+  s_constants->setDynamic(ar, "PHP_SAPI", true);
+  s_constants->setDynamic(ar, "SID", true);
+
+  // parse all PHP files under system/php
+  s_systemAr = ar = AnalysisResultPtr(new AnalysisResult());
+  ar->loadBuiltins();
+  string slib = get_systemlib();
+
+  Scanner scanner(slib.c_str(), slib.size(),
+                  Option::GetScannerType(), "systemlib.php");
+  Compiler::Parser parser(scanner, "systemlib.php", ar);
+  if (!parser.parse()) {
+    Logger::Error("Unable to parse systemlib.php: %s",
+                  parser.getMessage().c_str());
+    assert(false);
+  }
+
+  ar->analyzeProgram(true);
+  ar->inferTypes();
+  const StringToFileScopePtrMap &files = ar->getAllFiles();
+  for (StringToFileScopePtrMap::const_iterator iterFile = files.begin();
+       iterFile != files.end(); iterFile++) {
+    const StringToClassScopePtrVecMap &classes =
+      iterFile->second->getClasses();
+    for (StringToClassScopePtrVecMap::const_iterator iter = classes.begin();
+         iter != classes.end(); ++iter) {
+      assert(iter->second.size() == 1);
+      iter->second[0]->setSystem();
+      assert(!s_classes[iter->first]);
+      s_classes[iter->first] = iter->second[0];
     }
-    s_variables = ar2->getVariables();
-    for (int i = 0, n = NumGlobalNames(); i < n; ++i) {
-      s_variables->add(GlobalNames[i], Type::Variant, false, ar,
-                       ConstructPtr(), ModifierExpressionPtr());
+
+    const StringToFunctionScopePtrMap &functions =
+      iterFile->second->getFunctions();
+    for (StringToFunctionScopePtrMap::const_iterator iter = functions.begin();
+         iter != functions.end(); ++iter) {
+      iter->second->setSystem();
+      s_functions[iter->first] = iter->second;
     }
   }
-  s_constants->setDynamic(ar, "SID", true);
 
   return true;
 }
@@ -473,7 +484,6 @@ void BuiltinSymbols::LoadSuperGlobals() {
 }
 
 bool BuiltinSymbols::IsSuperGlobal(const std::string &name) {
-  if (NoSuperGlobals) return false;
   return s_superGlobals.find(name) != s_superGlobals.end();
 }
 

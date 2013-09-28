@@ -1,0 +1,788 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "gethostname",
+            "desc": "Gets the standard host name for the local machine.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a string with the hostname on success, otherwise FALSE is returned."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "gethostbyaddr",
+            "desc": "Returns the host name of the Internet host specified by ip_address.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the host name or the unmodified ip_address on failure."
+            },
+            "args": [
+                {
+                    "name": "ip_address",
+                    "type": "String",
+                    "desc": "The host IP address."
+                }
+            ]
+        },
+        {
+            "name": "gethostbyname",
+            "desc": "Returns the IPv4 address of the Internet host specified by hostname.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the IPv4 address or a string containing the unmodified hostname on failure."
+            },
+            "args": [
+                {
+                    "name": "hostname",
+                    "type": "String",
+                    "desc": "The host name."
+                }
+            ]
+        },
+        {
+            "name": "gethostbynamel",
+            "desc": "Returns a list of IPv4 addresses to which the Internet host specified by hostname resolves.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an array of IPv4 addresses or FALSE if hostname could not be resolved."
+            },
+            "args": [
+                {
+                    "name": "hostname",
+                    "type": "String",
+                    "desc": "The host name."
+                }
+            ]
+        },
+        {
+            "name": "getprotobyname",
+            "desc": "getprotobyname() returns the protocol number associated with the protocol name as per \/etc\/protocols.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the protocol number or -1 if the protocol is not found."
+            },
+            "args": [
+                {
+                    "name": "name",
+                    "type": "String",
+                    "desc": "The protocol name."
+                }
+            ]
+        },
+        {
+            "name": "getprotobynumber",
+            "desc": "getprotobynumber() returns the protocol name associated with protocol number as per \/etc\/protocols.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the protocol name as a string, or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "number",
+                    "type": "Int32",
+                    "desc": "The protocol number."
+                }
+            ]
+        },
+        {
+            "name": "getservbyname",
+            "desc": "getservbyname() returns the Internet port which corresponds to service for the specified protocol as per \/etc\/services.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the port number, or FALSE if service or protocol is not found."
+            },
+            "args": [
+                {
+                    "name": "service",
+                    "type": "String",
+                    "desc": "The Internet service name, as a string."
+                },
+                {
+                    "name": "protocol",
+                    "type": "String",
+                    "desc": "protocol is either \"tcp\" or \"udp\" (in lowercase)."
+                }
+            ]
+        },
+        {
+            "name": "getservbyport",
+            "desc": "getservbyport() returns the Internet service associated with port for the specified protocol as per \/etc\/services.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the Internet service name as a string."
+            },
+            "args": [
+                {
+                    "name": "port",
+                    "type": "Int32",
+                    "desc": "The port number."
+                },
+                {
+                    "name": "protocol",
+                    "type": "String",
+                    "desc": "protocol is either \"tcp\" or \"udp\" (in lowercase)."
+                }
+            ]
+        },
+        {
+            "name": "inet_ntop",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a string representation of the address or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "in_addr",
+                    "type": "String",
+                    "desc": "A 32bit IPv4, or 128bit IPv6 address."
+                }
+            ]
+        },
+        {
+            "name": "inet_pton",
+            "desc": "This function converts a human readable IPv4 or IPv6 address (if PHP was built with IPv6 support enabled) into an address family appropriate 32bit or 128bit binary structure.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the in_addr representation of the given address"
+            },
+            "args": [
+                {
+                    "name": "address",
+                    "type": "String",
+                    "desc": "A human readable IPv4 or IPv6 address."
+                }
+            ]
+        },
+        {
+            "name": "ip2long",
+            "desc": null,
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the IPv4 address or FALSE if ip_address is invalid."
+            },
+            "args": [
+                {
+                    "name": "ip_address",
+                    "type": "String",
+                    "desc": "A standard format address."
+                }
+            ]
+        },
+        {
+            "name": "long2ip",
+            "desc": "The function long2ip() generates an Internet address in dotted format (i.e.: aaa.bbb.ccc.ddd) from the proper address representation.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the Internet IP address as a string."
+            },
+            "args": [
+                {
+                    "name": "proper_address",
+                    "type": "Int32",
+                    "desc": "A proper address representation."
+                }
+            ]
+        },
+        {
+            "name": "dns_check_record",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "host",
+                    "type": "String"
+                },
+                {
+                    "name": "type",
+                    "type": "String",
+                    "value": "null_string"
+                }
+            ]
+        },
+        {
+            "name": "checkdnsrr",
+            "desc": "Searches DNS for records of type type corresponding to host.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE if any records are found; returns FALSE if no records were found or if an error occurred."
+            },
+            "args": [
+                {
+                    "name": "host",
+                    "type": "String",
+                    "desc": "host may either be the IP address in dotted-quad notation or the host name."
+                },
+                {
+                    "name": "type",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "type may be any one of: A, MX, NS, SOA, PTR, CNAME, AAAA, A6, SRV, NAPTR, TXT or ANY."
+                }
+            ]
+        },
+        {
+            "name": "dns_get_record",
+            "desc": "Fetch DNS Resource Records associated with the given hostname.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "hostname",
+                    "type": "String",
+                    "desc": "hostname should be a valid DNS hostname such as \"www.example.com\". Reverse lookups can be generated using in-addr.arpa notation, but gethostbyaddr() is more suitable for the majority of reverse lookups.\n\nPer DNS standards, email addresses are given in user.host format (for example: hostmaster.example.com as opposed to hostmaster@example.com), be sure to check this value and modify if necessary before using it with a functions such as mail()."
+                },
+                {
+                    "name": "type",
+                    "type": "Int32",
+                    "value": "-1",
+                    "desc": "By default, dns_get_record() will search for any resource records associated with hostname. To limit the query, specify the optional type parameter. May be any one of the following: DNS_A, DNS_CNAME, DNS_HINFO, DNS_MX, DNS_NS, DNS_PTR, DNS_SOA, DNS_TXT, DNS_AAAA, DNS_SRV, DNS_NAPTR, DNS_A6, DNS_ALL or DNS_ANY.\n\nBecause of eccentricities in the performance of libresolv between platforms, DNS_ANY will not always return every record, the slower DNS_ALL will collect all records more reliably."
+                },
+                {
+                    "name": "authns",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "Passed by reference and, if given, will be populated with Resource Records for the Authoritative Name Servers.",
+                    "ref": true
+                },
+                {
+                    "name": "addtl",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "Passed by reference and, if given, will be populated with any Additional Records.",
+                    "ref": true
+                }
+            ]
+        },
+        {
+            "name": "dns_get_mx",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "hostname",
+                    "type": "String"
+                },
+                {
+                    "name": "mxhosts",
+                    "type": "Variant",
+                    "ref": true
+                },
+                {
+                    "name": "weights",
+                    "type": "Variant",
+                    "value": "null",
+                    "ref": true
+                }
+            ]
+        },
+        {
+            "name": "getmxrr",
+            "desc": "Searches DNS for MX records corresponding to hostname.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE if any records are found; returns FALSE if no records were found or if an error occurred."
+            },
+            "args": [
+                {
+                    "name": "hostname",
+                    "type": "String",
+                    "desc": "The Internet host name."
+                },
+                {
+                    "name": "mxhosts",
+                    "type": "Variant",
+                    "desc": "A list of the MX records found is placed into the array mxhosts.",
+                    "ref": true
+                },
+                {
+                    "name": "weight",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "If the weight array is given, it will be filled with the weight information gathered.",
+                    "ref": true
+                }
+            ]
+        },
+        {
+            "name": "fsockopen",
+            "desc": "Initiates a socket connection to the resource specified by hostname.\n\nPHP supports targets in the Internet and Unix domains as described in List of Supported Socket Transports. A list of supported transports can also be retrieved using stream_get_transports().\n\nThe socket will by default be opened in blocking mode. You can switch it to non-blocking mode by using stream_set_blocking().",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "fsockopen() returns a file pointer which may be used together with the other file functions (such as fgets(), fgetss(), fwrite(), fclose(), and feof()). If the call fails, it will return FALSE"
+            },
+            "args": [
+                {
+                    "name": "hostname",
+                    "type": "String",
+                    "desc": "If you have compiled in OpenSSL support, you may prefix the hostname with either ssl:\/\/ or tls:\/\/ to use an SSL or TLS client connection over TCP\/IP to connect to the remote host."
+                },
+                {
+                    "name": "port",
+                    "type": "Int32",
+                    "value": "-1",
+                    "desc": "The port number."
+                },
+                {
+                    "name": "errnum",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "If provided, holds the system level error number that occurred in the system-level connect() call.\n\nIf the value returned in errno is 0 and the function returned FALSE, it is an indication that the error occurred before the connect() call. This is most likely due to a problem initializing the socket.",
+                    "ref": true
+                },
+                {
+                    "name": "errstr",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "The error message as a string.",
+                    "ref": true
+                },
+                {
+                    "name": "timeout",
+                    "type": "Double",
+                    "value": "-1.0",
+                    "desc": "The connection timeout, in seconds.\n\nIf you need to set a timeout for reading\/writing data over the socket, use stream_set_timeout(), as the timeout parameter to fsockopen() only applies while connecting the socket."
+                }
+            ]
+        },
+        {
+            "name": "pfsockopen",
+            "desc": "This function behaves exactly as fsockopen() with the difference that the connection is not closed after the script finishes. It is the persistent version of fsockopen().\nFor parameter information, see the fsockopen() documentation.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "hostname",
+                    "type": "String"
+                },
+                {
+                    "name": "port",
+                    "type": "Int32",
+                    "value": "-1"
+                },
+                {
+                    "name": "errnum",
+                    "type": "Variant",
+                    "value": "null",
+                    "ref": true
+                },
+                {
+                    "name": "errstr",
+                    "type": "Variant",
+                    "value": "null",
+                    "ref": true
+                },
+                {
+                    "name": "timeout",
+                    "type": "Double",
+                    "value": "-1.0"
+                }
+            ]
+        },
+        {
+            "name": "socket_get_status",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "stream",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "socket_set_blocking",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "stream",
+                    "type": "Resource"
+                },
+                {
+                    "name": "mode",
+                    "type": "Int32"
+                }
+            ]
+        },
+        {
+            "name": "socket_set_timeout",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "stream",
+                    "type": "Resource"
+                },
+                {
+                    "name": "seconds",
+                    "type": "Int32"
+                },
+                {
+                    "name": "microseconds",
+                    "type": "Int32",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "header",
+            "desc": null,
+            "flags": [
+            ],
+            "return": {
+                "type": null,
+                "desc": "No value is returned."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The header string.\n\nThere are two special-case header calls. The first is a header that starts with the string \"HTTP\/\" (case is not significant), which will be used to figure out the HTTP status code to send. For example, if you have configured Apache to use a PHP script to handle requests for missing files (using the ErrorDocument directive), you may want to make sure that your script generates the proper status code.\n\n\n\n\n\nThe second special case is the \"Location:\" header. Not only does it send this header back to the browser, but it also returns a REDIRECT (302) status code to the browser unless the 201 or a 3xx status code has already been set."
+                },
+                {
+                    "name": "replace",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "The optional replace parameter indicates whether the header should replace a previous similar header, or add a second header of the same type. By default it will replace, but if you pass in FALSE as the second argument you can force multiple headers of the same type. For example:"
+                },
+                {
+                    "name": "http_response_code",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "Forces the HTTP response code to the specified value."
+                }
+            ]
+        },
+        {
+            "name": "http_response_code",
+            "desc": "Get and\/or Set the HTTP response code.",
+            "return": {
+                "type": "Variant",
+                "desc": "The current response code."
+            },
+            "args": [
+                {
+                    "name": "response_code",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "New response code to set."
+                }
+            ],
+            "flags": [
+            ]
+        },
+        {
+            "name": "headers_list",
+            "desc": "headers_list() will return a list of headers to be sent to the browser \/ client. To determine whether or not these headers have been sent yet, use headers_sent().",
+            "flags": [
+            ],
+            "return": {
+                "type": "StringVec",
+                "desc": "Returns a numerically indexed array of headers."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "get_http_request_size",
+            "desc": "get_http_request_size() will return the size of the http request.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int32",
+                "desc": "Returns the size of the http request."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "headers_sent",
+            "desc": "Checks if or where headers have been sent.\n\nYou can't add any more header lines using the header() function once the header block has already been sent. Using this function you can at least prevent getting HTTP header related error messages. Another option is to use Output Buffering.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "headers_sent() will return FALSE if no HTTP headers have already been sent or TRUE otherwise."
+            },
+            "args": [
+                {
+                    "name": "file",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "If the optional file and line parameters are set, headers_sent() will put the PHP source file name and line number where output started in the file and line variables.",
+                    "ref": true
+                },
+                {
+                    "name": "line",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "The line number where the output started.",
+                    "ref": true
+                }
+            ]
+        },
+        {
+            "name": "header_register_callback",
+            "desc": "Registers a function that will be called when PHP starts sending output.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "callback",
+                    "type": "Variant",
+                    "desc": "Function called just before the headers are sent. It gets no parameters and the return value is ignored."
+                }
+            ]
+        },
+        {
+            "name": "header_remove",
+            "desc": "Removes an HTTP header previously set using header().",
+            "flags": [
+            ],
+            "return": {
+                "type": null,
+                "desc": "No value is returned."
+            },
+            "args": [
+                {
+                    "name": "name",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "The header name to be removed. This parameter is case-insensitive."
+                }
+            ]
+        },
+        {
+            "name": "setcookie",
+            "desc": null,
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "If output exists prior to calling this function, setcookie() will fail and return FALSE. If setcookie() successfully runs, it will return TRUE. This does not indicate whether the user accepted the cookie."
+            },
+            "args": [
+                {
+                    "name": "name",
+                    "type": "String",
+                    "desc": "The name of the cookie."
+                },
+                {
+                    "name": "value",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "The value of the cookie. This value is stored on the clients computer; do not store sensitive information. Assuming the name is 'cookiename', this value is retrieved through $_COOKIE['cookiename']"
+                },
+                {
+                    "name": "expire",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "The time the cookie expires. This is a Unix timestamp so is in number of seconds since the epoch. In other words, you'll most likely set this with the time() function plus the number of seconds before you want it to expire. Or you might use mktime(). time()+60*60*24*30 will set the cookie to expire in 30 days. If set to 0, or omitted, the cookie will expire at the end of the session (when the browser closes).\n\n\n\nYou may notice the expire parameter takes on a Unix timestamp, as opposed to the date format Wdy, DD-Mon-YYYY HH:MM:SS GMT, this is because PHP does this conversion internally.\n\nexpire is compared to the client's time which can differ from server's time."
+                },
+                {
+                    "name": "path",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "The path on the server in which the cookie will be available on. If set to '\/', the cookie will be available within the entire domain. If set to '\/foo\/', the cookie will only be available within the \/foo\/ directory and all sub-directories such as \/foo\/bar\/ of domain. The default value is the current directory that the cookie is being set in."
+                },
+                {
+                    "name": "domain",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": null
+                },
+                {
+                    "name": "secure",
+                    "type": "Boolean",
+                    "value": "false",
+                    "desc": "Indicates that the cookie should only be transmitted over a secure HTTPS connection from the client. When set to TRUE, the cookie will only be set if a secure connection exists. On the server-side, it's on the programmer to send this kind of cookie only on secure connection (e.g. with respect to $_SERVER[\"HTTPS\"])."
+                },
+                {
+                    "name": "httponly",
+                    "type": "Boolean",
+                    "value": "false",
+                    "desc": "When TRUE the cookie will be made accessible only through the HTTP protocol. This means that the cookie won't be accessible by scripting languages, such as JavaScript. This setting can effectively help to reduce identity theft through XSS attacks (although it is not supported by all browsers). Added in PHP 5.2.0. TRUE or FALSE"
+                }
+            ]
+        },
+        {
+            "name": "setrawcookie",
+            "desc": "setrawcookie() is exactly the same as setcookie() except that the cookie value will not be automatically urlencoded when sent to the browser.\nFor parameter information, see the setcookie() documentation.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "name",
+                    "type": "String"
+                },
+                {
+                    "name": "value",
+                    "type": "String",
+                    "value": "null_string"
+                },
+                {
+                    "name": "expire",
+                    "type": "Int64",
+                    "value": "0"
+                },
+                {
+                    "name": "path",
+                    "type": "String",
+                    "value": "null_string"
+                },
+                {
+                    "name": "domain",
+                    "type": "String",
+                    "value": "null_string"
+                },
+                {
+                    "name": "secure",
+                    "type": "Boolean",
+                    "value": "false"
+                },
+                {
+                    "name": "httponly",
+                    "type": "Boolean",
+                    "value": "false"
+                }
+            ]
+        },
+        {
+            "name": "define_syslog_variables",
+            "desc": "Initializes all variables used in the syslog functions.",
+            "flags": [
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "openlog",
+            "desc": "openlog() opens a connection to the system logger for a program.\n\nThe use of openlog() is optional. It will automatically be called by syslog() if necessary, in which case ident will default to FALSE.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "ident",
+                    "type": "String",
+                    "desc": "The string ident is added to each message."
+                },
+                {
+                    "name": "option",
+                    "type": "Int32",
+                    "desc": "The option argument is used to indicate what logging options will be used when generating a log message. openlog() Options Constant Description LOG_CONS if there is an error while sending data to the system logger, write directly to the system console LOG_NDELAY open the connection to the logger immediately LOG_ODELAY (default) delay opening the connection until the first message is logged LOG_PERROR print log message also to standard error LOG_PID include PID with each message You can use one or more of this options. When using multiple options you need to OR them, i.e. to open the connection immediately, write to the console and include the PID in each message, you will use: LOG_CONS | LOG_NDELAY | LOG_PID"
+                },
+                {
+                    "name": "facility",
+                    "type": "Int32",
+                    "desc": "The facility argument is used to specify what type of program is logging the message. This allows you to specify (in your machine's syslog configuration) how messages coming from different facilities will be handled. openlog() Facilities Constant Description LOG_AUTH security\/authorization messages (use LOG_AUTHPRIV instead in systems where that constant is defined) LOG_AUTHPRIV security\/authorization messages (private) LOG_CRON clock daemon (cron and at) LOG_DAEMON other system daemons LOG_KERN kernel messages LOG_LOCAL0 ... LOG_LOCAL7 reserved for local use, these are not available in Windows LOG_LPR line printer subsystem LOG_MAIL mail subsystem LOG_NEWS USENET news subsystem LOG_SYSLOG messages generated internally by syslogd LOG_USER generic user-level messages LOG_UUCP UUCP subsystem\n\nLOG_USER is the only valid log type under Windows operating systems"
+                }
+            ]
+        },
+        {
+            "name": "closelog",
+            "desc": "closelog() closes the descriptor being used to write to the system logger. The use of closelog() is optional.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "syslog",
+            "desc": "syslog() generates a log message that will be distributed by the system logger.\n\nFor information on setting up a user defined log handler, see the syslog.conf (5) Unix manual page. More information on the syslog facilities and option can be found in the man pages for syslog (3) on Unix machines.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "priority",
+                    "type": "Int32",
+                    "desc": "priority is a combination of the facility and the level. Possible values are: syslog() Priorities (in descending order) Constant Description LOG_EMERG system is unusable LOG_ALERT action must be taken immediately LOG_CRIT critical conditions LOG_ERR error conditions LOG_WARNING warning conditions LOG_NOTICE normal, but significant, condition LOG_INFO informational message LOG_DEBUG debug-level message"
+                },
+                {
+                    "name": "message",
+                    "type": "String",
+                    "desc": "The message to send, except that the two characters %m will be replaced by the error message string (strerror) corresponding to the present value of errno."
+                }
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

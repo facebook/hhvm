@@ -1,0 +1,7 @@
+Called class: D
+Called class: C
+Called class: C
+HipHop Warning: %s
+
+Strict Standards: Non-static method D::m() should not be called statically in %s on line %d
+HipHop Fatal error: %s

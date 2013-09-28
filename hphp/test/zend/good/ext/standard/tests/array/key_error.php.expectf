@@ -1,0 +1,10 @@
+*** Testing key() : error conditions ***
+
+-- Testing key() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing key() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

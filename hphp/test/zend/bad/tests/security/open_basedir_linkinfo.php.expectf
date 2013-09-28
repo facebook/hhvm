@@ -1,0 +1,16 @@
+*** Testing open_basedir configuration [linkinfo] ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+int(%d)
+int(%d)
+int(%d)
+int(%d)
+int(%d)
+HipHop Warning: %s
+bool(false)
+int(%d)
+bool(true)
+*** Finished testing open_basedir configuration [linkinfo] ***

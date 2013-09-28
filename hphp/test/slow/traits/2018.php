@@ -1,14 +1,16 @@
 <?php
 
+interface a {
+ }
 
+abstract class b {
+ }
 
-interface a { }
+final class c {
+ }
 
-abstract class b { }
-
-final class c { }
-
-trait d {}
+trait d {
+}
 
 var_dump(trait_exists('a'));
 var_dump(trait_exists('b'));

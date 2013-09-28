@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,9 +17,10 @@
 
 #include "hphp/runtime/ext/ext_ipc.h"
 #include "hphp/runtime/ext/ext_variable.h"
-#include "hphp/runtime/base/variable_unserializer.h"
+#include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
+#include "folly/String.h"
 
 #include <memory>
 
@@ -68,18 +69,15 @@ int64_t f_ftok(CStrRef pathname, CStrRef proj) {
 
 class MessageQueue : public ResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(MessageQueue)
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(MessageQueue)
 
   int64_t key;
   int id;
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("MessageQueue");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 };
-IMPLEMENT_OBJECT_ALLOCATION(MessageQueue)
-
-StaticString MessageQueue::s_class_name("MessageQueue");
 
 Variant f_msg_get_queue(int64_t key, int64_t perms /* = 0666 */) {
   int id = msgget(key, 0);
@@ -87,21 +85,21 @@ Variant f_msg_get_queue(int64_t key, int64_t perms /* = 0666 */) {
     id = msgget(key, IPC_CREAT | IPC_EXCL | perms);
     if (id < 0) {
       raise_warning("Failed to create message queue for key 0x%" PRIx64 ": %s",
-                      key, Util::safe_strerror(errno).c_str());
+                      key, folly::errnoStr(errno).c_str());
       return false;
     }
   }
   MessageQueue *q = NEWOBJ(MessageQueue)();
   q->key = key;
   q->id = id;
-  return Object(q);
+  return Resource(q);
 }
 
 bool f_msg_queue_exists(int64_t key) {
   return msgget(key, 0) >= 0;
 }
 
-bool f_msg_remove_queue(CObjRef queue) {
+bool f_msg_remove_queue(CResRef queue) {
   MessageQueue *q = queue.getTyped<MessageQueue>();
   if (!q) {
     raise_warning("Invalid message queue was specified");
@@ -111,18 +109,19 @@ bool f_msg_remove_queue(CObjRef queue) {
   return msgctl(q->id, IPC_RMID, NULL) == 0;
 }
 
-static const StaticString s_msg_perm_uid("msg_perm.uid");
-static const StaticString s_msg_perm_gid("msg_perm.gid");
-static const StaticString s_msg_perm_mode("msg_perm.mode");
-static const StaticString s_msg_stime("msg_stime");
-static const StaticString s_msg_rtime("msg_rtime");
-static const StaticString s_msg_ctime("msg_ctime");
-static const StaticString s_msg_qnum("msg_qnum");
-static const StaticString s_msg_qbytes("msg_qbytes");
-static const StaticString s_msg_lspid("msg_lspid");
-static const StaticString s_msg_lrpid("msg_lrpid");
+const StaticString
+  s_msg_perm_uid("msg_perm.uid"),
+  s_msg_perm_gid("msg_perm.gid"),
+  s_msg_perm_mode("msg_perm.mode"),
+  s_msg_stime("msg_stime"),
+  s_msg_rtime("msg_rtime"),
+  s_msg_ctime("msg_ctime"),
+  s_msg_qnum("msg_qnum"),
+  s_msg_qbytes("msg_qbytes"),
+  s_msg_lspid("msg_lspid"),
+  s_msg_lrpid("msg_lrpid");
 
-bool f_msg_set_queue(CObjRef queue, CArrRef data) {
+bool f_msg_set_queue(CResRef queue, CArrRef data) {
   MessageQueue *q = queue.getTyped<MessageQueue>();
   if (!q) {
     raise_warning("Invalid message queue was specified");
@@ -133,13 +132,13 @@ bool f_msg_set_queue(CObjRef queue, CArrRef data) {
   if (msgctl(q->id, IPC_STAT, &stat) == 0) {
     Variant value;
     value = data[s_msg_perm_uid];
-    if (!value.isNull()) stat.msg_perm.uid = (int64_t)value;
+    if (!value.isNull()) stat.msg_perm.uid = value.toInt64();
     value = data[s_msg_perm_gid];
-    if (!value.isNull()) stat.msg_perm.uid = (int64_t)value;
+    if (!value.isNull()) stat.msg_perm.uid = value.toInt64();
     value = data[s_msg_perm_mode];
-    if (!value.isNull()) stat.msg_perm.uid = (int64_t)value;
+    if (!value.isNull()) stat.msg_perm.uid = value.toInt64();
     value = data[s_msg_qbytes];
-    if (!value.isNull()) stat.msg_perm.uid = (int64_t)value;
+    if (!value.isNull()) stat.msg_perm.uid = value.toInt64();
 
     return msgctl(q->id, IPC_SET, &stat) == 0;
   }
@@ -147,7 +146,7 @@ bool f_msg_set_queue(CObjRef queue, CArrRef data) {
   return false;
 }
 
-Array f_msg_stat_queue(CObjRef queue) {
+Array f_msg_stat_queue(CResRef queue) {
   MessageQueue *q = queue.getTyped<MessageQueue>();
   if (!q) {
     raise_warning("Invalid message queue was specified");
@@ -173,7 +172,7 @@ Array f_msg_stat_queue(CObjRef queue) {
   return Array();
 }
 
-bool f_msg_send(CObjRef queue, int64_t msgtype, CVarRef message,
+bool f_msg_send(CResRef queue, int64_t msgtype, CVarRef message,
                 bool serialize /* = true */, bool blocking /* = true */,
                 VRefParam errorcode /* = null */) {
   MessageQueue *q = queue.getTyped<MessageQueue>();
@@ -199,7 +198,7 @@ bool f_msg_send(CObjRef queue, int64_t msgtype, CVarRef message,
   if (result < 0) {
     int err = errno;
     raise_warning("Unable to send message: %s",
-                    Util::safe_strerror(err).c_str());
+                    folly::errnoStr(err).c_str());
     if (!errorcode.isNull()) {
       errorcode = err;
     }
@@ -208,7 +207,7 @@ bool f_msg_send(CObjRef queue, int64_t msgtype, CVarRef message,
   return true;
 }
 
-bool f_msg_receive(CObjRef queue, int64_t desiredmsgtype, VRefParam msgtype,
+bool f_msg_receive(CResRef queue, int64_t desiredmsgtype, VRefParam msgtype,
                    int64_t maxsize, VRefParam message,
                    bool unserialize /* = true */,
                    int64_t flags /* = 0 */, VRefParam errorcode /* = null */) {
@@ -240,7 +239,7 @@ bool f_msg_receive(CObjRef queue, int64_t desiredmsgtype, VRefParam msgtype,
   if (result < 0) {
     int err = errno;
     raise_warning("Unable to receive message: %s",
-                    Util::safe_strerror(err).c_str());
+                    folly::errnoStr(err).c_str());
     if (!errorcode.isNull()) {
       errorcode = err;
     }
@@ -252,7 +251,7 @@ bool f_msg_receive(CObjRef queue, int64_t desiredmsgtype, VRefParam msgtype,
     const char *bufText = (const char *)MSGBUF_MTEXT(buffer);
     uint bufLen = strlen(bufText);
     VariableUnserializer vu(bufText, bufLen,
-                            VariableUnserializer::Serialize);
+                            VariableUnserializer::Type::Serialize);
     try {
       message = vu.unserialize();
     } catch (Exception &e) {
@@ -302,9 +301,9 @@ public:
   int count;        // Acquire count for auto-release.
   int auto_release; // flag that says to auto-release.
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("Semaphore");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   bool op(bool acquire) {
     struct sembuf sop;
@@ -323,7 +322,7 @@ public:
       if (errno != EINTR) {
         raise_warning("failed to %s key 0x%x: %s",
                         acquire ? "acquire" : "release",
-                        key, Util::safe_strerror(errno).c_str());
+                        key, folly::errnoStr(errno).c_str());
         return false;
       }
     }
@@ -333,9 +332,10 @@ public:
   }
 
   ~Semaphore() {
-    struct sembuf sop[2];
-    int opcount = 1;
+    Semaphore::sweep();
+  }
 
+  void sweep() FOLLY_OVERRIDE {
     /*
      * if count == -1, semaphore has been removed
      * Need better way to handle this
@@ -343,6 +343,9 @@ public:
     if (count == -1 || !auto_release) {
       return;
     }
+
+    sembuf sop[2];
+    int opcount = 1;
 
     /* Decrement the usage count. */
     sop[0].sem_num = SYSVSEM_USAGE;
@@ -354,20 +357,18 @@ public:
       sop[1].sem_num = SYSVSEM_SEM;
       sop[1].sem_op  = count;
       sop[1].sem_flg = SEM_UNDO;
-      opcount++;
+      opcount = 2;
     }
 
     semop(semid, sop, opcount);
   }
 };
 
-StaticString Semaphore::s_class_name("Semaphore");
-
-bool f_sem_acquire(CObjRef sem_identifier) {
+bool f_sem_acquire(CResRef sem_identifier) {
   return sem_identifier.getTyped<Semaphore>()->op(true);
 }
 
-bool f_sem_release(CObjRef sem_identifier) {
+bool f_sem_release(CResRef sem_identifier) {
   return sem_identifier.getTyped<Semaphore>()->op(false);
 }
 
@@ -385,7 +386,7 @@ Variant f_sem_get(int64_t key, int64_t max_acquire /* = 1 */,
   int semid = semget(key, 3, perm|IPC_CREAT);
   if (semid == -1) {
     raise_warning("failed for key 0x%" PRIx64 ": %s", key,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     return false;
   }
 
@@ -417,7 +418,7 @@ Variant f_sem_get(int64_t key, int64_t max_acquire /* = 1 */,
   while (semop(semid, sop, 3) == -1) {
     if (errno != EINTR) {
       raise_warning("failed acquiring SYSVSEM_SETVAL for key 0x%" PRIx64 ": %s",
-                      key, Util::safe_strerror(errno).c_str());
+                      key, folly::errnoStr(errno).c_str());
       break;
     }
   }
@@ -426,7 +427,7 @@ Variant f_sem_get(int64_t key, int64_t max_acquire /* = 1 */,
   int count = semctl(semid, SYSVSEM_USAGE, GETVAL, NULL);
   if (count == -1) {
     raise_warning("failed for key 0x%" PRIx64 ": %s", key,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
   }
 
   /* If we are the only user, then take this opportunity to set the max. */
@@ -435,7 +436,7 @@ Variant f_sem_get(int64_t key, int64_t max_acquire /* = 1 */,
     semarg.val = max_acquire;
     if (semctl(semid, SYSVSEM_SEM, SETVAL, semarg) == -1) {
       raise_warning("failed for key 0x%" PRIx64 ": %s", key,
-                      Util::safe_strerror(errno).c_str());
+                      folly::errnoStr(errno).c_str());
     }
   }
 
@@ -446,7 +447,7 @@ Variant f_sem_get(int64_t key, int64_t max_acquire /* = 1 */,
   while (semop(semid, sop, 1) == -1) {
     if (errno != EINTR) {
       raise_warning("failed releasing SYSVSEM_SETVAL for key 0x%" PRIx64 ": %s",
-                      key, Util::safe_strerror(errno).c_str());
+                      key, folly::errnoStr(errno).c_str());
       break;
     }
   }
@@ -456,14 +457,14 @@ Variant f_sem_get(int64_t key, int64_t max_acquire /* = 1 */,
   sem_ptr->semid = semid;
   sem_ptr->count = 0;
   sem_ptr->auto_release = auto_release;
-  return Object(sem_ptr);
+  return Resource(sem_ptr);
 }
 
 /**
  * contributed by Gavin Sherry gavin@linuxworld.com.au
  * Fri Mar 16 00:50:13 EST 2001
  */
-bool f_sem_remove(CObjRef sem_identifier) {
+bool f_sem_remove(CResRef sem_identifier) {
   Semaphore *sem_ptr = sem_identifier.getTyped<Semaphore>();
 
   union semun un;
@@ -478,7 +479,7 @@ bool f_sem_remove(CObjRef sem_identifier) {
   if (semctl(sem_ptr->semid, 0, IPC_RMID, un) < 0) {
     raise_warning("failed for SysV sempphore %d: %s",
                     sem_identifier->o_getId(),
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     return false;
   }
 
@@ -619,14 +620,14 @@ Variant f_shm_attach(int64_t shm_key, int64_t shm_size /* = 10000 */,
     if ((shm_id = shmget(shm_key, shm_size, shm_flag | IPC_CREAT | IPC_EXCL))
         < 0) {
       raise_warning("failed for key 0x%" PRIx64 ": %s", shm_key,
-                      Util::safe_strerror(errno).c_str());
+                      folly::errnoStr(errno).c_str());
       return false;
     }
   }
 
   if ((shm_ptr = (char*)shmat(shm_id, NULL, 0)) == (char *)-1) {
     raise_warning("failed for key 0x%" PRIx64 ": %s", shm_key,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
     return false;
   }
 
@@ -675,7 +676,7 @@ bool f_shm_remove(int64_t shm_identifier) {
 
   if (shmctl(shm_list_ptr->id, IPC_RMID,NULL) < 0) {
     raise_warning("failed for key 0x%x, id %" PRId64 ": %s", shm_list_ptr->key,
-                    shm_identifier, Util::safe_strerror(errno).c_str());
+                    shm_identifier, folly::errnoStr(errno).c_str());
     return false;
   }
   return true;

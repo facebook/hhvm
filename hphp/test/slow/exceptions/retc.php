@@ -3,7 +3,8 @@
 class Obj {
   public function __destruct() {
     // Raise a fatal.
-    class Obj {}
+    class Obj {
+}
   }
 }
 
@@ -22,6 +23,10 @@ function foo() {
 
 try {
   foo();
-} catch (Exception $x) { echo "notreached\n"; }
-foo(); // enter hook throws the fatal
+}
+ catch (Exception $x) {
+ echo "notreached\n";
+ }
+foo();
+ // enter hook throws the fatal
 

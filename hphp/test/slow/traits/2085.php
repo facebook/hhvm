@@ -1,6 +1,5 @@
 <?php
 
-
 trait Too {
   function bar() {
     $abc = 123;
@@ -8,7 +7,8 @@ trait Too {
       $n = func_num_args();
       $args = func_get_args();
       var_dump($n, $args);
-    };
+    }
+;
     return $a;
   }
 
@@ -17,6 +17,8 @@ trait Too {
     $obj(789);
   }
 }
-class Foo { use Too; }
+class Foo {
+ use Too;
+ }
 $a = Foo::bar();
 Foo::baz($a);

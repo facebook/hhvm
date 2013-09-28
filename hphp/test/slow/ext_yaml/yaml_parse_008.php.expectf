@@ -1,0 +1,24 @@
+array(9) {
+  ["key_a"]=>
+  string(46) "<value=[value_a], tag=[test-tag_a], flags=[1]>"
+  ["key_b"]=>
+  string(47) "<value=[value_b], tag=[test2-tag_b], flags=[2]>"
+  ["key_c"]=>
+  string(67) "<value=[value_c], tag=[tag:example.com,2011:test/tag_c], flags=[3]>"
+  ["key_d"]=>
+  string(49) "<value=[some
+text
+], tag=[test-tag_d], flags=[4]>"
+  ["key_e"]=>
+  string(49) "<value=[some text
+], tag=[test-tag_e], flags=[5]>"
+  ["key_f"]=>
+  string(65) "<value=['0' => 'one', '1' => 'two'], tag=[test-tag_f], flags=[0]>"
+  ["key_g"]=>
+  string(72) "<value=['sky' => 'blue', 'sea' => 'green'], tag=[test-tag_g], flags=[0]>"
+  ["key_h"]=>
+  string(65) "<value=['0' => 'one', '1' => 'two'], tag=[test-tag_h], flags=[0]>"
+  ["key_i"]=>
+  string(72) "<value=['sky' => 'blue', 'sea' => 'green'], tag=[test-tag_i], flags=[0]>"
+}
+int(1)

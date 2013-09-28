@@ -1,0 +1,12 @@
+*** Testing sub-arrays with in_array() ***
+bool(true)
+bool(true)
+bool(true)
+
+*** Testing objects with in_array() ***
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+bool(true)
+Done

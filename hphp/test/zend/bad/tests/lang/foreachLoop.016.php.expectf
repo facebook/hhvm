@@ -1,0 +1,81 @@
+$a
+array(1) {
+  [0]=>
+  string(8) "original"
+}
+
+${'a'}
+array(1) {
+  [0]=>
+  string(8) "original"
+}
+
+$$a
+array(1) {
+  [0]=>
+  string(8) "original"
+}
+
+$a[0]
+array(1) {
+  [0]=>
+  string(8) "original"
+}
+
+$a[0][0]
+array(1) {
+  [0]=>
+  string(8) "original"
+}
+
+$a->b
+HipHop Warning: %s
+array(1) {
+  [0]=>
+  string(8) "original"
+}
+
+$a->b->c
+HipHop Warning: %s
+array(1) {
+  [0]=>
+  string(8) "original"
+}
+
+$a->b[0]
+array(1) {
+  [0]=>
+  string(8) "original"
+}
+
+$a->b[0][0]
+array(1) {
+  [0]=>
+  string(8) "original"
+}
+
+$a->b[0]->c
+HipHop Warning: %s
+array(1) {
+  [0]=>
+  string(8) "original"
+}
+
+C::$a
+array(1) {
+  [0]=>
+  string(8) "original"
+}
+
+C::$a[0]
+array(1) {
+  [0]=>
+  string(8) "original"
+}
+
+C::$a[0]->b
+HipHop Warning: %s
+array(1) {
+  [0]=>
+  string(8) "original"
+}

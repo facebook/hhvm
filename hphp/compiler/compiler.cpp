@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,22 +27,22 @@
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/util/json.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/db_conn.h"
+#include "hphp/util/db-conn.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/process.h"
 #include "hphp/util/util.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/hdf.h"
-#include "hphp/util/async_func.h"
-#include "hphp/runtime/base/program_functions.h"
-#include "hphp/runtime/base/memory/smart_allocator.h"
+#include "hphp/util/async-func.h"
+#include "hphp/util/current-executable.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/externals.h"
-#include "hphp/runtime/base/thread_init_fini.h"
+#include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/vm/repo.h"
-#include "hphp/system/lib/systemlib.h"
-#include "hphp/util/repo_schema.h"
+#include "hphp/system/systemlib.h"
+#include "hphp/util/repo-schema.h"
 
-#include "hphp/hhvm/process_init.h"
+#include "hphp/hhvm/process-init.h"
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -63,7 +63,6 @@ struct CompilerOptions {
   string target;
   string format;
   string outputDir;
-  string outputFile;
   string syncDir;
   vector<string> config;
   string configDir;
@@ -84,8 +83,6 @@ struct CompilerOptions {
   vector<string> cfiles;
   vector<string> cmodules;
   bool parseOnDemand;
-  vector<string> parseOnDemandDirs; // parse these directories on-demand
-                                    // when parseOnDemand=false
   string program;
   string programArgs;
   string branch;
@@ -94,21 +91,15 @@ struct CompilerOptions {
   bool keepTempDir;
   string dbStats;
   bool noTypeInference;
-  bool noMinInclude;
-  bool noMetaInfo;
   int logLevel;
   bool force;
-  int clusterCount;
   int optimizeLevel;
   string filecache;
-  string javaRoot;
   bool dump;
   string docjson;
   bool coredump;
   bool nofork;
-  bool fl_annotate;
   string optimizations;
-  string ppp;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -126,7 +117,8 @@ public:
 
     struct stat sb;
     stat(m_name, &sb);
-    Logger::Info("%dMB %s saved", (int64_t)sb.st_size/(1024*1024), m_name);
+    Logger::Info("%" PRId64" MB %s saved",
+                 (int64_t)sb.st_size/(1024*1024), m_name);
   }
 
 private:
@@ -159,6 +151,9 @@ int compiler_main(int argc, char **argv) {
     Hdf empty;
     RuntimeOption::Load(empty);
     initialize_repo();
+
+    // we need to initialize pcre cache table very early
+    pcre_init();
 
     CompilerOptions po;
 #ifdef FACEBOOK
@@ -232,9 +227,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      " <any combination of them by any separator>; \n"
      "hhbc: binary (default) | text; \n"
      "run: cluster (default) | file")
-    ("cluster-count", value<int>(&po.clusterCount)->default_value(0),
-     "Cluster by file sizes and output roughly these many number of files. "
-     "Use 0 for no clustering.")
     ("input-dir", value<string>(&po.inputDir), "input directory")
     ("program", value<string>(&po.program)->default_value("program"),
      "final program name to use")
@@ -281,7 +273,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("branch", value<string>(&po.branch), "SVN branch")
     ("revision", value<int>(&po.revision), "SVN revision")
     ("output-dir,o", value<string>(&po.outputDir), "output directory")
-    ("output-file", value<string>(&po.outputFile), "output file")
     ("sync-dir", value<string>(&po.syncDir),
      "Files will be created in this directory first, then sync with output "
      "directory without overwriting identical files. Great for incremental "
@@ -298,13 +289,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("no-type-inference",
      value<bool>(&po.noTypeInference)->default_value(false),
      "turn off type inference for C++ code generation")
-    ("no-min-include",
-     value<bool>(&po.noMinInclude)->default_value(false),
-     "turn off minimium include analysis when target is \"analyze\"")
-    ("no-meta-info",
-     value<bool>(&po.noMetaInfo)->default_value(false),
-     "do not generate class map, function jump table and macros "
-     "when generating code; good for demo purposes")
     ("config,c", value<vector<string> >(&po.config)->composing(),
      "config file name")
     ("config-dir", value<string>(&po.configDir),
@@ -336,19 +320,9 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      value<bool>(&po.nofork)->default_value(false),
      "forking is needed for large compilation to release memory before g++"
      "compilation. turning off forking can help gdb debugging.")
-    ("fl-annotate",
-     value<bool>(&po.fl_annotate)->default_value(false),
-     "Annotate emitted source with compiler file-line info")
     ("opts",
      value<string>(&po.optimizations)->default_value(""),
      "Set optimizations to enable/disable")
-    ("ppp",
-     value<string>(&po.ppp)->default_value(""),
-     "Preprocessed partition configuration. To speed up distcc compilation, "
-     "bin/ppp.php can pre-compute better partition between different .cpp "
-     "files according to preprocessed file sizes, instead of original file "
-     "sizes (default). Run bin/ppp.php to generate an HDF configuration file "
-     "to specify here.")
     ("compiler-id", "display the git hash for the compiler id")
     ("repo-schema", "display the repo schema id used by this app")
     ;
@@ -385,7 +359,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 #endif
 
 #define HPHP_VERSION(v) cout << HPHP_COMPILER_STR #v << "\n";
-#include "../version"
+#include "../version" // nolint
 
     cout << "Compiler: " << kCompilerId << "\n";
     cout << "Repo schema: " << kRepoSchemaId << "\n";
@@ -417,8 +391,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   } else {
     Logger::LogLevel = Logger::LogInfo;
   }
-
-  Option::FlAnnotate = po.fl_annotate;
 
   Hdf config;
   for (vector<string>::const_iterator it = po.config.begin();
@@ -476,7 +448,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   }
 
   Option::ProgramName = po.program;
-  Option::PreprocessedPartitionConfig = po.ppp;
 
   if (po.format.empty()) {
     if (po.target == "php") {
@@ -569,13 +540,13 @@ int process(const CompilerOptions &po) {
 
   bool isPickledPHP = (po.target == "php" && po.format == "pickled");
   if (!isPickledPHP) {
-    if (!BuiltinSymbols::Load(ar,
-                              po.target == "hhbc" && !Option::WholeProgram)) {
-      return false;
-    }
     if (po.target == "hhbc" && !Option::WholeProgram) {
-      BuiltinSymbols::NoSuperGlobals = false;
+      // We're trying to produce the same bytecode as runtime parsing.
+      // There's nothing to do.
     } else {
+      if (!BuiltinSymbols::Load(ar)) {
+        return false;
+      }
       ar->loadBuiltins();
     }
     hphp_process_init();
@@ -834,6 +805,9 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
   RuntimeOption::RepoJournal = "memory";
   RuntimeOption::EnableHipHopSyntax = Option::EnableHipHopSyntax;
   RuntimeOption::EvalJitEnableRenameFunction = Option::JitEnableRenameFunction;
+
+  // Turn off commits, because we don't want systemlib to get included
+  RuntimeOption::RepoCommit = false;
 }
 
 int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr ar,
@@ -865,7 +839,7 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr ar,
   /* without this, emitClass allows classes with interfaces to be
      hoistable */
   SystemLib::s_inited = true;
-
+  RuntimeOption::RepoCommit = true;
   Option::AutoInline = -1;
 
   if (po.optimizeLevel > 0) {
@@ -892,11 +866,11 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr ar,
      */
     string exe = po.outputDir + '/' + po.program;
     string repo = "repo=" + exe + ".hhbc";
-    char buf[PATH_MAX];
-    if (!realpath("/proc/self/exe", buf)) return -1;
+    string buf = current_executable_path();
+    if (buf.empty()) return -1;
 
     const char *argv[] = { "objcopy", "--add-section", repo.c_str(),
-                           buf, exe.c_str(), 0 };
+                           buf.c_str(), exe.c_str(), 0 };
     string out;
     ret = Process::Exec(argv[0], argv, nullptr, out, nullptr) ? 0 : 1;
   }
@@ -935,8 +909,8 @@ int runTarget(const CompilerOptions &po) {
   // run the executable
   string cmd;
   if (po.format.find("exe") == string::npos) {
-    char buf[PATH_MAX];
-    if (!realpath("/proc/self/exe", buf)) return -1;
+    string buf = current_executable_path();
+    if (buf.empty()) return -1;
 
     cmd += buf;
     cmd += " -vRepo.Authoritative=true";

@@ -1,0 +1,51 @@
+*** Testing fopen() : variation ***
+
+--c:\--
+file in root
+
+--c:--
+file in root
+
+--c--
+HipHop Warning: %s
+file not opened for read
+HipHop Warning: %s
+
+--\--
+HipHop Warning: %s
+file not opened for read
+HipHop Warning: %s
+
+--/--
+HipHop Warning: %s
+file not opened for read
+HipHop Warning: %s
+
+--c:fopen11.tmpdirTwo--
+file in fopen11.tmpdirTwo
+
+--c:adir--
+HipHop Warning: %s
+file not opened for read
+HipHop Warning: %s
+
+--c:\/--
+file in root
+
+--c:\fopen11.tmpdirTwo\/--
+file in fopen11.tmpdirTwo
+
+--c:\fopen11.tmpdirTwo\--
+file in fopen11.tmpdirTwo
+
+--c:\fopen11.tmpdirTwo/--
+file in fopen11.tmpdirTwo
+
+--%s/fopen11.tmpDir--
+file in fopen11.tmpDir
+
+--/sortout--
+HipHop Warning: %s
+file not opened for read
+HipHop Warning: %s
+===DONE===

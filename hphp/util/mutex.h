@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +21,10 @@
 #include "hphp/util/util.h"
 #include <pthread.h>
 #include <time.h>
-#include "tbb/concurrent_hash_map.h"
+#include <tbb/concurrent_hash_map.h>
+#ifdef __APPLE__
+#include "pthread-spin-lock-shim.h"
+#endif
 
 #include "hphp/util/rank.h"
 
@@ -138,21 +141,6 @@ public:
     return success;
   }
 
-  bool tryLockWait(long long ns) {
-#ifdef DEBUG
-    assert(m_magic == kMagic);
-#endif
-    struct timespec delta;
-    delta.tv_sec  = 0;
-    delta.tv_nsec = ns;
-    bool success = !pthread_mutex_timedlock(&m_mutex, &delta);
-    if (success) {
-      recordAcquisition();
-      assertOwnedBySelf();
-    }
-    return success;
-  }
-
   void lock() {
 #ifdef DEBUG
     assert(m_magic == kMagic);
@@ -206,42 +194,6 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class SpinLock {
-#ifdef DEBUG
-  Rank m_rank;
-#endif
-public:
-  explicit SpinLock(Rank rank = RankUnranked)
-#ifdef DEBUG
-    : m_rank(rank)
-#endif
-  {
-    pthread_spin_init(&m_spinlock, 0);
-  }
-  ~SpinLock() {
-    pthread_spin_destroy(&m_spinlock);
-  }
-
-  void lock() {
-    pushRank(m_rank);
-    pthread_spin_lock(&m_spinlock);
-  }
-  void unlock() {
-    popRank(m_rank);
-    pthread_spin_unlock(&m_spinlock);
-  }
-
-  pthread_spinlock_t &getRaw() { return m_spinlock;}
-
-private:
-  SpinLock(const SpinLock &); // suppress
-  SpinLock &operator=(const SpinLock &); // suppress
-
-  pthread_spinlock_t m_spinlock;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
 /**
  * Read-write lock wrapper.
  */
@@ -252,7 +204,7 @@ class ReadWriteMutex {
  * implementation tends to do crazy things when a rwlock is double-wlocked,
  * so check and assert early in debug builds.
  */
-  static const pthread_t InvalidThread = (pthread_t)0;
+  static constexpr pthread_t InvalidThread = (pthread_t)0;
   pthread_t m_writeOwner;
   Rank m_rank;
 #endif

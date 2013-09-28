@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,7 +26,7 @@
 #include "hphp/compiler/statement/function_statement.h"
 #include "hphp/compiler/statement/return_statement.h"
 #include "hphp/compiler/statement/block_statement.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 #include "hphp/compiler/expression/binary_op_expression.h"
 #include "hphp/compiler/expression/assignment_expression.h"
 #include "hphp/compiler/expression/simple_variable.h"
@@ -291,7 +291,7 @@ void StatementList::setNthKid(int n, ConstructPtr cp) {
   if (n >= s) {
     assert(false);
   } else {
-    m_stmts[n] = boost::dynamic_pointer_cast<Statement>(cp);
+    m_stmts[n] = dynamic_pointer_cast<Statement>(cp);
   }
 }
 

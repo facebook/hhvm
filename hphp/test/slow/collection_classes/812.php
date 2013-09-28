@@ -1,6 +1,5 @@
 <?php
 
-
 $m = Map::fromArray(array('a' => 'foo'));
 var_dump($m['a']);
 var_dump($m->at('a'));

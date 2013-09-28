@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,9 +19,9 @@
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/variable_table.h"
-#include "hphp/util/parser/scanner.h"
+#include "hphp/parser/scanner.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/db_query.h"
+#include "hphp/util/db-query.h"
 #include "hphp/util/util.h"
 #include "hphp/util/process.h"
 #include <boost/algorithm/string/trim.hpp>
@@ -53,7 +53,6 @@ map<string, string> Option::IncludeRoots;
 map<string, string> Option::AutoloadRoots;
 vector<string> Option::IncludeSearchPaths;
 string Option::DefaultIncludeRoot;
-vector<Option::SepExtensionOptions> Option::SepExtensions;
 map<string, int> Option::DynamicFunctionCalls;
 
 bool Option::GeneratePickledPHP = false;
@@ -110,7 +109,6 @@ int Option::CodeErrorMaxProgram = 1;
 Option::EvalLevel Option::EnableEval = NoEval;
 
 std::string Option::ProgramName;
-std::string Option::PreprocessedPartitionConfig;
 
 bool Option::ParseTimeOpts = true;
 bool Option::EnableHipHopSyntax = false;
@@ -118,15 +116,16 @@ bool Option::JitEnableRenameFunction = false;
 bool Option::EnableHipHopExperimentalSyntax = false;
 bool Option::EnableShortTags = true;
 bool Option::EnableAspTags = false;
-bool Option::EnableXHP = true;
+bool Option::EnableXHP = false;
 bool Option::EnableFinallyStatement = false;
 int Option::ParserThreadCount = 0;
 
 int Option::GetScannerType() {
   int type = 0;
   if (EnableShortTags) type |= Scanner::AllowShortTags;
-  if (EnableHipHopSyntax) type |= Scanner::AllowHipHopSyntax;
   if (EnableAspTags) type |= Scanner::AllowAspTags;
+  if (EnableXHP) type |= Scanner::AllowXHPSyntax;
+  if (EnableHipHopSyntax) type |= Scanner::AllowHipHopSyntax;
   return type;
 }
 
@@ -156,7 +155,6 @@ StringBag Option::OptionStrings;
 bool Option::GenerateCppLibCode = false;
 bool Option::GenerateSourceInfo = false;
 bool Option::GenerateDocComments = true;
-bool Option::FlAnnotate = false;
 
 void (*Option::m_hookHandler)(Hdf &config);
 bool (*Option::PersistenceHook)(BlockScopeRawPtr scope, FileScopeRawPtr file);
@@ -228,23 +226,6 @@ void Option::Load(Hdf &config) {
     READ_CG_OPTION(LambdaPrefix);
   }
 
-  int count = 0;
-  for (Hdf hdf = config["SepExtensions"].firstChild(); hdf.exists();
-       hdf = hdf.next()) {
-    ++count;
-  }
-  SepExtensions.resize(count);
-  count = 0;
-  for (Hdf hdf = config["SepExtensions"].firstChild(); hdf.exists();
-       hdf = hdf.next()) {
-    SepExtensionOptions &options = SepExtensions[count++];
-    options.name = hdf.getName();
-    options.soname = hdf["soname"].getString();
-    options.include_path = hdf["include"].getString();
-    options.lib_path = hdf["libpath"].getString();
-    options.shared = hdf["shared"].getBool();
-  }
-
   config["DynamicFunctionPrefix"].get(DynamicFunctionPrefixes);
   config["DynamicFunctionPostfix"].get(DynamicFunctionPostfixes);
   config["DynamicMethodPrefix"].get(DynamicMethodPrefixes);
@@ -287,7 +268,13 @@ void Option::Load(Hdf &config) {
 
   EnableAspTags = config["EnableAspTags"].getBool();
 
-  EnableXHP = config["EnableXHP"].getBool(true);
+  EnableXHP = config["EnableXHP"].getBool(false);
+
+  if (EnableHipHopSyntax) {
+    // If EnableHipHopSyntax is true, it forces EnableXHP to true
+    // regardless of how it was set in the config
+    EnableXHP = true;
+  }
 
   ParserThreadCount = config["ParserThreadCount"].getInt32(0);
   if (ParserThreadCount <= 0) {
@@ -314,6 +301,9 @@ void Option::Load(Hdf &config) {
   ArrayAccessIdempotent    = config["ArrayAccessIdempotent"].getBool(false);
   DumpAst                  = config["DumpAst"].getBool(false);
   WholeProgram             = config["WholeProgram"].getBool(true);
+
+  // Temporary, during file-cache migration.
+  FileCache::UseNewCache   = config["UseNewCache"].getBool(false);
 
   if (m_hookHandler) m_hookHandler(config);
 
@@ -389,13 +379,13 @@ std::string Option::MangleFilename(const std::string &name, bool id) {
 
 bool Option::IsFileExcluded(const std::string &file,
                             const std::set<std::string> &patterns) {
-  String sfile(file.c_str(), file.size(), AttachLiteral);
+  String sfile(file.c_str(), file.size(), CopyString);
   for (set<string>::const_iterator iter = patterns.begin();
        iter != patterns.end(); ++iter) {
     const std::string &pattern = *iter;
     Variant matches;
     Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
-                                    AttachLiteral), sfile, matches);
+                                    CopyString), sfile, matches);
     if (ret.toInt64() > 0) {
       return true;
     }

@@ -1,0 +1,3 @@
+HipHop Warning: Constant AF_UNIX already defined in %s/test/slow/constant/1601.php on line 3
+bool(false)
+int(1)

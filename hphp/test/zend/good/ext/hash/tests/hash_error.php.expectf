@@ -1,0 +1,16 @@
+*** Testing hash() : error conditions ***
+
+-- Testing hash() function with less than expected no. of arguments --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Testing hash() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing hash() function with invalid hash algorithm --
+HipHop Warning: %s
+bool(false)
+===Done===

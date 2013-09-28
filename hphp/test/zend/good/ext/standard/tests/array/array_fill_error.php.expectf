@@ -1,0 +1,15 @@
+*** Testing array_fill() : error conditions ***
+-- Testing array_fill() function with Zero arguments --
+HipHop Warning: %s
+NULL
+-- Testing array_fill() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+-- Testing array_fill() function with less than expected no. of arguments --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+Done

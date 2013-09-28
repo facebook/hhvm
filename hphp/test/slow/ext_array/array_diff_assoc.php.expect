@@ -1,0 +1,14 @@
+array(3) {
+  ["b"]=>
+  string(5) "brown"
+  ["c"]=>
+  string(4) "blue"
+  [0]=>
+  string(3) "red"
+}
+array(2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -86,7 +86,7 @@ inline void assert_fail(const char* e,
                         const char* file,
                         unsigned int line,
                         const char* func) {
-#ifndef NDEBUG
+#if !defined(NDEBUG) && defined(_GNU_SOURCE) && defined(__linux__)
   __assert_fail(e, file, line, func);
 #else
   extern void impl_assert_fail(const char*,

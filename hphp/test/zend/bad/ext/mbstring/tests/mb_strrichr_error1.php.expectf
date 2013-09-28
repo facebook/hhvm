@@ -1,0 +1,10 @@
+*** Testing mb_strrichr() : error conditions ***
+
+-- Testing mb_strrichr() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing mb_strrichr() function with less than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+===DONE===

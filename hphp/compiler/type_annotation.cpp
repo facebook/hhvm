@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,9 +31,9 @@ TypeAnnotation::TypeAnnotation(const std::string &name,
                                 m_tuple(false),
                                 m_function(false),
                                 m_xhp(false),
-                                m_typevar(false) {}
+                                m_typevar(false) { }
 
-const std::string TypeAnnotation::simpleName() const {
+std::string TypeAnnotation::vanillaName() const {
   // filter out types that should not be exposed to the runtime
   if (m_nullable || m_soft || m_typevar || m_function) {
     return "";
@@ -44,7 +44,7 @@ const std::string TypeAnnotation::simpleName() const {
   return m_name;
 }
 
-const std::string TypeAnnotation::fullName() const {
+std::string TypeAnnotation::fullName() const {
   std::string name;
   if (m_nullable) {
     name += '?';
@@ -66,12 +66,45 @@ const std::string TypeAnnotation::fullName() const {
   return name;
 }
 
+DataType TypeAnnotation::dataType(bool expectedType /*= false */) const {
+  if (m_function || m_xhp || m_tuple) {
+    return KindOfObject;
+  }
+  if (m_typeArgs) {
+    return !m_name.compare("array") ? KindOfArray : KindOfObject;
+  }
+  if (!expectedType && (m_nullable || m_soft)) {
+    return KindOfUnknown;
+  }
+  if (!m_name.compare("null") || !m_name.compare("void")) {
+    return KindOfNull;
+  }
+  if (!m_name.compare("bool"))     return KindOfBoolean;
+  if (!m_name.compare("int"))      return KindOfInt64;
+  if (!m_name.compare("float"))    return KindOfDouble;
+  if (!m_name.compare("string"))   return KindOfString;
+  if (!m_name.compare("array"))    return KindOfArray;
+  if (!m_name.compare("resource")) return KindOfResource;
+  if (!m_name.compare("mixed"))    return KindOfUnknown;
+
+  return KindOfObject;
+}
+
+void TypeAnnotation::getAllSimpleNames(std::vector<std::string>& names) const {
+  names.push_back(m_name);
+  if (m_typeList) {
+    m_typeList->getAllSimpleNames(names);
+  } else if (m_typeArgs) {
+    m_typeArgs->getAllSimpleNames(names);
+  }
+}
+
 void TypeAnnotation::functionTypeName(std::string &name) const {
   name += "(function (";
   // return value of function types is the first element of type list
   TypeAnnotationPtr retType = m_typeArgs;
   TypeAnnotationPtr typeEl = m_typeArgs->m_typeList;
-  bool hasArgs = typeEl;
+  bool hasArgs = (typeEl != nullptr);
   while (typeEl) {
     name += typeEl->fullName();
     typeEl = typeEl->m_typeList;

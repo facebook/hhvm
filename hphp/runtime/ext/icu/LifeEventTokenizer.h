@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -22,7 +22,7 @@
 #include <vector>
 #include <boost/scoped_ptr.hpp>
 
-#include "unicode/rbbi.h" // icu
+#include <unicode/rbbi.h> // icu
 
 // Avoid dragging in the icu namespace.
 #ifndef U_USING_ICU_NAMESPACE

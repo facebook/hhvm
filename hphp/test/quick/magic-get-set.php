@@ -17,9 +17,9 @@ $obj = new C();
 
 // These are extension functions that call into o_set() and o_get().  These
 // exercise t___get() and t___set().
-hphp_set_property($obj, "unused arg", "priv", 1234);
+hphp_set_property($obj, null, "priv", 1234);
 var_dump(hphp_get_property($obj, "unused arg", "priv"));
-hphp_set_property($obj, "unused arg", "pub", 123);
+hphp_set_property($obj, null, "pub", 123);
 var_dump(hphp_get_property($obj, "unused arg", "pub"));
 var_dump($obj);
 

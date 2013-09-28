@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -67,7 +67,7 @@ public:
 /**
  * Base class of Expression and Statement.
  */
-class Construct : public boost::enable_shared_from_this<Construct>,
+class Construct : public std::enable_shared_from_this<Construct>,
                   public JSON::CodeError::ISerializable {
 protected:
   Construct(BlockScopePtr scope, LocationPtr loc);
@@ -166,6 +166,10 @@ public:
   void clearKilled() { m_flags.killed = false; }
   bool isKilled() const { return m_flags.killed; }
 
+  void setChildOfYield() { m_flags.childOfYield = true; }
+  void clearChildOfYield() { m_flags.childOfYield = false; }
+  bool isChildOfYield() const { return m_flags.childOfYield; }
+
   BlockScopeRawPtr getScope() const { return m_blockScope; }
   void setBlockScope(BlockScopeRawPtr scope) { m_blockScope = scope; }
   FileScopeRawPtr getFileScope() const {
@@ -178,7 +182,8 @@ public:
     return m_blockScope->getContainingClass();
   }
   void resetScope(BlockScopeRawPtr scope, bool resetOrigScope=false);
-  void parseTimeFatal(Compiler::ErrorType error, const char *fmt, ...);
+  void parseTimeFatal(Compiler::ErrorType error, const char *fmt, ...)
+    ATTRIBUTE_PRINTF(3,4);
   virtual int getLocalEffects() const { return UnknownEffect;}
   int getChildrenEffects() const;
   int getContainedEffects() const;
@@ -186,15 +191,15 @@ public:
   virtual bool kidUnused(int i) const { return false; }
 
   template<typename T>
-  static boost::shared_ptr<T> Clone(boost::shared_ptr<T> constr) {
+  static std::shared_ptr<T> Clone(std::shared_ptr<T> constr) {
     if (constr) {
-      return boost::dynamic_pointer_cast<T>(constr->clone());
+      return dynamic_pointer_cast<T>(constr->clone());
     }
-    return boost::shared_ptr<T>();
+    return std::shared_ptr<T>();
   }
 
   template<typename T>
-  boost::shared_ptr<T> Clone(boost::shared_ptr<T> constr, BlockScopePtr scope) {
+  std::shared_ptr<T> Clone(std::shared_ptr<T> constr, BlockScopePtr scope) {
     if (constr) {
       constr = constr->clone();
       constr->resetScope(scope);
@@ -294,6 +299,7 @@ private:
       unsigned killed              : 1;
       unsigned refCounted          : 2; // high bit indicates whether its valid
       unsigned inited              : 2; // high bit indicates whether its valid
+      unsigned childOfYield        : 1; // parent node is yield
     } m_flags;
   };
 protected:

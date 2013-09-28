@@ -1,10 +1,15 @@
 <?php
 
-
-trait T1 { abstract function foo(); }
-trait T2 { abstract function foo(); }
+trait T1 {
+ abstract function foo();
+ }
+trait T2 {
+ abstract function foo();
+ }
 class B {
-  function foo() { return "hello\n"; }
+  function foo() {
+ return "hello\n";
+ }
 }
 class C extends B {
   use T1, T2;

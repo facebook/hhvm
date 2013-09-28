@@ -1,0 +1,44 @@
+creating send socket
+resource(%d) of type (Socket)
+creating receive socket
+resource(%d) of type (Socket)
+bool(true)
+int(11)
+array(3) {
+  ["name"]=>
+  array(0) {
+  }
+  ["buffer_size"]=>
+  int(2000)
+  ["controllen"]=>
+  int(32)
+}
+Array
+(
+    [name] => 
+    [control] => Array
+        (
+            [0] => Array
+                (
+                    [level] => %d
+                    [type] => %d
+                    [data] => Array
+                        (
+                            [0] => Resource id #%d
+                            [1] => Resource id #%d
+                            [2] => Resource id #%d
+                            [3] => Resource id #%d
+                        )
+
+                )
+
+        )
+
+    [iov] => Array
+        (
+            [0] => test thing
+
+        )
+
+    [flags] => 0
+)

@@ -70,12 +70,7 @@ testing and some alternative PHP implementation.
 
 - fb_serialize
 - fb_unserialize
-- fb_thrift_serialize
-- fb_thrift_unserialize
 - fb_intercept
-- fb_stubout_intercept_handler
-- fb_rpc_intercept_handler
-- fb_renamed_functions
 - fb_rename_function
 - fb_get_code_coverage
 - fb_utf8ize

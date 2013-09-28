@@ -1,0 +1,13 @@
+HipHop Warning: %s
+array(2) {
+  [0]=>
+  object(__PHP_Incomplete_Class)#%d (1) {
+    ["__PHP_Incomplete_Class_Name"]=>
+    string(4) "Bar1"
+  }
+  [1]=>
+  object(__PHP_Incomplete_Class)#%d (1) {
+    ["__PHP_Incomplete_Class_Name"]=>
+    string(4) "Bar2"
+  }
+}

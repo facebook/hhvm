@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -14,23 +14,29 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/ext_options.h"
+
+#include "folly/ScopeGuard.h"
+
+#include "hphp/runtime/ext/ext_misc.h"
+#include "hphp/runtime/ext/ext_error.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/ini_setting.h"
-#include "hphp/runtime/base/memory/memory_manager.h"
-#include "hphp/runtime/base/util/request_local.h"
-#include "hphp/runtime/base/timeout_thread.h"
-#include "hphp/runtime/base/runtime_error.h"
-#include "hphp/runtime/base/zend/zend_functions.h"
-#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/process.h"
 #include <sys/utsname.h>
 #include <pwd.h>
 
-#include "hphp/runtime/vm/request_arena.h"
+#include "hphp/runtime/vm/request-arena.h"
+
+#define ZEND_VERSION "2.4.99"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,6 +47,7 @@ public:
     assertActive = RuntimeOption::AssertActive ? 1 : 0;
     assertWarning = RuntimeOption::AssertWarning ? 1 : 0;
     assertBail = 0;
+    assertQuietEval = false;
   }
 
   virtual void requestShutdown() {
@@ -50,6 +57,7 @@ public:
   int assertActive;
   int assertWarning;
   int assertBail;
+  bool assertQuietEval;
   Variant assertCallback;
 };
 
@@ -76,29 +84,91 @@ Variant f_assert_options(int what, CVarRef value /* = null_variant */) {
     if (!value.isNull()) s_option_data->assertCallback = value;
     return oldValue;
   }
+  if (what == k_ASSERT_QUIET_EVAL) {
+    bool oldValue = s_option_data->assertQuietEval;
+    if (!value.isNull()) s_option_data->assertQuietEval = value.toBoolean();
+    return Variant(oldValue);
+  }
   throw_invalid_argument("assert option %d is not supported", what);
   return false;
 }
 
+static Variant eval_for_assert(ActRec* const curFP, CStrRef codeStr) {
+  String prefixedCode = concat3("<?php return ", codeStr, ";");
+
+  auto const oldErrorLevel =
+    s_option_data->assertQuietEval ? f_error_reporting(Variant(0)) : 0;
+  SCOPE_EXIT {
+    if (s_option_data->assertQuietEval) f_error_reporting(oldErrorLevel);
+  };
+
+  auto const unit = g_vmContext->compileEvalString(prefixedCode.get());
+  if (unit == nullptr) {
+    raise_recoverable_error("Syntax error in assert()");
+    // Failure to compile the eval string doesn't count as an
+    // assertion failure.
+    return Variant(true);
+  }
+
+  auto const func = unit->getMain();
+  TypedValue retVal;
+  g_vmContext->invokeFunc(
+    &retVal,
+    func,
+    null_array,
+    nullptr,
+    nullptr,
+    // Zend appears to share the variable environment with the assert()
+    // builtin, but we deviate by having no shared env here.
+    nullptr /* VarEnv */,
+    nullptr,
+    VMExecutionContext::InvokePseudoMain
+  );
+
+  return tvAsVariant(&retVal);
+}
+
 Variant f_assert(CVarRef assertion) {
   if (!s_option_data->assertActive) return true;
-  if (assertion.isString()) {
-    throw NotSupportedException(__func__,
-                                "assert cannot take string argument");
-  }
-  if (assertion.toBoolean()) return true;
 
-  // assertion failed
+  Transl::CallerFrame cf;
+  Offset callerOffset;
+  auto const fp = cf(&callerOffset);
+
+  auto const passed = [&]() -> bool {
+    if (assertion.isString()) {
+      if (RuntimeOption::RepoAuthoritative) {
+        // We could support this with compile-time string literals,
+        // but it's not yet implemented.
+        throw NotSupportedException(__func__,
+          "assert with strings argument in RepoAuthoritative mode");
+      }
+      return eval_for_assert(fp, assertion.toString()).toBoolean();
+    }
+    return assertion.toBoolean();
+  }();
+  if (passed) return true;
+
   if (!s_option_data->assertCallback.isNull()) {
-    f_call_user_func(1, s_option_data->assertCallback);
+    auto const unit = fp->m_func->unit();
+
+    PackedArrayInit ai(3);
+    ai.append(String(unit->filepath()));
+    ai.append(Variant(unit->getLineNumber(callerOffset)));
+    ai.append(assertion.isString() ? assertion.toString() : String(""));
+    f_call_user_func(1, s_option_data->assertCallback, ai.toArray());
   }
 
   if (s_option_data->assertWarning) {
-    raise_warning("Assertion failed");
+    auto const str = !assertion.isString()
+      ? String("Assertion failed")
+      : concat3("Assertion \"", assertion.toString(), "\" failed");
+    raise_warning("%s", str.data());
   }
   if (s_option_data->assertBail) {
     throw Assertion();
   }
+
   return uninit_null();
 }
 
@@ -118,8 +188,8 @@ Array f_get_extension_funcs(CStrRef module_name) {
   throw NotSupportedException(__func__, "extensions are built differently");
 }
 
-String f_get_cfg_var(CStrRef option) {
-  throw NotSupportedException(__func__, "global configurations not used");
+Variant f_get_cfg_var(CStrRef option) {
+  return false;
 }
 
 String f_get_current_user() {
@@ -139,12 +209,8 @@ String f_get_current_user() {
   return ret;
 }
 
-Array f_get_defined_constants(CVarRef categorize /* = null_variant */) {
-  if (categorize) {
-    throw NotSupportedException(__func__, "constant categorization not "
-                                "supported");
-  }
-  return StringData::GetConstants();
+Array f_get_defined_constants(bool categorize /* = false */) {
+  return lookupDefinedConstants(categorize);
 }
 
 String f_get_include_path() {
@@ -161,8 +227,14 @@ String f_set_include_path(CStrRef new_include_path) {
 }
 
 Array f_get_included_files() {
-  return Array::Create();
+  Array included_files = Array::Create();
+  int idx = 0;
+  for (auto& ent : g_vmContext->m_evaledFiles) {
+    included_files.set(idx++, ent.first);
+  }
+  return included_files;
 }
+
 
 Array f_inclued_get_data() {
   return Array::Create();
@@ -467,8 +539,9 @@ Array f_getopt(CStrRef options, CVarRef longopts /* = null_variant */) {
   opts->need_param = 0;
   opts->opt_name   = NULL;
 
-  SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  Array vargv = g->GV(argv).toArray();
+  static const StaticString s_argv("argv");
+  GlobalVariables *g = get_global_variables();
+  Array vargv = g->get(s_argv).toArray();
   int argc = vargv.size();
   char **argv = (char **)malloc((argc+1) * sizeof(char*));
   vector<String> holders;
@@ -532,7 +605,7 @@ Array f_getopt(CStrRef options, CVarRef longopts /* = null_variant */) {
       if (ret.exists(optname_int)) {
         Variant &e = ret.lvalAt(optname_int);
         if (!e.isArray()) {
-          ret.set(optname_int, CREATE_VECTOR2(e, val));
+          ret.set(optname_int, make_packed_array(e, val));
         } else {
           e.append(val);
         }
@@ -545,7 +618,7 @@ Array f_getopt(CStrRef options, CVarRef longopts /* = null_variant */) {
       if (ret.exists(key)) {
         Variant &e = ret.lvalAt(key);
         if (!e.isArray()) {
-          ret.set(key, CREATE_VECTOR2(e, val));
+          ret.set(key, make_packed_array(e, val));
         } else {
           e.append(val);
         }
@@ -565,23 +638,24 @@ Array f_getopt(CStrRef options, CVarRef longopts /* = null_variant */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static const StaticString s_ru_oublock("ru_oublock");
-static const StaticString s_ru_inblock("ru_inblock");
-static const StaticString s_ru_msgsnd("ru_msgsnd");
-static const StaticString s_ru_msgrcv("ru_msgrcv");
-static const StaticString s_ru_maxrss("ru_maxrss");
-static const StaticString s_ru_ixrss("ru_ixrss");
-static const StaticString s_ru_idrss("ru_idrss");
-static const StaticString s_ru_minflt("ru_minflt");
-static const StaticString s_ru_majflt("ru_majflt");
-static const StaticString s_ru_nsignals("ru_nsignals");
-static const StaticString s_ru_nvcsw("ru_nvcsw");
-static const StaticString s_ru_nivcsw("ru_nivcsw");
-static const StaticString s_ru_nswap("ru_nswap");
-static const StaticString s_ru_utime_tv_usec("ru_utime.tv_usec");
-static const StaticString s_ru_utime_tv_sec("ru_utime.tv_sec");
-static const StaticString s_ru_stime_tv_usec("ru_stime.tv_usec");
-static const StaticString s_ru_stime_tv_sec("ru_stime.tv_sec");
+const StaticString
+  s_ru_oublock("ru_oublock"),
+  s_ru_inblock("ru_inblock"),
+  s_ru_msgsnd("ru_msgsnd"),
+  s_ru_msgrcv("ru_msgrcv"),
+  s_ru_maxrss("ru_maxrss"),
+  s_ru_ixrss("ru_ixrss"),
+  s_ru_idrss("ru_idrss"),
+  s_ru_minflt("ru_minflt"),
+  s_ru_majflt("ru_majflt"),
+  s_ru_nsignals("ru_nsignals"),
+  s_ru_nvcsw("ru_nvcsw"),
+  s_ru_nivcsw("ru_nivcsw"),
+  s_ru_nswap("ru_nswap"),
+  s_ru_utime_tv_usec("ru_utime.tv_usec"),
+  s_ru_utime_tv_sec("ru_utime.tv_sec"),
+  s_ru_stime_tv_usec("ru_stime.tv_usec"),
+  s_ru_stime_tv_sec("ru_stime.tv_sec");
 
 #define PHP_RUSAGE_PARA(a) s_ ## a, (int64_t)usg.a
 Array f_getrusage(int who /* = 0 */) {
@@ -657,7 +731,7 @@ Array f_ini_get_all(CStrRef extension /* = null_string */) {
 }
 
 String f_ini_get(CStrRef varname) {
-  String value("");
+  String value = empty_string;
   IniSetting::Get(varname, value);
   return value;
 }
@@ -672,36 +746,31 @@ String f_ini_set(CStrRef varname, CStrRef newvalue) {
 }
 
 int64_t f_memory_get_allocation() {
-  if (RuntimeOption::EnableMemoryManager) {
-    MemoryManager *mm = MemoryManager::TheMemoryManager();
-    const MemoryUsageStats &stats = mm->getStats(true);
-    int64_t ret = stats.totalAlloc;
-    ret -= request_arena().slackEstimate() +
-           varenv_arena().slackEstimate();
-    return ret;
-  }
-  return 0;
+  MemoryManager *mm = MemoryManager::TheMemoryManager();
+  const MemoryUsageStats &stats = mm->getStats(true);
+  int64_t ret = stats.totalAlloc;
+  ret -= request_arena().slackEstimate() +
+         varenv_arena().slackEstimate();
+  return ret;
 }
 
 int64_t f_memory_get_peak_usage(bool real_usage /* = false */) {
-  if (RuntimeOption::EnableMemoryManager) {
-    MemoryManager *mm = MemoryManager::TheMemoryManager();
-    const MemoryUsageStats &stats = mm->getStats(true);
-    return real_usage ? stats.peakUsage : stats.peakAlloc;
-  }
-  return (int64_t)Process::GetProcessRSS(Process::GetProcessId()) * 1024 * 1024;
+  MemoryManager *mm = MemoryManager::TheMemoryManager();
+  const MemoryUsageStats &stats = mm->getStats(true);
+  return real_usage ? stats.peakUsage : stats.peakAlloc;
 }
 
 int64_t f_memory_get_usage(bool real_usage /* = false */) {
-  if (RuntimeOption::EnableMemoryManager) {
-    MemoryManager *mm = MemoryManager::TheMemoryManager();
-    const MemoryUsageStats &stats = mm->getStats(true);
-    int64_t ret = real_usage ? stats.usage : stats.alloc;
-    ret -= request_arena().slackEstimate() +
-           varenv_arena().slackEstimate();
-    return ret;
-  }
-  return (int64_t)Process::GetProcessRSS(Process::GetProcessId()) * 1024 * 1024;
+  MemoryManager *mm = MemoryManager::TheMemoryManager();
+  const MemoryUsageStats &stats = mm->getStats(true);
+  int64_t ret = real_usage ? stats.usage : stats.alloc;
+  ret -= request_arena().slackEstimate() +
+         varenv_arena().slackEstimate();
+  return ret;
+}
+
+Variant f_php_ini_loaded_file() {
+  return false;
 }
 
 String f_php_ini_scanned_files() {
@@ -716,19 +785,25 @@ String f_php_sapi_name() {
   return RuntimeOption::ExecutionMode;
 }
 
+const StaticString s_s("s");
+const StaticString s_r("r");
+const StaticString s_n("n");
+const StaticString s_v("v");
+const StaticString s_m("m");
+
 String f_php_uname(CStrRef mode /* = null_string */) {
   String ret;
   struct utsname buf;
   if (uname((struct utsname *)&buf) != -1) {
-    if (mode == "s") {
+    if (mode == s_s) {
       ret = String(buf.sysname, CopyString);
-    } else if (mode == "r") {
+    } else if (mode == s_r) {
       ret = String(buf.release, CopyString);
-    } else if (mode == "n") {
+    } else if (mode == s_n) {
       ret = String(buf.nodename, CopyString);
-    } else if (mode == "v") {
+    } else if (mode == s_v) {
       ret = String(buf.version, CopyString);
-    } else if (mode == "m") {
+    } else if (mode == s_m) {
       ret = String(buf.machine, CopyString);
     } else { /* assume mode == "a" */
       char tmp_uname[512];
@@ -773,13 +848,9 @@ bool f_set_magic_quotes_runtime(bool new_setting) {
 }
 
 void f_set_time_limit(int seconds) {
-  TimeoutThread::DeferTimeout(seconds);
-  // Just for ini_get
-  g_context->setRequestTimeLimit(seconds);
-  if (RuntimeOption::clientExecutionMode() &&
-      seconds != 0) {
-    raise_warning("set_time_limit is not supported in client mode");
-  }
+  ThreadInfo *info = ThreadInfo::s_threadInfo.getNoCheck();
+  RequestInjectionData &data = info->m_reqInjectionData;
+  data.setTimeout(seconds);
 }
 
 String f_sys_get_temp_dir() {
@@ -789,7 +860,7 @@ String f_sys_get_temp_dir() {
 }
 
 String f_zend_logo_guid() {
-  throw NotSupportedException(__func__, "not zend anymore");
+  throw NotSupportedException(__func__, "deprecated and removed");
 }
 
 int64_t f_zend_thread_id() {
@@ -797,8 +868,9 @@ int64_t f_zend_thread_id() {
 }
 
 String f_zend_version() {
-  throw NotSupportedException(__func__, "not zend anymore");
+  return ZEND_VERSION;
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 

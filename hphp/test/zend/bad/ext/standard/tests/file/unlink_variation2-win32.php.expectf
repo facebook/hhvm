@@ -1,0 +1,6 @@
+*** Testing unlink() on a file when file handle is open ***
+HipHop Warning: %s
+bool(false)
+bool(true)
+bool(false)
+Done

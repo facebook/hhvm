@@ -1,0 +1,17 @@
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+HipHop Fatal error: Argument must implement interface Traversable in %s/test/slow/iterator/iterator_to_array.php on line 11

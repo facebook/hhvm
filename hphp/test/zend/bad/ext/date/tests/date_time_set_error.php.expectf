@@ -1,0 +1,24 @@
+*** Testing date_time_set() : error conditions ***
+
+-- Testing date_time_set() function with zero arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing date_time_set() function with less than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+-- Testing date_time_set() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing date_time_set() function with an invalid values for $object argument --
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+===DONE===

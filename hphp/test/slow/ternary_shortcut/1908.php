@@ -1,7 +1,9 @@
 <?php
 
-
-function foo() { var_dump('hello'); return 789;}
+function foo() {
+ var_dump('hello');
+ return 789;
+}
 $a = 123 ?: 456;
 var_dump($a);
 $b[123] = 456;

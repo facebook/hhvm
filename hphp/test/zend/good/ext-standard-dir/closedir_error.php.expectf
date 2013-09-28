@@ -1,6 +1,0 @@
-*** Testing closedir() : error conditions ***
-
--- Testing closedir() function with more than expected no. of arguments --
-HipHop Warning: %a
-NULL
-===DONE===

@@ -1,6 +1,0 @@
-*** Testing curl_version() : error conditions ***
-
--- Testing curl_version() function with more than expected no. of arguments --
-HipHop Warning: %a
-NULL
-===Done===

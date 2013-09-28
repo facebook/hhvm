@@ -1,0 +1,6 @@
+B1::doTest
+C1::test
+B2::doTest
+C2::test
+B4::doTest
+HipHop Fatal error: %s

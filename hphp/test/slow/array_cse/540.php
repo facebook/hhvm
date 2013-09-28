@@ -1,6 +1,5 @@
 <?php
 
-
 function foo($a, $b, $c, $d) {
   var_dump($a, $b, $c, $d);
 }

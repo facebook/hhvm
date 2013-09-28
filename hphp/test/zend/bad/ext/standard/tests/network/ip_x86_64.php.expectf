@@ -1,0 +1,26 @@
+int(2130706433)
+string(9) "127.0.0.1"
+int(167772161)
+string(8) "10.0.0.1"
+int(4294967295)
+string(15) "255.255.255.255"
+int(4294967040)
+string(13) "255.255.255.0"
+int(0)
+string(7) "0.0.0.0"
+int(1118019956)
+string(14) "66.163.161.116"
+HipHop Warning: %s
+NULL
+bool(false)
+bool(false)
+int(1869573999)
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+string(13) "255.254.82.80"
+string(7) "0.0.0.0"
+HipHop Warning: %s
+NULL
+Done

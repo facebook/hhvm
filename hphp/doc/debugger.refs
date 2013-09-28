@@ -76,6 +76,16 @@ variables at breakpoints. For example,
 
 So every time it breaks at mypage.php line 123, it will print out $a.
 
+    -------------------------- Call chains -------------------------------
+
+Function/method call breakpoints can be qualified with the names of
+functions or methods that must be calling the right most function/method
+name for execution to stop at the breakpoint. These calls need not be
+direct calls. The syntax looks like this:
+    {call}=>{call}()
+where call is either a {func} or {cls}::{method} and zero or more
+"{call}=>" clauses can be specified.
+
     --------------------- Breakpoint States and List ---------------------
 
 Every breakpoint has 3 states: ALWAYS, ONCE, DISABLED. Without keyword "once",
@@ -207,22 +217,6 @@ To get detailed information of a command, type '{cmd} [h]elp' or '{cmd}
 Use this command to display declaration of a symbol.
 
 
-    ---------------------------- Jump Command ----------------------------
-
-    [j]ump               jumps over one expression
-    [j]ump {line}        goto the specified line
-    [j]ump               goto the specified line
-      {file}:{line}
-    [j]ump {label}       goto the specified label
-
-
-This command changes program execution to the specified place without
-executing remaining code on current line. When no label or source
-location is specified, it jumps over just one expression without
-evaluating it. This may be useful to not throw an exception when breaks
-at a throw, for example.
-
-
     -------------------------- Constant Command --------------------------
 
     [k]onstant           lists all constants
@@ -265,7 +259,7 @@ will not be affected by this setting. This directory will be stored in
 configuration file for future sessions as well.
 
 
-    -------------------------- Machine Command --------------------------
+    -------------------------- Machine Command ---------------------------
 
     [m]achine            debugging remote server natively
       [c]onnect {host}
@@ -276,7 +270,7 @@ configuration file for future sessions as well.
       {host}
     [m]achine [r]pc      debugging remote server with RPC
       {host}:{port}
-    [m]achine            debugging local script
+    [m]achine            disconnect, debug only local script
       [d]isconnect
     [m]achine [l]ist     list all sandboxes
     [m]achine            attach to a sandbox
@@ -287,6 +281,10 @@ configuration file for future sessions as well.
     [m]achine            attach to a sandbox by user and name
       [a]ttach {user}
       {sandbox}
+    [m]achine            force attach to a sandbox (see below)
+      [a]ttach [f]orce
+      {index|sandbox|us
+      er sandbox}
 
 
 Use this command to switch between different machines or sandboxes.
@@ -307,6 +305,10 @@ attach to it.
 
 When your sandbox is not available, please hit it at least once from
 your browser. Then run '[m]achine [l]ist' command again.
+
+If another debugger client is already attached to your sandbox you can
+use the '[f]orce' option to '[m]achine [a]ttach'. This will disconnect
+the other client and force your client to connect.
 
 If a HipHop server has RPC port open, one can also debug the server in a
 very special RPC mode. In this mode, one can type in PHP scripts to run,
@@ -340,6 +342,8 @@ step out more than one level of function calls.
     --------------------------- Print Command ---------------------------
 
     [p]rint {php}        prints result of PHP code
+    [p]rint r {php}      prints result of PHP code, (print_r)
+    [p]rint v {php}      prints result of PHP code, (var_dump)
     [p]rint x {php}      prints hex encoded string or number
     [p]rint [h]ex        prints hex encoded string or number
       {php}
@@ -390,6 +394,21 @@ even if it is the same, as the first one.
 In server mode, this command will simply abort current page handling
 without restarting anything.
 
+
+    ---------------------------- Set Command ----------------------------
+
+    set bac on/off    on makes debugger bypass access checks on class members
+    set lf path/off   turn logging on and specify log file
+    set pl level      if level > 0, only print out object trees to that depth
+    set cc count      display at most count characters when doing = command
+    set ss on/off     on makes the debugger take small steps (not entire lines)
+    set sa on/off     on makes where command display argument values
+    set mcl limit     display at most limit source lines at breakpoints
+
+Use this command to change default settings. The new values are persisted into
+the configuration file that normally can be found at ~/.hphpd.hdf.
+
+Level, count and limit can be <= 0, in which case they are unlimited.
 
     ---------------------------- Step Command ----------------------------
 
@@ -487,38 +506,6 @@ where {cmd} can be:
 	[t]ension
 
 Type 'x [h]elp|? {cmd} to read their usages.
-
-    ----------------------- User Extended Command -----------------------
-
-    y {cmd} {arg1}       invoke specified command
-      {arg2} ...
-    y{cmd} {arg1}        invoke specified command
-      {arg2} ...
-
-
-These commands are implemented and installed in PHP by implementing
-DebuggerCommand and calling hphpd_install_user_command(). For example
-
-  class MyCommand implements DebuggerCommand {
-    public function help($client) {
-      $client->helpTitle("Hello Command");
-      $client->helpCmds("y [h]ello", "prints welcome message");
-      return true;
-    }
-    public function onClient($client) {
-      $client->output("Hello, world!");
-      return true;
-    }
-  }
-
-  hphpd_install_user_command('hello', 'MyCommand');
-
-Type '[i]nfo DebuggerCommand' for complete DebuggerCommand interface.
-Type '[i]nfo DebuggerClient' for complete DebuggerClient interface that
-you can use when implementing those $client callbacks. Type '[i]nfo
-DebuggerProxy' for complete DebuggerProxy interface that you can use
-when implementing those $proxy callbacks.
-
 
     ---------------------------- Zend Command ----------------------------
 

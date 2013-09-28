@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,11 +18,11 @@
 #ifndef incl_HPHP_EXT_DATETIME_H_
 #define incl_HPHP_EXT_DATETIME_H_
 
-#include "hphp/runtime/base/base_includes.h"
-#include "hphp/runtime/base/time/timestamp.h"
-#include "hphp/runtime/base/time/datetime.h"
-#include "hphp/runtime/base/time/timezone.h"
-#include "hphp/runtime/base/time/dateinterval.h"
+#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/timestamp.h"
+#include "hphp/runtime/base/datetime.h"
+#include "hphp/runtime/base/timezone.h"
+#include "hphp/runtime/base/dateinterval.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,13 +40,13 @@ extern const StaticString q_DateTime$$RFC3339;
 extern const StaticString q_DateTime$$RSS;
 extern const StaticString q_DateTime$$W3C;
 
-FORWARD_DECLARE_CLASS_BUILTIN(DateTime);
-class c_DateTime : public ExtObjectData {
+FORWARD_DECLARE_CLASS(DateTime);
+class c_DateTime : public ExtObjectDataFlags<ObjectData::HasClone> {
  public:
-  DECLARE_CLASS(DateTime, DateTime, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(DateTime)
 
   // need to implement
-  public: c_DateTime(Class* cls = c_DateTime::s_cls);
+  public: c_DateTime(Class* cls = c_DateTime::classof());
   public: ~c_DateTime();
   public: Object t_add(CObjRef interval);
   public: void t___construct(CStrRef time = "now",
@@ -67,7 +67,7 @@ class c_DateTime : public ExtObjectData {
   public: Object t_sub(CObjRef interval);
 
   // Helper for DateTime -> c_DateTime conversion
-  public: static Object wrap(SmartObject<DateTime> dt) {
+  public: static Object wrap(SmartResource<DateTime> dt) {
     c_DateTime *cdt = NEWOBJ(c_DateTime)();
     Object ret(cdt);
     cdt->m_dt = dt;
@@ -75,17 +75,17 @@ class c_DateTime : public ExtObjectData {
   }
 
   // Helper for c_DateTime -> DateTime conversion
-  public: static SmartObject<DateTime> unwrap(CObjRef datetime) {
+  public: static SmartResource<DateTime> unwrap(CObjRef datetime) {
     SmartObject<c_DateTime> cdt = datetime.getTyped<c_DateTime>(true);
     if (cdt.get() == NULL)
-      return SmartObject<DateTime>();
+      return SmartResource<DateTime>();
     return cdt->m_dt;
   }
 
  private:
-  SmartObject<DateTime> m_dt;
+  SmartResource<DateTime> m_dt;
  public:
-  virtual ObjectData *clone();
+  static c_DateTime* Clone(ObjectData* obj);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -106,13 +106,13 @@ extern const int64_t q_DateTimeZone$$ALL;
 extern const int64_t q_DateTimeZone$$ALL_WITH_BC;
 extern const int64_t q_DateTimeZone$$PER_COUNTRY;
 
-FORWARD_DECLARE_CLASS_BUILTIN(DateTimeZone);
-class c_DateTimeZone : public ExtObjectData {
+FORWARD_DECLARE_CLASS(DateTimeZone);
+class c_DateTimeZone : public ExtObjectDataFlags<ObjectData::HasClone> {
  public:
-  DECLARE_CLASS(DateTimeZone, DateTimeZone, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(DateTimeZone)
 
   // need to implement
-  public: c_DateTimeZone(Class* cls = c_DateTimeZone::s_cls);
+  public: c_DateTimeZone(Class* cls = c_DateTimeZone::classof());
   public: ~c_DateTimeZone();
   public: void t___construct(CStrRef timezone);
   public: Array t_getlocation();
@@ -123,7 +123,7 @@ class c_DateTimeZone : public ExtObjectData {
   public: static Array ti_listidentifiers();
 
   // Helper for TimeZone -> c_DateTimeZone conversion
-  public: static Object wrap(SmartObject<TimeZone> tz) {
+  public: static Object wrap(SmartResource<TimeZone> tz) {
     c_DateTimeZone *ctz = NEWOBJ(c_DateTimeZone)();
     Object ret(ctz);
     ctz->m_tz = tz;
@@ -131,29 +131,31 @@ class c_DateTimeZone : public ExtObjectData {
   }
 
   // Helper for c_DateTimeZone -> TimeZone conversion
-  public: static SmartObject<TimeZone> unwrap(CObjRef timezone) {
+  public: static SmartResource<TimeZone> unwrap(CObjRef timezone) {
     SmartObject<c_DateTimeZone> ctz = timezone.getTyped<c_DateTimeZone>(true);
     if (ctz.get() == NULL)
-      return SmartObject<TimeZone>();
+      return SmartResource<TimeZone>();
     return ctz->m_tz;
   }
 
  private:
-  SmartObject<TimeZone> m_tz;
+  SmartResource<TimeZone> m_tz;
  public:
-  virtual ObjectData *clone();
+  static c_DateTimeZone* Clone(ObjectData* obj);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 // class DateInterval
 
-FORWARD_DECLARE_CLASS_BUILTIN(DateInterval);
-class c_DateInterval : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet> {
+FORWARD_DECLARE_CLASS(DateInterval);
+class c_DateInterval : public ExtObjectDataFlags<ObjectData::UseGet|
+                                                 ObjectData::UseSet|
+                                                 ObjectData::HasClone> {
  public:
-  DECLARE_CLASS(DateInterval, DateInterval, ObjectData)
+  DECLARE_CLASS_NO_SWEEP(DateInterval)
 
   // need to implement
-  public: c_DateInterval(Class* cls = c_DateInterval::s_cls);
+  public: c_DateInterval(Class* cls = c_DateInterval::classof());
   public: ~c_DateInterval();
   public: void t___construct(CStrRef interval_spec);
   public: Variant t___get(Variant member);
@@ -162,25 +164,25 @@ class c_DateInterval : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::
   public: String t_format(CStrRef format);
 
 
-  public: static Object wrap(SmartObject<DateInterval> di) {
+  public: static Object wrap(SmartResource<DateInterval> di) {
     c_DateInterval *cdi = NEWOBJ(c_DateInterval)();
     Object ret(cdi);
     cdi->m_di = di;
     return ret;
   }
 
-  public: static SmartObject<DateInterval> unwrap(CObjRef dateinterval) {
+  public: static SmartResource<DateInterval> unwrap(CObjRef dateinterval) {
     SmartObject<c_DateInterval>
       cdi = dateinterval.getTyped<c_DateInterval>(true);
     if (cdi.get() == NULL)
-      return SmartObject<DateInterval>();
+      return SmartResource<DateInterval>();
     return cdi->m_di;
   }
 
  private:
-  SmartObject<DateInterval> m_di;
+  SmartResource<DateInterval> m_di;
  public:
-  virtual ObjectData *clone();
+  static c_DateInterval* Clone(ObjectData* obj);
 
 };
 

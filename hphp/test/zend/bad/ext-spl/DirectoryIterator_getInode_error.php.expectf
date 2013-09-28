@@ -1,5 +1,0 @@
-HipHop Fatal error: %a
-Stack trace:
-#0 %s: SplFileInfo->getInode()
-#1 {main}
-  thrown in %s

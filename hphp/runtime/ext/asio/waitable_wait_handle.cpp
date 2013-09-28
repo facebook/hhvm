@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -89,12 +89,11 @@ c_BlockableWaitHandle* c_WaitableWaitHandle::addParent(c_BlockableWaitHandle* pa
   return prev;
 }
 
-void c_WaitableWaitHandle::setResult(const TypedValue* result) {
-  assert(result);
-  assert(result->m_type != KindOfRef);
+void c_WaitableWaitHandle::setResult(const Cell& result) {
+  assert(cellIsPlausible(result));
 
   setState(STATE_SUCCEEDED);
-  tvDupCell(result, &m_resultOrException);
+  cellDup(result, m_resultOrException);
 
   // unref creator
   if (m_creator) {
@@ -140,25 +139,17 @@ void c_WaitableWaitHandle::join() {
 
   // enter new asio context and set up guard that will exit once we are done
   session->enterContext();
+  auto exit_guard = folly::makeGuard([&] { session->exitContext(); });
 
   assert(session->isInContext());
   assert(!session->getCurrentContext()->isRunning());
 
-  try {
-    // import this wait handle to the newly created context
-    // throws if cross-context cycle found
-    enterContext(session->getCurrentContextIdx());
+  // import this wait handle to the newly created context
+  // throws if cross-context cycle found
+  enterContext(session->getCurrentContextIdx());
 
-    // run queues until we are finished
-    session->getCurrentContext()->runUntil(this);
-  } catch (const Object& exception) {
-    // recover from PHP exceptions; HPHP internal exceptions are deliberately
-    // ignored as there is no easy way to recover from them
-    session->exitContext();
-    throw;
-  }
-  session->exitContext();
-
+  // run queues until we are finished
+  session->getCurrentContext()->runUntil(this);
   assert(isFinished());
 }
 
@@ -177,6 +168,45 @@ bool c_WaitableWaitHandle::hasCycle(c_WaitableWaitHandle* start) {
   }
 
   return start == this;
+}
+
+Array c_WaitableWaitHandle::t_getdependencystack() {
+  Array result = Array::Create();
+  if (isFinished()) return result;
+  hphp_hash_set<int64_t> visited;
+  auto wait_handle = this;
+  while (wait_handle != nullptr) {
+    result.append(wait_handle);
+    visited.insert(wait_handle->t_getid());
+    auto context_idx = wait_handle->getContextIdx();
+
+    // 1. find parent in the same context
+    auto p = wait_handle->getFirstParent();
+    while (p) {
+      if ((p->getContextIdx() == context_idx) &&
+          visited.find(p->t_getid()) == visited.end()) {
+        wait_handle = p;
+        break;
+      }
+      p = p->getNextParent();
+    }
+    if (p) continue;
+
+    // 2. follow creator
+    if (m_creator && !m_creator->isFinished() &&
+        (m_creator->getContextIdx() == context_idx) &&
+        visited.find(m_creator->t_getid()) == visited.end()) {
+      wait_handle = m_creator;
+      continue;
+    }
+
+    // 3. cross the context boundary
+    result.append(null_object);
+    wait_handle = (context_idx > 1)
+      ? AsioSession::Get()->getContext(context_idx - 1)->getCurrent()
+      : nullptr;
+  }
+  return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,6 +1,5 @@
 <?php
 
-
 function addChildNode(SimpleXMLElement $parent, SimpleXMLElement $node) {
   $newchild = $parent->addChild($node->getName(), (string)$node);
   foreach ($node->attributes() as $name => $value) {

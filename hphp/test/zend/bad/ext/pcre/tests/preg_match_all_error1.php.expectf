@@ -1,0 +1,45 @@
+*** Testing preg_match_all() : error conditions ***
+
+Arg value is abcdef
+HipHop Warning: %s
+bool(false)
+NULL
+
+Arg value is /[a-zA-Z]
+HipHop Warning: %s
+bool(false)
+NULL
+
+Arg value is [a-zA-Z]/
+HipHop Warning: %s
+bool(false)
+NULL
+
+Arg value is /[a-zA-Z]/F
+HipHop Warning: %s
+bool(false)
+NULL
+
+Arg value is Array
+HipHop Warning: %s
+bool(false)
+NULL
+
+Arg value is /[a-zA-Z]/
+int(4)
+array(1) {
+  [0]=>
+  array(4) {
+    [0]=>
+    string(1) "t"
+    [1]=>
+    string(1) "e"
+    [2]=>
+    string(1) "s"
+    [3]=>
+    string(1) "t"
+  }
+}
+HipHop Warning: %s
+bool(false)
+NULL

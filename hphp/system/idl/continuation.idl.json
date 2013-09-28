@@ -1,0 +1,199 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "hphp_create_continuation",
+            "return": {
+                "type": "Object"
+            },
+            "args": [
+                {
+                    "name": "clsname",
+                    "type": "String"
+                },
+                {
+                    "name": "funcname",
+                    "type": "String"
+                },
+                {
+                    "name": "origFuncName",
+                    "type": "String"
+                },
+                {
+                    "name": "args",
+                    "type": "VariantMap",
+                    "value": "null_array"
+                }
+            ],
+            "flags": [
+            ]
+        }
+    ],
+    "classes": [
+        {
+            "name": "Continuation",
+            "flags": [
+                "IsFinal",
+                "NoDefaultSweep"
+            ],
+            "ifaces": [
+                "Iterator",
+                "Awaitable"
+            ],
+            "footer": "",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ],
+                    "flags": [
+                    ]
+                },
+                {
+                    "name": "update",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "label",
+                            "type": "Int64"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ],
+                    "flags": [
+                    ]
+                },
+                {
+                    "name": "getWaitHandle",
+                    "desc": "Start asynchronous execution of this Continuation and return the wait handle",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getLabel",
+                    "return": {
+                        "type": "Int64"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "current",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "key",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "next",
+                    "return": {
+                        "type": null
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "rewind",
+                    "return": {
+                        "type": null
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "valid",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "send",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "v",
+                            "type": "Variant"
+                        }
+                    ],
+                    "flags": [
+                    ]
+                },
+                {
+                    "name": "raise",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "v",
+                            "type": "Variant"
+                        }
+                    ],
+                    "flags": [
+                    ]
+                },
+                {
+                    "name": "getOrigFuncName",
+                    "return": {
+                        "type": "String"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getCalledClass",
+                    "return": {
+                        "type": "String"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        }
+    ]
+}

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,9 +18,9 @@
 #ifndef incl_HPHP_EXT_ARRAY_H_
 #define incl_HPHP_EXT_ARRAY_H_
 
-#include "hphp/runtime/base/base_includes.h"
-#include "hphp/runtime/base/array/array_util.h"
-#include "hphp/runtime/base/zend/zend_collator.h"
+#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/array-util.h"
+#include "hphp/runtime/base/zend-collator.h"
 
 namespace HPHP {
 
@@ -113,12 +113,12 @@ int64_t f_count(CVarRef var, bool recursive = false);
 int64_t f_sizeof(CVarRef var, bool recursive = false);
 Variant f_each(VRefParam array);
 Variant f_current(VRefParam array);
-Variant f_next(VRefParam array);
 Variant f_pos(VRefParam array);
+Variant f_key(VRefParam array);
+Variant f_next(VRefParam array);
 Variant f_prev(VRefParam array);
 Variant f_reset(VRefParam array);
 Variant f_end(VRefParam array);
-Variant f_key(VRefParam array);
 
 bool f_in_array(CVarRef needle, CVarRef haystack, bool strict = false);
 Variant f_range(CVarRef low, CVarRef high, CVarRef step = 1);
@@ -172,6 +172,8 @@ bool f_i18n_loc_set_default(CStrRef locale);
 bool f_i18n_loc_set_attribute(int64_t attr, int64_t val);
 bool f_i18n_loc_set_strength(int64_t strength);
 Variant f_i18n_loc_get_error_code();
+
+Variant f_hphp_array_idx(CVarRef key, CVarRef search, CVarRef def);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

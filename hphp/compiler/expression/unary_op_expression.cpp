@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +16,7 @@
 
 #include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/compiler/expression/object_property_expression.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/statement/statement_list.h"
@@ -29,8 +29,8 @@
 #include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/compiler/expression/binary_op_expression.h"
 #include "hphp/compiler/expression/encaps_list_expression.h"
-#include "hphp/runtime/base/type_conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/compiler/parser/parser.h"
 
 using namespace HPHP;
@@ -229,25 +229,38 @@ bool UnaryOpExpression::preCompute(CVarRef value, Variant &result) {
       case '!':
         result = (!toBoolean(value)); break;
       case '+':
-        result = value.unary_plus(); break;
+        cellSet(cellAdd(make_tv<KindOfInt64>(0), *value.asCell()),
+                *result.asCell());
+        break;
       case '-':
-        result = value.negate(); break;
+        cellSet(cellSub(make_tv<KindOfInt64>(0), *value.asCell()),
+                *result.asCell());
+        break;
       case '~':
-        result = ~value; break;
+        tvSet(*value.asCell(), *result.asTypedValue());
+        cellBitNot(*result.asCell());
+        break;
       case '@':
-        result = value; break;
+        result = value;
+        break;
       case T_INT_CAST:
-        result = value.toInt64(); break;
+        result = value.toInt64();
+        break;
       case T_DOUBLE_CAST:
-        result = toDouble(value); break;
+        result = toDouble(value);
+        break;
       case T_STRING_CAST:
-        result = toString(value); break;
+        result = toString(value);
+        break;
       case T_BOOL_CAST:
-        result = toBoolean(value); break;
+        result = toBoolean(value);
+        break;
       case T_EMPTY:
-        result = empty(value); break;
+        result = !toBoolean(value);
+        break;
       case T_ISSET:
-        result = isset(value); break;
+        result = is_not_null(value);
+        break;
       case T_INC:
       case T_DEC:
         assert(false);
@@ -280,7 +293,7 @@ int UnaryOpExpression::getKidCount() const {
 void UnaryOpExpression::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_exp = boost::dynamic_pointer_cast<Expression>(cp);
+      m_exp = dynamic_pointer_cast<Expression>(cp);
       break;
     default:
       assert(false);
@@ -322,7 +335,7 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
     for (; i < n; i++) {
       ExpressionPtr e((*el)[i]);
       if (!e || !e->isScalar() || !e->getScalarValue(value)) break;
-      if (!isset(value)) {
+      if (value.isNull()) {
         result = false;
       }
     }

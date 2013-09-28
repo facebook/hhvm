@@ -1,0 +1,22 @@
+*** Testing vprintf() : unsigned formats and unsigned values ***
+
+-- Iteration 1 --
+1234567 342391 0
+int(16)
+
+-- Iteration 2 --
+12345678900 u 1234 12345
+int(24)
+
+-- Iteration 3 --
+   1234000 3875820019684212736 120
+int(34)
+
+-- Iteration 4 --
+#1 0 $0 10
+int(10)
+
+-- Iteration 5 --
+1 2 3 4
+int(7)
+===DONE===

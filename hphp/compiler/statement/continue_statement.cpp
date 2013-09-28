@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,15 +22,15 @@ using namespace HPHP;
 // constructors/destructors
 
 ContinueStatement::ContinueStatement
-(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp)
+(STATEMENT_CONSTRUCTOR_PARAMETERS, uint64_t depth)
   : BreakStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ContinueStatement),
-                   exp) {
+                   depth) {
   m_name = "continue";
 }
 
 StatementPtr ContinueStatement::clone() {
   ContinueStatementPtr stmt(new ContinueStatement(*this));
-  stmt->m_exp = Clone(m_exp);
+  stmt->m_depth = m_depth;
   return stmt;
 }
 

@@ -1,0 +1,24 @@
+array(4) {
+  [1]=>
+  string(3) "bob"
+  ["value"]=>
+  string(3) "bob"
+  [0]=>
+  int(0)
+  ["key"]=>
+  int(0)
+}
+array(4) {
+  [1]=>
+  string(3) "Bob"
+  ["value"]=>
+  string(3) "Bob"
+  [0]=>
+  string(6) "Robert"
+  ["key"]=>
+  string(6) "Robert"
+}
+string(32) "a: apple
+b: banana
+c: cranberry
+"

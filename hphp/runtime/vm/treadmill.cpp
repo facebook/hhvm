@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/treadmill.h"
+
 #include <stdlib.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -24,9 +26,7 @@
 #include "hphp/util/base.h"
 #include "hphp/util/rank.h"
 #include "hphp/runtime/base/macros.h"
-#include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/vm/treadmill.h"
-#include "hphp/runtime/vm/translator/translator-x64.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 
 namespace HPHP {  namespace Treadmill {
 
@@ -138,15 +138,6 @@ FreeMemoryTrigger::FreeMemoryTrigger(void* ptr) : m_ptr(ptr) {
 void FreeMemoryTrigger::operator()() {
   TRACE(3, "FreeMemoryTrigger: Firing @ %p , m_f %p\n", this, m_ptr);
   free(m_ptr);
-}
-
-FreeClassTrigger::FreeClassTrigger(Class* cls) : m_cls(cls) {
-  TRACE(3, "FreeClassTrigger @ %p, cls %p\n", this, m_cls);
-}
-
-void FreeClassTrigger::operator()() {
-  TRACE(3, "FreeClassTrigger: Firing @ %p , cls %p\n", this, m_cls);
-  m_cls->atomicRelease();
 }
 
 void deferredFree(void* p) {

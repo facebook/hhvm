@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,16 +21,17 @@
 
 namespace HPHP {
 
-class Unit;
+class UnitEmitter;
 
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Assemble the contents of `filename' and return a Unit.
+ * Assemble the contents of `filename' and return a UnitEmitter.
  *
  * Minimal documentation is available in as.cpp.
  */
-Unit* assemble_file(const char* filename, const MD5&);
+UnitEmitter* assemble_string(const char* code, int codeLen,
+                             const char* filename, const MD5&);
 
 //////////////////////////////////////////////////////////////////////
 

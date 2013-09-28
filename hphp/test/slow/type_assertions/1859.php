@@ -1,15 +1,16 @@
 <?php
 
-
 function f($x) {
   if (!is_array($x)) {
     var_dump($x[0]);
-  } else if (isset($x[0])) {
+  }
+ else if (isset($x[0])) {
     var_dump($x[0]);
   }
   if (!!!is_array($x)) {
     var_dump($x[0]);
-  } else if (isset($x[0])) {
+  }
+ else if (isset($x[0])) {
     var_dump($x[0]);
   }
 }
@@ -20,7 +21,8 @@ function g($x) {
 function h($x) {
   if (!is_array($x) && !is_string($x)) {
     var_dump('1');
-  } else {
+  }
+ else {
     var_dump($x[0]);
   }
 }
@@ -35,9 +37,11 @@ class X implements arrayaccess {
   public function offsetSet($offset, $value) {
     if (is_null($offset)) {
       $this->container[] = $value;
-    } else {
+    }
+ else {
       $this->container[$offset] = $value;
-    }   
+    }
+
   }
   public function offsetExists($offset) {
     return isset($this->container[$offset]);

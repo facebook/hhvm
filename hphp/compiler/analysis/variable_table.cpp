@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,11 +27,12 @@
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/simple_function_call.h"
 #include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/expression/static_member_expression.h"
-#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/class-info.h"
 #include "hphp/util/util.h"
-#include "hphp/util/parser/location.h"
-#include "hphp/util/parser/parser.h"
+#include "hphp/parser/location.h"
+#include "hphp/parser/parser.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,20 +69,31 @@ VariableTable::VariableTable(BlockScope &blockScope)
 
 void VariableTable::getLocalVariableNames(vector<string> &syms) const {
   FunctionScopeRawPtr fs = getScopePtr()->getContainingFunction();
-  bool dollarThisIsSpecial = (fs->getContainingClass() ||
-                              fs->inPseudoMain());
+  bool dollarThisIsSpecial = fs->getContainingClass() ||
+                             fs->inPseudoMain() ||
+                             // In closures, $this is "sometimes"
+                             // special (if it's a closure in a method
+                             // body), but it easiest to just always
+                             // treat it special.
+                             fs->isClosure();
 
+  bool hadThisSym = false;
   for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
     const string& name = m_symbolVec[i]->getName();
     if (name == "this" && dollarThisIsSpecial) {
-      // The "this" variable in methods and pseudo-main is special and is
-      // handled separately below.
+      /*
+       * The "this" variable in methods, pseudo-main, or closures is
+       * special and is handled separately below.
+       *
+       * Closures are the specialest.
+       */
+      hadThisSym = true;
       continue;
     }
     syms.push_back(name);
   }
 
-  if (fs->needsLocalThis()) {
+  if (fs->needsLocalThis() || (hadThisSym && fs->isClosure())) {
     assert(dollarThisIsSpecial);
     // We only need a local variable named "this" if the current function
     // contains an occurrence of "$this" that is not part of a property
@@ -178,8 +190,6 @@ bool VariableTable::isLocal(const Symbol *sym) const {
     */
     return (!sym->isStatic() &&
             !sym->isGlobal() &&
-            !sym->isGeneratorParameter() &&
-            !sym->isRefGeneratorParameter() &&
             !sym->isParameter());
   }
   return false;
@@ -227,7 +237,7 @@ ConstructPtr VariableTable::getStaticInitVal(string varName) {
 bool VariableTable::setStaticInitVal(string varName,
                                      ConstructPtr value) {
   Symbol *sym = addSymbol(varName);
-  bool exists = sym->getStaticInitVal();
+  bool exists = (sym->getStaticInitVal() != nullptr);
   sym->setStaticInitVal(value);
   return exists;
 }
@@ -241,7 +251,7 @@ ConstructPtr VariableTable::getClassInitVal(string varName) {
 
 bool VariableTable::setClassInitVal(string varName, ConstructPtr value) {
   Symbol *sym = addSymbol(varName);
-  bool exists = sym->getClassInitVal();
+  bool exists = (sym->getClassInitVal() != nullptr);
   sym->setClassInitVal(value);
   return exists;
 }
@@ -292,8 +302,7 @@ void VariableTable::addStaticVariable(Symbol *sym,
   m_hasStatic = true;
 
   FunctionScopeRawPtr funcScope = getFunctionScope();
-  if (funcScope &&
-      (funcScope->isClosure() || funcScope->isGeneratorFromClosure())) {
+  if (funcScope && funcScope->isClosure()) {
     // static variables for closures/closure generators are local to the
     // function scope
     m_staticLocalsVec.push_back(sym);
@@ -417,7 +426,12 @@ TypePtr VariableTable::add(Symbol *sym, TypePtr type,
   }
 
   type = setType(ar, sym, type, true);
-  sym->setDeclaration(construct);
+  if (sym->isParameter()) {
+    auto p = dynamic_pointer_cast<ParameterExpression>(construct);
+    if (p) sym->setDeclaration(construct);
+  } else {
+    sym->setDeclaration(construct);
+  }
 
   if (!implicit && m_blockScope.isFirstPass()) {
     if (!sym->getValue()) {
@@ -567,10 +581,6 @@ void VariableTable::clearUsed() {
       sym.second.clearGlobal();
       sym.second.clearReseated();
     } else {
-      sym.second.setReferenced();
-    }
-
-    if (sym.second.isRefGeneratorParameter()) {
       sym.second.setReferenced();
     }
   }

@@ -1,3 +1,4 @@
 <?php
 
- $a = 10; var_dump($a << 2);
+$a = 10;
+ var_dump($a << 2);

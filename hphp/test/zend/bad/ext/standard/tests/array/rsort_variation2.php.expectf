@@ -1,0 +1,369 @@
+*** Testing rsort() : variation ***
+
+-- Iteration 1 --
+bool(true)
+array(5) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(3)
+  [2]=>
+  int(2)
+  [3]=>
+  int(1)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 2 --
+bool(true)
+array(5) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(3)
+  [2]=>
+  int(2)
+  [3]=>
+  int(1)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 3 --
+bool(true)
+array(5) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(3)
+  [2]=>
+  int(2)
+  [3]=>
+  int(1)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 4 --
+bool(true)
+array(5) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(3)
+  [2]=>
+  int(2)
+  [3]=>
+  int(1)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 5 --
+bool(true)
+array(5) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(3)
+  [2]=>
+  int(2)
+  [3]=>
+  int(1)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 6 --
+bool(true)
+array(5) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(3)
+  [2]=>
+  int(2)
+  [3]=>
+  int(1)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 7 --
+bool(true)
+array(5) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(3)
+  [2]=>
+  int(2)
+  [3]=>
+  int(1)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 8 --
+bool(true)
+array(5) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(3)
+  [2]=>
+  int(2)
+  [3]=>
+  int(1)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 9 --
+bool(true)
+array(5) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(3)
+  [2]=>
+  int(2)
+  [3]=>
+  int(1)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 10 --
+bool(true)
+array(5) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(3)
+  [2]=>
+  int(2)
+  [3]=>
+  int(1)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 11 --
+bool(true)
+array(5) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(3)
+  [2]=>
+  int(2)
+  [3]=>
+  int(1)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 12 --
+bool(true)
+array(5) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(3)
+  [2]=>
+  int(2)
+  [3]=>
+  int(1)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 13 --
+bool(true)
+array(5) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(3)
+  [2]=>
+  int(2)
+  [3]=>
+  int(1)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 14 --
+bool(true)
+array(5) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(3)
+  [2]=>
+  int(2)
+  [3]=>
+  int(1)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 15 --
+bool(true)
+array(5) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(3)
+  [2]=>
+  int(2)
+  [3]=>
+  int(1)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 16 --
+HipHop Warning: %s
+bool(false)
+array(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(5)
+  [2]=>
+  int(2)
+  [3]=>
+  int(3)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 17 --
+HipHop Warning: %s
+bool(false)
+array(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(5)
+  [2]=>
+  int(2)
+  [3]=>
+  int(3)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 18 --
+HipHop Warning: %s
+bool(false)
+array(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(5)
+  [2]=>
+  int(2)
+  [3]=>
+  int(3)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 19 --
+HipHop Warning: %s
+bool(false)
+array(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(5)
+  [2]=>
+  int(2)
+  [3]=>
+  int(3)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 20 --
+HipHop Warning: %s
+bool(false)
+array(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(5)
+  [2]=>
+  int(2)
+  [3]=>
+  int(3)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 21 --
+HipHop Warning: %s
+bool(false)
+array(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(5)
+  [2]=>
+  int(2)
+  [3]=>
+  int(3)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 22 --
+bool(true)
+array(5) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(3)
+  [2]=>
+  int(2)
+  [3]=>
+  int(1)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 23 --
+bool(true)
+array(5) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(3)
+  [2]=>
+  int(2)
+  [3]=>
+  int(1)
+  [4]=>
+  int(1)
+}
+
+-- Iteration 24 --
+HipHop Warning: %s
+bool(false)
+array(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(5)
+  [2]=>
+  int(2)
+  [3]=>
+  int(3)
+  [4]=>
+  int(1)
+}
+Done

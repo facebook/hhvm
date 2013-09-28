@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -19,13 +19,13 @@
 #include <vector>
 #include <string>
 #include <boost/scoped_ptr.hpp>
-#include "unicode/rbbi.h"
-#include "unicode/translit.h"
-#include "unicode/uregex.h"
-#include "unicode/ustring.h"
-#include "icu/LifeEventTokenizer.h"
-#include "icu/ICUMatcher.h"
-#include "icu/ICUTransliterator.h"
+#include <unicode/rbbi.h>
+#include <unicode/translit.h>
+#include <unicode/uregex.h>
+#include <unicode/ustring.h>
+#include "icu/LifeEventTokenizer.h" // nolint
+#include "icu/ICUMatcher.h" // nolint
+#include "icu/ICUTransliterator.h" // nolint
 
 using namespace U_ICU_NAMESPACE;
 
@@ -74,7 +74,7 @@ Variant f_icu_match(CStrRef pattern, CStrRef subject,
     }
 
     if (s_patternCacheMap.insert(
-      accessor, StringData::GetStaticString(spattern.get()))) {
+      accessor, makeStaticString(spattern.get()))) {
       accessor->second = rpattern;
     } else {
       delete rpattern;
@@ -119,7 +119,7 @@ Variant f_icu_match(CStrRef pattern, CStrRef subject,
           }
 
           start = usubject.countChar32(0, start);
-          matches->append(CREATE_VECTOR2(match, start));
+          matches->append(make_packed_array(match, start));
         } else {
           matches->append(match);
         }

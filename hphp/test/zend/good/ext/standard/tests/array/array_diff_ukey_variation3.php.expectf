@@ -1,0 +1,106 @@
+*** Testing array_diff_ukey() : usage variation ***
+
+--int 0--
+HipHop Warning: %s
+NULL
+
+--int 1--
+HipHop Warning: %s
+NULL
+
+--int 12345--
+HipHop Warning: %s
+NULL
+
+--int -12345--
+HipHop Warning: %s
+NULL
+
+--float 10.5--
+HipHop Warning: %s
+NULL
+
+--float -10.5--
+HipHop Warning: %s
+NULL
+
+--float 12.3456789000e10--
+HipHop Warning: %s
+NULL
+
+--float -12.3456789000e10--
+HipHop Warning: %s
+NULL
+
+--float .5--
+HipHop Warning: %s
+NULL
+
+--uppercase NULL--
+HipHop Warning: %s
+NULL
+
+--lowercase null--
+HipHop Warning: %s
+NULL
+
+--lowercase true--
+HipHop Warning: %s
+NULL
+
+--lowercase false--
+HipHop Warning: %s
+NULL
+
+--uppercase TRUE--
+HipHop Warning: %s
+NULL
+
+--uppercase FALSE--
+HipHop Warning: %s
+NULL
+
+--empty string DQ--
+HipHop Warning: %s
+NULL
+
+--empty string SQ--
+HipHop Warning: %s
+NULL
+
+--string DQ--
+HipHop Warning: %s
+NULL
+
+--string SQ--
+HipHop Warning: %s
+NULL
+
+--mixed case string--
+HipHop Warning: %s
+NULL
+
+--heredoc--
+HipHop Warning: %s
+NULL
+
+--instance of classWithToString--
+HipHop Warning: %s
+NULL
+
+--instance of classWithoutToString--
+HipHop Warning: %s
+NULL
+
+--undefined var--
+HipHop Warning: %s
+NULL
+
+--unset var--
+HipHop Warning: %s
+NULL
+
+--resource--
+HipHop Warning: %s
+NULL
+===DONE===

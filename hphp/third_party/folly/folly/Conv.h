@@ -64,13 +64,17 @@ typename std::enable_if<
 to(const Src & value) {
   /* static */ if (std::numeric_limits<Tgt>::max()
                    < std::numeric_limits<Src>::max()) {
-    FOLLY_RANGE_CHECK(value <= std::numeric_limits<Tgt>::max(),
-                      "Overflow");
+    FOLLY_RANGE_CHECK(
+      (!greater_than<Tgt, std::numeric_limits<Tgt>::max()>(value)),
+      "Overflow"
+    );
   }
   /* static */ if (std::is_signed<Src>::value &&
                    (!std::is_signed<Tgt>::value || sizeof(Src) > sizeof(Tgt))) {
-    FOLLY_RANGE_CHECK(value >= std::numeric_limits<Tgt>::min(),
-                      "Negative overflow");
+    FOLLY_RANGE_CHECK(
+      (!less_than<Tgt, std::numeric_limits<Tgt>::min()>(value)),
+      "Negative overflow"
+    );
   }
   return static_cast<Tgt>(value);
 }
@@ -319,7 +323,6 @@ typename std::enable_if<
   std::is_integral<Src>::value && std::is_signed<Src>::value &&
   detail::IsSomeString<Tgt>::value && sizeof(Src) >= 4>::type
 toAppend(Src value, Tgt * result) {
-  typedef typename std::make_unsigned<Src>::type Usrc;
   char buffer[20];
   if (value < 0) {
     result->push_back('-');
@@ -473,6 +476,38 @@ toAppend(Tgt* result) {
 }
 
 /**
+ * Variadic base case: do nothing.
+ */
+template <class Delimiter, class Tgt>
+typename std::enable_if<detail::IsSomeString<Tgt>::value>::type
+toAppendDelim(const Delimiter& delim, Tgt* result) {
+}
+
+/**
+ * 1 element: same as toAppend.
+ */
+template <class Delimiter, class T, class Tgt>
+typename std::enable_if<detail::IsSomeString<Tgt>::value>::type
+toAppendDelim(const Delimiter& delim, const T& v, Tgt* tgt) {
+  toAppend(v, tgt);
+}
+
+/**
+ * Append to string with a delimiter in between elements.
+ */
+template <class Delimiter, class T, class... Ts>
+typename std::enable_if<sizeof...(Ts) >= 2
+  && detail::IsSomeString<
+  typename std::remove_pointer<
+    typename std::tuple_element<
+      sizeof...(Ts) - 1, std::tuple<Ts...>
+      >::type>::type>::value>::type
+toAppendDelim(const Delimiter& delim, const T& v, const Ts&... vs) {
+  toAppend(v, delim, detail::getLastElement(vs...));
+  toAppendDelim(delim, vs...);
+}
+
+/**
  * to<SomeString>(v1, v2, ...) uses toAppend() (see below) as back-end
  * for all types.
  */
@@ -481,6 +516,18 @@ typename std::enable_if<detail::IsSomeString<Tgt>::value, Tgt>::type
 to(const Ts&... vs) {
   Tgt result;
   toAppend(vs..., &result);
+  return result;
+}
+
+/**
+ * toDelim<SomeString>(delim, v1, v2, ...) uses toAppendDelim() as
+ * back-end for all types.
+ */
+template <class Tgt, class Delim, class... Ts>
+typename std::enable_if<detail::IsSomeString<Tgt>::value, Tgt>::type
+toDelim(const Delim& delim, const Ts&... vs) {
+  Tgt result;
+  toAppendDelim(delim, vs..., &result);
   return result;
 }
 

@@ -1,7 +1,11 @@
 <?hh
 
 class X {
-  protected function foo(): Map<string,string>{ return Map {}; }
+  protected function foo(): Map<string,string>{
+ return Map {
+}
+;
+ }
   function fiz(): void {
     $this->fuz('save', $this->foo());
   }

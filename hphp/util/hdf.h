@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,10 +18,11 @@
 #define incl_HPHP_CONFIG_HDF_H_
 
 #include "hphp/util/base.h"
+#include <boost/container/flat_set.hpp>
 #include <string>
 #include "hphp/util/exception.h"
-#include "hphp/util/case_insensitive.h"
-#include "neo/neo_hdf.h"
+#include "hphp/util/case-insensitive.h"
+#include "hphp/neo/neo_hdf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -132,6 +133,7 @@ public:
   void get(std::vector<std::string> &values) const;
   void get(std::set<std::string> &values) const;
   void get(std::set<std::string, stdltistr> &values) const;
+  void get(boost::container::flat_set<std::string> &values) const;
   void get(std::map<std::string, std::string> &values) const;
   void get(hphp_string_imap<std::string> &values) const;
 
@@ -360,9 +362,7 @@ private:
  */
 class HdfException : public Exception {
 public:
-  HdfException(const char *fmt, ...) {
-    va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
-  }
+  HdfException(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
   EXCEPTION_COMMON_IMPL(HdfException);
 };
 

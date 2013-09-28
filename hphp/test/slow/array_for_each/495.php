@@ -1,6 +1,6 @@
 <?php
 
- function k1() {
+function k1() {
   $arr = array(0,1,2,3,4);
   reset($arr);
   foreach ($arr as $v) {

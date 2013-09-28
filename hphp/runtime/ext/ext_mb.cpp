@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,18 +16,19 @@
 */
 
 #include "hphp/runtime/ext/ext_mb.h"
-#include "hphp/runtime/base/util/string_buffer.h"
-#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/ext/php_unicode.h"
 #include "hphp/runtime/ext/unicode_data.h"
 #include "hphp/runtime/ext/ext_process.h"
-#include "hphp/runtime/base/zend/zend_url.h"
-#include "hphp/runtime/base/zend/zend_string.h"
-#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/base/zend-url.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/ini-setting.h"
 
 extern "C" {
-#include "mbfl/mbfl_convert.h"
-#include "mbfl/mbfilter.h"
+#include <mbfl/mbfl_convert.h>
+#include <mbfl/mbfilter.h>
 #include <oniguruma.h>
 }
 
@@ -1267,7 +1268,7 @@ Variant f_mb_convert_kana(CStrRef str, CStrRef option /* = null_string */,
 
   ret = mbfl_ja_jp_hantozen(&string, &result, opt);
   if (ret != NULL) {
-    return String((const char*)ret->val, ret->len, AttachString);
+    return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
 }
@@ -1324,7 +1325,7 @@ static Variant php_mbfl_convert(CVarRef var,
     string->len = svar.size();
     mbfl_string *ret =
       mbfl_buffer_converter_feed_result(convd, string, result);
-    return String((const char*)ret->val, ret->len, AttachString);
+    return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
 
   return var;
@@ -1406,7 +1407,7 @@ Variant f_mb_convert_variables(int _argc, CStrRef to_encoding,
   if (convd != NULL) {
     vars = php_mbfl_convert(vars, convd, &string, &result);
     for (int n = 0; n < _argv.size(); n++) {
-      lval(((Array&)_argv).lval(n)) =
+      const_cast<Array&>(_argv).lval(n) =
         php_mbfl_convert(_argv[n], convd, &string, &result);
     }
     MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
@@ -1433,7 +1434,7 @@ Variant f_mb_decode_mimeheader(CStrRef str) {
   ret = mbfl_mime_header_decode(&string, &result,
                                 MBSTRG(current_internal_encoding));
   if (ret != NULL) {
-    return String((const char*)ret->val, ret->len, AttachString);
+    return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
 }
@@ -1482,7 +1483,7 @@ static Variant php_mb_numericentity_exec(CStrRef str, CVarRef convmap,
   ret = mbfl_html_numeric_entity(&string, &result, iconvmap, mapsize, type);
   free(iconvmap);
   if (ret != NULL) {
-    return String((const char*)ret->val, ret->len, AttachString);
+    return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
 }
@@ -1608,7 +1609,7 @@ Variant f_mb_encode_mimeheader(CStrRef str, CStrRef charset /* = null_string */,
   ret = mbfl_mime_header_encode(&string, &result, charsetenc, transenc,
                                 linefeed.data(), indent);
   if (ret != NULL) {
-    return String((const char*)ret->val, ret->len, AttachString);
+    return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
 }
@@ -1618,23 +1619,24 @@ Variant f_mb_encode_numericentity(CStrRef str, CVarRef convmap,
   return php_mb_numericentity_exec(str, convmap, encoding, 0);
 }
 
-static const StaticString s_internal_encoding("internal_encoding");
-static const StaticString s_http_input("http_input");
-static const StaticString s_http_output("http_output");
-static const StaticString s_mail_charset("mail_charset");
-static const StaticString s_mail_header_encoding("mail_header_encoding");
-static const StaticString s_mail_body_encoding("mail_body_encoding");
-static const StaticString s_illegal_chars("illegal_chars");
-static const StaticString s_encoding_translation("encoding_translation");
-static const StaticString s_On("On");
-static const StaticString s_Off("Off");
-static const StaticString s_language("language");
-static const StaticString s_detect_order("detect_order");
-static const StaticString s_substitute_character("substitute_character");
-static const StaticString s_strict_detection("strict_detection");
-static const StaticString s_none("none");
-static const StaticString s_long("long");
-static const StaticString s_entity("entity");
+const StaticString
+  s_internal_encoding("internal_encoding"),
+  s_http_input("http_input"),
+  s_http_output("http_output"),
+  s_mail_charset("mail_charset"),
+  s_mail_header_encoding("mail_header_encoding"),
+  s_mail_body_encoding("mail_body_encoding"),
+  s_illegal_chars("illegal_chars"),
+  s_encoding_translation("encoding_translation"),
+  s_On("On"),
+  s_Off("Off"),
+  s_language("language"),
+  s_detect_order("detect_order"),
+  s_substitute_character("substitute_character"),
+  s_strict_detection("strict_detection"),
+  s_none("none"),
+  s_long("long"),
+  s_entity("entity");
 
 Variant f_mb_get_info(CStrRef type /* = null_string */) {
   const mbfl_language *lang = mbfl_no2language(MBSTRG(current_language));
@@ -1967,7 +1969,7 @@ String f_mb_output_handler(CStrRef contents, int status) {
     MBSTRG(outconv) = NULL;
   }
 
-  return String((const char *)result.val, result.len, AttachString);
+  return String(reinterpret_cast<char*>(result.val), result.len, AttachString);
 }
 
 typedef struct _php_mb_encoding_handler_info_t {
@@ -2242,7 +2244,7 @@ static Variant php_mb_substr(CStrRef str, int from, int len,
     ret = mbfl_strcut(&string, &result, from, len);
   }
   if (ret != NULL) {
-    return String((const char*)ret->val, ret->len, AttachString);
+    return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
 }
@@ -2298,7 +2300,7 @@ Variant f_mb_strimwidth(CStrRef str, int start, int width,
 
   ret = mbfl_strimwidth(&string, &marker, &result, start, width);
   if (ret != NULL) {
-    return String((const char *)ret->val, ret->len, AttachString);
+    return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
 }
@@ -2395,7 +2397,7 @@ Variant f_mb_stristr(CStrRef haystack, CStrRef needle, bool part /* = false */,
   }
 
   if (ret != NULL) {
-    return String((const char*)ret->val, ret->len, AttachString);
+    return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
 }
@@ -2600,7 +2602,7 @@ Variant f_mb_strrchr(CStrRef haystack, CStrRef needle, bool part /* = false */,
   }
 
   if (ret != NULL) {
-    return String((const char*)ret->val, ret->len, AttachString);
+    return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
 }
@@ -2652,7 +2654,7 @@ Variant f_mb_strrichr(CStrRef haystack, CStrRef needle, bool part /* = false */,
   }
 
   if (ret != NULL) {
-    return String((const char*)ret->val, ret->len, AttachString);
+    return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
 }
@@ -2700,7 +2702,7 @@ Variant f_mb_strstr(CStrRef haystack, CStrRef needle, bool part /* = false */,
   }
 
   if (ret != NULL) {
-    return String((const char*)ret->val, ret->len, AttachString);
+    return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
 }
@@ -3838,7 +3840,7 @@ static int _php_mbstr_parse_mail_headers(Array &ht, const char *str,
           if (!fld_name.empty() && !fld_val.empty()) {
             /* FIXME: some locale free implementation is
              * really required here,,, */
-            ht.set(StringUtil::ToUpper(fld_name), fld_val);
+            ht.set(f_strtoupper(fld_name), fld_val);
           }
           state = 1;
         }
@@ -3871,7 +3873,7 @@ out:
     if (!fld_name.empty() && !fld_val.empty()) {
       /* FIXME: some locale free implementation is
        * really required here,,, */
-      ht.set(StringUtil::ToUpper(fld_name), fld_val);
+      ht.set(f_strtoupper(fld_name), fld_val);
     }
   }
   return state;
@@ -3958,7 +3960,7 @@ bool f_mb_send_mail(CStrRef to, CStrRef subject, CStrRef message,
   } suppressed_hdrs = { 0, 0 };
 
   static const StaticString s_CONTENT_TYPE("CONTENT-TYPE");
-  String s = ht_headers[s_CONTENT_TYPE];
+  String s = ht_headers[s_CONTENT_TYPE].toString();
   if (!s.isNull()) {
     char *tmp;
     char *param_name;
@@ -4066,7 +4068,8 @@ bool f_mb_send_mail(CStrRef to, CStrRef subject, CStrRef message,
       (&orig_str, &conv_str, tran_cs, head_enc,
        "\n", sizeof("Subject: [PHP-jp nnnnnnnn]"));
     if (pstr != NULL) {
-      encoded_subject = String((const char *)pstr->val, pstr->len,
+      encoded_subject = String(reinterpret_cast<char*>(pstr->val),
+                               pstr->len,
                                AttachString);
     }
   } else {
@@ -4099,7 +4102,8 @@ bool f_mb_send_mail(CStrRef to, CStrRef subject, CStrRef message,
       }
     }
     if (pstr != NULL) {
-      encoded_message = String((const char *)pstr->val, pstr->len,
+      encoded_message = String(reinterpret_cast<char*>(pstr->val),
+                               pstr->len,
                                AttachString);
     }
   } else {

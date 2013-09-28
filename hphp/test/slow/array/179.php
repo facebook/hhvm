@@ -1,3 +1,4 @@
 <?php
 
- $a = array();                       var_dump($a);
+$a = array();
+                       var_dump($a);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,19 +17,19 @@
 
 #include "hphp/runtime/ext/ext_intl.h"
 #include "hphp/runtime/ext/ext_array.h" // for throw_bad_array_exception
-#include "hphp/runtime/base/util/request_local.h"
-#include "hphp/runtime/base/zend/intl_convert.h"
-#include "hphp/runtime/base/zend/zend_collator.h"
-#include "hphp/runtime/base/zend/zend_qsort.h"
-#include "unicode/uidna.h"
-#include "unicode/ustring.h"
-#include "unicode/ucol.h" // icu
-#include "unicode/uclean.h" // icu
-#include "unicode/putil.h" // icu
-#include "unicode/utypes.h"
-#include "unicode/unorm.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/intl-convert.h"
+#include "hphp/runtime/base/zend-collator.h"
+#include "hphp/runtime/base/zend-qsort.h"
+#include <unicode/uidna.h>
+#include <unicode/ustring.h>
+#include <unicode/ucol.h> // icu
+#include <unicode/uclean.h> // icu
+#include <unicode/putil.h> // icu
+#include <unicode/utypes.h>
+#include <unicode/unorm.h>
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 #ifdef UIDNA_INFO_INITIALIZER
 #define HAVE_46_API 1 /* has UTS#46 API (introduced in ICU 4.6) */
@@ -47,11 +47,11 @@ String f_intl_get_error_message() {
   if (!s_intl_error->m_error.custom_error_message.empty()) {
     return s_intl_error->m_error.custom_error_message;
   }
-  return String(u_errorName(s_intl_error->m_error.code), AttachLiteral);
+  return String(u_errorName(s_intl_error->m_error.code), CopyString);
 }
 
 String f_intl_error_name(int64_t error_code) {
-  return String(u_errorName((UErrorCode)error_code), AttachLiteral);
+  return String(u_errorName((UErrorCode)error_code), CopyString);
 }
 
 bool f_intl_is_failure(int64_t error_code) {
@@ -222,7 +222,7 @@ int64_t c_Collator::t_geterrorcode() {
 }
 
 String c_Collator::t_geterrormessage() {
-  return String(u_errorName(m_errcode.code), AttachLiteral);
+  return String(u_errorName(m_errcode.code), CopyString);
 }
 
 String c_Collator::t_getlocale(int64_t type /* = 0 */) {
@@ -234,7 +234,7 @@ String c_Collator::t_getlocale(int64_t type /* = 0 */) {
   String ret(
     (char*)ucol_getLocaleByType(m_ucoll, (ULocDataLocaleType)type,
                                 &(m_errcode.code)),
-    AttachLiteral);
+    CopyString);
   if (U_FAILURE(m_errcode.code)) {
     m_errcode.custom_error_message = "Error getting locale by type";
     s_intl_error->m_error.code = m_errcode.code;
@@ -535,22 +535,6 @@ Variant f_collator_sort(CVarRef obj, VRefParam arr,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const int64_t q_Locale$$ACTUAL_LOCALE = 0;
-const int64_t q_Locale$$VALID_LOCALE = 1;
-
-///////////////////////////////////////////////////////////////////////////////
-
-c_Locale::c_Locale(Class* cb) : ExtObjectData(cb) {
-}
-
-c_Locale::~c_Locale() {
-}
-
-void c_Locale::t___construct() {
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 const int64_t q_Normalizer$$NONE     = UNORM_NONE;
 const int64_t q_Normalizer$$FORM_D   = UNORM_NFD;
 const int64_t q_Normalizer$$NFD      = UNORM_NFD;
@@ -736,9 +720,10 @@ enum {
 
 #ifdef HAVE_46_API
 
-static const StaticString s_result("result");
-static const StaticString s_isTransitionalDifferent("isTransitionalDifferent");
-static const StaticString s_errors("errors");
+const StaticString
+  s_result("result"),
+  s_isTransitionalDifferent("isTransitionalDifferent"),
+  s_errors("errors");
 
 static Variant php_intl_idn_to_46(CStrRef domain, int64_t options, IdnVariant idn_variant, VRefParam idna_info, int mode) {
   int32_t     converted_capacity;
@@ -757,7 +742,7 @@ static Variant php_intl_idn_to_46(CStrRef domain, int64_t options, IdnVariant id
   status = U_ZERO_ERROR;
   converted_capacity = 255; // no domain name may exceed this
   String result(converted_capacity, ReserveString); // reserves converted_capacity+1 characters.
-  converted = result.mutableSlice().ptr;
+  converted = result.bufferSlice().ptr;
   if (mode == INTL_IDN_TO_ASCII) {
     converted_len = uidna_nameToASCII_UTF8(uts46, (char*)domain.data(), domain.size(),
       converted, converted_capacity, &info, &status);

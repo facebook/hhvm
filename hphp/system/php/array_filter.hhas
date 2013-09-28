@@ -1,0 +1,73 @@
+.function array_filter($arr = no_args, $func = no_func("""null"""), $res = entry) {
+          .numiters 2;
+
+# if we get here, a value was supplied for $res
+          String "array_filter() expects at most 2 parameters"
+          Jmp warning
+no_args:  String "array_filter() expects at least 1 parameter, 0 given"
+          Jmp warning
+not_array:String "array_filter() expects parameter 1 to be array"
+          Jmp warning
+bad_func: String "array_filter() expects parameter 2 to be a valid callback"
+          Jmp warning
+warning:  Cns "E_USER_WARNING"
+          FCallBuiltin 2 2 "trigger_error"
+          PopR
+          Null
+          RetC
+
+entry:    IsArrayL $arr
+          JmpZ not_array
+
+          IssetL $func
+          JmpZ no_func
+
+          CGetL $func
+          DecodeCufIter 0 bad_func
+.try_fault kill_iter_0 {
+            NewArray
+            SetL $res
+            PopC
+
+            CGetL $arr
+            WIterInitK 1 endloop_a $v $k
+  .try_fault kill_iter_1 1 {
+    loop_a:   FPushCufIter 1 0
+              FPassL 0 $v
+              FCall 1
+              UnboxR
+              JmpZ skip_a
+              SetWithRefLM <L:$res EL:$k> $v
+    skip_a:   WIterNextK 1 loop_a $v $k
+  }
+}
+endloop_a:CIterFree 0
+endloop_n:CGetL $res
+          RetC
+
+no_func:  NewArray
+          SetL $res
+          PopC
+          CGetL $arr
+          WIterInitK 1 endloop_n $v $k
+.try_fault kill_iter_1_only 1 {
+loop_n:   CGetL $v
+          JmpZ skip_n
+          SetWithRefLM <L:$res EL:$k> $v
+skip_n:   WIterNextK 1 loop_n $v $k
+}
+          Jmp endloop_n
+
+kill_iter_0:
+          CIterFree 0
+          Unwind
+kill_iter_1:
+          IterFree 1
+          Unwind
+# Needed for the verifier. Otherwise it complains
+# because from in one fault region iter 0 is live
+# and in the other its not.
+kill_iter_1_only:
+          IterFree 1
+          Unwind
+}

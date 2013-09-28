@@ -1,0 +1,23 @@
+*** Test readfile(): error conditions ***
+-- Testing readfile() with unexpected no. of arguments --
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+-- Testing readfile() with invalid arguments --
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+-- Testing readfile() with non-existent file --
+HipHop Warning: %s
+bool(false)
+Done

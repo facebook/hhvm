@@ -1,5 +1,5 @@
 DateTimeZone
-HipHop Warning: DateTimeZone::__construct() expects exactly 1 parameter, 0 given in %s on line 5
+HipHop Warning: DateTimeZone::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
 object(DateTimeZone)#1 (0) {
 }
 string(24) "O:12:"DateTimeZone":0:{}"
@@ -23,7 +23,7 @@ array(7) {
 }
 ================
 A_DateTimeZone
-HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s on line 26
+HipHop Warning: DateTimeZone::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
 object(A_DateTimeZone)#3 (1) {
   ["___x"]=>
   NULL
@@ -33,15 +33,19 @@ object(A_DateTimeZone)#4 (1) {
   ["___x"]=>
   NULL
 }
-array(5) {
+array(7) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(5) "__get"
+  string(11) "getLocation"
   [2]=>
-  string(5) "__set"
+  string(7) "getName"
   [3]=>
-  string(20) "createFromDateString"
+  string(9) "getOffset"
   [4]=>
-  string(6) "format"
+  string(14) "getTransitions"
+  [5]=>
+  string(17) "listAbbreviations"
+  [6]=>
+  string(15) "listIdentifiers"
 }

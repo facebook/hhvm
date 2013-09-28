@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -53,7 +53,7 @@ public:
   const std::string &getName() const { return m_name;}
   const std::string &getOriginalName() const { return m_origName;}
   const std::string getNonNSOriginalName() const {
-    int nsPos = m_origName.rfind('\\');
+    auto nsPos = m_origName.rfind('\\');
     if (nsPos == string::npos) {
       return m_origName;
     }

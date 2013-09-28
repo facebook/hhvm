@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -89,6 +89,12 @@ public:
     Id str;
     Label* dest;
   };
+
+  struct IterPair {
+    IterPair(IterKind k, Id i) : kind(k), id(i) {}
+    IterKind kind;
+    Id id;
+  };
 #define O(name, imm, pop, push, flags) \
   void name(imm);
 #define NA
@@ -103,8 +109,9 @@ public:
 #define MA std::vector<uchar>
 #define BLA std::vector<Label*>&
 #define SLA std::vector<StrOff>&
+#define ILA std::vector<IterPair>&
 #define IVA int32_t
-#define HA int32_t
+#define LA int32_t
 #define IA int32_t
 #define I64A int64_t
 #define DA double
@@ -122,8 +129,9 @@ public:
 #undef MA
 #undef BLA
 #undef SLA
+#undef ILA
 #undef IVA
-#undef HA
+#undef LA
 #undef IA
 #undef I64A
 #undef DA
@@ -325,7 +333,7 @@ public:
   void visit(FileScopePtr file);
   void assignLocalVariableIds(FunctionScopePtr fs);
   void fixReturnType(Emitter& e, FunctionCallPtr fn,
-                     bool isBuiltinCall = false);
+                     Func* builtinFunc = nullptr);
   typedef std::vector<int> IndexChain;
   void visitListAssignmentLHS(Emitter& e, ExpressionPtr exp,
                               IndexChain& indexChain,
@@ -340,9 +348,10 @@ public:
   }
   bool evalStackIsUnknown() { return m_evalStackIsUnknown; }
   void popEvalStack(char symFlavor, int arg = -1, int pos = -1);
-  void popSymbolicLocal(Opcode opcode, int arg = -1, int pos = -1);
+  void popSymbolicLocal(Op opcode, int arg = -1, int pos = -1);
   void popEvalStackLMany();
   void popEvalStackMany(int len, char symFlavor);
+  void popEvalStackCVMany(int len);
   void pushEvalStack(char symFlavor);
   void peekEvalStack(char symFlavor, int depthActual);
   void pokeEvalStack(char symFlavor, int depthActual);
@@ -354,8 +363,8 @@ public:
   void restoreJumpTargetEvalStack();
   void recordCall();
   bool isJumpTarget(Offset target);
-  void setPrevOpcode(Opcode op) { m_prevOpcode = op; }
-  Opcode getPrevOpcode() const { return m_prevOpcode; }
+  void setPrevOpcode(Op op) { m_prevOpcode = op; }
+  Op getPrevOpcode() const { return m_prevOpcode; }
   bool currentPositionIsReachable() {
     return (m_ue.bcPos() == m_curFunc->base()
             || isJumpTarget(m_ue.bcPos())
@@ -373,20 +382,19 @@ public:
     EXCEPTION_COMMON_IMPL(IncludeTimeFatalException);
   };
 
-  enum IterKind {
-    KindOfIter = 0,
-    KindOfMIter = 1
-  };
-
-  void pushIterScope(Id id, bool itRef = false) {
-    IterKind itKind = itRef ? KindOfMIter : KindOfIter;
-    m_pendingIters.push_back(std::pair<Id,IterKind>(id,itKind));
+  void pushIterScope(Id id, IterKind kind) {
+    m_pendingIters.emplace_back(id, kind);
   }
   void popIterScope() { m_pendingIters.pop_back(); }
+
 private:
   typedef std::pair<StringData*, bool> ClosureUseVar;  // (name, byRef)
   typedef std::vector<ClosureUseVar> ClosureUseVarVec;
   typedef std::vector<std::pair<Id,IterKind> > PendingIterVec;
+  typedef std::pair<StringData*, ExpressionPtr> NonScalarPair;
+  typedef std::vector<NonScalarPair> NonScalarVec;
+  typedef std::pair<Id, int> StrCase;
+
   class PostponedMeth {
   public:
     PostponedMeth(MethodStatementPtr m, FuncEmitter* fe, bool top,
@@ -397,6 +405,7 @@ private:
     bool m_top;
     ClosureUseVarVec* m_closureUseVars;
   };
+
   class PostponedCtor {
   public:
     PostponedCtor(InterfaceStatementPtr is, FuncEmitter* fe)
@@ -404,8 +413,7 @@ private:
     InterfaceStatementPtr m_is;
     FuncEmitter* m_fe;
   };
-  typedef std::pair<StringData*, ExpressionPtr> NonScalarPair;
-  typedef std::vector<NonScalarPair> NonScalarVec;
+
   class PostponedNonScalars {
   public:
     PostponedNonScalars(InterfaceStatementPtr is, FuncEmitter* fe,
@@ -418,6 +426,7 @@ private:
     FuncEmitter* m_fe;
     NonScalarVec* m_vec;
   };
+
   class PostponedClosureCtor {
   public:
     PostponedClosureCtor(ClosureUseVarVec& v, ClosureExpressionPtr e,
@@ -427,25 +436,24 @@ private:
     ClosureExpressionPtr m_expr;
     FuncEmitter* m_fe;
   };
+
   class ControlTargets {
   public:
-    ControlTargets(Id itId, bool itRef, Label& brkTarg, Label& cntTarg,
-                   Label& brkHand, Label& cntHand) :
-        m_itId(itId), m_itRef(itRef), m_brkTarg(brkTarg), m_cntTarg(cntTarg),
-        m_brkHand(brkHand), m_cntHand(cntHand) {}
+    ControlTargets(Id itId, bool itRef, Label& brkTarg, Label& cntTarg)
+        : m_itId(itId), m_itRef(itRef), m_brkTarg(brkTarg), m_cntTarg(cntTarg)
+      {}
     Id m_itId;
     bool m_itRef;
     Label& m_brkTarg;  // Jump here for "break;" (after doing IterFree)
     Label& m_cntTarg;  // Jump here for "continue;"
-    Label& m_brkHand;  // Push N and jump here for "break N;"
-    Label& m_cntHand;  // Push N and jump here for "continue N;"
   };
+
   class ControlTargetPusher {
   public:
     ControlTargetPusher(EmitterVisitor* e, Id itId, bool itRef, Label& brkTarg,
-        Label& cntTarg, Label& brkHand, Label& cntHand) : m_e(e) {
+        Label& cntTarg) : m_e(e) {
       e->m_controlTargets.push_front(ControlTargets(itId, itRef, brkTarg,
-            cntTarg, brkHand, cntHand));
+            cntTarg));
     }
     ~ControlTargetPusher() {
       m_e->m_controlTargets.pop_front();
@@ -453,6 +461,7 @@ private:
   private:
     EmitterVisitor* m_e;
   };
+
   class ExnHandlerRegion {
   public:
     ExnHandlerRegion(Offset start, Offset end) : m_start(start),
@@ -468,15 +477,23 @@ private:
     std::set<StringData*, string_data_lt> m_names;
     std::vector<std::pair<StringData*, Label*> > m_catchLabels;
   };
+
   class FaultRegion {
   public:
-    FaultRegion(Offset start, Offset end, Id iterId)
-     : m_start(start), m_end(end), m_iterId(iterId) {}
+    FaultRegion(Offset start, Offset end, Id iterId, IterKind kind)
+      : m_start(start)
+      , m_end(end)
+      , m_iterId(iterId)
+      , m_iterKind(kind)
+    {}
+
     Offset m_start;
     Offset m_end;
     Id m_iterId;
-    Label m_func;
+    IterKind m_iterKind;
+    Label m_func; // note: a pointer to this is handed out to the Funclet
   };
+
   class FPIRegion {
     public:
       FPIRegion(Offset start, Offset end, Offset fpOff)
@@ -485,7 +502,7 @@ private:
       Offset m_end;
       Offset m_fpOff;
   };
-  typedef std::pair<Id, int> StrCase;
+
   struct SwitchState : private boost::noncopyable {
     SwitchState() : nonZeroI(-1), defI(-1) {}
     std::map<int64_t, int> cases; // a map from int (or litstr id) to case index
@@ -505,7 +522,7 @@ private:
   FuncEmitter* m_curFunc;
   FileScopePtr m_file;
 
-  Opcode m_prevOpcode;
+  Op m_prevOpcode;
 
   std::deque<PostponedMeth> m_postponedMeths;
   std::deque<PostponedCtor> m_postponedCtors;
@@ -514,29 +531,29 @@ private:
   std::deque<PostponedNonScalars> m_postponedCinits;
   std::deque<PostponedClosureCtor> m_postponedClosureCtors;
   PendingIterVec m_pendingIters;
-  typedef std::map<const StringData*, Label*, string_data_lt> LabelMap;
-  LabelMap m_methLabels;
+  hphp_hash_map<std::string,FuncEmitter*> m_generatorEmitted;
+  hphp_hash_set<std::string> m_nonTopGeneratorEmitted;
+  hphp_hash_set<std::string> m_topMethodEmitted;
   SymbolicStack m_evalStack;
   bool m_evalStackIsUnknown;
   hphp_hash_map<Offset, SymbolicStack> m_jumpTargetEvalStacks;
   int m_actualStackHighWater;
   int m_fdescHighWater;
-  int m_closureCounter;  // used to uniquify closures' mangled names
+  typedef tbb::concurrent_hash_map<const StringData*, int,
+                                   StringDataHashCompare> EmittedClosures;
+  static EmittedClosures s_emittedClosures;
   std::deque<ControlTargets> m_controlTargets;
   std::deque<Funclet> m_funclets;
   std::deque<ExnHandlerRegion*> m_exnHandlers;
   std::deque<FaultRegion*> m_faultRegions;
   std::deque<FPIRegion*> m_fpiRegions;
-  std::vector<HphpArray*> m_staticArrays;
+  std::vector<Array> m_staticArrays;
   std::set<std::string,stdltistr> m_hoistables;
   LocationPtr m_tempLoc;
   std::map<StringData*, Label, string_data_lt> m_gotoLabels;
   std::vector<Label> m_yieldLabels;
   MetaInfoBuilder m_metaInfo;
 public:
-  Label& topBreakHandler() { return m_controlTargets.front().m_brkHand; }
-  Label& topContHandler() { return m_controlTargets.front().m_cntHand; }
-
   bool checkIfStackEmpty(const char* forInstruction) const;
   void unexpectedStackSym(char sym, const char* where) const;
 
@@ -564,7 +581,8 @@ public:
   void emitIsDouble(Emitter& e);
   void emitIsBool(Emitter& e);
   void emitEmpty(Emitter& e);
-  void emitUnset(Emitter& e);
+  void emitUnset(Emitter& e, ExpressionPtr exp = ExpressionPtr());
+  void emitVisitAndUnset(Emitter& e, ExpressionPtr exp);
   void emitSet(Emitter& e);
   void emitSetOp(Emitter& e, int op);
   void emitBind(Emitter& e);
@@ -582,6 +600,7 @@ public:
   void emitResolveClsBase(Emitter& e, int pos);
   void emitClsIfSPropBase(Emitter& e);
   Id emitVisitAndSetUnnamedL(Emitter& e, ExpressionPtr exp);
+  Id emitSetUnnamedL(Emitter& e);
   void emitPushAndFreeUnnamedL(Emitter& e, Id tempLocal, Offset start);
   void emitContinuationSwitch(Emitter& e, int ncase);
   DataType analyzeSwitch(SwitchStatementPtr s, SwitchState& state);
@@ -591,6 +610,7 @@ public:
   void emitStringSwitch(Emitter& e, SwitchStatementPtr s,
                         std::vector<Label>& caseLabels, Label& done,
                         const SwitchState& state);
+  void emitIterBreak(Emitter& e, uint64_t n, Label& targ);
 
   void markElem(Emitter& e);
   void markNewElem(Emitter& e);
@@ -610,6 +630,32 @@ public:
   void postponeSinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);
   void postponeCinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);
   void emitPostponedMeths();
+  void bindUserAttributes(MethodStatementPtr meth,
+                          FuncEmitter *fe,
+                          bool &allowOverride);
+  void bindNativeFunc(MethodStatementPtr meth, FuncEmitter *fe);
+  void emitMethodMetadata(MethodStatementPtr meth,
+                          ClosureUseVarVec* useVars,
+                          bool top);
+  void fillFuncEmitterParams(FuncEmitter* fe,
+                             ExpressionListPtr params,
+                             bool builtin = false);
+  void emitMethodPrologue(Emitter& e, MethodStatementPtr meth);
+  void emitMethod(MethodStatementPtr meth);
+  std::pair<FuncEmitter*,bool> createFuncEmitterForGeneratorBody(
+                 MethodStatementPtr meth,
+                 FuncEmitter* fe,
+                 vector<FuncEmitter*>& top_fes);
+  void emitAsyncMethod(MethodStatementPtr meth);
+  void emitGeneratorCreate(MethodStatementPtr meth);
+  void emitGeneratorBody(MethodStatementPtr meth);
+  void emitConstMethodCallNoParams(Emitter& e, string name);
+  void emitCreateStaticWaitHandle(Emitter& e, std::string cls,
+                                  std::function<void()> emitParam);
+  void emitSetFuncGetArgs(Emitter& e);
+  void emitMethodDVInitializers(Emitter& e,
+                                MethodStatementPtr& meth,
+                                Label& topOfBody);
   void emitPostponedCtors();
   void emitPostponedPSinit(PostponedNonScalars& p, bool pinit);
   void emitPostponedPinits();
@@ -629,8 +675,7 @@ public:
   };
 
   bool emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr node);
-  bool canEmitBuiltinCall(FunctionCallPtr fn, const std::string& name,
-                          int numParams);
+  Func* canEmitBuiltinCall(const std::string& name, int numParams);
   void emitFuncCall(Emitter& e, FunctionCallPtr node);
   void emitFuncCallArg(Emitter& e, ExpressionPtr exp, int paramId);
   void emitBuiltinCallArg(Emitter& e, ExpressionPtr exp, int paramId,
@@ -639,22 +684,27 @@ public:
   PreClass::Hoistable emitClass(Emitter& e, ClassScopePtr cNode,
                                 bool topLevel);
   void emitTypedef(Emitter& e, TypedefStatementPtr);
-  void emitBreakHandler(Emitter& e, Label& brkTarg, Label& cntTarg,
-                        Label& brkHand, Label& cntHand, Id iter = -1,
-                        IterKind itKind = KindOfIter);
+  void emitForeachListAssignment(Emitter& e, ListAssignmentPtr la,
+                                 int vLocalId);
   void emitForeach(Emitter& e, ForEachStatementPtr fe);
   void emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc);
   void emitMakeUnitFatal(Emitter& e, const std::string& message);
 
   void addFunclet(Thunklet* body, Label* entry);
   void emitFunclets(Emitter& e);
-  void newFaultRegion(Offset start, Offset end, Thunklet* t, Id iter = -1);
+
+  struct FaultIterInfo {
+    Id iterId;
+    IterKind kind;
+  };
+  void newFaultRegion(Offset start, Offset end, Thunklet* t,
+                      FaultIterInfo = FaultIterInfo { -1, KindOfIter });
+
   void newFPIRegion(Offset start, Offset end, Offset fpOff);
   void copyOverExnHandlers(FuncEmitter* fe);
   void copyOverFPIRegions(FuncEmitter* fe);
   void saveMaxStackCells(FuncEmitter* fe);
   void finishFunc(Emitter& e, FuncEmitter* fe);
-  StringData* newClosureName();
 
   void initScalar(TypedValue& tvVal, ExpressionPtr val);
   bool requiresDeepInit(ExpressionPtr initExpr) const;

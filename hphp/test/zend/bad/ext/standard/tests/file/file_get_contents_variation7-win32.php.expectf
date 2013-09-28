@@ -1,0 +1,42 @@
+*** Testing file_get_contents() : variation ***
+
+-- Iteration 1 --
+string(%d) "contents read"
+
+-- Iteration 2 --
+string(%d) "contents read"
+
+-- Iteration 3 --
+string(%d) "contents read"
+
+-- Iteration 4 --
+string(%d) "contents read"
+
+-- Iteration 5 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 6 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 7 --
+string(%d) "contents read"
+
+-- Iteration 8 --
+string(%d) "contents read"
+
+-- Iteration 9 --
+string(%d) "contents read"
+
+-- Iteration 10 --
+string(%d) "contents read"
+
+-- Iteration 11 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 12 --
+string(%d) "contents read"
+
+*** Done ***

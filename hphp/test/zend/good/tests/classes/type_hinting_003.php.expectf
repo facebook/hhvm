@@ -1,0 +1,18 @@
+Test::f1()
+array(1) {
+  [0]=>
+  int(42)
+}
+Test::f2()
+NULL
+Test::f2()
+NULL
+Test::f3()
+array(0) {
+}
+Test::f4()
+array(1) {
+  [0]=>
+  int(25)
+}
+HipHop Fatal error: %s

@@ -1,0 +1,21 @@
+*** Testing array_udiff_uassoc() : usage variation - differing comparison functions***
+
+-- comparison function with an incorrect return value --
+array(1) {
+  [0]=>
+  int(1)
+}
+
+-- comparison function taking too many parameters --
+HipHop Warning: %s
+array(1) {
+  [0]=>
+  int(1)
+}
+
+-- comparison function taking too few parameters --
+array(1) {
+  [0]=>
+  int(1)
+}
+===DONE===

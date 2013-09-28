@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,16 +18,21 @@
 #define incl_HPHP_TYPES_H_
 
 #include "hphp/util/base.h"
-#include "hphp/util/thread_local.h"
+#include "hphp/runtime/base/datatype.h"
+#include "hphp/util/thread-local.h"
 #include "hphp/util/mutex.h"
-#include "hphp/util/case_insensitive.h"
-#include <vector>
+#include "hphp/util/case-insensitive.h"
 #include "hphp/runtime/base/macros.h"
-#include "hphp/runtime/base/memory/memory_manager.h"
+#include "hphp/runtime/base/memory-manager.h"
 
 #include <boost/static_assert.hpp>
 #include <boost/intrusive_ptr.hpp>
+
+#include <stdint.h>
+#include <atomic>
+#include <limits>
 #include <type_traits>
+#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,13 +50,11 @@ class StaticString;
 class Array;
 class Object;
 template<typename T> class SmartObject;
+class Resource;
+template<typename T> class SmartResource;
 class Variant;
 class VarNR;
 class RefData;
-typedef Variant Numeric;
-typedef Variant Primitive;
-typedef Variant PlusOperand;
-typedef Variant Sequence;
 
 /**
  * Macros related to Variant that are needed by StringData, ObjectData,
@@ -70,17 +73,20 @@ extern const Array null_array;
 extern const Array empty_array;
 
 /*
- * All TypedValue-compatible types have their reference count field at
- * the same offset in the object.
+ * All Refcounted types have their m_count field at the same offset
+ * in the object. This offset is chosen to allow a RefData's count
+ * field to pack after a TypedValue.
  *
- * This offset assumes there will be no padding after the initial
- * pointer member in some of these types, and that the object/array
- * vtable is implemented with a single pointer at the front of the
- * object.  All this should be true pretty much anywhere you might
- * want to use hphp (if it's not, you'll hit compile-time assertions
- * in the relevant classes and may have to fiddle with this).
+ * Other refcounted types (ArrayData, StringData, and ObjectData)
+ * have small fields that are packed into the same space.
  */
-const size_t FAST_REFCOUNT_OFFSET = sizeof(void*);
+const size_t FAST_REFCOUNT_OFFSET = 12;
+
+/*
+ * All native collection class have their m_size field at the same
+ * offset in the object.
+ */
+const size_t FAST_COLLECTION_SIZE_OFFSET = 36;
 
 /**
  * These are underlying data structures for the above complex data types. Since
@@ -92,12 +98,6 @@ class StringData;
 class ArrayData;
 class ObjectData;
 class ResourceData;
-
-/**
- * Arrays, strings and objects can take offsets or array elements. These offset
- * objects will help to store temporary information to make the task easier.
- */
-class StringOffset;
 
 /**
  * Miscellaneous objects to help arrays to construct or to iterate.
@@ -127,191 +127,12 @@ class VariableUnserializer;
  *
  */
 
-typedef std::conditional<packed_tv, int8_t, int32_t>::type DataTypeInt;
-enum DataType: DataTypeInt {
-  KindOfClass            = -13,
-  MinDataType            = -13,
-
-  // Values below zero are not PHP values, but runtime-internal.
-  KindOfAny              = -8,
-  KindOfUncounted        = -7,
-  KindOfUncountedInit    = -6,
-
-  KindOfInvalid          = -1,
-  KindOfUnknown          = KindOfInvalid,
-
-  /**
-   * Beware if you change the order, as we may have a few type checks
-   * in the code that depend on the order.  Also beware of adding to
-   * the number of bits needed to represent this.  (Known dependency
-   * in unwind-x64.h.)
-   */
-  KindOfUninit           = 0,
-  // Any code that static_asserts about the value of KindOfNull may
-  // also depend on there not being any values between KindOfUninit
-  // and KindOfNull.
-  KindOfNull             = 8,     //   0001000    0x08
-  KindOfBoolean          = 9,     //   0001001    0x09
-  KindOfInt64            = 10,    //   0001010    0x0a
-  KindOfDouble           = 11,    //   0001011    0x0b
-
-  KindOfStaticString     = 12,    //   0001100    0x0c
-  KindOfString           = 20,    //   0010100    0x14
-  KindOfArray            = 32,    //   0100000    0x20
-  KindOfObject           = 64,    //   1000000    0x40
-  KindOfRef              = 96,    //   1100000    0x60
-  KindOfIndirect         = 97,    //   1100001    0x61
-
-  MaxNumDataTypes        = KindOfIndirect + 1, // marker, not a valid type
-  MaxNumDataTypesIndex   = 11 + 1,  // 1 + the number of valid DataTypes above
-
-  MaxDataType            = 0x7f, // Allow KindOf* > 11 in HphpArray.
-
-  // Note: KindOfStringBit must be set in KindOfStaticString and KindOfString,
-  //       and it must be 0 in any other real DataType.
-  KindOfStringBit        = 4,
-
-  // Note: KindOfUncountedInitBit must be set for Null, Boolean, Int64, Double,
-  //       and StaticString, and it must be 0 for any other real DataType.
-  KindOfUncountedInitBit = 8,
-};
-
-static_assert(KindOfString       & KindOfStringBit, "");
-static_assert(KindOfStaticString & KindOfStringBit, "");
-static_assert(!(KindOfUninit     & KindOfStringBit), "");
-static_assert(!(KindOfNull       & KindOfStringBit), "");
-static_assert(!(KindOfBoolean    & KindOfStringBit), "");
-static_assert(!(KindOfInt64      & KindOfStringBit), "");
-static_assert(!(KindOfDouble     & KindOfStringBit), "");
-static_assert(!(KindOfArray      & KindOfStringBit), "");
-static_assert(!(KindOfObject     & KindOfStringBit), "");
-static_assert(!(KindOfRef        & KindOfStringBit), "");
-static_assert(!(KindOfIndirect   & KindOfStringBit), "");
-static_assert(!(KindOfClass      & KindOfStringBit), "");
-
-static_assert(KindOfNull         & KindOfUncountedInitBit, "");
-static_assert(KindOfBoolean      & KindOfUncountedInitBit, "");
-static_assert(KindOfInt64        & KindOfUncountedInitBit, "");
-static_assert(KindOfDouble       & KindOfUncountedInitBit, "");
-static_assert(KindOfStaticString & KindOfUncountedInitBit, "");
-static_assert(!(KindOfUninit     & KindOfUncountedInitBit), "");
-static_assert(!(KindOfString     & KindOfUncountedInitBit), "");
-static_assert(!(KindOfArray      & KindOfUncountedInitBit), "");
-static_assert(!(KindOfObject     & KindOfUncountedInitBit), "");
-static_assert(!(KindOfRef        & KindOfUncountedInitBit), "");
-static_assert(!(KindOfIndirect   & KindOfUncountedInitBit), "");
-static_assert(!(KindOfClass      & KindOfUncountedInitBit), "");
-
-// assume KindOfUninit == 0 in ClsCns
-static_assert(KindOfUninit == 0,
-              "Several things assume this tag is 0, expecially target cache");
-
-const unsigned int kDataTypeMask = 0x7F;
-BOOST_STATIC_ASSERT(MaxNumDataTypes - 1 <= kDataTypeMask);
-
-const unsigned int kNotConstantValueTypeMask = KindOfRef;
-static_assert(kNotConstantValueTypeMask & KindOfArray &&
-              kNotConstantValueTypeMask & KindOfObject &&
-              kNotConstantValueTypeMask & KindOfRef,
-              "DataType & kNotConstantValueTypeMask must be non-zero for "
-              "Array, Object and Ref types");
-static_assert(!(kNotConstantValueTypeMask &
-                (KindOfNull|KindOfBoolean|KindOfInt64|KindOfDouble|
-                 KindOfStaticString|KindOfString)),
-              "DataType & kNotConstantValueTypeMask must be zero for "
-              "null, bool, int, double and string types");
-
-// All DataTypes greater than this value are refcounted.
-const DataType KindOfRefCountThreshold = KindOfStaticString;
-
-enum DataTypeCategory {
-  DataTypeGeneric,
-  DataTypeCountness,
-  DataTypeCountnessInit,
-  DataTypeSpecific
-};
-
-std::string tname(DataType t);
-
-inline int getDataTypeIndex(DataType type) {
-  switch (type) {
-    case KindOfUninit       : return 0;
-    case KindOfNull         : return 1;
-    case KindOfBoolean      : return 2;
-    case KindOfInt64        : return 3;
-    case KindOfDouble       : return 4;
-    case KindOfStaticString : return 5;
-    case KindOfString       : return 6;
-    case KindOfArray        : return 7;
-    case KindOfObject       : return 8;
-    case KindOfRef          : return 9;
-    case KindOfIndirect     : return 10;
-    default                 : not_reached();
-  }
-}
-
-inline DataType getDataTypeValue(unsigned index) {
-  switch (index) {
-    case 0  : return KindOfUninit;
-    case 1  : return KindOfNull;
-    case 2  : return KindOfBoolean;
-    case 3  : return KindOfInt64;
-    case 4  : return KindOfDouble;
-    case 5  : return KindOfStaticString;
-    case 6  : return KindOfString;
-    case 7  : return KindOfArray;
-    case 8  : return KindOfObject;
-    case 9  : return KindOfRef;
-    case 10 : return KindOfIndirect;
-    default : not_reached();
-  }
-}
-
-// These are used in type_variant.cpp and translator-x64.cpp
-const unsigned int kShiftDataTypeToDestrIndex = 5;
-const unsigned int kDestrTableSize = 4;
-
-#define TYPE_TO_DESTR_IDX(t) ((t) >> kShiftDataTypeToDestrIndex)
-
-static inline ALWAYS_INLINE unsigned typeToDestrIndex(DataType t) {
-  assert(t >= KindOfString && t <= KindOfRef);
-  return TYPE_TO_DESTR_IDX(t);
-}
-
-// Helper macro for checking if a given type is refcounted
-#define IS_REFCOUNTED_TYPE(t) ((t) > KindOfRefCountThreshold)
-// Helper macro for checking if a type is KindOfString or KindOfStaticString.
-BOOST_STATIC_ASSERT(KindOfStaticString == 0x0C);
-BOOST_STATIC_ASSERT(KindOfString       == 0x14);
-#define IS_STRING_TYPE(t) (((t) & ~0x18) == KindOfStringBit)
-// Check if a type is KindOfUninit or KindOfNull
-#define IS_NULL_TYPE(t) (unsigned(t) <= KindOfNull)
-// Other type check macros
-#define IS_INT_TYPE(t) ((t) == KindOfInt64)
-#define IS_ARRAY_TYPE(t) ((t) == KindOfArray)
-#define IS_BOOL_TYPE(t) ((t) == KindOfBoolean)
-#define IS_DOUBLE_TYPE(t) ((t) == KindOfDouble)
-
-#define IS_REAL_TYPE(t) \
-  (((t) >= KindOfUninit && (t) < MaxNumDataTypes) || (t) == KindOfClass)
-
-// typeReentersOnRelease --
-//   Returns whether the release helper for a given type can
-//   reenter.
-static inline bool typeReentersOnRelease(DataType type) {
-  return IS_REFCOUNTED_TYPE(type) && type != KindOfString;
-}
-
-static inline DataType typeInitNull(DataType t) {
-  return t == KindOfUninit ? KindOfNull : t;
-}
-
 namespace Uns {
-enum Mode {
-  ValueMode = 0,
-  KeyMode = 1,
-  ColValueMode = 2,
-  ColKeyMode = 3,
+enum class Mode {
+  Value = 0,
+  Key = 1,
+  ColValue = 2,
+  ColKey = 3,
 };
 }
 
@@ -337,6 +158,7 @@ typedef const char * litstr; /* literal string */
 typedef const String & CStrRef;
 typedef const Array & CArrRef;
 typedef const Object & CObjRef;
+typedef const Resource & CResRef;
 typedef const Variant & CVarRef;
 
 typedef const class VRefParamValue    &VRefParam;
@@ -375,7 +197,7 @@ inline RefResult ref(Variant& v) {
   return *(RefResultValue*)&v;
 }
 
-  class Class;
+class Class;
 
 ///////////////////////////////////////////////////////////////////////////////
 // code injection classes
@@ -388,14 +210,18 @@ public:
   static const ssize_t EventHookFlag        = 1 << 3;
   static const ssize_t PendingExceptionFlag = 1 << 4;
   static const ssize_t InterceptFlag        = 1 << 5;
-  static const ssize_t LastFlag             = InterceptFlag;
+  // Set by the debugger to break out of loops in translated code.
+  static const ssize_t DebuggerSignalFlag   = 1 << 6;
+  static const ssize_t LastFlag             = DebuggerSignalFlag;
 
   RequestInjectionData()
-    : cflagsPtr(nullptr), surprisePage(nullptr), started(0), timeoutSeconds(-1),
-      m_debugger(false), m_dummySandbox(false),
-      m_debuggerIntr(false), m_coverage(false),
+    : cflagsPtr(nullptr),
+      m_timeoutSeconds(-1), m_hasTimer(false), m_timerActive(false),
+      m_debugger(false), m_debuggerIntr(false), m_coverage(false),
       m_jit(false) {
   }
+
+  ~RequestInjectionData();
 
   inline volatile ssize_t* getConditionFlags() {
     assert(cflagsPtr);
@@ -404,19 +230,26 @@ public:
 
   ssize_t* cflagsPtr;  // this points to the real condition flags,
                        // somewhere in the thread's targetcache
-  void *surprisePage;  // beginning address of page to
-                       // protect for error conditions
-  Mutex surpriseLock;  // mutex controlling access to surprisePage
 
-  time_t started;      // when a request was started
-  int timeoutSeconds;  // how many seconds to timeout
  private:
+#ifndef __APPLE__
+  timer_t m_timer_id;    // id of our timer
+#endif
+  int m_timeoutSeconds;  // how many seconds to timeout
+  bool m_hasTimer;       // Whether we've created our timer yet
+  std::atomic<bool> m_timerActive;
+                         // Set true when we activate a timer,
+                         // cleared when the signal handler runs
   bool m_debugger;       // whether there is a DebuggerProxy attached to me
-  bool m_dummySandbox;   // indicating it is from a dummy sandbox thread
   bool m_debuggerIntr;   // indicating we should force interrupt for debugger
   bool m_coverage;       // is coverage being collected
   bool m_jit;            // is the jit enabled
  public:
+  int getTimeout() const { return m_timeoutSeconds; }
+  void setTimeout(int seconds);
+  int getRemainingTime() const;
+  void resetTimer(int seconds = 0);
+  void onTimeout();
   bool getJit() const { return m_jit; }
   bool getDebugger() const { return m_debugger; }
   void setDebugger(bool d) {
@@ -436,8 +269,6 @@ public:
     m_coverage = flag;
     updateJit();
   }
-  bool getDummySandbox() const { return m_dummySandbox; }
-  void setDummySandbox(bool ds) { m_dummySandbox = ds; }
   void updateJit();
 
   std::stack<void *> interrupts;   // CmdInterrupts this thread's handling
@@ -446,6 +277,7 @@ public:
 
   void setMemExceededFlag();
   void setTimedOutFlag();
+  void clearTimedOutFlag();
   void setSignaledFlag();
   void setEventHookFlag();
   void clearEventHookFlag();
@@ -453,6 +285,7 @@ public:
   void clearPendingExceptionFlag();
   void setInterceptFlag();
   void clearInterceptFlag();
+  void setDebuggerSignalFlag();
   ssize_t fetchAndClearFlags();
 
   void onSessionInit();
@@ -467,7 +300,7 @@ typedef GlobalNameValueTableWrapper GlobalVariables;
 int object_alloc_size_to_index(size_t);
 size_t object_alloc_index_to_size(int);
 
-// implemented in runtime/base/thread_info
+// implemented in runtime/base/thread-info
 typedef boost::intrusive_ptr<ArrayData> ArrayHolder;
 void intrusive_ptr_add_ref(ArrayData* a);
 void intrusive_ptr_release(ArrayData* a);
@@ -487,7 +320,6 @@ public:
 public:
   static DECLARE_THREAD_LOCAL_NO_CHECK(ThreadInfo, s_threadInfo);
 
-  std::vector<ObjectAllocatorBase *> m_allocators;
   RequestInjectionData m_reqInjectionData;
 
   // For infinite recursion detection.  m_stacklimit is the lowest
@@ -510,7 +342,6 @@ public:
   Profiler *m_profiler;
   CodeCoverage *m_coverage;
 
-  GlobalVariables *m_globals;
   Executing m_executing;
 
   // A C++ exception which will be thrown by the next surprise check.
@@ -523,15 +354,6 @@ public:
   void onSessionExit();
   void setPendingException(Exception* e);
   void clearPendingException();
-  ObjectAllocatorBase* instanceSizeAllocator(size_t size) {
-    int index = object_alloc_size_to_index(size);
-    ASSERT_NOT_IMPLEMENTED(index != -1);
-    return m_allocators[index];
-  }
-
-  ObjectAllocatorBase* instanceIdxAllocator(int index) {
-    return m_allocators[index];
-  }
 
   static bool valid(ThreadInfo* info);
 };
@@ -548,10 +370,6 @@ inline bool stack_in_bounds(ThreadInfo *&info) {
   return stack_top_ptr() >= info->m_stacklimit;
 }
 
-inline bool is_stack_ptr(void* p) {
-  return p > stack_top_ptr() && ThreadInfo::t_stackbase >= p;
-}
-
 // The ThreadInfo pointer itself must be from the current stack frame.
 inline void check_recursion(ThreadInfo *&info) {
   if (!stack_in_bounds(info)) {
@@ -559,12 +377,12 @@ inline void check_recursion(ThreadInfo *&info) {
   }
 }
 
-// implemented in runtime/base/builtin_functions.cpp
+// implemented in runtime/base/builtin-functions.cpp
 extern ssize_t check_request_surprise(ThreadInfo *info) ATTRIBUTE_COLD;
 
 // implemented in runtime/ext/ext_hotprofiler.cpp
 extern void begin_profiler_frame(Profiler *p, const char *symbol);
-extern void end_profiler_frame(Profiler *p);
+extern void end_profiler_frame(Profiler *p, const char *symbol);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -599,7 +417,6 @@ public:
     NoHipHop = 8,
 
     Error_Key = Error | Key,
-    CheckExist_Key = CheckExist | Key,
     Error_NoHipHop = Error | NoHipHop,
   };
   static Type IsKey(bool s) { return s ? Key : None; }
@@ -608,6 +425,118 @@ public:
 
 #define ACCESSPARAMS_DECL AccessFlags::Type flags = AccessFlags::None
 #define ACCESSPARAMS_IMPL AccessFlags::Type flags
+
+/*
+ * Non-enumerated version of type for referring to opcodes or the
+ * bytecode stream.  (Use the enum Op in hhbc.h for an enumerated
+ * version.)
+ */
+typedef uint8_t Opcode;
+
+/*
+ * Program counters in the bytecode interpreter.
+ *
+ * Normally points to an Opcode, but has type const uchar* because
+ * during a given instruction it is incremented while decoding
+ * immediates and may point to arbitrary bytes.
+ */
+typedef const uchar* PC;
+
+/*
+ * Id type for various components of a unit that have to have unique
+ * identifiers.  For example, function ids, class ids, string literal
+ * ids.
+ */
+typedef int Id;
+const Id kInvalidId = Id(-1);
+
+// Bytecode offsets.  Used for both absolute offsets and relative
+// offsets.
+typedef int32_t Offset;
+constexpr Offset kInvalidOffset = std::numeric_limits<Offset>::max();
+typedef hphp_hash_set<Offset> OffsetSet;
+
+/*
+ * Various fields in the VM's runtime have indexes that are addressed
+ * using this "slot" type.  For example: methods, properties, class
+ * constants.
+ *
+ * No slot value greater than or equal to kInvalidSlot will actually
+ * be used for one of these.
+ */
+typedef uint32_t Slot;
+const Slot kInvalidSlot = Slot(-1);
+
+/*
+ * Special types that are not relevant to the runtime as a whole.
+ * The order for public/protected/private matters in numerous places.
+ *
+ * Attr unions are directly stored as integers in .hhbc repositories, so
+ * incompatible changes here require a schema version bump.
+ *
+ * AttrTrait on a method means that the method is NOT a constructor,
+ * even though it may look like one
+ *
+ * AttrNoOverride (WholeProgram only) on a class means its not extended
+ * and on a method means that no extending class defines the method.
+ *
+ * AttrVariadicByRef indicates a function is a builtin that takes
+ * variadic arguments, where the arguments are either by ref or
+ * optionally by ref.  (It is equivalent to having ClassInfo's
+ * (RefVariableArguments | MixedVariableArguments).)
+ *
+ * AttrMayUseVV indicates that a function may need to use a VarEnv or
+ * varargs (aka extraArgs) at run time.
+ *
+ * AttrPhpLeafFn indicates a function does not make any explicit calls
+ * to other php functions.  It may still call other user-level
+ * functions via re-entry (e.g. for destructors or autoload), and it
+ * may make calls to builtins using FCallBuiltin.
+ *
+ * AttrBuiltin is set on builtin functions - whether c++ or php
+ *
+ * AttrAllowOverride is set on builtin functions that can be replaced
+ *   by user implementations
+ *
+ * AttrSkipFrame is set to indicate that the frame should be ignored
+ *   when searching for the context (eg array_map evaluates its
+ *   callback in the context of its caller).
+ */
+enum Attr {
+  AttrNone      = 0,             // class  property  method  //
+  AttrReference = (1 << 0),      //                     X    //
+  AttrPublic    = (1 << 1),      //            X        X    //
+  AttrProtected = (1 << 2),      //            X        X    //
+  AttrPrivate   = (1 << 3),      //            X        X    //
+  AttrStatic    = (1 << 4),      //            X        X    //
+  AttrAbstract  = (1 << 5),      //    X                X    //
+  AttrFinal     = (1 << 6),      //    X                X    //
+  AttrInterface = (1 << 7),      //    X                     //
+  AttrPhpLeafFn = (1 << 7),      //                     X    //
+  AttrTrait     = (1 << 8),      //    X                X    //
+  AttrNoInjection = (1 << 9),    //                     X    //
+  AttrUnique    = (1 << 10),     //    X                X    //
+  AttrDynamicInvoke = (1 << 11), //                     X    //
+  AttrNoExpandTrait = (1 << 12), //    X                     //
+  AttrNoOverride= (1 << 13),     //    X                X    //
+  AttrClone     = (1 << 14),     //                     X    //
+  AttrVariadicByRef = (1 << 15), //                     X    //
+  AttrMayUseVV  = (1 << 16),     //                     X    //
+  AttrPersistent= (1 << 17),     //    X                X    //
+  AttrDeepInit = (1 << 18),      //            X             //
+  AttrHot = (1 << 19),           //                     X    //
+  AttrBuiltin = (1 << 20),       //                     X    //
+  AttrAllowOverride = (1 << 21), //                     X    //
+  AttrSkipFrame = (1 << 22),     //                     X    //
+  AttrNative = (1 << 23),        //                     X    //
+};
+
+inline Attr operator|(Attr a, Attr b) { return Attr((int)a | (int)b); }
+
+inline const char* attrToVisibilityStr(Attr attr) {
+  return (attr & AttrPrivate)   ? "private"   :
+         (attr & AttrProtected) ? "protected" : "public";
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

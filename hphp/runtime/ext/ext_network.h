@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,8 +18,9 @@
 #ifndef incl_HPHP_EXT_NETWORK_H_
 #define incl_HPHP_EXT_NETWORK_H_
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/util/network.h"
 #include <syslog.h>
 
 namespace HPHP {
@@ -53,17 +54,22 @@ bool f_getmxrr(CStrRef hostname, VRefParam mxhosts,
 ///////////////////////////////////////////////////////////////////////////////
 // socket
 
-Variant f_fsockopen(CStrRef hostname, int port = -1, VRefParam errnum = uninit_null(),
-                    VRefParam errstr = uninit_null(), double timeout = 0.0);
+Variant sockopen_impl(const Util::HostURL &hosturl,
+                      VRefParam errnum, VRefParam errstr,
+                      double timeout = -1.0, bool persistent = false);
+Variant f_fsockopen(CStrRef hostname, int port = -1,
+                    VRefParam errnum = uninit_null(),
+                    VRefParam errstr = uninit_null(), double timeout = -1.0);
 
-Variant f_pfsockopen(CStrRef hostname, int port = -1, VRefParam errnum = uninit_null(),
-                     VRefParam errstr = uninit_null(), double timeout = 0.0);
+Variant f_pfsockopen(CStrRef hostname, int port = -1,
+                     VRefParam errnum = uninit_null(),
+                     VRefParam errstr = uninit_null(), double timeout = -1.0);
 
-Variant f_socket_get_status(CObjRef stream);
+Variant f_socket_get_status(CResRef stream);
 
-bool f_socket_set_blocking(CObjRef stream, int mode);
+bool f_socket_set_blocking(CResRef stream, int mode);
 
-bool f_socket_set_timeout(CObjRef stream, int seconds,
+bool f_socket_set_timeout(CResRef stream, int seconds,
                           int microseconds = 0);
 
 ///////////////////////////////////////////////////////////////////////////////

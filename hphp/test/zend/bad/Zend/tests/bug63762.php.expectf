@@ -1,0 +1,16 @@
+Array of NULL:
+HipHop Warning: %s
+string(9) "#0 {main}"
+
+Array of empty array:
+string(36) "#0 [internal function]: ()
+#1 {main}"
+
+Array of array of NULL values:
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+string(60) "#0 [unknown function][unknown][unknown][unknown]()
+#1 {main}"

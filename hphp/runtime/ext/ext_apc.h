@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,11 +18,51 @@
 #ifndef incl_HPHP_EXT_APC_H_
 #define incl_HPHP_EXT_APC_H_
 
-#include "hphp/runtime/base/base_includes.h"
-#include "hphp/runtime/base/shared/shared_store_base.h"
-#include "hphp/runtime/base/server/upload.h"
+#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/shared-store-base.h"
+#include "hphp/runtime/server/upload.h"
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+
+class apcExtension : public Extension {
+ public:
+  apcExtension() : Extension("apc") {}
+
+  static bool Enable;
+  static bool EnableConstLoad;
+  static bool ForceConstLoadToAPC;
+  static std::string PrimeLibrary;
+  static int LoadThread;
+  static std::set<std::string> CompletionKeys;
+  enum class TableTypes {
+    ConcurrentTable
+  };
+  static TableTypes TableType;
+  static bool EnableApcSerialize;
+  static time_t KeyMaturityThreshold;
+  static size_t MaximumCapacity;
+  static int KeyFrequencyUpdatePeriod;
+  static bool ExpireOnSets;
+  static int PurgeFrequency;
+  static int PurgeRate;
+  static bool AllowObj;
+  static int TTLLimit;
+  static bool UseFileStorage;
+  static int64_t FileStorageChunkSize;
+  static int64_t FileStorageMaxSize;
+  static std::string FileStoragePrefix;
+  static int FileStorageAdviseOutPeriod;
+  static std::string FileStorageFlagKey;
+  static bool ConcurrentTableLockFree;
+  static bool FileStorageKeepFileLinked;
+  static std::vector<std::string> NoTTLPrefix;
+
+  virtual void moduleLoad(Hdf config);
+  virtual void moduleInit();
+  virtual void moduleShutdown();
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool f_apc_add(CStrRef key, CVarRef var, int64_t ttl = 0, int64_t cache_id = 0);
@@ -52,8 +92,9 @@ Variant f_apc_bin_dump(int64_t cache_id = 0, CVarRef filter = null_variant);
 bool f_apc_bin_load(CStrRef data, int64_t flags = 0, int64_t cache_id = 0);
 Variant f_apc_bin_dumpfile(int64_t cache_id, CVarRef filter,
                            CStrRef filename, int64_t flags = 0,
-                           CObjRef context = uninit_null());
-bool f_apc_bin_loadfile(CStrRef filename, CObjRef context = uninit_null(),
+                           CResRef context = Resource());
+bool f_apc_bin_loadfile(CStrRef filename,
+                        CResRef context = Resource(),
                         int64_t flags = 0, int64_t cache_id = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -117,7 +158,7 @@ static_assert(sizeof(int64_t) == sizeof(long long),
 // apc serialization
 
 String apc_serialize(CVarRef value);
-Variant apc_unserialize(CStrRef str);
+Variant apc_unserialize(const char* data, int len);
 String apc_reserialize(CStrRef str);
 
 ///////////////////////////////////////////////////////////////////////////////

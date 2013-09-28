@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,7 +26,7 @@
  */
 
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/vm/name_value_table_wrapper.h"
+#include "hphp/runtime/vm/name-value-table-wrapper.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -58,20 +58,29 @@ extern const char *g_class_map[];
  */
 typedef GlobalNameValueTableWrapper GlobalVariables;
 extern GlobalVariables *get_global_variables();
-extern void init_global_variables();
 extern void free_global_variables();
 extern void free_global_variables_after_sweep();
-extern Array get_global_state();
-/**
- * Returns a thread local global variable table pointer.
- */
-typedef GlobalNameValueTableWrapper SystemGlobals;
-extern SystemGlobals *get_system_globals();
 
 /**
- * Precomputed literal strings
+ * These are things that look like constants to PHP, but their values aren't
+ * known at compile time and are instead determined per request at startup time.
+ * lvalProxy is not that (it's a "black hole" for certain types of assignments)
+ * but there isn't really an obviously better place for it to live.
+ *
+ * The standalone k_ constants are similarly dynamic but invariant per process.
  */
-extern StaticString literalStrings[];
+struct EnvConstants {
+  static void requestInit(EnvConstants* gt);
+  static void requestExit();
+  Variant __lvalProxy;
+  Variant stgv_Variant[1];
+#define k_SID stgv_Variant[0]
+};
+extern EnvConstants* get_env_constants();
+extern String k_PHP_BINARY;
+extern String k_PHP_BINDIR;
+extern String k_PHP_OS;
+extern String k_PHP_SAPI;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

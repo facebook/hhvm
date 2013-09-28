@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +16,7 @@
 
 #include "hphp/compiler/expression/qop_expression.h"
 #include "hphp/compiler/analysis/code_error.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 
 using namespace HPHP;
 
@@ -75,13 +75,13 @@ int QOpExpression::getKidCount() const {
 void QOpExpression::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_condition = boost::dynamic_pointer_cast<Expression>(cp);
+      m_condition = dynamic_pointer_cast<Expression>(cp);
       break;
     case 1:
-      m_expYes = boost::dynamic_pointer_cast<Expression>(cp);
+      m_expYes = dynamic_pointer_cast<Expression>(cp);
       break;
     case 2:
-      m_expNo = boost::dynamic_pointer_cast<Expression>(cp);
+      m_expNo = dynamic_pointer_cast<Expression>(cp);
       break;
     default:
       assert(false);

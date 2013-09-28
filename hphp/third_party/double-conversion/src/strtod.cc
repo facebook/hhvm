@@ -506,7 +506,9 @@ float Strtof(Vector<const char> buffer, int exponent) {
   double double_previous = Double(double_guess).PreviousDouble();
 
   float f1 = static_cast<float>(double_previous);
+#ifdef DEBUG
   float f2 = float_guess;
+#endif
   float f3 = static_cast<float>(double_next);
   float f4;
   if (is_correct) {

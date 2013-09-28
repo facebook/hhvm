@@ -1,0 +1,6 @@
+*** Testing array_push() : error conditions ***
+
+-- Testing array_push() function with less than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

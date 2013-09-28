@@ -1,3 +1,4 @@
 <?php
 
- if (!$a = true) {}
+if (!$a = true) {
+}

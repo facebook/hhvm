@@ -1,0 +1,127 @@
+*** Testing timezone_transitions_get() : usage variation -  unexpected values to first argument $timestamp_begin ***
+
+-- int 0 --
+string(5) "array"
+int(8)
+
+-- int 1 --
+string(5) "array"
+int(8)
+
+-- int 12345 --
+string(5) "array"
+int(8)
+
+-- int -12345 --
+string(5) "array"
+int(8)
+
+-- float 10.5 --
+string(5) "array"
+int(8)
+
+-- float -10.5 --
+string(5) "array"
+int(8)
+
+-- float .5 --
+string(5) "array"
+int(8)
+
+-- empty array --
+HipHop Warning: %s
+string(7) "boolean"
+int(1)
+
+-- int indexed array --
+HipHop Warning: %s
+string(7) "boolean"
+int(1)
+
+-- associative array --
+HipHop Warning: %s
+string(7) "boolean"
+int(1)
+
+-- nested arrays --
+HipHop Warning: %s
+string(7) "boolean"
+int(1)
+
+-- uppercase NULL --
+string(5) "array"
+int(8)
+
+-- lowercase null --
+string(5) "array"
+int(8)
+
+-- lowercase true --
+string(5) "array"
+int(8)
+
+-- lowercase false --
+string(5) "array"
+int(8)
+
+-- uppercase TRUE --
+string(5) "array"
+int(8)
+
+-- uppercase FALSE --
+string(5) "array"
+int(8)
+
+-- empty string DQ --
+HipHop Warning: %s
+string(7) "boolean"
+int(1)
+
+-- empty string SQ --
+HipHop Warning: %s
+string(7) "boolean"
+int(1)
+
+-- string DQ --
+HipHop Warning: %s
+string(7) "boolean"
+int(1)
+
+-- string SQ --
+HipHop Warning: %s
+string(7) "boolean"
+int(1)
+
+-- mixed case string --
+HipHop Warning: %s
+string(7) "boolean"
+int(1)
+
+-- heredoc --
+HipHop Warning: %s
+string(7) "boolean"
+int(1)
+
+-- instance of classWithToString --
+HipHop Warning: %s
+string(7) "boolean"
+int(1)
+
+-- instance of classWithoutToString --
+HipHop Warning: %s
+string(7) "boolean"
+int(1)
+
+-- undefined var --
+string(5) "array"
+int(8)
+
+-- unset var --
+string(5) "array"
+int(8)
+
+-- resource --
+HipHop Warning: %s
+string(7) "boolean"
+int(1)
+===DONE===

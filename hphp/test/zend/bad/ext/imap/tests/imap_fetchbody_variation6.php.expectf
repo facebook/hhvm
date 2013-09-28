@@ -1,0 +1,22 @@
+*** Testing imap_fetchbody() : usage variations ***
+Create a temporary mailbox and add 3 msgs
+.. mailbox '{%s}%s' created
+
+-- $msg_no is 0 --
+HipHop Warning: %s
+bool(false)
+
+
+-- $msg_no is 4 --
+HipHop Warning: %s
+bool(false)
+
+
+-- $msg_no is 1,3 --
+HipHop Notice: %s
+%unicode|string%(%d) "1: this is a test message, please ignore%a"
+
+-- $msg_no is 1:3 --
+HipHop Notice: %s
+%unicode|string%(%d) "1: this is a test message, please ignore%a"
+===DONE===

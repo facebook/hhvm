@@ -1,0 +1,51 @@
+*** Testing abs() : usage variations ***
+
+-- Iteration 1 --
+int(0)
+
+-- Iteration 2 --
+int(0)
+
+-- Iteration 3 --
+int(1)
+
+-- Iteration 4 --
+int(0)
+
+-- Iteration 5 --
+int(1)
+
+-- Iteration 6 --
+int(0)
+
+-- Iteration 7 --
+int(0)
+
+-- Iteration 8 --
+int(0)
+
+-- Iteration 9 --
+bool(false)
+
+-- Iteration 10 --
+int(0)
+
+-- Iteration 11 --
+int(0)
+
+-- Iteration 12 --
+int(0)
+
+-- Iteration 13 --
+HipHop Notice: %s
+int(1)
+
+-- Iteration 14 --
+int(0)
+
+-- Iteration 15 --
+int(0)
+
+-- Iteration 16 --
+int(%d)
+===Done===

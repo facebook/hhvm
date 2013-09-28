@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,11 +40,18 @@ public:
   bool isStatic() const;
   bool isAbstract() const;
   bool isFinal() const;
+  bool isAsync() const;
 
   int getLocalEffects() const { return NoEffect; }
 
+  bool validForFunction() const;
+  bool validForClosure() const;
+
+  void setHasPrivacy(bool f) { m_hasPrivacy = f; }
+
 private:
   std::vector<int> m_modifiers;
+  bool m_hasPrivacy;
 
   bool hasModifier(int modifier) const;
 };

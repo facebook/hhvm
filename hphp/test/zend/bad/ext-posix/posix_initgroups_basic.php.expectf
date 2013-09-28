@@ -1,5 +1,0 @@
-Basic test of POSIX posix_initgroups function
-HipHop Warning: %a
-bool(false)
-bool(false)
-===DONE====

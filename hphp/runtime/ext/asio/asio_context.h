@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -20,15 +20,16 @@
 
 #include <functional>
 #include <queue>
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/smart-containers.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-FORWARD_DECLARE_CLASS_BUILTIN(WaitableWaitHandle);
-FORWARD_DECLARE_CLASS_BUILTIN(ContinuationWaitHandle);
-FORWARD_DECLARE_CLASS_BUILTIN(RescheduleWaitHandle);
-FORWARD_DECLARE_CLASS_BUILTIN(ExternalThreadEventWaitHandle);
+FORWARD_DECLARE_CLASS(WaitableWaitHandle);
+FORWARD_DECLARE_CLASS(ContinuationWaitHandle);
+FORWARD_DECLARE_CLASS(RescheduleWaitHandle);
+FORWARD_DECLARE_CLASS(ExternalThreadEventWaitHandle);
 
 typedef uint8_t context_idx_t;
 

@@ -1,0 +1,34 @@
+bool(true)
+should return previous chunk size (8192)
+int(8192)
+should be read without buffer ($count == 10000)
+read with size: 10000
+int(10000)
+should elicit 3 writes of size 1 and return 3
+write with size: 1
+write with size: 1
+write with size: 1
+int(3)
+should return previous chunk size (1)
+int(1)
+should elicit one read of size 100 (chunk size)
+read with size: 100
+int(100)
+should elicit one read of size 100 (chunk size)
+read with size: 100
+int(50)
+should elicit no read because there is sufficient cached data
+int(50)
+should elicit 2 writes of size 100 and one of size 50
+write with size: 100
+write with size: 100
+write with size: 50
+int(3)
+
+error conditions
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)

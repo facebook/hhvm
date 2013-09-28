@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -19,12 +19,12 @@
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/base/class_info.h"
-#include "hphp/runtime/base/util/libevent_http_client.h"
-#include "hphp/runtime/base/server/http_protocol.h"
+#include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/libevent-http-client.h"
+#include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/translator/translator.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/util.h"
 
@@ -32,12 +32,14 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 using HPHP::Transl::CallerFrame;
+using HPHP::Transl::EagerCallerFrame;
 
-static const StaticString s_internal("internal");
-static const StaticString s_user("user");
+const StaticString
+  s_internal("internal"),
+  s_user("user");
 
 Array f_get_defined_functions() {
-  return CREATE_MAP2(s_internal, ClassInfo::GetSystemFunctions(),
+  return make_map_array(s_internal, ClassInfo::GetSystemFunctions(),
                      s_user, ClassInfo::GetUserFunctions());
 }
 
@@ -49,9 +51,10 @@ bool f_function_exists(CStrRef function_name, bool autoload /* = true */) {
      function_exists(function_name));
 }
 
-static const StaticString
+const StaticString
   s__invoke("__invoke"),
-  s_Closure__invoke("Closure::__invoke");
+  s_Closure__invoke("Closure::__invoke"),
+  s_colon2("::");
 
 bool f_is_callable(CVarRef v, bool syntax /* = false */,
                    VRefParam name /* = null */) {
@@ -72,14 +75,14 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
     if (!name.isReferenced()) return ret;
   }
 
-  Variant::TypedValueAccessor tv_func = v.getTypedAccessor();
-  if (Variant::IsString(tv_func)) {
-    if (name.isReferenced()) name = Variant::GetStringData(tv_func);
+  auto const tv_func = v.asCell();
+  if (IS_STRING_TYPE(tv_func->m_type)) {
+    if (name.isReferenced()) name = tv_func->m_data.pstr;
     return ret;
   }
 
-  if (Variant::GetAccessorType(tv_func) == KindOfArray) {
-    CArrRef arr = Variant::GetAsArray(tv_func);
+  if (tv_func->m_type == KindOfArray) {
+    CArrRef arr = tv_func->m_data.parr;
     CVarRef clsname = arr.rvalAtRef(int64_t(0));
     CVarRef mthname = arr.rvalAtRef(int64_t(1));
     if (arr.size() != 2 ||
@@ -89,31 +92,31 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
       return false;
     }
 
-    Variant::TypedValueAccessor tv_meth = mthname.getTypedAccessor();
-    if (!Variant::IsString(tv_meth)) {
+    auto const tv_meth = mthname.asCell();
+    if (!IS_STRING_TYPE(tv_meth->m_type)) {
       if (name.isReferenced()) name = v.toString();
       return false;
     }
 
-    Variant::TypedValueAccessor tv_cls = clsname.getTypedAccessor();
-    if (Variant::GetAccessorType(tv_cls) == KindOfObject) {
-      name = Variant::GetObjectData(tv_cls)->o_getClassName();
-    } else if (Variant::IsString(tv_cls)) {
-      name = Variant::GetStringData(tv_cls);
+    auto const tv_cls = clsname.asCell();
+    if (tv_cls->m_type == KindOfObject) {
+      name = tv_cls->m_data.pobj->o_getClassName();
+    } else if (IS_STRING_TYPE(tv_cls->m_type)) {
+      name = tv_cls->m_data.pstr;
     } else {
       name = v.toString();
       return false;
     }
 
-    name = concat3(name, "::", Variant::GetAsString(tv_meth));
+    name = concat3(name, s_colon2, tv_meth->m_data.pstr);
     return ret;
   }
 
-  if (Variant::GetAccessorType(tv_func) == KindOfObject) {
-    ObjectData *d = Variant::GetObjectData(tv_func);
+  if (tv_func->m_type == KindOfObject) {
+    ObjectData *d = tv_func->m_data.pobj;
     const Func* invoke = d->getVMClass()->lookupMethod(s__invoke.get());
     if (name.isReferenced()) {
-      if (d->instanceof(c_Closure::s_cls)) {
+      if (d->instanceof(c_Closure::classof())) {
         // Hack to stop the mangled name from showing up
         name = s_Closure__invoke;
       } else {
@@ -135,17 +138,6 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params) {
   return vm_call_user_func(function, params);
 }
 
-Object f_call_user_func_array_async(CVarRef function, CArrRef params) {
-  raise_error("%s is no longer supported", __func__);
-  return null_object;
-}
-
-Object f_call_user_func_async(int _argc, CVarRef function,
-                              CArrRef _argv /* = null_array */) {
-  raise_error("%s is no longer supported", __func__);
-  return null_object;
-}
-
 Variant f_check_user_func_async(CVarRef handles, int timeout /* = -1 */) {
   raise_error("%s is no longer supported", __func__);
   return uninit_null();
@@ -158,7 +150,7 @@ Variant f_end_user_func_async(CObjRef handle,
   return uninit_null();
 }
 
-static const StaticString
+const StaticString
   s_func("func"),
   s_args("args"),
   s_exception("exception"),
@@ -168,7 +160,7 @@ String f_call_user_func_serialized(CStrRef input) {
   Variant out;
   try {
     Variant in = unserialize_from_string(input);
-    out.set(s_ret, vm_call_user_func(in[s_func], in[s_args]));
+    out.set(s_ret, vm_call_user_func(in[s_func], in[s_args].toArray()));
   } catch (Object &e) {
     out.set(s_exception, e);
   }
@@ -199,7 +191,7 @@ Variant f_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth,
   url += "/call_user_func_serialized?auth=";
   url += auth.data();
 
-  Array blob = CREATE_MAP2(s_func, function, s_args, _argv);
+  Array blob = make_map_array(s_func, function, s_args, _argv);
   String message = f_serialize(blob);
 
   vector<string> headers;
@@ -252,19 +244,13 @@ Variant f_forward_static_call(int _argc, CVarRef function,
 }
 
 Variant f_get_called_class() {
-  CallerFrame cf;
+  EagerCallerFrame cf;
   ActRec* ar = cf();
-  if (ar == NULL) {
-    return Variant(false);
+  if (ar) {
+    if (ar->hasThis()) return Variant(ar->getThis()->o_getClassName());
+    if (ar->hasClass()) return Variant(ar->getClass()->preClass()->name());
   }
-  if (ar->hasThis()) {
-    ObjectData* obj = ar->getThis();
-    return obj->o_getClassName();
-  } else if (ar->hasClass()) {
-    return ar->getClass()->preClass()->name()->data();
-  } else {
-    return Variant(false);
-  }
+  return Variant(false);
 }
 
 String f_create_function(CStrRef args, CStrRef code) {
@@ -275,7 +261,7 @@ String f_create_function(CStrRef args, CStrRef code) {
 
 Variant f_func_get_arg(int arg_num) {
   CallerFrame cf;
-  ActRec* ar = cf();
+  ActRec* ar = cf.actRecForArgs();
 
   if (ar == NULL) {
     return false;
@@ -346,27 +332,29 @@ Array hhvm_get_frame_args(const ActRec* ar) {
   }
   int numParams = ar->m_func->numParams();
   int numArgs = ar->numArgs();
-  HphpArray* retval = NEW(HphpArray)(numArgs);
 
-  TypedValue* local = (TypedValue*)(uintptr_t(ar) - sizeof(TypedValue));
+  PackedArrayInit retInit(numArgs);
+  auto local = reinterpret_cast<TypedValue*>(
+    uintptr_t(ar) - sizeof(TypedValue)
+  );
   for (int i = 0; i < numArgs; ++i) {
     if (i < numParams) {
       // This corresponds to one of the function's formal parameters, so it's
       // on the stack.
-      retval->nvAppend(local);
+      retInit.append(tvAsCVarRef(local));
       --local;
     } else {
       // This is not a formal parameter, so it's in the ExtraArgs.
-      retval->nvAppend(ar->getExtraArg(i - numParams));
+      retInit.append(tvAsCVarRef(ar->getExtraArg(i - numParams)));
     }
   }
 
-  return Array(retval);
+  return retInit.toArray();
 }
 
 Variant f_func_get_args() {
-  CallerFrame cf;
-  ActRec* ar = cf();
+  EagerCallerFrame cf;
+  ActRec* ar = cf.actRecForArgs();
   if (ar && ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope()) {
     raise_warning(
       "func_get_args():  Called from the global scope - no function context"
@@ -397,8 +385,8 @@ Array func_get_args(int num_args, CArrRef params, CArrRef args) {
 }
 
 int64_t f_func_num_args() {
-  CallerFrame cf;
-  ActRec* ar = cf();
+  EagerCallerFrame cf;
+  ActRec* ar = cf.actRecForArgs();
   if (ar == NULL) {
     return -1;
   }

@@ -1,0 +1,762 @@
+*** Test fscanf(): different octal format types with float values ***
+
+-- iteration 1 --
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(1821)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  int(32768)
+}
+array(1) {
+  [0]=>
+  int(-262144)
+}
+array(1) {
+  [0]=>
+  int(16777216)
+}
+array(1) {
+  [0]=>
+  int(-134217728)
+}
+array(1) {
+  [0]=>
+  int(8)
+}
+array(1) {
+  [0]=>
+  int(282624)
+}
+bool(false)
+
+-- iteration 2 --
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(1821)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  int(32768)
+}
+array(1) {
+  [0]=>
+  int(-262144)
+}
+array(1) {
+  [0]=>
+  int(16777216)
+}
+array(1) {
+  [0]=>
+  int(-134217728)
+}
+array(1) {
+  [0]=>
+  int(8)
+}
+array(1) {
+  [0]=>
+  int(282624)
+}
+bool(false)
+
+-- iteration 3 --
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(1821)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  int(32768)
+}
+array(1) {
+  [0]=>
+  int(-262144)
+}
+array(1) {
+  [0]=>
+  int(16777216)
+}
+array(1) {
+  [0]=>
+  int(-134217728)
+}
+array(1) {
+  [0]=>
+  int(8)
+}
+array(1) {
+  [0]=>
+  int(282624)
+}
+bool(false)
+
+-- iteration 4 --
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(1821)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  int(32768)
+}
+array(1) {
+  [0]=>
+  int(-262144)
+}
+array(1) {
+  [0]=>
+  int(16777216)
+}
+array(1) {
+  [0]=>
+  int(-134217728)
+}
+array(1) {
+  [0]=>
+  int(8)
+}
+array(1) {
+  [0]=>
+  int(282624)
+}
+bool(false)
+
+-- iteration 5 --
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(1821)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  int(32768)
+}
+array(1) {
+  [0]=>
+  int(-262144)
+}
+array(1) {
+  [0]=>
+  int(16777216)
+}
+array(1) {
+  [0]=>
+  int(-134217728)
+}
+array(1) {
+  [0]=>
+  int(8)
+}
+array(1) {
+  [0]=>
+  int(282624)
+}
+bool(false)
+
+-- iteration 6 --
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(1821)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  int(32768)
+}
+array(1) {
+  [0]=>
+  int(-262144)
+}
+array(1) {
+  [0]=>
+  int(16777216)
+}
+array(1) {
+  [0]=>
+  int(-134217728)
+}
+array(1) {
+  [0]=>
+  int(8)
+}
+array(1) {
+  [0]=>
+  int(282624)
+}
+bool(false)
+
+-- iteration 7 --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+bool(false)
+
+-- iteration 8 --
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(1821)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  int(32768)
+}
+array(1) {
+  [0]=>
+  int(-262144)
+}
+array(1) {
+  [0]=>
+  int(16777216)
+}
+array(1) {
+  [0]=>
+  int(-134217728)
+}
+array(1) {
+  [0]=>
+  int(8)
+}
+array(1) {
+  [0]=>
+  int(282624)
+}
+bool(false)
+
+-- iteration 9 --
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(1821)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  int(32768)
+}
+array(1) {
+  [0]=>
+  int(-262144)
+}
+array(1) {
+  [0]=>
+  int(16777216)
+}
+array(1) {
+  [0]=>
+  int(-134217728)
+}
+array(1) {
+  [0]=>
+  int(8)
+}
+array(1) {
+  [0]=>
+  int(282624)
+}
+bool(false)
+
+-- iteration 10 --
+array(1) {
+  [0]=>
+  int(-140)
+}
+array(1) {
+  [0]=>
+  int(1127)
+}
+array(1) {
+  [0]=>
+  int(-140)
+}
+array(1) {
+  [0]=>
+  int(1821)
+}
+array(1) {
+  [0]=>
+  int(1127)
+}
+array(1) {
+  [0]=>
+  int(-140)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  int(512)
+}
+array(1) {
+  [0]=>
+  int(-64)
+}
+array(1) {
+  [0]=>
+  int(512)
+}
+array(1) {
+  [0]=>
+  int(-64)
+}
+array(1) {
+  [0]=>
+  int(8)
+}
+array(1) {
+  [0]=>
+  int(552)
+}
+bool(false)
+
+-- iteration 11 --
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(1821)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  int(32768)
+}
+array(1) {
+  [0]=>
+  int(-262144)
+}
+array(1) {
+  [0]=>
+  int(16777216)
+}
+array(1) {
+  [0]=>
+  int(-134217728)
+}
+array(1) {
+  [0]=>
+  int(8)
+}
+array(1) {
+  [0]=>
+  int(282624)
+}
+bool(false)
+
+-- iteration 12 --
+array(1) {
+  [0]=>
+  NULL
+}
+array(1) {
+  [0]=>
+  string(5) "21474"
+}
+array(1) {
+  [0]=>
+  NULL
+}
+array(1) {
+  [0]=>
+  string(4) "3435"
+}
+array(1) {
+  [0]=>
+  string(5) "21474"
+}
+array(1) {
+  [0]=>
+  NULL
+}
+array(1) {
+  [0]=>
+  string(1) "0"
+}
+array(1) {
+  [0]=>
+  NULL
+}
+array(1) {
+  [0]=>
+  string(1) "1"
+}
+array(1) {
+  [0]=>
+  string(6) "100000"
+}
+array(1) {
+  [0]=>
+  NULL
+}
+array(1) {
+  [0]=>
+  string(9) "100000000"
+}
+array(1) {
+  [0]=>
+  NULL
+}
+array(1) {
+  [0]=>
+  string(2) "10"
+}
+array(1) {
+  [0]=>
+  string(7) "1050000"
+}
+bool(false)
+
+-- iteration 13 --
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+bool(false)
+
+*** Done ***

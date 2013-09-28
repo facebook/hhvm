@@ -1,3 +1,4 @@
 <?php
 
- $a = 'test'; print $a['junk'];
+$a = 'test';
+ print $a['junk'];

@@ -1,0 +1,14 @@
+array(3) {
+  [0]=>
+  string(12) "'a' 'b3' bcd"
+  ["v"]=>
+  string(6) "aksfjk"
+  [12]=>
+  string(9) "'aa' 'bb'"
+}
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(7) "'A'rray"
+}
+string(3) "aBC"

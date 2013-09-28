@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,7 +25,7 @@
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/util/hash.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 
 using namespace HPHP;
 
@@ -173,10 +173,10 @@ int ObjectPropertyExpression::getKidCount() const {
 void ObjectPropertyExpression::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_object = boost::dynamic_pointer_cast<Expression>(cp);
+      m_object = dynamic_pointer_cast<Expression>(cp);
       break;
     case 1:
-      m_property = boost::dynamic_pointer_cast<Expression>(cp);
+      m_property = dynamic_pointer_cast<Expression>(cp);
       break;
     default:
       assert(false);

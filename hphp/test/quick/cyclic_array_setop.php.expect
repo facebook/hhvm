@@ -1,0 +1,11 @@
+array(1) {
+  ["x0"]=>
+  &array(1) {
+    [0]=>
+    &array(1) {
+      [0]=>
+      *RECURSION*
+    }
+  }
+}
+string(7) "Arrayok"

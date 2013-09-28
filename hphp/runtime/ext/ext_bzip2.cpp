@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,26 +16,29 @@
 */
 
 #include "hphp/runtime/ext/ext_bzip2.h"
-#include "hphp/runtime/base/file/bzip2_file.h"
+#include "hphp/runtime/base/bzip2-file.h"
 #include "hphp/util/alloc.h"
+#include "folly/String.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_bzclose(CObjRef bz) {
+Variant f_bzclose(CResRef bz) {
   return f_fclose(bz);
 }
 
-Variant f_bzread(CObjRef bz, int length /* = 1024 */) {
+Variant f_bzread(CResRef bz, int length /* = 1024 */) {
   return f_fread(bz, length);
 }
 
-Variant f_bzwrite(CObjRef bz, CStrRef data, int length /* = 0 */) {
+Variant f_bzwrite(CResRef bz, CStrRef data, int length /* = 0 */) {
   return f_fwrite(bz, data, length);
 }
 
+const StaticString s_r("r"), s_w("w");
+
 Variant f_bzopen(CVarRef filename, CStrRef mode) {
-  if (mode != "r" && mode != "w") {
+  if (mode != s_r && mode != s_w) {
     raise_warning(
       "'%s' is not a valid mode for bzopen(). "
       "Only 'w' and 'r' are supported.",
@@ -51,9 +54,9 @@ Variant f_bzopen(CVarRef filename, CStrRef mode) {
       return false;
     }
     bz = NEWOBJ(BZ2File)();
-    bool ret = bz->open(File::TranslatePath(filename), mode);
+    bool ret = bz->open(File::TranslatePath(filename.toString()), mode);
     if (!ret) {
-      raise_warning("%s", Util::safe_strerror(errno).c_str());
+      raise_warning("%s", folly::errnoStr(errno).c_str());
       return false;
     }
   } else {
@@ -61,7 +64,7 @@ Variant f_bzopen(CVarRef filename, CStrRef mode) {
       raise_warning("first parameter has to be string or file-resource");
       return false;
     }
-    PlainFile* f = filename.cast<PlainFile>();
+    PlainFile* f = filename.toResource().getTyped<PlainFile>();
     if (!f) {
       return false;
     }
@@ -81,36 +84,37 @@ Variant f_bzopen(CVarRef filename, CStrRef mode) {
     }
 
     const char rw_mode = stream_mode[0];
-    if (mode == "r" && rw_mode != 'r') {
+    if (mode == s_r && rw_mode != 'r') {
       raise_warning("cannot write to a stream opened in read only mode");
       return false;
-    } else if (mode == "w" && rw_mode != 'w' && rw_mode != 'a' && rw_mode != 'x') {
+    } else if (mode == s_w && rw_mode != 'w' && rw_mode != 'a' &&
+               rw_mode != 'x') {
       raise_warning("cannot read from a stream opened in write only mode");
       return false;
     }
 
     bz = NEWOBJ(BZ2File)(f);
   }
-  Object handle(bz);
+  Resource handle(bz);
   return handle;
 }
 
-Variant f_bzflush(CObjRef bz) {
+Variant f_bzflush(CResRef bz) {
   BZ2File *f = bz.getTyped<BZ2File>();
   return f->flush();
 }
 
-String f_bzerrstr(CObjRef bz) {
+String f_bzerrstr(CResRef bz) {
   BZ2File *f = bz.getTyped<BZ2File>();
   return f->errstr();
 }
 
-Variant f_bzerror(CObjRef bz) {
+Variant f_bzerror(CResRef bz) {
   BZ2File *f = bz.getTyped<BZ2File>();
   return f->error();
 }
 
-int64_t f_bzerrno(CObjRef bz) {
+int64_t f_bzerrno(CResRef bz) {
   BZ2File *f = bz.getTyped<BZ2File>();
   return f->errnu();
 }

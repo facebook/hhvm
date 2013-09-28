@@ -1,0 +1,6 @@
+*** Testing DateTime::getOffset() : error conditions ***
+
+-- Testing DateTime::getOffset() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+===DONE===

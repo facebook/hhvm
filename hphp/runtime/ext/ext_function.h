@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_FUNCTION_H_
 #define incl_HPHP_EXT_FUNCTION_H_
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,10 +29,6 @@ bool f_is_callable(CVarRef v, bool syntax = false,
                    VRefParam name = uninit_null());
 Variant f_call_user_func(int _argc, CVarRef function, CArrRef _argv = null_array);
 Variant f_call_user_func_array(CVarRef function, CArrRef params);
-Object f_call_user_func_array_async(CVarRef function, CArrRef params);
-Object f_call_user_func_async(int _argc, CVarRef function, CArrRef _argv = null_array);
-Variant f_check_user_func_async(CVarRef handles, int timeout = -1);
-Variant f_end_user_func_async(CObjRef handle, int default_strategy = k_GLOBAL_STATE_IGNORE, CVarRef additional_strategies = uninit_null());
 String f_call_user_func_serialized(CStrRef input);
 Variant f_call_user_func_array_rpc(CStrRef host, int port, CStrRef auth, int timeout, CVarRef function, CArrRef params);
 Variant f_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth, int timeout, CVarRef function, CArrRef _argv = null_array);

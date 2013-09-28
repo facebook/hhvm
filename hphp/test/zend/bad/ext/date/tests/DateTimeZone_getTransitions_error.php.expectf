@@ -1,0 +1,6 @@
+*** Testing DateTimeZone::getTransitions() : error conditions ***
+
+-- Testing DateTimeZone::getTransitions() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+===DONE===

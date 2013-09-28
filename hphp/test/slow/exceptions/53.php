@@ -1,3 +1,7 @@
 <?php
 
- try { throw new Exception('test');} catch (Exception $e) {}
+try {
+ throw new Exception('test');
+}
+ catch (Exception $e) {
+}

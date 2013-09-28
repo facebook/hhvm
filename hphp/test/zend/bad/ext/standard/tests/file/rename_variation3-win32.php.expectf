@@ -1,0 +1,19 @@
+-- Renaming file to same file name --
+bool(true)
+bool(true)
+
+-- Renaming directory to same directory name --
+bool(true)
+bool(true)
+
+-- Renaming existing file to existing directory name --
+HipHop Warning: %s
+bool(false)
+bool(true)
+bool(true)
+
+-- Renaming existing directory to existing file name --
+bool(true)
+bool(true)
+bool(false)
+Done

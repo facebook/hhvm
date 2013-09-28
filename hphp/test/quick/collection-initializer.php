@@ -99,5 +99,16 @@ function main() {
   $obj1->prop[FOO] = 42;
   $obj1->prop[Z::FOO] = 73;
   var_dump($obj2->prop[FOO], $obj2->prop[Z::FOO]);
+
+  echo "=========\n";
+
+  class T {
+    public $prop = array(Set {'a'});
+  }
+  $obj1 = new T;
+  $obj2 = new T;
+  $obj1->prop[0][] = 'b';
+  var_dump($obj1->prop[0]->contains('b'));
+  var_dump($obj2->prop[0]->contains('b'));
 }
 main();

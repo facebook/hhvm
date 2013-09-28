@@ -6,11 +6,13 @@ array(6) {
     ["class"]=>
     string(8) "my_child"
     ["info"]=>
-    array(14) {
+    array(15) {
       ["name"]=>
       string(17) "my_other_override"
       ["access"]=>
       string(6) "public"
+      ["accessible"]=>
+      bool(true)
       ["modifiers"]=>
       int(256)
       ["class"]=>
@@ -47,11 +49,13 @@ array(6) {
     ["class"]=>
     string(8) "my_child"
     ["info"]=>
-    array(14) {
+    array(15) {
       ["name"]=>
       string(15) "my_child_method"
       ["access"]=>
       string(6) "public"
+      ["accessible"]=>
+      bool(true)
       ["modifiers"]=>
       int(256)
       ["class"]=>
@@ -88,11 +92,13 @@ array(6) {
     ["class"]=>
     string(8) "my_class"
     ["info"]=>
-    array(14) {
+    array(15) {
       ["name"]=>
       string(9) "my_method"
       ["access"]=>
       string(6) "public"
+      ["accessible"]=>
+      bool(true)
       ["modifiers"]=>
       int(256)
       ["class"]=>
@@ -129,11 +135,13 @@ array(6) {
     ["class"]=>
     string(8) "my_class"
     ["info"]=>
-    array(14) {
+    array(15) {
       ["name"]=>
       string(18) "my_override_method"
       ["access"]=>
       string(6) "public"
+      ["accessible"]=>
+      bool(true)
       ["modifiers"]=>
       int(256)
       ["class"]=>
@@ -170,11 +178,13 @@ array(6) {
     ["class"]=>
     string(8) "my_class"
     ["info"]=>
-    array(14) {
+    array(15) {
       ["name"]=>
       string(15) "my_trait_method"
       ["access"]=>
       string(6) "public"
+      ["accessible"]=>
+      bool(true)
       ["modifiers"]=>
       int(256)
       ["class"]=>
@@ -211,11 +221,13 @@ array(6) {
     ["class"]=>
     string(7) "my_base"
     ["info"]=>
-    array(14) {
+    array(15) {
       ["name"]=>
       string(14) "my_base_method"
       ["access"]=>
       string(6) "public"
+      ["accessible"]=>
+      bool(true)
       ["modifiers"]=>
       int(256)
       ["class"]=>
@@ -246,7 +258,7 @@ array(6) {
     }
   }
 }
-object(ReflectionParameter)#9 (1) {
+object(ReflectionParameter)#9 (2) {
   ["info"]=>
   array(7) {
     ["index"]=>
@@ -265,4 +277,6 @@ object(ReflectionParameter)#9 (1) {
     array(0) {
     }
   }
+  ["name"]=>
+  string(1) "c"
 }

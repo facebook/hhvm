@@ -1,6 +1,5 @@
 <?php
 
-
 trait MyTrait {
   public function say_meth() {
     echo "meth: MyTrait\n";

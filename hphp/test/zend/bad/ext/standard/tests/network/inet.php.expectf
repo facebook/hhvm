@@ -1,0 +1,27 @@
+%unicode|string%(9) "127.0.0.1"
+%unicode|string%(13) "255.255.255.0"
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+%unicode|string%(%d) "7f000001"
+%unicode|string%(9) "127.0.0.1"
+%unicode|string%(%d) "42a3a174"
+%unicode|string%(14) "66.163.161.116"
+%unicode|string%(%d) "ffffffff"
+%unicode|string%(15) "255.255.255.255"
+%unicode|string%(%d) "00000000"
+%unicode|string%(7) "0.0.0.0"
+Done

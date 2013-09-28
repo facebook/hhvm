@@ -1,0 +1,14 @@
+*** Testing exif_imagetype() : error conditions ***
+
+-- Testing exif_imagetype() function with no arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing exif_imagetype() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing exif_imagetype() function with an unknown file  --
+HipHop Warning: %s
+bool(false)
+===Done===

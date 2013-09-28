@@ -1,6 +1,5 @@
 <?php
 
-
 function f_str($x) {
   var_dump($x);
   print ' goes to: ';
@@ -112,7 +111,10 @@ function f($x) {
     break;
   }
 }
-function fcn($x) { if ($x) return 5; return 'bar'; }
+function fcn($x) {
+ if ($x) return 5;
+ return 'bar';
+ }
 function st($x) {
   switch ($y = $x) {
   case 0:
@@ -138,7 +140,8 @@ function st($x) {
   default:
     print 'default';
   }
-  switch($x){}
+  switch($x){
+}
   switch($x){
   default:
     print 'default';
@@ -156,7 +159,8 @@ f(1.0);
 f('1abc');
 f('3');
 f('foo');
-class M{}
+class M{
+}
 f(new M());
 f_str('0');
 f_str('');

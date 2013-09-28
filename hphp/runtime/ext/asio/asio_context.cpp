@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -14,11 +14,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/ext/asio/asio_context.h"
 
 #include "hphp/runtime/ext/ext_asio.h"
-#include "hphp/runtime/ext/asio/asio_context.h"
+#include "hphp/runtime/ext/asio/asio_external_thread_event_queue.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -96,15 +97,18 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
   auto session = AsioSession::Get();
   uint8_t check_ete_counter = 0;
 
+  if (!session->hasAbruptInterruptException()) {
+    session->initAbruptInterruptException();
+  }
+
   while (!wait_handle->isFinished()) {
     // process ready external thread events once per 256 other events
     // (when 8-bit check_ete_counter overflows)
     if (!++check_ete_counter) {
-      auto ete_wh = session->getReadyExternalThreadEvents();
-      while (ete_wh) {
-        auto next_wh = ete_wh->getNextToProcess();
-        ete_wh->process();
-        ete_wh = next_wh;
+      // queue may contain received unprocessed events from failed runUntil()
+      auto queue = session->getExternalThreadEventQueue();
+      if (UNLIKELY(queue->hasReceived()) || queue->tryReceiveSome()) {
+        queue->processAllReceived();
       }
     }
 
@@ -113,9 +117,12 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
       auto current = m_runnableQueue.front();
       m_runnableQueue.pop();
       m_current = current;
+      auto exit_guard = folly::makeGuard([&] {
+        m_current = nullptr;
+        decRefObj(current);
+      });
+
       m_current->run();
-      m_current = nullptr;
-      decRefObj(current);
       continue;
     }
 
@@ -126,13 +133,14 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
 
     // pending external thread events? wait for at least one to become ready
     if (!m_externalThreadEvents.empty()) {
-      // all your wait time are belong to us
-      auto ete_wh = session->waitForExternalThreadEvents();
-      while (ete_wh) {
-        auto next_wh = ete_wh->getNextToProcess();
-        ete_wh->process();
-        ete_wh = next_wh;
+      // queue may contain received unprocessed events from failed runUntil()
+      auto queue = session->getExternalThreadEventQueue();
+      if (LIKELY(!queue->hasReceived())) {
+        // all your wait time are belong to us
+        queue->receiveSome();
       }
+
+      queue->processAllReceived();
       continue;
     }
 

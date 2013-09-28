@@ -1,0 +1,332 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "mail",
+            "desc": "Sends an email.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE if the mail was successfully accepted for delivery, FALSE otherwise.\n\nIt is important to note that just because the mail was accepted for delivery, it does NOT mean the mail will actually reach the intended destination."
+            },
+            "args": [
+                {
+                    "name": "to",
+                    "type": "String",
+                    "desc": null
+                },
+                {
+                    "name": "subject",
+                    "type": "String",
+                    "desc": null
+                },
+                {
+                    "name": "message",
+                    "type": "String",
+                    "desc": "Message to be sent.\n\nEach line should be separated with a LF (\\n). Lines should not be larger than 70 characters. Caution\n\n(Windows only) When PHP is talking to a SMTP server directly, if a full stop is found on the start of a line, it is removed. To counter-act this, replace these occurrences with a double dot."
+                },
+                {
+                    "name": "additional_headers",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": null
+                },
+                {
+                    "name": "additional_parameters",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "The additional_parameters parameter can be used to pass additional flags as command line options to the program configured to be used when sending mail, as defined by the sendmail_path configuration setting. For example, this can be used to set the envelope sender address when using sendmail with the -f sendmail option.\n\nThe user that the webserver runs as should be added as a trusted user to the sendmail configuration to prevent a 'X-Warning' header from being added to the message when the envelope sender (-f) is set using this method. For sendmail users, this file is \/etc\/mail\/trusted-users."
+                }
+            ]
+        },
+        {
+            "name": "ezmlm_hash",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "The hash value of addr."
+            },
+            "args": [
+                {
+                    "name": "addr",
+                    "type": "String",
+                    "desc": "The email address that's being hashed."
+                }
+            ]
+        },
+        {
+            "name": "mailparse_msg_create",
+            "desc": "Create a MIME mail resource.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Resource",
+                "desc": "Returns a handle that can be used to parse a message."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "mailparse_msg_free",
+            "desc": "Frees a MIME resource.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "mimemail",
+                    "type": "Resource",
+                    "desc": "A valid MIME resource allocated by mailparse_msg_create() or mailparse_msg_parse_file()."
+                }
+            ]
+        },
+        {
+            "name": "mailparse_msg_parse_file",
+            "desc": "Parses a file. This is the optimal way of parsing a mail file that you have on disk.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a MIME resource representing the structure, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "filename",
+                    "type": "String",
+                    "desc": "Path to the file holding the message. The file is opened and streamed through the parser."
+                }
+            ]
+        },
+        {
+            "name": "mailparse_msg_parse",
+            "desc": "Incrementally parse data into the supplied mime mail resource.\n\nThis function allow you to stream portions of a file at a time, rather than read and parse the whole thing.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "mimemail",
+                    "type": "Resource",
+                    "desc": "A valid MIME resource."
+                },
+                {
+                    "name": "data",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "mailparse_msg_extract_part_file",
+            "desc": "Extracts\/decodes a message section from the supplied filename.\n\nThe contents of the section will be decoded according to their transfer encoding - base64, quoted-printable and uuencoded text are supported.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "If callbackfunc is not NULL returns TRUE on success.\n\nIf callbackfunc is set to NULL, returns the extracted section as a string.\n\nReturns FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "mimemail",
+                    "type": "Resource",
+                    "desc": "A valid MIME resource, created with mailparse_msg_create()."
+                },
+                {
+                    "name": "filename",
+                    "type": "Variant",
+                    "desc": "Can be a file name or a valid stream resource."
+                },
+                {
+                    "name": "callbackfunc",
+                    "type": "Variant",
+                    "value": "\"\"",
+                    "desc": "If set, this must be either a valid callback that will be passed the extracted section, or NULL to make this function return the extracted section.\n\nIf not specified, the contents will be sent to \"stdout\"."
+                }
+            ]
+        },
+        {
+            "name": "mailparse_msg_extract_whole_part_file",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "mimemail",
+                    "type": "Resource",
+                    "desc": "A valid MIME resource."
+                },
+                {
+                    "name": "filename",
+                    "type": "Variant"
+                },
+                {
+                    "name": "callbackfunc",
+                    "type": "Variant",
+                    "value": "\"\""
+                }
+            ]
+        },
+        {
+            "name": "mailparse_msg_extract_part",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "No value is returned."
+            },
+            "args": [
+                {
+                    "name": "mimemail",
+                    "type": "Resource",
+                    "desc": "A valid MIME resource."
+                },
+                {
+                    "name": "msgbody",
+                    "type": "Variant"
+                },
+                {
+                    "name": "callbackfunc",
+                    "type": "Variant",
+                    "value": "\"\""
+                }
+            ]
+        },
+        {
+            "name": "mailparse_msg_get_part_data",
+            "flags": [
+            ],
+            "return": {
+                "type": "VariantMap"
+            },
+            "args": [
+                {
+                    "name": "mimemail",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "mailparse_msg_get_part",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "mimemail",
+                    "type": "Resource"
+                },
+                {
+                    "name": "mimesection",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "mailparse_msg_get_structure",
+            "flags": [
+            ],
+            "return": {
+                "type": "VariantMap"
+            },
+            "args": [
+                {
+                    "name": "mimemail",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "mailparse_rfc822_parse_addresses",
+            "desc": null,
+            "flags": [
+            ],
+            "return": {
+                "type": "StringVec",
+                "desc": "Returns an array of associative arrays with the following keys for each recipient: display The recipient name, for display purpose. If this part is not set for a recipient, this key will hold the same value as address. address The email address is_group TRUE if the recipient is a newsgroup, FALSE otherwise."
+            },
+            "args": [
+                {
+                    "name": "addresses",
+                    "type": "String",
+                    "desc": "A string containing addresses, like in: Wez Furlong <wez@example.com>, doe@example.com\n\nThis string must not include the header name."
+                }
+            ]
+        },
+        {
+            "name": "mailparse_stream_encode",
+            "desc": "Streams data from the source file pointer, apply encoding and write to the destination file pointer.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "sourcefp",
+                    "type": "Resource",
+                    "desc": "A valid file handle. The file is streamed through the parser."
+                },
+                {
+                    "name": "destfp",
+                    "type": "Resource",
+                    "desc": "The destination file handle in which the encoded data will be written."
+                },
+                {
+                    "name": "encoding",
+                    "type": "String",
+                    "desc": "One of the character encodings supported by the mbstring module."
+                }
+            ]
+        },
+        {
+            "name": "mailparse_uudecode_all",
+            "desc": "Scans the data from the given file pointer and extract each embedded uuencoded file into a temporary file.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an array of associative arrays listing filename information. filename Path to the temporary file name created origfilename The original filename, for uuencoded parts only The first filename entry is the message body. The next entries are the decoded uuencoded files."
+            },
+            "args": [
+                {
+                    "name": "fp",
+                    "type": "Resource",
+                    "desc": "A valid file pointer."
+                }
+            ]
+        },
+        {
+            "name": "mailparse_determine_best_xfer_encoding",
+            "desc": "Figures out the best way of encoding the content read from the given file pointer.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns one of the character encodings supported by the mbstring module."
+            },
+            "args": [
+                {
+                    "name": "fp",
+                    "type": "Resource",
+                    "desc": "A valid file pointer, which must be seek-able."
+                }
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

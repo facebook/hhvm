@@ -1,6 +1,5 @@
 <?php
 
-
 final class Foo {
   use Bar;
   private static $a = 3;

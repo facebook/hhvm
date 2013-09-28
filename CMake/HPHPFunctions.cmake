@@ -67,3 +67,14 @@ macro(MYSQL_SOCKET_SEARCH)
 		set(MYSQL_UNIX_SOCK_ADDR ${MYSQL_SOCK} CACHE STRING "Path to MySQL Socket")
 	endif()
 endmacro()
+
+function(embed_systemlib TARGET DEST SOURCE)
+	if (APPLE)
+	        target_link_libraries(${TARGET} -Wl,-sectcreate,__text,systemlib,${SOURCE})
+	else()
+	        add_custom_command(TARGET ${TARGET} POST_BUILD
+	                   COMMAND "objcopy"
+	                   ARGS "--add-section" "systemlib=${SOURCE}" ${DEST}
+	                   COMMENT "Embedding systemlib.php in ${TARGET}")
+	endif()
+endfunction(embed_systemlib)

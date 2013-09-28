@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,7 +35,7 @@
 #include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/expression/assignment_expression.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 
 using namespace HPHP;
 
@@ -120,13 +120,13 @@ int FunctionCall::getKidCount() const {
 void FunctionCall::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_class = boost::dynamic_pointer_cast<Expression>(cp);
+      m_class = dynamic_pointer_cast<Expression>(cp);
       break;
     case 1:
-      m_nameExp = boost::dynamic_pointer_cast<Expression>(cp);
+      m_nameExp = dynamic_pointer_cast<Expression>(cp);
       break;
     case 2:
-      m_params = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      m_params = dynamic_pointer_cast<ExpressionList>(cp);
       break;
     default:
       assert(false);
@@ -171,39 +171,43 @@ void FunctionCall::markRefParams(FunctionScopePtr func,
   }
 }
 
+void FunctionCall::checkParamTypeCodeErrors(AnalysisResultPtr ar) {
+  if (!m_funcScope || m_arrayParams) return;
+  for (int i = 0, n = m_funcScope->getMaxParamCount(); i < n; ++i) {
+    TypePtr specType = m_funcScope->getParamTypeSpec(i);
+    if (!specType) continue;
+
+    const char *fmt = 0;
+    string ptype;
+    if (!m_params || m_params->getCount() <= i) {
+      if (i >= m_funcScope->getMinParamCount()) break;
+      fmt = "parameter %d of %s() requires %s, none given";
+    } else {
+      ExpressionPtr param = (*m_params)[i];
+      if (!Type::Inferred(ar, param->getType(), specType)) {
+        fmt = "parameter %d of %s() requires %s, called with %s";
+      }
+      ptype = param->getType()->toString();
+    }
+    if (fmt) {
+      string msg;
+      Util::string_printf
+        (msg, fmt,
+         i + 1,
+         Util::escapeStringForCPP(m_funcScope->getOriginalName()).c_str(),
+         specType->toString().c_str(), ptype.c_str());
+      Compiler::Error(Compiler::BadArgumentType,
+                      shared_from_this(), msg);
+    }
+  }
+}
+
 void FunctionCall::analyzeProgram(AnalysisResultPtr ar) {
   if (m_class) m_class->analyzeProgram(ar);
   if (m_nameExp) m_nameExp->analyzeProgram(ar);
   if (m_params) m_params->analyzeProgram(ar);
   if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    if (m_funcScope && !m_arrayParams) {
-      for (int i = 0, n = m_funcScope->getMaxParamCount(); i < n; ++i) {
-        if (TypePtr specType = m_funcScope->getParamTypeSpec(i)) {
-          const char *fmt = 0;
-          string ptype;
-          if (!m_params || m_params->getCount() <= i) {
-            if (i >= m_funcScope->getMinParamCount()) break;
-            fmt = "parameter %d of %s() requires %s, none given";
-          } else {
-            ExpressionPtr param = (*m_params)[i];
-            if (!Type::Inferred(ar, param->getType(), specType)) {
-              fmt = "parameter %d of %s() requires %s, called with %s";
-            }
-            ptype = param->getType()->toString();
-          }
-          if (fmt) {
-            string msg;
-            Util::string_printf
-              (msg, fmt,
-               i + 1,
-               Util::escapeStringForCPP(m_funcScope->getOriginalName()).c_str(),
-               specType->toString().c_str(), ptype.c_str());
-            Compiler::Error(Compiler::BadArgumentType,
-                            shared_from_this(), msg);
-          }
-        }
-      }
-    }
+    checkParamTypeCodeErrors(ar);
   }
 }
 
@@ -545,6 +549,15 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
     assert(!func->inVisitScopes() || getScope() == func);
     frt = func->getReturnType();
   }
+
+  // fix return type for generators and async functions here, keep the
+  // infered return type in function scope to allow further optimizations
+  if (func->isGenerator()) {
+    frt = Type::GetType(Type::KindOfObject, "Continuation");
+  } else if (func->isAsync()) {
+    frt = Type::GetType(Type::KindOfObject, "WaitHandle");
+  }
+
   if (!frt) {
     m_voidReturn = true;
     setActualType(TypePtr());

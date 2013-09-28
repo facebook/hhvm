@@ -1,0 +1,6 @@
+*** Testing array_merge_recursive() : error conditions ***
+
+-- Testing array_merge_recursive() function with Zero arguments --
+HipHop Warning: %s
+NULL
+Done

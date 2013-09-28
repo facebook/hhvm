@@ -1,0 +1,10 @@
+*** Testing crc32() : error conditions ***
+
+-- Testing crc32() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing crc32() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

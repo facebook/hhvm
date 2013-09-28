@@ -1,0 +1,2 @@
+--> Access non-visible static prop like instance prop:
+HipHop Fatal error: %s

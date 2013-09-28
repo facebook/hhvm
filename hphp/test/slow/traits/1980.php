@@ -1,6 +1,5 @@
 <?php
 
-
 trait T {
   function foo() {
     echo "Foo";

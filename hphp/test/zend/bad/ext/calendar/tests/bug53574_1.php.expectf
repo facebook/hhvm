@@ -1,0 +1,20 @@
+array(9) {
+  ["date"]=>
+  string(5) "0/0/0"
+  ["month"]=>
+  int(0)
+  ["day"]=>
+  int(0)
+  ["year"]=>
+  int(0)
+  ["dow"]=>
+  int(5)
+  ["abbrevdayname"]=>
+  string(3) "Fri"
+  ["dayname"]=>
+  string(6) "Friday"
+  ["abbrevmonth"]=>
+  string(0) ""
+  ["monthname"]=>
+  string(0) ""
+}

@@ -1,0 +1,10 @@
+array(4) {
+  ["dirname"]=>
+  string(%d) "%s/test/slow/ext_file"
+  ["basename"]=>
+  string(17) "test_ext_file.txt"
+  ["extension"]=>
+  string(3) "txt"
+  ["filename"]=>
+  string(13) "test_ext_file"
+}

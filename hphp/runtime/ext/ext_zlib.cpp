@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,14 +16,15 @@
 */
 
 #include "hphp/runtime/ext/ext_zlib.h"
-#include "hphp/runtime/base/file/file.h"
-#include "hphp/runtime/base/file/mem_file.h"
-#include "hphp/runtime/base/file/zip_file.h"
-#include "hphp/runtime/base/file/stream_wrapper.h"
-#include "hphp/runtime/base/file/stream_wrapper_registry.h"
-#include "hphp/runtime/base/file/file_stream_wrapper.h"
+#include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/mem-file.h"
+#include "hphp/runtime/base/zip-file.h"
+#include "hphp/runtime/base/stream-wrapper.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/util/compression.h"
 #include "hphp/util/logger.h"
+#include "folly/String.h"
 #ifdef HAVE_SNAPPY
 #include <snappy.h>
 #endif
@@ -95,7 +96,7 @@ static Variant gzcompress(const char *data, int len, int level /* = -1 */) {
   }
   unsigned long l2 = len + (len / PHP_ZLIB_MODIFIER) + 15;
   String str(l2, ReserveString);
-  char *s2 = str.mutableSlice().ptr;
+  char *s2 = str.bufferSlice().ptr;
 
   int status;
   if (level >= 0) {
@@ -114,14 +115,14 @@ static Variant gzcompress(const char *data, int len, int level /* = -1 */) {
 
 static Variant gzuncompress(const char *data, int len, int limit /* = 0 */) {
   if (limit < 0) {
-    Logger::Warning("length (%ld) must be greater or equal zero", limit);
+    Logger::Warning("length (%d) must be greater or equal zero", limit);
     return false;
   }
 
   unsigned long plength = limit;
   unsigned long length;
   unsigned int factor = 4, maxfactor = 16;
-  String str(std::max(plength, (unsigned long)StringData::MaxSmallSize),
+  String str(std::max(plength, (unsigned long)SmallStringReserve),
              ReserveString);
   int status;
   do {
@@ -159,7 +160,7 @@ static Variant gzdeflate(const char *data, int len, int level /* = -1 */) {
   stream.avail_out = len + (len / PHP_ZLIB_MODIFIER) + 15 + 1; // room for \0
 
   String str(stream.avail_out, ReserveString);
-  char* s2 = str.mutableSlice().ptr;
+  char* s2 = str.bufferSlice().ptr;
 
   stream.next_out = (Bytef*)s2;
 
@@ -192,7 +193,7 @@ static Variant gzinflate(const char *data, int len, int limit /* = 0 */) {
   }
 
   if (limit < 0) {
-    Logger::Warning("length (%ld) must be greater or equal zero", limit);
+    Logger::Warning("length (%d) must be greater or equal zero", limit);
     return false;
   }
   unsigned long plength = limit;
@@ -210,7 +211,7 @@ static Variant gzinflate(const char *data, int len, int limit /* = 0 */) {
   unsigned int factor = len < 128 * 1024 * 1024 ? 4 : 2;
   unsigned int maxfactor = 16;
 
-  String str(std::max(plength, (unsigned long)StringData::MaxSmallSize),
+  String str(std::max(plength, (unsigned long)SmallStringReserve),
              ReserveString);
   do {
     if (length >= StringData::MaxSize) {
@@ -252,7 +253,7 @@ static Variant gzinflate(const char *data, int len, int limit /* = 0 */) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_readgzfile(CStrRef filename, bool use_include_path /* = false */) {
-  Object stream = f_gzopen(filename, "rb", use_include_path);
+  Resource stream = f_gzopen(filename, "rb", use_include_path);
   if (stream.isNull()) {
     return false;
   }
@@ -260,7 +261,7 @@ Variant f_readgzfile(CStrRef filename, bool use_include_path /* = false */) {
 }
 
 Variant f_gzfile(CStrRef filename, bool use_include_path /* = false */) {
-  Object stream = f_gzopen(filename, "rb", use_include_path);
+  Resource stream = f_gzopen(filename, "rb", use_include_path);
   if (stream.isNull()) {
     return false;
   }
@@ -315,53 +316,53 @@ String f_zlib_get_coding_type() {
 ///////////////////////////////////////////////////////////////////////////////
 // stream functions
 
-Object f_gzopen(CStrRef filename, CStrRef mode,
-                bool use_include_path /* = false */) {
+Resource f_gzopen(CStrRef filename, CStrRef mode,
+                  bool use_include_path /* = false */) {
   File *file = NEWOBJ(ZipFile)();
-  Object handle(file);
+  Resource handle(file);
   bool ret = file->open(File::TranslatePath(filename), mode);
   if (!ret) {
-    raise_warning("%s",Util::safe_strerror(errno).c_str());
+    raise_warning("%s",folly::errnoStr(errno).c_str());
     return NULL;
   }
   return handle;
 }
 
-bool f_gzclose(CObjRef zp) {
+bool f_gzclose(CResRef zp) {
   return f_fclose(zp);
 }
-Variant f_gzread(CObjRef zp, int64_t length /* = 0 */) {
+Variant f_gzread(CResRef zp, int64_t length /* = 0 */) {
   return f_fread(zp, length);
 }
-Variant f_gzseek(CObjRef zp, int64_t offset, int64_t whence /* = k_SEEK_SET */) {
+Variant f_gzseek(CResRef zp, int64_t offset, int64_t whence /* = k_SEEK_SET */) {
   return f_fseek(zp, offset, whence);
 }
-Variant f_gztell(CObjRef zp) {
+Variant f_gztell(CResRef zp) {
   return f_ftell(zp);
 }
-bool f_gzeof(CObjRef zp) {
+bool f_gzeof(CResRef zp) {
   return f_feof(zp);
 }
-bool f_gzrewind(CObjRef zp) {
+bool f_gzrewind(CResRef zp) {
   return f_rewind(zp);
 }
-Variant f_gzgetc(CObjRef zp) {
+Variant f_gzgetc(CResRef zp) {
   return f_fgetc(zp);
 }
-Variant f_gzgets(CObjRef zp, int64_t length /* = 1024 */) {
+Variant f_gzgets(CResRef zp, int64_t length /* = 1024 */) {
   return f_fgets(zp, length);
 }
-Variant f_gzgetss(CObjRef zp, int64_t length /* = 0 */,
+Variant f_gzgetss(CResRef zp, int64_t length /* = 0 */,
                   CStrRef allowable_tags /* = null_string */) {
   return f_fgetss(zp, length, allowable_tags);
 }
-Variant f_gzpassthru(CObjRef zp) {
+Variant f_gzpassthru(CResRef zp) {
   return f_fpassthru(zp);
 }
-Variant f_gzputs(CObjRef zp, CStrRef str, int64_t length /* = 0 */) {
+Variant f_gzputs(CResRef zp, CStrRef str, int64_t length /* = 0 */) {
   return f_fwrite(zp, str, length);
 }
-Variant f_gzwrite(CObjRef zp, CStrRef str, int64_t length /* = 0 */) {
+Variant f_gzwrite(CResRef zp, CStrRef str, int64_t length /* = 0 */) {
   return f_fwrite(zp, str, length);
 }
 
@@ -380,7 +381,7 @@ namespace QuickLZ1 {
 #endif
 #define QLZ_COMPRESSION_LEVEL 1
 #define QLZ_STREAMING_BUFFER 0
-#include "runtime/ext/quicklz.inc"
+#include "hphp/runtime/ext/quicklz.inc"
 }
 
 namespace QuickLZ2 {
@@ -392,7 +393,7 @@ namespace QuickLZ2 {
 #endif
 #define QLZ_COMPRESSION_LEVEL 2
 #define QLZ_STREAMING_BUFFER 100000
-#include "runtime/ext/quicklz.inc"
+#include "hphp/runtime/ext/quicklz.inc"
 }
 
 namespace QuickLZ3 {
@@ -404,7 +405,7 @@ namespace QuickLZ3 {
 #endif
 #define QLZ_COMPRESSION_LEVEL 3
 #define QLZ_STREAMING_BUFFER 1000000
-#include "runtime/ext/quicklz.inc"
+#include "hphp/runtime/ext/quicklz.inc"
 }
 
 #endif // HAVE_QUICKLZ
@@ -419,7 +420,7 @@ Variant f_qlzcompress(CStrRef data, int level /* = 1 */) {
   }
 
   String str(data.size() + 400, ReserveString);
-  char* compressed = str.mutableSlice().ptr;
+  char* compressed = str.bufferSlice().ptr;
   size_t size = 0;
 
   switch (level) {
@@ -474,7 +475,7 @@ Variant f_qlzuncompress(CStrRef data, int level /* = 1 */) {
   }
 
   String s = String(size, ReserveString);
-  char *decompressed = s.mutableSlice().ptr;
+  char *decompressed = s.bufferSlice().ptr;
   size_t dsize = 0;
 
   switch (level) {
@@ -528,7 +529,7 @@ Variant f_snuncompress(CStrRef data) {
 
   snappy::GetUncompressedLength(data.data(), data.size(), &dsize);
   String s = String(dsize, ReserveString);
-  char *uncompressed = s.mutableSlice().ptr;
+  char *uncompressed = s.bufferSlice().ptr;
 
   if (!snappy::RawUncompress(data.data(), data.size(), uncompressed)) {
     return false;
@@ -551,7 +552,7 @@ typedef struct nzlib_format_s {
 Variant f_nzcompress(CStrRef uncompressed) {
   size_t len = compressBound(uncompressed.size());
   String str(sizeof(nzlib_format_t) + len, ReserveString);
-  nzlib_format_t* format = (nzlib_format_t*)str.mutableSlice().ptr;
+  nzlib_format_t* format = (nzlib_format_t*)str.bufferSlice().ptr;
 
   format->magic = htonl(NZLIB_MAGIC);
   format->uncompressed_sz = htonl(uncompressed.size());
@@ -580,7 +581,7 @@ Variant f_nzuncompress(CStrRef compressed) {
   }
 
   String str(len, ReserveString);
-  char* uncompressed = str.mutableSlice().ptr;
+  char* uncompressed = str.bufferSlice().ptr;
   int rc = uncompress((Bytef*)uncompressed, &len, format->buf,
                       compressed.size() - sizeof(*format));
   if (rc != Z_OK) {
@@ -636,7 +637,7 @@ Variant f_lz4compress(CStrRef uncompressed) {
   int headerSize = VarintSize(uncompressed.size());
   bufsize += headerSize;  // for the header
   String s = String(bufsize, ReserveString);
-  char *compressed = s.mutableSlice().ptr;
+  char *compressed = s.bufferSlice().ptr;
 
   VarintEncode(uncompressed.size(), &compressed);  // write the header
 
@@ -658,7 +659,7 @@ Variant f_lz4hccompress(CStrRef uncompressed) {
   int headerSize = VarintSize(uncompressed.size());
   bufsize += headerSize;  // for the header
   String s = String(bufsize, ReserveString);
-  char *compressed = s.mutableSlice().ptr;
+  char *compressed = s.bufferSlice().ptr;
 
   VarintEncode(uncompressed.size(), &compressed);  // write the header
 
@@ -679,7 +680,7 @@ Variant f_lz4uncompress(CStrRef compressed) {
   }
 
   String s = String(dsize, ReserveString);
-  char *uncompressed = s.mutableSlice().ptr;
+  char *uncompressed = s.bufferSlice().ptr;
   int ret = LZ4_uncompress(compressed_ptr, uncompressed, dsize);
 
   if (ret <= 0) {

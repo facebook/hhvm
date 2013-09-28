@@ -1,6 +1,5 @@
 <?php
 
-
 $ctypes = array('Vector', 'Map', 'StableMap');
 foreach ($ctypes as $ctype) {
   echo "=== $ctype ===\n";
@@ -8,17 +7,17 @@ foreach ($ctypes as $ctype) {
   try {
     $c[0];
   } catch (Exception $e) {
-    var_dump($e->getMessage());
+    echo $e->getMessage() . "\n";
   }
   try {
     $c[PHP_INT_MAX];
   } catch (Exception $e) {
-    var_dump($e->getMessage());
+    echo $e->getMessage() . "\n";
   }
   try {
     $c[~PHP_INT_MAX];
   } catch (Exception $e) {
-    var_dump($e->getMessage());
+    echo $e->getMessage() . "\n";
   }
   if ($ctype === 'Vector') {
     continue;
@@ -26,35 +25,36 @@ foreach ($ctypes as $ctype) {
   try {
     $c['abc'];
   } catch (Exception $e) {
-    var_dump($e->getMessage());
+    echo $e->getMessage() . "\n";
   }
+  $hundred_chars = 'abcdefghijklmnopqrst' .
+                   'abcdefghijklmnopqrst' .
+                   'abcdefghijklmnopqrst' .
+                   'abcdefghijklmnopqrst' .
+                   'abcdefghijklmnopqrst';
   try {
-    $c['abcdefghijklmnopqrst'];
+    $c[$hundred_chars];
   } catch (Exception $e) {
-    var_dump($e->getMessage());
+    echo $e->getMessage() . "\n";
   }
   try {
-    $c['abcdefghijklmnopqrstu'];
+    $c['ABCDEFGHIJKLMNOPQRST' . $hundred_chars];
   } catch (Exception $e) {
-    var_dump($e->getMessage());
+    echo $e->getMessage() . "\n";
   }
   try {
-    $c["abcdefghij\000klmnopqrst"];
+    $c["ABCDEFGHIJ\000KLMNOPQRST" . $hundred_chars];
   } catch (Exception $e) {
     $str = $e->getMessage();
-    $i = 0;
-    for (;;) {
-      echo(ord($str[$i]));
-      ++$i;
-      if ($i >= strlen($str)) {
-        break;
-      }
-      if (($i % 8) === 0) {
-        echo "\n";
+    $len = strlen($str);
+    for ($i = 0; $i < $len; ++$i) {
+      if (ord($str[$i]) == 0) {
+        echo '<NUL>';
       } else {
-        echo ' ';
+        echo($str[$i]);
       }
     }
     echo "\n";
   }
 }
+

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_icu_ucnv.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -69,8 +69,9 @@ UCNV_TYPE_CONST(UTF32);
 UCNV_TYPE_CONST(CESU8);
 UCNV_TYPE_CONST(IMAP_MAILBOX);
 
-static StaticString s_toUCallback("toUCallback");
-static StaticString s_fromUCallback("fromUCallback");
+const StaticString
+  s_toUCallback("toUCallback"),
+  s_fromUCallback("fromUCallback");
 
 #define THROW_UFAILURE(fname, uerr, ierr) throwFailure(uerr, #fname, ierr);
 
@@ -436,7 +437,7 @@ String c_UConverter::doConvert(CStrRef str,
   // Explicitly include the space for a \u0000 UChar since String
   // only allocates one extra byte (not the 2 needed)
   String tempStr(sizeof(UChar) * (temp_len + 1), ReserveString);
-  UChar *temp = (UChar*) tempStr.mutableSlice().ptr;
+  UChar *temp = (UChar*) tempStr.bufferSlice().ptr;
 
   error = U_ZERO_ERROR;
   temp_len = ucnv_toUChars(fromCnv, temp, temp_len,
@@ -456,7 +457,7 @@ String c_UConverter::doConvert(CStrRef str,
     return uninit_null();
   }
   String destStr(dest_len, ReserveString);
-  char *dest = (char*) destStr.mutableSlice().ptr;
+  char *dest = (char*) destStr.bufferSlice().ptr;
 
   error = U_ZERO_ERROR;
   dest_len = ucnv_fromUChars(toCnv, dest, dest_len,
@@ -468,8 +469,9 @@ String c_UConverter::doConvert(CStrRef str,
   return destStr.setSize(dest_len);
 }
 
-static const StaticString s_from_subst("from_subst");
-static const StaticString s_to_subst("to_subst");
+const StaticString
+  s_from_subst("from_subst"),
+  s_to_subst("to_subst");
 
 Variant c_UConverter::ti_transcode(CStrRef str, CStrRef toEncoding,
                                    CStrRef fromEncoding, CArrRef options) {
@@ -540,7 +542,7 @@ Array c_UConverter::ti_getaliases(CStrRef encoding) {
 
   if (U_FAILURE(error)) {
     THROW_UFAILURE(ucnv_getAliases, error, s_intl_error->m_error);
-    return uninit_null();
+    return uninit_null().toArray();
   }
 
   Array ret = Array::Create();
@@ -549,7 +551,7 @@ Array c_UConverter::ti_getaliases(CStrRef encoding) {
     const char *alias = ucnv_getAlias(encoding.c_str(), i, &error);
     if (U_FAILURE(error)) {
       THROW_UFAILURE(ucnv_getAlias, error, s_intl_error->m_error);
-      return uninit_null();
+      return uninit_null().toArray();
     }
     ret.append(alias);
   }
@@ -565,7 +567,7 @@ Array c_UConverter::ti_getstandards() {
     const char *name = ucnv_getStandard(i, &error);
     if (U_FAILURE(error)) {
       THROW_UFAILURE(ucnv_getStandard, error, s_intl_error->m_error);
-      return uninit_null();
+      return uninit_null().toArray();
     }
     ret.append(name);
   }

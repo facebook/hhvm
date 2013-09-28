@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,7 +15,8 @@
 */
 
 #include "hphp/compiler/statement/break_statement.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/runtime/base/complex-types.h"
 
 using namespace HPHP;
 
@@ -23,22 +24,22 @@ using namespace HPHP;
 // constructors/destructors
 
 BreakStatement::BreakStatement
-(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS, ExpressionPtr exp)
+(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS, uint64_t depth)
   : Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES),
-    m_exp(exp) {
+    m_depth(depth) {
   m_name = "break";
 }
 
 BreakStatement::BreakStatement
-(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp)
+(STATEMENT_CONSTRUCTOR_PARAMETERS, uint64_t depth)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(BreakStatement)),
-    m_exp(exp) {
+    m_depth(depth) {
   m_name = "break";
 }
 
 StatementPtr BreakStatement::clone() {
   BreakStatementPtr stmt(new BreakStatement(*this));
-  stmt->m_exp = Clone(m_exp);
+  stmt->m_depth = m_depth;
   return stmt;
 }
 
@@ -49,73 +50,38 @@ StatementPtr BreakStatement::clone() {
 // static analysis functions
 
 void BreakStatement::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_exp) m_exp->analyzeProgram(ar);
 }
 
 ConstructPtr BreakStatement::getNthKid(int n) const {
-  switch (n) {
-    case 0:
-      return m_exp;
-    default:
-      assert(false);
-      break;
-  }
-  return ConstructPtr();
+  always_assert(false);
 }
 
 int BreakStatement::getKidCount() const {
-  return 1;
+  return 0;
 }
 
 void BreakStatement::setNthKid(int n, ConstructPtr cp) {
-  switch (n) {
-    case 0:
-      m_exp = boost::dynamic_pointer_cast<Expression>(cp);
-      break;
-    default:
-      assert(false);
-      break;
-  }
+  always_assert(false);
 }
 
-ExpressionPtr BreakStatement::getExp() {
-  return m_exp;
+uint64_t BreakStatement::getDepth() {
+  return m_depth;
 }
 
 StatementPtr BreakStatement::preOptimize(AnalysisResultConstPtr ar) {
-  Variant v;
-  // break/continue 1 => break/continue;
-  if (m_exp && m_exp->getScalarValue(v) &&
-      v.isInteger() && v.toInt64() == 1) {
-    m_exp = ExpressionPtr();
-  }
   return StatementPtr();
 }
 
 void BreakStatement::inferTypes(AnalysisResultPtr ar) {
-  if (m_exp) m_exp->inferAndCheck(ar, Type::Int64, false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void BreakStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (m_exp) {
-    cg_printf("%s ", m_name);
-    m_exp->outputPHP(cg, ar);
-    cg_printf(";\n");
+  if (m_depth != 1) {
+    cg_printf("%s %" PRIu64 ";\n", m_name, m_depth);
   } else {
     cg_printf("%s;\n", m_name);
   }
-}
-
-int64_t BreakStatement::getDepth() {
-  if (!m_exp) return 1;
-  Variant v;
-  if (m_exp->getScalarValue(v) &&
-      v.isInteger()) {
-    int64_t depth = v.toInt64();
-    return depth >= 1 ? depth : 1;
-  }
-  return 0;
 }

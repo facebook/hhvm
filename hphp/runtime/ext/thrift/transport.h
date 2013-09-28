@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,11 +18,11 @@
 #ifndef incl_HPHP_THRIFT_TRANSPORT_H_
 #define incl_HPHP_THRIFT_TRANSPORT_H_
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/util/logger.h"
 
 #include <sys/types.h>
-#include "netinet/in.h"
+#include <netinet/in.h>
 #include <unistd.h>
 #if defined(__FreeBSD__)
 # include <sys/endian.h>
@@ -84,26 +84,28 @@ enum TType {
   T_SET        = 14,
   T_LIST       = 15,
   T_UTF8       = 16,
-  T_UTF16      = 17
+  T_UTF16      = 17,
+  T_FLOAT      = 19,
 };
 
 
-static StaticString s_getTransport("getTransport");
-static StaticString s_flush("flush");
-static StaticString s_write("write");
-static StaticString s_putBack("putBack");
-static StaticString s_read("read");
-static StaticString s_class("class");
-static StaticString s_key("key");
-static StaticString s_val("val");
-static StaticString s_elem("elem");
-static StaticString s_var("var");
-static StaticString s_type("type");
-static StaticString s_ktype("ktype");
-static StaticString s_vtype("vtype");
-static StaticString s_etype("etype");
-
 class PHPTransport {
+public:
+  static StaticString s_getTransport;
+  static StaticString s_flush;
+  static StaticString s_write;
+  static StaticString s_putBack;
+  static StaticString s_read;
+  static StaticString s_class;
+  static StaticString s_key;
+  static StaticString s_val;
+  static StaticString s_elem;
+  static StaticString s_var;
+  static StaticString s_type;
+  static StaticString s_ktype;
+  static StaticString s_vtype;
+  static StaticString s_etype;
+
 public:
   Object protocol() { return p; }
   Object transport() { return t; }
@@ -116,7 +118,7 @@ protected:
     buffer_used = 0;
     buffer_size = _buffer_size;
     p = _p;
-    t = p->o_invoke_few_args(s_getTransport, 0);
+    t = p->o_invoke_few_args(s_getTransport, 0).toObject();
   }
   ~PHPTransport() {
     free(buffer);
@@ -139,14 +141,15 @@ public:
   }
 
   ~PHPOutputTransport() {
-    // flush() and directFlush() call into user code which may throw
-    // an exception. Because this is a destructor, we might already be
+    // Because this is a destructor, we might already be
     // in the process of unwinding when this function is called, so we
     // need to ensure that no exceptions can escape so that the unwinder
     // does not terminate the process.
     try {
-      flush();
-      directFlush();
+      if (buffer_used != 0) {
+        raise_warning("runtime/ext_thrift: "
+                      "Output buffer has %lu unflushed bytes", buffer_used);
+      }
     } catch (...) {
       handle_destructor_exception();
     }
@@ -154,7 +157,7 @@ public:
 
   void write(const char* data, size_t len) {
     if ((len + buffer_used) > buffer_size) {
-      flush();
+      writeBufferToTransport();
     }
     if (len > buffer_size) {
       directWrite(data, len);
@@ -194,12 +197,17 @@ public:
     write(str, len);
   }
 
-  void flush() {
+  void writeBufferToTransport() {
     if (buffer_used) {
       directWrite(buffer, buffer_used);
       buffer_ptr = buffer;
       buffer_used = 0;
     }
+  }
+
+  void flush() {
+    writeBufferToTransport();
+    directFlush();
   }
 
 protected:

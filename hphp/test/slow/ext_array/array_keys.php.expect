@@ -1,0 +1,34 @@
+array(2) {
+  [0]=>
+  int(0)
+  [1]=>
+  string(5) "color"
+}
+array(3) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(3)
+  [2]=>
+  int(4)
+}
+array(2) {
+  [0]=>
+  string(5) "color"
+  [1]=>
+  string(4) "size"
+}
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "c"
+}

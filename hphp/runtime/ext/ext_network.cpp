@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,15 +18,15 @@
 #include "hphp/runtime/ext/ext_network.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/server/server-stats.h"
 #include "hphp/util/lock.h"
-#include "hphp/runtime/base/file/file.h"
-#include "netinet/in.h"
+#include "hphp/runtime/base/file.h"
+#include <netinet/in.h>
 #include <netdb.h>
 #include <sys/socket.h>
-#include "arpa/inet.h"
-#include "arpa/nameser.h"
+#include <arpa/inet.h>
+#include <arpa/nameser.h>
 #include <resolv.h>
 #include "hphp/util/network.h"
 
@@ -275,6 +275,8 @@ Variant f_inet_pton(CStrRef address) {
   return String(buffer, af == AF_INET ? 4 : 16, CopyString);
 }
 
+const StaticString s_255_255_255_255("255.255.255.255");
+
 Variant f_ip2long(CStrRef ip_address) {
   unsigned long int ip;
   if (ip_address.empty() ||
@@ -283,7 +285,7 @@ Variant f_ip2long(CStrRef ip_address) {
      * because inet_addr() considers it wrong. We return 0xFFFFFFFF and
      * not -1 or ~0 because of 32/64bit issues.
      */
-    if (ip_address == "255.255.255.255") {
+    if (ip_address == s_255_255_255_255) {
       return (int64_t)0xFFFFFFFF;
     }
     return false;
@@ -366,48 +368,48 @@ typedef union {
   u_char qb2[65536];
 } querybuf;
 
-static const StaticString s_host("host");
-static const StaticString s_type("type");
-static const StaticString s_ip("ip");
-static const StaticString s_pri("pri");
-static const StaticString s_weight("weight");
-static const StaticString s_port("port");
-static const StaticString s_order("order");
-static const StaticString s_pref("pref");
-static const StaticString s_target("target");
-static const StaticString s_cpu("cpu");
-static const StaticString s_os("os");
-static const StaticString s_txt("txt");
-static const StaticString s_mname("mname");
-static const StaticString s_rname("rname");
-static const StaticString s_serial("serial");
-static const StaticString s_refresh("refresh");
-static const StaticString s_retry("retry");
-static const StaticString s_expire("expire");
-static const StaticString s_minimum_ttl("minimum-ttl");
-static const StaticString s_ipv6("ipv6");
-static const StaticString s_masklen("masklen");
-static const StaticString s_chain("chain");
-static const StaticString s_flags("flags");
-static const StaticString s_services("services");
-static const StaticString s_regex("regex");
-static const StaticString s_replacement("replacement");
-static const StaticString s_class("class");
-static const StaticString s_ttl("ttl");
-
-static const StaticString s_A("A");
-static const StaticString s_MX("MX");
-static const StaticString s_CNAME("CNAME");
-static const StaticString s_NS("NS");
-static const StaticString s_PTR("PTR");
-static const StaticString s_HINFO("HINFO");
-static const StaticString s_TXT("TXT");
-static const StaticString s_SOA("SOA");
-static const StaticString s_AAAA("AAAA");
-static const StaticString s_A6("A6");
-static const StaticString s_SRV("SRV");
-static const StaticString s_NAPTR("NAPTR");
-static const StaticString s_IN("IN");
+const StaticString
+  s_host("host"),
+  s_type("type"),
+  s_ip("ip"),
+  s_pri("pri"),
+  s_weight("weight"),
+  s_port("port"),
+  s_order("order"),
+  s_pref("pref"),
+  s_target("target"),
+  s_cpu("cpu"),
+  s_os("os"),
+  s_txt("txt"),
+  s_mname("mname"),
+  s_rname("rname"),
+  s_serial("serial"),
+  s_refresh("refresh"),
+  s_retry("retry"),
+  s_expire("expire"),
+  s_minimum_ttl("minimum-ttl"),
+  s_ipv6("ipv6"),
+  s_masklen("masklen"),
+  s_chain("chain"),
+  s_flags("flags"),
+  s_services("services"),
+  s_regex("regex"),
+  s_replacement("replacement"),
+  s_class("class"),
+  s_ttl("ttl"),
+  s_A("A"),
+  s_MX("MX"),
+  s_CNAME("CNAME"),
+  s_NS("NS"),
+  s_PTR("PTR"),
+  s_HINFO("HINFO"),
+  s_TXT("TXT"),
+  s_SOA("SOA"),
+  s_AAAA("AAAA"),
+  s_A6("A6"),
+  s_SRV("SRV"),
+  s_NAPTR("NAPTR"),
+  s_IN("IN");
 
 static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
                                   int type_to_fetch, bool store,
@@ -491,7 +493,7 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
 
     subarray.set(s_type, s_TXT);
     String s = String(dlen, ReserveString);
-    tp = (unsigned char *)s.mutableSlice().ptr;
+    tp = (unsigned char *)s.bufferSlice().ptr;
 
     while (ll < dlen) {
       n = cp[ll];
@@ -890,15 +892,15 @@ bool f_getmxrr(CStrRef hostname, VRefParam mxhosts,
  * f_fsockopen() and f_pfsockopen() are implemented in ext_socket.cpp.
  */
 
-Variant f_socket_get_status(CObjRef stream) {
+Variant f_socket_get_status(CResRef stream) {
   return f_stream_get_meta_data(stream);
 }
 
-bool f_socket_set_blocking(CObjRef stream, int mode) {
+bool f_socket_set_blocking(CResRef stream, int mode) {
   return f_stream_set_blocking(stream, mode);
 }
 
-bool f_socket_set_timeout(CObjRef stream, int seconds,
+bool f_socket_set_timeout(CResRef stream, int seconds,
                           int microseconds /* = 0 */) {
   return f_stream_set_timeout(stream, seconds, microseconds);
 }
@@ -968,7 +970,7 @@ void f_header(CStrRef str, bool replace /* = true */,
   }
 }
 
-Variant f_http_response_code(int response_code /*= 0 */) {
+Variant f_http_response_code(int response_code /* = 0 */) {
   Transport *transport = g_context->getTransport();
   if (!transport) {
     raise_warning("Unable to access response code, no transport");

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -20,7 +20,7 @@
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,7 +49,7 @@ void c_ContinuationWaitHandle::t___construct() {
 }
 
 void c_ContinuationWaitHandle::ti_setoncreatecallback(CVarRef callback) {
-  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set ContinuationWaitHandle::onStart: on_start_cb not a closure"));
     throw e;
@@ -58,7 +58,7 @@ void c_ContinuationWaitHandle::ti_setoncreatecallback(CVarRef callback) {
 }
 
 void c_ContinuationWaitHandle::ti_setonyieldcallback(CVarRef callback) {
-  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set ContinuationWaitHandle::onYield: on_yield_cb not a closure"));
     throw e;
@@ -67,7 +67,7 @@ void c_ContinuationWaitHandle::ti_setonyieldcallback(CVarRef callback) {
 }
 
 void c_ContinuationWaitHandle::ti_setonsuccesscallback(CVarRef callback) {
-  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set ContinuationWaitHandle::onSuccess: on_success_cb not a closure"));
     throw e;
@@ -76,7 +76,7 @@ void c_ContinuationWaitHandle::ti_setonsuccesscallback(CVarRef callback) {
 }
 
 void c_ContinuationWaitHandle::ti_setonfailcallback(CVarRef callback) {
-  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set ContinuationWaitHandle::onFail: on_fail_cb not a closure"));
     throw e;
@@ -96,9 +96,9 @@ void c_ContinuationWaitHandle::Create(c_Continuation* continuation) {
     throw e;
   }
 
-  if (UNLIKELY(continuation->m_index != -1)) {
+  if (UNLIKELY(continuation->started())) {
     Object e(SystemLib::AllocInvalidOperationExceptionObject(
-      continuation->m_running
+      continuation->running()
       ? "Encountered an attempt to start currently running continuation"
       : "Encountered an attempt to start tainted continuation"));
     throw e;
@@ -128,6 +128,19 @@ void c_ContinuationWaitHandle::initialize(c_Continuation* continuation, uint16_t
   m_depth = depth;
 
   setState(STATE_SCHEDULED);
+
+  // In async functions, continutions are created only after the execution is
+  // blocked (i.e. with non-zero return label). If this is the case,
+  // update the state and child accordingly.
+  if (continuation->m_label > 0) {
+    m_continuation->start();
+    Cell* value = m_continuation->m_value.asCell();
+    assert(c_WaitHandle::fromCell(value));
+    auto child = static_cast<c_WaitableWaitHandle*>(value->m_data.pobj);
+    assert(!child->isFinished());
+    m_child = child;
+    blockOn(child);
+  }
   if (isInContext()) {
     getContext()->schedule(this);
   }
@@ -159,18 +172,18 @@ void c_ContinuationWaitHandle::run() {
       }
 
       // continuation finished, retrieve result from its m_value
-      if (m_continuation->m_done) {
-        markAsSucceeded(m_continuation->m_value.asTypedValue());
+      if (m_continuation->done()) {
+        markAsSucceeded(*m_continuation->m_value.asCell());
         return;
       }
 
       // set up dependency
-      TypedValue* value = m_continuation->m_value.asTypedValue();
+      Cell* value = m_continuation->m_value.asCell();
       if (IS_NULL_TYPE(value->m_type)) {
         // null dependency
         m_child = nullptr;
       } else {
-        c_WaitHandle* child = c_WaitHandle::fromTypedValue(value);
+        c_WaitHandle* child = c_WaitHandle::fromCell(value);
         if (UNLIKELY(!child)) {
           Object e(SystemLib::AllocInvalidArgumentExceptionObject(
               "Expected yield argument to be an instance of WaitHandle"));
@@ -192,6 +205,10 @@ void c_ContinuationWaitHandle::run() {
   } catch (const Object& exception) {
     // process exception thrown by generator or blockOn cycle detection
     markAsFailed(exception);
+  } catch (...) {
+    // process C++ exception
+    markAsFailed(AsioSession::Get()->getAbruptInterruptException());
+    throw;
   }
 }
 
@@ -202,10 +219,10 @@ void c_ContinuationWaitHandle::onUnblocked() {
   }
 }
 
-void c_ContinuationWaitHandle::markAsSucceeded(const TypedValue* result) {
+void c_ContinuationWaitHandle::markAsSucceeded(const Cell& result) {
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnContinuationSuccessCallback())) {
-    session->onContinuationSuccess(this, tvAsCVarRef(result));
+    session->onContinuationSuccess(this, cellAsCVarRef(result));
   }
 
   setResult(result);
@@ -341,6 +358,24 @@ void c_ContinuationWaitHandle::exitContext(context_idx_t ctx_idx) {
     default:
       assert(false);
   }
+}
+
+// Get the filename in which execution will proceed when execution resumes.
+String c_ContinuationWaitHandle::getFileName() {
+  if (m_continuation.isNull()) return empty_string;
+  auto ar = m_continuation->actRec();
+  auto file = ar->m_func->unit()->filepath()->data();
+  if (ar->m_func->originalFilename()) {
+    file = ar->m_func->originalFilename()->data();
+  }
+  return file;
+}
+
+// Get the line number on which execution will proceed when execution resumes.
+int c_ContinuationWaitHandle::getLineNumber() {
+  if (m_continuation.isNull()) return -1;
+  auto const unit = m_continuation->actRec()->m_func->unit();
+  return unit->getLineNumber(m_continuation->getNextExecutionOffset());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

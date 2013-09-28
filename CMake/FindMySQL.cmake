@@ -29,7 +29,7 @@
 
 
 #-------------- FIND MYSQL_INCLUDE_DIR ------------------
-FIND_PATH(MYSQL_INCLUDE_DIR mysql/mysql.h
+FIND_PATH(MYSQL_INCLUDE_DIR mysql.h
 		$ENV{MYSQL_INCLUDE_DIR}
 		$ENV{MYSQL_DIR}/include
 		/usr/include/mysql

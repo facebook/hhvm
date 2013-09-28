@@ -1,0 +1,8 @@
+array(3) {
+  [1]=>
+  int(2)
+  ["hello"]=>
+  int(2)
+  ["world"]=>
+  int(1)
+}

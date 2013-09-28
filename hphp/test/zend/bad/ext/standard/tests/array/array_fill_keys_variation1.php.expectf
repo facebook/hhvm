@@ -1,0 +1,37 @@
+*** Testing array_fill_keys() : parameter variations ***
+
+-- Testing array_fill_keys() function with empty arguments --
+array(0) {
+}
+
+-- Testing array_fill_keys() function with keyed array --
+array(4) {
+  [2]=>
+  string(6) "simple"
+  ["strv1"]=>
+  string(6) "simple"
+  [4]=>
+  string(6) "simple"
+  ["simple"]=>
+  string(6) "simple"
+}
+
+-- Testing array_fill_keys() function with mixed array --
+HipHop Notice: %s
+array(7) {
+  ["Resource id #%d"]=>
+  string(6) "simple"
+  ["Class A object"]=>
+  string(6) "simple"
+  ["simple"]=>
+  string(6) "simple"
+  ["Array"]=>
+  string(6) "simple"
+  [2]=>
+  string(6) "simple"
+  [""]=>
+  string(6) "simple"
+  ["2.4"]=>
+  string(6) "simple"
+}
+Done

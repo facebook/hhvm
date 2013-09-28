@@ -3,7 +3,7 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010 Hyves (http://www.hyves.nl)                       |
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,11 +17,12 @@
 */
 
 #include "hphp/runtime/ext/ext_memcached.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/ext/libmemcached_portability.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/ext_json.h"
 #include <zlib.h>
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -309,7 +310,7 @@ bool c_Memcached::t_getdelayedbykey(CStrRef server_key, CArrRef keys,
 
   MemcachedResultWrapper result(&m_impl->memcached); Array item;
   while (fetchImpl(result.value, item)) {
-    vm_call_user_func(value_cb, CREATE_VECTOR2(Variant(this), item));
+    vm_call_user_func(value_cb, make_packed_array(Variant(this), item));
   }
 
   if (m_impl->rescode != q_Memcached$$RES_END) return false;
@@ -368,9 +369,10 @@ bool c_Memcached::getMultiImpl(CStrRef server_key, CArrRef keys,
       keysCopy.size()));
 }
 
-static const StaticString s_key("key");
-static const StaticString s_value("value");
-static const StaticString s_cas("cas");
+const StaticString
+  s_key("key"),
+  s_value("value"),
+  s_cas("cas");
 
 bool c_Memcached::fetchImpl(memcached_result_st &result, Array &item) {
   memcached_return status;
@@ -390,7 +392,7 @@ bool c_Memcached::fetchImpl(memcached_result_st &result, Array &item) {
   String sKey(key, keyLength, CopyString);
   double cas = (double) memcached_result_cas(&result);
 
-  item = CREATE_MAP3(s_key, sKey, s_value, value, s_cas, cas);
+  item = make_map_array(s_key, sKey, s_value, value, s_cas, cas);
   return true;
 }
 
@@ -415,7 +417,7 @@ bool c_Memcached::t_setmultibykey(CStrRef server_key, CArrRef items,
   for (ArrayIter iter(items); iter; ++iter) {
     Variant key = iter.first();
     if (!key.isString()) continue;
-    if (!t_setbykey(server_key, key, iter.second(), expiration)) {
+    if (!t_setbykey(server_key, key.toString(), iter.second(), expiration)) {
       return false;
     }
   }
@@ -600,16 +602,24 @@ bool c_Memcached::t_addservers(CArrRef servers) {
 
 namespace {
 
-static const StaticString s_host("host");
-static const StaticString s_port("port");
-static const StaticString s_weight("weight");
+const StaticString s_host("host"), s_port("port");
+#ifdef LMCD_SERVER_QUERY_INCLUDES_WEIGHT
+const StaticString s_weight("weight");
+#endif
 
 memcached_return_t doServerListCallback(const memcached_st *ptr,
-    memcached_server_instance_st server, void *context) {
+    LMCD_SERVER_CALLBACK_INSTANCE_TYPE server, void *context) {
   Array *returnValue = (Array*) context;
-  returnValue->append(CREATE_MAP3(s_host, String(server->hostname, CopyString),
-                                  s_port, (int32_t)server->port,
+  const char* hostname = LMCD_SERVER_HOSTNAME(server);
+  in_port_t port = LMCD_SERVER_PORT(server);
+#ifdef LMCD_SERVER_QUERY_INCLUDES_WEIGHT
+  returnValue->append(make_map_array(s_host, String(hostname, CopyString),
+                                  s_port, (int32_t)port,
                                   s_weight, (int32_t)server->weight));
+#else
+  returnValue->append(make_map_array(s_host, String(hostname, CopyString),
+                                  s_port, (int32_t)port));
+#endif
   return MEMCACHED_SUCCESS;
 }
 }
@@ -629,16 +639,23 @@ Variant c_Memcached::t_getserverbykey(CStrRef server_key) {
   }
 
   memcached_return_t error;
-  const memcached_server_st *server = memcached_server_by_key(
-      &m_impl->memcached, server_key.c_str(), server_key.size(), &error);
+  LMCD_SERVER_BY_KEY_INSTANCE_TYPE server = memcached_server_by_key(
+    &m_impl->memcached, server_key.c_str(), server_key.size(), &error);
   if (!server) {
     handleError(error);
     return false;
   }
 
-  Array returnValue = CREATE_MAP3(s_host, String(server->hostname, CopyString),
-                                  s_port, (int32_t)server->port,
+  const char* hostname = LMCD_SERVER_HOSTNAME(server);
+  in_port_t port = LMCD_SERVER_PORT(server);
+#ifdef LMCD_SERVER_QUERY_INCLUDES_WEIGHT
+  Array returnValue = make_map_array(s_host, String(hostname, CopyString),
+                                  s_port, (int32_t)port,
                                   s_weight, (int32_t)server->weight);
+#else
+  Array returnValue = make_map_array(s_host, String(hostname, CopyString),
+                                  s_port, (int32_t)port);
+#endif
   return returnValue;
 }
 
@@ -648,37 +665,39 @@ struct StatsContext {
   Array returnValue;
 };
 
-static const StaticString s_pid("pid");
-static const StaticString s_uptime("uptime");
-static const StaticString s_threads("threads");
-static const StaticString s_time("time");
-static const StaticString s_pointer_size("pointer_size");
-static const StaticString s_rusage_user_seconds("rusage_user_seconds");
-static const StaticString s_rusage_user_microseconds("rusage_user_microseconds");
-static const StaticString s_rusage_system_seconds("rusage_system_seconds");
-static const StaticString
-             s_rusage_system_microseconds("rusage_system_microseconds");
-static const StaticString s_curr_items("curr_items");
-static const StaticString s_total_items("total_items");
-static const StaticString s_limit_maxbytes("limit_maxbytes");
-static const StaticString s_curr_connections("curr_connections");
-static const StaticString s_total_connections("total_connections");
-static const StaticString s_connection_structures("connection_structures");
-static const StaticString s_bytes("bytes");
-static const StaticString s_cmd_get("cmd_get");
-static const StaticString s_cmd_set("cmd_set");
-static const StaticString s_get_hits("get_hits");
-static const StaticString s_get_misses("get_misses");
-static const StaticString s_evictions("evictions");
-static const StaticString s_bytes_read("bytes_read");
-static const StaticString s_bytes_written("bytes_written");
-static const StaticString s_version("version");
+const StaticString
+  s_pid("pid"),
+  s_uptime("uptime"),
+  s_threads("threads"),
+  s_time("time"),
+  s_pointer_size("pointer_size"),
+  s_rusage_user_seconds("rusage_user_seconds"),
+  s_rusage_user_microseconds("rusage_user_microseconds"),
+  s_rusage_system_seconds("rusage_system_seconds"),
+  s_rusage_system_microseconds("rusage_system_microseconds"),
+  s_curr_items("curr_items"),
+  s_total_items("total_items"),
+  s_limit_maxbytes("limit_maxbytes"),
+  s_curr_connections("curr_connections"),
+  s_total_connections("total_connections"),
+  s_connection_structures("connection_structures"),
+  s_bytes("bytes"),
+  s_cmd_get("cmd_get"),
+  s_cmd_set("cmd_set"),
+  s_get_hits("get_hits"),
+  s_get_misses("get_misses"),
+  s_evictions("evictions"),
+  s_bytes_read("bytes_read"),
+  s_bytes_written("bytes_written"),
+  s_version("version");
 
 memcached_return_t doStatsCallback(const memcached_st *ptr,
-    memcached_server_instance_st server, void *inContext) {
+    LMCD_SERVER_CALLBACK_INSTANCE_TYPE server, void *inContext) {
   StatsContext *context = (StatsContext*) inContext;
   char key[NI_MAXHOST + 6];
-  snprintf(key, sizeof(key), "%s:%d", server->hostname, server->port);
+  const char* hostname = LMCD_SERVER_HOSTNAME(server);
+  in_port_t port = LMCD_SERVER_PORT(server);
+  snprintf(key, sizeof(key), "%s:%d", hostname, port);
   memcached_stat_st *stats = context->stats;
   ssize_t i = context->returnValue.size();
 
@@ -733,12 +752,19 @@ Variant c_Memcached::t_getstats() {
 
 namespace {
 memcached_return_t doVersionCallback(const memcached_st *ptr,
-    memcached_server_instance_st server, void *context) {
+    LMCD_SERVER_CALLBACK_INSTANCE_TYPE server, void *context) {
   Array *returnValue = (Array*) context;
   char key[NI_MAXHOST + 6], version[16];
-  snprintf(key, sizeof(key), "%s:%d", server->hostname, server->port);
-  snprintf(version, sizeof(version), "%d.%d.%d", server->major_version,
-           server->minor_version, server->micro_version);
+
+  const char* hostname = LMCD_SERVER_HOSTNAME(server);
+  in_port_t port = LMCD_SERVER_PORT(server);
+  uint8_t majorVersion = LMCD_SERVER_MAJOR_VERSION(server);
+  uint8_t minorVersion = LMCD_SERVER_MINOR_VERSION(server);
+  uint8_t microVersion = LMCD_SERVER_MICRO_VERSION(server);
+
+  snprintf(key, sizeof(key), "%s:%d", hostname, port);
+  snprintf(version, sizeof(version), "%" PRIu8 ".%" PRIu8 ".%" PRIu8,
+           majorVersion, minorVersion, microVersion);
   returnValue->set(String(key, CopyString), String(version, CopyString));
   return MEMCACHED_SUCCESS;
 }
@@ -953,9 +979,9 @@ bool c_Memcached::toObject(Variant& value, const memcached_result_st &result) {
       raise_warning("could not uncompress value");
       return false;
     }
-    decompPayload = NEW(StringData)(buffer.data(), bufferSize, CopyString);
+    decompPayload = StringData::Make(buffer.data(), bufferSize, CopyString);
   } else {
-    decompPayload = NEW(StringData)(payload, payloadLength, CopyString);
+    decompPayload = StringData::Make(payload, payloadLength, CopyString);
   }
 
   switch (flags & MEMC_VAL_TYPE_MASK) {
@@ -992,7 +1018,7 @@ memcached_return c_Memcached::doCacheCallback(CVarRef callback, CStrRef key,
   Array params(ArrayInit(3).set(Variant(this))
                            .set(key)
                            .setRef(value).create());
-  if (!vm_call_user_func(callback, params)) {
+  if (!vm_call_user_func(callback, params).toBoolean()) {
     return MEMCACHED_NOTFOUND;
   }
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,17 +17,16 @@
 #ifndef incl_HPHP_VM_UNIT_H_
 #define incl_HPHP_VM_UNIT_H_
 
-// Expects that runtime/vm/core_types.h is already included.
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/vm/repo_helpers.h"
-#include "hphp/runtime/vm/named_entity.h"
-#include "hphp/runtime/base/array/hphp_array.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/vm/repo-helpers.h"
+#include "hphp/runtime/vm/named-entity.h"
+#include "hphp/runtime/base/hphp-array.h"
 #include "hphp/util/range.h"
-#include "hphp/util/parser/location.h"
+#include "hphp/parser/location.h"
 #include "hphp/runtime/base/md5.h"
-#include "hphp/util/tiny_vector.h"
+#include "hphp/util/tiny-vector.h"
 
 namespace HPHP {
 // Forward declarations.
@@ -39,10 +38,11 @@ class FuncEmitter;
 class Repo;
 class FuncDict;
 class Unit;
+class PreClassEmitter;
 
-enum UnitOrigin {
-  UnitOriginFile = 0,
-  UnitOriginEval = 1
+enum class UnitOrigin {
+  File = 0,
+  Eval = 1
 };
 
 enum UnitMergeKind {
@@ -70,7 +70,8 @@ enum UnitMergeState {
   UnitMergeStateEmpty = 32
 };
 
-inline bool ALWAYS_INLINE isMergeKindReq(UnitMergeKind k) {
+ALWAYS_INLINE
+bool isMergeKindReq(UnitMergeKind k) {
   return k == UnitMergeKindReqDoc;
 }
 
@@ -114,11 +115,11 @@ struct UnitMergeInfo {
 // Exception handler table entry.
 class EHEnt {
  public:
-  enum EHType {
-    EHType_Catch,
-    EHType_Fault
+  enum class Type {
+    Catch,
+    Fault
   };
-  EHType m_ehtype;
+  Type m_type;
   Offset m_base;
   Offset m_past;
   int m_iterId;
@@ -129,7 +130,7 @@ class EHEnt {
   CatchVec m_catches;
 
   template<class SerDe> void serde(SerDe& sd) {
-    sd(m_ehtype)
+    sd(m_type)
       (m_base)
       (m_past)
       (m_iterId)
@@ -137,7 +138,7 @@ class EHEnt {
       (m_itRef)
       // eh.m_parentIndex is re-computed in sortEHTab, not serialized.
       ;
-    if (m_ehtype == EHType_Catch) {
+    if (m_type == Type::Catch) {
       sd(m_catches);
     }
   }
@@ -235,29 +236,11 @@ class TableEntry {
 
 typedef TableEntry<int> LineEntry;
 typedef std::vector<LineEntry> LineTable;
+typedef TableEntry<SourceLoc> SourceLocEntry;
+typedef std::vector<SourceLocEntry> SourceLocTable;
+typedef std::map<int, OffsetRangeVec> LineToOffsetRangeVecMap;
 typedef TableEntry<const Func*> FuncEntry;
 typedef std::vector<FuncEntry> FuncTable;
-
-/*
- * Each Unit has one of these structs for each DefCns instruction. If
- * the value is not known at Unit emission time, the 'value' field
- * will be KindOfUninit. The 'owner' field is an opaque blob used by
- * Units and ExecutionContexes to identify which PreConsts belong to
- * them on destruction.
- *
- * If user code contains a call to define($s, ...) where $s is not a
- * string known at compile time, it will be left as a normal call to
- * the function define. If that code is ever executed, a PreConst will
- * be created by that request's g_vmContext and destroyed at the end
- * of the request.
- */
-struct PreConst {
-  TypedValue value;
-  void* owner;
-  const StringData* name;
-};
-
-typedef std::vector<PreConst> PreConstVec;
 
 /*
  * This is the runtime representation of a typedef.  Typedefs are only
@@ -267,25 +250,41 @@ typedef std::vector<PreConst> PreConstVec;
  * just a name.  At runtime we still might resolve this name to
  * another typedef, becoming a typedef for KindOfArray or something in
  * that request.
+ *
+ * For the per-request struct, see TypedefReq below.
  */
 struct Typedef {
-  const StringData* m_name;
-  const StringData* m_value;
-  DataType          m_kind;
+  const StringData* name;
+  const StringData* value;
+  DataType          kind;
+  bool              nullable; // Null is allowed; for ?Foo typedefs
 
   template<class SerDe> void serde(SerDe& sd) {
-    sd(m_name)
-      (m_value)
-      (m_kind)
+    sd(name)
+      (value)
+      (kind)
+      (nullable)
       ;
   }
+};
+
+/*
+ * In a given request, a defined typedef is turned into a TypedefReq
+ * struct.  This contains the information needed to validate parameter
+ * type hints for a typedef at runtime.
+ */
+struct TypedefReq {
+  DataType kind;          // may be KindOfAny for "mixed"
+  bool nullable;          // for option types, like ?Foo
+  Class* klass;           // nullptr if kind != KindOfObject
+  const StringData* name; // needed for error messages; nullptr if not defined
 };
 
 //==============================================================================
 // (const StringData*) versus (StringData*)
 //
 // All (const StringData*) values are static strings that came from e.g.
-// StringData::GetStaticString().  Therefore no reference counting is required.
+// makeStaticString().  Therefore no reference counting is required.
 //
 //==============================================================================
 
@@ -310,7 +309,7 @@ struct Unit {
 
   class MetaInfo {
    public:
-    enum Kind {
+    enum class Kind {
       None,
       String,
       Class,
@@ -365,7 +364,7 @@ struct Unit {
     MetaInfo(Kind k, int a, Id d) : m_kind(k), m_arg(a), m_data(d) {
       assert((int)m_arg == a);
     }
-    MetaInfo() : m_kind(None), m_arg(-1), m_data(0) {}
+    MetaInfo() : m_kind(Kind::None), m_arg(-1), m_data(0) {}
 
     /*
      * m_arg indicates which input the MetaInfo applies to.
@@ -423,13 +422,18 @@ struct Unit {
 
   PC entry() const { return m_bc; }
   Offset bclen() const { return m_bclen; }
+
   PC at(const Offset off) const {
     assert(off >= 0 && off <= Offset(m_bclen));
     return m_bc + off;
   }
+
   Offset offsetOf(const Opcode* op) const {
     assert(op >= m_bc && op <= (m_bc + m_bclen));
     return op - m_bc;
+  }
+  Offset offsetOf(const Op* op) const {
+    return offsetOf(reinterpret_cast<const Opcode*>(op));
   }
 
   const StringData* filepath() const {
@@ -447,8 +451,10 @@ struct Unit {
 
   MD5 md5() const { return m_md5; }
 
-  static NamedEntity* GetNamedEntity(const StringData *)
-    __attribute__((__flatten__));
+  static NamedEntity* GetNamedEntity(const StringData *str,
+                                     bool allowCreate = true) FLATTEN;
+
+  static size_t GetNamedEntityTableSize();
   static Array getUserFunctions();
   static Array getClassesInfo();
   static Array getInterfacesInfo();
@@ -470,6 +476,8 @@ struct Unit {
     assert(id < Id(m_namedInfo.size()));
     const NamedEntityPair &ne = m_namedInfo[id];
     assert(ne.first);
+    assert(ne.first->data()[ne.first->size()] == 0);
+    assert(ne.first->data()[0] != '\\');
     if (UNLIKELY(!ne.second)) {
       const_cast<const NamedEntity*&>(ne.second) = GetNamedEntity(ne.first);
     }
@@ -490,11 +498,12 @@ struct Unit {
 
   static Class* defClass(const HPHP::PreClass* preClass,
                          bool failIsFatal = true);
+  static bool aliasClass(Class* original, const StringData* alias);
   void defTypedef(Id id);
 
-  static TypedValue* lookupCns(const StringData* cnsName);
-  static TypedValue* lookupPersistentCns(const StringData* cnsName);
-  static TypedValue* loadCns(const StringData* cnsName);
+  static Cell* lookupCns(const StringData* cnsName);
+  static Cell* lookupPersistentCns(const StringData* cnsName);
+  static Cell* loadCns(const StringData* cnsName);
   static bool defCns(const StringData* cnsName, const TypedValue* value,
                      bool persistent = false);
   static uint64_t defCnsHelper(uint64_t ch,
@@ -572,11 +581,6 @@ struct Unit {
   static bool classExists(const StringData* name, bool autoload,
                           Attr typeAttrs);
 
-  const PreConst* lookupPreConstId(Id id) const {
-    assert(id < Id(m_preConsts.size()));
-    return &m_preConsts[id];
-  }
-
   bool compileTimeFatal(const StringData*& msg, int& line) const;
   const TypedValue *getMainReturn() const {
     return &m_mainReturn;
@@ -629,18 +633,28 @@ public:
   bool getOffsetRanges(int line, OffsetRangeVec& offsets) const;
   bool getOffsetRange(Offset pc, OffsetRange& range) const;
 
-  Opcode getOpcode(size_t instrOffset) const {
+  Op getOpcode(size_t instrOffset) const {
     assert(instrOffset < m_bclen);
-    return (Opcode)m_bc[instrOffset];
+    return toOp(m_bc[instrOffset]);
   }
 
+  /*
+   * Return the Func* for the code at offset off.
+   *
+   * Returns nullptr if the offset is not in a func body (but this
+   * should be impossible).
+   */
   const Func* getFunc(Offset pc) const;
+
   void setCacheId(unsigned id) {
     m_cacheOffset = id >> 3;
     m_cacheMask = 1 << (id & 7);
   }
+  bool isInterpretOnly() const { return m_interpretOnly; }
+  void setInterpretOnly() { m_interpretOnly = true; }
   bool isMergeOnly() const { return m_mergeOnly; }
   void clearMergeOnly() { m_mergeOnly = false; }
+  bool isEmpty() const { return m_mergeState & UnitMergeStateEmpty; }
   void* replaceUnit() const;
 public:
   static Mutex s_classesMutex;
@@ -650,6 +664,7 @@ public:
       : startOffset(kInvalidOffset)
       , stopOffset(kInvalidOffset)
       , showLines(true)
+      , showFuncs(true)
       , indentSize(1)
     {}
 
@@ -664,6 +679,11 @@ public:
       return *this;
     }
 
+    PrintOpts& noFuncs() {
+      showFuncs = false;
+      return *this;
+    }
+
     PrintOpts& indent(int i) {
       indentSize = i;
       return *this;
@@ -672,6 +692,7 @@ public:
     Offset startOffset;
     Offset stopOffset;
     bool showLines;
+    bool showFuncs;
     int indentSize;
   };
 
@@ -682,6 +703,16 @@ public: // Translator field access
   static size_t bcOff() { return offsetof(Unit, m_bc); }
 
 private:
+  // List of (offset, sourceLoc) where offset is the offset of the first byte
+  // code of the next source location if there is one, m_bclen otherwise.
+  // Sorted by offset. sourceLocs are not assumed to be unique.
+  SourceLocTable getSourceLocTable() const;
+  // A map from all source lines that correspond to one or more byte codes.
+  // The result from the map is a list of offset ranges, so a single line
+  // with several sub-statements may correspond to the byte codes of all
+  // of the sub-statements.
+  LineToOffsetRangeVecMap getLineToOffsetRangeVecMap() const;
+
   // pseudoMain's return value, or KindOfUninit if its not known.
   TypedValue m_mainReturn;
   int64_t m_sn;
@@ -702,9 +733,14 @@ private:
   uint8_t m_mergeState;
   uint8_t m_cacheMask;
   bool m_mergeOnly;
+  bool m_interpretOnly;
+  // List of (line, offset) where offset is the offset of the first byte code
+  // of the next line if there is one, m_bclen otherwise.
+  // Sorted by offset. line values are not assumed to be unique.
   LineTable m_lineTable;
+  SourceLocTable m_sourceLocTable;
+  LineToOffsetRangeVecMap m_lineToOffsetRangeVecMap;
   FuncTable m_funcTable;
-  PreConstVec m_preConsts;
   mutable PseudoMainCacheMap *m_pseudoMainCache;
 };
 
@@ -715,6 +751,7 @@ class UnitEmitter {
   explicit UnitEmitter(const MD5& md5);
   ~UnitEmitter();
 
+  void addTrivialPseudoMain();
   int repoId() const { return m_repoId; }
   void setRepoId(int repoId) { m_repoId = repoId; }
   int64_t sn() const { return m_sn; }
@@ -727,13 +764,12 @@ class UnitEmitter {
   void setMainReturn(const TypedValue* v) { m_mainReturn = *v; }
   void setMergeOnly(bool b) { m_mergeOnly = b; }
   const MD5& md5() const { return m_md5; }
-  Id addPreConst(const StringData* name, const TypedValue& value);
   Id addTypedef(const Typedef& td);
   Id mergeLitstr(const StringData* litstr);
   Id mergeArray(ArrayData* a, const StringData* key=nullptr);
   FuncEmitter* getMain();
   void initMain(int line1, int line2);
-  FuncEmitter* newFuncEmitter(const StringData* n, bool top);
+  FuncEmitter* newFuncEmitter(const StringData* n);
   void appendTopEmitter(FuncEmitter* func);
   FuncEmitter* newMethodEmitter(const StringData* n, PreClassEmitter* pce);
   PreClassEmitter* newPreClassEmitter(const StringData* n,
@@ -793,16 +829,11 @@ class UnitEmitter {
   void emitDouble(double n, int64_t pos = -1) { emitImpl(n, pos); }
   bool insert(UnitOrigin unitOrigin, RepoTxn& txn);
   void commit(UnitOrigin unitOrigin);
-  Func* newFunc(const FuncEmitter* fe, Unit& unit, Id id, int line1, int line2,
-                Offset base, Offset past,
-                const StringData* name, Attr attrs, bool top,
-                const StringData* docComment, int numParams,
-                bool isClosureBody, bool isGenerator);
-  Func* newFunc(const FuncEmitter* fe, Unit& unit, PreClass* preClass,
+  Func* newFunc(const FuncEmitter* fe, Unit& unit, Id id, PreClass* preClass,
                 int line1, int line2, Offset base, Offset past,
                 const StringData* name, Attr attrs, bool top,
                 const StringData* docComment, int numParams,
-                bool isClosureBody, bool isGenerator);
+                bool needsNextClonedClosure);
   Unit* create();
   void returnSeen() { m_returnSeen = true; }
   void pushMergeableClass(PreClassEmitter* e);
@@ -844,9 +875,6 @@ class UnitEmitter {
   bool m_mergeOnly;
   typedef std::vector<FuncEmitter*> FeVec;
   FeVec m_fes;
-  typedef hphp_hash_map<const StringData*, FuncEmitter*, string_data_hash,
-                        string_data_isame> FuncEmitterMap;
-  FuncEmitterMap m_feMap;
   typedef hphp_hash_map<const FuncEmitter*, const Func*,
                         pointer_hash<FuncEmitter> > FMap;
   FMap m_fMap;
@@ -875,9 +903,11 @@ class UnitEmitter {
    */
   std::vector<std::pair<Offset,SourceLoc> > m_sourceLocTab;
   std::vector<std::pair<Offset,const FuncEmitter*> > m_feTab;
-  PreConstVec m_preConsts;
+  LineTable m_lineTable;
   std::vector<Typedef> m_typedefs;
 };
+
+//////////////////////////////////////////////////////////////////////
 
 class UnitRepoProxy : public RepoProxy {
   friend class Unit;
@@ -897,12 +927,11 @@ class UnitRepoProxy : public RepoProxy {
   URP_GOP(UnitLitstrs) \
   URP_IOP(UnitArray) \
   URP_GOP(UnitArrays) \
-  URP_IOP(UnitPreConst) \
-  URP_GOP(UnitPreConsts) \
   URP_IOP(UnitMergeable) \
   URP_GOP(UnitMergeables) \
   URP_IOP(UnitSourceLoc) \
   URP_GOP(SourceLoc) \
+  URP_GOP(SourceLocTab) \
   URP_GOP(SourceLocPastOffsets) \
   URP_GOP(SourceLocBaseOffset) \
   URP_GOP(BaseOffsetAtPCLoc) \
@@ -943,17 +972,6 @@ class UnitRepoProxy : public RepoProxy {
     GetUnitArraysStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void get(UnitEmitter& ue);
   };
-  class InsertUnitPreConstStmt : public RepoProxy::Stmt {
-  public:
-    InsertUnitPreConstStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64_t unitSn, const PreConst& pc,
-                Id id);
-  };
-  class GetUnitPreConstsStmt : public RepoProxy::Stmt {
-  public:
-    GetUnitPreConstsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue);
-  };
   class InsertUnitMergeableStmt : public RepoProxy::Stmt {
    public:
     InsertUnitMergeableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
@@ -976,6 +994,11 @@ class UnitRepoProxy : public RepoProxy {
    public:
     GetSourceLocStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     bool get(int64_t unitSn, Offset pc, SourceLoc& sLoc);
+  };
+  class GetSourceLocTabStmt : public RepoProxy::Stmt {
+   public:
+    GetSourceLocTabStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    bool get(int64_t unitSn, SourceLocTable& sourceLocTab);
   };
   class GetSourceLocPastOffsetsStmt : public RepoProxy::Stmt {
    public:
@@ -1008,12 +1031,7 @@ class UnitRepoProxy : public RepoProxy {
 #undef URP_OP
 };
 
-/**
- * AllFuncs
- * MutableAllFuncs
- *
- * Range over all Func's in a single unit.
- */
+//////////////////////////////////////////////////////////////////////
 
 struct ConstPreClassMethodRanger {
   typedef Func* const* Iter;
@@ -1030,10 +1048,10 @@ struct MutablePreClassMethodRanger {
     return pc->mutableMethods();
   }
 };
+
 template<typename FuncRange,
          typename GetMethods>
-class AllFuncsImpl {
- public:
+struct AllFuncsImpl {
   explicit AllFuncsImpl(const Unit* unit)
     : fr(unit->funcs())
     , mr(0, 0)
@@ -1056,7 +1074,8 @@ class AllFuncsImpl {
     if (fr.empty() && mr.empty()) skip();
     return f;
   }
- private:
+
+private:
   void skip() {
     assert(fr.empty());
     while (!cr.empty() && mr.empty()) {
@@ -1071,19 +1090,19 @@ class AllFuncsImpl {
   Unit::PreClassRange cr;
 };
 
-typedef AllFuncsImpl<Unit::FuncRange, ConstPreClassMethodRanger> AllFuncs;
-typedef AllFuncsImpl<Unit::MutableFuncRange, MutablePreClassMethodRanger> MutableAllFuncs;
+typedef AllFuncsImpl<Unit::FuncRange,ConstPreClassMethodRanger> AllFuncs;
+typedef AllFuncsImpl<Unit::MutableFuncRange,MutablePreClassMethodRanger>
+  MutableAllFuncs;
 
-/**
- *
+/*
  * Range over all defined classes.
  */
 class AllClasses {
-protected:
   NamedEntityMap::iterator m_next, m_end;
   Class* m_current;
   void next();
   void skip();
+
 public:
   AllClasses();
   bool empty() const;
@@ -1091,5 +1110,21 @@ public:
   Class* popFront();
 };
 
- } // HPHP::VM
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * If name starts with '\\', returns a new String with the leading
+ * slash stripped. Otherwise returns a null string.
+ */
+inline String normalizeNS(const StringData* name) {
+  assert(name->data()[name->size()] == 0);
+  if (name->data()[0] == '\\') {
+    return String(name->data() + 1);
+  }
+  return null_string;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}
 #endif

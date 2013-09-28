@@ -1,6 +1,5 @@
 <?php
 
-
 // as a static method
 class C4 {
   public static function __invoke($a0, $a1) {
@@ -8,7 +7,8 @@ class C4 {
     var_dump($a0, $a1);
   }
 }
-class D4 extends C4 {}
+class D4 extends C4 {
+}
 class E4 extends D4 {
   public static function __invoke($a0, $a1) {
     static $x = 0;
@@ -23,7 +23,8 @@ class C5 {
     var_dump($x ++);
   }
 }
-class D5 extends C5 {}
+class D5 extends C5 {
+}
 $c = new C4;
 $d = new D4;
 $c(0, 1);
@@ -39,5 +40,7 @@ call_user_func($e, 0, 1);
 E4::__invoke(0, 1);
 $c = new C5;
 $d = new D5;
-$c(); $d();
-$c(); $d();
+$c();
+ $d();
+$c();
+ $d();

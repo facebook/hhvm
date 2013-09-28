@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,11 +40,10 @@ public:
 
   bool isDefineWithoutImpl(AnalysisResultConstPtr ar);
   void setValid() { m_valid = true; }
-  void setNoPrefix() { m_noPrefix = true; }
   void setFromCompiler() { m_fromCompiler = true; }
-  void setThrowFatal() { m_noPrefix = true; m_type = ThrowFatalFunction; }
-  int isFatalFunction() const { return m_type == ThrowFatalFunction; }
-  int isStaticCompact() const { return m_type == StaticCompactFunction; }
+  void setThrowFatal() { m_type = FunType::ThrowFatal; }
+  int isFatalFunction() const { return m_type == FunType::ThrowFatal; }
+  int isStaticCompact() const { return m_type == FunType::StaticCompact; }
 
   // define(<literal-string>, <scalar>);
   bool isSimpleDefine(StringData **name, TypedValue *value) const;
@@ -74,34 +73,33 @@ public:
   void setLocalThis(const std::string &name) { m_localThis = name; }
   bool isCallToFunction(const char *name) const;
   bool isCompilerCallToFunction(const char *name) const;
+  void resolveNSFallbackFunc(AnalysisResultConstPtr ar, FileScopePtr fs);
 protected:
-  enum FunctionType {
-    UnknownType,
-    DefineFunction,
-    CreateFunction,
-    VariableArgumentFunction,
-    ExtractFunction,
-    CompactFunction,
-    StaticCompactFunction, // compact() with statically known variable names
-    ShellExecFunction,
-    ConstantFunction,
-    DefinedFunction,
-    FunctionExistsFunction,
-    ClassExistsFunction,
-    InterfaceExistsFunction,
-    UnserializeFunction,
-    GetDefinedVarsFunction,
-    FBCallUserFuncSafeFunction,
-    ThrowFatalFunction,
-
-    LastType, // marker, not a valid type
+  enum class FunType {
+    Unknown,
+    Define,
+    Create,
+    VariableArgument,
+    Extract,
+    Compact,
+    StaticCompact, // compact() with statically known variable names
+    ShellExec,
+    Constant,
+    Defined,
+    FunctionExists,
+    ClassExists,
+    InterfaceExists,
+    Unserialize,
+    GetDefinedVars,
+    FBCallUserFuncSafe,
+    ThrowFatal,
+    ClassAlias,
   };
 
-  static std::map<std::string, int> FunctionTypeMap;
-  int m_type;
+  static std::map<std::string,FunType> FunctionTypeMap;
+  FunType m_type;
   unsigned m_dynamicConstant : 1;
   unsigned m_builtinFunction : 1;
-  unsigned m_noPrefix : 1;
   unsigned m_fromCompiler : 1;
   unsigned m_invokeFewArgsDecision : 1;
   unsigned m_dynamicInvoke : 1;
@@ -122,6 +120,8 @@ private:
                          ExpressionPtr funcName,
                          ClassScopePtr &clsScope);
   std::string getThisString(bool withArrow);
+  void mungeIfSpecialFunction(AnalysisResultConstPtr ar, FileScopePtr fs);
+
   std::string m_localThis;
   void *m_extra; // e.g., raw pointer to the symbol defined
 };

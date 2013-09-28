@@ -1,0 +1,33 @@
+array(5) {
+  ["Version"]=>
+  string(1) "0"
+  ["Released"]=>
+  string(31) "Tue, 27 Oct 2009 12:01:07 -0000"
+  ["Browser"]=>
+  string(17) "DefaultProperties"
+  ["Platform"]=>
+  string(7) "unknown"
+  ["Beta"]=>
+  string(0) ""
+}
+===
+array(2) {
+  ["GJK_Browscap_Version"]=>
+  array(2) {
+    ["Version"]=>
+    string(4) "4520"
+    ["Released"]=>
+    string(31) "Tue, 27 Oct 2009 12:01:07 -0000"
+  }
+  ["DefaultProperties"]=>
+  array(4) {
+    ["Browser"]=>
+    string(17) "DefaultProperties"
+    ["Version"]=>
+    string(1) "0"
+    ["Platform"]=>
+    string(7) "unknown"
+    ["Beta"]=>
+    string(0) ""
+  }
+}

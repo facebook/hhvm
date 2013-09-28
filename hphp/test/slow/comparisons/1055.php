@@ -1,6 +1,5 @@
 <?php
 
-
 $a = array();
 $b = new stdClass();
 $b->foo = 2;

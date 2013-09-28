@@ -1,6 +1,5 @@
 <?php
 
-
 trait T {
   final public function foo() {
     return 'Bar';

@@ -1,6 +1,5 @@
 <?php
 
-
 trait T {
   public static function foo() {
     $bt = debug_backtrace();

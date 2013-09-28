@@ -1,0 +1,10 @@
+*** Testing session_set_save_handler() : variation ***
+string(%d) "%s"
+HipHop Warning: %s
+bool(false)
+string(%d) "%s"
+HipHop Warning: %s
+bool(false)
+string(%d) "%s"
+string(%d) "%s"
+string(5) "files"

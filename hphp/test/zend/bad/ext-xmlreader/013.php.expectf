@@ -1,5 +1,0 @@
-string(3) "123"
-string(3) "456"
-===FAIL===
-HipHop Warning: %a
-===DONE===

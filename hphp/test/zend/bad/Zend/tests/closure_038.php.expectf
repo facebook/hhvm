@@ -1,0 +1,8 @@
+int(1)
+Testing with scope given as object
+int(21)
+int(22)
+Testing with scope as string
+int(23)
+int(24)
+HipHop Fatal error: %s

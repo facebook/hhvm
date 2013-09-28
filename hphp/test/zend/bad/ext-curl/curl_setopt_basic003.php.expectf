@@ -1,4 +1,0 @@
-*** curl_setopt() call with CURLOPT_HTTPHEADER
-HipHop Warning: %a
-bool(false)
-bool(true)

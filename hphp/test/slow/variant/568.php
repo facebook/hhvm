@@ -1,3 +1,6 @@
 <?php
 
- $b = 'test'; $b = 1; $a += $b; print $a;
+$b = 'test';
+ $b = 1;
+ $a += $b;
+ print $a;

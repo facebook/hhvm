@@ -1,0 +1,11 @@
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  string(9) "something"
+}
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  string(9) "something"
+}
+HipHop Notice: %s
+HipHop Warning: %s
+Done

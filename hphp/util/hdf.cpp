@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -326,6 +326,13 @@ void Hdf::get(std::vector<std::string> &values) const {
 }
 
 void Hdf::get(std::set<std::string> &values) const {
+  values.clear();
+  for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
+    values.insert(hdf.getString(""));
+  }
+}
+
+void Hdf::get(boost::container::flat_set<std::string> &values) const {
   values.clear();
   for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
     values.insert(hdf.getString(""));
@@ -665,8 +672,15 @@ void Hdf::CheckNeoError(NEOERR *err) {
     NEOSTRING str;
     string_init(&str);
     nerr_error_string(err, &str);
-    throw HdfException(str.buf);
+    throw HdfException("%s", str.buf);
   }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// exceptions
+
+HdfException::HdfException(const char *fmt, ...) {
+  va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

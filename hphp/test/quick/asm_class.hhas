@@ -46,7 +46,10 @@
 
 .class [interface] IDunno {
   .default_ctor;
-  .method [public abstract] abs_method {}
+  .method [public abstract] abs_method {
+    String "Pure virtual method called"
+    Fatal 1
+  }
 }
 
 .class [interface] IDunno2 { .default_ctor; }

@@ -1,0 +1,6 @@
+*** Testing closelog() : error conditions ***
+
+-- Testing closelog() function with one argument --
+HipHop Warning: %s
+NULL
+===DONE===

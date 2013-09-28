@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,6 +18,7 @@
 #define incl_HPHP_YIELD_EXPRESSION_H_
 
 #include "hphp/compiler/expression/expression.h"
+#include "hphp/compiler/expression/generation_label.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,17 +28,18 @@ DECLARE_BOOST_TYPES(YieldExpression);
 class YieldExpression : public Expression {
 public:
   YieldExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
-                  ExpressionPtr exp);
+                  ExpressionPtr keyExp, ExpressionPtr valExp);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
-  ExpressionPtr getExpression() { return m_exp; }
-  int getLabel() { assert(m_label >= 0); return m_label; }
-  void setLabel(int label) { assert(m_label == -1); m_label = label; }
+  ExpressionPtr getKeyExpression() { return m_keyExp; }
+  ExpressionPtr getValueExpression() { return m_valExp; }
+  GenerationLabel& label() { return m_label; }
 
 private:
-  ExpressionPtr m_exp;
-  int m_label;
+  ExpressionPtr m_keyExp;
+  ExpressionPtr m_valExp;
+  GenerationLabel m_label;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

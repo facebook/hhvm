@@ -1,6 +1,5 @@
 <?php
 
-
 class MethodTest {
     public function __call($name, $arguments) {
         var_dump($name, implode(', ', $arguments));

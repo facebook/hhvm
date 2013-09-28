@@ -1,0 +1,38 @@
+array(1) {
+  [0]=>
+  %unicode|string%(12) "PDOStatement"
+}
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+array(2) {
+  [0]=>
+  %unicode|string%(12) "mystatement4"
+  [1]=>
+  array(1) {
+    [0]=>
+    %unicode|string%(6) "param1"
+  }
+}
+mystatement4
+%unicode|string%(6) "param1"
+mystatement5
+%unicode|string%(12) "mystatement5"
+%unicode|string%(10) "no data :)"
+array(1) {
+  [0]=>
+  array(4) {
+    [%u|b%"id"]=>
+    %unicode|string%(1) "1"
+    [0]=>
+    %unicode|string%(1) "1"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a"
+    [1]=>
+    %unicode|string%(1) "a"
+  }
+}
+HipHop Fatal error: %s

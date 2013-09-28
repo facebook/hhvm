@@ -1,6 +1,5 @@
 <?php
 
-
 trait T {
    public $x=1;
    function dump_vars() {

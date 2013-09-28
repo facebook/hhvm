@@ -1,9 +1,14 @@
 <?php
 
-
-trait T1 { public $xT1 = 'xT1'; }
-trait T2 { public $xT2 = 'xT2'; }
-trait T3 { public $xT3 = 'xT3'; }
+trait T1 {
+ public $xT1 = 'xT1';
+ }
+trait T2 {
+ public $xT2 = 'xT2';
+ }
+trait T3 {
+ public $xT3 = 'xT3';
+ }
 class B {
   use T1;
   public $xB = 'xB';

@@ -1,0 +1,25 @@
+object(x)#1 (2) {
+  ["x0"]=>
+  &object(x)#2 (2) {
+    ["x0"]=>
+    NULL
+    ["y1"]=>
+    *RECURSION*
+  }
+  ["y1"]=>
+  NULL
+}
+string(2) "ok"
+object(stdClass)#1 (1) {
+  ["x0"]=>
+  &object(stdClass)#2 (3) {
+    ["y0"]=>
+    string(1) "b"
+    ["y1"]=>
+    *RECURSION*
+    ["y2"]=>
+    *RECURSION*
+  }
+}
+string(2) "ok"
+string(2) "ok"

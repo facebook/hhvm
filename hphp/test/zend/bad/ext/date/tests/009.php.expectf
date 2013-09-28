@@ -1,0 +1,17 @@
+HipHop Warning: %s
+bool(false)
+bool(false)
+%unicode|string%(%d) "Tue Tuesday Jun June Tue Jun 27 00:00:00 2006 %s
+%s %"
+%unicode|string%(5) "%q %a"
+%unicode|string%(%d) "%s"
+%unicode|string%(4) "blah"
+HipHop Warning: %s
+bool(false)
+bool(false)
+%unicode|string%(%d) "Mon Monday Jun June Mon Jun 26 21:00:00 2006 %s
+%s %"
+%unicode|string%(5) "%q %a"
+%unicode|string%(%d) "%s"
+%unicode|string%(4) "blah"
+Done

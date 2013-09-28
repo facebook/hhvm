@@ -1,0 +1,29 @@
+Standard sorting
+ArrayObject Object
+(
+    [storage:ArrayObject:private] => Array
+        (
+            [3] => img1.png
+            [1] => img10.png
+            [0] => img12.png
+            [2] => img2.png
+        )
+
+    [flags:ArrayObject:private] => 0
+    [iteratorClass:ArrayObject:private] => ArrayIterator
+)
+
+Natural order sorting
+ArrayObject Object
+(
+    [storage:ArrayObject:private] => Array
+        (
+            [3] => img1.png
+            [2] => img2.png
+            [1] => img10.png
+            [0] => img12.png
+        )
+
+    [flags:ArrayObject:private] => 0
+    [iteratorClass:ArrayObject:private] => ArrayIterator
+)

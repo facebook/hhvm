@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -23,7 +23,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_WaitHandle::c_WaitHandle(Class* cb)
-    : ExtObjectData(cb) {
+    : ExtObjectData(cb), m_resultOrException(make_tv<KindOfNull>()) {
 }
 
 c_WaitHandle::~c_WaitHandle() {
@@ -34,7 +34,7 @@ void c_WaitHandle::t___construct() {
 }
 
 void c_WaitHandle::ti_setonjoincallback(CVarRef callback) {
-  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set WaitHandle::onJoin: on_join_cb not a closure"));
     throw e;
@@ -70,7 +70,7 @@ Variant c_WaitHandle::t_join() {
 
   if (LIKELY(isSucceeded())) {
     // succeeded? return result
-    return tvAsCVarRef(getResult());
+    return cellAsCVarRef(getResult());
   } else {
     // failed? throw exception
     Object e(getException());

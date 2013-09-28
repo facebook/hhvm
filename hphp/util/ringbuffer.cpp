@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,6 +22,7 @@
 #include <atomic>
 #include <cstdio>
 #include <cstring>
+#include <unistd.h>
 
 namespace HPHP {
 namespace Trace {
@@ -29,11 +30,12 @@ namespace Trace {
 /*
  * Thread-private ascii ringbuffer.
  */
-static const int kMaxRBBytes = 1 << 20; // 1MB
+static const int kMaxRBBytes = 1 << 19; // 512KB
 __thread int  tl_rbPtr;
 __thread char tl_ring[kMaxRBBytes];
 __thread const char _unused[] = "\n----END OF RINGBUFFER---\n";
 
+KEEP_SECTION
 void vtraceRingbuffer(const char* fmt, va_list ap) {
   char buf[4096];
   char* bufP = &buf[0];
@@ -174,7 +176,7 @@ void dumpEntry(const RingBufferEntry* e) {
       break;
     }
     default: {
-      printf("%#x %10u %#lx %d %20s\n",
+      printf("%#x %10u %#" PRIx64 " %d %20s\n",
              e->m_threadId, e->m_seq, e->m_funcId, e->m_offset,
              names[e->m_type]);
       break;
@@ -190,6 +192,8 @@ void dumpEntry(const RingBufferEntry* e) {
 //
 //    (gdb) call HPHP::Trace::dumpRingBufferMasked(100,
 //       (1 << HPHP::Trace::RBTypeFuncEntry))
+
+KEEP_SECTION
 void dumpRingBufferMasked(int numEntries, uint32_t types) {
   int startIdx = (g_ringIdx.load() - numEntries) % kMaxRBEntries;
   while (startIdx < 0) {
@@ -206,6 +210,7 @@ void dumpRingBufferMasked(int numEntries, uint32_t types) {
   }
 }
 
+KEEP_SECTION
 void dumpRingBuffer(int numEntries) {
   dumpRingBufferMasked(numEntries, -1u);
 }

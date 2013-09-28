@@ -1,0 +1,8 @@
+d: lemon
+a: orange
+b: banana
+c: apple
+d: fruit: lemon
+a: fruit: orange
+b: fruit: banana
+c: fruit: apple

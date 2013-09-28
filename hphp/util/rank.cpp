@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,6 +18,7 @@
 
 #include "hphp/util/base.h"
 #include "hphp/util/mutex.h"
+#include "hphp/util/process.h"
 
 namespace HPHP {
 #ifdef DEBUG
@@ -42,11 +43,12 @@ void checkRank(Rank r) {
      */
     if (prev >= r && r != RankUnranked) {
       if (r == RankLeaf) {
-        fprintf(stderr, "Rank violation in thr%lx! leaf lock from leaf rank; ",
-                pthread_self());
+        fprintf(stderr,
+                "Rank violation in thr%" PRIx64 "! leaf lock from leaf rank; ",
+                Process::GetThreadIdForTrace());
       } else {
-        fprintf(stderr, "Rank violation in thr%lx! lock of rank %d; ",
-                pthread_self(), r);
+        fprintf(stderr, "Rank violation in thr%" PRIx64 "! lock of rank %d; ",
+                Process::GetThreadIdForTrace(), r);
       }
       fprintf(stderr, "held locks:\n");
       for (int i = tl_curRankDepth - 1; i >= 0; --i) {

@@ -1,0 +1,758 @@
+*** Testing fputcsv() : with delimiter and enclosure as NULL ***
+
+-- file opened in r+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in r+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in a+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in w+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+ --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+b --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+
+-- file opened in x+t --
+HipHop Warning: %s
+bool(false)
+int(0)
+bool(false)
+string(0) ""
+Done

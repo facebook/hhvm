@@ -1,0 +1,10 @@
+*** Testing basename() : error conditions ***
+
+-- Testing basename() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing basename() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

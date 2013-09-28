@@ -1,0 +1,10 @@
+*** Testing method_exists() : error conditions ***
+
+-- Testing method_exists() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing method_exists() function with less than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

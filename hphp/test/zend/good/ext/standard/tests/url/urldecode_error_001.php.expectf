@@ -1,0 +1,10 @@
+*** Testing urldecode() : error conditions ***
+
+-- Testing urldecode() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing urldecode() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

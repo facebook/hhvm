@@ -1,0 +1,3 @@
+break error_bad_cmd_type_receive.php:3
+run
+internaltesting badcmdtypereceive

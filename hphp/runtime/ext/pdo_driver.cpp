@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -21,14 +21,6 @@
 #include "hphp/runtime/ext/ext_variable.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-// static strings
-
-StaticString PDOConnection::s_class_name("PDOConnection");
-StaticString PDOColumn::s_class_name("PDOColumn");
-StaticString PDOBoundParam::s_class_name("PDOBoundParam");
-StaticString PDOStatement::s_class_name("PDOStatement");
-
 ///////////////////////////////////////////////////////////////////////////////
 
 // This needs to get created first.

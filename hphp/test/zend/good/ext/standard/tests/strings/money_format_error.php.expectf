@@ -1,0 +1,14 @@
+*** Testing money_format() : error conditions ***
+
+-- Testing money_format() function with no arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing money_format() function with insufficient arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing money_format() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

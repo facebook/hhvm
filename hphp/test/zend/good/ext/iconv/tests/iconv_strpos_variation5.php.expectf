@@ -1,0 +1,52 @@
+*** Testing iconv_strpos() : usage variations ***
+
+**-- Offset is: -10 --**
+-- ASCII String --
+HipHop Warning: %s
+bool(false)
+--Multibyte String --
+HipHop Warning: %s
+bool(false)
+
+**-- Offset is: 0 --**
+-- ASCII String --
+int(9)
+--Multibyte String --
+int(9)
+
+**-- Offset is: 10 --**
+-- ASCII String --
+int(20)
+--Multibyte String --
+int(20)
+
+**-- Offset is: 20 --**
+-- ASCII String --
+int(20)
+--Multibyte String --
+int(20)
+
+**-- Offset is: 30 --**
+-- ASCII String --
+bool(false)
+--Multibyte String --
+bool(false)
+
+**-- Offset is: 40 --**
+-- ASCII String --
+bool(false)
+--Multibyte String --
+bool(false)
+
+**-- Offset is: 50 --**
+-- ASCII String --
+bool(false)
+--Multibyte String --
+bool(false)
+
+**-- Offset is: 60 --**
+-- ASCII String --
+bool(false)
+--Multibyte String --
+bool(false)
+Done

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,28 +35,45 @@ class Disasm : private boost::noncopyable {
       : m_indentLevel(0)
       , m_printEncoding(false)
       , m_relativeOffset(false)
+      , m_addresses(true)
+      , m_forceAttSyntax(false)
     {}
 
     Options& indent(int i) {
       m_indentLevel = i;
       return *this;
     }
+
     Options& printEncoding(bool pe) {
       m_printEncoding = pe;
       return *this;
     }
+
     Options& relativeOffset(bool re) {
       m_relativeOffset = re;
       return *this;
     }
+
     Options& color(std::string c) {
       m_color = std::move(c);
+      return *this;
+    }
+
+    Options& addresses(bool b) {
+      m_addresses = b;
+      return *this;
+    }
+
+    Options& forceAttSyntax(bool b) {
+      m_forceAttSyntax = b;
       return *this;
     }
 
     int m_indentLevel;
     bool m_printEncoding;
     bool m_relativeOffset;
+    bool m_addresses;
+    bool m_forceAttSyntax;
     std::string m_color;
   };
 

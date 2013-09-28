@@ -3,7 +3,7 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010 Hyves (http://www.hyves.nl)                       |
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -19,8 +19,8 @@
 #ifndef incl_HPHP_EXT_MEMCACHED_H_
 #define incl_HPHP_EXT_MEMCACHED_H_
 
-#include "hphp/runtime/base/base_includes.h"
-#include "libmemcached/memcached.h"
+#include "hphp/runtime/base/base-includes.h"
+#include <libmemcached/memcached.h>
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -85,13 +85,13 @@ extern const int64_t q_Memcached$$RES_PAYLOAD_FAILURE;
 ///////////////////////////////////////////////////////////////////////////////
 // class Memcached
 
-FORWARD_DECLARE_CLASS_BUILTIN(Memcached);
+FORWARD_DECLARE_CLASS(Memcached);
 class c_Memcached : public ExtObjectData, public Sweepable {
  public:
-  DECLARE_CLASS(Memcached, Memcached, ObjectData)
+  DECLARE_CLASS(Memcached)
 
   // need to implement
-  public: c_Memcached(Class* cls = c_Memcached::s_cls);
+  public: c_Memcached(Class* cls = c_Memcached::classof());
   public: ~c_Memcached();
   public: void t___construct(CStrRef persistent_id = null_string);
   public: bool t_add(CStrRef key, CVarRef value, int expiration = 0);
@@ -142,7 +142,7 @@ class c_Memcached : public ExtObjectData, public Sweepable {
     int serializer;
     int rescode;
   };
-  typedef boost::shared_ptr<Impl> ImplPtr;
+  typedef std::shared_ptr<Impl> ImplPtr;
   ImplPtr m_impl;
 
   bool handleError(memcached_return status);

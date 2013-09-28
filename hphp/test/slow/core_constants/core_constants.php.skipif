@@ -1,0 +1,4 @@
+<?php
+if (PHP_OS !== "Linux") {
+  echo "Skip";
+} 

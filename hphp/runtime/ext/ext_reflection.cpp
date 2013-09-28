@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,13 +17,17 @@
 
 #include "hphp/runtime/ext/ext_reflection.h"
 #include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/ext_misc.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/externals.h"
-#include "hphp/runtime/base/class_info.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/string_util.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/parser/parser.h"
+#include "hphp/runtime/ext/util.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 
@@ -32,61 +36,62 @@ using Transl::VMRegAnchor;
 IMPLEMENT_DEFAULT_EXTENSION(Reflection);
 ///////////////////////////////////////////////////////////////////////////////
 
-static StaticString s_name("name");
-static StaticString s_version("version");
-static StaticString s_info("info");
-static StaticString s_ini("ini");
-static StaticString s_constants("constants");
-static StaticString s_constructor("constructor");
-static StaticString s_functions("functions");
-static StaticString s_classes("classes");
-static StaticString s_access("access");
-static StaticString s_public("public");
-static StaticString s_protected("protected");
-static StaticString s_private("private");
-static StaticString s_file("file");
-static StaticString s_line1("line1");
-static StaticString s_line2("line2");
-static StaticString s_doc("doc");
-static StaticString s_modifiers("modifiers");
-static StaticString s_class("class");
-static StaticString s_ref("ref");
-static StaticString s_index("index");
-static StaticString s_type("type");
-static StaticString s_nullable("nullable");
-static StaticString s_msg("msg");
-static StaticString s_default("default");
-static StaticString s_defaultText("defaultText");
-static StaticString s_params("params");
-static StaticString s_final("final");
-static StaticString s_abstract("abstract");
-static StaticString s_internal("internal");
-static StaticString s_is_closure("is_closure");
-static StaticString s_is_generator("is_generator");
-static StaticString s_hphp("hphp");
-static StaticString s_static_variables("static_variables");
-static StaticString s_extension("extension");
-static StaticString s_interfaces("interfaces");
-static StaticString s_traits("traits");
-static StaticString s_interface("interface");
-static StaticString s_trait("trait");
-static StaticString s_methods("methods");
-static StaticString s_properties("properties");
-static StaticString s_private_properties("private_properties");
-static StaticString s_attributes("attributes");
-static StaticString s_function("function");
-
-static StaticString s_trait_aliases("trait_aliases");
-static StaticString s_varg("varg");
-static StaticString s_closure("closure");
-static StaticString s___invoke("__invoke");
-static StaticString s_closure_in_braces("{closure}");
-static StaticString s_closureobj("closureobj");
-static StaticString s_return_type("return_type");
-static StaticString s_type_hint("type_hint");
+const StaticString
+  s_name("name"),
+  s_version("version"),
+  s_info("info"),
+  s_ini("ini"),
+  s_constants("constants"),
+  s_constructor("constructor"),
+  s_functions("functions"),
+  s_classes("classes"),
+  s_access("access"),
+  s_public("public"),
+  s_protected("protected"),
+  s_private("private"),
+  s_file("file"),
+  s_line1("line1"),
+  s_line2("line2"),
+  s_doc("doc"),
+  s_modifiers("modifiers"),
+  s_class("class"),
+  s_ref("ref"),
+  s_index("index"),
+  s_type("type"),
+  s_nullable("nullable"),
+  s_msg("msg"),
+  s_default("default"),
+  s_defaultText("defaultText"),
+  s_params("params"),
+  s_final("final"),
+  s_abstract("abstract"),
+  s_internal("internal"),
+  s_is_closure("is_closure"),
+  s_is_generator("is_generator"),
+  s_hphp("hphp"),
+  s_static_variables("static_variables"),
+  s_extension("extension"),
+  s_interfaces("interfaces"),
+  s_traits("traits"),
+  s_interface("interface"),
+  s_trait("trait"),
+  s_methods("methods"),
+  s_properties("properties"),
+  s_private_properties("private_properties"),
+  s_attributes("attributes"),
+  s_function("function"),
+  s_trait_aliases("trait_aliases"),
+  s_varg("varg"),
+  s_closure("closure"),
+  s___invoke("__invoke"),
+  s_closure_in_braces("{closure}"),
+  s_closureobj("closureobj"),
+  s_return_type("return_type"),
+  s_type_hint("type_hint"),
+  s_accessible("accessible");
 
 static const Class* get_cls(CVarRef class_or_object) {
-  Class* cls = NULL;
+  Class* cls = nullptr;
   if (class_or_object.is(KindOfObject)) {
     ObjectData* obj = class_or_object.toCObjRef().get();
     cls = obj->getVMClass();
@@ -137,10 +142,13 @@ int get_modifiers(Attr attrs, bool cls) {
 static void set_attrs(Array& ret, int modifiers) {
   if (modifiers & 0x100) {
     ret.set(s_access, VarNR(s_public));
+    ret.set(s_accessible, true_varNR);
   } else if (modifiers & 0x200) {
     ret.set(s_access, VarNR(s_protected));
+    ret.set(s_accessible, false_varNR);
   } else if (modifiers & 0x400) {
     ret.set(s_access, VarNR(s_private));
+    ret.set(s_accessible, false_varNR);
   } else {
     assert(false);
   }
@@ -226,6 +234,54 @@ static void set_static_prop_info(Array &ret, const Class::SProp* prop) {
   }
 }
 
+static bool resolveConstant(const char *p, int64_t len, Variant &cns) {
+  // ltrim
+  while (len && (*p == ' ')) {
+    p++;
+    len--;
+  }
+  // rtrim
+  while (len && (p[len-1] == ' ')) {
+    len--;
+  }
+
+  String cname(p, len, CopyString);
+
+  if (!f_defined(cname)) {
+    cns = uninit_null();
+    return false;
+  }
+
+  cns = f_constant(cname);
+  return true;
+}
+
+static bool resolveDefaultParameterConstant(const char *value,
+                                            int64_t valueLen,
+                                            Variant &cns) {
+  const char *p = value;
+  const char *e = value + valueLen;
+  const char *s;
+  bool isLval = false;
+  int64_t lval = 0;
+
+  while ((s = strchr(p, '|'))) {
+    isLval = true;
+    if (!resolveConstant(p, s - p, cns)) {
+      return false;
+    }
+    lval |= cns.toInt64();
+    p = s + 1;
+  }
+  if (!resolveConstant(p, e - p, cns)) {
+    return false;
+  }
+  if (isLval) {
+    cns = cns.toInt64() | lval;
+  }
+  return true;
+}
+
 static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
                               const String *classname) {
   // return type
@@ -258,35 +314,58 @@ static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
       param.set(s_name, p->name);
       param.set(s_type, p->type);
       param.set(s_function, info->name);
+
       if (classname) {
         param.set(s_class, VarNR(*classname));
       }
+
       const char *defText = p->valueText;
-      if (defText == NULL) defText = "";
+      int64_t defTextLen = p->valueTextLen;
+      if (defText == nullptr) {
+        defText = "";
+        defTextLen = 0;
+      }
+
       if (!p->type || !*p->type || !strcasecmp("null", defText)) {
         param.set(s_nullable, true_varNR);
       }
+
       if (p->value && *p->value) {
         if (*p->value == '\x01') {
-          const char *sep = strchr(defText, ':');
-          Object v(SystemLib::AllocStdClassObject());
-          if (sep && sep[1] == ':') {
-            String cls = String(defText, sep - defText, CopyString);
-            String con = String(sep + 2, CopyString);
-            v.o_set(s_class, cls);
-            v.o_set(s_name, con);
+          if ((defTextLen > 2) &&
+              !strcmp(defText + defTextLen - 2, "()")) {
+            const char *sep = strchr(defText, ':');
+            Object obj = SystemLib::AllocStdClassObject();
+            if (sep && sep[1] == ':') {
+              String cls = String(defText, sep - defText, CopyString);
+              String con = String(sep + 2, CopyString);
+              obj->o_set(s_class, cls);
+              obj->o_set(s_name, con);
+            } else {
+              obj->o_set(s_name, String(defText, defTextLen, CopyString));
+            }
+            param.set(s_default, Variant(obj));
           } else {
-            v.o_set(s_msg, String("unable to eval ") + defText);
+            Variant v;
+            if (resolveDefaultParameterConstant(defText, defTextLen, v)) {
+              param.set(s_default, v);
+            } else {
+              Object obj = SystemLib::AllocStdClassObject();
+              obj->o_set(s_msg, String("Unknown unserializable default value: ")
+                                   + defText);
+              param.set(s_default, Variant(obj));
+            }
           }
-          param.set(s_default, v);
         } else {
           param.set(s_default, unserialize_from_string(p->value));
         }
         param.set(s_defaultText, defText);
       }
+
       if (p->attribute & ClassInfo::IsReference) {
         param.set(s_ref, true_varNR);
       }
+
       {
         Array userAttrs = Array::Create();
         for (unsigned int i = 0; i < p->userAttrs.size(); ++i) {
@@ -329,7 +408,8 @@ static void set_function_info(Array &ret, const Func* func) {
   }
   if (func->isBuiltin()) {
     ret.set(s_internal, true_varNR);
-    if (func->info()->attribute & ClassInfo::HipHopSpecific) {
+    if (func->info() &&
+        func->info()->attribute & ClassInfo::HipHopSpecific) {
       ret.set(s_hphp,     true_varNR);
     }
   }
@@ -349,8 +429,13 @@ static void set_function_info(Array &ret, const Func* func) {
       param.set(s_index, VarNR((int)i));
       VarNR name(func->localNames()[i]);
       param.set(s_name, name);
-      const StringData* type = fpi.typeConstraint().exists() ?
-        fpi.typeConstraint().typeName() : empty_string.get();
+
+      auto const nonExtendedConstraint =
+        fpi.typeConstraint().hasConstraint() &&
+        !fpi.typeConstraint().isExtended();
+      auto const type = nonExtendedConstraint ? fpi.typeConstraint().typeName()
+                                              : empty_string.get();
+
       param.set(s_type, VarNR(type));
       const StringData* typeHint = fpi.userType() ?
         fpi.userType() : empty_string.get();
@@ -360,12 +445,12 @@ static void set_function_info(Array &ret, const Func* func) {
         param.set(s_class, VarNR(func->cls() ? func->cls()->name() :
                                  func->preClass()->name()));
       }
-      if (!fpi.typeConstraint().exists() ||
-          fpi.typeConstraint().nullable()) {
+      if (!nonExtendedConstraint || fpi.typeConstraint().nullable()) {
         param.set(s_nullable, true_varNR);
       }
 
-      if (fpi.hasDefaultValue()) {
+      if (fpi.phpCode()) {
+        assert(fpi.hasDefaultValue());
         if (fpi.hasScalarDefaultValue()) {
           // Most of the time the default value is scalar, so we can
           // avoid evaling in the common case
@@ -375,7 +460,10 @@ static void set_function_info(Array &ret, const Func* func) {
           // undefined class constants can cause the eval() to
           // fatal. Zend lets such fatals propagate, so don't bother catching
           // exceptions here.
-          CVarRef v = g_vmContext->getEvaledArg(fpi.phpCode());
+          CVarRef v = g_vmContext->getEvaledArg(
+            fpi.phpCode(),
+            func->cls() ? func->cls()->nameRef() : func->nameRef()
+          );
           param.set(s_default, v);
         }
         param.set(s_defaultText, VarNR(fpi.phpCode()));
@@ -513,6 +601,7 @@ Array f_hphp_get_closure_info(CVarRef closure) {
   mi.set(s_closureobj, closure);
   mi.set(s_closure, empty_string);
   mi.remove(s_access);
+  mi.remove(s_accessible);
   mi.remove(s_modifiers);
   mi.remove(s_class);
 
@@ -525,10 +614,10 @@ Array f_hphp_get_closure_info(CVarRef closure) {
 }
 
 Variant f_hphp_get_class_constant(CVarRef cls, CVarRef name) {
-  TypedValue *res = g_vmContext->lookupClsCns(cls.toString().get(),
-                                              name.toString().get());
-  if (res) return tvAsCVarRef(res);
-  return uninit_null();
+  return cellAsCVarRef(
+    g_vmContext->lookupClsCns(cls.toString().get(),
+                              name.toString().get())
+  );
 }
 
 static Array get_class_info(const ClassInfo *cls) {
@@ -602,11 +691,9 @@ static Array get_class_info(const ClassInfo *cls) {
     for (ClassInfo::MethodVec::const_iterator iter = methods.begin();
          iter != methods.end(); ++iter) {
       ClassInfo::MethodInfo *m = *iter;
-      if ((m->attribute & ClassInfo::IsInherited) == 0) {
-        Array info = Array::Create();
-        set_method_info(info, m, cls);
-        arr.set(StringUtil::ToLower(m->name), info);
-      }
+      Array info = Array::Create();
+      set_method_info(info, m, cls);
+      arr.set(f_strtolower(m->name), info);
     }
     ret.set(s_methods, VarNR(arr));
   }
@@ -681,14 +768,11 @@ Array f_hphp_get_class_info(CVarRef name) {
   ret.set(s_extension, empty_string);
   ret.set(s_parent,    cls->parentRef());
 
-  typedef vector<ClassPtr> ClassVec;
   // interfaces
   {
     Array arr = Array::Create();
-    const ClassVec &interfaces = cls->declInterfaces();
-    for (ClassVec::const_iterator it = interfaces.begin(),
-           end = interfaces.end(); it != end; ++it) {
-      arr.set(it->get()->nameRef(), VarNR(1));
+    for (auto const& interface : cls->declInterfaces()) {
+      arr.set(interface->nameRef(), VarNR(1));
     }
     ret.set(s_interfaces, VarNR(arr));
   }
@@ -696,10 +780,8 @@ Array f_hphp_get_class_info(CVarRef name) {
   // traits
   {
     Array arr = Array::Create();
-    const ClassVec &traits = cls->usedTraits();
-    for (ClassVec::const_iterator it = traits.begin(),
-           end = traits.end(); it != end; ++it) {
-      arr.set(it->get()->nameRef(), VarNR(1));
+    for (auto const& trait : cls->usedTraits()) {
+      arr.set(trait->nameRef(), VarNR(1));
     }
     ret.set(s_traits, VarNR(arr));
   }
@@ -745,10 +827,10 @@ Array f_hphp_get_class_info(CVarRef name) {
     size_t const numMethods = cls->preClass()->numMethods();
     for (Slot i = 0; i < numMethods; ++i) {
       const Func* m = methods[i];
-      if (isdigit(m->name()->data()[0])) continue;
+      if (m->isGenerated()) continue;
       Array info = Array::Create();
       set_method_info(info, m);
-      arr.set(StringUtil::ToLower(m->nameRef()), VarNR(info));
+      arr.set(f_strtolower(m->nameRef()), VarNR(info));
     }
 
     Func* const* clsMethods = cls->methods();
@@ -756,10 +838,10 @@ Array f_hphp_get_class_info(CVarRef name) {
          i < cls->traitsEndIdx();
          ++i) {
       const Func* m = clsMethods[i];
-      if (isdigit(m->name()->data()[0])) continue;
+      if (m->isGenerated()) continue;
       Array info = Array::Create();
       set_method_info(info, m);
-      arr.set(StringUtil::ToLower(m->nameRef()), VarNR(info));
+      arr.set(f_strtolower(m->nameRef()), VarNR(info));
     }
     ret.set(s_methods, VarNR(arr));
   }
@@ -818,8 +900,9 @@ Array f_hphp_get_class_info(CVarRef name) {
       // Note: hphpc doesn't include inherited constants in
       // get_class_constants(), so mimic that behavior
       if (consts[i].m_class == cls) {
-        TypedValue* value = cls->clsCnsGet(consts[i].m_name);
-        arr.set(consts[i].nameRef(), tvAsVariant(value));
+        Cell value = cls->clsCnsGet(consts[i].m_name);
+        assert(value.m_type != KindOfUninit);
+        arr.set(consts[i].nameRef(), cellAsCVarRef(value));
       }
     }
 
@@ -889,52 +972,63 @@ Object f_hphp_create_object_without_constructor(CStrRef name) {
 }
 
 Variant f_hphp_get_property(CObjRef obj, CStrRef cls, CStrRef prop) {
-  return obj->o_get(prop);
+  return obj->o_get(prop, true /* error */, cls);
 }
 
 void f_hphp_set_property(CObjRef obj, CStrRef cls, CStrRef prop,
                          CVarRef value) {
-  obj->o_set(prop, value);
+  if (!cls.empty() && RuntimeOption::RepoAuthoritative) {
+    raise_error(
+      "We've already made many assumptions about private variables. "
+      "You can't change accessibility in Whole Program mode"
+    );
+  }
+  obj->o_set(prop, value, cls);
 }
 
-Variant f_hphp_get_static_property(CStrRef cls, CStrRef prop) {
-  Class* class_ = Unit::lookupClass(cls.get());
-  if (class_ == NULL) {
-    raise_error("Non-existent class %s", cls.get()->data());
+Variant f_hphp_get_static_property(CStrRef cls, CStrRef prop, bool force) {
+  StringData* sd = cls.get();
+  Class* class_ = lookup_class(sd);
+  if (!class_) {
+    raise_error("Non-existent class %s", sd->data());
   }
   VMRegAnchor _;
   bool visible, accessible;
-  TypedValue* tv = class_->getSProp(arGetContextClass(
-                                      g_vmContext->getFP()),
-                                    prop.get(), visible, accessible);
-  if (tv == NULL) {
+  TypedValue* tv = class_->getSProp(
+    force ? class_ : arGetContextClass(g_vmContext->getFP()),
+    prop.get(), visible, accessible
+  );
+  if (tv == nullptr) {
     raise_error("Class %s does not have a property named %s",
-                cls.get()->data(), prop.get()->data());
+                sd->data(), prop.get()->data());
   }
   if (!visible || !accessible) {
     raise_error("Invalid access to class %s's property %s",
-                cls.get()->data(), prop.get()->data());
+                sd->data(), prop.get()->data());
   }
   return tvAsVariant(tv);
 }
 
-void f_hphp_set_static_property(CStrRef cls, CStrRef prop, CVarRef value) {
-  Class* class_ = Unit::lookupClass(cls.get());
-  if (class_ == NULL) {
-    raise_error("Non-existent class %s", cls.get()->data());
+void f_hphp_set_static_property(CStrRef cls, CStrRef prop, CVarRef value,
+                                bool force) {
+  StringData* sd = cls.get();
+  Class* class_ = lookup_class(sd);
+  if (!class_) {
+    raise_error("Non-existent class %s", sd->data());
   }
   VMRegAnchor _;
   bool visible, accessible;
-  TypedValue* tv = class_->getSProp(arGetContextClass(
-                                      g_vmContext->getFP()),
-                                    prop.get(), visible, accessible);
-  if (tv == NULL) {
+  TypedValue* tv = class_->getSProp(
+    force ? class_ : arGetContextClass(g_vmContext->getFP()),
+    prop.get(), visible, accessible
+  );
+  if (tv == nullptr) {
     raise_error("Class %s does not have a property named %s",
                 cls.get()->data(), prop.get()->data());
   }
   if (!visible || !accessible) {
     raise_error("Invalid access to class %s's property %s",
-                cls.get()->data(), prop.get()->data());
+                sd->data(), prop.get()->data());
   }
   tvAsVariant(tv) = value;
 }

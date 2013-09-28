@@ -84,7 +84,6 @@ flood error logs.
     CallUserHandlerOnFatals = true
     MaxLoopCount = 0
     NoInfiniteRecursionDetection = false
-    MaxStackDepth = 1000
     ThrowBadTypeExceptions = false
     ThrowTooManyArguments = false
     WarnTooManyArguments = false
@@ -107,7 +106,6 @@ flood error logs.
     MaxRSSPollingCycle = 0    # in seconds, how often to check max memory
     DropCacheCycle = 0        # in seconds, how often to drop disk cache
     MaxSQLRowCount = 0
-    MaxMemcacheKeyCount = 0
     SerializationSizeLimit = 0
     StringOffsetLimit = 10 * 1024 * 1024
   }
@@ -151,10 +149,6 @@ flood error logs.
     MaxPostSize = 10MB
     # maximum memory size for image processing
     ImageMemoryMaxBytes = Upload.UploadMaxFileSize * 2
-
-    # Recommended to turn this on to avoid memory leaks and to enable the
-    # RequestInitDocument and RequestInitFunction features.
-    EnableMemoryManager = false
 
     # Only for debugging memory problems. When turned on, server will report
     # SmartAllocator's usage for each thread to stdout.
@@ -587,8 +581,6 @@ next requests.
     Malloc = false
     APC = false
     APCKey = false
-    Memcache = false
-    MemcacheKey = false
     SQL = false
     SQLTable = false
     NetworkIO = false
@@ -630,9 +622,6 @@ next requests.
     CoreDumpEmail = email address
     CoreDumpReport = true
     CoreDumpReportDirectory = /tmp
-
-    LocalMemcache = false
-    MemcacheReadOnly = false
   }
 
 - FullBacktrace, ServerStackTrace, ServerErrorMessage, TranslateSource
@@ -691,6 +680,23 @@ will look like this,
 "path" points to PHP source files. "log" points to error log location and
 "accesslog" points to access log location.
 
+== Debugger Configuration
+
+By default, HHVM does not listen for connections from the HipHop
+Debugger (hphpd). To enable this you need to first setup the sandbox
+environment described above, then add the following to your config:
+
+  Eval.Debugger {
+    EnableDebugger = true
+    EnableDebuggerServer = true
+    Port = 8089
+    DefaultSandboxPath = path to source files, similar to Server.SourceRoot
+  }
+
+This will cause HHVM to start a debugger server, and you should see an
+entry in the log indicating the debugger server has started before the
+entry about all servers having been started.
+
 - Machine Sharing
 
 The benefit is, same server can have one "Sandbox" configuration, and many
@@ -706,6 +712,8 @@ users can use the same machine serving their own source files.
     EnableAspTags = false    # is <% %> allowed
     EnableXHP = true         # XHP extension
     NativeXHP = true         # Use HPHP to directly handle XHP
+
+    VMStackElms = 16384      # Maximum stack size
 
     # debugger
     Debugger {
@@ -734,7 +742,6 @@ users can use the same machine serving their own source files.
 
   MySQL {
     ReadOnly = false
-    Localize = false           # true for native driver that's faster
     ConnectTimeout = 1000      # in ms
     ReadTimeout = 1000         # in ms
     WaitTimeout = -1           # in ms, -1 means "don't set"

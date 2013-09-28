@@ -1,0 +1,8 @@
+
+<h2>Known Limitations</h2>
+
+1. If using the PHP setlocale function, because it is implemented in terms of
+setlocale(3), it is process-wide and will affect all requests as well as, for
+example, internal logging. One way to mitigate the effect is to call
+setlocale(LC_ALL, "C"); at the end of a request to restore the default locale
+but this does not change the fact that PHP setlocale() is process-wide.

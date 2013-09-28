@@ -1,0 +1,108 @@
+*** Testing get_class() : usage variations ***
+HipHop Notice: %s
+HipHop Notice: %s
+
+Arg value: 0 (type: integer)
+HipHop Warning: %s
+bool(false)
+
+Arg value: 1 (type: integer)
+HipHop Warning: %s
+bool(false)
+
+Arg value: 12345 (type: integer)
+HipHop Warning: %s
+bool(false)
+
+Arg value: -2345 (type: integer)
+HipHop Warning: %s
+bool(false)
+
+Arg value: 10.5 (type: double)
+HipHop Warning: %s
+bool(false)
+
+Arg value: -10.5 (type: double)
+HipHop Warning: %s
+bool(false)
+
+Arg value: 101234567000 (type: double)
+HipHop Warning: %s
+bool(false)
+
+Arg value: 1.07654321E-9 (type: double)
+HipHop Warning: %s
+bool(false)
+
+Arg value: 0.5 (type: double)
+HipHop Warning: %s
+bool(false)
+
+Arg value: Array (type: array)
+HipHop Warning: %s
+bool(false)
+
+Arg value: Array (type: array)
+HipHop Warning: %s
+bool(false)
+
+Arg value: Array (type: array)
+HipHop Warning: %s
+bool(false)
+
+Arg value: Array (type: array)
+HipHop Warning: %s
+bool(false)
+
+Arg value: Array (type: array)
+HipHop Warning: %s
+bool(false)
+
+Arg value:  (type: NULL)
+HipHop Warning: %s
+bool(false)
+
+Arg value:  (type: NULL)
+HipHop Warning: %s
+bool(false)
+
+Arg value: 1 (type: boolean)
+HipHop Warning: %s
+bool(false)
+
+Arg value:  (type: boolean)
+HipHop Warning: %s
+bool(false)
+
+Arg value: 1 (type: boolean)
+HipHop Warning: %s
+bool(false)
+
+Arg value:  (type: boolean)
+HipHop Warning: %s
+bool(false)
+
+Arg value:  (type: string)
+HipHop Warning: %s
+bool(false)
+
+Arg value:  (type: string)
+HipHop Warning: %s
+bool(false)
+
+Arg value: string (type: string)
+HipHop Warning: %s
+bool(false)
+
+Arg value: string (type: string)
+HipHop Warning: %s
+bool(false)
+
+Arg value:  (type: NULL)
+HipHop Warning: %s
+bool(false)
+
+Arg value:  (type: NULL)
+HipHop Warning: %s
+bool(false)
+Done

@@ -1,6 +1,5 @@
 <?php
 
-
 trait MyTrait {
   public static function callNew() {
     new self("called via SELF");

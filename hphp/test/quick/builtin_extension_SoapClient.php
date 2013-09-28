@@ -2,7 +2,7 @@
 
 include __DIR__."/builtin_extensions.inc";
 
-class A_SoapClient extends DateInterval {
+class A_SoapClient extends SoapClient {
   public $___x;
 }
 test("SoapClient");

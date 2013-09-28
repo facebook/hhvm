@@ -1,6 +1,5 @@
 <?php
 
-
 // taking default args
 class C3 {
   public function __invoke($a0, $a1 = array(), $a2 = false) {

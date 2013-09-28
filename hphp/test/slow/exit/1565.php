@@ -1,3 +1,5 @@
 <?php
 
- $command = "exit 2";passthru($command, $return);print "$return\n";
+$command = "exit 2";
+passthru($command, $return);
+print "$return\n";

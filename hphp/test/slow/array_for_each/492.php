@@ -1,6 +1,5 @@
 <?php
 
-
 function foo() {
   $arr = array(10,20,30,40,50);
   foreach ($arr as $k => &$v) {
@@ -14,4 +13,5 @@ function foo() {
   var_dump($arr);
   var_dump($arr2);
 }
-foreach (foo() as $_) {}
+foreach (foo() as $_) {
+}

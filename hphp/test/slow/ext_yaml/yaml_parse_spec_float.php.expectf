@@ -1,0 +1,14 @@
+array(6) {
+  ["canonical"]=>
+  float(685230.15)
+  ["exponentioal"]=>
+  float(685230.15)
+  ["fixed"]=>
+  float(685230.15)
+  ["sexagesimal"]=>
+  float(685230.15)
+  ["negative infinity"]=>
+  float(-INF)
+  ["not a number"]=>
+  float(NAN)
+}

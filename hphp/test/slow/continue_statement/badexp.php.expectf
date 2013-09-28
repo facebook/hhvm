@@ -1,0 +1,1 @@
+HipHop Fatal error: 'continue' operator with non-constant operand is no longer supported in %s/test/slow/continue_statement/badexp.php on line 6

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,9 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
-#include "hphp/compiler/type_annotation.h"
 #include "hphp/compiler/expression/parameter_expression.h"
+#include "hphp/compiler/type_annotation.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/variable_table.h"
@@ -30,14 +29,25 @@ using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
 
-ParameterExpression::ParameterExpression
-(EXPRESSION_CONSTRUCTOR_PARAMETERS,
- TypeAnnotationPtr type, bool hhType, const std::string &name, bool ref,
- ExpressionPtr defaultValue, ExpressionPtr attributeList)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ParameterExpression)),
-    m_originalType(type), m_name(name), m_hhType(hhType), m_ref(ref),
-    m_defaultValue(defaultValue), m_attributeList(attributeList) {
-  m_type = Util::toLower(type ? type->simpleName() : "");
+ParameterExpression::ParameterExpression(
+     EXPRESSION_CONSTRUCTOR_PARAMETERS,
+     TypeAnnotationPtr type,
+     bool hhType,
+     const std::string &name,
+     bool ref,
+     TokenID modifier,
+     ExpressionPtr defaultValue,
+     ExpressionPtr attributeList)
+  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ParameterExpression))
+  , m_originalType(type)
+  , m_name(name)
+  , m_hhType(hhType)
+  , m_ref(ref)
+  , m_modifier(modifier)
+  , m_defaultValue(defaultValue)
+  , m_attributeList(attributeList)
+{
+  m_type = Util::toLower(type ? type->vanillaName() : "");
   if (m_defaultValue) {
     m_defaultValue->setContext(InParameterExpression);
   }
@@ -51,12 +61,12 @@ ExpressionPtr ParameterExpression::clone() {
   return exp;
 }
 
-const std::string ParameterExpression::getOriginalTypeHint() const  {
+const std::string ParameterExpression::getOriginalTypeHint() const {
   assert(hasTypeHint());
-  return m_originalType->simpleName();
+  return m_originalType->vanillaName();
 }
 
-const std::string ParameterExpression::getUserTypeHint() const  {
+const std::string ParameterExpression::getUserTypeHint() const {
   assert(hasUserType());
   return m_originalType->fullName();
 }
@@ -121,7 +131,7 @@ int ParameterExpression::getKidCount() const {
 void ParameterExpression::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_defaultValue = boost::dynamic_pointer_cast<Expression>(cp);
+      m_defaultValue = dynamic_pointer_cast<Expression>(cp);
       break;
     default:
       break;
@@ -134,15 +144,22 @@ TypePtr ParameterExpression::getTypeSpecForClass(AnalysisResultPtr ar,
   if (forInference) {
     ClassScopePtr cls = ar->findClass(m_type);
     if (!cls || cls->isRedeclaring() || cls->derivedByDynamic()) {
-      if (!cls && getScope()->isFirstPass()) {
+      if (!cls && getScope()->isFirstPass() && !ar->isTypeAliasName(m_type)) {
         ConstructPtr self = shared_from_this();
         Compiler::Error(Compiler::UnknownClass, self);
       }
       ret = Type::Variant;
     }
+    if (cls) {
+      // Classes must be redeclaring if there are also type aliases
+      // with the same name.
+      assert(!ar->isTypeAliasName(m_type) || cls->isRedeclaring());
+    }
   }
   if (!ret) {
-    ret = Type::CreateObjectType(m_type);
+    ret = ar->isTypeAliasName(m_type) || !Option::WholeProgram
+      ? Type::Variant
+      : Type::CreateObjectType(m_type);
   }
   always_assert(ret);
   return ret;
@@ -252,6 +269,7 @@ void ParameterExpression::compatibleDefault() {
     case KindOfNull:    compat = true; break;
     /* KindOfClass is an hhvm internal type, can not occur here */
     case KindOfObject:  /* fall through */
+    case KindOfResource: /* fall through */
     case KindOfRef: assert(false /* likely parser bug */);
     default:            compat = false; break;
     }
@@ -286,7 +304,7 @@ void ParameterExpression::compatibleDefault() {
 // code generation functions
 
 void ParameterExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (!m_type.empty()) cg_printf("%s ", m_originalType->simpleName().c_str());
+  if (!m_type.empty()) cg_printf("%s ", m_originalType->vanillaName().c_str());
   if (m_ref) cg_printf("&");
   cg_printf("$%s", m_name.c_str());
   if (m_defaultValue) {

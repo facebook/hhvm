@@ -1,6 +1,5 @@
 <?php
 
-
 class books extends domDocument {
   function addBook($title, $author) {
     $titleElement = $this->createElement('title');

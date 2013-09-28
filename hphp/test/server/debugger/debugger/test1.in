@@ -1,0 +1,22 @@
+break start
+continue
+next
+break break1.php:7
+continue
+variable
+break clear all
+break foo()
+continue
+break clear all
+break cls::pubObj()
+continue
+break clear all
+break cls::pubCls()
+continue
+break clear all
+continue
+break end test1.php
+continue
+break psp test1.php
+next
+quit

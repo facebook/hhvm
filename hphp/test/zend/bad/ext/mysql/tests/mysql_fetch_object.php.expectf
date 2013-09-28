@@ -1,0 +1,61 @@
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+object(stdClass)#%d (2) {
+  [%u|b%"ID"]=>
+  %unicode|string%(1) "1"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "a"
+}
+object(mysql_fetch_object_test)#%d (4) {
+  [%u|b%"a"]=>
+  NULL
+  [%u|b%"b"]=>
+  NULL
+  [%u|b%"ID"]=>
+  %unicode|string%(1) "2"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "b"
+}
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Notice: %s
+HipHop Notice: %s
+object(mysql_fetch_object_construct)#%d (4) {
+  [%u|b%"a"]=>
+  NULL
+  [%u|b%"b"]=>
+  NULL
+  [%u|b%"ID"]=>
+  %unicode|string%(1) "3"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "c"
+}
+HipHop Warning: %s
+HipHop Notice: %s
+object(mysql_fetch_object_construct)#%d (4) {
+  [%u|b%"a"]=>
+  %unicode|string%(1) "a"
+  [%u|b%"b"]=>
+  NULL
+  [%u|b%"ID"]=>
+  %unicode|string%(1) "4"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "d"
+}
+object(mysql_fetch_object_construct)#%d (4) {
+  [%u|b%"a"]=>
+  %unicode|string%(1) "a"
+  [%u|b%"b"]=>
+  %unicode|string%(1) "b"
+  [%u|b%"ID"]=>
+  %unicode|string%(1) "5"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "e"
+}
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Fatal error: %s

@@ -1,6 +1,6 @@
 <?php
 
- function h7() {
+function h7() {
   $arr = array(0,1,2,3,4);
   end($arr);
   next($arr);

@@ -4,10 +4,7 @@ array(3) {
     ["function"]=>
     string(12) "my_generator"
     ["args"]=>
-    array(1) {
-      [0]=>
-      object(Continuation)#1 (0) {
-      }
+    array(0) {
     }
   }
   [1]=>
@@ -54,10 +51,7 @@ array(3) {
     ["type"]=>
     string(2) "::"
     ["args"]=>
-    array(1) {
-      [0]=>
-      object(Continuation)#1 (0) {
-      }
+    array(0) {
     }
   }
   [1]=>

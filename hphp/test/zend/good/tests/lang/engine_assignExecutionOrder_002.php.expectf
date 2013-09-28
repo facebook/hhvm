@@ -1,0 +1,40 @@
+A=hello B=bye
+HipHop Warning: %s
+array(2) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(10)
+}
+array(2) {
+  [0]=>
+  int(30)
+  [1]=>
+  int(30)
+}
+array(3) {
+  [0]=>
+  int(1000)
+  [1]=>
+  int(2000)
+  [2]=>
+  int(3000)
+}
+L=100 M=200 N=300
+O= and P=
+10 20 40 50 60 70 80
+HipHop Notice: %s
+HipHop Notice: %s
+Y=,Z=
+HipHop Notice: %s
+AA=10
+CC=10 DD=30
+Array
+(
+    [0] => array created in f()
+    [array entry created after f()] => Array
+        (
+            [1] => hello
+        )
+
+)

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,6 +31,7 @@ void assert_fail_log(const char* title, const std::string& msg) {
   if (s_logger) {
     s_logger(title, msg);
   }
+  fprintf(stderr, "Assertion failure: %s\n", msg.c_str());
 }
 
 void register_assert_fail_logger(AssertFailLogger l) {

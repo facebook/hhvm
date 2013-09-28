@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,17 +17,30 @@
 #ifndef incl_HPHP_VM_FUNC_H_
 #define incl_HPHP_VM_FUNC_H_
 
-#include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/type_constraint.h"
-#include "hphp/runtime/vm/repo_helpers.h"
-#include "hphp/runtime/vm/indexed_string_map.h"
+#include "hphp/runtime/vm/type-constraint.h"
+#include "hphp/runtime/vm/repo-helpers.h"
+#include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/base/intercept.h"
+#include "hphp/runtime/base/class-info.h"
 
 namespace HPHP {
 
-static const int kNumFixedPrologues = 6;
+const int kNumFixedPrologues = 6;
 
+struct ActRec;
 typedef TypedValue*(*BuiltinFunction)(ActRec* ar);
+class PreClassEmitter;
+
+/*
+ * Unique identifier for a Func*.
+ */
+typedef uint32_t FuncId;
+constexpr FuncId InvalidFuncId = FuncId(-1LL);
+
+/*
+ * Vector of pairs (param number, offset of corresponding DV funclet).
+ */
+typedef std::vector<std::pair<int,Offset> > DVFuncletsVec;
 
 /*
  * Metadata about a php function or object method.
@@ -130,20 +143,13 @@ struct Func {
   typedef FixedVector<EHEnt> EHEntVec;
   typedef FixedVector<FPIEnt> FPIEntVec;
 
-  typedef uint32_t FuncId;
-  static const FuncId InvalidId = -1LL;
-
-  Func(Unit& unit, Id id, int line1, int line2, Offset base,
+  Func(Unit& unit, Id id, PreClass* preClass, int line1, int line2, Offset base,
        Offset past, const StringData* name, Attr attrs, bool top,
-       const StringData* docComment, int numParams, bool isGenerator);
-  Func(Unit& unit, PreClass* preClass, int line1,
-       int line2, Offset base, Offset past,
-       const StringData* name, Attr attrs, bool top,
-       const StringData* docComment, int numParams, bool isGenerator);
+       const StringData* docComment, int numParams);
   ~Func();
   static void destroy(Func* func);
 
-  Func* clone() const;
+  Func* clone(Class* cls) const;
   const Func* cloneAndSetClass(Class* cls) const;
 
   void validate() const {
@@ -153,16 +159,17 @@ struct Func {
   }
 
   FuncId getFuncId() const {
-    assert(m_funcId != InvalidId);
+    assert(m_funcId != InvalidFuncId);
+    assert(fromFuncId(m_funcId) == this);
     return m_funcId;
   }
-  void setFuncId(FuncId id);
   void setNewFuncId();
+  static FuncId nextFuncId();
+  static const Func* fromFuncId(FuncId id);
+  static bool isFuncIdValid(FuncId id);
 
   void rename(const StringData* name);
-  int numSlotsInFrame() const {
-    return shared()->m_numLocals + shared()->m_numIterators * kNumIterCells;
-  }
+  int numSlotsInFrame() const;
   Id lookupVarId(const StringData* name) const;
 
   /*
@@ -193,18 +200,15 @@ struct Func {
   bool isNameBindingImmutable(const Unit* fromUnit) const;
 
   void setMaxStackCells(int cells) { m_maxStackCells = cells; }
-  int maxStackCells() const {
-    // All functions have to return something, which pushes at least 1 cell
-    assert(m_maxStackCells > 0);
-    return m_maxStackCells;
-  }
+  int maxStackCells() const { return m_maxStackCells; }
 
   bool byRef(int32_t arg) const;
   bool mustBeRef(int32_t arg) const;
   void prettyPrint(std::ostream& out) const;
 
   bool isPseudoMain() const { return m_name->empty(); }
-  bool isBuiltin() const { return (bool)info(); }
+  bool isBuiltin() const { return m_attrs & AttrBuiltin; }
+  bool skipFrame() const { return m_attrs & AttrSkipFrame; }
   bool isMethod() const {
     return !isPseudoMain() && (bool)cls();
   }
@@ -240,18 +244,20 @@ struct Func {
   }
   bool isNoInjection() const { return bool(m_attrs & AttrNoInjection); }
 
-  HphpArray* getStaticLocals() const;
+  bool mayHaveThis() const {
+    return isPseudoMain() || (isMethod() && !isStatic());
+  }
+
   void getFuncInfo(ClassInfo::MethodInfo* mi) const;
+  DVFuncletsVec getDVFunclets() const;
+  bool isEntry(Offset offset) const;
+  bool isDVEntry(Offset offset) const;
+  int  getDVEntryNumParams(Offset offset) const;
 
   Unit* unit() const { return m_unit; }
   PreClass* preClass() const { return shared()->m_preClass; }
   Class* cls() const { return m_cls; }
-  void setCls(Class* cls) {
-    m_cls = cls;
-    setFullName();
-  }
-  void setClsAndName(Class* cls, const StringData* name) {
-    m_cls = cls;
+  void setName(const StringData* name) {
     m_name = name;
     setFullName();
   }
@@ -319,6 +325,10 @@ struct Func {
     return shared()->m_retTypeConstraint;
   }
 
+  const StringData* originalFilename() const {
+    return shared()->m_originalFilename;
+  }
+
   int numIterators() const { return shared()->m_numIterators; }
   const EHEntVec& ehtab() const { return shared()->m_ehtab; }
   const FPIEntVec& fpitab() const { return shared()->m_fpitab; }
@@ -332,6 +342,7 @@ struct Func {
   bool isGeneratorFromClosure() const {
     return shared()->m_isGeneratorFromClosure;
   }
+  bool isPairGenerator() const { return shared()->m_isPairGenerator; }
   /**
    * If this function is a generator then it is implemented as a simple
    * function that just returns another function. hasGeneratorAsBody() will be
@@ -344,13 +355,16 @@ struct Func {
    */
   bool hasGeneratorAsBody() const { return shared()->m_hasGeneratorAsBody; }
   const Func* getGeneratorBody(const StringData* name) const;
+  /**
+   * Was this generated specially by the compiler to aide the runtime?
+   */
+  bool isGenerated() const { return shared()->m_isGenerated; }
+  bool isAsync() const { return shared()->m_isAsync; }
   bool hasStaticLocals() const { return !shared()->m_staticVars.empty(); }
   int numStaticLocals() const { return shared()->m_staticVars.size(); }
   const ClassInfo::MethodInfo* info() const { return shared()->m_info; }
-  bool isIgnoreRedefinition() const {
-    return shared()->m_info &&
-    (shared()->m_info->attribute & ClassInfo::IgnoreRedefinition);
-  }
+  bool isAllowOverride() const { return m_attrs & AttrAllowOverride; }
+
   const BuiltinFunction& nativeFuncPtr() const {
     return shared()->m_nativeFuncPtr;
   }
@@ -373,7 +387,9 @@ struct Func {
   }
 
   static void* allocFuncMem(
-    const StringData* name, int numParams, bool needsNextClonedClosure);
+    const StringData* name, int numParams,
+    bool needsNextClonedClosure,
+    bool lowMem);
 
   void setPrologue(int index, unsigned char* tca) {
     m_prologueTable[index] = tca;
@@ -397,10 +413,11 @@ struct Func {
     // numParams.
     return numParams + 2;
   }
+  void resetPrologue(int numParams);
   void resetPrologues() {
     // Useful when killing code; forget what we've learned about the contents
     // of the translation cache.
-    initPrologues(m_numParams, isGenerator());
+    initPrologues(m_numParams);
   }
 
   const NamedEntity* getNamedEntity() const {
@@ -426,12 +443,13 @@ public: // Offset accessors for the translator.
   X(unit);
   X(cls);
   X(numParams);
-  X(refBitVec);
+  X(refBitVal);
   X(fullName);
   X(prologueTable);
   X(maybeIntercepted);
   X(maxStackCells);
   X(funcBody);
+  X(shared);
 #undef X
 
 private:
@@ -448,7 +466,9 @@ private:
     int m_line2;
     DataType m_returnType;
     const ClassInfo::MethodInfo* m_info; // For builtins.
-    uint64_t* m_refBitVec;
+    // bits 64 and up of the reffiness guards (first 64 bits
+    // are in Func::m_refBitVal)
+    uint64_t* m_refBitPtr;
     BuiltinFunction m_builtinFuncPtr;
     BuiltinFunction m_nativeFuncPtr;
     ParamInfoVec m_params; // m_params[i] corresponds to parameter i.
@@ -461,9 +481,14 @@ private:
     bool m_isClosureBody : 1;
     bool m_isGenerator : 1;
     bool m_isGeneratorFromClosure : 1;
+    bool m_isPairGenerator : 1;
     bool m_hasGeneratorAsBody : 1;
+    bool m_isGenerated : 1;
+    bool m_isAsync : 1;
     UserAttributeMap m_userAttributes;
     const StringData* m_retTypeConstraint;
+    // per-func filepath for traits flattened during repo construction
+    const StringData* m_originalFilename;
     SharedData(PreClass* preClass, Id id, Offset base,
         Offset past, int line1, int line2, bool top,
         const StringData* docComment);
@@ -479,8 +504,8 @@ private:
 
 private:
   void setFullName();
-  void init(int numParams, bool isGenerator);
-  void initPrologues(int numParams, bool isGenerator);
+  void init(int numParams);
+  void initPrologues(int numParams);
   void appendParam(bool ref, const ParamInfo& info,
                    std::vector<ParamInfo>& pBuilder);
   void allocVarId(const StringData* name);
@@ -501,7 +526,7 @@ private:
     const NamedEntity* m_namedEntity;
     Slot m_methodSlot;
   };
-  uint64_t* m_refBitVec;
+  uint64_t m_refBitVal;
 public: // used by Unit
   unsigned m_cachedOffset;
 private:
@@ -545,6 +570,7 @@ public:
   private:
     bool m_ref; // True if parameter is passed by reference.
   };
+
   typedef std::vector<ParamInfo> ParamInfoVec;
 
   FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n);
@@ -587,6 +613,7 @@ public:
 
   void setMaxStackCells(int cells) { m_maxStackCells = cells; }
   void addStaticVar(Func::SVInfo svInfo);
+  const SVInfoVec& svInfo() const { return m_staticVars; }
 
   UnitEmitter& ue() const { return m_ue; }
   PreClassEmitter* pce() const { return m_pce; }
@@ -621,21 +648,47 @@ public:
   void setIsGenerator(bool isGenerator) { m_isGenerator = isGenerator; }
   bool isGenerator() const { return m_isGenerator; }
 
+  bool isMethod() const {
+    return !isPseudoMain() && (bool)pce();
+  }
+
   void setIsGeneratorFromClosure(bool b) { m_isGeneratorFromClosure = b; }
   bool isGeneratorFromClosure() const { return m_isGeneratorFromClosure; }
+
+  void setIsPairGenerator(bool b) { m_isPairGenerator = b; }
+  bool isPairGenerator() const { return m_isPairGenerator; }
 
   void setHasGeneratorAsBody(bool b) { m_hasGeneratorAsBody = b; }
   bool hasGeneratorAsBody() const { return m_hasGeneratorAsBody; }
 
   void setContainsCalls() { m_containsCalls = true; }
 
+  void setIsAsync(bool isAsync) { m_isAsync = isAsync; }
+  bool isAsync() const { return m_isAsync; }
+
   void addUserAttribute(const StringData* name, TypedValue tv);
+  int parseNativeAttributes(Attr &attrs) const;
 
   void commit(RepoTxn& txn) const;
   Func* create(Unit& unit, PreClass* preClass = nullptr) const;
 
   void setBuiltinFunc(const ClassInfo::MethodInfo* info,
       BuiltinFunction bif, BuiltinFunction nif, Offset base);
+  void setBuiltinFunc(BuiltinFunction bif, BuiltinFunction nif,
+                      Attr attrs, Offset base);
+
+  void setOriginalFilename(const StringData* name) {
+    m_originalFilename = name;
+  }
+
+  void setReturnType(DataType dt) { m_returnType = dt; }
+  void setDocComment(const char *dc) {
+    m_docComment = makeStaticString(dc);
+  }
+  void setLocation(int l1, int l2) {
+    m_line1 = l1;
+    m_line2 = l2;
+  }
 
 private:
   void sortEHTab();
@@ -673,14 +726,18 @@ private:
   bool m_isClosureBody;
   bool m_isGenerator;
   bool m_isGeneratorFromClosure;
+  bool m_isPairGenerator;
   bool m_hasGeneratorAsBody;
   bool m_containsCalls;
+  bool m_isAsync;
 
   Func::UserAttributeMap m_userAttributes;
 
   const ClassInfo::MethodInfo* m_info;
   BuiltinFunction m_builtinFuncPtr;
   BuiltinFunction m_nativeFuncPtr;
+
+  const StringData* m_originalFilename;
 };
 
 class FuncRepoProxy : public RepoProxy {
@@ -719,6 +776,6 @@ FRP_OPS
 #undef FRP_OP
 };
 
- }
+}
 
 #endif

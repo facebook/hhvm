@@ -1,0 +1,46 @@
+FF00FF
+HipHop Warning: %s
+Array
+(
+    [red] => 255
+    [green] => 0
+    [blue] => 255
+    [alpha] => 0
+)
+Array
+(
+    [red] => 254
+    [green] => 0
+    [blue] => 0
+    [alpha] => 0
+)
+Array
+(
+    [red] => 246
+    [green] => 10
+    [blue] => 10
+    [alpha] => 0
+)
+64FF00FF
+HipHop Warning: %s
+Array
+(
+    [red] => 255
+    [green] => 0
+    [blue] => 255
+    [alpha] => 1
+)
+Array
+(
+    [red] => 254
+    [green] => 0
+    [blue] => 0
+    [alpha] => 1
+)
+Array
+(
+    [red] => 246
+    [green] => 10
+    [blue] => 10
+    [alpha] => 1
+)

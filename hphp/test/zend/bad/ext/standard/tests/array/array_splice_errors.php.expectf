@@ -1,0 +1,12 @@
+*** Testing error conditions of array_splice() ***
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+Done

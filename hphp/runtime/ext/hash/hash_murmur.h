@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -30,7 +30,7 @@ uint64_t murmur_rehash_64A(uint64_t k);
 /* Seed constant for MurmurHash64A selected by search for optimum diffusion
  * including recursive application.
  */
-static const int SEED = 4193360111ul;
+const int SEED = 4193360111ul;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -1,0 +1,85 @@
+*** Testing htmlspecialchars_decode() : usage variations ***
+
+-- Iteration 1 --
+string(104) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. " double quote string "</html>"
+
+-- Iteration 2 --
+string(104) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. " double quote string "</html>"
+
+-- Iteration 3 --
+string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+
+-- Iteration 4 --
+string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+
+-- Iteration 5 --
+string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+
+-- Iteration 6 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 7 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 8 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 9 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 10 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 11 --
+string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+
+-- Iteration 12 --
+string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+
+-- Iteration 13 --
+string(104) "<html>Roy's height > Sam's height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+
+-- Iteration 14 --
+string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+
+-- Iteration 15 --
+string(104) "<html>Roy's height > Sam's height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+
+-- Iteration 16 --
+string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+
+-- Iteration 17 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 18 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 19 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 20 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 21 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 22 --
+string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+
+-- Iteration 23 --
+string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+
+-- Iteration 24 --
+HipHop Warning: %s
+NULL
+Done

@@ -1,0 +1,12 @@
+Creating Table
+bool(true)
+INSERT into table
+bool(true)
+bool(true)
+SELECTING results
+paramCount with wrong number of arguments
+HipHop Warning: %s
+NULL
+Closing database
+bool(true)
+Done

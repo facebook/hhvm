@@ -1,0 +1,90 @@
+*** Testing iconv_mime_decode() : usage variations ***
+
+-- Iteration 1 --
+HipHop Notice: %s
+bool(false)
+
+-- Iteration 2 --
+HipHop Notice: %s
+bool(false)
+
+-- Iteration 3 --
+HipHop Notice: %s
+bool(false)
+
+-- Iteration 4 --
+HipHop Notice: %s
+bool(false)
+
+-- Iteration 5 --
+HipHop Notice: %s
+bool(false)
+
+-- Iteration 6 --
+HipHop Notice: %s
+bool(false)
+
+-- Iteration 7 --
+HipHop Notice: %s
+bool(false)
+
+-- Iteration 8 --
+HipHop Notice: %s
+bool(false)
+
+-- Iteration 9 --
+HipHop Notice: %s
+bool(false)
+
+-- Iteration 10 --
+string(44) "5375626a6563743a20412053616d706c652054657374"
+
+-- Iteration 11 --
+string(44) "5375626a6563743a20412053616d706c652054657374"
+
+-- Iteration 12 --
+HipHop Notice: %s
+bool(false)
+
+-- Iteration 13 --
+string(44) "5375626a6563743a20412053616d706c652054657374"
+
+-- Iteration 14 --
+HipHop Notice: %s
+bool(false)
+
+-- Iteration 15 --
+string(44) "5375626a6563743a20412053616d706c652054657374"
+
+-- Iteration 16 --
+string(44) "5375626a6563743a20412053616d706c652054657374"
+
+-- Iteration 17 --
+string(44) "5375626a6563743a20412053616d706c652054657374"
+
+-- Iteration 18 --
+HipHop Notice: %s
+bool(false)
+
+-- Iteration 19 --
+HipHop Notice: %s
+bool(false)
+
+-- Iteration 20 --
+HipHop Notice: %s
+bool(false)
+
+-- Iteration 21 --
+HipHop Notice: %s
+bool(false)
+
+-- Iteration 22 --
+string(44) "5375626a6563743a20412053616d706c652054657374"
+
+-- Iteration 23 --
+string(44) "5375626a6563743a20412053616d706c652054657374"
+
+-- Iteration 24 --
+HipHop Warning: %s
+bool(false)
+Done

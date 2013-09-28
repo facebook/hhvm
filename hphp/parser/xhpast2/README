@@ -1,0 +1,92 @@
+xhpast2 Parser Design
+
+This file discusses the design decisions made to produce xhpast-compatible
+output from the HPHP parser.  Most of the features of the design have
+to do with the impedance mismatch between the HPHP parser and xhpast.
+
+Specifically:
+
+1. xhpast outputs a byte-accurate token stream but HPHP does not.
+
+This is natural since HPHP is more concerned with executing PHP, not linting it.
+Therefore it is necessary for us to modify the HPHP parser so we can intercept
+and accumulate tokens as they are seen and associate them with the relevant
+parse tree node. There is not a 1:1 correspondence between the xhpast and HPHP
+tokenizers so some massaging is necessary.
+
+
+2. HPHP nodes are generally at a semantically higher level than xhpast nodes.
+xhpast nodes do not carry any attributes other than node type, pointers to
+the range of tokens in the token stream corresponding to that node + a list of
+children. HPHP parse tree nodes are more condensed than xhpast nodes, often
+choosing to represent features of a node as attributes instead of children.
+For example:
+
+$x = &$a;
+
+The HPHP parser callback is:
+
+void onAssign(Token& out, Token& var, Token& expr, bool ref, bool rhsFirst = false)
+
+Notice that '=' and '&' are not represented as tokens.  The '=' is implicit in
+the function call, and the optional '&' is represented as a bool.
+
+The xhpast tree structure for the same expression is:
+
+[n_BINARY_EXPRESSION ...
+  [n_VARIABLE ...             // $x
+  [n_OPERATOR ...             // =
+  [n_VARIABLE_REFERENCE ...   // &
+    [n_VARIABLE ...           // $a
+
+As a result it is necessary to do a small bit of manual parsing to identify the
+location of the = and & in the token stream and create nodes for them.
+
+There are also situations where the opposite is true.  For example strings with
+embedded variables like "foo {$x} {$y}" generate additional nodes for $x and $y
+but xhpast treats the entirety as a single string node.  These cases are easier to
+handle since we can simply prune or combine nodes we don't care about.
+
+IDEAL DESIGN
+
+In an ideal world, the HPHP parser would be augmented to provide a superset of the
+information required for all other parsers that we have (including Hack and pfff),
+then the other parsers would be trivial (or at least easy to derive from the HPHP
+parser).
+
+However, I didn't feel like making big intrusive changes to the HPHP parser. The ideal
+design might make sense at some future point in time.
+
+ACTUAL DESIGN
+
+Given that I wanted to avoid intrusive changes to the HPHP parser, I elected to build
+a framework that would most flexibly handle the differences listed above, plus any that
+I had perhaps not discovered yet or might arise in future. Thus I elected to implement the
+transformation as a batch process, that is, first build a clean HPHP AST + token stream,
+then transform it to an xhpast-compatible AST.  Specific changes include:
+
+1. Adding a TokenListener facility to the parser to eavesdrop on tokens as they fly by.
+See parser/scanner.h. In addition to eavesdropping on tokens we also want the token ids
+that are returned by the scanner (this was not previously captured by HPHP tokens). This
+has been accomplished by modifying scanner rules to also pass the token id, such as
+T_WHITESPACE, whenever we notify the scanner that a token has been detected.
+
+2. Constructing a new lightweight AST that purely captures the rules of the parser.
+See parser/xhpast2/parser.h. Due to the higher semantic level of the HPHP parser, these
+AST nodes need to contain arbitrary scalar attributes in addition to a list of children.
+This has been implemented via the various "ExtraInfo" structs in that file. For example,
+the extra arguments necessary for the onName parser callback are stored in the OnNameEI
+struct.
+
+The high level flow is found in xhpast2.cpp and is pretty simple. The only thing that might
+be non-obvious at first glance is that the when you call parser.parse(), what is actually
+invoked are the parse rules in hphp.y, which in turn calls each callback method as they
+fire.
+
+Once the tree is built we transform it to xhpast nodes via outputXHPAST() (with heavy
+lifting done by outputXHPASTImpl). The heart of outputXHPASTImpl is a giant switch that
+processes each node type differently. It would have been more object-oriented to make a
+class for each node and have each node know how to transform itself to xhpast but I was
+concerned that some of the transformations might require peeking up and down the hierarchy
+and break this nice abstraction anyway. Also, I didn't want to create an army of classes.
+Still, I would not be averse to going in this direction if it can be done elegantly.

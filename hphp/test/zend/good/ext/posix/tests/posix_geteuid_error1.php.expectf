@@ -1,0 +1,9 @@
+*** Test by calling method or function with incorrect numbers of arguments ***
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL

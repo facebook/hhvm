@@ -1,0 +1,83 @@
+---- Pass by ref / pass by val: functions ----
+HipHop Notice: %s
+HipHop Notice: %s
+NULL
+string(11) "Ref changed"
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+NULL
+NULL
+HipHop Notice: %s
+HipHop Notice: %s
+NULL
+string(11) "Ref changed"
+HipHop Notice: %s
+HipHop Notice: %s
+string(11) "Ref changed"
+NULL
+string(12) "Ref1 changed"
+string(12) "Ref2 changed"
+
+
+ ---- Pass by ref / pass by val: static method calls ----
+HipHop Notice: %s
+
+Strict Standards: Non-static method C::v() should not be called statically in %s on line 95
+
+Strict Standards: Non-static method C::r() should not be called statically in %s on line 96
+HipHop Notice: %s
+NULL
+string(11) "Ref changed"
+HipHop Notice: %s
+HipHop Notice: %s
+
+Strict Standards: Non-static method C::vv() should not be called statically in %s on line 100
+HipHop Notice: %s
+HipHop Notice: %s
+NULL
+NULL
+HipHop Notice: %s
+
+Strict Standards: Non-static method C::vr() should not be called statically in %s on line 104
+HipHop Notice: %s
+NULL
+string(11) "Ref changed"
+HipHop Notice: %s
+
+Strict Standards: Non-static method C::rv() should not be called statically in %s on line 108
+HipHop Notice: %s
+string(11) "Ref changed"
+NULL
+
+Strict Standards: Non-static method C::rr() should not be called statically in %s on line 112
+string(12) "Ref1 changed"
+string(12) "Ref2 changed"
+
+
+ ---- Pass by ref / pass by val: instance method calls ----
+HipHop Notice: %s
+HipHop Notice: %s
+NULL
+string(11) "Ref changed"
+HipHop Notice: %s
+HipHop Notice: %s
+NULL
+string(11) "Ref changed"
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+NULL
+NULL
+HipHop Notice: %s
+HipHop Notice: %s
+NULL
+string(11) "Ref changed"
+HipHop Notice: %s
+HipHop Notice: %s
+string(11) "Ref changed"
+NULL
+string(12) "Ref1 changed"
+string(12) "Ref2 changed"

@@ -1,6 +1,5 @@
 <?php
 
-
 $x = (object)null;
 var_dump ($x == 1 && 1 == $x);
 var_dump ($x == 1.0 && 1.0 == $x);

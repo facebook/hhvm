@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_PDO_DRIVER_H_
 #define incl_HPHP_PDO_DRIVER_H_
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -212,7 +212,7 @@ public:
   static const PDODriverMap &GetDrivers() { return s_drivers;}
 
 public:
-  PDODriver(const char *name);
+  explicit PDODriver(const char *name);
   virtual ~PDODriver() {}
 
   const char *getName() const { return m_name;}
@@ -232,7 +232,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 class PDOStatement;
-typedef SmartObject<PDOStatement> sp_PDOStatement;
+typedef SmartResource<PDOStatement> sp_PDOStatement;
 
 /* represents a connection to a database */
 class PDOConnection : public ResourceData {
@@ -260,9 +260,9 @@ public:
   virtual ~PDOConnection();
   virtual bool create(CArrRef options) = 0;
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("PDOConnection")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   // alloc/release persistent storage.
   virtual void persistentSave();
@@ -383,7 +383,7 @@ public:
   /* defaults for fetches */
   PDOFetchType default_fetch_type;
 };
-typedef SmartObject<PDOConnection> sp_PDOConnection;
+typedef SmartResource<PDOConnection> sp_PDOConnection;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -393,9 +393,9 @@ public:
   PDOColumn();
   ~PDOColumn();
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("PDOColumn")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
 public:
   String name;
@@ -412,9 +412,9 @@ public:
   PDOBoundParam();
   ~PDOBoundParam();
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("PDOBoundParam")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
 public:
   int64_t paramno;           /* if -1, then it has a name, and we don't
@@ -459,9 +459,9 @@ public:
   PDOStatement();
   virtual ~PDOStatement();
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("PDOStatement")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   virtual bool support(SupportedMethod method);
 
@@ -607,7 +607,8 @@ public:
 int pdo_parse_params(PDOStatement *stmt, CStrRef in, String &out);
 void pdo_raise_impl_error(sp_PDOConnection dbh, sp_PDOStatement stmt,
                           const char *sqlstate, const char *supp);
-void throw_pdo_exception(CVarRef code, CVarRef info, const char *fmt, ...);
+void throw_pdo_exception(CVarRef code, CVarRef info,
+                         const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,7 +18,7 @@
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/binary_op_expression.h"
 #include "hphp/compiler/analysis/code_error.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 using namespace HPHP;
 
@@ -70,7 +70,7 @@ int EncapsListExpression::getKidCount() const {
 void EncapsListExpression::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_exps = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      m_exps = dynamic_pointer_cast<ExpressionList>(cp);
       break;
     default:
       assert(false);

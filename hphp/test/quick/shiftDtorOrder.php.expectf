@@ -1,0 +1,5 @@
+HipHop Notice: Object of class A could not be converted to int in %s on line 12
+HipHop Notice: Object of class B could not be converted to int in %s on line 12
+~A
+~B
+int(2)

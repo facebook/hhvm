@@ -1,0 +1,10 @@
+*** Testing ctype_print() : error conditions ***
+
+-- Testing ctype_print() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing ctype_print() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

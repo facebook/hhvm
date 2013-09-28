@@ -1,0 +1,41 @@
+IntlTimeZone Object
+(
+    [valid] => 1
+    [id] => Europe/Amsterdam
+    [rawOffset] => 3600000
+    [currentOffset] => %d
+)
+nl
+IntlTimeZone Object
+(
+    [valid] => 1
+    [id] => Europe/Lisbon
+    [rawOffset] => 0
+    [currentOffset] => %d
+)
+nl
+IntlTimeZone Object
+(
+    [valid] => 1
+    [id] => Europe/Lisbon
+    [rawOffset] => 0
+    [currentOffset] => %d
+)
+nl
+IntlTimeZone Object
+(
+    [valid] => 1
+    [id] => Europe/Amsterdam
+    [rawOffset] => 3600000
+    [currentOffset] => %d
+)
+pt
+IntlTimeZone Object
+(
+    [valid] => 1
+    [id] => Europe/Lisbon
+    [rawOffset] => 0
+    [currentOffset] => %d
+)
+pt
+==DONE==

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,7 +31,7 @@ namespace Compiler {
 
 enum ErrorType {
 #define CODE_ERROR_ENTRY(x) x,
-#include "compiler/analysis/core_code_error.inc"
+#include "hphp/compiler/analysis/core_code_error.inc"
 #undef CODE_ERROR_ENTRY
   ErrorCount,
   NoError

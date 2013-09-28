@@ -1,6 +1,5 @@
 <?php
 
-
 trait T1 {
   static function hello() {
     echo "Hello ";

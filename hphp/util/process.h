@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -113,6 +113,21 @@ public:
    */
   static pthread_t GetThreadId() {
     return pthread_self();
+  }
+
+  /**
+   * Current thread's identifier.
+   */
+  static uint64_t GetThreadIdForTrace() {
+    // For tracing purposes this just needs to be unique, pthread_t is not
+    // portable but even if it's a pointer to a struct like on OSX this will
+    // produce a unique value. If we support platforms where this isn't the
+    // case we will need to revisit this.
+#ifdef __linux__
+    return pthread_self();
+#else
+    return (uint64_t)pthread_self();
+#endif
   }
 
   /*

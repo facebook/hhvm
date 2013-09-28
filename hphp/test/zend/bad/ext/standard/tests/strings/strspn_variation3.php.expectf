@@ -1,0 +1,120 @@
+*** Testing strspn() : with unexpected values of start argument ***
+
+-- Iteration with start value as "10.5" --
+int(0)
+int(0)
+
+-- Iteration with start value as "-10.5" --
+int(2)
+int(2)
+
+-- Iteration with start value as "1012345670" --
+bool(false)
+bool(false)
+
+-- Iteration with start value as "1.07654321E-7" --
+int(2)
+int(2)
+
+-- Iteration with start value as "0.5" --
+int(2)
+int(2)
+
+-- Iteration with start value as "Array" --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Iteration with start value as "Array" --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Iteration with start value as "Array" --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Iteration with start value as "Array" --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Iteration with start value as "Array" --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Iteration with start value as "" --
+int(2)
+int(2)
+
+-- Iteration with start value as "" --
+int(2)
+int(2)
+
+-- Iteration with start value as "1" --
+int(1)
+int(1)
+
+-- Iteration with start value as "" --
+int(2)
+int(2)
+
+-- Iteration with start value as "1" --
+int(1)
+int(1)
+
+-- Iteration with start value as "" --
+int(2)
+int(2)
+
+-- Iteration with start value as "" --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Iteration with start value as "" --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Iteration with start value as "string" --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Iteration with start value as "string" --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Iteration with start value as "object" --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Iteration with start value as "" --
+int(2)
+int(2)
+
+-- Iteration with start value as "" --
+int(2)
+int(2)
+
+-- Iteration with start value as "Resource id #%d" --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+Done

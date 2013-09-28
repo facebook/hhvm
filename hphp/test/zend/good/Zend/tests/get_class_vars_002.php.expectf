@@ -1,0 +1,17 @@
+array(1) {
+  ["a"]=>
+  int(1)
+}
+array(3) {
+  ["a"]=>
+  int(1)
+  ["aa"]=>
+  int(4)
+  ["cc"]=>
+  int(6)
+}
+HipHop Notice: %s
+HipHop Notice: %s
+int(1)
+NULL
+NULL

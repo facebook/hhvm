@@ -1,0 +1,6 @@
+*** Testing ob_get_contents() : error cases ***
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+Done

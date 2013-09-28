@@ -1,0 +1,10 @@
+*** Testing str_rot13() : error conditions ***
+-- Testing str_rot13() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+
+-- Testing str_rot13() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

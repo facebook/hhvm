@@ -1,0 +1,10 @@
+*** Testing get_object_vars() : error conditions ***
+
+-- Testing get_object_vars() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing get_object_vars() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

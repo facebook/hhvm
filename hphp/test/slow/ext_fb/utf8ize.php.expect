@@ -1,0 +1,24 @@
+bool(true)
+string(7) "hon�k"
+bool(true)
+string(10) "testఱ�"
+bool(true)
+string(13) "testఱ��"
+bool(true)
+string(3) "�"
+bool(true)
+string(6) "��"
+bool(true)
+string(9) "abc�def"
+bool(true)
+string(4) "�("
+====
+int(0)
+int(1)
+int(2)
+int(12)
+int(2)
+int(7)
+int(7)
+int(9)
+int(7)

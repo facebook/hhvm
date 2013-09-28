@@ -1,3 +1,3 @@
 <?php
 
- var_dump($a || null);
+var_dump($a || null);

@@ -1,0 +1,50 @@
+*** Testing trim() function: with unexpected inputs for 'str' argument ***
+-- Iteration 1 --
+string(1) "0"
+-- Iteration 2 --
+string(1) "1"
+-- Iteration 3 --
+string(3) "255"
+-- Iteration 4 --
+string(3) "256"
+-- Iteration 5 --
+string(10) "2147483647"
+-- Iteration 6 --
+string(10) "2147483648"
+-- Iteration 7 --
+string(4) "10.5"
+-- Iteration 8 --
+string(4) "20.5"
+-- Iteration 9 --
+string(12) "101234567000"
+-- Iteration 10 --
+HipHop Warning: %s
+NULL
+-- Iteration 11 --
+HipHop Warning: %s
+NULL
+-- Iteration 12 --
+HipHop Warning: %s
+NULL
+-- Iteration 13 --
+string(1) "1"
+-- Iteration 14 --
+string(0) ""
+-- Iteration 15 --
+string(1) "1"
+-- Iteration 16 --
+string(0) ""
+-- Iteration 17 --
+string(0) ""
+-- Iteration 18 --
+string(0) ""
+-- Iteration 19 --
+string(13) "sample object"
+-- Iteration 20 --
+HipHop Warning: %s
+NULL
+-- Iteration 21 --
+string(0) ""
+-- Iteration 22 --
+string(0) ""
+===DONE===

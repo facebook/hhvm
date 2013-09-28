@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,7 +34,7 @@
 
 namespace HPHP {
 
-static const Trace::Module TRACEMOD = Trace::tprefix;
+TRACE_SET_MOD(tprefix);
 
 namespace Trace {
 
@@ -86,7 +86,8 @@ class Init {
         if (mod >= 0) {
           levels[mod] = level;
         }
-        if (mod == Trace::minstr || mod == Trace::punt) {
+        if (mod == Trace::minstr ||
+            mod == Trace::interpOne) {
           levels[Trace::statgroups] = std::max(levels[Trace::statgroups], 1);
         }
       }
@@ -136,6 +137,13 @@ void traceRelease(const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   vtrace(fmt, ap);
+  va_end(ap);
+}
+
+void traceRingBufferRelease(const char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  vtraceRingbuffer(fmt, ap);
   va_end(ap);
 }
 

@@ -1,11 +1,11 @@
 <?php
 
-
 class Example {
    function whatever() {
       if (isset($this)) {
           var_dump('static method call');
-      } else {
+      }
+ else {
           var_dump('non-static method call');
       }
    }

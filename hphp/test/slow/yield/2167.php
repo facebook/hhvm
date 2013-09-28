@@ -1,6 +1,5 @@
 <?php
 
-
 class X {
   function foo($t) {
     $$t = 5;
@@ -8,4 +7,6 @@ class X {
   }
 }
 $x = new X;
-foreach ($x->foo('this') as $v) { var_dump($v); }
+foreach ($x->foo('this') as $v) {
+ var_dump($v);
+ }

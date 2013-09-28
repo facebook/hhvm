@@ -1,6 +1,5 @@
 <?php
 
-
 trait TraitFoo {
   public function testDoSomethingInTrait() {
     return call_user_func(array($this, 'doSomethingInTrait'));

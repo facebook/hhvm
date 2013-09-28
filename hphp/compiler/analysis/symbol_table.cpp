@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,9 +27,9 @@
 #include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/expression/simple_variable.h"
 
-#include "hphp/runtime/base/class_info.h"
-#include "hphp/runtime/base/complex_types.h"
-#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/util/logger.h"
 
@@ -65,13 +65,13 @@ TypePtr Symbol::setType(AnalysisResultConstPtr ar, BlockScopeRawPtr scope,
     // at this point, you *must* have a lock (if you are user scope)
     if (scope->is(BlockScope::FunctionScope)) {
       FunctionScopeRawPtr f =
-        boost::static_pointer_cast<FunctionScope>(scope);
+        static_pointer_cast<FunctionScope>(scope);
       if (f->isUserFunction()) {
         f->getInferTypesMutex().assertOwnedBySelf();
       }
     } else if (scope->is(BlockScope::ClassScope)) {
       ClassScopeRawPtr c =
-        boost::static_pointer_cast<ClassScope>(scope);
+        static_pointer_cast<ClassScope>(scope);
       if (c->isUserClass()) {
         c->getInferTypesMutex().assertOwnedBySelf();
       }
@@ -285,9 +285,9 @@ void Symbol::serializeParam(JSON::DocTarget::OutputStream &out) const {
     assert(valueExp);
     const string &init = ExtractInitializer(out.analysisResult(), valueExp);
     if (!init.empty()) out << init;
-    else               out << JSON::Null;
+    else               out << JSON::Null();
   } else {
-    out << JSON::Null;
+    out << JSON::Null();
   }
 
   ms.done();
@@ -336,9 +336,9 @@ void Symbol::serializeClassVar(JSON::DocTarget::OutputStream &out) const {
     assert(initExp);
     const string &init = ExtractInitializer(out.analysisResult(), initExp);
     if (!init.empty()) out << init;
-    else               out << JSON::Null;
+    else               out << JSON::Null();
   } else {
-    out << JSON::Null;
+    out << JSON::Null();
   }
 
   const string &docs = ExtractDocComment(
@@ -520,17 +520,6 @@ ConstructPtr SymbolTable::getValue(const std::string &name) const {
   return ConstructPtr();
 }
 
-void SymbolTable::setSepExtension(const std::string &name) {
-  genSymbol(name, m_const)->setSep();
-}
-
-bool SymbolTable::isSepExtension(const std::string &name) const {
-  if (const Symbol *sym = getSymbol(name)) {
-    return sym->isSep();
-  }
-  return false;
-}
-
 TypePtr SymbolTable::setType(AnalysisResultConstPtr ar, const std::string &name,
                              TypePtr type, bool coerced) {
   return setType(ar, genSymbol(name, m_const), type, coerced);
@@ -595,7 +584,7 @@ void SymbolTable::countTypes(std::map<std::string, int> &counts) {
 }
 
 string SymbolTable::getEscapedText(Variant v, int &len) {
-  VariableSerializer vs(VariableSerializer::Serialize);
+  VariableSerializer vs(VariableSerializer::Type::Serialize);
   String str = vs.serialize(v, true);
   len = str.length();
   string output = Util::escapeStringForCPP(str.data(), len);

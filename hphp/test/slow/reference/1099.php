@@ -1,8 +1,11 @@
 <?php
 
-
-function f($arg0, $arg1) { var_dump($arg0, $arg1); }
-function g(&$arg0, $arg1) { var_dump($arg0, $arg1); }
+function f($arg0, $arg1) {
+ var_dump($arg0, $arg1);
+ }
+function g(&$arg0, $arg1) {
+ var_dump($arg0, $arg1);
+ }
 class A {
   function f($f, $var) {
     $f($this, $$var = 5);

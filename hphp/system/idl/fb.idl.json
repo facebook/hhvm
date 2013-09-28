@@ -1,0 +1,727 @@
+{
+    "preamble": "",
+    "consts": [
+        {
+            "name": "FB_UNSERIALIZE_NONSTRING_VALUE",
+            "type": "Int64"
+        },
+        {
+            "name": "FB_UNSERIALIZE_UNEXPECTED_END",
+            "type": "Int64"
+        },
+        {
+            "name": "FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE",
+            "type": "Int64"
+        },
+        {
+            "name": "FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE",
+            "type": "Int64"
+        },
+        {
+            "name": "XHPROF_FLAGS_NO_BUILTINS",
+            "type": "Int64"
+        },
+        {
+            "name": "XHPROF_FLAGS_CPU",
+            "type": "Int64"
+        },
+        {
+            "name": "XHPROF_FLAGS_MEMORY",
+            "type": "Int64"
+        },
+        {
+            "name": "XHPROF_FLAGS_VTSC",
+            "type": "Int64"
+        },
+        {
+            "name": "XHPROF_FLAGS_TRACE",
+            "type": "Int64"
+        },
+        {
+            "name": "XHPROF_FLAGS_MEASURE_XHPROF_DISABLE",
+            "type": "Int64"
+        },
+        {
+            "name": "XHPROF_FLAGS_MALLOC",
+            "type": "Int64"
+        }
+    ],
+    "funcs": [
+        {
+            "name": "fb_serialize",
+            "desc": "Seriailize data into a compact format that can be unserialized by fb_unserialize().",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Serialized data."
+            },
+            "args": [
+                {
+                    "name": "thing",
+                    "type": "Variant",
+                    "desc": "What to serialize. Note that objects are not supported."
+                }
+            ]
+        },
+        {
+            "name": "fb_unserialize",
+            "desc": "Unserialize a previously fb_thrift_serialize()-ed data.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Unserialized data."
+            },
+            "args": [
+                {
+                    "name": "thing",
+                    "type": "Variant",
+                    "desc": "What to unserialize."
+                },
+                {
+                    "name": "success",
+                    "type": "Variant",
+                    "desc": "Whether it was successful or not.",
+                    "ref": true
+                }
+            ]
+        },
+        {
+            "name": "fb_compact_serialize",
+            "desc": "Serialize data into a compact format that can be unserialized by fb_compact_unserialize(). In general produces smaller output compared to fb_serialize(). Largest savings are on arrays with sequential (or almost sequential) indexes, i.e. simple arrays like array($a, $b, $c). NOTE: unlike serialize(), does not preserve internal references, i.e. array(&$a, &$a) will become array($a, $a).",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Serialized data."
+            },
+            "args": [
+                {
+                    "name": "thing",
+                    "type": "Variant",
+                    "desc": "What to serialize. Note that objects are not supported."
+                }
+            ]
+        },
+        {
+            "name": "fb_compact_unserialize",
+            "desc": "Unserialize a previously fb_compact_serialize()-ed data.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Unserialized data."
+            },
+            "args": [
+                {
+                    "name": "thing",
+                    "type": "Variant",
+                    "desc": "What to unserialize."
+                },
+                {
+                    "name": "success",
+                    "type": "Variant",
+                    "desc": "Whether it was successful or not.",
+                    "ref": true
+                },
+                {
+                    "name": "errcode",
+                    "type": "Variant",
+                    "value": "null_variant",
+                    "desc": "One of those FB_UNSERIALIZE_ constants to describe what the decoding error was, if it failed.",
+                    "ref": true
+                }
+            ]
+        },
+        {
+            "name": "fb_could_include",
+            "desc": "Returns whether the (php) file could be included (eg if its been compiled into the binary)",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "TRUE if it could be included"
+            },
+            "args": [
+                {
+                    "name": "file",
+                    "type": "String",
+                    "desc": "The file to test"
+                }
+            ]
+        },
+        {
+            "name": "fb_intercept",
+            "desc": "Invokes a user handler upon calling a function or a class method. If this handler returns FALSE, code will continue with original function. Otherwise, it will return what handler tells. The handler function looks like \"intercept_handler($name, $obj, $params, $data, &$done)\", where $name is orginal function's name, $obj is $this for an instance method call or null for static method call or function calls, and $params are original call's parameters. $data is what's passed to fb_intercept() and set $done to false to indicate function should continue its execution with old function as if interception did not happen. By default $done is true so it will return handler's return immediately without executing old function's code. Note that built-in functions are not interceptable.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "TRUE if successful, FALSE otherwise"
+            },
+            "args": [
+                {
+                    "name": "name",
+                    "type": "String",
+                    "desc": "The function or class method name to intercept. Use \"class::method\" for method name. If empty, all functions will be intercepted by the specified handler and registered individual handlers will be replaced. To make sure individual handlers not affected by such a call, call fb_intercept() with individual names afterwards."
+                },
+                {
+                    "name": "handler",
+                    "type": "Variant",
+                    "desc": "Callback to handle the interception. Use null, false or empty string to unregister a previously registered handler. If name is empty, all previously registered handlers, including those that are set by individual function names, will be removed."
+                },
+                {
+                    "name": "data",
+                    "type": "Variant",
+                    "value": "null_variant",
+                    "desc": "Extra data to pass to the handler when intercepting"
+                }
+            ]
+        },
+        {
+            "name": "fb_rename_function",
+            "desc": "Rename a function, so that a function can be called with the new name.\n\nWhen writing unit tests, one may want to stub out a function. To do so, call fb_rename_function('func_to_stub_out', 'somename') then fb_rename_function('new_func_to_replace_with', 'func_to_stub_out'). This way, when calling func_to_stub_out(), it will actually execute new_func_to_replace_with().",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "TRUE if successful, FALSE otherwise."
+            },
+            "args": [
+                {
+                    "name": "orig_func_name",
+                    "type": "String",
+                    "desc": "Which function to rename."
+                },
+                {
+                    "name": "new_func_name",
+                    "type": "String",
+                    "desc": "What is the new name."
+                }
+            ]
+        },
+        {
+            "name": "fb_autoload_map",
+            "desc": "Specify a map containing an array with four optional elements. 'class', 'function', 'constant', and 'failure'. The first three entries are maps from names to the file where that entity is defined. An attempt to access an undefined class\/function\/constant will look it up in the appropriate map, and if found, include that file. If the entity is still not defined, it will call the 'failure' entry.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "TRUE if successful, FALSE otherwise."
+            },
+            "args": [
+                {
+                    "name": "map",
+                    "type": "Variant",
+                    "desc": "The autoload map."
+                },
+                {
+                    "name": "root",
+                    "type": "String",
+                    "desc": "Root to be prepended to all paths in the map."
+                }
+            ]
+        },
+        {
+            "name": "fb_utf8ize",
+            "desc": "Sanitize a string to make sure it's legal UTF-8 by stripping off any characters that are not properly encoded.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Sanitized string."
+            },
+            "args": [
+                {
+                    "name": "input",
+                    "type": "Variant",
+                    "desc": "What string to sanitize.",
+                    "ref": true
+                }
+            ]
+        },
+        {
+            "name": "fb_utf8_strlen_deprecated",
+            "desc": "Count the number of UTF-8 code points in string or byte count if it's not valid UTF-8.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Returns the count of code points if valid UTF-8 else byte count."
+            },
+            "args": [
+                {
+                    "name": "input",
+                    "type": "String",
+                    "desc": "The string."
+                }
+            ]
+        },
+        {
+            "name": "fb_utf8_strlen",
+            "desc": "Count the number of UTF-8 code points in string, substituting U+FFFD for invalid sequences.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Returns the number of code points interpreting string as UTF-8."
+            },
+            "args": [
+                {
+                    "name": "input",
+                    "type": "String",
+                    "desc": "The string."
+                }
+            ]
+        },
+        {
+            "name": "fb_utf8_substr",
+            "desc": "Cuts a portion of str specified by the start and length parameters.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the portion of str specified by the start and length parameters.\n\nIf str is shorter than start characters long, FALSE will be returned."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The original string."
+                },
+                {
+                    "name": "start",
+                    "type": "Int32",
+                    "desc": "If start is non-negative, fb_utf8_substr() cuts the portion out of str beginning at start'th character, counting from zero.\n\nIf start is negative, fb_utf8_substr() cuts out the portion beginning at the position, start characters away from the end of str."
+                },
+                {
+                    "name": "length",
+                    "type": "Int32",
+                    "value": "INT_MAX",
+                    "desc": "If length is given and is positive, the return value will contain at most length characters of the portion that begins at start (depending on the length of string).\n\nIf negative length is passed, fb_utf8_substr() cuts the portion out of str from the start'th character up to the character that is length characters away from the end of the string. In case start is also negative, the start position is calculated beforehand according to the rule explained above."
+                }
+            ]
+        },
+        {
+            "name": "fb_call_user_func_safe",
+            "desc": "This function invokes $function with the arguments specified in its parameter list. It returns an array of two elements, the first being a boolean specifying whether or not the function was invoked, the latter being the return value, or null if it was not invoked. The function may be any PHP callable, either a string function name, an array of object instance and method, or array of classname and static class method.",
+            "flags": [
+                "HipHopSpecific",
+                "VariableArguments",
+                "HasOptFunction",
+                "NoProfile",
+                "ContextSensitive"
+            ],
+            "return": {
+                "type": "VariantVec",
+                "desc": "Two elements, 0 is a bool whether function was invoked, 1 is the return value if invoked."
+            },
+            "args": [
+                {
+                    "name": "function",
+                    "type": "Variant",
+                    "desc": "The callback to invoke."
+                }
+            ]
+        },
+        {
+            "name": "fb_call_user_func_safe_return",
+            "desc": "This function invokes $function with the arguments specified in its parameter\nlist. If the function is not defined, $default_rval is returned. Note that\nthe default return value comes BEFORE the arguments to the function.",
+            "flags": [
+                "HipHopSpecific",
+                "VariableArguments",
+                "HasOptFunction",
+                "NoProfile",
+                "ContextSensitive"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The result of the function call if defined, otherwise default."
+            },
+            "args": [
+                {
+                    "name": "function",
+                    "type": "Variant",
+                    "desc": "The callback to invoke."
+                },
+                {
+                    "name": "def",
+                    "type": "Variant",
+                    "desc": "Value returned when function does not exist."
+                }
+            ]
+        },
+        {
+            "name": "fb_call_user_func_array_safe",
+            "desc": "This function invokes $function with the arguments specified in its parameter list. It returns an array of two elements, the first being a boolean specifying whether or not the function was invoked, the latter being the return value, or null if it was not invoked. The function may be any PHP callable, either a string function name, an array of object instance and method, or array of classname and static class method.",
+            "flags": [
+                "HipHopSpecific",
+                "HasOptFunction",
+                "NoProfile",
+                "ContextSensitive"
+            ],
+            "return": {
+                "type": "VariantVec",
+                "desc": "Two elements, 0 is a bool whether function was invoked, 1 is the return value if invoked."
+            },
+            "args": [
+                {
+                    "name": "function",
+                    "type": "Variant",
+                    "desc": "The callback to invoke."
+                },
+                {
+                    "name": "params",
+                    "type": "VariantVec",
+                    "desc": "The function parameters to invoke with."
+                }
+            ]
+        },
+        {
+            "name": "fb_get_code_coverage",
+            "desc": "Returns code coverage data collected so far. Turn on code coverage by Eval.RecordCodeCoverage or by using fb_enable_code_coverage and call this function periodically to get results. Eval.CodeCoverageOutputFile allows you to specify an output file to store results at end of a script run from command line. Use this function in server mode to collect results instead.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "flush",
+                    "type": "Boolean",
+                    "desc": "Whether to clear data after this function call."
+                }
+            ]
+        },
+        {
+            "name": "fb_enable_code_coverage",
+            "desc": "Enables code coverage. The coverage information is cleared.",
+            "flags": [
+                "HipHopSpecific",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "fb_disable_code_coverage",
+            "desc": "Disables and returns code coverage. The coverage information is cleared.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "xhprof_enable",
+            "desc": "Starts xhprof profiling. For details on how to use this function, please refer to http:\/\/mirror.facebook.net\/facebook\/xhprof\/doc.html.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "flags",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "One of those XHPROF_FLAGS_ constant to specify what to profile."
+                },
+                {
+                    "name": "args",
+                    "type": "StringVec",
+                    "value": "null_array",
+                    "desc": "Extra argument to reserve for future use."
+                }
+            ]
+        },
+        {
+            "name": "xhprof_disable",
+            "desc": "Ends and reports xhprof profiling result. For details on how to use this function, please refer to http:\/\/mirror.facebook.net\/facebook\/xhprof\/doc.html.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Profile result."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "xhprof_network_enable",
+            "desc": "Starts xhprof network I\/O profiling.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "xhprof_network_disable",
+            "desc": "Ends and reports xhprof network I\/O profiling result.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Profile result."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "xhprof_frame_begin",
+            "desc": "Starts an artificial frame. Together with xhprof_frame_end(), this times one block of code execution as if it were a function call, allowing people to define arbitrary function boundaries. Prefer to use XhprofFrame classobjects instead of calling this function directly.",
+            "flags": [
+                "HipHopSpecific",
+                "NoInjection"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "name",
+                    "type": "String",
+                    "desc": "The \"virtual\" function's name."
+                }
+            ]
+        },
+        {
+            "name": "xhprof_frame_end",
+            "desc": "Ends an artificial frame that xhprof_frame_begin() started. One has to make sure there are no exceptions in between these two calls, as otherwise, it may report incorrect timings. Also, xhprof_frame_begin() and xhprof_frame_end() have to be paired up really well, so not to interfere with regular function's profiling, unless that's the intention. Prefer to use XhprofFrame classobjects instead of calling this function directly.",
+            "flags": [
+                "HipHopSpecific",
+                "NoInjection"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "xhprof_sample_enable",
+            "desc": "Starts sampling based xhprof profiling. For details on how to use this function, please refer to http:\/\/mirror.facebook.net\/facebook\/xhprof\/doc.html.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "xhprof_sample_disable",
+            "desc": "Ends sampling based xhprof profiling. For details on how to use this function, please refer to http:\/\/mirror.facebook.net\/facebook\/xhprof\/doc.html.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "fb_parallel_query",
+            "desc": "Runs MySQL queries in parallel. Internally it will spawn threads, each of which executes one or more queries sequentially.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "VariantMap",
+                "desc": "Query result in a format of array('affected' => {number of affected rows}, 'result' => array({dbId1} => {dataset}, {dbId2} => ...), 'error' => array({dbId1} => {error message}, {dbId2} => ....), 'errno' => array({dbId1} => {error code}, {dbId2} => ....))."
+            },
+            "args": [
+                {
+                    "name": "sql_map",
+                    "type": "VariantMap",
+                    "desc": "The map to locate databases to query. The format is array($id1 => array('sql' => { SQL query to execute}, 'ip' => {ip address}, 'db' => {database name}, 'port' => {port number}, 'username' => {user name for login}, 'password' => {password for login}), $id2 => ...), where $id1 and $ids2 are arbitrary 32-bit integers that fb_crossall_query() can use to refer to the physical databases."
+                },
+                {
+                    "name": "max_thread",
+                    "type": "Int32",
+                    "value": "50",
+                    "desc": "Maximum number of threads to run."
+                },
+                {
+                    "name": "combine_result",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "Whether to merge dataset into just one, without maps of database IDs. If TRUE, result set would be array(..., 'result' => {dataset}, ...) directly."
+                },
+                {
+                    "name": "retry_query_on_fail",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "Whether or not retry query once when it fails. This may be useful if database connection is temporarily lost during queries and re-executing a SELECT or other idempotent queries are acceptable."
+                },
+                {
+                    "name": "connect_timeout",
+                    "type": "Int32",
+                    "value": "-1",
+                    "desc": "Connection timeout. If timeout_in_ms is TRUE, it is in seconds. Otherwise, it is in milli-seconds."
+                },
+                {
+                    "name": "read_timeout",
+                    "type": "Int32",
+                    "value": "-1",
+                    "desc": "Query timeout. If timeout_in_ms is TRUE, it is in seconds. Otherwise, it is in milli-seconds."
+                },
+                {
+                    "name": "timeout_in_ms",
+                    "type": "Boolean",
+                    "value": "false",
+                    "desc": "Whether connect_timeout or read_timeout are in seconds or milli-seconds."
+                }
+            ]
+        },
+        {
+            "name": "fb_const_fetch",
+            "desc": "Fetches a constant string from a special store that's compiled into the executable. This is faster than apc_fetch(), which needs locking between different threads. This store is immutable and loaded once with strings that are never changed. Therefore, no locking is needed when accessed by different threads.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The value that was stored."
+            },
+            "args": [
+                {
+                    "name": "key",
+                    "type": "Variant",
+                    "desc": "The key for locating the value."
+                }
+            ]
+        },
+        {
+            "name": "fb_output_compression",
+            "desc": "Toggles the compression status of HipHop output, if headers have already been sent this may be ignored.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "The old value."
+            },
+            "args": [
+                {
+                    "name": "new_value",
+                    "type": "Boolean",
+                    "desc": "The new value for the compression state."
+                }
+            ]
+        },
+        {
+            "name": "fb_set_exit_callback",
+            "desc": "Set a callback function that is called when php tries to exit.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "function",
+                    "type": "Variant",
+                    "desc": "The callback to invoke. An exception object will be passed to the function"
+                }
+            ]
+        },
+        {
+            "name": "fb_get_last_flush_size",
+            "desc": "Get stats on flushing the last data chunk from server.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Total number of bytes flushed since last flush"
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "fb_lazy_lstat",
+            "desc": "Gathers the statistics of the file named by filename, like lstat(), except uses cached information from an internal inotify-based mechanism that may not be updated during the duration of a request.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Same format as the normal php lstat() function."
+            },
+            "args": [
+                {
+                    "name": "filename",
+                    "type": "String",
+                    "desc": "Path to a file or a symbolic link."
+                }
+            ]
+        },
+        {
+            "name": "fb_lazy_realpath",
+            "desc": "Returns a canonicalized version of the input path that contains no symbolic links, like realpath(), except uses cached information from an internal inotify-based mechanism that may not be updated during the duration of a request.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Real path of the file."
+            },
+            "args": [
+                {
+                    "name": "filename",
+                    "type": "String",
+                    "desc": "Fake path to the file."
+                }
+            ]
+        },
+        {
+            "name": "fb_setprofile",
+            "desc": "Set a callback function to be called whenever a function is entered or exited. Takes 3 args, the function name, the mode (enter or exit), and an array describing the frame.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null,
+                "desc": "No value is returned."
+            },
+            "args": [
+                {
+                    "name": "callback",
+                    "type": "Variant",
+                    "desc": "Profiler function to call or null to disable"
+                }
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

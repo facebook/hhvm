@@ -1,0 +1,14 @@
+*** Testing is_readable(): usage variations ***
+
+*** Testing is_readable() on miscelleneous filenames ***
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+HipHop Warning: %s
+NULL
+bool(false)
+Done

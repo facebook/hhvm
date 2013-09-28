@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,8 +16,8 @@
 */
 
 #include "hphp/runtime/ext/mailparse/rfc822.h"
-#include "hphp/runtime/base/util/string_buffer.h"
-#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/runtime-error.h"
 
 #define YYFILL(n)  if (YYCURSOR == YYLIMIT) goto stop
 #define YYCTYPE    unsigned char

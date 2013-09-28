@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,8 +18,11 @@
 #ifndef incl_HPHP_EXT_MYSQL_H_
 #define incl_HPHP_EXT_MYSQL_H_
 
-#include "hphp/runtime/base/base_includes.h"
-#include "mysql/mysql.h"
+#include "folly/Optional.h"
+
+#include "hphp/runtime/base/base-includes.h"
+#include "mysql.h"
+#include "hphp/runtime/base/smart-containers.h"
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
 #ifdef MYSQL_UNIX_ADDR
@@ -29,6 +32,59 @@
 #endif
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+
+class mysqlExtension : public Extension {
+public:
+  mysqlExtension() : Extension("mysql") {}
+
+  // implementing IDebuggable
+  virtual int  debuggerSupport() {
+    return SupportInfo;
+  }
+  virtual void debuggerInfo(InfoVec &info) {
+    int count = g_persistentObjects->getMap("mysql::persistent_conns").size();
+    Add(info, "Persistent", FormatNumber("%" PRId64, count));
+
+    AddServerStats(info, "sql.conn"       );
+    AddServerStats(info, "sql.reconn_new" );
+    AddServerStats(info, "sql.reconn_ok"  );
+    AddServerStats(info, "sql.reconn_old" );
+    AddServerStats(info, "sql.query"      );
+  }
+
+  static bool ReadOnly;
+#ifdef FACEBOOK
+  static bool Localize;
+#endif
+  static int ConnectTimeout;
+  static int ReadTimeout;
+  static int WaitTimeout;
+  static int SlowQueryThreshold;
+  static bool KillOnTimeout;
+  static int MaxRetryOpenOnFail;
+  static int MaxRetryQueryOnFail;
+  static std::string Socket;
+
+  virtual void moduleLoad(Hdf config) {
+    Hdf mysql = config["MySQL"];
+    ReadOnly = mysql["ReadOnly"].getBool();
+#ifdef FACEBOOK
+    Localize = mysql["Localize"].getBool();
+#endif
+    ConnectTimeout = mysql["ConnectTimeout"].getInt32(1000);
+    ReadTimeout = mysql["ReadTimeout"].getInt32(60000);
+    WaitTimeout = mysql["WaitTimeout"].getInt32(-1);
+    SlowQueryThreshold = mysql["SlowQueryThreshold"].getInt32(1000);
+    KillOnTimeout = mysql["KillOnTimeout"].getBool();
+    MaxRetryOpenOnFail = mysql["MaxRetryOpenOnFail"].getInt32(1);
+    MaxRetryQueryOnFail = mysql["MaxRetryQueryOnFail"].getInt32(1);
+    Socket = mysql["Socket"].getString();
+  }
+};
+
+extern mysqlExtension s_mysql_extension;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class MySQL : public SweepableResourceData {
@@ -89,15 +145,17 @@ private:
 
 public:
   MySQL(const char *host, int port, const char *username,
-        const char *password, const char *database);
+        const char *password, const char *database,
+        MYSQL* raw_connection = nullptr);
   ~MySQL();
+  void sweep() FOLLY_OVERRIDE;
   void setLastError(const char *func);
   void close();
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("mysql link")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
-  virtual bool isResource() const { return m_conn != NULL;}
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
+  virtual bool isInvalid() const { return m_conn == nullptr; }
 
   bool connect(CStrRef host, int port, CStrRef socket, CStrRef username,
                CStrRef password, CStrRef database, int client_flags,
@@ -111,6 +169,11 @@ public:
                  int connect_timeout);
 
   MYSQL *get() { return m_conn;}
+  MYSQL *eject_mysql() {
+    auto ret = m_conn;
+    m_conn = nullptr;
+    return ret;
+  }
 
 private:
   MYSQL *m_conn;
@@ -133,12 +196,12 @@ public:
 class MySQLFieldInfo {
 public:
   MySQLFieldInfo()
-    : name(NULL), table(NULL), def(NULL),
-      max_length(0), length(0), type(0), flags(0) {}
+    : max_length(0), length(0), type(0), flags(0)
+  {}
 
-  Variant *name;
-  Variant *table;
-  Variant *def;
+  String name;
+  String table;
+  String def;
   int64_t max_length;
   int64_t length;
   int type;
@@ -147,14 +210,14 @@ public:
 
 class MySQLResult : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(MySQLResult);
+  DECLARE_RESOURCE_ALLOCATION(MySQLResult);
 
-  MySQLResult(MYSQL_RES *res, bool localized = false);
+  explicit MySQLResult(MYSQL_RES *res, bool localized = false);
   virtual ~MySQLResult();
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("mysql result")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   void close() {
     if (m_res) {
@@ -173,7 +236,7 @@ public:
 
   void addRow();
 
-  void addField(Variant *value);
+  void addField(Variant&& value);
 
   void setFieldCount(int64_t fields);
   void setFieldInfo(int64_t f, MYSQL_FIELD *field);
@@ -210,8 +273,8 @@ protected:
   MYSQL_ROW m_current_async_row;
   bool m_localized; // whether all the rows have been localized
   MySQLFieldInfo *m_fields;
-  std::list<std::vector<Variant *> > *m_rows;
-  std::list<std::vector<Variant *> >::const_iterator m_current_row;
+  folly::Optional<smart::list<smart::vector<Variant>>> m_rows;
+  smart::list<smart::vector<Variant>>::const_iterator m_current_row;
   int64_t m_current_field;
   bool m_row_ready; // set to false after seekRow, true after fetchRow
   int64_t m_field_count;
@@ -301,6 +364,7 @@ Variant f_mysql_affected_rows(CVarRef link_identifier = uninit_null());
 // query functions
 
 Variant mysql_makevalue(CStrRef data, MYSQL_FIELD *mysql_field);
+Variant mysql_makevalue(CStrRef data, enum_field_types field_type);
 
 bool f_mysql_set_timeout(int query_timeout_ms = -1,
                          CVarRef link_identifier = uninit_null());
@@ -308,7 +372,7 @@ bool f_mysql_set_timeout(int query_timeout_ms = -1,
 Variant f_mysql_query(CStrRef query, CVarRef link_identifier = uninit_null());
 Variant f_mysql_multi_query(CStrRef query, CVarRef link_identifier = uninit_null());
 
-bool f_mysql_next_result(CVarRef link_identifier = uninit_null());
+int f_mysql_next_result(CVarRef link_identifier = uninit_null());
 
 bool f_mysql_more_results(CVarRef link_identifier = uninit_null());
 
@@ -340,7 +404,7 @@ Variant f_mysql_fetch_array(CVarRef result, int result_type = 3);
 Variant f_mysql_fetch_lengths(CVarRef result);
 
 Variant f_mysql_fetch_object(CVarRef result, CStrRef class_name = "stdClass",
-                             CArrRef params = uninit_null());
+                             CArrRef params = uninit_null().toArray());
 
 Variant f_mysql_result(CVarRef result, int row, CVarRef field = null_variant);
 

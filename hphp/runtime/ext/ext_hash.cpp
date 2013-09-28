@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/ext_hash.h"
 #include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/hash/hash_md.h"
 #include "hphp/runtime/ext/hash/hash_sha.h"
 #include "hphp/runtime/ext/hash/hash_ripemd.h"
@@ -38,7 +39,22 @@
 #endif
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(hash);
+
+static class HashExtension : public Extension {
+ public:
+  HashExtension() : Extension("hash") { }
+  virtual void moduleLoad(Hdf config) {
+    HHVM_FE(hash);
+    HHVM_FE(hash_algos);
+    HHVM_FE(hash_file);
+    HHVM_FE(hash_final);
+    HHVM_FE(hash_init);
+    HHVM_FE(hash_update);
+    HHVM_FE(furchash_hphp_ext);
+    HHVM_FE(hphp_murmurhash);
+  }
+} s_hash_extension;
+
 ///////////////////////////////////////////////////////////////////////////////
 // hash engines
 
@@ -110,27 +126,28 @@ static HashEngineMapInitializer s_engine_initializer;
 
 class HashContext : public SweepableResourceData {
 public:
-  static StaticString s_class_name;
+  CLASSNAME_IS("Hash Context")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   HashContext(HashEnginePtr ops_, void *context_, int options_)
-    : ops(ops_), context(context_), options(options_), key(NULL) {
+    : ops(ops_), context(context_), options(options_), key(nullptr) {
   }
 
   ~HashContext() {
+    HashContext::sweep();
+  }
+
+  void sweep() FOLLY_OVERRIDE {
     /* Just in case the algo has internally allocated resources */
     if (context) {
-      unsigned char *dummy = (unsigned char *)malloc(ops->digest_size);
+      assert(ops->digest_size >= 0);
+      unsigned char dummy[ops->digest_size];
       ops->hash_final(dummy, context);
-      free(dummy);
       free(context);
     }
 
-    if (key) {
-      memset(key, 0, ops->block_size);
-      free(key);
-    }
+    free(key);
   }
 
   HashEnginePtr ops;
@@ -139,12 +156,10 @@ public:
   char *key;
 };
 
-StaticString HashContext::s_class_name("Hash Context");
-
 ///////////////////////////////////////////////////////////////////////////////
 // hash functions
 
-Array f_hash_algos() {
+Array HHVM_FUNCTION(hash_algos) {
   Array ret;
   for (HashEngineMap::const_iterator iter = HashEngines.begin();
        iter != HashEngines.end(); ++iter) {
@@ -155,7 +170,7 @@ Array f_hash_algos() {
 
 static HashEnginePtr php_hash_fetch_ops(CStrRef algo) {
   HashEngineMap::const_iterator iter =
-    HashEngines.find(StringUtil::ToLower(algo).data());
+    HashEngines.find(f_strtolower(algo).data());
   if (iter == HashEngines.end()) {
     return HashEnginePtr();
   }
@@ -181,8 +196,9 @@ static Variant php_hash_do_hash(CStrRef algo, CStrRef data, bool isfilename,
   ops->hash_init(context);
 
   if (isfilename) {
-    for (Variant chunk = f_fread(f, 1024); !is_empty_string(chunk);
-         chunk = f_fread(f, 1024)) {
+    for (Variant chunk = f_fread(f.toResource(), 1024);
+         !is_empty_string(chunk);
+         chunk = f_fread(f.toResource(), 1024)) {
       String schunk = chunk.toString();
       ops->hash_update(context, (unsigned char *)schunk.data(), schunk.size());
     }
@@ -191,7 +207,7 @@ static Variant php_hash_do_hash(CStrRef algo, CStrRef data, bool isfilename,
   }
 
   String raw = String(ops->digest_size, ReserveString);
-  char *digest = raw.mutableSlice().ptr;
+  char *digest = raw.bufferSlice().ptr;
   ops->hash_final((unsigned char *)digest, context);
   free(context);
 
@@ -199,15 +215,16 @@ static Variant php_hash_do_hash(CStrRef algo, CStrRef data, bool isfilename,
   if (raw_output) {
     return raw;
   }
-  return StringUtil::HexEncode(raw);
+  return f_bin2hex(raw);
 }
 
-Variant f_hash(CStrRef algo, CStrRef data, bool raw_output /* = false */) {
+Variant HHVM_FUNCTION(hash, CStrRef algo, CStrRef data,
+                            bool raw_output /* = false */) {
   return php_hash_do_hash(algo, data, false, raw_output);
 }
 
-Variant f_hash_file(CStrRef algo, CStrRef filename,
-                   bool raw_output /* = false */) {
+Variant HHVM_FUNCTION(hash_file, CStrRef algo, CStrRef filename,
+                                 bool raw_output /* = false */) {
   return php_hash_do_hash(algo, filename, true, raw_output);
 }
 
@@ -250,62 +267,9 @@ static void finalize_hmac_key(char *K, HashEnginePtr ops, void *context,
   free(K);
 }
 
-static Variant php_hash_do_hash_hmac(CStrRef algo, CStrRef data,
-                                     bool isfilename, CStrRef key,
-                                     bool raw_output /* = false */) {
-  HashEnginePtr ops = php_hash_fetch_ops(algo);
-  if (!ops) {
-    raise_warning("Unknown hashing algorithm: %s", algo.data());
-    return false;
-  }
-  Variant f;
-  if (isfilename) {
-    f = f_fopen(data, "rb");
-    if (same(f, false)) {
-      return false;
-    }
-  }
-
-  void *context = malloc(ops->context_size);
-  ops->hash_init(context);
-
-  char *K = prepare_hmac_key(ops, context, key);
-
-  if (isfilename) {
-    for (Variant chunk = f_fread(f, 1024); !is_empty_string(chunk);
-         chunk = f_fread(f, 1024)) {
-      String schunk = chunk.toString();
-      ops->hash_update(context, (unsigned char *)schunk.data(), schunk.size());
-    }
-  } else {
-    ops->hash_update(context, (unsigned char *)data.data(), data.size());
-  }
-
-  String raw = String(ops->digest_size, ReserveString);
-  char *digest = raw.mutableSlice().ptr;
-  ops->hash_final((unsigned char *)digest, context);
-  finalize_hmac_key(K, ops, context, digest);
-  free(context);
-
-  raw.setSize(ops->digest_size);
-  if (raw_output) {
-    return raw;
-  }
-  return StringUtil::HexEncode(raw);
-}
-
-Variant f_hash_hmac(CStrRef algo, CStrRef data, CStrRef key,
-                   bool raw_output /* = false */) {
-  return php_hash_do_hash_hmac(algo, data, false, key, raw_output);
-}
-
-Variant f_hash_hmac_file(CStrRef algo, CStrRef filename, CStrRef key,
-                        bool raw_output /* = false */) {
-  return php_hash_do_hash_hmac(algo, filename, true, key, raw_output);
-}
-
-Variant f_hash_init(CStrRef algo, int options /* = 0 */,
-                   CStrRef key /* = null_string */) {
+Variant HHVM_FUNCTION(hash_init, CStrRef algo,
+                                 int64_t options /* = 0 */,
+                                 CStrRef key /* = null_string */) {
   HashEnginePtr ops = php_hash_fetch_ops(algo);
   if (!ops) {
     raise_warning("Unknown hashing algorithm: %s", algo.data());
@@ -320,60 +284,26 @@ Variant f_hash_init(CStrRef algo, int options /* = 0 */,
   void *context = malloc(ops->context_size);
   ops->hash_init(context);
 
-  HashContext *hash = new HashContext(ops, context, options);
+  const auto hash = new HashContext(ops, context, options);
   if (options & k_HASH_HMAC) {
     hash->key = prepare_hmac_key(ops, context, key);
   }
-  return Object(hash);
+  return Resource(hash);
 }
 
-bool f_hash_update(CObjRef context, CStrRef data) {
+bool HHVM_FUNCTION(hash_update, CResRef context, CStrRef data) {
   HashContext *hash = context.getTyped<HashContext>();
   hash->ops->hash_update(hash->context, (unsigned char *)data.data(),
                          data.size());
   return true;
 }
 
-bool f_hash_update_file(CObjRef init_context, CStrRef filename,
-                        CObjRef stream_context /* = null */) {
-  Variant f = f_fopen(filename, "rb");
-  if (same(f, false)) {
-    return false;
-  }
-
-  HashContext *hash = init_context.getTyped<HashContext>();
-  for (Variant chunk = f_fread(f, 1024); !is_empty_string(chunk);
-       chunk = f_fread(f, 1024)) {
-    String schunk = chunk.toString();
-    hash->ops->hash_update(hash->context, (unsigned char *)schunk.data(),
-                           schunk.size());
-  }
-  return true;
-}
-
-int64_t f_hash_update_stream(CObjRef context, CObjRef handle,
-                         int length /* = -1 */) {
-  HashContext *hash = context.getTyped<HashContext>();
-  int didread = 0;
-  while (length) {
-    Variant chunk = f_fread(handle, length > 0 ? length : 1024);
-    if (is_empty_string(chunk)) {
-      return didread;
-    }
-    String schunk = chunk.toString();
-    hash->ops->hash_update(hash->context, (unsigned char *)schunk.data(),
-                           schunk.size());
-    didread += schunk.size();
-    length -= schunk.size();
-  }
-  return didread;
-}
-
-String f_hash_final(CObjRef context, bool raw_output /* = false */) {
+String HHVM_FUNCTION(hash_final, CResRef context,
+                                 bool raw_output /* = false */) {
   HashContext *hash = context.getTyped<HashContext>();
 
   String raw = String(hash->ops->digest_size, ReserveString);
-  char *digest = raw.mutableSlice().ptr;
+  char *digest = raw.bufferSlice().ptr;
   hash->ops->hash_final((unsigned char *)digest, hash->context);
   if (hash->options & k_HASH_HMAC) {
     finalize_hmac_key(hash->key, hash->ops, hash->context, digest);
@@ -386,20 +316,18 @@ String f_hash_final(CObjRef context, bool raw_output /* = false */) {
   if (raw_output) {
     return raw;
   }
-  return StringUtil::HexEncode(raw);
+  return f_bin2hex(raw);
 }
 
-int64_t f_furchash_hphp_ext(CStrRef key, int len, int nPart) {
-  len = std::max(std::min(len, key.size()), 0);
+int64_t HHVM_FUNCTION(furchash_hphp_ext, CStrRef key,
+                                         int64_t len, int64_t nPart) {
+  len = std::max<int64_t>(std::min<int64_t>(len, key.size()), 0);
   return furc_hash(key.data(), len, nPart);
 }
 
-bool f_furchash_hphp_ext_supported() {
-  return true;
-}
-
-int64_t f_hphp_murmurhash(CStrRef key, int len, int seed) {
-  len = std::max(std::min(len, key.size()), 0);
+int64_t HHVM_FUNCTION(hphp_murmurhash, CStrRef key,
+                                       int64_t len, int64_t seed) {
+  len = std::max<int64_t>(std::min<int64_t>(len, key.size()), 0);
   return murmur_hash_64A(key.data(), len, seed);
 }
 

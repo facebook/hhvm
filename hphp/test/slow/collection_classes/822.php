@@ -1,15 +1,18 @@
 <?php
 
-
 function f() {
-  $v = Vector {'a', 'b', 'c'};
+  $v = Vector {
+'a', 'b', 'c'}
+;
   $m = new Map($v);
   var_dump($m);
   $sm = new StableMap($m);
   var_dump($sm);
 }
 function g() {
-  $m = Map {'a' => 1, 2 => 'b'};
+  $m = Map {
+'a' => 1, 2 => 'b'}
+;
   $v = new Vector($m);
   var_dump($v);
 }

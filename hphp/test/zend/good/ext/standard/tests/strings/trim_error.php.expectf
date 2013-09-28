@@ -1,0 +1,24 @@
+*** Testing trim() : error conditions ***
+
+-- Testing trim() function with no arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing trim() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Test trim function with various invalid charlists --
+HipHop Warning: %s
+string(14) "  Hello World
+"
+HipHop Warning: %s
+string(14) "  Hello World
+"
+HipHop Warning: %s
+string(14) "  Hello World
+"
+HipHop Warning: %s
+string(14) "  Hello World
+"
+===DONE===

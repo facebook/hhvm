@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,9 +24,10 @@ namespace HPHP {
 
 #define PHP_DIR_SEPARATOR '/'
 
-#if defined(__APPLE__)
+#if defined(__APPLE__) || defined(__FreeBSD__)
 char *strndup(const char* str, size_t len);
-int dprintf(int fd, const char *format, ...);
+int dprintf(int fd, const char *format, ...) ATTRIBUTE_PRINTF(2,3);
+typedef int clockid_t;
 #endif
 
 int gettime(clockid_t which_clock, struct timespec *tp);

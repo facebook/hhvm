@@ -1,0 +1,23 @@
+bool(true)
+string(%d) "%ssymlink.dat"
+int(%d)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+int(-1)
+HipHop Warning: %s
+bool(false)
+bool(true)
+HipHop Warning: %s
+bool(false)
+bool(true)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+int(%d)
+Done

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@ public:
   FunctionStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                     ModifierExpressionPtr modifiers, bool ref,
                     const std::string &name, ExpressionListPtr params,
-                    const std::string &retTypeConstraint,
+                    TypeAnnotationPtr retTypeAnnotation,
                     StatementListPtr stmt, int attr,
                     const std::string &docComment,
                     ExpressionListPtr attrList);

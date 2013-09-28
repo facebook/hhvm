@@ -1,0 +1,36 @@
+continue
+break \TestNs\foo()
+@ \TestNs\foo('test_break1')
+variable
+break clear all
+continue
+break TestNs\cls::pubObj()
+@ $break8=new \TestNs\cls()
+@ $break8->pubObj('test_break2')
+variable
+break clear all
+break \TestNs\break8->pubObj()
+break TestNs\cls::break8->pubObj()
+continue
+break \TestNs\cls::pubCls()
+@ \TestNs\cls::pubCls('test_break3')
+variable
+break clear all
+continue
+break \TestNs\Nested\foo()
+@ \TestNs\Nested\foo('test_break4')
+variable
+break clear all
+continue
+break TestNs\Nested\cls::pubObj()
+@ $break8=new \TestNs\Nested\cls()
+@ $break8->pubObj('test_break5')
+variable
+break clear all
+continue
+break \TestNs\Nested\cls::pubCls()
+@ \TestNs\Nested\cls::pubCls('test_break6')
+variable
+break clear all
+continue
+quit

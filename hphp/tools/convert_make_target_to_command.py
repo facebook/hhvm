@@ -16,18 +16,19 @@ import os
 import sys
 
 suites = {
-    'Slow' : 'slow',
-    'Quick' : 'quick',
-    'Zend' : 'zend/good',
+    'Slow': 'slow',
+    'Quick': 'quick',
+    'Zend': 'zend/good',
+    'Facebook': '../facebook/test/',
 }
 modes = {
-    'JitIR' : 'hhir',
-    'Jit' : 'jit',
-    'VM' : 'interp',
+    'JitIR': 'hhir',
+    'Jit': 'jit',
+    'VM': 'interp',
 }
 
 home = os.getenv('HPHP_HOME')
-root = os.getenv('FBMAKE_BIN_ROOT', home + '/_bin')
+root = home + '/' + os.getenv('FBMAKE_BIN_ROOT', '_bin')
 
 def main():
     if len(sys.argv) < 2:

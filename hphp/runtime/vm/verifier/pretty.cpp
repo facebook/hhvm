@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,27 +13,29 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/vm/verifier/pretty.h"
 
 #include <iostream>
 #include <iomanip>
 #include <stdio.h>
 
+#include "folly/Format.h"
+
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/verifier/util.h"
-#include "hphp/runtime/vm/verifier/pretty.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
 
 namespace HPHP {
 namespace Verifier {
 
 void printInstr(const Unit* unit, PC pc) {
-  Opcode* op = (Opcode*)pc;
+  auto* op = (Op*)pc;
   std::cout << "  " << std::setw(4) << (pc - unit->entry()) << ":" <<
                (isCF(pc) ? "C":" ") <<
                (isTF(pc) ? "T":" ") <<
                (isFF(pc) ? "F":" ") <<
                std::setw(3) << instrLen(op) <<
-               " " << instrToString(op, unit) << std::endl; 
+               " " << instrToString(op, unit) << std::endl;
 }
 
 std::string blockToString(const Block* b, const Graph* g, const Unit* u) {
@@ -143,13 +145,22 @@ void printGml(const Unit* unit) {
   fclose(file);
 }
 
-void verify_error(const char* fmt, ...) {
+void verify_error(const Unit* unit,
+                  const Func* func,
+                  const char* fmt,
+                  ...) {
   char buf[1024];
   va_list args;
   va_start(args, fmt);
   vsnprintf(buf, sizeof buf, fmt, args);
   va_end(args);
-  printf("Verification: %s", buf);
+  fprintf(stderr,
+          "Verification Error (unit %s%s): %s",
+          unit->filepath()->data(),
+          func != nullptr
+            ? folly::format(" func {}", func->fullName()->data()).str().c_str()
+            : "",
+          buf);
 }
 
 }} // namespace HPHP::VM

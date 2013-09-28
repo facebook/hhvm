@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,6 +16,10 @@
 
 #ifndef incl_HPHP_VM_VERIFIER_PRETTY_H_
 #define incl_HPHP_VM_VERIFIER_PRETTY_H_
+
+#include <string>
+
+#include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {
 
@@ -61,11 +65,14 @@ void printGml(const Unit*);
 /*
  * Called to indicate a verification error.
  *
- * Currently just prints to stdout, but we might eventually want to
+ * Currently just prints to stderr, but we might eventually want to
  * support other ways of reporting the error.
+ *
+ * The Func* may be nullptr.
  */
-void verify_error(const char* fmt, ...) __attribute__((format(printf,1,2)));
+void verify_error(const Unit*, const Func*, const char* fmt, ...)
+  ATTRIBUTE_PRINTF(3,4);
 
-}} // HPHP::Verifier
+}}
 
-#endif // incl_HPHP_VM_VERIFIER_PRETTY_H
+#endif

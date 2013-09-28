@@ -1,0 +1,29 @@
+DateTimeImmutable
+Tuesday 2008-01-01
+Tuesday 2008-01-15
+Tuesday 2008-01-01
+
+DateTimeImmutable
+Friday 2008-02-01
+Tuesday 2008-02-19
+Friday 2008-02-01
+
+DateTimeImmutable
+Saturday 2008-03-01
+Tuesday 2008-03-18
+Saturday 2008-03-01
+
+DateTime
+Tuesday 2008-01-01
+Tuesday 2008-01-15
+Tuesday 2008-01-15
+
+DateTime
+Friday 2008-02-01
+Tuesday 2008-02-19
+Tuesday 2008-02-19
+
+DateTime
+Saturday 2008-03-01
+Tuesday 2008-03-18
+Tuesday 2008-03-18

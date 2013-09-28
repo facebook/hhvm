@@ -1,0 +1,5 @@
+test filtering of buffered data
+HipHop Warning: %s
+HipHop Warning: %s
+test filtering of non buffered data
+HipHop Warning: %s

@@ -1,0 +1,5 @@
+string(19) "openssl_open() test"
+HipHop Warning: %s
+NULL
+string(19) "openssl_open() test"
+NULL

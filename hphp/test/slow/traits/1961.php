@@ -1,6 +1,5 @@
 <?php
 
-
 trait SayWorld {
   public function sayHelloWorld() {
     self::sayHello();

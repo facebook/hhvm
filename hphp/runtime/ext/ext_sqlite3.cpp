@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,9 +18,9 @@
 #include "hphp/runtime/ext/ext_sqlite3.h"
 #include "hphp/runtime/ext/ext_stream.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/base/util/exceptions.h"
+#include "hphp/runtime/base/exceptions.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(sqlite3);
@@ -249,8 +249,9 @@ bool c_SQLite3::t_exec(CStrRef sql) {
   return true;
 }
 
-static const StaticString s_versionString("versionString");
-static const StaticString s_versionNumber("versionNumber");
+const StaticString
+  s_versionString("versionString"),
+  s_versionNumber("versionNumber");
 
 Array c_SQLite3::t_version() {
   ArrayInit ret(2);
@@ -548,7 +549,7 @@ Variant c_SQLite3Stmt::t_execute() {
       {
         String sblob;
         if (p.value.isResource()) {
-          Variant blob = f_stream_get_contents(p.value);
+          Variant blob = f_stream_get_contents(p.value.toResource());
           if (same(blob, false)) {
             raise_warning("Unable to read stream for parameter %d",
                           p.index);

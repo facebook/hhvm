@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,11 +34,12 @@
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/parser/parser.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/externals.h"
-#include "hphp/runtime/base/execution_context.h"
-#include "hphp/runtime/base/array/array_init.h"
-#include "hphp/runtime/base/string_util.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/ext/ext_variable.h"
 
 using namespace HPHP;
@@ -46,41 +47,43 @@ using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
-std::map<std::string, int> SimpleFunctionCall::FunctionTypeMap;
+std::map<std::string,SimpleFunctionCall::FunType>
+  SimpleFunctionCall::FunctionTypeMap;
 
 void SimpleFunctionCall::InitFunctionTypeMap() {
   if (FunctionTypeMap.empty()) {
-    FunctionTypeMap["define"]               = DefineFunction;
-    FunctionTypeMap["create_function"]      = CreateFunction;
+    FunctionTypeMap["define"]               = FunType::Define;
+    FunctionTypeMap["create_function"]      = FunType::Create;
+    FunctionTypeMap["class_alias"]          = FunType::ClassAlias;
 
-    FunctionTypeMap["func_get_arg"]         = VariableArgumentFunction;
-    FunctionTypeMap["func_get_args"]        = VariableArgumentFunction;
-    FunctionTypeMap["func_num_args"]        = VariableArgumentFunction;
+    FunctionTypeMap["func_get_arg"]         = FunType::VariableArgument;
+    FunctionTypeMap["func_get_args"]        = FunType::VariableArgument;
+    FunctionTypeMap["func_num_args"]        = FunType::VariableArgument;
 
-    FunctionTypeMap["extract"]              = ExtractFunction;
-    FunctionTypeMap["compact"]              = CompactFunction;
+    FunctionTypeMap["extract"]              = FunType::Extract;
+    FunctionTypeMap["compact"]              = FunType::Compact;
 
-    FunctionTypeMap["shell_exec"]           = ShellExecFunction;
-    FunctionTypeMap["exec"]                 = ShellExecFunction;
-    FunctionTypeMap["passthru"]             = ShellExecFunction;
-    FunctionTypeMap["system"]               = ShellExecFunction;
+    FunctionTypeMap["shell_exec"]           = FunType::ShellExec;
+    FunctionTypeMap["exec"]                 = FunType::ShellExec;
+    FunctionTypeMap["passthru"]             = FunType::ShellExec;
+    FunctionTypeMap["system"]               = FunType::ShellExec;
 
-    FunctionTypeMap["defined"]              = DefinedFunction;
-    FunctionTypeMap["function_exists"]      = FunctionExistsFunction;
-    FunctionTypeMap["class_exists"]         = ClassExistsFunction;
-    FunctionTypeMap["interface_exists"]     = InterfaceExistsFunction;
-    FunctionTypeMap["constant"]             = ConstantFunction;
+    FunctionTypeMap["defined"]              = FunType::Defined;
+    FunctionTypeMap["function_exists"]      = FunType::FunctionExists;
+    FunctionTypeMap["class_exists"]         = FunType::ClassExists;
+    FunctionTypeMap["interface_exists"]     = FunType::InterfaceExists;
+    FunctionTypeMap["constant"]             = FunType::Constant;
 
-    FunctionTypeMap["unserialize"]          = UnserializeFunction;
-    FunctionTypeMap["apc_fetch"]            = UnserializeFunction;
+    FunctionTypeMap["unserialize"]          = FunType::Unserialize;
+    FunctionTypeMap["apc_fetch"]            = FunType::Unserialize;
 
-    FunctionTypeMap["get_defined_vars"]     = GetDefinedVarsFunction;
+    FunctionTypeMap["get_defined_vars"]     = FunType::GetDefinedVars;
 
-    FunctionTypeMap["fb_call_user_func_safe"] = FBCallUserFuncSafeFunction;
+    FunctionTypeMap["fb_call_user_func_safe"] = FunType::FBCallUserFuncSafe;
     FunctionTypeMap["fb_call_user_func_array_safe"] =
-      FBCallUserFuncSafeFunction;
+      FunType::FBCallUserFuncSafe;
     FunctionTypeMap["fb_call_user_func_safe_return"] =
-      FBCallUserFuncSafeFunction;
+      FunType::FBCallUserFuncSafe;
   }
 }
 
@@ -100,16 +103,15 @@ SimpleFunctionCall::SimpleFunctionCall
  ExpressionPtr cls)
   : FunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(SimpleFunctionCall),
                  ExpressionPtr(), name, hadBackslash, params, cls),
-    m_type(UnknownType), m_dynamicConstant(false),
-    m_builtinFunction(false), m_noPrefix(false), m_fromCompiler(false),
+    m_type(FunType::Unknown), m_dynamicConstant(false),
+    m_builtinFunction(false), m_fromCompiler(false),
     m_dynamicInvoke(false), m_transformed(false), m_no_volatile_check(false),
     m_safe(0), m_extra(nullptr) {
 
   if (!m_class && m_className.empty()) {
     m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_name) !=
       Option::DynamicInvokeFunctions.end();
-    std::map<string, int>::const_iterator iter =
-      FunctionTypeMap.find(m_name);
+    auto iter = FunctionTypeMap.find(m_name);
     if (iter != FunctionTypeMap.end()) {
       m_type = iter->second;
     }
@@ -132,9 +134,24 @@ void SimpleFunctionCall::deepCopy(SimpleFunctionCallPtr exp) {
 
 void SimpleFunctionCall::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
   StaticClassName::onParse(ar, fs);
+  mungeIfSpecialFunction(ar, fs);
+
+  if (m_type == FunType::Unknown && !m_class && m_className.empty()) {
+    ar->parseOnDemandByFunction(m_name);
+    int pos = m_name.rfind('\\');
+    std::string short_name = m_name.substr(pos + 1);
+    auto iter = FunctionTypeMap.find(short_name);
+    if (iter != FunctionTypeMap.end()) {
+      ar->lock()->addNSFallbackFunc(shared_from_this(), fs);
+    }
+  }
+}
+
+void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
+                                                FileScopePtr fs) {
   ConstructPtr self = shared_from_this();
   switch (m_type) {
-    case DefineFunction:
+    case FunType::Define:
       if (Option::ParseTimeOpts && m_params &&
           unsigned(m_params->getCount() - 2) <= 1u) {
         // need to register the constant before AnalyzeAll, so that
@@ -168,7 +185,8 @@ void SimpleFunctionCall::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
         }
       }
       break;
-    case CreateFunction:
+
+    case FunType::Create:
       if (Option::ParseTimeOpts &&
           m_params->getCount() == 2 &&
           (*m_params)[0]->isLiteralString() &&
@@ -182,7 +200,27 @@ void SimpleFunctionCall::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
         ar->appendExtraCode(fs->getName(), code);
       }
       break;
-    case VariableArgumentFunction:
+
+    // The class_alias builtin can create new names for other classes;
+    // we need to mark some of these classes redeclaring to avoid
+    // making incorrect assumptions during WholeProgram mode.  See
+    // AnalysisResult::collectFunctionsAndClasses.
+    case FunType::ClassAlias:
+      if (m_params &&
+          (m_params->getCount() == 2 || m_params->getCount() == 3) &&
+          Option::WholeProgram) {
+        if (!(*m_params)[0]->isLiteralString() ||
+            !(*m_params)[1]->isLiteralString()) {
+          parseTimeFatal(Compiler::NoError,
+            "class_alias with non-literal parameters is not allowed when "
+            "WholeProgram optimizations are turned on");
+        }
+        fs->addClassAlias((*m_params)[0]->getLiteralString(),
+                          (*m_params)[1]->getLiteralString());
+      }
+      break;
+
+    case FunType::VariableArgument:
       /*
         Note:
         At this point, we dont have a function scope, so we set
@@ -194,16 +232,18 @@ void SimpleFunctionCall::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
       */
       fs->setAttribute(FileScope::VariableArgument);
       break;
-    case ExtractFunction:
+
+    case FunType::Extract:
       fs->setAttribute(FileScope::ContainsLDynamicVariable);
       fs->setAttribute(FileScope::ContainsExtract);
       break;
-    case CompactFunction: {
+
+    case FunType::Compact: {
       // If all the parameters in the compact() call are statically known,
       // there is no need to create a variable table.
       vector<ExpressionPtr> literals;
       if (false && m_params->flattenLiteralStrings(literals)) {
-        m_type = StaticCompactFunction;
+        m_type = FunType::StaticCompact;
         m_params->clearElements();
         for (unsigned i = 0; i < literals.size(); i++) {
           m_params->addElement(literals[i]);
@@ -214,20 +254,36 @@ void SimpleFunctionCall::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
       fs->setAttribute(FileScope::ContainsCompact);
       break;
     }
-    case GetDefinedVarsFunction:
+
+    case FunType::GetDefinedVars:
       fs->setAttribute(FileScope::ContainsDynamicVariable);
       fs->setAttribute(FileScope::ContainsGetDefinedVars);
       fs->setAttribute(FileScope::ContainsCompact);
       break;
-    case UnknownType:
-      if (!m_class && m_className.empty()) {
-        ar->parseOnDemandByFunction(m_name);
-      }
+
+    case FunType::Unknown:
       break;
+
     default:
       break;
   }
 }
+
+void SimpleFunctionCall::resolveNSFallbackFunc(
+    AnalysisResultConstPtr ar, FileScopePtr fs) {
+  if (ar->findFunction(m_name)) {
+    // the fully qualified name for this function exists, nothing to do
+    return;
+  }
+
+  int pos = m_name.rfind('\\');
+  std::string short_name = m_name.substr(pos + 1);
+  auto iter = FunctionTypeMap.find(short_name);
+  assert(iter != FunctionTypeMap.end());
+  m_type = iter->second;
+  mungeIfSpecialFunction(ar, fs);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
@@ -247,12 +303,8 @@ void SimpleFunctionCall::setupScopes(AnalysisResultConstPtr ar) {
   FunctionScopePtr func;
   if (!m_class && m_className.empty()) {
     if (!m_dynamicInvoke) {
-      bool namespaced = (m_name[0] == '\\');
-      if (namespaced) {
-        m_name = m_name.substr(1);
-      }
       func = ar->findFunction(m_name);
-      if (!func && namespaced) {
+      if (!func && !hadBackslash() && Option::WholeProgram) {
         int pos = m_name.rfind('\\');
         m_name = m_name.substr(pos + 1);
         func = ar->findFunction(m_name);
@@ -292,7 +344,7 @@ ConstructPtr SimpleFunctionCall::getNthKid(int n) const {
 
 void SimpleFunctionCall::setNthKid(int n, ConstructPtr cp) {
   if (n == 1) {
-    m_safeDef = boost::dynamic_pointer_cast<Expression>(cp);
+    m_safeDef = dynamic_pointer_cast<Expression>(cp);
   } else {
     FunctionCall::setNthKid(n, cp);
   }
@@ -333,12 +385,12 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
 
     // check for dynamic constant and volatile function/class
     if (!m_class && m_className.empty() &&
-        (m_type == DefineFunction ||
-         m_type == DefinedFunction ||
-         m_type == FunctionExistsFunction ||
-         m_type == FBCallUserFuncSafeFunction ||
-         m_type == ClassExistsFunction ||
-         m_type == InterfaceExistsFunction) &&
+        (m_type == FunType::Define ||
+         m_type == FunType::Defined ||
+         m_type == FunType::FunctionExists ||
+         m_type == FunType::FBCallUserFuncSafe ||
+         m_type == FunType::ClassExists ||
+         m_type == FunType::InterfaceExists) &&
         m_params && m_params->getCount() >= 1) {
       ExpressionPtr value = (*m_params)[0];
       if (value->isScalar()) {
@@ -347,7 +399,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
         if (name && name->isLiteralString()) {
           string symbol = name->getLiteralString();
           switch (m_type) {
-            case DefineFunction: {
+            case FunType::Define: {
               ConstantTableConstPtr constants = ar->getConstants();
               // system constant
               if (constants->isPresent(symbol)) {
@@ -369,7 +421,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
               }
               break;
             }
-            case DefinedFunction: {
+            case FunType::Defined: {
               ConstantTablePtr constants = ar->getConstants();
               if (!constants->isPresent(symbol)) {
                 // user constant
@@ -377,15 +429,15 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
                 if (block) { // found the constant
                   constants = block->getConstants();
                   // set to be dynamic
-                  if (m_type == DefinedFunction) {
+                  if (m_type == FunType::Defined) {
                     constants->setDynamic(ar, symbol, true);
                   }
                 }
               }
               break;
             }
-            case FBCallUserFuncSafeFunction:
-            case FunctionExistsFunction:
+            case FunType::FBCallUserFuncSafe:
+            case FunType::FunctionExists:
               if (!m_no_volatile_check) {
                 FunctionScopePtr func = ar->findFunction(Util::toLower(symbol));
                 if (func && func->isUserFunction()) {
@@ -393,8 +445,8 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
                 }
                 break;
               }
-            case InterfaceExistsFunction:
-            case ClassExistsFunction:
+            case FunType::InterfaceExists:
+            case FunType::ClassExists:
               if (!m_no_volatile_check) {
                 ClassScopePtr cls = ar->findClass(Util::toLower(symbol));
                 if (cls && cls->isUserClass()) {
@@ -406,8 +458,8 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
               assert(false);
           }
         }
-      } else if ((m_type == InterfaceExistsFunction ||
-                  m_type == ClassExistsFunction) &&
+      } else if ((m_type == FunType::InterfaceExists ||
+                  m_type == FunType::ClassExists) &&
                  value->is(KindOfSimpleVariable)) {
         SimpleVariablePtr name = dynamic_pointer_cast<SimpleVariable>(value);
         if (name && name->getSymbol()) {
@@ -417,14 +469,14 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
       }
     }
 
-    if (m_type == StaticCompactFunction) {
+    if (m_type == FunType::StaticCompact) {
       FunctionScopePtr fs = getFunctionScope();
       VariableTablePtr vt = fs->getVariables();
       if (vt->isPseudoMainTable() ||
           vt->getAttribute(VariableTable::ContainsDynamicVariable)) {
         // When there is a variable table already, we will keep the ordinary
         // compact() call.
-        m_type = CompactFunction;
+        m_type = FunType::Compact;
       } else {
         // compact('a', 'b', 'c') becomes compact('a', $a, 'b', $b, 'c', $c)
         vector<ExpressionPtr> new_params;
@@ -459,14 +511,14 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
       }
     }
 
-    if (m_type == UnserializeFunction) {
+    if (m_type == FunType::Unserialize) {
       ar->forceClassVariants(getOriginalClass(), false);
     }
     if (m_params) {
       markRefParams(m_funcScope, m_name, canInvokeFewArgs());
     }
   } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    if (!m_fromCompiler && !m_noPrefix && m_type == UnknownType &&
+    if (!m_fromCompiler && m_type == FunType::Unknown &&
         !m_class && !m_redeclared && !m_dynamicInvoke && !m_funcScope &&
         (m_className.empty() ||
          (m_classScope &&
@@ -495,12 +547,12 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
 }
 
 bool SimpleFunctionCall::readsLocals() const {
-  return m_type == GetDefinedVarsFunction ||
-    m_type == CompactFunction;
+  return m_type == FunType::GetDefinedVars ||
+    m_type == FunType::Compact;
 }
 
 bool SimpleFunctionCall::writesLocals() const {
-  return m_type == ExtractFunction;
+  return m_type == FunType::Extract;
 }
 
 void SimpleFunctionCall::updateVtFlags() {
@@ -513,7 +565,7 @@ void SimpleFunctionCall::updateVtFlags() {
       if ((m_classScope && (isSelf() || isParent()) &&
            m_funcScope->usesLSB()) ||
           isStatic() ||
-          m_type == FBCallUserFuncSafeFunction ||
+          m_type == FunType::FBCallUserFuncSafe ||
           m_name == "call_user_func" ||
           m_name == "call_user_func_array" ||
           m_name == "forward_static_call" ||
@@ -524,22 +576,24 @@ void SimpleFunctionCall::updateVtFlags() {
       }
     }
   }
-  if (m_type != UnknownType) {
+  if (m_type != FunType::Unknown) {
     VariableTablePtr vt = getScope()->getVariables();
     switch (m_type) {
-      case ExtractFunction:
+      case FunType::Extract:
         vt->setAttribute(VariableTable::ContainsLDynamicVariable);
         vt->setAttribute(VariableTable::ContainsExtract);
         break;
-      case CompactFunction:
+      case FunType::Compact:
         vt->setAttribute(VariableTable::ContainsDynamicVariable);
-      case StaticCompactFunction:
+      case FunType::StaticCompact:
         vt->setAttribute(VariableTable::ContainsCompact);
         break;
-      case GetDefinedVarsFunction:
+      case FunType::GetDefinedVars:
         vt->setAttribute(VariableTable::ContainsDynamicVariable);
         vt->setAttribute(VariableTable::ContainsGetDefinedVars);
         vt->setAttribute(VariableTable::ContainsCompact);
+        break;
+      default:
         break;
     }
   }
@@ -561,12 +615,12 @@ bool SimpleFunctionCall::isSimpleDefine(StringData **outName,
   Variant v;
   if (!(*m_params)[0]->getScalarValue(v) || !v.isString()) return false;
   if (outName) {
-    *outName = StringData::GetStaticString(v.toCStrRef().get());
+    *outName = makeStaticString(v.toCStrRef().get());
   }
   if (!(*m_params)[1]->getScalarValue(v) || v.isArray()) return false;
   if (outValue) {
     if (v.isString()) {
-      v = StringData::GetStaticString(v.toCStrRef().get());
+      v = makeStaticString(v.toCStrRef().get());
     }
     *outValue = *v.asTypedValue();
   }
@@ -575,7 +629,7 @@ bool SimpleFunctionCall::isSimpleDefine(StringData **outName,
 
 bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultConstPtr ar) {
   if (m_class || !m_className.empty()) return false;
-  if (m_type == DefineFunction && m_params &&
+  if (m_type == FunType::Define && m_params &&
       unsigned(m_params->getCount() - 2) <= 1u) {
     if (m_dynamicConstant) return false;
     ScalarExpressionPtr name =
@@ -583,7 +637,7 @@ bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultConstPtr ar) {
     if (!name) return false;
     string varName = name->getIdentifier();
     if (varName.empty()) return false;
-    if (ar->isSystemConstant(varName)) {
+    if (!SystemLib::s_inited || ar->isSystemConstant(varName)) {
       always_assert(!m_extra);
       return true;
     }
@@ -607,7 +661,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
   }
 
   if (!m_funcScope->isUserFunction()) {
-    if (m_type == ExtractFunction && m_params && m_params->getCount() >= 1) {
+    if (m_type == FunType::Extract && m_params && m_params->getCount() >= 1) {
       ExpressionPtr vars = (*m_params)[0];
       while (vars) {
         if (vars->is(KindOfUnaryOpExpression) &&
@@ -685,10 +739,10 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
               name = voff.toString();
               if (mode == EXTR_PREFIX_ALL ||
                   (mode == EXTR_PREFIX_INVALID &&
-                   !name.isValidVariableName())) {
+                   !is_valid_var_name(name.c_str(), name.size()))) {
                 name = prefix + "_" + name;
               }
-              if (!name.isValidVariableName()) continue;
+              if (!is_valid_var_name(name.c_str(), name.size())) continue;
               SimpleVariablePtr var(
                 new SimpleVariable(getScope(), getLocation(), name.data()));
               var->updateSymbol(SimpleVariablePtr());
@@ -750,7 +804,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
   }
 
   if (!m_classScope && !m_funcScope->isUserFunction()) {
-    if (m_type == UnknownType && m_funcScope->isFoldable()) {
+    if (m_type == FunType::Unknown && m_funcScope->isFoldable()) {
       Array arr;
       if (m_params) {
         if (!m_params->isScalar()) return ExpressionPtr();
@@ -782,7 +836,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
     }
   }
 
-  if (m_type != UnknownType || m_safe) {
+  if (m_type != FunType::Unknown || m_safe) {
     return ExpressionPtr();
   }
 
@@ -803,16 +857,16 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
   }
 
   if (!m_class && m_className.empty() &&
-      (m_type == DefineFunction ||
-       m_type == DefinedFunction ||
-       m_type == FBCallUserFuncSafeFunction ||
-       m_type == FunctionExistsFunction ||
-       m_type == ClassExistsFunction ||
-       m_type == InterfaceExistsFunction) &&
+      (m_type == FunType::Define ||
+       m_type == FunType::Defined ||
+       m_type == FunType::FBCallUserFuncSafe ||
+       m_type == FunType::FunctionExists ||
+       m_type == FunType::ClassExists ||
+       m_type == FunType::InterfaceExists) &&
       m_params &&
-      (m_type == DefineFunction ?
+      (m_type == FunType::Define ?
        unsigned(m_params->getCount() - 2) <= 1u :
-       m_type == FBCallUserFuncSafeFunction ? m_params->getCount() >= 1 :
+       m_type == FunType::FBCallUserFuncSafe ? m_params->getCount() >= 1 :
        m_params->getCount() == 1)) {
     ExpressionPtr value = (*m_params)[0];
     if (value->isScalar()) {
@@ -820,7 +874,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
       if (name && name->isLiteralString()) {
         string symbol = name->getLiteralString();
         switch (m_type) {
-          case DefineFunction: {
+          case FunType::Define: {
             ConstantTableConstPtr constants = ar->getConstants();
             // system constant
             if (constants->isPresent(symbol)) {
@@ -855,7 +909,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
             }
             break;
           }
-          case DefinedFunction: {
+          case FunType::Defined: {
             if (symbol == "false" ||
                 symbol == "true" ||
                 symbol == "null") {
@@ -890,14 +944,14 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
             }
             break;
           }
-          case FBCallUserFuncSafeFunction:
-          case FunctionExistsFunction: {
+          case FunType::FBCallUserFuncSafe:
+          case FunType::FunctionExists: {
             const std::string &lname = Util::toLower(symbol);
             if (Option::DynamicInvokeFunctions.find(lname) ==
                 Option::DynamicInvokeFunctions.end()) {
               FunctionScopePtr func = ar->findFunction(lname);
               if (!func) {
-                if (m_type == FunctionExistsFunction &&
+                if (m_type == FunType::FunctionExists &&
                     Option::WholeProgram) {
                   return CONSTANT("false");
                 }
@@ -906,13 +960,13 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
               if (!m_no_volatile_check && func->isUserFunction()) {
                 func->setVolatile();
               }
-              if (!func->isVolatile() && m_type == FunctionExistsFunction) {
+              if (!func->isVolatile() && m_type == FunType::FunctionExists) {
                 return CONSTANT("true");
               }
             }
             break;
           }
-          case InterfaceExistsFunction: {
+          case FunType::InterfaceExists: {
             ClassScopePtrVec classes = ar->findClasses(Util::toLower(symbol));
             bool interfaceFound = false;
             for (ClassScopePtrVec::const_iterator it = classes.begin();
@@ -936,7 +990,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
             }
             break;
           }
-          case ClassExistsFunction: {
+          case FunType::ClassExists: {
             ClassScopePtrVec classes = ar->findClasses(Util::toLower(symbol));
             bool classFound = false;
             for (ClassScopePtrVec::const_iterator it = classes.begin();
@@ -970,7 +1024,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
 }
 
 ExpressionPtr SimpleFunctionCall::postOptimize(AnalysisResultConstPtr ar) {
-  if (m_type == StaticCompactFunction) {
+  if (m_type == FunType::StaticCompact) {
     for (int i = 0; i < m_params->getCount(); i += 2) {
       ExpressionPtr e = (*m_params)[i + 1];
       if (e->is(KindOfUnaryOpExpression) &&
@@ -1041,7 +1095,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
 
   // handling define("CONSTANT", ...);
   if (!m_class && m_className.empty()) {
-    if (m_type == DefineFunction && m_params &&
+    if (m_type == FunType::Define && m_params &&
         unsigned(m_params->getCount() - 2) <= 1u) {
       ScalarExpressionPtr name =
         dynamic_pointer_cast<ScalarExpression>((*m_params)[0]);
@@ -1101,7 +1155,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       if (getScope()->isFirstPass()) {
         Compiler::Error(Compiler::BadDefine, self);
       }
-    } else if (m_type == ExtractFunction || m_type == GetDefinedVarsFunction) {
+    } else if (m_type == FunType::Extract || m_type == FunType::GetDefinedVars) {
       getScope()->getVariables()->forceVariants(ar, VariableTable::AnyVars);
     }
   }
@@ -1178,7 +1232,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     Construct::recomputeEffects();
   }
 
-  m_builtinFunction = (!func->isUserFunction() || func->isSepExtension());
+  m_builtinFunction = !func->isUserFunction();
 
   beforeCheck(ar);
 

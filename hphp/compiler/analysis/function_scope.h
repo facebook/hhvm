@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,7 @@
 #include "hphp/compiler/option.h"
 
 #include "hphp/util/json.h"
-#include "hphp/util/parser/parser.h"
+#include "hphp/parser/parser.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -73,7 +73,7 @@ public:
 
   FunctionScope(FunctionScopePtr orig, AnalysisResultConstPtr ar,
                 const std::string &name, const std::string &originalName,
-                StatementPtr stmt, ModifierExpressionPtr modifiers);
+                StatementPtr stmt, ModifierExpressionPtr modifiers, bool user);
 
   /**
    * System functions.
@@ -90,16 +90,19 @@ public:
 
   void addModifier(int mod);
 
+  bool hasUserAttr(const char *attr) const;
+
   /**
    * What kind of function this is.
    */
-  bool isUserFunction() const { return !m_system;}
+  bool isUserFunction() const { return !m_system && !isNative(); }
   bool isDynamic() const { return m_dynamic; }
   bool isPublic() const;
   bool isProtected() const;
   bool isPrivate() const;
   bool isStatic() const;
   bool isAbstract() const;
+  bool isNative() const;
   bool isFinal() const;
   bool isMagic() const;
   bool isRefParam(int index) const;
@@ -109,20 +112,18 @@ public:
   bool hasImpl() const;
   void setDirectInvoke() { m_directInvoke = true; }
   bool hasDirectInvoke() const { return m_directInvoke; }
+  bool isZendParamMode() const;
   bool mayContainThis();
   bool isClosure() const;
-  bool isGenerator() const;
-  bool isGeneratorFromClosure() const;
-  int allocYieldLabel() { return ++m_yieldLabelCount; }
-  int getYieldLabelCount() const { return m_yieldLabelCount; }
-  bool hasGeneratorAsBody() const;
-  MethodStatementRawPtr getOrigGenStmt() const;
-  FunctionScopeRawPtr getOrigGenFS() const;
-  void setClosureGenerator() { m_closureGenerator = true; }
-  bool isClosureGenerator() const {
-    assert(!m_closureGenerator || isClosure());
-    return m_closureGenerator;
-  }
+  bool isGenerator() const { return m_generator; }
+  void setGenerator(bool f) { m_generator = f; }
+  int allocYieldLabel();
+  int getYieldLabelCount() const;
+  int getYieldLabelGeneration() const;
+  void resetYieldLabelCount();
+  bool isAsync() const { return m_async; }
+  void setAsync(bool f) { m_async = f; }
+
   bool needsClassParam();
 
   void setInlineSameContext(bool f) { m_inlineSameContext = f; }
@@ -158,7 +159,6 @@ public:
   }
 
   virtual std::string getId() const;
-  std::string getInjectionId() const;
 
   int getRedeclaringId() const {
     return m_redeclaring;
@@ -222,10 +222,10 @@ public:
   void setNeedsActRec();
 
   /*
-   * If this is a builtin and can be redefined
+   * If this is a builtin (C++ or PHP) and can be redefined
    */
-  bool ignoreRedefinition() const;
-  void setIgnoreRedefinition();
+  bool allowOverride() const;
+  void setAllowOverride();
 
   /**
    * Whether this function is a runtime helper function
@@ -254,6 +254,8 @@ public:
 
   /**
    * What is the inferred type of this function's return.
+   * Note that for generators and async functions, this is different
+   * from what caller actually gets when calling the function.
    */
   void pushReturnType();
   void setReturnType(AnalysisResultConstPtr ar, TypePtr type);
@@ -266,8 +268,6 @@ public:
   void addRetExprToFix(ExpressionPtr e);
   void clearRetExprs();
   void fixRetExprs();
-
-  bool needsTypeCheckWrapper() const;
 
   void setOptFunction(FunctionOptPtr fn) { m_optFunction = fn; }
   FunctionOptPtr getOptFunction() const { return m_optFunction; }
@@ -309,10 +309,6 @@ public:
 
   bool isInlined() const { return m_inlineable; }
   void disableInline() { m_inlineable = false; }
-
-  /* Whether this function is brought in by a separable extension */
-  void setSepExtension() { m_sep = true;}
-  bool isSepExtension() const { return m_sep;}
 
   /* Whether we need to worry about the named return value optimization
      for this function */
@@ -465,7 +461,6 @@ private:
   unsigned m_magicMethod : 1;
   unsigned m_system : 1;
   unsigned m_inlineable : 1;
-  unsigned m_sep : 1;
   unsigned m_containsThis : 1; // contains a usage of $this?
   unsigned m_containsBareThis : 2; // $this outside object-context,
                                    // 2 if in reference context
@@ -474,7 +469,8 @@ private:
   unsigned m_inlineSameContext : 1;
   unsigned m_contextSensitive : 1;
   unsigned m_directInvoke : 1;
-  unsigned m_closureGenerator : 1;
+  unsigned m_generator : 1;
+  unsigned m_async : 1;
   unsigned m_noLSB : 1;
   unsigned m_nextLSB : 1;
   unsigned m_hasTry : 1;
@@ -491,6 +487,7 @@ private:
   ReadWriteMutex m_inlineMutex;
   unsigned m_nextID; // used when cloning generators for traits
   int m_yieldLabelCount; // number of allocated yield labels
+  int m_yieldLabelGen;   // generation counter for yield labels
   std::list<FunctionScopeRawPtr> m_clonedTraitOuterScope;
 };
 

@@ -1,0 +1,33 @@
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+string(6) "stream"
+string(7) "Unknown"
+string(5) "array"
+int(%d)
+string(5) "array"
+int(%d)
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+string(5) "array"
+string(5) "array"
+int(%d)
+HipHop Warning: %s
+NULL
+string(5) "array"
+int(%d)
+HipHop Warning: %s
+NULL
+string(5) "array"
+int(%d)
+HipHop Warning: %s
+NULL
+bool(false)
+string(5) "array"
+int(%d)
+string(5) "array"
+int(%d)
+Done

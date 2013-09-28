@@ -1,3 +1,4 @@
 <?php
 
- $x = new stdclass;var_dump($z =& $x->$y);
+$x = new stdclass;
+var_dump($z =& $x->$y);

@@ -1,0 +1,6 @@
+*** Testing mb_substr_count() : error conditions ***
+
+-- Testing mb_substr_count() function with an unknown encoding --
+HipHop Warning: %s
+bool(false)
+Done

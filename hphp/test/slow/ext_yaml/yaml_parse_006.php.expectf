@@ -1,0 +1,16 @@
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+array(1) {
+  ["key"]=>
+  string(16) "tab before value"
+}
+array(1) {
+  ["key"]=>
+  string(26) "space and tab before value"
+}
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)

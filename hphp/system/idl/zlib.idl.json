@@ -1,0 +1,654 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "readgzfile",
+            "desc": "Reads a file, decompresses it and writes it to standard output.\n\nreadgzfile() can be used to read a file which is not in gzip format; in this case readgzfile() will directly read from the file without decompression.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the number of (uncompressed) bytes read from the file. If an error occurs, FALSE is returned and unless the function was called as @readgzfile, an error message is printed."
+            },
+            "args": [
+                {
+                    "name": "filename",
+                    "type": "String",
+                    "desc": "The file name. This file will be opened from the filesystem and its contents written to standard output."
+                },
+                {
+                    "name": "use_include_path",
+                    "type": "Boolean",
+                    "value": "false",
+                    "desc": "You can set this optional parameter to 1, if you want to search for the file in the include_path too."
+                }
+            ]
+        },
+        {
+            "name": "gzfile",
+            "desc": "This function is identical to readgzfile(), except that it returns the file in an array.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "An array containing the file, one line per cell."
+            },
+            "args": [
+                {
+                    "name": "filename",
+                    "type": "String",
+                    "desc": "The file name."
+                },
+                {
+                    "name": "use_include_path",
+                    "type": "Boolean",
+                    "value": "false",
+                    "desc": "You can set this optional parameter to 1, if you want to search for the file in the include_path too."
+                }
+            ]
+        },
+        {
+            "name": "gzcompress",
+            "desc": null,
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The compressed string or FALSE if an error occurred."
+            },
+            "args": [
+                {
+                    "name": "data",
+                    "type": "String",
+                    "desc": "The data to compress."
+                },
+                {
+                    "name": "level",
+                    "type": "Int32",
+                    "value": "-1",
+                    "desc": "The level of compression. Can be given as 0 for no compression up to 9 for maximum compression."
+                }
+            ]
+        },
+        {
+            "name": "gzuncompress",
+            "desc": "This function uncompress a compressed string.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The original uncompressed data or FALSE on error.\n\nThe function will return an error if the uncompressed data is more than 32768 times the length of the compressed input data or more than the optional parameter length."
+            },
+            "args": [
+                {
+                    "name": "data",
+                    "type": "String",
+                    "desc": "The data compressed by gzcompress()."
+                },
+                {
+                    "name": "limit",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "The maximum length of data to decode."
+                }
+            ]
+        },
+        {
+            "name": "gzdeflate",
+            "desc": null,
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The deflated string or FALSE if an error occurred."
+            },
+            "args": [
+                {
+                    "name": "data",
+                    "type": "String",
+                    "desc": "The data to deflate."
+                },
+                {
+                    "name": "level",
+                    "type": "Int32",
+                    "value": "-1",
+                    "desc": "The level of compression. Can be given as 0 for no compression up to 9 for maximum compression. If not given, the default compression level will be the default compression level of the zlib library."
+                }
+            ]
+        },
+        {
+            "name": "gzinflate",
+            "desc": "This function inflate a deflated string.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The original uncompressed data or FALSE on error.\n\nThe function will return an error if the uncompressed data is more than 32768 times the length of the compressed input data or more than the optional parameter length."
+            },
+            "args": [
+                {
+                    "name": "data",
+                    "type": "String",
+                    "desc": "The data compressed by gzdeflate()."
+                },
+                {
+                    "name": "limit",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "The maximum length of data to decode."
+                }
+            ]
+        },
+        {
+            "name": "gzencode",
+            "desc": null,
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The encoded string, or FALSE if an error occurred."
+            },
+            "args": [
+                {
+                    "name": "data",
+                    "type": "String",
+                    "desc": "The data to encode."
+                },
+                {
+                    "name": "level",
+                    "type": "Int32",
+                    "value": "-1",
+                    "desc": "The level of compression. Can be given as 0 for no compression up to 9 for maximum compression. If not given, the default compression level will be the default compression level of the zlib library."
+                },
+                {
+                    "name": "encoding_mode",
+                    "type": "Int32",
+                    "value": "k_FORCE_GZIP",
+                    "desc": "The encoding mode. Can be FORCE_GZIP (the default) or FORCE_DEFLATE.\n\nIf you use FORCE_DEFLATE, you get a standard zlib deflated string (inclusive zlib headers) after the gzip file header but without the trailing crc32 checksum."
+                }
+            ]
+        },
+        {
+            "name": "gzdecode",
+            "desc": "This function returns a decoded version of the input data.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The decoded string, or FALSE if an error occurred."
+            },
+            "args": [
+                {
+                    "name": "data",
+                    "type": "String",
+                    "desc": "The data to decode, encoded by gzencode()."
+                }
+            ]
+        },
+        {
+            "name": "zlib_get_coding_type",
+            "desc": "Returns the coding type used for output compression.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Possible return values are gzip, deflate, or FALSE."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "gzopen",
+            "desc": "Opens a gzip (.gz) file for reading or writing.\n\ngzopen() can be used to read a file which is not in gzip format; in this case gzread() will directly read from the file without decompression.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Resource",
+                "desc": "Returns a file pointer to the file opened, after that, everything you read from this file descriptor will be transparently decompressed and what you write gets compressed.\n\nIf the open fails, the function returns FALSE."
+            },
+            "args": [
+                {
+                    "name": "filename",
+                    "type": "String",
+                    "desc": "The file name."
+                },
+                {
+                    "name": "mode",
+                    "type": "String",
+                    "desc": "As in fopen() (rb or wb) but can also include a compression level (wb9) or a strategy: f for filtered data as in wb6f, h for Huffman only compression as in wb1h. (See the description of deflateInit2 in zlib.h for more information about the strategy parameter.)"
+                },
+                {
+                    "name": "use_include_path",
+                    "type": "Boolean",
+                    "value": "false",
+                    "desc": "You can set this optional parameter to 1, if you want to search for the file in the include_path too."
+                }
+            ]
+        },
+        {
+            "name": "gzclose",
+            "desc": "Closes the given gz-file pointer.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "zp",
+                    "type": "Resource",
+                    "desc": "The gz-file pointer. It must be valid, and must point to a file successfully opened by gzopen()."
+                }
+            ]
+        },
+        {
+            "name": "gzrewind",
+            "desc": "Sets the file position indicator of the given gz-file pointer to the beginning of the file stream.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "zp",
+                    "type": "Resource",
+                    "desc": "The gz-file pointer. It must be valid, and must point to a file successfully opened by gzopen()."
+                }
+            ]
+        },
+        {
+            "name": "gzeof",
+            "desc": "Tests the given GZ file pointer for EOF.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE if the gz-file pointer is at EOF or an error occurs; otherwise returns FALSE."
+            },
+            "args": [
+                {
+                    "name": "zp",
+                    "type": "Resource",
+                    "desc": "The gz-file pointer. It must be valid, and must point to a file successfully opened by gzopen()."
+                }
+            ]
+        },
+        {
+            "name": "gzgetc",
+            "desc": "Returns a string containing a single (uncompressed) character read from the given gz-file pointer.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The uncompressed character or FALSE on EOF (unlike gzeof())."
+            },
+            "args": [
+                {
+                    "name": "zp",
+                    "type": "Resource",
+                    "desc": "The gz-file pointer. It must be valid, and must point to a file successfully opened by gzopen()."
+                }
+            ]
+        },
+        {
+            "name": "gzgets",
+            "desc": "Gets a (uncompressed) string of up to length - 1 bytes read from the given file pointer. Reading ends when length - 1 bytes have been read, on a newline, or on EOF (whichever comes first).",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The uncompressed string, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "zp",
+                    "type": "Resource",
+                    "desc": "The gz-file pointer. It must be valid, and must point to a file successfully opened by gzopen()."
+                },
+                {
+                    "name": "length",
+                    "type": "Int64",
+                    "value": "1024",
+                    "desc": "The length of data to get."
+                }
+            ]
+        },
+        {
+            "name": "gzgetss",
+            "desc": "Identical to gzgets(), except that gzgetss() attempts to strip any HTML and PHP tags from the text it reads.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The uncompressed and striped string, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "zp",
+                    "type": "Resource",
+                    "desc": "The gz-file pointer. It must be valid, and must point to a file successfully opened by gzopen()."
+                },
+                {
+                    "name": "length",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "The length of data to get."
+                },
+                {
+                    "name": "allowable_tags",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "You can use this optional parameter to specify tags which should not be stripped."
+                }
+            ]
+        },
+        {
+            "name": "gzread",
+            "desc": "gzread() reads up to length bytes from the given gz-file pointer. Reading stops when length (uncompressed) bytes have been read or EOF is reached, whichever comes first.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The data that have been read."
+            },
+            "args": [
+                {
+                    "name": "zp",
+                    "type": "Resource",
+                    "desc": "The gz-file pointer. It must be valid, and must point to a file successfully opened by gzopen()."
+                },
+                {
+                    "name": "length",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "The number of bytes to read."
+                }
+            ]
+        },
+        {
+            "name": "gzpassthru",
+            "desc": "Reads to EOF on the given gz-file pointer from the current position and writes the (uncompressed) results to standard output.\n\nYou may need to call gzrewind() to reset the file pointer to the beginning of the file if you have already written data to it. Tip\n\nIf you just want to dump the contents of a file to the output buffer, without first modifying it or seeking to a particular offset, you may want to use the readgzfile() function, which saves you the gzopen() call.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The number of uncompressed characters read from gz and passed through to the input, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "zp",
+                    "type": "Resource",
+                    "desc": "The gz-file pointer. It must be valid, and must point to a file successfully opened by gzopen()."
+                }
+            ]
+        },
+        {
+            "name": "gzseek",
+            "desc": "Sets the file position indicator for the given file pointer to the given offset byte into the file stream. Equivalent to calling (in C) gzseek(zp, offset, SEEK_SET).\n\nIf the file is opened for reading, this function is emulated but can be extremely slow. If the file is opened for writing, only forward seeks are supported; gzseek() then compresses a sequence of zeroes up to the new starting position.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Upon success, returns 0; otherwise, returns -1. Note that seeking past EOF is not considered an error."
+            },
+            "args": [
+                {
+                    "name": "zp",
+                    "type": "Resource",
+                    "desc": "The gz-file pointer. It must be valid, and must point to a file successfully opened by gzopen()."
+                },
+                {
+                    "name": "offset",
+                    "type": "Int64",
+                    "desc": "The seeked offset."
+                },
+                {
+                    "name": "whence",
+                    "type": "Int64",
+                    "value": "k_SEEK_SET",
+                    "desc": "whence values are: SEEK_SET - Set position equal to offset bytes. SEEK_CUR - Set position to current location plus offset.\n\nIf whence is not specified, it is assumed to be SEEK_SET."
+                }
+            ]
+        },
+        {
+            "name": "gztell",
+            "desc": "Gets the position of the given file pointer; i.e., its offset into the uncompressed file stream.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The position of the file pointer or FALSE if an error occurs."
+            },
+            "args": [
+                {
+                    "name": "zp",
+                    "type": "Resource",
+                    "desc": "The gz-file pointer. It must be valid, and must point to a file successfully opened by gzopen()."
+                }
+            ]
+        },
+        {
+            "name": "gzwrite",
+            "desc": "gzwrite() writes the contents of string to the given gz-file.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the number of (uncompressed) bytes written to the given gz-file stream."
+            },
+            "args": [
+                {
+                    "name": "zp",
+                    "type": "Resource",
+                    "desc": "The gz-file pointer. It must be valid, and must point to a file successfully opened by gzopen()."
+                },
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The string to write."
+                },
+                {
+                    "name": "length",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "The number of uncompressed bytes to write. If supplied, writing will stop after length (uncompressed) bytes have been written or the end of string is reached, whichever comes first.\n\nNote that if the length argument is given, then the magic_quotes_runtime configuration option will be ignored and no slashes will be stripped from string."
+                }
+            ]
+        },
+        {
+            "name": "gzputs",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "zp",
+                    "type": "Resource"
+                },
+                {
+                    "name": "str",
+                    "type": "String"
+                },
+                {
+                    "name": "length",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "qlzcompress",
+            "desc": "This function compress the given string using the QuickLZ data format.\n\nFor details on the QuickLZ compression algorithm go to http:\/\/www.quicklz.com\/(RFC 1950).",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The compressed string or FALSE if an error occurred."
+            },
+            "args": [
+                {
+                    "name": "data",
+                    "type": "String",
+                    "desc": "The data to compress."
+                },
+                {
+                    "name": "level",
+                    "type": "Int32",
+                    "value": "1",
+                    "desc": "The level of compression. Can be given as 1, 2 or 3."
+                }
+            ]
+        },
+        {
+            "name": "qlzuncompress",
+            "desc": "This function uncompress a compressed string.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The original uncompressed data or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "data",
+                    "type": "String",
+                    "desc": "The data compressed by qlzcompress()."
+                },
+                {
+                    "name": "level",
+                    "type": "Int32",
+                    "value": "1",
+                    "desc": "The level of compression. Can be given as 1, 2 or 3."
+                }
+            ]
+        },
+        {
+            "name": "sncompress",
+            "desc": "This function compress the given string using the Snappy data format.\n\nFor details on the Snappy compression algorithm go to http:\/\/code.google.com\/p\/snappy\/.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The compressed string or FALSE if an error occurred."
+            },
+            "args": [
+                {
+                    "name": "data",
+                    "type": "String",
+                    "desc": "The data to compress."
+                }
+            ]
+        },
+        {
+            "name": "snuncompress",
+            "desc": "This function uncompress a compressed string.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The compressed string or FALSE if an error occurred."
+            },
+            "args": [
+                {
+                    "name": "data",
+                    "type": "String",
+                    "desc": "The data compressed by sncompress()."
+                }
+            ]
+        },
+        {
+            "name": "nzcompress",
+            "desc": "This function compresses the given string using the nzlib data format, which is primarily used for compressing and uncompressing memcache values",
+            "args": [
+                {
+                    "name": "uncompressed",
+                    "type": "String",
+                    "desc": "The uncompressed data"
+                }
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The compressed data, or FALSE on error."
+            },
+            "flags": [
+            ]
+        },
+        {
+            "name": "nzuncompress",
+            "desc": "This function uncompresses the given string given that it is in the nzlib data format, which is primarily used for compressing and uncompressing memcache values",
+            "args": [
+                {
+                    "name": "compressed",
+                    "type": "String",
+                    "desc": "The data compressed by nzcompress()."
+                }
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The uncompressed data, or FALSE on error"
+            },
+            "flags": [
+            ]
+        },
+        {
+            "name": "lz4compress",
+            "desc": "This function compresses the given string using the lz4lib data format, which is primarily used for compressing and uncompressing memcache values",
+            "args": [
+                {
+                    "name": "uncompressed",
+                    "type": "String",
+                    "desc": "The uncompressed data"
+                }
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The compressed data, or FALSE on error."
+            },
+            "flags": [
+            ]
+        },
+        {
+            "name": "lz4hccompress",
+            "desc": "This function compresses the given string using the lz4lib data format, which is primarily used for compressing and uncompressing memcache values",
+            "args": [
+                {
+                    "name": "uncompressed",
+                    "type": "String",
+                    "desc": "The uncompressed data"
+                }
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The compressed data, or FALSE on error."
+            },
+            "flags": [
+            ]
+        },
+        {
+            "name": "lz4uncompress",
+            "desc": "This function uncompresses the given string given that it is in the lz4lib data format, which is primarily used for compressing and uncompressing memcache values",
+            "args": [
+                {
+                    "name": "compressed",
+                    "type": "String",
+                    "desc": "The data compressed by lz4compress()."
+                }
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The uncompressed data, or FALSE on error"
+            },
+            "flags": [
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

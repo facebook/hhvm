@@ -1,3 +1,3 @@
 <?php
 
- print 1 << 32;
+print 1 << 32;

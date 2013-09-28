@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,6 +18,7 @@
 #define incl_HPHP_METHOD_STATEMENT_H_
 
 #include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/type_annotation.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,14 +35,14 @@ protected:
   MethodStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS,
                   ModifierExpressionPtr modifiers, bool ref,
                   const std::string &name, ExpressionListPtr params,
-                  const std::string &retTypeConstraint, StatementListPtr stmt,
+                  TypeAnnotationPtr retTypeAnnotation, StatementListPtr stmt,
                   int attr, const std::string &docComment,
                   ExpressionListPtr attrList, bool method = true);
 public:
   MethodStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                   ModifierExpressionPtr modifiers, bool ref,
                   const std::string &name, ExpressionListPtr params,
-                  const std::string &retTypeConstraint, StatementListPtr stmt,
+                  TypeAnnotationPtr retTypeAnnotation, StatementListPtr stmt,
                   int attr, const std::string &docComment,
                   ExpressionListPtr attrList, bool method = true);
 
@@ -61,10 +62,13 @@ public:
   void setOriginalName(const std::string name) { m_originalName = name; }
   std::string getFullName() const;
   std::string getOriginalFullName() const;
-  std::string getOriginalFullNameForInjection() const;
+  std::string getOriginalFilename() const { return m_originalFilename; }
   ExpressionListPtr getParams() { return m_params;}
   const std::string getReturnTypeConstraint() const {
-    return m_retTypeConstraint;
+    return m_retTypeAnnotation.get() ? m_retTypeAnnotation->fullName() : "";
+  }
+  const TypeAnnotationPtr retTypeAnnotation() const {
+    return m_retTypeAnnotation;
   }
   StatementListPtr getStmts() { return m_stmt;}
   bool isRef(int index = -1) const;
@@ -94,20 +98,6 @@ public:
   // these pointers must be raw (weak) pointers to prevent cycles
   // in the reference graph
 
-  void setOrigGeneratorFunc(MethodStatementRawPtr stmt) {
-    m_origGeneratorFunc = stmt;
-  }
-  MethodStatementRawPtr getOrigGeneratorFunc() const {
-    return m_origGeneratorFunc;
-  }
-
-  void setGeneratorFunc(MethodStatementRawPtr stmt) {
-    m_generatorFunc = stmt;
-  }
-  MethodStatementRawPtr getGeneratorFunc() const {
-    return m_generatorFunc;
-  }
-
   void setContainingClosure(ClosureExpressionRawPtr exp) {
     m_containingClosure = exp;
   }
@@ -120,12 +110,27 @@ public:
     m_originalClassName = name;
   }
 
+  // for flattened traits
+  void setOriginalFilename(const std::string &name) {
+    assert(m_method);
+    m_originalFilename = name;
+  }
+
   void addTraitMethodToScope(AnalysisResultConstPtr ar,
                              ClassScopePtr classScope);
+
+  void setHasCallToGetArgs(bool f) { m_hasCallToGetArgs = f; }
+  bool hasCallToGetArgs() const { return m_hasCallToGetArgs; }
+
+  std::string getGeneratorName() const;
+
+private:
+  void checkParameters();
 
 protected:
   bool m_method;
   bool m_ref;
+  bool m_hasCallToGetArgs;
   int m_attribute;
   int m_cppLength;
   ModifierExpressionPtr m_modifiers;
@@ -133,12 +138,11 @@ protected:
   std::string m_originalName;
   std::string m_className;
   std::string m_originalClassName;
+  std::string m_originalFilename;
   ExpressionListPtr m_params;
-  std::string m_retTypeConstraint;
+  TypeAnnotationPtr m_retTypeAnnotation;
   StatementListPtr m_stmt;
   std::string m_docComment;
-  MethodStatementRawPtr m_origGeneratorFunc;
-  MethodStatementRawPtr m_generatorFunc;
   ClosureExpressionRawPtr m_containingClosure;
   ExpressionListPtr m_attrList;
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,23 +18,26 @@
 #include "hphp/runtime/ext/ext_spl.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/ext_string.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
+IMPLEMENT_DEFAULT_EXTENSION(SPL);
 ///////////////////////////////////////////////////////////////////////////////
 
-static StaticString s_spl_autoload("spl_autoload");
-static StaticString s_spl_autoload_call("spl_autoload_call");
-static StaticString s_default_extensions(".inc,.php");
+const StaticString
+  s_spl_autoload("spl_autoload"),
+  s_spl_autoload_call("spl_autoload_call"),
+  s_default_extensions(".inc,.php"),
+  s_rewind("rewind"),
+  s_valid("valid"),
+  s_next("next"),
+  s_current("current"),
+  s_key("key"),
+  s_getIterator("getIterator");
 
-static StaticString s_rewind("rewind");
-static StaticString s_valid("valid");
-static StaticString s_next("next");
-static StaticString s_current("current");
-static StaticString s_key("key");
-
-static const StaticString spl_classes[] = {
+const StaticString spl_classes[] = {
   StaticString("AppendIterator"),
   StaticString("ArrayIterator"),
   StaticString("ArrayObject"),
@@ -100,6 +103,7 @@ Array f_spl_classes() {
   return ret.create();
 }
 
+void throw_spl_exception(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
 void throw_spl_exception(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
@@ -193,18 +197,40 @@ Variant f_class_uses(CVarRef obj, bool autoload /* = true */) {
   }
   Array ret(Array::Create());
   for (auto& elem : cls->usedTraits()) {
-    auto& traitName = elem.get()->nameRef();
+    auto& traitName = elem->nameRef();
     ret.set(traitName, traitName);
   }
   return ret;
 }
 
+Object get_traversable_object_iterator(CVarRef obj) {
+  if (!obj.instanceof(SystemLib::s_TraversableClass)) {
+    raise_error("Argument must implement interface Traversable");
+  }
+
+  bool isIteratorAggregate;
+  Object itObj = obj.getObjectData()
+    ->iterableObject(isIteratorAggregate, true);
+
+  if (!isIteratorAggregate) {
+    if (obj.instanceof(SystemLib::s_IteratorAggregateClass)) {
+      raise_error("Objects returned by getIterator() must be traversable or "
+                  "implement interface Iterator");
+    } else {
+      raise_error(
+        "Class %s must implement interface Traversable as part of either "
+        "Iterator or IteratorAggregate",
+        obj.toObject()->o_getClassName()->data()
+      );
+    }
+  }
+
+  return itObj;
+}
+
 Variant f_iterator_apply(CVarRef obj, CVarRef func,
                          CArrRef params /* = null_array */) {
-  if (!obj.instanceof(SystemLib::s_TraversableClass)) {
-    return false;
-  }
-  Object pobj = obj.toObject();
+  Object pobj = get_traversable_object_iterator(obj);
   pobj->o_invoke_few_args(s_rewind, 0);
   int64_t count = 0;
   while (same(pobj->o_invoke_few_args(s_valid, 0), true)) {
@@ -218,10 +244,7 @@ Variant f_iterator_apply(CVarRef obj, CVarRef func,
 }
 
 Variant f_iterator_count(CVarRef obj) {
-  if (!obj.instanceof(SystemLib::s_TraversableClass)) {
-    return false;
-  }
-  Object pobj = obj.toObject();
+  Object pobj = get_traversable_object_iterator(obj);
   pobj->o_invoke_few_args(s_rewind, 0);
   int64_t count = 0;
   while (same(pobj->o_invoke_few_args(s_valid, 0), true)) {
@@ -232,11 +255,9 @@ Variant f_iterator_count(CVarRef obj) {
 }
 
 Variant f_iterator_to_array(CVarRef obj, bool use_keys /* = true */) {
-  if (!obj.instanceof(SystemLib::s_TraversableClass)) {
-    return false;
-  }
+  Object pobj = get_traversable_object_iterator(obj);
   Array ret(Array::Create());
-  Object pobj = obj.toObject();
+
   pobj->o_invoke_few_args(s_rewind, 0);
   while (same(pobj->o_invoke_few_args(s_valid, 0), true)) {
     Variant val = pobj->o_invoke_few_args(s_current, 0);
@@ -254,7 +275,7 @@ Variant f_iterator_to_array(CVarRef obj, bool use_keys /* = true */) {
 bool f_spl_autoload_register(CVarRef autoload_function /* = null_variant */,
                              bool throws /* = true */,
                              bool prepend /* = false */) {
-  if (autoload_function.same(s_spl_autoload_call)) {
+  if (same(autoload_function, s_spl_autoload_call)) {
     if (throws) {
       throw_spl_exception("Function spl_autoload_call()"
                       "cannot be registered");
@@ -271,7 +292,7 @@ bool f_spl_autoload_register(CVarRef autoload_function /* = null_variant */,
 }
 
 bool f_spl_autoload_unregister(CVarRef autoload_function) {
-  if (autoload_function.same(s_spl_autoload_call)) {
+  if (same(autoload_function, s_spl_autoload_call)) {
     AutoloadHandler::s_instance->removeAllHandlers();
   } else {
     AutoloadHandler::s_instance->removeHandler(autoload_function);
@@ -295,7 +316,7 @@ namespace {
 class ExtensionList : public RequestEventHandler {
 public:
   virtual void requestInit() {
-    extensions = CREATE_VECTOR2(String(".inc"), String(".php"));
+    extensions = make_packed_array(String(".inc"), String(".php"));
   }
   virtual void requestShutdown() {
     extensions.reset();
@@ -321,10 +342,10 @@ void f_spl_autoload(CStrRef class_name,
   Array ext = file_extensions.isNull()
               ? s_extension_list->extensions
               : StringUtil::Explode(file_extensions, ",").toArray();
-  String lClass = StringUtil::ToLower(class_name);
+  String lClass = f_strtolower(class_name);
   bool found = false;
   for (ArrayIter iter(ext); iter; ++iter) {
-    String fileName = lClass + iter.second();
+    String fileName = lClass + iter.second().toString();
     include(fileName, true, "", false);
     if (f_class_exists(class_name, false)) {
       found = true;

@@ -1,0 +1,4276 @@
+{
+    "preamble": "#include <runtime\/ext\/ext_domdocument_includes.h>",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "dom_document_create_element",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "name",
+                    "type": "String"
+                },
+                {
+                    "name": "value",
+                    "type": "String",
+                    "value": "null_string"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_create_document_fragment",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_create_text_node",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "data",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_create_comment",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "data",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_create_cdatasection",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "data",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_create_processing_instruction",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "target",
+                    "type": "String"
+                },
+                {
+                    "name": "data",
+                    "type": "String",
+                    "value": "null_string"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_create_attribute",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "name",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_create_entity_reference",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "name",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_get_elements_by_tag_name",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "name",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_import_node",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "importednode",
+                    "type": "Object"
+                },
+                {
+                    "name": "deep",
+                    "type": "Boolean",
+                    "value": "false"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_create_element_ns",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "namespaceuri",
+                    "type": "String"
+                },
+                {
+                    "name": "qualifiedname",
+                    "type": "String"
+                },
+                {
+                    "name": "value",
+                    "type": "String",
+                    "value": "null_string"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_create_attribute_ns",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "namespaceuri",
+                    "type": "String"
+                },
+                {
+                    "name": "qualifiedname",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_get_elements_by_tag_name_ns",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "namespaceuri",
+                    "type": "String"
+                },
+                {
+                    "name": "localname",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_get_element_by_id",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "elementid",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_normalize_document",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_save",
+            "desc": "Creates an XML document from the DOM representation. This function is usually called after building a new dom document from scratch as in the example below.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the number of bytes written or FALSE if an error occurred."
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant",
+                    "desc": "The path to the saved XML document."
+                },
+                {
+                    "name": "file",
+                    "type": "String",
+                    "desc": "Additional Options. Currently only LIBXML_NOEMPTYTAG is supported."
+                },
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_savexml",
+            "desc": "Creates an XML document from the DOM representation. This function is usually called after building a new dom document from scratch as in the example below.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the XML, or FALSE if an error occurred."
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant",
+                    "desc": "Use this parameter to output only a specific node without XML declaration rather than the entire document."
+                },
+                {
+                    "name": "node",
+                    "type": "Object",
+                    "value": "null_object",
+                    "desc": "Additional Options. Currently only LIBXML_NOEMPTYTAG is supported."
+                },
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_validate",
+            "desc": "Validates the document based on its DTD.\n\nYou can also use the validateOnParse property of DOMDocument to make a DTD validation.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure. If the document have no DTD attached, this method will return FALSE."
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_xinclude",
+            "desc": null,
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the number of XIncludes in the document, -1 if some processing failed, or FALSE if there were no substitutions."
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant",
+                    "desc": "libxml parameters. Available since PHP 5.1.0 and Libxml 2.6.7."
+                },
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_save_html",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_save_html_file",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "file",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_schema_validate_file",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "filename",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_schema_validate_xml",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "source",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_relaxng_validate_file",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "filename",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_relaxng_validate_xml",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "source",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_node_insert_before",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "newnode",
+                    "type": "Object"
+                },
+                {
+                    "name": "refnode",
+                    "type": "Object",
+                    "value": "null"
+                }
+            ]
+        },
+        {
+            "name": "dom_node_replace_child",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "newchildobj",
+                    "type": "Object"
+                },
+                {
+                    "name": "oldchildobj",
+                    "type": "Object"
+                }
+            ]
+        },
+        {
+            "name": "dom_node_remove_child",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "node",
+                    "type": "Object"
+                }
+            ]
+        },
+        {
+            "name": "dom_node_append_child",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "newnode",
+                    "type": "Object"
+                }
+            ]
+        },
+        {
+            "name": "dom_node_has_child_nodes",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                }
+            ]
+        },
+        {
+            "name": "dom_node_clone_node",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "deep",
+                    "type": "Boolean",
+                    "value": "false"
+                }
+            ]
+        },
+        {
+            "name": "dom_node_normalize",
+            "desc": "Normalizes the node.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "No value is returned."
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                }
+            ]
+        },
+        {
+            "name": "dom_node_is_supported",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "feature",
+                    "type": "String"
+                },
+                {
+                    "name": "version",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_node_has_attributes",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                }
+            ]
+        },
+        {
+            "name": "dom_node_is_same_node",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "node",
+                    "type": "Object"
+                }
+            ]
+        },
+        {
+            "name": "dom_node_lookup_prefix",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "prefix",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_node_is_default_namespace",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "namespaceuri",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_node_lookup_namespace_uri",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "namespaceuri",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_nodelist_item",
+            "desc": "Retrieves a node specified by index within the DOMNodeList object. Tip\n\nIf you need to know the number of nodes in the collection, use the length property of the DOMNodeList object.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The node at the indexth position in the DOMNodeList, or NULL if that is not a valid index."
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant",
+                    "desc": "Index of the node into the collection."
+                },
+                {
+                    "name": "index",
+                    "type": "Int64"
+                }
+            ]
+        },
+        {
+            "name": "dom_namednodemap_get_named_item",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "name",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_namednodemap_item",
+            "desc": "Retrieves a node specified by index within the DOMNamedNodeMap object.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The node at the indexth position in the map, or NULL if that is not a valid index (greater than or equal to the number of nodes in this map)."
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant",
+                    "desc": "Index into this map."
+                },
+                {
+                    "name": "index",
+                    "type": "Int64"
+                }
+            ]
+        },
+        {
+            "name": "dom_namednodemap_get_named_item_ns",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "namespaceuri",
+                    "type": "String"
+                },
+                {
+                    "name": "localname",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_characterdata_substring_data",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "offset",
+                    "type": "Int64"
+                },
+                {
+                    "name": "count",
+                    "type": "Int64"
+                }
+            ]
+        },
+        {
+            "name": "dom_characterdata_append_data",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "arg",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_characterdata_insert_data",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "offset",
+                    "type": "Int64"
+                },
+                {
+                    "name": "data",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_characterdata_delete_data",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "offset",
+                    "type": "Int64"
+                },
+                {
+                    "name": "count",
+                    "type": "Int64"
+                }
+            ]
+        },
+        {
+            "name": "dom_characterdata_replace_data",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "offset",
+                    "type": "Int64"
+                },
+                {
+                    "name": "count",
+                    "type": "Int64"
+                },
+                {
+                    "name": "data",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_attr_is_id",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                }
+            ]
+        },
+        {
+            "name": "dom_element_get_attribute",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "name",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_element_set_attribute",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "name",
+                    "type": "String"
+                },
+                {
+                    "name": "value",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_element_remove_attribute",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "name",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_element_get_attribute_node",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "name",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_element_set_attribute_node",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "newattr",
+                    "type": "Object"
+                }
+            ]
+        },
+        {
+            "name": "dom_element_remove_attribute_node",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "oldattr",
+                    "type": "Object"
+                }
+            ]
+        },
+        {
+            "name": "dom_element_get_elements_by_tag_name",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "name",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_element_get_attribute_ns",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "namespaceuri",
+                    "type": "String"
+                },
+                {
+                    "name": "localname",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_element_set_attribute_ns",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "namespaceuri",
+                    "type": "String"
+                },
+                {
+                    "name": "name",
+                    "type": "String"
+                },
+                {
+                    "name": "value",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_element_remove_attribute_ns",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "namespaceuri",
+                    "type": "String"
+                },
+                {
+                    "name": "localname",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_element_get_attribute_node_ns",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "namespaceuri",
+                    "type": "String"
+                },
+                {
+                    "name": "localname",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_element_set_attribute_node_ns",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "newattr",
+                    "type": "Object"
+                }
+            ]
+        },
+        {
+            "name": "dom_element_get_elements_by_tag_name_ns",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "namespaceuri",
+                    "type": "String"
+                },
+                {
+                    "name": "localname",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_element_has_attribute",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "name",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_element_has_attribute_ns",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "namespaceuri",
+                    "type": "String"
+                },
+                {
+                    "name": "localname",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_element_set_id_attribute",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "name",
+                    "type": "String"
+                },
+                {
+                    "name": "isid",
+                    "type": "Boolean"
+                }
+            ]
+        },
+        {
+            "name": "dom_element_set_id_attribute_ns",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "namespaceuri",
+                    "type": "String"
+                },
+                {
+                    "name": "localname",
+                    "type": "String"
+                },
+                {
+                    "name": "isid",
+                    "type": "Boolean"
+                }
+            ]
+        },
+        {
+            "name": "dom_element_set_id_attribute_node",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "idattr",
+                    "type": "Object"
+                },
+                {
+                    "name": "isid",
+                    "type": "Boolean"
+                }
+            ]
+        },
+        {
+            "name": "dom_text_split_text",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "offset",
+                    "type": "Int64"
+                }
+            ]
+        },
+        {
+            "name": "dom_text_is_whitespace_in_element_content",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                }
+            ]
+        },
+        {
+            "name": "dom_xpath_register_ns",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "prefix",
+                    "type": "String"
+                },
+                {
+                    "name": "uri",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_xpath_query",
+            "desc": "Executes the given XPath expression.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a DOMNodeList containing all nodes matching the given XPath expression. Any expression which do not return nodes will return an empty DOMNodeList."
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant",
+                    "desc": "The XPath expression to execute."
+                },
+                {
+                    "name": "expr",
+                    "type": "String",
+                    "desc": "The optional contextnode can be specified for doing relative XPath queries. By default, the queries are relative to the root element."
+                },
+                {
+                    "name": "context",
+                    "type": "Object",
+                    "value": "null_object"
+                }
+            ]
+        },
+        {
+            "name": "dom_xpath_evaluate",
+            "desc": "Executes the given XPath expression and returns a typed result if possible.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a typed result if possible or a DOMNodeList containing all nodes matching the given XPath expression."
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant",
+                    "desc": "The XPath expression to execute."
+                },
+                {
+                    "name": "expr",
+                    "type": "String",
+                    "desc": "The optional contextnode can be specified for doing relative XPath queries. By default, the queries are relative to the root element."
+                },
+                {
+                    "name": "context",
+                    "type": "Object",
+                    "value": "null_object"
+                }
+            ]
+        },
+        {
+            "name": "dom_xpath_register_php_functions",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "funcs",
+                    "type": "Variant",
+                    "value": "null"
+                }
+            ]
+        },
+        {
+            "name": "dom_import_simplexml",
+            "desc": "This function takes the node node of class SimpleXML and makes it into a DOMElement node. This new object can then be used as a native DOMElement node.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The DOMElement node added or FALSE if any errors occur."
+            },
+            "args": [
+                {
+                    "name": "node",
+                    "type": "Object",
+                    "desc": "The SimpleXMLElement node."
+                }
+            ]
+        }
+    ],
+    "classes": [
+        {
+            "name": "DOMNode",
+            "desc": "",
+            "flags": [
+                     "NoDefaultSweep"
+            ],
+            "footer": "\npublic:\n  virtual ObjectData *clone();\n  virtual p_DOMDocument doc() { return m_doc;}\n  p_DOMDocument m_doc;\n  xmlNodePtr m_node;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "appendChild",
+                    "desc": "This functions appends a child to an existing list of children or creates a new list of children. The child can be created with e.g. DOMDocument::createElement(), DOMDocument::createTextNode() etc. or simply by using any other node.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The node added."
+                    },
+                    "args": [
+                        {
+                            "name": "newnode",
+                            "type": "Object",
+                            "desc": "The appended child."
+                        }
+                    ]
+                },
+                {
+                    "name": "cloneNode",
+                    "desc": "Creates a copy of the node.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The cloned node."
+                    },
+                    "args": [
+                        {
+                            "name": "deep",
+                            "type": "Boolean",
+                            "value": "false",
+                            "desc": "Indicates whether to copy all descendant nodes. This parameter is defaulted to FALSE."
+                        }
+                    ]
+                },
+                {
+                    "name": "getLineNo",
+                    "desc": "Gets line number for where the node is defined.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Always returns the line number where the node was defined in."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "hasAttributes",
+                    "desc": "This method checks if the node has attributes. The tested node have to be an XML_ELEMENT_NODE.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "hasChildNodes",
+                    "desc": "This function checks if the node has children.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "insertBefore",
+                    "desc": "This function inserts a new node right before the reference node. If you plan to do further modifications on the appended child you must use the returned node.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The inserted node."
+                    },
+                    "args": [
+                        {
+                            "name": "newnode",
+                            "type": "Object",
+                            "desc": "The new node."
+                        },
+                        {
+                            "name": "refnode",
+                            "type": "Object",
+                            "value": "null",
+                            "desc": "The reference node. If not supplied, newnode is appended to the children."
+                        }
+                    ]
+                },
+                {
+                    "name": "isDefaultNamespace",
+                    "desc": "Tells whether namespaceURI is the default namespace.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Return TRUE if namespaceURI is the default namespace, FALSE otherwise."
+                    },
+                    "args": [
+                        {
+                            "name": "namespaceuri",
+                            "type": "String",
+                            "desc": "The namespace URI to look for."
+                        }
+                    ]
+                },
+                {
+                    "name": "isSameNode",
+                    "desc": "This function indicates if two nodes are the same node. The comparison is not based on content",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "node",
+                            "type": "Object",
+                            "desc": "The compared node."
+                        }
+                    ]
+                },
+                {
+                    "name": "isSupported",
+                    "desc": "Checks if the asked feature is supported for the specified version.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "feature",
+                            "type": "String",
+                            "desc": "The feature to test. See the example of DOMImplementation::hasFeature() for a list of features."
+                        },
+                        {
+                            "name": "version",
+                            "type": "String",
+                            "desc": "The version number of the feature to test."
+                        }
+                    ]
+                },
+                {
+                    "name": "lookupNamespaceUri",
+                    "desc": "Gets the namespace URI of the node based on the prefix.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The namespace URI of the node."
+                    },
+                    "args": [
+                        {
+                            "name": "namespaceuri",
+                            "type": "String",
+                            "desc": "The prefix of the namespace."
+                        }
+                    ]
+                },
+                {
+                    "name": "lookupPrefix",
+                    "desc": "Gets the namespace prefix of the node based on the namespace URI.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The prefix of the namespace."
+                    },
+                    "args": [
+                        {
+                            "name": "prefix",
+                            "type": "String",
+                            "desc": "The namespace URI."
+                        }
+                    ]
+                },
+                {
+                    "name": "normalize",
+                    "desc": "Normalizes the node.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null,
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "removeChild",
+                    "desc": "This functions removes a child from a list of children.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "If the child could be removed the functions returns the old child."
+                    },
+                    "args": [
+                        {
+                            "name": "node",
+                            "type": "Object",
+                            "desc": "The removed child."
+                        }
+                    ]
+                },
+                {
+                    "name": "replaceChild",
+                    "desc": "This function replaces the child oldnode with the passed new node. If the new node is already a child it will not be added a second time. If the replacement succeeds the old node is returned.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The old node or FALSE if an error occur."
+                    },
+                    "args": [
+                        {
+                            "name": "newchildobj",
+                            "type": "Object",
+                            "desc": "The new node. It must be a member of the target document, i.e. created by one of the DOMDocument->createXXX() methods or imported in the document by DOMDocument::importNode."
+                        },
+                        {
+                            "name": "oldchildobj",
+                            "type": "Object",
+                            "desc": "The old node."
+                        }
+                    ]
+                },
+                {
+                    "name": "c14n",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "exclusive",
+                            "type": "Boolean",
+                            "value": "false"
+                        },
+                        {
+                            "name": "with_comments",
+                            "type": "Boolean",
+                            "value": "false"
+                        },
+                        {
+                            "name": "xpath",
+                            "type": "Variant",
+                            "value": "null"
+                        },
+                        {
+                            "name": "ns_prefixes",
+                            "type": "Variant",
+                            "value": "null"
+                        }
+                    ]
+                },
+                {
+                    "name": "c14nfile",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "uri",
+                            "type": "String"
+                        },
+                        {
+                            "name": "exclusive",
+                            "type": "Boolean",
+                            "value": "false"
+                        },
+                        {
+                            "name": "with_comments",
+                            "type": "Boolean",
+                            "value": "false"
+                        },
+                        {
+                            "name": "xpath",
+                            "type": "Variant",
+                            "value": "null"
+                        },
+                        {
+                            "name": "ns_prefixes",
+                            "type": "Variant",
+                            "value": "null"
+                        }
+                    ]
+                },
+                {
+                    "name": "getNodePath",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "DOMAttr",
+            "parent": "DOMNode",
+            "desc": "DOMAttr represents an attribute in the DOMElement object.",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String"
+                        },
+                        {
+                            "name": "value",
+                            "type": "String",
+                            "value": "null_string"
+                        }
+                    ]
+                },
+                {
+                    "name": "isId",
+                    "desc": "This function checks if the attribute is a defined ID.\n\nAccording to the DOM standard this requires a DTD which defines the attribute ID to be of type ID. You need to validate your document with DOMDocument::validate or DOMDocument::validateOnParse before using this function.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "DOMCharacterData",
+            "parent": "DOMNode",
+            "desc": "Represents nodes with character data. No nodes directly correspond to this class, but other nodes do inherit from it.",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "appendData",
+                    "desc": "Append the string data to the end of the character data of the node.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "arg",
+                            "type": "String",
+                            "desc": "The string to append."
+                        }
+                    ]
+                },
+                {
+                    "name": "deleteData",
+                    "desc": "Deletes count characters starting from position offset.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "offset",
+                            "type": "Int64",
+                            "desc": "The offset from which to start removing."
+                        },
+                        {
+                            "name": "count",
+                            "type": "Int64",
+                            "desc": "The number of characters to delete. If the sum of offset and count exceeds the length, then all characters to the end of the data are deleted."
+                        }
+                    ]
+                },
+                {
+                    "name": "insertData",
+                    "desc": "Inserts string data at position offset.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "offset",
+                            "type": "Int64",
+                            "desc": "The character offset at which to insert."
+                        },
+                        {
+                            "name": "data",
+                            "type": "String",
+                            "desc": "The string to insert."
+                        }
+                    ]
+                },
+                {
+                    "name": "replaceData",
+                    "desc": "Replace count characters starting from position offset with data.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "offset",
+                            "type": "Int64",
+                            "desc": "The offset from which to start replacing."
+                        },
+                        {
+                            "name": "count",
+                            "type": "Int64",
+                            "desc": "The number of characters to replace. If the sum of offset and count exceeds the length, then all characters to the end of the data are replaced."
+                        },
+                        {
+                            "name": "data",
+                            "type": "String",
+                            "desc": "The string with which the range must be replaced."
+                        }
+                    ]
+                },
+                {
+                    "name": "substringData",
+                    "desc": "Returns the specified substring.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "The specified substring. If the sum of offset and count exceeds the length, then all 16-bit units to the end of the data are returned."
+                    },
+                    "args": [
+                        {
+                            "name": "offset",
+                            "type": "Int64",
+                            "desc": "Start offset of substring to extract."
+                        },
+                        {
+                            "name": "count",
+                            "type": "Int64",
+                            "desc": "The number of characters to extract."
+                        }
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "DOMComment",
+            "parent": "DOMCharacterData",
+            "desc": "Represents comment nodes, characters delimited by <!-- and -->.",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "value",
+                            "type": "String",
+                            "value": "null_string"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "DOMText",
+            "parent": "DOMCharacterData",
+            "desc": "The DOMText class inherits from DOMCharacterData and represents the textual content of a DOMElement or DOMAttr.",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "value",
+                            "type": "String",
+                            "value": "null_string"
+                        }
+                    ]
+                },
+                {
+                    "name": "isWhitespaceInElementContent",
+                    "desc": "Indicates whether this text node contains whitespace. The text node is determined to contain whitespace in element content during the load of the document.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "splitText",
+                    "desc": "Breaks this node into two nodes at the specified offset, keeping both in the tree as siblings.\n\nAfter being split, this node will contain all the content up to the offset. If the original node had a parent node, the new node is inserted as the next sibling of the original node. When the offset is equal to the length of this node, the new node has no data.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The new node of the same type, which contains all the content at and after the offset."
+                    },
+                    "args": [
+                        {
+                            "name": "offset",
+                            "type": "Int64",
+                            "desc": "The offset at which to split, starting from 0."
+                        }
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "DOMCDATASection",
+            "parent": "DOMText",
+            "desc": "",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "value",
+                            "type": "String"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "DOMDocument",
+            "parent": "DOMNode",
+            "bases": [
+                "Sweepable"
+            ],
+            "desc": "Represents an entire HTML or XML document; serves as the root of the document tree.",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "footer": "\npublic:\n  virtual p_DOMDocument doc() { return this;}\n  bool m_formatoutput;\n  bool m_validateonparse;\n  bool m_resolveexternals;\n  bool m_preservewhitespace;\n  bool m_substituteentities;\n  bool m_stricterror;\n  bool m_recover;\n  Array m_classmap;\n  std::auto_ptr<XmlNodeSet> m_orphans;\n  bool m_owner;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "version",
+                            "type": "String",
+                            "value": "null_string"
+                        },
+                        {
+                            "name": "encoding",
+                            "type": "String",
+                            "value": "null_string"
+                        }
+                    ]
+                },
+                {
+                    "name": "createAttribute",
+                    "desc": "This function creates a new instance of class DOMAttr. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The new DOMAttr or FALSE if an error occured."
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String",
+                            "desc": "The name of the attribute."
+                        }
+                    ]
+                },
+                {
+                    "name": "createAttributens",
+                    "desc": "This function creates a new instance of class DOMAttr. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The new DOMAttr or FALSE if an error occured."
+                    },
+                    "args": [
+                        {
+                            "name": "namespaceuri",
+                            "type": "String",
+                            "desc": "The URI of the namespace."
+                        },
+                        {
+                            "name": "qualifiedname",
+                            "type": "String",
+                            "desc": "The tag name and prefix of the attribute, as prefix:tagname."
+                        }
+                    ]
+                },
+                {
+                    "name": "createCDATASection",
+                    "desc": "This function creates a new instance of class DOMCDATASection. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The new DOMCDATASection or FALSE if an error occured."
+                    },
+                    "args": [
+                        {
+                            "name": "data",
+                            "type": "String",
+                            "desc": "The content of the cdata."
+                        }
+                    ]
+                },
+                {
+                    "name": "createComment",
+                    "desc": "This function creates a new instance of class DOMComment. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The new DOMComment or FALSE if an error occured."
+                    },
+                    "args": [
+                        {
+                            "name": "data",
+                            "type": "String",
+                            "desc": "The content of the comment."
+                        }
+                    ]
+                },
+                {
+                    "name": "createDocumentFragment",
+                    "desc": "This function creates a new instance of class DOMDocumentFragment. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The new DOMDocumentFragment or FALSE if an error occured."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "createElement",
+                    "desc": "This function creates a new instance of class DOMElement. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns a new instance of class DOMElement or FALSE if an error occured."
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String",
+                            "desc": "The tag name of the element."
+                        },
+                        {
+                            "name": "value",
+                            "type": "String",
+                            "value": "null_string",
+                            "desc": "The value of the element. By default, an empty element will be created. The value can also be set later with DOMElement->nodeValue."
+                        }
+                    ]
+                },
+                {
+                    "name": "createElementNS",
+                    "desc": "This function creates a new element node with an associated namespace. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The new DOMElement or FALSE if an error occured."
+                    },
+                    "args": [
+                        {
+                            "name": "namespaceuri",
+                            "type": "String",
+                            "desc": "The URI of the namespace."
+                        },
+                        {
+                            "name": "qualifiedname",
+                            "type": "String",
+                            "desc": "The qualified name of the element, as prefix:tagname."
+                        },
+                        {
+                            "name": "value",
+                            "type": "String",
+                            "value": "null_string",
+                            "desc": "The value of the element. By default, an empty element will be created. You can also set the value later with DOMElement->nodeValue."
+                        }
+                    ]
+                },
+                {
+                    "name": "createEntityReference",
+                    "desc": "This function creates a new instance of class DOMEntityReference. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The new DOMEntityReference or FALSE if an error occured."
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String",
+                            "desc": "The content of the entity reference, e.g. the entity reference minus the leading & and the trailing ; characters."
+                        }
+                    ]
+                },
+                {
+                    "name": "createProcessingInstruction",
+                    "desc": "This function creates a new instance of class DOMProcessingInstruction. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The new DOMProcessingInstruction or FALSE if an error occured."
+                    },
+                    "args": [
+                        {
+                            "name": "target",
+                            "type": "String",
+                            "desc": "The target of the processing instruction."
+                        },
+                        {
+                            "name": "data",
+                            "type": "String",
+                            "value": "null_string",
+                            "desc": "The content of the processing instruction."
+                        }
+                    ]
+                },
+                {
+                    "name": "createTextNode",
+                    "desc": "This function creates a new instance of class DOMText. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The new DOMText or FALSE if an error occured."
+                    },
+                    "args": [
+                        {
+                            "name": "data",
+                            "type": "String",
+                            "desc": "The content of the text."
+                        }
+                    ]
+                },
+                {
+                    "name": "getElementById",
+                    "desc": "This function is similar to DOMDocument::getElementsByTagName but searches for an element with a given id.\n\nFor this function to work, you will need either to set some ID attributes with DOMElement::setIdAttribute or a DTD which defines an attribute to be of type ID. In the later case, you will need to validate your document with DOMDocument::validate or DOMDocument->validateOnParse before using this function.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns the DOMElement or NULL if the element is not found."
+                    },
+                    "args": [
+                        {
+                            "name": "elementid",
+                            "type": "String",
+                            "desc": "The unique id value for an element."
+                        }
+                    ]
+                },
+                {
+                    "name": "getElementsByTagName",
+                    "desc": "This function returns a new instance of class DOMNodeList containing the elements with a given tag name.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "A new DOMNodeList object containing all the matched elements."
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String",
+                            "desc": "The name of the tag to match on. The special value * matches all tags."
+                        }
+                    ]
+                },
+                {
+                    "name": "getElementsByTagNameNS",
+                    "desc": "Returns a DOMNodeList of all elements with a given local name and a namespace URI.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "A new DOMNodeList object containing all the matched elements."
+                    },
+                    "args": [
+                        {
+                            "name": "namespaceuri",
+                            "type": "String",
+                            "desc": "The namespace URI of the elements to match on. The special value * matches all namespaces."
+                        },
+                        {
+                            "name": "localname",
+                            "type": "String",
+                            "desc": "The local name of the elements to match on. The special value * matches all local names."
+                        }
+                    ]
+                },
+                {
+                    "name": "importNode",
+                    "desc": "This function returns a copy of the node to import and associates it with the current document.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The copied node or FALSE, if it cannot be copied."
+                    },
+                    "args": [
+                        {
+                            "name": "importednode",
+                            "type": "Object",
+                            "desc": "The node to import."
+                        },
+                        {
+                            "name": "deep",
+                            "type": "Boolean",
+                            "value": "false",
+                            "desc": "If set to TRUE, this method will recursively import the subtree under the importedNode.\n\nTo copy the nodes attributes deep needs to be set to TRUE"
+                        }
+                    ]
+                },
+                {
+                    "name": "load",
+                    "desc": "Loads an XML document from a file. Warning Unix style paths with forward slashes can cause significant performance degradation on Windows systems; be sure to call realpath() in such a case.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns TRUE on success or FALSE on failure. If called statically, returns a DOMDocument and issues E_STRICT warning."
+                    },
+                    "args": [
+                        {
+                            "name": "filename",
+                            "type": "String",
+                            "desc": "The path to the XML document."
+                        },
+                        {
+                            "name": "options",
+                            "type": "Int64",
+                            "value": "0",
+                            "desc": "Bitwise OR of the libxml option constants."
+                        }
+                    ]
+                },
+                {
+                    "name": "loadHTML",
+                    "desc": "The function parses the HTML contained in the string source. Unlike loading XML, HTML does not have to be well-formed to load. This function may also be called statically to load and create a DOMDocument object. The static invocation may be used when no DOMDocument properties need to be set prior to loading.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns TRUE on success or FALSE on failure. If called statically, returns a DOMDocument and issues E_STRICT warning."
+                    },
+                    "args": [
+                        {
+                            "name": "source",
+                            "type": "String",
+                            "desc": "The HTML string."
+                        }
+                    ]
+                },
+                {
+                    "name": "loadHTMLFile",
+                    "desc": "The function parses the HTML document in the file named filename. Unlike loading XML, HTML does not have to be well-formed to load.\n\nThough not recommended, this function may also be called statically to load and create a DOMDocument object. The static invocation may be used when no DOMDocument properties need to be set prior to loading. However, doing so will result an in E_STRICT error being generated.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns TRUE on success or FALSE on failure. If called statically, returns a DOMDocument and issues E_STRICT warning."
+                    },
+                    "args": [
+                        {
+                            "name": "filename",
+                            "type": "String",
+                            "desc": "The path to the HTML file."
+                        }
+                    ]
+                },
+                {
+                    "name": "loadXML",
+                    "desc": "Loads an XML document from a string.\n\nThis method may also be called statically to load and create a DOMDocument object. The static invocation may be used when no DOMDocument properties need to be set prior to loading.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns TRUE on success or FALSE on failure. If called statically, returns a DOMDocument and issues E_STRICT warning."
+                    },
+                    "args": [
+                        {
+                            "name": "source",
+                            "type": "String",
+                            "desc": "The string containing the XML."
+                        },
+                        {
+                            "name": "options",
+                            "type": "Int64",
+                            "value": "0",
+                            "desc": "Bitwise OR of the libxml option constants."
+                        }
+                    ]
+                },
+                {
+                    "name": "normalizeDocument",
+                    "desc": "This method acts as if you saved and then loaded the document, putting the document in a \"normal\" form.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null,
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "registerNodeClass",
+                    "desc": "This method allows you to register your own extended DOM class to be used afterward by the PHP DOM extension.\n\nThis method is not part of the DOM standard.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "baseclass",
+                            "type": "String",
+                            "desc": "The DOM class that you want to extend. You can find a list of these classes in the chapter introduction."
+                        },
+                        {
+                            "name": "extendedclass",
+                            "type": "String",
+                            "desc": "Your extended class name. If NULL is provided, any previously registered class extending baseclass will be removed."
+                        }
+                    ]
+                },
+                {
+                    "name": "relaxNGValidate",
+                    "desc": null,
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "filename",
+                            "type": "String",
+                            "desc": "The RNG file."
+                        }
+                    ]
+                },
+                {
+                    "name": "relaxNGValidateSource",
+                    "desc": null,
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "source",
+                            "type": "String",
+                            "desc": "A string containing the RNG schema."
+                        }
+                    ]
+                },
+                {
+                    "name": "save",
+                    "desc": "Creates an XML document from the DOM representation. This function is usually called after building a new dom document from scratch as in the example below.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns the number of bytes written or FALSE if an error occurred."
+                    },
+                    "args": [
+                        {
+                            "name": "file",
+                            "type": "String",
+                            "desc": "The path to the saved XML document."
+                        },
+                        {
+                            "name": "options",
+                            "type": "Int64",
+                            "value": "0",
+                            "desc": "Additional Options. Currently only LIBXML_NOEMPTYTAG is supported."
+                        }
+                    ]
+                },
+                {
+                    "name": "saveHTML",
+                    "desc": "Creates an HTML document from the DOM representation. This function is usually called after building a new dom document from scratch as in the example below.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns the HTML, or FALSE if an error occurred."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "saveHTMLFile",
+                    "desc": "Creates an HTML document from the DOM representation. This function is usually called after building a new dom document from scratch as in the example below.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns the number of bytes written or FALSE if an error occurred."
+                    },
+                    "args": [
+                        {
+                            "name": "file",
+                            "type": "String",
+                            "desc": "The path to the saved HTML document."
+                        }
+                    ]
+                },
+                {
+                    "name": "saveXML",
+                    "desc": "Creates an XML document from the DOM representation. This function is usually called after building a new dom document from scratch as in the example below.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns the XML, or FALSE if an error occurred."
+                    },
+                    "args": [
+                        {
+                            "name": "node",
+                            "type": "Object",
+                            "value": "null_object",
+                            "desc": "Use this parameter to output only a specific node without XML declaration rather than the entire document."
+                        },
+                        {
+                            "name": "options",
+                            "type": "Int64",
+                            "value": "0",
+                            "desc": "Additional Options. Currently only LIBXML_NOEMPTYTAG is supported."
+                        }
+                    ]
+                },
+                {
+                    "name": "schemaValidate",
+                    "desc": "Validates a document based on the given schema file.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "filename",
+                            "type": "String",
+                            "desc": "The path to the schema."
+                        }
+                    ]
+                },
+                {
+                    "name": "schemaValidateSource",
+                    "desc": "Validates a document based on a schema defined in the given string.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "source",
+                            "type": "String",
+                            "desc": "A string containing the schema."
+                        }
+                    ]
+                },
+                {
+                    "name": "validate",
+                    "desc": "Validates the document based on its DTD.\n\nYou can also use the validateOnParse property of DOMDocument to make a DTD validation.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure. If the document have no DTD attached, this method will return FALSE."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "xinclude",
+                    "desc": null,
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns the number of XIncludes in the document, -1 if some processing failed, or FALSE if there were no substitutions."
+                    },
+                    "args": [
+                        {
+                            "name": "options",
+                            "type": "Int64",
+                            "value": "0",
+                            "desc": "libxml parameters. Available since PHP 5.1.0 and Libxml 2.6.7."
+                        }
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "DOMDocumentFragment",
+            "parent": "DOMNode",
+            "desc": "",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "appendXML",
+                    "desc": "Appends raw XML data to a DOMDocumentFragment.\n\nThis method is not part of the DOM standard. It was created as a simpler approach for appending an XML DocumentFragment in a DOMDocument.\n\nIf you want to stick to the standards, you will have to create a temporary DOMDocument with a dummy root and then loop through the child nodes of the root of your XML data to append them.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "data",
+                            "type": "String",
+                            "desc": "XML to append."
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "DOMDocumentType",
+            "parent": "DOMNode",
+            "desc": "Each DOMDocument has a doctype attribute whose value is either NULL or a DOMDocumentType object.",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "DOMElement",
+            "parent": "DOMNode",
+            "desc": "",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String"
+                        },
+                        {
+                            "name": "value",
+                            "type": "String",
+                            "value": "null_string"
+                        },
+                        {
+                            "name": "namespaceuri",
+                            "type": "String",
+                            "value": "null_string"
+                        }
+                    ]
+                },
+                {
+                    "name": "getAttribute",
+                    "desc": "Gets the value of the attribute with name name for the current node.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "The value of the attribute, or an empty string if no attribute with the given name is found."
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String",
+                            "desc": "The name of the attribute."
+                        }
+                    ]
+                },
+                {
+                    "name": "getAttributeNode",
+                    "desc": "Returns the attribute node with name name for the current element.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The attribute node."
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String",
+                            "desc": "The name of the attribute."
+                        }
+                    ]
+                },
+                {
+                    "name": "getAttributeNodeNS",
+                    "desc": "Returns the attribute node in namespace namespaceURI with local name localName for the current node.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "The attribute node."
+                    },
+                    "args": [
+                        {
+                            "name": "namespaceuri",
+                            "type": "String",
+                            "desc": "The namespace URI."
+                        },
+                        {
+                            "name": "localname",
+                            "type": "String",
+                            "desc": "The local name."
+                        }
+                    ]
+                },
+                {
+                    "name": "getAttributeNS",
+                    "desc": "Gets the value of the attribute in namespace namespaceURI with local name localName for the current node.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "The value of the attribute, or an empty string if no attribute with the given localName and namespaceURI is found."
+                    },
+                    "args": [
+                        {
+                            "name": "namespaceuri",
+                            "type": "String",
+                            "desc": "The namespace URI."
+                        },
+                        {
+                            "name": "localname",
+                            "type": "String",
+                            "desc": "The local name."
+                        }
+                    ]
+                },
+                {
+                    "name": "getElementsByTagName",
+                    "desc": "This function returns a new instance of the class DOMNodeList of all descendant elements with a given tag name, in the order in which they are encountered in a preorder traversal of this element tree.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "This function returns a new instance of the class DOMNodeList of all matched elements."
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String",
+                            "desc": "The tag name. Use * to return all elements within the element tree."
+                        }
+                    ]
+                },
+                {
+                    "name": "getElementsByTagNameNS",
+                    "desc": "This function fetch all the descendant elements with a given localName and namespaceURI.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "This function returns a new instance of the class DOMNodeList of all matched elements in the order in which they are encountered in a preorder traversal of this element tree."
+                    },
+                    "args": [
+                        {
+                            "name": "namespaceuri",
+                            "type": "String",
+                            "desc": "The namespace URI."
+                        },
+                        {
+                            "name": "localname",
+                            "type": "String",
+                            "desc": "The local name. Use * to return all elements within the element tree."
+                        }
+                    ]
+                },
+                {
+                    "name": "hasAttribute",
+                    "desc": "Indicates whether attribute named name exists as a member of the element.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String",
+                            "desc": "The attribute name."
+                        }
+                    ]
+                },
+                {
+                    "name": "hasAttributeNS",
+                    "desc": "Indicates whether attribute in namespace namespaceURI named localName exists as a member of the element.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "namespaceuri",
+                            "type": "String",
+                            "desc": "The namespace URI."
+                        },
+                        {
+                            "name": "localname",
+                            "type": "String",
+                            "desc": "The local name."
+                        }
+                    ]
+                },
+                {
+                    "name": "removeAttribute",
+                    "desc": "Removes attribute named name from the element.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String",
+                            "desc": "The name of the attribute."
+                        }
+                    ]
+                },
+                {
+                    "name": "removeAttributeNode",
+                    "desc": "Removes attribute oldnode from the element.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "oldattr",
+                            "type": "Object",
+                            "desc": "The attribute node."
+                        }
+                    ]
+                },
+                {
+                    "name": "removeAttributeNS",
+                    "desc": "Removes attribute is namespace namespaceURI named localName from the element.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "namespaceuri",
+                            "type": "String",
+                            "desc": "The namespace URI."
+                        },
+                        {
+                            "name": "localname",
+                            "type": "String",
+                            "desc": "The local name."
+                        }
+                    ]
+                },
+                {
+                    "name": "setAttribute",
+                    "desc": "Sets an attribute with name name to the given value. If the attribute does not exist, it will be created.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The new DOMAttr or FALSE if an error occured."
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String",
+                            "desc": "The name of the attribute."
+                        },
+                        {
+                            "name": "value",
+                            "type": "String",
+                            "desc": "The value of the attribute."
+                        }
+                    ]
+                },
+                {
+                    "name": "setAttributeNode",
+                    "desc": "Adds new attribute node attr to element.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns old node if the attribute has been replaced or NULL."
+                    },
+                    "args": [
+                        {
+                            "name": "newattr",
+                            "type": "Object",
+                            "desc": "The attribute node."
+                        }
+                    ]
+                },
+                {
+                    "name": "setAttributeNodeNS",
+                    "desc": "Adds new attribute node attr to element.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns the old node if the attribute has been replaced."
+                    },
+                    "args": [
+                        {
+                            "name": "newattr",
+                            "type": "Object",
+                            "desc": "The attribute node."
+                        }
+                    ]
+                },
+                {
+                    "name": "setAttributeNS",
+                    "desc": "Sets an attribute with namespace namespaceURI and name name to the given value. If the attribute does not exist, it will be created.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "namespaceuri",
+                            "type": "String",
+                            "desc": "The namespace URI."
+                        },
+                        {
+                            "name": "name",
+                            "type": "String",
+                            "desc": "The qualified name of the attribute, as prefix:tagname."
+                        },
+                        {
+                            "name": "value",
+                            "type": "String",
+                            "desc": "The value of the attribute."
+                        }
+                    ]
+                },
+                {
+                    "name": "setIDAttribute",
+                    "desc": "Declares the attribute name to be of type ID.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String",
+                            "desc": "The name of the attribute."
+                        },
+                        {
+                            "name": "isid",
+                            "type": "Boolean",
+                            "desc": "Set it to TRUE if you want name to be of type ID, FALSE otherwise."
+                        }
+                    ]
+                },
+                {
+                    "name": "setIDAttributeNode",
+                    "desc": "Declares the attribute specified by attr to be of type ID.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "idattr",
+                            "type": "Object",
+                            "desc": "The attribute node."
+                        },
+                        {
+                            "name": "isid",
+                            "type": "Boolean",
+                            "desc": "Set it to TRUE if you want name to be of type ID, FALSE otherwise."
+                        }
+                    ]
+                },
+                {
+                    "name": "setIDAttributeNS",
+                    "desc": "Declares the attribute specified by localName and namespaceURI to be of type ID.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "namespaceuri",
+                            "type": "String",
+                            "desc": "The namespace URI of the attribute."
+                        },
+                        {
+                            "name": "localname",
+                            "type": "String",
+                            "desc": "The local name of the attribute, as prefix:tagname."
+                        },
+                        {
+                            "name": "isid",
+                            "type": "Boolean",
+                            "desc": "Set it to TRUE if you want name to be of type ID, FALSE otherwise."
+                        }
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "DOMEntity",
+            "parent": "DOMNode",
+            "desc": "This interface represents a known entity, either parsed or unparsed, in an XML document.",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "DOMEntityReference",
+            "parent": "DOMNode",
+            "desc": "",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "DOMNotation",
+            "parent": "DOMNode",
+            "desc": "",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "DOMProcessingInstruction",
+            "parent": "DOMNode",
+            "desc": "",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String"
+                        },
+                        {
+                            "name": "value",
+                            "type": "String",
+                            "value": "null_string"
+                        }
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "DOMNodeIterator",
+            "ifaces": [
+                "Iterator"
+            ],
+            "bases": [
+                "Sweepable"
+            ],
+            "desc": "",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "footer": "\npublic:\n  void reset_iterator(dom_iterable *objmap);\n\n  dom_iterable *m_objmap;\n  ArrayIter *m_iter;\n  int m_index;\n  Object m_curobj;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "current",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "key",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "next",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "rewind",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "valid",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "DOMNamedNodeMap",
+            "ifaces": [
+                "IteratorAggregate"
+            ],
+            "bases": [
+                "dom_iterable"
+            ],
+            "desc": "",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getNamedItem",
+                    "desc": "Retrieves a node specified by its nodeName.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "A node (of any type) with the specified nodeName, or NULL if no node is found."
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String",
+                            "desc": "The nodeName of the node to retrieve."
+                        }
+                    ]
+                },
+                {
+                    "name": "getNamedItemNS",
+                    "desc": "Retrieves a node specified by localName and namespaceURI.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "A node (of any type) with the specified local name and namespace URI, or NULL if no node is found."
+                    },
+                    "args": [
+                        {
+                            "name": "namespaceuri",
+                            "type": "String",
+                            "desc": "The namespace URI of the node to retrieve."
+                        },
+                        {
+                            "name": "localname",
+                            "type": "String",
+                            "desc": "The local name of the node to retrieve."
+                        }
+                    ]
+                },
+                {
+                    "name": "item",
+                    "desc": "Retrieves a node specified by index within the DOMNamedNodeMap object.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The node at the indexth position in the map, or NULL if that is not a valid index (greater than or equal to the number of nodes in this map)."
+                    },
+                    "args": [
+                        {
+                            "name": "index",
+                            "type": "Int64",
+                            "desc": "Index into this map."
+                        }
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "getIterator",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "DOMNodeList",
+            "ifaces": [
+                "IteratorAggregate"
+            ],
+            "bases": [
+                "dom_iterable"
+            ],
+            "desc": "",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "item",
+                    "desc": "Retrieves a node specified by index within the DOMNodeList object. Tip\n\nIf you need to know the number of nodes in the collection, use the length property of the DOMNodeList object.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The node at the indexth position in the DOMNodeList, or NULL if that is not a valid index."
+                    },
+                    "args": [
+                        {
+                            "name": "index",
+                            "type": "Int64",
+                            "desc": "Index of the node into the collection."
+                        }
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "getIterator",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "DOMImplementation",
+            "desc": "The DOMImplementation interface provides a number of methods for performing operations that are independent of any particular instance of the document object model.",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "createDocument",
+                    "desc": "Creates a DOMDocument object of the specified type with its document element.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "A new DOMDocument object. If namespaceURI, qualifiedName, and doctype are null, the returned DOMDocument is empty with no document element"
+                    },
+                    "args": [
+                        {
+                            "name": "namespaceuri",
+                            "type": "String",
+                            "value": "null_string",
+                            "desc": "The namespace URI of the document element to create."
+                        },
+                        {
+                            "name": "qualifiedname",
+                            "type": "String",
+                            "value": "null_string",
+                            "desc": "The qualified name of the document element to create."
+                        },
+                        {
+                            "name": "doctypeobj",
+                            "type": "Object",
+                            "value": "null_object",
+                            "desc": "The type of document to create or NULL."
+                        }
+                    ]
+                },
+                {
+                    "name": "createDocumentType",
+                    "desc": "Creates an empty DOMDocumentType object. Entity declarations and notations are not made available. Entity reference expansions and default attribute additions do not occur.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "A new DOMDocumentType node with its ownerDocument set to NULL."
+                    },
+                    "args": [
+                        {
+                            "name": "qualifiedname",
+                            "type": "String",
+                            "value": "null_string",
+                            "desc": "The qualified name of the document type to create."
+                        },
+                        {
+                            "name": "publicid",
+                            "type": "String",
+                            "value": "null_string",
+                            "desc": "The external subset public identifier."
+                        },
+                        {
+                            "name": "systemid",
+                            "type": "String",
+                            "value": "null_string",
+                            "desc": "The external subset system identifier."
+                        }
+                    ]
+                },
+                {
+                    "name": "hasFeature",
+                    "desc": null,
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "feature",
+                            "type": "String",
+                            "desc": "The feature to test."
+                        },
+                        {
+                            "name": "version",
+                            "type": "String",
+                            "desc": "The version number of the feature to test. In level 2, this can be either 2.0 or 1.0."
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "DOMXPath",
+            "bases": [
+                "Sweepable"
+            ],
+            "desc": "Supports XPath 1.0",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "footer": "\n public:\n  xmlNodePtr m_node;\n  p_DOMDocument m_doc;\n  Array m_node_list;\n  int m_registerPhpFunctions;\n  Array m_registered_phpfunctions;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "doc",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "evaluate",
+                    "desc": "Executes the given XPath expression and returns a typed result if possible.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns a typed result if possible or a DOMNodeList containing all nodes matching the given XPath expression."
+                    },
+                    "args": [
+                        {
+                            "name": "expr",
+                            "type": "String",
+                            "desc": "The XPath expression to execute."
+                        },
+                        {
+                            "name": "context",
+                            "type": "Object",
+                            "value": "null_object",
+                            "desc": "The optional contextnode can be specified for doing relative XPath queries. By default, the queries are relative to the root element."
+                        }
+                    ]
+                },
+                {
+                    "name": "query",
+                    "desc": "Executes the given XPath expression.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns a DOMNodeList containing all nodes matching the given XPath expression. Any expression which do not return nodes will return an empty DOMNodeList."
+                    },
+                    "args": [
+                        {
+                            "name": "expr",
+                            "type": "String",
+                            "desc": "The XPath expression to execute."
+                        },
+                        {
+                            "name": "context",
+                            "type": "Object",
+                            "value": "null_object",
+                            "desc": "The optional contextnode can be specified for doing relative XPath queries. By default, the queries are relative to the root element."
+                        }
+                    ]
+                },
+                {
+                    "name": "registerNamespace",
+                    "desc": "Registers the namespaceURI and prefix with the DOMXPath object.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "prefix",
+                            "type": "String",
+                            "desc": "The prefix."
+                        },
+                        {
+                            "name": "uri",
+                            "type": "String",
+                            "desc": "The URI of the namespace."
+                        }
+                    ]
+                },
+                {
+                    "name": "registerPHPFunctions",
+                    "desc": "This method enables the ability to use PHP functions within XPath expressions.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "funcs",
+                            "type": "Variant",
+                            "value": "null",
+                            "desc": "Use this parameter to only allow certain functions to be called from XPath.\n\nThis parameter can be either a string (a function name) or an array of function names."
+                        }
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        }
+    ]
+}

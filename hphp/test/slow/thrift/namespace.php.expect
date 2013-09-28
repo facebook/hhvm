@@ -1,0 +1,79 @@
+object(A\TestStruct)#3 (10) {
+  ["aBool"]=>
+  bool(true)
+  ["anInt"]=>
+  int(1234)
+  ["aString"]=>
+  string(6) "abcdef"
+  ["aDouble"]=>
+  float(1.2345)
+  ["anInt64"]=>
+  int(8589934592)
+  ["aList"]=>
+  array(3) {
+    [0]=>
+    float(13.3)
+    [1]=>
+    float(23.4)
+    [2]=>
+    float(3576.2)
+  }
+  ["aMap"]=>
+  array(2) {
+    [10]=>
+    float(1.2)
+    [43]=>
+    float(5.33)
+  }
+  ["aSet"]=>
+  array(2) {
+    [10]=>
+    bool(true)
+    [11]=>
+    bool(true)
+  }
+  ["anByte"]=>
+  int(123)
+  ["anI16"]=>
+  int(1234)
+}
+string(32) "6b4fbe9563551f3dee970a74b883f923"
+object(A\TestStruct)#4 (10) {
+  ["aBool"]=>
+  bool(true)
+  ["anInt"]=>
+  int(1234)
+  ["aString"]=>
+  string(6) "abcdef"
+  ["aDouble"]=>
+  float(1.2345)
+  ["anInt64"]=>
+  int(8589934592)
+  ["aList"]=>
+  array(3) {
+    [0]=>
+    float(13.3)
+    [1]=>
+    float(23.4)
+    [2]=>
+    float(3576.2)
+  }
+  ["aMap"]=>
+  array(2) {
+    [10]=>
+    float(1.2)
+    [43]=>
+    float(5.33)
+  }
+  ["aSet"]=>
+  array(2) {
+    [10]=>
+    bool(true)
+    [11]=>
+    bool(true)
+  }
+  ["anByte"]=>
+  int(123)
+  ["anI16"]=>
+  int(1234)
+}

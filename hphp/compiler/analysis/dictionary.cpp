@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,11 +39,11 @@ void Dictionary::build(MethodStatementPtr m) {
 void Dictionary::build(StatementPtr stmt) {
   for (int i = 0, n = stmt->getKidCount(); i < n; i++) {
     if (ConstructPtr kid = stmt->getNthKid(i)) {
-      if (StatementPtr s = boost::dynamic_pointer_cast<Statement>(kid)) {
+      if (StatementPtr s = dynamic_pointer_cast<Statement>(kid)) {
         if (FunctionWalker::SkipRecurse(s)) continue;
         build(s);
       } else {
-        ExpressionPtr e = boost::dynamic_pointer_cast<Expression>(kid);
+        ExpressionPtr e = dynamic_pointer_cast<Expression>(kid);
         build(e);
       }
     }

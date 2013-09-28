@@ -1,0 +1,51 @@
+--> Access prop on instance of ArrayObject with ArrayObject::STD_PROP_LIST:
+  - Iteration:
+      prop=>C::prop.orig
+  - Read:
+NULL
+string(12) "C::prop.orig"
+  - Write:
+string(8) "changed1"
+string(8) "changed2"
+  - Isset:
+bool(true)
+bool(true)
+  - Unset:
+HipHop Notice: %s
+HipHop Notice: %s
+NULL
+NULL
+  - After:
+object(ArrayObject)#2 (1) {
+  ["storage":"ArrayObject":private]=>
+  object(C)#1 (0) {
+  }
+}
+object(C)#1 (0) {
+}
+
+--> Access prop on instance of MyArrayObject with ArrayObject::STD_PROP_LIST:
+  - Iteration:
+      prop=>C::prop.orig
+  - Read:
+string(24) "MyArrayObject::prop.orig"
+string(12) "C::prop.orig"
+  - Write:
+string(8) "changed1"
+string(8) "changed2"
+  - Isset:
+bool(true)
+bool(true)
+  - Unset:
+HipHop Notice: %s
+HipHop Notice: %s
+NULL
+NULL
+  - After:
+object(MyArrayObject)#3 (1) {
+  ["storage":"ArrayObject":private]=>
+  object(C)#4 (0) {
+  }
+}
+object(C)#4 (0) {
+}

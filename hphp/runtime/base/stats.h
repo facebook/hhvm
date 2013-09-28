@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,8 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef STATS_H_
-#define STATS_H_
+#ifndef incl_HPHP_STATS_H_
+#define incl_HPHP_STATS_H_
+
+#include <atomic>
 
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/util/asm-x64.h"
@@ -22,7 +24,7 @@
 
 namespace HPHP {
 
- namespace Transl { class X64Assembler; }
+namespace Transl { class X64Assembler; }
 namespace Stats {
 
 #include "hphp/runtime/vm/stats-opcodeDef.h"
@@ -134,6 +136,10 @@ namespace Stats {
   STAT(TC_TypePredMiss) \
   STAT(TC_TypePredUnneeded) \
   STAT(TC_TypePredOverridden) \
+  STAT(TC_CatchTrace) \
+  STAT(TC_CatchSideExit) \
+  STAT(TC_SetMStrGuess_Hit) \
+  STAT(TC_SetMStrGuess_Miss) \
   /* Fixup */ \
   STAT(Fixup_Find) \
   STAT(Fixup_Probe) \
@@ -172,9 +178,6 @@ namespace Stats {
   /* astubs stats */ \
   STAT(Astubs_New) \
   STAT(Astubs_Reused) \
-  /* HphpArray */ \
-  STAT(HA_FindIntFast) \
-  STAT(HA_FindIntSlow) \
   /* Switches */ \
   STAT(Switch_Generic) \
   STAT(Switch_Integer) \
@@ -193,48 +196,51 @@ extern const char* g_counterNames[kNumStatCounters];
 extern __thread uint64_t tl_counters[kNumStatCounters];
 
 extern __thread uint64_t tl_helper_counters[];
-extern const char* volatile helperNames[];
+extern std::atomic<const char*> helperNames[];
 
-static inline bool enabled() {
+inline bool enabled() {
   return Trace::moduleEnabled(Trace::stats, 1);
 }
 
-static inline bool enabledAny() {
+inline bool enabledAny() {
   return enabled() || Trace::moduleEnabled(Trace::statgroups);
 }
 
-static inline bool enableInstrCount() {
+inline bool enableInstrCount() {
   return Trace::moduleEnabled(Trace::stats, 2);
 }
 
-static inline void inc(StatCounter stat, int n = 1) {
+inline void inc(StatCounter stat, int n = 1) {
   if (enabled()) {
     tl_counters[stat] += n;
   }
 }
 
-static inline StatCounter opcodeToStatCounter(Opcode opc) {
-  assert(OpLowInvalid == 0);
-  return StatCounter(Instr_InterpBBLowInvalid + STATS_PER_OPCODE * opc);
+static_assert(static_cast<uint64_t>(OpLowInvalid) == 0,
+              "stats.h assumes OpLowInvalid == 0");
+
+inline StatCounter opcodeToStatCounter(Op opc) {
+  return StatCounter(Instr_InterpBBLowInvalid +
+                     STATS_PER_OPCODE * uint8_t(opc));
 }
 
-static inline void incOp(Opcode opc) {
+inline void incOp(Op opc) {
   inc(opcodeToStatCounter(opc));
 }
 
-static inline StatCounter opcodeToTranslStatCounter(Opcode opc) {
-  assert(OpLowInvalid == 0);
-  return StatCounter(Instr_TranslLowInvalid + STATS_PER_OPCODE * opc);
+inline StatCounter opcodeToTranslStatCounter(Op opc) {
+  return StatCounter(Instr_TranslLowInvalid +
+                     STATS_PER_OPCODE * uint8_t(opc));
 }
 
-static inline StatCounter opcodeToIRPreStatCounter(Opcode opc) {
-  assert(OpLowInvalid == 0);
-  return StatCounter(Instr_TranslIRPreLowInvalid + STATS_PER_OPCODE * opc);
+inline StatCounter opcodeToIRPreStatCounter(Op opc) {
+  return StatCounter(Instr_TranslIRPreLowInvalid +
+                     STATS_PER_OPCODE * uint8_t(opc));
 }
 
-static inline StatCounter opcodeToIRPostStatCounter(Opcode opc) {
-  assert(OpLowInvalid == 0);
-  return StatCounter(Instr_TranslIRPostLowInvalid + STATS_PER_OPCODE * opc);
+inline StatCounter opcodeToIRPostStatCounter(Op opc) {
+  return StatCounter(Instr_TranslIRPostLowInvalid +
+                     STATS_PER_OPCODE * uint8_t(opc));
 }
 
 // Both emitIncs use r10.
@@ -250,7 +256,7 @@ inline void emitInc(Transl::X64Assembler& a, StatCounter stat, int n = 1,
   emitInc(a, &tl_counters[0], stat, n, cc, force);
 }
 
-extern void emitIncTranslOp(Transl::X64Assembler& a, Opcode opc,
+extern void emitIncTranslOp(Transl::X64Assembler& a, Op opc,
                             bool force = false);
 extern void init();
 extern void dump();

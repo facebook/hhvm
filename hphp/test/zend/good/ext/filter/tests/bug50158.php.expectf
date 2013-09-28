@@ -1,0 +1,4 @@
+%unicode|string%(21) "test=mail@example.com"
+%unicode|string%(21) "test-mail@example.com"
+%unicode|string%(21) "test+mail@example.com"
+%unicode|string%(21) "test?mail@example.com"

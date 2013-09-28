@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,6 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
+#include "hphp/compiler/analysis/alias_manager.h"
 
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/function_scope.h"
@@ -34,6 +36,8 @@
 #include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/expression/include_expression.h"
 #include "hphp/compiler/expression/closure_expression.h"
+#include "hphp/compiler/expression/yield_expression.h"
+#include "hphp/compiler/expression/await_expression.h"
 #include "hphp/compiler/statement/statement.h"
 #include "hphp/compiler/statement/statement_list.h"
 #include "hphp/compiler/statement/catch_statement.h"
@@ -54,7 +58,6 @@
 #include "hphp/compiler/statement/try_statement.h"
 #include "hphp/compiler/statement/global_statement.h"
 #include "hphp/compiler/statement/static_statement.h"
-#include "hphp/compiler/analysis/alias_manager.h"
 #include "hphp/compiler/analysis/control_flow.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/data_flow.h"
@@ -63,12 +66,14 @@
 #include "hphp/compiler/analysis/live_dict.h"
 #include "hphp/compiler/analysis/ref_dict.h"
 
-#include "hphp/util/parser/hphp.tab.hpp"
-#include "hphp/util/parser/location.h"
+#include "hphp/runtime/base/builtin-functions.h"
+
+#include "hphp/parser/hphp.tab.hpp"
+#include "hphp/parser/location.h"
 #include "hphp/util/util.h"
 
-#define spc(T,p) boost::static_pointer_cast<T>(p)
-#define dpc(T,p) boost::dynamic_pointer_cast<T>(p)
+#define spc(T,p) static_pointer_cast<T>(p)
+#define dpc(T,p) dynamic_pointer_cast<T>(p)
 
 using namespace HPHP;
 using std::string;
@@ -743,15 +748,6 @@ void AliasManager::killLocals() {
         goto kill_it;
 
       case Expression::KindOfBinaryOpExpression:
-        if (!(effects & emask) &&
-            getOpForAssignmentOp(spc(BinaryOpExpression, e)->getOp())) {
-          if (okToKill(spc(BinaryOpExpression, e)->getExp1(), false)) {
-            e->setContext(Expression::DeadStore);
-            m_replaced++;
-            ++it;
-            continue;
-          }
-        }
         cleanInterf(spc(BinaryOpExpression, e)->getExp1(), ++it, end, depth);
         continue;
 
@@ -1523,8 +1519,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
             e->is(Expression::KindOfSimpleVariable) &&
             !e->isThis()) {
           Symbol *s = spc(SimpleVariable, e)->getSymbol();
-          if (s && !s->isParameter() && !s->isGeneratorParameter() &&
-              !s->isClosureVar()) {
+          if (s && !s->isParameter() && !s->isClosureVar()) {
             rep = e->makeConstant(m_arp, "null");
             Compiler::Error(Compiler::UseUndeclaredVariable, e);
             if (m_variables->getAttribute(VariableTable::ContainsCompact)) {
@@ -1584,6 +1579,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
               cur = next;
             }
             if (!m_inCall &&
+                !last->is(Expression::KindOfAwaitExpression) &&
                 !last->is(Expression::KindOfYieldExpression) &&
                 ae->isUnused() && m_accessList.isLast(ae) &&
                 !e->hasAnyContext(Expression::AccessContext |
@@ -1680,7 +1676,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
                     while (v->getCanonPtr() && v->getCanonPtr() != op0) {
                       v = v->getCanonPtr();
                     }
-                    ok = v->getCanonPtr();
+                    ok = (v->getCanonPtr() != nullptr);
                   }
                   if (ok) {
                     b2->setContext(Expression::DeadStore);
@@ -2112,6 +2108,7 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
   }
 
   cs->clearVisited();
+  cs->clearChildOfYield();
 
   StatementPtr s = dpc(Statement, cs);
   if (s) {
@@ -2205,13 +2202,15 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
         ForEachStatementPtr fs(static_pointer_cast<ForEachStatement>(s));
         SimpleVariablePtr name = dpc(SimpleVariable, fs->getNameExp());
         if (name) {
-          Symbol *sym = name->getSymbol();
-          sym->setNeeded();
+          if (Symbol *sym = name->getSymbol()) {
+            sym->setNeeded();
+          }
         }
         SimpleVariablePtr value = dpc(SimpleVariable, fs->getValueExp());
         if (value) {
-          Symbol *sym = value->getSymbol();
-          sym->setNeeded();
+          if (Symbol *sym = value->getSymbol()) {
+            sym->setNeeded();
+          }
         }
         break;
       }
@@ -2399,6 +2398,9 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
         // currently disable inlining for scopes with closure
         // expressions. TODO: revisit this later
         m_inlineAsExpr = false;
+        break;
+      case Expression::KindOfYieldExpression:
+        spc(YieldExpression, e)->getValueExpression()->setChildOfYield();
         break;
       case Expression::KindOfUnaryOpExpression:
         if (Option::EnableEval > Option::NoEval && spc(UnaryOpExpression, e)->
@@ -2635,6 +2637,13 @@ private:
     if (sv && se) {
       const string &s = se->getLiteralString();
       if (s.empty()) return ExpressionPtr();
+      if (interface_supports_array(s) ||
+          interface_supports_string(s) ||
+          interface_supports_int(s) ||
+          interface_supports_double(s))  {
+        // This could be a primitive type, so don't assert anything
+        return ExpressionPtr();
+      }
       TypePtr o(Type::CreateObjectType(Util::toLower(s)));
 
       // don't do specific type assertions for unknown classes
@@ -2968,15 +2977,6 @@ private:
         }
       }
       break;
-    case Statement::KindOfBreakStatement:
-      {
-        BreakStatementPtr bs(spc(BreakStatement, stmt));
-        if (bs->getExp()) {
-          ExpressionPtr rep(
-              insertTypeAssertion(assertion, bs->getExp()));
-          replaceExpression(bs, rep, bs->getExp(), 0);
-        }
-      }
     default:
       // this is something like a continue statement,
       // in which case we don't do anything
@@ -3327,19 +3327,12 @@ public:
     DataFlowWalker::walk(*this);
     ControlBlock *b = m_graph.getDfBlock(1);
     std::map<std::string,int>::iterator it = m_gidMap.find("v:this");
-    if (m->getOrigGeneratorFunc()) {
-      BitOps::set(m_gidMap.size(), b->getRow(DataFlow::PRefIn),
-                  BitOps::Bits(-1));
-      BitOps::set(m_gidMap.size(), b->getRow(DataFlow::PInitIn),
-                  BitOps::Bits(-1));
-    } else {
-      if (it != m_gidMap.end() && it->second) {
-        b->setBit(DataFlow::PRefIn, it->second);
-        b->setBit(DataFlow::PInitIn, it->second);
-      }
-      updateParamInfo(m->getParams(), Option::HardTypeHints);
-      updateParamInfo(m->getFunctionScope()->getClosureVars(), false);
+    if (it != m_gidMap.end() && it->second) {
+      b->setBit(DataFlow::PRefIn, it->second);
+      b->setBit(DataFlow::PInitIn, it->second);
     }
+    updateParamInfo(m->getParams(), Option::HardTypeHints);
+    updateParamInfo(m->getFunctionScope()->getClosureVars(), false);
   }
 
   void updateParamInfo(ExpressionListPtr el, bool useDefaults) {
@@ -3351,6 +3344,9 @@ public:
       std::map<std::string,int>::iterator it =
         m_gidMap.find("v:" + p->getName());
       if (it != m_gidMap.end() && it->second) {
+        // NB: this is unsound if the user error handler swallows a
+        // parameter typehint failure.  It's opt-in via compiler
+        // options, though.
         if (useDefaults && p->hasTypeHint() && !p->defaultValue()) {
           b->setBit(DataFlow::AvailIn, it->second);
         }
@@ -3610,7 +3606,7 @@ public:
 
   bool walk() { ControlFlowGraphWalker::walk(*this); return m_changed; }
   int afterEach(ConstructRawPtr p, int i, ConstructPtr kid) {
-    if (ExpressionRawPtr e = boost::dynamic_pointer_cast<Expression>(kid)) {
+    if (ExpressionRawPtr e = dynamic_pointer_cast<Expression>(kid)) {
       if (e->isTypeAssertion()) return WalkContinue; // nothing to do
 
       bool safeForProp =

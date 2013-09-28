@@ -1,0 +1,16 @@
+array(7) {
+  [0]=>
+  string(1) "."
+  [1]=>
+  string(2) ".."
+  [2]=>
+  string(3) "dir"
+  [3]=>
+  string(5) "empty"
+  [4]=>
+  string(4) "file"
+  [5]=>
+  string(14) "fix_mtimes.inc"
+  [6]=>
+  string(7) "symlink"
+}

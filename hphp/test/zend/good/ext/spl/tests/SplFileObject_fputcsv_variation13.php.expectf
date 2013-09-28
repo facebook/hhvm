@@ -1,0 +1,4 @@
+*** Testing fputcsv() : with default enclosure & delimiter of two chars ***
+HipHop Warning: %s
+bool(false)
+Done

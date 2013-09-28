@@ -1,0 +1,18 @@
+bool(true)
+bool(true)
+bool(true)
+------ stream_truncate not implemented: -------
+HipHop Warning: %s
+bool(false)
+------ stream_truncate size 0: -------
+truncation with new_size=0
+bool(true)
+------ stream_truncate size 10: -------
+truncation with new_size=10
+bool(true)
+------ stream_truncate negative size: -------
+bool(false)
+------ stream_truncate bad return: -------
+truncation with new_size=0
+HipHop Warning: %s
+bool(false)

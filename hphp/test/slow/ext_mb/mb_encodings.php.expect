@@ -1,0 +1,15 @@
+bool(true)
+array(1) {
+  [0]=>
+  string(6) "qprint"
+}
+string(10) "x-uuencode"
+bool(true)
+string(7) "Pr‹fung"
+string(7) "Pr‹fung"
+string(7) "Pr‹fung"
+string(3) "foo"
+string(5) "UTF-8"
+string(5) "UTF-8"
+string(8) "SJIS-win"
+string(6) "EUC-JP"

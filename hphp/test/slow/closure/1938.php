@@ -1,11 +1,16 @@
 <?php
 
-
 function f(&$u0) {
-  return function () use (&$u0, $u0) { $u0++; };
+  return function () use (&$u0, $u0) {
+ $u0++;
+ }
+;
 }
 function g(&$u0) {
-  return function () use ($u0, &$u0) { $u0++; };
+  return function () use ($u0, &$u0) {
+ $u0++;
+ }
+;
 }
 $x1 = 0;
 $f = f($x1);

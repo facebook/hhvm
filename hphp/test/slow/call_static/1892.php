@@ -1,6 +1,5 @@
 <?php
 
-
 class c3 {
   public function __call($func, $args) {
     echo "c3::__call
@@ -11,12 +10,14 @@ class c3 {
 ";
   }
   public function test1b() {
-    c3::foo(); // invokes c3::__callStatic
+    c3::foo();
+ // invokes c3::__callStatic
   }
 }
 class d3 extends c3 {
   public function test1b() {
-    c3::foo(); // invokes c3::__callStatic
+    c3::foo();
+ // invokes c3::__callStatic
   }
 }
 

@@ -1,0 +1,12 @@
+*** Testing imap_fetch_overview() : usage variations ***
+
+-- File Resource opened with fopen() --
+resource(%d) of type (stream)
+HipHop Warning: %s
+bool(false)
+
+-- Directory Resource opened with opendir() --
+resource(%d) of type (stream)
+HipHop Warning: %s
+bool(false)
+===DONE===

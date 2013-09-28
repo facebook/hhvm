@@ -1,0 +1,28 @@
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+array(0) {
+}
+array(0) {
+}
+NULL
+string(0) ""
+string(0) ""
+int(0)
+int(0)
+NULL
+array(1) {
+  ["foo"]=>
+  array(1) {
+    [0]=>
+    int(0)
+  }
+}
+object(stdClass)#2 (0) {
+}
+NULL
+string(32) "8fa14cdd754f91cc6554c9e71929cce7"
+string(1) "f"

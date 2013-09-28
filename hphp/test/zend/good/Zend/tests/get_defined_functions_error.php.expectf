@@ -1,0 +1,7 @@
+*** Testing get_defined_functions() : error conditions ***
+
+-- Testing get_defined_functions() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+ 
+===Done===

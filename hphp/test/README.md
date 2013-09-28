@@ -21,7 +21,12 @@ all sub-suites.
 * Slow tests with the JIT in IR mode -
 `test/run test/slow -m hhir`
 
-* Run evertyhing that is supposed to pass -
+* Slow tests with the JIT, using pseudomain_wrapper.php to ensure that
+  statements in global scope get jitted (may have false positives due to,
+  e.g. backtraces changing) -
+`test/run test/slow -m automain`
+
+* Run everything that is supposed to pass -
 `fbmake runtests`
 
 # File Layout
@@ -33,20 +38,27 @@ you to easily run the .php file without first running the test suite.
 These are the allowed extensions:
 
 * .php - The source of the test.
-* .expect - The exact string expected output.
-* .expectf - The exact string expected output with formating characters.
-* .expectregex - A regex that matches the output.
-* .out - When you run the test, the output will be stored here.
-* .opts - Runtime options to pass to hhvm.
-* .diff - The diff for .expect tests.
+* .php.expect - The exact string expected output.
+* .php.expectf - The exact string expected output with formating characters.
+* .php.expectregex - A regex that matches the output.
+* .php.in - When you run the test, the input will be obtained from here.
+* .php.out - When you run the test, the output will be stored here.
+* .php.opts - Runtime options to pass to hhvm.
+* .php.hphp_opts - Options passed to hphp when generating a bytecode repo.
+* .php.diff or hhas.diff - The diff for .expect tests.
 * .hhas - HipHop Assembly.
+* .php.norepo - don't run the test in repo mode
 
-You must have one `.php`; one and only one of `.expect`, `.expectf`, and
-`.expectregex`; and the rest are optional.
+You must have one `.php`; one and only one of `.php.expect`, `.php.expectf`, and
+`.php.expectregex`; and the rest are optional.
 
 Any suite can have a `config.hdf` file in it that will be used. If one isn't
 present, then the parent suite it checked recusrivly until we use
 test/config.hdf.
+
+If a suite contains an `hphpd.hdf` file, all of the files in the suite will be
+run with the -m debug and --debug-config _dir_/hphpd.hdf switches added to the
+command line. (_dir_ will be replaced by path of the suite directory.)
 
 Name your test in a descriptive manner and when in doubt break your test into
 many files. You can use comments too so future engineers know if it is a real

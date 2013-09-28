@@ -1,3 +1,5 @@
 <?php
 
- $a = 't'; $a = 10; print $a / 2;
+$a = 't';
+ $a = 10;
+ print $a / 2;

@@ -1,26 +1,29 @@
 <?php
 
-
 class Base {
   public function f() {
     var_dump('Base::f');
   }
 }
-function get() { return true; }
+function get() {
+ return true;
+ }
 if (get()) {
   class X {
     public function f() {
       var_dump('X1::f');
     }
   }
-} else {
+}
+ else {
   class X {
     public function f() {
       var_dump('X2::f');
     }
   }
 }
-class Y extends X {}
+class Y extends X {
+}
 function f($x) {
   if ($x instanceof Base) {
     $x->f();

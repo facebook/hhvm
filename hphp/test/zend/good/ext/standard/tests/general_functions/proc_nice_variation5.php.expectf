@@ -1,0 +1,6 @@
+*** Test substituting argument 1 with int values ***
+bool(true)
+bool(true)
+bool(true)
+HipHop Warning: %s
+bool(false)

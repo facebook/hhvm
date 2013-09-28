@@ -1,0 +1,204 @@
+*** Testing DateTime::setDate() : usage variation -  unexpected values to second argument $month***
+
+-- int 0 --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "1962-12-02 08:34:10"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- int 1 --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "1963-01-02 08:34:10"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- int 12345 --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "2991-09-02 08:34:10"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- int -12345 --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "0934-03-02 08:34:10"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- float 10.5 --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "1963-10-02 08:34:10"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- float -10.5 --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "1962-02-02 08:34:10"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- float .5 --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "1962-12-02 08:34:10"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- empty array --
+HipHop Warning: %s
+bool(false)
+
+-- int indexed array --
+HipHop Warning: %s
+bool(false)
+
+-- associative array --
+HipHop Warning: %s
+bool(false)
+
+-- nested arrays --
+HipHop Warning: %s
+bool(false)
+
+-- uppercase NULL --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "1962-12-02 08:34:10"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- lowercase null --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "1962-12-02 08:34:10"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- lowercase true --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "1963-01-02 08:34:10"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- lowercase false --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "1962-12-02 08:34:10"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- uppercase TRUE --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "1963-01-02 08:34:10"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- uppercase FALSE --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "1962-12-02 08:34:10"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- empty string DQ --
+HipHop Warning: %s
+bool(false)
+
+-- empty string SQ --
+HipHop Warning: %s
+bool(false)
+
+-- string DQ --
+HipHop Warning: %s
+bool(false)
+
+-- string SQ --
+HipHop Warning: %s
+bool(false)
+
+-- mixed case string --
+HipHop Warning: %s
+bool(false)
+
+-- heredoc --
+HipHop Warning: %s
+bool(false)
+
+-- instance of classWithToString --
+HipHop Warning: %s
+bool(false)
+
+-- instance of classWithoutToString --
+HipHop Warning: %s
+bool(false)
+
+-- undefined var --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "1962-12-02 08:34:10"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- unset var --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "1962-12-02 08:34:10"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- resource --
+HipHop Warning: %s
+bool(false)
+===DONE===

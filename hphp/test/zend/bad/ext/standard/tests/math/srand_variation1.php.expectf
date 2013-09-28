@@ -1,0 +1,88 @@
+*** Testing srand() : usage variations ***
+
+-- Iteration 1 --
+NULL
+
+-- Iteration 2 --
+NULL
+
+-- Iteration 3 --
+NULL
+
+-- Iteration 4 --
+NULL
+
+-- Iteration 5 --
+NULL
+
+-- Iteration 6 --
+NULL
+
+-- Iteration 7 --
+NULL
+
+-- Iteration 8 --
+NULL
+
+-- Iteration 9 --
+NULL
+
+-- Iteration 10 --
+NULL
+
+-- Iteration 11 --
+NULL
+
+-- Iteration 12 --
+NULL
+
+-- Iteration 13 --
+NULL
+
+-- Iteration 14 --
+NULL
+
+-- Iteration 15 --
+NULL
+
+-- Iteration 16 --
+NULL
+
+-- Iteration 17 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 18 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 19 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 20 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 21 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 22 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 23 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 24 --
+NULL
+
+-- Iteration 25 --
+NULL
+
+-- Iteration 26 --
+HipHop Warning: %s
+NULL
+===Done===

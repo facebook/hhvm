@@ -1,0 +1,31 @@
+-- Renaming link to same link name --
+bool(true)
+
+-- Renaming file to same file name --
+bool(true)
+
+-- Renaming directory to same directory name --
+bool(true)
+
+-- Renaming existing link to existing directory name --
+HipHop Warning: %s
+bool(false)
+
+-- Renaming existing link to existing file name --
+bool(true)
+
+-- Renaming existing file to existing directory name --
+HipHop Warning: %s
+bool(false)
+
+-- Renaming existing file to existing link name --
+bool(true)
+
+-- Renaming existing directory to existing file name --
+HipHop Warning: %s
+bool(false)
+
+-- Renaming existing directory to existing link name --
+HipHop Warning: %s
+bool(false)
+Done

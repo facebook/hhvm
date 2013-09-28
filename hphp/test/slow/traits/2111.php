@@ -1,11 +1,14 @@
 <?php
 
-
 class C {
-  protected function foo() { echo "C::foo\n"; }
+  protected function foo() {
+ echo "C::foo\n";
+ }
 }
 trait T {
-  protected function foo() { echo "T::foo\n"; }
+  protected function foo() {
+ echo "T::foo\n";
+ }
 }
 class D extends C {
   use T;

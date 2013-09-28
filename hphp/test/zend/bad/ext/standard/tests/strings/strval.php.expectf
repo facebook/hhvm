@@ -1,0 +1,9 @@
+string(3) "bar"
+string(3) "BAR"
+string(6) "foobar"
+string(1) "1"
+string(3) "1.1"
+string(1) "1"
+string(0) ""
+HipHop Notice: %s
+string(5) "Array"

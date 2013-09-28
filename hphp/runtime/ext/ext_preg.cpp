@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,8 +18,8 @@
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/ext/ext_mb.h"
 #include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/base/ini_setting.h"
-#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/request-local.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(pcre);

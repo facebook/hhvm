@@ -1,6 +1,5 @@
 <?php
 
-
 error_reporting(E_ALL);
 
 trait T1 {

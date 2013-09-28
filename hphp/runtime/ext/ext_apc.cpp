@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,15 +18,16 @@
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_fb.h"
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/util/async_job.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/util/async-job.h"
 #include "hphp/util/timer.h"
 #include <dlfcn.h>
-#include "hphp/runtime/base/program_functions.h"
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/variable_serializer.h"
+#include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/util/alloc.h"
-#include "hphp/runtime/base/ini_setting.h"
+#include "hphp/util/hdf.h"
+#include "hphp/runtime/base/ini-setting.h"
 
 using HPHP::Util::ScopedMem;
 
@@ -35,35 +36,104 @@ namespace HPHP {
 
 extern void const_load();
 
+typedef ConcurrentTableSharedStore::KeyValuePair KeyValuePair;
 
-static class apcExtension : public Extension {
-public:
-  apcExtension() : Extension("apc") {}
-  virtual void moduleInit() {
-    IniSetting::SetGlobalDefault("apc.enabled","1");
-    IniSetting::SetGlobalDefault("apc.stat",
-                                 RuntimeOption::RepoAuthoritative
-                                 ? "0" : "1");
-    IniSetting::SetGlobalDefault("apc.enable_cli", "1");
-    if (RuntimeOption::ApcUseFileStorage) {
-      s_apc_file_storage.enable(RuntimeOption::ApcFileStoragePrefix,
-                                RuntimeOption::ApcFileStorageChunkSize,
-                                RuntimeOption::ApcFileStorageMaxSize);
-    }
-  }
-  virtual void moduleShutdown() {
-    if (RuntimeOption::ApcUseFileStorage) {
-      s_apc_file_storage.cleanup();
-    }
-  }
-} s_apc_extension;
+void apcExtension::moduleLoad(Hdf config) {
+  Hdf apc = config["Server"]["APC"];
 
+  Enable = apc["EnableApc"].getBool(true);
+  EnableConstLoad = apc["EnableConstLoad"].getBool(false);
+  ForceConstLoadToAPC = apc["ForceConstLoadToAPC"].getBool(true);
+  PrimeLibrary = apc["PrimeLibrary"].getString();
+  LoadThread = apc["LoadThread"].getInt16(2);
+  apc["CompletionKeys"].get(CompletionKeys);
+  string tblType = apc["TableType"].getString("concurrent");
+  if (strcasecmp(tblType.c_str(), "concurrent") == 0) {
+    TableType = TableTypes::ConcurrentTable;
+  } else {
+    throw InvalidArgumentException("apc table type", "Invalid table type");
+  }
+  EnableApcSerialize = apc["EnableApcSerialize"].getBool(true);
+  ExpireOnSets = apc["ExpireOnSets"].getBool();
+  PurgeFrequency = apc["PurgeFrequency"].getInt32(4096);
+  PurgeRate = apc["PurgeRate"].getInt32(-1);
+
+  AllowObj = apc["AllowObject"].getBool();
+  TTLLimit = apc["TTLLimit"].getInt32(-1);
+
+  Hdf fileStorage = apc["FileStorage"];
+  UseFileStorage = fileStorage["Enable"].getBool();
+  FileStorageChunkSize = fileStorage["ChunkSize"].getInt64(1LL << 29);
+  FileStorageMaxSize = fileStorage["MaxSize"].getInt64(1LL << 32);
+  FileStoragePrefix = fileStorage["Prefix"].getString("/tmp/apc_store");
+  FileStorageFlagKey = fileStorage["FlagKey"].getString("_madvise_out");
+  FileStorageAdviseOutPeriod = fileStorage["AdviseOutPeriod"].getInt32(1800);
+  FileStorageKeepFileLinked = fileStorage["KeepFileLinked"].getBool();
+
+  ConcurrentTableLockFree = apc["ConcurrentTableLockFree"].getBool(false);
+  KeyMaturityThreshold = apc["KeyMaturityThreshold"].getInt32(20);
+  MaximumCapacity = apc["MaximumCapacity"].getInt64(0);
+  KeyFrequencyUpdatePeriod = apc["KeyFrequencyUpdatePeriod"].getInt32(1000);
+
+  apc["NoTTLPrefix"].get(NoTTLPrefix);
+}
+
+void apcExtension::moduleInit() {
+  IniSetting::SetGlobalDefault("apc.enabled","1");
+  IniSetting::SetGlobalDefault("apc.stat",
+                               RuntimeOption::RepoAuthoritative
+                               ? "0" : "1");
+  IniSetting::SetGlobalDefault("apc.enable_cli", "1");
+  if (UseFileStorage) {
+    s_apc_file_storage.enable(FileStoragePrefix,
+                              FileStorageChunkSize,
+                              FileStorageMaxSize);
+  }
+}
+
+void apcExtension::moduleShutdown() {
+  if (UseFileStorage) {
+    s_apc_file_storage.cleanup();
+  }
+}
+
+
+bool apcExtension::Enable = true;
+bool apcExtension::EnableConstLoad = false;
+bool apcExtension::ForceConstLoadToAPC = true;
+std::string apcExtension::PrimeLibrary;
+int apcExtension::LoadThread = 1;
+std::set<std::string> apcExtension::CompletionKeys;
+apcExtension::TableTypes apcExtension::TableType =
+  TableTypes::ConcurrentTable;
+bool apcExtension::EnableApcSerialize = true;
+time_t apcExtension::KeyMaturityThreshold = 20;
+size_t apcExtension::MaximumCapacity = 0;
+int apcExtension::KeyFrequencyUpdatePeriod = 1000;
+bool apcExtension::ExpireOnSets = false;
+int apcExtension::PurgeFrequency = 4096;
+int apcExtension::PurgeRate = -1;
+bool apcExtension::AllowObj = false;
+int apcExtension::TTLLimit = -1;
+bool apcExtension::UseFileStorage = false;
+int64_t apcExtension::FileStorageChunkSize = int64_t(1LL << 29);
+int64_t apcExtension::FileStorageMaxSize = int64_t(1LL << 32);
+std::string apcExtension::FileStoragePrefix;
+int apcExtension::FileStorageAdviseOutPeriod = 1800;
+std::string apcExtension::FileStorageFlagKey;
+bool apcExtension::ConcurrentTableLockFree = false;
+bool apcExtension::FileStorageKeepFileLinked = false;
+std::vector<std::string> apcExtension::NoTTLPrefix;
+
+static apcExtension s_apc_extension;
+
+///////////////////////////////////////////////////////////////////////////////
 bool f_apc_store(CStrRef key, CVarRef var, int64_t ttl /* = 0 */,
                  int64_t cache_id /* = 0 */) {
-  if (!RuntimeOption::EnableApc) return false;
+  if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %d", cache_id);
+    throw_invalid_argument("cache_id: %" PRId64, cache_id);
     return false;
   }
 
@@ -72,10 +142,10 @@ bool f_apc_store(CStrRef key, CVarRef var, int64_t ttl /* = 0 */,
 
 bool f_apc_add(CStrRef key, CVarRef var, int64_t ttl /* = 0 */,
                int64_t cache_id /* = 0 */) {
-  if (!RuntimeOption::EnableApc) return false;
+  if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %d", cache_id);
+    throw_invalid_argument("cache_id: %" PRId64, cache_id);
     return false;
   }
 
@@ -84,10 +154,10 @@ bool f_apc_add(CStrRef key, CVarRef var, int64_t ttl /* = 0 */,
 
 Variant f_apc_fetch(CVarRef key, VRefParam success /* = null */,
                     int64_t cache_id /* = 0 */) {
-  if (!RuntimeOption::EnableApc) return false;
+  if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %d", cache_id);
+    throw_invalid_argument("cache_id: %" PRId64, cache_id);
     return false;
   }
 
@@ -123,10 +193,10 @@ Variant f_apc_fetch(CVarRef key, VRefParam success /* = null */,
 }
 
 Variant f_apc_delete(CVarRef key, int64_t cache_id /* = 0 */) {
-  if (!RuntimeOption::EnableApc) return false;
+  if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %d", cache_id);
+    throw_invalid_argument("cache_id: %" PRId64, cache_id);
     return false;
   }
 
@@ -149,10 +219,10 @@ Variant f_apc_delete(CVarRef key, int64_t cache_id /* = 0 */) {
 }
 
 bool f_apc_clear_cache(int64_t cache_id /* = 0 */) {
-  if (!RuntimeOption::EnableApc) return false;
+  if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %d", cache_id);
+    throw_invalid_argument("cache_id: %" PRId64, cache_id);
     return false;
   }
   return s_apc_store[cache_id].clear();
@@ -160,10 +230,10 @@ bool f_apc_clear_cache(int64_t cache_id /* = 0 */) {
 
 Variant f_apc_inc(CStrRef key, int64_t step /* = 1 */,
                   VRefParam success /* = null */, int64_t cache_id /* = 0 */) {
-  if (!RuntimeOption::EnableApc) return false;
+  if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %d", cache_id);
+    throw_invalid_argument("cache_id: %" PRId64, cache_id);
     return false;
   }
   bool found = false;
@@ -174,10 +244,10 @@ Variant f_apc_inc(CStrRef key, int64_t step /* = 1 */,
 
 Variant f_apc_dec(CStrRef key, int64_t step /* = 1 */,
                   VRefParam success /* = null */, int64_t cache_id /* = 0 */) {
-  if (!RuntimeOption::EnableApc) return false;
+  if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %d", cache_id);
+    throw_invalid_argument("cache_id: %" PRId64, cache_id);
     return false;
   }
   bool found = false;
@@ -188,20 +258,20 @@ Variant f_apc_dec(CStrRef key, int64_t step /* = 1 */,
 
 bool f_apc_cas(CStrRef key, int64_t old_cas, int64_t new_cas,
                int64_t cache_id /* = 0 */) {
-  if (!RuntimeOption::EnableApc) return false;
+  if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %d", cache_id);
+    throw_invalid_argument("cache_id: %" PRId64, cache_id);
     return false;
   }
   return s_apc_store[cache_id].cas(key, old_cas, new_cas);
 }
 
 Variant f_apc_exists(CVarRef key, int64_t cache_id /* = 0 */) {
-  if (!RuntimeOption::EnableApc) return false;
+  if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %d", cache_id);
+    throw_invalid_argument("cache_id: %" PRId64, cache_id);
     return false;
   }
 
@@ -225,10 +295,10 @@ Variant f_apc_exists(CVarRef key, int64_t cache_id /* = 0 */) {
   return s_apc_store[cache_id].exists(key.toString());
 }
 
-static const StaticString s_start_time("start_time");
+const StaticString s_start_time("start_time");
 
 Variant f_apc_cache_info(int64_t cache_id /* = 0 */, bool limited /* = false */) {
-  return CREATE_MAP1(s_start_time, start_time());
+  return make_map_array(s_start_time, start_time());
 }
 
 Array f_apc_sma_info(bool limited /* = false */) {
@@ -261,10 +331,10 @@ bool f_apc_bin_load(CStrRef data, int64_t flags /* = 0 */, int64_t cache_id /* =
 }
 Variant f_apc_bin_dumpfile(int64_t cache_id, CVarRef filter,
                            CStrRef filename, int64_t flags /* = 0 */,
-                           CObjRef context /* =  uninit_null() */) {
+                           CResRef context /* =  uninit_null() */) {
   throw NotSupportedException(__func__, "feature not supported");
 }
-bool f_apc_bin_loadfile(CStrRef filename, CObjRef context /* = uninit_null() */,
+bool f_apc_bin_loadfile(CStrRef filename, CResRef context /* = uninit_null() */,
                         int64_t flags /* = 0 */, int64_t cache_id /* = 0 */) {
   throw NotSupportedException(__func__, "feature not supported");
 }
@@ -290,7 +360,7 @@ static PFUNC_APC_LOAD apc_load_func(void *handle, const char *name) {
   const char *error = dlerror();
   if (error || p == NULL) {
     throw Exception("Unable to find %s in %s: %s", name,
-                    RuntimeOption::ApcPrimeLibrary.c_str(),
+                    apcExtension::PrimeLibrary.c_str(),
                     error ? error : "(unknown error)");
   }
   return p;
@@ -316,14 +386,15 @@ public:
 
 static size_t s_const_map_size = 0;
 
-KEEP_SECTION
+EXTERNALLY_VISIBLE
 void apc_load(int thread) {
   static void *handle = NULL;
   if (handle ||
-      RuntimeOption::ApcPrimeLibrary.empty() ||
-      !RuntimeOption::EnableApc) {
+      apcExtension::PrimeLibrary.empty() ||
+      !apcExtension::Enable) {
     static uint64_t keep_entry_points_around_under_lto;
-    if (++keep_entry_points_around_under_lto == UINT64_MAX) {
+    if (++keep_entry_points_around_under_lto ==
+        std::numeric_limits<uint64_t>::max()) {
       // this had better never happen...
 
       // Fill out a cache_info to prevent g++ from optimizing out
@@ -350,10 +421,10 @@ void apc_load(int thread) {
   }
 
   Timer timer(Timer::WallTime, "loading APC data");
-  handle = dlopen(RuntimeOption::ApcPrimeLibrary.c_str(), RTLD_LAZY);
+  handle = dlopen(apcExtension::PrimeLibrary.c_str(), RTLD_LAZY);
   if (!handle) {
     throw Exception("Unable to open apc prime library %s: %s",
-                    RuntimeOption::ApcPrimeLibrary.c_str(), dlerror());
+                    apcExtension::PrimeLibrary.c_str(), dlerror());
   }
 
   if (thread <= 1) {
@@ -371,7 +442,7 @@ void apc_load(int thread) {
 
   s_apc_store[0].primeDone();
 
-  if (RuntimeOption::EnableConstLoad) {
+  if (apcExtension::EnableConstLoad) {
 #ifdef USE_JEMALLOC
     size_t allocated_before = 0;
     size_t allocated_after = 0;
@@ -422,13 +493,13 @@ static int count_items(const char **p, int step) {
   return count;
 }
 
-KEEP_SECTION
+EXTERNALLY_VISIBLE
 void const_load_impl(struct cache_info *info,
                      const char **int_keys, long long *int_values,
                      const char **char_keys, char *char_values,
                      const char **strings, const char **objects,
                      const char **thrifts, const char **others) {
-  if (!RuntimeOption::EnableConstLoad || !info || !info->use_const) return;
+  if (!apcExtension::EnableConstLoad || !info || !info->use_const) return;
   {
     int count = count_items(int_keys, 2);
     if (count) {
@@ -479,7 +550,7 @@ void const_load_impl(struct cache_info *info,
       const char **p = objects;
       for (int i = 0; i < count; i++, p += 4) {
         String key(*p, (int)(int64_t)*(p+1), CopyString);
-        String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
+        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
         const_load_set(key, unserialize_from_string(value));
       }
     }
@@ -487,15 +558,15 @@ void const_load_impl(struct cache_info *info,
   {
     int count = count_items(thrifts, 4);
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       const char **p = thrifts;
       for (int i = 0; i < count; i++, p += 4) {
         String key(*p, (int)(int64_t)*(p+1), CopyString);
-        String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
+        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
         Variant success;
-        Variant v = f_fb_thrift_unserialize(value, ref(success));
+        Variant v = f_fb_unserialize(value, ref(success));
         if (same(success, false)) {
-          throw Exception("bad apc archive, f_fb_thrift_unserialize failed");
+          throw Exception("bad apc archive, f_fb_unserialize failed");
         }
         const_load_set(key, v);
       }
@@ -507,7 +578,7 @@ void const_load_impl(struct cache_info *info,
       const char **p = others;
       for (int i = 0; i < count; i++, p += 4) {
         String key(*p, (int)(int64_t)*(p+1), CopyString);
-        String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
+        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
         Variant v = unserialize_from_string(value);
         if (same(v, false)) {
           throw Exception("bad apc archive, unserialize_from_string failed");
@@ -518,24 +589,24 @@ void const_load_impl(struct cache_info *info,
   }
 }
 
-KEEP_SECTION
+EXTERNALLY_VISIBLE
 void apc_load_impl(struct cache_info *info,
                    const char **int_keys, long long *int_values,
                    const char **char_keys, char *char_values,
                    const char **strings, const char **objects,
                    const char **thrifts, const char **others) {
-  if (!RuntimeOption::ForceConstLoadToAPC) {
-    if (RuntimeOption::EnableConstLoad && info && info->use_const) return;
+  if (!apcExtension::ForceConstLoadToAPC) {
+    if (apcExtension::EnableConstLoad && info && info->use_const) return;
   }
-  SharedStore &s = s_apc_store[0];
+  auto& s = s_apc_store[0];
   {
     int count = count_items(int_keys, 2);
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       const char **k = int_keys;
       long long*v = int_values;
       for (int i = 0; i < count; i++, k += 2) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = *k;
         item.len = (int)(int64_t)*(k+1);
         s.constructPrime(*v++, item);
@@ -546,11 +617,11 @@ void apc_load_impl(struct cache_info *info,
   {
     int count = count_items(char_keys, 2);
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       const char **k = char_keys;
       char *v = char_values;
       for (int i = 0; i < count; i++, k += 2) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = *k;
         item.len = (int)(int64_t)*(k+1);
         switch (*v++) {
@@ -567,15 +638,14 @@ void apc_load_impl(struct cache_info *info,
   {
     int count = count_items(strings, 4);
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       const char **p = strings;
       for (int i = 0; i < count; i++, p += 4) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = *p;
         item.len = (int)(int64_t)*(p+1);
         // Strings would be copied into APC anyway.
-        String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
-        value.checkStatic();
+        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
         s.constructPrime(value, item, false);
       }
       s.prime(vars);
@@ -584,13 +654,13 @@ void apc_load_impl(struct cache_info *info,
   {
     int count = count_items(objects, 4);
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       const char **p = objects;
       for (int i = 0; i < count; i++, p += 4) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = *p;
         item.len = (int)(int64_t)*(p+1);
-        String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
+        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
         s.constructPrime(value, item, true);
       }
       s.prime(vars);
@@ -599,17 +669,17 @@ void apc_load_impl(struct cache_info *info,
   {
     int count = count_items(thrifts, 4);
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       const char **p = thrifts;
       for (int i = 0; i < count; i++, p += 4) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = *p;
         item.len = (int)(int64_t)*(p+1);
-        String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
+        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
         Variant success;
-        Variant v = f_fb_thrift_unserialize(value, ref(success));
+        Variant v = f_fb_unserialize(value, ref(success));
         if (same(success, false)) {
-          throw Exception("bad apc archive, f_fb_thrift_unserialize failed");
+          throw Exception("bad apc archive, f_fb_unserialize failed");
         }
         s.constructPrime(v, item);
       }
@@ -619,14 +689,14 @@ void apc_load_impl(struct cache_info *info,
   {
     int count = count_items(others, 4);
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       const char **p = others;
       for (int i = 0; i < count; i++, p += 4) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = *p;
         item.len = (int)(int64_t)*(p+1);
 
-        String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
+        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
         Variant v = unserialize_from_string(value);
         if (same(v, false)) {
           // we can't possibly get here if it was a boolean "false" that's
@@ -643,7 +713,7 @@ void apc_load_impl(struct cache_info *info,
 ///////////////////////////////////////////////////////////////////////////////
 // Constant and APC priming with compressed data
 
-KEEP_SECTION
+EXTERNALLY_VISIBLE
 void const_load_impl_compressed
     (struct cache_info *info,
      int *int_lens, const char *int_keys, long long *int_values,
@@ -652,7 +722,7 @@ void const_load_impl_compressed
      int *object_lens, const char *objects,
      int *thrift_lens, const char *thrifts,
      int *other_lens, const char *others) {
-  if (!RuntimeOption::EnableConstLoad || !info || !info->use_const) return;
+  if (!apcExtension::EnableConstLoad || !info || !info->use_const) return;
   {
     int count = int_lens[0];
     int len = int_lens[1];
@@ -727,7 +797,7 @@ void const_load_impl_compressed
       for (int i = 0; i < count; i++) {
         String key(p, object_lens[i + i + 2], CopyString);
         p += object_lens[i + i + 2] + 1;
-        String value(p, object_lens[i + i + 3], AttachLiteral);
+        String value(p, object_lens[i + i + 3], CopyString);
         const_load_set(key, unserialize_from_string(value));
         p += object_lens[i + i + 3] + 1;
       }
@@ -745,11 +815,11 @@ void const_load_impl_compressed
       for (int i = 0; i < count; i++) {
         String key(p, thrift_lens[i + i + 2], CopyString);
         p += thrift_lens[i + i + 2] + 1;
-        String value(p, thrift_lens[i + i + 3], AttachLiteral);
+        String value(p, thrift_lens[i + i + 3], CopyString);
         Variant success;
-        Variant v = f_fb_thrift_unserialize(value, ref(success));
+        Variant v = f_fb_unserialize(value, ref(success));
         if (same(success, false)) {
-          throw Exception("bad apc archive, f_fb_thrift_unserialize failed");
+          throw Exception("bad apc archive, f_fb_unserialize failed");
         }
         const_load_set(key, v);
         p += thrift_lens[i + i + 3] + 1;
@@ -768,7 +838,7 @@ void const_load_impl_compressed
       for (int i = 0; i < count; i++) {
         String key(p, other_lens[i + i + 2], CopyString);
         p += other_lens[i + i + 2] + 1;
-        String value(p, other_lens[i + i + 3], AttachLiteral);
+        String value(p, other_lens[i + i + 3], CopyString);
         Variant v = unserialize_from_string(value);
         if (same(v, false)) {
           throw Exception("bad apc archive, unserialize_from_string failed");
@@ -781,7 +851,7 @@ void const_load_impl_compressed
   }
 }
 
-KEEP_SECTION
+EXTERNALLY_VISIBLE
 void apc_load_impl_compressed
     (struct cache_info *info,
      int *int_lens, const char *int_keys, long long *int_values,
@@ -790,22 +860,22 @@ void apc_load_impl_compressed
      int *object_lens, const char *objects,
      int *thrift_lens, const char *thrifts,
      int *other_lens, const char *others) {
-  if (!RuntimeOption::ForceConstLoadToAPC) {
-    if (RuntimeOption::EnableConstLoad && info && info->use_const) return;
+  if (!apcExtension::ForceConstLoadToAPC) {
+    if (apcExtension::EnableConstLoad && info && info->use_const) return;
   }
-  SharedStore &s = s_apc_store[0];
+  auto& s = s_apc_store[0];
   {
     int count = int_lens[0];
     int len = int_lens[1];
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       char *keys = gzdecode(int_keys, len);
       if (keys == NULL) throw Exception("bad compressed apc archive.");
       ScopedMem holder(keys);
       const char *k = keys;
       long long* v = int_values;
       for (int i = 0; i < count; i++) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = k;
         item.len = int_lens[i + 2];
         s.constructPrime(*v++, item);
@@ -819,14 +889,14 @@ void apc_load_impl_compressed
     int count = char_lens[0];
     int len = char_lens[1];
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       char *keys = gzdecode(char_keys, len);
       if (keys == NULL) throw Exception("bad compressed apc archive.");
       ScopedMem holder(keys);
       const char *k = keys;
       char *v = char_values;
       for (int i = 0; i < count; i++) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = k;
         item.len = char_lens[i + 2];
         switch (*v++) {
@@ -846,19 +916,19 @@ void apc_load_impl_compressed
     int count = string_lens[0] / 2;
     int len = string_lens[1];
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       char *decoded = gzdecode(strings, len);
       if (decoded == NULL) throw Exception("bad compressed apc archive.");
       ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = p;
         item.len = string_lens[i + i + 2];
         p += string_lens[i + i + 2] + 1; // skip \0
         // Strings would be copied into APC anyway.
-        String value(p, string_lens[i + i + 3], AttachLiteral);
-        value.checkStatic();
+        String value(p, string_lens[i + i + 3], CopyString);
+        // todo: t2539893: check if value is already a static string
         s.constructPrime(value, item, false);
         p += string_lens[i + i + 3] + 1; // skip \0
       }
@@ -870,17 +940,17 @@ void apc_load_impl_compressed
     int count = object_lens[0] / 2;
     int len = object_lens[1];
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       char *decoded = gzdecode(objects, len);
       if (decoded == NULL) throw Exception("bad compressed APC archive.");
       ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = p;
         item.len = object_lens[i + i + 2];
         p += object_lens[i + i + 2] + 1; // skip \0
-        String value(p, object_lens[i + i + 3], AttachLiteral);
+        String value(p, object_lens[i + i + 3], CopyString);
         s.constructPrime(value, item, true);
         p += object_lens[i + i + 3] + 1; // skip \0
       }
@@ -892,21 +962,21 @@ void apc_load_impl_compressed
     int count = thrift_lens[0] / 2;
     int len = thrift_lens[1];
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       char *decoded = gzdecode(thrifts, len);
       if (decoded == NULL) throw Exception("bad compressed apc archive.");
       ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = p;
         item.len = thrift_lens[i + i + 2];
         p += thrift_lens[i + i + 2] + 1; // skip \0
-        String value(p, thrift_lens[i + i + 3], AttachLiteral);
+        String value(p, thrift_lens[i + i + 3], CopyString);
         Variant success;
-        Variant v = f_fb_thrift_unserialize(value, ref(success));
+        Variant v = f_fb_unserialize(value, ref(success));
         if (same(success, false)) {
-          throw Exception("bad apc archive, f_fb_thrift_unserialize failed");
+          throw Exception("bad apc archive, f_fb_unserialize failed");
         }
         s.constructPrime(v, item);
         p += thrift_lens[i + i + 3] + 1; // skip \0
@@ -919,17 +989,17 @@ void apc_load_impl_compressed
     int count = other_lens[0] / 2;
     int len = other_lens[1];
     if (count) {
-      vector<SharedStore::KeyValuePair> vars(count);
+      vector<KeyValuePair> vars(count);
       char *decoded = gzdecode(others, len);
       if (decoded == NULL) throw Exception("bad compressed apc archive.");
       ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
-        SharedStore::KeyValuePair &item = vars[i];
+        auto& item = vars[i];
         item.key = p;
         item.len = other_lens[i + i + 2];
         p += other_lens[i + i + 2] + 1; // skip \0
-        String value(p, other_lens[i + i + 3], AttachLiteral);
+        String value(p, other_lens[i + i + 3], CopyString);
         Variant v = unserialize_from_string(value);
         if (same(v, false)) {
           // we can't possibly get here if it was a boolean "false" that's
@@ -955,14 +1025,15 @@ static double my_time() {
   return t;
 }
 
-static const StaticString s_total("total");
-static const StaticString s_current("current");
-static const StaticString s_filename("filename");
-static const StaticString s_name("name");
-static const StaticString s_done("done");
-static const StaticString s_temp_filename("temp_filename");
-static const StaticString s_cancel_upload("cancel_upload");
-static const StaticString s_rate("rate");
+const StaticString
+  s_total("total"),
+  s_current("current"),
+  s_filename("filename"),
+  s_name("name"),
+  s_done("done"),
+  s_temp_filename("temp_filename"),
+  s_cancel_upload("cancel_upload"),
+  s_rate("rate");
 
 #define RFC1867_TRACKING_KEY_MAXLEN 63
 #define RFC1867_NAME_MAXLEN 63
@@ -1128,19 +1199,19 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
 
 String apc_serialize(CVarRef value) {
   VariableSerializer::Type sType =
-    RuntimeOption::EnableApcSerialize ?
-      VariableSerializer::APCSerialize :
-      VariableSerializer::Serialize;
+    apcExtension::EnableApcSerialize ?
+      VariableSerializer::Type::APCSerialize :
+      VariableSerializer::Type::Serialize;
   VariableSerializer vs(sType);
   return vs.serialize(value, true);
 }
 
-Variant apc_unserialize(CStrRef str) {
+Variant apc_unserialize(const char* data, int len) {
   VariableUnserializer::Type sType =
-    RuntimeOption::EnableApcSerialize ?
-      VariableUnserializer::APCSerialize :
-      VariableUnserializer::Serialize;
-  return unserialize_ex(str, sType);
+    apcExtension::EnableApcSerialize ?
+      VariableUnserializer::Type::APCSerialize :
+      VariableUnserializer::Type::Serialize;
+  return unserialize_ex(data, len, sType);
 }
 
 void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
@@ -1286,10 +1357,10 @@ void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
 
 String apc_reserialize(CStrRef str) {
   if (str.empty() ||
-      !RuntimeOption::EnableApcSerialize) return str;
+      !apcExtension::EnableApcSerialize) return str;
 
   VariableUnserializer uns(str.data(), str.size(),
-                           VariableUnserializer::APCSerialize);
+                           VariableUnserializer::Type::APCSerialize);
   StringBuffer buf;
   reserialize(&uns, buf);
 

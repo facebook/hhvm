@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,8 +18,8 @@
 #define incl_HPHP_BUILTIN_SYMBOLS_H_
 
 #include "hphp/compiler/hphp.h"
-#include "hphp/util/string_bag.h"
-#include "hphp/runtime/base/class_info.h"
+#include "hphp/util/string-bag.h"
+#include "hphp/runtime/base/class-info.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,9 +34,8 @@ DECLARE_BOOST_TYPES(ConstantTable);
 class BuiltinSymbols {
 public:
   static bool Loaded;
-  static bool NoSuperGlobals; // for SystemCPP bootstraping only
 
-  static bool Load(AnalysisResultPtr ar, bool extOnly = false);
+  static bool Load(AnalysisResultPtr ar);
 
   static void LoadFunctions(AnalysisResultPtr ar,
                             StringToFunctionScopePtrMap &functions);
@@ -65,6 +64,7 @@ public:
   static StringToClassScopePtrMap s_classes;
   static VariableTablePtr s_variables;
   static ConstantTablePtr s_constants;
+  static AnalysisResultPtr s_systemAr;
 
   static const char *const GlobalNames[];
   static int NumGlobalNames();

@@ -1,6 +1,5 @@
 <?php
 
-
 class Foo implements Iterator {
   private $data = array(1, 2, 3);
 
@@ -36,4 +35,5 @@ function run_test() {
   }
 }
 
-foreach (run_test() as $_) {}
+foreach (run_test() as $_) {
+}

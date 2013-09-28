@@ -57,22 +57,31 @@
 
 #include "folly/Portability.h"
 
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE 1
-#endif
-
 #ifndef __GNUC__
 #error GCC required
+#endif
+
+#ifndef __clang__
+#define FOLLY_INTRINSIC_CONSTEXPR constexpr
+#else
+// Unlike GCC, in Clang (as of 3.2) intrinsics aren't constexpr.
+#define FOLLY_INTRINSIC_CONSTEXPR const
+#endif
+
+#ifndef FOLLY_NO_CONFIG
+#include "folly/folly-config.h"
 #endif
 
 #include "folly/detail/BitsDetail.h"
 #include "folly/detail/BitIteratorDetail.h"
 #include "folly/Likely.h"
 
-#include <byteswap.h>
+#if FOLLY_HAVE_BYTESWAP_H
+# include <byteswap.h>
+#endif
+
 #include <cassert>
 #include <cinttypes>
-#include <endian.h>
 #include <iterator>
 #include <limits>
 #include <type_traits>
@@ -84,7 +93,7 @@ namespace folly {
 // Generate overloads for findFirstSet as wrappers around
 // appropriate ffs, ffsl, ffsll gcc builtins
 template <class T>
-inline constexpr
+inline FOLLY_INTRINSIC_CONSTEXPR
 typename std::enable_if<
   (std::is_integral<T>::value &&
    std::is_unsigned<T>::value &&
@@ -95,7 +104,7 @@ typename std::enable_if<
 }
 
 template <class T>
-inline constexpr
+inline FOLLY_INTRINSIC_CONSTEXPR
 typename std::enable_if<
   (std::is_integral<T>::value &&
    std::is_unsigned<T>::value &&
@@ -107,7 +116,7 @@ typename std::enable_if<
 }
 
 template <class T>
-inline constexpr
+inline FOLLY_INTRINSIC_CONSTEXPR
 typename std::enable_if<
   (std::is_integral<T>::value &&
    std::is_unsigned<T>::value &&
@@ -119,7 +128,7 @@ typename std::enable_if<
 }
 
 template <class T>
-inline constexpr
+inline FOLLY_INTRINSIC_CONSTEXPR
 typename std::enable_if<
   (std::is_integral<T>::value && std::is_signed<T>::value),
   unsigned int>::type
@@ -133,7 +142,7 @@ typename std::enable_if<
 // findLastSet: return the 1-based index of the highest bit set
 // for x > 0, findLastSet(x) == 1 + floor(log2(x))
 template <class T>
-inline constexpr
+inline FOLLY_INTRINSIC_CONSTEXPR
 typename std::enable_if<
   (std::is_integral<T>::value &&
    std::is_unsigned<T>::value &&
@@ -144,7 +153,7 @@ typename std::enable_if<
 }
 
 template <class T>
-inline constexpr
+inline FOLLY_INTRINSIC_CONSTEXPR
 typename std::enable_if<
   (std::is_integral<T>::value &&
    std::is_unsigned<T>::value &&
@@ -156,7 +165,7 @@ typename std::enable_if<
 }
 
 template <class T>
-inline constexpr
+inline FOLLY_INTRINSIC_CONSTEXPR
 typename std::enable_if<
   (std::is_integral<T>::value &&
    std::is_unsigned<T>::value &&
@@ -168,7 +177,7 @@ typename std::enable_if<
 }
 
 template <class T>
-inline constexpr
+inline FOLLY_INTRINSIC_CONSTEXPR
 typename std::enable_if<
   (std::is_integral<T>::value &&
    std::is_signed<T>::value),
@@ -178,7 +187,7 @@ typename std::enable_if<
 }
 
 template <class T>
-inline constexpr
+inline FOLLY_INTRINSIC_CONSTEXPR
 typename std::enable_if<
   std::is_integral<T>::value && std::is_unsigned<T>::value,
   T>::type
@@ -230,23 +239,41 @@ struct EndianIntBase {
   static T swap(T x);
 };
 
+/**
+ * If we have the bswap_16 macro from byteswap.h, use it; otherwise, provide our
+ * own definition.
+ */
+#ifdef bswap_16
+# define our_bswap16 bswap_16
+#else
+
+template<class Int16>
+inline constexpr typename std::enable_if<
+  sizeof(Int16) == 2,
+  Int16>::type
+our_bswap16(Int16 x) {
+  return ((x >> 8) & 0xff) | ((x & 0xff) << 8);
+}
+#endif
+
 #define FB_GEN(t, fn) \
 template<> inline t EndianIntBase<t>::swap(t x) { return fn(x); }
 
 // fn(x) expands to (x) if the second argument is empty, which is exactly
-// what we want for [u]int8_t
+// what we want for [u]int8_t. Also, gcc 4.7 on Intel doesn't have
+// __builtin_bswap16 for some reason, so we have to provide our own.
 FB_GEN( int8_t,)
 FB_GEN(uint8_t,)
-FB_GEN( int64_t, bswap_64)
-FB_GEN(uint64_t, bswap_64)
-FB_GEN( int32_t, bswap_32)
-FB_GEN(uint32_t, bswap_32)
-FB_GEN( int16_t, bswap_16)
-FB_GEN(uint16_t, bswap_16)
+FB_GEN( int64_t, __builtin_bswap64)
+FB_GEN(uint64_t, __builtin_bswap64)
+FB_GEN( int32_t, __builtin_bswap32)
+FB_GEN(uint32_t, __builtin_bswap32)
+FB_GEN( int16_t, our_bswap16)
+FB_GEN(uint16_t, our_bswap16)
 
 #undef FB_GEN
 
-#if __BYTE_ORDER == __LITTLE_ENDIAN
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 
 template <class T>
 struct EndianInt : public detail::EndianIntBase<T> {
@@ -255,7 +282,7 @@ struct EndianInt : public detail::EndianIntBase<T> {
   static T little(T x) { return x; }
 };
 
-#elif __BYTE_ORDER == __BIG_ENDIAN
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 
 template <class T>
 struct EndianInt : public detail::EndianIntBase<T> {
@@ -266,7 +293,7 @@ struct EndianInt : public detail::EndianIntBase<T> {
 
 #else
 # error Your machine uses a weird endianness!
-#endif  /* __BYTE_ORDER */
+#endif  /* __BYTE_ORDER__ */
 
 }  // namespace detail
 
@@ -296,13 +323,13 @@ class Endian {
   };
 
   static constexpr Order order =
-#if __BYTE_ORDER == __LITTLE_ENDIAN
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
     Order::LITTLE;
-#elif __BYTE_ORDER == __BIG_ENDIAN
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
     Order::BIG;
 #else
 # error Your machine uses a weird endianness!
-#endif  /* __BYTE_ORDER */
+#endif  /* __BYTE_ORDER__ */
 
   template <class T> static T swap(T x) {
     return detail::EndianInt<T>::swap(x);
@@ -358,11 +385,14 @@ class BitIterator
    * Construct a BitIterator that points at a given bit offset (default 0)
    * in iter.
    */
+  #pragma GCC diagnostic push // bitOffset shadows a member
+  #pragma GCC diagnostic ignored "-Wshadow"
   explicit BitIterator(const BaseIter& iter, size_t bitOffset=0)
     : bititerator_detail::BitIteratorBase<BaseIter>::type(iter),
       bitOffset_(bitOffset) {
     assert(bitOffset_ < bitsPerBlock());
   }
+  #pragma GCC diagnostic pop
 
   size_t bitOffset() const {
     return bitOffset_;
@@ -526,4 +556,3 @@ inline void storeUnaligned(void* p, T value) {
 }  // namespace folly
 
 #endif /* FOLLY_BITS_H_ */
-

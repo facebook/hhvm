@@ -1,6 +1,5 @@
 <?php
 
-
 function f() {
   $a = array();
   array_push($a[] = 1);

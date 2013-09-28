@@ -1,6 +1,5 @@
 <?php
 
-
 class MY_BASE {
   public $x = 3;
 }

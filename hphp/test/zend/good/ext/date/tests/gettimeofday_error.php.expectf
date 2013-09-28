@@ -1,0 +1,6 @@
+*** Testing gettimeofday() : error conditions ***
+
+-- Testing gettimeofday() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

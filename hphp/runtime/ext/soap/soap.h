@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,11 +18,11 @@
 #ifndef PHP_SOAP_H
 #define PHP_SOAP_H
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/ext/soap/sdl.h"
-#include "hphp/runtime/base/util/request_local.h"
-#include "hphp/runtime/base/util/exceptions.h"
-#include "hphp/runtime/base/util/http_client.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/http-client.h"
 #include "hphp/util/lock.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -157,11 +157,11 @@ struct soapClass {
 
 class soapHeader : public ResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(soapHeader);
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(soapHeader);
 
-  static StaticString s_class_name;
+  CLASSNAME_IS("soapHeader")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return s_class_name; }
+  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
 
   sdlFunction                      *function;
   String                            function_name;
@@ -175,7 +175,7 @@ public:
 
 class SoapException : public ExtendedException {
 public:
-  SoapException(const char *fmt, ...);
+  SoapException(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,7 +34,7 @@
 #include "hphp/compiler/expression/simple_function_call.h"
 #include "hphp/compiler/expression/include_expression.h"
 #include "hphp/compiler/expression/user_attribute.h"
-#include "hphp/runtime/base/complex_types.h"
+#include "hphp/runtime/base/complex-types.h"
 
 using namespace HPHP;
 
@@ -191,13 +191,6 @@ int FileScope::popAttribute() {
 int FileScope::getGlobalAttribute() const {
   assert(m_attributes.size() == 1);
   return m_attributes.back();
-}
-
-bool FileScope::needPseudoMainVariables() const {
-  VariableTablePtr variables = m_pseudoMain->getVariables();
-  return
-    variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
-    variables->getSymbols().size() > 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -399,8 +392,8 @@ FunctionScopePtr FileScope::createPseudoMain(AnalysisResultConstPtr ar) {
     (new FunctionStatement(BlockScopePtr(), LocationPtr(),
                            ModifierExpressionPtr(),
                            false, pseudoMainName(),
-                           ExpressionListPtr(), "", st, 0, "",
-                           ExpressionListPtr()));
+                           ExpressionListPtr(), TypeAnnotationPtr(),
+                           st, 0, "", ExpressionListPtr()));
   f->setFileLevel();
   FunctionScopePtr pseudoMain(
     new HPHP::FunctionScope(ar, true,

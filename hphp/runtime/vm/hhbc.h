@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_VM_HHBC_H_
 #define incl_HPHP_VM_HHBC_H_
 
-#include "hphp/runtime/vm/core_types.h"
+#include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {
 
@@ -32,21 +32,21 @@ struct Unit;
 // The types in this macro for MA, BLA, and SLA are meaningless since
 // they are never read out of ArgUnion (they use ImmVector and
 // ImmVectorO).
-#define ARGTYPES \
-  ARGTYPE(NA,    void*)         /* unused */  \
-  ARGTYPEVEC(MA, int32_t)       /* Member vector immediate */ \
-  ARGTYPEVEC(BLA,Offset)        /* Bytecode address vector immediate */ \
-  ARGTYPEVEC(SLA,Id)            /* litstrid/offset pair vector */ \
-  ARGTYPE(IVA,   int32_t)       /* variable size: 8 or 32-bit integer */  \
-  ARGTYPE(I64A,  int64_t)       /* 64-bit Integer */ \
-  ARGTYPE(HA,    int32_t)       /* Local variable ID: 8 or 32-bit int */  \
-                                /* TODO(jdelong): rename HA to LA */ \
-  ARGTYPE(IA,    int32_t)       /* Iterator variable ID: 8 or 32-bit int */ \
-  ARGTYPE(DA,    double)        /* Double */ \
-  ARGTYPE(SA,    Id)            /* litStr ID */ \
-  ARGTYPE(AA,    Id)            /* static array ID */ \
-  ARGTYPE(BA,    Offset)        /* Bytecode address */ \
-  ARGTYPE(OA,    unsigned char) /* Opcode */
+#define ARGTYPES                                                          \
+  ARGTYPE(NA,     void*)         /* unused */                             \
+  ARGTYPEVEC(MA,  int32_t)       /* Member vector immediate */            \
+  ARGTYPEVEC(BLA, Offset)        /* Bytecode offset vector immediate */   \
+  ARGTYPEVEC(SLA, Id)            /* String id/offset pair vector */       \
+  ARGTYPEVEC(ILA, Id)            /* IterKind/IterId pair vector */        \
+  ARGTYPE(IVA,    int32_t)       /* Variable size: 8 or 32-bit integer */ \
+  ARGTYPE(I64A,   int64_t)       /* 64-bit Integer */                     \
+  ARGTYPE(LA,     int32_t)       /* Local variable ID: 8 or 32-bit int */ \
+  ARGTYPE(IA,     int32_t)       /* Iterator ID: 8 or 32-bit int */       \
+  ARGTYPE(DA,     double)        /* Double */                             \
+  ARGTYPE(SA,     Id)            /* Static string ID */                   \
+  ARGTYPE(AA,     Id)            /* Static array ID */                    \
+  ARGTYPE(BA,     Offset)        /* Bytecode offset */                    \
+  ARGTYPE(OA,     unsigned char) /* Sub-opcode */
 
 enum ArgType {
 #define ARGTYPE(name, type) name,
@@ -65,7 +65,7 @@ union ArgUnion {
 #undef ARGTYPEVEC
 };
 
-static const Offset InvalidAbsoluteOffset = -1;
+const Offset InvalidAbsoluteOffset = -1;
 
 enum FlavorDesc {
   NOV = 0, // None
@@ -74,6 +74,7 @@ enum FlavorDesc {
   AV = 3,  // Classref
   RV = 4,  // Return value (cell or var)
   FV = 5,  // Function parameter (cell or var)
+  CVV =  6, // Cell or Var argument
 };
 
 enum InstrFlags {
@@ -204,18 +205,22 @@ enum MInstrAttr {
 //     fN)     final new element operation name
 #define MINSTRS \
   MII(CGet,   MIA_warn|MIA_final_get,            W,  W, 0, NotSuppNewElem) \
-  MII(VGet,   MIA_define|MIA_reffy|MIA_new|MIA_final_get, \
+  MII(VGet,   MIA_define|MIA_reffy|MIA_new|MIA_final_get,               \
                                                  D,  D, 0, VGetNewElem) \
   MII(Isset,  MIA_final_get,                      ,   , 0, NotSuppNewElem) \
   MII(Empty,  MIA_final_get,                      ,   , 0, NotSuppNewElem) \
-  MII(Set,    MIA_define|MIA_new,                D,  D, 1, SetNewElem) \
-  MII(SetOp,  MIA_more_warn|MIA_define|MIA_new|MIA_final_get, \
+  MII(Set,    MIA_define|MIA_new,                D,  D, 1, SetNewElem)  \
+  MII(SetOp,  MIA_more_warn|MIA_define|MIA_new|MIA_final_get,           \
                                                 WD, WD, 1, SetOpNewElem) \
-  MII(IncDec, MIA_more_warn|MIA_define|MIA_new|MIA_final_get, \
+  MII(IncDec, MIA_more_warn|MIA_define|MIA_new|MIA_final_get,           \
                                                 WD, WD, 0, IncDecNewElem) \
-  MII(Bind,   MIA_define|MIA_reffy|MIA_new|MIA_final_get, \
+  MII(Bind,   MIA_define|MIA_reffy|MIA_new|MIA_final_get,               \
                                                  D,  D, 1, BindNewElem) \
   MII(Unset,  MIA_unset,                          ,  U, 0, NotSuppNewElem) \
+  MII(SetWithRefL,MIA_define|MIA_reffy|MIA_new|MIA_final_get,           \
+                                                 D,  D, 1, SetWithRefNewElem) \
+  MII(SetWithRefR,MIA_define|MIA_reffy|MIA_new|MIA_final_get,           \
+                                                 D,  D, 1, SetWithRefNewElem)
 
 enum MInstr {
 #define MII(instr, attrs, bS, iS, vC, fN) \
@@ -264,27 +269,6 @@ struct MInstrInfo {
   }
 };
 
-static const MInstrInfo mInstrInfo[] = {
-#define MII(instr, attrs, bS, iS, vC, fN) \
-  {MI_##instr##M, \
-   {MIA_none, MIA_none, MInstrAttr((attrs) & MIA_base), \
-    MInstrAttr((attrs) & MIA_base), MInstrAttr((attrs) & MIA_base), \
-    MInstrAttr((attrs) & MIA_base), MInstrAttr((attrs) & MIA_base), MIA_none, \
-    MIA_none}, \
-   {MInstrAttr((attrs) & MIA_intermediate), \
-    MInstrAttr((attrs) & MIA_intermediate), \
-    MInstrAttr((attrs) & MIA_intermediate), \
-    MInstrAttr((attrs) & MIA_intermediate), \
-    MInstrAttr((attrs) & MIA_intermediate), \
-    MInstrAttr((attrs) & MIA_intermediate), \
-    MInstrAttr((attrs) & MIA_intermediate), \
-    MInstrAttr((attrs) & MIA_final)}, \
-   unsigned(vC), bool((attrs) & MIA_new), bool((attrs) & MIA_final_get), \
-   #instr},
-  MINSTRS
-#undef MII
-};
-
 inline bool memberCodeHasImm(MemberCode mc) {
   return mc == MEL || mc == MPL || mc == MET || mc == MPT || mc == MEI;
 }
@@ -319,6 +303,12 @@ enum IncDecOp {
   INCDEC_OPS
 #undef INCDEC_OP
   IncDec_invalid
+};
+
+enum IterKind {
+  KindOfIter  = 0,
+  KindOfMIter = 1,
+  KindOfCIter = 2,
 };
 
 // Each of the setop ops maps to a binary bytecode op. We have reasons
@@ -365,7 +355,7 @@ enum SetOpOp {
   O(String,          ONE(SA),          NOV,             ONE(CV),    NF) \
   O(Array,           ONE(AA),          NOV,             ONE(CV),    NF) \
   O(NewArray,        NA,               NOV,             ONE(CV),    NF) \
-  O(NewTuple,        ONE(IVA),         CMANY,           ONE(CV),    NF) \
+  O(NewPackedArray,  ONE(IVA),         CMANY,           ONE(CV),    NF) \
   O(AddElemC,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(AddElemV,        NA,               THREE(VV,CV,CV), ONE(CV),    NF) \
   O(AddNewElemC,     NA,               TWO(CV,CV),      ONE(CV),    NF) \
@@ -386,6 +376,7 @@ enum SetOpOp {
   O(Mul,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Div,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Mod,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
+  O(Sqrt,            NA,               ONE(CV),         ONE(CV),    NF) \
   O(Xor,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Not,             NA,               ONE(CV),         ONE(CV),    NF) \
   O(Same,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
@@ -424,27 +415,27 @@ enum SetOpOp {
   O(RetV,            NA,               ONE(VV),         NOV,        CF_TF) \
   O(Unwind,          NA,               NOV,             NOV,        CF_TF) \
   O(Throw,           NA,               ONE(CV),         NOV,        CF_TF) \
-  O(CGetL,           ONE(HA),          NOV,             ONE(CV),    NF) \
-  O(CGetL2,          ONE(HA),          NOV,             INS_1(CV),  NF) \
-  O(CGetL3,          ONE(HA),          NOV,             INS_2(CV),  NF) \
+  O(CGetL,           ONE(LA),          NOV,             ONE(CV),    NF) \
+  O(CGetL2,          ONE(LA),          NOV,             INS_1(CV),  NF) \
+  O(CGetL3,          ONE(LA),          NOV,             INS_2(CV),  NF) \
   O(CGetN,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(CGetG,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(CGetS,           NA,               TWO(AV,CV),      ONE(CV),    NF) \
   O(CGetM,           ONE(MA),          LMANY(),         ONE(CV),    NF) \
-  O(VGetL,           ONE(HA),          NOV,             ONE(VV),    NF) \
+  O(VGetL,           ONE(LA),          NOV,             ONE(VV),    NF) \
   O(VGetN,           NA,               ONE(CV),         ONE(VV),    NF) \
   O(VGetG,           NA,               ONE(CV),         ONE(VV),    NF) \
   O(VGetS,           NA,               TWO(AV,CV),      ONE(VV),    NF) \
   O(VGetM,           ONE(MA),          LMANY(),         ONE(VV),    NF) \
   O(AGetC,           NA,               ONE(CV),         ONE(AV),    NF) \
-  O(AGetL,           ONE(HA),          NOV,             ONE(AV),    NF) \
+  O(AGetL,           ONE(LA),          NOV,             ONE(AV),    NF) \
   O(AKExists,        NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(IssetL,          ONE(HA),          NOV,             ONE(CV),    NF) \
+  O(IssetL,          ONE(LA),          NOV,             ONE(CV),    NF) \
   O(IssetN,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IssetG,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IssetS,          NA,               TWO(AV,CV),      ONE(CV),    NF) \
   O(IssetM,          ONE(MA),          LMANY(),         ONE(CV),    NF) \
-  O(EmptyL,          ONE(HA),          NOV,             ONE(CV),    NF) \
+  O(EmptyL,          ONE(LA),          NOV,             ONE(CV),    NF) \
   O(EmptyN,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(EmptyG,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(EmptyS,          NA,               TWO(AV,CV),      ONE(CV),    NF) \
@@ -457,34 +448,36 @@ enum SetOpOp {
   O(IsStringC,       NA,               ONE(CV),         ONE(CV),    NF) \
   O(IsArrayC,        NA,               ONE(CV),         ONE(CV),    NF) \
   O(IsObjectC,       NA,               ONE(CV),         ONE(CV),    NF) \
-  O(IsNullL,         ONE(HA),          NOV,             ONE(CV),    NF) \
-  O(IsBoolL,         ONE(HA),          NOV,             ONE(CV),    NF) \
-  O(IsIntL,          ONE(HA),          NOV,             ONE(CV),    NF) \
-  O(IsDoubleL,       ONE(HA),          NOV,             ONE(CV),    NF) \
-  O(IsStringL,       ONE(HA),          NOV,             ONE(CV),    NF) \
-  O(IsArrayL,        ONE(HA),          NOV,             ONE(CV),    NF) \
-  O(IsObjectL,       ONE(HA),          NOV,             ONE(CV),    NF) \
-  O(SetL,            ONE(HA),          ONE(CV),         ONE(CV),    NF) \
+  O(IsNullL,         ONE(LA),          NOV,             ONE(CV),    NF) \
+  O(IsBoolL,         ONE(LA),          NOV,             ONE(CV),    NF) \
+  O(IsIntL,          ONE(LA),          NOV,             ONE(CV),    NF) \
+  O(IsDoubleL,       ONE(LA),          NOV,             ONE(CV),    NF) \
+  O(IsStringL,       ONE(LA),          NOV,             ONE(CV),    NF) \
+  O(IsArrayL,        ONE(LA),          NOV,             ONE(CV),    NF) \
+  O(IsObjectL,       ONE(LA),          NOV,             ONE(CV),    NF) \
+  O(SetL,            ONE(LA),          ONE(CV),         ONE(CV),    NF) \
   O(SetN,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(SetG,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(SetS,            NA,               THREE(CV,AV,CV), ONE(CV),    NF) \
   O(SetM,            ONE(MA),          C_LMANY(),       ONE(CV),    NF) \
-  O(SetOpL,          TWO(HA, OA),      ONE(CV),         ONE(CV),    NF) \
+  O(SetWithRefLM,    TWO(MA,LA),       LMANY(),         NOV,        NF) \
+  O(SetWithRefRM,    ONE(MA),          R_LMANY(),       NOV,        NF) \
+  O(SetOpL,          TWO(LA,OA),       ONE(CV),         ONE(CV),    NF) \
   O(SetOpN,          ONE(OA),          TWO(CV,CV),      ONE(CV),    NF) \
   O(SetOpG,          ONE(OA),          TWO(CV,CV),      ONE(CV),    NF) \
   O(SetOpS,          ONE(OA),          THREE(CV,AV,CV), ONE(CV),    NF) \
   O(SetOpM,          TWO(OA,MA),       C_LMANY(),       ONE(CV),    NF) \
-  O(IncDecL,         TWO(HA,OA),       NOV,             ONE(CV),    NF) \
+  O(IncDecL,         TWO(LA,OA),       NOV,             ONE(CV),    NF) \
   O(IncDecN,         ONE(OA),          ONE(CV),         ONE(CV),    NF) \
   O(IncDecG,         ONE(OA),          ONE(CV),         ONE(CV),    NF) \
   O(IncDecS,         ONE(OA),          TWO(AV,CV),      ONE(CV),    NF) \
   O(IncDecM,         TWO(OA,MA),       LMANY(),         ONE(CV),    NF) \
-  O(BindL,           ONE(HA),          ONE(VV),         ONE(VV),    NF) \
+  O(BindL,           ONE(LA),          ONE(VV),         ONE(VV),    NF) \
   O(BindN,           NA,               TWO(VV,CV),      ONE(VV),    NF) \
   O(BindG,           NA,               TWO(VV,CV),      ONE(VV),    NF) \
   O(BindS,           NA,               THREE(VV,AV,CV), ONE(VV),    NF) \
   O(BindM,           ONE(MA),          V_LMANY(),       ONE(VV),    NF) \
-  O(UnsetL,          ONE(HA),          NOV,             NOV,        NF) \
+  O(UnsetL,          ONE(LA),          NOV,             NOV,        NF) \
   O(UnsetN,          NA,               ONE(CV),         NOV,        NF) \
   O(UnsetG,          NA,               ONE(CV),         NOV,        NF) \
   O(UnsetM,          ONE(MA),          LMANY(),         NOV,        NF) \
@@ -499,36 +492,42 @@ enum SetOpOp {
   O(FPushClsMethodD, THREE(IVA,SA,SA), NOV,             NOV,        NF) \
   O(FPushCtor,       ONE(IVA),         ONE(AV),         ONE(CV),    NF) \
   O(FPushCtorD,      TWO(IVA,SA),      NOV,             ONE(CV),    NF) \
+  O(FPushCufIter,    TWO(IVA,IA),      NOV,             NOV,        NF) \
   O(FPushCuf,        ONE(IVA),         ONE(CV),         NOV,        NF) \
   O(FPushCufF,       ONE(IVA),         ONE(CV),         NOV,        NF) \
   O(FPushCufSafe,    ONE(IVA),         TWO(CV,CV),      TWO(CV,CV), NF) \
   O(FPassC,          ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
-  O(BPassC,          ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
   O(FPassCW,         ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
   O(FPassCE,         ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
   O(FPassV,          ONE(IVA),         ONE(VV),         ONE(FV),    FF) \
-  O(BPassV,          ONE(IVA),         ONE(VV),         ONE(FV),    FF) \
   O(FPassR,          ONE(IVA),         ONE(RV),         ONE(FV),    FF) \
-  O(FPassL,          TWO(IVA,HA),      NOV,             ONE(FV),    FF) \
+  O(FPassL,          TWO(IVA,LA),      NOV,             ONE(FV),    FF) \
   O(FPassN,          ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
   O(FPassG,          ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
   O(FPassS,          ONE(IVA),         TWO(AV,CV),      ONE(FV),    FF) \
   O(FPassM,          TWO(IVA,MA),      LMANY(),         ONE(FV),    FF) \
   O(FCall,           ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
   O(FCallArray,      NA,               ONE(FV),         ONE(RV),    CF_FF) \
-  O(FCallBuiltin,    THREE(IA,IA,SA),  FMANY,           ONE(RV),    CF) \
+  O(FCallBuiltin,    THREE(IVA,IVA,SA),CVMANY,          ONE(RV),    CF) \
   O(CufSafeArray,    NA,               THREE(RV,CV,CV), ONE(CV),    NF) \
   O(CufSafeReturn,   NA,               THREE(RV,CV,CV), ONE(RV),    NF) \
-  O(IterInit,        THREE(IA,BA,HA),  ONE(CV),         NOV,        CF) \
-  O(MIterInit,       THREE(IA,BA,HA),  ONE(VV),         NOV,        CF) \
-  O(IterInitK,       FOUR(IA,BA,HA,HA),ONE(CV),         NOV,        CF) \
-  O(MIterInitK,      FOUR(IA,BA,HA,HA),ONE(VV),         NOV,        CF) \
-  O(IterNext,        THREE(IA,BA,HA),  NOV,             NOV,        CF) \
-  O(MIterNext,       THREE(IA,BA,HA),  NOV,             NOV,        CF) \
-  O(IterNextK,       FOUR(IA,BA,HA,HA),NOV,             NOV,        CF) \
-  O(MIterNextK,      FOUR(IA,BA,HA,HA),NOV,             NOV,        CF) \
+  O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
+  O(MIterInit,       THREE(IA,BA,LA),  ONE(VV),         NOV,        CF) \
+  O(WIterInit,       THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
+  O(IterInitK,       FOUR(IA,BA,LA,LA),ONE(CV),         NOV,        CF) \
+  O(MIterInitK,      FOUR(IA,BA,LA,LA),ONE(VV),         NOV,        CF) \
+  O(WIterInitK,      FOUR(IA,BA,LA,LA),ONE(CV),         NOV,        CF) \
+  O(IterNext,        THREE(IA,BA,LA),  NOV,             NOV,        CF) \
+  O(MIterNext,       THREE(IA,BA,LA),  NOV,             NOV,        CF) \
+  O(WIterNext,       THREE(IA,BA,LA),  NOV,             NOV,        CF) \
+  O(IterNextK,       FOUR(IA,BA,LA,LA),NOV,             NOV,        CF) \
+  O(MIterNextK,      FOUR(IA,BA,LA,LA),NOV,             NOV,        CF) \
+  O(WIterNextK,      FOUR(IA,BA,LA,LA),NOV,             NOV,        CF) \
+  O(DecodeCufIter,   TWO(IA,BA),       ONE(CV),         NOV,        CF) \
   O(IterFree,        ONE(IA),          NOV,             NOV,        NF) \
   O(MIterFree,       ONE(IA),          NOV,             NOV,        NF) \
+  O(CIterFree,       ONE(IA),          NOV,             NOV,        NF) \
+  O(IterBreak,       TWO(ILA,BA),      NOV,             NOV,        CF_TF) \
   O(Incl,            NA,               ONE(CV),         ONE(CV),    CF) \
   O(InclOnce,        NA,               ONE(CV),         ONE(CV),    CF) \
   O(Req,             NA,               ONE(CV),         ONE(CV),    CF) \
@@ -554,45 +553,62 @@ enum SetOpOp {
   O(Parent,          NA,               NOV,             ONE(AV),    NF) \
   O(LateBoundCls,    NA,               NOV,             ONE(AV),    NF) \
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
-  O(CreateCl,        TWO(IVA,SA),      FMANY,           ONE(CV),    NF) \
-  O(CreateCont,      TWO(IVA,SA),      NOV,             ONE(CV),    NF) \
-  O(ContEnter,       NA,               NOV,             NOV,        CF) \
-  O(ContExit,        NA,               NOV,             NOV,        CF) \
-  O(UnpackCont,      NA,               NOV,             ONE(CV),    NF) \
-  O(PackCont,        ONE(IVA),         ONE(CV),         NOV,        NF) \
-  O(ContReceive,     NA,               NOV,             ONE(CV),    NF) \
+  O(CreateCl,        TWO(IVA,SA),      CVMANY,          ONE(CV),    NF) \
+  O(CreateCont,      ONE(SA),          NOV,             ONE(CV),    NF) \
+  O(CreateAsync,     THREE(SA,IVA,IVA),ONE(CV),         ONE(CV),    NF) \
+  O(ContEnter,       NA,               ONE(CV),         NOV,        CF) \
+  O(UnpackCont,      NA,               NOV,             TWO(CV,CV), NF) \
+  O(ContSuspend,     ONE(IVA),         ONE(CV),         NOV,        CF) \
+  O(ContSuspendK,    ONE(IVA),         TWO(CV,CV),      NOV,        CF) \
   O(ContRetC,        NA,               ONE(CV),         NOV,        CF_TF) \
-  O(ContNext,        NA,               NOV,             NOV,        NF) \
-  O(ContSend,        NA,               NOV,             NOV,        NF) \
+  O(ContCheck,       ONE(IVA),         NOV,             NOV,        NF) \
   O(ContRaise,       NA,               NOV,             NOV,        NF) \
   O(ContValid,       NA,               NOV,             ONE(CV),    NF) \
+  O(ContKey,         NA,               NOV,             ONE(CV),    NF) \
   O(ContCurrent,     NA,               NOV,             ONE(CV),    NF) \
   O(ContStopped,     NA,               NOV,             NOV,        NF) \
   O(ContHandle,      NA,               ONE(CV),         NOV,        CF_TF) \
   O(Strlen,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IncStat,         TWO(IVA,IVA),     NOV,             NOV,        NF) \
+  O(Abs,             NA,               ONE(CV),         ONE(CV),    NF) \
+  O(ArrayIdx,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
+  O(Floor,           NA,               ONE(CV),         ONE(CV),    NF) \
+  O(Ceil,            NA,               ONE(CV),         ONE(CV),    NF) \
   O(HighInvalid,     NA,               NOV,             NOV,        NF) \
 
-enum Op {
-#define O(name, imm, pop, push, flags) Op##name,
+enum class Op : uint8_t {
+#define O(name, ...) name,
   OPCODES
 #undef O
-  Op_count
 };
+auto constexpr Op_count = uint8_t(Op::HighInvalid) + 1;
 
-inline const MInstrInfo& getMInstrInfo(Op op) {
-  switch (op) {
-#define MII(instr_, attrs, bS, iS, vC, fN) \
-  case Op##instr_##M: { \
-    const MInstrInfo& mii = mInstrInfo[MI_##instr_##M]; \
-    assert(mii.instr() == MI_##instr_##M); \
-    return mii; \
-  }
-  MINSTRS
-#undef MII
-  default: not_reached();
-  }
+/* Also put Op* in the enclosing namespace, to avoid having to change
+ * every existing usage site of the enum values. */
+#define O(name, ...) UNUSED auto constexpr Op##name = Op::name;
+  OPCODES
+#undef O
+
+inline constexpr bool operator<(Op a, Op b) { return uint8_t(a) < uint8_t(b); }
+inline constexpr bool operator>(Op a, Op b) { return uint8_t(a) > uint8_t(b); }
+inline constexpr bool operator<=(Op a, Op b) {
+  return uint8_t(a) <= uint8_t(b);
 }
+inline constexpr bool operator>=(Op a, Op b) {
+  return uint8_t(a) >= uint8_t(b);
+}
+
+inline bool isValidOpcode(Op op) {
+  return op > OpLowInvalid && op < OpHighInvalid;
+}
+
+inline Op toOp(Opcode o) {
+  Op op = Op(o);
+  assert(isValidOpcode(op));
+  return op;
+}
+
+const MInstrInfo& getMInstrInfo(Op op);
 
 enum AstubsOp {
   OpAstubStart = Op_count-1,
@@ -605,14 +621,7 @@ enum AstubsOp {
 #define HIGH_OPCODES \
   O(FuncPrologue) \
   O(TraceletGuard) \
-  O(NativeTrampoline) \
-  O(ServiceRequest) \
-  O(DtorStub) \
-  O(SyncOutputs) \
-  O(RetFromInterp) \
-  O(ResumeHelper) \
-  O(RequireHelper) \
-  O(DefClsHelper) \
+  O(NativeTrampoline)
 
 enum HighOp {
   OpHighStart = OpAstubCount-1,
@@ -705,30 +714,52 @@ private:
 };
 
 // Must be an opcode that actually has an ImmVector.
-ImmVector getImmVector(const Opcode* opcode);
+ImmVector getImmVector(const Op* opcode);
+
+struct MInstrLocation {
+  LocationCode lcode;
+  int64_t imm;
+
+  bool hasImm() const {
+    auto count = numLocationCodeImms(lcode);
+    assert(count == 0 || count == 1);
+    return count;
+  }
+};
+MInstrLocation getMLocation(const Op* opcode);
+
+struct MVectorItem {
+  MemberCode mcode;
+  int64_t imm;
+
+  bool hasImm() const {
+    return memberCodeHasImm(mcode);
+  }
+};
+std::vector<MVectorItem> getMVector(const Op* opcode);
 
 /* Some decoding helper functions. */
-int numImmediates(Opcode opcode);
-ArgType immType(Opcode opcode, int idx);
-int immSize(const Opcode* opcode, int idx);
-bool immIsVector(Opcode opcode, int idx);
-bool hasImmVector(Opcode opcode);
-static inline bool isTypePred(const Opcode op) {
+int numImmediates(Op opcode);
+ArgType immType(Op opcode, int idx);
+int immSize(const Op* opcode, int idx);
+bool immIsVector(Op opcode, int idx);
+bool hasImmVector(Op opcode);
+inline bool isTypePred(const Op op) {
   return op >= OpIsNullC && op <= OpIsObjectL;
 }
-int instrLen(const Opcode* opcode);
-InstrFlags instrFlags(Opcode opcode);
-int numSuccs(const Opcode* opcode);
-bool pushesActRec(Opcode opcode);
+int instrLen(const Op* opcode);
+int numSuccs(const Op* opcode);
+bool pushesActRec(Op opcode);
 
 // The returned struct has normalized variable-sized immediates
-ArgUnion getImm(const Opcode* opcode, int idx);
+ArgUnion getImm(const Op* opcode, int idx);
 // Don't use this with variable-sized immediates!
-ArgUnion* getImmPtr(const Opcode* opcode, int idx);
+ArgUnion* getImmPtr(const Op* opcode, int idx);
 
 // Pass a pointer to the pointer to the immediate; this function will advance
 // the pointer past the immediate
-inline int32_t decodeVariableSizeImm(const unsigned char** immPtr) {
+ALWAYS_INLINE
+int32_t decodeVariableSizeImm(const unsigned char** immPtr) {
   const unsigned char small = **immPtr;
   if (UNLIKELY(small & 0x1)) {
     const unsigned int large = *((const unsigned int*)*immPtr);
@@ -758,20 +789,20 @@ void encodeToVector(std::vector<uchar>& vec, T val) {
 
 void staticStreamer(const TypedValue* tv, std::stringstream& out);
 
-std::string instrToString(const Opcode* it, const Unit* u = nullptr);
-const char* opcodeToName(Opcode op);
+std::string instrToString(const Op* it, const Unit* u = nullptr);
+const char* opcodeToName(Op op);
 
 // returns a pointer to the location within the bytecode containing the jump
 //   Offset, or NULL if the instruction cannot jump. Note that this offset is
 //   relative to the current instruction.
-Offset* instrJumpOffset(Opcode* instr);
+Offset* instrJumpOffset(Op* instr);
 
 // returns absolute address of target, or InvalidAbsoluteOffset if instruction
 //   cannot jump
-Offset instrJumpTarget(const Opcode* instrs, Offset pos);
+Offset instrJumpTarget(const Op* instrs, Offset pos);
 
 struct StackTransInfo {
-  enum Kind {
+  enum class Kind {
     PushPop,
     InsertMid
   };
@@ -781,26 +812,117 @@ struct StackTransInfo {
   int pos;
 };
 
-bool isValidOpcode(Opcode opcode);
-bool instrIsControlFlow(Opcode opcode);
-bool instrReadsCurrentFpi(Opcode opcode);
+bool instrIsNonCallControlFlow(Op opcode);
+bool instrAllowsFallThru(Op opcode);
+bool instrReadsCurrentFpi(Op opcode);
 
-inline bool isFPush(Opcode opcode) {
+constexpr InstrFlags instrFlagsData[] = {
+#define O(unusedName, unusedImm, unusedPop, unusedPush, flags) flags,
+  OPCODES
+#undef O
+};
+
+constexpr inline InstrFlags instrFlags(Op opcode) {
+  return instrFlagsData[uint8_t(opcode)];
+}
+
+constexpr inline bool instrIsControlFlow(Op opcode) {
+  return (instrFlags(opcode) & CF) != 0;
+}
+
+inline bool isFPush(Op opcode) {
   return opcode >= OpFPushFunc && opcode <= OpFPushCufSafe;
 }
 
-inline bool isFCallStar(Opcode opcode) {
-  return opcode == OpFCall || opcode == OpFCallArray;
+inline bool isFCallStar(Op opcode) {
+  switch (opcode) {
+    case OpFCall:
+    case OpFCallArray:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+inline bool isFPassStar(Op opcode) {
+  switch (opcode) {
+    case OpFPassC:
+    case OpFPassCW:
+    case OpFPassCE:
+    case OpFPassV:
+    case OpFPassR:
+    case OpFPassL:
+    case OpFPassN:
+    case OpFPassG:
+    case OpFPassS:
+    case OpFPassM:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+inline bool isLiteral(Op op) {
+  switch (op) {
+    case OpNull:
+    case OpNullUninit:
+    case OpTrue:
+    case OpFalse:
+    case OpInt:
+    case OpDouble:
+    case OpString:
+    case OpArray:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+inline bool isThisSelfOrParent(Op op) {
+  switch (op) {
+    case OpThis:
+    case OpSelf:
+    case OpParent:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+inline bool isRet(Op op) {
+  switch (op) {
+    case OpRetC:
+    case OpRetV:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+inline bool isSwitch(Op op) {
+  switch (op) {
+    case OpSwitch:
+    case OpSSwitch:
+      return true;
+
+    default:
+      return false;
+  }
 }
 
 inline bool isSwitch(Opcode op) {
-  return op == OpSwitch || op == OpSSwitch;
+  return isSwitch(toOp(op));
 }
 
 template<typename L>
-void foreachSwitchTarget(Opcode* op, L func) {
+void foreachSwitchTarget(Op* op, L func) {
   assert(isSwitch(*op));
-  bool isStr = readData<Opcode>(op) == OpSSwitch;
+  bool isStr = readData<Op>(op) == OpSSwitch;
   int32_t size = readData<int32_t>(op);
   for (int i = 0; i < size; ++i) {
     if (isStr) readData<Id>(op);
@@ -810,7 +932,7 @@ void foreachSwitchTarget(Opcode* op, L func) {
 
 template<typename L>
 void foreachSwitchString(Opcode* op, L func) {
-  assert(*op == OpSSwitch);
+  assert(toOp(*op) == OpSSwitch);
   readData<Opcode>(op);
   int32_t size = readData<int32_t>(op) - 1; // the last item is the default
   for (int i = 0; i < size; ++i) {
@@ -819,10 +941,10 @@ void foreachSwitchString(Opcode* op, L func) {
   }
 }
 
-int instrNumPops(const Opcode* opcode);
-int instrNumPushes(const Opcode* opcode);
-StackTransInfo instrStackTransInfo(const Opcode* opcode);
-int instrSpToArDelta(const Opcode* opcode);
+int instrNumPops(const Op* opcode);
+int instrNumPushes(const Op* opcode);
+StackTransInfo instrStackTransInfo(const Op* opcode);
+int instrSpToArDelta(const Op* opcode);
 
 inline bool
 mcodeIsLiteral(MemberCode mcode) {
@@ -835,7 +957,7 @@ mcodeMaybePropName(MemberCode mcode) {
 }
 
 inline bool
-mcodeMaybeArrayKey(MemberCode mcode) {
+mcodeMaybeArrayOrMapKey(MemberCode mcode) {
   return mcode == MEC || mcode == MEL || mcode == MET || mcode == MEI;
 }
 
@@ -849,7 +971,20 @@ mcodeMaybeArrayIntKey(MemberCode mcode) {
   return mcode == MEC || mcode == MEL || mcode == MEI;
 }
 
+inline bool
+mcodeMaybeVectorKey(MemberCode mcode) {
+    return mcode == MEC || mcode == MEL || mcode == MEI;
+}
 
- }
+}
+
+namespace std { namespace tr1 {
+template<>
+struct hash<HPHP::Op> {
+  size_t operator()(HPHP::Op op) const {
+    return HPHP::hash_int64(uint8_t(op));
+  }
+};
+} }
 
 #endif

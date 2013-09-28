@@ -1,0 +1,156 @@
+*** Testing date_parse() : usage variation -  unexpected values to first argument $date***
+
+-- int 0 --
+array(1) {
+  [0]=>
+  string(20) "Unexpected character"
+}
+
+-- int 1 --
+array(1) {
+  [0]=>
+  string(20) "Unexpected character"
+}
+
+-- int 12345 --
+array(1) {
+  [4]=>
+  string(20) "Unexpected character"
+}
+
+-- int -12345 --
+array(1) {
+  [5]=>
+  string(20) "Unexpected character"
+}
+
+-- float 10.5 --
+array(0) {
+}
+
+-- float -10.5 --
+array(1) {
+  [4]=>
+  string(20) "Unexpected character"
+}
+
+-- float .5 --
+array(0) {
+}
+
+-- empty array --
+HipHop Warning: %s
+bool(false)
+
+-- int indexed array --
+HipHop Warning: %s
+bool(false)
+
+-- associative array --
+HipHop Warning: %s
+bool(false)
+
+-- nested arrays --
+HipHop Warning: %s
+bool(false)
+
+-- uppercase NULL --
+array(1) {
+  [0]=>
+  string(12) "Empty string"
+}
+
+-- lowercase null --
+array(1) {
+  [0]=>
+  string(12) "Empty string"
+}
+
+-- lowercase true --
+array(1) {
+  [0]=>
+  string(20) "Unexpected character"
+}
+
+-- lowercase false --
+array(1) {
+  [0]=>
+  string(12) "Empty string"
+}
+
+-- uppercase TRUE --
+array(1) {
+  [0]=>
+  string(20) "Unexpected character"
+}
+
+-- uppercase FALSE --
+array(1) {
+  [0]=>
+  string(12) "Empty string"
+}
+
+-- empty string DQ --
+array(1) {
+  [0]=>
+  string(12) "Empty string"
+}
+
+-- empty string SQ --
+array(1) {
+  [0]=>
+  string(12) "Empty string"
+}
+
+-- string DQ --
+array(1) {
+  [0]=>
+  string(47) "The timezone could not be found in the database"
+}
+
+-- string SQ --
+array(1) {
+  [0]=>
+  string(47) "The timezone could not be found in the database"
+}
+
+-- mixed case string --
+array(1) {
+  [0]=>
+  string(47) "The timezone could not be found in the database"
+}
+
+-- heredoc --
+array(1) {
+  [0]=>
+  string(47) "The timezone could not be found in the database"
+}
+
+-- instance of classWithToString --
+array(2) {
+  [0]=>
+  string(47) "The timezone could not be found in the database"
+  [8]=>
+  string(29) "Double timezone specification"
+}
+
+-- instance of classWithoutToString --
+HipHop Warning: %s
+bool(false)
+
+-- undefined var --
+array(1) {
+  [0]=>
+  string(12) "Empty string"
+}
+
+-- unset var --
+array(1) {
+  [0]=>
+  string(12) "Empty string"
+}
+
+-- resource --
+HipHop Warning: %s
+bool(false)
+===DONE===

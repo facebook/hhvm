@@ -1,0 +1,11 @@
+bool(true)
+string(1) "/"
+bool(true)
+string(6) "/mydir"
+bool(true)
+string(11) "/xpto/mydir"
+bool(true)
+string(5) "/xpto"
+bool(true)
+string(1) "/"
+bool(true)

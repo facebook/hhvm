@@ -1,7 +1,5 @@
 <?php
 
-
-
 trait ATrait {
   public static function get_class_name() {
     return __CLASS__;

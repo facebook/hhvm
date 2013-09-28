@@ -1,0 +1,99 @@
+*** Testing date() : usage variation -  unexpected values to second argument $timestamp***
+
+-- int 0 --
+string(24) "January 1, 1970, 1:00 am"
+
+-- int 1 --
+string(24) "January 1, 1970, 1:00 am"
+
+-- int 12345 --
+string(24) "January 1, 1970, 4:25 am"
+
+-- int -12345 --
+string(26) "December 31, 1969, 9:34 pm"
+
+-- float 10.5 --
+string(24) "January 1, 1970, 1:00 am"
+
+-- float -10.5 --
+string(25) "January 1, 1970, 12:59 am"
+
+-- float .5 --
+string(24) "January 1, 1970, 1:00 am"
+
+-- empty array --
+HipHop Warning: %s
+bool(false)
+
+-- int indexed array --
+HipHop Warning: %s
+bool(false)
+
+-- associative array --
+HipHop Warning: %s
+bool(false)
+
+-- nested arrays --
+HipHop Warning: %s
+bool(false)
+
+-- uppercase NULL --
+string(24) "January 1, 1970, 1:00 am"
+
+-- lowercase null --
+string(24) "January 1, 1970, 1:00 am"
+
+-- lowercase true --
+string(24) "January 1, 1970, 1:00 am"
+
+-- lowercase false --
+string(24) "January 1, 1970, 1:00 am"
+
+-- uppercase TRUE --
+string(24) "January 1, 1970, 1:00 am"
+
+-- uppercase FALSE --
+string(24) "January 1, 1970, 1:00 am"
+
+-- empty string DQ --
+HipHop Warning: %s
+bool(false)
+
+-- empty string SQ --
+HipHop Warning: %s
+bool(false)
+
+-- string DQ --
+HipHop Warning: %s
+bool(false)
+
+-- string SQ --
+HipHop Warning: %s
+bool(false)
+
+-- mixed case string --
+HipHop Warning: %s
+bool(false)
+
+-- heredoc --
+HipHop Warning: %s
+bool(false)
+
+-- instance of classWithToString --
+HipHop Warning: %s
+bool(false)
+
+-- instance of classWithoutToString --
+HipHop Warning: %s
+bool(false)
+
+-- undefined var --
+string(24) "January 1, 1970, 1:00 am"
+
+-- unset var --
+string(24) "January 1, 1970, 1:00 am"
+
+-- resource --
+HipHop Warning: %s
+bool(false)
+===DONE===

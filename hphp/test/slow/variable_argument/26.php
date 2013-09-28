@@ -1,6 +1,5 @@
 <?php
 
-
 function f() {
   var_dump(func_get_args());
 }

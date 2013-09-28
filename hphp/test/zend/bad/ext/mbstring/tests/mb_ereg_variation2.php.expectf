@@ -1,0 +1,105 @@
+*** Testing mb_ereg() : usage variations ***
+
+-- Iteration 1 --
+bool(false)
+NULL
+
+-- Iteration 2 --
+bool(false)
+NULL
+
+-- Iteration 3 --
+bool(false)
+NULL
+
+-- Iteration 4 --
+bool(false)
+NULL
+
+-- Iteration 5 --
+bool(false)
+NULL
+
+-- Iteration 6 --
+bool(false)
+NULL
+
+-- Iteration 7 --
+bool(false)
+NULL
+
+-- Iteration 8 --
+bool(false)
+NULL
+
+-- Iteration 9 --
+bool(false)
+NULL
+
+-- Iteration 10 --
+bool(false)
+NULL
+
+-- Iteration 11 --
+bool(false)
+NULL
+
+-- Iteration 12 --
+bool(false)
+NULL
+
+-- Iteration 13 --
+bool(false)
+NULL
+
+-- Iteration 14 --
+bool(false)
+NULL
+
+-- Iteration 15 --
+bool(false)
+NULL
+
+-- Iteration 16 --
+bool(false)
+NULL
+
+-- Iteration 17 --
+bool(false)
+NULL
+
+-- Iteration 18 --
+int(3)
+array(1) {
+  [0]=>
+  string(3) "str"
+}
+
+-- Iteration 19 --
+int(3)
+array(1) {
+  [0]=>
+  string(3) "str"
+}
+
+-- Iteration 20 --
+bool(false)
+NULL
+
+-- Iteration 21 --
+bool(false)
+NULL
+
+-- Iteration 22 --
+bool(false)
+NULL
+
+-- Iteration 23 --
+bool(false)
+NULL
+
+-- Iteration 24 --
+HipHop Warning: %s
+bool(false)
+NULL
+Done

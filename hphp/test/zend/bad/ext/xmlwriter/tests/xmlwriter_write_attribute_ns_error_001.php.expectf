@@ -1,0 +1,5 @@
+HipHop Warning: %s
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+ <elem1 attr1="first"/>
+</root>%wbool(false)

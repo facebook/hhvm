@@ -1,0 +1,11 @@
+array(2) {
+  ["foo"]=>
+  string(8) "whatever"
+  ["bar"]=>
+  array(2) {
+    [0]=>
+    string(3) "uno"
+    [1]=>
+    string(3) "dos"
+  }
+}

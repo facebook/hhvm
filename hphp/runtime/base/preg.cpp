@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,19 +13,19 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/string_util.h"
-#include "hphp/runtime/base/util/request_local.h"
+#include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 #include <pcre.h>
 #include <onigposix.h>
-#include "hphp/runtime/base/runtime_option.h"
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/zend/zend_functions.h"
-#include "hphp/runtime/base/array/array_iterator.h"
-#include "hphp/runtime/base/ini_setting.h"
-#include "hphp/runtime/base/thread_init_fini.h"
-#include "tbb/concurrent_hash_map.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/thread-init-fini.h"
+#include <tbb/concurrent_hash_map.h>
 
 #define PREG_PATTERN_ORDER          1
 #define PREG_SET_ORDER              2
@@ -71,28 +71,67 @@ public:
   int compile_options;
 };
 
-typedef tbb::concurrent_hash_map<const StringData*,const pcre_cache_entry*,
-                                StringDataHashCompare> PCREStringMap;
+struct ahm_string_data_same {
+  bool operator()(const StringData* s1, const StringData* s2) {
+    // ahm uses -1, -2, -3 as magic values
+    return int64_t(s1) > 0 && s1->same(s2);
+  }
+};
+typedef folly::AtomicHashArray<const StringData*, const pcre_cache_entry*,
+                         string_data_hash, ahm_string_data_same> PCREStringMap;
+typedef std::pair<const StringData*, const pcre_cache_entry*> PCREEntry;
 
-static PCREStringMap s_pcreCacheMap;
+static PCREStringMap* s_pcreCacheMap;
+
+void pcre_init() {
+  if (!s_pcreCacheMap) {
+    PCREStringMap::Config config;
+    config.maxLoadFactor = 0.5;
+    s_pcreCacheMap = PCREStringMap::create(
+                       RuntimeOption::EvalPCRETableSize, config).release();
+  }
+}
+
+void pcre_reinit() {
+  PCREStringMap::Config config;
+  config.maxLoadFactor = 0.5;
+  PCREStringMap* newMap = PCREStringMap::create(
+                     RuntimeOption::EvalPCRETableSize, config).release();
+  if (s_pcreCacheMap) {
+    PCREStringMap::iterator it;
+    for (it = s_pcreCacheMap->begin(); it != s_pcreCacheMap->end(); it++) {
+      // there should not be a lot of entries created before runtime
+      // options were parsed.
+      delete(it->second);
+    }
+    PCREStringMap::destroy(s_pcreCacheMap);
+  }
+  s_pcreCacheMap = newMap;
+}
 
 static const pcre_cache_entry* lookup_cached_pcre(CStrRef regex) {
-  PCREStringMap::const_accessor acc;
-  if (s_pcreCacheMap.find(acc, regex.get())) {
-    return acc->second;
+  assert(s_pcreCacheMap);
+  PCREStringMap::iterator it;
+  if ((it = s_pcreCacheMap->find(regex.get())) != s_pcreCacheMap->end()) {
+    return it->second;
   }
   return 0;
 }
 
 static const pcre_cache_entry*
 insert_cached_pcre(CStrRef regex, const pcre_cache_entry* ent) {
-  PCREStringMap::accessor acc;
-  if (s_pcreCacheMap.insert(acc, StringData::GetStaticString(regex.get()))) {
-    acc->second = ent;
-    return ent;
+  assert(s_pcreCacheMap);
+  auto pair = s_pcreCacheMap->insert(
+    PCREEntry(makeStaticString(regex.get()), ent));
+  if (!pair.second) {
+    delete ent;
+    if (s_pcreCacheMap->size() < RuntimeOption::EvalPCRETableSize) {
+      return pair.first->second;
+    }
+    // if the AHA is too small, fail.
+    raise_error("PCRE cache full");
   }
-  delete ent;
-  return acc->second;
+  return ent;
 }
 
 /*
@@ -109,13 +148,15 @@ static __thread int t_last_error_code;
 
 namespace {
 
-static void preg_init_thread_locals() {
-    IniSetting::Bind("pcre.backtrack_limit", "1000000", ini_on_update_long,
-                     &g_context->m_preg_backtrace_limit);
-    IniSetting::Bind("pcre.recursion_limit", "100000", ini_on_update_long,
-                     &g_context->m_preg_recursion_limit);
+void preg_init_thread_locals() {
+  IniSetting::Bind("pcre.backtrack_limit",
+                   std::to_string(RuntimeOption::PregBacktraceLimit).c_str(),
+                   ini_on_update_long, &g_context->m_preg_backtrace_limit);
+  IniSetting::Bind("pcre.recursion_limit",
+                   std::to_string(RuntimeOption::PregRecursionLimit).c_str(),
+                   ini_on_update_long, &g_context->m_preg_recursion_limit);
 }
-InitFiniNode init(preg_init_thread_locals, InitFiniNode::ThreadInit);
+InitFiniNode init(preg_init_thread_locals, InitFiniNode::When::ThreadInit);
 
 template<bool useSmartFree = false>
 struct FreeHelperImpl : private boost::noncopyable {
@@ -1361,7 +1402,7 @@ int preg_last_error() {
 }
 
 size_t preg_pcre_cache_size() {
-  return (size_t)s_pcreCacheMap.size();
+  return (size_t)s_pcreCacheMap->size();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

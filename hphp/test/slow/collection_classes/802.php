@@ -1,6 +1,5 @@
 <?php
 
-
 $arr = array(null, false, true, 0, 1, 0.0, 1.0, '', '0', '1',
              '0.0', '1.0', '0 ', 'foo');
 $vec = Vector::fromArray($arr);
@@ -18,7 +17,8 @@ $mp = Map::fromArray($arr);
 foreach ($arr as $k => $v) {
   var_dump($mp[$k]);
   var_dump(isset($mp[$k]));
-  var_dump(empty($mp[$k])); 
+  var_dump(empty($mp[$k]));
+
   echo "\n";
 }
 $new_arr = array();

@@ -1,0 +1,11 @@
+array(4) {
+  [0]=>
+  string(6) "orange"
+  [1]=>
+  string(6) "banana"
+  [2]=>
+  string(5) "apple"
+  [3]=>
+  string(9) "raspberry"
+}
+int(4)

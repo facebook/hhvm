@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,10 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <boost/foreach.hpp>
-#include <boost/tuple/tuple.hpp>
-#include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/file_scope.h"
@@ -36,15 +34,18 @@
 #include "hphp/compiler/statement/function_statement.h"
 #include "hphp/compiler/statement/method_statement.h"
 #include "hphp/compiler/statement/statement_list.h"
-#include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/base/class_info.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/class-info.h"
 #include "hphp/compiler/statement/class_variable.h"
 #include "hphp/compiler/statement/class_constant.h"
 #include "hphp/compiler/statement/use_trait_statement.h"
 #include "hphp/compiler/statement/trait_prec_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
-#include "hphp/runtime/base/zend/zend_string.h"
+#include "hphp/runtime/base/zend-string.h"
 #include "hphp/util/util.h"
+
+#include <boost/foreach.hpp>
+#include <boost/tuple/tuple.hpp>
 
 using namespace HPHP;
 using std::map;
@@ -61,7 +62,7 @@ ClassScope::ClassScope(KindOf kindOf, const std::string &name,
     m_kindOf(kindOf), m_derivesFromRedeclaring(FromNormal),
     m_traitStatus(NOT_FLATTENED), m_volatile(false),
     m_persistent(false), m_derivedByDynamic(false),
-    m_sep(false), m_needsCppCtor(false), m_needsInit(true), m_knownBases(0) {
+    m_needsCppCtor(false), m_needsInit(true), m_knownBases(0) {
 
   m_dynamic = Option::IsDynamicClass(m_name);
 
@@ -91,7 +92,7 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
     m_kindOf(KindOfObjectClass), m_derivesFromRedeclaring(FromNormal),
     m_traitStatus(NOT_FLATTENED), m_dynamic(false),
     m_volatile(false), m_persistent(false),
-    m_derivedByDynamic(false), m_sep(false), m_needsCppCtor(false),
+    m_derivedByDynamic(false), m_needsCppCtor(false),
     m_needsInit(true), m_knownBases(0) {
   BOOST_FOREACH(FunctionScopePtr f, methods) {
     if (f->getName() == "__construct") setAttribute(HasConstructor);
@@ -402,22 +403,11 @@ MethodStatementPtr
 ClassScope::importTraitMethod(const TraitMethod&  traitMethod,
                               AnalysisResultPtr   ar,
                               string              methName,
-                              GeneratorRenameMap& genRenameMap,
                               const std::map<string, MethodStatementPtr>&
                               importedTraitMethods) {
   MethodStatementPtr meth = traitMethod.m_method;
   string origMethName = traitMethod.m_originalName;
   ModifierExpressionPtr modifiers = traitMethod.m_modifiers;
-
-  if (meth->getOrigGeneratorFunc()) {
-    const string &name = meth->getOrigGeneratorFunc()->getName();
-    if (!importedTraitMethods.count(name)) {
-      // Dont import the generator, if the origGenerator wasnt imported
-      // this happens when a generator in the trait is hidden by a non-generator
-      // method in the importing class.
-      return MethodStatementPtr();
-    }
-  }
 
   MethodStatementPtr cloneMeth = dynamic_pointer_cast<MethodStatement>(
     dynamic_pointer_cast<ClassStatement>(m_stmt)->addClone(meth));
@@ -433,23 +423,19 @@ ClassScope::importTraitMethod(const TraitMethod&  traitMethod,
   ClassScopePtr cScope = dynamic_pointer_cast<ClassScope>(shared_from_this());
   cloneMeth->fixupSelfAndParentTypehints( cScope );
 
-  // Generator methods need to be renamed, otherwise code gen produces multiple
-  // continuation classes with the same name
-  if (funcScope->isGenerator()) {
-    const string& newName = getNewGeneratorName(funcScope, genRenameMap);
-    methName = origMethName = newName;
-    cloneMeth->setName(newName);
-    cloneMeth->setOriginalName(newName);
-  }
   FunctionScopePtr cloneFuncScope
     (new HPHP::FunctionScope(funcScope, ar, methName, origMethName, cloneMeth,
-                             cloneMeth->getModifiers()));
+                             cloneMeth->getModifiers(), cScope->isUserClass()));
   cloneMeth->resetScope(cloneFuncScope, true);
   cloneFuncScope->setOuterScope(shared_from_this());
   informClosuresAboutScopeClone(cloneMeth, cloneFuncScope, ar);
 
   cloneMeth->addTraitMethodToScope(ar,
                dynamic_pointer_cast<ClassScope>(shared_from_this()));
+
+  // Preserve original filename (as this varies per-function and not per-unit
+  // in the case of methods imported from flattened traits)
+  cloneMeth->setOriginalFilename(meth->getFileScope()->getName());
 
   return cloneMeth;
 }
@@ -745,84 +731,6 @@ void ClassScope::removeSpareTraitAbstractMethods(AnalysisResultPtr ar) {
   }
 }
 
-const string& ClassScope::getNewGeneratorName(
-  FunctionScopePtr genFuncScope, GeneratorRenameMap &genRenameMap) {
-  assert(genFuncScope->isGenerator());
-  const string& oldName = genFuncScope->getName();
-  GeneratorRenameMap::iterator mapIt = genRenameMap.find(oldName);
-  if (mapIt != genRenameMap.end()) {
-    return mapIt->second;
-  }
-  string newName = oldName + "_" +
-    lexical_cast<string>(genFuncScope->getNewID());
-  genRenameMap[oldName] = newName;
-  return genRenameMap[oldName];
-}
-
-void
-ClassScope::renameCreateContinuationCalls(AnalysisResultPtr ar,
-                                          ConstructPtr      c,
-                                          ImportedMethodMap &importedMethods) {
-  if (!c) return;
-  SimpleFunctionCallPtr funcCall = dynamic_pointer_cast<SimpleFunctionCall>(c);
-  if (funcCall && funcCall->getName() == "hphp_create_continuation") {
-
-    ExpressionListPtr params = funcCall->getParams();
-    assert(params->getCount() >= 2);
-    const string &oldClassName =
-      dynamic_pointer_cast<ScalarExpression>((*params)[0])->getString();
-    ClassScopePtr oldClassScope = ar->findClass(oldClassName);
-    if (!oldClassScope || !oldClassScope->isTrait()) return;
-
-    const string &oldGenName =
-      dynamic_pointer_cast<ScalarExpression>((*params)[1])->getString();
-
-    MethodStatementPtr origGenStmt = importedMethods[oldGenName];
-    assert(origGenStmt);
-
-    const string &newGenName = origGenStmt->getOriginalName();
-    ExpressionPtr newGenExpr = funcCall->makeScalarExpression(ar, newGenName);
-    ExpressionPtr newClsExpr = funcCall->makeScalarExpression(ar, getName());
-    (*params)[0] = newClsExpr;
-    (*params)[1] = newGenExpr;
-    funcCall->analyzeProgram(ar);
-    return;
-  }
-  for (int i=0; i < c->getKidCount(); i++) {
-    renameCreateContinuationCalls(ar, c->getNthKid(i), importedMethods);
-  }
-}
-
-void ClassScope::relinkGeneratorMethods(
-  AnalysisResultPtr ar,
-  ImportedMethodMap &importedMethods) {
-  for (ImportedMethodMap::const_iterator methIt =
-         importedMethods.begin(); methIt != importedMethods.end(); methIt++) {
-    MethodStatementPtr newMeth = methIt->second;
-
-    // Skip non-generator methods
-    if (!newMeth) continue;
-
-    if (newMeth->getOrigGeneratorFunc()) {
-      // Get corresponding original generator method in the current class
-      const string& origGenName = newMeth->getOrigGeneratorFunc()->getName();
-      MethodStatementPtr origGenStmt = importedMethods[origGenName];
-      assert(origGenStmt);
-      // It must be an orig gen func already, we're just updating to point
-      // to the corresponding method cloned from the trait
-      assert(origGenStmt->getGeneratorFunc());
-      newMeth->setOrigGeneratorFunc(origGenStmt);
-      origGenStmt->setGeneratorFunc(newMeth);
-    }
-
-    // OrigGenerator methods need to have their hphp_create_continuation calls
-    // patched to the new generator name.
-    if (newMeth->getGeneratorFunc()) {
-      renameCreateContinuationCalls(ar, newMeth, importedMethods);
-    }
-  }
-}
-
 void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
   if (m_traitStatus == FLATTENED) return;
   if (m_traitStatus == BEING_FLATTENED) {
@@ -876,8 +784,6 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
   std::map<string, MethodStatementPtr> importedTraitMethods;
   std::vector<std::pair<string,const TraitMethod*> > importedTraitsWithOrigName;
 
-  GeneratorRenameMap genRenameMap;
-
   // Actually import the methods
   for (MethodToTraitListMap::const_iterator
          iter = m_importMethToTraitMap.begin();
@@ -922,14 +828,11 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
     const TraitMethod *traitMethod = importedTraitsWithOrigName[i].second;
     MethodStatementPtr newMeth = importTraitMethod(
       *traitMethod, ar, Util::toLower(traitMethod->m_originalName),
-      genRenameMap, importedTraitMethods);
+      importedTraitMethods);
     if (newMeth) {
       importedTraitMethods[sourceName] = newMeth;
     }
   }
-
-  // Relink generator and origGenerator methods
-  relinkGeneratorMethods(ar, importedTraitMethods);
 
   // Import trait properties
   importTraitProperties(ar);
@@ -1192,10 +1095,10 @@ void ClassScope::getAllParents(AnalysisResultConstPtr ar,
                                std::vector<std::string> &names) {
   if (m_stmt) {
     if (isInterface()) {
-      boost::dynamic_pointer_cast<InterfaceStatement>
+      dynamic_pointer_cast<InterfaceStatement>
         (m_stmt)->getAllParents(ar, names);
     } else {
-      boost::dynamic_pointer_cast<ClassStatement>
+      dynamic_pointer_cast<ClassStatement>
         (m_stmt)->getAllParents(ar, names);
     }
   } else {
@@ -1326,7 +1229,7 @@ void ClassScope::serialize(JSON::DocTarget::OutputStream &out) const {
 
   ms.add("parent");
   if (m_parent.empty()) {
-    out << JSON::Null;
+    out << JSON::Null();
   } else {
     out << GetDocName(out.analysisResult(), self, m_parent);
   }

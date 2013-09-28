@@ -1,0 +1,38 @@
+array(2) {
+  ["Bestiary"]=>
+  array(3) {
+    [0]=>
+    array(1) {
+      ["aardvark"]=>
+      string(33) "African pig-like ant eater. Ugly."
+    }
+    [1]=>
+    array(1) {
+      ["anteater"]=>
+      string(38) "South-American ant eater. Two species."
+    }
+    [2]=>
+    array(1) {
+      ["anaconda"]=>
+      string(40) "South-American constrictor snake. Scaly."
+    }
+  }
+  ["Numbers"]=>
+  array(3) {
+    [0]=>
+    array(1) {
+      ["one"]=>
+      int(1)
+    }
+    [1]=>
+    array(1) {
+      ["two"]=>
+      int(2)
+    }
+    [2]=>
+    array(1) {
+      ["three"]=>
+      int(3)
+    }
+  }
+}

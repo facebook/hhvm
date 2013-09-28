@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,17 +16,19 @@
 */
 
 #include "hphp/runtime/ext/ext_socket.h"
-#include "hphp/runtime/base/file/socket.h"
-#include "hphp/runtime/base/file/ssl_socket.h"
-#include "hphp/runtime/base/server/server_stats.h"
+#include "hphp/runtime/base/socket.h"
+#include "hphp/runtime/base/ssl-socket.h"
+#include "hphp/runtime/server/server-stats.h"
+#include "hphp/util/logger.h"
+#include "folly/String.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
-#include "netinet/in.h"
-#include "netinet/tcp.h"
+#include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <sys/un.h>
-#include "arpa/inet.h"
+#include <arpa/inet.h>
 #include <sys/time.h>
 #include <unistd.h>
 #include <errno.h>
@@ -58,7 +60,8 @@ static void check_socket_parameters(int &domain, int &type) {
   }
 }
 
-static bool get_sockaddr(sockaddr *sa, Variant &address, Variant &port) {
+static bool get_sockaddr(sockaddr *sa, socklen_t salen,
+                         Variant &address, Variant &port) {
   switch (sa->sa_family) {
   case AF_INET6:
     {
@@ -78,8 +81,13 @@ static bool get_sockaddr(sockaddr *sa, Variant &address, Variant &port) {
     return true;
   case AF_UNIX:
     {
+      // NB: an unnamed socket has no path, and sun_path should not be
+      // inspected. In that case the length is just the size of the
+      // struct without sun_path.
       struct sockaddr_un *s_un = (struct sockaddr_un *)sa;
-      address = String(s_un->sun_path, CopyString);
+      if (salen > offsetof(sockaddr_un, sun_path)) {
+        address = String(s_un->sun_path, CopyString);
+      }
     }
     return true;
 
@@ -203,7 +211,7 @@ static void sock_array_to_fd_set(CArrRef sockets, pollfd *fds, int &nfds,
                                  short flag) {
   assert(fds);
   for (ArrayIter iter(sockets); iter; ++iter) {
-    File *sock = iter.second().toObject().getTyped<File>();
+    File *sock = iter.second().toResource().getTyped<File>();
     pollfd &fd = fds[nfds++];
     fd.fd = sock->fd();
     fd.events = flag;
@@ -218,7 +226,7 @@ static void sock_array_from_fd_set(Variant &sockets, pollfd *fds, int &nfds,
   Array ret;
   for (ArrayIter iter(sock_array); iter; ++iter) {
     pollfd &fd = fds[nfds++];
-    assert(fd.fd == iter.second().toObject().getTyped<File>()->fd());
+    assert(fd.fd == iter.second().toResource().getTyped<File>()->fd());
     if (fd.revents & flag) {
       ret.append(iter.second());
       count++;
@@ -280,26 +288,26 @@ static int php_read(Socket *sock, void *buf, int maxlen, int flags) {
   return n;
 }
 
-static bool create_new_socket(const char *&name, int port, Variant &errnum,
-                              Variant &errstr, Object &ret, Socket *&sock) {
-  int domain = AF_INET;
+static bool create_new_socket(const Util::HostURL &hosturl,
+                              Variant &errnum, Variant &errstr, Resource &ret,
+                              Socket *&sock, double timeout) {
+  int domain = hosturl.isIPv6() ? AF_INET6 : AF_INET;
   int type = SOCK_STREAM;
-  if (strncmp(name, "udp://", 6) == 0 || strncmp(name, "udg://", 6) == 0) {
+  const std::string scheme = hosturl.getScheme();
+
+  if (scheme == "udp" || scheme == "udg") {
     type = SOCK_DGRAM;
-    name += 6;
-  } else if (strncmp(name, "tcp://", 6) == 0) {
-    name += 6;
-  } else if (strncmp(name, "unix://", 7) == 0) {
+  } else if (scheme == "unix") {
     domain = AF_UNIX;
-    name += 7;
   }
 
-  sock = new Socket(socket(domain, type, 0), domain, name, port);
-  ret = Object(sock);
+  sock = new Socket(socket(domain, type, 0), domain,
+                    hosturl.getHost().c_str(), hosturl.getPort(), timeout);
+  ret = Resource(sock);
   if (!sock->valid()) {
     SOCKET_ERROR(sock, "unable to create socket", errno);
     errnum = sock->getError();
-    errstr = String(Util::safe_strerror(sock->getError()));
+    errstr = String(folly::errnoStr(sock->getError()).toStdString());
     return false;
   }
   return true;
@@ -316,7 +324,7 @@ Variant f_socket_create(int domain, int type, int protocol) {
     return false;
   }
   Socket *sock = new Socket(socketId, domain);
-  Object ret(sock);
+  Resource ret(sock);
   return ret;
 }
 
@@ -334,14 +342,14 @@ Variant f_socket_create_listen(int port, int backlog /* = 128 */) {
 
   Socket *sock = new Socket(socket(PF_INET, SOCK_STREAM, 0), PF_INET,
                             "0.0.0.0", port);
-  Object ret(sock);
+  Resource ret(sock);
   if (!sock->valid()) {
     SOCKET_ERROR(sock, "unable to create listening socket", errno);
     return false;
   }
 
   if (::bind(sock->fd(), (struct sockaddr *)&la, sizeof(la)) < 0) {
-    SOCKET_ERROR(sock, "unable to bind to given adress", errno);
+    SOCKET_ERROR(sock, "unable to bind to given address", errno);
     return false;
   }
 
@@ -364,18 +372,19 @@ bool f_socket_create_pair(int domain, int type, int protocol, VRefParam fd) {
   }
 
   Array ret;
-  ret.set(0, Object(new Socket(fds_array[0], domain)));
-  ret.set(1, Object(new Socket(fds_array[1], domain)));
+  ret.set(0, Resource(new Socket(fds_array[0], domain)));
+  ret.set(1, Resource(new Socket(fds_array[1], domain)));
   fd = ret;
   return true;
 }
 
-static const StaticString s_l_onoff("l_onoff");
-static const StaticString s_l_linger("l_linger");
-static const StaticString s_sec("sec");
-static const StaticString s_usec("usec");
+const StaticString
+  s_l_onoff("l_onoff"),
+  s_l_linger("l_linger"),
+  s_sec("sec"),
+  s_usec("usec");
 
-Variant f_socket_get_option(CObjRef socket, int level, int optname) {
+Variant f_socket_get_option(CResRef socket, int level, int optname) {
   Socket *sock = socket.getTyped<Socket>();
   Array ret;
   socklen_t optlen;
@@ -424,7 +433,7 @@ Variant f_socket_get_option(CObjRef socket, int level, int optname) {
   return ret;
 }
 
-bool f_socket_getpeername(CObjRef socket, VRefParam address,
+bool f_socket_getpeername(CResRef socket, VRefParam address,
                           VRefParam port /* = null */) {
   Socket *sock = socket.getTyped<Socket>();
 
@@ -435,10 +444,10 @@ bool f_socket_getpeername(CObjRef socket, VRefParam address,
     SOCKET_ERROR(sock, "unable to retrieve peer name", errno);
     return false;
   }
-  return get_sockaddr(sa, address, port);
+  return get_sockaddr(sa, salen, address, port);
 }
 
-bool f_socket_getsockname(CObjRef socket, VRefParam address,
+bool f_socket_getsockname(CResRef socket, VRefParam address,
                           VRefParam port /* = null */) {
   Socket *sock = socket.getTyped<Socket>();
 
@@ -449,20 +458,20 @@ bool f_socket_getsockname(CObjRef socket, VRefParam address,
     SOCKET_ERROR(sock, "unable to retrieve peer name", errno);
     return false;
   }
-  return get_sockaddr(sa, address, port);
+  return get_sockaddr(sa, salen, address, port);
 }
 
-bool f_socket_set_block(CObjRef socket) {
+bool f_socket_set_block(CResRef socket) {
   Socket *sock = socket.getTyped<Socket>();
   return sock->setBlocking(true);
 }
 
-bool f_socket_set_nonblock(CObjRef socket) {
+bool f_socket_set_nonblock(CResRef socket) {
   Socket *sock = socket.getTyped<Socket>();
   return sock->setBlocking(false);
 }
 
-bool f_socket_set_option(CObjRef socket, int level, int optname,
+bool f_socket_set_option(CResRef socket, int level, int optname,
                          CVarRef optval) {
   Socket *sock = socket.getTyped<Socket>();
 
@@ -531,7 +540,7 @@ bool f_socket_set_option(CObjRef socket, int level, int optname,
   return true;
 }
 
-bool f_socket_connect(CObjRef socket, CStrRef address, int port /* = 0 */) {
+bool f_socket_connect(CResRef socket, CStrRef address, int port /* = 0 */) {
   Socket *sock = socket.getTyped<Socket>();
 
   switch (sock->getType()) {
@@ -568,7 +577,7 @@ bool f_socket_connect(CObjRef socket, CStrRef address, int port /* = 0 */) {
   return true;
 }
 
-bool f_socket_bind(CObjRef socket, CStrRef address, int port /* = 0 */) {
+bool f_socket_bind(CResRef socket, CStrRef address, int port /* = 0 */) {
   Socket *sock = socket.getTyped<Socket>();
 
   const char *addr = address.data();
@@ -592,7 +601,7 @@ bool f_socket_bind(CObjRef socket, CStrRef address, int port /* = 0 */) {
   return true;
 }
 
-bool f_socket_listen(CObjRef socket, int backlog /* = 0 */) {
+bool f_socket_listen(CResRef socket, int backlog /* = 0 */) {
   Socket *sock = socket.getTyped<Socket>();
   if (listen(sock->fd(), backlog) != 0) {
     SOCKET_ERROR(sock, "unable to listen on socket", errno);
@@ -634,10 +643,34 @@ Variant f_socket_select(VRefParam read, VRefParam write, VRefParam except,
   if (!vtv_sec.isNull()) {
     timeout_ms = vtv_sec.toInt32() * 1000 + tv_usec / 1000;
   }
+
+  /* slight hack to support buffered data; if there is data sitting in the
+   * read buffer of any of the streams in the read array, let's pretend
+   * that we selected, but return only the readable sockets */
+  if (!read.isNull()) {
+    auto hasData = Array::Create();
+    for (ArrayIter iter(read.toArray()); iter; ++iter) {
+      File *file = iter.second().toResource().getTyped<File>();
+      if (file->bufferedLen() > 0) {
+        hasData.append(iter.second());
+      }
+    }
+    if (hasData.size() > 0) {
+      if (!write.isNull()) {
+        write = Array::Create();
+      }
+      if (!except.isNull()) {
+        except = Array::Create();
+      }
+      read = hasData;
+      return hasData.size();
+    }
+  }
+
   int retval = poll(fds, count, timeout_ms);
   if (retval == -1) {
     raise_warning("unable to select [%d]: %s", errno,
-                  Util::safe_strerror(errno).c_str());
+                  folly::errnoStr(errno).c_str());
     free(fds);
     return false;
   }
@@ -645,7 +678,7 @@ Variant f_socket_select(VRefParam read, VRefParam write, VRefParam except,
   count = 0;
   int nfds = 0;
   if (!read.isNull()) {
-    sock_array_from_fd_set(read, fds, nfds, count, POLLIN|POLLERR);
+    sock_array_from_fd_set(read, fds, nfds, count, POLLIN|POLLERR|POLLHUP);
   }
   if (!write.isNull()) {
     sock_array_from_fd_set(write, fds, nfds, count, POLLOUT|POLLERR);
@@ -661,10 +694,19 @@ Variant f_socket_select(VRefParam read, VRefParam write, VRefParam except,
 Variant f_socket_server(CStrRef hostname, int port /* = -1 */,
                         VRefParam errnum /* = null */,
                         VRefParam errstr /* = null */) {
-  Object ret;
+  Util::HostURL hosturl(static_cast<const std::string>(hostname), port);
+  return socket_server_impl(hosturl,
+                            k_STREAM_SERVER_BIND|k_STREAM_SERVER_LISTEN,
+                            errnum, errstr);
+}
+
+Variant socket_server_impl(const Util::HostURL &hosturl,
+                           int flags, /* = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN */
+                           VRefParam errnum /* = null */,
+                           VRefParam errstr /* = null */) {
+  Resource ret;
   Socket *sock = NULL;
-  const char *name = hostname.data();
-  if (!create_new_socket(name, port, errnum, errstr, ret, sock)) {
+  if (!create_new_socket(hosturl, errnum, errstr, ret, sock, 0.0)) {
     return false;
   }
   assert(ret.get() && sock);
@@ -672,14 +714,18 @@ Variant f_socket_server(CStrRef hostname, int port /* = -1 */,
   sockaddr_storage sa_storage;
   struct sockaddr *sa_ptr;
   size_t sa_size;
-  if (!set_sockaddr(sa_storage, sock, name, port, sa_ptr, sa_size)) {
+  if (!set_sockaddr(sa_storage, sock, hosturl.getHost().c_str(),
+                    hosturl.getPort(), sa_ptr, sa_size)) {
     return false;
   }
-  if (::bind(sock->fd(), sa_ptr, sa_size) < 0) {
-    SOCKET_ERROR(sock, "unable to bind to given adress", errno);
+  int yes = 1;
+  setsockopt(sock->fd(), SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+  if ((flags & k_STREAM_SERVER_BIND) != 0 &&
+      ::bind(sock->fd(), sa_ptr, sa_size) < 0) {
+    SOCKET_ERROR(sock, "unable to bind to given address", errno);
     return false;
   }
-  if (listen(sock->fd(), 128) < 0) {
+  if ((flags & k_STREAM_SERVER_LISTEN) != 0 && listen(sock->fd(), 128) < 0) {
     SOCKET_ERROR(sock, "unable to listen on socket", errno);
     return false;
   }
@@ -687,7 +733,7 @@ Variant f_socket_server(CStrRef hostname, int port /* = -1 */,
   return ret;
 }
 
-Variant f_socket_accept(CObjRef socket) {
+Variant f_socket_accept(CResRef socket) {
   Socket *sock = socket.getTyped<Socket>();
   struct sockaddr sa;
   socklen_t salen = sizeof(sa);
@@ -698,10 +744,10 @@ Variant f_socket_accept(CObjRef socket) {
     delete new_sock;
     return false;
   }
-  return Object(new_sock);
+  return Resource(new_sock);
 }
 
-Variant f_socket_read(CObjRef socket, int length, int type /* = 0 */) {
+Variant f_socket_read(CResRef socket, int length, int type /* = 0 */) {
   if (length <= 0) {
     return false;
   }
@@ -732,7 +778,7 @@ Variant f_socket_read(CObjRef socket, int length, int type /* = 0 */) {
   return String(tmpbuf, retval, AttachString);
 }
 
-Variant f_socket_write(CObjRef socket, CStrRef buffer, int length /* = 0 */) {
+Variant f_socket_write(CResRef socket, CStrRef buffer, int length /* = 0 */) {
   Socket *sock = socket.getTyped<Socket>();
   if (length == 0 || length > buffer.size()) {
     length = buffer.size();
@@ -745,7 +791,7 @@ Variant f_socket_write(CObjRef socket, CStrRef buffer, int length /* = 0 */) {
   return retval;
 }
 
-Variant f_socket_send(CObjRef socket, CStrRef buf, int len, int flags) {
+Variant f_socket_send(CResRef socket, CStrRef buf, int len, int flags) {
   Socket *sock = socket.getTyped<Socket>();
   if (len > buf.size()) {
     len = buf.size();
@@ -758,8 +804,8 @@ Variant f_socket_send(CObjRef socket, CStrRef buf, int len, int flags) {
   return retval;
 }
 
-Variant f_socket_sendto(CObjRef socket, CStrRef buf, int len, int flags,
-                        CStrRef addr, int port /* = 0 */) {
+Variant f_socket_sendto(CResRef socket, CStrRef buf, int len, int flags,
+                        CStrRef addr, int port /* = -1 */) {
   Socket *sock = socket.getTyped<Socket>();
   if (len > buf.size()) {
     len = buf.size();
@@ -779,6 +825,11 @@ Variant f_socket_sendto(CObjRef socket, CStrRef buf, int len, int flags,
     break;
   case AF_INET:
     {
+      if (port == -1) {
+        throw_missing_arguments_nr("socket_sendto", 6, 5);
+        return false;
+      }
+
       struct sockaddr_in  sin;
       memset(&sin, 0, sizeof(sin));
       sin.sin_family = AF_INET;
@@ -793,6 +844,11 @@ Variant f_socket_sendto(CObjRef socket, CStrRef buf, int len, int flags,
     break;
   case AF_INET6:
     {
+      if (port == -1) {
+        throw_missing_arguments_nr("socket_sendto", 6, 5);
+        return false;
+      }
+
       struct sockaddr_in6  sin6;
       memset(&sin6, 0, sizeof(sin6));
       sin6.sin6_family = AF_INET6;
@@ -819,7 +875,7 @@ Variant f_socket_sendto(CObjRef socket, CStrRef buf, int len, int flags,
   return retval;
 }
 
-Variant f_socket_recv(CObjRef socket, VRefParam buf, int len, int flags) {
+Variant f_socket_recv(CResRef socket, VRefParam buf, int len, int flags) {
   if (len <= 0) {
     return false;
   }
@@ -842,12 +898,12 @@ Variant f_socket_recv(CObjRef socket, VRefParam buf, int len, int flags) {
   return retval;
 }
 
-static const StaticString
+const StaticString
   s_2colons("::"),
   s_0_0_0_0("0.0.0.0");
 
-Variant f_socket_recvfrom(CObjRef socket, VRefParam buf, int len, int flags,
-                      VRefParam name, VRefParam port /* = 0 */) {
+Variant f_socket_recvfrom(CResRef socket, VRefParam buf, int len, int flags,
+                      VRefParam name, VRefParam port /* = -1*/) {
   if (len <= 0) {
     return false;
   }
@@ -880,10 +936,14 @@ Variant f_socket_recvfrom(CObjRef socket, VRefParam buf, int len, int flags,
     break;
   case AF_INET:
     {
+      if (int(port) == -1) {
+        throw_missing_arguments_nr("socket_recvfrom", 5, 4);
+        return false;
+      }
+
       struct sockaddr_in sin;
       slen = sizeof(sin);
       memset(&sin, 0, slen);
-      sin.sin_family = AF_INET;
 
       retval = recvfrom(sock->fd(), recv_buf, len, flags,
                         (struct sockaddr *)&sin, (socklen_t *)&slen);
@@ -904,10 +964,14 @@ Variant f_socket_recvfrom(CObjRef socket, VRefParam buf, int len, int flags,
     break;
   case AF_INET6:
     {
+      if (int(port) == -1) {
+        throw_missing_arguments_nr("socket_recvfrom", 5, 4);
+        return false;
+      }
+
       struct sockaddr_in6 sin6;
       slen = sizeof(sin6);
       memset(&sin6, 0, slen);
-      sin6.sin6_family = AF_INET6;
 
       retval = recvfrom(sock->fd(), recv_buf, len, flags,
                         (struct sockaddr *)&sin6, (socklen_t *)&slen);
@@ -939,7 +1003,7 @@ Variant f_socket_recvfrom(CObjRef socket, VRefParam buf, int len, int flags,
   return retval;
 }
 
-bool f_socket_shutdown(CObjRef socket, int how /* = 0 */) {
+bool f_socket_shutdown(CResRef socket, int how /* = 0 */) {
   Socket *sock = socket.getTyped<Socket>();
   if (shutdown(sock->fd(), how) != 0) {
     SOCKET_ERROR(sock, "unable to shutdown socket", errno);
@@ -948,16 +1012,16 @@ bool f_socket_shutdown(CObjRef socket, int how /* = 0 */) {
   return true;
 }
 
-void f_socket_close(CObjRef socket) {
+void f_socket_close(CResRef socket) {
   Socket *sock = socket.getTyped<Socket>();
   sock->close();
 }
 
 String f_socket_strerror(int errnum) {
-  return String(Util::safe_strerror(errnum));
+  return String(folly::errnoStr(errnum).toStdString());
 }
 
-int64_t f_socket_last_error(CObjRef socket /* = null_object */) {
+int64_t f_socket_last_error(CResRef socket /* = null_object */) {
   if (!socket.isNull()) {
     Socket *sock = socket.getTyped<Socket>();
     return sock->getError();
@@ -965,29 +1029,26 @@ int64_t f_socket_last_error(CObjRef socket /* = null_object */) {
   return Socket::getLastError();
 }
 
-void f_socket_clear_error(CObjRef socket /* = null_object */) {
+void f_socket_clear_error(CResRef socket /* = null_object */) {
   if (!socket.isNull()) {
     Socket *sock = socket.getTyped<Socket>();
     sock->setError(0);
   }
 }
-
 ///////////////////////////////////////////////////////////////////////////////
 // fsock: treating sockets as "file"
 
-static Variant sockopen_impl(CStrRef hostname, int port, Variant &errnum,
-                             Variant &errstr, double timeout,
-                             bool persistent) {
+Variant sockopen_impl(const Util::HostURL &hosturl, VRefParam errnum,
+                      VRefParam errstr, double timeout, bool persistent) {
+
   string key;
   if (persistent) {
-    key = hostname.data();
-    key += ":";
-    key += boost::lexical_cast<string>(port);
+    key = hosturl.getHostURL();
     Socket *sock =
       dynamic_cast<Socket*>(g_persistentObjects->get("socket", key.c_str()));
     if (sock) {
       if (sock->getError() == 0 && sock->checkLiveness()) {
-        return Object(sock);
+        return Resource(sock);
       }
 
       // socket had an error earlier, we need to remove it from persistent
@@ -996,16 +1057,16 @@ static Variant sockopen_impl(CStrRef hostname, int port, Variant &errnum,
     }
   }
 
-  Object ret;
-  const char *name = hostname.data();
+  Resource ret;
   Socket *sock = NULL;
 
+  if (timeout < 0) timeout = RuntimeOption::SocketDefaultTimeout;
   // test if protocol is SSL
-  SSLSocket *sslsock = SSLSocket::Create(name, port, timeout);
+  SSLSocket *sslsock = SSLSocket::Create(hosturl, timeout);
   if (sslsock) {
     sock = sslsock;
     ret = sock;
-  } else if (!create_new_socket(name, port, errnum, errstr, ret, sock)) {
+  } else if (!create_new_socket(hosturl, errnum, errstr, ret, sock, timeout)) {
     return false;
   }
   assert(ret.get() && sock);
@@ -1013,13 +1074,15 @@ static Variant sockopen_impl(CStrRef hostname, int port, Variant &errnum,
   sockaddr_storage sa_storage;
   struct sockaddr *sa_ptr;
   size_t sa_size;
-  if (!set_sockaddr(sa_storage, sock, name, port, sa_ptr, sa_size)) {
+  if (!set_sockaddr(sa_storage, sock, hosturl.getHost().c_str(),
+                    hosturl.getPort(), sa_ptr, sa_size)) {
     return false;
   }
 
   int retval;
   int fd = sock->fd();
-  IOStatusHelper io("socket::connect", name, port);
+  IOStatusHelper io("socket::connect",
+                    hosturl.getHostURL().c_str(), hosturl.getPort());
   if (timeout <= 0) {
     retval = connect(fd, sa_ptr, sa_size);
   } else {
@@ -1038,13 +1101,10 @@ static Variant sockopen_impl(CStrRef hostname, int port, Variant &errnum,
           int valopt;
           getsockopt(fd, SOL_SOCKET, SO_ERROR, (void*)(&valopt), &lon);
           if (valopt) {
-            std::string msg = "failed to connect to ";
-            msg += name;
-            msg += ":";
-            msg += boost::lexical_cast<std::string>(port);
+            std::string msg = "failed to connect to " + hosturl.getHostURL();
             SOCKET_ERROR(sock, msg.c_str(), valopt);
             errnum = sock->getError();
-            errstr = String(Util::safe_strerror(sock->getError()));
+            errstr = String(folly::errnoStr(sock->getError()).toStdString());
             return false;
           } else {
             retval = 0; // success
@@ -1052,13 +1112,10 @@ static Variant sockopen_impl(CStrRef hostname, int port, Variant &errnum,
         } else {
           std::string msg = "timed out after ";
           msg += boost::lexical_cast<std::string>(timeout);
-          msg += " seconds when connecting to ";
-          msg += name;
-          msg += ":";
-          msg += boost::lexical_cast<std::string>(port);
+          msg += " seconds when connecting to " + hosturl.getHostURL();
           SOCKET_ERROR(sock, msg.c_str(), ETIMEDOUT);
           errnum = sock->getError();
-          errstr = String(Util::safe_strerror(sock->getError()));
+          errstr = String(folly::errnoStr(sock->getError()).toStdString());
           return false;
         }
       }
@@ -1071,7 +1128,7 @@ static Variant sockopen_impl(CStrRef hostname, int port, Variant &errnum,
 
   if (retval != 0) {
     errnum = sock->getError();
-    errstr = String(Util::safe_strerror(sock->getError()));
+    errstr = String(folly::errnoStr(sock->getError()).toStdString());
     return false;
   }
 
@@ -1091,16 +1148,18 @@ static Variant sockopen_impl(CStrRef hostname, int port, Variant &errnum,
 Variant f_fsockopen(CStrRef hostname, int port /* = -1 */,
                     VRefParam errnum /* = null */,
                     VRefParam errstr /* = null */,
-                    double timeout /* = 0.0 */) {
-  return sockopen_impl(hostname, port, errnum, errstr, timeout, false);
+                    double timeout /* = -1.0 */) {
+  Util::HostURL hosturl(static_cast<const std::string>(hostname), port);
+  return sockopen_impl(hosturl, errnum, errstr, timeout, false);
 }
 
 Variant f_pfsockopen(CStrRef hostname, int port /* = -1 */,
                      VRefParam errnum /* = null */,
                      VRefParam errstr /* = null */,
-                     double timeout /* = 0.0 */) {
+                     double timeout /* = -1.0 */) {
   // TODO: persistent socket handling
-  return sockopen_impl(hostname, port, errnum, errstr, timeout, true);
+  Util::HostURL hosturl(static_cast<const std::string>(hostname), port);
+  return sockopen_impl(hosturl, errnum, errstr, timeout, true);
 }
 
 String ipaddr_convert(struct sockaddr *addr, int addrlen) {
@@ -1114,14 +1173,15 @@ String ipaddr_convert(struct sockaddr *addr, int addrlen) {
   return String(buffer, CopyString);
 }
 
-static const StaticString s_family("family");
-static const StaticString s_socktype("socktype");
-static const StaticString s_protocol("protocol");
-static const StaticString s_address("address");
-static const StaticString s_port("port");
-static const StaticString s_flow_info("flow_info");
-static const StaticString s_scope_id("scope_id");
-static const StaticString s_sockaddr("sockaddr");
+const StaticString
+  s_family("family"),
+  s_socktype("socktype"),
+  s_protocol("protocol"),
+  s_address("address"),
+  s_port("port"),
+  s_flow_info("flow_info"),
+  s_scope_id("scope_id"),
+  s_sockaddr("sockaddr");
 
 Variant f_getaddrinfo(CStrRef host, CStrRef port, int family /* = 0 */,
                       int socktype /* = 0 */, int protocol /* = 0 */,

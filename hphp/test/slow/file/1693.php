@@ -1,3 +1,5 @@
 <?php
 
- fclose(STDOUT);echo 'test';ob_start();
+fclose(STDOUT);
+echo 'test';
+ob_start();

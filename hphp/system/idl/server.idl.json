@@ -1,0 +1,365 @@
+{
+    "preamble": "",
+    "consts": [
+        {
+            "name": "PAGELET_NOT_READY",
+            "type": "Int64"
+        },
+        {
+            "name": "PAGELET_READY",
+            "type": "Int64"
+        },
+        {
+            "name": "PAGELET_DONE",
+            "type": "Int64"
+        }
+    ],
+    "funcs": [
+        {
+            "name": "dangling_server_proxy_old_request",
+            "desc": "When I'm running a newer version of the server software and I'm getting an HTTP request that's from old version of a web page, proxy it to a local instance that is still running or dangling just for handling old version of requests. Please read server documentation for more details.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "TRUE if successful, FALSE otherwise."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "dangling_server_proxy_new_request",
+            "desc": "When I'm still running an old version of the server software and I'm getting an HTTP request that's newer, proxy it to a specified host that already has the new version of the software running. Please read server documentation for more details.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "TRUE if successful, FALSE otherwise."
+            },
+            "args": [
+                {
+                    "name": "host",
+                    "type": "String",
+                    "desc": "The machine to proxy to."
+                }
+            ]
+        },
+        {
+            "name": "pagelet_server_is_enabled",
+            "desc": "Whether pagelet server is enabled or not. Please read server documentation for what a pagelet server is.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "TRUE if it's enabled, FALSE otherwise."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "pagelet_server_task_start",
+            "desc": "Processes a pagelet server request.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Resource",
+                "desc": "An object that can be used with pagelet_server_task_status() or pagelet_server_task_result()."
+            },
+            "args": [
+                {
+                    "name": "url",
+                    "type": "String",
+                    "desc": "The URL we're running this pagelet with."
+                },
+                {
+                    "name": "headers",
+                    "type": "StringMap",
+                    "value": "null_array",
+                    "desc": "HTTP headers to send to the pagelet."
+                },
+                {
+                    "name": "post_data",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "POST data to send."
+                },
+                {
+                    "name": "files",
+                    "type": "VariantVec",
+                    "value": "null_array",
+                    "desc": "Array for the pagelet."
+                }
+            ]
+        },
+        {
+            "name": "pagelet_server_task_status",
+            "desc": "Checks finish status of a pagelet task.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "PAGELET_NOT_READY if there is no data available, PAGELET_READY if (partial) data is available from pagelet_server_flush(), and PAGELET_DONE if the pagelet request is done."
+            },
+            "args": [
+                {
+                    "name": "task",
+                    "type": "Resource",
+                    "desc": "The pagelet task handle returned from pagelet_server_task_start()."
+                }
+            ]
+        },
+        {
+            "name": "pagelet_server_task_result",
+            "desc": "Block and wait until pagelet task finishes or times out.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "String",
+                "desc": "HTTP response from the pagelet."
+            },
+            "args": [
+                {
+                    "name": "task",
+                    "type": "Resource",
+                    "desc": "The pagelet task handle returned from pagelet_server_task_start()."
+                },
+                {
+                    "name": "headers",
+                    "type": "Variant",
+                    "desc": "HTTP response headers.",
+                    "ref": true
+                },
+                {
+                    "name": "code",
+                    "type": "Variant",
+                    "desc": "HTTP response code. Set to -1 in the event of a timeout.",
+                    "ref": true
+                },
+                {
+                    "name": "timeout_ms",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "How many milliseconds to wait. A timeout of zero is interpreted as an infinite timeout."
+                }
+            ]
+        },
+        {
+            "name": "pagelet_server_flush",
+            "desc": "Flush all the currently buffered output, so that the main thread can read it with pagelet_server_task_result(). This is only meaningful in a pagelet thread.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null,
+                "desc": "No value is returned."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "xbox_send_message",
+            "desc": "Sends an xbox message and waits for response. Please read server documentation for what an xbox is.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "TRUE if successful, FALSE otherwise."
+            },
+            "args": [
+                {
+                    "name": "msg",
+                    "type": "String",
+                    "desc": "The message."
+                },
+                {
+                    "name": "ret",
+                    "type": "Variant",
+                    "desc": "The response.",
+                    "ref": true
+                },
+                {
+                    "name": "timeout_ms",
+                    "type": "Int64",
+                    "desc": "How many milli-seconds to wait."
+                },
+                {
+                    "name": "host",
+                    "type": "String",
+                    "value": "\"localhost\"",
+                    "desc": "Which machine to send to."
+                }
+            ]
+        },
+        {
+            "name": "xbox_post_message",
+            "desc": "Posts an xbox message without waiting. Please read server documentation for more details.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "TRUE if successful, FALSE otherwise."
+            },
+            "args": [
+                {
+                    "name": "msg",
+                    "type": "String",
+                    "desc": "The response."
+                },
+                {
+                    "name": "host",
+                    "type": "String",
+                    "value": "\"localhost\"",
+                    "desc": "Which machine to post to."
+                }
+            ]
+        },
+        {
+            "name": "xbox_task_start",
+            "desc": "Starts a local xbox task.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Resource",
+                "desc": "A task handle xbox_task_status() and xbox_task_result() can use."
+            },
+            "args": [
+                {
+                    "name": "message",
+                    "type": "String",
+                    "desc": "A message to send to xbox's message processing function."
+                }
+            ]
+        },
+        {
+            "name": "xbox_task_status",
+            "desc": "Checks an xbox task's status.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "TRUE if finished, FALSE otherwise."
+            },
+            "args": [
+                {
+                    "name": "task",
+                    "type": "Resource",
+                    "desc": "The xbox task object created by xbox_task_start()."
+                }
+            ]
+        },
+        {
+            "name": "xbox_task_result",
+            "desc": "Block and wait for xbox task's result.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Response code following HTTP's responses. For example, 200 for success and 500 for server error."
+            },
+            "args": [
+                {
+                    "name": "task",
+                    "type": "Resource",
+                    "desc": "The xbox task object created by xbox_task_start()."
+                },
+                {
+                    "name": "timeout_ms",
+                    "type": "Int64",
+                    "desc": "How many milli-seconds to wait."
+                },
+                {
+                    "name": "ret",
+                    "type": "Variant",
+                    "desc": "xbox message processing function's return value.",
+                    "ref": true
+                }
+            ]
+        },
+        {
+            "name": "xbox_process_call_message",
+            "desc": "This function is invoked by the xbox facility to start an xbox call task. This function is not intended to be called directly by user code.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The return value of the xbox call task."
+            },
+            "args": [
+                {
+                    "name": "msg",
+                    "type": "String",
+                    "desc": "The call message."
+                }
+            ]
+        },
+        {
+            "name": "xbox_get_thread_timeout",
+            "desc": "Gets the timeout (maximum duration), in seconds, of the current xbox thread. Throws for non-xbox threads.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "The current timeout (maximum duration)."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "xbox_set_thread_timeout",
+            "desc": "Sets the timeout (maximum duration), in seconds, of the current xbox thread. The xbox thread would reset when this amount of time has passed since the previous reset. Throws for non-xbox threads.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "timeout",
+                    "type": "Int32",
+                    "desc": "The new timeout (maximum duration)."
+                }
+            ]
+        },
+        {
+            "name": "xbox_schedule_thread_reset",
+            "desc": "Schedules a reset of the current xbox thread, when the next request comes in. Throws for non-xbox threads.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "xbox_get_thread_time",
+            "desc": "Returns the time that the current xbox thread has been running without a reset, in seconds, and throws for non-xbox threads.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "The time that the current xbox thread has been running without a reset."
+            },
+            "args": [
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

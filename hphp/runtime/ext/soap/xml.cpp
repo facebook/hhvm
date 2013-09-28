@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -69,8 +69,9 @@ static void soap_ignorableWhitespace(void *ctx, const xmlChar *ch, int len) {
 static void soap_Comment(void *ctx, const xmlChar *value) {
 }
 
-static StaticString s_http("http");
-static StaticString s_timeout("timeout");
+const StaticString
+  s_http("http"),
+  s_timeout("timeout");
 
 xmlDocPtr soap_xmlParseFile(const char *filename) {
   String cache_key("HPHP.SOAP.WSDL.");
@@ -79,9 +80,9 @@ xmlDocPtr soap_xmlParseFile(const char *filename) {
   Variant content = f_apc_fetch(cache_key);
   if (same(content, false)) {
     Variant stream = File::Open(filename, "rb", 0, f_stream_context_create(
-                CREATE_MAP1(s_http, CREATE_MAP1(s_timeout, 1000))));
+                make_map_array(s_http, make_map_array(s_timeout, 1000))));
     if (!same(stream, false)) {
-      content = f_stream_get_contents(stream);
+      content = f_stream_get_contents(stream.toResource());
       if (!same(content, false)) {
         f_apc_store(cache_key, content);
       }

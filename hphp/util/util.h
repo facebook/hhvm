@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_UTIL_H_
 #define incl_HPHP_UTIL_H_
 
+#include <cassert>
+#include <atomic>
 #include <vector>
 #include <string>
 #include <map>
@@ -24,9 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include "arpa/inet.h" // For htonl().
-
-#include <boost/utility.hpp>
+#include <arpa/inet.h> // For htonl().
 
 #include "folly/Likely.h"
 
@@ -39,51 +39,66 @@ namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
 // Non-gcc compat
 #ifndef __GNUC__
-#define __attribute__(x)
+# define __attribute__(x)
 #endif
 
-#define ATTRIBUTE_UNUSED __attribute__((unused))
-#define ATTRIBUTE_NORETURN __attribute__((noreturn))
+#define ATTRIBUTE_UNUSED   __attribute__((__unused__))
+#define ATTRIBUTE_NORETURN __attribute__((__noreturn__))
 #ifndef ATTRIBUTE_PRINTF
-#if __GNUC__ > 2 || __GNUC__ == 2 && __GNUC_MINOR__ > 6
-#define ATTRIBUTE_PRINTF(a1,a2) __attribute__((__format__ (__printf__, a1, a2)))
-#else
-#define ATTRIBUTE_PRINTF(a1,a2)
-#endif
+# if __GNUC__ > 2 || __GNUC__ == 2 && __GNUC_MINOR__ > 6
+#  define ATTRIBUTE_PRINTF(a1,a2) \
+     __attribute__((__format__ (__printf__, a1, a2)))
+# else
+#  define ATTRIBUTE_PRINTF(a1,a2)
+# endif
 #endif
 #if (__GNUC__ == 4 && __GNUC_MINOR__ >= 3) || __ICC >= 1200 || __GNUC__ > 4
-#define ATTRIBUTE_COLD __attribute__((cold))
+# define ATTRIBUTE_COLD    __attribute__((__cold__))
 #else
-#define ATTRIBUTE_COLD
+# define ATTRIBUTE_COLD
 #endif
 
-#define ALWAYS_INLINE  __attribute__((always_inline))
-#define NEVER_INLINE  __attribute__((noinline))
+#define ALWAYS_INLINE      inline __attribute__((__always_inline__))
+#define NEVER_INLINE       __attribute__((__noinline__))
 #define INLINE_SINGLE_CALLER ALWAYS_INLINE
-#define UNUSED         __attribute__((unused))
-#define FLATTEN        __attribute__((flatten))
-#define HOT_FUNC       __attribute__ ((section (".text.hot.builtin")))
+#define UNUSED             __attribute__((__unused__))
+#define FLATTEN            __attribute__((__flatten__))
+#ifndef __APPLE__
+# define HOT_FUNC          __attribute__((__section__(".text.hot.builtin")))
+#else
+// TODO: Figure out a way to link hot functions first on OSX with gobjdump
+# define HOT_FUNC
+#endif
+#define EXTERNALLY_VISIBLE __attribute__((__externally_visible__))
 
 #ifdef DEBUG
-#define DEBUG_ONLY /* nop */
+# define DEBUG_ONLY /* nop */
 #else
-#define DEBUG_ONLY UNUSED
+# define DEBUG_ONLY UNUSED
 #endif
 
 #define HOT_FUNC_VM HOT_FUNC
 
 /*
- * we need to keep some unreferenced functions from being removed by
+ * We need to keep some unreferenced functions from being removed by
  * the linker. There is no compile time mechanism for doing this, but
  * by putting them in the same section as some other, referenced function
  * in the same file, we can keep them around.
  *
  * So this macro should be used to mark at least one function that is
  * referenced, and other functions that are not referenced in the same
- * file
+ * file.
+ *
+ * Note: this may not work properly with LTO. We'll revisit when/if we
+ * move to it.
  */
-#define KEEP_SECTION \
-  __attribute__((externally_visible))
+#ifndef __APPLE__
+# define KEEP_SECTION \
+    __attribute__((__section__(".text.keep")))
+#else
+# define KEEP_SECTION \
+    __attribute__((__section__(".text.keep,")))
+#endif
 
 /**
  * Split a string into a list of tokens by character delimiter.
@@ -163,18 +178,14 @@ std::string relativePath(const std::string fromDir, const std::string toFile);
 /**
  * Canonicalize path to remove "..", "." and "\/", etc..
  */
-std::string canonicalize(const std::string &path);
-const char *canonicalize(const char *path, size_t len);
+std::string canonicalize(const std::string& path);
+char* canonicalize(const char* path, size_t len,
+                   bool collapse_slashes = true);
 
 /**
  * Makes sure there is ending slash by changing "path/name" to "path/name/".
  */
 std::string normalizeDir(const std::string &dirname);
-
-/**
- * Thread-safe strerror().
- */
-std::string safe_strerror(int errnum);
 
 /**
  * Thread-safe dirname().
@@ -192,7 +203,7 @@ size_t dirname_helper(char *path, int len);
  * Check if value is a power of two.
  */
 template<typename Int>
-static inline bool isPowerOfTwo(Int value) {
+inline bool isPowerOfTwo(Int value) {
   return (value > 0 && (value & (value-1)) == 0);
 }
 
@@ -200,7 +211,7 @@ static inline bool isPowerOfTwo(Int value) {
  * Round up value to the nearest power of two
  */
 template<typename Int>
-static inline Int roundUpToPowerOfTwo(Int value) {
+inline Int roundUpToPowerOfTwo(Int value) {
 #ifdef DEBUG
   (void) (0 / value); // fail for 0; ASSERT is a pain.
 #endif
@@ -216,25 +227,25 @@ static inline Int roundUpToPowerOfTwo(Int value) {
 /**
  * Return log-base-2 of the next power of 2, i.e. CLZ
  */
-static inline int lgNextPower2(uint64_t value) {
+inline int lgNextPower2(uint64_t value) {
 #ifdef DEBUG
   (void) (0 / value); // fail for 0; ASSERT is a pain.
 #endif
   return 64 - __builtin_clzll(value - 1);
 }
 
-static inline int lgNextPower2(uint32_t value) {
+inline int lgNextPower2(uint32_t value) {
 #ifdef DEBUG
   (void) (0 / value); // fail for 0; ASSERT is a pain.
 #endif
   return 32 - __builtin_clz(value - 1);
 }
 
-static inline uint64_t nextPower2(uint64_t value) {
+inline uint64_t nextPower2(uint64_t value) {
   return uint64_t(1) << lgNextPower2(value);
 }
 
-static inline uint32_t nextPower2(uint32_t value) {
+inline uint32_t nextPower2(uint32_t value) {
   return uint32_t(1) << lgNextPower2(value);
 }
 
@@ -254,7 +265,8 @@ const void *buffer_append(const void *buf1, int size1,
  */
 void string_printf(std::string &msg,
                    const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
-void string_vsnprintf(std::string &msg, const char *fmt, va_list ap);
+void string_vsnprintf(std::string &msg,
+                      const char *fmt, va_list ap) ATTRIBUTE_PRINTF(2,0);
 
 /**
  * Escaping strings for code generation.
@@ -283,53 +295,43 @@ void find(std::vector<std::string> &out,
  */
 std::string format_pattern(const std::string &pattern, bool prefixSlash);
 
-static inline void compiler_membar( ) {
-  asm volatile("" : : :"memory");
-}
-
 /**
  * Portable macros for mapping machine stack and frame pointers to variables.
  */
 #if defined(__x86_64__)
-#  define DECLARE_STACK_POINTER(sp) register void*   sp asm("rsp");
-#  define DECLARE_FRAME_POINTER(fp) register ActRec* fp asm("rbp");
+
+#  define DECLARE_STACK_POINTER(sp)               \
+     void* sp;                                    \
+     asm volatile("mov %%rsp, %0" : "=r" (sp) ::)
+
+#  if defined(__clang__)
+#    define DECLARE_FRAME_POINTER(fp)               \
+       ActRec* fp;                                  \
+       asm volatile("mov %%rbp, %0" : "=r" (fp) ::)
+#  else
+#    define DECLARE_FRAME_POINTER(fp) register ActRec* fp asm("rbp");
+#  endif
+
 #elif defined(__AARCH64EL__)
+
+#  if defined(__clang__)
+#    error Clang implementation not done for ARM
+#  endif
+
 #  define DECLARE_STACK_POINTER(sp) register void*   sp asm("sp");
 #  define DECLARE_FRAME_POINTER(fp) register ActRec* fp asm("x29");
+
 #else
+
 #  error What are the stack and frame pointers called on your architecture?
+
 #endif
 
-/**
- * Given the address of a C++ function, returns that function's name
- * or a hex string representation of the address if it can't find
- * the function's name. Attempts to demangle C++ function names. It's
- * the caller's responsibility to free the returned C string.
- */
-char* getNativeFunctionName(void* codeAddr);
-
-/**
- * Get the vtable offset corresponding to a method pointer. NB: only works
- * for single inheritance. For no inheritance at all, use
- * getMethodPtr. ABI-specific, don't play on or around.
- */
-template <typename MethodPtr>
-int64_t getVTableOffset(MethodPtr meth) {
-  union {
-    MethodPtr meth;
-    int64_t offset;
-  } u;
-  u.meth = meth;
-  return u.offset - 1;
-}
-
-template <typename MethodPtr>
-constexpr void* getMethodPtr(MethodPtr meth) {
-  union U {
-    MethodPtr meth;
-    void* ptr;
-  };
-  return ((U*)(&meth))->ptr;
+inline void assert_native_stack_aligned() {
+#ifndef NDEBUG
+  DECLARE_STACK_POINTER(sp);
+  assert(reinterpret_cast<uintptr_t>(sp) % 16 == 0);
+#endif
 }
 
 /**
@@ -353,18 +355,37 @@ constexpr void* getMethodPtr(MethodPtr meth) {
  * Read typed data from an offset relative to a base address
  */
 template <class T>
-static T& getDataRef(void* base, unsigned offset) {
+T& getDataRef(void* base, unsigned offset) {
   return *(T*)((char*)base + offset);
 }
 
-template<class T>
-struct Nuller : private boost::noncopyable {
-  explicit Nuller(const T** p) : p(p) {}
-  ~Nuller() { *p = 0; }
-  T const** const p;
-};
-
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
+
+class LogFileFlusher {
+public:
+  LogFileFlusher() : m_bytesWritten(0) {}
+  virtual ~LogFileFlusher() {}
+
+  void recordWriteAndMaybeDropCaches(int fd, int bytes);
+  inline void recordWriteAndMaybeDropCaches(FILE* f, int bytes) {
+    recordWriteAndMaybeDropCaches(fileno(f), bytes);
+  }
+
+  enum {
+    kDropCacheTail = 1 * 1024 * 1024
+  };
+
+  static int DropCacheChunkSize;
+protected:
+  // For testing
+  virtual void dropCache(int fd, off_t len) {
+    Util::drop_cache(fd, len);
+  }
+
+private:
+  std::atomic<int> m_bytesWritten;
+};
+}
 
 #endif

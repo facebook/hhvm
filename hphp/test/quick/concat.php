@@ -12,6 +12,23 @@ function main() {
 
   $s = array() . array();
   print $s."\n";
+
+  $s = "a" . 3;
+  print $s."\n";
+
+  $s = 3 . "a";
+  print $s."\n";
+
+  $s .= 4;
+  print $s."\n";
+
+  $s .= "a";
+  print $s."\n";
+
+  $b = array(array());
+  $a = $b[0];
+  $s = $a . "a";
+  print $s."\n";
 }
 
 main();

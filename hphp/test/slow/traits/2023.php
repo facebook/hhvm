@@ -1,8 +1,6 @@
 <?php
 
-
-
-	class MyClass {
+class MyClass {
 		static function test() {
 		  return __TRAIT__;
 		}

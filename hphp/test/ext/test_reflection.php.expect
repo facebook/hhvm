@@ -1,0 +1,30 @@
+string(3) "foo"
+bool(true)
+string(3) "bar"
+bool(true)
+string(3) "foo"
+bool(true)
+string(3) "bar"
+bool(true)
+string(3) "bar"
+bool(false)
+string(3) "baz"
+bool(false)
+string(3) "foo"
+bool(false)
+string(6) "foobar"
+bool(false)
+string(4) "foo2"
+bool(true)
+string(4) "foo2"
+bool(true)
+string(4) "foo2"
+bool(false)
+string(4) "bar2"
+bool(true)
+string(7) "foobar2"
+bool(false)
+string(4) "foo2"
+bool(false)
+string(7) "foobar2"
+bool(false)

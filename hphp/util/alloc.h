@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,10 +19,21 @@
 
 #include <stdint.h>
 
+#include "folly/Portability.h"
+
 #include "hphp/util/exception.h"
 
+#ifdef FOLLY_SANITIZE_ADDRESS
+// ASan is less precise than valgrind so we'll need a superset of those tweaks
+# define VALGRIND
+// TODO: (t2869817) ASan doesn't play well with jemalloc
+# ifdef USE_JEMALLOC
+#  undef USE_JEMALLOC
+# endif
+#endif
+
 #ifdef USE_TCMALLOC
-#include "google/malloc_extension.h"
+#include <google/malloc_extension.h>
 #endif
 
 #ifndef USE_JEMALLOC
@@ -33,6 +44,8 @@
 #  include "malloc.h"
 # endif
 #else
+# undef ALLOCM_ZERO
+# undef ALLOCM_NO_MOVE
 # include <jemalloc/jemalloc.h>
 # ifndef ALLOCM_ARENA
 #  define ALLOCM_ARENA(a) 0
@@ -48,6 +61,7 @@ extern "C" {
 #endif
 
 #ifdef USE_JEMALLOC
+
   int mallctl(const char *name, void *oldp, size_t *oldlenp, void *newp,
               size_t newlen) __attribute__((weak));
   int mallctlnametomib(const char *name, size_t* mibp, size_t*miblenp)
@@ -63,6 +77,14 @@ extern "C" {
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+const bool use_jemalloc =
+#ifdef USE_JEMALLOC
+  true
+#else
+  false
+#endif
+  ;
+
 class OutOfMemoryException : public Exception {
 public:
   explicit OutOfMemoryException(size_t size)
@@ -76,6 +98,7 @@ namespace Util {
 
 #ifdef USE_JEMALLOC
 extern unsigned low_arena;
+extern std::atomic<int> low_huge_pages;
 #endif
 
 inline void* low_malloc(size_t size) {
@@ -94,6 +117,14 @@ inline void low_free(void* ptr) {
   dallocm(ptr, ALLOCM_ARENA(low_arena));
 #endif
 }
+
+inline void low_malloc_huge_pages(int pages) {
+#ifdef USE_JEMALLOC
+  low_huge_pages = pages;
+#endif
+}
+
+void low_malloc_skip_huge(void* start, void* end);
 
 /**
  * Safe memory allocation.

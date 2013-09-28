@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -231,7 +231,7 @@ bool PDOSqliteConnection::quoter(CStrRef input, String &quoted,
                                  PDOParamType paramtype) {
   int len = 2 * input.size() + 3;
   String s(len, ReserveString);
-  char *buf = s.mutableSlice().ptr;
+  char *buf = s.bufferSlice().ptr;
   sqlite3_snprintf(len, buf, "'%q'", input.data());
   quoted = s.setSize(strlen(buf));
   return true;
@@ -401,11 +401,11 @@ bool PDOSqliteStatement::describer(int colno) {
 
   if (columns.empty()) {
     for (int i = 0; i < column_count; i++) {
-      columns.set(i, Object(new PDOColumn()));
+      columns.set(i, Resource(new PDOColumn()));
     }
   }
 
-  PDOColumn *col = columns[colno].toObject().getTyped<PDOColumn>();
+  PDOColumn *col = columns[colno].toResource().getTyped<PDOColumn>();
   col->name = String(sqlite3_column_name(m_stmt, colno), CopyString);
   col->maxlen = 0xffffffff;
   col->precision = 0;
@@ -499,7 +499,7 @@ bool PDOSqliteStatement::paramHook(PDOBoundParam *param,
 
       case PDO_PARAM_LOB:
         if (param->parameter.isResource()) {
-          Variant buf = f_stream_get_contents(param->parameter);
+          Variant buf = f_stream_get_contents(param->parameter.toResource());
           if (!same(buf, false)) {
             param->parameter = buf;
           } else {
@@ -551,15 +551,16 @@ bool PDOSqliteStatement::paramHook(PDOBoundParam *param,
   return true;
 }
 
-static const StaticString s_native_type("native_type");
-static const StaticString s_null("null");
-static const StaticString s_double("double");
-static const StaticString s_blob("blob");
-static const StaticString s_string("string");
-static const StaticString s_integer("integer");
-static const StaticString s_sqlite_decl_type("sqlite:decl_type");
-static const StaticString s_table("table");
-static const StaticString s_flags("flags");
+const StaticString
+  s_native_type("native_type"),
+  s_null("null"),
+  s_double("double"),
+  s_blob("blob"),
+  s_string("string"),
+  s_integer("integer"),
+  s_sqlite_decl_type("sqlite:decl_type"),
+  s_table("table"),
+  s_flags("flags");
 
 bool PDOSqliteStatement::getColumnMeta(int64_t colno, Array &ret) {
   if (!m_stmt) {

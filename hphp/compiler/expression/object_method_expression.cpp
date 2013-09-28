@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -116,7 +116,7 @@ ConstructPtr ObjectMethodExpression::getNthKid(int n) const {
 
 void ObjectMethodExpression::setNthKid(int n, ConstructPtr cp) {
   if (!n) {
-    m_object = boost::dynamic_pointer_cast<Expression>(cp);
+    m_object = dynamic_pointer_cast<Expression>(cp);
   } else {
     FunctionCall::setNthKid(n, cp);
   }

@@ -1,0 +1,10 @@
+*** Testing xml_get_current_byte_index() : error conditions ***
+
+-- Testing xml_get_current_byte_index() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing xml_get_current_byte_index() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

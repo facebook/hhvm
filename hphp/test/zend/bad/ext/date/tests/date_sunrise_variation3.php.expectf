@@ -1,0 +1,158 @@
+*** Testing date_sunrise() : usage variation ***
+
+--int 0--
+string(5) "01:10"
+float(1.174%d)
+int(1218177627)
+
+--int 1--
+string(5) "01:09"
+float(1.155%d)
+int(1218177558)
+
+--int 12345--
+bool(false)
+bool(false)
+bool(false)
+
+--int -12345--
+bool(false)
+bool(false)
+bool(false)
+
+--empty array--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--int indexed array--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--associative array--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--nested arrays--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--uppercase NULL--
+string(5) "01:10"
+float(1.174%d)
+int(1218177627)
+
+--lowercase null--
+string(5) "01:10"
+float(1.174%d)
+int(1218177627)
+
+--lowercase true--
+string(5) "01:09"
+float(1.155%d)
+int(1218177558)
+
+--lowercase false--
+string(5) "01:10"
+float(1.174%d)
+int(1218177627)
+
+--uppercase TRUE--
+string(5) "01:09"
+float(1.155%d)
+int(1218177558)
+
+--uppercase FALSE--
+string(5) "01:10"
+float(1.174%d)
+int(1218177627)
+
+--empty string DQ--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--empty string SQ--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--string DQ--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--string SQ--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--mixed case string--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--heredoc--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--instance of classWithToString--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--instance of classWithoutToString--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--undefined var--
+string(5) "01:10"
+float(1.174%d)
+int(1218177627)
+
+--unset var--
+string(5) "01:10"
+float(1.174%d)
+int(1218177627)
+===DONE===

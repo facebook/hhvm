@@ -1,0 +1,11 @@
+@
+info array_key_exists
+info stdClass
+run
+@
+info myfunc
+info MyClass
+info MyClass::pub
+info MyClass::pro
+info MyClass::pri
+quit

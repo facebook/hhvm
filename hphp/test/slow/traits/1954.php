@@ -1,6 +1,5 @@
 <?php
 
-
 trait Company {
   public function getName() {
     return 'Facebook';
@@ -11,7 +10,8 @@ trait Person {
     return 'Ottoni';
   }
 }
-class Language{}
+class Language{
+}
 class English extends Language {
   use Company, Person {
     Person::getName insteadof Company;

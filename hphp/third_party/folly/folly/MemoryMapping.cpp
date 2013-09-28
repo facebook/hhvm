@@ -22,7 +22,9 @@
 #include <sys/types.h>
 #include <system_error>
 
-#define FLAGS_mlock_chunk_size (1<<20)
+#define FLAGS_mlock_chunk_size (1 << 20)  // 1MB
+
+
 
 namespace folly {
 
@@ -129,7 +131,6 @@ bool memOpInChunks(std::function<int(void*, size_t)> op,
   // operations of their own.
 
   size_t chunkSize = memOpChunkSize(bufSize);
-  size_t chunkCount = bufSize / chunkSize;
 
   char* addr = static_cast<char*>(mem);
   amountSucceeded = 0;

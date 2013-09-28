@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_CLASS_H_
 #define incl_HPHP_EXT_CLASS_H_
 
-#include "hphp/runtime/base/base_includes.h"
+#include "hphp/runtime/base/base-includes.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,11 +26,12 @@ namespace HPHP {
 Array f_get_declared_classes();
 Array f_get_declared_interfaces();
 Array f_get_declared_traits();
+bool f_class_alias(CStrRef original, CStrRef alias, bool autoload = true);
 bool f_class_exists(CStrRef class_name, bool autoload = true);
 bool f_interface_exists(CStrRef interface_name, bool autoload = true);
 bool f_trait_exists(CStrRef trait_name, bool autoload = true);
 Array f_get_class_methods(CVarRef class_or_object);
-Array f_get_class_vars(CStrRef class_name);
+Variant f_get_class_vars(CStrRef class_name);
 Array f_get_class_constants(CStrRef class_name);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,7 +42,7 @@ bool f_is_a(CVarRef class_or_object, CStrRef class_name, bool allow_string = fal
 bool f_is_subclass_of(CVarRef class_or_object, CStrRef class_name, bool allow_string = true);
 bool f_method_exists(CVarRef class_or_object, CStrRef method_name);
 Variant f_property_exists(CVarRef class_or_object, CStrRef property);
-Variant f_get_object_vars(CVarRef object);
+Variant f_get_object_vars(CObjRef object);
 
 ///////////////////////////////////////////////////////////////////////////////
 

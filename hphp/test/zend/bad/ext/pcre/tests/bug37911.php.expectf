@@ -1,0 +1,20 @@
+array(3) {
+  [0]=>
+  string(4) "blub"
+  ["name"]=>
+  string(4) "blub"
+  [1]=>
+  string(4) "blub"
+}
+string(15) "bla blub/4 blah"
+int(1)
+array(3) {
+  [0]=>
+  string(4) "blub"
+  ["name"]=>
+  string(4) "blub"
+  [1]=>
+  string(4) "blub"
+}
+HipHop Warning: %s
+NULL

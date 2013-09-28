@@ -1,0 +1,2 @@
+HipHop Fatal error: Undefined function: foo in %s/test/slow/eval_order/1499.php on line 4
+string(7) "errored"

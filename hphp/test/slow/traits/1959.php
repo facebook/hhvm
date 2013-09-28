@@ -1,6 +1,5 @@
 <?php
 
-
 trait Company {
   public function getName() {
     return 'Facebook';

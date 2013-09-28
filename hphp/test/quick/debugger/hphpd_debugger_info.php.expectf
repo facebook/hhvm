@@ -1,0 +1,11 @@
+Program %s/hphpd_debugger_info.php loaded. Type '[r]un' or '[c]ontinue' to go.
+continue
+bool(true)
+array(2) {
+  ["clientIP"]=>
+  NULL
+  ["clientPort"]=>
+  NULL
+}
+Program %s/hphpd_debugger_info.php exited normally.
+quit

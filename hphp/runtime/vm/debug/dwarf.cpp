@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,16 +13,19 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <stdio.h>
 #include "hphp/runtime/vm/debug/dwarf.h"
+
+#include <stdio.h>
 #include "debug.h"
+#if !defined(__APPLE__) && !defined(__FreeBSD__)
 #include "hphp/runtime/vm/debug/elfwriter.h"
+#endif
 #include "hphp/runtime/vm/debug/gdb-jit.h"
 
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/execution_context.h"
-#include "hphp/runtime/vm/translator/translator.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 using namespace HPHP::Transl;
 
@@ -33,8 +36,12 @@ namespace Debug {
 int g_dwarfCallback(char *name, int size, Dwarf_Unsigned type,
             Dwarf_Unsigned flags, Dwarf_Unsigned link, Dwarf_Unsigned info,
             Dwarf_Unsigned *sect_name_index, Dwarf_Ptr handle, int *error) {
+#if !defined(__APPLE__) && !defined(__FreeBSD__)
   ElfWriter *e = reinterpret_cast<ElfWriter *>(handle);
   return e->dwarfCallback(name, size, type, flags, link, info);
+#else
+  return 0;
+#endif
 }
 
 void DwarfBuf::byte(uint8_t c) {
@@ -214,8 +221,10 @@ void DwarfInfo::compactChunks() {
     m_dwarfChunks[j] = nullptr;
   }
   m_dwarfChunks[i] = chunk;
+#if !defined(__APPLE__) && !defined(__FreeBSD__)
   // register compacted chunk with gdb
   ElfWriter e = ElfWriter(chunk);
+#endif
 }
 
 static Mutex s_lock(RankLeaf);
@@ -282,9 +291,11 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range, const char* name,
     f->m_chunk = chunk;
   }
 
+#if !defined(__APPLE__) && !defined(__FreeBSD__)
   if (f->m_chunk->m_functions.size() >= RuntimeOption::EvalGdbSyncChunks) {
     ElfWriter e = ElfWriter(f->m_chunk);
   }
+#endif
 
   return f->m_chunk;
 }
@@ -295,7 +306,9 @@ void DwarfInfo::syncChunks() {
   for (i = 0; i < m_dwarfChunks.size(); i++) {
     if (m_dwarfChunks[i] && !m_dwarfChunks[i]->isSynced()) {
       unregister_gdb_chunk(m_dwarfChunks[i]);
+#if !defined(__APPLE__) && !defined(__FreeBSD__)
       ElfWriter e = ElfWriter(m_dwarfChunks[i]);
+#endif
     }
   }
 }

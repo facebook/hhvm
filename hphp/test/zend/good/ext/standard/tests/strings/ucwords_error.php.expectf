@@ -1,0 +1,11 @@
+*** Testing ucwords() : error conditions ***
+
+-- Testing ucwords() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing ucwords() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+string(10) "string_val"
+Done

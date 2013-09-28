@@ -1,3 +1,5 @@
 <?php
 
- $a = array(10); $a += array('c' => 20);       var_dump($a);
+$a = array(10);
+ $a += array('c' => 20);
+       var_dump($a);

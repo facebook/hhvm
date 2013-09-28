@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,8 +18,9 @@
 #include "hphp/util/base.h"
 #include "util.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/async_func.h"
-#include "hphp/util/text_color.h"
+#include "hphp/util/async-func.h"
+#include "hphp/util/text-color.h"
+#include "folly/String.h"
 
 #include <pwd.h>
 
@@ -157,9 +158,11 @@ bool Process::Exec(const char *path, const char *argv[], const char *in,
     if (WEXITSTATUS(status) != 0) {
       Logger::Verbose("Status %d running command: `%s'\n",
                       WEXITSTATUS(status), path);
-      while (*argv) {
-        Logger::Verbose("  arg: `%s'\n", *argv);
-        argv++;
+      if (argv) {
+        while (*argv) {
+          Logger::Verbose("  arg: `%s'\n", *argv);
+          argv++;
+        }
       }
     } else {
       ret = true;
@@ -184,7 +187,7 @@ int Process::Exec(const std::string &cmd, const std::string &outf,
   int pid = fork();
   if (pid < 0) {
     Logger::Error("Unable to fork: %d %s", errno,
-                  Util::safe_strerror(errno).c_str());
+                  folly::errnoStr(errno).c_str());
     return 0;
   }
   if (pid == 0) {
@@ -219,7 +222,7 @@ int Process::Exec(const char *path, const char *argv[], int *fdin, int *fdout,
   int pid = fork();
   if (pid < 0) {
     Logger::Error("Unable to fork: %d %s", errno,
-                  Util::safe_strerror(errno).c_str());
+                  folly::errnoStr(errno).c_str());
     return 0;
   }
   if (pid == 0) {
@@ -540,7 +543,7 @@ std::string Process::GetAppVersion() {
 #undefine HPHP_VERSION
 #endif
 #define HPHP_VERSION(v) return #v;
-#include "../version"
+#include "../version" // nolint
 }
 
 std::string Process::GetHostName() {

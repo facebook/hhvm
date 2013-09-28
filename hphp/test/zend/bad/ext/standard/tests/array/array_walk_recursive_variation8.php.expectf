@@ -1,0 +1,9 @@
+*** Testing array_walk_recursive() : built-in function as callback ***
+-- With 'pow' built-in function --
+bool(true)
+-- With 'min' built-in function --
+bool(true)
+-- With 'echo' language construct --
+HipHop Warning: %s
+NULL
+Done

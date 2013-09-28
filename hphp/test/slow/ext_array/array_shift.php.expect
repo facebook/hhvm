@@ -1,0 +1,21 @@
+array(1) {
+  ["b"]=>
+  int(2)
+}
+array(1) {
+  [0]=>
+  int(2)
+}
+array(1) {
+  [0]=>
+  int(2)
+}
+array(3) {
+  [0]=>
+  string(6) "banana"
+  [1]=>
+  string(5) "apple"
+  [2]=>
+  string(9) "raspberry"
+}
+string(6) "orange"

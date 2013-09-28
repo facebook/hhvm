@@ -1,4 +1,0 @@
-bool(false)
-
-Deprecated: Function ereg() is deprecated in hphp/test/zend/bad/ext-mbstring/php_gr_jp_10830.phpt on line %d
-bool(false)

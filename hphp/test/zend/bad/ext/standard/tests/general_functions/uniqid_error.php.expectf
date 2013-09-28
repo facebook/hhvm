@@ -1,0 +1,11 @@
+*** Testing uniqid() : error conditions ***
+
+-- Testing uniqid() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing uniqid() function with invalid values for $prefix --
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+===DONE===

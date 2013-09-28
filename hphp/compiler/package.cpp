@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,6 +19,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
+#include "folly/String.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/compiler/analysis/symbol_table.h"
@@ -28,11 +29,11 @@
 #include "hphp/util/util.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/json.h"
-#include "hphp/util/db_conn.h"
-#include "hphp/util/db_query.h"
+#include "hphp/util/db-conn.h"
+#include "hphp/util/db-query.h"
 #include "hphp/util/exception.h"
-#include "hphp/util/job_queue.h"
-#include "hphp/runtime/base/execution_context.h"
+#include "hphp/util/job-queue.h"
+#include "hphp/runtime/base/execution-context.h"
 
 using namespace HPHP;
 using std::set;
@@ -41,8 +42,7 @@ using std::set;
 
 Package::Package(const char *root, bool bShortTags /* = true */,
                  bool bAspTags /* = false */)
-  : m_bShortTags(bShortTags), m_bAspTags(bAspTags), m_files(4000),
-    m_dispatcher(0), m_lineCount(0), m_charCount(0) {
+  : m_files(4000), m_dispatcher(0), m_lineCount(0), m_charCount(0) {
   m_root = Util::normalizeDir(root);
   m_ar = AnalysisResultPtr(new AnalysisResult());
   m_fileCache = FileCachePtr(new FileCache());
@@ -68,7 +68,7 @@ void Package::addInputList(const char *listFileName) {
   FILE *f = fopen(listFileName, "r");
   if (f == nullptr) {
     throw Exception("Unable to open %s: %s", listFileName,
-                    Util::safe_strerror(errno).c_str());
+                    folly::errnoStr(errno).c_str());
   }
   char fileName[PATH_MAX];
   while (fgets(fileName, sizeof(fileName), f)) {
@@ -378,7 +378,7 @@ int Package::saveStatsToDB(ServerDataPtr server, int totalSeconds,
 
   const char *sql = "INSERT INTO hphp_run (branch, revision, file, line, "
     "byte, program, function, class, types, time)";
-  DBQuery q(&conn, sql);
+  DBQuery q(&conn, "%s", sql);
   q.insert("'%s', %d, %d, %d, %d, %d, %d, %d, '%s', %d",
            branch.c_str(), revision,
            getFileCount(), getLineCount(), getCharCount(),

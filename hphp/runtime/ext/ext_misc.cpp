@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -15,20 +15,21 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/server/server_stats.h"
-#include "hphp/runtime/base/util/exceptions.h"
-#include "hphp/runtime/base/zend/zend_pack.h"
-#include "hphp/runtime/base/hphp_system.h"
-#include "hphp/runtime/base/runtime_option.h"
+#include "hphp/runtime/ext/ext_misc.h"
+
+#include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/zend-pack.h"
+#include "hphp/runtime/base/hphp-system.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_math.h"
-#include "hphp/runtime/ext/ext_misc.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/util/parser/scanner.h"
-#include "hphp/runtime/base/class_info.h"
-#include "hphp/runtime/vm/translator/translator.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/parser/scanner.h"
+#include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
 
@@ -39,6 +40,13 @@ IMPLEMENT_DEFAULT_EXTENSION(tokenizer);
 
 const double k_INF = std::numeric_limits<double>::infinity();
 const double k_NAN = std::numeric_limits<double>::quiet_NaN();
+const bool k_PHP_DEBUG =
+#if DEBUG
+        true;
+#else
+        false;
+#endif
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -110,9 +118,9 @@ Variant f_constant(CStrRef name) {
     Class* cls = getClassByName(data, classNameLen);
     if (cls) {
       String cnsName(constantName, data + len - constantName, CopyString);
-      TypedValue* tv = cls->clsCnsGet(cnsName.get());
-      if (tv) {
-        return tvAsCVarRef(tv);
+      Cell cns = cls->clsCnsGet(cnsName.get());
+      if (cns.m_type != KindOfUninit) {
+        return cellAsCVarRef(cns);
       }
     }
     raise_warning("Couldn't find constant %s", data);
@@ -135,7 +143,7 @@ bool f_define(CStrRef name, CVarRef value,
   if (case_insensitive) {
     raise_warning(Strings::CONSTANTS_CASE_SENSITIVE);
   }
-  return Unit::defCns(name.get(), value.getTypedAccessor());
+  return Unit::defCns(name.get(), value.asCell());
 }
 
 bool f_defined(CStrRef name, bool autoload /* = true */) {
@@ -159,7 +167,7 @@ bool f_defined(CStrRef name, bool autoload /* = true */) {
     Class* cls = getClassByName(data, classNameLen);
     if (cls) {
       String cnsName(constantName, data + len - constantName, CopyString);
-      return cls->clsCnsGet(cnsName.get());
+      return cls->clsCnsGet(cnsName.get()).m_type != KindOfUninit;
     }
     return false;
   } else {
@@ -185,14 +193,6 @@ Variant f_exit(CVarRef status /* = null_variant */) {
   throw ExitException(status.toInt32());
 }
 
-Variant f_eval(CStrRef code_str) {
-  String prefixedCode = concat("<?php ", code_str);
-  Unit* unit = g_vmContext->compileEvalString(prefixedCode.get());
-  TypedValue retVal;
-  g_vmContext->invokeUnit(&retVal, unit);
-  return tvAsVariant(&retVal);
-}
-
 Variant f_get_browser(CStrRef user_agent /* = null_string */,
                       bool return_array /* = false */) {
   throw NotSupportedException(__func__, "bad idea");
@@ -202,15 +202,7 @@ void f___halt_compiler() {
   // do nothing
 }
 
-Variant f_highlight_file(CStrRef filename, bool ret /* = false */) {
-  throw NotSupportedException(__func__, "PHP specific");
-}
-
 Variant f_show_source(CStrRef filename, bool ret /* = false */) {
-  throw NotSupportedException(__func__, "PHP specific");
-}
-
-Variant f_highlight_string(CStrRef str, bool ret /* = false */) {
   throw NotSupportedException(__func__, "PHP specific");
 }
 
@@ -226,10 +218,6 @@ bool f_php_check_syntax(CStrRef filename, VRefParam error_message /* = null */) 
   throw NotSupportedException(__func__, "PHP specific");
 }
 
-String f_php_strip_whitespace(CStrRef filename) {
-  throw NotSupportedException(__func__, "PHP specific");
-}
-
 int64_t f_sleep(int seconds) {
   IOStatusHelper io("sleep");
   sleep(seconds);
@@ -241,8 +229,9 @@ void f_usleep(int micro_seconds) {
   usleep(micro_seconds);
 }
 
-static const StaticString s_seconds("seconds");
-static const StaticString s_nanoseconds("nanoseconds");
+const StaticString
+  s_seconds("seconds"),
+  s_nanoseconds("nanoseconds");
 
 Variant f_time_nanosleep(int seconds, int nanoseconds) {
   if (seconds < 0) {
@@ -263,7 +252,7 @@ Variant f_time_nanosleep(int seconds, int nanoseconds) {
     return true;
   }
   if (errno == EINTR) {
-    return CREATE_MAP2(s_seconds, (int64_t)rem.tv_sec,
+    return make_map_array(s_seconds, (int64_t)rem.tv_sec,
                        s_nanoseconds, (int64_t)rem.tv_nsec);
   }
   return false;
@@ -325,7 +314,7 @@ Variant f_unpack(CStrRef format, CStrRef data) {
 Array f_sys_getloadavg() {
   double load[3];
   getloadavg(load, 3);
-  return CREATE_VECTOR3(load[0], load[1], load[2]);
+  return make_packed_array(load[0], load[1], load[2]);
 }
 
 
@@ -340,7 +329,7 @@ Array f_token_get_all(CStrRef source) {
     if (tokid < 256) {
       res.append(String::FromChar((char)tokid));
     } else {
-      Array p = CREATE_VECTOR3(tokid, String(tok.text()), loc.line0);
+      Array p = make_packed_array(tokid, String(tok.text()), loc.line0);
       res.append(p);
     }
   }
@@ -349,14 +338,18 @@ Array f_token_get_all(CStrRef source) {
 
 String f_token_name(int64_t token) {
 
+  // For compatibility with parser packages expecting veneration of the
+  // lexer's Hebrew roots.
+  if (token == k_T_DOUBLE_COLON) {
+    return "T_PAAMAYIM_NEKUDOTAYIM";
+  }
+
 #undef YYTOKENTYPE
-#ifdef YYTOKEN_MAP
 #undef YYTOKEN_MAP
 #undef YYTOKEN
-#endif
-#define YYTOKEN(num, name) #name
+#define YYTOKEN(num, name) #name,
 #define YYTOKEN_MAP static const char *names[] =
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 #undef YYTOKEN_MAP
 #undef YYTOKEN
 
@@ -369,18 +362,25 @@ String f_token_name(int64_t token) {
   return "UNKNOWN";
 }
 
-static const StaticString s_marauder("I solemnly swear that I am up to no good.");
-
-Variant f_hphp_process_abort(CVarRef magic) {
-  if (magic.equal(s_marauder)) {
-    *((int*)0) = 0xdead;
-  }
-  return null_variant;
-}
-
 String f_hphp_to_string(CVarRef v) {
   return v.toString();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#undef YYTOKENTYPE
+#undef YYTOKEN_MAP
+#undef YYTOKEN
+#define YYTOKEN(num, name)                      \
+  extern const int64_t k_##name = num;
+#define YYTOKEN_MAP namespace HPHP
+
+#include "hphp/parser/hphp.tab.hpp"
+
+namespace HPHP {
+extern const int64_t k_T_PAAMAYIM_NEKUDOTAYIM = k_T_DOUBLE_COLON;
+}
+
+#undef YYTOKEN_MAP
+#undef YYTOKEN

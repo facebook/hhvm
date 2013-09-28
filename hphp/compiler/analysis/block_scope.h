@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,7 +23,7 @@
 #include "hphp/util/lock.h"
 #include "hphp/runtime/base/macros.h"
 
-#include "tbb/concurrent_hash_map.h"
+#include <tbb/concurrent_hash_map.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -66,7 +66,7 @@ typedef SimpleMutex InferTypesMutex;
  * Base class of ClassScope and FunctionScope.
  */
 class BlockScope : private boost::noncopyable,
-                   public boost::enable_shared_from_this<BlockScope> {
+                   public std::enable_shared_from_this<BlockScope> {
 public:
   enum KindOf {
     ClassScope,

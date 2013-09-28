@@ -1,3 +1,3 @@
 <?php
 
- var_dump($v, $v = 0);
+var_dump($v, $v = 0);

@@ -25,6 +25,7 @@
 
 #include "folly/Bits.h"
 #include "folly/io/IOBuf.h"
+#include "folly/io/IOBufQueue.h"
 #include "folly/Likely.h"
 
 /**
@@ -84,6 +85,76 @@ class CursorBase {
     return Endian::little(read<T>());
   }
 
+  /**
+   * Read a fixed-length string.
+   *
+   * The std::string-based APIs should probably be avoided unless you
+   * ultimately want the data to live in an std::string. You're better off
+   * using the pull() APIs to copy into a raw buffer otherwise.
+   */
+  std::string readFixedString(size_t len) {
+    std::string str;
+
+    str.reserve(len);
+    for (;;) {
+      // Fast path: it all fits in one buffer.
+      size_t available = length();
+      if (LIKELY(available >= len)) {
+        str.append(reinterpret_cast<const char*>(data()), len);
+        offset_ += len;
+        return str;
+      }
+
+      str.append(reinterpret_cast<const char*>(data()), available);
+      if (UNLIKELY(!tryAdvanceBuffer())) {
+        throw std::out_of_range("string underflow");
+      }
+      len -= available;
+    }
+  }
+
+  /**
+   * Read a string consisting of bytes until the given terminator character is
+   * seen. Raises an std::length_error if maxLength bytes have been processed
+   * before the terminator is seen.
+   *
+   * See comments in readFixedString() about when it's appropriate to use this
+   * vs. using pull().
+   */
+  std::string readTerminatedString(
+    char termChar = '\0',
+    size_t maxLength = std::numeric_limits<size_t>::max()) {
+    std::string str;
+
+    for (;;) {
+      const uint8_t* buf = data();
+      size_t buflen = length();
+
+      size_t i = 0;
+      while (i < buflen && buf[i] != termChar) {
+        ++i;
+
+        // Do this check after incrementing 'i', as even though we start at the
+        // 0 byte, it still represents a single character
+        if (str.length() + i >= maxLength) {
+          throw std::length_error("string overflow");
+        }
+      }
+
+      str.append(reinterpret_cast<const char*>(buf), i);
+      if (i < buflen) {
+        skip(i + 1);
+        return str;
+      }
+
+      skip(i);
+
+      if (UNLIKELY(!tryAdvanceBuffer())) {
+        throw std::out_of_range("string underflow");
+      }
+    }
+  }
+
   explicit CursorBase(BufType* buf)
     : crtBuf_(buf)
     , offset_(0)
@@ -121,20 +192,20 @@ class CursorBase {
     return std::make_pair(data(), available);
   }
 
-  void pull(void* buf, size_t length) {
-    if (UNLIKELY(pullAtMost(buf, length) != length)) {
+  void pull(void* buf, size_t len) {
+    if (UNLIKELY(pullAtMost(buf, len) != len)) {
       throw std::out_of_range("underflow");
     }
   }
 
-  void clone(std::unique_ptr<folly::IOBuf>& buf, size_t length) {
-    if (UNLIKELY(cloneAtMost(buf, length) != length)) {
+  void clone(std::unique_ptr<folly::IOBuf>& buf, size_t len) {
+    if (UNLIKELY(cloneAtMost(buf, len) != len)) {
       throw std::out_of_range("underflow");
     }
   }
 
-  void skip(size_t length) {
-    if (UNLIKELY(skipAtMost(length) != length)) {
+  void skip(size_t len) {
+    if (UNLIKELY(skipAtMost(len) != len)) {
       throw std::out_of_range("underflow");
     }
   }
@@ -300,17 +371,20 @@ class Writable {
   typename std::enable_if<std::is_integral<T>::value>::type
   write(T value) {
     const uint8_t* u8 = reinterpret_cast<const uint8_t*>(&value);
+    Derived* d = static_cast<Derived*>(this);
     push(u8, sizeof(T));
   }
 
   template <class T>
   void writeBE(T value) {
-    write(Endian::big(value));
+    Derived* d = static_cast<Derived*>(this);
+    d->write(Endian::big(value));
   }
 
   template <class T>
   void writeLE(T value) {
-    write(Endian::little(value));
+    Derived* d = static_cast<Derived*>(this);
+    d->write(Endian::little(value));
   }
 
   void push(const uint8_t* buf, size_t len) {
@@ -524,6 +598,70 @@ class Appender : public detail::Writable<Appender> {
   IOBuf* buffer_;
   IOBuf* crtBuf_;
   uint32_t growth_;
+};
+
+class QueueAppender : public detail::Writable<QueueAppender> {
+ public:
+  /**
+   * Create an Appender that writes to a IOBufQueue.  When we allocate
+   * space in the queue, we grow no more than growth bytes at once
+   * (unless you call ensure() with a bigger value yourself).
+   */
+  QueueAppender(IOBufQueue* queue, uint32_t growth) {
+    reset(queue, growth);
+  }
+
+  void reset(IOBufQueue* queue, uint32_t growth) {
+    queue_ = queue;
+    growth_ = growth;
+  }
+
+  uint8_t* writableData() {
+    return static_cast<uint8_t*>(queue_->writableTail());
+  }
+
+  size_t length() const { return queue_->tailroom(); }
+
+  void append(size_t n) { queue_->postallocate(n); }
+
+  // Ensure at least n contiguous; can go above growth_, throws if
+  // not enough room.
+  void ensure(uint32_t n) { queue_->preallocate(n, growth_); }
+
+  template <class T>
+  typename std::enable_if<std::is_integral<T>::value>::type
+  write(T value) {
+    // We can't fail.
+    auto p = queue_->preallocate(sizeof(T), growth_);
+    storeUnaligned(p.first, value);
+    queue_->postallocate(sizeof(T));
+  }
+
+
+  size_t pushAtMost(const uint8_t* buf, size_t len) {
+    size_t remaining = len;
+    while (remaining != 0) {
+      auto p = queue_->preallocate(std::min(remaining, growth_),
+                                   growth_,
+                                   remaining);
+      memcpy(p.first, buf, p.second);
+      queue_->postallocate(p.second);
+      buf += p.second;
+      remaining -= p.second;
+    }
+
+    return len;
+  }
+
+  void insert(std::unique_ptr<folly::IOBuf> buf) {
+    if (buf) {
+      queue_->append(std::move(buf), true);
+    }
+  }
+
+ private:
+  folly::IOBufQueue* queue_;
+  size_t growth_;
 };
 
 }}  // folly::io

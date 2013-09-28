@@ -1,0 +1,13 @@
+bool(true)
+string(32) "Testing openssl_public_decrypt()"
+HipHop Warning: %s
+bool(false)
+NULL
+bool(false)
+NULL
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+NULL
+bool(true)
+string(32) "Testing openssl_public_decrypt()"

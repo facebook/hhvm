@@ -1,0 +1,271 @@
+{
+    "preamble": "",
+    "consts": [
+
+    ],
+    "funcs": [
+        {
+            "name": "bind_textdomain_codeset",
+            "desc": "With bind_textdomain_codeset(), you can set in which encoding will be messages from domain returned by gettext() and similar functions.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "A string on success."
+            },
+            "args": [
+                {
+                    "name": "domain",
+                    "type": "Variant",
+                    "desc": "The domain"
+                },
+                {
+                    "name": "codeset",
+                    "type": "Variant",
+                    "desc": "The code set"
+                }
+            ]
+        },
+        {
+            "name": "bindtextdomain",
+            "desc": "The bindtextdomain() function sets the path for a domain.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The full pathname for the domain currently being set."
+            },
+            "args": [
+                {
+                    "name": "domain",
+                    "type": "Variant",
+                    "desc": "The domain"
+                },
+                {
+                    "name": "directory",
+                    "type": "Variant",
+                    "desc": "The directory path"
+                }
+            ]
+        },
+        {
+            "name": "dcgettext",
+            "desc": "This function allows you to override the current domain for a single message lookup.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "A string on success."
+            },
+            "args": [
+                {
+                    "name": "domain",
+                    "type": "Variant",
+                    "desc": "The domain"
+                },
+                {
+                    "name": "message",
+                    "type": "Variant",
+                    "desc": "The message"
+                },
+                {
+                    "name": "category",
+                    "type": "Variant",
+                    "desc": "The category"
+                }
+            ]
+        },
+        {
+            "name": "dcngettext",
+            "desc": "This function allows you to override the current domain for a single plural message lookup.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "A string on success."
+            },
+            "args": [
+                {
+                    "name": "domain",
+                    "type": "Variant",
+                    "desc": "The domain"
+                },
+                {
+                    "name": "msgid1",
+                    "type": "Variant",
+                    "desc": ""
+                },
+                {
+                    "name": "msgid2",
+                    "type": "Variant",
+                    "desc": ""
+                },
+                {
+                    "name": "n",
+                    "type": "Variant",
+                    "desc": ""
+                },
+                {
+                    "name": "category",
+                    "type": "Variant",
+                    "desc": ""
+                }
+            ]
+        },
+        {
+            "name": "dgettext",
+            "desc": "The dgettext() function allows you to override the current domain for a single message lookup.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "A string on success."
+            },
+            "args": [
+                {
+                    "name": "domain",
+                    "type": "Variant",
+                    "desc": "The domain"
+                },
+                {
+                    "name": "message",
+                    "type": "Variant",
+                    "desc": "The message"
+                }
+            ]
+        },
+        {
+            "name": "dngettext",
+            "desc": "The dngettext() function allows you to override the current domain for a single plural message lookup.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "A string on success."
+            },
+            "args": [
+                {
+                    "name": "domain",
+                    "type": "Variant",
+                    "desc": "The domain"
+                },
+                {
+                    "name": "msgid1",
+                    "type": "Variant",
+                    "desc": ""
+                },
+                {
+                    "name": "msgid2",
+                    "type": "Variant",
+                    "desc": ""
+                },
+                {
+                    "name": "n",
+                    "type": "Variant",
+                    "desc": ""
+                }
+            ]
+        },
+        {
+            "name": "gettext",
+            "desc": "Looks up a message in the current domain.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a translated string if one is found in the translation table, or the submitted message if not found."
+            },
+            "args": [
+                {
+                    "name": "message",
+                    "type": "Variant",
+                    "desc": "The message being translated."
+                }
+            ]
+        },
+        {
+            "name": "_",
+            "desc": "An alias for gettext.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a translated string if one is found in the translation table, or the submitted message if not found."
+            },
+            "args": [
+                {
+                    "name": "message",
+                    "type": "Variant",
+                    "desc": "The message being translated."
+                }
+            ]
+        },
+        {
+            "name": "ngettext",
+            "desc": "The plural version of gettext(). Some languages have more than one form for plural messages dependent on the count.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns correct plural form of message identified by msgid1 and msgid2 for count n."
+            },
+            "args": [
+                {
+                    "name": "msgid1",
+                    "type": "Variant",
+                    "desc": ""
+                },
+                {
+                    "name": "msgid2",
+                    "type": "Variant",
+                    "desc": ""
+                },
+                {
+                    "name": "n",
+                    "type": "Variant",
+                    "desc": ""
+                }
+            ]
+        },
+        {
+            "name": "textdomain",
+            "desc": "This function sets the domain to search within when calls are made to gettext(), usually the named after an application.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "If successful, this function returns the current message domain, after possibly changing it."
+            },
+            "args": [
+                {
+                    "name": "text_domain",
+                    "type": "Variant",
+                    "desc": "The new message domain, or NULL to get the current setting without changing it"
+                }
+            ]
+        }
+    ],
+    "classes": [
+
+    ]
+}

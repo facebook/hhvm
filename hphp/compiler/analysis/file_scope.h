@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,6 +16,8 @@
 
 #ifndef incl_HPHP_FILE_SCOPE_H_
 #define incl_HPHP_FILE_SCOPE_H_
+
+#include <map>
 
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/analysis/function_container.h"
@@ -59,7 +61,7 @@ public:
     MixedVariableArgument     = 0x800, // variable args, may or may not be ref'd
     IsFoldable                = 0x1000,// function can be constant folded
     NeedsActRec               = 0x2000,// builtin function needs ActRec
-    IgnoreRedefinition        = 0x4000,// ignore redefinition of builtin function
+    AllowOverride             = 0x4000,// allow override of systemlib or builtin
   };
 
   typedef boost::adjacency_list<boost::setS, boost::vecS> Graph;
@@ -135,6 +137,23 @@ public:
   void addConstantDependency(AnalysisResultPtr ar,
                              const std::string &decname);
 
+  void addClassAlias(const std::string& target, const std::string& alias) {
+    m_classAliasMap.insert(std::make_pair(Util::toLower(target),
+                                          Util::toLower(alias)));
+  }
+
+  std::multimap<std::string,std::string> const& getClassAliases() const {
+    return m_classAliasMap;
+  }
+
+  void addTypeAliasName(const std::string& name) {
+    m_typeAliasNames.insert(Util::toLower(name));
+  }
+
+  std::set<std::string> const& getTypeAliasNames() const {
+    return m_typeAliasNames;
+  }
+
   /**
    * Called only by World
    */
@@ -162,24 +181,17 @@ public:
   const std::string &pseudoMainName();
   void outputFileCPP(AnalysisResultPtr ar, CodeGenerator &cg);
   bool load();
-  bool needPseudoMainVariables() const;
   std::string outputFilebase() const;
-
-  void addPseudoMainVariable(const std::string &name) {
-    m_pseudoMainVariables.insert(name);
-  }
-  std::set<std::string> &getPseudoMainVariables() {
-    return m_pseudoMainVariables;
-  }
 
   FunctionScopeRawPtr getPseudoMain() const {
     return m_pseudoMain;
   }
 
   FileScopePtr shared_from_this() {
-    return boost::static_pointer_cast<FileScope>
+    return static_pointer_cast<FileScope>
       (BlockScope::shared_from_this());
   }
+
 private:
   int m_size;
   MD5 m_md5;
@@ -198,9 +210,17 @@ private:
   vertex_descriptor m_vertex;
 
   std::string m_pseudoMainName;
-  std::set<std::string> m_pseudoMainVariables;
   BlockScopeSet m_providedDefs;
   std::set<std::string> m_redecBases;
+
+  // Map from class alias names to the class they are aliased to.
+  // This is only needed in WholeProgram mode.
+  std::multimap<std::string,std::string> m_classAliasMap;
+
+  // Set of names that are on the left hand side of type alias
+  // declarations.  We need this to make sure we don't mark classes
+  // with the same name Unique.
+  std::set<std::string> m_typeAliasNames;
 
   FunctionScopePtr createPseudoMain(AnalysisResultConstPtr ar);
   void setFileLevel(StatementListPtr stmt);

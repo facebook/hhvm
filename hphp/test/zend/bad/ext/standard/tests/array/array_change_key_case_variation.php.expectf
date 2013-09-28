@@ -1,0 +1,27 @@
+HipHop Warning: %s
+NULL
+array(4) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+  ["THREE"]=>
+  int(3)
+  ["FOUR"]=>
+  string(4) "four"
+}
+array(1) {
+  ["one"]=>
+  int(4)
+}
+HipHop Warning: %s
+NULL
+array(1) {
+  ["ONE"]=>
+  int(3)
+}
+array(1) {
+  ["ONE"]=>
+  int(2)
+}
+end

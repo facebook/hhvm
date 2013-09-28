@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,11 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include <sstream>
-#include <cmath>
-#include <limits.h>
 #include "hphp/compiler/expression/scalar_expression.h"
-#include "hphp/util/parser/hphp.tab.hpp"
+#include "hphp/parser/hphp.tab.hpp"
 #include "hphp/util/util.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/block_scope.h"
@@ -29,11 +26,15 @@
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/util/hash.h"
-#include "hphp/runtime/base/string_data.h"
-#include "hphp/runtime/base/type_conversions.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/compiler/analysis/file_scope.h"
+
+#include <sstream>
+#include <cmath>
+#include <limits.h>
 
 using namespace HPHP;
 
@@ -157,16 +158,21 @@ void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
             if (b && b->is(BlockScope::ClassScope)) {
               m_translated += "::";
             }
-            m_translated += func->getOriginalName();
+            if (func->isClosure()) {
+              m_translated += "{closure}";
+            } else {
+              m_translated += func->getOriginalName();
+            }
           }
         }
         break;
       }
       case T_FUNC_C:
-        if (getFunctionScope()) {
-          m_translated = getFunctionScope()->getOriginalName();
-          if (m_translated[0] == '0') {
+        if (FunctionScopePtr func = getFunctionScope()) {
+          if (func->isClosure()) {
             m_translated = "{closure}";
+          } else {
+            m_translated = func->getOriginalName();
           }
         }
         break;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,14 +17,14 @@
 
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_asio.h"
-#include "hphp/runtime/base/builtin_functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 #include "hphp/runtime/ext/ext_spl.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_function.h"
 
-#include "hphp/runtime/vm/translator/translator.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/stats.h"
@@ -32,7 +32,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-p_Continuation f_hphp_create_continuation(CStrRef clsname,
+Object f_hphp_create_continuation(CStrRef clsname,
                                           CStrRef funcname,
                                           CStrRef origFuncName,
                                           CArrRef args /* = null_array */) {
@@ -42,30 +42,26 @@ p_Continuation f_hphp_create_continuation(CStrRef clsname,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static StaticString s___cont__("__cont__");
-
-c_Continuation::c_Continuation(Class* cb) :
-    ExtObjectData(cb),
-    m_index(-1LL),
-    m_value(Variant::nullInit), m_received(Variant::nullInit),
-    m_done(false), m_running(false), m_should_throw(false),
-    m_vmFunc(nullptr), m_label(0ll) {
+c_Continuation::c_Continuation(Class* cb)
+    : ExtObjectDataFlags<ObjectData::HasClone>(cb)
+    , m_label(0)
+    , m_index(-1LL)
+    , m_key(-1LL)
+    , m_value(Variant::NullInit())
+    , m_origFunc(nullptr) {
+  o_subclassData.u16 = 0;
 }
 
 c_Continuation::~c_Continuation() {
   ActRec* ar = actRec();
 
-  // The first local is the object itself, and it wasn't increffed at creation
-  // time (see createContinuation()). Overwrite its type to exempt it from
-  // refcounting here.
-  TypedValue* contLocal = frame_local(ar, 0);
-  assert(contLocal->m_data.pobj == this);
-  contLocal->m_type = KindOfNull;
-
   if (ar->hasVarEnv()) {
     ar->getVarEnv()->detach(ar);
   } else {
-    frame_free_locals_inl(ar, m_vmFunc->numLocals());
+    // Free locals, but don't trigger the EventHook for FunctionExit
+    // since the continuation function has already been exited. We
+    // don't want redundant calls.
+    frame_free_locals_inl_no_hook<false>(ar, ar->m_func->numLocals());
   }
 }
 
@@ -73,7 +69,20 @@ void c_Continuation::t___construct() {}
 
 void c_Continuation::t_update(int64_t label, CVarRef value) {
   m_label = label;
+  assert(m_label == label); // check m_label for truncation
   m_value.assignVal(value);
+  m_key = ++m_index;
+}
+
+void c_Continuation::t_update_key(int64_t label, CVarRef key, CVarRef value) {
+  m_label = label;
+  assert(m_label == label); // check m_label for truncation
+  m_key.assignVal(key);
+  m_value.assignVal(value);
+  if (m_key.isInteger()) {
+    int64_t new_index = m_key.toInt64Val();
+    m_index = new_index > m_index ? new_index : m_index;
+  }
 }
 
 Object c_Continuation::t_getwaithandle() {
@@ -88,46 +97,32 @@ int64_t c_Continuation::t_getlabel() {
   return m_label;
 }
 
-int64_t c_Continuation::t_num_args() {
-  return m_args.size();
-}
-
-Array c_Continuation::t_get_args() {
-  return m_args;
-}
-
-Variant c_Continuation::t_get_arg(int64_t id) {
-  if (id < 0LL || id >= m_args.size()) return false;
-  return m_args.rvalAt(id, AccessFlags::Error);
-}
-
 Variant c_Continuation::t_current() {
   const_assert(false);
   return m_value;
 }
 
-int64_t c_Continuation::t_key() {
+Variant c_Continuation::t_key() {
   startedCheck();
-  return m_index;
-}
-
-bool c_Continuation::php_sleep(Variant &ret) {
-  ret = false;
-  return true;
+  return m_key;
 }
 
 void c_Continuation::t_next() {
   const_assert(false);
 }
 
-static StaticString s_next("next");
+const StaticString
+  s_next("next"),
+  s__closure_("{closure}"),
+  s_this("this");
+
 void c_Continuation::t_rewind() {
   this->o_invoke_few_args(s_next, 0);
 }
 
 bool c_Continuation::t_valid() {
   const_assert(false);
-  return !m_done;
+  return !done();
 }
 
 void c_Continuation::t_send(CVarRef v) {
@@ -138,15 +133,11 @@ void c_Continuation::t_raise(CVarRef v) {
   const_assert(false);
 }
 
-void c_Continuation::t_raised() {
-  if (m_should_throw) {
-    m_should_throw = false;
-    throw_exception(m_received);
-  }
-}
-
 String c_Continuation::t_getorigfuncname() {
-  return String(const_cast<StringData*>(m_origFuncName));
+  auto const origName = m_origFunc->isClosureBody() ? s__closure_.get()
+                                                    : m_origFunc->name();
+  assert(origName->isStatic());
+  return String(const_cast<StringData*>(origName));
 }
 
 String c_Continuation::t_getcalledclass() {
@@ -163,17 +154,74 @@ String c_Continuation::t_getcalledclass() {
   return called_class;
 }
 
-Variant c_Continuation::t___clone() {
-  throw_fatal(
-      "Trying to clone an uncloneable object of class Continuation");
-  return uninit_null();
+void c_Continuation::dupContVar(const StringData* name, TypedValue* src) {
+  ActRec *fp = actRec();
+  Id destId = fp->m_func->lookupVarId(name);
+  if (destId != kInvalidId) {
+    // Copy the value of the local to the cont object.
+    tvDupFlattenVars(src, frame_local(fp, destId), nullptr);
+  } else {
+    if (!fp->hasVarEnv()) {
+      // This VarEnv may potentially outlive the most recently stack-allocated
+      // VarEnv, so we need to heap allocate it.
+      fp->setVarEnv(VarEnv::createLocalOnHeap(fp));
+    }
+    fp->getVarEnv()->setWithRef(name, src);
+  }
 }
 
-HphpArray* c_Continuation::getStaticLocals() {
-  if (m_VMStatics.get() == NULL) {
-    m_VMStatics = NEW(HphpArray)(1);
+void c_Continuation::copyContinuationVars(ActRec* fp) {
+  // For functions that contain only named locals, we can copy TVs
+  // right to the local space.
+  static const StringData* thisStr = s_this.get();
+  bool skipThis;
+  if (fp->hasVarEnv()) {
+    Stats::inc(Stats::Cont_CreateVerySlow);
+    Array definedVariables = fp->getVarEnv()->getDefinedVariables();
+    skipThis = definedVariables.exists(s_this, true);
+
+    for (ArrayIter iter(definedVariables); !iter.end(); iter.next()) {
+      dupContVar(iter.first().getStringData(),
+                 const_cast<TypedValue *>(iter.secondRef().asTypedValue()));
+    }
+  } else {
+    const Func *genFunc = actRec()->m_func;
+    skipThis = genFunc->lookupVarId(thisStr) != kInvalidId;
+    for (Id i = 0; i < genFunc->numNamedLocals(); ++i) {
+      dupContVar(genFunc->localVarName(i), frame_local(fp, i));
+    }
   }
-  return m_VMStatics.get();
+
+  // If $this is used as a local inside the body and is not provided
+  // by our containing environment, just prefill it here instead of
+  // using InitThisLoc inside the body
+  if (!skipThis && fp->hasThis()) {
+    Id id = actRec()->m_func->lookupVarId(thisStr);
+    if (id != kInvalidId) {
+      tvAsVariant(frame_local(actRec(), id)) = fp->getThis();
+    }
+  }
+}
+
+c_Continuation *c_Continuation::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_Continuation*>(obj);
+  const Func *origFunc = thiz->m_origFunc;
+  const Func *genFunc = thiz->actRec()->m_func;
+
+  ActRec *fp = g_vmContext->getFP();
+  c_Continuation* cont = origFunc->isMethod()
+    ? g_vmContext->createContMeth(origFunc, genFunc, fp->getThisOrClass())
+    : g_vmContext->createContFunc(origFunc, genFunc);
+
+  cont->copyContinuationVars(thiz->actRec());
+
+  cont->o_subclassData.u16 = thiz->o_subclassData.u16;
+  cont->m_label = thiz->m_label;
+  cont->m_index = thiz->m_index;
+  cont->m_key   = thiz->m_key;
+  cont->m_value = thiz->m_value;
+
+  return cont;
 }
 
 namespace {
@@ -186,9 +234,9 @@ void c_Continuation::call_next() {
   g_vmContext->invokeContFunc(func, this);
 }
 
-void c_Continuation::call_send(TypedValue* v) {
+void c_Continuation::call_send(Cell& v) {
   const HPHP::Func* func = m_cls->lookupMethod(s_send.get());
-  g_vmContext->invokeContFunc(func, this, v);
+  g_vmContext->invokeContFunc(func, this, &v);
 }
 
 void c_Continuation::call_raise(ObjectData* e) {
@@ -197,45 +245,37 @@ void c_Continuation::call_raise(ObjectData* e) {
 
   const HPHP::Func* func = m_cls->lookupMethod(s_raise.get());
 
-  TypedValue arg;
+  Cell arg;
   arg.m_type = KindOfObject;
   arg.m_data.pobj = e;
 
   g_vmContext->invokeContFunc(func, this, &arg);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
-c_DummyContinuation::c_DummyContinuation(Class* cb) :
-  ExtObjectData(cb) {
+// Compute the bytecode offset at which execution will resume assuming
+// the given label.
+Offset c_Continuation::getExecutionOffset(int32_t label) const {
+  auto func = m_arPtr->m_func;
+  PC funcBase = func->unit()->entry() + func->base();
+  assert(toOp(*funcBase) == OpUnpackCont); // One byte
+  PC switchOffset = funcBase + 1;
+  assert(toOp(*switchOffset) == OpSwitch);
+  // The Switch opcode is one byte for the opcode itself, plus four
+  // bytes for the jmp table size, then the jump table.
+  if (label >= *(int32_t*)(switchOffset + 1)) {
+    return InvalidAbsoluteOffset;
+  }
+  Offset* jmpTable = (Offset*)(switchOffset + 5);
+  Offset relOff = jmpTable[label];
+  return func->base() + relOff + 1;
 }
 
-c_DummyContinuation::~c_DummyContinuation() {}
-
-void c_DummyContinuation::t___construct() {
-}
-
-Variant c_DummyContinuation::t_current() {
-  throw_fatal("Tring to use a DummyContinuation");
-  return uninit_null();
-}
-
-int64_t c_DummyContinuation::t_key() {
-  throw_fatal("Tring to use a DummyContinuation");
-  return 0;
-}
-
-void c_DummyContinuation::t_next() {
-  throw_fatal("Tring to use a DummyContinuation");
-}
-
-void c_DummyContinuation::t_rewind() {
-  throw_fatal("Tring to use a DummyContinuation");
-}
-
-bool c_DummyContinuation::t_valid() {
-  throw_fatal("Tring to use a DummyContinuation");
-  return false;
+// Compute the bytecode offset at which execution will resume when
+// this continuation resumes. Only valid on started but not actually
+// running continuations.
+Offset c_Continuation::getNextExecutionOffset() const {
+  assert(!running());
+  return getExecutionOffset(m_label);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

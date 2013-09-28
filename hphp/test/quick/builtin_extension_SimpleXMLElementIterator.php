@@ -2,7 +2,7 @@
 
 include __DIR__."/builtin_extensions.inc";
 
-class A_SimpleXMLElementIterator extends DateInterval {
+class A_SimpleXMLElementIterator extends SimpleXMLElementIterator {
   public $___x;
 }
 test("SimpleXMLElementIterator");

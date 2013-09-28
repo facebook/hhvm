@@ -1,6 +1,5 @@
 <?php
 
-
 class c2 {
   public static function __callStatic($func, $args) {
     echo "c2::__callStatic

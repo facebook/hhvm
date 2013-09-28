@@ -1,0 +1,24 @@
+*** Testing preg_replace() : error conditions***
+
+Arg value is abcdef
+HipHop Warning: %s
+NULL
+
+Arg value is /[a-zA-Z]
+HipHop Warning: %s
+NULL
+
+Arg value is [a-zA-Z]/
+HipHop Warning: %s
+NULL
+
+Arg value is /[a-zA-Z]/F
+HipHop Warning: %s
+NULL
+
+Arg value is Array
+string(1) "a"
+
+Arg value is /[a-zA-Z]/
+string(1) "1"
+HipHop Fatal error: %s

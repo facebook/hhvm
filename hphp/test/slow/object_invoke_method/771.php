@@ -1,7 +1,7 @@
 <?php
 
+class X {
 
-class X { 
   public function __invoke($x) {
     var_dump($x);
   }
@@ -11,7 +11,8 @@ class X {
     call_user_func_array($this, array(0, 1));
   }
 }
-class Y { 
+class Y {
+
   public function test($x) {
     $x(10);
     call_user_func($x, 300);

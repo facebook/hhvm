@@ -1,6 +1,5 @@
 <?php
 
-
 class Direct {
   use TestTrait;
 }

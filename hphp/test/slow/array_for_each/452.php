@@ -1,6 +1,5 @@
 <?php
 
-
 function f3() {
   $i = 0;
   $foo = array('a'=>1, 'b'=>2, 'c'=>3, 'd'=>4, 'e'=>5, 'f'=>6);
@@ -20,4 +19,5 @@ function f3() {
   }
   var_dump($foo);
 }
-foreach (f3() as $_) {}
+foreach (f3() as $_) {
+}

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,11 +18,13 @@
 #include "hphp/runtime/ext/ext_domdocument.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_class.h"
-#include "hphp/runtime/base/runtime_error.h"
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/vm/translator/translator-inline.h"
+#include "hphp/runtime/ext/ext_simplexml.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
-#include "hphp/system/lib/systemlib.h"
+#include "hphp/system/systemlib.h"
 
 #define DOM_XMLNS_NAMESPACE                             \
   (const xmlChar *) "http://www.w3.org/2000/xmlns/"
@@ -54,7 +56,11 @@ extern bool libxml_use_internal_error();
 extern void libxml_add_error(const std::string &msg);
 
 static void php_libxml_internal_error_handler(int error_type, void *ctx,
-                                              const char *fmt, va_list ap) {
+                                              const char *fmt,
+                                              va_list ap) ATTRIBUTE_PRINTF(3,0);
+static void php_libxml_internal_error_handler(int error_type, void *ctx,
+                                              const char *fmt,
+                                              va_list ap) {
   string msg;
   Util::string_vsnprintf(msg, fmt, ap);
 
@@ -120,7 +126,10 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx,
  * error handler callbacks.
  */
 
-static void php_libxml_ctx_error(void *ctx, const char *msg, ...) {
+static void php_libxml_ctx_error(void *ctx,
+                                 const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
+static void php_libxml_ctx_error(void *ctx,
+                                 const char *msg, ...) {
   va_list args;
   va_start(args, msg);
   try {
@@ -129,7 +138,10 @@ static void php_libxml_ctx_error(void *ctx, const char *msg, ...) {
   va_end(args);
 }
 
-static void php_libxml_ctx_warning(void *ctx, const char *msg, ...) {
+static void php_libxml_ctx_warning(void *ctx,
+                                   const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
+static void php_libxml_ctx_warning(void *ctx,
+                                   const char *msg, ...) {
   va_list args;
   va_start(args, msg);
   try {
@@ -305,8 +317,9 @@ static void dom_normalize(xmlNodePtr nodep) {
   }
 }
 
-static StaticString s_query("query");
-static StaticString s_namespaces("namespaces");
+const StaticString
+  s_query("query"),
+  s_namespaces("namespaces");
 
 static Variant dom_canonicalization(xmlNodePtr nodep, CStrRef file,
                                     bool exclusive, bool with_comments,
@@ -642,7 +655,8 @@ static String _dom_get_valid_file_path(const char *source) {
 }
 
 static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
-                                     char *source, int options) {
+                                     char *source, int source_len,
+                                     int options) {
   xmlDocPtr ret = NULL;
   xmlParserCtxtPtr ctxt = NULL;
 
@@ -661,7 +675,7 @@ static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
       ctxt = xmlCreateFileParserCtxt(file_dest.data());
     }
   } else {
-    ctxt = xmlCreateDocParserCtxt((xmlChar*)source);
+    ctxt = xmlCreateMemoryParserCtxt(source, source_len);
   }
 
   if (ctxt == NULL) {
@@ -741,7 +755,8 @@ static Variant dom_parse_document(c_DOMDocument *domdoc, CStrRef source,
     return false;
   }
   xmlDoc *newdoc =
-    dom_document_parser(domdoc, mode, (char*)source.data(), options);
+    dom_document_parser(domdoc, mode, (char*)source.data(), source.length(),
+                        options);
   if (!newdoc) {
     return false;
   }
@@ -1153,19 +1168,19 @@ static void removeOrphan(XmlNodeSet &orphans, xmlNodePtr node) {
   }
 }
 
-static const StaticString s_domdocument("domdocument");
-static const StaticString s_domdocumenttype("domdocumenttype");
-static const StaticString s_domelement("domelement");
-static const StaticString s_domattr("domattr");
-static const StaticString s_domtext("domtext");
-static const StaticString s_domcomment("domcomment");
-static const StaticString
-       s_domprocessinginstruction("domprocessinginstruction");
-static const StaticString s_domentityreference("domentityreference");
-static const StaticString s_domentity("domentity");
-static const StaticString s_domcdatasection("domcdatasection");
-static const StaticString s_domdocumentfragment("domdocumentfragment");
-static const StaticString s_domnotation("domnotation");
+const StaticString
+  s_domdocument("domdocument"),
+  s_domdocumenttype("domdocumenttype"),
+  s_domelement("domelement"),
+  s_domattr("domattr"),
+  s_domtext("domtext"),
+  s_domcomment("domcomment"),
+  s_domprocessinginstruction("domprocessinginstruction"),
+  s_domentityreference("domentityreference"),
+  s_domentity("domentity"),
+  s_domcdatasection("domcdatasection"),
+  s_domdocumentfragment("domdocumentfragment"),
+  s_domnotation("domnotation");
 
 static String domClassname(xmlNodePtr obj) {
   switch (obj->type) {
@@ -1532,8 +1547,8 @@ public:
   bool isset(ObjectData *obj, CStrRef name) {
     const_iterator iter = find(name.data());
     if (iter == end()) return false;
-    return !iter->second->test_isset ||
-      HPHP::isset(iter->second->getter(obj));
+    return !iter->second->test_isset &&
+      !iter->second->getter(obj).isNull();
   }
 };
 
@@ -1544,7 +1559,7 @@ public:
   xmlNodePtr nodep = domnode->m_node;                   \
   if (nodep == NULL) {                                  \
     php_dom_throw_error(INVALID_STATE_ERR, 0);          \
-    return uninit_null();                                        \
+    return uninit_null();                               \
   }                                                     \
 
 #define CHECK_WRITE_NODE(nodep)                         \
@@ -1905,7 +1920,10 @@ static PropertyAccessorMap domnode_properties_map
 ///////////////////////////////////////////////////////////////////////////////
 
 c_DOMNode::c_DOMNode(Class* cb) :
-    ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet|ObjectData::UseIsset>(cb),m_node(NULL) {
+    ExtObjectDataFlags<ObjectData::UseGet|
+                       ObjectData::UseSet|
+                       ObjectData::UseIsset|
+                       ObjectData::HasClone>(cb), m_node(nullptr) {
 }
 
 c_DOMNode::~c_DOMNode() {
@@ -1924,7 +1942,7 @@ Variant c_DOMNode::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMNode::t___isset(Variant name) {
-  return domnode_properties_map.isset(this, name);
+  return domnode_properties_map.isset(this, name.toString());
 }
 
 Variant c_DOMNode::t_appendchild(CObjRef newnode) {
@@ -2001,12 +2019,12 @@ Variant c_DOMNode::t_appendchild(CObjRef newnode) {
   return create_node_object(new_child, doc(), false);
 }
 
-ObjectData *c_DOMNode::clone() {
-  ObjectData *obj = ObjectData::clone();
-  c_DOMNode *node = static_cast<c_DOMNode*>(obj);
-  node->m_node = m_node;
-  node->m_doc = doc();
-  return obj;
+c_DOMNode* c_DOMNode::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_DOMNode*>(obj);
+  c_DOMNode* node = static_cast<c_DOMNode*>(obj->cloneImpl());
+  node->m_node = thiz->m_node;
+  node->m_doc = thiz->doc();
+  return node;
 }
 
 Variant c_DOMNode::t_clonenode(bool deep /* = false */) {
@@ -2492,7 +2510,7 @@ Variant c_DOMAttr::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMAttr::t___isset(Variant name) {
-  return domattr_properties_map.isset(this, name);
+  return domattr_properties_map.isset(this, name.toString());
 }
 
 bool c_DOMAttr::t_isid() {
@@ -2560,7 +2578,7 @@ Variant c_DOMCharacterData::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMCharacterData::t___isset(Variant name) {
-  return domcharacterdata_properties_map.isset(this, name);
+  return domcharacterdata_properties_map.isset(this, name.toString());
 }
 
 bool c_DOMCharacterData::t_appenddata(CStrRef arg) {
@@ -2771,7 +2789,7 @@ Variant c_DOMText::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMText::t___isset(Variant name) {
-  return domtext_properties_map.isset(this, name);
+  return domtext_properties_map.isset(this, name.toString());
 }
 
 bool c_DOMText::t_iswhitespaceinelementcontent() {
@@ -2839,7 +2857,7 @@ void c_DOMCDATASection::t___construct(CStrRef value) {
   xmlDocPtr docp = (xmlDocPtr)domdoc->m_node;                   \
   if (docp == NULL) {                                           \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                  \
-    return uninit_null();                                                \
+    return uninit_null();                                       \
   }                                                             \
 
 #define CHECK_WRITE_DOC(docp)                                   \
@@ -2852,7 +2870,11 @@ void c_DOMCDATASection::t___construct(CStrRef value) {
 
 static Variant dom_document_doctype_read(CObjRef obj) {
   CHECK_DOC(docp);
-  return create_node_object((xmlNodePtr)xmlGetIntSubset(docp), domdoc);
+  auto const& dtd = (xmlNodePtr)xmlGetIntSubset(docp);
+  if (dtd == nullptr) {
+    return uninit_null();
+  }
+  return create_node_object(dtd, domdoc);
 }
 
 static Variant dom_document_implementation_read(CObjRef obj) {
@@ -3069,7 +3091,7 @@ Variant c_DOMDocument::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMDocument::t___isset(Variant name) {
-  return domdocument_properties_map.isset(this, name);
+  return domdocument_properties_map.isset(this, name.toString());
 }
 
 Variant c_DOMDocument::t_createattribute(CStrRef name) {
@@ -3304,7 +3326,7 @@ Variant c_DOMDocument::t_getelementbyid(CStrRef elementid) {
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlAttrPtr attrp = xmlGetID(docp, (xmlChar*)elementid.data());
   if (attrp && attrp->parent) {
-    c_DOMText *ret = NEWOBJ(c_DOMText)();
+    c_DOMElement *ret = NEWOBJ(c_DOMElement)();
     ret->m_doc = this;
     ret->m_node = attrp->parent;
     return ret;
@@ -3414,7 +3436,7 @@ bool c_DOMDocument::t_registernodeclass(CStrRef baseclass,
                 baseclass.data());
     return false;
   }
-  m_classmap.set(StringUtil::ToLower(baseclass), extendedclass);
+  m_classmap.set(f_strtolower(baseclass), extendedclass);
   return true;
 }
 
@@ -3732,7 +3754,7 @@ Variant c_DOMDocumentType::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMDocumentType::t___isset(Variant name) {
-  return domdocumenttype_properties_map.isset(this, name);
+  return domdocumenttype_properties_map.isset(this, name.toString());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3843,7 +3865,7 @@ Variant c_DOMElement::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMElement::t___isset(Variant name) {
-  return domelement_properties_map.isset(this, name);
+  return domelement_properties_map.isset(this, name.toString());
 }
 
 String c_DOMElement::t_getattribute(CStrRef name) {
@@ -4438,7 +4460,7 @@ Variant c_DOMEntity::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMEntity::t___isset(Variant name) {
-  return domentity_properties_map.isset(this, name);
+  return domentity_properties_map.isset(this, name.toString());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4522,7 +4544,7 @@ Variant c_DOMNotation::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMNotation::t___isset(Variant name) {
-  return domnotation_properties_map.isset(this, name);
+  return domnotation_properties_map.isset(this, name.toString());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4593,7 +4615,7 @@ Variant c_DOMProcessingInstruction::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMProcessingInstruction::t___isset(Variant name) {
-  return domprocessinginstruction_properties_map.isset(this, name);
+  return domprocessinginstruction_properties_map.isset(this, name.toString());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4766,7 +4788,7 @@ Variant c_DOMNamedNodeMap::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMNamedNodeMap::t___isset(Variant name) {
-  return domnamednodemap_properties_map.isset(this, name);
+  return domnamednodemap_properties_map.isset(this, name.toString());
 }
 
 Variant c_DOMNamedNodeMap::t_getiterator() {
@@ -4846,7 +4868,7 @@ Variant c_DOMNodeList::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMNodeList::t___isset(Variant name) {
-  return domnodelist_properties_map.isset(this, name);
+  return domnodelist_properties_map.isset(this, name.toString());
 }
 
 Variant c_DOMNodeList::t_item(int64_t index) {
@@ -5158,7 +5180,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
     raise_warning("Not allowed to call handler '%s()'.", handler.data());
   } else {
     Variant retval = vm_call_user_func(handler, args);
-    if (retval.instanceof(c_DOMNode::s_cls)) {
+    if (retval.instanceof(c_DOMNode::classof())) {
       if (intern->m_node_list.empty()) {
         intern->m_node_list = Array::Create();
       }
@@ -5233,7 +5255,7 @@ Variant c_DOMXPath::t___set(Variant name, Variant value) {
 }
 
 bool c_DOMXPath::t___isset(Variant name) {
-  return domxpath_properties_map.isset(this, name);
+  return domxpath_properties_map.isset(this, name.toString());
 }
 
 Variant c_DOMXPath::t_evaluate(CStrRef expr,
@@ -5335,7 +5357,7 @@ void c_DOMNodeIterator::reset_iterator() {
  err:
   if (curnode) {
     p_DOMDocument doc = m_objmap->m_baseobj.getTyped<c_DOMNode>()->doc();
-    m_curobj = create_node_object(curnode, doc, owner);
+    m_curobj = create_node_object(curnode, doc, owner).toObject();
   } else {
     m_curobj.reset();
   }
@@ -5409,7 +5431,7 @@ Variant c_DOMNodeIterator::t_next() {
 err:
   if (curnode) {
     p_DOMDocument doc = m_objmap->m_baseobj.getTyped<c_DOMNode>()->doc();
-    m_curobj = create_node_object(curnode, doc, owner);
+    m_curobj = create_node_object(curnode, doc, owner).toObject();
   } else {
     m_curobj.reset();
   }
@@ -5834,6 +5856,20 @@ Variant f_dom_xpath_register_php_functions(CVarRef obj,
                                            CVarRef funcs /* = null */) {
   DOM_GET_OBJ(XPath);
   return pobj->t_registerphpfunctions(funcs);
+}
+
+Variant f_dom_import_simplexml(CObjRef node) {
+
+  c_SimpleXMLElement *elem = node.getTyped<c_SimpleXMLElement>();
+  xmlNodePtr nodep = elem->m_node;
+
+  if (nodep && (nodep->type == XML_ELEMENT_NODE ||
+                nodep->type == XML_ATTRIBUTE_NODE)) {
+    return create_node_object(nodep, SystemLib::AllocDOMDocumentObject());
+  } else {
+    raise_warning("Invalid Nodetype to import");
+    return uninit_null();
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

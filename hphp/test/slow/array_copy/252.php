@@ -1,6 +1,6 @@
 <?php
 
- function h3() {
+function h3() {
   $x = array(1,2,3,4);
   next($x);
   $y = $x;

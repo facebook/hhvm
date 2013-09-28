@@ -1,0 +1,52 @@
+Node Object
+(
+    [children:protected] => Array
+        (
+        )
+
+    [parent:protected] => Node Object
+        (
+            [children:protected] => Array
+                (
+                    [0] => Node Object
+ *RECURSION*
+                )
+
+            [parent:protected] => Node Object
+                (
+                    [children:protected] => Array
+                        (
+                            [0] => Node Object
+ *RECURSION*
+                        )
+
+                    [parent:protected] => 
+                    [data:protected] => HEAD
+                    [uid:protected] => %s
+                    [index:protected] => 0
+                    [assureUnique:protected] => 
+                    [storage:ArrayIterator:private] => Array
+                        (
+                        )
+
+                )
+
+            [data:protected] => value1
+            [uid:protected] => 1
+            [index:protected] => 1
+            [assureUnique:protected] => 
+            [storage:ArrayIterator:private] => Array
+                (
+                )
+
+        )
+
+    [data:protected] => value2
+    [uid:protected] => 2
+    [index:protected] => 0
+    [assureUnique:protected] => 
+    [storage:ArrayIterator:private] => Array
+        (
+        )
+
+)

@@ -1,0 +1,336 @@
+*** Testing getdate() : usage variation ***
+
+--float 10.5--
+array(11) {
+  ["seconds"]=>
+  int(10)
+  ["minutes"]=>
+  int(30)
+  ["hours"]=>
+  int(5)
+  ["mday"]=>
+  int(1)
+  ["wday"]=>
+  int(4)
+  ["mon"]=>
+  int(1)
+  ["year"]=>
+  int(1970)
+  ["yday"]=>
+  int(0)
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
+  [0]=>
+  int(10)
+}
+
+--float -10.5--
+array(11) {
+  ["seconds"]=>
+  int(50)
+  ["minutes"]=>
+  int(29)
+  ["hours"]=>
+  int(5)
+  ["mday"]=>
+  int(1)
+  ["wday"]=>
+  int(4)
+  ["mon"]=>
+  int(1)
+  ["year"]=>
+  int(1970)
+  ["yday"]=>
+  int(0)
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
+  [0]=>
+  int(-10)
+}
+
+--float .5--
+array(11) {
+  ["seconds"]=>
+  int(0)
+  ["minutes"]=>
+  int(30)
+  ["hours"]=>
+  int(5)
+  ["mday"]=>
+  int(1)
+  ["wday"]=>
+  int(4)
+  ["mon"]=>
+  int(1)
+  ["year"]=>
+  int(1970)
+  ["yday"]=>
+  int(0)
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
+  [0]=>
+  int(0)
+}
+
+--empty array--
+HipHop Warning: %s
+bool(false)
+
+--int indexed array--
+HipHop Warning: %s
+bool(false)
+
+--associative array--
+HipHop Warning: %s
+bool(false)
+
+--nested arrays--
+HipHop Warning: %s
+bool(false)
+
+--uppercase NULL--
+array(11) {
+  ["seconds"]=>
+  int(0)
+  ["minutes"]=>
+  int(30)
+  ["hours"]=>
+  int(5)
+  ["mday"]=>
+  int(1)
+  ["wday"]=>
+  int(4)
+  ["mon"]=>
+  int(1)
+  ["year"]=>
+  int(1970)
+  ["yday"]=>
+  int(0)
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
+  [0]=>
+  int(0)
+}
+
+--lowercase null--
+array(11) {
+  ["seconds"]=>
+  int(0)
+  ["minutes"]=>
+  int(30)
+  ["hours"]=>
+  int(5)
+  ["mday"]=>
+  int(1)
+  ["wday"]=>
+  int(4)
+  ["mon"]=>
+  int(1)
+  ["year"]=>
+  int(1970)
+  ["yday"]=>
+  int(0)
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
+  [0]=>
+  int(0)
+}
+
+--lowercase true--
+array(11) {
+  ["seconds"]=>
+  int(1)
+  ["minutes"]=>
+  int(30)
+  ["hours"]=>
+  int(5)
+  ["mday"]=>
+  int(1)
+  ["wday"]=>
+  int(4)
+  ["mon"]=>
+  int(1)
+  ["year"]=>
+  int(1970)
+  ["yday"]=>
+  int(0)
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
+  [0]=>
+  int(1)
+}
+
+--lowercase false--
+array(11) {
+  ["seconds"]=>
+  int(0)
+  ["minutes"]=>
+  int(30)
+  ["hours"]=>
+  int(5)
+  ["mday"]=>
+  int(1)
+  ["wday"]=>
+  int(4)
+  ["mon"]=>
+  int(1)
+  ["year"]=>
+  int(1970)
+  ["yday"]=>
+  int(0)
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
+  [0]=>
+  int(0)
+}
+
+--uppercase TRUE--
+array(11) {
+  ["seconds"]=>
+  int(1)
+  ["minutes"]=>
+  int(30)
+  ["hours"]=>
+  int(5)
+  ["mday"]=>
+  int(1)
+  ["wday"]=>
+  int(4)
+  ["mon"]=>
+  int(1)
+  ["year"]=>
+  int(1970)
+  ["yday"]=>
+  int(0)
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
+  [0]=>
+  int(1)
+}
+
+--uppercase FALSE--
+array(11) {
+  ["seconds"]=>
+  int(0)
+  ["minutes"]=>
+  int(30)
+  ["hours"]=>
+  int(5)
+  ["mday"]=>
+  int(1)
+  ["wday"]=>
+  int(4)
+  ["mon"]=>
+  int(1)
+  ["year"]=>
+  int(1970)
+  ["yday"]=>
+  int(0)
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
+  [0]=>
+  int(0)
+}
+
+--empty string DQ--
+HipHop Warning: %s
+bool(false)
+
+--empty string SQ--
+HipHop Warning: %s
+bool(false)
+
+--string DQ--
+HipHop Warning: %s
+bool(false)
+
+--string SQ--
+HipHop Warning: %s
+bool(false)
+
+--mixed case string--
+HipHop Warning: %s
+bool(false)
+
+--heredoc--
+HipHop Warning: %s
+bool(false)
+
+--instance of classWithToString--
+HipHop Warning: %s
+bool(false)
+
+--instance of classWithoutToString--
+HipHop Warning: %s
+bool(false)
+
+--undefined var--
+array(11) {
+  ["seconds"]=>
+  int(0)
+  ["minutes"]=>
+  int(30)
+  ["hours"]=>
+  int(5)
+  ["mday"]=>
+  int(1)
+  ["wday"]=>
+  int(4)
+  ["mon"]=>
+  int(1)
+  ["year"]=>
+  int(1970)
+  ["yday"]=>
+  int(0)
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
+  [0]=>
+  int(0)
+}
+
+--unset var--
+array(11) {
+  ["seconds"]=>
+  int(0)
+  ["minutes"]=>
+  int(30)
+  ["hours"]=>
+  int(5)
+  ["mday"]=>
+  int(1)
+  ["wday"]=>
+  int(4)
+  ["mon"]=>
+  int(1)
+  ["year"]=>
+  int(1970)
+  ["yday"]=>
+  int(0)
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
+  [0]=>
+  int(0)
+}
+===DONE===

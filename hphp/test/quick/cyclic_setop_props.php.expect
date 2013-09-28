@@ -1,0 +1,33 @@
+object(x)#1 (2) {
+  ["x0"]=>
+  &object(x)#2 (2) {
+    ["x0"]=>
+    NULL
+    ["y1"]=>
+    *RECURSION*
+  }
+  ["y1"]=>
+  NULL
+}
+string(7) "it's ok"
+object(x)#1 (3) {
+  ["x0"]=>
+  NULL
+  ["y1"]=>
+  NULL
+  ["q0"]=>
+  &object(x)#2 (5) {
+    ["x0"]=>
+    NULL
+    ["y1"]=>
+    NULL
+    ["r0"]=>
+    string(1) "b"
+    ["r1"]=>
+    *RECURSION*
+    ["y2"]=>
+    *RECURSION*
+  }
+}
+string(7) "it's ok"
+string(7) "it's ok"

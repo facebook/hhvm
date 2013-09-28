@@ -1,6 +1,5 @@
 <?php
 
-
 class A {
   public static function foo() {
     var_dump(get_called_class());
@@ -9,9 +8,11 @@ class A {
     $x = new B;
     $x->fiz(self::foo());
   }
-  function fiz($x) {}
+  function fiz($x) {
 }
-class B extends A {}
+}
+class B extends A {
+}
 $array = array('foo');
 array_map('B::foo', $array);
 call_user_func('B::foo');

@@ -614,7 +614,7 @@ void flush_evaluation_stack() {
     if (!t_se.isNull()) {
       t_se->flush();
     }
-    Transl::TargetCache::flush();
+    TargetCache::flush();
   }
 }
 
@@ -2324,7 +2324,7 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupPhpFile(StringData* path,
   if (efile && initial_opt) {
     // if initial_opt is not set, this shouldnt be recorded as a
     // per request fetch of the file.
-    if (Transl::TargetCache::testAndSetBit(efile->getId())) {
+    if (TargetCache::testAndSetBit(efile->getId())) {
       initial = false;
     }
     // if parsing was successful, update the mappings for spath and
@@ -3992,7 +3992,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFatal(PC& pc) {
 }
 
 OPTBLD_INLINE void VMExecutionContext::jmpSurpriseCheck(Offset offset) {
-  if (offset <= 0 && UNLIKELY(Transl::TargetCache::loadConditionFlags())) {
+  if (offset <= 0 && UNLIKELY(TargetCache::loadConditionFlags())) {
     EventHook::CheckSurprise();
   }
 }

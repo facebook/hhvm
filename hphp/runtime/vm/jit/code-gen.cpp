@@ -57,7 +57,6 @@
 #include "hphp/runtime/vm/jit/code-gen-arm.h"
 
 using HPHP::Transl::TCA;
-using namespace HPHP::Transl::TargetCache;
 
 namespace HPHP {
 namespace JIT {
@@ -2345,8 +2344,8 @@ void CodeGenerator::cgLdFuncCachedCommon(IRInstruction* inst) {
   SSATmp* methodName = inst->src(0);
 
   const StringData* name = methodName->getValStr();
-  CacheHandle ch = TargetCache::allocFixedFunction(name);
-  size_t funcCacheOff = ch + offsetof(FixedFuncCache, m_func);
+  auto const ch = TargetCache::allocFixedFunction(name);
+  size_t funcCacheOff = ch + offsetof(TargetCache::FixedFuncCache, m_func);
 
   auto dstReg = m_regs[dst].reg();
   if (dstReg == InvalidReg) {
@@ -2374,12 +2373,12 @@ void CodeGenerator::cgLdFuncCachedU(IRInstruction* inst) {
 
   // allocate both cache handles
   const StringData* name = methodName->getValStr();
-  CacheHandle ch = TargetCache::allocFixedFunction(name);
-  size_t funcCacheOff = ch + offsetof(FixedFuncCache, m_func);
+  auto const ch = TargetCache::allocFixedFunction(name);
+  size_t funcCacheOff = ch + offsetof(TargetCache::FixedFuncCache, m_func);
 
   const StringData* fallback = fallbackName->getValStr();
-  CacheHandle fch = TargetCache::allocFixedFunction(fallback);
-  size_t fallbackCacheOff = fch + offsetof(FixedFuncCache, m_func);
+  auto const fch = TargetCache::allocFixedFunction(fallback);
+  size_t fallbackCacheOff = fch + offsetof(TargetCache::FixedFuncCache, m_func);
 
   // check the first cache handle, then the fallback
   auto dstReg = m_regs[dst].reg();
@@ -2418,7 +2417,7 @@ void CodeGenerator::cgLdFunc(IRInstruction* inst) {
   TargetCache::CacheHandle ch = TargetCache::FuncCache::alloc();
   // raises an error if function not found
   cgCallHelper(m_as,
-               CppCall(FuncCache::lookup),
+               CppCall(TargetCache::FuncCache::lookup),
                callDest(m_regs[dst].reg()),
                SyncOptions::kSyncPoint,
                ArgGroup(m_regs).imm(ch).ssa(methodName));
@@ -2437,12 +2436,12 @@ void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
   auto name      = inst->src(1);
   auto actRec    = inst->src(2);
   auto actRecReg = m_regs[actRec].reg();
-  CacheHandle handle = Transl::TargetCache::MethodCache::alloc();
+  auto const handle = TargetCache::MethodCache::alloc();
 
   // lookup in the targetcache
-  assert(MethodCache::kNumLines == 1);
+  assert(TargetCache::MethodCache::kNumLines == 1);
   if (debug) {
-    MethodCache::Pair p;
+    TargetCache::MethodCache::Pair p;
     static_assert(sizeof(p.m_value) == 8,
                   "MethodCache::Pair::m_value assumed to be 8 bytes");
     static_assert(sizeof(p.m_key) == 8,
@@ -2450,15 +2449,17 @@ void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
   }
 
   // preload handle->m_value
-  m_as.loadq(rVmTl[handle + offsetof(MethodCache::Pair, m_value)], m_rScratch);
-  m_as.cmpq (rVmTl[handle + offsetof(MethodCache::Pair, m_key)], clsReg);
+  m_as.loadq(rVmTl[handle + offsetof(TargetCache::MethodCache::Pair, m_value)],
+             m_rScratch);
+  m_as.cmpq (rVmTl[handle + offsetof(TargetCache::MethodCache::Pair, m_key)],
+             clsReg);
   ifThenElse(CC_E, // if handle->key == cls
              [&] { // then actReg->m_func = handle->value
                m_as.storeq(m_rScratch, actRecReg[AROFF(m_func)]);
              },
              [&] { // else call slow path helper
                cgCallHelper(m_as,
-                            CppCall(methodCacheSlowPath),
+                            CppCall(TargetCache::methodCacheSlowPath),
                             kVoidDest,
                             SyncOptions::kSyncPoint,
                             ArgGroup(m_regs).addr(rVmTl, handle)
@@ -4837,12 +4838,12 @@ void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
     if (false) { // typecheck
       UNUSED TypedValue* fake_fp = nullptr;
       UNUSED TypedValue* fake_sp = nullptr;
-      const UNUSED Func* f = StaticMethodCache::lookupIR(ch, ne, cls, method,
-                                                         fake_fp, fake_sp);
+      const UNUSED Func* f = TargetCache::StaticMethodCache::lookupIR(
+        ch, ne, cls, method, fake_fp, fake_sp);
     }
     // can raise an error if class is undefined
     cgCallHelper(a,
-                 CppCall(StaticMethodCache::lookupIR),
+                 CppCall(TargetCache::StaticMethodCache::lookupIR),
                  callDest(funcDestReg),
                  SyncOptions::kSyncPoint,
                  ArgGroup(m_regs).imm(ch)         // Handle ch
@@ -4885,11 +4886,12 @@ void CodeGenerator::emitGetCtxFwdCallWithThis(PhysReg ctxReg,
  */
 void CodeGenerator::emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,
                                                  PhysReg      thisReg,
-                                                 CacheHandle& ch) {
+                                                 TargetCache::CacheHandle& ch) {
   Label NonStaticCall, End;
 
   // thisReg is holding $this. Should we pass it to the callee?
-  m_as.cmpl(1, rVmTl[ch + offsetof(StaticMethodFCache, m_static)]);
+  m_as.cmpl(1,
+            rVmTl[ch + offsetof(TargetCache::StaticMethodFCache, m_static)]);
   m_as.jcc8(CC_NE, NonStaticCall);
   // If calling a static method...
   {
@@ -4931,17 +4933,19 @@ void CodeGenerator::cgGetCtxFwdCall(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
-  PhysReg         funcDestReg = m_regs[inst->dst()].reg(0);
-  PhysReg          destCtxReg = m_regs[inst->dst()].reg(1);
-  const Class*            cls = inst->src(0)->getValClass();
-  const StringData*  methName = inst->src(1)->getValStr();
-  SSATmp*           srcCtxTmp = inst->src(2);
-  SSATmp*           fp        = inst->src(3);
-  PhysReg           srcCtxReg = m_regs[srcCtxTmp].reg(0);
-  Block*            exitLabel = inst->taken();
-  const StringData*   clsName = cls->name();
-  CacheHandle              ch = StaticMethodFCache::alloc(clsName, methName,
-                                              getContextName(curClass()));
+  auto const funcDestReg = m_regs[inst->dst()].reg(0);
+  auto const destCtxReg  = m_regs[inst->dst()].reg(1);
+  auto const cls         = inst->src(0)->getValClass();
+  auto const methName    = inst->src(1)->getValStr();
+  auto const srcCtxTmp   = inst->src(2);
+  auto const fp          = inst->src(3);
+  auto const srcCtxReg   = m_regs[srcCtxTmp].reg(0);
+  auto const exitLabel   = inst->taken();
+  auto const clsName     = cls->name();
+
+  auto ch = TargetCache::StaticMethodFCache::alloc(
+    clsName, methName, getContextName(curClass())
+  );
 
   assert(funcDestReg != InvalidReg && destCtxReg != InvalidReg);
   emitMovRegReg(m_as, srcCtxReg, destCtxReg);
@@ -4952,8 +4956,9 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
 
   // Handle case where method is not entered in the cache
   unlikelyIfBlock(CC_E, [&] (Asm& a) {
-    const Func* (*lookup)(CacheHandle, const Class*,
-      const StringData*, TypedValue*) = StaticMethodFCache::lookupIR;
+    const Func* (*lookup)(TargetCache::CacheHandle, const Class*,
+      const StringData*, TypedValue*) =
+        TargetCache::StaticMethodFCache::lookupIR;
     // preserve destCtxReg across the call since it wouldn't be otherwise
     RegSet toSave = m_state.liveRegs[inst] | RegSet(destCtxReg);
     cgCallHelper(a,
@@ -4995,7 +5000,6 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
-  using namespace Transl::TargetCache;
   SSATmp* dst      = inst->dst();
   SSATmp* cls      = inst->src(0);
   SSATmp* propName = inst->src(1);
@@ -5009,7 +5013,7 @@ void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
   string sds(Util::toLower(clsNameString->data()) + ":" +
              string(propNameString->data(), propNameString->size()));
   String sd(sds);
-  CacheHandle ch = SPropCache::alloc(sd.get());
+  auto const ch = TargetCache::SPropCache::alloc(sd.get());
 
   auto dstReg = m_regs[dst].reg();
   // Cls is live in the slow path call to lookupIR, so we have to be
@@ -5027,8 +5031,10 @@ void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
   unlikelyIfBlock(CC_E, [&] (Asm& a) {
     cgCallHelper(
       a,
-      CppCall(target ? SPropCache::lookup<false>
-                     : SPropCache::lookup<true>), // raise on error
+      CppCall(
+        target ? TargetCache::SPropCache::lookup<false>
+               : TargetCache::SPropCache::lookup<true> // raise on error
+      ),
       callDest(tmpReg),
       SyncOptions::kSyncPoint, // could re-enter to init properties
       ArgGroup(m_regs).imm(ch).ssa(cls).ssa(propName).ssa(cxt)
@@ -5061,8 +5067,10 @@ void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
   }
   cgCallHelper(
     m_as,
-    CppCall(target ? SPropCache::lookupSProp<false>
-                   : SPropCache::lookupSProp<true>), // raise on error
+    CppCall(
+      target ? TargetCache::SPropCache::lookupSProp<false>
+             : TargetCache::SPropCache::lookupSProp<true> // raise on error
+    ),
     callDest(dstReg),
     SyncOptions::kSyncPoint, // could re-enter to init properties
     ArgGroup(m_regs).ssa(cls).ssa(prop).ssa(ctx)
@@ -5113,9 +5121,9 @@ void CodeGenerator::cgLdCls(IRInstruction* inst) {
   SSATmp* dst       = inst->dst();
   SSATmp* className = inst->src(0);
 
-  CacheHandle ch = ClassCache::alloc();
+  auto const ch = TargetCache::ClassCache::alloc();
   cgCallHelper(m_as,
-               CppCall(ClassCache::lookup),
+               CppCall(TargetCache::ClassCache::lookup),
                callDest(dst),
                SyncOptions::kSyncPoint,
                ArgGroup(m_regs).imm(ch).ssa(className));

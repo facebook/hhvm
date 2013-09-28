@@ -253,7 +253,7 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
   if (isNew) {
     acc->second = new PhpFileWrapper(s, ret);
     ret->incRef();
-    ret->setId(Transl::TargetCache::allocBit());
+    ret->setId(TargetCache::allocBit());
   } else {
     PhpFile *f = old->getPhpFile();
     if (f != ret) {

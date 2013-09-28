@@ -126,31 +126,31 @@ NamedEntity* Unit::GetNamedEntity(const StringData* str,
 
 void NamedEntity::setCachedFunc(Func* f) {
   assert(m_cachedFuncOffset);
-  *(Func**)Transl::TargetCache::handleToPtr(m_cachedFuncOffset) = f;
+  *(Func**)TargetCache::handleToPtr(m_cachedFuncOffset) = f;
 }
 
 Func* NamedEntity::getCachedFunc() const {
   if (LIKELY(m_cachedFuncOffset != 0)) {
-    return *(Func**)Transl::TargetCache::handleToPtr(m_cachedFuncOffset);
+    return *(Func**)TargetCache::handleToPtr(m_cachedFuncOffset);
   }
   return nullptr;
 }
 
 void NamedEntity::setCachedClass(Class* f) {
   assert(m_cachedClassOffset);
-  *(Class**)Transl::TargetCache::handleToPtr(m_cachedClassOffset) = f;
+  *(Class**)TargetCache::handleToPtr(m_cachedClassOffset) = f;
 }
 
 Class* NamedEntity::getCachedClass() const {
   if (LIKELY(m_cachedClassOffset != 0)) {
-    return *(Class**)Transl::TargetCache::handleToPtr(m_cachedClassOffset);
+    return *(Class**)TargetCache::handleToPtr(m_cachedClassOffset);
   }
   return nullptr;
 }
 
 void NamedEntity::setCachedTypedef(const TypedefReq& td) {
   assert(m_cachedTypedefOffset);
-  auto& tdReq = Transl::TargetCache::handleToRef<TypedefReq>(
+  auto& tdReq = TargetCache::handleToRef<TypedefReq>(
     m_cachedTypedefOffset
   );
   tdReq = td;
@@ -158,7 +158,7 @@ void NamedEntity::setCachedTypedef(const TypedefReq& td) {
 
 const TypedefReq* NamedEntity::getCachedTypedef() const {
   if (LIKELY(m_cachedTypedefOffset != 0)) {
-    auto ret = &Transl::TargetCache::handleToRef<const TypedefReq>(
+    auto ret = &TargetCache::handleToRef<const TypedefReq>(
       m_cachedTypedefOffset
     );
     return ret->name ? ret : nullptr;
@@ -645,7 +645,7 @@ Class* Unit::defClass(const PreClass* preClass,
     }
 
     if (!nameList->m_cachedClassOffset) {
-      Transl::TargetCache::allocKnownClass(newClass.get());
+      TargetCache::allocKnownClass(newClass.get());
     }
     newClass->m_cachedOffset = nameList->m_cachedClassOffset;
 
@@ -682,7 +682,7 @@ bool Unit::aliasClass(Class* original, const StringData* alias) {
   auto const aliasNe = Unit::GetNamedEntity(alias);
 
   if (!aliasNe->m_cachedClassOffset) {
-    Transl::TargetCache::allocKnownClass(aliasNe, false);
+    TargetCache::allocKnownClass(aliasNe, false);
   }
 
   auto const aliasClass = aliasNe->getCachedClass();
@@ -723,7 +723,7 @@ void Unit::defTypedef(Id id) {
 
   if (!nameList->m_cachedTypedefOffset) {
     nameList->m_cachedTypedefOffset =
-      Transl::TargetCache::allocTypedef(nameList);
+      TargetCache::allocTypedef(nameList);
   }
 
   /*
@@ -850,7 +850,7 @@ void Unit::loadFunc(const Func *func) {
   assert(!func->isMethod());
   const NamedEntity *ne = func->getNamedEntity();
   if (UNLIKELY(!ne->m_cachedFuncOffset)) {
-    Transl::TargetCache::allocFixedFunction(
+    TargetCache::allocFixedFunction(
       ne, func->attrs() & AttrPersistent &&
       (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited));
   }

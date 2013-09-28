@@ -251,7 +251,7 @@ private:
 
   void emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,
                                     PhysReg      thisReg,
-                                    Transl::TargetCache::CacheHandle& ch);
+                                    TargetCache::CacheHandle& ch);
 
   void cgJcc(IRInstruction* inst);        // helper
   void cgReqBindJcc(IRInstruction* inst); // helper

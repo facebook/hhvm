@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef INCL_TARGETCACHE_H_
-#define INCL_TARGETCACHE_H_
+#ifndef incl_TARGETCACHE_H_
+#define incl_TARGETCACHE_H_
 
 #include "hphp/runtime/vm/func.h"
 #include "hphp/util/util.h"
@@ -22,9 +22,9 @@
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/util/asm-x64.h"
 
-namespace HPHP {
-namespace Transl {
-namespace TargetCache {
+namespace HPHP { namespace TargetCache {
+
+//////////////////////////////////////////////////////////////////////
 
 void requestInit();
 void requestExit();
@@ -360,6 +360,8 @@ void methodCacheSlowPath(MethodCache::Pair* mce,
                          StringData* name,
                          Class* cls);
 
-} } }
+//////////////////////////////////////////////////////////////////////
+
+}}
 
 #endif

@@ -68,12 +68,12 @@ bool RenamedFuncDict::rename(const StringData* old, const StringData* n3w) {
 
   oldNe->setCachedFunc(nullptr);
   if (UNLIKELY(newNe->m_cachedFuncOffset == 0)) {
-    Transl::TargetCache::allocFixedFunction(newNe, false);
+    TargetCache::allocFixedFunction(newNe, false);
   }
   newNe->setCachedFunc(func);
 
   if (RuntimeOption::EvalJit) {
-    Transl::TargetCache::invalidateForRename(old);
+    TargetCache::invalidateForRename(old);
   }
 
   return true;

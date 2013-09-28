@@ -1607,8 +1607,6 @@ struct TReqInfo {
 
 void
 TranslatorX64::enterTC(TCA start, void* data) {
-  using namespace TargetCache;
-
   if (debug) {
     fflush(stdout);
     fflush(stderr);
@@ -1676,7 +1674,7 @@ TranslatorX64::enterTC(TCA start, void* data) {
       sim.   set_xreg(JIT::ARM::rGContextReg.code(), g_vmContext);
       sim.   set_xreg(JIT::ARM::rVmFp.code(), vmfp());
       sim.   set_xreg(JIT::ARM::rVmSp.code(), vmsp());
-      sim.   set_xreg(JIT::ARM::rVmTl.code(), tl_targetCaches);
+      sim.   set_xreg(JIT::ARM::rVmTl.code(), TargetCache::tl_targetCaches);
 
       sim.RunFrom(vixl::Instruction::Cast(start));
 
@@ -1696,9 +1694,10 @@ TranslatorX64::enterTC(TCA start, void* data) {
       // register (aside from rbp). enterTCHelper does not save them.
       CALLEE_SAVED_BARRIER();
       enterTCHelper(vmsp(), vmfp(), start, &info, vmFirstAR(),
-                    tl_targetCaches);
+                    TargetCache::tl_targetCaches);
       CALLEE_SAVED_BARRIER();
     }
+
     assert(g_vmContext->m_stack.isValidAddress((uintptr_t)vmsp()));
 
     tl_regState = VMRegState::CLEAN; // Careful: pc isn't sync'ed yet.

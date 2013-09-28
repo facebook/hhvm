@@ -78,7 +78,6 @@ inline const Func* Class::wouldCall(const Func* prev) const {
   return nullptr;
 }
 
-namespace Transl {
 namespace TargetCache {
 
 TRACE_SET_MOD(targetcache);
@@ -87,13 +86,6 @@ static StaticString s___call(LITSTR_INIT("__call"));
 
 // Shorthand.
 typedef CacheHandle Handle; // TODO(#2879005): rename CacheHandle to Handle
-
-// Helper for lookup failures. msg should be a printf-style static
-// format with one %s parameter, which name will be substituted into.
-void
-undefinedError(const char* msg, const char* name) {
-  raise_error(msg, name);
-}
 
 // Targetcache memory. See the comment in target-cache.h
 __thread void* tl_targetCaches = nullptr;
@@ -452,10 +444,10 @@ FuncCache::lookup(Handle handle, StringData *sd, const void* /* ignored */) {
     // Miss. Does it actually exist?
     func = Unit::lookupFunc(sd);
     if (UNLIKELY(!func)) {
-      VMRegAnchor _;
+      Transl::VMRegAnchor _;
       func = Unit::loadFunc(sd);
       if (!func) {
-        undefinedError("Undefined function: %s", sd->data());
+        raise_error("Undefined function: %s", sd->data());
       }
     }
     func->validate();
@@ -473,10 +465,10 @@ FuncCache::lookup(Handle handle, StringData *sd, const void* /* ignored */) {
 // FixedFuncCache
 
 const Func* FixedFuncCache::lookupUnknownFunc(StringData* name) {
-  VMRegAnchor _;
+  Transl::VMRegAnchor _;
   Func* func = Unit::loadFunc(name);
   if (UNLIKELY(!func)) {
-    undefinedError("Undefined function: %s", name->data());
+    raise_error("Undefined function: %s", name->data());
   }
   return func;
 }
@@ -704,7 +696,7 @@ lookupKnownClass(Class** cache, const StringData* clsName, bool isClass) {
     return (Class*)(uintptr_t)(cls ? cls->attrs() :
       (isClass ? (AttrTrait | AttrInterface) : AttrNone));
   } else if (UNLIKELY(!cls)) {
-    undefinedError(Strings::UNKNOWN_CLASS, clsName->data());
+    raise_error(Strings::UNKNOWN_CLASS, clsName->data());
   }
   return cls;
 }
@@ -740,7 +732,7 @@ ClassCache::lookup(Handle handle, StringData *name,
         c = Unit::loadMissingClass(ne, name);
       }
       if (UNLIKELY(!c)) {
-        undefinedError(Strings::UNKNOWN_CLASS, name->data());
+        raise_error(Strings::UNKNOWN_CLASS, name->data());
       }
     }
 
@@ -827,7 +819,7 @@ SPropCache::lookupSProp(const Class *cls, const StringData *name, Class* ctx) {
     string propertyName;
     string_printf(propertyName, "%s::%s",
                   cls->name()->data(), name->data());
-    undefinedError("Invalid static property access: %s", propertyName.c_str());
+    raise_error("Invalid static property access: %s", propertyName.c_str());
   }
   return val;
 }
@@ -969,7 +961,7 @@ StaticMethodCache::lookup(Handle handle, const NamedEntity *ne,
   Stats::inc(Stats::TgtCache_StaticMethodHit, -1);
   TRACE(1, "miss %s :: %s caller %p\n",
         clsName->data(), methName->data(), __builtin_return_address(0));
-  VMRegAnchor _; // needed for lookupClsMethod.
+  Transl::VMRegAnchor _; // needed for lookupClsMethod.
 
   ActRec* ar = reinterpret_cast<ActRec*>(vmsp() - kNumActRecCells);
   const Func* f;
@@ -1053,4 +1045,4 @@ StaticMethodFCache::lookupIR(Handle handle, const Class* cls,
   return nullptr;
 }
 
-} } } // HPHP::Transl::TargetCache
+}}

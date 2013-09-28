@@ -230,7 +230,7 @@ uint32_t makeCnsHandle(const StringData* cnsName, bool persistent) {
   auto const it = s_stringDataMap->find(make_intern_key(cnsName));
   assert(it != s_stringDataMap->end());
   if (!it->second) {
-    Transl::TargetCache::allocConstant(&it->second, persistent);
+    TargetCache::allocConstant(&it->second, persistent);
   }
   return it->second;
 }
@@ -239,17 +239,16 @@ const StaticString s_user("user");
 const StaticString s_Core("Core");
 Array lookupDefinedConstants(bool categorize /*= false */) {
   assert(s_stringDataMap);
-  Array usr(Transl::TargetCache::s_constants());
+  Array usr(TargetCache::s_constants());
   Array sys;
 
   for (StringDataMap::const_iterator it = s_stringDataMap->begin();
        it != s_stringDataMap->end(); ++it) {
     if (it->second) {
       Array *tbl = (categorize &&
-                    Transl::TargetCache::isPersistentHandle(it->second))
+                    TargetCache::isPersistentHandle(it->second))
                  ? &sys : &usr;
-      auto& tv =
-        Transl::TargetCache::handleToRef<TypedValue>(it->second);
+      auto& tv = TargetCache::handleToRef<TypedValue>(it->second);
       if (tv.m_type != KindOfUninit) {
         StrNR key(const_cast<StringData*>(to_sdata(it->first)));
         tbl->set(key, tvAsVariant(&tv), true);

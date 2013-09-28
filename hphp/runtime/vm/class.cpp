@@ -32,8 +32,6 @@
 
 namespace HPHP {
 
-namespace TargetCache = Transl::TargetCache;
-
 static StringData* sd86ctor = makeStaticString("86ctor");
 static StringData* sd86pinit = makeStaticString("86pinit");
 static StringData* sd86sinit = makeStaticString("86sinit");
@@ -2324,7 +2322,7 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
   cellDup(v, m_data[m_size++]);
 }
 
-using Transl::TargetCache::handleToRef;
+using TargetCache::handleToRef;
 
 const Class::PropInitVec* Class::getPropData() const {
   if (m_propDataCache == (unsigned)-1) return nullptr;

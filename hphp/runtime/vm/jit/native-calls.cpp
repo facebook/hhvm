@@ -29,7 +29,6 @@
 namespace HPHP {  namespace JIT { namespace NativeCalls {
 
 using namespace HPHP::Transl;
-using namespace HPHP::Transl::TargetCache;
 
 namespace {
 
@@ -204,9 +203,11 @@ static CallMap s_callMap {
     {ClosureStaticLocInit,
                          closureStaticLocInit, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {TV, 2}}},
-    {LdFuncCached,       FixedFuncCache::lookupUnknownFunc, DSSA, SSync,
+    {LdFuncCached,       TargetCache::FixedFuncCache::lookupUnknownFunc,
+                             DSSA, SSync,
                            {{SSA, 0}}},
-    {LdFuncCachedU,      FixedFuncCache::lookupUnknownFunc, DSSA, SSync,
+    {LdFuncCachedU,      TargetCache::FixedFuncCache::lookupUnknownFunc,
+                             DSSA, SSync,
                            {{SSA, 0}}},
     {ArrayIdx,           fssa(0), DTV, SSync,
                            {{SSA, 1}, {SSA, 2}, {TV, 3}}},

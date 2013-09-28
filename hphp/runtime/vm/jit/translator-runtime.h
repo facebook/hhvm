@@ -115,6 +115,18 @@ RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val);
 
 bool instanceOfHelper(const Class* objClass, const Class* testClass);
 
+int64_t ak_exist_string(ArrayData* arr, StringData* key);
+int64_t ak_exist_int(ArrayData* arr, int64_t key);
+int64_t ak_exist_string_obj(ObjectData* obj, StringData* key);
+int64_t ak_exist_int_obj(ObjectData* obj, int64_t key);
+
+TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
+TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
+TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
+
+TypedValue* ldGblAddrHelper(StringData* name);
+TypedValue* ldGblAddrDefHelper(StringData* name);
+
 } }
 
 #endif

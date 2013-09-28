@@ -56,14 +56,6 @@ struct IRTrace : private boost::noncopyable {
   // Add a block to the back of this trace's block list.
   Block* push_back(Block* b);
 
-  // temporary data field for use by individual passes
-  //
-  // Used by LinearScan as a "fake" instruction id, that comes
-  // between the id of the last instruction that branches to
-  // this exit trace, and the next instruction on the main trace.
-  uint32_t data() const { return m_data; }
-  void setData(uint32_t d) { m_data = d; }
-
   bool isMain() const;
 
   std::string toString() const;
@@ -71,7 +63,6 @@ struct IRTrace : private boost::noncopyable {
 
 private:
   IRUnit& m_unit;
-  uint32_t m_data;
   std::list<Block*> m_blocks; // Blocks in main trace starting with entry block
 };
 

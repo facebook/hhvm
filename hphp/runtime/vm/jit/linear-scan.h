@@ -23,7 +23,6 @@
 
 namespace HPHP {  namespace JIT {
 
-class IRTrace;
 class IRUnit;
 
 // This value must be consistent with the number of pre-allocated

@@ -214,6 +214,9 @@ private:
   // SSATmps requiring 2 64-bit registers that are eligible for
   // allocation to a single XMM register
   boost::dynamic_bitset<> m_fullXMMCandidates;
+
+  // reserved linear ids for each exit trace
+  smart::flat_map<IRTrace*, uint32_t> m_exitIds;
 };
 
 static_assert(kReservedRSPSpillSpace == NumPreAllocatedSpillLocs * sizeof(void*),
@@ -284,6 +287,7 @@ LinearScan::LinearScan(IRUnit& unit)
   , m_allocInfo(unit)
   , m_fullXMMCandidates(unit.numTmps())
 {
+  m_exitIds.reserve(unit.exits().size());
   for (int i = 0; i < kNumRegs; i++) {
     m_regs[i].m_ssaTmp = nullptr;
     m_regs[i].m_reg = PhysReg(i);
@@ -734,7 +738,7 @@ void LinearScan::collectInfo(BlockList::iterator it, IRTrace* trace) {
     bool offTrace = block->trace() != trace;
     if (offTrace) {
       if (!trace->isMain()) return;
-      int lastId = block->trace()->data();
+      int lastId = m_exitIds[block->trace()];
       for (IRInstruction& inst : *block) {
         for (auto* src : inst.srcs()) {
           if (lastId > m_uses[src].lastUse) {
@@ -983,7 +987,7 @@ void LinearScan::numberInstructions(const BlockList& blocks) {
     if (block->taken() && block->isMain() && !block->taken()->isMain()) {
       // reserve a spot for the lastUseId when we're processing the main
       // trace, if the last use is really in an exit trace.
-      block->taken()->trace()->setData(nextId++);
+      m_exitIds[block->taken()->trace()] = nextId++;
     }
   }
 }

@@ -599,7 +599,7 @@ void CodeGenerator::cgAssertType(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdUnwinderValue(IRInstruction* inst) {
-  cgLoad(inst->dst(), rVmTl[TargetCache::kUnwinderTvOff], inst->taken());
+  cgLoad(inst->dst(), rVmTl[RDS::kUnwinderTvOff], inst->taken());
 }
 
 void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
@@ -625,10 +625,10 @@ static void unwindResumeHelper(_Unwind_Exception* data) {
 }
 
 void CodeGenerator::cgEndCatch(IRInstruction* inst) {
-  m_as.cmpb (0, rVmTl[TargetCache::kUnwinderSideExitOff]);
+  m_as.cmpb (0, rVmTl[RDS::kUnwinderSideExitOff]);
   unlikelyIfBlock(CC_E,
     [&](Asm& as) { // doSideExit == false, so call _Unwind_Resume
-      as.loadq(rVmTl[TargetCache::kUnwinderScratchOff], rdi);
+      as.loadq(rVmTl[RDS::kUnwinderScratchOff], rdi);
       as.call ((TCA)unwindResumeHelper); // pass control back to the unwinder
       as.ud2();
     });
@@ -638,7 +638,7 @@ void CodeGenerator::cgEndCatch(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgDeleteUnwinderException(IRInstruction* inst) {
-  m_as.loadq(rVmTl[TargetCache::kUnwinderScratchOff], rdi);
+  m_as.loadq(rVmTl[RDS::kUnwinderScratchOff], rdi);
   m_as.call ((TCA)_Unwind_DeleteException);
 }
 
@@ -2344,8 +2344,8 @@ void CodeGenerator::cgLdFuncCachedCommon(IRInstruction* inst) {
   SSATmp* methodName = inst->src(0);
 
   const StringData* name = methodName->getValStr();
-  auto const ch = TargetCache::allocFixedFunction(name);
-  size_t funcCacheOff = ch + offsetof(TargetCache::FixedFuncCache, m_func);
+  auto const ch = RDS::allocFixedFunction(name);
+  size_t funcCacheOff = ch + offsetof(RDS::FixedFuncCache, m_func);
 
   auto dstReg = m_regs[dst].reg();
   if (dstReg == InvalidReg) {
@@ -2373,12 +2373,12 @@ void CodeGenerator::cgLdFuncCachedU(IRInstruction* inst) {
 
   // allocate both cache handles
   const StringData* name = methodName->getValStr();
-  auto const ch = TargetCache::allocFixedFunction(name);
-  size_t funcCacheOff = ch + offsetof(TargetCache::FixedFuncCache, m_func);
+  auto const ch = RDS::allocFixedFunction(name);
+  size_t funcCacheOff = ch + offsetof(RDS::FixedFuncCache, m_func);
 
   const StringData* fallback = fallbackName->getValStr();
-  auto const fch = TargetCache::allocFixedFunction(fallback);
-  size_t fallbackCacheOff = fch + offsetof(TargetCache::FixedFuncCache, m_func);
+  auto const fch = RDS::allocFixedFunction(fallback);
+  size_t fallbackCacheOff = fch + offsetof(RDS::FixedFuncCache, m_func);
 
   // check the first cache handle, then the fallback
   auto dstReg = m_regs[dst].reg();
@@ -2414,10 +2414,10 @@ void CodeGenerator::cgLdFunc(IRInstruction* inst) {
   SSATmp*        dst = inst->dst();
   SSATmp* methodName = inst->src(0);
 
-  TargetCache::CacheHandle ch = TargetCache::FuncCache::alloc();
+  RDS::CacheHandle ch = RDS::FuncCache::alloc();
   // raises an error if function not found
   cgCallHelper(m_as,
-               CppCall(TargetCache::FuncCache::lookup),
+               CppCall(RDS::FuncCache::lookup),
                callDest(m_regs[dst].reg()),
                SyncOptions::kSyncPoint,
                ArgGroup(m_regs).imm(ch).ssa(methodName));
@@ -2436,12 +2436,12 @@ void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
   auto name      = inst->src(1);
   auto actRec    = inst->src(2);
   auto actRecReg = m_regs[actRec].reg();
-  auto const handle = TargetCache::MethodCache::alloc();
+  auto const handle = RDS::MethodCache::alloc();
 
   // lookup in the targetcache
-  assert(TargetCache::MethodCache::kNumLines == 1);
+  assert(RDS::MethodCache::kNumLines == 1);
   if (debug) {
-    TargetCache::MethodCache::Pair p;
+    RDS::MethodCache::Pair p;
     static_assert(sizeof(p.m_value) == 8,
                   "MethodCache::Pair::m_value assumed to be 8 bytes");
     static_assert(sizeof(p.m_key) == 8,
@@ -2449,9 +2449,9 @@ void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
   }
 
   // preload handle->m_value
-  m_as.loadq(rVmTl[handle + offsetof(TargetCache::MethodCache::Pair, m_value)],
+  m_as.loadq(rVmTl[handle + offsetof(RDS::MethodCache::Pair, m_value)],
              m_rScratch);
-  m_as.cmpq (rVmTl[handle + offsetof(TargetCache::MethodCache::Pair, m_key)],
+  m_as.cmpq (rVmTl[handle + offsetof(RDS::MethodCache::Pair, m_key)],
              clsReg);
   ifThenElse(CC_E, // if handle->key == cls
              [&] { // then actReg->m_func = handle->value
@@ -2459,7 +2459,7 @@ void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
              },
              [&] { // else call slow path helper
                cgCallHelper(m_as,
-                            CppCall(TargetCache::methodCacheSlowPath),
+                            CppCall(RDS::methodCacheSlowPath),
                             kVoidDest,
                             SyncOptions::kSyncPoint,
                             ArgGroup(m_regs).addr(rVmTl, handle)
@@ -4120,7 +4120,7 @@ void CodeGenerator::cgStRaw(IRInstruction* inst) {
 
 void CodeGenerator::cgLdStaticLocCached(IRInstruction* inst) {
   auto const extra = inst->extra<LdStaticLocCached>();
-  auto const ch = TargetCache::allocStaticLocal(extra->func, extra->name);
+  auto const ch = RDS::allocStaticLocal(extra->func, extra->name);
   auto const dst = m_regs[inst->dst()].reg();
   auto& a = m_as;
   emitLea(a, rVmTl[ch], dst);
@@ -4635,7 +4635,7 @@ void CodeGenerator::cgCheckTypeMem(IRInstruction* inst) {
 void CodeGenerator::cgCheckDefinedClsEq(IRInstruction* inst) {
   auto const clsName = inst->extra<CheckDefinedClsEq>()->clsName;
   auto const cls     = inst->extra<CheckDefinedClsEq>()->cls;
-  auto const ch      = TargetCache::allocKnownClass(clsName);
+  auto const ch      = RDS::allocKnownClass(clsName);
   m_as.cmpq(cls, rVmTl[ch]);
   emitFwdJcc(CC_NZ, inst->taken());
 }
@@ -4818,14 +4818,14 @@ void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
   const StringData*  cls    = className->getValStr();
   const StringData*  method = methodName->getValStr();
   auto const ne             = baseClass->getValNamedEntity();
-  TargetCache::CacheHandle ch =
-    TargetCache::StaticMethodCache::alloc(cls,
+  RDS::CacheHandle ch =
+    RDS::StaticMethodCache::alloc(cls,
                                           method,
                                           getContextName(curClass()));
   auto funcDestReg  = m_regs[dst].reg(0);
   auto classDestReg = m_regs[dst].reg(1);
-  auto offsetof_func = offsetof(TargetCache::StaticMethodCache, m_func);
-  auto offsetof_cls  = offsetof(TargetCache::StaticMethodCache, m_cls);
+  auto offsetof_func = offsetof(RDS::StaticMethodCache, m_func);
+  auto offsetof_cls  = offsetof(RDS::StaticMethodCache, m_cls);
 
   assert(funcDestReg != InvalidReg && classDestReg != InvalidReg);
   // Attempt to retrieve the func* and class* from cache
@@ -4838,12 +4838,12 @@ void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
     if (false) { // typecheck
       UNUSED TypedValue* fake_fp = nullptr;
       UNUSED TypedValue* fake_sp = nullptr;
-      const UNUSED Func* f = TargetCache::StaticMethodCache::lookupIR(
+      const UNUSED Func* f = RDS::StaticMethodCache::lookupIR(
         ch, ne, cls, method, fake_fp, fake_sp);
     }
     // can raise an error if class is undefined
     cgCallHelper(a,
-                 CppCall(TargetCache::StaticMethodCache::lookupIR),
+                 CppCall(RDS::StaticMethodCache::lookupIR),
                  callDest(funcDestReg),
                  SyncOptions::kSyncPoint,
                  ArgGroup(m_regs).imm(ch)         // Handle ch
@@ -4886,12 +4886,12 @@ void CodeGenerator::emitGetCtxFwdCallWithThis(PhysReg ctxReg,
  */
 void CodeGenerator::emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,
                                                  PhysReg      thisReg,
-                                                 TargetCache::CacheHandle& ch) {
+                                                 RDS::CacheHandle& ch) {
   Label NonStaticCall, End;
 
   // thisReg is holding $this. Should we pass it to the callee?
   m_as.cmpl(1,
-            rVmTl[ch + offsetof(TargetCache::StaticMethodFCache, m_static)]);
+            rVmTl[ch + offsetof(RDS::StaticMethodFCache, m_static)]);
   m_as.jcc8(CC_NE, NonStaticCall);
   // If calling a static method...
   {
@@ -4943,7 +4943,7 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
   auto const exitLabel   = inst->taken();
   auto const clsName     = cls->name();
 
-  auto ch = TargetCache::StaticMethodFCache::alloc(
+  auto ch = RDS::StaticMethodFCache::alloc(
     clsName, methName, getContextName(curClass())
   );
 
@@ -4956,9 +4956,9 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
 
   // Handle case where method is not entered in the cache
   unlikelyIfBlock(CC_E, [&] (Asm& a) {
-    const Func* (*lookup)(TargetCache::CacheHandle, const Class*,
+    const Func* (*lookup)(RDS::CacheHandle, const Class*,
       const StringData*, TypedValue*) =
-        TargetCache::StaticMethodFCache::lookupIR;
+        RDS::StaticMethodFCache::lookupIR;
     // preserve destCtxReg across the call since it wouldn't be otherwise
     RegSet toSave = m_state.liveRegs[inst] | RegSet(destCtxReg);
     cgCallHelper(a,
@@ -5013,7 +5013,7 @@ void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
   string sds(Util::toLower(clsNameString->data()) + ":" +
              string(propNameString->data(), propNameString->size()));
   String sd(sds);
-  auto const ch = TargetCache::SPropCache::alloc(sd.get());
+  auto const ch = RDS::SPropCache::alloc(sd.get());
 
   auto dstReg = m_regs[dst].reg();
   // Cls is live in the slow path call to lookupIR, so we have to be
@@ -5032,8 +5032,8 @@ void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
     cgCallHelper(
       a,
       CppCall(
-        target ? TargetCache::SPropCache::lookup<false>
-               : TargetCache::SPropCache::lookup<true> // raise on error
+        target ? RDS::SPropCache::lookup<false>
+               : RDS::SPropCache::lookup<true> // raise on error
       ),
       callDest(tmpReg),
       SyncOptions::kSyncPoint, // could re-enter to init properties
@@ -5068,8 +5068,8 @@ void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
   cgCallHelper(
     m_as,
     CppCall(
-      target ? TargetCache::SPropCache::lookupSProp<false>
-             : TargetCache::SPropCache::lookupSProp<true> // raise on error
+      target ? RDS::SPropCache::lookupSProp<false>
+             : RDS::SPropCache::lookupSProp<true> // raise on error
     ),
     callDest(dstReg),
     SyncOptions::kSyncPoint, // could re-enter to init properties
@@ -5081,11 +5081,11 @@ void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
   }
 }
 
-TargetCache::CacheHandle CodeGenerator::cgLdClsCachedCommon(
+RDS::CacheHandle CodeGenerator::cgLdClsCachedCommon(
   IRInstruction* inst) {
   SSATmp* dst = inst->dst();
   const StringData* className = inst->src(0)->getValStr();
-  auto ch = TargetCache::allocKnownClass(className);
+  auto ch = RDS::allocKnownClass(className);
   auto dstReg = m_regs[dst].reg();
   if (dstReg == InvalidReg) {
     m_as. cmpq   (0, rVmTl[ch]);
@@ -5103,7 +5103,7 @@ void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
     // Passing only two arguments to lookupKnownClass, since the
     // third is ignored in the checkOnly==false case.
     cgCallHelper(a,
-                 CppCall(TargetCache::lookupKnownClass<false>),
+                 CppCall(RDS::lookupKnownClass<false>),
                  callDest(inst->dst()),
                  SyncOptions::kSyncPoint,
                  ArgGroup(m_regs).addr(rVmTl, intptr_t(ch)).ssas(inst, 0));
@@ -5121,9 +5121,9 @@ void CodeGenerator::cgLdCls(IRInstruction* inst) {
   SSATmp* dst       = inst->dst();
   SSATmp* className = inst->src(0);
 
-  auto const ch = TargetCache::ClassCache::alloc();
+  auto const ch = RDS::ClassCache::alloc();
   cgCallHelper(m_as,
-               CppCall(TargetCache::ClassCache::lookup),
+               CppCall(RDS::ClassCache::lookup),
                callDest(dst),
                SyncOptions::kSyncPoint,
                ArgGroup(m_regs).imm(ch).ssa(className));
@@ -5139,17 +5139,17 @@ static StringData* fullConstName(const StringData* cls,
 void CodeGenerator::cgLdClsCns(IRInstruction* inst) {
   auto const extra    = inst->extra<LdClsCns>();
   auto const fullName = fullConstName(extra->clsName, extra->cnsName);
-  auto const ch       = TargetCache::allocClassConstant(fullName);
+  auto const ch       = RDS::allocClassConstant(fullName);
   cgLoad(inst->dst(), rVmTl[ch], inst->taken());
 }
 
 void CodeGenerator::cgLookupClsCns(IRInstruction* inst) {
   auto const extra    = inst->extra<LookupClsCns>();
   auto const fullName = fullConstName(extra->clsName, extra->cnsName);
-  auto const ch       = TargetCache::allocClassConstant(fullName);
+  auto const ch       = RDS::allocClassConstant(fullName);
   cgCallHelper(
     m_as,
-    CppCall(TargetCache::lookupClassConstantTv),
+    CppCall(RDS::lookupClassConstantTv),
     callDestTV(inst->dst()),
     SyncOptions::kSyncPoint,
     ArgGroup(m_regs)

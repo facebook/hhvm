@@ -92,10 +92,10 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
   // things to the handler using the target cache. This also simplifies the
   // handler code because it doesn't have to worry about saving its arguments
   // somewhere while executing the exit trace.
-  TargetCache::header()->unwinderScratch = (int64_t)exn;
-  TargetCache::header()->doSideExit = ism;
+  RDS::header()->unwinderScratch = (int64_t)exn;
+  RDS::header()->doSideExit = ism;
   if (ism) {
-    TargetCache::header()->unwinderTv = ism->tv();
+    RDS::header()->unwinderTv = ism->tv();
   }
   _Unwind_SetIP(ctx, (uint64_t)catchTrace);
   tl_regState = VMRegState::DIRTY;

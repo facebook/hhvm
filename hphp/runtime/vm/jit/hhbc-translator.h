@@ -110,7 +110,7 @@ private:
  * HhbcTranslator is where we make optimiations that relate to overall
  * knowledge of the runtime and HHBC.  For example, decisions like
  * whether to use IR instructions that have constant Class*'s (for a
- * AttrUnique class) instead of loading a Class* from TargetCache are
+ * AttrUnique class) instead of loading a Class* from RDS are
  * made at this level.
  */
 struct HhbcTranslator {

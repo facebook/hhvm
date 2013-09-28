@@ -2035,13 +2035,13 @@ void HhbcTranslator::emitFPushCufOp(Op op, Class* cls, StringData* invName,
     } else {
       ctx = genClsMethodCtx(callee, cls);
     }
-    if (!TargetCache::isPersistentHandle(cls->m_cachedOffset)) {
+    if (!RDS::isPersistentHandle(cls->m_cachedOffset)) {
       // The miss path is complicated and rare. Punt for now.
       gen(LdClsCachedSafe, makeExitSlow(), cns(cls->name()));
     }
   } else {
     ctx = m_tb->genDefInitNull();
-    if (!TargetCache::isPersistentHandle(callee->getCachedOffset())) {
+    if (!RDS::isPersistentHandle(callee->getCachedOffset())) {
       // The miss path is complicated and rare. Punt for now.
       func = gen(LdFuncCachedSafe, makeExitSlow(), cns(callee->name()));
     }
@@ -2140,7 +2140,7 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
 
   const Class* cls = Unit::lookupUniqueClass(className);
   bool uniqueCls = classIsUnique(cls);
-  bool persistentCls = TargetCache::classIsPersistent(cls);
+  bool persistentCls = RDS::classIsPersistent(cls);
   bool canInstantiate = canInstantiateClass(cls);
   bool fastAlloc = !RuntimeOption::EnableObjDestructCall &&
     persistentCls && canInstantiate;
@@ -2175,7 +2175,7 @@ const StaticString s_uuinvoke("__invoke");
  *
  * This means even if we're not in RepoAuthoritative mode, as long as
  * this code is reachable it will always use the same closure Class*,
- * so we can just burn it into the TC without using TargetCache.
+ * so we can just burn it into the TC without using RDS.
  */
 void HhbcTranslator::emitCreateCl(int32_t numParams, int32_t funNameStrId) {
   auto const cls = Unit::lookupUniqueClass(lookupStringId(funNameStrId));

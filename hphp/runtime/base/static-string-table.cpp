@@ -90,7 +90,7 @@ struct strintern_hash {
   }
 };
 
-// The uint32_t is used to hold TargetCache offsets for constants
+// The uint32_t is used to hold RDS offsets for constants
 typedef folly::AtomicHashMap<StrInternKey,uint32_t,strintern_hash,strintern_eq>
         StringDataMap;
 StringDataMap* s_stringDataMap;
@@ -224,13 +224,13 @@ uint32_t makeCnsHandle(const StringData* cnsName, bool persistent) {
   if (!cnsName->isStatic()) {
     // Its a dynamic constant, that doesn't correspond to
     // an already allocated handle. We'll allocate it in
-    // the request local TargetCache::s_constants instead.
+    // the request local RDS::s_constants instead.
     return 0;
   }
   auto const it = s_stringDataMap->find(make_intern_key(cnsName));
   assert(it != s_stringDataMap->end());
   if (!it->second) {
-    TargetCache::allocConstant(&it->second, persistent);
+    RDS::allocConstant(&it->second, persistent);
   }
   return it->second;
 }
@@ -239,16 +239,16 @@ const StaticString s_user("user");
 const StaticString s_Core("Core");
 Array lookupDefinedConstants(bool categorize /*= false */) {
   assert(s_stringDataMap);
-  Array usr(TargetCache::s_constants());
+  Array usr(RDS::s_constants());
   Array sys;
 
   for (StringDataMap::const_iterator it = s_stringDataMap->begin();
        it != s_stringDataMap->end(); ++it) {
     if (it->second) {
       Array *tbl = (categorize &&
-                    TargetCache::isPersistentHandle(it->second))
+                    RDS::isPersistentHandle(it->second))
                  ? &sys : &usr;
-      auto& tv = TargetCache::handleToRef<TypedValue>(it->second);
+      auto& tv = RDS::handleToRef<TypedValue>(it->second);
       if (tv.m_type != KindOfUninit) {
         StrNR key(const_cast<StringData*>(to_sdata(it->first)));
         tbl->set(key, tvAsVariant(&tv), true);

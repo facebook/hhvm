@@ -47,7 +47,7 @@ class EventHook {
       auto name = ar->m_func->fullName();
       Trace::ringbufferMsg(name->data(), name->size(), Trace::RBTypeFuncEntry);
     }
-    if (UNLIKELY(TargetCache::loadConditionFlags())) {
+    if (UNLIKELY(RDS::loadConditionFlags())) {
       return onFunctionEnter(ar, funcType);
     }
     return true;
@@ -67,7 +67,7 @@ class EventHook {
       auto name = ar->m_func->fullName();
       Trace::ringbufferMsg(name->data(), name->size(), Trace::RBTypeFuncExit);
     }
-    if (UNLIKELY(TargetCache::loadConditionFlags())) {
+    if (UNLIKELY(RDS::loadConditionFlags())) {
       onFunctionExit(ar);
     }
   }

@@ -584,7 +584,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("hhbc-roarena-capac", hhbc_arena_capacity());
     appendStat("tc-size", tx->getCodeSize());
     appendStat("tc-stubsize", tx->getStubSize());
-    appendStat("targetcache", tx->getTargetCacheSize());
+    appendStat("targetcache", tx->getRDSSize());
     appendStat("units", Eval::FileRepository::getLoadedFiles());
     appendStat("Funcs", Func::nextFuncId());
     out << "}" << endl;

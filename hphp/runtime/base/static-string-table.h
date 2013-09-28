@@ -88,7 +88,7 @@ size_t makeStaticStringCount();
 /*
  * Functions mapping constants to target cache offsets.
  *
- * TODO(#2879005): replace uint32_t with TargetCache::CacheHandle.
+ * TODO(#2879005): replace uint32_t with RDS::CacheHandle.
  */
 uint32_t lookupCnsHandle(const StringData* cnsName);
 uint32_t makeCnsHandle(const StringData* cnsName, bool persistent);

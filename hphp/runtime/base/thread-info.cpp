@@ -46,7 +46,7 @@ ThreadInfo::ThreadInfo()
   m_pendingException = nullptr;
   m_coverage = new CodeCoverage();
 
-  TargetCache::threadInit();
+  RDS::threadInit();
   onSessionInit();
 
   Lock lock(s_thread_info_mutex);
@@ -59,7 +59,7 @@ ThreadInfo::~ThreadInfo() {
   Lock lock(s_thread_info_mutex);
   s_thread_infos.erase(this);
   delete m_coverage;
-  TargetCache::threadExit();
+  RDS::threadExit();
 }
 
 bool ThreadInfo::valid(ThreadInfo* info) {
@@ -110,7 +110,7 @@ void ThreadInfo::setPendingException(Exception* e) {
 void ThreadInfo::onSessionExit() {
   m_reqInjectionData.setTimeout(0);
   m_reqInjectionData.reset();
-  TargetCache::requestExit();
+  RDS::requestExit();
 }
 
 RequestInjectionData::~RequestInjectionData() {
@@ -122,8 +122,8 @@ RequestInjectionData::~RequestInjectionData() {
 }
 
 void RequestInjectionData::onSessionInit() {
-  TargetCache::requestInit();
-  cflagsPtr = TargetCache::conditionFlagsPtr();
+  RDS::requestInit();
+  cflagsPtr = RDS::conditionFlagsPtr();
   reset();
 }
 

@@ -78,7 +78,7 @@ inline const Func* Class::wouldCall(const Func* prev) const {
   return nullptr;
 }
 
-namespace TargetCache {
+namespace RDS {
 
 TRACE_SET_MOD(targetcache);
 
@@ -95,8 +95,8 @@ __thread std::aligned_storage<sizeof(Array),alignof(Array)>::type
 static const size_t kPreAllocatedBytes = 64;
 size_t s_frontier = kPreAllocatedBytes;
 
-static_assert(sizeof(TargetCacheHeader) <= kPreAllocatedBytes,
-              "TargetCacheHeader doesn't fit in kPreAllocatedBytes");
+static_assert(sizeof(RDSHeader) <= kPreAllocatedBytes,
+              "RDSHeader doesn't fit in kPreAllocatedBytes");
 size_t s_persistent_frontier = 0;
 size_t s_persistent_start = 0;
 static size_t s_next_bit;
@@ -302,19 +302,19 @@ namedAlloc(PHPNameSpace where, const StringData* name,
   typename HI::Map& map = HI::getHandleMap(where);
   typename HI::Map::const_accessor a;
   if (name && map.find(a, name)) {
-    TRACE(2, "TargetCache: hit \"%s\", %d\n", name->data(), int(a->second));
+    TRACE(2, "RDS: hit \"%s\", %d\n", name->data(), int(a->second));
     return a->second;
   }
   Lock l(s_handleMutex);
   if (name && map.find(a, name)) { // Retry under the lock
-    TRACE(2, "TargetCache: hit \"%s\", %d\n", name->data(), int(a->second));
+    TRACE(2, "RDS: hit \"%s\", %d\n", name->data(), int(a->second));
     return a->second;
   }
   Handle retval = allocLocked(where == NSPersistent, numBytes, align);
   if (name) {
     if (!name->isStatic()) name = makeStaticString(name);
     if (!map.insert(typename HI::Map::value_type(name, retval))) NOT_REACHED();
-    TRACE(1, "TargetCache: inserted \"%s\", %d\n", name->data(), int(retval));
+    TRACE(1, "RDS: inserted \"%s\", %d\n", name->data(), int(retval));
   } else if (where == NSDynFunction) {
     funcCacheEntries.push_back(retval);
   }
@@ -389,9 +389,9 @@ requestInit() {
   assert(tl_targetCaches);
   new (&s_constantsStorage) Array();
   assert(!s_constants().get());
-  TRACE(1, "TargetCache: @%p\n", tl_targetCaches);
+  TRACE(1, "RDS: @%p\n", tl_targetCaches);
   if (zeroViaMemset) {
-    TRACE(1, "TargetCache: bzeroing %zd bytes: %p\n", s_frontier,
+    TRACE(1, "RDS: bzeroing %zd bytes: %p\n", s_frontier,
           tl_targetCaches);
     memset(tl_targetCaches, 0, s_frontier);
   }
@@ -408,7 +408,7 @@ requestExit() {
 
 void
 flush() {
-  TRACE(1, "TargetCache: MADV_DONTNEED %zd bytes: %p\n", s_frontier,
+  TRACE(1, "RDS: MADV_DONTNEED %zd bytes: %p\n", s_frontier,
         tl_targetCaches);
   if (madvise(tl_targetCaches, s_frontier, MADV_DONTNEED) < 0) {
     not_reached();

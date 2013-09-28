@@ -607,14 +607,14 @@ void flush_evaluation_stack() {
   if (g_context.isNull()) {
     // For RPCRequestHandler threads, the ExecutionContext can stay alive
     // across requests, and hold references to the VM stack, and
-    // the TargetCache needs to keep track of which classes are live etc
+    // the RDS needs to keep track of which classes are live etc
     // So only flush the VM stack and the target cache if the execution
     // context is dead.
 
     if (!t_se.isNull()) {
       t_se->flush();
     }
-    TargetCache::flush();
+    RDS::flush();
   }
 }
 
@@ -2324,7 +2324,7 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupPhpFile(StringData* path,
   if (efile && initial_opt) {
     // if initial_opt is not set, this shouldnt be recorded as a
     // per request fetch of the file.
-    if (TargetCache::testAndSetBit(efile->getId())) {
+    if (RDS::testAndSetBit(efile->getId())) {
       initial = false;
     }
     // if parsing was successful, update the mappings for spath and
@@ -3992,7 +3992,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFatal(PC& pc) {
 }
 
 OPTBLD_INLINE void VMExecutionContext::jmpSurpriseCheck(Offset offset) {
-  if (offset <= 0 && UNLIKELY(TargetCache::loadConditionFlags())) {
+  if (offset <= 0 && UNLIKELY(RDS::loadConditionFlags())) {
     EventHook::CheckSurprise();
   }
 }
@@ -6377,10 +6377,10 @@ static inline RefData* lookupStatic(StringData* name,
     );
   }
 
-  auto const handle = TargetCache::allocStaticLocal(func, name);
-  auto refData = TargetCache::handleToPtr<RefData>(handle);
-  inited = !refData->isUninitializedInTargetCache();
-  if (!inited) refData->initInTargetCache();
+  auto const handle = RDS::allocStaticLocal(func, name);
+  auto refData = RDS::handleToPtr<RefData>(handle);
+  inited = !refData->isUninitializedInRDS();
+  if (!inited) refData->initInRDS();
   return refData;
 }
 

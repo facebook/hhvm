@@ -113,7 +113,7 @@ void ProcessInit() {
   RuntimeOption::EvalAllowHhas = true;
   Option::WholeProgram = false;
 
-  TargetCache::requestInit();
+  RDS::requestInit();
   string hhas;
   string slib = get_systemlib(&hhas);
 

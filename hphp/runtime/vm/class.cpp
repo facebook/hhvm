@@ -326,27 +326,27 @@ void Class::atomicRelease() {
 }
 
 Class *Class::getCached() const {
-  return *(Class**)TargetCache::handleToPtr(m_cachedOffset);
+  return *(Class**)RDS::handleToPtr(m_cachedOffset);
 }
 
 void Class::setCached() {
-  *(Class**)TargetCache::handleToPtr(m_cachedOffset) = this;
+  *(Class**)RDS::handleToPtr(m_cachedOffset) = this;
 }
 
 bool Class::verifyPersistent() const {
   if (!(attrs() & AttrPersistent)) return false;
   if (m_parent.get() &&
-      !TargetCache::isPersistentHandle(m_parent->m_cachedOffset)) {
+      !RDS::isPersistentHandle(m_parent->m_cachedOffset)) {
     return false;
   }
   for (auto const& declInterface : declInterfaces()) {
-    if (!TargetCache::isPersistentHandle(
+    if (!RDS::isPersistentHandle(
           declInterface->m_cachedOffset)) {
       return false;
     }
   }
   for (auto const& usedTrait : m_usedTraits) {
-    if (!TargetCache::isPersistentHandle(
+    if (!RDS::isPersistentHandle(
           usedTrait->m_cachedOffset)) {
       return false;
     }
@@ -862,11 +862,11 @@ Cell Class::clsCnsGet(const StringData* clsCnsName) const {
   // potentially different in different requests, which we store
   // separately in an array living off target cache.
   if (UNLIKELY(!m_nonScalarConstantCache)) {
-    TargetCache::allocNonScalarClassConstantMap(
+    RDS::allocNonScalarClassConstantMap(
       const_cast<unsigned*>(&m_nonScalarConstantCache));
   }
 
-  auto& clsCnsData = TargetCache::handleToRef<Array>(
+  auto& clsCnsData = RDS::handleToRef<Array>(
     m_nonScalarConstantCache
   );
   if (clsCnsData.get() == nullptr) {
@@ -2322,7 +2322,7 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
   cellDup(v, m_data[m_size++]);
 }
 
-using TargetCache::handleToRef;
+using RDS::handleToRef;
 
 const Class::PropInitVec* Class::getPropData() const {
   if (m_propDataCache == (unsigned)-1) return nullptr;
@@ -2332,7 +2332,7 @@ const Class::PropInitVec* Class::getPropData() const {
 void Class::initPropHandle() const {
   if (UNLIKELY(m_propDataCache == (unsigned)-1)) {
     const_cast<unsigned&>(m_propDataCache) =
-      TargetCache::allocClassInitProp(name());
+      RDS::allocClassInitProp(name());
   }
 }
 
@@ -2354,7 +2354,7 @@ TypedValue* Class::getSPropData() const {
 void Class::initSPropHandle() const {
   if (UNLIKELY(m_propSDataCache == (unsigned)-1)) {
     const_cast<unsigned&>(m_propSDataCache) =
-      TargetCache::allocClassInitSProp(name());
+      RDS::allocClassInitSProp(name());
   }
 }
 

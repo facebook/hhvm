@@ -251,7 +251,7 @@ private:
 
   void emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,
                                     PhysReg      thisReg,
-                                    TargetCache::CacheHandle& ch);
+                                    RDS::CacheHandle& ch);
 
   void cgJcc(IRInstruction* inst);        // helper
   void cgReqBindJcc(IRInstruction* inst); // helper
@@ -323,7 +323,7 @@ private:
   void cgMIterInitCommon(IRInstruction* inst);
   void cgLdFuncCachedCommon(IRInstruction* inst);
   void cgLookupCnsCommon(IRInstruction* inst);
-  TargetCache::CacheHandle cgLdClsCachedCommon(IRInstruction* inst);
+  RDS::CacheHandle cgLdClsCachedCommon(IRInstruction* inst);
   void emitFwdJcc(ConditionCode cc, Block* target);
   void emitFwdJcc(Asm& a, ConditionCode cc, Block* target);
   void emitContVarEnvHelperCall(SSATmp* fp, TCA helper);

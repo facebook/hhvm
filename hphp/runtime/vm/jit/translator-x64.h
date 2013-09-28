@@ -377,7 +377,7 @@ public:
   virtual std::string getUsage();
   virtual size_t getCodeSize();
   virtual size_t getStubSize();
-  virtual size_t getTargetCacheSize();
+  virtual size_t getRDSSize();
 
   // true iff calling thread is sole writer.
   static bool canWrite() {

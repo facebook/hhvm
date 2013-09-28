@@ -273,7 +273,7 @@ bool canUseSPropCache(SSATmp* clsTmp,
 
   const Class* cls = clsTmp->getValClass();
 
-  if (!TargetCache::classIsPersistent(cls)) return false;
+  if (!RDS::classIsPersistent(cls)) return false;
 
   // If the class requires initialization, it might not have been
   // initialized yet.  getSProp() below will trigger initialization,
@@ -536,7 +536,7 @@ SSATmp* Simplifier::simplifyLdCls(IRInstruction* inst) {
   if (clsName->isConst()) {
     const Class* cls = Unit::lookupClass(clsName->getValStr());
     if (cls) {
-      if (TargetCache::isPersistentHandle(cls->m_cachedOffset)) {
+      if (RDS::isPersistentHandle(cls->m_cachedOffset)) {
         // the class is always defined
         return cns(cls);
       }

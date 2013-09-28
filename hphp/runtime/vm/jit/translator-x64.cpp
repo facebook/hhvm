@@ -1674,7 +1674,7 @@ TranslatorX64::enterTC(TCA start, void* data) {
       sim.   set_xreg(JIT::ARM::rGContextReg.code(), g_vmContext);
       sim.   set_xreg(JIT::ARM::rVmFp.code(), vmfp());
       sim.   set_xreg(JIT::ARM::rVmSp.code(), vmsp());
-      sim.   set_xreg(JIT::ARM::rVmTl.code(), TargetCache::tl_targetCaches);
+      sim.   set_xreg(JIT::ARM::rVmTl.code(), RDS::tl_targetCaches);
 
       sim.RunFrom(vixl::Instruction::Cast(start));
 
@@ -1694,7 +1694,7 @@ TranslatorX64::enterTC(TCA start, void* data) {
       // register (aside from rbp). enterTCHelper does not save them.
       CALLEE_SAVED_BARRIER();
       enterTCHelper(vmsp(), vmfp(), start, &info, vmFirstAR(),
-                    TargetCache::tl_targetCaches);
+                    RDS::tl_targetCaches);
       CALLEE_SAVED_BARRIER();
     }
 
@@ -2933,8 +2933,8 @@ size_t TranslatorX64::getStubSize() {
   return stubsCode.used();
 }
 
-size_t TranslatorX64::getTargetCacheSize() {
-  return TargetCache::s_frontier;
+size_t TranslatorX64::getRDSSize() {
+  return RDS::s_frontier;
 }
 
 std::string TranslatorX64::getUsage() {
@@ -2944,9 +2944,9 @@ std::string TranslatorX64::getUsage() {
   size_t aUsage     = mainCode.used();
   size_t stubsUsage = stubsCode.used();
   size_t dataUsage  = m_globalData.used();
-  size_t tcUsage    = TargetCache::s_frontier;
+  size_t tcUsage    = RDS::s_frontier;
   size_t persistentUsage =
-    TargetCache::s_persistent_frontier - TargetCache::s_persistent_start;
+    RDS::s_persistent_frontier - RDS::s_persistent_start;
   Util::string_printf(
     usage,
     "tx64: %9zd bytes (%zd%%) in ahot.code\n"

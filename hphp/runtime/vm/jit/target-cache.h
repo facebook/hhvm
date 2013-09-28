@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/util/asm-x64.h"
 
-namespace HPHP { namespace TargetCache {
+namespace HPHP { namespace RDS {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -54,10 +54,10 @@ ALWAYS_INLINE Array& s_constants() {
 }
 
 /*
- * The fields in TargetCacheHeader are pre-allocated at process
+ * The fields in RDSHeader are pre-allocated at process
  * startup and live at the beginning of the targetCache.
  */
-struct TargetCacheHeader {
+struct RDSHeader {
   ssize_t conditionFlags;
 
   // Used to pass values between unwinder code and catch traces:
@@ -66,18 +66,18 @@ struct TargetCacheHeader {
   bool doSideExit;
 };
 
-inline TargetCacheHeader* header() {
-  return (TargetCacheHeader*)tl_targetCaches;
+inline RDSHeader* header() {
+  return (RDSHeader*)tl_targetCaches;
 }
 
 constexpr int kConditionFlagsOff =
-  offsetof(TargetCacheHeader, conditionFlags);
+  offsetof(RDSHeader, conditionFlags);
 constexpr int kUnwinderScratchOff =
-  offsetof(TargetCacheHeader, unwinderScratch);
+  offsetof(RDSHeader, unwinderScratch);
 constexpr int kUnwinderSideExitOff =
-  offsetof(TargetCacheHeader, doSideExit);
+  offsetof(RDSHeader, doSideExit);
 constexpr int kUnwinderTvOff =
-  offsetof(TargetCacheHeader, unwinderTv);
+  offsetof(RDSHeader, unwinderTv);
 
 /*
  * Some caches have different numbers of lines. This is our default.
@@ -316,7 +316,7 @@ TypedValue lookupClassConstantTv(TypedValue* cache,
                                  const StringData* cns);
 
 /*
- * Non-scalar class constants are stored in TargetCache slots as
+ * Non-scalar class constants are stored in RDS slots as
  * Arrays.
  */
 CacheHandle allocNonScalarClassConstantMap(unsigned* handleOut);
@@ -325,7 +325,7 @@ CacheHandle allocNonScalarClassConstantMap(unsigned* handleOut);
  * Static locals.
  *
  * For normal functions, static locals are allocated as RefData's that
- * live in TargetCache.  Note that we don't put closures or
+ * live in RDS.  Note that we don't put closures or
  * generatorFromClosure locals here because they are per-instance.
  */
 CacheHandle allocStaticLocal(const Func*, const StringData*);

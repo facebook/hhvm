@@ -538,7 +538,7 @@ SSATmp* Simplifier::simplifyLdCls(IRInstruction* inst) {
   if (clsName->isConst()) {
     const Class* cls = Unit::lookupClass(clsName->getValStr());
     if (cls) {
-      if (RDS::isPersistentHandle(cls->m_cachedOffset)) {
+      if (RDS::isPersistentHandle(cls->classHandle())) {
         // the class is always defined
         return cns(cls);
       }

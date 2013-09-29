@@ -17,6 +17,7 @@
 
 #include "folly/AtomicHashMap.h"
 
+#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/rds.h"
 
@@ -93,7 +94,7 @@ struct strintern_hash {
 // The uint32_t is used to hold RDS offsets for constants
 typedef folly::AtomicHashMap<
   StrInternKey,
-  RDS::Handle,
+  RDS::Link<TypedValue>,
   strintern_hash,
   strintern_eq
 > StringDataMap;
@@ -130,7 +131,10 @@ StringData** precomputed_chars = precompute_chars();
 
 StringData* insertStaticString(StringSlice slice) {
   auto const sd = StringData::MakeStatic(slice);
-  auto pair = s_stringDataMap->insert(make_intern_key(sd), 0);
+  auto pair = s_stringDataMap->insert(
+    make_intern_key(sd),
+    RDS::Link<TypedValue>(RDS::kInvalidHandle)
+  );
   if (!pair.second) {
     sd->destructStatic();
   }
@@ -217,7 +221,7 @@ RDS::Handle lookupCnsHandle(const StringData* cnsName) {
   assert(s_stringDataMap);
   auto const it = s_stringDataMap->find(make_intern_key(cnsName));
   if (it != s_stringDataMap->end()) {
-    return it->second;
+    return it->second.handle();
   }
   return 0;
 }
@@ -233,10 +237,9 @@ RDS::Handle makeCnsHandle(const StringData* cnsName, bool persistent) {
   }
   auto const it = s_stringDataMap->find(make_intern_key(cnsName));
   assert(it != s_stringDataMap->end());
-  if (!it->second) {
-    RDS::allocConstant(&it->second, persistent);
-  }
-  return it->second;
+  it->second.bind<0x10>(persistent ? RDS::Mode::Persistent
+                                   : RDS::Mode::Normal);
+  return it->second.handle();
 }
 
 const StaticString s_user("user");
@@ -248,11 +251,11 @@ Array lookupDefinedConstants(bool categorize /*= false */) {
 
   for (StringDataMap::const_iterator it = s_stringDataMap->begin();
        it != s_stringDataMap->end(); ++it) {
-    if (it->second) {
+    if (it->second.bound()) {
       Array *tbl = (categorize &&
-                    RDS::isPersistentHandle(it->second))
+                    RDS::isPersistentHandle(it->second.handle()))
                  ? &sys : &usr;
-      auto& tv = RDS::handleToRef<TypedValue>(it->second);
+      auto& tv = *it->second;
       if (tv.m_type != KindOfUninit) {
         StrNR key(const_cast<StringData*>(to_sdata(it->first)));
         tbl->set(key, tvAsVariant(&tv), true);

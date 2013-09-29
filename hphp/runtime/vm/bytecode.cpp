@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/runtime/vm/event-hook.h"
+#include "hphp/runtime/vm/func-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/member-operations.h"
@@ -3979,7 +3980,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFatal(PC& pc) {
 }
 
 OPTBLD_INLINE void VMExecutionContext::jmpSurpriseCheck(Offset offset) {
-  if (offset <= 0 && UNLIKELY(RDS::loadConditionFlags())) {
+  if (offset <= 0 && UNLIKELY(checkConditionFlags())) {
     EventHook::CheckSurprise();
   }
 }
@@ -6286,7 +6287,7 @@ OPTBLD_INLINE void VMExecutionContext::iopDefFunc(PC& pc) {
   NEXT();
   DECODE_IVA(fid);
   Func* f = m_fp->m_func->unit()->lookupFuncId(fid);
-  f->setCached();
+  setCachedFunc(f, isDebuggerAttached());
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopDefCls(PC& pc) {
@@ -6364,11 +6365,10 @@ static inline RefData* lookupStatic(StringData* name,
     );
   }
 
-  auto const handle = RDS::allocStaticLocal(func, name);
-  auto refData = RDS::handleToPtr<RefData>(handle);
+  auto const refData = RDS::bindStaticLocal(func, name);
   inited = !refData->isUninitializedInRDS();
   if (!inited) refData->initInRDS();
-  return refData;
+  return refData.get();
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopStaticLoc(PC& pc) {

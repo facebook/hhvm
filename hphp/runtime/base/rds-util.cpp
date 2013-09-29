@@ -13,29 +13,31 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/base/rds-util.h"
 
-#ifndef incl_HPHP_VM_FUNC_INLINE_H_
-#define incl_HPHP_VM_FUNC_INLINE_H_
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/named-entity.h"
 
-#include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/vm/debugger-hook.h"
+namespace HPHP { namespace RDS {
 
-namespace HPHP {
+//////////////////////////////////////////////////////////////////////
 
-ALWAYS_INLINE void setCachedFunc(Func* func, bool debugger) {
-  assert(!func->isMethod());
-  RDS::Link<Func*> funcLink(func->funcHandle());
-  auto const funcAddr = funcLink.get();
-  if (UNLIKELY(*funcAddr != nullptr)) {
-    if (*funcAddr == func) return;
-    if (!(*funcAddr)->isAllowOverride()) {
-      raise_error(Strings::FUNCTION_ALREADY_DEFINED, func->name()->data());
-    }
-  }
-  *funcAddr = func;
-  if (UNLIKELY(debugger)) phpDebuggerDefFuncHook(func);
+Link<RefData> bindStaticLocal(const Func* func, const StringData* name) {
+  return bind<RefData>(
+    StaticLocal { func->getFuncId(), name },
+    Mode::Normal
+  );
 }
 
+Link<TypedValue> bindClassConstant(const StringData* clsName,
+                                   const StringData* cnsName) {
+  return bind<TypedValue,0x10>(
+    ClsConstant { clsName, cnsName },
+    Mode::Normal
+  );
 }
 
-#endif
+//////////////////////////////////////////////////////////////////////
+
+}}
+

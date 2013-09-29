@@ -13,29 +13,43 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#ifndef incl_HPHP_RUNTIME_BASE_RDS_UTIL_H_
+#define incl_HPHP_RUNTIME_BASE_RDS_UTIL_H_
 
-#ifndef incl_HPHP_VM_FUNC_INLINE_H_
-#define incl_HPHP_VM_FUNC_INLINE_H_
-
-#include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/vm/debugger-hook.h"
+#include "hphp/runtime/base/rds.h"
 
 namespace HPHP {
-
-ALWAYS_INLINE void setCachedFunc(Func* func, bool debugger) {
-  assert(!func->isMethod());
-  RDS::Link<Func*> funcLink(func->funcHandle());
-  auto const funcAddr = funcLink.get();
-  if (UNLIKELY(*funcAddr != nullptr)) {
-    if (*funcAddr == func) return;
-    if (!(*funcAddr)->isAllowOverride()) {
-      raise_error(Strings::FUNCTION_ALREADY_DEFINED, func->name()->data());
-    }
-  }
-  *funcAddr = func;
-  if (UNLIKELY(debugger)) phpDebuggerDefFuncHook(func);
+  struct NamedEntity;
+  struct Func;
+  struct StringData;
 }
 
-}
+namespace HPHP { namespace RDS {
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Utility functions for allocating some types of data from RDS.
+ */
+
+/*
+ * Static locals.
+ *
+ * For normal functions, static locals are allocated as RefData's that
+ * live in RDS.  Note that we don't put closures or
+ * generatorFromClosure locals here because they are per-instance.
+ */
+Link<RefData> bindStaticLocal(const Func*, const StringData*);
+
+/*
+ * Allocate storage for the value of a class constant in RDS.
+ */
+Link<TypedValue> bindClassConstant(const StringData* className,
+                                   const StringData* constName);
+
+//////////////////////////////////////////////////////////////////////
+
+}}
 
 #endif
+

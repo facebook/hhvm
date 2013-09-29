@@ -23,6 +23,14 @@
 
 namespace HPHP {
 
+//////////////////////////////////////////////////////////////////////
+
+inline bool checkConditionFlags() {
+  return atomic_acquire_load(&RDS::header()->conditionFlags);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 class EventHook {
  public:
   enum {
@@ -47,7 +55,7 @@ class EventHook {
       auto name = ar->m_func->fullName();
       Trace::ringbufferMsg(name->data(), name->size(), Trace::RBTypeFuncEntry);
     }
-    if (UNLIKELY(RDS::loadConditionFlags())) {
+    if (UNLIKELY(checkConditionFlags())) {
       return onFunctionEnter(ar, funcType);
     }
     return true;
@@ -67,7 +75,7 @@ class EventHook {
       auto name = ar->m_func->fullName();
       Trace::ringbufferMsg(name->data(), name->size(), Trace::RBTypeFuncExit);
     }
-    if (UNLIKELY(RDS::loadConditionFlags())) {
+    if (UNLIKELY(checkConditionFlags())) {
       onFunctionExit(ar);
     }
   }
@@ -84,8 +92,8 @@ private:
                                                 int funcType);
 };
 
-#undef DECLARE_HOOK
+//////////////////////////////////////////////////////////////////////
 
-} // namespace HPHP
+}
 
 #endif

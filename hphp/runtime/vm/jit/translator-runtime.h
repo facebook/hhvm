@@ -17,8 +17,10 @@
 #define incl_HPHP_TRANSLATOR_RUNTIME_H_
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/vm/type-constraint.h"
 
 namespace HPHP { namespace Transl {
 
@@ -127,6 +129,16 @@ void traceCallback(ActRec* fp, Cell* sp, int64_t pcOff, void* rip);
 
 const Func* lookupUnknownFunc(const StringData*);
 
-} }
+template<bool checkOnly>
+Class* lookupKnownClass(Class** cache,
+                        const StringData* clsName,
+                        bool isClass);
+
+TypedValue lookupClassConstantTv(TypedValue* cache,
+                                 const NamedEntity* ne,
+                                 const StringData* cls,
+                                 const StringData* cns);
+
+}}
 
 #endif

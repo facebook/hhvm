@@ -212,9 +212,7 @@ void rename_function(const String& old_name, const String& new_name) {
   }
 
   oldNe->setCachedFunc(nullptr);
-  if (UNLIKELY(newNe->m_cachedFuncOffset == 0)) {
-    RDS::allocFixedFunction(newNe, false);
-  }
+  newNe->m_cachedFunc.bind();
   newNe->setCachedFunc(func);
 
   if (RuntimeOption::EvalJit) {

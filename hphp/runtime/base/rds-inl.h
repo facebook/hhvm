@@ -20,18 +20,67 @@ namespace HPHP { namespace RDS {
 
 //////////////////////////////////////////////////////////////////////
 
+namespace detail {
+
+  Handle alloc(Mode mode, size_t numBytes, size_t align);
+  Handle allocUnlocked(Mode mode, size_t numBytes, size_t align);
+  Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes, size_t align);
+  void bindOnLinkImpl(std::atomic<Handle>& handle, Mode mode,
+    size_t sizeBytes, size_t align);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 inline Header* header() {
   return static_cast<Header*>(tl_base);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-extern __thread std::aligned_storage<sizeof(Array),alignof(Array)>::type
-  s_constantsStorage;
+template<class T> Link<T>::Link(Handle handle) : m_handle(handle) {}
+template<class T> Link<T>::Link(const Link& l) : m_handle{l.handle()} {}
 
-ALWAYS_INLINE Array& s_constants() {
-  void* vp = &s_constantsStorage;
-  return *static_cast<Array*>(vp);
+template<class T> Link<T>& Link<T>::operator=(const Link& l) {
+  m_handle.store(l.handle(), std::memory_order_relaxed);
+  return *this;
+}
+
+template<class T> T& Link<T>::operator*() const { return *get(); }
+template<class T> T* Link<T>::operator->() const { return get(); }
+
+template<class T> T* Link<T>::get() const {
+  assert(bound());
+  void* vp = static_cast<char*>(tl_base) + handle();
+  return static_cast<T*>(vp);
+}
+
+template<class T>
+bool Link<T>::bound() const {
+  return handle() != kInvalidHandle;
+}
+
+template<class T>
+Handle Link<T>::handle() const {
+  return m_handle.load(std::memory_order_relaxed);
+}
+
+template<class T>
+template<size_t Align>
+void Link<T>::bind(Mode mode) {
+  if (LIKELY(bound())) return;
+  detail::bindOnLinkImpl(m_handle, mode, sizeof(T), Align);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+template<class T, size_t Align>
+Link<T> bind(Symbol key, Mode mode) {
+  return Link<T>(detail::bindImpl(key, mode, sizeof(T), Align));
+}
+
+template<class T, size_t Align>
+Link<T> alloc(Mode mode) {
+  return Link<T>(detail::allocUnlocked(mode, sizeof(T), Align));
 }
 
 //////////////////////////////////////////////////////////////////////

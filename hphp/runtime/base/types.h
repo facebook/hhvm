@@ -25,7 +25,6 @@
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/memory-manager.h"
 
-#include <boost/static_assert.hpp>
 #include <boost/intrusive_ptr.hpp>
 
 #include <stdint.h>
@@ -491,9 +490,19 @@ typedef uint32_t Slot;
 const Slot kInvalidSlot = Slot(-1);
 
 /*
- * Handles into Request Data Segment.  See rds.h.
+ * Handles into Request Data Segment.  These are offsets from
+ * RDS::tl_base.  See rds.h.
  */
-namespace RDS { typedef uint32_t Handle; }
+namespace RDS {
+  typedef uint32_t Handle;
+  constexpr Handle kInvalidHandle = 0;
+}
+
+/*
+ * Unique identifier for a Func*.
+ */
+typedef uint32_t FuncId;
+constexpr FuncId InvalidFuncId = FuncId(-1LL);
 
 /*
  * Special types that are not relevant to the runtime as a whole.

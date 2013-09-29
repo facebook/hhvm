@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/base/stats.h"
 
 namespace HPHP {
 
@@ -567,6 +568,46 @@ const Func* lookupUnknownFunc(const StringData* name) {
     raise_error("Undefined function: %s", name->data());
   }
   return func;
+}
+
+template<bool checkOnly>
+Class*
+lookupKnownClass(Class** cache, const StringData* clsName, bool isClass) {
+  if (!checkOnly) {
+    Stats::inc(Stats::TgtCache_KnownClsHit, -1);
+    Stats::inc(Stats::TgtCache_KnownClsMiss, 1);
+  }
+
+  Class* cls = *cache;
+  assert(!cls); // the caller should already have checked
+  assert(clsName->data()[0] != '\\'); // namespace names should be done earlier
+
+  AutoloadHandler::s_instance->invokeHandler(
+    StrNR(const_cast<StringData*>(clsName)));
+  cls = *cache;
+
+  if (checkOnly) {
+    // If the class still doesn't exist, return flags causing the
+    // attribute check in the translated code that called us to fail.
+    return (Class*)(uintptr_t)(cls ? cls->attrs() :
+      (isClass ? (AttrTrait | AttrInterface) : AttrNone));
+  } else if (UNLIKELY(!cls)) {
+    raise_error(Strings::UNKNOWN_CLASS, clsName->data());
+  }
+  return cls;
+}
+
+template Class* lookupKnownClass<true>(Class**, const StringData*, bool);
+template Class* lookupKnownClass<false>(Class**, const StringData*, bool);
+
+Cell lookupClassConstantTv(TypedValue* cache,
+                           const NamedEntity* ne,
+                           const StringData* cls,
+                           const StringData* cns) {
+  Cell clsCns = g_vmContext->lookupClsCns(ne, cls, cns);
+  assert(isUncounted(clsCns));
+  cellDup(clsCns, *cache);
+  return clsCns;
 }
 
 //////////////////////////////////////////////////////////////////////

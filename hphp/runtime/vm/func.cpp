@@ -25,6 +25,7 @@
 #include "hphp/util/debug.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/base/rds.h"
@@ -217,7 +218,7 @@ Func::Func(Unit& unit, Id id, PreClass* preClass, int line1, int line2,
   , m_name(name)
   , m_namedEntity(nullptr)
   , m_refBitVal(0)
-  , m_cachedOffset(0)
+  , m_cachedFunc(RDS::kInvalidHandle)
   , m_maxStackCells(0)
   , m_numParams(0)
   , m_attrs(attrs)
@@ -720,15 +721,6 @@ Func::SharedData::~SharedData() {
 
 void Func::SharedData::atomicRelease() {
   delete this;
-}
-
-Func** Func::getCachedAddr() {
-  assert(!isMethod());
-  return getCachedFuncAddr(m_cachedOffset);
-}
-
-void Func::setCached() {
-  setCachedFunc(this, isDebuggerAttached());
 }
 
 const Func* Func::getGeneratorBody(const StringData* name) const {

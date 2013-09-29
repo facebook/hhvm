@@ -125,45 +125,29 @@ NamedEntity* Unit::GetNamedEntity(const StringData* str,
 }
 
 void NamedEntity::setCachedFunc(Func* f) {
-  assert(m_cachedFuncOffset);
-  *(Func**)RDS::handleToPtr(m_cachedFuncOffset) = f;
+  *m_cachedFunc = f;
 }
 
 Func* NamedEntity::getCachedFunc() const {
-  if (LIKELY(m_cachedFuncOffset != 0)) {
-    return *(Func**)RDS::handleToPtr(m_cachedFuncOffset);
-  }
-  return nullptr;
+  return LIKELY(m_cachedFunc.bound()) ? *m_cachedFunc : nullptr;
 }
 
 void NamedEntity::setCachedClass(Class* f) {
-  assert(m_cachedClassOffset);
-  *(Class**)RDS::handleToPtr(m_cachedClassOffset) = f;
+  *m_cachedClass = f;
 }
 
 Class* NamedEntity::getCachedClass() const {
-  if (LIKELY(m_cachedClassOffset != 0)) {
-    return *(Class**)RDS::handleToPtr(m_cachedClassOffset);
-  }
-  return nullptr;
+  return LIKELY(m_cachedClass.bound()) ? *m_cachedClass : nullptr;
 }
 
 void NamedEntity::setCachedTypedef(const TypedefReq& td) {
-  assert(m_cachedTypedefOffset);
-  auto& tdReq = RDS::handleToRef<TypedefReq>(
-    m_cachedTypedefOffset
-  );
-  tdReq = td;
+  *m_cachedTypedef = td;
 }
 
 const TypedefReq* NamedEntity::getCachedTypedef() const {
-  if (LIKELY(m_cachedTypedefOffset != 0)) {
-    auto ret = &RDS::handleToRef<const TypedefReq>(
-      m_cachedTypedefOffset
-    );
-    return ret->name ? ret : nullptr;
-  }
-  return nullptr;
+  // TODO(#2103214): support persistent typedefs
+  m_cachedTypedef.bind();
+  return m_cachedTypedef->name ? m_cachedTypedef.get() : nullptr;
 }
 
 void NamedEntity::pushClass(Class* cls) {
@@ -644,12 +628,16 @@ Class* Unit::defClass(const PreClass* preClass,
       continue;
     }
 
-    if (!nameList->m_cachedClassOffset) {
-      RDS::allocKnownClass(newClass.get());
-    }
-    newClass->m_cachedOffset = nameList->m_cachedClassOffset;
-
+    bool const isPersistent =
+      (!SystemLib::s_inited || RuntimeOption::RepoAuthoritative) &&
+      newClass->verifyPersistent();
+    nameList->m_cachedClass.bind(
+      isPersistent ? RDS::Mode::Persistent
+                   : RDS::Mode::Normal
+    );
+    newClass->setClassHandle(nameList->m_cachedClass);
     newClass.get()->incAtomicCount();
+
     if (InstanceBits::initFlag.load(std::memory_order_acquire)) {
       // If the instance bitmap has already been set up, we can just
       // initialize our new class's bits and add ourselves to the class
@@ -680,10 +668,7 @@ Class* Unit::defClass(const PreClass* preClass,
 
 bool Unit::aliasClass(Class* original, const StringData* alias) {
   auto const aliasNe = Unit::GetNamedEntity(alias);
-
-  if (!aliasNe->m_cachedClassOffset) {
-    RDS::allocKnownClass(aliasNe, false);
-  }
+  aliasNe->m_cachedClass.bind();
 
   auto const aliasClass = aliasNe->getCachedClass();
   if (aliasClass) {
@@ -721,10 +706,8 @@ void Unit::defTypedef(Id id) {
     return;
   }
 
-  if (!nameList->m_cachedTypedefOffset) {
-    nameList->m_cachedTypedefOffset =
-      RDS::allocTypedef(nameList);
-  }
+  // TODO(#2103214): persistent typedef support
+  nameList->m_cachedTypedef.bind();
 
   /*
    * If this typedef is a KindOfObject and the name on the right hand
@@ -848,13 +831,15 @@ bool Unit::classExists(const StringData* name, bool autoload, Attr typeAttrs) {
 
 void Unit::loadFunc(const Func *func) {
   assert(!func->isMethod());
-  const NamedEntity *ne = func->getNamedEntity();
-  if (UNLIKELY(!ne->m_cachedFuncOffset)) {
-    RDS::allocFixedFunction(
-      ne, func->attrs() & AttrPersistent &&
-      (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited));
-  }
-  const_cast<Func*>(func)->m_cachedOffset = ne->m_cachedFuncOffset;
+  auto const ne = func->getNamedEntity();
+  auto const isPersistent =
+    (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited) &&
+    (func->attrs() & AttrPersistent);
+  ne->m_cachedFunc.bind(
+    isPersistent ? RDS::Mode::Persistent
+                 : RDS::Mode::Normal
+  );
+  const_cast<Func*>(func)->setFuncHandle(ne->m_cachedFunc);
 }
 
 static void mergeCns(TypedValue& tv, TypedValue *value,
@@ -883,7 +868,7 @@ void Unit::initialMerge() {
         allFuncsUnique = (f->attrs() & AttrUnique);
       }
       loadFunc(f);
-      if (RDS::isPersistentHandle(f->m_cachedOffset)) {
+      if (RDS::isPersistentHandle(f->funcHandle())) {
         needsCompact = true;
       }
     }
@@ -891,7 +876,7 @@ void Unit::initialMerge() {
     if (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited) {
       /*
        * The mergeables array begins with the hoistable Func*s,
-       * followed by the (potenitally) hoistable Class*s.
+       * followed by the (potentially) hoistable Class*s.
        *
        * If the Unit is merge only, it then contains enough information
        * to simulate executing the pseudomain. Normally, this is just
@@ -1092,9 +1077,9 @@ void Unit::merge() {
   }
 
   if (UNLIKELY(isDebuggerAttached())) {
-    mergeImpl<true>(RDS::handleToPtr(0), m_mergeInfo);
+    mergeImpl<true>(RDS::tl_base, m_mergeInfo);
   } else {
-    mergeImpl<false>(RDS::handleToPtr(0), m_mergeInfo);
+    mergeImpl<false>(RDS::tl_base, m_mergeInfo);
   }
 }
 
@@ -1132,7 +1117,7 @@ size_t compactUnitMergeInfo(UnitMergeInfo* in, UnitMergeInfo* out) {
   size_t delta = 0;
   while (it != fend) {
     Func* func = *it++;
-    if (RDS::isPersistentHandle(func->getCachedOffset())) {
+    if (RDS::isPersistentHandle(func->funcHandle())) {
       delta++;
     } else if (iout) {
       *iout++ = func;
@@ -1153,7 +1138,7 @@ size_t compactUnitMergeInfo(UnitMergeInfo* in, UnitMergeInfo* out) {
       Class* cls = pre->namedEntity()->clsList();
       assert(cls && !cls->m_nextClass);
       assert(cls->preClass() == pre);
-      if (RDS::isPersistentHandle(cls->m_cachedOffset)) {
+      if (RDS::isPersistentHandle(cls->classHandle())) {
         delta++;
       } else if (out) {
         out->mergeableObj(oix++) = (void*)(uintptr_t(cls) | 1);
@@ -1178,7 +1163,7 @@ size_t compactUnitMergeInfo(UnitMergeInfo* in, UnitMergeInfo* out) {
           Class* cls = pre->namedEntity()->clsList();
           assert(cls && !cls->m_nextClass);
           assert(cls->preClass() == pre);
-          if (RDS::isPersistentHandle(cls->m_cachedOffset)) {
+          if (RDS::isPersistentHandle(cls->classHandle())) {
             delta++;
           } else if (out) {
             out->mergeableObj(oix++) =
@@ -1245,7 +1230,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
       do {
         Func* func = *it;
         assert(func->top());
-        getDataRef<Func*>(tcbase, func->getCachedOffset()) = func;
+        getDataRef<Func*>(tcbase, func->funcHandle()) = func;
         if (debugger) phpDebuggerDefFuncHook(func);
       } while (++it != fend);
     } else {
@@ -1275,7 +1260,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
           Stats::inc(Stats::UnitMerge_hoistable_persistent);
         }
         if (Stats::enabled() &&
-            RDS::isPersistentHandle(cls->m_cachedOffset)) {
+            RDS::isPersistentHandle(cls->classHandle())) {
           Stats::inc(Stats::UnitMerge_hoistable_persistent_cache);
         }
         if (Class* parent = cls->parent()) {
@@ -1283,15 +1268,15 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
             Stats::inc(Stats::UnitMerge_hoistable_persistent_parent);
           }
           if (Stats::enabled() &&
-              RDS::isPersistentHandle(parent->m_cachedOffset)) {
+              RDS::isPersistentHandle(parent->classHandle())) {
             Stats::inc(Stats::UnitMerge_hoistable_persistent_parent_cache);
           }
-          if (UNLIKELY(!getDataRef<Class*>(tcbase, parent->m_cachedOffset))) {
+          if (UNLIKELY(!getDataRef<Class*>(tcbase, parent->classHandle()))) {
             redoHoistable = true;
             continue;
           }
         }
-        getDataRef<Class*>(tcbase, cls->m_cachedOffset) = cls;
+        getDataRef<Class*>(tcbase, cls->classHandle()) = cls;
         if (debugger) phpDebuggerDefClassHook(cls);
       } else {
         if (UNLIKELY(!defClass(pre, false))) {
@@ -1361,7 +1346,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
             Stats::inc(Stats::UnitMerge_mergeable_unique_persistent);
           }
           if (Stats::enabled() &&
-              RDS::isPersistentHandle(cls->m_cachedOffset)) {
+              RDS::isPersistentHandle(cls->classHandle())) {
             Stats::inc(Stats::UnitMerge_mergeable_unique_persistent_cache);
           }
           Class::Avail avail = cls->avail(other, true);
@@ -1369,7 +1354,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
             raise_error("unknown class %s", other->name()->data());
           }
           assert(avail == Class::Avail::True);
-          getDataRef<Class*>(tcbase, cls->m_cachedOffset) = cls;
+          getDataRef<Class*>(tcbase, cls->classHandle()) = cls;
           if (debugger) phpDebuggerDefClassHook(cls);
           obj = mi->mergeableObj(++ix);
           k = UnitMergeKind(uintptr_t(obj) & 7);

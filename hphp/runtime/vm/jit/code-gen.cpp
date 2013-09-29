@@ -38,6 +38,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/rds-util.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/jit/translator-x64-internal.h"
@@ -599,7 +600,7 @@ void CodeGenerator::cgAssertType(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdUnwinderValue(IRInstruction* inst) {
-  cgLoad(inst->dst(), rVmTl[RDS::kUnwinderTvOff], inst->taken());
+  cgLoad(inst->dst(), rVmTl[unwinderTvOff()], inst->taken());
 }
 
 void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
@@ -625,10 +626,10 @@ static void unwindResumeHelper(_Unwind_Exception* data) {
 }
 
 void CodeGenerator::cgEndCatch(IRInstruction* inst) {
-  m_as.cmpb (0, rVmTl[RDS::kUnwinderSideExitOff]);
+  m_as.cmpb (0, rVmTl[unwinderSideExitOff()]);
   unlikelyIfBlock(CC_E,
     [&](Asm& as) { // doSideExit == false, so call _Unwind_Resume
-      as.loadq(rVmTl[RDS::kUnwinderScratchOff], rdi);
+      as.loadq(rVmTl[unwinderScratchOff()], rdi);
       as.call ((TCA)unwindResumeHelper); // pass control back to the unwinder
       as.ud2();
     });
@@ -638,7 +639,7 @@ void CodeGenerator::cgEndCatch(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgDeleteUnwinderException(IRInstruction* inst) {
-  m_as.loadq(rVmTl[RDS::kUnwinderScratchOff], rdi);
+  m_as.loadq(rVmTl[unwinderScratchOff()], rdi);
   m_as.call ((TCA)_Unwind_DeleteException);
 }
 
@@ -2342,7 +2343,7 @@ void CodeGenerator::cgUnbox(IRInstruction* inst) {
 void CodeGenerator::cgLdFuncCachedCommon(IRInstruction* inst) {
   auto const dst  = m_regs[inst->dst()].reg();
   auto const name = inst->extra<LdFuncCachedData>()->name;
-  auto const ch   = RDS::allocFixedFunction(name);
+  auto const ch   = Unit::GetNamedEntity(name)->getFuncHandle();
   auto& a = m_as;
 
   if (dst == InvalidReg) {
@@ -2376,23 +2377,24 @@ void CodeGenerator::cgLdFuncCachedSafe(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdFuncCachedU(IRInstruction* inst) {
-  auto const dstReg        = m_regs[inst->dst()].reg();
-  auto const extra         = inst->extra<LdFuncCachedU>();
-  auto const funcCache     = RDS::allocFixedFunction(extra->name);
-  auto const fallbackCache = RDS::allocFixedFunction(extra->fallback);
+  auto const dstReg    = m_regs[inst->dst()].reg();
+  auto const extra     = inst->extra<LdFuncCachedU>();
+  auto const hFunc     = Unit::GetNamedEntity(extra->name)->getFuncHandle();
+  auto const hFallback = Unit::GetNamedEntity(
+                           extra->fallback)->getFuncHandle();
   auto& a = m_as;
 
   // Check the first function handle, then the fallback.
   Label end;
   if (dstReg == InvalidReg) {
-    a.   cmpq  (0, rVmTl[funcCache]);
+    a.   cmpq  (0, rVmTl[hFunc]);
     a.   jnz8  (end);
-    a.   cmpq  (0, rVmTl[fallbackCache]);
+    a.   cmpq  (0, rVmTl[hFallback]);
   } else {
-    a.   loadq (rVmTl[funcCache], dstReg);
+    a.   loadq (rVmTl[hFunc], dstReg);
     a.   testq (dstReg, dstReg);
     a.   jnz8  (end);
-    a.   loadq (rVmTl[fallbackCache], dstReg);
+    a.   loadq (rVmTl[hFallback], dstReg);
     a.   testq (dstReg, dstReg);
   }
 
@@ -2439,7 +2441,6 @@ void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
   auto const handle = RDS::MethodCache::alloc();
 
   // lookup in the targetcache
-  assert(RDS::MethodCache::kNumLines == 1);
   if (debug) {
     RDS::MethodCache::Pair p;
     static_assert(sizeof(p.m_value) == 8,
@@ -4120,10 +4121,10 @@ void CodeGenerator::cgStRaw(IRInstruction* inst) {
 
 void CodeGenerator::cgLdStaticLocCached(IRInstruction* inst) {
   auto const extra = inst->extra<LdStaticLocCached>();
-  auto const ch = RDS::allocStaticLocal(extra->func, extra->name);
-  auto const dst = m_regs[inst->dst()].reg();
+  auto const link  = RDS::bindStaticLocal(extra->func, extra->name);
+  auto const dst   = m_regs[inst->dst()].reg();
   auto& a = m_as;
-  emitLea(a, rVmTl[ch], dst);
+  emitLea(a, rVmTl[link.handle()], dst);
 }
 
 void CodeGenerator::cgCheckStaticLocInit(IRInstruction* inst) {
@@ -4635,7 +4636,7 @@ void CodeGenerator::cgCheckTypeMem(IRInstruction* inst) {
 void CodeGenerator::cgCheckDefinedClsEq(IRInstruction* inst) {
   auto const clsName = inst->extra<CheckDefinedClsEq>()->clsName;
   auto const cls     = inst->extra<CheckDefinedClsEq>()->cls;
-  auto const ch      = RDS::allocKnownClass(clsName);
+  auto const ch      = Unit::GetNamedEntity(clsName)->getClassHandle();
   m_as.cmpq(cls, rVmTl[ch]);
   emitFwdJcc(CC_NZ, inst->taken());
 }
@@ -5012,7 +5013,7 @@ void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
   string sds(Util::toLower(clsNameString->data()) + ":" +
              string(propNameString->data(), propNameString->size()));
   String sd(sds);
-  auto const ch = RDS::SPropCache::alloc(sd.get());
+  auto const ch = RDS::SPropCache::alloc(makeStaticString(sd));
 
   auto dstReg = m_regs[dst].reg();
   // Cls is live in the slow path call to lookupIR, so we have to be
@@ -5084,7 +5085,7 @@ RDS::Handle CodeGenerator::cgLdClsCachedCommon(
   IRInstruction* inst) {
   SSATmp* dst = inst->dst();
   const StringData* className = inst->src(0)->getValStr();
-  auto ch = RDS::allocKnownClass(className);
+  auto ch = Unit::GetNamedEntity(className)->getClassHandle();
   auto dstReg = m_regs[dst].reg();
   if (dstReg == InvalidReg) {
     m_as. cmpq   (0, rVmTl[ch]);
@@ -5101,8 +5102,9 @@ void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
   unlikelyIfBlock(CC_E, [&] (Asm& a) {
     // Passing only two arguments to lookupKnownClass, since the
     // third is ignored in the checkOnly==false case.
+    // TODO: lookupKnownClass<true> is dead code?
     cgCallHelper(a,
-                 CppCall(RDS::lookupKnownClass<false>),
+                 CppCall(Transl::lookupKnownClass<false>),
                  callDest(inst->dst()),
                  SyncOptions::kSyncPoint,
                  ArgGroup(m_regs).addr(rVmTl, intptr_t(ch)).ssas(inst, 0));
@@ -5128,31 +5130,22 @@ void CodeGenerator::cgLdCls(IRInstruction* inst) {
                ArgGroup(m_regs).imm(ch).ssa(className));
 }
 
-static StringData* fullConstName(const StringData* cls,
-                                 const StringData* cnsName) {
-  return makeStaticString(
-    Util::toLower(cls->data()) + "::" + cnsName->data()
-  );
-}
-
 void CodeGenerator::cgLdClsCns(IRInstruction* inst) {
-  auto const extra    = inst->extra<LdClsCns>();
-  auto const fullName = fullConstName(extra->clsName, extra->cnsName);
-  auto const ch       = RDS::allocClassConstant(fullName);
-  cgLoad(inst->dst(), rVmTl[ch], inst->taken());
+  auto const extra = inst->extra<LdClsCns>();
+  auto const link  = RDS::bindClassConstant(extra->clsName, extra->cnsName);
+  cgLoad(inst->dst(), rVmTl[link.handle()], inst->taken());
 }
 
 void CodeGenerator::cgLookupClsCns(IRInstruction* inst) {
-  auto const extra    = inst->extra<LookupClsCns>();
-  auto const fullName = fullConstName(extra->clsName, extra->cnsName);
-  auto const ch       = RDS::allocClassConstant(fullName);
+  auto const extra = inst->extra<LookupClsCns>();
+  auto const link  = RDS::bindClassConstant(extra->clsName, extra->cnsName);
   cgCallHelper(
     m_as,
-    CppCall(RDS::lookupClassConstantTv),
+    CppCall(Transl::lookupClassConstantTv),
     callDestTV(inst->dst()),
     SyncOptions::kSyncPoint,
     ArgGroup(m_regs)
-      .addr(rVmTl, ch)
+      .addr(rVmTl, link.handle())
       .immPtr(Unit::GetNamedEntity(extra->clsName))
       .immPtr(extra->clsName)
       .immPtr(extra->cnsName)

@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/base/intercept.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/class-info.h"
 
 namespace HPHP {
@@ -32,12 +33,6 @@ const int kNumFixedPrologues = 6;
 struct ActRec;
 typedef TypedValue*(*BuiltinFunction)(ActRec* ar);
 class PreClassEmitter;
-
-/*
- * Unique identifier for a Func*.
- */
-typedef uint32_t FuncId;
-constexpr FuncId InvalidFuncId = FuncId(-1LL);
 
 /*
  * Vector of pairs (param number, offset of corresponding DV funclet).
@@ -431,10 +426,13 @@ struct Func {
     assert(m_cls);
     m_methodSlot = s;
   }
-  Func** getCachedAddr();
-  Func* getCached() { return *getCachedAddr(); }
-  void setCached();
-  unsigned getCachedOffset() const { return m_cachedOffset; }
+  RDS::Handle funcHandle() const { return m_cachedFunc.handle(); }
+  void setFuncHandle(RDS::Link<Func*> l) {
+    // TODO(#2950356): this assertion fails for create_function with
+    // an existing declared function named __lambda_func.
+    // assert(!m_cachedFunc.valid());
+    m_cachedFunc = l;
+  }
 
 public: // Offset accessors for the translator.
 #define X(f) static size_t f##Off() { return offsetof(Func, m_##f); }
@@ -526,9 +524,7 @@ private:
     Slot m_methodSlot;
   };
   uint64_t m_refBitVal;
-public: // used by Unit
-  unsigned m_cachedOffset;
-private:
+  mutable RDS::Link<Func*> m_cachedFunc;
 #ifdef DEBUG
   int m_magic; // For asserts only.
 #endif

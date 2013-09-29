@@ -16,11 +16,24 @@
 #ifndef incl_HPHP_RUNTIME_RDS_H_
 #define incl_HPHP_RUNTIME_RDS_H_
 
-#include "hphp/runtime/vm/func.h"
+#include <cstdlib>
+#include <cinttypes>
+#include <boost/variant.hpp>
+
 #include "hphp/util/util.h"
-#include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/unwind-x64.h"
-#include "hphp/util/asm-x64.h"
+#include "hphp/runtime/base/types.h"
+
+namespace HPHP {
+  struct Func;
+  struct ActRec;
+  struct Array;
+  struct StringData;
+  struct TypedValue;
+  struct Class;
+  struct NamedEntity;
+}
+
+//////////////////////////////////////////////////////////////////////
 
 namespace HPHP { namespace RDS {
 
@@ -55,12 +68,29 @@ namespace HPHP { namespace RDS {
  * JIT-compiled code, a machine register
  * is reserved to always point at the base of RDS.
  *
- * There are several different types of data stored here; documented
- * in line below on the various entry points (TODO).  A common theme
- * is mapping some kind of PHP-level identifier to a runtime
- * structure, where the identifier may mean different things in
- * different requests, but once bound in any given request will retain
- * meaning until the end.  (E.g. class names to Class*.)
+ *
+ * Allocation/linking API:
+ *
+ *   You can allocate data from RDS in two primary ways, either by
+ *   binding a Link, or anonymously.  The distinction is whether the
+ *   allocated space is associated with some unique key that allows it
+ *   to be re-found for any new attempts to allocate that symbol.
+ *
+ *   Anonymous allocations are created with RDS::alloc.  Non-anonymous
+ *   allocations can be created in two ways:
+ *
+ *     RDS::bind(Symbol) uses an RDS-internal link table to find if
+ *     there is an existing handle for the given symbol.
+ *
+ *     RDS::Link<T>::bind allows the caller to make use of the
+ *     uniqueness of other runtime structure (e.g. the Class
+ *     structure) to avoid having a special key and needing to do
+ *     lookups in the internal RDS link table.  The "key" for the
+ *     allocation is the RDS::Link<> object itself.
+ *
+ *   Finally, you can allocate anonymous single bits at a time with
+ *   allocBit().
+ *
  *
  * Side note: this module originally only contained caches for things
  * like method call targets, so it was referred to as "target cache".
@@ -112,23 +142,12 @@ struct Header {
    * if so go to a slow path to handle unusual conditions (e.g. OOM).
    */
   ssize_t conditionFlags;
-
-  /*
-   * Used to pass values between unwinder code and catch traces.
-   */
-  int64_t unwinderScratch;
-  TypedValue unwinderTv;
-  bool doSideExit;
 };
 
+/*
+ * Access to the statically layed out header.
+ */
 Header* header();
-
-constexpr ptrdiff_t kConditionFlagsOff   = offsetof(Header, conditionFlags);
-constexpr ptrdiff_t kUnwinderScratchOff  = offsetof(Header, unwinderScratch);
-constexpr ptrdiff_t kUnwinderSideExitOff = offsetof(Header, doSideExit);
-constexpr ptrdiff_t kUnwinderTvOff       = offsetof(Header, unwinderTv);
-
-//////////////////////////////////////////////////////////////////////
 
 /*
  * Values for dynamically defined constants are stored as key value
@@ -136,73 +155,175 @@ constexpr ptrdiff_t kUnwinderTvOff       = offsetof(Header, unwinderTv);
  */
 Array& s_constants();
 
-enum PHPNameSpace {
-  NSCtor,
-  NSFixedCall,
-  NSDynFunction,
-  NSStaticMethod,
-  NSStaticMethodF,
-  NSClass,
-  NSClsInitProp,
-  NSClsInitSProp,
+constexpr ptrdiff_t kConditionFlagsOff   = offsetof(Header, conditionFlags);
 
-  NumInsensitive, NS_placeholder = NumInsensitive-1,
+//////////////////////////////////////////////////////////////////////
 
-  NSConstant,
-  NSClassConstant,
-  NSGlobal,
-  NSSProp,
-  NSProperty,
-  NSCnsBits,
+/*
+ * RDS symbols are centrally registered here.
+ *
+ * All StringData*'s below must be static strings.
+ */
 
-  NumNameSpaces,
-  NumCaseSensitive = NumNameSpaces - NumInsensitive,
-  FirstCaseSensitive = NumInsensitive,
+/*
+ * Symbol for function static locals.  These are RefData's allocated
+ * in RDS.
+ */
+struct StaticLocal { FuncId funcId;
+                     const StringData* name; };
 
-  NSInvalid = -1,
-  NSPersistent = -2
+/*
+ * Class constant values are TypedValue's stored in RDS.
+ */
+struct ClsConstant { const StringData* clsName;
+                     const StringData* cnsName; };
+
+/*
+ * SPropCache allocations.  These cache static properties accesses
+ * within the class that declares the static property.
+ */
+struct StaticProp { const StringData* name; };
+
+/*
+ * StaticMethod{F,}Cache allocations.  These are used to cache static
+ * method dispatch targets in a given class context.  The `name' field
+ * here is a string that encodes the target class, property, and
+ * source context.
+ */
+struct StaticMethod  { const StringData* name; };
+struct StaticMethodF { const StringData* name; };
+
+typedef boost::variant< StaticLocal
+                      , ClsConstant
+                      , StaticProp
+                      , StaticMethod
+                      , StaticMethodF
+                      > Symbol;
+
+//////////////////////////////////////////////////////////////////////
+
+enum class Mode { Normal, Persistent };
+
+/*
+ * RDS::Link<T> is a thin, typed wrapper around an RDS::Handle.
+ *
+ * Note that nothing prevents using non-POD types with this.  But
+ * nothing here is going to run the constructor.  (In the
+ * non-persistent region, the space for T will be zero'd at the
+ * start of each request.)
+ *
+ * Links are atomic types.  All apis may be called concurrently by
+ * multiple threads, and the alloc() api guarantees only a single
+ * caller will actually allocate new space in RDS.
+ */
+template<class T>
+struct Link {
+  explicit Link(Handle handle);
+  Link(const Link&);
+  ~Link() = default;
+
+  Link& operator=(const Link& r);
+
+  /*
+   * Ensure this Link is bound to an RDS allocation.  If it is not,
+   * allocate it using this Link itself as the symbol.
+   *
+   * This function internally synchronizes to avoid double-allocating.
+   * It is legal to call it repeatedly with a link that may already be
+   * bound.  The `mode' parameter and `Align' parameters are ignored
+   * if the link is already bound, and only affects the call that
+   * allocates RDS memory.
+   *
+   * Post: bound()
+   */
+  template<size_t Align = alignof(T)> void bind(Mode mode = Mode::Normal);
+
+  /*
+   * Dereference a Link and access its RDS memory for the current
+   * thread.
+   *
+   * Pre: bound()
+   */
+  T& operator*() const;
+  T* operator->() const;
+  T* get() const;
+
+  /*
+   * Returns: whether this Link is bound to RDS memory or not.
+   * (I.e. is its internal handle valid.)
+   */
+  bool bound() const;
+
+  /*
+   * Access to the underlying RDS::Handle.
+   */
+  Handle handle() const;
+
+private:
+  std::atomic<Handle> m_handle;
 };
 
-template <bool sensitive>
-Handle namedAlloc(PHPNameSpace where, const StringData* name,
-                  int numBytes, int align);
+/*
+ * Return a bound link to memory from RDS, using the given Symbol.
+ *
+ * Mode indicates whether the memory should be placed in the
+ * persistent region or not, and Align indicates the alignment
+ * requirements.  Both arguments are ignored if there is already an
+ * allocation for the Symbol---they only affect the first caller for
+ * the given Symbol.
+ */
+template<class T, size_t Align = alignof(T)>
+Link<T> bind(Symbol key, Mode mode = Mode::Normal);
 
-template<PHPNameSpace where>
-Handle namedAlloc(const StringData* name, int numBytes, int align) {
-  return namedAlloc<(where >= FirstCaseSensitive)>(where, name,
-                                                   numBytes, align);
-}
+/*
+ * Allocate anonymous memory from RDS.
+ *
+ * The memory is not keyed on any Symbol, so the handle in the
+ * returned Link will be unique.
+ */
+template<class T, size_t Align = alignof(T)>
+Link<T> alloc(Mode mode = Mode::Normal);
 
+/*
+ * Allocate a single anonymous bit from non-persistent RDS.  The bit
+ * can be manipulated with testAndSetBit().
+ *
+ * Note: the returned integer is *not* an RDS::Handle.
+ */
 size_t allocBit();
-Handle bitOffToHandleAndMask(size_t bit, uint8_t &mask);
-bool testBit(Handle handle, uint32_t mask);
-bool testBit(size_t bit);
-bool testAndSetBit(Handle handle, uint32_t mask);
 bool testAndSetBit(size_t bit);
-bool isPersistentHandle(Handle handle);
-bool classIsPersistent(const Class* cls);
 
-Handle ptrToHandle(const void*);
+//////////////////////////////////////////////////////////////////////
 
-template<typename T = void>
-static inline T*
-handleToPtr(Handle h) {
-  assert(h < RuntimeOption::EvalJitTargetCacheSize);
-  return (T*)((char*)tl_base + h);
-}
-
+/*
+ * Dereference an un-typed RDS::Handle.
+ */
 template<class T>
 T& handleToRef(Handle h) {
-  return *static_cast<T*>(handleToPtr(h));
+  void* vp = static_cast<char*>(tl_base) + h;
+  return *static_cast<T*>(vp);
 }
 
-inline ssize_t* conditionFlagsPtr() {
-  return &header()->conditionFlags;
-}
+/*
+ * Returns: whether the supplied handle is from the persistent RDS
+ * region.
+ */
+bool isPersistentHandle(Handle handle);
 
-inline ssize_t loadConditionFlags() {
-  return atomic_acquire_load(conditionFlagsPtr());
-}
+/*
+ * TODO(#2879005): get rid of this function.  It duplicates similar
+ * functions in hhbctranslator and class.
+ */
+bool classIsPersistent(const Class* cls);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Target caches are a use case of RDS.  These are chunks of memory
+ * used to cache things like method dispatch targets.
+ *
+ * TODO(#2879005): this part should probably go back in JIT::
+ */
 
 /*
  * Some caches have a Lookup != k, because the TC passes a container
@@ -214,7 +335,6 @@ inline ssize_t loadConditionFlags() {
  * KNLines must be a power of two.
  */
 template<typename Key, typename Value, class LookupKey,
-  PHPNameSpace NameSpace = NSInvalid,
   int KNLines = 4,
   typename ReturnValue = Value>
 class Cache {
@@ -226,10 +346,6 @@ public:
     Value m_value;
   } m_pairs[kNumLines];
 
-  static inline Cache* cacheAtHandle(Handle handle) {
-    return (Cache*)handleToPtr(handle);
-  }
-
   inline Pair* keyToPair(Key k) {
     if (kNumLines == 1) {
       return &m_pairs[0];
@@ -238,7 +354,7 @@ public:
     return m_pairs + (hashKey(k) & (kNumLines - 1));
   }
 
-protected:
+private:
   // Each instance needs to implement this
   static int hashKey(Key k);
 
@@ -247,21 +363,8 @@ public:
   typedef LookupKey CacheLookupKey;
   typedef Value CacheValue;
 
-  static Handle alloc(const StringData* name = nullptr) {
-    // Each lookup should access exactly one Pair so there's no point
-    // in making sure the entire cache fits on one cache line.
-    return namedAlloc<NameSpace>(name, sizeof(Cache), sizeof(Pair));
-  }
-  inline Handle handle() const {
-    return ptrToHandle(this);
-  }
-  static void invalidate(Handle chand, Key lookup) {
-    Pair* pair = cacheAtHandle(chand)->keyToPair(lookup);
-    memset(pair, 0, sizeof(Pair));
-  }
-  static void invalidate(Handle chand) {
-    auto const thiz = cacheAtHandle(chand);
-    memset(thiz, 0, sizeof *thiz);
+  static Handle alloc() {
+    return HPHP::RDS::alloc<Cache,sizeof(Pair)>(Mode::Normal).handle();
   }
   static ReturnValue lookup(Handle chand, LookupKey lookup,
                             const void* extraKey = nullptr);
@@ -270,8 +373,9 @@ public:
 struct StaticMethodCache {
   const Func* m_func;
   const Class* m_cls;
-  static Handle alloc(const StringData* cls, const StringData* meth,
-                           const char* ctxName);
+  static Handle alloc(const StringData* cls,
+                      const StringData* meth,
+                      const char* ctxName);
   static const Func* lookupIR(Handle chand,
                               const NamedEntity* ne, const StringData* cls,
                               const StringData* meth, TypedValue* vmfp,
@@ -285,18 +389,21 @@ struct StaticMethodFCache {
   const Func* m_func;
   int m_static;
 
-  static Handle alloc(const StringData* cls, const StringData* meth,
-                           const char* ctxName);
+  static Handle alloc(const StringData* cls,
+                      const StringData* meth,
+                      const char* ctxName);
   static const Func* lookupIR(Handle chand, const Class* cls,
                               const StringData* meth, TypedValue* vmfp);
 };
 
-typedef Cache<uintptr_t, const Func*, ActRec*, NSInvalid, 1, void>
-  MethodCache;
-typedef Cache<StringData*, const Class*, StringData*, NSClass> ClassCache;
+typedef Cache<StringData*,const Class*,StringData*> ClassCache;
+typedef Cache<const StringData*,const Func*,StringData*> FuncCache;
 
-typedef Cache<const StringData*, const Func*, StringData*, NSDynFunction>
-  FuncCache;
+template<> Handle FuncCache::alloc();
+template<> const Func* FuncCache::lookup(Handle,
+  StringData*, const void* extraKey);
+template<> const Class* ClassCache::lookup(Handle,
+  StringData*, const void* extraKey);
 
 /*
  * In order to handle fb_rename_function (when it is enabled), we need
@@ -306,81 +413,16 @@ typedef Cache<const StringData*, const Func*, StringData*, NSDynFunction>
 void invalidateForRenameFunction(const StringData* name);
 
 /*
- * Classes.
+ * Static properties.
  *
- * The request-private Class* for a given class name. This is used when
- * the class name is known at translation time.
+ * We only cache statically known property name references from within
+ * the class.  Current statistics shows in class references dominating
+ * by 91.5% of all static property access.
  */
-Handle allocKnownClass(const Class* name);
-Handle allocKnownClass(const NamedEntity* name, bool persistent);
-Handle allocKnownClass(const StringData* name);
-typedef Class* (*lookupKnownClass_func_t)(Class** cache,
-                                          const StringData* clsName,
-                                          bool isClass);
-template<bool checkOnly>
-Class* lookupKnownClass(Class** cache, const StringData* clsName,
-                        bool isClass);
-Handle allocClassInitProp(const StringData* name);
-Handle allocClassInitSProp(const StringData* name);
-
-/*
- * Functions.
- */
-Handle allocFixedFunction(const NamedEntity* ne, bool persistent);
-Handle allocFixedFunction(const StringData* name);
-
-/*
- * Type aliases.
- *
- * Request-private values for type aliases (typedefs).  When a typedef
- * is defined, the entry for it is cached.  This reserves enough space
- * for a TypedefReq struct.
- */
-Handle allocTypedef(const NamedEntity* name);
-
-/*
- * Constants.
- *
- * The request-private value of a constant.
- */
-Handle allocConstant(uint32_t* handlep, bool persistent);
-
-Handle allocClassConstant(StringData* name);
-TypedValue lookupClassConstantTv(TypedValue* cache,
-                                 const NamedEntity* ne,
-                                 const StringData* cls,
-                                 const StringData* cns);
-
-/*
- * Non-scalar class constants are stored in RDS slots as
- * Arrays.
- */
-Handle allocNonScalarClassConstantMap(unsigned* handleOut);
-
-/*
- * Static locals.
- *
- * For normal functions, static locals are allocated as RefData's that
- * live in RDS.  Note that we don't put closures or
- * generatorFromClosure locals here because they are per-instance.
- */
-Handle allocStaticLocal(const Func*, const StringData*);
-
-/*
- * Static properties.  We only cache statically known property name
- * references from within the class.  Current statistics shows in
- * class references dominating by 91.5% of all static property access.
- */
-class SPropCache {
-private:
-  static inline SPropCache* cacheAtHandle(Handle handle) {
-    return (SPropCache*)(uintptr_t(tl_base) + handle);
-  }
-public:
+struct SPropCache {
   TypedValue* m_tv;  // public; it is used from TC and we assert the offset
-  static Handle alloc(const StringData* sd = nullptr) {
-    return namedAlloc<NSSProp>(sd, sizeof(SPropCache), sizeof(SPropCache));
-  }
+
+  static Handle alloc(const StringData* sd);
 
   template<bool raiseOnError>
   static TypedValue* lookup(Handle handle, const Class* cls,
@@ -389,6 +431,24 @@ public:
   template<bool raiseOnError>
   static TypedValue* lookupSProp(const Class *cls, const StringData *name,
                                  Class* ctx);
+};
+
+struct MethodCache {
+  struct Pair {
+    uintptr_t m_key;
+    const Func* m_value;
+  } m_pairs[1];
+
+  inline Pair* keyToPair(uintptr_t k) {
+    return &m_pairs[0];
+  }
+
+  static int hashKey(uintptr_t);
+
+  static Handle alloc() {
+    return ::HPHP::RDS::alloc<MethodCache,alignof(Pair)>(Mode::Normal)
+      .handle();
+  }
 };
 
 void methodCacheSlowPath(MethodCache::Pair* mce,

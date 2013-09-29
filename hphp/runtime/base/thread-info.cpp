@@ -123,7 +123,7 @@ RequestInjectionData::~RequestInjectionData() {
 
 void RequestInjectionData::onSessionInit() {
   RDS::requestInit();
-  cflagsPtr = RDS::conditionFlagsPtr();
+  cflagsPtr = &RDS::header()->conditionFlags;
   reset();
 }
 

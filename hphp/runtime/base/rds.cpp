@@ -15,9 +15,11 @@
 */
 #include "hphp/runtime/base/rds.h"
 
+#include <cassert>
 #include <vector>
 #include <string>
 #include <cstdio>
+#include <mutex>
 
 #include <sys/mman.h>
 
@@ -39,17 +41,396 @@
 
 using namespace HPHP::MethodLookup;
 using namespace HPHP::Util;
-using std::string;
+
+namespace HPHP { namespace RDS {
+
+//////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(targetcache);
+
+namespace {
+
+//////////////////////////////////////////////////////////////////////
+
+// Current allocation frontier for the non-persistent region.
+size_t s_frontier = sizeof(Header);
+
+// Frontier and base of the persistent region.
+size_t s_persistent_base = 0;
+size_t s_persistent_frontier = 0;
+
+//////////////////////////////////////////////////////////////////////
+
+struct SymbolEq : boost::static_visitor<bool> {
+  template<class T, class U>
+  typename std::enable_if<
+    !std::is_same<T,U>::value,
+    bool
+  >::type operator()(const T&, const U&) const { return false; }
+
+  bool operator()(StaticLocal k1, StaticLocal k2) const {
+    assert(k1.name->isStatic() && k2.name->isStatic());
+    return k1.funcId == k2.funcId && k1.name == k2.name;
+  }
+
+  bool operator()(ClsConstant k1, ClsConstant k2) const {
+    assert(k1.clsName->isStatic() && k1.cnsName->isStatic());
+    assert(k2.clsName->isStatic() && k2.cnsName->isStatic());
+    return k1.clsName->isame(k2.clsName) &&
+           k1.cnsName == k2.cnsName;
+  }
+
+  bool operator()(StaticProp k1, StaticProp k2) const {
+    assert(k1.name->isStatic() && k2.name->isStatic());
+    return k1.name == k2.name;
+  }
+
+  template<class T>
+  typename std::enable_if<
+    std::is_same<T,StaticMethod>::value ||
+      std::is_same<T,StaticMethodF>::value,
+    bool
+  >::type operator()(const T& t1, const T& t2) const {
+    assert(t1.name->isStatic() && t2.name->isStatic());
+    return t1.name->isame(t2.name);
+  }
+};
+
+struct SymbolHash : boost::static_visitor<size_t> {
+  size_t operator()(StaticLocal k) const {
+    return folly::hash::hash_128_to_64(
+      std::hash<FuncId>()(k.funcId),
+      k.name->hash()
+    );
+  }
+
+  size_t operator()(ClsConstant k) const {
+    return folly::hash::hash_128_to_64(
+      k.clsName->hash(),
+      k.cnsName->hash()
+    );
+  }
+
+  size_t operator()(StaticProp k)    const { return k.name->hash(); }
+  size_t operator()(StaticMethod k)  const { return k.name->hash(); }
+  size_t operator()(StaticMethodF k) const { return k.name->hash(); }
+};
+
+struct HashCompare {
+  bool equal(const Symbol& k1, const Symbol& k2) const {
+    return boost::apply_visitor(SymbolEq(), k1, k2);
+  }
+
+  size_t hash(const Symbol& k) const {
+    return boost::apply_visitor(SymbolHash(), k);
+  }
+};
+
+typedef tbb::concurrent_hash_map<
+  Symbol,
+  Handle,
+  HashCompare
+> LinkTable;
+
+LinkTable s_linkTable;
+
+//////////////////////////////////////////////////////////////////////
 
 /*
- * The targetcache module provides a set of per-request caches.
+ * This mutex protects actually allocating from RDS.  It is ordered
+ * *after* the locks in s_linkTable.
  */
-namespace HPHP {
+SimpleMutex s_allocMutex(false /*recursive*/, RankLeaf);
+
+//////////////////////////////////////////////////////////////////////
+
+template<class T = void>
+T* handleToPtr(Handle h) {
+  assert(h < RuntimeOption::EvalJitTargetCacheSize);
+  return (T*)((char*)tl_base + h);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+namespace detail {
+
+  Handle alloc(Mode mode, size_t numBytes, size_t align) {
+    s_allocMutex.assertOwnedBySelf();
+    align = Util::roundUpToPowerOfTwo(align);
+    auto& frontier = mode == Mode::Persistent ? s_persistent_frontier
+                                              : s_frontier;
+
+    frontier += align - 1;
+    frontier &= ~(align - 1);
+    frontier += numBytes;
+
+    auto const limit = mode == Mode::Persistent
+      ? RuntimeOption::EvalJitTargetCacheSize
+      : s_persistent_base;
+    always_assert(frontier < limit);
+
+    return frontier - numBytes;
+  }
+
+  Handle allocUnlocked(Mode mode, size_t numBytes, size_t align) {
+    SimpleLock l(s_allocMutex);
+    return alloc(mode, numBytes, align);
+  }
+
+  /*
+   * TODO: the locking here is still a little too weird
+   */
+  Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes, size_t align) {
+    LinkTable::const_accessor acc;
+    if (s_linkTable.find(acc, key)) return acc->second;
+
+    SimpleLock l(s_allocMutex);
+    if (s_linkTable.find(acc, key)) return acc->second;
+
+    auto const retval = alloc(mode, sizeBytes, align);
+    if (!s_linkTable.insert(LinkTable::value_type(key, retval))) {
+      always_assert(0);
+    }
+    return retval;
+  }
+
+  void bindOnLinkImpl(std::atomic<Handle>& handle,
+                      Mode mode,
+                      size_t sizeBytes,
+                      size_t align) {
+    SimpleLock l(s_allocMutex);
+    if (handle.load(std::memory_order_relaxed) == kInvalidHandle) {
+      handle.store(alloc(mode, sizeBytes, align), std::memory_order_relaxed);
+    }
+  }
+
+}
+
+
+//////////////////////////////////////////////////////////////////////
+
+const StaticString s_call("__call");
+
+__thread void* tl_base = nullptr;
+static __thread std::aligned_storage<
+  sizeof(Array),
+  alignof(Array)
+>::type s_constantsStorage;
+
+//////////////////////////////////////////////////////////////////////
+
+static size_t s_next_bit;
+static size_t s_bits_to_go;
+static int s_tc_fd;
+
+// Mapping from names to targetcache locations.
+typedef tbb::concurrent_hash_map<const StringData*, Handle,
+        StringDataHashICompare>
+  HandleMapIS;
+
+typedef tbb::concurrent_hash_map<const StringData*, Handle,
+        StringDataHashCompare>
+  HandleMapCS;
+
+//////////////////////////////////////////////////////////////////////
+
+void requestInit() {
+  assert(tl_base);
+  new (&s_constantsStorage) Array();
+  assert(!s_constants().get());
+  TRACE(1, "RDS: @%p\n", tl_base);
+  memset(tl_base, 0, s_frontier);
+}
+
+void requestExit() {
+  s_constants().detach(); // it will be swept
+  // Don't bother running the dtor ...
+}
+
+void flush() {
+  TRACE(1, "RDS: MADV_DONTNEED %zd bytes: %p\n", s_frontier,
+        tl_base);
+  if (madvise(tl_base, s_frontier, MADV_DONTNEED) < 0) {
+    not_reached();
+  }
+}
+
+size_t usedBytes() {
+  return s_frontier;
+}
+
+size_t usedPersistentBytes() {
+  return s_persistent_frontier - s_persistent_base;
+}
+
+Array& s_constants() {
+  void* vp = &s_constantsStorage;
+  return *static_cast<Array*>(vp);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+size_t allocBit() {
+  SimpleLock l(s_allocMutex);
+  if (!s_bits_to_go) {
+    static const int kNumBytes = 512;
+    static const int kNumBytesMask = kNumBytes - 1;
+    s_next_bit = s_frontier * CHAR_BIT;
+    // allocate at least kNumBytes bytes, and make sure we end
+    // on a 64 byte aligned boundary.
+    int bytes = ((~s_frontier + 1) & kNumBytesMask) + kNumBytes;
+    s_bits_to_go = bytes * CHAR_BIT;
+    s_frontier += bytes;
+  }
+  s_bits_to_go--;
+  return s_next_bit++;
+}
+
+bool testAndSetBit(size_t bit) {
+  Handle handle = bit / CHAR_BIT;
+  unsigned char mask = 1 << (bit % CHAR_BIT);
+  bool ret = *(unsigned char*)handleToPtr(handle) & mask;
+  *(unsigned char*)handleToPtr(handle) |= mask;
+  return ret;
+}
+
+bool isPersistentHandle(Handle handle) {
+  assert(handle >= 0 && handle < RuntimeOption::EvalJitTargetCacheSize);
+  return handle >= (unsigned)s_persistent_base;
+}
+
+bool classIsPersistent(const Class* cls) {
+  return (RuntimeOption::RepoAuthoritative &&
+          cls &&
+          isPersistentHandle(cls->classHandle()));
+}
+
+static void initPersistentCache() {
+  SimpleLock l(s_allocMutex);
+  if (s_tc_fd) return;
+  char tmpName[] = "/tmp/tcXXXXXX";
+  s_tc_fd = mkstemp(tmpName);
+  always_assert(s_tc_fd != -1);
+  unlink(tmpName);
+  s_persistent_base = RuntimeOption::EvalJitTargetCacheSize * 3 / 4;
+  s_persistent_base -= s_persistent_base & (4 * 1024 - 1);
+  ftruncate(s_tc_fd,
+            RuntimeOption::EvalJitTargetCacheSize - s_persistent_base);
+  s_persistent_frontier = s_persistent_base;
+}
+
+void threadInit() {
+  if (!s_tc_fd) {
+    initPersistentCache();
+  }
+
+  tl_base = mmap(nullptr, RuntimeOption::EvalJitTargetCacheSize,
+                 PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+  always_assert(tl_base != MAP_FAILED);
+  Util::numa_bind_to(tl_base, s_persistent_base, Util::s_numaNode);
+  if (RuntimeOption::EvalMapTgtCacheHuge) {
+    hintHuge(tl_base, RuntimeOption::EvalJitTargetCacheSize);
+  }
+
+  void *shared_base = (char*)tl_base + s_persistent_base;
+  /*
+   * map the upper portion of the RDS to a shared area This is used
+   * for persistent classes and functions, so they are always defined,
+   * and always visible to all threads.
+   */
+  void *mem = mmap(shared_base,
+                   RuntimeOption::EvalJitTargetCacheSize - s_persistent_base,
+                   PROT_READ | PROT_WRITE, MAP_SHARED | MAP_FIXED, s_tc_fd, 0);
+  always_assert(mem == shared_base);
+}
+
+void threadExit() {
+  munmap(tl_base, RuntimeOption::EvalJitTargetCacheSize);
+}
+
+static inline bool
+stringMatches(const StringData* rowString, const StringData* sd) {
+  return rowString &&
+    (rowString == sd ||
+     rowString->data() == sd->data() ||
+     (rowString->hash() == sd->hash() &&
+      rowString->same(sd)));
+}
+
+//=============================================================================
+// FuncCache
+
+// Set of FuncCache handles for dynamic function callsites, used for
+// invalidation when a function is renamed.
+static std::mutex funcCacheMutex;
+static std::vector<Link<FuncCache> > funcCacheEntries;
+
+template<>
+Handle FuncCache::alloc() {
+  auto const link = RDS::alloc<FuncCache,sizeof(Pair)>();
+  std::lock_guard<std::mutex> g(funcCacheMutex);
+  funcCacheEntries.push_back(link);
+  return link.handle();
+}
+
+void invalidateForRenameFunction(const StringData* name) {
+  assert(name);
+  std::lock_guard<std::mutex> g(funcCacheMutex);
+  for (auto& h : funcCacheEntries) {
+    memset(h.get(), 0, sizeof *h);
+  }
+}
+
+template<>
+inline int
+FuncCache::hashKey(const StringData* sd) {
+  return sd->hash();
+}
+
+template<>
+const Func*
+FuncCache::lookup(Handle handle, StringData *sd, const void* /* ignored */) {
+  auto const thiz = handleToPtr<FuncCache>(handle);
+  Func* func;
+  Pair* pair = thiz->keyToPair(sd);
+  const StringData* pairSd = pair->m_key;
+  if (!stringMatches(pairSd, sd)) {
+    // Miss. Does it actually exist?
+    func = Unit::lookupFunc(sd);
+    if (UNLIKELY(!func)) {
+      Transl::VMRegAnchor _;
+      func = Unit::loadFunc(sd);
+      if (!func) {
+        raise_error("Undefined function: %s", sd->data());
+      }
+    }
+    func->validate();
+    pair->m_key = func->name(); // use a static name
+    pair->m_value = func;
+  }
+  // DecRef the string here; more compact than doing so in callers.
+  decRefStr(sd);
+  assert(stringMatches(pair->m_key, pair->m_value->name()));
+  pair->m_value->validate();
+  return pair->m_value;
+}
+
+//=============================================================================
+// MethodCache
+
+inline int MethodCache::hashKey(uintptr_t c) {
+  pointer_hash<Class> h;
+  return h(reinterpret_cast<const Class*>(c));
+}
 
 /*
- * We have a call site for an object method, which previously
- * invoked func, but this call has a different Class (cls).  See
- * if we can figure out the correct Func to call.
+ * We have a call site for an object method, which previously invoked
+ * func, but this call has a different Class (cls).  See if we can
+ * figure out the correct Func to call.
  */
 static inline const Func* wouldCall(const Class* cls, const Func* prev) {
   if (LIKELY(cls->numMethods() > prev->methodSlot())) {
@@ -80,400 +461,6 @@ static inline const Func* wouldCall(const Class* cls, const Func* prev) {
     }
   }
   return nullptr;
-}
-
-namespace RDS {
-
-TRACE_SET_MOD(targetcache);
-
-static StaticString s___call(LITSTR_INIT("__call"));
-
-// Targetcache memory. See the comment in target-cache.h
-__thread void* tl_base = nullptr;
-__thread std::aligned_storage<sizeof(Array),alignof(Array)>::type
-  s_constantsStorage;
-
-static const size_t kPreAllocatedBytes = 64;
-static size_t s_frontier = kPreAllocatedBytes;
-
-static_assert(sizeof(Header) <= kPreAllocatedBytes,
-              "RDS::Header doesn't fit in kPreAllocatedBytes");
-static size_t s_persistent_frontier = 0;
-static size_t s_persistent_start = 0;
-static size_t s_next_bit;
-static size_t s_bits_to_go;
-static int s_tc_fd;
-
-// Mapping from names to targetcache locations.
-typedef tbb::concurrent_hash_map<const StringData*, Handle,
-        StringDataHashICompare>
-  HandleMapIS;
-
-typedef tbb::concurrent_hash_map<const StringData*, Handle,
-        StringDataHashCompare>
-  HandleMapCS;
-
-namespace {
-
-struct StaticLocalKey {
-  struct HashCompare;
-
-  FuncId funcId;
-  const StringData* localName;
-};
-
-struct StaticLocalKey::HashCompare {
-  bool equal(StaticLocalKey k1, StaticLocalKey k2) const {
-    assert(k1.localName->isStatic());
-    assert(k2.localName->isStatic());
-    return k1.funcId == k2.funcId && k1.localName == k2.localName;
-  }
-
-  size_t hash(StaticLocalKey k) const {
-    return folly::hash::hash_128_to_64(
-      std::hash<FuncId>()(k.funcId),
-      k.localName->hash()
-    );
-  }
-};
-
-typedef tbb::concurrent_hash_map<
-  StaticLocalKey,
-  Handle,
-  StaticLocalKey::HashCompare
-> StaticLocalMap;
-
-// handleMaps[NSConstant]['FOO'] is the cache associated with the constant
-// FOO, eg. handleMaps is a rare instance of shared, mutable state across
-// the request threads in the translator: it is essentially a lazily
-// constructed link table for tl_base.
-HandleMapIS handleMapsIS[NumInsensitive];
-HandleMapCS handleMapsCS[NumCaseSensitive];
-StaticLocalMap s_staticLocalMap;
-
-}
-
-//////////////////////////////////////////////////////////////////////
-
-size_t usedBytes() {
-  return s_frontier;
-}
-
-size_t usedPersistentBytes() {
-  return s_persistent_frontier - s_persistent_start;
-}
-
-// Set of FuncCache handles for dynamic function callsites, used for
-// invalidation when a function is renamed.
-static std::vector<Handle> funcCacheEntries;
-
-static Mutex s_handleMutex(false /*recursive*/, RankLeaf);
-
-inline Handle
-ptrToHandle(const void* ptr) {
-  ptrdiff_t retval = uintptr_t(ptr) - uintptr_t(tl_base);
-  assert(retval < RuntimeOption::EvalJitTargetCacheSize);
-  return retval;
-}
-
-template <bool sensitive>
-class HandleInfo {
-public:
-  typedef HandleMapIS Map;
-  static Map &getHandleMap(int where) {
-    return handleMapsIS[where];
-  }
-};
-
-template <>
-class HandleInfo<true> {
-public:
-  typedef HandleMapCS Map;
-  static Map &getHandleMap(int where) {
-    return handleMapsCS[where - FirstCaseSensitive];
-  }
-};
-
-#define getHMap(where) \
-  HandleInfo<where >= FirstCaseSensitive>::getHandleMap(where)
-
-static size_t allocBitImpl(const StringData* name, PHPNameSpace ns) {
-  ASSERT_NOT_IMPLEMENTED(ns == NSInvalid || ns >= FirstCaseSensitive);
-  HandleMapCS& map = HandleInfo<true>::getHandleMap(ns);
-  HandleMapCS::const_accessor a;
-  if (name != nullptr && ns != NSInvalid && map.find(a, name)) {
-    return a->second;
-  }
-  Lock l(s_handleMutex);
-  if (name != nullptr && ns != NSInvalid && map.find(a, name)) {
-    // Retry under the lock.
-    return a->second;
-  }
-  if (!s_bits_to_go) {
-    static const int kNumBytes = 512;
-    static const int kNumBytesMask = kNumBytes - 1;
-    s_next_bit = s_frontier * CHAR_BIT;
-    // allocate at least kNumBytes bytes, and make sure we end
-    // on a 64 byte aligned boundary.
-    int bytes = ((~s_frontier + 1) & kNumBytesMask) + kNumBytes;
-    s_bits_to_go = bytes * CHAR_BIT;
-    s_frontier += bytes;
-  }
-  s_bits_to_go--;
-  if (name != nullptr && ns != NSInvalid) {
-    if (!name->isStatic()) name = makeStaticString(name);
-    if (!map.insert(HandleMapCS::value_type(name, s_next_bit)))
-      NOT_REACHED();
-  }
-  return s_next_bit++;
-}
-
-size_t allocBit() {
-  return allocBitImpl(nullptr, NSInvalid);
-}
-
-Handle bitOffToHandleAndMask(size_t bit, uint8_t &mask) {
-  static_assert(!(8 % CHAR_BIT), "Unexpected size of char");
-  mask = (uint8_t)1 << (bit % 8);
-  size_t off = bit / CHAR_BIT;
-  off -= off % (8 / CHAR_BIT);
-  return off;
-}
-
-bool testBit(size_t bit) {
-  Handle handle = bit / CHAR_BIT;
-  unsigned char mask = 1 << (bit % CHAR_BIT);
-  return *(unsigned char*)handleToPtr(handle) & mask;
-}
-
-bool testBit(Handle handle, uint32_t mask) {
-  assert(!(mask & (mask - 1)));
-  return *(uint32_t*)handleToPtr(handle) & mask;
-}
-
-bool testAndSetBit(size_t bit) {
-  Handle handle = bit / CHAR_BIT;
-  unsigned char mask = 1 << (bit % CHAR_BIT);
-  bool ret = *(unsigned char*)handleToPtr(handle) & mask;
-  *(unsigned char*)handleToPtr(handle) |= mask;
-  return ret;
-}
-
-bool testAndSetBit(Handle handle, uint32_t mask) {
-  assert(!(mask & (mask - 1)));
-  bool ret = *(uint32_t*)handleToPtr(handle) & mask;
-  *(uint32_t*)handleToPtr(handle) |= mask;
-  return ret;
-}
-
-bool isPersistentHandle(Handle handle) {
-  return handle >= (unsigned)s_persistent_start;
-}
-
-bool classIsPersistent(const Class* cls) {
-  return (RuntimeOption::RepoAuthoritative &&
-          cls &&
-          isPersistentHandle(cls->m_cachedOffset));
-}
-
-static Handle allocLocked(bool persistent, int numBytes, int align) {
-  s_handleMutex.assertOwnedBySelf();
-  align = Util::roundUpToPowerOfTwo(align);
-  size_t &frontier = persistent ? s_persistent_frontier : s_frontier;
-
-  frontier += align - 1;
-  frontier &= ~(align - 1);
-  frontier += numBytes;
-
-  always_assert(frontier < (persistent ?
-                     RuntimeOption::EvalJitTargetCacheSize :
-                     s_persistent_start));
-
-  return frontier - numBytes;
-}
-
-// namedAlloc --
-//   Many targetcache entries (Func, Class, Constant, ...) have
-//   request-unique values. There is no reason to allocate more than
-//   one item for all such calls in a request.
-//
-//   handleMaps acts as a de-facto dynamic link table that lives
-//   across requests; the translator can write out code that assumes
-//   that a given named entity's location in tl_base is
-//   stable from request to request.
-template<bool sensitive>
-Handle
-namedAlloc(PHPNameSpace where, const StringData* name,
-           int numBytes, int align) {
-  assert(!name || (where >= 0 && where < NumNameSpaces));
-  typedef HandleInfo<sensitive> HI;
-  typename HI::Map& map = HI::getHandleMap(where);
-  typename HI::Map::const_accessor a;
-  if (name && map.find(a, name)) {
-    TRACE(2, "RDS: hit \"%s\", %d\n", name->data(), int(a->second));
-    return a->second;
-  }
-  Lock l(s_handleMutex);
-  if (name && map.find(a, name)) { // Retry under the lock
-    TRACE(2, "RDS: hit \"%s\", %d\n", name->data(), int(a->second));
-    return a->second;
-  }
-  Handle retval = allocLocked(where == NSPersistent, numBytes, align);
-  if (name) {
-    if (!name->isStatic()) name = makeStaticString(name);
-    if (!map.insert(typename HI::Map::value_type(name, retval))) NOT_REACHED();
-    TRACE(1, "RDS: inserted \"%s\", %d\n", name->data(), int(retval));
-  } else if (where == NSDynFunction) {
-    funcCacheEntries.push_back(retval);
-  }
-  return retval;
-}
-
-template
-Handle namedAlloc<true>(PHPNameSpace where, const StringData* name,
-                        int numBytes, int align);
-template
-Handle namedAlloc<false>(PHPNameSpace where, const StringData* name,
-                         int numBytes, int align);
-
-void invalidateForRenameFunction(const StringData* name) {
-  assert(name);
-  Lock l(s_handleMutex);
-
-  for (auto& h : funcCacheEntries) {
-    FuncCache::invalidate(h, name);
-  }
-}
-
-void initPersistentCache() {
-  Lock l(s_handleMutex);
-  if (s_tc_fd) return;
-  char tmpName[] = "/tmp/tcXXXXXX";
-  s_tc_fd = mkstemp(tmpName);
-  always_assert(s_tc_fd != -1);
-  unlink(tmpName);
-  s_persistent_start = RuntimeOption::EvalJitTargetCacheSize * 3 / 4;
-  s_persistent_start -= s_persistent_start & (4 * 1024 - 1);
-  ftruncate(s_tc_fd,
-            RuntimeOption::EvalJitTargetCacheSize - s_persistent_start);
-  s_persistent_frontier = s_persistent_start;
-}
-
-void threadInit() {
-  if (!s_tc_fd) {
-    initPersistentCache();
-  }
-
-  tl_base = mmap(nullptr, RuntimeOption::EvalJitTargetCacheSize,
-                 PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
-  always_assert(tl_base != MAP_FAILED);
-  Util::numa_bind_to(tl_base, s_persistent_start, Util::s_numaNode);
-  if (RuntimeOption::EvalMapTgtCacheHuge) {
-    hintHuge(tl_base, RuntimeOption::EvalJitTargetCacheSize);
-  }
-
-  void *shared_base = (char*)tl_base + s_persistent_start;
-  /*
-   * map the upper portion of the RDS to a shared area This is used
-   * for persistent classes and functions, so they are always defined,
-   * and always visible to all threads.
-   */
-  void *mem = mmap(shared_base,
-                   RuntimeOption::EvalJitTargetCacheSize - s_persistent_start,
-                   PROT_READ | PROT_WRITE, MAP_SHARED | MAP_FIXED, s_tc_fd, 0);
-  always_assert(mem == shared_base);
-}
-
-void threadExit() {
-  munmap(tl_base, RuntimeOption::EvalJitTargetCacheSize);
-}
-
-static const bool zeroViaMemset = true;
-
-void
-requestInit() {
-  assert(tl_base);
-  new (&s_constantsStorage) Array();
-  assert(!s_constants().get());
-  TRACE(1, "RDS: @%p\n", tl_base);
-  if (zeroViaMemset) {
-    TRACE(1, "RDS: bzeroing %zd bytes: %p\n", s_frontier,
-          tl_base);
-    memset(tl_base, 0, s_frontier);
-  }
-}
-
-void
-requestExit() {
-  if (!zeroViaMemset) {
-    flush();
-  }
-  s_constants().detach(); // it will be swept
-  // Don't bother running the dtor ...
-}
-
-void
-flush() {
-  TRACE(1, "RDS: MADV_DONTNEED %zd bytes: %p\n", s_frontier,
-        tl_base);
-  if (madvise(tl_base, s_frontier, MADV_DONTNEED) < 0) {
-    not_reached();
-  }
-}
-
-static inline bool
-stringMatches(const StringData* rowString, const StringData* sd) {
-  return rowString &&
-    (rowString == sd ||
-     rowString->data() == sd->data() ||
-     (rowString->hash() == sd->hash() &&
-      rowString->same(sd)));
-}
-
-//=============================================================================
-// FuncCache
-template<>
-inline int
-FuncCache::hashKey(const StringData* sd) {
-  return sd->hash();
-}
-
-template<>
-const Func*
-FuncCache::lookup(Handle handle, StringData *sd, const void* /* ignored */) {
-  FuncCache* thiz = cacheAtHandle(handle);
-  Func* func;
-  Pair* pair = thiz->keyToPair(sd);
-  const StringData* pairSd = pair->m_key;
-  if (!stringMatches(pairSd, sd)) {
-    // Miss. Does it actually exist?
-    func = Unit::lookupFunc(sd);
-    if (UNLIKELY(!func)) {
-      Transl::VMRegAnchor _;
-      func = Unit::loadFunc(sd);
-      if (!func) {
-        raise_error("Undefined function: %s", sd->data());
-      }
-    }
-    func->validate();
-    pair->m_key = func->name(); // use a static name
-    pair->m_value = func;
-  }
-  // DecRef the string here; more compact than doing so in callers.
-  decRefStr(sd);
-  assert(stringMatches(pair->m_key, pair->m_value->name()));
-  pair->m_value->validate();
-  return pair->m_value;
-}
-
-//=============================================================================
-// MethodCache
-
-template<>
-inline int
-MethodCache::hashKey(uintptr_t c) {
-  pointer_hash<Class> h;
-  return h(reinterpret_cast<const Class*>(c));
 }
 
 /*
@@ -515,7 +502,7 @@ void methodCacheSlowPath(MethodCache::Pair* mce,
         func = g_vmContext->lookupMethodCtx(cls, name, ctx, objMethod, false);
         if (UNLIKELY(!func)) {
           isMagicCall = true;
-          func = cls->lookupMethod(s___call.get());
+          func = cls->lookupMethod(s_call.get());
           if (UNLIKELY(!func)) {
             // Do it again, but raise the error this time.
             (void) g_vmContext->lookupMethodCtx(cls, name, ctx, objMethod,
@@ -578,125 +565,6 @@ void methodCacheSlowPath(MethodCache::Pair* mce,
   }
 }
 
-template<>
-HOT_FUNC_VM
-void
-MethodCache::lookup(Handle handle, ActRec* ar, const void* extraKey) {
-  assert(ar->hasThis());
-  auto* cls = ar->getThis()->getVMClass();
-  auto* pair = MethodCache::cacheAtHandle(handle)->keyToPair(uintptr_t(cls));
-
-  /*
-   * The MethodCache line consists of a Class* key (stored as a
-   * uintptr_t) and a Func*.  The low bit of the key is set if the
-   * function call is a magic call (in which case the cached Func* is
-   * the __call function).  The second lowest bit of the key is set if
-   * the cached Func has AttrStatic.
-   *
-   * For this fast path, we just check if the key is bitwise equal to
-   * the Class* on the object.  If either of the special bits are set
-   * in the key we'll bail to the slow path.
-   */
-  if (LIKELY(pair->m_key == reinterpret_cast<uintptr_t>(cls))) {
-    ar->m_func = pair->m_value;
-  } else {
-    auto* name = static_cast<const StringData*>(extraKey);
-    methodCacheSlowPath(pair, ar, const_cast<StringData*>(name), cls);
-  }
-}
-
-static Handle allocFuncOrClass(const unsigned* handlep, bool persistent) {
-  if (UNLIKELY(!*handlep)) {
-    Lock l(s_handleMutex);
-    if (!*handlep) {
-      *const_cast<unsigned*>(handlep) =
-        allocLocked(persistent, sizeof(void*), sizeof(void*));
-    }
-  }
-  return *handlep;
-}
-
-Handle allocKnownClass(const Class* cls) {
-  const NamedEntity* ne = cls->preClass()->namedEntity();
-  if (ne->m_cachedClassOffset) return ne->m_cachedClassOffset;
-
-  return allocKnownClass(ne,
-                         (!SystemLib::s_inited ||
-                          RuntimeOption::RepoAuthoritative) &&
-                         cls->verifyPersistent());
-}
-
-Handle allocKnownClass(const NamedEntity* ne,
-                            bool persistent) {
-  return allocFuncOrClass(&ne->m_cachedClassOffset, persistent);
-}
-
-Handle allocKnownClass(const StringData* name) {
-  return allocKnownClass(Unit::GetNamedEntity(name), false);
-}
-
-Handle allocClassInitProp(const StringData* name) {
-  return namedAlloc<NSClsInitProp>(name, sizeof(Class::PropInitVec*),
-                                   sizeof(Class::PropInitVec*));
-}
-
-Handle allocClassInitSProp(const StringData* name) {
-  return namedAlloc<NSClsInitSProp>(name, sizeof(TypedValue*),
-                                    sizeof(TypedValue*));
-}
-
-Handle allocFixedFunction(const NamedEntity* ne, bool persistent) {
-  return allocFuncOrClass(&ne->m_cachedFuncOffset, persistent);
-}
-
-Handle allocFixedFunction(const StringData* name) {
-  return allocFixedFunction(Unit::GetNamedEntity(name), false);
-}
-
-Handle allocTypedef(const NamedEntity* ne) {
-  if (ne->m_cachedTypedefOffset) {
-    return ne->m_cachedTypedefOffset;
-  }
-
-  Lock l(s_handleMutex);
-  // TODO(#2103214): support persistent
-  const_cast<NamedEntity*>(ne)->m_cachedTypedefOffset =
-    allocLocked(false /* persistent */,
-                sizeof(TypedefReq),
-                alignof(TypedefReq));
-  return ne->m_cachedTypedefOffset;
-}
-
-template<bool checkOnly>
-Class*
-lookupKnownClass(Class** cache, const StringData* clsName, bool isClass) {
-  if (!checkOnly) {
-    Stats::inc(Stats::TgtCache_KnownClsHit, -1);
-    Stats::inc(Stats::TgtCache_KnownClsMiss, 1);
-  }
-
-  Class* cls = *cache;
-  assert(!cls); // the caller should already have checked
-  assert(clsName->data()[0] != '\\'); // namespace names should be done earlier
-
-  AutoloadHandler::s_instance->invokeHandler(
-    StrNR(const_cast<StringData*>(clsName)));
-  cls = *cache;
-
-  if (checkOnly) {
-    // If the class still doesn't exist, return flags causing the
-    // attribute check in the translated code that called us to fail.
-    return (Class*)(uintptr_t)(cls ? cls->attrs() :
-      (isClass ? (AttrTrait | AttrInterface) : AttrNone));
-  } else if (UNLIKELY(!cls)) {
-    raise_error(Strings::UNKNOWN_CLASS, clsName->data());
-  }
-  return cls;
-}
-
-template Class* lookupKnownClass<true>(Class**, const StringData*, bool);
-template Class* lookupKnownClass<false>(Class**, const StringData*, bool);
-
 //=============================================================================
 // ClassCache
 
@@ -710,7 +578,7 @@ template<>
 const Class*
 ClassCache::lookup(Handle handle, StringData *name,
                    const void* unused) {
-  ClassCache* thiz = cacheAtHandle(handle);
+  auto const thiz = handleToPtr<ClassCache>(handle);
   Pair *pair = thiz->keyToPair(name);
   const StringData* pairSd = pair->m_key;
   if (!stringMatches(pairSd, name)) {
@@ -739,67 +607,16 @@ ClassCache::lookup(Handle handle, StringData *name,
   return pair->m_value;
 }
 
-/*
- * Constants are raw TypedValues read from TLS storage by emitted code.
- * We must represent the undefined value as KindOfUninit == 0. Constant
- * definition is hooked in the runtime to allocate and update these
- * structures.
- */
-Handle allocConstant(uint32_t* handlep, bool persistent) {
-  if (UNLIKELY(!*handlep)) {
-    Lock l(s_handleMutex);
-    if (!*handlep) {
-      *handlep =
-        allocLocked(persistent, sizeof(TypedValue), sizeof(TypedValue));
-    }
-  }
-  return *handlep;
-}
-
-Handle allocStaticLocal(const Func* func, const StringData* name) {
-  auto const mapKey = StaticLocalKey { func->getFuncId(), name };
-
-  StaticLocalMap::const_accessor acc;
-  if (s_staticLocalMap.find(acc, mapKey)) {
-    return acc->second;
-  }
-
-  Lock l(s_handleMutex);
-  if (s_staticLocalMap.find(acc, mapKey)) {
-    return acc->second;
-  }
-
-  Handle retval = allocLocked(false /* persistent */,
-                              sizeof(RefData),
-                              alignof(RefData));
-  if (!s_staticLocalMap.insert(StaticLocalMap::value_type(mapKey, retval))) {
-    always_assert(0);
-  }
-  return retval;
-}
-
-Handle allocClassConstant(StringData* name) {
-  return namedAlloc<NSClassConstant>(name,
-                                     sizeof(TypedValue), sizeof(TypedValue));
-}
-
-Cell lookupClassConstantTv(TypedValue* cache,
-                           const NamedEntity* ne,
-                           const StringData* cls,
-                           const StringData* cns) {
-  Cell clsCns = g_vmContext->lookupClsCns(ne, cls, cns);
-  assert(isUncounted(clsCns));
-  cellDup(clsCns, *cache);
-  return clsCns;
-}
-
-Handle allocNonScalarClassConstantMap(unsigned* handleOut) {
-  return allocFuncOrClass(handleOut, false /* isPersistent */);
-}
-
 //=============================================================================
 // *SPropCache
 //
+
+Handle SPropCache::alloc(const StringData* sd) {
+  assert(sd->isStatic());
+  return bind<SPropCache>(
+    StaticProp { sd }
+  ).handle();
+}
 
 template<bool raiseOnError>
 TypedValue*
@@ -809,7 +626,7 @@ SPropCache::lookupSProp(const Class *cls, const StringData *name, Class* ctx) {
   val = cls->getSProp(ctx, name, visible, accessible);
   if (UNLIKELY(!visible || !accessible)) {
     if (!raiseOnError) return NULL;
-    string propertyName;
+    std::string propertyName;
     string_printf(propertyName, "%s::%s",
                   cls->name()->data(), name->data());
     raise_error("Invalid static property access: %s", propertyName.c_str());
@@ -830,7 +647,7 @@ TypedValue*
 SPropCache::lookup(Handle handle, const Class *cls, const StringData *name,
                    Class* ctx) {
   // The fast path is in-TC. If we get here, we have already missed.
-  SPropCache* thiz = cacheAtHandle(handle);
+  auto const thiz = handleToPtr<SPropCache>(handle);
   Stats::inc(Stats::TgtCache_SPropMiss);
   Stats::inc(Stats::TgtCache_SPropHit, -1);
   assert(cls && name);
@@ -867,38 +684,34 @@ template TypedValue* SPropCache::lookup<false>(Handle handle,
 // StaticMethodCache
 //
 
-template<typename T, PHPNameSpace ns>
-static inline Handle
-allocStaticMethodCache(const StringData* clsName,
-                       const StringData* methName,
-                       const char* ctxName) {
+static const StringData* mangleStaticMethodCacheName(const StringData* cls,
+                                                     const StringData* meth,
+                                                     const char* ctx) {
   // Implementation detail of FPushClsMethodD/F: we use "C::M:ctx" as
   // the key for invoking static method "M" on class "C". This
   // composes such a key. "::" is semi-arbitrary, though whatever we
   // choose must delimit possible class and method names, so we might
   // as well ape the source syntax
-  const StringData* joinedName =
-    makeStaticString(String(clsName->data()) + String("::") +
-                                String(methName->data()) + String(":") +
-                                String(ctxName));
-
-  return namedAlloc<ns>(joinedName, sizeof(T), sizeof(T));
+  return
+    makeStaticString(String(cls->data()) + String("::") +
+                     String(meth->data()) + String(":") +
+                     String(ctx));
 }
 
-Handle
-StaticMethodCache::alloc(const StringData* clsName,
-                         const StringData* methName,
-                         const char* ctxName) {
-  return allocStaticMethodCache<StaticMethodCache, NSStaticMethod>(
-    clsName, methName, ctxName);
+Handle StaticMethodCache::alloc(const StringData* clsName,
+                                const StringData* methName,
+                                const char* ctxName) {
+  return bind<StaticMethodCache>(
+    StaticMethod { mangleStaticMethodCacheName(clsName, methName, ctxName) }
+  ).handle();
 }
 
-Handle
-StaticMethodFCache::alloc(const StringData* clsName,
-                          const StringData* methName,
-                          const char* ctxName) {
-  return allocStaticMethodCache<StaticMethodFCache, NSStaticMethodF>(
-    clsName, methName, ctxName);
+Handle StaticMethodFCache::alloc(const StringData* clsName,
+                                 const StringData* methName,
+                                 const char* ctxName) {
+  return bind<StaticMethodFCache>(
+    StaticMethodF { mangleStaticMethodCacheName(clsName, methName, ctxName) }
+  ).handle();
 }
 
 const Func*
@@ -1037,5 +850,7 @@ StaticMethodFCache::lookupIR(Handle handle, const Class* cls,
 
   return nullptr;
 }
+
+//////////////////////////////////////////////////////////////////////
 
 }}

@@ -22,6 +22,7 @@
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/range.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/fixed-string-map.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
@@ -480,7 +481,7 @@ struct Class : AtomicCountable {
    * isZombie() returns true if this class has been logically destroyed,
    * but needed to be preserved due to outstanding references.
    */
-  bool isZombie() const { return !m_cachedOffset; }
+  bool isZombie() const { return !m_cachedClass.bound(); }
 
   Avail avail(Class *&parent, bool tryAutoload = false) const;
 
@@ -656,9 +657,14 @@ struct Class : AtomicCountable {
 
   void initialize() const;
   void initPropHandle() const;
-  unsigned propHandle() const { return m_propDataCache; }
+  RDS::Handle classHandle() const { return m_cachedClass.handle(); }
+  void setClassHandle(RDS::Link<Class*> link) const {
+    assert(!m_cachedClass.bound());
+    m_cachedClass = link;
+  }
+  RDS::Handle propHandle() const { return m_propDataCache.handle(); }
   void initSPropHandle() const;
-  unsigned sPropHandle() const { return m_propSDataCache; }
+  RDS::Handle sPropHandle() const { return m_propSDataCache.handle(); }
   void initProps() const;
   TypedValue* initSProps() const;
   Class* getCached() const;
@@ -834,13 +840,10 @@ private:
   int32_t m_builtinPropSize;
   int32_t m_declPropNumAccessible;
   unsigned m_classVecLen;
-  // TODO: use RDS::Handle for these.
-public:
-  unsigned m_cachedOffset; // used by Unit
-private:
-  unsigned m_propDataCache;
-  unsigned m_propSDataCache;
-  unsigned m_nonScalarConstantCache;
+  mutable RDS::Link<Class*> m_cachedClass; // can this be const Class*?
+  mutable RDS::Link<PropInitVec*> m_propDataCache;
+  mutable RDS::Link<TypedValue*> m_propSDataCache;
+  mutable RDS::Link<Array> m_nonScalarConstantCache;
   BuiltinCtorFunction m_instanceCtor;
   ConstMap m_constants;
 

@@ -2034,13 +2034,13 @@ void HhbcTranslator::emitFPushCufOp(Op op, Class* cls, StringData* invName,
     } else {
       ctx = genClsMethodCtx(callee, cls);
     }
-    if (!RDS::isPersistentHandle(cls->m_cachedOffset)) {
+    if (!RDS::isPersistentHandle(cls->classHandle())) {
       // The miss path is complicated and rare. Punt for now.
       gen(LdClsCachedSafe, makeExitSlow(), cns(cls->name()));
     }
   } else {
     ctx = m_tb->genDefInitNull();
-    if (!RDS::isPersistentHandle(callee->getCachedOffset())) {
+    if (!RDS::isPersistentHandle(callee->funcHandle())) {
       // The miss path is complicated and rare. Punt for now.
       func = gen(
         LdFuncCachedSafe, LdFuncCachedData(callee->name()), makeExitSlow()

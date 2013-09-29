@@ -39,6 +39,8 @@ TRACE_SET_MOD(unwind);
 
 namespace HPHP { namespace Transl {
 
+RDS::Link<UnwindRDS> unwindRdsInfo(RDS::kInvalidHandle);
+
 namespace {
 
 template<class T>
@@ -93,10 +95,10 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
   // RDS. This also simplifies the handler code because it doesn't
   // have to worry about saving its arguments somewhere while
   // executing the exit trace.
-  RDS::header()->unwinderScratch = (int64_t)exn;
-  RDS::header()->doSideExit = ism;
+  unwindRdsInfo->unwinderScratch = (int64_t)exn;
+  unwindRdsInfo->doSideExit = ism;
   if (ism) {
-    RDS::header()->unwinderTv = ism->tv();
+    unwindRdsInfo->unwinderTv = ism->tv();
   }
   _Unwind_SetIP(ctx, (uint64_t)catchTrace);
   tl_regState = VMRegState::DIRTY;
@@ -184,6 +186,11 @@ void deregister_unwind_region(std::vector<char>* p) {
 
 UnwindInfoHandle
 register_unwind_region(unsigned char* startAddr, size_t size) {
+  // The first time we're called, this will dynamically link the data
+  // we need in the request data segment.  All future JIT translations
+  // of catch traces may use offsets based on this handle.
+  unwindRdsInfo.bind();
+
   std::unique_ptr<std::vector<char>> bufferMem(new std::vector<char>);
   std::vector<char>& buffer = *bufferMem;
 

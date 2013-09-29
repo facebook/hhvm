@@ -1257,19 +1257,6 @@ Array VMExecutionContext::getCallerInfo() {
   return result;
 }
 
-bool VMExecutionContext::renameFunction(const StringData* oldName,
-                                        const StringData* newName) {
-  return m_renamedFuncs.rename(oldName, newName);
-}
-
-bool VMExecutionContext::isFunctionRenameable(const StringData* name) {
-  return m_renamedFuncs.isFunctionRenameable(name);
-}
-
-void VMExecutionContext::addRenameableFunctions(ArrayData* arr) {
-  m_renamedFuncs.addRenameableFunctions(arr);
-}
-
 VarEnv* VMExecutionContext::getVarEnv() {
   VMRegAnchor _;
 

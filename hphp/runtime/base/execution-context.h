@@ -24,7 +24,6 @@
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/hphp-array.h"
-#include "hphp/runtime/vm/funcdict.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/util/base.h"
@@ -556,7 +555,6 @@ public:
 
   VarEnv* m_globalVarEnv;
 
-  HPHP::RenamedFuncDict m_renamedFuncs;
   EvaledFilesMap m_evaledFiles;
   typedef std::vector<HPHP::Unit*> EvaledUnitsVec;
   EvaledUnitsVec m_createdFuncs;
@@ -591,9 +589,6 @@ public:
   const String& getContainingFileName();
   int getLine();
   Array getCallerInfo();
-  bool renameFunction(const StringData* oldName, const StringData* newName);
-  bool isFunctionRenameable(const StringData* name);
-  void addRenameableFunctions(ArrayData* arr);
   HPHP::Eval::PhpFile* lookupPhpFile(
       StringData* path, const char* currentDir, bool* initial = nullptr);
   HPHP::Unit* evalInclude(StringData* path,

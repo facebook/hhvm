@@ -204,8 +204,6 @@ inline ssize_t loadConditionFlags() {
   return atomic_acquire_load(conditionFlagsPtr());
 }
 
-void invalidateForRename(const StringData* name);
-
 /*
  * Some caches have a Lookup != k, because the TC passes a container
  * with other necessary info to Cache::lookup. E.g., when looking up
@@ -308,11 +306,19 @@ struct StaticMethodFCache {
                               const StringData* meth, TypedValue* vmfp);
 };
 
-typedef Cache<const StringData*, const Func*, StringData*, NSDynFunction>
-  FuncCache;
 typedef Cache<uintptr_t, const Func*, ActRec*, NSInvalid, 1, void>
   MethodCache;
 typedef Cache<StringData*, const Class*, StringData*, NSClass> ClassCache;
+
+typedef Cache<const StringData*, const Func*, StringData*, NSDynFunction>
+  FuncCache;
+
+/*
+ * In order to handle fb_rename_function (when it is enabled), we need
+ * to invalidate dynamic function call caches (the FuncCache).  This
+ * hook is called when fb_rename_function is used.
+ */
+void invalidateForRenameFunction(const StringData* name);
 
 /*
  * Classes.

@@ -15,6 +15,12 @@
 */
 #include "hphp/runtime/base/rds.h"
 
+#include <vector>
+#include <string>
+#include <cstdio>
+
+#include <sys/mman.h>
+
 #include "folly/Hash.h"
 
 #include "hphp/runtime/base/complex-types.h"
@@ -30,10 +36,6 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/base.h"
 #include "hphp/util/maphuge.h"
-
-#include <string>
-#include <stdio.h>
-#include <sys/mman.h>
 
 using namespace HPHP::MethodLookup;
 using namespace HPHP::Util;
@@ -161,12 +163,9 @@ size_t usedPersistentBytes() {
   return s_persistent_frontier - s_persistent_start;
 }
 
-// Vector of cache handles
-typedef std::vector<Handle> HandleVector;
-
 // Set of FuncCache handles for dynamic function callsites, used for
 // invalidation when a function is renamed.
-HandleVector funcCacheEntries;
+static std::vector<Handle> funcCacheEntries;
 
 static Mutex s_handleMutex(false /*recursive*/, RankLeaf);
 
@@ -337,14 +336,12 @@ template
 Handle namedAlloc<false>(PHPNameSpace where, const StringData* name,
                          int numBytes, int align);
 
-void
-invalidateForRename(const StringData* name) {
+void invalidateForRenameFunction(const StringData* name) {
   assert(name);
   Lock l(s_handleMutex);
 
-  for (HandleVector::iterator i = funcCacheEntries.begin();
-       i != funcCacheEntries.end(); ++i) {
-    FuncCache::invalidate(*i, name);
+  for (auto& h : funcCacheEntries) {
+    FuncCache::invalidate(h, name);
   }
 }
 

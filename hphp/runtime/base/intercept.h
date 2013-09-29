@@ -21,6 +21,7 @@
 #include "hphp/util/case-insensitive.h"
 
 namespace HPHP {
+
 ///////////////////////////////////////////////////////////////////////////////
 // fb_intercept()
 
@@ -56,31 +57,10 @@ void unregister_intercept_flag(const String& name, char *flag);
 ///////////////////////////////////////////////////////////////////////////////
 // fb_rename_function()
 
-/**
- * Functions on the specified list will be the only ones that are allowed
- * to rename. Without calling this function, all functions are allowed to
- * rename, even including built-in functions.
- */
-void check_renamed_functions(CArrRef names);
-
-/**
- * Checks to see if the specified function is on the allow list.
- */
-bool check_renamed_function(const String& name);
-
-/**
- * Rename a function.
- */
 void rename_function(const String& old_name, const String& new_name);
 
-/**
- * Get the actual function to call.
- */
-String get_renamed_function(const String& name);
-
-extern DECLARE_THREAD_LOCAL_NO_CHECK(bool, s_hasRenamedFunction);
-
 ///////////////////////////////////////////////////////////////////////////////
+
 }
 
 #endif // incl_HPHP_INTERCEPT_H_

@@ -1047,16 +1047,6 @@ bool f_fb_rename_function(const String& orig_func_name, const String& new_func_n
     }
   }
 
-  if (!check_renamed_function(orig_func_name) &&
-      !check_renamed_function(new_func_name)) {
-    raise_error("fb_rename_function(%s, %s) failed: %s is not allowed to "
-                "rename. Please add it to the list provided to "
-                "fb_renamed_functions().",
-                orig_func_name.data(), new_func_name.data(),
-                orig_func_name.data());
-    return false;
-  }
-
   rename_function(orig_func_name, new_func_name);
   return true;
 }

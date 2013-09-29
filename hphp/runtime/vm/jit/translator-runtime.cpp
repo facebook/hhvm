@@ -564,6 +564,15 @@ void traceCallback(ActRec* fp, Cell* sp, int64_t pcOff, void* rip) {
   checkFrame(fp, sp, /*checkLocals*/true);
 }
 
+const Func* lookupUnknownFunc(const StringData* name) {
+  Transl::VMRegAnchor _;
+  auto const func = Unit::loadFunc(name);
+  if (UNLIKELY(!func)) {
+    raise_error("Undefined function: %s", name->data());
+  }
+  return func;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}

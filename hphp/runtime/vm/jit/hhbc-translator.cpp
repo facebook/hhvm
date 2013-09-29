@@ -2043,7 +2043,9 @@ void HhbcTranslator::emitFPushCufOp(Op op, Class* cls, StringData* invName,
     ctx = m_tb->genDefInitNull();
     if (!RDS::isPersistentHandle(callee->getCachedOffset())) {
       // The miss path is complicated and rare. Punt for now.
-      func = gen(LdFuncCachedSafe, makeExitSlow(), cns(callee->name()));
+      func = gen(
+        LdFuncCachedSafe, LdFuncCachedData(callee->name()), makeExitSlow()
+      );
     }
   }
 
@@ -2254,10 +2256,14 @@ void HhbcTranslator::emitFPushFuncCommon(const Func* func,
   }
 
   // LdFuncCached can throw
-  auto catchBlock = makeCatch();
-  SSATmp* ssaFunc = fallback
-    ? gen(LdFuncCachedU, catchBlock, cns(name), cns(fallback))
-    : gen(LdFuncCached,  catchBlock, cns(name));
+  auto const catchBlock = makeCatch();
+  auto const ssaFunc = fallback
+    ? gen(LdFuncCachedU,
+          LdFuncCachedUData { name, fallback },
+          catchBlock)
+    : gen(LdFuncCached,
+          LdFuncCachedData { name },
+          catchBlock);
   emitFPushActRec(ssaFunc,
                   m_tb->genDefInitNull(),
                   numParams,

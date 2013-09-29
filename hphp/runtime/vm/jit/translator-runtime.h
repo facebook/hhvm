@@ -126,6 +126,8 @@ Cell lookupCnsUHelper(const TypedValue* tv,
 void checkFrame(ActRec* fp, Cell* sp, bool checkLocals);
 void traceCallback(ActRec* fp, Cell* sp, int64_t pcOff, void* rip);
 
+const Func* lookupUnknownFunc(const StringData*);
+
 } }
 
 #endif

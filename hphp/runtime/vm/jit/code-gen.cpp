@@ -2340,74 +2340,74 @@ void CodeGenerator::cgUnbox(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdFuncCachedCommon(IRInstruction* inst) {
-  SSATmp* dst        = inst->dst();
-  SSATmp* methodName = inst->src(0);
+  auto const dst  = m_regs[inst->dst()].reg();
+  auto const name = inst->extra<LdFuncCachedData>()->name;
+  auto const ch   = RDS::allocFixedFunction(name);
+  auto& a = m_as;
 
-  const StringData* name = methodName->getValStr();
-  auto const ch = RDS::allocFixedFunction(name);
-  size_t funcCacheOff = ch + offsetof(RDS::FixedFuncCache, m_func);
-
-  auto dstReg = m_regs[dst].reg();
-  if (dstReg == InvalidReg) {
-    // happens if LdFixedFunc and FCall not in same trace
-    m_as.   cmpq(0, rVmTl[funcCacheOff]);
+  if (dst == InvalidReg) {
+    a.   cmpq  (0, rVmTl[ch]);
   } else {
-    m_as.   loadq (rVmTl[funcCacheOff], dstReg);
-    m_as.   testq (dstReg, dstReg);
+    a.   loadq (rVmTl[ch], dst);
+    a.   testq (dst, dst);
   }
 }
 
 void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
   cgLdFuncCachedCommon(inst);
-  // jz off to the helper call in astubs
   unlikelyIfBlock(CC_Z, [&] (Asm& a) {
-    // this helper tries the autoload map, and fatals on failure
-    cgCallNative(a, inst);
+    const Func* (*const func)(const StringData*) = lookupUnknownFunc;
+    cgCallHelper(
+      a,
+      CppCall(func),
+      callDest(inst->dst()),
+      SyncOptions::kSyncPoint,
+      ArgGroup(m_regs)
+        .immPtr(inst->extra<LdFuncCached>()->name)
+    );
   });
-}
-
-void CodeGenerator::cgLdFuncCachedU(IRInstruction* inst) {
-  SSATmp* dst          = inst->dst();
-  SSATmp* methodName   = inst->src(0);
-  SSATmp* fallbackName = inst->src(1);
-
-  // allocate both cache handles
-  const StringData* name = methodName->getValStr();
-  auto const ch = RDS::allocFixedFunction(name);
-  size_t funcCacheOff = ch + offsetof(RDS::FixedFuncCache, m_func);
-
-  const StringData* fallback = fallbackName->getValStr();
-  auto const fch = RDS::allocFixedFunction(fallback);
-  size_t fallbackCacheOff = fch + offsetof(RDS::FixedFuncCache, m_func);
-
-  // check the first cache handle, then the fallback
-  auto dstReg = m_regs[dst].reg();
-  Label end;
-  if (dstReg == InvalidReg) {
-    m_as.   cmpq (0, rVmTl[funcCacheOff]);
-    m_as.   jcc8 (CC_NZ, end);
-    m_as.   cmpq (0, rVmTl[fallbackCacheOff]);
-  } else {
-    m_as.   loadq(rVmTl[funcCacheOff], dstReg);
-    m_as.   testq(dstReg, dstReg);
-    m_as.   jcc8 (CC_NZ, end);
-    m_as.   loadq(rVmTl[fallbackCacheOff], dstReg);
-    m_as.   testq(dstReg, dstReg);
-  }
-
-  // finally, jump to native call in astubs if neither hits
-  unlikelyIfBlock(CC_Z, [&] (Asm& a) {
-    // same helper as LdFuncCached
-    cgCallNative(a, inst);
-  });
-  asm_label(m_as, end);
 }
 
 void CodeGenerator::cgLdFuncCachedSafe(IRInstruction* inst) {
   cgLdFuncCachedCommon(inst);
-  if (Block* taken = inst->taken()) {
+  if (auto const taken = inst->taken()) {
     emitFwdJcc(m_as, CC_Z, taken);
   }
+}
+
+void CodeGenerator::cgLdFuncCachedU(IRInstruction* inst) {
+  auto const dstReg        = m_regs[inst->dst()].reg();
+  auto const extra         = inst->extra<LdFuncCachedU>();
+  auto const funcCache     = RDS::allocFixedFunction(extra->name);
+  auto const fallbackCache = RDS::allocFixedFunction(extra->fallback);
+  auto& a = m_as;
+
+  // Check the first function handle, then the fallback.
+  Label end;
+  if (dstReg == InvalidReg) {
+    a.   cmpq  (0, rVmTl[funcCache]);
+    a.   jnz8  (end);
+    a.   cmpq  (0, rVmTl[fallbackCache]);
+  } else {
+    a.   loadq (rVmTl[funcCache], dstReg);
+    a.   testq (dstReg, dstReg);
+    a.   jnz8  (end);
+    a.   loadq (rVmTl[fallbackCache], dstReg);
+    a.   testq (dstReg, dstReg);
+  }
+
+  unlikelyIfBlock(CC_Z, [&] (Asm& a) {
+    const Func* (*const func)(const StringData*) = lookupUnknownFunc;
+    cgCallHelper(
+      a,
+      CppCall(func),
+      callDest(inst->dst()),
+      SyncOptions::kSyncPoint,
+      ArgGroup(m_regs)
+        .immPtr(extra->name)
+    );
+  });
+  asm_label(m_as, end);
 }
 
 void CodeGenerator::cgLdFunc(IRInstruction* inst) {

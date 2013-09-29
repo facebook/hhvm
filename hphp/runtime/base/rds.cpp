@@ -467,18 +467,6 @@ FuncCache::lookup(Handle handle, StringData *sd, const void* /* ignored */) {
 }
 
 //=============================================================================
-// FixedFuncCache
-
-const Func* FixedFuncCache::lookupUnknownFunc(StringData* name) {
-  Transl::VMRegAnchor _;
-  Func* func = Unit::loadFunc(name);
-  if (UNLIKELY(!func)) {
-    raise_error("Undefined function: %s", name->data());
-  }
-  return func;
-}
-
-//=============================================================================
 // MethodCache
 
 template<>

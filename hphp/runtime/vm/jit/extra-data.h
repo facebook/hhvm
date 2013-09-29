@@ -385,6 +385,45 @@ struct StaticLocName : IRExtraData {
   const StringData* name;
 };
 
+struct LdFuncCachedData : IRExtraData {
+  explicit LdFuncCachedData(const StringData* name)
+    : name(name)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>(name->data());
+  }
+
+  size_t cseHash() const { return name->hash(); }
+  bool cseEquals(const LdFuncCachedData& o) const {
+    return name == o.name;
+  }
+
+  const StringData* name;
+};
+
+struct LdFuncCachedUData : IRExtraData {
+  explicit LdFuncCachedUData(const StringData* name,
+                             const StringData* fallback)
+    : name(name)
+    , fallback(fallback)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>(name->data(), ',', fallback->data());
+  }
+
+  size_t cseHash() const {
+    return hash_int64_pair(name->hash(), fallback->hash());
+  }
+  bool cseEquals(const LdFuncCachedUData& o) const {
+    return name == o.name && fallback == o.fallback;
+  }
+
+  const StringData* name;
+  const StringData* fallback;
+};
+
 /*
  * The name of a class, and the expected Class* at runtime.
  */
@@ -551,6 +590,9 @@ X(CallArray,                    CallArrayData);
 X(LdClsCns,                     ClsCnsName);
 X(LookupClsCns,                 ClsCnsName);
 X(LdStaticLocCached,            StaticLocName);
+X(LdFuncCached,                 LdFuncCachedData);
+X(LdFuncCachedSafe,             LdFuncCachedData);
+X(LdFuncCachedU,                LdFuncCachedUData);
 X(ReqBindJmpGt,                 ReqBindJccData);
 X(ReqBindJmpGte,                ReqBindJccData);
 X(ReqBindJmpLt,                 ReqBindJccData);

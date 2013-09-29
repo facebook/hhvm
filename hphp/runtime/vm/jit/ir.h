@@ -382,9 +382,9 @@ O(LdGblAddrDef,            D(PtrToGen), S(Str),                      E|N|CRc) \
 O(LdGblAddr,               D(PtrToGen), S(Str),                            N) \
 O(LdObjClass,                   D(Cls), S(Obj),                            C) \
 O(LdFunc,                      D(Func), S(Str),              E|N|CRc|Refs|Er) \
-O(LdFuncCached,                D(Func), CStr,                  N|C|E|Refs|Er) \
-O(LdFuncCachedU,               D(Func), CStr CStr,             N|C|E|Refs|Er) \
-O(LdFuncCachedSafe,            D(Func), CStr,                              C) \
+O(LdFuncCached,                D(Func), NA,                    N|C|E|Refs|Er) \
+O(LdFuncCachedU,               D(Func), NA,                    N|C|E|Refs|Er) \
+O(LdFuncCachedSafe,            D(Func), NA,                                C) \
 O(LdARFuncPtr,                 D(Func), S(StkPtr,FramePtr) C(Int),         C) \
 O(LdSSwitchDestFast,            D(TCA), S(Gen),                            N) \
 O(LdSSwitchDestSlow,            D(TCA), S(Gen),                  E|N|Refs|Er) \

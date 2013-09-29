@@ -1002,16 +1002,23 @@ D:Func = LdFunc S0:Str
   Loads the Func whose name is S0.  Fatal if the named function is
   not defined, and the function autoloader fails to define it.
 
-D:Func = LdFuncCached S0:ConstStr
+D:Func = LdFuncCached<funcName>
 
-  Loads the Func whose name is S0 from the RDS. Fatal if the named
-  function is not defined, and the function autoloader fails to define
-  it.
+  Loads the Func whose name is funcName from the RDS, invoking
+  autoload if it not defined yet.  Fatal if function autoloader fails
+  to define it.
 
-D:Func = LdFuncCachedSafe S0:ConstStr [ -> L ]
+D:Func = LdFuncCachedSafe<funcName> [ -> L ]
 
-  Loads the Func named S0 from the RDS. If the function is not
-  defined, returns null and optionally branches to L.
+  Try to load the Func named funcName from the RDS.  If the function
+  is not defined, returns null and optionally branches to L.
+
+D:Func = LdFuncCachedU<funcName,fallbackName>
+
+  Try to load a Func named funcName from the RDS, if it isn't defined,
+  try to load a Func named fallbackName.  If that also isn't defined,
+  invoke autoload.  If this still doesn't result in a Func, raise a
+  fatal error.
 
 D:Func& = LdARFuncPtr S0:{StkPtr|FramePtr} S1:ConstInt
 

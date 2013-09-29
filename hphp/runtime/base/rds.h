@@ -267,21 +267,6 @@ public:
                             const void* extraKey = nullptr);
 };
 
-struct FixedFuncCache {
-  const Func* m_func;
-
-  static inline FixedFuncCache* cacheAtHandle(Handle handle) {
-    return (FixedFuncCache*)handleToPtr(handle);
-  }
-
-  static void invalidate(Handle handle) {
-    FixedFuncCache* thiz = cacheAtHandle(handle);
-    thiz->m_func = nullptr;
-  }
-
-  static const Func* lookupUnknownFunc(StringData* name);
-};
-
 struct StaticMethodCache {
   const Func* m_func;
   const Class* m_cls;

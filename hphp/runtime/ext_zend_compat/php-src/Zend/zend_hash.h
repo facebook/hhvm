@@ -55,6 +55,19 @@ typedef void (*copy_ctor_param_func_t)(void *pElement, void *pParam);
 
 struct _hashtable;
 
+// Just alive for sorting function to reach in
+typedef struct bucket {
+  ulong h;            /* Used for numeric indexing */
+  uint nKeyLength;
+  void *pData;
+  void *pDataPtr;
+  struct bucket *pListNext;
+  struct bucket *pListLast;
+  struct bucket *pNext;
+  struct bucket *pLast;
+  const char *arKey;
+} Bucket;
+
 typedef HPHP::ArrayData HashTable;
 
 typedef struct _zend_hash_key {
@@ -90,7 +103,7 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKe
 #define zend_hash_add(ht, arKey, nKeyLength, pData, nDataSize, pDest) \
     _zend_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, HASH_ADD ZEND_FILE_LINE_CC)
 
-ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, zval **pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
+ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
 #define zend_hash_quick_update(ht, arKey, nKeyLength, h, pData, nDataSize, pDest) \
     _zend_hash_quick_add_or_update(ht, arKey, nKeyLength, h, pData, nDataSize, pDest, HASH_UPDATE ZEND_FILE_LINE_CC)
 #define zend_hash_quick_add(ht, arKey, nKeyLength, h, pData, nDataSize, pDest) \
@@ -125,6 +138,7 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint n
 
 /* Data retreival */
 ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, void **pData);
+ZEND_API int zend_hash_quick_find(const HashTable *ht, const char *arKey, uint nKeyLength, ulong h, void **pData);
 ZEND_API int zend_hash_index_find(const HashTable *ht, ulong h, void **pData);
 
 /* Misc */
@@ -160,9 +174,78 @@ ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *p
   zend_hash_internal_pointer_end_ex(ht, NULL)
 
 /* Copying, merging and sorting */
+ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size);
 ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size, int overwrite ZEND_FILE_LINE_DC);
+ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func, compare_func_t compare_func, int renumber TSRMLS_DC);
 #define zend_hash_merge(target, source, pCopyConstructor, tmp, size, overwrite)          \
   _zend_hash_merge(target, source, pCopyConstructor, tmp, size, overwrite ZEND_FILE_LINE_CC)
+
+ZEND_API int zend_hash_num_elements(const HashTable *ht);
+
+/*
+ * DJBX33A (Daniel J. Bernstein, Times 33 with Addition)
+ *
+ * This is Daniel J. Bernstein's popular `times 33' hash function as
+ * posted by him years ago on comp.lang.c. It basically uses a function
+ * like ``hash(i) = hash(i-1) * 33 + str[i]''. This is one of the best
+ * known hash functions for strings. Because it is both computed very
+ * fast and distributes very well.
+ *
+ * The magic of number 33, i.e. why it works better than many other
+ * constants, prime or not, has never been adequately explained by
+ * anyone. So I try an explanation: if one experimentally tests all
+ * multipliers between 1 and 256 (as RSE did now) one detects that even
+ * numbers are not useable at all. The remaining 128 odd numbers
+ * (except for the number 1) work more or less all equally well. They
+ * all distribute in an acceptable way and this way fill a hash table
+ * with an average percent of approx. 86%.
+ *
+ * If one compares the Chi^2 values of the variants, the number 33 not
+ * even has the best value. But the number 33 and a few other equally
+ * good numbers like 17, 31, 63, 127 and 129 have nevertheless a great
+ * advantage to the remaining numbers in the large set of possible
+ * multipliers: their multiply operation can be replaced by a faster
+ * operation based on just one shift plus either a single addition
+ * or subtraction operation. And because a hash function has to both
+ * distribute good _and_ has to be very fast to compute, those few
+ * numbers should be preferred and seems to be the reason why Daniel J.
+ * Bernstein also preferred it.
+ *
+ *
+ *                  -- Ralf S. Engelschall <rse@engelschall.com>
+ */
+
+static inline ulong zend_inline_hash_func(const char *arKey, uint nKeyLength)
+{
+  register ulong hash = 5381;
+
+  /* variant with the hash unrolled eight times */
+  for (; nKeyLength >= 8; nKeyLength -= 8) {
+    hash = ((hash << 5) + hash) + *arKey++;
+    hash = ((hash << 5) + hash) + *arKey++;
+    hash = ((hash << 5) + hash) + *arKey++;
+    hash = ((hash << 5) + hash) + *arKey++;
+    hash = ((hash << 5) + hash) + *arKey++;
+    hash = ((hash << 5) + hash) + *arKey++;
+    hash = ((hash << 5) + hash) + *arKey++;
+    hash = ((hash << 5) + hash) + *arKey++;
+  }
+  switch (nKeyLength) {
+    case 7: hash = ((hash << 5) + hash) + *arKey++; /* fallthrough... */
+    case 6: hash = ((hash << 5) + hash) + *arKey++; /* fallthrough... */
+    case 5: hash = ((hash << 5) + hash) + *arKey++; /* fallthrough... */
+    case 4: hash = ((hash << 5) + hash) + *arKey++; /* fallthrough... */
+    case 3: hash = ((hash << 5) + hash) + *arKey++; /* fallthrough... */
+    case 2: hash = ((hash << 5) + hash) + *arKey++; /* fallthrough... */
+    case 1: hash = ((hash << 5) + hash) + *arKey++; break;
+    case 0: break;
+EMPTY_SWITCH_DEFAULT_CASE()
+  }
+  return hash;
+}
+
+
+ZEND_API ulong zend_hash_func(const char *arKey, uint nKeyLength);
 
 END_EXTERN_C()
 

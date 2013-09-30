@@ -32,6 +32,7 @@
 
 #include "php_version.h"
 #include "zend.h"
+#include "zend_qsort.h"
 
 #include "zend_API.h"
 

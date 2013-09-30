@@ -41,8 +41,7 @@ typedef X64Assembler Asm;
 
 constexpr size_t kJmpTargetAlign = 16;
 
-void moveToAlign(Asm &aa, const size_t alignment = kJmpTargetAlign,
-                 const bool unreachable = true);
+void moveToAlign(CodeBlock& cb, size_t alignment = kJmpTargetAlign);
 
 enum class TestAndSmashFlags {
   kAlignJccImmediate,

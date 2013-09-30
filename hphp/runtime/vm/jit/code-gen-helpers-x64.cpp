@@ -53,27 +53,22 @@ using Transl::rVmFp;
 using Transl::rVmSp;
 
 /*
- * Satisfy an alignment constraint. If we're in a reachable section
- * of code, bridge the gap with nops. Otherwise, int3's.
+ * Satisfy an alignment constraint. Bridge the gap with int3's.
  */
-void moveToAlign(Asm& aa,
-                 const size_t align /* =kJmpTargetAlign */,
-                 const bool unreachable /* =true */) {
+void moveToAlign(CodeBlock& cb,
+                 const size_t align /* =kJmpTargetAlign */) {
   using namespace HPHP::Util;
+  X64Assembler a { cb };
   assert(isPowerOfTwo(align));
-  size_t leftInBlock = align - ((align - 1) & uintptr_t(aa.frontier()));
+  size_t leftInBlock = align - ((align - 1) & uintptr_t(cb.frontier()));
   if (leftInBlock == align) return;
-  if (unreachable) {
-    if (leftInBlock > 2) {
-      aa.ud2();
-      leftInBlock -= 2;
-    }
-    if (leftInBlock > 0) {
-      aa.emitInt3s(leftInBlock);
-    }
-    return;
+  if (leftInBlock > 2) {
+    a.ud2();
+    leftInBlock -= 2;
   }
-  aa.emitNop(leftInBlock);
+  if (leftInBlock > 0) {
+    a.emitInt3s(leftInBlock);
+  }
 }
 
 /*

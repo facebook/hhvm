@@ -467,8 +467,7 @@ TranslatorX64::translate(const TranslArgs& args) {
                            .hot(func->attrs() & AttrHot));
 
   if (args.m_align) {
-    Asm a { mainCode };
-    moveToAlign(a, kNonFallthroughAlign);
+    moveToAlign(mainCode, kNonFallthroughAlign);
   }
 
   TCA start = mainCode.frontier();
@@ -945,8 +944,7 @@ TranslatorX64::funcPrologue(Func* func, int nPassed, ActRec* ar) {
   // If we're close to a cache line boundary, just burn some space to
   // try to keep the func and its body on fewer total lines.
   if (((uintptr_t)mainCode.frontier() & kX64CacheLineMask) >= 32) {
-    Asm a { mainCode };
-    moveToAlign(a, kX64CacheLineSize);
+    moveToAlign(mainCode, kX64CacheLineSize);
   }
   // Careful: this isn't necessarily the real entry point. For funcIsMagic
   // prologues, this is just a possible prologue.

@@ -76,7 +76,7 @@ TCA add(const char* name, TCA start) {
 
 TCA emitRetFromInterpretedFrame() {
   Asm a { tx64->stubsCode };
-  moveToAlign(a);
+  moveToAlign(tx64->stubsCode);
   auto const ret = a.frontier();
 
   auto const arBase = static_cast<int32_t>(sizeof(ActRec) - sizeof(Cell));
@@ -89,7 +89,7 @@ TCA emitRetFromInterpretedFrame() {
 
 TCA emitRetFromInterpretedGeneratorFrame() {
   Asm a { tx64->stubsCode };
-  moveToAlign(a);
+  moveToAlign(tx64->stubsCode);
   auto const ret = a.frontier();
 
   // We have to get the Continuation object from the current AR's $this, then
@@ -103,29 +103,13 @@ TCA emitRetFromInterpretedGeneratorFrame() {
   return ret;
 }
 
-template<int Arity>
-TCA emitNAryStub(Asm& a, CppCall c) {
-  static_assert(Arity < kNumRegisterArgs, "");
-
-  // The callNAryStub has already saved these regs on a.
-  RegSet alreadySaved;
-  for (size_t i = 0; i < Arity; ++i) {
-    alreadySaved |= RegSet(argNumToRegName[i]);
-  }
-
-  /*
-   * We've made a call instruction, and pushed Arity args on the
-   * stack.  So the stack address will be odd coming into the stub if
-   * Arity + 1 (for the call) is odd.  We need to correct for this
-   * when saving other registers below to keep SSE-friendly alignment
-   * of the stack.
-   */
-  const int Parity = (Arity + 1) % 2;
+TCA emitUnaryStub(CodeBlock& cb, CppCall c) {
+  Asm a { cb };
 
   // These dtor stubs are meant to be called with the call
   // instruction, unlike most translator code.
-  moveToAlign(a);
-  TCA start = a.frontier();
+  moveToAlign(cb);
+  TCA start = cb.frontier();
   /*
    * Preserve most caller-saved regs. The calling code has already
    * preserved regs in `alreadySaved'; we push the rest of the caller
@@ -143,17 +127,17 @@ TCA emitNAryStub(Asm& a, CppCall c) {
   a.    push (rbp); // {
   a.    movq (rsp, rbp);
   {
-    RegSet s = kGPCallerSaved - alreadySaved;
-    PhysRegSaverParity rs(Parity, a, s);
+    // We've made a call instruction, and pushed 1 arg onto the stack,
+    // so the stack is currently even.
+    constexpr auto parity = 0;
+    // The callNAryStub has already saved the first arg reg on a.
+    RegSet s = kGPCallerSaved - RegSet(argNumToRegName[0]);
+    PhysRegSaverParity rs(parity, a, s);
     emitCall(a, c);
   }
   a.    pop  (rbp);  // }
   a.    ret  ();
   return start;
-}
-
-TCA emitUnaryStub(Asm& a, CppCall c) {
-  return emitNAryStub<1>(a, c);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -188,7 +172,7 @@ void emitReturnHelpers(UniqueStubs& us) {
 
 void emitResumeHelpers(UniqueStubs& uniqueStubs) {
   Asm a { tx64->stubsCode };
-  moveToAlign(a);
+  moveToAlign(tx64->stubsCode);
 
   auto const fpOff = offsetof(VMExecutionContext, m_fp);
   auto const spOff = offsetof(VMExecutionContext, m_stack) +
@@ -225,7 +209,7 @@ void emitDefClsHelper(UniqueStubs& uniqueStubs) {
 void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
   Asm a { tx64->stubsCode };
 
-  moveToAlign(a);
+  moveToAlign(tx64->stubsCode);
   uniqueStubs.stackOverflowHelper = a.frontier();
 
   // We are called from emitStackCheck, with the new stack frame in
@@ -242,22 +226,20 @@ void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
 }
 
 void emitDtorStubs(UniqueStubs& uniqueStubs) {
-  Asm a { tx64->stubsCode };
-
   auto const strDtor = add("dtorStr", emitUnaryStub(
-    a, CppCall(getMethodPtr(&StringData::release))
+    tx64->stubsCode, CppCall(getMethodPtr(&StringData::release))
   ));
   auto const arrDtor = add("dtorArr", emitUnaryStub(
-    a, CppCall(getVTableOffset(&HphpArray::release))
+    tx64->stubsCode, CppCall(getVTableOffset(&HphpArray::release))
   ));
   auto const objDtor = add("dtorObj", emitUnaryStub(
-    a, CppCall(getMethodPtr(&ObjectData::release))
+    tx64->stubsCode, CppCall(getMethodPtr(&ObjectData::release))
   ));
   auto const resDtor = add("dtorRes", emitUnaryStub(
-    a, CppCall(getMethodPtr(&ResourceData::release))
+    tx64->stubsCode, CppCall(getMethodPtr(&ResourceData::release))
   ));
   auto const refDtor = add("dtorRef", emitUnaryStub(
-    a, CppCall((void*)(&refdata_after_decref_helper))
+    tx64->stubsCode, CppCall((void*)(&refdata_after_decref_helper))
   ));
 
   uniqueStubs.dtorStubs[0] = nullptr;
@@ -272,7 +254,7 @@ void emitGenericDecRefHelpers(UniqueStubs& uniqueStubs) {
   Label release;
 
   Asm a { tx64->mainCode };
-  moveToAlign(a, kNonFallthroughAlign);
+  moveToAlign(tx64->mainCode, kNonFallthroughAlign);
 
   // dtorGenericStub just takes a pointer to the TypedValue in rdi.
   uniqueStubs.irPopRHelper = a.frontier();
@@ -329,7 +311,7 @@ void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
   auto const rData     = rdi;
 
   Asm a { tx64->mainCode };
-  moveToAlign(a, kNonFallthroughAlign);
+  moveToAlign(tx64->mainCode, kNonFallthroughAlign);
 
 asm_label(a, release);
   a.    loadq  (rIter[TVOFF(m_data)], rData);
@@ -342,7 +324,7 @@ asm_label(a, release);
 asm_label(a, doRelease);
   jumpDestructor(a, PhysReg(rType), rax);
 
-  moveToAlign(a, kJmpTargetAlign);
+  moveToAlign(tx64->mainCode, kJmpTargetAlign);
   uniqueStubs.freeManyLocalsHelper = a.frontier();
   a.    lea    (rVmFp[-(JIT::kNumFreeLocalsHelpers * sizeof(Cell))],
                 rFinished);
@@ -383,7 +365,7 @@ asm_label(a, loopHead);
 void emitFuncPrologueRedispatch(UniqueStubs& uniqueStubs) {
   Asm a { tx64->mainCode };
 
-  moveToAlign(a);
+  moveToAlign(tx64->mainCode);
   uniqueStubs.funcPrologueRedispatch = a.frontier();
 
   assert(kScratchCrossTraceRegs.contains(rax));
@@ -429,7 +411,7 @@ asm_label(a, numParamsCheck);
 void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
   Asm a { tx64->mainCode };
 
-  moveToAlign(a, kNonFallthroughAlign);
+  moveToAlign(tx64->mainCode, kNonFallthroughAlign);
   uniqueStubs.fcallArrayHelper = a.frontier();
 
   /*
@@ -509,7 +491,7 @@ void emitFCallHelperThunk(UniqueStubs& uniqueStubs) {
   TCA (*helper)(ActRec*) = &fcallHelper;
   Asm a { tx64->stubsCode };
 
-  moveToAlign(a);
+  moveToAlign(tx64->stubsCode);
   uniqueStubs.fcallHelperThunk = a.frontier();
 
   Label popAndXchg;
@@ -554,7 +536,7 @@ void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
   TCA (*helper)(ActRec*) = &funcBodyHelper;
   Asm a { tx64->stubsCode };
 
-  moveToAlign(a);
+  moveToAlign(tx64->stubsCode);
   uniqueStubs.funcBodyHelperThunk = a.frontier();
 
   // This helper is called via a direct jump from the TC (from

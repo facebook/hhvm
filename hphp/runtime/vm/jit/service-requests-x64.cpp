@@ -201,7 +201,7 @@ emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
     kMaxStubSpace = kJmpTargetAlign - 1 + kVMRegSpace +
       kNumServiceRegs * kMovSize;
   if (align) {
-    moveToAlign(as);
+    moveToAlign(cb);
   }
   TCA retval = as.frontier();
   TRACE(3, "Emit Service Req @%p %s(", start, serviceReqName(req));

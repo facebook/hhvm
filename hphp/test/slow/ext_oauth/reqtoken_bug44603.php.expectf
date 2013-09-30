@@ -1,0 +1,32 @@
+array(2) {
+  ["oauth_token"]=>
+  string(4) "1234"
+  ["oauth_token_secret"]=>
+  string(4) "4567"
+}
+array(2) {
+  ["oauth_token"]=>
+  string(4) "1234"
+  ["oauth_token_secret"]=>
+  string(4) "4567"
+}
+array(2) {
+  ["oauth_token"]=>
+  string(4) "1234"
+  ["oauth_token_secret"]=>
+  string(4) "4567"
+}
+string(%d) "GET /test HTTP/%f
+Authorization: OAuth oauth_consumer_key="1234",oauth_signature_method="HMAC-SHA1",oauth_nonce="%s.%d",oauth_timestamp="%d",oauth_version="1.0",oauth_signature="%s"
+Host: 127.0.0.1:%s
+
+POST /test HTTP/%f
+Content-Type: application/x-www-form-urlencoded
+Host: 127.0.0.1:%s
+Content-Length: %d
+
+oauth_consumer_key=1234&oauth_signature_method=HMAC-SHA1&oauth_nonce=%s.%d&oauth_timestamp=%d&oauth_version=1.0&oauth_signature=%s
+GET /test?oauth_consumer_key=1234&oauth_signature_method=HMAC-SHA1&oauth_nonce=%s.%d&oauth_timestamp=%d&oauth_version=1.0&oauth_signature=%s HTTP/%f
+Host: 127.0.0.1:%s
+
+"

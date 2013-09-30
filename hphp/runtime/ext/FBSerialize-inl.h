@@ -19,6 +19,7 @@
 #define incl_HPHP_FBSERIALIZE_INL_H_
 
 #include <folly/Bits.h>
+#include <folly/Conv.h>
 
 namespace HPHP { namespace serialize {
 
@@ -185,7 +186,7 @@ void FBSerializer<V>::serializeThing(const typename V::VariantType& thing,
       break;
 
     default:
-      throw UnserializeError("Unknown type");
+      throw SerializeError("Unknown type");
   }
 }
 
@@ -232,7 +233,7 @@ size_t FBSerializer<V>::serializedSizeThing(const Variant& thing,
       break;
 
     default:
-      throw UnserializeError("Unknown type");
+      throw SerializeError("Unknown type");
   }
 }
 

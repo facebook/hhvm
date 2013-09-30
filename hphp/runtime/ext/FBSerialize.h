@@ -62,6 +62,7 @@ enum class Type {
   VECTOR,
   MAP,
   STRING,
+  OBJECT,
 };
 
 struct FBSerializeBase {

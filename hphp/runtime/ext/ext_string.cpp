@@ -936,11 +936,18 @@ Variant f_substr_compare(CStrRef main_str, CStrRef str, int offset,
   int s1_len = main_str.size();
   int s2_len = str.size();
 
+  if (length <= 0) {
+    raise_warning("The length must be greater than zero");
+    return false;
+  }
+
   if (offset < 0) {
     offset = s1_len + offset;
     if (offset < 0) offset = 0;
   }
-  if (offset >= s1_len || length <= 0) {
+
+  if (offset >= s1_len) {
+    raise_warning("The start position cannot exceed initial string length");
     return false;
   }
 

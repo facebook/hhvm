@@ -315,6 +315,13 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     refineLocalType(inst->extra<LocalId>()->locId, inst->typeParam());
     break;
 
+  case CheckType: {
+    SSATmp* newVal = inst->dst();
+    SSATmp* oldVal = inst->src(0);
+    updateLocalValues(oldVal, newVal);
+    break;
+  }
+
   case OverrideLocVal:
     setLocalValue(inst->extra<LocalId>()->locId, inst->src(1));
     break;
@@ -1310,6 +1317,17 @@ bool TraceBuilder::callerHasValueAvailable(SSATmp* tmp) const {
   return std::find(m_callerAvailableValues.begin(),
                    m_callerAvailableValues.end(),
                    tmp) != m_callerAvailableValues.end();
+}
+
+void TraceBuilder::updateLocalValues(SSATmp* oldVal, SSATmp* newVal) {
+  Type newType = newVal->type();
+  for (auto& loc : m_locals) {
+    if (loc.value == oldVal) {
+      assert(!loc.unsafe);
+      loc.value = newVal;
+      loc.type  = newType;
+    }
+  }
 }
 
 //

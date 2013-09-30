@@ -384,6 +384,7 @@ private:
   bool      isValueAvailable(SSATmp*) const;
   bool      anyLocalHasValue(SSATmp*) const;
   bool      callerHasValueAvailable(SSATmp*) const;
+  void      updateLocalValues(SSATmp* oldVal, SSATmp* newVal);
   void      updateLocalRefValues(SSATmp* oldRef, SSATmp* newRef);
   void      trackDefInlineFP(IRInstruction* inst);
   void      trackInlineReturn(IRInstruction* inst);

@@ -5452,7 +5452,7 @@ function c999($x) {
 }
 
 global $y;
-for ($j = 0; $j < 100; ++$j) {
+for ($j = 0; $j < 500; ++$j) {
   $y = '';
   for ($i = 0; true; ++$i) {
     $str = sprintf("%03.d", $i);

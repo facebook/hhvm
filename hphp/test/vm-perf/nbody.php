@@ -141,4 +141,4 @@ function n_body($n) {
   printf("%0.9f\n", Energy($bodies));
 }
 
-n_body(100000);
+n_body(1000000);

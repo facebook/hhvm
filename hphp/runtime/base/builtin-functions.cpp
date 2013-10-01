@@ -74,6 +74,8 @@ const StaticString
 
 ///////////////////////////////////////////////////////////////////////////////
 
+typedef smart::unique_ptr<CufIter>::type SmartCufIterPtr;
+
 bool array_is_valid_callback(CArrRef arr) {
   if (arr.size() != 2 || !arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
     return false;
@@ -344,6 +346,61 @@ Variant vm_call_user_func(CVarRef function, CArrRef params,
                                            obj, cls, invName);
   if (f == nullptr) {
     return uninit_null();
+  }
+  Variant ret;
+  g_vmContext->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
+                          nullptr, invName, ExecutionContext::InvokeCuf);
+  return ret;
+}
+
+/*
+ * Helper method from converting between a PHP function and a CufIter.
+ */
+static bool vm_decode_function_cufiter(CVarRef function,
+                                       SmartCufIterPtr& cufIter) {
+  ObjectData* obj = nullptr;
+  HPHP::Class* cls = nullptr;
+  HPHP::Transl::CallerFrame cf;
+  StringData* invName = nullptr;
+  // Don't warn here, let the caller decide what to do if the func is nullptr.
+  const HPHP::Func* func = vm_decode_function(function, cf(), false,
+                                              obj, cls, invName, false);
+  if (func == nullptr) {
+    return false;
+  }
+
+  cufIter = smart::make_unique<CufIter>();
+  cufIter->setFunc(func);
+  cufIter->setName(invName);
+  if (obj) {
+    cufIter->setCtx(obj);
+    obj->incRefCount();
+  } else {
+    cufIter->setCtx(cls);
+  }
+
+  return true;
+}
+
+/*
+ * Wraps calling an (autoload) PHP function from a CufIter.
+ */
+static Variant vm_call_user_func_cufiter(const CufIter& cufIter,
+                                         CArrRef params) {
+  ObjectData* obj = nullptr;
+  HPHP::Class* cls = nullptr;
+  StringData* invName = cufIter.name();
+  const HPHP::Func* f = cufIter.func();
+  if (cufIter.ctx()) {
+    if (uintptr_t(cufIter.ctx()) & 1) {
+      cls = (Class*)(uintptr_t(cufIter.ctx()) & ~1);
+    } else {
+      obj = (ObjectData*)cufIter.ctx();
+    }
+  }
+  assert(!obj || !cls);
+  if (invName) {
+    invName->incRefCount();
   }
   Variant ret;
   g_vmContext->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
@@ -1015,22 +1072,24 @@ Variant require(CStrRef file, bool once /* = false */,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// class Limits
+// class AutoloadHandler
 
 IMPLEMENT_REQUEST_LOCAL(AutoloadHandler, AutoloadHandler::s_instance);
 
 void AutoloadHandler::requestInit() {
-  assert(m_handlers.get() == nullptr);
-  assert(m_loading.get() == nullptr);
   assert(m_map.get() == nullptr);
   assert(m_map_root.get() == nullptr);
+  assert(m_loading.get() == nullptr);
+  m_spl_stack_inited = false;
+  new (&m_handlers) smart::deque<HandlerBundle>();
 }
 
 void AutoloadHandler::requestShutdown() {
-  m_handlers.reset();
-  m_loading.reset();
   m_map.reset();
   m_map_root.reset();
+  m_loading.reset();
+  // m_spl_stack_inited will be re-initialized by the next requestInit
+  // m_handlers will be re-initialized by the next requestInit
 }
 
 bool AutoloadHandler::setMap(CArrRef map, CStrRef root) {
@@ -1160,20 +1219,20 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
   };
 
   Array params = PackedArrayInit(1).append(className).toArray();
-  if (m_handlers.isNull() && !forceSplStack) {
+  if (!m_spl_stack_inited && !forceSplStack) {
     if (function_exists(s___autoload)) {
       invoke(s___autoload, params, -1, true, false);
       return true;
     }
     return false;
   }
-  if (m_handlers.isNull() || m_handlers->empty()) {
+  if (!m_spl_stack_inited || m_handlers.empty()) {
     return false;
   }
   Object autoloadException;
-  for (ArrayIter iter(m_handlers); iter; ++iter) {
+  for (const HandlerBundle& hb : m_handlers) {
     try {
-      vm_call_user_func(iter.second(), params);
+      vm_call_user_func_cufiter(*hb.m_cufIter, params);
     } catch (Object& ex) {
       assert(ex.instanceof(SystemLib::s_ExceptionClass));
       if (autoloadException.isNull()) {
@@ -1199,22 +1258,58 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
   return true;
 }
 
-bool AutoloadHandler::addHandler(CVarRef handler, bool prepend) {
-  String name = getSignature(handler);
-  if (name.isNull()) return false;
+Array AutoloadHandler::getHandlers() {
+  if (!m_spl_stack_inited) {
+    return null_array;
+  }
 
-  if (m_handlers.isNull()) {
-    m_handlers = Array::Create();
+  PackedArrayInit handlers(m_handlers.size());
+
+  for (const HandlerBundle& hb : m_handlers) {
+    handlers.append(hb.m_handler);
+  }
+
+  return handlers.toArray();
+}
+
+bool AutoloadHandler::CompareBundles::operator()(
+  const HandlerBundle& hb) {
+  auto const& lhs = *m_cufIter;
+  auto const& rhs = *hb.m_cufIter;
+
+  if (lhs.ctx() != rhs.ctx()) {
+    // We only consider ObjectData* for equality (not a Class*) so if either is
+    // an object these are not considered equal.
+    if (!(uintptr_t(lhs.ctx()) & 1) || !(uintptr_t(rhs.ctx()) & 1)) {
+      return false;
+    }
+  }
+
+  return lhs.func() == rhs.func();
+}
+
+bool AutoloadHandler::addHandler(CVarRef handler, bool prepend) {
+  SmartCufIterPtr cufIter = nullptr;
+  if (!vm_decode_function_cufiter(handler, cufIter)) {
+    return false;
+  }
+
+  m_spl_stack_inited = true;
+
+  // Zend doesn't modify the order of the list if the handler is already
+  // registered.
+  auto const& compareBundles = CompareBundles(cufIter.get());
+  if (std::find_if(m_handlers.begin(), m_handlers.end(), compareBundles) !=
+      m_handlers.end()) {
+    return true;
   }
 
   if (!prepend) {
-    // The following ensures that the handler is added at the end
-    m_handlers.remove(name, true);
-    m_handlers.add(name, handler, true);
+    m_handlers.emplace_back(handler, cufIter);
   } else {
-    // This adds the handler at the beginning
-    m_handlers = make_map_array(name, handler) + m_handlers;
+    m_handlers.emplace_front(handler, cufIter);
   }
+
   return true;
 }
 
@@ -1223,35 +1318,21 @@ bool AutoloadHandler::isRunning() {
 }
 
 void AutoloadHandler::removeHandler(CVarRef handler) {
-  String name = getSignature(handler);
-  if (name.isNull()) return;
-  m_handlers.remove(name, true);
+  SmartCufIterPtr cufIter = nullptr;
+  if (!vm_decode_function_cufiter(handler, cufIter)) {
+    return;
+  }
+
+  // Use find_if instead of remove_if since we know there can only be one match
+  // in the vector.
+  auto const& compareBundles = CompareBundles(cufIter.get());
+  m_handlers.erase(
+    std::find_if(m_handlers.begin(), m_handlers.end(), compareBundles));
 }
 
 void AutoloadHandler::removeAllHandlers() {
-  m_handlers.reset();
-}
-
-String AutoloadHandler::getSignature(CVarRef handler) {
-  Variant name;
-  if (!f_is_callable(handler, false, ref(name))) {
-    return null_string;
-  }
-  String lName = f_strtolower(name.toString());
-  if (handler.isArray()) {
-    Variant first = handler.getArrayData()->get(int64_t(0));
-    if (first.isObject()) {
-      // Add the object address as part of the signature
-      int64_t data = (int64_t)first.getObjectData();
-      lName += String((const char *)&data, sizeof(data), CopyString);
-    }
-  } else if (handler.isObject()) {
-    // "lName" will just be "classname::__invoke",
-    // add object address to differentiate the signature
-    int64_t data = (int64_t)handler.getObjectData();
-    lName += String((const char*)&data, sizeof(data), CopyString);
-  }
-  return lName;
+  m_spl_stack_inited = false;
+  m_handlers.clear();
 }
 
 bool function_exists(CStrRef function_name) {

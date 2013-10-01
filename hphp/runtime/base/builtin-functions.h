@@ -330,18 +330,40 @@ class AutoloadHandler : public RequestEventHandler {
     ContinueAutoloading
   };
 
+  struct HandlerBundle {
+    HandlerBundle() = delete;
+    HandlerBundle(CVarRef handler,
+                  smart::unique_ptr<CufIter>::type& cufIter) :
+      m_handler(handler) {
+      m_cufIter = std::move(cufIter);
+    }
+
+    Variant m_handler; // used to respond to f_spl_autoload_functions
+    smart::unique_ptr<CufIter>::type m_cufIter; // used to invoke handlers
+  };
+
+  class CompareBundles {
 public:
+    explicit CompareBundles(CufIter* cufIter) : m_cufIter(cufIter) { }
+    bool operator()(const HandlerBundle& hb);
+private:
+    CufIter* m_cufIter;
+  };
+
+public:
+  AutoloadHandler() { }
+
   ~AutoloadHandler() {
     m_map.detach();
     m_map_root.detach();
-    m_handlers.detach();
+    // m_handlers won't run a destructor so nothing to do here
     m_loading.detach();
   }
 
   virtual void requestInit();
   virtual void requestShutdown();
 
-  CArrRef getHandlers() { return m_handlers; }
+  Array getHandlers();
   bool addHandler(CVarRef handler, bool prepend);
   void removeHandler(CVarRef handler);
   void removeAllHandlers();
@@ -362,7 +384,10 @@ private:
 
   Array m_map;
   String m_map_root;
-  Array m_handlers;
+  bool m_spl_stack_inited;
+  union {
+    smart::deque<HandlerBundle> m_handlers;
+  };
   Array m_loading;
 };
 

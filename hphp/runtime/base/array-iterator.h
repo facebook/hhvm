@@ -526,7 +526,7 @@ class MArrayIter : public FullPos {
 
 class CufIter {
  public:
-  CufIter() {}
+  CufIter() : m_func(nullptr), m_ctx(nullptr), m_name(nullptr) {}
   ~CufIter();
   const Func* func() const { return m_func; }
   void* ctx() const { return m_ctx; }

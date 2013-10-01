@@ -148,7 +148,7 @@ void SrcRec::patchIncomingBranches(TCA newStart) {
 
   TRACE(1, "%zd incoming branches to rechain\n", m_incomingBranches.size());
 
-  vector<IncomingBranch>& change = m_incomingBranches;
+  auto& change = m_incomingBranches;
   for (unsigned i = 0; i < change.size(); ++i) {
     TRACE(1, "SrcRec(%p)::newTranslation rechaining @%p -> %p\n",
           this, change[i].toSmash(), newStart);

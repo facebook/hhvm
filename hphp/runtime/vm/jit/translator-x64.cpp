@@ -414,7 +414,6 @@ TranslatorX64::createTranslation(const TranslArgs& args) {
   //   allow conditional jump fall-throughs
   TCA astart = mainCode.frontier();
   TCA stubstart = stubsCode.frontier();
-  Asm astubs { stubsCode };
   TCA req = emitServiceReq(stubsCode, JIT::REQ_RETRANSLATE, sk.offset());
   SKTRACE(1, sk, "inserting anchor translation for (%p,%d) at %p\n",
           sk.unit(), sk.offset(), req);
@@ -2173,7 +2172,7 @@ TranslatorX64::reachedTranslationLimit(SrcKey sk,
   if (srcRec.translations().size() == RuntimeOption::EvalJitMaxTranslations) {
     INC_TPC(max_trans);
     if (debug && Trace::moduleEnabled(Trace::tx64, 2)) {
-      const vector<TCA>& tns = srcRec.translations();
+      const auto& tns = srcRec.translations();
       TRACE(1, "Too many (%zd) translations: %s, BC offset %d\n",
             tns.size(), sk.unit()->filepath()->data(),
             sk.offset());

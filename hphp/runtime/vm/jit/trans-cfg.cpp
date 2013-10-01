@@ -26,7 +26,7 @@ static TransIDSet findPredTrans(const SrcRec* sr,
   assert(sr);
   TransIDSet predSet;
 
-  for (auto inBr : sr->incomingBranches()) {
+  for (auto& inBr : sr->incomingBranches()) {
     TransID srcId = mapGet(jmpToTransID, inBr.toSmash(), InvalidID);
     FTRACE(5, "findPredTrans: toSmash = {}   srcId = {}\n",
            inBr.toSmash(), srcId);

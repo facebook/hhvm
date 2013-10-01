@@ -128,7 +128,8 @@ bool f_is_uploaded_file(CStrRef filename);
 bool f_file_exists(CStrRef filename);
 Variant f_stat(CStrRef filename);
 Variant f_lstat(CStrRef filename);
-void f_clearstatcache();
+void f_clearstatcache(bool clear_realpath_cache = false,
+                      CStrRef filename = null_string);
 Variant f_readlink_internal(CStrRef path, bool warning_compliance);
 Variant f_readlink(CStrRef path);
 Variant f_realpath(CStrRef path);

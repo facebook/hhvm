@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 
 namespace HPHP {
 
@@ -125,6 +126,24 @@ void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis) {
 // TODO: Kill this #2031980
 HOT_FUNC_VM RefData* box_value(TypedValue tv) {
   return tvBoxHelper(tv.m_type, tv.m_data.num);
+}
+
+inline int64_t reinterpretDblAsInt(double d) {
+  union {
+    int64_t intval;
+    double dblval;
+  } u;
+  u.dblval = d;
+  return u.intval;
+}
+
+inline double reinterpretIntAsDbl(int64_t i) {
+  union {
+    int64_t intval;
+    double dblval;
+  } u;
+  u.intval = i;
+  return u.dblval;
 }
 
 ArrayData* convCellToArrHelper(TypedValue tv) {
@@ -397,6 +416,127 @@ TypedValue* ldGblAddrDefHelper(StringData* name) {
   TypedValue* r = g_vmContext->m_globalVarEnv->lookupAdd(name);
   decRefStr(name);
   return r;
+}
+
+TCA sswitchHelperFast(const StringData* val,
+                      const SSwitchMap* table,
+                      TCA* def) {
+  TCA* dest = table->find(val);
+  return dest ? *dest : *def;
+}
+
+// TODO(#2031980): clear these out
+void tv_release_generic(TypedValue* tv) {
+  assert(Transl::tx64->stateIsDirty());
+  assert(tv->m_type == KindOfString || tv->m_type == KindOfArray ||
+         tv->m_type == KindOfObject || tv->m_type == KindOfResource ||
+         tv->m_type == KindOfRef);
+  g_destructors[typeToDestrIndex(tv->m_type)](tv->m_data.pref);
+}
+
+void tv_release_typed(RefData* pv, DataType dt) {
+  assert(Transl::tx64->stateIsDirty());
+  assert(dt == KindOfString || dt == KindOfArray ||
+         dt == KindOfObject || dt == KindOfResource ||
+         dt == KindOfRef);
+  g_destructors[typeToDestrIndex(dt)](pv);
+}
+
+Cell lookupCnsHelper(const TypedValue* tv,
+                     StringData* nm,
+                     bool error) {
+  assert(tv->m_type == KindOfUninit);
+
+  // Deferred constants such as SID
+  if (UNLIKELY(tv->m_data.pref != nullptr)) {
+    ClassInfo::ConstantInfo* ci =
+      (ClassInfo::ConstantInfo*)(void*)tv->m_data.pref;
+    Cell *cns = const_cast<Variant&>(ci->getDeferredValue()).asTypedValue();
+    if (LIKELY(cns->m_type != KindOfUninit)) {
+      Cell c1;
+      cellDup(*cns, c1);
+      return c1;
+    }
+  }
+
+  Cell *cns = nullptr;
+  if (UNLIKELY(TargetCache::s_constants().get() != nullptr)) {
+    cns = TargetCache::s_constants()->nvGet(nm);
+  }
+  if (!cns) {
+    cns = Unit::loadCns(const_cast<StringData*>(nm));
+  }
+  if (LIKELY(cns != nullptr)) {
+    Cell c1;
+    c1.m_type = cns->m_type;
+    c1.m_data = cns->m_data;
+    return c1;
+  }
+
+  // Undefined constants
+  if (error) {
+    raise_error("Undefined constant '%s'", nm->data());
+  } else {
+    raise_notice(Strings::UNDEFINED_CONSTANT, nm->data(), nm->data());
+    Cell c1;
+    c1.m_data.pstr = const_cast<StringData*>(nm);
+    c1.m_type = KindOfStaticString;
+    return c1;
+  }
+  not_reached();
+}
+
+Cell lookupCnsUHelper(const TypedValue* tv,
+                      StringData* nm,
+                      StringData* fallback) {
+  Cell *cns = nullptr;
+  Cell c1;
+
+  // lookup qualified name in thread-local constants
+  bool cacheConsts = TargetCache::s_constants().get() != nullptr;
+  if (UNLIKELY(cacheConsts)) {
+    cns = TargetCache::s_constants()->nvGet(nm);
+  }
+  if (!cns) {
+    cns = Unit::loadCns(const_cast<StringData*>(nm));
+  }
+
+  // try cache handle for unqualified name
+  if (UNLIKELY(!cns && tv->m_type != KindOfUninit)) {
+    cns = const_cast<Cell*>(tv);
+  }
+
+  // lookup unqualified name in thread-local constants
+  if (UNLIKELY(!cns)) {
+    if (UNLIKELY(cacheConsts)) {
+      cns = TargetCache::s_constants()->nvGet(fallback);
+    }
+    if (!cns) {
+      cns = Unit::loadCns(const_cast<StringData*>(fallback));
+    }
+    if (UNLIKELY(!cns)) {
+      raise_notice(Strings::UNDEFINED_CONSTANT,
+                   fallback->data(), fallback->data());
+      c1.m_data.pstr = const_cast<StringData*>(fallback);
+      c1.m_type = KindOfStaticString;
+    }
+  } else {
+    c1.m_type = cns->m_type;
+    c1.m_data = cns->m_data;
+  }
+  return c1;
+}
+
+void iterFreeHelper(Iter* iter) {
+  iter->free();
+}
+
+void miterFreeHelper(Iter* iter) {
+  iter->mfree();
+}
+
+void citerFreeHelper(Iter* iter) {
+  iter->cfree();
 }
 
 //////////////////////////////////////////////////////////////////////

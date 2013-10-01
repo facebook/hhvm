@@ -58,30 +58,12 @@ void setNewElem(TypedValue* base, Cell val);
 void setNewElemArray(TypedValue* base, Cell val);
 void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis);
 RefData* box_value(TypedValue tv);
-ArrayData* convCellToArrHelper(TypedValue tv);
 ArrayData* array_add(ArrayData* a1, ArrayData* a2);
 
 /* Helper functions for conversion instructions that are too
-complicated to inline */
-
-inline int64_t reinterpretDblAsInt(double d) {
-  union {
-    int64_t intval;
-    double dblval;
-  } u;
-  u.dblval = d;
-  return u.intval;
-}
-
-inline double reinterpretIntAsDbl(int64_t i) {
-  union {
-    int64_t intval;
-    double dblval;
-  } u;
-  u.intval = i;
-  return u.dblval;
-}
-
+ * complicated to inline
+ */
+ArrayData* convCellToArrHelper(TypedValue tv);
 int64_t convArrToBoolHelper(const ArrayData* a);
 int64_t convObjToBoolHelper(const ObjectData* o);
 int64_t convArrToDblHelper(ArrayData* a);
@@ -104,7 +86,6 @@ void VerifyParamTypeSlow(const Class* cls,
                          int param,
                          const TypeConstraint* expected);
 
-
 void raise_error_sd(const StringData* sd);
 
 int64_t switchDoubleHelper(int64_t val, int64_t base, int64_t nTargets);
@@ -126,6 +107,25 @@ TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
 
 TypedValue* ldGblAddrHelper(StringData* name);
 TypedValue* ldGblAddrDefHelper(StringData* name);
+
+typedef FixedStringMap<TCA,true> SSwitchMap;
+TCA sswitchHelperFast(const StringData* val,
+                      const SSwitchMap* table,
+                      TCA* def);
+
+void tv_release_generic(TypedValue* tv);
+void tv_release_typed(RefData* pv, DataType dt);
+
+Cell lookupCnsHelper(const TypedValue* tv,
+                     StringData* nm,
+                     bool error);
+Cell lookupCnsUHelper(const TypedValue* tv,
+                      StringData* nm,
+                      StringData* fallback);
+
+void iterFreeHelper(Iter* iter);
+void miterFreeHelper(Iter* iter);
+void citerFreeHelper(Iter* iter);
 
 } }
 

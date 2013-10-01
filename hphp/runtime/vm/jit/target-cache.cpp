@@ -39,8 +39,7 @@ namespace {
 
 const StaticString s_call("__call");
 
-inline bool
-stringMatches(const StringData* rowString, const StringData* sd) {
+inline bool stringMatches(const StringData* rowString, const StringData* sd) {
   return rowString &&
     (rowString == sd ||
      rowString->data() == sd->data() ||
@@ -53,9 +52,15 @@ T* handleToPtr(RDS::Handle h) {
   return (T*)((char*)RDS::tl_base + h);
 }
 
+template<class Cache>
+typename Cache::Pair* keyToPair(Cache* cache, const StringData* k) {
+  assert(Util::isPowerOfTwo(Cache::kNumLines));
+  return cache->m_pairs + (k->hash() & (Cache::kNumLines - 1));
 }
 
-//=============================================================================
+}
+
+//////////////////////////////////////////////////////////////////////
 // FuncCache
 
 // Set of FuncCache handles for dynamic function callsites, used for
@@ -63,7 +68,6 @@ T* handleToPtr(RDS::Handle h) {
 static std::mutex funcCacheMutex;
 static std::vector<RDS::Link<FuncCache> > funcCacheEntries;
 
-template<>
 RDS::Handle FuncCache::alloc() {
   auto const link = RDS::alloc<FuncCache,sizeof(Pair)>();
   std::lock_guard<std::mutex> g(funcCacheMutex);
@@ -71,26 +75,10 @@ RDS::Handle FuncCache::alloc() {
   return link.handle();
 }
 
-void invalidateForRenameFunction(const StringData* name) {
-  assert(name);
-  std::lock_guard<std::mutex> g(funcCacheMutex);
-  for (auto& h : funcCacheEntries) {
-    memset(h.get(), 0, sizeof *h);
-  }
-}
-
-template<>
-inline int
-FuncCache::hashKey(const StringData* sd) {
-  return sd->hash();
-}
-
-template<>
-const Func*
-FuncCache::lookup(RDS::Handle handle, StringData *sd, const void* /* ignored */) {
-  auto const thiz = handleToPtr<FuncCache>(handle);
+const Func* FuncCache::lookup(RDS::Handle handle, StringData* sd) {
   Func* func;
-  Pair* pair = thiz->keyToPair(sd);
+  auto const thiz = handleToPtr<FuncCache>(handle);
+  auto const pair = keyToPair(thiz, sd);
   const StringData* pairSd = pair->m_key;
   if (!stringMatches(pairSd, sd)) {
     // Miss. Does it actually exist?
@@ -103,7 +91,7 @@ FuncCache::lookup(RDS::Handle handle, StringData *sd, const void* /* ignored */)
       }
     }
     func->validate();
-    pair->m_key = func->name(); // use a static name
+    pair->m_key = const_cast<StringData*>(func->name()); // use a static name
     pair->m_value = func;
   }
   // DecRef the string here; more compact than doing so in callers.
@@ -113,13 +101,53 @@ FuncCache::lookup(RDS::Handle handle, StringData *sd, const void* /* ignored */)
   return pair->m_value;
 }
 
+void invalidateForRenameFunction(const StringData* name) {
+  assert(name);
+  std::lock_guard<std::mutex> g(funcCacheMutex);
+  for (auto& h : funcCacheEntries) {
+    memset(h.get(), 0, sizeof *h);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+// ClassCache
+
+RDS::Handle ClassCache::alloc() {
+  return RDS::alloc<ClassCache,sizeof(Pair)>().handle();
+}
+
+const Class* ClassCache::lookup(RDS::Handle handle, StringData* name) {
+  auto const thiz = handleToPtr<ClassCache>(handle);
+  auto const pair = keyToPair(thiz, name);
+  const StringData* pairSd = pair->m_key;
+  if (!stringMatches(pairSd, name)) {
+    TRACE(1, "ClassCache miss: %s\n", name->data());
+    const NamedEntity *ne = Unit::GetNamedEntity(name);
+    Class *c = Unit::lookupClass(ne);
+    if (UNLIKELY(!c)) {
+      String normName = normalizeNS(name);
+      if (normName) {
+        return lookup(handle, normName.get());
+      } else {
+        c = Unit::loadMissingClass(ne, name);
+      }
+      if (UNLIKELY(!c)) {
+        raise_error(Strings::UNKNOWN_CLASS, name->data());
+      }
+    }
+
+    if (pair->m_key) decRefStr(pair->m_key);
+    pair->m_key = name;
+    name->incRefCount();
+    pair->m_value = c;
+  } else {
+    TRACE(1, "ClassCache hit: %s\n", name->data());
+  }
+  return pair->m_value;
+}
+
 //=============================================================================
 // MethodCache
-
-inline int MethodCache::hashKey(uintptr_t c) {
-  pointer_hash<Class> h;
-  return h(reinterpret_cast<const Class*>(c));
-}
 
 /*
  * We have a call site for an object method, which previously invoked
@@ -157,15 +185,8 @@ static inline const Func* wouldCall(const Class* cls, const Func* prev) {
   return nullptr;
 }
 
-/*
- * This is flagged NEVER_INLINE because if gcc inlines it, it will
- * hoist a bunch of initialization code (callee-saved regs pushes,
- * making a frame, and rsp adjustment) above the fast path.  When not
- * inlined, gcc is generating a jmp to this function instead of a
- * call.
- */
-HOT_FUNC_VM NEVER_INLINE
-void methodCacheSlowPath(MethodCache::Pair* mce,
+HOT_FUNC_VM
+void methodCacheSlowPath(MethodCache* mce,
                          ActRec* ar,
                          StringData* name,
                          Class* cls) {
@@ -257,48 +278,6 @@ void methodCacheSlowPath(MethodCache::Pair* mce,
 
     throw;
   }
-}
-
-//=============================================================================
-// ClassCache
-
-template<>
-inline int
-ClassCache::hashKey(StringData* sd) {
-  return sd->hash();
-}
-
-template<>
-const Class*
-ClassCache::lookup(RDS::Handle handle, StringData *name,
-                   const void* unused) {
-  auto const thiz = handleToPtr<ClassCache>(handle);
-  Pair *pair = thiz->keyToPair(name);
-  const StringData* pairSd = pair->m_key;
-  if (!stringMatches(pairSd, name)) {
-    TRACE(1, "ClassCache miss: %s\n", name->data());
-    const NamedEntity *ne = Unit::GetNamedEntity(name);
-    Class *c = Unit::lookupClass(ne);
-    if (UNLIKELY(!c)) {
-      String normName = normalizeNS(name);
-      if (normName) {
-        return lookup(handle, normName.get(), unused);
-      } else {
-        c = Unit::loadMissingClass(ne, name);
-      }
-      if (UNLIKELY(!c)) {
-        raise_error(Strings::UNKNOWN_CLASS, name->data());
-      }
-    }
-
-    if (pair->m_key) decRefStr(pair->m_key);
-    pair->m_key = name;
-    name->incRefCount();
-    pair->m_value = c;
-  } else {
-    TRACE(1, "ClassCache hit: %s\n", name->data());
-  }
-  return pair->m_value;
 }
 
 //=============================================================================

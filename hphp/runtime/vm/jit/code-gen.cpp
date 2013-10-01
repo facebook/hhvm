@@ -2439,21 +2439,12 @@ void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
   auto name      = inst->src(1);
   auto actRec    = inst->src(2);
   auto actRecReg = m_regs[actRec].reg();
-  auto const handle = MethodCache::alloc();
-
-  // lookup in the targetcache
-  if (debug) {
-    MethodCache::Pair p;
-    static_assert(sizeof(p.m_value) == 8,
-                  "MethodCache::Pair::m_value assumed to be 8 bytes");
-    static_assert(sizeof(p.m_key) == 8,
-                  "MethodCache::Pair::m_key assumed to be 8 bytes");
-  }
+  auto const handle = RDS::alloc<MethodCache>().handle();
 
   // preload handle->m_value
-  m_as.loadq(rVmTl[handle + offsetof(MethodCache::Pair, m_value)],
+  m_as.loadq(rVmTl[handle + offsetof(MethodCache, m_value)],
              m_rScratch);
-  m_as.cmpq (rVmTl[handle + offsetof(MethodCache::Pair, m_key)],
+  m_as.cmpq (rVmTl[handle + offsetof(MethodCache, m_key)],
              clsReg);
   ifThenElse(CC_E, // if handle->key == cls
              [&] { // then actReg->m_func = handle->value

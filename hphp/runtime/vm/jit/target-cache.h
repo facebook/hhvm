@@ -34,53 +34,56 @@ namespace HPHP { namespace JIT {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Some caches have a Lookup != k, because the TC passes a container
- * with other necessary info to Cache::lookup. E.g., when looking up
- * function preludes, we also need the number of arguments. Since
- * the current ActRec encapsulates both, we pass in an ActRec to
- * Cache::lookup even though CallCache maps Funcs to TCAs.
- *
- * KNLines must be a power of two.
+ * Per-callsite dynamic function name lookups (where the name of the
+ * function isn't known at translation time).  4-way cache.
  */
-template<typename Key, typename Value, class LookupKey,
-  int KNLines = 4,
-  typename ReturnValue = Value>
-class Cache {
-public:
-  static const int kNumLines = KNLines;
+struct FuncCache {
+  static constexpr int kNumLines = 4;
 
   struct Pair {
-    Key   m_key;
-    Value m_value;
-  } m_pairs[kNumLines];
+    StringData*  m_key;
+    const Func*  m_value;
+  };
 
-  inline Pair* keyToPair(Key k) {
-    if (kNumLines == 1) {
-      return &m_pairs[0];
-    }
-    assert(HPHP::Util::isPowerOfTwo(kNumLines));
-    return m_pairs + (hashKey(k) & (kNumLines - 1));
-  }
+  static RDS::Handle alloc();
+  static const Func* lookup(RDS::Handle, StringData* lookup);
 
-private:
-  // Each instance needs to implement this
-  static int hashKey(Key k);
-
-public:
-  typedef Key CacheKey;
-  typedef LookupKey CacheLookupKey;
-  typedef Value CacheValue;
-
-  static RDS::Handle alloc() {
-    return HPHP::RDS::alloc<Cache,sizeof(Pair)>().handle();
-  }
-  static ReturnValue lookup(RDS::Handle chand, LookupKey lookup,
-                            const void* extraKey = nullptr);
+  Pair m_pairs[kNumLines];
 };
+
+/*
+ * In order to handle fb_rename_function (when it is enabled), we need
+ * to invalidate dynamic function call caches (the FuncCache).  This
+ * hook is called when fb_rename_function is used.
+ */
+void invalidateForRenameFunction(const StringData* name);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Per-callsite dynamic class name lookups (where the name of the
+ * class isn't known at translation time).  4-way cache.
+ */
+struct ClassCache {
+  static constexpr int kNumLines = 4;
+
+  struct Pair {
+    StringData*  m_key;
+    const Class* m_value;
+  };
+
+  static RDS::Handle alloc();
+  static const Class* lookup(RDS::Handle, StringData* lookup);
+
+  Pair m_pairs[kNumLines];
+};
+
+//////////////////////////////////////////////////////////////////////
 
 struct StaticMethodCache {
   const Func* m_func;
   const Class* m_cls;
+
   static RDS::Handle alloc(const StringData* cls,
                       const StringData* meth,
                       const char* ctxName);
@@ -104,21 +107,7 @@ struct StaticMethodFCache {
                               const StringData* meth, TypedValue* vmfp);
 };
 
-typedef Cache<StringData*,const Class*,StringData*> ClassCache;
-typedef Cache<const StringData*,const Func*,StringData*> FuncCache;
-
-template<> RDS::Handle FuncCache::alloc();
-template<> const Func* FuncCache::lookup(RDS::Handle,
-  StringData*, const void* extraKey);
-template<> const Class* ClassCache::lookup(RDS::Handle,
-  StringData*, const void* extraKey);
-
-/*
- * In order to handle fb_rename_function (when it is enabled), we need
- * to invalidate dynamic function call caches (the FuncCache).  This
- * hook is called when fb_rename_function is used.
- */
-void invalidateForRenameFunction(const StringData* name);
+//////////////////////////////////////////////////////////////////////
 
 /*
  * Static properties.
@@ -141,25 +130,27 @@ struct SPropCache {
                                  Class* ctx);
 };
 
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Method cache entries cache the dispatch target for a function call.
+ * The key is a Class*, but the low bits are reused for other
+ * purposes.  The fast path in the TC doesn't have to check these
+ * bits---it just checks if m_key is bitwise equal to the candidate
+ * Class* it has, and if so it accepts m_value.
+ *
+ * The MethodCache line consists of a Class* key (stored as a
+ * uintptr_t) and a Func*.  The low bit of the key is set if the
+ * function call is a magic call (in which case the cached Func* is
+ * the __call function).  The second lowest bit of the key is set if
+ * the cached Func has AttrStatic.
+ */
 struct MethodCache {
-  struct Pair {
-    uintptr_t m_key;
-    const Func* m_value;
-  } m_pairs[1];
-
-  inline Pair* keyToPair(uintptr_t k) {
-    return &m_pairs[0];
-  }
-
-  static int hashKey(uintptr_t);
-
-  static RDS::Handle alloc() {
-    return ::HPHP::RDS::alloc<MethodCache,alignof(Pair)>()
-      .handle();
-  }
+  uintptr_t m_key;
+  const Func* m_value;
 };
 
-void methodCacheSlowPath(MethodCache::Pair* mce,
+void methodCacheSlowPath(MethodCache* mce,
                          ActRec* ar,
                          StringData* name,
                          Class* cls);

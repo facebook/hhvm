@@ -1354,6 +1354,9 @@ bool f_chroot(const String& directory) {
  */
 struct directory_data {
   Resource defaultDirectory;
+  ~directory_data() {
+    defaultDirectory.detach();
+  }
 };
 IMPLEMENT_THREAD_LOCAL(directory_data, s_directory_data);
 InitFiniNode init([&] () {

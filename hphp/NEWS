@@ -1,3 +1,19 @@
+"Tabasco" 30-Sep-2013
+  - Fix issues with __toString() functions that return non-string values
+  - Don't allow mock classes to extend collection classes
+  - Smarter memory allocation and scheduling for NUMA systems
+  - Improve profiler performance in the jit
+  - Fix several Zend compatibility issues
+  - Fix several bugs uncovered by ASAN
+  - Add collection support to array_keys, array_values, and array_combine
+  - Return a set-like array from Set::toArray
+  - Add to(Vector|Map|StableMap|Set) methods to collections
+  - Collections convert to boolean false when empty
+  - get_class_vars invokes the autoloader when necessary
+  - Rework the Zend compatibility layer to be more robust
+  - Allow traits to implement interfaces
+  - Support arbitrary expressions inside empty()
+
 "Bobotie" 16-Sep-2013
   - HNI (HipHop Native Interface) for calling C++ functions from Php
   - Fix PropertyAccessorMap::isset

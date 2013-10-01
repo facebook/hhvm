@@ -1,0 +1,7 @@
+string(0) ""
+string(6) "foobar"
+string(13) "foobar foobar"
+HipHop Warning: unable to decode base64 data in %s on line 13
+bool(false)
+HipHop Warning: unable to decode base64 data in %s on line 13
+bool(false)

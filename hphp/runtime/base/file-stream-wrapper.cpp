@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/file-stream-wrapper.h"
+#include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/directory.h"
@@ -48,6 +49,14 @@ File* FileStreamWrapper::open(CStrRef filename, CStrRef mode,
   if (MemFile *file = openFromCache(fname, mode)) {
     return file;
   }
+
+  if (options & File::USE_INCLUDE_PATH) {
+    struct stat s;                           
+    String resolved_fname = Eval::resolveVmInclude(fname.get(), "", &s);
+    if (!resolved_fname.isNull()) {
+        fname = resolved_fname;
+    }
+  } 
 
   std::unique_ptr<PlainFile> file(NEWOBJ(PlainFile)());
   bool ret = file->open(File::TranslatePath(fname), mode);

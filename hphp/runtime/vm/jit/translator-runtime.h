@@ -57,7 +57,7 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad, StringData* key,
 void setNewElem(TypedValue* base, Cell val);
 void setNewElemArray(TypedValue* base, Cell val);
 void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis);
-RefData* box_value(TypedValue tv);
+RefData* boxValue(TypedValue tv);
 ArrayData* array_add(ArrayData* a1, ArrayData* a2);
 
 /* Helper functions for conversion instructions that are too

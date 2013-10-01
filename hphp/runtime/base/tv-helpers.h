@@ -159,16 +159,11 @@ ALWAYS_INLINE void tvDecRefOnly(TypedValue* tv) {
   }
 }
 
-// tvBoxHelper sets the refcount of the newly allocated inner cell to 1
-inline RefData* tvBoxHelper(DataType type, uint64_t datum) {
-  return RefData::Make(type, datum);
-}
-
 // Assumes 'tv' is live
 inline TypedValue* tvBox(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   assert(tv->m_type != KindOfRef);
-  tv->m_data.pref = tvBoxHelper(tv->m_type, tv->m_data.num);
+  tv->m_data.pref = RefData::Make(*tv);
   tv->m_type = KindOfRef;
   return tv;
 }

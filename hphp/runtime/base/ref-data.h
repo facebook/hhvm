@@ -81,8 +81,9 @@ struct RefData {
   /*
    * Create a RefData, allocated in the request local heap.
    */
-  static RefData* Make(DataType t, int64_t datum) {
-    return new (MM().smartMallocSize(sizeof(RefData))) RefData(t, datum);
+  static RefData* Make(TypedValue tv) {
+    return new (MM().smartMallocSize(sizeof(RefData)))
+      RefData(tv.m_type, tv.m_data.num);
   }
 
   /*

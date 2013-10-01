@@ -125,9 +125,8 @@ void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis) {
   }
 }
 
-// TODO: Kill this #2031980
-HOT_FUNC_VM RefData* box_value(TypedValue tv) {
-  return tvBoxHelper(tv.m_type, tv.m_data.num);
+HOT_FUNC_VM RefData* boxValue(TypedValue tv) {
+  return RefData::Make(tv);
 }
 
 inline int64_t reinterpretDblAsInt(double d) {

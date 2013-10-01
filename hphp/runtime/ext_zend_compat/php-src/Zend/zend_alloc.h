@@ -132,7 +132,7 @@ END_EXTERN_C()
 
 /* fast cache for zval's */
 #define ALLOC_ZVAL(z)  \
-  (z) = HPHP::RefData::Make(HPHP::KindOfNull, 0)
+  (z) = HPHP::RefData::Make(*HPHP::init_null_variant.asTypedValue())
 
 #define FREE_ZVAL(z)  \
   do { \
@@ -141,7 +141,7 @@ END_EXTERN_C()
   } while (0)
 
 #define ALLOC_ZVAL_REL(z)  \
-  (z) = HPHP::RefData::Make(HPHP::KindOfNull, 0)
+  (z) = HPHP::RefData::Make(*HPHP::init_null_variant.asTypedValue())
 
 #define FREE_ZVAL_REL(z)  \
   do { \

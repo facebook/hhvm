@@ -1052,7 +1052,7 @@ public:
   static ALWAYS_INLINE void PromoteToRef(CVarRef v) {
     assert(&v != &null_variant);
     if (v.m_type != KindOfRef) {
-      auto const ref = RefData::Make(v.m_type, v.m_data.num);
+      auto const ref = RefData::Make(*v.asTypedValue());
       const_cast<Variant&>(v).m_type = KindOfRef;
       const_cast<Variant&>(v).m_data.pref = ref;
     }

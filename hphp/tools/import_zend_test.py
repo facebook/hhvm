@@ -423,6 +423,7 @@ other_files = (
     '/ext/standard/tests/class_object/AutoLoaded.inc',
     '/ext/standard/tests/class_object/AutoTrait.inc',
     '/ext/standard/tests/file/bug40501.csv',
+    '/ext/standard/tests/file/file.inc',
     '/ext/standard/tests/file/fopen_include_path.inc',
     '/ext/standard/tests/file/test.csv',
     '/ext/standard/tests/file/test2.csv',

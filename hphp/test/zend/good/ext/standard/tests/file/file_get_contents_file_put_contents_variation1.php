@@ -1,5 +1,5 @@
 <?php
-/* Prototype: string file_get_contents( string $filename[, bool $use_include_path[, 
+/* Prototype: string file_get_contents( string $filename[, bool $use_include_path[,
  *                                      resource $context[, int $offset[, int $maxlen]]]] )
  * Description: Reads entire file into a string
  */
@@ -30,7 +30,7 @@ foreach( $buffer_types as $type) {
 
 echo "--- Done ---";
 ?><?php
-//Deleting the temporary file 
+//Deleting the temporary file
 
 $file_path = dirname(__FILE__);
 unlink($file_path."/file_put_contents_variation1.tmp");

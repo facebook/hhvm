@@ -572,6 +572,11 @@ static Variant str_replace(CVarRef search, CVarRef replace, CVarRef subject,
     Array arr = subject.toArray();
     Array ret;
     for (ArrayIter iter(arr); iter; ++iter) {
+      if (iter.second().is(KindOfArray) || iter.second().is(KindOfObject)) {
+        ret.set(iter.first(), iter.second());
+        continue;
+      }
+
       String replaced = str_replace(search, replace, iter.second().toString(),
                                     count, caseSensitive);
       ret.set(iter.first(), replaced);

@@ -262,8 +262,8 @@ public:
   /*
    * Create a new trace
    */
-  IRTrace* makeMain(const Func* func, uint32_t bcOff);
-  IRTrace* addExit(const Func* func);
+  Block* makeMain(const Func* func, uint32_t bcOff);
+  Block* addExit(const Func* func);
 
   Arena&   arena()               { return m_arena; }
   uint32_t numTmps() const       { return m_nextOpndId; }

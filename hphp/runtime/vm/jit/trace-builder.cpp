@@ -34,7 +34,7 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
                            const Func* func)
   : m_unit(unit)
   , m_simplifier(*this)
-  , m_curTrace(m_unit.makeMain(func, initialBcOffset))
+  , m_curTrace(m_unit.makeMain(func, initialBcOffset)->trace())
   , m_curBlock(nullptr)
   , m_enableCse(false)
   , m_enableSimplification(false)

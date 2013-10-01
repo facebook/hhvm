@@ -60,13 +60,7 @@ struct Block : boost::noncopyable {
   void        addEdge(IRInstruction* jmp);
   void        removeEdge(IRInstruction* jmp);
 
-  // Returns true if this block is the main trace exit.  This block
-  // post-dominates all main trace blocks.  Currently there is only
-  // ever a single main trace exit.
-  bool isMainExit() const { return isMain() && isExit(); }
-
-  // Returns true if this block is part of the main trace.  I.e. it is
-  // post-dominated by a block with isMainExit() == true.
+  // Returns true if this block is part of the main trace.
   bool isMain() const;
 
   // Returns true if this block has no successors.

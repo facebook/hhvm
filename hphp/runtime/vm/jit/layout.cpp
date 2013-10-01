@@ -73,9 +73,7 @@ LayoutInfo layoutBlocks(const IRUnit& unit) {
   // Partition into a and astubs, without changing relative order.
   ret.astubsIt = std::stable_partition(
     ret.blocks.begin(), ret.blocks.end(),
-    [&] (Block* b) {
-      return b->isMain() && b->hint() != Block::Hint::Unlikely;
-    }
+    [&] (Block* b) { return b->hint() != Block::Hint::Unlikely; }
   );
 
   if (HPHP::Trace::moduleEnabled(HPHP::Trace::hhir, 5)) {
@@ -108,7 +106,7 @@ LayoutInfo layoutBlocks(const IRUnit& unit) {
    */
   if (!RuntimeOption::EvalHHIRStressCodegenBlocks) {
     always_assert(ret.blocks.front()->isEntry());
-    always_assert((*boost::prior(ret.astubsIt))->isMainExit());
+    always_assert((*boost::prior(ret.astubsIt))->isExit());
   }
 
   return ret;

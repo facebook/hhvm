@@ -289,8 +289,7 @@ struct TraceBuilder {
    * rejoining the main line.
    */
   Block* makeExit() {
-    auto t = m_unit.addExit(m_curFunc->getValFunc());
-    return t->front();
+    return m_unit.addExit(m_curFunc->getValFunc());
   }
 
   /*

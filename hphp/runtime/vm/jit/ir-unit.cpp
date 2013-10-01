@@ -55,15 +55,18 @@ SSATmp* IRUnit::findConst(ConstData& cdata, Type ctype) {
   return m_constTable.insert(cloneInstruction(&inst)->dst());
 }
 
-IRTrace* IRUnit::makeMain(const Func* func, uint32_t bcOff) {
+Block* IRUnit::makeMain(const Func* func, uint32_t bcOff) {
   assert(!m_main);
+  auto entry = defBlock(func);
   m_bcOff = bcOff;
-  return m_main = new (m_arena) IRTrace(*this, defBlock(func));
+  m_main = new (m_arena) IRTrace(*this, entry);
+  return entry;
 }
 
-IRTrace* IRUnit::addExit(const Func* func) {
-  auto exit = new (m_arena) IRTrace(*this, defBlock(func));
-  m_exits.push_back(exit);
+Block* IRUnit::addExit(const Func* func) {
+  auto exit = defBlock(func);
+  exit->setHint(Block::Hint::Unlikely);
+  m_exits.push_back(new (m_arena) IRTrace(*this, exit));
   return exit;
 }
 

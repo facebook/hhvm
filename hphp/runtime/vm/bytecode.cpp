@@ -60,6 +60,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/ext_spl.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/server/source-root-info.h"
@@ -915,7 +916,22 @@ Cell VMExecutionContext::lookupClsCns(const StringData* cls,
                                       const StringData* cns) {
   return lookupClsCns(Unit::GetNamedEntity(cls), cls, cns);
 }
-
+//SPL autoload override private and protected
+bool spl_override(const Func* method, bool case_ctx){
+	Class* baseClass = method->baseCls();
+	String a_f=StrNR(method->name()->data()).asString();
+	String a_c=StrNR(baseClass->preClass()->name()->data()).asString();
+	if(!case_ctx){	
+	  VMExecutionContext* context = g_vmContext;  
+	  ActRec *fp = context->getFP();
+	  ActRec *ar= context->getPrevVMState(fp);
+	  if(ar){
+		if(ar->m_func->cls()){if(a_c->data() != ar->m_func->cls()->name()->data())return false;}
+	  }
+	}
+	
+	return SPL::s_instance->bool_spl_register_class(a_c+"::"+a_f);
+}
 // Look up the method specified by methodName from the class specified by cls
 // and enforce accessibility. Accessibility checks depend on the relationship
 // between the class that first declared the method (baseClass) and the context
@@ -986,6 +1002,9 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
     // The anonymous context cannot access protected or private methods,
     // so we can fail fast here.
     if (ctx == nullptr) {
+      if(AutoloadHandler::s_instance->isRunning()){ 
+        if(spl_override(method, false))return method;
+      }
       if (raise) {
         raise_error("Call to %s method %s::%s from anonymous context",
                     (method->attrs() & AttrPrivate) ? "private" : "protected",
@@ -1000,7 +1019,9 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
       // this private method, so this private method is not accessible.
       // We need to keep going because the context class may define a
       // private method with this name.
-      accessible = false;
+      if(AutoloadHandler::s_instance->isRunning() && ctx->classof(baseClass)){ 
+        spl_override(method, true) ? accessible = true : accessible = false;
+      }else{accessible=false;}
     } else {
       // If the context class is derived from the class that first
       // declared this protected method, then we know this method is

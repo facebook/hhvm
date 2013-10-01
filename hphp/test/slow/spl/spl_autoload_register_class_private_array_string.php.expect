@@ -1,0 +1,3 @@
+Trying to load testCore via ClassAutoloader::loader()
+string(14) "myClass expect"
+string(7) "myClass"

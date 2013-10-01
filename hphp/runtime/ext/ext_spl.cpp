@@ -93,7 +93,24 @@ const StaticString spl_classes[] = {
   StaticString("UnderflowException"),
   StaticString("UnexpectedValueException"),
 };
+IMPLEMENT_REQUEST_LOCAL(SPL, SPL::s_instance);
+void SPL::requestInit() {
+  m_spl_registered.reset();
+}
 
+void SPL::requestShutdown() {
+  m_spl_registered.reset();
+}
+void SPL::set_spl_register_class(CStrRef className){ 
+  if (m_spl_registered.isNull()) {m_spl_registered = Array::Create(className,TRUE);}
+  else{if(!m_spl_registered.exists(className))m_spl_registered.set(className,TRUE);}
+}
+void SPL::unset_spl_register_class(CStrRef className){
+ m_spl_registered.remove(className, true);
+}
+bool SPL::bool_spl_register_class(CStrRef className){
+  return m_spl_registered.exists(className);
+}
 Array f_spl_classes() {
   const size_t num_classes = sizeof(spl_classes) / sizeof(spl_classes[0]);
   ArrayInit ret(num_classes);
@@ -272,6 +289,42 @@ Variant f_iterator_to_array(CVarRef obj, bool use_keys /* = true */) {
   return ret;
 }
 
+void spl_register_set(String f) {
+  SPL::s_instance->set_spl_register_class(f);
+}
+
+void spl_register_unset(String f) {
+  SPL::s_instance->unset_spl_register_class(f);
+}
+bool spl_register_class_normalize(CVarRef func, bool get, bool throws = true , bool prepend = false ){
+  bool res;
+  if(func.isString()){
+  String f_f=func.toString();
+  if(f_f.find("::"))get ? spl_register_set(f_f) : spl_register_unset(f_f);
+  get ? res = AutoloadHandler::s_instance->addHandler(func, prepend) : res = true;
+  if(res)return res;
+  }
+  if(func.isArray()){
+  Variant x= func.toArray();
+    if(x[0].isObject()){
+	HPHP::Class * cls=x[0].getObjectData()->getVMClass();
+ 	String classname=cls->preClass()->name()->data();
+	get ? spl_register_set(classname+"::"+x[1].toString()) : spl_register_unset(classname+"::"+x[1].toString());
+    }else{
+	get ? spl_register_set(x[0].toString()+"::"+x[1].toString()) : spl_register_unset(x[0].toString()+"::"+x[1].toString()); 
+    }
+  get ? res = AutoloadHandler::s_instance->addHandler(func, prepend) : res = true;
+  if(res)return res;
+  }
+  if(func.isObject()){
+    get ? res = AutoloadHandler::s_instance->addHandler(func, prepend) : res = true;
+    if(res)return res;
+  }
+  if (!res && throws) {
+    throw_spl_exception("Invalid autoload_function specified");
+  }
+  return res;
+}
 bool f_spl_autoload_register(CVarRef autoload_function /* = null_variant */,
                              bool throws /* = true */,
                              bool prepend /* = false */) {
@@ -284,11 +337,7 @@ bool f_spl_autoload_register(CVarRef autoload_function /* = null_variant */,
   }
   CVarRef func = autoload_function.isNull() ?
                  s_spl_autoload : autoload_function;
-  bool res = AutoloadHandler::s_instance->addHandler(func, prepend);
-  if (!res && throws) {
-    throw_spl_exception("Invalid autoload_function specified");
-  }
-  return res;
+  return spl_register_class_normalize(func, true, throws, prepend);
 }
 
 bool f_spl_autoload_unregister(CVarRef autoload_function) {
@@ -297,7 +346,7 @@ bool f_spl_autoload_unregister(CVarRef autoload_function) {
   } else {
     AutoloadHandler::s_instance->removeHandler(autoload_function);
   }
-  return true;
+  return spl_register_class_normalize(autoload_function, false);
 }
 
 Variant f_spl_autoload_functions() {

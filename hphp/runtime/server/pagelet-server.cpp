@@ -26,6 +26,7 @@
 #include "hphp/util/job-queue.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/service-data.h"
 #include "hphp/util/timer.h"
 
 using std::set;
@@ -341,6 +342,9 @@ Resource PageletServer::TaskStart(const String& url, CArrRef headers,
                                   const String& post_data /* = null_string */,
                                   CArrRef files /* = null_array */,
                                   int timeoutSeconds /* = -1 */) {
+  static auto pageletOverflowCounter =
+    ServiceData::createTimeseries("pagelet_overflow",
+                                  { ServiceData::StatsType::COUNT });
   {
     Lock l(s_dispatchMutex);
     if (!s_dispatcher) {
@@ -349,6 +353,7 @@ Resource PageletServer::TaskStart(const String& url, CArrRef headers,
     if (RuntimeOption::PageletServerQueueLimit > 0 &&
         s_dispatcher->getQueuedJobs() >
         RuntimeOption::PageletServerQueueLimit) {
+      pageletOverflowCounter->addValue(1);
       return null_resource;
     }
   }

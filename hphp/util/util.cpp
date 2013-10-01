@@ -103,7 +103,7 @@ bool Util::mkdir(const std::string &path, int mode /* = 0777 */) {
   if (pos != string::npos) {
     // quick test whole path exists
     if (access(path.substr(0, pos).c_str(), F_OK) >= 0) {
-      return true;
+      return false;
     }
     for (pos = path.find('/'); pos != string::npos;
          pos = path.find('/', pos + 1)) {

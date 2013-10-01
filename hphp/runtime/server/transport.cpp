@@ -28,6 +28,7 @@
 #include "hphp/runtime/ext/ext_openssl.h"
 #include "hphp/util/compression.h"
 #include "hphp/util/util.h"
+#include "hphp/util/service-data.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/timer.h"
@@ -36,6 +37,8 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+static const char HTTP_RESPONSE_STATS_PREFIX[] = "http_response_";
 
 Transport::Transport()
   : m_instructions(0), m_url(nullptr), m_postData(nullptr), m_postDataParsed(false),
@@ -792,6 +795,10 @@ void Transport::onSendEnd() {
     String response = prepareResponse("", 0, compressed, true);
     sendImpl(response.data(), response.size(), m_responseCode, true);
   }
+  auto httpResponseStats = ServiceData::createTimeseries(
+    folly::to<string>(HTTP_RESPONSE_STATS_PREFIX, getResponseCode()),
+    {ServiceData::StatsType::RATE});
+  httpResponseStats->addValue(1);
   onSendEndImpl();
 }
 

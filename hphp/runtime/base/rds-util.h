@@ -17,6 +17,7 @@
 #define incl_HPHP_RUNTIME_BASE_RDS_UTIL_H_
 
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {
   struct NamedEntity;

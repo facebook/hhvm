@@ -54,9 +54,9 @@ done
 
 if [ "$FAIL" == "0" ];
 then
-    echo "all downloads finished";
+    echo "all downloads finished"
 else
-    echo "$FAIL errors while downloading!";
+    echo "$FAIL errors while downloading!"
     exit 100
 fi 
 

@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/fixed-string-map.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP {
 
@@ -883,6 +884,21 @@ inline bool isInterface(const Class* cls) {
 inline bool isNormalClass(const Class* cls ) {
   return !(cls->attrs() & (AttrTrait | AttrInterface));
 }
+
+/*
+ * Returns whether a class is persistent *and* has a persistent RDS
+ * handle.  You probably mean this instead of cls->isPersistent(),
+ * which only checks the attributes.
+ *
+ * A persistent class can end up with a non-persistent RDS handle if
+ * we had to allocate the handle before we loaded the class.
+ */
+inline bool classHasPersistentRDS(const Class* cls) {
+  return (RuntimeOption::RepoAuthoritative &&
+          cls &&
+          RDS::isPersistentHandle(cls->classHandle()));
+}
+
 
 } // HPHP
 

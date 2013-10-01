@@ -50,12 +50,6 @@ bool classIsUnique(const Class* cls) {
     (cls->attrs() & AttrUnique);
 }
 
-bool classIsPersistent(const Class* cls) {
-  return RuntimeOption::RepoAuthoritative &&
-    cls &&
-    (cls->attrs() & AttrPersistent);
-}
-
 bool classIsUniqueNormalClass(const Class* cls) {
   return classIsUnique(cls) &&
     !(cls->attrs() & (AttrInterface | AttrTrait));
@@ -98,7 +92,7 @@ bool HhbcTranslator::classIsUniqueOrCtxParent(const Class* cls) const {
 
 bool HhbcTranslator::classIsPersistentOrCtxParent(const Class* cls) const {
   if (!cls) return false;
-  if (classIsPersistent(cls)) return true;
+  if (classHasPersistentRDS(cls)) return true;
   if (!curClass()) return false;
   return curClass()->classof(cls);
 }
@@ -2141,7 +2135,7 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
 
   const Class* cls = Unit::lookupUniqueClass(className);
   bool uniqueCls = classIsUnique(cls);
-  bool persistentCls = RDS::classIsPersistent(cls);
+  bool persistentCls = classHasPersistentRDS(cls);
   bool canInstantiate = canInstantiateClass(cls);
   bool fastAlloc = !RuntimeOption::EnableObjDestructCall &&
     persistentCls && canInstantiate;

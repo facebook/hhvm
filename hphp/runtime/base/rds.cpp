@@ -29,7 +29,6 @@
 
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/class.h" // XXX (go away when classIsPersistent does)
 
 namespace HPHP { namespace RDS {
 
@@ -270,12 +269,6 @@ bool testAndSetBit(size_t bit) {
 bool isPersistentHandle(Handle handle) {
   assert(handle >= 0 && handle < RuntimeOption::EvalJitTargetCacheSize);
   return handle >= (unsigned)s_persistent_base;
-}
-
-bool classIsPersistent(const Class* cls) {
-  return (RuntimeOption::RepoAuthoritative &&
-          cls &&
-          isPersistentHandle(cls->classHandle()));
 }
 
 static void initPersistentCache() {

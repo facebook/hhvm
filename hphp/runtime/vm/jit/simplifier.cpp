@@ -275,7 +275,7 @@ bool canUseSPropCache(SSATmp* clsTmp,
 
   const Class* cls = clsTmp->getValClass();
 
-  if (!RDS::classIsPersistent(cls)) return false;
+  if (!classHasPersistentRDS(cls)) return false;
 
   // If the class requires initialization, it might not have been
   // initialized yet.  getSProp() below will trigger initialization,

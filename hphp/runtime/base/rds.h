@@ -25,7 +25,6 @@
 namespace HPHP {
   struct Array;
   struct StringData;
-  struct Class; // XXX
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -299,12 +298,6 @@ T& handleToRef(Handle h) {
  * region.
  */
 bool isPersistentHandle(Handle handle);
-
-/*
- * TODO(#2879005): get rid of this function.  It duplicates similar
- * functions in hhbctranslator and class.
- */
-bool classIsPersistent(const Class* cls);
 
 //////////////////////////////////////////////////////////////////////
 

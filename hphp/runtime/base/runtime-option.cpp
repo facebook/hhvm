@@ -782,7 +782,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     for (unsigned int i = 0; i < IncludeSearchPaths.size(); i++) {
       IncludeSearchPaths[i] = Util::normalizeDir(IncludeSearchPaths[i]);
     }
-    IncludeSearchPaths.insert(IncludeSearchPaths.begin(), "./");
+    IncludeSearchPaths.insert(IncludeSearchPaths.begin(), ".");
 
     FileCache = server["FileCache"].getString();
     DefaultDocument = server["DefaultDocument"].getString();

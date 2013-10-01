@@ -958,12 +958,25 @@ int Array::SortNumericDescending(CVarRef v1, CVarRef v2, const void *data) {
 int Array::SortStringAscending(CVarRef v1, CVarRef v2, const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
-  return strcmp(s1.data(), s2.data());
+  return string_strcmp(s1.data(), s1.size(), s2.data(), s2.size());
 }
+
+int Array::SortStringAscendingCase(CVarRef v1, CVarRef v2, const void *data) {
+  String s1 = v1.toString();
+  String s2 = v2.toString();
+  return bstrcasecmp(s1.data(), s1.size(), s2.data(), s2.size());
+}
+
 int Array::SortStringDescending(CVarRef v1, CVarRef v2, const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
-  return strcmp(s2.data(), s1.data());
+  return string_strcmp(s2.data(), s2.size(), s1.data(), s1.size());
+}
+
+int Array::SortStringDescendingCase(CVarRef v1, CVarRef v2, const void *data) {
+  String s1 = v1.toString();
+  String s2 = v2.toString();
+  return bstrcasecmp(s2.data(), s2.size(), s1.data(), s1.size());
 }
 
 int Array::SortLocaleStringAscending(CVarRef v1, CVarRef v2,

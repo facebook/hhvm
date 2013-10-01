@@ -5,7 +5,7 @@
  * Alias to functions: 
  */
 
-echo "*** Testing array_multisort() : case-insensitive\n";
+echo "*** Testing array_multisort() : natural sorting case-sensitive\n";
 
 $a = array(
 	'Second',
@@ -27,7 +27,7 @@ $b = array(
 	'3 e',
 );
 
-array_multisort($b, SORT_STRING | SORT_FLAG_CASE, $a);
+array_multisort($b, SORT_NATURAL, $a);
 
 var_dump($a, $b);
 

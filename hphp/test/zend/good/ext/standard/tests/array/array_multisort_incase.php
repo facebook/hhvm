@@ -5,11 +5,13 @@
  * Alias to functions: 
  */
 
-echo "*** Testing array_multisort() : natural sorting\n";
+echo "*** Testing array_multisort() : case-insensitive\n";
 
 $a = array(
 	'Second',
-	'First',
+	'First.1',
+	'First.2',
+	'First.3',
 	'Twentieth',
 	'Tenth',
 	'Third',
@@ -17,13 +19,15 @@ $a = array(
 
 $b = array(
 	'2 a',
-	'1 b',
+	'1 bb 1',
+	'1 bB 2',
+	'1 BB 3',
 	'20 c',
 	'10 d',
 	'3 e',
 );
 
-array_multisort($b, SORT_NATURAL, $a);
+array_multisort($b, SORT_STRING | SORT_FLAG_CASE, $a);
 
 var_dump($a, $b);
 

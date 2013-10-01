@@ -164,6 +164,7 @@ ArrayData* HphpArray::EscalateForSort(ArrayData* ad) {
     SORT_CASE(SORT_REGULAR, cmp_type, acc_type) \
     SORT_CASE(SORT_NUMERIC, cmp_type, acc_type) \
     SORT_CASE(SORT_STRING, cmp_type, acc_type) \
+    SORT_CASE(SORT_STRING_CASE, cmp_type, acc_type) \
     SORT_CASE(SORT_LOCALE_STRING, cmp_type, acc_type) \
     SORT_CASE(SORT_NATURAL, cmp_type, acc_type) \
     SORT_CASE(SORT_NATURAL_CASE, cmp_type, acc_type) \

@@ -200,12 +200,14 @@ public:
   static int SortRegularAscending(CVarRef v1, CVarRef v2, const void *data);
   static int SortNumericAscending(CVarRef v1, CVarRef v2, const void *data);
   static int SortStringAscending(CVarRef v1, CVarRef v2, const void *data);
+  static int SortStringAscendingCase(CVarRef v1, CVarRef v2, const void *data);
   static int SortLocaleStringAscending(CVarRef v1, CVarRef v2,
                                        const void *data);
 
   static int SortRegularDescending(CVarRef v1, CVarRef v2, const void *data);
   static int SortNumericDescending(CVarRef v1, CVarRef v2, const void *data);
   static int SortStringDescending(CVarRef v1, CVarRef v2, const void *data);
+  static int SortStringDescendingCase(CVarRef v1, CVarRef v2, const void *data);
   static int SortLocaleStringDescending(CVarRef v1, CVarRef v2,
                                         const void *data);
 

@@ -6010,8 +6010,16 @@
             "value": 3
         },
         {
+            "name": "SORT_FLAG_CASE",
+            "value": 8
+        },
+        {
             "name": "SORT_LOCALE_STRING",
             "value": 5
+        },
+        {
+            "name": "SORT_NATURAL",
+            "value": 6
         },
         {
             "name": "SORT_NUMERIC",

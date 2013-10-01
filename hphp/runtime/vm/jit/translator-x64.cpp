@@ -218,6 +218,12 @@ bool TranslatorX64::profileSrcKey(const SrcKey& sk) const {
 }
 
 TCA TranslatorX64::retranslate(const TranslArgs& args) {
+  SrcRec* sr = m_srcDB.find(args.m_sk);
+
+  bool locked = sr->tryLock();
+  SCOPE_EXIT {
+    if (locked) sr->freeLock();
+  };
   if (isDebuggerAttachedProcess() && isSrcKeyInBL(args.m_sk)) {
     // We are about to translate something known to be blacklisted by
     // debugger, exit early
@@ -226,6 +232,14 @@ TCA TranslatorX64::retranslate(const TranslArgs& args) {
   }
   LeaseHolder writer(s_writeLease);
   if (!writer) return nullptr;
+  if (!locked) {
+    // Even though we knew above that we were going to skip
+    // doing another translation, we wait until we get the
+    // write lease, to avoid spinning through the tracelet
+    // guards again and again while another thread is writing
+    // to it.
+    return sr->getTopTranslation();
+  }
   SKTRACE(1, args.m_sk, "retranslate\n");
   if (m_mode == TransInvalid) {
     m_mode = profileSrcKey(args.m_sk) ? TransProfile : TransLive;
@@ -388,9 +402,6 @@ TranslatorX64::createTranslation(const TranslArgs& args) {
    * lottery at the dawn of time. Hopefully lots of requests won't require
    * any new translation.
    */
-  auto retransl = [&] {
-    return retranslate(args);
-  };
   auto sk = args.m_sk;
   LeaseHolder writer(s_writeLease);
   if (!writer) return nullptr;
@@ -406,7 +417,7 @@ TranslatorX64::createTranslation(const TranslArgs& args) {
       // Since we are holding the write lease, we know that sk is properly
       // initialized, except that it has no translations (due to
       // replaceOldTranslations)
-      return retransl();
+      return retranslate(args);
     }
   }
 
@@ -433,7 +444,7 @@ TranslatorX64::createTranslation(const TranslArgs& args) {
     assert(!isTransDBEnabled() || getTransRec(stubstart)->kind == TransAnchor);
   }
 
-  return retransl();
+  return retranslate(args);
 }
 
 TCA

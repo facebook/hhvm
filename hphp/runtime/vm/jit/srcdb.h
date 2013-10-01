@@ -167,12 +167,13 @@ struct SrcRec {
     : m_topTranslation(nullptr)
     , m_anchorTranslation(0)
     , m_dbgBranchGuardSrc(nullptr)
+    , m_guard(0)
   {}
 
   /*
    * The top translation is our first target, a translation whose type
    * checks properly chain through all other translations. Usually this will
-   * be the most recently created translation.
+   * be the first translation.
    *
    * This function can be safely called without holding the write
    * lease.
@@ -221,6 +222,24 @@ struct SrcRec {
     m_inProgressTailJumps.clear();
   }
 
+  /*
+   * There is an unlikely race in retranslate, where two threads
+   * could simultaneously generate the same translation for a
+   * tracelet. In practice its almost impossible to hit this, unless
+   * Eval.JitRequireWriteLease is set. But when it is set, we hit
+   * it a lot.
+   * m_guard doesn't quite solve it, but its as good as things were
+   * before.
+   */
+  bool tryLock() {
+    uint32_t val = 0;
+    return m_guard.compare_exchange_strong(val, 1);
+  }
+
+  void freeLock() {
+    m_guard = 0;
+  }
+
 private:
   TCA getFallbackTranslation() const;
   void patch(IncomingBranch branch, TCA dest);
@@ -249,6 +268,7 @@ private:
   MD5 m_unitMd5;
   // The branch src for the debug guard, if this has one.
   TCA m_dbgBranchGuardSrc;
+  std::atomic<uint32_t> m_guard;
 };
 
 class SrcDB : boost::noncopyable {

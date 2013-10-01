@@ -18,7 +18,6 @@
 #include <atomic>
 
 #include <sys/mman.h>
-#include <sys/prctl.h>
 #include <stdlib.h>
 #include <errno.h>
 #include "hphp/util/util.h"
@@ -27,6 +26,7 @@
 #include "folly/Format.h"
 
 #ifdef HAVE_NUMA
+#include <sys/prctl.h>
 #include <numa.h>
 #endif
 

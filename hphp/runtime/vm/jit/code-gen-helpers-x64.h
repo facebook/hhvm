@@ -70,8 +70,6 @@ void emitLea(Asm& as, MemoryRef mr, PhysReg dst);
 void emitLdObjClass(Asm& as, PhysReg objReg, PhysReg dstReg);
 void emitLdClsCctx(Asm& as, PhysReg srcReg, PhysReg dstReg);
 
-void emitExitSlowStats(Asm& as, const Func* func, SrcKey dest);
-
 void emitCall(Asm& as, TCA dest);
 void emitCall(Asm& as, CppCall call);
 

@@ -129,6 +129,8 @@ struct CodeGenerator {
   CodeGenerator(const IRUnit& unit, CodeBlock& mainCode, CodeBlock& stubsCode,
                 Transl::TranslatorX64* tx64, CodegenState& state)
     : m_unit(unit)
+    , m_mainCode(mainCode)
+    , m_stubsCode(stubsCode)
     , m_as(mainCode)
     , m_astubs(stubsCode)
     , m_tx64(tx64)
@@ -405,6 +407,8 @@ private:
 
 private:
   const IRUnit&       m_unit;
+  CodeBlock&          m_mainCode;
+  CodeBlock&          m_stubsCode;
   Asm                 m_as;  // current "main" assembler
   Asm                 m_astubs; // for stubs and other cold code
   TranslatorX64*      m_tx64;

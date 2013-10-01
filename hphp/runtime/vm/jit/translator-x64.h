@@ -236,10 +236,9 @@ private:
   //
   ////////////////////////////////////////
 private:
-  void emitGuardChecks(Asm& a, SrcKey, const ChangeMap&,
-    const RefDeps&, SrcRec&);
+  void emitGuardChecks(SrcKey, const ChangeMap&, const RefDeps&, SrcRec&);
   void emitResolvedDeps(const ChangeMap& resolvedDeps);
-  void checkRefs(Asm&, SrcKey, const RefDeps&, SrcRec&);
+  void checkRefs(SrcKey, const RefDeps&, SrcRec&);
 
   void emitFallbackUncondJmp(Asm& as, SrcRec& dest);
   void emitFallbackCondJmp(Asm& as, SrcRec& dest, ConditionCode cc);

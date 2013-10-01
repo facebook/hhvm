@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/stats.h"
 
 #include "hphp/util/base.h"
+#include "hphp/util/data-block.h"
 #include "hphp/runtime/vm/jit/x64-util.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 
@@ -43,17 +44,11 @@ __thread StatGroupMap* tl_stat_groups = nullptr;
 std::atomic<const char*> helperNames[kMaxNumTrampolines];
 
 void
-emitInc(X64Assembler& a, uint64_t* tl_table, uint index, int n,
-        ConditionCode cc, bool force) {
+emitInc(CodeBlock& cb, uint64_t* tl_table, uint index, int n, bool force) {
   if (!force && !enabled()) return;
-  bool havecc = cc != CC_None;
   uintptr_t virtualAddress = uintptr_t(&tl_table[index]) - tlsBase();
+  X64Assembler a { cb };
 
-  TCA jcc = nullptr;
-  if (havecc) {
-    jcc = a.frontier();
-    a.  jcc8  (ccNegate(cc), jcc);
-  }
   a.    pushf ();
   a.    push  (reg::rAsm);
   a.    movq  (virtualAddress, reg::rAsm);
@@ -61,16 +56,6 @@ emitInc(X64Assembler& a, uint64_t* tl_table, uint index, int n,
   a.    addq  (n, *reg::rAsm);
   a.    pop   (reg::rAsm);
   a.    popf  ();
-  if (havecc) {
-    assert(jcc);
-    a.  patchJcc8(jcc, a.frontier());
-  }
-}
-
-void emitIncTranslOp(X64Assembler& a, Op opc, bool force) {
-  if (!force && !enableInstrCount()) return;
-  emitInc(a, &tl_counters[0], opcodeToTranslStatCounter(opc), 1,
-          CC_None, force);
 }
 
 void init() {

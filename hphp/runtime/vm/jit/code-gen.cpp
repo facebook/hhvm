@@ -596,7 +596,7 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
 
   m_tx64->registerCatchTrace(info.afterCall, m_as.frontier());
 
-  Stats::emitInc(m_as, Stats::TC_CatchTrace);
+  Stats::emitInc(m_mainCode, Stats::TC_CatchTrace);
 
   // We want to restore state as though the call had completed
   // successfully, so skip over any stack arguments and pop any
@@ -622,7 +622,7 @@ void CodeGenerator::cgEndCatch(IRInstruction* inst) {
     });
 
   // doSideExit == true, so fall through to the side exit code
-  Stats::emitInc(m_as, Stats::TC_CatchSideExit);
+  Stats::emitInc(m_mainCode, Stats::TC_CatchSideExit);
 }
 
 void CodeGenerator::cgDeleteUnwinderException(IRInstruction* inst) {
@@ -2887,7 +2887,16 @@ void CodeGenerator::cgReqInterpret(IRInstruction* inst) {
   auto offset = inst->extra<ReqInterpret>()->offset;
   auto destSk = SrcKey { curFunc(), offset };
   auto const numInstrs = 1;
-  emitExitSlowStats(m_as, curFunc(), destSk);
+
+  if (RuntimeOption::EnableInstructionCounts ||
+      HPHP::Trace::moduleEnabled(HPHP::Trace::stats, 3)) {
+    Stats::emitInc(m_mainCode,
+                   Stats::opcodeToIRPreStatCounter(
+                     Op(*curFunc()->unit()->at(destSk.offset()))),
+                   -1,
+                   true);
+  }
+
   emitServiceReq(tx64->stubsCode, REQ_INTERPRET, offset, numInstrs);
 }
 
@@ -6015,10 +6024,9 @@ void CodeGenerator::cgCIterFree(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgIncStat(IRInstruction *inst) {
-  Stats::emitInc(m_as,
+  Stats::emitInc(m_mainCode,
                  Stats::StatCounter(inst->src(0)->getValInt()),
                  inst->src(1)->getValInt(),
-                 Transl::CC_None,
                  inst->src(2)->getValBool());
 }
 

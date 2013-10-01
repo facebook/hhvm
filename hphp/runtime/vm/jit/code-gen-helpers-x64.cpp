@@ -300,18 +300,6 @@ void emitLdClsCctx(Asm& as, PhysReg srcReg, PhysReg dstReg) {
   as.   decq(dstReg);
 }
 
-void emitExitSlowStats(Asm& as, const Func* func, SrcKey dest) {
-  if (RuntimeOption::EnableInstructionCounts ||
-      HPHP::Trace::moduleEnabled(HPHP::Trace::stats, 3)) {
-    Stats::emitInc(as,
-                   Stats::opcodeToIRPreStatCounter(
-                     Op(*func->unit()->at(dest.offset()))),
-                   -1,
-                   Transl::CC_None,
-                   true);
-  }
-}
-
 void emitCall(Asm& a, TCA dest) {
   if (a.jmpDeltaFits(dest) && !Stats::enabled()) {
     a.    call(dest);

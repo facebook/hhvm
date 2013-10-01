@@ -1494,8 +1494,7 @@ TranslatorX64::emitFallbackCondJmp(Asm& as, SrcRec& dest, ConditionCode cc) {
 }
 
 void
-TranslatorX64::checkRefs(X64Assembler& a,
-                         SrcKey sk,
+TranslatorX64::checkRefs(SrcKey sk,
                          const RefDeps& refDeps,
                          SrcRec& fail) {
   if (refDeps.size() == 0) {
@@ -2064,9 +2063,7 @@ void raiseUndefVariable(StringData* nm) {
 
 TCA
 TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
-  Asm a { trampolinesCode };
-
-  if (!a.canEmit(kExpectedPerTrampolineSize)) {
+  if (!trampolinesCode.canEmit(kExpectedPerTrampolineSize)) {
     // not enough space to emit a trampoline, so just return the
     // helper address and emitCall will the emit the right sequence
     // to call it indirectly
@@ -2074,10 +2071,11 @@ TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
     always_assert(false);
     return helperAddr;
   }
+
   uint32_t index = m_numNativeTrampolines++;
-  TCA trampAddr = a.frontier();
+  TCA trampAddr = trampolinesCode.frontier();
   if (Stats::enabled()) {
-    Stats::emitInc(a, &Stats::tl_helper_counters[0], index);
+    Stats::emitInc(trampolinesCode, &Stats::tl_helper_counters[0], index);
     char* name = getNativeFunctionName(helperAddr);
     const size_t limit = 50;
     if (strlen(name) > limit) {
@@ -2095,6 +2093,7 @@ TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
   auto DEBUG_ONLY stubUsingRScratch = [&](TCA tca) {
     return tca == uniqueStubs.dtorGenericStubRegs;
   };
+  Asm a { trampolinesCode };
 
   assert(IMPLIES(stubUsingRScratch(helperAddr), a.jmpDeltaFits(helperAddr)));
   a.    jmp    (helperAddr);
@@ -2206,13 +2205,12 @@ TranslatorX64::reachedTranslationLimit(SrcKey sk,
 }
 
 void
-TranslatorX64::emitGuardChecks(X64Assembler& a,
-                               SrcKey sk,
+TranslatorX64::emitGuardChecks(SrcKey sk,
                                const ChangeMap& dependencies,
                                const RefDeps& refDeps,
                                SrcRec& fail) {
   if (Trace::moduleEnabled(Trace::stats, 2)) {
-    Stats::emitInc(a, Stats::TraceletGuard_enter);
+    Stats::emitInc(mainCode, Stats::TraceletGuard_enter);
   }
 
   m_irTrans->hhbcTrans().emitRB(RBTypeTraceletGuards, sk);
@@ -2221,10 +2219,10 @@ TranslatorX64::emitGuardChecks(X64Assembler& a,
     m_irTrans->checkType(dep.first, dep.second->rtt, checkOuterTypeOnly);
   }
 
-  checkRefs(a, sk, refDeps, fail);
+  checkRefs(sk, refDeps, fail);
 
   if (Trace::moduleEnabled(Trace::stats, 2)) {
-    Stats::emitInc(a, Stats::TraceletGuard_execute);
+    Stats::emitInc(mainCode, Stats::TraceletGuard_execute);
   }
 }
 
@@ -2452,8 +2450,7 @@ TranslatorX64::translateTracelet(Tracelet& t) {
   try {
     emitResolvedDeps(t.m_resolvedDeps);
     {
-      Asm a { mainCode };
-      emitGuardChecks(a, sk, t.m_dependencies, t.m_refDeps, srcRec);
+      emitGuardChecks(sk, t.m_dependencies, t.m_refDeps, srcRec);
 
       dumpTranslationInfo(t, mainCode.frontier());
 
@@ -2471,7 +2468,7 @@ TranslatorX64::translateTracelet(Tracelet& t) {
       }
 
       m_irTrans->hhbcTrans().emitRB(RBTypeTraceletBody, t.m_sk);
-      Stats::emitInc(a, Stats::Instr_TC, t.m_numOpcodes);
+      Stats::emitInc(mainCode, Stats::Instr_TC, t.m_numOpcodes);
     }
 
     // Profiling on function entry.
